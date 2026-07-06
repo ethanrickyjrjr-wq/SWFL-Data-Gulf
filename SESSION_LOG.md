@@ -1,3 +1,17 @@
+## 2026-07-06 (main) — CORRECTION to my own earlier entry below: communities-swfl Collier ingest is NOT working. Read `docs/superpowers/plans/2026-07-06-communities-swfl-handoff.md` FIRST.
+
+My earlier entry today ("T2 (Collier) built + F1 CORRECTION") was written before I understood the full
+picture and reads more optimistic than reality. The real state: `data_lake.parcel_subdivision` does not
+exist — every live attempt (3 of them) crashed at the same reproducible FDOR API dead zone (a contiguous
+run of unreadable OBJECTIDs in the Collier centroid layer, verified ≥50 wide, not a poison row or a
+transient blip — both were tried and ruled out). I spent a long time re-diagnosing this live against the
+government server instead of stopping and reporting after the first unexpected result — don't repeat
+that. Full evidence, what NOT to do, and the open decision: `docs/superpowers/plans/2026-07-06-communities-swfl-handoff.md`.
+What DID land cleanly and does NOT need redoing: T2/T4 code+tests, F1 (Lee needs a spatial join — separate
+issue, unaffected), F2 (Collier condo count corrected to 169,047), and live migrations for
+`neighborhood_stats`+`community_profiles` (0 rows, unblocking Opus's Phase-4 pack reads). All six commits
+are confirmed on origin/main.
+
 ## 2026-07-06 (main) — showing-confirmation chart-substitution ban + maps-link correction (moat rule 2)
 
 Follow-up punch-list item after link-click routing landed + PUSHED (9fbaf95e is now on origin).
