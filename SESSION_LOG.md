@@ -1,3 +1,44 @@
+## 2026-07-06 (main) — communities-swfl Phase 1: T2 (Collier) built + F1 CORRECTION (Lee needs a spatial join, not a name-join)
+
+Continuing `docs/superpowers/specs/2026-07-05-communities-swfl-design.md` (spec approved 07/05). Opus
+started Phase 4 (brain pack + master wiring) in parallel this session — don't touch
+`refinery/packs/communities-swfl*` / `refinery/__fixtures__/communities-swfl*`, that's theirs in flight.
+
+**Triage (reasoning-complexity axis, not blast-radius):** Sonnet builds T2/T3/T4/T5/T6 + Phase 2/5
+(mechanical, design already spent in the plan); Opus builds Phase 4 (many simultaneous constraints:
+atomic vocab+pack+catalog+master `sources[]`/`input_brains[]` mirror, detail_tables scrubbing, build
+order).
+
+**Shipped (2 commits, `b4dce3d1`..`27dde50f`): `b4dce3d1` PUSHED to origin/main; `27dde50f` (F1 finding +
+T5 fixture) still LOCAL, UNPUSHED pending operator go-ahead:**
+- **T2** — `ingest/pipelines/parcel_subdivision/` (Collier FDOR centroid-layer ingest, DOR→home-type map,
+  subdivision-name stemmer ported byte-identical to `refinery/lib/subdivision-aliases.mts`). 6/6 tests
+  pass. Code + tests only — no live ingest run, no table creation (dlt auto-creates Tier-2 tables; no
+  hand migration needed, confirmed against `collier_parcels`' sibling — has none either).
+- **T4** — `ingest/duckdb_pipelines/neighborhood_stats/agg.py` (aggregate-at-source by
+  `(county, subdivision_name)`). 3/3 tests pass. **Still open:** the Postgres→DuckDB read glue for
+  `pipeline.py` — no precedent in this repo for DuckDB reading a Tier-2 Postgres table directly; simplest
+  fix is probably to skip the DuckDB round-trip entirely and run a plain `GROUP BY` in Postgres (still
+  satisfies aggregate-at-source) — flagging, not deciding, for whoever picks this up.
+- **T5 (mechanical part)** — extracted `COMMUNITY_ALIASES` to `fixtures/community-aliases.json` (single
+  source of truth); TS reconciler reads it (4/4 still pass); added `ingest/lib/community_aliases.py`
+  loader so Python never drifts from TS (3/3 pass). Coverage growth still blocked on Phase 2's scrape
+  name list (not yet built).
+- **F1 CORRECTION (the big one)** — live-probed both of the plan's Lee candidates
+  (`verification/communities-lee-source-probe.md`): **neither yields a per-home subdivision name.**
+  `ParcelDetails` layer 33 "Subdivisions" (7,387 rows) is plat/boundary-record grain (`Just`/`Assessed`
+  null on every row — confirmed live) — Collier's `S_LEGAL`-on-every-parcel win does NOT generalize to
+  Lee. Lee needs a **scoped spatial join**: 548,389 parcel centroids (`ParcelInfo` layer 12's `SHAPE`) ×
+  ~7,387 `ParcelDetails/33` polygons, CRS 2237→4326, DuckDB `ST_Contains` — reusing the SUPERSEDED
+  backbone plan's Part A (A0–A4) steps almost verbatim, narrowed to one county instead of two. T2
+  (Collier) is unaffected and ships regardless of how Lee resolves.
+
+**Next (T3):** prove `INSTALL spatial` loads on the GHA runner + one known-answer point-in-polygon test
+(e.g. a Lehigh Acres or Pointe Estero parcel) BEFORE writing the full Lee ingest — this is a real
+unknown (C4 in the program plan: DuckDB spatial has never been proven on this stack), do the small
+proof first. Then T6 (cadence+cron), Phase 2 (scrape), Phase 5 (Lab AI + chat grounding) remain,
+all still mechanical/unblocked. Check `communities_swfl_live_verify` stays open.
+
 ## 2026-07-05 (main) — BUILT: lifecycle sequences build 3 (12 commits, bf3115ba..2f2cc088) — milestone-fired listing arc, UNPUSHED pending operator approval
 
 Brainstormed (RULE 3.5, crawl4ai research: Ylopo lifecycle switching needs a real-time MLS feed we don't
