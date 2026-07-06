@@ -78,6 +78,17 @@ describe("detectRecipe — deterministic keyword routing", () => {
     // near-miss: a bare "chart" mention never trips the chart recipes
     ["monthly newsletter with a chart", "monthly-newsletter"],
     ["can you chart Cape Coral prices", null],
+    // infographic-snapshot — distilled 07/06/2026 (see PROVENANCE in author-recipes.ts)
+    ["build an infographic for the Naples market", "infographic-snapshot"],
+    ["make me a market infographic snapshot", "infographic-snapshot"],
+    // precedence: an infographic ask keeps its shape even with a monthly/newsletter keyword
+    ["a monthly market infographic", "infographic-snapshot"],
+    ["an infographic newsletter for my sphere", "infographic-snapshot"],
+    // precedence: welcome, year-review, and the chart recipes still win before it
+    ["welcome email with an infographic attached", "agent-intro"],
+    ["a chart of the week infographic", "chart-story"],
+    // near-miss: "graphic" alone never trips it
+    ["make the listing photo more graphic", null],
     // no match → null → generic prompt unchanged
     ["price update for Cape Coral", null],
     ["", null],

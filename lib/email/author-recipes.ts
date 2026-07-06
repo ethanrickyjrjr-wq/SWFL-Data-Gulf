@@ -21,6 +21,7 @@ export const RECIPE_IDS = [
   "year-in-review",
   "chart-digest",
   "chart-story",
+  "infographic-snapshot",
   "monthly-newsletter",
   "editorial-letter",
   "editorial-showcase",
@@ -68,6 +69,12 @@ const CHART_DIGEST_RE =
 // phrases only), so "newsletter with a chart" stays monthly.
 const CHART_STORY_RE =
   /\bchart of the (day|week|month)\b|\bone[- ]chart\b|\bchart (story|breakdown|deep[- ]dive|walkthrough)\b/i;
+// The one-glance visual snapshot ("infographic"). Checked AFTER the chart
+// recipes (an explicit chart ask keeps its chart shape) and BEFORE monthly —
+// an "infographic" ask must keep the icon-and-stat-grid shape even when the
+// prompt also says "monthly" or "newsletter", never fall through to the
+// plain digest just because monthly's keywords also match.
+const INFOGRAPHIC_RE = /\binfographics?\b/i;
 const MONTHLY_RE = /\bmonthly\b|\bnewsletter\b|\bdigest\b/i;
 const EDITORIAL_RE = /\bfancy\b|\belegant\b|\beditorial\b|\bmagazine\b|\bluxury\b|\bletter\b/i;
 const LETTER_RE = /\bletter\b/i;
@@ -83,6 +90,7 @@ export function detectRecipe(prompt: string): RecipeId | null {
   if (YEAR_REVIEW_RE.test(p)) return "year-in-review";
   if (CHART_DIGEST_RE.test(p)) return "chart-digest";
   if (CHART_STORY_RE.test(p)) return "chart-story";
+  if (INFOGRAPHIC_RE.test(p)) return "infographic-snapshot";
   if (MONTHLY_RE.test(p)) return "monthly-newsletter";
   if (EDITORIAL_RE.test(p)) {
     if (LETTER_RE.test(p)) return "editorial-letter";
@@ -324,6 +332,60 @@ const RECIPES: Record<RecipeId, string> = {
     "learn-more label. Sign off with an `agent-card` — the bio reads as a " +
     "signature.\n" +
     "- The footer with unsubscribe and postal address always renders.",
+
+  // PROVENANCE: distilled from Google NotebookLM's "Infographic" Studio
+  // feature (notebooklm.google.com), a screenshot capture, found 07/06/2026.
+  // Layout system only — no source copy, figures, images, or brand identity
+  // retained.
+  // Why-tag evidence: nngroup.com/articles/icon-usability (fetched in-session
+  // 07/06/2026 — icons lack a standard universal meaning and need a text
+  // label to actually communicate, the reason the icon rides beside the stat
+  // rather than replacing it) and nngroup.com/articles/data-tables (fetched
+  // in-session 07/06/2026 — a table's core advantage is scalable side-by-side
+  // comparison of many records, the reason the closing multi-place comparison
+  // belongs in the table shape, not spread across more stat cells). Plus the
+  // in-file base: nngroup.com/articles/how-users-read-on-the-web (readers
+  // scan; the whole story must land before a single cell loads) and
+  // storytellingwithdata.com's guiding principles (make it clear where to
+  // look; one aha beats several competing cells) — both already cited above
+  // for the chart recipes, reused here for the masthead-first read and the
+  // single headline metric-card.
+  "infographic-snapshot":
+    "RECIPE — MARKET SNAPSHOT INFOGRAPHIC (the one-glance stat grid; icon, " +
+    "number, one line each).\n" +
+    "Target structure, top to bottom:\n" +
+    "- A masthead `header` naming the snapshot's place and moment, paired " +
+    "with a short `text` intro of a couple of sentences stating the one " +
+    "overall read in plain words — readers scan rather than read, so the " +
+    "whole story must land before a single stat cell loads.\n" +
+    "- A `multi-column` row of a small handful of columns, each pairing a " +
+    "small icon `imageUrl` with a big-stat `heading` (restated verbatim from " +
+    "the DATA MENU, never computed) and a one-sentence `body` explainer. The " +
+    "icon alone never carries the fact — icons lack a standard, universal " +
+    "meaning, so the number and its label are what actually communicate; " +
+    "treat the icon as decoration riding beside the words that do the real " +
+    "work, never as a caption's replacement.\n" +
+    "- One `metric-card` as the single most important number in the whole " +
+    "snapshot — its value the headline stat, its label the plain name of " +
+    "what it measures, its sub line the one-sentence context. Give this one " +
+    "room of its own; a snapshot earns its one aha moment by making it " +
+    "obvious where to look first, not by matching every cell to the same " +
+    "size.\n" +
+    "- A second `multi-column` row for the counterpoint set — the same " +
+    "icon-plus-stat-plus-line shape, used for whatever cuts against or " +
+    "complicates the first row's story, so the snapshot reads as reporting, " +
+    "not a pitch; readers detest marketese, and a one-sided stat grid reads " +
+    "like one.\n" +
+    "- Close with the offered chart in its table shape, comparing the same " +
+    "handful of places or periods side by side. A table earns its place " +
+    "here because comparing many records against each other, side by side, " +
+    "is precisely the task a table is built for — the same comparison " +
+    "spread across separate stat cells would cost far more room and give " +
+    "the eye nowhere to scan across.\n" +
+    "- Every value in every cell is id-selected from the DATA MENU or the " +
+    "offered chart — never a number typed from memory. The footer with " +
+    "unsubscribe and postal address always renders — never suggest removing " +
+    "it.",
 
   "monthly-newsletter":
     "RECIPE — MONTHLY NEWSLETTER (recurring market digest).\n" +
