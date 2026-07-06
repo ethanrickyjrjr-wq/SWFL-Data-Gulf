@@ -68,6 +68,13 @@ const kinds = z.discriminatedUnion("kind", [
     text: z.string(),
   }),
   z.object({
+    // A street address the project has touched beyond its primary subject_address
+    // (lab-entry reconcile, spec 2026-07-06). The build feed + assistant see every
+    // address the project knows, enabling later "how do these two relate" work.
+    kind: z.literal("address"),
+    address: z.string().min(1),
+  }),
+  z.object({
     kind: z.literal("report"),
     slug: z.string(),
     title: z.string().optional(),

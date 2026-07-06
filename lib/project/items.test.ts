@@ -41,4 +41,27 @@ describe("projectItemSchema", () => {
   it("parses an array", () => {
     expect(projectItemsSchema.parse([])).toEqual([]);
   });
+
+  it("accepts an address item — a project's additional known address (lab-entry reconcile)", () => {
+    const item = {
+      id: "a1",
+      added_at: "2026-07-06T00:00:00Z",
+      origin: "web",
+      kind: "address",
+      address: "123 Palm Ave, Fort Myers FL 33901",
+    };
+    expect(projectItemSchema.parse(item).kind).toBe("address");
+  });
+
+  it("rejects an empty address", () => {
+    expect(() =>
+      projectItemSchema.parse({
+        id: "a1",
+        added_at: "t",
+        origin: "web",
+        kind: "address",
+        address: "",
+      }),
+    ).toThrow();
+  });
 });
