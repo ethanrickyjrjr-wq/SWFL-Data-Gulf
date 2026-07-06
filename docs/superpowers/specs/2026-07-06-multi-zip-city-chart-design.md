@@ -24,8 +24,12 @@ or SWFL-wide chart is a direct contradiction of what the deliverable claims.
 ### Evidence (live, 2026-07-06)
 
 - USPS audit (zippopotam.us, USPS-derived) of all 42 crosswalk ZIPs: every city's
-  primary ZIP correct; all alt_zips correct EXCEPT Estero's (`33967` = Fort Myers,
-  `34134`/`34135` = Bonita Springs). See the Estero exclusion below.
+  primary ZIP correct; all alt_zips correct EXCEPT Estero's. Estero was corrected
+  2026-07-06 (crosswalk + `zip-resolver` test) to `33928` only — `33967` = Fort
+  Myers/San Carlos Park and `34134`/`34135` = Bonita Springs per a USPS + Mapbox
+  geographic cross-check (Mapbox place context; Wikipedia's loose infobox on 33967
+  overruled by the geographic authority), consistent with `lib/swfl-zip-city.ts`.
+  Estero is therefore a single-ZIP place and is NOT a multi-ZIP-chart city.
 - Code probe: `computeMetricChart` (`chart-from-metrics.mts`) truncates a per-ZIP
   detail table to top-`MAX_BARS`(12) by value, with no place filter; the `scope`
   passed to `buildPromptChart` only tweaks the routing question string, not the data.
@@ -71,11 +75,12 @@ A place gets the multi-ZIP chart only if it is on an explicit allowlist:
     VERIFIED_MULTI_ZIP_CITIES = { "Cape Coral", "Fort Myers", "Naples",
                                   "Lehigh Acres", "Bonita Springs" }
 
-- **Estero is excluded** — its crosswalk alt_zips (`33967`, `34134`, `34135`) belong
-  to Fort Myers and Bonita Springs per the 2026-07-06 USPS audit, so filtering to them
-  would plot neighbor-city ZIPs under an "Estero" label. Estero stays single-ZIP until
-  the crosswalk correction (tracked separately) lands, at which point it joins the
-  allowlist.
+- **Estero is not on the list because it is a single-ZIP place** (`33928`), settled by
+  the 2026-07-06 correction. It never needed exclusion logic — with one ZIP it takes
+  the ordinary single-ZIP path (its value rides the figure feed), same as Sanibel or
+  Marco Island. Had its bad alt_zips remained, filtering to them would have plotted
+  Fort Myers and Bonita ZIPs under an "Estero" label — which is exactly why the data
+  was corrected first.
 - Any future/unverified multi-ZIP place also stays single-ZIP rather than silently
   charting a possibly-wrong ZIP set. Single-ZIP places and explicit-ZIP scopes are
   unaffected (they never pass `zips`).
@@ -111,8 +116,8 @@ number outside the city.
 
 ## Out of scope
 
-- The crosswalk Estero data correction and the `zip-resolver` spine (separate change,
-  needs operator sign-off).
+- The crosswalk Estero data correction (`33928` only) + its `zip-resolver` test —
+  DONE 2026-07-06, ahead of this build, so the allowlist has no bad-data edge case.
 - The one-narrative-across-ZIPs **dossier** read (`fetchMasterDossier` is single-ZIP) —
   a larger, separate piece; this spec covers the chart only.
 - Any new chart shape (bar/table only; the chat chart-shape expansion stays parked).

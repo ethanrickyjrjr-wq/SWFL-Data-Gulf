@@ -21,12 +21,15 @@ describe("zip-resolver §A spine", () => {
     expect(r.places[0].source).toMatch(/USPS/i);
   });
 
-  // ---- Honesty rule: 34134 is alt of BOTH Estero and Bonita Springs; can't flap ----
-  it("34134 → alt of both Estero & Bonita Springs in deterministic crosswalk order, and is a genuine 2-county straddler", () => {
+  // ---- Honesty rule: 34134 is a Bonita Springs ZIP (USPS + Mapbox), and a genuine
+  // 2-county straddler. It was mis-listed as an Estero alt until the 07/06/2026
+  // crosswalk correction — the place assignment (crosswalk) and the county straddle
+  // (swfl-zip-county, TIGER) are independent sources; only the place changed. ----
+  it("34134 → Bonita Springs alt (corrected off Estero), still a genuine 2-county straddler", () => {
     const r = resolveZip("34134");
-    expect(r.places.map((p) => p.place)).toEqual(["Estero", "Bonita Springs"]);
+    expect(r.places.map((p) => p.place)).toEqual(["Bonita Springs"]);
     expect(r.places.every((p) => p.match === "alt")).toBe(true);
-    // genuine straddle: counties.length === 2, primary is Lee
+    // genuine straddle: counties.length === 2, primary is Lee (independent of place)
     expect(r.counties).toEqual(["12071", "12021"]);
     expect(r.primary_county).toBe("12071");
     // determinism: identical on repeat (no flapping)

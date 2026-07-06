@@ -2,8 +2,8 @@
   "crosswalk_vintage": "2024",
   "note": "SWFL place-name -> primary USPS ZIP crosswalk for deterministic, citable place resolution (Lee + Collier counties only). Geographic ZIP/ZCTA boundaries follow the U.S. Census 2024 TIGER/Line ZCTA vintage; each place-name -> ZIP association and USPS preferred mail city was verified against the USPS ZIP Code Lookup (tools.usps.com). A place may span several ZIPs; `zip` is the primary (core/most-recognized) code and `alt_zips` lists the others. This is a SOURCED crosswalk: every entry carries a `source`. Do not invent ZIPs not present here.",
   "default_source": "USPS ZIP Code Lookup (tools.usps.com); ZCTA geometry: U.S. Census TIGER/Line 2024 ZCTA Gazetteer",
-  "verified_date": "2026-06-04",
-  "verification_method": "USPS ZIP Code Lookup (tools.usps.com) cross-referenced with USPS-derived ZIP directories; ZCTA boundaries per Census 2024 TIGER/Line. No LLM knowledge used as the source of record.",
+  "verified_date": "2026-07-06",
+  "verification_method": "USPS ZIP Code Lookup (tools.usps.com) cross-referenced with USPS-derived ZIP directories; ZCTA boundaries per Census 2024 TIGER/Line. No LLM knowledge used as the source of record. Re-verified 07/06/2026: all 42 place->ZIP associations re-checked against live USPS mail-city assignment; every primary and alt_zip confirmed EXCEPT Estero, whose alt_zips were corrected to [] (33967 belongs to Fort Myers/San Carlos Park; 34134 and 34135 to Bonita Springs) after a USPS + Mapbox geographic cross-check, consistent with lib/swfl-zip-city.ts. Gateway 33913 intentionally retains USPS mail city Fort Myers (Gateway is a CDP within that ZIP).",
   "entries": [
     {
       "place": "Gateway",
@@ -53,7 +53,20 @@
       "place": "Naples",
       "aliases": ["downtown naples", "old naples"],
       "zip": "34102",
-      "alt_zips": ["34103", "34104", "34105", "34108", "34109", "34110", "34112", "34113", "34114", "34116", "34119", "34120"],
+      "alt_zips": [
+        "34103",
+        "34104",
+        "34105",
+        "34108",
+        "34109",
+        "34110",
+        "34112",
+        "34113",
+        "34114",
+        "34116",
+        "34119",
+        "34120"
+      ],
       "county": "collier",
       "usps_preferred_city": "Naples",
       "source": "USPS ZIP Code Lookup (tools.usps.com)",
@@ -64,12 +77,12 @@
       "place": "Estero",
       "aliases": [],
       "zip": "33928",
-      "alt_zips": ["33967", "34134", "34135"],
+      "alt_zips": [],
       "county": "lee",
       "usps_preferred_city": "Estero",
-      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "source": "USPS ZIP Code Lookup (tools.usps.com); Mapbox Geocoding place context",
       "needs_verification": false,
-      "note": "Village of Estero, Lee County. 33928 is the primary Estero code."
+      "note": "Village of Estero, Lee County — 33928 is the dedicated Estero ZCTA (Mapbox place=Estero, centroid 26.437,-81.811). Corrected 07/06/2026: the prior alt_zips [33967, 34134, 34135] were re-verified across three authorities and belong to OTHER cities — 33967 = Fort Myers / San Carlos Park (USPS mail city Fort Myers; Mapbox place=Fort Myers, centroid 26.480,-81.833, north of the village), 34134 and 34135 = Bonita Springs (USPS + Mapbox). This matches lib/swfl-zip-city.ts, which already maps those three to Fort Myers/Bonita. Wikipedia's infobox loosely listed 33967 as Estero; the geographic authority (Mapbox/Census) overrules it. Estero is a single-ZCTA place."
     },
     {
       "place": "Bonita Springs",
