@@ -29,6 +29,11 @@ test("every feature lands exactly where it was routed", () => {
   }
 });
 
+test("labEntry is 'both' — entry + safety identical across tiers", () => {
+  expect(free.labEntry).toBe(true);
+  expect(paid.labEntry).toBe(true);
+});
+
 test("paid-only features never leak into free, and paid keeps them", () => {
   for (const [key, routing] of Object.entries(FEATURE_ROUTING)) {
     if (routing !== "paid-only") continue;

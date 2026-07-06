@@ -33,6 +33,8 @@ export interface EmailLabCapabilities {
   classicTemplates: boolean;
   /** Social calendar panel. */
   socialCalendar: boolean;
+  /** Lab-entry root: project/address popups + autosave + leave guard. */
+  labEntry: boolean;
 }
 
 // ── THE DIAL. Route every feature here; that's the whole build. ───────────────
@@ -47,6 +49,8 @@ export const FEATURE_ROUTING: Record<keyof EmailLabCapabilities, Routing> = {
   // calendar OFF on `capabilitiesFor("free").socialCalendar` (false) and render it in
   // the paid panel (true). The dial is the intent; the shells follow it.
   socialCalendar: "paid-only",
+  // Free and paid get identical entry + safety behavior (spec 2026-07-06 §D).
+  labEntry: "both",
 };
 
 /** Does `tier` get something routed `routing`? */

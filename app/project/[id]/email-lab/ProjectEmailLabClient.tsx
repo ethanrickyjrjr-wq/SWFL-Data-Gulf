@@ -22,6 +22,7 @@ import { reconcileAddress, addressItem } from "@/lib/lab-entry/address-reconcile
 import { AddressPopup } from "@/components/lab-entry/AddressPopup";
 import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 import { useAutosave, makeAutosaveScheduler } from "@/lib/lab-entry/use-autosave";
+import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
 import type { ProjectUiState } from "../workspace/types";
 
 interface Props {
@@ -161,6 +162,17 @@ export function ProjectEmailLabClient({
     dirtyRef,
   });
 
+  // Leave guard (spec §D): a reactive dirty flag (dirtyRef alone can't drive the
+  // guard) + a 5-min save-nudge for a never-saved doc. Cleared on save.
+  const [dirty, setDirty] = useState(false);
+  const [nudge, setNudge] = useState(false);
+  const guard = useLeaveGuard({ dirty });
+  useEffect(() => {
+    if (!dirty || savedId) return; // nudge only a never-saved, edited doc
+    const t = setTimeout(() => setNudge(true), 5 * 60 * 1000);
+    return () => clearTimeout(t);
+  }, [dirty, savedId]);
+
   function seedCanvas(doc: EmailDoc) {
     setSeedDoc(doc);
     currentDocRef.current = doc;
@@ -247,6 +259,7 @@ export function ProjectEmailLabClient({
   function handleDocChange(doc: EmailDoc) {
     currentDocRef.current = doc;
     dirtyRef.current = true;
+    setDirty(true);
     if (savedId) autosave.current.schedule(); // debounced silent save (spec §D)
   }
   // Keep the autosave action pointed at the latest handleSave / savedId (synced
@@ -308,6 +321,8 @@ export function ProjectEmailLabClient({
         }
         savedDocRef.current = doc;
         dirtyRef.current = false;
+        setDirty(false);
+        setNudge(false);
         recordArcBuilt(savedId);
         return savedId;
       }
@@ -325,6 +340,8 @@ export function ProjectEmailLabClient({
         setSavedId(id);
         savedDocRef.current = doc;
         dirtyRef.current = false;
+        setDirty(false);
+        setNudge(false);
         window.history.replaceState({}, "", `/project/${projectId}/email-lab?did=${id}`);
         recordArcBuilt(id);
         return id;
@@ -561,6 +578,54 @@ export function ProjectEmailLabClient({
               <button
                 type="button"
                 onClick={() => setDiffAddr(null)}
+                className="py-1 text-xs text-white/40 hover:text-white/70"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {nudge && !savedId && (
+        <div className="fixed bottom-4 left-1/2 z-[55] -translate-x-1/2 rounded-full border border-gulf-teal/30 bg-[#0a1822] px-4 py-2 text-xs text-white/70 shadow-2xl">
+          You haven’t saved yet.
+          <button
+            type="button"
+            onClick={() => void handleSave(currentDocRef.current, "")}
+            className="ml-2 font-semibold text-gulf-teal hover:text-[#17a3b3]"
+          >
+            Save now
+          </button>
+        </div>
+      )}
+
+      {guard.active && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0a1822] p-5 shadow-2xl">
+            <h2 className="text-sm font-semibold text-white">Leave without saving?</h2>
+            <p className="mt-1 text-xs text-white/50">Your design isn’t saved yet.</p>
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleSave(currentDocRef.current, "");
+                  guard.accept();
+                }}
+                className="rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] hover:bg-[#17a3b3]"
+              >
+                Save &amp; leave
+              </button>
+              <button
+                type="button"
+                onClick={guard.accept}
+                className="rounded-lg border border-white/15 py-2 text-sm text-white/70 hover:bg-white/5"
+              >
+                Leave without saving
+              </button>
+              <button
+                type="button"
+                onClick={guard.reject}
                 className="py-1 text-xs text-white/40 hover:text-white/70"
               >
                 Cancel

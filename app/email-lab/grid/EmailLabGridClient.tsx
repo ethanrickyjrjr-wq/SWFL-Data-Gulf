@@ -9,6 +9,7 @@ import type { EmailDoc } from "@/lib/email/doc/types";
 import { findPlaceholder, type BrandNeed, type ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 import { planArrival } from "@/lib/lab-entry/arrival";
+import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
 import { ProjectConfirmPopup } from "@/components/lab-entry/ProjectConfirmPopup";
 import { AddressPopup } from "@/components/lab-entry/AddressPopup";
 
@@ -69,6 +70,11 @@ export function EmailLabGridClient({
       );
     return seedDoc ?? (seedById("luxury-market-report") ?? SEED_DOCS[0]).build();
   });
+
+  // Leave guard (spec §D): an anonymous grid visitor's unsaved work shouldn't
+  // vanish on an accidental back/close. Dirty once they edit the canvas.
+  const [dirty, setDirty] = useState(false);
+  const guard = useLeaveGuard({ dirty });
 
   const [confirmOpen, setConfirmOpen] = useState(plan.projectConfirm);
   // The address popup only matters for the ANONYMOUS recipe arrival — a signed-in
@@ -140,6 +146,7 @@ export function EmailLabGridClient({
         autoGenerate={build != null}
         // The popup owns the blank now; don't also seed it into the Build box.
         initialRecipe={build || plan.addressPopup ? null : initialRecipe}
+        onDocChange={() => setDirty(true)}
         scope={zip ? { kind: "zip", value: zip, address: addr ?? undefined } : undefined}
         headerSlot={
           <span className="flex items-center gap-2 text-sm font-semibold">
@@ -169,6 +176,32 @@ export function EmailLabGridClient({
           onBuild={buildWithAddress}
           onCancel={() => setAddressOpen(false)}
         />
+      )}
+      {guard.active && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0a1822] p-5 shadow-2xl">
+            <h2 className="text-sm font-semibold text-white">Leave without saving?</h2>
+            <p className="mt-1 text-xs text-white/50">
+              Your design will be lost. Send it to yourself first to keep it.
+            </p>
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={guard.accept}
+                className="rounded-lg border border-white/15 py-2 text-sm text-white/70 hover:bg-white/5"
+              >
+                Leave without saving
+              </button>
+              <button
+                type="button"
+                onClick={guard.reject}
+                className="py-1 text-xs text-white/40 hover:text-white/70"
+              >
+                Stay
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
