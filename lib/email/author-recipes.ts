@@ -16,6 +16,7 @@
 
 export const RECIPE_IDS = [
   "agent-intro",
+  "showing-confirmation",
   "sphere-weekly",
   "year-in-review",
   "chart-digest",
@@ -33,6 +34,16 @@ export type RecipeId = (typeof RECIPE_IDS)[number];
 // editorial family, letter/showcase pick sub-recipes; magazine-issue is the
 // default. \bletter\b never fires inside "newsletter" (word boundary).
 const WELCOME_RE = /\bwelcome\b|introduc|\bnew agent\b|\bmeet\b/i;
+// The scheduled-visit receipt ("showing confirmation" / "confirmed the tour" /
+// "appointment reminder"). Requires BOTH a visit-noun (showing/viewing/tour/
+// appointment) and a confirm-word (confirm/schedule/booked) in the same
+// sentence — a bare "appointment" or bare "schedule" near-misses to null.
+// Checked AFTER welcome (an intro that also confirms a first meeting stays a
+// welcome) and BEFORE sphere-weekly/monthly/editorial — a confirmation that
+// happens to read "elegant" or land in a weekly cadence must still read as
+// the confirmation, not editorial or the market digest.
+const SHOWING_CONFIRMATION_RE =
+  /\b(showing|viewing|tour|appointment)\b[^.!?]*\b(confirm(ed|ation)?|schedul\w*|booked)\b|\b(confirm(ed|ation)?|schedul\w*|booked)\b[^.!?]*\b(showing|viewing|tour|appointment)\b/i;
 // The weekly contrast brief ("weekly … market update" / "sphere market update").
 // Checked AFTER welcome (an intro mentioning a weekly update stays a welcome)
 // and BEFORE monthly (a "weekly" ask must never read as the monthly digest).
@@ -67,6 +78,7 @@ const SHOWCASE_RE = /\bshowcase\b|\bspotlight\b/i;
 export function detectRecipe(prompt: string): RecipeId | null {
   const p = prompt ?? "";
   if (WELCOME_RE.test(p)) return "agent-intro";
+  if (SHOWING_CONFIRMATION_RE.test(p)) return "showing-confirmation";
   if (SPHERE_WEEKLY_RE.test(p)) return "sphere-weekly";
   if (YEAR_REVIEW_RE.test(p)) return "year-in-review";
   if (CHART_DIGEST_RE.test(p)) return "chart-digest";
@@ -113,6 +125,58 @@ const RECIPES: Record<RecipeId, string> = {
     "- The key message and the one ask land in the first readable lines. Copy is always " +
     "real text, never baked into an image. The footer with unsubscribe and postal " +
     "address always renders — never suggest removing it.",
+
+  // PROVENANCE: distilled from https://moosend.com/blog/real-estate-email-newsletter-templates/
+  // (the BEE-free "real-estate-rendezvous" appointment template, a screenshot
+  // embedded in that article — screenshot lane, content stripped, layout system
+  // only), found 07/05/2026.
+  // Why-tag evidence: docs/superpowers/specs/2026-07-05-email-marketing-evidence-notes.md
+  // §1 (agents want a personal, not automated, feel — the same reason a stranger
+  // showing up at a home needs a face before the front door), §2 (one CTA is the
+  // rule — the source template broke it with two extra upsell cards under the
+  // primary button, dropped here), and §5 (trigger emails send within minutes of
+  // the action or engagement dies). Plus sequenzy.com/templates/appointment-
+  // reminder-email-templates (confirmed live in-session 07/05/2026 — a
+  // confirmation-then-reminder-then-follow-up sequence reduces no-shows for any
+  // appointment-based business) and nngroup.com/articles/how-users-read-on-the-web
+  // (readers scan; already this file's base citation for scan-first layouts,
+  // reused here for the side-by-side glance and the label-then-value rows).
+  "showing-confirmation":
+    "RECIPE — SHOWING CONFIRMATION (the scheduled-visit receipt; trust before the " +
+    "front door).\n" +
+    "Target structure, top to bottom:\n" +
+    "- A `signal` block as the confirmation itself: kicker names the moment (a " +
+    "visit is booked), title states the confirmation in the reader's own words, " +
+    "body is one short line pointing at the details below. This is a receipt, not " +
+    "a pitch — the reader already said yes; the job now is reassurance the visit " +
+    "is set, delivered the moment it is booked. A trigger email that lags the " +
+    "action it confirms loses the reader's attention before it ever opens.\n" +
+    "- A `multi-column` row of exactly two `image` blocks side by side, evenly " +
+    "split: the home on one side, a map or area view on the other — readers scan " +
+    "rather than read, so one glance should answer what and where before a single " +
+    "label is read.\n" +
+    "- A `list` block carrying the confirmation's facts as short label-then-value " +
+    "rows, one idea per row — the property, the time, and the place, in that " +
+    "order, each on its own line. Every value is id-selected, never guessed; the " +
+    "rows read like a receipt, never a paragraph.\n" +
+    "- An `agent-card` introducing who the reader is about to meet — here it does " +
+    "NOT close the email as a signature; it rides mid-body, right where the " +
+    "reader wants to know who is showing up. A stranger walking someone through " +
+    "their own home needs a face and a name first — the same reason agents who " +
+    "write in their own voice out-trust an anonymous or templated sender. The " +
+    "bio line stays a couple of words, never a resume.\n" +
+    "- Exactly ONE `button`, and you MUST write its `button_label` field yourself " +
+    "as the calendar action in a few short words that fit a button (add the " +
+    "visit to your calendar — never a generic view or confirm label); leaving it " +
+    "empty ships a generic label.\n" +
+    "- One soft second ask, if any, lives in a single short line of `text` below " +
+    "the button — never a second full card with its own button. A receipt earns " +
+    "trust by staying about the one thing it confirmed; bolting on a pitch for " +
+    "other listings or a valuation right under the calendar button reads as a " +
+    "bait-and-switch and undercuts the very confirmation the email exists to " +
+    "deliver. One clear ask beats several competing ones.\n" +
+    "- The footer with unsubscribe and postal address always renders — never " +
+    "suggest removing it.",
 
   "sphere-weekly":
     "RECIPE — WEEKLY SPHERE MARKET UPDATE (the headlines-versus-here contrast).\n" +

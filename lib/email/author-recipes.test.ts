@@ -11,6 +11,18 @@ describe("detectRecipe — deterministic keyword routing", () => {
     ["Welcome new subscribers to my list", "agent-intro"],
     ["introduce me as their new agent", "agent-intro"],
     ["Meet your Cape Coral agent", "agent-intro"],
+    // showing-confirmation — distilled 07/05/2026 (see PROVENANCE in author-recipes.ts)
+    ["Write the showing confirmation email for my client", "showing-confirmation"],
+    ["confirm the appointment and remind them of the tour time", "showing-confirmation"],
+    // precedence: welcome still wins before it (an intro that also confirms a
+    // first meeting stays a welcome)
+    ["a welcome email that also confirms our showing appointment", "agent-intro"],
+    // precedence: it beats a trailing editorial keyword ("luxury") — checked
+    // well before the editorial family
+    ["an elegant showing confirmation for my luxury listing", "showing-confirmation"],
+    // near-misses: a bare visit-noun or a bare confirm-word alone stays null
+    ["set up an appointment with a lender", null],
+    ["let's schedule a call to discuss pricing", null],
     // monthly newsletter
     ["our monthly market digest", "monthly-newsletter"],
     ["send the July newsletter", "monthly-newsletter"],
