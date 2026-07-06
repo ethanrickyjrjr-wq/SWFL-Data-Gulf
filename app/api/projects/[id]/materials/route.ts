@@ -17,6 +17,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
+import { findFreezingSchedule, type FreezeQueryDb } from "@/lib/email/sequence/freeze";
 
 const EMPTY_NARRATIVE = { exec_summary: "", sections: [], inference_notes: [] };
 
@@ -104,6 +105,22 @@ export async function PATCH(
     .eq("template", "block-canvas")
     .single();
   if (!owned) return NextResponse.json({ error: "not found" }, { status: 404 });
+
+  // Freeze guard (lifecycle sequences): a deliverable referenced by an armed
+  // one-shot is LOCKED — "Scheduling locks this email. It can't be edited or
+  // sent until [time] — unlock to change it." Unlock (stop the row) thaws it.
+  // Structural cast, same pattern as writeAction's ScheduleUpsertDb — the real
+  // PostgrestFilterBuilder satisfies the narrow query slice at runtime.
+  const frozen = await findFreezingSchedule(
+    createServiceRoleClient() as unknown as FreezeQueryDb,
+    body.deliverable_id,
+  );
+  if (frozen) {
+    return NextResponse.json(
+      { error: "frozen", scheduled_for: frozen.next_run_at },
+      { status: 423 },
+    );
+  }
 
   // Keep the saved build prompt fresh too (only overwrite when one is supplied, so a
   // doc-only PATCH never wipes it). Powers the scheduled re-render's chart fidelity.

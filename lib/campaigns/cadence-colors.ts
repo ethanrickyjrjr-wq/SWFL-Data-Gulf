@@ -21,11 +21,15 @@ export interface CadenceColor {
   label: string;
 }
 
-/** Three distinct, theme-aware hues — full Record so every `Cadence` is covered. */
+/** Distinct, theme-aware hues — full Record so every `Cadence` is covered.
+ *  "once" (lifecycle-sequence one-shots) is a SEND shape, not a data-freshness
+ *  band: neutral grey, and it stays out of CADENCE_ORDER so the freshness
+ *  legend never renders it. */
 export const CADENCE_COLORS: Record<Cadence, CadenceColor> = {
   daily: { bg: "rgba(20,184,166,0.18)", fg: "#5eead4", label: "Daily" },
   weekly: { bg: "rgba(245,158,11,0.18)", fg: "#fcd34d", label: "Weekly" },
   monthly: { bg: "rgba(139,92,246,0.20)", fg: "#c4b5fd", label: "Monthly" },
+  once: { bg: "rgba(148,163,184,0.18)", fg: "#cbd5e1", label: "One-time" },
 };
 
 /** Stable render order for the legend (freshest first). */
