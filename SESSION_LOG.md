@@ -1,3 +1,32 @@
+## 2026-07-06 (main) — email-lab grid auto-height design + working-tree cleanup, PUSHED
+
+Diagnosed the grid-canvas clipping bug from an operator screenshot (Sources citation + stat tiles
+cut off mid-line): `GridCanvas.tsx`'s react-grid-layout cells are a fixed `h × rowHeight` with
+`overflow-hidden`, and `EmailLabGridShell.tsx`'s `normalizeAuthorHeights()` assigns that `h` from a
+static per-block-TYPE `DEFAULT_H` table — never the block's real rendered content. Brainstormed
+(RULE 3.5) with crawl4ai research (RULE 0.4): native CSS masonry (`display: grid-lanes`) confirmed
+Experimental/non-Baseline via MDN, not production-viable; GridStack.js confirmed via its `doc/API.md`
+to ship a built-in `sizeToContent` feature (MIT, npm gridstack@12.6.0) plus an official React wrapper
+in the same package — chosen over hand-rolling a ResizeObserver layer on RGL. Verified `compile-grid.ts`/
+`row-grouping.ts` only ever read `x/y/w` (never `h`), so the migration is contained to the editor
+canvas — sent email, PDF, and the free-tier stacked canvas are unaffected. Design written to
+`docs/superpowers/specs/2026-07-06-email-grid-autoheight-gridstack-design.md`; plan not yet written
+(next: superpowers:writing-plans).
+
+Also swept the working tree per operator request: committed 3 stray-but-complete untracked docs
+(lab-entry-root plan, email-campaign flow-graph + playbooks specs — all finished artifacts of
+already-shipped/researched work) and added 2 `.gitignore` patterns (`scripts/email/tmp-*.mts` —
+self-labeled "LOCAL ONLY — never commit"; `verification/*.log` — runtime audit trail, env-var names
+only, never values). Noted but deliberately did NOT touch `migrations/*.sql` /
+`ingest/pipelines/parcel_subdivision/` / `scripts/verify-communities-tables.ts` — confirmed those
+belong to a concurrent live session's in-progress communities-swfl work (it landed its own commit,
+`339d06de`, moments later). This push bundles that commit too (operator said push everything on the
+board; flagged it as foreign before pushing per the safe-push rule).
+
+**Next:** write the implementation plan for the GridStack.js migration spec above.
+
+---
+
 ## 2026-07-06 (main) — communities-swfl Phase 4 BUILT (brain pack + master wiring + drill pages) — empty-tolerant, UNPUSHED
 
 Opus, parallel to Sonnet's Phase 1. Built Phase 4 of the communities-swfl program
