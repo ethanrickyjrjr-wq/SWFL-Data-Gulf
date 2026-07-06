@@ -197,17 +197,23 @@ export function ArcStrip({ projectId, sequence, onChanged }: Props) {
                 ))}
               </ul>
             )}
-            {nudges
-              .filter((n) => n.step_key === step.key)
-              .map((n) => (
-                <ArcNudgeChip
-                  key={n.id}
-                  nudge={n}
-                  onBuild={() => router.push(arcStepDestination(projectId, step))}
-                  onDismiss={() => void dismissNudge(n.id)}
-                  dismissing={dismissingId === n.id}
-                />
-              ))}
+            {/* Only nag on a step you can still act on. The adapter still WRITES a nudge row for
+                every actionable-at-creation step (that's the instrumentation dataset), but once a
+                step is sent/scheduled/skipped its "Build it →" chip would be stale — so the UI
+                hides it. A step that has since progressed simply stops showing its chip; the row
+                stays for the precision/latency analysis. (Design decision C, operator 07/06/2026.) */}
+            {(step.state === "pending" || step.state === "built") &&
+              nudges
+                .filter((n) => n.step_key === step.key)
+                .map((n) => (
+                  <ArcNudgeChip
+                    key={n.id}
+                    nudge={n}
+                    onBuild={() => router.push(arcStepDestination(projectId, step))}
+                    onDismiss={() => void dismissNudge(n.id)}
+                    dismissing={dismissingId === n.id}
+                  />
+                ))}
             <div className="mt-2 flex flex-wrap gap-1.5">
               <button
                 type="button"
