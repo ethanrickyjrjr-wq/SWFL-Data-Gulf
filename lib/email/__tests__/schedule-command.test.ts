@@ -237,3 +237,29 @@ describe("resume action", () => {
     );
   });
 });
+
+import { deliverableToScheduleRecipe } from "@/lib/deliverable/schedule-recipe";
+
+describe('validateToolInput cadence "once" (lifecycle sequences)', () => {
+  test("create with once needs no day fields", () => {
+    const r = validateToolInput({
+      action: "create",
+      cadence: "once",
+      send_hour_et: 14,
+      template_id: "block-canvas",
+      deliverable_id: "d-123",
+    });
+    expect(r.ok).toBe(true);
+  });
+  test("recipe bridge builds a once block-canvas command", () => {
+    const r = deliverableToScheduleRecipe(
+      { id: "d-123", template: "block-canvas", scope_kind: "zip", scope_value: "33904" },
+      { cadence: "once", send_hour_et: 14 },
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.command.cadence).toBe("once");
+      expect(r.command.deliverable_id).toBe("d-123");
+    }
+  });
+});

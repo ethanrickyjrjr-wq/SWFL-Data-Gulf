@@ -165,7 +165,7 @@ export function buildSystemPrompt(existing: ExistingSchedule[]): string {
 const hourSchema = z.number().int().min(0).max(23);
 const dowSchema = z.number().int().min(0).max(6);
 const domSchema = z.number().int().min(1).max(28);
-const cadenceSchema = z.enum(["daily", "weekly", "monthly"]);
+const cadenceSchema = z.enum(["daily", "weekly", "monthly", "once"]);
 
 const rawSchema = z.object({
   action: z.enum(SCHEDULE_ACTIONS),
@@ -221,7 +221,7 @@ export function validateToolInput(input: unknown): ValidationResult {
 
   const requireCadence = () => {
     if (!c.cadence) {
-      errors.push("cadence is required (daily | weekly | monthly)");
+      errors.push("cadence is required (daily | weekly | monthly | once)");
       return;
     }
     if (c.cadence === "weekly" && c.day_of_week == null)
