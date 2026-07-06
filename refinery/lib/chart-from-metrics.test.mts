@@ -16,7 +16,7 @@
  */
 import { test } from "bun:test";
 import assert from "node:assert/strict";
-import { computeMetricChart } from "./chart-from-metrics.mts";
+import { computeMetricChart, filterOutputToZips } from "./chart-from-metrics.mts";
 import { lintChartBlock } from "../validate/chart-block-lint.mts";
 import type {
   BrainOutput,
@@ -578,4 +578,148 @@ test("computeMetricChart: caps a large key_metrics group to the first 12 (preser
   assert.equal(block.rows.length, 12);
   assert.deepEqual(block.rows.map((r) => r[0]).slice(0, 3), ["M0", "M1", "M2"]);
   assert.match(block.title, /top 12/i);
+});
+
+// --- filterOutputToZips: keep only a city's ZIPs before charting -------------
+// A SWFL-wide per-ZIP table filtered to one city's ZIP set, so a "Cape Coral"
+// build charts Cape Coral's ZIPs instead of the region's top-12 by value.
+function swflByZip(): BrainOutputDetailTable {
+  return {
+    id: "housing_by_zip",
+    title: "Median list price by ZIP",
+    grain: "zip",
+    columns: [
+      { id: "median_list", label: "Median list price", display_format: "currency", units: "USD" },
+    ],
+    rows: [
+      { key: "33904", label: "33904", cells: { median_list: 410000 } }, // Cape Coral
+      { key: "33914", label: "33914", cells: { median_list: 560000 } }, // Cape Coral
+      { key: "33990", label: "33990", cells: { median_list: 380000 } }, // Cape Coral
+      { key: "34102", label: "34102", cells: { median_list: 2200000 } }, // Naples — drop
+      { key: "34145", label: "34145", cells: { median_list: 1500000 } }, // Marco — drop
+    ],
+    source: SRC,
+  };
+}
+
+const CAPE_ZIPS = ["33904", "33909", "33914", "33990", "33991", "33993"];
+
+test("filterOutputToZips: keeps only rows whose ZIP is in the set (Cape Coral)", () => {
+  const out = filterOutputToZips(output({ detail_tables: [swflByZip()] }), CAPE_ZIPS);
+  assert.deepEqual(
+    out.detail_tables![0].rows.map((r) => r.key),
+    ["33904", "33914", "33990"],
+  );
+});
+
+test("filterOutputToZips: empty zips returns the SAME output reference (default byte-identical)", () => {
+  const o = output({ detail_tables: [swflByZip()] });
+  assert.equal(filterOutputToZips(o, []), o);
+});
+
+test("filterOutputToZips: non-zip-grain tables and key_metrics pass through untouched", () => {
+  const tbl = swflByZip();
+  tbl.grain = "county";
+  const o = output({
+    detail_tables: [tbl],
+    key_metrics: [
+      metric({
+        metric: "a",
+        value: 1,
+        label: "A",
+        variable_type: "intensive",
+        display_format: "percent",
+      }),
+    ],
+  });
+  const out = filterOutputToZips(o, ["33904"]);
+  assert.equal(out.detail_tables![0].rows.length, 5); // county grain untouched
+  assert.equal(out.key_metrics.length, 1);
+});
+
+test("filterOutputToZips: matches a 5-digit token in the label when key is not a bare ZIP", () => {
+  const tbl = swflByZip();
+  tbl.rows[0] = { key: "cape-33904", label: "Cape Coral 33904", cells: { median_list: 410000 } };
+  const out = filterOutputToZips(output({ detail_tables: [tbl] }), CAPE_ZIPS);
+  assert.deepEqual(
+    out.detail_tables![0].rows.map((r) => r.cells.median_list),
+    [410000, 560000, 380000],
+  );
+});
+
+test("computeMetricChart detailTablesOnly: charts the city's ZIPs after filtering", () => {
+  const out = filterOutputToZips(output({ detail_tables: [swflByZip()] }), CAPE_ZIPS);
+  const block = computeMetricChart(out, { detailTablesOnly: true });
+  assert.ok(block, "expected a Cape Coral ZIP chart");
+  assert.deepEqual(
+    block!.rows.map((r) => r[0]),
+    ["33904", "33914", "33990"], // <=12 rows: original (filtered) order preserved, not sorted
+  );
+});
+
+test("computeMetricChart detailTablesOnly: null (no SWFL key-metrics fallback) when too few ZIP rows", () => {
+  const o = output({
+    detail_tables: [swflByZip()],
+    key_metrics: [
+      metric({
+        metric: "a",
+        value: 1,
+        label: "A",
+        variable_type: "intensive",
+        display_format: "percent",
+      }),
+      metric({
+        metric: "b",
+        value: 2,
+        label: "B",
+        variable_type: "intensive",
+        display_format: "percent",
+      }),
+      metric({
+        metric: "c",
+        value: 3,
+        label: "C",
+        variable_type: "intensive",
+        display_format: "percent",
+      }),
+    ],
+  });
+  const filtered = filterOutputToZips(o, ["00000"]); // no match -> 0 rows
+  assert.equal(computeMetricChart(filtered, { detailTablesOnly: true }), null);
+});
+
+test("computeMetricChart default (no opts): still falls back to key_metrics — unchanged", () => {
+  const o = output({
+    detail_tables: [swflByZip()],
+    key_metrics: [
+      metric({
+        metric: "a",
+        value: 1,
+        label: "A",
+        variable_type: "intensive",
+        display_format: "percent",
+      }),
+      metric({
+        metric: "b",
+        value: 2,
+        label: "B",
+        variable_type: "intensive",
+        display_format: "percent",
+      }),
+      metric({
+        metric: "c",
+        value: 3,
+        label: "C",
+        variable_type: "intensive",
+        display_format: "percent",
+      }),
+    ],
+  });
+  const filtered = filterOutputToZips(o, ["00000"]);
+  const block = computeMetricChart(filtered); // no opts -> key_metrics fallback fires
+  assert.ok(block);
+  assert.deepEqual(
+    block!.rows.map((r) => r[0]),
+    ["A", "B", "C"],
+  );
 });

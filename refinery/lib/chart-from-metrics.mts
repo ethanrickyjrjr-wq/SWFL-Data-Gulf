@@ -33,11 +33,45 @@ import type {
   BrainOutput,
   BrainOutputMetric,
   BrainOutputDetailTable,
+  BrainOutputDetailRow,
   BrainOutputMetricDisplayFormat,
 } from "../types/brain-output.mts";
 
 /** A chart needs at least this many comparable bars to be worth drawing. */
 export const MIN_POINTS = 3;
+
+const FIVE_DIGIT_RE = /\b(\d{5})\b/;
+
+/** The ZIP a per-ZIP detail row identifies: its `key` when that IS a 5-digit ZIP,
+ *  else the first 5-digit token in its `label`. `null` when neither yields one. */
+function rowZip(row: BrainOutputDetailRow): string | null {
+  if (/^\d{5}$/.test(row.key)) return row.key;
+  const m = FIVE_DIGIT_RE.exec(row.label ?? "");
+  return m ? m[1] : null;
+}
+
+/**
+ * Return a shallow-cloned BrainOutput whose per-ZIP (`grain` contains "zip")
+ * detail-table rows are kept only when their ZIP is in `zips`. Non-per-ZIP tables
+ * and `key_metrics` pass through untouched. Empty `zips` or no detail tables → the
+ * SAME reference back, so a caller that passes no filter gets byte-identical output.
+ *
+ * This is the ONE root for scoping the shared chart producer to a named city's ZIP
+ * set (a multi-ZIP city's ZIP-by-ZIP chart) without the SWFL-wide top-12 leaking in.
+ */
+export function filterOutputToZips(output: BrainOutput, zips: readonly string[]): BrainOutput {
+  if (zips.length === 0 || !output.detail_tables?.length) return output;
+  const set = new Set(zips);
+  const detail_tables = output.detail_tables.map((t) => {
+    if (!/zip/i.test(t.grain)) return t;
+    const rows = t.rows.filter((r) => {
+      const z = rowZip(r);
+      return z !== null && set.has(z);
+    });
+    return { ...t, rows };
+  });
+  return { ...output, detail_tables };
+}
 
 /** Column id matches a date/period time dimension. */
 export const DATE_COLUMN_RE = /date|year|month|period|quarter|week/i;
@@ -279,7 +313,10 @@ function chartFromKeyMetrics(
 /**
  * Compute the one build-time bar chart for a brain output, or `null`.
  */
-export function computeMetricChart(output: BrainOutput): ChartBlock | null {
+export function computeMetricChart(
+  output: BrainOutput,
+  opts: { detailTablesOnly?: boolean } = {},
+): ChartBlock | null {
   // KEYSTONE as-of: a single-vintage block is anchored to the brain's
   // `refined_at` (the moment all its audited numbers were computed). ISO
   // 8601 → date portion. The contributing sources' `fetched_at` precede this
@@ -289,6 +326,9 @@ export function computeMetricChart(output: BrainOutput): ChartBlock | null {
   // Every pre-computed chart is a bar — stamp its registry frame so the adapter
   // (`blockToSpec`) can lift it to a ChartSpec without re-inferring shape.
   if (fromTable) return { ...fromTable, frame_id: "bar-table" };
+  // A ZIP-filtered (city-scoped) request must NEVER fall back to the SWFL-wide
+  // key_metrics chart — that would put region aggregates under a city's name.
+  if (opts.detailTablesOnly) return null;
   const fromMetrics = chartFromKeyMetrics(output.key_metrics, asOf);
   return fromMetrics ? { ...fromMetrics, frame_id: "bar-table" } : null;
 }
