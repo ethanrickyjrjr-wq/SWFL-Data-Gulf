@@ -1,3 +1,22 @@
+## 2026-07-05 (main) — BUILT: lifecycle sequences build 3 (12 commits, bf3115ba..2f2cc088) — milestone-fired listing arc, UNPUSHED pending operator approval
+
+Brainstormed (RULE 3.5, crawl4ai research: Ylopo lifecycle switching needs a real-time MLS feed we don't
+have; our transitions.py HOLDING can't distinguish pending/sold → MANUAL milestones locked), spec + plan
+committed, then executed inline (TDD, commit per task). SHIPPED: cadence "once" (computeNextRunAt→null =
+one-shot parks itself; scheduler.ts core UNTOUCHED); tables email_sequence_setups + email_sequences (RLS
+owner-only, one-default + one-armed partial unique indexes, migration LIVE, types regenerated);
+lib/email/sequence/* (state machine: frozen refuses edits / sent never re-fires; setup snapshot never
+carries project data; frozen-occurrence renders the SAVED doc verbatim — no AI refill; date-free once:<id>
+claim key); runner: frozen once-lane (missing deliverable THROWS, never digest-fallback), fired once rows
+flip status='completed', crash-orphaned once rows re-arm to now (claim key dedupes); freeze guard = DERIVED
+(armed one-shot → materials PATCH 423 with the operator's verbatim unlock copy); send-now = atomic
+single-row claim + the SAME processSchedule core in-request, cron as crash net (lost claim = "queued");
+API arm/step/fire/setups; ArcStrip + MilestoneConfirmCard on the project email tab ($0 section previews,
+build-on-demand any order, unlock, save-as-my-setup with default-follows-to-new-projects). Gates: 1390
+tests 0 fail, `bunx next build` green, DRY_RUN runner clean. Checks: `lifecycle_sequences_live_verify`
+OPEN (operator prod check); follow-up `overnight_data_update_window` (realtor.com nightly timing → our
+2–5 AM ET window). NOT built: auto-detect nudge, social arc, "send again". STOPPED BEFORE PUSH.
+
 ## 2026-07-05 (main) — communities-swfl: spatial-join crux KILLED — home→community link already in every parcel
 
 Reviewed + scoped `docs/superpowers/specs/2026-07-05-communities-swfl-design.md`, probed all six subsystems
