@@ -1227,6 +1227,75 @@ export interface Database {
         };
         Relationships: [];
       };
+      email_sequence_setups: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          is_default: boolean;
+          steps: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          is_default?: boolean;
+          steps?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          is_default?: boolean;
+          steps?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      email_sequences: {
+        Row: {
+          id: string;
+          user_id: string;
+          project_id: string;
+          setup_name: string | null;
+          status: string;
+          audience_slug: string | null;
+          send_hour_et: number | null;
+          steps: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          project_id: string;
+          setup_name?: string | null;
+          status?: string;
+          audience_slug?: string | null;
+          send_hour_et?: number | null;
+          steps?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          project_id?: string;
+          setup_name?: string | null;
+          status?: string;
+          audience_slug?: string | null;
+          send_hour_et?: number | null;
+          steps?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       email_subscribers: {
         Row: {
           id: number;
