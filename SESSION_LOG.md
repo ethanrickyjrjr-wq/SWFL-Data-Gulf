@@ -1,3 +1,24 @@
+## 2026-07-06 (main) — email/social/MLS campaign trigger map + link-click-routing design, PUSHED
+
+Built the full end-to-end trigger map connecting email campaigns, social (`lib/social/`), and MLS
+listing events (`ingest/pipelines/listing_lifecycle/`): 9 campaigns, every claim sourced live via
+crawl4ai (RESO StandardStatus, FTC CAN-SPAM opt-out timing, Resend webhook payload shapes, real
+CRM/ESP practitioner sources) — `docs/superpowers/specs/2026-07-06-email-campaign-playbooks.md` +
+`-flow-graph.yaml`, plus a redeployed clickable visual map. Shipped one real recipe
+(`showing-confirmation`, commit `951c24e1`) via the distiller skill, live-verified in the grid
+builder — found and logged a real gap (chart substitutes for the photo+map pair; no maps-deep-link
+button yet). RULE 0.5 probe surfaced that `lib/email/outreach/lifecycle.ts` already receives
+Resend's `data.click.link` field but discards it (collapses every click to one "engaged" signal) —
+this reframed the "click tracking" ask from a from-scratch build to "stop throwing away a field we
+already get." Brainstormed and spec'd sub-project 1 of 3 (per-link click routing via a signed
+redirect token, no DB read on the critical path, unsubscribe riding the same mechanism without
+sharing a failure mode) — `docs/superpowers/specs/2026-07-06-link-click-routing-design.md`,
+approved, not yet built. Sub-projects 2 (PLATFORM_ARC auto-advance off `listing_transitions`) and 3
+(attribution windows) scoped but not brainstormed. Landmine flagged: a NotebookLM notebook the
+operator pointed at turned out to be built FROM our own artifacts, not independent research — its
+outputs just reflect our own work back. Full punch list: `docs/handoff/2026-07-06-campaign-
+automation-followups.md`.
+
 ## 2026-07-06 (main) — GridStack migration: PDF/Outlook safety scoping + spec correction, PUSHED
 
 Operator asked to make sure the GridStack auto-height migration still turns into PDFs and works with
