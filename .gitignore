@@ -114,6 +114,15 @@ tmp/
 # Ingest runtime logs (LeePA + future ingest pipelines)
 ingest/*.log
 
+# Verification/proof-run logs — audit trail of which env vars a metered call
+# saw, never secret values, but still a runtime log, not repo content.
+verification/*.log
+
+# Operator one-off email scripts — self-labeled "LOCAL ONLY — never commit"
+# in their own header comment (rebrand fixes, one-off sends, showcase mirrors).
+# Same convention as scripts/.prove-*/scripts/probe_*.py below.
+scripts/email/tmp-*.mts
+
 # Scratch / throwaway scripts — never commit
 refinery/__scratch__/
 __scratch__/
