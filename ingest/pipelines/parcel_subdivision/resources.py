@@ -25,7 +25,6 @@ from .constants import (
     CO_NO,
     DOR_HOME_TYPE,
     OUT_FIELDS,
-    PAGE_SIZE,
     SUBDIVISION_QUALIFIER_PATTERN,
 )
 
@@ -117,27 +116,31 @@ def _promote_to_tier2(rows: list[dict], chunk_size: int = 5_000) -> None:
         print(f"  parcel_subdivision chunk {i // chunk_size + 1}/{n_chunks} ({len(chunk)} rows)")
 
 
-_MAX_ATTEMPTS_PER_SIZE = 3
-_MIN_PAGE_SIZE = 100
+_MAX_ATTEMPTS = 3
+# OBJECTIDs per objectIds fetch. This CENTROID layer's backend is slow: live
+# 07/06/2026 an objectIds batch of 500 (and 1000) reliably 504'd at the ArcGIS
+# gateway (~60s to time out) while 250–327 returned in ~2s. So 250 sits safely
+# under that ceiling and avoids the 60s-per-504 split tax on every batch. A batch
+# that does 504/soft-400 anyway is still halved + retried (_fetch_object_id_batch)
+# for correctness — 250 is the size that makes the common path fast, not a limit.
+# (Must also stay <= the layer's maxRecordCount of 2000 or a batch would truncate.)
+_BATCH_SIZE = 250
+SKIPPED_OBJECT_IDS: list[int] = []  # audit trail — every OBJECTID that was unservable
 
 
-def _fetch_page(last_oid: int, page_size: int) -> dict:
-    """One ArcGIS request, retried up to _MAX_ATTEMPTS_PER_SIZE times at THIS
-    page_size. Returns the parsed JSON body (which may itself carry a
-    {"error": ...} key — the caller decides whether that's grounds to shrink
-    the page and retry). Raises only on a real transport/HTTP failure."""
-    params = {
-        "where": f"(CO_NO={CO_NO['collier']}) AND OBJECTID>{last_oid}",
-        "outFields": OUT_FIELDS,
-        "orderByFields": "OBJECTID ASC",
-        "resultRecordCount": page_size,
-        "returnGeometry": "false",
-        "f": "json",
-    }
-    for attempt in range(_MAX_ATTEMPTS_PER_SIZE):
-        last_attempt = attempt == _MAX_ATTEMPTS_PER_SIZE - 1
+def _request(params: dict, retries: int = _MAX_ATTEMPTS) -> dict:
+    """One ArcGIS /query POST, retried up to `retries` times on transport/5xx.
+    Returns the parsed JSON body (may itself carry an {"error": ...} key — the
+    caller decides). POST (form-encoded body) not GET: an objectIds batch is a
+    long parameter and POST sidesteps any URL-length limit.
+
+    A multi-id batch passes retries=1 (fail fast): a 504 there means the batch is
+    too heavy, so retrying the SAME size can't help — the caller splits instead.
+    Only a lone id retries, where a 504 may be a genuine transient blip."""
+    for attempt in range(retries):
+        last_attempt = attempt == retries - 1
         try:
-            resp = requests.get(CENTROID_URL, params=params, timeout=120)
+            resp = requests.post(CENTROID_URL, data=params, timeout=120)
             if resp.status_code >= 500 and not last_attempt:
                 time.sleep(2 * (attempt + 1))
                 continue
@@ -150,103 +153,75 @@ def _fetch_page(last_oid: int, page_size: int) -> dict:
     raise RuntimeError("unreachable")  # loop always returns or raises on last_attempt
 
 
-def _fetch_page_with_shrink(last_oid: int, page_size: int) -> tuple[dict, int]:
-    """Fetch one page, shrinking resultRecordCount on a repeated soft-400
-    ({"error": {"code": 400, ...}} inside an HTTP 200 body) before giving up.
+def _fetch_all_object_ids() -> list[int]:
+    """All Collier OBJECTIDs via `returnIdsOnly=true` — the official Esri pattern
+    for a layer that won't paginate (docs: returnIdsOnly returns up to 1M
+    conforming IDs in one response, then fetch by objectIds).
 
-    Verified live 07/06/2026: a page can 400 at resultRecordCount=2000 while
-    succeeding cleanly at 500 for the IDENTICAL cursor (OBJECTID>2274627) —
-    this is page-size-dependent (a response-size/server limit at that specific
-    cursor), NOT a transient blip and NOT a rejected query shape (unlike
-    returnCountOnly/LIKE/returnCentroid on this same layer, which 400 every
-    time regardless of size). Halving down to _MIN_PAGE_SIZE before raising
-    absorbs it without needing a hand-picked page size.
-
-    Returns (body, page_size_used) — the caller resumes subsequent pages at
-    the ORIGINAL page_size; the shrink is local to the one problem cursor."""
-    size = page_size
-    while True:
-        body = _fetch_page(last_oid, size)
-        if "error" not in body:
-            return body, size
-        if size <= _MIN_PAGE_SIZE:
-            raise RuntimeError(
-                f"collier parcel_subdivision page failed @OBJECTID>{last_oid} "
-                f"even at the minimum page size ({_MIN_PAGE_SIZE}): {body['error']}"
-            )
-        size = max(size // 2, _MIN_PAGE_SIZE)
-        print(f"  parcel_subdivision (collier): OBJECTID>{last_oid} soft-400'd — retrying at page_size={size}")
+    Verified live 07/06/2026: this layer soft-400s ("Invalid query parameters")
+    on `where=(CO_NO=21) AND OBJECTID>N` + orderByFields + resultRecordCount deep
+    pagination at specific cursors, but returnIdsOnly returned all 364,827 Collier
+    OIDs cleanly in a single request, and every one of those "failing" OIDs proved
+    individually queryable via objectIds (with S_LEGAL intact). The bug was the
+    keyset-pagination query shape, not the source data — there is no dead zone."""
+    body = _request({"where": f"CO_NO={CO_NO['collier']}", "returnIdsOnly": "true", "f": "json"})
+    if "objectIds" not in body:
+        raise RuntimeError(f"collier parcel_subdivision returnIdsOnly failed: {body.get('error', body)}")
+    return sorted(int(x) for x in (body["objectIds"] or []))
 
 
-# Live-tested 07/06/2026 at OBJECTID>2275379: shrinking resultRecordCount down to
-# _MIN_PAGE_SIZE STILL soft-400'd, but nudging the cursor forward by even +1
-# (OBJECTID>2275380) succeeded immediately. So a second, distinct failure mode
-# exists alongside the size-dependent one: a poison VALUE on the single row at
-# that exact OBJECTID (a corrupt field breaking server-side query/serialization),
-# not a size limit. Cap how many parcels a nudge is allowed to skip so a real
-# systemic outage still raises instead of silently skipping a huge range.
-_MAX_CURSOR_NUDGE = 50
-SKIPPED_OBJECT_IDS: list[int] = []  # audit trail — every OBJECTID a nudge skipped past
-
-
-def _fetch_page_resilient(last_oid: int, page_size: int) -> tuple[dict, int, int]:
-    """`_fetch_page_with_shrink`, plus a cursor-nudge fallback for the poison-row
-    case that shrinking alone can't fix. Returns (body, page_size_used, cursor_used)
-    — cursor_used may be > last_oid if a nudge was needed; the caller resumes
-    pagination from there, having logged exactly what was skipped."""
+def _fetch_object_id_batch(oids: list[int]) -> list[dict]:
+    """Fetch a batch of parcels by explicit `objectIds` (no where/orderBy/
+    resultRecordCount — the path that 400s on this layer). Adaptive to both of
+    the layer's failure modes: a soft-400 ({"error": ...} in a 200 body) and a
+    hard gateway 504/timeout on a too-heavy batch. Either way, if the batch has
+    more than one id, halve it and recurse — smaller batches serialize faster
+    and stay under the gateway timeout. A LONE OBJECTID that still soft-400s is
+    logged + skipped (a genuinely unservable row must never abort the ingest —
+    per the 07/06/2026 probe none exist, so this is a safety net); a lone id that
+    fails at the transport level (504/timeout) is re-raised, because losing a
+    real row to a transient network blip would be silent data loss."""
+    if not oids:
+        return []
+    lone = len(oids) == 1
     try:
-        body, used_size = _fetch_page_with_shrink(last_oid, page_size)
-        return body, used_size, last_oid
-    except RuntimeError:
-        pass  # even the floor page size failed — try nudging the cursor instead
+        body = _request({
+            "objectIds": ",".join(map(str, oids)),
+            "outFields": OUT_FIELDS,
+            "returnGeometry": "false",
+            "f": "json",
+        }, retries=_MAX_ATTEMPTS if lone else 1)  # multi-id: fail fast -> split; lone: retry a blip
+        reason = body.get("error")  # soft-400 inside a 200, or None on success
+    except Exception as exc:
+        if lone:
+            raise  # a single real row failing at the transport level is not skippable
+        reason = f"transport/5xx: {exc}"
+        body = None
 
-    for nudge in range(1, _MAX_CURSOR_NUDGE + 1):
-        candidate = last_oid + nudge
-        try:
-            body, used_size = _fetch_page_with_shrink(candidate, page_size)
-        except RuntimeError:
-            continue
-        SKIPPED_OBJECT_IDS.extend(range(last_oid + 1, candidate + 1))
-        print(
-            f"  parcel_subdivision (collier): OBJECTID {last_oid + 1}-{candidate} "
-            f"unqueryable (poison row?) — skipped, resuming at OBJECTID>{candidate}"
-        )
-        return body, used_size, candidate
-
-    raise RuntimeError(
-        f"collier parcel_subdivision: OBJECTID>{last_oid} failed at every page size AND "
-        f"every cursor nudge up to +{_MAX_CURSOR_NUDGE} — this is a systemic outage, not a poison row"
-    )
+    if body is not None and reason is None:
+        return body.get("features", [])
+    if lone:  # only reachable via a soft-400 (transport raised above)
+        SKIPPED_OBJECT_IDS.append(oids[0])
+        print(f"  parcel_subdivision (collier): OBJECTID {oids[0]} unservable even alone — skipped: {reason}")
+        return []
+    mid = len(oids) // 2
+    print(f"  parcel_subdivision (collier): objectIds batch of {len(oids)} failed ({reason}) — splitting")
+    return _fetch_object_id_batch(oids[:mid]) + _fetch_object_id_batch(oids[mid:])
 
 
-def _iter_collier_attrs(page_size: int = PAGE_SIZE):
-    """Keyset pagination by OBJECTID — the resultOffset paginator caps at 100k
-    features on this hosted layer (verified on the sibling cadastral layer;
-    same ArcGIS Online hosting tier), so cursor on OBJECTID instead."""
-    last_oid = -1
-    page_num = 0
-    while True:
-        data, used_size, cursor_used = _fetch_page_resilient(last_oid, page_size)
-
-        features = data.get("features", [])
-        if not features:
-            break
-        page_num += 1
-        if page_num % 20 == 0:
-            print(f"  parcel_subdivision (collier): page {page_num}, OBJECTID>{last_oid}")
-        max_oid = cursor_used
-        for feat in features:
-            oid = feat.get("attributes", {}).get("OBJECTID")
-            if isinstance(oid, int) and oid > max_oid:
-                max_oid = oid
-            yield feat
-        if len(features) < used_size or max_oid == cursor_used:
-            break
-        last_oid = max_oid
+def _iter_collier_attrs(batch_size: int = _BATCH_SIZE):
+    """Retrieve every Collier parcel: one returnIdsOnly call for the full OBJECTID
+    list, then fetch in batches by objectIds."""
+    oids = _fetch_all_object_ids()
+    total_batches = (len(oids) + batch_size - 1) // batch_size
+    for n, i in enumerate(range(0, len(oids), batch_size), start=1):
+        if n % 20 == 0:
+            print(f"  parcel_subdivision (collier): objectIds batch {n}/{total_batches}")
+        yield from _fetch_object_id_batch(oids[i : i + batch_size])
 
 
 def fetch_collier_parcel_subdivisions() -> list[dict]:
-    """Fetch all Collier (CO_NO=21) parcel names via OBJECTID keyset paging, normalized."""
+    """Fetch all Collier (CO_NO=21) parcel names via returnIdsOnly + objectIds batching, normalized."""
     return _normalize(list(_iter_collier_attrs()), "collier")
 
 

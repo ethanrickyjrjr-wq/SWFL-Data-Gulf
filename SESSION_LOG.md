@@ -1,3 +1,30 @@
+## 2026-07-06 (main) — communities-swfl Collier ingest FIXED: the "FDOR dead zone" was a query-shape bug, not dead data (100% recovery)
+
+Picked up the handoff (`docs/superpowers/plans/2026-07-06-communities-swfl-handoff.md`) that declared
+`parcel_subdivision` blocked on a "real ~50+ record dead zone in FDOR's Collier centroid layer." It
+wasn't. RULE 0.5 (probe code): the sibling `collier_parcels` pulls all 364,827 rows with the IDENTICAL
+keyset-pagination shape on the cadastral layer — so the shape, not the data, was suspect. RULE 0.4
+(crawl4ai): Esri REST docs confirm the official pattern for a layer that won't paginate — `returnIdsOnly`
+then fetch by `objectIds`. Two rate-limited probes (NOT the prior session's spray) settled it: (a)
+`returnIdsOnly=true` returned all 364,827 Collier OIDs in one call; (b) every "unreadable" OBJECTID
+(2274627, 2275379, 2275380…) fetches cleanly by `objectIds` WITH `S_LEGAL` intact (`SALERNO AT BAY
+COLONY`, etc.). There is NO dead zone — the prior session misread a soft-400 *query* error ("Invalid
+query parameters") as corrupt data, and its 50-nudge exhaustion (which "proved" a 50-wide zone) was an
+artifact of nudging +1 while still reading a full page.
+
+Rewrote `ingest/pipelines/parcel_subdivision/resources.py`: dropped keyset pagination + the
+shrink/nudge hacks; retrieval is now `_fetch_all_object_ids()` (returnIdsOnly) → `_fetch_object_id_batch()`
+(POST by objectIds, batch=250, adaptive halving on soft-400 OR gateway 504, lone-unservable-id logged+
+skipped). Live-verified read-only over the exact former "dead zone" + 4 spread points: 0 rows skipped,
+`SKIPPED_OBJECT_IDS=[]`. Tuned batch 500→250 after live 500-batches all 504'd (slow layer; 250 returns
+in ~2s). Tests rewritten, 13/13 pass. `constants.py` + the handoff doc corrected. Data is fully
+recoverable — Option A (permanent documented gap) discarded.
+
+NOT pushed, NOT run to Tier 2 (RULE 1: data_lake write needs operator OK). Next: operator runs the full
+`ingest_collier_parcel_subdivisions()` (~45 min, ~1,460 batches) to actually land `data_lake.parcel_subdivision`,
+then T4/T6 (agg glue + cadence floor from the real row count) unblock. Lee (T3) still a separate spatial-join
+issue, unaffected.
+
 ## 2026-07-06 (main) — PLATFORM_ARC auto-advance nudges: design spec written, nothing built yet
 
 Brainstormed + spec'd sub-project 2 from `docs/handoff/2026-07-06-campaign-automation-followups.md`

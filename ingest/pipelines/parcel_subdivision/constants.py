@@ -5,12 +5,17 @@ Centroid_Version"), layer 0 — the CENTROID-version layer, not the cadastral la
 `collier_parcels` uses. The cadastral layer does NOT expose `S_LEGAL` (requesting
 it 400s); the centroid layer does.
 
-Verified live 2026-07-05:
+Verified live 2026-07-05 / re-verified 2026-07-06:
   - where=(CO_NO=21) -> 364,827 Collier parcels. Carries PARCEL_ID, S_LEGAL, DOR_UC,
     PA_UC, JV, PHY_ADDR1, PHY_CITY, PHY_ZIPCD (all populated).
-  - `returnCountOnly=true`, `S_LEGAL LIKE '...'`, `returnCentroid=true`, and `outSR`
-    combined with the above all 400 on THIS layer. Do not retry those shapes —
-    they are rejected, not transient. Use keyset (OBJECTID) pagination + f=json only.
+  - RETRIEVAL METHOD (07/06/2026): do NOT keyset-paginate this layer. A
+    `where=(CO_NO=21) AND OBJECTID>N` + `orderByFields` + `resultRecordCount` query
+    soft-400s ("Invalid query parameters") at specific deep cursors — NOT a data
+    problem (every "failing" OBJECTID is individually queryable, S_LEGAL intact),
+    it's the sorted-pagination query shape this layer chokes on. Use the official
+    Esri pattern instead: `returnIdsOnly=true` (returns all 364,827 IDs in one call)
+    then fetch by `objectIds` in batches (resources.py). `returnCountOnly=true`
+    (bare, no LIKE/centroid) works and is used for the canonical count.
   - CO_NO=46 (Lee) record queries 400 on BOTH statewide layers (count works, records
     don't) — a broken Lee partition. Lee is ingested from a SEPARATE source (see
     ingest/pipelines/lee_parcel_subdivision, follow-up F1). Do not pull Lee here.

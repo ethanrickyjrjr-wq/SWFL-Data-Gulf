@@ -1,3 +1,18 @@
+> **RESOLVED 07/06/2026 (later same day) — THE "DEAD ZONE" DOES NOT EXIST.**
+> The premise of this whole doc was wrong. The failing OBJECTIDs are all present
+> and individually queryable (with `S_LEGAL` intact); the bug was the keyset-
+> pagination *query shape* (`where OBJECTID>N AND CO_NO=21 ORDER BY OBJECTID ASC` +
+> `resultRecordCount`), which soft-400s on this centroid layer — NOT corrupt source
+> data. Fix: retrieval now uses the official Esri pattern `returnIdsOnly` →
+> `objectIds` batching (`ingest/pipelines/parcel_subdivision/resources.py`), which
+> recovered 100% of the data live (0 rows skipped). The 50-nudge "50-wide zone"
+> was an artifact of the nudge logic (advancing +1 while re-reading a full page),
+> not 50 dead rows. **Option A (permanent documented gap) is discarded — do not
+> ship it.** Everything below is kept as the record of the bad session; read it for
+> what was tried, not as current guidance. Remaining real work (unchanged): the
+> operator runs the full ingest to land the table, then T3 Lee spatial join, T4 agg
+> glue, T6 cadence floor. See the 07/06/2026 SESSION_LOG entry.
+
 # communities-swfl — handoff (07/06/2026, after a bad session)
 
 **Read this before touching anything in `ingest/pipelines/parcel_subdivision/`.**
