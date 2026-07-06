@@ -15,6 +15,7 @@ import {
 import { defaultDoc, type SeedDoc } from "@/lib/email/doc/default-docs";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
+import { ArcStrip, type ArcSequence } from "@/components/email-lab/ArcStrip";
 import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
 import type { ProjectUiState } from "../workspace/types";
 
@@ -49,6 +50,12 @@ interface Props {
   autoOpenSchedule?: boolean;
   projectPhotos?: { storage_path: string; signedUrl: string; caption?: string }[];
   uiState: ProjectUiState;
+  /** Lifecycle arc (spec 2026-07-05): the armed sequence for the strip, or null. */
+  initialSequence?: ArcSequence | null;
+  /** ?arcStep= — a save in this lab session records its deliverable on that step. */
+  arcStep?: string | null;
+  /** Listing projects (subject_address set) get the arm CTA when no arc exists. */
+  subjectAddress?: string | null;
 }
 
 // Project-scoped Email tool (cockpit D2). GRID is the default canvas (per-section
@@ -70,9 +77,17 @@ export function ProjectEmailLabClient({
   autoOpenSchedule,
   projectPhotos,
   uiState,
+  initialSequence,
+  arcStep,
+  subjectAddress,
 }: Props) {
   const [savedId, setSavedId] = useState<string | null>(deliverableId ?? null);
   const [saving, setSaving] = useState(false);
+  // Lifecycle arc state — the strip mutates via its own API calls and bubbles back.
+  const [sequence, setSequence] = useState<ArcSequence | null>(initialSequence ?? null);
+  const [arming, setArming] = useState(false);
+  // Set when a save is refused because the piece is frozen (armed one-shot).
+  const [frozenNote, setFrozenNote] = useState<string | null>(null);
   const [doc0] = useState<EmailDoc>(() => initialDoc ?? defaultDoc());
   const [canvas, setCanvas] = useState<EmailCanvas>(() => emailCanvasPref(uiState));
   // The doc the CURRENT canvas mount was seeded with (updated on switch).
@@ -115,6 +130,20 @@ export function ProjectEmailLabClient({
     dirtyRef.current = true;
   }
 
+  // Lifecycle arc: a save made while ?arcStep= is set records the deliverable on
+  // that step (state → built). Best-effort; the strip re-renders from the response.
+  function recordArcBuilt(did: string) {
+    if (!arcStep) return;
+    void fetch(`/api/projects/${projectId}/sequence`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ step_key: arcStep, op: "record-built", deliverable_id: did }),
+    }).then(async (r) => {
+      const j = await r.json().catch(() => null);
+      if (r.ok && j?.sequence) setSequence(j.sequence);
+    });
+  }
+
   // `ai_prompt` is persisted as the deliverable's build prompt so a SCHEDULED re-render
   // reproduces this exact email — chart included — with fresh data each occurrence (the
   // chart selector keys off the prompt; without it a scheduled send loses the chart).
@@ -128,13 +157,31 @@ export function ProjectEmailLabClient({
       if (savedId) {
         // PATCH is doc-only on purpose — a later edit never wipes the
         // campaign provenance set at creation.
-        await fetch(`/api/projects/${projectId}/materials`, {
+        const patchRes = await fetch(`/api/projects/${projectId}/materials`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ deliverable_id: savedId, doc, ai_prompt: prompt }),
         });
+        if (patchRes.status === 423) {
+          // Frozen: an armed one-shot references this deliverable (operator copy).
+          const j = await patchRes.json().catch(() => null);
+          const when = j?.scheduled_for
+            ? new Date(j.scheduled_for).toLocaleString("en-US", {
+                timeZone: "America/New_York",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              }) + " ET"
+            : "its send time";
+          setFrozenNote(
+            `Scheduling locks this email. It can't be edited or sent until ${when} — unlock to change it.`,
+          );
+          return;
+        }
         savedDocRef.current = doc;
         dirtyRef.current = false;
+        recordArcBuilt(savedId);
         return savedId;
       }
       const res = await fetch(`/api/projects/${projectId}/materials`, {
@@ -152,10 +199,33 @@ export function ProjectEmailLabClient({
         savedDocRef.current = doc;
         dirtyRef.current = false;
         window.history.replaceState({}, "", `/project/${projectId}/email-lab?did=${id}`);
+        recordArcBuilt(id);
         return id;
       }
     } finally {
       setSaving(false);
+    }
+  }
+
+  // Arm the listing campaign (v1-minimal audience/hour pickers; the real
+  // audience picker upgrade is a welcome follow-up, not a requirement).
+  async function armArc() {
+    const audience = window.prompt(
+      "Which contact list should this campaign send to? (audience slug)",
+      "all-contacts",
+    );
+    if (!audience) return;
+    setArming(true);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/sequence`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audience_slug: audience, send_hour_et: 9 }),
+      });
+      const j = await res.json().catch(() => null);
+      if (res.ok && j?.sequence) setSequence(j.sequence);
+    } finally {
+      setArming(false);
     }
   }
 
@@ -238,6 +308,35 @@ export function ProjectEmailLabClient({
 
   return (
     <>
+      {sequence ? (
+        <ArcStrip projectId={projectId} sequence={sequence} onChanged={setSequence} />
+      ) : subjectAddress ? (
+        <div className="border-b border-white/10 bg-[#081420] px-4 py-2.5">
+          <button
+            type="button"
+            disabled={arming}
+            onClick={() => void armArc()}
+            className="rounded-full bg-gulf-teal px-3 py-1.5 text-xs font-semibold text-[#070f14] hover:bg-[#17a3b3] disabled:opacity-50"
+          >
+            {arming ? "Starting…" : "Start the listing campaign"}
+          </button>
+          <span className="ml-2 text-[10px] text-white/40">
+            Five pieces, teaser to sold — you fire each milestone. Every number sourced.
+          </span>
+        </div>
+      ) : null}
+      {frozenNote && (
+        <div className="border-b border-amber-300/30 bg-amber-300/10 px-4 py-2 text-[11px] text-amber-200">
+          {frozenNote}
+          <button
+            type="button"
+            onClick={() => setFrozenNote(null)}
+            className="ml-3 text-amber-300/70 hover:text-amber-100"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       {showGallery ? (
         <div className="min-h-[calc(100dvh-3.5rem)]">
           <TemplateGallery

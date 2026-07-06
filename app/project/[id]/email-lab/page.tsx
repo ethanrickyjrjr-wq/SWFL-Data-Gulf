@@ -87,6 +87,16 @@ export default async function ProjectEmailLabPage({
 
   if (!project) notFound();
 
+  // Lifecycle arc: load the armed sequence (if any) for the strip. The arm
+  // CTA shows only for listing projects (subject_address present).
+  const { data: seqRow } = await supabase
+    .from("email_sequences")
+    .select("id, status, setup_name, audience_slug, send_hour_et, steps")
+    .eq("project_id", id)
+    .eq("status", "armed")
+    .maybeSingle();
+  const arcStep = typeof sp.arcStep === "string" ? sp.arcStep : null;
+
   // Lane E gallery: does this project have ANY built block-canvas deliverable?
   // head:true count — no rows shipped. RLS-scoped like every read on this page.
   const { count: dCount } = await supabase
@@ -173,6 +183,11 @@ export default async function ProjectEmailLabPage({
       autoOpenSchedule={autoOpenSchedule}
       projectPhotos={projectPhotos}
       uiState={(project.ui_state ?? {}) as import("../workspace/types").ProjectUiState}
+      initialSequence={
+        (seqRow as import("@/components/email-lab/ArcStrip").ArcSequence | null) ?? null
+      }
+      arcStep={arcStep}
+      subjectAddress={project.subject_address ?? null}
     />
   );
 }
