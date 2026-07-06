@@ -1,3 +1,16 @@
+## 2026-07-06 (main) — PLATFORM_ARC auto-advance nudges: implementation plan written; Property Watch handed off
+
+Implementation plan for the arc-nudge spec (previous entry below): `docs/superpowers/plans/
+2026-07-06-platform-arc-auto-advance-nudges.md` — 10 tasks, TDD, no placeholders. Corrected one
+spec inaccuracy while planning: arm-time address resolution uses `geocodeAddress()`
+(`refinery/lib/geocode.mts`, one-shot free-text geocode) not `/api/address-retrieve` (that route
+needs a live Mapbox session token from a prior autocomplete call — can't resolve an already-stored
+`subject_address` after the fact). Also wrote up `docs/handoff/2026-07-06-property-watch-handoff.md`
+for the radius-based nearby-market tracking idea the operator raised mid-brainstorm (explicitly out
+of the arc-nudge spec — different data model, bigger scope) and corrected the stale "spec not
+started" line for sub-project 2 in `docs/handoff/2026-07-06-campaign-automation-followups.md`.
+No implementation code written yet — plan awaits operator review before execution starts.
+
 ## 2026-07-06 (main) — communities-swfl Collier ingest FIXED: the "FDOR dead zone" was a query-shape bug, not dead data (100% recovery)
 
 Picked up the handoff (`docs/superpowers/plans/2026-07-06-communities-swfl-handoff.md`) that declared

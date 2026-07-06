@@ -52,15 +52,15 @@ address (moat rule 2: engine authors the URL, model never does). Blocked on how 
 arrives — user upload vs. a generated static map (the project has Mapbox; a static-map render keyed
 on the address is the likely path). Bounded once that's decided.
 
-**2. PLATFORM_ARC auto-advance off real MLS events — spec not started.** `lib/email/sequence/
-types.ts`'s five arc steps (`coming-soon`, `new-listing`, `market-comps`, `under-contract`, `sold`)
-are advanced only by an agent manually calling `markBuilt`/`markScheduled`/`markSent`
-(`lib/email/sequence/state.ts`). `ingest/pipelines/listing_lifecycle/transitions.py` already emits
-the exact event rows (`from_state`/`to_state`/`price_delta`) that should drive `new-listing`,
-`under-contract`, and `sold` automatically — this is the SAME gap identified independently two
-ways this session (once via crawl4ai research into real estate CRMs, once via a GetResponse
-feature comparison the operator brought). `market-comps` has no corresponding MLS event; needs a
-second trigger type (N days after the previous step sent). Doesn't depend on sub-project 1.
+**2. PLATFORM_ARC auto-advance off real MLS events — SPEC + PLAN DONE (07/06/2026), nothing
+built yet.** Design: `docs/superpowers/specs/2026-07-06-platform-arc-auto-advance-nudges-design.md`.
+Implementation plan: `docs/superpowers/plans/2026-07-06-platform-arc-auto-advance-nudges.md`. Locked
+nudge-only (never auto-build/schedule/send), a dedicated `lifecycle_nudges` table, market-comps
+anchored strictly on `new-listing`'s `sent_at` (+14 days). Check `platform_arc_nudges_live_verify`.
+A fourth follow-on sub-project spun out of this brainstorm — **Property Watch** (radius-based
+nearby-market tracking for ANY address, not just an armed arc) — is explicitly NOT part of this
+spec; see `docs/handoff/2026-07-06-property-watch-handoff.md` (not started, needs its own
+brainstorm).
 
 **3. Attribution windows — spec not started, depends on #1.** Last-click-with-time-window
 crediting (a competitor ESP's shipped mechanic: link click opens an attribution window, default

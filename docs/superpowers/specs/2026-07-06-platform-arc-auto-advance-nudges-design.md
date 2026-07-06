@@ -68,8 +68,11 @@ RLS: `auth.uid() = user_id`, owner-only, mirrors `email_sequences`/`email_schedu
 address_key.py`) has no TS twin. Rather than re-resolving on every cron pass:
 
 - At arm time (`POST /api/projects/[id]/sequence`), resolve `subject_address` through the existing
-  Mapbox `/api/address-retrieve` (same call `lib/geo/address-route.ts` already makes) to get a
-  clean ZIP.
+  one-shot geocoder `geocodeAddress()` (`refinery/lib/geocode.mts` — Mapbox forward-geocode
+  primary, Census single-line fallback, no session/billing pairing needed) to get a clean ZIP.
+  (Correction from the first draft: `/api/address-retrieve` needs a live Mapbox session token from
+  a prior `/api/address-suggest` autocomplete call — it can't resolve an already-stored address
+  string after the fact. `geocodeAddress` takes plain free text directly.)
 - Port `address_key()` faithfully to TS: `lib/listings/address-key.ts`, with a test file mirroring
   `ingest/tests/pipelines/listing_lifecycle/test_address_key.py` case-for-case so the two
   implementations can't silently drift.
