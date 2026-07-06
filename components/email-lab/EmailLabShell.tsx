@@ -103,6 +103,10 @@ export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc 
       if (t.COMPANY_NAME) props.companyName = t.COMPANY_NAME;
       if (t.TAGLINE) props.tagline = t.TAGLINE;
       if (t.LOGO_URL) props.logoUrl = t.LOGO_URL;
+      // A real company name overriding the house-brand text must drop the
+      // house-brand logo pixels too — never ship "SWFL Data Gulf" imagery
+      // under a client's own name (operator escalation 2026-07-06).
+      else if (t.COMPANY_NAME) delete props.logoUrl;
     } else if (b.type === "footer") {
       if (t.COMPANY_NAME) props.companyName = t.COMPANY_NAME;
       if (t.ADDRESS) props.address = t.ADDRESS;

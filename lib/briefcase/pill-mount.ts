@@ -39,6 +39,21 @@ export function isAiChromeFree(pathname: string | null): boolean {
 }
 
 /**
+ * Pages where the SELECTION highlighter (figure→ask popup, coachmark, discovery ticker) is
+ * pure noise but the AI pill still belongs — marketing/utility routes with NO SWFL data
+ * figures to ground a highlight. On `/billing` the only "numbers" are prices; the ticker's
+ * tips ("Compare any two SWFL ZIPs", "what's driving this?") read as nonsense there. Unlike
+ * AI_CHROME_FREE_PREFIXES this suppresses ONLY the highlighter — the pill stays so a visitor
+ * can still ask about plans.
+ */
+export const HIGHLIGHTER_FREE_PREFIXES = ["/billing"] as const;
+
+export function isHighlighterFree(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return HIGHLIGHTER_FREE_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
+/**
  * The root standalone pill renders everywhere EXCEPT on /r/* while the highlighter
  * is enabled — there the BRIDGED pill (AppShell renders it when the /r/* page's
  * ReportHighlightBridge has published a report context, bridging the report thread)
@@ -78,6 +93,8 @@ export function shouldMountHighlighter(pathname: string | null): boolean {
   // Clean reviewer/marketing pages (/for-agents) suppress the highlighter too, so the
   // first-touch coachmark + discovery ticker never appear on a data-license landing page.
   if (isAiChromeFree(pathname)) return false;
+  // Marketing/utility pages with no data figures to ground a highlight (/billing) — pill stays.
+  if (isHighlighterFree(pathname)) return false;
   return !isHiddenPath(pathname);
 }
 

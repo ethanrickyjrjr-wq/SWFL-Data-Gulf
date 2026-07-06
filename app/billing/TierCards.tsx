@@ -94,8 +94,6 @@ export function TierCards({
       {/* paid tiers */}
       <div className="grid gap-4 sm:grid-cols-3">
         {BILLING_TIERS.map((t) => {
-          const price = interval === "annual" ? t.priceAnnualUsd : t.priceMonthlyUsd;
-          const suffix = interval === "annual" ? "/yr" : "/mo";
           const isCurrent = currentTier === t.slug;
           const featured = t.slug === "growth";
           return (
@@ -112,14 +110,21 @@ export function TierCards({
               )}
               <p className="font-semibold text-text-primary">{t.name}</p>
               <p className="mt-1 text-sm text-text-tertiary">{TIER_TAGLINES[t.slug]}</p>
+              {/* Postiz-style: always show the per-MONTH figure big; on annual it's the
+                  yearly price ÷ 12 with the whole-year charge stated underneath. */}
               <p className="mt-5">
                 <span className="metric-value text-3xl font-semibold text-text-primary">
-                  ${price.toLocaleString()}
+                  $
+                  {interval === "annual"
+                    ? (t.priceAnnualUsd / 12).toFixed(2)
+                    : t.priceMonthlyUsd.toLocaleString()}
                 </span>
-                <span className="ml-1 text-sm text-text-tertiary">{suffix}</span>
+                <span className="ml-1 text-sm text-text-tertiary">/mo</span>
               </p>
               <p className="mt-1 text-xs text-text-tertiary">
-                {interval === "annual" ? "billed annually" : "billed monthly"}
+                {interval === "annual"
+                  ? `billed as $${t.priceAnnualUsd.toLocaleString()}/year`
+                  : "billed monthly"}
               </p>
               <p className="mt-4 text-sm text-text-secondary">
                 {t.sendsPerMonth.toLocaleString()} sends / month
@@ -152,6 +157,40 @@ export function TierCards({
             </div>
           );
         })}
+      </div>
+
+      {/* Socials — included on every plan (build is free; send is the paywall).
+          Sits directly under the paid tiers so it reads as a headline value, not a
+          footnote. Honest claim: we BUILD ready-to-post content for every format from
+          the same live data as the email. Auto-posting is a roadmap item (gated on
+          per-platform app review) — do NOT claim it here. */}
+      <div className="mt-6 rounded-xl glass-card-modern border border-gulf-teal/30 px-6 py-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-gulf-teal">
+          Included on every plan
+        </p>
+        <h2 className="mt-2 text-xl font-semibold tracking-tight text-text-primary">
+          Every campaign builds your socials, too
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm text-text-secondary">
+          The same live local data behind your email becomes ready-to-post content — in every
+          format: square feed, portrait, landscape, and 9:16 story. Caption and hashtags done. Build
+          it here, post it anywhere.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {["Square feed", "Portrait", "Landscape", "9:16 story"].map((f) => (
+            <span
+              key={f}
+              className="rounded-full border border-white/10 bg-gulf-deep px-3 py-1 text-xs text-text-secondary"
+            >
+              {f}
+            </span>
+          ))}
+        </div>
+        <p className="mt-4 text-xs text-text-tertiary">
+          Social media is the #1 source of quality leads for agents — 54% rank it their top tool,
+          ahead of the CRM and the MLS.{" "}
+          <span className="text-text-tertiary/80">Source: NAR agent technology survey, 2026.</span>
+        </p>
       </div>
 
       {/* free tier */}

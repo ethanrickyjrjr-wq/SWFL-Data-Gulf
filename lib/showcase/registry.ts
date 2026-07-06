@@ -52,6 +52,11 @@ export interface ShowcaseSlide {
    *  Buildable email slides carry one; social-surface slides are wired in a
    *  follow-up (exempt list in registry.test.ts). */
   recipe?: ShowcaseRecipe;
+  /** Social-format slides render LIVE, responsive cards (SocialBoard) instead of
+   *  the flat `image` — one wide capture can't be big on both desktop and phone,
+   *  so the cards reflow (side-by-side → stacked) and stay crisp at any width.
+   *  `image` stays as the JS-off / asset-test fallback. Renderer: SocialBoard. */
+  socialBoard?: "market-pulse" | "launch-blitz";
 }
 
 export interface Showcase {
@@ -227,6 +232,7 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Led every caption with a data hook and mixed local + broad hashtags; the market chart travels into the link post unchanged.",
         liveHref: "/showcase/launch-blitz/live/social-pack.html",
+        socialBoard: "launch-blitz",
         receipt:
           "Data-hook first lines and a local + broad hashtag mix are the current lead-generating pattern for agent social (The Close, 2026).",
         recipe: {
@@ -391,6 +397,7 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Chose the single most clickable fact (the biggest ZIP move) for the square and kept every value identical to the email's.",
         liveHref: "/showcase/market-pulse/live/socials.html",
+        socialBoard: "market-pulse",
         receipt:
           "Serialized, recurring content keeps audiences returning — 57% of consumers want original series (Sprout Social, 2026).",
         recipe: {

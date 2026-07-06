@@ -70,6 +70,23 @@ describe("showcase registry", () => {
     }
   });
 
+  it("every social-target slide renders a live board (SocialBoard)", () => {
+    // Social formats reflow as live cards, not a flat capture — the wiring is
+    // the slide's socialBoard id, and it must point at a board the renderer
+    // knows (components/showcase/SocialBoard.tsx BOARDS).
+    const KNOWN_BOARDS = new Set(["market-pulse", "launch-blitz"]);
+    for (const s of SHOWCASES) {
+      for (const sl of s.slides) {
+        if (sl.recipe?.target === "social") {
+          expect(sl.socialBoard, `social slide missing board: ${s.id}/${sl.title}`).toBeDefined();
+        }
+        if (sl.socialBoard) {
+          expect(KNOWN_BOARDS.has(sl.socialBoard), `unknown board ${sl.socialBoard}`).toBe(true);
+        }
+      }
+    }
+  });
+
   it("recipes carry exactly one [[blank]] and real brand needs", () => {
     for (const s of SHOWCASES) {
       for (const sl of s.slides) {

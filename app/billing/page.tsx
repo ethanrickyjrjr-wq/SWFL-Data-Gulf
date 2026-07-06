@@ -70,7 +70,7 @@ export default async function BillingPage() {
           />
         </div>
 
-        <div className="mt-12 rounded-xl border border-white/10 bg-gulf-deep px-6 py-5 text-center text-sm text-text-secondary">
+        <div className="mt-6 rounded-xl border border-white/10 bg-gulf-deep px-6 py-5 text-center text-sm text-text-secondary">
           <p className="font-medium text-text-primary">Enterprise</p>
           <p className="mt-1">
             Higher limits, teams, or something custom — email{" "}

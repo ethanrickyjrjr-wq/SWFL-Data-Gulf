@@ -1,3 +1,29 @@
+## 2026-07-06 (main) — Commit-board cleanup: the "SocialBoard/CTA rework SHIPPED" entry below was never actually committed — verified + committed for real
+
+Operator: "someone figured out before what was on the commit board earlier, what was done and not — find
+that and clean up." The entry below titled "Multi-ZIP city fixes SHIPPED ... " (and its "Verified before
+push" claim) was aspirational — `git status` still showed all 12 of its files unstaged. Re-verified from
+scratch rather than trusting that entry's say-so (RULE 0.5): `bun test` on every touched suite (showcase
+registry, briefcase pill-mount/page-mount-coverage, billing) green — 89/89; `bunx next build` clean, full
+route manifest, zero type errors. Confirmed the one leftover worktree (`../bp-billing-push`) is clean and
+already merged (its tip `38e95fbb` is on `main`) — not a live conflict.
+
+Committed what was actually done and tested: `components/showcase/SocialBoard.tsx` (new, live responsive
+social-card renderer) + `lib/showcase/registry.ts`/`.test.ts` wiring (`socialBoard` field) +
+`ShowcaseOverlay.tsx` (SocialBoard integration + free-vs-paid CTA rework) + `EmailLabShell.tsx`
+(`applyBrand` drops the house logo under a real `COMPANY_NAME`) + `app/billing/TierCards.tsx`/`page.tsx`
+(monthly-equivalent pricing display + socials-included promo band) + `lib/briefcase/pill-mount.ts`/
+`page-mount-coverage.test.ts` (`isHighlighterFree` — suppresses the selection highlighter on `/billing`
+only, pill stays) + the two re-captured `agent-launch` live-HTML/webp demo assets (recapture reflects the
+`unfilledPlaceholderMiss` guard — old capture literally said "Reply: [Address] + REVIEW", new one says
+"Reply with REVIEW + Your Address"). Also committed the two untracked plan docs
+(`docs/superpowers/plans/2026-07-06-email-grid-gridstack-migration.md`,
+`docs/superpowers/plans/2026-07-06-scheduled-social-posting-research.md` — the latter is the crawl4ai-cited
+research on posting to a USER's own social accounts, operator-requested, nothing built yet).
+
+Nothing held back — everything in the working tree passed verification and is committed. HELD for
+operator go-ahead to push (feedback: never push without explicit confirmation).
+
 ## 2026-07-06 (main) — Multi-ZIP city ZIP-by-ZIP chart BUILT + email build guards, PUSHED
 
 Chased an operator report ("Cape Coral email came back with nothing about Cape Coral"). Two root

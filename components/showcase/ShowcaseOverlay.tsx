@@ -7,7 +7,12 @@ import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { totalSteps, clampStep, stepLabel } from "@/lib/showcase/overlay-logic";
 import { CADENCE_COLORS, CADENCE_ORDER } from "@/lib/campaigns/cadence-colors";
 import { LoginModal } from "@/components/landing/LoginModal";
+import { SocialBoard } from "@/components/showcase/SocialBoard";
+import { BILLING_TIERS } from "@/lib/billing/tiers";
 import { useSession } from "@/lib/auth/use-session";
+
+/** Cheapest paid plan, from the one price root — the "from $x/mo" anchor. */
+const STARTER_PRICE = BILLING_TIERS[0].priceMonthlyUsd;
 
 /**
  * Near-fullscreen step-through for one showcase. Click-through ONLY — no
@@ -150,13 +155,17 @@ export function ShowcaseOverlay({
           {slide ? (
             <div className="flex flex-col gap-4 p-4 sm:flex-row sm:p-6">
               <div className="min-w-0 flex-1">
-                {/* eslint-disable-next-line @next/next/no-img-element -- committed static capture */}
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="mx-auto w-full max-w-2xl rounded-lg border border-white/10"
-                  loading={step === 0 ? "eager" : "lazy"}
-                />
+                {slide.socialBoard ? (
+                  <SocialBoard board={slide.socialBoard} accent={showcase.accent} />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element -- committed static capture
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="mx-auto w-full max-w-2xl rounded-lg border border-white/10"
+                    loading={step === 0 ? "eager" : "lazy"}
+                  />
+                )}
               </div>
               <div className="w-full shrink-0 sm:w-64">
                 <p
@@ -245,37 +254,67 @@ export function ShowcaseOverlay({
               >
                 {stepLabel(showcase, step)}
               </p>
-              <p className="max-w-md text-center text-lg font-semibold text-[#f0ede6]">
-                Everything you just saw, for your own listings and your own farm.
+              <p className="max-w-lg text-center text-lg font-semibold text-[#f0ede6]">
+                Everything you just saw, for your own listings and your own farm. Pick how you want
+                to start.
               </p>
-              <div className="grid w-full max-w-lg grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="rounded-xl border border-white/10 bg-[#0b161c] p-4">
-                  <p className="text-sm font-bold text-[#f0ede6]">Free</p>
-                  <ul className="mt-2 space-y-1.5 text-xs text-gray-300">
-                    <li>Unlimited builds</li>
+              <div className="grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
+                {/* ── Free: sign up with email, keep your work ── */}
+                <div className="flex flex-col rounded-xl border border-white/12 bg-[#0b161c] p-5 text-left">
+                  <p className="text-base font-bold text-[#f0ede6]">Try it free</p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-gray-400">
+                    Build as much as you want and keep every draft saved — just sign up with your
+                    email below.
+                  </p>
+                  <ul className="mt-3 space-y-1.5 text-xs text-gray-300">
+                    <li>Unlimited builds, work saved to your account</li>
                     <li>Every number cited to a real source</li>
                     <li>Email + PDF output</li>
                     <li className="text-gray-500">Watermark after the first month</li>
                   </ul>
+                  <button
+                    type="button"
+                    onClick={handleFreeCta}
+                    className="btn-gradient mt-auto rounded-lg px-4 py-2.5 text-sm font-semibold text-navy-dark"
+                  >
+                    {authed ? "Go build it →" : "Sign up with email"}
+                  </button>
                 </div>
-                <div className="rounded-xl border p-4" style={{ borderColor: showcase.accent }}>
-                  <p className="text-sm font-bold" style={{ color: showcase.accent }}>
-                    Pro
+                {/* ── Plans: autonomous campaigns, links to real pricing ── */}
+                <div
+                  className="flex flex-col rounded-xl border p-5 text-left"
+                  style={{ borderColor: showcase.accent, background: `${showcase.accent}12` }}
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-base font-bold" style={{ color: showcase.accent }}>
+                      Go autonomous
+                    </p>
+                    <p className="shrink-0 text-[11px] text-gray-400">
+                      from ${STARTER_PRICE.toFixed(2)}/mo
+                    </p>
+                  </div>
+                  <p className="mt-1.5 text-xs leading-relaxed text-gray-400">
+                    Hands-off email + social campaigns that send research-backed marketing at each
+                    stage of the sale — you pick the plan, it runs itself.
                   </p>
-                  <ul className="mt-2 space-y-1.5 text-xs text-gray-300">
-                    <li>Clean, branded sends</li>
-                    <li>Your logo, your sign-off</li>
-                    <li>Scheduling — set it once</li>
+                  <ul className="mt-3 space-y-1.5 text-xs text-gray-300">
+                    <li>Clean, branded sends — your logo, your sign-off</li>
+                    <li>Scheduling — set it once, it sends itself</li>
+                    <li>Higher send limits as you grow</li>
                   </ul>
+                  <a
+                    href="/billing"
+                    className="mt-auto rounded-lg px-4 py-2.5 text-center text-sm font-semibold text-navy-dark transition-opacity hover:opacity-90"
+                    style={{ background: showcase.accent }}
+                  >
+                    Choose your plan →
+                  </a>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleFreeCta}
-                className="btn-gradient rounded-lg px-8 py-2.5 text-sm font-semibold text-navy-dark"
-              >
-                {authed ? "Go build it →" : "Start building free"}
-              </button>
+              <p className="max-w-md text-center text-[11px] leading-relaxed text-gray-500">
+                Not sure yet? Start free — you can pick a plan any time to turn on scheduled,
+                branded sends.
+              </p>
             </div>
           )}
         </div>
