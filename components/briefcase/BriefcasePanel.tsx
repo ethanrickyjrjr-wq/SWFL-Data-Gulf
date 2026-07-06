@@ -16,7 +16,11 @@ import { projectPrompts } from "@/lib/project/prompt-engine";
 import { projectHome } from "@/lib/project/tool-tabs";
 import { panelState, resolveBuildAction } from "@/lib/briefcase/panel-logic";
 import { SHOWCASES } from "@/lib/showcase/registry";
-import { recipeDestination, type ShowcaseRecipe } from "@/lib/lab-entry/destination";
+import {
+  recipeDestination,
+  signedInLabArrival,
+  type ShowcaseRecipe,
+} from "@/lib/lab-entry/destination";
 import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
 import { ShowcaseOverlay } from "@/components/showcase/ShowcaseOverlay";
 import { BriefcaseChat } from "@/components/briefcase/BriefcaseChat";
@@ -113,7 +117,7 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
       setLoginOpen(true);
       return;
     }
-    window.location.assign(projectId ? projectHome(projectId) : "/email-lab/grid");
+    window.location.assign(projectId ? projectHome(projectId) : signedInLabArrival());
   }
 
   // "Make this →" on a showcase slide (operator ruling 07/03/2026: the pill's

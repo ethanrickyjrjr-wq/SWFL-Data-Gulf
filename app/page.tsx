@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
 import Hero from "@/components/landing/Hero";
 import HeroCampaign from "@/components/landing/HeroCampaign";
 import ProofStrip, { type ProofItem } from "@/components/landing/ProofStrip";
@@ -74,7 +75,7 @@ export default async function Home() {
       <section className="final-cta">
         <h2 className="final-cta-headline">Every number sourced. Every send automatic.</h2>
         <div className="cap-cta-row">
-          <a className="cap-btn" href="/email-lab">
+          <a className="cap-btn" href={EMAIL_LAB_LANDING}>
             Build one free
           </a>
           <p>

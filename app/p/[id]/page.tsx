@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PageShell } from "@/components/PageShell";
+import { openDoc } from "@/lib/lab-entry/destination";
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
@@ -510,7 +511,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
         {isOwner && (
           <div className="print-hide mb-6 flex flex-wrap items-center justify-between gap-3">
             <a
-              href={`/project/${data.project_id}/email-lab?did=${id}`}
+              href={openDoc(data.project_id, id)}
               className="rounded-full border border-gulf-teal/40 px-4 py-2 text-sm font-medium text-gulf-teal transition-colors hover:bg-gulf-teal/10"
             >
               Edit in Email Lab

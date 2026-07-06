@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { openDoc } from "@/lib/lab-entry/destination";
 import { SocialComposer } from "@/components/email-lab/social/SocialComposer";
 import { SocialElementInspector } from "@/components/email-lab/social/SocialElementInspector";
 import { useSocialComposer } from "@/components/email-lab/social/useSocialComposer";
@@ -153,7 +154,7 @@ export function ProjectSocialClient({
       });
       if (res.ok) {
         const { id } = (await res.json()) as { id: string };
-        router.push(`/project/${projectId}/email-lab?did=${id}`);
+        router.push(openDoc(projectId, id));
       }
     } finally {
       setSavingCard(false);

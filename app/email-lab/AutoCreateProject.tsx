@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 
 // Cockpit D4 — a signed-in lab visitor with ZERO projects gets one made for
 // them via POST /api/projects (tokenless; the saved brand profile applies
@@ -36,7 +37,7 @@ export function AutoCreateProject({
     })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("create failed"))))
       .then((data: { id?: string }) => {
-        router.replace(data.id ? `/project/${data.id}/email-lab${q}` : "/project");
+        router.replace(data.id ? `${projectEmailLabBase(data.id)}${q}` : "/project");
       })
       .catch(() => router.replace("/project"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
