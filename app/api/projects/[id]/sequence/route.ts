@@ -60,6 +60,16 @@ async function loadSequence(db: Db, projectId: string) {
   return { ...data, steps: reconciled };
 }
 
+async function loadNudges(db: Db, sequenceId: string) {
+  const { data } = await db
+    .from("lifecycle_nudges")
+    .select("id, step_key, event_kind, price, price_delta, at")
+    .eq("sequence_id", sequenceId)
+    .is("dismissed_at", null)
+    .order("created_at", { ascending: false });
+  return data ?? [];
+}
+
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = createClient(await cookies());
@@ -69,7 +79,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!(await ownedProject(db, id)))
     return NextResponse.json({ error: "not found" }, { status: 404 });
-  return NextResponse.json({ sequence: await loadSequence(db, id) });
+  const sequence = await loadSequence(db, id);
+  const nudges = sequence ? await loadNudges(db, sequence.id) : [];
+  return NextResponse.json({ sequence, nudges });
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
