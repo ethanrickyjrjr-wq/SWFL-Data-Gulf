@@ -185,8 +185,16 @@ rollup with `--dry-run`. No LLM, no paid API.
 
 ## Follow-ups (punch list — carry to next session)
 
-- **F1 — Finalize the Lee parcel-name source.** FDOR `CO_NO=46` is broken (record queries 400). Decide
-  between Lee GIS `FabricSubdivisions.Description`⋈LeePA-`FolioID` vs LeePA `ParcelInfo` layers. Owns T3.
+- **F1 — RESOLVED 07/06/2026, but the answer is NOT a name-join.** FDOR `CO_NO=46` is broken (record
+  queries 400) — AND neither of this file's two candidates yields a per-home name: `FabricSubdivisions`
+  / `ParcelDetails` layer 33 "Subdivisions" (7,387 rows) is subdivision/plat-BOUNDARY grain (one row per
+  plat, `Just`/`Assessed` null on every row) — not per home; `ParcelInfo`'s 24 layers carry no
+  legal-description/subdivision field at all. Lee has no Collier-style `S_LEGAL`-on-every-parcel
+  equivalent. **Lee needs a scoped spatial join** (548,389-parcel centroids from `ParcelInfo` layer 12's
+  `SHAPE` × ~7,387 `ParcelDetails/33` polygons, CRS 2237→4326, DuckDB `ST_Contains`) — full evidence +
+  recommended approach in `verification/communities-lee-source-probe.md`. This reuses the SUPERSEDED
+  backbone plan's Part A (A0–A4) DuckDB spatial-join steps almost verbatim, narrowed to one county. Owns
+  T3; T2 (Collier, already built) is unaffected and ships regardless.
 - **F2 — Condo count reconciliation.** 169,047 (ours, per-unit) vs 100,847 (spec). Confirm the grain we
   cite (per-unit is what we want); update the spec's numbers or annotate. Blocks any headline condo figure.
 - **F3 — Alias-map coverage.** Grow `COMMUNITY_ALIASES` from the name dumps; measure % of homes assigned to

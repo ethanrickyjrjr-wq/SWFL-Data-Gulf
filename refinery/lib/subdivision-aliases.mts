@@ -14,7 +14,11 @@
  * Seeded small from the Part-A boundary-name dump; grown as Phase 2's scrape supplies clean
  * marketed names (the bootstrap trick). An unknown name resolves to `null` — a coverage hole to
  * fill from a real source, never an invented community.
+ *
+ * Data lives in `fixtures/community-aliases.json` (single source of truth — Python's
+ * `parcel_subdivision` ingest reads the same file, so TS and the ingest never drift apart).
  */
+import communityAliasesJson from "../../fixtures/community-aliases.json";
 
 export type CommunitySlug = string;
 
@@ -31,11 +35,10 @@ export function normalizeSubdivisionName(raw: string): string {
 }
 
 /** Canonical marketed community -> the normalized platted-name prefixes that roll into it.
- *  Seeded from the Part-A boundary-name dump + Phase-2 clean names. */
-export const COMMUNITY_ALIASES: Record<CommunitySlug, { label: string; patterns: string[] }> = {
-  "heritage-bay": { label: "Heritage Bay", patterns: ["HERITAGE BAY"] },
-  // … populated from the Part-A dump + Phase-2 clean names (bootstrap trick).
-};
+ *  Seeded from the Part-A boundary-name dump + Phase-2 clean names — see
+ *  fixtures/community-aliases.json for the actual data. */
+export const COMMUNITY_ALIASES: Record<CommunitySlug, { label: string; patterns: string[] }> =
+  communityAliasesJson;
 
 // Reverse index: normalized pattern -> community slug (built once).
 const _PATTERN_INDEX: Map<string, CommunitySlug> = (() => {
