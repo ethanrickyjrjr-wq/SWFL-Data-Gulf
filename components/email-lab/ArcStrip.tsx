@@ -3,12 +3,13 @@
 // the ONE lab surface (grid shell — never forked). $0 layout previews at arm;
 // build-on-demand; manual milestones; save-as-my-setup. Order is advisory.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { stepSections, type SequenceStep } from "@/lib/email/sequence/types";
 import { snapshotSetup } from "@/lib/email/sequence/setup";
 import { arcStepDestination } from "@/lib/lab-entry/destination";
 import { MilestoneConfirmCard } from "./MilestoneConfirmCard";
+import { ArcNudgeChip, type ArcNudge } from "./ArcNudgeChip";
 
 export interface ArcSequence {
   id: string;
@@ -58,6 +59,35 @@ export function ArcStrip({ projectId, sequence, onChanged }: Props) {
   const [previewing, setPreviewing] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  const [nudges, setNudges] = useState<ArcNudge[]>([]);
+  const [dismissingId, setDismissingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/projects/${projectId}/sequence`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (!cancelled && Array.isArray(j?.nudges)) setNudges(j.nudges);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  async function dismissNudge(nudgeId: string) {
+    setDismissingId(nudgeId);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/sequence/nudges`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nudge_id: nudgeId }),
+      });
+      if (res.ok) setNudges((prev) => prev.filter((n) => n.id !== nudgeId));
+    } finally {
+      setDismissingId(null);
+    }
+  }
 
   async function patch(body: Record<string, unknown>) {
     const res = await fetch(`/api/projects/${projectId}/sequence`, {
@@ -94,6 +124,7 @@ export function ArcStrip({ projectId, sequence, onChanged }: Props) {
       else setNote("Scheduled.");
       const fresh = await fetch(`/api/projects/${projectId}/sequence`).then((r) => r.json());
       if (fresh.sequence) onChanged(fresh.sequence);
+      if (Array.isArray(fresh.nudges)) setNudges(fresh.nudges);
     } finally {
       setBusy(false);
     }
@@ -166,6 +197,17 @@ export function ArcStrip({ projectId, sequence, onChanged }: Props) {
                 ))}
               </ul>
             )}
+            {nudges
+              .filter((n) => n.step_key === step.key)
+              .map((n) => (
+                <ArcNudgeChip
+                  key={n.id}
+                  nudge={n}
+                  onBuild={() => router.push(arcStepDestination(projectId, step))}
+                  onDismiss={() => void dismissNudge(n.id)}
+                  dismissing={dismissingId === n.id}
+                />
+              ))}
             <div className="mt-2 flex flex-wrap gap-1.5">
               <button
                 type="button"
