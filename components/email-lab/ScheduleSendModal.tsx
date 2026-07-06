@@ -10,6 +10,7 @@
 
 import { SendWeeklyHandle } from "@/app/p/[id]/SendWeeklyHandle";
 import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
+import { openDoc } from "@/lib/lab-entry/destination";
 
 interface Props {
   deliverableId: string;
@@ -58,7 +59,7 @@ export function ScheduleSendModal({
           scopeValue={scopeValue}
           // If they bounce to "Upload contacts", bring them back HERE with the schedule
           // modal reopened (?schedule=1) — not the generic /project page.
-          returnTo={`/project/${projectId}/email-lab?did=${deliverableId}&schedule=1`}
+          returnTo={openDoc(projectId, deliverableId, { schedule: true })}
         />
       </div>
     </div>

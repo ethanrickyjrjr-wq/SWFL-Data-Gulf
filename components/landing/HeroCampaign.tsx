@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { HERO_CAMPAIGNS, heroDestination, type HeroCampaignEntry } from "@/lib/campaigns";
+import { HERO_CAMPAIGNS, type HeroCampaignEntry } from "@/lib/campaigns";
+import { heroDestination } from "@/lib/lab-entry/destination";
 import type { AddressSuggestion } from "@/lib/geo/search-box";
 
 /**

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { TemplateId } from "@/lib/deliverable/templates";
+import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 
 const DELIVERABLE_TEMPLATE_OPTIONS: { id: TemplateId; label: string }[] = [
   { id: "market-overview", label: "Market overview" },
@@ -62,7 +63,7 @@ export function BuildActions({
       )}
       {buildError && <p className="text-xs text-red-400">{buildError}</p>}
       <Link
-        href={`/project/${id}/email-lab`}
+        href={projectEmailLabBase(id)}
         className="self-start text-xs text-white/40 hover:text-gulf-teal transition-colors mt-1"
       >
         Design email in Email Lab →

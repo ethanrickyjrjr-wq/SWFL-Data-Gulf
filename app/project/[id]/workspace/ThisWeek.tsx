@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ScheduleSendModal } from "@/components/email-lab/ScheduleSendModal";
 import { ScheduleSocialModal } from "@/components/email-lab/ScheduleSocialModal";
+import { openDoc } from "@/lib/lab-entry/destination";
 import type { SocialDraft } from "@/lib/email/social-calendar/types";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import {
@@ -241,9 +242,7 @@ export function ThisWeek({
                   setEmailState("approved");
                   setEmailScheduleFor(week.email!.did);
                 }}
-                onTweak={() =>
-                  router.push(`/project/${projectId}/email-lab?did=${week.email!.did}`)
-                }
+                onTweak={() => router.push(openDoc(projectId, week.email!.did))}
                 onSkip={() => setEmailState("skipped")}
               />
             )}
@@ -258,7 +257,7 @@ export function ThisWeek({
                   setSocialState(s.did, "approved");
                   setSocialScheduleFor({ ...s, state: "approved" });
                 }}
-                onTweak={() => router.push(`/project/${projectId}/email-lab?did=${s.did}`)}
+                onTweak={() => router.push(openDoc(projectId, s.did))}
                 onSkip={() => setSocialState(s.did, "skipped")}
               />
             ))}

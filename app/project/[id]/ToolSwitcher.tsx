@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { activeTool, type ProjectTool } from "@/lib/project/tool-tabs";
+import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 
 // Email first — opening a project lands on the Email tool (operator ruling 07/03/2026),
 // so the tab order mirrors the landing order.
 const TABS: { tool: ProjectTool; label: string; href: (id: string) => string }[] = [
-  { tool: "email", label: "Email", href: (id) => `/project/${id}/email-lab` },
+  { tool: "email", label: "Email", href: (id) => projectEmailLabBase(id) },
   { tool: "social", label: "Social", href: (id) => `/project/${id}/social` },
   { tool: "overview", label: "Overview", href: (id) => `/project/${id}` },
 ];

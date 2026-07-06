@@ -1,6 +1,7 @@
 import "./zip-report.css";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { openZipLab } from "@/lib/lab-entry/destination";
 import { resolveZip } from "../../../../refinery/lib/zip-resolver.mts";
 import type { LocationInput } from "../../../../refinery/lib/location-resolver.mts";
 import type { Grain } from "../../../../refinery/lib/zip-resolver.mts";
@@ -564,7 +565,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
           {/* Lab-first funnel (spec 07/03/2026): plain link, no claim token —
               auth happens inline at send time (SendToSelfModal). */}
           <a
-            href={`/email-lab?zip=${zip}${typeof sp.ref === "string" && sp.ref ? `&ref=${encodeURIComponent(sp.ref)}` : ""}`}
+            href={openZipLab(zip, { ref: typeof sp.ref === "string" && sp.ref ? sp.ref : null })}
             className="mt-4 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition"
             style={{ backgroundColor: "var(--brand-primary)" }}
           >

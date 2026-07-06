@@ -16,7 +16,7 @@ import { projectPrompts } from "@/lib/project/prompt-engine";
 import { projectHome } from "@/lib/project/tool-tabs";
 import { panelState, resolveBuildAction } from "@/lib/briefcase/panel-logic";
 import { SHOWCASES } from "@/lib/showcase/registry";
-import { recipeDestination, type ShowcaseRecipe } from "@/lib/showcase/recipe";
+import { recipeDestination, type ShowcaseRecipe } from "@/lib/lab-entry/destination";
 import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
 import { ShowcaseOverlay } from "@/components/showcase/ShowcaseOverlay";
 import { BriefcaseChat } from "@/components/briefcase/BriefcaseChat";

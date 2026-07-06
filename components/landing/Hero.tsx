@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { openZipLab } from "@/lib/lab-entry/destination";
 import {
   METRIC_ORDER,
   NO_DATA_FILL,
@@ -31,7 +32,7 @@ type Payload = Pick<HomeMapPayload, "data" | "badge" | "stats">;
 /** Full page load (not router.push): the signed-in path is a server redirect
  *  into the project Email tab and the ?zip= must reach the server. */
 const openZipInLab = (zip: string) => {
-  window.location.href = `/email-lab?zip=${zip}`;
+  window.location.href = openZipLab(zip);
 };
 
 const fmt = (val: number, format: "currency" | "number") => {

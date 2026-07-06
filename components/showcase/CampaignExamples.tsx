@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SHOWCASES } from "@/lib/showcase/registry";
-import { recipeDestination, type ShowcaseRecipe } from "@/lib/showcase/recipe";
+import {
+  recipeDestination,
+  signedInLabArrival,
+  type ShowcaseRecipe,
+} from "@/lib/lab-entry/destination";
 import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
 import { ShowcaseOverlay } from "@/components/showcase/ShowcaseOverlay";
 
@@ -58,7 +62,7 @@ export function CampaignExamples() {
           showcase={SHOWCASES.find((s) => s.id === openShowcase)!}
           onClose={() => setOpenShowcase(null)}
           onUseRecipe={handleUseRecipe}
-          onAuthedCta={() => router.push("/email-lab/grid")}
+          onAuthedCta={() => router.push(signedInLabArrival())}
         />
       )}
     </div>

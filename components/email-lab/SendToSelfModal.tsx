@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { suggestEmailFix } from "@/lib/email/typo-suggest";
 import type { EmailDoc } from "@/lib/email/doc/types";
+import { openDoc, projectEmailLabBase, EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
 
 /**
  * Send-to-self capture (spec: 2026-07-03-lab-first-funnel-landing-design.md §4).
@@ -106,17 +107,17 @@ export function SendToSelfModal({
             : "Saved to your project — the send hiccuped, you can retry from there. Opening…",
         );
         // Full reload so the server re-reads the fresh session cookie.
-        window.location.href = `/project/${data.projectId}/email-lab${
-          data.deliverableId ? `?did=${data.deliverableId}` : ""
-        }`;
+        window.location.href = data.deliverableId
+          ? openDoc(data.projectId, data.deliverableId)
+          : projectEmailLabBase(data.projectId);
         return;
       }
       // Signed in but save failed — land them in their (new) workspace anyway.
       setFinishNote("Signed in — opening your workspace…");
-      window.location.href = "/email-lab";
+      window.location.href = EMAIL_LAB_LANDING;
     } catch {
       setFinishNote("Signed in — opening your workspace…");
-      window.location.href = "/email-lab";
+      window.location.href = EMAIL_LAB_LANDING;
     }
   }
 

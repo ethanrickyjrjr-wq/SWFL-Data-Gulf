@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { liveCampaigns, COMING_TILES, type CampaignSurface } from "@/lib/campaigns";
-import { recipeDestination, type ShowcaseRecipe } from "@/lib/showcase/recipe";
+import { recipeDestination, type ShowcaseRecipe } from "@/lib/lab-entry/destination";
 
 /**
  * "Start a campaign" row — one-click quick-start buttons for the live campaigns

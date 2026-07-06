@@ -5,6 +5,8 @@
  * shape, real numbers, never abstract art. When the loader served sample data
  * the preview hides rather than showcase mock figures as the product.
  */
+import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
+
 export interface ShowcaseFigures {
   zip: string;
   place: string;
@@ -91,7 +93,7 @@ export default function DeliverableShowcase({ figures }: { figures: ShowcaseFigu
         )}
       </div>
       <div className="cap-cta-row">
-        <a className="cap-btn" href="/email-lab">
+        <a className="cap-btn" href={EMAIL_LAB_LANDING}>
           Build one free — no credit card
         </a>
         <p>

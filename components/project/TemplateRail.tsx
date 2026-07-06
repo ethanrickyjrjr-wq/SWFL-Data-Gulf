@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { SEED_DOCS } from "@/lib/email/doc/default-docs";
+import { openSeed } from "@/lib/lab-entry/destination";
 
 const REPORT_TEMPLATES = [
   { id: "market-overview", label: "Market overview" },
@@ -26,7 +27,7 @@ export function TemplateRail({
         {SEED_DOCS.map((s) => (
           <Link
             key={s.id}
-            href={`/project/${projectId}/email-lab?seed=${s.id}`}
+            href={openSeed(projectId, s.id)}
             className={[
               "rounded-lg border px-3 py-2 transition-all focus:outline-none focus:ring-2 focus:ring-gulf-teal/40",
               "hover:border-gulf-teal/60 hover:bg-gulf-teal/[0.06]",

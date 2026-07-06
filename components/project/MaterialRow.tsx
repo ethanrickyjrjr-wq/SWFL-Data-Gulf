@@ -5,6 +5,7 @@ import type { DeliverableRow } from "@/app/project/[id]/workspace/types";
 import type { EmailBlock } from "@/lib/email/doc/types";
 import { getMaterialStatus, getFormatBadge } from "@/lib/deliverable/material-status";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
+import { openDoc } from "@/lib/lab-entry/destination";
 
 /** Derive a human-readable title from the material's doc or fallback fields. */
 export function deriveTitle(d: DeliverableRow): string {
@@ -32,9 +33,7 @@ function formatDate(iso: string): string {
 }
 
 function rowHref(d: { template: string; id: string }, projectId: string): string {
-  return d.template === "block-canvas"
-    ? `/project/${projectId}/email-lab?did=${d.id}`
-    : `/p/${d.id}`;
+  return d.template === "block-canvas" ? openDoc(projectId, d.id) : `/p/${d.id}`;
 }
 
 const header = (blocks: EmailBlock[]) =>
@@ -143,7 +142,7 @@ export function MaterialRow({ d, projectId, onRefresh, onTrash }: Props) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/project/${projectId}/email-lab?did=${d.id}&schedule=1`);
+                router.push(openDoc(projectId, d.id, { schedule: true }));
               }}
               className="text-xs text-gray-500 transition-colors hover:text-black"
             >

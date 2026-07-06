@@ -1,4 +1,5 @@
 import { TrendingUp, DollarSign, BarChart3, MapPin } from "lucide-react";
+import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
 
 /**
  * Persona cards (Lane B spec §3) — each card IS its question: the whole card
@@ -72,7 +73,7 @@ export default function Capabilities() {
       </div>
 
       <div className="cap-cta-row">
-        <a className="cap-btn" href="/email-lab">
+        <a className="cap-btn" href={EMAIL_LAB_LANDING}>
           <svg
             width="15"
             height="15"

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { stepSections, type SequenceStep } from "@/lib/email/sequence/types";
 import { snapshotSetup } from "@/lib/email/sequence/setup";
+import { arcStepDestination } from "@/lib/lab-entry/destination";
 import { MilestoneConfirmCard } from "./MilestoneConfirmCard";
 
 export interface ArcSequence {
@@ -176,11 +177,7 @@ export function ArcStrip({ projectId, sequence, onChanged }: Props) {
               {(step.state === "pending" || step.state === "built") && (
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push(
-                      `/project/${projectId}/email-lab?arcStep=${step.key}&seed=${step.seed_doc_id}&recipe=${encodeURIComponent(step.recipe_prompt)}${step.deliverable_id ? `&did=${step.deliverable_id}` : ""}`,
-                    )
-                  }
+                  onClick={() => router.push(arcStepDestination(projectId, step))}
                   className="rounded border border-white/10 px-2 py-0.5 text-[10px] text-white/50 hover:text-white"
                 >
                   {step.state === "built" ? "Edit" : "Build"}

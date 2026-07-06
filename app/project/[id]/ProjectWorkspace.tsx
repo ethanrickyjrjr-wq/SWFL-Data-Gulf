@@ -13,6 +13,7 @@ import type { SignificantChange, ScoredEventSummary } from "@/lib/signals/types"
 import { withConfirmed, withoutConfirmed } from "@/lib/signals/confirmed-values";
 import type { FeedRow } from "@/lib/project/feed";
 import { deriveProjectName } from "@/lib/project/derive-name";
+import { openDoc } from "@/lib/lab-entry/destination";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { projectTrail } from "@/lib/nav/breadcrumbs";
 import { ProjectAiContextBridge } from "./workspace/ProjectAiContextBridge";
@@ -424,7 +425,7 @@ export function ProjectWorkspace({
       template: { id: string; name: string };
     } | null;
     if (!data?.id) return null;
-    router.push(`/project/${id}/email-lab?did=${data.id}`); // open the new material to edit
+    router.push(openDoc(id, data.id)); // open the new material to edit
     return data;
   }
 

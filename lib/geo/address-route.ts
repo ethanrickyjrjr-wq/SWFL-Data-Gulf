@@ -10,7 +10,8 @@
 // ABOUT an address (worth/comps/flood…) still flow to the chat engine — only a
 // bare address lookup is a listing signal.
 
-import { HERO_CAMPAIGNS, heroDestination } from "@/lib/campaigns";
+import { HERO_CAMPAIGNS } from "@/lib/campaigns";
+import { heroDestination } from "@/lib/lab-entry/destination";
 import type { AddressSuggestion } from "@/lib/geo/search-box";
 
 /** Street-type token — the strongest "this is an address, not a question" signal. */
