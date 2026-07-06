@@ -40,6 +40,17 @@ Coral or a condo complex in East Naples gets the same treatment. Real counts fro
 - **Condos are ~186K combined** — near-parity with single-family in Collier. Property type comes
   from the DOR use code. **Condos are counted per UNIT (each condo folio = one home)**; a condo
   building maps to its community by name/footprint, never collapsed to a single parcel.
+
+  > **F2 CORRECTION (07/06/2026, live-verified):** the `100,847` condominium figure above does not
+  > match this section's own stated per-unit policy. A live pull of ALL 364,000 Collier parcels from
+  > the FDOR Statewide Parcel Centroid layer (`CO_NO=21`, `DOR_UC`, 07/05/2026 —
+  > `verification/communities-name-join-accuracy.md`) counted **169,047 condominium folios** —
+  > single-family matched independently (110,992 vs 111,129, within 0.1%), so the pull method is
+  > sound; only condo diverges, and by exactly the per-unit-vs-per-building grain this section already
+  > says is the target grain. **169,047 is the number to cite going forward** (Collier total homes
+  > →  **289,212**, not ~221K); `100,847` was either a different-grain source or a stale roll snapshot
+  > and should not be re-cited. F2 closed — no further reconciliation needed; this is a grain
+  > confirmation, not an open question.
 - "How many homes are gated?" is NOT a stored number anywhere — it is an OUTPUT of Tier 1 (count
   parcels whose community carries the gated flag), authoritative once the join runs. Never invented.
 

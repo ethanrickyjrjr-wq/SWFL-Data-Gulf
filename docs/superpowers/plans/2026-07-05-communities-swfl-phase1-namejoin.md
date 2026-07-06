@@ -195,8 +195,10 @@ rollup with `--dry-run`. No LLM, no paid API.
   recommended approach in `verification/communities-lee-source-probe.md`. This reuses the SUPERSEDED
   backbone plan's Part A (A0–A4) DuckDB spatial-join steps almost verbatim, narrowed to one county. Owns
   T3; T2 (Collier, already built) is unaffected and ships regardless.
-- **F2 — Condo count reconciliation.** 169,047 (ours, per-unit) vs 100,847 (spec). Confirm the grain we
-  cite (per-unit is what we want); update the spec's numbers or annotate. Blocks any headline condo figure.
+- **F2 — RESOLVED 07/06/2026.** 169,047 (ours, per-unit) is the number to cite; `100,847` was a
+  different-grain/stale source, not a live discrepancy — single-family independently matched within
+  0.1% so the pull method is sound. Spec annotated in place (`docs/superpowers/specs/2026-07-05-communities-swfl-design.md`
+  §Scope). Collier total homes is **289,212**, not ~221K.
 - **F3 — Alias-map coverage.** Grow `COMMUNITY_ALIASES` from the name dumps; measure % of homes assigned to
   a marketed community; set the coverage bar. This is the ONLY remaining accuracy work (replaces the X/Y gate).
 - **F4 — Marketed-community master list.** Build the ~120–300 name list (naplesgolfguy golf + 55places gated)
