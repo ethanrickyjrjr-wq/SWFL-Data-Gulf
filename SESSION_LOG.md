@@ -1,3 +1,17 @@
+## 2026-07-06 (main) — showing-confirmation chart-substitution ban + maps-link correction (moat rule 2)
+
+Follow-up punch-list item after link-click routing landed + PUSHED (9fbaf95e is now on origin).
+Handoff flagged `showing-confirmation`'s recipe should (a) forbid the AI swapping a chart in for the
+photo+map pair and (b) require a clickable maps address. (a) FIXED in `lib/email/author-recipes.ts` —
+the two-cell row now MUST be two `image` blocks, never a chart/`signal`/`stats`/`metric-card` (56
+recipe tests green). (b) was mis-scoped as recipe prose: `author-doc.ts` (≈L488) is explicit that the
+model writes `button_label` ONLY and URLs are never authored (moat rule 2), with no author-writable
+image/list link field — so the maps deep-link is ENGINE injection (onto the map image + place-row
+`linkUrl` from the confirmed address, like `inject-photo.ts`), NOT prose. Reverted the wrong
+URL-authoring instruction; recipe now tells the author the directions link is engine-applied. Spun
+out as sub-project 2b in the handoff (blocked on how the map image arrives — likely a Mapbox static
+render keyed on the address). Committed, awaiting push OK.
+
 ## 2026-07-06 (main) — email grid clip FIXED via ResizeObserver auto-height; GridStack ABANDONED
 
 The grid-canvas clip (Sources line / stat tiles cut off) is fixed on the EXISTING react-grid-layout

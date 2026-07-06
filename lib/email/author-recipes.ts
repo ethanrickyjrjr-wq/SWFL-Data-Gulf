@@ -162,7 +162,12 @@ const RECIPES: Record<RecipeId, string> = {
     "- A `multi-column` row of exactly two `image` blocks side by side, evenly " +
     "split: the home on one side, a map or area view on the other — readers scan " +
     "rather than read, so one glance should answer what and where before a single " +
-    "label is read.\n" +
+    "label is read. Both cells MUST be `image` blocks (a listing photo and a " +
+    "map/area view) — NEVER substitute a chart, `signal`, `stats`, or `metric-card` " +
+    "for either one. A confirmation shows the reader their home and where to go, not " +
+    "market data; a chart in this row breaks the receipt. The map's tappable " +
+    "directions link is applied by the build engine — you write the map image block, " +
+    "never a URL.\n" +
     "- A `list` block carrying the confirmation's facts as short label-then-value " +
     "rows, one idea per row — the property, the time, and the place, in that " +
     "order, each on its own line. Every value is id-selected, never guessed; the " +

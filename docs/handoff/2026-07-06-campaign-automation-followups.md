@@ -19,20 +19,38 @@ punch list for whoever picks this up next — nothing here is started unless mar
 - `showing-confirmation` email recipe (`lib/email/author-recipes.ts`, commit `951c24e1`) —
   distilled from a real BEE-free template. Tested, live-verified in the grid builder.
 
-## Immediate small fix (no research needed, do this first)
+## Immediate small fix — PARTLY DONE (07/06/2026)
 
-`showing-confirmation`'s recipe prose doesn't yet forbid the AI substituting a chart for the
-photo+map pair, and doesn't yet require the maps-deep-link button the operator explicitly asked
-for ("time, place, clickable address that opens Apple Maps or Google"). Observed live in the grid
-builder: a test build put a market chart next to the confirmation instead. Fix the recipe text,
-not the block renderer.
+`showing-confirmation`'s recipe prose didn't forbid the AI substituting a chart for the photo+map
+pair. **FIXED** (`lib/email/author-recipes.ts`): the two-cell row now MUST be two `image` blocks
+and NEVER a chart/`signal`/`stats`/`metric-card`. Recipe test green; behavioral proof is a live AI
+author run (paid — operator-run).
+
+**Correction on the maps-deep-link half:** it is NOT a recipe-text fix. `lib/email/author-doc.ts`
+(≈L488) is explicit — the model writes `button_label` ONLY; **URLs are never authored (moat rule
+2)**, and there is no author-writable link field for images/list rows. Image/list `link_url` is
+ENGINE-injected (see `linkUrl: photo.linkUrl` / `chart.linkUrl` in author-doc.ts). So the tappable
+"clickable address that opens Apple Maps or Google" must be applied by the build engine — inject a
+maps deep link (`https://www.google.com/maps/search/?api=1&query=<url-encoded address>`) onto the
+map `image` block's `linkUrl` (and the place list-row's `linkUrl`) from the confirmed listing
+address, the same way `inject-photo.ts` injects the photo. The recipe now tells the author the map's
+directions link is engine-applied and to never fake a URL. **Open task** — see sub-project 2b below;
+needs to know how the map image arrives (user upload vs. a generated static map) before wiring.
 
 ## Three follow-on sub-projects (decomposed during brainstorming, in dependency order)
 
-**1. Per-link click routing — SPEC DONE, not built.** See the design doc above. Next step is
-`superpowers:writing-plans` against that spec, then implementation. Nothing else in this list
-should get built ahead of this one without a reason — it's the foundation the flow graph's
-branching edges assume exists.
+**1. Per-link click routing — BUILT + LIVE (07/06/2026, commit `9fbaf95e`).** As-built differs from
+the original spec (which was bound to the not-yet-built flow-graph model); corrections folded into
+`docs/superpowers/specs/2026-07-06-link-click-routing-design.md`. Targets the live outreach drip:
+`lib/email/tracked-links/{token,wrap,redirect}.ts`, `app/api/r/[token]/route.ts`, `link_events`
+table (LIVE), wired into `scripts/email/outreach-drip-run.mts`. Check `link_click_routing_live_verify`
+open (operator-run live send). Demo/campaign runners are a one-line follow-on.
+
+**2b. Maps deep-link injection (spun out of the "immediate small fix").** Engine-inject a maps
+directions `linkUrl` onto the `showing-confirmation` map image + place row from the confirmed
+address (moat rule 2: engine authors the URL, model never does). Blocked on how the map image
+arrives — user upload vs. a generated static map (the project has Mapbox; a static-map render keyed
+on the address is the likely path). Bounded once that's decided.
 
 **2. PLATFORM_ARC auto-advance off real MLS events — spec not started.** `lib/email/sequence/
 types.ts`'s five arc steps (`coming-soon`, `new-listing`, `market-comps`, `under-contract`, `sold`)
