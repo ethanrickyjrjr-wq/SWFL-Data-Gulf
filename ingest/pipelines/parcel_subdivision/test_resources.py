@@ -2,7 +2,9 @@
 Phase 1 T2). Mirrors the ArcGIS `features[].attributes` shape verbatim."""
 from unittest.mock import patch
 
+from ingest.pipelines.parcel_subdivision import resources
 from ingest.pipelines.parcel_subdivision.resources import (
+    _fetch_page_resilient,
     _fetch_page_with_shrink,
     _normalize,
     _stem,
@@ -80,6 +82,38 @@ def test_shrink_raises_when_even_minimum_page_size_fails():
             assert False, "expected RuntimeError"
         except RuntimeError as e:
             assert "minimum page size" in str(e)
+
+
+def test_resilient_nudges_cursor_past_a_poison_row():
+    """Reproduces the live 07/06/2026 finding: OBJECTID>2275379 failed at every
+    page size down to the floor, but OBJECTID>2275380 (cursor +1) succeeded
+    immediately - a poison single row, not a size limit."""
+    resources.SKIPPED_OBJECT_IDS.clear()
+
+    def fake_fetch_page(last_oid, page_size):
+        if last_oid == 2275379:
+            return {"error": {"code": 400, "message": "Cannot perform query."}}
+        return {"features": [{"attributes": {"OBJECTID": last_oid + 1}}]}
+
+    with patch("ingest.pipelines.parcel_subdivision.resources._fetch_page", side_effect=fake_fetch_page):
+        body, used_size, cursor_used = _fetch_page_resilient(2275379, 2000)
+    assert cursor_used == 2275380
+    assert "features" in body
+    assert resources.SKIPPED_OBJECT_IDS == [2275380]
+
+
+def test_resilient_raises_past_the_nudge_cap():
+    resources.SKIPPED_OBJECT_IDS.clear()
+
+    def always_soft_400(last_oid, page_size):
+        return {"error": {"code": 400, "message": "Cannot perform query."}}
+
+    with patch("ingest.pipelines.parcel_subdivision.resources._fetch_page", side_effect=always_soft_400):
+        try:
+            _fetch_page_resilient(1000, 2000)
+            assert False, "expected RuntimeError"
+        except RuntimeError as e:
+            assert "systemic outage" in str(e)
 
 
 def test_dor_code_is_zero_padded_before_lookup():

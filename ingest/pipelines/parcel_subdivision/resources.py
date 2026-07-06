@@ -178,6 +178,47 @@ def _fetch_page_with_shrink(last_oid: int, page_size: int) -> tuple[dict, int]:
         print(f"  parcel_subdivision (collier): OBJECTID>{last_oid} soft-400'd — retrying at page_size={size}")
 
 
+# Live-tested 07/06/2026 at OBJECTID>2275379: shrinking resultRecordCount down to
+# _MIN_PAGE_SIZE STILL soft-400'd, but nudging the cursor forward by even +1
+# (OBJECTID>2275380) succeeded immediately. So a second, distinct failure mode
+# exists alongside the size-dependent one: a poison VALUE on the single row at
+# that exact OBJECTID (a corrupt field breaking server-side query/serialization),
+# not a size limit. Cap how many parcels a nudge is allowed to skip so a real
+# systemic outage still raises instead of silently skipping a huge range.
+_MAX_CURSOR_NUDGE = 50
+SKIPPED_OBJECT_IDS: list[int] = []  # audit trail — every OBJECTID a nudge skipped past
+
+
+def _fetch_page_resilient(last_oid: int, page_size: int) -> tuple[dict, int, int]:
+    """`_fetch_page_with_shrink`, plus a cursor-nudge fallback for the poison-row
+    case that shrinking alone can't fix. Returns (body, page_size_used, cursor_used)
+    — cursor_used may be > last_oid if a nudge was needed; the caller resumes
+    pagination from there, having logged exactly what was skipped."""
+    try:
+        body, used_size = _fetch_page_with_shrink(last_oid, page_size)
+        return body, used_size, last_oid
+    except RuntimeError:
+        pass  # even the floor page size failed — try nudging the cursor instead
+
+    for nudge in range(1, _MAX_CURSOR_NUDGE + 1):
+        candidate = last_oid + nudge
+        try:
+            body, used_size = _fetch_page_with_shrink(candidate, page_size)
+        except RuntimeError:
+            continue
+        SKIPPED_OBJECT_IDS.extend(range(last_oid + 1, candidate + 1))
+        print(
+            f"  parcel_subdivision (collier): OBJECTID {last_oid + 1}-{candidate} "
+            f"unqueryable (poison row?) — skipped, resuming at OBJECTID>{candidate}"
+        )
+        return body, used_size, candidate
+
+    raise RuntimeError(
+        f"collier parcel_subdivision: OBJECTID>{last_oid} failed at every page size AND "
+        f"every cursor nudge up to +{_MAX_CURSOR_NUDGE} — this is a systemic outage, not a poison row"
+    )
+
+
 def _iter_collier_attrs(page_size: int = PAGE_SIZE):
     """Keyset pagination by OBJECTID — the resultOffset paginator caps at 100k
     features on this hosted layer (verified on the sibling cadastral layer;
@@ -185,7 +226,7 @@ def _iter_collier_attrs(page_size: int = PAGE_SIZE):
     last_oid = -1
     page_num = 0
     while True:
-        data, used_size = _fetch_page_with_shrink(last_oid, page_size)
+        data, used_size, cursor_used = _fetch_page_resilient(last_oid, page_size)
 
         features = data.get("features", [])
         if not features:
@@ -193,13 +234,13 @@ def _iter_collier_attrs(page_size: int = PAGE_SIZE):
         page_num += 1
         if page_num % 20 == 0:
             print(f"  parcel_subdivision (collier): page {page_num}, OBJECTID>{last_oid}")
-        max_oid = last_oid
+        max_oid = cursor_used
         for feat in features:
             oid = feat.get("attributes", {}).get("OBJECTID")
             if isinstance(oid, int) and oid > max_oid:
                 max_oid = oid
             yield feat
-        if len(features) < used_size or max_oid == last_oid:
+        if len(features) < used_size or max_oid == cursor_used:
             break
         last_oid = max_oid
 
@@ -222,6 +263,11 @@ def ingest_collier_parcel_subdivisions() -> int:
     where = f"CO_NO={CO_NO['collier']}"
     canonical = arcgis_count(where)
     rows = fetch_collier_parcel_subdivisions()
+    if SKIPPED_OBJECT_IDS:
+        print(
+            f"parcel_subdivision (collier): WARNING - {len(SKIPPED_OBJECT_IDS)} OBJECTID(s) "
+            f"unqueryable on the source layer, skipped: {SKIPPED_OBJECT_IDS}"
+        )
     if not rows:
         print("parcel_subdivision (collier): 0 rows — aborting Tier 2 promotion")
         return 0
