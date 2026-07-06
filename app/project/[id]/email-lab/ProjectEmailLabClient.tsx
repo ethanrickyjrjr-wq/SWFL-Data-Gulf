@@ -154,6 +154,8 @@ export function ProjectEmailLabClient({
   // build prompt (materials PATCH only overwrites when a non-empty one is sent).
   const autosaveAction = useRef<() => void>(() => {});
   const autosave = useRef(makeAutosaveScheduler(() => autosaveAction.current()));
+  // Cancel any pending debounced save on unmount (fire-and-forget otherwise).
+  useEffect(() => () => autosave.current.cancel(), []);
   useAutosave({
     savedId,
     projectId,
