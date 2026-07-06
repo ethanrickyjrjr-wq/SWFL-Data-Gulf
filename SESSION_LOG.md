@@ -1,3 +1,18 @@
+## 2026-07-06 (main) — PLATFORM_ARC auto-advance nudges: design spec written, nothing built yet
+
+Brainstormed + spec'd sub-project 2 from `docs/handoff/2026-07-06-campaign-automation-followups.md`
+(auto-advance the listing arc off real MLS events from `ingest/pipelines/listing_lifecycle/
+transitions.py`). Spec: `docs/superpowers/specs/2026-07-06-platform-arc-auto-advance-nudges-design.md`.
+Locked this session: nudge-only always (never auto-build/schedule/send — extends, doesn't reopen,
+the 07/05 lock), a dedicated `lifecycle_nudges` table (not `project_feed`), market-comps anchored
+strictly on `new-listing`'s `sent_at` (+14 days, not configurable v1), and a TS port of the Python
+`address_key()` snapshotted onto `email_sequences.address_key` at arm time so the nudge cron never
+re-geocodes. 2b (maps deep-link injection) and a new, bigger "Property Watch" idea (radius-based
+nearby-market tracking for any address, not just an armed arc — operator raised it mid-session)
+are explicitly OUT of this spec; Property Watch is the next thing to brainstorm, not yet started.
+No code changed. Next: user reviews the written spec, then either writing-plans for this build or
+straight into the Property Watch brainstorm per what the operator wants next.
+
 ## 2026-07-06 (main) — CORRECTION to my own earlier entry below: communities-swfl Collier ingest is NOT working. Read `docs/superpowers/plans/2026-07-06-communities-swfl-handoff.md` FIRST.
 
 My earlier entry today ("T2 (Collier) built + F1 CORRECTION") was written before I understood the full
