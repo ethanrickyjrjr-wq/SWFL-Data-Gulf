@@ -35,7 +35,11 @@ export const DEFAULT_GLOBAL_STYLE: EmailGlobalStyle = {
 export const HOUSE_BRAND = {
   companyName: "SWFL Data Gulf",
   tagline: "Southwest Florida Market Intelligence",
-  logoUrl: "https://www.swfldatagulf.com/logo-name.png",
+  // Icon-only, transparent mark — header/doc-report already render companyName as
+  // text right next to this image. logo-name.png (full wordmark, opaque bg) is for
+  // standalone placements (README, style-gallery) with no adjacent text; using it
+  // here duplicated the brand name and boxed a near-black rect inside the header.
+  logoUrl: "https://www.swfldatagulf.com/logo-mark.png",
   address: "Fort Myers, FL",
   email: "hello@swfldatagulf.com",
   websiteUrl: "https://www.swfldatagulf.com",

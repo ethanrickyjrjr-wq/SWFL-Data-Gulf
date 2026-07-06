@@ -88,11 +88,14 @@ export interface BrandTheme {
   logoUrl: string | null;
 }
 
-/** SWFL Data Gulf house brand — the default when no white-label theme is passed. */
+/** SWFL Data Gulf house brand — the default when no white-label theme is passed.
+ *  logoUrl is the icon-only transparent mark — doc-report.html renders the company
+ *  name as text right next to it. logo-name.png (full wordmark, opaque bg) is for
+ *  standalone placements with no adjacent text (README, style-gallery). */
 export const SWFL_THEME = {
   primary: "#0f1d24",
   accent: "#3DC9C0",
-  logoUrl: "https://www.swfldatagulf.com/logo-name.png",
+  logoUrl: "https://www.swfldatagulf.com/logo-mark.png",
 } as const;
 
 /** Merge a nullable/partial theme over the SWFL defaults. Null/undefined fields fall back. */
