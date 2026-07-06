@@ -12,11 +12,15 @@ import {
   type EmailCanvas,
   type SwitchChoice,
 } from "@/lib/email/lab/canvas-pref";
-import { defaultDoc, type SeedDoc } from "@/lib/email/doc/default-docs";
+import { defaultDoc, seedById, SEED_DOCS, type SeedDoc } from "@/lib/email/doc/default-docs";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
 import { ArcStrip, type ArcSequence } from "@/components/email-lab/ArcStrip";
-import type { ShowcaseRecipe } from "@/lib/showcase/recipe";
+import { findPlaceholder, type ShowcaseRecipe } from "@/lib/showcase/recipe";
+import { planArrival } from "@/lib/lab-entry/arrival";
+import { reconcileAddress, addressItem } from "@/lib/lab-entry/address-reconcile";
+import { AddressPopup } from "@/components/lab-entry/AddressPopup";
+import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 import type { ProjectUiState } from "../workspace/types";
 
 interface Props {
@@ -88,7 +92,32 @@ export function ProjectEmailLabClient({
   const [arming, setArming] = useState(false);
   // Set when a save is refused because the piece is frozen (armed one-shot).
   const [frozenNote, setFrozenNote] = useState<string | null>(null);
-  const [doc0] = useState<EmailDoc>(() => initialDoc ?? defaultDoc());
+  // The recipe's remaining [[blank]], if any (a hero arrival has none — it slices
+  // the address into the prompt before navigating).
+  const recipeBlank = initialRecipe ? findPlaceholder(initialRecipe.prompt) : null;
+  // THE arrival plan (spec 2026-07-06 §A2) — the ONE decision for doc + popups +
+  // auto-build, shared with the standalone lab. insideProject=true, so it never
+  // asks "is this for <this project>?". did/seed/zip already produced initialDoc.
+  const [plan] = useState(() =>
+    planArrival({
+      params: { did: deliverableId, recipe: initialRecipe?.prompt ?? null },
+      signedIn: true,
+      offeredProject: { id: projectId, title: projectTitle },
+      insideProject: true,
+      subjectAddress: subjectAddress ?? null,
+      recipeHasBlank: Boolean(recipeBlank),
+      recipeInputKind: recipeBlank ? "address" : null,
+      firstRunGalleryEligible: !initialDoc && !hasDeliverables && !initialRecipe,
+    }),
+  );
+  // A recipe arrival opens the BLANK skeleton (never defaultDoc / a fake-fill demo);
+  // did/seed/zip already resolved initialDoc server-side.
+  const [doc0] = useState<EmailDoc>(() => {
+    if (initialDoc) return initialDoc;
+    if (plan.doc.kind === "blank")
+      return (seedById("skeleton-clean-white") ?? SEED_DOCS[0]).build();
+    return defaultDoc();
+  });
   const [canvas, setCanvas] = useState<EmailCanvas>(() => emailCanvasPref(uiState));
   // The doc the CURRENT canvas mount was seeded with (updated on switch).
   const [seedDoc, setSeedDoc] = useState<EmailDoc>(doc0);
@@ -100,15 +129,22 @@ export function ProjectEmailLabClient({
   // autoGenerate fires ONCE per page load — never again after a canvas toggle.
   // State (not a ref): it feeds the autoGenerate prop, i.e. render output.
   const [hasToggled, setHasToggled] = useState(false);
-  // Lane E first-run gallery — pure UI state, never persisted. Shows only when
-  // the tool opened with no doc (?did/?seed absent) AND nothing was ever built,
-  // AND there's no pending recipe to seed the Build box with instead.
-  const [showGallery, setShowGallery] = useState(
-    () => !initialDoc && !hasDeliverables && !initialRecipe,
-  );
+  // Lane E first-run gallery — pure UI state, never persisted (arrival plan decides).
+  const [showGallery, setShowGallery] = useState(() => plan.doc.kind === "gallery");
   // A pick/Start-blank suppresses the shells' one-shot AI auto-build: on the
   // grid canvas that build REPLACES the doc, which would clobber the choice.
   const [galleryPicked, setGalleryPicked] = useState(false);
+  // Address popup (spec §C) — a recipe still holding a blank collects it here,
+  // pre-filled with what the project believes (subject_address). Anonymous grid
+  // never reaches this client.
+  const [addressOpen, setAddressOpen] = useState(plan.addressPopup);
+  // Differ confirm: the entered address doesn't match the project's belief.
+  const [diffAddr, setDiffAddr] = useState<string | null>(null);
+  // Remount-build: the grid shell fires ONE build off initialAiPrompt on mount.
+  // To build a filled recipe (the address popup's Build), we set buildPrompt and
+  // bump buildKey to remount the grid shell with autoGenerate.
+  const [buildPrompt, setBuildPrompt] = useState<string | null>(null);
+  const [buildKey, setBuildKey] = useState(0);
 
   function seedCanvas(doc: EmailDoc) {
     setSeedDoc(doc);
@@ -117,6 +153,74 @@ export function ProjectEmailLabClient({
     dirtyRef.current = false;
     setGalleryPicked(true);
     setShowGallery(false);
+  }
+
+  // Fill the recipe's [[blank]] with `value` and remount the grid shell to build
+  // it (autoGenerate off buildPrompt). The canvas was the blank skeleton, so a
+  // remount loses nothing.
+  function fireBuild(value: string) {
+    if (!initialRecipe) return;
+    const ph = findPlaceholder(initialRecipe.prompt);
+    const filled = ph
+      ? initialRecipe.prompt.slice(0, ph.start) + value + initialRecipe.prompt.slice(ph.end)
+      : initialRecipe.prompt;
+    setBuildPrompt(filled);
+    setBuildKey((k) => k + 1);
+  }
+
+  // Record an address the project didn't already know as a project item, so the
+  // build feed + assistant see every address the project has touched (spec §C).
+  async function recordAddress(address: string) {
+    await fetch(`/api/projects/${projectId}/add-item`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        item: {
+          id: crypto.randomUUID(),
+          added_at: new Date().toISOString(),
+          origin: "web",
+          ...addressItem(address),
+        },
+      }),
+    }).catch(() => {});
+  }
+
+  // Address popup Build → reconcile against what the project believes. Match /
+  // no-belief → build here. Differ → the keep/new confirm.
+  function onAddressBuild(value: string) {
+    setAddressOpen(false);
+    const r = reconcileAddress(value, subjectAddress ?? null);
+    if (r.kind === "differ") {
+      setDiffAddr(value);
+      return;
+    }
+    fireBuild(value);
+  }
+
+  // Differ → Keep: build here AND record the address so the project knows it.
+  async function keepDifferingAddress(address: string) {
+    setDiffAddr(null);
+    await recordAddress(address);
+    fireBuild(address);
+  }
+
+  // Differ → New: a project titled the address (listing kind), then build there.
+  async function newProjectForAddress(address: string) {
+    setDiffAddr(null);
+    const res = await fetch("/api/projects", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: address, kind: "listing", subject_address: address }),
+    });
+    const data = (await res.json().catch(() => null)) as { id?: string } | null;
+    if (!data?.id) return;
+    const params = new URLSearchParams();
+    if (initialRecipe) {
+      params.set("recipe", initialRecipe.prompt);
+      if (initialRecipe.needs.length > 0) params.set("recipeNeeds", initialRecipe.needs.join(","));
+    }
+    params.set("addr", address);
+    window.location.href = `${projectEmailLabBase(data.id)}?${params.toString()}`;
   }
 
   const scopeLabel = scope
@@ -288,13 +392,22 @@ export function ProjectEmailLabClient({
     </>
   );
 
+  // The ONLY on-mount build now is an explicit recipe that's ready to fire: the
+  // address popup filled the blank (buildPrompt), or the recipe never had one
+  // (hero pre-filled → plan.autoBuildAfterConfirm). The generic "market spotlight"
+  // auto-build is GONE for new-build arrivals — it produced the wrong-listing
+  // email (spec §A2). A saved/toggled/gallery-picked doc never auto-builds.
+  const readyPrompt =
+    buildPrompt ?? (plan.autoBuildAfterConfirm && initialRecipe ? initialRecipe.prompt : null);
+  const autoBuild = readyPrompt != null && !savedId && !hasToggled && !galleryPicked && !zipSeeded;
   const shared = {
     brandTokens: initialTokens,
     initialBranding,
     scope: effectiveScope,
-    initialAiPrompt: aiPrompt,
-    initialRecipe,
-    autoGenerate: !savedId && !hasToggled && !galleryPicked && !zipSeeded && !initialRecipe,
+    initialAiPrompt: readyPrompt ?? aiPrompt,
+    // The popup owns the blank now — don't also seed the recipe into the Build box.
+    initialRecipe: buildPrompt || plan.addressPopup ? null : initialRecipe,
+    autoGenerate: autoBuild,
     aiPlaceholder: `e.g. Listing announcement for ${scopeLabel} — 3BR condo, pool view, under market…`,
     onSave: handleSave,
     saving,
@@ -346,7 +459,9 @@ export function ProjectEmailLabClient({
         </div>
       ) : canvas === "grid" ? (
         <EmailLabGridShell
-          key="grid"
+          // buildKey bumps when the address popup fires a build → remount so the
+          // grid shell's mount-only autoGenerate runs with the filled prompt.
+          key={`grid-${buildKey}`}
           initialDoc={ensureGridLayouts(seedDoc, DEFAULT_H)}
           {...shared}
         />
@@ -379,6 +494,50 @@ export function ProjectEmailLabClient({
               <button
                 type="button"
                 onClick={() => void onChoice("cancel")}
+                className="py-1 text-xs text-white/40 hover:text-white/70"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {addressOpen && recipeBlank && (
+        <AddressPopup
+          inputKind={recipeBlank.hint.toLowerCase().includes("address") ? "address" : "area"}
+          initialValue={subjectAddress ?? ""}
+          onBuild={onAddressBuild}
+          onCancel={() => setAddressOpen(false)}
+        />
+      )}
+
+      {diffAddr && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0a1822] p-5 shadow-2xl">
+            <h2 className="text-sm font-semibold text-white">Different address</h2>
+            <p className="mt-1 text-xs text-white/50">
+              This project knows {subjectAddress}. Build {diffAddr} as a new project, or keep it in
+              this one?
+            </p>
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => void newProjectForAddress(diffAddr)}
+                className="rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] hover:bg-[#17a3b3]"
+              >
+                New project for {diffAddr}
+              </button>
+              <button
+                type="button"
+                onClick={() => void keepDifferingAddress(diffAddr)}
+                className="rounded-lg border border-white/15 py-2 text-sm text-white/70 hover:bg-white/5"
+              >
+                Keep in {projectTitle}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDiffAddr(null)}
                 className="py-1 text-xs text-white/40 hover:text-white/70"
               >
                 Cancel

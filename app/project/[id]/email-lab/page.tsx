@@ -70,6 +70,9 @@ export default async function ProjectEmailLabPage({
   const initialRecipe: ShowcaseRecipe | null = recipePrompt
     ? { prompt: recipePrompt, needs: recipeNeeds }
     : null;
+  // A hero handoff carries the typed listing address as ?addr= — it becomes the
+  // build's effective scope address (comps), overriding the project's stored one.
+  const arrivalAddr = (sp.addr ?? "").trim() || null;
 
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
@@ -168,12 +171,23 @@ export default async function ProjectEmailLabPage({
       initialBranding={branding as Record<string, string>}
       scope={
         // Address spine (build 2): a listing project's saved subject address
-        // rides the scope so the build feed pulls its nearby sold comps.
+        // rides the scope so the build feed pulls its nearby sold comps. A hero
+        // ?addr= overrides it so the build uses the address just typed.
         scope.zip
-          ? { kind: "zip", value: scope.zip, address: project.subject_address ?? undefined }
+          ? {
+              kind: "zip",
+              value: scope.zip,
+              address: arrivalAddr ?? project.subject_address ?? undefined,
+            }
           : scope.place
-            ? { kind: "place", value: scope.place, address: project.subject_address ?? undefined }
-            : undefined
+            ? {
+                kind: "place",
+                value: scope.place,
+                address: arrivalAddr ?? project.subject_address ?? undefined,
+              }
+            : arrivalAddr
+              ? { kind: "region", value: "swfl", address: arrivalAddr }
+              : undefined
       }
       initialDoc={initialDoc}
       zipSeeded={Boolean(zipSeed && initialDoc)}
