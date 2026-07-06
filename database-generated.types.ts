@@ -1269,6 +1269,7 @@ export interface Database {
           steps: Json;
           created_at: string;
           updated_at: string;
+          address_key: string | null;
         };
         Insert: {
           id?: string;
@@ -1281,6 +1282,7 @@ export interface Database {
           steps?: Json;
           created_at?: string;
           updated_at?: string;
+          address_key?: string | null;
         };
         Update: {
           id?: string;
@@ -1293,6 +1295,7 @@ export interface Database {
           steps?: Json;
           created_at?: string;
           updated_at?: string;
+          address_key?: string | null;
         };
         Relationships: [];
       };
@@ -1626,6 +1629,57 @@ export interface Database {
           gradeable_slug?: string | null;
           n?: number | null;
           pct_correct?: number | null;
+        };
+        Relationships: [];
+      };
+      lifecycle_nudges: {
+        Row: {
+          id: string;
+          user_id: string;
+          project_id: string;
+          sequence_id: string;
+          step_key: string;
+          event_kind: string;
+          from_state: string | null;
+          to_state: string | null;
+          at: string;
+          price: number | null;
+          price_delta: number | null;
+          dedup_key: string;
+          created_at: string;
+          dismissed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          project_id: string;
+          sequence_id: string;
+          step_key: string;
+          event_kind: string;
+          from_state?: string | null;
+          to_state?: string | null;
+          at: string;
+          price?: number | null;
+          price_delta?: number | null;
+          dedup_key: string;
+          created_at?: string;
+          dismissed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          project_id?: string;
+          sequence_id?: string;
+          step_key?: string;
+          event_kind?: string;
+          from_state?: string | null;
+          to_state?: string | null;
+          at?: string;
+          price?: number | null;
+          price_delta?: number | null;
+          dedup_key?: string;
+          created_at?: string;
+          dismissed_at?: string | null;
         };
         Relationships: [];
       };
