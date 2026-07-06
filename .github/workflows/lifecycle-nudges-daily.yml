@@ -1,0 +1,50 @@
+name: Lifecycle-arc nudges (daily)
+
+on:
+  schedule:
+    # 16:00 UTC — after all three staggered listing-lifecycle-daily county runs
+    # (Lee 09:00, Collier 12:00, Hendry 15:00 UTC) have committed the day's transitions.
+    - cron: "0 16 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — print every would-insert row, write nothing"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  nudge:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run lifecycle-arc nudge detection
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            bun scripts/project-feed/lifecycle-nudges.mts --dry-run
+          else
+            bun scripts/project-feed/lifecycle-nudges.mts
+          fi
+
+      - name: Healthchecks.io heartbeat
+        if: always()
+        run: |
+          curl -fsS -m 10 --retry 3 \
+            "https://hc-ping.com/${{ secrets.HEALTHCHECKS_PING_KEY }}/lifecycle-nudges-daily?create=1" || true
