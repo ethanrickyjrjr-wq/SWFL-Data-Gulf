@@ -28,6 +28,7 @@ import { GRID_COLS, WIDTH_PRESETS, widthPresetLabel } from "@/lib/email/grid-sch
 import {
   initHistory,
   pushDoc,
+  patchPresent,
   undo as undoHistory,
   redo as redoHistory,
   canUndo,
@@ -337,6 +338,13 @@ export function EmailLabGridShell({
     editingRef.current = false;
     if (idleRef.current) clearTimeout(idleRef.current);
     setHistory((h) => pushDoc(h, next));
+    onDocChange?.(next);
+  }
+
+  /** Content auto-height correction from the grid canvas — replace present in place,
+   *  no undo frame (a line-wrap crossing a row boundary must not pollute undo). */
+  function patchPresentDoc(next: EmailDoc) {
+    setHistory((h) => patchPresent(h, next));
     onDocChange?.(next);
   }
 
@@ -1159,7 +1167,9 @@ export function EmailLabGridShell({
               doc={doc}
               selectedId={selectedId}
               onSelectBlock={setSelectedId}
-              onChangeDoc={commit}
+              onChangeDoc={(next, opts) =>
+                opts?.autoHeightOnly ? patchPresentDoc(next) : commit(next)
+              }
               onDuplicate={duplicateBlock}
               onAddBlock={() => setShowBlocks(true)}
               onBlockAi={setSelectedId}

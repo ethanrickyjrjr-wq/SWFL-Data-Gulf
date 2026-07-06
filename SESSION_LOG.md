@@ -1,3 +1,22 @@
+## 2026-07-06 (main) — email grid clip FIXED via ResizeObserver auto-height; GridStack ABANDONED
+
+The grid-canvas clip (Sources line / stat tiles cut off) is fixed on the EXISTING react-grid-layout
+canvas — no dependency swap. Each block now measures its own rendered content with a ResizeObserver
+(`GridBlock` in `GridCanvas.tsx`) and reports the rows it needs (`neededRows` = ceil((px+marginY)/
+(rowHeight+marginY))); the cell grows to fit, so nothing clips. Resize handles are width-only (`e,w`);
+height is automatic. Auto-height corrections route through `onChangeDoc(next, {autoHeightOnly:true})` →
+the shell's new `patchPresentDoc` (present-only history patch, no undo frame). Verified: `bunx next
+build` green; `bun test lib/email/doc` 12/12.
+
+GridStack was ABANDONED after crawl4ai (RULE 0.4) proved its React wrapper is UNRELEASED: no
+`dist/react` on any npm version 12.2.0–12.6.0, master's package.json ships only `dist/`, `refreshDragHandles`
+absent from shipped core, no maintained community bridge (react-gridstack died 2016). The spec's
+rationale ("first-party/maintained/2yr-hardened") is true only of unreleased code — on 12.6.0 GridStack
+MEANS hand-rolling. Reverted the dep swap (`42a43810` reverts `8fcc5fc6`); ResizeObserver is the
+proportionate fix (~1 file, keeps the working canvas). Kept the two standalone wins from the aborted
+migration: grouping-stability guard (`0a00f2bf`) + `patchPresent` (`4009cc8e`) — both already on origin
+via a parallel session's rebase-push. Evidence + full trace in `.superpowers/sdd/progress.md`.
+
 ## 2026-07-06 (main) — link-click routing BUILT (drip-targeted), spec corrected — COMMITTED, awaiting push OK
 
 RULE 0.5 probe of the link-click-routing spec found it bound to the wrong system: it named the live

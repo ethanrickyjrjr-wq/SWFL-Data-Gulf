@@ -1,32 +1,19 @@
 "use client";
-// components/email-lab/GridCanvas.tsx (Build G1 + G2 — operator track)
+// components/email-lab/GridCanvas.tsx (Build G1 + G2 + content auto-height)
 //
-// The PAID-tier resizable/movable canvas: a true 2D grid built on
-// react-grid-layout v2 (verified in-session via crawl4ai 06/28/2026 — npm
-// react-grid-layout@2.2.3, README v2 + dist .d.ts). It is the SUPERSET sibling
-// of the free-tier `BlockCanvas` (dnd-kit stacked reorder): same core props
-// (`doc / selectedId / onSelectBlock / onChangeDoc`) so the grid shell mounts it
-// for paid docs and keeps BlockCanvas for the free tier — nothing downgraded.
+// The PAID-tier resizable/movable canvas: a true 2D grid on react-grid-layout v2
+// (npm react-grid-layout@2.2.3). SUPERSET sibling of the free-tier BlockCanvas
+// (dnd-kit stacked reorder): same core props (doc / selectedId / onSelectBlock /
+// onChangeDoc) so the grid shell mounts it for paid docs, BlockCanvas for free.
 //
-// G1 (done): drag moves a block, corner-drag resizes, the new position flows back
-// into `block.layout`, the preview reflects the new columns.
-// G2 (this build): the per-block toolbar is ALWAYS reachable — a visible drag
-// handle, duplicate, and delete on hover/selection, a "Selected · ⅔ width" tag,
-// and a "click to add here" tile so a block can be added straight on the grid.
-// Per-block AI + field editing live in the shell's right panel (click selects →
-// the inspector + AI re-target to that block), so they aren't duplicated here.
-//
-// NOTE — "wrap the existing CanvasBlock" (spec) is reinterpreted: `CanvasBlock`
-// is hard-wired to dnd-kit `useSortable`, which only works inside a DndContext;
-// nesting it under RGL would pit two drag systems against each other. So this
-// renders the SAME pure block (`BlockRenderer`) with its own ring/handle/toolbar
-// chrome, RGL-driven.
-//
-// KNOWN TENSION (surfaced, not solved): RGL cells are a fixed
-// height = h × rowHeight, but email blocks are content-driven height. Content
-// taller than the cell is clipped (`overflow-hidden` keeps the box truthful so
-// the user resizes to fit). The shell normalizes author-engine heights on import.
-import { useMemo } from "react";
+// CONTENT AUTO-HEIGHT (fixes the clip): every block measures its OWN rendered
+// content with a ResizeObserver and reports the row-count it needs; its cell grows
+// to fit, so content never clips. Height is automatic — the user only sets WIDTH
+// (side handles / width presets). This replaces the old fixed h×rowHeight cell that
+// clipped taller content (the reported Sources-line / stat-tile cut-off). Auto-height
+// corrections route through onChangeDoc with { autoHeightOnly: true } so the shell
+// patches them in place (no undo frame).
+import { useCallback, useMemo, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import ReactGridLayout, {
   verticalCompactor,
@@ -36,7 +23,13 @@ import ReactGridLayout, {
 } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import type { BlockLayout, BlockType, EmailBlock, EmailDoc } from "@/lib/email/doc/types";
+import type {
+  BlockLayout,
+  BlockType,
+  EmailBlock,
+  EmailDoc,
+  EmailGlobalStyle,
+} from "@/lib/email/doc/types";
 import {
   GRID_COLS,
   GRID_MARGIN,
@@ -46,13 +39,15 @@ import {
 } from "@/lib/email/grid-schema";
 import { BlockRenderer } from "@/lib/email/blocks/BlockRenderer";
 
-// Corner handles only (spec). ResizeHandleAxis ⊂ {s,w,e,n,sw,nw,se,ne}.
-const RESIZE_HANDLES: ResizeHandleAxis[] = ["se", "sw", "ne", "nw"];
+// Width-only resize: the side handles change the width preset; height is
+// content-driven, so there are no corner/vertical handles for a user to fight the
+// auto-height with.
+const RESIZE_HANDLES: ResizeHandleAxis[] = ["e", "w"];
 
-// Default row-spans (× rowHeight 30) for a block that arrives WITHOUT a `layout`.
-// Used to render it on the grid AND (exported) by the shell to materialize a
-// layout when the user resizes/duplicates/adds a block. Stacked compactly so
-// RGL's mount-time vertical compaction is a no-op.
+// Placeholder row-spans for a block that arrives WITHOUT a `layout` — used only for
+// the very first paint (avoids a zero-height flash) before the ResizeObserver's
+// first measure lands and sets the real content height. Still exported: the shell
+// seeds add/duplicate placements with it.
 export const DEFAULT_H: Record<BlockType, number> = {
   header: 3,
   hero: 6,
@@ -71,6 +66,14 @@ export const DEFAULT_H: Record<BlockType, number> = {
   divider: 1,
   footer: 5,
 };
+
+/** Content pixel height → grid row count. RGL stacks h rows as
+ *  `h*rowHeight + (h-1)*marginY` px, so the smallest h that fits `px` is
+ *  `ceil((px + marginY) / (rowHeight + marginY))`. Min 1. */
+function neededRows(px: number): number {
+  const marginY = GRID_MARGIN[1];
+  return Math.max(1, Math.ceil((px + marginY) / (GRID_ROW_HEIGHT + marginY)));
+}
 
 /** Doc blocks → RGL layout. Blocks with `layout` pass through (constraints kept);
  *  blocks without get a full-width, vertically-stacked default (footer locked). */
@@ -95,6 +98,138 @@ function buildLayout(blocks: EmailBlock[]): LayoutItem[] {
   });
 }
 
+/** One grid child: our chrome (ring, width tag, drag handle, action pill) around
+ *  BlockRenderer, PLUS a ResizeObserver on the natural-height content wrapper that
+ *  reports the rows this block needs (grows AND shrinks with content). */
+function GridBlock({
+  block,
+  globalStyle,
+  selected,
+  onSelect,
+  onDuplicate,
+  onBlockAi,
+  onEditPhoto,
+  onRemove,
+  onAutoHeight,
+}: {
+  block: EmailBlock;
+  globalStyle: EmailGlobalStyle;
+  selected: boolean;
+  onSelect: (id: string) => void;
+  onDuplicate?: (id: string) => void;
+  onBlockAi?: (id: string) => void;
+  onEditPhoto?: (id: string) => void;
+  onRemove: (id: string) => void;
+  onAutoHeight: (id: string, rows: number) => void;
+}) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const locked = block.type === "footer" && block.layout?.static;
+
+  // Measure the block's NATURAL content height (the inner wrapper is not stretched,
+  // so offsetHeight is the true content height, independent of the current cell) and
+  // report the rows it needs. Re-fires on any content/width reflow via the observer.
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const measure = () => onAutoHeight(block.id, neededRows(el.offsetHeight));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [block.id, onAutoHeight]);
+
+  return (
+    <div
+      onClick={() => onSelect(block.id)}
+      className={`group relative h-full w-full cursor-pointer overflow-hidden rounded-[3px] transition-shadow ${
+        selected
+          ? "ring-2 ring-inset ring-gulf-teal"
+          : "ring-1 ring-inset ring-transparent hover:ring-gray-300"
+      }`}
+    >
+      {/* width tag — only on the selected block */}
+      {selected && (
+        <div className="pointer-events-none absolute -top-0 left-0 z-20 rounded-br-md rounded-tl-[3px] bg-gulf-teal px-2 py-0.5 text-[10px] font-semibold text-[#06222a]">
+          ✦ Selected · {widthPresetLabel(block.layout?.w ?? GRID_COLS)} width
+        </div>
+      )}
+
+      {/* drag handle — always visible, left edge */}
+      <div
+        role="button"
+        aria-label="Drag to move"
+        title={locked ? "Locked block" : "Drag to move"}
+        onClick={(e) => e.stopPropagation()}
+        className={`drag-handle absolute bottom-0 left-0 top-0 z-10 flex cursor-grab select-none items-center px-1 text-base leading-none active:cursor-grabbing ${
+          locked ? "cursor-not-allowed text-gray-200" : "text-gray-300 hover:text-gray-600"
+        }`}
+      >
+        ⠿
+      </div>
+
+      {/* action pill — visible on hover, pinned when selected */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`absolute right-1 top-1 z-20 flex items-center gap-0.5 rounded-md bg-white/95 px-1 py-0.5 shadow-sm ring-1 ring-gray-200 transition-opacity ${
+          selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        }`}
+      >
+        <button
+          type="button"
+          aria-label="AI: edit this block"
+          title="Ask AI to edit this block"
+          onClick={() => (onBlockAi ? onBlockAi(block.id) : onSelect(block.id))}
+          className="px-1 text-sm leading-none text-gulf-teal hover:text-[#17a3b3]"
+        >
+          ✦
+        </button>
+        {(block.type === "image" || block.type === "listing") && onEditPhoto && (
+          <button
+            type="button"
+            aria-label="Change photo"
+            title="Change photo"
+            onClick={() => onEditPhoto(block.id)}
+            className="px-1 text-sm leading-none text-gray-400 hover:text-gray-700"
+          >
+            ◧
+          </button>
+        )}
+        {onDuplicate && !locked && (
+          <button
+            type="button"
+            aria-label="Duplicate block"
+            title="Duplicate"
+            onClick={() => onDuplicate(block.id)}
+            className="px-1 text-sm leading-none text-gray-400 hover:text-gulf-teal"
+          >
+            ⧉
+          </button>
+        )}
+        <button
+          type="button"
+          aria-label="Delete block"
+          title={locked ? "Required (unsubscribe)" : "Delete"}
+          onClick={() => onRemove(block.id)}
+          className={`px-1 text-sm leading-none ${
+            locked ? "cursor-not-allowed text-gray-200" : "text-red-400 hover:text-red-600"
+          }`}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* pointer-events off so the wrapper owns the click/select. The inner div is
+          NOT height-constrained, so its offsetHeight is the true content height we
+          measure for auto-height. */}
+      <div className="pointer-events-none h-full">
+        <div ref={contentRef}>
+          <BlockRenderer block={block} globalStyle={globalStyle} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function GridCanvas({
   doc,
   selectedId,
@@ -108,7 +243,9 @@ export function GridCanvas({
   doc: EmailDoc;
   selectedId: string | null;
   onSelectBlock: (id: string | null) => void;
-  onChangeDoc: (next: EmailDoc) => void;
+  /** `autoHeightOnly` marks a content-measured height correction — the shell patches
+   *  it in place (no undo frame); user actions omit it and push a normal frame. */
+  onChangeDoc: (next: EmailDoc, opts?: { autoHeightOnly?: boolean }) => void;
   /** Duplicate a block (shell mints the id + places the copy on the grid). */
   onDuplicate?: (id: string) => void;
   /** Click the "add here" tile → shell adds a block on the grid. */
@@ -118,15 +255,41 @@ export function GridCanvas({
   /** Edit-photo button (image / listing) → shell opens the photos panel. */
   onEditPhoto?: (id: string) => void;
 }) {
-  // Stable layout identity → RGL doesn't recompact on unrelated re-renders
-  // (e.g. a selection change). Also the BASELINE we diff writebacks against.
+  // Stable layout identity → RGL doesn't recompact on unrelated re-renders. Also the
+  // BASELINE we diff writebacks against.
   const layout = useMemo(() => buildLayout(doc.blocks), [doc.blocks]);
 
+  // Latest doc for the (stable) auto-height callback — the ResizeObserver captures
+  // the callback once, so it must read fresh state via a ref rather than a closure.
+  const docRef = useRef(doc);
+  useEffect(() => {
+    docRef.current = doc;
+  });
+
+  const onAutoHeight = useCallback(
+    (id: string, rows: number) => {
+      const cur = docRef.current;
+      const b = cur.blocks.find((x) => x.id === id);
+      if (!b) return;
+      const curH = b.layout?.h ?? DEFAULT_H[b.type] ?? 4;
+      if (curH === rows) return; // no change → no write (guards the loop)
+      const base: BlockLayout = b.layout ?? {
+        x: 0,
+        y: 0,
+        w: GRID_COLS,
+        h: rows,
+        static: b.type === "footer" ? true : undefined,
+      };
+      const blocks = cur.blocks.map((x) =>
+        x.id === id ? { ...x, layout: { ...base, h: rows } } : x,
+      );
+      onChangeDoc({ ...cur, blocks }, { autoHeightOnly: true });
+    },
+    [onChangeDoc],
+  );
+
   // RGL fires onLayoutChange once on mount (after compaction) and after every
-  // drag/resize. Commit ONLY a real geometry change vs the baseline we fed in —
-  // otherwise mount → writeback → recompact loops (and dirties a freshly loaded
-  // doc / adds a bogus history entry). Synthesized defaults are compact already,
-  // so the mount pass is a no-op and is never committed.
+  // drag/resize. Commit ONLY a real geometry change vs the baseline we fed in.
   function handleLayoutChange(next: Layout) {
     const baseline = new Map(layout.map((it) => [it.i, it]));
     let changed = false;
@@ -138,8 +301,6 @@ export function GridCanvas({
         return b;
       }
       changed = true;
-      // Take ONLY geometry from RGL; preserve constraints from the existing
-      // layout (RGL's echo of minW/static is not authoritative for us).
       const nextLayout: BlockLayout = {
         ...(b.layout ?? {}),
         x: item.x,
@@ -189,108 +350,24 @@ export function GridCanvas({
               compactor={verticalCompactor}
               onLayoutChange={handleLayoutChange}
             >
-              {doc.blocks.map((block) => {
-                const selected = block.id === selectedId;
-                const locked = block.type === "footer" && block.layout?.static;
-                return (
-                  // Direct child stays a plain div — RGL injects positioning
-                  // style/className + ref + mouse/touch handlers + resize handles
-                  // onto it. All of OUR chrome lives on the inner div so RGL never
-                  // clobbers it.
-                  <div key={block.id}>
-                    <div
-                      onClick={() => onSelectBlock(block.id)}
-                      className={`group relative h-full w-full cursor-pointer overflow-hidden rounded-[3px] transition-shadow ${
-                        selected
-                          ? "ring-2 ring-inset ring-gulf-teal"
-                          : "ring-1 ring-inset ring-transparent hover:ring-gray-300"
-                      }`}
-                    >
-                      {/* width tag — only on the selected block (matches the mockup) */}
-                      {selected && (
-                        <div className="pointer-events-none absolute -top-0 left-0 z-20 rounded-br-md rounded-tl-[3px] bg-gulf-teal px-2 py-0.5 text-[10px] font-semibold text-[#06222a]">
-                          ✦ Selected · {widthPresetLabel(block.layout?.w ?? GRID_COLS)} width
-                        </div>
-                      )}
-
-                      {/* drag handle — always visible, left edge (G2: not opacity-0 at rest) */}
-                      <div
-                        role="button"
-                        aria-label="Drag to move"
-                        title={locked ? "Locked block" : "Drag to move"}
-                        onClick={(e) => e.stopPropagation()}
-                        className={`drag-handle absolute bottom-0 left-0 top-0 z-10 flex cursor-grab select-none items-center px-1 text-base leading-none active:cursor-grabbing ${
-                          locked
-                            ? "cursor-not-allowed text-gray-200"
-                            : "text-gray-300 hover:text-gray-600"
-                        }`}
-                      >
-                        ⠿
-                      </div>
-
-                      {/* action pill — visible on hover, pinned when selected */}
-                      <div
-                        onClick={(e) => e.stopPropagation()}
-                        className={`absolute right-1 top-1 z-20 flex items-center gap-0.5 rounded-md bg-white/95 px-1 py-0.5 shadow-sm ring-1 ring-gray-200 transition-opacity ${
-                          selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          aria-label="AI: edit this block"
-                          title="Ask AI to edit this block"
-                          onClick={() =>
-                            onBlockAi ? onBlockAi(block.id) : onSelectBlock(block.id)
-                          }
-                          className="px-1 text-sm leading-none text-gulf-teal hover:text-[#17a3b3]"
-                        >
-                          ✦
-                        </button>
-                        {(block.type === "image" || block.type === "listing") && onEditPhoto && (
-                          <button
-                            type="button"
-                            aria-label="Change photo"
-                            title="Change photo"
-                            onClick={() => onEditPhoto(block.id)}
-                            className="px-1 text-sm leading-none text-gray-400 hover:text-gray-700"
-                          >
-                            ◧
-                          </button>
-                        )}
-                        {onDuplicate && !locked && (
-                          <button
-                            type="button"
-                            aria-label="Duplicate block"
-                            title="Duplicate"
-                            onClick={() => onDuplicate(block.id)}
-                            className="px-1 text-sm leading-none text-gray-400 hover:text-gulf-teal"
-                          >
-                            ⧉
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          aria-label="Delete block"
-                          title={locked ? "Required (unsubscribe)" : "Delete"}
-                          onClick={() => remove(block.id)}
-                          className={`px-1 text-sm leading-none ${
-                            locked
-                              ? "cursor-not-allowed text-gray-200"
-                              : "text-red-400 hover:text-red-600"
-                          }`}
-                        >
-                          ✕
-                        </button>
-                      </div>
-
-                      {/* pointer-events off so the wrapper owns the click/select */}
-                      <div className="pointer-events-none h-full">
-                        <BlockRenderer block={block} globalStyle={doc.globalStyle} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {doc.blocks.map((block) => (
+                // Direct child stays a plain div — RGL injects positioning
+                // style/className + ref + handlers + resize handles onto it. All of
+                // OUR chrome lives inside GridBlock so RGL never clobbers it.
+                <div key={block.id}>
+                  <GridBlock
+                    block={block}
+                    globalStyle={doc.globalStyle}
+                    selected={block.id === selectedId}
+                    onSelect={onSelectBlock}
+                    onDuplicate={onDuplicate}
+                    onBlockAi={onBlockAi}
+                    onEditPhoto={onEditPhoto}
+                    onRemove={remove}
+                    onAutoHeight={onAutoHeight}
+                  />
+                </div>
+              ))}
             </ReactGridLayout>
           )}
         </div>
