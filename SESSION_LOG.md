@@ -1,3 +1,28 @@
+## 2026-07-06 (main) — Multi-ZIP city chart: Estero ZIP data CORRECTED + chart spec/plan written
+
+Ran down an operator report that a "Cape Coral" email came back with nothing about Cape Coral.
+Root causes, separated: (1) the email-lab build shipped an unfilled recipe `[[your city or ZIP]]`
+placeholder / empty-area fill straight to the author — literal token to the model + unscoped generic
+content (fix built + tested, HELD uncommitted: `lib/email/build-doc.ts` `unfilledPlaceholderMiss`
+chokepoint guard + `lib/campaigns.ts` `heroDestination` empty-fill guard); (2) a multi-ZIP city
+collapses to its primary ZIP and the chart routes through `buildChartForQuestion` which shows the
+SWFL-wide top-12 ZIPs, never filtered to the city.
+
+Audited all 42 crosswalk ZIPs live vs USPS (zippopotam) — every primary correct, every alt correct
+EXCEPT Estero. Per operator decree (Census/Mapbox/TIGER breaks ties), re-verified Estero with USPS +
+Mapbox place context: `33967` = Fort Myers/San Carlos Park, `34134`/`34135` = Bonita Springs; only
+Wikipedia's infobox loosely called 33967 Estero (overruled). Corrected Estero -> `33928` only
+(commit `01fce907`, already on origin via a concurrent push) — this matched `lib/swfl-zip-city.ts`,
+which the crosswalk had contradicted since 2026-06-04. Location spine tests green (resolver 13,
+location-resolver 16, gazetteer 8, location-surface 19).
+
+Brainstormed + spec'd the chart fix (`docs/superpowers/specs/2026-07-06-multi-zip-city-chart-design.md`,
+commit `4c93f805`): a `filterOutputToZips` on the shared producer + opt-in `{ zips }` (default
+byte-identical, chat unaffected), fail-closed allowlist of the 5 verified multi-ZIP cities (Estero
+excluded — single ZIP). Implementation plan pushed now:
+`docs/superpowers/plans/2026-07-06-multi-zip-city-chart.md` (4 tasks, TDD, no placeholders). No chart
+code written yet — plan awaits execution. `multi_zip_city_chart_live_verify` open.
+
 ## 2026-07-06 (main) — PLATFORM_ARC auto-advance nudges: implementation plan written; Property Watch handed off
 
 Implementation plan for the arc-nudge spec (previous entry below): `docs/superpowers/plans/
