@@ -20,6 +20,8 @@ import {
   reconcileSent,
 } from "@/lib/email/sequence/state";
 import { resolveArmSteps } from "@/lib/email/sequence/setup";
+import { geocodeAddress } from "@/refinery/lib/geocode.mts";
+import { addressKey } from "@/lib/listings/address-key";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,8 +79,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     data: { user },
   } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  if (!(await ownedProject(db, id)))
-    return NextResponse.json({ error: "not found" }, { status: 404 });
+  const project = await ownedProject(db, id);
+  if (!project) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   const body = await req.json().catch(() => null);
   const audience = typeof body?.audience_slug === "string" ? body.audience_slug.trim() : "";
@@ -96,6 +98,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .eq("user_id", user.id);
   const { source, steps } = resolveArmSteps(setups ?? []);
 
+  // Address matching (spec 2026-07-06-platform-arc-auto-advance-nudges-design.md): resolve once
+  // at arm time so the daily nudge cron never re-geocodes. subject_address is free text like
+  // "1234 Main St, Cape Coral, FL 33914" — the street portion (before the first comma) is what
+  // the lake's own address_key() keys on (it only ever sees street_address, never city/state), so
+  // we split on comma rather than passing the full string. A bad/incomplete address (no comma, or
+  // geocode miss) leaves address_key null — that sequence is simply never a nudge candidate
+  // (fail closed, no invented match).
+  let address_key: string | null = null;
+  if (project.subject_address) {
+    const street = project.subject_address.split(",")[0]?.trim() ?? "";
+    const geo = await geocodeAddress(project.subject_address);
+    if (street && geo?.zip) address_key = addressKey(street, geo.zip);
+  }
+
   const { data: created, error } = await db
     .from("email_sequences")
     .insert({
@@ -106,6 +122,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       audience_slug: audience,
       send_hour_et: hour,
       steps: applySetup(steps),
+      address_key,
     })
     .select("id, status, setup_name, audience_slug, send_hour_et, steps")
     .single();
