@@ -64,6 +64,8 @@ import { buildContentDoc } from "@/lib/email/build-doc";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { buildEmailDocOccurrence, type EmailDocDeliverable } from "@/lib/email/emaildoc-occurrence";
+import { isSequenceOnceRow, onceClaimKey } from "@/lib/email/sequence/once";
+import { buildFrozenOccurrence } from "@/lib/email/sequence/frozen-occurrence";
 
 const DRY_RUN = process.env.DRY_RUN === "true";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
@@ -223,8 +225,23 @@ async function main(): Promise<void> {
     if (error) throw new Error(`reaper select crash-orphans failed: ${error.message}`);
     const orphans = (data ?? []) as ScheduleRow[];
     if (orphans.length === 0) return;
+    // A crash-orphaned once row (active+parked+stale: the worker died mid-flight)
+    // re-arms to NOW — the date-free once claim key dedupes if the send actually
+    // went out before the crash, so this can never double-send. computeNext("once")
+    // is null, so reapOrphans would strand these as "invalid spec".
+    const onceOrphans = orphans.filter((r) => r.cadence === "once");
+    for (const o of onceOrphans) {
+      const { error: onceErr } = await db
+        .from("email_schedules")
+        .update({ next_run_at: nowIso, updated_at: new Date().toISOString() })
+        .eq("id", o.id);
+      if (onceErr) console.error(`[run-schedules] once-orphan re-arm ${o.id}: ${onceErr.message}`);
+      else console.log(`[run-schedules] once-orphan ${o.id} re-armed to now (claim key dedupes).`);
+    }
+    const rest = orphans.filter((r) => r.cadence !== "once");
+    if (rest.length === 0) return;
     const reaped = await reapOrphans(
-      orphans,
+      rest,
       {
         computeNext: computeNextRunAt,
         async rearm(scheduleId: number, nextRunAt: string | null): Promise<void> {
@@ -240,7 +257,7 @@ async function main(): Promise<void> {
     );
     const n = reaped.filter((r) => r.kind === "reaped").length;
     console.log(
-      `[run-schedules] reaper re-armed ${n} crash-orphaned schedule(s) (of ${orphans.length} stale parked, threshold=${staleBeforeIso}).`,
+      `[run-schedules] reaper re-armed ${n} crash-orphaned schedule(s) (of ${rest.length} stale parked cadence rows, threshold=${staleBeforeIso}).`,
     );
   }
 
@@ -355,6 +372,10 @@ async function main(): Promise<void> {
     });
   }
 
+  // Once rows terminate on completion (see the rearm dep): the batch rows are in
+  // scope here so the dep can tell a once row from a cadence row by id.
+  const claimedById = new Map(rows.map((r) => [r.id, r]));
+
   const deps: ProcessDeps = {
     dryRun: DRY_RUN,
     platform: PLATFORM,
@@ -383,6 +404,35 @@ async function main(): Promise<void> {
     },
 
     async buildContent(row: ScheduleRow) {
+      // Sequence one-shot (lifecycle arc): render the FROZEN saved doc verbatim —
+      // no AI refill (freeze-at-schedule, operator-locked 07/05/2026). A missing/
+      // invalid deliverable THROWS (loud per-row error outcome): a listing-milestone
+      // email must never fall back to the whole-region digest.
+      if (isSequenceOnceRow(row)) {
+        const frozen = await buildFrozenOccurrence(row.deliverable_id!, {
+          loadDeliverable: async (id) => {
+            const { data, error } = await db
+              .from("deliverables")
+              .select("doc, instruction, scope_kind, scope_value, template")
+              .eq("id", id)
+              .maybeSingle();
+            if (error || !data) return null;
+            return {
+              doc: data.doc,
+              instruction: (data.instruction as string | null) ?? null,
+              scope_kind: (data.scope_kind as string | null) ?? null,
+              scope_value: (data.scope_value as string | null) ?? null,
+              template: data.template as string,
+            };
+          },
+          renderDoc: renderEmailDocHtml,
+          log: (line) => console.log(line),
+        });
+        if (frozen) return frozen;
+        throw new Error(
+          `sequence one-shot schedule=${row.id}: deliverable ${row.deliverable_id} missing/invalid — refusing digest fallback`,
+        );
+      }
       // Block-canvas EmailDoc lane (N6) — checked FIRST: a row carrying a deliverable_id
       // + template_id="block-canvas" re-renders the user's saved Email Lab design with
       // fresh data this occurrence. Returns finished HTML (emailDocHtml) the core sends
@@ -493,10 +543,15 @@ async function main(): Promise<void> {
       // parked the row, so there is nothing to re-arm; we already logged the
       // computed next_run_at inside the core). A true read-only dry run.
       if (DRY_RUN) return;
-      const { error } = await db
-        .from("email_schedules")
-        .update({ next_run_at: nextRunAt, updated_at: new Date().toISOString() })
-        .eq("id", scheduleId);
+      // A fired sequence one-shot terminates: computeNext("once") → null, and
+      // instead of an active+parked zombie (permanent reaper noise) the row flips
+      // to status='completed'. A definitive send failure re-arms non-null (+30min
+      // retry) and stays active — the retry path is untouched.
+      const isOnceDone = nextRunAt === null && claimedById.get(scheduleId)?.cadence === "once";
+      const patch = isOnceDone
+        ? { status: "completed", next_run_at: null, updated_at: new Date().toISOString() }
+        : { next_run_at: nextRunAt, updated_at: new Date().toISOString() };
+      const { error } = await db.from("email_schedules").update(patch).eq("id", scheduleId);
       if (error) throw new Error(`re-arm schedule ${scheduleId}: ${error.message}`);
     },
 
@@ -527,17 +582,22 @@ async function main(): Promise<void> {
       if (error) throw new Error(`insert email_sends: ${error.message}`);
     },
 
-    // ── At-most-once idempotency (scope/digest lane) ──
+    // ── At-most-once idempotency ──
     async claimSend(row: ScheduleRow, fromUtc: Date): Promise<{ proceed: boolean }> {
-      // Occurrence key: scheduleId + the UTC date of this run instant. A same-day
-      // crash-replay re-claims the SAME key (dedupe → skip); the next cadence
-      // occurrence is a different date → a fresh key → sends. This is at-most-once
-      // defense-in-depth on top of the claim RPC's primary guarantee — it closes the
-      // crash-AFTER-POST-BEFORE-rearm window the reaper would otherwise re-fire.
-      const dateKey = fromUtc.toISOString().slice(0, 10);
-      const won = await claimOnce(db, `digest:${row.id}:${dateKey}`, {
+      // Occurrence key, two lanes:
+      //  - digest/report/scoped: scheduleId + the UTC date of this run instant. A
+      //    same-day crash-replay re-claims the SAME key (dedupe → skip); the next
+      //    cadence occurrence is a different date → a fresh key → sends.
+      //  - sequence one-shot: DATE-FREE `once:<id>` — a one-shot fires at most once
+      //    EVER, so a crash-orphan healed past midnight still dedupes.
+      // Both are at-most-once defense-in-depth on top of the claim RPC's primary
+      // guarantee — closing the crash-AFTER-POST-BEFORE-rearm window.
+      const key = isSequenceOnceRow(row)
+        ? onceClaimKey(row)
+        : `digest:${row.id}:${fromUtc.toISOString().slice(0, 10)}`;
+      const won = await claimOnce(db, key, {
         userId: row.user_id,
-        kind: "digest",
+        kind: isSequenceOnceRow(row) ? "sequence" : "digest",
         scheduleId: row.id,
       });
       return { proceed: won };
@@ -545,10 +605,12 @@ async function main(): Promise<void> {
 
     // Release the SAME key after a DEFINITIVE non-2xx send failure (nothing was
     // sent) so the core's 30-min same-occurrence retry can re-claim. Key derivation
-    // mirrors claimSend exactly — same scheduleId + same fromUtc date.
+    // mirrors claimSend exactly.
     async releaseSend(row: ScheduleRow, fromUtc: Date): Promise<void> {
-      const dateKey = fromUtc.toISOString().slice(0, 10);
-      await releaseClaim(db, `digest:${row.id}:${dateKey}`);
+      const key = isSequenceOnceRow(row)
+        ? onceClaimKey(row)
+        : `digest:${row.id}:${fromUtc.toISOString().slice(0, 10)}`;
+      await releaseClaim(db, key);
     },
 
     computeNext: computeNextRunAt,
