@@ -1,3 +1,21 @@
+## 2026-07-06 (main) — GridStack migration: PDF/Outlook safety scoping + spec correction, PUSHED
+
+Operator asked to make sure the GridStack auto-height migration still turns into PDFs and works with
+Outlook. Probed the real render pipeline (RULE 0.5) and found the prior entry's + spec's load-bearing
+claim WRONG: `row-grouping.ts` DOES read `h` (`h: l?.h ?? 1`; band bottom `y + h`, lines 34/60), and it
+is the ONE shared root consumed by BOTH the Outlook compiler (`compile-grid.ts`) AND the PDF engine
+(`lib/pdf/email-doc-pdf.tsx`, `groupRows`). `GridCanvas`'s `onLayoutChange` persists `h` into
+`block.layout.h`. Correction (advisor-sharpened): `h` reaches the output ONLY through grouping, never
+sizing — Outlook sizes columns from `w` (`colSpanToPx`), the PDF from `flex: eff.w` + `<Page wrap>`, so
+the sent output was always content-driven and never clipped; clipping is editor-canvas-only. Migration's
+real blast radius = the content-measured `h` changes WHICH blocks group into a row. Bounded risk: a tall
+block beside a short one with a third below the short one can be swallowed into a spurious extra column;
+amplification depends on GridStack `cellHeight`/compaction (unpinned by the design — flagged for
+in-session crawl4ai before wiring `sizeToContent`). Deliverable = grouping-stability test + golden
+`compileGrid`/`EmailDocPdf` renders. Wrote plan `docs/superpowers/plans/2026-07-06-email-grid-gridstack-pdf-outlook-safety.md`;
+folded corrections into the spec's Scope/Out-of-scope/Testing sections (released a stale repolith claim
+from the now-closed parallel session d4e7cd5a to do so). Docs-only.
+
 ## 2026-07-06 (main) — email-lab grid auto-height design + working-tree cleanup, PUSHED
 
 Diagnosed the grid-canvas clipping bug from an operator screenshot (Sources citation + stat tiles

@@ -41,13 +41,25 @@ Two options were weighed:
 
 ## Scope and blast radius
 
-Verified by reading the render pipeline: `lib/email/compile-grid.ts` and `lib/email/doc/row-grouping.ts`
-(the code that turns the editor's grid positions into the actual sent email / PDF layout) read only
-`x`, `y`, and `w` from `BlockLayout` — **never `h`**. `h` is purely an editor-canvas display concern.
-This means:
+Verified by reading the render pipeline (this corrects an earlier draft of this section that claimed the
+output "never reads `h`" — it does; the accurate picture follows):
 
-- The sent email, the PDF export, and the free-tier stacked canvas (`BlockCanvas`, dnd-kit) are
-  **entirely unaffected** by this migration.
+- **`h` reaches the output ONLY through grouping, never through sizing.** `compile-grid.ts` sizes columns
+  from `w` (`colSpanToPx`); block heights are natural HTML flow. The PDF (`lib/pdf/email-doc-pdf.tsx`)
+  sizes cells from `flex: eff.w` and flows content across pages with `<Page wrap>`. Neither engine ever
+  uses `h` to set a pixel height — so the sent email and PDF were **already content-driven and never
+  clipped**. The clipping is an **editor-canvas-only** bug (RGL's `overflow-hidden` box); that is what
+  this migration fixes.
+- **But `h` IS read** by `lib/email/doc/row-grouping.ts` — the ONE root that decides which blocks share a
+  visual row (band-overlap: a block joins while `y < curBottom`, where `curBottom = max(y + h)`; lines
+  34/60). That root is consumed by BOTH the Outlook compiler (`compile-grid.ts`) AND the PDF engine
+  (`email-doc-pdf.tsx`, `groupRows(doc.blocks)`). So the migration's change to how `h` is *computed*
+  (static `DEFAULT_H` → content-measured `sizeToContent`, persisted back via `GridCanvas`'s
+  `onLayoutChange`) flows into the sent email and PDF **through grouping** — that grouping is the entire
+  downstream blast radius. Covered by the PDF/Outlook safety plan
+  (`docs/superpowers/plans/2026-07-06-email-grid-gridstack-pdf-outlook-safety.md`).
+- The free-tier stacked canvas (`BlockCanvas`, dnd-kit) is **entirely unaffected** — the free renderer
+  (`EmailDocRenderer`) stacks blocks and never calls `groupRows`, never reads `h`.
 - No existing test references `GridCanvas` or `react-grid-layout` directly (confirmed via repo
   search), so there is no test-suite migration debt on the canvas itself — only new tests to add.
 - The migration is contained to: `components/email-lab/GridCanvas.tsx`, the layout-assignment code
@@ -117,11 +129,31 @@ text edit, add/remove/duplicate a block, an AI edit) push a normal undo frame.
 - Manual verification via dev server: rebuild the doc from the reported screenshot (long Sources
   citation line, a stats row, a signal-block bullet list) and confirm nothing clips, corner-drag no
   longer changes height, and opening an old saved draft self-heals on load.
+- **PDF/Outlook safety (grouping stability) — the migration changes `h` VALUES, which feed the shared
+  `groupRows` root that both the Outlook compiler and PDF engine consume.** Required (see
+  `docs/superpowers/plans/2026-07-06-email-grid-gridstack-pdf-outlook-safety.md`):
+  - Pin GridStack's default `cellHeight` + compaction/`y`-alignment in-session (crawl4ai, RULE 0.4)
+    before wiring `sizeToContent` — grouping stability hinges on these, and the design only verified the
+    `sizeToContent` formula, not these.
+  - Grouping-stability test in `lib/email/doc/row-grouping.test.ts`: feed GridStack-shaped layouts through
+    `groupRows` and assert row composition matches intent (one assertion serves both engines) — the
+    regression guard is a **tall block beside a short block with a third block below the short one**, which
+    must remain its own row and NOT become a spurious third column (3-col ghost table / 3-flex-cell PDF row).
+  - Golden render of the reported-screenshot doc through `compileGrid` (intended full-bleed blocks render
+    single-column, real 2-col rows still emit the MSO ghost table) and through `EmailDocPdf` (all blocks
+    present, none swallowed into a wrong flex row).
+  - Test first; only harden grouping (e.g. key band math on `y`-top proximity) IF that test fails —
+    don't pre-emptively redesign grouping.
 
 ## Out of scope
 
 - The free-tier stacked canvas (`BlockCanvas`, dnd-kit `useSortable`) — untouched, not part of this
   migration.
-- The sent-email renderer (`EmailDocRenderer.tsx`) and PDF export — untouched; they never read `h`.
+- The free-tier sent-email renderer (`EmailDocRenderer.tsx`) — untouched; it stacks blocks and never
+  calls `groupRows`, never reads `h`.
+- The PDF engine (`lib/pdf/email-doc-pdf.tsx`) code itself — no code change; it renders the same
+  content-flowed blocks. It DOES read `h` via the shared `groupRows` root (grouping only, never sizing),
+  so its correctness under content-measured `h` is covered by the grouping-stability test below and the
+  PDF/Outlook safety plan — not by editing the PDF engine.
 - Nested/sub-grids, multi-grid drag-between-grids (GridStack features not needed here — this canvas
   is a single flat grid of blocks).
