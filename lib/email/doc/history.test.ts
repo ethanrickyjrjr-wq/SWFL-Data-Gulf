@@ -1,5 +1,14 @@
 import { test, expect } from "bun:test";
-import { initHistory, pushDoc, undo, redo, canUndo, canRedo, HISTORY_LIMIT } from "./history";
+import {
+  initHistory,
+  pushDoc,
+  patchPresent,
+  undo,
+  redo,
+  canUndo,
+  canRedo,
+  HISTORY_LIMIT,
+} from "./history";
 import type { EmailDoc } from "./types";
 
 const doc = (n: number): EmailDoc => ({
@@ -51,4 +60,16 @@ test("history is capped at HISTORY_LIMIT frames", () => {
   let h = initHistory(doc(0));
   for (let i = 1; i <= HISTORY_LIMIT + 10; i++) h = pushDoc(h, doc(i));
   expect(h.past.length).toBe(HISTORY_LIMIT);
+});
+
+test("patchPresent replaces present without a new undo frame", () => {
+  // For GridStack auto-height corrections: patch present in place, never push a
+  // frame. undo must skip the patched value and land on the prior committed one.
+  let h = initHistory(doc(0));
+  h = pushDoc(h, doc(1)); // past:[0] present:1
+  const patched = patchPresent(h, doc(2)); // auto-height style patch
+  expect(patched.present.blocks[0].props.body).toBe("2");
+  expect(patched.past).toEqual(h.past); // unchanged
+  expect(patched.future).toEqual(h.future); // unchanged
+  expect(undo(patched).present.blocks[0].props.body).toBe("0"); // skips the patch
 });

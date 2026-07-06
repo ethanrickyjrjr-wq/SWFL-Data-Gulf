@@ -26,6 +26,12 @@ export function pushDoc(h: DocHistory, next: EmailDoc): DocHistory {
   };
 }
 
+/** Replace the current present WITHOUT pushing an undo frame — for geometry
+ *  corrections (GridStack auto-height) that must not pollute undo history. */
+export function patchPresent(h: DocHistory, next: EmailDoc): DocHistory {
+  return { past: h.past, present: next, future: h.future };
+}
+
 export function undo(h: DocHistory): DocHistory {
   if (h.past.length === 0) return h;
   const present = h.past[h.past.length - 1];
