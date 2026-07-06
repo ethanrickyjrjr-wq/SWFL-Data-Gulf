@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EmailLabShell } from "@/components/email-lab/EmailLabShell";
 import { EmailLabGridShell } from "@/components/email-lab/EmailLabGridShell";
 import { DEFAULT_H } from "@/components/email-lab/GridCanvas";
@@ -21,6 +21,7 @@ import { planArrival } from "@/lib/lab-entry/arrival";
 import { reconcileAddress, addressItem } from "@/lib/lab-entry/address-reconcile";
 import { AddressPopup } from "@/components/lab-entry/AddressPopup";
 import { projectEmailLabBase } from "@/lib/lab-entry/destination";
+import { useAutosave, makeAutosaveScheduler } from "@/lib/lab-entry/use-autosave";
 import type { ProjectUiState } from "../workspace/types";
 
 interface Props {
@@ -146,6 +147,20 @@ export function ProjectEmailLabClient({
   const [buildPrompt, setBuildPrompt] = useState<string | null>(null);
   const [buildKey, setBuildKey] = useState(0);
 
+  // Silent autosave for a SAVED doc (spec §D): debounced ~5s after edits +
+  // keepalive flush on exit. The action ref always calls the latest handleSave
+  // (which closes over the current savedId). ai_prompt "" never wipes the stored
+  // build prompt (materials PATCH only overwrites when a non-empty one is sent).
+  const autosaveAction = useRef<() => void>(() => {});
+  const autosave = useRef(makeAutosaveScheduler(() => autosaveAction.current()));
+  useAutosave({
+    savedId,
+    projectId,
+    getDoc: () => currentDocRef.current,
+    getPrompt: () => "",
+    dirtyRef,
+  });
+
   function seedCanvas(doc: EmailDoc) {
     setSeedDoc(doc);
     currentDocRef.current = doc;
@@ -232,7 +247,15 @@ export function ProjectEmailLabClient({
   function handleDocChange(doc: EmailDoc) {
     currentDocRef.current = doc;
     dirtyRef.current = true;
+    if (savedId) autosave.current.schedule(); // debounced silent save (spec §D)
   }
+  // Keep the autosave action pointed at the latest handleSave / savedId (synced
+  // per commit in an effect — never assign a ref during render).
+  useEffect(() => {
+    autosaveAction.current = () => {
+      if (savedId && dirtyRef.current) void handleSave(currentDocRef.current, "");
+    };
+  });
 
   // Lifecycle arc: a save made while ?arcStep= is set records the deliverable on
   // that step (state → built). Best-effort; the strip re-renders from the response.
