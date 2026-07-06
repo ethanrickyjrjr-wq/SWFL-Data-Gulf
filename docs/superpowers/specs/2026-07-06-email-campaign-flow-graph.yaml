@@ -1,0 +1,361 @@
+# Email campaign flow graph — the machine-readable map behind
+# docs/superpowers/specs/2026-07-06-email-campaign-playbooks.md
+#
+# Every node is one email template (or one gating decision). Every edge is a
+# real, sourced trigger: a button click, a reply, a fixed time delay, or a
+# no-response deadline. This is the graph "graphify" would walk if it covered
+# product flows instead of code — query it the same way: pick a node, follow
+# its edges forward (what does this lead to) or backward (what leads here).
+#
+# Schema:
+#   nodes: id, kind (email | gate | task), recipe (which lib/email/author-
+#     recipes.ts id it reuses, "NEW" if unshipped), buttons (label -> edge id)
+#   edges: id, from, to, trigger (click:<button> | reply | no_response:<Nd> |
+#     time:<event>+<Nd>), action (send | create_task | notify_agent | tag),
+#     source (the named citation from the playbooks doc, or "product design
+#     decision — not a factual claim" for our own button-copy choices)
+
+nodes:
+  - id: calendar-connected-gate
+    kind: gate
+    description: >
+      Has the agent connected a real calendar (Google/Outlook/Exchange)?
+      Gates every "pick a time" button in the whole graph.
+    source: calendly.com/features, fetched 07/06/2026
+
+  - id: new-lead-welcome-sequence
+    kind: email
+    recipe: agent-intro
+    description: >
+      Fixed day-by-day drip: Day 0 welcome, Day 1 quick question, Day 3
+      neighborhood update, Day 5 educational tips, Day 7 check-in + offer to
+      schedule a call, Day 10 lead magnet, Day 14 final outreach.
+    buttons:
+      reply: exit to human takeover
+      schedule-a-call (Day 7 only): showing-confirmation-booking
+    source: realestatetoolkit.ai, fetched 07/06/2026
+
+  - id: human-takeover
+    kind: task
+    description: Lead replied — automation stops, agent continues manually.
+    source: realtymarketingpro.com (pause-on-reply rule), fetched 07/06/2026
+
+  - id: new-listing-alert
+    kind: email
+    recipe: "NEW — gap, not yet shipped"
+    buttons:
+      schedule-a-private-showing: showing-confirmation-booking
+      see-more-photos (soft link): buyer-preference-nurture
+    source: activepipe.com ("Listing and Buyer Updates" workflow), fetched 07/06/2026
+
+  - id: showing-confirmation-booking
+    kind: gate
+    description: >
+      Time-picker step. Behind calendar-connected-gate: if connected, offers
+      real open slots; if not, degrades to a "tell us what times work" form.
+      Never renders a fake slot.
+    buttons:
+      time-picked: showing-confirmation-sent
+    source: calendly.com/features, fetched 07/06/2026
+
+  - id: showing-confirmation-sent
+    kind: email
+    recipe: showing-confirmation
+    buttons:
+      add-to-calendar: showing-day-reminder
+    edges_out:
+      no_response_by_24h: create-call-task-1
+    source: >
+      Follow Up Boss click/open notification mechanic + Pivota Marketing's
+      "if a lead clicks... a task could be created... within 24 hours"
+      (generalized here to the calendar-add button), fetched 07/06/2026
+
+  - id: create-call-task-1
+    kind: task
+    description: Notify the agent to call and confirm manually.
+    source: pivotamarketing.com, fetched 07/06/2026
+
+  - id: showing-day-reminder
+    kind: email
+    recipe: "NEW — needs the maps-deep-link fix flagged in the playbooks doc"
+    description: Sent the morning-of or evening-before the appointment.
+    buttons:
+      get-directions: (tracked signal only — no new send)
+    edges_out:
+      time:showing-scheduled-end+0h: showing-post-visit-check
+    source: product design decision — not a factual claim
+
+  - id: showing-post-visit-check
+    kind: email
+    recipe: "NEW"
+    description: >
+      Sent right after the scheduled showing window ends. "Did you make it
+      to the showing?"
+    buttons:
+      yes-i-went: showing-feedback-ask
+      didnt-make-it: showing-reschedule-offer
+    edges_out:
+      no_response_by_2d: create-call-task-2
+    source: >
+      ActivePipe's named "Inspection and Appraisal Follow-Up" workflow:
+      request feedback after the visit, prompt to book a follow-up call,
+      notify the agent when feedback comes in. Button copy and the 2-day
+      deadline are our own product design choice, not a cited figure.
+
+  - id: showing-reschedule-offer
+    kind: email
+    recipe: "NEW"
+    buttons:
+      pick-a-new-time: showing-confirmation-booking
+    source: product design decision
+
+  - id: create-call-task-2
+    kind: task
+    description: >
+      No response 2 days after the showing — notify the agent to call. This
+      is exactly the pattern the operator asked for verbatim.
+    source: pivotamarketing.com (task-trigger pattern, generalized), fetched 07/06/2026
+
+  - id: showing-feedback-ask
+    kind: email
+    recipe: "NEW"
+    description: Sent about a day after "yes, I went." "What did you think?"
+    buttons:
+      loved-it-schedule-another: showing-confirmation-booking
+      not-the-right-fit: buyer-preference-nurture
+    edges_out:
+      no_response_by_2d: create-call-task-2
+    source: activepipe.com, fetched 07/06/2026
+
+  - id: open-house-invite
+    kind: email
+    recipe: "NEW"
+    buttons:
+      rsvp: showing-confirmation-sent
+    edges_out:
+      no_rsvp: market-update-newsletter
+    source: >
+      realtymarketingpro.com: "a lead registering for an open house might
+      trigger a confirmation email, followed by a thank-you message [24
+      hours later]." fetched 07/06/2026
+
+  - id: market-update-newsletter
+    kind: email
+    recipe: "monthly-newsletter / sphere-weekly"
+    buttons:
+      reply: human-takeover
+    description: Clicking any listing/area link inside tags interest — no new send.
+    edges_out:
+      no_engagement_long_window: [re-engagement-variant, pixel-retargeting-audience]
+    source: >
+      activepipe.com ("Past Client Stay-in-Touch" + "Re-Engaging Quiet Contacts") for the
+      email-side branch; growth-realty.com for the fan-out itself: "a subscriber who clicks
+      on multiple listing emails... might benefit from a personal follow-up, while less
+      active contacts might respond better to a re-engagement campaign on social media" —
+      BOTH branches fire, not either/or. Fetched 07/06/2026.
+
+  - id: re-engagement-variant
+    kind: email
+    recipe: "NEW"
+    description: Lower-frequency "still there?" send.
+    edges_out:
+      engagement_resumes: market-update-newsletter
+      still_nothing: suppress-contact
+    source: activepipe.com, fetched 07/06/2026
+
+  - id: suppress-contact
+    kind: task
+    description: Stop sending — a clean list beats a big dead one.
+    source: activepipe.com, fetched 07/06/2026
+
+  - id: home-valuation-cta
+    kind: gate
+    description: The "Get my home's value" button appears on multiple emails.
+    buttons:
+      get-my-home-value: cma-result-email
+    source: realestatetoolkit.ai (Seller Nurture "Free CMA offer"), fetched 07/06/2026
+
+  - id: cma-result-email
+    kind: email
+    recipe: "NEW — reuse chart-story/chart-digest shape (one chart, one number)"
+    source: realestatetoolkit.ai, fetched 07/06/2026
+
+  - id: seller-nurture-drip
+    kind: email
+    recipe: "NEW"
+    description: 8-12 emails over 3-6 months, bi-weekly, comps/prep/staging content.
+    buttons:
+      get-my-home-value: cma-result-email
+    source: realestatetoolkit.ai, fetched 07/06/2026
+
+  - id: buyer-preference-nurture
+    kind: email
+    recipe: "NEW"
+    description: Ongoing, filtered by tagged area/price/type interest.
+    buttons:
+      get-my-home-value: cma-result-email
+    source: activepipe.com, fetched 07/06/2026
+
+  - id: just-sold-post-closing-sequence
+    kind: email
+    recipe: "NEW — gap, see playbooks doc Campaign 7 table"
+    description: Week1/2/4, Month2/3/6/12 fixed cadence.
+    buttons:
+      leave-feedback (Week 1): (logged only)
+      refer-a-friend (Month 3): new-lead-welcome-sequence (loop closes — the referred contact enters at the top)
+      see-my-updated-value (Month 6): cma-result-email
+    source: realestatetoolkit.ai, fetched 07/06/2026
+
+  # --- Campaign 8: MLS status-change triggers, sourced 07/06/2026 ---
+  # RULE 0.5 probe first: ingest/pipelines/listing_lifecycle/transitions.py is a real, working
+  # diff engine already emitting these exact rows (from_state/to_state/price_delta/at) into
+  # a listing_transitions table. Two brain packs already read it for reporting. Nothing reads
+  # it to FIRE a campaign — that's the gap this section closes. Industry vocabulary confirmed
+  # live against reso.org (RESO StandardStatus: Active, Active Under Contract, Pending, Closed,
+  # Withdrawn, Canceled, Expired) — our internal states map onto these directly.
+
+  - id: mls-new-listing
+    kind: gate
+    description: from_state IS NULL — a listing appears for the first time.
+    edges_out:
+      fires: [new-listing-alert, content-repurposing-source]
+    source: ingest/pipelines/listing_lifecycle/transitions.py (our own code), fetched 07/06/2026
+
+  - id: mls-price-change
+    kind: gate
+    description: >
+      from_state = to_state with price_delta negative (cut) or positive (raise) — both tracked.
+    edges_out:
+      price_cut_and_recipient_marked_interested: price-drop-alert
+      price_cut_no_interest_marked: (no send — logged only)
+    source: >
+      ingest/pipelines/listing_lifecycle/transitions.py (our own code) for the raw event;
+      support.realscout.com/en/articles/11954599-listing-alert-emails-for-status-changes for the
+      opt-in gate: "clients will only receive additional email notifications for status or price
+      changes if they have marked a home as Interested." Fetched 07/06/2026.
+
+  - id: price-drop-alert
+    kind: email
+    recipe: "NEW"
+    description: Only sent to contacts who marked this specific listing Interested — never a blast.
+    buttons: [ { label: "See the new price", target: "showing-confirmation-booking" } ]
+    source: support.realscout.com, fetched 07/06/2026
+
+  - id: mls-departure-ambiguous
+    kind: task
+    description: >
+      to_state = 'holding' — reason unresolved (sold/pending/withdrawn unknown). Our own code's
+      comment: "we don't assert WHY it left." No client-facing send fires from this alone.
+    edges_out:
+      resolves_sold: just-sold-post-closing-sequence
+      resolves_withdrawn: mls-manual-task
+      relists_back_on_market: mls-manual-task
+    source: >
+      ingest/pipelines/listing_lifecycle/transitions.py (our own code) for the raw ambiguity;
+      ustechautomations.com's exact rule for why this must stay manual: "any status that means
+      trouble (back on market, contingency failed) should route to you, not to an auto-send" —
+      "a back-on-market status should never be the first thing a seller learns from an automated
+      text." Fetched 07/06/2026.
+
+  - id: mls-manual-task
+    kind: task
+    description: >
+      Withdrawn or back-on-market — notify the agent, never an automated client email. The
+      practitioner source's whole point: good news and procedural milestones auto-send; bad or
+      ambiguous news is a human task.
+    source: ustechautomations.com, fetched 07/06/2026
+
+  # --- Campaign 9: cross-channel (email <-> social), sourced 07/06/2026 ---
+  # Real code note: lib/social/ (publish + schedule + engagement polling) is a
+  # genuinely separate, working state machine from email's — mirrored from
+  # lib/email/outreach/lifecycle.ts but deliberately one-shot, not drip-cursored.
+  # Every node below is a real gap, same as most of Campaigns 1-7.
+
+  - id: social-lead-ad
+    kind: gate
+    description: >
+      A Facebook/Instagram Lead Ad Instant Form submit — pre-filled name/email/
+      phone, no leaving the app.
+    buttons:
+      form-submitted: new-lead-welcome-sequence
+    source: >
+      propphy.com: lead is "instantly synced" to CRM + marketing stack,
+      "immediate SMS and email replies" fire on submit. keetechnology.com: "responding
+      ... within the first five minutes increases conversion rates dramatically" — this
+      is why the Day-0 welcome email in new-lead-welcome-sequence should be the
+      automated first reply, not a generic holding message. Fetched 07/06/2026.
+
+  - id: social-organic-post
+    kind: email
+    recipe: "NEW — lib/social/publish.ts already schedules/publishes posts; the gated-link routing is not wired"
+    description: >
+      Neighborhood content, listing carousel, tips — organic, not paid. A bio
+      link or caption CTA can gate an offer.
+    buttons:
+      "get your home's value (bio/caption link)": home-valuation-cta
+      "gated guide/checklist download": new-lead-welcome-sequence
+    source: >
+      growth-realty.com: "Use social posts to promote gated content (like home
+      valuation tools) and grow your email list"; once submitted, "they're added
+      to your email list for future nurturing campaigns." Fetched 07/06/2026.
+
+  - id: pixel-retargeting-audience
+    kind: gate
+    description: >
+      A custom ad audience built from (a) emails pushed here by the
+      market-update-newsletter no-engagement fan-out, or (b) website visitors
+      the Meta Pixel saw view a listing but never submit a form.
+    edges_out:
+      audience_built: social-retargeting-ad
+    source: >
+      growth-realty.com: "Meta Pixel can track which listings prospects view on
+      your website... upload your email list to create custom audiences for
+      retargeting ads." aihomedesign.com's three-stage funnel names the second
+      entry point: mid-funnel ads "re-engage people who showed interest."
+      Fetched 07/06/2026.
+
+  - id: social-retargeting-ad
+    kind: email
+    recipe: "NEW — paid social, not an email-doc recipe; listed here for graph completeness"
+    description: >
+      Bottom-funnel ad shown to the pixel-retargeting-audience. Its offer must
+      land on a surface already in this graph — never a new destination.
+    buttons:
+      "clicked the offer": [home-valuation-cta, showing-confirmation-booking]
+    source: >
+      aihomedesign.com: "Bottom-funnel ads convert with a clear offer and a
+      friction-managed lead form." COMPLIANCE FLAG (not a build item): Meta's
+      Special Ad Category for housing strips normal demographic targeting —
+      irrelevant until paid ads are actually in scope. Fetched 07/06/2026.
+
+  - id: content-repurposing-source
+    kind: gate
+    description: >
+      Not a trigger — a shared source. One listing or one closed sale feeds
+      several channel-specific outputs at once, in parallel, not in sequence.
+    edges_out:
+      listing_published: [new-listing-alert, social-organic-post]
+      sale_closed: [just-sold-post-closing-sequence, social-organic-post]
+    source: >
+      growth-realty.com: "A single property listing can be transformed into an
+      Instagram carousel (5-7 images), a 15-30 second TikTok or Reel, a
+      'Just Listed' email blast, and a detailed feature in your monthly
+      newsletter." Fetched 07/06/2026.
+
+edges_summary:
+  # Every loop-back in the whole graph, listed once for a quick scan:
+  - "showing-feedback-ask (loved it) → showing-confirmation-booking (new property, same family)"
+  - "showing-reschedule-offer (pick a new time) → showing-confirmation-booking"
+  - "just-sold-post-closing (refer a friend) → new-lead-welcome-sequence (referred contact starts over)"
+  - "re-engagement-variant (engagement resumes) → market-update-newsletter (back to normal cadence)"
+  - "new-listing-alert / open-house-invite / showing-feedback-ask (not interested) → buyer-preference-nurture (parking lot, not a dead end)"
+  # Cross-channel (Campaign 8):
+  - "social-lead-ad (form submitted) → new-lead-welcome-sequence (Day 0 IS the auto-reply, sent within minutes)"
+  - "market-update-newsletter (long inactivity) → BOTH re-engagement-variant (email) AND pixel-retargeting-audience (social) — parallel fan-out, not either/or"
+  - "pixel-retargeting-audience → social-retargeting-ad → back into home-valuation-cta / showing-confirmation-booking (re-entry, never a new destination)"
+  - "content-repurposing-source (one listing or one closed sale) → email AND social outputs, in parallel — a shared source, not a trigger chain"
+  # MLS status-change (Campaign 8):
+  - "mls-new-listing (from_state IS NULL) → new-listing-alert AND content-repurposing-source, at the moment the listing appears"
+  - "mls-departure-ambiguous (holding, resolves sold) → just-sold-post-closing-sequence (the real trigger that was missing)"
+  - "mls-departure-ambiguous (holding, resolves withdrawn OR relists back_on_market) → mls-manual-task — human-only, never an automated client email"
+  - "mls-price-change (cut, recipient marked Interested) → price-drop-alert; everyone else gets no send at all"
