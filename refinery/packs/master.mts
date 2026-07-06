@@ -262,6 +262,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("investor-zip-swfl"),
     makeBrainInputSource("active-listings-swfl"),
     makeBrainInputSource("active-rentals-swfl"),
+    makeBrainInputSource("communities-swfl"),
   ],
   // Typed edges (P5 + Group C 2026-05-20): every leaf feeds master as `input`
   // data EXCEPT env-swfl, which is wired as a `modifier`. Group B made env-swfl
@@ -349,6 +350,15 @@ export const master: PackDefinition = {
     // (direction: "neutral", magnitude: 0, skipSynthesisAgent) — cannot skew
     // master's direction vote.
     { id: "active-rentals-swfl", edge_type: "input" },
+    // 2026-07-06: communities-swfl — SWFL community intelligence (neighborhood
+    // backbone + marketed golf/gated communities). Same pattern as the listing
+    // reporters above: plain `input`, non-critical, deterministic reporter
+    // (direction: "neutral", magnitude: 0, skipSynthesisAgent) — cannot skew
+    // master's direction vote regardless of edge_type. Its finer grain
+    // (per-community / per-neighborhood) is offered via grain_boundary.routes
+    // (route-don't-guess), gated on the community catalog actually contributing
+    // rows this run (see composeGrainBoundary in synth.mts).
+    { id: "communities-swfl", edge_type: "input" },
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
   // gates whether the upstream is fresh enough to even reach this pack.

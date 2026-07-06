@@ -1,3 +1,52 @@
+## 2026-07-06 (main) — communities-swfl Phase 4 BUILT (brain pack + master wiring + drill pages) — empty-tolerant, UNPUSHED
+
+Opus, parallel to Sonnet's Phase 1. Built Phase 4 of the communities-swfl program
+(`docs/superpowers/plans/2026-07-05-communities-swfl.md` §4) — the brain pack + drill pages + master
+wiring — as empty-tolerant scaffolding wired AHEAD of its data (same pattern active-listings-swfl
+shipped under with its cron parked). All gates green; degrades to a neutral "no data yet" brain until
+Sonnet's Phase-1/2/3 tables land, then lights up automatically. NOT pushed (RULE 1 master/api surface +
+no-autonomous-push — operator pushes + runs `communities_swfl_live_verify`).
+
+**Built (my files only, staged explicit):**
+- `refinery/sources/communities-swfl-source.mts` — DEFENSIVE reader over `data_lake.neighborhood_stats`
+  (Tier-1, concrete schema from agg.py) + `data_lake.community_profiles` (Tier-2, spec fact-set). Both
+  readers try/catch → `[]` on any missing-table/PostgREST error + `select("*")` null-safe map, so
+  Phase-2/3 columns flow through with no code change. The typed `CommunityProfileRow` is the SHARED
+  CONTRACT the (not-yet-built) community_profiles writer must match.
+- `refinery/packs/communities-swfl.mts` (+ `.test.mts` 6/6, + fixture) — neutral/mag-0/skipSynthesis,
+  copied active-listings-swfl (NOT storm-history — C6). 5 headline `key_metrics` (homes catalogued,
+  homes-in-gated-communities [operator's ask], community count, bundled-golf share, median HOA midpoint),
+  each emits ONLY when its data is present (never fakes a 0). ~300-community catalog in `detail_tables`
+  (lookup surface) with an L1 sanitizer (latent guard vs facts-only/smoothing lint on serialized cells).
+- Registered: `index.mts` (PER_PACK_REGISTRY) + `catalog.mts` (Gate-5 mirror, scope verbatim) +
+  `brain-vocabulary.json` (5 headline slugs in concepts + slug_index, same commit).
+- Master: appended to `input_brains[]` AND `sources[]` (mirror landmine) as plain non-critical `input`;
+  `composeGrainBoundary` (synth.mts) gets a community/neighborhood route gated on the catalog
+  contributing rows this run (route-don't-guess).
+- Pages: `app/r/communities-swfl/[community]/page.tsx` (reads `community_profiles` DIRECTLY via
+  untyped service-role — C7, cre-swfl pattern, NOT detail_tables) + `n/[neighborhood]/page.tsx` (lighter,
+  `neighborhood_stats`) + `communities.ts` loader; `lib/jsonld.ts` `communityJsonLd`
+  (`GatedResidenceCommunity` — C8); `app/r/source/_tables.ts` registers the 3 tables (date_col `as_of`).
+- `brains/communities-swfl.md` — generated live (empty "no data" v1), so master won't fail (L3).
+
+**Gates:** communities pack 6/6, catalog.test 10/10, brain-input-parity + synth 54/54, vocab-coverage
+--all OK (41 brains), `bunx next build` exit 0 (both new routes compile ƒ). Leaf built, master left for
+the operator's rebuild (no `master --target-only` locally — parallel session owns the tree).
+
+**Audit of Sonnet's Phase 1 (`b4dce3d1`, `27dde50f`) — against the correction ledger:**
+- ✓ C1 (property_type mapped from DOR_UC in the join, not a re-ingest); ✓ C2 (Lee NOT pulled from FDOR
+  CO_NO=46) — Sonnet went further (F1): proved BOTH plan Lee candidates are plat-grain not per-home →
+  Lee is now a scoped spatial-join track (`verification/communities-lee-source-probe.md`).
+- ✓ Stemmer BYTE-IDENTICAL to `normalizeSubdivisionName` (verified: `SUBDIVISION_QUALIFIER_PATTERN`
+  tokens match the committed TS reconciler exactly — Sonnet correctly used those, not the plan's
+  divergent Task-2 excerpt). ✓ Gate-4 (merge + `assert_vs_canonical` floor, no raw replace).
+- ⚠️ GAPS for the operator/Sonnet: (1) NO migration yet for `parcel_subdivision`/`neighborhood_stats`/
+  `community_profiles` — so my reader stays empty until `CREATE TABLE ... GRANT SELECT TO service_role;
+  NOTIFY pgrst` lands (deferred under RULE 1). (2) NO `community_profiles` writer exists yet — my typed
+  read contract is the first concrete column spec; T5-seed/Phase-2 must match `community_slug`,
+  `home_count`, `gated`, `golf_structure`∈{bundled,equity,optional,none}. (3) T3(Lee)/T4-glue/T6/Phase
+  2/3 remain. (4) F2 condo grain (169k per-unit vs spec 100k) still unresolved.
+
 ## 2026-07-06 (main) — BUILT: lab-entry-root — one arrival path for every email-lab door (11 tasks, plan-executed, UNPUSHED pending operator go)
 
 Executed `docs/superpowers/plans/2026-07-06-lab-entry-root.md` (spec `…-lab-entry-root-design.md`) task-by-task,

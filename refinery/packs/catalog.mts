@@ -100,6 +100,21 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     ttl_seconds: 8 * 24 * 60 * 60,
   },
   {
+    // Scope DUPLICATED VERBATIM from COMMUNITIES_SWFL_SCOPE in communities-swfl.mts.
+    // Gate 5 (catalog.test.mts) checks catalog ⇆ PER_PACK_REGISTRY parity on
+    // id/domain/scope/ttl — edit both strings together.
+    id: "communities-swfl",
+    domain: "real-estate",
+    scope:
+      "Southwest Florida community intelligence (Lee + Collier) — every residential parcel " +
+      "name-joined to its neighborhood with authoritative home count, count-by-type and median " +
+      "just-value (Tier 1), plus the ~300 marketed golf/gated communities profiled with golf " +
+      "structure, HOA fee range, amenities (named-web sources) and drive-times/nearby counts " +
+      "(Mapbox) as a per-community lookup (Tier 2). Deterministic aggregation, no LLM synthesis; " +
+      "neutral reporter (never a market-direction vote).",
+    ttl_seconds: 180 * 24 * 60 * 60,
+  },
+  {
     id: "hurricane-tracks-fl",
     domain: "environmental",
     scope:

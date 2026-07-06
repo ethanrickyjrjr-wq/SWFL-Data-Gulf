@@ -713,6 +713,23 @@ export function composeGrainBoundary(args: {
       "Housing prices, days on market and supply are tracked per ZIP — want it for a specific ZIP or town?",
     );
   }
+  // Community / neighborhood route. communities-swfl publishes one row per
+  // marketed golf/gated community in a `detail_tables` entry (id
+  // "marketed_communities", grain "community") — finer than master's
+  // county-month headline. Gate on that table carrying rows THIS run (it is []
+  // until the Phase-1/2/3 backbone lands, communities-swfl.mts), NOT on the
+  // brain merely being wired — same contribution-not-wiring rule as the
+  // flood/corridor/housing routes above. Wording is kept DISTINCT from those so
+  // a downstream Claude routes to the community catalog, not the wrong report.
+  const communities = byId.get("communities-swfl");
+  if (
+    communities &&
+    communities.detail_tables?.some((t) => t.id === "marketed_communities" && t.rows.length > 0)
+  ) {
+    routes.push(
+      "Golf-or-not, HOA fees, amenities, home count and drive-times are tracked per community — and every home rolls up to a neighborhood with real counts; want a specific community, neighborhood or address?",
+    );
+  }
   // TODO(§3 + §9): add a condo-association route once condo-sirs-swfl is wired
   // to master AND holds per-association grain. Today its connector is
   // count-only-by-county (dbpr-sirs-source.mts), so offering "filings for that

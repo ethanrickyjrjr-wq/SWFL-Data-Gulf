@@ -8288,6 +8288,122 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "Count of active rental listings across SWFL (Lee + Collier), from SteadyAPI's weekly rentals-search sweep. List-side rental inventory only — not a median rent (see market-temperature-swfl for the source-faithful median) and not the ZORI rent index/trend (see rentals-swfl)."
+    },
+    "total_homes_catalogued_swfl": {
+      "id": "total_homes_catalogued_swfl",
+      "prefLabel": "SWFL Homes Catalogued to a Neighborhood (Lee + Collier)",
+      "altLabels": [
+        "homes catalogued",
+        "homes assigned to a neighborhood",
+        "total residential parcels"
+      ],
+      "raw_slugs": [
+        "total_homes_catalogued_swfl"
+      ],
+      "category": "market-signal",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "communities-swfl"
+      ],
+      "value_type": "extensive",
+      "unit": "homes",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of residential parcels in Lee + Collier assigned to a subdivision/neighborhood by the parcel name-join (Tier-1 universal backbone). Authoritative from our parcel data; each condo unit counts as one home."
+    },
+    "homes_in_gated_communities_swfl": {
+      "id": "homes_in_gated_communities_swfl",
+      "prefLabel": "SWFL Homes Inside Gated Communities",
+      "altLabels": [
+        "homes in gated communities",
+        "gated community homes"
+      ],
+      "raw_slugs": [
+        "homes_in_gated_communities_swfl"
+      ],
+      "category": "market-signal",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "communities-swfl"
+      ],
+      "value_type": "extensive",
+      "unit": "homes",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of SWFL homes whose marketed community carries the gated flag — an OUTPUT of the Tier-1 join (never a stored/invented number). Emitted only when a community's gated flag and home count are both known."
+    },
+    "marketed_communities_count_swfl": {
+      "id": "marketed_communities_count_swfl",
+      "prefLabel": "SWFL Marketed Golf/Gated Communities Catalogued",
+      "altLabels": [
+        "marketed communities count",
+        "golf/gated communities catalogued"
+      ],
+      "raw_slugs": [
+        "marketed_communities_count_swfl"
+      ],
+      "category": "market-signal",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "communities-swfl"
+      ],
+      "value_type": "extensive",
+      "unit": "communities",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of marketed golf/gated communities in Lee + Collier profiled with golf/fee/amenity facts (Tier-2 catalog)."
+    },
+    "golf_bundled_community_share_swfl": {
+      "id": "golf_bundled_community_share_swfl",
+      "prefLabel": "SWFL Communities Where Golf Is Bundled (Share of Golf Communities)",
+      "altLabels": [
+        "bundled golf share",
+        "share of golf communities that bundle golf"
+      ],
+      "raw_slugs": [
+        "golf_bundled_community_share_swfl"
+      ],
+      "category": "market-signal",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "communities-swfl"
+      ],
+      "value_type": "intensive",
+      "unit": "percent",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Share of SWFL marketed golf communities whose golf is bundled into membership (vs equity/optional/none), over communities with a known golf structure. Cited to named real-estate sources."
+    },
+    "median_hoa_fee_midpoint_swfl": {
+      "id": "median_hoa_fee_midpoint_swfl",
+      "prefLabel": "SWFL Marketed-Community Median HOA Fee (Range Midpoint)",
+      "altLabels": [
+        "median HOA fee",
+        "community HOA fee midpoint"
+      ],
+      "raw_slugs": [
+        "median_hoa_fee_midpoint_swfl"
+      ],
+      "category": "market-signal",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "communities-swfl"
+      ],
+      "value_type": "intensive",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Median of the HOA fee-range midpoints across SWFL marketed communities with both fee bounds known. Cited to named real-estate sources; community-level range, not a per-home due."
     }
   },
   "ordered_collections": {
@@ -8559,6 +8675,11 @@
     "new_listing_share_swfl": "new_listing_share_swfl",
     "sold_to_rent_ratio_swfl": "sold_to_rent_ratio_swfl",
     "active_rental_listings_count_swfl": "active_rental_listings_count_swfl",
+    "total_homes_catalogued_swfl": "total_homes_catalogued_swfl",
+    "homes_in_gated_communities_swfl": "homes_in_gated_communities_swfl",
+    "marketed_communities_count_swfl": "marketed_communities_count_swfl",
+    "golf_bundled_community_share_swfl": "golf_bundled_community_share_swfl",
+    "median_hoa_fee_midpoint_swfl": "median_hoa_fee_midpoint_swfl",
     "freshness_median_sale_price_cape_coral_usd": "freshness_median_sale_price_cape_coral_usd",
     "freshness_median_sale_price_fort_myers_usd": "freshness_median_sale_price_fort_myers_usd",
     "freshness_median_sale_price_naples_usd": "freshness_median_sale_price_naples_usd",

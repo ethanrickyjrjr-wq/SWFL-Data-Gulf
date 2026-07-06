@@ -41,6 +41,25 @@ export const SOURCE_PROVENANCE_TABLES: Record<string, SourceTableEntry> = {
     brain: "cre-swfl",
     date_col: "quarter",
   },
+  // communities-swfl — the source connector cites these via buildSourceCitationUrl
+  // (date_col "as_of"). Ship the `CREATE INDEX ... (as_of DESC)` migration
+  // alongside the Phase-1/2/3 table-creation migration (the tables don't exist
+  // yet); the page ORDER BY as_of DESC will seq-scan a small table until then.
+  neighborhood_stats: {
+    label: "SWFL neighborhood/subdivision stats (all homes, Lee + Collier)",
+    brain: "communities-swfl",
+    date_col: "as_of",
+  },
+  community_profiles: {
+    label: "SWFL marketed communities — golf, fees, amenities, access",
+    brain: "communities-swfl",
+    date_col: "as_of",
+  },
+  parcel_subdivision: {
+    label: "SWFL parcels → subdivision name-join (Lee + Collier)",
+    brain: "communities-swfl",
+    date_col: "as_of",
+  },
 };
 
 export function isPublishedSourceTable(table: string): boolean {

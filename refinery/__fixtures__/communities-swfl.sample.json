@@ -1,0 +1,93 @@
+{
+  "__meta": {
+    "note": "Fixture for communities-swfl unit tests. Two marketed communities (one bundled-golf gated, one non-golf gated) + three neighborhood rows. Mirrors the community_profiles (Tier-2) and neighborhood_stats (Tier-1) lake shapes.",
+    "as_of": "2026-07-05"
+  },
+  "communities": [
+    {
+      "community_slug": "heritage-bay",
+      "label": "Heritage Bay",
+      "county": "Collier",
+      "home_count": 1400,
+      "gated": true,
+      "golf_structure": "bundled",
+      "golf_holes": 27,
+      "hoa_fee_min": 8000,
+      "hoa_fee_max": 9500,
+      "cdd_flag": true,
+      "pool": true,
+      "tennis": true,
+      "pickleball": true,
+      "fitness": true,
+      "clubhouse": true,
+      "on_site_dining": true,
+      "boating": false,
+      "drive_min_rsw": 36,
+      "drive_min_beach": 28,
+      "drive_min_downtown": 22,
+      "drive_min_hospital": 18,
+      "nearby_dining_count": 8,
+      "source_url": "https://www.naplesgolfguy.com/heritage-bay/",
+      "as_of": "2026-07-05"
+    },
+    {
+      "community_slug": "pelican-bay",
+      "label": "Pelican Bay",
+      "county": "Collier",
+      "home_count": 6500,
+      "gated": true,
+      "golf_structure": "equity",
+      "golf_holes": 18,
+      "hoa_fee_min": 2900,
+      "hoa_fee_max": 4200,
+      "cdd_flag": false,
+      "pool": true,
+      "tennis": true,
+      "pickleball": false,
+      "fitness": true,
+      "clubhouse": true,
+      "on_site_dining": true,
+      "boating": true,
+      "drive_min_rsw": 45,
+      "drive_min_beach": 6,
+      "drive_min_downtown": 12,
+      "drive_min_hospital": 10,
+      "nearby_dining_count": 15,
+      "source_url": "https://www.55places.com/florida/communities/pelican-bay",
+      "as_of": "2026-07-05"
+    }
+  ],
+  "neighborhoods": [
+    {
+      "county": "Collier",
+      "subdivision_name": "HERITAGE BAY",
+      "home_count": 1501,
+      "count_by_type": { "single-family": 900, "condominium": 601 },
+      "median_just_value": 615000,
+      "source_url": "https://www.swfldatagulf.com/r/source/neighborhood_stats",
+      "as_of": "2026-07-05"
+    },
+    {
+      "county": "Collier",
+      "subdivision_name": "PELICAN BAY",
+      "home_count": 6500,
+      "count_by_type": { "single-family": 2600, "condominium": 3900 },
+      "median_just_value": 1250000,
+      "source_url": "https://www.swfldatagulf.com/r/source/neighborhood_stats",
+      "as_of": "2026-07-05"
+    },
+    {
+      "county": "Lee",
+      "subdivision_name": "GATEWAY",
+      "home_count": 4200,
+      "count_by_type": {
+        "single-family": 3100,
+        "condominium": 900,
+        "duplex-small-multifamily": 200
+      },
+      "median_just_value": 445000,
+      "source_url": "https://www.swfldatagulf.com/r/source/neighborhood_stats",
+      "as_of": "2026-07-04"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 [
+  "app/r/communities-swfl/communities.ts",
   "app/api/cron/news-crawl/route.ts",
   "app/api/mcp/project-tools.test.ts",
   "app/api/mls/disconnect/route.test.ts",

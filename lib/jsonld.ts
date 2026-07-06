@@ -47,12 +47,7 @@ export function brainJsonLd(display: DisplayBrain, slug: string): object[] {
   // brand-new/empty brain. An empty acceptedAnswer.text invalidates the whole
   // FAQPage — so skip the intro Q when falsy and let metrics fill all 8 slots.
   const introQ = display.conclusion
-    ? [
-        question(
-          `What is the ${display.title} outlook for Southwest Florida?`,
-          display.conclusion,
-        ),
-      ]
+    ? [question(`What is the ${display.title} outlook for Southwest Florida?`, display.conclusion)]
     : [];
   const faqEntries = [
     ...introQ,
@@ -161,5 +156,79 @@ export function corridorJsonLd(
     mainEntity: faqEntries,
   };
 
+  return [place, faq];
+}
+
+/** Minimal shape the community JSON-LD needs — decoupled from the page's data
+ *  module so this file stays import-light. `slug`/`label` are user-safe. */
+export interface CommunityJsonLdInput {
+  label: string;
+  county: string | null;
+  gated: boolean | null;
+  golf_holes: number | null;
+  hoa_fee_min: number | null;
+  hoa_fee_max: number | null;
+  home_count: number | null;
+  source_url: string | null;
+}
+
+/**
+ * `GatedResidenceCommunity` structured data for a marketed community page
+ * (schema.org/GatedResidenceCommunity). Same Place + containedInPlace shape as
+ * `corridorJsonLd`, plus an FAQ of the buy/no-buy headline facts (golf, fees,
+ * home count) — each emitted only when the fact is actually present so an
+ * empty seed never ships a hollow answer.
+ */
+export function communityJsonLd(community: CommunityJsonLdInput, freshnessToken: string): object[] {
+  const sourceSuffix = (url: string | null) => (url ? ` Source: ${url}.` : "");
+  const countyName = community.county ? `${community.county} County, Florida` : null;
+
+  const place = {
+    "@context": "https://schema.org",
+    "@type": "GatedResidenceCommunity",
+    name: community.label,
+    ...(community.home_count != null ? { numberOfAccommodationUnits: community.home_count } : {}),
+    containedInPlace: countyName
+      ? {
+          "@type": "AdministrativeArea",
+          name: countyName,
+          containedInPlace: SPATIAL,
+        }
+      : SPATIAL,
+  };
+
+  const faqEntries: object[] = [];
+  if (community.golf_holes != null) {
+    faqEntries.push(
+      question(
+        `Does ${community.label} have golf?`,
+        `${community.label} has a ${community.golf_holes}-hole golf course. As of ${freshnessToken}.${sourceSuffix(community.source_url)}`,
+      ),
+    );
+  }
+  if (community.hoa_fee_min != null && community.hoa_fee_max != null) {
+    faqEntries.push(
+      question(
+        `What are the HOA fees at ${community.label}?`,
+        `HOA fees at ${community.label} range from $${community.hoa_fee_min.toLocaleString()} to $${community.hoa_fee_max.toLocaleString()}. As of ${freshnessToken}.${sourceSuffix(community.source_url)}`,
+      ),
+    );
+  }
+  if (community.home_count != null) {
+    faqEntries.push(
+      question(
+        `How many homes are in ${community.label}?`,
+        `${community.label} has ${community.home_count.toLocaleString()} homes. As of ${freshnessToken}.${sourceSuffix(community.source_url)}`,
+      ),
+    );
+  }
+
+  if (faqEntries.length === 0) return [place];
+
+  const faq = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqEntries,
+  };
   return [place, faq];
 }
