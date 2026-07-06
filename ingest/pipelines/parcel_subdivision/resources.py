@@ -117,50 +117,89 @@ def _promote_to_tier2(rows: list[dict], chunk_size: int = 5_000) -> None:
         print(f"  parcel_subdivision chunk {i // chunk_size + 1}/{n_chunks} ({len(chunk)} rows)")
 
 
+_MAX_ATTEMPTS_PER_SIZE = 3
+_MIN_PAGE_SIZE = 100
+
+
+def _fetch_page(last_oid: int, page_size: int) -> dict:
+    """One ArcGIS request, retried up to _MAX_ATTEMPTS_PER_SIZE times at THIS
+    page_size. Returns the parsed JSON body (which may itself carry a
+    {"error": ...} key — the caller decides whether that's grounds to shrink
+    the page and retry). Raises only on a real transport/HTTP failure."""
+    params = {
+        "where": f"(CO_NO={CO_NO['collier']}) AND OBJECTID>{last_oid}",
+        "outFields": OUT_FIELDS,
+        "orderByFields": "OBJECTID ASC",
+        "resultRecordCount": page_size,
+        "returnGeometry": "false",
+        "f": "json",
+    }
+    for attempt in range(_MAX_ATTEMPTS_PER_SIZE):
+        last_attempt = attempt == _MAX_ATTEMPTS_PER_SIZE - 1
+        try:
+            resp = requests.get(CENTROID_URL, params=params, timeout=120)
+            if resp.status_code >= 500 and not last_attempt:
+                time.sleep(2 * (attempt + 1))
+                continue
+            resp.raise_for_status()
+            return resp.json()
+        except Exception:
+            if last_attempt:
+                raise
+            time.sleep(2 * (attempt + 1))
+    raise RuntimeError("unreachable")  # loop always returns or raises on last_attempt
+
+
+def _fetch_page_with_shrink(last_oid: int, page_size: int) -> tuple[dict, int]:
+    """Fetch one page, shrinking resultRecordCount on a repeated soft-400
+    ({"error": {"code": 400, ...}} inside an HTTP 200 body) before giving up.
+
+    Verified live 07/06/2026: a page can 400 at resultRecordCount=2000 while
+    succeeding cleanly at 500 for the IDENTICAL cursor (OBJECTID>2274627) —
+    this is page-size-dependent (a response-size/server limit at that specific
+    cursor), NOT a transient blip and NOT a rejected query shape (unlike
+    returnCountOnly/LIKE/returnCentroid on this same layer, which 400 every
+    time regardless of size). Halving down to _MIN_PAGE_SIZE before raising
+    absorbs it without needing a hand-picked page size.
+
+    Returns (body, page_size_used) — the caller resumes subsequent pages at
+    the ORIGINAL page_size; the shrink is local to the one problem cursor."""
+    size = page_size
+    while True:
+        body = _fetch_page(last_oid, size)
+        if "error" not in body:
+            return body, size
+        if size <= _MIN_PAGE_SIZE:
+            raise RuntimeError(
+                f"collier parcel_subdivision page failed @OBJECTID>{last_oid} "
+                f"even at the minimum page size ({_MIN_PAGE_SIZE}): {body['error']}"
+            )
+        size = max(size // 2, _MIN_PAGE_SIZE)
+        print(f"  parcel_subdivision (collier): OBJECTID>{last_oid} soft-400'd — retrying at page_size={size}")
+
+
 def _iter_collier_attrs(page_size: int = PAGE_SIZE):
     """Keyset pagination by OBJECTID — the resultOffset paginator caps at 100k
     features on this hosted layer (verified on the sibling cadastral layer;
     same ArcGIS Online hosting tier), so cursor on OBJECTID instead."""
     last_oid = -1
+    page_num = 0
     while True:
-        params = {
-            "where": f"(CO_NO={CO_NO['collier']}) AND OBJECTID>{last_oid}",
-            "outFields": OUT_FIELDS,
-            "orderByFields": "OBJECTID ASC",
-            "resultRecordCount": page_size,
-            "returnGeometry": "false",
-            "f": "json",
-        }
-        data = None
-        for attempt in range(6):
-            try:
-                resp = requests.get(CENTROID_URL, params=params, timeout=120)
-                if resp.status_code >= 500 and attempt < 5:
-                    time.sleep(2 * (attempt + 1))
-                    continue
-                resp.raise_for_status()
-                data = resp.json()
-                if "error" in data:
-                    time.sleep(2 * (attempt + 1))
-                    continue
-                break
-            except Exception:
-                if attempt == 5:
-                    raise
-                time.sleep(2 * (attempt + 1))
-        else:
-            raise RuntimeError(f"collier parcel_subdivision page failed @OBJECTID>{last_oid}")
+        data, used_size = _fetch_page_with_shrink(last_oid, page_size)
 
-        features = data.get("features", []) if data else []
+        features = data.get("features", [])
         if not features:
             break
+        page_num += 1
+        if page_num % 20 == 0:
+            print(f"  parcel_subdivision (collier): page {page_num}, OBJECTID>{last_oid}")
         max_oid = last_oid
         for feat in features:
             oid = feat.get("attributes", {}).get("OBJECTID")
             if isinstance(oid, int) and oid > max_oid:
                 max_oid = oid
             yield feat
-        if len(features) < page_size or max_oid == last_oid:
+        if len(features) < used_size or max_oid == last_oid:
             break
         last_oid = max_oid
 

@@ -1,6 +1,12 @@
 """No-network unit tests for the parcel_subdivision normalizer (communities-swfl
 Phase 1 T2). Mirrors the ArcGIS `features[].attributes` shape verbatim."""
-from ingest.pipelines.parcel_subdivision.resources import _normalize, _stem
+from unittest.mock import patch
+
+from ingest.pipelines.parcel_subdivision.resources import (
+    _fetch_page_with_shrink,
+    _normalize,
+    _stem,
+)
 
 
 def test_normalize_maps_type_and_stems_name():
@@ -43,6 +49,37 @@ def test_stem_matches_ts_reconciler_semantics():
     assert _stem("Heritage Bay, Phase 1") == "HERITAGE BAY"
     assert _stem("PELICAN BAY TR 1") == "PELICAN BAY TR 1"  # "TR" not a stripped qualifier (matches TS list)
     assert _stem("LELY RESORT ADDITION 3") == "LELY RESORT"
+
+
+def test_shrink_retries_smaller_page_size_on_soft_400():
+    """Reproduces the live 07/06/2026 finding: OBJECTID>2274627 soft-400'd at
+    2000 but succeeded at 500 — _fetch_page_with_shrink must halve and retry
+    rather than raise immediately."""
+    calls = []
+
+    def fake_fetch_page(last_oid, page_size):
+        calls.append(page_size)
+        if page_size > 500:
+            return {"error": {"code": 400, "message": "Cannot perform query."}}
+        return {"features": [{"attributes": {"OBJECTID": 1}}]}
+
+    with patch("ingest.pipelines.parcel_subdivision.resources._fetch_page", side_effect=fake_fetch_page):
+        body, used_size = _fetch_page_with_shrink(2274627, 2000)
+    assert used_size == 500
+    assert "features" in body
+    assert calls == [2000, 1000, 500]  # halves each time until it succeeds
+
+
+def test_shrink_raises_when_even_minimum_page_size_fails():
+    def always_soft_400(last_oid, page_size):
+        return {"error": {"code": 400, "message": "Cannot perform query."}}
+
+    with patch("ingest.pipelines.parcel_subdivision.resources._fetch_page", side_effect=always_soft_400):
+        try:
+            _fetch_page_with_shrink(2274627, 2000)
+            assert False, "expected RuntimeError"
+        except RuntimeError as e:
+            assert "minimum page size" in str(e)
 
 
 def test_dor_code_is_zero_padded_before_lookup():
