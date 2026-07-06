@@ -69,6 +69,27 @@ import {
 import { extractNumbers } from "@/lib/deliverable/narrative-lint";
 import { loadAddressFigures } from "@/lib/email/address-context";
 import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
+import { findPlaceholder } from "@/lib/showcase/recipe";
+
+/** A recipe's [[blank]] must be FILLED before it reaches the model. If an unfilled
+ *  placeholder survives to here — an empty hero fill, a recipe auto-built before its
+ *  address popup ran, or a bot POSTing the raw recipe straight to the build — the
+ *  literal "[[your city or ZIP]]" token would ship to the author (a word it can't
+ *  resolve) AND the build would run unscoped, producing generic content about no
+ *  place the user named. This is the ONE chokepoint every build path funnels
+ *  through, so the guard lives here: stop and ask for the area instead of shipping
+ *  a placeholder. Returns the miss payload the UI already renders, or null when the
+ *  prompt is clean. (Sabotage-path backstop, 07/06/2026.) */
+export function unfilledPlaceholderMiss(prompt: string): BuildResult | null {
+  const ph = findPlaceholder(prompt);
+  if (!ph) return null;
+  return {
+    payload: {
+      applied: false,
+      message: `Which area should this cover? Tell me a city or ZIP (${ph.hint}) and I'll build it — I won't drop a blank placeholder into your email.`,
+    },
+  };
+}
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com";
 const MAX_TOKENS = 4096;
@@ -190,15 +211,43 @@ export async function refreshStaleLakeContext(opts: {
 // ChartSpec + the chart's real figures (groundingNote). spec-to-png rasterizes that
 // spec to a hosted PNG for email (the registry's React frames can't run in email).
 // This replaces the old one-city ZHVI fork. NEVER throws — a chart is a bonus.
+/** The multi-ZIP cities whose ZIP sets are USPS+Mapbox-verified (2026-07-06). Only
+ *  these get the ZIP-by-ZIP city chart — a fail-closed allowlist so an unverified or
+ *  wrongly-listed place (see the Estero correction) never charts neighbor-city ZIPs
+ *  under its own name. New entries join only after the same three-source check. */
+const VERIFIED_MULTI_ZIP_CITIES: ReadonlySet<string> = new Set([
+  "Cape Coral",
+  "Fort Myers",
+  "Naples",
+  "Lehigh Acres",
+  "Bonita Springs",
+]);
+
+/** The city's full ZIP list for the ZIP-by-ZIP chart, or undefined when the place is
+ *  not an allowlisted multi-ZIP city (single-ZIP places, explicit ZIP scopes, and
+ *  unverified places all fall through to the existing single-scope chart). */
+export function cityZipsFor(
+  promptPlace: { place: string; zip: string; zips: string[] } | undefined,
+): string[] | undefined {
+  if (!promptPlace) return undefined;
+  if (!VERIFIED_MULTI_ZIP_CITIES.has(promptPlace.place)) return undefined;
+  return promptPlace.zips.length > 1 ? promptPlace.zips : undefined;
+}
+
 async function buildPromptChart(
   prompt: string,
   doc: EmailDoc,
   scope?: BuildScope,
   chartType?: ChartType,
+  zips?: string[],
 ): Promise<{ image: EmailChartImage; groundingNote: string; note?: string } | null> {
   try {
     const question = scope?.value ? `${prompt} (${scope.kind ?? "scope"}: ${scope.value})` : prompt;
-    const cfq = await buildChartForQuestion(question, BASE_URL);
+    const cfq = await buildChartForQuestion(
+      question,
+      BASE_URL,
+      zips?.length ? { zips } : undefined,
+    );
     if (!cfq?.chart) {
       console.log("[email-lab/chart] no chart matched for prompt:", prompt.slice(0, 80));
       return null;
@@ -378,6 +427,8 @@ export async function buildContentDoc({
   if (!docParsed.success) {
     return { httpStatus: 400, payload: { error: "Invalid email document." } };
   }
+  const placeholderMiss = unfilledPlaceholderMiss(prompt);
+  if (placeholderMiss) return placeholderMiss;
   let doc = docParsed.data;
 
   // ── Listing flyer branch ───────────────────────────────────────────────────
@@ -650,6 +701,8 @@ export async function authorDoc({
   if (!docParsed.success) {
     return { httpStatus: 400, payload: { error: "Invalid email document." } };
   }
+  const placeholderMiss = unfilledPlaceholderMiss(prompt);
+  if (placeholderMiss) return placeholderMiss;
   const currentDoc = docParsed.data;
   const globalStyle = currentDoc.globalStyle; // brand is canonical — never authored
   const model = resolveAuthorModel(mode);
@@ -664,14 +717,35 @@ export async function authorDoc({
     : scope;
 
   // Data feed + best-effort chart/photo, in parallel — the SAME producers the
-  // content-patch path uses (each never throws; a chart/photo is a bonus).
+  // content-patch path uses (each never throws; a chart/photo is a bonus). For an
+  // allowlisted multi-ZIP city the chart is scoped to that city's ZIPs (a real
+  // ZIP-by-ZIP chart) instead of the SWFL-wide top-12; every other place is undefined
+  // here and takes the existing single-scope chart.
+  const chartZips = cityZipsFor(promptPlace);
   const [lakeParts, chartRes, photoRes] = await Promise.all([
     fetchLakeParts(effectiveScope),
-    buildPromptChart(prompt, currentDoc, effectiveScope, chartType),
+    buildPromptChart(prompt, currentDoc, effectiveScope, chartType, chartZips),
     resolveHeroPhoto(prompt, currentDoc),
   ]);
 
-  const menu = buildFigureMenu(lakeParts.figures);
+  // A multi-ZIP place (Cape Coral is six ZIPs, not one) needs figures from
+  // EVERY ZIP it spans — the fetch above only covers the primary ZIP, which is
+  // real Cape Coral data but a fraction of the city. Pull the rest in parallel
+  // and merge (each figure's own label already carries its ZIP, so a straight
+  // concat never blends two ZIPs into one falsely-averaged number). The chart,
+  // photo, and dossier above stay primary-ZIP-only for now — those producers
+  // take one scope value each; multi-ZIP dossier/chart aggregation is a
+  // separate, bigger piece of work, not silently faked here.
+  let figures = lakeParts.figures;
+  if (promptPlace && promptPlace.zips.length > 1) {
+    const otherZips = promptPlace.zips.filter((z) => z !== promptPlace.zip);
+    const otherParts = await Promise.all(
+      otherZips.map((z) => fetchLakeParts({ kind: "zip", value: z })),
+    );
+    figures = [...figures, ...otherParts.flatMap((p) => p.figures)];
+  }
+
+  const menu = buildFigureMenu(figures);
   const figuresById = figureMenuById(menu);
   const chartGroundingNumbers = chartRes?.groundingNote
     ? extractNumbers(chartRes.groundingNote)
@@ -679,11 +753,11 @@ export async function authorDoc({
   // Lane 4: figures the USER typed (street number, an asking figure) join the
   // GENERAL anchors only — never recordedStrings, so "sold for $X" still
   // requires a recorded menu figure.
-  const anchorStrings = collectAnchorNumbers(lakeParts.figures, [
+  const anchorStrings = collectAnchorNumbers(figures, [
     ...chartGroundingNumbers,
     ...promptAnchors(prompt),
   ]);
-  const recordedStrings = collectRecordedAnchors(lakeParts.figures);
+  const recordedStrings = collectRecordedAnchors(figures);
 
   // The agent-intro letter carries ONE clipping figure and no chart (recipe rule)
   // — without this, assembleAuthoredDoc force-reserves any offered chart above the

@@ -190,6 +190,27 @@ describe("heroDestination", () => {
     const areaUrl = heroDestination(area, { filled: "Cape Coral", zip: null });
     expect(new URLSearchParams(areaUrl.split("?")[1]).get("addr")).toBeNull();
   });
+
+  // An EMPTY fill must NOT collapse the [[blank]] — a placeless recipe auto-builds
+  // an unscoped, generic email ("nothing about the place I asked for"). The
+  // placeholder must survive so the lab's address popup asks for the area.
+  it("keeps the [[blank]] intact when the fill is empty or whitespace", () => {
+    for (const filled of ["", "   "]) {
+      const area = HERO_CAMPAIGNS[3];
+      const url = heroDestination(area, { filled, zip: null });
+      const params = new URLSearchParams(url.split("?")[1]);
+      expect(params.get("recipe")).toContain("[[");
+      expect(params.get("addr")).toBeNull();
+    }
+  });
+
+  it("does not carry an empty addr= for a listing chip with no address typed", () => {
+    const listing = HERO_CAMPAIGNS[0];
+    const url = heroDestination(listing, { filled: "  ", zip: null });
+    const params = new URLSearchParams(url.split("?")[1]);
+    expect(params.get("recipe")).toContain("[[");
+    expect(params.get("addr")).toBeNull();
+  });
 });
 
 describe("campaignKeyForPrompt (save provenance — deliverables.campaign_key)", () => {

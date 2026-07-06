@@ -1,3 +1,88 @@
+## 2026-07-06 (main) — Multi-ZIP city ZIP-by-ZIP chart BUILT + email build guards, PUSHED
+
+Chased an operator report ("Cape Coral email came back with nothing about Cape Coral"). Two root
+causes, fixed: (1) the lab shipped an unfilled recipe `[[your city or ZIP]]` / empty-area fill to the
+author — literal token + unscoped generic content; guarded at the chokepoint (`unfilledPlaceholderMiss`
+in `lib/email/build-doc.ts`) + at the source (`heroDestination` empty-fill guard, `lib/campaigns.ts`).
+(2) a multi-ZIP city collapsed to its primary ZIP and the chart showed the SWFL-wide top-12, never the
+city. Built the shared-producer fix per plan (40 tests green): `filterOutputToZips` +
+`computeMetricChart` `detailTablesOnly` (`refinery/lib/chart-from-metrics.mts`, `ef133199`); opt-in
+`{ zips }` on `buildChartForQuestion` (`lib/assistant/chart-for-question.ts`, `7805aa69`, default
+byte-identical so chat is unchanged); `cityZipsFor` fail-closed allowlist of the 5 USPS+Mapbox-verified
+multi-ZIP cities wired into the email chart (`build-doc.ts`). Estero corrected to single ZIP `33928`
+earlier this session (`01fce907`). Every plotted number stays a real audited figure; grounding runs on
+the filtered chart. Depends on this tree's `place-from-prompt.ts` `zips` field (bundled). One
+pre-existing unrelated red remains: `campaigns/cadence-colors` "once" mismatch (untouched by this work).
+`multi_zip_city_chart_live_verify` open for the operator-run live build.
+
+## 2026-07-06 (main) — PLATFORM_ARC auto-advance nudges BUILT (10 tasks, 13 files, committed local, NOT pushed)
+
+Executed `docs/superpowers/plans/2026-07-06-platform-arc-auto-advance-nudges.md` end to end. Surfaces a
+dismissible, nudge-only chip on the listing campaign arc strip when a real MLS lifecycle event (new
+listing appeared, departed to holding, resolved sold) or a 14-day time trigger suggests building the
+next arc step — never auto-builds, auto-schedules, or auto-sends. A daily cron reads armed
+`email_sequences` rows with a resolved `address_key`, joins `data_lake.listing_state`/`listing_transitions`,
+runs a pure decision core, and inserts idempotent `lifecycle_nudges` rows the UI reads + dismisses.
+
+PROBE-FIRST before touching code (RULE 0.5): verified every plan assumption against live code — the
+Python `address_key.py` matches the TS port 1:1, `SequenceStep` carries `sent_at`, `geocodeAddress`
+returns `{zip}`, the service-role untyped hatch + `data_lake` columns, and the reference GHA workflow.
+Two facts the advisor flagged as make-or-break, both verified against the LIVE DB: `sale_or_rent="sale"`
+and `source_name="api_feed"` are the correct literal filter values (extract_api.py:127) AND `api_feed`
+already holds real rows — a standalone probe against `1814NE8THPL:33909` confirmed the full lake→decision-core
+path produces a genuine `appeared` nudge. So this is functional scaffolding, not empty structure.
+
+DEVIATION from plan (documented in code): the `resolved_sold` branch fires ONLY when a real
+`to_state='sold'` transition exists, dropping the plan's `at = ... ?? toDateOnly(today)` fallback that
+minted a fresh dedup_key each daily run (a duplicate-nudge bug). More source-faithful too — the "county
+records show this sold" copy is sourced by that transition. Also added the required `// KNOWN-DEBT(...)`
+annotation on the untyped `data_lake` client (plan omitted it; ESLint blocks new uncommented uses).
+
+Shipped: migration `docs/sql/20260706_lifecycle_nudges.sql` (RUN live — table + `email_sequences.address_key`
+column exist, types regenerated); `lib/listings/address-key.ts` (+test, 10 green); `lib/project/lifecycle-nudge.ts`
+(+test, 12 green); `lib/project/nudge-copy.ts` (+test, 5 green); arm-route `address_key` resolution;
+`scripts/project-feed/lifecycle-nudges.mts` adapter; `.github/workflows/lifecycle-nudges-daily.yml` (16:00
+UTC, after the three staggered lifecycle county runs); GET nudges + PATCH dismiss on the sequence API;
+`components/email-lab/ArcNudgeChip.tsx` + `ArcStrip.tsx` wiring. Verified: 55 unit tests + 46 scheduler
+tests green (zero regressions), `bunx next build` clean with `/api/projects/[id]/sequence/nudges` registered.
+NEXT: operator go-ahead to push; `platform_arc_nudges_live_verify` is operator-run prod evidence (a nudge
+appears once a sequence is armed for a live api_feed address) — not closed here.
+
+## 2026-07-06 (main) — Multi-ZIP city fixes SHIPPED: placeholder/empty-fill guards, per-ZIP figure merge, chart `filterOutputToZips`, live SocialBoard, showcase CTA rework
+
+Prior session (d7d5525a) had left this work built + tested but uncommitted/undocumented when it
+ended. Picked it up cold: verified only one Claude session was active (repolith's "active file
+claim" warnings on these paths were stale claims from that finished session, echoing back — not a
+live conflict), then verified each piece before shipping rather than trusting the prior session's
+say-so.
+
+Shipped: (1) `lib/email/build-doc.ts` `unfilledPlaceholderMiss` chokepoint guard — every build path
+(`buildContentDoc`/`authorDoc`) now stops and asks for an area instead of shipping a literal
+`[[your city or ZIP]]` token; (2) `lib/campaigns.ts` `heroDestination` keeps the `[[blank]]` intact
+on an empty/whitespace fill instead of collapsing it to a placeless prompt; (3)
+`lib/email/place-from-prompt.ts` `zipFromPromptPlace` now returns the full `zips[]` a multi-ZIP city
+spans (Cape Coral = 6), not just the primary; `authorDoc` fetches figures for every ZIP in parallel
+and merges (chart/photo/dossier stay primary-ZIP-only — noted as separate follow-on work, not
+silently faked); (4) `refinery/lib/chart-from-metrics.mts` `filterOutputToZips` — opt-in scoping,
+byte-identical default, wired into the chat chart path per the 07/06 design spec; (5)
+`components/showcase/SocialBoard.tsx` (new) — live, responsive social-example cards replacing the
+flat captured `.webp` (couldn't be legible on both desktop and phone at once), wired into
+`ShowcaseOverlay.tsx` via `slide.socialBoard`; (6) `ShowcaseOverlay.tsx` CTA panel reworked —
+free-signup vs. paid-plan cards with a real `BILLING_TIERS[0]` price anchor, replacing the old
+generic Free/Pro copy; (7) `EmailLabShell.tsx` `applyBrand` drops the house-brand logo when a real
+`COMPANY_NAME` overrides it (never ship SWFL Data Gulf imagery under a client's name).
+
+Verified before push: `bun test` on all five touched suites green (the one pre-existing
+`campaigns.test.ts` cadence-colors failure — missing `"once"` in `CADENCE_COLORS` — reproduces
+identically on HEAD before these changes, unrelated to this diff, not fixed here); `bunx next build`
+clean, zero type errors, full route manifest compiled. Also staged the plan doc
+`docs/superpowers/plans/2026-07-06-email-grid-gridstack-migration.md` (GridStack.js migration for
+the paid-tier grid canvas, 8 tasks — plan only, no code yet).
+
+Next: execute the gridstack migration plan; fix the pre-existing `campaigns.test.ts` cadence-colors
+gap (`CADENCE_COLORS` missing `"once"`); multi-ZIP chart/photo/dossier aggregation (currently
+primary-ZIP-only) is still open per the design spec.
+
 ## 2026-07-06 (main) — Multi-ZIP city chart: Estero ZIP data CORRECTED + chart spec/plan written
 
 Ran down an operator report that a "Cape Coral" email came back with nothing about Cape Coral.

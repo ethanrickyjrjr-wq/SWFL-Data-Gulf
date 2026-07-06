@@ -121,16 +121,24 @@ export function heroDestination(
   entry: HeroCampaignEntry,
   opts: { filled: string; zip?: string | null },
 ): string {
+  const filled = opts.filled.trim();
   const ph = findPlaceholder(entry.recipe.prompt);
-  const prompt = ph
-    ? entry.recipe.prompt.slice(0, ph.start) + opts.filled + entry.recipe.prompt.slice(ph.end)
-    : entry.recipe.prompt;
+  // An EMPTY fill must NOT collapse the [[blank]] to nothing: a placeless prompt
+  // ("...for my farm area  —") slips past the arrival's recipeHasBlank guard and
+  // auto-builds an unscoped, generic email — the exact "nothing about the place I
+  // asked for" bug (07/06/2026). Keep the placeholder when there's nothing to
+  // fill it with, so the lab's address popup asks for the area instead.
+  const prompt =
+    ph && filled
+      ? entry.recipe.prompt.slice(0, ph.start) + filled + entry.recipe.prompt.slice(ph.end)
+      : entry.recipe.prompt;
   const params = new URLSearchParams({ recipe: prompt });
   if (entry.recipe.needs.length > 0) params.set("recipeNeeds", entry.recipe.needs.join(","));
   if (opts.zip) params.set("zip", opts.zip);
   // Address spine (build 2): listing chips carry the subject address so the lab
-  // scope can pull the listing's own nearby sold comps into the figure feed.
-  if (entry.input === "address") params.set("addr", opts.filled);
+  // scope can pull the listing's own nearby sold comps into the figure feed. Only
+  // when there's a real address — an empty addr param answers no popup.
+  if (entry.input === "address" && filled) params.set("addr", filled);
   return `/email-lab/grid?${params.toString()}`;
 }
 

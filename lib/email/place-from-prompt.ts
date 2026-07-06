@@ -31,10 +31,17 @@ const NEEDLES: { needle: string; place: string; zips: string[] }[] = (() => {
 })();
 
 /** Find the first (most specific) known SWFL place named in free text, whole-word
- *  matched (so "landscape" never matches "cape"). Returns its primary ZIP — never
- *  invents one; a place absent from the sourced crosswalk resolves to undefined. */
-export function zipFromPromptPlace(text: string): { place: string; zip: string } | undefined {
+ *  matched (so "landscape" never matches "cape"). `zips` is EVERY ZIP the place
+ *  spans (a multi-ZIP city like Cape Coral is six ZIPs, not one) — `zip` is the
+ *  primary/reference ZIP only, kept for callers that need a single value (the
+ *  master-dossier fetch, the chart scope). A caller pulling FIGURES for the place
+ *  must use the full `zips` list — collapsing to `zip` alone silently drops most
+ *  of the city (fixed 07/06/2026: the first cut of this file did exactly that).
+ *  Never invents a ZIP; a place absent from the sourced crosswalk is undefined. */
+export function zipFromPromptPlace(
+  text: string,
+): { place: string; zip: string; zips: string[] } | undefined {
   const padded = ` ${normalize(text)} `;
   const hit = NEEDLES.find((n) => n.needle && padded.includes(` ${n.needle} `));
-  return hit ? { place: hit.place, zip: hit.zips[0] } : undefined;
+  return hit ? { place: hit.place, zip: hit.zips[0], zips: hit.zips } : undefined;
 }
