@@ -68,6 +68,7 @@ import {
 } from "@/lib/email/author-doc";
 import { extractNumbers } from "@/lib/deliverable/narrative-lint";
 import { loadAddressFigures } from "@/lib/email/address-context";
+import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com";
 const MAX_TOKENS = 4096;
@@ -613,10 +614,23 @@ async function callAuthor(
     });
     const tool = msg.content.find((b) => b.type === "tool_use") as
       Anthropic.ToolUseBlock | undefined;
-    if (!tool) return null;
+    if (!tool) {
+      console.error("[email-lab/ai] callAuthor: model returned no tool_use block");
+      return null;
+    }
     const parsed = AuthorDocSchema.safeParse(tool.input);
-    return parsed.success ? parsed.data : null;
-  } catch {
+    if (!parsed.success) {
+      console.error("[email-lab/ai] callAuthor: tool input failed AuthorDocSchema:", parsed.error);
+      return null;
+    }
+    return parsed.data;
+  } catch (err) {
+    // Previously a bare `catch { return null }` — every failure (network, rate
+    // limit, API error) surfaced as the same "try rephrasing" message regardless
+    // of cause, so a transient miss read as a permanent one. Log the real error;
+    // the caller's message to the user stays generic (never leak internals),
+    // but the log now tells us WHY instead of nothing.
+    console.error("[email-lab/ai] callAuthor: request failed:", err);
     return null;
   }
 }
@@ -640,11 +654,20 @@ export async function authorDoc({
   const globalStyle = currentDoc.globalStyle; // brand is canonical — never authored
   const model = resolveAuthorModel(mode);
 
+  // A place named IN THE PROMPT ("...for Cape Coral") resolves to its real ZIP
+  // scope when the caller didn't already pass one — a ZIP inside a place's
+  // boundary IS that place's data; the user should never have to supply a raw
+  // ZIP by hand. Never overrides an explicit caller-supplied scope.
+  const promptPlace = !scope?.value ? zipFromPromptPlace(prompt) : undefined;
+  const effectiveScope: BuildScope | undefined = promptPlace
+    ? { kind: "zip", value: promptPlace.zip }
+    : scope;
+
   // Data feed + best-effort chart/photo, in parallel — the SAME producers the
   // content-patch path uses (each never throws; a chart/photo is a bonus).
   const [lakeParts, chartRes, photoRes] = await Promise.all([
-    fetchLakeParts(scope),
-    buildPromptChart(prompt, currentDoc, scope, chartType),
+    fetchLakeParts(effectiveScope),
+    buildPromptChart(prompt, currentDoc, effectiveScope, chartType),
     resolveHeroPhoto(prompt, currentDoc),
   ]);
 
@@ -692,8 +715,8 @@ export async function authorDoc({
     assetMenu,
     recipe: recipeId ? recipeSection(recipeId) : undefined,
   });
-  const baseUser = scope?.value
-    ? `User request: ${prompt}\nScope: ${scope.kind ?? "area"} ${scope.value}`
+  const baseUser = effectiveScope?.value
+    ? `User request: ${prompt}\nScope: ${effectiveScope.kind ?? "area"} ${effectiveScope.value}`
     : `User request: ${prompt}`;
 
   const authored = await callAuthor(model, system, baseUser);
