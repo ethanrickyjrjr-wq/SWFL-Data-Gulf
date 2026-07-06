@@ -26,9 +26,10 @@ import { routeChart, routeRankedDelta } from "@/lib/route-chart";
 import { buildChartForIntent, summarizeChartForGrounding } from "@/lib/build-chart-for-intent.mts";
 import { resolveReachTargets } from "@/lib/highlighter/reach";
 import { fetchBrain } from "@/lib/fetch-brain";
-import { computeMetricChart } from "@/refinery/lib/chart-from-metrics.mts";
+import { computeMetricChart, filterOutputToZips } from "@/refinery/lib/chart-from-metrics.mts";
 import { bindRankedDeltaSpec } from "@/lib/deliverable/ranked-delta-bind";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
+import type { BrainOutput } from "@/refinery/types/brain-output.mts";
 
 export interface ChartForQuestion {
   /** The ready-to-render spec (carries its own frameId). */
@@ -59,8 +60,18 @@ export function looksChartWorthy(question: string): boolean {
 export async function buildChartForQuestion(
   question: string,
   origin: string,
+  opts: { zips?: string[] } = {},
 ): Promise<ChartForQuestion | null> {
   if (!question || typeof question !== "string") return null;
+
+  // City scoping (opt-in): when a caller passes the ZIP set of a multi-ZIP city,
+  // every fetched brain output is filtered to those ZIPs before charting, and the
+  // key_metrics fallback is disabled (a city request must never yield a SWFL-wide
+  // chart). With no `zips`, `scope` is identity and `metricOpts` is undefined — the
+  // path is byte-for-byte today's, so chat and every existing caller are unaffected.
+  const zips = opts.zips ?? [];
+  const scope = (o: BrainOutput): BrainOutput => (zips.length ? filterOutputToZips(o, zips) : o);
+  const metricOpts = zips.length ? { detailTablesOnly: true } : undefined;
 
   // Layer 0 — explicit ranked-delta intent ("rank/compare ZIPs by home value /
   // investor yield / market heat, with the YoY change"). resolveReachTargets never
@@ -73,7 +84,7 @@ export async function buildChartForQuestion(
     const rdSlug = routeRankedDelta(question);
     if (rdSlug) {
       const { output } = await fetchBrain(rdSlug, { tier: 2, origin });
-      const rd = bindRankedDeltaSpec(output);
+      const rd = bindRankedDeltaSpec(scope(output));
       if (rd) return { chart: rd, groundingNote: summarizeChartForGrounding(rd) };
     }
   } catch {
@@ -115,16 +126,17 @@ export async function buildChartForQuestion(
     const slugs = topicSlugs.length ? topicSlugs : CHART_FALLBACKS;
     for (const slug of slugs) {
       const { output } = await fetchBrain(slug, { tier: 2, origin });
+      const scoped = scope(output);
 
       // Auto-pick upgrade: when this brain's table carries a value column paired
       // with its OWN period-over-period delta (home_value_zhvi + value_yoy_pct, …),
       // emit ranked-delta — the same bars plus a ▲/▼ chip. Strictly non-regressive:
       // null when no clean pair exists, falling through to the bar below. The binder
       // is registry-free, so this stays off the chat route's server bundle.
-      const ranked = bindRankedDeltaSpec(output);
+      const ranked = bindRankedDeltaSpec(scoped);
       if (ranked) return { chart: ranked, groundingNote: summarizeChartForGrounding(ranked) };
 
-      const block = computeMetricChart(output);
+      const block = computeMetricChart(scoped, metricOpts);
       if (block) {
         // Server-side lift: computeMetricChart only ever stamps frame_id
         // "bar-table", so this is a faithful one-line ChartBlock → ChartSpec
