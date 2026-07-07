@@ -4,7 +4,14 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { closeTier, buildSignalProof, buildManualProof, parseSignalFlag } from "./check.mjs";
+import {
+  closeTier,
+  buildSignalProof,
+  buildManualProof,
+  parseSignalFlag,
+  ageDays,
+  sortByStaleness,
+} from "./check.mjs";
 
 const NOW = "2026-07-05T12:00:00Z";
 
@@ -58,4 +65,52 @@ test("parseSignalFlag — accepts every phase-1 type", () => {
   for (const type of ["http_ok", "http_body", "db_row_exists", "db_fresh", "workflow_success"]) {
     assert.equal(parseSignalFlag(JSON.stringify({ type, url: "x" })).type, type);
   }
+});
+
+// --- ageDays: pure date math ---
+test("ageDays — whole days between two ISO timestamps", () => {
+  assert.equal(ageDays("2026-07-07T12:00:00Z", "2026-07-03T12:00:00Z"), 4);
+});
+
+test("ageDays — null sinceIso returns null (row has no timestamp)", () => {
+  assert.equal(ageDays("2026-07-07T12:00:00Z", null), null);
+});
+
+test("ageDays — same instant is 0 days", () => {
+  assert.equal(ageDays("2026-07-07T12:00:00Z", "2026-07-07T12:00:00Z"), 0);
+});
+
+// --- sortByStaleness: oldest-untouched-first, updated_at wins over created_at ---
+test("sortByStaleness — orders oldest updated_at first", () => {
+  const rows = [
+    { check_key: "b", created_at: "2026-06-01T00:00:00Z", updated_at: "2026-07-01T00:00:00Z" },
+    { check_key: "a", created_at: "2026-06-01T00:00:00Z", updated_at: "2026-06-05T00:00:00Z" },
+  ];
+  const sorted = sortByStaleness(rows);
+  assert.deepEqual(
+    sorted.map((r) => r.check_key),
+    ["a", "b"],
+  );
+});
+
+test("sortByStaleness — falls back to created_at when updated_at is null", () => {
+  const rows = [
+    { check_key: "recent", created_at: "2026-07-06T00:00:00Z", updated_at: null },
+    { check_key: "old", created_at: "2026-06-01T00:00:00Z", updated_at: null },
+  ];
+  const sorted = sortByStaleness(rows);
+  assert.deepEqual(
+    sorted.map((r) => r.check_key),
+    ["old", "recent"],
+  );
+});
+
+test("sortByStaleness — does not mutate the input array", () => {
+  const rows = [
+    { check_key: "b", created_at: "2026-06-01T00:00:00Z", updated_at: "2026-07-01T00:00:00Z" },
+    { check_key: "a", created_at: "2026-06-01T00:00:00Z", updated_at: "2026-06-05T00:00:00Z" },
+  ];
+  const original = [...rows];
+  sortByStaleness(rows);
+  assert.deepEqual(rows, original);
 });

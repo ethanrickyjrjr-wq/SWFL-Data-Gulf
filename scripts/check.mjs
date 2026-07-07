@@ -83,6 +83,24 @@ function fmtDate(iso) {
   });
 }
 
+/** Whole days between two ISO timestamps (now - since). Null `since` (a row
+ *  with no timestamp at all) returns null rather than a bogus number. */
+export function ageDays(nowIso, sinceIso) {
+  if (!sinceIso) return null;
+  const ms = new Date(nowIso).getTime() - new Date(sinceIso).getTime();
+  return Math.floor(ms / (24 * 60 * 60 * 1000));
+}
+
+/** Oldest-untouched-first. `updated_at` is the real "last touched" signal;
+ *  fall back to `created_at` for rows where it's null. Does not mutate. */
+export function sortByStaleness(rows) {
+  return [...rows].sort((a, b) => {
+    const aStamp = a.updated_at ?? a.created_at;
+    const bStamp = b.updated_at ?? b.created_at;
+    return new Date(aStamp).getTime() - new Date(bStamp).getTime();
+  });
+}
+
 /** Split argv into positionals + a flag map (flags take the next token as value). */
 function parseArgs(args) {
   const positionals = [];
@@ -141,16 +159,30 @@ export function parseSignalFlag(raw) {
   return sig;
 }
 
-async function list() {
+async function list(args = []) {
+  const { flags } = parseArgs(args);
   const rows = await rest("checks?state=eq.open&order=due_at.asc.nullslast&select=*");
   if (!rows.length) {
     console.log("none open ✓");
     return;
   }
-  for (const r of rows) {
-    const due = r.due_at ? ` (due ${fmtDate(r.due_at)})` : "";
-    console.log(`  ${r.check_key}  ·  ${r.label}${due}  [${r.project}]`);
+  const nowIso = new Date().toISOString();
+  const staleDays = flags.stale != null ? Number(flags.stale) : null;
+
+  let out = rows;
+  if (staleDays != null) {
+    out = sortByStaleness(rows).filter(
+      (r) => (ageDays(nowIso, r.updated_at ?? r.created_at) ?? 0) >= staleDays,
+    );
   }
+
+  for (const r of out) {
+    const due = r.due_at ? ` (due ${fmtDate(r.due_at)})` : "";
+    const age = ageDays(nowIso, r.updated_at ?? r.created_at);
+    const ageLabel = age != null ? ` [${age}d untouched]` : "";
+    console.log(`  ${r.check_key}  ·  ${r.label}${due}${ageLabel}  [${r.project}]`);
+  }
+  if (staleDays != null && !out.length) console.log(`none untouched ≥${staleDays}d ✓`);
 }
 
 async function open(args) {
@@ -312,7 +344,7 @@ async function update(args) {
   // `close`'s job). At least one field is required so a no-op can't pass.
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(handle);
   const col = isUuid ? "id" : "check_key";
-  const patch = {};
+  const patch = { updated_at: new Date().toISOString() };
   if (flags.detail != null) patch.detail = flags.detail;
   if (flags.due != null) patch.due_at = flags.due;
   if (flags.priority != null) patch.priority = Number(flags.priority);
@@ -328,7 +360,8 @@ async function update(args) {
       );
     patch.signal = sig;
   }
-  if (!Object.keys(patch).length)
+  const { updated_at: _unused, ...meaningful } = patch;
+  if (!Object.keys(meaningful).length)
     fail("update: nothing to change — pass --detail / --due / --priority / --label / --signal");
   const updated = await rest(`checks?${col}=eq.${encodeURIComponent(handle)}`, {
     method: "PATCH",
@@ -345,7 +378,7 @@ async function mainCli() {
   try {
     switch (cmd) {
       case "list":
-        await list();
+        await list(args);
         break;
       case "open":
         await open(args);
@@ -361,7 +394,7 @@ async function mainCli() {
         break;
       default:
         console.log(
-          'usage:\n  check.mjs list\n  check.mjs open <project> <check_key> "<label>" [--detail "..."] [--due YYYY-MM-DD] [--resolution manual] [--priority N] [--signal \'<json>\']\n  check.mjs reopen <project> <check_key> "<label>" [--detail "..."]  (idempotent: re-open a closed check or create it)\n  check.mjs update <check_key|id> [--detail "..."] [--due YYYY-MM-DD] [--priority N] [--label "..."] [--signal \'<json>\']\n  check.mjs close <check_key|id> [note] [--evidence "..."] [--drop]\n\n  --signal types: http_ok {url}, http_body {url,contains}, db_row_exists {table,filter}, db_fresh {table,column,max_age_days}\n  A check WITH a signal closes only when the CLI re-runs it live and it passes; a check WITHOUT one needs --evidence.',
+          'usage:\n  check.mjs list [--stale N]  (N = min days untouched; omit to list everything)\n  check.mjs open <project> <check_key> "<label>" [--detail "..."] [--due YYYY-MM-DD] [--resolution manual] [--priority N] [--signal \'<json>\']\n  check.mjs reopen <project> <check_key> "<label>" [--detail "..."]  (idempotent: re-open a closed check or create it)\n  check.mjs update <check_key|id> [--detail "..."] [--due YYYY-MM-DD] [--priority N] [--label "..."] [--signal \'<json>\']\n  check.mjs close <check_key|id> [note] [--evidence "..."] [--drop]\n\n  --signal types: http_ok {url}, http_body {url,contains}, db_row_exists {table,filter}, db_fresh {table,column,max_age_days}\n  A check WITH a signal closes only when the CLI re-runs it live and it passes; a check WITHOUT one needs --evidence.',
         );
         process.exitCode = cmd ? 1 : 0;
     }
