@@ -27,18 +27,30 @@ their edit, and deleting a block never comes back.
 
 ## Architecture
 
-**Not scoped to New Listing alone.** There are four hero-chip categories already live
-(`HERO_CAMPAIGNS` — New Listing, Just Sold, Coming to Market, Market Update), and more
-will come. A "design" is a visual language that must render consistently across ALL of
-them — so a recipient recognizes the same agent's emails whether it's a new-listing
-announcement or a just-sold card. The registry is keyed by design, and each design
-carries one builder PER CATEGORY, not one builder total.
+**Not scoped to New Listing alone — but not all four hero chips either.** Correction
+found while planning (checked `campaigns.ts` directly, RULE 0.5): `HERO_CAMPAIGNS` has
+four chips, but only three are **listing/address-scoped** — New Listing, Just Sold, and
+Coming to Market each carry a subject property address and already have (or, for the
+latter two, need) a recipe-detection regex parallel to `isNewListingRecipePrompt`
+(`lib/email/listing-intent.ts`). **Market Update is area-scoped** (`input: "area"`,
+seeded from the separate `market-pulse` showcase) — it has no single subject property,
+so it produces no `ListingFacts` and structurally cannot use a `(facts, current) =>
+EmailBlock[]` builder. It is explicitly OUT of this design-family system; a future
+"market update design" would need its own registry keyed on area facts, not this one.
+
+`BuildCategory` is therefore `"new-listing" | "just-sold" | "coming-to-market"` — three
+categories, not four. A "design" is a visual language that must render consistently
+across all three — so a recipient recognizes the same agent's emails whether it's a
+new-listing announcement or a just-sold card. The registry is keyed by design, and each
+design carries one builder per listing category, not one builder total.
 
 **Design registry** (`lib/email/listing-flyer-designs.ts`, new):
 
 ```
-type BuildCategory = "new-listing" | "just-sold" | "coming-to-market" | "market-update";
-// extensible — a fifth category is a new union member + one builder per existing design
+type BuildCategory = "new-listing" | "just-sold" | "coming-to-market";
+// extensible — a fourth LISTING category is a new union member + one builder per
+// existing design. Market Update is deliberately excluded (see above) — area-scoped,
+// no ListingFacts subject, not a fit for this registry.
 
 interface DesignFamily {
   id: string;
@@ -147,9 +159,11 @@ at whatever now happens to be its new neighbor.
 
 ## Free creation is unaffected; nothing auto-touches an existing doc
 
-This feature is purely additive — it fires ONLY at the specific moment one of the four
-hero-chip arrivals happens with no existing project doc (`arrival.ts` routing). It does
-not gate, replace, or wrap any existing entry point:
+This feature is purely additive — it fires ONLY at the specific moment one of the three
+listing-scoped hero-chip arrivals (New Listing / Just Sold / Coming to Market) happens
+with no existing project doc (`arrival.ts` routing). Market Update is untouched — it
+never routes through this system at all (see Architecture). It does not gate, replace,
+or wrap any existing entry point:
 
 - "Start blank," the template gallery, and every generic AI recipe stay exactly as they
   are today — a user who wants to freely compose from scratch always can.
@@ -191,8 +205,8 @@ feature runs a background re-sync against it.
 ## Testing
 
 - Golden-render snapshot for `"classic"`'s now-gridded output, per category (pins the
-  fixed arrangement for New Listing / Just Sold / Coming to Market / Market Update
-  separately — same pattern as `lib/email/render-golden.test.ts`).
+  fixed arrangement for New Listing / Just Sold / Coming to Market separately — same
+  pattern as `lib/email/render-golden.test.ts`).
 - **Completeness gate**: iterate every registered `DesignFamily` × every `BuildCategory`,
   fail if a builder is missing — the test that makes "every template made the same for
   every category" a build-time guarantee, not a hope.
@@ -213,7 +227,7 @@ feature runs a background re-sync against it.
   always lands on it regardless of tier. The resolution ORDER and storage ship now;
   there's simply nothing to choose from yet. A second design is what turns the chooser on.
 - No additional designs built. The registry + completeness gate + tiering + showcase +
-  bounds pattern is proven on `"classic"` across all four categories; a second design is
+  bounds pattern is proven on `"classic"` across all three listing categories; a second design is
   "repeat the pattern," not new mechanism.
 - No "Change Template" UI (settings-level default change, or per-category override
   change) — the resolution function and storage it reads from ship now; the UI that
