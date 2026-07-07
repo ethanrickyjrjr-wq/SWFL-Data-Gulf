@@ -111,6 +111,17 @@ Single session / no file overlap → just work on `main`.
 1. **CHECK** — SessionStart prints it: `SESSION_LOG.md`, open `checks` (Supabase `public.checks`), build queue (`_AUDIT_AND_ROADMAP/build-queue.md`). Trust it; verify surprises against `git`.
 2. **SUBMIT** — commit + SESSION_LOG entry + `node scripts/safe-push.mjs`.
 3. **UPDATE** — same push: `node scripts/check.mjs close <key>` / `open <project> <key> "<label>"` / `list`. Open obligations live in `checks` — never as `⬜/✅` in plan docs.
+4. **NO SILENT DEFERRALS (locked 07/07/2026).** The moment you park/defer a finding, or hit a known
+   gap you're not fixing right now, open a `checks` entry for it in that same session — do not just
+   write a SESSION_LOG sentence and move on. **Postmortem that forced this:** three separate
+   condo/multi-unit-grain gaps — Marco Island address-matching 0/360 (06/30), `land_manufactured_swfl`
+   parked with zero pipeline code (07/01), and `listing_state.property_type` collapsing every condo
+   into `single_family` region-wide, found independently the very next day (07/06–07) — were each
+   individually logged as prose and never promoted to `checks`. SESSION_LOG is a diary nobody re-reads
+   in full; `checks` is the only thing that surfaces at every session start. Each gap got rediscovered
+   from scratch instead of connected, because "I noted it in the log" is not deferral — it's forgetting
+   on a delay. Write it in the log for narrative context if you want, but the log entry is not a
+   substitute for the check.
 
 Plan docs are briefs, not status boards. Flip or delete markers in the same commit as the code.
 
