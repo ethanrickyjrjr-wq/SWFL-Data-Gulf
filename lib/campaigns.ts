@@ -115,12 +115,13 @@ export const HERO_CAMPAIGNS: HeroCampaignEntry[] = [
 ];
 
 /** Hero → grid-lab URL: fill the recipe's [[blank]] with the picked text and
- *  carry zip (when known) + recipeNeeds — the same params the lab already reads
- *  (lib/project/lab-redirect.ts threads them through the signed-in redirect). */
-export function heroDestination(
-  entry: HeroCampaignEntry,
-  opts: { filled: string; zip?: string | null },
-): string {
+ *  carry the subject address (address spine) + recipeNeeds. NO zip param: a
+ *  property/area campaign is about the ADDRESS, not a ZIP — the build derives any
+ *  ZIP layer it needs from the prompt/place (zipFromPromptPlace in build-doc.ts),
+ *  and multi-ZIP city charts key off that derived place, not a URL zip. A user who
+ *  means a ZIP as the SUBJECT (typed bare ZIP, or a map/report click) routes through
+ *  openZipLab instead — that's the only path that makes the email ZIP-scoped. */
+export function heroDestination(entry: HeroCampaignEntry, opts: { filled: string }): string {
   const filled = opts.filled.trim();
   const ph = findPlaceholder(entry.recipe.prompt);
   // An EMPTY fill must NOT collapse the [[blank]] to nothing: a placeless prompt
@@ -134,7 +135,6 @@ export function heroDestination(
       : entry.recipe.prompt;
   const params = new URLSearchParams({ recipe: prompt });
   if (entry.recipe.needs.length > 0) params.set("recipeNeeds", entry.recipe.needs.join(","));
-  if (opts.zip) params.set("zip", opts.zip);
   // Address spine (build 2): listing chips carry the subject address so the lab
   // scope can pull the listing's own nearby sold comps into the figure feed. Only
   // when there's a real address — an empty addr param answers no popup.

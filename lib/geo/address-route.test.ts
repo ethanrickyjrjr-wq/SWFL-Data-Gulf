@@ -72,7 +72,7 @@ describe("resolveAddressDestination (suggest → retrieve → grid-lab URL)", ()
     }) as typeof fetch;
   }
 
-  test("happy path: returns the new-listing grid URL with the retrieved name + zip", async () => {
+  test("happy path: returns the new-listing grid URL with the retrieved name — never a zip param", async () => {
     const dest = await resolveAddressDestination(
       "3412 SE 10th Pl",
       fakeFetch({
@@ -85,10 +85,13 @@ describe("resolveAddressDestination (suggest → retrieve → grid-lab URL)", ()
     const params = new URLSearchParams(dest!.split("?")[1]);
     expect(params.get("recipe")).toContain("3412 SE 10th Pl");
     expect(params.get("recipe")).not.toContain("[[");
-    expect(params.get("zip")).toBe("33914");
+    // The subject is the address; a property campaign never rides an ambient zip
+    // param — heroDestination derives any ZIP layer downstream from the address/
+    // prompt instead (lib/campaigns.ts). A ZIP-subject arrival goes via openZipLab.
+    expect(params.get("zip")).toBeNull();
   });
 
-  test("retrieve failure falls back to the suggestion's own text, no zip", async () => {
+  test("retrieve failure falls back to the suggestion's own text, still no zip", async () => {
     const dest = await resolveAddressDestination(
       "3412 SE 10th Pl",
       fakeFetch({

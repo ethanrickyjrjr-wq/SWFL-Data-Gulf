@@ -1,3 +1,21 @@
+## 2026-07-07 (main) — finish address-first hero-campaign refactor: heroDestination drops ambient zip param
+
+Operator flagged the pattern directly: "Claude fucking loves Zips only data... handcuffing what a
+question is actually asking and handcuffing the use of our data." Found the concrete instance: a
+half-finished WIP already in the shared working tree (lib/campaigns.ts, lib/geo/address-route.ts,
+components/landing/HeroCampaign.tsx, app/email-lab/grid/EmailLabGridClient.tsx, lib/lab-entry/arrival.ts)
+was mid-refactor to fix exactly this — `heroDestination` used to carry a `zip` URL param alongside every
+address-anchored recipe, which is why `planArrival` needed the 07/06 "recipe wins over the ZIP branch"
+patch (1eb411ed) in the first place: the ambient zip kept threatening to hijack a listing/property email
+onto the generic ZIP city card. The refactor removes the ambient zip entirely — a property/area campaign
+is scoped by ADDRESS (comps ride `scope.address`), any ZIP layer the build needs is derived downstream
+from the address/prompt, and the ONLY path that produces a ZIP-scoped email is a genuine ZIP-as-subject
+(bare zip typed in hero, map click, report "email this") via `openZipLab`. That part was done but two
+tests were stale against the old contract: `lib/geo/address-route.test.ts` still asserted `zip=33914` on
+the happy path, and a comment in `lib/lab-entry/arrival.test.ts` still said "heroDestination ALWAYS carries
+zip." Updated both to match the shipped design. Full suite 5197/5199 pass (2 pre-existing zip-seed.test.ts
+fails are a test-order flake unrelated to this — pass in isolation, pass on main CI). Lint clean.
+
 ## 2026-07-07 (main) — Pulse Intelligence Engine: brainstorm→spec→Phase-1 plan (crawl4ai capture + event-thread memory); 2 small fixes
 
 Three-part session. (1) Diagnosed operator's report: `lib/campaigns.test.ts` cadence test asserted set-EQUALITY

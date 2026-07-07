@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { HERO_CAMPAIGNS, type HeroCampaignEntry } from "@/lib/campaigns";
-import { heroDestination } from "@/lib/lab-entry/destination";
+import { heroDestination, openZipLab } from "@/lib/lab-entry/destination";
 import type { AddressSuggestion } from "@/lib/geo/search-box";
 
 /**
@@ -60,8 +60,8 @@ export default function HeroCampaign() {
     }, 300);
   };
 
-  const go = (filled: string, zip: string | null) => {
-    window.location.href = heroDestination(chip, { filled, zip });
+  const go = (filled: string) => {
+    window.location.href = heroDestination(chip, { filled });
   };
 
   const pick = async (s: AddressSuggestion) => {
@@ -73,27 +73,31 @@ export default function HeroCampaign() {
       );
       if (res.ok) {
         const json = (await res.json()) as { name: string; zip: string | null };
-        go(json.name, json.zip);
+        go(json.name);
         return;
       }
     } catch {
       /* fall through to the suggestion's own text */
     }
-    go(`${s.name}${s.placeFormatted ? `, ${s.placeFormatted}` : ""}`, null);
+    go(`${s.name}${s.placeFormatted ? `, ${s.placeFormatted}` : ""}`);
   };
 
   const submit = () => {
     const q = query.trim();
     if (!q || busy) return;
     if (/^\d{5}$/.test(q)) {
-      go(q, q); // bare ZIP: it IS the scope
+      // A bare ZIP IS a ZIP subject ("telling us about a ZIP") — route it through
+      // the same door as a map/report ZIP click so the email is ZIP-scoped. This
+      // is the ONLY hero path that makes a ZIP the subject; every other goes to
+      // heroDestination, where the ADDRESS is the subject and ZIP is derived.
+      window.location.href = openZipLab(q);
       return;
     }
     if (suggestions.length > 0) {
       void pick(suggestions[0]); // Enter = top suggestion, the standard pattern
       return;
     }
-    go(q, null); // free text: the recipe carries it verbatim (no error states)
+    go(q); // free text: the recipe carries it verbatim (no error states)
   };
 
   return (

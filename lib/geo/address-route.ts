@@ -66,12 +66,11 @@ export async function resolveAddressDestination(
       `/api/address-retrieve?id=${encodeURIComponent(top.mapboxId)}&session=${session}`,
     );
     if (rRes.ok) {
-      const rJson = (await rRes.json()) as { name: string; zip: string | null };
-      return heroDestination(newListing, { filled: rJson.name, zip: rJson.zip });
+      const rJson = (await rRes.json()) as { name: string };
+      return heroDestination(newListing, { filled: rJson.name });
     }
     return heroDestination(newListing, {
       filled: `${top.name}${top.placeFormatted ? `, ${top.placeFormatted}` : ""}`,
-      zip: null,
     });
   } catch {
     return null;

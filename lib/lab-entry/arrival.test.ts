@@ -37,9 +37,11 @@ describe("planArrival", () => {
   });
 
   test("?recipe= + ?addr= + ?zip= together (real New-Listing arrival) → BLANK, recipe wins over the ZIP card", () => {
-    // heroDestination ALWAYS carries zip (scope) alongside the address-anchored
-    // recipe. The zip branch used to fire first and drop this onto the generic
-    // ZIP city card — the 07/06/2026 screenshot. The recipe is the subject; it wins.
+    // heroDestination no longer sends an ambient zip alongside an address-anchored
+    // recipe (lib/campaigns.ts) — but a stray zip param (e.g. a stale bookmark, or
+    // any other future door) must still never hijack a recipe arrival onto the
+    // generic ZIP city card, which is exactly what happened before this guard
+    // (the 07/06/2026 screenshot). The recipe is the subject; it always wins.
     const p = planArrival({
       ...base,
       params: {

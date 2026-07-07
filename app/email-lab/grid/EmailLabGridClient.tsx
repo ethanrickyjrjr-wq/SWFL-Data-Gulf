@@ -147,7 +147,18 @@ export function EmailLabGridClient({
         // The popup owns the blank now; don't also seed it into the Build box.
         initialRecipe={build || plan.addressPopup ? null : initialRecipe}
         onDocChange={() => setDirty(true)}
-        scope={zip ? { kind: "zip", value: zip, address: addr ?? undefined } : undefined}
+        // Address-first scope: a property email's subject is the ADDRESS (comps
+        // ride scope.address, and the feed is NOT narrowed to a ZIP), so ZIP is
+        // just one derived layer among many. The email is ZIP-scoped ONLY when the
+        // arrival is the actual ZIP door (map/report click) — otherwise a listing
+        // never gets hijacked into a ZIP-only feed.
+        scope={
+          plan.doc.kind === "zip" && zip
+            ? { kind: "zip", value: zip, address: addr ?? undefined }
+            : addr
+              ? { address: addr }
+              : undefined
+        }
         headerSlot={
           <span className="flex items-center gap-2 text-sm font-semibold">
             <span className="text-gulf-teal">Email</span>
