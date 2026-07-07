@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
-from ingest.lib.api_usage import RunBudget, RunBudgetExceeded, log_api_usage  # noqa: E402
+from ingest.lib.api_usage import RunBudget, RunBudgetExceeded  # noqa: E402
 from ingest.lib.pulse_lake import build_capture, load_recent_articles  # noqa: E402
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import upsert_inventory_row  # noqa: E402
