@@ -1,3 +1,31 @@
+## 2026-07-07 (main) — SteadyAPI: 3 of 6 in-scope counties aren't ingested anywhere (22k listings missing) + city-seed vs county-level architecture question
+
+Operator pushed back hard on the property_type fix verification (below) being spot-checked on only
+Naples/Fort Myers: "what about Cape, North Fort Myers, Bonita Springs, Estero... is city-by-city even
+the only way to search?" That question led to two much bigger findings than the bug itself, both
+live-verified (RULE 0.4), neither built — full detail + prioritized todo in
+`docs/handoff/2026-07-07-steadyapi-full-scope-handoff.md`:
+
+1. **Charlotte, Glades, and Sarasota counties (12015/12043/12115) are in CLAUDE.md's own 6-county SCOPE
+   but are not ingested by ANY of the 3 SteadyAPI pipelines** (listing_lifecycle/rentals/market_aggregates
+   all hardcode Lee+Collier(+Hendry for listing_lifecycle only)). Live county-level `/search` totals:
+   Lee 22,360, Collier 7,986, Charlotte 11,439, Glades 231, Hendry 1,080, Sarasota 10,351 — 53,447
+   6-county total vs. 31,426 currently captured, **59% coverage**. Charlotte and Sarasota are each
+   individually bigger than Collier. Full property_type breakdown per county captured while the trial's
+   live (single_family 22,619 / condos 8,424 / townhomes 934 / multi_family 804 across all 6, land+other
+   ~20,666). Not a decision that excluded these counties — just never widened past the original
+   Lee+Collier v1. Checks opened: `steadyapi_missing_3_counties`.
+2. **`location={County}-County_FL` works directly against `/search`** — one call per county, cleanly
+   scoped (spot-checked, zero cross-county contamination), and MORE complete than `listing_lifecycle`'s
+   curated `SWFL_CITY_SEED` city list (Lee's county-level total is ~4% higher than the sum of its 8
+   seeded cities — unincorporated places like Alva/Pine Island/Captiva aren't in the seed list and were
+   silently dropped). `rentals`/`market_aggregates` already use county-level location strings —
+   `listing_lifecycle` is the one pipeline still on the older city-by-city design. Check opened:
+   `steadyapi_migrate_city_seed_to_county_level`.
+
+Neither finding is built yet — this is a handoff, not a fix. Next session should read the handoff doc
+and start with item 1 (widen scope config) since it's the highest-value, lowest-effort item.
+
 ## 2026-07-07 (main) — Self-healing deploy bots: Build B (rollback bot) built DARK, offline-verified
 
 Unblocked the token first: the old VERCEL_KEY was scoped to the personal account, not the team, so it 403'd
