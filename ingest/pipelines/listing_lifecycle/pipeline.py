@@ -71,7 +71,7 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
     scan = scan_county_api if source == "api" else scan_county
     counties = [only_county] if only_county else (API_COUNTIES if source == "api" else SWFL_COUNTIES)
     prior_all = distill.load_current_state(source_name=src_name)
-    totals = {"scanned": 0, "upserts": 0, "transitions": 0}
+    totals = {"scanned": 0, "upserts": 0, "transitions": 0, "source_total": 0}
     budget_calls = 0
     sold_budget_remaining = SOLD_CHECK_CAP  # paid /property-tax-history calls left this run (shared across counties)
     for county in counties:
@@ -84,6 +84,7 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
                          if v.get("county") == county and v.get("property_id")}
             result = scan_county_api(county, known_ids, dry_run=dry_run)
             budget_calls += result.get("search_calls", 0) + result.get("enrich_calls", 0)
+            totals["source_total"] += result.get("source_total", 0)
         else:
             result = scan(county)
         rows = result["rows"]
@@ -206,6 +207,11 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
     if totals["scanned"] == 0:
         print("[fatal] every county returned 0 rows — failing loud (no silent fake-green)", flush=True)
         sys.exit(1)
+    if source == "api" and not dry_run and not only_county and totals["source_total"] > 0:
+        distill.log_source_total(
+            totals["source_total"],
+            "SteadyAPI meta.total sum (Lee+Collier+Hendry city sweep)",
+        )
     return totals
 
 

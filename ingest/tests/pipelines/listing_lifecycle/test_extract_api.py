@@ -185,30 +185,32 @@ def test_fetch_steadyapi_paginates_to_meta_total():
     body1 = {"meta": {"total": 250}, "body": [_STEADYAPI_ROW] * 200}
     body2 = {"meta": {"total": 250}, "body": [_STEADYAPI_ROW] * 50}
     with patch.object(extract_api.requests, "get", side_effect=[_resp(200, body1), _resp(200, body2)]):
-        rows, ok, pages = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
-    assert len(rows) == 250 and ok is True and pages == 2
+        rows, ok, pages, total = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+    assert len(rows) == 250 and ok is True and pages == 2 and total == 250
 
 
 def test_fetch_steadyapi_clean_empty_first_page_is_complete():
     with patch.object(extract_api.requests, "get", return_value=_resp(200, {"meta": {"total": 0}, "body": []})):
-        rows, ok, pages = extract_api.fetch_steadyapi_city("Sanibel", key="p")
-    assert rows == [] and ok is True and pages == 1
+        rows, ok, pages, total = extract_api.fetch_steadyapi_city("Sanibel", key="p")
+    # total stays None here: the empty-body short-circuit returns BEFORE the meta.total capture line
+    # (existing extractor behavior, unchanged by Task 11 -- verified empirically, not assumed).
+    assert rows == [] and ok is True and pages == 1 and total is None
 
 
 def test_fetch_steadyapi_non_200_is_a_gap():
     with patch.object(extract_api.requests, "get", return_value=_resp(429, {})):
-        rows, ok, pages = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
-    assert rows == [] and ok is False
+        rows, ok, pages, total = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+    assert rows == [] and ok is False and total is None
 
 
 def test_fetch_steadyapi_no_key_is_a_gap():
-    rows, ok, pages = extract_api.fetch_steadyapi_city("Cape Coral", key=None)
-    assert rows == [] and ok is False and pages == 0
+    rows, ok, pages, total = extract_api.fetch_steadyapi_city("Cape Coral", key=None)
+    assert rows == [] and ok is False and pages == 0 and total is None
 
 
 def test_scan_county_api_labels_counts_and_reports_call_budget(monkeypatch):
     monkeypatch.setenv("PHOTOS_API", "p")
-    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True, 1)):
+    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True, 1, None)):
         out = extract_api.scan_county_api("Lee", known_ids={"5493101642"})
     assert out["count"] >= 1
     assert out["exhausted"] is True
@@ -221,14 +223,14 @@ def test_scan_county_api_labels_counts_and_reports_call_budget(monkeypatch):
 def test_scan_county_api_clean_empty_city_stays_complete(monkeypatch):
     # A cleanly-empty city must NOT poison the whole county's completeness (robustness fix).
     monkeypatch.setenv("PHOTOS_API", "p")
-    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([], True, 1)):
+    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([], True, 1, None)):
         out = extract_api.scan_county_api("Lee")
     assert out["exhausted"] is True and out["count"] == 0
 
 
 def test_scan_county_api_truncated_city_marks_incomplete(monkeypatch):
     monkeypatch.setenv("PHOTOS_API", "p")
-    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], False, 1)):
+    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], False, 1, None)):
         out = extract_api.scan_county_api("Lee")
     assert out["exhausted"] is False and out["last_status"] != 200
 
@@ -236,8 +238,28 @@ def test_scan_county_api_truncated_city_marks_incomplete(monkeypatch):
 def test_scan_county_api_dry_run_never_calls_nearby_home_values(monkeypatch):
     # The regression this whole fix targets: a --dry-run invocation must not detonate the budget.
     monkeypatch.setenv("PHOTOS_API", "p")
-    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True, 1)), \
+    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True, 1, None)), \
          patch.object(extract_api.requests, "get") as mock_get:
         extract_api.scan_county_api("Lee", known_ids=set(), dry_run=True)
     mock_get.assert_not_called()                     # fetch_steadyapi_city is mocked out above;
                                                        # this proves enrich made no real request either
+
+
+def test_fetch_steadyapi_city_returns_four_tuple_with_total(monkeypatch):
+    """meta.total must be returned, not discarded -- Task 11 wires it into the
+    census reconciliation ledger."""
+    class FakeResp:
+        status_code = 200
+
+        def json(self):
+            return {"body": [{"property_id": "1"}], "meta": {"total": 1}}
+
+    monkeypatch.setattr(
+        "ingest.pipelines.listing_lifecycle.extract_api.requests.get",
+        lambda *a, **k: FakeResp(),
+    )
+    rows, ok, pages, total = extract_api.fetch_steadyapi_city("Naples", key="fake-key")
+    assert len(rows) == 1
+    assert ok is True
+    assert pages == 1
+    assert total == 1

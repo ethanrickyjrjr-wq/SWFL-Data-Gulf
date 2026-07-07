@@ -176,12 +176,14 @@ def _cluster_by_latlon(rows: list[dict], grid: float = _ENRICH_GRID) -> list[tup
 # True  = paginated to NATURAL exhaustion (a short/empty page, or reached meta.total) — trustworthy.
 # False = a GAP: no key, non-200, bad body, network error, or _MAX_PAGES backstop — may be truncated.
 
-def fetch_steadyapi_city(city: str, state: str = "FL", key: str | None = None) -> tuple[list[dict], bool, int]:
+def fetch_steadyapi_city(city: str, state: str = "FL", key: str | None = None) -> tuple[list[dict], bool, int, int | None]:
     """Enumerate one city via SteadyAPI (location slug 'City-Name_FL', offset += 200 until meta.total).
-    Returns (rows, ok, pages_fetched) — pages_fetched is the real call count for budget logging."""
+    Returns (rows, ok, pages_fetched, total) — pages_fetched is the real call count for budget
+    logging; total is SteadyAPI's own meta.total claim for this city (None if never seen), captured
+    for the /ops/census source-reconciliation ledger (Task 11)."""
     key = key or os.environ.get("PHOTOS_API")
     if not key or not city:
-        return [], False, 0
+        return [], False, 0, None
     slug = f"{city.strip().replace(' ', '-')}_{state}"
     out: list[dict] = []
     total: int | None = None
@@ -192,22 +194,22 @@ def fetch_steadyapi_city(city: str, state: str = "FL", key: str | None = None) -
                              headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"}, timeout=30)
             pages = page + 1
             if r.status_code != 200:
-                return out, False, pages
+                return out, False, pages, total
             data = r.json()
             body = data.get("body") if isinstance(data, dict) else None
             if not isinstance(body, list):
-                return out, False, pages
+                return out, False, pages, total
             if not body:
-                return out, True, pages
+                return out, True, pages, total
             out.extend(body)
             total = (data.get("meta") or {}).get("total", total)
             if total is not None and (page + 1) * _SA_PAGE >= total:
-                return out, True, pages
+                return out, True, pages, total
             if len(body) < _SA_PAGE:
-                return out, True, pages
+                return out, True, pages, total
         except Exception:
-            return out, False, page + 1
-    return out, False, _MAX_PAGES
+            return out, False, page + 1, total
+    return out, False, _MAX_PAGES, total
 
 
 def fetch_steadyapi_type_ids(
@@ -321,20 +323,24 @@ def enrich_baths_batched(rows: list[dict], known_ids: set[str], *, dry_run: bool
 def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: bool = False) -> dict[str, Any]:
     """SteadyAPI-only: enumerate every seed city, parse + scope-filter, batch-enrich new listings.
     Returns the coverage-guard payload pipeline.py consumes: {rows, exhausted, count, last_status,
-    county_total, search_calls, enrich_calls}. County is COMPLETE only if every city's UNFILTERED
-    pull reached natural exhaustion — that stays the sole completeness gate. Per-city type sweeps
-    (build_type_lookup) run alongside to type-stamp rows; a type-sweep gap just leaves the affected
-    rows at the land-heuristic/"other" fallback, it never flips `exhausted`/`last_status`. `dry_run=True`
-    still fires the (cheap) search + type sweeps — that's the real page count the gate needs — but
-    skips the (expensive, multiplying) enrich network calls."""
+    county_total, search_calls, enrich_calls, source_total}. County is COMPLETE only if every city's
+    UNFILTERED pull reached natural exhaustion — that stays the sole completeness gate. Per-city type
+    sweeps (build_type_lookup) run alongside to type-stamp rows; a type-sweep gap just leaves the
+    affected rows at the land-heuristic/"other" fallback, it never flips `exhausted`/`last_status`.
+    source_total sums each city's SteadyAPI meta.total — an inexact-but-real completeness signal
+    (per-city search, not a single county query) fed to the /ops/census reconciliation ledger.
+    `dry_run=True` still fires the (cheap) search + type sweeps — that's the real page count the gate
+    needs — but skips the (expensive, multiplying) enrich network calls."""
     cities = SWFL_CITY_SEED.get(county, [])
     sa_rows: list[dict] = []
     all_ok = True
     search_calls = 0
+    source_total = 0
     for city in cities:
-        sa_raw, sa_ok, pages = fetch_steadyapi_city(city)
+        sa_raw, sa_ok, pages, city_total = fetch_steadyapi_city(city)
         all_ok = all_ok and sa_ok
         search_calls += pages
+        source_total += city_total or 0
         type_lookup, type_pages = build_type_lookup(city)
         search_calls += type_pages
         sa_rows.extend(
@@ -349,6 +355,7 @@ def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: 
         "rows": rows, "exhausted": all_ok, "count": len(rows),
         "last_status": 200 if all_ok else 429, "county_total": len(rows),
         "search_calls": search_calls,
+        "source_total": source_total,
         "enrich_calls": enrich_stats["calls"],
         "enrich_new_count": enrich_stats["new_count"],
         "enrich_baths_filled": enrich_stats["baths_filled"],

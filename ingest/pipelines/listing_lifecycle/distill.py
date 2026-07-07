@@ -236,6 +236,21 @@ def append_transitions(
     return len(transitions)
 
 
+def log_source_total(value: int, source_label: str, *, dry_run: bool = False) -> None:
+    """Insert one row into data_lake.source_totals — the source's own current-total claim, read by
+    /ops/census to detect silent ingestion drift (Task 11 of the pipeline-data-census plan)."""
+    if dry_run:
+        print(f"[dry-run] would log source_total={value} ({source_label})", flush=True)
+        return
+    with _get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO data_lake.source_totals (pipeline_name, source_label, value, method) "
+            "VALUES (%s, %s, %s, %s)",
+            ("listing_lifecycle", source_label, value, "api_meta_total"),
+        )
+        conn.commit()
+
+
 def load_price_pending_solds(
     source_name: str = SOURCE_NAME, *, max_age_days: int = 60
 ) -> list[dict[str, Any]]:
