@@ -19,6 +19,7 @@ import { useFiler } from "@/lib/briefcase/file-routing";
 import { buildQaItem } from "@/lib/briefcase/qa-item";
 import { DockChart } from "./DockChart";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
+import { AnswerText } from "@/components/answer/AnswerText";
 
 const GEOM_KEY = "swfl_ai_dock_geom";
 
@@ -481,7 +482,7 @@ export function AskAiDock({
                 <span className="text-red-600">{error}</span>
               ) : (
                 <>
-                  {answer}
+                  <AnswerText text={answer} />
                   {streaming && (
                     <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-gulf-teal/80 align-middle" />
                   )}

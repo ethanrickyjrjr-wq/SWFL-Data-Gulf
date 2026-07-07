@@ -20,6 +20,7 @@ import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { CitationList } from "@/components/CitationList";
 import type { WelcomeSource } from "@/lib/welcome/frames";
 import { suggestFollowUps } from "@/lib/assistant/follow-up-suggestions";
+import { AnswerText } from "@/components/answer/AnswerText";
 
 /**
  * The global Briefcase's standalone chat (off /r/*). Streams via the SHARED
@@ -350,7 +351,11 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
                       : "whitespace-pre-wrap text-xs leading-5 text-gray-300"
                   }
                 >
-                  {m.content || (busy ? "…" : "")}
+                  {m.role === "user" ? (
+                    m.content
+                  ) : (
+                    <AnswerText text={m.content || (busy ? "…" : "")} />
+                  )}
                 </p>
                 {showFile && (
                   <button

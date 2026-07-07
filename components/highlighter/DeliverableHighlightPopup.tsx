@@ -5,6 +5,7 @@ import { popupPosition, type Position } from "@/lib/highlighter/position";
 import { useSteerSuggestions, type SteerContext } from "@/lib/highlighter/use-steer-suggestions";
 import { useConverse } from "@/lib/assistant/use-converse";
 import type { IframeSelection } from "@/lib/highlighter/use-iframe-selection";
+import { AnswerText } from "@/components/answer/AnswerText";
 
 interface Props {
   deliverableId: string;
@@ -214,7 +215,7 @@ export function DeliverableHighlightPopup({
             {converse.answer && (
               <div className="space-y-2">
                 <p className="whitespace-pre-wrap text-xs leading-5 text-gray-200">
-                  {converse.answer}
+                  <AnswerText text={converse.answer} />
                   {converse.streaming && (
                     <span className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-gulf-teal/80 align-middle" />
                   )}

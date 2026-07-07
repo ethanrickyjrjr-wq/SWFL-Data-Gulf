@@ -1,3 +1,27 @@
+## 2026-07-07 (main) — AnswerText: word+number split-color bug fixed, wired into 5 missing surfaces
+
+Operator screenshot (`/r` report page): "High 5 Entertainment" rendered "High" white next to a
+teal "5"; separately, spelled-out dates like "August 2025" rendered the month white and the year
+teal — a number and the word it belongs to should be one color, not two. Root cause in
+`components/answer/AnswerText.tsx`: `TOKEN_PATTERN` tokenized digits in complete isolation from
+adjacent words, with no concept of "this number and that word are one unit." Fix (advisor-directed
+after I nearly shipped the wrong direction — suppress instead of extend): added two new regex
+alternatives so a capitalized-word-plus-short-bare-integer ("High 5", "Phase 2") and a spelled-out
+narrative date ("August 2025", "December 5, 2026") each highlight as ONE unit, plus a closed-list
+trailing-magnitude/unit suffix ("$27 million", "40,000 square feet", "75,910-square-foot") so the
+number and its unit word group together too. Guarded against false positives: sentence-initial
+capitals before a bare year ("Since 2020") still isolate correctly, and comma-grouped/fused numbers
+("22,484", "3yr", "FY2025") are unaffected — 10 new/updated tests in `AnswerText.test.tsx` (20/20
+pass). Then swept for "everywhere it's supposed to apply" per operator ask: found `AnswerText` was
+never wired into `BriefcaseChat.tsx` (the actual AI+Briefcase chat panel from the screenshot),
+`AskAiDock.tsx`, `HighlightPopup.tsx` (2 sites), `DeliverableHighlightPopup.tsx`, or
+`app/r/zip-report/[zip]/page.tsx` (3 dossier-line sites) — all rendered raw AI answer text with zero
+number highlighting. Wired all of them. Deliberately left `app/alerts/[id]/page.tsx` alone — that's
+a human contact's raw reply, not an AI answer, out of scope. Verified: `bun test` (20/20) +
+`tsc --noEmit` clean on every touched file (`app/project/[id]/email-lab/ProjectEmailLabClient.tsx`
+shows unrelated pre-existing errors from a concurrent session's in-progress edit, not mine — left
+untouched per RULE 1.5).
+
 ## 2026-07-07 (main) — Fixed follow-up chip generic-bucket trap in BriefcaseChat
 
 Operator flagged (screenshots of the homepage AI+Briefcase widget) that two totally different

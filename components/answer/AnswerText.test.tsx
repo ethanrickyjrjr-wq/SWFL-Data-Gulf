@@ -37,6 +37,45 @@ describe("tokenizeAnswerText", () => {
     ]);
   });
 
+  test("highlights a word + short number as one unit, not split colors (High 5, Phase 2)", () => {
+    expect(highlighted("High 5 Entertainment leased space")).toEqual(["High 5"]);
+    expect(highlighted("Corkscrew Road Phase 2 widening")).toEqual(["Phase 2"]);
+  });
+
+  test("highlights a spelled-out narrative date as one unit, not split colors", () => {
+    expect(highlighted("finishing end of August 2025")).toEqual(["August 2025"]);
+    expect(highlighted("awarded April 2026 for the pier")).toEqual(["April 2026"]);
+    expect(highlighted("contract signed December 5, 2026 today")).toEqual(["December 5, 2026"]);
+  });
+
+  test("word + short number does NOT swallow a comma-grouped or fused number", () => {
+    expect(highlighted("Lee 22,484 active listings and Collier 8,067 units")).toEqual([
+      "22,484",
+      "8,067",
+    ]);
+  });
+
+  test("sentence-initial capitalized word before a bare year is NOT treated as an entity", () => {
+    expect(highlighted("Since 2020 permits rose")).toEqual(["2020"]);
+  });
+
+  test("highlights a number + trailing magnitude/unit word as one unit, not split colors", () => {
+    expect(highlighted("roughly $27 million, finishing end of 2026")).toEqual([
+      "$27 million",
+      "2026",
+    ]);
+    expect(highlighted("a 40,000 square feet building")).toEqual(["40,000 square feet"]);
+    expect(highlighted("a 75,910-square-foot building")).toEqual(["75,910-square-foot"]);
+    expect(highlighted("$1.1 million permit value")).toEqual(["$1.1 million"]);
+  });
+
+  test("does NOT swallow a following word that isn't a recognized unit", () => {
+    expect(highlighted("40,000 square feet at 9000 Williams Road")).toEqual([
+      "40,000 square feet",
+      "9000",
+    ]);
+  });
+
   test("round-trips: joining every token's text reconstructs the original string", () => {
     const text =
       "Lee 22,484, Collier 8,067 (as of 07/01/2026), z = -0.9, $1M+, 3yr baseline Q4 FY2025.";

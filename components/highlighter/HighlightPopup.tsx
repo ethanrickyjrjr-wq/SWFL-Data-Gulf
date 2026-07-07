@@ -13,6 +13,7 @@ import type { ProjectItem } from "@/lib/project/items";
 import { DockChart } from "./DockChart";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import type { AssistantContext } from "@/lib/assistant/contract";
+import { AnswerText } from "@/components/answer/AnswerText";
 
 /** The matched metric's value + provenance, resolved by GlobalHighlighter (via the
  *  report-context store) so "File this figure" can pin a sourced snapshot. Structurally
@@ -520,7 +521,7 @@ export function HighlightPopup({
               {isOpen && archived.answer && (
                 <div>
                   <p className="whitespace-pre-wrap text-xs leading-5 text-gray-200">
-                    {archived.answer}
+                    <AnswerText text={archived.answer} />
                   </p>
                   <button
                     type="button"
@@ -606,7 +607,7 @@ export function HighlightPopup({
                 <span className="text-red-400">{error}</span>
               ) : (
                 <>
-                  {answer}
+                  <AnswerText text={answer} />
                   {streaming && (
                     <span className="ml-0.5 inline-block h-3 w-1 animate-pulse bg-gulf-teal/80 align-middle" />
                   )}

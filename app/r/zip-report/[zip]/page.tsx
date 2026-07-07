@@ -35,6 +35,7 @@ import {
 } from "../../_components/location-ui";
 import { CitationList } from "../../../../components/CitationList";
 import type { SourceEntry } from "../../../../components/CitationList";
+import { AnswerText } from "../../../../components/answer/AnswerText";
 import { asOfFromToken } from "../../../../lib/project/as-of";
 import { computeZipGradient, FLOOD_GRADIENT } from "../../../../lib/map/zip-color";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
@@ -477,7 +478,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                   key={l.brain_id}
                   className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
                 >
-                  <p className="text-sm leading-6 text-gray-200">{stripStatAnnotation(l.text)}</p>
+                  <p className="text-sm leading-6 text-gray-200">
+                    <AnswerText text={stripStatAnnotation(l.text)} />
+                  </p>
                 </div>
               ))}
             </div>
@@ -494,7 +497,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                   key={l.brain_id}
                   className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
                 >
-                  <p className="text-sm leading-6 text-gray-200">{stripStatAnnotation(l.text)}</p>
+                  <p className="text-sm leading-6 text-gray-200">
+                    <AnswerText text={stripStatAnnotation(l.text)} />
+                  </p>
                 </div>
               ))}
             </div>
@@ -526,7 +531,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                   key={l.brain_id}
                   className="rounded-xl glass-card-modern border border-white/10 px-4 py-3"
                 >
-                  <p className="text-sm leading-6 text-gray-200">{stripStatAnnotation(l.text)}</p>
+                  <p className="text-sm leading-6 text-gray-200">
+                    <AnswerText text={stripStatAnnotation(l.text)} />
+                  </p>
                 </div>
               ))}
             </div>
