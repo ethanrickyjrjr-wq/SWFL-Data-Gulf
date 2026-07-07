@@ -30,6 +30,7 @@ from ingest.pipelines.listing_lifecycle.constants_api import (
     PROPERTY_TYPE_MAP,
     STEADYAPI_BASE,
     STEADYAPI_HEADERS,
+    STEADYAPI_TYPE_FILTERS,
     SWFL_CITY_SEED,
 )
 
@@ -87,10 +88,16 @@ def _iso_date(v: Any) -> str | None:
 
 # ----------------------------------------------------------------------------- pure parser
 
-def parse_steadyapi(raw: dict, city: str, state: str) -> dict | None:
+def parse_steadyapi(raw: dict, city: str, state: str, type_hint: str | None = None) -> dict | None:
     """One SteadyAPI search record -> the wide row shape. Street + zip parsed from the permalink slug.
-    Property type derived: lot + no beds = land. Returns None without identity or out of SWFL scope.
-    `property_id` is a REAL persisted column (not stripped) — it's what makes `known_ids` possible."""
+    `/search` returns NO property-type field on any row (verified live 07/07/2026 against every
+    real-estate endpoint) — property_type is a request-side FILTER only. `type_hint` is the filter
+    value (from STEADYAPI_TYPE_FILTERS) whose sweep returned this property_id, threaded in by
+    scan_county_api's id->type lookup; map_property_type resolves it to our internal token. With no
+    hint (not matched by any type sweep — e.g. manufactured/farm, which aren't filterable at all),
+    falls back to the land heuristic (no beds + a lot_sqft), else "other". Returns None without
+    identity or out of SWFL scope. `property_id` is a REAL persisted column (not stripped) — it's
+    what makes `known_ids` possible."""
     pid = raw.get("property_id")
     if not pid:
         return None
@@ -107,7 +114,12 @@ def parse_steadyapi(raw: dict, city: str, state: str) -> dict | None:
     desc = raw.get("description") or {}
     beds = _int(desc.get("beds"))
     lot_sqft = _num(desc.get("lot_sqft"))
-    ptype = "land" if (beds is None and lot_sqft) else "single_family"
+    if type_hint:
+        ptype = map_property_type(type_hint)
+    elif beds is None and lot_sqft:
+        ptype = "land"
+    else:
+        ptype = "other"
     price = raw.get("price") or {}
     flags = raw.get("flags") or {}
     return {
@@ -198,6 +210,60 @@ def fetch_steadyapi_city(city: str, state: str = "FL", key: str | None = None) -
     return out, False, _MAX_PAGES
 
 
+def fetch_steadyapi_type_ids(
+    city: str, property_type: str, state: str = "FL", key: str | None = None,
+) -> tuple[set[str], bool, int]:
+    """Sweep /search?property_type=<v> for one city, return just the matched property_id set (+ok,
+    pages) — used ONLY to build a type lookup; full row data comes from the unfiltered sweep in
+    fetch_steadyapi_city, so this never re-parses a row, just collects ids cheaply."""
+    key = key or os.environ.get("PHOTOS_API")
+    if not key or not city:
+        return set(), False, 0
+    slug = f"{city.strip().replace(' ', '-')}_{state}"
+    ids: set[str] = set()
+    total: int | None = None
+    for page in range(_MAX_PAGES):
+        params = {"location": slug, "offset": page * _SA_PAGE, "property_type": property_type}
+        try:
+            r = requests.get(f"{STEADYAPI_BASE}/search", params=params,
+                             headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"}, timeout=30)
+            pages = page + 1
+            if r.status_code != 200:
+                return ids, False, pages
+            data = r.json()
+            body = data.get("body") if isinstance(data, dict) else None
+            if not isinstance(body, list):
+                return ids, False, pages
+            if not body:
+                return ids, True, pages
+            ids.update(str(x["property_id"]) for x in body if x.get("property_id"))
+            total = (data.get("meta") or {}).get("total", total)
+            if total is not None and (page + 1) * _SA_PAGE >= total:
+                return ids, True, pages
+            if len(body) < _SA_PAGE:
+                return ids, True, pages
+        except Exception:
+            return ids, False, page + 1
+    return ids, False, _MAX_PAGES
+
+
+def build_type_lookup(city: str, state: str = "FL", key: str | None = None) -> tuple[dict[str, str], int]:
+    """Sweep every STEADYAPI_TYPE_FILTERS value for one city, return {property_id: filter_value} +
+    total pages spent. First-match-wins on the (rare, unverified-precedence) chance a property_id
+    surfaces under more than one filter; STEADYAPI_TYPE_FILTERS is ordered single_family first since
+    that's the largest, least ambiguous bucket. A type-sweep failure degrades gracefully — the
+    unmatched property_ids just fall through to parse_steadyapi's land-heuristic/"other" fallback —
+    it never marks the county scan itself incomplete (that stays gated on the unfiltered sweep only)."""
+    lookup: dict[str, str] = {}
+    pages = 0
+    for ptype in STEADYAPI_TYPE_FILTERS:
+        ids, _ok, p = fetch_steadyapi_type_ids(city, ptype, state, key)
+        pages += p
+        for pid in ids:
+            lookup.setdefault(pid, ptype)
+    return lookup, pages
+
+
 def enrich_baths_batched(rows: list[dict], known_ids: set[str], *, dry_run: bool = False) -> dict[str, Any]:
     """In-place: batch-fill baths for NEW listings (property_id not in known_ids) via clustered
     /nearby-home-values calls. Land rows are skipped (baths is meaningless there; Phase 5 parks
@@ -255,9 +321,12 @@ def enrich_baths_batched(rows: list[dict], known_ids: set[str], *, dry_run: bool
 def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: bool = False) -> dict[str, Any]:
     """SteadyAPI-only: enumerate every seed city, parse + scope-filter, batch-enrich new listings.
     Returns the coverage-guard payload pipeline.py consumes: {rows, exhausted, count, last_status,
-    county_total, search_calls, enrich_calls}. County is COMPLETE only if every city's pull reached
-    natural exhaustion. `dry_run=True` still fires the (cheap, ~106-call) search sweep — that's the
-    real page count the gate needs — but skips the (expensive, multiplying) enrich network calls."""
+    county_total, search_calls, enrich_calls}. County is COMPLETE only if every city's UNFILTERED
+    pull reached natural exhaustion — that stays the sole completeness gate. Per-city type sweeps
+    (build_type_lookup) run alongside to type-stamp rows; a type-sweep gap just leaves the affected
+    rows at the land-heuristic/"other" fallback, it never flips `exhausted`/`last_status`. `dry_run=True`
+    still fires the (cheap) search + type sweeps — that's the real page count the gate needs — but
+    skips the (expensive, multiplying) enrich network calls."""
     cities = SWFL_CITY_SEED.get(county, [])
     sa_rows: list[dict] = []
     all_ok = True
@@ -266,7 +335,14 @@ def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: 
         sa_raw, sa_ok, pages = fetch_steadyapi_city(city)
         all_ok = all_ok and sa_ok
         search_calls += pages
-        sa_rows.extend(p for p in (parse_steadyapi(x, city, "FL") for x in sa_raw) if p)
+        type_lookup, type_pages = build_type_lookup(city)
+        search_calls += type_pages
+        sa_rows.extend(
+            p for p in (
+                parse_steadyapi(x, city, "FL", type_hint=type_lookup.get(str(x.get("property_id"))))
+                for x in sa_raw
+            ) if p
+        )
     rows = [r for r in sa_rows if r.get("county") == county]
     enrich_stats = enrich_baths_batched(rows, known_ids or set(), dry_run=dry_run)
     return {

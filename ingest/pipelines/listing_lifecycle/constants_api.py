@@ -52,11 +52,23 @@ STEADYAPI_HEADERS = {
 
 # RentCast/SteadyAPI type strings -> the lifecycle property_type tokens. Unknown -> "other".
 PROPERTY_TYPE_MAP = {
-    "single family": "single_family", "single-family": "single_family",
+    "single family": "single_family", "single-family": "single_family", "single_family": "single_family",
     "condo": "condo", "condominium": "condo", "condos": "condo",
     "townhouse": "townhouse", "townhomes": "townhouse",
     "multi-family": "multi_family", "multifamily": "multi_family", "multi family": "multi_family",
+    "multi_family": "multi_family", "duplex_triplex": "multi_family",
     "manufactured": "manufactured", "mobile": "manufactured", "mobile/manufactured": "manufactured",
     "land": "land", "lot": "land", "vacant land": "land", "lots/land": "land",
     "apartment": "multi_family",
 }
+
+# /search property_type FILTER values we sweep to type-stamp rows (verified live 07/07/2026, RULE 0.4:
+# docs.steadyapi.com/collection.json + direct probe across Naples/Fort Myers/Cape Coral/Marco Island).
+# `single_family` + `condos` + `townhomes` + `multi_family` cover the field: `condos` + `townhomes`
+# together equal `condo_townhome_rowhome_coop` almost exactly (off by 0-2 rows per city, a negligible
+# pure-rowhome/coop remainder) — so sweeping the broader combined filter too would just double-count
+# the same property_ids for zero new information. `condo_townhome` and `duplex_triplex` returned ZERO
+# results on every one of the 4 test cities — dead/non-functional filter values, excluded. Land and
+# manufactured/mobile are NOT filterable at all (confirmed in docs); land keeps the existing
+# beds-is-None-and-lot_sqft heuristic, manufactured has no reliable signal yet and falls to "other".
+STEADYAPI_TYPE_FILTERS = ["single_family", "condos", "townhomes", "multi_family"]

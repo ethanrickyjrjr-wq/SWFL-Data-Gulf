@@ -57,7 +57,7 @@ interface RawResult {
   };
 }
 
-function normalizeResult(raw: RawResult, city: string, state: string): Listing | null {
+export function normalizeResult(raw: RawResult, city: string, state: string): Listing | null {
   const id = typeof raw.property_id === "string" ? raw.property_id : String(raw.property_id ?? "");
   if (!id) return null;
   const price =
@@ -97,6 +97,20 @@ function normalizeResult(raw: RawResult, city: string, state: string): Listing |
       : typeof raw.description?.sqft === "string"
         ? Number(raw.description.sqft)
         : null;
+  const lotSqft =
+    typeof raw.description?.lot_sqft === "number"
+      ? raw.description.lot_sqft
+      : typeof raw.description?.lot_sqft === "string"
+        ? Number(raw.description.lot_sqft)
+        : null;
+  // /search returns NO property-type field on any row (verified live 07/07/2026 against every
+  // real-estate endpoint) — property_type is a request-side filter only, one value per call,
+  // which this single-page photo fetch doesn't sweep (see ingest/pipelines/listing_lifecycle/
+  // extract_api.py's build_type_lookup for the full per-type-sweep design). Asserting "Single
+  // Family" for every result was a fabricated fact — a condo or townhouse showed as "Single
+  // Family" in listing copy. Land is still cheaply detectable (no beds + a lot_sqft); everything
+  // else gets the honest generic "Residential" rather than a specific type we don't hold.
+  const propertyType = beds == null && lotSqft ? "Land" : "Residential";
   return {
     id: `sa_${id}`,
     formattedAddress: [addressLine1, city, state, zipCode].filter(Boolean).join(", "),
@@ -107,7 +121,7 @@ function normalizeResult(raw: RawResult, city: string, state: string): Listing |
     county: "",
     latitude: lat != null && Number.isFinite(lat) ? lat : null,
     longitude: lon != null && Number.isFinite(lon) ? lon : null,
-    propertyType: "Single Family",
+    propertyType,
     bedrooms: beds != null && Number.isFinite(beds) ? beds : null,
     bathrooms: null,
     squareFootage: sqft != null && Number.isFinite(sqft) ? sqft : null,

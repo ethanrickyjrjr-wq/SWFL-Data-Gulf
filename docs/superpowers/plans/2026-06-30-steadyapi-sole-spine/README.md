@@ -68,6 +68,9 @@ by city); `/search` pages at 200, `/rentals-search` at 20; DOM 87 (ZIP 33901 and
 - `phase-4-rentals-brain.md` — rentals asset class
 - `phase-5-land-manufactured-parked.md` — parked backfill (ODD scaffold)
 - `orchestration.md` — who builds what, what runs together vs separate, the dependency DAG
+- `06-full-audit-and-continue-decision.md` — 07/07/2026: property_type bug fix (was hardcoding
+  every non-land row to single_family), full 18-endpoint live audit off the 7-day/50k trial, Reddit
+  pain-point research, and the continue-after-trial recommendation
 
 ## Out of scope (tracked separately)
 

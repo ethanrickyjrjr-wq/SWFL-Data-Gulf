@@ -69,6 +69,11 @@ const RESIDENTIAL = new Set([
   "Multi-Family",
   "Apartment",
   "Manufactured",
+  // steadyapi.ts's fetchPhotoListings can't sweep /search's property_type filter (one value per
+  // call, no per-row type on this single-page path) — "Residential" is its honest generic label
+  // for anything that isn't land. Keeping it in this set preserves the ranking bonus for those
+  // listings while still correctly excluding actual land (see steadyapi.ts normalizeResult).
+  "Residential",
 ]);
 
 /** Best-first: priced listings, preferring those with coordinates (aerial-able) and a

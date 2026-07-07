@@ -1,3 +1,37 @@
+## 2026-07-07 (main) — SteadyAPI property_type bug fixed (was hardcoding everything to single_family) + full 18-endpoint trial audit
+
+Operator noticed a `property_type=condo` 422 while poking the API directly and asked to fix it. Root
+cause: `parse_steadyapi` (`extract_api.py`) hardcoded every non-land row to `"single_family"` — every
+condo/townhouse/multi-family listing region-wide was mislabeled; same bug in `lib/listings/steadyapi.ts`.
+Verified live (crawl4ai + direct probe, RULE 0.4): `/search` returns NO property-type field on any row —
+it's a request-side filter only, 7 enum values, but `condos`+`townhomes` ≈ `condo_townhome_rowhome_coop`
+(superset, not a new bucket) and `condo_townhome`/`duplex_triplex` return zero results everywhere tested.
+Shipped a 4-filter sweep (`single_family`/`condos`/`townhomes`/`multi_family`) that stamps each row's real
+type via a property_id lookup, keeping the existing unfiltered sweep as the sole completeness gate. Live
+end-to-end verified on Naples (3,075/2,378/142/39/757/328 single_family/condo/townhouse/multi_family/land/
+other) and Fort Myers (1,869/1,320/236/69/426/273) — real breakdowns instead of one bucket. TS-side fix:
+`steadyapi.ts` now says honest `"Land"`/`"Residential"` instead of a fabricated `"Single Family"`.
+8 new pytest cases + 3 bun tests, full suite green.
+
+**Cost note (not a silent deferral — the fix + tradeoff are both in hand, just needs an operator call):**
+the fix ~3x's search-call volume; extrapolated to ~11-12.6k calls/month at current daily cadence, at or
+over the $14.95/mo Starter 10k/mo cap. Recommended fix (weekly-cache the type-sweep, not the daily
+inventory sweep) recorded in the plan doc, not yet built.
+
+Operator also had a fresh 50k-request/7-day SteadyAPI trial (`new_steady` key in `.env.local`, separate
+from the still-suspended production `PHOTOS_API` — billing issue confirmed live, 403 "cancelled or
+past-due subscription"; check `steadyapi_subscription_suspended` open). Used the trial to live-test all
+12 previously-untested real-estate endpoints (11 confirmed working with real SWFL data; `gallery-similar-
+homes` 422'd, param contract unconfirmed) and ran a dedicated Reddit/BiggerPockets pain-point research
+pass. Standout finding: Florida condo/HOA reserve + special-assessment opacity (SB 4-D) is the single
+most-repeated, highest-dollar pain point found — and SteadyAPI does NOT carry HOA/reserve data at all
+(checked `/search`, `/similar-homes`, `/new-construction` — confirmed live). Second finding:
+`/property-tax-history` (already an endpoint we call) carries a `building_permits[]` array we never read
+— real per-property permit history, a second source against our own Accela/county pipelines. Third:
+`/environment-risk` isn't just flood — it's flood+wildfire+heat+wind+air each with a trend direction,
+genuinely different from our AAL-dollar flood brain. Full audit + recommendation (continue past trial,
+on a cadence-fixed budget) in `docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/06-full-audit-and-continue-decision.md`.
+
 ## 2026-07-07 (main) — Pulse Phase 1.5: C1 dedup-before-distill fix (review-caught cost bug); design-doc daily-ceiling claim corrected
 
 Independent opus review (vs the approved design, judged on operator intent not rules) returned SHIP-WITH-FIXES.
