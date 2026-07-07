@@ -1,3 +1,39 @@
+## 2026-07-07 (main) — prompt-caching audit: 2 of 3 "already cached" call sites are no-ops; wired the one that works
+
+Operator asked "are we using cache so we aren't blowing credits, where can we improve." Probed
+`refinery/agents/anthropic.mts` first (RULE 0.5) — cost math already prices `cache_read`/`cache_creation`
+correctly, and `cache_control` exists on 3 system prompts: triage, synthesis, deliverable_build. Queried
+`api_usage_log` directly (Bun.SQL, 30-day window, grouped by call_type+model) before writing any code —
+**triage (Haiku, 2 calls) and deliverable_build (Sonnet, 87 calls, $1.49) both show ZERO cache_creation
+despite having `cache_control` wired.** Fetched live vendor docs via crawl4ai (RULE 0.4,
+platform.claude.com/docs/en/build-with-claude/prompt-caching): minimum cacheable prefix is **4,096 tokens
+for Haiku 4.5** (not 1,024 like Sonnet) — triage's static block (SYSTEM_INSTRUCTIONS + pack.triageContext)
+runs a few hundred tokens, so it can never clear the floor; same root cause killed my first instinct to add
+caching to the live assistant chat path (also Haiku, ~600-1000 static tokens — would've shipped a no-op).
+deliverable_build's static systemPrompt() is ~450-500 tokens, under Sonnet's 1,024 floor. Neither is worth
+padding artificially just to hit a threshold. Only synthesis (Sonnet, 3669 tokens cached on its one call)
+is genuinely working — it just runs too rarely (1x/30d) to show a cache_read yet.
+
+**Real fix:** `AUTHOR_TOOL` in `lib/email/author-doc.ts` — the forced-tool definition (name+description+
+schema) sent byte-identical on every `email_build` author call, Sonnet-based, comfortably over 1,024
+tokens, never had `cache_control`. Added it. Left the two dead breakpoints (triage-agent.mts,
+lib/deliverable/build.ts) in place with comments explaining why they don't fire today — no cost when
+unused per the vendor docs, and useful if either prompt ever grows.
+
+**Ops billing tracking** (operator: "make sure this shows up nicely, what's spending what") — discovered
+`swfldatagulf-ops` already has `fetchApiUsage()` → `LiveApiUsagePanel` reading `api_usage_log` live,
+broken down by call_type; any newly-cached call auto-shows reduced cost, no new wiring needed. Fixed two
+real gaps there: (1) `ApiCostPanel`'s note flatly said "live tracking not possible" while the live panel
+rendered right above it — contradictory stale copy from before logging existed, now conditional on
+`hasLive`; (2) `fetchApiUsage()` commingled dev/local-session spend with production in the totals — now
+filters `env !== "production"` out of the main totals and surfaces it as a separate "Dev/local (excluded
+above)" line, since "what's spending what" should mean product truth, not dev-session noise.
+
+Both repos: `bunx next build` clean, relevant test suites green (author-doc.test.ts, build-doc.test.ts,
+build.test.ts x2). Not pushed — held per no-autonomous-push. Files: `refinery/agents/anthropic.mts` (read
+only, no changes needed), `lib/email/author-doc.ts`, `refinery/agents/triage-agent.mts`,
+`lib/deliverable/build.ts`; ops: `lib/spend.ts`, `app/spend/page.tsx`.
+
 ## 2026-07-07 (main) — Pulse Engine Phase 1 BUILT + LIVE-CONFIRMED (already on origin via parallel push); crons still dark
 
 Executed Phase 1 subagent-driven (I reviewed every task diff + ran every test set myself, per operator mandate).

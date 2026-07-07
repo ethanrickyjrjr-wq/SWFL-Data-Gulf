@@ -113,6 +113,11 @@ export function renderAssetMenu(menu: MenuAsset[]): string {
 
 export const AUTHOR_TOOL = {
   name: "author_email",
+  // Byte-identical on every author call (name + description + schema, no
+  // per-request content) — cache it so repeat builds in the same 5-min window
+  // (a user iterating on one email, or several sends in a burst) read from
+  // cache instead of re-billing the full tool definition as input tokens.
+  cache_control: { type: "ephemeral" },
   description:
     "Author a complete marketing email as an ordered list of blocks. You choose " +
     "WHICH blocks, in WHAT order, and how they group into rows.\n\n" +

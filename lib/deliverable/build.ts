@@ -345,6 +345,11 @@ async function callModel(userContent: string): Promise<Narrative> {
   const response = await client.messages.create({
     model: DELIVERABLE_MODEL,
     max_tokens: 2048,
+    // Verified 07/07/2026: systemPrompt() runs ~450-500 tokens — under Sonnet 4.6's
+    // 1,024-token cacheable minimum (platform.claude.com/docs/en/build-with-claude/
+    // prompt-caching), so this breakpoint doesn't activate. api_usage_log confirms
+    // zero cache_creation across 87 logged calls. Not worth padding the prompt just
+    // to clear the floor — left in place (no cost when unused) for if it grows.
     system: [{ type: "text", text: systemPrompt(), cache_control: { type: "ephemeral" } }],
     tools: [NARRATIVE_TOOL],
     tool_choice: { type: "tool", name: NARRATIVE_TOOL.name },

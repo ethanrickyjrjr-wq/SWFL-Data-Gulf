@@ -98,6 +98,13 @@ async function triageBatch(
       {
         type: "text",
         text: `${SYSTEM_INSTRUCTIONS}\n\n--- PACK CONTEXT ---\n${pack.prompts.triageContext}`,
+        // Verified 07/07/2026: this breakpoint is currently a no-op for every pack —
+        // Haiku 4.5's minimum cacheable prefix is 4,096 tokens (platform.claude.com/
+        // docs/en/build-with-claude/prompt-caching), and SYSTEM_INSTRUCTIONS + a
+        // pack's triageContext runs a few hundred tokens. api_usage_log confirms
+        // zero cache_creation/cache_read on every triage call to date. Left in place
+        // (harmless, no cost per the same docs) in case a pack's triageContext ever
+        // grows past the floor — but don't count on this for savings today.
         cache_control: { type: "ephemeral" },
       },
     ],
