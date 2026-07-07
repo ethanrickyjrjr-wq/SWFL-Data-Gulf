@@ -17,6 +17,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const DAILY_CEILING_USD = 5.0; // locked decree 07/05/2026 (ingest/CLAUDE.md)
@@ -245,21 +246,108 @@ function checkValveAudit() {
     );
 }
 
+// ---------- check 6: dangling git worktrees ------------------------------
+
+const WORKTREE_STALE_HOURS = 6; // a `land`ed-but-unpushed worktree past this age is a RED
+
+// Pure — given ahead-count and age, what color is this worktree? Exported for
+// the unit test; the git-shelling caller below is integration-only like its
+// siblings in this file.
+export function classifyWorktree({ aheadCount, ageHours, staleHoursThreshold }) {
+  if (aheadCount === 0) return "green"; // fully landed — safe to `git worktree remove`
+  return ageHours >= staleHoursThreshold ? "red" : "yellow";
+}
+
+function checkWorktrees() {
+  let raw = "";
+  try {
+    raw = sh("git worktree list --porcelain");
+  } catch {
+    yellows.push("WORKTREES: `git worktree list` failed — could not scan");
+    return;
+  }
+  const entries = raw.trim().split(/\n\n+/).filter(Boolean);
+  let sawNonMain = false;
+
+  for (const entry of entries) {
+    const lines = entry.split("\n");
+    const worktreeLine = lines.find((l) => l.startsWith("worktree "));
+    if (!worktreeLine) continue;
+    const dir = worktreeLine.slice("worktree ".length).trim();
+    if (path.resolve(dir) === ROOT) continue; // skip the main checkout itself
+    sawNonMain = true;
+
+    const branchLine = lines.find((l) => l.startsWith("branch "));
+    const branch = branchLine ? branchLine.slice("branch ".length).trim() : null;
+    const detached = lines.some((l) => l === "detached");
+    const branchLabel = branch ?? (detached ? "detached HEAD" : "unknown");
+
+    let headSha = "";
+    try {
+      headSha = sh(`git -C "${dir}" rev-parse HEAD`).trim();
+    } catch {
+      yellows.push(`WORKTREE: ${dir} — could not read HEAD`);
+      continue;
+    }
+
+    let aheadCount = 0;
+    try {
+      const ahead = sh(`git log --oneline origin/main..${headSha}`).trim();
+      aheadCount = ahead ? ahead.split("\n").length : 0;
+    } catch {
+      yellows.push(`WORKTREE: ${dir} (${branchLabel}) — could not diff against origin/main`);
+      continue;
+    }
+
+    let ageHours = 0;
+    try {
+      const epochSec = Number(sh(`git -C "${dir}" log -1 --format=%ct`).trim());
+      ageHours = (Date.now() - epochSec * 1000) / (60 * 60 * 1000);
+    } catch {
+      yellows.push(`WORKTREE: ${dir} (${branchLabel}) — could not read last commit time`);
+      continue;
+    }
+
+    const color = classifyWorktree({
+      aheadCount,
+      ageHours,
+      staleHoursThreshold: WORKTREE_STALE_HOURS,
+    });
+    const label = `${dir} (${branchLabel}) — ${aheadCount} commit(s) ahead of origin/main, last commit ${ageHours.toFixed(1)}h ago`;
+    if (color === "green") greens.push(`WORKTREE — ${label} — fully landed, safe to remove`);
+    else if (color === "yellow") yellows.push(`WORKTREE ACTIVE — ${label} — likely a live session`);
+    else reds.push(`WORKTREE STALE — ${label} — land it or abandon it`);
+  }
+
+  if (!sawNonMain) greens.push("WORKTREES — none besides the main checkout");
+}
+
 // ---------- run ---------------------------------------------------------------
 
-await checkSpend();
-checkPulseDark();
-checkPaidDispatches();
-checkGuards();
-checkValveAudit();
+const isMain = (() => {
+  try {
+    return import.meta.url === pathToFileURL(process.argv[1]).href;
+  } catch {
+    return false;
+  }
+})();
 
-const B = "=".repeat(72);
-console.log(`\n${B}\nTRIPWIRE SCAN ${new Date().toISOString()}\n${B}`);
-for (const r of reds) console.log(`  RED    ${r}`);
-for (const y of yellows) console.log(`  YELLOW ${y}`);
-for (const g of greens) console.log(`  green  ${g}`);
-console.log(
-  `${B}\n${reds.length} RED · ${yellows.length} YELLOW · ${greens.length} green\n` +
-    `Not visible here: Claude Code dev-session spend + console fees (console export only).\n${B}`,
-);
-process.exit(reds.length ? 1 : 0);
+if (isMain) {
+  await checkSpend();
+  checkPulseDark();
+  checkPaidDispatches();
+  checkGuards();
+  checkValveAudit();
+  checkWorktrees();
+
+  const B = "=".repeat(72);
+  console.log(`\n${B}\nTRIPWIRE SCAN ${new Date().toISOString()}\n${B}`);
+  for (const r of reds) console.log(`  RED    ${r}`);
+  for (const y of yellows) console.log(`  YELLOW ${y}`);
+  for (const g of greens) console.log(`  green  ${g}`);
+  console.log(
+    `${B}\n${reds.length} RED · ${yellows.length} YELLOW · ${greens.length} green\n` +
+      `Not visible here: Claude Code dev-session spend + console fees (console export only).\n${B}`,
+  );
+  process.exit(reds.length ? 1 : 0);
+}
