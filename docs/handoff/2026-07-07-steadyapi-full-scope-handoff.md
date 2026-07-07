@@ -1,7 +1,9 @@
-# HANDOFF — SteadyAPI: we're only seeing ~59% of SWFL's real inventory, and it's an easy fix
+# HANDOFF — SteadyAPI: county-level search fixes a real gap; 6-county widening is NOT wanted
 
 **Status:** Two real findings this session, both live-verified (RULE 0.4, crawl4ai + direct probe
-calls), neither built yet. This is the todo list — nothing below is done except the property_type fix.
+calls). **Operator decision (07/07/2026, same session): SteadyAPI listing/rental/market scope is
+Lee + Collier + Hendry ONLY — do not widen to Charlotte/Glades/Sarasota.** Finding 1 below is corrected
+to reflect that; Finding 2 (county-level search) still stands and is the real actionable item.
 
 ## Why this handoff exists
 
@@ -11,20 +13,29 @@ Bonita Springs, Estero, any other Lee or Collier name? Is city-by-city even the 
 That question led straight to a much bigger finding than the property_type bug. Both are recorded here
 so neither gets lost.
 
-## FINDING 1 (the big one): 3 of our 6 in-scope counties aren't ingested by ANY SteadyAPI pipeline
+## FINDING 1 — RESOLVED: SteadyAPI listing/rental/market scope is Lee + Collier + Hendry ONLY, confirmed
 
-CLAUDE.md's own SCOPE section names 6 counties: Charlotte (12015), Collier (12021), Glades (12043),
-Hendry (12051), Lee (12071), Sarasota (12115). Checked all three SteadyAPI-fed ingest pipelines against
-that list:
+I initially flagged this as a gap because CLAUDE.md's platform-wide SCOPE section names 6 counties
+(Charlotte 12015, Collier 12021, Glades 12043, Hendry 12051, Lee 12071, Sarasota 12115). Checked all
+three SteadyAPI-fed ingest pipelines against that list and found none of them cover Charlotte/Glades/
+Sarasota:
 
 - `ingest/pipelines/listing_lifecycle/constants_api.py` `IN_SCOPE_FIPS` — **Lee, Collier, Hendry only**
 - `ingest/pipelines/rentals/constants.py` `COUNTY_LOCATIONS` — **Lee, Collier only**
 - `ingest/pipelines/market_aggregates/constants.py` `_IN_SCOPE_COUNTY_FIPS` — **Lee, Collier only**
 
-Charlotte, Glades, and Sarasota are NOT missing by decision — there's no doc, no locked call, no ODD
-scaffold parking them. They're just never been added since the original Lee+Collier v1 (Hendry got
-added later, 07/02, as a one-off widening; the other two never did). Live-verified real inventory
-sizes (`GET /search?location={County}-County_FL`, one call per county, ~30 total calls):
+**Operator correction, same session: this is intentional. SteadyAPI listing/rental/market data stays
+Lee + Collier + Hendry only — do NOT widen to Charlotte/Glades/Sarasota.** Do not re-propose this.
+
+That leaves an open, unresolved discrepancy worth a separate decision: CLAUDE.md's SCOPE section
+declares a platform-wide 6-county footprint used by several OTHER brains (`env-swfl`, `hurricane-tracks-fl`,
+`news-swfl`, `storm-history-swfl`, etc. all use the 6-county or 5-county `SIX_COUNTY`/subset lists in
+`lib/zip-dossier.ts`). Whether that broader 6-county platform scope should also narrow, or whether it's
+correct as-is and only the *SteadyAPI listing/rental/market* data is meant to stay 3-county, is a
+separate question I have NOT assumed an answer to — flagged for the operator, not touched.
+
+Live-verified real inventory sizes for all 6 counties are kept below for reference (captured while the
+trial was live) — useful context even though only the first 3 rows are in scope:
 
 | County | For-sale listings (live, 07/07/2026) | Currently ingested? |
 |---|---:|---|
@@ -34,14 +45,9 @@ sizes (`GET /search?location={County}-County_FL`, one call per county, ~30 total
 | Glades (12043) | 231 | ❌ no |
 | Hendry (12051) | 1,080 | ✅ yes |
 | Sarasota (12115) | **10,351** | ❌ **no** |
-| **6-county total** | **53,447** | **31,426 captured (59%)** |
+| **6-county total** | **53,447** | **31,426 in-scope (Lee+Collier+Hendry)** |
 
-Charlotte alone has more listings than Collier. Sarasota alone has more than Collier too. We're missing
-**22,021 listings** — more than what we currently hold for Lee. This isn't a rounding error, it's a
-structural scope gap that predates this session and applies to inventory, rentals, and market
-aggregates alike.
-
-**Property-type breakdown for all 6, captured now while the trial's live** (same 4-filter method as the
+**Property-type breakdown for all 6, captured for reference while the trial's live** (same 4-filter method as the
 property_type fix, run at county grain):
 
 | County | single_family | condos | townhomes | multi_family | land+other (implied) |
@@ -76,26 +82,23 @@ Autocomplete confirms the exact slug format for every county (tested `Lee County
 
 ## Todo — everything to actually do, in priority order
 
-1. **Widen all 3 SteadyAPI pipelines to the real 6-county scope.** Add Charlotte (12015), Glades
-   (12043), Sarasota (12115) to `IN_SCOPE_FIPS` (listing_lifecycle), `COUNTY_LOCATIONS` (rentals),
-   `_IN_SCOPE_COUNTY_FIPS` (market_aggregates). This is the single highest-value item — it roughly
-   doubles real inventory coverage for zero new endpoint work, just scope config + whatever downstream
-   brain/cadence wiring a new county touches (check `refinery/packs/*` county-gating, `BRAIN_GEO`
-   `covers` lists in `lib/zip-dossier.ts`, and `fixtures/swfl-zip-county.json` — that fixture already
-   claims 6-county scope per CLAUDE.md, so it may already be ready).
-2. **Migrate `listing_lifecycle` off `SWFL_CITY_SEED` onto county-level `/search` calls**, matching the
-   pattern `rentals`/`market_aggregates` already use. One call per county instead of N calls per city —
-   cheaper AND catches the ~4% of listings the city list silently drops. This also simplifies the
-   property_type fix's `build_type_lookup` (4 type-sweeps per COUNTY instead of per CITY — even less
-   call volume than the per-city version shipped this session).
-3. **Fix the type-sweep cost cadence** (already flagged in `06-full-audit-and-continue-decision.md`) —
-   cache it weekly, don't re-sweep types daily. Doing #2 first changes the exact math (fewer, bigger
+1. **Migrate `listing_lifecycle` off `SWFL_CITY_SEED` onto county-level `/search` calls**, matching the
+   pattern `rentals`/`market_aggregates` already use — still Lee/Collier/Hendry only, just 3 calls
+   instead of 15 city calls. Cheaper AND catches the ~4% of listings the city list silently drops
+   (unincorporated places like Alva/Pine Island/Captiva). This also simplifies the property_type fix's
+   `build_type_lookup` (4 type-sweeps per COUNTY instead of per CITY — even less call volume than the
+   per-city version shipped this session).
+2. **Fix the type-sweep cost cadence** (already flagged in `06-full-audit-and-continue-decision.md`) —
+   cache it weekly, don't re-sweep types daily. Doing #1 first changes the exact math (fewer, bigger
    calls instead of many small ones) so re-cost this after the county migration, not before.
-4. **Decide the SteadyAPI account**: promote the trial key (`new_steady`) to production `PHOTOS_API`,
+3. **Decide the SteadyAPI account**: promote the trial key (`new_steady`) to production `PHOTOS_API`,
    or fix billing on the suspended original key (`steadyapi_subscription_suspended` check, still open).
-5. Everything in `06-full-audit-and-continue-decision.md`'s recommendation list (autocomplete as a geo
+4. Everything in `06-full-audit-and-continue-decision.md`'s recommendation list (autocomplete as a geo
    resolver backstop, reading `building_permits[]` off the already-called `property-tax-history`,
    re-evaluating `environment-risk` for its wildfire/heat/wind/trend data beyond flood).
+5. **Separate, not-yet-decided question:** does CLAUDE.md's platform-wide 6-county SCOPE declaration
+   need narrowing too, or does it correctly stay wider than the SteadyAPI listing/rental/market data
+   scope? Not assumed either way — needs an explicit operator call before touching CLAUDE.md.
 
 ## While the trial credits are still live (use them — don't let the window close unused)
 
@@ -108,11 +111,8 @@ Autocomplete confirms the exact slug format for every county (tested `Lee County
   question as `/search` — untested this session, likely yes given the shared location-resolution
   system, but not verified).
 - Check whether `/price-histogram` and `/housing-market-details` behave the same at county grain for
-  Charlotte/Glades/Sarasota as they do for Lee/Collier (confirms the market_aggregates widening in item
-  1 above is a pure scope-config change, not a new endpoint-behavior risk).
-- Full county-level property_type sweep for the NEW 3 counties' rentals inventory too (parallel to the
-  for-sale breakdown captured above) — not yet done, would inform whether rentals coverage is equally
-  worth the widening.
+  Hendry as they already do for Lee/Collier (confirms item 1's county-level migration is a pure
+  mechanical change for all 3 in-scope counties, not just the 2 already using that pattern).
 
 ## Reference
 

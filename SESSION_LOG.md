@@ -1,3 +1,15 @@
+## 2026-07-07 (main) — correction: SteadyAPI scope IS Lee+Collier+Hendry only, confirmed by operator
+
+Immediately following the entry below: operator confirmed "LEE, COLLIER AND HENDRY ONLY" — the
+"3 missing counties" finding was wrong to flag as a gap. Closed `steadyapi_missing_3_counties`
+(not a bug, intentional scope). `steadyapi_migrate_city_seed_to_county_level` stays open — that
+finding (county-level `/search` beats city-by-city) holds regardless of county count. Updated
+`docs/handoff/2026-07-07-steadyapi-full-scope-handoff.md` to match: dropped the "widen to 6 counties"
+todo item, kept the county-level migration as the real action, and flagged a separate open question
+(does CLAUDE.md's platform-wide 6-county SCOPE section also need narrowing, or does it correctly stay
+wider than SteadyAPI's listing/rental/market scope?) for an explicit operator call — not assumed either
+way, not touched.
+
 ## 2026-07-07 (main) — SteadyAPI: 3 of 6 in-scope counties aren't ingested anywhere (22k listings missing) + city-seed vs county-level architecture question
 
 Operator pushed back hard on the property_type fix verification (below) being spot-checked on only
