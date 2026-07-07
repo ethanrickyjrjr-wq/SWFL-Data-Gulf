@@ -1,3 +1,41 @@
+## 2026-07-07 (main) — Answer-engine jargon/token-cap/thin-sample fixes + mobile Enter-key fix + Lee Accela parser fix
+
+Operator screenshots of the `/ask` page (phone) flagged: raw vendor/stats jargon in answers
+("Accela feed has gone quiet", z-score/sigma), a response silently cut off mid-section at
+"LABOR MARKET" (hit the token cap), a sector-credit answer headlining "100% survival rate" off
+just 7 SBA loans, and Shift+Enter for a new line being unusable on a touch keyboard. Fixed all four:
+`lib/assistant/conversation-path.ts` — the jargon-ban list (4 premises) now also blocks vendor/system
+names ("Accela") and raw stats terms ("z-score", "sigma"); `GROUNDED_MAX_TOKENS` 700→1100 so a
+broad multi-brain question doesn't truncate mid-answer. `refinery/packs/permits-swfl.mts` — stripped
+"Accela" out of the two caveat strings at the source. `refinery/packs/sector-credit-swfl.mts` — added
+`sampleFlag()`, flagging any sector under 20 resolved loans as thin-sample everywhere it's named
+(safest/riskiest lists, headline metric, conclusion); also killed a blanket "meaningful sample size in
+each case" claim that wasn't true at n=5. `lib/chat/use-is-touch-device.ts` (new) + `app/ask/AskPage.tsx`
+— Enter now inserts a newline on touch devices instead of submitting; hint text swaps to "Tap Ask to
+submit". Same bug exists in `BriefcaseChat.tsx` — blocked by another session's file claim, tracked in
+`checks` (`briefcasechat_enter_touch_fix`).
+
+Operator then asked to actually root-cause the "Accela quiet" caveat instead of just rewording it.
+Pulled the real GHA run (`lee-permits-weekly` #28798608078, 07/06): it hard-failed on
+`ingest.lib.guards.ContentStaleError` (newest issued_date stuck at 2026-06-16, 20d > 14d guard).
+Live crawl4ai probe against aca-prod.accela.com (RULE 0.4) found TWO distinct causes, not one:
+(1) confirmed via the failed run's actual log — GHA's datacenter IP is getting sustained HTTP 429
+"Blocked by anti-bot protection" on CapDetail fetches (pre-existing open check
+`lee_permits_capdetail_waf_429`, opened 07/03, still unresolved — NOT fixed by this session);
+(2) NEW finding — Lee County's Accela portal dropped the labeled Issue Date field from CapDetail.aspx
+entirely (page now points to a separate "Reports" export instead) and left only a workflow-history
+sentence ("Marked as Issued on MM/DD/YYYY by ..."). Confirmed live against FIR2026-01517, issued
+same-day 2026-07-07 — Lee County is NOT backlogged, our parser just couldn't see it. Fixed
+`parse_cap_detail_html` with a 3rd fallback strategy reading that workflow-history line; captured the
+live HTML as a new fixture (`cap_detail_FIR2026-01517.html`) and added a regression test. Merged this
+finding into the existing `lee_permits_capdetail_waf_429` check (closed the duplicate
+`lee_permits_source_stalled_20d` check) — the format fix does NOT resolve the WAF/429 block; that
+still needs concurrency/backoff/egress work before the GHA cron runs clean.
+
+Verified: `bun test` (192/192, brain-platform side) + `pytest ingest/pipelines/lee_permits/` via the
+crawl4ai venv (18/18, format fix included) + `bunx next build` (exit 0, clean). Not yet re-run on GHA
+(no live ingest write triggered this session — parser-only fix, no `data_lake.*` write).
+
 ## 2026-07-07 (main) — AnswerText: word+number split-color bug fixed, wired into 5 missing surfaces
 
 Operator screenshot (`/r` report page): "High 5 Entertainment" rendered "High" white next to a

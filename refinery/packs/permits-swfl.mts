@@ -867,7 +867,7 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const caveats: string[] = [];
   if (snap.backfill_days < 365) {
     caveats.push(
-      `Accela backfill window is ${snap.backfill_days}d (< 365d) - historical baseline is incomplete; z-scores are indicative, not robust.`,
+      `Lee permit history only reaches back ${snap.backfill_days}d (< 365d) - the historical baseline is incomplete; the rate-of-change reads above are indicative, not robust.`,
     );
   }
   if (snap.low_n_cell_count > 0) {
@@ -916,7 +916,7 @@ function permitsOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       const ageDays = Math.floor((now.getTime() - t) / 86400_000);
       if (ageDays > LEE_STALE_DAYS) {
         caveats.push(
-          `Most recent Lee permit issued ${snap.lee_max_issued_date}; daily Accela scrape may be stalled (${ageDays} days since last issue).`,
+          `Most recent Lee permit issued ${snap.lee_max_issued_date}; the daily Lee County permit feed may be stalled (${ageDays} days since last issue).`,
         );
       }
     }

@@ -163,6 +163,18 @@ function sectorLabel(twoDigit: string): string {
  * directional only, not actionable for lending recommendation. */
 const RANKING_MIN_RESOLVED = 5;
 
+/** Below this, a sector clears the ranking floor but its rate is still a small
+ * enough sample that a single loan swings it double digits — flag it inline so
+ * a lucky/unlucky streak (e.g. 0 charge-offs of 7 resolved = a flat "100%") never
+ * reads as a confident headline without the sample size attached. */
+const THIN_SAMPLE_RESOLVED = 20;
+
+function sampleFlag(resolved: number): string {
+  return resolved < THIN_SAMPLE_RESOLVED
+    ? ` [thin sample: only ${resolved} resolved loans, directional not confident]`
+    : "";
+}
+
 function rowsFrom(fragments: RawFragment[]): SectorCreditNormalized[] {
   return fragments
     .map((f) => f.normalized as unknown as SectorCreditNormalized)
@@ -329,7 +341,7 @@ function sectorCreditCorpusSummary(allFragments: RawFragment[]): SynthesisFact[]
     const named = top
       .map(
         (s) =>
-          `${s.label} (NAICS ${s.naics_2digit}) — ${pct(s.rate_resolved)}% resolved charge-off rate (${fmtInt(s.n_chargeoffs)} of ${fmtInt(s.resolved)} resolved loans charged off; ${usdM(s.total_approved)} approved across ${s.sample_brands} sub-industries)`,
+          `${s.label} (NAICS ${s.naics_2digit}) — ${pct(s.rate_resolved)}% resolved charge-off rate (${fmtInt(s.n_chargeoffs)} of ${fmtInt(s.resolved)} resolved loans charged off; ${usdM(s.total_approved)} approved across ${s.sample_brands} sub-industries)${sampleFlag(s.resolved)}`,
       )
       .join("; ");
     facts.push({
@@ -346,7 +358,7 @@ function sectorCreditCorpusSummary(allFragments: RawFragment[]): SynthesisFact[]
     const named = top
       .map(
         (s) =>
-          `${s.label} (NAICS ${s.naics_2digit}) — ${pct(s.rate_resolved)}% resolved charge-off rate (${fmtInt(s.n_chargeoffs)} of ${fmtInt(s.resolved)} resolved loans charged off; ${usdM(s.total_approved)} approved across ${s.sample_brands} sub-industries)`,
+          `${s.label} (NAICS ${s.naics_2digit}) — ${pct(s.rate_resolved)}% resolved charge-off rate (${fmtInt(s.n_chargeoffs)} of ${fmtInt(s.resolved)} resolved loans charged off; ${usdM(s.total_approved)} approved across ${s.sample_brands} sub-industries)${sampleFlag(s.resolved)}`,
       )
       .join("; ");
     facts.push({
@@ -362,7 +374,7 @@ function sectorCreditCorpusSummary(allFragments: RawFragment[]): SynthesisFact[]
     facts.push({
       topic: `metric:sector_${s.naics_2digit}_chargeoff_rate`,
       fact: `${s.label} (NAICS ${s.naics_2digit}) resolved charge-off rate`,
-      value: `${s.label} — ${pct(s.rate_resolved)}% resolved-loan charge-off rate (${fmtInt(s.n_chargeoffs)} charged off out of ${fmtInt(s.resolved)} resolved loans; ${fmtInt(s.n_loans_total)} total loans approved including still-active; ${usdM(s.total_approved)} gross approved capital).`,
+      value: `${s.label} — ${pct(s.rate_resolved)}% resolved-loan charge-off rate (${fmtInt(s.n_chargeoffs)} charged off out of ${fmtInt(s.resolved)} resolved loans; ${fmtInt(s.n_loans_total)} total loans approved including still-active; ${usdM(s.total_approved)} gross approved capital).${sampleFlag(s.resolved)}`,
       source_fragment_ids: [],
     });
   }
@@ -454,7 +466,7 @@ function sectorCreditOutputProducer(_out: PackOutput): BrainOutputProducerResult
       metric: "best_naics_survival",
       value: Math.round((100 - best.rate_resolved) * 10) / 10,
       direction: "stable",
-      label: `${best.label} (NAICS ${best.naics_2digit}) — best SWFL SBA survival rate`,
+      label: `${best.label} (NAICS ${best.naics_2digit}) — best SWFL SBA survival rate${sampleFlag(best.resolved)}`,
       variable_type: "intensive",
       units: "percent",
       display_format: "percent",
@@ -472,7 +484,7 @@ function sectorCreditOutputProducer(_out: PackOutput): BrainOutputProducerResult
       metric: "worst_naics_chargeoff",
       value: Math.round(worst.rate_resolved * 10) / 10,
       direction: "stable",
-      label: `${worst.label} (NAICS ${worst.naics_2digit}) — worst SWFL SBA charge-off rate`,
+      label: `${worst.label} (NAICS ${worst.naics_2digit}) — worst SWFL SBA charge-off rate${sampleFlag(worst.resolved)}`,
       variable_type: "intensive",
       units: "percent",
       display_format: "percent",
@@ -514,7 +526,7 @@ function sectorCreditOutputProducer(_out: PackOutput): BrainOutputProducerResult
   if (sortedSafe.length > 0) {
     const safe3 = sortedSafe
       .slice(0, 3)
-      .map((s) => `${s.label} (${pct(s.rate_resolved)}%)`)
+      .map((s) => `${s.label} (${pct(s.rate_resolved)}%${sampleFlag(s.resolved)})`)
       .join(", ");
     conclusionParts.push(
       `For SWFL lenders, the three lowest-risk 2-digit NAICS sectors by SBA resolved-loan charge-off rate are: ${safe3}.`,
@@ -523,11 +535,9 @@ function sectorCreditOutputProducer(_out: PackOutput): BrainOutputProducerResult
   if (sortedRisk.length > 0) {
     const risk3 = sortedRisk
       .slice(0, 3)
-      .map((s) => `${s.label} (${pct(s.rate_resolved)}%)`)
+      .map((s) => `${s.label} (${pct(s.rate_resolved)}%${sampleFlag(s.resolved)})`)
       .join(", ");
-    conclusionParts.push(
-      `The three highest-risk sectors are: ${risk3} — meaningful sample size in each case.`,
-    );
+    conclusionParts.push(`The three highest-risk sectors are: ${risk3}.`);
   }
   if (macroUs) {
     const sofr = macroUs.key_metrics.find((m) => m.metric === "sofr_rate");

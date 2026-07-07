@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useConverse } from "@/lib/assistant/use-converse";
 import { AnswerText } from "@/components/answer/AnswerText";
 import { isBareAddressQuery, resolveAddressDestination } from "@/lib/geo/address-route";
+import { useIsTouchDevice } from "@/lib/chat/use-is-touch-device";
 
 /** A bare street address is a listing signal, not a research question — send it
  *  to the campaign-build flow (the hero's URL) instead of answering it with
@@ -33,6 +34,7 @@ export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: st
   const answerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasSubmittedInitial = useRef(false);
+  const isTouchDevice = useIsTouchDevice();
 
   // Auto-submit when a ?q= param is provided (address-shaped q redirects instead)
   useEffect(() => {
@@ -63,6 +65,9 @@ export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: st
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    // Touch devices have no reliable Shift modifier — leave Enter alone so it
+    // inserts a newline; the Ask button is the only way to submit there.
+    if (isTouchDevice) return;
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       submit();
@@ -107,7 +112,9 @@ export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: st
             className="w-full resize-none bg-transparent text-white placeholder:text-gray-500 focus:outline-none text-sm"
           />
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-            <span className="text-[11px] text-gray-500">Shift+Enter for new line</span>
+            <span className="text-[11px] text-gray-500">
+              {isTouchDevice ? "Tap Ask to submit" : "Shift+Enter for new line"}
+            </span>
             <button
               onClick={submit}
               disabled={!question.trim() || streaming}

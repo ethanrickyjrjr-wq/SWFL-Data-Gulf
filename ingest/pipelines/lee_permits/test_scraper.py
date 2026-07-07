@@ -191,3 +191,17 @@ def test_parse_cap_detail_html_fnc_permit_value() -> None:
         f"FNC residential fence: expected 15000.0, got {result['declared_value_usd']!r}"
     )
     assert result["permit_type_raw"], "permit_type_raw should be non-empty"
+
+
+def test_parse_cap_detail_html_fir_workflow_history_issued_date() -> None:
+    """FIR2026-01517, captured live 2026-07-07: Lee's Accela portal no longer
+    renders a labeled Issue Date field on CapDetail.aspx (the page instead
+    points to a separate Reports export for Record Dates). The only remaining
+    on-page signal is a workflow-history line — "Marked as Issued on
+    07/07/2026 by ..." — which the id/label strategies both miss; this is the
+    fallback span-sibling strategy's regression anchor."""
+    html = (FIXTURES / "cap_detail_FIR2026-01517.html").read_text(encoding="utf-8")
+    result = parse_cap_detail_html(html)
+    assert result["issued_date"] == "2026-07-07", (
+        f"expected 2026-07-07, got {result['issued_date']!r}"
+    )

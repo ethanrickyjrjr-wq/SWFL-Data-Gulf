@@ -328,6 +328,23 @@ def parse_cap_detail_html(html: str) -> dict[str, Any]:
                 issued_date = _parse_mm_dd_yyyy(raw)
                 if issued_date:
                     break
+    if not issued_date:
+        # Lee's Accela portal (as of ~06/2026) dropped the dedicated Issue Date
+        # field from CapDetail.aspx — the page now tells the user to pull a
+        # separate "Reports" export for Record Dates instead. The only date
+        # left on THIS page is a workflow-history line: a <span>Issued</span>
+        # followed by a sibling <span>MM/DD/YYYY</span> ("Marked as Issued on
+        # 07/07/2026 by ..."). Confirmed live 2026-07-07 against FIR2026-01517.
+        for span in soup.find_all("span"):
+            if span.get_text(strip=True).lower() != "issued":
+                continue
+            date_span = span.find_next("span")
+            if not date_span:
+                continue
+            parsed = _parse_mm_dd_yyyy(date_span.get_text(strip=True))
+            if parsed:
+                issued_date = parsed
+                break
 
     # --- declared_value_usd ---
     declared_value_usd: Optional[float] = None

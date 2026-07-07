@@ -154,7 +154,13 @@ export async function compForConversation(
 }
 
 const MAX_TOKENS = 500; // un-grounded explainer
-const GROUNDED_MAX_TOKENS = 700; // grounded path — more real, cited data to relay
+// Grounded path — more real, cited data to relay. Bumped 700→1100 (07/07/2026):
+// a broad region-wide question (e.g. "where is growth happening") legitimately
+// spans permits + tourism + freight + credit + flood + labor in one answer, and
+// 700 tokens hit mid-section with no wrap-up — the response just stopped cold
+// after a section header. 1100 gives that case room without opening the cap to
+// the un-grounded explainer's cost profile (which stays at MAX_TOKENS).
+const GROUNDED_MAX_TOKENS = 1100;
 const MAX_HISTORY = 12;
 
 // Cost guards — public, unauthenticated, paid-Haiku surface (per-IP burst lives in
@@ -194,8 +200,9 @@ export const PUBLIC_SYSTEM =
   'the real, cited read — give me a ZIP or a place" and set up that build. Inventing a ' +
   "SWFL number is the one thing you must never do; every number being real and sourced " +
   "is the entire point.\n\n" +
-  "Be a sharp, direct local operator, not a salesperson. Never use internal jargon " +
-  '(no "master", "brain", "payload", "grain", "dossier").';
+  "Be a sharp, direct local operator, not a salesperson. Never use internal jargon, vendor/system " +
+  'names (no "master", "brain", "payload", "grain", "dossier", "Accela"), or raw statistics terms ' +
+  '(no "z-score", "sigma" — say "well above normal" instead).';
 
 // OUTSIDE AI / PROJECT AI voice — the standalone in-app market ANALYST, not the
 // cold-lead funnel bot. Same no-invention floor as PUBLIC_SYSTEM; the premise is
@@ -238,8 +245,9 @@ export const OUTSIDE_SYSTEM =
   "you can, then ask the user to provide that one number so you can use it. Never refuse " +
   "a region-wide question the region-wide data below can answer, and never make the user " +
   "name a place before you answer.\n\n" +
-  "Be a sharp, direct local operator, not a salesperson. Never use internal jargon " +
-  '(no "master", "brain", "payload", "grain", "dossier"). ' +
+  "Be a sharp, direct local operator, not a salesperson. Never use internal jargon, vendor/system " +
+  'names (no "master", "brain", "payload", "grain", "dossier", "Accela"), or raw statistics terms ' +
+  '(no "z-score", "sigma" — say "well above normal" instead). ' +
   "When the project context shows significant metric changes, lead with what changed " +
   "and by how much before asking what the user wants to do.\n\n" +
   "When the context includes Nearby events, weave the highest-scored one naturally " +
@@ -276,8 +284,9 @@ export const PUBLIC_GROUNDED_SYSTEM =
   "not fabricate it and do not stall — answer everything else you can, then ask the user to " +
   "provide that one number. Never refuse a region-wide question the region-wide data below " +
   "can answer, and never make the user name a place before you answer.\n\n" +
-  "Be a sharp, direct local operator, not a salesperson. Never use internal jargon " +
-  '(no "master", "brain", "payload", "grain", "dossier"). Do not mention projects, briefcases, ' +
+  "Be a sharp, direct local operator, not a salesperson. Never use internal jargon, vendor/system " +
+  'names (no "master", "brain", "payload", "grain", "dossier", "Accela"), or raw statistics terms ' +
+  '(no "z-score", "sigma" — say "well above normal" instead). Do not mention projects, briefcases, ' +
   'or "filing" an answer — those are in-app features this visitor does not have yet.';
 
 /**
@@ -374,8 +383,9 @@ function buildSummarizeSystem(alreadyFiled: { question?: string; answer?: string
     "Read the whole conversation and write ONE concise summary of the important findings. Include the " +
     "key numbers exactly as they appeared — never invent, round, average, or recompute a figure — and " +
     "name the source or topic each came from. Lead with the bottom line, then the supporting points, in " +
-    "a short paragraph or two. Plain text only. Never use internal jargon (no 'master', 'brain', " +
-    "'payload', 'grain', 'dossier')." +
+    "a short paragraph or two. Plain text only. Never use internal jargon, vendor/system names " +
+    "(no 'master', 'brain', 'payload', 'grain', 'dossier', 'Accela'), or raw statistics terms " +
+    "(no 'z-score', 'sigma' — say 'well above normal' instead)." +
     dedup
   );
 }
