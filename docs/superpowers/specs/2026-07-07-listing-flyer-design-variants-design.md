@@ -27,39 +27,100 @@ their edit, and deleting a block never comes back.
 
 ## Architecture
 
+**Not scoped to New Listing alone.** There are four hero-chip categories already live
+(`HERO_CAMPAIGNS` — New Listing, Just Sold, Coming to Market, Market Update), and more
+will come. A "design" is a visual language that must render consistently across ALL of
+them — so a recipient recognizes the same agent's emails whether it's a new-listing
+announcement or a just-sold card. The registry is keyed by design, and each design
+carries one builder PER CATEGORY, not one builder total.
+
 **Design registry** (`lib/email/listing-flyer-designs.ts`, new):
 
 ```
-interface ListingFlyerDesign {
+type BuildCategory = "new-listing" | "just-sold" | "coming-to-market" | "market-update";
+// extensible — a fifth category is a new union member + one builder per existing design
+
+interface DesignFamily {
   id: string;
   name: string;
   description: string;
-  showcaseId: string;       // the Showcase card this design is presented on
-  build: (facts: ListingFacts, current: EmailDoc) => EmailBlock[]; // blocks WITH layout
+  tier: "free-only" | "both" | "paid-only"; // registered in FEATURE_ROUTING, not a parallel list
+  showcaseId: string;
+  builders: Record<BuildCategory, (facts: ListingFacts, current: EmailDoc) => EmailBlock[]>;
 }
 ```
 
-- Today's `buildListingFlyer` becomes the first entry, id `"classic"`. Its output gains
-  `layout` (x/y/w/h) per block so it renders on `GridCanvas` instead of stacked — this
-  is the only behavior change to existing output, and it's covered by a golden-render
-  snapshot so the arrangement is pinned, not just "however it happens to lay out."
+- Today's `buildListingFlyer` becomes the first entry, id `"classic"`, tier `"both"`
+  (nothing regresses — this is the only design free tier will ever see). Its output
+  gains `layout` (x/y/w/h) per block so it renders on `GridCanvas` instead of stacked.
+  Its `new-listing` builder is `buildListingFlyer` as-is; the other three category
+  builders for `"classic"` are new but small (same visual language, different lead
+  block — e.g. Just Sold leads with a "Sold" badge instead of "New Listing").
+- **Completeness is enforced, not assumed.** A registry test iterates every `DesignFamily`
+  × every `BuildCategory` and fails if a builder is missing — the same discipline the
+  existing `RECIPE_IDS`/`SOCIAL_TEMPLATES` registry tests already apply (nothing ships
+  half a design). This is what "every template has to be made the same for every
+  category" means structurally: it's a gate, not a style guideline.
 - Each block declares bounds, not just a position — `minW/maxW/minH/maxH` (already a
   supported, unused-until-now part of `BlockLayout` in `lib/email/doc/types.ts`). E.g.
   the hero photo can't be squeezed narrower than stays legible; the footer stays
   `static` (already the existing lock mechanism for the unsubscribe block).
-- **Tiering** is NOT a new parallel list. A design's tier is registered in the existing
-  `FEATURE_ROUTING` dial (`lib/email/lab/capabilities.ts`) — the exact mechanism fonts
-  and features already use (`"free-only" | "both" | "paid-only"`). `capabilities.test.ts`
-  already enforces that a paid-only entry never leaks to free — a new design inherits
-  that enforcement for free by registering there, no new test infrastructure.
+- **Tiering**: free tier's resolution (below) ALWAYS returns `"classic"` — there is no
+  design choice on free, by design, not by omission. Paid tier's resolution can return
+  any `"both"` or `"paid-only"` design the user has picked.
 - **Showcase**: each design gets a `Showcase` entry (`lib/showcase/registry.ts`), same
-  shape as the existing `listing-to-close` / `launch-blitz` / `agent-launch` cards. With
-  exactly one design (this slice), the New Listing hero chip auto-selects it — no picker
-  UI ships yet. A second design is what turns the picker on: the New Listing entry point
-  shows a small design-select step (reusing `TemplateGallery`'s live-preview card
-  pattern, filtered to designs sharing this showcase family) before the address popup.
-  **This picker is out of scope for this slice** — documented here so design #2 doesn't
-  require re-deriving it.
+  shape as the existing `listing-to-close` / `launch-blitz` / `agent-launch` cards —
+  this is where a paid user discovers and picks a design, not a popup gated in front of
+  every build (see "Arrival flow" below).
+
+## Design selection — sticky per-user default, per-category override
+
+99% of builds should use the same design every time without asking. Modeled as a
+two-tier resolution, same shape `resolveUserBrand` already uses for brand colors
+(project-level override → user-level default → fallback):
+
+1. **Category override** — this user has explicitly set a different design for THIS
+   category (e.g. Just Sold looks different from everything else) → use it.
+2. **User default** — the design the user picked (anywhere) becomes their standing
+   default → use it for every category that has no override.
+3. **Base fallback** — brand-new paid user who's never picked one, or any free-tier
+   user → `"classic"`.
+
+`resolveUserDesign(supabase, userId, category): Promise<DesignId>` mirrors
+`resolveUserBrand`'s two-query shape. Storage extends the existing `user_brand_profiles`
+row (a `default_design_id` column) plus a small per-category override store (a JSONB
+column or a `user_design_overrides(user_id, category, design_id)` table — exact shape is
+an implementation-plan decision, not a spec-level one; the resolution ORDER above is
+the actual contract).
+
+**"Auto-saves to other builds"**: picking a design (however that pick happens — a design
+chooser isn't built in this slice, see Non-goals) writes the USER-level default, which is
+why it then applies to every other category automatically — that's tier 2 of the
+resolution, not a separate propagation step.
+
+## Arrival flow — no popup, build immediately, change afterward
+
+Determined (operator asked for a call, not a re-ask): **chip stays first, address
+second** — the chip selects the category, which is what the arrival needs to know
+before it can pick a builder at all; there's nothing to gain by reversing that. The
+address remains what `resolveSubjectListing` needs, unchanged from `506f799f`.
+
+**No design-picker popup before a build, ever.** With 99% of builds wanting the same
+design, gating every build behind a "pick a design" step is friction for the common case
+and contradicts the house rule already set for this exact recipe family (`506f799f`'s
+own decision: "On a resolved match → build immediately, no confirm step"). Instead:
+resolve the design via the two-tier lookup above and build immediately — the same
+behavior New Listing already has today, just now design-aware instead of hardcoded to
+one design.
+
+**"Change Template" is a standing affordance, not a gate.** Two distinct actions, both
+deferred to a fast-follow (this slice ships the resolution + one design; a chooser UI
+has nothing to choose from yet):
+- Changing the STANDING default (a settings-style pick — writes tier 2, applies to every
+  future build with no override).
+- Changing ONE category's override (writes tier 1 for that category only).
+Neither of these touches a doc already on the canvas — see the next section for why
+swapping the design under an in-progress build is explicitly a separate, later decision.
 
 ## Position-aware directional styling
 
@@ -86,9 +147,9 @@ at whatever now happens to be its new neighbor.
 
 ## Free creation is unaffected; nothing auto-touches an existing doc
 
-This feature is purely additive — it fires ONLY at the specific moment a "New Listing"
-arrival happens with no existing project doc (`arrival.ts` routing). It does not gate,
-replace, or wrap any existing entry point:
+This feature is purely additive — it fires ONLY at the specific moment one of the four
+hero-chip arrivals happens with no existing project doc (`arrival.ts` routing). It does
+not gate, replace, or wrap any existing entry point:
 
 - "Start blank," the template gallery, and every generic AI recipe stay exactly as they
   are today — a user who wants to freely compose from scratch always can.
@@ -97,12 +158,12 @@ replace, or wrap any existing entry point:
   and the explicit per-block "ask AI" click (already restricted to content fields only —
   it cannot touch colors, links, or identity, so it can't clobber a user's styling even
   when invoked). No toggle is needed for this slice because nothing auto-re-triggers.
-- **Forward note, not built here:** the first time a feature lets a user pick a
-  DIFFERENT design after they've already started building, or "refresh" listing data on
-  a doc they've since customized, that action needs to know whether the doc has been
-  touched since it was built — and confirm before replacing anything rather than
-  silently overwriting. No such re-trigger exists yet, so no guard exists yet; this is
-  written down so it isn't skipped when one is added.
+- **Named next feature, not built here:** "Change Template" (above) only ever changes
+  which design future builds use — it does not touch a doc already on the canvas. The
+  moment a "swap THIS doc's design after I've started editing it" action is built, it
+  needs to know whether the doc has been touched since it was built, and confirm before
+  replacing anything rather than silently overwriting. Written down now so it isn't
+  skipped when that action is added.
 
 ## Durability contract (explicit, test-enforced)
 
@@ -129,10 +190,17 @@ feature runs a background re-sync against it.
 
 ## Testing
 
-- Golden-render snapshot for the `"classic"` design's now-gridded output (pins the fixed
-  arrangement — same pattern as `lib/email/render-golden.test.ts`).
+- Golden-render snapshot for `"classic"`'s now-gridded output, per category (pins the
+  fixed arrangement for New Listing / Just Sold / Coming to Market / Market Update
+  separately — same pattern as `lib/email/render-golden.test.ts`).
+- **Completeness gate**: iterate every registered `DesignFamily` × every `BuildCategory`,
+  fail if a builder is missing — the test that makes "every template made the same for
+  every category" a build-time guarantee, not a hope.
 - Layout-bounds sanity test: every declared block's `minW/maxW/minH/maxH` is internally
   consistent (min ≤ max, fits within `GRID_COLS`).
+- **Resolution-order test** for `resolveUserDesign`: category override beats user
+  default beats base fallback; a free-tier user resolves to `"classic"` regardless of
+  any override/default present on their row (free never sees a choice, even a stale one).
 - `capabilities.test.ts` coverage extends automatically once `"classic"` is registered in
   `FEATURE_ROUTING` — no new test file needed for tiering itself.
 - A regression test asserting a doc missing a block (simulating a user's delete) is
@@ -141,10 +209,17 @@ feature runs a background re-sync against it.
 
 ## Non-goals / v1 limits (honest)
 
-- No design picker UI — one design, auto-selected. Documented above as the exact seam
-  design #2 turns on.
-- No additional designs built. The registry + tiering + showcase + bounds pattern is
-  proven on `"classic"`; a second design is "repeat the pattern," not new mechanism.
+- No design-picker/chooser UI — one design (`"classic"`) exists, so the resolution chain
+  always lands on it regardless of tier. The resolution ORDER and storage ship now;
+  there's simply nothing to choose from yet. A second design is what turns the chooser on.
+- No additional designs built. The registry + completeness gate + tiering + showcase +
+  bounds pattern is proven on `"classic"` across all four categories; a second design is
+  "repeat the pattern," not new mechanism.
+- No "Change Template" UI (settings-level default change, or per-category override
+  change) — the resolution function and storage it reads from ship now; the UI that
+  writes to that storage is the fast-follow once there's a second design to pick.
+- No swap-design-on-an-already-built-doc action — flagged above as the one place a
+  touched-since-built guard will be required later.
 - No AI-authored prose in any flyer — today's flyer (and this slice) restates only real
   MLS remarks text, omitting what's missing. An AI-written blurb slot (raised earlier
   this session) is a separate future increment, not part of this spec.
