@@ -214,7 +214,11 @@ Goals 0–8: Supabase `goals` table → `/ops/goals`. Insert-only from sessions.
 - **G2:** Derivable now → derive + backfill + wire pipeline. Not derivable → park in deferred.
 - **G3:** New `zip_code` on Tier-2 without consuming brain in same PR = violation.
 
-**SCOPE:** 6-county (Charlotte 12015, Collier 12021, Glades 12043, Hendry 12051, Lee 12071, Sarasota 12115). Source: `fixtures/swfl-zip-county.json`.
+**SCOPE:** Lee (12071) + Collier (12021) — the two core, data-rich counties; Hendry (12051) is a small
+minor addition, not a headline county. Charlotte/Glades/Sarasota are NOT real coverage today — don't
+claim them. `fixtures/swfl-zip-county.json` is a ZIP↔county geographic crosswalk reference covering more
+counties than that; a crosswalk entry existing is not the same as having real data for that county.
+Locked 07/07/2026 (operator correction — this line previously overclaimed "6-county").
 
 ---
 

@@ -1,3 +1,20 @@
+## 2026-07-07 (main) — CLAUDE.md SCOPE corrected: Lee+Collier (core), Hendry minor, NOT 6-county
+
+Operator, blunt and direct: "We don't have data on those other places really... what does it say 6 for
+still? We are Lee and Collier. Hendry is small and we don't even need to really talk about it. Change it
+to be correct and push." The SCOPE line (was: "6-county, Charlotte/Collier/Glades/Hendry/Lee/Sarasota,
+source fixtures/swfl-zip-county.json") overclaimed — that fixture is a ZIP↔county geographic crosswalk
+reference covering more counties than we have real DATA for; a crosswalk entry existing isn't the same
+as real coverage. Corrected to: Lee + Collier are the two core, data-rich counties; Hendry is a small
+minor addition; Charlotte/Glades/Sarasota are not real coverage today, don't claim them. This also
+resolves the internal contradiction already in the file — the rules-of-engagement SCOPE rule (line 175)
+already said "Lee/Collier" only; the Brain Factory SCOPE line (was line 217) was the stale, overclaiming
+one. No code changed — this is the doc-level correction; individual brains' own `covers` lists
+(`lib/zip-dossier.ts` `BRAIN_GEO`, e.g. `hurricane-tracks-fl`/`env-swfl`/`storm-history-swfl` using NOAA/
+FEMA federal data that's genuinely available county-by-county regardless of our own vendor limits) were
+NOT touched or audited in this pass — this was the CLAUDE.md scope-declaration fix specifically, not a
+full per-brain scope audit.
+
 ## 2026-07-07 (main) — Pulse Phase 1 Task 6: city-pulse-daily re-enabled (crawl4ai retrofit live-verified)
 
 Operator-approved paid dry-run on the GHA runner (run 28883520933) confirmed the crawl4ai-fetch +
