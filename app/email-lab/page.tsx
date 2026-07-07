@@ -2,18 +2,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { signedInLabArrival } from "@/lib/lab-entry/destination";
-import { buildZipSeedDoc } from "@/lib/email/zip-seed";
-import { EmailLabClient } from "./EmailLabClient";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Email Lab — Design Surface" };
 
-// Cockpit D4 — signed-in users work in their project's Email tab; the
-// standalone lab stays the anonymous taste-surface until Phase 2.
-// ?zip=<5-digit> (homepage map click) seeds the ZIP email prebuild on EVERY
-// path: anonymous opens it here; signed-in carries it through the redirect so
-// the project Email tab seeds the same doc with their brand applied.
+// Cockpit D4 / retire-block-shell (2026-07-07): the block-canvas standalone is
+// gone. The GRID lab is the ONE email surface. Signed-in users go to their
+// project's Email tab (which owns the project/address popups); anonymous visitors
+// go to the anonymous grid lab. Every param rides the redirect so nothing drops.
 export default async function EmailLabPage({
   searchParams,
 }: {
@@ -21,9 +18,6 @@ export default async function EmailLabPage({
 }) {
   const sp = await searchParams;
   const zip = /^\d{5}$/.test(sp.zip ?? "") ? (sp.zip as string) : null;
-  // A pill/showcase "Make this →" (?recipe=/?recipeNeeds=) that lands here
-  // (the block-canvas standalone) rides through to the grid canvas via the
-  // redirect below — the block canvas itself has no Build box to seed, Grid-only.
   const recipe = sp.recipe ?? null;
   const recipeNeeds = sp.recipeNeeds ?? null;
 
@@ -32,16 +26,19 @@ export default async function EmailLabPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (user) {
-    // The dying block-canvas standalone never grows the new-build flow — send
-    // signed-in visitors to the grid lab, which owns the project/address popups
-    // (spec 2026-07-06 §A). The grid page then asks which project (or auto-creates
-    // one when they have none). Params ride the redirect so nothing is dropped.
     redirect(signedInLabArrival({ zip, recipe, recipeNeeds }));
   }
 
-  const seedDoc = zip ? await buildZipSeedDoc(zip) : null;
-  // `ref` = outreach attribution (REF_RE-validated at claim time); rides into
-  // the send-to-self capture instead of a claim token.
-  const refCode = typeof sp.ref === "string" ? sp.ref : null;
-  return <EmailLabClient initialDoc={seedDoc} zip={zip} refCode={refCode} />;
+  // Anonymous: the grid lab is the taste surface. Carry every param through —
+  // zip/addr seed the prebuild, recipe/recipeNeeds ride the Make-this handoff.
+  // `ref` (outreach attribution) was a dead prop on the old block shell; it's
+  // preserved in the URL for the grid path to consume if/when wired.
+  const params = new URLSearchParams();
+  if (zip) params.set("zip", zip);
+  if (sp.addr) params.set("addr", sp.addr);
+  if (recipe) params.set("recipe", recipe);
+  if (recipeNeeds) params.set("recipeNeeds", recipeNeeds);
+  if (typeof sp.ref === "string" && sp.ref) params.set("ref", sp.ref);
+  const qs = params.toString();
+  redirect(`/email-lab/grid${qs ? `?${qs}` : ""}`);
 }

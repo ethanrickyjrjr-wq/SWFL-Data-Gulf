@@ -6,7 +6,7 @@
 //   • FooterBlock's social row (lib/email/blocks/FooterBlock.tsx)
 //   • the standalone social-icons block (lib/email/blocks/SocialIconsBlock.tsx)
 //   • the icon registry (components/email-lab/social-icons/index.tsx)
-//   • applyBrand token-fill (components/email-lab/EmailLabShell.tsx)
+//   • applyBrand token-fill (lib/email/brand/apply-brand.ts)
 //   • the BrandingBlock "Connect Socials" form
 //
 // Add a platform in EXACTLY one place — append an entry below. The icon registry
@@ -21,7 +21,7 @@ export interface PlatformMeta {
   label: string;
   /** Brand color used for the "original" icon color and footer link color. */
   brandColor: string;
-  /** applyBrand token key (uppercase) — see EmailLabShell.applyBrand. */
+  /** applyBrand token key (uppercase) — see lib/email/brand/apply-brand.ts. */
   tokenKey: string;
   /** projects.branding / user_brand_profiles column name (lowercase). */
   brandingKey: string;

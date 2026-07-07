@@ -29,8 +29,6 @@ export interface EmailLabCapabilities {
   gridCanvas: boolean;
   /** In-canvas photo editor (Filerobot). */
   photoEditor: boolean;
-  /** Classic-templates preview rail. */
-  classicTemplates: boolean;
   /** Social calendar panel. */
   socialCalendar: boolean;
   /** Lab-entry root: project/address popups + autosave + leave guard. */
@@ -42,7 +40,6 @@ export const FEATURE_ROUTING: Record<keyof EmailLabCapabilities, Routing> = {
   authorEngine: "paid-only",
   gridCanvas: "paid-only",
   photoEditor: "paid-only",
-  classicTemplates: "free-only",
   // PAID-ONLY — social calendar is a premium feature. NOTE the wiring is currently
   // backwards vs this dial: the FREE shell still renders SocialCalendarPanel and the
   // PAID shell doesn't. Bringing reality into compliance = gate the free shell's

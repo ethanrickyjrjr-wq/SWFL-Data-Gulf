@@ -2,16 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { EmailLabShell } from "@/components/email-lab/EmailLabShell";
 import { EmailLabGridShell } from "@/components/email-lab/EmailLabGridShell";
 import { DEFAULT_H } from "@/components/email-lab/GridCanvas";
 import { ensureGridLayouts } from "@/lib/email/doc/grid-layouts";
-import {
-  emailCanvasPref,
-  nextCanvasAfterChoice,
-  type EmailCanvas,
-  type SwitchChoice,
-} from "@/lib/email/lab/canvas-pref";
 import { defaultDoc, seedById, SEED_DOCS, type SeedDoc } from "@/lib/email/doc/default-docs";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
@@ -64,11 +57,10 @@ interface Props {
   subjectAddress?: string | null;
 }
 
-// Project-scoped Email tool (cockpit D2). GRID is the default canvas (per-section
-// AI editing); the block canvas is the fallback via a per-project toggle persisted
-// in ui_state.email_canvas. Both canvases operate on the same EmailDoc — the
-// toggle re-renders without converting or rewriting the saved doc. Auto-fills on
-// mount when no saved doc is loaded (?did absent).
+// Project-scoped Email tool (cockpit D2). The GRID canvas is the ONE authoring
+// surface (per-section AI editing); the block canvas was retired 2026-07-07
+// (retire-block-shell) — a stored ui_state.email_canvas is now ignored. Auto-fills
+// on mount when no saved doc is loaded (?did absent).
 export function ProjectEmailLabClient({
   projectId,
   projectTitle,
@@ -82,7 +74,6 @@ export function ProjectEmailLabClient({
   hasDeliverables,
   autoOpenSchedule,
   projectPhotos,
-  uiState,
   initialSequence,
   arcStep,
   subjectAddress,
@@ -120,17 +111,12 @@ export function ProjectEmailLabClient({
       return (seedById("skeleton-clean-white") ?? SEED_DOCS[0]).build();
     return defaultDoc();
   });
-  const [canvas, setCanvas] = useState<EmailCanvas>(() => emailCanvasPref(uiState));
-  // The doc the CURRENT canvas mount was seeded with (updated on switch).
+  // The doc the grid canvas mount was seeded with (updated on gallery pick).
   const [seedDoc, setSeedDoc] = useState<EmailDoc>(doc0);
-  const [confirmOpen, setConfirmOpen] = useState(false);
   // Refs, not state: the shells own the live doc; we only need it at toggle/save time.
   const currentDocRef = useRef<EmailDoc>(doc0);
   const savedDocRef = useRef<EmailDoc>(doc0);
   const dirtyRef = useRef(false);
-  // autoGenerate fires ONCE per page load — never again after a canvas toggle.
-  // State (not a ref): it feeds the autoGenerate prop, i.e. render output.
-  const [hasToggled, setHasToggled] = useState(false);
   // Lane E first-run gallery — pure UI state, never persisted (arrival plan decides).
   const [showGallery, setShowGallery] = useState(() => plan.doc.kind === "gallery");
   // A pick/Start-blank suppresses the shells' one-shot AI auto-build: on the
@@ -375,43 +361,6 @@ export function ProjectEmailLabClient({
     }
   }
 
-  function switchTo(next: EmailCanvas, seed: EmailDoc) {
-    setHasToggled(true);
-    setSeedDoc(seed);
-    setCanvas(next);
-    currentDocRef.current = seed;
-    dirtyRef.current = false;
-    // Persist the preference — additive merge of the whole bag (established
-    // patchUiState pattern). Best-effort; a miss just means the default next visit.
-    void fetch(`/api/projects/${projectId}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ui_state: { ...uiState, email_canvas: next } }),
-    });
-  }
-
-  function onTogglePress() {
-    if (!dirtyRef.current) {
-      switchTo(nextCanvasAfterChoice(canvas, "discard"), currentDocRef.current);
-      return;
-    }
-    // In-flight edits: canvases seed history independently, so switching would
-    // silently lose them. Explicit dialog — no silent loss, no silent save.
-    setConfirmOpen(true);
-  }
-
-  async function onChoice(choice: SwitchChoice) {
-    setConfirmOpen(false);
-    if (choice === "cancel") return;
-    const next = nextCanvasAfterChoice(canvas, choice);
-    if (choice === "save") {
-      await handleSave(currentDocRef.current, "");
-      switchTo(next, currentDocRef.current);
-    } else {
-      switchTo(next, savedDocRef.current); // discard in-flight edits
-    }
-  }
-
   const headerSlot = (
     <>
       <Link
@@ -424,13 +373,6 @@ export function ProjectEmailLabClient({
       <p className="mt-0.5 text-[10px] text-gulf-teal">
         {scope ? `Scope: ${scopeLabel}` : "Southwest Florida"} · real data enabled
       </p>
-      <button
-        type="button"
-        onClick={onTogglePress}
-        className="mt-2 rounded-full border border-white/15 px-2.5 py-1 text-[10px] text-white/50 transition-colors hover:border-gulf-teal/50 hover:text-gulf-teal"
-      >
-        {canvas === "grid" ? "Switch to block canvas" : "Switch to grid canvas"}
-      </button>
     </>
   );
 
@@ -441,7 +383,7 @@ export function ProjectEmailLabClient({
   // email (spec §A2). A saved/toggled/gallery-picked doc never auto-builds.
   const readyPrompt =
     buildPrompt ?? (plan.autoBuildAfterConfirm && initialRecipe ? initialRecipe.prompt : null);
-  const autoBuild = readyPrompt != null && !savedId && !hasToggled && !galleryPicked && !zipSeeded;
+  const autoBuild = readyPrompt != null && !savedId && !galleryPicked && !zipSeeded;
   const shared = {
     brandTokens: initialTokens,
     initialBranding,
@@ -499,7 +441,7 @@ export function ProjectEmailLabClient({
             onStartBlank={() => seedCanvas(defaultDoc())}
           />
         </div>
-      ) : canvas === "grid" ? (
+      ) : (
         <EmailLabGridShell
           // buildKey bumps when the address popup fires a build → remount so the
           // grid shell's mount-only autoGenerate runs with the filled prompt.
@@ -507,42 +449,6 @@ export function ProjectEmailLabClient({
           initialDoc={ensureGridLayouts(seedDoc, DEFAULT_H)}
           {...shared}
         />
-      ) : (
-        <EmailLabShell key="block" initialDoc={seedDoc} {...shared} />
-      )}
-
-      {confirmOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0a1822] p-5 shadow-2xl">
-            <h2 className="text-sm font-semibold text-white">You have unsaved changes</h2>
-            <p className="mt-1 text-xs text-white/50">
-              Switching canvases resets the edit history. Save this design first?
-            </p>
-            <div className="mt-4 flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={() => void onChoice("save")}
-                className="rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] hover:bg-[#17a3b3]"
-              >
-                Save &amp; switch
-              </button>
-              <button
-                type="button"
-                onClick={() => void onChoice("discard")}
-                className="rounded-lg border border-white/15 py-2 text-sm text-white/70 hover:bg-white/5"
-              >
-                Switch without saving
-              </button>
-              <button
-                type="button"
-                onClick={() => void onChoice("cancel")}
-                className="py-1 text-xs text-white/40 hover:text-white/70"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       {addressOpen && recipeBlank && (
