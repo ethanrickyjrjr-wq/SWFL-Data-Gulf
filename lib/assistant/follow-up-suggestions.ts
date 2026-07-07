@@ -1,9 +1,15 @@
 // suggestFollowUps — static, zero-latency follow-up chips shown under a completed
-// chat answer (BriefcaseChat). No LLM call: topic-keyword matched off the USER
-// question that produced the answer, same doctrine as lib/highlighter/suggestions.ts
+// chat answer (BriefcaseChat). No LLM call: topic-keyword matched off the question
+// AND the answer that produced it, same doctrine as lib/highlighter/suggestions.ts
 // (never definitional — don't assume the user doesn't know what a term means).
 // Purely additive UI — a miss (no topic matched) still returns the generic set, so
 // a follow-up row always renders once an answer completes.
+//
+// Matching the answer text (not just the question) matters because the chips
+// themselves get fed back in: clicking a GENERIC_FOLLOW_UPS chip resubmits its own
+// literal text as the next "question" ("What's driving this?" etc contain no topic
+// keyword by design), so question-only matching can never escape the generic bucket
+// once it's hit, no matter how specific the conversation has become.
 
 const TOPIC_FOLLOW_UPS: Array<{ keywords: RegExp; chips: string[] }> = [
   {
@@ -66,12 +72,16 @@ const GENERIC_FOLLOW_UPS = [
   "What should I watch next?",
 ];
 
-/** Up to 3 follow-up chips for the answer to `question`. Deterministic, no model
- *  call, never empty — falls to GENERIC_FOLLOW_UPS when no topic keyword matched. */
-export function suggestFollowUps(question: string): string[] {
-  if (!question || typeof question !== "string") return GENERIC_FOLLOW_UPS;
+/** Up to 3 follow-up chips for the answer to `question`. `answer` is the assistant's
+ *  reply text — pass it so topic drift the answer surfaces (e.g. a generic question
+ *  that got a flood-risk answer) still matches, instead of only matching the question
+ *  that triggered it. Deterministic, no model call, never empty — falls to
+ *  GENERIC_FOLLOW_UPS when neither matched a topic keyword. */
+export function suggestFollowUps(question: string, answer?: string): string[] {
+  const haystack = [question, answer].filter((s): s is string => typeof s === "string").join(" ");
+  if (!haystack) return GENERIC_FOLLOW_UPS;
   for (const { keywords, chips } of TOPIC_FOLLOW_UPS) {
-    if (keywords.test(question)) return chips;
+    if (keywords.test(haystack)) return chips;
   }
   return GENERIC_FOLLOW_UPS;
 }

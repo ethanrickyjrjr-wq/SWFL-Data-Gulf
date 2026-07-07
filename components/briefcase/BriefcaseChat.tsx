@@ -270,7 +270,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
   const lastUserQuestion = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
   const followUps =
     !busy && lastMsg?.role === "assistant" && lastMsg.content.length > 0
-      ? suggestFollowUps(lastUserQuestion)
+      ? suggestFollowUps(lastUserQuestion, lastMsg.content)
       : [];
 
   return (

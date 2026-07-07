@@ -1,3 +1,21 @@
+## 2026-07-07 (main) — Fixed follow-up chip generic-bucket trap in BriefcaseChat
+
+Operator flagged (screenshots of the homepage AI+Briefcase widget) that two totally different
+answers — one on CRE cap rates, one on flood/NFIP — ended in the identical 3 follow-up chips.
+Root cause: `suggestFollowUps()` (`lib/assistant/follow-up-suggestions.ts`) topic-matches only
+the USER QUESTION that produced the answer, and clicking any chip calls `submit(chipText)` —
+resubmitting the chip's own literal text as the next question. None of the 3 GENERIC_FOLLOW_UPS
+chips ("What's driving this?", "How does this compare to nearby areas?", "What should I watch
+next?") contain a topic keyword by design, so once a conversation lands in the generic bucket
+(off-topic first question, or clicking a generic chip), it can never escape — every subsequent
+click re-derives the same generic set regardless of what the assistant's answer actually
+discussed. Fix: `suggestFollowUps(question, answer?)` now matches against question+answer
+combined; `BriefcaseChat.tsx:273` now passes `lastMsg.content` (the assistant's own answer) as
+the second arg, so topic drift in the answer breaks the loop. Added
+`lib/assistant/follow-up-suggestions.test.ts` (5 tests incl. a named regression for the trap).
+Verified: `bun test` (5/5 pass) + `bunx next build` (exit 0, clean). Not yet pushed — awaiting
+operator go-ahead.
+
 ## 2026-07-07 (main) — Starter repriced $9.99→$19.99/mo (+annual), LIVE Stripe reprice executed; dropped dead chart-experience check
 
 Operator: "make starter price 19.99, fix the yearly too, push." Updated `lib/billing/tiers.ts`
