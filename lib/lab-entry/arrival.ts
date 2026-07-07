@@ -71,8 +71,12 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
   // never confirm.
   const projectConfirm = input.signedIn && !input.insideProject && input.offeredProject !== null;
 
-  // Map prebuild — the ZIP is the subject, so no address popup.
-  if (/^\d{5}$/.test(trimmed(params.zip))) {
+  // Map / zip-report prebuild — the ZIP is the subject, so no address popup.
+  // BUT only when no recipe rode along: the hero/new-listing address flow carries
+  // zip (as scope) AND a recipe (the real subject) together, and the recipe must
+  // win. Checking zip first here discarded the address-anchored recipe and dropped
+  // every New-Listing arrival onto the generic ZIP city card (07/06/2026 screenshot).
+  if (/^\d{5}$/.test(trimmed(params.zip)) && !trimmed(params.recipe)) {
     return { doc: { kind: "zip", zip: params.zip! }, projectConfirm, addressPopup: false, ...dead };
   }
 

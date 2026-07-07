@@ -29,11 +29,29 @@ describe("planArrival", () => {
     expect(p.addressPopup).toBe(false);
   });
 
-  test("?zip= signed-in standalone → zip doc + project confirm, NO address popup", () => {
+  test("?zip= ONLY (map / zip-report click, no recipe) → zip doc + project confirm, NO address popup", () => {
     const p = planArrival({ ...base, params: { zip: "33901" } });
     expect(p.doc).toEqual({ kind: "zip", zip: "33901" });
     expect(p.projectConfirm).toBe(true);
     expect(p.addressPopup).toBe(false);
+  });
+
+  test("?recipe= + ?addr= + ?zip= together (real New-Listing arrival) → BLANK, recipe wins over the ZIP card", () => {
+    // heroDestination ALWAYS carries zip (scope) alongside the address-anchored
+    // recipe. The zip branch used to fire first and drop this onto the generic
+    // ZIP city card — the 07/06/2026 screenshot. The recipe is the subject; it wins.
+    const p = planArrival({
+      ...base,
+      params: {
+        recipe: "Just listed 123 Palm Ave, Fort Myers",
+        addr: "123 Palm Ave, Fort Myers",
+        zip: "33908",
+      },
+      recipeHasBlank: false,
+      recipeInputKind: "address",
+    });
+    expect(p.doc).toEqual({ kind: "blank" });
+    expect(p.autoBuildAfterConfirm).toBe(true);
   });
 
   test("?recipe= signed-in standalone → BLANK skeleton + confirm + address popup", () => {

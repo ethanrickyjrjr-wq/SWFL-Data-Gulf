@@ -1,3 +1,20 @@
+## 2026-07-07 (main) — FIX: homepage hero buttons dropped the listing onto a generic ZIP card — recipe now wins in planArrival
+
+Operator screenshot: clicking a New-Listing address suggestion on the homepage produced a generic "Fort Myers
+ZIP 33908" city report card instead of the address-anchored listing email. Root cause (RULE 0.5 code-probe,
+not memory): `HeroCampaign.pick()` → `heroDestination(new-listing, {filled, zip})` emits a URL carrying
+`recipe` + `addr` + `zip` TOGETHER, but `lib/lab-entry/arrival.ts planArrival` evaluated the `zip` branch
+BEFORE the `recipe` branch — so the ZIP city card short-circuited and the address-anchored recipe was never
+reached. Every hero chip (New Listing / Just Sold / Coming to Market / Market Update) was hit by this, not
+just New Listing. The existing hero test was a false green: it built the hero case WITHOUT the `zip` param
+that `heroDestination` always emits. Fix: gate the zip branch on `!trimmed(params.recipe)` so a present recipe
+(the real subject) wins; the zip still rides along as scope via `intoProject`. Added a regression test pinning
+`{recipe, addr, zip}` together → `blank` (recipe wins) and kept zip-only → `zip`. `bun test arrival` green.
+Advisor caught that the real path was the suggestion CLICK handler (`HeroCampaign.pick`), not the bare-typed
+`resolveAddressDestination` — verified the click URL carries the recipe before committing to the fix.
+Separately found (NOT fixed here): `campaigns.test.ts` cadence test red on clean HEAD — a `"once"` Cadence
+value missing from `CADENCE_COLORS`. Pre-existing, unrelated. Next: deploy to eyeball the four built emails live.
+
 ## 2026-07-07 (main) — Property Watch v1 BUILT (held for push): nearby-comp movement nudges, extends project_events
 
 Built the approved design (`docs/superpowers/specs/2026-07-07-property-watch-design.md`) after a full
