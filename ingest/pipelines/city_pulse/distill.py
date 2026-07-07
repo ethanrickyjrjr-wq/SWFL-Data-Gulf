@@ -175,7 +175,7 @@ def live_story_keys(city: str) -> list[str]:
         return []  # pre-migration / dry-run / no-DB → grounding simply unavailable
 
 
-def distill_capture(capture: dict[str, Any]) -> list[dict[str, Any]]:
+def distill_capture(capture: dict[str, Any], budget=None) -> list[dict[str, Any]]:
     """One forced-tool-use call: extract facts from the capture's citation spans,
     then post-process into rows. No web search here.
 
@@ -242,7 +242,9 @@ def distill_capture(capture: dict[str, Any]) -> list[dict[str, Any]]:
         tool_choice={"type": "tool", "name": "record_city_facts"},
         messages=[{"role": "user", "content": prompt}],
     )
-    log_api_usage(model=msg.model, call_type="ingest_city_pulse_distill", usage=msg.usage)
+    cost = log_api_usage(model=msg.model, call_type="ingest_city_pulse_distill", usage=msg.usage)
+    if budget is not None:
+        budget.charge(cost)
     extraction = next(
         (b.input for b in msg.content if getattr(b, "type", None) == "tool_use"),
         {"facts": []},

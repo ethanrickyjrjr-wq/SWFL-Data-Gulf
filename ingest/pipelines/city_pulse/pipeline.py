@@ -1,15 +1,14 @@
 """SWFL city pulse — daily current-events capture -> Tier-1 cold + Tier-2 distilled.
 
-Per city: one Anthropic web_search_20250305 call captures current signals
-(openings, layoffs, construction starts, major sales, disasters). The raw
-response + flattened citations[] is written to Tier-1 cold storage; distill.py
-then turns it into citation-backed rows in data_lake.city_pulse.
+Per city: the free news lake (data_lake.news_articles_swfl, crawl4ai-fed by the
+news_swfl pipeline) is matched against the city name (ingest.lib.pulse_match)
+and packed into the capture shape distill.py already consumes. The raw
+matched-article set + flattened citations[] is written to Tier-1 cold storage;
+distill.py then turns it into citation-backed rows in data_lake.city_pulse.
 
-Tool version: web_search_20250305 — NOT web_search_20260209. The 20260209
-dynamic filtering suppresses per-claim citations[] (repo A/B 2026-05-26:
-9 vs 0 cited_text spans). Per-claim citations are the no-hallucination spine.
-See ingest/pipelines/corridor_grounded/pipeline.py and
-docs/vendor-notes/anthropic-web-search-wire-up.md.
+Retrofit (Phase 1, 07/07/2026): replaces the paid web_search_20250305 capture
+(dead code removed) with the $0 lake-read capture. See
+docs/superpowers/plans/2026-07-07-pulse-intelligence-engine/01-phase1-plan.md.
 
 Env: ANTHROPIC_API_KEY + SUPABASE_URL + SUPABASE_SERVICE_KEY +
 DESTINATION__POSTGRES__CREDENTIALS.
@@ -23,21 +22,18 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import anthropic
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
-from ingest.lib.api_usage import (  # noqa: E402
-    RunBudget, RunBudgetExceeded, log_api_usage, search_count,
-)
+from ingest.lib.api_usage import RunBudget, RunBudgetExceeded, log_api_usage  # noqa: E402
+from ingest.lib.pulse_lake import build_capture, load_recent_articles  # noqa: E402
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import upsert_inventory_row  # noqa: E402
 from ingest.pipelines.city_pulse.distill import (  # noqa: E402
@@ -52,123 +48,16 @@ CITIES = [
 ]
 
 MODEL = "claude-sonnet-4-6"
-SEARCH_TOOL_VERSION = "web_search_20250305"
 BUCKET = "lake-tier1"
-
-# Audited domains. naplesnews.com + news-press.com BLOCK Anthropic's crawler
-# (verified in corridor_grounded), so SWFL news comes from the publishers below
-# plus county/gov/state primary sources. Do NOT add the blocked papers.
-ALLOWED_DOMAINS = [
-    "gulfshorebusiness.com",
-    "businessobserverfl.com",
-    "winknews.com",
-    "leegov.com",
-    "colliercountyfl.gov",
-    "capecoral.gov",
-    "cityftmyers.com",
-    "leepa.org",
-    "collierappraiser.com",
-    "floridajobs.org",
-    "bls.gov",
-    "census.gov",
-    # Barrier-island locals — primary sources for Marco Island and Sanibel/Captiva.
-    "marcoislandeagle.com",
-    "islandreporter.com",
-]
 
 
 def slug(city: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-")
 
 
-QUERY_TEMPLATE = (
-    "Provide a current-events briefing for {city}, Florida (Southwest Florida, "
-    "Lee or Collier County) covering the LAST 7 DAYS. Surface concrete, dated "
-    "developments in these areas:\n"
-    "- New business openings, closings, expansions, or major hiring/layoffs.\n"
-    "- Commercial building sales, large lease signings, or land acquisitions.\n"
-    "- Construction starts, planning-board approvals, or permit milestones.\n"
-    "- Storm, flood, or disaster impacts to the local economy.\n\n"
-    "Quote specific figures, company names, dollar amounts, and dates. Cite each "
-    "claim to its primary source (local news, county records, company releases)."
-)
-
-USER_LOCATION = {
-    "type": "approximate",
-    "city": "Fort Myers",
-    "region": "Florida",
-    "country": "US",
-    "timezone": "America/New_York",
-}
-
-
-def _extract_citations(content: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Flatten all non-null citations from model_dump() content blocks, deduped."""
-    seen: set[str] = set()
-    out: list[dict[str, Any]] = []
-    for block in content:
-        for c in block.get("citations") or []:
-            key = f"{c.get('url')}|{c.get('cited_text', '')[:60]}"
-            if key in seen:
-                continue
-            seen.add(key)
-            out.append({
-                "url": c.get("url"),
-                "title": c.get("title"),
-                "cited_text": c.get("cited_text"),
-                "type": c.get("type"),
-            })
-    return out
-
-
-def build_record(city: str, query: str, response_dump: dict[str, Any], run_at: str) -> dict[str, Any]:
-    content = response_dump.get("content", [])
-    citations = _extract_citations(content)
-    usage = response_dump.get("usage", {}) or {}
-    return {
-        "city": city,
-        "city_slug": slug(city),
-        "query": query,
-        "model": MODEL,
-        "tool_version": SEARCH_TOOL_VERSION,
-        "run_at": run_at,
-        "input_tokens": usage.get("input_tokens"),
-        "output_tokens": usage.get("output_tokens"),
-        "stop_reason": response_dump.get("stop_reason"),
-        "response": response_dump,
-        "citations": citations,
-        "cited_text_count": len(citations),
-    }
-
-
-def run_city_search(
-    city: str, run_at: str, budget: RunBudget | None = None
-) -> dict[str, Any]:
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    query = QUERY_TEMPLATE.format(city=city)
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=4096,
-        tools=[{
-            "type": SEARCH_TOOL_VERSION,
-            "name": "web_search",
-            "max_uses": 8,
-            "allowed_domains": ALLOWED_DOMAINS,
-            "user_location": USER_LOCATION,
-        }],
-        messages=[{"role": "user", "content": query}],
-    )
-    cost = log_api_usage(
-        model=response.model,
-        call_type="ingest_city_pulse",
-        usage=response.usage,
-        searches=search_count(response.usage),
-    )
-    if budget is not None:
-        budget.charge(cost)
-    return build_record(city, query, response.model_dump(), run_at)
-
-
+def build_city_capture(city: str, run_at: str, articles: list) -> dict:
+    """Lake-fed replacement for run_city_search: no paid web_search, no API call."""
+    return build_capture("city", city, run_at, articles)
 
 
 def to_ndjson(records: list[dict[str, Any]]) -> bytes:
@@ -195,35 +84,32 @@ def main(argv: list[str] | None = None) -> int:
     run_key = now.strftime("%Y%m%dT%H%M%SZ")
     yyyy, mm = f"{now.year:04d}", f"{now.month:02d}"
 
-    # Hard run budget (operator guard 07/05/2026): 13 cities x ~$0.30 structural
-    # ceiling per capture (<=8 searches @ $0.01 + ~60K in @ $3/MTok + 4K out
-    # @ $15/MTok) ~= $4 expected; cap at 2x. Crossing it = misbehaving run —
-    # abort loudly rather than drain the account. Override: CITY_PULSE_MAX_USD.
-    budget = RunBudget("city_pulse", default_usd=8.0, env_var="CITY_PULSE_MAX_USD")
+    # Hard run budget (operator guard 07/05/2026): the retrofit's only paid call
+    # left is the Sonnet distill (~$0.03-0.07/unit), so 13 cities structurally
+    # ceilings well under $1. Crossing it = misbehaving run — abort loudly
+    # rather than drain the account. Override: CITY_PULSE_MAX_USD.
+    budget = RunBudget("city_pulse", default_usd=1.0, env_var="CITY_PULSE_MAX_USD")
+
+    articles = load_recent_articles(window_days=7)
+    print(f"city_pulse: {len(articles)} lake articles in the 7-day window")
 
     errors: list[str] = []
     total_new = 0
     for city in cities:
         print(f"city_pulse: querying '{city}'...")
-        try:
-            record = run_city_search(city, run_at, budget)
-        except RunBudgetExceeded:
-            raise  # kill the whole run — never "continue" past a blown budget
-        except Exception as exc:
-            print(f"  -> ERROR (search): {exc!r}")
-            errors.append(city)
-            continue
-
-        cited = record["cited_text_count"]
-        print(f"  -> {cited} cited_text spans | {record['input_tokens']} in / {record['output_tokens']} out")
+        record = build_city_capture(city, run_at, articles)
+        cited = len(record["citations"])
+        print(f"  -> {cited} matched lake articles")
         if cited == 0:
-            print(f"  -> WARNING: zero cited_text spans — verify SEARCH_TOOL_VERSION is '{SEARCH_TOOL_VERSION}'")
+            print(f"  -> no lake matches for '{city}' — zero LLM calls, skipping")
 
         path = tier1_path(city, run_key, yyyy, mm)
         body = to_ndjson([record])
 
         try:
-            rows = distill_capture(record)
+            rows = distill_capture(record, budget)
+        except RunBudgetExceeded:
+            raise  # blown budget kills the whole run — never continue to the next city
         except Exception as exc:
             print(f"  -> ERROR (distill): {exc!r}")
             errors.append(city)

@@ -12,31 +12,22 @@ def test_slug_is_filesystem_safe():
     assert slug("Lehigh Acres") == "lehigh-acres"
 
 
-from ingest.pipelines.city_pulse.pipeline import _extract_citations, build_record
+from ingest.pipelines.city_pulse.pipeline import build_city_capture
 
 
-def test_extract_citations_dedupes_by_url_and_text():
-    content = [
-        {"citations": [
-            {"url": "https://gulfshorebusiness.com/a", "title": "A", "cited_text": "Amazon bought 60M of land", "type": "web_search_result_location"},
-            {"url": "https://gulfshorebusiness.com/a", "title": "A", "cited_text": "Amazon bought 60M of land", "type": "web_search_result_location"},
-        ]},
-        {"citations": None},
+def test_build_city_capture_from_lake_articles():
+    articles = [
+        {"article_url": "https://n/1", "headline": "Naples land deal",
+         "body_text": "Company bought 20 acres in Naples for $5M.",
+         "source_name": "gulfshorebusiness", "published_date": "2026-07-06"},
+        {"article_url": "https://n/2", "headline": "Estero news",
+         "body_text": "Nothing about the target city.", "source_name": "s", "published_date": "2026-07-06"},
     ]
-    out = _extract_citations(content)
-    assert len(out) == 1
-    assert out[0]["url"] == "https://gulfshorebusiness.com/a"
-
-
-def test_build_record_shape():
-    dump = {"content": [{"citations": [{"url": "https://x.com", "title": "T", "cited_text": "c"}]}],
-            "usage": {"input_tokens": 10, "output_tokens": 5}, "stop_reason": "end_turn"}
-    rec = build_record("Naples", "q", dump, "2026-05-30T00:00:00Z")
-    assert rec["city"] == "Naples"
-    assert rec["city_slug"] == "naples"
-    assert rec["tool_version"] == "web_search_20250305"
-    assert rec["cited_text_count"] == 1
-    assert rec["response"] == dump
+    cap = build_city_capture("Naples", "2026-07-07T00:00:00Z", articles)
+    assert cap["city"] == "Naples"
+    assert cap["source"] == "news_lake"
+    assert [c["url"] for c in cap["citations"]] == ["https://n/1"]
+    assert set(["city", "run_at", "citations"]).issubset(cap)
 
 
 from ingest.pipelines.city_pulse.pipeline import to_ndjson, tier1_path
