@@ -1,17 +1,17 @@
 name: City pulse daily
 
 on:
-  # PAUSED AGAIN 07/05/2026 — operator decree (ingest/CLAUDE.md, LOCKED): NO paid
-  # model web_search on a schedule. This pipeline's capture is web_search-based;
-  # the crawl4ai-fetch + Haiku-distill retrofit is in flight
-  # (docs/superpowers/specs/2026-07-05-pulse-native-fetch-retrofit-design.md).
-  # Retrofit first, re-enable second. Weekly cost-mode slot was "0 9 * * 3".
-  # schedule:
-  #   - cron: "0 9 * * 3"
+  # RE-ENABLED 07/07/2026 — crawl4ai-fetch + Sonnet-distill retrofit is live on
+  # main (docs/superpowers/plans/2026-07-07-pulse-intelligence-engine/HANDOFF.md,
+  # Task 6). Dry-run confirmed on the runner: zero web_search billing, 11 Sonnet
+  # distill calls, $0.86 total (run 28883520933). Corridor pulse stays dark —
+  # see corridor-pulse-weekly.yml.
+  schedule:
+    - cron: "0 9 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run — search + distill, print rows, no upload/DB write"
+        description: "Dry run — lake match + distill, print rows, no upload/DB write"
         required: false
         default: "false"
       city:
@@ -26,9 +26,9 @@ jobs:
   ingest:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    # 13 cities × sequential Anthropic web_search calls run ~24 min (06-15: 24m15s,
-    # 06-28: 24m11s) — a 25-min cap guillotines a normal run. 45 gives ~1.85× headroom
-    # for a busy news day (more cited spans → longer distill, more searches).
+    # Post-retrofit (lake-read + Sonnet distill, no web_search): dry-run over all
+    # 13 cities completed in 2m49s (run 28883520933, 07/07/2026). 45 keeps the old
+    # web_search-era headroom in case of lake/API slowness on a busy news day.
     timeout-minutes: 45
     steps:
       - name: Checkout

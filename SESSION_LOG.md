@@ -1,3 +1,17 @@
+## 2026-07-07 (main) — Pulse Phase 1 Task 6: city-pulse-daily re-enabled (crawl4ai retrofit live-verified)
+
+Operator-approved paid dry-run on the GHA runner (run 28883520933) confirmed the crawl4ai-fetch +
+Sonnet-distill retrofit (docs/superpowers/plans/2026-07-07-pulse-intelligence-engine/HANDOFF.md, Task 6):
+63 lake articles matched across 13 cities in the 7-day window, 61 citation-backed facts distilled, zero
+web_search rows anywhere in the run log or in api_usage_log for the run window — only 11x
+`ingest_city_pulse_distill` (claude-sonnet-4-6) totaling $0.856, plus 2 unrelated live assistant_stream
+rows. Uncommented the `schedule:` block in `.github/workflows/city-pulse-daily.yml` (cron `0 9 * * *`),
+corrected the stale web_search-era timeout comment (24min -> confirmed 2m49s post-retrofit) and the
+dry_run input description. Closed `pulse_crawl4ai_retrofit_live_verify` with the run URL + numbers.
+Corridor pulse stays DARK per the HANDOFF (1/27 corridors match any article — near-empty until Phase 3).
+Left `pulse_dedup_before_distill` open — HANDOFF requires a real (non-dry) write followed by a second
+overlapping-window run to prove no re-pay; this single dry-run doesn't cover that.
+
 ## 2026-07-07 (main) — Self-healing: deploy-triage Claude spend tracked + capped (paid-surface override recorded)
 
 Operator chose Option A (claude-code-action draft-PR) + "track spend + have guards." claude-code-action is a
