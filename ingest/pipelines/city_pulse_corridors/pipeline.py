@@ -1,10 +1,15 @@
 """SWFL corridor pulse — weekly current-events capture -> Tier-1 cold + Tier-2 distilled (Build #2).
 
-Corridor-grained, weekly sibling of ingest/pipelines/city_pulse. Per corridor: one
-capture (Anthropic web_search_20250305)
-surfaces recent commercial-real-estate / current-events signals on that corridor;
-the raw response + flattened citations[] is written to Tier-1 cold storage; distill.py
-then turns it into citation-backed rows in data_lake.city_pulse_corridors.
+Corridor-grained, weekly sibling of ingest/pipelines/city_pulse. Per corridor: the
+free news lake (data_lake.news_articles_swfl, crawl4ai-fed by the news_swfl
+pipeline) is matched against the corridor's road name (ingest.lib.pulse_match)
+and packed into the capture shape distill.py already consumes. The raw
+matched-article set + flattened citations[] is written to Tier-1 cold storage;
+distill.py then turns it into citation-backed rows in data_lake.city_pulse_corridors.
+
+Retrofit (Phase 1, 07/07/2026): replaces the paid web_search_20250305 capture
+(dead code removed) with the $0 lake-read capture. See
+docs/superpowers/plans/2026-07-07-pulse-intelligence-engine/01-phase1-plan.md.
 
 Grain: the 25 verified CRE corridors in public.corridor_profiles (live runtime
 authority). Live runs key every row on `corridor_name`. A --dry-run with no DB falls
@@ -13,9 +18,6 @@ exercisable offline — that fallback NEVER writes.
 
 Distill is SYNCHRONOUS (one forced-tool call per corridor) — 25 corridors/week does
 not justify the Batch API poll loop (Build #2 decision).
-
-Tool version: web_search_20250305 — NOT web_search_20260209 (which suppresses
-per-claim citations[], the no-hallucination spine). See the daily city_pulse pipeline.
 
 Env: ANTHROPIC_API_KEY + SUPABASE_URL + SUPABASE_SERVICE_KEY +
 DESTINATION__POSTGRES__CREDENTIALS.
@@ -29,21 +31,18 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import anthropic
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
-from ingest.lib.api_usage import (  # noqa: E402
-    RunBudget, RunBudgetExceeded, log_api_usage, search_count,
-)
+from ingest.lib.api_usage import RunBudget, RunBudgetExceeded  # noqa: E402
+from ingest.lib.pulse_lake import build_capture, load_recent_articles  # noqa: E402
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import (  # noqa: E402
     _get_connection,
@@ -54,53 +53,15 @@ from ingest.pipelines.city_pulse_corridors.distill import (  # noqa: E402
 )
 
 MODEL = "claude-sonnet-4-6"
-SEARCH_TOOL_VERSION = "web_search_20250305"
 BUCKET = "lake-tier1"
 PACK_ID = "corridor-pulse-swfl"
 
 CENTROIDS_FIXTURE = Path(__file__).resolve().parents[3] / "fixtures" / "corridor-centroids.json"
 
-# Audited domains — brokerages + county/gov/state + Gulfshore Business (the one SWFL
-# paper that does NOT block Anthropic's crawler). Mirrors corridor_grounded's set.
-# Do NOT add news-press.com or naplesnews.com (block the crawler).
-ALLOWED_DOMAINS = [
-    "cushmanwakefield.com",
-    "lsicompanies.com",
-    "creconsultants.com",
-    "ipcnaples.com",
-    "cbre.com",
-    "colliers.com",
-    "leegov.com",
-    "colliercountyfl.gov",
-    "leepa.org",
-    "collierappraiser.com",
-    "gulfshorebusiness.com",
-    "businessobserverfl.com",
-    "bls.gov",
-    "census.gov",
-    "fdot.gov",
-]
 
-USER_LOCATION = {
-    "type": "approximate",
-    "city": "Fort Myers",
-    "region": "Florida",
-    "country": "US",
-    "timezone": "America/New_York",
-}
-
-QUERY_TEMPLATE = (
-    "Provide a current-events briefing for the {corridor} corridor in Southwest "
-    "Florida (Lee or Collier County) covering the LAST 90 DAYS. Surface concrete, "
-    "dated commercial-real-estate and business developments on or immediately along "
-    "this corridor:\n"
-    "- Commercial building sales, large lease signings, or land acquisitions.\n"
-    "- Construction starts, planning-board approvals, or permit milestones.\n"
-    "- New business openings, closings, expansions, or major hiring/layoffs.\n"
-    "- Storm, flood, or disaster impacts to the corridor's economy.\n\n"
-    "Quote specific figures, company names, dollar amounts, and dates. Cite each "
-    "claim to its primary source (broker reports, county records, local news)."
-)
+def build_corridor_capture(corridor: str, run_at: str, articles: list) -> dict:
+    """Lake-fed replacement for run_corridor_search: no paid web_search, no API call."""
+    return build_capture("corridor", corridor, run_at, articles)
 
 
 def slug(corridor: str) -> str:
@@ -157,75 +118,6 @@ def resolve_corridors(corridor_arg: str | None, dry_run: bool) -> list[str]:
     return corridors
 
 
-def _extract_citations(content: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Flatten all non-null citations from model_dump() content blocks, deduped."""
-    seen: set[str] = set()
-    out: list[dict[str, Any]] = []
-    for block in content:
-        for c in block.get("citations") or []:
-            key = f"{c.get('url')}|{c.get('cited_text', '')[:60]}"
-            if key in seen:
-                continue
-            seen.add(key)
-            out.append({
-                "url": c.get("url"),
-                "title": c.get("title"),
-                "cited_text": c.get("cited_text"),
-                "type": c.get("type"),
-            })
-    return out
-
-
-def build_record(corridor: str, query: str, response_dump: dict[str, Any], run_at: str) -> dict[str, Any]:
-    content = response_dump.get("content", [])
-    citations = _extract_citations(content)
-    usage = response_dump.get("usage", {}) or {}
-    return {
-        "corridor": corridor,
-        "corridor_slug": slug(corridor),
-        "query": query,
-        "model": MODEL,
-        "tool_version": SEARCH_TOOL_VERSION,
-        "run_at": run_at,
-        "input_tokens": usage.get("input_tokens"),
-        "output_tokens": usage.get("output_tokens"),
-        "stop_reason": response_dump.get("stop_reason"),
-        "response": response_dump,
-        "citations": citations,
-        "cited_text_count": len(citations),
-    }
-
-
-def run_corridor_search(
-    corridor: str, run_at: str, budget: RunBudget | None = None
-) -> dict[str, Any]:
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    query = QUERY_TEMPLATE.format(corridor=corridor)
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=4096,
-        tools=[{
-            "type": SEARCH_TOOL_VERSION,
-            "name": "web_search",
-            "max_uses": 8,
-            "allowed_domains": ALLOWED_DOMAINS,
-            "user_location": USER_LOCATION,
-        }],
-        messages=[{"role": "user", "content": query}],
-    )
-    cost = log_api_usage(
-        model=response.model,
-        call_type="ingest_corridor_pulse",
-        usage=response.usage,
-        searches=search_count(response.usage),
-    )
-    if budget is not None:
-        budget.charge(cost)
-    return build_record(corridor, query, response.model_dump(), run_at)
-
-
-
-
 def to_ndjson(records: list[dict[str, Any]]) -> bytes:
     return ("\n".join(json.dumps(r, ensure_ascii=False) for r in records) + "\n").encode("utf-8")
 
@@ -251,35 +143,34 @@ def main(argv: list[str] | None = None) -> int:
     run_key = now.strftime("%Y%m%dT%H%M%SZ")
     yyyy, mm = f"{now.year:04d}", f"{now.month:02d}"
 
-    # Hard run budget (operator guard 07/05/2026): 27 corridors x ~$0.30
-    # structural ceiling per capture (<=8 searches @ $0.01 + ~60K in @ $3/MTok
-    # + 4K out @ $15/MTok) ~= $8 expected; cap at 2x. Crossing it = misbehaving
-    # run — abort loudly. Override: CORRIDOR_PULSE_MAX_USD.
+    # Hard run budget (operator guard 07/05/2026): the retrofit's only paid call
+    # left is the Sonnet distill (~$0.03-0.07/unit), so ~25 corridors structurally
+    # ceilings well under $1. Crossing it = misbehaving run — abort loudly
+    # rather than drain the account. Override: CORRIDOR_PULSE_MAX_USD.
     budget = RunBudget(
-        "corridor_pulse", default_usd=16.0, env_var="CORRIDOR_PULSE_MAX_USD"
+        "corridor_pulse", default_usd=1.0, env_var="CORRIDOR_PULSE_MAX_USD"
     )
+
+    articles = load_recent_articles(window_days=7)
+    print(f"corridor_pulse: {len(articles)} lake articles in the 7-day window")
 
     errors: list[str] = []
     total_new = 0
     for corridor in corridors:
         print(f"corridor_pulse: querying '{corridor}'...")
-        try:
-            record = run_corridor_search(corridor, run_at, budget)
-        except RunBudgetExceeded:
-            raise  # kill the whole run — never "continue" past a blown budget
-        except Exception as exc:
-            print(f"  -> ERROR (search): {exc!r}")
-            errors.append(corridor)
-            continue
-
-        cited = record["cited_text_count"]
-        print(f"  -> {cited} cited_text spans | {record['input_tokens']} in / {record['output_tokens']} out")
+        record = build_corridor_capture(corridor, run_at, articles)
+        cited = len(record["citations"])
+        print(f"  -> {cited} matched lake articles")
+        if cited == 0:
+            print(f"  -> no lake matches for '{corridor}' — zero LLM calls, skipping")
 
         path = tier1_path(corridor, run_key, yyyy, mm)
         body = to_ndjson([record])
 
         try:
-            rows = distill_capture(record)
+            rows = distill_capture(record, budget)
+        except RunBudgetExceeded:
+            raise  # blown budget kills the whole run — never continue to the next corridor
         except Exception as exc:
             print(f"  -> ERROR (distill): {exc!r}")
             errors.append(corridor)

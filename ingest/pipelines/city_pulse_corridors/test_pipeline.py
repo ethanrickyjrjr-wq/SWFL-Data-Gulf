@@ -52,20 +52,19 @@ def test_resolve_live_raises_on_db_error(monkeypatch):
         pipeline.resolve_corridors(None, dry_run=False)
 
 
-# ── build_record shape (distill-ready) ───────────────────────────────────────
+# ── corridor capture from the free news lake ─────────────────────────────────
 
-def test_build_record_has_distill_required_keys():
-    dump = {
-        "content": [{"citations": [
-            {"url": "https://gulfshorebusiness.com/a", "title": "A", "cited_text": "c"},
-        ]}],
-        "usage": {"input_tokens": 5, "output_tokens": 10},
-        "stop_reason": "end_turn",
-    }
-    rec = pipeline.build_record("Immokalee Rd North Naples", "q", dump, "2026-06-01T00:00:00Z")
-    # distill_capture / rows_from_extraction read exactly these:
-    for key in ("corridor", "run_at", "citations"):
-        assert key in rec
-    assert rec["corridor"] == "Immokalee Rd North Naples"
-    assert rec["citations"][0]["url"] == "https://gulfshorebusiness.com/a"
-    assert rec["cited_text_count"] == 1
+from ingest.pipelines.city_pulse_corridors.pipeline import build_corridor_capture
+
+
+def test_build_corridor_capture_matches_road_name():
+    articles = [
+        {"article_url": "https://c/1", "headline": "Cleveland Avenue redevelopment",
+         "body_text": "A 40,000 sqft lease signed on Cleveland Ave.",
+         "source_name": "businessobserver", "published_date": "2026-07-06"},
+        {"article_url": "https://c/2", "headline": "Daniels Parkway news",
+         "body_text": "Different corridor entirely.", "source_name": "s", "published_date": "2026-07-06"},
+    ]
+    cap = build_corridor_capture("Cleveland Ave Fort Myers", "2026-07-07T00:00:00Z", articles)
+    assert cap["corridor"] == "Cleveland Ave Fort Myers"
+    assert [c["url"] for c in cap["citations"]] == ["https://c/1"]
