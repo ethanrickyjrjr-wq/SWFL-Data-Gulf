@@ -27,6 +27,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Claude deploy-incident triage
+        id: claude
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -53,3 +54,15 @@ jobs:
 
             Never merge anything. If you are not confident the cause is in-repo code, default to a
             comment, not a PR. Prefer the smallest safe change.
+
+      # Spend tracking + per-run ceiling. Logs the run's real cost to
+      # public.api_usage_log (the tripwire's ledger) and reddens the workflow if
+      # a single run exceeds SELFHEAL_TRIAGE_MAX_USD.
+      - name: Track + cap triage spend
+        if: always()
+        env:
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SELFHEAL_TRIAGE_MAX_USD: ${{ vars.SELFHEAL_TRIAGE_MAX_USD || '2.00' }}
+        run: node scripts/log-triage-spend.mjs

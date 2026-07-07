@@ -1,3 +1,17 @@
+## 2026-07-07 (main) — Self-healing: deploy-triage Claude spend tracked + capped (paid-surface override recorded)
+
+Operator chose Option A (claude-code-action draft-PR) + "track spend + have guards." claude-code-action is a
+3rd-party GH Action so it can't route through our TS RunBudget client — the check-no-new-paid-surface guard
+flagged it correctly. Override recorded here (ALLOW_PAID_SURFACE=1), justified by real tracking + 4 guard layers:
+- scripts/log-triage-spend.mjs: reads claude-code-action's execution_file (output verified via action.yml,
+  RULE 0.4), extracts total_cost_usd + tokens, inserts a row into public.api_usage_log (call_type
+  'deploy_triage', env 'gha-deploy-triage') — the same ledger the tripwire reads.
+- Per-run ceiling SELFHEAL_TRIAGE_MAX_USD (default $2.00) -> reddens the workflow if one run exceeds it.
+- Pre-run --max-turns 25; label-gated (fires only on an ARMED Build-B deploy-incident); account daily/monthly
+  caps + tripwire on top.
+Offline-verified: cost parse (JSONL+array), ceiling alarm exit 1, missing-file non-fatal, YAML valid. Loop
+A->B->C complete; all dark until armed. Triage spend now per-run visible in api_usage_log.
+
 ## 2026-07-07 (main) — Self-healing deploy bots: Build C (Claude incident triage) shipped, dark
 
 Closes the loop's diagnosis rung, guarded per operator directive ("guard everything Claude runs auto",
