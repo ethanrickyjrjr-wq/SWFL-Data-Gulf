@@ -84,6 +84,26 @@ at whatever now happens to be its new neighbor.
   mechanic is written down now so any design that DOES use one (a sidebar-style agent
   card, a callout with a colored edge) gets it for free instead of re-deriving it.
 
+## Free creation is unaffected; nothing auto-touches an existing doc
+
+This feature is purely additive — it fires ONLY at the specific moment a "New Listing"
+arrival happens with no existing project doc (`arrival.ts` routing). It does not gate,
+replace, or wrap any existing entry point:
+
+- "Start blank," the template gallery, and every generic AI recipe stay exactly as they
+  are today — a user who wants to freely compose from scratch always can.
+- Nothing runs in the background against a doc once it exists. The only things that ever
+  change a built doc are the user's own actions: drag/resize/delete (pure UI, zero AI),
+  and the explicit per-block "ask AI" click (already restricted to content fields only —
+  it cannot touch colors, links, or identity, so it can't clobber a user's styling even
+  when invoked). No toggle is needed for this slice because nothing auto-re-triggers.
+- **Forward note, not built here:** the first time a feature lets a user pick a
+  DIFFERENT design after they've already started building, or "refresh" listing data on
+  a doc they've since customized, that action needs to know whether the doc has been
+  touched since it was built — and confirm before replacing anything rather than
+  silently overwriting. No such re-trigger exists yet, so no guard exists yet; this is
+  written down so it isn't skipped when one is added.
+
 ## Durability contract (explicit, test-enforced)
 
 Once a design builds onto the canvas, the doc is a **normal `EmailDoc`** —
