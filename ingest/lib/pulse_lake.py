@@ -60,3 +60,30 @@ def build_capture(
         for a in matched
     ]
     return {unit_field: unit_value, "run_at": run_at, "citations": citations, "source": "news_lake"}
+
+
+def _evict_count_sql() -> str:
+    return "SELECT count(*) FROM data_lake.news_articles_swfl WHERE published_date < %(cutoff)s"
+
+
+def _evict_sql() -> str:
+    return "DELETE FROM data_lake.news_articles_swfl WHERE published_date < %(cutoff)s"
+
+
+def evict_stale_pool(window_days: int = 45, dry_run: bool = True, conn=None) -> int:
+    """Drop raw-pool rows older than window_days. Lossless: city_pulse facts copy
+    their own source_url + cited_text; Tier-1 cold storage keeps the raw audit."""
+    cutoff = (date.today() - timedelta(days=window_days)).isoformat()
+    own = conn is None
+    conn = conn or _get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(_evict_count_sql(), {"cutoff": cutoff})
+            n = cur.fetchone()[0]
+            if not dry_run and n:
+                cur.execute(_evict_sql(), {"cutoff": cutoff})
+                conn.commit()
+        return n
+    finally:
+        if own:
+            conn.close()

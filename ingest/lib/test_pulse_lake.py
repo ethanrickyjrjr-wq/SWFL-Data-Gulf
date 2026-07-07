@@ -31,3 +31,11 @@ def test_build_capture_corridor_uses_corridor_field():
     cap = build_capture("corridor", "Immokalee Rd North Naples", "2026-07-07T00:00:00Z", arts)
     assert cap["corridor"] == "Immokalee Rd North Naples"
     assert len(cap["citations"]) == 1
+
+
+from ingest.lib.pulse_lake import _evict_sql, _evict_count_sql
+
+def test_evict_sql_targets_news_pool_by_published_date():
+    assert "delete from data_lake.news_articles_swfl" in _evict_sql().lower()
+    assert "published_date <" in _evict_sql().lower()
+    assert "count(*)" in _evict_count_sql().lower()

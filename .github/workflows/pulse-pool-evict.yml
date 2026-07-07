@@ -1,0 +1,29 @@
+name: pulse-pool-evict
+on:
+  # DISPATCH-ONLY (Phase 1). news_articles_swfl is shared with news_swfl —
+  # coordinate before scheduling. Enable via check pulse_pool_evict_enable.
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Set true to actually delete (default = dry-run count only)"
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  evict:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: pip install -r ingest/requirements.txt
+      - name: Evict stale pool
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: python -m ingest.pipelines.pulse_pool_evict ${{ github.event.inputs.apply == 'true' && ' ' || '--dry-run' }}
