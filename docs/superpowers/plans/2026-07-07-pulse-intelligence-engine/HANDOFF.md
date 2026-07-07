@@ -2,6 +2,7 @@
 
 > **Recommended model:** ⚡ Sonnet — keywords: architecture
 
+
 Pick-up doc for whoever re-enables the crons or builds Phase 2/3. Everything for this build is in this folder:
 `00-design.md` (target architecture), `01-phase1-plan.md` (the executed plan), `README.md` (follow-on uses), this file.
 
@@ -15,6 +16,15 @@ New shared modules: `ingest/lib/pulse_match.py` (deterministic matcher), `ingest
 
 ## Commits (all on origin/main)
 `9a5e583e` matcher · `ace41607` lake reader · `b1b5bbd1`+`ff93dd23` city retrofit · `f4cad5ec` corridor retrofit · `451c6bb6` eviction · `fae055f2` **C1 dedup-before-distill** · `80e59b39` doc corrections. (Plus session-log/plan-doc commits.)
+
+## Fixes & folds applied (2026-07-07, post-review)
+The independent opus review returned SHIP-WITH-FIXES; both key findings were verified against code, then:
+
+- **FIX — C1: dedup before the paid distill** (commit `fae055f2`). Before: dedup ran at `write_rows` ON CONFLICT(dedup_key), i.e. AFTER the Sonnet call, so overlapping daily windows re-paid Sonnet for articles already processed (hub cities match ~60/63, edging the $1 cap). After: `pulse_lake.known_urls_by_unit(table, unit_col)` (allowlist-guarded — only `city_pulse`/`city` and `city_pulse_corridors`/`corridor`) returns every already-written `source_url` per unit, and `build_capture(..., exclude_urls=)` drops those matched articles before the call. Recall preserved (every NEW article still distilled); ON CONFLICT remains the after-the-fact net. Wired into both pipelines' `main()`. Tests: `build_capture` exclude + `known_urls_by_unit` allowlist-reject. Check `pulse_dedup_before_distill`.
+- **FOLD — corridor lookback 7d → 14d** (commit `fae055f2`, `city_pulse_corridors/pipeline.py`). Corridor pulse runs WEEKLY, so a 14-day window gives miss-tolerance (a skipped weekly run still catches the prior week). The overlap is now free because C1 skips already-distilled articles. City stays 7d (daily).
+- **FIX — I1 doc correction** (commit `80e59b39`). The daily-ceiling preflight `ingest/CLAUDE.md` decrees is NOT wired in `api_usage.py` or the pipelines; the design doc wrongly claimed it existed. Doc corrected; gap tracked as check `ingest_daily_ceiling_preflight`. The per-run `RunBudget` (cap 1.0, charged by the distill) is the only live spend backstop today — and C1 keeps per-run cost far under it.
+- **NOTE — ship order inverted.** Post-retrofit corridor is the ~$0 near-empty unit and city is the cost risk (opposite of the old web_search-era rationale). Enable city (after C1 ✓); hold corridor.
+- Minors from the review left as-is (documented under Known limitations): hub over-match first-run payload, mirror-source dupes (Phase 2), corridor sparsity (Phase 3).
 
 ## Live-confirm evidence (real lake, operator-authorized paid dry-runs 07/07/2026)
 - Bonita Springs: 12 matched → **9 real dated sourced facts** (Oakes Landing venue proposed→withdrawn, Bonita Beach Rd data center, 2,000 homes) at **$0.065**.
