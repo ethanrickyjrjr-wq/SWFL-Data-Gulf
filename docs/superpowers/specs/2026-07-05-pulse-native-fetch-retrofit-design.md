@@ -1,3 +1,9 @@
+> **SUPERSEDED 2026-07-07** by `docs/superpowers/plans/2026-07-07-pulse-intelligence-engine/00-design.md`.
+> Direction (kill paid web_search capture) was right; three load-bearing claims here are wrong against
+> live code (re-fetch redundant — `body_text` already stored; `corridor-aliases` is a centroid map, not a
+> text matcher; crawl4ai already reaches the blocked papers). The new spec keeps Phase 1 and adds the
+> event-thread memory + per-user delivery architecture from the 07-07 design session. Read that one.
+
 # corridor+city pulse on crawl4ai — kill paid web_search captures
 
 **Date:** 2026-07-05

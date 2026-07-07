@@ -1,3 +1,23 @@
+## 2026-07-07 (main) — Pulse Intelligence Engine: brainstorm→spec→Phase-1 plan (crawl4ai capture + event-thread memory); 2 small fixes
+
+Three-part session. (1) Diagnosed operator's report: `lib/campaigns.test.ts` cadence test asserted set-EQUALITY
+between `CADENCE_ORDER` and `CADENCE_COLORS`, but "once" is deliberately in COLORS (full Record) and out of ORDER
+(freshness legend) — loosened to a subset check, 22/22 green. Reconciled build-queue: `account_quick_access_live_verify`
++ `social_pulse_swfl_live_verify` were shown `[~]` open but are `done` in the ledger (closed 07/05) — flipped both to
+`[x]`. Confirmed the two web_search pulse crons are intentionally dark (re-paused by `c974db6e` after same-day
+re-enable `80fdad43`); social-pulse-scan runs its own live daily cron (different, non-web_search pulse).
+(2) Brainstormed the pulse retrofit into a full design with the operator: cost inversion (gather free, think cheap,
+spend surgically), free-first escalation ladder, three-store model w/ promotion + 45d/+90d/permanent retention,
+two-tier memory (global event-thread ledger + per-USER delivery memory so "the Walmart I told YOU about" only fires
+on a real delivery row), rolling-summary threads. Verified spec claims vs live code — corrected 3 wrong claims in the
+07-05 spec (body_text already stored 3000 chars → re-fetch redundant; corridor-aliases is a centroid map not a text
+matcher; crawl4ai already reaches the blocked papers). Wrote it all to
+`docs/superpowers/plans/2026-07-07-pulse-intelligence-engine/` (00-design, README w/ follow-on applications, 01-phase1-plan).
+Opened checks `pulse_event_thread_ledger`, `pulse_per_user_delivery_memory`, `pulse_aggressive_gather_gapfill` (Phase 2/3,
+RULE 2.4). (3) Phase-1 plan pre-flight found + fixed: orphaned-test deletion, RunBudget must charge the distill call
+(caps 8/16→1), RunBudgetExceeded re-raise. **Next:** execute Phase 1 tasks (subagent-driven, orchestrator reviews each).
+Nothing pushed. Check `pulse_crawl4ai_retrofit_live_verify` = Phase 1 live-verify.
+
 ## 2026-07-07 (main) — fix: `communities-swfl` missing BRAIN_GEO entry — was red CI + prod 500 on every /r/zip-report/[zip]
 
 Operator asked "is GitHub in good shape" — it wasn't. CI had been red on every push since ~03:03 (7
