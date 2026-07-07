@@ -543,7 +543,7 @@ EOF
 **Files:**
 - 🔴 Modify: `ingest/lib/pulse_lake.py` (add `evict_stale_pool`)
 - Create: `ingest/pipelines/pulse_pool_evict.py` (CLI runner with `--dry-run`)
-- Create: `.github/workflows/pulse-pool-evict-daily.yml` (cron wrapper, `--dry-run` default)
+- Create: `.github/workflows/pulse-pool-evict.yml` (dispatch-only wrapper, `--dry-run` default)
 - 🔴 Test: `ingest/lib/test_pulse_lake.py` (add SQL-shape test)
 
 **Safety note (put in the module docstring):** deleting an aged `news_articles_swfl` row is lossless — every `city_pulse` fact copies its own `source_url` + `cited_text` at distill time (`rows_from_extraction`), and Tier-1 cold storage holds the permanent raw audit. So age-based eviction never breaks a live fact. Coordinate the enable with the `news_swfl` session (RULE 1.5); ship behind `--dry-run`.
@@ -638,18 +638,18 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-- [ ] **Step 6: Create the GHA wrapper** (`--dry-run` default; mirror an existing ingest cron's structure — engine guard, Python 3.13, secrets)
+- [ ] **Step 6: Create the GHA wrapper — DISPATCH-ONLY for Phase 1.** No `schedule:` block: `news_articles_swfl` is owned by the parallel `news_swfl` session, so the eviction stays manual until that write is coordinated (tracked by a check the orchestrator opens). The workflow counts on a bare dispatch and only deletes when `apply=true`.
 
 ```yaml
-# .github/workflows/pulse-pool-evict-daily.yml
-name: pulse-pool-evict-daily
+# .github/workflows/pulse-pool-evict.yml
+name: pulse-pool-evict
 on:
-  schedule:
-    - cron: "30 8 * * *" # 08:30 UTC daily — dry-run counts by default
+  # DISPATCH-ONLY (Phase 1). news_articles_swfl is shared with news_swfl —
+  # coordinate before scheduling. Enable via check pulse_pool_evict_enable.
   workflow_dispatch:
     inputs:
       apply:
-        description: "Set true to actually delete (default dry-run)"
+        description: "Set true to actually delete (default = dry-run count only)"
         type: boolean
         default: false
 permissions:
@@ -673,19 +673,22 @@ jobs:
         run: python -m ingest.pipelines.pulse_pool_evict ${{ github.event.inputs.apply == 'true' && ' ' || '--dry-run' }}
 ```
 
-- [ ] **Step 7: Register the cadence entry** in `ingest/cadence_registry.yaml` under the appropriate section (daily), documenting the 45-day window and the lossless rationale. (Match the surrounding YAML shape; coordinate with the `news_swfl` owner since the table is shared.)
+(No `cadence_registry.yaml` entry: that registry is the freshness probe's SOURCE list — the eviction is a maintenance job with no data to freshness-check, so an entry there would make the probe alert on a non-existent freshness. The pipeline-freshness rule is satisfied by the dispatch wrapper + `--dry-run`.)
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add ingest/lib/pulse_lake.py ingest/lib/test_pulse_lake.py ingest/pipelines/pulse_pool_evict.py .github/workflows/pulse-pool-evict-daily.yml ingest/cadence_registry.yaml
+git add ingest/lib/pulse_lake.py ingest/lib/test_pulse_lake.py ingest/pipelines/pulse_pool_evict.py .github/workflows/pulse-pool-evict.yml
 git commit -F - <<'EOF'
-feat(pulse): 45-day raw-pool eviction sweep, dry-run default (Phase 1)
+feat(pulse): 45-day raw-pool eviction sweep, dispatch-only (Phase 1)
 
 Lossless age-based cleanup of news_articles_swfl so Store-1 never bloats.
-GHA wrapper counts by default; delete is an explicit dispatch input.
+Dispatch-only + dry-run default; the real DELETE against the news_swfl-owned
+table is an explicit apply=true dispatch, coordinated separately.
 EOF
 ```
+
+(Orchestrator, after this task: open check `pulse_pool_evict_enable` — "schedule the eviction + run the first real apply once coordinated with the news_swfl owner".)
 
 ---
 
