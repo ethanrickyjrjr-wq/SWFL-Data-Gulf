@@ -81,6 +81,13 @@ export const HOME_MAP_DATA: HomeMapFixture = {
     "34141": "Ochopee",
     "34142": "Immokalee",
     "34145": "Marco Island",
+    // Hendry County (12051, fixtures/swfl-zip-county.json primary_county) —
+    // no ZHVI/listings coverage yet, so these render no-data gray like any
+    // other data-thin ZIP (operator ruling 07/07/2026: draw them like every
+    // other ZIP, don't gate on data availability).
+    "33440": "Clewiston",
+    "33930": "Felda",
+    "33935": "LaBelle",
   },
   metrics: {
     flood: {
