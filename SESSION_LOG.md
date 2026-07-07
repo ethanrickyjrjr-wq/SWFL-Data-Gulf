@@ -1,3 +1,19 @@
+## 2026-07-07 (main) — SteadyAPI property-type is a /search FILTER only, never returned — recorded the enum + condo bug (docs-only)
+
+Operator: "condo is not an option? scope out what the api can actually return." Probed our code first
+(RULE 0.5): `lib/listings/steadyapi.ts:110` and `ingest/pipelines/listing_lifecycle/extract_api.py`
+`parse_steadyapi` both hardcode `single_family` for every non-land row. Then verified the vendor contract
+live (RULE 0.4, crawl4ai fetch of docs.steadyapi.com/collection.json, 1.49MB) instead of guessing:
+**no SteadyAPI real-estate endpoint returns a property-type field on any row** (searched all 18 —
+`property-tax-history`→`permit_type`, `similar-homes`→`type:"mls"`, `nearby-home-values`→none). `property_type`
+is a request-side `/search` FILTER only, single value per call, enum `single_family | condos |
+condo_townhome_rowhome_coop | condo_townhome | townhomes | duplex_triplex | multi_family`. The 422 was
+`condo` (singular) vs `condos` (plural). `map_property_type()`/`PROPERTY_TYPE_MAP` are dead code that CAN'T
+be wired to a response field (none exists); the only real design is a filtered sweep per type, ~6× budget.
+Recorded verbatim into `docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/00-foundation-endpoint-catalog.md`
++ a memory so we stop rediscovering it. Code fix (extract_api.py) is a PARALLEL session's work — not touched here.
+Next: parallel session wires the filtered-sweep fix; note PROPERTY_TYPE_MAP is missing the compound enum keys.
+
 ## 2026-07-07 (main) — prompt-caching audit: 2 of 3 "already cached" call sites are no-ops; wired the one that works
 
 Operator asked "are we using cache so we aren't blowing credits, where can we improve." Probed

@@ -75,3 +75,37 @@ reachable only **per-property / per-radius** — which is the right shape for co
   still need a full sweep (no "what changed" filter), but that full sweep could then drop to **weekly**.
   ⚠️ **Unproven:** newest-ordering stability for early-stop has NOT been verified — costs 1 test call.
   Do not wire early-stop until that probe confirms a stable, monotonic newest order.
+
+## Property type — FILTER-ONLY, never returned (verbatim from docs.steadyapi.com/collection.json, crawl4ai 07/07/2026)
+
+**Recorded because we kept rediscovering this.** SteadyAPI returns **NO property-type field on any
+listing/property row** — not `/search`, not any per-property endpoint (`property-tax-history` → only
+`permit_type`; `similar-homes` → `type:"mls"` = the SOURCE; `nearby-home-values` → none;
+`neighborhood-market-trends` → `geo_type`). The only type-ish field on a `/search` row is `source_type`
+("mls"). You cannot READ a property's type from a response.
+
+`property_type` exists ONLY as a request-side `/search` **filter** — a **single value per call** (no
+arrays). Verbatim allowed values:
+
+```
+single_family
+condos
+condo_townhome_rowhome_coop
+condo_townhome
+townhomes
+duplex_triplex
+multi_family
+```
+
+- **The 422 gotcha:** the value is `condos` (plural). Sending `condo` (singular) 422s.
+- **Not filterable at all:** land/lots, mobile/manufactured, farm.
+- **Consequence:** the ONLY way to know a row's type is to sweep `/search?property_type=<v>` once per
+  value and stamp each returned batch by the filter you sent (~6× the `/search` budget vs one unfiltered
+  sweep — a real cost decision).
+- **Live bug (07/07/2026):** `ingest/pipelines/listing_lifecycle/extract_api.py` `parse_steadyapi`
+  hardcodes `ptype = "land" if (beds is None and lot_sqft) else "single_family"` — every condo/townhouse/
+  multi-family/manufactured → `single_family`. Same hardcode in `lib/listings/steadyapi.ts`
+  (`propertyType: "Single Family"`). `map_property_type()` + `PROPERTY_TYPE_MAP` (constants_api.py) are
+  dead code — and can't be wired to a `/search` field because none exists. Note `PROPERTY_TYPE_MAP` is
+  keyed on clean words (`condos`,`townhomes`,`single family`) and is MISSING the compound filter values
+  (`condo_townhome_rowhome_coop`, `condo_townhome`, `duplex_triplex`) → those map to `"other"` today.
