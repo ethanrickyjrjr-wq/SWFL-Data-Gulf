@@ -1,3 +1,22 @@
+## 2026-07-07 (main) — Self-healing deploy bots: Build B (rollback bot) built DARK, offline-verified
+
+Unblocked the token first: the old VERCEL_KEY was scoped to the personal account, not the team, so it 403'd
+on the team's deployments (that "deployments locked" symptom was scope, NOT an account lock — the OAuth/MCP
+path listed all 20 prod deploys, every one isRollbackCandidate:true). Fix = a team-scoped token; operator
+minted + tested one (returns the live dpl_ uid). Build B, DARK by default:
+- scripts/smoke-prod.mts: tagged 3 assertions critical (homepage x2 + /api/assistant); new exit codes
+  2=critical-failed, 1=soft-only, 0=pass; --critical-only for the confirm-retry.
+- scripts/rollback-deploy.mts: reads prod deploys, picks the previous READY rollback candidate, POSTs
+  /v1/projects/{id}/rollback/{id}. Guards: kill-switch SELFHEAL_ROLLBACK_ENABLED (dark unless "true"),
+  ABORT if live-prod sha != failed sha (no blind-rollback), never prints the token, logs the
+  auto-assignment-disabled caveat (vercel promote forward after a fix).
+- .github/workflows/rollback-on-red.yml: Production deploy_status success -> smoke -> confirm-retry on
+  critical -> actuator -> incident issue (armed only; body tells Claude to classify cause FIRST, draft-PR
+  only for in-repo-code). DARK = red workflow + zero side effects (no rollback, no issue, no Claude trigger).
+Offline-verified: critical-only picks exactly 3 -> exit 2; no-token + under-scoped-token both fail-loud exit 1;
+YAML valid. Arming = VERCEL_ROLLBACK_TOKEN secret + SELFHEAL_ROLLBACK_ENABLED=true var. Next: push (operator
+call - prod-acting, though dark), then Build C (tighten claude-code-automation to the deploy-incident label).
+
 ## 2026-07-07 (main) — SteadyAPI property_type bug fixed (was hardcoding everything to single_family) + full 18-endpoint trial audit
 
 Operator noticed a `property_type=condo` 422 while poking the API directly and asked to fix it. Root

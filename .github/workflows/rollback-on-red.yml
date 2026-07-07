@@ -1,0 +1,118 @@
+name: Rollback on red — Prod
+
+# Self-healing deploy loop (Build B + the Build C trigger).
+# After a Production deploy goes live, run the smoke assertions:
+#   - all green            -> nothing to do
+#   - soft assertion(s)    -> (armed) open an incident issue; NO rollback
+#   - critical assertion   -> confirm-retry (flake filter); if still red,
+#                             (armed) roll back to the previous good deploy +
+#                             open an incident issue
+#
+# DARK BY DEFAULT. When SELFHEAL_ROLLBACK_ENABLED != "true":
+#   - the workflow still runs the smoke + goes RED on failure (visible signal),
+#   - it does NOT roll back and does NOT open an issue (so nothing triggers Claude).
+# Arming is one repo variable + one secret:
+#   Settings -> Secrets and variables -> Actions
+#     Variable: SELFHEAL_ROLLBACK_ENABLED = true
+#     Secret:   VERCEL_ROLLBACK_TOKEN     = <team-scoped token>
+
+on:
+  deployment_status:
+
+concurrency:
+  group: rollback-${{ github.event.deployment.sha }}
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    if: |
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.deployment.sha }}
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - run: bun install --frozen-lockfile
+
+      - name: Smoke → confirm → rollback decision
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          VERCEL_ROLLBACK_TOKEN: ${{ secrets.VERCEL_ROLLBACK_TOKEN }}
+          SELFHEAL_ROLLBACK_ENABLED: ${{ vars.SELFHEAL_ROLLBACK_ENABLED }}
+          FAILED_SHA: ${{ github.event.deployment.sha }}
+          DEPLOY_URL: ${{ github.event.deployment_status.environment_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set +e
+          BASE="https://www.swfldatagulf.com"
+          ARMED="false"
+          [ "$SELFHEAL_ROLLBACK_ENABLED" = "true" ] && ARMED="true"
+
+          # Open an incident issue (armed only). The body tells Claude to classify
+          # severity/cause FIRST and to draft a PR only for in-repo-code causes.
+          open_issue() {
+            KIND="$1"; shift
+            if [ "$ARMED" != "true" ]; then
+              echo "[dark] would open a '$KIND' incident issue; skipping (not armed)."
+              return 0
+            fi
+            gh label create deploy-incident --color B60205 --description "auto self-heal incident" --force >/dev/null 2>&1 || true
+            BODY=$(mktemp)
+            {
+              echo "@claude a production smoke run went red after a deploy. Before proposing any fix, FIRST classify:"
+              echo ""
+              echo "1. Cause class — is this \`infra\` (Vercel/Supabase/network), \`transient\`, \`data\` (a source/pipeline), or \`in-repo-code\`?"
+              echo "2. Only if the cause is \`in-repo-code\`, open a DRAFT PR with the fix. Otherwise comment the root cause + the class and STOP — do not open a PR."
+              echo ""
+              echo "- Failure kind: $KIND"
+              echo "- Failed commit: \`$FAILED_SHA\`"
+              echo "- Deploy URL: $DEPLOY_URL"
+              echo "- Workflow run: $RUN_URL"
+              echo ""
+              echo '```'
+              for f in "$@"; do echo "----- $f -----"; cat "$f"; done
+              echo '```'
+            } > "$BODY"
+            gh issue create \
+              --title "deploy-incident($KIND): prod smoke red @ $(echo "$FAILED_SHA" | cut -c1-7)" \
+              --label deploy-incident \
+              --body-file "$BODY" || echo "WARN: gh issue create failed"
+          }
+
+          bun scripts/smoke-prod.mts --base "$BASE" | tee /tmp/smoke1.log
+          CODE=${PIPESTATUS[0]}
+          echo "first smoke exit code: $CODE (armed=$ARMED)"
+
+          if [ "$CODE" = "0" ]; then echo "All green."; exit 0; fi
+
+          if [ "$CODE" = "1" ]; then
+            echo "Soft-only failure — no rollback."
+            open_issue soft /tmp/smoke1.log
+            exit 1
+          fi
+
+          # CODE == 2 -> a critical assertion failed. Confirm before acting.
+          echo "Critical failure. Confirm-retry (critical-only) to filter a cold-start flake..."
+          sleep 20
+          bun scripts/smoke-prod.mts --base "$BASE" --critical-only --no-stamp | tee /tmp/smoke2.log
+          CODE2=${PIPESTATUS[0]}
+          echo "confirm exit code: $CODE2"
+
+          if [ "$CODE2" = "0" ]; then echo "Recovered on retry — flake. No rollback."; exit 0; fi
+
+          echo "Confirmed critical red. Running the rollback actuator (dark unless armed)..."
+          bun scripts/rollback-deploy.mts | tee /tmp/rollback.log
+          open_issue critical /tmp/smoke2.log /tmp/rollback.log
+          exit 1

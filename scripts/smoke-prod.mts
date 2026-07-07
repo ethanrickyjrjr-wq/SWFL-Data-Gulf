@@ -16,6 +16,10 @@ import { resolve } from "node:path";
 type SmokeTest = {
   checkKey: string;
   label: string;
+  // Critical = homepage reachability + the assistant endpoint. A CONFIRMED
+  // critical failure is what the rollback bot acts on (exit 2); soft failures
+  // redden CI + open an issue (exit 1) but never trigger an auto-rollback.
+  critical?: boolean;
   run: (base: string) => Promise<void>;
 };
 
@@ -24,12 +28,19 @@ type SmokeResult =
 
 // ── Arg parsing ──────────────────────────────────────────────────────────────
 
-function parseArgs(): { base: string; keys: string[] | null; dryRun: boolean; noStamp: boolean } {
+function parseArgs(): {
+  base: string;
+  keys: string[] | null;
+  dryRun: boolean;
+  noStamp: boolean;
+  criticalOnly: boolean;
+} {
   const args = process.argv.slice(2);
   let base = "https://www.swfldatagulf.com";
   let keys: string[] | null = null;
   let dryRun = false;
   let noStamp = false;
+  let criticalOnly = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--base" && args[i + 1]) base = args[++i];
     else if (args[i] === "--keys" && args[i + 1]) keys = args[++i].split(",");
@@ -37,8 +48,11 @@ function parseArgs(): { base: string; keys: string[] | null; dryRun: boolean; no
     // Preview runs assert-only: pass/fail still gates CI, but nothing stamps a
     // prod check (a preview URL is not evidence a prod check is satisfied).
     else if (args[i] === "--no-stamp") noStamp = true;
+    // The rollback bot's confirm-retry re-runs ONLY the critical assertions to
+    // filter a cold-start flake before it acts.
+    else if (args[i] === "--critical-only") criticalOnly = true;
   }
-  return { base, keys, dryRun, noStamp };
+  return { base, keys, dryRun, noStamp, criticalOnly };
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -83,6 +97,7 @@ const SMOKE_TESTS: SmokeTest[] = [
   {
     checkKey: "one_assistant_unify_live_verify",
     label: "POST /api/assistant → 200 + streaming body starts",
+    critical: true,
     async run(base) {
       const res = await assertOk(`${base}/api/assistant`, {
         method: "POST",
@@ -140,6 +155,7 @@ const SMOKE_TESTS: SmokeTest[] = [
   {
     checkKey: "homepage_listing_showcase_live_verify",
     label: "GET / → 200 + HTML contains <body",
+    critical: true,
     async run(base) {
       const res = await assertOk(base);
       await assertBodyContains(res, "<body");
@@ -148,6 +164,7 @@ const SMOKE_TESTS: SmokeTest[] = [
   {
     checkKey: "siteflow_b1_shell_verify",
     label: "GET / → 200 (SiteShell render)",
+    critical: true,
     async run(base) {
       // Shares the homepage GET; just confirms 200
       await assertOk(base);
@@ -205,12 +222,13 @@ const MANUAL_ONLY: Array<{ checkKey: string; reason: string }> = [
 // ── Runner ───────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  const { base, keys, dryRun, noStamp } = parseArgs();
+  const { base, keys, dryRun, noStamp, criticalOnly } = parseArgs();
 
-  const tests = keys ? SMOKE_TESTS.filter((t) => keys.includes(t.checkKey)) : SMOKE_TESTS;
+  let tests = keys ? SMOKE_TESTS.filter((t) => keys.includes(t.checkKey)) : SMOKE_TESTS;
+  if (criticalOnly) tests = tests.filter((t) => t.critical);
 
   console.log(
-    `\nsmoke-prod — target: ${base}${dryRun ? " [dry-run]" : ""}${noStamp ? " [no-stamp/preview]" : ""}`,
+    `\nsmoke-prod — target: ${base}${dryRun ? " [dry-run]" : ""}${noStamp ? " [no-stamp/preview]" : ""}${criticalOnly ? " [critical-only]" : ""}`,
   );
   console.log(`Running ${tests.length} automated assertions...\n`);
 
@@ -224,6 +242,7 @@ async function main(): Promise<void> {
   );
 
   let failures = 0;
+  let criticalFailures = 0;
 
   for (const r of settled) {
     // allSettled never rejects — the inner .catch() guarantees fulfillment
@@ -235,7 +254,8 @@ async function main(): Promise<void> {
       if (!noStamp) stampCheck(result.test.checkKey, dryRun);
     } else {
       failures++;
-      console.log(`  FAIL  ${result.test.checkKey}`);
+      if (result.test.critical) criticalFailures++;
+      console.log(`  FAIL ${result.test.critical ? "*" : " "} ${result.test.checkKey}`);
       console.log(`        ${result.test.label}`);
       console.log(`        Error: ${result.error}`);
       console.log(
@@ -244,7 +264,7 @@ async function main(): Promise<void> {
     }
   }
 
-  if (!keys) {
+  if (!keys && !criticalOnly) {
     console.log(`\nManual-only (${MANUAL_ONLY.length}) — skipped:`);
     for (const m of MANUAL_ONLY) {
       console.log(`  SKIP  ${m.checkKey} — ${m.reason}`);
@@ -253,8 +273,15 @@ async function main(): Promise<void> {
 
   const total = tests.length;
   const passed = total - failures;
-  console.log(`\n${passed}/${total} passed${failures > 0 ? `, ${failures} FAILED` : " ✓"}`);
+  console.log(
+    `\n${passed}/${total} passed${failures > 0 ? `, ${failures} FAILED (${criticalFailures} critical)` : " ✓"}`,
+  );
 
+  // Exit codes are the rollback bot's signal:
+  //   2 = a CRITICAL assertion failed  → confirm-retry, then roll back
+  //   1 = only SOFT assertions failed  → redden CI + open an issue, no rollback
+  //   0 = all passed
+  if (criticalFailures > 0) process.exit(2);
   if (failures > 0) process.exit(1);
 }
 
