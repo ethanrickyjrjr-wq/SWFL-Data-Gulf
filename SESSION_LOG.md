@@ -1,3 +1,17 @@
+## 2026-07-07 (main) — fix: `communities-swfl` missing BRAIN_GEO entry — was red CI + prod 500 on every /r/zip-report/[zip]
+
+Operator asked "is GitHub in good shape" — it wasn't. CI had been red on every push since ~03:03 (7
+consecutive pushes, ~11hrs) and prod Smoke's `zip_quick_summary_live_verify` was failing live
+(`GET /r/zip-report/33908` → HTTP 500). Root-caused both to the same thing: `communities-swfl` shipped
+catalog-registered in `6aeff4a9` without a `BRAIN_GEO` entry in `lib/zip-dossier.ts`; `validateBrainGeo()`
+throws on every `assembleLocationDossier()` call, which every `/r/zip-report/[zip]` load makes — same
+failure mode as the prior `active-listings-swfl`/`market-heat-swfl` incidents. Added the entry
+(county-grain, Lee+Collier — matches its Lee+Collier-only tax-roll source). `bun test lib/zip-dossier.test.ts`
+28/28 pass; full suite 5196/5199 pass (3 pre-existing fails are in uncommitted WIP left in the working
+tree by another session — `lib/geo/address-route.test.ts` is stale against a `zip`-param removal in
+`lib/campaigns.ts`/`address-route.ts`, not touched here). Resolved same-session, no check opened per
+RULE 2.4 (nothing deferred).
+
 ## 2026-07-07 (main) — RULE 2.4 hook-enforced: push blocked on defer-language in SESSION_LOG with no checks entry named
 
 Operator caught a real pattern today: three separate condo/multi-unit-grain gaps (Marco address-match

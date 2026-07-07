@@ -182,6 +182,13 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   "condo-sirs-swfl": { grains: ["county"], covers: LEE_COLLIER },
   // SBA FOIA county-grain franchise loan outcomes, Lee + Collier.
   "franchise-outcomes": { grains: ["county"], covers: LEE_COLLIER },
+  // Marketed-community catalogue (golf/gated, fees, amenities) + parcel-derived
+  // neighborhood rollup — Lee + Collier tax rolls only (v1). Rows carry `county`,
+  // no zip/city/corridor field, so county is the true grain. Added 2026-07-07 to
+  // fix a red main + prod 500: shipped catalog-registered in 6aeff4a9 without this
+  // entry, so validateBrainGeo() throws on EVERY /r/zip-report/[zip] load (same
+  // failure mode as the active-listings-swfl/market-heat-swfl incidents above).
+  "communities-swfl": { grains: ["county"], covers: LEE_COLLIER },
 };
 
 /**
