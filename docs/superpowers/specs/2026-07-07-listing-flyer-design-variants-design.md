@@ -61,6 +61,29 @@ interface ListingFlyerDesign {
   **This picker is out of scope for this slice** — documented here so design #2 doesn't
   require re-deriving it.
 
+## Position-aware directional styling
+
+A design's visual flourishes (a colored side border, an accent stripe) are decomposed as
+their own blocks/toggles per the layer principle above — but a SIDE accent has an extra
+wrinkle: which side it renders on should track the block's position, not be hardcoded.
+A card with a left border that gets dragged to the right edge of the grid should show
+its border on the right — it's framing the *outside* of the composition, not pointing
+at whatever now happens to be its new neighbor.
+
+- Any block whose design carries a directional accent derives its side from its own
+  live `layout` vs the grid bounds: `x === 0` → left edge, `x + w === GRID_COLS` → right
+  edge, otherwise no side accent (a block floating mid-grid doesn't get one). Recomputed
+  on every layout change — hooks into the same `handleLayoutChange` callback
+  `GridCanvas` already calls on every drag/resize, no new event plumbing.
+- **Out of scope for this slice, stated explicitly so it isn't silently dropped:** true
+  proportional rescaling of fonts/images as a block resizes. Height already auto-fits
+  content (shipped); width resize already snaps to bounded presets. Content pixel-for-
+  pixel rescaling with block width is a different, larger effort — email-safe layouts
+  stay fluid/non-breaking at any width today, but they don't intelligently rescale.
+- `"classic"` (today's `buildListingFlyer`) has no directional-accent block today — this
+  mechanic is written down now so any design that DOES use one (a sidebar-style agent
+  card, a callout with a colored edge) gets it for free instead of re-deriving it.
+
 ## Durability contract (explicit, test-enforced)
 
 Once a design builds onto the canvas, the doc is a **normal `EmailDoc`** —
