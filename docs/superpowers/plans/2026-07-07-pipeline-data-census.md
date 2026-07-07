@@ -1,7 +1,7 @@
 # Pipeline Data Census Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** 🧠 Opus — 9 tasks, 10 files, keywords: refactor, schema, architecture
+> **Recommended model:** 🧠 Opus — 14 tasks, 17 files, 2 conflict groups, keywords: migration, refactor, schema
 
 **Goal:** Ship a live `/census` ops page that lists every pipeline in `cadence_registry.yaml`, grouped by category, showing live row counts, the existing freshness/floor guard, and three research cells (confirmed total / source ceiling / vendor benchmark) that show real cited data or an explicit "pending" — never a guess.
 
@@ -210,8 +210,8 @@ git commit -m "refactor(census): export classify/resolveSpec/ageInDays/RegistryE
 **Repo:** `swfldatagulf-ops`
 
 **Files:**
-- Create: `lib/census-logic.mjs`
-- Test: `lib/census-logic.test.mjs`
+- 🔴 Create: `lib/census-logic.mjs`
+- 🔴 Test: `lib/census-logic.test.mjs`
 
 **Interfaces:**
 - Consumes: nothing (pure functions, plain objects in/out).
@@ -594,7 +594,7 @@ git commit -m "feat(census): category map for every registry pipeline"
 **Repo:** `swfldatagulf-ops`
 
 **Files:**
-- Create: `lib/census.ts`
+- 🟡 Create: `lib/census.ts`
 
 **Interfaces:**
 - Consumes: `rawText` from `./github`; `rowCounts`, `latestDltLoads`, `tier1Freshness`, `directTableFreshness`, `supabaseMeta` from `./supabase`; `classify`, `resolveSpec`, `ageInDays`, `RegistryEntry`, `SourceProbe`, `ClassifiedRow` from `./coverage`; `prettifyLabel`, `countPipelines`, `groupByCategory`, `groupSharedTables`, `researchProgress`, `UNCATEGORIZED` from `./census-logic.mjs`; `CATEGORY`, `CATEGORY_ORDER` from `./census-supplement`.
@@ -835,7 +835,7 @@ git commit -m "feat(census): buildCensus orchestrator — live counts + guard + 
 **Repo:** `swfldatagulf-ops`
 
 **Files:**
-- Create: `app/census/page.tsx`
+- 🟡 Create: `app/census/page.tsx`
 
 **Interfaces:**
 - Consumes: `buildCensus`, `CensusEntry`, `CensusFamily`, `SourceScopeValue` from `../../lib/census`; `Link` from `../ui`.
@@ -1071,3 +1071,700 @@ Open `http://localhost:3000/census` (adjust port if different) and confirm:
 git add app/coverage/page.tsx
 git commit -m "feat(census): link /coverage <-> /census"
 ```
+
+---
+
+## Addendum (2026-07-07, same day): live source reconciliation
+
+Tasks 10–14 implement the "Source Reconciliation" section added to the design spec after Task 1–9 were already written. This is a real automatic drift check against the source's own current total — corrected, after probing our own ingest code (RULE 0.5), from an initial "crawl4ai + LLM" idea to reusing infra that already exists: `ingest/lib/arcgis_paginator.py:88`'s `arcgis_count()` (a public, unauthenticated ArcGIS `returnCountOnly=true` query) is already called by both `collier_parcels` and `leepa` on every ingest run and asserted via `ingest/lib/guards.py:74`'s `assert_vs_canonical(landed, canonical, floor=0.9)` — the parcels leg needs zero new pipeline and zero LLM calls, just surfacing the same live check on the census page. The listings leg captures a number (`meta.total` from the SteadyAPI response) that `ingest/pipelines/listing_lifecycle/extract_api.py:191` already reads and currently throws away.
+
+### Task 10: `data_lake.source_totals` migration
+
+**Repo:** `brain-platform`
+
+**Files:**
+- Create: `migrations/20260707_source_totals.sql`
+
+**Interfaces:**
+- Produces: table `data_lake.source_totals(id, pipeline_name, source_label, value, method, fetched_at)`. Task 11 inserts into it; Task 13/14 (ops repo) reads the latest row per `pipeline_name`.
+
+- [ ] **Step 1: Write the migration**
+
+Create `migrations/20260707_source_totals.sql`:
+
+```sql
+-- Source-of-truth totals captured from the SAME origin each pipeline ingests
+-- from (an ArcGIS returnCountOnly query, a SteadyAPI meta.total, etc.) — read
+-- by /ops/census (swfldatagulf-ops) to detect silent ingestion drift.
+-- Insert-only ledger; the census page reads the latest row per pipeline_name.
+CREATE TABLE IF NOT EXISTS data_lake.source_totals (
+  id BIGSERIAL PRIMARY KEY,
+  pipeline_name TEXT NOT NULL,        -- matches a `name` in ingest/cadence_registry.yaml
+  source_label TEXT NOT NULL,         -- e.g. "SteadyAPI meta.total (Lee+Collier+Hendry city sweep)"
+  value BIGINT NOT NULL,
+  method TEXT NOT NULL,               -- "arcgis_count" | "api_meta_total"
+  fetched_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS source_totals_pipeline_fetched_idx
+  ON data_lake.source_totals (pipeline_name, fetched_at DESC);
+
+GRANT SELECT, INSERT ON data_lake.source_totals TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE data_lake.source_totals_id_seq TO service_role;
+NOTIFY pgrst, 'reload schema';
+```
+
+- [ ] **Step 2: Run the migration**
+
+Run: `bun scripts/run-migration.ts migrations/20260707_source_totals.sql`
+Expected: prints `Running migrations/20260707_source_totals.sql...` then `✓ done` then `Migrations complete.`
+
+- [ ] **Step 3: Verify the table exists with the right grants**
+
+Run: `bun scripts/run-migration.ts` is not a query tool — instead verify via a one-off: create a temp file `/tmp-verify.sql` is not needed; instead run this inline check:
+```bash
+bun -e "
+const { readFileSync } = require('fs');
+const secrets = readFileSync('.dlt/secrets.toml', 'utf8');
+const t = (k) => secrets.match(new RegExp('^'+k+'\\\\s*=\\\\s*\"([^\"]+)\"','m'))[1];
+const conn = \`postgres://\${t('username')}:\${encodeURIComponent(t('password'))}@\${t('host')}:5432/\${t('database')}?sslmode=require\`;
+const sql = new Bun.SQL(conn);
+const rows = await sql\`SELECT count(*) FROM data_lake.source_totals\`;
+console.log(rows);
+await sql.end();
+"
+```
+Expected: prints `[ { count: "0" } ]` (table exists, empty) with no error.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add migrations/20260707_source_totals.sql
+git commit -m "feat(census): add data_lake.source_totals — ledger for live source-total reconciliation"
+```
+
+---
+
+### Task 11: Capture SteadyAPI's `meta.total` in `listing_lifecycle`
+
+**Repo:** `brain-platform`
+
+**Files:**
+- Modify: `ingest/pipelines/listing_lifecycle/extract_api.py:167-198` (`fetch_steadyapi_city`), `:255-279` (`scan_county_api`)
+- Modify: `ingest/pipelines/listing_lifecycle/distill.py` (add `log_source_total`, next to the other `_get_conn()`-using writers)
+- Modify: `ingest/pipelines/listing_lifecycle/pipeline.py:56-176` (`run`)
+- Test: `ingest/pipelines/listing_lifecycle/test_extract_api.py` (create if it doesn't already exist as a sibling test file; if a test file for `extract_api.py` already exists, add to it instead of creating a duplicate)
+
+**Interfaces:**
+- Consumes: nothing new.
+- Produces: `fetch_steadyapi_city(...) -> tuple[list[dict], bool, int, int | None]` (4th element is SteadyAPI's `meta.total` for that city, or `None`); `scan_county_api(...)` result dict gains a `"source_total": int` key (sum of each city's `total`, `0` if every city returned `None`); `distill.log_source_total(value: int, source_label: str, dry_run: bool = False) -> None`.
+
+- [ ] **Step 1: Write the failing test for the return-shape change**
+
+Add to `ingest/pipelines/listing_lifecycle/test_extract_api.py` (create the file with this content if it doesn't exist yet; if it exists, add this test function to it):
+
+```python
+from ingest.pipelines.listing_lifecycle.extract_api import fetch_steadyapi_city
+
+
+def test_fetch_steadyapi_city_returns_four_tuple_with_total(monkeypatch):
+    """meta.total must be returned, not discarded — Task 11 wires it into the
+    census reconciliation ledger."""
+    class FakeResp:
+        status_code = 200
+
+        def json(self):
+            return {"body": [{"property_id": "1"}], "meta": {"total": 1}}
+
+    monkeypatch.setattr(
+        "ingest.pipelines.listing_lifecycle.extract_api.requests.get",
+        lambda *a, **k: FakeResp(),
+    )
+    rows, ok, pages, total = fetch_steadyapi_city("Naples", key="fake-key")
+    assert len(rows) == 1
+    assert ok is True
+    assert pages == 1
+    assert total == 1
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+Run: `cd ingest && python -m pytest pipelines/listing_lifecycle/test_extract_api.py -k four_tuple -v`
+Expected: FAIL — `ValueError: not enough values to unpack (expected 4, got 3)` (the function still returns a 3-tuple).
+
+- [ ] **Step 3: Add `total` to `fetch_steadyapi_city`'s return**
+
+In `ingest/pipelines/listing_lifecycle/extract_api.py`, change the signature and every `return` in `fetch_steadyapi_city` (lines 167-198) from 3-tuples to 4-tuples, carrying `total`:
+
+```python
+def fetch_steadyapi_city(city: str, state: str = "FL", key: str | None = None) -> tuple[list[dict], bool, int, int | None]:
+    """Enumerate one city via SteadyAPI (location slug 'City-Name_FL', offset += 200 until meta.total).
+    Returns (rows, ok, pages_fetched, total) — pages_fetched is the real call count for budget
+    logging; total is SteadyAPI's own meta.total claim for this city (None if never seen), captured
+    for the /ops/census source-reconciliation ledger (Task 11)."""
+    key = key or os.environ.get("PHOTOS_API")
+    if not key or not city:
+        return [], False, 0, None
+    slug = f"{city.strip().replace(' ', '-')}_{state}"
+    out: list[dict] = []
+    total: int | None = None
+    for page in range(_MAX_PAGES):
+        params = {"location": slug, "offset": page * _SA_PAGE}
+        try:
+            r = requests.get(f"{STEADYAPI_BASE}/search", params=params,
+                             headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"}, timeout=30)
+            pages = page + 1
+            if r.status_code != 200:
+                return out, False, pages, total
+            data = r.json()
+            body = data.get("body") if isinstance(data, dict) else None
+            if not isinstance(body, list):
+                return out, False, pages, total
+            if not body:
+                return out, True, pages, total
+            out.extend(body)
+            total = (data.get("meta") or {}).get("total", total)
+            if total is not None and (page + 1) * _SA_PAGE >= total:
+                return out, True, pages, total
+            if len(body) < _SA_PAGE:
+                return out, True, pages, total
+        except Exception:
+            return out, False, page + 1, total
+    return out, False, _MAX_PAGES, total
+```
+
+- [ ] **Step 4: Run the test to verify it passes**
+
+Run: `cd ingest && python -m pytest pipelines/listing_lifecycle/test_extract_api.py -k four_tuple -v`
+Expected: PASS.
+
+- [ ] **Step 5: Update `scan_county_api`'s caller and aggregate `source_total`**
+
+In `ingest/pipelines/listing_lifecycle/extract_api.py`, update `scan_county_api` (lines 255-279) — the unpacking on line 266 and the returned dict:
+
+```python
+def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: bool = False) -> dict[str, Any]:
+    """SteadyAPI-only: enumerate every seed city, parse + scope-filter, batch-enrich new listings.
+    Returns the coverage-guard payload pipeline.py consumes: {rows, exhausted, count, last_status,
+    county_total, search_calls, enrich_calls, source_total}. County is COMPLETE only if every city's
+    pull reached natural exhaustion. source_total sums each city's SteadyAPI meta.total — an
+    inexact-but-real completeness signal (per-city search, not a single county query) fed to the
+    /ops/census reconciliation ledger. `dry_run=True` still fires the (cheap, ~106-call) search sweep
+    — that's the real page count the gate needs — but skips the (expensive, multiplying) enrich
+    network calls."""
+    cities = SWFL_CITY_SEED.get(county, [])
+    sa_rows: list[dict] = []
+    all_ok = True
+    search_calls = 0
+    source_total = 0
+    for city in cities:
+        sa_raw, sa_ok, pages, city_total = fetch_steadyapi_city(city)
+        all_ok = all_ok and sa_ok
+        search_calls += pages
+        source_total += city_total or 0
+        sa_rows.extend(p for p in (parse_steadyapi(x, city, "FL") for x in sa_raw) if p)
+    rows = [r for r in sa_rows if r.get("county") == county]
+    enrich_stats = enrich_baths_batched(rows, known_ids or set(), dry_run=dry_run)
+    return {
+        "rows": rows, "exhausted": all_ok, "count": len(rows),
+        "last_status": 200 if all_ok else 429, "county_total": len(rows),
+        "search_calls": search_calls,
+        "source_total": source_total,
+        "enrich_calls": enrich_stats["calls"],
+        "enrich_new_count": enrich_stats["new_count"],
+        "enrich_baths_filled": enrich_stats["baths_filled"],
+    }
+```
+
+- [ ] **Step 6: Add `distill.log_source_total`**
+
+In `ingest/pipelines/listing_lifecycle/distill.py`, add a new function near the other `_get_conn()`-using writers (after the existing `upsert_state`/`append_transitions` functions):
+
+```python
+def log_source_total(value: int, source_label: str, *, dry_run: bool = False) -> None:
+    """Insert one row into data_lake.source_totals — the source's own current-total claim, read by
+    /ops/census to detect silent ingestion drift (Task 11 of the pipeline-data-census plan)."""
+    if dry_run:
+        print(f"[dry-run] would log source_total={value} ({source_label})", flush=True)
+        return
+    with _get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO data_lake.source_totals (pipeline_name, source_label, value, method) "
+            "VALUES (%s, %s, %s, %s)",
+            ("listing_lifecycle", source_label, value, "api_meta_total"),
+        )
+        conn.commit()
+```
+
+- [ ] **Step 7: Wire it into `run()`**
+
+In `ingest/pipelines/listing_lifecycle/pipeline.py`, make two changes inside `run()`:
+
+First, accumulate `source_total` alongside the existing `totals` dict. Change line 72 from:
+```python
+    totals = {"scanned": 0, "upserts": 0, "transitions": 0}
+```
+to:
+```python
+    totals = {"scanned": 0, "upserts": 0, "transitions": 0, "source_total": 0}
+```
+
+Then, inside the `for county in counties:` loop, immediately after line 84 (`budget_calls += result.get("search_calls", 0) + result.get("enrich_calls", 0)`), add:
+```python
+            totals["source_total"] += result.get("source_total", 0)
+```
+
+Finally, immediately before the final `return totals` (line 176), add the log call — only for a real, complete, non-dry-run API sweep across every county (not `--county` single-county debug runs, so the ledger always represents the full in-scope footprint):
+```python
+    if source == "api" and not dry_run and not only_county and totals["source_total"] > 0:
+        distill.log_source_total(
+            totals["source_total"],
+            "SteadyAPI meta.total sum (Lee+Collier+Hendry city sweep)",
+        )
+    return totals
+```
+
+- [ ] **Step 8: Run the full pipeline test suite for this pipeline**
+
+Run: `cd ingest && python -m pytest pipelines/listing_lifecycle/ -v`
+Expected: PASS — all existing tests plus the new one from Step 1.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add ingest/pipelines/listing_lifecycle/extract_api.py ingest/pipelines/listing_lifecycle/distill.py ingest/pipelines/listing_lifecycle/pipeline.py ingest/pipelines/listing_lifecycle/test_extract_api.py
+git commit -m "feat(census): capture SteadyAPI meta.total into data_lake.source_totals instead of discarding it"
+```
+
+---
+
+### Task 12: Bidirectional drift check (pure, TDD)
+
+**Repo:** `swfldatagulf-ops`
+
+**Files:**
+- 🔴 Modify: `lib/census-logic.mjs` (add one function)
+- 🔴 Modify: `lib/census-logic.test.mjs` (add its tests)
+
+**Interfaces:**
+- Produces: `driftStatus(ours: number, benchmark: number, tolerancePct: number): { withinTolerance: boolean, deltaPct: number, direction: "over" | "under" | "match" }`. Task 14 (`lib/census.ts`) calls this for any pipeline with a reconciliation source configured.
+
+- [ ] **Step 1: Write the failing tests**
+
+Add to `lib/census-logic.test.mjs` (append; keep the existing `import` line, adding `driftStatus` to it):
+
+```javascript
+import {
+  prettifyLabel,
+  countPipelines,
+  groupByCategory,
+  groupSharedTables,
+  researchProgress,
+  driftStatus,
+  UNCATEGORIZED,
+} from "./census-logic.mjs";
+```
+
+```javascript
+test("driftStatus reports match when within tolerance", () => {
+  const result = driftStatus(548798, 548798, 0.1);
+  assert.deepEqual(result, { withinTolerance: true, deltaPct: 0, direction: "match" });
+});
+
+test("driftStatus reports under when ours is far below the benchmark", () => {
+  const result = driftStatus(400000, 548798, 0.1);
+  assert.equal(result.withinTolerance, false);
+  assert.equal(result.direction, "under");
+  assert.ok(result.deltaPct > 0.1);
+});
+
+test("driftStatus reports over when ours is far above the benchmark (retired/duplicate rows)", () => {
+  const result = driftStatus(700000, 548798, 0.1);
+  assert.equal(result.withinTolerance, false);
+  assert.equal(result.direction, "over");
+});
+
+test("driftStatus treats a benchmark of 0 as inconclusive (never divides by zero)", () => {
+  const result = driftStatus(100, 0, 0.1);
+  assert.deepEqual(result, { withinTolerance: true, deltaPct: 0, direction: "match" });
+});
+```
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+Run: `node --test lib/census-logic.test.mjs`
+Expected: FAIL — `driftStatus is not a function`.
+
+- [ ] **Step 3: Implement `driftStatus`**
+
+Add to `lib/census-logic.mjs` (after `researchProgress`):
+
+```javascript
+/**
+ * Bidirectional drift check against a live-fetched source total. Separate
+ * from the static expected_rows_min floor (which only catches "too few") —
+ * too many can mean retired/duplicate rows just as easily as too few means a
+ * dropped page, so both directions matter here.
+ */
+export function driftStatus(ours, benchmark, tolerancePct) {
+  if (!benchmark || benchmark <= 0) {
+    return { withinTolerance: true, deltaPct: 0, direction: "match" };
+  }
+  const deltaPct = Math.abs(ours - benchmark) / benchmark;
+  const withinTolerance = deltaPct <= tolerancePct;
+  const direction = withinTolerance
+    ? "match"
+    : ours < benchmark
+      ? "under"
+      : "over";
+  return { withinTolerance, deltaPct, direction };
+}
+```
+
+- [ ] **Step 4: Run tests to verify they pass**
+
+Run: `node --test lib/census-logic.test.mjs`
+Expected: PASS — all 12 tests green (8 from Task 5 + 4 new).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add lib/census-logic.mjs lib/census-logic.test.mjs
+git commit -m "feat(census): bidirectional driftStatus check against a live source total"
+```
+
+---
+
+### Task 13: Live ArcGIS count + reconciliation pairing config
+
+**Repo:** `swfldatagulf-ops`
+
+**Files:**
+- Create: `lib/arcgis.ts`
+- Create: `lib/census-reconciliation.ts`
+
+**Interfaces:**
+- Produces: `arcgisCount(baseUrl: string, where?: string): Promise<number | null>` (from `lib/arcgis.ts`); `RECONCILIATION: Record<string, ReconciliationSource>` where `ReconciliationSource = { kind: "arcgis", url: string, where?: string, sourceLabel: string, tolerancePct: number } | { kind: "source_totals_table", tolerancePct: number }` (from `lib/census-reconciliation.ts`). Task 14 (`lib/census.ts`) imports both.
+
+The exact ArcGIS URLs below are copied verbatim from the SAME constants our own ingest pipelines already query (`ingest/pipelines/collier_parcels/constants.py:18-24` and `ingest/pipelines/leepa/constants.py:1,15`) — not new endpoints, not guessed.
+
+- [ ] **Step 1: Create `lib/arcgis.ts`**
+
+```typescript
+/**
+ * Public ArcGIS returnCountOnly probe — no auth, mirrors
+ * ingest/lib/arcgis_paginator.py:88 (arcgis_count) exactly, so the census
+ * page reads the SAME canonical count our own ingest guards already assert
+ * against (ingest/lib/guards.py:74 assert_vs_canonical).
+ */
+export async function arcgisCount(
+  baseUrl: string,
+  where = "1=1",
+): Promise<number | null> {
+  try {
+    const url = new URL(baseUrl);
+    url.searchParams.set("where", where);
+    url.searchParams.set("returnCountOnly", "true");
+    url.searchParams.set("f", "json");
+    const res = await fetch(url.toString(), {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { count?: number };
+    return typeof data.count === "number" ? data.count : null;
+  } catch {
+    return null;
+  }
+}
+```
+
+- [ ] **Step 2: Create `lib/census-reconciliation.ts`**
+
+```typescript
+/**
+ * Pairing config: which registry pipelines get a live source-reconciliation
+ * check, and where the current source total comes from. Explicit per
+ * pipeline, never inferred — a naive pairing (e.g. active-listing count vs.
+ * a county's all-parcels total) would show every pipeline as permanently
+ * "off" and make the guard worthless.
+ */
+export type ReconciliationSource =
+  | {
+      kind: "arcgis";
+      url: string;
+      where?: string;
+      sourceLabel: string;
+      tolerancePct: number;
+    }
+  | { kind: "source_totals_table"; tolerancePct: number };
+
+export const RECONCILIATION: Record<string, ReconciliationSource> = {
+  collier_parcels: {
+    kind: "arcgis",
+    url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Cadastral/FeatureServer/0/query",
+    where: "CO_NO=21",
+    sourceLabel: "FDOR Statewide Cadastral (live parcel count, CO_NO=21)",
+    tolerancePct: 0.1, // matches assert_vs_canonical's 0.9 floor (ingest/lib/guards.py:74)
+  },
+  leepa: {
+    kind: "arcgis",
+    url: "https://gissvr.leepa.org/gissvr/rest/services/ParcelInfo/MapServer/12/query",
+    sourceLabel: "LeePA Just Value layer (live parcel count)",
+    tolerancePct: 0.1,
+  },
+  listing_lifecycle: {
+    kind: "source_totals_table",
+    tolerancePct: 0.25, // listing inventory churns day to day; wider than the parcel roll
+  },
+};
+```
+
+- [ ] **Step 3: Verify it type-checks**
+
+Run: `npm run build` (from `swfldatagulf-ops`)
+Expected: build succeeds (not imported anywhere yet — full wiring verified in Task 14).
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add lib/arcgis.ts lib/census-reconciliation.ts
+git commit -m "feat(census): live ArcGIS count adapter + reconciliation pairing config (parcels + listings)"
+```
+
+---
+
+### Task 14: Wire reconciliation into the census page
+
+**Repo:** `swfldatagulf-ops`
+
+**Files:**
+- 🟡 Modify: `lib/census.ts` (fetch reconciliation values, compute drift, attach to `CensusEntry`)
+- 🟡 Modify: `app/census/page.tsx` (render a real value + drift pill instead of "pending" for the 3 configured pipelines)
+
+**Interfaces:**
+- Consumes: `arcgisCount` from `./arcgis`; `RECONCILIATION` from `./census-reconciliation`; `driftStatus` from `./census-logic.mjs`.
+- Produces: `CensusEntry` gains an optional `reconciliation: { sourceLabel: string; benchmark: number; drift: ReturnType<typeof driftStatus> } | undefined` field.
+
+- [ ] **Step 1: Add `latestSourceTotals` to `lib/supabase.ts`**
+
+`directTableFreshness`/`tableCoverage` don't fit here — neither filters by an arbitrary column value nor returns a per-key latest row, and `data_lake.source_totals` needs "the newest row for THIS pipeline_name," not a table-wide count. Add a dedicated small helper instead. Add to `lib/supabase.ts`, after `rowCounts`:
+
+```typescript
+export interface LatestSourceTotal {
+  pipeline_name: string;
+  value: number;
+  source_label: string;
+  fetched_at: string;
+}
+
+/** Most recent data_lake.source_totals row per pipeline_name (Task 14). */
+export async function latestSourceTotals(
+  pipelineNames: string[],
+): Promise<{ available: boolean; rows: LatestSourceTotal[] }> {
+  if (!URL || !KEY || pipelineNames.length === 0)
+    return { available: false, rows: [] };
+  try {
+    const sb = createClient(URL, KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      db: { schema: "data_lake" },
+    });
+    const rows: LatestSourceTotal[] = [];
+    for (const name of pipelineNames) {
+      const { data } = await sb
+        .from("source_totals")
+        .select("pipeline_name, value, source_label, fetched_at")
+        .eq("pipeline_name", name)
+        .order("fetched_at", { ascending: false })
+        .limit(1);
+      if (data?.[0]) rows.push(data[0] as LatestSourceTotal);
+    }
+    return { available: true, rows };
+  } catch {
+    return { available: false, rows: [] };
+  }
+}
+```
+
+- [ ] **Step 2: Extend `CensusEntry` and fetch reconciliation values in `buildCensus`**
+
+In `lib/census.ts`, add two new imports (`arcgisCount`, `RECONCILIATION`), add `latestSourceTotals` to the existing `./supabase` import list, and add `driftStatus` to the existing `./census-logic.mjs` import list:
+
+```typescript
+import { arcgisCount } from "./arcgis";
+import { RECONCILIATION } from "./census-reconciliation";
+```
+
+```typescript
+import {
+  rowCounts,
+  latestDltLoads,
+  tier1Freshness,
+  directTableFreshness,
+  latestSourceTotals,
+  supabaseMeta,
+} from "./supabase";
+```
+
+```typescript
+import {
+  prettifyLabel,
+  countPipelines,
+  groupByCategory,
+  groupSharedTables,
+  researchProgress,
+  driftStatus,
+  UNCATEGORIZED,
+} from "./census-logic.mjs";
+```
+
+Add the field to `CensusEntry`:
+
+```typescript
+export interface CensusEntry {
+  name: string;
+  label: string;
+  lane: string;
+  spec: string | null;
+  classified: ClassifiedRow;
+  sourceScope: SourceScope | undefined;
+  reconciliation:
+    | { sourceLabel: string; benchmark: number; drift: ReturnType<typeof driftStatus> }
+    | undefined;
+}
+```
+
+Inside `buildCensus`, before building `censusEntries`, fetch every configured benchmark concurrently:
+
+```typescript
+  const reconciliationEntries = Object.entries(RECONCILIATION);
+  const arcgisResults = await Promise.all(
+    reconciliationEntries.map(async ([name, cfg]) => {
+      if (cfg.kind !== "arcgis") return [name, null] as const;
+      const count = await arcgisCount(cfg.url, cfg.where);
+      return [name, count] as const;
+    }),
+  );
+  const arcgisByName = new Map(arcgisResults);
+
+  const tableTargetNames = reconciliationEntries
+    .filter(([, cfg]) => cfg.kind === "source_totals_table")
+    .map(([name]) => name);
+  const sourceTotals = await latestSourceTotals(tableTargetNames);
+  const sourceTotalByName = new Map(
+    sourceTotals.rows.map((r) => [r.pipeline_name, r]),
+  );
+```
+
+Then, inside the `censusEntries` map, after computing `classified` and before the `return`, compute `reconciliation`:
+
+```typescript
+    const reconCfg = RECONCILIATION[e.name];
+    let reconciliation: CensusEntry["reconciliation"];
+    if (reconCfg?.kind === "arcgis") {
+      const benchmark = arcgisByName.get(e.name) ?? null;
+      if (benchmark !== null && rowCount !== null) {
+        reconciliation = {
+          sourceLabel: reconCfg.sourceLabel,
+          benchmark,
+          drift: driftStatus(rowCount, benchmark, reconCfg.tolerancePct),
+        };
+      }
+    } else if (reconCfg?.kind === "source_totals_table") {
+      const row = sourceTotalByName.get(e.name);
+      if (row && rowCount !== null) {
+        reconciliation = {
+          sourceLabel: row.source_label,
+          benchmark: row.value,
+          drift: driftStatus(rowCount, row.value, reconCfg.tolerancePct),
+        };
+      }
+    }
+
+    return {
+      name: e.name,
+      label: probe.label,
+      lane,
+      spec,
+      classified: classify(probe, currentYear),
+      sourceScope: e.source_scope,
+      reconciliation,
+    };
+```
+
+- [ ] **Step 3: Verify it type-checks**
+
+Run: `npm run build` (from `swfldatagulf-ops`)
+Expected: build succeeds.
+
+- [ ] **Step 4: Render reconciliation in `app/census/page.tsx`**
+
+In `app/census/page.tsx`, replace the "Vendor benchmark" column's header and cell to show live reconciliation when present, falling back to the existing `pending` scope cell otherwise. Change the `<th>` row in `FamilyCard`:
+
+```tsx
+            <th style={{ width: 160 }}>Source reconciliation</th>
+```
+
+(replacing the old `<th style={{ width: 140 }}>Vendor benchmark</th>`), and change the corresponding `<td>`:
+
+```tsx
+              <td>{reconciliationCell(m)}</td>
+```
+
+(replacing `<td>{scopeCell(m.sourceScope?.vendor_benchmark)}</td>`). Add the new render function above `FamilyCard`:
+
+```tsx
+function reconciliationCell(entry: CensusEntry) {
+  const r = entry.reconciliation;
+  if (!r) return <span className="pill dim">pending</span>;
+  const cls =
+    r.drift.direction === "match"
+      ? "green"
+      : r.drift.direction === "under"
+        ? "red"
+        : "yellow";
+  return (
+    <span>
+      <span className={`pill ${cls}`}>
+        {r.drift.direction === "match"
+          ? "match"
+          : `${r.drift.direction} ${(r.drift.deltaPct * 100).toFixed(1)}%`}
+      </span>
+      <div className="note" style={{ fontSize: "0.68rem", marginTop: 2 }}>
+        {r.benchmark.toLocaleString("en-US")} via {r.sourceLabel}
+      </div>
+    </span>
+  );
+}
+```
+
+- [ ] **Step 5: Verify it type-checks and build**
+
+Run: `npm run build` (from `swfldatagulf-ops`)
+Expected: build succeeds, no type errors.
+
+- [ ] **Step 6: Manually verify live reconciliation**
+
+Run: `npm run build && npm run start` (from `swfldatagulf-ops`), open `http://localhost:3000/census`, and confirm:
+- `collier_parcels` and `leepa` (in "Real Estate & Property") show a real "Source reconciliation" pill (`match`, or `under X.X%`/`over X.X%`) with a benchmark number and "via FDOR Statewide Cadastral..."/"via LeePA Just Value..." underneath — not "pending".
+- `listing_lifecycle` shows "pending" until Task 11's pipeline has run at least once in production and written a row to `data_lake.source_totals` (this is expected on first deploy — the reconciliation only appears after the next scheduled `listing_lifecycle` run).
+- Every other pipeline still shows "pending" for source reconciliation, unchanged from Task 9's verification.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add lib/supabase.ts lib/census.ts app/census/page.tsx
+git commit -m "feat(census): wire live parcel/listing reconciliation into /census"
+```
+
+---
+
+## Parallel Safety
+
+> Tasks sharing a color badge touch overlapping files and **cannot run in parallel**.
+
+| Group | Tasks | Shared Files |
+|-------|-------|--------------|
+| 🔴 | Task 5, Task 12 | `lib/census-logic.mjs`, `lib/census-logic.test.mjs` |
+| 🟡 | Task 7, Task 8, Task 14 | `lib/census.ts`, `app/census/page.tsx` |
+
+Tasks with no color badge have no file conflicts — safe to parallelize freely.
