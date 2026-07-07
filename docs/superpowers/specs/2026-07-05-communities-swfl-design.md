@@ -38,19 +38,32 @@ Coral or a condo complex in East Naples gets the same treatment. Real counts fro
   100,847 · mobile home (002) 3,509 · cooperative (005) 2,478 · duplex/small-multifamily (008)
   1,970 · misc-residential (007) 942.
 - **Condos are ~186K combined** — near-parity with single-family in Collier. Property type comes
-  from the DOR use code. **Condos are counted per UNIT (each condo folio = one home)**; a condo
-  building maps to its community by name/footprint, never collapsed to a single parcel.
+  from the DOR use code. Collier condos land at **parcel/building grain, not unit grain** — see the
+  F2 reversal below; the "per-unit" claim in this bullet does not hold for this source and should
+  not be relied on when sizing a condo community's home count.
 
-  > **F2 CORRECTION (07/06/2026, live-verified):** the `100,847` condominium figure above does not
-  > match this section's own stated per-unit policy. A live pull of ALL 364,000 Collier parcels from
-  > the FDOR Statewide Parcel Centroid layer (`CO_NO=21`, `DOR_UC`, 07/05/2026 —
-  > `verification/communities-name-join-accuracy.md`) counted **169,047 condominium folios** —
-  > single-family matched independently (110,992 vs 111,129, within 0.1%), so the pull method is
-  > sound; only condo diverges, and by exactly the per-unit-vs-per-building grain this section already
-  > says is the target grain. **169,047 is the number to cite going forward** (Collier total homes
-  > →  **289,212**, not ~221K); `100,847` was either a different-grain source or a stale roll snapshot
-  > and should not be re-cited. F2 closed — no further reconciliation needed; this is a grain
-  > confirmation, not an open question.
+  > **F2 REVERSED (07/06/2026, live-verified — corrects the 07/06/2026 "F2 CORRECTION" below it,
+  > which was itself wrong).** The `169,047` figure was never a per-unit count — it's the FDOR
+  > centroid layer's raw, undeduped OBJECTID row count for `DOR_UC='004'`, and this layer duplicates
+  > condo rows: one geometry point per unit footprint, but with every non-geometry attribute
+  > (owner, sale, value, `S_LEGAL`, even `NO_RES_UNT`) byte-identical across the duplicates — proven
+  > live by pulling all ~110 fields for parcel `81750002283` ("Whitaker Woods A Condominium"): 33
+  > raw rows, only `OBJECTID`/`ORIG_FID`/geometry differ, nothing else. That's the same DOR roll
+  > record stamped onto 33 map points, not 33 distinct folios. Rerunning the corrected ingest
+  > (`ingest/pipelines/parcel_subdivision/`, proper `returnIdsOnly`→`objectIds` pagination, merged on
+  > `parcel_id` PK) reproduced the ORIGINAL `100,847` distinct-parcel-id condo count exactly — the
+  > figure this doc's prior "F2 CORRECTION" told readers to stop citing. **`100,847` is correct;
+  > `169,047`/`169,486` was row-count-before-dedup, not a real per-unit count; `289,212` Collier total
+  > homes is wrong for the same reason (Collier stays ~221K).** Neither the centroid layer nor the
+  > sibling cadastral layer (`collier_parcels` — same 364,827-row FDOR source, confirmed by matching
+  > row count) exposes any field that distinguishes individual condo units (no unit number, no
+  > per-unit owner/folio) — that's a hard ceiling of this source, not a normalizer bug. True per-unit
+  > condo data would need Collier's own assessment-roll data request (flagged already in
+  > `docs/data-sources/data-sources-discovery-2026-06-13.md` line 660) or Lee's own LeePA GIS layer,
+  > neither pulled yet. The per-community benchmark table in
+  > `verification/communities-name-join-accuracy.md` (Heritage Bay etc.) used the same undeduped pull
+  > method, so its condo-inclusive home counts are likely inflated by the same artifact and have NOT
+  > been re-verified at dedup grain — treat those specific numbers as open, not settled.
 - "How many homes are gated?" is NOT a stored number anywhere — it is an OUTPUT of Tier 1 (count
   parcels whose community carries the gated flag), authoritative once the join runs. Never invented.
 

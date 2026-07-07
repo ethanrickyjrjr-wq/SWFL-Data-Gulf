@@ -1,3 +1,23 @@
+> **CORRECTION (07/06/2026) — the condo counts below are inflated, this doc's condo-inclusive
+> numbers are NOT settled.** The `169,047` combined-Collier-condo figure (and every condo count in
+> the per-community table below, including Heritage Bay's `1,252 condo`) came from raw, undeduped
+> FDOR centroid-layer rows. That layer stamps ONE DOR roll record onto multiple map points per condo
+> — proven live by pulling all ~110 fields for parcel `81750002283` ("Whitaker Woods A
+> Condominium"): 33 raw rows, only `OBJECTID`/`ORIG_FID`/geometry differ, every other field
+> (owner, sale, value, `S_LEGAL`, `NO_RES_UNT`) byte-identical. Deduping on `parcel_id` (the actual
+> ingest's merge PK) reproduces the ORIGINAL `100,847` Collier condo count this doc says to stop
+> citing — that number was right. Full evidence:
+> `docs/superpowers/specs/2026-07-05-communities-swfl-design.md` §Scope (F2 REVERSED block).
+>
+> This doc's method (§Method below) never deduped by `parcel_id` — it grouped raw rows by `S_LEGAL`
+> prefix — so the per-community condo counts in the benchmark table are built on the same inflated
+> base. Heritage Bay's "clean match, +7%" verdict has NOT been re-verified at dedup grain; live
+> re-querying the exact per-community number hit the same server flakiness the ingest work already
+> documented (this layer soft-400s on any `LIKE` query shape) and was not worth forcing — re-run the
+> benchmark from a properly deduped pull before citing any condo-inclusive community count from this
+> doc. Single-family counts are unaffected (that property type rarely has >1 geometry point per
+> parcel, which is also why it "matched" while condo didn't — not because the method was sound).
+
 # Communities name-join accuracy — "how far off are we" (07/05/2026)
 
 **Question:** the design calls the parcel→community assignment its "one hard, unproven piece"

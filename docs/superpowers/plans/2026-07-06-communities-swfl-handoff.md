@@ -114,8 +114,19 @@ All six commits below are confirmed present on `origin/main` (checked via
 - `6e5d7d5c` — the cursor-nudge fix (works for a single poison row, not a wide dead
   zone — this is the fix that exhausted its cap and proved the zone is wider than 50)
 
-None of this needs to be redone. The F1/F2 findings and the migrations are real,
-verified, and correct regardless of how the Collier dead-zone question resolves.
+> **F2 REVERSED, same day, later session (07/06/2026).** The `339d06de` line above is wrong. The
+> `169,047`/`289,212` figures are the FDOR centroid layer's raw, undeduped row count — this layer
+> stamps ONE DOR roll record onto multiple map points per condo (proven live: parcel `81750002283`,
+> 33 raw rows, only `OBJECTID`/geometry differ, every other field byte-identical). The original
+> `100,847` condo count (and ~221K Collier total) was correct all along; the "single-family matched
+> independently so the method is sound" reasoning missed that single-family rarely has >1 point per
+> parcel, so the artifact barely touched it while condo absorbed nearly all of it. Corrected in place
+> in the design spec and phase-1 plan (F2 REVERSED blocks). The migrations and F1 (Lee spatial join)
+> finding are unaffected and still stand.
+
+The migrations are real, verified, and correct regardless of how the Collier dead-zone question
+resolves. The F2 condo-grain finding is NOT — see the reversal above; do not cite `169,047` or
+`289,212` going forward.
 
 ## What's still open
 

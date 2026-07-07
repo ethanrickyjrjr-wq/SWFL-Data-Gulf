@@ -1,3 +1,36 @@
+## 2026-07-06 (main) — communities-swfl F2 REVERSED: 100,847 Collier condos was right, 169,047 was a duplicate-row artifact, not per-unit
+
+Operator asked how to get condo unit numbers / units-per-parcel; investigating that surfaced that
+yesterday's F2 "resolved" call (commit `339d06de`: "169,047 is the correct per-unit condo count,
+100,847 was stale") was itself wrong, and it had propagated into 4 docs. Verified live against the
+FDOR Statewide Parcel Centroid FeatureServer (RULE 0.4, not memory): pulled all ~110 fields for one
+duplicated condo parcel (`81750002283`, "Whitaker Woods A Condominium") — 33 raw OBJECTID rows share
+that `parcel_id`, and only `OBJECTID`/`ORIG_FID`/geometry differ between them; owner, sale price,
+values, `S_LEGAL`, even `NO_RES_UNT` are byte-identical across all 33. That's the same DOR roll
+record stamped onto 33 map points (one centroid per unit footprint), not 33 distinct folios. So the
+raw `169,047`/`169,486` DOR_UC='004' row count is inflated by exact-duplicate rows; deduping on
+`parcel_id` (the actual ingest's merge PK) reproduces the original `100,847` — which was correct all
+along. Collier total homes stays ~221K, not the `289,212` F2 asserted. Confirmed the sibling
+`collier_parcels` cadastral layer is the same underlying 364,827-row FDOR source (identical count) and
+carries no per-unit field either — neither layer distinguishes individual condo units at all (no unit
+number, no per-unit owner/folio). True per-unit data would need Collier's own assessment-roll request
+(already flagged in `docs/data-sources/data-sources-discovery-2026-06-13.md`) or Lee's own LeePA GIS
+layer — neither pulled yet.
+
+Corrected in place, all 4 docs that cited the wrong numbers: `docs/superpowers/specs/2026-07-05-communities-swfl-design.md`
+(F2 REVERSED block replaces the old F2 CORRECTION), `docs/superpowers/plans/2026-07-05-communities-swfl-phase1-namejoin.md`
+(both the inline discrepancy note and the "F2 — RESOLVED" open-items entry), `docs/superpowers/plans/2026-07-06-communities-swfl-handoff.md`
+(correction note appended after the `339d06de` commit-list line, doesn't rewrite history), `docs/superpowers/plans/2026-07-05-communities-swfl.md`
+(accuracy bullet + Collier data bullet + new correction bullet). Also flagged
+`verification/communities-name-join-accuracy.md`'s per-community benchmark table (Heritage Bay's
+"1,252 condo, clean +7% match" etc.) as NOT re-verified at dedup grain — it used the same undeduped
+raw-row method, so those specific numbers are open again, not settled; didn't force a live re-derive
+since the layer soft-400s on any `LIKE` query shape (hit that live, stopped rather than repeat the
+prior session's rate-limit mess). `communities_swfl_live_verify` check stays open (unaffected, was
+already correctly open). Nothing else in the ingest code changed — this was a documentation/finding
+correction only. HELD for operator go-ahead to push (there's already one unrelated unpushed commit
+`d22efd7e` on this branch from other work — not bundling it in without asking).
+
 ## 2026-07-06 (main) — Commit-board cleanup: the "SocialBoard/CTA rework SHIPPED" entry below was never actually committed — verified + committed for real
 
 Operator: "someone figured out before what was on the commit board earlier, what was done and not — find

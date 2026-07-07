@@ -127,15 +127,23 @@ offline-verifiable — `communities_swfl_live_verify` stays operator-run.
   (Collier) / `Description` (Lee); grouping by it reproduces real community counts. Benchmark:
   `verification/communities-name-join-accuracy.md`. Spatial join, boundary polygons, centroid pull, and
   the GO/NO-GO gate are all obsolete.
-- **Accuracy:** ~7% on a built-out single-name community (Heritage Bay 1,501 vs 55places' 1,400). The
-  only systematic gap is sub-neighborhood name fragmentation (Pelican Bay raw prefix = 59% of 6,500),
-  closed by the alias reconciler — bounded, testable, no infra.
-- **Collier data:** 364,000 parcels pulled from the FDOR centroid layer → 289,212 homes, 4,521
-  subdivisions. Marketed golf communities ~120 in Lee+Collier (naplesgolfguy); a few hundred with gated.
+- **Accuracy:** ~7% on a built-out single-name community (Heritage Bay 1,501 vs 55places' 1,400) —
+  **CORRECTED 07/06/2026: NOT re-verified.** The 1,501 (1,252 condo + 249 SF) was built on undeduped
+  condo rows (see correction below); the true dedup-grain Heritage Bay number is open, not settled.
+- **Collier data:** 364,000 parcels pulled from the FDOR centroid layer → ~221K homes (not 289,212 —
+  see correction), 4,521 subdivisions. Marketed golf communities ~120 in Lee+Collier (naplesgolfguy);
+  a few hundred with gated.
 - **Landmines recorded in the name-join plan:** FDOR Lee partition (`CO_NO=46`) is broken (record queries
   400); the cadastral layer doesn't expose `S_LEGAL` (use the centroid layer); `returnCountOnly`/`LIKE`/
-  `returnCentroid` 400 on these layers (use keyset pagination); condo count is per-unit (169,047) vs the
-  spec's 100,847 — reconcile.
+  `returnCentroid` 400 on these layers (use keyset pagination).
+- **CORRECTION (07/06/2026):** the `169,047`/`289,212` condo/total figures above were never per-unit —
+  they're the FDOR centroid layer's raw undeduped row count. That layer stamps ONE DOR roll record
+  onto multiple map points per condo (proven live on parcel `81750002283`: 33 raw rows, only
+  `OBJECTID`/geometry differ). Deduped, Collier condo count is `100,847` (Collier total ~221K) — the
+  original spec figure was right all along. Neither this layer nor a sibling FDOR layer exposes any
+  per-unit field. Full evidence + the reversed benchmark table caveat:
+  `docs/superpowers/specs/2026-07-05-communities-swfl-design.md` §Scope,
+  `verification/communities-name-join-accuracy.md`.
 
 ## 6. Prerequisites before executing Phase 1
 - **Executable plan:** `docs/superpowers/plans/2026-07-05-communities-swfl-phase1-namejoin.md` (the

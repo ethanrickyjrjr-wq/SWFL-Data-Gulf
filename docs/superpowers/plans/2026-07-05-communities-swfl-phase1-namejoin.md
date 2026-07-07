@@ -48,10 +48,17 @@ fragmentation (Pelican Bay raw prefix = 59% of 6,500), which the alias map close
   `gissvr.leepa.org/gissvr/rest/services/ParcelInfo/MapServer` — 24 polygon layers keyed on `FOLIOID`,
   wkid 2237. **T3 resolves which of these to use — see follow-up F1.**
 
-**Condo count discrepancy (flag, don't settle):** our Collier pull shows 169,047 condo units vs an
-earlier spec figure of 100,847. Single-family matches (110,992 vs 111,129). The gap is per-unit vs
-per-building grain — each condo folio is its own row here, which is the grain we want. Reconcile before
-citing (follow-up F2).
+**Condo count discrepancy — RESOLVED 07/06/2026, reverses the earlier F2 "169,047 is correct" call.**
+169,047/169,486 is NOT per-unit — it's the FDOR centroid layer's raw undeduped row count for
+`DOR_UC='004'`. Live-pulled all fields for one condo parcel (`81750002283`, "Whitaker Woods A
+Condominium"): 33 raw rows, only `OBJECTID`/`ORIG_FID`/geometry differ — owner, sale, value,
+`S_LEGAL`, `NO_RES_UNT` are byte-identical across every "duplicate." One DOR roll record stamped on
+33 map points, not 33 folios. **100,847 (distinct `parcel_id` after merge) is the correct count;
+169,047 was row-count-before-dedup.** Neither this layer nor the cadastral layer `collier_parcels`
+uses (same 364,827-row FDOR source) exposes any per-unit field — no unit number, no per-unit
+owner/folio. True per-unit condo data needs Collier's own assessment-roll request or Lee's LeePA GIS
+layer, neither pulled. Full evidence in
+`docs/superpowers/specs/2026-07-05-communities-swfl-design.md` §Scope (F2 REVERSED block).
 
 **Reconciler is BUILT:** `refinery/lib/subdivision-aliases.mts` (committed) — `communityForSubdivision`,
 `normalizeSubdivisionName`, `COMMUNITY_ALIASES`. Currently seeded with 1 community; T5 grows it.
@@ -195,10 +202,13 @@ rollup with `--dry-run`. No LLM, no paid API.
   recommended approach in `verification/communities-lee-source-probe.md`. This reuses the SUPERSEDED
   backbone plan's Part A (A0–A4) DuckDB spatial-join steps almost verbatim, narrowed to one county. Owns
   T3; T2 (Collier, already built) is unaffected and ships regardless.
-- **F2 — RESOLVED 07/06/2026.** 169,047 (ours, per-unit) is the number to cite; `100,847` was a
-  different-grain/stale source, not a live discrepancy — single-family independently matched within
-  0.1% so the pull method is sound. Spec annotated in place (`docs/superpowers/specs/2026-07-05-communities-swfl-design.md`
-  §Scope). Collier total homes is **289,212**, not ~221K.
+- **F2 — REVERSED 07/06/2026 (later same day).** The prior "169,047 is per-unit, cite it" call above
+  was wrong. 169,047/169,486 is the raw undeduped row count, not per-unit — the FDOR centroid layer
+  stamps one DOR roll record onto multiple map points per condo (proven live on parcel `81750002283`,
+  33 identical-attribute rows differing only by `OBJECTID`/geometry). **100,847 is correct**; Collier
+  total homes stays **~221K**, not 289,212. Neither this layer nor `collier_parcels`'s cadastral
+  layer carries any per-unit distinguishing field. Spec annotated in place
+  (`docs/superpowers/specs/2026-07-05-communities-swfl-design.md` §Scope, F2 REVERSED block).
 - **F3 — Alias-map coverage.** Grow `COMMUNITY_ALIASES` from the name dumps; measure % of homes assigned to
   a marketed community; set the coverage bar. This is the ONLY remaining accuracy work (replaces the X/Y gate).
 - **F4 — Marketed-community master list.** Build the ~120–300 name list (naplesgolfguy golf + 55places gated)
