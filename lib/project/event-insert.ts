@@ -26,7 +26,20 @@ const COOLDOWN_DAYS: Partial<Record<ScoredEvent["event_type"], number>> = {
   closing: 30,
   zoning_change: 30,
   business_news: 14,
+  // Property Watch: keyed on (project, comp address_key, event_type). A comp appears/sells
+  // once; a price cut can repeat — the cooldown suppresses re-notifying the SAME comp's SAME
+  // event within the window (tracked-but-silent), while the daily digest batches the rest.
+  nearby_new_listing: 30,
+  nearby_price_cut: 14,
+  nearby_sale: 90,
 };
+
+/**
+ * Watch event types. The daily watch digest (watch-digest.mts) is the batcher for these, so
+ * the CRE 48-hour notify window must NOT count them (a watch send would otherwise silently
+ * suppress a CRE notify — and vice versa). Kept in sync with the EventType union.
+ */
+const WATCH_EVENT_TYPES = ["nearby_new_listing", "nearby_price_cut", "nearby_sale"] as const;
 
 const NOTIFY_BATCH_WINDOW_HOURS = 48;
 
@@ -40,7 +53,15 @@ export async function insertProjectEvent(
   supabase: SupabaseClient,
   projectId: string,
   event: ScoredEvent,
-  opts: { geocode_source?: "zip_centroid" | "exact" } = {},
+  opts: {
+    geocode_source?: "zip_centroid" | "exact";
+    /**
+     * Skip the 48-hour notify-batch window for THIS insert (Property Watch). The watch digest is
+     * the batcher for nearby_* events, so the CRE window would wrongly flip notify_user→false and
+     * drop them from the digest. Defaults false — existing CRE callers are unchanged.
+     */
+    bypassBatchWindow?: boolean;
+  } = {},
 ): Promise<InsertEventResult> {
   try {
     // ── 1. Cooldown check ──────────────────────────────────────────────────────
@@ -86,9 +107,11 @@ export async function insertProjectEvent(
 
     // ── 2. 48-hour notify batch window ─────────────────────────────────────────
     // If another event already fired a user notification for this project in the last 48h,
-    // keep inject_ai but suppress notify_user to avoid back-to-back pings.
+    // keep inject_ai but suppress notify_user to avoid back-to-back pings. The watch path
+    // (bypassBatchWindow) opts out entirely — its own daily digest is the batcher — and the
+    // window NEVER counts watch rows, so watch↔CRE notifies can't cross-suppress each other.
     let notifyUser = event.notify_user;
-    if (notifyUser) {
+    if (notifyUser && !opts.bypassBatchWindow) {
       const windowSince = new Date(
         Date.now() - NOTIFY_BATCH_WINDOW_HOURS * 3_600_000,
       ).toISOString();
@@ -98,6 +121,7 @@ export async function insertProjectEvent(
         .eq("project_id", projectId)
         .eq("notify_user", true)
         .not("notified_at", "is", null)
+        .not("event_type", "in", `(${WATCH_EVENT_TYPES.join(",")})`)
         .gte("notified_at", windowSince);
 
       if ((count ?? 0) > 0) {

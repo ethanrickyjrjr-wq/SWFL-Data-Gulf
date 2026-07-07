@@ -1,0 +1,53 @@
+name: Property Watch digest (daily)
+
+# PARKED until property_watch_live_verify passes: dispatch-only, no schedule. This send path mails
+# real users, so it stays operator-gated. A dispatch defaults to a dry-run (compose + print, stamp
+# nothing). A live send additionally requires WATCH_DIGEST_LIVE=1 — the adapter refuses --send without
+# it, so this workflow cannot blast email even if triggered. After property_watch_live_verify wires the
+# transport, add the schedule + set the env flag:
+#   schedule:
+#     - cron: "0 17 * * *"   # after watch-scan-daily (16:30) has inserted the day's events
+on:
+  workflow_dispatch:
+    inputs:
+      send:
+        description: "Attempt a live send (still requires WATCH_DIGEST_LIVE=1). Default: dry-run."
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run Property Watch digest
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # WATCH_DIGEST_LIVE is intentionally unset here — set it only during the operator live-verify.
+        run: |
+          if [ "${{ github.event.inputs.send }}" = "true" ]; then
+            bun scripts/project-feed/watch-digest.mts --send
+          else
+            bun scripts/project-feed/watch-digest.mts --dry-run
+          fi
+
+      - name: Healthchecks.io heartbeat
+        if: always()
+        run: |
+          curl -fsS -m 10 --retry 3 \
+            "https://hc-ping.com/${{ secrets.HEALTHCHECKS_PING_KEY }}/watch-digest-daily?create=1" || true

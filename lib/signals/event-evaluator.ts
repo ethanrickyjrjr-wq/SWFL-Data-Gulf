@@ -19,7 +19,10 @@ const TIER_WEIGHT: Record<number, { open: number; close: number }> = {
   5: { open: 0, close: 0 },
 };
 
-const EVENT_TYPE_MULTIPLIER: Record<EventType, number> = {
+// CRE event scoring only — Property Watch's nearby_* types never flow through scoreEvent (the
+// watch adapter builds a neutral-scored ScoredEvent directly), so they're intentionally absent.
+// Access is always `?? 0.5`-guarded below.
+const EVENT_TYPE_MULTIPLIER: Partial<Record<EventType, number>> = {
   opening: 1.0,
   anchor_announced: 0.9,
   construction_start: 0.8,
@@ -107,7 +110,7 @@ function resolveBrandEntry(
 
 function buildAiSummary(event: QualEvent, distanceMiles: number, _finalScore: number): string {
   const dir = distanceMiles < 0.1 ? "on-site" : `${distanceMiles.toFixed(1)} mi`;
-  const typeLabel: Record<EventType, string> = {
+  const typeLabel: Partial<Record<EventType, string>> = {
     opening: "opening",
     closing: "closed permanently",
     permit_filed: "permit filed",

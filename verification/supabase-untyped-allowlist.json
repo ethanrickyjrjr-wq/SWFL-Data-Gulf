@@ -5,6 +5,7 @@
   "app/api/mls/disconnect/route.test.ts",
   "app/api/mls/disconnect/route.ts",
   "app/api/projects/[id]/confirm-value/route.ts",
+  "app/api/projects/[id]/watch/route.ts",
   "app/charts/page.tsx",
   "lib/charts/gallery-loaders.ts",
   "lib/charts/load-metro-trend.ts",

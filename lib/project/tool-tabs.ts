@@ -1,5 +1,5 @@
 // lib/project/tool-tabs.ts
-export type ProjectTool = "overview" | "email" | "social";
+export type ProjectTool = "overview" | "email" | "social" | "watch";
 
 /**
  * Where "open this project" lands — the Email tool, ready to author (operator ruling
@@ -16,5 +16,6 @@ export function activeTool(pathname: string, id: string): ProjectTool {
   const base = `/project/${id}`;
   if (pathname.startsWith(`${base}/email-lab`)) return "email";
   if (pathname.startsWith(`${base}/social`)) return "social";
+  if (pathname.startsWith(`${base}/watch`)) return "watch";
   return "overview";
 }

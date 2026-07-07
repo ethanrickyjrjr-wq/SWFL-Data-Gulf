@@ -2305,6 +2305,17 @@ export interface Database {
           kind: string;
           subject_address: string | null;
           property_url: string | null;
+          watch_enabled: boolean;
+          watch_mode: string | null;
+          watch_lat: number | null;
+          watch_lon: number | null;
+          watch_radius_miles: number;
+          watch_price_cut_threshold_pct: number;
+          watch_beds: number | null;
+          watch_baths: number | null;
+          watch_sqft: number | null;
+          watch_price: number | null;
+          watch_price_is_estimate: boolean;
         };
         Insert: {
           id: string;
@@ -2321,6 +2332,17 @@ export interface Database {
           kind?: string;
           subject_address?: string | null;
           property_url?: string | null;
+          watch_enabled?: boolean;
+          watch_mode?: string | null;
+          watch_lat?: number | null;
+          watch_lon?: number | null;
+          watch_radius_miles?: number;
+          watch_price_cut_threshold_pct?: number;
+          watch_beds?: number | null;
+          watch_baths?: number | null;
+          watch_sqft?: number | null;
+          watch_price?: number | null;
+          watch_price_is_estimate?: boolean;
         };
         Update: {
           id?: string;
@@ -2337,6 +2359,17 @@ export interface Database {
           kind?: string;
           subject_address?: string | null;
           property_url?: string | null;
+          watch_enabled?: boolean;
+          watch_mode?: string | null;
+          watch_lat?: number | null;
+          watch_lon?: number | null;
+          watch_radius_miles?: number;
+          watch_price_cut_threshold_pct?: number;
+          watch_beds?: number | null;
+          watch_baths?: number | null;
+          watch_sqft?: number | null;
+          watch_price?: number | null;
+          watch_price_is_estimate?: boolean;
         };
         Relationships: [];
       };

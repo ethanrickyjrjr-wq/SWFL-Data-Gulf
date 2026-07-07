@@ -66,9 +66,21 @@ export type EventType =
   | "construction_start"
   | "zoning_change"
   | "anchor_announced"
-  | "business_news";
+  | "business_news"
+  // ── Property Watch (spec 2026-07-07-property-watch-design.md) — residential comps ──
+  // near a tracked address. These ride the SAME project_events row + insertProjectEvent
+  // path as the CRE events above; the DB `event_type` column is text, so no migration.
+  | "nearby_new_listing"
+  | "nearby_price_cut"
+  | "nearby_sale";
 
-export type EventSource = "permits_swfl" | "news_crawl" | "google_places_delta" | "operator_manual";
+export type EventSource =
+  | "permits_swfl"
+  | "news_crawl"
+  | "google_places_delta"
+  | "operator_manual"
+  // Property Watch: the data_lake.listing_transitions ⋈ listing_state join (watch-scan.mts).
+  | "listing_lifecycle_lake";
 
 export interface QualEvent {
   entity_name: string;

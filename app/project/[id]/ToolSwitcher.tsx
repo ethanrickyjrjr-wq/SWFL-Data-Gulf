@@ -10,6 +10,7 @@ import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 const TABS: { tool: ProjectTool; label: string; href: (id: string) => string }[] = [
   { tool: "email", label: "Email", href: (id) => projectEmailLabBase(id) },
   { tool: "social", label: "Social", href: (id) => `/project/${id}/social` },
+  { tool: "watch", label: "Watch", href: (id) => `/project/${id}/watch` },
   { tool: "overview", label: "Overview", href: (id) => `/project/${id}` },
 ];
 

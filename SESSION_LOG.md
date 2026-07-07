@@ -1,3 +1,37 @@
+## 2026-07-07 (main) — Property Watch v1 BUILT (held for push): nearby-comp movement nudges, extends project_events
+
+Built the approved design (`docs/superpowers/specs/2026-07-07-property-watch-design.md`) after a full
+RULE-0.5 code-probe that confirmed the spec's surfaces and surfaced 4 real gaps it left open — all
+resolved in code:
+1. The 48h notify-batch window in `insertProjectEvent` would silently drop new-listing/price-cut events
+   from the digest (the digest, not the window, is the watch batcher). Added `opts.bypassBatchWindow`
+   AND scoped the window's count query to exclude `nearby_*` so watch↔CRE notifies never cross-suppress.
+2. `project_events` has no dedup_key → idempotency via a rolling 7-day scan window (perf) + an
+   adapter-level existence check on `(project_id, entity_brand_key, event_type, event_date)` (self-heals
+   a missed cron day). `entity_brand_key = comp address_key` drives the existing cooldown as anti-spam.
+3. `listing_state` price column is `list_price`, not `price` (transitions has `price`) — wired correctly.
+4. Source-B `lifecycle_seed` rows can have NULL lat/lon → EXCLUDED, never guessed (four-lane no-invention);
+   `entity_name`=address_key (internal, never surfaced — feed/digest render distance+specs+delta only).
+
+Shipped: migration `20260707_projects_property_watch.sql` (applied to prod, additive; 11 `watch_*` cols
+on `public.projects`) + hand-added those cols to `database-generated.types.ts` (33-line diff — regen
+would have reformatted the whole prettier'd file and collided with parallel-session edits). Pure cores
+(no DB/disk/Date.now, fully TDD'd, 29 tests): `lib/project/watch-delta.ts` (price/sqft + beds/baths
+deltas, threshold check, the ONE deterministic raw-fact copy builder — no LLM anywhere), `watch-event.ts`
+(classify sold→new-listing→price-cut, neutral-scored ScoredEvent), `watch-digest.ts` (group by project).
+Adapters: `scripts/project-feed/watch-scan.mts` (daily detection, mirrors lifecycle-nudges) + `watch-digest.mts`
+(compose + `--dry-run`; live send is HARD-gated behind `WATCH_DIGEST_LIVE=1`, refuses `--send` otherwise,
+never stamps `notified_at` without a real send). API `app/api/projects/[id]/watch` (GET feed / POST
+enable+geocode+auto-fill subject spec from the lake / PATCH toggle+adjust). UI: new "Watch" tab
+(`/project/[id]/watch`, setup card + reverse-chron feed) + `tool-tabs.ts`/`ToolSwitcher.tsx`. Both crons
+PARKED (dispatch-only, no schedule) until `property_watch_live_verify`.
+
+Verify: `bunx next build` green (both routes registered, 0 type errors), 78/78 tests across touched
+suites, both adapters `--dry-run` connect+exit 0, eslint clean (route allowlisted for the data_lake
+untyped read). v1 verifiable loop = scan→project_events→Watch tab feed (in-app); email digest is the
+parked async channel. NOT pushed — awaiting operator confirmation. Foreign parallel-session working-tree
+changes present (email-lab/blocks/pdf/doc); will stage ONLY the explicit Property Watch paths.
+
 ## 2026-07-06 (main) — communities-swfl F2 REVERSED: 100,847 Collier condos was right, 169,047 was a duplicate-row artifact, not per-unit
 
 Operator asked how to get condo unit numbers / units-per-parcel; investigating that surfaced that
