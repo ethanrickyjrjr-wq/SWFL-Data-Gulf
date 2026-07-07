@@ -1,3 +1,32 @@
+## 2026-07-07 (main) — Answer-engine jargon fix needed a SECOND pass: prompt ban alone didn't hold, scrubbed at the grounding-render layer instead
+
+Operator said "push" on the fixes below, then asked to find anything else blocked. Before pushing,
+live-tested the jargon fix (RULE: verify before claiming) by running the actual dev server and POSTing
+a real broad question ("Where is growth actually happening in SWFL right now?") to `/api/assistant`.
+First live answer still said "corridor-weighted z-score... sits at 3.688 — well above normal" — the
+model kept the banned word and just bolted the plain-English gloss on next to it. Broadened the ban
+from a word list to a category rule ("never cite a statistical methodology term") and re-tested: the
+model swapped to "3.688 standard deviations above the trailing 365-day average" instead — same jargon,
+a word not on the list. Root cause: the pack's own metric LABELS and conclusion text literally contain
+"z-score" (permits-swfl.mts writes it into `key_metrics` labels by design, for its Tier-1 Reporter
+audience) and the model was faithfully citing that labeled text per RULE 1 (CITE) — a prompt
+instruction cannot out-compete data it's told to answer only from. Fixed at the correct layer instead:
+`lib/highlighter/grounding.ts::renderBlock` (the ONE function every grounding consumer — chat,
+report-path, welcome — funnels through) now scrubs `z-score(s)|sigma|standard deviation(s)` out of the
+assembled text before it ever reaches a system prompt, leaving pack-internal labels/units untouched (so
+`/r/*` report pages and tier-3 audit still show the real term where it's wanted). Re-tested live a 4th
+time: clean answer, zero jargon, full completion, honest "7 resolved SBA loans" framing instead of a
+bare "100%" claim. Captured that live answer as the required proof record in
+`verification/answer-proofs.jsonl` (validated against the actual gate's `validateProofs()` before
+pushing, not just eyeballed).
+
+Also hit a real parallel-session git race committing this: another active session's email-lab
+retirement work was sitting staged in the shared index twice, and a failed pre-commit hook's
+stash/restore cycle briefly dropped their commit (`c64c47e7`) from `main`'s history entirely (content
+was never lost — recovered by reparenting my commit onto theirs via `git reset --soft` before
+anything was pushed). Corrects the prior entry below, which said the touch-device hook "landed in the
+prior commit" — that was this same race, not a deliberate split.
+
 ## 2026-07-07 (main) — Answer-engine jargon/token-cap/thin-sample fixes + mobile Enter-key fix + Lee Accela parser fix
 
 Operator screenshots of the `/ask` page (phone) flagged: raw vendor/stats jargon in answers

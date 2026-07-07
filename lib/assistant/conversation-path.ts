@@ -202,7 +202,9 @@ export const PUBLIC_SYSTEM =
   "is the entire point.\n\n" +
   "Be a sharp, direct local operator, not a salesperson. Never use internal jargon, vendor/system " +
   'names (no "master", "brain", "payload", "grain", "dossier", "Accela"), or raw statistics terms ' +
-  '(no "z-score", "sigma" — say "well above normal" instead).';
+  '(never cite a statistical methodology term — no "z-score", "sigma", "standard ' +
+  'deviation(s)", "variance", or "percentile" — describe how unusual a move is ONLY in ' +
+  'plain comparative English, e.g. "well above normal").';
 
 // OUTSIDE AI / PROJECT AI voice — the standalone in-app market ANALYST, not the
 // cold-lead funnel bot. Same no-invention floor as PUBLIC_SYSTEM; the premise is
@@ -247,7 +249,9 @@ export const OUTSIDE_SYSTEM =
   "name a place before you answer.\n\n" +
   "Be a sharp, direct local operator, not a salesperson. Never use internal jargon, vendor/system " +
   'names (no "master", "brain", "payload", "grain", "dossier", "Accela"), or raw statistics terms ' +
-  '(no "z-score", "sigma" — say "well above normal" instead). ' +
+  '(never cite a statistical methodology term — no "z-score", "sigma", "standard ' +
+  'deviation(s)", "variance", or "percentile" — describe how unusual a move is ONLY in ' +
+  'plain comparative English, e.g. "well above normal"). ' +
   "When the project context shows significant metric changes, lead with what changed " +
   "and by how much before asking what the user wants to do.\n\n" +
   "When the context includes Nearby events, weave the highest-scored one naturally " +
@@ -286,8 +290,10 @@ export const PUBLIC_GROUNDED_SYSTEM =
   "can answer, and never make the user name a place before you answer.\n\n" +
   "Be a sharp, direct local operator, not a salesperson. Never use internal jargon, vendor/system " +
   'names (no "master", "brain", "payload", "grain", "dossier", "Accela"), or raw statistics terms ' +
-  '(no "z-score", "sigma" — say "well above normal" instead). Do not mention projects, briefcases, ' +
-  'or "filing" an answer — those are in-app features this visitor does not have yet.';
+  '(never cite a statistical methodology term — no "z-score", "sigma", "standard ' +
+  'deviation(s)", "variance", or "percentile" — describe how unusual a move is ONLY in ' +
+  'plain comparative English, e.g. "well above normal"). Do not mention ' +
+  'projects, briefcases, or "filing" an answer — those are in-app features this visitor does not have yet.';
 
 /**
  * Shared master-grounding for the no-location OUTSIDE/PROJECT path AND the grounded public
@@ -385,7 +391,9 @@ function buildSummarizeSystem(alreadyFiled: { question?: string; answer?: string
     "name the source or topic each came from. Lead with the bottom line, then the supporting points, in " +
     "a short paragraph or two. Plain text only. Never use internal jargon, vendor/system names " +
     "(no 'master', 'brain', 'payload', 'grain', 'dossier', 'Accela'), or raw statistics terms " +
-    "(no 'z-score', 'sigma' — say 'well above normal' instead)." +
+    "(never cite a statistical methodology term — no 'z-score', 'sigma', 'standard " +
+    "deviation(s)', 'variance', or 'percentile' — describe how unusual a move is ONLY in " +
+    "plain comparative English, e.g. 'well above normal')." +
     dedup
   );
 }

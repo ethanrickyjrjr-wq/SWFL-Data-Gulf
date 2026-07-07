@@ -71,6 +71,24 @@ const DIRECTION_LABEL: Record<Dossier["direction"], string> = {
   neutral: "Neutral",
 };
 
+// Pack labels/conclusions/caveats are written for the Tier-1 "Reporter" audience
+// (analyst prose is fine — e.g. permits-swfl's own instructions ask for a
+// z-score read) but this text becomes the CONSUMER-facing chat's grounding —
+// the Conversation tier, which CLEAN (no jargon) applies to. A prompt-only ban
+// on these words lost 3 live tests running: the model recited "z-score" straight
+// out of a metric label / conclusion sentence it was told to cite faithfully
+// (RULE 1 CITE beats a "don't say this" instruction every time). Scrubbing the
+// words out of the grounding text itself — not just asking the model not to say
+// them — is the structural fix (see "structural guarantee, not AI virtue").
+// Deliberately NOT touching pack `units`/label source fields: those still render
+// correctly on /r/* report pages and tier-3 audit, where "z-score" is accurate
+// and wanted.
+const STATS_JARGON_RE = /\bz-?scores?\b|\bsigma\b|\bstandard deviations?\b/gi;
+
+function scrubStatsJargon(text: string): string {
+  return text.replace(STATS_JARGON_RE, "index reading");
+}
+
 export function renderBlock(b: GroundingBlock): string {
   const d = b.dossier;
   const parts = [
@@ -92,7 +110,7 @@ export function renderBlock(b: GroundingBlock): string {
   if (tables) parts.push(`Detail rows (every covered area — use these to compare):\n${tables}`);
   if (d.caveats.length) parts.push(`Caveats: ${d.caveats.join("; ")}`);
   if (d.grain_boundary) parts.push(`What we do NOT hold: ${JSON.stringify(d.grain_boundary)}`);
-  return parts.join("\n");
+  return scrubStatsJargon(parts.join("\n"));
 }
 
 /**
