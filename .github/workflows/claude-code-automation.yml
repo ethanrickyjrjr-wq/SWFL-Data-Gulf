@@ -1,7 +1,11 @@
 name: Claude Code Automation
+# Fires on an explicit signal only: an @claude comment or an issue assigned to
+# Claude. NOT on every issue `opened` (that summoned Claude on any new issue —
+# too broad, and it double-fired on the self-healing deploy-incident issues,
+# which are handled by the label-gated claude-deploy-triage workflow instead).
 on:
   issues:
-    types: [assigned, opened]
+    types: [assigned]
   issue_comment:
     types: [created]
 

@@ -1,0 +1,55 @@
+name: Claude — deploy incident triage
+
+# Build C of the self-healing deploy loop. Fires ONLY when the rollback bot
+# labels an issue `deploy-incident` (never on ordinary issues). Claude classifies
+# the cause FIRST and opens a DRAFT pull request only when the cause is in-repo
+# code — it never merges (a human does).
+#
+# Guards: label-gated trigger, turn cap (--max-turns), draft-only by prompt. The
+# ANTHROPIC daily/monthly spend caps + tripwire apply on top of this.
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  triage:
+    if: github.event.label.name == 'deploy-incident'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Claude deploy-incident triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Cost guard: cap the run. Cause-classification + one small fix fits well under this.
+          claude_args: "--max-turns 25"
+          prompt: |
+            A production smoke run went red after a deploy, and this issue is the incident record.
+            Its body holds the failing assertion output, the failed commit SHA, and the deploy URL.
+
+            Do this, strictly in order:
+
+            1. CLASSIFY the cause as EXACTLY ONE of:
+               - infra        (Vercel/Supabase/network/provider outage; not our code)
+               - transient    (cold start, a one-off blip that a rerun would clear)
+               - data         (a data source or pipeline produced bad/empty data)
+               - in-repo-code (a bug in THIS repository's code)
+
+            2. Post ONE comment: the class, then a one-paragraph root cause that cites the
+               specific failed assertion(s). "How big is the problem" comes first — say it plainly.
+
+            3. ONLY if the class is `in-repo-code`: open a DRAFT pull request with the smallest
+               fix that addresses the root cause, and reference this issue number. For every other
+               class, do NOT open a PR — the comment is the whole deliverable.
+
+            Never merge anything. If you are not confident the cause is in-repo code, default to a
+            comment, not a PR. Prefer the smallest safe change.

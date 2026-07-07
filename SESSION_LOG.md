@@ -1,3 +1,17 @@
+## 2026-07-07 (main) — Self-healing deploy bots: Build C (Claude incident triage) shipped, dark
+
+Closes the loop's diagnosis rung, guarded per operator directive ("guard everything Claude runs auto",
+"how big is the problem first"):
+- Tightened claude-code-automation.yml: dropped the blanket `issues: opened` trigger (it summoned Claude on
+  EVERY new issue). Now fires only on an @claude comment or an issue assignment.
+- New claude-deploy-triage.yml: fires ONLY on the `deploy-incident` label (which only the ARMED rollback bot
+  applies). v1 config verified live (crawl4ai): label-gated trigger + prompt + claude_args (--max-turns 25
+  cost cap; deprecated model/allowed_tools now route through claude_args). Prompt: CLASSIFY cause first
+  (infra/transient/data/in-repo-code), comment root cause, open a DRAFT PR ONLY for in-repo-code, never merge.
+Dark: triage can't fire until Build B is armed (only armed B labels an issue deploy-incident). Offline: both
+YAML valid, triggers confirmed ([assigned] / [labeled]+if deploy-incident). Loop A->B->C all built. Arming =
+VERCEL_ROLLBACK_TOKEN secret + SELFHEAL_ROLLBACK_ENABLED=true var. Live-verify (rollback + triage) operator-run.
+
 ## 2026-07-07 (main) — correction: SteadyAPI scope IS Lee+Collier+Hendry only, confirmed by operator
 
 Immediately following the entry below: operator confirmed "LEE, COLLIER AND HENDRY ONLY" — the
