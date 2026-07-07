@@ -79,8 +79,12 @@ describe("cadence colors + refresh legend", () => {
       expect(color.fg.length).toBeGreaterThan(0);
       expect(color.label.length).toBeGreaterThan(0);
     }
-    // CADENCE_ORDER and CADENCE_COLORS keys agree exactly.
-    expect([...CADENCE_ORDER].sort()).toEqual(Object.keys(CADENCE_COLORS).sort());
+    // Every ordered (freshness-band) cadence has a color. CADENCE_COLORS is a
+    // full Record<Cadence> so it also carries "once" — a SEND shape that stays
+    // OUT of CADENCE_ORDER by design (cadence-colors.ts) so the freshness legend
+    // never renders it. So the invariant is subset, not set-equality.
+    const colorKeys = new Set(Object.keys(CADENCE_COLORS));
+    for (const c of CADENCE_ORDER) expect(colorKeys.has(c)).toBe(true);
   });
 
   it("every showcase cadenceRefresh key is a real Cadence", () => {
@@ -163,20 +167,22 @@ describe("HERO_CAMPAIGNS", () => {
 });
 
 describe("heroDestination", () => {
-  it("fills the blank and carries zip + recipeNeeds to the grid lab", () => {
+  it("fills the blank and carries addr + recipeNeeds to the grid lab — never a zip", () => {
     const entry = HERO_CAMPAIGNS[0];
-    const url = heroDestination(entry, { filled: "123 Main St, Cape Coral", zip: "33904" });
+    const url = heroDestination(entry, { filled: "123 Main St, Cape Coral" });
     expect(url.startsWith("/email-lab/grid?")).toBe(true);
     const params = new URLSearchParams(url.split("?")[1]);
     expect(params.get("recipe")).toContain("123 Main St, Cape Coral");
     expect(params.get("recipe")).not.toContain("[[");
-    expect(params.get("zip")).toBe("33904");
+    // The subject is the address; a property campaign never rides a zip param —
+    // ZIP is derived downstream, and a ZIP-subject arrival goes via openZipLab.
+    expect(params.get("zip")).toBeNull();
     expect(params.get("recipeNeeds")).toBe(entry.recipe.needs.join(","));
   });
 
-  it("omits zip when the pick has none (city input)", () => {
+  it("never carries a zip, even for a city/area input", () => {
     const entry = HERO_CAMPAIGNS[3];
-    const url = heroDestination(entry, { filled: "Cape Coral", zip: null });
+    const url = heroDestination(entry, { filled: "Cape Coral" });
     const params = new URLSearchParams(url.split("?")[1]);
     expect(params.get("recipe")).toContain("Cape Coral");
     expect(params.get("zip")).toBeNull();
@@ -184,10 +190,10 @@ describe("heroDestination", () => {
 
   it("listing chips carry addr= for the address spine; market-update does not", () => {
     const listing = HERO_CAMPAIGNS[0];
-    const url = heroDestination(listing, { filled: "123 Main St, Cape Coral", zip: "33904" });
+    const url = heroDestination(listing, { filled: "123 Main St, Cape Coral" });
     expect(new URLSearchParams(url.split("?")[1]).get("addr")).toBe("123 Main St, Cape Coral");
     const area = HERO_CAMPAIGNS[3];
-    const areaUrl = heroDestination(area, { filled: "Cape Coral", zip: null });
+    const areaUrl = heroDestination(area, { filled: "Cape Coral" });
     expect(new URLSearchParams(areaUrl.split("?")[1]).get("addr")).toBeNull();
   });
 
@@ -197,7 +203,7 @@ describe("heroDestination", () => {
   it("keeps the [[blank]] intact when the fill is empty or whitespace", () => {
     for (const filled of ["", "   "]) {
       const area = HERO_CAMPAIGNS[3];
-      const url = heroDestination(area, { filled, zip: null });
+      const url = heroDestination(area, { filled });
       const params = new URLSearchParams(url.split("?")[1]);
       expect(params.get("recipe")).toContain("[[");
       expect(params.get("addr")).toBeNull();
@@ -206,7 +212,7 @@ describe("heroDestination", () => {
 
   it("does not carry an empty addr= for a listing chip with no address typed", () => {
     const listing = HERO_CAMPAIGNS[0];
-    const url = heroDestination(listing, { filled: "  ", zip: null });
+    const url = heroDestination(listing, { filled: "  " });
     const params = new URLSearchParams(url.split("?")[1]);
     expect(params.get("recipe")).toContain("[[");
     expect(params.get("addr")).toBeNull();
