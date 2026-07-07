@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-01",
+  "generated_at": "2026-07-07",
   "spec": "docs/superpowers/plans/2026-06-03-row-tier/sweep-spec.md",
   "note": "Regenerable artifact — never hand-edit. Regenerate: bun refinery/tools/grade-config-sweep.mts. Adjudications live in the `checks` ledger, not here.",
   "summary": {
     "unregistered": 0,
     "invalid-polarity": 0,
-    "row-candidate": 40,
+    "row-candidate": 45,
     "gradeable": 195,
     "reviewed-display": 40,
     "moat-fuel": 0,
@@ -2009,6 +2009,27 @@
       "backtest_clean": false
     },
     {
+      "slug": "golf_bundled_community_share_swfl",
+      "concept_id": "golf_bundled_community_share_swfl",
+      "bucket": "row-candidate",
+      "gateVector": {
+        "slug": "golf_bundled_community_share_swfl",
+        "concept_id": "golf_bundled_community_share_swfl",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": false,
+        "numeric_ok": false,
+        "raw_polarity": null,
+        "category": "market-signal",
+        "value_type": "intensive",
+        "window_days": null,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
       "slug": "home_value_yoy_pct",
       "concept_id": "home_value_yoy_pct",
       "bucket": "gradeable",
@@ -2129,6 +2150,27 @@
         "value_type": "count",
         "window_days": 180,
         "reviewed_non_directional": true
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "homes_in_gated_communities_swfl",
+      "concept_id": "homes_in_gated_communities_swfl",
+      "bucket": "row-candidate",
+      "gateVector": {
+        "slug": "homes_in_gated_communities_swfl",
+        "concept_id": "homes_in_gated_communities_swfl",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": false,
+        "numeric_ok": false,
+        "raw_polarity": null,
+        "category": "market-signal",
+        "value_type": "extensive",
+        "window_days": null,
+        "reviewed_non_directional": false
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
@@ -3710,6 +3752,27 @@
       "backtest_clean": false
     },
     {
+      "slug": "marketed_communities_count_swfl",
+      "concept_id": "marketed_communities_count_swfl",
+      "bucket": "row-candidate",
+      "gateVector": {
+        "slug": "marketed_communities_count_swfl",
+        "concept_id": "marketed_communities_count_swfl",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": false,
+        "numeric_ok": false,
+        "raw_polarity": null,
+        "category": "market-signal",
+        "value_type": "extensive",
+        "window_days": null,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
       "slug": "median_dom_yoy_days",
       "concept_id": "median_dom_yoy_days",
       "bucket": "gradeable",
@@ -3729,6 +3792,27 @@
       "gradeable": true,
       "reason": null,
       "backtest_clean": false
+    },
+    {
+      "slug": "median_hoa_fee_midpoint_swfl",
+      "concept_id": "median_hoa_fee_midpoint_swfl",
+      "bucket": "row-candidate",
+      "gateVector": {
+        "slug": "median_hoa_fee_midpoint_swfl",
+        "concept_id": "median_hoa_fee_midpoint_swfl",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": false,
+        "numeric_ok": false,
+        "raw_polarity": null,
+        "category": "market-signal",
+        "value_type": "intensive",
+        "window_days": null,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
     },
     {
       "slug": "median_list_price_swfl",
@@ -6123,6 +6207,27 @@
       "gradeable": true,
       "reason": null,
       "backtest_clean": false
+    },
+    {
+      "slug": "total_homes_catalogued_swfl",
+      "concept_id": "total_homes_catalogued_swfl",
+      "bucket": "row-candidate",
+      "gateVector": {
+        "slug": "total_homes_catalogued_swfl",
+        "concept_id": "total_homes_catalogued_swfl",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": false,
+        "numeric_ok": false,
+        "raw_polarity": null,
+        "category": "market-signal",
+        "value_type": "extensive",
+        "window_days": null,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
     },
     {
       "slug": "total_passengers",
