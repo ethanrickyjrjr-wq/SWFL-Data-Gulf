@@ -1,13 +1,16 @@
 """Scraper tests — parse a captured Accela result page into typed rows."""
 from pathlib import Path
 import pytest
+from . import scraper as _scraper_mod  # for monkeypatching fetch_sequential
 from .scraper import (
     PermitRow,
     _extract_zip,
+    enrich_rows_with_details,
     parse_accela_result_page,
     parse_cap_detail_html,
     parse_page_count,
 )
+from ingest.lib.guards import FetchHealthError
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -205,3 +208,90 @@ def test_parse_cap_detail_html_fir_workflow_history_issued_date() -> None:
     assert result["issued_date"] == "2026-07-07", (
         f"expected 2026-07-07, got {result['issued_date']!r}"
     )
+
+
+# ---------------------------------------------------------------------------
+# enrich_rows_with_details — sequential fetch + fetch-health guard (WAF fix)
+# ---------------------------------------------------------------------------
+
+
+def _detail_row(pid: str) -> PermitRow:
+    """A list-view row with a cap_detail_url, ready for detail enrichment."""
+    return PermitRow(
+        permit_id=pid,
+        issued_date="",
+        permit_type_raw="",
+        permit_description_raw="desc",
+        address="123 MAIN ST FORT MYERS FL 33901",
+        zip_code="33901",
+        lat=None,
+        lon=None,
+        declared_value_usd=None,
+        status="Issued",
+        cap_detail_url=f"/LEECO/Cap/CapDetail.aspx?ID={pid}",
+    )
+
+
+def _fake_sequential(html_for):
+    """Build an async stand-in for crawl_client.fetch_sequential returning {url: html}."""
+
+    async def _f(urls, **kwargs):
+        urls = list(urls)
+        return {u: html_for(i) for i, u in enumerate(urls)}
+
+    return _f
+
+
+def test_enrich_raises_fetchhealth_on_blocked_sweep(monkeypatch) -> None:
+    # 2 of 10 detail pages come back — 20% < 80% floor — the partial-block WAF case.
+    rows = [_detail_row(f"BLD2026-{i:05d}") for i in range(10)]
+
+    def html_for(i: int) -> str:
+        return '<span id="lblIssuedDate">07/01/2026</span>' if i < 2 else ""
+
+    monkeypatch.setattr(_scraper_mod, "fetch_sequential", _fake_sequential(html_for))
+    with pytest.raises(FetchHealthError, match="WAF/429 suspected"):
+        enrich_rows_with_details(rows)
+
+
+def test_enrich_fills_fields_on_healthy_sweep(monkeypatch) -> None:
+    rows = [_detail_row(f"BLD2026-{i:05d}") for i in range(10)]
+    html = (
+        '<span id="lblIssuedDate">07/01/2026</span>'
+        '<span id="lblDeclaredValuation">$12,500</span>'
+        '<span id="lblPermitType">Residential</span>'
+    )
+    monkeypatch.setattr(_scraper_mod, "fetch_sequential", _fake_sequential(lambda i: html))
+    out = enrich_rows_with_details(rows)
+    assert out[0].issued_date == "2026-07-01"
+    assert out[0].declared_value_usd == 12500.0
+    assert out[0].permit_type_raw == "Residential"
+
+
+def test_enrich_no_targets_skips_fetch(monkeypatch) -> None:
+    # No cap_detail_url on any row -> nothing to fetch, guard skipped, fetch never called.
+    rows = [
+        PermitRow(
+            permit_id="BLD2026-00001",
+            issued_date="2026-07-01",
+            permit_type_raw="",
+            permit_description_raw="d",
+            address="a",
+            zip_code=None,
+            lat=None,
+            lon=None,
+            declared_value_usd=None,
+            status=None,
+            cap_detail_url=None,
+        )
+    ]
+    called = {"n": 0}
+
+    async def _boom(urls, **kwargs):
+        called["n"] += 1
+        return {}
+
+    monkeypatch.setattr(_scraper_mod, "fetch_sequential", _boom)
+    out = enrich_rows_with_details(rows)
+    assert out == rows
+    assert called["n"] == 0

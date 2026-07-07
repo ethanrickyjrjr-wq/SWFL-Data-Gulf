@@ -16,9 +16,10 @@ Public API:
       Pure parser for CapDetail.aspx. Extracts issued_date, declared_value_usd,
       permit_type_raw.
 
-  enrich_rows_with_details(rows, max_workers) -> list[PermitRow]
-      Parallel-fetches each row's CapDetail.aspx URL and fills issued_date,
-      declared_value_usd, permit_type_raw in place.
+  enrich_rows_with_details(rows, jitter) -> list[PermitRow]
+      Sequentially fetches each row's CapDetail.aspx URL through one reused session
+      and fills issued_date, declared_value_usd, permit_type_raw in place. Asserts
+      fetch-health first — a mostly-blocked sweep aborts loud (FetchHealthError).
 
 v3 — 2026-06-16 (crawl4ai cutover)
 ----------------------------------
@@ -31,9 +32,12 @@ window across the js_only click. pagecount is read from page 1's GridView. There
 is no Firecrawl-style 60 s wait cap; per-page browser cost is amortized by the
 single session. Works from both home IP and GHA datacenter IP (proven 2026-06-16).
 
-Per-permit detail: after pagination, each row's CapDetail.aspx URL is fetched in
-a clean context (crawl4ai_client.fetch_many, independent + parallel) to extract
-issued_date, declared_value_usd, permit_type_raw.
+Per-permit detail: after pagination, each row's CapDetail.aspx URL is fetched
+SEQUENTIALLY through one reused session (crawl_client.fetch_sequential) to extract
+issued_date, declared_value_usd, permit_type_raw. The former parallel arun_many burst
+(fetch_many) tripped Accela's sustained-burst WAF 429 from GHA datacenter IPs; the
+single reused session paces requests like a human and survives that IP (the list-view
+pattern). assert_fetch_health aborts the run loud if the sweep comes back mostly blocked.
 
 The parsers below (parse_accela_result_page, parse_page_count, parse_cap_detail_html)
 are pure and unchanged by the cutover. firecrawl_client.py is intentionally left in
@@ -52,7 +56,8 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from ingest.lib.crawl_client import Crawl4aiError, Crawl4aiSession, fetch_many
+from ingest.lib.crawl_client import Crawl4aiError, Crawl4aiSession, fetch_sequential
+from ingest.lib.guards import assert_fetch_health
 
 log = logging.getLogger(__name__)
 
@@ -497,14 +502,21 @@ async def _fetch_async(start_str: str, end_str: str) -> list[str]:
 def enrich_rows_with_details(
     rows: list[PermitRow],
     *,
-    concurrency: int = 5,
+    jitter: tuple[float, float] = (1.5, 3.5),
 ) -> list[PermitRow]:
-    """Fetch each row's CapDetail.aspx (independent URLs, parallel via crawl4ai
-    arun_many) and fill issued_date, declared_value_usd, permit_type_raw in place.
+    """Fetch each row's CapDetail.aspx SEQUENTIALLY through one reused crawl4ai session and
+    fill issued_date, declared_value_usd, permit_type_raw in place.
 
-    cap_detail_url is root-relative in the list view (/LEECO/Cap/CapDetail.aspx?...),
-    so it is absolutized against the Accela host before fetching. Rows without a
-    cap_detail_url are skipped; an empty/failed detail fetch leaves fallback values.
+    cap_detail_url is root-relative in the list view (/LEECO/Cap/CapDetail.aspx?...), so it is
+    absolutized against the Accela host before fetching. Rows without a cap_detail_url are
+    skipped; an empty/failed detail fetch leaves fallback values (dropped later by the cursor's
+    on_cursor_value_missing="exclude" — never invent a date).
+
+    Sequential, not parallel arun_many: the per-permit detail burst is what trips Lee's Accela
+    sustained-burst WAF 429 from GHA datacenter IPs, while the reused single-session list-view
+    pattern survives it (fetch_sequential). Before parsing, assert_fetch_health aborts LOUD
+    (FetchHealthError) if the sweep came back mostly blocked — so a WAF storm fails on run #1,
+    before any merge, not 14 days later via the content-stale backstop.
     """
     targets = {
         urljoin(_ACCELA_HOST, r.cap_detail_url): i
@@ -515,12 +527,14 @@ def enrich_rows_with_details(
         return rows
 
     log.info(
-        "enriching %d/%d rows from CapDetail (crawl4ai, concurrency=%d)",
+        "enriching %d/%d rows from CapDetail (crawl4ai, sequential)",
         len(targets),
         len(rows),
-        concurrency,
     )
-    htmls = asyncio.run(fetch_many(list(targets), concurrency=concurrency))
+    htmls = asyncio.run(fetch_sequential(list(targets), jitter=jitter))
+    succeeded = sum(1 for url in targets if htmls.get(url))
+    # Fail loud on a blocked/empty sweep BEFORE parsing/merge (run #1), not 14 days later.
+    assert_fetch_health(succeeded, len(targets), floor=0.8, label="lee_permits")
     for url, idx in targets.items():
         html = htmls.get(url, "")
         if not html:

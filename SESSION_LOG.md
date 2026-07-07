@@ -1,3 +1,29 @@
+## 2026-07-07 (main) — Lee permits CapDetail WAF fix: sequential reused-session detail fetch + shared fetch-health guard
+
+Operator root-caused (this session's earlier work + prior 07/06 finding) that the Lee permits
+`lee-permits-weekly` cron drifts stale because `enrich_rows_with_details` fetches each CapDetail.aspx
+via `fetch_many` (parallel `arun_many`) — an N-request burst that trips Accela's sustained-burst WAF
+429 from GHA datacenter IPs. A blocked detail returns `""`, the row loses its `issued_date`, and the
+cursor drops it (`on_cursor_value_missing="exclude"`) — so permits silently vanish while the run looks
+green, invisible until the 14d `assert_content_fresh` gate trips ~2 weeks later. The list-view scrape
+(`fetch_permit_pages`) already proves ONE reused stealth `Crawl4aiSession` survives the datacenter IP.
+
+Built "Option B" (spec: `docs/superpowers/specs/2026-07-07-lee-permits-sequential-fetch-design.md`;
+check `lee_permits_sequential_fetch_live_verify`): (1) `crawl_client.fetch_sequential()` — one reused
+stealth session, jitter-paced, `{url: html}` contract identical to `fetch_many` (drop-in), per-url
+failures caught so the sweep aggregates rather than dying on the first 429; (2) `guards.assert_fetch_health()`
++ `FetchHealthError` — logs the fetch ratio every run (trend line), raises below an 80% floor BEFORE the
+merge; (3) `enrich_rows_with_details` rewritten to sequential + guarded. Tests: 14 new (guard boundary/
+partial-block/total-block/empty-window/logging; enrich blocked-raises / healthy-fills / no-targets-skips).
+Verified `pytest` 70 passed (crawl4ai venv) + 49 guard tests (system/dlt interpreter). Docstrings corrected.
+
+NOT proven: the actual WAF clearance — my session runs on a residential IP with no block; the decisive
+test is a FULL GHA run from the datacenter IP (dry-run skips enrichment, so it can't test this). That's
+the operator-triggered live-verify. Still open: `lee_permits_capdetail_waf_429` (the underlying block —
+this detects + reduces the trigger; if it's a pure IP ban not a burst, falls to `CRAWL4AI_PROXY` or the
+Accela API the operator is separately pursuing). Also machine-local this session (outside repo): a
+`crawl4ai` PATH shim at `~/.local/bin` (noted in CLAUDE.md, uncommitted).
+
 ## 2026-07-07 (main) — Answer-engine jargon fix needed a SECOND pass: prompt ban alone didn't hold, scrubbed at the grounding-render layer instead
 
 Operator said "push" on the fixes below, then asked to find anything else blocked. Before pushing,

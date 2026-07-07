@@ -24,6 +24,7 @@ import asyncio
 import inspect
 import logging
 import os
+import random
 import shutil
 import tempfile
 from pathlib import Path
@@ -471,4 +472,59 @@ async def fetch_many(
         else:
             for r in result_obj:
                 _record(r)
+    return out
+
+
+async def fetch_sequential(
+    urls: Iterable[str],
+    *,
+    wait_for: Optional[str] = None,
+    jitter: tuple[float, float] = (1.5, 3.5),
+    timeout: int = 45_000,
+    headless: bool = True,
+    retry_once: bool = True,
+    session_id: str = "seq_detail",
+) -> dict[str, str]:
+    """Fetch each url SEQUENTIALLY through ONE reused Crawl4aiSession (UndetectedAdapter +
+    stealth), with a randomized inter-request delay so the traffic reads as a human clicking
+    records rather than a burst. Returns {url: html}; a failed/blocked url maps to '' —
+    contract-identical to fetch_many, so it is a drop-in replacement.
+
+    The counterpart to fetch_many: fetch_many parallelizes INDEPENDENT contexts (fast, but a
+    burst that a sustained-burst WAF 429s — proven on lee_permits CapDetail from GHA IPs);
+    fetch_sequential reuses ONE session's cleared-challenge/cookie state and paces requests, the
+    pattern a list-view scrape already proves survives a datacenter IP. Slower on purpose.
+
+    Per-url failures are CAUGHT (a Crawl4aiError from a 429/challenge does not abort the whole
+    sweep) and recorded as '' — optionally after one backed-off retry — so a caller's fetch-health
+    guard (ingest.lib.guards.assert_fetch_health) can aggregate the block rate instead of the run
+    dying on the first flaky page. anti_bot_gate is left OFF on purpose here: we want to COUNT
+    blocks across the sweep, not raise on the first (a total block still surfaces — every url ''
+    -> the guard fails)."""
+    url_list = list(urls)
+    out: dict[str, str] = {}
+    if not url_list:
+        return out
+    lo, hi = jitter
+    async with Crawl4aiSession(session_id=session_id, headless=headless) as session:
+        for i, url in enumerate(url_list):
+            if i > 0 and hi > 0:
+                await asyncio.sleep(random.uniform(lo, hi))
+            html = ""
+            attempts = 2 if retry_once else 1
+            for attempt in range(attempts):
+                try:
+                    html = await session.step(url, wait_for=wait_for, timeout=timeout)
+                    break
+                except Crawl4aiError as e:
+                    logger.warning(
+                        "fetch_sequential blocked/failed (%d/%d) url=%s: %s",
+                        attempt + 1,
+                        attempts,
+                        url,
+                        e,
+                    )
+                    if attempt + 1 < attempts:
+                        await asyncio.sleep(random.uniform(lo, hi) + 2.0)
+            out[url] = html or ""
     return out

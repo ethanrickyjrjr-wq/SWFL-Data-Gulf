@@ -6,9 +6,11 @@ import pytest
 
 from ingest.lib.guards import (
     ContentStaleError,
+    FetchHealthError,
     VolumeGuardError,
     assert_content_fresh,
     assert_county_coverage,
+    assert_fetch_health,
     assert_min_rows,
     assert_vs_baseline,
     assert_vs_canonical,
@@ -183,3 +185,51 @@ class TestAssertContentFresh:
         # never conflated with a VolumeGuardError.
         assert not issubclass(ContentStaleError, VolumeGuardError)
         assert not issubclass(VolumeGuardError, ContentStaleError)
+
+
+class TestAssertFetchHealth:
+    """Fetch-layer guard — trips when a sequential detail sweep came back mostly blocked, so a
+    burst-WAF 429 fails LOUD on run #1 instead of leaking through as dropped rows for 2 weeks."""
+
+    def test_passes_at_floor_boundary(self):
+        assert_fetch_health(8, 10, floor=0.8)  # exactly 80% — no raise
+
+    def test_passes_full(self):
+        assert_fetch_health(36, 36)
+
+    def test_raises_below_floor(self):
+        with pytest.raises(FetchHealthError, match="aborting before merge"):
+            assert_fetch_health(7, 10, floor=0.8)  # 70% — trips
+
+    def test_raises_the_partial_block(self):
+        # The flagship failure mode: a burst-WAF 429s a third of the CapDetail sweep.
+        with pytest.raises(FetchHealthError, match="WAF/429 suspected"):
+            assert_fetch_health(11, 36, floor=0.8)
+
+    def test_raises_total_block(self):
+        with pytest.raises(FetchHealthError):
+            assert_fetch_health(0, 36)
+
+    def test_skips_when_nothing_attempted(self):
+        assert_fetch_health(0, 0)  # empty window is not a block — no raise
+
+    def test_custom_floor(self):
+        assert_fetch_health(6, 10, floor=0.5)  # 60% >= 50% — passes
+        with pytest.raises(FetchHealthError):
+            assert_fetch_health(4, 10, floor=0.5)
+
+    def test_logs_ratio_every_call(self, caplog):
+        with caplog.at_level(logging.INFO):
+            assert_fetch_health(9, 10, label="lee_permits")  # passes, but must still log
+        assert "[fetch-health]" in caplog.text
+        assert "9/10" in caplog.text
+
+    def test_label_in_error_message(self):
+        with pytest.raises(FetchHealthError, match="lee_permits"):
+            assert_fetch_health(1, 36, label="lee_permits")
+
+    def test_distinct_error_class(self):
+        # Own class so the cron classifier routes it to FETCH_BLOCKED (investigate WAF, do not
+        # blind-retry), never conflated with a volume or content-stale failure.
+        assert not issubclass(FetchHealthError, VolumeGuardError)
+        assert not issubclass(FetchHealthError, ContentStaleError)

@@ -31,6 +31,20 @@ class ContentStaleError(RuntimeError):
     pass
 
 
+class FetchHealthError(RuntimeError):
+    """Raised pre-parse when too large a share of a sequential fetch sweep came back blocked/empty.
+
+    Distinct from VolumeGuardError / ContentStaleError so cron-failure classification reads it
+    as FETCH_BLOCKED -> investigate source/WAF, do NOT blind-retry (a retry storm makes an
+    anti-bot block worse). Catches a PARTIAL block on run #1: a burst-WAF 429s some detail
+    pages, those rows lose their dated field and get dropped downstream, and the run otherwise
+    looks healthy while records silently vanish (exactly how lee_permits CapDetail drifted 2
+    weeks before the 14d content-stale gate finally tripped). Named for unambiguous GHA log
+    parsing."""
+
+    pass
+
+
 def assert_content_fresh(
     newest,
     max_age_days: int,
@@ -157,4 +171,40 @@ def assert_vs_baseline(
     if landed > int(prior * spike_band):
         raise VolumeGuardError(
             f"[volume-guard] {label}: landed {landed:,} rows > {spike_band:.0f}x prior {prior:,} — spike detected"
+        )
+
+
+def assert_fetch_health(
+    succeeded: int,
+    attempted: int,
+    floor: float = 0.8,
+    label: str = "",
+) -> None:
+    """Assert at least ``floor`` of a fetch sweep returned content.
+
+    ``succeeded`` = urls that returned non-empty HTML; ``attempted`` = urls tried. Use after a
+    sequential detail-fetch sweep (``crawl_client.fetch_sequential``) so a WAF-blocked pull
+    fails LOUD on run #1 instead of leaking through as dropped rows for two weeks.
+
+    Logs the ratio every call (pass or fail) so the success rate is a visible per-run trend —
+    100% -> 92% -> 85% across weeks warns of a tightening WAF before it breaches the floor.
+    Skips (logs, returns) when ``attempted == 0``: an empty scrape window is not a block, so a
+    quiet week never false-alarms. Raises ``FetchHealthError`` (its own class) below the floor.
+    """
+    if attempted <= 0:
+        log.info("[fetch-health] %s: no fetch targets — skipping", label or "unknown")
+        return
+    ratio = succeeded / attempted
+    log.info(
+        "[fetch-health] %s: %d/%d fetched (%.0f%%)",
+        label or "unknown",
+        succeeded,
+        attempted,
+        ratio * 100,
+    )
+    if ratio < floor:
+        raise FetchHealthError(
+            f"[fetch-guard] {label}: {succeeded}/{attempted} detail pages fetched "
+            f"({ratio:.0%} < {floor:.0%} floor) — detail sweep blocked (WAF/429 suspected); "
+            f"aborting before merge"
         )
