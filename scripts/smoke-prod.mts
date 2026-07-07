@@ -24,17 +24,21 @@ type SmokeResult =
 
 // ── Arg parsing ──────────────────────────────────────────────────────────────
 
-function parseArgs(): { base: string; keys: string[] | null; dryRun: boolean } {
+function parseArgs(): { base: string; keys: string[] | null; dryRun: boolean; noStamp: boolean } {
   const args = process.argv.slice(2);
   let base = "https://www.swfldatagulf.com";
   let keys: string[] | null = null;
   let dryRun = false;
+  let noStamp = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--base" && args[i + 1]) base = args[++i];
     else if (args[i] === "--keys" && args[i + 1]) keys = args[++i].split(",");
     else if (args[i] === "--dry-run") dryRun = true;
+    // Preview runs assert-only: pass/fail still gates CI, but nothing stamps a
+    // prod check (a preview URL is not evidence a prod check is satisfied).
+    else if (args[i] === "--no-stamp") noStamp = true;
   }
-  return { base, keys, dryRun };
+  return { base, keys, dryRun, noStamp };
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -201,11 +205,13 @@ const MANUAL_ONLY: Array<{ checkKey: string; reason: string }> = [
 // ── Runner ───────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  const { base, keys, dryRun } = parseArgs();
+  const { base, keys, dryRun, noStamp } = parseArgs();
 
   const tests = keys ? SMOKE_TESTS.filter((t) => keys.includes(t.checkKey)) : SMOKE_TESTS;
 
-  console.log(`\nsmoke-prod — target: ${base}${dryRun ? " [dry-run]" : ""}`);
+  console.log(
+    `\nsmoke-prod — target: ${base}${dryRun ? " [dry-run]" : ""}${noStamp ? " [no-stamp/preview]" : ""}`,
+  );
   console.log(`Running ${tests.length} automated assertions...\n`);
 
   const settled = await Promise.allSettled(
@@ -226,7 +232,7 @@ async function main(): Promise<void> {
     if (result.passed) {
       console.log(`  PASS  ${result.test.checkKey}`);
       console.log(`        ${result.test.label}`);
-      stampCheck(result.test.checkKey, dryRun);
+      if (!noStamp) stampCheck(result.test.checkKey, dryRun);
     } else {
       failures++;
       console.log(`  FAIL  ${result.test.checkKey}`);

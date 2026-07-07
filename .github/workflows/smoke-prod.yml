@@ -12,10 +12,10 @@ concurrency:
 
 jobs:
   smoke:
-    # Only run for successful Production deployments (not Preview, not failure).
-    if: |
-      github.event.deployment_status.state == 'success' &&
-      github.event.deployment.environment == 'Production'
+    # Run for any successful Vercel deployment. Production keeps its original
+    # behavior (assert prod + stamp checks). Preview deploys assert against the
+    # preview URL with --no-stamp, so a bug reddens the PR before it reaches prod.
+    if: github.event.deployment_status.state == 'success'
 
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -38,4 +38,21 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: bun scripts/smoke-prod.mts --base https://www.swfldatagulf.com
+          ENVIRONMENT: ${{ github.event.deployment.environment }}
+          # Vercel populates environment_url with the deployment's URL; target_url
+          # is the fallback the GitHub deployment_status API also carries.
+          PREVIEW_URL: ${{ github.event.deployment_status.environment_url }}
+          TARGET_URL: ${{ github.event.deployment_status.target_url }}
+        run: |
+          if [ "$ENVIRONMENT" = "Production" ]; then
+            bun scripts/smoke-prod.mts --base https://www.swfldatagulf.com
+          else
+            URL="$PREVIEW_URL"
+            [ -z "$URL" ] && URL="$TARGET_URL"
+            if [ -z "$URL" ]; then
+              echo "No preview URL on the deployment_status event — skipping."
+              exit 0
+            fi
+            echo "Preview smoke against: $URL"
+            bun scripts/smoke-prod.mts --base "$URL" --no-stamp
+          fi

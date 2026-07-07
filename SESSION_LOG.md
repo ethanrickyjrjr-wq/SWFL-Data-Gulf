@@ -1,3 +1,22 @@
+## 2026-07-07 (main) — Self-healing deploy bots: plan + Build A (preview-smoke) shipped
+
+Operator arc: "how do we use paperclipinc/openclaw-operator to care for the site + create loops?" That repo
+is a Kubernetes operator for a different product — doesn't port to our Vercel stack. Mapped the real
+equivalents and verified every vendor fact live (crawl4ai, RULE 0.4): `vercel rollback [id|url]` /
+`vercel promote` / REST `POST /v1/projects/{id}/rollback/{id}` (Instant Rollback re-aliases the previous prod
+deploy AND disables auto-assignment until you promote forward); Checks-API gate-before-live needs OAuth2 (not
+a plain token); Rolling Releases (canary) + Observability Plus + Drains are INCLUDED — confirmed Pro from the
+billing dashboard. GitHub Actions free on public repos. Probed our code (RULE 0.5): smoke-prod fired on
+`deployment_status:success` Production-only and only DETECTS (no rollback); claude-code-automation.yml already
+gives Claude-in-CI; VERCEL_KEY is wired into ZERO workflows and is under-scoped (can't read deployments → can't
+rollback). Wrote plan `docs/superpowers/plans/2026-07-07-self-healing-deploy-bots.md` (builds/owners/
+offline+live done-checks; auto-dispatch honestly bounded to the build stage — live-verify stays operator-run)
+and opened 7 checks (RULE 2.4). Build A shipped: smoke now also runs on Preview deploys, asserting against the
+preview URL with `--no-stamp` so a preview never stamps a prod check; Production path byte-identical.
+Offline-verified (arg parse + YAML). Build B (rollback) HELD — needs operator to mint a scoped Vercel token
+(check `selfheal_vercel_rollback_token`). This push also carries d0661976 (your own prior prompt-caching
+commit, already logged). Next: mint token → Build B → Build C.
+
 ## 2026-07-07 (main) — SteadyAPI property-type is a /search FILTER only, never returned — recorded the enum + condo bug (docs-only)
 
 Operator: "condo is not an option? scope out what the api can actually return." Probed our code first
