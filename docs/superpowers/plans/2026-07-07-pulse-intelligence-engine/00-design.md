@@ -75,7 +75,7 @@ Scope: **capture retrofit + matcher + dedup + raw-pool eviction + re-enable cron
 3. **Distill unchanged in shape**, input swapped: Sonnet (`claude-sonnet-4-6`, already the constant) distills the **matched stored `body_text`**, not a captured blob. Zero matched articles for a unit → **zero LLM calls**, no-op merge (Dumbo-Drop tolerant).
 4. **Three dedup layers** (two already exist): URL dedup (`dedup_key(city,url)` + `news_swfl` novelty guard) · story dedup (`story_key` + `reconcile_supersession`) · temporal dedup is Phase 2 (needs the durable ledger) — Phase 1 relies on the existing non-expired `live_story_keys` reuse.
 5. **Store-1 eviction sweep:** a `prune`-pattern pass over `news_articles_swfl` dropping rows older than **45 days** that are unpromoted/unused. Ships with its own `--dry-run`.
-6. **Budget + re-enable:** both pipelines already build `RunBudget` (default $1/run) and the daily-ceiling preflight; keep them. Re-enable each cron **only after its `--dry-run` is green on the runner** with **zero web-search billing segments**. Corridors first (bigger burner), then city (pipeline-freshness: cron wrapper + `--dry-run` in the same PR).
+6. **Budget + re-enable:** both pipelines build `RunBudget` (default $1/run), now charged by the distill call. **CORRECTION (07/07/2026, review-caught):** the daily-ceiling preflight that `ingest/CLAUDE.md` decrees is NOT actually wired in `api_usage.py` or these pipelines — an earlier draft here wrongly claimed it exists. It's a pre-existing platform gap (tracked by check `ingest_daily_ceiling_preflight`), so the per-run cap is the only live backstop; a retry loop is bounded per-run but not per-day until the preflight lands. Re-enable each cron **only after its `--dry-run` is green on the runner** with **zero web-search billing segments** — and after the C1 dedup-before-distill fix (below), which is what keeps the per-run cost well under the cap. **Ship order is INVERTED from the old plan:** post-retrofit corridor is the near-$0 unit (≈1/27 match) and city is the cost risk, so enable city only after C1 + a metered dry-run.
 
 **Phase 1 done =** `pulse_crawl4ai_retrofit_live_verify` closed with a real run URL showing rows written and a console view with zero web-search billing.
 
@@ -95,7 +95,7 @@ Per-user delivery memory (Store 3, Tier B) + backward-reference composer in the 
 
 - **No-invention preserved end-to-end.** Every kept fact carries its source URL; the existing facts-only / no-unbacked-claim distill guarantee stays. Empty unit → emits nothing, costs nothing.
 - **Cross-user isolation.** Store 3 is guarded on the cross-USER boundary (the one security line the platform enforces); a back-reference fires only on a real delivery row.
-- **Budget hard-stops stay.** `RunBudget` $1/run + daily-ceiling preflight on every LLM call site.
+- **Budget hard-stops stay.** `RunBudget` $1/run, charged by the distill call. (The daily-ceiling preflight `ingest/CLAUDE.md` decrees is NOT yet implemented — check `ingest_daily_ceiling_preflight`; the per-run cap is the only live layer today.)
 - **Extend, don't erect a new gate** (RULE C2): reuses `prune_expired`, `reconcile_supersession`, `story_key`, `project_events`, `RunBudget`.
 
 ## Out of scope

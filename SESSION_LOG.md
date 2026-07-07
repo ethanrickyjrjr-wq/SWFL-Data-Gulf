@@ -1,3 +1,17 @@
+## 2026-07-07 (main) — Pulse Phase 1.5: C1 dedup-before-distill fix (review-caught cost bug); design-doc daily-ceiling claim corrected
+
+Independent opus review (vs the approved design, judged on operator intent not rules) returned SHIP-WITH-FIXES.
+Verified both key findings against code before acting. **C1 (fixed):** dedup ran at `write_rows` ON CONFLICT — AFTER the
+paid Sonnet distill — so overlapping daily windows re-paid for articles already processed (hub cities match ~60/63, edging
+the $1 cap). Fix: `pulse_lake.known_urls_by_unit()` (allowlisted table/col) + `build_capture(..., exclude_urls=)` drop
+already-written source_urls BEFORE the call; recall preserved (new articles kept), ON CONFLICT still the safety net. Wired
+into both pipelines; corridor window 7d→14d (weekly cadence, overlap now free). **I1 (my error, corrected):** the daily-
+ceiling preflight `ingest/CLAUDE.md` decrees is NOT wired anywhere — my design doc falsely claimed it existed. Corrected the
+doc; opened check `ingest_daily_ceiling_preflight` (pre-existing platform gap). Opened `pulse_dedup_before_distill` (now
+fixed). Gates: 53 pulse tests green; live re-confirm Estero → 3 real sourced facts (Coconut Point retailers) $0.02, known-urls
+query ran clean against real DB. **Ship order INVERTED** (noted in doc): corridor is now the ~$0 unit, city the cost risk —
+enable city only after this fix. Crons still DARK (Task 6 operator). Mirror-source dupes remain a Phase-2 (event-thread) fix.
+
 ## 2026-07-07 (main) — Self-healing deploy bots: plan + Build A (preview-smoke) shipped
 
 Operator arc: "how do we use paperclipinc/openclaw-operator to care for the site + create loops?" That repo
