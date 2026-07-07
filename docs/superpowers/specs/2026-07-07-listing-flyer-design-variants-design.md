@@ -35,7 +35,7 @@ latter two, need) a recipe-detection regex parallel to `isNewListingRecipePrompt
 (`lib/email/listing-intent.ts`). **Market Update is area-scoped** (`input: "area"`,
 seeded from the separate `market-pulse` showcase) — it has no single subject property,
 so it produces no `ListingFacts` and structurally cannot use a `(facts, current) =>
-EmailBlock[]` builder. It is explicitly OUT of this design-family system; a future
+EmailDoc` builder. It is explicitly OUT of this design-family system; a future
 "market update design" would need its own registry keyed on area facts, not this one.
 
 `BuildCategory` is therefore `"new-listing" | "just-sold" | "coming-to-market"` — three
@@ -58,7 +58,9 @@ interface DesignFamily {
   description: string;
   tier: "free-only" | "both" | "paid-only"; // registered in FEATURE_ROUTING, not a parallel list
   showcaseId: string;
-  builders: Record<BuildCategory, (facts: ListingFacts, current: EmailDoc) => EmailBlock[]>;
+  // Matches buildListingFlyer's real signature (returns a full EmailDoc, not a bare
+  // block array) — corrected during planning, RULE 0.5.
+  builders: Record<BuildCategory, (facts: ListingFacts, current: EmailDoc) => EmailDoc>;
 }
 ```
 
