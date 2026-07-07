@@ -33,7 +33,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
 from ingest.lib.api_usage import RunBudget, RunBudgetExceeded  # noqa: E402
-from ingest.lib.pulse_lake import build_capture, load_recent_articles  # noqa: E402
+from ingest.lib.pulse_lake import build_capture, known_urls_by_unit, load_recent_articles  # noqa: E402
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import upsert_inventory_row  # noqa: E402
 from ingest.pipelines.city_pulse.distill import (  # noqa: E402
@@ -55,9 +55,12 @@ def slug(city: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-")
 
 
-def build_city_capture(city: str, run_at: str, articles: list) -> dict:
-    """Lake-fed replacement for run_city_search: no paid web_search, no API call."""
-    return build_capture("city", city, run_at, articles)
+def build_city_capture(
+    city: str, run_at: str, articles: list, exclude_urls=frozenset()
+) -> dict:
+    """Lake-fed replacement for run_city_search: no paid web_search, no API call.
+    exclude_urls = articles already distilled for this city (skip before the paid call)."""
+    return build_capture("city", city, run_at, articles, exclude_urls)
 
 
 def to_ndjson(records: list[dict[str, Any]]) -> bytes:
@@ -92,12 +95,15 @@ def main(argv: list[str] | None = None) -> int:
 
     articles = load_recent_articles(window_days=7)
     print(f"city_pulse: {len(articles)} lake articles in the 7-day window")
+    # Dedup BEFORE the paid distill: skip articles already written for this city
+    # so overlapping daily windows never re-pay Sonnet for the same article.
+    known = known_urls_by_unit("city_pulse", "city")
 
     errors: list[str] = []
     total_new = 0
     for city in cities:
         print(f"city_pulse: querying '{city}'...")
-        record = build_city_capture(city, run_at, articles)
+        record = build_city_capture(city, run_at, articles, exclude_urls=known.get(city, frozenset()))
         cited = len(record["citations"])
         print(f"  -> {cited} matched lake articles")
         if cited == 0:

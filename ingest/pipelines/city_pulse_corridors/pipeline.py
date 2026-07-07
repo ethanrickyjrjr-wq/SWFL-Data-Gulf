@@ -42,7 +42,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
 from ingest.lib.api_usage import RunBudget, RunBudgetExceeded  # noqa: E402
-from ingest.lib.pulse_lake import build_capture, load_recent_articles  # noqa: E402
+from ingest.lib.pulse_lake import build_capture, known_urls_by_unit, load_recent_articles  # noqa: E402
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import (  # noqa: E402
     _get_connection,
@@ -59,9 +59,12 @@ PACK_ID = "corridor-pulse-swfl"
 CENTROIDS_FIXTURE = Path(__file__).resolve().parents[3] / "fixtures" / "corridor-centroids.json"
 
 
-def build_corridor_capture(corridor: str, run_at: str, articles: list) -> dict:
-    """Lake-fed replacement for run_corridor_search: no paid web_search, no API call."""
-    return build_capture("corridor", corridor, run_at, articles)
+def build_corridor_capture(
+    corridor: str, run_at: str, articles: list, exclude_urls=frozenset()
+) -> dict:
+    """Lake-fed replacement for run_corridor_search: no paid web_search, no API call.
+    exclude_urls = articles already distilled for this corridor (skip before the paid call)."""
+    return build_capture("corridor", corridor, run_at, articles, exclude_urls)
 
 
 def slug(corridor: str) -> str:
@@ -151,14 +154,18 @@ def main(argv: list[str] | None = None) -> int:
         "corridor_pulse", default_usd=1.0, env_var="CORRIDOR_PULSE_MAX_USD"
     )
 
-    articles = load_recent_articles(window_days=7)
-    print(f"corridor_pulse: {len(articles)} lake articles in the 7-day window")
+    # 14-day window: corridor pulse runs WEEKLY, so a 14d lookback gives overlap
+    # tolerance (a missed weekly run still catches the prior week). Dedup-before-
+    # distill makes the overlap free (already-distilled articles are skipped).
+    articles = load_recent_articles(window_days=14)
+    print(f"corridor_pulse: {len(articles)} lake articles in the 14-day window")
+    known = known_urls_by_unit("city_pulse_corridors", "corridor")
 
     errors: list[str] = []
     total_new = 0
     for corridor in corridors:
         print(f"corridor_pulse: querying '{corridor}'...")
-        record = build_corridor_capture(corridor, run_at, articles)
+        record = build_corridor_capture(corridor, run_at, articles, exclude_urls=known.get(corridor, frozenset()))
         cited = len(record["citations"])
         print(f"  -> {cited} matched lake articles")
         if cited == 0:

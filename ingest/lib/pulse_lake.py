@@ -46,20 +46,57 @@ def load_recent_articles(window_days: int = 7, conn=None) -> list[LakeArticle]:
 
 
 def build_capture(
-    unit_field: str, unit_value: str, run_at: str, articles: list[LakeArticle]
+    unit_field: str,
+    unit_value: str,
+    run_at: str,
+    articles: list[LakeArticle],
+    exclude_urls: frozenset[str] | set[str] = frozenset(),
 ) -> dict[str, Any]:
+    """Pack this unit's matched lake articles into the distill `capture` shape.
+
+    `exclude_urls` drops articles already distilled for this unit (their url is
+    already a source_url in the pulse table) — dedup BEFORE the paid Sonnet call,
+    so overlapping daily windows never re-pay for the same article. Recall is
+    preserved: only already-processed urls are skipped, every NEW article stays.
+    write_rows' ON CONFLICT(dedup_key) remains the after-the-fact safety net."""
     if unit_field == "city":
         matched = [a for a in articles if article_matches_city(unit_value, a["headline"], a["body_text"])]
     elif unit_field == "corridor":
         matched = [a for a in articles if article_matches_corridor(unit_value, a["headline"], a["body_text"])]
     else:
         raise ValueError(f"unit_field must be 'city' or 'corridor', got {unit_field!r}")
+    matched = [a for a in matched if a["article_url"] not in exclude_urls]
     citations = [
         {"url": a["article_url"], "title": a["headline"],
          "cited_text": a["body_text"], "type": "news_lake"}
         for a in matched
     ]
     return {unit_field: unit_value, "run_at": run_at, "citations": citations, "source": "news_lake"}
+
+
+# Only these (table, unit_col) pairs are queryable — the values interpolate into
+# SQL, so the allowlist is the injection guard (they are internal constants).
+_PULSE_TABLES = {("city_pulse", "city"), ("city_pulse_corridors", "corridor")}
+
+
+def known_urls_by_unit(table: str, unit_col: str, conn=None) -> dict[str, set[str]]:
+    """Every source_url already written to the pulse table, grouped by unit, so
+    build_capture can skip already-distilled articles (dedup before the paid call).
+    Mirrors what write_rows' ON CONFLICT would reject, but before the spend."""
+    if (table, unit_col) not in _PULSE_TABLES:
+        raise ValueError(f"unknown pulse (table, unit_col): {(table, unit_col)!r}")
+    own = conn is None
+    conn = conn or _get_connection()
+    out: dict[str, set[str]] = {}
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"SELECT {unit_col}, source_url FROM data_lake.{table}")
+            for unit, url in cur.fetchall():
+                out.setdefault(unit, set()).add(url)
+        return out
+    finally:
+        if own:
+            conn.close()
 
 
 def _evict_count_sql() -> str:

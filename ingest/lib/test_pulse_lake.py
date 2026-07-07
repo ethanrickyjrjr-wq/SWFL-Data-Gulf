@@ -39,3 +39,26 @@ def test_evict_sql_targets_news_pool_by_published_date():
     assert "delete from data_lake.news_articles_swfl" in _evict_sql().lower()
     assert "published_date <" in _evict_sql().lower()
     assert "count(*)" in _evict_count_sql().lower()
+
+
+from ingest.lib.pulse_lake import known_urls_by_unit
+
+
+def test_build_capture_excludes_already_distilled_urls():
+    # https://x/1 already distilled for Naples -> skipped before the paid call;
+    # a NEW Naples article still comes through (recall preserved).
+    arts = ARTICLES + [
+        {"article_url": "https://x/9", "headline": "Naples land deal",
+         "body_text": "New in Naples.", "source_name": "s", "published_date": "2026-07-07"},
+    ]
+    cap = build_capture("city", "Naples", "2026-07-07T00:00:00Z", arts,
+                        exclude_urls={"https://x/1"})
+    urls = [c["url"] for c in cap["citations"]]
+    assert "https://x/1" not in urls          # already-distilled -> skipped
+    assert "https://x/9" in urls               # new -> kept
+
+
+def test_known_urls_by_unit_rejects_unknown_table():
+    import pytest
+    with pytest.raises(ValueError):
+        known_urls_by_unit("news_articles_swfl", "city")  # not an allowlisted pulse table
