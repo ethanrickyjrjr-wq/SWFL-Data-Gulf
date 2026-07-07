@@ -26,7 +26,8 @@ export type BlockType =
   | "social-icons"
   | "button"
   | "divider"
-  | "footer";
+  | "footer"
+  | "sources";
 
 export type TextAlign = "left" | "center" | "right";
 
@@ -268,6 +269,26 @@ export interface DividerProps {
   color?: string;
 }
 
+/** One held citation — same shape as `RawCitation` (lib/citations/clean-url), kept
+ *  structurally duck-typed rather than imported so this file stays import-free. */
+export interface SourceCitation {
+  url?: string;
+  label?: string;
+}
+
+/** The collapsed "Sources" accordion — DATA-SEEDED (the builder that assembles the
+ *  doc lists real held/cited sources), never AI-authored: there is no content-patch
+ *  or author field for it, so a send can never show an invented citation. Renders
+ *  default-CLOSED with a click-to-open list (native <details>, no JS needed), the
+ *  same collapsed-by-default rule every other citation surface follows
+ *  (components/CitationList.tsx). `sources[]` is the structural exception (ordered
+ *  by array position, like `stats`/`items`/`columns`). */
+export interface SourcesProps extends BlockBase {
+  sources: SourceCitation[];
+  /** Small print line under the accordion (e.g. a refresh/freshness note). */
+  note?: string;
+}
+
 export interface FooterProps {
   companyName?: string;
   address?: string;
@@ -303,6 +324,7 @@ export interface BlockPropsMap {
   button: ButtonProps;
   divider: DividerProps;
   footer: FooterProps;
+  sources: SourcesProps;
 }
 
 /**

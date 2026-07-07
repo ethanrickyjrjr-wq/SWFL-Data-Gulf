@@ -121,7 +121,9 @@ describe("renderDripEmail — demo sections", () => {
     );
     expect(html).toContain("Median sale price: $899,000 → $912,000");
     expect(html).toContain("See your whole week — already built");
-    expect(html).toContain("Sources: SWFL Data Gulf");
+    expect(html).toContain("<details");
+    expect(html).toContain("Sources (1)");
+    expect(html).toContain("SWFL Data Gulf");
     expect(html).toContain("#670038"); // brand primary present (pre-send gate relies on this)
     expect(html).toContain("#ab8f40"); // accent styles the button borders
   });

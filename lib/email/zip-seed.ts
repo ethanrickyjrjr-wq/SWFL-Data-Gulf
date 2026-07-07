@@ -158,18 +158,22 @@ export async function buildZipSeedDoc(zip: string): Promise<EmailDoc | null> {
   }
 
   // ── Sources + CTA + footer ────────────────────────────────────────────────
-  const sourceLabels = [
-    ...sources.map((s) => s.label),
-    ...(lifecycle ? [lifecycle.source] : []),
-  ].filter((l, i, arr) => l && arr.indexOf(l) === i);
-  if (sourceLabels.length > 0) {
+  // Collapsed accordion, not an inline wall of text — SourcesBlock (native
+  // <details>, opens on click only) is the ONE place a citation renders in the
+  // Email Lab canvas, same rule every other citation surface follows
+  // (components/CitationList.tsx).
+  const citationList = [
+    ...sources.map((s) => ({ label: s.label, url: s.url })),
+    ...(lifecycle ? [{ label: lifecycle.source, url: undefined }] : []),
+  ].filter((c, i, arr) => c.label && arr.findIndex((x) => x.label === c.label) === i);
+  if (citationList.length > 0) {
     blocks.push(
       gblk(
-        "text",
+        "sources",
         { x: 0, y, w: 12, h: 2 },
         {
-          body: `Sources: ${sourceLabels.join(" · ")}. Figures refresh from live data when this email rebuilds.`,
-          align: "left",
+          sources: citationList,
+          note: "Figures refresh from live data when this email rebuilds.",
         },
       ),
     );

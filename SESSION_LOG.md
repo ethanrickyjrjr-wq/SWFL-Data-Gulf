@@ -1,3 +1,24 @@
+## 2026-07-07 (main) — fix(email): Sources render as a collapsed accordion in the Email Lab grid + outreach drip, not inline text
+
+Operator screenshot: the `/email-lab/grid` ZIP-recipe email dumped every citation into one giant inline
+paragraph — root cause was `lib/email/zip-seed.ts` pushing the sources list into a generic `"text"` block;
+the Email Lab's EmailDoc canvas had no accordion block type at all (unlike the website/chat surfaces, which
+already route through `components/CitationList.tsx`, collapsed by default). Built the missing root:
+`lib/email/blocks/SourcesBlock.tsx` — native `<details>/<summary>` (no client JS, since a sent email can't
+run React state), pulling label/link cleanup from the same `lib/citations/clean-url.ts` root `CitationList`
+uses, so a source cleans identically everywhere. Added `"sources"` as a first-class `BlockType` (types.ts +
+schema.ts + default-docs.ts default `{sources: []}`, never a placeholder that could ship in a real send),
+wired into `BlockRenderer.tsx` (covers canvas preview + sent HTML) and `lib/pdf/email-doc-pdf.tsx` (PDF has
+no click-to-open, so it prints the cleaned list). `zip-seed.ts` now emits a `sources` block with the real
+`{label,url}` pairs instead of a joined string. Also fixed `lib/email/outreach/drip-email.ts`'s cold-outreach
+footer, same bug at smaller scale (inline `Sources: X · Y` → `<details>` accordion). Fixed 3 downstream TS
+errors from the new `BlockType` key (`BlockInspector.tsx`, `GridCanvas.tsx` DEFAULT_H, `sequence/types.ts`
+BLOCK_LABELS). Confirmed already-correct and untouched: zip-report page, `/p/[id]` deliverable page, welcome-
+chat sources — all already route through `CitationList`. `bun test` lib/email+lib/pdf 1087/2 (2 fails are
+pre-existing `communities-swfl`/`BRAIN_GEO` gaps from a parallel session, unrelated); `bunx tsc --noEmit`
+clean; `bunx next build` clean full route manifest. Next: none open — this closes the repeated "sources
+must be a closed accordion" complaint everywhere it was found.
+
 ## 2026-07-07 (main) — FIX: homepage hero buttons dropped the listing onto a generic ZIP card — recipe now wins in planArrival
 
 Operator screenshot: clicking a New-Listing address suggestion on the homepage produced a generic "Fort Myers

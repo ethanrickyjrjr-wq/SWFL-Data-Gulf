@@ -65,6 +65,7 @@ export const DEFAULT_H: Record<BlockType, number> = {
   button: 2,
   divider: 1,
   footer: 5,
+  sources: 3,
 };
 
 /** Content pixel height → grid row count. RGL stacks h rows as

@@ -153,6 +153,19 @@ const fullDoc: EmailDoc = {
     },
     { id: "block_cccc9999", type: "divider", props: { color: "#ccc" } },
     {
+      id: "block_sources1",
+      type: "sources",
+      props: {
+        sources: [
+          { url: "https://files.zillowstatic.com/x", label: "Zillow Research" },
+          { url: "https://x/y" },
+        ],
+        note: "Figures refresh from live data.",
+        paddingY: "sm",
+        sectionBg: "#fff",
+      },
+    },
+    {
       id: "block_dddd0000",
       type: "footer",
       props: {

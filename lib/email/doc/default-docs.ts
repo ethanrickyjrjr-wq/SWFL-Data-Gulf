@@ -126,6 +126,9 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
   },
   button: { label: "View Full Report", url: "" },
   divider: { color: "#E5E7EB" },
+  // Empty by default — the block renders nothing until the builder seeds real
+  // held citations (never a placeholder "Source 1" a real send could ship).
+  sources: { sources: [] },
   footer: {
     companyName: HOUSE_BRAND.companyName,
     address: HOUSE_BRAND.address,

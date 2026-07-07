@@ -118,6 +118,17 @@ const FULL_DOC: EmailDoc = {
       },
     },
     {
+      id: "b14",
+      type: "sources",
+      props: {
+        sources: [
+          { label: "Zillow Research", url: "https://files.zillowstatic.com/x" },
+          { url: "https://data_lake.internal/x" }, // internal → no link, branded label
+        ],
+        note: "Figures refresh from live data when this email rebuilds.",
+      },
+    },
+    {
       id: "b10",
       type: "footer",
       props: {

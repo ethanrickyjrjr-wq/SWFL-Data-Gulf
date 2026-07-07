@@ -162,8 +162,11 @@ export async function renderDripEmail(input: DripEmailInput): Promise<DripEmail>
       : "",
     input.stats?.length ? statsHtml(input.stats) : "",
     input.promptButtons?.length ? promptButtonsHtml(input.promptButtons, accent) : "",
+    // Collapsed accordion, not an inline line — native <details> (no JS in an inbox,
+    // so this is the email-safe version of the same rule components/CitationList.tsx
+    // enforces everywhere else: sources are click-to-open, never inline text).
     input.sources?.length
-      ? `<p style="font-family:${FONT}; font-size:11px; line-height:1.5; color:#9ca3af; margin:14px 0 0;">Sources: ${input.sources.map(escapeHtml).join(" &middot; ")}</p>`
+      ? `<details style="margin:14px 0 0;"><summary style="font-family:${FONT}; font-size:11px; color:#9ca3af; cursor:pointer;">Sources (${input.sources.length})</summary><p style="font-family:${FONT}; font-size:11px; line-height:1.5; color:#9ca3af; margin:6px 0 0;">${input.sources.map(escapeHtml).join(" &middot; ")}</p></details>`
       : "",
   ]
     .filter(Boolean)

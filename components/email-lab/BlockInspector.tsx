@@ -36,6 +36,7 @@ const LABELS: Record<EmailBlock["type"], string> = {
   button: "Button",
   divider: "Divider",
   footer: "Footer",
+  sources: "Sources",
 };
 
 export function BlockInspector({

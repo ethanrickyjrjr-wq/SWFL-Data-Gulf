@@ -17,6 +17,7 @@ import { SocialIconsBlock } from "./SocialIconsBlock";
 import { ButtonBlock } from "./ButtonBlock";
 import { DividerBlock } from "./DividerBlock";
 import { FooterBlock } from "./FooterBlock";
+import { SourcesBlock } from "./SourcesBlock";
 
 export function BlockRenderer({
   block,
@@ -58,6 +59,8 @@ export function BlockRenderer({
       return <DividerBlock props={block.props} globalStyle={globalStyle} />;
     case "footer":
       return <FooterBlock props={block.props} globalStyle={globalStyle} />;
+    case "sources":
+      return <SourcesBlock props={block.props} globalStyle={globalStyle} />;
     default:
       return null;
   }

@@ -31,6 +31,7 @@ import type {
   MultiColumnProps,
   SignalProps,
   SocialIconsProps,
+  SourcesProps,
   StatsProps,
   TextProps,
 } from "./types";
@@ -235,6 +236,22 @@ const DividerPropsSchema = z.object({
   color: color().optional(),
 }) satisfies z.ZodType<DividerProps>;
 
+const SourceCitationSchema = z.object({
+  url: z.string().optional(),
+  label: z.string().optional(),
+});
+
+// DATA-SEEDED, never AI-authored: `sources`/`note` are named OUTSIDE the AI
+// content-patch allowlist (BlockContentPatchSchema) and outside AuthoredBlockSchema,
+// exactly like MetricCardProps' metricValue/metricLabel — a held citation is never
+// AI-writable.
+const SourcesPropsSchema = z.object({
+  sources: z.array(SourceCitationSchema).max(30),
+  note: z.string().max(200).optional(),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
+}) satisfies z.ZodType<SourcesProps>;
+
 const FooterPropsSchema = z.object({
   companyName: z.string().max(80).optional(),
   address: z.string().max(200).optional(),
@@ -305,6 +322,7 @@ const BlockSchema = z
     z.object({ id: idIn, type: z.literal("button"), props: ButtonPropsSchema }),
     z.object({ id: idIn, type: z.literal("divider"), props: DividerPropsSchema }),
     z.object({ id: idIn, type: z.literal("footer"), props: FooterPropsSchema }),
+    z.object({ id: idIn, type: z.literal("sources"), props: SourcesPropsSchema }),
   ])
   .and(z.object({ layout: LayoutSchema.optional() }))
   .transform((b) => ({ ...b, id: b.id ?? mintBlockId() }));

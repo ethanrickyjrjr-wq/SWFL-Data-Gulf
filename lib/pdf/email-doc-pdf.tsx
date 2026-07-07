@@ -21,6 +21,7 @@
    `Image` element to `img` by name, so the a11y rule mis-fires — disable it for
    this PDF-only file. */
 import { Document, Page, View, Text, Image, Link, StyleSheet } from "@react-pdf/renderer";
+import { cleanCitations } from "@/lib/citations/clean-url";
 import { groupRows } from "@/lib/email/doc/row-grouping";
 import type { EmailBlock, EmailDoc, EmailGlobalStyle, FontFamily } from "@/lib/email/doc/types";
 import { PLATFORMS, platformMeta, domainFromUrl } from "@/lib/email/social/platforms";
@@ -774,6 +775,53 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
               }}
             >
               {captions}
+            </Text>
+          ) : null}
+        </View>
+      );
+    }
+
+    case "sources": {
+      // A PDF has no click-to-open — print the full (cleaned) citation list.
+      const p = block.props;
+      const cited = cleanCitations(p.sources ?? []);
+      if (cited.length === 0) return null;
+      return (
+        <View style={s.section}>
+          <Text
+            style={{
+              fontFamily: font,
+              fontSize: 10,
+              fontWeight: "bold",
+              color: MUTED,
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+              marginBottom: 6,
+            }}
+          >
+            Sources
+          </Text>
+          {cited.map((c, i) =>
+            c.linkable && c.href ? (
+              <Link
+                key={c.href}
+                src={c.href}
+                style={{ fontFamily: font, fontSize: 9, color: MUTED, marginBottom: 3 }}
+              >
+                {c.label}
+              </Link>
+            ) : (
+              <Text
+                key={`${c.label}-${i}`}
+                style={{ fontFamily: font, fontSize: 9, color: MUTED, marginBottom: 3 }}
+              >
+                {c.label}
+              </Text>
+            ),
+          )}
+          {p.note ? (
+            <Text style={{ fontFamily: font, fontSize: 9, color: MUTED, marginTop: 4 }}>
+              {p.note}
             </Text>
           ) : null}
         </View>

@@ -96,6 +96,7 @@ const BLOCK_LABELS: Record<BlockType, string> = {
   button: "Button",
   divider: "Divider",
   footer: "Footer",
+  sources: "Sources",
 };
 
 /** Block types whose content refreshes from the lake when the piece is built —
