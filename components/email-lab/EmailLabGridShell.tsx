@@ -39,7 +39,7 @@ import {
 import { GridCanvas, DEFAULT_H } from "./GridCanvas";
 import { BlockInspector } from "./BlockInspector";
 import { BLOCK_MENU } from "./AddBlockPanel";
-import { applyBrand } from "./EmailLabShell";
+import { applyBrand } from "@/lib/email/brand/apply-brand";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { ScheduleSendModal } from "./ScheduleSendModal";
 import { ScheduleSocialModal } from "./ScheduleSocialModal";

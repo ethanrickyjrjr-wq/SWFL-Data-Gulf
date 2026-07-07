@@ -14,7 +14,7 @@ import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 import type { SocialElement } from "@/lib/social/design/types";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
-import { applyBrand } from "@/components/email-lab/EmailLabShell";
+import { applyBrand } from "@/lib/email/brand/apply-brand";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
 import type { CalendarDay, SocialDraft, WeeklyCalendar } from "@/lib/email/social-calendar/types";
