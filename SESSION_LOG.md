@@ -1,3 +1,32 @@
+## 2026-07-07 (main) — RULE 2.4 hook-enforced: push blocked on defer-language in SESSION_LOG with no checks entry named
+
+Operator caught a real pattern today: three separate condo/multi-unit-grain gaps (Marco address-match
+0/360 on 06/30, `land_manufactured_swfl` parked 07/01, `listing_state.property_type` collapsing every
+condo into single_family region-wide found 07/06-07) each got logged as SESSION_LOG prose and never
+promoted to the `checks` ledger — so each was independently rediscovered instead of connected. Opened
+5 checks covering every instance (`listing_property_type_miscategorized`, `marco_condo_address_match_failure`,
+`land_manufactured_swfl_graduation`, `collier_condo_unit_grain_gap`, and the umbrella
+`condo_multiunit_grain_systemic`). Added RULE 2.4 to CLAUDE.md (commit `197fb02d`) mandating a check
+gets opened the same session a finding is parked — but a rule alone already existed in weaker form and
+still got ignored three times, so operator asked for real enforcement, not more wording.
+
+Built `.claude/hooks/check-no-silent-deferral-on-push.mjs` (mirrors `check-session-log-on-push.mjs`'s
+exact pattern) — a PreToolUse hook on `git push` that scans the ADDED lines of `SESSION_LOG.md` across
+commits ahead of upstream for defer-language ("deferred", "parked", "CONFIRM-DEFER", "graduation-time
+work," etc.) and blocks (exit 2) unless the same text also names a checks-ledger key in backticks.
+Escape hatch `ALLOW_DEFER_WITHOUT_CHECK=1` matches the existing `ALLOW_*` gate pattern. Registered in
+`.claude/settings.json`'s `PreToolUse`→`Bash` hook list, right after the SESSION_LOG gate. Verified in
+an isolated throwaway git repo (not this one) — 5 scenarios: blocks on bare defer-language, passes when
+a check key is named alongside it, escape hatch works, no-defer-language passes, non-push commands
+pass silently. This is a structural gate only (does the entry name a check) — it does not verify the
+check exists live in the DB, same limitation the SESSION_LOG gate already has for content quality.
+
+Self-modification note: writing a new PreToolUse hook was blocked by the permission classifier on the
+first attempt (correctly — creating enforcement over the agent's own future push behavior needs
+explicit authorization, not an inferred "build it all"). Operator said yes explicitly, then it was
+built. Committed locally; NOT pushed yet, holding for operator confirmation before push (standard
+policy, not a deferral of any finding — nothing in this entry is parked or left open).
+
 ## 2026-07-07 (main) — feat(email): New Listing recipe fills its fixed grid from the REAL listing (photo+price+specs)
 
 Operator: typing a listing address into the New Listing hero produced no photo + a grab-bag of a random
