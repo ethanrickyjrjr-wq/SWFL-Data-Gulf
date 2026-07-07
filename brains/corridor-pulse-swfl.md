@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v14 | Token: SWFL-7421-v14-20260629 -->
+<!-- FRESHNESS: v15 | Token: SWFL-7421-v15-20260707 -->
 ---
 brain_id: corridor-pulse-swfl
-version: 14
-refined_at: 2026-06-29T18:35:26Z
-freshness_token: SWFL-7421-v14-20260629
+version: 15
+refined_at: 2026-07-07T09:33:33Z
+freshness_token: SWFL-7421-v15-20260707
 ttl_seconds: 604800
 context_type: user_saved_reference
 scope: SWFL (Lee + Collier) weekly corridor current-events pulse — dated commercial-real-estate transactions, construction, leasing, and openings/closings on the CRE corridors, each cited to a primary source.
@@ -29,45 +29,45 @@ SCOPE: SWFL (Lee + Collier) weekly corridor current-events pulse — dated comme
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                | verified   | expires
-s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-06-29 | 2026-07-06
+s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-07-07 | 2026-07-14
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corridor-pulse:summary","fact":"Live SWFL corridor current-events signals","value":"273 non-expired signals across 24 corridors (Bonita Trail: 15, Coral Pointe (Cape Coral): 22, Ben Hill Griffin: 8, Estero / Bonita line: 14, Cleveland Ave: 12, Colonial East: 10, Daniels: 13, Midpoint Bridge: 13, Six Mile Cypress: 13, Fort Myers Beach: 16, Lee Blvd: 10, Downtown Naples: 17, East Naples: 14, Bonita Beach: 8, Cape Coral Pkwy: 14, Pine Island Rd: 15, Summerlin: 7, Joel Blvd: 9, Airport-Pulling: 18, Collier Blvd: 9, Coconut Point: 4, Gulf Coast Town Center: 5, North Naples (Immokalee Rd): 5, East Trail (Naples): 2).","src":"s01","date":"2026-06-29"},
-  {"id":"f002","topic":"corridor-pulse:transactions","fact":"Bonita Trail — transactions","value":"A two-tenant retail center at 27250 Bay Landing Drive in Bonita Springs sold for $3.82 million; the 4,665-square-foot retail property sits on 1.18 acres just off South Tamiami Trail. (source: https://www.businessobserverfl.com/news/2026/may/03/lee-hillsborough-charlotte-shopping-centers/)","src":"s01","date":"2026-06-29"},
-  {"id":"f003","topic":"corridor-pulse:transactions","fact":"Bonita Trail — transactions","value":"Collier County is finalizing an $11.64 million contract to purchase a 1½-mile portion of Seminole Gulf Railway property that would link to the Bonita Estero Rail Trail. (source: https://www.gulfshorebusiness.com/collier/collier-rail-trail-plan-faces-environmental-challenges/article_7ad8e797-7396-4660-8cdf-b15d3cc5c23b.html)","src":"s01","date":"2026-06-29"},
-  {"id":"f004","topic":"corridor-pulse:transactions","fact":"Coral Pointe (Cape Coral) — transactions","value":"A retail store at 1499 S.W. Pine Island Road, Cape Coral was sold; buyer is EKS Investments LLC, seller is Piedmont GFIM Ft Myers Tamiami GW LLC. (source: https://www.businessobserverfl.com/news/2026/may/11/commercial-real-estate-transactions/)","src":"s01","date":"2026-06-29"},
-  {"id":"f005","topic":"corridor-pulse:transactions","fact":"Ben Hill Griffin — transactions","value":"On March 27, 2026, LSI Companies, Inc. brokered a 61.3± acre mixed-use property in Fort Myers, FL for $20,451,050.56. (source: https://lsicompanies.com/lsi-companies-brokersa-61-3%C2%B1-acre-mixed-use-property-in-fort-myers-fl/)","src":"s01","date":"2026-06-29"},
-  {"id":"f006","topic":"corridor-pulse:transactions","fact":"Ben Hill Griffin — transactions","value":"Ryan Companies, a Minneapolis-based apartment developer, purchased the 61.3-acre parcel divided by Alico Road for $20.45 million; the 47-acre rectangular tract is north of Alico Road. (source: https://www.gulfshorebusiness.com/real_estate/alico-road-development-site-acquired-by-ryan-companies/article_fee689af-61c5-4db1-9d8a-2530c5a16b04.html)","src":"s01","date":"2026-06-29"},
-  {"id":"f007","topic":"corridor-pulse:transactions","fact":"Estero / Bonita line — transactions","value":"Woodfield Development (South Carolina) and ELV Associates (Boston) paid $32.6 million for the Estero property at U.S. 41 and Coconut Road; the property was originally owned by Lee Health, which assembled the parcels over three years for $18.5 million. (source: https://www.businessobserverfl.com/article/apartment-developers-pay-dollar32-6-million-for-estero-property)","src":"s01","date":"2026-06-29"},
-  {"id":"f008","topic":"corridor-pulse:transactions","fact":"Cleveland Ave — transactions","value":"Classical Christian Academy Inc. purchased 7.07 acres of commercial land at 16220 N. Cleveland Ave. in North Fort Myers from 805 Del Prado Building LLC for $1.4M. (source: https://www.gulfshorebusiness.com/gb-daily/north-fort-myers-commercial-land-sells-for-1-4m/article_6387a492-1e52-4f9c-aeb3-428c43162c5f.html)","src":"s01","date":"2026-06-29"},
-  {"id":"f009","topic":"corridor-pulse:transactions","fact":"Colonial East — transactions","value":"Costco paid $55 million for a 55-acre parcel in Fort Myers on May 12, 2026, equating to $1 million per acre. (source: https://www.businessobserverfl.com/news/2026/may/13/costco-buys-fort-myers-land/)","src":"s01","date":"2026-06-29"}
+  {"id":"f001","topic":"corridor-pulse:summary","fact":"Live SWFL corridor current-events signals","value":"149 non-expired signals across 26 corridors (Coral Pointe (Cape Coral): 13, Pine Island Rd: 5, Ben Hill Griffin: 8, Midpoint Bridge: 5, Bonita Beach: 5, Estero / Bonita line: 6, Daniels: 6, Fort Myers Beach: 8, Lee Blvd: 3, Vanderbilt: 5, Bonita Trail: 6, Cape Coral Pkwy: 9, Six Mile Cypress: 8, Summerlin: 4, Collier Blvd: 6, Downtown Naples: 12, Airport-Pulling: 11, Pine Ridge: 1, East Trail (Naples): 4, Cleveland Ave: 5, Colonial East: 4, Joel Blvd: 5, East Naples: 3, Gulf Coast Town Center: 3, North Naples (Immokalee Rd): 3, Coconut Point: 1).","src":"s01","date":"2026-07-07"},
+  {"id":"f002","topic":"corridor-pulse:transactions","fact":"Coral Pointe (Cape Coral) — transactions","value":"The Shops at Surfside at 2354 Surfside Blvd. sold to a Pinellas County real estate developer for $12 million (source: https://www.businessobserverfl.com/news/2026/jun/22/cape-coral-shopping-center-sells-for-12m-to-pinellas-investor/)","src":"s01","date":"2026-07-07"},
+  {"id":"f003","topic":"corridor-pulse:transactions","fact":"Coral Pointe (Cape Coral) — transactions","value":"A multitenant retail plaza on Del Prado Boulevard sold in Cape Coral for $3.19 million (source: https://www.gulfshorebusiness.com/gb-daily/cape-coral-retail-plaza-sells-for-3-19m/article_514db224-0a39-42a0-ac5c-712c77340fd0.html)","src":"s01","date":"2026-07-07"},
+  {"id":"f004","topic":"corridor-pulse:transactions","fact":"Pine Island Rd — transactions","value":"EKS Investments LLC bought a retail store at 1499 S.W. Pine Island Road, Cape Coral from Piedmont GFIM Ft Myers Tamiami GW LLC in May 2026 (source: https://www.businessobserverfl.com/news/2026/may/11/commercial-real-estate-transactions/)","src":"s01","date":"2026-07-07"},
+  {"id":"f005","topic":"corridor-pulse:transactions","fact":"Ben Hill Griffin — transactions","value":"14-acre parcel at Three Oaks Parkway and Alico Road sold for $11.6 million (source: https://www.businessobserverfl.com/news/2026/feb/22/multifamily-developer-buys-fort-myers-land/)","src":"s01","date":"2026-07-07"},
+  {"id":"f006","topic":"corridor-pulse:transactions","fact":"Midpoint Bridge — transactions","value":"A less than 1-acre corner lot at 2675 Del Prado Blvd. S. in Cape Coral primed for redevelopment has sold. (source: https://www.businessobserverfl.com/news/2025/sep/28/clearwater-tech-company-expands/)","src":"s01","date":"2026-07-07"},
+  {"id":"f007","topic":"corridor-pulse:transactions","fact":"Bonita Beach — transactions","value":"Collier County Public Utilities is conducting work to replace the transmission water main on Bonita Beach Road from February 2025. (source: https://www.colliercountyfl.gov/Home/Components/News/News/49481/1536)","src":"s01","date":"2026-07-07"},
+  {"id":"f008","topic":"corridor-pulse:transactions","fact":"Coral Pointe (Cape Coral) — transactions","value":"A 0.84-acre parcel at 2675 Del Prado Blvd. S. in Cape Coral sold to Alegian Growth Partners for $550,000. (source: https://www.businessobserverfl.com/news/2025/sep/28/clearwater-tech-company-expands/)","src":"s01","date":"2026-07-07"},
+  {"id":"f009","topic":"corridor-pulse:transactions","fact":"Pine Island Rd — transactions","value":"1.04 acre vacant outparcel located on Pine Island Road (SR 78) in Cape Coral is available for sale and lease. (source: https://www.colliers.com/en/properties/prime-location-at-1133-sw-pine-island-road-cape-coral-fl/usa-1133-sw-pine-island-rd-cape-coral-fl-33991-usa/usa1157658)","src":"s01","date":"2026-07-07"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "corridor-pulse-swfl",
-  "version": 14,
-  "refined_at": "2026-06-29T18:35:26Z",
-  "expires": "2026-07-06T18:35:26Z",
+  "version": 15,
+  "refined_at": "2026-07-07T09:33:33Z",
+  "expires": "2026-07-14T09:33:33Z",
   "ttl_seconds": 604800,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL corridor pulse as of 2026-06-29: 273 live current-events signals across 24 corridors — Bonita Trail (15), Coral Pointe (Cape Coral) (22), Ben Hill Griffin (8), Estero / Bonita line (14), Cleveland Ave (12), Colonial East (10), Daniels (13), Midpoint Bridge (13), Six Mile Cypress (13), Fort Myers Beach (16), Lee Blvd (10), Downtown Naples (17), East Naples (14), Bonita Beach (8), Cape Coral Pkwy (14), Pine Island Rd (15), Summerlin (7), Joel Blvd (9), Airport-Pulling (18), Collier Blvd (9), Coconut Point (4), Gulf Coast Town Center (5), North Naples (Immokalee Rd) (5), East Trail (Naples) (2). Most current: Bonita Trail — A two-tenant retail center at 27250 Bay Landing Drive in Bonita Springs sold for $3.82 million; the 4,665-square-foot retail property sits on 1.18 acres just off South Tamiami Trail. These are current cited facts only; the corridor read and any direction call live downstream in cre-swfl and master.",
+  "conclusion": "SWFL corridor pulse as of 2026-07-07: 149 live current-events signals across 26 corridors — Coral Pointe (Cape Coral) (13), Pine Island Rd (5), Ben Hill Griffin (8), Midpoint Bridge (5), Bonita Beach (5), Estero / Bonita line (6), Daniels (6), Fort Myers Beach (8), Lee Blvd (3), Vanderbilt (5), Bonita Trail (6), Cape Coral Pkwy (9), Six Mile Cypress (8), Summerlin (4), Collier Blvd (6), Downtown Naples (12), Airport-Pulling (11), Pine Ridge (1), East Trail (Naples) (4), Cleveland Ave (5), Colonial East (4), Joel Blvd (5), East Naples (3), Gulf Coast Town Center (3), North Naples (Immokalee Rd) (3), Coconut Point (1). Most current: Coral Pointe (Cape Coral) — The Shops at Surfside at 2354 Surfside Blvd. sold to a Pinellas County real estate developer for $12 million These are current cited facts only; the corridor read and any direction call live downstream in cre-swfl and master.",
   "key_metrics": [
     {
       "metric": "signal_transactions_1",
-      "value": "Bonita Trail: A two-tenant retail center at 27250 Bay Landing Drive in Bonita Springs sold for $3.82 million; the 4,665-square-foot retail property sits on 1.18 acres just off South Tamiami Trail.",
+      "value": "Coral Pointe (Cape Coral): The Shops at Surfside at 2354 Surfside Blvd. sold to a Pinellas County real estate developer for $12 million",
       "direction": "stable",
-      "label": "Bonita Trail — transactions",
+      "label": "Coral Pointe (Cape Coral) — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2026/may/03/lee-hillsborough-charlotte-shopping-centers/",
-        "fetched_at": "2026-06-29T18:35:26Z",
+        "url": "https://www.businessobserverfl.com/news/2026/jun/22/cape-coral-shopping-center-sells-for-12m-to-pinellas-investor/",
+        "fetched_at": "2026-07-07T09:33:33Z",
         "tier": 2,
-        "citation": "Lee, Hillsborough, Charlotte county shopping centers sell, land tenants | Business Observer: \"A two-tenant retail center at 27250 Bay Landing Drive in Bonita Springs sold for $3.82 million. Image courtesy of Marcus &amp; Millichap ... A deal ha...\""
+        "citation": "Pinellas investor buys Cape Coral shopping center for $12M | Business Observer: \"The Shops at Surfside, according to a listing on LoopNet, is 117,556 square feet and sits on 8.26 acres just off the Veterans Memorial Parkway. The li...\""
       },
       "suggestions": [
         "What's driving signal transactions 1?",
@@ -76,15 +76,15 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
     },
     {
       "metric": "signal_transactions_2",
-      "value": "Bonita Trail: Collier County is finalizing an $11.64 million contract to purchase a 1½-mile portion of Seminole Gulf Railway property that would link to the Bonita Estero Rail Trail.",
+      "value": "Coral Pointe (Cape Coral): A multitenant retail plaza on Del Prado Boulevard sold in Cape Coral for $3.19 million",
       "direction": "stable",
-      "label": "Bonita Trail — transactions",
+      "label": "Coral Pointe (Cape Coral) — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/collier/collier-rail-trail-plan-faces-environmental-challenges/article_7ad8e797-7396-4660-8cdf-b15d3cc5c23b.html",
-        "fetched_at": "2026-06-29T18:35:26Z",
+        "url": "https://www.gulfshorebusiness.com/gb-daily/cape-coral-retail-plaza-sells-for-3-19m/article_514db224-0a39-42a0-ac5c-712c77340fd0.html",
+        "fetched_at": "2026-07-07T09:33:33Z",
         "tier": 2,
-        "citation": "Collier County commissioners debate rail trail funding | Government | gulfshorebusiness.com: \"Collier County is finalizing an $11.64 million contract to purchase a 1½-mile portion of Seminole Gulf Railway property that would link to the Bonita ...\""
+        "citation": "Cape Coral retail plaza sells for $3.19M | GB Daily | gulfshorebusiness.com: \"Multitenant retail plaza on Del Prado Boulevard sells in Cape Coral.\""
       },
       "suggestions": [
         "What's driving signal transactions 2?",
@@ -93,13 +93,13 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
     },
     {
       "metric": "signal_transactions_3",
-      "value": "Coral Pointe (Cape Coral): A retail store at 1499 S.W. Pine Island Road, Cape Coral was sold; buyer is EKS Investments LLC, seller is Piedmont GFIM Ft Myers Tamiami GW LLC.",
+      "value": "Pine Island Rd: EKS Investments LLC bought a retail store at 1499 S.W. Pine Island Road, Cape Coral from Piedmont GFIM Ft Myers Tamiami GW LLC in May 2026",
       "direction": "stable",
-      "label": "Coral Pointe (Cape Coral) — transactions",
+      "label": "Pine Island Rd — transactions",
       "variable_type": "categorical",
       "source": {
         "url": "https://www.businessobserverfl.com/news/2026/may/11/commercial-real-estate-transactions/",
-        "fetched_at": "2026-06-29T18:35:26Z",
+        "fetched_at": "2026-07-07T09:33:33Z",
         "tier": 2,
         "citation": "The week's top commercial real estate transactions in Charlotte, Collier, Hillsborough, Lee, Manatee, Pasco, Pinellas, Polk, Sarasota | Business Observer: \"Buyer: EKS Investments LLC Seller: Piedmont GFIM Ft Myers Tamiami GW LLC Address: 1499 S.W. Pine Island Road, Cape Coral Property Type: Retail store P...\""
       },
@@ -110,15 +110,15 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
     },
     {
       "metric": "signal_transactions_4",
-      "value": "Ben Hill Griffin: On March 27, 2026, LSI Companies, Inc. brokered a 61.3± acre mixed-use property in Fort Myers, FL for $20,451,050.56.",
+      "value": "Ben Hill Griffin: 14-acre parcel at Three Oaks Parkway and Alico Road sold for $11.6 million",
       "direction": "stable",
       "label": "Ben Hill Griffin — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://lsicompanies.com/lsi-companies-brokersa-61-3%C2%B1-acre-mixed-use-property-in-fort-myers-fl/",
-        "fetched_at": "2026-06-29T18:35:26Z",
+        "url": "https://www.businessobserverfl.com/news/2026/feb/22/multifamily-developer-buys-fort-myers-land/",
+        "fetched_at": "2026-07-07T09:33:33Z",
         "tier": 2,
-        "citation": "LSI Companies Brokersa 61.3± Acre Mixed-Use Property in Fort Myers, FL - Commercial Real Estate | LSI Companies, Inc.: \"Fort Myers, FL – March 27, 2026 – LSI Companies, Inc., brokered a 61.3± acre mixed-use property in Fort Myers, FL, for $20,451,050.56. The property wa...\""
+        "citation": "Prolific Atlanta multifamily developer buys Fort Myers land | Business Observer: \"A 14-acre parcel in Fort Myers has sold for $11.6 million. The property is at Three Oaks Parkway and Alico Road, just off of Interstate 75. The buyer ...\""
       },
       "suggestions": [
         "What's driving signal transactions 4?",
@@ -127,15 +127,15 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
     },
     {
       "metric": "signal_transactions_5",
-      "value": "Ben Hill Griffin: Ryan Companies, a Minneapolis-based apartment developer, purchased the 61.3-acre parcel divided by Alico Road for $20.45 million; the 47-acre rectangular tract is north of Alico Road.",
+      "value": "Midpoint Bridge: A less than 1-acre corner lot at 2675 Del Prado Blvd. S. in Cape Coral primed for redevelopment has sold.",
       "direction": "stable",
-      "label": "Ben Hill Griffin — transactions",
+      "label": "Midpoint Bridge — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/real_estate/alico-road-development-site-acquired-by-ryan-companies/article_fee689af-61c5-4db1-9d8a-2530c5a16b04.html",
-        "fetched_at": "2026-06-29T18:35:26Z",
+        "url": "https://www.businessobserverfl.com/news/2025/sep/28/clearwater-tech-company-expands/",
+        "fetched_at": "2026-07-07T09:33:33Z",
         "tier": 2,
-        "citation": "Alico Road development site acquired for $20.45 million | Real Estate | gulfshorebusiness.com: \"Ryan Companies, a Minneapolis-based apartment developer, purchased the 61.3-acre parcel, which is divided by Alico Road. The 47-acre rectangular tract...\""
+        "citation": "Clearwater insurtech company expands with new facility | Business Observer: \"... A less than 1-acre parcel primed for redevelopment has sold. The corner lot is at 2675 Del Prado Blvd. S. in Cape Coral between S.E.\""
       },
       "suggestions": [
         "What's driving signal transactions 5?",
@@ -144,15 +144,15 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
     },
     {
       "metric": "signal_transactions_6",
-      "value": "Estero / Bonita line: Woodfield Development (South Carolina) and ELV Associates (Boston) paid $32.6 million for the Estero property at U.S. 41 and Coconut Road; the property was originally owned by Lee Health, which assembled the parcels over three years for $18.5 million.",
+      "value": "Bonita Beach: Collier County Public Utilities is conducting work to replace the transmission water main on Bonita Beach Road from February 2025.",
       "direction": "stable",
-      "label": "Estero / Bonita line — transactions",
+      "label": "Bonita Beach — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/article/apartment-developers-pay-dollar32-6-million-for-estero-property",
-        "fetched_at": "2026-06-29T18:35:26Z",
+        "url": "https://www.colliercountyfl.gov/Home/Components/News/News/49481/1536",
+        "fetched_at": "2026-07-07T09:33:33Z",
         "tier": 2,
-        "citation": "Apartment developers pay $32.6 million for Estero property | Business Observer | Business Observer: \"Woodfield Development, a South Carolina developer of luxury apartments, and ELV Associates, a Boston real estate investment firm, paid $32.6 million f...\""
+        "citation": "News Releases | Collier County, FL: \"Post Date:02/21/2025 2:16 PM · Collier County Public Utilities is conducting work to replace the transmission water main on Bonita Beach Road from Feb...\""
       },
       "suggestions": [
         "What's driving signal transactions 6?",
@@ -161,15 +161,15 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
     },
     {
       "metric": "signal_transactions_7",
-      "value": "Cleveland Ave: Classical Christian Academy Inc. purchased 7.07 acres of commercial land at 16220 N. Cleveland Ave. in North Fort Myers from 805 Del Prado Building LLC for $1.4M.",
+      "value": "Coral Pointe (Cape Coral): A 0.84-acre parcel at 2675 Del Prado Blvd. S. in Cape Coral sold to Alegian Growth Partners for $550,000.",
       "direction": "stable",
-      "label": "Cleveland Ave — transactions",
+      "label": "Coral Pointe (Cape Coral) — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/gb-daily/north-fort-myers-commercial-land-sells-for-1-4m/article_6387a492-1e52-4f9c-aeb3-428c43162c5f.html",
-        "fetched_at": "2026-06-29T18:35:26Z",
+        "url": "https://www.businessobserverfl.com/news/2025/sep/28/clearwater-tech-company-expands/",
+        "fetched_at": "2026-07-07T09:33:33Z",
         "tier": 2,
-        "citation": "North Fort Myers commercial land sells for $1.4M | GB Daily | gulfshorebusiness.com: \"Classical Christian Academy Inc. purchased 7.07 acres of commercial land at 16220 N. Cleveland Ave. in North Fort Myers from 805 Del Prado Building LL...\""
+        "citation": "Clearwater insurtech company expands with new facility | Business Observer: \"The buyer, according to Lee property records, is local financial management firm Alegian Growth Partners. It paid $550,000.\""
       },
       "suggestions": [
         "What's driving signal transactions 7?",
@@ -178,15 +178,15 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
     },
     {
       "metric": "signal_transactions_8",
-      "value": "Colonial East: Costco paid $55 million for a 55-acre parcel in Fort Myers on May 12, 2026, equating to $1 million per acre.",
+      "value": "Pine Island Rd: 1.04 acre vacant outparcel located on Pine Island Road (SR 78) in Cape Coral is available for sale and lease.",
       "direction": "stable",
-      "label": "Colonial East — transactions",
+      "label": "Pine Island Rd — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2026/may/13/costco-buys-fort-myers-land/",
-        "fetched_at": "2026-06-29T18:35:26Z",
+        "url": "https://www.colliers.com/en/properties/prime-location-at-1133-sw-pine-island-road-cape-coral-fl/usa-1133-sw-pine-island-rd-cape-coral-fl-33991-usa/usa1157658",
+        "fetched_at": "2026-07-07T09:33:33Z",
         "tier": 2,
-        "citation": "Costco buys Fort Myers land for $1 million per acre | Business Observer: \"Warehouse retail giant and membership club Costco has paid $55 million for a 55-acre parcel in Fort Myers in a deal the local broker is calling “one o...\""
+        "citation": "Commercial-Specialty For Sale and Lease — 1133 SW Pine Island Rd, Cape Coral, FL 33991, USA | United States | Colliers: \"1.04 acre vacant outparcel located on Pine Island Road (SR 78), a major east-west thoroughfare and thriving commercial corridor in Cape Coral. The out...\""
       },
       "suggestions": [
         "What's driving signal transactions 8?",
@@ -195,7 +195,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
     }
   ],
   "caveats": [
-    "265 additional live signals are tracked but not surfaced here (cap 8).",
+    "141 additional live signals are tracked but not surfaced here (cap 8).",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
   ],
   "contradicts": [],
@@ -208,7 +208,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-29T18:35:26Z"
+    "computed_at": "2026-07-07T09:33:33Z"
   },
   "exogenous_signals": []
 }
@@ -217,5 +217,5 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
 - corridor-pulse-swfl: weekly SWFL corridor-grain current-events reporter over data_lake.city_pulse_corridors (TTL'd, citation-backed); brain-input edge into cre-swfl.
 
 --- RECENT NOTES ---
-- 2026-06-29: pack refined by the Refinery — 9 fact(s) from 1 source(s).
+- 2026-07-07: pack refined by the Refinery — 9 fact(s) from 1 source(s).
 ```
