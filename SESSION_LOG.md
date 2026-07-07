@@ -1,3 +1,25 @@
+## 2026-07-07 (main) — feat(email): New Listing recipe fills its fixed grid from the REAL listing (photo+price+specs)
+
+Operator: typing a listing address into the New Listing hero produced no photo + a grab-bag of a random
+comp welded to ZIP aggregates — "the Rainbow Meadows failure" the code already names. Traced it: the
+address-only recipe has no URL, so `isListingIntent` is false and the rich `buildListingFlyer` path (gated
+on a pasted URL, in `buildContentDoc`) never fires; `planArrival` routes the recipe to a blank + the FREE
+author (`authorDoc`/`runAuthorBuild`), which only knows ZIP figures + nearby SOLD comps and has no step
+that resolves the subject listing or its photo. The fixed `new-listing` seed grid AND `buildListingFlyer`
+(the Latitude 26 layout) already exist — the hero just drove past them. Vendor-verified live (crawl4ai on
+docs.steadyapi.com): `/v2/search` returns for-sale listings WITH `photo_url` + address, city-scoped.
+
+Built the ADDRESS lane that pairs with the existing URL lane, both feeding the SAME `buildListingFlyer`:
+`lib/listings/resolve-subject.ts` (new, pure/DI) — geocode → Lee/Collier gate → page the photo feed
+(`fetchPhotoListings`, added `offset`) → match by canonical street line (Court≡Ct) → `ListingFacts`. Wired
+an early branch in `authorDoc` (`build-doc.ts`): `scope.address` + `isNewListingRecipePrompt` (new, tight
+regex in `listing-intent.ts` — new-listing only, not coming-soon/open-house/just-sold) → resolve → mirror
+photo → flyer → best-effort ZIP trend chart (scoped to the resolved listing's ZIP). Miss (out of footprint /
+no photo / no key) → `applied:false` + "paste your listing link or add a photo" ask — never the grab-bag,
+never invented placeholders. Offline tests (10) green; `next build` ✓ clean. Spec:
+`docs/superpowers/specs/2026-07-07-new-listing-grid-fill-design.md`. Check: `new_listing_grid_fill_live_verify`
+(operator-run — no live SteadyAPI spend from the dev session). NOT pushed (build-flow change; awaiting go).
+
 ## 2026-07-07 (main) — fix(email-lab,social): AI panel leads every lab, Start a Campaign moves below it, textarea +1 row
 
 Operator screenshot of `/email-lab/grid` (email tab) showed Start a Campaign stacked above Build with AI —

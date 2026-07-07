@@ -134,12 +134,15 @@ export async function fetchPhotoListings(opts: {
   city: string;
   state?: string;
   limit?: number;
+  /** Server-side page offset (SteadyAPI honors `offset`) — lets a caller page past
+   *  the first ~200 to find a specific address in a large city. Default 0. */
+  offset?: number;
 }): Promise<Listing[]> {
   const key = process.env.PHOTOS_API;
   if (!key || !opts.city) return [];
   const state = opts.state ?? "FL";
   const slug = cityToSlug(opts.city, state);
-  const params = new URLSearchParams({ location: slug, offset: "0" });
+  const params = new URLSearchParams({ location: slug, offset: String(opts.offset ?? 0) });
   try {
     const res = await fetch(`${BASE}/search?${params}`, {
       headers: {

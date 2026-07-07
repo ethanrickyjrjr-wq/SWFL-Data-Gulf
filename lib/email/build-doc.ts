@@ -37,7 +37,8 @@ import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/in
 import { loadListingContext, renderListingsBlock } from "@/lib/listings/select";
 import { deriveListingPhoto } from "@/lib/media/listing-photo";
 import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
-import { isListingIntent } from "@/lib/email/listing-intent";
+import { isListingIntent, isNewListingRecipePrompt } from "@/lib/email/listing-intent";
+import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { fetchListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
 import { fetchAreaComps, buildCompsSpec, deriveAreaUrl } from "@/lib/email/listing-comps";
@@ -704,6 +705,70 @@ export async function authorDoc({
   const placeholderMiss = unfilledPlaceholderMiss(prompt);
   if (placeholderMiss) return placeholderMiss;
   const currentDoc = docParsed.data;
+
+  // ── Subject-listing flyer lane (address spine) ─────────────────────────────
+  // The New Listing recipe carries the subject ADDRESS but no URL. Resolve THAT
+  // property's own for-sale record — real photo + price + beds/sqft — and build the
+  // fixed listing FLYER grid (the same buildListingFlyer the pasted-URL path uses),
+  // instead of letting the free author improvise a generic ZIP/comp card with no
+  // house photo. A resolve miss returns the "paste your link or add a photo" ask —
+  // never the placeholder grid (that would invent numbers), never a blocked build.
+  if (scope?.address && isNewListingRecipePrompt(prompt)) {
+    const facts = await resolveSubjectListing(scope.address).catch(() => null);
+    if (facts) {
+      if (facts.photos[0]) {
+        // Same durable-copy rule as the URL flyer: host OUR crop, so a re-send
+        // months later never depends on the vendor CDN (miss keeps the original).
+        const mirrored = await mirrorHeroPhoto(facts.photos[0]).catch(() => null);
+        if (mirrored) facts.photos[0] = mirrored;
+      }
+      let flyer = buildListingFlyer(facts, currentDoc);
+      // Best-effort market chart (the recipe asks for the ZIP's home-value trend) —
+      // a chart is a bonus; any failure ships the flyer without it, never blocks.
+      // The subject's arrival scope is address-only, so scope the chart to the
+      // resolved listing's ZIP — otherwise the ZIP trend chart has nothing to plot.
+      const chartScope = facts.zip ? { kind: "zip", value: facts.zip } : scope;
+      try {
+        const chart = await buildPromptChart(prompt, flyer, chartScope, chartType);
+        if (chart) {
+          flyer = upsertChartBlock(
+            flyer,
+            chartImageBlock({
+              url: chart.image.url,
+              alt: chart.image.alt,
+              linkUrl: brandWebsiteUrl(currentDoc),
+            }),
+          );
+        }
+      } catch {
+        /* chart is a bonus */
+      }
+      const parsed = EmailDocSchema.safeParse(flyer);
+      if (parsed.success) {
+        return {
+          payload: {
+            doc: parsed.data,
+            applied: true,
+            replacedLayout: true,
+            listing: { subject: facts.address ?? scope.address },
+          },
+        };
+      }
+    }
+    // Resolve miss (out of footprint, no photo match, or no key) → the four-lane ask.
+    // NEVER fall through to the free author here: that is the generic grab-bag the
+    // whole lane exists to replace. The user pastes a link (→ the URL flyer lane in
+    // buildContentDoc) or drops a photo, and the flyer builds with real facts.
+    return {
+      payload: {
+        doc: currentDoc,
+        applied: false,
+        message:
+          "I couldn't pull that listing's photo automatically — paste your listing link or add a photo, and I'll build the full flyer with the real price and specs.",
+      },
+    };
+  }
+
   const globalStyle = currentDoc.globalStyle; // brand is canonical — never authored
   const model = resolveAuthorModel(mode);
 
