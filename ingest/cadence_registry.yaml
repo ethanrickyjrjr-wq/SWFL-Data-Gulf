@@ -92,6 +92,20 @@
 #                     pipelines: entry that are consciously NOT sources. Suppresses Phase 2's
 #                     ZERO_COVERAGE red — and nothing else.
 #
+#   source_scope (optional, any lane — filled in ONLY by a real per-source research pass,
+#                 crawl4ai per RULE 0.4; never a guessed number; absent = "pending research"):
+#     confirmed_total: {value, as_of, source_url, source_label}
+#       The source's own confirmed/published total — DISTINCT from expected_rows_min above,
+#       which is a 90%-of-last-observed-count heuristic, not a confirmed promise.
+#     source_ceiling: {summary, source_url}
+#       Everything the source publishes that we could pull, even fields/years/geography we
+#       don't currently ingest — the true ceiling, not just what we've built so far.
+#     vendor_benchmark: {source, value, as_of, source_url}
+#       An external authority's own count for the same scope (e.g. Redfin's own published
+#       inventory count for a ZIP/county). Omit entirely when no real comparable exists —
+#       never fill with a placeholder or "N/A" value.
+#   Read live by /ops/census (swfldatagulf-ops repo). See
+#   docs/superpowers/specs/2026-07-07-pipeline-data-census-design.md for the full design.
 # Naming note: dlt_schema_name is the schema_name column in _dlt_loads, NOT the
 # pipeline_name argument in pipeline.py (they sometimes differ — see verified values below).
 
