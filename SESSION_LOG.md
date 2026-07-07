@@ -1,3 +1,21 @@
+## 2026-07-07 (main) — Pulse Engine Phase 1 BUILT + LIVE-CONFIRMED (already on origin via parallel push); crons still dark
+
+Executed Phase 1 subagent-driven (I reviewed every task diff + ran every test set myself, per operator mandate).
+Six commits (9a5e583e, ace41607, b1b5bbd1, ff93dd23, f4cad5ec, 451c6bb6) — all already on origin/main (a parallel
+session's push carried them; local==origin, 0 ahead). Delivered: `ingest/lib/pulse_match.py` (deterministic city/corridor
+matcher) + `pulse_lake.py` (lake reader + capture builder), both pulse `pipeline.py` retrofitted to read
+`data_lake.news_articles_swfl` instead of paid web_search (distill unchanged except it now charges RunBudget, caps 8/16→1),
+45-day pool eviction (dispatch-only, dry-run default). Pre-flight + review CAUGHT: orphaned-test breakage, budget guard
+going dark, RunBudgetExceeded re-raise, an unused import, and a cadence-registry category error — all fixed before/at review.
+**LIVE-CONFIRMED on real lake (operator-authorized paid run):** Bonita Springs --dry-run read 63 articles/7d, matched 12,
+Sonnet distilled 9 real dated SOURCED facts (Oakes Landing venue proposed→withdrawn, Bonita Beach Rd data center + 2,000
+homes) at $0.0653, under the $1 cap, zero invention. **Findings (real product signal, not rule):** (1) hub cities over-match
+— Fort Myers 72/74, Naples 70/74 — bloats distill payloads; (2) corridors near-empty, 1/27 matched — passive matching barely
+names roads; (3) mirror-source dupes (naplesnews+news-press same story twice) — partly collapsed by story_key supersession on
+real writes, fully fixed by Phase 2 event-thread memory. **Crons stay DARK** — Task 6 (re-enable) is operator-run.
+Independent adversarial review (opus, vs the approved design) running. Checks: `pulse_crawl4ai_retrofit_live_verify` (Phase 1),
+`pulse_pool_evict_enable`, plus the Phase 2/3 checks. **Next:** operator decides on hub-cap + corridor-dark-until-Phase-3, then Task 6.
+
 ## 2026-07-07 (main) — finish address-first hero-campaign refactor: heroDestination drops ambient zip param
 
 Operator flagged the pattern directly: "Claude fucking loves Zips only data... handcuffing what a
