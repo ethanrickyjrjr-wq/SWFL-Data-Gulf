@@ -1,3 +1,30 @@
+## 2026-07-07 (main) — Starter repriced $9.99→$19.99/mo (+annual), LIVE Stripe reprice executed; dropped dead chart-experience check
+
+Operator: "make starter price 19.99, fix the yearly too, push." Updated `lib/billing/tiers.ts`
+(THE one price root) — starter monthly $9.99→$19.99, annual $99.90→$199.90 (kept the established
+annual=monthly×10 "2 months free" invariant every other tier already uses; `tiers.test.ts` updated
+to match). Researched Stripe's price-immutability + lookup_key transfer mechanics live via crawl4ai
+(docs.stripe.com/products-prices/manage-prices, 07/07/2026) before touching the LIVE `sk_live` key —
+discovered `scripts/stripe/setup-products.mts` (the existing tool) can't actually reprice an existing
+tier: it only creates prices for lookup keys that don't exist yet, so pointed at an already-live key
+it silently skips without comparing amounts. Wrote `scripts/stripe/reprice-tier.mts` to close that gap
+(diffs code vs. live Stripe price, creates a new Price with the same `lookup_key` +
+`transfer_lookup_key:true` when they differ — verified against live docs, not memory). Dry-run
+confirmed live Stripe matched the pre-change code exactly ($9.99/$99.90, no drift) before mutating.
+Executed live: `swfl_starter_monthly` → `price_1Tqdzl6Nq6usB9gG2FPzmqZZ` ($19.99/mo, transferred from
+`price_1TpqoT6Nq6usB9gGwDrTUxmw`), `swfl_starter_annual` → `price_1Tqdzm6Nq6usB9gGkR7wGWQZ` ($199.90/yr,
+transferred from `price_1TpqoT6Nq6usB9gGEDbri48x`). Verified zero existing subscriptions on either old
+price ID before mutating — no live customer billing affected. Re-ran the script post-change (no-op,
+confirms the live amounts now match code). `bunx next build` clean, `tiers.test.ts` 3/3 pass.
+
+Also dropped `homepage_chart_experience_live_verify` — traced to commits `27f8212e`/`1f30bb56` (06/28,
+"nautical-chart homepage experience"), fully reverted same day by `fd231898` per operator review of the
+live page. Was tracking dead work, not a real open item.
+
+Separately this session (worktree/checks-tooling remediation, homepage-audit correction — see prior
+entries below for the full drift-audit + Phase-1 subagent-driven build) shipped clean and reviewed but
+is NOT yet pushed; this entry's commit rides along in the same push.
+
 ## 2026-07-07 (main) — CLAUDE.md SCOPE corrected: Lee+Collier (core), Hendry minor, NOT 6-county
 
 Operator, blunt and direct: "We don't have data on those other places really... what does it say 6 for
