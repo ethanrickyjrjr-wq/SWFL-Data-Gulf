@@ -208,7 +208,7 @@ export function ProjectSocialClient({
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void social.author();
               }}
               placeholder="Describe the post — the AI builds it with real numbers…"
-              rows={3}
+              rows={4}
               className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
             />
             {social.recipeHint && (

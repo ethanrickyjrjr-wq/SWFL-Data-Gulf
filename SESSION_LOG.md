@@ -1,3 +1,12 @@
+## 2026-07-07 (main) — fix(email-lab,social): AI panel leads every lab, Start a Campaign moves below it, textarea +1 row
+
+Operator screenshot of `/email-lab/grid` (email tab) showed Start a Campaign stacked above Build with AI —
+reversed from the intended "AI on top" layout. Swapped the block order in
+`components/email-lab/EmailLabGridShell.tsx` (email mode only) so Build with AI leads and CampaignQuickStart
+renders below it. `app/project/[id]/social/ProjectSocialClient.tsx` already had AI on top, left as-is.
+Bumped all three AI prompt textareas (`EmailLabGridShell.tsx` email + social tabs, `ProjectSocialClient.tsx`)
+from `rows={3}` to `rows={4}` per operator ask. Typecheck clean on both files.
+
 ## 2026-07-07 (main) — fix(email): Sources render as a collapsed accordion in the Email Lab grid + outreach drip, not inline text
 
 Operator screenshot: the `/email-lab/grid` ZIP-recipe email dumped every citation into one giant inline

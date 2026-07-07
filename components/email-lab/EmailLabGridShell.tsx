@@ -1197,9 +1197,8 @@ export function EmailLabGridShell({
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {/* ── Start a campaign — seeds the Build box below via handleUseRecipe ── */}
-          {mode === "email" && <CampaignQuickStart surface="email" onUseRecipe={handleUseRecipe} />}
-          {/* ── Build the whole email ── */}
+          {/* ── Build the whole email — leads the panel (operator ruling 07/07/2026:
+              AI on top of every lab, Start a Campaign below it) ── */}
           {mode === "email" && (
             <div className="border-b border-white/8 px-4 pb-4 pt-4">
               <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
@@ -1213,7 +1212,7 @@ export function EmailLabGridShell({
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) buildFromPanel();
                 }}
                 placeholder={aiPlaceholder}
-                rows={3}
+                rows={4}
                 className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
               />
               {recipeHint && <p className="mt-1.5 text-[11px] text-gulf-teal/90">{recipeHint}</p>}
@@ -1293,6 +1292,9 @@ export function EmailLabGridShell({
             </div>
           )}
 
+          {/* ── Start a campaign — seeds the Build box above via handleUseRecipe ── */}
+          {mode === "email" && <CampaignQuickStart surface="email" onUseRecipe={handleUseRecipe} />}
+
           {/* ── Examples — LEAD, open on first visit (operator ruling 07/03/2026 PM:
               "lead with what they can do"; supersedes the same-day closed-by-default
               ruling — examples now ACT via Make-this recipes). ── */}
@@ -1313,7 +1315,7 @@ export function EmailLabGridShell({
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void social.author();
                 }}
                 placeholder="Describe the post — the AI picks a layout, writes cited copy, and drops in a photo…"
-                rows={3}
+                rows={4}
                 className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal"
               />
               <p className="mb-1.5 mt-2.5 text-[10px] uppercase tracking-[0.15em] text-white/35">
