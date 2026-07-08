@@ -1,3 +1,10 @@
+## 2026-07-08 (Opus 4.8 · main) — docs: email-builder integration plan committed to repo (M1–M3 + handoff)
+
+Copied the approved integration plan into `docs/superpowers/plans/2026-07-08-email-builder-integration.md`
+(was only a local `.claude/plans` file — caused a "where's the plan" mixup with a parallel session).
+M1 (`b196d062`, supply/design contract) is live on origin. NOTE: a second session ran the same task
+concurrently and pushed (`c48a13a6`, `94fba137`) — recommend running one session at a time here.
+
 ## 2026-07-08 (Opus 4.8 · main) — feat: email builder supply/design contract (M1) — one registry, block-vocab drift killed
 
 Brainstormed + planned the whole "bring it all together" email-builder integration (plan file
