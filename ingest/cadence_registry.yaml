@@ -101,6 +101,16 @@ pipelines:
     inventory_id: lake-tier1/market/zori_swfl.parquet
     inventory_key_type: exact
     # Verified: ('lake-tier1/market/zori_swfl.parquet', '2026-05-23') ✓
+    source_scope:
+      confirmed_total:
+        summary: "ZORI rent index (unadjusted), ZIP grain — live"
+        as_of: "2026-05-23"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Zillow also publishes a seasonally-adjusted ZORI variant, same ZIP grain, free — not pulled."
+        as_of: "07/07/2026"
+        source_url: "https://www.zillow.com/research/data/"
+        source_label: "Zillow Research Data"
 
   - name: zhvi_swfl_duckdb
     lane: tier-1-duckdb
@@ -110,6 +120,15 @@ pipelines:
     inventory_key_type: exact
     # Zillow ZHVI ZIP-level all-homes middle-tier (0.33-0.67) smoothed+SA home-value index.
     # Cron: zhvi-tier1-monthly.yml (day 22). Pack: refinery/packs/home-values-swfl.mts.
+    source_scope:
+      confirmed_total:
+        summary: "ZHVI ZIP-level all-homes middle-tier, smoothed+SA — live"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Zillow also publishes ZHVI cut by bedroom count and SF-vs-condo, plus a raw (non-SA) variant — same ZIP grain, free, not pulled."
+        as_of: "07/07/2026"
+        source_url: "https://www.zillow.com/research/data/"
+        source_label: "Zillow Research Data"
 
   - name: tier_divergence_swfl_duckdb
     lane: tier-1-duckdb
@@ -120,6 +139,15 @@ pipelines:
     # Zillow ZHVI tier split (top 0.67-1.0 luxury vs bottom 0.0-0.33 starter), RAW, ZIP-level.
     # FULL OUTER JOIN of the two tiers per zip x month. Cron: tier-divergence-tier1-monthly.yml
     # (day 21). Pack: refinery/packs/tier-divergence-swfl.mts.
+    source_scope:
+      confirmed_total:
+        summary: "ZHVI tier split (top 0.67-1.0 vs bottom 0.0-0.33), ZIP grain, raw — live"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Zillow's inventory/days-on-market/price-cut/new-construction/sales/affordability categories are metro-or-national grain only — no ZIP cut exists (vendor ceiling)."
+        as_of: "07/07/2026"
+        source_url: "https://www.zillow.com/research/data/"
+        source_label: "Zillow Research Data"
 
   - name: redfin_swfl
     lane: tier-1-duckdb
@@ -128,6 +156,16 @@ pipelines:
     inventory_id: lake-tier1/market/redfin_swfl.parquet
     inventory_key_type: exact
     # First run: 2026-05-27 (workflow_dispatch) — 66,672 rows / 125 ZIP codes ✓
+    source_scope:
+      confirmed_total:
+        value: 66672
+        as_of: "2026-05-27"
+        source: "our ingest (125 ZIPs)"
+      source_ceiling:
+        summary: "Redfin publishes the same county/ZIP tracker weekly (we pull monthly). Also separate metro-grain-only products: quarterly migration flows, investor home purchases, Redfin Home Price Index."
+        as_of: "07/07/2026"
+        source_url: "https://www.redfin.com/news/data-center/"
+        source_label: "Redfin Data Center"
 
   - name: redfin_price_drops
     lane: tier-1-duckdb
@@ -138,6 +176,11 @@ pipelines:
     # Source: redfin_data_center/price_drops/monthly/all_zips.csv (333 MB plain CSV)
     # Cron: 0 17 15 * * (15th 17:00 UTC, staggered after redfin-monthly 13:00 slot)
     # First run: 2026-06-14 (workflow_dispatch) — 9,955 rows / 126 ZIPs ✓
+    source_scope:
+      confirmed_total:
+        value: 9955
+        as_of: "2026-06-14"
+        source: "our ingest (126 ZIPs)"
 
   - name: redfin_contract_cancellations
     lane: tier-1-duckdb
@@ -148,6 +191,11 @@ pipelines:
     # Source: redfin_data_center/contract_cancellations/monthly/all_zips.csv (278 MB)
     # Cron: 0 18 15 * * (15th 18:00 UTC, staggered 1h after price-drops slot)
     # First run: 2026-06-14 (workflow_dispatch) — 9,955 rows / 126 ZIPs ✓
+    source_scope:
+      confirmed_total:
+        value: 9955
+        as_of: "2026-06-14"
+        source: "our ingest (126 ZIPs)"
 
   - name: redfin_delistings_relistings
     lane: tier-1-duckdb
@@ -158,6 +206,11 @@ pipelines:
     # Source: redfin_data_center/delistings_relistings/monthly/all_zips.csv (328 MB)
     # Cron: 0 19 15 * * (15th 19:00 UTC, staggered 1h after cancellations slot)
     # First run: 2026-06-14 (workflow_dispatch) — 9,955 rows / 126 ZIPs ✓
+    source_scope:
+      confirmed_total:
+        value: 9955
+        as_of: "2026-06-14"
+        source: "our ingest (126 ZIPs)"
 
   - name: hurdat2_fl
     lane: tier-1-duckdb
@@ -174,6 +227,15 @@ pipelines:
     inventory_id: lake-tier1/environmental/storm_events_swfl.parquet
     inventory_key_type: exact
     # Verified: id exists, vintage='1996-2025'; probe uses updated_at ✓
+    source_scope:
+      confirmed_total:
+        summary: "NOAA Storm Events event-type allowlist, 1996-2025 — live"
+        source: "our ingest"
+      source_ceiling:
+        summary: "The allowlist silently excludes Flood and Waterspout event types — unlike Drought/Frost-Freeze, which are excluded on purpose. Real gap for a Florida product."
+        as_of: "07/07/2026"
+        source_url: "https://www.ncdc.noaa.gov/stormevents/"
+        source_label: "NOAA Storm Events Database"
 
   - name: usgs
     lane: tier-1-duckdb
@@ -183,6 +245,15 @@ pipelines:
     inventory_key_type: exact
     # Verified: id exists, vintage='2000-2026'; probe uses updated_at ✓
     # Tracks the daily-readings Parquet; sites Parquet excluded (same run).
+    source_scope:
+      confirmed_total:
+        summary: "4 parameters extracted (per constants.py) — live"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same 60 USGS sites, same fetch, also carry streamflow/discharge, water temperature, salinity, and dissolved oxygen/pH — free at the same call, not extracted."
+        as_of: "07/07/2026"
+        source_url: "https://waterdata.usgs.gov/nwis"
+        source_label: "USGS National Water Information System"
 
   # ── Tier-1 prefix (date-partitioned cold storage) ─────────────────────────
   # Verified: SELECT id FROM data_lake._tier1_inventory WHERE id LIKE '<prefix>%' ORDER BY updated_at DESC LIMIT 1
@@ -210,6 +281,12 @@ pipelines:
     inventory_id: lake-tier1/macro/fred_laus_alfred/
     inventory_key_type: prefix
     # First run: <fill on first successful workflow_dispatch>.
+    source_scope:
+      source_ceiling:
+        summary: "Vendor ceiling: LAUS has no sub-state demographic breakdown at any vintage — not something ALFRED's vintage history can add."
+        as_of: "07/07/2026"
+        source_url: "https://alfred.stlouisfed.org/"
+        source_label: "FRED ALFRED (vintage LAUS)"
 
   - name: fred_listing_swfl
     lane: tier-1
@@ -254,6 +331,16 @@ pipelines:
     # MSAs: 15980 (Cape Coral-Fort Myers / Lee) + 34940 (Naples-Marco Island / Collier)
     # First run: 2026-05-31 backfill (220 rows, 2021-2025). GHA cron: 14:00 UTC 15 May (next: 2027).
     # Update CURRENT_OEWS_YEAR in ingest/pipelines/bls_oews_swfl/constants.py when oesm26ma.zip ships (~Apr 2027).
+    source_scope:
+      confirmed_total:
+        value: 220
+        as_of: "2026-05-31"
+        source: "our ingest (2021-2025)"
+      source_ceiling:
+        summary: "BLS CES/SAE publishes monthly nonfarm payroll by industry for both SWFL MSAs — free, unpulled. Ceiling: no metro CPI exists for either MSA."
+        as_of: "07/07/2026"
+        source_url: "https://www.bls.gov/sae/"
+        source_label: "BLS CES/SAE"
 
   - name: census_vip
     lane: tier-1
@@ -303,6 +390,16 @@ pipelines:
     dlt_schema_name: bls_laus
     expected_rows_min: 295 # 90% of 328 confirmed 2026-05-31
     # Verified: MAX(inserted_at) = 2026-05-25 ✓
+    source_scope:
+      confirmed_total:
+        value: 328
+        as_of: "2026-05-31"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Vendor ceiling: LAUS has no sub-state demographic breakdown; JOLTS stops at state grain; ECI stops at census-region. None of these publish finer than what we already pull."
+        as_of: "07/07/2026"
+        source_url: "https://www.bls.gov/lau/"
+        source_label: "BLS LAUS"
 
   - name: bls_qcew
     lane: tier-2
@@ -311,6 +408,16 @@ pipelines:
     dlt_schema_name: bls_qcew
     expected_rows_min: 28 # 90% of 32 confirmed 2026-05-31
     # Verified: MAX(inserted_at) = 2026-05-18 ✓
+    source_scope:
+      confirmed_total:
+        value: 32
+        as_of: "2026-05-31"
+        source: "our ingest (all-industries headline)"
+      source_ceiling:
+        summary: "Same QCEW API call also returns industry-sector detail (mining, construction, retail, etc.) in the same response — filtered out at parse time, zero additional API cost to pull."
+        as_of: "07/07/2026"
+        source_url: "https://www.bls.gov/cew/"
+        source_label: "BLS QCEW"
 
   - name: bls_oews_swfl
     lane: tier-2
@@ -324,6 +431,16 @@ pipelines:
     # First run: 2026-05-31 backfill (220 rows, 2021-2025). Next cron: 15 May 2027.
     # After 2027 run, update CURRENT_OEWS_YEAR=2026 in ingest/pipelines/bls_oews_swfl/constants.py.
     # Verify row counts: SELECT ref_year, area_code, COUNT(*) FROM data_lake.bls_oews_swfl GROUP BY 1,2 ORDER BY 1,2
+    source_scope:
+      confirmed_total:
+        value: 220
+        as_of: "2026-05-31"
+        source: "our ingest (2021-2025)"
+      source_ceiling:
+        summary: "BLS CES/SAE publishes monthly nonfarm payroll by industry for both SWFL MSAs — free, unpulled. Ceiling: no metro CPI exists for either MSA."
+        as_of: "07/07/2026"
+        source_url: "https://www.bls.gov/sae/"
+        source_label: "BLS CES/SAE"
 
   - name: census_cbp
     lane: tier-2
@@ -333,6 +450,16 @@ pipelines:
     expected_rows_min: 230006 # 90% of 255,563 confirmed 2026-05-31
     count_table: data_lake.census_cbp_fl # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-20 ✓
+    source_scope:
+      confirmed_total:
+        value: 255563
+        as_of: "2026-05-31"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Census also publishes the Building Permits Survey down to county and permit-issuing-place grain — an independent government cross-check against our own scraped permit pipelines, not pulled."
+        as_of: "07/07/2026"
+        source_url: "https://www.census.gov/construction/bps/"
+        source_label: "Census Building Permits Survey"
 
   - name: census_acs
     lane: tier-2
@@ -345,6 +472,16 @@ pipelines:
     # ACS 5-year publishes a new vintage each December; the GHA cron re-runs idempotently
     # (dlt replace). ACS_LATEST_YEAR in constants.py is a MANUAL one-line bump per vintage.
     # Verified: 100 ZCTAs loaded 2026-06-24 ✓ (income 95/100; 5 suppressed → NULL)
+    source_scope:
+      confirmed_total:
+        value: 100
+        as_of: "2026-06-24"
+        source: "our ingest (ZCTAs)"
+      source_ceiling:
+        summary: "Census also publishes SAIPE (income/poverty) and Nonemployer Statistics at county grain, plus Population Estimates — not pulled. Housing Vacancy Survey's finest publishable grain is unconfirmed either way."
+        as_of: "07/07/2026"
+        source_url: "https://www.census.gov/programs-surveys/saipe.html"
+        source_label: "Census SAIPE"
 
   - name: usgs_tier2
     lane: tier-2
@@ -355,6 +492,16 @@ pipelines:
     count_table: data_lake.usgs_daily # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-19 ✓
     # Separate from usgs tier-1-duckdb entry above; this tracks the Postgres load.
+    source_scope:
+      confirmed_total:
+        value: 605
+        as_of: "2026-05-31"
+        source: "our ingest (4 parameters)"
+      source_ceiling:
+        summary: "Same 60 USGS sites, same fetch, also carry streamflow/discharge, water temperature, salinity, and dissolved oxygen/pH — free at the same call, not extracted."
+        as_of: "07/07/2026"
+        source_url: "https://waterdata.usgs.gov/nwis"
+        source_label: "USGS National Water Information System"
 
   - name: fema
     lane: tier-2
@@ -365,6 +512,16 @@ pipelines:
     count_table: data_lake.fema_nfip_claims # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-19 ✓
     # pipeline_name="tier1_inventory" in pipeline.py — actual schema_name in _dlt_loads is fema_nfip_tier2.
+    source_scope:
+      confirmed_total:
+        value: 448381
+        as_of: "2026-05-31"
+        source: "our ingest (claims data)"
+      source_ceiling:
+        summary: "FEMA publishes 'NFIP Residential Penetration Rates' as a real cited dataset. Our code uses a static guess (INSURED_PENETRATION_FACTOR = 0.3) as a stand-in for exactly that number — directly swappable for the real one. FEMA also publishes a Policies-in-Force dataset and the Community Status Book, neither pulled."
+        as_of: "07/07/2026"
+        source_url: "https://www.fema.gov/about/openfema/data-sets"
+        source_label: "FEMA OpenFEMA"
 
   - name: leepa
     lane: tier-2
@@ -378,6 +535,17 @@ pipelines:
       error_after_days: 730 # 2yr — genuinely abandoned (annual publish, generous margin)
     # Verified: MAX(inserted_at) = 2026-05-18 ✓
     # pipeline_name="tier1_inventory" in pipeline.py — actual schema_name is leepa_parcels_tier2.
+    source_scope:
+      confirmed_total:
+        value: 548798
+        as_of: "2026-05-31"
+        source: "our ingest (layer 12, Just Value bundle)"
+      source_ceiling:
+        value: 24
+        as_of: "07/08/2026"
+        source_url: "https://gissvr.leepa.org/gissvr/rest/services/ParcelInfo/MapServer"
+        source_label: "LeePA ParcelInfo MapServer"
+        summary: "24 layers total (not the ~4 assumed). We pull layers 0, 9, 10, 12; layers 1-8 confirmed as cartographic label duplicates of value layers 13-18 (not a gap). Layers 19-23 (Non CT Sales, Land Type, Delinquent Tax Advertising, Cert of Title Sales, Comparable Sales) are genuinely unexamined — field schemas UNCONFIRMED as of 07/08/2026 (repeated live-query timeouts against gissvr.leepa.org for those specific layer IDs; retry from a clean session)."
 
   - name: redfin_collier
     lane: tier-2
@@ -387,6 +555,11 @@ pipelines:
     expected_rows_min: 700 # 90% of 782 Collier rows confirmed 2026-06-06 (5 property types x ~13yr monthly)
     count_table: data_lake.redfin_collier_market
     # Source: Redfin Data Center county market tracker (free public TSV), filtered to "Collier County, FL". Refreshes ~monthly. Consumed by properties-collier-value.
+    source_scope:
+      confirmed_total:
+        value: 782
+        as_of: "2026-06-06"
+        source: "our ingest"
 
   - name: redfin_lee
     lane: tier-2
@@ -396,6 +569,11 @@ pipelines:
     expected_rows_min: 594 # 90% of 660 confirmed 2026-06-13 (first live DLT run)
     count_table: data_lake.redfin_lee_market
     # Source: Redfin Data Center county market tracker (free public TSV), filtered to "Lee County, FL". Refreshes ~monthly. Consumed by properties-lee-value.
+    source_scope:
+      confirmed_total:
+        value: 660
+        as_of: "2026-06-13"
+        source: "our ingest"
 
   - name: collier_parcels
     lane: tier-2
@@ -405,6 +583,17 @@ pipelines:
     expected_rows_min: 261000 # 90% of 290,973 UNIQUE parcel_ids (table merges 364,827 cadastral features to unique PARCEL_ID — multi-part rows carry identical values) confirmed 2026-06-06
     count_table: data_lake.collier_parcels
     # Source: FDOR Statewide Cadastral ArcGIS FeatureServer (CO_NO=21). Annual roll (~Aug); monthly idempotent retry catches the refresh. Consumed by properties-collier-value (SOH gap + parcel count). 290,973 unique parcels live 2026-06-06; SOH gap median 36.47%.
+    source_scope:
+      confirmed_total:
+        value: 290973
+        as_of: "2026-06-06"
+        source: "our ingest (unique PARCEL_ID; 13 of 135 fields pulled)"
+      source_ceiling:
+        value: 135
+        as_of: "07/07/2026"
+        source_url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Cadastral/FeatureServer/0"
+        source_label: "FDOR Statewide Cadastral (ArcGIS FeatureServer)"
+        summary: "135 fields total; we pull 13. Biggest miss: SALE_PRC1/SALE_PRC2 (actual sale price) — never pulled despite sale year/month/qualification being pulled in the same query. Also free in the same call: owner mailing address, building sqft, year built, land value/sqft."
 
   - name: fhfa
     lane: tier-2
@@ -414,6 +603,16 @@ pipelines:
     expected_rows_min: 119903 # 90% of 133,226 confirmed 2026-05-31
     # Verified: MAX(inserted_at) = 2026-05-18 ✓
     # pipeline_name="fhfa_hpi" in pipeline.py matches _dlt_loads schema_name.
+    source_scope:
+      confirmed_total:
+        value: 133226
+        as_of: "2026-05-31"
+        source: "our ingest (MSA-quarterly)"
+      source_ceiling:
+        summary: "FHFA also publishes county- and ZIP-level annual HPI variants. Current MSA-quarterly grain is a choice, not a vendor ceiling — revisitable."
+        as_of: "07/07/2026"
+        source_url: "https://www.fhfa.gov/data/hpi"
+        source_label: "FHFA House Price Index"
 
   - name: fdot
     lane: tier-2
@@ -424,6 +623,16 @@ pipelines:
     count_table: data_lake.fdot_aadt_fl # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-05-18 ✓
     # pipeline_name="tier1_inventory" in pipeline.py — actual schema_name is fdot_aadt_tier2.
+    source_scope:
+      confirmed_total:
+        value: 103662
+        as_of: "2026-05-31"
+        source: "our ingest (AADT traffic counts, statewide filtered to Lee/Collier)"
+      source_ceiling:
+        summary: "FDOT's own ArcGIS org runs 1,586 public layers; we use one. Untouched: crash/fatality data (standout safety signal), bridge inventory/condition, 5-Year Work Program (capital projects), transit ridership, bike/ped infrastructure."
+        as_of: "07/07/2026"
+        source_url: "https://gis-fdot.opendata.arcgis.com/"
+        source_label: "FDOT GIS Open Data"
 
   - name: lee_permits
     lane: tier-2
@@ -433,6 +642,16 @@ pipelines:
     expected_rows_min: 5 # weekly at ~1.2 permits/day → ≥8; floor 5 for quiet weeks
     count_table: data_lake.lee_building_permits # dlt schema_name != table name
     # Verified: MAX(inserted_at) = 2026-06-06 ✓ (v2 pagination fix + 90d backfill)
+    source_scope:
+      confirmed_total:
+        summary: "Accela Angular-SPA scrape (crawl4ai stealth), ~90d backfill — live"
+        as_of: "2026-06-06"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Lee County's own ArcGIS org (orgId LvWGAAhHwbCJ2GMP) has structured building-permit FeatureServer layers — 9,386 unincorporated-Lee permits, 719 commercial permits, 2,192 Cape Coral residential permits — that could replace this fragile Accela scrape entirely. Same org also has a 93,976-row code-enforcement/nuisance-violation layer (new category) and two manufactured-home layers (43,000+ lots — a direct fix for the parked land_manufactured_swfl gap)."
+        as_of: "07/07/2026"
+        source_url: "https://leegis.maps.arcgis.com/"
+        source_label: "Lee County GIS (ArcGIS Online org)"
 
   - name: collier_permits
     lane: tier-2
@@ -479,6 +698,15 @@ pipelines:
     # Non-dlt pipeline — freshness via MAX(inserted_at). Pack: refinery/packs/safety-swfl.mts.
     # Pipeline: ingest/pipelines/fdle_crime_swfl/ (cde.py). Needs FBI_CDE_API_KEY (api.data.gov).
     # Cron: quarterly 1st of Jan/Apr/Jul/Oct 12:00 UTC via fdle-crime-quarterly.yml.
+    source_scope:
+      confirmed_total:
+        summary: "County-total crime, computed by summing already-fetched city-level detail (Fort Myers PD, Cape Coral PD, Naples PD) and discarding the breakdown"
+        source: "our ingest"
+      source_ceiling:
+        summary: "City-level crime AND offense-type breakdown (burglary, robbery, assault, etc.) are sitting in a variable we already compute — not a new API call, just stop discarding it. Ceiling: NIBRS certification dates are per-agency, so sub-county grain needs a coverage check first."
+        as_of: "07/07/2026"
+        source_url: "https://cde.ucr.cjis.gov/"
+        source_label: "FBI Crime Data Explorer (NIBRS)"
 
   - name: zori_swfl_tier2
     lane: tier-2
@@ -575,6 +803,16 @@ pipelines:
     # Metrics (v3): enplanements, deplanements, total_passengers, aircraft_operations, total_freight_lbs — all 5 LCPA PDFs.
     # YoY % back-filled per metric. Cron: 8th of month 15:00 UTC via rsw-airport-monthly.yml.
     # First run: 2026-05-31 — 516 rows (enplanements only). v3 adds 4 new metrics.
+    source_scope:
+      confirmed_total:
+        value: 2580
+        as_of: "2026-06-14"
+        source: "our ingest (RSW, 5 metrics)"
+      source_ceiling:
+        summary: "Page Field (LCPA general-aviation) is entirely unscraped alongside RSW. RSW financials/route/concessions data either need document parsing or aren't published at this grain."
+        as_of: "07/07/2026"
+        source_url: "https://www.flylcpa.com/about-lcpa/reports-and-statistics/"
+        source_label: "Lee County Port Authority reports"
 
   - name: dbpr_sirs_submissions
     lane: tier-2
@@ -606,6 +844,17 @@ pipelines:
     # Cron: 0 10 5 * * (5th of month, 10:00 UTC) via ingest-fl-dbpr-licenses.yml.
     # Consuming brain: licenses-swfl.
     # First run: 2026-06-01 (licenses-swfl.md: Lee 6,342 + Collier 3,281 active = 9,623; lapse rate 0.5%).
+    source_scope:
+      confirmed_total:
+        value: 9623
+        as_of: "2026-06-01"
+        source: "our ingest (2 of 35 license boards: Construction + Electrical)"
+      source_ceiling:
+        value: 35
+        as_of: "07/07/2026"
+        source_url: "https://www2.myfloridalicense.com/data-download/"
+        source_label: "FL DBPR license board data download"
+        summary: "35 license boards total; we use 2. Community Association Managers board pairs directly with condo SIRS data we already pull (dbpr_sirs_submissions) — the standout unpulled complement."
 
   - name: fl_dbpr_applicants
     lane: tier-2
@@ -651,6 +900,15 @@ pipelines:
     # Consumer: env-swfl brain (env_rainfall_swfl_annual_in key_metric).
     # Cron: 5th of month 14:00 UTC via noaa-ghcn-rainfall-monthly.yml.
     # First run: pending first GHA dispatch.
+    source_scope:
+      confirmed_total:
+        summary: "Precipitation only, 4 anchor stations"
+        source: "our ingest"
+      source_ceiling:
+        summary: "The yearly file we already fetch also carries temperature, wind, humidity, and pressure at zero extra cost — only precipitation is extracted."
+        as_of: "07/07/2026"
+        source_url: "https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-daily"
+        source_label: "NOAA GHCN-Daily"
 
   - name: city_pulse_corridors_tier2
     lane: tier-2
@@ -679,6 +937,16 @@ pipelines:
     # Drop folder: ingest/drops/marketbeat_pdf/ (gitignored *.pdf)
     # Source connector: refinery/sources/marketbeat-swfl-source.mts
     # First run: 2026-06-09, 109 rows (7 C&W PDFs Q1 2024-Q1 2026, manual ODD drop).
+    source_scope:
+      confirmed_total:
+        value: 109
+        as_of: "2026-06-09"
+        source: "our ingest (retail/industrial/office sectors, 7 quarters)"
+      source_ceiling:
+        summary: "Cushman & Wakefield also publishes a Medical Office sector report for Fort Myers/Naples quarterly, same PDF pipeline — the sector list is hardcoded to retail/industrial/office in the source file and Medical Office was never added. Crexi/Brevitas separately show 300+ active for-sale listings county-wide across Lee/Collier; our CRE listing coverage is 1-4 leases per city."
+        as_of: "07/07/2026"
+        source_url: "https://www.cushmanwakefield.com/en/united-states/insights/us-marketbeat-reports"
+        source_label: "Cushman & Wakefield MarketBeat"
 
   - name: colliers_industrial
     lane: tier-2
@@ -766,6 +1034,16 @@ pipelines:
     note: "Active CRE lease listings — Estero (33928) + Fort Myers Beach (33931). Fills MarketBeat coverage gap for these submarkets. Weekly Firecrawl agent scrape → active_listings_cre table. NOT YET ACTIVATED — table exists, pipeline needs first green GHA run to graduate."
     # SQL migration: docs/sql/20260609_active_listings_cre.sql (applied 2026-06-09).
     # Pipeline: ingest/pipelines/crexi_listings/pipeline.py.
+    source_scope:
+      confirmed_total:
+        summary: "Estero + Fort Myers Beach only, ~1-4 confirmed leases/city"
+        source: "our ingest"
+      source_ceiling:
+        value: 300
+        as_of: "07/07/2026"
+        source_url: "https://www.crexi.com/properties"
+        source_label: "Crexi"
+        summary: "300+ active for-sale/lease listings exist county-wide across Lee/Collier in the categories checked alone — our coverage today is a small slice (2 submarkets, 1-4 leases/city)."
 
   - name: brevitas_listings
     lane: tier-2
@@ -802,9 +1080,17 @@ pipelines:
     freshness_column: _ingested_at
     source_name: estero_edc
     expected_rows_min: 6 # seed-based pipeline always upserts 6 SEED_ROWS; floor = seed count
-    note: "Active Estero development (2025-2026): Corkscrew Rd Widening Phase 2 (~$27M, end-2026); mini-warehouse 75,910 SF; High 5 Entertainment 40,000 SF; Aldi (11906 Newbridge Ct); Home2 Suites; Walmart expansion. 6 rows live. estero-fl.gov returns 526 — seed-based upsert. GHA: monthly (ingest-local-cre-context.yml)."
+    note: "Active Estero development (2025-2026): Corkscrew Rd Widening Phase 2 (~$27M, end-2026); mini-warehouse 75,910 SF; High 5 Entertainment 40,000 SF; Aldi (11906 Newbridge Ct); Home2 Suites; Walmart expansion. 6 rows live. CORRECTED 07/08/2026: estero-fl.gov's own source page is now a flat 404; '526' in a prior version of this note was a Cloudflare SSL-handshake error code, not a row count. Seed-based upsert is correct — nothing real is being missed. GHA: monthly (ingest-local-cre-context.yml)."
     # SQL: docs/sql/20260609_local_cre_context.sql (applied 2026-06-09).
     # Pipeline: ingest/pipelines/estero_edc/.
+    source_scope:
+      confirmed_total:
+        value: 6
+        source: "our ingest (seed rows)"
+      source_ceiling:
+        summary: "Vendor ceiling: estero-fl.gov's source page is now a flat 404. Nothing is being missed — the seed-only fallback is the correct posture for a dead source."
+        as_of: "07/08/2026"
+        source_label: "Estero EDC (estero-fl.gov)"
 
   - name: fmb_recovery
     lane: tier-2
@@ -818,6 +1104,14 @@ pipelines:
     note: "$1.107B CDBG-DR funding (largest single-municipality award in SWFL post-Ian). Pier contract $11.7M awarded Apr 8, 2026. Beach renourishment 41,655 CY (mid-May 2026). Bay Oaks Park complete ~Aug 2025. Times Square: plans→permits. Big Carlos Pass Bridge underway. 8 rows live. GHA: monthly (ingest-local-cre-context.yml)."
     # SQL: docs/sql/20260609_local_cre_context.sql (applied 2026-06-09).
     # Pipeline: ingest/pipelines/fmb_recovery/.
+    source_scope:
+      confirmed_total:
+        value: 8
+        source: "our ingest (seed rows)"
+      source_ceiling:
+        summary: "The real live projects dashboard shows a granular street-level repaving program, a 19-street stormwater program, a lighting project, and 4 county-owned parks — more detail than our 8 seed rows carry. The one genuine gap in this vendor group."
+        as_of: "07/07/2026"
+        source_label: "Fort Myers Beach recovery projects dashboard"
 
   - name: news_swfl
     lane: tier-2
@@ -907,6 +1201,15 @@ pipelines:
     freshness_column: captured_at
     # ~471 calls/run (Lee ~259 + Collier ~207 pages @ 20/page). Consumer:
     # refinery/packs/active-rentals-swfl.mts (via data_lake.rental_listing_stats). Workflow: ingest-rentals.yml.
+    source_scope:
+      confirmed_total:
+        summary: "Lee + Collier only — 7,185 rows after PK dedupe"
+        as_of: "2026-07-02"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Hendry County gets residential listings via listing_lifecycle but zero rental or price-aggregate coverage here — an asymmetry nobody had flagged before. Same SteadyAPI /rentals-search endpoint could cover it."
+        as_of: "07/07/2026"
+        source_label: "realtor.com (via SteadyAPI)"
 
 # ── Pipelines that have never run — excluded from active probe ────────────────
 # (All former entries graduated to pipelines: above with probe_mode: odd_window.)
@@ -935,6 +1238,15 @@ not_yet_running:
     note: "Never run BY DESIGN — first quarterly cron fires 07/15/2026 (franchise-outcomes-quarterly.yml, 15th Jan/Apr/Jul/Oct). Consumer brain is empty-tolerant; graduates to pipelines: after first green run."
     # Merge key (county-grain): (franchise_code, franchise_name) — stable across quarterly refreshes.
     # Pipeline does a full-replace (overwrite in place); the Parquet is regenerated from all 3 FOIA files.
+    source_scope:
+      confirmed_total:
+        value: 453
+        source: "SOURCED.md (all 3 FOIA files)"
+      source_ceiling:
+        value: 453
+        as_of: "07/07/2026"
+        source_label: "SBA FOIA franchise data"
+        summary: "Already complete — 453 franchise rows is the full FOIA total, not a subset."
 
   # ── AirDNA STR (short-term-rental) — Operation Dumbo Drop, parked ──────────
   # STR revenue/occupancy/ADR has no free source; AirDNA is the only authoritative
@@ -992,6 +1304,11 @@ not_yet_running:
     source_name: api_feed
     parked: true # shows yellow on ops, not red — deliberate backfill deferral (operator 06/30)
     note: "Parked ODD backfill — no pipeline code yet, spare-call sweep once budget allows. See docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/phase-5-land-manufactured-parked.md."
+    source_scope:
+      source_ceiling:
+        summary: "Vendor ceiling confirmed 07/07/2026: land and manufactured-home listings cannot be filtered at the SteadyAPI/realtor.com level at all. Land is caught by a beds-is-null+lot_sqft heuristic; manufactured has no signal and falls to 'other'. Not something we're leaving on the table — this is the vendor's real limit."
+        as_of: "07/07/2026"
+        source_label: "realtor.com (via SteadyAPI)"
 
 # ── Tables intentionally excluded from the probe — DO NOT ADD ────────────────
 # These tables have rows in Postgres but no active ingest pipeline. Adding them

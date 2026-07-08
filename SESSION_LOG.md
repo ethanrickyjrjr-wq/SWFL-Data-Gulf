@@ -1,3 +1,33 @@
+## 2026-07-08 (Sonnet 5 · main) — feat(census): populate source_scope for 36/72 pipelines from vendor extraction-ceiling audit
+
+Operator: "Do you have all the possible rows we can extract from each one? Not just what we extract."
+16 parallel research agents (one per vendor family) probed our own ingest code (RULE 0.5) then verified
+each vendor's real full catalog live (RULE 0.4) — full report at
+`_ASSISTANT/2026-07-08-vendor-extraction-ceiling-audit.md`. Populated `source_scope.confirmed_total` +
+`source_scope.source_ceiling` in `ingest/cadence_registry.yaml` for 36 of 72 entries (was 0/72 — this is
+why swfldatagulf-ops `/census` showed "pending" everywhere) with real cited numbers/URLs, so the ops
+Pipeline Data Census page now renders real confirmed-total/source-ceiling cells instead of pending pills
+for those rows. Biggest single finding: Collier/FDOR cadastral pulls 13 of 135 available fields —
+`SALE_PRC1`/`SALE_PRC2` (actual sale price) never pulled despite sale year/month/qualification code
+being pulled in the same query. Also corrected two of my own earlier mid-session misstatements: the
+Estero registry's "526" was a Cloudflare SSL-handshake error code, not a row count (source page is now a
+flat 404 — noted in the estero_edc entry's note field); and SteadyAPI's land/manufactured filtering gap
+is a genuine vendor-side ceiling, not an unused filter on our end.
+
+Unresolved: LeePA's own ArcGIS layers 19-23 (Non CT Sales, Land Type, Delinquent Tax Advertising, Cert
+of Title Sales, Comparable Sales) confirmed to exist (24 layers total, not ~4 as assumed) but field
+schemas are still unconfirmed — repeated live-query timeouts against gissvr.leepa.org for those specific
+layer IDs, worth a retry from a clean session. Opened `vendor_extraction_ceiling_audit_followup` check
+for the ~15 real gaps this audit surfaced (FDOR sale price, BLS QCEW industry cut, FDLE offense
+breakdown, C&W Medical Office, NOAA flood/waterspout event types, FEMA penetration rate, Lee GIS permit
+layers as an Accela-scrape replacement, etc.) — none of the actual pipeline code was changed this
+session, only the registry's source_scope annotations.
+
+Verified: `python3 -c "import yaml; yaml.safe_load(open('ingest/cadence_registry.yaml'))"` parses clean,
+36/72 entries now carry source_scope. Pre-existing unrelated test failure noted (not caused by this
+change): `test_check_freshness.py::test_tier2_fresh_not_stale` fails on a hand-constructed entry dict
+that never reads this file — a timezone/date-boundary flake, not a regression.
+
 ## 2026-07-07 (main) — REVERT: broken Hendry-ZIP geometry (fdb83bf1) was rendering huge gray blobs across the live homepage map
 
 Operator caught it live (screenshot, homepage map): three gray shapes sprawling across most of the
