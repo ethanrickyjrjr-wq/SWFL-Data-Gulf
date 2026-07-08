@@ -909,6 +909,32 @@ Note: user timeline endpoints take `user_id` (numeric), not username — resolve
 - `GET /v1/reddit/user-stats` (weight 1) — public user stats (total/post/comment/awarder/awardee karma, account metadata). Params: `username`
 - `GET /v1/reddit/user-data` (weight 2) — a user's posts + comments, sortable hot/top/new. Params: `username?`, `filter?`
 
+### Reddit quirks — field-verified, not in the crawled docs
+
+**07/05/2026 (39 real calls):**
+- `/v1/reddit/search`'s `filter` param REJECTS the value `posts` (422/error) even though it looks
+  documented; `subreddit:` query syntax also breaks the endpoint.
+- The `subreddit` param on `/v1/reddit/search` must be a bare name and only BIASES site-wide relevance
+  ranking — it does not hard-filter. Client-side filtering by subreddit is required for scoped mining.
+- `/v1/reddit/post` responds with `body.post` + `body.post_comments[]` with nested `replies`.
+
+**07/08/2026 (20 real calls):**
+- `/v1/reddit/search`'s `filter` param is content-sensitive, not just value-sensitive: 2 of 14
+  identical-shaped queries ("claude ai prompting hacks", "claude code subagents workflow") returned
+  HTTP 200 with `{"success": false, "message": "Please enter a valid subReddit URL."}` — no subreddit
+  syntax was in either query. Rewording the same query slightly succeeded immediately. **Always check
+  `body.success !== false` even on HTTP 200** — this endpoint can 200 with no real results.
+- `/v1/reddit/posts` (hard subreddit targeting via `url=`) needs a DIFFERENT `filter` enum than
+  `/search`: valid values are `hot | new | top | rising`. The `/search` filter values
+  (`posts`/`comments`/`users`/`communities`) all 422 here ("The selected filter is invalid."). Omitting
+  both `filter` and `sortType` 422s ("filter field is required when sort type is not present").
+- `filter=top` alone on `/v1/reddit/posts` returns only ~3 items (short default window, likely "past
+  hour"); `filter=hot`, `filter=new`, and `filter=rising` each reliably return a full 25-item page. Use
+  `hot` for a representative subreddit snapshot.
+- `sortType` could not be made to work in combination with `filter` on `/v1/reddit/posts` — every value
+  tried (`all/year/month/week/day/hour`) 422'd ("The selected sort type is invalid"). Valid values
+  remain unconfirmed; don't rely on it — use bare `filter=hot` instead.
+
 ## 🤖 ScrapeFlow — generic scraper
 
 - `POST /v1/scraper` — SteadyAPI's general-purpose scraping endpoint (their "ScrapeFlow" product). Fallback lane for social surfaces they don't have dedicated endpoints for (e.g. TikTok, Facebook, LinkedIn — none of which have dedicated SteadyAPI sections as of 07/05/2026).

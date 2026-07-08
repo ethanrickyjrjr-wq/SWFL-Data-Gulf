@@ -1,3 +1,25 @@
+## 2026-07-08 (Sonnet 5 · main) — RESEARCH: SteadyAPI Reddit sweep (Claude cheats + email/social AI + data-deliverable hacks)
+
+Operator supplied a fresh SteadyAPI key (`PHOTOS_API` is still the suspended/past-due one) and asked to
+mine Reddit for Claude/Claude-Code power-user tricks, AI-assisted email/social design, and growth hacks
+for a data-and-deliverables product, then crawl4ai-verify the best findings into a buildable file. Ran 20
+real SteadyAPI calls (14 `/v1/reddit/search` + 6 targeted `/v1/reddit/posts` subreddit-hot pulls — generic
+keyword search drowned in unrelated viral posts, targeted subreddit pulls carried the signal), then 4
+crawl4ai fetches to verify the strongest claims against primary sources (Anthropic's own "how Anthropic
+teams use Claude Code" post, 2 GitHub repos, the n8n workflow repo behind a "$0.20 AI report" post).
+Strongest finding: r/realtors names, unprompted, the exact workflow this platform already has the data
+for — agents manually spending 3 hours pulling comps + permit history + tax records + disclosures into a
+"showing prep binder" before every showing — a near-direct spec for a one-click deliverable using data we
+already ingest. Everything else mostly validates strategy already locked (free-build/paid-send model,
+structural-guarantee positioning, graphify as our token-reduction analog). Wrote
+`docs/superpowers/plans/2026-07-08-reddit-ai-cheats-and-deliverable-hacks.md` (full findings + prioritized
+next-build list — nothing registered as a build yet, needs a brainstorming pass first per RULE 3.5). Also
+found 4 new SteadyAPI Reddit vendor quirks (filter-param content-sensitivity on `/search`; the
+`/v1/reddit/posts` `filter` enum is `hot|new|top|rising`, distinct from `/search`'s filter; `sortType`
+could not be made to work) and folded them into `docs/vendor-notes/INSTAGRAM-SOCIAL-STEADY.md` — also
+backfilled the 07/05 handoff's 3 quirks that were written up in a handoff doc but never actually applied
+to the vendor note. Docs-only; nothing pushed yet, holding for operator go-ahead.
+
 ## 2026-07-08 (Sonnet 5 · main) — feat(census): source_scope for all 71 real pipelines + 9 bugs opened as checks
 
 Operator wanted every pipeline/API on `/census` — what we pull vs. what's available — not just the
