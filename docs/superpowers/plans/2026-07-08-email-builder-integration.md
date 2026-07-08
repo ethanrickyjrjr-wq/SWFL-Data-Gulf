@@ -132,21 +132,23 @@ One shared contract every consumer reads from is both the enforcement point AND 
   (`branding.preferred_recipe`), so it persists to **projects.branding JSONB** on brand-save
   and round-trips (project scope). `brandingToTokens` ignores it (no visual side effect).
 
-**STAGED — ready, NOT run (operator call: run the migration under supervision):**
-Migration file written: `docs/sql/20260708_user_brand_variety_defaults.sql` (adds
-`preferred_recipe`, `default_photo_ratio` to `user_brand_profiles`). To finish M3-B, in ONE
-atomic diff (phantom columns = compile errors, so these move together):
-1. Run the migration (idempotent) + verify the two columns exist.
-2. Regenerate the typed Supabase client (`database-generated.types.ts`) so the new columns type.
-3. `app/api/user/brand/route.ts`: add a `PREFERENCE_FIELDS = ["preferred_recipe",
-   "default_photo_ratio"]` group to BOTH `BASE_SELECT` (GET) and the PATCH write loop — mirrors
-   the existing FONT_FIELDS/CONTACT_FIELDS pattern. (Do NOT land this before step 1: the GET
-   `BASE_SELECT` has no missing-column fallback, unlike `color_palettes`.)
-4. Seed the lab picker from the account profile (GET `/api/user/brand`) on first Brand-panel
-   open, same as agent fields, so a saved default carries to NEW projects.
-5. (Optional, pairs with the type-lift) Apply `default_photo_ratio` on build: thread it into
-   `assembleAuthoredDoc` so authored `kind:"photo"` blocks get `props.ratio` = the saved default
-   (today photos default 3:2 in `ImageBlock`; per-block ratio picker already ships from M2).
+**DONE 07/08/2026 — type-lift landed (steps 1–4):**
+Migration file: `docs/sql/20260708_user_brand_variety_defaults.sql` (adds `preferred_recipe`,
+`default_photo_ratio` to `user_brand_profiles`).
+1. ✅ Migration run by operator + both columns verified live (`information_schema`, VARCHAR).
+2. ✅ `database-generated.types.ts` regenerated (`bun run gen:types` → prettier); diff is EXACTLY
+   the two columns on `user_brand_profiles` Row/Insert/Update — no concurrent-session drift.
+3. ✅ `app/api/user/brand/route.ts`: `PREFERENCE_FIELDS = ["preferred_recipe",
+   "default_photo_ratio"]` added to `BASE_SELECT` (GET) + PATCH write loop (mirrors FONT_FIELDS).
+4. ✅ `EmailLabGridShell` brand-prefill seeds `preferred_recipe` from the account profile on first
+   Brand-panel open (only when the project has none) so a saved default carries to NEW projects.
+   `default_photo_ratio` is NOT seeded into `branding` state — no UI consumes it yet; the route
+   field accepts it for when a picker lands.
+5. DEFERRED → check `email_default_photo_ratio_build_thread`. Applying `default_photo_ratio` on
+   build needs NEW threading (BuildArgs→AssembleArgs→`assembleAuthoredDoc`; no ratio plumbing
+   exists there today) + an account-level ratio picker — not "already reachable", so per RULE 0.6
+   it's a separate build, not smuggled into the type-lift. Verify: 71/71 route+recipe tests,
+   `bunx next build` clean.
 
 **Also deferred (checks opened):** M2 soft span/accent WARNINGS in the canvas (AI already
 hard-clamps; user path unblocked, just not yet nudged) + react-email visual-regression fixtures

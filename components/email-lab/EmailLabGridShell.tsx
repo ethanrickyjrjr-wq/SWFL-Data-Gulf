@@ -919,7 +919,9 @@ export function EmailLabGridShell({
         setPalettes(sanitizePalettes(data.color_palettes));
         setBranding((prev) => {
           const next = { ...prev };
-          for (const k of ["agent_name", "photo_url", "license", "brokerage"]) {
+          // preferred_recipe rides along so a saved account default seeds the
+          // recipe picker on NEW projects (only when the project has none yet).
+          for (const k of ["agent_name", "photo_url", "license", "brokerage", "preferred_recipe"]) {
             if (!next[k] && typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
           }
           const scheme = defaultScheme(data);

@@ -3208,6 +3208,8 @@ export interface Database {
           background_color: string | null;
           surface_color: string | null;
           surface_dark_color: string | null;
+          preferred_recipe: string | null;
+          default_photo_ratio: string | null;
         };
         Insert: {
           id?: string;
@@ -3248,6 +3250,8 @@ export interface Database {
           background_color?: string | null;
           surface_color?: string | null;
           surface_dark_color?: string | null;
+          preferred_recipe?: string | null;
+          default_photo_ratio?: string | null;
         };
         Update: {
           id?: string;
@@ -3288,6 +3292,8 @@ export interface Database {
           background_color?: string | null;
           surface_color?: string | null;
           surface_dark_color?: string | null;
+          preferred_recipe?: string | null;
+          default_photo_ratio?: string | null;
         };
         Relationships: [];
       };

@@ -37,6 +37,16 @@ type ColorField = (typeof COLOR_FIELDS)[number];
 const FONT_FIELDS = ["font_display", "font_body"] as const;
 type FontField = (typeof FONT_FIELDS)[number];
 
+// M2 variety DEFAULTS persisted at the account level so a saved design default
+// carries to NEW projects (like colors/fonts). preferred_recipe = a RecipeId
+// (lib/email/author-recipes.ts); default_photo_ratio = a PhotoRatio
+// (lib/email/doc/types.ts). Columns added by
+// docs/sql/20260708_user_brand_variety_defaults.sql — the GET BASE_SELECT has no
+// missing-column fallback (unlike color_palettes), so this select requires the
+// migration to have run.
+const PREFERENCE_FIELDS = ["preferred_recipe", "default_photo_ratio"] as const;
+type PreferenceField = (typeof PREFERENCE_FIELDS)[number];
+
 // Social + unsubscribe URLs persisted at the account level (like colors) so they
 // carry to NEW projects. Columns added by docs/sql/20260625_user_brand_socials.sql.
 const SOCIAL_FIELDS = [
@@ -69,6 +79,7 @@ const BASE_SELECT = [
   FONT_FIELDS.join(", "),
   SOCIAL_FIELDS.join(", "),
   CONTACT_FIELDS.join(", "),
+  PREFERENCE_FIELDS.join(", "),
 ].join(", ");
 
 async function authed() {
@@ -160,6 +171,12 @@ export async function PATCH(req: NextRequest) {
   for (const key of FONT_FIELDS) {
     if (key in body) {
       const v = body[key as FontField];
+      update[key] = typeof v === "string" && v.trim() ? v : null;
+    }
+  }
+  for (const key of PREFERENCE_FIELDS) {
+    if (key in body) {
+      const v = body[key as PreferenceField];
       update[key] = typeof v === "string" && v.trim() ? v : null;
     }
   }

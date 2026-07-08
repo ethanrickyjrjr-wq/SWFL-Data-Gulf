@@ -1,3 +1,18 @@
+## 2026-07-08 (Opus 4.8 · main) — feat: brand variety-defaults type-lift (email-builder M3-B, steps 1–4)
+
+Operator ran the migration (`docs/sql/20260708_user_brand_variety_defaults.sql`) and said "good to go"
+(their "M2-B" = the plan's M3-B type-lift — reconciling the label here). Verified both columns
+(`preferred_recipe`, `default_photo_ratio`) live on `user_brand_profiles` via `information_schema`,
+then landed the code side that pairs with them (phantom columns = compile errors, so these move together):
+regenerated `database-generated.types.ts` (`bun run gen:types` → prettier collapsed the whole-file
+churn to EXACTLY the two new columns — no concurrent-session drift smuggled in); added
+`PREFERENCE_FIELDS` to `/api/user/brand` GET `BASE_SELECT` + PATCH write loop (mirrors FONT_FIELDS);
+seeded `preferred_recipe` into the lab recipe picker from the account profile on Brand-panel open so a
+saved default carries to NEW projects. `default_photo_ratio` build-application DEFERRED (needs new
+BuildArgs→assembleAuthoredDoc threading + an account ratio UI — not already reachable) → check
+`email_default_photo_ratio_build_thread`. Gates: 71/71 route+recipe tests, `bunx next build` clean.
+NOT pushed — awaiting operator confirmation.
+
 ## 2026-07-08 (Opus 4.8 · main) — docs: email-builder integration plan committed to repo (M1–M3 + handoff)
 
 Copied the approved integration plan into `docs/superpowers/plans/2026-07-08-email-builder-integration.md`
