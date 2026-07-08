@@ -24,9 +24,10 @@ import { resolveEmailModel } from "./model-router";
 import type { EmailDoc, EmailBlock } from "./doc/types";
 import type { ShowingPrepData } from "@/lib/listings/showing-prep-source";
 
-/** True when `b` is the empty commentary text block (found by its caption marker,
- *  not by position — the builder tags it, so ordering can change freely). */
-function isCommentaryBlock(b: EmailBlock): boolean {
+/** True when `b` is the commentary text block (found by its caption marker, not by
+ *  position — the builder tags it, so ordering can change freely). A type guard so
+ *  callers get the narrowed `text` variant (its props carry `body`). */
+function isCommentaryBlock(b: EmailBlock): b is Extract<EmailBlock, { type: "text" }> {
   return (
     b.type === "text" &&
     (b.props as { caption?: string }).caption === SHOWING_PREP_COMMENTARY_MARKER
