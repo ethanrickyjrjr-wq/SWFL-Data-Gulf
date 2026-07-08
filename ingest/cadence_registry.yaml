@@ -728,6 +728,15 @@ pipelines:
     # Separate from zori_swfl_duckdb; this is the Postgres promotion pipeline.
     # liveness_view (§06 pivoted view) probed daily via PostgREST — catches a missing GRANT on
     # zori_zip_latest, mirroring zhvi_swfl_tier2. Added 2026-06-13 (§07 had wired ZHVI but not ZORI).
+    source_scope:
+      confirmed_total:
+        summary: "ZORI rent index (unadjusted), ZIP grain — live (Postgres promotion of zori_swfl_duckdb)"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same vendor ceiling as zori_swfl_duckdb: Zillow also publishes a seasonally-adjusted ZORI variant, same ZIP grain, free — not pulled."
+        as_of: "07/08/2026"
+        source_url: "https://www.zillow.com/research/data/"
+        source_label: "Zillow Research Data"
 
   - name: zhvi_swfl_tier2
     lane: tier-2
@@ -740,6 +749,15 @@ pipelines:
     # Separate from zhvi_swfl_duckdb; this is the Postgres promotion pipeline.
     # Pack: refinery/packs/home-values-swfl.mts. Set expected_rows_min after first run.
     # liveness_view probed daily via PostgREST REST surface (catches missing GRANT on the view).
+    source_scope:
+      confirmed_total:
+        summary: "ZHVI ZIP-level all-homes middle-tier, smoothed+SA — live (Postgres promotion of zhvi_swfl_duckdb)"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same vendor ceiling as zhvi_swfl_duckdb: bedroom-cut, SF-vs-condo, raw (non-SA), and ZHVF (forecast) variants — same ZIP grain, free, not pulled."
+        as_of: "07/08/2026"
+        source_url: "https://www.zillow.com/research/data/"
+        source_label: "Zillow Research Data"
 
   - name: tier_divergence_swfl_tier2
     lane: tier-2
@@ -752,6 +770,15 @@ pipelines:
     # Separate from tier_divergence_swfl_duckdb; this is the Postgres promotion pipeline.
     # Pack: refinery/packs/tier-divergence-swfl.mts. Set expected_rows_min after first run (~107 ZIPs x months).
     # liveness_view probed daily via PostgREST (catches missing GRANT on data_lake.tier_divergence_zip_latest).
+    source_scope:
+      confirmed_total:
+        summary: "ZHVI tier split (top 0.67-1.0 vs bottom 0.0-0.33), ZIP grain, raw — live (Postgres promotion of tier_divergence_swfl_duckdb)"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same vendor ceiling as tier_divergence_swfl_duckdb: Zillow's inventory/DOM/price-cut/new-construction/sales/affordability categories are metro-or-national grain only — no ZIP cut exists."
+        as_of: "07/08/2026"
+        source_url: "https://www.zillow.com/research/data/"
+        source_label: "Zillow Research Data"
 
   - name: fgcu_reri_indicators
     lane: tier-2
@@ -1278,6 +1305,12 @@ not_yet_running:
     # Idempotent merge key when it graduates: (zip_code, period_end), source_tag provenance.
     # Pricing verified 2026-06-11: airdna.co/pricing — single market $19.95-99.95/mo by
     # listing count; FL state $179/mo. API/Enterprise is sales-negotiated (not needed).
+    source_scope:
+      source_ceiling:
+        summary: "STR revenue/occupancy/ADR — no free source exists; AirDNA is the only authoritative feed. Parked on cost, not a research gap: single-market sub $19.95-99.95/mo by listing count, FL statewide $179/mo."
+        as_of: "2026-06-11"
+        source_url: "https://www.airdna.co/pricing"
+        source_label: "AirDNA MarketMinder pricing"
 
   # ── Land + manufactured (SteadyAPI sole spine, realtor.com origin) — parked backfill ─────────
   # Excluded from the residential /search sweep (Ricky, 06/30) to save calls, not dropped permanently —
