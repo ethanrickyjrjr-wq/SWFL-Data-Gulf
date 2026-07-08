@@ -819,8 +819,10 @@ export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
 // ── The no-invention prose lint (gateNarrative philosophy, applied to blocks) ──
 
 /** Free-text fields the author writes (number-bearing fields are id-selected, so
- *  they always anchor and are not linted here). */
-const PROSE_FIELDS = [
+ *  they always anchor and are not linted here). Exported as the ONE source of prose
+ *  surfaces so sibling guards (voice-guard.ts) walk exactly what the invention lint
+ *  walks — the two can never drift. */
+export const PROSE_FIELDS = [
   "kicker",
   "label",
   "prose",
@@ -832,6 +834,11 @@ const PROSE_FIELDS = [
   "designation",
   "bio",
 ] as const;
+
+/** Nested prose fields inside a `multi-column` column and a `list` item — the
+ *  one-level-down surfaces the prose gates also walk. Same ONE-source rule. */
+export const COLUMN_PROSE_FIELDS = ["heading", "body", "linkLabel"] as const;
+export const ITEM_PROSE_FIELDS = ["lead", "text"] as const;
 
 /** Build the verbatim anchor set from the data feed — mirrors narrative-lint's own
  *  (non-exported) buildAnchorSet, reusing its tokenizer/normalizer. */
@@ -982,12 +989,12 @@ export function lintAuthoredProse(
         }
       }
     }
-    const cols = lintNested(props.columns, ["heading", "body", "linkLabel"]);
+    const cols = lintNested(props.columns, COLUMN_PROSE_FIELDS);
     if (cols) {
       next.columns = cols;
       changed = true;
     }
-    const items = lintNested(props.items, ["lead", "text"]);
+    const items = lintNested(props.items, ITEM_PROSE_FIELDS);
     if (items) {
       next.items = items;
       changed = true;
