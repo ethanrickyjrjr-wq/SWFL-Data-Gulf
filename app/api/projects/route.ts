@@ -35,16 +35,22 @@ export async function POST(req: NextRequest) {
   const id = crypto.randomUUID().slice(0, 12);
   const title = typeof body?.title === "string" ? body.title : null;
 
-  // Build 1 — the listing anchor. `kind` is distinct from `project_type` (the CRE
-  // asset-class): only "listing" is honored, anything else (incl. absent/bogus) is
-  // "general". `subject_address` is the saved listing address, trimmed; when a listing
-  // is created without one, parse it from the title (a listing title is often the
-  // address) — never invent one, and never guess for a general project.
-  const kind = body?.kind === "listing" ? "listing" : "general";
+  // Build 1 — the address anchor. `kind` is distinct from `project_type` (the CRE
+  // asset-class). "listing" markets a listing to buyers; "showing-prep" is the agent's
+  // own internal showing prep document. Both anchor a `subject_address`; anything else
+  // (incl. absent/bogus) is "general". `subject_address` is the saved address, trimmed;
+  // when an address-bearing project is created without one, parse it from the title (the
+  // title is often the address) — never invent one, and never guess for a general project.
+  const kind =
+    body?.kind === "listing"
+      ? "listing"
+      : body?.kind === "showing-prep"
+        ? "showing-prep"
+        : "general";
   const typedAddress =
     typeof body?.subject_address === "string" ? body.subject_address.trim() || null : null;
   const subject_address =
-    kind === "listing" && !typedAddress && title ? extractAddress(title) : typedAddress;
+    kind !== "general" && !typedAddress && title ? extractAddress(title) : typedAddress;
 
   const { error } = await supabase.from("projects").insert({
     id,
