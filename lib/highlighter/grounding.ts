@@ -2,6 +2,11 @@ import type { Dossier } from "../fetch-brain";
 import type { BrainOutputMetric } from "../../refinery/types/brain-output.mts";
 import type { MethodologyEntry } from "../../refinery/lib/methodology-registry.mts";
 import { freshnessDirective } from "@/lib/assistant/system-prompt";
+import {
+  sanitizeProse,
+  scrubCaveatTechnical,
+  isDisplayableCaveat,
+} from "@/refinery/render/speaker.mts";
 
 export interface GroundingBlock {
   /** Human label the model uses to attribute a number ("Naples housing", "Naples flood (env-swfl)"). */
@@ -25,6 +30,13 @@ export interface GroundingInput {
   chartShown?: string;
 }
 
+/** Citations are author free text (e.g. "OpenFEMA … via data_lake.fema_nfip_claims,
+ *  FL, SWFL core counties") — the same raw-schema/table leak class as caveats. Run
+ *  through the same scrub so a table/column name never reaches the model's context. */
+function cleanCitation(citation: string): string {
+  return scrubCaveatTechnical(sanitizeProse(citation));
+}
+
 /** Inline a dossier's detail_tables as compact rows so cross-area lookups are in-context (R0). */
 function renderDetailTables(d: Dossier): string {
   if (!d.detail_tables || d.detail_tables.length === 0) return "";
@@ -34,7 +46,9 @@ function renderDetailTables(d: Dossier): string {
     // snake_case column id (e.g. `cap_rate_median`) — those are internal slugs
     // the customer must never see (CLEAN rule).
     const colLabel = new Map(t.columns.map((c) => [c.id, c.label]));
-    out.push(`  Table "${t.title}" (grain: ${t.grain}; source: ${t.source.citation}):`);
+    out.push(
+      `  Table "${t.title}" (grain: ${t.grain}; source: ${cleanCitation(t.source.citation)}):`,
+    );
     for (const r of t.rows) {
       const cells = Object.entries(r.cells)
         .filter(([, v]) => v !== null && v !== undefined && v !== "")
@@ -53,7 +67,9 @@ function renderKeyMetrics(d: Dossier): string {
   return d.key_metrics
     .map(
       (m: BrainOutputMetric) =>
-        `  - ${m.label || m.metric}: ${m.value}${m.source?.citation ? ` [${m.source.citation}]` : ""}`,
+        `  - ${scrubCaveatTechnical(m.label || m.metric)}: ${m.value}${
+          m.source?.citation ? ` [${cleanCitation(m.source.citation)}]` : ""
+        }`,
     )
     .join("\n");
 }
@@ -93,7 +109,7 @@ export function renderBlock(b: GroundingBlock): string {
   const d = b.dossier;
   const parts = [
     `### ${b.label}`,
-    `Conclusion: ${d.conclusion}`,
+    `Conclusion: ${sanitizeProse(d.conclusion)}`,
     // Header synthesis badges (Strength / Confidence / Direction) — serialized in
     // the SAME human-facing shape the report header shows: page.tsx renders
     // `${magnitudePct}%`, `${confidencePct}%`, and DIRECTION_LABEL[direction],
@@ -108,7 +124,17 @@ export function renderBlock(b: GroundingBlock): string {
   ];
   const tables = renderDetailTables(d);
   if (tables) parts.push(`Detail rows (every covered area — use these to compare):\n${tables}`);
-  if (d.caveats.length) parts.push(`Caveats: ${d.caveats.join("; ")}`);
+  // SAME caveat pipeline the report page + canned tier-2 reply already run
+  // (refinery/render/speaker.mts renderTier2 / toDisplayBrain) — this live-chat
+  // grounding path was the one surface that skipped it and fed d.caveats raw,
+  // which is how machine-internal disclosure prose (pack-id leaks, QA notes,
+  // "schema-required fallback" mechanics) reached the model verbatim for it to
+  // recite back as an excuse. Structural fix, not a "please don't say X"
+  // instruction: an unwanted caveat is dropped before the model ever sees it.
+  const cleanCaveats = d.caveats
+    .map((c) => scrubCaveatTechnical(sanitizeProse(c)))
+    .filter(isDisplayableCaveat);
+  if (cleanCaveats.length) parts.push(`Caveats: ${cleanCaveats.join("; ")}`);
   if (d.grain_boundary) parts.push(`What we do NOT hold: ${JSON.stringify(d.grain_boundary)}`);
   return scrubStatsJargon(parts.join("\n"));
 }
@@ -161,6 +187,18 @@ export function buildGroundingContext(input: GroundingInput): string {
   const chartBlock = input.chartShown
     ? `=== CHART ON SCREEN (cite ONLY these figures) ===\n${input.chartShown}`
     : "";
+  // DIRECTION directive — twin of the CHARTS bug above, one level up: a pack caveat
+  // disclosing that "direction" is an unmeasured schema fallback (e.g. cre-swfl v1
+  // doesn't compute quarter-over-quarter trend) is written for an internal audit
+  // trail, not a customer. Feeding it raw into Caveats (below) let the model recite
+  // the mechanic back ("schema design", "cannot surface") as if that were an answer
+  // — a deflection just like "I can't chart that", never a flat refusal.
+  const directionLine =
+    "DIRECTION/TREND — if a caveat says a direction or period-over-period trend is a " +
+    "schema fallback, unmeasured, or 'v1 does not compute' it: NEVER explain that to the " +
+    "user (no 'schema', 'framework', 'fallback label', or any internal-mechanics reasoning). " +
+    "Just state the current levels you DO hold for that metric and skip the trend claim " +
+    "entirely — never say you 'cannot surface' or 'don't have a read' on something.";
   return [
     "You are the SWFL Data Gulf in-page analyst. The user highlighted something on a live report and asked about it. Lead straight with the substance in plain prose — no 'I'll pull…', no setup sentence, and do NOT echo back what they highlighted (they can see it; skip 'That $22.29 you're looking at is…' openers). Keep it tight: a few sentences for a simple ask, a short paragraph or two at most. Don't define obvious words — if they highlighted 'rising', give the number and what's rising, not a definition of the word. Surface the key point and let the follow-up chips carry the rest.",
     "Three kinds of question; pick the lane and answer in it:",
@@ -174,6 +212,7 @@ export function buildGroundingContext(input: GroundingInput): string {
     "NATURAL — sound like a person, not a template. Don't mechanically repeat the same count or framing in every answer (not '27 corridors' every time — say 'across our corridors', or name the relevant ones). Vary it.",
     "BUILD — prior questions and answers from this session may be included in the question; build on them, don't repeat what you already said.",
     chartsLine,
+    directionLine,
     "ABOUT SWFL DATA GULF — only if asked what the platform/system is (2-3 sentences, precise, never cheesy, never sector-locked): a data-analytics engine for Southwest Florida (Lee + Collier) spanning real estate, permits, the economy, and risk — not one sector. Every answer is grounded in verified local data, which keeps the AI honest and surfaces real patterns across the region. It compounds — the more it's used the sharper its read on SWFL gets, and the more YOU use it the better it works as your data-grounded sidekick: faster answers, simpler workflows, better calls on real deals.",
     "Tag any projection beyond the cited numbers inline with [INFERENCE] and give one falsifying condition.",
     // Rule 5: state the as-of DATE (MM/DD/YYYY), NEVER the raw freshness token. This is

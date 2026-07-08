@@ -731,10 +731,23 @@ function sanitizeChart(block: ChartBlock | null): ChartBlock | null {
  * metrics, no caveats) — never throws.
  */
 /** Drop technical QA caveats that are noise on a user-facing page. */
-function isDisplayableCaveat(scrubbed: string): boolean {
+export function isDisplayableCaveat(scrubbed: string): boolean {
   // Sub-market corpus QA notes (cre-swfl corridor mapping quality)
   if (/D-mapped areas/i.test(scrubbed)) return false;
   if (/verified corpus this run/i.test(scrubbed)) return false;
+  // Internal-mechanics disclosure — a pack telling itself (and the Tier-3 audit
+  // trail) that a metric's direction/trend defaults to a schema-required label
+  // because v1 doesn't compute it yet (cre-swfl's MarketBeat + corridor_factor
+  // caveats). Real content for an auditor; pure excuse-jargon to a customer —
+  // this is the exact sentence a live chat answer was caught parroting back
+  // verbatim ("the framework flags direction as stable by schema design...")
+  // instead of just stating the levels it holds. Drop at the source so no
+  // consumer (chat, report page, canned reply) can ever recite it — a per-path
+  // prompt instruction telling the model not to say it is not enough, per the
+  // z-score/sigma precedent above: the model just paraphrases around a banned
+  // word when the underlying explanation is still sitting in its context.
+  if (/schema[- ]required (?:fallback|label)/i.test(scrubbed)) return false;
+  if (/v1 does not compute/i.test(scrubbed)) return false;
   // Raw override-fire diagnostics — synth.mts' fallback string when an override
   // ships no customer `caveatText`: `Override "storm-history-modifier" fired
   // (priority 70)`. Pure machinery: the override_id is already captured in

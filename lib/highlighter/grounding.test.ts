@@ -272,6 +272,66 @@ test("preamble carries the focus + natural-voice rules", () => {
   expect(ctx).toContain("BUILD");
 });
 
+test("caveat scrub: internal schema-fallback disclosure never reaches the model", () => {
+  // REGRESSION: cre-swfl's own audit-trail caveat for an unmeasured trend —
+  // '"stable" label on this metric is a schema-required fallback, not a
+  // measured trend' — was fed raw into Caveats: and the live chat parroted it
+  // back to the customer as "I do not have a current directional read... the
+  // framework flags direction as stable by schema design". A caveat like this
+  // must be dropped at the source (isDisplayableCaveat), same as the report
+  // page + canned tier-2 reply already do — not just asked-not-to-recite.
+  const d = fakeDossier("t");
+  d.caveats = [
+    'asking_rent_psf_median: 2 corridors report a value but none reports a direction — the "stable" label on this metric is a schema-required fallback, not a measured trend.',
+    'corridor_factor: direction ships as "stable" — v1 does not compute period-over-period index change; the label is a schema-required fallback, not a measured trend.',
+    "Naples reports a smaller sample size than other ZIPs this quarter.", // a real, customer-useful caveat
+  ];
+  const ctx = buildGroundingContext({
+    rules: "RULES",
+    gazetteer: "GEO",
+    blocks: [{ label: "x", dossier: d }],
+  });
+  // The instruction preamble itself names "schema" as a forbidden example (same
+  // convention as the CHARTS test above) — assert the DROPPED CAVEAT SENTENCES
+  // specifically, not a blanket absence of the word "schema".
+  expect(ctx).not.toContain("schema-required fallback");
+  expect(ctx).not.toContain("asking_rent_psf_median");
+  expect(ctx).not.toContain("corridor_factor");
+  // The real, customer-useful caveat survives the filter.
+  expect(ctx).toContain("Naples reports a smaller sample size than other ZIPs this quarter.");
+});
+
+test("citation scrub: a raw data_lake.* table name never leaks into the grounding", () => {
+  // REGRESSION: pack citations are author free text ("OpenFEMA … via
+  // data_lake.fema_nfip_claims, FL, …") — the exact schema.table shape
+  // scrubCaveatTechnical already redacts for the report page, but this
+  // chat-grounding path fed source.citation raw for both key_metrics and
+  // detail_tables.
+  const d = fakeDossier("t", true);
+  d.key_metrics[0].source!.citation =
+    "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL, SWFL core counties.";
+  d.detail_tables[0].source.citation = "Redfin ZHVI via data_lake.zhvi_zip_latest.";
+  const ctx = buildGroundingContext({
+    rules: "RULES",
+    gazetteer: "GEO",
+    blocks: [{ label: "x", dossier: d }],
+  });
+  expect(ctx).not.toContain("data_lake.fema_nfip_claims");
+  expect(ctx).not.toContain("data_lake.zhvi_zip_latest");
+  expect(ctx).toContain("OpenFEMA FimaNfipClaims");
+  expect(ctx).toContain("Redfin ZHVI");
+});
+
+test("DIRECTION directive: never explain schema/framework mechanics for an unmeasured trend", () => {
+  const ctx = buildGroundingContext({
+    rules: "RULES",
+    gazetteer: "GEO",
+    blocks: [{ label: "x", dossier: fakeDossier("t") }],
+  });
+  expect(ctx).toContain("DIRECTION/TREND");
+  expect(ctx.toLowerCase()).toContain("cannot surface");
+});
+
 test("three-lane preamble: replaces the two-shape straitjacket, keeps the hard floor", () => {
   const ctx = buildGroundingContext({
     rules: "RULES",

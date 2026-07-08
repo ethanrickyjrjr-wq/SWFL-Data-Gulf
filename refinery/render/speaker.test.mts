@@ -309,6 +309,22 @@ describe("speak tier-2 caveats — cap + fixture backstop (PR3-C / PR2-B)", () =
     assert.doesNotMatch(reply, /Fixture mode:/i);
     assert.match(reply, /cached sample data at build time/);
   });
+
+  test("drops the schema-required-fallback disclosure (cre-swfl's unmeasured-trend audit note)", () => {
+    // REGRESSION: this exact caveat shape ("stable" label is a schema-required
+    // fallback, not a measured trend) was fed raw into a live chat's grounding
+    // (a DIFFERENT consumer of caveats — lib/highlighter/grounding.ts) and the
+    // model recited the mechanic back as a deflection. Dropped here at the
+    // shared isDisplayableCaveat chokepoint so no caveat consumer can leak it.
+    const caveats = [
+      'corridor_factor: direction ships as "stable" — v1 does not compute period-over-period index change; the label is a schema-required fallback, not a measured trend.',
+      "FRED can revise recent observations.",
+    ];
+    const reply = speak(parsedFixture({ caveats }), { tier: 2 });
+    assert.doesNotMatch(reply, /schema-required fallback/i);
+    assert.doesNotMatch(reply, /corridor_factor/i);
+    assert.match(reply, /FRED can revise recent observations/);
+  });
 });
 
 describe("parseBrainMarkdown", () => {
