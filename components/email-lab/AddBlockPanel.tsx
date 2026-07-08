@@ -1,24 +1,12 @@
 "use client";
-// components/email-lab/AddBlockPanel.tsx (Card 32) — the 10-type mini palette.
+// components/email-lab/AddBlockPanel.tsx (Card 32) — the user add-block palette.
+// The menu is derived from the ONE supply contract (block-contract.ts): every
+// block whose contract entry carries `menu` is user-addable, in contract order.
+// Re-exported here so existing importers (EmailLabGridShell) keep their path.
 import type { BlockType } from "@/lib/email/doc/types";
+import { BLOCK_MENU } from "@/lib/email/doc/block-contract";
 
-export const BLOCK_MENU: { type: BlockType; label: string; icon: string }[] = [
-  { type: "header", label: "Header", icon: "▦" },
-  { type: "hero", label: "Big Number", icon: "◆" },
-  { type: "stats", label: "Stats", icon: "▣" },
-  { type: "signal", label: "Callout", icon: "❖" },
-  { type: "text", label: "Text", icon: "¶" },
-  { type: "image", label: "Image", icon: "▢" },
-  { type: "listing", label: "Listing", icon: "⌂" },
-  { type: "multi-column", label: "Columns", icon: "▥" },
-  { type: "list", label: "List", icon: "☰" },
-  { type: "agent-card", label: "Agent Card", icon: "☻" },
-  { type: "agent-hero", label: "Agent Feature", icon: "◧" },
-  { type: "social-icons", label: "Social Icons", icon: "✦" },
-  { type: "button", label: "Button", icon: "▭" },
-  { type: "divider", label: "Divider", icon: "—" },
-  { type: "footer", label: "Footer", icon: "▤" },
-];
+export { BLOCK_MENU };
 
 export function AddBlockPanel({
   onAdd,

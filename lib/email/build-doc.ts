@@ -17,7 +17,7 @@ import {
   type AuthoredDoc,
 } from "@/lib/email/doc/schema";
 import type { EmailDoc } from "@/lib/email/doc/types";
-import { DEFAULT_BLOCK_PROPS } from "@/lib/email/doc/default-docs";
+import { AUTHORABLE_TYPES } from "@/lib/email/doc/block-contract";
 import { detectRecipe, recipeSection } from "@/lib/email/author-recipes";
 import {
   loadMarketFigures,
@@ -914,12 +914,12 @@ export async function authorDoc({
   const system = authorSystem({
     menu,
     dossier: lakeParts.dossier,
-    // `metric-card` is DATA-SEEDED only (its held value is `metricValue`, sourced
-    // from the ranked-candidate pool — see lib/email/zip-seed.ts). The author
-    // writes `value_figure`, not `metricValue`, so an authored metric-card would
-    // ship its placeholder number — a no-invention violation. Keep it out of the
-    // author's block vocabulary; it reaches a doc only via the ZIP seed builder.
-    vocabulary: Object.keys(DEFAULT_BLOCK_PROPS).filter((t) => t !== "metric-card"),
+    // Block vocabulary comes from the ONE supply contract (block-contract.ts):
+    // `authorable` is false only for `metric-card`, which is DATA-SEEDED (its held
+    // value is `metricValue`, sourced from the ranked-candidate pool — see
+    // lib/email/zip-seed.ts). The author writes `value_figure`, not `metricValue`,
+    // so an authored metric-card would ship its placeholder number.
+    vocabulary: AUTHORABLE_TYPES,
     hasChart: !!chartRes,
     chartGrounding: chartRes?.groundingNote,
     hasPhoto: !!photoRes,

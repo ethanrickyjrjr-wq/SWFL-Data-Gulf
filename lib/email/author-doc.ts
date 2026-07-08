@@ -21,7 +21,8 @@
 // LAYOUT IS SEMANTIC, NOT ABSOLUTE — see AuthorDocSchema in ./doc/schema.ts: the
 // model emits `span` + `new_row`; THIS module derives bounds-correct {x,y,w,h}.
 
-import { DEFAULT_BLOCK_PROPS, defaultPropsFor } from "./doc/default-docs";
+import { defaultPropsFor } from "./doc/default-docs";
+import { KNOWN_BLOCK_TYPES, BANDABLE_TYPES } from "./doc/block-contract";
 import { mintBlockId } from "./doc/schema";
 import type { AuthoredBlock, AuthoredDoc } from "./doc/schema";
 import type { BlockLayout, BlockType, EmailBlock, EmailDoc, EmailGlobalStyle } from "./doc/types";
@@ -353,8 +354,6 @@ export function authorSystem(opts: {
 
 // ── Assembly: authored blocks → a positioned EmailDoc ─────────────────────────
 
-const KNOWN_TYPES = new Set(Object.keys(DEFAULT_BLOCK_PROPS));
-
 function isStructural(t: BlockType): boolean {
   return t === "header" || t === "footer" || t === "divider";
 }
@@ -445,17 +444,6 @@ const PAD_MAP: Record<NonNullable<AuthoredBlock["pad"]>, "lg" | "md" | "sm"> = {
 };
 
 /** Block types whose props extend BlockBase (accept paddingY/sectionBg). */
-const BANDABLE = new Set<BlockType>([
-  "hero",
-  "stats",
-  "signal",
-  "text",
-  "image",
-  "listing",
-  "multi-column",
-  "list",
-]);
-
 /** Resolve a semantic band onto a concrete palette color. Exported for tests. */
 export function resolveBand(
   band: NonNullable<AuthoredBlock["band"]>,
@@ -518,7 +506,7 @@ function buildEntry(
   buttonMailto?: string,
 ): { entry: Entry; placedChart: boolean; placedPhoto: boolean } | null {
   const type = a.type as BlockType;
-  if (!KNOWN_TYPES.has(type)) return null; // unknown block type (drives off the ONE root) — skip
+  if (!KNOWN_BLOCK_TYPES.has(type)) return null; // unknown block type (drives off the ONE root) — skip
   // `metric-card` is DATA-SEEDED only (its held value is `metricValue`, sourced from
   // the ranked-candidate pool — see lib/email/zip-seed.ts). The author writes
   // `value_figure`, not `metricValue`, so an authored metric-card would ship its
@@ -642,7 +630,7 @@ function buildEntry(
 
   // Semantic band/pad — resolved by the engine, only on blocks whose schema
   // carries sectionBg/paddingY (BlockBase extenders).
-  if (BANDABLE.has(type)) {
+  if (BANDABLE_TYPES.has(type)) {
     if (a.band) props.sectionBg = resolveBand(a.band, gs);
     if (a.pad) props.paddingY = PAD_MAP[a.pad];
   }

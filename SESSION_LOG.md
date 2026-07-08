@@ -1,3 +1,26 @@
+## 2026-07-08 (Opus 4.8 · main) — feat: email builder supply/design contract (M1) — one registry, block-vocab drift killed
+
+Brainstormed + planned the whole "bring it all together" email-builder integration (plan file
+`fuzzy-sniffing-boole.md`). Three explorer passes mapped the real state and corrected two spec
+assumptions: (1) Fences 1/2/5 do NOT need a new plan→fill pipeline — the forced-tool funnel
+(`AUTHOR_TOOL` `tool_choice` → `AuthoredBlockSchema` → `assembleAuthoredDoc` → `deriveLayout`,
+clamp/repair) already enforces structure; new fences plug in there. (2) bklit charts are
+web-only (email charts are PNG via resvg — animation can't survive). Operator reframed fences
+as the BOUNDS of a variety space (hard for AI, soft for user), not one forced look — Fence 3's
+single 3:2 photo lock must become a choosable ratio SET (M2). Charts + widgets → handoff.
+
+M1 shipped: `lib/email/doc/block-contract.ts` — ONE `BLOCK_CONTRACT` (one entry per BlockType:
+`authorable` / `bandable` / optional `menu`). Killed the 4-way drift — `KNOWN_TYPES`
+(author-doc), author vocabulary (build-doc:922), `BANDABLE` (author-doc), and `BLOCK_MENU`
+(AddBlockPanel) now all DERIVE from it. Ordered in `DEFAULT_BLOCK_PROPS` order so the filtered
+derivations are byte-identical to the deleted lists (proven). TDD: `block-contract.test.ts`
+freezes all four against verbatim pre-converge values (RED on missing module → GREEN). Net −24
+lines. Full `lib/email` suite 1135/1135 pass; `bunx next build` clean. Behavior-neutral —
+project creation + author path untouched in behavior. Spec:
+`docs/superpowers/specs/2026-07-08-email-supply-contract-design.md`. Check
+`email_supply_contract_live_verify` opened. Next: M2 fences (add zone/spans/ratio-set fields to
+the contract; validators read them). NOT pushed — awaiting operator confirmation.
+
 ## 2026-07-08 (Sonnet 5 · main) — feat: Storybook + Playwright visual regression, design-workshop handoff
 
 Added Storybook (`bun run storybook`, port 6006) scoped to the app's own editor UI —
