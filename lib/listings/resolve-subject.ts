@@ -76,6 +76,24 @@ const SUFFIX: Record<string, string> = {
   xing: "xing",
   run: "run",
   pass: "pass",
+  // Directionals fold both ways so "10th Street North" ≡ the vendor's "10th St N"
+  // (USPS-standard). Without these, any N/S/E/W address silently missed.
+  north: "n",
+  n: "n",
+  south: "s",
+  s: "s",
+  east: "e",
+  e: "e",
+  west: "w",
+  w: "w",
+  northeast: "ne",
+  ne: "ne",
+  northwest: "nw",
+  nw: "nw",
+  southeast: "se",
+  se: "se",
+  southwest: "sw",
+  sw: "sw",
 };
 
 /** A street line → a canonical token string for matching: lowercased, punctuation

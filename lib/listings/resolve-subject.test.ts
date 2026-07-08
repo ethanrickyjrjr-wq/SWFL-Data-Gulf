@@ -133,6 +133,10 @@ describe("canonStreet", () => {
   test("drops unit tokens", () => {
     expect(canonStreet("742 Evergreen Terrace, Apt 3")).toBe("742 evergreen ter");
   });
+  test("folds directionals both ways so North matches N", () => {
+    expect(canonStreet("850 10th Street North")).toBe(canonStreet("850 10th St N"));
+    expect(canonStreet("100 SW 5th Ave")).toBe(canonStreet("100 Southwest 5th Avenue"));
+  });
 });
 
 describe("isNewListingRecipePrompt", () => {

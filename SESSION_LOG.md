@@ -1,3 +1,14 @@
+## 2026-07-08 (Opus 4.8 · main) — fix(listings): fold directionals in address match + rotate PHOTOS_API (local)
+
+Operator tested the New Listing build live and got an EMPTY grid (structure + chart rendered, but no
+photo/beds/baths/sqft). Root cause: `resolveSubjectListing` returned zero records. Two reasons found:
+(1) `PHOTOS_API` in `.env.local` was the suspended/past-due SteadyAPI account (logged this morning) —
+rotated it locally to the operator-supplied fresh key (uncommitted, gitignored; Vercel prod still needs
+the same swap). (2) `canonStreet` folded street suffixes but NOT directionals, so "10th Street North"
+never matched the vendor's "10th St N" — added both-way N/S/E/W + NE/NW/SE/SW folding (`resolve-subject.ts`)
+so N/S/E/W addresses can match once the key is live. `bun test lib/listings/resolve-subject.test.ts` 11
+pass (+1 directional test). Dev server must restart to pick up the new key.
+
 ## 2026-07-08 (Opus 4.8 · main) — feat(email): New Listing pill fills the coded flyer grid (never refuses) + AI writes only the commentary
 
 Operator's frame: the email grid is "just like a website" — the layout is CODE, and the lab AI should
