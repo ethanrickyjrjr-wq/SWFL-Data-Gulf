@@ -1,5 +1,12 @@
 # Two-phase plan+fill grid authoring for Email Lab
 
+**SUPERSEDED 2026-07-08.** This spec solved "how does the model plan structure"
+in isolation. The operator redefined the problem: the model still plans, but
+inside hardcoded, research-backed fences (proportions, prohibited/weighted
+zones, aspect-ratio locks) — not a free 1-12 span choice. See
+`docs/superpowers/specs/2026-07-08-email-grid-fence-system-design.md`. This
+file stays for history; do not implement from it as-is.
+
 **Date:** 2026-07-08
 
 ## Problem

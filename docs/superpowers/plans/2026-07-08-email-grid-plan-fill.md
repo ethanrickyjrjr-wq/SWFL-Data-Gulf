@@ -1,5 +1,10 @@
 # Two-phase plan+fill grid authoring — Implementation Plan
 
+**SUPERSEDED 2026-07-08** — see
+`docs/superpowers/specs/2026-07-08-email-grid-fence-system-design.md`. Do not
+execute this plan as-is; the PLAN phase it describes needs to choose from
+hardcoded fenced proportions, not a free 1-12 span.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 > **Recommended model:** 🧠 Opus — 6 tasks, 9 files, keywords: refactor, schema, architecture
 
