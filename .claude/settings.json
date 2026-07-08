@@ -37,10 +37,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/check-build-context.mjs"
-          },
-          {
-            "type": "command",
             "command": "node .claude/hooks/print-session-log.mjs"
           },
           {

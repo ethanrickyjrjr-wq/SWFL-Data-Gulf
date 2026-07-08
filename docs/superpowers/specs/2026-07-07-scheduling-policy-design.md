@@ -1,8 +1,49 @@
 # Scheduling policy — batch window, checks window, send window
 
-Status: DRAFT — awaiting operator review before `writing-plans`.
+Status: DRAFT — **BLOCKED at correctness review 2026-07-07 (see §0). Do not implement as written.**
 Supersedes the numeric windows floated earlier in this conversation (10 PM start, 7:05 AM–1:50 AM
 send window, hard gate-on-failure) — the operator's final numbers are below.
+
+## 0. Correctness review — 2026-07-07 (BLOCKING)
+
+Reviewed spec claims against the live workflow files (`grep` of every uncommented `cron:` line) and
+GitHub's live docs (crawl4ai). The `timezone:` mechanism (§2) is **real and confirmed** — GitHub's own
+docs carry the identical `cron: '30 5 * * 1-5' / timezone: "America/New_York"` example. But four
+independent defects make the plan un-implementable as one faithful pass:
+
+**D1 — The conversion rule is missing, and it silently breaks §3a (headline defect).** §2 says "every
+workflow touched gets `timezone: America/New_York` added." §3a says the ~16 already-compliant files
+need "no change." These contradict. Those files are compliant *only because they're written in UTC* —
+`daily-rebuild.yml` is `0 6 * * *` = 6 UTC = 2 AM ET. Add `timezone` **without changing the numbers**
+and `0 6` becomes **6 AM ET** — a 4-hour jump out of BATCH into the CHECKS/FIX hour. Same for
+`build-example` (`0 8`→8 AM ET), `city-pulse` (`0 9`→9 AM ET), every §3a file. The real rule the whole
+doc omits: **adding the `timezone` key makes the cron field literal ET wall-clock, so every touched
+file's numbers must be rewritten to the ET time actually wanted — §3a included.** This is a
+rewrite-every-number migration, not an add-a-key migration.
+
+**D2 — §4a arithmetic bug (confirmed).** "Move to `0 11 * * 1-5` with `timezone` for a literal 7:00 AM"
+is wrong: `0 11` + `America/New_York` = **11:00 AM ET**. Correct is `0 7 * * 1-5` + timezone. The author
+added the UTC offset (10→11) *and* invoked the wall-clock key — double-counted.
+
+**D3 — Inventory is materially incomplete.** Spec claims "54 active scheduled workflows"; the tree has
+**66 active (uncommented) cron lines**. At least 9 workflows with live schedules appear in **no** bucket
+(§3a–§3e), several of which run *outside* the BATCH window and are therefore in-scope by the policy's
+own logic: `redfin-lee-monthly.yml` (day 18, 9 AM ET), `redfin-collier-monthly.yml` (day 18, 8 AM ET),
+`dbpr-press-releases-weekly.yml` (5 AM ET Mon), `deliverables-retention-sweep-daily.yml` (5:15 AM ET),
+`fema-nfip-quarterly.yml` (9 AM ET), `ingest-bls-ppi.yml` (10 AM ET), `ingest-brevitas-listings.yml`
+(8 AM ET Sun), `social-pulse-scan.yml` (7 AM ET), `ingest-local-cre-context.yml` (`0 1 1 * *` = 9 PM ET
+— runs *before* the window opens, its own edge case). "Implement the plan" is undefined for these.
+
+**D4 — §3c has no slot table.** It names ~35 files but assigns a target hour to none. Designing a
+non-colliding stagger across the 6-hour 23:00–05:00 window *is* the core work, and it does not exist
+yet. Preserving the two named sub-group offsets (Redfin day-15 +4h/+1h/+1h, usgs/storm +1h) is
+verified-correct against the files, but that's 6 of the 35.
+
+**Verdict:** plan-correction + operator decisions required before any code. Three decisions block:
+(1) adopt the D1 conversion rule explicitly and pick the canonical wall-clock time per §3a file;
+(2) classify the 9 missing workflows; (3) design the §3c slot table (a brainstorm, not a mechanical
+edit). §2 (mechanism), the gate-soft decision (§1), and the §3d/§3e classifications survive review
+intact. Everything below this section is the pre-review draft, preserved as-is.
 
 ## 1. The policy
 

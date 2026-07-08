@@ -24,6 +24,10 @@ Twin of RULE 0.5: **0.5 = read OUR files; 0.4 = research the outside answer.** D
 
 **crawl4ai — PINNED LOCATION:**
 - Interpreter: `C:\Users\ethan\crawl4ai-venv\Scripts\python.exe` (installed 2026-06-22 via uv)
+- PATH shim (any project/terminal): `crawl4ai <url>` — thin alias over the venv's official `crwl` CLI,
+  lives at `C:\Users\ethan\.local\bin\` (`crawl4ai.cmd` for PowerShell/cmd, `crawl4ai` for Git Bash,
+  both call `crawl4ai-launcher.py`). Bare URL defaults to clean markdown; own flags/subcommands pass
+  through. Machine-local, outside every repo (not the in-repo ingest `crawl_client.py` path).
 - Re-install: `uv venv C:\Users\ethan\crawl4ai-venv --python 3.12 && uv pip install --python C:\Users\ethan\crawl4ai-venv crawl4ai && C:\Users\ethan\crawl4ai-venv\Scripts\python.exe -m playwright install chromium`
 - Verify: `C:\Users\ethan\crawl4ai-venv\Scripts\python.exe -c "import crawl4ai; print(crawl4ai.__version__)"`
 
