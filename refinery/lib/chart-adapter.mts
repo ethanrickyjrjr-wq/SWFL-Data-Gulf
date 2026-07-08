@@ -6,15 +6,8 @@
  * Pattern mirrors refinery/lib/corridor-aliases.mts.
  */
 
-import type {
-  ChartBlock,
-  ChartValueFormat,
-} from "../validate/chart-block-lint.mts";
-import type {
-  HBarCorridor,
-  HBarChartProps,
-  HBarTier,
-} from "../../components/charts/HBarChart";
+import type { ChartBlock, ChartValueFormat } from "../validate/chart-block-lint.mts";
+import type { HBarCorridor, HBarChartProps, HBarTier } from "../../components/charts/HBarChart";
 import type { NfipZipAggregate } from "../sources/fema-nfip-source.mts";
 import { barrierClassFor } from "./swfl-geo.mts";
 import { medianOf } from "../../lib/stats";
@@ -31,10 +24,7 @@ import { cityForZip, looksLikeZip } from "../../lib/swfl-zip-city";
  * percentages, counts, and ratios legible. Defaults to "currency" when the
  * block carries no hint (the historical HBarChart default).
  */
-export function formatChartValue(
-  format: ChartValueFormat | undefined,
-  v: number,
-): string {
+export function formatChartValue(format: ChartValueFormat | undefined, v: number): string {
   switch (format ?? "currency") {
     case "usd":
       return `$${Math.round(v).toLocaleString("en-US")}`;
@@ -80,9 +70,18 @@ export function tierFor(value: number, median: number): HBarTier {
  * metric ($/sqft). Rows where columns[1] is not a number are skipped.
  */
 export function adaptToHBar(block: ChartBlock): HBarChartProps {
-  const numericRows = block.rows.filter(
-    (row) => typeof row[1] === "number",
-  ) as [string | number | null, number, ...(string | number | null)[]][];
+  // block.columns[1] is the human label for the plotted metric (e.g. "Median
+  // Home Value", "Flood AAL") — always pass it through as the tooltip label.
+  // Without this, HBarChart falls back to its own hardcoded default
+  // ("Asking Rent"), which is wrong for every generic chart that isn't
+  // literally about rent (home value, permits, labor, ...).
+  const tooltipMetricLabel = block.columns[1];
+
+  const numericRows = block.rows.filter((row) => typeof row[1] === "number") as [
+    string | number | null,
+    number,
+    ...(string | number | null)[],
+  ][];
 
   if (numericRows.length === 0) {
     return {
@@ -91,6 +90,7 @@ export function adaptToHBar(block: ChartBlock): HBarChartProps {
       median: 0,
       range: { min: 0, max: 0 },
       valueFormat: block.value_format,
+      tooltipMetricLabel,
     };
   }
 
@@ -114,6 +114,7 @@ export function adaptToHBar(block: ChartBlock): HBarChartProps {
     median,
     range,
     valueFormat: block.value_format,
+    tooltipMetricLabel,
   };
 }
 
@@ -143,9 +144,7 @@ const VALID_RENDERERS = new Set(["bar", "area", "scatter", "table"] as const);
  * Returns block.chart_type if it is one of the four known renderer keys;
  * otherwise falls back to "table".
  */
-export function pickRenderer(
-  block: ChartBlock,
-): "bar" | "area" | "scatter" | "table" {
+export function pickRenderer(block: ChartBlock): "bar" | "area" | "scatter" | "table" {
   if (block.chart_type && VALID_RENDERERS.has(block.chart_type)) {
     return block.chart_type;
   }
@@ -206,8 +205,7 @@ export function adaptFloodZipsToHBar(zips: NfipZipAggregate[]): HBarChartProps {
     return barrierClassFor(z.zip).score === 1.0 ? i : acc;
   }, -1);
   const hasNonBarrier = sorted.some((z) => barrierClassFor(z.zip).score < 1.0);
-  const separatorAfter =
-    lastBarrierIdx >= 0 && hasNonBarrier ? lastBarrierIdx + 1 : undefined;
+  const separatorAfter = lastBarrierIdx >= 0 && hasNonBarrier ? lastBarrierIdx + 1 : undefined;
 
   return {
     title: "Flood loss by ZIP",
@@ -229,14 +227,10 @@ export function adaptFloodZipsToHBar(zips: NfipZipAggregate[]): HBarChartProps {
 // Stubs — return adaptToTable result until producers emit matching chart_type
 // ---------------------------------------------------------------------------
 
-export function adaptToArea(
-  block: ChartBlock,
-): ReturnType<typeof adaptToTable> {
+export function adaptToArea(block: ChartBlock): ReturnType<typeof adaptToTable> {
   return adaptToTable(block);
 }
 
-export function adaptToScatter(
-  block: ChartBlock,
-): ReturnType<typeof adaptToTable> {
+export function adaptToScatter(block: ChartBlock): ReturnType<typeof adaptToTable> {
   return adaptToTable(block);
 }

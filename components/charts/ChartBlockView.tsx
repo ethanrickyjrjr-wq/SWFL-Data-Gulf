@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import { pickRenderer, adaptToHBar, adaptToTable } from "@/refinery/lib/chart-adapter.mts";
 import { HBarChart } from "@/components/charts/HBarChart";
@@ -62,11 +63,24 @@ export function ChartBlockView({ block, compact = false, asOf }: ChartBlockViewP
   const caption = captionFor(block, asOf);
   const captionEl = caption ? <p style={captionStyle}>{caption}</p> : null;
 
+  // Memoized on `block`, not recomputed every render: adaptToHBar() builds a
+  // fresh `corridors` array each call, and HBarChart's count-up animation
+  // restarts whenever that array's REFERENCE changes (its useLayoutEffect
+  // depends on it). Without this, any incidental parent re-render during an
+  // active chat (streaming, scroll, hover elsewhere on the page) resets the
+  // animation for every bar — and a bar whose stagger delay hasn't elapsed
+  // yet when that happens is left showing the static "$0.00" placeholder
+  // indefinitely instead of its real value (07/07/2026 live repro: a ZIP
+  // home-value bar chart stuck one row at $0.00 under normal interaction).
+  // Computed unconditionally (not just when renderer === "bar") because hooks
+  // can't be called behind a branch — cost is a no-op array pass for non-bar
+  // charts, which is negligible next to a broken/suppressed hooks rule.
+  const hbarProps = useMemo(() => adaptToHBar(block), [block]);
+
   if (renderer === "bar") {
-    const props = adaptToHBar(block);
     return (
       <>
-        <HBarChart {...props} compact={compact} />
+        <HBarChart {...hbarProps} compact={compact} />
         {captionEl}
       </>
     );

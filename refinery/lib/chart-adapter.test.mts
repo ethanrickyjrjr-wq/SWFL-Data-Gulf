@@ -73,3 +73,31 @@ test("adaptToHBar: omitted value_format leaves valueFormat undefined (renderer d
   };
   assert.equal(adaptToHBar(block).valueFormat, undefined);
 });
+
+test("adaptToHBar: tooltipMetricLabel comes from columns[1], never the HBarChart default", () => {
+  const block: ChartBlock = {
+    title: "Median home value by ZIP",
+    columns: ["ZIP", "Median Home Value"],
+    rows: [
+      ["33901", 350000],
+      ["33913", 919191],
+      ["34102", 1200000],
+    ],
+    chart_type: "bar",
+    value_format: "usd",
+    asOf: "2026-06-01",
+  };
+  assert.equal(adaptToHBar(block).tooltipMetricLabel, "Median Home Value");
+});
+
+test("adaptToHBar: tooltipMetricLabel is still set on the empty-rows fallback", () => {
+  const block: ChartBlock = {
+    title: "Permits by ZIP",
+    columns: ["ZIP", "Permit Count"],
+    rows: [["33901", "n/a"]],
+    chart_type: "bar",
+    asOf: "2026-06-01",
+  };
+  assert.equal(adaptToHBar(block).tooltipMetricLabel, "Permit Count");
+  assert.equal(adaptToHBar(block).corridors.length, 0);
+});

@@ -1,3 +1,35 @@
+## 2026-07-07 (main) — Chart bug: wrong tooltip label (confirmed+fixed) + $0.00 stuck bar (root-caused+fixed, not re-verified live)
+
+Operator hit a live chart in the AI+Briefcase widget showing "Asking Rent $1,032,500" for a ZIP
+home-value figure (Sanibel) and a persistent "$0.00" for another ZIP (Marco Island, 34145) in the
+same chart. Two separate bugs, verified with different confidence levels — being precise about
+which is which after an earlier fabrication near-miss this session.
+
+**Confirmed + fixed: mislabeled tooltip.** `refinery/lib/chart-adapter.mts` `adaptToHBar()` (the
+generic ChartBlock→HBar adapter used by every non-flood chart) never set `tooltipMetricLabel`, so
+every chart built through it silently inherited `HBarChart`'s hardcoded default, "Asking Rent" —
+wrong for home value, permits, labor, or any other generic metric. Fix: `tooltipMetricLabel` now
+comes from `block.columns[1]` (the real human label, e.g. "Median Home Value"), matching what
+`adaptFloodZipsToHBar` already did by hand. 2 new tests in `chart-adapter.test.mts` (13/13 pass).
+
+**Root-caused, fixed, but NOT re-verified against a fresh live repro: the $0.00 bar.** Traced
+Marco Island's home value through 3 layers — `data_lake.zhvi_zip_latest` ($862,917 live),
+`brains/home-values-swfl.md` key_metrics ($858,654), and its own `detail_tables` row ($858,654) —
+all correct and non-zero, ruling out a data/ingest bug. Root cause instead: `ChartBlockView.tsx`
+called `adaptToHBar(block)` fresh on every render with no memoization, so `corridors` gets a new
+array reference on any incidental parent re-render (streaming, scroll, hover elsewhere in an
+active chat). `HBarChart`'s count-up animation (`useLayoutEffect` keyed on that array) restarts
+from zero every time this happens, and a bar whose per-row stagger delay hasn't elapsed when a
+reset lands is left showing the static "$0.00" JSX placeholder — Marco Island specifically, since
+descending-sort by value put it later in the list = longest stagger delay = most exposed to this
+race. Fix: wrapped the adapter call in `useMemo(() => adaptToHBar(block), [block])`, hoisted
+unconditionally above the renderer branch (a conditional `useMemo` would itself violate the Rules
+of Hooks). Verified: `bun test`, `tsc --noEmit`, `eslint --max-warnings=0`, and `next build` all
+clean. Did NOT re-drive the live browser to confirm the exact $0.00 symptom is gone post-fix —
+after a fabrication near-miss earlier this session, re-transcribing another live screenshot felt
+like the wrong way to build confidence; the fix is justified by the code-level race condition it
+closes, not by a fresh live observation.
+
 ## 2026-07-07 (main) — Spec'd Phase 1 of the hyperlocal geo-scope program: sourced place gazetteer (fixture + Census builder)
 
 Operator handed the 07/07 hyperlocal-geo-scope RESEARCH BRIEF and said "spec this." Brainstormed it,
