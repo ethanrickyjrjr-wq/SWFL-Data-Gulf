@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v17 | Token: SWFL-7421-v17-20260706 -->
+<!-- FRESHNESS: v18 | Token: SWFL-7421-v18-20260708 -->
 ---
 brain_id: freshness-pulse
-version: 17
-refined_at: 2026-07-06T10:08:41Z
-freshness_token: SWFL-7421-v17-20260706
+version: 18
+refined_at: 2026-07-08T08:19:52Z
+freshness_token: SWFL-7421-v18-20260708
 ttl_seconds: 86400
 context_type: user_saved_reference
 scope: SWFL daily sourced freshness snapshot — today's cited median sale price (Cape Coral / Fort Myers / Naples) and 30-year fixed mortgage rate, each provenance-gated to a real source URL, with ZIP-grain Baseline-Delta projections ([INFERENCE]).
@@ -29,19 +29,19 @@ SCOPE: SWFL daily sourced freshness snapshot — today's cited median sale price
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                                           | verified   | expires
-s01 | SWFL daily freshness layer — one cited current number per (metric, area) from a grounded live search (Gemini grounded → Firecrawl failsafe), provenance-gated to a real source URL, via Supabase data_lake.daily_truth (metric_key, area, period, value, unit, source_url, source_title, source_tag, verified_on_page, agreement_n, anomaly_flag, retrieved_at). | 2026-07-06 | 2026-07-07
+s01 | SWFL daily freshness layer — one cited current number per (metric, area) from a grounded live search (Gemini grounded → Firecrawl failsafe), provenance-gated to a real source URL, via Supabase data_lake.daily_truth (metric_key, area, period, value, unit, source_url, source_title, source_tag, verified_on_page, agreement_n, anomaly_flag, retrieved_at). | 2026-07-08 | 2026-07-09
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"freshness :: mortgage_30yr_fixed :: swfl","fact":"SWFL 30-year fixed mortgage rate (sourced 2026-07-02)","value":"6.43 pct as of 2026-07-02, source FRED (https://fred.stlouisfed.org/series/MORTGAGE30US).","src":"s01","date":"2026-07-06"}
+  {"id":"f001","topic":"freshness :: mortgage_30yr_fixed :: swfl","fact":"SWFL 30-year fixed mortgage rate (sourced 2026-07-02)","value":"6.43 pct as of 2026-07-02, source FRED (https://fred.stlouisfed.org/series/MORTGAGE30US).","src":"s01","date":"2026-07-08"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "freshness-pulse",
-  "version": 17,
-  "refined_at": "2026-07-06T10:08:41Z",
-  "expires": "2026-07-07T10:08:41Z",
+  "version": 18,
+  "refined_at": "2026-07-08T08:19:52Z",
+  "expires": "2026-07-09T08:19:52Z",
   "ttl_seconds": 86400,
   "direction": "neutral",
   "magnitude": 0,
@@ -59,7 +59,7 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
       "display_format": "percent",
       "source": {
         "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-        "fetched_at": "2026-07-05T13:11:36.546607+00:00",
+        "fetched_at": "2026-07-07T14:10:35.229035+00:00",
         "tier": 2,
         "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-07-02"
       },
@@ -83,7 +83,7 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-06T10:08:41Z"
+    "computed_at": "2026-07-08T08:19:52Z"
   },
   "exogenous_signals": []
 }
@@ -92,5 +92,5 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
 - freshness-pulse: daily SWFL sourced-freshness reporter over data_lake.daily_truth (cited, provenance-gated, anomaly-screened), feeding master a fresh county-grain snapshot.
 
 --- RECENT NOTES ---
-- 2026-07-06: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-07-08: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
