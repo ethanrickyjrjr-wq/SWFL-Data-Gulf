@@ -1,6 +1,7 @@
 import { test, expect } from "bun:test";
 import { buildShowingPrepDoc, SHOWING_PREP_COMMENTARY_MARKER } from "./showing-prep-doc";
 import { SEED_DOCS } from "./doc/default-docs";
+import { EmailDocSchema } from "./doc/schema";
 import type { ShowingPrepData } from "@/lib/listings/showing-prep-source";
 import type { RenderComp } from "@/lib/assistant/comp-helper";
 
@@ -144,6 +145,28 @@ test("degrades to an address-only skeleton (no subject) and still builds every f
   // No comps → no listing/list blocks, but the doc still built.
   expect(doc.blocks.some((b) => b.type === "listing")).toBe(false);
   expect(doc.blocks.length).toBeGreaterThan(4);
+});
+
+// The built doc is persisted raw and later parsed through EmailDocSchema on the canvas
+// — a field over its cap would make the packet fail to open. Real SWFL comp addresses
+// (36+ chars) overflow the ListItem `lead` cap (24), so the short test fixtures above
+// would never catch it. This round-trips the whole doc with a real long address,
+// guarding every tight cap (lead 24, hero.value 24, stats.value 24) against drift.
+test("the built doc round-trips through EmailDocSchema for a real long address", () => {
+  const longComp: RenderComp = {
+    addressLine: "16447 Rainbow Meadows Ct",
+    city: "Fort Myers",
+    beds: 3,
+    baths: 2,
+    sqft: 1840,
+    status: "sold",
+    price: 489000,
+    priceKind: "sold",
+    priceDate: "2026-06-01",
+  };
+  const data: ShowingPrepData = { ...FULL, comps: [longComp], oneSheets: [], compPins: [] };
+  const parsed = EmailDocSchema.safeParse(buildShowingPrepDoc(data, currentDoc()));
+  expect(parsed.success).toBe(true);
 });
 
 test("every block carries a grid layout that stacks without overlap", () => {

@@ -55,6 +55,14 @@ function compPricePhrase(c: RenderComp): string {
   return `list ${money}`;
 }
 
+/** A short (<24 char) status tag for a comp row's `lead` — the ListItem `lead` cap
+ *  is 24 chars, and a full street address does not belong there (it goes in `text`). */
+function compLeadTag(c: RenderComp): string {
+  if (c.priceKind === "sold") return "Sold";
+  if (c.priceKind === "estimate") return "Est.";
+  return "Active";
+}
+
 function compSpec(c: RenderComp): string {
   return [
     c.beds != null ? `${c.beds} bd` : "",
@@ -177,9 +185,18 @@ export function buildShowingPrepDoc(data: ShowingPrepData, current: EmailDoc): E
         type: "list",
         props: {
           title: "Nearby comps",
+          // `lead` is a short status tag (cap 24); the address + spec + price go in
+          // `text` (cap 200) — a full street address overflows the `lead` cap and would
+          // make the persisted doc fail EmailDocSchema on load.
           items: gridComps.slice(0, 8).map((c) => ({
-            lead: [c.addressLine, c.city].filter(Boolean).join(", "),
-            text: [compSpec(c), compPricePhrase(c)].filter(Boolean).join(" — "),
+            lead: compLeadTag(c),
+            text: [
+              [c.addressLine, c.city].filter(Boolean).join(", "),
+              compSpec(c),
+              compPricePhrase(c),
+            ]
+              .filter(Boolean)
+              .join(" — "),
           })),
         },
       },
