@@ -15,6 +15,7 @@ import {
 import { ImportDraftOnLogin } from "./_import/ImportDraftOnLogin";
 import { NewProjectButton } from "./NewProjectButton";
 import { NewListingButton } from "./NewListingButton";
+import { ShowingPrepButton } from "./ShowingPrepButton";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 
 export const runtime = "nodejs";
@@ -149,6 +150,7 @@ export default async function ProjectListPage() {
         <h1 className="text-xl font-semibold text-white">Your projects</h1>
         <div className="flex items-center gap-2">
           <NewListingButton />
+          <ShowingPrepButton />
           <NewProjectButton />
         </div>
       </div>
