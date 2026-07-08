@@ -1,3 +1,40 @@
+## 2026-07-08 (Opus 4.8 · main) — feat: Showing Prep Packet SHIPPED (dedicated coded-grid build path, 11 tasks TDD)
+
+Executed `docs/superpowers/plans/2026-07-08-showing-prep-packet.md` inline. One-click on an address builds
+an agent-facing Showing Prep Packet — a coded-grid `block-canvas` EmailDoc (subject hero + spec strip +
+best-effort comp/subject map + best-effort per-comp one-sheets + comparison grid + housing-swfl per-ZIP
+market snapshot + ONE lint-gated commentary paragraph + a disclosure drag-drop slot), reachable from a
+homepage pill AND the assistant. New files only (zero edits to the flyer/build-doc files a parallel session
+holds): `lib/email/showing-prep-{intent,doc,assemble}.ts`, `lib/listings/{market-snapshot,listings-map,
+showing-prep-source}.ts`, `app/api/projects/[id]/showing-prep/route.ts`, `app/project/ShowingPrepButton.tsx`;
+one-line edits to `app/api/projects/route.ts` (kind:"showing-prep") + `app/project/page.tsx` (pill) + a
+branch in `app/api/email-lab/ai/route.ts`. `gatherShowingPrepData` is four-lane best-effort + NEVER-THROWS
+(every section degrades to an empty cell); `buildShowingPrepDoc` is a PURE coded-grid builder.
+
+Verified every load-bearing interface against source before typing (RULE 0.5): housing-swfl detail table id
+`housing_by_zip`, row key = zip_code, `cells.months_of_supply` carries the DERIVED value; Mapbox multi-marker
+`auto`-fit contract re-verified in-session via crawl4ai (RULE 0.4, 07/08); `resolveEmailModel("haiku")` =
+`claude-haiku-4-5`; `projects.kind` is free-text string (no enum/CHECK). 27 new tests + full lib/email +
+lib/listings suites green (1208 pass); `bunx next build` clean, new route registered.
+
+**Corrected a real defect in the approved plan before shipping:** the plan ran `lintAuthoredProse(doc, …)`
+over the WHOLE doc, but that lint walks PROSE_FIELDS (body/text) and `extractNumbers` tokenizes dates
+("07/01/2026" → 07,01,2026) — so it would have silently STRIPPED the deterministic comp-grid rows
+("sold $475,000 · 06/01/2026") and the market-snapshot source line whenever commentary was present (the
+"sold …" rows also trip RECORDED_CLAIM_RE with empty recorded anchors). The plan's tests used `comps:[]`
+and never asserted the source line, so they'd pass green while production quietly gutted real data. Fix:
+lint the COMMENTARY BLOCK ONLY (isolate → lint → merge back), pass sold-comp prices as recordedStrings, and
+added a regression test (comps + snapshot present) that asserts the dated comp rows + source line survive
+while the commentary fabrication is stripped — it fails the whole-doc form, passes commentary-only.
+
+Four spec deviations (documented at plan top, verified vs source): market source = housing-swfl (not
+market-heat-swfl, which lacks months-of-inventory + sold); comp map/photos best-effort (comp feed carries no
+lat/lon or photo); gate = lintAuthoredProse block-lint (not the incompatible gateNarrative/SnapshotItem
+pipeline); disclosure = empty image drag-drop slot (EmailDoc has no file block). Fast-follows: native
+PDF-drop block + extraction; comp-photo enrich cost; pending-count needs a housing-swfl pack change. NOT
+pushed — awaiting operator confirmation. `showing_prep_packet_live_verify` check stays OPEN (operator-run:
+spends live SteadyAPI/Mapbox/Anthropic).
+
 ## 2026-07-08 (Opus 4.8 · main) — log: consolidated this session's Reddit findings into the canonical Reddit-sweep doc
 
 Per operator, appended this session's 3-surface sweep Reddit slice (tool-mention frequency, 6
