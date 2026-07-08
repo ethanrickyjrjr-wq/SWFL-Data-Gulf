@@ -19,6 +19,25 @@
       "oauth": {
         "clientId": "aNx3H5VIPeDIfUgY4wA4yRlqY1_UK1q0JPaO2cyqhzY"
       }
+    },
+    "chrome-devtools": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "chrome-devtools-mcp@latest"]
+    },
+    "designlang": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "designlang@12.21.0", "mcp"]
+    },
+    "figma": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "figma-developer-mcp",
+        "--figma-api-key=${FIGMA_API_KEY:-}",
+        "--stdio"
+      ]
     }
   }
 }

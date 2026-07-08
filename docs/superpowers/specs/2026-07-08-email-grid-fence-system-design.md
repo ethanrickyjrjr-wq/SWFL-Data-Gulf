@@ -151,3 +151,65 @@ Deterministic, testable, no model call.
 - The plan+fill CALL MECHANICS (PLAN call → per-row FILL calls → merge,
   fallback ladder, caching) — that shape from the superseded spec is correct
   and carries over unchanged. Only the PLAN schema's legal values change.
+
+## Design research handoff (live audit, 07/08/2026)
+
+Ran a live design audit against the deployed site (`swfldatagulf.com`) to
+ground this spec's decisions in evidence instead of taste — same
+research-first standard the fences above were built on.
+
+**Result: Grade B, 87/100.**
+
+| Dimension | Score | Verdict |
+|---|---|---|
+| Spacing System | 100/100 | Exemplary |
+| Tokenization | 100/100 | Exemplary |
+| Color Discipline | 92/100 | Exemplary |
+| Elevation | 90/100 | Exemplary |
+| Border Radii | 90/100 | Exemplary |
+| Typography | 82/100 | Strong |
+| Accessibility | 75/100 | Adequate |
+| CSS Health | 65/100 | Below standard |
+
+What this confirms for the fences above:
+
+- **Spacing System 100/100** validates the "keep `GRID_COLS`/react-grid-layout,
+  narrow what's legal within it" call in Explicitly Out of Scope — the
+  underlying infrastructure is not the problem, freedom of choice within it
+  is, exactly as this spec argues.
+- **Typography 82/100 ("Strong", not "Exemplary")** is direct evidence for
+  Fence 4 — the site-wide 2-font-slot discipline is real but not fully
+  tight; `BLESSED_PAIRINGS` closes the remaining gap.
+- **Accessibility 75/100, 3 WCAG contrast failures** is a finding this spec
+  does NOT yet cover: none of Fences 1–5 check color contrast on the
+  `band:"accent"` / text-on-color combinations they legalize. Worth a
+  follow-up fence (contrast-checked band/text pairs) once Fences 1–5 ship —
+  flagged here, not added to scope now to avoid scope creep on this spec.
+- **CSS Health 65/100** (34 `!important` rules, 1,710 duplicate
+  declarations) is a website-wide CSS hygiene issue, orthogonal to the
+  email-grid fence system — not a blocker for this spec, noted for a
+  separate website cleanup pass.
+
+## What we currently need
+
+This spec is still design-only — zero implementation commits against it as
+of 07/08/2026. The concrete next steps, in the order the spec above lays
+them out:
+
+1. **Fence 1** — collapse `PlanBlockSchema.span` from `z.number().int().min(1).max(12)`
+   to the blessed enum (`12` solo; `[6,6]`/`[8,4]`/`[7,5]` two-block;
+   `[4,4,4]` three-block).
+2. **Fence 2** — add the OPEN/BODY/CLOSE zone validator at merge time
+   (same rejection path as `PlanDocSchema` failures today).
+3. **Fence 3** — add `aspectRatio: "3 / 2"` + `objectFit: "cover"` to
+   `ImageBlock.tsx`'s `<Img>` for `kind === "photo"`.
+4. **Fence 4** — add the `BLESSED_PAIRINGS` lookup to brand validation
+   (`apply-brand.ts`), gated on the audit finding above.
+5. **Fence 5** — cap `band:"accent"` to 2 rows per email in the same
+   validator as Fence 2.
+6. **Flip-to-correct** — the pure left↔right prop-flip function for the
+   free canvas editor.
+
+Each fence is independently shippable (no fence depends on another landing
+first); Fence 3 (photo aspect-ratio) is the lowest-risk starting point since
+it's a single-file CSS change with no schema migration.

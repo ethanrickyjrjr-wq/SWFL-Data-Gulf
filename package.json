@@ -5,6 +5,7 @@
   "scripts": {
     "orphans": "node scripts/check-orphans.mjs",
     "dev": "next dev",
+    "email:dev": "email dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -90,6 +91,7 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "0.22.0",
+    "@react-email/ui": "^6.6.8",
     "@tailwindcss/postcss": "^4.3.1",
     "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^20.19.43",
@@ -101,6 +103,7 @@
     "knip": "^6.24.0",
     "lint-staged": "^17.0.8",
     "prettier": "^3.9.0",
+    "react-email": "^6.6.8",
     "tailwindcss": "^4.3.1",
     "type-fest": "^5.7.0",
     "typescript": "6"

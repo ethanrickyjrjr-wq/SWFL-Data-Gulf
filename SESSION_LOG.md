@@ -1,3 +1,34 @@
+## 2026-07-08 (Sonnet 5 · main) — feat: Fence 3 (photo aspect-ratio) + Fence 4 (typography pairing) from grid-fence spec + react-email live preview
+
+Implemented 2 of 5 fences from `docs/superpowers/specs/2026-07-08-email-grid-fence-system-design.md`,
+TDD, verified against real vendor constraints (RULE 0.4/0.5) rather than the spec's own claims. Fence 3:
+`ImageBlock.tsx` locks `kind:"photo"` images to `aspect-ratio:3/2` + `object-fit:cover` — confirmed via
+caniemail this is ~41% supported and Outlook desktop falls back to today's behavior (never worse, same
+progressive-enhancement policy as `lib/brand/fonts.ts`); confirmed `compile-grid.ts` reuses this same
+component so the fix reaches the actual sent email, not just a preview path. Fence 4: `BLESSED_PAIRINGS`
+in `lib/email/brand/apply-brand-style.ts` rejects a serif display pairing with a serif body — caught and
+fixed a real edge case myself (a body-only font change can strand an untouched display font in a newly
+illegal pairing; cascades to dropping it rather than keeping the stale serif+serif). 12 new tests
+(9 apply-brand-style, 3 ImageBlock), 1128/1128 lib/email tests pass, `bunx next build` clean.
+
+Fences 1/2/5 (blessed spans, row zones, accent budget) all depend on a `PlanBlockSchema`/`PlanDocSchema`
+plan+fill layer the spec describes but — confirmed via grep — doesn't exist in code yet, only in
+superseded spec/plan docs. Opened check `fences_1_2_5_need_planfill_layer` rather than leaving it as a
+sentence to forget. This work is email-lab only; social-lab was not touched.
+
+Also added `react-email` + `@react-email/ui` (official, MIT) and an `emails/` directory with 3 preview
+files (`fence-3-photo-ratio`, `fence-4-typography`, `fence-4-typography-illegal`) rendering through the
+real production path (`EmailDocEmail`), not redrawn mockups — `bun email:dev` for a live-reload preview
+server, no Figma round-trip needed. Styled with the real "Dark Pro" skeleton palette
+(`lib/email/doc/default-docs.ts`) and real place names (Fort Myers, Naples), not invented content.
+
+Side quest that led here: explored Figma (Sites/Buzz/Make) for a design-system cheat sheet on the fence
+spec. Figma Make (paid tier, Claude Sonnet 4.6 available) generated a visually-accurate reference — verified
+it against real code and caught it fabricating a font ("Cormorant Garamond") not in our actual
+`FONT_FAMILY_ENUM`, and inventing "what counts as accent" nuance not in the real `resolveBand` boolean. None
+of that React/MUI/Tailwind code was kept — wrong stack — but the verification pass is what grounded Fence 4's
+implementation.
+
 ## 2026-07-08 (Opus 4.8 · main) — fix: Showing Prep — comp address moved out of the 24-char list `lead` cap
 
 Post-ship advisor review caught a second latent defect the green tests masked (like the lint one): the comp

@@ -74,11 +74,25 @@ export function ImageBlock({
     );
   }
 
+  // Fence 3 (2026-07-08 fence spec) — a listing photo displays center-cropped
+  // to the MLS 3:2 standard regardless of its source dimensions. Progressive
+  // enhancement: ~41% email-client support per caniemail, Outlook desktop
+  // falls back to today's unconstrained render (never worse), matching the
+  // same policy lib/brand/fonts.ts already uses for webfonts.
+  const photoRatioStyle =
+    props.kind === "photo" ? { aspectRatio: "3 / 2", objectFit: "cover" as const } : {};
+
   const imgEl = props.url ? (
     <Img
       src={props.url}
       alt={props.alt ?? ""}
-      style={{ width: "100%", maxWidth: "600px", display: "block", margin: 0 }}
+      style={{
+        width: "100%",
+        maxWidth: "600px",
+        display: "block",
+        margin: 0,
+        ...photoRatioStyle,
+      }}
     />
   ) : (
     <Section

@@ -203,6 +203,9 @@ _ASSISTANT/TODAY.md
 *crawl4ai*
 .crawl4ai/
 
+# designlang MCP tool — local design-audit scratch output (grade cards, tokens)
+design-extract-output/
+
 # Outreach campaign dry-run artifacts (rendered previews + run reports)
 outreach-runs/
 
