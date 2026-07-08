@@ -1,3 +1,14 @@
+## 2026-07-08 (Opus 4.8 · main) — fix: Showing Prep — comp address moved out of the 24-char list `lead` cap
+
+Post-ship advisor review caught a second latent defect the green tests masked (like the lint one): the comp
+grid put `"addressLine, city"` in `ListItem.lead`, but `EmailDocSchema` caps `lead` at 24 chars — real SWFL
+addresses (36+) overflow, and since the persist route inserts the doc WITHOUT validating, the failure would
+surface only at load ("pill succeeds, packet won't open on the canvas"). The Task-5 fixtures ("101 A St")
+were short enough to slip under. Fix: address → `text` (cap 200), `lead` → a short status tag (Sold/Est./
+Active). Added the missing schema round-trip test — `EmailDocSchema.safeParse(buildShowingPrepDoc(realLong
+Address)).success` — which fails the old code, passes the fix, and guards the other tight caps (hero.value
+24, stats.value 24). 28 new tests now; `bunx next build` clean. Commit 0ec47038.
+
 ## 2026-07-08 (Opus 4.8 · main) — feat: Showing Prep Packet SHIPPED (dedicated coded-grid build path, 11 tasks TDD)
 
 Executed `docs/superpowers/plans/2026-07-08-showing-prep-packet.md` inline. One-click on an address builds
