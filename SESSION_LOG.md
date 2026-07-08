@@ -1,3 +1,26 @@
+## 2026-07-08 (Sonnet 5 · main) — fix(homepage): swap the "price my home" persona card for a market-trend question
+
+Operator flagged the Capabilities persona card asking "What should I price my Fort Myers Beach home at?"
+on the live homepage — clicking it demos the assistant on `/ask`, and that question asks for an
+individual property valuation, which the assistant correctly refuses to invent (no comp/condition/sqft
+data for one house), so the flagship "No Guessing" demo produced a hedging non-answer that punted to
+Zillow/MLS instead of showing off real market data. Swapped the question in
+`components/landing/Capabilities.tsx` to "Is Fort Myers Beach a buyer's or seller's market right now?" —
+an aggregate market question the assistant can actually answer with cited DOM/price-cut/supply data,
+matching the card's existing desc/chips. Desc copy tweaked (DOM per ZIP → Days on market) to drop
+internal jargon per the no-ZIP-level-framing rule.
+
+## 2026-07-08 (Sonnet 5 · main) — feat(billing): reprice Starter to $19/mo + $190/yr, live on Stripe
+
+Operator: "make the starter price 19 instead of 19.99, fix the yearly price too." Updated the one price
+root `lib/billing/tiers.ts` (priceMonthlyUsd 19.99→19, priceAnnualUsd 199.90→190, keeping the "2 months
+free" 10x-monthly invariant the other tiers use) + `tiers.test.ts` expectations. Ran
+`scripts/stripe/reprice-tier.mts starter --dry-run` first to confirm the diff, then live: new prices
+`price_1TqmBK6Nq6usB9gGpHlhDPv7` ($19/mo) and `price_1TqmBM6Nq6usB9gGMOzNZ6IK` ($190/yr) created and the
+`swfl_starter_monthly`/`swfl_starter_annual` lookup keys transferred onto them. Old $19.99/$199.90 prices
+untouched — still bill any subscriber already attached to them by price ID. `bun test
+lib/billing/tiers.test.ts` — 3 pass.
+
 ## 2026-07-08 (Sonnet 5 · main) — feat(census): populate source_scope for 36/72 pipelines from vendor extraction-ceiling audit
 
 Operator: "Do you have all the possible rows we can extract from each one? Not just what we extract."

@@ -17,8 +17,8 @@ const CARDS = [
   },
   {
     icon: DollarSign,
-    q: "What should I price my Fort Myers Beach home at?",
-    desc: "DOM per ZIP, price-cut trends, YoY value direction, active supply. The answer is what the market will pay—not what you hope.",
+    q: "Is Fort Myers Beach a buyer's or seller's market right now?",
+    desc: "Days on market, price-cut trends, YoY value direction, active supply. The answer is what the market is actually doing—not a guess.",
     chips: ["Sellers", "Pricing", "No Guessing"],
   },
   {
