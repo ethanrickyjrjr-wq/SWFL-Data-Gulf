@@ -151,11 +151,16 @@ export async function fetchPhotoListings(opts: {
   /** Server-side page offset (SteadyAPI honors `offset`) — lets a caller page past
    *  the first ~200 to find a specific address in a large city. Default 0. */
   offset?: number;
+  /** Full `location` slug override, e.g. "5370-Holland-St_Naples_FL_34113". When
+   *  present, queries that address directly instead of paging the whole city —
+   *  SteadyAPI centers the result set on the exact address (verified 07/08/2026).
+   *  Far cheaper + more reliable than scanning ~800 city rows for one house. */
+  location?: string;
 }): Promise<Listing[]> {
   const key = process.env.PHOTOS_API;
-  if (!key || !opts.city) return [];
+  if (!key || (!opts.city && !opts.location)) return [];
   const state = opts.state ?? "FL";
-  const slug = cityToSlug(opts.city, state);
+  const slug = opts.location ?? cityToSlug(opts.city, state);
   const params = new URLSearchParams({ location: slug, offset: String(opts.offset ?? 0) });
   try {
     const res = await fetch(`${BASE}/search?${params}`, {

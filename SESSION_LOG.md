@@ -1,3 +1,15 @@
+## 2026-07-08 (Opus 4.8 · main) — fix(listings): query the exact address directly instead of scanning ~800 city rows
+
+Operator (on live prod) got empty New Listing grids. Root cause of the empties is two-part: (1) code —
+`resolveSubjectListing` paged the whole-city SteadyAPI feed hoping to trip over the subject (unreliable in
+a big city); (2) key — the code reads `process.env.PHOTOS_API`, which is the SUSPENDED subscription (the
+working key is the operator's `new_steady`), so prod returns [] regardless. Fixed the code half: verified
+live that SteadyAPI `/search?location=<full-address-slug>` centers on the exact address, added a `location`
+override to `fetchPhotoListings` + a direct-address query as step 1 in `resolveSubjectListing` (falls back
+to the old city scan). Best-effort — SteadyAPI address search is fuzzy. `bun test` 14 pass. The KEY half
+is the operator's (safety layer blocks agent prod-secret writes) — live data stays empty until whatever
+`PHOTOS_API` resolves to in prod is the working key.
+
 ## 2026-07-08 (Opus 4.8 · main) — research: 3-surface SteadyAPI sweep → AI design programs + email-marketing AI hacks, crawled & broken down for spec
 
 Operator: "run steadyapi on reddit and insta and twitter social, find design programs for AI or hacks and

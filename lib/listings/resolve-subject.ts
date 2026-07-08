@@ -24,6 +24,8 @@ export type FetchListingsFn = (opts: {
   state?: string;
   limit?: number;
   offset?: number;
+  /** Full address `location` slug override — query the exact address directly. */
+  location?: string;
 }) => Promise<Listing[]>;
 
 export interface ResolveSubjectDeps {
@@ -202,6 +204,29 @@ export async function resolveSubjectListing(
   const target = canonStreet(streetLineOf(subject));
   if (!city || !target) return null;
 
+  const matches = (r: Listing): boolean => {
+    const rc = canonStreet(r.addressLine1 || r.formattedAddress);
+    return rc === target || rc.startsWith(target + " ") || target.startsWith(rc + " ");
+  };
+
+  // 1) DIRECT address query — SteadyAPI centers its result set on the exact address
+  //    slug ("850-10th-St-N_Naples_FL_34102"), so the subject (if listed) is right at
+  //    the top. One call, no scanning ~800 city rows hoping to trip over it.
+  if (geo.zip) {
+    const slug =
+      `${streetLineOf(subject).trim().replace(/\s+/g, "-")}` +
+      `_${city.replace(/\s+/g, "-")}_FL_${geo.zip}`;
+    try {
+      const direct = await fetchListings({ city, state: "FL", location: slug, limit: PAGE });
+      const hit = direct.find(matches);
+      if (hit) return toFacts(hit, geo.zip, subject);
+    } catch {
+      /* fall through to the city scan */
+    }
+  }
+
+  // 2) Fallback — page the city feed (the pre-07/08 behavior) in case the direct
+  //    slug didn't center on the address (odd formatting, missing ZIP).
   for (let page = 0; page < maxPages; page++) {
     let rows: Listing[];
     try {
@@ -210,10 +235,7 @@ export async function resolveSubjectListing(
       return null;
     }
     if (!rows.length) break;
-    const hit = rows.find((r) => {
-      const rc = canonStreet(r.addressLine1 || r.formattedAddress);
-      return rc === target || rc.startsWith(target + " ") || target.startsWith(rc + " ");
-    });
+    const hit = rows.find(matches);
     if (hit) return toFacts(hit, geo.zip, subject);
     if (rows.length < PAGE) break; // last (short) page — no more to scan
   }
