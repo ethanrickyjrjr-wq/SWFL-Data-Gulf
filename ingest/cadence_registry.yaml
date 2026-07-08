@@ -125,8 +125,8 @@ pipelines:
         summary: "ZHVI ZIP-level all-homes middle-tier, smoothed+SA — live"
         source: "our ingest"
       source_ceiling:
-        summary: "Zillow also publishes ZHVI cut by bedroom count and SF-vs-condo, plus a raw (non-SA) variant — same ZIP grain, free, not pulled."
-        as_of: "07/07/2026"
+        summary: "Zillow also publishes ZHVI cut by bedroom count and SF-vs-condo, a raw (non-SA) variant, and ZHVF (Home Value Forecast, 1yr-ahead) — same ZIP grain, free, not pulled."
+        as_of: "07/08/2026"
         source_url: "https://www.zillow.com/research/data/"
         source_label: "Zillow Research Data"
 
@@ -273,6 +273,15 @@ pipelines:
     inventory_id: lake-tier1/macro/fred_g17/
     inventory_key_type: prefix
     # First run: 2026-05-27 (workflow_dispatch) ✓
+    source_scope:
+      confirmed_total:
+        summary: "G.17 industrial production/capacity utilization, national series only"
+        source: "our ingest"
+      source_ceiling:
+        summary: "FRED also publishes real Lee/Collier county-level annual series with confirmed series IDs — house price index, county GDP, per-capita income, median household income, poverty rate, building permits — none pulled today. Vendor ceiling: MSA-level GDP was discontinued by BEA/FRED in 2023; unemployment claims never publish finer than statewide."
+        as_of: "07/08/2026"
+        source_url: "https://fred.stlouisfed.org/"
+        source_label: "FRED (St. Louis Fed)"
 
   - name: fred_laus_alfred
     lane: tier-1
@@ -648,8 +657,8 @@ pipelines:
         as_of: "2026-06-06"
         source: "our ingest"
       source_ceiling:
-        summary: "Lee County's own ArcGIS org (orgId LvWGAAhHwbCJ2GMP) has structured building-permit FeatureServer layers — 9,386 unincorporated-Lee permits, 719 commercial permits, 2,192 Cape Coral residential permits — that could replace this fragile Accela scrape entirely. Same org also has a 93,976-row code-enforcement/nuisance-violation layer (new category) and two manufactured-home layers (43,000+ lots — a direct fix for the parked land_manufactured_swfl gap)."
-        as_of: "07/07/2026"
+        summary: "Lee County's own ArcGIS org (orgId LvWGAAhHwbCJ2GMP) has structured building-permit FeatureServer layers — 9,386 unincorporated-Lee permits, 719 commercial permits, 2,192 Cape Coral residential permits — that could replace this fragile Accela scrape entirely. Same org also has a 93,976-row code-enforcement/nuisance-violation layer (new category), two manufactured-home layers (43,000+ lots — direct fix for the parked land_manufactured_swfl gap), a 550,454-row parcel land-use/valuation table, a subdivisions/plats layer, and a separately confirmed ZoningCases layer (8,017 rows) — none ingested."
+        as_of: "07/08/2026"
         source_url: "https://leegis.maps.arcgis.com/"
         source_label: "Lee County GIS (ArcGIS Online org)"
 
