@@ -1,3 +1,22 @@
+## 2026-07-07 (main) — REVERT: broken Hendry-ZIP geometry (fdb83bf1) was rendering huge gray blobs across the live homepage map
+
+Operator caught it live (screenshot, homepage map): three gray shapes sprawling across most of the
+map, far beyond Lee/Collier. Root cause: commit `fdb83bf1` (15:51 today, same session) added Clewiston/
+Felda/LaBelle (33440/33930/33935) to `public/map/lee-collier.svg` via a local affine transform, but the
+transform badly mis-scaled the real Census ZCTA polygons — e.g. 33440's bounding box spans ~450×500 SVG
+units (nearly half the whole 1190×1237 viewBox) vs tens of units for every real Lee/Collier ZIP; 33935
+extends above y=0, off the visible canvas. They render `NO_DATA_FILL` gray (no ZHVI/listings coverage),
+producing exactly the huge gray sprawl in the report. This also silently overrode the operator's explicit
+07/03/2026 ruling (`docs/handoff/2026-07-03-homepage-map-color-scope-bugs.md`) to **hold Hendry until it
+has real data** — nobody asked before shipping it.
+
+**Fix:** `git revert fdb83bf1` (clean, no later commits touched the same files) — restores
+`public/map/lee-collier.svg`, `components/landing/Hero.tsx`, `components/charts/MapCanvas.tsx`,
+`lib/landing/home-map-data.ts` to the last known-good Lee+Collier-only state. Verified: `bunx next build`
+clean, `bun test lib/landing/load-home-map-data.test.ts` 9/9 green, visually confirmed via local dev
+server — map renders correctly, gray sprawl gone. Logged as Failure 12 in `docs/map-failure-log.md`.
+Hendry stays HELD per the 07/03 ruling — re-add only with a verified transform + real data, and ask first.
+
 ## 2026-07-07 (main) — Scope: strip Charlotte/Glades/Sarasota from 3 flood/storm brains + unify AI web-lookup onto both paths + scope AI coverage prompts to Lee+Collier
 
 Operator: the product silently blended Charlotte/Glades/Sarasota into "Lee+Collier/SWFL" numbers, and a

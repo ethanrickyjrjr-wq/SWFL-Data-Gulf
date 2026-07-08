@@ -202,6 +202,32 @@ Papers over the tiling gaps without affecting choropleth coloring (MapCanvas sel
 
 ---
 
+## Failure 12 — Hendry ZIPs added with a broken affine transform, no visual verification of scale (Jul 7)
+
+**What we tried:** Commit `fdb83bf1` grafted real Census ZCTA polygons for Clewiston (33440), Felda
+(33930), and LaBelle (33935) onto `public/map/lee-collier.svg` via a locally-fit affine transform
+(lon/lat → contractor SVG space, fit from the 16 nearest existing Lee/Collier ZIP shapes).
+
+**What happened:** The transform badly mis-scaled the three polygons. 33440's bounding box spans
+~450×500 SVG units — nearly half the entire 1190×1237 viewBox — for what should be a small local
+"bump" the size of a couple dozen units, like every other ZIP on the map. 33935 extends above y=0,
+off the visible canvas entirely. All three render `NO_DATA_FILL` gray (no ZHVI/listings coverage yet),
+so the result was huge gray shapes sprawling across most of the homepage map, dwarfing the real
+Lee/Collier choropleth. The commit message claimed "verified live via dev server + browser... render
+correctly" — either the verification didn't check absolute scale against the rest of the map, or it
+wasn't done at all.
+
+**Why it failed:** No sanity check that the new polygons' bounding-box size was in proportion to
+existing ZIPs before committing. Also silently overrode the operator's explicit 07/03/2026 ruling to
+**hold Hendry until it has real data** (`docs/handoff/2026-07-03-homepage-map-color-scope-bugs.md`) —
+shipped without asking first.
+
+**What we did:** `git revert fdb83bf1` — clean revert, no later commits touched the same 4 files.
+Verified via `next build` + `load-home-map-data.test.ts` (9/9) + visual check on local dev server.
+Hendry stays HELD per the original ruling.
+
+---
+
 ## Summary: the categories of failure
 
 1. **Wrong source data** — contractor drew 33931 as mainland (Failures 1, 2)
