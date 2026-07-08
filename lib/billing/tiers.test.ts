@@ -12,10 +12,10 @@ describe("BILLING_TIERS", () => {
     assert.equal(FREE_SENDS_PER_MONTH, tierLimit("free"));
   });
 
-  test("prices: 19.99/79/149 monthly, 199.90/790/1490 annual (2 months free; starter repriced 07/07/2026)", () => {
+  test("prices: 19/79/149 monthly, 190/790/1490 annual (2 months free; starter repriced 07/07/2026)", () => {
     const bySlug = Object.fromEntries(BILLING_TIERS.map((t) => [t.slug, t]));
-    assert.equal(bySlug.starter.priceMonthlyUsd, 19.99);
-    assert.equal(bySlug.starter.priceAnnualUsd, 199.9);
+    assert.equal(bySlug.starter.priceMonthlyUsd, 19);
+    assert.equal(bySlug.starter.priceAnnualUsd, 190);
     assert.equal(bySlug.growth.priceMonthlyUsd, 79);
     assert.equal(bySlug.growth.priceAnnualUsd, 790);
     assert.equal(bySlug.pro.priceMonthlyUsd, 149);

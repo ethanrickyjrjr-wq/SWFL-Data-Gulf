@@ -24,14 +24,15 @@ export const BILLING_TIERS: readonly BillingTier[] = [
     slug: "starter",
     name: "Starter",
     sendsPerMonth: 500,
-    // $19.99 — operator repricing 07/07/2026 (was $9.99/$99.90 from the 07/05
-    // repricing, which itself replaced $29/$290 from the 07/02 spec).
+    // $19 — operator repricing 07/07/2026 (was $19.99, which itself replaced
+    // $9.99/$99.90 from the 07/05 repricing, which replaced $29/$290 from the
+    // 07/02 spec).
     // Stripe Price objects must carry the same amounts: lookup keys move to
     // new price objects via scripts/stripe/reprice-tier.mts (prices are
     // immutable — the key transfers via transfer_lookup_key, the old price
     // stays live for any existing subscriber still on it).
-    priceMonthlyUsd: 19.99,
-    priceAnnualUsd: 199.9,
+    priceMonthlyUsd: 19,
+    priceAnnualUsd: 190,
     lookupKeyMonthly: "swfl_starter_monthly",
     lookupKeyAnnual: "swfl_starter_annual",
   },
