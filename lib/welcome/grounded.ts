@@ -269,9 +269,8 @@ export function buildWelcomeGroundedSystem(input: WelcomeGroundedInput): string 
 // ---------------------------------------------------------------------------
 
 export const OUT_OF_SCOPE_GAP =
-  "That's outside the six Southwest Florida counties we cover — Lee, Collier, Charlotte, Glades, " +
-  "Hendry, and Sarasota. Give me a ZIP or a town inside that footprint and I'll pull the real, " +
-  "cited read.";
+  "That's outside the Southwest Florida counties we cover — Lee and Collier. Give me a ZIP " +
+  "or a town in Lee or Collier and I'll pull the real, cited read.";
 
 export const BUSY_GAP =
   "We're getting a lot of look-ups right now, so I've paused live reads for a moment. Try again " +

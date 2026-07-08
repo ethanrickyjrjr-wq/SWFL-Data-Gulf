@@ -1,3 +1,31 @@
+## 2026-07-07 (main) — Scope: strip Charlotte/Glades/Sarasota from 3 flood/storm brains + unify AI web-lookup onto both paths + scope AI coverage prompts to Lee+Collier
+
+Operator: the product silently blended Charlotte/Glades/Sarasota into "Lee+Collier/SWFL" numbers, and a
+prior Claude fabricated a "$30,075 Lee County AAL" (traces to NO brain — env-swfl computes AAL per-ZIP).
+Root cause: a 05/2026 broad-ingest push widened 3 brains to a 6-county footprint; corrected in docs 07/07
+but never in the brains. Git shows Lee+Collier scope since 05/14/2026 — 6-county was never operator-authorized.
+
+Re-scoped (code, tested; NUMBERS still need a targeted rebuild to recompute):
+- hurricane-tracks-fl (pack SWFL_COUNTIES + all "6-county" framing → Lee+Collier+Hendry; NFIP FIPS filter),
+- env-swfl (source county bboxes + pack scope/citation/caveat strings via new SWFL_COUNTY_COUNT export),
+- fema-nfip-source (county list feeds both flood + hurricane), storm-history-swfl (source+pack Lee+Collier
+  + a corpus-counter scope gate — totals were tallied over ALL parquet rows incl Charlotte), catalog mirrors synced.
+  85 pack/source/catalog tests green; vocab coverage OK.
+
+Unified the AI web-lookup: the report-dock path (report-path.ts) had NO internet fallback while the
+conversation path (Outside/Project/Lab/Search) did. Extracted webFallbackForAnswer into web-fallback.ts;
+BOTH paths now call the one shared hookup — so ALL AI surfaces check the internet. 81 assistant tests green.
+
+Answer-layer coverage prompts told the AI it covers 6 counties (PUBLIC_SYSTEM/OUTSIDE_SYSTEM/
+PUBLIC_GROUNDED_SYSTEM + OUT_OF_SCOPE_GAP) — a root of the AI's 6-county claims. Now say "Lee and Collier".
+The geographic zip-resolver/crosswalk keeps all counties BY DESIGN (needed to call a Charlotte ZIP
+out-of-scope) — tracked, not changed.
+
+Pushed with ALLOW_ANSWER_FIX_WITHOUT_PROOF=1 (logged override, NOT a fabricated proof): answer-path changes
+can't be live-verified before deploy. Post-deploy TODO: run the targeted rebuild (env-swfl/hurricane/storm +
+master) to recompute numbers, then live-verify a scoped answer. Checks: scope_* (3), flood_county_aal,
+assistant_paths_unify_web, answer_layer_6county_prompt_leak, scope_more_brains_charlotte_leak.
+
 ## 2026-07-07 (main) — Chart bug: wrong tooltip label (confirmed+fixed) + $0.00 stuck bar (root-caused+fixed, not re-verified live)
 
 Operator hit a live chart in the AI+Briefcase widget showing "Asking Rent $1,032,500" for a ZIP

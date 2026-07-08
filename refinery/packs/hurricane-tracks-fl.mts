@@ -16,7 +16,7 @@ import { isoDate, expiresDate } from "../lib/dates.mts";
 
 /**
  * hurricane-tracks-fl — NOAA HURDAT2 best-track joined against OpenFEMA NFIP
- * claims, scoped to the SWFL 6-county footprint. First brain to use the
+ * claims, scoped to the SWFL core-county footprint (Lee + Collier + Hendry). First brain to use the
  * generic makeDuckDBSource cross-tier connector: HURDAT2 Parquet lives in
  * Tier 1 Storage, NFIP claims live in Tier 2 Postgres, and the pre-join
  * runs in DuckDB SQL (NOT TypeScript memory) — establishing the pattern for
@@ -43,19 +43,19 @@ const FIXTURE_PATH = path.resolve(
   "hurricane-tracks-fl.sample.json",
 );
 
-/** SWFL 6-county footprint with county centroids (used in the SQL CROSS JOIN). */
+/** SWFL core-county footprint with county centroids (used in the SQL CROSS JOIN).
+ *  Scope locked to Lee + Collier core with Hendry as the minor add (CLAUDE.md SCOPE,
+ *  07/07/2026). Charlotte / Glades / Sarasota were removed — they are NOT real coverage
+ *  and must never surface as ours (they had leaked in via the 05/2026 broad-ingest push). */
 const SWFL_COUNTIES: ReadonlyArray<{
   fips: string;
   name: string;
   lat: number;
   lon: number;
 }> = [
-  { fips: "12015", name: "Charlotte", lat: 26.93, lon: -82.05 },
   { fips: "12021", name: "Collier", lat: 26.11, lon: -81.41 },
-  { fips: "12043", name: "Glades", lat: 26.97, lon: -81.18 },
   { fips: "12051", name: "Hendry", lat: 26.55, lon: -81.18 },
   { fips: "12071", name: "Lee", lat: 26.55, lon: -81.92 },
-  { fips: "12115", name: "Sarasota", lat: 27.18, lon: -82.36 },
 ];
 const SWFL_FIPS = SWFL_COUNTIES.map((c) => c.fips);
 const SWFL_FIPS_SQL = SWFL_FIPS.map((f) => `'${f}'`).join(",");
@@ -76,7 +76,7 @@ const RECENT_WINDOW_YEARS_CLOSEST = 5;
  *   - `pg.data_lake.fema_nfip_claims` = ATTACHed Tier 2 Postgres
  *
  * CTE chain:
- *   1. county_centroids — inline VALUES table (6 SWFL counties + lat/lon)
+ *   1. county_centroids — inline VALUES table (SWFL core counties + lat/lon)
  *   2. track_county — full HURDAT2 obs CROSS JOIN centroids + haversine distance_mi
  *   3. track_county_within — WHERE distance_mi <= 50 (drops far-pass obs)
  *   4. storm_county_summary — GROUP BY (storm_id, county_fips):
@@ -241,10 +241,7 @@ function rowShape(r: Record<string, unknown>): HurricaneCountyRow {
   };
 }
 
-function normalize(
-  rows: HurricaneCountyRow[],
-  ctx: { fetched_at: string },
-): RawFragment[] {
+function normalize(rows: HurricaneCountyRow[], ctx: { fetched_at: string }): RawFragment[] {
   return rows.map((r) => ({
     fragment_id: fragmentId(SOURCE_ID, `${r.storm_id}-${r.county_fips}`),
     source_id: SOURCE_ID,
@@ -317,9 +314,7 @@ export function buildSnapshot(
   // Metric 1: distinct landfall storms in last 30yr (across any SWFL county).
   const landfall_storms_30yr = new Set(
     landfall_rows
-      .filter(
-        (r) => current_year - r.storm_year <= RECENT_WINDOW_YEARS_LANDFALL,
-      )
+      .filter((r) => current_year - r.storm_year <= RECENT_WINDOW_YEARS_LANDFALL)
       .map((r) => r.storm_id),
   );
 
@@ -337,14 +332,11 @@ export function buildSnapshot(
 
   // Metric 3: avg NFIP paid per (landfall storm × county) where landfall occurred.
   // Per-row mean — each county-storm is its own loss observation.
-  const landfall_nfip_values = landfall_rows.map(
-    (r) => r.nfip_paid_usd_storm_year,
-  );
+  const landfall_nfip_values = landfall_rows.map((r) => r.nfip_paid_usd_storm_year);
   const nfip_avg =
     landfall_nfip_values.length === 0
       ? 0
-      : landfall_nfip_values.reduce((a, b) => a + b, 0) /
-        landfall_nfip_values.length;
+      : landfall_nfip_values.reduce((a, b) => a + b, 0) / landfall_nfip_values.length;
 
   // Metric 4: max NFIP paid across landfall (storm × county) rows.
   const nfip_max = landfall_rows.reduce(
@@ -368,9 +360,7 @@ export function buildSnapshot(
   const closest_5yr =
     recent_passes.length === 0
       ? null
-      : Math.round(
-          Math.min(...recent_passes.map((r) => r.closest_pass_mi)) * 10,
-        ) / 10;
+      : Math.round(Math.min(...recent_passes.map((r) => r.closest_pass_mi)) * 10) / 10;
 
   return {
     rows,
@@ -388,8 +378,7 @@ export function buildSnapshot(
 
 function buildSourceMeta(fetched_at: string): BrainOutputMetricSource {
   return {
-    url:
-      env.source === "fixture" ? `fixture://${FIXTURE_PATH}` : HURDAT2_S3_URL,
+    url: env.source === "fixture" ? `fixture://${FIXTURE_PATH}` : HURDAT2_S3_URL,
     fetched_at,
     tier: 1,
     citation: HURRICANE_TRACKS_CITATION,
@@ -411,7 +400,7 @@ function hurricaneCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 
   facts.push({
     topic: "corpus_overview",
-    fact: `HURDAT2 × NFIP cross-tier corpus — SWFL 6-county footprint`,
+    fact: `HURDAT2 × NFIP cross-tier corpus — SWFL core-county footprint`,
     value:
       `${snap.unique_storm_count.toLocaleString()} distinct named storms in the SWFL near-pass corpus ` +
       `(within ${NEAR_MILES}mi of any SWFL county centroid), ` +
@@ -423,7 +412,7 @@ function hurricaneCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   facts.push({
     topic: "metric:hurricane_landfalls_30yr",
     fact: "SWFL hurricane landfalls in the trailing 30-year window",
-    value: `${snap.landfalls_30yr_storms.toLocaleString()} distinct named storms made landfall inside any of the 6 SWFL counties (FIPS ${SWFL_FIPS.join("/")}) in the trailing 30-year window.`,
+    value: `${snap.landfalls_30yr_storms.toLocaleString()} distinct named storms made landfall inside any of the ${SWFL_FIPS.length} SWFL core counties (FIPS ${SWFL_FIPS.join("/")}) in the trailing 30-year window.`,
     source_fragment_ids: [],
   });
 
@@ -500,7 +489,7 @@ function hurricaneOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     value: snap.landfalls_30yr_storms,
     direction: "stable",
     label:
-      "SWFL hurricane landfalls — distinct named storms landfalling in any of the 6 SWFL counties, trailing 30yr window",
+      "SWFL hurricane landfalls — distinct named storms landfalling in any of the SWFL core counties, trailing 30yr window",
     variable_type: "extensive",
     units: "storms",
     display_format: "count",
@@ -523,8 +512,7 @@ function hurricaneOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     metric: "hurricane_nfip_paid_per_landfall_storm_avg_usd",
     value: snap.nfip_paid_per_landfall_storm_avg_usd,
     direction: "stable",
-    label:
-      "SWFL average NFIP paid per (landfall storm × county) — building + contents + ICO",
+    label: "SWFL average NFIP paid per (landfall storm × county) — building + contents + ICO",
     variable_type: "intensive",
     units: "USD",
     display_format: "currency",
@@ -548,8 +536,7 @@ function hurricaneOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       metric: "hurricane_most_recent_landfall_date",
       value: snap.most_recent_landfall_label,
       direction: "stable",
-      label:
-        "Most recent named-storm landfall in the SWFL footprint (storm + ISO date)",
+      label: "Most recent named-storm landfall in the SWFL footprint (storm + ISO date)",
       variable_type: "categorical",
       source,
     });
@@ -571,7 +558,7 @@ function hurricaneOutputProducer(_out: PackOutput): BrainOutputProducerResult {
 
   const conclusion_parts: string[] = [];
   conclusion_parts.push(
-    `Southwest Florida hurricane impact history (HURDAT2 × NFIP cross-tier join, 6 counties: ${SWFL_COUNTIES.map((c) => c.name).join(" + ")}) — ` +
+    `Southwest Florida hurricane impact history (HURDAT2 × NFIP cross-tier join, ${SWFL_COUNTIES.length} core counties: ${SWFL_COUNTIES.map((c) => c.name).join(" + ")}) — ` +
       `${snap.landfalls_30yr_storms.toLocaleString()} distinct named storms made landfall in a SWFL county over the trailing 30-year window, ` +
       `${snap.cat3plus_passes_50mi_30yr_storms.toLocaleString()} of those were Cat-3+ on Saffir-Simpson at any point in their lifetime.`,
   );
@@ -580,9 +567,7 @@ function hurricaneOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       `with the worst single (storm × county) on record at $${snap.worst_storm_county_year_nfip_paid_usd.toLocaleString()}.`,
   );
   if (snap.most_recent_landfall_label) {
-    conclusion_parts.push(
-      `Most recent landfall in scope: ${snap.most_recent_landfall_label}.`,
-    );
+    conclusion_parts.push(`Most recent landfall in scope: ${snap.most_recent_landfall_label}.`);
   }
   if (snap.closest_pass_5yr_min_mi != null) {
     conclusion_parts.push(
@@ -628,7 +613,7 @@ export const hurricaneTracksFl: PackDefinition = {
   public_label: "Hurricane Tracks",
   domain: "environmental",
   scope:
-    "NOAA HURDAT2 best-track joined against OpenFEMA NFIP claims for the SWFL 6-county footprint (LEE+COLLIER+CHARLOTTE+GLADES+HENDRY+SARASOTA). Cross-tier brain: HURDAT2 Parquet in Tier 1 Storage + NFIP claims in Tier 2 Postgres, pre-joined in DuckDB SQL (NOT TypeScript memory). Surfaces landfall counts, Cat-3+ near-passes, per-storm NFIP exposure, most-recent landfall, and closest-pass distance. Pairs with storm-history-swfl (NOAA Storm Events catalog — different upstream, different framing).",
+    "NOAA HURDAT2 best-track joined against OpenFEMA NFIP claims for the SWFL core-county footprint (LEE+COLLIER+HENDRY). Cross-tier brain: HURDAT2 Parquet in Tier 1 Storage + NFIP claims in Tier 2 Postgres, pre-joined in DuckDB SQL (NOT TypeScript memory). Surfaces landfall counts, Cat-3+ near-passes, per-storm NFIP exposure, most-recent landfall, and closest-pass distance. Pairs with storm-history-swfl (NOAA Storm Events catalog — different upstream, different framing).",
   ttl_seconds: 31536000, // 1 year — NHC publishes HURDAT2 annually
   sources: [hurricaneTracksFlSource],
   input_brains: [],

@@ -46,12 +46,7 @@ import {
   type ChartForQuestion,
 } from "@/lib/assistant/chart-for-question";
 import { composeChartFromRequest } from "@/lib/assistant/compose-chart";
-import {
-  looksLikeFigureAsk,
-  webFallback,
-  renderWebFallbackBlock,
-  hostOf,
-} from "@/lib/assistant/web-fallback";
+import { webFallbackForAnswer } from "@/lib/assistant/web-fallback";
 import {
   looksLikeCompAsk,
   compHelper,
@@ -89,35 +84,8 @@ async function chartForConversation(
 }
 
 /**
- * The conversational four-lane web-fallback (rung 3 named web source + rung 4 ask the
- * user) for a TEXT answer. When the question asks for a specific figure (cheap gate) the
- * grounded dossier may not carry, fetch it live + verified (lib/assistant/web-fallback)
- * and return BOTH the grounding block to append to the system AND the verified sources
- * for the collapsed citation frame. No-op ("" + []) when it's not a figure ask or
- * nothing was missing/verifiable — so a normal answer pays zero extra latency.
- *
- * `heldSystem` is the already-built grounded prompt (it contains the live dossier), so
- * the probe's notion of "what we hold" is exactly what the answer is grounded on — no
- * second egress, one source of truth.
- */
-async function webFallbackForConversation(
-  question: string,
-  heldSystem: string,
-): Promise<{ block: string; sources: WelcomeSource[] }> {
-  if (!looksLikeFigureAsk(question)) return { block: "", sources: [] };
-  const result = await webFallback(question, heldSystem);
-  const sources = result.verified.map((v) => ({
-    label: v.label,
-    value: v.value,
-    url: v.url,
-    domain: hostOf(v.url),
-  }));
-  return { block: renderWebFallbackBlock(result), sources };
-}
-
-/**
  * The on-demand comp path (lib/assistant/comp-helper) for a property/value ask the
- * region/place dossier can't answer. Twin of webFallbackForConversation: a cheap gate,
+ * region/place dossier can't answer. Twin of webFallbackForAnswer: a cheap gate,
  * then a live + cited fetch (≤3 SteadyAPI calls, Lee/Collier only) returning the
  * grounding block to append + the homepage sources for the collapsed accordion. `hit`
  * is true when the helper produced comps OR a lane-4 needs-block — in which case the
@@ -181,8 +149,8 @@ function freeWeeklyCap(): number {
 export const PUBLIC_SYSTEM =
   "You are the assistant for SWFL Data Gulf, talking to a real-estate agent or " +
   "investor who just clicked through from a branded market-data email — an email in " +
-  "their own brand carrying real Southwest Florida numbers (Lee, Collier, Charlotte, " +
-  "Glades, Hendry, Sarasota: prices, permits, flood risk, tourism, the local economy, " +
+  "their own brand carrying real Southwest Florida numbers (Lee and Collier: prices, " +
+  "permits, flood risk, tourism, the local economy, " +
   "down to the ZIP and named place). They have ALREADY seen what one report looks " +
   'like. Do not re-explain the platform and never say "sign up and you can build it".\n\n' +
   "Your job is to show them the real magic: that same branded, cited market data, " +
@@ -212,8 +180,8 @@ export const PUBLIC_SYSTEM =
 // briefcase. No "branded email you just saw", no email-hook pitch. (Was ANALYST_SYSTEM.)
 export const OUTSIDE_SYSTEM =
   "You are a Southwest Florida market analyst helping this person build a cited, " +
-  "client-ready project. The data covers Lee, Collier, Charlotte, Glades, Hendry, and " +
-  "Sarasota counties — prices, permits, flood risk, tourism, and the local economy, down " +
+  "client-ready project. The data covers Lee and Collier counties — prices, permits, " +
+  "flood risk, tourism, and the local economy, down " +
   "to the ZIP and named place. Answer the question directly and usefully, in plain prose, " +
   // CHARTS + DATA (capability-truth lives IN the prompt below, not only when a chart
   // renders): the analyst CAN build a cited chart and CAN surface the source behind any
@@ -271,8 +239,8 @@ export const OUTSIDE_SYSTEM =
 // which still serves the off-topic / master-unavailable fallback.)
 export const PUBLIC_GROUNDED_SYSTEM =
   "You are a Southwest Florida market analyst talking to a real-estate agent or investor " +
-  "on the public site — no account yet. The data covers Lee, Collier, Charlotte, Glades, " +
-  "Hendry, and Sarasota counties — prices, permits, flood risk, tourism, and the local " +
+  "on the public site — no account yet. The data covers Lee and Collier counties — prices, " +
+  "permits, flood risk, tourism, and the local " +
   "economy, down to the ZIP and named place. Answer the question directly and usefully, in " +
   "plain prose, from the cited data below.\n\n" +
   "ANSWER FIRST: a region-wide Southwest Florida question (e.g. what's driving prices and " +
@@ -728,7 +696,7 @@ export async function runConversationPath(
     if (comp.chart) prelude.push({ type: "chart", chart: comp.chart });
     const { block: gapBlock, sources: gapSources } = comp.hit
       ? comp
-      : await webFallbackForConversation(lastUser, system);
+      : await webFallbackForAnswer(lastUser, system);
     if (gapSources.length) prelude.push({ type: "sources", sources: gapSources });
     // otherProjectsBlock is "" for public (no auth, no session) and for analyst without an
     // open project — so the public posture (no project context) is preserved structurally.
@@ -825,7 +793,7 @@ export async function runConversationPath(
   if (comp.chart) prelude.push({ type: "chart", chart: comp.chart });
   const { block: gapBlock, sources: gapSources } = comp.hit
     ? comp
-    : await webFallbackForConversation(lastUser, system);
+    : await webFallbackForAnswer(lastUser, system);
   if (gapSources.length) prelude.push({ type: "sources", sources: gapSources });
   // otherProjectsBlock is "" unless PROJECT AI with an open project, so public/located
   // answers are unchanged.

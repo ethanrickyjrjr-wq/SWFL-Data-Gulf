@@ -17,8 +17,8 @@ import {
 import { env } from "../config/env.mts";
 
 /**
- * storm-history-swfl — NOAA Storm Events Database for SWFL (Lee, Collier,
- * Charlotte counties), 1996-2025 modern-schema vintage.
+ * storm-history-swfl — NOAA Storm Events Database for SWFL (Lee + Collier core),
+ * 1996-2025 modern-schema vintage. Charlotte removed 07/07/2026 — not real coverage.
  *
  * Single Tier-1 source: s3://lake-tier1/environmental/storm_events_swfl.parquet
  * (audited in data_lake._tier1_inventory). The source connector pre-aggregates
@@ -33,7 +33,7 @@ import { env } from "../config/env.mts";
  * Leaf brain (no upstream brains). Pure deterministic — no synthesis agent.
  */
 
-const SWFL_COUNTIES = ["LEE", "COLLIER", "CHARLOTTE"] as const;
+const SWFL_COUNTIES = ["LEE", "COLLIER"] as const;
 const TROPICAL_CYCLONE_BEARISH_THRESHOLD = 3;
 
 interface StormSnapshot {
@@ -130,7 +130,7 @@ function stormCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   facts.push({
     topic: "metric:property_damage_events_10yr",
     fact: "SWFL property-damage events in the trailing 10-year window",
-    value: `${snapshot.swflPropertyDamageEvents10yr.toLocaleString()} events with parseable, non-zero property damage across LEE+COLLIER+CHARLOTTE in the trailing 10-year window.`,
+    value: `${snapshot.swflPropertyDamageEvents10yr.toLocaleString()} events with parseable, non-zero property damage across ${SWFL_COUNTIES.join("+")} in the trailing 10-year window.`,
     source_fragment_ids: [],
   });
 
@@ -353,7 +353,7 @@ export const stormHistorySwfl: PackDefinition = {
   public_label: "Storm History",
   domain: "environmental",
   scope:
-    "NOAA Storm Events history for Southwest Florida (LEE + COLLIER + CHARLOTTE), 1996-2025 modern-schema vintage. Surfaces SWFL-wide event counts (total / major / 10yr property-damage / 10yr distinct tropical cyclones) and the most recent billion-dollar event for risk-history framing. Pairs with env-swfl (modeled NFHL exposure) — exposure says WHERE flood risk lives, storm-history says WHAT has hit historically.",
+    "NOAA Storm Events history for Southwest Florida (LEE + COLLIER core), 1996-2025 modern-schema vintage. Surfaces SWFL-wide event counts (total / major / 10yr property-damage / 10yr distinct tropical cyclones) and the most recent billion-dollar event for risk-history framing. Pairs with env-swfl (modeled NFHL exposure) — exposure says WHERE flood risk lives, storm-history says WHAT has hit historically.",
   ttl_seconds: 31536000, // 1 year — NCEI publishes annually
   sources: [stormHistorySource],
   input_brains: [],

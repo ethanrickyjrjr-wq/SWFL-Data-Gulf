@@ -27,15 +27,8 @@ test("fragments split into county-year aggregates + exactly one swfl-aggregate",
   const aggregates = fragments.filter(
     (f) => (f.normalized as { kind: string }).kind === "nfip-swfl-aggregate",
   );
-  assert.ok(
-    countyYears.length > 0,
-    "expected at least one county-year fragment",
-  );
-  assert.equal(
-    aggregates.length,
-    1,
-    "expected exactly one swfl-aggregate fragment",
-  );
+  assert.ok(countyYears.length > 0, "expected at least one county-year fragment");
+  assert.equal(aggregates.length, 1, "expected exactly one swfl-aggregate fragment");
 });
 
 test("every county-year fragment has the required aggregate fields", async () => {
@@ -67,14 +60,11 @@ test("swfl-aggregate carries all 4 storm-vs-baseline metrics", async () => {
   assert.equal(typeof n["post_ian_ratio"], "number");
   assert.equal(typeof n["latest_complete_year"], "number");
   assert.equal(typeof n["latest_complete_year_total_usd"], "number");
-  assert.equal(
-    n["storm_year_list_reviewed_at"],
-    SWFL_STORM_YEARS_LAST_REVIEWED,
-  );
-  assert.ok(
-    Array.isArray(n["county_codes"]) &&
-      (n["county_codes"] as string[]).length === 6,
-    "county_codes should be the 6 SWFL FIPS",
+  assert.equal(n["storm_year_list_reviewed_at"], SWFL_STORM_YEARS_LAST_REVIEWED);
+  assert.deepEqual(
+    n["county_codes"],
+    ["12071", "12021", "12051"],
+    "county_codes should be the SWFL core FIPS (Lee + Collier + Hendry); Charlotte/Glades/Sarasota removed 07/07/2026",
   );
 });
 
@@ -91,8 +81,7 @@ test("storm-year total includes Ian 2022 — should dominate non-storm baseline"
     `storm_year_total_usd should exceed $1M (got ${n["storm_year_total_usd"]})`,
   );
   assert.ok(
-    (n["storm_year_total_usd"] as number) >
-      (n["baseline_annual_usd"] as number) * 10,
+    (n["storm_year_total_usd"] as number) > (n["baseline_annual_usd"] as number) * 10,
     "storm-year total should be >10x baseline (Ian's signal must not be averaged away)",
   );
 });
@@ -123,9 +112,7 @@ test("storm_year_count_since_2000 matches hardcoded SWFL_STORM_YEARS filtered to
   const n = agg!.normalized as Record<string, unknown>;
   // Deduped set of years where year >= 2000. Charley 2004, Wilma 2005, Irma 2017,
   // Ian 2022, Helene+Milton both 2024 (one year, two storms) = 5 distinct years.
-  const expected = new Set(
-    SWFL_STORM_YEARS.filter((s) => s.year >= 2000).map((s) => s.year),
-  ).size;
+  const expected = new Set(SWFL_STORM_YEARS.filter((s) => s.year >= 2000).map((s) => s.year)).size;
   assert.equal(n["storm_year_count_since_2000"], expected);
   assert.equal(expected, 5, "expected 5 distinct SWFL storm years since 2000");
 });
@@ -148,8 +135,7 @@ test("post_ian_ratio reflects latest_complete_year vs baseline", async () => {
   );
   // 2025 non-storm total ~$87,800 / baseline median ~$56,150 ≈ 1.56. Loose bound.
   assert.ok(
-    (n["post_ian_ratio"] as number) > 0.5 &&
-      (n["post_ian_ratio"] as number) < 5,
+    (n["post_ian_ratio"] as number) > 0.5 && (n["post_ian_ratio"] as number) < 5,
     `post_ian_ratio should sit between 0.5 and 5 for the fixture (got ${n["post_ian_ratio"]})`,
   );
 });
@@ -158,11 +144,7 @@ test("storm-year flagging: Ian 2022 fragment must carry is_storm_year=true and s
   const fragments = await femaNfipSource.fetch();
   const ianLee = fragments.find((f) => {
     const n = f.normalized as Record<string, unknown>;
-    return (
-      n["kind"] === "nfip-county-year" &&
-      n["year"] === 2022 &&
-      n["county_code"] === "12071"
-    );
+    return n["kind"] === "nfip-county-year" && n["year"] === 2022 && n["county_code"] === "12071";
   });
   assert.ok(ianLee, "expected a 2022 Lee County fragment");
   const n = ianLee!.normalized as Record<string, unknown>;
@@ -277,8 +259,7 @@ test("nfip-zip-aggregate fragments carry the full v1 AAL schema", async () => {
     assert.equal(typeof n["insured_denominator_basis"], "string");
     assert.equal(typeof n["paid_total_in_window_usd"], "number");
     assert.ok(
-      (n["aal_pct_swfl_rank"] as number) >= 0 &&
-        (n["aal_pct_swfl_rank"] as number) <= 100,
+      (n["aal_pct_swfl_rank"] as number) >= 0 && (n["aal_pct_swfl_rank"] as number) <= 100,
       `percentile rank must be in [0, 100], got ${n["aal_pct_swfl_rank"]}`,
     );
     assert.ok((n["window_years"] as number) === AAL_WINDOW_YEARS);
@@ -290,9 +271,7 @@ test("nfip-zip-aggregate fragments carry the full v1 AAL schema", async () => {
 test("top-ranked ZIP in fixture is 33931 (Fort Myers Beach — Ian-2022 surge core)", async () => {
   const fragments = await femaNfipSource.fetch();
   const zipAggs = fragments
-    .filter(
-      (f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate",
-    )
+    .filter((f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate")
     .map((f) => f.normalized as Record<string, unknown>);
   // The source emits fragments sorted by AAL desc, so the first one is top.
   assert.equal(
@@ -306,9 +285,7 @@ test("top-ranked ZIP in fixture is 33931 (Fort Myers Beach — Ian-2022 surge co
 test("AAL math matches paid_total_in_window / window_years / insured_denominator", async () => {
   const fragments = await femaNfipSource.fetch();
   const zipAggs = fragments
-    .filter(
-      (f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate",
-    )
+    .filter((f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate")
     .map((f) => f.normalized as Record<string, unknown>);
   for (const n of zipAggs) {
     const paid = n["paid_total_in_window_usd"] as number;
@@ -327,9 +304,7 @@ test("AAL math matches paid_total_in_window / window_years / insured_denominator
 test("percentile rank is monotone decreasing across the top-6 sorted by AAL", async () => {
   const fragments = await femaNfipSource.fetch();
   const zipAggs = fragments
-    .filter(
-      (f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate",
-    )
+    .filter((f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate")
     .map((f) => f.normalized as Record<string, unknown>);
   for (let i = 1; i < zipAggs.length; i++) {
     const prevAal = zipAggs[i - 1]["aal_usd_per_insured_property"] as number;
@@ -350,17 +325,11 @@ test("percentile rank is monotone decreasing across the top-6 sorted by AAL", as
 test("window end year = max(year_of_loss) and span = AAL_WINDOW_YEARS across fragments", async () => {
   const fragments = await femaNfipSource.fetch();
   const zipAggs = fragments
-    .filter(
-      (f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate",
-    )
+    .filter((f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate")
     .map((f) => f.normalized as Record<string, unknown>);
   // Fixture's max year_of_loss is 2025.
   for (const n of zipAggs) {
-    assert.equal(
-      n["window_end_year"],
-      2025,
-      `window_end_year should match fixture max year`,
-    );
+    assert.equal(n["window_end_year"], 2025, `window_end_year should match fixture max year`);
     assert.equal(n["window_years"], AAL_WINDOW_YEARS);
   }
 });
@@ -368,9 +337,7 @@ test("window end year = max(year_of_loss) and span = AAL_WINDOW_YEARS across fra
 test("median_building_property_value_usd > 0 for every ZIP fragment", async () => {
   const fragments = await femaNfipSource.fetch();
   const zipAggs = fragments
-    .filter(
-      (f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate",
-    )
+    .filter((f) => (f.normalized as { kind: string }).kind === "nfip-zip-aggregate")
     .map((f) => f.normalized as Record<string, unknown>);
   for (const n of zipAggs) {
     assert.ok(
@@ -428,49 +395,42 @@ test("aggregateZipRollupTop6 callable directly with synthetic ClaimRow[] — unk
   assert.ok(known, "known ZIP 33931 should be in output");
   assert.ok(unknown, "unknown ZIP 33555 should be in output (no silent drop)");
   // Known ZIP uses table population.
-  const expectedKnownDenom =
-    (ZIP_POPULATION_2020.get("33931") ?? 0) * INSURED_PENETRATION_FACTOR;
+  const expectedKnownDenom = (ZIP_POPULATION_2020.get("33931") ?? 0) * INSURED_PENETRATION_FACTOR;
   assert.ok(
     Math.abs(known!.insured_denominator - expectedKnownDenom) < 0.01,
     `known ZIP denom should be ${expectedKnownDenom}, got ${known!.insured_denominator}`,
   );
   // Unknown ZIP uses fallback.
-  const expectedUnknownDenom =
-    SWFL_ZIP_POPULATION_DEFAULT * INSURED_PENETRATION_FACTOR;
+  const expectedUnknownDenom = SWFL_ZIP_POPULATION_DEFAULT * INSURED_PENETRATION_FACTOR;
   assert.ok(
     Math.abs(unknown!.insured_denominator - expectedUnknownDenom) < 0.01,
     `unknown ZIP denom should be ${expectedUnknownDenom}, got ${unknown!.insured_denominator}`,
   );
   assert.match(unknown!.insured_denominator_basis, /not in coverage table/i);
-  assert.doesNotMatch(
-    known!.insured_denominator_basis,
-    /not in coverage table/i,
-  );
+  assert.doesNotMatch(known!.insured_denominator_basis, /not in coverage table/i);
 });
 
 test("aggregateZipRollupTop6 honors topN cap and drops rows outside SWFL FIPS or outside window", () => {
   const rows = [
     // 7 distinct ZIPs in SWFL window — only top 6 should be emitted.
-    ...["33931", "33957", "34145", "33921", "34102", "33914", "33901"].map(
-      (zip, idx) => ({
-        id: `swfl-${zip}`,
-        year_of_loss: 2024,
-        date_of_loss: "2024-09-26",
-        state: "FL",
-        county_code: "12071",
-        reported_city: "X",
-        reported_zipcode: zip,
-        flood_zone: "AE",
-        occupancy_type: 1,
-        number_of_floors_insured: 1,
-        // Decreasing paid amounts so the order of the top-6 is deterministic.
-        amount_paid_on_building_claim: 500000 - idx * 10000,
-        amount_paid_on_contents_claim: 0,
-        amount_paid_on_ico_claim: 0,
-        building_property_value: 400000,
-        building_damage_amount: 100000,
-      }),
-    ),
+    ...["33931", "33957", "34145", "33921", "34102", "33914", "33901"].map((zip, idx) => ({
+      id: `swfl-${zip}`,
+      year_of_loss: 2024,
+      date_of_loss: "2024-09-26",
+      state: "FL",
+      county_code: "12071",
+      reported_city: "X",
+      reported_zipcode: zip,
+      flood_zone: "AE",
+      occupancy_type: 1,
+      number_of_floors_insured: 1,
+      // Decreasing paid amounts so the order of the top-6 is deterministic.
+      amount_paid_on_building_claim: 500000 - idx * 10000,
+      amount_paid_on_contents_claim: 0,
+      amount_paid_on_ico_claim: 0,
+      building_property_value: 400000,
+      building_damage_amount: 100000,
+    })),
     // Out-of-SWFL row (Miami-Dade) — must be dropped.
     {
       id: "out-of-swfl",
@@ -510,10 +470,7 @@ test("aggregateZipRollupTop6 honors topN cap and drops rows outside SWFL FIPS or
   ];
   const out = aggregateZipRollupTop6(rows as never);
   assert.equal(out.length, 6, "topN=6 cap should hold");
-  assert.ok(
-    !out.some((a) => a.zip === "33101"),
-    "out-of-SWFL ZIP 33101 must be dropped",
-  );
+  assert.ok(!out.some((a) => a.zip === "33101"), "out-of-SWFL ZIP 33101 must be dropped");
   // The 33931 fragment should reflect ONLY the in-window claim (500000), not the
   // 2000-year claim (999999). paid_total_in_window_usd should equal 500000.
   const fmb = out.find((a) => a.zip === "33931");

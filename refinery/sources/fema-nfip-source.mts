@@ -30,9 +30,11 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
  * stays a thin reader. One fragment per (county, year) bucket PLUS one
  * SWFL-rollup fragment carrying the 4 brain metrics directly.
  *
- * SWFL scope (matches env-swfl-source.mts SWFL_COUNTIES): 6 counties keyed by
- * 5-char FIPS. The brain reads the base table directly, not the convenience
- * view at docs/sql/fema_nfip_claims_swfl.sql.
+ * SWFL scope (matches env-swfl-source.mts SWFL_COUNTIES): the core-county set
+ * (Lee + Collier + Hendry) keyed by 5-char FIPS. The brain reads the base table
+ * directly, not the convenience view at docs/sql/fema_nfip_claims_swfl.sql.
+ * NFIP dollars are gated by SWFL_FIPS.includes(county_code), so this list IS the
+ * scope — non-core counties contribute zero.
  *
  * Coverage caveat surfaced on every render: NFIP claims are policyholder-only.
  * Uninsured losses and properties not covered by NFIP are NOT in this archive.
@@ -53,16 +55,15 @@ const COUNTY_YEAR_VIEW = "fema_nfip_county_year";
 const ZIP_WINDOW_VIEW = "fema_nfip_zip_window_agg";
 
 /**
- * 6 SWFL counties. Order matches env-swfl-source.mts SWFL_COUNTIES.
- * Mirrors the same county set the brain has used for modeled-risk metrics.
+ * SWFL core counties (Lee + Collier core, Hendry minor). Order matches
+ * env-swfl-source.mts SWFL_COUNTIES. Charlotte / Glades / Sarasota removed —
+ * NOT real coverage (CLAUDE.md SCOPE lock 07/07/2026); they had leaked in via
+ * the 05/2026 broad-ingest push.
  */
 const SWFL_COUNTIES: ReadonlyArray<{ fips: string; name: string }> = [
   { fips: "12071", name: "Lee" },
   { fips: "12021", name: "Collier" },
-  { fips: "12015", name: "Charlotte" },
-  { fips: "12043", name: "Glades" },
   { fips: "12051", name: "Hendry" },
-  { fips: "12115", name: "Sarasota" },
 ];
 
 const SWFL_FIPS = SWFL_COUNTIES.map((c) => c.fips);
@@ -71,7 +72,7 @@ const COUNTY_NAME_BY_FIPS = new Map(SWFL_COUNTIES.map((c) => [c.fips, c.name]));
 /**
  * Named SWFL-impacting hurricanes — the storm-year list.
  * LAST_REVIEWED: 2026-05-17. Update this constant AND bump LAST_REVIEWED when a
- * new storm landfalls in or pushes water into the 6-county SWFL footprint.
+ * new storm landfalls in or pushes water into the SWFL core-county footprint.
  * Auto-detection (rolling-median outlier) is fragile for N=5; explicit named
  * storms with a reviewed-by date is more defensible.
  */
@@ -291,7 +292,7 @@ export interface NfipZipAggregate {
 /** SWFL-rollup fragment — carries the 4 env-swfl brain metrics directly. */
 export interface NfipSwflAggregate {
   kind: "nfip-swfl-aggregate";
-  /** Sum of paid (building + contents + ICO) across all 6 SWFL counties in named storm years. */
+  /** Sum of paid (building + contents + ICO) across the SWFL core counties in named storm years. */
   storm_year_total_usd: number;
   /** Median of annual SWFL-wide paid totals, restricted to non-storm years. The "boring-times floor." */
   baseline_annual_usd: number;
@@ -305,7 +306,7 @@ export interface NfipSwflAggregate {
   latest_complete_year_total_usd: number;
   /** LAST_REVIEWED date for the storm-year list (caveat plumbing). */
   storm_year_list_reviewed_at: string;
-  /** The 6 SWFL FIPS the aggregate covers. */
+  /** The SWFL core FIPS the aggregate covers. */
   county_codes: ReadonlyArray<string>;
 }
 
@@ -691,7 +692,7 @@ export function assertClaimsNonEmpty(rows: ClaimRow[]): void {
 async function fetchLive(): Promise<LiveFetchResult> {
   const sb = getSupabase().schema(SCHEMA);
 
-  // County-year aggregates from the pre-built SQL view (~300-600 rows: 6 counties × ~decades).
+  // County-year aggregates from the pre-built SQL view (SWFL core counties × ~decades).
   // Replaces the county-year TS aggregation on the old 86.6k-row full-archive fetch.
   const { data: cyData, error: cyErr } = await sb
     .from(COUNTY_YEAR_VIEW)
@@ -924,8 +925,8 @@ export const femaNfipSource: SourceConnector = {
     return {
       source:
         env.source === "fixture"
-          ? `OpenFEMA FimaNfipClaims (fixture; ${SCHEMA}.${TABLE}, FL state, 6 SWFL counties ${SWFL_FIPS.join("+")}, storm-list reviewed ${SWFL_STORM_YEARS_LAST_REVIEWED}) — ${liveUrl}`
-          : `OpenFEMA FimaNfipClaims via ${SCHEMA}.${COUNTY_YEAR_VIEW} + ${SCHEMA}.${ZIP_WINDOW_VIEW} (aggregated from ${SCHEMA}.${TABLE}; FL state, 6 SWFL counties ${SWFL_FIPS.join("+")}, storm-list reviewed ${SWFL_STORM_YEARS_LAST_REVIEWED}) — ${liveUrl}`,
+          ? `OpenFEMA FimaNfipClaims (fixture; ${SCHEMA}.${TABLE}, FL state, SWFL core counties ${SWFL_FIPS.join("+")}, storm-list reviewed ${SWFL_STORM_YEARS_LAST_REVIEWED}) — ${liveUrl}`
+          : `OpenFEMA FimaNfipClaims via ${SCHEMA}.${COUNTY_YEAR_VIEW} + ${SCHEMA}.${ZIP_WINDOW_VIEW} (aggregated from ${SCHEMA}.${TABLE}; FL state, SWFL core counties ${SWFL_FIPS.join("+")}, storm-list reviewed ${SWFL_STORM_YEARS_LAST_REVIEWED}) — ${liveUrl}`,
       verified: verifiedDate,
       expires: expiresDate(verifiedDate, ttlSeconds),
     };

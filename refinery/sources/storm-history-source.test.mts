@@ -36,18 +36,18 @@ test("fixture mode returns one fragment per SWFL county + one corpus fragment", 
   const corpus = fragments.filter(
     (f) => (f.normalized as { kind: string }).kind === "storm-corpus-summary",
   );
-  assert.equal(perCounty.length, 3, "expected one fragment per SWFL county");
+  assert.equal(perCounty.length, 2, "expected one fragment per SWFL core county (Lee + Collier)");
   assert.equal(corpus.length, 1, "expected exactly one corpus-summary fragment");
 });
 
-test("per-county fragments cover LEE, COLLIER, CHARLOTTE with non-zero counts and numeric (not BigInt) fields", async () => {
+test("per-county fragments cover LEE, COLLIER with non-zero counts and numeric (not BigInt) fields", async () => {
   const fragments = await stormHistorySource.fetch();
   const perCounty = fragments
     .map((f) => f.normalized as Record<string, unknown>)
     .filter((n) => n["kind"] === "storm-per-county");
 
   const counties = perCounty.map((n) => n["county"] as string).sort();
-  assert.deepEqual(counties, ["CHARLOTTE", "COLLIER", "LEE"]);
+  assert.deepEqual(counties, ["COLLIER", "LEE"]);
 
   for (const n of perCounty) {
     assert.equal(typeof n["county"], "string");
@@ -73,7 +73,7 @@ test("corpus fragment populates required fields and covers all 3 SWFL counties",
   assert.equal(typeof n["last_billion_dollar_event_date"], "string");
   assert.equal(n["last_billion_dollar_event_name"], "Ian");
   assert.ok((n["distinct_tropical_cyclones_10yr"] as number) >= 1);
-  assert.deepEqual(n["counties_covered"], ["CHARLOTTE", "COLLIER", "LEE"]);
+  assert.deepEqual(n["counties_covered"], ["COLLIER", "LEE"]);
   assert.equal(typeof n["total_storm_count"], "number");
   assert.ok((n["total_storm_count"] as number) > 0);
   assert.equal(typeof n["vintage_start_year"], "number");

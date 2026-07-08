@@ -29,6 +29,7 @@ import {
   type ExternalPoint,
   type ExternalRequest,
 } from "@/lib/assistant/gap-fill";
+import type { WelcomeSource } from "@/lib/welcome/frames";
 
 const MAX_FIGURES = 3; // cap live lookups per answer (cost/latency guard)
 const PROBE_MAX_TOKENS = 400;
@@ -242,4 +243,30 @@ export function renderWebFallbackBlock(result: WebFallbackResult): string {
   }
 
   return parts.length > 0 ? "\n\n" + parts.join("\n\n") : "";
+}
+
+/**
+ * The ONE shared four-lane web-fallback hookup for a TEXT answer. Both the conversation
+ * path (Outside AI / Project AI / Lab / Search) AND the report-dock path call THIS — so
+ * every AI surface checks the internet through a single function, never a per-path copy.
+ * Gates on the cheap figure-ask pre-filter (zero added latency for a non-figure ask),
+ * runs the rung-3 (named web source) + rung-4 (ask the user) cascade, and returns the
+ * grounding block to append to the system prompt PLUS the verified sources for the
+ * collapsed citation frame. `heldSystem` is the already-built grounded prompt, so the
+ * probe's notion of "what we hold" is exactly what the answer is grounded on — one
+ * source of truth, no second egress. Never throws (webFallback degrades to empty).
+ */
+export async function webFallbackForAnswer(
+  question: string,
+  heldSystem: string,
+): Promise<{ block: string; sources: WelcomeSource[] }> {
+  if (!looksLikeFigureAsk(question)) return { block: "", sources: [] };
+  const result = await webFallback(question, heldSystem);
+  const sources = result.verified.map((v) => ({
+    label: v.label,
+    value: v.value,
+    url: v.url,
+    domain: hostOf(v.url),
+  }));
+  return { block: renderWebFallbackBlock(result), sources };
 }

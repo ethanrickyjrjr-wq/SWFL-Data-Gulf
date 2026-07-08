@@ -293,7 +293,7 @@ test("an in-scope ZIP grounds Haiku on the real dossier (cited, no-math floor, c
 test("an out-of-scope ZIP → honest gap, no fetch, no model", async () => {
   const res = await ask("what about 90210?");
   const body = await res.text();
-  expect(body).toContain("outside the six Southwest Florida counties");
+  expect(body).toContain("outside the Southwest Florida counties we cover — Lee and Collier");
   expect(body).not.toContain(MODEL_SENTINEL); // model never streamed
 });
 

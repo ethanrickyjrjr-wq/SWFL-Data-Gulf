@@ -21,6 +21,7 @@ import {
 } from "@/lib/highlighter/meter";
 import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
 import { buildGroundedSystemPrompt } from "@/lib/grounded-answer";
+import { webFallbackForAnswer } from "@/lib/assistant/web-fallback";
 import type { AssistantRequest } from "@/lib/assistant/contract";
 import { extractText, sseMessage, SSE_STREAM_HEADERS } from "@/lib/assistant/stream";
 
@@ -127,7 +128,7 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
   // gated on selection_type (popup yes, dock/email no). `chartNote` tells the grounding the
   // chart's title so the CHARTS directive flips from "you can't chart" to "describe what's
   // on screen".
-  const system = buildGroundedSystemPrompt({
+  const grounded = buildGroundedSystemPrompt({
     fact,
     question,
     selectionType: selection_type,
@@ -139,6 +140,15 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
     // model invent figures (a moat violation that the deflection/leak detectors miss).
     chartNote: chart ? summarizeChartForGrounding(chart) : undefined,
   });
+
+  // RUNG 3/4 — the SAME internet web-fallback the conversation path uses, called through
+  // the ONE shared hookup (webFallbackForAnswer). So the report dock checks the web for a
+  // figure the report's own dossier doesn't hold — cited from a named source, or handed to
+  // the user — instead of deflecting. Gated on a figure-ask (zero added latency for a
+  // normal question), never throws (degrades to ""). This is the Phase-3 unification the
+  // engine always intended: both paths, one internet lookup.
+  const { block: webBlock } = await webFallbackForAnswer(question, grounded);
+  const system = grounded + webBlock;
 
   // Tell the model the SHAPE of what was grabbed so the answer (not just the follow-ups)
   // is tailored — e.g. a date/token reads differently than a metric.

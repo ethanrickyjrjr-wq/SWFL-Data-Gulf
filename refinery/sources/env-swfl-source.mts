@@ -38,8 +38,7 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
  */
 
 const SOURCE_ID = "fema_nfhl";
-const FEMA_BASE_URL =
-  "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer";
+const FEMA_BASE_URL = "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer";
 const FLOOD_HAZARD_ZONES_LAYER = 28;
 
 /**
@@ -79,20 +78,7 @@ const SFHA_ZONES = new Set([
 ]);
 
 /** Coastal high-hazard SFHA subset — V-family FEMA flood zones (wave action per 44 CFR §59.1). Flags each fragment's is_ve_zone, which aggregates into swfl_ve_area_sq_deg. */
-const VE_ZONES = new Set([
-  "V",
-  "VE",
-  "V1",
-  "V2",
-  "V3",
-  "V4",
-  "V5",
-  "V6",
-  "V7",
-  "V8",
-  "V9",
-  "V30",
-]);
+const VE_ZONES = new Set(["V", "VE", "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V30"]);
 
 interface CountyDef {
   fips: string;
@@ -110,18 +96,18 @@ interface CountyDef {
 const SWFL_COUNTIES: CountyDef[] = [
   { fips: "12071", name: "Lee", bbox: [-82.32, 26.32, -81.57, 26.91] },
   { fips: "12021", name: "Collier", bbox: [-81.91, 25.79, -80.85, 26.5] },
-  { fips: "12015", name: "Charlotte", bbox: [-82.41, 26.78, -81.61, 27.1] },
-  { fips: "12043", name: "Glades", bbox: [-81.62, 26.79, -80.94, 27.21] },
   { fips: "12051", name: "Hendry", bbox: [-81.58, 26.32, -80.86, 26.9] },
-  { fips: "12115", name: "Sarasota", bbox: [-82.55, 26.79, -81.97, 27.45] },
+  // Charlotte / Glades / Sarasota removed — NOT real coverage (CLAUDE.md SCOPE lock
+  // 07/07/2026). They leaked in via the 05/2026 broad-ingest push; core = Lee+Collier,
+  // Hendry minor. Each county here fires one live FEMA fetch, so this list IS the scope.
 ];
 
-const FIXTURE_PATH = path.join(
-  process.cwd(),
-  "refinery",
-  "__fixtures__",
-  "env-swfl.sample.json",
-);
+/** The count of in-scope SWFL core counties — the expected full-coverage set.
+ *  Downstream caveats reference this instead of a hardcoded number so the scope
+ *  can only be changed in one place (here). */
+export const SWFL_COUNTY_COUNT = SWFL_COUNTIES.length;
+
+const FIXTURE_PATH = path.join(process.cwd(), "refinery", "__fixtures__", "env-swfl.sample.json");
 
 /**
  * Normalized shape: one fragment per (county, FLD_ZONE) pair. Aggregates the
@@ -168,9 +154,7 @@ interface FemaStatsResponse {
 }
 
 /** Build the area-weighted stats query URL for one county bbox. */
-export function buildFemaStatsUrl(
-  bbox: [number, number, number, number],
-): string {
+export function buildFemaStatsUrl(bbox: [number, number, number, number]): string {
   const outStats = encodeURIComponent(
     JSON.stringify([
       {
@@ -292,35 +276,29 @@ export const envSwflSource: SourceConnector = {
     const normalized =
       env.source === "fixture"
         ? await loadFixture()
-        : (
-            await Promise.all(
-              SWFL_COUNTIES.map((c) => fetchCountyStats(c, fetched_at)),
-            )
-          ).flat();
-    return normalized.map(
-      (n): RawFragment<EnvSwflNormalized> => ({
-        fragment_id: fragmentId(SOURCE_ID, `${n.county_fips}:${n.fld_zone}`),
-        source_id: SOURCE_ID,
-        source_trust_tier: 1,
-        fetched_at: n.fetched_at,
-        raw: {
-          county_fips: n.county_fips,
-          county_name: n.county_name,
-          FLD_ZONE: n.fld_zone,
-          polygon_count: n.polygon_count,
-          area_total: n.area_sq_deg,
-          bbox: n.bbox,
-        },
-        normalized: n,
-      }),
-    );
+        : (await Promise.all(SWFL_COUNTIES.map((c) => fetchCountyStats(c, fetched_at)))).flat();
+    return normalized.map((n): RawFragment<EnvSwflNormalized> => ({
+      fragment_id: fragmentId(SOURCE_ID, `${n.county_fips}:${n.fld_zone}`),
+      source_id: SOURCE_ID,
+      source_trust_tier: 1,
+      fetched_at: n.fetched_at,
+      raw: {
+        county_fips: n.county_fips,
+        county_name: n.county_name,
+        FLD_ZONE: n.fld_zone,
+        polygon_count: n.polygon_count,
+        area_total: n.area_sq_deg,
+        bbox: n.bbox,
+      },
+      normalized: n,
+    }));
   },
   citationMeta(verifiedDate, ttlSeconds): Omit<CitationRow, "id"> {
     return {
       source:
         env.source === "fixture"
-          ? "FEMA NFHL — Flood Hazard Zones (Layer 28, fixture; SWFL 6-county aggregate)"
-          : "FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWFL 6-county area-weighted aggregate)",
+          ? "FEMA NFHL — Flood Hazard Zones (Layer 28, fixture; SWFL core-county aggregate)"
+          : "FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWFL core-county area-weighted aggregate)",
       verified: verifiedDate,
       expires: expiresDate(verifiedDate, ttlSeconds),
     };

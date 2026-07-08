@@ -8,7 +8,7 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 
 /**
  * storm-history-source — NOAA Storm Events Database for SWFL (Lee, Collier,
- * Charlotte counties), 1996-2025 modern-schema vintage.
+ * Lee + Collier core), 1996-2025 modern-schema vintage.
  *
  * Reads directly from a Parquet file in Tier 1 Supabase Storage via DuckDB
  * httpfs. The Python ingest pipeline (ingest/duckdb_pipelines/storm_history_swfl)
@@ -44,7 +44,11 @@ const FIXTURE_PATH = path.resolve(
   "storm-history-swfl.sample.parquet",
 );
 
-const SWFL_COUNTIES = ["LEE", "COLLIER", "CHARLOTTE"] as const;
+// Lee + Collier core. Charlotte removed 07/07/2026 — NOT real coverage (CLAUDE.md
+// SCOPE lock); it leaked in via the 05/2026 broad-ingest push. The Tier-1 parquet
+// may still hold Charlotte rows, so aggregateStormRows gates EVERY counter (corpus
+// + per-county) on this set — see the scope gate in the row loop.
+const SWFL_COUNTIES = ["LEE", "COLLIER"] as const;
 const MAJOR_EVENT_TYPES = new Set([
   "Hurricane (Typhoon)",
   "Tropical Storm",
@@ -349,7 +353,12 @@ export function aggregateStormRows(rows: StormRow[], now: Date = new Date()): Ag
       }
     }
     const county = normalizeCounty(row.cz_name);
-    if (county) countiesCovered.add(county);
+    // Scope gate: ONLY in-scope core-county rows feed ANY counter (corpus totals,
+    // tropical-cyclone set, billion-dollar tracker, AND per-county). A Charlotte row
+    // still present in the pre-filtered parquet — or an unmappable marine zone — is
+    // skipped so headline numbers reflect Lee+Collier only, not the old 3-county set.
+    if (!county || !(SWFL_COUNTIES as readonly string[]).includes(county)) continue;
+    countiesCovered.add(county);
 
     const damageRaw = row.damage_property;
     const damage = parseDamageString(damageRaw);
@@ -480,7 +489,7 @@ export const stormHistorySource: SourceConnector = {
       source:
         env.source === "fixture"
           ? `NOAA Storm Events (fixture; 2022-2024 sample including Hurricane Ian) — ${fixtureUrl}`
-          : `NOAA Storm Events Database via data_lake._tier1_inventory[${BUCKET}/${PARQUET_PATH}] — ingested from ${"https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"}, SWFL counties (LEE+COLLIER+CHARLOTTE), 1996-2025 modern-schema vintage — ${liveUrl}`,
+          : `NOAA Storm Events Database via data_lake._tier1_inventory[${BUCKET}/${PARQUET_PATH}] — ingested from ${"https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"}, SWFL counties (${SWFL_COUNTIES.join("+")}), 1996-2025 modern-schema vintage — ${liveUrl}`,
       verified: verifiedDate,
       expires: expiresDate(verifiedDate, ttlSeconds),
     };

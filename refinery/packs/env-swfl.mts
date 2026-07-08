@@ -11,6 +11,7 @@ import type {
 import {
   envSwflSource,
   buildFemaStatsUrl,
+  SWFL_COUNTY_COUNT,
   type EnvSwflNormalized,
 } from "../sources/env-swfl-source.mts";
 import {
@@ -44,8 +45,8 @@ import { fmtUsd } from "./lib/number-format.mts";
  * env-swfl — Southwest Florida flood-hazard exposure derived directly from
  * the FEMA National Flood Hazard Layer (Layer 28 / S_FLD_HAZ_AR).
  *
- * Branches: per-county area-weighted aggregates across the 6 SWFL counties
- * (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). One fragment per
+ * Branches: per-county area-weighted aggregates across the SWFL core counties
+ * (Lee + Collier core, Hendry minor). One fragment per
  * (county, FLD_ZONE) pair — see refinery/sources/env-swfl-source.mts for the
  * fetch shape and docs/env-swfl-spike-findings.md for the verified endpoint
  * contract.
@@ -104,7 +105,7 @@ interface EnvSnapshot {
   /** Earliest fetched_at across all fragments — feeds source.fetched_at. */
   earliest_fetched_at: string;
   /**
-   * Realized-loss NFIP aggregate for the 6 SWFL counties, populated from the
+   * Realized-loss NFIP aggregate for the SWFL core counties, populated from the
    * fema-nfip swfl-aggregate fragment when one was returned. Null when fixture
    * mode lacks NFIP data or live mode returns zero NFIP rows — the 4 NFIP
    * metrics are then silently omitted from outputProducer.
@@ -541,7 +542,7 @@ function nfipAggregateSource(snapshot: EnvSnapshot): BrainOutputMetricSource {
     url: FEMA_NFIP_TABLE_URL,
     fetched_at: snapshot.nfip_fetched_at ?? snapshot.earliest_fetched_at,
     tier: 1,
-    citation: `${provenance}, FL state, 6 SWFL counties (FIPS ${nfip.county_codes.join("+")}), storm-list reviewed ${nfip.storm_year_list_reviewed_at}.`,
+    citation: `${provenance}, FL state, ${nfip.county_codes.length} SWFL core counties (FIPS ${nfip.county_codes.join("+")}), storm-list reviewed ${nfip.storm_year_list_reviewed_at}.`,
   };
 }
 
@@ -1012,12 +1013,12 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   );
   if (env.source === "fixture") {
     caveats.push(
-      "Fixture mode: only Lee County is populated. SWFL-wide metrics reflect Lee alone — switch to REFINERY_SOURCE=live for the full 6-county footprint.",
+      "Fixture mode: only Lee County is populated. SWFL-wide metrics reflect Lee alone — switch to REFINERY_SOURCE=live for the full core-county footprint (Lee + Collier + Hendry).",
     );
   }
-  if (snapshot.counties.length < 6 && env.source === "live") {
+  if (snapshot.counties.length < SWFL_COUNTY_COUNT && env.source === "live") {
     caveats.push(
-      `Live mode returned aggregates for only ${snapshot.counties.length} of 6 SWFL counties. Missing counties may indicate FEMA API throttling or empty bbox results — re-run before relying on the SWFL-wide rollup.`,
+      `Live mode returned aggregates for only ${snapshot.counties.length} of ${SWFL_COUNTY_COUNT} SWFL core counties. Missing counties may indicate FEMA API throttling or empty bbox results — re-run before relying on the SWFL-wide rollup.`,
     );
   }
   // LOMR cache-invalidation note — v1 hits FEMA on every build, so the read
@@ -1089,8 +1090,8 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
           snapshot.earliest_fetched_at,
         tier: 1,
         citation:
-          `OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL, 6 SWFL counties ` +
-          `(FIPS ${snapshot.nfip?.county_codes.join("+") ?? "12071+12021+12015+12043+12051+12115"}). ` +
+          `OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL, SWFL core counties ` +
+          `(FIPS ${snapshot.nfip?.county_codes.join("+") ?? "12071+12021+12051"}). ` +
           `Per-named-storm paid totals (building + contents + ICO). ` +
           `2024 storms split by date_of_loss at Milton landfall (${HELENE_MILTON_SPLIT_DATE}); ` +
           `null-date 2024 claims are excluded from per-storm rows. ` +
@@ -1269,7 +1270,7 @@ export const envSwfl: PackDefinition = {
   public_label: "Flood & Environment",
   domain: "environmental",
   scope:
-    "Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), observed Caloosahatchee surface stage (USGS daily value, parameterCd 00065), and annual rainfall (NOAA GHCN-Daily, Lee+Collier station average) across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-barrier-mode-1 consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = USGS surface-stage metric for HUC 03090205 (Caloosahatchee) + GHCN-Daily annual rainfall average across 4 Lee+Collier anchor stations.",
+    "Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized loss (NFIP paid claims), observed Caloosahatchee surface stage (USGS daily value, parameterCd 00065), and annual rainfall (NOAA GHCN-Daily, Lee+Collier station average) across the SWFL core counties (Lee + Collier core, Hendry minor). Modeled side = area-weighted FEMA NFHL aggregates with coastal V/VE breakouts for barrier-island / flood-barrier-mode-1 consumers. Realized side = storm-vs-baseline aggregates of historical NFIP paid claims with hardcoded SWFL hurricane list. Observed side = USGS surface-stage metric for HUC 03090205 (Caloosahatchee) + GHCN-Daily annual rainfall average across 4 Lee+Collier anchor stations.",
   ttl_seconds: 2592000, // 30 days — FEMA NFHL revisions arrive via LOMRs at multi-month cadence
   sources: [envSwflSource, femaNfipSource, usgsWaterSource, noaaGhcnRainfallSource],
   input_brains: [],

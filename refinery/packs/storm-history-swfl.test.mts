@@ -63,7 +63,7 @@ test("stormHistorySwfl: outputProducer returns valid BrainOutputProducerResult a
   // Counties metric reflects alphabetical sort across the 3 SWFL counties.
   const counties = result.key_metrics.find((m) => m.metric === "storm_counties_covered");
   assert.ok(counties, "expected storm_counties_covered metric");
-  assert.equal(counties!.value, "CHARLOTTE+COLLIER+LEE");
+  assert.equal(counties!.value, "COLLIER+LEE");
 
   // Ingest vintage is a categorical YYYY-YYYY span.
   const vintage = result.key_metrics.find((m) => m.metric === "storm_ingest_vintage");
