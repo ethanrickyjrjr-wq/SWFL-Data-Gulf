@@ -70,6 +70,14 @@ pipelines:
       expected_range: [200000, 900000]
       tolerance_pct: 10
       anomaly_threshold_pct: 8
+    source_scope:
+      confirmed_total:
+        summary: "Daily median home sale price, 3 areas (Cape Coral, Fort Myers, Naples) via live-search cascade — only the Gemini-grounded leg is actually live; Firecrawl/Spider/Claude legs are stubbed no-ops"
+        source: "our ingest"
+      source_ceiling:
+        summary: "4 real SWFL sub-markets used elsewhere in this platform (city_pulse, listing_lifecycle) are absent from this cascade's areas list: Bonita Springs, Estero, Marco Island, Immokalee — same code path, config-only addition. Also only one metric is templated (median sale price); the same daily cascade could answer active-inventory-count or median-DOM per city with a new question template."
+        as_of: "07/08/2026"
+        source_label: "our own live-search cascade (no fixed vendor API)"
 
   - name: live_search_daily_mortgage
     lane: tier-2
@@ -90,6 +98,16 @@ pipelines:
       expected_range: [2.0, 12.0]
       tolerance_pct: 5
       anomaly_threshold_pct: 8
+    source_scope:
+      confirmed_total:
+        summary: "Daily 30-yr fixed mortgage rate (national), FRED MORTGAGE30US"
+        source: "our ingest"
+      source_ceiling:
+        value: 2
+        summary: "Same FRED release (rid=190) also carries MORTGAGE15US (15-yr fixed) — confirmed live, same API call shape, zero new integration cost. Every OTHER series in that release (5/1 ARM, 1-yr ARM, points/margin, regional variants) is confirmed DISCONTINUED by FRED — a real vendor ceiling, not a gap."
+        as_of: "07/08/2026"
+        source_url: "https://fred.stlouisfed.org/release?rid=190"
+        source_label: "FRED — Mortgage Rates release"
 
   # ── Tier-1 DuckDB (fixed-path Parquet, overwritten each run) ─────────────
   # Verified: SELECT id, updated_at FROM data_lake._tier1_inventory WHERE id = '<id>'
@@ -219,6 +237,15 @@ pipelines:
     inventory_id: lake-tier1/environmental/hurdat2_fl.parquet
     inventory_key_type: exact
     # Verified: id exists, vintage='1851-2024' (historical range); probe uses updated_at ✓
+    source_scope:
+      confirmed_total:
+        summary: "Full Atlantic HURDAT2 best-track, storms touching the FL bounding box, 6-hourly obs (position/wind/pressure/category), 1851-2024"
+        source: "our ingest"
+      source_ceiling:
+        summary: "NHC's own file (already downloaded) also carries wind-radii/RMW fields (34/50/64kt quadrant radii + radius of max wind, present since 2004) — parser explicitly discards 16 of these per observation, zero extra fetch cost to keep them. A full companion NE/NC Pacific HURDAT2 database exists at the same URL root — deliberately and correctly excluded (FL-only product)."
+        as_of: "07/08/2026"
+        source_url: "https://www.nhc.noaa.gov/data/#hurdat"
+        source_label: "NOAA National Hurricane Center (HURDAT2)"
 
   - name: storm_history_swfl
     lane: tier-1-duckdb
@@ -265,6 +292,15 @@ pipelines:
     inventory_key_type: prefix
     # Verified: lake-tier1/faf5/2026-05-20/faf_flows.parquet (updated_at 2026-05-20) ✓
     # faf5 is Tier-1 cold-only; no tier-2 dlt pipeline exists yet (data_lake.faf_flows is a cache).
+    source_scope:
+      confirmed_total:
+        summary: "FAF5.7.1 regional O-D freight flows filtered to FL's 5 zones (SWFL is undifferentiated inside 'Remainder of Florida'), tons/value/tmiles 2017-2024 + mid-range forecast 2030-2050, by commodity (sctg2)"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Vendor's own page states FAF5 also breaks flows out by MODE OF TRANSPORT (truck/rail/water/air/pipeline) — we never read a mode column, so every SWFL freight number we serve is mode-blind. Also unpulled: FAF5 Experimental County-Level Estimates (could separate Lee/Collier out of the catch-all zone we're stuck aggregating into — directly relevant to this platform's county grain), a separate state-level file, High/Low forecast bands (we pull mid-range only), 1997-2012 historical backfill, and the FAF5 Truck Network Highway Assignment (flows mapped onto actual highway segments)."
+        as_of: "07/08/2026"
+        source_url: "https://ops.fhwa.dot.gov/freight/freight_analysis/faf/"
+        source_label: "FHWA/BTS Freight Analysis Framework 5"
 
   - name: fred_g17
     lane: tier-1
@@ -306,6 +342,18 @@ pipelines:
     # 8 Realtor.com monthly series: active listings, DOM, list price, new listings
     # for Lee MSA (15980) and Collier MSA (34940). Starts Jul 2016. MSA grain only (no ZIP).
     # First run: <fill on first successful workflow_dispatch>.
+    # BUG (see check fred_listing_swfl_wrong_source_url): constants.py SOURCE_URL points at
+    # fred.stlouisfed.org/categories/32287, which live-resolves to a Singapore/International-Data
+    # category, not the real Realtor.com release (rid=462) — wrong citation persisted every run.
+    source_scope:
+      confirmed_total:
+        summary: "active_listing_count, median_days_on_market, median_list_price, new_listing_count x 2 MSAs (Lee 15980, Collier 34940), monthly since Jul 2016 — 4 metrics x 2 MSAs = 8 series"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same FRED release, same MSAs, confirmed-live series we don't pull: Avg Listing Price, Median Listing Price per Sqft, Median Listing Sqft (home size), Pending Listing Count (raw — we only infer via ratio elsewhere), Price Increase Count, Price Reduced Count (raw), Total Listing Count (active+pending), plus every metric's M/M and Y/Y percent-change companion series — all same-cost FRED API calls."
+        as_of: "07/08/2026"
+        source_url: "https://fred.stlouisfed.org/release?rid=462"
+        source_label: "FRED — Housing Inventory Core Metrics (Realtor.com)"
 
   - name: market_heat_swfl
     lane: tier-1
@@ -319,6 +367,15 @@ pipelines:
     # Public S3, no API key. Consumer brain: refinery/packs/market-heat-swfl.mts.
     # Workflow: .github/workflows/ingest-market-heat-swfl.yml. Gate-4 floor: MIN_ROWS=200.
     # First run: <fill on first successful workflow_dispatch>.
+    source_scope:
+      confirmed_total:
+        summary: "Core CSV (active_listing_count, median_days_on_market, pending_ratio, new_listing_count, price_reduced_share, median_listing_price, all +YoY) + Hotness CSV (hotness_score, supply_score, demand_score, hotness_rank, median_dom_vs_us), ZIP grain, SWFL-filtered, monthly"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same ZIP-grain CSVs, same fetch — Avg Listing Price, Median List Price Per Sqft, Median Listing Sqft, Pending Listing Count raw (we only keep the ratio), Price Increase Count, Total Listing Count (active+pending), Nielsen HH Rank (all +M/M+Y/Y), plus from the Hotness file: Hotness Rank Change/Prev/Within-CBSA/Within-County, LDP Unique Viewers Per Property vs US."
+        as_of: "07/08/2026"
+        source_url: "https://www.realtor.com/research/data/"
+        source_label: "Realtor.com Economic Research Data Library"
 
   - name: bls_ppi
     lane: tier-1
@@ -327,6 +384,22 @@ pipelines:
     inventory_id: lake-tier1/macro/bls_ppi/
     inventory_key_type: prefix
     # First run: 2026-05-27 (workflow_dispatch) ✓
+    # LABELING DISCREPANCY confirmed 07/08/2026 (see check bls_ppi_mislabeled_series): our own
+    # constants.py labels PCU236221236221/PCU236211236211 "single-family/multi-family home
+    # construction PPI." BLS's live Industry Factsheets page states 236221 = "New Warehouse
+    # Building Construction" and 236211 = "New Industrial Building Construction" — both
+    # NONRESIDENTIAL. Series still fetch/load fine; the LABEL is what's wrong. Genuine
+    # residential-construction PPI series (NAICS 236115/236116) were not confirmed live this
+    # session — needs a follow-up probe before trusting downstream consumption of this signal.
+    source_scope:
+      confirmed_total:
+        summary: "2 PPI industry series, 10-year rolling monthly index — currently labeled residential construction, likely mislabeled (see comment above)"
+        source: "our ingest"
+      source_ceiling:
+        summary: "BLS PPI publishes a much broader set for the same 'Nonresidential Building Construction' sector we're actually measuring — New School (236222), New Office (236223), New Health Care (236224), Construction Trade Contractors (238), plus 'Final Demand Construction' and 'Inputs to Construction Industries' composite indexes — none pulled. If genuine residential PPI series (236115/236116) exist as intended, those are a separate unconfirmed gap."
+        as_of: "07/08/2026"
+        source_url: "https://www.bls.gov/ppi/factsheets/"
+        source_label: "BLS Producer Price Index — Industry Factsheets"
 
   - name: bls_oews_swfl_tier1
     lane: tier-1
@@ -358,6 +431,15 @@ pipelines:
     inventory_id: lake-tier1/macro/census_vip/
     inventory_key_type: prefix
     # First run: 2026-05-27 (workflow_dispatch) ✓
+    source_scope:
+      confirmed_total:
+        summary: "Census Value of Construction Put in Place, monthly, 10-year window — 4 collapsed categories only (total, residential, nonresidential, manufacturing), seasonally-adjusted value only, national grain"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same VIP survey publishes dozens of sub-categories we collapse away: residential new single-family/multi-family/improvements split separately; nonresidential broken into lodging, office, full commercial detail, health care, ~10 educational sub-types, religious, public safety, recreation, transportation, communication, power, and 13 named manufacturing sub-sectors (vs. our single bucket). Also unused: non-seasonally-adjusted series. Confirmed vendor ceiling: VIP is national-only, no state/county cut exists for this survey — not a grain gap."
+        as_of: "07/08/2026"
+        source_url: "https://www.census.gov/construction/c30/c30index.html"
+        source_label: "Census Bureau Construction Spending (VIP/C30)"
 
   - name: city_pulse
     lane: tier-1
@@ -372,6 +454,14 @@ pipelines:
     # data_lake.city_pulse (Tier-2) and read by the city-pulse-swfl brain.
     # First run: <fill on first successful GHA run>.
     note: "RE-ENABLED 07/05/2026 in weekly cost mode (operator: build data cheaply pre-launch): cron Wednesday 09:00 UTC, distill on Haiku, capture stays Sonnet web_search. At launch: daily cadence + freshness_sla 2/4."
+    source_scope:
+      confirmed_total:
+        summary: "13 named SWFL cities scanned weekly: Lehigh Acres, Cape Coral, Fort Myers, Naples, Estero, Bonita Springs, Fort Myers Beach, Sanibel, North Fort Myers, Marco Island, East Naples, North Naples, Golden Gate"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Real, named Lee/Collier places absent from the scan list: Immokalee, Ave Maria, Everglades City, Goodland, Chokoloskee, Copeland (Collier); Captiva, Pine Island (Matlacha/St. James City/Bokeelia), Alva, San Carlos Park (Lee) — same code path, config-only addition."
+        as_of: "07/08/2026"
+        source_label: "Wikipedia Lee County / Collier County community lists"
 
   - name: city_pulse_corridors
     lane: tier-1
@@ -383,7 +473,17 @@ pipelines:
     # synchronous distill into data_lake.city_pulse_corridors (Tier-2), read by the
     # corridor-pulse-swfl brain (brain-input edge into cre-swfl). Cron 0 10 * * 0.
     # First run: <fill on first successful GHA run>.
+    # Live corridor_profiles table has 27 verified corridors as of 07/08/2026 — a stale
+    # code comment elsewhere says "25 corridors," corrected here, not a data issue.
     note: "Was silently dead 3 weeks (06/21-07/05/2026): runs outgrew the 45-min workflow timeout — killed after full API spend, zero rows kept (last success 06/14 ran 37m). Fixed 07/05/2026: timeout 90m + unbuffered logs; distill inherits Haiku cost mode."
+    source_scope:
+      confirmed_total:
+        summary: "27 verified CRE corridors, Lee (17) + Collier (9, all Naples-labeled), weekly"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Alico Road (Lee — major commercial/industrial/logistics corridor past RSW airport) and Corkscrew Road (Lee — the growth corridor Alico terminates at, connecting Estero/Bonita to rural Lee/Collier) are both real and missing. Structural gap: zero corridor coverage for Marco Island, though city_pulse tracks it as a city. Golden Gate Parkway (Collier) checked but unconfirmed — no standalone source found, not asserted as a gap."
+        as_of: "07/08/2026"
+        source_label: "Wikipedia (Alico Road, Corkscrew Road)"
 
   # ── Tier-2 dlt (Postgres data_lake.* via _dlt_loads) ─────────────────────
   # Verified: SELECT schema_name, MAX(inserted_at) FROM data_lake._dlt_loads
@@ -672,6 +772,15 @@ pipelines:
     # 2026-06-16: fetcher rewritten — crawl4ai UndetectedAdapter replaces Firecrawl stealth
     # + Spider residential. GHA dry-run probe required before re-enabling cron.
     # Verified: April 2026 XLSX loaded 2026-05-27 (operator-confirmed, pre-WAF window).
+    source_scope:
+      confirmed_total:
+        summary: "Issued-series monthly XLSX, 23 mapped columns (permit #, value, type, address, dates, owner/contractor detail, computed bucket)"
+        source: "our ingest"
+      source_ceiling:
+        summary: "The Applied-series XLSX — a leading indicator (what's coming vs. Issued's what's-built) — is published on the same county page, same monthly cadence, same column layout, and deliberately excluded (needs a composite permit_number+series primary key, a real scoped fix not yet built)."
+        as_of: "07/08/2026"
+        source_url: "https://www.collier.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports"
+        source_label: "Collier County Building Permit Reports"
 
   - name: fl_dor_tdt
     lane: tier-2
@@ -684,6 +793,15 @@ pipelines:
     # Cron: 20th of month 10:00 UTC via fl-dor-tdt-monthly.yml.
     # Note: pipeline uses FY-derived dates (not row 9 cell values) — FY1999/2001-2003
     # had 1900-era date serials in row 9 which required cleanup + _fix_bad_dates.py.
+    source_scope:
+      confirmed_total:
+        summary: "Monthly Tourist Development Tax collections ($), Lee + Collier, from the Form 3 workbook's TDT sheet only"
+        source: "our ingest"
+      source_ceiling:
+        summary: "The same downloaded workbook has 7 sheets, we parse 1. Unused: Local Option Sales Tax Coll (discretionary sales-tax receipts by county), Conv & Tourist Impact tax (same layout as the TDT sheet we already parse), and 3 Local Option Fuel Tax sheets (voted/non-voted/additional) — all real monthly county revenue, zero extra download cost."
+        as_of: "07/08/2026"
+        source_url: "https://floridarevenue.com/dataPortal/GTA/Form%203/"
+        source_label: "FL Dept. of Revenue, Office of Tax Research (Form 3)"
 
   - name: fl_dor_sales_tax
     lane: tier-2
@@ -694,6 +812,15 @@ pipelines:
     # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
     # First run: 2026-05-29 backfill (cy0203–cy2425). 40,140 rows. Lee + Collier.
     # Cron: 15th of month 11:00 UTC via fl-dor-sales-tax-monthly.yml.
+    source_scope:
+      confirmed_total:
+        summary: "Monthly taxable sales ($) by kind_code/business_type, per county (Lee+Collier), full 24-month coverage per file"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Vendor ceiling confirmed: the 2 unused sheets in the same workbook (Summary, Line Item Detail) are a statewide rollup and a static citation glossary — not data. County x business-type x month is the finest grain DOR publishes; no ZIP cut exists."
+        as_of: "07/08/2026"
+        source_url: "https://floridarevenue.com/dataPortal/GTA/Form%2010/"
+        source_label: "FL Dept. of Revenue, Office of Tax Research (Form 10)"
 
   - name: fdle_crime_swfl
     lane: tier-2
@@ -787,12 +914,22 @@ pipelines:
     freshness_table: public.fgcu_reri_indicators
     expected_rows_min: 16 # ≥2 months × 8 indicators; rebaseline to 90% of actual after first monthly cron count
     # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
-    # Source: FGCU RERI homepage (https://www.fgcu.edu/cob/reri/). Scrapes via Firecrawl.
+    # Source: FGCU RERI homepage (https://www.fgcu.edu/cob/reri/). Scrapes via crawl4ai
+    # (ingest.lib.crawl_client) — comment corrected 07/08/2026, code was never Firecrawl.
     # 8 SWFL economic indicators per month: airport activity, tourist tax, taxable sales,
     # unemployment, building permits, home sales, home prices (per county), active listings.
     # Lee + Collier + Charlotte coverage. ~2-month data lag (e.g., May 2026 report → March data).
     # Cron: 5th of month 14:00 UTC via fgcu-reri-monthly.yml.
     # First run: 2026-05-29 (manual dispatch after SQL migration).
+    source_scope:
+      confirmed_total:
+        summary: "8 monthly pct-change indicators, scraped from the RERI homepage summary text only (not underlying index levels)"
+        source: "our ingest"
+      source_ceiling:
+        summary: "RERI's own Indicators Dashboard (Tableau-driven) lists 13 indicator categories against our 8 — 5 entirely untouched: Employment by Industry, Consumer Sentiment Index, regional CPI, SWFL Stock Index, Industry Diversification Index. RERI also publishes a monthly PDF report (indicators{YYYYMM}.pdf, confirmed live) likely holding raw index levels vs. our single pct-change sentence — never parsed. A separate annual Southwest Florida Economic Almanac is also untouched. RERI's own stated coverage is 5 counties (Collier/Lee/Charlotte/Hendry/Glades); our parser already anticipates Hendry/Glades but the vendor homepage text has only ever populated Lee/Collier/Charlotte."
+        as_of: "07/08/2026"
+        source_url: "https://www.fgcu.edu/cob/reri/dashboard/"
+        source_label: "FGCU RERI Indicators Dashboard"
 
   - name: swfl_inc
     lane: tier-2
@@ -804,10 +941,20 @@ pipelines:
     expected_rows_min: 28 # 90% of 32 confirmed 2026-05-31
     # Non-dlt pipeline — freshness checked via MAX(scraped_at) on the table directly.
     # Source: SWFL Inc. (swflinc.com/blog/ category feeds), Lee County Economic Development Organization.
-    # Weekly scrape via Firecrawl; NDJSON cold copy at lake-tier1/econ/swfl_inc/.
+    # Weekly scrape via crawl4ai stealth (UndetectedAdapter) — comment corrected 07/08/2026, not Firecrawl.
+    # NDJSON cold copy at lake-tier1/econ/swfl_inc/.
     # Cron: Monday 08:00 UTC via swfl-inc-weekly.yml.
     # First run: 2026-06-01 (GHA success confirmed).
     note: "FIXED + re-enabled 07/05/2026: swflinc.com WAF 403s GHA IPs on plain Playwright AND plain HTTP; stealth fetch (UndetectedAdapter) passes. Real run green 07/05/2026 (32 rows, 3 feeds). Weekly cron Monday 08:00 UTC. Source publishes sporadically — freshness reads scraped_at."
+    source_scope:
+      confirmed_total:
+        summary: "3 blog category feeds scraped weekly: business-development, chamber-news, policy"
+        source: "our ingest"
+      source_ceiling:
+        summary: "swflinc.com/blog/ lists 13 total category feeds live; we scrape 3. Econ-dev-relevant ones worth adding: Nonprofit News, Veteran Resources, Accommodations & Hotels, Shop Local — real, live, same shape as the 3 we pull. The other 6 (Business Builders, Business Guide, Email Marketing, Hurricane Ian Resources, Social Media, Website & SEO) are marketing/how-to content, reasonably out of scope."
+        as_of: "07/08/2026"
+        source_url: "https://www.swflinc.com/blog/"
+        source_label: "SWFL Inc. blog"
 
   - name: dbpr_press_releases
     lane: tier-2
@@ -819,13 +966,23 @@ pipelines:
     expected_rows_min: 135 # 90% of 151 confirmed 2026-06-01 backfill
     # Non-dlt pipeline — freshness checked via MAX(inserted_at); inserted_at backfilled from scraped_at for 2026-06-01 rows.
     # Source: FL DBPR (www2.myfloridalicense.com/press-releases/) — ~4-5 releases/month.
-    # Weekly scrape via Firecrawl; listing pages rendered with full body (no per-article fetch).
+    # Weekly scrape via crawl4ai (comment corrected 07/08/2026, matches note below — not Firecrawl);
+    # listing pages rendered with full body (no per-article fetch).
     # Cron: Monday 09:00 UTC via dbpr-press-releases-weekly.yml (clears 08:00 swfl-inc slot).
     # Pages per run: 2 (default weekly); --backfill crawls all 30 pages (one-time).
     # Enrichment: Sonnet fills summary/topics/affected_industries/geographic_mentions/is_swfl_relevant.
     # Consumer: news-swfl brain (refinery/packs/news-swfl.mts).
     # First run: 2026-06-01 backfill — 151 rows, 2016-2026, 146/151 dated.
     note: "Pipeline HEALTHY (crawl4ai, green weekly, upserts fine) — the SOURCE went quiet: newest DBPR release is dated 02/07/2025. Freshness now reads scraped_at (pipeline-alive), fixed 07/05/2026; was false-RED on frozen inserted_at."
+    source_scope:
+      confirmed_total:
+        summary: "Single DBPR press-release feed, fully paginated (30 pages backfilled = complete history, 2016-2026, 151 rows), filtered to SWFL relevance"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Exhaustive single-feed scrape — checked for a second distinct DBPR news feed (/news-room/), it's the same page under a different nav slug, not a real second source. The only 'gap' is the source itself going quiet (newest release dated 02/07/2025) — a source-side ceiling, not a coverage gap."
+        as_of: "07/08/2026"
+        source_url: "https://www2.myfloridalicense.com/press-releases/"
+        source_label: "FL DBPR Press Releases"
 
   - name: rsw_airport_monthly
     lane: tier-2
@@ -867,6 +1024,15 @@ pipelines:
     # Consuming brain: condo-sirs-swfl.
     # Positive signal only — presence = confirmed SIRS filing; absence has no meaning.
     # First cron run: 2026-06-02 (success). 239 rows (LEE=83, COLLIER=159) backfill.
+    source_scope:
+      confirmed_total:
+        summary: "Full QIX hypercube pull from both DBPR SIRS Qlik apps, Lee+Collier filtered: project_type/name, association_name, city, zip, county, dbpr_id"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Confirmed vendor ceiling, nothing left on the table: live QIX introspection shows each app exposes exactly one hypercube with 7 (pre-Jul-2025) or 5 (Jul-2025+) columns total — the full column set is already mapped. This is a public filing-status registry only; actual reserve-study dollar figures/structural findings aren't published here at all."
+        as_of: "07/08/2026"
+        source_url: "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/"
+        source_label: "FL DBPR SIRS Reporting Database (Qlik Sense)"
 
   - name: fl_dbpr_licenses
     lane: tier-2
@@ -890,7 +1056,7 @@ pipelines:
         as_of: "07/07/2026"
         source_url: "https://www2.myfloridalicense.com/data-download/"
         source_label: "FL DBPR license board data download"
-        summary: "35 license boards total; we use 2. Community Association Managers board pairs directly with condo SIRS data we already pull (dbpr_sirs_submissions) — the standout unpulled complement."
+        summary: "35 license boards total; we use 2. Community Association Managers board pairs directly with condo SIRS data we already pull (dbpr_sirs_submissions) — the standout unpulled complement. Separately (07/08/2026, see check dbpr_licenses_dropped_street_address): the source CSV (CONSTRUCTIONLICENSE_1.csv, 22 columns) carries full street address in already-downloaded columns 5-10, but our column map drops them — zero ZIP-grain license data today."
 
   - name: fl_dbpr_applicants
     lane: tier-2
@@ -906,6 +1072,15 @@ pipelines:
     # Fixed 2026-06-13: was MISSING — wrong URL (CONSTRUCTIONAPPLICANT_1.csv 301→HTML), wrong 11-col layout, no
     # county_code → consumer .in("county_code") errored → applicants_swfl silently 0. Now constr_app.csv, 15-col.
     # Consuming brain: licenses-swfl (licenses_applicants_swfl metric).
+    source_scope:
+      confirmed_total:
+        summary: "occupation_code, first/last name, city/state/zip, county, phone — from constr_app.csv, Lee+Collier filtered"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same already-downloaded 15-column CSV has 6 unused columns: Occupation Description (human-readable label, vs. our raw code), Middle/Second Name, Suffix, full Address 1/2/3 (dropped — only city/state/zip kept, see check dbpr_licenses_dropped_street_address), Phone Extension."
+        as_of: "07/08/2026"
+        source_url: "https://www2.myfloridalicense.com/sto/file_download/extracts/constr_app.csv"
+        source_label: "FL DBPR Construction Applicants bulk extract"
 
   - name: dbpr_public_notices
     lane: tier-2
@@ -923,6 +1098,15 @@ pipelines:
     # Two rows for the same respondent is normal; ORDER BY response_deadline DESC for active version.
     # First run: 2026-06-01 (news-swfl.md: 6 notices, 1 construction unlicensed, 0 ABT/hospitality).
     note: "RE-ENABLED 07/05/2026 — cron Monday 10:00 UTC restored; pdf_summary moved to Haiku (cost mode, handful of notices/week = cents). Structured fields are deterministic regex; only the summary prose is LLM."
+    source_scope:
+      confirmed_total:
+        summary: "respondent_name, county, case_number(s), violation_type, industry, response_deadline, plus an LLM pdf_summary of the notice narrative — 7-county SWFL scope"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Index page structure fully matches the parser (live-verified). Whether the underlying notice PDFs carry statute citations or civil-penalty dollar amounts as separate fields beyond what's already folded into pdf_summary prose is unconfirmed — PDF binary content wasn't parsed this session."
+        as_of: "07/08/2026"
+        source_url: "https://www2.myfloridalicense.com/public-notices/"
+        source_label: "FL DBPR Public Notices Index"
 
   - name: noaa_ghcn_rainfall
     lane: tier-2
@@ -959,6 +1143,8 @@ pipelines:
     # NO expected_rows_min: a slow CRE-news week legitimately writes 0 NEW rows, so a
     # per-run volume floor would false-alarm. Recency only: MAX(captured_at) within 21d.
     # Consuming brain: corridor-pulse-swfl (brain-input edge into cre-swfl).
+    # Not a separate scrape — this is a recency watchdog on the same table city_pulse_corridors
+    # writes; its coverage delta is identical to that entry's source_scope (see above).
 
   - name: marketbeat_swfl
     lane: tier-2
@@ -997,6 +1183,15 @@ pipelines:
     # Submarket aliases: refinery/lib/marketbeat-submarket-aliases.mts
     # First run: 2026-06-09, 132 rows (11 Colliers PDFs Q4 2022-Q4 2025, manual ODD drop).
     # Q4 2024 form-gated (cloud.usa.colliers.com email delivery) — GHA creates GH issue when blocked.
+    source_scope:
+      confirmed_total:
+        summary: "6 SWFL submarkets x Industrial+Flex sectors: inventory_sf, total vacancy %, net absorption (current+YTD), deliveries, under construction, asking rate NNN"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Building count and direct vacancy % (distinct from total vacancy %) are parsed from the same PDF rows by column position but never stored — zero extra fetch cost. Whether Colliers publishes Office/Retail/Multifamily SWFL reports alongside Industrial is unconfirmed — colliers.com sits behind a Cloudflare managed challenge and its research pages are a JS SPA that returned nav-only boilerplate on live crawl4ai fetch, even for the report we already ingest."
+        as_of: "07/08/2026"
+        source_url: "https://www.colliers.com/en/research"
+        source_label: "Colliers International Research"
 
   - name: mhs_databook
     lane: tier-2
@@ -1011,6 +1206,19 @@ pipelines:
     # First run: 2026-06-09, 48 rows (2026 MHS Data Book, sectors: industrial/office/retail).
     # Recipes: docs/superpowers/plans/2026-06-05-mhs-odd-graduation-handoff.md.
     # Extraction spec: docs/littlebird-notes/2026-06-05.md.
+    # MISSING SECTOR (see check mhs_databook_missing_multifamily): vendor's own page confirms
+    # Multi-Family coverage in the same PDF, same annual cost — scoped as "Recipe 3" originally,
+    # never built.
+    source_scope:
+      confirmed_total:
+        value: 48
+        as_of: "2026-06-09"
+        source: "our ingest (16 submarkets x 3 sectors: retail/industrial/office)"
+      source_ceiling:
+        summary: "Vendor's own 2026 Data Book page states it covers retail, office, industrial, AND multi-family markets across Lee/Collier/Charlotte — Multi-Family is confirmed live and unpulled, zero extra annual cost (see check above)."
+        as_of: "07/08/2026"
+        source_url: "https://www.mhsappraisal.com/market-trends-2026/"
+        source_label: "MHS Appraisal 2026 Data Book"
 
   - name: swfl_search_demand
     lane: tier-2
@@ -1027,6 +1235,15 @@ pipelines:
     # DataForSEO bills per task, so weekly would re-pull identical numbers and burn ~4x the cost;
     # monthly matches the source cadence (verified-clear slot, nothing runs at hour >= 16).
     # First run: 2026-06-03, 825 rows (manual live backfill, all 3 SWFL locations).
+    source_scope:
+      confirmed_total:
+        summary: "keyword, avg_monthly_searches, competition (HIGH/MEDIUM/LOW text), cpc, 12-month search trend array, 275 seed keywords (15 SWFL places x 18 topic templates + 5 core terms), 3 locations (Fort Myers metro, Naples metro, state FL)"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same DataForSEO response also carries competition_index (0-100 precise score, vs. our coarse HIGH/MEDIUM/LOW text), low/high_top_of_page_bid (Google Ads bid range), and spell (vendor's auto-corrected keyword) — none stored, zero extra API cost. DataForSEO's separate keywords_for_keywords expansion endpoint (demand discovery beyond our fixed 275 seeds) is Phase-2, already flagged in our own seeds.py, not a new finding."
+        as_of: "07/08/2026"
+        source_url: "https://docs.dataforseo.com/v3/keywords_data/google_ads/search_volume/live/"
+        source_label: "DataForSEO Google Ads Search Volume Live"
 
   # ── Graduated ODD source — MHS commercial permits (J3, 2026-06-10) ───────────
   # Was probe_mode: odd_window until its jurisdiction→submarket crosswalk and
@@ -1047,6 +1264,16 @@ pipelines:
     # Table DDL: docs/sql/20260605_mhs_permits_swfl.sql
     # Consumer: refinery/packs/permits-commercial-swfl.mts. Pipeline stamps
     # submarket + zip via ingest/pipelines/mhs_permits_swfl/geocode.py.
+    source_scope:
+      confirmed_total:
+        value: 281
+        as_of: "2026-06-10"
+        source: "our ingest (issued date, asset class, project address/name, permit value, building SF, jurisdiction, calendar year — all 6 vendor columns extracted)"
+      source_ceiling:
+        summary: "Field-complete — the vendor's permit table itself only has these 6 columns, all extracted. Known issue is data quality not extraction: pages with multiple jurisdiction sections (Naples/Marco Island/Charlotte/Punta Gorda sharing a page) can assign every row to whichever jurisdiction header appears first — documented TODO for the next annual drop."
+        as_of: "07/08/2026"
+        source_url: "https://mhsappraisal.com/market-trends-2026/"
+        source_label: "MHS Appraisal 2026 Data Book"
 
   # ── ODD-window entries (probe_mode: odd_window) ──────────────────────────────
   # Sources that cannot be auto-ingested on a reliable schedule. The probe is
@@ -1090,7 +1317,16 @@ pipelines:
     freshness_column: _ingested_at
     source_name: brevitas
     expected_rows_min: 1
-    note: "Brevitas active CRE lease listings — Estero + Fort Myers Beach. Supplements Crexi (same table, source_name=brevitas). Clean JSON API (brevitas.com/api/search), no auth. ~1-4 confirmed leases/city; for-sale listings filtered by price threshold. Weekly Sunday 12:00 UTC. Pipeline: ingest/pipelines/brevitas_listings/pipeline.py."
+    note: "Brevitas active CRE lease listings — Estero + Fort Myers Beach. Supplements Crexi (same table, source_name=brevitas). Clean JSON API (brevitas.com/api/search), no auth. ~1-4 confirmed leases/city. Weekly Sunday 12:00 UTC. Pipeline: ingest/pipelines/brevitas_listings/pipeline.py. CORRECTED 07/08/2026: the 'for-sale listings filtered by price threshold' framing was wrong — transaction_type=for_lease is hardcoded in the API call, so for-sale listings aren't fetched at all, not filtered post-hoc (see check brevitas_lease_only_hardcoded)."
+    source_scope:
+      confirmed_total:
+        summary: "For-lease only, Estero + Fort Myers Beach: address (URL-slug-derived), city, state, property_type (single top-level type, no subtype), sqft, asking_price_psf, status, source_url"
+        source: "our ingest"
+      source_ceiling:
+        summary: "For-sale listings via brevitas.com/search — a distinct live endpoint, never queried. Live site also exposes a much richer type/subtype taxonomy than the flat top-level type we store: Hotel (Airport/B&B/Casino/Economy Limited/Extended Stay/Full Service/Resort), Development (Hospitality/Industrial/Mixed Use/Multifamily/Office/Residential/Retail), plus Business/Commercial/Industrial/Land/Mixed Use/Multifamily/Office/Residential/Retail/Special Purpose at top level."
+        as_of: "07/08/2026"
+        source_url: "https://www.brevitas.com/"
+        source_label: "Brevitas"
 
   - name: lee_associates_swfl
     lane: tier-2
@@ -1103,6 +1339,15 @@ pipelines:
     expected_rows_min: 18 # 90% of 20 confirmed rows (Q1-2025–Q1-2026 initial load; cumulative upsert table)
     note: "Fort Myers quarterly: Q1-2026 Office 6.05% vac / $27.74 NNN; Retail 3.60% / $23.07 NNN; Industrial 9.01% / $12.20 NNN; Multifamily 17.2% vac / $1,689/unit. 20 rows loaded (Q1-2025–Q1-2026). GHA quarterly (20th of Feb/May/Aug/Nov). Graduate after first GHA green."
     # Pipeline: ingest/pipelines/lee_associates_swfl/pipeline.py + extract.py.
+    source_scope:
+      confirmed_total:
+        summary: "Fort Myers only, all 4 sectors (Office/Retail/Industrial/Multifamily): vacancy_rate, asking_rent_nnn/mf, absorption_sqft, sale_price_psf, under_construction, inventory_sf, 5 quarters/PDF"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Naples/Collier County entirely — confirmed live (see check lee_associates_missing_naples): the same URL pattern used for Fort Myers returns HTTP 200 for all 4 Naples sector PDFs, same vendor, same cadence, same extractor would work. Cap Rate is already extracted from the PDF text by the parser but silently dropped before the DB write — no cap_rate column exists on data_lake.marketbeat_swfl and the INSERT never references it, despite the regex already populating it in memory."
+        as_of: "07/08/2026"
+        source_url: "https://www.lee-associates.com/research/"
+        source_label: "Lee & Associates"
 
   # premier_commercial_swfl — RETIRED 2026-06-22: premcomm.com is brokerage-only, no survey tables, stub exited 1. Dead end.
   # svn_florida_swfl — RETIRED 2026-06-22: svncp.com publishes deal press releases only, not vacancy/rent/absorption surveys. Stub exited 1. Dead end.
@@ -1159,6 +1404,14 @@ pipelines:
     dlt_schema_name: data_lake
     source_tag: news_crawl
     note: "4 SWFL sources via crawl4ai. Cron at /api/cron/news-crawl scores + inserts into project_events. Novelty guard (2026-07-05): published_date = first-seen (carried forward pre-merge); assert_content_fresh 7d gate trips when no NEW article_url appears — news has no real content date, so staleness = no novelty."
+    source_scope:
+      confirmed_total:
+        summary: "4 named sources scraped daily: Naples Daily News (business section), Fort Myers News-Press (business section), Lee County govt releases, Collier County govt news"
+        source: "our ingest"
+      source_ceiling:
+        summary: "6 real, live SWFL outlets confirmed but not scraped: Gulfshore Business, WINK News (fox4now.com now redirects into the same site — one outlet, not two), NBC2/WBBH (gulfcoastnewsnow.com), WGCU public media news, Cape Coral Breeze, Florida Weekly (has separate Naples/Fort Myers county editions)."
+        as_of: "07/08/2026"
+        source_label: "gulfshorebusiness.com, winknews.com, gulfcoastnewsnow.com, wgcu.org/news, capecoralbreeze.com, floridaweekly.com"
 
   - name: active_listings
     lane: tier-2
@@ -1172,6 +1425,14 @@ pipelines:
     # SQL migration: docs/sql/20260625_active_listings_residential.sql (applied 2026-06-25).
     # Pipeline: ingest/pipelines/active_listings/. Workflow: .github/workflows/active-listings-daily.yml.
     # Consumer brain: refinery/packs/active-listings-swfl.mts.
+    source_scope:
+      confirmed_total:
+        summary: "mls_id, list_price, street_address, city, community, beds, baths, sqft, acres, days_on_market, status, property_type, listing_type, zip_code, county, state, listing_url — card-level HTML scrape of an undisclosed regional brokerage site (base URL is a GHA secret, not committed), region-wide SWFL, daily"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Per-listing DETAIL PAGES (one fetch per listing, deliberately skipped to keep the index scrape light) would carry year built, garage, pool/waterfront features, HOA fee, listing agent/office contact, photo count, virtual tour link, open house schedule, price-change history, and listing remarks/description — none captured. Not live-probed this session given the deliberate operational-security posture (secret withheld); code/design-doc sourced."
+        as_of: "07/08/2026"
+        source_label: "regional listings source (base URL undisclosed by design)"
 
   - name: listing_lifecycle
     lane: tier-2
@@ -1193,6 +1454,15 @@ pipelines:
     # the same GHA runner IP; no [skip]/[warn] 403 in either log. Hendry scheduled 2026-07-02.
     # Pipeline: ingest/pipelines/listing_lifecycle/pipeline.py. Workflow: .github/workflows/listing-lifecycle-daily.yml.
     # Consumer brain: refinery/packs/active-listings-swfl.mts (via data_lake.listing_active_stats).
+    source_scope:
+      confirmed_total:
+        summary: "Daily SteadyAPI /search sweep, Lee+Collier+Hendry: address/price/beds/sqft/lot/lat-lon/county/photo/status/property_type, all 7 status flags, reduced_amount. State-machine diff (new/active/price-cut/holding/relist). CLOSINGS ARE CAPTURED: budget-sampled departures/holding listings resolve to sold_price + sold_date via /property-tax-history (see check listing_lifecycle_sold_sampling_bias for the sampling caveat)."
+        source: "our ingest"
+      source_ceiling:
+        summary: "listed_date is a confirmed-live vendor field (property_history[].listing.list_date) we read but never persist. brokerage/agent fields and true per-listing days-on-market are genuine vendor ceilings — grepped all 18 SteadyAPI real-estate endpoints, zero agent/broker/office fields exist anywhere; only aggregate median_days_on_market exists (city/county/ZIP grain), not per-listing."
+        as_of: "07/08/2026"
+        source_url: "https://docs.steadyapi.com/collection.json"
+        source_label: "realtor.com (via SteadyAPI)"
     # Tables: data_lake.listing_state (MERGE) + data_lake.listing_transitions (log). Migration: migrations/20260627_listing_lifecycle.sql.
 
   # ── Market aggregates (SteadyAPI Layer-B, realtor.com origin) ──────────────
@@ -1210,12 +1480,34 @@ pipelines:
     freshness_column: captured_at
     # ~2 calls/run (Lee + Collier). Consumer: refinery/packs/price-distribution-swfl.mts (via
     # data_lake.listing_price_histogram_swfl_latest). Workflow: ingest-market-aggregates-histogram.yml.
+    source_scope:
+      confirmed_total:
+        summary: "Price-band histogram (band_min/max/range, listing_count, total_listings, status), per county (Lee, Collier), for-sale only, weekly"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Full extraction confirmed — the live vendor response schema is parsed field-by-field with no gap on this endpoint."
+        as_of: "07/08/2026"
+        source_url: "https://docs.steadyapi.com"
+        source_label: "realtor.com (via SteadyAPI — price histogram)"
+
   - name: market_aggregates_details
     lane: tier-2
     cadence_days: 30 # monthly — realtor.com ZIP-grain aggregates only refresh monthly
     tolerance_multiplier: 2.0
     freshness_table: data_lake.market_details_swfl
     freshness_column: captured_at
+    # DROPPED FIELDS (see check market_aggregates_details_dropped_fields): parse_market_details()
+    # never reads the market_comparison block or market_temperature extras already present in the
+    # same paid response body — zero extra network cost, pure code gap.
+    source_scope:
+      confirmed_total:
+        summary: "Per-ZIP (57 in-scope Lee+Collier ZIPs, monthly): median_sold_price, median_listing_price, median_rent_price, median_days_on_market, median_price_per_sqft, local_hotness_score, list_to_sold_ratio_pct, sold_to_rent_ratio, market_strength, is_competitive"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Same paid response body, silently dropped: market_comparison block (ratio_of_days_on_market vs. typical property in county/US, ratio_of_ldp_views vs. typical in county/US) and market_temperature extras (national_hotness_score, local_temperature, national_temperature, hot_market_badge, hot_market_rank). Separately, unused sibling SteadyAPI endpoints not wired into any pipeline: /neighborhood-market-trends, /property-tax-history, /neighborhood-amenities, /environment-risk, /nearby-home-values, /similar-homes, /new-construction, /mortgage-rate, /property-estimates, /property-urgency."
+        as_of: "07/08/2026"
+        source_url: "https://docs.steadyapi.com"
+        source_label: "realtor.com (via SteadyAPI — housing market details)"
     # ~57 calls/run (one per in-scope Lee+Collier ZIP). Consumer: refinery/packs/market-temperature-swfl.mts
     # (via data_lake.market_details_swfl_latest). Workflow: ingest-market-aggregates-details.yml.
 
