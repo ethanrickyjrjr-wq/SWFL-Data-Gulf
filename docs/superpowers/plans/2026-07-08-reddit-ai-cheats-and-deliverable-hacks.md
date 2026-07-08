@@ -1,6 +1,7 @@
 # Reddit AI-cheats + deliverable-hacks sweep — research only, nothing built
 
-> **Recommended model:** ⚡ Sonnet
+> **Recommended model:** ⚡ Sonnet — keywords: architecture
+
 
 **Status:** research only, nothing built. Written 07/08/2026 per operator request: "run steadyapi on
 reddit and find all the cheats we can for claude, designing with AI for emails and socials, and any
@@ -216,3 +217,74 @@ scratchpad, not committed.
 
 **Cross-reference:** `docs/superpowers/specs/2026-07-05-email-marketing-evidence-notes.md` (prior,
 deeper email-marketing research — not repeated here).
+
+---
+
+# ADDENDUM — 07/08/2026 (later, Opus 4.8 session) — Reddit slice of the 3-surface AI-design/email sweep
+
+A second, separate sweep ran the same day (operator: "run steadyapi on reddit and insta and twitter
+social, find design programs for AI or hacks and email marketing AI hacks"). Its **Reddit findings** are
+consolidated here so this file stays the one Reddit-findings home. The FULL cross-surface breakdowns —
+every crawled AI-design/email tool broken down with a spec skeleton, plus the Instagram + Twitter slices —
+live in the companion doc **`docs/superpowers/plans/2026-07-08-ai-design-and-email-marketing-hacks-sweep.md`**.
+
+**Reddit method this run:** 34 calls — 20 `/v1/reddit/search` keyword sweeps + 14 targeted
+`/v1/reddit/posts` hot pulls (r/graphic_design, r/artificial, r/PromptEngineering, r/marketing,
+r/Emailmarketing, r/SaaS, r/webdesign, r/Design, r/advertising, r/digital_marketing, r/content_marketing,
+r/copywriting, r/socialmedia). 775 posts. Reconfirmed a THIRD time: generic `/search` relevance-ranks
+site-wide (bucket queries drowned in layoffs/model-release/IPO viral noise) — the targeted subreddit
+hot-pulls + tool-mention frequency carried the on-topic signal. Two on-topic queries (`midjourney
+marketing`, `AI subject line`) 200'd with `{"success": false}` — the content-sensitivity quirk, now folded
+into `docs/vendor-notes/INSTAGRAM-SOCIAL-STEADY.md`.
+
+## Reddit tool-mention frequency (titles + selftext, on-topic slice)
+
+canva 171 · figma 139 · chatgpt 114 · midjourney 26 · photoshop 22 · instantly 21 · klaviyo 19 · adobe 13
+· n8n 13 · mailchimp 6 · beehiiv 6 · jasper 5 · substack 5 · gamma 3 · hubspot / apollo / capcut / freepik
+/ runway / ideogram / synthesia / recraft / looka / smartlead 1–2.
+
+## Reddit-surfaced HACKS (thread-derived — full detail + spec skeletons in the companion doc)
+
+1. **"Human-sounding email" prompt hack** — r/ChatGPT, "After 147 failed ChatGPT prompts… a simple email
+   that didn't sound like a robot" (~22,927 upvotes / 2,409 comments — the single highest-engagement email
+   find of the sweep). A constraint + negative-example prompt: ban the robotic tells ("I hope this email
+   finds you well", "circle back", "leverage"), pin a persona + length. **→ BUILT this session** as the
+   `voiceGuard` banned-phrase lint (`lib/email/voice-guard.ts`, wired into the author repair loop; spec
+   `docs/superpowers/specs/2026-07-08-email-voice-guard-design.md`).
+2. **n8n AI newsletter/report workflow** — r/n8n (415pts) + gist
+   `github.com/joseph1kurivila/…c04a6f74` ("N8N is the highest-ROI skill I learned in 2026"). A 7-step
+   research→compress→synthesize-under-strict-contract→deterministic-render→scheduled-email pattern that
+   independently validates our own thin-pipe / deterministic-render / cited-only architecture. Concrete
+   liftable: its citation-index rewrite (numbered refs → clean single-root links, dedupe, drop-unresolved).
+3. **Free-newsletter-as-audience (Ed Zitron / wheresyoured.at)** — a genuinely-useful free newsletter is
+   the funnel; one repeated low-friction paid ask ($7/mo) converts. Mirrors our locked build-free/send-paid
+   model — the free artifact must stand alone (not a crippled teaser) or nobody pays to send.
+4. **Copywriter's AI-era toolkit** — r/copywriting-adjacent (1078pts, "wrote ads for Burger King/Siemens/
+   Hyundai, 140 online tools I use"): Power Thesaurus (vote-ranked synonyms) + OneLook (reverse/concept
+   dictionary). Retrieval tools that sharpen human phrasing without letting the model rewrite meaning.
+5. **awesome-chatgpt-prompts → prompts.chat** — r/PromptEngineering (732pts): a CC0 "Act as a [role]"
+   prompt library (~165k stars) shipped as csv-data + CLI + Claude Code plugin + MCP server. Model for a
+   curated internal deliverable-recipe library.
+6. **thebilig "Best AI Newsletters"** — the ranked picks all lead with a stated cadence + one-line coverage
+   promise; "short + daily + curated" wins. Informs the default shape of our scheduled deliverables.
+
+## Reddit-surfaced PROGRAMS (named in threads; full crawl breakdowns in the companion doc)
+
+- **recap.aitools.inc** (surfaced x6, r/marketing/SaaS) — "AI voice agent that creates a newsletter w/ 10k
+  subs"; the live page is a human-branded beehiiv newsletter (voice-agent claim unverified on-page).
+- **Rond for Figma** (r/graphic_design, Tally beta form) — a Figma plugin that automates carousel/slide
+  design; direct analog to our grid builder's crown-jewel N-frame social output.
+- **Claude Design (Anthropic beta)** + **Migma's "Import Claude design"** — surfaced via
+  theinformation.com + r/… mentions; live-verified that AI-designed email is a shipping market pattern.
+- Also named across on-topic threads: gamma, recraft, ideogram, figma make, getalai/alai, beehiiv,
+  klaviyo, instantly, jasper, smartlead, lemlist, walterwrites, jenova (jenova.ai crawl was JS-walled —
+  flagged for re-crawl). Each broken down with a spec skeleton in the companion doc.
+
+## Addendum sources
+
+**SteadyAPI Reddit (this run, 07/08/2026, `new_steady` key):** 34 calls; raw JSON in this session's
+scratchpad (`sweep-raw.json`), not committed. **crawl4ai (live 07/08/2026):** gamma.app · recraft.ai ·
+figma.com/make · getalai.com · ideogram.ai · claude.com/product/design · recap.aitools.inc · tally.so
+(Rond) · beehiiv.com · klaviyo.com · instantly.ai · migma.ai · jasper.ai · smartlead.ai · lemlist.com ·
+walterwrites.ai · n8n.io · gist.github.com/joseph1kurivila/… · wheresyoured.at · powerthesaurus.org ·
+onelook.com · github.com/f/awesome-chatgpt-prompts · thebilig.com/newsletters/editors-picks/best-ai-newsletters.

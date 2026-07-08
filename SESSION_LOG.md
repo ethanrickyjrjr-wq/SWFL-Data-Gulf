@@ -1,3 +1,11 @@
+## 2026-07-08 (Opus 4.8 · main) — log: consolidated this session's Reddit findings into the canonical Reddit-sweep doc
+
+Per operator, appended this session's 3-surface sweep Reddit slice (tool-mention frequency, 6
+thread-derived hacks, programs named in threads) as a clearly-attributed ADDENDUM to the prior session's
+`docs/superpowers/plans/2026-07-08-reddit-ai-cheats-and-deliverable-hacks.md` (append-only — did NOT touch
+its existing content; that file is the earlier 07/08 session's, commit 0ad0cd25). Full cross-surface tool
+breakdowns + IG/Twitter remain in the companion doc `2026-07-08-ai-design-and-email-marketing-hacks-sweep.md`.
+
 ## 2026-07-08 (Opus 4.8 · main) — feat(email): voiceGuard banned-phrase lint SHIPPED (module + tests + repair-loop wiring)
 
 Built Tier-1 #1 from today's AI-design/email sweep: `lib/email/voice-guard.ts` — `VOICE_TELLS` (v1 =
