@@ -3,7 +3,34 @@
 // recipe containing a digit would collide with the no-invention prose lint, so
 // zero digits is test-enforced here.
 import { test, expect, describe } from "bun:test";
-import { detectRecipe, recipeSection, RECIPE_IDS, type RecipeId } from "./author-recipes";
+import {
+  detectRecipe,
+  recipeSection,
+  resolveRecipe,
+  isRecipeId,
+  RECIPE_IDS,
+  RECIPE_LABELS,
+  type RecipeId,
+} from "./author-recipes";
+
+describe("resolveRecipe — explicit pick wins, else keyword detection (M3)", () => {
+  test("a valid explicit id overrides prompt detection", () => {
+    // prompt would detect monthly-newsletter, but the user picked editorial-letter
+    expect(resolveRecipe("editorial-letter", "our monthly market digest")).toBe("editorial-letter");
+  });
+
+  test("an unknown/empty explicit id falls back to detection (never throws)", () => {
+    expect(resolveRecipe("not-a-recipe", "our monthly market digest")).toBe("monthly-newsletter");
+    expect(resolveRecipe(null, "Meet your Cape Coral agent")).toBe("agent-intro");
+    expect(resolveRecipe(undefined, "a plain note with no keywords")).toBe(null);
+  });
+
+  test("isRecipeId + RECIPE_LABELS cover exactly RECIPE_IDS", () => {
+    expect(isRecipeId("agent-intro")).toBe(true);
+    expect(isRecipeId("nope")).toBe(false);
+    expect(Object.keys(RECIPE_LABELS).sort()).toEqual([...RECIPE_IDS].sort());
+  });
+});
 
 describe("detectRecipe — deterministic keyword routing", () => {
   const cases: Array<[string, RecipeId | null]> = [

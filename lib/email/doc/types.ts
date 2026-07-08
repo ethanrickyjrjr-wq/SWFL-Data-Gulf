@@ -33,6 +33,12 @@ export type TextAlign = "left" | "center" | "right";
 
 export type PaddingSize = "none" | "sm" | "md" | "lg";
 
+/** Fence 3 — the blessed photo aspect ratios (the photo-size variety axis). A
+ *  listing photo displays center-cropped to one of these; default 3:2 (the MLS
+ *  standard) when unset, so every existing doc renders identically. User-choosable
+ *  in the canvas; the AI leaves it at the default. Registry: block-contract.ts. */
+export type PhotoRatio = "3:2" | "4:3" | "4:5" | "1:1";
+
 export type FontFamily =
   | "MODERN_SANS"
   | "BOOK_SERIF"
@@ -122,6 +128,10 @@ export interface ImageProps extends BlockBase {
    *  blocks coexist: the chart upsert skips kind:"photo". User-owned/sticky —
    *  the AI content-patch can never set it. */
   kind?: "chart" | "photo";
+  /** Fence 3 — the photo's aspect ratio (center-cropped). Only applies to
+   *  kind:"photo"; absent → 3:2 (behavior-neutral). User-owned/sticky — the AI
+   *  content-patch can never set it; the canvas ratio picker writes it. */
+  ratio?: PhotoRatio;
   /** Optional click-through URL — wraps the image in an <a> tag. */
   linkUrl?: string;
   // ── Text overlay ────────────────────────────────────────────────────────────

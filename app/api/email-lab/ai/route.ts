@@ -78,6 +78,8 @@ export async function POST(req: NextRequest) {
     // PAID author (build 03): compose the WHOLE doc (blocks + layout) from the data
     // menu, not just re-fill the current skeleton. `build:true` (or mode "author").
     build?: boolean;
+    // Explicit deliverable-type recipe pick (M3) — overrides keyword detection.
+    recipeId?: string;
   };
   const prompt = body.prompt ?? "";
 
@@ -111,6 +113,7 @@ export async function POST(req: NextRequest) {
             chartType: body.chartType as ChartType | undefined,
             assets: caller?.assets,
             replyEmail: caller?.email,
+            recipeId: body.recipeId,
           })
         : await buildContentDoc({
             prompt,

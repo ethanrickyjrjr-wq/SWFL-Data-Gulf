@@ -15,6 +15,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { CHART_TYPE_OPTIONS, type ChartType } from "@/lib/email/reshape-chart-type";
+import { RECIPE_IDS, RECIPE_LABELS } from "@/lib/email/author-recipes";
 import type {
   BlockLayout,
   BlockType,
@@ -379,6 +380,7 @@ export function EmailLabGridShell({
           scope,
           build: true,
           chartType: chartType === "auto" ? undefined : chartType,
+          recipeId: branding.preferred_recipe || undefined,
         }),
       });
       const data = (await res.json()) as { doc?: unknown; applied?: boolean; message?: string };
@@ -419,7 +421,13 @@ export function EmailLabGridShell({
     fetch("/api/email-lab/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: (initialAiPrompt ?? "").trim(), doc, scope, build: true }),
+      body: JSON.stringify({
+        prompt: (initialAiPrompt ?? "").trim(),
+        doc,
+        scope,
+        build: true,
+        recipeId: branding.preferred_recipe || undefined,
+      }),
     })
       .then((r) => r.json())
       .then((data: { doc?: unknown; applied?: boolean; message?: string }) => {
@@ -1237,6 +1245,25 @@ export function EmailLabGridShell({
                   </button>
                 ))}
               </div>
+              {/* Recipe picker (M3) — pick a research-backed layout recipe, or let the
+                  prompt choose. Stored in the brand blob, so it saves with the project. */}
+              <div className="mb-1.5 mt-2.5">
+                <span className="text-[10px] uppercase tracking-[0.15em] text-white/35">
+                  Recipe
+                </span>
+              </div>
+              <select
+                value={branding.preferred_recipe ?? ""}
+                onChange={(e) => setBranding({ ...branding, preferred_recipe: e.target.value })}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm text-white/80 focus:border-gulf-teal/50 focus:outline-none"
+              >
+                <option value="">Auto — choose from my prompt</option>
+                {RECIPE_IDS.map((id) => (
+                  <option key={id} value={id} className="text-black">
+                    {RECIPE_LABELS[id]}
+                  </option>
+                ))}
+              </select>
               <div className="mt-2.5 flex gap-2">
                 <button
                   onClick={buildFromPanel}

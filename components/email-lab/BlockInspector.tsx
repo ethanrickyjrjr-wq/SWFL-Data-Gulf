@@ -18,6 +18,8 @@ import type {
   TextAlign,
 } from "@/lib/email/doc/types";
 import { KNOWN_PLATFORMS, PLATFORMS, platformMeta } from "@/lib/email/social/platforms";
+import { PHOTO_RATIOS, DEFAULT_PHOTO_RATIO } from "@/lib/email/doc/block-contract";
+import { flipBlockSide } from "@/lib/email/doc/flip";
 
 const LABELS: Record<EmailBlock["type"], string> = {
   header: "Header",
@@ -205,6 +207,7 @@ export function BlockInspector({
               options={["left", "center", "right"]}
               onChange={(v) => set("align", v)}
             />
+            <FlipSideButton block={block} onChange={onChange} />
             <TextField
               label="Link URL"
               value={str("linkUrl")}
@@ -230,6 +233,13 @@ export function BlockInspector({
             />
             <TextField label="Alt text" value={str("alt")} onChange={(v) => set("alt", v)} />
             <TextField label="Caption" value={str("caption")} onChange={(v) => set("caption", v)} />
+            {/* Fence 3 (soft-user) — crop to a blessed photo ratio. Absent → 3:2. */}
+            <Segmented
+              label="Photo ratio"
+              value={(props.ratio as string) ?? DEFAULT_PHOTO_RATIO}
+              options={PHOTO_RATIOS.map((r) => [r, r] as [string, string])}
+              onChange={(v) => set("ratio", v)}
+            />
             <TextField
               label="Link URL"
               value={str("linkUrl")}
@@ -275,6 +285,7 @@ export function BlockInspector({
                 options={["left", "center", "right"]}
                 onChange={(v) => set("overlayAlign", v)}
               />
+              <FlipSideButton block={block} onChange={onChange} />
             </div>
           </>
         )}
@@ -611,6 +622,28 @@ export function BlockInspector({
         Delete block
       </button>
     </div>
+  );
+}
+
+/** Flip-to-correct (M2) — a pure left↔right flip of the block's side-dependent
+ *  props (text align, image overlay align), for when the user swaps sides of a
+ *  two-block row. No model call. */
+function FlipSideButton({
+  block,
+  onChange,
+}: {
+  block: EmailBlock;
+  onChange: (next: EmailBlock) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(flipBlockSide(block))}
+      className="w-full rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 hover:border-gulf-teal hover:text-gulf-teal"
+      title="Flip left/right — mirror alignment when you move this block to the other side of a row"
+    >
+      ⇄ Flip left / right
+    </button>
   );
 }
 

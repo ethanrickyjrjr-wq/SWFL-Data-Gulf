@@ -74,13 +74,18 @@ export function ImageBlock({
     );
   }
 
-  // Fence 3 (2026-07-08 fence spec) — a listing photo displays center-cropped
-  // to the MLS 3:2 standard regardless of its source dimensions. Progressive
-  // enhancement: ~41% email-client support per caniemail, Outlook desktop
-  // falls back to today's unconstrained render (never worse), matching the
-  // same policy lib/brand/fonts.ts already uses for webfonts.
-  const photoRatioStyle =
-    props.kind === "photo" ? { aspectRatio: "3 / 2", objectFit: "cover" as const } : {};
+  // Fence 3 (2026-07-08 fence spec) — a listing photo displays center-cropped to
+  // a blessed aspect ratio (the photo-size variety axis, block-contract.ts). The
+  // ratio is user-choosable in the canvas; absent → 3:2 (the MLS standard), so
+  // every existing doc renders identically. Progressive enhancement: ~41%
+  // email-client support per caniemail, Outlook desktop falls back to today's
+  // unconstrained render (never worse), matching lib/brand/fonts.ts's webfont policy.
+  // A photo crops to 3:2 by default; a ratio set in the canvas picker crops any
+  // image (kind or not). No kind and no ratio → today's unconstrained render.
+  const wantsRatio = props.kind === "photo" || props.ratio != null;
+  const photoRatioStyle = wantsRatio
+    ? { aspectRatio: (props.ratio ?? "3:2").replace(":", " / "), objectFit: "cover" as const }
+    : {};
 
   const imgEl = props.url ? (
     <Img

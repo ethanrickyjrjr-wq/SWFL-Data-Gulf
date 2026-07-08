@@ -22,7 +22,14 @@
 // model emits `span` + `new_row`; THIS module derives bounds-correct {x,y,w,h}.
 
 import { defaultPropsFor } from "./doc/default-docs";
-import { KNOWN_BLOCK_TYPES, BANDABLE_TYPES } from "./doc/block-contract";
+import {
+  KNOWN_BLOCK_TYPES,
+  BANDABLE_TYPES,
+  BLOCK_CONTRACT,
+  ZONE_RANK,
+  BLESSED_ROW_SPANS,
+  ACCENT_BUDGET,
+} from "./doc/block-contract";
 import { mintBlockId } from "./doc/schema";
 import type { AuthoredBlock, AuthoredDoc } from "./doc/schema";
 import type { BlockLayout, BlockType, EmailBlock, EmailDoc, EmailGlobalStyle } from "./doc/types";
@@ -642,11 +649,93 @@ function buildEntry(
   };
 }
 
+// ── The fences, applied HARD (AI path only) ──────────────────────────────────
+// deriveLayout is not exported and is called ONLY by assembleAuthoredDoc, so every
+// clamp here binds the AI author and NOTHING the user does on the canvas. The
+// canvas (react-grid-layout) has its own layout path and only WARNS the user.
+
+/** Fence 1 — snap a row's spans onto the nearest blessed multiset (the layout
+ *  variety space in block-contract.ts). Orientation is preserved: whichever side
+ *  was bigger stays bigger (flip-to-correct owns left↔right). Every blessed set
+ *  sums to 12, so a snapped row butts edge-to-edge with no separate pad/trim.
+ *  A row length outside the registry (never produced here — rows cap at 3) falls
+ *  back to the old clamp-and-pad so the engine stays total. Exported for tests. */
+export function snapRowSpans(spans: number[]): number[] {
+  const clamped = spans.map((s) => Math.max(1, Math.min(GRID_COLS, Math.round(s))));
+  const blessed = BLESSED_ROW_SPANS[clamped.length];
+  if (!blessed) return padTrimToGrid(clamped);
+  // rank the positions by descending span; match against the (descending) blessed set
+  const byRank = clamped.map((s, i) => ({ s, i })).sort((a, b) => b.s - a.s || a.i - b.i);
+  const vals = byRank.map((x) => x.s);
+  let best = blessed[0];
+  let bestCost = Infinity;
+  for (const cand of blessed) {
+    const cost = cand.reduce((acc, v, k) => acc + Math.abs(v - vals[k]), 0);
+    if (cost < bestCost) {
+      bestCost = cost;
+      best = cand;
+    }
+  }
+  const out = new Array<number>(clamped.length);
+  byRank.forEach((x, rank) => {
+    out[x.i] = best[rank];
+  });
+  return out;
+}
+
+/** Old behavior kept as the >3-column fallback: trim the largest down, then pad
+ *  round-robin, until the row sums to exactly 12. */
+function padTrimToGrid(spans: number[]): number[] {
+  const out = [...spans];
+  while (out.reduce((a, b) => a + b, 0) > GRID_COLS) {
+    const idx = out.indexOf(Math.max(...out));
+    out[idx] = Math.max(1, out[idx] - 1);
+    if (out[idx] === 1 && out.every((s) => s === 1)) break;
+  }
+  let rem = GRID_COLS - out.reduce((a, b) => a + b, 0);
+  let i = 0;
+  while (rem > 0) {
+    out[i % out.length] += 1;
+    rem -= 1;
+    i += 1;
+  }
+  return out;
+}
+
+/** Fence 5 — hold accent bands to the budget (emphasis is budgeted, not banned).
+ *  After ACCENT_BUDGET accents, further `band:"accent"` are downgraded to `light`
+ *  (still a styled section, just not accent-emphasized). PURE; exported for tests. */
+export function clampAccentBudget(blocks: AuthoredBlock[]): AuthoredBlock[] {
+  let used = 0;
+  return blocks.map((b) => {
+    if (b.band !== "accent") return b;
+    if (used < ACCENT_BUDGET) {
+      used += 1;
+      return b;
+    }
+    return { ...b, band: "light" };
+  });
+}
+
+/** Fence 2 — stable sort into zone order (open leads, close trails); the footer is
+ *  forced absolute-last so a CLOSE sibling (sources / social row) can never sit
+ *  under it. Stable, so within-zone order and every `new_row` grouping survives. */
+function sortEntriesByZone(entries: Entry[]): Entry[] {
+  const rank = (e: Entry) =>
+    e.type === "footer" ? ZONE_RANK.close + 1 : ZONE_RANK[BLOCK_CONTRACT[e.type].zone];
+  return entries
+    .map((e, i) => ({ e, i }))
+    .sort((a, b) => rank(a.e) - rank(b.e) || a.i - b.i)
+    .map((x) => x.e);
+}
+
 /** Group entries into rows (structural blocks + new_row force a break; ≤3 per row)
  *  and derive bounds-correct {x,y,w,h}: each row fills 12 columns, y increments by
  *  row, height is a uniform advisory 1 (email height is content-driven). Footer is
- *  marked static. This is what makes a no-react-grid-layout engine sound. */
-function deriveLayout(entries: Entry[]): EmailBlock[] {
+ *  marked static. This is what makes a no-react-grid-layout engine sound.
+ *  Fences 1 (blessed spans) & 2 (zones) are enforced HERE — the AI-only path. */
+function deriveLayout(rawEntries: Entry[]): EmailBlock[] {
+  const entries = sortEntriesByZone(rawEntries);
   const rows: Entry[][] = [];
   let cur: Entry[] = [];
   const flush = () => {
@@ -670,26 +759,9 @@ function deriveLayout(entries: Entry[]): EmailBlock[] {
   const out: EmailBlock[] = [];
   let y = 0;
   for (const row of rows) {
-    let spans: number[];
-    if (row.length === 1) {
-      spans = [GRID_COLS];
-    } else {
-      spans = row.map((e) => Math.max(1, Math.min(GRID_COLS, Math.round(e.span))));
-      // trim down to ≤12
-      while (spans.reduce((a, b) => a + b, 0) > GRID_COLS) {
-        const idx = spans.indexOf(Math.max(...spans));
-        spans[idx] = Math.max(1, spans[idx] - 1);
-        if (spans[idx] === 1 && spans.every((s) => s === 1)) break;
-      }
-      // pad up to exactly 12 so columns butt edge-to-edge
-      let rem = GRID_COLS - spans.reduce((a, b) => a + b, 0);
-      let i = 0;
-      while (rem > 0) {
-        spans[i % spans.length] += 1;
-        rem -= 1;
-        i += 1;
-      }
-    }
+    // Fence 1 — snap the row onto the nearest blessed multiset (single blocks →
+    // full-bleed [12]; every blessed set already sums to 12).
+    const spans = snapRowSpans(row.map((e) => e.span));
     let x = 0;
     row.forEach((e, idx) => {
       const w = spans[idx];
@@ -737,7 +809,8 @@ export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
   let chartPlaced = false;
   let photoPlaced = false;
 
-  for (const a of authored.blocks) {
+  // Fence 5 — hold accent bands to the budget before assembly (AI path only).
+  for (const a of clampAccentBudget(authored.blocks)) {
     const r = buildEntry(
       a,
       figuresById,

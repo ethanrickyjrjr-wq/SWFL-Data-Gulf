@@ -110,6 +110,7 @@ const ImagePropsSchema = z.object({
   alt: z.string().max(160).optional(),
   caption: z.string().max(200).optional(),
   kind: z.enum(["chart", "photo"]).optional(),
+  ratio: z.enum(["3:2", "4:3", "4:5", "1:1"]).optional(),
   linkUrl: z.string().optional(),
   paddingY: paddingY(),
   sectionBg: sectionBg(),

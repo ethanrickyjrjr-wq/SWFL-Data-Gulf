@@ -18,7 +18,7 @@ import {
 } from "@/lib/email/doc/schema";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { AUTHORABLE_TYPES } from "@/lib/email/doc/block-contract";
-import { detectRecipe, recipeSection } from "@/lib/email/author-recipes";
+import { resolveRecipe, recipeSection } from "@/lib/email/author-recipes";
 import {
   loadMarketFigures,
   loadLifecycleDigest,
@@ -409,6 +409,10 @@ export interface BuildArgs {
    *  a reply CTA, authored buttons get the engine-owned `mailto:` to this address —
    *  the same address blast sends already use as reply-to. Never model-written. */
   replyEmail?: string;
+  /** An explicit deliverable-type recipe chosen in the lab, or a saved
+   *  `preferred_recipe` (M3 — recipes are user-SELECTABLE). Overrides keyword
+   *  detection; unknown/empty falls back to detection. Advisory only (RULE C2). */
+  recipeId?: string | null;
 }
 
 export interface BuildResult {
@@ -772,6 +776,7 @@ export async function authorDoc({
   chartType,
   assets,
   replyEmail,
+  recipeId: recipeOverride,
 }: BuildArgs): Promise<BuildResult> {
   const docParsed = EmailDocSchema.safeParse(rawDoc);
   if (!docParsed.success) {
@@ -896,20 +901,22 @@ export async function authorDoc({
   ]);
   const recordedStrings = collectRecordedAnchors(figures);
 
+  // The deliverable-type recipe: an explicit lab pick / saved preferred_recipe wins,
+  // else deterministic keyword routing; no match leaves the generic prompt
+  // byte-identical (advisory only — RULE C2, no new gate).
+  const resolvedRecipe = resolveRecipe(recipeOverride, prompt);
+
   // The agent-intro letter carries ONE clipping figure and no chart (recipe rule)
   // — without this, assembleAuthoredDoc force-reserves any offered chart above the
   // footer and a cross-SWFL ranking lands in a personal letter (seen live 07/05/2026).
   const chartSlot =
-    chartRes && detectRecipe(prompt) !== "agent-intro"
+    chartRes && resolvedRecipe !== "agent-intro"
       ? { url: chartRes.image.url, alt: chartRes.image.alt, linkUrl: brandWebsiteUrl(currentDoc) }
       : null;
   const photoSlot = photoRes
     ? { url: photoRes.image, alt: photoRes.title ?? "Featured property", linkUrl: photoRes.source }
     : null;
 
-  // Deliverable-type recipe: deterministic keyword routing; no match leaves the
-  // generic prompt byte-identical (advisory only — RULE C2, no new gate).
-  const recipeId = detectRecipe(prompt);
   const assetMenu = buildAssetMenu(assets ?? []);
   const system = authorSystem({
     menu,
@@ -924,7 +931,7 @@ export async function authorDoc({
     chartGrounding: chartRes?.groundingNote,
     hasPhoto: !!photoRes,
     assetMenu,
-    recipe: recipeId ? recipeSection(recipeId) : undefined,
+    recipe: resolvedRecipe ? recipeSection(resolvedRecipe) : undefined,
   });
   const baseUser = effectiveScope?.value
     ? `User request: ${prompt}\nScope: ${effectiveScope.kind ?? "area"} ${effectiveScope.value}`

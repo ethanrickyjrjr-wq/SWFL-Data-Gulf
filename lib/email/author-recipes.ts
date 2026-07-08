@@ -30,6 +30,41 @@ export const RECIPE_IDS = [
 
 export type RecipeId = (typeof RECIPE_IDS)[number];
 
+/** Human labels for the lab's recipe picker (M3 — recipes are now user-SELECTABLE,
+ *  not only keyword-detected). Order mirrors RECIPE_IDS. */
+export const RECIPE_LABELS: Record<RecipeId, string> = {
+  "agent-intro": "Agent intro / welcome",
+  "showing-confirmation": "Showing confirmation",
+  "sphere-weekly": "Weekly market update",
+  "year-in-review": "Year in review",
+  "chart-digest": "Chart digest",
+  "chart-story": "Chart story",
+  "infographic-snapshot": "Market snapshot infographic",
+  "monthly-newsletter": "Monthly newsletter",
+  "editorial-letter": "Editorial letter",
+  "editorial-showcase": "Editorial showcase",
+  "editorial-magazine": "Magazine issue",
+};
+
+const RECIPE_ID_SET: ReadonlySet<string> = new Set(RECIPE_IDS);
+
+/** True iff `id` is a known recipe id. */
+export function isRecipeId(id: string | null | undefined): id is RecipeId {
+  return typeof id === "string" && RECIPE_ID_SET.has(id);
+}
+
+/** Resolve the recipe for a build: an EXPLICIT user pick (the lab's recipe
+ *  picker, or a saved `preferred_recipe`) wins; otherwise fall back to keyword
+ *  detection from the prompt. An unknown/empty explicit id is ignored (never a
+ *  throw) so a stale saved value can't break a build. */
+export function resolveRecipe(
+  explicit: string | null | undefined,
+  prompt: string,
+): RecipeId | null {
+  if (isRecipeId(explicit)) return explicit;
+  return detectRecipe(prompt);
+}
+
 // Detection order is fixed: welcome → monthly → editorial (so "a fancy welcome
 // email" reads as a welcome, and "monthly letter" as a newsletter). Within the
 // editorial family, letter/showcase pick sub-recipes; magazine-issue is the
