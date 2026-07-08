@@ -6,6 +6,8 @@
     "orphans": "node scripts/check-orphans.mjs",
     "dev": "next dev",
     "email:dev": "email dev",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -42,7 +44,9 @@
     "ingest:zhvi-swfl:tier2": "python -m ingest.pipelines.zhvi_swfl.pipeline",
     "ingest:zhvi-swfl": "npm run ingest:zhvi-swfl:tier1 && npm run ingest:zhvi-swfl:tier2",
     "gen:types": "bun scripts/gen-supabase-types.ts",
-    "check:schema-drift": "bun scripts/check-schema-drift.ts"
+    "check:schema-drift": "bun scripts/check-schema-drift.ts",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.106.0",
@@ -90,22 +94,36 @@
     "*.{ts,tsx,js,jsx,mts,mjs}": "eslint --fix --max-warnings=0 --no-warn-ignored"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^5.2.1",
     "@modelcontextprotocol/inspector": "0.22.0",
+    "@playwright/test": "^1.61.1",
     "@react-email/ui": "^6.6.8",
+    "@storybook/addon-a11y": "^10.4.6",
+    "@storybook/addon-docs": "^10.4.6",
+    "@storybook/addon-mcp": "^0.6.0",
+    "@storybook/addon-vitest": "^10.4.6",
+    "@storybook/nextjs-vite": "^10.4.6",
     "@tailwindcss/postcss": "^4.3.1",
     "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^20.19.43",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19",
+    "@vitest/browser-playwright": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "9",
     "eslint-config-next": "16.2.9",
+    "eslint-plugin-storybook": "^10.4.6",
     "knip": "^6.24.0",
     "lint-staged": "^17.0.8",
+    "playwright": "^1.61.1",
     "prettier": "^3.9.0",
     "react-email": "^6.6.8",
+    "storybook": "^10.4.6",
     "tailwindcss": "^4.3.1",
     "type-fest": "^5.7.0",
-    "typescript": "6"
+    "typescript": "6",
+    "vite": "^8.1.3",
+    "vitest": "^4.1.10"
   }
 }

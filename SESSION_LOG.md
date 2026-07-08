@@ -1,3 +1,30 @@
+## 2026-07-08 (Sonnet 5 · main) — feat: Storybook + Playwright visual regression, design-workshop handoff
+
+Added Storybook (`bun run storybook`, port 6006) scoped to the app's own editor UI —
+`components/ui/*` and `components/email-lab/*` — separate from and non-overlapping with the
+react-email preview (which owns actual email content). 5 story files, 9 tests, all passing
+(`bunx vitest --project storybook run`). Caught a real bug writing the mandatory `CssCheck`
+story: `Badge`'s own default parameter is `variant = "secondary"`, not `"default"` — a story
+titled "Default" without an explicit `variant: "default"` renders near-white, not teal. Fixed
+the installer's own stories glob too — it was left pointed at the auto-generated `stories/`
+sample folder instead of our real components; deleted that sample folder per Storybook's own
+cleanup step once real stories passed.
+
+Added Playwright visual regression (`bun run test:visual`) over the react-email previews —
+`toHaveScreenshot()` against every `emails/*.tsx` file, baseline written to
+`emails/__screenshots__/`. Verified this actually catches something, not just assumed it:
+reverted Fence 3's aspect-ratio lock, confirmed a 17% pixel-diff failure, restored it, confirmed
+clean. Found and documented two real gotchas along the way: `email dev` only hot-reloads files
+inside `emails/`, not `lib/email/blocks/*` it imports (must restart the server after editing
+fence code); and stopping a background task running `email dev` does not reliably kill the
+underlying process on Windows — it can keep holding the port, `taskkill //F //PID` the real PID
+instead. Considered wiring the chrome-devtools MCP server for this instead (the original ask) —
+it's interactive-agent-only, not something a script can invoke repeatably, so `@playwright/test`
+is the actual right tool; used chrome-devtools/claude-in-chrome for my own spot-checks instead.
+
+Full handoff at `docs/superpowers/specs/2026-07-08-design-workshop-handoff.md`. All of this is
+developer tooling — none of it is Email Lab, Social Lab, or customer-facing.
+
 ## 2026-07-08 (Sonnet 5 · main) — feat: Fence 3 (photo aspect-ratio) + Fence 4 (typography pairing) from grid-fence spec + react-email live preview
 
 Implemented 2 of 5 fences from `docs/superpowers/specs/2026-07-08-email-grid-fence-system-design.md`,
