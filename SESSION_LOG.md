@@ -1,3 +1,31 @@
+## 2026-07-08 (Opus 4.8 · main) — feat(email): New Listing pill fills the coded flyer grid (never refuses) + AI writes only the commentary
+
+Operator's frame: the email grid is "just like a website" — the layout is CODE, and the lab AI should
+only fill the blanks (photo, data, one commentary paragraph), not improvise a design. Traced the live
+path first (RULE 0.5): the New Listing pill already wires end-to-end — hero slices the address into the
+prompt + sets `scope.address`, arrival auto-builds with `build:true` (`EmailLabGridShell.tsx:422`) →
+`authorDoc` → the `scope.address && isNewListingRecipePrompt` branch (`build-doc.ts`) →
+`resolveSubjectListing` → `buildListingFlyer`. So it was NOT a broken pipe — the flyer was just weak:
+blocks carried no `layout` (stacked, not the 2D grid), the commentary paragraph was EMPTY (resolver
+returns no remarks), and a resolve-miss REFUSED with "paste a link" (violated RULE 0.7).
+
+Wired it to the operator's model:
+- `buildListingFlyer` now emits the coded grid — every block carries a 12-col `layout` (static footer),
+  an editorial fallback palette when the brand is blank (a real brand passes through untouched), a
+  2-row spec strip (Beds/Baths/SqFt + computed $/SqFt / Lot / Type), an EMPTY photo block when no photo
+  resolves (the canvas drag-drop), and an empty commentary + chart slot.
+- `authorDoc` branch: NEVER refuses (RULE 0.7) — a resolve-miss falls back to an address-only skeleton so
+  the branded grid always lands (empty cells the user types in; empty cells ≠ the killed grab-bag — no
+  invented numbers). Fills the chart slot in place (preserves layout), and fills the ONE commentary blank
+  via a constrained Haiku call that may state no number not in the real record.
+- **Reverses the 07/07 "ask, don't grab-bag" operator lock** — per operator 07/08. Recorded, not silent.
+
+Verified: `bun test lib/email/` 1079 pass (added 5 flyer tests: gridded, $/sqft, empty-photo dropzone,
+editorial-vs-brand palette), tsc clean on changed files, `bunx next build` [pending]. NOT pushed —
+holding for operator confirmation. Vendor note for later (RULE 2.4 check opened): SteadyAPI `/search`
+genuinely has no per-row property type (verified 07/07), but DOES return `description.lot_sqft` which
+`normalizeResult` drops to null — acres is free data we discard (one-line follow-up, not done here).
+
 ## 2026-07-08 (Sonnet 5 · main) — RESEARCH: SteadyAPI Reddit sweep (Claude cheats + email/social AI + data-deliverable hacks)
 
 Operator supplied a fresh SteadyAPI key (`PHOTOS_API` is still the suspended/past-due one) and asked to

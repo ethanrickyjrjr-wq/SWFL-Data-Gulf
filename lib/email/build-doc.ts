@@ -39,7 +39,7 @@ import { deriveListingPhoto } from "@/lib/media/listing-photo";
 import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
 import { isListingIntent, isNewListingRecipePrompt } from "@/lib/email/listing-intent";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
-import { fetchListingFacts } from "@/lib/email/listing-scrape";
+import { fetchListingFacts, type ListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
 import { fetchAreaComps, buildCompsSpec, deriveAreaUrl } from "@/lib/email/listing-comps";
 import { chartSpecToEmailImage, type EmailChartImage } from "@/lib/email/spec-to-png";
@@ -687,6 +687,80 @@ async function callAuthor(
   }
 }
 
+// ── Listing-flyer slot fillers (the coded grid; only the blanks get filled) ───
+/** Fill the empty kind:"chart" image slot's url IN PLACE — keeps its grid layout,
+ *  which upsertChartBlock would strip. Only an empty chart slot is touched. */
+function fillChartSlot(doc: EmailDoc, url: string, linkUrl?: string): EmailDoc {
+  return {
+    ...doc,
+    blocks: doc.blocks.map((b) =>
+      b.type === "image" && b.props.kind === "chart" && !b.props.url
+        ? { ...b, props: { ...b.props, url, ...(linkUrl ? { linkUrl } : {}) } }
+        : b,
+    ),
+  };
+}
+
+/** Drop the empty chart slot when no chart resolved — never ship an empty box. */
+function dropEmptyChartSlot(doc: EmailDoc): EmailDoc {
+  return {
+    ...doc,
+    blocks: doc.blocks.filter(
+      (b) => !(b.type === "image" && b.props.kind === "chart" && !b.props.url),
+    ),
+  };
+}
+
+/** Fill the FIRST empty text block (the commentary slot) with the paragraph. */
+function fillNarrative(doc: EmailDoc, body: string): EmailDoc {
+  let done = false;
+  return {
+    ...doc,
+    blocks: doc.blocks.map((b) => {
+      if (done || b.type !== "text" || (b.props.body ?? "").trim()) return b;
+      done = true;
+      return { ...b, props: { ...b.props, body } };
+    }),
+  };
+}
+
+/** One constrained Haiku call → a 2-3 sentence "just listed" paragraph built from
+ *  ONLY the real record facts. Best-effort: nothing real to say (no price/beds/
+ *  sqft), or any failure → null (the slot stays empty for the user to fill). Never
+ *  invents — the model is told to state no number that isn't in the facts. */
+async function authorListingNarrative(facts: ListingFacts): Promise<string | null> {
+  // Nothing real to describe → leave the slot empty (never improvise a house).
+  if (!facts.price && !facts.beds && !facts.sqft) return null;
+  const lines = [
+    facts.address && `Address: ${facts.address}`,
+    facts.price && `List price: ${facts.price}`,
+    facts.beds && `Beds: ${facts.beds}`,
+    facts.baths && `Baths: ${facts.baths}`,
+    facts.sqft && `Square feet: ${facts.sqft}`,
+    facts.lotSize && `Lot: ${facts.lotSize}`,
+    facts.propertyType && `Type: ${facts.propertyType}`,
+    facts.city && `City: ${facts.city}`,
+  ].filter(Boolean);
+  const system =
+    `You write ONE short paragraph (2-3 sentences) for a "just listed" real-estate ` +
+    `email about a specific home. Use ONLY the facts provided. Do NOT state any number, ` +
+    `price, or statistic that is not in the facts. No hype, no invented market claims, no ` +
+    `fake amenities. Return ONLY the paragraph text — no preamble, no quotes.`;
+  const user = `FACTS:\n${lines.join("\n")}\n\nWrite the paragraph.`;
+  try {
+    const msg = await getAnthropic("email_build").messages.create({
+      model: EMAIL_MODEL_HAIKU,
+      max_tokens: 400,
+      system,
+      messages: [{ role: "user", content: user }],
+    });
+    const t = msg.content[0]?.type === "text" ? msg.content[0].text.trim() : "";
+    return t || null;
+  } catch {
+    return null;
+  }
+}
+
 /** Run the full Email Lab AUTHOR build. Returns a positioned (chart/photo-filled,
  *  brand-overlaid-later) EmailDoc, or the current doc + a message on a miss. */
 export async function authorDoc({
@@ -714,59 +788,56 @@ export async function authorDoc({
   // house photo. A resolve miss returns the "paste your link or add a photo" ask —
   // never the placeholder grid (that would invent numbers), never a blocked build.
   if (scope?.address && isNewListingRecipePrompt(prompt)) {
-    const facts = await resolveSubjectListing(scope.address).catch(() => null);
-    if (facts) {
-      if (facts.photos[0]) {
-        // Same durable-copy rule as the URL flyer: host OUR crop, so a re-send
-        // months later never depends on the vendor CDN (miss keeps the original).
-        const mirrored = await mirrorHeroPhoto(facts.photos[0]).catch(() => null);
-        if (mirrored) facts.photos[0] = mirrored;
-      }
-      let flyer = buildListingFlyer(facts, currentDoc);
-      // Best-effort market chart (the recipe asks for the ZIP's home-value trend) —
-      // a chart is a bonus; any failure ships the flyer without it, never blocks.
-      // The subject's arrival scope is address-only, so scope the chart to the
-      // resolved listing's ZIP — otherwise the ZIP trend chart has nothing to plot.
-      const chartScope = facts.zip ? { kind: "zip", value: facts.zip } : scope;
-      try {
-        const chart = await buildPromptChart(prompt, flyer, chartScope, chartType);
-        if (chart) {
-          flyer = upsertChartBlock(
-            flyer,
-            chartImageBlock({
-              url: chart.image.url,
-              alt: chart.image.alt,
-              linkUrl: brandWebsiteUrl(currentDoc),
-            }),
-          );
-        }
-      } catch {
-        /* chart is a bonus */
-      }
-      const parsed = EmailDocSchema.safeParse(flyer);
-      if (parsed.success) {
-        return {
-          payload: {
-            doc: parsed.data,
-            applied: true,
-            replacedLayout: true,
-            listing: { subject: facts.address ?? scope.address },
-          },
-        };
-      }
-    }
-    // Resolve miss (out of footprint, no photo match, or no key) → the four-lane ask.
-    // NEVER fall through to the free author here: that is the generic grab-bag the
-    // whole lane exists to replace. The user pastes a link (→ the URL flyer lane in
-    // buildContentDoc) or drops a photo, and the flyer builds with real facts.
-    return {
-      payload: {
-        doc: currentDoc,
-        applied: false,
-        message:
-          "I couldn't pull that listing's photo automatically — paste your listing link or add a photo, and I'll build the full flyer with the real price and specs.",
-      },
+    // Never refuse (RULE 0.7). Resolve the real record; on a miss fall back to an
+    // address-only skeleton so the coded flyer grid ALWAYS lands on the canvas —
+    // empty photo dropzone + empty cells the user fills. This reverses the 07/07
+    // "ask for a link/photo" behavior per operator (07/08/2026): the branded grid
+    // appears every time; empty cells ≠ the killed grab-bag (no invented numbers,
+    // no generic ZIP/comp improviser — just blanks to fill).
+    const resolved = await resolveSubjectListing(scope.address).catch(() => null);
+    const facts: ListingFacts = resolved ?? {
+      address: scope.address,
+      photos: [],
+      sourceUrl: BASE_URL,
     };
+    if (facts.photos[0]) {
+      // Same durable-copy rule as the URL flyer: host OUR crop, so a re-send
+      // months later never depends on the vendor CDN (miss keeps the original).
+      const mirrored = await mirrorHeroPhoto(facts.photos[0]).catch(() => null);
+      if (mirrored) facts.photos[0] = mirrored;
+    }
+    let flyer = buildListingFlyer(facts, currentDoc);
+
+    // Fill the chart slot IN PLACE (preserve its grid layout). buildPromptChart is
+    // a bonus; on any miss we drop the empty slot rather than ship an empty box.
+    const chartScope = facts.zip ? { kind: "zip", value: facts.zip } : scope;
+    let chartUrl: string | null = null;
+    try {
+      const chart = await buildPromptChart(prompt, flyer, chartScope, chartType);
+      if (chart) chartUrl = chart.image.url;
+    } catch {
+      /* chart is a bonus */
+    }
+    flyer = chartUrl
+      ? fillChartSlot(flyer, chartUrl, brandWebsiteUrl(currentDoc))
+      : dropEmptyChartSlot(flyer);
+
+    // Fill the ONE commentary blank — best-effort; numbers stay in the cells.
+    const narrative = await authorListingNarrative(facts);
+    if (narrative) flyer = fillNarrative(flyer, narrative);
+
+    const parsed = EmailDocSchema.safeParse(flyer);
+    if (parsed.success) {
+      return {
+        payload: {
+          doc: parsed.data,
+          applied: true,
+          replacedLayout: true,
+          listing: { subject: facts.address ?? scope.address, resolved: Boolean(resolved) },
+        },
+      };
+    }
+    // Defensive only: a malformed flyer falls through to the generic author below.
   }
 
   const globalStyle = currentDoc.globalStyle; // brand is canonical — never authored

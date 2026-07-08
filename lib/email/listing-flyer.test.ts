@@ -70,3 +70,44 @@ test("flyer omits specs it doesn't have — never fabricates a 0", () => {
   const hero = doc.blocks.find((b) => b.type === "hero");
   expect(hero?.type === "hero" && hero.props.value).toBe("$1,200,000");
 });
+
+test("every block carries a grid layout — the coded grid, not a stack", () => {
+  const doc = buildListingFlyer(FACTS, brandedCurrentDoc());
+  for (const b of doc.blocks) {
+    expect(b.layout).toBeDefined();
+    expect(b.layout && b.layout.w).toBe(12);
+  }
+  // footer is locked (static) so a drag can't move the unsubscribe block.
+  const footer = doc.blocks.find((b) => b.type === "footer");
+  expect(footer?.layout?.static).toBe(true);
+});
+
+test("computes $/sq ft into the second spec row from real price + sqft", () => {
+  const doc = buildListingFlyer(FACTS, brandedCurrentDoc()); // $20,895,000 / 7453
+  const rowB = doc.blocks.filter((b) => b.type === "stats")[1];
+  const ppsf =
+    rowB?.type === "stats" ? rowB.props.stats.find((c) => c.label === "$/Sq Ft") : undefined;
+  expect(ppsf?.value).toBe("$2,804"); // 20,895,000 / 7,453 = 2,803.97 → rounds to 2,804
+});
+
+test("no photo → an EMPTY photo block (the canvas drag-drop), never refuses", () => {
+  const noPhoto: ListingFacts = {
+    address: "1 Any St, Cape Coral",
+    photos: [],
+    sourceUrl: "https://x/y",
+  };
+  const doc = buildListingFlyer(noPhoto, brandedCurrentDoc());
+  const photo = doc.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
+  expect(photo).toBeDefined();
+  expect(photo?.type === "image" && photo.props.url).toBe("");
+});
+
+test("blank brand gets the editorial palette; a real brand is preserved", () => {
+  // Blank brand = house default accent → editorial fallback applies.
+  const houseDoc = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const editorial = buildListingFlyer(FACTS, houseDoc);
+  expect(editorial.globalStyle.accentColor).toBe("#B98F45");
+  // A real brand (branded doc sets #C17B3E) is left untouched.
+  const branded = buildListingFlyer(FACTS, brandedCurrentDoc());
+  expect(branded.globalStyle.accentColor).toBe("#C17B3E");
+});
