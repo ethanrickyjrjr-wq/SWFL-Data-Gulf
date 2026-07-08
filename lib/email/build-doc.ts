@@ -67,6 +67,7 @@ import {
   promptAnchors,
   type LibraryAsset,
 } from "@/lib/email/author-doc";
+import { voiceGuard } from "@/lib/email/voice-guard";
 import { extractNumbers } from "@/lib/deliverable/narrative-lint";
 import { loadAddressFigures } from "@/lib/email/address-context";
 import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
@@ -967,31 +968,59 @@ export async function authorDoc({
   }
   let doc: EmailDoc = firstParse.data;
 
-  // No-invention gate (gateNarrative philosophy): lint prose → on a violation,
-  // regenerate ONCE naming the offending sentences → still bad ⇒ hard-strip them.
+  // No-invention gate (gateNarrative philosophy) + voiceGuard (banned-phrase lint,
+  // spec 2026-07-08): lint prose → on a number-violation OR a robotic corporate-AI
+  // "tell", regenerate ONCE naming BOTH → then number-strip (sentence-level) and
+  // voice-strip (phrase-surgical, number-safe) whatever survives. One repair round;
+  // voiceGuard detection is pure/local, so it adds no extra model call.
   const lint = lintAuthoredProse(doc, anchorStrings, recordedStrings);
+  const voice = voiceGuard(doc);
   let regenerations = 0;
   let stripped = false;
-  if (!lint.ok) {
+  let voiceStripped = false;
+  if (!lint.ok || !voice.ok) {
     regenerations = 1;
-    const retryUser =
-      `${baseUser}\n\nYour previous draft used numbers that are NOT in the DATA MENU. ` +
-      `Re-author so every number in prose is quoted verbatim from a [fN] figure, or removed:\n` +
-      lint.offending.map((s) => `- "${s}"`).join("\n");
+    const problems: string[] = [];
+    if (!lint.ok) {
+      problems.push(
+        "Your previous draft used numbers that are NOT in the DATA MENU. Re-author so every " +
+          "number in prose is quoted verbatim from a [fN] figure, or removed:\n" +
+          lint.offending.map((s) => `- "${s}"`).join("\n"),
+      );
+    }
+    if (!voice.ok) {
+      problems.push(
+        "These phrases read as robotic corporate-AI filler — rewrite the copy in a natural, " +
+          "human voice without them (keep every real figure):\n" +
+          voice.tells.map((s) => `- "${s}"`).join("\n"),
+      );
+    }
+    const retryUser = `${baseUser}\n\n${problems.join("\n\n")}`;
     const authored2 = await callAuthor(model, system, retryUser);
     const reparse2 = authored2 ? EmailDocSchema.safeParse(assemble(authored2)) : null;
+    // Number gate first (sentence-level), then voiceGuard (phrase-surgical) on the
+    // result — a number sharing a tell's sentence is never lost.
+    let candidate: EmailDoc;
     if (reparse2?.success) {
       const lint2 = lintAuthoredProse(reparse2.data, anchorStrings, recordedStrings);
       if (lint2.ok) {
-        doc = reparse2.data;
+        candidate = reparse2.data;
       } else {
-        doc = lint2.stripped; // hard-strip the second draft's offenders
+        candidate = lint2.stripped; // hard-strip the second draft's number offenders
         stripped = true;
       }
-    } else {
-      doc = lint.stripped; // no usable second draft — strip the first
+    } else if (!lint.ok) {
+      candidate = lint.stripped; // no usable second draft — strip the first draft's numbers
       stripped = true;
+    } else {
+      candidate = doc; // regenerated for voice only, no usable retry — strip voice off the first draft
     }
+    const voice2 = voiceGuard(candidate);
+    if (!voice2.ok) {
+      candidate = voice2.stripped;
+      voiceStripped = true;
+    }
+    doc = candidate;
   }
 
   // Stripping only shortens strings, so the doc still validates; parse once more
@@ -1009,6 +1038,7 @@ export async function authorDoc({
       photo: Boolean(photoRes),
       regenerations,
       stripped,
+      voiceStripped,
       scheduleSuggestion: authored.schedule_suggestion ?? null,
     },
   };
