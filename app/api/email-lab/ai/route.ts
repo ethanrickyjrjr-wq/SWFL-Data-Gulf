@@ -7,6 +7,11 @@ import { toPanelItem, type MediaAssetRow } from "@/lib/email/media-assets";
 import type { LibraryAsset } from "@/lib/email/author-doc";
 import { resolveEmailModel } from "@/lib/email/model-router";
 import type { ChartType } from "@/lib/email/reshape-chart-type";
+import { isShowingPrepPrompt } from "@/lib/email/showing-prep-intent";
+import { gatherShowingPrepData } from "@/lib/listings/showing-prep-source";
+import { assembleShowingPrepDoc } from "@/lib/email/showing-prep-assemble";
+import { EmailDocSchema } from "@/lib/email/doc/schema";
+import { seedById } from "@/lib/email/doc/default-docs";
 
 /** The caller's media library for the author's ASSET MENU (newest 24) plus their
  *  account email (the engine-owned reply-CTA destination — the same address every
@@ -82,6 +87,20 @@ export async function POST(req: NextRequest) {
     // (re-fill the existing skeleton) stays buildContentDoc. Both validate the doc.
     const isAuthor = body.build === true || body.mode === "author";
     try {
+      // Showing Prep Packet — a dedicated build path (not authorDoc). Fires only on the
+      // showing-prep recipe carrying a subject address; returns the coded packet doc in
+      // the same { applied, doc } shape the canvas already consumes. Never throws —
+      // every sourcing lane degrades to an empty cell.
+      const spAddress =
+        (typeof body.scope?.address === "string" && body.scope.address.trim()) || "";
+      if (isShowingPrepPrompt(prompt) && spAddress) {
+        const parsed = EmailDocSchema.safeParse(body.doc);
+        const base = parsed.success ? parsed.data : seedById("market-spotlight")!.build();
+        const data = await gatherShowingPrepData(spAddress);
+        const doc = await assembleShowingPrepDoc(data, base);
+        return NextResponse.json({ applied: true, doc });
+      }
+
       const caller = isAuthor ? await loadCaller() : null;
       const { httpStatus, payload } = isAuthor
         ? await authorDoc({
