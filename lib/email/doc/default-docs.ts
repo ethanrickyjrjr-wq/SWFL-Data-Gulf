@@ -1335,6 +1335,50 @@ export const SEED_DOCS: SeedDoc[] = [
     }),
   },
 
+  // PROVENANCE: distilled from a Manus.im-generated "SWFL Market Snapshot"
+  // infographic (agent output, screenshot capture), found 07/08/2026. Layout
+  // system only — no source copy, figures, images, or brand identity retained.
+  {
+    id: "trend-snapshot",
+    name: "Trend Snapshot",
+    description:
+      "Chart leads, no hero — one trend chart up top, supporting stats below, a short read, and your sign-off.",
+    build: () => ({
+      globalStyle: { ...style() },
+      blocks: [
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 2, w: 12, h: 6 },
+          {
+            alt: "The single trend chart that carries this snapshot's story",
+            caption: "Name the trend and the time window it covers",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 8, w: 12, h: 3 },
+          {
+            stats: [
+              { value: "", label: "The headline number the chart supports" },
+              { value: "", label: "A second metric for context" },
+              { value: "", label: "A third metric for comparison" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "text",
+          { x: 0, y: 11, w: 12, h: 3 },
+          {
+            body: "Read the trend in plain language: what changed, why it matters, and what to watch next.",
+          },
+        ),
+        seedBlockGrid("agent-card", { x: 0, y: 14, w: 12, h: 4 }),
+        seedBlockGrid("footer", { x: 0, y: 18, w: 12, h: 3, static: true }),
+      ],
+    }),
+  },
+
   // ── Editorial seeds (author-layout-recipes build) ──────────────────────────
   // STRUCTURE comes from the recipes (author-recipes.ts); these seeds carry the
   // editorial GLOBAL STYLE — serif display, airy padding, restrained palette.
