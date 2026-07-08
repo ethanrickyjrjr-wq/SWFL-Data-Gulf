@@ -1,3 +1,22 @@
+## 2026-07-07 (main) — Spec'd Phase 1 of the hyperlocal geo-scope program: sourced place gazetteer (fixture + Census builder)
+
+Operator handed the 07/07 hyperlocal-geo-scope RESEARCH BRIEF and said "spec this." Brainstormed it,
+flagged it as a 3-subsystem program, and decomposed: operator chose to spec **Phase 1 only — the place
+gazetteer** (county→place→ZCTA), materialized as `fixtures/swfl-places.json` + a builder, NOT a
+`data_lake.*` table (deferred to Phase 2 w/ its consumer, per brain-first + RULE 3 C2). Registered via
+`new-build.mjs` → check `place_gazetteer_phase1_live_verify` (open); spec at
+`docs/superpowers/specs/2026-07-08-place-gazetteer-phase1-design.md`.
+
+Sourcing verified LIVE (crawl4ai + curl, RULE 0.4): Census `rel2020` ZCTA→place file exists in the same
+family as our ZCTA→county crosswalk; captured verbatim column headers (pipe rel + BOM vs tab gazetteer).
+Key finding: 11 of 13 pulse units are real Census places, but "North Naples"/"East Naples" are NOT
+(colloquial, no CDP) → gazetteer keys on GEOID, never a name substring (the root-cause fix). Builder
+(`scripts/build_swfl_places.py`) specced as a sibling of `build_swfl_zip_county.py`: scope read from the
+crosswalk (100 ZCTAs), derived place→county edges, unincorporated-ZCTA fallback, straddle rules, fail-loud
+cross-checks. All 7 parent open-questions dispositioned. Additive-only; NOTHING built yet — spec is the
+deliverable. Next: writing-plans → the actual builder. (My first spec commit ca32184b was carried to origin
+by a parallel session's rebase-push; this pushes the build-ready update.)
+
 ## 2026-07-07 (main) — Lee permits CapDetail WAF fix: sequential reused-session detail fetch + shared fetch-health guard
 
 Operator root-caused (this session's earlier work + prior 07/06 finding) that the Lee permits
