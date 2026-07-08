@@ -125,7 +125,9 @@ export async function buildZipSeedDoc(zip: string): Promise<EmailDoc | null> {
   // never its number — the number already rides the card. Composed in code (no
   // LLM call); a fuller "what it means" paragraph is what the visitor gets by
   // opening/editing the doc in the Email Lab (AI-patch path, unchanged). ──
-  const lead = top[0];
+  // Skip candidates whose extremity is a known Census artifact (institutional-
+  // population ZIP), not a real distinguishing condition — see census-values.ts.
+  const lead = ranked.find((s) => s.leadEligible !== false);
   const leadTopic = lead
     ? lead.label
         .replace(/\([^)]*\)/g, "") // drop "(90 Days)" etc — no digits in prose

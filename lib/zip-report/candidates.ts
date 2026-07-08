@@ -35,6 +35,9 @@ export interface CensusValue {
   display: string;
   sourceLabel: string;
   sourceUrl: string;
+  /** See `SignalCandidate.leadEligible` — set by census-values.ts from this same
+   *  ZIP's own held age/tenure figures, never guessed. */
+  leadEligible?: boolean;
 }
 
 export interface CandidateInput {
@@ -765,6 +768,7 @@ export function buildZipCandidates(input: CandidateInput): {
       movementPct: null,
       covered: true,
       source: { label: cv.sourceLabel, url: cv.sourceUrl },
+      leadEligible: cv.leadEligible,
     });
   }
 

@@ -32,6 +32,15 @@ export interface SignalCandidate {
    * does not participate in scoring.
    */
   footnote?: string;
+  /**
+   * False when this candidate's extremity is a known Census methodology artifact
+   * (e.g. a dorm/institutional-population ZIP skewing income) rather than a real
+   * distinguishing condition — set by the candidate builder from the ZIP's OWN
+   * held ACS fields, never guessed. Still scores/ranks/displays normally; only
+   * disqualified from being crowned the single "what defines this place" lead.
+   * Omitted (undefined) means eligible, same as `true`.
+   */
+  leadEligible?: boolean;
 }
 
 export interface RankedSignal extends SignalCandidate {
