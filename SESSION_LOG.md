@@ -1,3 +1,24 @@
+## 2026-07-08 (Sonnet 5 · main) — feat(census): source_scope for all 71 real pipelines + 9 bugs opened as checks
+
+Operator wanted every pipeline/API on `/census` — what we pull vs. what's available — not just the
+36/72 the earlier session's `_ASSISTANT/2026-07-08-vendor-extraction-ceiling-audit.md` covered. Fanned
+out 6 parallel research agents (after confirming via search that this genuinely wasn't already done) to
+cover the remaining 35, each probing our own ingest code first then verifying vendor catalogs live via
+crawl4ai — no memory, no invented fields. Result: 71/72 pipelines now carry `source_scope` in
+`ingest/cadence_registry.yaml` (the 1 exception is a pure recency watchdog, not a distinct source).
+Along the way, found 9 real bugs (not just vendor ceilings) and opened each as a `checks` entry per
+RULE 2.4 instead of leaving them in prose: bls_ppi series mislabeled residential (BLS says
+industrial/warehouse), fred_listing_swfl's citation URL resolves to Singapore, market_aggregates_details
+drops already-paid-for response fields, collier_permits skips the Applied-series leading indicator,
+fl_dbpr_licenses/applicants drop full street address despite the platform's ZIP-grain priority,
+lee_associates_swfl is missing all of Naples/Collier at zero extra cost and separately discards a parsed
+Cap Rate field, brevitas_listings never calls the for-sale endpoint (hardcoded to lease-only),
+mhs_databook is missing a confirmed-live Multi-Family sector, and listing_lifecycle's closings capture
+is real but budget-sampled and price-skewed. Corrected 2 stale "via Firecrawl" code comments (swfl_inc,
+dbpr_press_releases — both already run crawl4ai). Next: 9 checks above are real follow-up work, not
+closed by this pass. Blocked: push needs operator run — see swfldatagulf-ops SESSION_LOG for the /census
+page (nav pill + cadence column + category colors + bottom data index) built to display this.
+
 ## 2026-07-08 (Sonnet 5 · main) — fix(homepage): swap the "price my home" persona card for a market-trend question
 
 Operator flagged the Capabilities persona card asking "What should I price my Fort Myers Beach home at?"
