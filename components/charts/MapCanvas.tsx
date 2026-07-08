@@ -42,11 +42,6 @@ const LEE_ZIPS = new Set([
   "34135",
 ]);
 
-// Hendry County ZIPs (source of truth: fixtures/swfl-zip-county.json,
-// primary_county 12051) — drawn on the "both" view only; excluded from the
-// Lee-only and Collier-only sub-maps since they're neither.
-const HENDRY_ZIPS = new Set(["33440", "33930", "33935"]);
-
 interface Props {
   county?: "Lee" | "Collier" | "both";
   metric?: FixtureMetricKey;
@@ -119,7 +114,7 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
             group.style.display = "none";
             return;
           }
-          if (county === "Collier" && (isLee || HENDRY_ZIPS.has(zip))) {
+          if (county === "Collier" && isLee) {
             group.style.display = "none";
             return;
           }
@@ -197,16 +192,9 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
           if (county === "Lee") {
             y0 = Math.max(y0, 153); // top of Cape Coral (33909 y_min=153.3) / Alva (33920 y_min=153.2)
           }
-          if (county === "Collier") {
+          if (county === "both" || county === "Collier") {
             y0 = Math.max(y0, 153); // same top cut: remove NFM spike
             x1 = Math.min(x1, 1188); // east edge of Ochopee (34141 x_max=1186.5)
-          }
-          if (county === "both") {
-            // Same NFM-spike trim, but widened to frame the Hendry bumps
-            // (LaBelle/Felda north edge, Clewiston east edge) added to the
-            // both-clip polygon below — see its comment for the exact bounds.
-            y0 = Math.max(y0, -35);
-            x1 = Math.min(x1, 1310);
           }
           if (Number.isFinite(x0)) {
             const w = x1 - x0;
@@ -260,15 +248,8 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
                 "points",
                 [
                   `${x0 - pad},${yTopCut}`,
-                  // Hendry bumps — see matching comment in Hero.tsx hero-clip.
-                  `580,${yTopCut}`,
-                  `580,-35`,
-                  `875,-35`,
-                  `875,${yTopCut}`,
                   `${xImmE},${yTopCut}`,
-                  `${xImmE},140`,
-                  `1310,140`,
-                  `1310,${yOchN}`,
+                  `${xImmE},${yOchN}`,
                   `${xOchE},${yOchN}`,
                   `${xOchE},${y1 + pad}`,
                   `${x0 - pad},${y1 + pad}`,

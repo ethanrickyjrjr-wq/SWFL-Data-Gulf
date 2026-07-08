@@ -172,10 +172,8 @@ export default function Hero({ payload }: { payload: Payload }) {
               /* skip */
             }
           });
-          // Widened to frame the Hendry bumps (LaBelle/Felda north edge,
-          // Clewiston east edge) added to hero-clip below — see its comment.
-          by0 = Math.max(by0, -35);
-          bx1 = Math.min(bx1, 1310);
+          by0 = Math.max(by0, 153);
+          bx1 = Math.min(bx1, 1188);
           if (Number.isFinite(bx0)) {
             const bw = bx1 - bx0,
               bh = by1 - by0;
@@ -193,21 +191,8 @@ export default function Hero({ payload }: { payload: Payload }) {
               "points",
               [
                 `${bx0 - bpad},153`,
-                // Hendry bump 1 (LaBelle 33935 + Felda 33930, west of the Ochopee
-                // staircase) — opens the y<153 band ONLY across x=[580,875], well
-                // east of the NFM spike (33917, x<=424) and Alva (33920, x<=575)
-                // the y=153 line exists to trim, so neither stays untouched.
-                `580,153`,
-                `580,-35`,
-                `875,-35`,
-                `875,153`,
                 `1102,153`,
-                // Hendry bump 2 (Clewiston 33440) — same trick east of the
-                // Immokalee corner: opens above yOchN=663 only for x=[1102,1310],
-                // then rejoins the original (1188,663) corner untouched.
-                `1102,140`,
-                `1310,140`,
-                `1310,663`,
+                `1102,663`,
                 `1188,663`,
                 `1188,${by1 + bpad}`,
                 `${bx0 - bpad},${by1 + bpad}`,
