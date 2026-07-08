@@ -1,187 +1,243 @@
-# Sourced place gazetteer — Phase 1 of hyperlocal geo-scope
+# Sourced place gazetteer — Phase 1 of hyperlocal geo-scope (BUILD-READY)
 
-- **Date:** 07/07/2026 (spec file stamped 07-08 by the build registrar; the parent program is the 07/07 brief)
-- **Status:** DESIGN — approved in brainstorming, not yet built. No runtime code touched.
-- **Parent program:** `docs/superpowers/specs/2026-07-07-hyperlocal-geo-scope-reweighting-design.md`
-  (the RESEARCH BRIEF). That brief is a 3-subsystem program: (1) sourced gazetteer, (2) place-aware
-  capture/distill with reach weighting, (3) read-time rollup + migration of ~12 reader surfaces +
-  backfill. **This spec is Phase 1 only — the gazetteer.** Phases 2 and 3 get their own specs.
+- **Date:** 07/07/2026 (spec file stamped 07-08 by the build registrar; content anchored to the 07/07 parent brief)
+- **Status:** BUILD-READY DESIGN — brainstormed + approved, sourced contracts verified verbatim in-session. No runtime code touched yet.
+- **Parent program:** `docs/superpowers/specs/2026-07-07-hyperlocal-geo-scope-reweighting-design.md` (the RESEARCH BRIEF).
+  That brief is a 3-subsystem program: (1) sourced gazetteer, (2) place-aware capture/distill + reach weighting,
+  (3) read-time rollup + migration of ~12 reader surfaces + backfill. **This spec is Phase 1 only — the gazetteer.**
 - **Check:** `place_gazetteer_phase1_live_verify` (open).
-- **Author:** assistant, from live code probe (RULE 0.5) + live Census-source verification (RULE 0.4, crawl4ai).
+- **Sibling template:** `scripts/build_swfl_zip_county.py` — this builder is a direct sibling and copies its shape.
+- **Author:** assistant, from live code probe (RULE 0.5) + live Census-source verification (RULE 0.4, crawl4ai + curl, 07/07/2026).
 
 ---
 
 ## 1. Problem (Phase-1 slice)
 
-The pulse pipeline has no real place hierarchy. `ingest/lib/pulse_match.py:47` matches a city by naive
-substring (`city.lower() in hay`), sub-areas are treated as sibling cities, and there is no
-county→city→ZIP structure any consumer can join to. Everything the parent brief wants — conflict-free
-one-place-per-fact resolution, reach that climbs a hierarchy, rollup by containment — is blocked on the
-absence of a **sourced place tree**. Phase 1 builds exactly that tree and nothing else.
+The pulse pipeline has no real place hierarchy. `ingest/lib/pulse_match.py:47` matches a city by naive substring
+(`city.lower() in hay`), so "Naples" swallows "North Naples"/"East Naples"; sub-areas are treated as sibling
+cities; there is no county→city→ZIP structure any consumer can join to. Everything the parent brief wants —
+conflict-free one-place-per-fact resolution, reach that climbs a hierarchy, rollup by containment — is blocked on
+the absence of a **sourced place tree**. Phase 1 builds exactly that tree and nothing else.
 
-We already hold the bottom (ZIP) and top (county): `fixtures/swfl-zip-county.json` is a Census-sourced
-ZCTA→county crosswalk (Census 2020 ZCTA-to-county relationship file). The **city/place layer in the
-middle is missing**, and there is no artifact any pipeline or pack can join a fact to.
+We already hold the bottom (ZIP) and the top (county): `fixtures/swfl-zip-county.json` is a Census-sourced
+ZCTA→county crosswalk. The **city/place layer in the middle is missing**, and there is no artifact any pipeline
+or pack can join a fact to.
 
-## 2. Goal
+## 2. Goal & non-goals
 
-Deliver a **sourced, tested, reproducible place hierarchy** covering our footprint —
-**county → place (city/town/village/CDP) → ZCTA** — with each node carrying its parent(s) and provenance.
-Additive-only: Phase 1 ships an artifact and a seeder, changes **zero** runtime behavior, and touches no
-live pipeline or reader. It is the foundation Phase 2 (`place_pulse` + reach) and Phase 3 (rollup) build on.
+**Goal:** a **sourced, tested, reproducible place hierarchy** covering our geographic footprint —
+**county → place (city / town / village / CDP) → ZCTA** — every node carrying its parent(s), overlap weights for
+genuine straddles, place centroids, and full provenance. Delivered as a committed fixture + a builder script that
+regenerates it, in the exact style of `build_swfl_zip_county.py`.
 
-## 3. Sourcing decision (researched live, RULE 0.4)
+**Non-goals (deferred, and WHY):**
+- **No `data_lake.places` table.** Brain-first gate + RULE 3 C2: a `data_lake.*` table must ship with its consuming
+  brain/PackDefinition in the same PR. This gazetteer's consumer (`place_pulse` + packs) is Phase 2, so the table is
+  created there. `fixtures/swfl-places.json` is the seed source-of-record until then.
+- **No pipeline/reader/distill change.** Phase 1 is **additive-only** — zero runtime behavior change. The live
+  city-pulse pipeline keeps running as-is.
+- **No reach weighting, no neighborhoods, no backfill.** Phases 2/3.
 
-Stay inside the **Census `rel2020` family** — the *same authority* as the existing crosswalk, so there is
-one provenance story and no seam between sources. Verified present and same-format via crawl4ai on
-07/07/2026:
+## 3. The parent brief's 7 open questions — dispositions (nothing dropped)
 
-- **ZCTA→county** — `https://www2.census.gov/geo/docs/maps-data/data/rel2020/zcta520/tab20_zcta520_county20_natl.txt`
-  *(already parsed into `swfl-zip-county.json`; the scope floor)*
-- **ZCTA→place** — `https://www2.census.gov/geo/docs/maps-data/data/rel2020/zcta520/tab20_zcta520_place20_natl.txt`
-  *(the missing city layer; 9.4M national, same column family as the county file)*
-- **Place canonical names + FIPS + centroid** — `https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2020_Gazetteer/2020_gaz_place_12.txt`
-  (FL = state 12; gives `NAME`, `LSAD`, `GEOID`, `INTPTLAT`, `INTPTLONG`)
+1. **Gazetteer source of truth** — **RESOLVED here.** Census `rel2020` family (§5), same authority as the crosswalk.
+2. **Reach rubric + thresholds** — **Phase 2** (reach lives on the fact table, not on `places`).
+3. **Discrete levels vs continuous reach** — **Phase 2.**
+4. **Ambiguity handling** (story names 2 places / none) — **Phase 2** distill/resolver.
+5. **Neighborhood coverage** — **RESOLVED here:** Phase 1 lands at **ZCTA grain**; named neighborhoods (Old Naples,
+   River District, Cape Coral quadrants) are sub-place, **absent from Census**, and become a **Phase-2** layer from a
+   non-Census source (GeoNames/OSM). The `neighborhood` node type is reserved but empty in Phase 1.
+6. **Migration vs re-distill of the 142 existing rows** — **Phase 3.**
+7. **Prior art (CLAVIN / geoparsepy / Mordecai)** — **Phase 2** resolver.
 
-**Alternatives considered and rejected for Phase 1:**
-- **GeoNames / OSM full hierarchy incl. neighborhoods now** — thinner authority for CDP/place-boundary
-  truth, and it mixes GeoNames *postal codes* with Census *ZCTAs* (a provenance seam). Reserve GeoNames/OSM
-  as the **Phase-2 neighborhood** source, where sub-place granularity genuinely needs a non-Census origin.
-- **Just add a city column to the JSON fixture, nothing structured** — a flat column can't express the
-  many-to-many ZCTA↔place overlap our data actually has, and can't be joined at read time the way
-  Phases 2/3 need. We keep the fixture *format*, but structure it as a node list + overlap edges.
+## 4. Node-set finding that shapes the build (live-verified 07/07/2026)
 
-## 4. Key finding that shapes the node set (live-verified)
+Grepping the FL gazetteer place file against our 13 current pulse units:
 
-Grepping the FL gazetteer place file (07/07/2026) against our 13 current pulse units:
+- **11 are real Census places** (keep, by GEOID): Bonita Springs city (1207525), Cape Coral city (1210275),
+  Estero village (1221150), Fort Myers city (1224125), Fort Myers Beach town (1224150), Golden Gate CDP (1226300),
+  Lehigh Acres CDP (1239925), Marco Island city (1243083), Naples city (1247625), North Fort Myers CDP (1249350),
+  Sanibel city (1263700).
+- **"North Naples" and "East Naples" are NOT Census places** — no CDP, no FIPS (colloquial/realtor names). They
+  **cannot be nodes** (RULE 1 — no invented places). Documented alias gap → **Phase-2 resolver** maps them to their
+  actual ZCTAs (e.g. 34109/34110) or containing place. Phase 1 doesn't rewire the pipeline, so no behavior change.
+- **Census adds real in-footprint places we don't cover** (included for free): Naples Park CDP (1247675),
+  Naples Manor CDP (1247650), San Carlos Park CDP (1263425), Fort Myers Shores CDP (1224175), Immokalee CDP (1233250).
+- **Consequence:** the gazetteer keys on **Census GEOID, never a name substring** — this is the root-cause fix.
 
-- **11 are real Census places** with FIPS: Bonita Springs (1207525), Cape Coral (1210275),
-  Estero village (1221150), Fort Myers (1224125), Fort Myers Beach town (1224150),
-  Golden Gate CDP (1226300), Lehigh Acres CDP (1239925), Marco Island (1243083), Naples city (1247625),
-  North Fort Myers CDP (1249350), Sanibel (1263700). *(Immokalee CDP 1233250 also present.)*
-- **"North Naples" and "East Naples" are NOT Census places** — no CDP, no FIPS. They are colloquial /
-  realtor-area names. In a sourced gazetteer they cannot be nodes (RULE 1 — no invented places). They
-  become a **documented alias gap** that Phase 2's resolver handles (resolving to their actual ZCTAs,
-  e.g. 34109/34110, or to the containing Census place). Phase 1 does not rewire the pipeline, so their
-  current capture behavior is unchanged until Phase 2.
-- **Census adds real places we don't currently cover** and should include: Naples Park CDP (1247675),
-  Naples Manor CDP (1247650), San Carlos Park CDP (1263425), Fort Myers Shores CDP (1224175). Including
-  them is *finer real coverage for free*, not scope creep — they're inside our 6-county floor.
+## 5. Sourcing — three Census files, verbatim contracts (verified in-session)
 
-This is the substring-overmatch bug (`Naples` ⊂ `North Naples`) reappearing at the data layer: the fix is
-to key on **Census GEOID**, never on a name substring.
+All are the SAME authority as the existing crosswalk (one provenance story, no seam). **rel files are PIPE-delimited
+with a UTF-8 BOM; the gazetteer is TAB-delimited with trailing-space padding.** Verbatim headers pulled 07/07/2026:
 
-## 5. Deliverables (exactly these; nothing else)
+**(a) ZCTA→place** — the missing city layer — `.../rel2020/zcta520/tab20_zcta520_place20_natl.txt` (9.4 MB, pipe):
+```
+OID_ZCTA5_20|GEOID_ZCTA5_20|NAMELSAD_ZCTA5_20|AREALAND_ZCTA5_20|AREAWATER_ZCTA5_20|MTFCC_ZCTA5_20|CLASSFP_ZCTA5_20|
+FUNCSTAT_ZCTA5_20|OID_PLACE_20|GEOID_PLACE_20|NAMELSAD_PLACE_20|AREALAND_PLACE_20|AREAWATER_PLACE_20|MTFCC_PLACE_20|
+CLASSFP_PLACE_20|FUNCSTAT_PLACE_20|AREALAND_PART|AREAWATER_PART
+```
+Columns used: `GEOID_ZCTA5_20` (child ZCTA, 5-digit), `GEOID_PLACE_20` (parent place, 7-digit = state+place),
+`NAMELSAD_PLACE_20` (e.g. "Golden Gate CDP" — carries the human type suffix), `AREALAND_PART` (ZCTA∩place land, m²),
+`AREALAND_ZCTA5_20` (total ZCTA land, m² — denominator for straddle %).
+**Two empty-side cases exist:** rows where the ZCTA side is blank (place has land outside any ZCTA — skipped by the
+scope filter), and ZCTAs that appear in NO populated-place row (fully unincorporated — get a county-only parent, §9).
 
-1. **`fixtures/swfl-places.json`** — the committed, sourced place hierarchy artifact (schema in §6).
-2. **`ingest/pipelines/places_gazetteer/`** — an idempotent, reproducible seeder that regenerates
-   `swfl-places.json` from the three Census files (§3), with `--dry-run` and a provenance stamp.
-3. **Tests** — parser unit tests + data-invariant tests (§8).
-4. **GHA cron wrapper** — freshness per `docs/standards/pipeline-freshness.md` (the Census rel files are
-   decennial-stable, so cadence is annual/manual; the wrapper + `--dry-run` still ship in the same PR).
+**(b) ZCTA→county** — the top tier — `.../rel2020/zcta520/tab20_zcta520_county20_natl.txt` (already parsed by the
+crosswalk builder). Same shape, `GEOID_COUNTY_20` (5-digit) in place of the place fields.
 
-**NOT in Phase 1 (deferred, respecting brain-first + RULE 3 C2):** no `data_lake.places` table. The table
-is created in **Phase 2's PR**, alongside its consumer (`place_pulse` + PackDefinition), so no orphan
-`data_lake.*` table stands up ahead of a brain. `swfl-places.json` is the seed source-of-record until then.
+**(c) FL place centroids** — `.../gazetteer/2020_Gazetteer/2020_gaz_place_12.txt` (FL = state 12, TAB-delimited):
+```
+USPS  GEOID  ANSICODE  NAME  LSAD  FUNCSTAT  ALAND  AWATER  ALAND_SQMI  AWATER_SQMI  INTPTLAT  INTPTLONG
+```
+Columns used: `GEOID` (join key), `INTPTLAT`, `INTPTLONG` (place centroid). Example verified live:
+`Golden Gate CDP  GEOID 1226300  INTPTLAT 26.183598  INTPTLONG -81.703694`. **Trailing whitespace must be stripped.**
+Names come from file (a)'s `NAMELSAD_PLACE_20`; file (c) is joined **only** for centroids (belt-and-suspenders that
+the place is a real gazetteer entry). `LSAD` is a numeric code (25=city, 43/47=town/village, 57=CDP); we do NOT
+decode it — the human type is parsed from the `NAMELSAD` suffix, which is unambiguous.
 
-## 6. Fixture schema — `fixtures/swfl-places.json`
+**Rejected alternatives:** GeoNames/OSM (thinner CDP authority; mixes postal codes with ZCTAs — a provenance seam) —
+reserved as the Phase-2 neighborhood source. A flat city column on the existing fixture (can't express many-to-many
+overlap, can't be joined at read time).
 
-Mirrors the existing crosswalk's provenance header + `primary_* / straddle-list` pattern so it reads as a
-sibling of `swfl-zip-county.json`.
+## 6. Deliverables (exactly these)
 
+1. `fixtures/swfl-places.json` — the committed hierarchy artifact (schema §7).
+2. `scripts/build_swfl_places.py` — the idempotent builder (algorithm §8), a sibling of `build_swfl_zip_county.py`:
+   dry-run by default, `--write` to emit, fail-loud cross-checks, diagnostics to stdout.
+3. `scripts/test_build_swfl_places.py` — pure-function unit tests on the parse/aggregate/straddle logic (§10).
+4. GHA cron wrapper — freshness per `docs/standards/pipeline-freshness.md`. The Census rel files are decennial-stable,
+   so cadence is **annual/manual** (a workflow that runs the builder in dry-run and fails if the committed fixture
+   drifts from a fresh rebuild — a staleness tripwire, not a data refresher).
+
+## 7. Fixture schema — `fixtures/swfl-places.json`
+
+Header mirrors the crosswalk's provenance/precedence block. Body = node list + overlap-edge list. Example values are
+illustrative; the builder computes them.
 ```
 {
-  "gazetteer_vintage": "2020 Census (rel2020 + 2020 Gazetteer, FL)",
-  "source": "<the three Census file URLs from §3, verbatim>",
+  "gazetteer_vintage": "2020 Census (rel2020 ZCTA↔place/county + 2020 Gazetteer FL places)",
+  "source": "<the three §5 file URLs, verbatim>",
   "verified_date": "2026-07-07",
-  "scope_note": "6-county SWFL floor = ZCTAs present in swfl-zip-county.json. Places included = any
-                 Census place that overlaps an in-scope ZCTA. GEOID is the sole identity; names never
-                 key resolution.",
+  "scope_note": "Scope floor = the 100 in-scope ZCTAs in swfl-zip-county.json (the SOLE scope authority).
+                 Places = any Census place overlapping an in-scope ZCTA. GEOID is the sole identity; names
+                 never key resolution. Reference ≠ coverage: geographic span is 6-county, but real DATA is
+                 Lee+Collier (core) + Hendry (minor) per CLAUDE.md SCOPE (07/07/2026) — node existence for a
+                 Charlotte/Glades/Sarasota place is a reference fact, not a data-coverage claim.",
+  "primary_parent_rule": "For a ZCTA: the place with the largest AREALAND_PART overlap; if it overlaps no place
+                          (unincorporated) its parent is its primary_county. For a place: the county carrying the
+                          largest share of the place's land, derived by summing each member ZCTA's AREALAND_PART
+                          attributed to that ZCTA's primary_county (crosswalk). Secondary parents kept at ≥1% of
+                          the primary's weight (same MIN_SECONDARY_RATIO as the crosswalk); sub-1% slivers dropped.",
+  "counts": { "counties": 6, "places": <computed>, "zctas": 100 },
   "nodes": [
     { "place_id": "county:12021", "geoid": "12021", "type": "county", "name": "Collier",
-      "primary_parent": null, "centroid_lat": ..., "centroid_lon": ... },
-    { "place_id": "place:1226300", "geoid": "1226300", "type": "place", "name": "Golden Gate",
-      "lsad": "CDP", "primary_parent": "county:12021", "centroid_lat": ..., "centroid_lon": ... },
+      "primary_parent": null },
+    { "place_id": "place:1226300", "geoid": "1226300", "type": "place", "name": "Golden Gate", "lsad": "CDP",
+      "primary_parent": "county:12021", "centroid_lat": 26.183598, "centroid_lon": -81.703694 },
     { "place_id": "zcta:34116", "geoid": "34116", "type": "zcta", "name": "34116",
-      "primary_parent": "place:1226300", "centroid_lat": ..., "centroid_lon": ... }
+      "primary_parent": "place:1226300" }
   ],
   "overlaps": [
-    { "child": "zcta:34116", "parent": "place:1226300", "arealand_part": <m2>, "is_primary": true },
-    { "child": "zcta:34116", "parent": "place:1247625", "arealand_part": <m2>, "is_primary": false }
+    { "child": "zcta:34116", "parent": "place:1226300", "arealand_part": <m2>, "share_of_child": <0..1>, "is_primary": true },
+    { "child": "zcta:34116", "parent": "place:1247625", "arealand_part": <m2>, "share_of_child": <0..1>, "is_primary": false },
+    { "child": "place:1226300", "parent": "county:12021", "arealand_part": <m2>, "share_of_child": <0..1>, "is_primary": true }
   ]
 }
 ```
+- `place_id` is a namespaced surrogate (`type:geoid`) so a ZCTA and a place never collide. `type ∈ {county, place, zcta}`;
+  `neighborhood` reserved for Phase 2.
+- `nodes[].primary_parent` == the `is_primary` edge in `overlaps` (denormalized for a cheap single-parent tree walk).
+- `overlaps` holds the full many-to-many containment with `arealand_part` and `share_of_child` (= arealand_part ÷ the
+  child's total land), preserving genuine straddles exactly as the crosswalk preserves `counties[]`.
+- **ZCTA centroids are deliberately absent** — they already live in `lib/geo/zip-centroid.ts` / `fl_zips.geojson`
+  (RULE 0.5, don't duplicate). Only **place** centroids are new (from file (c)); they power "zoom on the named spot"
+  (rules-of-engagement PLACES) and Phase-2 proximity resolution.
 
-- **`nodes`** — one row per real place. `place_id` is a namespaced surrogate (`type:geoid`) so a ZCTA and
-  a place can never collide. `type ∈ {county, place, zcta}`; `neighborhood` is **reserved for Phase 2**.
-  `primary_parent` is the dominant-overlap parent, giving Phase 2/3 a cheap single-parent tree walk.
-- **`overlaps`** — the full many-to-many containment with `arealand_part` weight and an `is_primary` flag,
-  preserving genuine straddles (a ZCTA spanning two places; a place spanning two counties) exactly the way
-  the county crosswalk preserves `counties[]` today. `primary_parent` in `nodes` == the `is_primary` edge.
-- **Centroids** come free from the gazetteer file and power "zoom on the named spot" (rules-of-engagement
-  PLACES) and Phase-2 proximity resolution; sourced, not invented.
+## 8. Builder algorithm — `scripts/build_swfl_places.py`
 
-## 7. Seeder design — `ingest/pipelines/places_gazetteer/`
+Copies `build_swfl_zip_county.py`'s spine: `urllib.request.urlopen(...).read().decode("utf-8-sig")` →
+`csv.DictReader(io.StringIO(data), delimiter="|")`; dry-run default, `--write` emits; `json.dump(indent=2,
+ensure_ascii=False)` + trailing `\n`, `newline="\n"`.
 
-- **Scope floor:** read the in-scope ZCTA set from `fixtures/swfl-zip-county.json` (the existing authority).
-  Only ZCTAs in that set, and only places overlapping them, enter the gazetteer. This inherits the
-  crosswalk's documented county precedence and its excluded-mailing-ZIP discipline — no widening of scope.
-  **Reference ≠ coverage:** the crosswalk (and therefore this gazetteer) spans the 6-county geographic
-  floor, but per the locked SCOPE note (CLAUDE.md, 07/07/2026) our *real data* is Lee + Collier (core) with
-  Hendry a minor addition; Charlotte/Glades/Sarasota nodes existing in the gazetteer is a geographic-reference
-  fact, **not** a claim we hold data for them. The gazetteer is a place dimension, exactly as the crosswalk
-  is a county-crosswalk reference — neither asserts coverage.
-- **Parse:** the ZCTA→place file (child ZCTA, parent place GEOID, `AREALAND_PART`) → `overlaps`; the FL
-  gazetteer place file → place `name`/`lsad`/`centroid`; the ZCTA→county file (already have it) → the
-  county tier. `is_primary` = largest `AREALAND_PART` per child, matching the crosswalk's
-  "primary = largest overlap" rule. Ties and sub-1% slivers handled the same way the crosswalk documents.
-- **Probe first (ingest rule):** before parsing the 9.4M national ZCTA→place file, a <1-min probe confirms
-  the exact column order/header live (columns are expected to mirror the county file:
-  `GEOID_ZCTA5_20 | GEOID_PLACE_20 | NAMELSAD_PLACE_20 | AREALAND_PART | …`), rather than trusting this
-  spec's memory of them.
-- **Idempotent:** deterministic sort + stable `place_id` → re-running produces a byte-identical fixture
-  (diff-noise-free). A `--dry-run` prints the node/overlap counts and the diff without writing.
-- **No LLM** → no `RunBudget` needed. Still emits a provenance record (file URLs + vintage + row counts).
+1. **Scope floor from the crosswalk (single authority).** Load `fixtures/swfl-zip-county.json`; build
+   `IN_SCOPE = {e.zip}` (100 ZCTAs) and `ZCTA_PRIMARY_COUNTY = {e.zip: e.primary_county}`. Do NOT re-derive scope.
+2. **Counties.** 6 nodes from the crosswalk's county set (`12015 Charlotte … 12115 Sarasota`), `primary_parent=null`.
+3. **ZCTA→place overlaps.** Stream file (a). For each row with `GEOID_ZCTA5_20 ∈ IN_SCOPE` **and** non-empty
+   `GEOID_PLACE_20`: record `overlap[zcta][place] += int(AREALAND_PART or 0)` and capture `place_name`
+   (from `NAMELSAD_PLACE_20`), `zcta_total_land` (from `AREALAND_ZCTA5_20`). Every place seen here becomes a place node.
+4. **ZCTA nodes + primary place.** For each in-scope ZCTA: `is_primary` place = argmax `AREALAND_PART`;
+   `share_of_child = part ÷ zcta_total_land`; secondary place edges kept at ≥ `MIN_SECONDARY_RATIO (0.01)` × primary.
+   **Unincorporated fallback:** a ZCTA with no place overlap gets `primary_parent = county:<its crosswalk primary_county>`
+   and only a county edge (real case — e.g. Golden Gate Estates land).
+5. **Place→county edges (derived, documented).** For each place, `county_weight[place][county] += AREALAND_PART(zcta,place)`
+   for each member ZCTA, attributed to `ZCTA_PRIMARY_COUNTY[zcta]`. `primary_parent` = argmax; secondaries by the 1% rule.
+   If a place's dominant county is out-of-scope (a place clipping in from Manatee/DeSoto), assign its largest **in-scope**
+   county and log it in diagnostics (mirrors the crosswalk's fringe handling).
+6. **Place centroids.** Stream file (c) (TAB-delimited, strip trailing space); join on `GEOID`; attach
+   `centroid_lat/lon`. A place present in (a) but missing from (c) → centroid null + a diagnostic line (should be empty).
+7. **Assemble + sort** deterministically (`type` then `geoid`) so re-runs are byte-identical.
+8. **Fail-loud cross-checks (raise SystemExit, like the sibling):**
+   - all 11 known units from §4 present by GEOID;
+   - "North Naples"/"East Naples" absent from every `name` (proves no invention);
+   - every in-scope ZCTA (100) has a node and a non-null `primary_parent`;
+   - every place node has a county `primary_parent`; no orphan node; every `geoid` is 5 (county/zcta) or 7 (place) digits.
+9. **Diagnostics to stdout** before trusting: node/edge counts by type; every place→primary_county for review;
+   list of straddle ZCTAs (>1 place) and straddle places (>1 county); any null centroid; any out-of-scope-dominant place.
 
-## 8. Testing / invariants
+## 9. Edge cases (enumerated, all handled above)
 
-- **Parser units:** a known in-scope ZCTA (e.g. 34116) resolves to Golden Gate CDP as `is_primary` with a
-  correct county tier; a straddle ZCTA emits ≥2 overlap edges with exactly one `is_primary`; an
-  out-of-6-county ZCTA is dropped by the scope filter.
-- **Data invariants (assert on the generated fixture):** every `zcta` node has ≥1 overlap edge and a
-  non-null `primary_parent`; every `place` node has a county `primary_parent`; no orphan node; every
-  `geoid` is 5 digits (county/zcta) or 7 digits (place) and traces to a Census file (no invented GEOID);
-  the 11 known units from §4 are all present by GEOID; North/East Naples are absent (proving we didn't
-  invent them).
-- **Idempotency:** second `--dry-run` reports 0 diff.
+- **Unincorporated ZCTA** (no place overlap) → county-only parent (§8.4). Expected for East-Naples/Golden Gate Estates land.
+- **ZCTA straddling two places** → multiple place edges, one `is_primary` (§8.4).
+- **Place straddling two counties** → multiple county edges, one `is_primary` (§8.5).
+- **Place clipping in from a non-scope county** → in-scope county parent + diagnostic (§8.5).
+- **Empty-ZCTA-side rows** in file (a) → skipped by the `IN_SCOPE` filter (§8.3).
+- **BOM + delimiter mismatch** (pipe rel vs tab gazetteer) → `utf-8-sig` decode; per-file delimiter (§8).
+- **Place in (a) but missing from (c)** → null centroid + diagnostic, never a crash (§8.6).
 
-## 9. Handoff to Phase 2 / Phase 3 (so this schema doesn't need re-migration)
+## 10. Testing / invariants
 
-- **Phase 2** creates `data_lake.places` + `data_lake.place_overlaps` from this fixture in the same PR as
-  `place_pulse` + its PackDefinition (brain-first satisfied there), adds the **reach** axis on the *fact*
-  table (not on `places`), and rewrites capture/distill to assign `home_place` (by GEOID) + `reach_level`.
-  The alias gap (North/East Naples and other colloquial names) is resolved in the Phase-2 distill prompt +
-  a small alias map, not in this fixture.
-- **Phase 3** adds the read-time rollup helper (containment via `overlaps`) and migrates the ~12 reader
-  surfaces + backfills the 142 existing rows.
-- Reserved-but-empty now: `neighborhood` node type, and any `population/prominence` column (Phase-2
-  toponym resolution may add it from Census population, sourced).
+- **Unit (`test_build_swfl_places.py`, pure functions on tiny in-memory fixtures):** argmax primary selection; the 1%
+  secondary rule keeps a 1.2% straddle and drops a 0.5% sliver; `share_of_child` math; unincorporated fallback yields a
+  county parent; the derived place→county picks the majority county.
+- **Invariants** are the §8.8 fail-loud checks — they run on every build, so a bad regenerate can never be committed.
+- **Idempotency:** a second dry-run after `--write` reports an empty diff.
 
-## 10. Guards honored
+## 11. Reuse (RULE 0.5 — don't rebuild what exists)
 
-- **RULE 1 / no invented places:** every node's identity is a Census GEOID from a named file; North/East
-  Naples deliberately excluded because Census has no such place.
-- **Brain-first + RULE 3 C2:** no `data_lake.*` table in Phase 1; the fixture+seeder extend an existing
-  artifact rather than erecting a new orphan table/gate.
-- **Ingest conventions (`ingest/CLAUDE.md`):** probe <1 min before the multi-MB parse; `--dry-run` + cron
-  wrapper ship in the same PR (pipeline-freshness); provenance stamped.
-- **Data provenance (global rule 3):** source homepage URLs carried in the fixture header + seeder output.
+- **Scope** is read from `fixtures/swfl-zip-county.json`, never re-derived — one scope authority.
+- **ZCTA centroids** are NOT added — `lib/geo/zip-centroid.ts` + `fl_zips.geojson` already hold them.
+- **Builder shape, provenance-header pattern, straddle rule, `--write` convention** all copied from
+  `build_swfl_zip_county.py` so the two fixtures read as siblings.
 
-## 11. Provenance
+## 12. Handoff to Phase 2 / 3 (so this schema needs no re-migration)
+
+- **Phase 2** creates `data_lake.places` + `data_lake.place_overlaps` **from this fixture** in the same PR as
+  `place_pulse` + its PackDefinition (brain-first satisfied there), adds the **reach** axis on the *fact* table (not on
+  `places`), rewrites capture (one pass per top-level place) and distill (assign `home_place` by GEOID + `reach_level`),
+  and resolves the North/East-Naples alias gap via the distill prompt + a small alias map.
+- **Phase 3** adds the read-time rollup helper (containment via `overlaps`) and migrates the ~12 reader surfaces
+  (`pulse_lake.py`, `city-pulse-swfl` / `corridor-pulse-swfl` / `cre-swfl` packs, `speaker.mts`, both pulse sources,
+  email activation snapshot, ops scripts) + backfills the 142 existing rows.
+- **Reserved-but-empty now:** the `neighborhood` node type; an optional `population/prominence` place column (Phase-2
+  toponym resolution may add it from a sourced Census population field, for "bare Naples → the city, not a hamlet").
+
+## 13. Gates / guards honored
+
+- **RULE 1 / no invented places:** every node's identity is a Census GEOID from a named file; North/East Naples excluded
+  because Census has no such place. Every number in the fixture traces to file (a) or (c).
+- **Brain-first + RULE 3 C2:** no `data_lake.*` table in Phase 1; the fixture+builder extend an existing artifact rather
+  than erecting a new orphan table/gate.
+- **Pre-push gates:** none of Gate 2 (vocab/alias), Gate 4 (ingest destructive write — no DB write here), or Gate 5
+  (pack⇆catalog — no pack) apply. Standard SESSION_LOG entry + `scripts/safe-push.mjs` + explicit-path staging still do.
+- **Ingest ethos:** probe-before-parse already done (§5 headers verified live); dry-run default; cron freshness tripwire
+  ships in the same PR; provenance stamped in the fixture header + builder stdout.
+- **Data provenance (global rule 3):** source URLs carried in the fixture header and printed by the builder.
+
+## 14. Provenance
 
 - Live code probed: `ingest/lib/pulse_match.py`, `ingest/pipelines/city_pulse/distill.py`,
-  `fixtures/swfl-zip-county.json`.
-- Live sources verified (crawl4ai + curl, 07/07/2026): Census `rel2020/zcta520/` directory
-  (confirmed `tab20_zcta520_place20_natl.txt` exists), FL 2020 gazetteer place file
-  (confirmed the 11 SWFL units + the absence of North/East Naples + 4 addable CDPs).
-- Existing authority reused: `fixtures/swfl-zip-county.json` (Census ZCTA→county rel file).
+  `scripts/build_swfl_zip_county.py`, `fixtures/swfl-zip-county.json` (100 in-scope ZCTAs), `ingest/utils/zip_approx.py`.
+- Live sources verified (crawl4ai + curl, 07/07/2026): Census `rel2020/zcta520/` directory listing (confirmed
+  `tab20_zcta520_place20_natl.txt`); the ZCTA→place, ZCTA→county, and FL gazetteer place file headers (verbatim, §5);
+  FL gazetteer grep (11 SWFL units present, North/East Naples absent, 4 addable CDPs + Immokalee).
+- Existing authority reused: `fixtures/swfl-zip-county.json` (Census ZCTA→county rel file) as the sole scope source.
