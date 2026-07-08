@@ -35,6 +35,11 @@ const eslintConfig = defineConfig([
     // not shipped code, not authored here, intentionally outside lint scope.
     "app/_design/**",
     "docs/design-reference/**",
+    // bklit-ui chart primitives — verbatim vendor (MIT, pinned commit, see
+    // NOTICE.md) except two documented forks (staticSize/initialLoaded).
+    // Same reasoning as components/viz/** below: third-party-authored code,
+    // not worth carrying our lint rules into someone else's source.
+    "components/charts/vendor/bklit/**",
     // /ops is a separate Vercel project with its own toolchain — isolated from
     // the main app's lint/build (see _AUDIT_AND_ROADMAP/ops-build-spec.md).
     "ops/**",

@@ -1,3 +1,42 @@
+## 2026-07-08 (Sonnet 5 · main) — feat: vendor real bklit-ui chart primitives, server-render for email (kills a hand-SVG-per-shape shape ceiling)
+
+Operator's actual ask, corrected after two misreads this session (chased "chat charts" — operator
+killed that a month ago, `3c2f316e`; then almost regressed the working `barChartSvg`): the Email Lab
+chart-type picker (`lib/email/reshape-chart-type.ts`, `CHART_TYPE_OPTIONS`) is hard-capped at 4 shapes
+(bar/ranked/donut/dotplot) because every new shape costs 3 hand-authored files. Operator: go read
+bklit-ui's real component docs (`bklit.com/docs/components`) and build with it — a composable primitive
+library (`ComposedChart`+`SeriesBar`/`Line`/`Area`, not 16 rigid types), built on `@visx` (pure SVG).
+
+Proved live before touching production code: `@visx` components render server-side to REAL, correctly-
+scaled static SVG (not blank/0×0) via a 2-prop fork (`staticSize` bypasses `ParentSize`'s ResizeObserver
+dependency; `initialLoaded` skips the motion reveal-from-zero state) — rasterized through the same
+`@resvg/resvg-js` pipeline every other email chart already uses. Spike PNG confirmed real bar geometry
+before any real vendoring started.
+
+Shipped: vendored Bar/Line/Area/Composed chart shells + full shared context/animation/axis/tooltip/
+legend infra from bklit-ui (pinned commit `d7cd58276de167c10fdd6c6bf44351a6459c11b4`, MIT) into
+`components/charts/vendor/bklit/` — 78 files, typecheck clean. Deps added: `@visx/{scale,event,
+responsive,shape,group,gradient,pattern,grid}`, `@base-ui/react` (motion already installed). Built
+`render-static.tsx` (the SSR bridge — uses `@react-email/render`, NOT a direct `react-dom/server`
+import, because Next's App Router flags that as an illegal nested render even server-side-only; matches
+the existing `render-email-doc.ts` pattern). Wired the FIRST real production path: `email-svg.tsx`'s
+`bklitTrendSvg` (real `AreaChart`, gradient fill) now renders the zhvi-area email chart in
+`spec-to-png.ts`, ahead of the old hand-rolled `trendChartSvg` (kept as the belt-and-suspenders
+fallback, RULE 0.7 — never blocks). `chartSpecToEmailSvg`/`chartSpecToEmailImage` are now async
+(2 pre-existing test call sites + 1 `tmp/` proof script updated to `await`).
+
+Scope cut, logged not hidden (see `components/charts/vendor/bklit/NOTICE.md`): Gauge/Pie/Sankey/Live
+Line and the other 8 bklit chart types are NOT vendored this pass — Gauge's dependency chain reaches
+into Pie's infra + a new `@base-ui/react/progress`, and bundling that in without a visual check felt
+like exactly the half-shipped expansion this build was supposed to stop doing. Bar/Line/Composed are
+vendored and typecheck clean but NOT yet wired into a production call site (only Area/zhvi-area is).
+`reshape-chart-type.ts`'s 4-case switch itself is UNCHANGED — next increment, not done here.
+
+Gates: full test suite 5317 pass / 4 pre-existing fails (unrelated — env-var-dependent zip-seed test,
+a stale nav-string lint hit, a Playwright/bun-test runner clash; none touch files this session changed).
+`bunx next build` clean. NOT pushed — awaiting operator confirmation (new deps + a public function
+signature going async).
+
 ## 2026-07-08 (Opus 4.8 · main) — feat: brand variety-defaults type-lift (email-builder M3-B, steps 1–4)
 
 Operator ran the migration (`docs/sql/20260708_user_brand_variety_defaults.sql`) and said "good to go"

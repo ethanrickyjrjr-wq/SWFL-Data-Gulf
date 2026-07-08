@@ -251,9 +251,9 @@ describe("bindRankedDeltaSpec", () => {
 });
 
 describe("email dispatch — chartSpecToEmailSvg executes the frame→builder routing", () => {
-  test("a bound ranked-delta spec rasterizes with the PUBLISHED % chip, not a $ delta", () => {
+  test("a bound ranked-delta spec rasterizes with the PUBLISHED % chip, not a $ delta", async () => {
     const spec = bindRankedDeltaSpec(output([zhviTable]))!;
-    const svg = chartSpecToEmailSvg(spec, "#1BB8C9");
+    const svg = await chartSpecToEmailSvg(spec, "#1BB8C9");
     expect(svg).not.toBeNull();
     // The chip carries the source's published YoY % (─9.6% / +2.5%), formatted as a
     // percent — NEVER a dollar amount the source never published.

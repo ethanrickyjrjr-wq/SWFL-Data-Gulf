@@ -20,6 +20,7 @@ import {
   type TrendPoint,
 } from "@/lib/email/chart-image";
 import { formatDisplayDate } from "@/lib/format-date";
+import { bklitTrendSvg } from "@/components/charts/vendor/bklit/email-svg";
 import { rankedDeltaSvg } from "@/lib/charts/svg/ranked-delta";
 import { donutShareSvg } from "@/lib/charts/svg/donut-share";
 import { dotPlotSvg } from "@/lib/charts/svg/dot-plot";
@@ -74,10 +75,13 @@ export interface EmailChartImage {
   caption: string;
 }
 
-/** ChartSpec → the email-safe SVG STRING (the dispatch only — no I/O). PURE and
- *  exported so the frame→builder routing is unit-testable without Supabase. Returns
- *  null for an unsupported frame or on any error (never throws). */
-export function chartSpecToEmailSvg(spec: ChartSpec, accent: string): string | null {
+/** ChartSpec → the email-safe SVG STRING (the dispatch only — no network/Supabase
+ *  I/O, so still unit-testable without a live backend). Returns null for an
+ *  unsupported frame or on any error (never throws). Async because the
+ *  zhvi-area path's bklit AreaChart render goes through `@react-email/render`
+ *  (2026-07-08 — see render-static.tsx for why that's not a direct
+ *  `react-dom/server` import). */
+export async function chartSpecToEmailSvg(spec: ChartSpec, accent: string): Promise<string | null> {
   try {
     const title = spec.title || "Market data";
     const vf = mapValueFormat(spec.value_format);
@@ -130,9 +134,16 @@ export function chartSpecToEmailSvg(spec: ChartSpec, accent: string): string | n
     }
 
     // Fallbacks: zhvi-area / any options.data time series, then bar-table.
+    // bklit's real AreaChart (server-rendered, gradient fill) tries first —
+    // it's the SAME component the live web frame would use, not a second
+    // hand-authored SVG string; trendChartSvg is the belt-and-suspenders
+    // fallback if the render ever comes back null (RULE 0.7 — never blocks).
     if (!svg && (spec.frameId === "zhvi-area" || spec.chart_type === "area")) {
       const pts = specToTrendPoints(spec);
-      if (pts) svg = trendChartSvg(pts.slice(-18), baseOpts);
+      if (pts) {
+        const recent = pts.slice(-18);
+        svg = (await bklitTrendSvg(recent, baseOpts)) ?? trendChartSvg(recent, baseOpts);
+      }
     }
     if (!svg) {
       const bars = specToBars(spec);
@@ -166,7 +177,7 @@ export async function chartSpecToEmailImage(
   accent: string,
   key: string,
 ): Promise<EmailChartImage | null> {
-  const svg = chartSpecToEmailSvg(spec, accent);
+  const svg = await chartSpecToEmailSvg(spec, accent);
   if (!svg) return null;
   try {
     const title = spec.title || "Market data";

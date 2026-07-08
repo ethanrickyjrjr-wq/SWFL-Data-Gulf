@@ -1,5 +1,6 @@
 import { test, expect } from "bun:test";
-import { chartImageCaption } from "./spec-to-png";
+import { chartImageCaption, chartSpecToEmailSvg } from "./spec-to-png";
+import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
 // Rule 2: an as-of date is written MM/DD/YYYY, never the raw ISO/SWFL token. The chart
 // SVG already obeys this; the email image-block caption (the line UNDER the chart) was
@@ -23,4 +24,44 @@ test("chart image caption omits the as-of clause when no date", () => {
 
 test("chart image caption falls back to a default title", () => {
   expect(chartImageCaption({})).toBe("Market data");
+});
+
+// 2026-07-08: zhvi-area now renders through a real bklit AreaChart (server-
+// rendered, same component the web frame would use) instead of a second
+// hand-authored SVG string. trendChartSvg stays as the belt-and-suspenders
+// fallback if the bklit render ever returns null.
+
+test("zhvi-area renders a real bklit AreaChart SVG, not the hand-rolled polyline fallback", async () => {
+  const spec = {
+    frameId: "zhvi-area",
+    title: "Fort Myers — Median Home Value",
+    chart_type: "area",
+    value_format: "usd",
+    source: { citation: "SWFL Data Gulf — housing-swfl" },
+    asOf: "2026-07-08",
+    options: {
+      data: [
+        { month: "2025-08", value: 398000 },
+        { month: "2025-09", value: 402000 },
+        { month: "2025-10", value: 405500 },
+        { month: "2025-11", value: 403000 },
+        { month: "2025-12", value: 408000 },
+      ],
+    },
+  } as ChartSpec;
+
+  const svg = await chartSpecToEmailSvg(spec, "#0ea5e9");
+
+  expect(svg).not.toBeNull();
+  expect(svg).toContain("<svg");
+  expect(svg).toContain("Fort Myers");
+  expect(svg).not.toContain("<polyline");
+});
+
+test("chartSpecToEmailSvg never throws (rejects) on a malformed zhvi-area spec", async () => {
+  const spec = { frameId: "zhvi-area", options: {} } as ChartSpec;
+  // If this rejected, `await` would fail the test — the assertion below just
+  // confirms the actual no-data-to-plot outcome: a clean null, not a crash.
+  const svg = await chartSpecToEmailSvg(spec, "#0ea5e9");
+  expect(svg).toBeNull();
 });
