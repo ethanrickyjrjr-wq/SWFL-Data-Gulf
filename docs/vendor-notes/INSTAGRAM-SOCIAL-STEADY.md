@@ -16,6 +16,15 @@
   - `404` → `{"success": false, "message": "Resource Not Found"}`
   - `422` → `{"message": "The <field> field is required.", "errors": {"<field>": ["..."]}}`
 
+## Instagram `/search` is TOKEN-only — field-verified 07/08/2026 (17 real calls)
+
+`/v1/instagram/search` for concept discovery wants **single hashtag-style tokens**, not multi-word phrases.
+`aimarketing` / `emaildesign` / `canva` each returned ~24 posts; the phrase `email marketing AI` returned
+HTTP 200 with `{"success": false}` and an empty `body`. Same "check `body.success !== false` even on a 200"
+guard as Reddit. A few valid-looking single tokens also came back empty (`midjourney`, `designhacks`,
+`coldemail`) — token-sensitivity on the vendor side, not a client bug; reword/try a sibling token. Captions
+carry no external URLs (link-in-bio), so IG `/search` is an engagement/signal surface, not a crawl-target source.
+
 ## Instagram pagination & token expiration (CRITICAL)
 
 Most collection endpoints (posts, followers, following, comments, search, likes) paginate:
@@ -897,6 +906,17 @@ Lists:
 
 Note: user timeline endpoints take `user_id` (numeric), not username — resolve via `/v1/twitter/user` first.
 
+### Twitter quirks — field-verified, not in the crawled docs
+
+**07/08/2026 (24 real calls):**
+- **`/v1/twitter/search` returns an ENTITY object, NOT tweet bodies.** `body` is
+  `{ users, topics, events, lists }` — regardless of the `type` param. Values tried
+  (`Top`/`Latest`/`tweets`/`Tweets`/`People`/`Media`) ALL yielded the same entity object; none returned an
+  array of tweets. So the docs' "search users, tweets, topics" wording overstates it — you get matching
+  *accounts/topics/events/lists*, not tweet text or tweet URLs. To actually read tweets: resolve an account
+  via `/v1/twitter/user` → numeric `user_id`, then `/v1/twitter/user/tweets`. For a keyword content sweep,
+  Twitter is a two-hop endpoint, not one.
+
 ## 🗨️ Reddit — 9 endpoints (`/v1/reddit/...`)
 
 - `GET /v1/reddit/search` (weight 1) — search topics; filter by posts/comments/users/communities; sort by relevant/hot/new/rising + time frame. Params: `search`, `subreddit?`, `filter?`, `cursor?`
@@ -934,6 +954,16 @@ Note: user timeline endpoints take `user_id` (numeric), not username — resolve
 - `sortType` could not be made to work in combination with `filter` on `/v1/reddit/posts` — every value
   tried (`all/year/month/week/day/hour`) 422'd ("The selected sort type is invalid"). Valid values
   remain unconfirmed; don't rely on it — use bare `filter=hot` instead.
+
+**07/08/2026 (later, 34 real calls — AI-design/email sweep):**
+- The content-sensitive `/search` 200-with-`{"success": false, "message": "Please enter a valid subReddit
+  URL."}` behavior reproduced a THIRD independent time — this run it hit `midjourney marketing` and
+  `AI subject line` (neither has subreddit syntax); rewording succeeded. Treat as a stable vendor-side
+  content-filter false-positive, not intermittent. `body.success !== false` is a mandatory guard.
+- Same run confirmed generic `/search` relevance-ranks **site-wide**, not by topic: bucketed queries about
+  AI design / email marketing returned mostly unrelated viral posts (layoffs, model releases, IPOs). For
+  scoped mining, targeted `/v1/reddit/posts?url=<subreddit>&filter=hot` + client-side filtering is the
+  reliable path; generic `/search` is low-yield for niche topics.
 
 ## 🤖 ScrapeFlow — generic scraper
 

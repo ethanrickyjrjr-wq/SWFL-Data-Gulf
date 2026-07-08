@@ -1,3 +1,19 @@
+## 2026-07-08 (Opus 4.8 · main) — research: 3-surface SteadyAPI sweep → AI design programs + email-marketing AI hacks, crawled & broken down for spec
+
+Operator: "run steadyapi on reddit and insta and twitter social, find design programs for AI or hacks and
+email marketing AI hacks, then crawl4ai what's returned and break each down so another claude can spec."
+63 real SteadyAPI calls on the WORKING `new_steady` key (`PHOTOS_API` = the suspended-subscription one):
+Reddit 775 posts (20 search + 14 targeted `/posts` hot pulls), IG 336 posts (17 tokens), Twitter 51
+accounts. Then 5 parallel crawl4ai subagents broke down ~24 distinct finds. Deliverable:
+`docs/superpowers/plans/2026-07-08-ai-design-and-email-marketing-hacks-sweep.md` — one spec-ready block per
+find (Gamma/Recraft/Figma Make/Alai/Ideogram/Claude Design/beehiiv/Klaviyo/Instantly/Migma/Jasper/Smartlead/
+Lemlist/Walter + 6 hacks) with a tiered spec-priority ranking. Live-verified: Claude Design is a real
+Anthropic beta shipping marketing-collateral/email connectors, and Migma already advertises "Import Claude
+design" — "AI-designed email" is a shipping market pattern. Folded 3 new vendor quirks into
+INSTAGRAM-SOCIAL-STEADY.md: Twitter `/search` returns an entity object (no tweet bodies — two-hop via
+`/user/tweets`); IG `/search` is token-only; Reddit `/search` content-sensitivity reproduced a 3rd time.
+Research only — nothing built yet. NEXT: brainstorm + build Tier-1 item #1 (voiceGuard banned-phrase lint).
+
 ## 2026-07-08 (Sonnet 5 · main) — SPEC: Showing Prep Packet (comps + subject-listing, one-click)
 
 Brainstormed (RULE 3.5) the #1 idea from the 07/08 Reddit research sweep: agents naming, unprompted,
