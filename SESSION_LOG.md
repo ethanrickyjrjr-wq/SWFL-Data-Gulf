@@ -1,3 +1,26 @@
+## 2026-07-08 (Sonnet 5 · main) — SPEC: Showing Prep Packet (comps + subject-listing, one-click)
+
+Brainstormed (RULE 3.5) the #1 idea from the 07/08 Reddit research sweep: agents naming, unprompted,
+a ~3-hour manual pre-showing ritual (comps, permits, tax records, disclosures assembled by hand).
+Used two parallel Plan-agent explorations (operator asked for "a couple Claude's to plan") — one on
+data feasibility, one on deliverable-pipeline fit — which corrected the initial assumption: comps are
+genuinely address-grain today (live via SteadyAPI through `comp-helper.ts`), but permits (ZIP/corridor
+grain only) and tax/parcel (folio/parcel-ID keyed, no address join) are NOT, and disclosures have zero
+data/vendor. Operator locked v1 scope to comps + subject-listing only, disclosures as a user-upload
+file slot (Lane 2 of the four-lane model), a new project kind `"showing-prep"` (not a bolt-on to the
+existing New Listing flyer — different audience/tone), persisted project + PDF/email (not a one-shot
+export), and both a conversational and homepage-pill trigger. A second crawl4ai research pass (per
+operator ask: "find best showing prep designs... help selling agents stick out") verified real
+industry-standard packet structure against RPR's own official Next Gen Reports template, Luxury
+Presence's 2026 guide, and Bramlett Partners — added a comp map, per-comp one-sheets, and a
+ZIP-grain "Local Market Snapshot" (fed from existing market-heat-swfl/housing-swfl packs) to v1,
+each cited. Design doc written + self-reviewed:
+`docs/superpowers/specs/2026-07-08-showing-prep-packet-design.md`. Check opened:
+`showing_prep_packet_live_verify`. Next: writing-plans skill for the implementation plan. Noted: a
+different concurrent session left an untracked, unrelated research doc
+(`docs/superpowers/plans/2026-07-08-ai-design-and-email-marketing-hacks-sweep.md`) in the working
+tree — not touched, not staged here, per parallel-session isolation.
+
 ## 2026-07-08 (Opus 4.8 · main) — fix(listings): fold directionals in address match + rotate PHOTOS_API (local)
 
 Operator tested the New Listing build live and got an EMPTY grid (structure + chart rendered, but no
