@@ -1,3 +1,19 @@
+## 2026-07-08 (Opus 4.8 · main) — feat(email): voiceGuard banned-phrase lint SHIPPED (module + tests + repair-loop wiring)
+
+Built Tier-1 #1 from today's AI-design/email sweep: `lib/email/voice-guard.ts` — `VOICE_TELLS` (v1 =
+corporate-AI tells only, near-zero false positives), `detectVoiceTells`, `stripVoiceTells`
+(phrase-surgical + whitespace tidy, so a cited number sharing a tell's sentence survives), `voiceGuard`.
+Pure; walks the SAME prose surfaces as the no-invention lint via field lists now exported from
+author-doc.ts (`PROSE_FIELDS`/`COLUMN_PROSE_FIELDS`/`ITEM_PROSE_FIELDS`) so the two can't drift. Wired
+into build-doc.ts's existing author repair loop: regenerate ONCE naming BOTH number-offenders and
+robotic tells → number-strip (sentence) then voice-strip (phrase) → `voiceStripped` meta. No extra model
+call (detection is local). 26 new tests + full lib/email suite (1105) green; `next build` clean. Commits:
+spec 8344c2ca · module+tests 10cfefc2 · wiring 312a0b51. Design decisions (operator-locked): remedy =
+regenerate+phrase-strip, list = corporate-AI tells only. NOTE: had to override a parallel session's live
+claim on build-doc.ts (operator-approved) after it clobbered the loop edit twice — committed fast to lock
+it. Check `email_voice_guard_live_verify` stays OPEN until an operator-run live send confirms a clean,
+figure-intact commentary. Spec: docs/superpowers/specs/2026-07-08-email-voice-guard-design.md.
+
 ## 2026-07-08 (Opus 4.8 · main) — fix(listings): query the exact address directly instead of scanning ~800 city rows
 
 Operator (on live prod) got empty New Listing grids. Root cause of the empties is two-part: (1) code —
