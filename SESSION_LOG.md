@@ -1,3 +1,17 @@
+## 2026-07-09 (Sonnet 5 · main) — feat(nav): "New Campaign" door into the blank grid cockpit, signed-in, every page
+
+Operator wanted one click from anywhere (signed in) straight into a blank Email/Social Lab grid
+canvas — no project pick, no prebuilt seed. Added a "New Campaign" button to `components/nav/SiteShell.tsx`
+in both nav variants: `HomeBar` (home page, desktop + mobile, next to "My Projects") and `AppBar`
+(every other page, desktop + mobile, next to the account menu). Wired through the existing canonical
+`signedInLabArrival()` builder (`lib/lab-entry/destination.ts`) — called with no args it always resolves
+to `/email-lab/grid` with zero query params, which is the blank-canvas arrival (confirmed by the page's
+own `EmailLabGridPage` logic and the existing `destination.test.ts` assertion). Used the helper rather
+than a raw href because `destination.static.test.ts` (door-pin) fails the suite on any raw `/email-lab`
+nav string outside `lib/lab-entry`. Verified: `bun test lib/lab-entry/destination.static.test.ts
+lib/lab-entry/destination.test.ts` (7 pass) + `bunx next build` clean, both before and after the second
+(AppBar) pass.
+
 ## 2026-07-09 (Sonnet 5 · main) — feat(graphify): scheduled cron to auto-republish the code graph
 
 Operator asked whether the graph auto-refreshes. It didn't — no GHA workflow referenced `graphify` at

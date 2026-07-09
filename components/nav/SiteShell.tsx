@@ -9,6 +9,7 @@ import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
 import { LoginModal } from "@/components/landing/LoginModal";
 import { revealBrandPanel } from "@/lib/brand/reveal-brand-panel";
+import { signedInLabArrival } from "@/lib/lab-entry/destination";
 import {
   NAV_GROUPS,
   ACCOUNT_MENU,
@@ -158,6 +159,13 @@ function HomeBar({ user, onLogin }: { user: User | null; onLogin: () => void }) 
           </ul>
           {user ? (
             <div className="flex items-center gap-3">
+              {/* Straight-to-cockpit door: a blank grid canvas, no project pick. */}
+              <Link
+                href={signedInLabArrival()}
+                className="btn-gradient rounded-xl px-5 py-2.5 text-sm font-medium text-navy-dark transition-all"
+              >
+                New Campaign
+              </Link>
               <Link
                 href="/project"
                 className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10"
@@ -241,6 +249,13 @@ function HomeBar({ user, onLogin }: { user: User | null; onLogin: () => void }) 
           <div className="border-t border-white/10 pt-3">
             {user ? (
               <div className="flex flex-col gap-3">
+                <Link
+                  href={signedInLabArrival()}
+                  className="btn-gradient block rounded-xl px-6 py-2.5 text-center font-medium text-navy-dark"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  New Campaign
+                </Link>
                 <Link
                   href="/project"
                   className="rounded-full border border-white/20 px-4 py-2 text-center text-sm font-medium text-white"
@@ -435,57 +450,66 @@ function AppBar({
 
         <div className="hidden items-center gap-2 md:flex">
           {user ? (
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setExploreOpen(false);
-                  setAccountOpen((o) => !o);
-                }}
-                aria-expanded={accountOpen}
-                aria-controls="account-menu"
-                aria-label="Account menu"
-                className="flex items-center gap-2 rounded-full border border-white/15 py-1 pl-1 pr-2 text-sm text-white transition-colors hover:bg-white/10"
+            <>
+              {/* Straight-to-cockpit door: a blank grid canvas, no project pick. */}
+              <Link
+                href={signedInLabArrival()}
+                className="btn-gradient rounded-xl px-5 py-2 text-sm font-medium text-navy-dark transition-all"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gulf-teal text-xs font-semibold text-[#0a1419]">
-                  {initial}
-                </span>
-                <span className="hidden max-w-[14rem] truncate text-gray-200 lg:inline">
-                  {email}
-                </span>
-                <Caret open={accountOpen} />
-              </button>
-              {accountOpen && (
-                <div
-                  id="account-menu"
-                  className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-xl border border-white/10 bg-navy-dark p-1 shadow-2xl"
+                New Campaign
+              </Link>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExploreOpen(false);
+                    setAccountOpen((o) => !o);
+                  }}
+                  aria-expanded={accountOpen}
+                  aria-controls="account-menu"
+                  aria-label="Account menu"
+                  className="flex items-center gap-2 rounded-full border border-white/15 py-1 pl-1 pr-2 text-sm text-white transition-colors hover:bg-white/10"
                 >
-                  <div className="truncate border-b border-white/10 px-3 py-2 text-xs text-gray-400">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gulf-teal text-xs font-semibold text-[#0a1419]">
+                    {initial}
+                  </span>
+                  <span className="hidden max-w-[14rem] truncate text-gray-200 lg:inline">
                     {email}
-                  </div>
-                  {ACCOUNT_MENU.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={(e) => onAccountItem(item, e)}
-                      className="block rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeAccount();
-                      void signOut();
-                    }}
-                    className="block w-full rounded-lg px-3 py-2 text-left text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+                  </span>
+                  <Caret open={accountOpen} />
+                </button>
+                {accountOpen && (
+                  <div
+                    id="account-menu"
+                    className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-xl border border-white/10 bg-navy-dark p-1 shadow-2xl"
                   >
-                    Sign out
-                  </button>
-                </div>
-              )}
-            </div>
+                    <div className="truncate border-b border-white/10 px-3 py-2 text-xs text-gray-400">
+                      {email}
+                    </div>
+                    {ACCOUNT_MENU.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={(e) => onAccountItem(item, e)}
+                        className="block rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        closeAccount();
+                        void signOut();
+                      }}
+                      className="block w-full rounded-lg px-3 py-2 text-left text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
             <>
               <button
@@ -575,6 +599,14 @@ function AppBar({
           <div className="mt-2 border-t border-white/10 pt-3">
             {user ? (
               <>
+                {/* Straight-to-cockpit door: a blank grid canvas, no project pick. */}
+                <Link
+                  href={signedInLabArrival()}
+                  onClick={() => setMobileOpen(false)}
+                  className="btn-gradient mb-3 block rounded-xl px-5 py-2.5 text-center text-sm font-medium text-navy-dark"
+                >
+                  New Campaign
+                </Link>
                 <p className="truncate px-3 pb-1 text-xs text-gray-400">{email}</p>
                 {ACCOUNT_MENU.map((item) => (
                   <Link
