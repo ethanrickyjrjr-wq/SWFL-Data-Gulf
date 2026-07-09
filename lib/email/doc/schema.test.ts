@@ -287,14 +287,20 @@ test("two builds of the same seed have distinct (non-aliased) block ids", () => 
   expect(a.blocks[0].id).not.toBe(b.blocks[0].id);
 });
 
-test("editorial seeds exist and carry the serif-display editorial style", () => {
+test("editorial seeds exist, carry a serif editorial voice, and end with a footer", () => {
   for (const id of ["editorial-letter", "magazine-issue"]) {
     const seed = SEED_DOCS.find((s) => s.id === id);
     expect(seed).toBeDefined();
     const doc = seed!.build();
-    expect(doc.globalStyle.displayFontFamily).toBe("PLAYFAIR_SERIF");
     expect(doc.blocks.at(-1)!.type).toBe("footer");
   }
+  // Distinct pairings, not a shared font — BLESSED_PAIRINGS (Fence 4) forbids
+  // serif+serif, so "editorial" can't mean identical settings on both seeds.
+  const magazine = SEED_DOCS.find((s) => s.id === "magazine-issue")!.build();
+  expect(magazine.globalStyle.displayFontFamily).toBe("PLAYFAIR_SERIF");
+  const letter = SEED_DOCS.find((s) => s.id === "editorial-letter")!.build();
+  expect(letter.globalStyle.fontFamily).toBe("BOOK_SERIF");
+  expect(letter.globalStyle.displayFontFamily).toBeUndefined();
 });
 
 test("createBlock mints a fresh block with default props", () => {

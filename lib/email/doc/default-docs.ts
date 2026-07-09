@@ -239,9 +239,24 @@ export const SEED_DOCS: SeedDoc[] = [
       globalStyle: style(),
       blocks: [
         seedBlock("header"),
-        seedBlock("hero"),
-        seedBlock("stats"),
-        seedBlock("signal"),
+        seedBlock("hero", {
+          kicker: "Market Spotlight",
+          value: "",
+          label: "The headline number and what it measures",
+          prose: "Write a quick, plain-language read on where the market's heading this month.",
+        }),
+        seedBlock("stats", {
+          stats: [
+            { value: "", label: "Median DOM" },
+            { value: "", label: "Months of Supply" },
+            { value: "", label: "YoY Price" },
+          ],
+        }),
+        seedBlock("signal", {
+          kicker: "Signal to Watch",
+          title: "Name the one shift worth watching this month",
+          body: "Say what's changing and why it matters — inventory, pricing, or buyer behavior.",
+        }),
         seedBlock("button"),
         seedBlock("footer"),
       ],
@@ -257,11 +272,17 @@ export const SEED_DOCS: SeedDoc[] = [
         seedBlock("header"),
         seedBlock("hero", {
           kicker: "Just Sold",
-          value: "$512K",
-          label: "Sale Price · Cape Coral",
-          prose: "Another home closed above asking — here's what the numbers say.",
+          value: "",
+          label: "Sale price and where it sold",
+          prose: "Say what made this sale notable — over asking, days on market, a bidding war.",
         }),
-        seedBlock("stats"),
+        seedBlock("stats", {
+          stats: [
+            { value: "", label: "Sale Price" },
+            { value: "", label: "Days on Market" },
+            { value: "", label: "List-to-Sale %" },
+          ],
+        }),
         seedBlock("agent-card"),
         seedBlock("footer"),
       ],
@@ -272,14 +293,22 @@ export const SEED_DOCS: SeedDoc[] = [
     name: "Market Letter",
     description: "An editorial note: intro, narrative, a signal, and your sign-off.",
     build: () => ({
-      globalStyle: style(),
+      globalStyle: { ...style(), displayFontFamily: "PLAYFAIR_SERIF" },
       blocks: [
         seedBlock("header"),
-        seedBlock("hero", { kicker: "This Month in SWFL", label: "Lee & Collier Counties" }),
+        seedBlock("hero", {
+          kicker: "This Month in SWFL",
+          value: "",
+          label: "Lee & Collier Counties",
+        }),
         seedBlock("text", {
           body: "Open with the story behind the month's numbers — what shifted and why it matters to your readers.",
         }),
-        seedBlock("signal"),
+        seedBlock("signal", {
+          kicker: "Signal to Watch",
+          title: "Name the one shift worth watching this month",
+          body: "Say what's changing and why it matters — inventory, pricing, or buyer behavior.",
+        }),
         seedBlock("divider"),
         seedBlock("agent-card"),
         seedBlock("footer"),
@@ -291,11 +320,20 @@ export const SEED_DOCS: SeedDoc[] = [
     name: "Listing Feature",
     description: "A photo-led feature for a single property or neighborhood.",
     build: () => ({
-      globalStyle: style(),
+      globalStyle: {
+        ...style(),
+        backdropColor: "#F7F5F2",
+        accentColor: "#8A6D3B",
+      },
       blocks: [
         seedBlock("header"),
         seedBlock("hero", { kicker: "Featured Listing", value: "", label: "" }),
-        seedBlock("image", { alt: "Featured property", caption: "Add a caption for this photo." }),
+        seedBlock("image", {
+          alt: "Featured property",
+          caption: "Add a caption for this photo.",
+          kind: "photo",
+          ratio: "4:5",
+        }),
         seedBlock("text", { body: "Describe what makes this property stand out." }),
         seedBlock("button", { label: "See the Listing" }),
         seedBlock("footer"),
@@ -307,14 +345,20 @@ export const SEED_DOCS: SeedDoc[] = [
     name: "Welcome",
     description: "Onboard a new subscriber: who you are and what to expect.",
     build: () => ({
-      globalStyle: style(),
+      globalStyle: {
+        ...style(),
+        backdropColor: "#F6F8F6",
+        accentColor: "#3F7D5C",
+        displayFontFamily: "BOOK_SERIF",
+      },
       blocks: [
         seedBlock("header"),
         seedBlock("hero", {
           kicker: "Welcome",
           value: "",
           label: "",
-          prose: "Thanks for subscribing — here's what you can expect from us each month.",
+          prose:
+            "Welcome them in your own voice — who you are, what they'll get, and how often you'll send it.",
         }),
         seedBlock("agent-card"),
         seedBlock("button", { label: "Explore the Data" }),
@@ -341,37 +385,40 @@ export const SEED_DOCS: SeedDoc[] = [
     name: "Agent Spotlight",
     description: "Lead with the agent photo, then track record and a clear call to action.",
     build: () => ({
-      globalStyle: style(),
+      globalStyle: {
+        ...style(),
+        backdropColor: "#FAF6F0",
+        primaryColor: "#1F2937",
+        accentColor: "#D97706",
+        fontFamily: "PLAYFAIR_SERIF",
+      },
       blocks: [
-        seedBlock("header", {
-          companyName: "Coastal Realty Group",
-          tagline: "Southwest Florida Real Estate",
-        }),
+        seedBlock("header", { companyName: "", tagline: "" }),
         seedBlock("hero", {
           kicker: "Meet Your Agent",
-          value: "Sarah Mitchell",
-          label: "Realtor® · Lee & Collier Counties",
+          value: "",
+          label: "Your name, license, and the counties you serve",
           prose:
-            "I specialize in luxury waterfront and investment properties across Southwest Florida — and I bring the market data to back every recommendation.",
+            "Introduce yourself in a sentence or two — what you specialize in, why it matters.",
         }),
         seedBlock("agent-card", {
-          photoUrl: "https://randomuser.me/api/portraits/women/44.jpg",
-          name: "Sarah Mitchell",
-          title: "Realtor® · Coastal Realty Group",
-          bio: "15+ years in SWFL real estate. Whether you're buying your first home or selling an investment property, I'll make sure you move with confidence.",
-          phone: "(239) 555-0182",
-          ctaUrl: "https://www.swfldatagulf.com",
+          photoUrl: "",
+          name: "",
+          title: "Your title and brokerage",
+          bio: "A short bio that builds trust — years of experience, what makes you different.",
+          phone: "",
+          ctaUrl: "",
           ctaLabel: "See my listings",
         }),
         seedBlock("stats", {
           stats: [
-            { value: "127", label: "Homes Sold" },
-            { value: "$2.4M", label: "Avg Sale Price" },
-            { value: "98%", label: "List-to-Sale" },
+            { value: "", label: "Homes Sold" },
+            { value: "", label: "Avg Sale Price" },
+            { value: "", label: "List-to-Sale" },
           ],
         }),
         seedBlock("button", { label: "Schedule a Consultation" }),
-        seedBlock("footer", { companyName: "Coastal Realty Group" }),
+        seedBlock("footer"),
       ],
     }),
   },
@@ -399,7 +446,7 @@ export const SEED_DOCS: SeedDoc[] = [
         seedBlockGrid(
           "image",
           { x: 0, y: 2, w: 12, h: 5 },
-          { alt: "Property hero photo", kind: "photo" },
+          { alt: "Property hero photo", kind: "photo", ratio: "4:3" },
         ),
         // headline left, median-price stat right — same row
         seedBlockGrid(
@@ -407,9 +454,9 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 7, w: 8, h: 4 },
           {
             kicker: "Luxury Market Report",
-            value: "$1.2M",
+            value: "",
             label: "Median Sale Price · Lee County",
-            prose: "The luxury tier is moving — here's a look at what the numbers say this month.",
+            prose: "Say where the luxury tier is moving and what's driving it this month.",
           },
         ),
         seedBlockGrid(
@@ -417,8 +464,8 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 8, y: 7, w: 4, h: 4 },
           {
             stats: [
-              { value: "18", label: "Days on Market" },
-              { value: "↑ 6%", label: "YoY Price" },
+              { value: "", label: "Days on Market" },
+              { value: "", label: "YoY Price" },
             ],
           },
         ),
@@ -432,26 +479,12 @@ export const SEED_DOCS: SeedDoc[] = [
         seedBlockGrid(
           "listing",
           { x: 0, y: 16, w: 6, h: 7 },
-          {
-            price: "$1,295,000",
-            beds: "4",
-            baths: "3.5",
-            sqft: "3,200",
-            address: "100 Gulf Shore Dr, Naples",
-            badge: "Featured",
-          },
+          { price: "", beds: "", baths: "", sqft: "", address: "", badge: "Featured" },
         ),
         seedBlockGrid(
           "listing",
           { x: 6, y: 16, w: 6, h: 7 },
-          {
-            price: "$980,000",
-            beds: "3",
-            baths: "3",
-            sqft: "2,650",
-            address: "200 Bay Colony Dr, Naples",
-            badge: "New",
-          },
+          { price: "", beds: "", baths: "", sqft: "", address: "", badge: "New" },
         ),
         seedBlockGrid("footer", { x: 0, y: 23, w: 12, h: 3, static: true }),
       ],
@@ -476,38 +509,38 @@ export const SEED_DOCS: SeedDoc[] = [
         seedBlockGrid(
           "image",
           { x: 0, y: 2, w: 12, h: 6 },
-          { alt: "Property photo", kind: "photo" },
+          { alt: "Property photo", kind: "photo", ratio: "3:2" },
         ),
         seedBlockGrid(
           "hero",
           { x: 0, y: 8, w: 12, h: 4 },
           {
             kicker: "Just Listed",
-            value: "$549,000",
-            label: "4521 Surfside Blvd, Cape Coral",
+            value: "",
+            label: "Price and address",
             prose: "",
           },
         ),
         seedBlockGrid(
           "stats",
-          { x: 0, y: 12, w: 12, h: 3 },
+          { x: 0, y: 12, w: 6, h: 4 },
           {
             stats: [
-              { value: "3", label: "Beds" },
-              { value: "2", label: "Baths" },
-              { value: "1,840", label: "Sq Ft" },
+              { value: "", label: "Beds" },
+              { value: "", label: "Baths" },
+              { value: "", label: "Sq Ft" },
             ],
           },
         ),
         seedBlockGrid(
           "text",
-          { x: 0, y: 15, w: 12, h: 4 },
+          { x: 6, y: 12, w: 6, h: 4 },
           {
-            body: "Describe what makes this home stand out — the backyard, the finishes, the neighborhood.",
+            body: "Write a few sentences on what makes this home stand out — let the layout, upgrades, or location lead.",
           },
         ),
-        seedBlockGrid("button", { x: 0, y: 19, w: 12, h: 2 }, { label: "Schedule a Showing" }),
-        seedBlockGrid("footer", { x: 0, y: 21, w: 12, h: 3, static: true }),
+        seedBlockGrid("button", { x: 0, y: 16, w: 12, h: 2 }, { label: "Schedule a Showing" }),
+        seedBlockGrid("footer", { x: 0, y: 18, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -526,42 +559,34 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 6, w: 12, h: 3 },
           {
             stats: [
-              { value: "$485K", label: "Median Price" },
-              { value: "34", label: "Median DOM" },
-              { value: "3.2 mo", label: "Supply" },
+              { value: "", label: "Median Price" },
+              { value: "", label: "Median DOM" },
+              { value: "", label: "Supply" },
             ],
           },
         ),
-        // two charts side-by-side via multi-column
+        // two charts side-by-side — real top-level blocks, not one multi-column
         seedBlockGrid(
-          "multi-column",
-          { x: 0, y: 9, w: 12, h: 6 },
-          {
-            columns: [
-              {
-                imageUrl: "",
-                heading: "Price Trend",
-                body: "12-month median sale price movement in your target area.",
-              },
-              {
-                imageUrl: "",
-                heading: "Inventory Trend",
-                body: "Months of supply over the same window — a leading indicator of price direction.",
-              },
-            ],
-          },
+          "image",
+          { x: 0, y: 9, w: 6, h: 6 },
+          { alt: "Price trend chart", caption: "12-month median sale price movement" },
+        ),
+        seedBlockGrid(
+          "image",
+          { x: 6, y: 9, w: 6, h: 6 },
+          { alt: "Inventory trend chart", caption: "Months of supply, same window" },
         ),
         seedBlockGrid(
           "signal",
-          { x: 0, y: 15, w: 12, h: 4 },
+          { x: 0, y: 15, w: 7, h: 4 },
           {
             kicker: "ZIP Comparison",
             title: "How your ZIP stacks up",
-            body: "Side-by-side data for the ZIPs your clients care about most.",
+            body: "Pull side-by-side data for the ZIPs your clients care about most.",
           },
         ),
-        seedBlockGrid("button", { x: 0, y: 19, w: 12, h: 2 }, { label: "See Full Report" }),
-        seedBlockGrid("footer", { x: 0, y: 21, w: 12, h: 3, static: true }),
+        seedBlockGrid("button", { x: 7, y: 15, w: 5, h: 4 }, { label: "See Full Report" }),
+        seedBlockGrid("footer", { x: 0, y: 19, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -580,10 +605,11 @@ export const SEED_DOCS: SeedDoc[] = [
         backdropColor: "#ffffff",
         primaryColor: "#111827",
         accentColor: "#3DC9C0",
+        displayFontFamily: "PLAYFAIR_SERIF",
       },
       blocks: [
         seedBlock("header", { companyName: "", tagline: "" }),
-        seedBlock("image"),
+        seedBlock("image", { kind: "photo", ratio: "4:3" }),
         seedBlock("hero", { kicker: "", value: "", label: "", prose: "" }),
         seedBlock("stats", {
           stats: [
@@ -611,10 +637,11 @@ export const SEED_DOCS: SeedDoc[] = [
         primaryColor: "#0f1d24",
         accentColor: "#3DC9C0",
         textColor: "#e8e4dc",
+        displayFontFamily: "BOOK_SERIF",
       },
       blocks: [
         seedBlock("header", { companyName: "", tagline: "" }),
-        seedBlock("image"),
+        seedBlock("image", { kind: "photo", ratio: "1:1" }),
         seedBlock("hero", { kicker: "", value: "", label: "", prose: "" }),
         seedBlock("stats", {
           stats: [
@@ -675,14 +702,15 @@ export const SEED_DOCS: SeedDoc[] = [
     build: () => ({
       globalStyle: {
         ...style(),
-        backdropColor: "#F5F0EB",
-        primaryColor: "#2C1810",
-        accentColor: "#C17B3E",
-        textColor: "#3D2414",
+        backdropColor: "#EFF5F3",
+        primaryColor: "#123334",
+        accentColor: "#2E8B7A",
+        textColor: "#1C2B2B",
+        displayFontFamily: "BOOK_SERIF",
       },
       blocks: [
         seedBlock("header", { companyName: "", tagline: "" }),
-        seedBlock("image"),
+        seedBlock("image", { kind: "photo", ratio: "4:3" }),
         seedBlock("hero", { kicker: "New Listing", value: "", label: "", prose: "" }),
         seedBlock("stats", {
           stats: [
@@ -722,15 +750,15 @@ export const SEED_DOCS: SeedDoc[] = [
         seedBlockGrid(
           "image",
           { x: 0, y: 2, w: 12, h: 6 },
-          { alt: "Property exterior", kind: "photo" },
+          { alt: "Property exterior", kind: "photo", ratio: "3:2" },
         ),
         seedBlockGrid(
           "hero",
           { x: 0, y: 8, w: 12, h: 4 },
           {
             kicker: "You're Invited · Open House",
-            value: "Sunday, July 13",
-            label: "2:00 PM – 4:00 PM · 4521 Surfside Blvd, Cape Coral",
+            value: "",
+            label: "Date, time, and address",
             prose: "",
           },
         ),
@@ -739,9 +767,9 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 12, w: 12, h: 3 },
           {
             stats: [
-              { value: "$549,000", label: "Asking Price" },
-              { value: "3 / 2", label: "Beds / Baths" },
-              { value: "1,840", label: "Sq Ft" },
+              { value: "", label: "Asking Price" },
+              { value: "", label: "Beds / Baths" },
+              { value: "", label: "Sq Ft" },
             ],
           },
         ),
@@ -749,7 +777,7 @@ export const SEED_DOCS: SeedDoc[] = [
           "text",
           { x: 0, y: 15, w: 7, h: 4 },
           {
-            body: "Step inside and see why this home stands out — great light, updated kitchen, and a backyard made for entertaining.",
+            body: "Write a couple of sentences that get someone off the couch — great light, an updated kitchen, whatever's true here.",
           },
         ),
         seedBlockGrid("button", { x: 7, y: 15, w: 5, h: 4 }, { label: "Get Directions" }),
@@ -779,7 +807,7 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 2, w: 6, h: 4 },
           {
             kicker: "Price Reduced",
-            value: "$489,000",
+            value: "",
             label: "New Asking Price",
             prose: "",
           },
@@ -789,22 +817,22 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 6, y: 2, w: 6, h: 4 },
           {
             stats: [
-              { value: "$525,000", label: "Original Price" },
-              { value: "$36,000", label: "Price Drop" },
-              { value: "47", label: "Days on Market" },
+              { value: "", label: "Original Price" },
+              { value: "", label: "Price Drop" },
+              { value: "", label: "Days on Market" },
             ],
           },
         ),
         seedBlockGrid(
           "image",
           { x: 0, y: 6, w: 12, h: 5 },
-          { alt: "Property photo", kind: "photo" },
+          { alt: "Property photo", kind: "photo", ratio: "4:3" },
         ),
         seedBlockGrid(
           "text",
           { x: 0, y: 11, w: 12, h: 3 },
           {
-            body: "This price reduction makes it one of the best values in the neighborhood right now — and motivated sellers are ready to move.",
+            body: "Say why this is a good value now — what changed, and why a motivated seller means room to negotiate.",
           },
         ),
         seedBlockGrid("button", { x: 0, y: 14, w: 12, h: 2 }, { label: "See the New Price" }),
@@ -828,14 +856,18 @@ export const SEED_DOCS: SeedDoc[] = [
       },
       blocks: [
         seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
-        seedBlockGrid("image", { x: 0, y: 2, w: 7, h: 5 }, { alt: "Sold property", kind: "photo" }),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 2, w: 7, h: 5 },
+          { alt: "Sold property", kind: "photo", ratio: "4:5" },
+        ),
         seedBlockGrid(
           "hero",
           { x: 7, y: 2, w: 5, h: 5 },
           {
             kicker: "Just Sold",
-            value: "$512,000",
-            label: "Cape Coral · Closed July 2026",
+            value: "",
+            label: "Location and close date",
             prose: "",
           },
         ),
@@ -844,9 +876,9 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 7, w: 12, h: 3 },
           {
             stats: [
-              { value: "$512,000", label: "Sale Price" },
-              { value: "11", label: "Days on Market" },
-              { value: "102%", label: "List-to-Sale" },
+              { value: "", label: "Sale Price" },
+              { value: "", label: "Days on Market" },
+              { value: "", label: "List-to-Sale" },
             ],
           },
         ),
@@ -854,7 +886,7 @@ export const SEED_DOCS: SeedDoc[] = [
           "text",
           { x: 0, y: 10, w: 12, h: 3 },
           {
-            body: "Another happy family in their new home — and another data point that proves the right pricing strategy still wins fast.",
+            body: "Say what made this one move fast — right pricing, a bidding war, whatever the real story is.",
           },
         ),
         seedBlockGrid("agent-card", { x: 0, y: 13, w: 12, h: 4 }),
@@ -877,9 +909,9 @@ export const SEED_DOCS: SeedDoc[] = [
           "hero",
           { x: 0, y: 2, w: 12, h: 4 },
           {
-            kicker: "Cape Coral · 33914 Market Update",
-            value: "$432,000",
-            label: "Median Sale Price · June 2026",
+            kicker: "The area and the month this report covers",
+            value: "",
+            label: "Median Sale Price",
             prose: "",
           },
         ),
@@ -888,9 +920,9 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 6, w: 12, h: 3 },
           {
             stats: [
-              { value: "$432K", label: "Median Price" },
-              { value: "28", label: "Avg Days on Market" },
-              { value: "14", label: "Homes Sold" },
+              { value: "", label: "Median Price" },
+              { value: "", label: "Avg Days on Market" },
+              { value: "", label: "Homes Sold" },
             ],
           },
         ),
@@ -907,15 +939,15 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 7, y: 9, w: 5, h: 5 },
           {
             kicker: "Signal",
-            title: "Inventory tightening fast",
-            body: "Active listings dropped 18% month-over-month — homes priced right are moving in under two weeks.",
+            title: "Name the one inventory or pricing shift worth flagging",
+            body: "Say what changed and what it means for how fast homes are moving.",
           },
         ),
         seedBlockGrid(
           "text",
           { x: 0, y: 14, w: 12, h: 3 },
           {
-            body: "If you've been watching this area, the window to buy before prices reset is narrowing. Here's what I'm seeing on the ground.",
+            body: "Give your read on this area — what you're seeing on the ground and what buyers or sellers should know.",
           },
         ),
         seedBlockGrid(
@@ -946,15 +978,15 @@ export const SEED_DOCS: SeedDoc[] = [
         seedBlockGrid(
           "image",
           { x: 0, y: 2, w: 6, h: 5 },
-          { alt: "Investment property", kind: "photo" },
+          { alt: "Investment property", kind: "photo", ratio: "1:1" },
         ),
         seedBlockGrid(
           "hero",
           { x: 6, y: 2, w: 6, h: 5 },
           {
             kicker: "Investment Opportunity",
-            value: "6.2% Cap Rate",
-            label: "4-Unit · Fort Myers · $620,000",
+            value: "",
+            label: "Cap rate, unit count, city, and price",
             prose: "",
           },
         ),
@@ -963,9 +995,9 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 7, w: 12, h: 3 },
           {
             stats: [
-              { value: "$3,800/mo", label: "Gross Monthly Rent" },
-              { value: "6.2%", label: "Cap Rate" },
-              { value: "14.5×", label: "Gross Rent Multiplier" },
+              { value: "", label: "Gross Monthly Rent" },
+              { value: "", label: "Cap Rate" },
+              { value: "", label: "Gross Rent Multiplier" },
             ],
           },
         ),
@@ -974,8 +1006,8 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 10, w: 12, h: 3 },
           {
             kicker: "Why Now",
-            title: "Rents up 9% YoY, inventory down",
-            body: "The combination of rising rents and low supply is compressing cap rates across SWFL — this one is priced ahead of the correction.",
+            title: "Name the market condition making this deal work",
+            body: "Say what's driving it — rent growth, tight supply, or pricing ahead of a correction.",
           },
         ),
         seedBlockGrid(
@@ -1016,8 +1048,8 @@ export const SEED_DOCS: SeedDoc[] = [
           "hero",
           { x: 0, y: 2, w: 7, h: 4 },
           {
-            kicker: "Rate Watch · July 2026",
-            value: "6.75%",
+            kicker: "Rate Watch · this month",
+            value: "",
             label: "30-Year Fixed · National Average",
             prose: "",
           },
@@ -1027,9 +1059,9 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 7, y: 2, w: 5, h: 4 },
           {
             stats: [
-              { value: "$2,590/mo", label: "Payment on $400K" },
-              { value: "↑ 4.2%", label: "Price YoY" },
-              { value: "3.1 mo", label: "Months of Supply" },
+              { value: "", label: "Payment on $400K" },
+              { value: "", label: "Price YoY" },
+              { value: "", label: "Months of Supply" },
             ],
           },
         ),
@@ -1046,15 +1078,15 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 11, w: 12, h: 3 },
           {
             kicker: "What This Means for Buyers",
-            title: "Less competition, more room to negotiate",
-            body: "Higher rates pushed 22% of buyers to the sidelines — but qualified buyers who act now face less competition and more willing sellers.",
+            title: "Say what higher rates changed for competition and negotiating room",
+            body: "Ground it in a real number if you have one — how many buyers sat out, or how much leverage shifted.",
           },
         ),
         seedBlockGrid(
           "text",
           { x: 0, y: 14, w: 12, h: 3 },
           {
-            body: "Three things every buyer should know right now: how to use rate buydowns, why seller concessions are up, and when to lock.",
+            body: "Give buyers a short, practical list — rate buydowns, seller concessions, or when to lock.",
           },
         ),
         seedBlockGrid(
@@ -1080,9 +1112,9 @@ export const SEED_DOCS: SeedDoc[] = [
           "hero",
           { x: 0, y: 2, w: 12, h: 3 },
           {
-            kicker: "July 2026 · SWFL Market Digest",
-            value: "$475,000",
-            label: "Median Sale Price · Lee & Collier Counties",
+            kicker: "Month and market this digest covers",
+            value: "",
+            label: "Median Sale Price",
             prose: "",
           },
         ),
@@ -1091,9 +1123,9 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 5, w: 12, h: 3 },
           {
             stats: [
-              { value: "$475K", label: "Median Price" },
-              { value: "31", label: "Median DOM" },
-              { value: "3.4 mo", label: "Months of Supply" },
+              { value: "", label: "Median Price" },
+              { value: "", label: "Median DOM" },
+              { value: "", label: "Months of Supply" },
             ],
           },
         ),
@@ -1110,15 +1142,15 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 13, w: 6, h: 4 },
           {
             kicker: "Key Signal",
-            title: "Supply stabilizing",
-            body: "Months of supply held flat for the third consecutive month — the first sign the correction may be leveling.",
+            title: "Name the one number that summarizes the month",
+            body: "Say what it means and whether it's the third straight month of the same trend or a change.",
           },
         ),
         seedBlockGrid(
           "text",
           { x: 6, y: 13, w: 6, h: 4 },
           {
-            body: "My take: we're at an inflection point. Buyers still have leverage but the window is narrowing. Sellers who priced right closed fast; those who didn't are still sitting.",
+            body: "Give your take — where things stand for buyers and sellers right now, in your own words.",
           },
         ),
         seedBlockGrid("divider", { x: 0, y: 17, w: 12, h: 1 }),
@@ -1147,20 +1179,26 @@ export const SEED_DOCS: SeedDoc[] = [
           "hero",
           { x: 0, y: 2, w: 12, h: 3 },
           {
-            kicker: "2026 Year in Review",
-            value: "SWFL Market",
-            label: "A Full-Year Look at What Moved, What Stalled, and What's Next",
+            kicker: "The year and market this recap covers",
+            value: "",
+            label: "A full-year look at what moved, what stalled, and what's next",
             prose: "",
+            sectionBg: "#7B3FC7",
           },
         ),
+        // Researched convention (RULE 0.4, housingwire.com + highnote.io annual-review
+        // templates): a year-in-review cascades national → local → neighborhood stats,
+        // then a market analysis — this seed's shape (headline stats → full-year chart →
+        // highlights → forward-look) already matches; the fix here is real data slots and
+        // real layout variety, not a restructure.
         seedBlockGrid(
           "stats",
           { x: 0, y: 5, w: 12, h: 3 },
           {
             stats: [
-              { value: "$481K", label: "Median Price · Full Year" },
-              { value: "↑ 3.8%", label: "Annual Price Growth" },
-              { value: "4,217", label: "Homes Sold" },
+              { value: "", label: "Median Price · Full Year" },
+              { value: "", label: "Annual Price Growth" },
+              { value: "", label: "Homes Sold" },
             ],
           },
         ),
@@ -1169,42 +1207,46 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 8, w: 12, h: 5 },
           {
             alt: "Full-year price trend",
-            caption: "2026 Median Sale Price · Month by Month",
+            caption: "Median Sale Price · Month by Month",
+          },
+        ),
+        // {4,4,4} — three real blocks, not one multi-column pretending to be three.
+        seedBlockGrid(
+          "signal",
+          { x: 0, y: 13, w: 4, h: 5 },
+          {
+            kicker: "What Moved",
+            title: "Name the segment that led the year",
+            body: "Waterfront, luxury, a price band — say which and why.",
           },
         ),
         seedBlockGrid(
-          "multi-column",
-          { x: 0, y: 13, w: 12, h: 5 },
+          "signal",
+          { x: 4, y: 13, w: 4, h: 5 },
           {
-            columns: [
-              {
-                heading: "What Moved",
-                body: "Waterfront and luxury led the year — sub-$500K sat longest as affordability pressured first-time buyers.",
-              },
-              {
-                heading: "What Stalled",
-                body: "New construction deliveries outpaced absorption in Lee County, softening prices in newer communities.",
-              },
-              {
-                heading: "What's Next",
-                body: "Rate relief in H2 2026 should unlock pent-up demand — expect a faster spring market than 2025.",
-              },
-            ],
+            kicker: "What Stalled",
+            title: "Name what softened or sat longest",
+            body: "New construction, a submarket, a price band — say which and why.",
+          },
+        ),
+        seedBlockGrid(
+          "signal",
+          { x: 8, y: 13, w: 4, h: 5 },
+          {
+            kicker: "What's Next",
+            title: "Give one forward-looking call",
+            body: "What you expect heading into next year, and what would change your mind.",
           },
         ),
         seedBlockGrid(
           "text",
-          { x: 0, y: 18, w: 12, h: 3 },
+          { x: 0, y: 18, w: 7, h: 3 },
           {
-            body: "It's been a year of recalibration. The excess of 2021–2022 has fully unwound, and we're building on a more honest foundation heading into 2027.",
+            body: "Close in your own voice — what kind of year this was, and what you're building toward next.",
           },
         ),
-        seedBlockGrid(
-          "button",
-          { x: 0, y: 21, w: 12, h: 2 },
-          { label: "See the Full Year Report" },
-        ),
-        seedBlockGrid("footer", { x: 0, y: 23, w: 12, h: 3, static: true }),
+        seedBlockGrid("button", { x: 7, y: 18, w: 5, h: 3 }, { label: "See the Full Year Report" }),
+        seedBlockGrid("footer", { x: 0, y: 21, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -1228,60 +1270,44 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 2, w: 12, h: 3 },
           {
             kicker: "New to Market",
-            value: "4 Homes",
-            label: "Just Listed This Week · Lee & Collier Counties",
+            value: "",
+            label: "How many homes, and the area they're in",
             prose: "",
           },
         ),
         seedBlockGrid(
           "listing",
           { x: 0, y: 5, w: 6, h: 7 },
-          {
-            photoUrl: "",
-            price: "$489,000",
-            beds: "3",
-            baths: "2",
-            sqft: "1,840",
-            address: "4521 Surfside Blvd, Cape Coral",
-            badge: "New",
-          },
+          { photoUrl: "", price: "", beds: "", baths: "", sqft: "", address: "", badge: "New" },
         ),
         seedBlockGrid(
           "listing",
           { x: 6, y: 5, w: 6, h: 7 },
           {
             photoUrl: "",
-            price: "$625,000",
-            beds: "4",
-            baths: "3",
-            sqft: "2,400",
-            address: "1205 Estero Blvd, Fort Myers Beach",
+            price: "",
+            beds: "",
+            baths: "",
+            sqft: "",
+            address: "",
             badge: "Waterfront",
           },
         ),
         seedBlockGrid(
           "listing",
           { x: 0, y: 12, w: 6, h: 7 },
-          {
-            photoUrl: "",
-            price: "$319,000",
-            beds: "2",
-            baths: "2",
-            sqft: "1,200",
-            address: "8800 Merano Dr, Naples",
-            badge: "Pool",
-          },
+          { photoUrl: "", price: "", beds: "", baths: "", sqft: "", address: "", badge: "Pool" },
         ),
         seedBlockGrid(
           "listing",
           { x: 6, y: 12, w: 6, h: 7 },
           {
             photoUrl: "",
-            price: "$1,195,000",
-            beds: "5",
-            baths: "4",
-            sqft: "3,800",
-            address: "200 Gulf Shore Blvd, Naples",
+            price: "",
+            beds: "",
+            baths: "",
+            sqft: "",
+            address: "",
             badge: "Luxury",
           },
         ),
@@ -1342,8 +1368,8 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 7, y: 10, w: 5, h: 4 },
           {
             kicker: "Market Snapshot",
-            title: "Prices up 4% in your ZIP",
-            body: "Your neighborhood appreciated above the county average this year — your equity is working.",
+            title: "Name the one stat that makes them feel good about staying put",
+            body: "Pull a real number for their ZIP or neighborhood and say what it means for their equity.",
           },
         ),
         seedBlockGrid(
@@ -1423,8 +1449,11 @@ export const SEED_DOCS: SeedDoc[] = [
     build: () => ({
       globalStyle: {
         ...style(),
+        // Fence 4 (BLESSED_PAIRINGS): a serif body's only legal display pairing is
+        // a sans — never serif+serif. This template has no hero/kicker that would
+        // render a display font anyway, so a single serif voice throughout is both
+        // correct and the intended "plain letter" feel.
         fontFamily: "BOOK_SERIF",
-        displayFontFamily: "PLAYFAIR_SERIF",
         primaryColor: "#1C1C1C",
         accentColor: "#8A7B5C",
         textColor: "#2A2A2A",

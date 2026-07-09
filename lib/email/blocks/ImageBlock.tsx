@@ -24,7 +24,10 @@ export function ImageBlock({
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          backgroundColor: props.url ? undefined : "#111827",
+          // Unfilled overlay slot: a neutral mid-gray placeholder, not a near-black
+          // rectangle that reads as a second dark section band when a template also
+          // uses a dark band block nearby (the magazine-issue "two black boxes" bug).
+          backgroundColor: props.url ? undefined : "#9CA3AF",
           borderBottom: `1px solid ${BORDER}`,
         }}
       >
