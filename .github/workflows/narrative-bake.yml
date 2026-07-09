@@ -1,0 +1,45 @@
+# Surface-narrative bake (spec docs/superpowers/specs/2026-07-09-zip-page-destination-design.md).
+# Cron fires daily; the script's BAKE_CADENCE gate decides whether today bakes:
+#   repo variable BAKE_CADENCE unset/"weekly" (default) -> Mondays (UTC) only
+#   repo variable BAKE_CADENCE="daily"                  -> every firing
+# LAUNCH FLIP = edit that one repo variable. No workflow edits, no deploy.
+name: narrative-bake
+
+on:
+  schedule:
+    - cron: "40 10 * * *" # daily 10:40 UTC, after the daily brain rebuild window
+  workflow_dispatch:
+    inputs:
+      surface:
+        description: "Surface to bake"
+        default: "zip"
+      force:
+        description: "Bypass cadence + delta gates (full rebake)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  bake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # SPEND GUARD — explicit, reviewable per-run cap (ingest/CLAUDE.md rule:
+      # caps live as visible workflow lines, never code defaults). The metered
+      # client's daily/monthly SpendCapError seam applies on top.
+      NARRATIVE_BAKE_RUN_CAP_USD: "1.00"
+      BAKE_CADENCE: ${{ vars.BAKE_CADENCE }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Bake narratives
+        run: >
+          bun scripts/bake-narratives.mts
+          --surface "${{ inputs.surface || 'zip' }}"
+          ${{ inputs.force == true && '--force' || '' }}

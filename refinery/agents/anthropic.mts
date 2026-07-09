@@ -28,6 +28,9 @@ export type CallType =
   // caps. The pre-push proof gate makes these runs mandatory — they must never
   // again be the invisible spender.
   | "proof"
+  // Weekly/daily surface-narrative bake (scripts/bake-narratives.mts) — its own
+  // ops /spend line per spec 2026-07-09-zip-page-destination-design.md.
+  | "narrative_bake"
   | "other";
 
 export interface UsageLike {

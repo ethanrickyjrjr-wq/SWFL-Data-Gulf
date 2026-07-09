@@ -13,6 +13,7 @@
   "lib/claim/claim-store.ts",
   "lib/email/market-context.ts",
   "lib/landing/load-home-map-data.ts",
+  "lib/narratives/store.ts",
   "lib/email/usage.ts",
   "lib/listings/select.ts",
   "lib/zip-report/candidates.ts",
