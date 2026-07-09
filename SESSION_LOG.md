@@ -1,3 +1,39 @@
+## 2026-07-09 (Sonnet 5 · main) — verified email-fence cluster is logged, not fixed; punch-list handoff
+
+Operator asked to verify a prior session's "everything is durable" summary against the 5 named
+checks. Confirmed the paper trail (SESSION_LOG, checks, handoff docs) is real and on `main`, but
+none of the underlying code has changed: grepped `ButtonBlock.tsx`/`HeaderBlock.tsx`/
+`AgentHeroBlock.tsx` directly — all three still hardcode `#ffffff`/raw `accentColor` on brand
+fills, the exact bug `email_contrast_ink_fence` describes; `legibleAccent()` exists in
+`lib/email/blocks/on-dark.ts` but is unwired at all three sites. Also found the ledger has grown to
+7 open items in this cluster (not 5) — `email_accent_ink_palette_gate` and
+`seed_previews_recapture_after_enrichment` surfaced in later verification passes after the
+summary was written. Wrote a priority-ordered punch list:
+`docs/handoff/2026-07-09-email-fence-punch-list.md`. No code touched this session.
+
+## 2026-07-09 (Sonnet 5 · main) — SteadyAPI round-3 Tier-1 + Tier-2 social-listening run
+
+Ran the Sonnet-session half of `docs/handoff/2026-07-09-round3-sonnet-run-handoff.md`: ~30 live
+SteadyAPI Reddit calls (`new_steady` key) against `2026-07-09-round3-question-backlog.md`. Q1
+(residential-agent WTP) closed — r/RealEstateTechnology names $50-100/mo/seat WTP and an $80/mo
+ceiling; r/PropTech surfaces a live CMA competitor (Saleswise.ai) at exactly $39/mo, our own price
+point. Q2 (CMA/comp adjustments) closed — a 255-comment r/RealEstate appraisal-gap thread ranks
+factors unprompted: condition first, then comp-selection/arm's-length, sqft, garage/bed/bath, lot
+size; view/landscaping real but rare/large-swing-only. Tier 2: Q6 snowbird pain (directional,
+r/Naples_FL), Q7 CRE broker pain (family-office/solo brokers already using Claude by name for
+reporting — reinforces bottom-up positioning), Q8 forecast-trust framing (confirms lead-with-the-
+falsifier), Q9 pre-send review QA (structurally absent industry-wide). Q5 (digest cadence) searched
+empty across 4 subreddits, logged not chased further. Findings:
+`docs/steadyapi-research/2026-07-09-round3-q1-q2-tier2-answers.md`. Checks: closed
+`steadyapi_round3_tier1_run` (all 4 Tier-1 Qs now answered across this file + the parallel Fable
+session's `2026-07-09-round3-q3-q4-answers.md`); annotated `paid_path_wtp` and
+`highlighter_pricing_matrix` with the new pricing evidence. **Deferred:** folding settled items into
+round1's §1 + updating the folder README + a vendor-note quirk fold-in (`/v1/reddit/post` content-
+filter false-positive, mirrors the known `/search` one) — all three files were claimed by a live
+parallel session (`856ab63d`) for 30+ min and still held at write time; did not override. Next:
+retry those three fold-ins once that session's claim releases, or have that session do it directly
+since it already holds the files.
+
 ## 2026-07-09 (Fable 5 · main) — spec: answer-path observability — coverage snapshot + red-main sentinel (build registered)
 
 Brainstormed + operator-ratified the answer-path observability design (three AskUserQuestion
