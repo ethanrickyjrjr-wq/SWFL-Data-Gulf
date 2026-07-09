@@ -458,6 +458,12 @@ export const AuthoredBlockSchema = z.object({
   designation: authoredText(120),
   bio: authoredText(400),
   button_label: authoredText(40),
+  /** 2-4 alternate button labels for THIS block (only meaningful on `button`). */
+  cta_variants: z
+    .array(authoredText(40).transform((s) => s ?? ""))
+    .min(2)
+    .max(4)
+    .optional(),
   align: z.enum(["left", "center", "right"]).optional(),
   /** For an image block: which auto-resolved asset the engine drops in. */
   image_role: z.enum(["chart", "photo"]).optional(),
@@ -493,6 +499,12 @@ export const ScheduleSuggestionSchema = z.object({
 
 export const AuthorDocSchema = z.object({
   blocks: z.array(AuthoredBlockSchema).min(1).max(20),
+  /** 2-4 AI-authored subject-line alternatives. */
+  subject_variants: z
+    .array(authoredText(90).transform((s) => s ?? ""))
+    .min(2)
+    .max(4)
+    .optional(),
   schedule_suggestion: ScheduleSuggestionSchema.optional(),
 });
 

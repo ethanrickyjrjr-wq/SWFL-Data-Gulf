@@ -1,5 +1,11 @@
 import { test, expect, describe, it } from "bun:test";
-import { EmailDocSchema, ContentPatchSchema, BlockContentPatchSchema, mintBlockId } from "./schema";
+import {
+  EmailDocSchema,
+  ContentPatchSchema,
+  BlockContentPatchSchema,
+  mintBlockId,
+  AuthorDocSchema,
+} from "./schema";
 import { SEED_DOCS, createBlock, DEFAULT_GLOBAL_STYLE } from "./default-docs";
 import type { EmailDoc } from "./types";
 
@@ -426,5 +432,22 @@ describe("EmailDocSchema — subjectVariants/ctaVariants", () => {
     const parsed = EmailDocSchema.parse(baseDoc);
     expect(parsed.subjectVariants).toBeUndefined();
     expect(parsed.ctaVariants).toBeUndefined();
+  });
+});
+
+describe("AuthorDocSchema — subject_variants / cta_variants", () => {
+  it("accepts subject_variants at the doc level and cta_variants on a block", () => {
+    const parsed = AuthorDocSchema.parse({
+      blocks: [
+        {
+          type: "button",
+          button_label: "View Report",
+          cta_variants: ["View Report", "See the Numbers"],
+        },
+      ],
+      subject_variants: ["Subject A", "Subject B", "Subject C"],
+    });
+    expect(parsed.subject_variants).toEqual(["Subject A", "Subject B", "Subject C"]);
+    expect(parsed.blocks[0].cta_variants).toEqual(["View Report", "See the Numbers"]);
   });
 });
