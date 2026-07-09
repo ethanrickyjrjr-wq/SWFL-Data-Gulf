@@ -3,6 +3,7 @@ import { Section, Img, Text } from "@react-email/components";
 import type { EmailGlobalStyle, HeaderProps } from "../doc/types";
 import { displayFontStack, fontStack, SECTION_PAD } from "./styles";
 import { DISPLAY_FONT_CLASS } from "./email-head";
+import { legibleInk } from "./on-dark";
 
 export function HeaderBlock({
   props,
@@ -48,7 +49,7 @@ export function HeaderBlock({
           style={{
             fontFamily: font,
             fontSize: "12px",
-            color: globalStyle.accentColor,
+            color: legibleInk(globalStyle.accentColor, bg, 4.5),
             margin: "4px 0 0",
           }}
         >

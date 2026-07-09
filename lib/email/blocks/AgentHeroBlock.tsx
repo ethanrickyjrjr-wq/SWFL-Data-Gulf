@@ -4,6 +4,7 @@
 import { Section, Img, Text, Link } from "@react-email/components";
 import type { AgentHeroProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, CARD_BG, BORDER, MUTED } from "./styles";
+import { legibleInk } from "./on-dark";
 
 const PHOTO_HEIGHT = 300;
 const PLACEHOLDER_BG = "#1a2e35";
@@ -77,7 +78,7 @@ export function AgentHeroBlock({
               fontFamily: font,
               fontSize: "12px",
               fontWeight: 600,
-              color: globalStyle.accentColor,
+              color: legibleInk(globalStyle.accentColor, globalStyle.primaryColor, 4.5),
               margin: 0,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
