@@ -34,8 +34,9 @@ A block-canvas email (`deliverables.template = "block-canvas"`, populated `doc`)
 is sent/downloaded from where it actually lives — **not** `/p/[id]` (that route
 redirects block-canvas to the Email Lab):
 
-- **Email Lab toolbar** — `components/email-lab/EmailLabShell.tsx`: "Download PDF"
-  (POSTs the live doc to the pdf route) + "Send to contacts".
+- **Email Lab toolbar** — `components/email-lab/EmailLabGridShell.tsx`: "Download PDF"
+  (POSTs the live doc to the pdf route) + "Send to contacts". (Was `EmailLabShell.tsx`
+  until the 2026-07-07 retire-block-shell pass deleted it.)
 - **Materials Hub row** — `components/project/MaterialRow.tsx`: compact "Send".
 - **Contact picker** — `components/contacts/ContactPickerModal.tsx`: the
   `Attach PDF report` checkbox (`include_pdf`), block-canvas only.

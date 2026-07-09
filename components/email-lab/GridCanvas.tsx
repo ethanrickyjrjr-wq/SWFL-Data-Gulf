@@ -1,10 +1,11 @@
 "use client";
 // components/email-lab/GridCanvas.tsx (Build G1 + G2 + content auto-height)
 //
-// The PAID-tier resizable/movable canvas: a true 2D grid on react-grid-layout v2
-// (npm react-grid-layout@2.2.3). SUPERSET sibling of the free-tier BlockCanvas
-// (dnd-kit stacked reorder): same core props (doc / selectedId / onSelectBlock /
-// onChangeDoc) so the grid shell mounts it for paid docs, BlockCanvas for free.
+// The ONE canvas: a true 2D grid on react-grid-layout v2 (npm
+// react-grid-layout@2.2.3). Began as the paid-tier SUPERSET sibling of the
+// free-tier BlockCanvas (dnd-kit stacked reorder) — same core props (doc /
+// selectedId / onSelectBlock / onChangeDoc) — but BlockCanvas was deleted in the
+// 2026-07-07 retire-block-shell pass; the grid shell mounts this for every doc.
 //
 // CONTENT AUTO-HEIGHT (fixes the clip): every block measures its OWN rendered
 // content with a ResizeObserver and reports the row-count it needs; its cell grows

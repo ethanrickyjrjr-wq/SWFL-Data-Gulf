@@ -1,3 +1,23 @@
+## 2026-07-09 (Fable 5 · main) — fence-polish follow-ups: ghost sweep, signal fold-in, accent-ink gate PLAN
+
+Follow-ups from the 07/09 fence-polish verification pass (scratchpad
+`2026-07-09-fence-polish-verification-followup.md`). (1) Ghost sweep: fixed every LIVE reference
+to the 07/07-deleted `EmailLabShell`/`BlockCanvas` — `apply-brand-style.ts:4` (the named one; now
+points at `lib/email/brand/apply-brand.ts`), `GridCanvas.tsx` + `EmailLabGridShell.tsx` headers
+(+`:430`), `lib/pdf/README.md:37`, `docs/email-lab/BUILDER-GUIDE.md` (retirement banner + §1
+routes + §3 applyBrand), gallery spec `:99` free-tier line. Historical docs/SESSION_LOG left
+untouched; `isBlockCanvas` booleans are the live `"block-canvas"` template string, not ghosts.
+(2) `email_palette_demo_figures` check: folded the `DEFAULT_BLOCK_PROPS.signal` directional-claim
+rewrite ("Inventory is ticking up" → instruction voice, market-spotlight precedent) + P3
+metric-card whole-set note into the item-3 pass. (3) `email_accent_ink_palette_gate`: wrote the
+plan — `docs/superpowers/specs/2026-07-09-email-accent-ink-palette-gate-design.md` (Fence 6:
+Tier A `legibleInk` render guards over an 11-row site audit; Tier B save-time warn strip in
+BrandingBlock via pure `lib/brand/palette-contrast.ts`). Ratios computed via repo `contrastRatio`
+— house default accent #3DC9C0 FAILS on white today (2.04:1); WCAG floors verified via WebAIM
+(https://webaim.org). Operator decisions D1–D3 pending in §4; sequenced after
+`email_contrast_ink_fence`. Verified: `bun test lib/email/brand/` 12 pass. Next: operator reviews
+spec D1–D3, then `new-build.mjs email-accent-ink-gate`.
+
 ## 2026-07-09 (Fable 5 · main) — docs(steadyapi-research): round-3 backlog + Sonnet run handoff + triage
 
 Operator: triage settled research into spec/build verdicts, rank the open questions, hand the

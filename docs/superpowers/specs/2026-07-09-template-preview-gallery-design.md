@@ -2,6 +2,7 @@
 
 > **Recommended model:** ⚡ Sonnet
 
+
 **Date:** 2026-07-09
 **Check:** `template_preview_gallery_live_verify`
 **Status:** HANDOFF — design settled with operator 07/09/2026 (two review turns), not yet implemented.
@@ -96,9 +97,10 @@ pattern:
    nothing points to it.
 3. **Lab picker thumbnails.** Replace the text-only seed buttons (`EmailLabGridShell.tsx:1575-1586`)
    with thumbnail tiles using the same committed webp (small: ~120px wide, name under it,
-   description as title/tooltip). Free-tier `EmailLabShell` seed picker gets the same treatment if
-   it has one (check at build time — capabilities dial decides which seeds each tier lists, do NOT
-   hardcode tier differences; read `capabilitiesFor(tier)`).
+   description as title/tooltip). (Correction 07/09: there is no free-tier `EmailLabShell` — it was
+   deleted in the 2026-07-07 retire-block-shell pass; the grid shell is the only seed picker. The
+   capabilities dial still decides which seeds each tier lists, do NOT hardcode tier differences;
+   read `capabilitiesFor(tier)`.)
 4. **Landing strip — OPTIONAL, OPERATOR-GATED.** A 3-4 tile "See what it builds" row linking to
    /showcase, placed below the fold near `DeliverableShowcase` (`components/landing/`). The
    homepage design is LOCKED (address-bar hero first, lake trust layer, map below fold — spec

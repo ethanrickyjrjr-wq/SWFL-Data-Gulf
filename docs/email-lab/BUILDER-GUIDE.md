@@ -4,6 +4,13 @@ What the Email Lab is, how its pieces fit, and what you need to know before addi
 to it. Written from the code (not memory) on 2026-06-28. Probe the files named here
 before changing them — this is a map, not a contract.
 
+> **Update 2026-07-09:** the free block shell (`EmailLabShell.tsx`, `BlockCanvas.tsx`,
+> `CanvasBlock.tsx`) was **deleted** in the 2026-07-07 retire-block-shell pass
+> (`docs/superpowers/specs/2026-07-07-retire-block-shell-design.md`). The grid lab
+> (`EmailLabGridShell.tsx` + `GridCanvas.tsx`) is the ONE email surface; `applyBrand`
+> now lives at `lib/email/brand/apply-brand.ts`. Shell references below are corrected
+> in place; anything else naming the block shell is historical.
+
 ---
 
 ## 1. What it is
@@ -12,14 +19,14 @@ A block-canvas email/PDF designer. The user describes an email; the AI fills **r
 SWFL data** (never invents numbers); the user tweaks blocks, brand, photos, and
 charts; then saves → sends → or schedules. One shared shell powers two routes.
 
-- **`/email-lab`** — standalone design surface. No auth, no project, no lake scope.
-  `app/email-lab/page.tsx` → `EmailLabClient.tsx` → `EmailLabShell`.
+- **`/email-lab`** — a redirect, not a surface: signed-in users go to their
+  project's Email tab, anonymous visitors to the anonymous grid lab
+  (`app/email-lab/page.tsx` → `lib/lab-entry/destination.ts`).
 - **`/project/[id]/email-lab`** — project-scoped. Carries the project's brand + lake
   scope + filed photos, and can Save/Send/Schedule against the project.
-  `app/project/[id]/email-lab/page.tsx` (server) → `ProjectEmailLabClient.tsx` → `EmailLabShell`.
 
-The whole UI lives in **`components/email-lab/EmailLabShell.tsx`** — it owns all
-state (doc + undo/redo history, selection, AI fill, brand, photos, export). The two
+The whole UI lives in **`components/email-lab/EmailLabGridShell.tsx`** — it owns all
+state (doc + undo/redo history, selection, AI fill, brand, photos, export). The
 route clients are thin wrappers passing brand/scope/save config.
 
 ---
@@ -65,7 +72,7 @@ brandingToTokens(branding)             ← lib/email/brand/branding-to-tokens.ts
 UPPER tokens
    │
    ▼
-applyBrand(doc, tokens)                ← components/email-lab/EmailLabShell.tsx
+applyBrand(doc, tokens)                ← lib/email/brand/apply-brand.ts
        → globalStyle.{primary,accent,text,backdrop}Color + brand-bearing block props
 ```
 

@@ -1,8 +1,8 @@
 // lib/email/brand/apply-brand-style.ts
 //
 // The globalStyle half of applyBrand, extracted pure so it's testable without
-// importing the client shell. applyBrand (components/email-lab/EmailLabShell.tsx,
-// the ONE brand-fill root — the grid shell imports it) delegates here.
+// importing the client shell. applyBrand (lib/email/brand/apply-brand.ts, the ONE
+// brand-fill root — EmailLabGridShell.tsx imports it) delegates here.
 
 import type { EmailGlobalStyle, FontFamily } from "@/lib/email/doc/types";
 import { BRAND_FONTS, isFontFamily } from "@/lib/brand/fonts";

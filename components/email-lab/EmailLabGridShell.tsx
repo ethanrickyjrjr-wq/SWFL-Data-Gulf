@@ -8,10 +8,11 @@
 // selected block; the 12-col grid is internal plumbing the user never counts.
 // Add/duplicate happen straight on the grid; neighbors auto-reflow.
 //
-// Strict SUPERSET of the free tier (EmailLabShell) — it inherits the same brand
-// bridge (applyBrand, ONE root), seeds, blocks, photos, save/send/schedule/PDF,
-// undo-redo — and ADDS the grid + author + width presets on top. The free shell
-// is left untouched; it copies what it needs from here later.
+// THE ONE EMAIL SURFACE since the 2026-07-07 retire-block-shell pass (the free
+// linear shell, EmailLabShell, is deleted; /email-lab redirects here). Owns the
+// brand bridge (applyBrand from lib/email/brand/apply-brand.ts, ONE root), seeds,
+// blocks, photos, save/send/schedule/PDF, undo-redo, plus the grid + author +
+// width presets. Tier differences come from capabilitiesFor(tier), never hardcoded.
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { CHART_TYPE_OPTIONS, type ChartType } from "@/lib/email/reshape-chart-type";
@@ -427,8 +428,8 @@ export function EmailLabGridShell({
   }
 
   // Auto-build on mount (project email tab lands on a generated email, not a
-  // blank grid). Mirrors EmailLabShell's autoGenerate effect; author path here
-  // because the grid composes whole layouts.
+  // blank grid). Mirrors the retired block shell's autoGenerate effect; author
+  // path here because the grid composes whole layouts.
   useEffect(() => {
     if (!autoGenerate) return;
     fetch("/api/email-lab/ai", {
