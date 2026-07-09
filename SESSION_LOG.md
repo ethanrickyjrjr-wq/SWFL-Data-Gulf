@@ -1,4 +1,30 @@
-## 2026-07-08 (Opus 4.8 · main) — docs: THE SLOT RULE — how to author a starter template
+## 2026-07-08 (Sonnet 5 · main) — feat(charts): vendor bklit-ui Ring Chart, real NOAA hurricane-category chart on /charts
+
+Operator: "distill this [bklit.com/docs/components/ring-chart] and build a cool hurricane chart using
+real data with our colors, put it on /charts for now." Checked NOTICE.md first per operator's own
+nudge — confirmed Ring was explicitly NOT vendored in the 07/08 bklit pass (Bar/Line/Area/Composed
+only). Pulled the real ring-chart.tsx/ring.tsx/ring-center.tsx/ring-context.tsx/chart-center-typography.ts/
+chart-stat-flow.tsx from bklit/bklit-ui at the pinned commit and vendored verbatim (no forks needed —
+web-only, no static/email SSR path). One new dep, `@number-flow/react`, added + bun installed.
+
+Data: brains/hurricane-tracks-fl.md is stale (v1, pre-dates the 07/07 Lee+Collier+Hendry scope
+correction, still 6-county) and never exposed a per-category histogram anyway. Queried hurdat2_fl
+directly via the lake MCP, mirroring refinery/packs/hurricane-tracks-fl.mts's exact centroid/distance/
+window logic (Lee+Collier+Hendry, within 50mi, trailing 30yr) — cross-checked cat3+ count against the
+pack's own methodology, matches. Real result: 11 tropical storms, 2 Cat 2, 2 Cat 4, zero Cat 1/3/5 (15
+total, 1996-2025). Baked into lib/charts/hurricane-series.ts with full citation + methodology note (not
+a brain read — a live, verified lake query, since the brain would have been wrong).
+
+Built components/charts/HurricaneRingChart.tsx (6 rings, calm-to-severe on-brand color ramp reusing
+hexes already in the app's other charts) and wired it onto /charts as the first panel. Verified via
+`bunx next build` (clean) + `next start` on a fresh port (the running dev server on 3100 turned out to
+belong to a parallel session and was serving stale/unstyled CSS — don't trust `next dev` for a visual
+check, always build+start). Screenshotted the real render: rings, colors, and hover-to-category-swap
+all correct. Found reshape-chart-type.ts/spec-to-png.ts/email-svg.tsx modified + a new spec doc
+uncommitted in the same working tree from a parallel session — staged only this session's 12 files
+explicitly, left the other session's in-progress work alone.
+
+
 
 Operator asked for a playbook: prefilled template areas, open where real data belongs, AI fills the
 rest. Probed the code (RULE 0.5) and found the spine already ships — `docSkeleton`→`tryParsePatch`→

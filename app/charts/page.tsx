@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { PageShell } from "@/components/PageShell";
-import { MetroAreaChart } from "@/components/charts";
+import { MetroAreaChart, HurricaneRingChart } from "@/components/charts";
 import { AddChartToProject } from "./AddChartToProject";
 import { mapPivotedCityRows, mapPivotedCityYoY } from "@/lib/charts/pivoted-series";
 import { mapAirportTotalWithTrend, type AirportMonthRow } from "@/lib/charts/airport-series";
@@ -241,6 +241,13 @@ export default async function ChartsPage() {
         </header>
 
         <div className="flex flex-col gap-6">
+          <div>
+            <div className="flex justify-end mb-2">
+              <AddChartToProject rootId="hurricane-rings" title="Hurricane Impact by Category" />
+            </div>
+            <HurricaneRingChart />
+          </div>
+
           {panels.map((panel) => (
             <div key={panel.rootId}>
               <div className="flex justify-end mb-2">

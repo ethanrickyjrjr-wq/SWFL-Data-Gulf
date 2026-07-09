@@ -58,6 +58,7 @@
     "@modelcontextprotocol/ext-apps": "^1.7.4",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@notionhq/client": "^5.22.0",
+    "@number-flow/react": "^0.5.4",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.9",
     "@react-pdf/renderer": "4.5.1",

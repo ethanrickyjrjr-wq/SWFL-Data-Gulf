@@ -5,4 +5,5 @@ export { MetroAreaChart, ZHVIAreaChart } from "./ZHVIAreaChart";
 export { CorridorMarketScatter } from "./CorridorMarketScatter";
 export { RadialConfidenceGauge } from "./RadialConfidenceGauge";
 export { SeasonalRadialChart } from "./SeasonalRadialChart";
+export { HurricaneRingChart } from "./HurricaneRingChart";
 export { ZipChoropleth } from "./ZipChoropleth";

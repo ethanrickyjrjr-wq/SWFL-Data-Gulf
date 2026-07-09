@@ -32,13 +32,26 @@ Node API route.
 Everything else in this directory (shared context/animation/axis/tooltip/legend infra) is
 verbatim, no edits.
 
+**Ring Chart (2026-07-08)** — `ring-chart.tsx`, `ring.tsx`, `ring-center.tsx`,
+`ring-context.tsx`, `chart-center-typography.ts`, `chart-stat-flow.tsx` vendored verbatim, no
+forks (this is web-only — no static/email SSR path needed yet, so neither of the `staticSize`/
+`initialLoaded` forks applies). Pulls in one new upstream dependency, `@number-flow/react`
+(animated number transitions for `RingCenter`'s value flip on hover) — added to `package.json`.
+First call site: `components/charts/HurricaneRingChart.tsx` (SWFL hurricane category rings,
+`/charts` page) supplies its own `color` per ring (bypassing the CSS-var `--chart-1..5`
+palette, which this app's Tailwind theme doesn't define) and scopes `--border` locally for the
+ring background track — this app has no global shadcn chart-theme CSS vars, so any future
+bklit chart relying on `--chart-N`/`--border`/`--muted` needs the same local-scope treatment
+until/unless those vars get defined in `app/globals.css`.
+
 Not vendored (this pass): `packages/studio` (proprietary, see upstream `LICENSE-STUDIO.md`),
 every `registry/examples/*` demo file, and — scope cut, not a rejection — Gauge, Pie, Sankey,
-Live Line, Candlestick, Choropleth, Funnel, Heatmap, Radar, Ring, Scatter, and Sunburst. Gauge
+Live Line, Candlestick, Choropleth, Funnel, Heatmap, Radar, Scatter, and Sunburst. Gauge
 was dropped from this pass specifically because its dependency chain reaches into Pie's
 center-label infra plus a new `@base-ui/react` progress dependency — bundling that in without
 verifying it visually felt like exactly the kind of half-shipped expansion this build was
-supposed to stop doing. Wired so far: Bar, Line, Area, Composed (shells + shared infra all
+supposed to stop doing. Wired so far: Bar, Line, Area, Composed, Ring (shells + shared infra all
 vendored and typecheck clean); only Area (as the zhvi-area trend chart) is wired into
-production email rendering. Bar/Line/Composed are vendored and proven (Bar via the SSR spike)
-but not yet wired into a production call site — that's the next increment, not a silent gap.
+production email rendering, and Ring is wired into the live `/charts` web page. Bar/Line/Composed
+are vendored and proven (Bar via the SSR spike) but not yet wired into a production call site —
+that's the next increment, not a silent gap.
