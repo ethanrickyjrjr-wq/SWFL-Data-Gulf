@@ -11,7 +11,7 @@
 
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
-export type ChartType = "bar" | "ranked" | "donut" | "dotplot";
+export type ChartType = "bar" | "ranked" | "donut" | "dotplot" | "composed";
 
 /** The user-facing labels for the control (kept here so UI + engine share one list). */
 export const CHART_TYPE_OPTIONS: { type: ChartType; label: string }[] = [
@@ -19,6 +19,7 @@ export const CHART_TYPE_OPTIONS: { type: ChartType; label: string }[] = [
   { type: "ranked", label: "Bar + change" },
   { type: "donut", label: "Donut / share" },
   { type: "dotplot", label: "Dot vs average" },
+  { type: "composed", label: "Bar + trend line" },
 ];
 
 interface Pt {
@@ -82,6 +83,7 @@ export function chartTypeFits(spec: ChartSpec, type: ChartType): boolean {
       return pts.some((p) => typeof p.delta === "number");
     case "bar":
     case "dotplot":
+    case "composed":
     default:
       return true;
   }
@@ -158,6 +160,21 @@ export function reshapeChartToType(spec: ChartSpec, type: ChartType): ChartSpec 
           data: pts.map((p) => ({ label: p.label, value: p.value, reference: avg })),
           referenceLabel: "average",
           valueLabel: typeof cols[1] === "string" ? cols[1] : "value",
+        },
+      } as ChartSpec;
+    }
+    case "composed": {
+      const avg = Math.round(pts.reduce((a, p) => a + p.value, 0) / pts.length);
+      return {
+        ...base,
+        columns: cols,
+        rows: pts.map((p) => [p.label, p.value]),
+        chart_type: "bar",
+        frameId: "composed-bar-line",
+        options: {
+          items: pts.map((p) => ({ label: p.label, value: p.value })),
+          average: avg,
+          averageLabel: "average",
         },
       } as ChartSpec;
     }

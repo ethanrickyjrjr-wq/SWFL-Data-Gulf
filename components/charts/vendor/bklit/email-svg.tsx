@@ -13,7 +13,10 @@
 // invents it.
 import { AreaChart } from "./area-chart";
 import { Area } from "./area";
+import { ComposedChart } from "./composed-chart";
 import { Grid } from "./grid";
+import { Line } from "./line";
+import { SeriesBar } from "./series-bar";
 import { renderBklitStaticSvg } from "./render-static";
 import { formatDisplayDate } from "@/lib/format-date";
 
@@ -66,6 +69,64 @@ export async function bklitTrendSvg(
   // subtree rather than through bklit's own axis/legend text (which would need
   // its own font-availability check under resvg's loadSystemFonts:false — a
   // follow-up, not this pass).
+  const captionParts: string[] = [];
+  if (opts.source) captionParts.push(opts.source);
+  if (opts.asOf) captionParts.push(`as of ${formatDisplayDate(opts.asOf)}`);
+  const chrome = [
+    `<text x="16" y="26" font-family="Arial" font-size="15" font-weight="bold" fill="#1F2937">${escXml(opts.title)}</text>`,
+    captionParts.length
+      ? `<text x="16" y="${H - 10}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${escXml(captionParts.join(" · "))}</text>`
+      : "",
+  ].join("");
+
+  return svg.replace(
+    /<svg([^>]*)>/,
+    `<svg$1><rect width="${W}" height="${H}" fill="#ffffff"/>${chrome}`,
+  );
+}
+
+export interface EmailComposedPoint {
+  label: string;
+  value: number;
+}
+
+/** A bar + reference-line combo as a real bklit `ComposedChart` (SeriesBar +
+ *  Line), server-rendered — the upgrade path for a plain bar-table when the
+ *  caller also has a derived reference value (e.g. the mean of the same
+ *  points, per `reshapeChartToType`'s "composed" case — never a second
+ *  invented number). Returns `null` on <2 points or any render failure
+ *  (caller falls back to `barChartSvg`, RULE 0.7 — best-effort, never blocks
+ *  the build). */
+export async function bklitComposedSvg(
+  points: EmailComposedPoint[],
+  average: number,
+  opts: BklitTrendOpts,
+): Promise<string | null> {
+  if (points.length < 2) return null;
+  const W = opts.width ?? 600;
+  const H = opts.height ?? 300;
+  // NOT `date: p.label` — ComposedChart shares bklit's time-series shell,
+  // whose xAccessor always does `new Date(value)`. Category labels here are
+  // ZIP codes / city names, not dates: `new Date("33921")` parses as year
+  // 33921 (not Invalid Date), silently re-sorting/overlapping the bars by
+  // that bogus year instead of the given order (caught via a spike render —
+  // real bars landed at scrambled/overlapping x positions). A synthetic
+  // strictly-increasing day sequence positions points in the given order;
+  // no axis is rendered (no <XAxis> child below) so the fake dates are never
+  // shown — only the real (label, value) pairs plot as bar height + line.
+  const data = points.map((p, i) => ({ date: new Date(2000, 0, i + 1), value: p.value, average }));
+
+  const svg = await renderBklitStaticSvg(
+    <ComposedChart data={data} staticSize={{ width: W, height: H }} xDataKey="date">
+      <Grid horizontal stroke="#EAECEF" />
+      <SeriesBar dataKey="value" fill={opts.accent} />
+      <Line dataKey="average" stroke={AXIS_TEXT} strokeWidth={2} />
+    </ComposedChart>,
+  );
+  if (!svg) return null;
+
+  // Same chrome pattern as bklitTrendSvg — see its comment for why this is
+  // plain <text> outside the bklit subtree rather than bklit's own axis text.
   const captionParts: string[] = [];
   if (opts.source) captionParts.push(opts.source);
   if (opts.asOf) captionParts.push(`as of ${formatDisplayDate(opts.asOf)}`);

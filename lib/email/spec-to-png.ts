@@ -20,7 +20,7 @@ import {
   type TrendPoint,
 } from "@/lib/email/chart-image";
 import { formatDisplayDate } from "@/lib/format-date";
-import { bklitTrendSvg } from "@/components/charts/vendor/bklit/email-svg";
+import { bklitTrendSvg, bklitComposedSvg } from "@/components/charts/vendor/bklit/email-svg";
 import { rankedDeltaSvg } from "@/lib/charts/svg/ranked-delta";
 import { donutShareSvg } from "@/lib/charts/svg/donut-share";
 import { dotPlotSvg } from "@/lib/charts/svg/dot-plot";
@@ -130,6 +130,16 @@ export async function chartSpecToEmailSvg(spec: ChartSpec, accent: string): Prom
       case "line-band":
         if (Array.isArray(o.data) && o.data.length)
           svg = lineBandSvg(o.data as Parameters<typeof lineBandSvg>[0], baseOpts);
+        break;
+      case "composed-bar-line":
+        // Real bklit ComposedChart (SeriesBar + Line) — the same server-render
+        // bridge as the zhvi-area path below, not a hand-authored SVG string.
+        if (Array.isArray(o.items) && o.items.length && typeof o.average === "number")
+          svg = await bklitComposedSvg(
+            o.items as Parameters<typeof bklitComposedSvg>[0],
+            o.average,
+            baseOpts,
+          );
         break;
     }
 

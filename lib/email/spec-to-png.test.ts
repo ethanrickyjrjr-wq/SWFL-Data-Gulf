@@ -58,6 +58,38 @@ test("zhvi-area renders a real bklit AreaChart SVG, not the hand-rolled polyline
   expect(svg).not.toContain("<polyline");
 });
 
+// 2026-07-08: composed (bar + reference line) renders through a real bklit
+// ComposedChart (SeriesBar + Line) — same server-render bridge as zhvi-area,
+// wired as the "Bar + trend line" reshape-picker option.
+
+test("composed-bar-line renders a real bklit ComposedChart SVG (bar + line)", async () => {
+  const spec = {
+    frameId: "composed-bar-line",
+    title: "Median sale price by ZIP",
+    chart_type: "bar",
+    value_format: "usd",
+    source: { citation: "MLS" },
+    asOf: "2026-06-03",
+    options: {
+      items: [
+        { label: "33921", value: 2975000 },
+        { label: "34102", value: 2050000 },
+        { label: "34103", value: 1400000 },
+      ],
+      average: 2141667,
+      averageLabel: "average",
+    },
+  } as ChartSpec;
+
+  const svg = await chartSpecToEmailSvg(spec, "#0ea5e9");
+
+  expect(svg).not.toBeNull();
+  expect(svg).toContain("<svg");
+  expect(svg).toContain("<rect");
+  expect(svg).toContain("<path");
+  expect(svg).toContain("Median sale price by ZIP");
+});
+
 test("chartSpecToEmailSvg never throws (rejects) on a malformed zhvi-area spec", async () => {
   const spec = { frameId: "zhvi-area", options: {} } as ChartSpec;
   // If this rejected, `await` would fail the test — the assertion below just

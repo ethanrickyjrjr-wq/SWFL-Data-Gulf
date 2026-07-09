@@ -61,9 +61,10 @@ test("chartTypeFits: ranked needs a real delta", () => {
   expect(chartTypeFits(usdSpec, "ranked")).toBe(false);
 });
 
-test("chartTypeFits: bar + dotplot always fit ≥2 points", () => {
+test("chartTypeFits: bar + dotplot + composed always fit ≥2 points", () => {
   expect(chartTypeFits(usdSpec, "bar")).toBe(true);
   expect(chartTypeFits(usdSpec, "dotplot")).toBe(true);
+  expect(chartTypeFits(usdSpec, "composed")).toBe(true);
 });
 
 test("count data → donut maps rows to segments", () => {
@@ -85,6 +86,16 @@ test("usd → dotplot adds the mean of the shown points as the reference + a val
   const data = out.options?.data as { value: number; reference: number }[];
   expect(data[0].reference).toBe(Math.round((2975000 + 2050000 + 1400000) / 3));
   expect(out.options?.valueLabel).toBe("Median sale price");
+});
+
+test("usd → composed adds the mean of the shown points as the reference line, never invents one", () => {
+  const out = reshapeChartToType(usdSpec, "composed");
+  expect(out.frameId).toBe("composed-bar-line");
+  const items = out.options?.items as { label: string; value: number }[];
+  expect(items).toHaveLength(3);
+  expect(items[0]).toEqual({ label: "33921", value: 2975000 });
+  expect(out.options?.average).toBe(Math.round((2975000 + 2050000 + 1400000) / 3));
+  expect(out.options?.averageLabel).toBe("average");
 });
 
 test("GUARDRAIL: ranked with NO delta falls back to bar (never a fabricated delta)", () => {
