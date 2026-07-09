@@ -1,3 +1,25 @@
+## 2026-07-09 (Fable 5 · main) — fix(assistant): reach topic-map coverage gate + 15 rule backfill
+
+Operator asked "how are we not picking up crucial information — what else could we be missing?"
+off the chat-chart-honesty handoff. Audit answer: the answer path is three stacked filters and only
+the widest had a drift test. PER_PACK_REGISTRY (42) → BRAIN_CATALOG (39; the 3 absentees are
+governed by catalog.test.mts KNOWN_INCOMPLETE) → TOPIC_TO_SLUG (12 rules) — so 26 of 39 catalogued
+brains were unreachable by chat reach-grounding and chart topic-routing, with zero test on that
+joint. Same class as the 07/09 live empty-reach bug, ×14. Two more word-boundary plural bugs found
+in the existing rules: `\bemploy\b` never matched "employment"/"unemployment", `price cut|price
+reduction` never matched "price cuts"/"price drops". Built: (1) `reach-coverage.test.ts` — every
+BRAIN_CATALOG id must be routed in TOPIC_TO_SLUG or carry a written reason in the new exported
+`INTENTIONALLY_UNROUTED` (12 entries: macro denominators, county rollups, pulses w/ too-generic
+keywords, etc.), plus fail-loud on rules targeting uncatalogued slugs; (2) 15 new topic rules
+(safety, macro-swfl employment, market-temperature yield, condo-SIRS, hurricane-tracks +
+storm-history above env, active-rentals above rentals, airport, traffic, communities, licenses,
+econ-dev, franchise, logistics-nowcast, freshness-pulse mortgage) with ordering constraints
+documented in the table header; (3) plural fixes + 10 behavioral regressions incl. cap-rate and
+landfall priority guards. `bun test lib/ refinery/render` → 4046 pass 0 fail (+14 = the new tests)
+· `bunx next build` clean. NOT pushed — rides the chat_chart_honesty_live_verify paid push (answer-
+proof gate). Checks opened: `reach_topic_map_coverage_gate`, `reach_topic_rules_backfill`. Still
+open for the operator: the two decisions in `2026-07-09-chat-chart-honesty-open-decisions.md`.
+
 ## 2026-07-09 (Sonnet 5 · main) — feat(email): rebuild all 27 SEED_DOCS templates — content + visual pass
 
 Executed the approved `2026-07-09-template-rebuild-27-design.md` spec end to end. Track A (19

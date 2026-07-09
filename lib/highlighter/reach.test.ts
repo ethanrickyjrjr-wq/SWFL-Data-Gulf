@@ -97,3 +97,71 @@ test("a mixed-topic question still reaches the pre-existing rules under the cap"
   expect(t).toContain("env-swfl");
   expect(t).toContain("cre-swfl");
 });
+
+// --- Regressions for the 07/09/2026 coverage audit: 26 of 39 catalogued brains
+// --- had no topic rule at all (check `reach_topic_rules_backfill`).
+
+test("a safety question reaches safety-swfl", () => {
+  expect(resolveReachTargets("is Cape Coral safe? what's the crime rate?", "master")).toContain(
+    "safety-swfl",
+  );
+});
+
+// `\bemploy\b` never matches "unemployment" — the word boundary eats the suffix.
+// LAUS unemployment lives in macro-swfl, not the OEWS occupations brain.
+test("an unemployment question reaches macro-swfl", () => {
+  expect(resolveReachTargets("what's the unemployment rate in Lee County?", "master")).toContain(
+    "macro-swfl",
+  );
+});
+
+// Plural-boundary bug class, third instance: "price cut|price reduction" matched
+// neither "price cuts" nor "price drops".
+test("'where are prices dropping' reaches listing-momentum-swfl", () => {
+  expect(resolveReachTargets("where are prices dropping the most?", "master")).toContain(
+    "listing-momentum-swfl",
+  );
+});
+
+test("a rent-yield question reaches market-temperature-swfl", () => {
+  expect(resolveReachTargets("chart the gross rent yield by ZIP", "master")).toContain(
+    "market-temperature-swfl",
+  );
+});
+
+// Yield phrasing sits BELOW cre-swfl and must never steal a cap-rate question.
+test("a cap-rate question still routes cre-swfl first, not market-temperature", () => {
+  const t = resolveReachTargets("how do office cap rates compare?", "master");
+  expect(t[0]).toBe("cre-swfl");
+  expect(t).not.toContain("market-temperature-swfl");
+});
+
+// History phrasing outranks modeled flood exposure; env still rides via "hurricane".
+test("a landfall question slots hurricane-tracks-fl ahead of env-swfl", () => {
+  const t = resolveReachTargets("when did the last hurricane make landfall here?", "master");
+  expect(t[0]).toBe("hurricane-tracks-fl");
+  expect(t).toContain("env-swfl");
+});
+
+// Inventory phrasing outranks the ZORI rent index; both ride together.
+test("a rental-availability question slots active-rentals-swfl ahead of rentals-swfl", () => {
+  const t = resolveReachTargets("how many rentals are available in Naples?", "master");
+  expect(t[0]).toBe("active-rentals-swfl");
+  expect(t).toContain("rentals-swfl");
+});
+
+test("a mortgage-rate question reaches freshness-pulse", () => {
+  expect(resolveReachTargets("what are mortgage rates doing today?", "master")).toContain(
+    "freshness-pulse",
+  );
+});
+
+test("a condo SIRS question reaches condo-sirs-swfl", () => {
+  expect(
+    resolveReachTargets("has my condo association filed its SIRS reserve study?", "master"),
+  ).toContain("condo-sirs-swfl");
+});
+
+test("a traffic question reaches traffic-swfl", () => {
+  expect(resolveReachTargets("how bad is traffic on US-41?", "master")).toContain("traffic-swfl");
+});
