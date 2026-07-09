@@ -1,7 +1,7 @@
 # Chat stops negotiating charts; fix the brain router feeding chat grounding + AI email charts
 
 **Date:** 2026-07-09
-**Status:** approved (operator, 07/09/2026) — implementation plan pending
+**Status:** approved (operator, 07/09/2026) — implementation plan written 07/09/2026, build pending
 **Checks:** `chart_router_heat_inventory_deadzone`, `followup_chips_build_verb_hijack`,
 `brain_slug_leak_runtime_no_scrubber`, `chart_offer_unfulfillable_by_construction`,
 `chat_chart_honesty_live_verify`
@@ -311,3 +311,111 @@ inventory questions, and both use clean ZIP labels.
 
 None. Both design forks were decided by the operator on 07/09/2026: charts leave chat entirely, and
 the slug scrub ships as both input and runtime layers.
+
+## Implementation plan (written 07/09/2026, code-verified against current HEAD)
+
+Every file and line number below was re-read at current HEAD before this plan was written — the
+design above matches the live code almost exactly (it was written same-day from a live audit). Four
+things surfaced during that re-read that this plan accounts for and the sections above don't:
+
+1. **The Testing section above has a stale case.** It asserts `"where is inventory tightening"` →
+   contains `active-listings-swfl` — that was the *pre-correction* expectation. Surface 1's own
+   routing table (corrected in a follow-up commit) says tightening must route to `market-heat-swfl`
+   (it holds `Inventory Y/Y`; `active-listings-swfl` is levels-only, no delta). The new test below
+   uses the corrected slug.
+2. **Surface 3's Layer 1 map would duplicate an existing one.** `refinery/render/speaker.mts`
+   (already imported by `grounding.ts`) has `PACK_ID_LABELS` and `displayName()`/
+   `humanizeBrainId()` covering nearly the same slug set the spec describes building fresh.
+   **Decided:** extend that map rather than author a second one.
+3. **`scripts/prove-chart-conversation.mts`** (not named above) manually drives the chat chart path
+   for live testing. Its premise dies with Surface 2 — needs retiring or repurposing.
+4. **`lib/assistant/CLAUDE.md`** (area conventions, auto-loads on edits here) still documents the
+   chat auto-chart as current behavior. It goes stale the moment Surface 2 ships.
+
+Six phases, in dependency order, each independently testable and each closing one `checks` entry:
+
+**Phase A — Router + chips** (closes `chart_router_heat_inventory_deadzone`,
+`followup_chips_build_verb_hijack`)
+- `lib/highlighter/reach.ts`: insert the spec's 7 new `TOPIC_TO_SLUG` rules before the existing 6,
+  in table order (incl. the `investor-zip-swfl`-after-`cre-swfl` ordering guard). Delete bare
+  `build` from the permits regex at line 17 (keep `building`/`builds`).
+- `lib/assistant/follow-up-suggestions.ts`: same one-word permit-regex edit (line 32). The file
+  already has a 7th, partial-match rule (line ~64: `market heat|listing`) that the spec's "add a
+  topic rule for inventory/heat/momentum" would otherwise shadow or collide with — **extend that
+  existing rule** to also match `tighten(ing)?|hotness|hottest|days on market|dom|momentum|
+  inventory` instead of adding a competing one. Simpler, no ordering risk, extends rather than
+  duplicates (per RULE 3 C2).
+- No code change needed in `compose-chart.ts` or `lib/email/build-doc.ts` — both already route
+  through `resolveReachTargets`, so this phase alone fixes the compose-chart starvation and the AI
+  email chart for free (Surface 6 confirmed a no-op).
+- Tests, `reach.test.ts`: `"build me a chart of rents by ZIP"` → `["rentals-swfl"]`, not permits;
+  `"chart the median sale price by ZIP"` → non-empty; `"Which corridors are heating up?"` → contains
+  `market-heat-swfl`; `"where is inventory tightening"` → contains `market-heat-swfl` (**corrected**
+  from the Testing section above). Tests, `follow-up-suggestions.test.ts`: an answer containing the
+  verb "build" does not return permit chips; a heat/inventory question returns the extended rule's
+  chips.
+- Close both checks once tests pass.
+
+**Phase B — Slug scrub, Layer 1** (progresses `brain_slug_leak_runtime_no_scrubber`)
+- Extend `refinery/render/speaker.mts`'s `PACK_ID_LABELS` with any of the 7 new slugs it's missing,
+  and export a `sanitizeSlugs(text): string` helper from there — reusing `displayName()`/
+  `humanizeBrainId()`'s existing unrecognized-token fallback logic rather than writing a new one.
+- `lib/highlighter/grounding.ts`: apply `sanitizeSlugs` inside `renderBlock` (line 108), at the same
+  chokepoint as the existing `scrubStatsJargon` call that wraps `parts.join("\n")` (line 139) —
+  same precedent pattern already used for stats-jargon scrubbing.
+- New `slug-scrub.test.ts`: a known slug maps to its label; an unrecognized `*-swfl` token falls
+  back to a de-hyphenated, non-broken-grammar substitution.
+
+**Phase C — Remove chat auto-chart + grounding reach loop** (closes
+`chart_offer_unfulfillable_by_construction`, part 1)
+- `lib/assistant/conversation-path.ts`: delete `chartForConversation` (lines 76-84) and its two call
+  sites (~661, ~762), the two `=== CHART ON SCREEN ===` grounding blocks, and the two
+  `prelude.push({type:"chart",...})` lines they feed. Re-confirm exact line numbers immediately
+  before editing — earlier edits in this same file will have shifted them. Leave the `comp.chart`
+  lines (the property-comp lane, ~682/~793) untouched — different lane, out of scope.
+- Generalize `buildGroundedRegionSystem`'s hardcoded `cre-swfl` special case (lines 297-313) into a
+  loop over `resolveReachTargets(lastUser, "master")`; each fetch stays independently `try`/`catch`
+  fail-open; each grounding block is labeled via Phase B's map, never the raw slug.
+- Delete `looksChartWorthy` (`chart-for-question.ts:53-58`) — it has no dedicated test file, only a
+  mock-stub line in `build-doc.test.ts:29`; drop that stub line too since the export disappears.
+- Tests, `conversation-path.test.ts`: no `{type:"chart"}` frame is emitted on any auto-chart path,
+  located or region-wide (comp charts still allowed); grounding for a heat question includes the
+  reach brain's dossier.
+
+**Phase D — Slug scrub Layer 2 + system prompts** (closes
+`chart_offer_unfulfillable_by_construction`, part 2)
+- `lib/assistant/stream.ts`: in `streamAnswer`'s loop (lines 79-81), wrap `extractText(ai)`'s
+  yielded text with a tail-buffered (~32 char, the longest possible partial match) regex transform
+  matching `\b[a-z][a-z0-9-]*-swfl\b`, substituting via Phase B's same map, flushing the held-back
+  tail once the loop completes (before the final `done: true` enqueue). `sseMessage`'s zero-token
+  path is untouched — it never carries model-authored text.
+- `conversation-path.ts`: delete the chart-offer paragraph and the affirmative capability line from
+  `OUTSIDE_SYSTEM` (~lines 186-202); replace with the 5-point block from "Surface 5" above. Apply
+  points 2 and 3 to `PUBLIC_GROUNDED_SYSTEM` and `PUBLIC_SYSTEM`. Apply point 3 only to
+  `buildSummarizeSystem` (line 346) — it already bans jargon/vendor names but never had chart-offer
+  language to remove.
+
+**Phase E — Cleanup** (not in the original design above; found during this code read)
+- Retire or repurpose `scripts/prove-chart-conversation.mts` — its premise (proving the chat chart
+  path) disappears once Phase C lands.
+- Update `lib/assistant/CLAUDE.md`'s chart paragraph: `composeChartFromRequest`/
+  `buildChartForQuestion` still power the AI-authored email chart and user-directed comp charts;
+  the chat auto-chart lane is gone.
+- Add the "heat/inventory prompt routes to a heat brain, not the price fallback" assertion (from the
+  Testing section above) to `chart-for-question.test.ts`, not `build-doc.test.ts` — that file's own
+  top-level `mock.module` stubs `buildChartForQuestion` to `null` for its entire run, restored only
+  in `afterAll`, so a real-routing assertion can't live there without its own scoped mock override.
+
+**Phase F — Close the loop**
+- `node scripts/check.mjs close <key>` for each of the four build-time checks as its phase lands.
+  `chat_chart_honesty_live_verify` stays open for the operator to run — paid live-verify, never
+  autonomous.
+- Gate 5 (pack ⇆ catalog) is not triggered anywhere in this plan — no pack, vocab, or migration
+  changes.
+
+**Verification, once built:**
+`bun test lib/highlighter/reach.test.ts lib/assistant/follow-up-suggestions.test.ts
+lib/assistant/conversation-path.test.ts lib/assistant/chart-for-question.test.ts` plus the new
+`slug-scrub.test.ts`; `bunx next build`; manual check in chat that "Which corridors are heating up?"
+and "a chart of inventory tightening by corridor" produce no chart, no spoken slug, and real
+`market-heat-swfl`/`housing-swfl` figures.
