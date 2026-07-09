@@ -29,7 +29,7 @@ BEFORE the gallery's capture run, or the 27 preview webps need re-capturing.
 navy `#0f1d24` passes (17.19:1) — which is why nothing looks broken today.
 
 **Fix:** route ink through the existing dark-band machinery — `isDarkBg` (`lib/email/blocks/on-dark.ts`)
-already picks white-vs-`#111827` by WCAG math, render-time, never persisted; `templates/components/badge.ts`
+already picks white-vs-`#111827` by WCAG math, render-time, never persisted; `lib/email/templates/components/badge.ts`
 already does exactly this for badge fills. Apply the same pick to the three hardcoded sites (label ink,
 strip ink, header ink). This was the fence spec's own deferred follow-up ("contrast-checked band/text
 pairs"), now demonstrated.
@@ -39,24 +39,40 @@ the house default (navy → white) so existing snapshots/sends don't shift. Veri
 shared path (these blocks are the shared React components — the ONE render root `render-email-doc.ts`
 covers free + grid; check the legacy token rail separately only if it renders these blocks).
 
+**Out of scope (own check, 07/09: `email_accent_ink_palette_gate`):** the ACCENT-ink family —
+`HeaderBlock.tsx:51` tagline + `AgentHeroBlock.tsx:80` designation render `accentColor` ON
+`primaryColor` fills, `AgentHeroBlock.tsx:115` CTA link renders it on white; `legibleAccent()`
+(`on-dark.ts`) exists unused at all three. Needs its own plan (save-time palette gate) — don't
+fold it in here.
+
 ## 2. Sources accordion autofill (`email_sources_accordion_autofill`)
 
 **Defect:** THE-GOAL rule 1 says sources ride in the collapsed list — but no production path in the
-lab fill flow ever creates or fills a `sources` block. Verified 07/09: `type: "sources"` appears only
-in tests, welcome frames, and the assistant; none of the 27 seeds carry one; `assembleAuthoredDoc`
-(`lib/email/author-doc.ts`) never appends one. Data-rich emails send with zero visible provenance —
-the moat is invisible on the flagship surface.
+lab AI-fill flow ever creates or fills a `sources` block. Re-verified 07/09 (second pass): `type:
+"sources"` appears in tests, welcome frames, the assistant, and ONE production composer —
+`lib/email/zip-seed.ts:174`, the deterministic map-click seed, which already fills the accordion from
+held citations and is the pattern to copy. None of the 27 seeds carry one; `assembleAuthoredDoc`
+(`lib/email/author-doc.ts`) never appends one. Data-rich AI-filled emails send with zero visible
+provenance — the moat is invisible on the flagship surface.
 
 **Key fact:** at assembly time the figures the AI actually used are known (`figuresById` /
 `collectAnchorNumbers`), and each `MarketFigure` already carries `source` + `as_of`. Nothing new to
 fetch — the citations are in hand and dropped.
 
 **Fix:** in `assembleAuthoredDoc`, when ≥1 held figure was consumed, upsert ONE `sources` block filled
-from the used figures' `{source, url?, label}` (dedupe by source), `note` carrying the as-of
-(MM/DD/YYYY, stated once). Fence 2 zone `close` already sorts it above the footer — no placement code.
+from the used figures (dedupe by source), `note` carrying the as-of (MM/DD/YYYY, stated once).
+Precision (07/09 second pass): `MarketFigure` is `{key, label, value, source, as_of?}` — NO `url`
+field — so entries are label-only `{label: figure.source}`, exactly zip-seed's lifecycle-citation
+shape. UPSERT, not append: `sources` is `authorable: true` in `block-contract.ts` (it rides the AI
+vocabulary via `AUTHORABLE_TYPES` — `build-doc.ts:929`) but `applyContent` has no `sources` case, so
+an AI-emitted one materializes as an inert `{sources: []}` block that renders null — fill/replace that
+empty instead of adding a second (or flip `sources` to `authorable: false` like `metric-card`;
+implementer's call). Fence 2 zone `close` already sorts it above the footer — no placement code.
 Respect the existing contract: `SourcesProps.sources[]` stays data-seeded (the AI still cannot write
 citations; assembly restates held ones). Renders default-collapsed via the existing `SourcesBlock`
-(`fb033c2b` wired rendering).
+(`fb033c2b` wired rendering). Outlook watch: `<details>` renders permanently OPEN in Outlook (per
+`SourcesBlock.tsx`'s own header) — once every data-rich send carries the accordion, cap the autofilled
+list (~6; the schema allows 30) so degraded clients never see a citation wall.
 
 **Tests:** fill with 2 figures from distinct sources → one sources block, 2 deduped entries, sits
 between last body block and footer; fill that uses zero figures → no sources block; an AI-emitted
@@ -81,9 +97,12 @@ consistent). Keep structural/brand defaults (button labels, footer, agent-card c
 the slot rule's other half.
 
 **Guard (kills the class):** a test in `schema.test.ts` (or a sibling) asserting no `DEFAULT_BLOCK_PROPS`
-figure-bearing field (`hero.value`, `stats[].value`, `listing.price/beds/baths/sqft/address`,
-`metric-card.metricValue`) is non-empty, and — the drift half — every SEED_DOCS block's figure fields
-are `""` even when the seed only partially overrides. NOTE: `lib/email/doc/schema.test.ts` was
+figure-bearing field (`hero.value`, `stats[].value`, `listing.price/beds/baths/sqft/address`) is
+non-empty, and — the drift half — every SEED_DOCS block's figure fields are `""` even when the seed
+only partially overrides. metric-card consistency (07/09 second pass): if you empty it, empty the SET —
+`metricValue`, `rankText` ("#12 of 57"), `movementText` ("↑ 4% YoY"), `sub`, and `barPct: 62` all
+carry demo numbers — and add them to the guard; if you leave it alone (defensible: no palette menu
+entry, data-seeded only), leave it OUT of the guard so the test matches the decision. NOTE: `lib/email/doc/schema.test.ts` was
 claim-locked by a parallel session on 07/09 (`repolith claim list`) — check the claim before editing;
 a new test file avoids the collision entirely.
 
