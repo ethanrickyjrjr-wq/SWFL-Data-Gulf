@@ -9,6 +9,15 @@ import type { EmailDeliverableRow } from "@/lib/deliverable/email-deliverable";
 // name + reply-to (sending From: an unverified agent address would fail DKIM and
 // land in spam). Each recipient gets a one-click unsubscribe (List-Unsubscribe
 // header for Gmail + an in-body footer link as the CAN-SPAM floor).
+//
+// Split-send (variant_test): an optional { subjects?, ctas? } on the request body
+// cohort-hashes each recipient (cohortIndex, Task 8) into 2-4 groups, deterministically
+// and stably across a retried/partial send. subjects-only and ctas-only tests are both
+// valid; when both axes are given they must be the same length (one cohort = one
+// subject + one CTA). A single-length override (e.g. variant_test: {ctas:[x]}) is a
+// content override, not a real test — it applies to every recipient, tags no
+// `variant:i`, and persists no `variant_config` (isRealSplit requires variantCount>=2).
+// Block-canvas only — the legacy non-block-canvas template branch is untouched.
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
@@ -23,6 +32,8 @@ import { renderEmailDocToBuffer, pdfFilename } from "@/lib/pdf";
 import { logActivity } from "@/lib/project/activity";
 import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint";
 import { blastTags } from "@/lib/email/blast-tags";
+import { cohortIndex } from "@/lib/email/variant-cohort";
+import { validateVariantTest, withCtaLabel } from "@/lib/email/blast-variant-doc";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -86,6 +97,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: `max ${MAX_CONTACTS} contacts per blast` }, { status: 400 });
   }
 
+  // Split-send request: optional { subjects?, ctas? }, validated against each
+  // other (mismatched lengths, >4 variants) before any rendering/quota work.
+  // Absent entirely (the common case) → variantCount stays 1 and every branch
+  // below behaves exactly as it did before split-send existed.
+  const variantTestRaw = body?.variant_test as { subjects?: string[]; ctas?: string[] } | undefined;
+  let variantCount = 1;
+  if (variantTestRaw) {
+    const v = validateVariantTest(variantTestRaw);
+    if (!v.ok) return NextResponse.json({ error: v.error }, { status: 422 });
+    variantCount = v.variantCount;
+  }
+
   // Deliverable (RLS proves ownership → non-owner sees nothing → 404).
   const { data: deliverable } = await supabase
     .from("deliverables")
@@ -128,12 +151,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // Render the REAL report once (same engine as /p/[id]); per-recipient we only
   // swap the footer's unsubscribe link. Non-ZIP deliverables (model null) fall
-  // back to a minimal wrapper linking to the web version.
+  // back to a minimal wrapper linking to the web version. A ctas split-test
+  // renders 2-4 near-identical HTML variants (same doc, only the button label
+  // differs) instead of one; every other path renders exactly one, same as
+  // before split-send existed.
   const webUrl = `${BASE_URL}/p/${id}`;
   // Opt-in PDF attachment — block-canvas only (the only template the PDF root
   // renders). Default off: attachments inflate every message.
   const includePdf = body?.include_pdf === true && deliverable.template === "block-canvas";
-  let baseHtml: string;
+  let htmlByVariant: string[] = [];
   let pdfBuffer: Buffer | null = null;
 
   if (deliverable.template === "block-canvas") {
@@ -145,7 +171,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!parsedDoc.success) {
       return NextResponse.json({ error: "invalid email document" }, { status: 422 });
     }
-    baseHtml = await renderEmailDocHtml(parsedDoc.data);
+    const ctas = variantTestRaw?.ctas;
+    const docsToRender =
+      ctas && ctas.length > 1
+        ? ctas.map((label) => withCtaLabel(parsedDoc.data, label))
+        : ctas && ctas.length === 1
+          ? [withCtaLabel(parsedDoc.data, ctas[0])]
+          : [parsedDoc.data];
+    htmlByVariant = await Promise.all(docsToRender.map((d) => renderEmailDocHtml(d)));
     if (includePdf) {
       pdfBuffer = await renderEmailDocToBuffer(parsedDoc.data);
     }
@@ -155,22 +188,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const model = buildEmailDeliverableModel(deliverable as unknown as EmailDeliverableRow, {
       siteOrigin: BASE_URL,
     });
+    let legacyHtml: string;
     if (model) {
-      baseHtml = await renderGroundedReport(model, { skin: "email" });
+      legacyHtml = await renderGroundedReport(model, { skin: "email" });
     } else {
-      baseHtml =
+      legacyHtml =
         `<!doctype html><html><body style="font-family:Arial,sans-serif;padding:24px">` +
         `<p style="font-size:16px;color:#111">Your market report is ready.</p>` +
         `<p><a href="${escAttr(webUrl)}" style="display:inline-block;background:#3DC9C0;color:#fff;` +
         `padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">View Report</a></p>` +
         `</body></html>`;
     }
+    // Split-send is block-canvas only (plan's own scope note) — legacy template
+    // always renders exactly one HTML, regardless of variant_test.
+    htmlByVariant = [legacyHtml];
   }
+  const baseHtml = htmlByVariant[0]; // keep existing single-HTML call sites (url-lint) working
 
   // Fake-link tripwire (invention-surface-guards §C, unattended send = hard
   // fail): every href/src in the compiled email must be verbatim from the
   // deliverable's own content (doc/snapshot/branding) or a platform link. A
-  // minted URL never ships.
+  // minted URL never ships. Every htmlByVariant entry is the SAME doc with only
+  // the button label swapped, so linting the first is sufficient.
   const allowedUrls = collectAllowedUrls(
     deliverable.doc,
     deliverable.items_snapshot,
@@ -196,10 +235,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
   const from = `${senderName} <${senderAddress}>`;
   const replyTo = user.email || undefined;
-  const subject =
-    typeof body?.subject === "string" && body.subject.trim()
-      ? body.subject.trim()
-      : deriveSubject(deliverable.narrative as { exec_summary?: string } | null);
+  const subjectByVariant: string[] =
+    variantTestRaw?.subjects && variantTestRaw.subjects.length > 0
+      ? variantTestRaw.subjects
+      : [
+          typeof body?.subject === "string" && body.subject.trim()
+            ? body.subject.trim()
+            : deriveSubject(deliverable.narrative as { exec_summary?: string } | null),
+        ];
+
+  // A real split needs >=2 cohorts on at least one axis — a single-length
+  // override (subjects or ctas) renders/sends that one value to everyone but
+  // is a content override, not a test: no variant_config persisted, no
+  // variant:i tag on the Resend send.
+  const isRealSplit = variantCount >= 2;
 
   // Audit row.
   const { data: blast } = await supabase
@@ -209,6 +258,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       deliverable_id: id,
       contact_ids: contacts.map((c) => c.id),
       status: "sending",
+      ...(isRealSplit
+        ? {
+            variant_config: {
+              subjects: variantTestRaw?.subjects ?? null,
+              ctas: variantTestRaw?.ctas ?? null,
+            },
+          }
+        : {}),
     })
     .select("id")
     .single();
@@ -218,16 +275,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let failed = 0;
 
   const messageFor = (c: { id: string; email: string; name: string | null }) => {
+    const cohort = isRealSplit ? cohortIndex(c.id, variantCount) : 0;
+    const html = htmlByVariant[cohort] ?? htmlByVariant[0];
+    const subject = subjectByVariant[cohort] ?? subjectByVariant[0];
     const unsubUrl = `${BASE_URL}/api/unsubscribe?id=${c.id}`;
-    const html = withMergeTags(
-      bindUnsubscribeHref(withFooter(baseHtml, webUrl, unsubUrl), unsubUrl),
+    const finalHtml = withMergeTags(
+      bindUnsubscribeHref(withFooter(html, webUrl, unsubUrl), unsubUrl),
       c,
     );
     return {
       from,
       to: [c.email],
       subject,
-      html,
+      html: finalHtml,
       ...(replyTo ? { replyTo } : {}),
       headers: {
         "List-Unsubscribe": `<${unsubUrl}>`,
@@ -236,7 +296,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       // Attribution hook: webhook events carry these back (Build 2 reads them).
       // `campaign` = the quick-start campaign that seeded this deliverable
       // (deliverables.campaign_key, stamped at save) — null for organic builds.
-      tags: blastTags(id, deliverable.template, deliverable.campaign_key),
+      // `variant:<cohort>` tags only a real split (isRealSplit) so a single-value
+      // content override never fakes a two-arm test in the results aggregator.
+      tags: blastTags(
+        id,
+        deliverable.template,
+        deliverable.campaign_key,
+        isRealSplit ? cohort : undefined,
+      ),
     };
   };
 
@@ -288,7 +355,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       type: "email_sent",
       actor: "system",
       summary: `Email blast sent to ${sent} contact${sent === 1 ? "" : "s"}`,
-      detail: { sent, failed, deliverable_id: id, subject },
+      detail: { sent, failed, deliverable_id: id, subject: subjectByVariant[0] },
     });
   }
 
