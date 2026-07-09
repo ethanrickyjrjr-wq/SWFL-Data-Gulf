@@ -1,3 +1,12 @@
+## 2026-07-09 (Fable 5 · main) — handoff amend 2: bklit NOTICE.md is the primary chart path
+
+Operator named it: `components/charts/vendor/bklit/NOTICE.md`. bklit Area (`bklitTrendSvg`) +
+Composed (`bklitComposedSvg`) are ALREADY wired into production email rendering via
+`email-svg.tsx`/`render-static.tsx`/`chart-image.ts` — preview charts rendered through that path
+look exactly like real product emails. Handoff STEP 0 now leads with the NOTICE (incl. its
+categorical-date landmine + staticSize/initialLoaded SSR forks + no --chart-N vars); Bar/Line are
+the sanctioned next wirings; `renderChart` demoted to fallback.
+
 ## 2026-07-09 (Fable 5 · main) — spec: public /guides hub (Figma-style best-practices), build registered
 
 Brainstormed + ratified with operator (4 AskUserQuestion gates, all approved): public /guides

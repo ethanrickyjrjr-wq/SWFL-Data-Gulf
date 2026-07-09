@@ -45,11 +45,22 @@ set, not the tile.
 07/09).** The shipping session hand-authored ONE SVG while two in-repo chart systems sat unused.
 Do not repeat that. Use these:
 
-- **`lib/email/templates/charts/chart-renderer.ts` → `renderChart(spec, theme?)`** — the email
-  chart root; pure function returning an SVG string, brand-themable. The capture script runs
-  under bun with full lib access, so it can call this DIRECTLY per template and drop the SVG into
-  the doc's chart slot (or write it to `public/showcase/seed-previews/assets/`). Spec shapes in
-  `chart-types.ts`, defaults in `chart-defaults.ts`.
+- **THE PRIMARY PATH — the vendored bklit-ui email charts. READ
+  `components/charts/vendor/bklit/NOTICE.md` FIRST** (operator pointed at it by name, 07/09).
+  Area (`bklitTrendSvg`, the zhvi trend) and Composed (`bklitComposedSvg`, bar + mean reference
+  line) are ALREADY WIRED INTO PRODUCTION EMAIL RENDERING via
+  `components/charts/vendor/bklit/email-svg.tsx` + the `renderBklitStaticSvg` bridge
+  (`render-static.tsx`), rasterized by the existing `lib/email/chart-image.ts` (@resvg) pipeline.
+  Render preview charts through THIS path and the previews show exactly what real built emails
+  produce. Bar and Line are vendored + SSR-proven but unwired — wiring one into a preview series
+  is the sanctioned "next increment" the NOTICE names. Gotchas documented in the NOTICE and
+  non-optional: categorical labels (ZIPs, cities) MUST use the synthetic date-sequence trick
+  (`new Date(2000, 0, i+1)`, no XAxis) or bars land at scrambled positions; server renders need
+  `staticSize` (+ `initialLoaded` for Bar); no `--chart-N` CSS vars exist globally — pass colors
+  explicitly.
+- **`lib/email/templates/charts/chart-renderer.ts` → `renderChart(spec, theme?)`** — the older
+  email chart root; pure SVG-string function, brand-themable (spec shapes in `chart-types.ts`).
+  Fallback for shapes bklit doesn't cover.
 - **`lib/charts/` — the /charts gallery machinery (brought in 07/08–07/09)** — real, loader-backed
   SWFL series ready to plot: `gallery-loaders.ts` registers Median Home Value (Cape Coral · Fort
   Myers · Naples), Median Monthly Rent, RSW Airport Passenger Volume, Home Value YoY Growth,
