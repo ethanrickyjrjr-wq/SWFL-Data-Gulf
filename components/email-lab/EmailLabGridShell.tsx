@@ -306,6 +306,11 @@ export function EmailLabGridShell({
   const [brandSaving, setBrandSaving] = useState(false);
   const [brandSavedMsg, setBrandSavedMsg] = useState<string | null>(null);
   const brandPrefillAttempted = useRef(false);
+  // Set whenever the Brand panel edits a field (applyBranding); cleared once that
+  // change has actually reached projects.branding. The main Save button used to only
+  // persist the doc — a brand edit that was never separately re-saved from inside the
+  // Brand panel would silently revert on the next load. See saveBrandIfDirty below.
+  const [brandDirty, setBrandDirty] = useState(false);
 
   // Social composer — ALL social state + actions lifted here so the right "AI assistant"
   // aside drives the center canvas (mode === "social"). Effect-free until an action fires,
@@ -655,6 +660,7 @@ export function EmailLabGridShell({
   // ── Brand panel (one root) ──────────────────────────────────────────────────
   function applyBranding(next: Record<string, string>) {
     setBranding(next);
+    setBrandDirty(true);
     liveEdit(applyBrand(doc, brandingToTokens(next)));
   }
 
@@ -674,7 +680,17 @@ export function EmailLabGridShell({
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ branding }),
     });
+    if (res.ok) setBrandDirty(false);
     return res.ok;
+  }
+
+  // The main toolbar Save/Send/Schedule actions used to save the doc only — a brand
+  // edit that was never separately re-saved from inside the Brand panel silently
+  // reverted on the next load (the project's stored branding never changed). Project-
+  // scoped ONLY: saveBrandGlobal also writes the user's account-wide brand, which would
+  // bleed this project's colors into every future project.
+  async function saveBrandIfDirty(): Promise<void> {
+    if (brandDirty) await saveBrandToProject();
   }
 
   async function saveBrandGlobal(): Promise<boolean> {
@@ -896,6 +912,7 @@ export function EmailLabGridShell({
   async function openSend() {
     let id = deliverableId ?? null;
     if (onSave) {
+      await saveBrandIfDirty();
       const saved = await onSave(doc, aiPrompt, campaignKey);
       if (typeof saved === "string") id = saved;
     }
@@ -908,6 +925,7 @@ export function EmailLabGridShell({
   async function openSchedule() {
     let id = deliverableId ?? null;
     if (onSave) {
+      await saveBrandIfDirty();
       const saved = await onSave(doc, aiPrompt, campaignKey);
       if (typeof saved === "string") id = saved;
     }
@@ -1136,7 +1154,10 @@ export function EmailLabGridShell({
             {onSave && (
               <button
                 type="button"
-                onClick={() => onSave(doc, aiPrompt, campaignKey)}
+                onClick={async () => {
+                  await saveBrandIfDirty();
+                  await onSave(doc, aiPrompt, campaignKey);
+                }}
                 disabled={saving}
                 className="rounded-lg border border-gulf-teal/30 bg-gulf-teal/20 px-3 py-1.5 text-sm text-gulf-teal transition-colors hover:bg-gulf-teal/30 disabled:opacity-40"
               >

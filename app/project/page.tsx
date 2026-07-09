@@ -7,6 +7,7 @@ import { createClient } from "@/utils/supabase/server";
 import type { ProjectItem } from "@/lib/project/items";
 import { inferScopeFromItems } from "@/lib/project/derive-name";
 import { projectHome } from "@/lib/project/tool-tabs";
+import { openDoc } from "@/lib/lab-entry/destination";
 import {
   describeCadence,
   formatScheduleSendTime,
@@ -78,7 +79,13 @@ export default async function ProjectListPage() {
           "id, project_id, status, cadence, day_of_week, day_of_month, send_hour_et, platform, next_run_at",
         )
         .in("status", ["active", "paused"]),
-      supabase.from("deliverables").select("id, project_id"),
+      // Ordered newest-first so the per-project lastDidByProject fold below (line ~131)
+      // keeps the FIRST block-canvas row it sees per project — the deliberate
+      // "most recent" tie-break, same rule Fix 1 uses for the tool-switcher.
+      supabase
+        .from("deliverables")
+        .select("id, project_id, template")
+        .order("data_as_of", { ascending: false }),
     ]);
   const projects = (data as ProjectRow[] | null) ?? [];
 
@@ -129,8 +136,15 @@ export default async function ProjectListPage() {
     });
   }
   const builtByProject = new Map<string, number>();
+  // The card link (below) opens this instead of a bare project URL — without it,
+  // clicking into a project with a built email dropped you onto a fresh/blank
+  // canvas every time (the arrival planner has no `did` to load).
+  const lastDidByProject = new Map<string, string>();
   for (const d of delivRows ?? []) {
     builtByProject.set(d.project_id, (builtByProject.get(d.project_id) ?? 0) + 1);
+    if (d.template === "block-canvas" && !lastDidByProject.has(d.project_id)) {
+      lastDidByProject.set(d.project_id, d.id);
+    }
   }
 
   // Upcoming: the next 3 active sends across everything, soonest first.
@@ -230,6 +244,7 @@ export default async function ProjectListPage() {
             const scopeLabel = scope.place ?? scope.zip ?? null;
             const chips = chipsByProject.get(p.id) ?? [];
             const built = builtByProject.get(p.id) ?? 0;
+            const lastDid = lastDidByProject.get(p.id) ?? null;
             return (
               <li
                 key={p.id}
@@ -237,7 +252,7 @@ export default async function ProjectListPage() {
               >
                 <div className="flex items-center justify-between gap-3">
                   <Link
-                    href={projectHome(p.id)}
+                    href={lastDid ? openDoc(p.id, lastDid) : projectHome(p.id)}
                     className="min-w-0 flex-1 text-sm font-medium text-white hover:text-gulf-teal"
                   >
                     <span className="truncate">{p.title || "Untitled project"}</span>

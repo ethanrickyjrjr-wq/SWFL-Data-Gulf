@@ -29,14 +29,35 @@ export default async function ProjectAreaLayout({ children }: { children: React.
   // Unauthenticated: render children plain — the child page redirects to /login.
   if (!user) return <>{children}</>;
 
-  const { data } = await supabase
-    .from("projects")
-    .select("id, title, items, updated_at")
-    .order("updated_at", { ascending: false });
+  const [{ data }, { data: delivRows }] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("id, title, items, updated_at")
+      .order("updated_at", { ascending: false }),
+    // Newest-first so the fold below keeps the first (= most recent) block-canvas
+    // row per project — same rule the tool-switcher fix (layout.tsx under [id])
+    // uses. Without a remembered did, clicking a rail row into a project with a
+    // built email dropped you onto a fresh/blank canvas every time.
+    supabase
+      .from("deliverables")
+      .select("id, project_id, template")
+      .order("data_as_of", { ascending: false }),
+  ]);
+  const lastDidByProject = new Map<string, string>();
+  for (const d of delivRows ?? []) {
+    if (d.template === "block-canvas" && !lastDidByProject.has(d.project_id)) {
+      lastDidByProject.set(d.project_id, d.id);
+    }
+  }
 
   const projects: RailProject[] = (
     (data as { id: string; title: string | null; items: ProjectItem[] | null }[] | null) ?? []
-  ).map((p) => ({ id: p.id, title: p.title, itemCount: p.items?.length ?? 0 }));
+  ).map((p) => ({
+    id: p.id,
+    title: p.title,
+    itemCount: p.items?.length ?? 0,
+    lastDid: lastDidByProject.get(p.id) ?? null,
+  }));
 
   // Bottom-bar search index (§F): reports from BRAIN_CATALOG + recent titled saved
   // charts. Built server-side so the client filters a plain array (no catalog bundle).

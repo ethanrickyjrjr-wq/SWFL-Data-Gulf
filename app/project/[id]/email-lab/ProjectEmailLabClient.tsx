@@ -16,6 +16,7 @@ import { AddressPopup } from "@/components/lab-entry/AddressPopup";
 import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 import { useAutosave, makeAutosaveScheduler } from "@/lib/lab-entry/use-autosave";
 import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
+import { useLastDid } from "../LastDidContext";
 import type { ProjectUiState } from "../workspace/types";
 
 interface Props {
@@ -80,6 +81,18 @@ export function ProjectEmailLabClient({
 }: Props) {
   const [savedId, setSavedId] = useState<string | null>(deliverableId ?? null);
   const [saving, setSaving] = useState(false);
+  // Local echo of the project's title so a first-save auto-rename (below) shows
+  // immediately in the header without a reload.
+  const [title, setTitle] = useState(projectTitle);
+  // Tells the tab switcher (ToolFrame, a layout sibling) which deliverable to
+  // reopen if the user leaves Email and comes back — null outside a project
+  // ToolFrame (shouldn't happen here, but this page always renders inside one).
+  const lastDid = useLastDid();
+  useEffect(() => {
+    if (deliverableId) lastDid?.setLastDid(deliverableId);
+    // Only needs to run once per mount — deliverableId is this page's initial prop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Lifecycle arc state — the strip mutates via its own API calls and bubbles back.
   const [sequence, setSequence] = useState<ArcSequence | null>(initialSequence ?? null);
   const [arming, setArming] = useState(false);
@@ -242,7 +255,6 @@ export function ProjectEmailLabClient({
     ? `${scope.kind === "zip" ? "ZIP " : ""}${scope.value}`
     : "Southwest Florida";
   const effectiveScope = scope ?? { kind: "region", value: "swfl" };
-  const aiPrompt = `Market spotlight email for ${scopeLabel} — fill in realistic market context and agent copy`;
 
   function handleDocChange(doc: EmailDoc) {
     currentDocRef.current = doc;
@@ -270,6 +282,23 @@ export function ProjectEmailLabClient({
       const j = await r.json().catch(() => null);
       if (r.ok && j?.sequence) setSequence(j.sequence);
     });
+  }
+
+  // A project born from the plain "New project" button carries the literal placeholder
+  // title forever (nothing else renames it — building an email never touches
+  // project.items, so the content-driven deriveProjectName has nothing to read). Fire
+  // once, right after the FIRST save creates a deliverable: rename off the same
+  // scopeLabel already shown in the header/scope line. Best-effort; a failed PATCH just
+  // leaves the placeholder rather than blocking the save that already succeeded.
+  function renameIfUntitled() {
+    if (title.trim() && title !== "Untitled project") return;
+    const next = scope ? `${scopeLabel} Email` : "SWFL Market Email";
+    setTitle(next);
+    void fetch(`/api/projects/${projectId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: next }),
+    }).catch(() => {});
   }
 
   // `ai_prompt` is persisted as the deliverable's build prompt so a SCHEDULED re-render
@@ -312,6 +341,11 @@ export function ProjectEmailLabClient({
         setDirty(false);
         setNudge(false);
         recordArcBuilt(savedId);
+        lastDid?.setLastDid(savedId);
+        // Heals older projects that already had a deliverable built before this
+        // rename existed (renameIfUntitled no-ops once it's no longer the
+        // placeholder, so this costs nothing on every other save).
+        renameIfUntitled();
         return savedId;
       }
       const res = await fetch(`/api/projects/${projectId}/materials`, {
@@ -332,6 +366,8 @@ export function ProjectEmailLabClient({
         setNudge(false);
         window.history.replaceState({}, "", `/project/${projectId}/email-lab?did=${id}`);
         recordArcBuilt(id);
+        renameIfUntitled();
+        lastDid?.setLastDid(id);
         return id;
       }
     } finally {
@@ -367,7 +403,7 @@ export function ProjectEmailLabClient({
         href={`/project/${projectId}`}
         className="mb-2 flex items-center gap-1.5 text-[10px] text-white/35 transition-colors hover:text-white/60"
       >
-        ← {projectTitle}
+        ← {title}
       </Link>
       <p className="text-sm font-semibold text-white/80">Email</p>
       <p className="mt-0.5 text-[10px] text-gulf-teal">
@@ -388,7 +424,9 @@ export function ProjectEmailLabClient({
     brandTokens: initialTokens,
     initialBranding,
     scope: effectiveScope,
-    initialAiPrompt: readyPrompt ?? aiPrompt,
+    // A truly blank project (no ready recipe) gets an EMPTY box, not a fake
+    // pre-written sentence — the aiPlaceholder below already shows a grey example.
+    initialAiPrompt: readyPrompt ?? undefined,
     // The popup owns the blank now — don't also seed the recipe into the Build box.
     initialRecipe: buildPrompt || plan.addressPopup ? null : initialRecipe,
     autoGenerate: autoBuild,

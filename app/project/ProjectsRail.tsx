@@ -4,12 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { projectHome } from "@/lib/project/tool-tabs";
+import { openDoc } from "@/lib/lab-entry/destination";
 import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
 
 export interface RailProject {
   id: string;
   title: string | null;
   itemCount: number;
+  /** Most-recent block-canvas deliverable, if any — reopens the SAME saved doc
+   *  instead of a fresh/blank one (see app/project/layout.tsx). */
+  lastDid: string | null;
 }
 
 /**
@@ -141,8 +145,9 @@ export function ProjectsRail({ projects }: { projects: RailProject[] }) {
           <ul className="flex flex-col gap-0.5 overflow-y-auto">
             {projects.map((p) => {
               // Open into the Email tool (projectHome); highlight on ANY of the
-              // project's tool pages, not just the landing one.
-              const href = projectHome(p.id);
+              // project's tool pages, not just the landing one. A remembered
+              // did reopens the SAME saved doc instead of a fresh/blank one.
+              const href = p.lastDid ? openDoc(p.id, p.lastDid) : projectHome(p.id);
               const active = pathname.startsWith(`/project/${p.id}`);
               return (
                 <li key={p.id} className="flex items-center gap-1">
