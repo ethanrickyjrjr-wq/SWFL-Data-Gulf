@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { buildShowingPrepDoc, SHOWING_PREP_COMMENTARY_MARKER } from "./showing-prep-doc";
+import { buildShowingPrepDoc, SHOWING_PREP_COMMENTARY_BLOCK_ID } from "./showing-prep-doc";
 import { SEED_DOCS } from "./doc/default-docs";
 import { EmailDocSchema } from "./doc/schema";
 import type { ShowingPrepData } from "@/lib/listings/showing-prep-source";
@@ -112,7 +112,7 @@ test("renders the market snapshot stat strip with market type; omits it when sna
 test("always includes an empty commentary slot and a disclosure slot", () => {
   const doc = buildShowingPrepDoc(FULL, currentDoc());
   const commentary = doc.blocks.find(
-    (b) => b.type === "text" && b.props.caption === SHOWING_PREP_COMMENTARY_MARKER,
+    (b) => b.type === "text" && b.id === SHOWING_PREP_COMMENTARY_BLOCK_ID,
   );
   expect(commentary).toBeDefined();
   expect(commentary?.type === "text" && commentary.props.body).toBe(""); // empty — Task 6 fills it

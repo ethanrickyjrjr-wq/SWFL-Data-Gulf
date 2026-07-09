@@ -15,11 +15,19 @@ import { listingsMapUrl, type MapPin } from "@/lib/listings/listings-map";
 import type { RenderComp } from "@/lib/assistant/comp-helper";
 import type { ShowingPrepData } from "@/lib/listings/showing-prep-source";
 import type { MarketSnapshot } from "@/lib/listings/market-snapshot";
-import type { BlockLayout, EmailBlock, EmailDoc, StatItem, TextProps } from "./doc/types";
+import type { BlockLayout, EmailBlock, EmailDoc, StatItem } from "./doc/types";
 
-/** Caption sentinel on the empty commentary text block — the assembler (Task 6)
- *  finds the block to fill by this marker, so no positional coupling. */
-export const SHOWING_PREP_COMMENTARY_MARKER = "__showing_prep_commentary__";
+/** Fixed id on the empty commentary text block — the assembler (Task 6) finds the
+ *  block to fill by this id, so no positional coupling. Deliberately NOT a `caption`
+ *  marker: `TextPropsSchema` (./doc/schema.ts) doesn't declare `caption`, so Zod's
+ *  default strip-unknown-keys behavior silently drops it on every schema round-trip
+ *  (proven empirically — a doc reloaded through `EmailDocSchema.safeParse` loses the
+ *  field entirely). `id` is a real, always-present, never-stripped field on every
+ *  block, so the marker survives persistence + reload. It also sidesteps THE SLOT
+ *  RULE's docSkeleton semantics (lib/email/CLAUDE.md): `caption` is one of
+ *  `docSkeleton`'s walked TEXT_KEYS, so a sentinel string sitting there would ship
+ *  to the AI verbatim as "the current answer" on any future edit of this doc. */
+export const SHOWING_PREP_COMMENTARY_BLOCK_ID = "sp-commentary";
 
 const DISCLOSURE_LABEL = "Attach seller disclosure (optional)";
 
@@ -228,15 +236,12 @@ export function buildShowingPrepDoc(data: ShowingPrepData, current: EmailDoc): E
   }
 
   // 9. Commentary — empty; the assembler (Task 6) authors + lints one paragraph in here.
-  // The marker rides on `caption` (an open prop — TextProps doesn't declare it, so the
-  // props are typed as the intersection to stay compile-clean; the field is present at
-  // runtime, which is what the assembler's marker finder reads).
-  const commentaryProps: TextProps & { caption: string } = {
-    body: "",
-    align: "left",
-    caption: SHOWING_PREP_COMMENTARY_MARKER,
-  };
-  push({ id: createBlock("text").id, type: "text", props: commentaryProps }, 4);
+  // Fixed id (not a caption field — see SHOWING_PREP_COMMENTARY_BLOCK_ID above) is
+  // what the assembler's marker finder reads.
+  push(
+    { id: SHOWING_PREP_COMMENTARY_BLOCK_ID, type: "text", props: { body: "", align: "left" } },
+    4,
+  );
 
   // 10. Disclosure slot — empty image block (the drag-drop mechanic; Deviation #4).
   push(

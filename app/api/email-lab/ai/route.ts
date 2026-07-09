@@ -10,6 +10,7 @@ import type { ChartType } from "@/lib/email/reshape-chart-type";
 import { isShowingPrepPrompt } from "@/lib/email/showing-prep-intent";
 import { gatherShowingPrepData } from "@/lib/listings/showing-prep-source";
 import { assembleShowingPrepDoc } from "@/lib/email/showing-prep-assemble";
+import { SHOWING_PREP_INTRO_NOTE } from "@/lib/email/showing-prep-copy";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { seedById } from "@/lib/email/doc/default-docs";
 
@@ -91,8 +92,9 @@ export async function POST(req: NextRequest) {
     try {
       // Showing Prep Packet — a dedicated build path (not authorDoc). Fires only on the
       // showing-prep recipe carrying a subject address; returns the coded packet doc in
-      // the same { applied, doc } shape the canvas already consumes. Never throws —
-      // every sourcing lane degrades to an empty cell.
+      // the same { applied, doc } shape the canvas already consumes, plus a `note` —
+      // it's not obvious from "build a packet" alone that this isn't a marketing email.
+      // Never throws — every sourcing lane degrades to an empty cell.
       const spAddress =
         (typeof body.scope?.address === "string" && body.scope.address.trim()) || "";
       if (isShowingPrepPrompt(prompt) && spAddress) {
@@ -100,7 +102,7 @@ export async function POST(req: NextRequest) {
         const base = parsed.success ? parsed.data : seedById("market-spotlight")!.build();
         const data = await gatherShowingPrepData(spAddress);
         const doc = await assembleShowingPrepDoc(data, base);
-        return NextResponse.json({ applied: true, doc });
+        return NextResponse.json({ applied: true, doc, note: SHOWING_PREP_INTRO_NOTE });
       }
 
       const caller = isAuthor ? await loadCaller() : null;

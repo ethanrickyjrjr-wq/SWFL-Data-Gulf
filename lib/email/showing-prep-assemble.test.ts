@@ -1,7 +1,8 @@
 import { test, expect } from "bun:test";
 import { assembleShowingPrepDoc } from "./showing-prep-assemble";
-import { SHOWING_PREP_COMMENTARY_MARKER } from "./showing-prep-doc";
+import { SHOWING_PREP_COMMENTARY_BLOCK_ID } from "./showing-prep-doc";
 import { SEED_DOCS } from "./doc/default-docs";
+import { EmailDocSchema } from "./doc/schema";
 import type { ShowingPrepData } from "@/lib/listings/showing-prep-source";
 import type { RenderComp } from "@/lib/assistant/comp-helper";
 
@@ -9,12 +10,10 @@ function currentDoc() {
   return SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
 }
 
-function commentaryBody(doc: { blocks: Array<{ type: string; props: Record<string, unknown> }> }) {
-  const c = doc.blocks.find(
-    (b) =>
-      b.type === "text" &&
-      (b.props as { caption?: string }).caption === SHOWING_PREP_COMMENTARY_MARKER,
-  );
+function commentaryBody(doc: {
+  blocks: Array<{ id: string; type: string; props: Record<string, unknown> }>;
+}) {
+  const c = doc.blocks.find((b) => b.type === "text" && b.id === SHOWING_PREP_COMMENTARY_BLOCK_ID);
   return (c?.props?.body as string | undefined) ?? "";
 }
 
@@ -76,6 +75,24 @@ test("no-key / offline build skips the AI paragraph and still returns a valid do
   });
   expect(commentaryBody(doc)).toBe("");
   expect(doc.blocks.some((b) => b.type === "footer")).toBe(true);
+});
+
+// Regression: the marker used to ride on `caption`, a field TextPropsSchema doesn't
+// declare — Zod's default strip-unknown-keys behavior silently dropped it on every
+// schema round-trip (proven empirically before this fix), breaking any later attempt
+// to relocate the commentary block in a reloaded doc. `id` is never stripped.
+test("the commentary block survives an EmailDocSchema round-trip (reload/re-parse)", async () => {
+  const doc = await assembleShowingPrepDoc(DATA, currentDoc(), {
+    authorCommentary: async () => "Listed at $489,000 in a market running 2.1 months of supply.",
+  });
+  const parsed = EmailDocSchema.safeParse(doc);
+  expect(parsed.success).toBe(true);
+  if (!parsed.success) return;
+  const reloaded = parsed.data.blocks.find(
+    (b) => b.type === "text" && b.id === SHOWING_PREP_COMMENTARY_BLOCK_ID,
+  );
+  expect(reloaded).toBeDefined();
+  expect(reloaded?.type === "text" && reloaded.props.body).toContain("$489,000");
 });
 
 // Regression (pins the commentary-only lint): with comps AND a snapshot present, an

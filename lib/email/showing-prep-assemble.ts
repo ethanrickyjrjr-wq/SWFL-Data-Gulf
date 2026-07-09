@@ -17,21 +17,21 @@
 // not AI-authored; only the commentary is. So we lint only it. Never throws; an
 // offline / no-key build simply ships with the commentary blank.
 
-import { buildShowingPrepDoc, SHOWING_PREP_COMMENTARY_MARKER } from "./showing-prep-doc";
+import { buildShowingPrepDoc, SHOWING_PREP_COMMENTARY_BLOCK_ID } from "./showing-prep-doc";
 import { lintAuthoredProse } from "./author-doc";
 import { getAnthropic, agentsAreMocked } from "@/refinery/agents/anthropic.mts";
 import { resolveEmailModel } from "./model-router";
 import type { EmailDoc, EmailBlock } from "./doc/types";
 import type { ShowingPrepData } from "@/lib/listings/showing-prep-source";
 
-/** True when `b` is the commentary text block (found by its caption marker, not by
+/** True when `b` is the commentary text block (found by its fixed id, not by
  *  position — the builder tags it, so ordering can change freely). A type guard so
- *  callers get the narrowed `text` variant (its props carry `body`). */
+ *  callers get the narrowed `text` variant (its props carry `body`). Matched on
+ *  `id`, not a `caption` marker: `TextPropsSchema` doesn't declare `caption`, so a
+ *  schema round-trip (EmailDocSchema.safeParse) silently strips it — `id` is a
+ *  real, never-stripped field. */
 function isCommentaryBlock(b: EmailBlock): b is Extract<EmailBlock, { type: "text" }> {
-  return (
-    b.type === "text" &&
-    (b.props as { caption?: string }).caption === SHOWING_PREP_COMMENTARY_MARKER
-  );
+  return b.type === "text" && b.id === SHOWING_PREP_COMMENTARY_BLOCK_ID;
 }
 
 /** Every real number/string on the packet — the anchor set the commentary must not

@@ -383,7 +383,12 @@ export function EmailLabGridShell({
           recipeId: branding.preferred_recipe || undefined,
         }),
       });
-      const data = (await res.json()) as { doc?: unknown; applied?: boolean; message?: string };
+      const data = (await res.json()) as {
+        doc?: unknown;
+        applied?: boolean;
+        message?: string;
+        note?: string;
+      };
       // Only treat it as a real build when the engine actually authored — the
       // author path echoes the INPUT doc with applied:false on a miss, so guarding
       // on `data.doc` alone would falsely report "built" and re-commit the seed.
@@ -396,8 +401,11 @@ export function EmailLabGridShell({
           const normalized = normalizeAuthorHeights(applyBrand(parsed.data, brandTokens));
           commit(normalized);
           setSelectedId(null);
+          // A dedicated build path (e.g. Showing Prep) may carry its own explainer —
+          // what this doc actually is, since that's not obvious from the prompt alone.
           setAiStatus(
-            `Built the whole email from one line — ${normalized.blocks.length} blocks laid out on the grid.`,
+            data.note ??
+              `Built the whole email from one line — ${normalized.blocks.length} blocks laid out on the grid.`,
           );
           // Phone: show them what got built (the tab bar is right there to come
           // back). No-op on lg+ where both panes are visible. Failure paths stay

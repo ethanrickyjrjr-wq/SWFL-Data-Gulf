@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { projectHome } from "@/lib/project/tool-tabs";
+import { SHOWING_PREP_INTRO_SHORT } from "@/lib/email/showing-prep-copy";
 
 /**
  * Showing Prep entry. Creates a project with kind:"showing-prep" anchored to an
@@ -45,6 +46,7 @@ export function ShowingPrepButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
+        title={SHOWING_PREP_INTRO_SHORT}
         className="rounded-full border border-gulf-teal px-4 py-2 text-sm font-medium text-gulf-teal transition-opacity hover:opacity-90"
       >
         Showing prep
