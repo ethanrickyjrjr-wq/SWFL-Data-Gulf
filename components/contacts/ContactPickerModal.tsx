@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { Contact } from "@/lib/contacts/types";
 import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
+import { BlastResultsPanel } from "./BlastResultsPanel";
 
 interface Props {
   deliverableId: string;
@@ -120,6 +121,9 @@ export function ContactPickerModal({
                   Sent to {(result as { sent: number }).sent} contact
                   {(result as { sent: number }).sent !== 1 ? "s" : ""}
                 </p>
+                {(subjectVariants?.length ?? 0) >= 2 || (ctaVariants?.length ?? 0) >= 2 ? (
+                  <BlastResultsPanel deliverableId={deliverableId} />
+                ) : null}
                 {(result as { failed: number }).failed > 0 && (
                   <p className="text-sm text-yellow-300">
                     {(result as { failed: number }).failed} failed to send
