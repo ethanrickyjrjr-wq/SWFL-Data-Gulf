@@ -1,3 +1,21 @@
+## 2026-07-09 (Fable 5 · main) — Fence 6 BUILT + white-ink trio: no palette can produce unreadable email ink
+
+Executed `docs/superpowers/plans/2026-07-09-email-ink-fence-and-palette-gate.md` (8 tasks, TDD,
+commit per task, c369b404..27e51175). Tier A: `legibleInk(preferred, bg, floor)` in `on-dark.ts`
+(directional readable-neutral fallback via `readableLabel`, ONE root; `legibleAccent` now
+delegates — 5 legacy call sites byte-identical, full sweep proven) rewired into every raw
+brand-ink site: Header tagline, AgentHero designation/CTA, AgentCard CTA, Footer links+icons,
+Sources links, Listing price (large-text floor 3)/badge-chip/link, SocialIcons custom-globe.
+White-ink trio (Button/Header/AgentHero) same primitive — CLOSED `email_contrast_ink_fence`.
+Tier B: `lib/brand/palette-contrast.ts` `evaluateSchemeContrast` (7 renderer-real pairs, WCAG AA
+floors, empty slots skip) + `PaletteContrastStrip` (pure render, warn-only, cap 3 + "+N more")
+mounted in BrandingBlock under the color slots. CLOSED `email_accent_ink_palette_gate`;
+`_live_verify` stays open for grid-lab proof. Verified: `bun test lib/email/ lib/brand/
+components/brand/` 1308 pass 0 fail · `bunx next build` green. Test-harness note: rendered-HTML
+ink asserts use `[^-]color:#hex` (background-/border- props are exempt surfaces). UX note: most
+palettes incl. the house default trip 1-2 strip warnings BY DESIGN (honest feedback; render
+guards fix the send) — if noisy, tune strip display floors, never the guards.
+
 ## 2026-07-09 (Fable 5 · main) — zip-page Phase B BUILT: narrative bake + Down the Road; C/D/E handoff written
 
 Phase B (6543c3af): ONE-root bake harness `lib/narratives/` (types/hash/cadence/prompt/
