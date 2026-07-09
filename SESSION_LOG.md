@@ -1,3 +1,42 @@
+## 2026-07-09 (Sonnet 5 · main) — feat(email): subject/CTA AI variants + split-test, merged + pushed
+
+Picked up a prior session's crash mid-plan (`docs/superpowers/plans/2026-07-09-subject-cta-ai-variants.md`,
+all 14 implementation tasks already committed in worktree `bp-subject-cta-variants` /
+`wt/subject-cta-variants`, individually reviewed). The final whole-branch review had failed silently —
+the Agent dispatch hit the account's weekly Opus limit mid-run and produced zero findings, but the UI
+still showed it as "Done," which read as a completed-but-lost review. Retried it; this time it ran to
+completion (14.8 min) and found real cross-task issues the 14 per-task reviews couldn't see:
+
+**Critical (fixed, commit 4705b9b1):** a concurrent session's deliverability-diagnostics-panel work had
+landed on `main` (`79700a47`) while this branch was being built. Both sessions independently built the
+SAME did-tag webhook plumbing (`lib/email/blast-events.ts`, the `email_events` upsert in
+`app/api/webhooks/resend/route.ts`) with divergent, incompatible content — main wrote `user_id` with no
+`variant`, this branch wrote `variant` with no `user_id`. A naive merge would have compiled clean and
+silently zeroed out one feature's results forever. Resolved as a real union merge (both fields written
+together); caught and fixed one self-inflicted merge-assembly bug (dropped docblock terminator) via `tsc`.
+
+**Important (fixed, commit ecd9ec21):** the blast route's `variant_test` request body wasn't re-running
+the anchor-number/voice-tell moat that authored subject/CTA text otherwise always passes through — a
+scripted caller bypassing the send-modal UI could push an invented-number CTA into a real send. Fixed by
+requiring every `variant_test` string to be a literal member of the doc's own `subjectVariants`/
+`ctaVariants` (the exact strings already filtered+cleaned at build time) — closes the gap AND resolves
+Task 11's open question (split-testing now only works on block-canvas docs, by construction).
+
+Also found (unrelated, pre-existing): `main` had a failing test — `lib/email/emaildoc-subject.test.ts`
+asserted `subjectVariants[0]` preference with no matching type/implementation on `main`, evidently stray
+test content that leaked into an unrelated commit (`1f2c9fe4`, "remove unused chart components"). This
+branch's own Task 2/7 supplied the missing type + implementation, so merging fixed it as a side effect —
+flagging here since it was a real breakage on `main`, not something I introduced.
+
+Merged `main` twice (once mid-review at `79700a47`, once more after the as-of-date consolidation session
+landed `1848a35d`) to stay current before push. Full repo suite green before pushing: `bun test` → 5396
+pass / 0 fail, `tsc --noEmit` clean. Pushed `1848a35d..c89b88a7` → `main`. Worktree + branch removed
+(`node scripts/worktree.mjs cleanup subject-cta-variants`).
+
+**Not yet done:** `subject_cta_variants_live_verify` check is still open — needs a real live send + live
+webhook read (operator-run, per `feedback_checks-prod-evidence-not-dev-attestation`), dev-time
+verification isn't sufficient to close it.
+
 ## 2026-07-09 (Sonnet 5 · main) — fix(charts): dedupe friendlyAsOf to ONE root; fix 2 chart frames rendering raw ISO
 
 Operator pushed back hard on the digest fix above: "is this fixed in ALL future emails, not just
