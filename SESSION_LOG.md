@@ -1,3 +1,17 @@
+## 2026-07-09 (Sonnet 5 · main) — feat(graphify): scheduled cron to auto-republish the code graph
+
+Operator asked whether the graph auto-refreshes. It didn't — no GHA workflow referenced `graphify` at
+all before this (grepped `.github/workflows/`, zero hits); the 41-vs-42 drift fixed in the entry below
+could recur any time a new pack lands and nobody thinks to republish by hand. Added
+`.github/workflows/graphify-republish.yml`: daily at 07:00 UTC (1h after daily-rebuild, so a same-day
+new brain is reflected same-run), checks out both brain-platform and the sibling `swfldatagulf-ops` repo
+(cross-repo — REBUILD_PAT reused as the push credential; its scope was proven for this repo's own
+protected main, NOT yet verified against swfldatagulf-ops, so the first run is the real test), runs
+`bun run graphify:publish` (now self-updating per the fix below), commits+pushes only if
+`brain-graph.json` actually changed. `graphify update` needs no LLM call (its own `--help` says so) —
+$0 marginal cost per run. `workflow_dispatch` with a `dry_run` input for a build-and-diff-only test
+before trusting the schedule. HELD for push + a manual dispatch to prove the cross-repo token works.
+
 ## 2026-07-09 (Sonnet 5 · main) — docs(charts): NOTICE.md follow-up for Composed wiring
 
 Closed out the one leftover from the Composed-chart-in-reshape-picker push (already live on main

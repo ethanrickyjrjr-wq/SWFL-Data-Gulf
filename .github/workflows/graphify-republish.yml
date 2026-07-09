@@ -1,0 +1,107 @@
+name: Graphify Republish
+
+# Regenerates the code graph in brain-platform (bun run graphify:update, folded
+# into graphify:publish 2026-07-09) and republishes it into the sibling
+# swfldatagulf-ops repo's app/graph/brain-graph.json — the ops /graph page reads
+# that static snapshot on every render, so it can only be as fresh as the last
+# publish. Code-only re-extraction needs no LLM call (graphify update's own
+# --help: "no LLM needed") — this job spends $0 on model credits.
+#
+# Runs after daily-rebuild (0 6 * * *) so a same-day new/changed brain is
+# reflected the same run, not a day behind.
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build the graph but skip commit+push to the ops repo"
+        required: false
+        default: "false"
+
+concurrency:
+  group: graphify-republish
+  cancel-in-progress: false
+
+jobs:
+  republish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout brain-platform
+        uses: actions/checkout@v6
+        with:
+          path: brain-platform
+
+      # Cross-repo checkout — the ops repo is separate from brain-platform, so
+      # the default GITHUB_TOKEN (scoped to this repo only) can't read or push
+      # it. Reuses REBUILD_PAT (already a fine-grained PAT owned by the
+      # operator, used elsewhere to push brains/ to this repo's protected
+      # main) — unverified whether its scope extends to swfldatagulf-ops until
+      # this step actually runs; a scope gap fails loudly right here.
+      - name: Checkout swfldatagulf-ops
+        uses: actions/checkout@v6
+        with:
+          repository: ethanrickyjrjr-wq/swfldatagulf-ops
+          path: swfldatagulf-ops
+          token: ${{ secrets.REBUILD_PAT }}
+          persist-credentials: true
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install bun dependencies
+        working-directory: brain-platform
+        run: bun install --frozen-lockfile
+
+      - name: Setup Python (for the graphify CLI)
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install graphify (PyPI package is graphifyy, CLI command is graphify)
+        run: pip install graphifyy
+
+      - name: Regenerate + publish graph
+        working-directory: brain-platform
+        run: bun run graphify:publish
+
+      - name: Commit + push ops repo
+        working-directory: swfldatagulf-ops
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/graph/brain-graph.json
+          if git diff --staged --quiet; then
+            echo "No graph changes — brain-graph.json already current."
+            exit 0
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "dry_run=true — built and diffed, skipping commit+push."
+            git diff --staged --stat
+            exit 0
+          fi
+          git commit -m "chore(graph): republish — $(date -u '+%Y-%m-%d')"
+          for attempt in 1 2 3; do
+            git fetch origin
+            git rebase --autostash origin/main
+            if git push; then
+              echo "Push succeeded on attempt $attempt."
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "Push failed after 3 attempts — giving up."
+              exit 1
+            fi
+            echo "Push rejected — another commit landed first; retrying (attempt $attempt/3)..."
+          done
+
+      - name: Healthchecks.io heartbeat
+        if: always()
+        run: |
+          curl -fsS -m 10 --retry 3 \
+            "https://hc-ping.com/${{ secrets.HEALTHCHECKS_PING_KEY }}/graphify-republish?create=1" || true
