@@ -136,10 +136,12 @@ got written down until now (found via `checks` drift, not a fresh build):
   canvas has its own layout path untouched by any of this.
 - Verified 07/09/2026: `bun test lib/email/doc/fences.test.ts` — 12/12 pass.
 
-**Still open** (tracked as `m2_fences_bounds_of_space`): the soft-user half of "hard for AI,
-soft for user" — no canvas warning when a manual edit pushes past a fence, and no UI writes
-`props.ratio` or picks a span variant (the fields exist, unused). Flip-to-correct and the
-react-email visual-regression fixture per fence are also not built.
+**CORRECTED 07/09/2026** — flip-to-correct (`lib/email/doc/flip.ts`, wired into
+`BlockInspector.tsx:641`) and the photo-ratio picker (`BlockInspector.tsx:236-241`) are BOTH
+shipped, not open as first written here. **Still open** (tracked as `m2_fences_bounds_of_space`):
+`GridCanvas.tsx` has zero connection to `BLESSED_ROW_SPANS`/`ACCENT_BUDGET` — manual resize is
+free 1-12 react-grid-layout, no snap, no warning. That's the entire remaining soft-user gap,
+plus the react-email visual-regression fixture per fence (CI-only).
 
 ## M3 status (07/08/2026) — recipe-picker DONE, brand type-lift STAGED
 
