@@ -28,11 +28,15 @@ function clean(s: string): string {
 }
 
 /**
- * Best subject for an EmailDoc. A `signal.title` reads like a headline; a hero's
+ * Best subject for an EmailDoc. Prefers a variant from `subjectVariants[0]` when present;
+ * falls back to block-derived text. A `signal.title` reads like a headline; a hero's
  * label/kicker is the next-best human line; then the header's tagline/company. Never
  * returns "" — a doc with no usable text falls back to a neutral default.
  */
 export function deriveEmailDocSubject(doc: EmailDoc): string {
+  const variant = doc.subjectVariants?.[0]?.trim();
+  if (variant) return clean(variant);
+
   const b = doc.blocks;
   const headline =
     firstText(b, "signal", "title") ??
