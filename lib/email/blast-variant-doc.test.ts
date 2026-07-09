@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { validateVariantTest, withCtaLabel } from "./blast-variant-doc";
+import { validateVariantTest, variantTestMatchesDoc, withCtaLabel } from "./blast-variant-doc";
 import type { EmailDoc } from "./doc/types";
 
 describe("validateVariantTest", () => {
@@ -17,6 +17,43 @@ describe("validateVariantTest", () => {
   });
   it("rejects more than 4 variants", () => {
     expect(validateVariantTest({ subjects: ["A", "B", "C", "D", "E"] }).ok).toBe(false);
+  });
+});
+
+describe("variantTestMatchesDoc", () => {
+  const doc = {
+    subjectVariants: ["Subject A", "Subject B"],
+    ctaVariants: ["View Report", "See the Numbers"],
+  };
+
+  it("accepts subjects that are a subset of doc.subjectVariants", () => {
+    expect(variantTestMatchesDoc({ subjects: ["Subject B"] }, doc)).toBe(true);
+  });
+
+  it("accepts ctas that are a subset of doc.ctaVariants", () => {
+    expect(variantTestMatchesDoc({ ctas: ["View Report", "See the Numbers"] }, doc)).toBe(true);
+  });
+
+  it("rejects a subject not authored onto the doc — no injection via the API", () => {
+    expect(variantTestMatchesDoc({ subjects: ["Subject B", "$999,000 invented"] }, doc)).toBe(
+      false,
+    );
+  });
+
+  it("rejects a cta not authored onto the doc", () => {
+    expect(variantTestMatchesDoc({ ctas: ["Click here now!!"] }, doc)).toBe(false);
+  });
+
+  it("rejects any variant_test when the doc carries no variants at all (legacy template, or none authored)", () => {
+    expect(variantTestMatchesDoc({ subjects: ["Anything"] }, null)).toBe(false);
+    expect(variantTestMatchesDoc({ subjects: ["Anything"] }, undefined)).toBe(false);
+    expect(variantTestMatchesDoc({ ctas: ["Anything"] }, { subjectVariants: ["Subject A"] })).toBe(
+      false,
+    );
+  });
+
+  it("passes trivially when neither axis is given (validateVariantTest already rejects this shape upstream)", () => {
+    expect(variantTestMatchesDoc({}, doc)).toBe(true);
   });
 });
 

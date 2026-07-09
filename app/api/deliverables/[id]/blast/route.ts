@@ -33,7 +33,12 @@ import { logActivity } from "@/lib/project/activity";
 import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint";
 import { blastTags } from "@/lib/email/blast-tags";
 import { cohortIndex } from "@/lib/email/variant-cohort";
-import { validateVariantTest, withCtaLabel } from "@/lib/email/blast-variant-doc";
+import {
+  validateVariantTest,
+  variantTestMatchesDoc,
+  withCtaLabel,
+} from "@/lib/email/blast-variant-doc";
+import type { EmailDoc } from "@/lib/email/doc/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -124,6 +129,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
   if (deliverable.status !== "ready") {
     return NextResponse.json({ error: "deliverable is not ready" }, { status: 400 });
+  }
+
+  // Split-send content moat: every subject/CTA in variant_test must already be
+  // one of the doc's own AI-authored variants (doc.subjectVariants/ctaVariants
+  // — populated only after filterAnchoredVariants + cleanTellText at build
+  // time). This request body is reachable by any authenticated caller, not
+  // just the send-modal UI, which only ever offers the doc's own variants —
+  // without this check a raw API call could push an unanchored-number or
+  // voice-tell string straight into a real send, skipping the moat every
+  // authored string already passes through. It also means split-testing only
+  // exists for docs the model actually wrote variants onto (block-canvas),
+  // matching this route's stated scope.
+  if (
+    variantTestRaw &&
+    !variantTestMatchesDoc(variantTestRaw, deliverable.doc as EmailDoc | null)
+  ) {
+    return NextResponse.json(
+      { error: "variant_test values must match the deliverable's own authored variants" },
+      { status: 422 },
+    );
   }
 
   // SEND is the paywall — gate on the user's monthly quota before doing any work.

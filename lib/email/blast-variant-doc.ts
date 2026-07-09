@@ -35,6 +35,28 @@ export function validateVariantTest(req: VariantTestRequest): VariantTestValidat
   return { ok: true, variantCount };
 }
 
+/** Every variant_test string must be one the model already wrote onto the doc
+ *  itself (doc.subjectVariants/ctaVariants — populated by assembleAuthoredDoc
+ *  only after filterAnchoredVariants + cleanTellText, lib/email/author-doc.ts
+ *  + lib/email/build-doc.ts). A caller can only PICK from that vetted set,
+ *  never inject new text: a raw API request (bypassing the send-modal UI,
+ *  which only ever offers the doc's own variants) could otherwise push an
+ *  unanchored-number or voice-tell subject/CTA straight into a real send,
+ *  skipping the same moat every authored string already passes through.
+ *  A doc with no variants (legacy template, or block-canvas doc the model
+ *  wrote no variants for) allows no variant_test — split-testing only exists
+ *  for the variants the doc actually carries. */
+export function variantTestMatchesDoc(
+  req: VariantTestRequest,
+  doc: Pick<EmailDoc, "subjectVariants" | "ctaVariants"> | null | undefined,
+): boolean {
+  const allowedSubjects = new Set(doc?.subjectVariants ?? []);
+  const allowedCtas = new Set(doc?.ctaVariants ?? []);
+  const subjectsOk = (req.subjects ?? []).every((s) => allowedSubjects.has(s));
+  const ctasOk = (req.ctas ?? []).every((c) => allowedCtas.has(c));
+  return subjectsOk && ctasOk;
+}
+
 /** Replace the FIRST button block's label — the doc model is "single centered
  *  CTA" (ButtonBlock.tsx), so there's exactly one to swap. A doc with no
  *  button block is returned unchanged (a CTA-only test with no button is a
