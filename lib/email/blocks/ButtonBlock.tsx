@@ -2,6 +2,7 @@
 import { Section, Button, Text } from "@react-email/components";
 import type { ButtonProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, SECTION_PAD, CARD_BG, BORDER } from "./styles";
+import { legibleInk } from "./on-dark";
 
 export function ButtonBlock({
   props,
@@ -15,7 +16,7 @@ export function ButtonBlock({
   const bg = props.bgColor ?? globalStyle.primaryColor;
   const sharedStyle = {
     backgroundColor: bg,
-    color: "#ffffff",
+    color: legibleInk("#ffffff", bg, 4.5),
     padding: "14px 32px",
     borderRadius: "8px",
     fontFamily: font,

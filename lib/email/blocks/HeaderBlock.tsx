@@ -37,7 +37,7 @@ export function HeaderBlock({
             fontFamily: displayFont,
             fontSize: "18px",
             fontWeight: 700,
-            color: "#ffffff",
+            color: legibleInk("#ffffff", bg, 4.5),
             margin: 0,
           }}
         >

@@ -64,7 +64,8 @@ export function AgentHeroBlock({
               fontFamily: font,
               fontSize: "22px",
               fontWeight: 800,
-              color: "#ffffff",
+              // 22px/800 = WCAG large text → 3:1 floor (spec D3)
+              color: legibleInk("#ffffff", globalStyle.primaryColor, 3),
               margin: "0 0 4px",
               letterSpacing: "-0.3px",
             }}

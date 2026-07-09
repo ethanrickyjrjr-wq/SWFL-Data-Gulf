@@ -14,6 +14,7 @@ import { FooterBlock } from "./FooterBlock";
 import { SourcesBlock } from "./SourcesBlock";
 import { ListingBlock } from "./ListingBlock";
 import { SocialIconsBlock } from "./SocialIconsBlock";
+import { ButtonBlock } from "./ButtonBlock";
 
 /** Regex for a standalone `color:` TEXT-INK declaration carrying `hex` —
  *  `[^-]` excludes `background-color:` / `border-*-color:` (fills and borders
@@ -174,5 +175,53 @@ describe("SocialIconsBlock custom icon color", () => {
       }),
     );
     expect(out).not.toContain("#3DC9C0");
+  });
+});
+
+// White-ink trio (email_contrast_ink_fence): ButtonBlock/HeaderBlock/AgentHeroBlock
+// hardcoded #ffffff on brand fills. White on #D4AF37 = 2.10:1; white on the house
+// primary #0f1d24 = 17.19:1 (must be kept).
+const GOLD_FILL: EmailGlobalStyle = {
+  primaryColor: "#D4AF37",
+  accentColor: "#0b3d4c",
+  fontFamily: "MODERN_SANS",
+  textColor: "#1F2937",
+  backdropColor: "#F8FAFC",
+};
+
+describe("white-ink trio (email_contrast_ink_fence)", () => {
+  it("ButtonBlock label flips to dark ink on a pale gold fill", async () => {
+    const out = await render(
+      createElement(ButtonBlock, {
+        props: { label: "Schedule a Showing", url: "https://example.com" },
+        globalStyle: GOLD_FILL,
+      }),
+    );
+    expect(out).toMatch(inkDecl("#111827"));
+    expect(out).not.toMatch(inkDecl("#ffffff"));
+  });
+
+  it("ButtonBlock keeps white on the dark house primary (17.19:1)", async () => {
+    const out = await render(
+      createElement(ButtonBlock, {
+        props: { label: "Schedule a Showing", url: "https://example.com" },
+        globalStyle: HOUSE,
+      }),
+    );
+    expect(out).toMatch(inkDecl("#ffffff"));
+  });
+
+  it("HeaderBlock company name + AgentHeroBlock name flip on pale fills", async () => {
+    const header = await render(
+      createElement(HeaderBlock, { props: { companyName: "Gulf Co" }, globalStyle: GOLD_FILL }),
+    );
+    const hero = await render(
+      createElement(AgentHeroBlock, {
+        props: { photoUrl: "https://example.com/p.jpg", name: "R. Cooper" },
+        globalStyle: GOLD_FILL,
+      }),
+    );
+    expect(header).not.toMatch(inkDecl("#ffffff"));
+    expect(hero).not.toMatch(inkDecl("#ffffff"));
   });
 });
