@@ -110,10 +110,10 @@ export async function buildChartForQuestion(
     "tourism-tdt",
     "macro-swfl",
   ];
-  try {
-    const topicSlugs = resolveReachTargets(question, "master");
-    const slugs = topicSlugs.length ? topicSlugs : CHART_FALLBACKS;
-    for (const slug of slugs) {
+  const topicSlugs = resolveReachTargets(question, "master");
+  const slugs = topicSlugs.length ? topicSlugs : CHART_FALLBACKS;
+  for (const slug of slugs) {
+    try {
       const { output } = await fetchBrain(slug, { tier: 2, origin });
       const scoped = scope(output);
 
@@ -134,9 +134,11 @@ export async function buildChartForQuestion(
         const chart: ChartSpec = { ...block, frameId: block.frame_id ?? "bar-table" };
         return { chart, groundingNote: summarizeChartForGrounding(chart) };
       }
+    } catch {
+      // This brain failed to fetch/chart — try the next fallback rather than
+      // abandoning the whole CHART_FALLBACKS chain on one bad slug.
+      continue;
     }
-  } catch {
-    /* no chart — the answer streams text-only */
   }
 
   return null;

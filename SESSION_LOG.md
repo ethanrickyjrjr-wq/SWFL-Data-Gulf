@@ -1,3 +1,31 @@
+## 2026-07-09 (Sonnet 5 · main) — fix(assistant): chart-fallback resilience + reach-grounding latency; handoff for two open decisions
+
+Triaged `2026-07-09-chat-chart-honesty-followup.md`. Confirmed `5982b8e3`/`9c072470` (the Phase A–E
+honesty fix) already on `origin/main`; closed the four Phase F checks with commit evidence
+(`chart_router_heat_inventory_deadzone`, `followup_chips_build_verb_hijack`,
+`brain_slug_leak_runtime_no_scrubber`, `chart_offer_unfulfillable_by_construction`). Fixed the two
+"clean" follow-ups: `buildChartForQuestion`'s `CHART_FALLBACKS` loop
+(`lib/assistant/chart-for-question.ts`) had one `try/catch` around all ten fallback slugs, so the
+first `fetchBrain` failure killed every remaining fallback — moved the catch inside the loop
+(`catch { continue }` per slug). `buildGroundedRegionSystem`'s reach-target loop
+(`lib/assistant/conversation-path.ts`) awaited up to `MAX_REACH` brains sequentially; confirmed
+`fetchBrain` is a local disk read (no network call, no pooled connection, so no version of the
+documented lake-MCP slot-exhaustion risk applies) and switched to `Promise.all`, preserving
+`resolveReachTargets`' array order for grounding-block order. `bun test lib/ refinery/render` →
+4032 pass, 0 fail (same baseline as the parent handoff) · `bunx next build` → clean. Wrote
+`2026-07-09-chat-chart-honesty-open-decisions.md` for the two remaining items that are genuine
+operator calls, not bugs: (1) `home_values_investor_zip_not_in_catalog` — adding
+`home-values-swfl`/`investor-zip-swfl` to `BRAIN_CATALOG` makes them routable but also publishes
+them on the live MCP inventory surface; (2) `located_branch_no_reach_grounding` — the located chat
+branch (`buildWelcomeGroundedSystem`) never got the reach-grounding generalization the no-location
+branch did, so "Is Cape Coral heating up?" doesn't get the same heat-brain grounding "which
+corridors are heating up?" now gets; wiring it in needs ZIP-scoped reach targets, not a one-liner.
+
+**Not pushed yet — both fixes touch answer-path files, so they're gated on the same paid
+`scripts/prove-chart-conversation.mts` live-verify run `chat_chart_honesty_live_verify` is already
+waiting on**, per `check-answer-fix-proof.mjs`. Next: operator picks lane for the two open
+decisions, operator runs the paid verify, one push lands the fixes + closes the live-verify check.
+
 ## 2026-07-09 (Sonnet 5 · main) — docs(spec): design for rebuilding all 27 email SEED_DOCS templates
 
 Scoped the 2026-07-09 email-fences-and-template-rebuild handoff before touching any template.

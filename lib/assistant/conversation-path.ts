@@ -290,16 +290,28 @@ export async function buildGroundedRegionSystem(
     // old nested cre failsafe — a brain that will not load is skipped, master-only
     // grounding survives as a complete honest answer, and the no-invention floor is
     // unchanged. Labels are customer-facing (`displayName`), never the internal slug.
-    for (const slug of resolveReachTargets(lastUser, "master")) {
-      try {
-        const reach = await fetchBrain(slug, { tier: 2, origin });
-        blocks.push({
-          label: displayName(slug),
-          dossier: buildDossier(reach.output, reach.freshness_token),
-        });
-      } catch {
-        // This brain is unavailable → the remaining blocks are still a real answer.
-      }
+    // fetchBrain reads brains/{slug}.md off local disk (no network round-trip, no
+    // shared connection pool), so firing the up-to-MAX_REACH fetches concurrently
+    // has no exhaustion risk — only sum-of-latencies-vs-max-latency on a streaming
+    // surface's time-to-first-token. Promise.all preserves resolveReachTargets'
+    // priority order in `reachSlugs` regardless of which fetch resolves first.
+    const reachSlugs = resolveReachTargets(lastUser, "master");
+    const reachBlocks = await Promise.all(
+      reachSlugs.map(async (slug) => {
+        try {
+          const reach = await fetchBrain(slug, { tier: 2, origin });
+          return {
+            label: displayName(slug),
+            dossier: buildDossier(reach.output, reach.freshness_token),
+          };
+        } catch {
+          // This brain is unavailable → the remaining blocks are still a real answer.
+          return null;
+        }
+      }),
+    );
+    for (const block of reachBlocks) {
+      if (block) blocks.push(block);
     }
     const system =
       buildPlaceContext(lastUser) +
