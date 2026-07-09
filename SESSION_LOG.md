@@ -1,3 +1,29 @@
+## 2026-07-09 (Sonnet 5 · main) — docs(email): SEED_DOCS drift audit + M2 status correction + doc archive
+
+Operator flagged that `monthly-digest`/`neighborhood-report` ship finished example numbers where
+THE SLOT RULE (`lib/email/CLAUDE.md`) says fields should be empty+instructional. Audited all 27
+`SEED_DOCS` entries by hand: 8 conformant, 16 drifted (baked figures in open slots — worst is
+`agent-spotlight`, which fakes an entire competing brand, a fake person, and a hotlinked
+`randomuser.me` photo), 3 half-right. Also found a structural gap: `text`/`signal`/`multi-column`
+block props have no separate label/instruction field, so THE RULE's empty+label mechanism can't
+apply to prose the way it does to figures — the two clean prose templates (`editorial-letter`,
+`magazine-issue`) solve it by writing the instruction directly into `body`, which isn't yet a
+documented convention. Decision on formalizing that (vs. a schema addition) deferred to next
+session; SEED_DOCS conversion (starting with `neighborhood-report`, per operator) not yet started.
+
+Separately, operator asked whether `docs/superpowers/plans/2026-07-08-email-grid-plan-fill.md` was
+done — it wasn't (explicitly SUPERSEDED, zero code exists against it) — then asked whether M2 (from
+`2026-07-08-email-builder-integration.md`) was done, correctly suspecting it was further along than
+the checks ledger showed. It was: the hard-AI side of Fences 1/2/5 plus the Fence-3 ratio-SET
+upgrade shipped 07/08 in `f9ffd6a2`, titled about the recipe picker, so nothing surfaced it and two
+checks stayed open describing already-shipped work. Closed `fences_1_2_5_need_planfill_layer` (dead
+premise — superseded same-day by the M1 supply-contract approach, not a plan+fill layer); corrected
+`m2_fences_bounds_of_space` to the real remaining scope (canvas warnings + a photo-ratio/span picker
+UI — soft-user side only); added the missing "M2 status" section to the integration plan. Archived
+the two superseded plan-fill docs (`plans/2026-07-08-email-grid-plan-fill.md`,
+`specs/2026-07-08-email-grid-plan-fill-design.md`) into their `_archive/` folders. Verified:
+`bun test lib/email/doc/fences.test.ts` (12/12 pass).
+
 ## 2026-07-09 (Sonnet 5 · main) — feat(nav): "New Campaign" door into the blank grid cockpit, signed-in, every page
 
 Operator wanted one click from anywhere (signed in) straight into a blank Email/Social Lab grid
