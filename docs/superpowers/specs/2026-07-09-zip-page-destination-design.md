@@ -2,6 +2,11 @@
 
 **Date:** 2026-07-09 · **Check:** `zip_page_destination_live_verify`
 **Status:** operator-approved design (brainstorm 07/09/2026); reverses the 07/03/2026 "map click = email lab" ruling.
+**Amended 07/09/2026 (operator):** treatment extends to (just about) ALL report pages; bake
+cadence is WEEKLY until launch with a one-switch flip to daily; every bake dollar lands in
+`api_usage_log` so the ops /spend page tracks it; spend guards mandatory at four layers
+(operator holds a ~$199k API balance — vendor-side backstop required, see check
+`anthropic_workspace_spend_limit`).
 
 ## Problem
 
@@ -39,7 +44,8 @@ build-an-email funnel woven into the content, not bolted on.
 
 ## What we're building
 
-Four phases, each a separate PR, shipped in order.
+Five phases, each a separate PR, shipped in order (Phase E fans out across surfaces as
+multiple small PRs reusing the Phase B harness).
 
 ### Phase A — routing flip (small; fixes the complaint immediately)
 
@@ -54,19 +60,25 @@ Four phases, each a separate PR, shipped in order.
 
 ### Phase B — baked narration + Down the Road
 
-**Bake job** (post-daily-rebuild, GHA):
+**Bake job** (post-rebuild, GHA; cadence-gated — see "Cadence & launch switch"):
 - Inputs per ZIP: ranked signals (`lib/zip-report/candidates.ts` + `signal-rank.ts`
   outputs), dossier lines, metro trend, master direction call, permits, flood.
-- **Delta-gated**: hash the numeric inputs per ZIP; bake only ZIPs whose hash changed
-  (housing moves weekly / ZHVI monthly, so most days most ZIPs skip).
+- **Delta-gated**: hash the numeric inputs per surface; bake only surfaces whose hash
+  changed (housing moves weekly / ZHVI monthly, so most runs most surfaces skip).
 - **Batch API + Sonnet** (`claude-sonnet-4-6` per the pulse-distill precedent; batches =
-  50% off). Cost at list price: ~2.6¢/ZIP full; typical delta-gated day well under the
-  $1/run cap; first full bake ~$1.60 batched → needs its own explicit per-pipeline cap
-  env var line in the workflow file (ingest/CLAUDE.md rule — never a code default).
-  Wired through `RunBudget` + daily-ceiling preflight like every LLM pipeline.
-- Sink: new `public.zip_narratives` table (zip pk, sections jsonb, inputs_hash,
-  baked_at, model, sources jsonb). Table, NOT committed files — the rebuild bot cannot
-  push to main (live-data freeze). Idempotent upsert.
+  50% off). Cost at list price (Anthropic pricing, platform.claude.com/docs/en/pricing):
+  ~2.6¢/surface full, ~1.3¢ batched. Wired through the spend-guard stack below.
+- Sink: new `public.narratives` table keyed `(surface, surface_key)` — e.g.
+  `('zip','33920')`, `('corridor','us41-bonita')`, `('brain','housing-swfl')` — columns:
+  sections jsonb, inputs_hash, baked_at, model, sources jsonb. **Surface-generic from
+  day one** so Phase E surfaces are adapter additions, not schema changes. Table, NOT
+  committed files — the rebuild bot cannot push to main (live-data freeze). Idempotent
+  upsert.
+- **Metering**: every call goes through the existing TS metered client root
+  (`refinery/agents/anthropic.mts`) charging the ONE ledger `api_usage_log`
+  (migration `20260701_api_usage_log.sql`) with pipeline tag `narrative-bake` — the ops
+  /spend page reads that table, so bake spend shows as its own line with zero new
+  plumbing. No new metering path, either language.
 - **Quality gate**: sections run the narrative validators (facts-only where applicable,
   inference contract on the outlook, smoothing lint) BEFORE the upsert; a failed bake
   keeps the previous row — same failure posture as brains.
@@ -112,6 +124,63 @@ Four phases, each a separate PR, shipped in order.
 - Zip-seed email itself is untouched — correct artifact for the lab audience; the bug
   was routing visitors into it.
 
+### Phase E — all report pages (operator amendment 07/09/2026)
+
+The narration + outlook (+ news where geo applies) treatment rolls out to every
+market/place report surface, each as its own PR adding a bake adapter (input assembly for
+that surface) + page section. The `narratives` sink and bake harness from Phase B are
+reused unchanged.
+
+Surface inventory (counts from our fixtures/rankings 07/09/2026):
+- `zip` — ~123 ZIPs (housing rankings; Phase B ships this one)
+- `corridor` — 27 corridors (`fixtures/corridor-centroids.json`) → `/r/cre-swfl/[corridor]`
+- `brain` — topic pages `/r/[slug]` + `/r/housing-swfl` (~32 brains; only surfaces with a
+  public page get baked — enumerate at plan time from the route registry)
+- `community` / `neighborhood` — `/r/communities-swfl/*`; entity count read from the
+  communities pack's detail tables at plan time (not guessed here)
+
+Excluded: `/r/search`, `/r/method/*`, `/r/source/*` (utility pages, no market narrative).
+
+Cost envelope at weekly cadence, all surfaces, batched list price: 182 known surfaces
+(123+27+32) ≈ $2.40/week ≈ ~$10/month; even a 500-surface worst case (communities included)
+≈ $6.50/week ≈ ~$28/month — before delta-gating removes unchanged surfaces. (Per-surface
+rates sourced above; counts as listed.)
+
+### Cadence & launch switch (operator amendment 07/09/2026)
+
+- One repo-level GitHub Actions variable — `BAKE_CADENCE` = `weekly` (default) | `daily` —
+  read by EVERY narrative-bake workflow. The cron fires daily; the first job step gates:
+  `weekly` runs only on Monday (skips quiet otherwise), `daily` runs every firing.
+  **Launch flip = edit that one variable.** No workflow-file edits, no code deploy.
+- Delta-gating still applies inside every run regardless of cadence.
+- Pulse distill cadence is unchanged (it has its own budget discipline); this switch
+  governs narrative bakes only.
+
+### Cost tracking & spend guards (operator amendment 07/09/2026)
+
+Four layers, all mandatory before the first bake runs. Context: the API account holds
+~$199k (operator figure 07/09/2026) — a runaway must be structurally impossible, not
+merely unlikely.
+
+1. **Per-run cap** — bake workflow carries an explicit, reviewable cap env line
+   (ingest/CLAUDE.md rule: never a code default). Steady-state $1/run; first-full-bake
+   runs use an explicit temporary line (~$3 all-surface batched), removed after.
+   Plan-time verify: confirm `refinery/agents/anthropic.mts` ENFORCES a cap (not just
+   logs); if log-only today, the bake build adds enforcement at that root — not a
+   side-channel.
+2. **Daily ceiling preflight** — before the first API call, sum today's `api_usage_log`
+   spend; at/over `INGEST_DAILY_CEILING_USD` (default $5) → exit 1 loud with zero calls.
+   Shared ledger means retries/re-dispatches can never multiply past the ceiling.
+3. **Cadence gate** (above) — weekly until launch bounds worst-case monthly spend to
+   ~4–5 bake runs/month per surface set.
+4. **Vendor-side workspace spend limit** — Anthropic Console monthly limit on the
+   workspace; the ONLY layer that also catches spend our code never meters. Operator
+   action (check `anthropic_workspace_spend_limit`); suggested setting: $100–250/month
+   now, revisit at launch.
+
+Visibility: pipeline tag `narrative-bake` in `api_usage_log` → ops /spend page line item;
+`scripts/tripwire-scan.mjs` already watches the same ledger.
+
 ## Explicitly out of scope
 
 - Live per-view AI narration (cost + ungated-answer risk; the live layer is the existing
@@ -123,8 +192,8 @@ Four phases, each a separate PR, shipped in order.
 
 - Bake job: validator failure or budget stop → keep prior narrative row, exit loud
   (deterministic=exit 1) per silent-master-freeze rule.
-- Page: missing `zip_narratives` row → page renders exactly as today (sections are
-  additive, empty-tolerant). Missing pulse geo columns → news section hides.
+- Page: missing `narratives` row for a surface → page renders exactly as today (sections
+  are additive, empty-tolerant). Missing pulse geo columns → news section hides.
 - Geocode miss at every ladder rung → item stays city-grain; never invents a ZIP.
 
 ## Verification
@@ -133,5 +202,9 @@ Four phases, each a separate PR, shipped in order.
   /r/zip-report with narration + news + Down the Road rendering from live rows; a
   delta-gated bake run shows in api_usage_log under cap.
 - Phase gates: A ships alone (routing + copy diff, `bunx next build`); B adds bake
-  dry-run + golden narrative fixture test; C adds distill schema test + geocode ladder
-  unit tests + pack Gate 5; D visual check in lab preview.
+  dry-run + golden narrative fixture test + a spend-guard test (cap breach → exit 1,
+  zero rows written); C adds distill schema test + geocode ladder unit tests + pack
+  Gate 5; D visual check in lab preview; E per-surface adapter tests reusing B's golden
+  fixture pattern.
+- Cadence switch verified once: with `BAKE_CADENCE=weekly` a Tuesday dispatch exits 0
+  quiet with zero API calls (asserted against `api_usage_log`).
