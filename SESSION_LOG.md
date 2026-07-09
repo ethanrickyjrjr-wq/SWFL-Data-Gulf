@@ -1,3 +1,17 @@
+## 2026-07-09 (Fable 5 · main) — handoff: seed-preview presentability (operator escalation — duplicate charts)
+
+Operator opened weekly-pulse on live /showcase: the SAME ZHVI chart 3x in one email (template
+promises "two charts side-by-side"). Root cause: v1 previewFill cycles ONE committed chart + one
+figure pool + 3 photos type-wise through 27 templates — fine per-tile, copy-paste as a SET. The
+shipping session saw the repeat, filed it as polish, and shipped: wrong call, and QA was per-tile
+instead of set-level. Wrote the fix handoff
+`docs/handoff/2026-07-09-seed-preview-presentability-handoff.md` (per-template chart/figure/photo
+assignments from real lake series already verified queryable — market_heat per-ZIP, LeePA
+sales-by-month, ZORI, redfin drops, PMMS history xlsx; mechanical guards: no duplicate chart
+within a doc, hero variety per group, contact-sheet QA) + opened check `seed_preview_variety_pass`
+(RULE 2.4). Invariants preserved in the handoff: display-only fill, four-lane sourcing, skeleton
+commit untouched.
+
 ## 2026-07-09 (Fable 5 · main) — feat(showcase+lab): gallery above Visual Templates; New-Project first-run picker → 27 filled previews
 
 Operator follow-up on 66dc049e: (1) /showcase — moved "Start-from Layouts" section ABOVE "Visual
