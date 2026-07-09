@@ -193,6 +193,38 @@ export interface SeedDoc {
 
 const style = (): EmailGlobalStyle => ({ ...DEFAULT_GLOBAL_STYLE });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// THE SLOT RULE — read before authoring or editing a template below.
+//
+//   If a field's right answer depends on real data, leave it EMPTY ("") and put
+//   the instruction in the LABEL. If it's structure, style, brand, or a button
+//   that says "Schedule a Showing," fill it in.
+//
+// This is mechanical, not stylistic. docSkeleton (build-doc.ts:317) builds the
+// AI's view of a template and SKIPS any field whose value is "" — so an empty
+// value is an OPEN SLOT the AI fills, while a filled value is handed to the AI
+// as "the current answer" and may simply be kept. The label is ALWAYS sent.
+//
+//   => A label is an instruction to whoever fills the slot, not a caption.
+//
+//   OPEN ("")   every figure · every photo · every commentary sentence · every link
+//   FILLED      layout (x/y/w/h) · globalStyle · brand · stats labels ("Beds") ·
+//               button labels · caption/alt written as instructions
+//
+// `trend-snapshot` (bottom of this file) is the reference implementation:
+//   { value: "", label: "The headline number the chart supports" }
+//
+// Charts need no authoring: reserve an `image` block with the layout you want and
+// upsertChartBlock (inject-chart.ts) replaces it IN PLACE. Colors need no
+// authoring: applyBrand overlays the user's brand after the fill.
+//
+// NOTE: many templates below predate this rule and carry finished EXAMPLE numbers
+// (a demo look). That is a known divergence, tracked in `checks` as
+// `seed_static_figures_bypass_invention_gate` — do not copy that pattern into a
+// new template. Full playbook:
+//   docs/superpowers/specs/2026-07-08-seed-slot-playbook-handoff.md
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
  * Linear "start from" seeds. These cover the single-column templates; the 5
  * structural templates (shell-two-col, email-compare, email-hbar, email-table,

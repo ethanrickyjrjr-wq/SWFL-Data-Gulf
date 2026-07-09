@@ -13,6 +13,17 @@
   (corrected 07/02/2026 per Shopify's FTC-sourced guide). The footer's `address` field is its home —
   populated from the brand profile's `business_address`; the lab nudges (non-blocking) when it's empty.
   Don't re-add a compliance lecture.
+- **Starter templates — THE SLOT RULE.** Authoring a template in `lib/email/doc/default-docs.ts`
+  (`SEED_DOCS`)? **If a field's right answer depends on real data, leave it empty (`""`) and put the
+  instruction in the label. If it's structure, style, brand, or a button that says "Schedule a
+  Showing," fill it in.** This is mechanical, not stylistic: `docSkeleton` (`build-doc.ts:317`) skips
+  empty fields when building the AI's view of the template, so an empty value is an OPEN SLOT the AI
+  fills — while a filled value is shown to the AI as "the current answer" and may simply be kept. The
+  label is always sent, so **a label is an instruction to whoever fills the slot, not a caption.**
+  Open: every figure, photo, commentary sentence, and link. Filled: layout, palette, brand, `stats`
+  labels like "Beds". Copy the `trend-snapshot` template. Charts need no authoring — reserve an
+  `image` block and `upsertChartBlock` replaces it in place. Full playbook:
+  `docs/superpowers/specs/2026-07-08-seed-slot-playbook-handoff.md`.
 - **Layout:** use `h-full` / `dvh`, never `h-screen`.
 - **Send is the paywall, builds are free** — watermark only; no build gate, no Stripe on creation.
 - **Email Lab tier DIAL has ONE root:** `lib/email/lab/capabilities.ts`. Every feature + every font

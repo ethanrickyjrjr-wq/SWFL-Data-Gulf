@@ -1,3 +1,33 @@
+## 2026-07-08 (Opus 4.8 · main) — docs: THE SLOT RULE — how to author a starter template
+
+Operator asked for a playbook: prefilled template areas, open where real data belongs, AI fills the
+rest. Probed the code (RULE 0.5) and found the spine already ships — `docSkeleton`→`tryParsePatch`→
+`applyPatch` (build-doc.ts) fills content into a fixed skeleton, `upsertChartBlock` drops a chart into
+a reserved `image` block in place, `applyBrand` overlays color after. Nothing to build.
+
+The rule, now written in three places: **if a field's right answer depends on real data, leave it empty
+("") and put the instruction in the label; if it's structure, style, brand, or a button label, fill it
+in.** Mechanical, not stylistic — `docSkeleton` (build-doc.ts:317) SKIPS empty fields when building the
+AI's view, so an empty value is an open slot while a filled one is handed to the AI as "the current
+answer." The label is always sent → a label is an instruction, not a caption. `trend-snapshot` is the
+reference implementation. Landed in `lib/email/CLAUDE.md` (auto-loads on any lib/email edit), a header
+above `SEED_DOCS` in `default-docs.ts` (point of authoring), and the handoff at
+`docs/superpowers/specs/2026-07-08-seed-slot-playbook-handoff.md`. 58/58 doc tests pass; comment-only
+code change.
+
+CORRECTION on my own earlier framing: I reported the older templates' example numbers as "bypassing the
+no-invention moat" — leading with a bug hunt instead of the operator's actual question, and using the
+code's internal noun ("seed") as if it were English. They are demo examples; that is what a template is.
+The code-confirmed-but-never-observed note (`applyPatch` passes an unpatched block through verbatim;
+`docSkeleton` shows a filled value to the model) is demoted to a footnote and stays parked as check
+`seed_static_figures_bypass_invention_gate` — a thing to verify, not a known bug. Open questions handed
+back: positioned template vs written recipe; how strict "open" is for prose.
+
+NOTE (parallel-session hazard, observed): the concurrent Sonnet session's push of `7ecb7f35` carried my
+unpushed `5b3eea4f` (M3-B type-lift) to origin — the documented concurrent-rebase-push behavior. It was
+gate-clean, but it reached main without the operator's explicit push call. Two sessions were live on
+this repo again.
+
 ## 2026-07-08 (Sonnet 5 · main) — feat: vendor real bklit-ui chart primitives, server-render for email (kills a hand-SVG-per-shape shape ceiling)
 
 Operator's actual ask, corrected after two misreads this session (chased "chat charts" — operator
