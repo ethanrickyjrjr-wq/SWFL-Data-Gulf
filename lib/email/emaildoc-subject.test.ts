@@ -71,4 +71,21 @@ describe("deriveEmailDocSubject", () => {
     ]);
     expect(deriveEmailDocSubject(d)).toBe("This week in SWFL");
   });
+
+  test("prefers subjectVariants[0] over block-derived text when present", () => {
+    const d = {
+      globalStyle: STYLE,
+      blocks: [{ id: "1", type: "signal", props: { title: "Block-derived headline" } }],
+      subjectVariants: ["AI-chosen subject line"],
+    } as EmailDoc;
+    expect(deriveEmailDocSubject(d)).toBe("AI-chosen subject line");
+  });
+
+  test("falls back to block-derived text when subjectVariants is absent — no regression", () => {
+    const d = {
+      globalStyle: STYLE,
+      blocks: [{ id: "1", type: "signal", props: { title: "Block-derived headline" } }],
+    } as EmailDoc;
+    expect(deriveEmailDocSubject(d)).toBe("Block-derived headline");
+  });
 });

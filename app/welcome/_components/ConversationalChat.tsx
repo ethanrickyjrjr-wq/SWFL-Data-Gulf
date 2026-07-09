@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useChatStream } from "@/lib/assistant/use-chat-stream";
 import { describePage } from "@/lib/chat/page-context";
-import { DockChart } from "@/components/highlighter/DockChart";
-import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { CitationList } from "@/components/CitationList";
 import type { WelcomeSource } from "@/lib/welcome/frames";
 import { AnswerText } from "@/components/answer/AnswerText";
@@ -33,11 +31,8 @@ export function ConversationalChat({
   initialPrompt?: string;
 } = {}) {
   const pathname = usePathname();
-  // The deterministic, cited chart for the current answer (prelude `chart` frame),
-  // reset per question in `ask` so it never lingers from a prior turn.
-  const [chart, setChart] = useState<ChartSpec | null>(null);
   // Lane-3 web-verified sources for the current answer (prelude `sources` frame),
-  // reset per question in `ask` like `chart`.
+  // reset per question in `ask`.
   const [sources, setSources] = useState<WelcomeSource[]>([]);
   const { messages, busy, send } = useChatStream("/api/assistant", {
     // The public /welcome funnel context of the one assistant (OUTSIDE AI, no auth).
@@ -46,14 +41,14 @@ export function ConversationalChat({
     // (No briefcase here — the funnel page has no draft yet.)
     getExtraBody: () => ({ pageContext: describePage(pathname ?? "/welcome") }),
     onFrame: (f) => {
-      if (f.type === "chart" && f.chart) setChart(f.chart as ChartSpec);
-      else if (f.type === "sources" && Array.isArray(f.sources))
+      // Chart frames are intentionally ignored — no AI chat surface renders charts
+      // (07/09/2026 operator directive: chart pushed the answer text out of view).
+      if (f.type === "sources" && Array.isArray(f.sources))
         setSources(f.sources as WelcomeSource[]);
     },
   });
   const ask = (text: string) => {
     if (busy || !text.trim()) return;
-    setChart(null);
     setSources([]);
     send(text);
   };
@@ -61,7 +56,7 @@ export function ConversationalChat({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // One-shot deep-link seed (ClaimOnLogin's ref-guard precedent). Calls `send`
-  // directly — chart/sources are already empty on a fresh mount, and `send` is an
+  // directly — sources are already empty on a fresh mount, and `send` is an
   // external hook function (no local setState in the effect body).
   const seeded = useRef(false);
   useEffect(() => {
@@ -108,12 +103,6 @@ export function ConversationalChat({
               {m.role === "user" ? m.content : <AnswerText text={m.content || (busy ? "…" : "")} />}
             </p>
           ))}
-          {chart && (
-            <div className="overflow-hidden rounded-lg border border-gulf-haze bg-gulf-slate">
-              <div className="px-2 py-1 text-[10px] text-text-tertiary">Chart</div>
-              <DockChart spec={chart} compact />
-            </div>
-          )}
           {sources.length > 0 && (
             // Lane-3 web sources — the locked collapsed Sources box, pulled snug under
             // the answer in this compact panel (its built-in mt-10 is for full pages).

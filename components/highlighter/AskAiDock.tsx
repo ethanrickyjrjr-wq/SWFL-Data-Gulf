@@ -17,8 +17,6 @@ import {
 import { useHighlighterContext, type ChatEntry } from "@/lib/highlighter/context";
 import { useFiler } from "@/lib/briefcase/file-routing";
 import { buildQaItem } from "@/lib/briefcase/qa-item";
-import { DockChart } from "./DockChart";
-import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { AnswerText } from "@/components/answer/AnswerText";
 
 const GEOM_KEY = "swfl_ai_dock_geom";
@@ -79,8 +77,7 @@ export function AskAiDock({
   const archive = (entry: ChatEntry) =>
     ctx ? ctx.archiveExchange(reportId, entry) : setLocalThread((t) => [...t, entry]);
   const [activeQuestion, setActiveQuestion] = useState("");
-  const { ask, answer, reach, chart, error, streaming, reset } = useConverse();
-  const [dismissedChart, setDismissedChart] = useState<unknown>(null);
+  const { ask, answer, reach, error, streaming, reset } = useConverse();
   const [filed, setFiled] = useState<string | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   // Funnel examples for PROSPECTS on report pages — the same "See it built"
@@ -225,37 +222,6 @@ export function AskAiDock({
       },
       () => {},
     );
-  }
-
-  async function fileChart() {
-    const cs = chart as ChartSpec | null;
-    if (!cs || !cs.frameId) return;
-    try {
-      const res = await fetch("/api/charts/save", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          block: cs,
-          source_meta: { report_id: reportId },
-          freshness_token: freshnessToken,
-        }),
-      });
-      if (!res.ok) throw new Error("save failed");
-      const { id } = (await res.json()) as { id: string };
-      file({
-        id: crypto.randomUUID(),
-        added_at: new Date().toISOString(),
-        origin: "web",
-        kind: "chart",
-        chart_id: id,
-        title: cs.title,
-      });
-      setFiled("chart");
-      setTimeout(() => setFiled((k) => (k === "chart" ? null : k)), 1800);
-    } catch {
-      setFiled("chartErr");
-      setTimeout(() => setFiled((k) => (k === "chartErr" ? null : k)), 2500);
-    }
   }
 
   // Capability parity with the standalone analyst chat: file the current grounded
@@ -420,63 +386,6 @@ export function AskAiDock({
 
         {stage === "answer" && (
           <>
-            {(() => {
-              const cs = chart as ChartSpec | null;
-              if (!cs || chart === dismissedChart) return null;
-              const canFile = !!cs.frameId;
-              return (
-                <div className="mb-3 overflow-hidden rounded-lg border border-white/10 bg-[#0d1e2b]/80">
-                  <div className="flex items-center justify-between px-2 py-1">
-                    <span className="text-[10px] text-gray-500">Chart</span>
-                    <div className="flex items-center gap-2">
-                      {canFile ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            void fileChart();
-                          }}
-                          disabled={filed === "chart" || filed === "chartErr"}
-                          className="text-[10px] text-gulf-teal transition-colors hover:text-gulf-teal/80 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {filed === "chart"
-                            ? "Filed ✓"
-                            : filed === "chartErr"
-                              ? "Save failed"
-                              : "File this chart"}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            void fetch("/api/meter", {
-                              method: "POST",
-                              headers: { "content-type": "application/json" },
-                              body: JSON.stringify({
-                                action: "chart_save_gated",
-                                report_id: reportId,
-                              }),
-                            }).catch(() => {});
-                          }}
-                          className="text-[10px] text-gray-500 hover:text-gray-400"
-                          title="Saving this chart type is coming soon"
-                        >
-                          File this chart
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setDismissedChart(chart)}
-                        className="text-sm leading-none text-gray-500 hover:text-gray-300"
-                        aria-label="Dismiss chart"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                  <DockChart spec={cs} compact />
-                </div>
-              );
-            })()}
             <div className="whitespace-pre-wrap leading-6">
               {error ? (
                 <span className="text-red-600">{error}</span>

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { HelpCircle } from "lucide-react";
+import { useState } from "react";
 import { RingChart } from "./vendor/bklit/ring-chart";
 import { Ring } from "./vendor/bklit/ring";
 import { RingCenter } from "./vendor/bklit/ring-center";
@@ -27,26 +28,31 @@ function formatUsdCompact(v: number): string {
   return `$${v.toLocaleString()}`;
 }
 
-// Legend reads highest-spend-first (Ian -> Charley), same convention as the
-// reference layout (highest % first). Ring geometry below stays in
-// HURRICANE_STORM_DAMAGE's own chronological order — Charley is index 0,
-// so it's the innermost/center ring; that ordering is unrelated to the
-// legend's sort and is intentional (oldest storm anchors the center).
+// Legend reads highest-spend-first: Ian, Helene, Milton, Irma, Charley.
+// Ring geometry uses the exact reverse — index 0 (innermost/center) to
+// index 4 (outermost) — so the rings read Charley (center) -> Irma ->
+// Milton -> Helene -> Ian (outermost), matching that same order spatially.
 const LEGEND_STORMS = [...HURRICANE_STORM_DAMAGE].sort((a, b) => b.nfipPaidUsd - a.nfipPaidUsd);
+const RING_STORMS = [...LEGEND_STORMS].reverse();
 
 /**
  * SWFL hurricane damage by named storm — Charley (2004), Irma (2017), Ian
- * (2022), Helene (2024), Milton (2024) — real FEMA NFIP claims paid,
- * chronological rings innermost (Charley) to outermost (Milton), legend
- * sorted highest-spend-first. Real numbers, see lib/charts/hurricane-series.ts.
+ * (2022), Helene (2024), Milton (2024) — real FEMA NFIP claims paid, rings
+ * ordered Charley (center) -> Irma -> Milton -> Helene -> Ian (outermost),
+ * legend sorted highest-spend-first. Real numbers, see
+ * lib/charts/hurricane-series.ts.
  */
 export function HurricaneRingChart({ className = "" }: HurricaneRingChartProps) {
-  const ringData = HURRICANE_STORM_DAMAGE.map((s) => ({
+  const ringData = RING_STORMS.map((s) => ({
     label: s.name,
     value: s.nfipPaidUsd,
     maxValue: HURRICANE_TOTAL_NFIP_PAID_USD,
     color: s.color,
   }));
+
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const hoveredStorm = hoveredIndex === null ? null : RING_STORMS[hoveredIndex];
 
   return (
     <div
@@ -77,18 +83,42 @@ export function HurricaneRingChart({ className = "" }: HurricaneRingChartProps) 
       {/* Rings + legend */}
       <div className="flex flex-col sm:flex-row items-center gap-8 sm:gap-10 mt-6 bg-[#0a1419]/20 rounded-xl border border-[#22414f]/40 p-4 sm:p-6">
         <div
-          className="flex-none w-[220px] h-[220px] sm:w-[260px] sm:h-[260px]"
+          className="relative flex-none w-[220px] h-[220px] sm:w-[260px] sm:h-[260px]"
           style={RING_TRACK_VARS}
+          onMouseMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            setCursorPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+          }}
         >
-          <RingChart data={ringData} strokeWidth={16} ringGap={5} baseInnerRadius={52}>
+          <RingChart
+            data={ringData}
+            strokeWidth={16}
+            ringGap={5}
+            baseInnerRadius={52}
+            hoveredIndex={hoveredIndex}
+            onHoverChange={setHoveredIndex}
+          >
             {ringData.map((_, i) => (
-              <Ring key={HURRICANE_STORM_DAMAGE[i].name} index={i} />
+              <Ring key={RING_STORMS[i].name} index={i} />
             ))}
             <RingCenter
               defaultLabel={`5 storms · ${HURRICANE_STORM_DAMAGE[0].year}–${HURRICANE_STORM_DAMAGE[HURRICANE_STORM_DAMAGE.length - 1].year}`}
               formatOptions={{ style: "currency", currency: "USD", notation: "compact" }}
             />
           </RingChart>
+
+          {hoveredStorm && (
+            <div
+              className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[calc(100%+10px)] whitespace-nowrap rounded-md border border-[#22414f] bg-[#0a1419] px-2.5 py-1 text-xs font-semibold text-[#f0ede6] shadow-lg"
+              style={{ left: cursorPos.x, top: cursorPos.y }}
+            >
+              <span
+                className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle"
+                style={{ backgroundColor: hoveredStorm.color }}
+              />
+              {hoveredStorm.name} ({hoveredStorm.year})
+            </div>
+          )}
         </div>
 
         <div className="flex-1 w-full space-y-3.5">

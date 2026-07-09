@@ -10,8 +10,6 @@ import { suggestionsForSpan, deriveSelectionType } from "@/lib/highlighter/sugge
 import { useHighlighterContext, type ChatEntry } from "@/lib/highlighter/context";
 import { useFiler } from "@/lib/briefcase/file-routing";
 import type { ProjectItem } from "@/lib/project/items";
-import { DockChart } from "./DockChart";
-import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import type { AssistantContext } from "@/lib/assistant/contract";
 import { AnswerText } from "@/components/answer/AnswerText";
 
@@ -102,14 +100,12 @@ export function HighlightPopup({
     reach,
     followups,
     answered,
-    chart,
     groundedPlace,
     groundedToken,
     error,
     streaming,
     reset,
   } = useConverse();
-  const [dismissedChart, setDismissedChart] = useState<unknown>(null);
 
   // Filing identity. ON /r/*: the real reportId + the report's freshness token. OFF-report:
   // the grounded ZIP captured from the conversation path's prelude `place` frame, falling
@@ -252,9 +248,10 @@ export function HighlightPopup({
   // to that answer); fall back to the static set if the tail was missing.
   const hasCompletedAnswer = Boolean(activeQuestion && answer && !streaming && !error);
   const realtimeChips = hasCompletedAnswer && followups.length > 0;
-  const chartOnScreen = chart !== null && chart !== dismissedChart;
+  // No AI chat surface renders charts (07/09/2026 operator directive) — "Chart …"
+  // suggestion chips would promise something that never appears, so drop them.
   const chips = (realtimeChips ? followups : staticChips).filter(
-    (c) => !(chartOnScreen && c.toLowerCase().startsWith("chart ")),
+    (c) => !c.toLowerCase().startsWith("chart "),
   );
 
   function submit(q: string, opts?: { fromChip?: boolean; isRealtime?: boolean }) {
@@ -344,37 +341,6 @@ export function HighlightPopup({
       },
       "figure",
     );
-  }
-
-  async function fileChart() {
-    const cs = chart as ChartSpec | null;
-    if (!cs || !cs.frameId) return;
-    try {
-      const res = await fetch("/api/charts/save", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          block: cs,
-          source_meta: { report_id: filingReportId },
-          freshness_token: filingToken,
-        }),
-      });
-      if (!res.ok) throw new Error("save failed");
-      const { id } = (await res.json()) as { id: string };
-      fileToTarget({
-        id: crypto.randomUUID(),
-        added_at: new Date().toISOString(),
-        origin: "web",
-        kind: "chart",
-        chart_id: id,
-        title: cs.title,
-      });
-      setFiled("chart");
-      setTimeout(() => setFiled((k) => (k === "chart" ? null : k)), 1800);
-    } catch {
-      setFiled("chartErr");
-      setTimeout(() => setFiled((k) => (k === "chartErr" ? null : k)), 2500);
-    }
   }
 
   // The Claude handoff is inherently report-referencing — it emits a `swfl_fetch
@@ -545,63 +511,6 @@ export function HighlightPopup({
             <p className="mb-1 ml-6 rounded-lg bg-gulf-teal/10 px-2.5 py-1.5 text-right text-xs text-gray-300">
               {activeQuestion}
             </p>
-            {(() => {
-              const cs = chart as ChartSpec | null;
-              if (!cs || chart === dismissedChart) return null;
-              const canFile = !!cs.frameId;
-              return (
-                <div className="mb-2 overflow-hidden rounded-lg border border-white/10 bg-[#0d1e2b]/80">
-                  <div className="flex items-center justify-between px-2 py-1">
-                    <span className="text-[10px] text-gray-500">Chart</span>
-                    <div className="flex items-center gap-2">
-                      {canFile ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            void fileChart();
-                          }}
-                          disabled={filed === "chart" || filed === "chartErr"}
-                          className="text-[10px] text-gulf-teal transition-colors hover:text-gulf-teal/80 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {filed === "chart"
-                            ? "Filed ✓"
-                            : filed === "chartErr"
-                              ? "Save failed"
-                              : "File this chart"}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            void fetch("/api/meter", {
-                              method: "POST",
-                              headers: { "content-type": "application/json" },
-                              body: JSON.stringify({
-                                action: "chart_save_gated",
-                                report_id: reportId,
-                              }),
-                            }).catch(() => {});
-                          }}
-                          className="text-[10px] text-gray-500 hover:text-gray-400"
-                          title="Saving this chart type is coming soon"
-                        >
-                          File this chart
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setDismissedChart(chart)}
-                        className="text-sm leading-none text-gray-500 hover:text-gray-300"
-                        aria-label="Dismiss chart"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                  <DockChart spec={cs} compact />
-                </div>
-              );
-            })()}
             <div className="whitespace-pre-wrap text-xs leading-5 text-gray-200">
               {error ? (
                 <span className="text-red-400">{error}</span>

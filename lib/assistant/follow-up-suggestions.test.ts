@@ -5,7 +5,7 @@ test("topic keyword in the question selects that topic's chips", () => {
   expect(suggestFollowUps("what's the flood risk in 33931?")).toEqual([
     "How does this compare to nearby ZIPs?",
     "What's the flood-risk trend over time?",
-    "Chart this by ZIP",
+    "Which ZIP is worst off?",
   ]);
 });
 
@@ -28,7 +28,7 @@ test("generic-bucket trap: clicking a generic chip alone can no longer escape on
   expect(suggestFollowUps(clickedChip, answerAboutFlood)).toEqual([
     "How does this compare to nearby ZIPs?",
     "What's the flood-risk trend over time?",
-    "Chart this by ZIP",
+    "Which ZIP is worst off?",
   ]);
 });
 
