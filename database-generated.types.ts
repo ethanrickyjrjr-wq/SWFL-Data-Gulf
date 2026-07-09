@@ -1006,6 +1006,7 @@ export interface Database {
           user_id: string | null;
           did: string | null;
           variant: string | null;
+          contact_id: string | null;
         };
         Insert: {
           id?: number;
@@ -1016,6 +1017,7 @@ export interface Database {
           user_id?: string | null;
           did?: string | null;
           variant?: string | null;
+          contact_id?: string | null;
         };
         Update: {
           id?: number;
@@ -1026,6 +1028,7 @@ export interface Database {
           user_id?: string | null;
           did?: string | null;
           variant?: string | null;
+          contact_id?: string | null;
         };
         Relationships: [];
       };

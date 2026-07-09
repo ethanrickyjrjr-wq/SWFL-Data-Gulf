@@ -34,6 +34,12 @@ import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint
 import { blastTags } from "@/lib/email/blast-tags";
 import { cohortIndex } from "@/lib/email/variant-cohort";
 import {
+  partitionByEngagement,
+  WAVE2_DELAY_MS,
+  WAVE2_PACE_MS,
+  type ContactEventRow,
+} from "@/lib/email/blast-stagger";
+import {
   validateVariantTest,
   variantTestMatchesDoc,
   withCtaLabel,
@@ -295,9 +301,36 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .select("id")
     .single();
 
+  // ── Engagement-staggered waves (spec: 2026-07-09-engagement-staggered-send-design.md) ──
+  // Wave 1 = engaged / new / thin-history contacts, batch-sent NOW. Wave 2 = dormant
+  // (≥2 deliveries, zero opens/clicks) or bouncy contacts, scheduled +2h via per-recipient
+  // scheduledAt (Resend's batch endpoint has no scheduled_at — verified 07/09/2026).
+  // Fail-open: an engagement-lookup error means "no history" → everyone sends now,
+  // exactly the pre-stagger behavior. The lookup is chunked to keep PostgREST URLs sane.
+  const startedAt = Date.now();
+  const engagementRows: ContactEventRow[] = [];
+  for (let i = 0; i < contacts.length; i += 100) {
+    const chunk = contacts.slice(i, i + 100);
+    const { data: rows } = await supabase
+      .from("email_events")
+      .select("contact_id, event")
+      .eq("user_id", user.id)
+      .in(
+        "contact_id",
+        chunk.map((c) => c.id),
+      );
+    if (rows) engagementRows.push(...rows);
+  }
+  const { wave1, wave2 } = partitionByEngagement(contacts, engagementRows);
+  const wave2ScheduledAt = new Date(startedAt + WAVE2_DELAY_MS).toISOString();
+  // Stop scheduling wave 2 this many ms into the request; the remainder degrades to an
+  // immediate send (never a timeout). 15s of headroom under maxDuration.
+  const wave2Deadline = startedAt + (maxDuration - 15) * 1000;
+
   const resend = getMarketingResend();
   let sent = 0;
   let failed = 0;
+  let scheduled = 0;
 
   const messageFor = (c: { id: string; email: string; name: string | null }) => {
     const cohort = isRealSplit ? cohortIndex(c.id, variantCount) : 0;
@@ -328,16 +361,43 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         deliverable.template,
         deliverable.campaign_key,
         isRealSplit ? cohort : undefined,
+        c.id,
       ),
     };
   };
 
+  /** Sleep between wave-2 sends: 4/s stays under Resend's 5 req/s team limit. */
+  const pace = () => new Promise((r) => setTimeout(r, WAVE2_PACE_MS));
+
+  /** Wave-2 per-recipient scheduled send. Returns false once the deadline passes
+   *  so the caller can degrade the remainder to an immediate send. */
+  const scheduleOne = async (
+    c: (typeof contacts)[number],
+    attachments?: { content: Buffer; filename: string }[],
+  ): Promise<boolean> => {
+    if (Date.now() >= wave2Deadline) return false;
+    try {
+      const { error } = await resend.emails.send({
+        ...messageFor(c),
+        ...(attachments ? { attachments } : {}),
+        scheduledAt: wave2ScheduledAt,
+      });
+      if (error) failed += 1;
+      else scheduled += 1;
+    } catch {
+      failed += 1;
+    }
+    await pace();
+    return true;
+  };
+
   if (pdfBuffer) {
     // Resend's BATCH endpoint strips attachments — its payload type is
-    // Omit<CreateEmailOptions, "attachments"> (verified against the installed SDK,
-    // index.d.cts:630). So an attached PDF forces per-recipient emails.send().
+    // Omit<CreateEmailOptions, "attachments" | "scheduledAt"> (verified against the
+    // installed SDK, index.d.cts:635). So an attached PDF forces per-recipient
+    // emails.send() — which is also the only lane that supports scheduledAt.
     const attachments = [{ content: pdfBuffer, filename: pdfFilename() }];
-    for (const c of contacts) {
+    for (const c of wave1) {
       try {
         const { error } = await resend.emails.send({ ...messageFor(c), attachments });
         if (error) failed += 1;
@@ -346,10 +406,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         failed += 1;
       }
     }
+    for (let i = 0; i < wave2.length; i += 1) {
+      const c = wave2[i];
+      if (!(await scheduleOne(c, attachments))) {
+        // Deadline hit → the rest sends immediately (degrade, never time out).
+        for (const rest of wave2.slice(i)) {
+          try {
+            const { error } = await resend.emails.send({ ...messageFor(rest), attachments });
+            if (error) failed += 1;
+            else sent += 1;
+          } catch {
+            failed += 1;
+          }
+        }
+        break;
+      }
+    }
   } else {
-    // No attachment → fast path: batch up to 100 per call.
-    for (let i = 0; i < contacts.length; i += 100) {
-      const batch = contacts.slice(i, i + 100);
+    // No attachment → wave 1 on the fast batch path, up to 100 per call.
+    for (let i = 0; i < wave1.length; i += 100) {
+      const batch = wave1.slice(i, i + 100);
       try {
         const { error } = await resend.batch.send(batch.map(messageFor));
         if (error) failed += batch.length;
@@ -358,31 +434,56 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         failed += batch.length;
       }
     }
+    // Wave 2: per-recipient scheduled sends (batch has no scheduled_at). On
+    // deadline, the remainder degrades to immediate batches.
+    for (let i = 0; i < wave2.length; i += 1) {
+      if (!(await scheduleOne(wave2[i]))) {
+        const overflow = wave2.slice(i);
+        for (let j = 0; j < overflow.length; j += 100) {
+          const batch = overflow.slice(j, j + 100);
+          try {
+            const { error } = await resend.batch.send(batch.map(messageFor));
+            if (error) failed += batch.length;
+            else sent += batch.length;
+          } catch {
+            failed += batch.length;
+          }
+        }
+        break;
+      }
+    }
   }
 
+  // A wave-2 scheduled email is a committed send: it counts toward sent_count,
+  // quota, and the activity summary; the response separates it so the UI can say
+  // "N now, M scheduled".
+  const accepted = sent + scheduled;
   if (blast?.id) {
     await supabase
       .from("email_blasts")
       .update({
-        status: failed > 0 && sent === 0 ? "failed" : "sent",
-        sent_count: sent,
+        status: failed > 0 && accepted === 0 ? "failed" : "sent",
+        sent_count: accepted,
         failed_count: failed,
         sent_at: new Date().toISOString(),
       })
       .eq("id", blast.id);
   }
-  if (sent > 0) await recordEmailSent(user.id, sent);
+  if (accepted > 0) await recordEmailSent(user.id, accepted);
 
   // Activity log on any successful send so the AI knows "email blast sent to N contacts".
-  if (sent > 0 && deliverable.project_id) {
+  if (accepted > 0 && deliverable.project_id) {
     await logActivity(supabase, {
       projectId: deliverable.project_id,
       type: "email_sent",
       actor: "system",
-      summary: `Email blast sent to ${sent} contact${sent === 1 ? "" : "s"}`,
-      detail: { sent, failed, deliverable_id: id, subject: subjectByVariant[0] },
+      summary:
+        scheduled > 0
+          ? `Email blast sent to ${sent} contact${sent === 1 ? "" : "s"} now, ${scheduled} scheduled +2h (engagement stagger)`
+          : `Email blast sent to ${sent} contact${sent === 1 ? "" : "s"}`,
+      detail: { sent, failed, scheduled, deliverable_id: id, subject: subjectByVariant[0] },
     });
   }
 
-  return NextResponse.json({ sent, failed });
+  return NextResponse.json({ sent, failed, scheduled });
 }

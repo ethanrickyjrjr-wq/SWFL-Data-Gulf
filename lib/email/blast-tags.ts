@@ -15,6 +15,7 @@ export function blastTags(
   template: string,
   campaignKey?: string | null,
   variant?: number,
+  contactId?: string,
 ): { name: string; value: string }[] {
   const tags = [
     { name: "did", value: deliverableId.replace(SAFE, "") },
@@ -23,5 +24,8 @@ export function blastTags(
   const campaign = (campaignKey ?? "").replace(SAFE, "");
   if (campaign) tags.push({ name: "campaign", value: campaign });
   if (variant !== undefined) tags.push({ name: "variant", value: String(variant) });
+  // Per-contact engagement linkage (blast-stagger reads it back off webhook events).
+  const cid = (contactId ?? "").replace(SAFE, "");
+  if (cid) tags.push({ name: "cid", value: cid });
   return tags;
 }

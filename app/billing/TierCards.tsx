@@ -6,10 +6,14 @@ import { BILLING_TIERS, FREE_SENDS_PER_MONTH } from "@/lib/billing/tiers";
 
 type Interval = "monthly" | "annual";
 
+// Outcome-framed, not volume-framed: buyers in this category justify a tool by
+// the deals and hours it returns, not by data access (r/CommercialRealEstate
+// pricing research, 07/09/2026 — docs/steadyapi-research/2026-07-09-recurring-
+// pain-questions-and-answers.md §1). No invented numbers here, ever.
 const TIER_TAGLINES: Record<string, string> = {
-  starter: "Your first recurring send",
-  growth: "A real audience, every week",
-  pro: "Full-scale distribution",
+  starter: "Stay in front of your sphere, automatically",
+  growth: "Show up every week without writing a word",
+  pro: "Your whole pipeline, on autopilot",
 };
 
 export function TierCards({

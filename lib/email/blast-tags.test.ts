@@ -49,4 +49,23 @@ describe("blastTags", () => {
       value: "0",
     });
   });
+
+  it("adds a cid tag when a contact id is given, sanitized", () => {
+    expect(
+      blastTags("abc-123", "block-canvas", null, undefined, "223e4567-e89b-12d3-a456-426614174000"),
+    ).toContainEqual({ name: "cid", value: "223e4567-e89b-12d3-a456-426614174000" });
+    expect(blastTags("abc-123", "block-canvas", null, undefined, "c d!")).toContainEqual({
+      name: "cid",
+      value: "cd",
+    });
+  });
+
+  it("no cid tag when the contact id is omitted or sanitizes to empty", () => {
+    expect(blastTags("abc-123", "block-canvas")).not.toContainEqual(
+      expect.objectContaining({ name: "cid" }),
+    );
+    expect(blastTags("abc-123", "block-canvas", null, undefined, "!!!")).not.toContainEqual(
+      expect.objectContaining({ name: "cid" }),
+    );
+  });
 });

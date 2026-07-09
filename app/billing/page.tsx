@@ -39,7 +39,8 @@ export default async function BillingPage() {
         <div className="text-center">
           <h1 className="text-4xl font-semibold tracking-tight text-text-primary">Pricing</h1>
           <p className="mx-auto mt-3 max-w-md text-text-secondary">
-            Building is free. You pay to send at scale — no contract, cancel anytime.
+            Building is free. You pay to send at scale — no contract, cancel anytime. Judge it the
+            way you judge any tool: by the conversations it starts, not the data it holds.
           </p>
         </div>
 

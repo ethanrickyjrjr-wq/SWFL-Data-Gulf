@@ -185,6 +185,8 @@ export async function POST(request: Request): Promise<Response> {
             user_id: deliverable.user_id,
             event: blastAction.event,
             variant: blastAction.variant ?? null,
+            // Per-recipient engagement linkage (cid tag) — blast-stagger's corpus.
+            contact_id: blastAction.contactId ?? null,
           },
           { onConflict: "resend_email_id,event", ignoreDuplicates: true },
         );

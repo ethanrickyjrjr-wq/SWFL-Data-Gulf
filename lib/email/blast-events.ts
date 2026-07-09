@@ -24,6 +24,9 @@ export interface BlastWebhookAction {
   event: "sent" | "delivered" | "opened" | "clicked" | "bounced" | "unsubscribed" | "complained";
   /** The variant cohort index (0-based, as a string) from a split-test send's `variant` tag. */
   variant?: string;
+  /** contacts.id from the send's `cid` tag — per-recipient engagement linkage
+   *  (blast-stagger). Absent on sends made before the tag shipped. */
+  contactId?: string;
 }
 
 /** The slice of a Resend webhook payload we read (outbound email.* events). */
@@ -44,10 +47,12 @@ export function extractBlastAction(payload: ResendWebhookPayload): BlastWebhookA
   const { event } = mapResendOutbound(payload.type ?? "");
   if (!event) return null;
   const variant = payload.data?.tags?.["variant"];
+  const contactId = payload.data?.tags?.["cid"];
   return {
     did,
     emailId: payload.data?.email_id ?? null,
     event,
     ...(variant ? { variant } : {}),
+    ...(contactId ? { contactId } : {}),
   };
 }

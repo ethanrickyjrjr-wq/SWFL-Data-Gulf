@@ -92,4 +92,22 @@ describe("extractBlastAction", () => {
       }),
     ).toEqual({ did: "dlv-abc", emailId: "re_1", event: "clicked", variant: "0" });
   });
+
+  it("carries the cid tag when present (per-contact engagement linkage)", () => {
+    expect(
+      extractBlastAction({
+        type: "email.opened",
+        data: { email_id: "re_1", tags: { did: "dlv-abc", cid: "contact-1" } },
+      }),
+    ).toEqual({ did: "dlv-abc", emailId: "re_1", event: "opened", contactId: "contact-1" });
+  });
+
+  it("omits contactId when the cid tag is absent (pre-linkage sends)", () => {
+    expect(
+      extractBlastAction({
+        type: "email.opened",
+        data: { email_id: "re_1", tags: { did: "dlv-abc" } },
+      }),
+    ).toEqual({ did: "dlv-abc", emailId: "re_1", event: "opened" });
+  });
 });

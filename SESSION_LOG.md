@@ -67,6 +67,29 @@ BrandingBlock via pure `lib/brand/palette-contrast.ts`). Ratios computed via rep
 `email_contrast_ink_fence`. Verified: `bun test lib/email/brand/` 12 pass. Next: operator reviews
 spec D1–D3, then `new-build.mjs email-accent-ink-gate`.
 
+## 2026-07-09 (Fable 5 · main) — feat(email): engagement-staggered blast waves + Q3/Q4 research closed
+
+Remote-control directive: fix the top triage issues, push authorized. (1) **Q3 closed** (crawl4ai:
+Google sender guidelines + Resend docs + MailReach): link-tracking deliverability harm is a
+SHARED-tracking-domain mechanism; our first-party `/api/r` is aligned — NO toggle build; constraint
+check `tracked_links_domain_alignment_on_custom_sender` opened for the custom-sender-domain future.
+(2) **Q4 closed**: seed-testing = vendor API integration (GlockApps API v2 $59/mo · MailReach Spam
+Test API), not DIY; parked on `seed_test_prestep_decision`. Both in
+`docs/steadyapi-research/2026-07-09-round3-q3-q4-answers.md`. (3) **Engagement-staggered send
+BUILT** (spec `2026-07-09-engagement-staggered-send-design.md`, brainstorm autonomous per directive):
+`cid` tag → `email_events.contact_id` (migration run + verified live, no backfill possible),
+pure `lib/email/blast-stagger.ts` partition (dormant = ≥2 delivered + zero opens, or bounced;
+cold-start = all wave 1), blast route sends wave 1 batch-now / wave 2 per-recipient
+`scheduledAt`+2h at 4/s under the verified 5 req/s limit, deadline-guard degrade to immediate.
+Google's own guidance verbatim backs it ("Start with a low sending volume to engaged users").
+Response gains `scheduled`; UI line deferred (`stagger_send_modal_surface` — modal files held by
+parallel sessions). (4) Billing copy reframed outcome-first (no invented numbers). Verified:
+1254 lib/email tests pass, `bunx next build` green ×2. Deferred (files claimed by live Sonnet
+session): README index line + backlog Q3/Q4 ANSWERED annotations in docs/steadyapi-research/ —
+the answers file is canonical. Checks: closed `engagement_staggered_send_decision`; opened
+`tracked_links_domain_alignment_on_custom_sender`, `seed_test_prestep_decision`,
+`stagger_send_modal_surface`, `engagement_staggered_send_live_verify`.
+
 ## 2026-07-09 (Fable 5 · main) — docs(steadyapi-research): round-3 backlog + Sonnet run handoff + triage
 
 Operator: triage settled research into spec/build verdicts, rank the open questions, hand the
