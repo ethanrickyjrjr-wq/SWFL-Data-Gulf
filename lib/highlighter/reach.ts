@@ -33,11 +33,13 @@ const ALLOWED = buildReportIdSet();
  *      eats the plural. Same bug class, found twice; write `cuts?`, not `cut`.
  *
  *  `ALLOWED` fail-closes any slug missing from the live catalog, so a rule for an
- *  unpublished brain is inert, never a crash. `home-values-swfl` and
- *  `investor-zip-swfl` are deliberately absent: both are built but neither is in
- *  `BRAIN_CATALOG`, so a rule for them would be a no-op dressed as a fix
- *  (check `home_values_investor_zip_not_in_catalog`); `reach-coverage.test.ts`
- *  fails loud on any rule whose slug is not catalogued.
+ *  unpublished brain is inert, never a crash — and `reach-coverage.test.ts` fails
+ *  loud on any rule whose slug is not catalogued. Yield disambiguation (07/09/2026,
+ *  when `home-values-swfl`/`investor-zip-swfl` were catalogued): generic yield
+ *  phrasing (gross/rent yield, price-to-rent) routes to `market-temperature-swfl`
+ *  (source-faithful realtor.com sold-to-rent read); investor/composite phrasing
+ *  (investor, investment property, flood-adjusted) routes to `investor-zip-swfl`
+ *  (COMPUTED ZHVI × ZORI composite). Two methodologies, two rules, no collision.
  */
 export const TOPIC_TO_SLUG: Array<{ keywords: RegExp; slug: string }> = [
   {
@@ -54,6 +56,13 @@ export const TOPIC_TO_SLUG: Array<{ keywords: RegExp; slug: string }> = [
     keywords:
       /\b(median sale price|sale price|sold price|list price|sale-to-list|months of supply|inventory|supply)\b/i,
     slug: "housing-swfl",
+  },
+  {
+    // ZHVI value index — "home values" / appreciation phrasing. Distinct from
+    // housing-swfl (Redfin closed-sale prices): value INDEX vs sale prices.
+    keywords:
+      /\b(home values?|property values?|zhvi|apprecia(?:te|ting|tion)|home[- ]value index)\b/i,
+    slug: "home-values-swfl",
   },
   {
     keywords: /\b(active listings?|listing count|how many listings)\b/i,
@@ -87,11 +96,18 @@ export const TOPIC_TO_SLUG: Array<{ keywords: RegExp; slug: string }> = [
     slug: "cre-swfl",
   },
   {
-    // Below cre-swfl on purpose: yield/investor phrasing must never steal a
-    // cap-rate question. Headline here is the sold-to-rent gross-yield read.
-    keywords:
-      /\b(gross yields?|rent(?:al)? yields?|price[- ]to[- ]rent|cash ?flows?|investors?|investment propert(?:y|ies)|roi)\b/i,
+    // Below cre-swfl on purpose: yield phrasing must never steal a cap-rate
+    // question. Headline here is the SOURCE-FAITHFUL realtor.com sold-to-rent
+    // gross-yield read — generic yield phrasing lands here.
+    keywords: /\b(gross yields?|rent(?:al)? yields?|price[- ]to[- ]rent|cash ?flows?|roi)\b/i,
     slug: "market-temperature-swfl",
+  },
+  {
+    // The COMPUTED ZHVI × ZORI investor composite (+ flood-adjusted cap rate).
+    // Investor/composite phrasing lands here; generic yield stays on
+    // market-temperature-swfl above (see the header's yield-disambiguation note).
+    keywords: /\b(investors?|investment propert(?:y|ies)|investor composite|flood[- ]adjusted)\b/i,
+    slug: "investor-zip-swfl",
   },
   {
     // The bare verb `build` used to live in this alternation. It matched "build me a

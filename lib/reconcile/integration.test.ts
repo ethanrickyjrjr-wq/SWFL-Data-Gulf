@@ -204,7 +204,9 @@ describe("end-to-end lane-3 path (ProjectItem → assertion → fact → verdict
 
   test("uncataloged + unstamped brain → not_found, NOT stale (no false 'expired')", () => {
     const assertion: LaneTwoAssertion = {
-      report_id: "home-values-swfl", // absent from BRAIN_CATALOG
+      // A synthetic never-catalogued slug (was home-values-swfl until it graduated
+      // to BRAIN_CATALOG on 07/09/2026 and correctly started deriving a TTL).
+      report_id: "uncataloged-fixture-swfl", // absent from BRAIN_CATALOG
       label: "Median sale price",
       value: "362000",
       freshness_token: "SWFL-7421-v5-20260610",
@@ -213,7 +215,7 @@ describe("end-to-end lane-3 path (ProjectItem → assertion → fact → verdict
     const brain = makeBrain("2026-06-10T12:00:00Z", [
       metric("median_sale_price", "Median sale price", 362000),
     ]); // no stamped expires
-    const fact = factFromParsedBrain("home-values-swfl", brain, "median_sale_price");
+    const fact = factFromParsedBrain("uncataloged-fixture-swfl", brain, "median_sale_price");
     expect(fact!.expires).toBeUndefined();
     const verdict = reconcileMetric(fact, assertion, NOW);
     expect(verdict.status).toBe("not_found");

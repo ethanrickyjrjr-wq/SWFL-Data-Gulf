@@ -17,13 +17,12 @@ test("BRAIN_CATALOG: every catalog id exists in PER_PACK_REGISTRY", () => {
 // BRAIN_CATALOG — in-flight work not ready to ship a catalog entry. A fake catalog
 // entry would be worse than this skip: it would advertise an ungraduated brain.
 // Remove an id here the moment its real catalog entry lands.
-//   home-values-swfl, investor-zip-swfl: "free ZIP investor composite" / pivoted-views
-//   build (parked; both registered together in 4a4154e 2026-06-11, predating this
-//   requirement). docs/superpowers/plans/2026-06-12-pivoted-views-build/
 //   tier-divergence-swfl: NEW 2026-06-14, standalone leaf. Graduate to BRAIN_CATALOG
 //   only after the first clean live cycle (probe clean + view-parity oracle passes
 //   live). docs/superpowers/specs/2026-06-14-tier-divergence-swfl-design.md
-const KNOWN_INCOMPLETE = new Set(["home-values-swfl", "investor-zip-swfl", "tier-divergence-swfl"]);
+//   (home-values-swfl + investor-zip-swfl graduated 07/09/2026 on operator decision —
+//   check home_values_investor_zip_not_in_catalog.)
+const KNOWN_INCOMPLETE = new Set(["tier-divergence-swfl"]);
 
 test("BRAIN_CATALOG: every PER_PACK_REGISTRY id exists in catalog", () => {
   const catalogIds = new Set(BRAIN_CATALOG.map((e) => e.id));

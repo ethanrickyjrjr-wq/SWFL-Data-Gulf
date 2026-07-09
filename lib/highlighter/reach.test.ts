@@ -165,3 +165,29 @@ test("a condo SIRS question reaches condo-sirs-swfl", () => {
 test("a traffic question reaches traffic-swfl", () => {
   expect(resolveReachTargets("how bad is traffic on US-41?", "master")).toContain("traffic-swfl");
 });
+
+// --- 07/09/2026: home-values-swfl + investor-zip-swfl catalogued (operator decision,
+// --- check home_values_investor_zip_not_in_catalog) with the yield disambiguation:
+// --- generic yield → market-temperature (source-faithful), investor → investor-zip (computed).
+
+test("a home-value/appreciation question reaches home-values-swfl", () => {
+  expect(resolveReachTargets("which ZIPs are appreciating fastest?", "master")).toContain(
+    "home-values-swfl",
+  );
+  expect(resolveReachTargets("chart home values by ZIP", "master")).toContain("home-values-swfl");
+});
+
+test("an investor question reaches investor-zip-swfl, not market-temperature", () => {
+  const t = resolveReachTargets("best ZIPs for investors right now?", "master");
+  expect(t).toContain("investor-zip-swfl");
+  expect(t).not.toContain("market-temperature-swfl");
+});
+
+test("generic rent-yield stays on market-temperature, flood-adjusted goes to investor-zip", () => {
+  expect(resolveReachTargets("what's the gross rent yield in Naples?", "master")).toContain(
+    "market-temperature-swfl",
+  );
+  expect(resolveReachTargets("show the flood-adjusted cap rate by ZIP", "master")).toContain(
+    "investor-zip-swfl",
+  );
+});

@@ -31,6 +31,32 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     ttl_seconds: 86400 * 35,
   },
   {
+    // Scope DUPLICATED VERBATIM from homeValuesSwfl.scope in home-values-swfl.mts.
+    // Gate 5 (catalog.test.mts) checks catalog ⇆ PER_PACK_REGISTRY parity — edit both strings together.
+    // Registered 06/11/2026 (pivoted-views build), catalogued 07/09/2026 on operator
+    // decision (check home_values_investor_zip_not_in_catalog) — the pack was finished,
+    // the parent build parked before the publish call was ever made.
+    id: "home-values-swfl",
+    domain: "real-estate",
+    scope:
+      "SWFL ZIP-level home-value index (Zillow ZHVI), monthly — regional median direction, fastest-appreciating/cooling ZIPs, and per-ZIP YoY/MoM.",
+    ttl_seconds: 86400 * 35,
+  },
+  {
+    // Scope DUPLICATED VERBATIM from investorZipSwfl.scope in investor-zip-swfl.mts.
+    // Gate 5 (catalog.test.mts) checks catalog ⇆ PER_PACK_REGISTRY parity — edit both strings together.
+    // Catalogued 07/09/2026 with home-values-swfl (same parked-build history). NOTE:
+    // this brain's gross yield is COMPUTED from Zillow indexes (ZHVI × ZORI);
+    // market-temperature-swfl carries the source-faithful realtor.com sold-to-rent
+    // yield — reach.ts routes generic yield phrasing there and investor/composite
+    // phrasing here, so the two never collide on one question.
+    id: "investor-zip-swfl",
+    domain: "real-estate",
+    scope:
+      "SWFL ZIP-level investor composite — home value (ZHVI) + long-term rent (ZORI) + gross rent yield, with a flood-adjusted cap rate and NFIP percentile on env-surfaced ZIPs.",
+    ttl_seconds: 86400 * 35,
+  },
+  {
     id: "permits-swfl",
     domain: "real-estate",
     scope:

@@ -80,6 +80,17 @@ export const DOSSIER_EXCLUDED_BRAINS: readonly string[] = ["master", "freshness-
 export const BRAIN_GEO: Record<string, BrainGeo> = {
   // Zillow ZORI per-ZIP rent index (site-grade, reaches Charlotte+Sarasota) + a SWFL regional median.
   "rentals-swfl": { grains: ["zip", "region"], covers: METRO_4 },
+  // Zillow ZHVI per-ZIP value index + a SWFL regional median. Live coverage queried
+  // 07/09/2026 (data_lake.zhvi_zip_latest): Lee 34 / Sarasota 24 / Collier 19 /
+  // Charlotte 13 ZIPs (+ Manatee 19, outside the county universe) — same METRO_4
+  // footprint as its ZORI sibling. Catalogued 07/09/2026 WITH this entry in the same
+  // commit — a catalog entry without a BRAIN_GEO entry 500s every located answer
+  // (the active-listings / market-heat / communities incidents below).
+  "home-values-swfl": { grains: ["zip", "region"], covers: METRO_4 },
+  // ZHVI × ZORI × env composite (gross yield + flood-adjusted cap rate). Emits ZIP
+  // cards only where BOTH indexes hold the ZIP — both upstreams are METRO_4, so the
+  // pairing is METRO_4-bounded. Added 07/09/2026 with its catalog entry (brain-first).
+  "investor-zip-swfl": { grains: ["zip", "region"], covers: METRO_4 },
   // Collier permits now carry SITE `zip_code` (Census-geocoded, scope-gated — J2/7f67f1f); Lee
   // permits' `zip_code` is MAILING-grade contractor (out-of-state ZIPs fenced at resolution). The
   // pack's `permits_by_zip` (grain="zip") detail table feeds branch (a) once the brain is rebuilt.

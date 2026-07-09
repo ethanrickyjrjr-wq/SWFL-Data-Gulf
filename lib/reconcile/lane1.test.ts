@@ -110,10 +110,12 @@ test("a stamped output.expires wins over derivation", () => {
 });
 
 test("uncataloged brain, unstamped → expires undefined (→ not_found downstream)", () => {
-  const brain = makeBrain("home-values-swfl", REFINED, [
+  // A synthetic never-catalogued slug — this fixture used home-values-swfl until it
+  // graduated to BRAIN_CATALOG on 07/09/2026 and correctly started deriving a TTL.
+  const brain = makeBrain("uncataloged-fixture-swfl", REFINED, [
     metric("median_sale_price", "Median sale price", 362000),
   ]);
-  const fact = factFromParsedBrain("home-values-swfl", brain, "median_sale_price");
+  const fact = factFromParsedBrain("uncataloged-fixture-swfl", brain, "median_sale_price");
   expect(fact).not.toBeNull();
   expect(fact!.expires).toBeUndefined();
 });
