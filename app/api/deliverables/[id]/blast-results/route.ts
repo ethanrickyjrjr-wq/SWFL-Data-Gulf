@@ -7,6 +7,7 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { variantResults } from "@/lib/email/variant-results";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -17,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const { data: blast } = await supabase
+  const { data: blast, error: blastErr } = await supabase
     .from("email_blasts")
     .select("contact_ids, variant_config")
     .eq("deliverable_id", id)
@@ -26,6 +27,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+  if (blastErr) {
+    return NextResponse.json({ error: "blast fetch failed" }, { status: 500 });
+  }
 
   if (!blast?.variant_config) {
     return NextResponse.json({ hasSplitTest: false });
@@ -37,11 +41,20 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ hasSplitTest: false });
   }
 
-  const { data: events } = await supabase
+  // email_events RLS (migrations/20260628_email_events.sql) grants SELECT to
+  // service_role ONLY — no user policy (operator-internal data). Ownership of
+  // this blast is already proven above via the cookie-scoped, user_id-filtered
+  // email_blasts query; only this read needs to escalate, the same way the
+  // webhook writer (app/api/webhooks/resend/route.ts) already does for writes.
+  const db = createServiceRoleClient();
+  const { data: events, error: eventsErr } = await db
     .from("email_events")
     .select("variant, event")
     .eq("did", id)
     .in("event", ["opened", "clicked"]);
+  if (eventsErr) {
+    return NextResponse.json({ error: "events fetch failed" }, { status: 500 });
+  }
 
   const results = variantResults({
     contactIds: (blast.contact_ids as string[]) ?? [],
