@@ -25,7 +25,7 @@
     "pgvector:verify": "bun refinery/tools/verify-pgvector.mts",
     "graphify:app": "node scripts/graphify-app-nodes.mjs",
     "graphify:update": "graphify update . && node scripts/graphify-app-nodes.mjs",
-    "graphify:publish": "node scripts/graphify-app-nodes.mjs && node scripts/graphify-publish.mjs",
+    "graphify:publish": "graphify update . && node scripts/graphify-app-nodes.mjs && node scripts/graphify-publish.mjs",
     "embed-concepts": "bun refinery/tools/embed-all-concepts.mts",
     "vault:capture": "bun refinery/tools/vault-capture.mts",
     "vault:list": "bun refinery/tools/vault-list.mts",

@@ -1,3 +1,15 @@
+## 2026-07-09 (Sonnet 5 · main) — fix(graphify): publish can no longer ship a stale data-plane graph
+
+Operator asked why `/graph` on ops showed 41 brains vs. ops home page's 42. Root cause: `graphify:publish`
+only re-ran the app-plane patcher (`graphify-app-nodes.mjs`) before writing to the sibling ops repo — it
+never called `graphify update .`, so a stale local `graphify-out/graph.json` (missing `communities-swfl`,
+built 2026-07-06) got silently republished. Nothing was actually untracked — `brains/*.md` and
+`refinery/packs/index.mts` both had all 42; only the static graph snapshot was behind. Fixed by folding
+`graphify update .` into `graphify:publish` in `package.json` (one-line diff) so publish always forces a
+full data-plane refresh first — can't desync silently again. Regenerated + republished once by hand;
+ops repo (`swfldatagulf-ops` c5887b9) already has all 42 brain nodes live, confirmed via diff. No GHA
+cron runs graphify today — it's manual/on-demand only.
+
 ## 2026-07-09 (Sonnet 5 · main) — feat(email): subject/CTA AI variants + split-test, merged + pushed
 
 Picked up a prior session's crash mid-plan (`docs/superpowers/plans/2026-07-09-subject-cta-ai-variants.md`,
