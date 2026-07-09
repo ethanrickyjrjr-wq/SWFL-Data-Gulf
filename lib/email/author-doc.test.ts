@@ -762,6 +762,52 @@ describe("assembleAuthoredDoc — subject/CTA variants", () => {
     expect(doc.ctaVariants).toEqual(["View Report", "See the Numbers"]);
   });
 
+  test("picks cta_variants from the FIRST button block that carries them, not the first button block", () => {
+    const doc = assembleAuthoredDoc({
+      authored: {
+        blocks: [
+          {
+            type: "button",
+            button_label: "Contact Us",
+            // no cta_variants on this earlier button — must be skipped, not selected
+          },
+          {
+            type: "button",
+            button_label: "View Report",
+            cta_variants: ["View Report", "See the Numbers"],
+          },
+        ],
+      } as AuthoredDoc,
+      figuresById: new Map(),
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      anchorNumbers: [],
+    });
+    expect(doc.ctaVariants).toEqual(["View Report", "See the Numbers"]);
+  });
+
+  test("when two button blocks both carry cta_variants, uses the FIRST block's set (true first-wins)", () => {
+    const doc = assembleAuthoredDoc({
+      authored: {
+        blocks: [
+          {
+            type: "button",
+            button_label: "Contact Us",
+            cta_variants: ["Contact Us", "Reach Out"],
+          },
+          {
+            type: "button",
+            button_label: "View Report",
+            cta_variants: ["View Report", "See the Numbers"],
+          },
+        ],
+      } as AuthoredDoc,
+      figuresById: new Map(),
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      anchorNumbers: [],
+    });
+    expect(doc.ctaVariants).toEqual(["Contact Us", "Reach Out"]);
+  });
+
   test("omits both fields when the model wrote no variants — no regression", () => {
     const doc = assembleAuthoredDoc({
       authored: { blocks: [{ type: "footer" }] } as AuthoredDoc,
