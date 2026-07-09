@@ -26,6 +26,37 @@ This session's changes (`email-svg.tsx`, `reshape-chart-type.ts`(+test),
 uncommitted files alongside two of their own spec docs) — already on `origin/main`. This entry
 backfills the missing log coverage; no code changes in this commit.
 
+## 2026-07-09 (Sonnet 5 · main) — fix(ci): stop bun test from executing the Playwright spec + close a lab-entry door-pin violation
+
+Operator: "figure out the red on github." `gh run list` showed CI red on the last 3 pushes to main.
+Two distinct causes, both confirmed against the raw GitHub Actions job log (API `.../jobs/{id}/logs`,
+not just `gh run view --log-failed`, to rule out truncation):
+
+1. `bun test`'s default discovery matches `*.spec.ts` too, not just `*.test.ts` (verified against
+   live Bun docs via crawl4ai, RULE 0.4 — bun.sh/docs/test/discovery lists `.spec.{js|ts|...}` as a
+   default pattern). It was picking up `emails/visual-regression.spec.ts`, a Playwright-only spec
+   (its own `playwright.config.ts` + `test:visual` script), and crashing with "Playwright Test did
+   not expect test.describe() to be called here" — counted as CI's "1 error". Fixed by renaming to
+   `emails/visual-regression.playwright.ts` (doesn't match any of bun's four discovery patterns) and
+   repointing `playwright.config.ts`'s `testMatch`. No other refs to the old filename in CI or scripts.
+2. `lib/lab-entry/destination.static.test.ts`'s door-pin test correctly caught
+   `app/email-lab/page.tsx:43` building the anonymous grid-lab redirect URL raw (`redirect(\`/email-lab/grid...\`)`)
+   instead of routing through `lib/lab-entry/destination.ts`, per [[project_lab-entry-root]]. Added
+   `anonymousLabArrival()` to the single root (byte-identical URL) and call it from the page.
+
+Verified: `bun test` clean on both target tests; full local suite has only the pre-existing
+`lib/email/zip-seed.test.ts` local-env flake (missing `NEXT_PUBLIC_SITE_URL`, defaults to
+localhost:3000) — confirmed present on unmodified `main` too and absent from CI's actual raw log,
+so out of scope here. Cross-checked CI's "2 fail" vs 1 named test in the recap: raw log has no
+second distinct failing test name anywhere; `5321 pass + 2 fail = 5323 = Ran 5323 tests` is
+self-consistent with the one destination.static test being double-counted (printed once live, once
+in bun's recap), not a hidden second bug.
+
+Files: `app/email-lab/page.tsx`, `lib/lab-entry/destination.ts`, `playwright.config.ts`,
+`emails/visual-regression.spec.ts` → `emails/visual-regression.playwright.ts`. Did not touch several
+other locally-modified files (`showing-prep-*`, `EmailLabGridShell.tsx`, `email-lab/ai/route.ts`,
+`HurricaneRingChart.tsx`, `hurricane-series.ts`) — live uncommitted work from other parallel sessions.
+
 ## 2026-07-08 (Sonnet 5 · main) — feat(charts): vendor bklit-ui Ring Chart, real NOAA hurricane-category chart on /charts
 
 Operator: "distill this [bklit.com/docs/components/ring-chart] and build a cool hurricane chart using

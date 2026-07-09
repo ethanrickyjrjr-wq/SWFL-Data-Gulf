@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { signedInLabArrival } from "@/lib/lab-entry/destination";
+import { signedInLabArrival, anonymousLabArrival } from "@/lib/lab-entry/destination";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,12 +33,13 @@ export default async function EmailLabPage({
   // zip/addr seed the prebuild, recipe/recipeNeeds ride the Make-this handoff.
   // `ref` (outreach attribution) was a dead prop on the old block shell; it's
   // preserved in the URL for the grid path to consume if/when wired.
-  const params = new URLSearchParams();
-  if (zip) params.set("zip", zip);
-  if (sp.addr) params.set("addr", sp.addr);
-  if (recipe) params.set("recipe", recipe);
-  if (recipeNeeds) params.set("recipeNeeds", recipeNeeds);
-  if (typeof sp.ref === "string" && sp.ref) params.set("ref", sp.ref);
-  const qs = params.toString();
-  redirect(`/email-lab/grid${qs ? `?${qs}` : ""}`);
+  redirect(
+    anonymousLabArrival({
+      zip,
+      addr: sp.addr,
+      recipe,
+      recipeNeeds,
+      ref: typeof sp.ref === "string" ? sp.ref : null,
+    }),
+  );
 }

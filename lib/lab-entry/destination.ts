@@ -78,3 +78,25 @@ export function signedInLabArrival(
   const q = params.size > 0 ? `?${params.toString()}` : "";
   return `/email-lab/grid${q}`;
 }
+
+/** An anonymous visit to /email-lab lands on the grid lab, carrying every
+ *  param through (zip/addr seed the prebuild, recipe/recipeNeeds ride the
+ *  Make-this handoff, ref is outreach attribution). */
+export function anonymousLabArrival(
+  carry: {
+    zip?: string | null;
+    addr?: string | null;
+    recipe?: string | null;
+    recipeNeeds?: string | null;
+    ref?: string | null;
+  } = {},
+): string {
+  const params = new URLSearchParams();
+  if (carry.zip) params.set("zip", carry.zip);
+  if (carry.addr) params.set("addr", carry.addr);
+  if (carry.recipe) params.set("recipe", carry.recipe);
+  if (carry.recipeNeeds) params.set("recipeNeeds", carry.recipeNeeds);
+  if (carry.ref) params.set("ref", carry.ref);
+  const q = params.size > 0 ? `?${params.toString()}` : "";
+  return `/email-lab/grid${q}`;
+}

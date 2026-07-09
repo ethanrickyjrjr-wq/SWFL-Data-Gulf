@@ -5,7 +5,7 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./emails",
-  testMatch: "visual-regression.spec.ts",
+  testMatch: "visual-regression.playwright.ts",
   webServer: {
     command: "bun email:dev --port 3001",
     url: "http://localhost:3001",
