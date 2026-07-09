@@ -122,6 +122,25 @@ One shared contract every consumer reads from is both the enforcement point AND 
 4. Supply contract = big-bang converge (explicit >5-file buy-in).
 5. Must not break project creation.
 
+## M2 status (07/08/2026, confirmed live 07/09/2026) — hard-AI side DONE, soft-user side OPEN
+
+Shipped in commit `f9ffd6a2` — titled about the recipe picker, which is why this status never
+got written down until now (found via `checks` drift, not a fresh build):
+
+- ✅ **Fence 1 (blessed spans):** `snapRowSpans` (`author-doc.ts`) snaps each row onto the
+  nearest blessed multiset from `BLESSED_ROW_SPANS` (`block-contract.ts`); orientation preserved.
+- ✅ **Fence 2 (zones):** `sortEntriesByZone` + `ZONE_RANK`, hard-sorted inside `deriveLayout`.
+- ✅ **Fence 5 (accent budget):** `clampAccentBudget`, capped at `ACCENT_BUDGET`.
+- ✅ **Fence 3 → ratio SET:** `ImageBlock.tsx` reads `props.ratio` (default `"3:2"`) — no longer
+  a hard lock, just an unset default. All AI-path-only per `deriveLayout`'s own comment; the
+  canvas has its own layout path untouched by any of this.
+- Verified 07/09/2026: `bun test lib/email/doc/fences.test.ts` — 12/12 pass.
+
+**Still open** (tracked as `m2_fences_bounds_of_space`): the soft-user half of "hard for AI,
+soft for user" — no canvas warning when a manual edit pushes past a fence, and no UI writes
+`props.ratio` or picks a span variant (the fields exist, unused). Flip-to-correct and the
+react-email visual-regression fixture per fence are also not built.
+
 ## M3 status (07/08/2026) — recipe-picker DONE, brand type-lift STAGED
 
 **Shipped (no migration, no `BrandTheme` ripple):**
