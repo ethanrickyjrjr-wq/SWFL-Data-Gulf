@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { openZipLab } from "@/lib/lab-entry/destination";
 import {
   METRIC_ORDER,
   NO_DATA_FILL,
@@ -21,19 +20,17 @@ import {
  * map and wears the orange brand ramp; color position blends rank with
  * magnitude so decisive gaps pop (operator rulings 07/03/2026).
  *
- * MAP CLICK = THE LAB (operator's shape, locked 07/03/2026): clicking any ZIP —
- * map polygon or rail row — lands in /email-lab?zip= with that ZIP's page
- * prebuilt as a branded email. No intermediate select-panel. The contractor SVG
- * is served from public/map/lee-collier.svg and injected client-side.
+ * MAP CLICK = THE ZIP REPORT (operator ruling 07/09/2026, spec
+ * 2026-07-09-zip-page-destination-design.md — reverses the 07/03 lab-first
+ * click): clicking any ZIP — map polygon or rail row — lands on
+ * /r/zip-report/[zip]. The email lab stays one click away via that page's
+ * build bridge. The contractor SVG is served from public/map/lee-collier.svg
+ * and injected client-side.
  */
 
 type Payload = Pick<HomeMapPayload, "data" | "badge" | "stats">;
 
-/** Full page load (not router.push): the signed-in path is a server redirect
- *  into the project Email tab and the ?zip= must reach the server. */
-const openZipInLab = (zip: string) => {
-  window.location.href = openZipLab(zip);
-};
+const zipReportHref = (zip: string) => `/r/zip-report/${zip}`;
 
 const fmt = (val: number, format: "currency" | "number") => {
   if (format === "currency") {
@@ -109,7 +106,7 @@ export default function Hero({ payload }: { payload: Payload }) {
       set("tip-zip", zip);
       set("tip-place", data.placeNames[zip] || "");
       set("tip-val", m && val !== undefined ? fmt(val, m.format) : "N/A");
-      set("tip-cta", "Click → open as a branded email");
+      set("tip-cta", "Click → full ZIP report");
       tip.style.opacity = "1";
       moveTip(e);
     };
@@ -127,7 +124,7 @@ export default function Hero({ payload }: { payload: Payload }) {
           g.setAttribute("role", "link");
           g.setAttribute(
             "aria-label",
-            `${data.placeNames[g.id] || g.id} (${g.id}) — open as a branded email`,
+            `${data.placeNames[g.id] || g.id} (${g.id}) — open the full ZIP report`,
           );
           const on = <K extends keyof HTMLElementEventMap>(
             type: K,
@@ -139,12 +136,12 @@ export default function Hero({ payload }: { payload: Payload }) {
           on("mouseenter", (e) => showTip(e as MouseEvent, g.id));
           on("mousemove", (e) => moveTip(e as MouseEvent));
           on("mouseleave", hideTip);
-          on("click", () => openZipInLab(g.id));
+          on("click", () => router.push(zipReportHref(g.id)));
           on("keydown", (e) => {
             const ke = e as KeyboardEvent;
             if (ke.key === "Enter" || ke.key === " ") {
               ke.preventDefault();
-              openZipInLab(g.id);
+              router.push(zipReportHref(g.id));
             }
           });
         });
@@ -260,7 +257,7 @@ export default function Hero({ payload }: { payload: Payload }) {
           <h2 className="map-heading">The data your campaigns are built on</h2>
           <p className="map-sub">
             Live Southwest Florida market signals, cited to the source. Click any ZIP — map or list
-            — and it opens in the email lab, prebuilt with that ZIP&rsquo;s live figures.
+            — for its full report: the numbers, what just moved, and what&rsquo;s down the road.
           </p>
           <div className="search-wrap">
             <div className="search-bar">
@@ -324,7 +321,7 @@ export default function Hero({ payload }: { payload: Payload }) {
                       <button
                         type="button"
                         className="rail-top-row"
-                        onClick={() => openZipInLab(zip)}
+                        onClick={() => router.push(zipReportHref(zip))}
                       >
                         <span className="rail-top-rank">{i + 1}</span>
                         <span className="rail-top-place">
@@ -337,8 +334,7 @@ export default function Hero({ payload }: { payload: Payload }) {
                   ))}
                 </ol>
                 <div className="rail-top-hint">
-                  Click any ZIP — map or list — and it opens in the email lab, prebuilt with that
-                  ZIP&rsquo;s live figures.
+                  Click any ZIP — map or list — to open its full report, built from live figures.
                 </div>
               </div>
             )}
