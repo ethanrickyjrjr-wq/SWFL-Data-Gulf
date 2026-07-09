@@ -1,3 +1,14 @@
+## 2026-07-09 (Sonnet 5 · main) — docs(charts): NOTICE.md follow-up for Composed wiring
+
+Closed out the one leftover from the Composed-chart-in-reshape-picker push (already live on main
+via `7ecb7f35`/`43a2d7e5`): `NOTICE.md`'s "Wired so far" line still said Composed was vendored
+but not yet wired into a production call site. Updated it to reflect Composed being live (bar +
+mean reference line, the reshape picker's `composed` option), and added a new section documenting
+the ZIP-code-as-year date bug found during that build — bklit's Composed/Line/Area share a
+time-series shell whose x-axis accessor does `new Date(value)` unconditionally, silently
+misparsing categorical labels (e.g. `new Date("33921")` → year 33921, not Invalid Date) — and its
+fix (synthetic sequential dates, never rendered via an `<XAxis>`). Docs-only, no code change.
+
 ## 2026-07-09 (Sonnet 5 · main) — fix(graphify): publish can no longer ship a stale data-plane graph
 
 Operator asked why `/graph` on ops showed 41 brains vs. ops home page's 42. Root cause: `graphify:publish`

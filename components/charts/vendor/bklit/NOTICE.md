@@ -51,7 +51,22 @@ was dropped from this pass specifically because its dependency chain reaches int
 center-label infra plus a new `@base-ui/react` progress dependency — bundling that in without
 verifying it visually felt like exactly the kind of half-shipped expansion this build was
 supposed to stop doing. Wired so far: Bar, Line, Area, Composed, Ring (shells + shared infra all
-vendored and typecheck clean); only Area (as the zhvi-area trend chart) is wired into
-production email rendering, and Ring is wired into the live `/charts` web page. Bar/Line/Composed
-are vendored and proven (Bar via the SSR spike) but not yet wired into a production call site —
-that's the next increment, not a silent gap.
+vendored and typecheck clean). Area (zhvi-area trend chart) and Composed (bar + mean reference
+line, the email reshape picker's `composed` option) are both wired into production email
+rendering; Ring is wired into the live `/charts` web page. Bar/Line are vendored and proven (Bar
+via the SSR spike) but not yet wired into a production call site — that's the next increment,
+not a silent gap.
+
+**Composed ≠ categorical out of the box (2026-07-08)** — `ComposedChart` (and by extension
+`LineChart`/`AreaChart`) is built on a shared time-series shell (`time-series-chart-shell.tsx`)
+whose x-axis accessor unconditionally does `value instanceof Date ? value : new Date(value)`.
+The email reshape picker's Composed option plots categorical points (ZIP codes, city names),
+not dates — passing a label straight through as `date: p.label` doesn't throw or produce
+`Invalid Date`; `new Date("33921")` silently parses as year 33921, so bars land at
+scrambled/overlapping x-positions ordered by that bogus year instead of the given point order.
+Caught via a spike render inspecting raw `<rect>` x/width coordinates, not by typecheck or
+`next build`. Fix (`bklitComposedSvg` in `email-svg.tsx`): pass a synthetic strictly-increasing
+day sequence (`new Date(2000, 0, i + 1)`) instead of the real label, and never render an
+`<XAxis>` child, so the fake dates position points in the given order but are never shown —
+only the real (label, value) pairs plot as bar height + line. Any future non-time-series wiring
+of Line/Area onto categorical data needs the same treatment.
