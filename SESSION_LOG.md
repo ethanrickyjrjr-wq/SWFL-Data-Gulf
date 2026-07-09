@@ -20,8 +20,9 @@ side-by-side…", "Welcome them…", year-in-review "say which and why") — INS
 assigned signals now replace title+body as a pair. New guards in `preview-fill.test.ts`: no
 duplicate chart within a doc, hero variety per group, ≤3 global chart repeats, every referenced
 asset exists, instruction-leak list. Gates: `bun test lib/email/doc/ lib/lab-entry/` 103/0 ·
-`bunx next build` ✓. Closed `seed_preview_variety_pass`; chart half of
-`seed_previews_recapture_after_enrichment` is done (its enrichment re-run note stands).
+`bunx next build` ✓. Closed check `seed_preview_variety_pass`; the chart half of check
+`seed_previews_recapture_after_enrichment` is done (its enrichment re-run note stands — that
+check remains open for the post-enrichment recapture, nothing newly deferred this session).
 
 ## 2026-07-09 (Fable 5 · main) — round-3 research: deferred fold-ins applied + answers file committed
 
