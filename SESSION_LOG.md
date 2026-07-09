@@ -1,3 +1,30 @@
+## 2026-07-09 (Fable 5 · main) — docs(email): fence/design review → 5 checks + 2 handoffs (template previews + fence polish)
+
+Operator: verify the fence/font/size research is correctly built, confirm brand persists to the
+account, recommend upgrades — review only. Verified all 5 fences live (`block-contract.ts`,
+`apply-brand-style.ts`, hard-AI/soft-user as specced) and brand persistence structural:
+`user_brand_profiles` (account) + `projects.branding` (project), `applyBrand` at init/seed-pick/AI-
+build/live-edit, Save/Send/Schedule flush dirty brand (b2555903). Findings promoted to checks (RULE
+2.4): `email_contrast_ink_fence` (Button/AgentHero/Header hardcode white on brand fills — proof via
+repo's own contrastRatio: white on teal 2.04:1, pale gold 1.41:1 vs WCAG 4.5), `email_sources_
+accordion_autofill` (lab AI-fill never materializes the sources accordion though used MarketFigures
+carry source+as_of), `email_palette_demo_figures` (DEFAULT_BLOCK_PROPS still ships $485K/4521
+Surfside — root cause of the market-letter/weekly-pulse drift class), `email_cadence_enrichment`
+(monthly+ templates thinner than weekly-pulse), plus `template_preview_gallery_live_verify` via
+new-build.mjs. RULE 0.4 crawls (07/09): luxurypresence.com confirms luxury-segment serif (Playfair
+named; rest of 2026 RE typography trends sans — other grid templates correctly stay sans);
+mailmodo.com puts banner height at 300–500px → 3:2 stays default, 16:9 becomes an added option, not
+a replacement. On the record: retracted the "Fence-1 4+ row escape hatch" finding — author-doc.ts
+caps rows ≤3 before snapping; unreachable on the AI path. Wrote handoffs:
+`docs/superpowers/specs/2026-07-09-template-preview-gallery-design.md` (previews = filled, canvas =
+skeleton; /showcase third section + SiteShell nav link [none exists today] + lab picker thumbnails
+via existing capture-showcase pattern + `?seed=` deep link) and
+`docs/superpowers/plans/2026-07-09-email-fence-polish-handoff.md` (the 4 fixes, evidence + steps +
+test guards). Docs/checks only, zero code touched. NOT pushed — stacked on 4 unpushed local commits
+incl. a parallel session's 8ae31949; stopping for operator confirmation per standing rule.
+
+---
+
 ## 2026-07-09 (Sonnet 5 · main) — docs(steadyapi-research): recurring-pain filter + live SteadyAPI answers (round 2)
 
 Operator: "go through ops page, all my repeats of problems in chats and things that constantly
