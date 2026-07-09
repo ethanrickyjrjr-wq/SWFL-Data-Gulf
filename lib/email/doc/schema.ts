@@ -331,6 +331,8 @@ const BlockSchema = z
 export const EmailDocSchema = z.object({
   globalStyle: GlobalStyleSchema,
   blocks: z.array(BlockSchema).min(1).max(20),
+  subjectVariants: z.array(z.string().max(90)).max(4).optional(),
+  ctaVariants: z.array(z.string().max(40)).max(4).optional(),
 });
 
 // ── AI content patch ────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test";
+import { test, expect, describe, it } from "bun:test";
 import { EmailDocSchema, ContentPatchSchema, BlockContentPatchSchema, mintBlockId } from "./schema";
 import { SEED_DOCS, createBlock, DEFAULT_GLOBAL_STYLE } from "./default-docs";
 import type { EmailDoc } from "./types";
@@ -398,4 +398,33 @@ test("a metric-card block round-trips through EmailDocSchema with its held value
       expect(mc.props.barPct).toBe(62);
     }
   }
+});
+
+describe("EmailDocSchema — subjectVariants/ctaVariants", () => {
+  const baseDoc = {
+    globalStyle: {
+      primaryColor: "#000",
+      accentColor: "#111",
+      fontFamily: "MODERN_SANS",
+      textColor: "#222",
+      backdropColor: "#fff",
+    },
+    blocks: [{ type: "footer", props: {} }],
+  };
+
+  it("accepts and preserves subjectVariants/ctaVariants", () => {
+    const parsed = EmailDocSchema.parse({
+      ...baseDoc,
+      subjectVariants: ["Subject A", "Subject B"],
+      ctaVariants: ["View Report", "See the Numbers"],
+    });
+    expect(parsed.subjectVariants).toEqual(["Subject A", "Subject B"]);
+    expect(parsed.ctaVariants).toEqual(["View Report", "See the Numbers"]);
+  });
+
+  it("omits both when absent — no regression", () => {
+    const parsed = EmailDocSchema.parse(baseDoc);
+    expect(parsed.subjectVariants).toBeUndefined();
+    expect(parsed.ctaVariants).toBeUndefined();
+  });
 });

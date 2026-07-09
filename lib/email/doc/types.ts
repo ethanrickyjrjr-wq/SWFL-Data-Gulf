@@ -386,4 +386,10 @@ export interface EmailGlobalStyle {
 export interface EmailDoc {
   globalStyle: EmailGlobalStyle;
   blocks: EmailBlock[]; // ordered array — index = render order
+  /** Up to 4 AI-authored subject-line alternatives; [0] is the default subject
+   *  (deriveEmailDocSubject prefers it). Absent → today's block-derived subject. */
+  subjectVariants?: string[];
+  /** Up to 4 AI-authored CTA-label alternatives for the doc's button block.
+   *  Absent → today's single button_label. */
+  ctaVariants?: string[];
 }
