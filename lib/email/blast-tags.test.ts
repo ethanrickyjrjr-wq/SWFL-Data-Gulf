@@ -29,4 +29,17 @@ describe("blastTags", () => {
     expect(blastTags("abc-123", "block-canvas")).toHaveLength(2);
     expect(blastTags("abc-123", "block-canvas", "!!!")).toHaveLength(2);
   });
+
+  it("adds a variant tag when a cohort index is given", () => {
+    expect(blastTags("abc-123", "block-canvas", null, 1)).toContainEqual({
+      name: "variant",
+      value: "1",
+    });
+  });
+
+  it("no variant tag when the cohort index is omitted", () => {
+    expect(blastTags("abc-123", "block-canvas")).not.toContainEqual(
+      expect.objectContaining({ name: "variant" }),
+    );
+  });
 });
