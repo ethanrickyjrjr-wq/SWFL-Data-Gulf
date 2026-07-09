@@ -42,4 +42,11 @@ describe("blastTags", () => {
       expect.objectContaining({ name: "variant" }),
     );
   });
+
+  it("adds a variant tag when variant is 0 (falsy-zero guard)", () => {
+    expect(blastTags("abc-123", "block-canvas", null, 0)).toContainEqual({
+      name: "variant",
+      value: "0",
+    });
+  });
 });
