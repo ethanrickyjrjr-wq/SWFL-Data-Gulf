@@ -1,3 +1,18 @@
+## 2026-07-09 (Fable 5 · main) — spec: public /guides hub (Figma-style best-practices), build registered
+
+Brainstormed + ratified with operator (4 AskUserQuestion gates, all approved): public /guides
+hub modeled on figma.com/best-practices (RULE 0.4 crawl, 3 pages: two-tier hub of deep guides +
+bite-size tips; article anatomy = anchor TOC → pain-hook intro → "best for X" sections →
+inline Pro-tips → try-it-now exits into product; the move: sell the tool by teaching the
+craft). V1 = flagship trio: "Where every number comes from" (four-source methodology),
+"Why our emails look the way they do" (grid/layout-rules/send discipline), "N things the
+builder does that you might miss" (code-verified tips only). Typed registry (`lib/guides/`) +
+one `[slug]` template; Guides entry in Explore dropdown (+ pinned nav test same commit);
+homepage change = ONE GuidesStrip after DeliverableShowcase. Real artifacts as figures (seed
+previews, committed charts); hard copy rules (no internal nouns, no unsourced figures).
+Spec: `docs/superpowers/specs/2026-07-09-guides-hub-design.md`. Registered via new-build.mjs →
+`guides_hub_live_verify` open. Next: operator spec review → writing-plans.
+
 ## 2026-07-09 (Fable 5 · main) — handoff amend: use the EXISTING chart systems + crawl4ai/Pexels photos; push
 
 Operator: "where are all these charts we just brought in yesterday?" — right: `renderChart`
