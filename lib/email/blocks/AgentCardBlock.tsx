@@ -2,6 +2,7 @@
 import { Section, Row, Column, Img, Text, Link } from "@react-email/components";
 import type { AgentCardProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, SECTION_PAD, MUTED, BORDER, CARD_BG } from "./styles";
+import { legibleInk } from "./on-dark";
 
 export function AgentCardBlock({
   props,
@@ -82,7 +83,7 @@ export function AgentCardBlock({
                   fontFamily: font,
                   fontSize: "13px",
                   fontWeight: 600,
-                  color: globalStyle.accentColor,
+                  color: legibleInk(globalStyle.accentColor, CARD_BG, 4.5),
                 }}
               >
                 {props.ctaLabel} →

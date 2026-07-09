@@ -113,7 +113,7 @@ export function AgentHeroBlock({
                   fontFamily: font,
                   fontSize: "13px",
                   fontWeight: 700,
-                  color: globalStyle.accentColor,
+                  color: legibleInk(globalStyle.accentColor, CARD_BG, 4.5),
                   textDecoration: "none",
                 }}
               >

@@ -9,6 +9,9 @@ import { createElement } from "react";
 import type { EmailGlobalStyle } from "../doc/types";
 import { HeaderBlock } from "./HeaderBlock";
 import { AgentHeroBlock } from "./AgentHeroBlock";
+import { AgentCardBlock } from "./AgentCardBlock";
+import { FooterBlock } from "./FooterBlock";
+import { SourcesBlock } from "./SourcesBlock";
 
 /** Regex for a standalone `color:` TEXT-INK declaration carrying `hex` —
  *  `[^-]` excludes `background-color:` / `border-*-color:` (fills and borders
@@ -66,5 +69,55 @@ describe("AgentHeroBlock designation ink", () => {
       }),
     );
     expect(out).not.toMatch(inkDecl("#1B3A5C"));
+  });
+});
+
+// The house default on light surfaces is the LIVE failure: #3DC9C0 on #ffffff
+// = 2.04:1, on the footer's #F9FAFB = 1.95:1 — all must resolve to dark ink.
+describe("accent links on light surfaces", () => {
+  it("AgentHeroBlock CTA on the white card never ships 2.04:1 teal", async () => {
+    const out = await render(
+      createElement(AgentHeroBlock, {
+        props: {
+          photoUrl: "https://example.com/p.jpg",
+          name: "R. Cooper",
+          ctaLabel: "Book a call",
+          ctaUrl: "https://example.com",
+        },
+        globalStyle: HOUSE,
+      }),
+    );
+    expect(out).toMatch(inkDecl("#111827"));
+    expect(out).not.toMatch(inkDecl("#3DC9C0"));
+  });
+
+  it("AgentCardBlock CTA guards the same pair", async () => {
+    const out = await render(
+      createElement(AgentCardBlock, {
+        props: { name: "R. Cooper", ctaLabel: "Book a call", ctaUrl: "https://example.com" },
+        globalStyle: HOUSE,
+      }),
+    );
+    expect(out).not.toMatch(inkDecl("#3DC9C0"));
+  });
+
+  it("FooterBlock social links guard accent on #F9FAFB", async () => {
+    const out = await render(
+      createElement(FooterBlock, {
+        props: { instagramUrl: "https://instagram.com/gulfco" },
+        globalStyle: HOUSE,
+      }),
+    );
+    expect(out).not.toMatch(inkDecl("#3DC9C0"));
+  });
+
+  it("SourcesBlock citation links guard accent on the card bg", async () => {
+    const out = await render(
+      createElement(SourcesBlock, {
+        props: { sources: [{ label: "SWFL Data Gulf", url: "https://www.swfldatagulf.com" }] },
+        globalStyle: HOUSE,
+      }),
+    );
+    expect(out).not.toMatch(inkDecl("#3DC9C0"));
   });
 });

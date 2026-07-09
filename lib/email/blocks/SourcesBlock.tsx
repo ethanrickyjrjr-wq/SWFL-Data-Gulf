@@ -11,6 +11,7 @@ import { Link, Section, Text } from "@react-email/components";
 import { cleanCitations } from "@/lib/citations/clean-url";
 import type { EmailGlobalStyle, SourcesProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER, MUTED } from "./styles";
+import { legibleInk } from "./on-dark";
 
 export function SourcesBlock({
   props,
@@ -22,6 +23,7 @@ export function SourcesBlock({
   const font = fontStack(globalStyle.fontFamily);
   const cited = cleanCitations(props.sources ?? []);
   if (cited.length === 0) return null;
+  const linkInk = legibleInk(globalStyle.accentColor, props.sectionBg ?? CARD_BG, 4.5);
 
   return (
     <Section
@@ -50,7 +52,7 @@ export function SourcesBlock({
                 key={c.href ?? i}
                 style={{ fontFamily: font, fontSize: "11px", lineHeight: "1.6", margin: "0 0 4px" }}
               >
-                <Link href={c.href} style={{ color: globalStyle.accentColor }}>
+                <Link href={c.href} style={{ color: linkInk }}>
                   {c.label}
                 </Link>
               </Text>

@@ -4,6 +4,7 @@ import type { EmailGlobalStyle, FooterProps } from "../doc/types";
 import { PLATFORMS, platformMeta } from "../social/platforms";
 import { SocialIcon } from "@/components/email-lab/social-icons";
 import { fontStack, SECTION_PAD, MUTED, BORDER } from "./styles";
+import { legibleInk } from "./on-dark";
 
 export function FooterBlock({
   props,
@@ -14,6 +15,8 @@ export function FooterBlock({
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const hasContact = props.phone || props.email || props.websiteUrl;
+  // Link ink picked once for the fixed footer bg (matches the Section fill below).
+  const linkInk = legibleInk(globalStyle.accentColor, "#F9FAFB", 4.5);
 
   // Footer renders the 3 registry-mapped socials (IG/FB/LI) ordered by socialOrder
   // (registry default when unset), keeping those with a URL — same root the
@@ -84,7 +87,7 @@ export function FooterBlock({
               key={`${soc.type}-${i}`}
               href={soc.url}
               style={{
-                color: globalStyle.accentColor,
+                color: linkInk,
                 marginRight: "12px",
                 textDecoration: "none",
                 display: "inline-flex",
@@ -92,12 +95,7 @@ export function FooterBlock({
                 gap: "5px",
               }}
             >
-              <SocialIcon
-                type={soc.type}
-                size={14}
-                color={globalStyle.accentColor}
-                label={soc.label}
-              />
+              <SocialIcon type={soc.type} size={14} color={linkInk} label={soc.label} />
               {soc.label}
             </Link>
           ))}
