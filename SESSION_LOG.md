@@ -1,3 +1,13 @@
+## 2026-07-09 (Fable 5 · main) — zip-page Phase A SHIPPED: homepage ZIP clicks → /r/zip-report
+
+`components/landing/Hero.tsx` (c286dbe4): map polygons, Enter/Space activation, and top-5
+rail rows now `router.push` to `/r/zip-report/[zip]` (was `openZipInLab` full-page load into
+/email-lab?zip=). Tooltip "Click → full ZIP report", aria "open the full ZIP report",
+map-sub/rail-hint copy rewritten; lab import removed (lab reachable via the report page's
+build bridge, unchanged). Gates: `bunx next build` ✓, eslint clean, no stray lab refs.
+Live-verify slice: prod click-through after deploy (check `zip_page_destination_live_verify`).
+Next in-session: Phase B (bake job) + handoff for C/D/E.
+
 ## 2026-07-09 (Fable 5 · main) — seed-preview variety pass shipped: per-template charts/figures/photos
 
 Executed `docs/handoff/2026-07-09-seed-preview-presentability-handoff.md` (operator escalation:
