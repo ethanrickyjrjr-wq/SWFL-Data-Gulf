@@ -9,11 +9,21 @@ interface Props {
   /** Block-canvas emails can ship a generated PDF attachment — gates the checkbox. */
   isBlockCanvas: boolean;
   onClose: () => void;
+  /** AI-authored subject-line alternatives (Task 5) — absent/empty → no picker UI, unchanged today's behavior. */
+  subjectVariants?: string[];
+  /** AI-authored CTA-label alternatives (Task 5) — absent/empty → no picker UI, unchanged today's behavior. */
+  ctaVariants?: string[];
 }
 
 type SendResult = { sent: number; failed: number } | { error: string; limit?: number };
 
-export function ContactPickerModal({ deliverableId, isBlockCanvas, onClose }: Props) {
+export function ContactPickerModal({
+  deliverableId,
+  isBlockCanvas,
+  onClose,
+  subjectVariants,
+  ctaVariants,
+}: Props) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -22,6 +32,9 @@ export function ContactPickerModal({ deliverableId, isBlockCanvas, onClose }: Pr
   const [attachPdf, setAttachPdf] = useState(false);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<SendResult | null>(null);
+  const [splitTest, setSplitTest] = useState(false);
+  const [ctaOverride, setCtaOverride] = useState<string | null>(null);
+  const hasVariants = (subjectVariants?.length ?? 0) >= 2 || (ctaVariants?.length ?? 0) >= 2;
 
   useEffect(() => {
     fetch("/api/contacts")
@@ -58,6 +71,15 @@ export function ContactPickerModal({ deliverableId, isBlockCanvas, onClose }: Pr
     if (selected.size === 0) return;
     setSending(true);
     try {
+      const variantTest =
+        splitTest && hasVariants
+          ? {
+              ...((subjectVariants?.length ?? 0) >= 2 ? { subjects: subjectVariants } : {}),
+              ...((ctaVariants?.length ?? 0) >= 2 ? { ctas: ctaVariants } : {}),
+            }
+          : ctaOverride
+            ? { ctas: [ctaOverride] }
+            : undefined;
       const res = await fetch(`/api/deliverables/${deliverableId}/blast`, {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -65,6 +87,7 @@ export function ContactPickerModal({ deliverableId, isBlockCanvas, onClose }: Pr
           contact_ids: Array.from(selected),
           ...(subject.trim() ? { subject: subject.trim() } : {}),
           ...(attachPdf ? { include_pdf: true } : {}),
+          ...(variantTest ? { variant_test: variantTest } : {}),
         }),
       });
       setResult(await res.json());
@@ -129,6 +152,55 @@ export function ContactPickerModal({ deliverableId, isBlockCanvas, onClose }: Pr
                 placeholder="Subject (optional — a clean default is used)"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none"
               />
+              {(subjectVariants?.length ?? 0) >= 2 && !splitTest && (
+                <div className="flex flex-wrap gap-1.5">
+                  {subjectVariants!.map((v, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setSubject(v)}
+                      className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                        subject === v
+                          ? "border-gulf-teal bg-gulf-teal/20 text-gulf-teal"
+                          : "border-white/10 bg-white/5 text-white/50 hover:text-white/80"
+                      }`}
+                    >
+                      {v.length > 40 ? `${v.slice(0, 40)}…` : v}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {(ctaVariants?.length ?? 0) >= 2 && !splitTest && (
+                <div className="flex flex-wrap gap-1.5">
+                  {ctaVariants!.map((v, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setCtaOverride(v)}
+                      className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                        ctaOverride === v
+                          ? "border-gulf-teal bg-gulf-teal/20 text-gulf-teal"
+                          : "border-white/10 bg-white/5 text-white/50 hover:text-white/80"
+                      }`}
+                    >
+                      CTA: {v}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {hasVariants && (
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={splitTest}
+                    onChange={(e) => setSplitTest(e.target.checked)}
+                    className="h-4 w-4 accent-gulf-teal"
+                  />
+                  Split test this send (
+                  {Math.max(subjectVariants?.length ?? 0, ctaVariants?.length ?? 0)} variants,
+                  cohort-assigned)
+                </label>
+              )}
               {isBlockCanvas && (
                 <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-300">
                   <input

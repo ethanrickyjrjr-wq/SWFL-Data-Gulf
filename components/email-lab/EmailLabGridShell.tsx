@@ -1690,6 +1690,8 @@ export function EmailLabGridShell({
           deliverableId={sendId}
           isBlockCanvas
           onClose={() => setSendOpen(false)}
+          subjectVariants={doc.subjectVariants}
+          ctaVariants={doc.ctaVariants}
         />
       )}
 
