@@ -938,6 +938,7 @@ export interface Database {
           failed_count: number;
           sent_at: string | null;
           created_at: string;
+          variant_config: Json | null;
         };
         Insert: {
           id?: string;
@@ -949,6 +950,7 @@ export interface Database {
           failed_count?: number;
           sent_at?: string | null;
           created_at?: string;
+          variant_config?: Json | null;
         };
         Update: {
           id?: string;
@@ -960,6 +962,7 @@ export interface Database {
           failed_count?: number;
           sent_at?: string | null;
           created_at?: string;
+          variant_config?: Json | null;
         };
         Relationships: [];
       };
