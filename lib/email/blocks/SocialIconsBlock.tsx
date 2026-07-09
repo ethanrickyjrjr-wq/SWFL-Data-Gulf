@@ -8,6 +8,7 @@ import type { EmailGlobalStyle, SocialIconsProps, SocialPlatformEntry } from "..
 import { platformMeta, domainFromUrl } from "../social/platforms";
 import { SocialIcon } from "@/components/email-lab/social-icons";
 import { fontStack, SECTION_PAD, CARD_BG, BORDER, MUTED } from "./styles";
+import { legibleInk } from "./on-dark";
 
 const SIZE_PX: Record<NonNullable<SocialIconsProps["iconSize"]>, number> = {
   sm: 20,
@@ -85,7 +86,9 @@ export function SocialIconsBlock({
     >
       {entries.map((entry, i) => {
         const label = labelFor(entry);
-        const color = colorFor(entry, props, accent);
+        // Icons sit on the white card — non-text floor 3 (custom entries carry
+        // the brand accent; known platforms keep their own brand colors).
+        const color = legibleInk(colorFor(entry, props, accent), CARD_BG, 3);
         const showIcon = displayMode !== "text";
         const showText = displayMode !== "icon";
         return (

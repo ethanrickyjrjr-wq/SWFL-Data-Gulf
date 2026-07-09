@@ -12,6 +12,8 @@ import { AgentHeroBlock } from "./AgentHeroBlock";
 import { AgentCardBlock } from "./AgentCardBlock";
 import { FooterBlock } from "./FooterBlock";
 import { SourcesBlock } from "./SourcesBlock";
+import { ListingBlock } from "./ListingBlock";
+import { SocialIconsBlock } from "./SocialIconsBlock";
 
 /** Regex for a standalone `color:` TEXT-INK declaration carrying `hex` —
  *  `[^-]` excludes `background-color:` / `border-*-color:` (fills and borders
@@ -119,5 +121,58 @@ describe("accent links on light surfaces", () => {
       }),
     );
     expect(out).not.toMatch(inkDecl("#3DC9C0"));
+  });
+});
+
+// Pale-primary / dark-accent brand: price ink (1.2:1 on white) and the badge
+// chip's hardcoded #06231f on a dark accent fill are the failure pair here.
+const PALE: EmailGlobalStyle = {
+  primaryColor: "#F5E6C4",
+  accentColor: "#0b3d4c",
+  fontFamily: "MODERN_SANS",
+  textColor: "#1F2937",
+  backdropColor: "#F8FAFC",
+};
+
+describe("ListingBlock ink guards", () => {
+  it("price never renders a pale primary on the white card", async () => {
+    const out = await render(
+      createElement(ListingBlock, { props: { price: "$485,000" }, globalStyle: PALE }),
+    );
+    expect(out).not.toMatch(inkDecl("#F5E6C4"));
+  });
+
+  it("badge chip ink adapts to a DARK accent fill (hardcoded #06231f would vanish)", async () => {
+    const out = await render(
+      createElement(ListingBlock, { props: { badge: "JUST LISTED" }, globalStyle: PALE }),
+    );
+    expect(out).not.toMatch(inkDecl("#06231f"));
+  });
+
+  it("'View listing' link guards accent on the card", async () => {
+    const out = await render(
+      createElement(ListingBlock, {
+        props: { linkUrl: "https://example.com" },
+        globalStyle: HOUSE, // teal on white = 2.04
+      }),
+    );
+    expect(out).not.toMatch(inkDecl("#3DC9C0"));
+  });
+});
+
+describe("SocialIconsBlock custom icon color", () => {
+  it("guards the accent used for custom entries on the white card (non-text floor 3)", async () => {
+    // Custom entry with no logoUrl → GlobeIcon tinted with the accent (SVG fill,
+    // not a css `color:` decl) — assert the raw hex is absent entirely: in this
+    // fixture the accent has no other legitimate way into the output.
+    const out = await render(
+      createElement(SocialIconsBlock, {
+        props: {
+          platforms: [{ type: "custom", url: "https://example.com", label: "My site" }],
+        },
+        globalStyle: HOUSE, // teal on white = 2.04 < 3
+      }),
+    );
+    expect(out).not.toContain("#3DC9C0");
   });
 });

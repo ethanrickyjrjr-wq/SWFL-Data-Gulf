@@ -5,6 +5,7 @@
 import { Section, Img, Text, Link } from "@react-email/components";
 import type { EmailGlobalStyle, ListingProps } from "../doc/types";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
+import { legibleInk } from "./on-dark";
 
 export function ListingBlock({
   props,
@@ -14,6 +15,7 @@ export function ListingBlock({
   globalStyle: EmailGlobalStyle;
 }) {
   const font = fontStack(globalStyle.fontFamily);
+  const bg = props.sectionBg ?? CARD_BG;
   const specs = [
     props.beds ? `${props.beds} bd` : null,
     props.baths ? `${props.baths} ba` : null,
@@ -40,7 +42,7 @@ export function ListingBlock({
   return (
     <Section
       style={{
-        backgroundColor: props.sectionBg ?? CARD_BG,
+        backgroundColor: bg,
         padding: sectionPad(props.paddingY),
         borderBottom: `1px solid ${BORDER}`,
       }}
@@ -56,7 +58,7 @@ export function ListingBlock({
             fontWeight: 700,
             letterSpacing: "0.06em",
             textTransform: "uppercase",
-            color: "#06231f",
+            color: legibleInk("#06231f", globalStyle.accentColor, 4.5),
             backgroundColor: globalStyle.accentColor,
             padding: "3px 8px",
             borderRadius: "4px",
@@ -73,7 +75,8 @@ export function ListingBlock({
             fontFamily: font,
             fontSize: "22px",
             fontWeight: 700,
-            color: globalStyle.primaryColor,
+            // 22px/700 = WCAG large text → 3:1 floor (spec D3)
+            color: legibleInk(globalStyle.primaryColor, bg, 3),
             margin: "10px 0 0",
           }}
         >
@@ -109,7 +112,7 @@ export function ListingBlock({
               fontFamily: font,
               fontSize: "13px",
               fontWeight: 600,
-              color: globalStyle.accentColor,
+              color: legibleInk(globalStyle.accentColor, bg, 4.5),
             }}
           >
             View listing →
