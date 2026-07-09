@@ -4,6 +4,7 @@ import type { MethodologyEntry } from "../../refinery/lib/methodology-registry.m
 import { freshnessDirective } from "@/lib/assistant/system-prompt";
 import {
   sanitizeProse,
+  scrubBrainSlugs,
   scrubCaveatTechnical,
   isDisplayableCaveat,
 } from "@/refinery/render/speaker.mts";
@@ -136,7 +137,15 @@ export function renderBlock(b: GroundingBlock): string {
     .filter(isDisplayableCaveat);
   if (cleanCaveats.length) parts.push(`Caveats: ${cleanCaveats.join("; ")}`);
   if (d.grain_boundary) parts.push(`What we do NOT hold: ${JSON.stringify(d.grain_boundary)}`);
-  return scrubStatsJargon(parts.join("\n"));
+  // Same doctrine as scrubStatsJargon, one leak class over: master's dossier prose
+  // names its upstream brains by internal id, the prompt then tells the model to
+  // "name the specific datasets we hold" — and the model complies with the only names
+  // it has. `sanitizeProse` (above, on conclusion + caveats) maps every id it KNOWS;
+  // this runs on the whole joined block, so a metric label or table title carrying a
+  // slug is caught too, and an id with no map entry still never reaches the model.
+  // Structural fix, not a "please don't say X" instruction: RULE 1 CITE beats a
+  // prompt-level ban every time.
+  return scrubBrainSlugs(scrubStatsJargon(parts.join("\n")));
 }
 
 /**

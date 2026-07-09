@@ -1,6 +1,15 @@
-import { test, expect } from "bun:test";
+import { test, expect, mock, afterAll } from "bun:test";
 import { filterOutputToZips, computeMetricChart } from "@/refinery/lib/chart-from-metrics.mts";
+import * as fetchBrainModule from "@/lib/fetch-brain";
 import type { BrainOutput } from "@/refinery/types/brain-output.mts";
+
+// Bun's mock.module is process-global and mock.restore() does NOT undo it. Snapshot the
+// real module and re-install it in afterAll, or this stub leaks into every later file
+// that imports fetch-brain for real (conversation-path.test.ts among them).
+const ORIG_FETCH_BRAIN = { ...fetchBrainModule };
+afterAll(() => {
+  mock.module("@/lib/fetch-brain", () => ORIG_FETCH_BRAIN);
+});
 
 // buildChartForQuestion itself fetches brains over the network (fetchBrain), so the
 // live route is covered by the *_live_verify check. Here we pin the COMPOSITION seam
@@ -46,4 +55,43 @@ test("scoped path charts only the city's ZIPs (filter + detailTablesOnly)", () =
 test("default path (no zips) leaves the output untouched — the chat-regression seam", () => {
   const o = swflByZip();
   expect(filterOutputToZips(o, [])).toBe(o); // identity → chat's computeMetricChart(output) is unchanged
+});
+
+// --- Which brain does a prompt actually reach? (the AI-authored email chart) ---
+//
+// `lib/email/build-doc.ts` buildPromptChart hands the user's prompt straight to
+// buildChartForQuestion, which routes through resolveReachTargets. Before 07/09/2026 the
+// router had no rule for heat or inventory, so an email prompt about either fell to
+// CHART_FALLBACKS[0] = housing-swfl and rendered a median-sale-price bar — the wrong
+// column, silently. This pins the slug the producer fetches, which is the whole fix.
+// (This assertion cannot live in build-doc.test.ts: that file module-mocks
+// buildChartForQuestion to null for its entire run.)
+
+const fetched: string[] = [];
+mock.module("@/lib/fetch-brain", () => ({
+  ...ORIG_FETCH_BRAIN,
+  fetchBrain: async (slug: string) => {
+    fetched.push(slug);
+    throw new Error("no network in this test — we only assert the routing decision");
+  },
+}));
+const { buildChartForQuestion } = await import("./chart-for-question");
+
+test("an inventory-tightening prompt reaches market-heat-swfl, not the price fallback", async () => {
+  fetched.length = 0;
+  await buildChartForQuestion("a chart of inventory tightening by corridor", "https://x");
+  expect(fetched).toContain("market-heat-swfl");
+  expect(fetched[0]).not.toBe("housing-swfl"); // the old silent-wrong-column fallback
+});
+
+test("a heat prompt reaches market-heat-swfl", async () => {
+  fetched.length = 0;
+  await buildChartForQuestion("which corridors are heating up?", "https://x");
+  expect(fetched).toContain("market-heat-swfl");
+});
+
+test("an unroutable prompt still falls back rather than charting nothing", async () => {
+  fetched.length = 0;
+  await buildChartForQuestion("add a chart", "https://x");
+  expect(fetched[0]).toBe("housing-swfl"); // CHART_FALLBACKS[0] — the intended fallback lane
 });

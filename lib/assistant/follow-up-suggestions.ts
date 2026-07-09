@@ -29,7 +29,11 @@ const TOPIC_FOLLOW_UPS: Array<{ keywords: RegExp; chips: string[] }> = [
     ],
   },
   {
-    keywords: /\b(permit|construction|build(?:ing|s)?|new homes?)\b/i,
+    // The bare verb `build` used to live in this alternation, and this table matches
+    // the ANSWER as well as the question — so any answer that offered to "build" a
+    // chart manufactured permit chips under a conversation about something else
+    // entirely (found live 07/09/2026). Keep `building` / `builds`, never the verb.
+    keywords: /\b(permit|construction|building|builds|new homes?)\b/i,
     chips: [
       "What's driving the permit activity?",
       "How does this compare to last quarter?",
@@ -61,7 +65,13 @@ const TOPIC_FOLLOW_UPS: Array<{ keywords: RegExp; chips: string[] }> = [
     ],
   },
   {
-    keywords: /\b(price|value|zhvi|valuation|home price|sale price|market heat|listing)\b/i,
+    // The residential catch-all. Extended (not duplicated) to cover the heat /
+    // inventory / momentum vocabulary the router now reaches — a corridor-heat
+    // conversation used to fall through to GENERIC_FOLLOW_UPS. A competing rule
+    // would have to sit somewhere in this first-match-wins order and would shadow
+    // or be shadowed by this one; extending has no ordering risk.
+    keywords:
+      /\b(price|value|zhvi|valuation|home price|sale price|market heat|listing|tighten(?:ing|ed)?|hotness|hottest|heating up|cooling off|days on market|dom|momentum|inventory)\b/i,
     chips: ["How does this compare to last year?", "Show me this by ZIP", "What's driving this?"],
   },
 ];

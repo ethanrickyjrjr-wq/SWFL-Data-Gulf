@@ -1,47 +1,49 @@
 /**
- * prove-chart-conversation.mts — PROVE the CONVERSATION-path chart on a LIVE Haiku
- * answer (Increment 1 of the dynamic-chart build). The report path was already
- * proven (scripts/prove-chart-deflection.mts); this is its sibling for the OTHER
- * engine path — /api/assistant's conversation path (BriefcaseChat / OUTSIDE /
- * public welcome), which until now emitted NO chart and told the analyst it
- * "can't chart".
+ * prove-chart-conversation.mts — PROVE the CONVERSATION path tells the truth about
+ * charts, on a LIVE Haiku answer.
  *
- * It assembles the system prompt EXACTLY as runConversationPath does on the
- * grounded region branch — buildGroundedRegionSystem(voice) + the same
- * "=== CHART ON SCREEN ===" directive + the chart's real figures from
- * buildChartForQuestion — then runs live Haiku and scores each answer with the
- * SAME detectors the push-gate uses (findDeflection + findLeak). A clean answer
- * proves: the analyst describes the chart, cites real numbers, never deflects,
- * never leaks the raw token.
+ * REPURPOSED 07/09/2026. This harness used to prove the chat AUTO-CHART: it assembled
+ * `buildGroundedRegionSystem` + a "=== CHART ON SCREEN ===" block + the chart's figures
+ * and checked that the analyst described the chart instead of refusing. That premise is
+ * gone. Chat no longer charts — the producer ran to completion BEFORE the model was
+ * called, so an offer to build one could never be honored, and the user's reply re-entered
+ * the same producer and missed identically. The prompt was patched twice; the prompt was
+ * never the root.
  *
- * Run:  bun run scripts/prove-chart-conversation.mts
+ * The invariants are now INVERTED. A clean answer proves the analyst:
+ *   1. never mentions, offers, or promises a chart              (the unfulfillable offer)
+ *   2. never speaks an internal `*-swfl` brain id               (the slug leak)
+ *   3. never deflects and never leaks the raw freshness token   (the pre-existing gate)
+ *   4. answers a heat/inventory question from real reached numbers, not a paraphrase
+ *
+ * (1) and (2) are what `chat_chart_honesty_live_verify` asks for. (2) is a defense-in-depth
+ * read: `stream.ts` scrubs the streamed output too, but this harness calls the model
+ * directly, so it sees the RAW completion — exactly the leak layer 2 would otherwise mask.
+ *
+ * PAID. Operator-run, never autonomous. Run:  bun run scripts/prove-chart-conversation.mts
  */
 import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropic } from "../refinery/agents/anthropic.mts";
 import { TRIAGE_MODEL } from "../refinery/agents/anthropic.mts";
 import { buildGroundedRegionSystem } from "../lib/assistant/conversation-path";
-import { buildChartForQuestion } from "../lib/assistant/chart-for-question";
 import { findDeflection, findLeak } from "../.claude/hooks/check-answer-fix-proof.mjs";
 
-const QUESTION =
-  "What's the read on SWFL commercial real estate — chart vacancy across the corridors?";
+// The exact live transcript that exposed all four roots on 07/09/2026.
+const QUESTION = "Which corridors are heating up? Show me where inventory is tightening.";
 const ORIGIN = "https://www.swfldatagulf.com";
 const ROLLS = 6;
-const MAX_TOKENS = 700; // mirrors GROUNDED_MAX_TOKENS in conversation-path.ts
+const MAX_TOKENS = 1100; // mirrors GROUNDED_MAX_TOKENS in conversation-path.ts
 const fs = await import("node:fs/promises");
 const { execSync } = await import("node:child_process");
 
-// Reproduce runConversationPath's region-branch system assembly verbatim.
-async function buildSystem(): Promise<{ system: string; chartTitle: string | null }> {
-  const { system } = await buildGroundedRegionSystem(QUESTION, ORIGIN, "analyst");
-  const chartResult = await buildChartForQuestion(QUESTION, ORIGIN);
-  const chartBlock = chartResult
-    ? "\n\n=== CHART ON SCREEN — a chart is displayed to the user RIGHT NOW. Describe what " +
-      "it shows; never say you can't chart or that it's out of scope. State ONLY the figures " +
-      "below — never invent one not listed here. ===\n" +
-      chartResult.groundingNote
-    : "";
-  return { system: system + chartBlock, chartTitle: chartResult?.chart.title ?? null };
+/** Any internal brain id the model spoke out loud. Mirrors stream.ts's BRAIN_SLUG_RE. */
+function findSlug(answer: string): string | null {
+  return /\b[a-z][a-z0-9]*(?:-[a-z0-9]+)*-swfl\b/.exec(answer)?.[0] ?? null;
+}
+
+/** A chart promise the surface cannot honor. Chat has no chart tool. */
+function findChartOffer(answer: string): string | null {
+  return /\b(chart|plot|graph|visuali[sz]\w*)\b/i.exec(answer)?.[0] ?? null;
 }
 
 async function callHaiku(client: Anthropic, system: string): Promise<string> {
@@ -61,6 +63,8 @@ interface Scored {
   answer: string;
   deflect: string | null;
   leak: string | null;
+  slug: string | null;
+  chart: string | null;
   bad: boolean;
 }
 
@@ -76,12 +80,19 @@ async function main() {
     encoding: "utf-8",
   }).trim();
 
-  const { system, chartTitle } = await buildSystem();
-  if (!chartTitle) {
+  // Assembled EXACTLY as runConversationPath's region branch does — no chart block.
+  const { system } = await buildGroundedRegionSystem(QUESTION, ORIGIN, "analyst");
+
+  // The router fix is what makes this question answerable. If the reach brain never
+  // landed in the prompt, a clean answer would only prove the model stayed quiet.
+  const reached = /Market Heat|Inventory Y\/Y/i.test(system);
+  if (!reached) {
     console.log(
       JSON.stringify({
         key_loaded: true,
-        reason: "no chart built — check brains/cre-swfl.md corridor_vacancy",
+        reason:
+          "market-heat-swfl did not reach the grounding block — check resolveReachTargets " +
+          "and that the brain is published. Proving honesty on empty grounding is worthless.",
       }),
     );
     return;
@@ -97,7 +108,16 @@ async function main() {
     }
     const deflect = findDeflection(answer);
     const leak = findLeak(answer);
-    results.push({ answer, deflect, leak, bad: Boolean(deflect || leak) });
+    const slug = findSlug(answer);
+    const chart = findChartOffer(answer);
+    results.push({
+      answer,
+      deflect,
+      leak,
+      slug,
+      chart,
+      bad: Boolean(deflect || leak || slug || chart),
+    });
     process.stderr.write(results[i].bad ? "x" : ".");
   }
   process.stderr.write("\n");
@@ -111,13 +131,19 @@ async function main() {
     harness: "scripts/prove-chart-conversation.mts",
     endpoint: "/api/assistant",
     question: QUESTION,
-    chart_title: chartTitle,
+    grounding_reached_heat_brain: reached,
     rolls: ROLLS,
     bad,
     bad_rate: bad / ROLLS,
     worked: bad === 0,
     sample_clean: firstClean,
-    breakdown: results.map((r) => ({ bad: r.bad, deflect: r.deflect, leak: r.leak })),
+    breakdown: results.map((r) => ({
+      bad: r.bad,
+      deflect: r.deflect,
+      leak: r.leak,
+      slug: r.slug,
+      chart: r.chart,
+    })),
   };
   await fs.writeFile(
     "scripts/.prove-chart-conversation-result.json",
@@ -125,9 +151,9 @@ async function main() {
   );
   console.log(JSON.stringify(report, null, 2));
 
-  // Append ONE proof line to the ledger when we captured a clean live answer (the
-  // push-gate requires this for an answer-path fix claim). Honest by construction:
-  // it's a REAL captured Haiku answer, scored clean by the gate's own detectors.
+  // Append ONE proof line when we captured a clean live answer (the push-gate requires
+  // this for an answer-path fix claim). Honest by construction: a REAL captured Haiku
+  // answer, scored clean by the gate's own detectors plus the two new ones.
   if (firstClean) {
     const proof = {
       question: QUESTION,
@@ -135,7 +161,8 @@ async function main() {
       endpoint: "/api/assistant",
       observed_at: observedAt,
       commit_claim:
-        "conversation-path charts (Increment 1): analyst describes the on-screen vacancy chart, cites real corridor figures, no deflection, no token leak",
+        "chat chart honesty: the analyst answers heat/inventory from the reached brain's real " +
+        "figures, never offers a chart it cannot build, never speaks an internal brain id",
     };
     await fs.appendFile("verification/answer-proofs.jsonl", JSON.stringify(proof) + "\n");
     process.stderr.write("✅ appended live proof to verification/answer-proofs.jsonl\n");

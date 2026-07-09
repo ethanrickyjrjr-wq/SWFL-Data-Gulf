@@ -26,7 +26,6 @@ globalThis.fetch = (async () => {
 }) as typeof fetch;
 mock.module("@/lib/assistant/chart-for-question", () => ({
   buildChartForQuestion: async () => null,
-  looksChartWorthy: () => false,
 }));
 
 // The authored payload the mocked model "returns" — a clean text block (so the

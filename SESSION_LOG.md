@@ -1,3 +1,40 @@
+## 2026-07-09 (Opus 4.8 · main) — fix(assistant): chat stops negotiating charts; repair the brain router feeding chat grounding + AI email charts
+
+Executed `docs/superpowers/specs/2026-07-09-chat-chart-honesty-design.md` Phases A–E. Four roots,
+all four closed in code: (R1) `TOPIC_TO_SLUG` had 6 rules for 42 brains and none for housing, heat,
+listings, or momentum, so every chart-shaped question routed to nothing and `buildChartForQuestion`
+rendered `CHART_FALLBACKS[0]` (median sale price) for all of them — now 12 rules, residential above
+`cre-swfl` so nothing steals `cap rate`/`vacancy`; (R2) the bare verb `build` sat in the permits regex
+in two files, so "build me a chart of rents" routed to permits — deleted, kept `building`/`builds`;
+(R3) `PACK_ID_LABELS` had drifted 18 brains behind, which is the whole reason `listing-momentum-swfl`
+reached a customer verbatim — extended, plus a new `scrubBrainSlugs` catch-all applied at
+`renderBlock`'s join (Layer 1, before the prompt) and in `stream.ts` as a tail-buffered transform
+(Layer 2, a slug straddles SSE chunks); (R4) `chartForConversation` ran to completion before the model
+was called, so the prompt's "offer to build one" could never be honored — chart lane deleted from chat,
+`looksChartWorthy` deleted with it, all three system prompts now forbid mentioning a chart.
+
+Three spec defects found by executing rather than reading. **home-values-swfl and investor-zip-swfl
+are not in `BRAIN_CATALOG`**, and `reach.ts` fail-closes on it, so the spec's `home-values-swfl` row
+would have shipped inert — dropped it, opened a check (probed `/api/b/home-values-swfl?tier=2` → 200,
+so `routeRankedDelta` is NOT dead in prod; blast radius is the reach allowlist + MCP inventory only).
+**`\brent\b` never matched "rents"**, so the spec's own Phase-A test failed: that question only ever
+routed anywhere via the permits hijack being deleted in the same phase — pluralized to match
+`route-chart.ts:33`, which had already solved it. **Layer 1 was mostly an existing function** —
+`sanitizeProse` already substitutes slugs; the spec's proposed fresh `sanitizeSlugs` would have been a
+second competing per-id pass.
+
+Commit `1f2c9fe4` (2h earlier, on main) had already stripped chart rendering from every chat client, so
+the server was pushing a `{type:"chart"}` frame nobody painted and paying a `composeChartFromRequest`
+LLM call per chart-worthy turn to build it. Surface 2 is a cost deletion, not a pixel change.
+
+`bun test lib/ refinery/render` → 4032 pass, 0 fail. `bunx next build` clean. Phase F deliberately NOT
+done: the four build-time checks stay open until this lands on main (checks are prod receipts, not dev
+attestation), and `chat_chart_honesty_live_verify` is operator-run + paid. `scripts/prove-chart-conversation.mts`
+repurposed to prove the inverted invariants (no chart mention, no slug spoken) and to append the
+`answer-proofs.jsonl` line the pre-push gate will demand. Opened `home_values_investor_zip_not_in_catalog`,
+`chart_fallback_chain_dies_on_first_fetch_error`, `located_branch_no_reach_grounding`. Follow-up:
+`docs/superpowers/handoffs/2026-07-09-chat-chart-honesty-followup.md`.
+
 ## 2026-07-09 (Sonnet 5 · main) — docs(email): widen Phase 2 to all 27 templates, split into content/visual tracks
 
 Operator screenshotted `magazine-issue` (one of the 8 "clean" templates from the earlier audit)

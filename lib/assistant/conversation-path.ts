@@ -26,7 +26,6 @@ import {
 } from "@/lib/welcome/grounded";
 import { fetchBrain, buildDossier } from "@/lib/fetch-brain";
 import { renderBlock, type GroundingBlock } from "@/lib/highlighter/grounding";
-import { routeChart } from "@/lib/route-chart";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { buildWelcomeAnswer } from "@/lib/welcome/answer";
 import { identityForLocation } from "@/lib/location-surface";
@@ -40,12 +39,8 @@ import { streamAnswer, sseMessage } from "@/lib/assistant/stream";
 import { FORMAT_RULE } from "@/lib/assistant/system-prompt";
 import { isOffTopicQuestion } from "@/lib/assistant/off-topic";
 import { asOfFromToken } from "@/lib/project/as-of";
-import {
-  buildChartForQuestion,
-  looksChartWorthy,
-  type ChartForQuestion,
-} from "@/lib/assistant/chart-for-question";
-import { composeChartFromRequest } from "@/lib/assistant/compose-chart";
+import { resolveReachTargets } from "@/lib/highlighter/reach";
+import { displayName } from "@/refinery/render/speaker.mts";
 import { webFallbackForAnswer } from "@/lib/assistant/web-fallback";
 import {
   looksLikeCompAsk,
@@ -60,28 +55,19 @@ import {
 import { looksLikePastedListingLink, pastedLinkComp } from "@/lib/assistant/pasted-link-comp";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
-/**
- * Pick the chart for a conversation answer. GATED on chart-shaped intent
- * (`looksChartWorthy`) so a plain factual question ("what's the median home value
- * in Naples") gets a text answer, not a bar chart on every single turn — routeChart
- * / resolveReachTargets match on TOPIC, not on whether a chart is the right response
- * shape, so without this gate any on-topic question auto-charted (bug found live
- * 2026-07-03: a chart appeared on every question/starter prompt). Once gated in: an
- * explicit "chart X / plot Y" request first tries the user-DIRECTED composer (Tier C:
- * the LLM selects which HELD numbers to plot and the shape, provenance-gated so it can
- * never invent) — honoring the exact ask. On any miss (lint reject, nothing to plot) it
- * falls back to the canned producer (rich zhvi/scatter visuals + the any-brain
- * deterministic bar).
- */
-async function chartForConversation(
-  question: string,
-  origin: string,
-  uploadsText: string,
-): Promise<ChartForQuestion | null> {
-  if (!looksChartWorthy(question)) return null;
-  const composed = await composeChartFromRequest(question, origin, { uploadsText });
-  return composed ?? (await buildChartForQuestion(question, origin));
-}
+// THE CHAT AUTO-CHART IS GONE (07/09/2026). `chartForConversation` lived here and ran
+// to completion BEFORE streamAnswer, so the model had no chart tool and no way to honor
+// its own offer. When the producer returned null the prompt still told the model to
+// "offer to build one" — the offer asked for SCOPE, scope doesn't change routing, and
+// the user's reply re-entered the identical producer and missed identically. The loop
+// could not terminate; two prior fixes went at the prompt and the prompt was never the
+// root. The chat clients had already stopped painting the frame (commit 1f2c9fe4), so
+// `composeChartFromRequest` was a paid LLM call per chart-worthy turn rendering nothing.
+//
+// `chart-for-question.ts` and `compose-chart.ts` STAY — they power the AI-authored email
+// chart (`lib/email/build-doc.ts` buildPromptChart) and, through the reach router this
+// same change repaired, now route heat/inventory prompts correctly there. The
+// user-directed property-comp chart (`comp.chart`) is a different lane and is untouched.
 
 /**
  * The on-demand comp path (lib/assistant/comp-helper) for a property/value ask the
@@ -162,6 +148,9 @@ export const PUBLIC_SYSTEM =
   "cold — this works it for them without them working harder.\n\n" +
   "Lead with that hook. Then offer to build a real, cited one-pager right now for any " +
   "ZIP or named place they give you, so they see the actual data before anything else.\n\n" +
+  "NEVER mention charts or offer to build a chart in this conversation — the one-pager is " +
+  "the build you are offering, and it is real. NEVER name a dataset, table, brain, report, " +
+  "or identifier; describe what the data IS in plain English.\n\n" +
   "NEVER invent a Southwest Florida number — no flood loss, sale price, or rate from " +
   "memory or a guess. The real figures come only from the live build, each carrying " +
   'its source. If they ask for a specific number, do not make one up: say "let me pull ' +
@@ -183,23 +172,23 @@ export const OUTSIDE_SYSTEM =
   "client-ready project. The data covers Lee and Collier counties — prices, permits, " +
   "flood risk, tourism, and the local economy, down " +
   "to the ZIP and named place. Answer the question directly and usefully, in plain prose, " +
-  // CHARTS + DATA (capability-truth lives IN the prompt below, not only when a chart
-  // renders): the analyst CAN build a cited chart and CAN surface the source behind any
-  // number. When a chart IS built a "=== CHART ON SCREEN ===" block is appended with its
-  // real figures + a "describe it, never refuse" directive; when none renders this turn the
-  // prompt still tells the model to OFFER one and name what it would plot (never deny the
-  // capability — the "I can't chart, that's on you" deflection came from this truth living
-  // only here in a comment). The other wired affordance is "File this answer".
+  // CAPABILITY TRUTH. The old text here told the model it "CAN build a cited chart" and,
+  // when none was on screen, to "offer to build one and name what you would plot." Chat
+  // has no chart tool and never did — the producer ran to completion before the model was
+  // called, so the offer could never be honored, and the user's reply re-entered the same
+  // producer and missed identically. An unfulfillable promise is a lie with extra steps.
+  // The honest affordances are: file an answer into the project, and build in the lab.
   "from the cited data below. You CAN file answers into their " +
   "project: when they save something it lands in their briefcase to build into a " +
   "client-ready deliverable — point them to the 'File this answer' link when it would " +
-  "help, but do not pitch and do not steer the conversation toward a product. " +
-  "You CAN also build a cited chart from this data on request and surface the source " +
-  "behind any number — when a chart or a useful data pull fits the question, offer it. " +
-  "NEVER tell the user you can't make a chart, can't bring in data, or that creating or " +
-  "saving it is 'on them'; if no chart is on screen this turn, offer to build one and name " +
-  "what you would plot. When they ask what else would help, name the specific datasets we " +
-  "hold for that topic and offer to pull, chart, or file each. " +
+  "help, but do not pitch and do not steer the conversation toward a product.\n\n" +
+  "NEVER mention charts, offer to build a chart, or promise any future build in this " +
+  "conversation — you cannot make one here, and an offer you cannot honor is worse than " +
+  "no offer. NEVER name a dataset, table, brain, report, or identifier; describe what the " +
+  "data IS in plain English (say 'our market-heat read', never a slug or a file name). " +
+  "After a substantive answer, route the user: offer to save it into a file, or — if they " +
+  "are done researching — to build it in the lab now. Let them choose. If no project is " +
+  "open, offer to start one on your first substantive answer.\n\n" +
   "ANSWER FIRST: a region-wide Southwest Florida question (e.g. what's driving prices " +
   "and rents right now) is answerable from the region-wide data below — answer it with " +
   "the real numbers FIRST. A SWFL-wide read is a real, complete answer, never a reason " +
@@ -243,6 +232,9 @@ export const PUBLIC_GROUNDED_SYSTEM =
   "permits, flood risk, tourism, and the local " +
   "economy, down to the ZIP and named place. Answer the question directly and usefully, in " +
   "plain prose, from the cited data below.\n\n" +
+  "NEVER mention charts, offer to build a chart, or promise any future build — you cannot " +
+  "make one here. NEVER name a dataset, table, brain, report, or identifier; describe what " +
+  "the data IS in plain English.\n\n" +
   "ANSWER FIRST: a region-wide Southwest Florida question (e.g. what's driving prices and " +
   "rents right now) is answerable from the region-wide data below — answer it with the real " +
   "numbers FIRST. A SWFL-wide read is a real, complete answer, never a reason to demand a " +
@@ -289,26 +281,24 @@ export async function buildGroundedRegionSystem(
         dossier: buildDossier(output, freshness_token),
       },
     ];
-    // CRE corridor-grain questions (vacancy / asking-rent / corridor positioning) need
-    // the per-corridor numbers master rolls into a single median. Add cre-swfl's dossier
-    // — it carries the corridor_vacancy detail_table — so the prose answers AT corridor
-    // grain and lines up with the chart. Nested failsafe: if cre-swfl can't load,
-    // master-only grounding still holds and the no-invention floor is unchanged.
-    const intent = routeChart(lastUser);
-    if (
-      intent &&
-      (intent.scope === "vacancy" ||
-        intent.scope === "asking-rent" ||
-        intent.scope === "corridor-scatter")
-    ) {
+    // Master holds region-wide rollups. A question at finer grain ("which corridors are
+    // heating up", "where is inventory tightening") answered from those rollups alone
+    // comes out vague, because the model has no per-ZIP numbers to reason over — so it
+    // paraphrases. This used to be a hardcoded cre-swfl special case for three chart
+    // intents; it is now the general form: route the question to up to MAX_REACH brains
+    // and append each one's dossier. Each fetch is independently fail-open, matching the
+    // old nested cre failsafe — a brain that will not load is skipped, master-only
+    // grounding survives as a complete honest answer, and the no-invention floor is
+    // unchanged. Labels are customer-facing (`displayName`), never the internal slug.
+    for (const slug of resolveReachTargets(lastUser, "master")) {
       try {
-        const cre = await fetchBrain("cre-swfl", { tier: 2, origin });
+        const reach = await fetchBrain(slug, { tier: 2, origin });
         blocks.push({
-          label: "SWFL commercial corridors",
-          dossier: buildDossier(cre.output, cre.freshness_token),
+          label: displayName(slug),
+          dossier: buildDossier(reach.output, reach.freshness_token),
         });
       } catch {
-        // cre-swfl unavailable → master-only grounding is the graceful floor.
+        // This brain is unavailable → the remaining blocks are still a real answer.
       }
     }
     const system =
@@ -357,7 +347,8 @@ function buildSummarizeSystem(alreadyFiled: { question?: string; answer?: string
     "Read the whole conversation and write ONE concise summary of the important findings. Include the " +
     "key numbers exactly as they appeared — never invent, round, average, or recompute a figure — and " +
     "name the source or topic each came from. Lead with the bottom line, then the supporting points, in " +
-    "a short paragraph or two. Plain text only. Never use internal jargon, vendor/system names " +
+    "a short paragraph or two. Plain text only. Never name a dataset, table, brain, report, or " +
+    "identifier — describe what the data IS in plain English. Never use internal jargon, vendor/system names " +
     "(no 'master', 'brain', 'payload', 'grain', 'dossier', 'Accela'), or raw statistics terms " +
     "(never cite a statistical methodology term — no 'z-score', 'sigma', 'standard " +
     "deviation(s)', 'variance', or 'percentile' — describe how unusual a move is ONLY in " +
@@ -653,18 +644,6 @@ export async function runConversationPath(
       origin,
       analyst ? "analyst" : "public",
     );
-    // A deterministic, cited chart for the question — brain numbers ONLY (the
-    // moat: the LLM never touches a figure). Best-effort: null → text-only answer.
-    // When present, inject the chart's REAL figures + a "describe it, never refuse"
-    // directive (the report path's proven technique) so prose and chart agree and no
-    // figure is invented.
-    const chartResult = await chartForConversation(lastUser, origin, uploadsText);
-    const chartBlock = chartResult
-      ? "\n\n=== CHART ON SCREEN — a chart is displayed to the user RIGHT NOW. Describe what " +
-        "it shows; never say you can't chart or that it's out of scope. State ONLY the figures " +
-        "below — never invent one not listed here. ===\n" +
-        chartResult.groundingNote
-      : "";
     const prelude: WelcomeFrame[] = token
       ? [
           {
@@ -677,9 +656,6 @@ export async function runConversationPath(
           },
         ]
       : [];
-    // The chart frame rides in the prelude (emitted before the text stream), mirroring
-    // the report path's chart-before-text order. Clients that don't paint charts ignore it.
-    if (chartResult) prelude.push({ type: "chart", chart: chartResult.chart });
     // RUNG 3/4 — a figure the region dossier doesn't hold is fetched live + verified
     // (web) or handed to the user to supply (never invented). The verified sources ride
     // in a collapsed citation frame; the grounding block tells the model to state ONLY
@@ -701,12 +677,7 @@ export async function runConversationPath(
     // otherProjectsBlock is "" for public (no auth, no session) and for analyst without an
     // open project — so the public posture (no project context) is preserved structurally.
     return streamAnswer(
-      system +
-        chartBlock +
-        gapBlock +
-        buildUploadsBlock(uploadsText) +
-        clientContext +
-        otherProjectsBlock,
+      system + gapBlock + buildUploadsBlock(uploadsText) + clientContext + otherProjectsBlock,
       messages,
       GROUNDED_MAX_TOKENS,
       prelude,
@@ -756,18 +727,6 @@ export async function runConversationPath(
   ];
   if (answer) prelude.push({ type: "data", answer });
 
-  // A located question charts too — "chart anything" includes when the user names a
-  // place. The chart is region/corridor-grain (e.g. the 3-metro ZHVI trend, a brain's
-  // by-ZIP bar) and includes the named place; brain numbers ONLY (the moat). Best-effort.
-  const locatedChart = await chartForConversation(lastUser, origin, uploadsText);
-  if (locatedChart) prelude.push({ type: "chart", chart: locatedChart.chart });
-  const locatedChartBlock = locatedChart
-    ? "\n\n=== CHART ON SCREEN — a chart is displayed to the user RIGHT NOW. Describe what " +
-      "it shows; never say you can't chart or that it's out of scope. State ONLY the figures " +
-      "below — never invent one not listed here. ===\n" +
-      locatedChart.groundingNote
-    : "";
-
   const system = buildWelcomeGroundedSystem({
     dossier,
     detectedText: detected.token,
@@ -799,7 +758,6 @@ export async function runConversationPath(
   // answers are unchanged.
   return streamAnswer(
     system +
-      locatedChartBlock +
       sourcedBlock +
       gapBlock +
       buildUploadsBlock(uploadsText) +

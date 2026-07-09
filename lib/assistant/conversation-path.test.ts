@@ -111,6 +111,9 @@ const brainState: { map: Record<string, unknown> } = { map: {} };
 const masterState: { output: Record<string, unknown> | null } = { output: null };
 // cre-swfl read for the analyst CRE-grain grounding. null → not pulled.
 const creState: { output: Record<string, unknown> | null } = { output: null };
+// market-heat-swfl read — the reach target for a heat/inventory question. Same shape as
+// creState: the hardcoded cre special case became a general resolveReachTargets loop.
+const heatState: { output: Record<string, unknown> | null } = { output: null };
 mock.module("@/lib/fetch-brain", () => ({
   ...fetchBrain,
   loadParsedBrain: async (slug: string) => brainState.map[slug] ?? null,
@@ -120,6 +123,9 @@ mock.module("@/lib/fetch-brain", () => ({
     }
     if (slug === "cre-swfl" && creState.output) {
       return { output: creState.output, freshness_token: "SWFL-7421-v9-20260601" };
+    }
+    if (slug === "market-heat-swfl" && heatState.output) {
+      return { output: heatState.output, freshness_token: "SWFL-7421-v9-20260601" };
     }
     throw new Error(`unexpected fetchBrain("${slug}") in test`);
   },
@@ -612,6 +618,107 @@ test("analyst NON-corridor question → does NOT pull cre-swfl (master-only grou
   expect(captured.system).not.toContain("SWFL CRE corridor vacancy rate"); // cre-swfl NOT pulled
   masterState.output = null;
   creState.output = null;
+});
+
+// --- 07/09/2026: charts leave chat; the router stops dead-zoning heat/inventory ---
+
+const HEAT_OUTPUT = {
+  conclusion: "Inventory is tightening across several Lee County ZIPs.",
+  direction: "bullish",
+  magnitude: 0.6,
+  confidence: 0.8,
+  refined_at: "2026-06-12",
+  key_metrics: [],
+  detail_tables: [
+    {
+      id: "heat_by_zip",
+      title: "SWFL market heat by ZIP",
+      grain: "zip",
+      columns: [{ id: "inventory_yoy_pct", label: "Inventory Y/Y", display_format: "percent" }],
+      rows: [{ key: "33913", label: "33913", cells: { inventory_yoy_pct: -12.4 } }],
+      source: {
+        url: "https://x.supabase.co/rest/v1/market_heat",
+        fetched_at: "2026-06-15T00:00:00Z",
+        tier: 2,
+        citation: "Brains Supabase market_heat — inventory_yoy_pct per ZIP.",
+      },
+    },
+  ],
+  caveats: [],
+};
+
+test("a heat question grounds on the reach brain's real per-ZIP numbers", async () => {
+  // The dead zone: TOPIC_TO_SLUG had 6 rules for 42 brains and none for heat/inventory,
+  // so this question reached NO brain, the model saw only master's region-wide rollup,
+  // and it paraphrased instead of answering. Now market-heat-swfl rides along.
+  captured.system = undefined;
+  masterState.output = MASTER_OUTPUT;
+  heatState.output = HEAT_OUTPUT;
+  const res = await ask("Which corridors are heating up?", "outside");
+  await res.text();
+  expect(captured.system).toContain("Inventory Y/Y"); // the reach brain's real column
+  expect(captured.system).toContain("cooling into summer 2026"); // master still present
+  masterState.output = null;
+  heatState.output = null;
+});
+
+test("a reach brain that will not load degrades to master-only grounding, never a 500", async () => {
+  captured.system = undefined;
+  masterState.output = MASTER_OUTPUT;
+  heatState.output = null; // the mock throws for market-heat-swfl
+  const res = await ask("Which corridors are heating up?", "outside");
+  const body = await res.text();
+  expect(body).toContain(MODEL_SENTINEL); // the answer still streamed
+  expect(captured.system).toContain("cooling into summer 2026");
+  masterState.output = null;
+});
+
+test("no chart frame is emitted on the region-wide auto-chart path", async () => {
+  // chartForConversation ran to completion BEFORE the model was called, so the model
+  // could never honor the chart offer the prompt told it to make. Both are gone.
+  masterState.output = MASTER_OUTPUT;
+  heatState.output = HEAT_OUTPUT;
+  const res = await ask("chart the median sale price by ZIP", "outside");
+  const body = await res.text();
+  expect(frames(body).some((f) => f.type === "chart")).toBe(false);
+  masterState.output = null;
+  heatState.output = null;
+});
+
+test("no chart frame is emitted on the located path either", async () => {
+  brainState.map = { "housing-swfl": HOUSING_STUB };
+  guardState.result = {
+    capped: false,
+    fromCache: false,
+    dossier: dossierWith([
+      {
+        brain_id: "housing-swfl",
+        domain: "real-estate",
+        grain: "zip",
+        coverage_label: "ZIP 33913",
+        is_true_zip: true,
+        text: "",
+        source_citation: "Redfin Data Center.",
+        source_url: "https://www.redfin.com/news/data-center/",
+      },
+    ]),
+  };
+  const res = await ask("chart the median sale price by ZIP in 33913", "outside");
+  const body = await res.text();
+  expect(frames(body).some((f) => f.type === "chart")).toBe(false);
+  guardState.result = { capped: false, fromCache: false };
+  brainState.map = {};
+});
+
+test("the analyst prompt never claims it can build a chart", async () => {
+  captured.system = undefined;
+  masterState.output = MASTER_OUTPUT;
+  const res = await ask("what's the bottom line right now?", "outside");
+  await res.text();
+  expect(captured.system).toContain("NEVER mention charts");
+  expect(captured.system).not.toContain("offer to build one and name");
+  expect(captured.system).not.toContain("You CAN also build a cited chart");
+  masterState.output = null;
 });
 
 test("summarize action → synthesis prompt over the thread, dedups against filed Q&A", async () => {

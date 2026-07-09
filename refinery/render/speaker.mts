@@ -100,7 +100,56 @@ const PACK_ID_LABELS: Record<string, string> = {
   "rsw-airport": "RSW airport activity",
   "news-swfl": "SWFL news signals",
   "flood-barrier-mode-1": "flood barrier",
+  // The 18 brains this map had drifted behind. master.md names its upstreams in the
+  // dossier prose it hands the chat, and an id with no entry here passed through
+  // `sanitizeProse` untouched — which is how "listing-momentum-swfl" and
+  // "market-temperature-swfl" reached a customer verbatim (found live 07/09/2026).
+  "active-listings-swfl": "SWFL active listings",
+  "active-rentals-swfl": "SWFL active rentals",
+  "communities-swfl": "SWFL communities",
+  "condo-sirs-swfl": "SWFL condo reserve studies",
+  "corridor-pulse-swfl": "SWFL corridor pulse",
+  "fgcu-reri": "the FGCU real-estate index",
+  "freshness-pulse": "data freshness",
+  "home-values-swfl": "SWFL home values",
+  "hurricane-tracks-fl": "Florida hurricane tracks",
+  "investor-zip-swfl": "SWFL investor yield",
+  "licenses-swfl": "SWFL business licenses",
+  "listing-momentum-swfl": "SWFL listing momentum",
+  "market-heat-swfl": "the SWFL market-heat read",
+  "market-temperature-swfl": "the SWFL market-temperature read",
+  "permits-commercial-swfl": "SWFL commercial permits",
+  "price-distribution-swfl": "the SWFL price distribution",
+  "properties-collier-value": "Collier County parcel velocity",
+  "seller-stress-swfl": "SWFL seller stress",
 };
+
+/**
+ * The catch-all under `PACK_ID_LABELS`: substitute ANY `*-swfl` token, mapped or not.
+ *
+ * Two layers need this and must never disagree, so it lives here, next to the map:
+ *   - grounding.ts `renderBlock` scrubs the text BEFORE it enters the system prompt
+ *     (the real fix — the model cannot speak a name it never saw);
+ *   - stream.ts scrubs the model's OUTPUT (belt-and-suspenders, catches a
+ *     hallucinated or newly-added slug that bypassed layer 1).
+ *
+ * An unrecognized token is REWRITTEN, never deleted: strip-to-nothing leaves broken
+ * grammar in the user's face ("I also track , which reads…"), which is worse than
+ * the leak it fixes.
+ *
+ * The `(?![-\w])` lookahead is the same guard the per-id pass carries: without it,
+ * `env-swfl-spike-findings.md` becomes `<label>-spike-findings.md`.
+ */
+const BRAIN_SLUG_RE = /\b[a-z][a-z0-9]*(?:-[a-z0-9]+)*-swfl\b(?![-\w])/g;
+
+export function scrubBrainSlugs(text: string): string {
+  return text.replace(BRAIN_SLUG_RE, (slug) => {
+    const mapped = PACK_ID_LABELS[slug];
+    if (mapped) return mapped;
+    // Unknown `*-swfl` brain: drop the suffix, de-hyphenate, keep it readable.
+    return slug.slice(0, -"-swfl".length).split("-").join(" ");
+  });
+}
 
 const BANNED_PROSE: Array<[RegExp, string]> = [
   [/\bbifurcate(s|d|ing)?\b/gi, "split"],
@@ -609,6 +658,14 @@ const PACK_DISPLAY_NAMES: Record<string, string> = {
   "city-pulse-swfl": "Southwest Florida — City Pulse",
   "rsw-airport": "RSW Airport Activity",
   "news-swfl": "Southwest Florida — News Signals",
+  // The residential brains the chat router now reaches. Without an entry here their
+  // grounding-block label falls to `humanizeBrainId` — "Market Heat Swfl" — which is a
+  // slug with a haircut, not a customer-facing name.
+  "market-heat-swfl": "Southwest Florida — Market Heat",
+  "listing-momentum-swfl": "Southwest Florida — Listing Momentum",
+  "active-listings-swfl": "Southwest Florida — Active Listings",
+  "price-distribution-swfl": "Southwest Florida — Price Distribution",
+  "seller-stress-swfl": "Southwest Florida — Seller Stress",
 };
 
 /** Kebab id → Title Case, e.g. "new-brain-swfl" → "New Brain Swfl". */

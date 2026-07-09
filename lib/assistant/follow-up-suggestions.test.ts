@@ -40,6 +40,26 @@ test("question with no topic + answer with no topic still falls to generic", () 
   ]);
 });
 
+test("an answer offering to 'build' a chart does not return permit chips", () => {
+  // The live bug (07/09/2026): OUTSIDE_SYSTEM told the model to offer to *build* a
+  // chart, this table matches the ANSWER too, and the bare verb `build` sat in the
+  // permits regex above every residential rule. Corridor-heat conversations got
+  // "What's driving the permit activity?" underneath them.
+  const chips = suggestFollowUps(
+    "Which corridors are heating up?",
+    "I can build that chart for you — inventory is tightening across several corridors.",
+  );
+  expect(chips).not.toContain("What's driving the permit activity?");
+});
+
+test("a heat/inventory conversation gets residential chips, not the generic set", () => {
+  expect(suggestFollowUps("where is inventory tightening?")).toEqual([
+    "How does this compare to last year?",
+    "Show me this by ZIP",
+    "What's driving this?",
+  ]);
+});
+
 test("no inputs at all returns generic", () => {
   expect(suggestFollowUps("")).toEqual([
     "What's driving this?",
