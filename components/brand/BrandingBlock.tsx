@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PLATFORMS } from "@/lib/email/social/platforms";
 import { BRAND_FONTS } from "@/lib/brand/fonts";
 import { fontsFor } from "@/lib/email/lab/capabilities";
+import { PaletteContrastStrip } from "./PaletteContrastStrip";
 import {
   type BrandPalette,
   PALETTE_SLOT_KEYS,
@@ -412,6 +413,11 @@ export function BrandingBlock({
             );
           })}
         </div>
+
+        {/* Fence 6 Tier B: non-blocking contrast feedback on the CURRENT scheme —
+            warns, never blocks a save, never rewrites a color (render guards in
+            lib/email/blocks/on-dark.ts are the enforcement layer). */}
+        <PaletteContrastStrip scheme={currentScheme} />
 
         {/* Saved palettes — account-level library. Pick a chip to apply to this
             project; "Save as new palette" snapshots the current colors. */}
