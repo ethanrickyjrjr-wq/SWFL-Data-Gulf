@@ -2,6 +2,7 @@ import { test, expect, mock, afterAll } from "bun:test";
 import { tryParsePatch, dropSuperseded, unfilledPlaceholderMiss, cityZipsFor } from "./build-doc";
 import type { MarketFigure } from "@/lib/email/market-context";
 import * as anthropicModule from "@/refinery/agents/anthropic.mts";
+import * as chartForQuestionModule from "@/lib/assistant/chart-for-question";
 import { SEED_DOCS } from "./doc/default-docs";
 
 // mock.module is process-global (no per-file isolation) — snapshot + restore, same
@@ -13,13 +14,11 @@ import { SEED_DOCS } from "./doc/default-docs";
 // (loadMarketFigures/loadLifecycleDigest/loadAddressFigures) short-circuit on their
 // own `!scope?.value` guards — no DB access needed there.
 const anthropicOrig = { ...anthropicModule };
+const chartForQuestionOrig = { ...chartForQuestionModule };
 const fetchOrig = globalThis.fetch;
 afterAll(() => {
   mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrig);
-  mock.module("@/lib/assistant/chart-for-question", () => ({
-    buildChartForQuestion: async () => null,
-    looksChartWorthy: () => false,
-  }));
+  mock.module("@/lib/assistant/chart-for-question", () => chartForQuestionOrig);
   globalThis.fetch = fetchOrig;
 });
 globalThis.fetch = (async () => {
