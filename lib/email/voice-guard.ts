@@ -130,8 +130,10 @@ export function detectVoiceTells(doc: EmailDoc): string[] {
   return [...found];
 }
 
-/** Remove every tell phrase from a single field, tidying only when it changed. */
-function cleanField(text: string): string {
+/** Remove every tell phrase from a single field, tidying only when it changed. Exported
+ *  so a top-level (non-block-prose) string — e.g. a subject-line/CTA variant — can be
+ *  cleaned the same way without walking a whole EmailDoc (see build-doc.ts). */
+export function cleanTellText(text: string): string {
   let out = text;
   for (const { pattern } of VOICE_TELLS) out = out.replace(globalize(pattern), "");
   return out === text ? text : tidy(out);
@@ -149,7 +151,7 @@ export function stripVoiceTells(doc: EmailDoc): EmailDoc {
     for (const f of PROSE_FIELDS) {
       const v = props[f];
       if (typeof v === "string" && v) {
-        const c = cleanField(v);
+        const c = cleanTellText(v);
         if (c !== v) {
           next[f] = c;
           changed = true;
@@ -181,7 +183,7 @@ function cleanNested(
     for (const f of fields) {
       const v = rec[f];
       if (typeof v === "string" && v) {
-        const c = cleanField(v);
+        const c = cleanTellText(v);
         if (c !== v) {
           nel[f] = c;
           elChanged = true;

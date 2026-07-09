@@ -16,7 +16,13 @@ import { DEFAULT_GLOBAL_STYLE } from "./doc/default-docs";
 import type { AuthoredDoc } from "./doc/schema";
 import type { EmailDoc } from "./doc/types";
 import type { MarketFigure } from "./market-context";
-import { VOICE_TELLS, detectVoiceTells, stripVoiceTells, voiceGuard } from "./voice-guard";
+import {
+  VOICE_TELLS,
+  detectVoiceTells,
+  stripVoiceTells,
+  voiceGuard,
+  cleanTellText,
+} from "./voice-guard";
 
 const FIGURES: MarketFigure[] = [
   {
@@ -181,5 +187,15 @@ describe("clean doc is untouched", () => {
     expect(res.ok).toBe(true);
     expect(res.tells).toEqual([]);
     expect(allProse(res.stripped)).toBe(allProse(doc));
+  });
+});
+
+describe("cleanTellText", () => {
+  test("strips a tell phrase from a standalone string (not just doc prose fields)", () => {
+    expect(cleanTellText("Don't hesitate to reach out today")).toBe("Reach out today");
+  });
+
+  test("returns the input unchanged when clean", () => {
+    expect(cleanTellText("A clean, direct subject line")).toBe("A clean, direct subject line");
   });
 });

@@ -67,7 +67,7 @@ import {
   promptAnchors,
   type LibraryAsset,
 } from "@/lib/email/author-doc";
-import { voiceGuard } from "@/lib/email/voice-guard";
+import { voiceGuard, cleanTellText } from "@/lib/email/voice-guard";
 import { extractNumbers } from "@/lib/deliverable/narrative-lint";
 import { loadAddressFigures } from "@/lib/email/address-context";
 import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
@@ -1028,6 +1028,17 @@ export async function authorDoc({
       voiceStripped = true;
     }
     doc = candidate;
+  }
+
+  // Variants aren't walked by lintAuthoredProse/voiceGuard (they're top-level
+  // EmailDoc fields, not block prose) — clean them here, once, unconditionally
+  // (variants need cleaning even when the repair loop above never triggered).
+  if (doc.subjectVariants?.length || doc.ctaVariants?.length) {
+    doc = {
+      ...doc,
+      ...(doc.subjectVariants ? { subjectVariants: doc.subjectVariants.map(cleanTellText) } : {}),
+      ...(doc.ctaVariants ? { ctaVariants: doc.ctaVariants.map(cleanTellText) } : {}),
+    };
   }
 
   // Stripping only shortens strings, so the doc still validates; parse once more

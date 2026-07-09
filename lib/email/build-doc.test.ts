@@ -1,6 +1,71 @@
-import { test, expect } from "bun:test";
+import { test, expect, mock, afterAll } from "bun:test";
 import { tryParsePatch, dropSuperseded, unfilledPlaceholderMiss, cityZipsFor } from "./build-doc";
 import type { MarketFigure } from "@/lib/email/market-context";
+import * as anthropicModule from "@/refinery/agents/anthropic.mts";
+import { SEED_DOCS } from "./doc/default-docs";
+
+// mock.module is process-global (no per-file isolation) — snapshot + restore, same
+// pattern as build-doc-listing.test.ts / lib/assistant/report-path.test.ts. Stubs the
+// author model call so this integration test stays fully offline/deterministic, and
+// stubs chart-for-question so buildPromptChart's ALWAYS-tries-a-fallback-brain path
+// (chart-for-question.ts's CHART_FALLBACKS) never reaches the real PNG-render/upload
+// step. authorDoc is called with no `scope`, so the lake-figure loaders
+// (loadMarketFigures/loadLifecycleDigest/loadAddressFigures) short-circuit on their
+// own `!scope?.value` guards — no DB access needed there.
+const anthropicOrig = { ...anthropicModule };
+const fetchOrig = globalThis.fetch;
+afterAll(() => {
+  mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrig);
+  mock.module("@/lib/assistant/chart-for-question", () => ({
+    buildChartForQuestion: async () => null,
+    looksChartWorthy: () => false,
+  }));
+  globalThis.fetch = fetchOrig;
+});
+globalThis.fetch = (async () => {
+  throw new Error("network disabled in build-doc.test.ts");
+}) as typeof fetch;
+mock.module("@/lib/assistant/chart-for-question", () => ({
+  buildChartForQuestion: async () => null,
+  looksChartWorthy: () => false,
+}));
+
+// The authored payload the mocked model "returns" — a clean text block (so the
+// no-invention/voiceGuard repair loop never triggers) plus a subject_variants entry
+// carrying a banned corporate-AI tell, proving the variant clean runs on the
+// UNCONDITIONAL path (right before finalParse), not just inside the repair branch.
+const AUTHORED_WITH_TELL = {
+  blocks: [{ type: "text", body: "The market held steady again this period." }],
+  subject_variants: ["Don't hesitate to see your new report", "Your market update"],
+};
+mock.module("@/refinery/agents/anthropic.mts", () => ({
+  ...anthropicOrig,
+  getAnthropic: () => ({
+    messages: {
+      create: async () => ({
+        content: [
+          { type: "tool_use", id: "t1", name: "author_email_doc", input: AUTHORED_WITH_TELL },
+        ],
+      }),
+    },
+  }),
+}));
+
+const { authorDoc } = await import("./build-doc");
+
+test("authorDoc voice-cleans subject variants the same way it cleans body prose", async () => {
+  const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const result = await authorDoc({
+    prompt: "Write a friendly market update email with a strong subject line.",
+    rawDoc: current,
+  });
+  expect(result.payload.applied).toBe(true);
+  const doc = result.payload.doc as { subjectVariants?: string[] };
+  expect(doc.subjectVariants?.length).toBeGreaterThan(0);
+  expect(doc.subjectVariants?.[0]).not.toMatch(/don.t hesitate/i);
+  expect(doc.subjectVariants?.[0]).toBe("See your new report");
+  expect(doc.subjectVariants?.[1]).toBe("Your market update");
+});
 
 // CHOKEPOINT GUARD: an unfilled recipe [[blank]] must NEVER reach the model. Every
 // build path (empty hero fill, recipe auto-built before its address popup, a bot
