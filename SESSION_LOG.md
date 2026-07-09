@@ -1,3 +1,34 @@
+## 2026-07-09 (Sonnet 5 · main) — docs(steadyapi-research): recurring-pain filter + live SteadyAPI answers (round 2)
+
+Operator: "go through ops page, all my repeats of problems in chats and things that constantly
+break... figure out what questions we need to ask... start finding answers to the most important
+issues and design wants with steadyapi." Scanned `checks` (200 open), `cron-rebuild-failures.md`
+Recurring Patterns, and the archived `CLAUDE IS STUPID AS FUCK PROBLEMS.md` (35-item AI-discipline
+list, 06/25-06/26). Applied one filter (confirmed via `advisor()` first): "is this answerable by
+real agent/broker voice on Reddit/X/Insta?" — excluded internal AI-discipline friction, cron/infra
+recurring patterns, and `*_live_verify` feature-debt as out of scope for social listening. Three
+questions survived: pricing willingness-to-pay, Gmail Promotions-tab avoidance, "Showing Prep
+Packet" reconfirmation. Got explicit operator sign-off before spending live SteadyAPI credits (an
+auto-mode classifier blocked the first call, citing the paid-API rule; operator approved "run as
+many calls as you need"). Ran ~14 live Reddit calls via the working `new_steady` key (`PHOTOS_API`
+is suspended, per `steadyapi_subscription_suspended`). Findings: real CRE-broker pricing comps
+(Reonomy $157-700/mo/seat, CoStar 3x+ that, API-tier ~$30k/yr — our $39-79/mo sits well below
+category, pricing there is admittedly opaque/negotiable per an in-thread proptech founder) and a
+concrete 5-tactic Gmail-Promotions-tab playbook (engagement-staggered send order is "the single
+biggest lever," cut tracking links, real reply-to, consistent cadence, pre-send seed-test) —
+supersedes the 07/08 sweep's "no silver-bullet solution found." Photo-hotlink-rot and
+residential-agent-specific pricing reaction: searched, not found (documented so not re-searched
+blind). Also confirmed a 4th time that generic `/v1/reddit/search` is unusable for niche queries
+(site-wide ranking), and found `/v1/reddit/post` comment objects use field `content` not `body`
+(not yet folded into the vendor note). Wrote
+`docs/steadyapi-research/2026-07-09-recurring-pain-questions-and-answers.md`, folded the two real
+answers into round1 as items 17-18 (narrowed items 3 + 12 to match), updated the folder README, and
+wrote `docs/handoff/2026-07-09-recurring-pain-steadyapi-handoff.md`. Docs-only, no code touched.
+Raw SteadyAPI JSON stays in session scratchpad, not committed. NOT pushed — committing locally and
+stopping for operator confirmation before push per standing rule.
+
+---
+
 ## 2026-07-09 (Fable 5 · main) — fix(assistant): reach topic-map coverage gate + 15 rule backfill
 
 Operator asked "how are we not picking up crucial information — what else could we be missing?"
