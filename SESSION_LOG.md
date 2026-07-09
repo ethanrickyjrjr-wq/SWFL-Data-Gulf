@@ -1,3 +1,16 @@
+## 2026-07-09 (Fable 5 · main) — feat(showcase+lab): gallery above Visual Templates; New-Project first-run picker → 27 filled previews
+
+Operator follow-up on 66dc049e: (1) /showcase — moved "Start-from Layouts" section ABOVE "Visual
+Templates" (prerender order verified: index 10,903 vs 37,888). (2) New Project first-run picker
+(`components/email-lab/TemplateGallery.tsx`, shown by ProjectEmailLabClient when a project opens
+with no doc/deliverable) rebuilt on the SEED_PREVIEWS manifest: all 27 committed filled captures,
+job-grouped with count+pitch headers (same grammar as /showcase SeedGallery), even 2/3/4-col grid;
+replaced the live scaled BlockRenderer skeleton renders + featured/rest split. onPick/onStartBlank
+contract unchanged — picking still commits the honest skeleton. Drift note in header updated: the
+old "live renders can't drift" rationale is superseded by the seed-previews existence-guard test +
+`seed_previews_recapture_after_enrichment`. Gates: eslint clean, email-doc suites 71/0, `bunx next
+build` ✓.
+
 ## 2026-07-09 (Sonnet 5 · main) — verified email-fence cluster is logged, not fixed; punch-list handoff
 
 Operator asked to verify a prior session's "everything is durable" summary against the 5 named

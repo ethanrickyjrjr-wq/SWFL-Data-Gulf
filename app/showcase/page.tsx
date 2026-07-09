@@ -34,24 +34,6 @@ export default function ShowcasePage() {
 
       <header className="mb-12">
         <span className="font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-gulf-teal">
-          Visual Templates
-        </span>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">
-          More report formats, ready for your data
-        </h2>
-        <p className="mt-3 max-w-2xl text-text-secondary">
-          Every card below renders from live SWFL data — real corridors, SBA outcomes, FEMA flood
-          layers, FDOT freight. Preview any one with sample data, then ask the AI to build it
-          against your scope.
-        </p>
-      </header>
-
-      <ShowcaseGrid />
-
-      <hr className="my-14 border-gulf-haze" />
-
-      <header className="mb-12">
-        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-gulf-teal">
           Start-from Layouts
         </span>
         <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">
@@ -65,6 +47,24 @@ export default function ShowcasePage() {
       </header>
 
       <SeedGallery />
+
+      <hr className="my-14 border-gulf-haze" />
+
+      <header className="mb-12">
+        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-gulf-teal">
+          Visual Templates
+        </span>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">
+          More report formats, ready for your data
+        </h2>
+        <p className="mt-3 max-w-2xl text-text-secondary">
+          Every card below renders from live SWFL data — real corridors, SBA outcomes, FEMA flood
+          layers, FDOT freight. Preview any one with sample data, then ask the AI to build it
+          against your scope.
+        </p>
+      </header>
+
+      <ShowcaseGrid />
 
       <section className="mt-14 rounded-xl border border-gulf-haze bg-gulf-deep px-6 py-8 text-center">
         <h2 className="text-xl font-semibold text-text-primary">
