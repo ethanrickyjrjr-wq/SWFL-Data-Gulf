@@ -1,3 +1,22 @@
+## 2026-07-09 (Fable 5 · main) — zip-page Phase B BUILT: narrative bake + Down the Road; C/D/E handoff written
+
+Phase B (6543c3af): ONE-root bake harness `lib/narratives/` (types/hash/cadence/prompt/
+validate/store/zip-inputs) + `scripts/bake-narratives.mts` (SURFACE_ADAPTERS; zip first) +
+ONE renderer `components/narratives/NarrativeSections.tsx` mounted on the zip report.
+`public.narratives` migration RUN + verified (RLS public-read, 0 rows — first REAL bake is
+operator-gated paid: dispatch narrative-bake, $1 cap ≈ 38 ZIPs/run, or bump the cap line to
+3.50 once). Guards live: BAKE_CADENCE weekly→daily repo-var switch, $1 run-cap line in
+`narrative-bake.yml`, SpendCapError seam, call_type `narrative_bake` → api_usage_log (ops
+/spend line). Validator = numeric whitelist (no invented numbers), [INFERENCE]+hedge+
+falsifier, jargon guard; failed bake keeps prior row. 10 tests green; dry-run proven on
+live inputs (26–27 facts/ZIP); `bunx next build` ✓. Spec amended: v1 = synchronous calls
+through the metered seam (Batch API = flagged Phase-E optimization).
+HANDOFF for C/D/E: `docs/handoff/2026-07-09-zip-page-phases-cde-handoff.md` (C geocoder
+vendor terms = crawl4ai verify BEFORE code; D funnel module after narration; E per-surface
+adapters + report-shell one-root migration). Checks open: zip_page_destination_live_verify,
+anthropic_workspace_spend_limit (operator), zip_page_queue_line_sync,
+lab_phone_side_panel_visibility.
+
 ## 2026-07-09 (Fable 5 · main) — zip-page Phase A SHIPPED: homepage ZIP clicks → /r/zip-report
 
 `components/landing/Hero.tsx` (c286dbe4): map polygons, Enter/Space activation, and top-5

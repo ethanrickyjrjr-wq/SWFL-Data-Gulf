@@ -65,9 +65,11 @@ multiple small PRs reusing the Phase B harness).
   outputs), dossier lines, metro trend, master direction call, permits, flood.
 - **Delta-gated**: hash the numeric inputs per surface; bake only surfaces whose hash
   changed (housing moves weekly / ZHVI monthly, so most runs most surfaces skip).
-- **Batch API + Sonnet** (`claude-sonnet-4-6` per the pulse-distill precedent; batches =
-  50% off). Cost at list price (Anthropic pricing, platform.claude.com/docs/en/pricing):
-  ~2.6¢/surface full, ~1.3¢ batched. Wired through the spend-guard stack below.
+- **Sonnet** (`claude-sonnet-4-6` per the pulse-distill precedent). Cost at list price
+  (Anthropic pricing, platform.claude.com/docs/en/pricing): ~2.6¢/surface. BUILT 07/09/2026
+  as synchronous calls through the metered seam (the seam has no Batch path; delta-gated
+  weekly volume makes the 50% Batch discount ≈ pennies) — Batch API upgrade is a flagged
+  cost optimization when Phase E volume warrants it.
 - Sink: new `public.narratives` table keyed `(surface, surface_key)` — e.g.
   `('zip','33920')`, `('corridor','us41-bonita')`, `('brain','housing-swfl')` — columns:
   sections jsonb, inputs_hash, baked_at, model, sources jsonb. **Surface-generic from
