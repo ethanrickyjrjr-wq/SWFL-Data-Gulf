@@ -86,7 +86,7 @@ ledger. This diff touches `conversation-path.ts`, `stream.ts`, and `grounding.ts
 sequence is: `bun run scripts/prove-chart-conversation.mts` (operator, paid) → commit the proof
 line → push.
 
-## Three new checks opened (RULE 2.4)
+## Four new checks opened (RULE 2.4)
 
 - `home_values_investor_zip_not_in_catalog` — see above.
 - `chart_fallback_chain_dies_on_first_fetch_error` — `buildChartForQuestion` Layer 2 wraps the
@@ -100,6 +100,24 @@ line → push.
   gains `market-heat-swfl` grounding, but **"Is Cape Coral heating up?" loses its chart and gains
   nothing**, degrading to whatever the per-location dossier fan-out already carried. The spec is
   silent on this. Worth deciding before the live-verify.
+- `reach_grounding_sequential_await_latency` — the new reach loop `await`s up to 3 brains **one at
+  a time**, and it fires for a far broader question class than the `cre-swfl` special case it
+  replaced (which only ran on 3 chart intents). That is added time-to-first-token on a streaming
+  surface. `Promise.all` would make it max-latency instead of sum-of-latencies. The spec chose the
+  sequential shape, so this is a follow-up, not a defect.
+
+## Verification notes for whoever pushes this
+
+- `scripts/` is in `tsconfig.json`'s **exclude** list, so `bunx next build` does *not* typecheck
+  `scripts/prove-chart-conversation.mts`. I verified it separately: scoped `tsc --noEmit` shows no
+  real errors (only `TS5097` artifacts from `--ignoreConfig` dropping `allowImportingTsExtensions`),
+  and `bun build` resolves all 259 modules — confirming it carries no dangling import of the now-
+  deleted `looksChartWorthy` / `buildChartForQuestion` symbols. Worth knowing before the paid run.
+- `display-leak.test.mts` lives in `refinery/render/` and did run green. That matters because this
+  diff adds entries to `PACK_DISPLAY_NAMES`, changing `displayName()` for five slugs from the
+  `humanizeBrainId` fallback ("Market Heat Swfl") to a mapped name.
+- `inventory`, `supply`, and `dom` are broad tokens. They will append housing/momentum grounding to
+  some tangential questions. Additive and fail-open, so harmless — but it is happening.
 
 ## Lightly-verified tail
 
