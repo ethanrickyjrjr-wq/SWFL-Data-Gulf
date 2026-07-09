@@ -26,11 +26,27 @@
   the footer's `address` field is populated from the brand profile's
   `business_address`, and the lab already nudges (non-blocking) when it's
   empty. The panel surfaces this as a checklist line, doesn't reinvent it.
-- Bounce/complaint events are **already captured** per-event in
-  `email_events` / `outreach_events` (`app/api/webhooks/resend/route.ts`,
-  `lib/email/outreach/lifecycle.ts` — `mapResendOutbound` maps `email.bounced`
-  → `bounced`, `email.complained` → `complained`). Nothing aggregates them
-  into a rate today.
+- **CORRECTED 2026-07-09 (re-probed before implementation planning — this
+  claim was wrong):** bounce/complaint events are captured in `email_events` /
+  `outreach_events`, but NOT for the sending path this panel needs. `rid` →
+  `outreach_recipients` → `outreach_events` is the platform's own cold-outreach
+  prospecting funnel (`campaign_id` is a free-text slug like `"cold-outreach"`,
+  confirmed in `lib/email/outreach/recipients.test.ts` — not a foreign key, no
+  `user_id` anywhere in that chain). It's platform-level, not per-tenant data,
+  so it can't back a settings page a logged-in agent views. The actual
+  per-tenant sending surface — `app/api/deliverables/[id]/blast/route.ts`,
+  tagged via `blastTags()` (`did`/`tpl`/`campaign`,
+  `lib/email/blast-tags.ts`) — was NOT captured by the webhook at all before
+  this build; `app/api/webhooks/resend/route.ts` only had `wid` and `rid`
+  branches. Fixed by this build: a `did` branch was added (resolves
+  `deliverables.user_id`, writes to `email_events` with new nullable
+  `user_id`/`did` columns — `docs/sql/20260709_email_events_blast_scope.sql`).
+  Checked whether Google Postmaster Tools could shortcut this instead
+  (verified live via crawl4ai, `support.google.com/mail/answer/81126`): it's a
+  separate per-domain Google dashboard/API needing its own per-tenant auth —
+  heavier than local capture, not used. Bounce/complaint data starts
+  accumulating only from sends AFTER this build ships; historical blast sends
+  were never captured.
 - Existing settings-page convention: `app/settings/mls/` and
   `app/settings/mcp/`, each a `page.tsx` + `<name>-settings-client.tsx`. New
   work follows this pattern rather than inventing a new one.

@@ -1000,6 +1000,8 @@ export interface Database {
           rid: string | null;
           event: string;
           created_at: string;
+          user_id: string | null;
+          did: string | null;
         };
         Insert: {
           id?: number;
@@ -1007,6 +1009,8 @@ export interface Database {
           rid?: string | null;
           event: string;
           created_at?: string;
+          user_id?: string | null;
+          did?: string | null;
         };
         Update: {
           id?: number;
@@ -1014,6 +1018,8 @@ export interface Database {
           rid?: string | null;
           event?: string;
           created_at?: string;
+          user_id?: string | null;
+          did?: string | null;
         };
         Relationships: [];
       };

@@ -25,6 +25,7 @@ import {
   type InboundEvent,
 } from "@/lib/email/process-inbound";
 import { extractOutreachAction, type ResendWebhookPayload } from "@/lib/email/outreach/lifecycle";
+import { extractBlastAction } from "@/lib/email/blast-events";
 import { onDemoEvent, type DemoStage } from "@/lib/email/outreach/demo-cadence";
 import { extractWeeklyReadAction } from "@/lib/email/weekly-read/webhook";
 
@@ -151,6 +152,46 @@ export async function POST(request: Request): Promise<Response> {
     }
     return NextResponse.json(
       { ok: true, kind: "outreach", event: outreachAction.event },
+      { status: 200 },
+    );
+  }
+
+  // ── Deliverability diagnostic panel: per-tenant blast-send tracking ───────
+  // A `did`-tagged event (app/api/deliverables/[id]/blast/route.ts, tags set by
+  // lib/email/blast-tags.ts) → resolve the sending tenant via deliverables.user_id
+  // and log it. Unlike outreach/weekly-read, blast recipients have no
+  // suppression ledger to flip — this only feeds the deliverability-status
+  // aggregator's bounce/complaint rate for THAT tenant (docs/superpowers/specs/
+  // 2026-07-08-deliverability-diagnostic-panel-design.md).
+  const blastAction = extractBlastAction(event as unknown as ResendWebhookPayload);
+  if (blastAction) {
+    try {
+      const bdb = createServiceRoleClient();
+      const { data: deliverable } = await bdb
+        .from("deliverables")
+        .select("user_id")
+        .eq("id", blastAction.did)
+        .maybeSingle();
+      if (deliverable?.user_id) {
+        await bdb.from("email_events").upsert(
+          {
+            resend_email_id: blastAction.emailId,
+            did: blastAction.did,
+            user_id: deliverable.user_id,
+            event: blastAction.event,
+          },
+          { onConflict: "resend_email_id,event", ignoreDuplicates: true },
+        );
+      } else {
+        console.error(`[resend-webhook] blast event for unknown deliverable ${blastAction.did}`);
+      }
+    } catch (err) {
+      console.error(
+        `[resend-webhook] blast tracking failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+    return NextResponse.json(
+      { ok: true, kind: "blast", event: blastAction.event },
       { status: 200 },
     );
   }
