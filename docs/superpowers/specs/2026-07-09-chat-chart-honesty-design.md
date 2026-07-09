@@ -118,16 +118,41 @@ verb** from the permits alternation (keep `building` / `builds`).
 Order is priority (first-match-wins, capped at `MAX_REACH = 3`), so specific rules must precede
 general ones. Rules to add, in priority order before the existing six:
 
+The table below is derived from the brains' **actual** `detail_tables`, inspected 07/09/2026 — not
+from slug names. Verified content:
+
+- `market-heat-swfl` — 99 ZIP rows. Columns: `Heat Tilt (0-100)`, `Hotness (relative)`,
+  `Hotness Rank`, `Median DOM`, `DOM Y/Y`, `Inventory Y/Y`, `Pending Ratio`, `Pending Ratio Y/Y`,
+  `Price-Cut Share`, `Median Active Listings`. Plus a 36-month region trend table. The brain's own
+  metric prose calls Heat Tilt `>50 = tightening/seller-favoring` and `Inventory Y/Y` **"the lead
+  tightening signal."**
+- `housing-swfl` — 124 ZIP rows: `Median sale price`, `Median sale price YoY`, `Median days on
+  market`, `Median days-on-market YoY change`, `Active inventory`, `Months of supply`,
+  `Sale-to-list ratio`, `Homes sold (90-day)`.
+- `active-listings-swfl` — 67 ZIP rows: `Active listings`, `Avg days on market`, `Median asking
+  price`. **Levels only — no year-over-year.**
+- `listing-momentum-swfl` — 67 ZIP rows: `New-listing share`, `Price-cut share`, `Active listings`.
+
+This corrects a first-draft error. "Inventory tightening" must route to `market-heat-swfl` (which
+holds `Inventory Y/Y`), **not** `active-listings-swfl` (raw counts, no delta — it cannot express
+"tightening" at all).
+
 | topic signal | slug |
 |---|---|
-| heating up, cooling, market heat, hotness, hottest, sellers'/buyers' market, pending ratio | `market-heat-swfl` |
-| inventory, tightening, months of supply, active listings, supply | `active-listings-swfl` |
-| days on market, DOM, time on market, price cut, price reduction, momentum | `listing-momentum-swfl` |
+| heating up, cooling off, market heat, hotness, hottest, tightening, sellers'/buyers' market, pending ratio | `market-heat-swfl` |
+| days on market, DOM, time on market, price cut, price reduction, new listings, momentum | `listing-momentum-swfl` |
+| median sale price, sale price, sold price, list price, sale-to-list, months of supply, inventory, supply | `housing-swfl` |
+| active listings, listing count, how many listings | `active-listings-swfl` |
 | home value, ZHVI, appreciation | `home-values-swfl` |
-| median sale price, sale price, sold price, list price, sale-to-list | `housing-swfl` |
-| investor, cap rate, rent yield, cash flow | `investor-zip-swfl` |
 | price distribution, price tier, affordability band | `price-distribution-swfl` |
 | seller stress, distressed, foreclosure | `seller-stress-swfl` |
+
+**Ordering constraint (priority inversion guard).** The existing `cre-swfl` rule already claims
+`cap rate`. An `investor-zip-swfl` rule keyed on `investor / rent yield / cash flow` must be placed
+**after** `cre-swfl` and must **not** include `cap rate`, or a commercial cap-rate question silently
+reroutes to the investor brain — a regression against today's behavior. `routeRankedDelta` retains
+its own `cap ?rate` → `investor-zip-swfl` mapping; that path is unchanged and is gated on an explicit
+ranking intent.
 
 `ALLOWED = buildReportIdSet()` already fail-closes any slug not in the live inventory, so an entry
 for a brain that is not published is inert rather than a crash. `market-temperature-swfl` and
@@ -179,10 +204,15 @@ unrecognized `*-swfl` token, strips the `-swfl` suffix and de-hyphenates. Applie
 passes through, so chat, `report-path`, and the welcome path all inherit it from a single edit.
 
 **Layer 2, runtime output scrubber (belt-and-suspenders).** A transform in `lib/assistant/stream.ts`
-that strips `\b[a-z][a-z0-9-]*-swfl\b` from the streamed text. Because a slug can split across SSE
-chunk boundaries, the transform holds back a tail buffer (the longest possible partial match, ~32
-chars) and flushes it on completion. This catches a hallucinated slug or a future regression that
-bypasses Layer 1.
+matching `\b[a-z][a-z0-9-]*-swfl\b` in the streamed text. Because a slug can split across SSE chunk
+boundaries, the transform holds back a tail buffer (the longest possible partial match, ~32 chars)
+and flushes it on completion. This catches a hallucinated slug or a future regression that bypasses
+Layer 1.
+
+Layer 2 **substitutes via the same slug→label map as Layer 1**, and only falls back to deletion for
+an unrecognized token. A naive strip-to-nothing leaves broken grammar in the user's face — *"I also
+track , which reads…"* — which is a worse bug than the leak it fixes. Both layers share one map, so
+they can never disagree.
 
 ### Surface 4 — `lib/assistant/follow-up-suggestions.ts` (chips)
 
@@ -266,6 +296,16 @@ Regressions that would have caught the live bugs:
   (respecting the existing module mock).
 
 Gate 5 (pack ⇆ catalog) is not triggered — no pack changes. No vocab slugs change. No migration.
+
+## Adjacent finding — not in scope
+
+While auditing the routing targets, `active-listings-swfl` and `listing-momentum-swfl` were found to
+carry out-of-region ZIP row labels — `31420 (Collier)` is Savannah GA, `33155 (Collier)` is Miami,
+`33467 (Lee)` is Lake Worth, `33040 (Hendry)` is Key West — and `33936` appears under **both** Lee
+and Hendry. This spec routes chat grounding traffic to those brains, so bad ZIPs could surface in
+answers. Tracked separately as check `active_listings_zip_county_contamination` (ZIP gate G1). It
+does not block this work: `market-heat-swfl` and `housing-swfl` carry the load for the heat and
+inventory questions, and both use clean ZIP labels.
 
 ## Open questions
 
