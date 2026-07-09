@@ -1,3 +1,20 @@
+## 2026-07-08 (Sonnet 5 · main) — fix(charts): hurricane ring chart — real named-storm damage, on-brand colors
+
+Operator hated the first cut, hard: colors didn't match the rest of /charts, the Saffir-Simpson
+category topic was weak (3 of 6 buckets were zero, boring), and asked directly for named-storm
+damage — Charley, Irma, Ian, Helene — plus Sarasota/Port Charlotte included with an asterisk.
+
+Fix: queried pg.data_lake.fema_nfip_claims live (Lee+Collier+Hendry+Charlotte+Sarasota FIPS,
+storm years 2004/2017/2022/2024) for real NFIP-paid-per-storm-year totals — Charley $50.5M, Irma
+$134.5M, Ian $4.43B, Helene+Milton $1.69B (2024 can't be split between the two storms from this
+source — labeled honestly as both, not attributed to Helene alone). Recolored the 4 rings to the
+actual brand palette used everywhere else on the page (gulf-teal/mangrove/gold from
+lib/charts/series.ts, plus sunset-coral as the established 4th brand accent from globals.css) —
+no more invented severity ramp. Charlotte/Sarasota carry an asterisk footnote: shown for
+storm-impact context, not claimed as SWFL Data Gulf core coverage (Lee+Collier+Hendry stays
+locked). Verified via bunx next build + next start + screenshot: Ian's ring visibly dwarfs the
+other three, hover-swap confirmed working with the new data.
+
 ## 2026-07-08 (Sonnet 5 · main) — feat(email): wire Composed into the reshape picker
 
 Operator: "wire Composed into the reshape picker next, that's the biggest visual jump" — the
