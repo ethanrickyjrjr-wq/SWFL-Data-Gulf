@@ -1,3 +1,19 @@
+## 2026-07-09 (Fable 5 · main) — spec: answer-path observability — coverage snapshot + red-main sentinel (build registered)
+
+Brainstormed + operator-ratified the answer-path observability design (three AskUserQuestion
+decisions: sentinel IN scope · small registry-shape consolidation first · committed artifact +
+`--check`). Spec: `docs/superpowers/specs/2026-07-09-answer-path-observability-design.md`.
+Evidence corrections that reshaped the plan (RULE 0.5 code-probe, not the scratchpad's claims):
+(1) the proposed geo pre-push gate ALREADY EXISTS — Gate 6, `e2611ee6`, 06/25 — and communities-swfl
+(07/06) shipped anyway because the push bypassed local hooks; red CI then sat ~31h across 7 pushes
+(nothing watches main → Phase 3 red-main sentinel, `workflow_run` semantics verified in-session via
+crawl4ai against live GitHub docs per RULE 0.4). (2) `CHART_FALLBACKS` is function-local,
+`KNOWN_INCOMPLETE` lives in a TEST file, no excuse entry carries a date → Phase 0 consolidation.
+(3) `prove-chart-conversation.mts` appends proof ONLY `if (firstClean)` — an all-bad paid run leaves
+zero trace (operator hit this live) → Phase 4 attempt ledger. Registered per RULE 3.5:
+`answer_path_observability_live_verify` opened. `brain_geo_prepush_gate` to be closed as
+already-built when this pushes. Next: operator spec review → writing-plans → Phase 3 first.
+
 ## 2026-07-09 (Fable 5 · main) — accent-ink gate decisions RATIFIED; build registered
 
 Operator approved spec §4 as written ("good with your S4 ideas — fold in and push"). Folded into
