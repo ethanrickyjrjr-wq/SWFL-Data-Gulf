@@ -1,3 +1,27 @@
+## 2026-07-09 (Sonnet 5 · main) — docs(spec): design for rebuilding all 27 email SEED_DOCS templates
+
+Scoped the 2026-07-09 email-fences-and-template-rebuild handoff before touching any template.
+Verified against code: Phase 1 (canvas fence-violation warning UI) still not built (zero grep
+hits for `checkFenceViolations`), all 27 `SEED_DOCS` confirmed present, and the reported
+`magazine-issue` black-box bug is real (`ImageBlock.tsx` renders `#111827` when an overlay block
+has no `url`, stacked directly under a `#14181C` signal band). Also caught `year-in-review` as an
+unflagged Track B offender — all 8 of its rows are span `{12}`, zero layout variety. Operator
+decisions: templates proceed now, Phase 1 stays queued separately (seed docs never pass through
+the canvas); both Track A (content/slot-rule) and Track B (visual/variety) ship together per
+template, one edit each; verification stays code-level (`bun test` + `bunx next build`), no
+live-render pass this round — charts/photos can't be seen without real data anyway, a rendered
+example gallery is a later deliverable. Ran a crawl4ai/WebSearch research pass (RULE 0.4) on the
+two least-obvious email types — market-report newsletters (3–5 sections, ~80/20 value/promo, one
+CTA — housingwire.com) and year-in-review recaps (stats cascade national→local→neighborhood, then
+a CMA-style analysis — highnote.io) — to ground structure decisions for those two categories; the
+other four (listing showcase, agent/personal, skeleton/utility, magazine) have obvious
+conventions and didn't need it. Wrote the design to
+`docs/superpowers/specs/2026-07-09-template-rebuild-27-design.md`: a 6-category taxonomy for all
+27 templates (doubles as a future website-grouping follow-up, not built here), a per-template
+Track-A-then-Track-B process, and a hand-kept variety ledger worked sequentially in one session
+(not farmed to parallel subagents, which can't see each other's choices and tend to converge on
+the same "safe" combo). Next: execute the rebuild template by template.
+
 ## 2026-07-09 (Opus 4.8 · main) — fix(assistant): chat stops negotiating charts; repair the brain router feeding chat grounding + AI email charts
 
 Executed `docs/superpowers/specs/2026-07-09-chat-chart-honesty-design.md` Phases A–E. Four roots,
