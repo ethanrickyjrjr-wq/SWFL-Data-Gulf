@@ -60,6 +60,14 @@ export interface DetectedLocation {
    * town's "representative" flood would mislead — see buildWelcomeGroundedSystem).
    */
   explicitZip: boolean;
+  /**
+   * The location's FULL ZIP set: [token] for a typed ZIP; primary + `alt_zips`
+   * for a matched town (crosswalk-sourced, USPS/Census). Feeds the located
+   * reach-depth block (conversation-path `buildLocatedReachBlock`) so "Is Cape
+   * Coral heating up?" scopes topic detail to ALL of Cape Coral's ZIPs, not just
+   * the primary one the dossier resolves on.
+   */
+  zips: string[];
 }
 
 /** Extract a location signal from ONE message, in precedence order. */
@@ -69,20 +77,30 @@ function detectInMessage(content: string): DetectedLocation | null {
   // 1. in-scope typed ZIP — the strongest, most-specific signal (last one wins
   //    within the message: "33901 ... actually 33931" → 33931).
   for (let i = zips.length - 1; i >= 0; i--) {
-    if (resolveZip(zips[i]).in_scope) return { token: zips[i], explicitZip: true };
+    if (resolveZip(zips[i]).in_scope) return { token: zips[i], explicitZip: true, zips: [zips[i]] };
   }
 
   // 2. a known town/place → resolve on its primary ZIP, but explicitZip stays false.
+  //    `zips` carries the town's full crosswalk set (primary first, deduped).
   const scan = ` ${flatten(content)} `;
   for (const { needle, entry } of ALIAS_NEEDLES) {
-    if (scan.includes(` ${needle} `)) return { token: entry.zip, explicitZip: false };
+    if (scan.includes(` ${needle} `)) {
+      return {
+        token: entry.zip,
+        explicitZip: false,
+        zips: [...new Set([entry.zip, ...entry.alt_zips])],
+      };
+    }
   }
 
   // 3. an out-of-scope 5-digit token (a Miami ZIP, or a "50000" salary) — counts
   //    as "a ZIP was named" so the route answers honestly ("outside our footprint").
   //    It can ONLY reach the gap path: resolveZip().in_scope is false, so it never
   //    grounds and never invents. (5-digit false-positive invariant.)
-  if (zips.length > 0) return { token: zips[zips.length - 1], explicitZip: true };
+  if (zips.length > 0) {
+    const last = zips[zips.length - 1];
+    return { token: last, explicitZip: true, zips: [last] };
+  }
 
   return null;
 }

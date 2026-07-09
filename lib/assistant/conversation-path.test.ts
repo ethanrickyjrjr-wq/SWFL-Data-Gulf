@@ -192,7 +192,7 @@ mock.module("@/lib/geo/geocode-address", () => ({
   },
 }));
 
-const { runConversationPath, PUBLIC_SYSTEM, buildClientContextBlock } =
+const { runConversationPath, PUBLIC_SYSTEM, buildClientContextBlock, buildLocatedReachBlock } =
   await import("./conversation-path");
 
 /** Drive the conversation path with an AssistantRequest (the unified contract). */
@@ -930,4 +930,94 @@ test('BUILD 1 — a "yes" reply re-enters the comp path with the saved address (
   expect(geocodeState.lastArg).toBe("500 5th Ave S, Naples");
   masterState.output = null;
   projectState.subjectAddress = "";
+});
+
+// --- buildLocatedReachBlock — the located twin of the region branch's reach append
+// --- (07/09/2026, check located_branch_no_reach_grounding). Question-aware DEPTH cut
+// --- to the place's ZIP set; the dossier keeps its question-blind breadth.
+
+const HEAT_TWO_ZIPS = {
+  ...HEAT_OUTPUT,
+  detail_tables: [
+    {
+      ...HEAT_OUTPUT.detail_tables[0],
+      rows: [
+        { key: "33913", label: "33913", cells: { inventory_yoy_pct: -12.4 } },
+        { key: "33971", label: "33971", cells: { inventory_yoy_pct: 8.1 } },
+      ],
+    },
+  ],
+};
+
+test("located reach block: topic brain's table is CUT to the place's ZIP set", async () => {
+  heatState.output = HEAT_TWO_ZIPS;
+  const block = await buildLocatedReachBlock(
+    "is this area heating up?",
+    ["33913"],
+    true,
+    "https://x",
+  );
+  expect(block).toContain("Inventory Y/Y"); // the reach brain's real column rode in
+  expect(block).toContain("33913"); // the place's own row survives
+  expect(block).not.toContain("33971"); // the other ZIP's row is scoped OUT
+  heatState.output = null;
+});
+
+test("located reach block: no zip rows for this place -> brain skipped entirely", async () => {
+  heatState.output = HEAT_TWO_ZIPS;
+  const block = await buildLocatedReachBlock(
+    "is this area heating up?",
+    ["34102"],
+    true,
+    "https://x",
+  );
+  expect(block).toBe(""); // heat holds no 34102 row; regional tables must NOT ride in as depth
+  heatState.output = null;
+});
+
+test("located reach block: env-swfl is suppressed for a town (non-explicit ZIP)", async () => {
+  // "flood risk" reaches only env-swfl; a town-level ask must not pull one ZIP's flood
+  // read as the town's own — same suppression buildWelcomeGroundedSystem applies.
+  const block = await buildLocatedReachBlock(
+    "what about flood risk?",
+    ["33904", "33909"],
+    false,
+    "https://x",
+  );
+  expect(block).toBe("");
+});
+
+test("located reach block: no topic match or unavailable brain -> empty, never throws", async () => {
+  expect(await buildLocatedReachBlock("hello there", ["33913"], true, "https://x")).toBe("");
+  // market-heat matched but the mock throws for it (heatState null) -> fail-open to "".
+  expect(
+    await buildLocatedReachBlock("is this area heating up?", ["33913"], true, "https://x"),
+  ).toBe("");
+});
+
+test("located path WIRING: a heat question on a typed ZIP carries the scoped reach block", async () => {
+  captured.system = undefined;
+  heatState.output = HEAT_TWO_ZIPS;
+  guardState.result = {
+    capped: false,
+    fromCache: false,
+    dossier: dossierWith([
+      {
+        brain_id: "housing-swfl",
+        domain: "real-estate",
+        grain: "zip",
+        coverage_label: "ZIP 33913",
+        is_true_zip: true,
+        text: "**Median sale price** — $512,000.\n\nSource: Redfin Data Center.",
+        source_citation: "Redfin Data Center.",
+        source_url: "https://www.redfin.com/news/data-center/",
+      },
+    ]),
+  };
+  const res = await ask("is 33913 heating up?", "outside");
+  await res.text();
+  expect(captured.system).toContain("Inventory Y/Y"); // reach depth reached the prompt
+  expect(captured.system).not.toContain("33971"); // and it is place-scoped
+  heatState.output = null;
+  guardState.result = { capped: false, fromCache: false };
 });

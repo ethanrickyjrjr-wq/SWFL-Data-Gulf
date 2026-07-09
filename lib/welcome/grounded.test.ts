@@ -44,7 +44,7 @@ const a = (content: string) => ({ role: "assistant" as const, content });
 
 test("detects an in-scope typed ZIP as an explicit ZIP", () => {
   const d = detectWelcomeLocation([u("what's the flood risk in 33931?")]);
-  expect(d).toEqual({ token: "33931", explicitZip: true });
+  expect(d).toEqual({ token: "33931", explicitZip: true, zips: ["33931"] });
 });
 
 test("an out-of-scope 5-digit token is returned (→ gap path), never grounded", () => {
@@ -53,10 +53,12 @@ test("an out-of-scope 5-digit token is returned (→ gap path), never grounded",
   expect(detectWelcomeLocation([u("homes in 90210?")])).toEqual({
     token: "90210",
     explicitZip: true,
+    zips: ["90210"],
   });
   expect(detectWelcomeLocation([u("I make 50000, what can I afford?")])).toEqual({
     token: "50000",
     explicitZip: true,
+    zips: ["50000"],
   });
 });
 
@@ -71,14 +73,24 @@ test("a known town resolves to its primary ZIP but stays explicitZip:false (floo
   expect(d!.token).toMatch(/^\d{5}$/);
 });
 
+test("a matched town carries its FULL crosswalk ZIP set (primary first)", () => {
+  // Cape Coral spans 6 ZIPs (USPS/Census crosswalk). The located reach-depth block
+  // scopes topic detail to ALL of them — not just the primary the dossier resolves on.
+  const d = detectWelcomeLocation([u("is Cape Coral heating up?")]);
+  expect(d).not.toBeNull();
+  expect(d!.zips[0]).toBe(d!.token);
+  expect(d!.zips.length).toBeGreaterThan(1);
+  expect(new Set(d!.zips).size).toBe(d!.zips.length);
+});
+
 test("an in-scope ZIP in the same message beats a place name", () => {
   const d = detectWelcomeLocation([u("Cape Coral, specifically 33931")]);
-  expect(d).toEqual({ token: "33931", explicitZip: true });
+  expect(d).toEqual({ token: "33931", explicitZip: true, zips: ["33931"] });
 });
 
 test("falls back to an older user turn when the latest names no location", () => {
   const d = detectWelcomeLocation([u("flood risk in 33931?"), a("…"), u("and what about prices?")]);
-  expect(d).toEqual({ token: "33931", explicitZip: true });
+  expect(d).toEqual({ token: "33931", explicitZip: true, zips: ["33931"] });
 });
 
 test("returns null when no location is named", () => {

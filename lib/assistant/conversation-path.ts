@@ -25,6 +25,7 @@ import {
   BUSY_GAP,
 } from "@/lib/welcome/grounded";
 import { fetchBrain, buildDossier } from "@/lib/fetch-brain";
+import { filterOutputToZips } from "@/refinery/lib/chart-from-metrics.mts";
 import { renderBlock, type GroundingBlock } from "@/lib/highlighter/grounding";
 import { RULES_OF_ENGAGEMENT } from "@/refinery/lib/rules-of-engagement.mts";
 import { buildWelcomeAnswer } from "@/lib/welcome/answer";
@@ -326,6 +327,70 @@ export async function buildGroundedRegionSystem(
   } catch {
     return { system: buildPlaceContext(lastUser) + FORMAT_RULE + premise };
   }
+}
+
+/**
+ * The LOCATED twin of buildGroundedRegionSystem's reach append (07/09/2026 —
+ * check `located_branch_no_reach_grounding`). Before this, the same question
+ * asked two ways behaved inconsistently: "which corridors are heating up?"
+ * (no place) got up to MAX_REACH full topic-matched brain outputs, while
+ * "is Cape Coral heating up?" got exactly ONE market-heat row for the town's
+ * primary ZIP — the per-place dossier is question-BLIND breadth (one line per
+ * brain, headlines capped by static domain priority), with no way to deepen
+ * the asked topic.
+ *
+ * This block is question-aware DEPTH on top of that breadth: route the question
+ * through the same resolveReachTargets, fetch each matched brain (local disk,
+ * concurrent — same rationale as the region branch), and CUT its output to the
+ * place's full ZIP set via filterOutputToZips — the same scoping mechanism the
+ * chart producer's city path uses, never a second one.
+ *
+ * Honesty guards:
+ *   - ZIP-grain depth ONLY: a brain whose scoped output holds no zip-grain rows
+ *     for this place is skipped — its county/region headline already rides in
+ *     the dossier at its true grain, and appending its full region-wide tables
+ *     here would invite the model to present regional numbers as the place's
+ *     own (the coverage-label rule exists to prevent exactly that).
+ *   - env-swfl is skipped for a non-explicit ZIP — the same town-level flood
+ *     suppression buildWelcomeGroundedSystem applies to the dossier lines (a
+ *     town spans ZIPs with very different flood; see DetectedLocation).
+ *   - Fail-open per brain: a brain that won't load is skipped; the dossier-only
+ *     system is still a complete honest answer. Never throws.
+ */
+export async function buildLocatedReachBlock(
+  question: string,
+  zips: readonly string[],
+  explicitZip: boolean,
+  origin: string,
+): Promise<string> {
+  if (!question || zips.length === 0) return "";
+  const reachSlugs = resolveReachTargets(question, "master").filter(
+    (slug) => explicitZip || slug !== "env-swfl",
+  );
+  if (reachSlugs.length === 0) return "";
+  const blocks = await Promise.all(
+    reachSlugs.map(async (slug) => {
+      try {
+        const { output, freshness_token } = await fetchBrain(slug, { tier: 2, origin });
+        const scoped = filterOutputToZips(output, zips);
+        const hasZipRows = (scoped.detail_tables ?? []).some(
+          (t) => /zip/i.test(t.grain) && t.rows.length > 0,
+        );
+        if (!hasZipRows) return null;
+        // Keep ONLY the zip-grain tables (now cut to this place) — the regional
+        // key_metrics/conclusion still ride via buildDossier, but the tables the
+        // model reasons over are the place's own rows.
+        return renderBlock({
+          label: displayName(slug),
+          dossier: buildDossier(scoped, freshness_token),
+        });
+      } catch {
+        return null; // this brain is unavailable → the rest still answer.
+      }
+    }),
+  );
+  const parts = blocks.filter((b): b is string => Boolean(b));
+  return parts.length ? "\n\n" + parts.join("\n\n") : "";
 }
 
 /**
@@ -750,6 +815,15 @@ export async function runConversationPath(
   // this answer too, so the assistant never says "I don't know" about a number
   // the platform already found and cited. "" when nothing is cached (no-op).
   const sourcedBlock = await sourcedFiguresBlockForZip(dossier.zip);
+  // Question-aware DEPTH on the located branch (parity with the region branch's
+  // reach append): topic-matched brains, cut to the place's full ZIP set. "" when
+  // the question matches no topic or no matched brain holds zip rows here.
+  const reachBlock = await buildLocatedReachBlock(
+    lastUser,
+    detected.zips,
+    detected.explicitZip,
+    origin,
+  );
   // RUNG 3/4 — same web-fallback for a located figure ask the per-place dossier may not
   // hold (e.g. active listings / days on market before market-heat-swfl is live): fetch
   // it cited from a named source, or hand it to the user, never invent.
@@ -770,6 +844,7 @@ export async function runConversationPath(
   // answers are unchanged.
   return streamAnswer(
     system +
+      reachBlock +
       sourcedBlock +
       gapBlock +
       buildUploadsBlock(uploadsText) +

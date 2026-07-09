@@ -1,3 +1,26 @@
+## 2026-07-09 (Fable 5 · main) — feat: publish home-values + investor-zip; located-branch reach depth
+
+Operator decided both open items from `2026-07-09-chat-chart-honesty-open-decisions.md`. (1)
+`home-values-swfl` + `investor-zip-swfl` graduated to `BRAIN_CATALOG` (verbatim pack scopes,
+KNOWN_INCOMPLETE shrunk to tier-divergence only) WITH their `BRAIN_GEO` entries in the same
+commit — covers=METRO_4 from a live `zhvi_zip_latest` county query (Lee 34 / Sarasota 24 /
+Collier 19 / Charlotte 13, + Manatee 19 outside the county universe), because the
+catalog-without-geo class has 500'd prod three times (opened `brain_geo_prepush_gate`). Topic
+rules added with yield disambiguation: generic yield → market-temperature-swfl (source-faithful
+realtor.com sold-to-rent), investor/flood-adjusted → investor-zip-swfl (computed ZHVI×ZORI) —
+two methodologies, never one question. Two lib/reconcile tests had used home-values-swfl as
+their "uncatalogued" fixture; re-pointed to a synthetic slug. (2) Located branch now gets
+question-aware DEPTH: `buildLocatedReachBlock` (conversation-path.ts) routes the question via
+resolveReachTargets and appends matched brains CUT to the place's full ZIP set via
+filterOutputToZips — `DetectedLocation.zips` now carries primary+alt_zips from the crosswalk,
+zip-grain depth only (no regional tables masquerading as place numbers), env suppressed for
+towns, fail-open per brain. Verified: `bun test lib/ refinery/render refinery/packs/catalog.test.mts`
+→ 4059 pass 0 fail · Gate 2 vocab OK (41 brains) · corridor-aliases 7/7 · `bunx next build`
+clean. NOT pushed — awaiting the paid live-verify; NOTE: the operator's verify run today wrote
+NO proof line (answer-proofs.jsonl untouched since 07/07) — needs the run output before any
+push. Observability field notes → scratchpad `answer-path-observability-notes.md`; checks
+opened `brain_geo_prepush_gate` + `answer_path_coverage_signal`; decision checks updated BUILT.
+
 ## 2026-07-09 (Fable 5 · main) — docs(email): fence/design review → 5 checks + 2 handoffs (template previews + fence polish)
 
 Operator: verify the fence/font/size research is correctly built, confirm brand persists to the
