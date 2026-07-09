@@ -17,7 +17,7 @@ const TOPIC_FOLLOW_UPS: Array<{ keywords: RegExp; chips: string[] }> = [
     chips: [
       "How does this compare to nearby ZIPs?",
       "What's the flood-risk trend over time?",
-      "Chart this by ZIP",
+      "Which ZIP is worst off?",
     ],
   },
   {
@@ -25,7 +25,7 @@ const TOPIC_FOLLOW_UPS: Array<{ keywords: RegExp; chips: string[] }> = [
     chips: [
       "How does vacancy compare across corridors?",
       "What's the asking-rent trend?",
-      "Chart this by corridor",
+      "Which corridor is tightest?",
     ],
   },
   {
@@ -33,7 +33,7 @@ const TOPIC_FOLLOW_UPS: Array<{ keywords: RegExp; chips: string[] }> = [
     chips: [
       "What's driving the permit activity?",
       "How does this compare to last quarter?",
-      "Chart permits by area",
+      "Which area has the most permits?",
     ],
   },
   {
@@ -41,7 +41,7 @@ const TOPIC_FOLLOW_UPS: Array<{ keywords: RegExp; chips: string[] }> = [
     chips: [
       "How does this compare to home prices?",
       "What's the rent trend?",
-      "Chart rents by ZIP",
+      "Which ZIP has the highest rent?",
     ],
   },
   {
@@ -57,7 +57,7 @@ const TOPIC_FOLLOW_UPS: Array<{ keywords: RegExp; chips: string[] }> = [
     chips: [
       "How does this compare to last season?",
       "What's driving visitor numbers?",
-      "Chart this by month",
+      "Which month is busiest?",
     ],
   },
   {

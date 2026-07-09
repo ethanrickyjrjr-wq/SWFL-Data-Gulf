@@ -68,3 +68,23 @@ export function tokenVersion(token: string | null | undefined): number | null {
   const m = /-v(\d+)-/.exec(token);
   return m ? Number(m[1]) : null;
 }
+
+/**
+ * ISO `YYYY-MM-DD` → "Jun 1, 2026" (UTC-safe so the day never drifts). Chart
+ * captions want this human-readable form, NOT the `MM/DD/YYYY` of
+ * `asOfFromIso` above — two legitimately different presentation needs (prose
+ * vs. a caption under a chart), sharing ONE root instead of each chart
+ * component growing its own copy. Previously duplicated verbatim across
+ * ChartBlockView.tsx, SeasonalRadialChart.tsx, and TimelineFrame.tsx —
+ * consolidated 2026-07-09. Returns the input unchanged when unparseable.
+ */
+export function friendlyAsOf(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return iso;
+  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}

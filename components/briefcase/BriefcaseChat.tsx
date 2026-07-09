@@ -15,8 +15,6 @@ import { projectIdFromPath } from "@/lib/briefcase/pill-mount";
 import { isBareAddressQuery, resolveAddressDestination } from "@/lib/geo/address-route";
 import { getAiContext } from "@/lib/project/ai-context-store";
 import type { ProjectItem } from "@/lib/project/items";
-import { DockChart } from "@/components/highlighter/DockChart";
-import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { CitationList } from "@/components/CitationList";
 import type { WelcomeSource } from "@/lib/welcome/frames";
 import { suggestFollowUps } from "@/lib/assistant/follow-up-suggestions";
@@ -69,11 +67,8 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
   // re-render, so it's mirrored into state (set once per answer when the prelude
   // place frame lands; a no-op setState when the ZIP is unchanged).
   const [place, setPlace] = useState<{ zip: string; name: string } | null>(null);
-  // The deterministic, cited chart for the current answer (prelude `chart` frame).
-  // Reset per question in submit() so it never lingers from a prior turn.
-  const [chart, setChart] = useState<ChartSpec | null>(null);
   // Lane-3 web-verified sources for the current answer (prelude `sources` frame).
-  // Reset per question in submit() like `chart`, so they never linger across turns.
+  // Reset per question in submit(), so they never linger across turns.
   const [sources, setSources] = useState<WelcomeSource[]>([]);
   const onFrame = (f: ChatFrame) => {
     if (f.type === "place") {
@@ -86,11 +81,11 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
         );
       }
       if (typeof f.freshness_token === "string") tokenRef.current = f.freshness_token;
-    } else if (f.type === "chart" && f.chart) {
-      setChart(f.chart as ChartSpec);
     } else if (f.type === "sources" && Array.isArray(f.sources)) {
       setSources(f.sources as WelcomeSource[]);
     }
+    // Chart frames are intentionally ignored — no AI chat surface renders charts
+    // (07/09/2026 operator directive: chart pushed the answer text out of view).
   };
 
   const { messages, setMessages, busy, send } = useChatStream("/api/assistant", {
@@ -145,7 +140,6 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
     placeRef.current = null;
     tokenRef.current = undefined;
     setPlace(null);
-    setChart(null);
     setSources([]);
     send(text);
   };
@@ -370,12 +364,6 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
               </div>
             );
           })}
-          {chart && (
-            <div className="overflow-hidden rounded-lg border border-white/10 bg-[#0d1e2b]/80">
-              <div className="px-2 py-1 text-[10px] text-gray-500">Chart</div>
-              <DockChart spec={chart} compact />
-            </div>
-          )}
           {sources.length > 0 && (
             // Lane-3 web sources — THE locked collapsed Sources box. Its built-in mt-10
             // is pulled up here so it sits snug under the answer in the compact dock.

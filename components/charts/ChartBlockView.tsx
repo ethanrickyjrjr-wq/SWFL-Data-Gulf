@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import { pickRenderer, adaptToHBar, adaptToTable } from "@/refinery/lib/chart-adapter.mts";
 import { HBarChart } from "@/components/charts/HBarChart";
+import { friendlyAsOf } from "@/lib/project/as-of";
 import {
   AreaChart,
   Area,
@@ -29,18 +30,6 @@ const captionStyle: React.CSSProperties = {
   marginTop: 6,
   letterSpacing: "0.02em",
 };
-
-/** ISO `YYYY-MM-DD` → "Jun 1, 2026" (UTC-safe so the day never drifts). */
-function friendlyAsOf(iso: string): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  if (!m) return iso;
-  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
 
 /**
  * The bottom-of-chart vintage caption. The KEYSTONE date lives on `block.asOf`

@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts";
 import type { ChartSpec } from "../chart-spec";
+import { friendlyAsOf } from "@/lib/project/as-of";
 
 /**
  * Named-event timeline frame — discrete events plotted over time with magnitude.
@@ -45,17 +46,6 @@ function isoToYear(iso: string): number {
 }
 
 function friendlyDate(iso: string): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  if (!m) return iso;
-  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
-
-function friendlyAsOf(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   if (!m) return iso;
   return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).toLocaleDateString("en-US", {

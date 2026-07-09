@@ -15,6 +15,13 @@ import {
 } from "@react-email/components";
 import type { DigestPayload, MetricDelta, BrandTheme } from "./types.ts";
 import { ZIP_FOCUS, resolveTheme } from "./types.ts";
+import { asOfFromIso } from "../../lib/project/as-of.ts";
+
+// ALL user-facing date display in this template goes through this — never a
+// raw ISO string (year-first, reads "backwards"). Falls back to the raw
+// value only if it somehow fails to parse, so a bad date is visible/debuggable
+// rather than silently blank.
+const fmtDate = (iso: string) => asOfFromIso(iso) ?? iso;
 
 // Fixed neutrals — never themed. Brand colors (primary/accent) come from `theme`.
 const NEUTRAL = {
@@ -108,7 +115,7 @@ export function DigestEmail({
               SWFL DATA GULF INTEL
             </Text>
             <Text style={{ fontFamily: F, fontSize: "12px", color: accent, margin: "4px 0 0" }}>
-              {payload.date} · Issue #{issue} · 33908 + Lee County
+              {fmtDate(payload.date)} · Issue #{issue} · 33908 + Lee County
               {payload.freshness_manifest.source_env === "preview" ? " · [PREVIEW]" : ""}
             </Text>
           </Section>
@@ -142,7 +149,7 @@ export function DigestEmail({
             <Text
               style={{ fontFamily: F, fontSize: "10px", color: NEUTRAL.muted, margin: "6px 0 0" }}
             >
-              master brain · as of {payload.freshness_manifest.master.as_of}
+              SWFL Data Gulf · as of {fmtDate(payload.freshness_manifest.master.as_of)}
             </Text>
           </Section>
 
@@ -216,7 +223,8 @@ export function DigestEmail({
             <Text
               style={{ fontFamily: F, fontSize: "10px", color: NEUTRAL.muted, margin: "6px 0 0" }}
             >
-              housing-swfl · period beginning {payload.freshness_manifest.housing_swfl.period_begin}
+              SWFL Data Gulf · period beginning{" "}
+              {fmtDate(payload.freshness_manifest.housing_swfl.period_begin)}
             </Text>
           </Section>
 
@@ -320,7 +328,7 @@ export function DigestEmail({
               <Text
                 style={{ fontFamily: F, fontSize: "10px", color: NEUTRAL.muted, margin: "6px 0 0" }}
               >
-                city-pulse-swfl · as of {payload.freshness_manifest.city_pulse.as_of}
+                SWFL Data Gulf · as of {fmtDate(payload.freshness_manifest.city_pulse.as_of)}
               </Text>
             </Section>
           )}
