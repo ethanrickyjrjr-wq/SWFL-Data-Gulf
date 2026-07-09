@@ -128,6 +128,51 @@ question backlog below — full evidence trail + raw JSON pointers in
     our exact $39–79/mo price point, but hard evidence the category tolerates 2–10× that price for a
     comparable data product — we are not priced high relative to the category.
 
+**Also settled by the 07/09/2026 round-3 sweep** (~30 live SteadyAPI Reddit calls; full evidence
+trail in `2026-07-09-round3-q1-q2-tier2-answers.md`, with Q3/Q4 crawl4ai answers in
+`2026-07-09-round3-q3-q4-answers.md`):
+
+19. **Residential-agent willingness-to-pay is now real-numbered — closes Section 2 item 3.**
+    r/RealEstateTechnology lead-tool threads name $50–100/mo per seat as the WTP cluster, with
+    $80/mo cited as a real ceiling for a fully-loaded single tool ("under $50/month" as the
+    solo-agent comfort point); r/PropTech surfaces Saleswise.ai's CMA tool at exactly $39/mo — a
+    live competitor sitting at our exact price point. Our $39–79/mo band is validated by
+    point-in-time evidence, not just competitor-sticker inference. The stronger design lesson:
+    agents weigh *switching cost* (contact/activity-history migration, API access gated behind
+    expensive tiers) as much as sticker price — "your data, exportable, no lock-in" is a value line
+    distinct from any WTP number. Searched-not-found: Cloud CMA/BoomTown/Ylopo/Curaytor by name;
+    r/newagent is empty/dead (`meta.total: 0`).
+20. **CMA/comp adjustment factors, ranked by unprompted agent/appraiser repetition — closes
+    Section 4 item 1.** From a 255-comment r/RealEstate appraisal-gap thread + an r/appraisal
+    methodology thread: **condition first** (the dominant named factor), comp-selection /
+    arm's-length exclusion second (distress/divorce/foreclosure comps excluded or heavily adjusted;
+    3-comp minimum; take-5-drop-high-low pattern), sqft third (incl. finished basement), garage +
+    bed/bath count fourth, lot size/site fifth. View and landscaping are real but rare,
+    large-swing-only — explicitly de-prioritize, don't give equal billing. The complaint format is
+    "this comp should have been excluded / the condition adjustment is wrong," NOT "the math is
+    opaque" — commenters describe the actual method unprompted. Feeds the comp helper's default
+    adjustment set + display order directly.
+21. **Snowbird / out-of-state buyer pain is validated (directional) — narrows Section 3 item 4.**
+    r/Naples_FL carries the population and the failure mode directly: newcomers can't evaluate
+    agent trustworthiness or block-by-block area fit remotely; local advice is "rent first" /
+    "drive the neighborhoods yourself." A remote-buyer packet substituting for that drive is
+    validated whitespace (reuses the showing-prep pipeline). Venue note: r/CapeCoral and
+    r/FortMyers are weak for this question (hyperlocal daily-life content); r/Naples_FL and
+    r/AskFlorida are the venues. Not high-volume — directional, no longer a zero-research guess.
+22. **CRE broker pain beyond pricing — closes Section 3 item 1.** r/CommercialRealEstate: solo
+    brokers and family offices are ALREADY using Claude informally for exactly our kind of
+    reporting work ("monthly reporting from a 2 full day grind to maybe 2-3 hours"); enterprise
+    adoption is stalled on compliance (VPC, no-training guarantees, audit trails), not model
+    quality. Directly reinforces the locked bottom-up positioning — the receptive CRE persona is
+    the solo broker/family-office operator, not an enterprise compliance-gated sale. Corroborating
+    evidence for a decision already made, not a new build item.
+23. **Forecast/direction-call trust framing — closes Section 2 item 4.** r/REBubble readers treat
+    market forecasts as serious conditional debate and explicitly reward hedged/falsifiable framing
+    ("It really depends on WFH and AI job future, which I believe is fully unknowable") while
+    dismissing unconditional claims as "mostly BS" in the same thread. Validates leading the
+    master's direction call with the falsifier ("wrong if X"), not with confidence. No format
+    change needed — confirming evidence for the existing design.
+
 ---
 
 ## 2. Open — product-format assumptions (nobody's actually asked real people)
@@ -141,24 +186,21 @@ agent/investor statement.
    "brief categories" market email, or would they rather pull data on demand? Where to look:
    r/realtors, r/CommercialRealEstate — search "market report" + "newsletter" complaints (do people
    say they ignore/unsubscribe from automated market reports specifically?).
+   **Searched, empty (07/09/2026 round 3):** r/Emailmarketing + r/FirstTimeHomeBuyer hot, plus
+   r/realtors + r/RealEstate fallback, keyword-filtered — zero hits. Stays open. Next attempt ideas
+   (logged, not run): `filter=new`/`rising` instead of `hot`, or a targeted "unsubscribe from my
+   realtor" search framing instead of browsing.
 2. **Self-editing via chat ("tell AI to change the template").** Do agents want a conversational
    edit workflow for their own marketing, or do they want a fixed template they trust and reuse?
    Look for complaints about *too much customization* / decision fatigue in marketing tools
    threads, vs. complaints about being *locked into* a template.
-3. **Willingness-to-pay at $39–79/mo — CRE comp evidence found, residential-agent half still open.**
-   Competitor sticker prices were pulled (Cloud CMA/Chime/Mailchimp, Smartlead $59/mo, Lemlist
-   $55–87/user/mo, Beehiiv $0–96/mo, Walter Writes $8–99/mo) plus real CRE-broker numbers for a
-   comparable data tool (Section 1 item 18: Reonomy $157–700/mo/seat, CoStar 3×+ that) — but that's
-   CRE brokers on an enterprise comps platform, not a residential agent's reaction to $39–79/mo
-   specifically. Still open: searched r/realtors + r/RealEstate hot/new/rising (07/09/2026) and
-   generic reddit-search for "worth it"/"subscription" framing — no residential-agent tool-pricing
-   threads surfaced (confirms residential agents don't discuss SaaS pricing in the general subs the
-   way CRE brokers do in r/CommercialRealEstate). Next attempt: try r/proptech, r/newagent, or a
-   direct "what do you pay for [Cloud CMA/Chime/etc]" targeted search rather than generic browsing.
-4. **Falsifiable "direction call" / forecast-trust format.** We invented this as a differentiator
-   internally — never checked how agents actually talk about trusting (or distrusting) an
-   AI-generated market prediction. Look for sentiment on "AI market prediction," "Zillow forecast
-   wrong," "algorithm got it wrong" in r/RealEstate / r/REBubble.
+3. **CLOSED 07/09/2026 (round 3) — see Section 1 item 19.** The targeted retry this item
+   recommended (r/RealEstateTechnology, r/PropTech instead of generic-sub browsing) worked:
+   residential-agent WTP clusters $50–100/mo/seat with an $80/mo ceiling, and Saleswise.ai's CMA
+   tool prices at exactly $39/mo. Nothing left open here.
+4. **CLOSED 07/09/2026 (round 3) — see Section 1 item 23.** r/REBubble sentiment confirms the
+   falsifier-first framing is exactly how this audience already reasons; unconditional claims read
+   as "mostly BS." No format change needed.
 5. **"One sentence → branded PDF/email" workflow.** Is this solving a pain agents actually voice,
    or are current Cloud CMA / Altos users simply satisfied with what they have? Only pricing was
    researched for these competitors, never satisfaction/complaint content. Look for
@@ -172,6 +214,9 @@ agent/investor statement.
 7. **Email/deliverable frequency tolerance.** How many automated emails before a recipient calls
    it spam vs. useful? Look for real complaints from homeowners/buyers about realtor newsletter
    frequency (r/RealEstate, r/FirstTimeHomeBuyer — "why does my realtor email me every day").
+   **Searched, empty (07/09/2026 round 3):** same run as item 1 above — r/FirstTimeHomeBuyer's hot
+   snapshot was almost entirely "got the keys!" celebration posts, zero frequency complaints. Stays
+   open; same next-attempt ideas as item 1.
 8. **AI-authorship anxiety — copy specifically, not photos.** Photo-enhancement trust anxiety is
    already settled (Section 1 item 15). Separately: do agents worry that AI-*written* copy will make
    them look inauthentic to clients, or get flagged as "AI slop"? The "sounds like a robot" pain is
@@ -186,9 +231,10 @@ agent/investor statement.
 
 ## 3. Open — segment-specific pain points (not yet swept at all)
 
-1. **CRE broker/business-owner pain points.** All existing Reddit/BiggerPockets research skews
-   residential/HOA/condo. No sweep of r/CommercialRealEstate for broker-specific complaints has
-   been done (only CoStar *pricing* was researched, not CRE broker pain).
+1. **CLOSED 07/09/2026 (round 3) — see Section 1 item 22.** r/CommercialRealEstate swept: the
+   receptive persona is the solo broker/family-office operator already using Claude informally for
+   reporting; enterprise is compliance-gated. Reinforces locked bottom-up positioning; no new build
+   item.
 2. **Investor/landlord pain beyond rental-comp trust.** Do investors on r/realestateinvesting or
    BiggerPockets want a motivated-seller score, a market-regime signal, or listing-survival
    curves? These are currently product-whitespace guesses from academic/industry analogy
@@ -196,9 +242,10 @@ agent/investor statement.
 3. **Manufactured/mobile-home community pain points.** Lee/Collier have significant
    manufactured-home stock (`land_manufactured_swfl` is a known data gap) — zero social research
    exists on what buyers/owners in that segment actually struggle with.
-4. **Snowbird / out-of-state / sight-unseen buyer pain.** SWFL's seasonal buyer base is
-   structurally different (cash-heavy, remote) — no research yet on what specifically frustrates
-   an out-of-state buyer transacting without walking the property first.
+4. **NARROWED 07/09/2026 (round 3) — see Section 1 item 21.** Validated directionally on
+   r/Naples_FL (remote agent-vetting + block-by-block area-fit failure mode; "rent first / drive
+   the neighborhoods" advice). What stays open is only volume/urgency, not whether the pain is
+   real. Venue note: use r/Naples_FL + r/AskFlorida, not r/CapeCoral / r/FortMyers.
 5. **Insurance-driven delisting, asked directly.** We've only inferred this indirectly (volume
    decline + inventory rise). Nobody has searched for a seller directly saying "insurance killed
    my sale" on r/florida, r/Insurance, or r/RealEstate.
@@ -210,10 +257,10 @@ agent/investor statement.
 These pains are already confirmed real (Section 1) — what's open is what specific format/detail
 level people actually want, which changes how we build the feature, not whether to build it.
 
-1. **Comp/CMA transparency — which adjustments specifically?** "Agents want to see the math" is
-   settled. Which adjustment factors do they name most (sqft, age, condition, view, lot size,
-   pool, waterfront/canal tier)? Look for specifics in CMA-complaint threads, not just the
-   general "black box" framing.
+1. **CLOSED 07/09/2026 (round 3) — see Section 1 item 20.** Ranked unprompted: condition,
+   comp-selection/arm's-length, sqft, garage + bed/bath, lot size; view/landscaping de-prioritized
+   (rare, large-swing only). The complaint is wrong comp selection / missing condition adjustment,
+   not opaque math. Feeds the comp helper's default adjustment set + display order.
 2. **Flood/insurance risk — what format do buyers trust?** A 1-10 severity score? Plain-language
    tier ("Severe")? A raw trend chart? Do buyers trust third-party risk scores (First Street) or
    want to see raw underlying data instead? Look for reactions to First Street / Risk Factor

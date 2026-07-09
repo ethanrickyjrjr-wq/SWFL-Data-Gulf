@@ -973,6 +973,16 @@ Note: user timeline endpoints take `user_id` (numeric), not username — resolve
   worth it" biased to r/realtors → e-commerce/Overleaf/OpenAI threads; "listing photos broken in old
   emails" → creepypasta). The 07/08 verdict stands: targeted `/posts?url=` + client-side filter only.
 
+**07/09/2026 (~30 real calls — round-3 sweep, `docs/steadyapi-research/2026-07-09-round3-q1-q2-tier2-answers.md`):**
+- The content-filter false-positive is **endpoint-agnostic, not `/search`-only**: `/v1/reddit/post`
+  reproduced it — a well-formed, valid post URL (an r/appraisal thread) returned HTTP 200 with
+  `{"success": false, "message": "Please enter a valid subReddit URL."}` on first call, then 200'd
+  normally on an immediate identical retry. Retry once before treating any `success: false` as a real
+  empty result, on every Reddit endpoint.
+- Subreddit redirects surface as a near-empty (2-item) response carrying a redirect notice, not an
+  error: r/Naples → r/Naples_FL. If a known-active subreddit comes back nearly empty, check for a
+  redirect notice and refetch at the canonical name.
+
 ## 🤖 ScrapeFlow — generic scraper
 
 - `POST /v1/scraper` — SteadyAPI's general-purpose scraping endpoint (their "ScrapeFlow" product). Fallback lane for social surfaces they don't have dedicated endpoints for (e.g. TikTok, Facebook, LinkedIn — none of which have dedicated SteadyAPI sections as of 07/05/2026).

@@ -1,4 +1,17 @@
-## 2026-07-09 (Fable 5 · main) — spec: ZIP page as homepage destination (build registered) + operator amendments
+## 2026-07-09 (Fable 5 · main) — round-3 research: deferred fold-ins applied + answers file committed
+
+Operator handed the path to `docs/steadyapi-research/2026-07-09-round3-q1-q2-tier2-answers.md` (the
+Sonnet session's round-3 write-up — still untracked, with three fold-ins deferred behind parallel
+session 856ab63d's file claims). Verified the claims released (all live claims are now the
+seed-preview session's asset files), then applied everything as the file specified: (1) round1
+`2026-07-09-pain-point-questions-round1.md` — Q1/Q2/Q6/Q7/Q8 folded into §1 as items 19–23; §2.3
+(residential WTP), §2.4 (forecast trust), §3.1 (CRE broker pain), §4.1 (comp adjustments) closed
+with pointers; §3.4 (snowbird) narrowed; §2.1 + §2.7 annotated "searched, empty" per Q5. (2) vendor
+note `INSTAGRAM-SOCIAL-STEADY.md` — new 07/09 round-3 quirks block: `/v1/reddit/post` reproduces
+the content-filter false-positive (endpoint-agnostic, retry once) + r/Naples→r/Naples_FL
+redirect-as-near-empty-response. (3) folder README — indexed both round-3 answer files. Also
+stripped leaked tooling artifacts from the answers file (a "Recommended model" banner + a
+"Parallel Safety" table) and flipped its two PENDING sections to APPLIED. Docs-only; no code.
 
 Brainstormed + operator-ratified (3 AskUserQuestion gates): homepage ZIP clicks (map + rail)
 route to /r/zip-report — REVERSES the locked 07/03 "map click = email lab" ruling; visitors

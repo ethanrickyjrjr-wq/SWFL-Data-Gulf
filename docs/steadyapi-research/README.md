@@ -26,6 +26,17 @@ API-integration build track. See the inventory below for where the rest lives.
   are crawl4ai-only). This is the handoff for the next research runner. The companion build triage
   (which SETTLED findings become specs vs. are already built) lives in the 07/09 session
   scratchpad, summarized in SESSION_LOG.
+- `2026-07-09-round3-q3-q4-answers.md` — round-3 results, crawl4ai half: Q3/Q4 (the two
+  crawl4ai-only Tier-1 questions from the backlog).
+- `2026-07-09-round3-q1-q2-tier2-answers.md` — round-3 results, SteadyAPI half (~30 live Reddit
+  calls): Q1 residential-agent WTP CLOSED ($50–100/mo/seat cluster, $80 ceiling, Saleswise.ai CMA
+  at exactly $39/mo) · Q2 comp-adjustment ranking CLOSED (condition → comp-selection → sqft →
+  garage/bed/bath → lot; view/landscaping de-prioritized) · Tier 2: Q6 snowbird (directional,
+  r/Naples_FL), Q7 CRE broker pain (solo brokers already on Claude — bottom-up confirmed), Q8
+  forecast-trust (falsifier-first confirmed), Q9 pre-send review QA (structurally absent
+  industry-wide — genuine whitespace) · Q5 digest cadence searched EMPTY, stays open. All settled
+  items are folded into round1 Section 1 as items 19–23; the `/v1/reddit/post` content-filter
+  quirk is folded into the vendor note.
 
 ## Existing SteadyAPI material elsewhere (inventory, as of 07/09/2026)
 
