@@ -1,3 +1,25 @@
+## 2026-07-09 (Fable 5 · main) — spec: ZIP page as homepage destination (build registered) + operator amendments
+
+Brainstormed + operator-ratified (3 AskUserQuestion gates): homepage ZIP clicks (map + rail)
+route to /r/zip-report — REVERSES the locked 07/03 "map click = email lab" ruling; visitors
+were landing in a zip-seeded email doc (operator screenshot). Spec:
+`docs/superpowers/specs/2026-07-09-zip-page-destination-design.md`, check
+`zip_page_destination_live_verify`. Five phases: A routing flip · B baked narration + Down
+the Road ([INFERENCE] base+falsifier) via delta-gated Batch-API Sonnet into surface-generic
+`public.narratives` · C ZIP-radius pulse news (distill `location_anchor` field = zero extra
+LLM calls; geocode ladder; geocoder vendor terms = crawl4ai verify before code) · D funnel
+weave (live zip-seed email miniature — product-led, no brochure; evidence: daydream Zillow
+playbook + userp.io PLC, crawled in-session) · E all report surfaces (123 ZIPs + 27
+corridors + ~32 brain pages; communities counted at plan time). Operator amendments folded:
+weekly bake cadence w/ one-switch `BAKE_CADENCE` daily flip; spend through
+`refinery/agents/anthropic.mts` → `api_usage_log` tag `narrative-bake` (ops /spend line);
+4-layer guards (~$199k balance — vendor-side console limit = operator check
+`anthropic_workspace_spend_limit`); ONE-ROOT consolidation (report-shell absorbs per-page
+ReportHighlightBridge/metricSuggestions duplication across 6 /r/ pages; one narrative
+renderer; one bake prompt root; projects AI = thin overlay on the pages AI root); phone
+sections follow the grid-lab phone standard (lab side-panel gap = separate check
+`lab_phone_side_panel_visibility`). Next: writing-plans → Phase A.
+
 ## 2026-07-09 (Fable 5 · main) — handoff amend 2: bklit NOTICE.md is the primary chart path
 
 Operator named it: `components/charts/vendor/bklit/NOTICE.md`. bklit Area (`bklitTrendSvg`) +

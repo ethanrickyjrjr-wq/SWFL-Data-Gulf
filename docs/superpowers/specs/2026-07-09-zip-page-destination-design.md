@@ -181,6 +181,41 @@ merely unlikely.
 Visibility: pipeline tag `narrative-bake` in `api_usage_log` → ops /spend page line item;
 `scripts/tripwire-scan.mjs` already watches the same ledger.
 
+## One root (operator amendment 07/09/2026)
+
+Per-page AI wiring drift was a daily problem ("changing AI on one zip page doesn't change
+it on any other; changing an /r/ page doesn't change the highlighter on the homes page").
+Today every /r/ page hand-assembles its own `metricSuggestions` and mounts
+`ReportHighlightBridge` itself (zip-report ~50 inline lines; housing, corridor, [slug],
+method, source each their own copy). This build consolidates — C2: extend the existing
+seam, `app/r/_components/report-shell.tsx`:
+
+1. **Report AI shell — ONE root.** Highlighter bridge mounting + metric-suggestion
+   assembly move into the report shell; every /r/ surface passes data
+   (`surface, surfaceKey, signals, freshnessToken`) and mounts the shell. A highlighter
+   or suggestion change edits ONE file and lands on every page. All six current /r/
+   pages migrate as part of Phase E's fan-out.
+2. **Narrative renderer — ONE component.** One `NarrativeSections` component renders the
+   baked sections (narration / news / Down the Road) on every surface; per-surface pages
+   contribute zero narrative markup of their own.
+3. **Bake harness — ONE prompt root.** One bake script, one prompt-assembly + lint
+   pipeline; Phase E surface adapters supply inputs only. A prompt or gate change
+   propagates to all surfaces on their next bake — no per-surface prompt forks.
+4. **Pages AI vs projects AI.** One assistant root (`lib/assistant` answer path).
+   The projects layer stays a thin overlay — project-context injection only ("a little
+   difference"), never a forked prompt stack or a second display/citation path.
+   Citations remain on their single root (`lib/citations/clean-url.ts` + CitationList).
+
+## Phone (operator amendment 07/09/2026)
+
+- All new page sections follow the phone standard set by
+  `docs/superpowers/specs/2026-07-05-grid-lab-phone-design.md`: sized for phone, no
+  horizontal scroll, tools/affordances visible without hover.
+- The funnel module (Phase D) and news section must be verified at phone width before
+  each phase's live-verify closes.
+- Known follow-up OUTSIDE this build: lab side panel not visible on phone — tracked as
+  check `lab_phone_side_panel_visibility` (opened 07/09/2026).
+
 ## Explicitly out of scope
 
 - Live per-view AI narration (cost + ungated-answer risk; the live layer is the existing
