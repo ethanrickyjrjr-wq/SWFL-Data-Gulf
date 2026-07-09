@@ -27,6 +27,10 @@ import {
 import { extractOutreachAction, type ResendWebhookPayload } from "@/lib/email/outreach/lifecycle";
 import { onDemoEvent, type DemoStage } from "@/lib/email/outreach/demo-cadence";
 import { extractWeeklyReadAction } from "@/lib/email/weekly-read/webhook";
+import {
+  extractBlastAction,
+  type ResendWebhookPayload as BlastWebhookPayload,
+} from "@/lib/email/blast-events";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -151,6 +155,35 @@ export async function POST(request: Request): Promise<Response> {
     }
     return NextResponse.json(
       { ok: true, kind: "outreach", event: outreachAction.event },
+      { status: 200 },
+    );
+  }
+
+  // -- Blast (Task 1 — subject/CTA split-test): did-tagged deliverable sends ----
+  // A did-tagged event (any deliverable blast — app/api/deliverables/[id]/blast/
+  // route.ts) is logged into email_events for the results route (Task 12) to
+  // group by variant. No suppression/status ledger here — blast recipients are
+  // one-shot sends, not a drip.
+  const blastAction = extractBlastAction(event as unknown as BlastWebhookPayload);
+  if (blastAction) {
+    try {
+      const bdb = createServiceRoleClient();
+      await bdb.from("email_events").upsert(
+        {
+          resend_email_id: blastAction.emailId,
+          did: blastAction.did,
+          event: blastAction.event,
+          variant: blastAction.variant ?? null,
+        },
+        { onConflict: "resend_email_id,event", ignoreDuplicates: true },
+      );
+    } catch (err) {
+      console.error(
+        `[resend-webhook] blast tracking failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+    return NextResponse.json(
+      { ok: true, kind: "blast", event: blastAction.event },
       { status: 200 },
     );
   }
