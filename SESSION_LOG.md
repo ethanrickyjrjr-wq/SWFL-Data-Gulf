@@ -1,3 +1,25 @@
+## 2026-07-09 (Fable 5 · main) — feat(showcase): template preview gallery — filled previews for all 27 layouts
+
+Executed the 07/09 handoff spec (`2026-07-09-template-preview-gallery-design.md`). RULE 0.4
+crawls first (operator directive: big-gallery design insight): stripo.email validates committed
+fixed-width captures at 1,650-template scale + dual card CTA (Edit deep-link / Preview overlay);
+RGE groups by job-to-be-done with count+pitch headers; NN/g cards = identical internals, whole
+card one target. Built: `lib/email/doc/preview-fill.ts` (display-ONLY fill; real figures — lake
+listing feed 07/09, ZHVI through 05/31, Realtor.com hotness 06/26, LeePA recorded sales (just-sold
+heroes get a REAL sold aggregate, never an active address under a SOLD banner), Freddie Mac PMMS
+6.49% — AND purges legacy $485K/4521-Surfside demo placeholders; guard test proves no lab path
+imports it) · `scripts/capture-seed-previews.mts` (crawl4ai-venv playwright+Pillow, zero repo deps)
+→ 27 committed webp · `seed-previews.ts` manifest + existence guards · /showcase "Start-from
+layouts" (`SeedGallery`, job groups, `?seed=` via new `seedGalleryDestination`, anonymous-usable) ·
+grid picker thumbnails. Corrections: nav link ALREADY existed (`nav-config.ts:45` — spec evidence
+stale); ShowcaseCard/Overlay couldn't be reused UNCHANGED (recipe-shaped CTA ≠ seed pick) → sibling
+SeedGallery. Assets: 3 Pexels photos (licensed, README) + real-data ZHVI SVG chart (dataviz-skill
+validated ink #0891B2). Gates: 10 new tests, 98/0 email-doc+lab-entry, eslint clean, `bunx next
+build` ✓, prerendered /showcase carries 27 tiles. Checks: opened
+`seed_previews_recapture_after_enrichment` (RULE 2.4); `template_preview_gallery_live_verify`
+stays open for operator. NOT built: landing strip (operator-gated B4). Coordinated live with the
+fence session (claim-waits on `EmailLabGridShell.tsx` + the spec; no overrides).
+
 ## 2026-07-09 (Fable 5 · main) — fence-polish follow-ups: ghost sweep, signal fold-in, accent-ink gate PLAN
 
 Follow-ups from the 07/09 fence-polish verification pass (scratchpad

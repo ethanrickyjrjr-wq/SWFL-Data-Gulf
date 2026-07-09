@@ -26,6 +26,7 @@ import type {
 } from "@/lib/email/doc/types";
 import { EmailDocSchema, mintBlockId } from "@/lib/email/doc/schema";
 import { SEED_DOCS, createBlock } from "@/lib/email/doc/default-docs";
+import { SEED_PREVIEWS } from "@/lib/email/doc/seed-previews";
 import { GRID_COLS, WIDTH_PRESETS, widthPresetLabel } from "@/lib/email/grid-schema";
 import {
   initHistory,
@@ -1572,19 +1573,34 @@ export function EmailLabGridShell({
                 <span className={`transition-transform ${showSeeds ? "rotate-180" : ""}`}>▾</span>
               </button>
               {showSeeds && (
-                <div className="mt-2 space-y-1.5">
-                  {GRID_SEEDS.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => pickSeed(s.id)}
-                      className="w-full rounded-md border border-white/8 bg-white/4 px-3 py-2 text-left transition-colors hover:bg-white/8"
-                    >
-                      <span className="block text-xs font-medium text-white/75">{s.name}</span>
-                      <span className="block text-[10px] leading-tight text-white/35">
-                        {s.description}
-                      </span>
-                    </button>
-                  ))}
+                <div className="mt-2 grid grid-cols-2 gap-1.5">
+                  {/* Filled-preview thumbnails (committed captures — the same
+                      tiles /showcase browses); picking still commits the honest
+                      slot-rule skeleton via pickSeed → seed.build(). */}
+                  {GRID_SEEDS.map((s) => {
+                    const thumb = SEED_PREVIEWS.find((p) => p.id === s.id)?.image;
+                    return (
+                      <button
+                        key={s.id}
+                        onClick={() => pickSeed(s.id)}
+                        title={s.description}
+                        className="overflow-hidden rounded-md border border-white/8 bg-white/4 text-left transition-colors hover:border-white/25 hover:bg-white/8"
+                      >
+                        {thumb && (
+                          // eslint-disable-next-line @next/next/no-img-element -- committed static capture, top crop
+                          <img
+                            src={thumb}
+                            alt=""
+                            className="h-24 w-full object-cover object-top"
+                            loading="lazy"
+                          />
+                        )}
+                        <span className="block px-2 py-1.5 text-[10px] font-medium leading-tight text-white/75">
+                          {s.name}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

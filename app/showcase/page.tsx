@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ShowcaseGrid } from "./ShowcaseGrid";
 import { CampaignExamples } from "@/components/showcase/CampaignExamples";
+import { SeedGallery } from "@/components/showcase/SeedGallery";
+import { SEED_PREVIEWS } from "@/lib/email/doc/seed-previews";
 import { PageShell } from "@/components/PageShell";
 
 export const metadata: Metadata = {
@@ -45,6 +47,24 @@ export default function ShowcasePage() {
       </header>
 
       <ShowcaseGrid />
+
+      <hr className="my-14 border-gulf-haze" />
+
+      <header className="mb-12">
+        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-gulf-teal">
+          Start-from Layouts
+        </span>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">
+          {SEED_PREVIEWS.length} email layouts, ready to make yours
+        </h2>
+        <p className="mt-3 max-w-2xl text-text-secondary">
+          Every layout the email lab offers, shown filled with live SWFL data so you can see what it
+          becomes. Pick one and you start from the clean version — the AI fills it with your
+          area&rsquo;s real figures, your brand, your voice.
+        </p>
+      </header>
+
+      <SeedGallery />
 
       <section className="mt-14 rounded-xl border border-gulf-haze bg-gulf-deep px-6 py-8 text-center">
         <h2 className="text-xl font-semibold text-text-primary">

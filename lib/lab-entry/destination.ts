@@ -34,6 +34,14 @@ export function openSeed(projectId: string, seedId: string): string {
   return `${projectEmailLabBase(projectId)}?seed=${encodeURIComponent(seedId)}`;
 }
 
+/** A template-gallery pick with NO project context (the /showcase "Start-from
+ *  layouts" section). Lands on the anonymous-usable grid lab carrying ?seed= —
+ *  planArrival treats it as an explicit template pick (no popups) for both
+ *  anonymous and signed-in visitors. In-project hosts keep using openSeed. */
+export function seedGalleryDestination(seedId: string): string {
+  return `/email-lab/grid?seed=${encodeURIComponent(seedId)}`;
+}
+
 /** Homepage-map / zip-report click → the anonymous grid lab's deterministic
  *  ZIP seed doc. Signed-in users hit /email-lab first, which carries this. */
 export function openZipLab(
