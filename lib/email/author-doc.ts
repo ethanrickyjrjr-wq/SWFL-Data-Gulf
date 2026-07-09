@@ -528,6 +528,24 @@ function anchoredStatValue(raw: string, anchors: ReadonlySet<string>): string {
   return nums.every((t) => anchorsExactly(t, anchors)) ? raw : "";
 }
 
+/** Drop (never blank) any variant string carrying a number that doesn't anchor
+ *  verbatim to the data feed — the same moat as anchoredStatValue, applied to a
+ *  whole candidate string rather than a single field. Empty/whitespace entries
+ *  are dropped too (never ship a blank subject/CTA option). Exported for tests. */
+export function filterAnchoredVariants(
+  variants: readonly string[] | undefined,
+  anchors: ReadonlySet<string>,
+): string[] {
+  if (!variants) return [];
+  return variants
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .filter((v) => {
+      const nums = extractNumbers(v).filter((t) => !isBareYear(t));
+      return nums.every((t) => anchorsExactly(t, anchors));
+    });
+}
+
 function buildEntry(
   a: AuthoredBlock,
   figuresById: Map<string, MarketFigure>,
@@ -901,7 +919,18 @@ export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
     entries.push({ type: "text", span: GRID_COLS, newRow: true, props: { body: "" } });
   }
 
-  return { globalStyle, blocks: deriveLayout(capBlocks(entries)) };
+  const subjectVariants = filterAnchoredVariants(authored.subject_variants, anchors).slice(0, 4);
+  const ctaSource = authored.blocks.find(
+    (b) => b.type === "button" && (b.cta_variants?.length ?? 0) > 0,
+  );
+  const ctaVariants = filterAnchoredVariants(ctaSource?.cta_variants, anchors).slice(0, 4);
+
+  return {
+    globalStyle,
+    blocks: deriveLayout(capBlocks(entries)),
+    ...(subjectVariants.length ? { subjectVariants } : {}),
+    ...(ctaVariants.length ? { ctaVariants } : {}),
+  };
 }
 
 // ── The no-invention prose lint (gateNarrative philosophy, applied to blocks) ──

@@ -12,6 +12,7 @@ import {
   assembleAuthoredDoc,
   collectAnchorNumbers,
   lintAuthoredProse,
+  filterAnchoredVariants,
   AUTHOR_TOOL,
   authorSystem,
   buildAssetMenu,
@@ -698,5 +699,77 @@ describe("menu-label fidelity — an id-selected figure carries its own label", 
     expect(propsOf(doc.blocks.find((b) => b.type === "hero")!).label).toBe(
       "A qualitative headline",
     );
+  });
+});
+
+describe("filterAnchoredVariants", () => {
+  const anchors = new Set(["485000", "42"]);
+
+  test("keeps a variant with no numbers", () => {
+    expect(filterAnchoredVariants(["A clean headline"], anchors)).toEqual(["A clean headline"]);
+  });
+
+  test("keeps a variant whose number anchors exactly", () => {
+    expect(filterAnchoredVariants(["$485,000 median — see it"], anchors)).toEqual([
+      "$485,000 median — see it",
+    ]);
+  });
+
+  test("drops a variant with an unanchored number", () => {
+    expect(filterAnchoredVariants(["$999,000 median — see it"], anchors)).toEqual([]);
+  });
+
+  test("drops empty/whitespace-only entries and returns [] for undefined", () => {
+    expect(filterAnchoredVariants(["  ", ""], anchors)).toEqual([]);
+    expect(filterAnchoredVariants(undefined, anchors)).toEqual([]);
+  });
+});
+
+describe("assembleAuthoredDoc — subject/CTA variants", () => {
+  // NOTE: the brief's original fixture used "$485,000 median in 34103" — but "34103"
+  // is itself extracted as a number (extractNumbers has no ZIP exemption, only
+  // isBareYear for 4-digit calendar years) and was NOT in anchorNumbers, so that
+  // string would correctly get DROPPED by the real anchor-every-number logic.
+  // Fixed here to a string that only carries the one anchored figure.
+  test("populates subjectVariants from authored.subject_variants, anchor-filtered", () => {
+    const doc = assembleAuthoredDoc({
+      authored: {
+        blocks: [{ type: "footer" }],
+        subject_variants: ["$485,000 median", "$999,000 invented", "A clean headline"],
+      } as AuthoredDoc,
+      figuresById: new Map(),
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      anchorNumbers: ["$485,000"],
+    });
+    expect(doc.subjectVariants).toEqual(["$485,000 median", "A clean headline"]);
+  });
+
+  test("populates ctaVariants from the first button block carrying cta_variants", () => {
+    const doc = assembleAuthoredDoc({
+      authored: {
+        blocks: [
+          {
+            type: "button",
+            button_label: "View Report",
+            cta_variants: ["View Report", "See the Numbers"],
+          },
+        ],
+      } as AuthoredDoc,
+      figuresById: new Map(),
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      anchorNumbers: [],
+    });
+    expect(doc.ctaVariants).toEqual(["View Report", "See the Numbers"]);
+  });
+
+  test("omits both fields when the model wrote no variants — no regression", () => {
+    const doc = assembleAuthoredDoc({
+      authored: { blocks: [{ type: "footer" }] } as AuthoredDoc,
+      figuresById: new Map(),
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      anchorNumbers: [],
+    });
+    expect(doc.subjectVariants).toBeUndefined();
+    expect(doc.ctaVariants).toBeUndefined();
   });
 });
