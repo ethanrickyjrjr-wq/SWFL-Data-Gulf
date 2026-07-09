@@ -1,3 +1,39 @@
+## 2026-07-09 (Sonnet 5 · main) — feat(email): rebuild all 27 SEED_DOCS templates — content + visual pass
+
+Executed the approved `2026-07-09-template-rebuild-27-design.md` spec end to end. Track A (19
+templates): emptied every baked demo figure and stripped agent-spotlight's fake brand ("Coastal
+Realty Group"/"Sarah Mitchell"/a hotlinked randomuser.me photo) — worst offender per the handoff.
+Caught two silent-drift bugs the handoff flagged as a pattern but hadn't found instances of beyond
+market-letter: `weekly-pulse` also partially-overrode `hero` and inherited a baked stat via
+`DEFAULT_BLOCK_PROPS`. Emptied listing-digest's four fake addresses/prices (`4521 Surfside Blvd`
+etc.) even though `ListingProps` fields aren't part of the AI's authorable surface — they still
+shipped as real-looking example data in a fresh canvas, same risk class as the fake agent.
+Track B (all 27): real fence-bounded variety, not new sizes/fonts. `new-listing`, `weekly-pulse`,
+`year-in-review` were literally all-`{12}` rows with zero layout variety — gave each real
+`{6,6}`/`{7,5}`/`{4,4,4}` splits (first use of `{4,4,4}` anywhere in the file — year-in-review's
+3-highlight section, converted from one `multi-column` pretending to be three blocks into three
+real top-level `signal` blocks). `weekly-pulse`'s "two charts side-by-side" became two real
+top-level `image` blocks instead of the same multi-column trick. Found and fixed a real Fence-4
+violation: `editorial-letter` set `fontFamily:"BOOK_SERIF"` + `displayFontFamily:"PLAYFAIR_SERIF"`
+— serif+serif, illegal per `BLESSED_PAIRINGS` — unvalidated because SEED_DOCS is hand-authored and
+never passes through brand validation; a `schema.test.ts` test had baked the violation in as an
+assertion (both "editorial" seeds must share one font), rewrote it to assert compliance instead of
+sameness. Root-caused the original `magazine-issue` "two black boxes" complaint to a component-level
+bug, not a template bug: `ImageBlock.tsx`'s empty-overlay fallback was `#111827` (near-black),
+reading as a second dark band next to any nearby dark `signal` block — changed to a neutral
+`#9CA3AF` placeholder, fixing every template with an empty overlay photo, not just this one.
+`minimal`, `skeleton-agent-feature`, `trend-snapshot` left unchanged — already distinct by
+structure/design intent (trend-snapshot is THE SLOT RULE's own reference implementation).
+Operator decision this session: code-level verification only (no live-render/screenshot pass) —
+charts/photos can't be seen without real data anyway, a rendered example gallery is a later
+deliverable; ran crawl4ai/WebSearch research (RULE 0.4) on market-report-newsletter and
+year-in-review conventions first to ground structure decisions for those two categories.
+`bun test lib/email` 1232/1232 pass, `bun test lib/email/author-recipes.test.ts` 59/59 pass,
+`bunx next build` clean. Commit `29e80c8a`. Phase 1 (canvas fence-violation warning UI) stays
+queued separately — templates never pass through the canvas, so nothing blocked starting here.
+Not yet pushed — holding for explicit push confirmation on this commit (docs-only spec commit
+`102fc7c0`/`9d8a45af` already pushed earlier this session).
+
 ## 2026-07-09 (Sonnet 5 · main) — fix(assistant): chart-fallback resilience + reach-grounding latency; handoff for two open decisions
 
 Triaged `2026-07-09-chat-chart-honesty-followup.md`. Confirmed `5982b8e3`/`9c072470` (the Phase A–E
