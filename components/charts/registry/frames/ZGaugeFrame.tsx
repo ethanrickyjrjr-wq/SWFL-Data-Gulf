@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChartSpec } from "../chart-spec";
+import { friendlyAsOf } from "@/lib/project/as-of";
 
 // ---------------------------------------------------------------------------
 // Data-adapter (exported for pure-function testing — no React dependency)
@@ -94,7 +95,7 @@ export function ZGaugeFrame({ spec }: { spec: ChartSpec }) {
   // Caption shared by both the main render and the fallback
   const caption = (
     <p className="mt-3 text-xs text-slate-400 text-center">
-      As of {spec.asOf}
+      As of {friendlyAsOf(spec.asOf)}
       {spec.source?.citation ? ` · ${spec.source.citation}` : ""}
     </p>
   );

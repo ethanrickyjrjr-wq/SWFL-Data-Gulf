@@ -1,3 +1,89 @@
+## 2026-07-09 (Sonnet 5 · main) — fix(charts): dedupe friendlyAsOf to ONE root; fix 2 chart frames rendering raw ISO
+
+Operator pushed back hard on the digest fix above: "is this fixed in ALL future emails, not just
+this?" — No. Then: "how do we not have a root for all of these?" Fair — swept every `.asOf` call
+site in the codebase before touching anything.
+
+Found: NO single root. `friendlyAsOf` (chart-caption format, "Jun 1, 2026") was defined 3 times
+verbatim — `ChartBlockView.tsx`, `SeasonalRadialChart.tsx`, `registry/frames/TimelineFrame.tsx` —
+one file's own comment even says "Mirrors ChartBlockView.friendlyAsOf" and duplicated it anyway.
+Separately, `lib/format-date.ts`'s `formatDisplayDate` (MM/DD/YYYY) duplicates
+`lib/project/as-of.ts`'s `asOfFromIso` — same logic, two files, and `format-date.ts`'s own comment
+cross-references `as-of.ts` and still didn't reuse it. Plus a 6th local `mdY()` in
+`load-home-map-data.ts`.
+
+**Track A (dedupe, done):** moved `friendlyAsOf` into `lib/project/as-of.ts` as a second named
+export (kept distinct from `asOfFromIso` on purpose — chart captions and prose have legitimately
+different display needs, "one root" means one shared module, not one universal format). Deleted
+the 3 local copies, wired all 3 components to the shared import. Zero behavior change — same
+strings render, just from one source. Verified: `tsc --noEmit` clean, 752 tests pass
+(lib/deliverable + lib/project + lib/charts).
+
+**Track B (operator: check before wiring, don't assume):** operator flagged `bind-frame.ts`,
+`ranked-delta-bind.ts`, `listing-comps.ts` as suspects. Traced each to its real render consumer
+before touching anything — turns out these are NOT bugs. `ChartSpec.asOf` is deliberately raw ISO
+at the data layer (`lib/deliverable/print-vintage.ts` depends on comparing raw dates across charts
+to catch a stale chart hiding in an otherwise-fresh deliverable); `bind-frame.ts`'s own comment says
+"`asOf` is PROVENANCE — never run through prose policing." Formatting is correctly deferred to the
+render layer, and every consumer I found there already formats it (svg generators + chart-image.ts
+via `formatDisplayDate`; landing/showing-prep/pulse-digest pages pre-formatted upstream). Wiring
+these through a formatter at the data layer would have been wrong, not a fix.
+
+The check-before-wiring did surface a REAL bug one layer down: two sibling components in the same
+`registry/frames/` directory as `TimelineFrame` never formatted `spec.asOf` at all —
+`CompositionFrame.tsx:130` and `ZGaugeFrame.tsx:98` rendered raw ISO directly ("As of 2026-07-08").
+Fixed both with the same shared `friendlyAsOf` import. Live, on the actual website/PDF, same bug
+class as the original digest complaint — just a different chart type.
+
+Opened `asof_formatter_fragmentation` for the `format-date.ts`/`mdY()` duplication — did not fold
+into this pass (out of Track A's stated scope), not silently dropped.
+
+## 2026-07-09 (Sonnet 5 · main) — fix(email): digest jargon/date/staleness bugs — plus why the pre-send "check" never caught them
+
+Operator flagged a real sent digest (Issue #17): ISO dates showing backwards in 4+ spots, raw
+internal pack IDs leaking as attribution text ("master brain", "housing-swfl", "city-pulse-swfl"),
+a "BREAKING" item that was actually a month old, and a "View Full Report" CTA that goes to
+`/r/housing-swfl` — a page with none of what's actually in the email. Core question: how does
+this ship if there's a check before send?
+
+Answer: there isn't one, content-wise. `scripts/email/build-digest.mts`'s only pre-send "check" is
+`computeDelta`/`buildDeltaText` — a NUMERIC escalation detector (price/DOM/inventory % moves), not
+a jargon/date/staleness lint. `lib/email/voice-guard.ts` (the actual anti-jargon guard) is wired
+only into the AI-authored grid-email path (`author-doc.ts`), never into this separate cron digest.
+
+Fixed (scripts/email/DigestEmail.tsx + fetch-digest-data.mts):
+- All date displays now go through `asOfFromIso` (MM/DD/YYYY) instead of raw ISO — reused the
+  existing `lib/project/as-of.ts` helper rather than writing a new one.
+- Replaced hardcoded "master brain"/"housing-swfl"/"city-pulse-swfl" attribution strings with
+  plain "SWFL Data Gulf" (matches the existing citation-naming rule).
+- `freshness_manifest.{master,housing_swfl,city_pulse}.as_of` now reads each brain's REAL
+  freshness token off its file (`brains/{id}.md`) instead of stamping `today` on all three —
+  the old code was masking staleness, not just misformatting it. Confirmed live: housing-swfl's
+  real as_of is 06/29/2026 (10 days stale), not 07/09.
+- `top_line` was slicing the tier-2 speak markdown by raw LINES (`.split("\n").slice(0,3)`), which
+  split the "\n\n" block separator apart and glued the literal `**scope**` header (unrendered
+  markdown asterisks) onto the conclusion. Now takes the actual conclusion block directly —
+  removes the visible `**` characters and the duplicated header.
+- Verified via a live dry-run render against production brain files + `bun test scripts/email`
+  (39 pass) + `bunx tsc --noEmit`.
+
+NOT fixed here (opened as checks, not silently deferred — RULE 2.4):
+- `breaking_no_recency_filter` — city-pulse-swfl's "breaking" topic has no event-recency filter;
+  the pack's own doc claims a 1-day TTL but nothing enforces it. Needs a capture/pack-level fix.
+- `master_conclusion_jargon_leak` — `composeConclusion` (refinery/lib/synth.mts) bakes
+  magnitude/confidence/trust-tier language directly into the ONE conclusion field tier-2 speak
+  renders; `sanitizeProse` doesn't strip it. This is why "moderate magnitude" still reads jargon-y
+  post-fix — it's upstream of the digest, likely hits other tier-2 surfaces too. Answer-engine-
+  guardian scope, not a digest patch.
+- `cta_report_link_mismatch` — CTA always points at `/r/housing-swfl` regardless of what the email
+  actually contains; needs a product decision on target page, not a unilateral pick.
+- `digest_no_quality_gate` — this pipeline still has no content lint after this fix; only the
+  numeric delta detector. voice-guard.ts doesn't cover it and wasn't extended here (its scope is
+  narrower — corporate-AI-tell phrases only — so it wouldn't catch jargon/dates/system-nouns
+  anyway without real design work).
+
+Not yet pushed — showing the diff before commit per operator's no-autonomous-push rule.
+
 ## 2026-07-09 (Sonnet 5 · main) — fix(highlighter): remove the "double-tap a figure" coachmark pill
 
 Operator wanted the white bottom-left coachmark pill gone site-wide ("delete it and stop not

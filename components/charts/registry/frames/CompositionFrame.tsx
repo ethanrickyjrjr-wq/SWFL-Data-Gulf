@@ -1,5 +1,6 @@
 import type { ChartSpec, ChartTheme } from "../chart-spec";
 import { extendPalette } from "@/lib/charts/palette";
+import { friendlyAsOf } from "@/lib/project/as-of";
 
 /**
  * CompositionFrame — generic segmented / stacked bar showing parts of a whole,
@@ -126,7 +127,7 @@ export function CompositionFrame({ spec }: { spec: ChartSpec }) {
 
       {/* Bottom caption: asOf + source */}
       <div className="mt-auto space-y-0.5 text-xs text-neutral-500">
-        <p>As of {spec.asOf}</p>
+        <p>As of {friendlyAsOf(spec.asOf)}</p>
         {spec.source?.citation && <p>{spec.source.citation}</p>}
       </div>
     </div>

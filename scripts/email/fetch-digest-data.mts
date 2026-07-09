@@ -9,9 +9,26 @@ import type {
 } from "./types.ts";
 import { ZIP_FOCUS } from "./types.ts";
 
+const FRESHNESS_TOKEN_RE = /SWFL-\d{4}-v\d+-\d{8}/;
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
 const REPO_ROOT = path.join(import.meta.dirname, "..", "..");
 const DRY_RUN = process.env.DRY_RUN === "true";
+
+/**
+ * The real freshness token off a brain's own file — NEVER the tier-2 `speak`
+ * text, which deliberately scrubs raw `SWFL-…` tokens as an internal ID
+ * (data protocol v3 rule 6, "no internal IDs"). Reading the file directly is
+ * the only way to get the source's true vintage for freshness_manifest.
+ */
+function readFreshnessToken(brainId: string): string {
+  try {
+    const content = fs.readFileSync(path.join(REPO_ROOT, "brains", `${brainId}.md`), "utf-8");
+    return content.match(FRESHNESS_TOKEN_RE)?.[0] ?? "unknown";
+  } catch {
+    return "unknown";
+  }
+}
 
 // ── Brain file parsing ─────────────────────────────────────────────────────
 
@@ -93,9 +110,11 @@ function readHousingBrain(): {
   zipMetrics: Record<string, ZipMetricSnapshot>;
   countyMetrics: ZipMetricSnapshot;
   periodBegin: string;
+  freshnessToken: string;
 } {
   const content = fs.readFileSync(path.join(REPO_ROOT, "brains", "housing-swfl.md"), "utf-8");
   const output = parseBrainOutputSection(content) as HousingOutput | null;
+  const freshnessToken = readFreshnessToken("housing-swfl");
 
   // detail_tables[0] is the ZIP grain table: rows are {key=ZIP, label, cells}.
   const table = output?.detail_tables?.[0];
@@ -127,7 +146,7 @@ function readHousingBrain(): {
     inventory: null,
     sale_count_period: null,
   };
-  return { zipMetrics, countyMetrics, periodBegin };
+  return { zipMetrics, countyMetrics, periodBegin, freshnessToken };
 }
 
 // ── API narrative fetch ────────────────────────────────────────────────────
@@ -136,7 +155,7 @@ async function fetchSpeak(slug: string): Promise<{ text: string; freshness_token
   const res = await fetch(`${SITE_URL}/api/b/${slug}?view=speak&tier=2`);
   if (!res.ok) throw new Error(`Brain speak fetch failed: ${slug} (${res.status})`);
   const text = await res.text();
-  const token = text.match(/SWFL-\d{4}-v\d+-\d{8}/)?.[0] ?? "unknown";
+  const token = text.match(FRESHNESS_TOKEN_RE)?.[0] ?? "unknown";
   return { text, freshness_token: token };
 }
 
@@ -281,6 +300,17 @@ export function selectCityVoices(
 
 // ── Main export ────────────────────────────────────────────────────────────
 
+// A source's as_of is the real vintage of the data it served — its own
+// freshness token's trailing YYYYMMDD — NEVER the send date. Stamping `today`
+// on a brain that last rebuilt days/weeks ago hides staleness instead of
+// surfacing it. Falls back to today only when the token itself can't be
+// parsed (e.g. a dry-run fixture with no live token). Kept as ISO here (not
+// MM/DD/YYYY) — display formatting happens once, at render, via asOfFromIso.
+function asOfForToken(token: string, today: string): string {
+  const m = /(\d{4})(\d{2})(\d{2})\b/.exec(token);
+  return m ? `${m[1]}-${m[2]}-${m[3]}` : today;
+}
+
 export async function fetchDigestData(): Promise<DigestPayload> {
   const today = new Date().toISOString().slice(0, 10);
   const [masterSpeak, cityVoices, housing] = await Promise.all([
@@ -289,10 +319,16 @@ export async function fetchDigestData(): Promise<DigestPayload> {
     Promise.resolve(readHousingBrain()),
   ]);
 
+  const masterToken = readFreshnessToken("master");
+  const cityPulseToken = readFreshnessToken("city-pulse-swfl");
   const manifest: FreshnessManifest = {
-    master: { token: masterSpeak.freshness_token, as_of: today },
-    housing_swfl: { token: "housing-swfl-disk", as_of: today, period_begin: housing.periodBegin },
-    city_pulse: { token: "city-pulse-daily", as_of: today },
+    master: { token: masterToken, as_of: asOfForToken(masterToken, today) },
+    housing_swfl: {
+      token: housing.freshnessToken,
+      as_of: asOfForToken(housing.freshnessToken, today),
+      period_begin: housing.periodBegin,
+    },
+    city_pulse: { token: cityPulseToken, as_of: asOfForToken(cityPulseToken, today) },
     lee_cre: null,
     source_env: DRY_RUN ? "preview" : "live",
   };
@@ -301,10 +337,18 @@ export async function fetchDigestData(): Promise<DigestPayload> {
   // top_story that is always market-relevant (never a human-interest item).
   const { cityVoices: selectedVoices, topStory } = selectCityVoices(cityVoices, 4);
 
+  // The rendered speak text is markdown BLOCKS joined by "\n\n" (speaker.mts
+  // renderTier2): blocks[0] is the bold "**{scope}**" header, blocks[1] is the
+  // sanitized conclusion prose. Slicing raw LINES (the old approach) split
+  // that "\n\n" apart, glued the literal "**scope**" header onto the front of
+  // the conclusion, and left the markdown asterisks unrendered as plain text.
+  const speakBlocks = masterSpeak.text.split("\n\n");
+  const topLine = (speakBlocks[1] ?? speakBlocks[0] ?? "").trim();
+
   return {
     date: today,
     freshness_manifest: manifest,
-    top_line: masterSpeak.text.split("\n").slice(0, 3).join(" ").trim(),
+    top_line: topLine,
     zip_metrics: housing.zipMetrics,
     county_metrics: housing.countyMetrics,
     city_voices: selectedVoices,

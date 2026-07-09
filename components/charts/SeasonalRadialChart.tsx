@@ -2,24 +2,13 @@
 
 import { RadialBarChart, RadialBar, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import type { SeasonalRadialEntry } from "@/types/viz";
+import { friendlyAsOf } from "@/lib/project/as-of";
 
 export type { SeasonalRadialEntry };
 
 export interface SeasonalRadialChartProps {
   data: SeasonalRadialEntry[];
   asOf?: string;
-}
-
-/** ISO YYYY-MM-DD → "Jun 1, 2026" (UTC-safe). Mirrors ChartBlockView.friendlyAsOf. */
-function friendlyAsOf(iso: string): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  if (!m) return iso;
-  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
 }
 
 /** Teal → sky → amber gradient keyed on the seasonal index (0→1). */
