@@ -151,6 +151,11 @@ export const AUTHOR_TOOL = {
     "an image block, or on a multi-column column) — the system drops in that " +
     "library image and its credit. Do not place an image whose asset was not " +
     "offered; only listed ids exist.\n\n" +
+    "VARIANTS — optionally set `subject_variants` (2-4 alternate subject lines for the whole " +
+    "email) and, on a `button` block, `cta_variants` (2-4 alternate labels for THAT button). " +
+    "Same hard rule applies: any number you quote must be verbatim from the DATA MENU. " +
+    "These are picked from, not concatenated — write genuinely different angles, not " +
+    "punctuation variants of one sentence.\n\n" +
     "SECTIONS — optional semantic styling; the system resolves every color and " +
     'pixel, you never write one. `band` ("light" | "dark" | "accent") gives a ' +
     "section a background from the user's palette (text flips automatically on " +
@@ -203,6 +208,15 @@ export const AUTHOR_TOOL = {
             designation: { type: "string" },
             bio: { type: "string" },
             button_label: { type: "string" },
+            cta_variants: {
+              type: "array",
+              description:
+                "button blocks only: 2-4 alternate labels for THIS button (e.g. 'View Report', " +
+                "'See the Numbers'). Omit on non-button blocks.",
+              items: { type: "string" },
+              minItems: 2,
+              maxItems: 4,
+            },
             align: { type: "string", enum: ["left", "center", "right"] },
             image_role: {
               type: "string",
@@ -293,6 +307,15 @@ export const AUTHOR_TOOL = {
           required: ["type"],
         },
       },
+      subject_variants: {
+        type: "array",
+        description:
+          "2-4 alternate subject lines for this email. Same rule as prose: quote a number " +
+          "verbatim from the DATA MENU or omit it — never invent one.",
+        items: { type: "string" },
+        minItems: 2,
+        maxItems: 4,
+      },
       schedule_suggestion: {
         type: "object",
         additionalProperties: false,
@@ -334,6 +357,10 @@ export function authorSystem(opts: {
     "SCHEDULING — if this content reads like a recurring digest (a weekly/monthly market update, not " +
       "a one-off), you MAY optionally set schedule_suggestion (cadence + a one-sentence reason). Omit " +
       "it for a one-off email.",
+    "SUBJECT + CTA VARIANTS — write 3 subject lines (genuinely different angles: a headline " +
+      "figure, a question, an urgency framing) via `subject_variants`. If you place a `button` " +
+      "block, also write 3 alternate labels via `cta_variants` on that block. Same DATA MENU-only " +
+      "number rule as everywhere else.",
   ];
   if (opts.dossier) {
     parts.push(
