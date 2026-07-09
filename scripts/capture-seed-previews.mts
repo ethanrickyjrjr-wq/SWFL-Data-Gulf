@@ -55,8 +55,11 @@ for (const seed of SEED_DOCS) {
   const filled = previewFill(seed.build(), { seedId: seed.id });
   let html = await renderEmailDocHtml(filled);
   // Root-relative asset paths (committed photos/charts) must resolve from the
-  // throwaway file:// page — prod URLs stay untouched.
+  // throwaway file:// page — prod URLs stay untouched. Overlay images (the
+  // magazine-issue cover) ride in CSS background-image:url(/...), not src=,
+  // so rewrite both forms or the capture shows the gray fallback band.
   html = html.replaceAll('src="/', `src="${PUBLIC_FILE_PREFIX}`);
+  html = html.replaceAll("url(/", `url(${PUBLIC_FILE_PREFIX}`);
   const htmlPath = join(tmp, `${seed.id}.html`);
   writeFileSync(htmlPath, html);
   jobs.push({

@@ -1,3 +1,28 @@
+## 2026-07-09 (Fable 5 · main) — seed-preview variety pass shipped: per-template charts/figures/photos
+
+Executed `docs/handoff/2026-07-09-seed-preview-presentability-handoff.md` (operator escalation:
+same ZHVI chart 3× in one weekly-pulse preview). 9 new chart SVGs generated through the
+PRODUCTION bklit email path per NOTICE.md (`scripts/generate-seed-preview-charts.mts` —
+bklitTrendSvg/bklitComposedSvg; label chrome outside the bklit subtree; categorical bars use the
+synthetic-date trick; trends plot a tight baseline, true values in endpoint labels) from series
+pulled live this session: FRED Lee asking+inventory, market_heat per-ZIP (33914 series + 6-ZIP
+bars), tier_divergence top tier, ZORI Fort Myers, LeePA sales/median by month (arm's-length
+≥$10K), PMMS weekly xlsx (crawl4ai lane). weekly-pulse now carries 3 distinct charts;
+trend-snapshot is sole owner of the hand ZHVI chart. `preview-fill.ts` rebuilt around
+SEED_ASSIGNMENTS — per-seed hero/stats/charts/photos/listings/signals/commentary for all 27
+seeds, heroes distinct within every gallery group; 15 operator-provided SWFL photos (lane 4,
+vendor watermark strips cropped, no visible-house-number/address mismatches) + 6 kept Pexels
+replace the 3-photo cycle. Set-level QA (contact sheet — the step the shipping session skipped)
+caught 3 more classes, all fixed: magazine cover never loaded in captures (CSS
+background-image `url(/` rewrite added to capture script), agent-hero banners cropped the tall
+portrait to wallpaper (new face-centered banner crop), 8 instruction-copy leaks ("Pull
+side-by-side…", "Welcome them…", year-in-review "say which and why") — INSTRUCTION_RE widened +
+assigned signals now replace title+body as a pair. New guards in `preview-fill.test.ts`: no
+duplicate chart within a doc, hero variety per group, ≤3 global chart repeats, every referenced
+asset exists, instruction-leak list. Gates: `bun test lib/email/doc/ lib/lab-entry/` 103/0 ·
+`bunx next build` ✓. Closed `seed_preview_variety_pass`; chart half of
+`seed_previews_recapture_after_enrichment` is done (its enrichment re-run note stands).
+
 ## 2026-07-09 (Fable 5 · main) — round-3 research: deferred fold-ins applied + answers file committed
 
 Operator handed the path to `docs/steadyapi-research/2026-07-09-round3-q1-q2-tier2-answers.md` (the

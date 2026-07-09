@@ -1,8 +1,18 @@
 import { describe, it, expect } from "bun:test";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { SEED_DOCS } from "./default-docs";
+import { SEED_PREVIEWS } from "./seed-previews";
 import { previewFill } from "./preview-fill";
+
+/** Chart URLs (committed SVGs) of a filled doc's image blocks, in slot order. */
+function chartUrls(doc: ReturnType<typeof previewFill>): string[] {
+  const urls: string[] = [];
+  for (const b of doc.blocks) {
+    if (b.type === "image" && b.props.url?.endsWith(".svg")) urls.push(b.props.url);
+  }
+  return urls;
+}
 
 describe("previewFill", () => {
   it("never mutates the input doc and returns a new object", () => {
@@ -44,6 +54,27 @@ describe("previewFill", () => {
     }
   });
 
+  it("leaves no known authoring-instruction copy in filled output", () => {
+    // Preset seed copy that reads as an instruction to the author — each of
+    // these shipped visibly in a capture at least once (set-level QA 07/09/2026).
+    const leaks = [
+      "Pull side-by-side data",
+      "Pull a real number",
+      "Ground it in a real number",
+      "say which and why",
+      "Welcome them in your own voice",
+      "Read the trend in plain language",
+      "A short bio that builds trust",
+      "What you expect heading into next year",
+    ];
+    for (const seed of SEED_DOCS) {
+      const json = JSON.stringify(previewFill(seed.build(), { seedId: seed.id }));
+      for (const leak of leaks) {
+        expect(json, `${seed.id} leaks "${leak}"`).not.toContain(leak);
+      }
+    }
+  });
+
   it("leaves no [[placeholder]] tokens in filled output", () => {
     for (const seed of SEED_DOCS) {
       const filled = previewFill(seed.build(), { seedId: seed.id });
@@ -60,6 +91,64 @@ describe("previewFill", () => {
         expect(JSON.stringify(filled.blocks[i].layout ?? null)).toBe(
           JSON.stringify(doc.blocks[i].layout ?? null),
         );
+      }
+    }
+  });
+
+  // ── variety guards (seed_preview_variety_pass, operator escalation
+  // 07/09/2026: the SAME ZHVI chart rendered 3× inside one weekly-pulse
+  // preview). These make that class of ship impossible.
+
+  it("never repeats a chart inside one doc", () => {
+    for (const seed of SEED_DOCS) {
+      const urls = chartUrls(previewFill(seed.build(), { seedId: seed.id }));
+      expect(new Set(urls).size, `${seed.id} chart slots: ${urls.join(", ")}`).toBe(urls.length);
+    }
+  });
+
+  it("keeps hero values distinct within each gallery group", () => {
+    const byGroup = new Map<string, Map<string, string>>();
+    for (const seed of SEED_DOCS) {
+      const group = SEED_PREVIEWS.find((p) => p.id === seed.id)?.group ?? "?";
+      const filled = previewFill(seed.build(), { seedId: seed.id });
+      const heroBlock = filled.blocks.find((b) => b.type === "hero");
+      if (!heroBlock || heroBlock.type !== "hero") continue;
+      const value = heroBlock.props.value ?? "";
+      const seen = byGroup.get(group) ?? new Map<string, string>();
+      expect(
+        seen.has(value),
+        `group "${group}": ${seed.id} and ${seen.get(value)} share hero "${value}"`,
+      ).toBe(false);
+      seen.set(value, seed.id);
+      byGroup.set(group, seen);
+    }
+  });
+
+  it("caps any single chart at 3 appearances across the whole gallery", () => {
+    const counts = new Map<string, number>();
+    for (const seed of SEED_DOCS) {
+      for (const url of chartUrls(previewFill(seed.build(), { seedId: seed.id }))) {
+        counts.set(url, (counts.get(url) ?? 0) + 1);
+      }
+    }
+    for (const [url, n] of counts) {
+      expect(n, `${url} appears ${n}× across the gallery`).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("every filled image/chart/listing asset exists on disk", () => {
+    for (const seed of SEED_DOCS) {
+      const filled = previewFill(seed.build(), { seedId: seed.id });
+      for (const b of filled.blocks) {
+        const urls: (string | undefined)[] =
+          b.type === "image" ? [b.props.url] : b.type === "listing" ? [b.props.photoUrl] : [];
+        for (const u of urls) {
+          if (!u || !u.startsWith("/")) continue;
+          expect(
+            existsSync(join(process.cwd(), "public", u.replace(/^\//, ""))),
+            `${seed.id}: missing asset ${u}`,
+          ).toBe(true);
+        }
       }
     }
   });
