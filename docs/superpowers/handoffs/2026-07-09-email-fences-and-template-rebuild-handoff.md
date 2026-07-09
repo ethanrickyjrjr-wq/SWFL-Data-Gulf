@@ -1,12 +1,14 @@
-# Handoff — finish M2's canvas fence, then rebuild the 19 drifted templates
+# Handoff — finish M2's canvas fence, then rebuild all 27 templates
 
 **Date:** 07/09/2026 · **For:** a fresh Sonnet session, no prior context on this thread.
 **Read first:** `lib/email/CLAUDE.md` (THE SLOT RULE), and this doc in full before touching code.
 
 ## Why this exists
 
-Two things converged this session: (1) an audit found 19 of 27 `SEED_DOCS` starter templates
-ship finished example numbers in slots that should be empty, and (2) the M2 grid-fence system
+Three things converged this session: (1) an audit found 19 of 27 `SEED_DOCS` starter templates
+ship finished example numbers in slots that should be empty, (2) a live screenshot of one of the
+8 "clean" templates (`magazine-issue`) showed content-correctness doesn't mean it looks good —
+so all 27 need a visual pass, not just the 19, and (3) the M2 grid-fence system
 (the mechanical guardrails meant to stop the AI/user from collapsing every template into one
 generic look) turned out to be much further along than the `checks` ledger said — a shipped
 commit was titled about something else, so nobody updated the record. Both threads land in the
@@ -80,14 +82,38 @@ end-to-end test required — this is advisory UI, not a build-blocking gate.
 Verify: `bun test lib/email`, `bunx next build` clean. Close check `m2_fences_bounds_of_space`
 with evidence once this lands.
 
-## Phase 2 — rebuild the 19 drifted templates
+## Phase 2 — rebuild all 27 templates, two tracks
 
-**Scope is exactly these 19 `SEED_DOCS` entries in `lib/email/doc/default-docs.ts` — not all 27.**
-The other 8 are already conformant and are your REFERENCE MODELS, not targets:
-`minimal`, `skeleton-clean-white`, `skeleton-dark-pro`, `skeleton-agent-feature`,
-`skeleton-listing-showcase`, `trend-snapshot`, `editorial-letter`, `magazine-issue`.
+**Scope is all 27 `SEED_DOCS` entries in `lib/email/doc/default-docs.ts`.** Checked whether
+"Start a Campaign" (`lib/campaigns.ts` + `lib/showcase/registry.ts`) or a "Seller Pack" template
+carve out any of these 27 — neither does. The 4 live campaigns (New Listing, Agent Launch,
+Newsletter/Market Pulse, New Listing Socials) seed a prose *recipe* through the free-form AI
+builder (`?recipe=`), never a `SEED_DOCS` id (`?seed=`) — completely separate surface, zero
+overlap. "Seller Pack" doesn't exist anywhere in this repo under any name (searched code, docs,
+checks, both active worktrees) — it's a separate, unresolved gap, tracked as its own check
+(`seller_pack_not_found`), not part of this handoff. So: nothing to exclude. All 27 are in play.
 
-### The 16 fully drifted (baked figures in what should be open slots)
+**Two tracks, not one — every template needs Track B, only some need Track A:**
+
+- **Track A — content/slot-rule fix.** Only the 19 templates listed below have baked figures,
+  fake brand, or fake commentary violating THE SLOT RULE.
+- **Track B — visual/variety pass.** ALL 27 need this, including the 8 that are already
+  content-clean. Proof: `magazine-issue` (content-clean, one of the 8) was screenshotted mid-session
+  and is visually bad — its `image` block has no `url`, so the "photo" is just a solid black
+  rectangle, and the section-band block is also solid black, so the whole template reads as two
+  identical black boxes with no real imagery, no accent color, no border/radius treatment, and
+  minimal type hierarchy. Being SLOT-RULE-clean says nothing about looking good — that's a
+  separate axis this session hadn't checked until an actual screenshot exposed it. Assume the
+  other 7 "clean" templates need the same visual scrutiny; don't assume they're fine because they
+  passed the content audit.
+
+Do Track A before Track B on any given template (fix the content, then make it look distinct) —
+but a template needing only Track B (the 8) still goes through this phase, it just skips the
+content-fix step.
+
+### Track A — the 19 templates needing a content/slot-rule fix
+
+#### The 16 fully drifted (baked figures in what should be open slots)
 `market-spotlight`, `just-sold`, `market-letter`, `agent-spotlight`, `luxury-market-report`,
 `new-listing`, `weekly-pulse`, `open-house`, `price-reduced`, `just-sold-grid`,
 `neighborhood-report`, `investment-brief`, `rate-watch`, `monthly-digest`, `year-in-review`,
@@ -105,7 +131,7 @@ without anyone writing that number in the file. When you touch a block via `seed
 ...overrides })`, check EVERY field in `DEFAULT_BLOCK_PROPS[type]` against THE RULE, not just the
 ones already in the override object.
 
-### The 3 half-right (mostly open, one leak each)
+#### The 3 half-right (mostly open, one leak each)
 - `listing-feature` — figures are open, but `text.body` is sample-style copy, not clean
   instruction phrasing. See the prose-instruction decision below.
 - `welcome` — figures are open, but `hero.prose` carries real boilerplate commentary that
@@ -114,7 +140,7 @@ ones already in the override object.
   ("Prices up 4% in your ZIP") — that's an invented-looking number in a commentary block. Rewrite
   as an instruction.
 
-### The decision this needs, made now, not left open again
+#### The decision this needs, made now, not left open again
 
 `text`, `signal`, and `multi-column` block props have NO separate label/instruction field —
 only `body`. THE SLOT RULE's empty+label mechanism (`docSkeleton` skips empty fields, always
@@ -138,7 +164,7 @@ check `seed_static_figures_bypass_invention_gate` already tracks this exact fail
 its description to cover prose echo, not just static figures, if you see it happen. Don't
 preemptively add the schema field on a hypothetical.
 
-### Per-template checklist (apply THE SLOT RULE, `lib/email/CLAUDE.md`)
+#### Per-template checklist (apply THE SLOT RULE, `lib/email/CLAUDE.md`)
 
 - OPEN (`""` + instruction in `label`): every figure, every photo, every link.
 - OPEN via imperative-instruction-in-`body`: every commentary sentence on `text`/`signal`/
@@ -151,11 +177,18 @@ preemptively add the schema field on a hypothetical.
 - Charts need no authoring: an `image` block with a real `layout` + instructional `alt`/
   `caption` is enough; `upsertChartBlock` replaces it in place.
 
-### Then: the variety pass (the "different looks" work)
+### Track B — visual/variety pass (all 27 templates)
 
-Once a template is SLOT-RULE-conformant, use the fence system's own "variety axes" (from
-`email-builder-integration.md`) to make it look distinct from its siblings, not just
-mechanically correct:
+For the 19 in Track A, do this AFTER the content fix. For the 8 already-clean templates
+(`minimal`, `skeleton-clean-white`, `skeleton-dark-pro`, `skeleton-agent-feature`,
+`skeleton-listing-showcase`, `trend-snapshot`, `editorial-letter`, `magazine-issue`), this is the
+ONLY step needed — skip Track A for these, they don't need a content fix, but don't skip this.
+Check every one of the 8 for the `magazine-issue` failure mode first (an `image`/section block
+with no real content behind it, rendering as a flat solid-color rectangle) before assuming
+"clean" means "done."
+
+Use the fence system's own "variety axes" (from `email-builder-integration.md`) to make each
+template look distinct from its siblings, not just mechanically correct:
 - **Layout** — pick a blessed span multiset (`{12}`/`{6,6}`/`{8,4}`/`{7,5}`/`{4,4,4}`) per row;
   don't default every template to the same row shape.
 - **Photo** — ratio from `PHOTO_RATIOS`, placement (left/right/full, `flipBlockSide`-compatible),
@@ -167,7 +200,8 @@ mechanically correct:
   current render code for where border/radius is hardcoded before deciding whether it needs its
   own small contract addition — don't assume, verify first (RULE 0.5).
 
-Goal: after this pass, no two of the 19 should read as the same template with different colors.
+Goal: after this pass, no two of the 27 should read as the same template with different colors —
+including within the previously-"clean" 8, which get judged on this axis for the first time here.
 
 ## Verification (every template, before commit)
 
@@ -182,7 +216,8 @@ Append a SESSION_LOG entry before any push (RULE 0 — hook-enforced).
 
 ## What NOT to do
 
-- Don't touch the 8 clean templates — they're the reference, not in scope.
+- Don't run Track A (content rewrite) on the 8 already-clean templates — they don't need it. DO
+  run Track B (visual pass) on them — see the correction above; content-clean isn't visually-done.
 - Don't add a new mandatory gate anywhere (RULE C2 / brain-platform CLAUDE.md RULE 3-C2).
 - Don't add the `text`/`signal` instruction field to the schema — see the decision above.
 - Don't invent brand identity (company names, people, photos) anywhere — house brand or nothing.

@@ -1,3 +1,22 @@
+## 2026-07-09 (Sonnet 5 · main) — docs(email): widen Phase 2 to all 27 templates, split into content/visual tracks
+
+Operator screenshotted `magazine-issue` (one of the 8 "clean" templates from the earlier audit)
+and called it out as visually bad — correctly. Investigated: its `image` block has no `url`, so
+the "photo" renders as a solid black rectangle, and the section-band block is also solid black,
+so the whole template is two identical black boxes with no real imagery, accent color, or border
+treatment. Content-slot correctness (no baked fake numbers) and visual quality are different
+axes, and the handoff had only audited the first. Checked whether "Start a Campaign" or a
+"Seller Pack" template should carve any of the 27 out of scope, per operator instruction — neither
+does: the 4 live campaigns seed a prose recipe through the free-form builder, never a `SEED_DOCS`
+id, and "Seller Pack" doesn't exist anywhere in this repo (searched code/docs/checks/both active
+worktrees) — opened `seller_pack_not_found` as its own gap rather than guessing at it. Operator
+confirmed all 27 in scope. Restructured the handoff
+(`docs/superpowers/handoffs/2026-07-09-email-fences-and-template-rebuild-handoff.md`) into Track A
+(content/slot-rule fix, the original 19) and Track B (visual/variety pass, all 27 — including the
+8 previously called "clean," which only passed the content check, not a visual one). Updated
+`phase2_19_template_slot_rule_rebuild` to Track-A-only scope, opened
+`phase2b_all_27_visual_variety_pass` for Track B.
+
 ## 2026-07-09 (Sonnet 5 · main) — docs(email): correct M2 status again + write the fence/template-rebuild handoff
 
 The M2 status entry below was itself wrong: it claimed flip-to-correct and the photo-ratio picker
