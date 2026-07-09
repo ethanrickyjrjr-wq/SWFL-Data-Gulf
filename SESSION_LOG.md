@@ -1,3 +1,14 @@
+## 2026-07-09 (Fable 5 · main) — handoff amend: use the EXISTING chart systems + crawl4ai/Pexels photos; push
+
+Operator: "where are all these charts we just brought in yesterday?" — right: `renderChart`
+(`lib/email/templates/charts/chart-renderer.ts`, the email chart root) and the /charts gallery
+machinery (`lib/charts/` — gallery-loaders series: metro home value, rent, RSW passengers, YoY,
+luxury-vs-starter; svg forms line-band/ranked-delta/dot-plot/donut-share/spark-grid) both sat
+unused while the shipping session hand-authored one SVG. Handoff amended: STEP 0 = inventory +
+reuse those two systems (new helper ONLY for a shape genuinely absent, logged); photos = crawl4ai
+Pexels search → curl CDN → visually vet → per-seed assignment. Pushing per operator directive
+(carries fence session's 252d100f, disclosed).
+
 ## 2026-07-09 (Fable 5 · main) — handoff: seed-preview presentability (operator escalation — duplicate charts)
 
 Operator opened weekly-pulse on live /showcase: the SAME ZHVI chart 3x in one email (template

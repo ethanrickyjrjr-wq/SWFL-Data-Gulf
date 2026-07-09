@@ -41,10 +41,27 @@ set, not the tile.
 
 ### 1. Distinct charts (the loudest failure)
 
-One committed chart cannot serve ~6+ chart slots. Build a tiny deterministic SVG chart helper in
-the capture path (or pre-commit one SVG per series — either is fine, charts must be REAL data),
-and give every chart-bearing template ITS OWN chart; a template with two chart slots gets TWO
-DIFFERENT charts. Real series already verified queryable via lake MCP this session:
+**STEP 0 — INVENTORY THE CHARTS WE ALREADY HAVE BEFORE BUILDING ANYTHING (operator directive
+07/09).** The shipping session hand-authored ONE SVG while two in-repo chart systems sat unused.
+Do not repeat that. Use these:
+
+- **`lib/email/templates/charts/chart-renderer.ts` → `renderChart(spec, theme?)`** — the email
+  chart root; pure function returning an SVG string, brand-themable. The capture script runs
+  under bun with full lib access, so it can call this DIRECTLY per template and drop the SVG into
+  the doc's chart slot (or write it to `public/showcase/seed-previews/assets/`). Spec shapes in
+  `chart-types.ts`, defaults in `chart-defaults.ts`.
+- **`lib/charts/` — the /charts gallery machinery (brought in 07/08–07/09)** — real, loader-backed
+  SWFL series ready to plot: `gallery-loaders.ts` registers Median Home Value (Cape Coral · Fort
+  Myers · Naples), Median Monthly Rent, RSW Airport Passenger Volume, Home Value YoY Growth,
+  Luxury vs Starter Price Index (+ yearly change); plus `tier-divergence-series.ts`,
+  `airport-series.ts`, `hurricane-series.ts`, `load-metro-trend.ts`, and the SVG forms under
+  `lib/charts/svg/` (line-band, ranked-delta, dot-plot, donut-share, spark-grid) with the tested
+  `palette.ts`.
+
+Rule of engagement: a new chart helper may be written ONLY for a shape/series genuinely absent
+from both systems — and say so in the SESSION_LOG when you do. Give every chart-bearing template
+ITS OWN chart; a template with two chart slots gets TWO DIFFERENT charts. If a series needs raw
+figures the loaders don't cover, these were verified queryable via lake MCP on 07/09/2026:
 
 - `zhvi_swfl` — monthly home-value series per county/city/ZIP (the one existing chart uses the
   Lee County avg; keep it for ONE template only — trend-snapshot is its natural home).
@@ -96,9 +113,13 @@ real):
 - skeletons (4) → they're sold as "blank canvases": keep the fill MINIMAL by design — structure
   is the product; do not force market data into them. Their group pitch already says so.
 
-Photos: pool of 3 repeats visibly. Add ~5 more licensed coastal/property Pexels photos (precedent
-+ license note: `public/showcase/seed-previews/assets/README.md`; download pattern in git history
-of this session) and assign per-seed, not cycled.
+Photos: pool of 3 repeats visibly — GO GET MORE (operator directive). Use crawl4ai on Pexels
+search pages (e.g. `crawl4ai "https://www.pexels.com/search/florida%20house/"` with
+`PYTHONIOENCODING=utf-8`, grep out `images.pexels.com/photos/<id>/...` CDN URLs, curl with
+`?auto=compress&cs=tinysrgb&w=1200`) — free license, commercial use, no attribution required;
+credit pattern + precedent in `public/showcase/seed-previews/assets/README.md`. Pull ~8-10
+coastal/property/interior candidates, LOOK at each (Read renders images), keep the good ones,
+assign per-seed — never cycled. Committed own-hosted files only; never hotlink.
 
 ### 3. Mechanical guards so this class can't ship again
 
