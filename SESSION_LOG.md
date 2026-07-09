@@ -1,3 +1,20 @@
+## 2026-07-09 (Fable 5 · main) — docs(steadyapi-research): round-3 backlog + Sonnet run handoff + triage
+
+Operator: triage settled research into spec/build verdicts, rank the open questions, hand the
+run to Sonnet (credits window ~07/09–07/11), then fix the top issues. Probed code first: round1
+item 10's "go build Showing Prep" was STALE — it shipped 07/08 (`lib/email/showing-prep-*`,
+`ShowingPrepButton`, API route); corrected in place. Split-test infra (variant-cohort/
+blast-variant-doc/variant-results) also already built. Wrote
+`docs/steadyapi-research/2026-07-09-round3-question-backlog.md` (18 questions, Tier 1–3, exact
+run recipes, SteadyAPI-vs-crawl4ai tool split) + `docs/handoff/2026-07-09-round3-sonnet-run-handoff.md`
+(Sonnet runs Q1/Q2 + Tier 2; this session takes crawl4ai-only Q3/Q4 + builds). Folded the
+07/09 Reddit quirks into `INSTAGRAM-SOCIAL-STEADY.md` (`content` not `body` on comments; 4th
+`/search` junk confirmation). Checks opened: `steadyapi_round3_tier1_run`,
+`engagement_staggered_send_decision`. Build triage verdict: engagement-staggered send = top
+candidate (evidence + code gap + data already in `email_events`); seed-test + tracking-toggle
+HELD on Q4/Q3; hotlink-rot + manufactured-home research PARKED. Next in this session: Q3/Q4
+crawl4ai research, then the engagement-staggered send brainstorm/build.
+
 ## 2026-07-09 (Fable 5 · main) — feat: publish home-values + investor-zip; located-branch reach depth
 
 Operator decided both open items from `2026-07-09-chat-chart-honesty-open-decisions.md`. (1)

@@ -965,6 +965,14 @@ Note: user timeline endpoints take `user_id` (numeric), not username — resolve
   scoped mining, targeted `/v1/reddit/posts?url=<subreddit>&filter=hot` + client-side filtering is the
   reliable path; generic `/search` is low-yield for niche topics.
 
+**07/09/2026 (~14 real calls — recurring-pain sweep):**
+- `/v1/reddit/post` comment objects carry their text in the field **`content`, not `body`**
+  (confirmed live against a 9-comment r/CommercialRealEstate thread; nested `replies` items use the
+  same field). Parsers reading `comment.body` silently get `undefined`.
+- Generic `/search` site-wide-ranking confirmed a FOURTH independent time ("CMA software subscription
+  worth it" biased to r/realtors → e-commerce/Overleaf/OpenAI threads; "listing photos broken in old
+  emails" → creepypasta). The 07/08 verdict stands: targeted `/posts?url=` + client-side filter only.
+
 ## 🤖 ScrapeFlow — generic scraper
 
 - `POST /v1/scraper` — SteadyAPI's general-purpose scraping endpoint (their "ScrapeFlow" product). Fallback lane for social surfaces they don't have dedicated endpoints for (e.g. TikTok, Facebook, LinkedIn — none of which have dedicated SteadyAPI sections as of 07/05/2026).

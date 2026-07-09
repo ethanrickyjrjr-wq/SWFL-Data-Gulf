@@ -20,6 +20,12 @@ API-integration build track. See the inventory below for where the rest lives.
   category), a concrete Gmail-Promotions-tab-avoidance playbook (5 ranked tactics), and
   reconfirmation of the "Showing Prep Packet" finding two days on. Also documents what was searched
   and came up empty (photo-hotlink-rot, residential-agent pricing) so it isn't re-searched blind.
+- `2026-07-09-round3-question-backlog.md` — round 3: triage of everything still open after rounds
+  1–2, priority-ranked (Tier 1 = load-bearing for an active build/keystone check) with an exact
+  run recipe per question and an explicit SteadyAPI-vs-crawl4ai tool split (two Tier-1 questions
+  are crawl4ai-only). This is the handoff for the next research runner. The companion build triage
+  (which SETTLED findings become specs vs. are already built) lives in the 07/09 session
+  scratchpad, summarized in SESSION_LOG.
 
 ## Existing SteadyAPI material elsewhere (inventory, as of 07/09/2026)
 

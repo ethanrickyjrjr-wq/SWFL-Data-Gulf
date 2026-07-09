@@ -73,10 +73,12 @@ for the full inventory):
     agents describe manually pulling comps, permit history, tax records, disclosures, and organizing
     it all before every showing. This is the highest-fit, most implementable finding in either sweep
     — it maps directly onto data we already hold (comps via `steadyapi-comps.ts`, permits via
-    existing county pipelines, tax/parcel via LeePA) and the existing deliverable pipeline. **This is
-    no longer an open research question — it's a flagged HIGH-priority build candidate** (needs a
-    `superpowers:brainstorming` pass before code, per that file's "what to build next" list). Don't
-    re-research it; go build or explicitly park it.
+    existing county pipelines, tax/parcel via LeePA) and the existing deliverable pipeline.
+    **UPDATE 07/09/2026: this is BUILT, not a candidate** — shipped 07/08 as
+    `lib/email/showing-prep-{assemble,doc,copy,intent}.ts`, `lib/listings/showing-prep-source.ts`,
+    `app/project/ShowingPrepButton.tsx`, `app/api/projects/[id]/showing-prep/route.ts` (spec:
+    `docs/superpowers/specs/2026-07-08-showing-prep-packet-design.md`). Don't re-research and don't
+    re-spec; remaining work is live-verification only.
 11. **AI-written email "sounds like a robot" is a massive, validated pain** (r/ChatGPT, ~22,927
     upvotes) — and it's **already fixed**: the `voiceGuard` banned-phrase lint
     (`lib/email/voice-guard.ts`) was built directly off this finding. Don't re-research; if anything,
