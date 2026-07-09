@@ -10,7 +10,6 @@ import {
 } from "@/lib/highlighter/report-context-store";
 import { shouldMountHighlighter } from "@/lib/briefcase/pill-mount";
 import { HighlightPopup } from "./HighlightPopup";
-import { FirstTouchHint } from "./FirstTouchHint";
 import { DiscoveryTicker } from "./DiscoveryTicker";
 import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
 import { useAiContext } from "@/components/briefcase/use-ai-context";
@@ -98,7 +97,6 @@ export function GlobalHighlighter() {
           onClose={close}
         />
       )}
-      <FirstTouchHint used={!!fact} />
       <DiscoveryTicker onReport={onReport} />
     </div>
   );

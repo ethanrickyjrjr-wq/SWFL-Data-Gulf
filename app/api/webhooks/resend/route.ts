@@ -25,13 +25,12 @@ import {
   type InboundEvent,
 } from "@/lib/email/process-inbound";
 import { extractOutreachAction, type ResendWebhookPayload } from "@/lib/email/outreach/lifecycle";
-import { onDemoEvent, type DemoStage } from "@/lib/email/outreach/demo-cadence";
-import { extractWeeklyReadAction } from "@/lib/email/weekly-read/webhook";
 import {
   extractBlastAction,
   type ResendWebhookPayload as BlastWebhookPayload,
 } from "@/lib/email/blast-events";
-
+import { onDemoEvent, type DemoStage } from "@/lib/email/outreach/demo-cadence";
+import { extractWeeklyReadAction } from "@/lib/email/weekly-read/webhook";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -159,24 +158,39 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
-  // -- Blast (Task 1 — subject/CTA split-test): did-tagged deliverable sends ----
-  // A did-tagged event (any deliverable blast — app/api/deliverables/[id]/blast/
-  // route.ts) is logged into email_events for the results route (Task 12) to
-  // group by variant. No suppression/status ledger here — blast recipients are
+  // -- Blast (Task 1 -- subject/CTA split-test) + Deliverability diagnostic
+  // panel: did-tagged deliverable sends -------------------------------------
+  // A `did`-tagged event (app/api/deliverables/[id]/blast/route.ts, tags set
+  // by lib/email/blast-tags.ts) resolves the sending tenant via
+  // deliverables.user_id (so the deliverability-status aggregator's
+  // bounce/complaint rate can scope to that tenant -- docs/superpowers/specs/
+  // 2026-07-08-deliverability-diagnostic-panel-design.md) and logs the
+  // `variant` cohort tag (so the split-test results route, Task 12, can
+  // group by it). No suppression/status ledger here -- blast recipients are
   // one-shot sends, not a drip.
   const blastAction = extractBlastAction(event as unknown as BlastWebhookPayload);
   if (blastAction) {
     try {
       const bdb = createServiceRoleClient();
-      await bdb.from("email_events").upsert(
-        {
-          resend_email_id: blastAction.emailId,
-          did: blastAction.did,
-          event: blastAction.event,
-          variant: blastAction.variant ?? null,
-        },
-        { onConflict: "resend_email_id,event", ignoreDuplicates: true },
-      );
+      const { data: deliverable } = await bdb
+        .from("deliverables")
+        .select("user_id")
+        .eq("id", blastAction.did)
+        .maybeSingle();
+      if (deliverable?.user_id) {
+        await bdb.from("email_events").upsert(
+          {
+            resend_email_id: blastAction.emailId,
+            did: blastAction.did,
+            user_id: deliverable.user_id,
+            event: blastAction.event,
+            variant: blastAction.variant ?? null,
+          },
+          { onConflict: "resend_email_id,event", ignoreDuplicates: true },
+        );
+      } else {
+        console.error(`[resend-webhook] blast event for unknown deliverable ${blastAction.did}`);
+      }
     } catch (err) {
       console.error(
         `[resend-webhook] blast tracking failed: ${err instanceof Error ? err.message : String(err)}`,

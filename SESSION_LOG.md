@@ -1,3 +1,11 @@
+## 2026-07-09 (Sonnet 5 · main) — fix(highlighter): remove the "double-tap a figure" coachmark pill
+
+Operator wanted the white bottom-left coachmark pill gone site-wide ("delete it and stop not
+making sense"). It was `FirstTouchHint` (components/highlighter/FirstTouchHint.tsx), mounted once
+at the app root inside `GlobalHighlighter` (app/layout.tsx → every page). Removed the render call
++ import from GlobalHighlighter.tsx and deleted the now-dead component file entirely (no other
+importers). Verified via `bunx next build` — clean, no broken references.
+
 ## 2026-07-08 (Sonnet 5 · main) — fix(charts): hurricane ring chart — real named-storm damage, on-brand colors
 
 Operator hated the first cut, hard: colors didn't match the rest of /charts, the Saffir-Simpson

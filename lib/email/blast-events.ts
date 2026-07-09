@@ -6,33 +6,38 @@
 // upsert. Mirrors the SHAPE of outreach's extractOutreachAction / weekly-
 // read's extractWeeklyReadAction, but a blast recipient has no drip/
 // suppression ledger — this only extracts what to log, never a status flip.
+// Reuses mapResendOutbound's event vocabulary (same Resend account, same
+// webhook types) without pulling in its suppressTo (outreach-only concept).
 //
-// NOTE: this module's `did`-tag webhook plumbing was expected to already
-// exist courtesy of a separate, concurrent deliverability-diagnostics-panel
-// build (see docs/superpowers/plans/2026-07-09-subject-cta-ai-variants.md,
-// "Prerequisite" section). It was absent from this worktree (fresh `main`
-// checkout — that other session's uncommitted work never landed here), so
-// this file, the webhook branch in app/api/webhooks/resend/route.ts, and the
-// `did` column were all built fresh by Task 1, scoped to only what THIS
-// plan's later tasks (variant split-test results) actually read. `user_id`
-// on email_events — needed only by that other, unrelated feature — was
-// deliberately NOT added here; that stays that session's own migration.
+// This module started as two concurrent builds — a deliverability-diagnostics
+// panel (per-tenant bounce/complaint tracking, needs `user_id`) and this
+// split-test plan (per-cohort results, needs `variant`) — that independently
+// built the same did-tag plumbing. Merged: BlastWebhookAction carries both.
 
 import { mapResendOutbound } from "./outreach/lifecycle";
 
 export interface BlastWebhookAction {
+  /** deliverables.id, from the `did` tag blastTags() sets at send time. */
   did: string;
+  /** Resend's message id, for idempotent event dedupe. */
   emailId: string | null;
   event: "sent" | "delivered" | "opened" | "clicked" | "bounced" | "unsubscribed" | "complained";
   /** The variant cohort index (0-based, as a string) from a split-test send's `variant` tag. */
   variant?: string;
 }
 
+/** The slice of a Resend webhook payload we read (outbound email.* events). */
 export interface ResendWebhookPayload {
   type?: string;
   data?: { email_id?: string; tags?: Record<string, string> };
 }
 
+/**
+ * Decide what an inbound Resend webhook means for blast-send tracking. Returns
+ * null when the event isn't a tracked outbound type OR carries no `did` tag
+ * (i.e. it's an outreach `rid` or weekly-read `wid` send, or untagged/inbound).
+ * Pure.
+ */
 export function extractBlastAction(payload: ResendWebhookPayload): BlastWebhookAction | null {
   const did = payload.data?.tags?.["did"];
   if (!did) return null;
