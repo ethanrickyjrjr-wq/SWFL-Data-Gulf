@@ -1,3 +1,31 @@
+## 2026-07-08 (Sonnet 5 · main) — feat(email): wire Composed into the reshape picker
+
+Operator: "wire Composed into the reshape picker next, that's the biggest visual jump" — the
+next increment off NOTICE.md's punch list (Bar/Line/Composed vendored+typecheck-clean, only
+Area wired into production). Brainstormed first per RULE 3.5: spec at
+`docs/superpowers/specs/2026-07-08-composed-chart-reshape-design.md`. New `composed` ChartType
+in `reshape-chart-type.ts` (fits any ≥2-point spec, same bucket as bar/dotplot) derives a mean
+reference line the same non-invented way the existing dot-plot does; new `bklitComposedSvg` in
+`email-svg.tsx` (real bklit `ComposedChart` — SeriesBar + Line, server-rendered) wired into
+`spec-to-png.ts` via a new `composed-bar-line` frameId.
+
+Caught a real bug via a spike PNG render, not typecheck/build: `ComposedChart` shares bklit's
+time-series shell, whose x-axis always does `new Date(value)`. Feeding it ZIP-code labels
+doesn't error — `new Date("33921")` silently parses as year 33921 — so bars landed
+scrambled/overlapping, re-sorted by that bogus year instead of the given order. Fixed by
+plotting a synthetic ordered date sequence for x-positioning only (never shown, no axis
+rendered) — verified with a rendered PNG before (broken) and after (correct: 4 descending bars,
+reference line crossing exactly where the values say it should). NOTICE.md's punch-list update
++ the gotcha writeup for the next non-time-series bklit wiring is still queued — a parallel
+session has held a live claim on that file for 15+ min (its own Ring Chart section landed
+first); will land as a follow-up once it frees up.
+
+This session's changes (`email-svg.tsx`, `reshape-chart-type.ts`(+test),
+`spec-to-png.ts`(+test), the spec doc) landed already via a parallel session's commit
+(`43a2d7e5`, no SESSION_LOG entry of its own — same working tree, their push swept up my
+uncommitted files alongside two of their own spec docs) — already on `origin/main`. This entry
+backfills the missing log coverage; no code changes in this commit.
+
 ## 2026-07-08 (Sonnet 5 · main) — feat(charts): vendor bklit-ui Ring Chart, real NOAA hurricane-category chart on /charts
 
 Operator: "distill this [bklit.com/docs/components/ring-chart] and build a cool hurricane chart using
