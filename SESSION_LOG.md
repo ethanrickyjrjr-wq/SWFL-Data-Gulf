@@ -1,3 +1,20 @@
+## 2026-07-09 (Sonnet 5 · main) — docs(email): correct M2 status again + write the fence/template-rebuild handoff
+
+The M2 status entry below was itself wrong: it claimed flip-to-correct and the photo-ratio picker
+weren't built. Both are — `lib/email/doc/flip.ts` (`flipAlign`/`flipBlockSide`) is wired to a
+button in `BlockInspector.tsx:641`, and the ratio picker is `BlockInspector.tsx:236-241`,
+literally commented "Fence 3 (soft-user)". Corrected `m2_fences_bounds_of_space` and the
+integration plan's M2 status section in place. The ONLY real remaining gap: `GridCanvas.tsx` has
+no connection to `BLESSED_ROW_SPANS`/`ACCENT_BUDGET` — manual resize is free 1-12, no snap, no
+warning. Wrote `docs/superpowers/handoffs/2026-07-09-email-fences-and-template-rebuild-handoff.md`
+for a fresh session to execute: Phase 1 closes that gap (a pure `checkFenceViolations` + a
+non-blocking canvas indicator); Phase 2 rebuilds the 19 drifted/half-right `SEED_DOCS` templates
+(not all 27 — operator scoped it down to just the ones found wrong) to THE SLOT RULE, plus a
+made-now decision to solve the text/signal instruction-field gap via convention (imperative
+`body` text, matching `editorial-letter`/`magazine-issue`) rather than a schema change. Opened
+`phase1_canvas_span_accent_warnings` and `phase2_19_template_slot_rule_rebuild` (both
+`checks`) pointing at the handoff so this doesn't go dark the way the original M2 status did.
+
 ## 2026-07-09 (Sonnet 5 · main) — docs(email): SEED_DOCS drift audit + M2 status correction + doc archive
 
 Operator flagged that `monthly-digest`/`neighborhood-report` ship finished example numbers where
