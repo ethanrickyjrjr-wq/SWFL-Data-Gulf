@@ -1,8 +1,10 @@
 # Email accent-ink family + save-time palette gate — design
 
-**Date:** 2026-07-09 · **Check:** `email_accent_ink_palette_gate` · **Status:** AWAITING OPERATOR
-DECISIONS (D1–D3 below) — no code until approved, then register via
-`node scripts/new-build.mjs email-accent-ink-gate "Accent-ink guards + brand palette contrast warn"`.
+**Date:** 2026-07-09 · **Check:** `email_accent_ink_palette_gate` · **Status:** DECISIONS RATIFIED
+07/09/2026 (operator: "good with your §4 ideas") — D1 warn-only, D2 form + pure evaluator, D3 WCAG
+AA floors, D4 sequence as written. Build registered as `email_accent_ink_palette_gate_live_verify`
+(spec already existed, so the check was opened directly — `new-build.mjs` would have stubbed over
+this file). Next step: implementation plan, after `email_contrast_ink_fence` lands.
 
 **Grounding:** every file:line and ratio below probed/computed this session (RULE 0.5) — ratios via
 the repo's own `contrastRatio` (`lib/charts/palette.ts:51`). WCAG thresholds verified in-session
@@ -124,21 +126,20 @@ color mutation — auto-adjusting there would silently violate brand-is-canonica
 `sanitizePalettes` keeps zero contrast logic (it must never DROP a palette over contrast);
 no server-side gate (warnings are advisory; the render guards are the enforcement layer).
 
-## 4. Operator decisions (recommendation first)
+## 4. Decisions — RATIFIED 07/09/2026 (operator approved the recommendations as written)
 
-- **D1 — warn vs auto-adjust vs block: RECOMMEND warn-only.** Tier A makes output legible by
-  construction, so the gate's job is feedback, not safety. Auto-adjust rewrites saved brand colors
-  (violates brand-is-canonical); block handcuffs a build (violates never-refuse). Cheap later
-  enhancement: a "use a darker version of this accent" one-tap suggestion in the strip.
-- **D2 — gate location: RECOMMEND BrandingBlock form + pure `lib/brand` evaluator.** The form is
-  the ONE root all brand entry flows through; `applyBrand` is the wrong layer (runs per-render, no
-  UI channel, mutation there = silent auto-adjust).
-- **D3 — floors: RECOMMEND 4.5:1 functional text / 3:1 large-text + non-text / decoration exempt**
-  (straight WCAG AA per §2). Alternative: flat 3:1 everywhere — cheaper to explain, but leaves
-  12px links at ratios WCAG calls failing, and two committed seed accents sit in exactly that gap.
-- **D4 — sequencing (no decision needed unless objected):** `email_contrast_ink_fence` first
-  (as written) → Tier A → Tier B. Tiers land as separate commits; Tier B is independently
-  shippable.
+- **D1 — DECIDED: warn-only.** Tier A makes output legible by construction, so the gate's job is
+  feedback, not safety. Auto-adjust rewrites saved brand colors (violates brand-is-canonical);
+  block handcuffs a build (violates never-refuse). Both rejected. Cheap later enhancement (not in
+  scope): a "use a darker version of this accent" one-tap suggestion in the strip.
+- **D2 — DECIDED: BrandingBlock form + pure `lib/brand` evaluator.** The form is the ONE root all
+  brand entry flows through; `applyBrand` is the wrong layer (runs per-render, no UI channel,
+  mutation there = silent auto-adjust). Rejected.
+- **D3 — DECIDED: 4.5:1 functional text / 3:1 large-text + non-text / decoration exempt**
+  (straight WCAG AA per §2). Flat 3:1 everywhere rejected — it leaves 12px links at ratios WCAG
+  calls failing, and two committed seed accents sit in exactly that gap.
+- **D4 — DECIDED: sequence as written.** `email_contrast_ink_fence` first (as written) → Tier A →
+  Tier B. Tiers land as separate commits; Tier B is independently shippable.
 
 ## 5. Testing
 

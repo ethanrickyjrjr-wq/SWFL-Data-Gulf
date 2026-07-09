@@ -1,3 +1,14 @@
+## 2026-07-09 (Fable 5 · main) — accent-ink gate decisions RATIFIED; build registered
+
+Operator approved spec §4 as written ("good with your S4 ideas — fold in and push"). Folded into
+`docs/superpowers/specs/2026-07-09-email-accent-ink-palette-gate-design.md`: D1 warn-only,
+D2 BrandingBlock form + pure `lib/brand` evaluator, D3 WCAG AA floors (4.5 functional / 3
+large+non-text), D4 sequence after `email_contrast_ink_fence`. Build registered per RULE 3.5 —
+opened `email_accent_ink_palette_gate_live_verify` directly (spec already exists at the exact
+path `new-build.mjs` would stub, and the script exits before opening the check when the file
+exists); `email_accent_ink_palette_gate` detail updated to RATIFIED. Next: implementation plan
+(writing-plans) once `email_contrast_ink_fence` lands, or on request.
+
 ## 2026-07-09 (Fable 5 · main) — feat(showcase): template preview gallery — filled previews for all 27 layouts
 
 Executed the 07/09 handoff spec (`2026-07-09-template-preview-gallery-design.md`). RULE 0.4
