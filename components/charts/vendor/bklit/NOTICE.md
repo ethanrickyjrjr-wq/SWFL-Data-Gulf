@@ -57,6 +57,14 @@ rendering; Ring is wired into the live `/charts` web page. Bar/Line are vendored
 via the SSR spike) but not yet wired into a production call site — that's the next increment,
 not a silent gap.
 
+**Gauge (2026-07-10)** — `gauge.tsx`, `gauge-label-layout.tsx`, `notch-gauge-shared.ts`,
+`pie-center-shell.tsx`, `pie-center.tsx`, `pie-context.tsx` vendored verbatim, no forks
+(web-only — no static/email SSR path, so neither `staticSize` nor `initialLoaded` applies).
+The 07/08 deferral reason is gone at this commit: the gauge chain imports NO
+`@base-ui/react`; its only new external dep is `d3-shape` (via `pie-center-shell`), now a
+declared direct dependency. First call site: `components/charts/MarketTemperatureGauge.tsx`
+(passes explicit `activeFill`/`inactiveFill` — the CSS-var caveat above applies).
+
 **Composed ≠ categorical out of the box (2026-07-08)** — `ComposedChart` (and by extension
 `LineChart`/`AreaChart`) is built on a shared time-series shell (`time-series-chart-shell.tsx`)
 whose x-axis accessor unconditionally does `value instanceof Date ? value : new Date(value)`.
