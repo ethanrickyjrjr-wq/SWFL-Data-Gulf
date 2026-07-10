@@ -1123,7 +1123,7 @@ export function collectUsedFigures(
 export function fillEmptySourcesBlock(
   doc: EmailDoc,
   figures: readonly MarketFigure[],
-  webSources: ReadonlyArray<{ label: string; value: string; url?: string }> = [],
+  webSources: ReadonlyArray<{ label: string; value: string | number; url?: string }> = [],
 ): EmailDoc {
   const hasEmpty = doc.blocks.some(
     (b) => b.type === "sources" && (b.props.sources ?? []).length === 0,
@@ -1150,7 +1150,7 @@ export function fillEmptySourcesBlock(
 
   const citations = figureCitations(figures.filter((f) => cited(f.value)));
   for (const w of webSources) {
-    if (!cited(w.value)) continue;
+    if (!cited(String(w.value))) continue;
     if (citations.some((c) => c.label === w.label)) continue;
     citations.push({ label: w.label, ...(w.url ? { url: w.url } : {}) });
   }
