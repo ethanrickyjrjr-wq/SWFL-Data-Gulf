@@ -32,6 +32,8 @@ import { parseTargetsCsv } from "@/lib/email/outreach/targets";
 import { composeCampaign, type ComposedMessage } from "@/lib/email/outreach/campaign";
 import { buildContent } from "@/lib/email/outreach/build-content";
 import { enrichBrand } from "@/lib/prospects/enrich-brand";
+import { loadBrandFixtures } from "@/lib/email/outreach/brand-fixtures";
+import { makeFixtureFirstEnrich } from "@/lib/email/outreach/brand-resolver";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { getMarketingResend } from "@/lib/email/marketing-client";
 import { buildBatchMessages, sendBatches, type BatchSender } from "@/lib/email/outreach/send";
@@ -197,8 +199,13 @@ async function main(): Promise<void> {
     `[outreach] composing ${rows.length} target(s) · campaign=${campaignId} · DRY_RUN=${DRY_RUN} · origin=${SITE_ORIGIN}`,
   );
 
+  const { fixtures, skipped } = await loadBrandFixtures("fixtures/real-estate-brands");
+  console.log(
+    `[outreach] brand fixtures: ${fixtures.length} loaded${skipped.length ? `, ${skipped.length} skipped` : ""}`,
+  );
+
   const { messages, summary } = await composeCampaign(rows, {
-    enrich: enrichBrand,
+    enrich: makeFixtureFirstEnrich({ fixtures, liveEnrich: enrichBrand }),
     buildContent,
     siteOrigin: SITE_ORIGIN,
     confidenceThreshold: CONFIDENCE_THRESHOLD,
@@ -230,6 +237,8 @@ async function main(): Promise<void> {
   console.log("\n========================================================================");
   console.log(`RUN REPORT: ${join(outDir, "run-report.json")}`);
   console.log(`SUMMARY: ${JSON.stringify(summary)}`);
+  const fixtureResolved = messages.filter((m) => m.brandSource.startsWith("fixture:")).length;
+  console.log(`fixture-resolved brands: ${fixtureResolved}/${messages.length}`);
   console.log("------------------------------------------------------------------------");
   for (const m of messages) {
     const tag =
