@@ -35,7 +35,9 @@ variations exist on the same page (e.g. marketing services peak ~4 PM) — a fut
 
 2. **The suggestion.** When a user schedules a send, the flow offers the researched default:
    around 10 AM local, Tuesday or Thursday — with its one-line why and the named source riding
-   along (four-lane rule 1: a named web source, cited). Copy says "around 10 AM"; our
+   along (four-lane rule 1: a named web source, cited). **The suggestion is a default, never a
+   gate** (operator, 07/10/2026): 7 AM and 8 AM picks are inside the window and always honored —
+   only sends outside 7:00 AM–10:30 PM shift. Copy says "around 10 AM"; our
    infrastructure cron minutes (:23 anti-congestion offsets) never appear in customer copy.
 
 3. **One root.** Window constants + suggestion copy live in one module so the lab scheduling UI,

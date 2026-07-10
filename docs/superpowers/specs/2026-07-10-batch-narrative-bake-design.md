@@ -106,6 +106,12 @@ observe DST; the band 04:00–10:00 UTC sits inside the window in both EDT and E
 
 - `daily-rebuild.yml`: cron `0 6 * * *` → `23 4 * * *` (04:23 UTC = 12:23 AM EDT / 11:23 PM EST).
   Worst-observed drift (+4.1 h) still lands in-window.
+  **Why the early anchor costs zero freshness** (operator review target: everything landed by
+  6–7 AM ET): no lake-writing cron fires between 04:23 and 09:00 UTC, so rebuild inputs at
+  12:23 AM ET are byte-identical to a 4 AM rebuild's — the early slot only buys drift headroom.
+  Worst-case chain (max observed drift + minutes of runtime + ~1 h batch) completes ~5:40 AM EDT;
+  typical chain by ~1:30 AM. If same-morning listing data in the 6 AM review is ever wanted, the
+  lever is moving an ingest earlier (vendor-paced, deliberately untouched here), then re-anchoring.
 - `narrative-bake.yml`: cron trigger replaced by `workflow_run` on Daily Brain Rebuild
   completion (submit immediately; batch typically done within the hour → fresh narratives ~1 h
   post-rebuild, drift-proof) PLUS a fallback cron `23 10 * * *` as a dead-rebuild backstop
