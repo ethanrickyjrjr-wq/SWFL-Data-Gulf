@@ -66,13 +66,16 @@ declared direct dependency. First call site: `components/charts/MarketTemperatur
 (passes explicit `activeFill`/`inactiveFill` — the CSS-var caveat above applies).
 
 **Heatmap (2026-07-10)** — the whole upstream `heatmap/` directory (19 files, minus
-`__tests__/`) vendored into `heatmap/`. ONE fork, additive: `heatmap-tooltip.tsx` gains
-optional `formatTitle`/`formatSubtitle` props (defaults reproduce upstream date + weekday
-lines; `formatSubtitle` returning null hides the weekday row) — upstream hardwires a
-calendar-contribution header, and our first call site is a ZIP×month grid, not a
-contribution calendar. `HeatmapXAxis`/`HeatmapYAxis` are vendored for completeness but NOT
-used by the ZIP×month panel (upstream y-axis is hardwired to weekday labels; the wrapper
-renders its own plain-HTML labels instead — no fork needed). New dep: `@visx/heatmap`.
+`__tests__/`) vendored VERBATIM, no forks. The upstream axes/tooltip are hardwired to a
+weekday contribution calendar, so the first call site
+(`components/charts/ZipMomentumHeatmap.tsx`, a ZIP×month grid) renders its own plain-HTML
+labels and a custom tooltip CHILD built on the exported `useHeatmap` +
+`useHeatmapInteraction` hooks + `TooltipBox` (a tooltip fork was tried and reverted — the
+stock tooltip only sees `(count, date)` and can't name the hovered column). Sizing gotcha:
+`HeatmapChart` positions its plot absolutely inside a `relative w-full` root — a call site
+MUST size it (the `aspectRatio` prop = cols/rows with zero margins is the clean way);
+an unsized flex parent collapses and the grid paints nothing visible. New dep:
+`@visx/heatmap`.
 
 **Profit/Loss Line (2026-07-10)** — `profit-loss-line.tsx`, `profit-loss-segments.ts`,
 `profit-loss-legend.tsx`, `profit-loss-legend-hover.tsx` + the upstream `legend/` directory

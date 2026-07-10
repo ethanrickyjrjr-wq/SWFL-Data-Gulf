@@ -39,6 +39,11 @@
   --brand-border:       rgba(61,201,192,0.4);       /* border at 40% opacity */
   --brand-border-subtle:rgba(61,201,192,0.2);       /* border at 20% opacity */
   --text-on-brand:      var(--text-on-accent);      /* dark text on teal bg  */
+
+  /* bklit chart tooltip tokens (vendor/bklit reads these — see NOTICE.md).
+     Mapped onto gulf tokens; without them the tooltip panel renders
+     transparent with inherited text. */
+  --chart-tooltip-background: var(--gulf-slate-hi);
 }
 
 @theme inline {
@@ -72,6 +77,11 @@
   --color-brand: var(--brand-primary);
   --color-brand-dim: var(--brand-dim);
   --color-text-on-accent: var(--text-on-accent);
+
+  /* bklit chart tooltip utilities (text-chart-tooltip-foreground etc.) */
+  --color-chart-tooltip-background: var(--gulf-slate-hi);
+  --color-chart-tooltip-foreground: var(--text-primary);
+  --color-chart-tooltip-muted: var(--text-secondary);
 }
 
 /* Direction state — set instantly, never animated (see motion-rules.md) */
