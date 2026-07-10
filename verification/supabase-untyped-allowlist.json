@@ -19,5 +19,6 @@
   "lib/email/usage.ts",
   "lib/listings/select.ts",
   "lib/zip-report/candidates.ts",
-  "lib/zip-summary/load.ts"
+  "lib/zip-summary/load.ts",
+  "app/api/webhooks/resend/route.ts"
 ]

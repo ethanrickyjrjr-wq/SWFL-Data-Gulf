@@ -31,6 +31,9 @@ import {
 } from "@/lib/email/blast-events";
 import { onDemoEvent, type DemoStage } from "@/lib/email/outreach/demo-cadence";
 import { extractWeeklyReadAction } from "@/lib/email/weekly-read/webhook";
+import { extractMarketAlertEngagement } from "@/lib/email/zip-events/webhook";
+// KNOWN-DEBT(market_alert_engagement is a new public table not yet in Database types — regen types, then retype)
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -66,6 +69,29 @@ export async function POST(request: Request): Promise<Response> {
     event = JSON.parse(raw) as InboundEvent;
   } catch {
     return NextResponse.json({ error: "bad_json" }, { status: 400 });
+  }
+
+  // ── Market-area alerts: per-recipient × per-trigger engagement ─────────────
+  // `ma`-tagged sends record every open/click/delivery/suppression event keyed
+  // by recipient + trigger + area (paid-tier prerequisite, pinned in the
+  // 07/10/2026 spec — "which contact opened the price-cut alert" stays a query).
+  // NO early return: a bounce/complaint continues into the wid suppression flip.
+  const maEngagement = extractMarketAlertEngagement(event as unknown as ResendWebhookPayload);
+  if (maEngagement) {
+    try {
+      const mdb = createServiceRoleClientUntyped();
+      await mdb.from("market_alert_engagement").insert({
+        wid: maEngagement.wid,
+        issue_id: maEngagement.issue_id,
+        trigger: maEngagement.trigger,
+        area_id: maEngagement.area_id,
+        event: maEngagement.event,
+      });
+    } catch (err) {
+      console.error(
+        `[resend-webhook] ma engagement insert failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
   // ── Weekly-read (Lane D): suppression only ─────────────────────────────────
