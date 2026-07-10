@@ -1127,7 +1127,9 @@ export const SEED_DOCS: SeedDoc[] = [
           "hero",
           { x: 0, y: 2, w: 12, h: 3 },
           {
-            kicker: "Month and market this digest covers",
+            // Structural kicker (like "Market Spotlight") — the label/prose carry
+            // the authoring instructions; a kicker instruction leaks into previews.
+            kicker: "Monthly Digest",
             value: "",
             label: "Median Sale Price",
             prose: "",
@@ -1215,7 +1217,7 @@ export const SEED_DOCS: SeedDoc[] = [
           "hero",
           { x: 0, y: 2, w: 12, h: 3 },
           {
-            kicker: "The year and market this recap covers",
+            kicker: "Year in Review",
             value: "",
             label: "A full-year look at what moved, what stalled, and what's next",
             prose: "",
@@ -1287,7 +1289,7 @@ export const SEED_DOCS: SeedDoc[] = [
           "text",
           { x: 0, y: 18, w: 7, h: 3 },
           {
-            body: "Close in your own voice — what kind of year this was, and what you're building toward next.",
+            body: "Write your close, in your own voice — what kind of year this was, and what you're building toward next.",
           },
         ),
         seedBlockGrid("button", { x: 7, y: 18, w: 5, h: 3 }, { label: "See the Full Year Report" }),
@@ -1538,18 +1540,19 @@ export const SEED_DOCS: SeedDoc[] = [
           paddingY: "lg",
         }),
         // Feature cards with image slots — imageUrl: "" declares the open slot
-        // (a column without the key stays image-less by design).
+        // (a column without the key stays image-less by design). Bodies are
+        // instruction-phrased (slot rule) so fills replace them, never ship them.
         seedBlock("multi-column", {
           columns: [
             {
               imageUrl: "",
               heading: "Feature one",
-              body: "A couple of lines that earn the click.",
+              body: "Write a couple of lines that earn the click.",
             },
             {
               imageUrl: "",
               heading: "Feature two",
-              body: "Aspirational context lifts time spent.",
+              body: "Give aspirational context — it lifts time spent.",
             },
           ],
           paddingY: "lg",
