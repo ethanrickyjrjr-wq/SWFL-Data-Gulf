@@ -1,18 +1,15 @@
 # .github/workflows/weekly-read.yml
-name: Weekly Read Cadence
+name: Market Area Alerts Cadence
 on:
   # SCHEDULE COMMENTED until the first operator-approved live cycle ships clean
-  # (spec + plan: v1 is approval-locked — the engine-routed content pipeline is new;
-  # a human reviews each week's per-ZIP previews before anything reaches real
-  # subscribers). Before uncommenting: several clean weeks of operator-local
-  # preview → approve → send.
-  # NOTE: WEEKLY_READ_APPROVED and ANTHROPIC_API_KEY are deliberately NOT provided
-  # by this workflow — a dispatch run previews with the engine in deterministic
-  # mock mode (zero spend, zero sends); real builds + live sends are operator-local
-  # commands with the real key. Even a live cron run would refuse to send until
-  # the approval env is threaded on purpose.
+  # (market-area alerts spec 07/10/2026: v1 is approval-locked — a human reviews
+  # per-ZIP previews before anything reaches real subscribers). The runner is now
+  # a DAILY detector pass (baseline/alert/weekly classes decided per subscriber),
+  # fully deterministic — zero LLM calls, no ANTHROPIC_API_KEY anywhere.
+  # WEEKLY_READ_APPROVED is deliberately NOT provided: even a live cron run
+  # refuses to send until the approval env is threaded on purpose.
   # schedule:
-  #   - cron: "0 13 * * 2" # 13:00 UTC Tuesdays (~9am ET)
+  #   - cron: "0 11 * * *" # daily 11:00 UTC (~7am ET) — detector pass + due sends
   workflow_dispatch:
 concurrency:
   group: weekly-read

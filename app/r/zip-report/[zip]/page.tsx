@@ -511,9 +511,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
             source="zip-report"
             presetZip={zip}
             endpoint="/api/weekly-read/subscribe"
-            heading={`Subscribe to ${zip}'s weekly read`}
-            blurb={`A short weekly market read for ${primaryPlace ?? `ZIP ${zip}`}, built and sent by our engine — see it before you build your own.`}
-            doneMessage={`You're in — ${zip}'s next weekly read will land in your inbox.`}
+            heading="Get alerted when this market moves"
+            blurb={`Real events in ${primaryPlace ?? `ZIP ${zip}`} and its neighbors — price shifts, listing surges, market heat. Starts with a snapshot of your market today; quiet weeks stay quiet.`}
+            doneMessage={`You're in — your ${primaryPlace ?? zip} market snapshot is on its way, then alerts when things move.`}
           />
         </div>
         <ColorLegend />
