@@ -1,3 +1,22 @@
+## 2026-07-10 (Fable 5 · main) — /insiders centerpiece page BUILT + verified local; subscribe lane LIVE
+
+Operator: "centerpiece of the entire marketing campaign — push the limits, take the wheel."
+Brainstormed w/ research (RULE 0.4: bklit.com = chart-component registry, parked as
+`bklit_charts_evaluation`; notice.md = dead end/rickroll; sherwood.news = tone ref only), spec
+`2026-07-10-insiders-page-design.md` (e7996a07), build registered (`insiders_page_live_verify`).
+Page (85b9677b): masthead hero (Instrument Serif page-scoped, hero sparkline IS real Cape Coral
+ZHVI), live wire ticker (6 real ZHVI/ZORI figures through May 2026, hidden if loaders degrade),
+cream specimen + teal annotation rail + machine stamp (only figures = live-injected, prose
+digit-free), TWO live MetroAreaCharts (zhvi/zori pivoted), 4 rules, 4-step pipeline, issue ledger,
+dual capture. `insiders_subscribers` migration RUN + verified (RLS on, service-role only, 0 rows);
+POST /api/insiders/subscribe proven e2e local (row w/ server-side consent → cleaned). Verified:
+`bunx next build` GREEN (/insiders + /api/insiders/subscribe in route manifest), nav pinned test
+29/29 (Insiders top-level tab), jargon sweep clean (no system nouns, no "ZIP-level"), mobile
+390px no-overflow, desktop/mobile screenshots reviewed. database-generated.types.ts regen adds 4
+parallel-session tables (already-applied DB migrations — disclosed in commit). NOT pushed
+(operator gate). Next: operator review → push → prod live-verify → close
+`insiders_page_live_verify`. Insiders Edition Task-10 live-authoring go/no-go still parked.
+
 ## 2026-07-10 (Fable 5 · main) — correction: spec-estate audit UNBLOCKED + built same session
 
 The entry below says plan Task 7 is BLOCKED on wrapBatchesSurface — that landed on origin
