@@ -62,6 +62,10 @@ const nextConfig: NextConfig = {
     // ZIP cutout PNG (seeded ZIP email's image block): reads the contractor SVG
     // from disk at runtime — belt-and-braces trace so the file always ships.
     "/api/zip-shape/[zip]": ["./public/map/lee-collier.svg"],
+    // /c/[id]/card rasterizes the saved-chart social card via svgToPng — bundle
+    // the chart TTFs or Vercel renders every label blank (see
+    // lib/charts/chart-fonts.ts header for the landmine).
+    "/c/[id]/card": ["./assets/fonts/*.ttf"],
   },
   async redirects() {
     return [
