@@ -1,0 +1,265 @@
+{
+  "id": "idL0iThUh6",
+  "name": "Brandfetch",
+  "domain": "brandfetch.com",
+  "claimed": true,
+  "description": "Brandfetch is the home for the world's brands. Discover the latest logos, colors, fonts and more.",
+  "longDescription": "Brandfetch is a tool that allows users to easily fetch logo images, color codes, and other brand assets for various companies. By inputting a domain name, Brandfetch returns the company's logo, primary colors, and sometimes additional branding information. This streamlined process aids marketers, designers, developers, and other professionals in quickly acquiring branding assets without the need to manually sift through a company's website or branding guidelines. The platform is especially beneficial for those crafting presentations, websites, apps, or any other visual content where brand consistency and accuracy are of utmost importance.",
+  "links": [
+    {
+      "name": "github",
+      "url": "https://github.com/Brandfetch"
+    },
+    {
+      "name": "twitter",
+      "url": "https://twitter.com/brandfetch"
+    },
+    {
+      "name": "instagram",
+      "url": "https://instagram.com/brandfetch"
+    },
+    {
+      "name": "linkedin",
+      "url": "https://linkedin.com/company/brandfetch"
+    }
+  ],
+  "logos": [
+    {
+      "theme": "light",
+      "formats": [
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/theme/light/logo.svg?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": "transparent",
+          "format": "svg",
+          "height": null,
+          "width": null,
+          "size": 15555
+        },
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/w/2031/h/546/theme/light/logo.webp?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": "transparent",
+          "format": "webp",
+          "height": 546,
+          "width": 2031,
+          "size": 34794
+        }
+      ],
+      "tags": [],
+      "type": "logo"
+    },
+    {
+      "theme": "dark",
+      "formats": [
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/w/800/h/215/theme/dark/logo.png?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": "transparent",
+          "format": "png",
+          "height": 215,
+          "width": 800,
+          "size": 33937
+        },
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/theme/dark/logo.svg?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": "transparent",
+          "format": "svg",
+          "height": null,
+          "width": null,
+          "size": 15567
+        }
+      ],
+      "tags": [],
+      "type": "logo"
+    },
+    {
+      "theme": "light",
+      "formats": [
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/theme/light/symbol.svg?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": "transparent",
+          "format": "svg",
+          "height": null,
+          "width": null,
+          "size": 2215
+        }
+      ],
+      "tags": [],
+      "type": "symbol"
+    },
+    {
+      "theme": "dark",
+      "formats": [
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/theme/dark/symbol.svg?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": "transparent",
+          "format": "svg",
+          "height": null,
+          "width": null,
+          "size": 2215
+        }
+      ],
+      "tags": [],
+      "type": "symbol"
+    },
+    {
+      "theme": "dark",
+      "formats": [
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/w/480/h/480/theme/dark/icon.png?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": null,
+          "format": "png",
+          "height": 480,
+          "width": 480,
+          "size": 24041
+        }
+      ],
+      "tags": [],
+      "type": "icon"
+    },
+    {
+      "theme": null,
+      "formats": [
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/w/400/h/400/idoYtqlZke.png?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": null,
+          "format": "png",
+          "height": 400,
+          "width": 400,
+          "size": 2565
+        }
+      ],
+      "tags": [],
+      "type": "other"
+    }
+  ],
+  "colors": [
+    {
+      "hex": "#0084ff",
+      "type": "accent",
+      "brightness": 113
+    },
+    {
+      "hex": "#00193E",
+      "type": "brand",
+      "brightness": 22
+    },
+    {
+      "hex": "#F03063",
+      "type": "brand",
+      "brightness": 93
+    },
+    {
+      "hex": "#7B0095",
+      "type": "brand",
+      "brightness": 37
+    },
+    {
+      "hex": "#76CC4B",
+      "type": "brand",
+      "brightness": 176
+    },
+    {
+      "hex": "#FFDA00",
+      "type": "brand",
+      "brightness": 210
+    },
+    {
+      "hex": "#000000",
+      "type": "dark",
+      "brightness": 0
+    },
+    {
+      "hex": "#FFFFFF",
+      "type": "light",
+      "brightness": 255
+    }
+  ],
+  "fonts": [
+    {
+      "name": "Inter",
+      "type": "body",
+      "origin": "google",
+      "originId": "Inter",
+      "weights": []
+    },
+    {
+      "name": "Poppins",
+      "type": "title",
+      "origin": "google",
+      "originId": "Poppins",
+      "weights": []
+    }
+  ],
+  "images": [
+    {
+      "formats": [
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/w/1500/h/500/theme/dark/idowMAWZTd.jpeg?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": null,
+          "format": "jpeg",
+          "height": 500,
+          "width": 1500,
+          "size": 77849
+        }
+      ],
+      "tags": [],
+      "type": "banner"
+    },
+    {
+      "formats": [
+        {
+          "src": "https://cdn.brandfetch.io/idL0iThUh6/w/1500/h/500/idfRIO4sMD.png?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+          "background": "transparent",
+          "format": "png",
+          "height": 500,
+          "width": 1500,
+          "size": 5539
+        }
+      ],
+      "tags": [],
+      "type": "other"
+    }
+  ],
+  "qualityScore": 0.9968808646048315,
+  "company": {
+    "employees": 2,
+    "financialIdentifiers": {
+      "isin": [],
+      "ticker": []
+    },
+    "foundedYear": 2020,
+    "industries": [
+      {
+        "score": 1,
+        "id": "28",
+        "name": "Computers Electronics and Technology",
+        "emoji": "🖥",
+        "parent": null,
+        "slug": "computers-electronics-and-technology"
+      },
+      {
+        "score": 1,
+        "id": "32",
+        "name": "Computers Electronics and Technology",
+        "emoji": "🖥",
+        "parent": {
+          "emoji": "🖥",
+          "id": "28",
+          "name": "Computers Electronics and Technology",
+          "slug": "computers-electronics-and-technology"
+        },
+        "slug": "computers-electronics-and-technology"
+      }
+    ],
+    "kind": "PRIVATELY_HELD",
+    "location": {
+      "city": "Savigny",
+      "country": "Switzerland",
+      "countryCode": "CH",
+      "region": "Europe",
+      "state": "Vaud",
+      "subregion": "Western Europe"
+    }
+  },
+  "isNsfw": false,
+  "urn": "urn:brandfetch:brand:idL0iThUh6"
+}
