@@ -45,6 +45,10 @@
           },
           {
             "type": "command",
+            "command": "node .claude/hooks/print-desk-status.mjs"
+          },
+          {
+            "type": "command",
             "command": "node scripts/tripwire-scan.mjs"
           },
           {
