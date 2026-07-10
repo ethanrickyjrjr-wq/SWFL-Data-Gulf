@@ -4,7 +4,13 @@ on:
   # Re-armed 2026-06-20 after the credit freeze. Gated by the ENGINE_ENABLED
   # repo variable (job-level if:) — flip with `node scripts/engine.mjs off|on`.
   schedule:
-    - cron: "0 6 * * *"
+    # 04:23 UTC = 12:23 AM EDT / 11:23 PM EST — front of the operator's overnight
+    # window, off the top-of-hour congestion (GitHub docs: schedule delays peak
+    # at :00 and jobs can be dropped; observed drift here was 2.3-4.1h on the old
+    # 06:00 slot). Early anchor costs zero freshness: no lake-writing cron fires
+    # 04:23-09:00 UTC. narrative-bake chains on this workflow's completion.
+    # Spec: 2026-07-10-batch-narrative-bake-design.md §4.
+    - cron: "23 4 * * *"
   workflow_dispatch:
     inputs:
       pack_id:

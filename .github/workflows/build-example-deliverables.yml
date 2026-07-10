@@ -2,9 +2,11 @@ name: Rebuild Example Deliverables
 
 on:
   schedule:
-    # 8 AM UTC daily — after the 6 AM Daily Brain Rebuild refreshes brains/*.md, so the
-    # examples carry the current freshness_token (matching live /r/*).
-    - cron: "0 8 * * *"
+    # 08:23 UTC daily — after the 04:23 Daily Brain Rebuild refreshes brains/*.md
+    # (even with observed multi-hour schedule drift), so the examples carry the
+    # current freshness_token (matching live /r/*). :23 = off the top-of-hour
+    # congestion (GitHub schedule delays peak at :00).
+    - cron: "23 8 * * *"
   workflow_dispatch:
 
 # Serialize so a manual dispatch can't race a scheduled run's upserts.

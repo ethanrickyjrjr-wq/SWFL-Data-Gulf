@@ -12,7 +12,9 @@ name: Graphify Republish
 
 on:
   schedule:
-    - cron: "0 7 * * *"
+    # :37 = off the top-of-hour congestion (GitHub schedule delays peak at :00);
+    # staggered from gate-a-parity (23 7).
+    - cron: "37 7 * * *"
   workflow_dispatch:
     inputs:
       dry_run:

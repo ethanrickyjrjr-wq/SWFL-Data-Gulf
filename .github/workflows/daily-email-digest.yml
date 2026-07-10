@@ -3,9 +3,13 @@ name: Daily Email Digest
 
 on:
   schedule:
-    # 10:00 UTC = 6:00 AM ET Mon–Fri.
-    # Clear of: daily-rebuild (0 6), city-pulse (0 9), freshness-probe (0 14).
-    - cron: "0 10 * * 1-5"
+    # 14:23 UTC = 10:23 AM EDT / 9:23 AM EST weekdays — the researched engagement
+    # peak (Brevo send-time study: ~10 AM local best; spec 2026-07-10-batch-
+    # narrative-bake-design.md §4 + companion send-window spec). :23 is our
+    # anti-congestion minute (GitHub schedule delays peak at :00), NOT a research
+    # finding — customer-facing copy never quotes it.
+    # Clear of: daily-rebuild (23 4), city-pulse (0 9), freshness-probe (0 14).
+    - cron: "23 14 * * 1-5"
   workflow_dispatch:
     inputs:
       dry_run:

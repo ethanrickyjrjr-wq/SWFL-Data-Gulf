@@ -10,7 +10,8 @@ on:
   # Re-armed 2026-06-20 after the credit freeze. Gated by ENGINE_ENABLED
   # (job-level if:) — flip with `node scripts/engine.mjs off|on`.
   schedule:
-    - cron: "0 7 * * *"
+    # :23 = off the top-of-hour congestion (GitHub schedule delays peak at :00).
+    - cron: "23 7 * * *"
   workflow_dispatch: {}
 
 # One parity run at a time (a manual dispatch landing on the nightly can't race it).

@@ -9,8 +9,10 @@ name: Data-readiness verification (hourly)
 
 on:
   schedule:
-    # Top of every hour — matches the handler's 75-min look-ahead window.
-    - cron: "0 * * * *"
+    # Hourly at :23 — off the top-of-hour congestion (GitHub schedule delays
+    # peak at :00 and jobs can be dropped). The handler's 75-min look-ahead
+    # window still covers every send regardless of the minute offset.
+    - cron: "23 * * * *"
   workflow_dispatch:
 
 permissions:

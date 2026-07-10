@@ -6,8 +6,19 @@
 name: narrative-bake
 
 on:
+  # PRIMARY TRIGGER — chained, not clocked: fires when the Daily Brain Rebuild
+  # completes, whenever GitHub's drifting scheduler actually ran it (observed
+  # 2.3-4.1h late on the old 06:00 slot). The batch submits immediately;
+  # results typically land within the hour. Spec:
+  # 2026-07-10-batch-narrative-bake-design.md §4.
+  workflow_run:
+    workflows: ["Daily Brain Rebuild"]
+    types: [completed]
+  # BACKSTOP — GitHub docs: heavily-loaded schedules can be DROPPED entirely.
+  # If the rebuild never fired, this still bakes once a day; the delta gate
+  # makes a redundant firing cost ~$0 (unchanged keys skip before any API call).
   schedule:
-    - cron: "40 10 * * *" # daily 10:40 UTC, after the daily brain rebuild window
+    - cron: "23 10 * * *"
   workflow_dispatch:
     inputs:
       surface:
@@ -23,8 +34,14 @@ permissions:
 
 jobs:
   bake:
+    # workflow_run fires on failure/cancel too — only bake on a green rebuild.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 90: the job now polls the Message Batch to completion (~1h typical worst
+    # case) instead of making per-key synchronous calls. In-script deadline is
+    # 80 min (BAKE_POLL_DEADLINE_MS) — on overrun it exits 0 loud and the next
+    # run's Phase 0 collects the persisted batch.
+    timeout-minutes: 90
     env:
       # SPEND GUARD — explicit, reviewable per-run cap (ingest/CLAUDE.md rule:
       # caps live as visible workflow lines, never code defaults). The metered
