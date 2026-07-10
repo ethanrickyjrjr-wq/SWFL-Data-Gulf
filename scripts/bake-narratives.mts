@@ -27,6 +27,7 @@ import {
   assembleCorridorBakeInputs,
   listCorridorSurfaceKeys,
 } from "../lib/narratives/corridor-inputs";
+import { assembleBrainBakeInputs, listBrainSurfaceKeys } from "../lib/narratives/brain-inputs";
 import type { BakeInputs, NarrativeSectionsData } from "../lib/narratives/types";
 
 type Args = { surface: string; keys: string[] | null; force: boolean; dryRun: boolean };
@@ -54,6 +55,7 @@ const SURFACE_ADAPTERS: Record<
 > = {
   zip: { list: listZipSurfaceKeys, assemble: assembleZipBakeInputs },
   corridor: { list: listCorridorSurfaceKeys, assemble: assembleCorridorBakeInputs },
+  brain: { list: listBrainSurfaceKeys, assemble: assembleBrainBakeInputs },
 };
 
 function runCapUsd(): number {

@@ -42,6 +42,8 @@ import {
   type MetricBox,
 } from "../cre-swfl/cre-metrics";
 import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
+import { loadNarrative } from "../../../lib/narratives/store";
+import { NarrativeSections } from "../../../components/narratives/NarrativeSections";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -113,6 +115,7 @@ export default async function ReportPage({ params }: PageProps) {
     return <RawFallback slug={slug} content={content} />;
   }
 
+  const narrative = await loadNarrative("brain", slug);
   const hasDetail = display.detailCaveats.length > 0 || display.metrics.length > 0;
   const ld = brainJsonLd(display, slug);
 
@@ -199,6 +202,9 @@ export default async function ReportPage({ params }: PageProps) {
           <AnswerText text={display.conclusion} />
         </p>
       </section>
+
+      {/* ── Baked narrative — ONE renderer root, additive (absent row = today's page) ── */}
+      <NarrativeSections row={narrative} />
 
       {/* The at-a-glance chart. For cre-swfl this is the sector-clickable
           "Market Beat" chart (six city totals); every other report keeps the

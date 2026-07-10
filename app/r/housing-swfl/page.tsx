@@ -23,6 +23,8 @@ import DigestSubscribe from "../../../components/email/DigestSubscribe";
 import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
 import { PrintButton } from "../../../components/PrintButton";
 import { ReportAi } from "../_components/report-ai";
+import { loadNarrative } from "../../../lib/narratives/store";
+import { NarrativeSections } from "../../../components/narratives/NarrativeSections";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -131,6 +133,7 @@ export default async function HousingPage() {
     // not yet built — housing-only render
   }
 
+  const narrative = await loadNarrative("brain", "housing-swfl");
   const housingBoxes = toBoxes(housingParsed.output.key_metrics ?? [], HOUSING_SHORT);
   const stressBoxes = toBoxes(stressParsed?.output.key_metrics ?? [], STRESS_SHORT);
 
@@ -165,6 +168,10 @@ export default async function HousingPage() {
         </div>
         <p className="mt-6 text-lg leading-8 text-gray-200">{housing.conclusion}</p>
       </section>
+
+      {/* ── Baked narrative — same ('brain','housing-swfl') row as /r/housing-swfl's
+          canonical twin at /r/[slug]; ONE bake, two mounts, zero drift ── */}
+      <NarrativeSections row={narrative} />
 
       {housing.chart && <ReportChart block={housing.chart} />}
 
