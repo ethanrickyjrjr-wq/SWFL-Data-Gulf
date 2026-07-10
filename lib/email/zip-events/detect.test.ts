@@ -36,7 +36,7 @@ function snap(metrics: Partial<ZipMetricsSnapshot["metrics"]>): ZipMetricsSnapsh
     },
     rank_position: null,
     heat: {
-      median_dom_trend: null,
+      absorption_rate_pct: null,
       sale_to_list_ratio: null,
       price_momentum_pct: null,
       sold_momentum_pct: null,

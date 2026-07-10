@@ -18,7 +18,7 @@ const SOURCE_HEAT = "SWFL Data Gulf market-area heat rank";
 
 export interface AreaHeatInput {
   area_id: string;
-  median_dom_trend: number | null;
+  absorption_rate_pct: number | null;
   sale_to_list_ratio: number | null;
   price_momentum_pct: number | null;
   sold_momentum_pct: number | null;
@@ -45,13 +45,13 @@ export function areaHeatInputs(
     avg(members.map((m) => f(m.heat)).filter((v): v is number => v != null));
   const out: AreaHeatInput = {
     area_id: area.area_id,
-    median_dom_trend: pick((h) => h.median_dom_trend),
+    absorption_rate_pct: pick((h) => h.absorption_rate_pct),
     sale_to_list_ratio: pick((h) => h.sale_to_list_ratio),
     price_momentum_pct: pick((h) => h.price_momentum_pct),
     sold_momentum_pct: pick((h) => h.sold_momentum_pct),
   };
   const anyHeld =
-    out.median_dom_trend != null ||
+    out.absorption_rate_pct != null ||
     out.sale_to_list_ratio != null ||
     out.price_momentum_pct != null ||
     out.sold_momentum_pct != null;
@@ -64,7 +64,7 @@ export function areaHeatInputs(
 export function rankAreaHeat(inputs: AreaHeatInput[]): AreaHeatRank[] {
   const complete = inputs.filter(
     (i) =>
-      i.median_dom_trend != null &&
+      i.absorption_rate_pct != null &&
       i.sale_to_list_ratio != null &&
       i.price_momentum_pct != null &&
       i.sold_momentum_pct != null,
@@ -77,7 +77,7 @@ export function rankAreaHeat(inputs: AreaHeatInput[]): AreaHeatRank[] {
     const pos = sorted.indexOf(v);
     return sorted.length === 1 ? 1 : 1 - pos / (sorted.length - 1);
   };
-  const doms = complete.map((i) => i.median_dom_trend as number);
+  const paces = complete.map((i) => i.absorption_rate_pct as number);
   const ratios = complete.map((i) => i.sale_to_list_ratio as number);
   const momenta = complete.map(
     (i) => (i.price_momentum_pct as number) + (i.sold_momentum_pct as number),
@@ -86,7 +86,7 @@ export function rankAreaHeat(inputs: AreaHeatInput[]): AreaHeatRank[] {
   const scored = complete.map((i) => ({
     area_id: i.area_id,
     score:
-      HEAT_WEIGHTS.pace * rank01(doms, i.median_dom_trend as number, false) + // falling DOM = hot
+      HEAT_WEIGHTS.pace * rank01(paces, i.absorption_rate_pct as number, true) + // faster absorption = hot
       HEAT_WEIGHTS.tightness * rank01(ratios, i.sale_to_list_ratio as number, true) +
       HEAT_WEIGHTS.momentum *
         rank01(momenta, (i.price_momentum_pct as number) + (i.sold_momentum_pct as number), true),

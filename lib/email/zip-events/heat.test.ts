@@ -5,10 +5,10 @@ import type { MarketArea } from "./market-areas";
 import type { ZipMetricsSnapshot } from "./types";
 
 function input(area_id: string, v: number): AreaHeatInput {
-  // Lower DOM trend = hotter (pace); higher ratio/momentum = hotter.
+  // Higher absorption = hotter (pace); higher ratio/momentum = hotter.
   return {
     area_id,
-    median_dom_trend: -v,
+    absorption_rate_pct: v,
     sale_to_list_ratio: 90 + v,
     price_momentum_pct: v,
     sold_momentum_pct: v,
@@ -25,7 +25,7 @@ describe("rankAreaHeat", () => {
   test("missing-input areas are EXCLUDED, not zero-filled", () => {
     const partial: AreaHeatInput = {
       area_id: "x",
-      median_dom_trend: null,
+      absorption_rate_pct: null,
       sale_to_list_ratio: 95,
       price_momentum_pct: 1,
       sold_momentum_pct: 1,
@@ -64,7 +64,7 @@ describe("areaHeatInputs", () => {
       [
         "33904",
         snapWithHeat("33904", {
-          median_dom_trend: -2,
+          absorption_rate_pct: -2,
           sale_to_list_ratio: 96,
           price_momentum_pct: 3,
           sold_momentum_pct: 1,
@@ -73,7 +73,7 @@ describe("areaHeatInputs", () => {
       [
         "33914",
         snapWithHeat("33914", {
-          median_dom_trend: -4,
+          absorption_rate_pct: -4,
           sale_to_list_ratio: 98,
           price_momentum_pct: null,
           sold_momentum_pct: 3,
@@ -81,7 +81,7 @@ describe("areaHeatInputs", () => {
       ],
     ]);
     const got = areaHeatInputs(AREA, snaps);
-    expect(got?.median_dom_trend).toBe(-3);
+    expect(got?.absorption_rate_pct).toBe(-3);
     expect(got?.price_momentum_pct).toBe(3);
   });
   test("null when no member snapshot holds anything", () => {

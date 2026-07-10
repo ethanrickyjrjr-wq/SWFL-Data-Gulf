@@ -68,9 +68,13 @@ export interface ZipMetricsSnapshot {
   /** Position (1-based) in the ranked signal pool's headline metric, or null. */
   rank_position: number | null;
   /** Heat inputs at capture time (nulls preserved — an area missing inputs is
-   *  EXCLUDED from the heat rank, never zero-filled). */
+   *  EXCLUDED from the heat rank, never zero-filled). Pace = absorption rate
+   *  (30-day sold count / active inventory × 100, higher = faster = hotter) —
+   *  the lake holds NO days-on-market (listing_state.days_on_market and
+   *  listed_date are null at source, verified live 07/10/2026), and first_seen
+   *  math would be an invented figure. */
   heat: {
-    median_dom_trend: number | null;
+    absorption_rate_pct: number | null;
     sale_to_list_ratio: number | null;
     price_momentum_pct: number | null;
     sold_momentum_pct: number | null;
