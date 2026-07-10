@@ -1,3 +1,21 @@
+## 2026-07-10 (Fable 5 · main) — batch bake BUILT: Batches API + metered seam + overnight cron replan (8-task plan executed)
+
+Plan `docs/superpowers/plans/2026-07-10-batch-narrative-bake.md` executed inline, all tasks green:
+`computeCostUsd` batch flag (626e75ae) · `wrapBatchesSurface` + messages-proxy `batches` interception
+— the unmetered `client.messages.batches` hole is CLOSED (52644441, type fix 552fb630) ·
+`narrative_bake_batches` migration RUN + PostgREST-verified count 0 (1ee7e5bc) · batch-store
+(9863eaed) · batch-estimate cap sizing (3f02efa2) · three-phase bake script — collect-pending /
+submit-one-batch / poll+collect, delta+cadence+dry-run gates unchanged, dry-run proven 157 keys/
+35 skipped exit 0 (ff23b2fc) · 7 workflows re-anchored — rebuild 23 4, bake workflow_run-chained
+(success-only guard) + 23 10 backstop + timeout 90, digest 23 14 wk, parity/graphify/examples/
+readiness off :00 (a8f92737). Verified: `bunx next build` clean, 55 tests pass (7 files).
+Worktree detour reverted (bp-batch-bake created + cleaned — Edit/Write hook blocks bp-*; no file
+overlap with the live zip-events session so main per RULE 1.5). NOT pushed — operator gate; push
+will bundle the parallel session's zip-events/market-area-alerts commits (ask first). Live verify
+after push: `gh workflow run narrative-bake.yml -f surface=corridor -f force=true` (first live
+batch run — flagged per spend philosophy), then overnight chain observation → close
+`batch_narrative_bake_live_verify`. `send_window_guidance` build is specced, not started.
+
 ## 2026-07-10 (Fable 5 · main) — market-area alerts BUILT: deterministic engine verified DRY; research fold-in (opens + paid evidence)
 
 Second crawl4ai pass folded into the spec (Backlinko welcome-email 83.63% opens/5.1x CTR; GetResponse
