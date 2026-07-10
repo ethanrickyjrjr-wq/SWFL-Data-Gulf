@@ -1,3 +1,18 @@
+## 2026-07-10 (Sonnet 5 · main) — Brandfetch key landed, live probe pinned (Task 4 of outreach-brand-injection plan)
+
+Operator dropped `brandfetch_key` into `.env.local` (free dev account, $0 spend cap).
+Ran Task 4 Step 1 of `docs/superpowers/plans/2026-07-10-outreach-brand-injection.md`:
+live `GET /v2/brands/domain/brandfetch.com` (quota-free per plan) → saved
+`scripts/outreach/__fixtures__/brandfetch-sample.json` (commit `0910c265`). Real response
+discriminators (`logos[].theme`/`type`, `colors[].type: brand|accent|dark|light`,
+`fonts[].type`) match the `BrandfetchBrand` interface already coded in `pilot-lib.mts` —
+no mapper changes needed. The previously-`skipIf`-gated "REAL probe payload" test now
+runs live: 6/6 `pilot-lib.test.mts` pass. Task 4 done. Task 5 (bulk pilot CLI run against
+real brokerage domains, `brand-pilot.mts --live`) is BLOCKED on explicit operator go —
+it burns real Brandfetch quota against non-quota-free domains; auto-mode classifier
+correctly refused to self-authorize it. `outreach_brand_injection_live_verify` stays open
+(still DRY evidence for the bulk pilot; only the single quota-free probe is live-verified).
+
 ## 2026-07-10 (Fable 5 · main) — /charts glow-up BUILT: gauge, ZIP-heat grid, P/L multiples, tier projection + fabricated vintages killed
 
 Lane B executed end-to-end (spec `2026-07-10-charts-glowup-design.md`, plan
