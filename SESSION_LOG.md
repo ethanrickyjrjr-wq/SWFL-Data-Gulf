@@ -1,3 +1,20 @@
+## 2026-07-09 (Fable 5 · main) — guides hub BUILT: /guides trio + nav/footer/sitemap + homepage strip
+
+Executed `docs/superpowers/plans/2026-07-09-guides-hub.md` (spec 6137fd85), 7 commits: typed
+registry `lib/guides/` (types/registry/registry.test — asset-exists, MM/DD/YYYY as-of,
+tryIt-route allowlist, forbidden-internal-noun scan) + the flagship trio (sourced-numbers,
+email-design, builder-tips); article components `components/guides/`; `/guides` hub +
+`/guides/[slug]` SSG routes + sitemap; Guides in Explore dropdown + footer (pinned nav test
+updated same commit); homepage GuidesStrip after DeliverableShowcase (only homepage change).
+All 10 builder tips survived code verification with anchors; ONE clause cut per spec rule:
+per-image click tracking (tracked-links/wrap.ts wraps the campaign CTA on the send path, not
+every block link) — tip claims the link, not the tracking. photoEditor + socialCalendar say
+"on paid plans" (FEATURE_ROUTING). Figure provenance verbatim from seed-previews assets
+README (LeePA chart carries its own 05/30/2026 vintage). Gates: 36 tests green, `bunx next
+build` ✓ (81/81, 3 SSG guide paths), prod-server smoke: routes 200/404, strip + anchors +
+assets verified. NOT pushed — awaiting operator. `guides_hub_live_verify` stays open for the
+post-deploy pass.
+
 ## 2026-07-09 (Fable 5 · main) — Phase C pushed (operator "Push all"); D/E handoff written; queue line synced
 
 Push bundles 22 commits: Phase C (7, this session) + parallel-session ship-complete work (Fence 6
