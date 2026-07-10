@@ -45,6 +45,8 @@ import { loadMetroTrend } from "../../../../lib/charts/load-metro-trend";
 import { loadZipQuickSummary } from "../../../../lib/zip-summary/load";
 import { loadNarrative } from "../../../../lib/narratives/store";
 import { NarrativeSections } from "../../../../components/narratives/NarrativeSections";
+import { loadPulseNearby } from "../../../../lib/pulse/nearby";
+import { PulseNearby } from "../../../../components/narratives/PulseNearby";
 import { nearestZips } from "../../../../lib/geo/nearest-zips";
 import { zipReportMetadata } from "./metadata";
 import type { Metadata } from "next";
@@ -124,6 +126,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     censusSignals,
     sourcedFigures,
     narrative,
+    pulseNearby,
   ] = await Promise.all([
     Promise.all(REGISTRY_PACK_IDS.map((id) => loadParsedBrain(id))).then(
       (brains) => new Map(REGISTRY_PACK_IDS.map((id, i) => [id, brains[i]])),
@@ -136,6 +139,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     loadCensusSignals(zip),
     getSourcedFigures({ kind: "zip", key: zip }),
     loadNarrative("zip", zip),
+    loadPulseNearby(zip),
   ]);
   const housing = registryBrains.get("housing-swfl") ?? null;
   const registryTables = buildRegistryTableMap(registryBrains);
@@ -392,6 +396,9 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
       {/* ── Baked narrative — ONE renderer root, additive (absent row = today's page) ── */}
       <NarrativeSections row={narrative} />
+
+      {/* ── Live local pulse — grain-ordered, empty-tolerant (Phase C) ── */}
+      <PulseNearby zip={zip} items={pulseNearby} />
 
       {/* ── BODY: ranked grid (left) + context rail (right) — every number once ── */}
       <div className="zp-body">
