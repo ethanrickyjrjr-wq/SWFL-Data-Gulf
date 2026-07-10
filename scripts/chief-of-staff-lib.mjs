@@ -65,3 +65,60 @@ export function buildEvidencePack({ commits, checks, fullLogText, now = new Date
     stale: staleChecks(checks, { now }),
   };
 }
+
+const REQUIRED_SECTIONS = [
+  "## Close candidates",
+  "## Never started",
+  "## Stale top 3",
+  "## No evidence",
+];
+const CANDIDATE_RE = /^- (\S+) — ([0-9a-f]{7,40}(?:, ?[0-9a-f]{7,40})*) — .+ — (HIGH|MEDIUM)$/;
+const MAX_CANDIDATES = 15;
+
+function candidateSection(briefText) {
+  const m = String(briefText).match(/## Close candidates\n([\s\S]*?)(?:\n## |$)/);
+  return m ? m[1].trim() : null;
+}
+
+/** Validate a drafted brief against the evidence pack. Deterministic, $0. */
+export function lintBrief(briefText, pack) {
+  const errors = [];
+  for (const s of REQUIRED_SECTIONS) {
+    if (!String(briefText).includes(s)) errors.push(`missing section: ${s}`);
+  }
+  const section = candidateSection(briefText);
+  if (section != null) {
+    const lines = section.split("\n").filter((l) => l.startsWith("- "));
+    if (lines.length > MAX_CANDIDATES)
+      errors.push(`too many candidates: ${lines.length} > ${MAX_CANDIDATES}`);
+    for (const line of lines) {
+      const m = line.match(CANDIDATE_RE);
+      if (!m) {
+        errors.push(`malformed candidate line: ${line}`);
+        continue;
+      }
+      for (const sha of m[2].split(",").map((s) => s.trim())) {
+        if (!pack.commits.some((c) => c.sha.startsWith(sha))) {
+          errors.push(`cited SHA not in evidence pack: ${sha}`);
+        }
+      }
+    }
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+/** Top candidate lines for the session kickoff block. */
+export function briefKickoffLines(briefText, { max = 5 } = {}) {
+  const section = candidateSection(briefText);
+  if (!section) return [];
+  return section
+    .split("\n")
+    .filter((l) => CANDIDATE_RE.test(l))
+    .slice(0, max);
+}
+
+/** "owner/repo" from a git remote URL (https or ssh), else null. */
+export function repoSlugFromRemoteUrl(url) {
+  const m = String(url).match(/github\.com[:/]([^/\s]+)\/([^/\s]+?)(?:\.git)?\s*$/);
+  return m ? `${m[1]}/${m[2]}` : null;
+}
