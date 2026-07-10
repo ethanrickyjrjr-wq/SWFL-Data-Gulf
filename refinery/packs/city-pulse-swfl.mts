@@ -14,11 +14,9 @@ import type { SynthesisFact } from "../types/event.mts";
 import type {
   BrainOutputProducerResult,
   BrainOutputMetric,
+  BrainOutputDetailTable,
 } from "../types/brain-output.mts";
-import {
-  cityPulseSource,
-  type CityPulseNormalized,
-} from "../sources/city-pulse-source.mts";
+import { cityPulseSource, type CityPulseNormalized } from "../sources/city-pulse-source.mts";
 import { env } from "../config/env.mts";
 
 // ---------------------------------------------------------------------
@@ -26,13 +24,7 @@ import { env } from "../config/env.mts";
 // ---------------------------------------------------------------------
 
 /** Topic display order — breaking is most volatile, structural least. */
-const TOPIC_PRIORITY = [
-  "breaking",
-  "transactions",
-  "development",
-  "business",
-  "structural",
-];
+const TOPIC_PRIORITY = ["breaking", "transactions", "development", "business", "structural"];
 
 /** Cap on how many signals we surface as key_metrics (plan spec). */
 const MAX_SIGNALS = 8;
@@ -61,13 +53,7 @@ let lastSnapshot: CityPulseSnapshot | null = null;
 function pulseRowsFrom(fragments: RawFragment[]): CityPulseNormalized[] {
   return fragments
     .map((f) => f.normalized as unknown as CityPulseNormalized)
-    .filter(
-      (n) =>
-        n &&
-        n.kind === "city-pulse" &&
-        n.fact.length > 0 &&
-        n.source_url.length > 0,
-    );
+    .filter((n) => n && n.kind === "city-pulse" && n.fact.length > 0 && n.source_url.length > 0);
 }
 
 function sortSignals(rows: CityPulseNormalized[]): CityPulseNormalized[] {
@@ -75,9 +61,7 @@ function sortSignals(rows: CityPulseNormalized[]): CityPulseNormalized[] {
     const ta = TOPIC_PRIORITY.indexOf(a.topic);
     const tb = TOPIC_PRIORITY.indexOf(b.topic);
     // Unknown topics sort last
-    const t =
-      (ta === -1 ? TOPIC_PRIORITY.length : ta) -
-      (tb === -1 ? TOPIC_PRIORITY.length : tb);
+    const t = (ta === -1 ? TOPIC_PRIORITY.length : ta) - (tb === -1 ? TOPIC_PRIORITY.length : tb);
     if (t !== 0) return t;
     return b.captured_at.localeCompare(a.captured_at); // newest first within topic
   });
@@ -94,8 +78,7 @@ function cityPulseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   for (const r of rows) cityCounts[r.city] = (cityCounts[r.city] ?? 0) + 1;
 
   const sourceFragment = allFragments.find(
-    (f) =>
-      (f.normalized as unknown as CityPulseNormalized)?.kind === "city-pulse",
+    (f) => (f.normalized as unknown as CityPulseNormalized)?.kind === "city-pulse",
   );
 
   lastSnapshot = {
@@ -134,13 +117,67 @@ function cityPulseCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 }
 
 // ---------------------------------------------------------------------
+// Phase C — pulse_by_zip detail table (finer grain than the capped
+// key_metrics). One row per ZIP: fetchDetailRow (lib/fetch-brain.ts)
+// matches the FIRST row by exact key, so duplicate keys would shadow.
+// Only location-derived grains qualify (G1); city-wide items carry no ZIP.
+// ---------------------------------------------------------------------
+
+function pulseByZipTable(
+  signals: CityPulseNormalized[],
+  fetched_at: string,
+): BrainOutputDetailTable | null {
+  const geocoded = signals.filter(
+    (s) => s.zip_code && (s.geo_grain === "point" || s.geo_grain === "neighborhood"),
+  );
+  if (geocoded.length === 0) return null;
+  const byZip = new Map<string, CityPulseNormalized[]>();
+  for (const s of geocoded) {
+    const list = byZip.get(s.zip_code!) ?? [];
+    list.push(s);
+    byZip.set(s.zip_code!, list);
+  }
+  return {
+    id: "pulse_by_zip",
+    title: "Live local news signals by ZIP",
+    grain: "zip",
+    columns: [
+      { id: "items", label: "Live signals" },
+      { id: "latest_fact", label: "Most recent signal" },
+      { id: "latest_place", label: "Named place" },
+      { id: "latest_source", label: "Source" },
+    ],
+    rows: [...byZip.entries()].map(([zip, items]) => {
+      const latest = [...items].sort((a, b) => b.captured_at.localeCompare(a.captured_at))[0];
+      return {
+        key: zip,
+        label: zip,
+        cells: {
+          items: items.length,
+          latest_fact: latest.fact,
+          latest_place: latest.location_anchor,
+          latest_source: latest.source_url,
+        },
+      };
+    }),
+    source: {
+      url: "https://www.swfldatagulf.com/r/source/city_pulse",
+      fetched_at,
+      tier: 2,
+      citation:
+        "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse.",
+    },
+    note: "ZIPs are location-derived from each item's named place (address/landmark geocode); city-wide items carry no ZIP and are excluded here.",
+  };
+}
+
+// ---------------------------------------------------------------------
 // Stage 4 — BrainOutput producer.
 // ---------------------------------------------------------------------
 
 function cityPulseOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const snapshot = lastSnapshot;
-  const fetched_at =
-    snapshot?.fetched_at ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetched_at = snapshot?.fetched_at ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   // Empty-snapshot guard — valid neutral output, no throw.
   if (!snapshot || snapshot.signals.length === 0) {
@@ -165,24 +202,22 @@ function cityPulseOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const surfaced = snapshot.signals.slice(0, MAX_SIGNALS);
 
   // Each surfaced signal → one BrainOutputMetric with a source receipt.
-  const key_metrics: BrainOutputMetric[] = surfaced.map(
-    (s, i): BrainOutputMetric => ({
-      metric: `signal_${s.topic}_${i + 1}`,
-      value: `${s.city}: ${s.fact}`,
-      direction: "stable", // reporter facts carry no trend; master interprets
-      label: `${s.city} — ${s.topic}`,
-      variable_type: "categorical",
-      // units intentionally OMITTED for categorical metrics (spec-validator rule)
-      source: {
-        url: s.source_url,
-        fetched_at,
-        tier: 2,
-        citation: s.cited_text
-          ? `${s.source_title ?? s.city}: "${s.cited_text}"`
-          : `${s.source_title ?? s.city} (${s.source_url})`,
-      },
-    }),
-  );
+  const key_metrics: BrainOutputMetric[] = surfaced.map((s, i): BrainOutputMetric => ({
+    metric: `signal_${s.topic}_${i + 1}`,
+    value: `${s.city}: ${s.fact}`,
+    direction: "stable", // reporter facts carry no trend; master interprets
+    label: `${s.city} — ${s.topic}`,
+    variable_type: "categorical",
+    // units intentionally OMITTED for categorical metrics (spec-validator rule)
+    source: {
+      url: s.source_url,
+      fetched_at,
+      tier: 2,
+      citation: s.cited_text
+        ? `${s.source_title ?? s.city}: "${s.cited_text}"`
+        : `${s.source_title ?? s.city} (${s.source_url})`,
+    },
+  }));
 
   const cityList = Object.entries(snapshot.cityCounts)
     .map(([c, n]) => `${c} (${n})`)
@@ -192,9 +227,7 @@ function cityPulseOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     `SWFL city pulse as of ${fetched_at.slice(0, 10)}: ${snapshot.signals.length} live current-events signals across ${Object.keys(snapshot.cityCounts).length} cities — ${cityList}.`,
   ];
   if (surfaced.length > 0) {
-    conclusionParts.push(
-      `Most current: ${surfaced[0].city} — ${surfaced[0].fact}`,
-    );
+    conclusionParts.push(`Most current: ${surfaced[0].city} — ${surfaced[0].fact}`);
   }
   conclusionParts.push(
     "These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
@@ -210,9 +243,12 @@ function cityPulseOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
   );
 
+  const detailTable = pulseByZipTable(snapshot.signals, fetched_at);
+
   return {
     conclusion: conclusionParts.join(" "),
     key_metrics,
+    ...(detailTable ? { detail_tables: [detailTable] } : {}),
     caveats,
     direction: "neutral",
     magnitude: 0,

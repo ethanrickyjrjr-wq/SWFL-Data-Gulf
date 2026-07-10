@@ -22,11 +22,14 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
  * DB failure still throws.
  *
  * THIS IS THE ONLY FILE THAT KNOWS THE data_lake.city_pulse SCHEMA.
- * Columns read (verified against 2026-05-30 + 2026-05-31 migrations):
+ * Columns read (verified against 2026-05-30 + 2026-05-31 + 20260710 migrations):
  *   id (bigint PK), city (text), topic (text), fact (text),
  *   source_url (text), source_title (text), cited_text (text),
  *   captured_at (timestamptz), expires_at (timestamptz),
- *   dedup_key (text), run_at (timestamptz).
+ *   dedup_key (text), run_at (timestamptz),
+ *   location_anchor (text), lat/lon (double), zip_code (text),
+ *   geo_grain (text: point|neighborhood|city|county) — Phase C geocode ladder;
+ *   all five nullable (legacy rows and geocode misses stay native grain).
  * Also on the table but NOT selected — used only as a server-side filter:
  *   story_key (text), superseded_by (bigint FK->id). The live query adds
  *   .is("superseded_by", null) so a story's retired versions never surface;
@@ -40,12 +43,7 @@ const SOURCE_ID = "city-pulse";
 const SCHEMA = "data_lake";
 const TABLE = "city_pulse";
 
-const FIXTURE_PATH = path.join(
-  process.cwd(),
-  "refinery",
-  "__fixtures__",
-  "city-pulse.sample.json",
-);
+const FIXTURE_PATH = path.join(process.cwd(), "refinery", "__fixtures__", "city-pulse.sample.json");
 
 /** Normalized city-pulse row — what Stage 2 / Stage 3 see. */
 export interface CityPulseNormalized {
@@ -66,6 +64,15 @@ export interface CityPulseNormalized {
   captured_at: string;
   /** ISO timestamp when this fact expires (captured_at + TTL(topic)). */
   expires_at: string;
+  /** Most specific place the fact names (verbatim), null when city-wide. */
+  location_anchor: string | null;
+  /** Geocoded point (Census/Nominatim ladder), null when unresolved. */
+  lat: number | null;
+  lon: number | null;
+  /** Location-derived ZCTA (G1) — set only for point/neighborhood grain. */
+  zip_code: string | null;
+  /** Resolution grain; null on legacy rows = native city grain. */
+  geo_grain: "point" | "neighborhood" | "city" | "county" | null;
 }
 
 // ── Defensive coercion ──────────────────────────────────────────────────────
@@ -83,11 +90,24 @@ function strOrNull(v: unknown): string | null {
   return s.length > 0 ? s : null;
 }
 
+function numOrNull(v: unknown): number | null {
+  if (v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+const GEO_GRAINS = new Set(["point", "neighborhood", "city", "county"]);
+
+function geoGrainOrNull(v: unknown): CityPulseNormalized["geo_grain"] {
+  const s = strOrNull(v);
+  return s !== null && GEO_GRAINS.has(s)
+    ? (s as Exclude<CityPulseNormalized["geo_grain"], null>)
+    : null;
+}
+
 // ── Row normalizer ──────────────────────────────────────────────────────────
 
-export function normalizeRow(
-  row: Record<string, unknown>,
-): CityPulseNormalized {
+export function normalizeRow(row: Record<string, unknown>): CityPulseNormalized {
   return {
     kind: "city-pulse",
     city: str(row.city) || "Unknown",
@@ -98,6 +118,11 @@ export function normalizeRow(
     cited_text: strOrNull(row.cited_text),
     captured_at: str(row.captured_at),
     expires_at: str(row.expires_at),
+    location_anchor: strOrNull(row.location_anchor),
+    lat: numOrNull(row.lat),
+    lon: numOrNull(row.lon),
+    zip_code: strOrNull(row.zip_code),
+    geo_grain: geoGrainOrNull(row.geo_grain),
   };
 }
 
@@ -105,11 +130,8 @@ export function normalizeRow(
 
 async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
   const data = JSON.parse(await readFile(FIXTURE_PATH, "utf-8")) as
-    | unknown[]
-    | { rows?: unknown[]; data?: unknown[] };
-  const rows: unknown[] = Array.isArray(data)
-    ? data
-    : (data.rows ?? data.data ?? []);
+    unknown[] | { rows?: unknown[]; data?: unknown[] };
+  const rows: unknown[] = Array.isArray(data) ? data : (data.rows ?? data.data ?? []);
   return rows as Record<string, unknown>[];
 }
 
@@ -129,15 +151,13 @@ async function fetchRows(): Promise<Record<string, unknown>[]> {
     .schema(SCHEMA)
     .from(TABLE)
     .select(
-      "id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at",
+      "id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at, location_anchor, lat, lon, zip_code, geo_grain",
     )
     .gt("expires_at", nowIso)
     .is("superseded_by", null);
 
   if (error) {
-    throw new Error(
-      `city-pulse-source: ${SCHEMA}.${TABLE} fetch failed — ${error.message}`,
-    );
+    throw new Error(`city-pulse-source: ${SCHEMA}.${TABLE} fetch failed — ${error.message}`);
   }
 
   const rows = (data ?? []) as Record<string, unknown>[];
