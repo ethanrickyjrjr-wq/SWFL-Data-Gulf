@@ -38,6 +38,13 @@ API-integration build track. See the inventory below for where the rest lives.
   items are folded into round1 Section 1 as items 19–23; the `/v1/reddit/post` content-filter
   quirk is folded into the vendor note.
 
+- `2026-07-10-outreach-brand-injection-research.md` — round 4: the outreach-to-agents pass
+  (~55 live Reddit calls + crawl4ai on Brandfetch/logo.dev/DBPR) ahead of the first agent test
+  send. Settles: cold sends text-forward + 1 chart, locked-brand-layer compliance shape,
+  per-client-subdomain send-on-behalf, DBPR RE_rgn7.csv as the free weekly agent-name spine
+  (no emails), Brandfetch/logo.dev as the brand-at-scale lanes. Q5 cadence: 5th empty search —
+  decided from pinned 07/02 evidence. Also the source of the 403-default-UA vendor quirk.
+
 ## Existing SteadyAPI material elsewhere (inventory, as of 07/09/2026)
 
 **API mechanics / vendor reference:**

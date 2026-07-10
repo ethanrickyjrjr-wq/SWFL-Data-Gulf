@@ -1,3 +1,23 @@
+## 2026-07-10 (Fable 5 · main) — outreach test-send research pass: brand injection, contacts, cadence, brand takeover
+
+Operator directive: research BEFORE planning the agent test send (SteadyAPI Reddit/X/Insta, no
+limit, + crawl4ai). Ran ~55 live SteadyAPI Reddit calls (250 posts / 5 subs, 16 comment pulls;
+X + IG passes searched-and-empty) + crawl4ai on Brandfetch/logo.dev/DBPR. Full findings:
+`docs/steadyapi-research/2026-07-10-outreach-brand-injection-research.md`. Headlines: generic
+automated outreach explicitly ignored, data-specific is the stated exception (validates T1 demo
+shape) · brand compliance = LOCKED templates w/ disclosures baked in ("make the compliant path
+the lazy path") · send-on-behalf consensus = per-client subdomain + aligned auth (domain-verify
+backend's missing UI is now load-bearing) · designed grids fine warm, cold sends must be
+text-forward + 1 chart · DBPR `RE_rgn7.csv` = weekly free CSV of EVERY Lee/Collier licensee
+(name + brokerage employer + county; NO emails — emails stay directory-crawl or Ch.119 request) ·
+Brandfetch `GET /v2/brands/domain/{d}` = logos+colors+fonts, 100 free dev requests (pricing
+bot-walled); logo.dev = the alternative · Q5 cadence: FIFTH empty search — decided from pinned
+07/02 funnel-spec evidence, not re-searched. NEW VENDOR QUIRK folded into the vendor note:
+SteadyAPI 403s Python's default urllib UA before auth (non-JSON body); browser UA fixes it.
+Inventory confirmed: `fixtures/real-estate-brands/` (28 brokerages + 80 emails, 0 names) is
+consumed by NOTHING in code — wiring it into the outreach brand resolver is the gap. Design/spec
+next (brainstorm in flight, approaches going to operator). Committed docs only; NOT pushed.
+
 ## 2026-07-10 (Fable 5 · main) — seed-preview quality pass: stats overflow ROOT-CAUSED + listing copy now SELLS
 
 Operator escalation (screenshots): misaligned bands / "different lengths", meta copy shipping as

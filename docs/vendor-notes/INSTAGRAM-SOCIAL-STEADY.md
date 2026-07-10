@@ -8,6 +8,10 @@
 - **Base URL:** `https://api.steadyapi.com`
 - **Auth:** `Authorization: Bearer {YOUR_AUTH_KEY}` header, or `?apikey=` query param in a browser. Tokens: dashboard → account (upper-right) → Personal Access Tokens (https://steadyapi.com/profile/personal-access-tokens).
 - **Global rate limit:** 15 requests/second → `429 Too Many Requests` beyond that; vendor recommends retry with backoff.
+- **User-Agent required (field-verified 07/10/2026):** requests with Python's default `User-Agent`
+  (`Python-urllib/3.x`) are rejected with HTTP 403 and a non-JSON body BEFORE auth is evaluated —
+  every endpoint, valid key. Send a browser-style UA header and the same call 200s. A 403 here is
+  NOT necessarily a key problem; check the UA first.
 - **Endpoint weights:** each endpoint has a weight (cost multiplier against your quota). Instagram: `/search` = 2, everything else = 1.
 - **Response envelope (every endpoint):** `{ "meta": { "version", "status", "copywrite", ...request echo... }, "body": [ ... ] | { ... } }`
 - **Common errors (identical across all endpoints):**
