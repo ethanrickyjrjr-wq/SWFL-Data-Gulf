@@ -358,7 +358,10 @@ export function wrapMessageSurface<M extends MessageSurfaceLike>(real: M, callTy
       if (prop === "batches") {
         const rawBatches = Reflect.get(target, prop, target);
         if (!rawBatches) return rawBatches; // surface without batches (defensive)
-        wrappedBatches ??= wrapBatchesSurface(rawBatches as BatchesSurfaceLike, callType);
+        wrappedBatches ??= wrapBatchesSurface(
+          rawBatches as unknown as BatchesSurfaceLike,
+          callType,
+        );
         return wrappedBatches;
       }
       return Reflect.get(target, prop, target);
