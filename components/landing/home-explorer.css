@@ -255,3 +255,15 @@
 .home-explorer .map-intro {text-align:center;padding:40px 20px 8px;max-width:720px;margin:0 auto}
 .home-explorer .map-heading {font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--text-primary);margin:14px 0 10px}
 .home-explorer .map-sub {font-size:15px;color:var(--text-secondary);line-height:1.6;max-width:560px;margin:0 auto 20px}
+
+/* ── Guides strip (guides-hub build — the only homepage section it adds) ── */
+.home-explorer .guides-strip {padding:64px 32px;max-width:1060px;margin:0 auto;text-align:center}
+.home-explorer .guides-strip-cards {display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;text-align:left}
+.home-explorer .guides-strip-card {display:flex;flex-direction:column;border:1px solid var(--gulf-slate-hi);border-radius:12px;overflow:hidden;background:var(--gulf-deep);text-decoration:none;transition:border-color .15s}
+.home-explorer .guides-strip-card:hover {border-color:var(--gulf-teal)}
+.home-explorer .guides-strip-art {display:block;aspect-ratio:4/3;overflow:hidden;background:#fff;border-bottom:1px solid var(--gulf-slate-hi)}
+.home-explorer .guides-strip-art img {width:100%;height:100%;object-fit:cover;object-position:top}
+.home-explorer .guides-strip-title {font-size:15px;font-weight:600;color:var(--text-primary);padding:14px 16px 0}
+.home-explorer .guides-strip-desc {flex:1;font-size:13px;line-height:1.5;color:var(--text-secondary);padding:6px 16px 0}
+.home-explorer .guides-strip-more {font-size:13px;font-weight:500;color:var(--gulf-teal);padding:10px 16px 16px}
+@media (max-width: 860px) {.home-explorer .guides-strip-cards {grid-template-columns:1fr}}

@@ -7,6 +7,7 @@ import Capabilities from "@/components/landing/Capabilities";
 import DeliverableShowcase, {
   type ShowcaseFigures,
 } from "@/components/landing/DeliverableShowcase";
+import GuidesStrip from "@/components/landing/GuidesStrip";
 import PricingStrip from "@/components/landing/PricingStrip";
 import WeeklyReadCapture from "@/components/landing/WeeklyReadCapture";
 import ObjectionFaq from "@/components/landing/ObjectionFaq";
@@ -69,6 +70,7 @@ export default async function Home() {
       <ProofStrip items={proofItems} zipCount={Object.keys(data.placeNames).length} />
       <Capabilities />
       <DeliverableShowcase figures={showcase} />
+      <GuidesStrip />
       <PricingStrip />
       <WeeklyReadCapture />
       <ObjectionFaq />
