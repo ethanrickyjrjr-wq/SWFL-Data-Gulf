@@ -1,3 +1,5 @@
+import { corridorKey } from "../../refinery/lib/corridor-display.mts";
+
 /** Pure ranking for the zip page news section. Order: point items in the
  * ~3mi primary band (trade-area basis: ingest/event-radius-config.yaml) or in
  * the ZIP itself → neighborhood items in the ZIP → city-wide items. Bigger
@@ -35,6 +37,40 @@ export function haversineMiles(lat1: number, lon1: number, lat2: number, lon2: n
 }
 
 const GRAIN_ORDER = { point: 0, neighborhood: 1, city: 2, county: 3 } as const;
+
+export type CorridorPulseRow = Omit<PulseGeoRow, "city"> & { corridor: string };
+
+/** Corridor variant of rankNearby (Phase E): THIS corridor's rows only —
+ * anchored points (grain point/neighborhood) first, corridor-wide items after,
+ * newest first within each group. No cross-corridor distance banding:
+ * corridors are linear, so the corridor key itself is the locality signal.
+ * `city` is set to the display name so the shared renderer labels wide items
+ * "{display} · {wideSuffix}". */
+export function rankCorridorPulse(
+  rows: CorridorPulseRow[],
+  slug: string,
+  displayName: string,
+  limit: number,
+): NearbyPulseItem[] {
+  const kept: NearbyPulseItem[] = rows
+    .filter((r) => corridorKey(r.corridor) === slug)
+    .map((r) => ({
+      ...r,
+      city: displayName,
+      geo_grain: (r.geo_grain === "point" || r.geo_grain === "neighborhood"
+        ? r.geo_grain
+        : "city") as PulseGeoRow["geo_grain"],
+      distance_mi: null,
+    }));
+  kept.sort((a, b) => {
+    const g =
+      GRAIN_ORDER[a.geo_grain as keyof typeof GRAIN_ORDER] -
+      GRAIN_ORDER[b.geo_grain as keyof typeof GRAIN_ORDER];
+    if (g !== 0) return g;
+    return b.captured_at.localeCompare(a.captured_at);
+  });
+  return kept.slice(0, limit);
+}
 
 export function rankNearby(
   rows: PulseGeoRow[],

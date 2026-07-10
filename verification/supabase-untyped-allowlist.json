@@ -14,6 +14,7 @@
   "lib/email/market-context.ts",
   "lib/landing/load-home-map-data.ts",
   "lib/narratives/store.ts",
+  "lib/pulse/corridor-nearby.ts",
   "lib/pulse/nearby.ts",
   "lib/email/usage.ts",
   "lib/listings/select.ts",

@@ -27,6 +27,10 @@ import { ReportAi } from "../../_components/report-ai";
 import { AnswerText } from "../../../../components/answer/AnswerText";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { corridorTrail } from "@/lib/nav/breadcrumbs";
+import { loadNarrative } from "../../../../lib/narratives/store";
+import { NarrativeSections } from "../../../../components/narratives/NarrativeSections";
+import { loadPulseNearbyCorridor } from "../../../../lib/pulse/corridor-nearby";
+import { PulseNearby } from "../../../../components/narratives/PulseNearby";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -82,6 +86,11 @@ export default async function CorridorPage({ params }: PageProps) {
 
   const { corridor: c, freshnessToken } = d;
   const displayN = c.display_name ?? displayNameFor(c.name);
+  // Baked narrative + corridor news — additive, empty-tolerant (Phase E).
+  const [narrative, pulseItems] = await Promise.all([
+    loadNarrative("corridor", corridor),
+    loadPulseNearbyCorridor(corridor, displayN),
+  ]);
   const metrics = buildMetricRows(c);
   const ld = corridorJsonLd(c, freshnessToken, displayN);
 
@@ -152,6 +161,15 @@ export default async function CorridorPage({ params }: PageProps) {
       )}
 
       <WebCitations citations={c.character_citations} />
+
+      {/* ── Baked narrative + corridor-radius news — ONE renderer root each,
+          additive (absent rows = today's page) ── */}
+      <NarrativeSections row={narrative} />
+      <PulseNearby
+        items={pulseItems}
+        heading={`What’s happening along ${displayN}`}
+        wideSuffix="corridor-wide"
+      />
 
       {metrics.length > 0 && <ColorLegend />}
 

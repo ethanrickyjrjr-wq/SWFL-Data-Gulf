@@ -13,8 +13,21 @@ import type { NearbyPulseItem } from "../../lib/pulse/nearby-rank";
  * Nominatim-resolved locations; it renders unconditionally — cheaper and more
  * honest than threading per-item provider state through the read path.
  */
-export function PulseNearby({ zip, items }: { zip: string; items: NearbyPulseItem[] }) {
+export function PulseNearby({
+  zip,
+  items,
+  heading,
+  wideSuffix = "city-wide",
+}: {
+  zip?: string;
+  items: NearbyPulseItem[];
+  /** Section heading override; defaults to the zip phrasing. */
+  heading?: string;
+  /** Label suffix for non-point items, e.g. "corridor-wide" on corridor pages. */
+  wideSuffix?: string;
+}) {
   if (items.length === 0) return null;
+  const title = heading ?? `What’s happening near ${zip}`;
 
   const asOf = (iso: string) => {
     const d = new Date(iso);
@@ -26,7 +39,7 @@ export function PulseNearby({ zip, items }: { zip: string; items: NearbyPulseIte
   const placeLabel = (it: NearbyPulseItem) =>
     it.geo_grain === "point" || it.geo_grain === "neighborhood"
       ? (it.location_anchor ?? it.city)
-      : `${it.city} · city-wide`;
+      : `${it.city} · ${wideSuffix}`;
 
   const sourceLabel = (it: NearbyPulseItem) => {
     if (it.source_title) return it.source_title;
@@ -39,8 +52,8 @@ export function PulseNearby({ zip, items }: { zip: string; items: NearbyPulseIte
 
   return (
     <div className="mx-auto max-w-[1120px] space-y-6 px-6 py-8 sm:px-10">
-      <section aria-label={`What's happening near ${zip}`}>
-        <h2 className="text-lg font-bold text-white">What&rsquo;s happening near {zip}</h2>
+      <section aria-label={title}>
+        <h2 className="text-lg font-bold text-white">{title}</h2>
         <ul className="mt-3 space-y-3">
           {items.map((it, i) => (
             <li
