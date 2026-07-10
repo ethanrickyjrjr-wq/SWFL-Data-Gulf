@@ -6,8 +6,10 @@
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { execFileSync } from "node:child_process";
 import { chronicFlappers } from "../.github/scripts/lib/ledger-flap.mjs";
 import { writeTodayMd } from "./assistant-lib.mjs";
+import { briefKickoffLines, repoSlugFromRemoteUrl } from "./chief-of-staff-lib.mjs";
 
 const ROOT = process.cwd();
 const SPECS_DIR = resolve(ROOT, "docs/superpowers/specs");
@@ -80,6 +82,34 @@ async function getOpenChecks(sbUrl, sbKey) {
     return await res.json();
   } catch {
     return null;
+  }
+}
+
+// Newest open morning-brief issue -> top close-candidate lines. Best-effort:
+// public-repo unauthenticated REST; ANY failure returns "" (never block start).
+async function morningBriefBlock() {
+  try {
+    const remote = execFileSync("git", ["config", "--get", "remote.origin.url"], {
+      encoding: "utf8",
+    }).trim();
+    const slug = repoSlugFromRemoteUrl(remote);
+    if (!slug) return "";
+    const res = await fetch(
+      `https://api.github.com/repos/${slug}/issues?labels=morning-brief&state=open&per_page=1`,
+      { headers: { Accept: "application/vnd.github+json" }, signal: AbortSignal.timeout(4000) },
+    );
+    if (!res.ok) return "";
+    const [issue] = await res.json();
+    if (!issue?.body) return "";
+    const lines = briefKickoffLines(issue.body, { max: 5 });
+    if (!lines.length) return "";
+    return (
+      `Morning brief: ${issue.title} (#${issue.number}) — close candidates:\n` +
+      lines.map((l) => `    ${l}`).join("\n") +
+      `\n    ^ verify then \`node scripts/check.mjs close <key> --evidence "<sha>"\`\n`
+    );
+  } catch {
+    return "";
   }
 }
 
@@ -157,6 +187,8 @@ async function main() {
 
   const clutterLine = specClutterLine();
 
+  const briefBlock = await morningBriefBlock();
+
   // Write TODAY.md automatically on every session start
   try {
     const { building } = parseBuildQueue(
@@ -199,6 +231,7 @@ async function main() {
       `Build queue  : ${queueLine}\n` +
       clutterLine +
       flappersLine +
+      briefBlock +
       todayBlock +
       `\nWhat should we work on?\n` +
       `${banner}\n`,
