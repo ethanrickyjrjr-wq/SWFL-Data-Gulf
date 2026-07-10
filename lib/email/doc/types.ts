@@ -37,7 +37,7 @@ export type PaddingSize = "none" | "sm" | "md" | "lg";
  *  listing photo displays center-cropped to one of these; default 3:2 (the MLS
  *  standard) when unset, so every existing doc renders identically. User-choosable
  *  in the canvas; the AI leaves it at the default. Registry: block-contract.ts. */
-export type PhotoRatio = "3:2" | "4:3" | "4:5" | "1:1";
+export type PhotoRatio = "3:2" | "4:3" | "4:5" | "1:1" | "16:9";
 
 export type FontFamily =
   | "MODERN_SANS"

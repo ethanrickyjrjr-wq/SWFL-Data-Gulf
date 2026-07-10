@@ -287,6 +287,7 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       { value: "21,934", label: "Homes for Sale" },
       { value: "−8.1%", label: "Home Values YoY" },
     ],
+    charts: [CHART_LEE_ASKING],
     signals: [
       {
         title: "One in six listings has cut its price",
@@ -451,7 +452,7 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       { value: "83 days", label: "Median Days on Market" },
       { value: "11,347", label: "Homes for Sale · May" },
     ],
-    charts: [CHART_SALES_BY_MONTH],
+    charts: [CHART_SALES_BY_MONTH, CHART_LEE_INVENTORY],
     signals: [
       {
         title: "Spring closed strong",
@@ -474,6 +475,9 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
         url: `${A}/swfl-fmb-pier-aerial.jpg`,
         alt: "Fort Myers Beach shoreline and pier from above",
       },
+      // Feature-card image slots (columns declaring imageUrl: "") consume next.
+      { url: `${A}/swfl-naples-bayfront.jpg`, alt: "Waterfront condo buildings and marina" },
+      { url: `${A}/swfl-coastal-great-room.jpg`, alt: "Open coastal great room" },
     ],
     commentary: [
       "Home values reset 8.1% in a year — inside the ZIPs that held firm and the ones that led the slide.",
@@ -494,7 +498,7 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       { value: "−8.1%", label: "Annual Value Change" },
       { value: "37,040", label: "Sales Recorded · 12 Months" },
     ],
-    charts: [CHART_SALE_PRICE_YEAR],
+    charts: [CHART_SALE_PRICE_YEAR, CHART_SALES_BY_MONTH],
     signals: [
       {
         title: "Sales pace led the year",
@@ -526,6 +530,7 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       { value: "3,636", label: "Sales Recorded · April" },
       { value: "83 days", label: "County Median DOM" },
     ],
+    photos: [{ url: `${A}/pexels-15824733.jpg`, alt: "White villa with royal palms" }],
   },
   "just-sold-grid": {
     hero: {
@@ -891,6 +896,11 @@ export function previewFill(
         for (const col of block.props.columns) {
           if (isEmpty(col.body) || isInstruction(col.body) || dfltBodies.has(col.body)) {
             col.body = nextComment();
+          }
+          // A feature card that DECLARES an image slot (imageUrl: "") gets a real
+          // photo — a column without the key stays image-less (template-owned).
+          if ("imageUrl" in col && isEmpty(col.imageUrl)) {
+            col.imageUrl = nextPhoto().url;
           }
         }
         break;

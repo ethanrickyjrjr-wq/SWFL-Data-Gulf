@@ -125,8 +125,9 @@ export const BLESSED_ROW_SPANS: Record<number, number[][]> = {
  *  banned). The AI author is clamped to it at assembly; the canvas warns the user. */
 export const ACCENT_BUDGET = 2;
 
-/** Fence 3 — the blessed photo aspect ratios (the photo-size variety axis). */
-export const PHOTO_RATIOS: readonly PhotoRatio[] = ["3:2", "4:3", "4:5", "1:1"];
+/** Fence 3 — the blessed photo aspect ratios (the photo-size variety axis).
+ *  16:9 is the wide banner cut (magazine/luxury full-bleed heroes). */
+export const PHOTO_RATIOS: readonly PhotoRatio[] = ["3:2", "4:3", "4:5", "1:1", "16:9"];
 export const DEFAULT_PHOTO_RATIO: PhotoRatio = "3:2";
 
 /** Every legal block type (author-doc.ts KNOWN_TYPES). */
