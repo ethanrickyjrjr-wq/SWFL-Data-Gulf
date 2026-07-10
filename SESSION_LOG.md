@@ -1,3 +1,23 @@
+## 2026-07-10 (Fable 5 · main) — Insiders Edition PLANNED: 16-task plan + $20/issue budget ruling + spec amended
+
+Operator rulings: NO blanket no-paid-API rule (memory corrected —
+`feedback_paid-api-spend-philosophy` replaces the old over-generalized one); early issues run RICH
+to learn — per-issue cap **$20** (`INSIDERS_MAX_SPEND_USD`), not $2–3; heads-up required before the
+FIRST live authoring run (hard STOP task in plan); operator still approves every send. Spec amended
+in place (budget ruling, authoring = 1–2 passes draft+editor w/ dossier cache, effort default xhigh).
+Plan written: `docs/superpowers/plans/2026-07-10-insiders-edition-plan.md` — 16 tasks / 4 phases:
+A desk (`_FABLE5/` scaffold, desk parser+shape test, SessionStart hook), B composer (meter
+claude-fable-5 in refinery/agents/anthropic.mts — RATES gap found: fable would log $0 today; wrap
+beta.messages for server-side refusal fallback; IssueBudget ledger; IssueDoc zod+JSON schema;
+dossier assembler; 2-pass author; materializer via buildChartForQuestion + narrative-lint/url-lint +
+renderEmailDocHtml; runner cloned from weekly-read ladder + INSIDERS_LIVE_AUTHOR belt), C
+distribution (insiders_subscribers/insiders_issues tables, subscribe route, /r/insiders pages, GHA
+monthly DRY_RUN cron — Gate 6 ALLOW_PAID_SURFACE=1 documented), D minis + retro loop. Probed seams
+verified: gateNarrative build.ts:444, renderEmailDocHtml render-email-doc.ts:22,
+buildChartForQuestion chart-for-question.ts:49, weekly-read-run.mts ladder, news_articles_swfl,
+Gate 6 hook, push lock. Next: operator plan review → execute Phase A (no paid calls until the Task
+10 STOP gate).
+
 ## 2026-07-09 (Fable 5 · main) — Insiders Edition SPECCED: Fable 5 flagship monthly + minis + `_FABLE5/` desk
 
 Brainstormed (RULE 3.5) + registered `insiders-edition`; spec at

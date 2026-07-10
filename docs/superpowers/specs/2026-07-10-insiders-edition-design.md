@@ -44,6 +44,13 @@ A publication, not a digest:
   signup box, public proof, future gating switch, future SMS payload).
 - **Sequencing:** composer works before subscriber plumbing, so issue #1 can ship
   operator-triggered.
+- **Budget (operator ruling 07/10/2026):** do NOT cap early issues at $2–3. Front-load
+  quality — give the flagship room to run and impress, learn from the first issues, and
+  drive cost down from evidence, not up front. Per-issue ceiling **$20**
+  (`INSIDERS_MAX_SPEND_USD`, default 20), enforced as a hard in-run ledger. There is no
+  blanket "no paid API calls" rule; the gates that remain are (a) operator gets a
+  heads-up before the FIRST live authoring run of this new surface, and (b) operator
+  approves every SEND. All spend still routes through the metered client + spend caps.
 
 ## Research evidence (RULE 0.4, gathered 07/09/2026)
 
@@ -57,8 +64,13 @@ A publication, not a digest:
 - **Requires 30-day data retention** — org config must be verified before the first
   live authoring call (a ZDR org 400s on every request). Fallback if blocked:
   author on `claude-opus-4-8`.
-- Cost: ~150K in / ~15K out per issue ≈ **$2–3/issue**. Routed through the existing
-  RunBudget spend guards like every other Anthropic call path.
+- Cost at $10/$50 per MTok: a two-pass authoring stage (draft + editor, dossier
+  cache-read on pass 2) lands ≈ **$6–8/issue typical**; hard per-issue ceiling **$20**
+  (operator ruling 07/10/2026 — room to run on early issues; tune down from retro
+  evidence). Routed through the existing metered-client spend guards
+  (`refinery/agents/anthropic.mts`) like every other Anthropic call path; note the
+  guard's default daily cap is $25 (`ANTHROPIC_DAILY_SPEND_CAP_USD`) — issue day may
+  need it raised for the run.
 
 **Newsletter gating benchmarks (for the deferred monetization research):**
 - beehiiv "State of Paid Newsletters 2026": median free→paid conversion **0.62%**.
@@ -100,7 +112,9 @@ no hedge-encoding of hard numbers (rules of engagement apply verbatim).
 
 ## Section 2 — Pipeline
 
-Three stages; ONE Fable 5 call in the middle.
+Three stages; one metered Fable 5 AUTHORING STAGE in the middle (amended 07/10/2026:
+up to two passes — draft + editor — inside the same stage, same guardrails, one
+shared budget ledger; the deterministic sandwich around it is unchanged).
 
 **2a. Dossier assembly (deterministic, no model).** `lib/email/insiders/dossier.ts`
 gathers: master's current dossier + direction call, per-brain OUTPUT sections, the
@@ -108,12 +122,20 @@ month's news events (desk-curated picks first — see Section 3 — raw scored e
 as backstop), and the historical-series catalog (what is chartable, how far back).
 Produces a typed `IssueDossier`.
 
-**2b. Authoring (one call).** `lib/email/insiders/author.ts` — `claude-fable-5`,
-streaming, `effort: "high"`, refusal fallback per above. Input: dossier + standing
-rules (cite everything, mark every projection with base + falsifier, skeleton
-contract). Output: structured `IssueDoc` — sections of prose with inline source
-references + chart REQUESTS (series id + range), never chart data. Structured
-output enforced (schema), parse-miss = abort, never ship a partial.
+**2b. Authoring (one stage, 1–2 passes).** `lib/email/insiders/author.ts` —
+`claude-fable-5`, streaming, `effort` env-tunable (`INSIDERS_EFFORT`, default
+`"xhigh"` — the recommended tier for the hardest agentic work; `"max"` is the dial
+for issue #1 if we want the ceiling), refusal fallback per above. **Pass 1 (draft):**
+input = dossier + standing rules (cite everything, mark every projection with base +
+falsifier, skeleton contract); dossier block carries `cache_control` so pass 2 reads
+it at ~10% rate. **Pass 2 (editor):** Fable 5 re-reads its own draft against the
+dossier + playbook charge (tighten thesis, kill weak analogs, sharpen falsifiers) and
+emits the final doc; skippable via `INSIDERS_SINGLE_PASS=1`. Output: structured
+`IssueDoc` — sections of prose with inline source references + chart REQUESTS
+(natural-language series asks), never chart data. Structured output enforced
+(schema), parse-miss = abort, never ship a partial. Both passes record into one
+`IssueBudget` ledger (cap `INSIDERS_MAX_SPEND_USD`, default $20) — breach aborts
+before the next call, never mid-issue silence.
 
 **2c. Materialization (deterministic).** Chart requests resolve against real series
 through the production bklit email chart path (per the seed-preview NOTICE.md
