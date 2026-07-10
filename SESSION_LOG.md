@@ -1,3 +1,34 @@
+## 2026-07-09 (Fable 5 · main) — Insiders Edition SPECCED: Fable 5 flagship monthly + minis + `_FABLE5/` desk
+
+Brainstormed (RULE 3.5) + registered `insiders-edition`; spec at
+`docs/superpowers/specs/2026-07-10-insiders-edition-design.md`, check `insiders_edition_live_verify`
+open. Operator rulings: free-with-signup V1 (gating = post-launch research), operator approves EVERY
+send, news-anchored format, Approach A (dedicated composer reusing gateNarrative/narrative-lint/
+renderEmailDocHtml + weekly-read safety ladder; buildContentDoc untouched — probed: 4,096-token
+slot-fill patcher, wrong shape), canonical `/r/insiders/[issue]` page, composer ships before
+subscriber plumbing. New: `_FABLE5/` editorial desk (daily news triage w/ 1–5 weights, one-page
+FABLE5.md boot index, MINDMAP.md, playbook, per-issue retros; promotions→checks, gaps→build queue).
+RULE 0.4 evidence in spec: `claude-fable-5` verified ($10/$50 per MTok, 128K out, omit thinking
+param, refusal fallback→claude-opus-4-8, 30-day retention req to verify); gating benchmarks (beehiiv
+2026 median 0.62% free→paid; Substack analyses 1–3%; Whop ~5%). Next: operator spec review →
+writing-plans (Phase A: desk + mindmap + hook).
+
+## 2026-07-09 (Fable 5 · main) — zip-page Phase D BUILT: funnel weave — live zip-seed email miniature on the ZIP report
+
+Executed Phase D from `docs/handoff/2026-07-09-zip-page-phases-de-handoff.md` (spec
+`2026-07-09-zip-page-destination-design.md`). New `app/r/zip-report/_components/zip-email-funnel.tsx`
+mounted between NarrativeSections and PulseNearby: live miniature of THIS ZIP's zip-seed email
+(`buildZipSeedDoc` → `renderEmailDocHtml`, the ONE EmailDoc→HTML root — compileGrid, same engine
+real sends use; displayed in the existing `EmailPreviewFrame` iframe scaler, NOT a fourth
+renderer), spec copy verbatim, CTA → `openZipLab(zip,{ref})`. Seed load rides the page's
+Promise.all, `.catch(()=>null)` → module hides (additive). Render-engine landmine honored;
+zip-seed doc untouched. Verified: `bunx next build` ✓, prod server 33914 — module renders
+(masthead/shape/metric cards mirror the page's own hero signals), CTA `/email-lab?zip=33914`
+lands in the grid lab holding the same doc; phone 390px emulation: stacks single-column, no
+horizontal scroll, CTA visible (grid-lab phone standard). Stale zip-page claim from the idle
+Phase C session released (heartbeat frozen 25 min, work pushed, handoff explicit). Phase E next;
+`zip_page_destination_live_verify` stays open for the operator's live pass.
+
 ## 2026-07-09 (Fable 5 · main) — guides hub BUILT: /guides trio + nav/footer/sitemap + homepage strip
 
 Executed `docs/superpowers/plans/2026-07-09-guides-hub.md` (spec 6137fd85), 7 commits: typed
