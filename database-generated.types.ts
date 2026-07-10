@@ -1647,6 +1647,42 @@ export interface Database {
         };
         Relationships: [];
       };
+      insiders_subscribers: {
+        Row: {
+          id: string;
+          email: string;
+          status: string;
+          issues_sent: number;
+          source: string | null;
+          consent_text: string | null;
+          consent_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          status?: string;
+          issues_sent?: number;
+          source?: string | null;
+          consent_text?: string | null;
+          consent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          status?: string;
+          issues_sent?: number;
+          source?: string | null;
+          consent_text?: string | null;
+          consent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       lifecycle_nudges: {
         Row: {
           id: string;
@@ -1734,6 +1770,60 @@ export interface Database {
         };
         Relationships: [];
       };
+      market_alert_engagement: {
+        Row: {
+          id: number;
+          wid: string;
+          issue_id: string;
+          trigger: string | null;
+          area_id: string | null;
+          event: string;
+          occurred_at: string;
+        };
+        Insert: {
+          id: number;
+          wid: string;
+          issue_id: string;
+          trigger?: string | null;
+          area_id?: string | null;
+          event: string;
+          occurred_at?: string;
+        };
+        Update: {
+          id?: number;
+          wid?: string;
+          issue_id?: string;
+          trigger?: string | null;
+          area_id?: string | null;
+          event?: string;
+          occurred_at?: string;
+        };
+        Relationships: [];
+      };
+      market_event_snapshots: {
+        Row: {
+          zip: string;
+          payload: Json;
+          as_of: string;
+          advanced_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          zip: string;
+          payload: Json;
+          as_of: string;
+          advanced_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          zip?: string;
+          payload?: Json;
+          as_of?: string;
+          advanced_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       metric_observations: {
         Row: {
           id: number;
@@ -1761,6 +1851,57 @@ export interface Database {
           observed_at?: string;
           source_url?: string | null;
           captured_at?: string;
+        };
+        Relationships: [];
+      };
+      narrative_bake_batches: {
+        Row: {
+          batch_id: string;
+          requests: Json;
+          submitted_at: string;
+          collected_at: string | null;
+        };
+        Insert: {
+          batch_id: string;
+          requests: Json;
+          submitted_at?: string;
+          collected_at?: string | null;
+        };
+        Update: {
+          batch_id?: string;
+          requests?: Json;
+          submitted_at?: string;
+          collected_at?: string | null;
+        };
+        Relationships: [];
+      };
+      narratives: {
+        Row: {
+          surface: string;
+          surface_key: string;
+          sections: Json;
+          inputs_hash: string;
+          sources: Json;
+          model: string;
+          baked_at: string;
+        };
+        Insert: {
+          surface: string;
+          surface_key: string;
+          sections: Json;
+          inputs_hash: string;
+          sources?: Json;
+          model: string;
+          baked_at?: string;
+        };
+        Update: {
+          surface?: string;
+          surface_key?: string;
+          sections?: Json;
+          inputs_hash?: string;
+          sources?: Json;
+          model?: string;
+          baked_at?: string;
         };
         Relationships: [];
       };

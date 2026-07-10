@@ -79,12 +79,19 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
   it("carries the top-level marquees + Explore group in order", () => {
     expect(NAV_GROUPS.map((n) => n.label)).toEqual([
       "Explore",
+      "Insiders",
       "Charts",
       "Maps",
       "Showcase",
       "Projects",
       "Alerts",
     ]);
+  });
+
+  it("exposes Insiders as a top-level leaf at /insiders (campaign centerpiece)", () => {
+    const insiders = NAV_GROUPS.find((n) => n.label === "Insiders");
+    expect(insiders?.href).toBe("/insiders");
+    expect(insiders?.children).toBeUndefined();
   });
   it("keeps Search + Guides under Explore (Maps promoted top-level, ZIP Reports retired)", () => {
     const explore = NAV_GROUPS.find((n) => n.label === "Explore");

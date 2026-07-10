@@ -43,6 +43,9 @@ export const NAV_GROUPS: NavItem[] = [
       { label: "Guides", href: "/guides" },
     ],
   },
+  // The campaign centerpiece rides top-level, right after Explore (spec
+  // 2026-07-10-insiders-page-design.md) — not buried as a dropdown child.
+  { label: "Insiders", href: "/insiders" },
   { label: "Charts", href: "/charts" },
   { label: "Maps", href: "/map" },
   { label: "Showcase", href: "/showcase" },

@@ -36,6 +36,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 1.0,
   });
 
+  // ── Insiders Edition (/insiders — the campaign centerpiece) ──────────────
+  entries.push({
+    url: `${ORIGIN}/insiders`,
+    changeFrequency: "weekly",
+    priority: 0.9,
+  });
+
   // ── Guides hub (/guides + /guides/[slug]) ─────────────────────────────────
   entries.push({
     url: `${ORIGIN}/guides`,
