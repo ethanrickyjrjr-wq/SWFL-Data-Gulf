@@ -113,6 +113,28 @@ describe("computeCostUsd()", () => {
   });
 });
 
+describe("computeCostUsd() batch flag", () => {
+  test("batch: true halves the full-rate total (all token classes)", () => {
+    const usage = {
+      input_tokens: 1_000_000,
+      output_tokens: 1_000_000,
+      cache_read_input_tokens: 1_000_000,
+      cache_creation_input_tokens: 1_000_000,
+    };
+    const full = computeCostUsd("claude-sonnet-4-6", usage);
+    const batch = computeCostUsd("claude-sonnet-4-6", usage, { batch: true });
+    // full = 3 + 15 + 3*0.1 + 3*1.25 = 22.05 ; batch = exactly half (Batches API
+    // bills 50% of standard on ALL usage — vendor docs, verified 07/10/2026)
+    assert.equal(full, 22.05);
+    assert.equal(batch, 11.025);
+  });
+
+  test("omitting opts is unchanged behavior", () => {
+    const usage = { input_tokens: 2_000_000, output_tokens: 0 };
+    assert.equal(computeCostUsd("claude-sonnet-4-6", usage), 6.0);
+  });
+});
+
 describe("logApiUsage()", () => {
   test("missing supabase env — no-op, does not throw, does not return an error", async () => {
     await assert.doesNotReject(

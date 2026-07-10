@@ -81,17 +81,22 @@ function baseModelId(model: string): string {
  * a rate — the row still logs (model + token counts preserved) for manual
  * reconciliation instead of inventing a number.
  */
-export function computeCostUsd(model: string, usage: UsageLike): number {
+export function computeCostUsd(
+  model: string,
+  usage: UsageLike,
+  opts?: { batch?: boolean },
+): number {
   const rate = RATES[model] ?? RATES[baseModelId(model)];
   if (!rate) return 0;
   const cacheRead = usage.cache_read_input_tokens ?? 0;
   const cacheWrite = usage.cache_creation_input_tokens ?? 0;
-  return (
+  const full =
     (usage.input_tokens / 1_000_000) * rate.in +
     (usage.output_tokens / 1_000_000) * rate.out +
     (cacheRead / 1_000_000) * rate.in * CACHE_READ_FRACTION +
-    (cacheWrite / 1_000_000) * rate.in * CACHE_WRITE_PREMIUM
-  );
+    (cacheWrite / 1_000_000) * rate.in * CACHE_WRITE_PREMIUM;
+  // Batches API: 50% of standard prices on ALL usage (vendor docs, verified 07/10/2026).
+  return opts?.batch ? full * 0.5 : full;
 }
 
 export interface LogApiUsageOpts {
@@ -99,6 +104,8 @@ export interface LogApiUsageOpts {
   callType: CallType;
   packId?: string | null;
   usage: UsageLike;
+  /** Batches API call — cost logs at 50% of standard rates. */
+  batch?: boolean;
   /** Test injection points; production calls omit these and fall through to env.*. */
   supabaseUrl?: string;
   supabaseKey?: string;
@@ -128,7 +135,7 @@ export async function logApiUsage(opts: LogApiUsageOpts): Promise<void> {
       output_tokens: opts.usage.output_tokens,
       cache_read_tokens: opts.usage.cache_read_input_tokens ?? 0,
       cache_creation_tokens: opts.usage.cache_creation_input_tokens ?? 0,
-      cost_usd: computeCostUsd(opts.model, opts.usage),
+      cost_usd: computeCostUsd(opts.model, opts.usage, { batch: opts.batch ?? false }),
       env:
         process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production"
           ? "production"
