@@ -1,3 +1,15 @@
+## 2026-07-10 (Fable 5 · main) — /insiders freshness fix: wire leads with TODAY'S desk (operator ruling)
+
+Operator: "May monthly data in July… when we have a daily" — correct; the wire led with the
+laggiest series (ZHVI's May is Zillow-current — June publishes mid-July — but leading with it was
+the handcuff). Fix (16034e73): new `app/insiders/_lib/desk-stats.ts` (untyped-allowlist + KNOWN-DEBT)
+reads the SAME live views as the homepage stats bar, verbatim values + counts only: 29,401 active
+listings scraped 07/10/2026 (same-day), busiest ZIP Cape Coral NW 2,230, 65 news-desk stories since
+July 1 (latest 07/10), Boca Grande $2.28M top ZIP. Wire opens with those; Zillow layer stays,
+labeled "through May 2026"; hero gains "Desk updated 07/10/2026" badge; specimen pull-stat = the
+same-day listings figure (ZHVI fallback). All loader-backed or hidden. next build GREEN, rendered
+values verified in-browser. Still NOT pushed (operator gate).
+
 ## 2026-07-10 (Fable 5 · main) — /insiders centerpiece page BUILT + verified local; subscribe lane LIVE
 
 Operator: "centerpiece of the entire marketing campaign — push the limits, take the wheel."
