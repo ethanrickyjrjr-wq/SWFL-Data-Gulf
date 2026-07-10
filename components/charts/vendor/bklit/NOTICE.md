@@ -74,6 +74,16 @@ contribution calendar. `HeatmapXAxis`/`HeatmapYAxis` are vendored for completene
 used by the ZIP×month panel (upstream y-axis is hardwired to weekday labels; the wrapper
 renders its own plain-HTML labels instead — no fork needed). New dep: `@visx/heatmap`.
 
+**Profit/Loss Line (2026-07-10)** — `profit-loss-line.tsx`, `profit-loss-segments.ts`,
+`profit-loss-legend.tsx`, `profit-loss-legend-hover.tsx` + the upstream `legend/` directory
+(8 files) vendored verbatim, no forks. `legend/legend-progress.tsx` is where the
+`@base-ui/react/progress` import actually lives (the dep the 07/08 gauge deferral
+remembered) — `@base-ui/react` was already a declared dependency, so it resolves. Upstream
+P/L defaults `var(--color-emerald-500)`/`var(--color-red-500)` are never used — call sites
+pass explicit `positiveColor`/`negativeColor` (gulf mangrove / sunset-coral; the design
+language forbids stock-market red/green). First call site:
+`components/charts/MomentumProfitLossPanel.tsx`.
+
 **Composed ≠ categorical out of the box (2026-07-08)** — `ComposedChart` (and by extension
 `LineChart`/`AreaChart`) is built on a shared time-series shell (`time-series-chart-shell.tsx`)
 whose x-axis accessor unconditionally does `value instanceof Date ? value : new Date(value)`.
