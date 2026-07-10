@@ -1,3 +1,15 @@
+## 2026-07-10 (Fable 5 · main) — Seller Pack mystery resolved + campaign-builder entry-point verification (no code changes)
+
+"Seller Pack" = the Showing Prep Packet under a different name — operator confirmed. Closed
+`seller_pack_not_found` (shipped 07/08 on main: f2363d54/ef873e7e/12e66a0b/ee2c074c) and
+`showing_prep_scheduled_refresh_not_wired` (operator descoped: one-off email ability is enough,
+and it exists — block-canvas blast path renders showing-prep packets with optional PDF;
+refresh-on-fire becomes a new scoped build only if scheduled packet sends ever ship).
+`showing_prep_packet_live_verify` stays OPEN — operator-run live pass still owed. Also verified
+all three campaign-builder entry points (homepage hero Build-it, briefcase Make-this, showcase
+tab) route through the one destination/recipe root, fences 1-5 hard on the AI path, applyBrand
+on every doc entry: 202 tests pass, 0 fail, nothing needed fixing.
+
 ## 2026-07-10 (Fable 5 · main) — batch bake BUILT: Batches API + metered seam + overnight cron replan (8-task plan executed)
 
 Plan `docs/superpowers/plans/2026-07-10-batch-narrative-bake.md` executed inline, all tasks green:
