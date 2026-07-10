@@ -47,7 +47,9 @@ export interface BakeFact {
 }
 
 export interface BakeInputs {
-  surface: "zip";
+  /** Report surface this bake belongs to — mirrors public.narratives.surface
+   *  ("zip" | "corridor" | "brain" | …); adapters, not this type, own the set. */
+  surface: string;
   key: string;
   place: string | null;
   county: string | null;
