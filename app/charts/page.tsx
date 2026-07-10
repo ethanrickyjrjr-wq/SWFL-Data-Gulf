@@ -1,6 +1,11 @@
 import Image from "next/image";
 import { PageShell } from "@/components/PageShell";
-import { MetroAreaChart, HurricaneRingChart } from "@/components/charts";
+import { MetroAreaChart, HurricaneRingChart, MarketTemperatureGauge } from "@/components/charts";
+import {
+  mapMarketTemperature,
+  type MarketTempRow,
+  type MarketTempGaugeData,
+} from "@/lib/charts/market-temperature-series";
 import { AddChartToProject } from "./AddChartToProject";
 import { mapPivotedCityRows, mapPivotedCityYoY } from "@/lib/charts/pivoted-series";
 import { mapAirportTotalWithTrend, type AirportMonthRow } from "@/lib/charts/airport-series";
@@ -119,6 +124,23 @@ async function loadTierYoY(supabase: Supabase): Promise<LoadedPanel> {
   }
 }
 
+// Median per-ZIP market hotness for the temperature dial
+// (data_lake.market_details_swfl_latest — ~54 rows, one per ZIP).
+async function loadMarketTemperature(
+  supabase: Supabase,
+): Promise<{ gauge: MarketTempGaugeData | null }> {
+  try {
+    const { data, error } = await supabase
+      .schema("data_lake")
+      .from("market_details_swfl_latest")
+      .select("local_hotness_score, captured_date");
+    if (error) return { gauge: null };
+    return { gauge: mapMarketTemperature(data as MarketTempRow[] | null) };
+  } catch {
+    return { gauge: null };
+  }
+}
+
 // Total-passenger feed with 12-month trend overlay (public.rsw_airport_monthly).
 async function loadPassengers(supabase: Supabase): Promise<LoadedPanel> {
   try {
@@ -148,7 +170,7 @@ interface RenderedPanel extends LoadedPanel {
 
 export default async function ChartsPage() {
   const supabase = createServiceRoleClientUntyped();
-  const [homeValues, rents, passengers, homeValueMomentum, tierIndexed, tierYoY] =
+  const [homeValues, rents, passengers, homeValueMomentum, tierIndexed, tierYoY, marketTemp] =
     await Promise.all([
       loadMetros(supabase, "zhvi_pivoted"),
       loadMetros(supabase, "zori_pivoted"),
@@ -156,6 +178,7 @@ export default async function ChartsPage() {
       loadHomeValueMomentum(supabase),
       loadTierIndexed(supabase),
       loadTierYoY(supabase),
+      loadMarketTemperature(supabase),
     ]);
 
   const panels: RenderedPanel[] = [
@@ -241,6 +264,8 @@ export default async function ChartsPage() {
         </header>
 
         <div className="flex flex-col gap-6">
+          {marketTemp.gauge && <MarketTemperatureGauge gauge={marketTemp.gauge} />}
+
           <div>
             <div className="flex justify-end mb-2">
               <AddChartToProject rootId="hurricane-rings" title="Hurricane Impact by Category" />

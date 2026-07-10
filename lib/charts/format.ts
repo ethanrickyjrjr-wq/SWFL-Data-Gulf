@@ -46,6 +46,14 @@ export function formatAxisTick(format: ValueFormat, value: number): string {
   return formatChartValue(format, value);
 }
 
+/** ISO date ("2026-07-04" or a timestamp) → the MM/DD/YYYY caption convention. */
+export function formatAsOfDate(isoDate: string | undefined): string | undefined {
+  if (!isoDate) return undefined;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDate);
+  if (!m) return undefined;
+  return `${m[2]}/${m[3]}/${m[1]}`;
+}
+
 /** "2026-04" → "Apr 2026" for the "as of" caption; passes anything unexpected through. */
 export function formatAsOf(month: string | undefined): string | undefined {
   if (!month) return undefined;

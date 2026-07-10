@@ -6,4 +6,5 @@ export { CorridorMarketScatter } from "./CorridorMarketScatter";
 export { RadialConfidenceGauge } from "./RadialConfidenceGauge";
 export { SeasonalRadialChart } from "./SeasonalRadialChart";
 export { HurricaneRingChart } from "./HurricaneRingChart";
+export { MarketTemperatureGauge } from "./MarketTemperatureGauge";
 export { ZipChoropleth } from "./ZipChoropleth";
