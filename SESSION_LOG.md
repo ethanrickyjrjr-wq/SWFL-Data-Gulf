@@ -1,3 +1,55 @@
+## 2026-07-09 (Fable 5 · main) — zip-page Phase C BUILT: pulse news gains ZIP grain + "What's happening near {ZIP}"
+
+Executed `docs/superpowers/plans/2026-07-09-zip-radius-pulse-news-phase-c.md` (6 build tasks, TDD,
+commit per task, cadbb15d..b6aaccb1). Distillers (city + corridor twins) emit nullable
+`location_anchor` in the SAME forced-tool call (zero extra LLM cost). Migration
+`20260710_pulse_geo.sql` RUN 2x (idempotent, columns probed): pulse tables gain
+location_anchor/lat/lon/zip_code/geo_grain + `data_lake.geo_anchor_cache` (Nominatim policy
+requires caching; misses negative-cached 30d). `ingest/lib/geo_ladder.py`: cache → address→Census
+onelineaddress (coords+ZCTA one call) → else SWFL-bounded Nominatim (15s throttle, identifying UA)
+→ Census coords→ZCTA → miss = native grain, never an invented ZIP (G1). Live smoke: '2000 Main St,
+Fort Myers'→33901 · 'Coconut Point, Estero'→33928. Both pipelines annotate post-distill (dry-run =
+no network); city fallback grain 'city', corridors NULL (native corridor grain — spec enum has no
+'corridor'). Pack: city-pulse emits `pulse_by_zip` detail table, ONE row per ZIP (fetchDetailRow
+matches first-by-key), count + latest fact; omitted when nothing geocoded — Gate 3/brain-first in
+same PR. Page: `lib/pulse/nearby.ts` (empty-tolerant, untyped-allowlisted) + `PulseNearby` sibling
+of NarrativeSections — point (≤3mi band via zip centroids, or in-ZIP) → neighborhood → city-wide
+(reverse place-zip crosswalk; city rows keep zip NULL), grain labeled, OSM attribution line.
+Verified: pytest 62 pass · bun pack+catalog 12 pass · vocab-coverage OK (41 brains) · lib/pulse 5
+pass · `bunx next build` green. Section renders NOTHING until the next scheduled pulse run writes
+geocoded rows (empty-tolerant by design) — rendered + phone check lands with
+`zip_page_destination_live_verify`. Deviations: pipeline --dry-run smoke SKIPPED (dry-run still
+makes the paid Sonnet distill call — operator-gated); neighborhood rung via Nominatim not
+name-join (tables hold no geometry, see prior entry). NOT pushed — awaiting operator.
+
+## 2026-07-09 (Fable 5 · main) — Phase C geocoder vendor verify DONE (crawl4ai + live probes): Census + Nominatim in, Mapbox out
+
+RULE 0.4 evidence for the zip-page Phase C geocode ladder (all crawled/probed live 07/09/2026):
+**Mapbox — OUT, three separate live-terms disqualifiers.** (1) Geocoding v6 default is Temporary:
+"Temporary results are not allowed to be cached, while Permanent results are allowed to be cached
+and stored indefinitely" (docs.mapbox.com/api/search/geocoding/ §Storing Geocoding Results);
+`permanent=true` needs a card/enterprise contract. (2) v6 "no longer provides POI data (use the
+Search Box API for POI search)" — and Search Box: "all data returned by the Search Box API
+endpoints is only available for temporary use. If your use case requires storing position data,
+contact Mapbox sales" (docs.mapbox.com/api/search/search-box/ §restrictions). (3) Even paid
+Permanent: "cannot be used for distribution or sublicense" (mapbox.com/pricing) — our derived
+zips render on a public page. **US Census Geocoder — address rung.** Free REST, no key, public
+domain, no storage restriction; batch caps 10k/file but batch geographies OMIT ZCTA — single-record
+REST has it. Live probes: `geographies/onelineaddress?...&layers=all` → coords + key "2020 Census
+ZIP Code Tabulation Areas" (2000 Main St Fort Myers → -81.872,26.641); `geographies/coordinates?
+x=-81.8072&y=26.3448&layers=2020 Census ZIP Code Tabulation Areas` → ZCTA5 "34135" (Bonita — the
+point→ZIP rung for Nominatim hits; no local ZIP polygons needed, we only hold centroids). No CORS
+(server-side only — fine, ingest is server-side). **Nominatim (nominatim.openstreetmap.org) —
+landmark/POI rung.** Policy (operations.osmfoundation.org/policies/nominatim/): caching REQUIRED
+("Results must be cached on your side"), scheduled scripts max 4 req/min single-thread one-machine,
+identifying User-Agent, OSM attribution, ODbL ("small extractions are likely to be covered by fair
+usage"); "regular geocoding tasks → look into alternatives" + LLM clause = deliberate documented
+decision, mitigated by tiny volume (a handful of unique anchors/week, permanent cache = each anchor
+geocoded once ever). Ladder: address→Census; landmark AND neighborhood→Nominatim→Census
+point→ZIP (code-probe correction to the handoff: neighborhood_stats/community_profiles hold NO
+lat/lon/zip — a name-join cannot produce a ZIP); null/miss→city grain (never invent a ZIP).
+Crawl dumps local-only (scratchpad, `*crawl4ai*` gitignored). Next: Phase C plan → build.
+
 ## 2026-07-09 (Fable 5 · main) — Fence 6 BUILT + white-ink trio: no palette can produce unreadable email ink
 
 Executed `docs/superpowers/plans/2026-07-09-email-ink-fence-and-palette-gate.md` (8 tasks, TDD,
@@ -34,6 +86,11 @@ vendor terms = crawl4ai verify BEFORE code; D funnel module after narration; E p
 adapters + report-shell one-root migration). Checks open: zip_page_destination_live_verify,
 anthropic_workspace_spend_limit (operator), zip_page_queue_line_sync,
 lab_phone_side_panel_visibility.
+ALLOW_PAID_SURFACE=1 recorded for this push: the new paid surface is `narrative-bake.yml`
+passing ANTHROPIC_API_KEY to `scripts/bake-narratives.mts`, whose only call path is the
+metered root `getAnthropic("narrative_bake")` under the $1 run-cap line + SpendCapError
+seam; the other flagged line is the script's own no-key refusal message. Push bundles
+ship-complete commits from parallel sessions — operator: "Push all".
 
 ## 2026-07-09 (Fable 5 · main) — zip-page Phase A SHIPPED: homepage ZIP clicks → /r/zip-report
 
