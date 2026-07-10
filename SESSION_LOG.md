@@ -1,3 +1,14 @@
+## 2026-07-09 (Fable 5 · main) — Phase C pushed (operator "Push all"); D/E handoff written; queue line synced
+
+Push bundles 22 commits: Phase C (7, this session) + parallel-session ship-complete work (Fence 6
+email-ink trio, zip-page Phase A/B, template preview gallery, SteadyAPI research fold-ins) —
+operator: "Push all". Handoff for the next session: `docs/handoff/2026-07-09-zip-page-phases-de-handoff.md`
+(D = funnel weave after narration, zip-seed miniature via an EXISTING render engine + openZipLab;
+E = per-surface adapters + report-shell one-root migration + corridor news reuse; first-bake
+instructions; C landmines incl. dry-run-is-paid, Nominatim policy posture, grain semantics,
+untyped-allowlist debt). Build-queue line added for the whole zip-page build (claim on
+`_AUDIT_AND_ROADMAP/build-queue.md` freed) — closing `zip_page_queue_line_sync` this push.
+
 ## 2026-07-09 (Fable 5 · main) — zip-page Phase C BUILT: pulse news gains ZIP grain + "What's happening near {ZIP}"
 
 Executed `docs/superpowers/plans/2026-07-09-zip-radius-pulse-news-phase-c.md` (6 build tasks, TDD,
