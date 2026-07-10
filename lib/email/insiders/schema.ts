@@ -256,11 +256,11 @@ export function FIXTURE_ISSUE_DOC(dossier: FixtureDossierInput): IssueDoc {
 
   return {
     issue_slug: dossier.month,
-    subject: `Insiders Edition — ${dossier.month} (mock draft)`,
+    subject: "Insiders Edition (mock draft)",
     as_of: dossier.asOf,
     the_read: [
       "This is the deterministic mock issue — the real thesis is authored live.",
-      `Every figure in a live issue anchors to the dossier; this mock states none [${lakeN}].`,
+      `Every figure in a live issue anchors to held data; this mock states none [${lakeN}].`,
     ],
     stories,
     dashboard: questions.map((question) => ({
