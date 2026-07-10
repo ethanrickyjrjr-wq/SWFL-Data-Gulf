@@ -2,7 +2,13 @@ import { describe, test } from "bun:test";
 import assert from "node:assert/strict";
 import Anthropic from "@anthropic-ai/sdk";
 import { env } from "../config/env.mts";
-import { computeCostUsd, getAnthropic, logApiUsage } from "./anthropic.mts";
+import {
+  computeCostUsd,
+  getAnthropic,
+  logApiUsage,
+  wrapBatchesSurface,
+  wrapMessageSurface,
+} from "./anthropic.mts";
 
 // `bun test` doesn't run `process.loadEnvFile()` (it's undefined in that
 // runtime — a Bun gap, not project config), so `env.anthropicApiKey` is
@@ -160,6 +166,69 @@ describe("logApiUsage()", () => {
       }),
     );
     delete process.env.SKIP_USAGE_LOG;
+  });
+});
+
+describe("wrapBatchesSurface()", () => {
+  test("create runs; results yields every row untouched; retrieve forwards", async () => {
+    const seen: string[] = [];
+    async function* fakeResults() {
+      yield {
+        custom_id: "req-0",
+        result: {
+          type: "succeeded",
+          message: {
+            model: "claude-sonnet-4-6",
+            usage: { input_tokens: 10, output_tokens: 5 },
+          },
+        },
+      };
+      yield { custom_id: "req-1", result: { type: "errored", error: { type: "api_error" } } };
+    }
+    const fake = {
+      create: async (body: unknown) => {
+        seen.push("create");
+        return { id: "msgbatch_test", processing_status: "in_progress", body };
+      },
+      results: async (_id: string) => fakeResults(),
+      retrieve: async (_id: string) => ({ id: "msgbatch_test", processing_status: "ended" }),
+    };
+    const wrapped = wrapBatchesSurface(fake as never, "narrative_bake") as unknown as typeof fake;
+    const batch = (await wrapped.create({ requests: [] })) as { id: string };
+    assert.equal(batch.id, "msgbatch_test");
+    assert.ok(seen.includes("create"));
+    // results: iterating must yield BOTH rows untouched (logging is fire-and-forget)
+    const out: string[] = [];
+    for await (const r of await wrapped.results("msgbatch_test")) {
+      out.push((r as { custom_id: string }).custom_id);
+    }
+    assert.deepEqual(out, ["req-0", "req-1"]);
+    // any other prop forwards straight through to the real surface
+    const st = (await wrapped.retrieve("msgbatch_test")) as { processing_status: string };
+    assert.equal(st.processing_status, "ended");
+  });
+});
+
+describe("messages proxy exposes metered batches", () => {
+  test("wrapMessageSurface intercepts .batches and memoizes the wrapper", () => {
+    const fakeMessages = {
+      create: async () => ({}),
+      stream: () => ({
+        finalMessage: async () => ({
+          model: "m",
+          usage: { input_tokens: 0, output_tokens: 0 },
+        }),
+      }),
+      batches: {
+        create: async () => ({}),
+        results: async () => (async function* () {})(),
+      },
+    };
+    const wrapped = wrapMessageSurface(fakeMessages as never, "narrative_bake") as unknown as {
+      batches: unknown;
+    };
+    assert.notEqual(wrapped.batches, fakeMessages.batches); // wrapped, not passthrough
+    assert.equal(wrapped.batches, wrapped.batches); // memoized — one wrapper per surface
   });
 });
 

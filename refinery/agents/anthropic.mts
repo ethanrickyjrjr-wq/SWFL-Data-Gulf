@@ -347,10 +347,86 @@ export function wrapMessageSurface<M extends MessageSurfaceLike>(real: M, callTy
     return stream;
   };
 
+  // Memoized so `.batches` always hands back the SAME wrapper (callers may
+  // compare identity; re-wrapping per property access would also re-bind).
+  let wrappedBatches: unknown;
+
   return new Proxy(real, {
     get(target, prop, _receiver) {
       if (prop === "create") return wrappedCreate;
       if (prop === "stream") return wrappedStream;
+      if (prop === "batches") {
+        const rawBatches = Reflect.get(target, prop, target);
+        if (!rawBatches) return rawBatches; // surface without batches (defensive)
+        wrappedBatches ??= wrapBatchesSurface(rawBatches as BatchesSurfaceLike, callType);
+        return wrappedBatches;
+      }
+      return Reflect.get(target, prop, target);
+    },
+  });
+}
+
+/**
+ * A BATCHES surface is any object exposing `create` / `results`. Both the
+ * regular and beta clients reach theirs via `<messages>.batches`, which the
+ * wrapMessageSurface proxy above routes through this wrapper — closing the
+ * hole where `client.messages.batches` dodged the meter entirely.
+ *
+ * `create` runs the SAME daily/monthly spend gate as every other call path.
+ * The gate fires at submit; actual spend lands at collection — documented
+ * softness, same class as the post-call-logging note above (and vendor docs
+ * note batches may slightly exceed workspace spend limits). `results` wraps
+ * the streamed iterator and logs each succeeded result's REAL usage at batch
+ * rates (Batches API = 50% of standard on all usage, verified 07/10/2026).
+ * Rows are yielded untouched — logging is fire-and-forget, like the create
+ * and stream hooks. Exported for tests.
+ */
+export interface BatchesSurfaceLike {
+  create: (...args: never[]) => unknown;
+  results: (...args: never[]) => unknown;
+}
+
+interface BatchResultLike {
+  result?: {
+    type?: string;
+    message?: { model: string; usage: UsageLike };
+  };
+}
+
+export function wrapBatchesSurface<B extends BatchesSurfaceLike>(real: B, callType: CallType): B {
+  const realCreate = real.create.bind(real) as (...args: unknown[]) => Promise<unknown>;
+  const realResults = real.results.bind(real) as (
+    ...args: unknown[]
+  ) => Promise<AsyncIterable<unknown>>;
+
+  const wrappedCreate = async (...args: unknown[]) => {
+    await checkSpendGuardAsync(); // throws SpendCapError on breach — never a silent drain
+    return realCreate(...args);
+  };
+
+  const wrappedResults = async (...args: unknown[]) => {
+    const iter = await realResults(...args);
+    async function* metered() {
+      for await (const item of iter) {
+        const r = item as BatchResultLike;
+        if (r.result?.type === "succeeded" && r.result.message) {
+          void logApiUsage({
+            model: r.result.message.model,
+            callType,
+            usage: r.result.message.usage,
+            batch: true,
+          }).catch((e) => console.error("[api-usage-log] batch result hook failed:", e));
+        }
+        yield item;
+      }
+    }
+    return metered();
+  };
+
+  return new Proxy(real, {
+    get(target, prop, _receiver) {
+      if (prop === "create") return wrappedCreate;
+      if (prop === "results") return wrappedResults;
       return Reflect.get(target, prop, target);
     },
   });
