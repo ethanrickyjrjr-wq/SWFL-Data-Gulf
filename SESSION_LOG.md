@@ -1,3 +1,25 @@
+## 2026-07-10 (Fable 5 · main) — saved-chart SOCIAL OBJECT built + verified local: OG card, download, embed
+
+Operator: "more sweet graphs/charts… user can embed a link, save it and add it to their socials
+→ say scheduled socials COMING SOON." Brainstormed w/ research (RULE 0.4: bklit.com registry
+re-crawled — Profit/Loss Line + Projection/Brush utilities exist upstream, absent from vendor
+NOTICE; ogp.me og:* contract verbatim), spec `2026-07-10-chart-social-object-design.md`, plan
+executed inline (5 tasks, TDD, commits `cfd10faf..607b2807`): `lib/charts/social-card.ts`
+(ChartBlock → branded 1200×630 SVG/PNG; bar via barChartSvg, area via trendChartSvg, big-stat
+fallback; verbatim figures, provenance footer; 7 tests) · `/c/[id]/card` PNG route (+ REQUIRED
+`outputFileTracingIncludes` fonts entry; 4 tests incl. malformed-block→404) · `/c/[id]` og:image
++ twitter:summary_large_image + ShareRow (copy link / download / embed snippet / coming-soon
+pill) · `/embed/c/[id]` chromeless iframe target under the existing frame-ancestors-* prefix,
+attribution credit not disableable. VERIFIED live-local (next start :3117, clean detached
+worktree build — main tree had a parallel session's in-flight FIXTURE_ASOF edit): saved REAL
+May-2026 ZHVI metro figures through the real /api/charts/save lint → id `efbc944f`; card PNG
+visually inspected (labels render — fonts traced), download disposition, og tags, embed CSP
+headers all confirmed. bun 11/11 · `bunx next build` GREEN. Handoffs: /charts glow-up brief
+`docs/handoff/2026-07-10-charts-glowup-handoff.md` (rides `bklit_charts_evaluation`; third
+session already landed the gauge panel 9530af2d) · `desk_showpiece_parked` check opened.
+`chart_social_object_live_verify` stays OPEN → close on prod unfurl validation post-deploy.
+NOT pushed (operator gate). Demo: `/c/efbc944f`.
+
 ## 2026-07-10 (Fable 5 · main) — outreach brand injection BUILT: fixture-first resolver + brand-pilot CLI
 
 Executed `docs/superpowers/plans/2026-07-10-outreach-brand-injection.md` inline (6 tasks, TDD, 5
