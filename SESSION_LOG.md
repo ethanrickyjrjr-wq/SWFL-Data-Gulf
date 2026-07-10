@@ -1,3 +1,19 @@
+## 2026-07-10 (Fable 5 · main) — comp helper: Q2 polish ($/sqft + condition caveat) + SteadyAPI key restored to gh secrets
+
+Verified the Phase 2B comp helper is FULLY BUILT (v1 `6027a608`, chart `514658af`, pasted-link
+`1db8d402`, all live-verifies from that era closed) — no plan needed from the round-3 answers doc;
+opened + now closing `comp_helper_q2_adjustment_polish` instead. Shipped the one Q2 delta
+(`docs/steadyapi-research/2026-07-09-round3-q1-q2-tier2-answers.md`): `renderCompBlock` now carries
+a CODE-computed `$N/sqft` per comp (agents' first sanity check; model never derives it) + a
+"not adjusted for condition / not screened for non-arm's-length sales — invite the user to flag or
+add comps" caveat (condition = the dominant adjustment factor we structurally don't hold; user
+input = lane 4). 2 new tests; 89 pass across the 4 comp-adjacent assistant files; next build clean.
+KEY: gh secret `PHOTOS_API` updated to the working `new_steady` key (old one suspended 07/07 —
+unblocks the 5 ingest workflows). Vercel has NO `PHOTOS_API` var at all (only an unused
+`new_steady` entry) — prod comp helper is keyless until the operator OKs `vercel env add
+PHOTOS_API production` (permission-gated this session) + redeploy. Next: Vercel env + redeploy,
+then re-run `comp_helper_remaining_live_verify` + `address_spine_live_verify` live.
+
 ## 2026-07-10 (Fable 5 · main) — Insiders Edition PLANNED: 16-task plan + $20/issue budget ruling + spec amended
 
 Operator rulings: NO blanket no-paid-API rule (memory corrected —

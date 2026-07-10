@@ -336,6 +336,14 @@ export async function compHelper(question: string, deps: CompDeps = {}): Promise
 
 // ── render + sources (the two seams the wiring uses) ──────────────────────────
 
+/** Code-computed $/sqft — agents' first sanity check on a comp (round-3 Q2 evidence,
+ *  docs/steadyapi-research/2026-07-09-round3-q1-q2-tier2-answers.md). Computed HERE so
+ *  the model never derives a rate itself; "" unless both parts are present. */
+function perSqftPhrase(c: RenderComp): string {
+  if (c.price == null || c.sqft == null || c.sqft <= 0) return "";
+  return ` · $${Math.round(c.price / c.sqft).toLocaleString("en-US")}/sqft`;
+}
+
 /** The price phrase, labeled by kind so an AVM/last-list is never called a sale. */
 function pricePhrase(c: RenderComp): string {
   if (c.price == null) return "price not available";
@@ -366,14 +374,17 @@ export function renderCompBlock(result: CompResult): string {
           .filter(Boolean)
           .join("/");
         const loc = [c.addressLine, c.city].filter(Boolean).join(", ");
-        return `- ${spec ? spec + " — " : ""}${pricePhrase(c)}${loc ? ` (${loc})` : ""}`;
+        return `- ${spec ? spec + " — " : ""}${pricePhrase(c)}${perSqftPhrase(c)}${loc ? ` (${loc})` : ""}`;
       })
       .join("\n");
     parts.push(
       `=== NEARBY COMPARABLE PROPERTIES (fetched live, as of ${result.asOf}) — state these in ` +
         `plain text and give the as-of date. Do NOT name any website, data provider, or MLS in ` +
         `your answer. Never invent a number. A "sold" figure is a recorded sale; an "estimated ` +
-        `value" or "last listed" figure is NOT a sale — never describe it as one. ===\n` +
+        `value" or "last listed" figure is NOT a sale — never describe it as one. These comps ` +
+        `are NOT adjusted for property condition and NOT screened for non-arm's-length sales ` +
+        `(foreclosure, family transfer) — note that briefly, and invite the user to flag a comp ` +
+        `they know differs or to add comps of their own. ===\n` +
         lines,
     );
   }

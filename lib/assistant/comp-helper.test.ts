@@ -314,6 +314,36 @@ describe("renderCompBlock — grounding text (label figures by kind, no vendor n
     expect(block).not.toContain("M-1");
   });
 
+  it("includes a code-computed $/sqft when a comp has both price and sqft, omits it otherwise", async () => {
+    const result = await compHelper("comps near 3412 Atlantic Circle, Cape Coral", {
+      ...baseDeps(),
+      fetchNearby: async () => [
+        comp({ propertyId: "M-1", sqft: 1850 }), // enriched sale → 400000/1850 → $216/sqft
+        comp({ propertyId: null, sqft: null }), // AVM price, no sqft → no per-sqft figure
+      ],
+      fetchSold: async () => ({ soldPrice: 400000, soldDate: "2026-05-12" }),
+    });
+    const block = renderCompBlock(result);
+    expect(block).toContain("$216/sqft");
+    const noSqftLine = block.split("\n").find((l) => l.includes("estimated value"));
+    expect(noSqftLine).toBeDefined();
+    expect(noSqftLine).not.toContain("/sqft");
+  });
+
+  it("carries the condition + arm's-length caveat so the model invites user adjustments", async () => {
+    const result = await compHelper("comps near 3412 Atlantic Circle, Cape Coral", baseDeps());
+    const block = renderCompBlock(result);
+    expect(block).toMatch(/not adjusted for property condition/i);
+    expect(block).toMatch(/foreclosure/i);
+    // the caveat rides the comps header only — a needs-only block stays a plain ask
+    const needsOnly = renderCompBlock({
+      comps: [],
+      asOf: "06/30/2026",
+      needs: ["Send the address."],
+    });
+    expect(needsOnly).not.toMatch(/condition/i);
+  });
+
   it("renders a needs-only block when nothing was found", () => {
     const block = renderCompBlock({
       comps: [],
