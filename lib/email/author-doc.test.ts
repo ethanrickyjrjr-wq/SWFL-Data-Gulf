@@ -19,6 +19,7 @@ import {
   assetMenuById,
   renderAssetMenu,
   promptAnchors,
+  fillEmptySourcesBlock,
   type AssembleArgs,
 } from "./author-doc";
 import { DEFAULT_GLOBAL_STYLE } from "./doc/default-docs";
@@ -817,5 +818,143 @@ describe("assembleAuthoredDoc — subject/CTA variants", () => {
     });
     expect(doc.subjectVariants).toBeUndefined();
     expect(doc.ctaVariants).toBeUndefined();
+  });
+});
+
+describe("sources accordion autofill (email_sources_accordion_autofill)", () => {
+  test("an id-selected figure materializes a sources accordion above the footer", () => {
+    const doc = assembleAuthoredDoc(
+      args({
+        blocks: [{ type: "hero", value_figure: "f0", kicker: "Spotlight" }, { type: "footer" }],
+      }),
+    );
+    const types = doc.blocks.map((b) => b.type);
+    const srcIdx = types.indexOf("sources");
+    const ftrIdx = types.indexOf("footer");
+    expect(srcIdx).toBeGreaterThan(-1);
+    expect(srcIdx).toBeLessThan(ftrIdx);
+    const cites = propsOf(doc.blocks[srcIdx]).sources as Array<{ label?: string }>;
+    expect(cites).toEqual([{ label: "Zillow ZHVI · 06/01/2026" }]);
+  });
+
+  test("a prose-cited figure (no id-selection) is attributed and cited", () => {
+    const doc = assembleAuthoredDoc(
+      args({
+        blocks: [{ type: "text", body: "Homes are averaging 47 days on market right now." }],
+      }),
+    );
+    const src = doc.blocks.find((b) => b.type === "sources");
+    expect(src).toBeDefined();
+    const labels = (propsOf(src!).sources as Array<{ label?: string }>).map((c) => c.label);
+    expect(labels).toEqual(["MLS active-listings · 06/01/2026"]); // f1 only — f0's value never appears
+  });
+
+  test("no figure used → no sources block is added", () => {
+    const doc = assembleAuthoredDoc(
+      args({ blocks: [{ type: "text", body: "A quiet week on the water." }] }),
+    );
+    expect(doc.blocks.some((b) => b.type === "sources")).toBe(false);
+  });
+
+  test("a model-authored sources block is FILLED — never duplicated, never empty", () => {
+    const doc = assembleAuthoredDoc(
+      args({
+        blocks: [{ type: "hero", value_figure: "f0" }, { type: "sources" }, { type: "footer" }],
+      }),
+    );
+    const sourcesBlocks = doc.blocks.filter((b) => b.type === "sources");
+    expect(sourcesBlocks.length).toBe(1);
+    const cites = propsOf(sourcesBlocks[0]).sources as Array<{ label?: string }>;
+    expect(cites).toEqual([{ label: "Zillow ZHVI · 06/01/2026" }]);
+  });
+
+  test("two used figures from the same source dedupe to one citation", () => {
+    const figs: MarketFigure[] = [
+      {
+        key: "zhvi",
+        label: "Median home value",
+        value: "$433,549",
+        source: "Zillow ZHVI",
+        as_of: "05/31/2026",
+      },
+      {
+        key: "zhvi_yoy",
+        label: "Home values YoY",
+        value: "-8.1%",
+        source: "Zillow ZHVI",
+        as_of: "05/31/2026",
+      },
+    ];
+    const menu = buildFigureMenu(figs);
+    const doc = assembleAuthoredDoc({
+      authored: {
+        blocks: [
+          {
+            type: "stats",
+            stats: [
+              { value_figure: "f0", label: "Value" },
+              { value_figure: "f1", label: "YoY" },
+            ],
+          },
+        ],
+      },
+      figuresById: figureMenuById(menu),
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      anchorNumbers: collectAnchorNumbers(figs),
+    });
+    const src = doc.blocks.find((b) => b.type === "sources");
+    const cites = propsOf(src!).sources as Array<{ label?: string }>;
+    expect(cites).toEqual([{ label: "Zillow ZHVI · 05/31/2026" }]);
+  });
+});
+
+describe("fillEmptySourcesBlock (slot-fill path — template-owned structure, data-seeded cites)", () => {
+  const baseDoc = (sources: Array<{ label?: string; url?: string }>): EmailDoc => ({
+    globalStyle: DEFAULT_GLOBAL_STYLE,
+    blocks: [
+      {
+        id: "b1",
+        type: "text",
+        props: { body: "The median home value stands at $1,250,000 today." },
+      },
+      { id: "b2", type: "sources", props: { sources } },
+    ] as EmailDoc["blocks"],
+  });
+
+  test("fills an EMPTY sources block from figures the doc's prose actually cites", () => {
+    const out = fillEmptySourcesBlock(baseDoc([]), FIGURES);
+    const src = out.blocks.find((b) => b.type === "sources");
+    const cites = propsOf(src!).sources as Array<{ label?: string }>;
+    expect(cites).toEqual([{ label: "Zillow ZHVI · 06/01/2026" }]); // f1's "47" never appears
+  });
+
+  test("web-verified sources ride in WITH their urls", () => {
+    const doc: EmailDoc = {
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      blocks: [
+        { id: "b1", type: "text", props: { body: "This week's average rate is 6.49%." } },
+        { id: "b2", type: "sources", props: { sources: [] } },
+      ] as EmailDoc["blocks"],
+    };
+    const out = fillEmptySourcesBlock(
+      doc,
+      [],
+      [{ label: "Freddie Mac PMMS", value: "6.49%", url: "https://www.freddiemac.com/pmms" }],
+    );
+    const src = out.blocks.find((b) => b.type === "sources");
+    expect(propsOf(src!).sources).toEqual([
+      { label: "Freddie Mac PMMS", url: "https://www.freddiemac.com/pmms" },
+    ]);
+  });
+
+  test("a NON-empty sources block is never overwritten; a doc with no sources block is untouched", () => {
+    const seeded = baseDoc([{ label: "Hand-picked citation" }]);
+    const out = fillEmptySourcesBlock(seeded, FIGURES);
+    expect(out).toBe(seeded); // unchanged, same reference
+    const noBlock: EmailDoc = {
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      blocks: [{ id: "b1", type: "text", props: { body: "$1,250,000" } }] as EmailDoc["blocks"],
+    };
+    expect(fillEmptySourcesBlock(noBlock, FIGURES)).toBe(noBlock);
   });
 });

@@ -63,6 +63,7 @@ import {
   figureMenuById,
   collectAnchorNumbers,
   collectRecordedAnchors,
+  fillEmptySourcesBlock,
   lintAuthoredProse,
   promptAnchors,
   type LibraryAsset,
@@ -606,9 +607,18 @@ export async function buildContentDoc({
     };
   }
 
+  // A template's EMPTY sources accordion is an open slot the patch can't write
+  // (ContentPatch has no sources key) — seed it from the figures the filled doc
+  // actually cites, web-verified ones with their urls (email_sources_accordion_autofill).
+  const sourcedDoc = fillEmptySourcesBlock(
+    reparsed.data,
+    lakeParts.figures,
+    web.verified.map((v) => ({ label: v.label, value: v.value, url: v.url })),
+  );
+
   return {
     payload: {
-      doc: reparsed.data,
+      doc: sourcedDoc,
       applied: true,
       patch,
       chart: Boolean(chartRes),

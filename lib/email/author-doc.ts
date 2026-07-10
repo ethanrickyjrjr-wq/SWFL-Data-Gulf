@@ -32,7 +32,14 @@ import {
 } from "./doc/block-contract";
 import { mintBlockId } from "./doc/schema";
 import type { AuthoredBlock, AuthoredDoc } from "./doc/schema";
-import type { BlockLayout, BlockType, EmailBlock, EmailDoc, EmailGlobalStyle } from "./doc/types";
+import type {
+  BlockLayout,
+  BlockType,
+  EmailBlock,
+  EmailDoc,
+  EmailGlobalStyle,
+  SourceCitation,
+} from "./doc/types";
 import { GRID_COLS } from "./grid-schema";
 import type { MarketFigure } from "./market-context";
 import { chartImageBlock } from "./inject-chart";
@@ -904,6 +911,30 @@ export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
     else entries.splice(footerIdx, 0, entry);
   }
 
+  // Sources accordion — cite the figures the doc actually used (check:
+  // email_sources_accordion_autofill). Data-seeded, never authored: a
+  // model-emitted `sources` block arrives with empty props (buildEntry has no
+  // sources case) and is filled here; otherwise one is appended — Fence 2's
+  // zone sort places it in the close zone, above the footer.
+  const citations = figureCitations(collectUsedFigures(authored, figuresById));
+  if (citations.length > 0) {
+    const existing = entries.find((e) => e.type === "sources");
+    if (existing) {
+      const cur = existing.props.sources as SourceCitation[] | undefined;
+      if (!cur || cur.length === 0) existing.props.sources = citations;
+    } else {
+      entries.push({
+        type: "sources",
+        span: GRID_COLS,
+        newRow: true,
+        props: {
+          ...(defaultPropsFor("sources") as unknown as Record<string, unknown>),
+          sources: citations,
+        },
+      });
+    }
+  }
+
   // CAN-SPAM: a footer always survives, even if the model omitted one.
   if (!entries.some((e) => e.type === "footer")) {
     entries.push({
@@ -1018,6 +1049,122 @@ export function collectRecordedAnchors(figures: MarketFigure[]): string[] {
 function isBareYear(token: string): boolean {
   if (/[$%]|bps|basis points/i.test(token)) return false;
   return /^(?:19|20)\d{2}$/.test(normalizeNumber(token));
+}
+
+// ── Sources accordion autofill (check: email_sources_accordion_autofill) ─────
+// The model never writes citations — they are DATA-SEEDED from the menu figures
+// the doc actually used, at assembly (author path) or post-patch (slot-fill
+// path). MarketFigure carries source + as_of but no URL, so a figure citation
+// renders label-only (SourcesBlock shows a linkless citation as muted text).
+
+/** Dedupe used figures onto accordion citations, house citation style:
+ *  "Zillow ZHVI · 05/31/2026". One entry per source name (first as_of wins);
+ *  capped at the SourcesPropsSchema maximum. PURE; exported for tests. */
+export function figureCitations(figures: readonly MarketFigure[]): SourceCitation[] {
+  const bySource = new Map<string, SourceCitation>();
+  for (const f of figures) {
+    if (!f.source || bySource.has(f.source)) continue;
+    bySource.set(f.source, { label: f.as_of ? `${f.source} · ${f.as_of}` : f.source });
+  }
+  return [...bySource.values()].slice(0, 30);
+}
+
+/** The prose surfaces of one AUTHORED block, flattened — mirrors the fields
+ *  applyContent/buildEntry actually ship (PROSE_FIELDS + nested column/item
+ *  fields + literal stat values). Never a blind JSON walk: numeric NON-content
+ *  fields (span) must not count as a citation of a figure. */
+function authoredBlockText(a: AuthoredBlock): string[] {
+  const rec = a as unknown as Record<string, unknown>;
+  const parts: string[] = [];
+  for (const field of [...PROSE_FIELDS, "button_label"]) {
+    const v = rec[field];
+    if (typeof v === "string") parts.push(v);
+  }
+  for (const s of a.stats ?? []) parts.push(s.value ?? "", s.label ?? "");
+  for (const c of a.columns ?? []) parts.push(c.heading ?? "", c.body ?? "");
+  for (const it of a.items ?? []) parts.push(it.lead ?? "", it.text ?? "");
+  return parts;
+}
+
+/** The menu figures an authored doc ACTUALLY used: id-selected (a `value_figure`
+ *  on the block or a stat cell) plus prose-cited (every numeric token of the
+ *  figure's value appears verbatim in the authored text — the lint's own
+ *  tokenizer, so "used" here can never drift from "anchored" there). */
+export function collectUsedFigures(
+  authored: AuthoredDoc,
+  figuresById: Map<string, MarketFigure>,
+): MarketFigure[] {
+  const used = new Map<string, MarketFigure>(); // keyed by menu id — insertion order
+  const proseParts: string[] = [];
+  for (const a of authored.blocks) {
+    const idSelect = (id?: string) => {
+      const f = id ? figuresById.get(id) : undefined;
+      if (id && f) used.set(id, f);
+    };
+    idSelect(a.value_figure);
+    for (const s of a.stats ?? []) idSelect(s.value_figure);
+    proseParts.push(...authoredBlockText(a));
+  }
+  const proseAnchors = buildAnchorSet(proseParts);
+  for (const [id, f] of figuresById) {
+    if (used.has(id)) continue;
+    const tokens = extractNumbers(f.value).filter((t) => !isBareYear(t));
+    if (tokens.length > 0 && tokens.every((t) => anchorsExactly(t, proseAnchors))) {
+      used.set(id, f);
+    }
+  }
+  return [...used.values()];
+}
+
+/** Slot-fill half: fill an EMPTY sources block in an EXISTING doc from the
+ *  figures its prose actually cites (+ web-verified figures, WITH their urls).
+ *  Structure stays template-owned — a doc with no sources block, or a sources
+ *  block someone already filled, is returned untouched (same reference). */
+export function fillEmptySourcesBlock(
+  doc: EmailDoc,
+  figures: readonly MarketFigure[],
+  webSources: ReadonlyArray<{ label: string; value: string; url?: string }> = [],
+): EmailDoc {
+  const hasEmpty = doc.blocks.some(
+    (b) => b.type === "sources" && (b.props.sources ?? []).length === 0,
+  );
+  if (!hasEmpty) return doc;
+
+  const proseParts: string[] = [];
+  for (const b of doc.blocks) {
+    const rec = b.props as Record<string, unknown>;
+    for (const [key, v] of Object.entries(rec)) {
+      if (key === "url" || key === "linkUrl" || key === "photoUrl") continue;
+      if (typeof v === "string") proseParts.push(v);
+    }
+    if (b.type === "stats") for (const s of b.props.stats) proseParts.push(s.value, s.label);
+    if (b.type === "multi-column")
+      for (const c of b.props.columns) proseParts.push(c.heading ?? "", c.body ?? "");
+    if (b.type === "list") for (const it of b.props.items) proseParts.push(it.lead ?? "", it.text);
+  }
+  const proseAnchors = buildAnchorSet(proseParts);
+  const cited = (value: string) => {
+    const tokens = extractNumbers(value).filter((t) => !isBareYear(t));
+    return tokens.length > 0 && tokens.every((t) => anchorsExactly(t, proseAnchors));
+  };
+
+  const citations = figureCitations(figures.filter((f) => cited(f.value)));
+  for (const w of webSources) {
+    if (!cited(w.value)) continue;
+    if (citations.some((c) => c.label === w.label)) continue;
+    citations.push({ label: w.label, ...(w.url ? { url: w.url } : {}) });
+  }
+  if (citations.length === 0) return doc;
+
+  let filled = false;
+  return {
+    ...doc,
+    blocks: doc.blocks.map((b) => {
+      if (filled || b.type !== "sources" || (b.props.sources ?? []).length > 0) return b;
+      filled = true;
+      return { ...b, props: { ...b.props, sources: citations.slice(0, 30) } };
+    }),
+  };
 }
 
 export interface ProseLintResult {
