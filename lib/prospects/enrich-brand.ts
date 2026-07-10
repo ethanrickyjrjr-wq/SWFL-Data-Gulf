@@ -6,7 +6,7 @@ export type BrandEnrichment = {
   secondary: string | null;
   logo_url: string | null;
   confidence: number; // 0..1; 0 on fallback
-  source: "direct-scrape+haiku" | "fallback";
+  source: "direct-scrape+haiku" | "fallback" | `fixture:${string}`;
   company_name?: string | null;
 };
 
@@ -203,8 +203,7 @@ export async function enrichBrand(domain: string, deps: EnrichDeps = {}): Promis
       ],
     });
     const block = msg.content.find((b) => b.type === "tool_use") as
-      | Anthropic.ToolUseBlock
-      | undefined;
+      Anthropic.ToolUseBlock | undefined;
     input = (block?.input ?? {}) as Record<string, unknown>;
   } catch {
     return FALLBACK;
