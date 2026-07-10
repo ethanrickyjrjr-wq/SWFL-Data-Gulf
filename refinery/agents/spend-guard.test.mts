@@ -1,6 +1,12 @@
 // refinery/agents/spend-guard.test.mts — the hard spend cap at the ONE client seam.
 import { describe, expect, test } from "bun:test";
-import { assertUnderCaps, spendCaps, SpendCapError } from "./anthropic.mts";
+import {
+  assertUnderCaps,
+  computeCostUsd,
+  spendCaps,
+  SpendCapError,
+  wrapMessageSurface,
+} from "./anthropic.mts";
 
 describe("spendCaps (env parsing)", () => {
   test("defaults when unset; never silently zero", () => {
@@ -64,5 +70,63 @@ describe("assertUnderCaps (the gate)", () => {
     expect(() =>
       assertUnderCaps({ dayUsd: 999, monthUsd: 9999 }, { ...caps, off: true }),
     ).not.toThrow();
+  });
+});
+
+describe("computeCostUsd — model rates", () => {
+  test("claude-fable-5 prices at $10/$50 per MTok (a missing row would log the flagship at $0, invisible to the caps)", () => {
+    expect(
+      computeCostUsd("claude-fable-5", { input_tokens: 1_000_000, output_tokens: 100_000 }),
+    ).toBeCloseTo(15.0, 6);
+  });
+
+  test("fable cache tokens price at 10% read / 1.25x write of the input rate", () => {
+    expect(
+      computeCostUsd("claude-fable-5", {
+        input_tokens: 0,
+        output_tokens: 0,
+        cache_read_input_tokens: 1_000_000,
+        cache_creation_input_tokens: 1_000_000,
+      }),
+    ).toBeCloseTo(1.0 + 12.5, 6);
+  });
+
+  test("unknown model logs $0 — never invents a rate", () => {
+    expect(
+      computeCostUsd("claude-imaginary-9", { input_tokens: 1_000_000, output_tokens: 0 }),
+    ).toBe(0);
+  });
+});
+
+describe("wrapMessageSurface (the ONE proxy both surfaces — messages and beta.messages — share)", () => {
+  class FakeSurface {
+    calls: string[] = [];
+    async create(params: { model: string }) {
+      this.calls.push(`create:${params.model}`);
+      return { model: params.model, usage: { input_tokens: 1, output_tokens: 1 } };
+    }
+    stream(params: { model: string }) {
+      this.calls.push(`stream:${params.model}`);
+      return {
+        finalMessage: async () => ({
+          model: params.model,
+          usage: { input_tokens: 1, output_tokens: 1 },
+        }),
+      };
+    }
+    other() {
+      return "prototype-method-intact";
+    }
+  }
+
+  test("create/stream pass through; prototype methods survive the proxy (spread would drop them)", async () => {
+    const fake = new FakeSurface();
+    const wrapped = wrapMessageSurface(fake, "insiders_author") as unknown as FakeSurface;
+    const res = await wrapped.create({ model: "claude-fable-5" });
+    expect(res.model).toBe("claude-fable-5");
+    const s = wrapped.stream({ model: "claude-fable-5" });
+    expect((await s.finalMessage()).model).toBe("claude-fable-5");
+    expect(wrapped.other()).toBe("prototype-method-intact");
+    expect(fake.calls).toEqual(["create:claude-fable-5", "stream:claude-fable-5"]);
   });
 });

@@ -31,6 +31,10 @@ export type CallType =
   // Weekly/daily surface-narrative bake (scripts/bake-narratives.mts) — its own
   // ops /spend line per spec 2026-07-09-zip-page-destination-design.md.
   | "narrative_bake"
+  // Insiders Edition flagship authoring (lib/email/insiders/author.ts) — Fable 5
+  // draft+editor passes; a per-issue IssueBudget ledger rides on top of these
+  // global caps (spec 2026-07-10-insiders-edition-design.md).
+  | "insiders_author"
   | "other";
 
 export interface UsageLike {
@@ -48,6 +52,11 @@ const RATES: Record<string, { in: number; out: number }> = {
   // Reachable via EMAIL_MODEL_OPUS (lib/email/model-router.ts, "max"/"opus" mode
   // -> email_build call type). Missing this silently priced every Opus call at $0.
   "claude-opus-4-8": { in: 5.0, out: 25.0 },
+  // Insiders Edition flagship author (insiders_author; refusal fallback target is
+  // the opus row above). $/MTok verified 07/10/2026 against platform.claude.com
+  // pricing via the claude-api skill reference. Missing this row would price every
+  // Fable 5 call at $0 — the flagship invisible to the daily/monthly caps.
+  "claude-fable-5": { in: 10.0, out: 50.0 },
 };
 const CACHE_READ_FRACTION = 0.1; // 10% of base input rate
 const CACHE_WRITE_PREMIUM = 1.25; // 25% premium on input rate
@@ -275,23 +284,33 @@ function getRawClient(): Anthropic {
 }
 
 /**
- * Wraps only `.messages.create` / `.messages.stream` — the only two methods
- * any call site in this codebase invokes on the client (verified via grep
- * for `client\.(beta|models|batches)\.` — zero hits). A `Proxy` `get` trap,
- * not a plain-object spread: `raw.messages`'s own-enumerable keys are only
- * `_client`/`batches` (verified directly against the installed SDK) —
- * `create`/`stream` live on the `Messages` class prototype, so
- * `{...raw.messages}` silently drops them. `Reflect.get(target, prop,
- * target)` (passing `target`, not the proxy, as the receiver) forwards every
- * other property through correctly, including prototype getters, without
- * risking a private-class-field `this`-binding surprise (those would throw
- * if invoked with `this` = the proxy instead of the real instance).
+ * A message SURFACE is any object exposing `create` / `stream`. Two exist per
+ * client — `raw.messages` and `raw.beta.messages` — and BOTH wrap through this
+ * one function so no capability can dodge the meter. The beta surface exists
+ * for `claude-fable-5`'s server-side refusal fallback (`betas` + `fallbacks`
+ * params live only on `beta.messages.*`; used by insiders_author). The
+ * `(...args: never[]) => unknown` constraint is the universal function
+ * supertype — every concrete SDK signature is assignable to it, and the
+ * returned proxy keeps the caller's exact `M` typing.
+ *
+ * A `Proxy` `get` trap, not a plain-object spread: `create`/`stream` live on
+ * the class prototype, so `{...real}` silently drops them. `Reflect.get(
+ * target, prop, target)` (passing `target`, not the proxy, as the receiver)
+ * forwards every other property through correctly, including prototype
+ * getters, without risking a private-class-field `this`-binding surprise
+ * (those would throw if invoked with `this` = the proxy instead of the real
+ * instance). Exported for tests — proxy-shape regressions are the real risk.
  */
-function wrapMessages(raw: Anthropic, callType: CallType): Anthropic["messages"] {
-  const realCreate = raw.messages.create.bind(raw.messages);
-  const realStream = raw.messages.stream.bind(raw.messages);
+export interface MessageSurfaceLike {
+  create: (...args: never[]) => unknown;
+  stream: (...args: never[]) => unknown;
+}
 
-  const wrappedCreate = (async (...args: Parameters<typeof realCreate>) => {
+export function wrapMessageSurface<M extends MessageSurfaceLike>(real: M, callType: CallType): M {
+  const realCreate = real.create.bind(real) as (...args: unknown[]) => Promise<unknown>;
+  const realStream = real.stream.bind(real) as (...args: unknown[]) => unknown;
+
+  const wrappedCreate = async (...args: unknown[]) => {
     await checkSpendGuardAsync(); // throws SpendCapError on breach — never a silent drain
     const response = await realCreate(...args);
     // Non-streaming Message has `.usage` directly; a `stream:true` Message
@@ -305,19 +324,23 @@ function wrapMessages(raw: Anthropic, callType: CallType): Anthropic["messages"]
       }).catch((e) => console.error("[api-usage-log] create hook failed:", e));
     }
     return response;
-  }) as typeof realCreate;
+  };
 
-  const wrappedStream = ((...args: Parameters<typeof realStream>) => {
+  const wrappedStream = (...args: unknown[]) => {
     checkSpendGuardSync(); // last-known window (stream() must return sync) + async refresh
-    const stream = realStream(...args);
+    const stream = realStream(...args) as {
+      finalMessage: () => Promise<Pick<Anthropic.Message, "model" | "usage">>;
+    };
+    // Works for both surfaces: a beta stream's finalMessage() resolves a
+    // BetaMessage whose `model`/`usage` carry the same fields logApiUsage reads.
     stream
       .finalMessage()
       .then((msg) => logApiUsage({ model: msg.model, callType, usage: msg.usage }))
       .catch((e) => console.error("[api-usage-log] stream hook failed:", e));
     return stream;
-  }) as typeof realStream;
+  };
 
-  return new Proxy(raw.messages, {
+  return new Proxy(real, {
     get(target, prop, _receiver) {
       if (prop === "create") return wrappedCreate;
       if (prop === "stream") return wrappedStream;
@@ -331,16 +354,26 @@ const wrappedByCallType = new Map<CallType, Anthropic>();
 /** Shared Anthropic client. Only call when NOT in mock mode. Every real call
  *  is logged to public.api_usage_log; pass callType to label it (defaults to
  *  "other", fully backward compatible with existing zero-arg call sites).
- *  A `Proxy` `get` trap intercepts only `.messages`, forwarding every other
- *  top-level property (models/beta/apiKey/...) straight through to `raw`. */
+ *  `Proxy` `get` traps intercept `.messages` AND `.beta.messages` (both wrap
+ *  through wrapMessageSurface — the spend gate covers the beta surface that
+ *  insiders_author uses for Fable 5 refusal fallbacks); every other top-level
+ *  property (models/batches/apiKey/...) forwards straight through to `raw`. */
 export function getAnthropic(callType: CallType = "other"): Anthropic {
   const existing = wrappedByCallType.get(callType);
   if (existing) return existing;
   const raw = getRawClient();
-  const wrappedMessages = wrapMessages(raw, callType);
+  const wrappedMessages = wrapMessageSurface(raw.messages, callType);
+  const wrappedBetaMessages = wrapMessageSurface(raw.beta.messages, callType);
+  const wrappedBeta = new Proxy(raw.beta, {
+    get(target, prop, _receiver) {
+      if (prop === "messages") return wrappedBetaMessages;
+      return Reflect.get(target, prop, target);
+    },
+  });
   const wrapped = new Proxy(raw, {
     get(target, prop, _receiver) {
       if (prop === "messages") return wrappedMessages;
+      if (prop === "beta") return wrappedBeta;
       return Reflect.get(target, prop, target);
     },
   }) as Anthropic;
