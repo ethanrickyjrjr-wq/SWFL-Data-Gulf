@@ -3,21 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { openZipLab } from "@/lib/lab-entry/destination";
 import { resolveZip } from "../../../../refinery/lib/zip-resolver.mts";
-import type { LocationInput } from "../../../../refinery/lib/location-resolver.mts";
 import type { Grain } from "../../../../refinery/lib/zip-resolver.mts";
-import { loadParsedBrain } from "../../../../lib/fetch-brain";
-import { buildRegistryTableMap } from "../../../../lib/zip-report/load-registry-tables";
-import { rankSignals, type RankedSignal } from "../../../../lib/zip-report/signal-rank";
-import {
-  buildZipCandidates,
-  loadCensusSignals,
-  ZIP_METRIC_SOURCES,
-  type CensusValue,
-  type FloodZipRow,
-} from "../../../../lib/zip-report/candidates";
+import { assembleZipReport } from "../../../../lib/zip-report/assemble";
+import type { RankedSignal } from "../../../../lib/zip-report/signal-rank";
+import { ZIP_METRIC_SOURCES, type FloodZipRow } from "../../../../lib/zip-report/candidates";
 import { getSourcedFigures } from "../../../../lib/figures/sourced";
 import { FindItButton, type FoundFigure } from "../_components/find-it-button";
-import { assembleLocationDossier, selectDossierLines } from "../../../../lib/zip-dossier";
+import { selectDossierLines } from "../../../../lib/zip-dossier";
 import type { LocationDossierLine } from "../../../../lib/zip-dossier";
 import { didYouMeanBanner } from "../../../../lib/location-surface";
 import { extractZipShape } from "../../../../lib/map/extract-zip-shape";
@@ -38,7 +30,6 @@ import DigestSubscribe from "../../../../components/email/DigestSubscribe";
 import { MetroAreaChart } from "../../../../components/charts";
 import { SWFL_METRO_SERIES } from "../../../../lib/charts/series";
 import { loadMetroTrend } from "../../../../lib/charts/load-metro-trend";
-import { loadZipQuickSummary } from "../../../../lib/zip-summary/load";
 import { loadNarrative } from "../../../../lib/narratives/store";
 import { NarrativeSections } from "../../../../components/narratives/NarrativeSections";
 import { loadPulseNearby } from "../../../../lib/pulse/nearby";
@@ -99,44 +90,12 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     );
   }
 
-  const loc: LocationInput = { kind: "zip", resolution: res };
-
-  const REGISTRY_PACK_IDS = [
-    "housing-swfl",
-    "home-values-swfl",
-    "rentals-swfl",
-    "active-rentals-swfl",
-    "market-heat-swfl",
-    "market-temperature-swfl",
-    "listing-momentum-swfl",
-    "seller-stress-swfl",
-    "tier-divergence-swfl",
-    "permits-commercial-swfl",
-    "properties-collier-value",
-  ] as const;
-
-  const [
-    registryBrains,
-    env,
-    permits,
-    dossier,
-    summary,
-    metroTrend,
-    censusSignals,
-    sourcedFigures,
-    narrative,
-    pulseNearby,
-    seedEmailHtml,
-  ] = await Promise.all([
-    Promise.all(REGISTRY_PACK_IDS.map((id) => loadParsedBrain(id))).then(
-      (brains) => new Map(REGISTRY_PACK_IDS.map((id, i) => [id, brains[i]])),
-    ),
-    loadParsedBrain("env-swfl"),
-    loadParsedBrain("permits-swfl"),
-    assembleLocationDossier(loc),
-    loadZipQuickSummary(zip),
+  // Shared report data — ONE assembly root (lib/zip-report/assemble.ts), the
+  // same derivations the narrative bake adapter reads. Page-only loads ride
+  // the same Promise.all.
+  const [a, metroTrend, sourcedFigures, narrative, pulseNearby, seedEmailHtml] = await Promise.all([
+    assembleZipReport(zip),
     loadMetroTrend("zhvi_pivoted"),
-    loadCensusSignals(zip),
     getSourcedFigures({ kind: "zip", key: zip }),
     loadNarrative("zip", zip),
     loadPulseNearby(zip),
@@ -146,14 +105,29 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
       .then((doc) => (doc ? renderEmailDocHtml(doc) : null))
       .catch(() => null),
   ]);
-  const housing = registryBrains.get("housing-swfl") ?? null;
-  const registryTables = buildRegistryTableMap(registryBrains);
+  if (!a) notFound(); // unreachable — res.in_scope already guarded above
+  const {
+    dossier,
+    summary,
+    floodForZip,
+    floodSourceUrl,
+    floodSourceCitation,
+    permitsCount,
+    permitsSourceUrl,
+    permitsSourceCitation,
+    gaps,
+    railContext,
+    ranked,
+    freshnessToken,
+    primaryPlace,
+  } = a;
+  const housing = a.registryBrains.get("housing-swfl") ?? null;
 
   // ── ZIP shape ─────────────────────────────────────────────────────────────
   const { svgMarkup, found: shapeFound } = extractZipShape(zip);
 
-  // ── Housing display fields read directly off the brain; ranking now goes
-  // through registryTables (populated above via buildRegistryTableMap). ──
+  // ── Housing display fields read directly off the brain; ranking already
+  // happened inside assembleZipReport (shared root). ──
   const housingRow = housing?.output.detail_tables
     ?.find((t) => t.id === "housing_by_zip")
     ?.rows.find((r) => r.key === zip);
@@ -167,80 +141,10 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   const hasHousing = housingRow !== undefined && price !== undefined && dom !== undefined;
 
-  // ── Flood — flood_by_zip detail table first (all 57 ZIPs), key_metrics fallback ──
-  const floodTable = env?.output.detail_tables?.find((t) => t.id === "flood_by_zip");
-  const floodRows: FloodZipRow[] = (floodTable?.rows ?? [])
-    .map((r) => ({
-      zip: r.key,
-      aal: r.cells["aal_usd_per_insured_property"] as number,
-      pctRank: typeof r.cells["pct_rank"] === "number" ? (r.cells["pct_rank"] as number) : null,
-    }))
-    .filter((r) => typeof r.aal === "number" && Number.isFinite(r.aal));
-  let floodForZip: FloodZipRow | null = floodRows.find((r) => r.zip === zip) ?? null;
-  const floodMetric = env?.output.key_metrics.find(
-    (m) => m.metric === `swfl_zip_${zip}_flood_aal_usd_per_insured_property`,
-  );
-  const rankMetric = env?.output.key_metrics.find(
-    (m) => m.metric === `swfl_zip_${zip}_flood_aal_pct_swfl_rank`,
-  );
-  if (!floodForZip && floodMetric && rankMetric) {
-    floodForZip = {
-      zip,
-      aal: floodMetric.value as number,
-      pctRank: rankMetric.value as number,
-    };
-  }
   const hasFlood = floodForZip !== null;
-  const floodSourceUrl = floodTable?.source.url ?? floodMetric?.source.url ?? "";
-  const floodSourceCitation = floodTable?.source.citation ?? floodMetric?.source.citation ?? "";
 
-  // ── Permits (unchanged aggregation; the builder decides covered vs gap) ──
-  const permitsTable = permits?.output.detail_tables?.find((t) => t.id === "permits_by_zip");
-  const permitsCountMap = new Map<string, number>();
-  for (const r of permitsTable?.rows ?? []) {
-    const n = r.cells["n_current"];
-    if (typeof n === "number") {
-      permitsCountMap.set(r.key, (permitsCountMap.get(r.key) ?? 0) + n);
-    }
-  }
-  const permitsCount = permitsCountMap.get(zip) ?? 0;
   const hasPermits = permitsCount > 0;
-  const permitsSourceUrl = hasPermits ? (permitsTable?.source.url ?? "") : "";
-  const permitsSourceCitation = hasPermits
-    ? (permitsTable?.source.citation ?? "Lee County permits")
-    : "";
 
-  // ── Candidate pool + deterministic ranking (spec §2) ──────────────────────
-  const censusValues: CensusValue[] = summary.figures.flatMap((fig) => {
-    const value = censusSignals.numericByKey.get(fig.key);
-    if (value === undefined) return [];
-    return [
-      {
-        key: fig.key,
-        label: fig.label,
-        value,
-        display: fig.value,
-        sourceLabel: fig.source_label,
-        sourceUrl: fig.source_url,
-      },
-    ];
-  });
-  const { candidates, gaps, railContext } = buildZipCandidates({
-    zip,
-    registryTables,
-    floodRows,
-    floodForZip,
-    floodSource: floodSourceUrl
-      ? { label: floodSourceCitation || "FEMA NFIP", url: floodSourceUrl }
-      : undefined,
-    permitsCounts: permitsCountMap,
-    permitsSource: permitsSourceUrl
-      ? { label: permitsSourceCitation, url: permitsSourceUrl }
-      : undefined,
-    censusValues,
-    censusDistribution: censusSignals.distribution,
-  });
-  const ranked = rankSignals(candidates);
   const heroSignals = ranked.slice(0, 3);
   const gridSignals = ranked.slice(3);
   const sourcedByKey = new Map(sourcedFigures.map((f) => [f.key, f]));
@@ -257,8 +161,6 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   // ── Identity ──────────────────────────────────────────────────────────────
   const didYouMean = didYouMeanBanner(sp.q, sp.matched);
-  const primaryPlace =
-    (res.places.find((p) => p.match === "primary") ?? res.places[0])?.place ?? null;
   const nearby = nearestZips(zip, 5);
   const cityAreaTitle = primaryPlace ? `${primaryPlace} Area` : "Local Area";
   const countyTitle = res.county_names[0] ? `${res.county_names[0]} County` : "County";
@@ -298,8 +200,6 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   }
 
   // ── Freshness ─────────────────────────────────────────────────────────────
-  const freshnessToken =
-    housing?.freshness_token ?? env?.freshness_token ?? Object.values(dossier.freshness_tokens)[0];
   const asOf = asOfFromToken(freshnessToken);
 
   // ── Metric suggestions (normalized by the ReportAi one-root at mount) ─────
