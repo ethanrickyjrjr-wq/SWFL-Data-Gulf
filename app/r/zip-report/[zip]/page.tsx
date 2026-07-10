@@ -47,6 +47,9 @@ import { loadNarrative } from "../../../../lib/narratives/store";
 import { NarrativeSections } from "../../../../components/narratives/NarrativeSections";
 import { loadPulseNearby } from "../../../../lib/pulse/nearby";
 import { PulseNearby } from "../../../../components/narratives/PulseNearby";
+import { buildZipSeedDoc } from "../../../../lib/email/zip-seed";
+import { renderEmailDocHtml } from "../../../../lib/email/render-email-doc";
+import { ZipEmailFunnel } from "../_components/zip-email-funnel";
 import { nearestZips } from "../../../../lib/geo/nearest-zips";
 import { zipReportMetadata } from "./metadata";
 import type { Metadata } from "next";
@@ -127,6 +130,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     sourcedFigures,
     narrative,
     pulseNearby,
+    seedEmailHtml,
   ] = await Promise.all([
     Promise.all(REGISTRY_PACK_IDS.map((id) => loadParsedBrain(id))).then(
       (brains) => new Map(REGISTRY_PACK_IDS.map((id, i) => [id, brains[i]])),
@@ -140,6 +144,11 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     getSourcedFigures({ kind: "zip", key: zip }),
     loadNarrative("zip", zip),
     loadPulseNearby(zip),
+    // Funnel miniature (Phase D): the SAME doc a lab visitor lands in, rendered
+    // through the ONE EmailDoc→HTML root. Additive — any failure = no module.
+    buildZipSeedDoc(zip)
+      .then((doc) => (doc ? renderEmailDocHtml(doc) : null))
+      .catch(() => null),
   ]);
   const housing = registryBrains.get("housing-swfl") ?? null;
   const registryTables = buildRegistryTableMap(registryBrains);
@@ -396,6 +405,18 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
       {/* ── Baked narrative — ONE renderer root, additive (absent row = today's page) ── */}
       <NarrativeSections row={narrative} />
+
+      {/* ── Funnel weave — this ZIP's email, live miniature (Phase D). Gated on a
+          baked narration row (operator ruling 07/09/2026): the funnel meets the
+          reader AFTER the intel, so a pre-bake page stays pure report — never a
+          pitch above the breakdown. ── */}
+      {!!narrative?.sections.narration && (
+        <ZipEmailFunnel
+          zip={zip}
+          html={seedEmailHtml}
+          refParam={typeof sp.ref === "string" && sp.ref ? sp.ref : null}
+        />
+      )}
 
       {/* ── Live local pulse — grain-ordered, empty-tolerant (Phase C) ── */}
       <PulseNearby zip={zip} items={pulseNearby} />
