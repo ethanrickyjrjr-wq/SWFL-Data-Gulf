@@ -81,7 +81,7 @@ function splitCsvLine(line: string): string[] {
 }
 
 /** Normalize a domain: strip scheme, path, and a leading www. (lowercased). */
-function normalizeDomain(raw: string): string | undefined {
+export function normalizeDomain(raw: string): string | undefined {
   const d = raw
     .trim()
     .toLowerCase()
