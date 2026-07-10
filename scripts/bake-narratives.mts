@@ -77,12 +77,18 @@ function parseSections(raw: string): NarrativeSectionsData {
 
 async function main(): Promise<number> {
   const args = parseArgs(process.argv.slice(2));
-  const adapter = SURFACE_ADAPTERS[args.surface];
-  if (!adapter) {
-    console.error(
-      `unknown surface "${args.surface}" — known: ${Object.keys(SURFACE_ADAPTERS).join(", ")}`,
-    );
+  const surfaces = args.surface === "all" ? Object.keys(SURFACE_ADAPTERS) : [args.surface];
+  if (args.surface === "all" && args.keys) {
+    console.error("--keys requires a single named --surface (not all)");
     return 1;
+  }
+  for (const surface of surfaces) {
+    if (!SURFACE_ADAPTERS[surface]) {
+      console.error(
+        `unknown surface "${surface}" — known: ${Object.keys(SURFACE_ADAPTERS).join(", ")}, all`,
+      );
+      return 1;
+    }
   }
 
   const cadence = shouldRunToday(process.env.BAKE_CADENCE, new Date());
@@ -103,77 +109,82 @@ async function main(): Promise<number> {
     return 1;
   }
 
-  const keys = args.keys ?? (await adapter.list());
-  const existing = args.force ? new Map<string, string>() : await loadInputsHashes(args.surface);
+  // ONE shared run cap across every surface in this invocation — a `--surface
+  // all` run can never spend more than a single-surface run could.
   const cap = runCapUsd();
-
   let spent = 0;
   let baked = 0;
   let skipped = 0;
   let failed = 0;
   const failures: string[] = [];
 
-  for (const key of keys) {
-    const inputs = await adapter.assemble(key);
-    if (!inputs) {
-      skipped++;
-      continue;
-    }
-    const hash = inputsHash(inputs);
-    if (existing.get(key) === hash) {
-      skipped++;
-      continue;
-    }
-    if (args.dryRun) {
-      console.log(`[bake] would bake ${args.surface}/${key} (${inputs.facts.length} facts)`);
-      baked++;
-      continue;
-    }
-    if (spent >= cap) {
-      console.error(
-        `[bake] RUN CAP: $${spent.toFixed(2)} logged >= $${cap.toFixed(2)} (NARRATIVE_BAKE_RUN_CAP_USD) — stopping with ${keys.length - baked - skipped - failed} keys unprocessed`,
-      );
-      failures.push(`run cap hit at $${spent.toFixed(2)}`);
-      break;
-    }
+  outer: for (const surface of surfaces) {
+    const adapter = SURFACE_ADAPTERS[surface];
+    const keys = args.keys ?? (await adapter.list());
+    const existing = args.force ? new Map<string, string>() : await loadInputsHashes(surface);
 
-    const { system, user } = buildNarrativePrompt(inputs);
-    try {
-      const client = getAnthropic("narrative_bake");
-      const response = await client.messages.create({
-        model: SYNTHESIS_MODEL,
-        max_tokens: NARRATIVE_MAX_TOKENS,
-        system,
-        messages: [{ role: "user", content: user }],
-      });
-      spent += computeCostUsd(response.model, response.usage);
-      const text = response.content.find((b) => b.type === "text")?.text ?? "";
-      const sections = parseSections(text);
-      const errors = validateNarrative(sections, inputs);
-      if (errors.length > 0) {
-        failed++;
-        failures.push(`${key}: ${errors.join("; ")}`);
-        console.error(
-          `[bake] ${args.surface}/${key} FAILED validation (previous row kept):\n  ${errors.join("\n  ")}`,
-        );
+    for (const key of keys) {
+      const inputs = await adapter.assemble(key);
+      if (!inputs) {
+        skipped++;
         continue;
       }
-      await upsertNarrative({
-        surface: args.surface,
-        surface_key: key,
-        sections,
-        inputs_hash: hash,
-        sources: inputs.sources,
-        model: response.model,
-      });
-      baked++;
-      console.log(`[bake] ${args.surface}/${key} baked ($${spent.toFixed(3)} run total)`);
-    } catch (e) {
-      failed++;
-      failures.push(`${key}: ${e instanceof Error ? e.message : String(e)}`);
-      console.error(`[bake] ${args.surface}/${key} errored:`, e instanceof Error ? e.message : e);
-      // SpendCapError from the metered seam = structural stop, not per-key noise.
-      if (e instanceof Error && e.name === "SpendCapError") break;
+      const hash = inputsHash(inputs);
+      if (existing.get(key) === hash) {
+        skipped++;
+        continue;
+      }
+      if (args.dryRun) {
+        console.log(`[bake] would bake ${surface}/${key} (${inputs.facts.length} facts)`);
+        baked++;
+        continue;
+      }
+      if (spent >= cap) {
+        console.error(
+          `[bake] RUN CAP: $${spent.toFixed(2)} logged >= $${cap.toFixed(2)} (NARRATIVE_BAKE_RUN_CAP_USD) — stopping with keys unprocessed`,
+        );
+        failures.push(`run cap hit at $${spent.toFixed(2)}`);
+        break outer;
+      }
+
+      const { system, user } = buildNarrativePrompt(inputs);
+      try {
+        const client = getAnthropic("narrative_bake");
+        const response = await client.messages.create({
+          model: SYNTHESIS_MODEL,
+          max_tokens: NARRATIVE_MAX_TOKENS,
+          system,
+          messages: [{ role: "user", content: user }],
+        });
+        spent += computeCostUsd(response.model, response.usage);
+        const text = response.content.find((b) => b.type === "text")?.text ?? "";
+        const sections = parseSections(text);
+        const errors = validateNarrative(sections, inputs);
+        if (errors.length > 0) {
+          failed++;
+          failures.push(`${key}: ${errors.join("; ")}`);
+          console.error(
+            `[bake] ${surface}/${key} FAILED validation (previous row kept):\n  ${errors.join("\n  ")}`,
+          );
+          continue;
+        }
+        await upsertNarrative({
+          surface,
+          surface_key: key,
+          sections,
+          inputs_hash: hash,
+          sources: inputs.sources,
+          model: response.model,
+        });
+        baked++;
+        console.log(`[bake] ${surface}/${key} baked ($${spent.toFixed(3)} run total)`);
+      } catch (e) {
+        failed++;
+        failures.push(`${key}: ${e instanceof Error ? e.message : String(e)}`);
+        console.error(`[bake] ${surface}/${key} errored:`, e instanceof Error ? e.message : e);
+        // SpendCapError from the metered seam = structural stop, not per-key noise.
+        if (e instanceof Error && e.name === "SpendCapError") break outer;
+      }
     }
   }
 

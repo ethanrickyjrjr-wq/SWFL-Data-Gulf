@@ -11,8 +11,8 @@ on:
   workflow_dispatch:
     inputs:
       surface:
-        description: "Surface to bake"
-        default: "zip"
+        description: "Surface to bake (zip | corridor | brain | all)"
+        default: "all"
       force:
         description: "Bypass cadence + delta gates (full rebake)"
         type: boolean
@@ -41,5 +41,5 @@ jobs:
       - name: Bake narratives
         run: >
           bun scripts/bake-narratives.mts
-          --surface "${{ inputs.surface || 'zip' }}"
+          --surface "${{ inputs.surface || 'all' }}"
           ${{ inputs.force == true && '--force' || '' }}
