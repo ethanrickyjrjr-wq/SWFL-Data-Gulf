@@ -1,3 +1,22 @@
+## 2026-07-10 (Fable 5 · main) — outreach brand injection BUILT: fixture-first resolver + brand-pilot CLI
+
+Executed `docs/superpowers/plans/2026-07-10-outreach-brand-injection.md` inline (6 tasks, TDD, 5
+commits `71fed0c8..e1eb76bf`): `lib/email/outreach/brand-fixtures.ts` loader/validator (8 tests;
+all 26 indexed repo fixtures validate) · `brand-resolver.ts` `makeFixtureFirstEnrich` on the
+`CampaignDeps.enrich` seam (6 tests incl. empty-fixtures byte-parity tripwire; `BrandEnrichment.
+source` union gains `fixture:<slug>` — composeCampaign UNTOUCHED, provenance flows to run-report
+`brandSource`) · CLI wiring + DRY smoke PROVEN: johnrwood.com recipient → `fixture:john-r-wood`,
+primary #219653 in preview + arrival URL preload, zero scrape/paid calls (evidence
+`outreach-runs/2026-07-10T17-37-26-714Z/`) · `scripts/outreach/pilot-lib.mts` Brandfetch mapper
+(5 tests + 1 SKIP pinned to the future live probe; api-confidence hard-capped 0.7) ·
+`brand-pilot.mts` rank mode verified on the LIVE DBPR RE_rgn7.csv (no header, quoted cells,
+positional cols — 27,292 current Lee/Collier agents, 2,848 employers; `splitCsvLine` exported for
+reuse) + fetch mode dry-run default, never-overwrite-curated, corp-list gate → unconfirmed/.
+Gates: bun 1426/1 skip/0 fail · eslint clean · `bunx next build` ✓ ×2. OPEN (operator):
+`brandfetch_key` into `.env.local` ($0-cap free dev account) → resume plan Task 4 Step 1 probe
+pin + single-domain live fetch; `outreach_brand_injection_live_verify` left OPEN with DRY
+evidence noted (close on DRY or hold for live send — operator's call). NOT pushed.
+
 ## 2026-07-10 (Fable 5 · main) — contact-factory handoff committed + checks opened (outreach split, session A wrap)
 
 Companion to the brand-injection spec (committed/pushed by lane B below): the SPLIT ruling's
