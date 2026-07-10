@@ -1,3 +1,32 @@
+## 2026-07-10 (Fable 5 · main) — zip-page Phase E BUILT: narration on corridor + brain pages, ReportAi one-root, --surface all cron
+
+Executed `docs/superpowers/plans/2026-07-10-zip-page-phase-e-report-pages.md` (8 tasks, commit per
+task, `3e88b965..208dcf3e`). **One root (spec §One root #1):** new `app/r/_components/report-ai.tsx`
+(`ReportAi` — flag gate + `buildReportId` encoding + MetricSuggestion normalization, incl.
+`suggestionsForMetric` via `packId`) mounted by ALL SIX /r/ pages; no page touches
+ReportHighlightBridge anymore; both CI guards moved WITH the migration (report-surface GUARD now
+enforces literal `surface="…"` + bans direct bridge imports; grounding-coverage Check 2 retargeted
+to `report-ai` + housing-swfl ADDED to the grounded registry — it was never listed). Intentional
+delta: housing/[slug] stopped filtering zero-suggestion metrics (full provenance flows, corridor
+AUDIT-FIX precedent). **Zip glue:** `lib/zip-report/assemble.ts` is the ONE assembly root (page +
+bake adapter consume it; `inputsHash('33901')` byte-identical pre/post: `4306cd2b…`). **New bake
+surfaces:** corridor (27 dry-run proven; metric rows shared via extracted
+`app/r/cre-swfl/corridor-metrics.ts`) + brain (39/41 assemble; 2 skip on zero display metrics;
+list mirrors the sitemap registry). `BakeInputs.surface` widened from literal `'zip'` (Phase B
+latent bug — `next build` fail-fast had masked it behind a parallel session's transient error).
+**Pages:** corridor pages mount NarrativeSections + "What's happening along {corridor}"
+(`lib/pulse/corridor-nearby.ts` + `rankCorridorPulse` over city_pulse_corridors geo columns —
+corridor-key locality, no centroid banding; PulseNearby gained heading/wideSuffix props, zip
+call site byte-compatible); `/r/[slug]` + `/r/housing-swfl` mount narration off the SAME
+('brain', slug) row. **Cron:** `--surface all` iterates every adapter under ONE shared $1 run cap
+(`--keys`+all rejected, exit 1); workflow schedule + dispatch default now `all`. Cost: ~68 new
+surfaces ≈ $1.77 full first bake — still operator-gated, splits across runs like zip. Gates:
+4,119 bun tests green · `bunx next build` ✓ · `--surface all --dry-run --force` = 157 would-bake
+· prod-smoke: corridor/brain/zip pages 200, sections correctly absent (0 baked rows — renders
+land with live-verify). Communities/neighborhood surface DEFERRED → check
+`narratives_communities_surface` (RULE 2.4). `zip_page_destination_live_verify` stays open.
+NOT pushed — awaiting operator.
+
 ## 2026-07-10 (Fable 5 · main) — comp helper: Q2 polish ($/sqft + condition caveat) + SteadyAPI key restored to gh secrets
 
 Verified the Phase 2B comp helper is FULLY BUILT (v1 `6027a608`, chart `514658af`, pasted-link
