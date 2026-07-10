@@ -1,3 +1,15 @@
+## 2026-07-10 (Fable 5 · main) — CSV/formula-injection policy PINNED: store raw, escape at exit
+
+Check `contacts_csv_injection_policy` (19d overdue) decided with the operator after a live OWASP
+CSV-Injection research pass (crawl4ai) + code probe: every CSV module in the repo is a PARSER —
+zero export surface today — so import-side mangling is the wrong layer (corrupts legit `-`/`@`
+names and OWASP says escaping still fails in Excel after re-save). Commit 37db31b6: one-root
+`lib/email/csv-escape.ts` (`escapeCsvCell`/`toCsvLine` — quote + double-`"` + `'`-prefix on
+`= + - @` tab/CR/LF + full-width variants), OWASP worked examples locked in
+`csv-escape.test.ts` (8 pass; full lib/email 1,337 pass / 0 fail), policy pinned in
+`lib/email/CLAUDE.md`. Check stays OPEN until this lands in a push (close in that push's UPDATE
+step). NOT pushed — operator confirmation required.
+
 ## 2026-07-10 (Fable 5 · main) — email fence punch list FINISHED: items #3-#6 built (list itself now fully cleared of build work)
 
 Picked up `docs/handoff/2026-07-09-email-fence-punch-list.md`; verified #1/#2 already shipped by
