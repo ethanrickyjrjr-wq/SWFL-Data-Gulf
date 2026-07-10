@@ -57,9 +57,9 @@ def test_expires_at_adds_ttl():
 def test_extract_tool_is_corridor_named():
     assert EXTRACT_TOOL["name"] == "record_corridor_facts"
     props = EXTRACT_TOOL["input_schema"]["properties"]["facts"]["items"]["properties"]
-    assert set(props) == {"topic", "fact", "cite", "story_key"}
+    assert set(props) == {"topic", "fact", "cite", "story_key", "location_anchor"}
     required = EXTRACT_TOOL["input_schema"]["properties"]["facts"]["items"]["required"]
-    assert required == ["topic", "fact", "cite", "story_key"]
+    assert required == ["topic", "fact", "cite", "story_key", "location_anchor"]
 
 
 # ── rows_from_extraction — keyed on `corridor` ───────────────────────────────
@@ -192,3 +192,24 @@ def test_build_distill_prompt_no_grounding_block_when_empty():
 # slugify re-exported for parity with the daily module surface
 def test_slugify_story_key_reexported():
     assert slugify_story_key("Immokalee Rd!! Retail") == "immokalee-rd-retail"
+
+
+# ---------------------------------------------------------------------------
+# location_anchor (Phase C — zip-radius pulse news)
+# ---------------------------------------------------------------------------
+
+def test_extract_tool_has_location_anchor():
+    items = EXTRACT_TOOL["input_schema"]["properties"]["facts"]["items"]
+    assert items["properties"]["location_anchor"]["type"] == ["string", "null"]
+
+
+def test_rows_carry_location_anchor():
+    extraction = {"facts": [
+        {"topic": "business", "fact": "F1", "cite": 1, "story_key": "s-one",
+         "location_anchor": "  Coconut Point  "},
+        {"topic": "business", "fact": "F2", "cite": 1, "story_key": "s-two",
+         "location_anchor": None},
+        {"topic": "business", "fact": "F3", "cite": 1, "story_key": "s-three"},
+    ]}
+    rows = rows_from_extraction(_capture(), extraction)
+    assert [r["location_anchor"] for r in rows] == ["Coconut Point", None, None]

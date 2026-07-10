@@ -179,3 +179,28 @@ def test_reconcile_sql_shape():
     assert "LEAST(cp.expires_at, head.keep_expires)" in sql  # FK-safe expiry cap
     assert "IS DISTINCT FROM head.keep_id" in sql        # idempotent
     assert "superseded_by" in sql
+
+
+# ---------------------------------------------------------------------------
+# location_anchor (Phase C — zip-radius pulse news)
+# ---------------------------------------------------------------------------
+
+from ingest.pipelines.city_pulse.distill import EXTRACT_TOOL
+
+
+def test_extract_tool_has_location_anchor():
+    items = EXTRACT_TOOL["input_schema"]["properties"]["facts"]["items"]
+    assert items["properties"]["location_anchor"]["type"] == ["string", "null"]
+    assert "location_anchor" in items["required"]
+
+
+def test_rows_carry_location_anchor():
+    extraction = {"facts": [
+        {"topic": "business", "fact": "F1", "cite": 1, "story_key": "s-one",
+         "location_anchor": "  Coconut Point  "},
+        {"topic": "business", "fact": "F2", "cite": 1, "story_key": "s-two",
+         "location_anchor": None},
+        {"topic": "business", "fact": "F3", "cite": 1, "story_key": "s-three"},
+    ]}
+    rows = rows_from_extraction(_capture(), extraction)
+    assert [r["location_anchor"] for r in rows] == ["Coconut Point", None, None]

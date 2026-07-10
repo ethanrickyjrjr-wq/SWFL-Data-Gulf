@@ -65,8 +65,10 @@ EXTRACT_TOOL = {
                         "cite": {"type": "integer", "description": "The number of the citation span (from the numbered list) that backs this fact."},
                         "story_key": {"type": "string",
                                   "description": "Stable lowercase-kebab slug naming the underlying story/entity/deal this fact is about (e.g. 'amazon-lehigh-distribution-center'). If this fact continues one of the already-tracked stories listed in the prompt, return that EXACT slug. Otherwise mint a new concise kebab slug from the core entity + place. Use the SAME slug for every fact in THIS response that is about the same story. Never paraphrase an existing slug."},
+                        "location_anchor": {"type": ["string", "null"],
+                                  "description": "The MOST SPECIFIC place this fact names below corridor grain: a street address ('4125 Cleveland Ave'), an intersection, a named plaza/mall/landmark ('Coconut Point'), or a named neighborhood/subdivision ('Pelican Bay'). null when the fact is corridor-wide or names no more specific place. Copy the place text verbatim from the span — never guess one."},
                     },
-                    "required": ["topic", "fact", "cite", "story_key"],
+                    "required": ["topic", "fact", "cite", "story_key", "location_anchor"],
                 },
             }
         },
@@ -113,6 +115,7 @@ def rows_from_extraction(capture: dict[str, Any], extraction: dict[str, Any]) ->
             "expires_at": expires_at_for(topic, captured_at),
             "dedup_key": dedup_key(capture["corridor"], url),
             "story_key": slugify_story_key(f.get("story_key") or "") or None,
+            "location_anchor": ((f.get("location_anchor") or "").strip() or None),
             "run_at": captured_at,
         })
     return rows
@@ -173,6 +176,9 @@ def build_distill_prompt(corridor: str, citations: list[dict[str, Any]], known: 
         "classify `topic`. "
         "Set `story_key` for each fact — reuse an exact slug from the tracked list "
         "above when the fact continues that story, otherwise mint a new kebab slug. "
+        "Set `location_anchor` to the most specific place each fact names below "
+        "corridor grain (street address, intersection, plaza/landmark, or "
+        "neighborhood), verbatim from the span — or null when none is named. "
         f"IMPORTANT: Only extract facts whose primary subject — the business, project, "
         f"transaction, or event — is physically located on or immediately along the "
         f"{corridor} corridor (or its immediate commercial area). SKIP facts about a "
