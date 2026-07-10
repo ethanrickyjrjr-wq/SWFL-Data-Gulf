@@ -1,3 +1,26 @@
+## 2026-07-10 (Fable 5 · main) — /charts glow-up BUILT: gauge, ZIP-heat grid, P/L multiples, tier projection + fabricated vintages killed
+
+Lane B executed end-to-end (spec `2026-07-10-charts-glowup-design.md`, plan
+`2026-07-10-charts-glowup.md`, 11 commits). Vendored at the already-pinned bklit d7cd5827:
+Gauge (+pie-center closure — the 07/08 @base-ui blocker is GONE upstream; the import actually
+lives in legend-progress and @base-ui/react was already a dep), full heatmap dir (verbatim),
+P/L line + legend dir, projection line (+end marker; support files were already vendored).
+Deps made explicit: @visx/curve (was hoisting luck), @visx/heatmap, d3-shape. New lake view
+`zhvi_zip_yoy_monthly` (32,720 rows / 109 ZIPs thru 05/31/2026, spot-checked). Four live
+panels on /charts, all browser-verified: median-hotness gauge (52.2/50 ZIPs, 07/04/2026) ·
+ZIP×month YoY heat grid (10 most-resilient vs 10 deepest-falling; buckets recalibrated after
+the live spread −17.5..−0.2% painted a ±5-only cut ONE color) · momentum as P/L small
+multiples (replaces recharts panel) · tier divergence w/ 6-month linear projection +
+[INFERENCE]+falsifier caption (luxury 150→148, starter 146→143). Fabrication kill: rent bar +
+scatter now read live corridor_profiles w/ real metrics_verified_date vintage; FIXTURE_ASOF
+gone. TWO upstream bugs found+forked (NOTICE.md): static reveal-clip id collides across
+same-page charts (tier panel rendered BLANK next to the P/L minis; useId fork) and
+HeatmapChart needs caller aspectRatio sizing. globals.css gains chart-tooltip tokens. Checks:
+CLOSED charts_vacancy_asof_fabricated, bklit_charts_evaluation (adopt/pass verdicts),
+charts_global_nav_link (already shipped in nav-config.ts). charts_glowup_live_verify open for
+post-deploy; AddChartToProject on new panels deferred to chart_social_object (noted in
+check). 148/148 chart tests, next build green. NOT pushed — awaiting operator approval.
+
 ## 2026-07-10 (Fable 5 · main) — saved-chart SOCIAL OBJECT built + verified local: OG card, download, embed
 
 Operator: "more sweet graphs/charts… user can embed a link, save it and add it to their socials
