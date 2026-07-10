@@ -17,6 +17,7 @@ on:
       - "BLS LAUS monthly"
       - "BLS QCEW quarterly"
       - "Census CBP annual"
+      - "Chief of staff nightly"
       - "City pulse daily"
       - "Collier County permits monthly"
       - "Corridor pulse weekly"

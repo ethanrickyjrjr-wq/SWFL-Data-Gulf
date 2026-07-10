@@ -1,0 +1,102 @@
+name: Chief of staff nightly
+
+# Reconciles the last 48h of git history against the open checks ledger and
+# posts a propose-only "Morning brief" issue. NEVER closes checks or touches
+# code — permissions are contents:read + issues:write only.
+# Spec: docs/superpowers/specs/2026-07-10-chief-of-staff-nightly-design.md
+# Kill switch (repo Settings -> Variables): CHIEF_OF_STAFF_ENABLED = "false"
+
+on:
+  schedule:
+    - cron: "47 8 * * *" # 08:47 UTC = 4:47 AM ET; off-hour minute (GH :00 congestion)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: chief-of-staff-nightly
+  cancel-in-progress: false
+
+jobs:
+  brief:
+    if: vars.CHIEF_OF_STAFF_ENABLED != 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history: never-started heuristic + agent git log/show
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+
+      - name: Collect evidence (deterministic, $0)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node scripts/chief-of-staff-collect.mjs --out evidence.json
+
+      - name: Reconcile (Sonnet 4.6, judgment only)
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --max-turns 30
+            --model claude-sonnet-4-6
+            --allowedTools "Read,Grep,Glob,Write,Bash(git log:*),Bash(git show:*),Bash(git diff:*)"
+          prompt: |
+            You are the nightly chief of staff for this repo. Read ./evidence.json —
+            it holds the last 48h of commits (sha, subject, files), every open check
+            (key, label, project, detail, days_untouched), live_verify checks that
+            look never-started, and the stale list.
+
+            Your ONLY job: judge which open checks the last 48h of commits actually
+            completed, then write the file ./chief-of-staff-brief.md. You may run
+            git log / git show / git diff or read files to confirm a match. You must
+            NOT close checks, edit any other file, or push anything.
+
+            Write ./chief-of-staff-brief.md with EXACTLY these four sections:
+
+            ## Close candidates
+            - <check_key> — <sha7>[, <sha7>…] — <one-line why> — HIGH|MEDIUM
+
+            ## Never started
+            - <check_key> — <one line>   (from live_verify_never_started; verify before listing)
+
+            ## Stale top 3
+            - <check_key> (<N>d) — <label>
+
+            ## No evidence
+            <N> open checks had no matching work in the window.
+
+            Hard rules:
+            - Every candidate cites at least one SHA that appears in evidence.json.
+              A deterministic lint rejects the brief otherwise — nothing posts.
+            - Max 15 candidates, ranked most-confident first.
+            - HIGH = commit message names the check's work AND touched files match.
+              MEDIUM = files match but the message is ambiguous. Anything weaker is
+              NOT a candidate — it belongs in the No-evidence count.
+            - An empty candidates list is a good outcome. Write "(none)" under the
+              section header and fill the other sections. Never pad.
+            - Sections with no items get "(none)". Plain text, no tables.
+
+      - name: Lint brief (deterministic gate)
+        run: node scripts/chief-of-staff-lint.mjs --brief chief-of-staff-brief.md --evidence evidence.json
+
+      - name: Post brief + supersede previous
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh label create morning-brief --color 0E8A16 \
+            --description "Nightly chief-of-staff brief (propose-only)" 2>/dev/null || true
+          PREV=$(gh issue list --label morning-brief --state open --json number --jq '.[].number')
+          DATE=$(date -u +%m/%d/%Y)
+          gh issue create --title "Morning brief — $DATE" \
+            --label morning-brief --body-file chief-of-staff-brief.md
+          for n in $PREV; do
+            gh issue close "$n" --comment "Superseded by today's brief."
+          done
