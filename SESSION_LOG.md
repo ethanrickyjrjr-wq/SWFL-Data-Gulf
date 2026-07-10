@@ -1,3 +1,26 @@
+## 2026-07-10 (Fable 5 · main) — market-area alerts SPECCED: event-fired deterministic emails replace calendar weekly-read content
+
+Operator critique of the calendar/AI weekly email ("anything but another email you have to delete")
+→ RULE 3.5 brainstorm + registered `market-area-alerts`; spec
+`docs/superpowers/specs/2026-07-10-market-area-alerts-design.md`, checks
+`market_area_alerts_live_verify` + `alert_signup_conversion_funnel` (deferred why-no-signups
+question, RULE 2.4) open. RULE 0.4 evidence (crawl4ai 07/10/2026, in spec): Zillow's consumer
+emails are event-fired with silence-by-design + one monthly ZIP market-report floor
+(zillow.zendesk.com art. 16115195331091); Omnisend 2025 report — automated 52% higher opens /
+332% higher clicks vs campaigns; Validity 2024 — behavioral triggers ~10x revenue; realtor.com
+hottest-ZIPs = demand(views, not held) + pace(DOM, held). Operator rulings: one engine, direct
+subscribers first; alerts + movement-gated weekly with market-area/city/county fill ladder;
+replace weekly-read's LLM content path (plumbing stays); footprint = Lee+Collier 58 ZIPs (operator
+caught my 100-ZIP overcount — crosswalk file ≠ data coverage); occasional flagged insider extra;
+per-trigger open/click tags now, dashboard in ops repo later. Design: committed market-area
+fixture (~12-18 areas; place anchor → barrier lock → county-locked nearest-centroid → band flag),
+pure detector module (threshold-cross / rank-flip / lifecycle-burst / nearby-news / heat-shift,
+snapshot-diff + fail-closed, one snapshot row per ZIP), deterministic card composer via
+`renderEmailDocHtml`, heat leaderboard from held pace/tightness/momentum. Phase D note: parallel
+session committed my funnel weave as `963964f2` (narration gate included, line 304);
+`bunx next build` re-verified green on that HEAD this session. Next: operator spec review →
+writing-plans.
+
 ## 2026-07-10 (Fable 5 · main) — CSV/formula-injection policy PINNED: store raw, escape at exit
 
 Check `contacts_csv_injection_policy` (19d overdue) decided with the operator after a live OWASP
