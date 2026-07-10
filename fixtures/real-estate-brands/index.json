@@ -90,7 +90,7 @@
       "counties": ["Lee", "Collier"],
       "primary": "#FFC72C",
       "accent": "#BEAF87",
-      "confidence": 1.0,
+      "confidence": 1,
       "file": "century-21.json"
     },
     {
@@ -120,7 +120,7 @@
       "counties": ["Collier"],
       "primary": "#002D62",
       "accent": "#8B8BBC",
-      "confidence": 1.0,
+      "confidence": 1,
       "file": "powers-realty-group.json"
     },
     {

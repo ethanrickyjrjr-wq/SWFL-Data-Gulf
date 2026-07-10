@@ -1,0 +1,17 @@
+{
+  "slug": "exprealty",
+  "company_name": "eXp Realty",
+  "domain": "exprealty.com",
+  "brand": {
+    "status": "api",
+    "palette": {
+      "primaryColor": "#19469d",
+      "accentColor": "#f6811f"
+    },
+    "confidence": 0.7,
+    "logo_url": "https://cdn.brandfetch.io/id9p9KDpwy/w/400/h/400/theme/dark/icon.png?c=1bxetk31i42hlwc245ud97rs7rgBlODsoYL",
+    "source_url": "https://api.brandfetch.io/v2/brands/domain/exprealty.com (fetched 2026-07-10)",
+    "fonts": ["Roboto", "Roboto"],
+    "notes": "Brandfetch Brand API candidate — crawl4ai-verify before emailing this brokerage."
+  }
+}
