@@ -17,12 +17,16 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = createServiceRoleClient();
-  const { data, error } = await db.from("saved_charts").select("chart_block").eq("id", id).single();
+  const { data, error } = await db
+    .from("saved_charts")
+    .select("chart_block")
+    .eq("id", id)
+    .single<{ chart_block: ChartBlock }>();
   if (error || !data) return new NextResponse("not found", { status: 404 });
 
   let png: Buffer;
   try {
-    png = chartBlockToCardPng(data.chart_block as ChartBlock);
+    png = chartBlockToCardPng(data.chart_block);
   } catch {
     // A legacy/malformed persisted block degrades to "no card" (platforms fall
     // back to a text-only unfurl — same as today), never a half-drawn 500.
