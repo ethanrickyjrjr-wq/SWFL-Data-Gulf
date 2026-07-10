@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-07-10T04:47:35.445Z",
+  "dry_run": true,
+  "mode": "mock",
+  "month": "2026-07",
+  "issue_slug": "2026-07",
+  "subject": "Insiders Edition (mock draft)",
+  "passes": ["draft"],
+  "served_by": ["mock"],
+  "ledger": [],
+  "ledger_lines": ["TOTAL $0.00 of $20.00 cap"],
+  "total_usd": 0,
+  "cap_usd": 20,
+  "warnings": [],
+  "charts": 3,
+  "preview": "issue-2026-07.html"
+}
