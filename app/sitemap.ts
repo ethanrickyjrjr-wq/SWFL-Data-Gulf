@@ -1,11 +1,9 @@
 import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import type { MetadataRoute } from "next";
-import {
-  fetchVerifiedCorridorRows,
-  toCorridorLinks,
-} from "./r/cre-swfl/corridors";
+import { fetchVerifiedCorridorRows, toCorridorLinks } from "./r/cre-swfl/corridors";
 import { SOURCE_PROVENANCE_TABLES } from "./r/source/_tables";
+import { GUIDES } from "@/lib/guides/registry";
 
 const ORIGIN = "https://www.swfldatagulf.com";
 const BRAINS_DIR = path.join(process.cwd(), "brains");
@@ -37,6 +35,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "daily",
     priority: 1.0,
   });
+
+  // ── Guides hub (/guides + /guides/[slug]) ─────────────────────────────────
+  entries.push({
+    url: `${ORIGIN}/guides`,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  });
+  for (const guide of GUIDES) {
+    entries.push({
+      url: `${ORIGIN}/guides/${guide.slug}`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    });
+  }
 
   // ── Brain report pages (/r/[slug]) ───────────────────────────────────────
   let files: string[] = [];
