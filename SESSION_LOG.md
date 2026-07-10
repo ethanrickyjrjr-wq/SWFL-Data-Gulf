@@ -1,3 +1,11 @@
+## 2026-07-10 (Fable 5 · main) — correction: spec-estate audit UNBLOCKED + built same session
+
+The entry below says plan Task 7 is BLOCKED on wrapBatchesSurface — that landed on origin
+mid-session (batch-bake `552fb630`/`ff23b2fc`), verified in code, so `scripts/audit-spec-estate.mts`
+is now BUILT (`5d17feb8`): one Haiku Batches job over 303 specs/plans via `getAnthropic("other")`
+(metered seam), dry-run proven, propose-only (`_ASSISTANT/spec-estate-audit.{json,md}` with git mv
+checklist; moves nothing). Live run stays operator-gated (first live run of a new paid surface).
+
 ## 2026-07-10 (Fable 5 · main) — chief-of-staff nightly BUILT: checks-vs-git morning brief cron (propose-only)
 
 Reconciliation-gap build (operator picked it from an agents/crons survey; n8n and Managed Agents
