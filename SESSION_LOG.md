@@ -1,3 +1,16 @@
+## 2026-07-10 (Fable 5 · main) — comp helper LIVE-VERIFIED on prod: chart lane green post key restore, 2 checks closed
+
+Runway cleared: prod deploys green again (5 consecutive Ready, verified ~03:30 ET) so the restored
+PHOTOS_API env is live — closed `main_deploy_typecheck_broken`. Live-verified the comps chart lane
+on prod `/api/assistant` (public): "comps for 1015 Cultural Park Blvd, Cape Coral 33990" returned
+the bar-chart frame (5 priced comps, honest (est.)/(list) labels, citation "SWFL Data Gulf +
+realtor.com") + correct sources accordion, zero vendor/MLS leak → closed
+`comp_helper_remaining_live_verify` (pasted-link authenticated fetch already proven 07/01; today
+re-verified the public CANT_OPEN guard fires as designed, no fetch). Proof appended to
+`verification/answer-proofs.jsonl`. `address_spine_live_verify` stays OPEN — operator-close by
+design (hero → New Listing UI walk); its engine is the same geocode→comps path just proven live,
+so it is unblocked and ready for the walk.
+
 ## 2026-07-10 (Fable 5 · main) — Seller Pack mystery resolved + campaign-builder entry-point verification (no code changes)
 
 "Seller Pack" = the Showing Prep Packet under a different name — operator confirmed. Closed
