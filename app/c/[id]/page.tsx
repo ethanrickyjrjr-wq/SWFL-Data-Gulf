@@ -7,6 +7,7 @@ import { ChartBlockView } from "@/components/charts/ChartBlockView";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 import { AddToProject } from "./AddToProject";
 import { PrintButton } from "@/components/PrintButton";
+import { ShareRow } from "./ShareRow";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,7 +29,37 @@ export async function generateMetadata({
   const db = createServiceRoleClient();
   const { data } = await db.from("saved_charts").select("chart_block").eq("id", id).single();
   const title = (data?.chart_block as ChartBlock | null)?.title ?? "Saved Chart";
-  return { title: `${title} — SWFL Data Gulf` };
+  const citation = (data?.chart_block as ChartBlock | null)?.source?.citation;
+  // OG contract per ogp.me (crawled 07/10/2026): og:title/type/url/image required;
+  // width/height/type/alt structured props on the image. Next's Metadata API emits them.
+  const base =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://www.swfldatagulf.com";
+  const pageTitle = `${title} — SWFL Data Gulf`;
+  return {
+    title: pageTitle,
+    description: citation ? `Chart · ${citation}` : "A sourced chart from SWFL Data Gulf.",
+    metadataBase: new URL(base),
+    alternates: { canonical: `/c/${id}` },
+    openGraph: {
+      title: pageTitle,
+      type: "website",
+      url: `/c/${id}`,
+      images: [
+        {
+          url: `/c/${id}/card`,
+          width: 1200,
+          height: 630,
+          type: "image/png",
+          alt: `${title} — chart by SWFL Data Gulf`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      images: [`/c/${id}/card`],
+    },
+  };
 }
 
 export default async function SavedChartPage({ params }: { params: Promise<{ id: string }> }) {
@@ -43,6 +74,8 @@ export default async function SavedChartPage({ params }: { params: Promise<{ id:
   if (error || !data) notFound();
 
   const { chart_block, source_meta, freshness_token } = data;
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://www.swfldatagulf.com";
 
   return (
     <PageShell width="narrow">
@@ -64,6 +97,8 @@ export default async function SavedChartPage({ params }: { params: Promise<{ id:
           <PrintButton reportId={id} />
         </div>
       </div>
+
+      <ShareRow id={id} title={chart_block.title} siteUrl={siteUrl} />
 
       {source_meta?.report_id && (
         <p className="mt-6 text-xs text-gray-500">
