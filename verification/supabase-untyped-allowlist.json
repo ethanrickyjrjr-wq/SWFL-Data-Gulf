@@ -13,6 +13,7 @@
   "lib/claim/claim-store.ts",
   "lib/email/market-context.ts",
   "lib/landing/load-home-map-data.ts",
+  "lib/narratives/batch-store.ts",
   "lib/narratives/store.ts",
   "lib/pulse/corridor-nearby.ts",
   "lib/pulse/nearby.ts",
