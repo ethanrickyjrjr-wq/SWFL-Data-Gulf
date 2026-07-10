@@ -23,6 +23,10 @@ import { buildNarrativePrompt, NARRATIVE_MAX_TOKENS } from "../lib/narratives/pr
 import { validateNarrative } from "../lib/narratives/validate";
 import { loadInputsHashes, upsertNarrative } from "../lib/narratives/store";
 import { assembleZipBakeInputs, listZipSurfaceKeys } from "../lib/narratives/zip-inputs";
+import {
+  assembleCorridorBakeInputs,
+  listCorridorSurfaceKeys,
+} from "../lib/narratives/corridor-inputs";
 import type { BakeInputs, NarrativeSectionsData } from "../lib/narratives/types";
 
 type Args = { surface: string; keys: string[] | null; force: boolean; dryRun: boolean };
@@ -49,6 +53,7 @@ const SURFACE_ADAPTERS: Record<
   { list: () => Promise<string[]>; assemble: (key: string) => Promise<BakeInputs | null> }
 > = {
   zip: { list: listZipSurfaceKeys, assemble: assembleZipBakeInputs },
+  corridor: { list: listCorridorSurfaceKeys, assemble: assembleCorridorBakeInputs },
 };
 
 function runCapUsd(): number {
