@@ -84,6 +84,18 @@ pass explicit `positiveColor`/`negativeColor` (gulf mangrove / sunset-coral; the
 language forbids stock-market red/green). First call site:
 `components/charts/MomentumProfitLossPanel.tsx`.
 
+**Projection Line + Reference Area (2026-07-10)** — `projection-line.tsx` and
+`projection-line-end-marker.tsx` vendored verbatim, no forks. Their support files
+(`projection-utils.ts`, `projection-config.ts`, `reference-area.tsx`,
+`reference-area-config.ts`, `reference-area-geometry.ts`,
+`reference-area-registration-context.tsx`) were ALREADY vendored in the 07/08 pass (the
+time-series shell imports them) — re-fetched at the same pin and confirmed byte-identical
+after prettier, so nothing changed. Projections render a dashed forecast segment past the
+anchor; per the rules of engagement every projection call site MUST carry `[INFERENCE]` +
+base value + one falsifier in visible copy (first call site:
+`components/charts/TierProjectionChart.tsx`). Not compatible with Brush (upstream docs) —
+Brush is not vendored.
+
 **Composed ≠ categorical out of the box (2026-07-08)** — `ComposedChart` (and by extension
 `LineChart`/`AreaChart`) is built on a shared time-series shell (`time-series-chart-shell.tsx`)
 whose x-axis accessor unconditionally does `value instanceof Date ? value : new Date(value)`.
