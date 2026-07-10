@@ -227,7 +227,7 @@ def distill_capture(capture: dict[str, Any], budget=None) -> list[dict[str, Any]
 _INSERT_COLUMNS = [
     "corridor", "topic", "fact", "source_url", "source_title",
     "cited_text", "captured_at", "expires_at", "dedup_key", "run_at",
-    "story_key",
+    "story_key", "location_anchor", "lat", "lon", "zip_code", "geo_grain",
 ]
 
 

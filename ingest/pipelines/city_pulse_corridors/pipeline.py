@@ -42,6 +42,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
 
 from ingest.lib.api_usage import RunBudget, RunBudgetExceeded  # noqa: E402
+from ingest.lib.geo_ladder import annotate_geo  # noqa: E402
 from ingest.lib.pulse_lake import build_capture, known_urls_by_unit, load_recent_articles  # noqa: E402
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402
 from ingest.lib.tier1_inventory import (  # noqa: E402
@@ -176,6 +177,11 @@ def main(argv: list[str] | None = None) -> int:
 
         try:
             rows = distill_capture(record, budget)
+            # Phase C geocode ladder ($0 vendors, cached): anchored facts gain
+            # lat/lon/zip; misses stay native corridor grain (geo_grain NULL —
+            # the spec grain enum has no 'corridor'). dry-run = no network.
+            rows = annotate_geo(rows, context="FL",
+                                fallback_grain=None, dry_run=args.dry_run)
         except RunBudgetExceeded:
             raise  # blown budget kills the whole run — never continue to the next corridor
         except Exception as exc:

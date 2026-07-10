@@ -204,3 +204,8 @@ def test_rows_carry_location_anchor():
     ]}
     rows = rows_from_extraction(_capture(), extraction)
     assert [r["location_anchor"] for r in rows] == ["Coconut Point", None, None]
+
+
+def test_insert_columns_include_geo():
+    for col in ["location_anchor", "lat", "lon", "zip_code", "geo_grain"]:
+        assert col in _INSERT_COLUMNS
