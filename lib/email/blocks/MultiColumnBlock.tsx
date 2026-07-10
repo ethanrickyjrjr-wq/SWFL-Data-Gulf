@@ -57,9 +57,15 @@ export function MultiColumnBlock({
                 src={c.imageUrl}
                 alt={c.heading ?? ""}
                 width={maxW}
+                // Fixed height + cover (AgentHeroBlock precedent): mixed-aspect
+                // card photos otherwise start each column's heading at a
+                // different y — the ragged feature row in the 07/10/2026
+                // magazine-issue capture. Outlook ignores object-fit and shows
+                // the natural aspect scaled to width — acceptable degrade.
                 style={{
                   width: "100%",
-                  height: "auto",
+                  height: `${threeUp ? 110 : 160}px`,
+                  objectFit: "cover",
                   display: "block",
                   borderRadius: "6px",
                   marginBottom: "8px",

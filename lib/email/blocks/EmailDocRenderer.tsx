@@ -15,7 +15,7 @@ export function EmailDocEmail({ doc, preview }: { doc: EmailDoc; preview?: strin
         {msoFontPin(doc)}
         <Container style={{ maxWidth: "600px", margin: "0 auto", backgroundColor: "#ffffff" }}>
           {doc.blocks.map((block) => (
-            <BlockRenderer key={block.id} block={block} globalStyle={doc.globalStyle} />
+            <BlockRenderer key={block.id} block={block} globalStyle={doc.globalStyle} emailRender />
           ))}
         </Container>
       </Body>

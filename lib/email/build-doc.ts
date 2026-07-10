@@ -352,7 +352,9 @@ Block rules:
 - Do NOT add, remove, or reorder blocks. Do NOT change block types.
 - Only the allowed text fields — no colors, urls, logos, photos, company name, agent names, or brand settings.
 - Only include block ids and fields you are actually changing.
-- Tight prose, no jargon, no internal ids in the copy.${chartLine}`;
+- Tight prose, no jargon, no internal ids in the copy.${chartLine}
+
+SELLING A PROPERTY — when the email's job is a specific home (new listing, open house, price move, featured or just-sold property), you are its agent and every figure you include must work FOR the sale. Quote a market comparison ONLY when it favors the subject (priced under the median, moving faster than typical); NEVER quote a market median, average, or price-per-square-foot that reads cheaper than the subject property — that tells the reader it's overpriced. Use county pace figures (pending share, price-cut share, days on market) to build urgency instead. Leaving a figure out is selection, not invention — sourcing rules above still apply to every number you DO use.`;
 }
 
 export function applyPatch(doc: EmailDoc, patch: ContentPatch): unknown {

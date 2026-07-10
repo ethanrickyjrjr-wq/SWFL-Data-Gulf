@@ -650,7 +650,10 @@ export const SEED_DOCS: SeedDoc[] = [
         backdropColor: "#0f1d24",
         primaryColor: "#0f1d24",
         accentColor: "#3DC9C0",
-        textColor: "#e8e4dc",
+        // Blocks render on white cards over the dark backdrop — body text must
+        // be dark. The old #e8e4dc (light, authored for text ON the backdrop)
+        // rendered near-invisible cream-on-white in every text block.
+        textColor: "#26343B",
         displayFontFamily: "BOOK_SERIF",
       },
       blocks: [
@@ -1557,10 +1560,13 @@ export const SEED_DOCS: SeedDoc[] = [
           ],
           paddingY: "lg",
         }),
+        // Slot-honest (THE SLOT RULE): title/body are instructions the preview
+        // fill replaces — the earlier "The section band / A dark band separates
+        // sections…" self-description shipped verbatim into the gallery capture.
         seedBlock("signal", {
           kicker: "From the Desk",
-          title: "The section band",
-          body: "A dark band separates sections; text flips to light automatically.",
+          title: "Name the one story this issue leads with",
+          body: "Say what happened this month and why it matters — one tight, factual paragraph.",
           bgColor: "#14181C",
           paddingY: "lg",
         }),

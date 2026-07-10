@@ -34,9 +34,14 @@ function colorFor(entry: SocialPlatformEntry, props: SocialIconsProps, accent: s
 export function SocialIconsBlock({
   props,
   globalStyle,
+  emailRender,
 }: {
   props: SocialIconsProps;
   globalStyle: EmailGlobalStyle;
+  /** True on the sendable-HTML paths — the canvas-only empty placeholder must
+   *  never reach a recipient ("Add social links in the panel →" shipped into
+   *  the stay-in-touch capture, 07/10/2026). */
+  emailRender?: boolean;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const accent = globalStyle.accentColor;
@@ -45,6 +50,10 @@ export function SocialIconsBlock({
   const size = SIZE_PX[props.iconSize ?? "md"];
 
   const entries = (props.platforms ?? []).filter((p) => p.url.trim().length > 0);
+
+  // Empty in an EMAIL → render nothing (applyBrand never fills platforms, so
+  // the placeholder would ship to real recipients).
+  if (entries.length === 0 && emailRender) return null;
 
   // Empty → a muted placeholder so the block stays visible/selectable on the
   // canvas (mirrors the image block's empty state). The user fills it in the panel.

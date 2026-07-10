@@ -159,11 +159,12 @@ export const SEED_PREVIEW_FILL: PreviewFillData = {
     },
   ],
   portrait: {
-    // Wide face-centered crop of the agent-launch portrait — the agent-hero
-    // block renders a full-width BANNER, and the tall original crops to the
-    // wallpaper above her head there (caught in set-level QA 07/09/2026).
-    url: "/showcase/seed-previews/assets/marisol-vega-banner.jpg",
-    alt: "Agent portrait",
+    // Professional 2:1 banner crop (agent-hero renders 600×300; a pre-cropped
+    // 2:1 keeps Outlook honest — it ignores object-fit). Pexels license, same
+    // lane as every pexels-*.jpg here. Replaced the marisol-vega banner
+    // (busy-wallpaper crop, operator ruling 07/10/2026).
+    url: "/showcase/seed-previews/assets/pexels-7414903-banner.jpg",
+    alt: "Agent in a navy suit at a home showing",
   },
   agentBio:
     "I work Lee County every day — my updates carry the real numbers behind the market, sourced and dated.",
@@ -273,6 +274,8 @@ interface SeedAssignment {
   listings?: Listing[];
   commentary?: string[];
   signals?: { title: string; body: string }[];
+  /** Per-seed agent portrait — so no two agent templates preview the same face. */
+  portrait?: PreviewFillData["portrait"];
   /** Editorial seeds whose baked-in body copy is an authoring instruction the
    *  slot-rule regex can't catch — replace every text body from commentary. */
   replaceTextBodies?: boolean;
@@ -483,6 +486,14 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       "Home values reset 8.1% in a year — inside the ZIPs that held firm and the ones that led the slide.",
       "21,934 homes are on the market county-wide. We picked where the money is actually moving.",
     ],
+    // The dark section band carries a real desk note — its seed copy is now
+    // slot-honest instructions, so an unfilled signal would leak them.
+    signals: [
+      {
+        title: "The reset found its floor",
+        body: "Values across Lee County ZIPs closed the year down 8.1% — but April's 3,636 recorded sales say demand never left. The story now is selection, not retreat.",
+      },
+    ],
   },
 
   // ── annual ──────────────────────────────────────────────────────────────
@@ -499,18 +510,20 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       { value: "37,040", label: "Sales Recorded · 12 Months" },
     ],
     charts: [CHART_SALE_PRICE_YEAR, CHART_SALES_BY_MONTH],
+    // Three-up card row: titles one short line, bodies near-equal length —
+    // uneven copy renders as ragged card heights in the 3×4-column layout.
     signals: [
       {
-        title: "Sales pace led the year",
-        body: "March 2026 was the busiest month of the twelve — 3,849 recorded sales — and April held nearly all of it at 3,636.",
+        title: "Sales led",
+        body: "March was the year's busiest month — 3,849 recorded sales — and April held nearly all of it at 3,636.",
       },
       {
-        title: "Prices did the giving",
-        body: "The median recorded sale drifted from $349,999 last May to $330,500 in April; the top tier gave back 7% of its value.",
+        title: "Prices gave",
+        body: "The median sale drifted from $349,999 last May to $330,500 in April; the top tier gave back 7%.",
       },
       {
-        title: "Watch rates, not headlines",
-        body: "If the 30-year rate holds near 6.49%, expect the spring pattern to repeat — volume first, price stability second.",
+        title: "Watch rates",
+        body: "If the 30-year rate holds near 6.49%, expect spring's pattern again — volume first, prices second.",
       },
     ],
     commentary: [
@@ -548,15 +561,20 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       "March was the busiest month of the year county-wide — 3,849 recorded sales — and well-priced homes led the pack.",
     ],
   },
+  // Listing-lane copy SELLS (operator ruling 07/10/2026): never quote a market
+  // figure that reads cheaper than the subject property — the earlier
+  // "$406/sqft against a county median of $223" told every reader the home was
+  // overpriced. Comparisons appear only when they favor the home; county pace
+  // stats build urgency instead. Skipping a figure is selection, not invention.
   "listing-feature": {
     hero: {
       value: "$955,000",
       label: "1430 SE 23rd St, Cape Coral · 4 bd · 3 ba · 2,350 sq ft",
-      prose: "Listed at $406 per square foot against a county median of $223.",
+      prose: "Four bedrooms, three baths, and 2,350 square feet in southeast Cape Coral.",
     },
     photos: [{ url: `${A}/swfl-stilt-beach-house.jpg`, alt: "Elevated coastal home at dusk" }],
     commentary: [
-      "Four bedrooms and 2,350 square feet in southeast Cape Coral, priced with the canal-front market — asking $406 a square foot where the county median is $223.",
+      "Room to spread out and the indoor-outdoor living Cape Coral is known for — with 25.5% of Lee County listings already pending, homes that show this well are the ones that draw the early offers. Private showings this week.",
     ],
   },
   "new-listing": {
@@ -572,7 +590,7 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
     ],
     photos: [{ url: `${A}/pexels-15334543.jpg`, alt: "Gulf-coast home with palms" }],
     commentary: [
-      "Four bedrooms across 2,010 square feet in southwest Cape Coral — listed at $303 per square foot against a county median of $223.",
+      "Four bedrooms, three baths, and 2,010 square feet in southwest Cape Coral — fresh to market at $609,000. With 25.5% of Lee County listings already pending, the homes priced right don't linger. Schedule your showing early.",
     ],
   },
   "open-house": {
@@ -680,6 +698,12 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
     ],
   },
   "stay-in-touch": {
+    // Different face from skeleton-agent-feature — no two agent templates
+    // preview the same portrait.
+    portrait: {
+      url: `${A}/pexels-36733296-banner.jpg`,
+      alt: "Agent in a gray suit in a bright lobby",
+    },
     hero: {
       value: "$433,549",
       label: "Average Lee County ZIP home value today",
@@ -694,7 +718,9 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
     ],
   },
 
-  // ── blank canvases — minimal by design: one real figure each, no charts ──
+  // ── blank canvases — the preview shows the kind of content a user would put
+  // there (operator ruling 07/10/2026: no meta "your story goes here" copy; a
+  // blank canvas previews best with a real, sourced example filling its shape).
   "skeleton-clean-white": {
     hero: { value: "$290,000", label: "Median asking price · Lee County", prose: "" },
     stats: [
@@ -703,7 +729,9 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       { value: "21,934", label: "Homes for Sale" },
     ],
     photos: [{ url: `${A}/swfl-coastal-great-room.jpg`, alt: "Open coastal great room" }],
-    commentary: ["Your story goes here — the structure is ready when you are."],
+    commentary: [
+      "Lee County handed buyers real choice this month — 21,934 homes for sale and a median ask of $290,000. If you've been waiting for leverage, this is what it looks like.",
+    ],
   },
   "skeleton-dark-pro": {
     hero: { value: "83 days", label: "Median days on market · Lee County", prose: "" },
@@ -713,15 +741,23 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       { value: "16.3%", label: "With a Price Cut" },
     ],
     photos: [{ url: `${A}/swfl-canal-night.jpg`, alt: "Canal homes at night" }],
-    commentary: ["Dark, quiet, and confident — drop your message into the frame."],
+    commentary: [
+      "Buyers are negotiating again and sellers are adjusting: 16.3% of Lee County listings have cut asking, yet 25.5% sit pending. The homes that move are priced to the market from day one.",
+    ],
   },
   "skeleton-agent-feature": {
+    portrait: {
+      url: `${A}/pexels-7414903-banner.jpg`,
+      alt: "Agent in a navy suit at a home showing",
+    },
     stats: [
       { value: "3,636", label: "April Sales · Lee County" },
       { value: "$330,500", label: "Median Sale Price" },
       { value: "83 days", label: "Median DOM" },
     ],
-    commentary: ["Introduce yourself here — the banner and stats carry the rest."],
+    commentary: [
+      "I watch this county's numbers every morning — 3,636 closings last April alone — so my clients never price on a guess. When you're ready, we'll start from the real figures.",
+    ],
   },
   "skeleton-listing-showcase": {
     hero: {
@@ -735,14 +771,20 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
       { value: "2,033", label: "Sq Ft" },
     ],
     photos: [{ url: `${A}/swfl-coastal-living-room.jpg`, alt: "Coastal living room and kitchen" }],
-    commentary: ["A photo, a price, the essentials — this shell does the showing."],
+    commentary: [
+      // A favorable comparison is the ONE kind that belongs in listing copy:
+      // $339,000 sits under the county's $396,850 June median ask.
+      "Three bedrooms and 2,033 square feet in Fort Myers at $339,000 — under the county's $396,850 median ask this June. Move-in ready, and priced like it wants to go pending.",
+    ],
   },
 };
 
 /** Text that reads as an authoring instruction, not content — seed labels put
- *  the instruction in the copy slot (THE SLOT RULE), so previews replace it. */
+ *  the instruction in the copy slot (THE SLOT RULE), so previews replace it.
+ *  Second-person "Your title and brokerage"-style slots count too — one shipped
+ *  verbatim into the agent-spotlight capture (07/10/2026). */
 const INSTRUCTION_RE =
-  /^(write|say|name|tell|describe|add|swap|use|pick|lead|open|share|explain|give|list|note|call|invite|announce|introduce|summarize|highlight|read|pull|ground|welcome|a short bio|the headline)\b|\[\[/i;
+  /^(write|say|name|tell|describe|add|swap|use|pick|lead|open|share|explain|give|list|note|call|invite|announce|introduce|summarize|highlight|read|pull|ground|welcome|your|a short bio|the headline)\b|\[\[/i;
 
 function isInstruction(s: string | undefined): boolean {
   return !!s && INSTRUCTION_RE.test(s.trim());
@@ -924,8 +966,9 @@ export function previewFill(
       case "agent-hero": {
         const p = block.props;
         if (isEmpty(p.photoUrl)) {
-          p.photoUrl = fill.portrait.url;
-          p.alt = fill.portrait.alt;
+          const portrait = assign?.portrait ?? fill.portrait;
+          p.photoUrl = portrait.url;
+          p.alt = portrait.alt;
         }
         if (fillable(p.tagline, D["agent-hero"].tagline)) p.tagline = fill.agentBio;
         break;
@@ -933,6 +976,9 @@ export function previewFill(
       case "agent-card": {
         const p = block.props;
         if (fillable(p.bio, D["agent-card"].bio)) p.bio = fill.agentBio;
+        // "Your title and brokerage"-class slots — show an example designation,
+        // never the instruction (applyBrand owns this in real sends).
+        if (isInstruction(p.title)) p.title = "Realtor® · Southwest Florida";
         break;
       }
       case "sources": {

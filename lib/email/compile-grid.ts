@@ -77,9 +77,17 @@ function groupRows(blocks: EmailBlock[]): EmailBlock[][] {
 
 /** Render ONE block to a self-contained HTML fragment (no doctype, no Suspense
  *  markers) by reusing the shared `BlockRenderer` — so `kind` tags, links, and
- *  brand styling are identical to the free tier. */
-async function renderFragment(block: EmailBlock, globalStyle: EmailGlobalStyle): Promise<string> {
-  const html = await render(createElement(BlockRenderer, { block, globalStyle }));
+ *  brand styling are identical to the free tier. `colPx` (the ghost column's
+ *  width) lets width-sensitive blocks (stats) pick a narrow layout instead of
+ *  letting their inner table expand past the column. */
+async function renderFragment(
+  block: EmailBlock,
+  globalStyle: EmailGlobalStyle,
+  colPx: number,
+): Promise<string> {
+  const html = await render(
+    createElement(BlockRenderer, { block, globalStyle, colPx, emailRender: true }),
+  );
   return html.replace(DOCTYPE_RE, "").replace(SUSPENSE_MARKER_RE, "").trim();
 }
 
@@ -134,6 +142,7 @@ export async function compileGrid(doc: EmailDoc): Promise<string> {
             key: block.id,
             block,
             globalStyle: doc.globalStyle,
+            emailRender: true,
           }),
         );
       }
@@ -142,10 +151,10 @@ export async function compileGrid(doc: EmailDoc): Promise<string> {
 
     // Multi-column: Cerberus hybrid ghost-table row.
     const cols = await Promise.all(
-      row.map(async (block) => ({
-        html: await renderFragment(block, doc.globalStyle),
-        px: colSpanToPx(block.layout?.w ?? GRID_COLS),
-      })),
+      row.map(async (block) => {
+        const px = colSpanToPx(block.layout?.w ?? GRID_COLS);
+        return { html: await renderFragment(block, doc.globalStyle, px), px };
+      }),
     );
     rowEls.push(
       createElement(

@@ -1,3 +1,28 @@
+## 2026-07-10 (Fable 5 · main) — seed-preview quality pass: stats overflow ROOT-CAUSED + listing copy now SELLS
+
+Operator escalation (screenshots): misaligned bands / "different lengths", meta copy shipping as
+content, anti-selling listing copy, one bad agent photo reused. Root cause of ALL misalignment:
+StatsBlock renders 32px values in a Row/Column table and HTML tables expand past width:100% —
+a 3-cell stats block in a w:5/w:6 ghost column overflowed the 600px container ~100-140px
+(price-reduced/rate-watch captures were 782/788px wide, not 700). Fix: compile-grid passes colPx
+→ BlockRenderer → StatsBlock stacks cells vertically when colPx/cells < 180px (test added; all 27
+recaptures now exactly 1400px, overflow class gone). Also fixed: magazine-issue "The section
+band / A dark band separates sections…" seed meta-copy → slot-honest instructions + real assigned
+signal; skeleton fills rewritten from "Your story goes here" meta to real sourced example content;
+dark-pro textColor #e8e4dc→#26343B (was cream-on-white invisible); year-in-review 3-card copy
+balanced; agent-card "Your title and brokerage" now filled (INSTRUCTION_RE += ^your);
+multi-column card images fixed-height+cover (ragged feature row); SocialIconsBlock empty-state
+"Add social links in the panel →" was shipping into SENDABLE HTML (applyBrand never fills
+platforms) — new emailRender flag renders it null on both email roots, canvas keeps placeholder.
+LISTING LANE SELLS now (operator: "killing the sale before it starts"): purged "$303-$406/sqft
+against a county median of $223" fills; SELLING A PROPERTY rule added to AUTHOR_TOOL.description
++ contentPatchSystem (favorable comparisons only; skipping a figure is selection, not invention).
+Two professional Pexels agent banners (pexels-7414903/36733296, 2:1 pre-crops) replace the
+marisol banner; per-seed portrait assignment so no two agent templates share a face. Verified:
+bun test lib/email 1385/1385 GREEN, bunx next build GREEN, recaptured previews re-viewed one by
+one. Check opened: canvas_email_stats_layout_parity (canvas still shows side-by-side; metric-card
+class remains). NOT pushed (operator gate).
+
 ## 2026-07-10 (Fable 5 · main) — /insiders freshness fix: wire leads with TODAY'S desk (operator ruling)
 
 Operator: "May monthly data in July… when we have a daily" — correct; the wire led with the

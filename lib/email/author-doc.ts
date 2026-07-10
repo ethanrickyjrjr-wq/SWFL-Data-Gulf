@@ -172,6 +172,15 @@ export const AUTHOR_TOOL = {
     "`columns` (two or three cards of heading/body/link_label — the system " +
     "supplies link destinations). A `list` block carries an optional `title` plus " +
     "`items` rows of {lead, text} (lead is a short prefix like a date tag).\n\n" +
+    "SELLING A PROPERTY — when the email's job is a specific home (new listing, " +
+    "open house, price move, featured or just-sold property), you are its agent: " +
+    "every figure you include must work FOR the sale. Quote a market comparison " +
+    "ONLY when it favors the subject (priced under the median, moving faster than " +
+    "typical); NEVER quote a market median, average, or price-per-square-foot " +
+    "that reads cheaper than the subject property — that tells the reader it's " +
+    "overpriced. Use county pace figures (pending share, price-cut share, days " +
+    "on market) to build urgency instead. The DATA MENU is what you MAY use, " +
+    "never what you must — leaving a figure out is selection, not invention.\n\n" +
     "Lead with the answer, keep prose tight, no internal ids or jargon. Always " +
     "include a footer block.",
   input_schema: {

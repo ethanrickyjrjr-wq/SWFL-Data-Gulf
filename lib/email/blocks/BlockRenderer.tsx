@@ -22,9 +22,17 @@ import { SourcesBlock } from "./SourcesBlock";
 export function BlockRenderer({
   block,
   globalStyle,
+  colPx,
+  emailRender,
 }: {
   block: EmailBlock;
   globalStyle: EmailGlobalStyle;
+  /** Rendered column width in px when the block sits in a multi-column grid row
+   *  (compile-grid passes it) — lets width-sensitive blocks pick a narrow layout. */
+  colPx?: number;
+  /** True on the sendable-HTML paths (EmailDocRenderer, compile-grid) — canvas-only
+   *  affordances (empty-state placeholders) must not reach a recipient. */
+  emailRender?: boolean;
 }) {
   switch (block.type) {
     case "header":
@@ -32,7 +40,7 @@ export function BlockRenderer({
     case "hero":
       return <HeroBlock props={block.props} globalStyle={globalStyle} />;
     case "stats":
-      return <StatsBlock props={block.props} globalStyle={globalStyle} />;
+      return <StatsBlock props={block.props} globalStyle={globalStyle} colPx={colPx} />;
     case "signal":
       return <SignalBlock props={block.props} globalStyle={globalStyle} />;
     case "text":
@@ -52,7 +60,9 @@ export function BlockRenderer({
     case "agent-hero":
       return <AgentHeroBlock props={block.props} globalStyle={globalStyle} />;
     case "social-icons":
-      return <SocialIconsBlock props={block.props} globalStyle={globalStyle} />;
+      return (
+        <SocialIconsBlock props={block.props} globalStyle={globalStyle} emailRender={emailRender} />
+      );
     case "button":
       return <ButtonBlock props={block.props} globalStyle={globalStyle} />;
     case "divider":

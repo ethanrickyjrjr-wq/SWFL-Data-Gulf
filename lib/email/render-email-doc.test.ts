@@ -44,6 +44,53 @@ const GRID_DOC: EmailDoc = {
   ],
 };
 
+/** The seed shape that overflowed the 600px container (07/10/2026 captures):
+ *  a hero beside a 3-cell stats block in a half-width column. Unbreakable 32px
+ *  values force the stats table wider than its ghost column — the narrow
+ *  variant must stack instead. */
+const NARROW_STATS_DOC: EmailDoc = {
+  globalStyle: STYLE,
+  blocks: [
+    {
+      id: "n1",
+      type: "hero",
+      props: { kicker: "Price Reduced", value: "−$25,000", label: "New Asking Price", prose: "" },
+      layout: { x: 0, y: 0, w: 6, h: 4 },
+    },
+    {
+      id: "n2",
+      type: "stats",
+      props: {
+        stats: [
+          { value: "$630,000", label: "Original Price" },
+          { value: "−$25,000", label: "Price Drop" },
+          { value: "83 days", label: "Days on Market" },
+        ],
+      },
+      layout: { x: 6, y: 0, w: 6, h: 4 },
+    },
+  ],
+};
+
+/** Same stats full-width — the classic side-by-side row must NOT stack. */
+const WIDE_STATS_DOC: EmailDoc = {
+  globalStyle: STYLE,
+  blocks: [
+    {
+      id: "w1",
+      type: "stats",
+      props: {
+        stats: [
+          { value: "$630,000", label: "Original Price" },
+          { value: "−$25,000", label: "Price Drop" },
+          { value: "83 days", label: "Days on Market" },
+        ],
+      },
+      layout: { x: 0, y: 0, w: 12, h: 4 },
+    },
+  ],
+};
+
 describe("renderEmailDocHtml — the ONE EmailDoc→HTML root", () => {
   it("free doc (no layout) is byte-identical to render(EmailDocEmail(...))", async () => {
     const viaRoot = await renderEmailDocHtml(FREE_DOC);
@@ -60,5 +107,17 @@ describe("renderEmailDocHtml — the ONE EmailDoc→HTML root", () => {
     expect(html).toContain("Right column copy.");
     const freeStacked = await render(EmailDocEmail({ doc: GRID_DOC }));
     expect(html).not.toBe(freeStacked);
+  });
+
+  it("a 3-cell stats block in a half-width grid column renders the stacked variant", async () => {
+    const html = await renderEmailDocHtml(NARROW_STATS_DOC);
+    expect(html).toContain('data-stats-variant="stacked"');
+    expect(html).toContain("$630,000");
+  });
+
+  it("a full-width stats block keeps the classic side-by-side row", async () => {
+    const html = await renderEmailDocHtml(WIDE_STATS_DOC);
+    expect(html).not.toContain('data-stats-variant="stacked"');
+    expect(html).toContain("$630,000");
   });
 });
