@@ -1,3 +1,22 @@
+## 2026-07-10 (Fable 5 · main) — chief-of-staff nightly BUILT: checks-vs-git morning brief cron (propose-only)
+
+Reconciliation-gap build (operator picked it from an agents/crons survey; n8n and Managed Agents
+rejected — RULE C2). Brainstormed → spec (`2026-07-10-chief-of-staff-nightly-design.md`) → plan
+(7 tasks) → tasks 1–5 executed inline on main, `d134c7fe..42ea2869`: `chief-of-staff-lib.mjs`
+pure functions + 17 bun tests (git-log parse, staleness ≥14d, never-started live_verify heuristic,
+brief lint: SHA-must-be-in-pack / ≤15 candidates / HIGH|MEDIUM only / required sections),
+collect+lint CLIs (smoke on real ledger: 283 open checks — 64 never-started live_verifies, 77
+stale; PostgREST truncation guard fails loudly on %1000 counts), `chief-of-staff-nightly.yml`
+(08:47 UTC off-hour; collect → claude-code-action@v1 Sonnet 4.6 --max-turns 30 read-only tools →
+deterministic lint gate → gh posts `morning-brief` issue + supersedes previous; contents:read +
+issues:write ONLY; kill switch `CHIEF_OF_STAFF_ENABLED`; watched by log-cron-incident), kickoff
+prints newest brief's top-5 close candidates (best-effort, 4s timeout). RULE 0.4 evidence in spec
+(claude-code-action README/usage crawled live 07/10/2026; Batches facts from same-day batch-bake
+crawl; model IDs/pricing from claude-api skill). Verified: 53/0 across script suites, YAML parses,
+kickoff degrades clean. NOT pushed (operator gate). Next: operator push → 2× workflow_dispatch →
+week-one grading → close `chief_of_staff_nightly_live_verify` on first scheduled run. Plan Task 7
+(Haiku Batches spec-estate audit, ~317 docs) BLOCKED on batch-narrative-bake's wrapBatchesSurface.
+
 ## 2026-07-10 (Fable 5 · main) — comp helper LIVE-VERIFIED on prod: chart lane green post key restore, 2 checks closed
 
 Runway cleared: prod deploys green again (5 consecutive Ready, verified ~03:30 ET) so the restored
