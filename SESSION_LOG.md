@@ -1,3 +1,15 @@
+## 2026-07-10 (Fable 5 · main) — contact-factory handoff committed + checks opened (outreach split, session A wrap)
+
+Companion to the brand-injection spec (committed/pushed by lane B below): the SPLIT ruling's
+second build is parked properly — handoff `docs/handoff/2026-07-10-agent-contact-factory-handoff.md`
+(DBPR RE_rgn7 weekly spine: name/brokerage/license, NO emails; mailto-only directory crawls
+joined by name+brokerage; gitignored CSV output; settle `contacts_csv_injection_policy` in the
+same build; factory GATES cycle-1 send per operator ruling). Checks opened this session:
+`outreach_brand_injection_live_verify` (via new-build.mjs) + `agent_contact_factory_build`.
+Operator rulings recorded in the spec header: hybrid brand scale · DBPR+directory contacts ·
+send waits for full factory · brand offer = one T1 line + arrival preload. Next for session A:
+writing-plans on the brand-injection spec.
+
 ## 2026-07-10 (Fable 5 · main) — push pending docs + commit outreach brand-injection spec; taking lane B (/charts glow-up)
 
 Operator: "push everything, you are on B." Committed the parallel session's approved spec
