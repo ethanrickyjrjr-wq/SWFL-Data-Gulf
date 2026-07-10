@@ -7,4 +7,7 @@ export { RadialConfidenceGauge } from "./RadialConfidenceGauge";
 export { SeasonalRadialChart } from "./SeasonalRadialChart";
 export { HurricaneRingChart } from "./HurricaneRingChart";
 export { MarketTemperatureGauge } from "./MarketTemperatureGauge";
+export { ZipMomentumHeatmap } from "./ZipMomentumHeatmap";
+export { MomentumProfitLossPanel } from "./MomentumProfitLossPanel";
+export { TierProjectionChart } from "./TierProjectionChart";
 export { ZipChoropleth } from "./ZipChoropleth";

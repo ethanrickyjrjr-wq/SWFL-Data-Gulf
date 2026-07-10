@@ -99,6 +99,14 @@ base value + one falsifier in visible copy (first call site:
 `components/charts/TierProjectionChart.tsx`). Not compatible with Brush (upstream docs) —
 Brush is not vendored.
 
+**Static clip-id collision fork (2026-07-10)** — upstream `line-chart.tsx` and
+`composed-chart.tsx` hardcode `clipPathId="chart-grow-clip"` / `"composed-chart-grow-clip"`.
+`url(#id)` resolves DOCUMENT-WIDE to the FIRST matching element, so with several LineCharts
+on one page every later chart clips its series against the first chart's grow-clip rect —
+the tier-projection panel rendered fully blank next to the three P/L minis (found via live
+DOM: 4 clipPaths, one id; forced-red strokes still invisible). Fork (both files, additive):
+suffix the id with React `useId()` so each instance owns its clip. Worth upstreaming.
+
 **Composed ≠ categorical out of the box (2026-07-08)** — `ComposedChart` (and by extension
 `LineChart`/`AreaChart`) is built on a shared time-series shell (`time-series-chart-shell.tsx`)
 whose x-axis accessor unconditionally does `value instanceof Date ? value : new Date(value)`.

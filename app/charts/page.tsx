@@ -1,11 +1,23 @@
 import Image from "next/image";
 import { PageShell } from "@/components/PageShell";
-import { MetroAreaChart, HurricaneRingChart, MarketTemperatureGauge } from "@/components/charts";
+import {
+  MetroAreaChart,
+  HurricaneRingChart,
+  MarketTemperatureGauge,
+  ZipMomentumHeatmap,
+  MomentumProfitLossPanel,
+  TierProjectionChart,
+} from "@/components/charts";
 import {
   mapMarketTemperature,
   type MarketTempRow,
   type MarketTempGaugeData,
 } from "@/lib/charts/market-temperature-series";
+import {
+  mapZipHeatmap,
+  type ZipYoYRow,
+  type ZipHeatmapData,
+} from "@/lib/charts/zip-heatmap-series";
 import { AddChartToProject } from "./AddChartToProject";
 import { mapPivotedCityRows, mapPivotedCityYoY } from "@/lib/charts/pivoted-series";
 import { mapAirportTotalWithTrend, type AirportMonthRow } from "@/lib/charts/airport-series";
@@ -14,11 +26,7 @@ import {
   mapTierYoY,
   type TierPivotedRow,
 } from "@/lib/charts/tier-divergence-series";
-import {
-  SWFL_METRO_SERIES,
-  REGION_AIR_TRAVEL_SERIES,
-  TIER_INDEXED_SERIES,
-} from "@/lib/charts/series";
+import { SWFL_METRO_SERIES, REGION_AIR_TRAVEL_SERIES } from "@/lib/charts/series";
 import type { ChartRow, ChartSeriesDef, PivotedCityMonth } from "@/types/viz";
 import type { ValueFormat } from "@/lib/charts/format";
 // KNOWN-DEBT(data_lake: reads chart aggregates from the data_lake schema (typed public only))
@@ -141,6 +149,35 @@ async function loadMarketTemperature(
   }
 }
 
+// Trailing-13-month ZIP×month YoY window for the momentum heatmap
+// (data_lake.zhvi_zip_yoy_monthly — aggregate-at-source view). 13 months ×
+// 109 ZIPs ≈ 1,400 rows, over the 1000-row PostgREST cap, so page through it.
+async function loadZipHeatmap(supabase: Supabase): Promise<{ grid: ZipHeatmapData | null }> {
+  try {
+    const since = new Date();
+    since.setUTCMonth(since.getUTCMonth() - 13);
+    const sinceIso = since.toISOString().slice(0, 10);
+    const pageSize = 1000;
+    const all: ZipYoYRow[] = [];
+    for (let from = 0; ; from += pageSize) {
+      const { data, error } = await supabase
+        .schema("data_lake")
+        .from("zhvi_zip_yoy_monthly")
+        .select("zip_code, period_end, yoy_pct")
+        .gte("period_end", sinceIso)
+        .order("period_end", { ascending: true })
+        .order("zip_code", { ascending: true })
+        .range(from, from + pageSize - 1);
+      if (error) return { grid: null };
+      all.push(...((data ?? []) as ZipYoYRow[]));
+      if (!data || data.length < pageSize) break;
+    }
+    return { grid: mapZipHeatmap(all) };
+  } catch {
+    return { grid: null };
+  }
+}
+
 // Total-passenger feed with 12-month trend overlay (public.rsw_airport_monthly).
 async function loadPassengers(supabase: Supabase): Promise<LoadedPanel> {
   try {
@@ -170,16 +207,25 @@ interface RenderedPanel extends LoadedPanel {
 
 export default async function ChartsPage() {
   const supabase = createServiceRoleClientUntyped();
-  const [homeValues, rents, passengers, homeValueMomentum, tierIndexed, tierYoY, marketTemp] =
-    await Promise.all([
-      loadMetros(supabase, "zhvi_pivoted"),
-      loadMetros(supabase, "zori_pivoted"),
-      loadPassengers(supabase),
-      loadHomeValueMomentum(supabase),
-      loadTierIndexed(supabase),
-      loadTierYoY(supabase),
-      loadMarketTemperature(supabase),
-    ]);
+  const [
+    homeValues,
+    rents,
+    passengers,
+    homeValueMomentum,
+    tierIndexed,
+    tierYoY,
+    marketTemp,
+    zipHeat,
+  ] = await Promise.all([
+    loadMetros(supabase, "zhvi_pivoted"),
+    loadMetros(supabase, "zori_pivoted"),
+    loadPassengers(supabase),
+    loadHomeValueMomentum(supabase),
+    loadTierIndexed(supabase),
+    loadTierYoY(supabase),
+    loadMarketTemperature(supabase),
+    loadZipHeatmap(supabase),
+  ]);
 
   const panels: RenderedPanel[] = [
     {
@@ -210,25 +256,10 @@ export default async function ChartsPage() {
       series: REGION_AIR_TRAVEL_SERIES,
       ...passengers,
     },
-    {
-      rootId: "home-value-momentum",
-      eyebrow: "Southwest Florida",
-      title: "Home Value Year-Over-Year Growth",
-      subtitle: "Year-over-year change — Cape Coral · Fort Myers · Naples",
-      valueFormat: "pct",
-      series: SWFL_METRO_SERIES,
-      ...homeValueMomentum,
-    },
-    {
-      rootId: "tier-gap",
-      eyebrow: "Southwest Florida",
-      title: "Luxury vs. Starter Home Price Index",
-      subtitle:
-        "Each set to 100 in Jan 2019 — regionally the two tiers have risen in near-lockstep (the K-shaped split shows up ZIP by ZIP, not in the median)",
-      valueFormat: "index",
-      series: TIER_INDEXED_SERIES,
-      ...tierIndexed,
-    },
+    // home-value-momentum + tier-gap moved off recharts: the momentum panel is
+    // now MomentumProfitLossPanel (sign-colored P/L small multiples) and the
+    // tier index is TierProjectionChart (bklit LineChart + 6-month projection),
+    // rendered below alongside this array.
     {
       rootId: "tier-momentum",
       eyebrow: "Southwest Florida",
@@ -297,6 +328,20 @@ export default async function ChartsPage() {
               />
             </div>
           ))}
+
+          <MomentumProfitLossPanel
+            data={homeValueMomentum.data}
+            asOf={homeValueMomentum.asOf}
+            error={homeValueMomentum.error}
+          />
+
+          {zipHeat.grid && <ZipMomentumHeatmap grid={zipHeat.grid} />}
+
+          <TierProjectionChart
+            data={tierIndexed.data}
+            asOf={tierIndexed.asOf}
+            error={tierIndexed.error}
+          />
         </div>
 
         <footer className="mt-12 border-t border-white/10 pt-6 text-sm text-gray-500">

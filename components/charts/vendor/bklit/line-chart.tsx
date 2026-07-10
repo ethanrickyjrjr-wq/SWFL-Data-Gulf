@@ -9,6 +9,7 @@ import {
   type ReactElement,
   type ReactNode,
   useCallback,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -180,13 +181,18 @@ function ChartInner({
   onPhaseChange,
 }: ChartInnerProps) {
   const lines = useMemo(() => extractLineConfigs(children), [children]);
+  // FORK(swfl): upstream hardcodes clipPathId="chart-grow-clip"; with several
+  // LineCharts on one page url(#chart-grow-clip) resolves DOCUMENT-WIDE to the
+  // FIRST chart's clip rect, clipping every other chart's series to the wrong
+  // geometry (an entire chart can vanish). useId makes it per-instance.
+  const clipReactId = useId();
 
   return (
     <TimeSeriesChartInner
       animationDuration={animationDuration}
       animationEasing={animationEasing}
       chartStatus={chartStatus}
-      clipPathId="chart-grow-clip"
+      clipPathId={`chart-grow-clip-${clipReactId}`}
       containerRef={containerRef}
       data={data}
       enterTransition={enterTransition}

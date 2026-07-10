@@ -7,6 +7,7 @@ import {
   isValidElement,
   type ReactElement,
   type ReactNode,
+  useId,
   useMemo,
   useRef,
 } from "react";
@@ -248,11 +249,15 @@ function ChartInner({
     [data, lines, barDataKeys, stacked],
   );
 
+  // FORK(swfl): per-instance clip id — same document-wide id-collision bug as
+  // line-chart.tsx (see the fork note there).
+  const clipReactId = useId();
+
   return (
     <TimeSeriesChartInner
       animationDuration={animationDuration}
       animationEasing={animationEasing}
-      clipPathId="composed-chart-grow-clip"
+      clipPathId={`composed-chart-grow-clip-${clipReactId}`}
       composedBarDataKeys={barDataKeys.length > 0 ? barDataKeys : undefined}
       composedBarGap={barGap}
       composedBarSize={barSize}
