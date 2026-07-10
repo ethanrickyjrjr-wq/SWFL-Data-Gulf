@@ -1,3 +1,19 @@
+## 2026-07-10 (Fable 5 · main) — parallel-session unblock + QR-token replay test (route-level, check-ready)
+
+Two commits from the observer session. (1) 92690019 — committed the OTHER session's completed-but-
+uncommitted 16:9 photo-ratio trio + preview-fill feature-card image slots (operator: "commit what
+you have so they can finish"); verified self-contained first (renderer maps ratios via CSS
+aspect-ratio, chart constants defined, bun test lib/email/doc 81 pass). (2) NEW
+`lib/email/__tests__/contact-import-replay.route.test.ts` — the route-level single-use replay proof
+check `contacts_singleuse_replay_e2e_test` (19d overdue) asked for: real POST handler + real
+verifyContactImportToken + real claimOnce flow against an in-memory UNIQUE(idempotency_key) ledger;
+proves 200 first use → 409 `token_already_used` replay with zero contact writes, fresh-nid recovery,
+401 tamper pre-claim. Establishes the repo's first route-handler test pattern; mock.module leak
+guarded (delegating wrappers spread the real modules — naive version broke upsert-contacts.test.ts;
+full lib/email suite 1,329 pass / 0 fail). Check stays OPEN until this lands in a push (close in
+that push's UPDATE step). Phase E + Insiders were built by the parallel session this same night —
+this session deliberately stood down from both (zero overlap footprint).
+
 ## 2026-07-10 (Fable 5 · main) — Insiders Edition Phases A+B BUILT: desk + composer, mocked e2e green, STOPPED at operator gate
 
 Executed plan Tasks 1–9 inline (TDD, 8 commits dc7602ab..dd80fa89). Phase A: `_FABLE5/` desk
