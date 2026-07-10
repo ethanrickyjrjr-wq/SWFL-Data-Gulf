@@ -27,6 +27,9 @@ export interface WeeklyReadOutgoing {
   email: string;
   subject: string;
   html: string;
+  /** Extra attribution tags (market-area alerts: ma/trigger/area/class) —
+   *  merged after the always-present wid tag. */
+  tags?: Array<{ name: string; value: string }>;
 }
 
 export interface BuildWeeklyReadBatchesInput {
@@ -54,7 +57,7 @@ export function buildWeeklyReadBatches(
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
       // wid rides on the message so the Resend webhook maps events → subscriber.
-      tags: [{ name: "wid", value: m.subscriberId }],
+      tags: [{ name: "wid", value: m.subscriberId }, ...(m.tags ?? [])],
     };
   });
 

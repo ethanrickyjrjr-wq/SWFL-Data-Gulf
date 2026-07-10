@@ -35,6 +35,25 @@ describe("buildWeeklyReadBatches", () => {
     expect(m.to).toEqual(["p1@example.com"]);
     expect(m.tags).toEqual([{ name: "wid", value: "sub-1" }]);
   });
+  it("extra tags ride each message alongside wid (market-area alerts attribution)", () => {
+    const [batch] = buildWeeklyReadBatches({
+      messages: [
+        {
+          ...msg(1),
+          tags: [
+            { name: "ma", value: "i-1" },
+            { name: "trigger", value: "lifecycle_burst" },
+            { name: "area", value: "cape-coral" },
+          ],
+        },
+      ],
+      from: "x <x@y.z>",
+      unsubBase: "https://www.swfldatagulf.com",
+    });
+    expect(batch[0].tags).toContainEqual({ name: "wid", value: "sub-1" });
+    expect(batch[0].tags).toContainEqual({ name: "trigger", value: "lifecycle_burst" });
+    expect(batch[0].tags).toContainEqual({ name: "area", value: "cape-coral" });
+  });
   it("chunks at 100 (Resend batch cap)", () => {
     const batches = buildWeeklyReadBatches({
       messages: Array.from({ length: 205 }, (_, i) => msg(i)),
