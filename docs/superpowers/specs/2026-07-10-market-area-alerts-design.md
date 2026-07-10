@@ -2,6 +2,8 @@
 
 **Date:** 2026-07-10
 **Status:** APPROVED design (operator, in-session 07/10/2026) — awaiting spec review → writing-plans
+**Amended:** 07/10/2026 — second research pass folded in (baseline welcome email, subject-line
+contract, per-recipient×trigger tracking pin, paid-tier notes, funnel calibration)
 **Check:** `market_area_alerts_live_verify` · Deferred question tracked: `alert_signup_conversion_funnel`
 **Supersedes:** the CONTENT pipeline of `2026-07-03-weekly-read-design.md` (operator ruling 07/10/2026:
 "Replace it" — the deterministic engine becomes weekly-read's content builder; that spec's subscriber
@@ -50,6 +52,39 @@ send is tagged so opens/clicks per trigger type are measurable from day one.
   methodology = market demand (unique viewers per property — proprietary, we do NOT hold) + market
   pace (days on market — we DO hold). Grounds the heat-leaderboard block: our producible variant
   ranks on pace + tightness + momentum from held fields only.
+
+### Second research pass (crawl4ai, pulled 07/10/2026 — opens + paid-conversion evidence)
+
+- **Backlinko email-marketing stats roundup** (backlinko.com/email-marketing-stats): welcome
+  emails run an 83.63% open rate and 5.1x the click-through of a regular newsletter send — the
+  single highest-engagement send available. Top unsubscribe drivers: too many emails (53.5%),
+  repetitive/redundant (46.5%), subject misaligned with content (30.4%) — the movement gate,
+  snapshot-advance-on-send, and subject-IS-the-event kill all three by construction. Only the
+  first ~37 characters of a subject are visible in the Gmail mobile app (~48 on iPhone Mail).
+  Behavior-triggered automated email = 46.9% of email-driven sales on ~2.6% of send volume
+  (corroborates the Omnisend evidence above).
+- **GetResponse Email Marketing Benchmarks** (getresponse.com/resources/reports/
+  email-marketing-benchmarks): real estate industry average = 42.71% open / 3.51% CTR — the
+  dashboard's benchmark line.
+- **Homebot** (homebot.ai + homebot.ai/pricing/agent): claims 75% average open / 52% monthly
+  engagement / <1% unsubscribe on personalized home-value digests — personal relevance is the
+  open engine; the agent-paid pitch is behavioral intel ("identify high-intent clients showing
+  signals to sell or buy"). Agent pricing: ~$25/mo lender-co-sponsored, $100/mo team, +$10 per
+  block of 100 clients.
+- **Altos Research** (altosresearch.com + altosresearch.com/pricing): $29/mo (5 branded ZIP
+  reports) · $79/mo (10 ZIPs + lead nurture for 1,000 contacts + narratives) · $149/mo (unlimited
+  in-state). Headline paid feature: "Know exactly when a lead sees a report, forwards it, or
+  searches different ZIP codes." Signup funnel = free first ZIP report (instant gratification).
+- **Keeping Current Matters** (keepingcurrentmatters.com): tiered agent subscription selling
+  "your brand, our research" local-expert positioning.
+- **Growtoro, free-to-paid playbook** (growtoro.com/blog/paid-newsletter-conversion-free-to-paid-
+  playbook, 05/24/2026): free→paid benchmarks 1% = launch, 3% = median, 5%+ = strong. Long-tenure
+  free subscribers convert at 3–5x new ones, typically month 6+ — free-list retention IS the paid
+  funnel. Highest-converting recurring mechanic = a periodic tour of what paid subscribers got.
+  Specific-outcome copy converts ~4% vs ~0.5% for vague "premium insights."
+- **Humblytics** (humblytics.com/blog/free-to-paid-newsletter-conversion-rate, 06/18/2026, citing
+  The Audiencers' 99-publisher study): freemium paywalls average 0.76% conversion per visit;
+  improving each funnel step ~10% compounds to ~46% overall conversion lift.
 
 ## Probe evidence (RULE 0.5 — what already exists; extend, never rebuild)
 
@@ -158,7 +193,8 @@ identical events. All thresholds are named exported constants (operator-set v1; 
 is out of scope).
 
 v1 detector catalog — each emits typed `MarketEvent { type, grain: "zip"|"area"|"city"|"county",
-area_id, zip?, class: "alert"|"weekly", facts: {label, from?, to?, value, unit, source}[] }`:
+area_id, zip?, class: "alert"|"weekly"|"baseline", facts: {label, from?, to?, value, unit,
+source}[] }`:
 
 - **threshold-cross** (grain zip/area): median sale price, days on market, inventory/actives, or
   sold count crossing a round level or moving ≥ a % band vs the STORED snapshot. Reuses the
@@ -201,6 +237,25 @@ flagged as usually-paid; frequency constant, e.g. every 4th issue — operator-t
 own funnel CTA (existing lab-entry root) → unsubscribe/CAN-SPAM footer (existing).
 Alert email: the firing event's cards + minimal context, same skeleton.
 
+**Baseline welcome email (added 07/10/2026, research fold-in):** a third send class, fired ONCE
+immediately on signup — "here's your market area right now": current medians + DOM for the
+subscriber's ZIP, the area's heat-rank position, and the area's most recent event(s). Same cards,
+same held numbers, no new detector — a composer entry point fed by the current snapshot assembly.
+Seeding the subscriber's ZIP snapshot row (already required for first-run ZIPs) and the welcome
+send are the same moment. Evidence: welcome emails run 83.63% opens / 5.1x CTR (Backlinko) — the
+highest-engagement send we will ever get to this person; Altos runs its whole signup funnel on the
+free first ZIP report. Without it, signup is followed by possibly days of silence at the moment of
+peak interest. Paid mention in the welcome: at most one low-key line (long-tenure subscribers are
+the ones who convert — month 6+, Growtoro; never push paid at signup).
+
+**Subject-line rules (composer contract, added 07/10/2026):** the number + place name lead the
+subject and must land inside the first ~37 characters (Gmail-app truncation limit; ~48 iPhone
+Mail) — "3 price cuts in Cape Coral" never "This week in your market area: 3 price cuts…". When a
+firing event is ZIP-grain, the subject names the subscriber's own ZIP's place, not the area label
+(personal relevance is the open engine — Homebot's claimed 75% opens ride on "YOUR home"; our
+nearest held grain of "yours" is their ZIP); area label is the fallback for area/city/county-grain
+events. Enforced by composer unit tests, not review.
+
 **Movement gate + fill ladder:** subject ZIP events → market-area sibling events → city pulse →
 county trends. With four grains feeding, a genuinely empty week should be rare (the operator's
 "most likely something will happen" — now true by construction, with zero invented content). A
@@ -209,6 +264,9 @@ truly flat week ⇒ NO send (reported skip). Never a padded or bare email.
 ### 4. Cadence, caps, runner
 
 - Daily detector pass (cron): scan all 58 ZIPs' fresh data vs snapshots, classify events, queue.
+- **Baseline class:** fired once, immediately on signup (runner handles new subscribers before the
+  daily batch); a subscriber's first alert/roundup within the same day is absorbed into it (the
+  welcome IS that day's send). Never re-fired.
 - **Alert class:** batches into at most ONE email per subscriber per day (Zillow's overnight-queue
   pattern). An alert send within the roundup window absorbs the roundup (no double-send).
 - **Weekly class:** roundup on the configured weekday, movement-gated with the fill ladder.
@@ -226,6 +284,12 @@ truly flat week ⇒ NO send (reported skip). Never a padded or bare email.
 - Webhook route grows an extract for the new tag (mirrors `extractBlastAction`) → engagement rows
   per event type. From the FIRST send we learn which triggers earn opens and tune the catalog on
   evidence.
+- **Engagement rows are per-recipient × per-trigger (pinned 07/10/2026 — paid-tier prerequisite).**
+  Not aggregate counts: each open/click row keys recipient + trigger type + area, so "which of
+  your contacts opened the price-cut alert" is a QUERY when the agent-branded tier ships, not a
+  schema migration. This intel is the headline paid feature in this exact market (Altos: "know
+  exactly when a lead sees a report"; Homebot: "identify high-intent clients") — do not optimize
+  it away into aggregates.
 - Click-wrap through the existing `/api/r/[token]` path where links need attribution.
 - **Dashboard = ops app** (house rule: ops pages live in swfldatagulf-ops, not brain-platform).
   Its own small build, out of scope here; the tags ship NOW so data accrues from day one. Scope
@@ -258,11 +322,27 @@ truly flat week ⇒ NO send (reported skip). Never a padded or bare email.
 - Fixture generator: snapshot test over the committed fixtures (place anchor, barrier lock, county
   lock, band flag) — regeneration diffs must be intentional.
 - Composer: golden EmailDoc tests (event cards, leaderboard block, insider flag, CTA + unsubscribe
-  present); render through `renderEmailDocHtml` in tests (no new renderer).
+  present); render through `renderEmailDocHtml` in tests (no new renderer). Subject-line contract
+  tests: number + place inside first 37 chars; ZIP-grain event ⇒ subscriber's own place named;
+  fallback to area label otherwise. Baseline email: golden doc + fires-once semantics (seeding the
+  snapshot and composing the welcome are one moment; a re-signup never re-fires it).
 - Runner: DRY_RUN end-to-end writes previews + sends nothing (existing harness pattern).
 - Live verify (`market_area_alerts_live_verify`, operator-run): a real subscriber receives an
   event-fired email whose every number traces to a held row; webhook logs open/click rows tagged
   with the trigger type; a flat-week dry-run shows the reported skip.
+
+## Paid-tier notes (recorded 07/10/2026 for the NEXT build — not v1 scope)
+
+- **Pricing anchors (named sources, pulled 07/10/2026):** Altos Research $29/mo (5 ZIP reports) /
+  $79/mo (10 ZIPs + nurture for 1,000 contacts) / $149/mo (unlimited in-state); Homebot agent
+  ~$25/mo co-sponsored, $100/mo team, +$10 per 100-client block; KCM tiered subscription. The
+  market clears at $29–$149/mo for agent-branded local market email, tiered by ZIP count/contacts.
+- **What agents actually pay for:** their brand on the data + per-contact engagement intel (who
+  opened, who's heating up). The v1 per-recipient × per-trigger tracking rows are the moat here.
+- **Insider-extra card copy rule:** sell a specific outcome, never "premium insights" (Growtoro:
+  specificity ~4% vs vague-premium ~0.5%). Applies from the first free issue that carries the card.
+- **Conversion expectations:** free→paid median ~3% of subscribers, converting at month 6+ of
+  tenure — free-list retention is the funnel; don't judge the paid tier on launch-month numbers.
 
 ## Out of scope (v1)
 
@@ -275,6 +355,9 @@ truly flat week ⇒ NO send (reported skip). Never a padded or bare email.
 ## Open questions (tracked, not blocking)
 
 - `alert_signup_conversion_funnel` — why do readers not subscribe? Instrumented by the dashboard
-  scope; diagnose with data.
+  scope; diagnose with data. Calibration (07/10/2026): freemium paywalls average 0.76% conversion
+  per visit (The Audiencers 99-publisher study via Humblytics) — a sub-1% page→subscribe rate is
+  NORMAL, not broken; the play once instrumented is compounding ~10% step improvements (~46%
+  overall lift), not one heroic fix.
 - Heat-rank weights and every detector threshold are [PROVISIONAL] operator-tunable constants;
   first weeks' engagement data (per-trigger opens) inform tuning.

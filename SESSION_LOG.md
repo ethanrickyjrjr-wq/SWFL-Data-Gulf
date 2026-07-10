@@ -1,3 +1,24 @@
+## 2026-07-10 (Fable 5 · main) — market-area alerts BUILT: deterministic engine verified DRY; research fold-in (opens + paid evidence)
+
+Second crawl4ai pass folded into the spec (Backlinko welcome-email 83.63% opens/5.1x CTR; GetResponse
+RE benchmarks 42.71%/3.51%; Homebot 75%-open claims + $25-100/mo agent pricing; Altos $29/79/149
+tiers + "know when a lead sees a report"; Growtoro/Humblytics free→paid 3% median, month-6+ tenure,
+0.76%/visit calibration) → 4 spec amendments: baseline welcome class, 37-char subject contract,
+per-recipient×trigger tracking PIN, paid-tier notes. Then plan
+(`docs/superpowers/plans/2026-07-10-market-area-alerts-plan.md`) executed inline, 10 commits:
+`lib/email/zip-events/` (types/detectors/heat/gate/compose/state/webhook, 47 bun tests) +
+`fixtures/swfl-market-areas.json` (19 areas / 58 ZIPs, generator with hand-authored override table,
+2 review flags: 34101 PO-box, 33955 straddle) + `market_event_snapshots` +
+`market_alert_engagement` migrations (run + verified) + runner rewrite (baseline>alert>weekly,
+safety ladder untouched, WEEKLY_READ_PREVIEW_ZIP sampler) + webhook `ma` extract + zip-page
+alert-promise reframe + daily cadence comment. Live-data findings baked in as fail-closed guards:
+sold_price=0 junk rows, MIN_SOLD_SAMPLE=5 (34102 $8.2M median on 8 sales), DOM NOT held at source
+(pace = absorption rate instead), false trailing baseline (history starts 06/27). DRY run: 58 ZIPs,
+63 events, 1 real subscriber correctly classed baseline, previews eyeballed clean. Checks:
+`market_alert_thresholds_tuning` opened (33904: 34 cuts/wk vs N=3 — big ZIPs would alert daily;
+heat rank empty until ~08/10 second sold window); `market_area_alerts_live_verify` stays open
+(operator live run). NOT pushed — awaiting operator confirmation.
+
 ## 2026-07-10 (Fable 5 · main) — batch bake + overnight cron replan SPECCED; send-window guidance SPECCED
 
 Cache-alert diagnosis → two registered builds. (1) `batch-narrative-bake`: bake moves to the
