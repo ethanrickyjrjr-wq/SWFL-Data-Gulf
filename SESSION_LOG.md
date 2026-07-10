@@ -1,3 +1,37 @@
+## 2026-07-10 (Fable 5 · main) — email fence punch list FINISHED: items #3-#6 built (list itself now fully cleared of build work)
+
+Picked up `docs/handoff/2026-07-09-email-fence-punch-list.md`; verified #1/#2 already shipped by
+the Fence 6 session (both ink checks closed). Built the rest, commit per item, TDD:
+- **#3 `email_palette_demo_figures`** (ba25184a): DEFAULT_BLOCK_PROPS follows THE SLOT RULE —
+  hero $485K / stats / listing 4521 Surfside / metric-card demo figures + the invented signal
+  claim are now empty slots with instruction labels. Guard: `default-props-slots.test.ts`.
+- **#4 `email_sources_accordion_autofill`** (48504173 + 1a2f8f15): author path collects USED
+  figures (id-selected value_figure + prose-cited via the lint's own tokenizer) →
+  `figureCitations` ("Source · MM/DD/YYYY", deduped) injected at assembly; Fence 2 zone sort
+  places it above the footer; model-emitted empty sources block filled, never duplicated.
+  Slot-fill path: `fillEmptySourcesBlock` seeds a template's EMPTY accordion post-patch from
+  cited lake figures + web-verified sources (with urls). Citations are data-seeded — the model
+  never writes them. 7 new tests.
+- **#5 `email_cadence_enrichment`** (92690019 [carried by parallel session] + 1e577930):
+  market-spotlight chart slot · just-sold photo slot · monthly-digest 2nd chart + month-in-
+  numbers list · year-in-review 2nd chart (volume) · magazine-issue feature-card image slots
+  (imageUrl:"" declares; previewFill fills declared slots only) · luxury PLAYFAIR_SERIF display
+  + 16:9 wide banner (16:9 added to the blessed PhotoRatio registry: types + block-contract +
+  schema; renderer/inspector derive).
+- **#6 `seed_previews_recapture_after_enrichment`** (95b72403): all 27 recaptured (8 rasters
+  changed), each enriched preview eyeballed. Same-pass gallery QA: digest/year kickers were
+  instruction text leaking into captures → structural; magazine feature-card bodies +
+  year-in-review close rephrased as slot-rule instructions so fills replace them. Weekly-pulse
+  3 chart slots already render 3 distinct charts (variety pass, test-enforced). SEED_PREVIEW_FILL
+  re-audited: labels name their 07/09/2026 vintages verbatim — source-faithful.
+Verified: lib/email 1329-1333 pass across runs · `bunx next build` green ×2 (one type error
+caught by build, fixed in 1a2f8f15). Coordination: default-docs claim force-released after
+42 min held with zero edits (operator-approved); preview-fill claim NOT overridden — leak fix
+moved to the template level instead. NOT pushed — awaiting operator. Close on push:
+email_palette_demo_figures · email_sources_accordion_autofill · email_cadence_enrichment ·
+seed_previews_recapture_after_enrichment. Still open (operator-run):
+template_preview_gallery_live_verify · email_accent_ink_palette_gate_live_verify.
+
 ## 2026-07-10 (Fable 5 · main) — parallel-session unblock + QR-token replay test (route-level, check-ready)
 
 Two commits from the observer session. (1) 92690019 — committed the OTHER session's completed-but-
