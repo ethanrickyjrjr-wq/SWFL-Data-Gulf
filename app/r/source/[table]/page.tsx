@@ -6,9 +6,7 @@ import {
 } from "../_tables";
 import { createServiceRoleClient } from "../../../../utils/supabase/service-role";
 import { ReportShell, ReportHeader, ReportFooter, Meta } from "../../_components/report-shell";
-import { ReportHighlightBridge } from "../../../../components/highlighter/ReportHighlightBridge";
-import { buildReportId } from "../../../../lib/highlighter/report-surface";
-import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
+import { ReportAi } from "../../_components/report-ai";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { sourceTrail } from "@/lib/nav/breadcrumbs";
 
@@ -196,7 +194,6 @@ function Shell({
   dateRange,
   statusMessage,
 }: ShellProps) {
-  const highlighterEnabled = highlighterUiEnabled();
   const content = (
     <>
       <Breadcrumbs trail={sourceTrail(label)} />
@@ -299,7 +296,7 @@ function Shell({
 
       <ReportFooter note="Provenance page for tables consumed by Brains. Rows served via a server-only Supabase service-role client; no credentials reach the browser." />
 
-      {highlighterEnabled && <ReportHighlightBridge reportId={buildReportId("source", table)} />}
+      <ReportAi surface="source" surfaceKey={table} />
     </>
   );
 

@@ -22,11 +22,7 @@ import type { LocationDossierLine } from "../../../../lib/zip-dossier";
 import { didYouMeanBanner } from "../../../../lib/location-surface";
 import { extractZipShape } from "../../../../lib/map/extract-zip-shape";
 import { ReportFooter, SectionTitle } from "../../_components/report-shell";
-import { ReportHighlightBridge } from "../../../../components/highlighter/ReportHighlightBridge";
-import { buildReportId } from "../../../../lib/highlighter/report-surface";
-import { suggestionsForMetric } from "../../../../lib/highlighter/suggestions";
-import type { MetricSuggestion } from "../../../../lib/highlighter/report-context-store";
-import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
+import { ReportAi, type ReportAiMetric } from "../../_components/report-ai";
 import { ColorLegend } from "../../_components/color-legend";
 import {
   LocationSearchBox,
@@ -306,25 +302,22 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     housing?.freshness_token ?? env?.freshness_token ?? Object.values(dossier.freshness_tokens)[0];
   const asOf = asOfFromToken(freshnessToken);
 
-  const highlighterEnabled = highlighterUiEnabled();
-
-  // ── Metric suggestions ────────────────────────────────────────────────────
-  const metricSuggestions: MetricSuggestion[] = [];
+  // ── Metric suggestions (normalized by the ReportAi one-root at mount) ─────
+  const aiMetrics: ReportAiMetric[] = [];
   if (hasHousing) {
-    const hm = (label: string, value: string): MetricSuggestion => ({
+    const hm = (label: string, value: string): ReportAiMetric => ({
       label,
-      suggestions: suggestionsForMetric({ metric: label.toLowerCase(), value }, "housing-swfl"),
       value,
-      freshnessToken,
+      packId: "housing-swfl",
     });
-    metricSuggestions.push(
+    aiMetrics.push(
       hm("Median sale price", `$${(price as number).toLocaleString()}`),
       hm("Days on market", String(dom)),
     );
-    if (saleToList != null) metricSuggestions.push(hm("Sale-to-list ratio", `${saleToList}%`));
-    if (mos != null) metricSuggestions.push(hm("Months of supply", String(mos)));
-    if (homesSold != null) metricSuggestions.push(hm("Homes sold (90 days)", String(homesSold)));
-    if (inventory != null) metricSuggestions.push(hm("Active inventory", String(inventory)));
+    if (saleToList != null) aiMetrics.push(hm("Sale-to-list ratio", `${saleToList}%`));
+    if (mos != null) aiMetrics.push(hm("Months of supply", String(mos)));
+    if (homesSold != null) aiMetrics.push(hm("Homes sold (90 days)", String(homesSold)));
+    if (inventory != null) aiMetrics.push(hm("Active inventory", String(inventory)));
   }
   if (hasFlood && floodForZip) {
     const aalVal = floodForZip.aal;
@@ -332,22 +325,20 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     const fp = {
       sourceUrl: floodSourceUrl,
       sourceLabel: floodSourceCitation || "FEMA NFIP",
-      freshnessToken,
     };
-    metricSuggestions.push({
+    aiMetrics.push({
       label: "Avg Annual Loss",
-      suggestions: suggestionsForMetric({ metric: "avg annual loss", value: aalVal }, "env-swfl"),
       value: `$${aalVal.toLocaleString(undefined, { maximumFractionDigits: 0 })} / yr`,
+      packId: "env-swfl",
+      metricKey: "avg annual loss",
       ...fp,
     });
     if (floodPctVal !== null) {
-      metricSuggestions.push({
+      aiMetrics.push({
         label: "SWFL percentile rank",
-        suggestions: suggestionsForMetric(
-          { metric: "SWFL percentile rank", value: floodPctVal },
-          "env-swfl",
-        ),
         value: `${floodPctVal}th`,
+        packId: "env-swfl",
+        metricKey: "SWFL percentile rank",
         ...fp,
       });
     }
@@ -629,13 +620,12 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
         <ReportFooter freshnessToken={freshnessToken} />
       </div>
 
-      {highlighterEnabled && (
-        <ReportHighlightBridge
-          reportId={buildReportId("zip", zip)}
-          freshnessToken={freshnessToken}
-          metricSuggestions={metricSuggestions}
-        />
-      )}
+      <ReportAi
+        surface="zip"
+        surfaceKey={zip}
+        freshnessToken={freshnessToken}
+        metrics={aiMetrics}
+      />
     </div>
   );
 }

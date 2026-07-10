@@ -22,9 +22,7 @@ import { ReportChart } from "../../../components/charts/ReportChart";
 import DigestSubscribe from "../../../components/email/DigestSubscribe";
 import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
 import { PrintButton } from "../../../components/PrintButton";
-import { ReportHighlightBridge } from "../../../components/highlighter/ReportHighlightBridge";
-import { buildReportId } from "../../../lib/highlighter/report-surface";
-import { highlighterUiEnabled } from "../../../lib/highlighter/flag";
+import { ReportAi } from "../_components/report-ai";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -136,8 +134,6 @@ export default async function HousingPage() {
   const housingBoxes = toBoxes(housingParsed.output.key_metrics ?? [], HOUSING_SHORT);
   const stressBoxes = toBoxes(stressParsed?.output.key_metrics ?? [], STRESS_SHORT);
 
-  const highlighterEnabled = highlighterUiEnabled();
-
   return (
     <ReportShell>
       <Breadcrumbs trail={reportTrail(housing.title)} />
@@ -197,23 +193,19 @@ export default async function HousingPage() {
 
       <ReportFooter freshnessToken={housing.freshnessToken} />
 
-      {highlighterEnabled && (
-        <ReportHighlightBridge
-          reportId={buildReportId("brain", "housing-swfl")}
-          conclusion={housing.conclusion}
-          freshnessToken={housing.freshnessToken}
-          metricSuggestions={housing.metrics
-            .filter((m) => m.suggestions.length > 0)
-            .map((m) => ({
-              label: m.label,
-              value: typeof m.value === "string" ? m.value : String(m.value),
-              suggestions: m.suggestions,
-              sourceUrl: m.sourceUrl,
-              sourceLabel: m.sourceLabel,
-              freshnessToken: housing.freshnessToken,
-            }))}
-        />
-      )}
+      <ReportAi
+        surface="brain"
+        surfaceKey="housing-swfl"
+        conclusion={housing.conclusion}
+        freshnessToken={housing.freshnessToken}
+        metrics={housing.metrics.map((m) => ({
+          label: m.label,
+          value: m.value,
+          suggestions: m.suggestions,
+          sourceUrl: m.sourceUrl,
+          sourceLabel: m.sourceLabel,
+        }))}
+      />
     </ReportShell>
   );
 }

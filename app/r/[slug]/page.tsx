@@ -26,8 +26,7 @@ import { ColorLegend } from "../_components/color-legend";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { reportTrail } from "@/lib/nav/breadcrumbs";
 import { ReportChart } from "../../../components/charts/ReportChart";
-import { ReportHighlightBridge } from "../../../components/highlighter/ReportHighlightBridge";
-import { highlighterUiEnabled } from "../../../lib/highlighter/flag";
+import { ReportAi } from "../_components/report-ai";
 import { AnswerText } from "../../../components/answer/AnswerText";
 import { PrintButton } from "../../../components/PrintButton";
 import DigestSubscribe from "../../../components/email/DigestSubscribe";
@@ -168,8 +167,6 @@ export default async function ReportPage({ params }: PageProps) {
       direction: m.direction,
     }));
 
-  const highlighterEnabled = highlighterUiEnabled();
-
   const pageContent = (
     <>
       <Breadcrumbs trail={reportTrail(display.title)} />
@@ -255,27 +252,23 @@ export default async function ReportPage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
 
       {/* Publishes this report's context to the app-root highlighter + pill (both
-          siblings of this page). The highlighter UI itself lives at the root now
-          (GlobalHighlighter); this just feeds it the report identity. Gated behind
-          HIGHLIGHTER_UI (default ON): when off, no bridge → the root pill falls back
-          to standalone and MetricsTable renders plain <span> values (no FactChips). */}
-      {highlighterEnabled && (
-        <ReportHighlightBridge
-          reportId={slug}
-          conclusion={display.conclusion}
-          freshnessToken={display.freshnessToken}
-          metricSuggestions={display.metrics
-            .filter((m) => m.suggestions.length > 0)
-            .map((m) => ({
-              label: m.label,
-              value: typeof m.value === "string" ? m.value : String(m.value),
-              suggestions: m.suggestions,
-              sourceUrl: m.sourceUrl,
-              sourceLabel: m.sourceLabel,
-              freshnessToken: display.freshnessToken,
-            }))}
-        />
-      )}
+          siblings of this page) via ReportAi — the ONE root that owns the flag gate,
+          reportId encoding, and MetricSuggestion normalization. When HIGHLIGHTER_UI
+          is off it renders nothing → the root pill falls back to standalone and
+          MetricsTable renders plain <span> values (no FactChips). */}
+      <ReportAi
+        surface="brain"
+        surfaceKey={slug}
+        conclusion={display.conclusion}
+        freshnessToken={display.freshnessToken}
+        metrics={display.metrics.map((m) => ({
+          label: m.label,
+          value: m.value,
+          suggestions: m.suggestions,
+          sourceUrl: m.sourceUrl,
+          sourceLabel: m.sourceLabel,
+        }))}
+      />
     </>
   );
 

@@ -5,9 +5,7 @@ import {
 } from "../../../../refinery/lib/methodology-registry.mts";
 import { isPublishedSourceTable } from "../../source/_tables";
 import { ReportShell, ReportHeader, ReportFooter, Meta } from "../../_components/report-shell";
-import { ReportHighlightBridge } from "../../../../components/highlighter/ReportHighlightBridge";
-import { buildReportId } from "../../../../lib/highlighter/report-surface";
-import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
+import { ReportAi } from "../../_components/report-ai";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { methodTrail } from "@/lib/nav/breadcrumbs";
 
@@ -39,7 +37,6 @@ export default async function MethodPage({ params }: PageProps) {
 
 function Method({ metric, entry }: { metric: string; entry: MethodologyEntry }) {
   const showSourceLink = entry.sourceTable ? isPublishedSourceTable(entry.sourceTable) : false;
-  const highlighterEnabled = highlighterUiEnabled();
 
   const content = (
     <>
@@ -118,7 +115,7 @@ function Method({ metric, entry }: { metric: string; entry: MethodologyEntry }) 
 
       <ReportFooter note="Methodology page — what this metric measures and how it is derived. Values are audited against the linked source rows; this page explains the formula, not a track record." />
 
-      {highlighterEnabled && <ReportHighlightBridge reportId={buildReportId("method", metric)} />}
+      <ReportAi surface="method" surfaceKey={metric} />
     </>
   );
 

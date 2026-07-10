@@ -22,10 +22,8 @@ import {
 } from "../../_components/report-shell";
 import { MetricsTable, type MetricRow } from "../../_components/metrics-table";
 import { ColorLegend } from "../../_components/color-legend";
-import { ReportHighlightBridge } from "../../../../components/highlighter/ReportHighlightBridge";
+import { ReportAi } from "../../_components/report-ai";
 import { AnswerText } from "../../../../components/answer/AnswerText";
-import { buildReportId } from "../../../../lib/highlighter/report-surface";
-import { highlighterUiEnabled } from "../../../../lib/highlighter/flag";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { corridorTrail } from "@/lib/nav/breadcrumbs";
 
@@ -85,7 +83,6 @@ export default async function CorridorPage({ params }: PageProps) {
   const displayN = c.display_name ?? displayNameFor(c.name);
   const metrics = buildMetricRows(c);
   const ld = corridorJsonLd(c, freshnessToken, displayN);
-  const highlighterEnabled = highlighterUiEnabled();
 
   const pageContent = (
     <>
@@ -168,26 +165,23 @@ export default async function CorridorPage({ params }: PageProps) {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
 
-      {highlighterEnabled && (
-        <ReportHighlightBridge
-          reportId={buildReportId("corridor", corridor)}
-          conclusion={
-            c.character_render ? stripCitations(c.character_render).slice(0, 500) : undefined
-          }
-          freshnessToken={freshnessToken || undefined}
-          // [AUDIT-FIX C-meta EXTENDED] Carry the corridor metric rows so the popup
-          // gets each figure's value + source + freshness for "File this figure".
-          // No precomputed chips here, so suggestions are empty (the popup falls
-          // back to type-aware chips) — but provenance now flows.
-          metricSuggestions={metrics.map((m) => ({
-            label: m.label,
-            value: typeof m.value === "string" ? m.value : String(m.value),
-            suggestions: [],
-            sourceUrl: m.sourceUrl ?? undefined,
-            freshnessToken: freshnessToken || undefined,
-          }))}
-        />
-      )}
+      {/* Report AI context — ReportAi is the ONE root (gate + encoding + normalization).
+          Metric rows ride along so the popup gets each figure's value + source +
+          freshness for "File this figure"; no precomputed chips, so the popup falls
+          back to type-aware chips — provenance flows. */}
+      <ReportAi
+        surface="corridor"
+        surfaceKey={corridor}
+        conclusion={
+          c.character_render ? stripCitations(c.character_render).slice(0, 500) : undefined
+        }
+        freshnessToken={freshnessToken || undefined}
+        metrics={metrics.map((m) => ({
+          label: m.label,
+          value: typeof m.value === "string" ? m.value : String(m.value),
+          sourceUrl: m.sourceUrl ?? undefined,
+        }))}
+      />
     </>
   );
 

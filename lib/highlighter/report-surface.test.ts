@@ -66,36 +66,35 @@ test("resolveReportGrounding returns a real block + token for every kind", async
 });
 
 // ---------------------------------------------------------------------------
-// THE GUARD — this is the test that ends the 404 class. Every page that publishes
-// a report context to the app-root highlighter/pill (via ReportHighlightBridge)
-// must declare its surface via buildReportId, so the engine can always resolve its
-// reportId. The single exception is the canonical brain report page
-// `app/r/[slug]/page.tsx`, whose `[slug]` param IS a brain slug (the bare = brain
-// contract). A new synthetic page that publishes a raw id fails here BEFORE it can
-// 404 in production. (Phase 3C lifted the highlighter UI to the root, but the
-// per-page bridge still carries the encoded reportId — so this guard moved with it,
-// from <HighlighterLayer> to <ReportHighlightBridge>.)
+// THE GUARD — ends the 404 class AND enforces the one-root (Phase E). Pages
+// never touch ReportHighlightBridge directly: they mount <ReportAi> with a
+// literal surface="…" from REPORT_SURFACE_KINDS, and ReportAi (unit-tested in
+// app/r/_components/report-ai.test.tsx) is the single buildReportId call site
+// on the page path — so a new page can neither publish a raw id (the old 404
+// class) nor fork the bridge wiring (the drift class).
 // ---------------------------------------------------------------------------
 
-test("GUARD: every report page publishes its surface kind via the bridge", () => {
+test("GUARD: pages mount ReportAi (never the bridge) with a literal known surface", () => {
   const glob = new Glob("app/r/**/page.tsx");
   const offenders: string[] = [];
 
   for (const rel of glob.scanSync(REPO_ROOT)) {
     const src = readFileSync(path.join(REPO_ROOT, rel), "utf-8");
-    if (!src.includes("ReportHighlightBridge")) continue;
-
     const norm = rel.replace(/\\/g, "/");
-    // The one allowed bare-slug mount: the canonical brain report page.
-    const isBrainSlugPage = norm.endsWith("app/r/[slug]/page.tsx");
 
-    // Find each reportId={...} expression the page passes to the dock.
-    const matches = [...src.matchAll(/reportId=\{([^}]*)\}/g)].map((m) => m[1].trim());
-    expect(matches.length).toBeGreaterThan(0); // it mounts the dock → must pass a reportId
+    if (src.includes("ReportHighlightBridge")) {
+      offenders.push(`${norm}: touches ReportHighlightBridge directly — mount <ReportAi> instead`);
+    }
+    if (!src.includes("<ReportAi")) continue;
 
-    for (const expr of matches) {
-      const ok = expr.startsWith("buildReportId(") || (isBrainSlugPage && expr === "slug");
-      if (!ok) offenders.push(`${norm}: reportId={${expr}}`);
+    const surfaces = [...src.matchAll(/<ReportAi\b[\s\S]*?\bsurface="([^"]+)"/g)].map((m) => m[1]);
+    if (surfaces.length === 0) {
+      offenders.push(`${norm}: <ReportAi> without a literal surface="…" prop`);
+    }
+    for (const s of surfaces) {
+      if (!(REPORT_SURFACE_KINDS as readonly string[]).includes(s)) {
+        offenders.push(`${norm}: surface="${s}" is not a known report surface kind`);
+      }
     }
   }
 

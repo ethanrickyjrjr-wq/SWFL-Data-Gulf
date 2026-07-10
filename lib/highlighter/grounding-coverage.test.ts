@@ -16,8 +16,9 @@ import { join, relative, sep } from "node:path";
  * descends from), because grounding is OPT-IN per page with no guard. This is that guard.
  *
  * How a page makes its numbers "AI-knowable":
- *   - GROUNDING: it mounts `ReportHighlightBridge` (publishes reportId + metricSuggestions
- *     to lib/highlighter/report-context-store) — see app/r/_components + the /r/* pages.
+ *   - GROUNDING: it mounts `ReportAi` (app/r/_components/report-ai.tsx — the ONE root that
+ *     publishes reportId + metricSuggestions to lib/highlighter/report-context-store via
+ *     ReportHighlightBridge) — see the /r/* pages.
  *   - REAL DATA: it never renders `home-map-data` (mock) on a user-facing surface.
  *
  * These three checks fail the build BEFORE an ungrounded or mock-fed numeric page can ship.
@@ -89,15 +90,17 @@ describe("grounding coverage guard", () => {
   });
 
   // ── Check 2: BRIDGE REGRESSION ─────────────────────────────────────────────
-  // Each known data-report route MUST keep mounting ReportHighlightBridge. Removing it
+  // Each known data-report route MUST keep mounting the ReportAi root (which is
+  // the ONE importer of ReportHighlightBridge — Phase E one-root). Removing it
   // silently degrades the whole report to "off-report" → naked numbers.
-  test("every grounded report route still mounts ReportHighlightBridge", () => {
+  test("every grounded report route still mounts the report AI root", () => {
     const GROUNDED_ROUTES = [
       "app/r/[slug]/page.tsx",
       "app/r/zip-report/[zip]/page.tsx",
       "app/r/source/[table]/page.tsx",
       "app/r/method/[metric]/page.tsx",
       "app/r/cre-swfl/[corridor]/page.tsx",
+      "app/r/housing-swfl/page.tsx",
     ];
     for (const route of GROUNDED_ROUTES) {
       const abs = join(REPO_ROOT, route);
@@ -105,10 +108,13 @@ describe("grounding coverage guard", () => {
         true,
       );
       expect(
-        importsSpecifier(readFileSync(abs, "utf8"), "ReportHighlightBridge"),
-        `${route} no longer mounts ReportHighlightBridge — its numbers degraded to ungrounded.`,
+        importsSpecifier(readFileSync(abs, "utf8"), "report-ai"),
+        `${route} no longer mounts ReportAi — its numbers degraded to ungrounded.`,
       ).toBe(true);
     }
+    // The chain must stay intact: ReportAi is the ONE importer of the bridge.
+    const shell = readFileSync(join(REPO_ROOT, "app/r/_components/report-ai.tsx"), "utf8");
+    expect(importsSpecifier(shell, "ReportHighlightBridge")).toBe(true);
   });
 
   // ── Check 3: NEW NUMBERED PAGE MUST GROUND ─────────────────────────────────
