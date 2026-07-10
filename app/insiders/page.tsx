@@ -4,6 +4,7 @@ import { Instrument_Serif } from "next/font/google";
 import { MetroAreaChart } from "@/components/charts";
 import { SWFL_METRO_SERIES } from "@/lib/charts/series";
 import { loadMetroTrend, type MetroTrendPanel } from "@/lib/charts/load-metro-trend";
+import { loadDeskStats } from "./_lib/desk-stats";
 import { InsidersCapture } from "./_components/insiders-capture";
 import { WireTicker, type WireItem } from "./_components/wire-ticker";
 import { Specimen, type SpecimenPullStat } from "./_components/specimen";
@@ -106,13 +107,39 @@ const METROS: Array<{ key: string; name: string }> = [
 ];
 
 export default async function InsidersPage() {
-  const [zhvi, zori] = await Promise.all([
+  const [zhvi, zori, desk] = await Promise.all([
     loadMetroTrend("zhvi_pivoted"),
     loadMetroTrend("zori_pivoted"),
+    loadDeskStats(),
   ]);
 
-  // ── The wire: latest metro values + rents, read as written ──────────────
+  // ── The wire: TODAY'S desk first (operator ruling 07/10/2026 — never lead
+  //    the centerpiece with the laggiest series), then the monthly indices ──
   const wire: WireItem[] = [];
+  if (desk.listingsTotal != null) {
+    wire.push({
+      label: "Active listings on the desk · Lee & Collier",
+      value: desk.listingsTotal.toLocaleString("en-US"),
+    });
+  }
+  if (desk.mostActive) {
+    wire.push({
+      label: `Most active ZIP · ${desk.mostActive.place ?? desk.mostActive.zip}`,
+      value: `${desk.mostActive.count.toLocaleString("en-US")} listings`,
+    });
+  }
+  if (desk.newsThisMonth != null && desk.newsThisMonth > 0) {
+    wire.push({
+      label: `Local stories filed since ${desk.newsMonthName} 1`,
+      value: desk.newsThisMonth.toLocaleString("en-US"),
+    });
+  }
+  if (desk.topValue) {
+    wire.push({
+      label: `Highest-value ZIP · ${desk.topValue.place ?? desk.topValue.zip}`,
+      value: desk.topValue.usd,
+    });
+  }
   const zhviLatest = latestRow(zhvi);
   const zoriLatest = latestRow(zori);
   if (zhviLatest) {
@@ -129,23 +156,34 @@ export default async function InsidersPage() {
   }
   const zhviMonth = monthLabel(zhvi.asOf);
   const zoriMonth = monthLabel(zori.asOf);
-  const throughNote =
-    zhviMonth && zoriMonth && zhviMonth !== zoriMonth
-      ? `values through ${zhviMonth}, rents through ${zoriMonth}`
-      : `data through ${zhviMonth ?? zoriMonth ?? ""}`.trim();
-  const wireNote = `${throughNote} · Zillow ZHVI & ZORI via SWFL Data Gulf`;
+  const noteParts: string[] = [];
+  if (desk.listingsAsOf) noteParts.push(`desk updated ${desk.listingsAsOf}`);
+  if (zhviMonth && zoriMonth && zhviMonth !== zoriMonth) {
+    noteParts.push(`Zillow values through ${zhviMonth}, rents through ${zoriMonth}`);
+  } else if (zhviMonth || zoriMonth) {
+    noteParts.push(`Zillow ZHVI & ZORI through ${zhviMonth ?? zoriMonth}`);
+  }
+  noteParts.push("SWFL Data Gulf");
+  const wireNote = noteParts.join(" · ");
 
-  // ── Specimen: one real pull-stat + one real mini-plot ────────────────────
+  // ── Specimen: one real pull-stat (freshest lane first) + one real plot ───
   const naplesValue = zhviLatest?.["naples"];
   const pullStat: SpecimenPullStat | null =
-    isNum(naplesValue) && zhviMonth
+    desk.listingsTotal != null && desk.listingsAsOf
       ? {
-          label: "Naples — median home value",
-          value: usd(naplesValue),
-          source: "Zillow ZHVI · SWFL Data Gulf",
-          asOfMonth: zhviMonth,
+          label: "Active listings on the desk — Lee & Collier",
+          value: desk.listingsTotal.toLocaleString("en-US"),
+          source: "SWFL Data Gulf listings desk",
+          asOf: desk.listingsAsOf,
         }
-      : null;
+      : isNum(naplesValue) && zhviMonth
+        ? {
+            label: "Naples — median home value",
+            value: usd(naplesValue),
+            source: "Zillow ZHVI · SWFL Data Gulf",
+            asOf: zhviMonth,
+          }
+        : null;
   const paperSpark = sparkPoints(zhvi, "cape_coral", 320, 64);
   const heroSpark = sparkPoints(zhvi, "cape_coral", 1000, 280);
 
@@ -175,10 +213,15 @@ export default async function InsidersPage() {
             <strong>Claude Fable 5</strong>, the most capable model Anthropic ships, and
             fact-checked by code that will not let it invent a number.
           </p>
-          <p className="ins-issue-badge">
-            <span className="ins-pulse" aria-hidden="true" />
-            Issue 001 · July 2026 · in production
-          </p>
+          <div className="ins-badge-row">
+            <p className="ins-issue-badge">
+              <span className="ins-pulse" aria-hidden="true" />
+              Issue 001 · July 2026 · in production
+            </p>
+            {desk.listingsAsOf && (
+              <p className="ins-issue-badge">Desk updated {desk.listingsAsOf}</p>
+            )}
+          </div>
           <InsidersCapture source="insiders-hero" />
         </div>
       </section>

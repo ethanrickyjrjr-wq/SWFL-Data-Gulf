@@ -143,11 +143,17 @@
   font-weight: 600;
 }
 
+.ins-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.9rem;
+}
 .ins-issue-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  margin-top: 1.9rem;
   padding: 0.42rem 0.95rem;
   border: 1px solid var(--brand-border-subtle);
   border-radius: 999px;

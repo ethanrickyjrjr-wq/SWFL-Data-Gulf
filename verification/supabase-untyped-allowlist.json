@@ -1,4 +1,5 @@
 [
+  "app/insiders/_lib/desk-stats.ts",
   "app/r/communities-swfl/communities.ts",
   "app/api/cron/news-crawl/route.ts",
   "app/api/mcp/project-tools.test.ts",

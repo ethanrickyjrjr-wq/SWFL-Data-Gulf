@@ -9,10 +9,10 @@
 // the lake degrades those slots collapse instead of showing a sample number.
 
 export interface SpecimenPullStat {
-  label: string; // e.g. "NAPLES — MEDIAN HOME VALUE"
-  value: string; // e.g. "$598,400"
-  source: string; // e.g. "Zillow ZHVI · SWFL Data Gulf"
-  asOfMonth: string; // e.g. "May 2026"
+  label: string; // e.g. "ACTIVE LISTINGS ON THE DESK — LEE & COLLIER"
+  value: string; // e.g. "29,401"
+  source: string; // e.g. "SWFL Data Gulf listings desk"
+  asOf: string; // e.g. "07/10/2026" (or a month label when the source is monthly)
 }
 
 interface Annotation {
@@ -97,7 +97,7 @@ export function Specimen({
                 <sup>[1]</sup>
               </p>
               <p className="ins-paper-pullstat-src">
-                {pullStat.source} · {pullStat.asOfMonth}
+                {pullStat.source} · as of {pullStat.asOf}
               </p>
             </aside>
           )}
@@ -158,7 +158,7 @@ export function Specimen({
           </h3>
           <p className="ins-paper-src-line">
             {pullStat
-              ? `[1] ${pullStat.source} — data through ${pullStat.asOfMonth}.`
+              ? `[1] ${pullStat.source} — as of ${pullStat.asOf}.`
               : "[1] — every figure resolves here, numbered and named."}{" "}
             Every other figure prints the same way.
           </p>
