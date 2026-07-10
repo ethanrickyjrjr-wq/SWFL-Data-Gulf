@@ -65,6 +65,15 @@ The 07/08 deferral reason is gone at this commit: the gauge chain imports NO
 declared direct dependency. First call site: `components/charts/MarketTemperatureGauge.tsx`
 (passes explicit `activeFill`/`inactiveFill` — the CSS-var caveat above applies).
 
+**Heatmap (2026-07-10)** — the whole upstream `heatmap/` directory (19 files, minus
+`__tests__/`) vendored into `heatmap/`. ONE fork, additive: `heatmap-tooltip.tsx` gains
+optional `formatTitle`/`formatSubtitle` props (defaults reproduce upstream date + weekday
+lines; `formatSubtitle` returning null hides the weekday row) — upstream hardwires a
+calendar-contribution header, and our first call site is a ZIP×month grid, not a
+contribution calendar. `HeatmapXAxis`/`HeatmapYAxis` are vendored for completeness but NOT
+used by the ZIP×month panel (upstream y-axis is hardwired to weekday labels; the wrapper
+renders its own plain-HTML labels instead — no fork needed). New dep: `@visx/heatmap`.
+
 **Composed ≠ categorical out of the box (2026-07-08)** — `ComposedChart` (and by extension
 `LineChart`/`AreaChart`) is built on a shared time-series shell (`time-series-chart-shell.tsx`)
 whose x-axis accessor unconditionally does `value instanceof Date ? value : new Date(value)`.
