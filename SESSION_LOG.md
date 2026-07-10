@@ -1,3 +1,21 @@
+## 2026-07-10 (Fable 5 · main) — batch bake + overnight cron replan SPECCED; send-window guidance SPECCED
+
+Cache-alert diagnosis → two registered builds. (1) `batch-narrative-bake`: bake moves to the
+Message Batches API (50% cost; Sonnet 4.6 batch $1.50/$7.50 per MTok), metered at the ONE seam
+(wrapBatchesSurface closes the unmetered `messages.batches` passthrough), 3-phase script with
+`narrative_bake_batches` handoff table; overnight replan — rebuild cron 06:00→04:23 UTC, bake
+chained via workflow_run + 10:23 UTC backstop, digest → 14:23 UTC weekdays (10:23 AM EDT
+engagement peak, operator pick). RULE 0.4 evidence in spec (all crawl4ai/live 07/10/2026):
+Anthropic batch-processing docs (custom_id regex, unordered results, 24h expiry, per-result
+usage); GitHub docs reusable schedule-delay.md ("high load... start of every hour... jobs may be
+dropped") matching our observed 2.3–4.1h rebuild drift (gh run history); Brevo send-time study
+(10 AM local peak, Tue/Thu). (2) `send-window-guidance`: sends clamped 7:00 AM–10:30 PM ET in
+product code (DST-correct, never cron), scheduling flow teaches the cited 10 AM/Tue-Thu default —
+research-as-authority strategy per operator. Checks opened: both live_verifies +
+`news_pulse_scoring_cron_locate` (RULE 2.4 park — find the Vercel scoring cron before moving
+news/pulse overnight). Specs committed, awaiting operator review; NO code yet, NO push of
+workflow changes. Next: operator spec review → writing-plans.
+
 ## 2026-07-10 (Fable 5 · main) — market-area alerts SPECCED: event-fired deterministic emails replace calendar weekly-read content
 
 Operator critique of the calendar/AI weekly email ("anything but another email you have to delete")
