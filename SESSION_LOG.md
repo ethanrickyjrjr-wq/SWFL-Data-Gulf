@@ -1,3 +1,14 @@
+## 2026-07-10 (Fable 5 · main) — push pending docs + commit outreach brand-injection spec; taking lane B (/charts glow-up)
+
+Operator: "push everything, you are on B." Committed the parallel session's approved spec
+`docs/superpowers/specs/2026-07-10-outreach-brand-injection-design.md` (fixture-first brand
+resolver + Brandfetch/crawl4ai scale pilot, check `outreach_brand_injection_live_verify`) and
+pushed it with the two pending doc commits (chart social object design + charts-glowup handoff;
+round-4 outreach research). This session now executes
+`docs/handoff/2026-07-10-charts-glowup-handoff.md` — vendor Gauge/Heatmap/Profit-Loss
+Line/Projection Line from bklit, 4 new /charts panels, fix `charts_vacancy_asof_fabricated`.
+Brainstorm + spec next per RULE 3.5.
+
 ## 2026-07-10 (Fable 5 · main) — outreach test-send research pass: brand injection, contacts, cadence, brand takeover
 
 Operator directive: research BEFORE planning the agent test send (SteadyAPI Reddit/X/Insta, no
