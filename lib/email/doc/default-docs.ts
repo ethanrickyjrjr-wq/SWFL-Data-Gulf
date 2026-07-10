@@ -51,33 +51,38 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
     tagline: HOUSE_BRAND.tagline,
     logoUrl: HOUSE_BRAND.logoUrl,
   },
+  // Data-bearing blocks follow THE SLOT RULE (check: email_palette_demo_figures):
+  // a field whose right answer depends on real data ships EMPTY, with the
+  // instruction in the label — docSkeleton skips empty fields, so an empty value
+  // is an open slot the AI fills, while a filled one reads as "the current
+  // answer" and can ship verbatim into a real send.
   hero: {
     kicker: "Market Spotlight",
-    value: "$485K",
-    label: "Median Sale Price · Lee County",
-    prose: "A quick read on where the local market is heading this month.",
+    value: "",
+    label: "The headline number and what it measures",
+    prose: "Write a quick, plain-language read on what this number means for readers.",
   },
   stats: {
     stats: [
-      { value: "34", label: "Median DOM" },
-      { value: "3.2 mo", label: "Months of Supply" },
-      { value: "↑ 4%", label: "YoY Price" },
+      { value: "", label: "Median DOM" },
+      { value: "", label: "Months of Supply" },
+      { value: "", label: "YoY Price" },
     ],
   },
   signal: {
     kicker: "Signal to Watch",
-    title: "Inventory is ticking up",
-    body: "More listings are reaching the market while demand holds — a shift worth watching.",
+    title: "Name the one shift worth watching",
+    body: "Say what's changing and why it matters — inventory, pricing, or buyer behavior.",
   },
   text: { body: "Write your message here.", align: "left" },
   image: { url: "", alt: "", caption: "" },
   listing: {
     photoUrl: "",
-    price: "$489,000",
-    beds: "3",
-    baths: "2",
-    sqft: "1,840",
-    address: "4521 Surfside Blvd, Cape Coral",
+    price: "",
+    beds: "",
+    baths: "",
+    sqft: "",
+    address: "",
     badge: "",
   },
   "multi-column": {
@@ -94,12 +99,12 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
     ],
   },
   "metric-card": {
-    metricValue: "$485K",
-    metricLabel: "Median Home Value",
-    sub: "90-day median sale price",
-    rankText: "#12 of 57 SWFL ZIPs",
-    movementText: "↑ 4% YoY",
-    barPct: 62,
+    metricValue: "",
+    metricLabel: "Name the metric this card carries",
+    sub: "",
+    rankText: "",
+    movementText: "",
+    // No barPct: a bar restates a held percentile — absent means no bar renders.
   },
   "agent-card": {
     name: HOUSE_BRAND.companyName,
