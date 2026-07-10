@@ -1,3 +1,31 @@
+## 2026-07-10 (Sonnet 5 · main) — Outreach brand-injection plan CLOSED: Task 5 live pilot + Task 6 gates, check closed
+
+Operator greenlit Task 5 (bulk pilot CLI) after Task 4's probe landed. Step 2 dry-run
+smoke: 2 held domains skipped, 1 new domain queued, zero network calls. Step 3 rank-mode
+against the REAL DBPR `RE_rgn7.csv` (downloaded live, 12.95MB, no header, quoted fields —
+matches the code's documented column layout): 27,292 current Lee/Collier agents, 2,849
+distinct employers. Step 4 single-domain live probe: verified `exprealty.com` via crawl4ai
+first (real SWFL MLS listings tagged "exp realty llc") before spending quota, then fetched
+live — HTTP 200, quota 1/100, correctly landed `unconfirmed/` (eXp Realty isn't in the
+06/26 DBPR corp-confirmation scrape — national/foreign LLC registration, not a
+Lee/Collier-filed corp — so the hard rule kept it out of `index.json`). Commit `a7c64a96`.
+
+Task 6 final gates: 1427 `bun test` (lib/email+prospects+outreach) pass, eslint clean,
+`bunx next build` green. Live-verify evidence (Task 6 Step 2) surfaced a REAL bug in the
+plan doc itself, not the code: its Task 3 Step 2 smoke CSV used `john-r-wood.com` (matching
+the fixture's hyphenated slug) but the real fixture's `domain` field is `johnrwood.com` — the
+wrong domain silently fell through to `usedHouseBrand: true`. Corrected the domain and
+re-ran: `brandSource: "fixture:john-r-wood"`, `primary: "#219653"`, `usedHouseBrand: false`,
+preview HTML confirmed rendering `#219653`, zero paid calls. Plan doc corrected in place
+(07/10/2026 note) so a future session doesn't repeat the wrong smoke CSV. All 30 plan
+checkboxes flipped — Tasks 1–3 were already committed in a prior session (`71fed0c8`,
+`66e5baaf`, `06de121a`) and re-verified end-to-end by this run.
+
+Asked operator whether to close `outreach_brand_injection_live_verify` on DRY evidence or
+hold for a live send — operator: "why are we live sending?" (correctly rejecting the
+premise). Closed on DRY evidence; no live send occurred or is warranted. `build-queue.md`
+synced.
+
 ## 2026-07-10 (Sonnet 5 · main) — Brandfetch key landed, live probe pinned (Task 4 of outreach-brand-injection plan)
 
 Operator dropped `brandfetch_key` into `.env.local` (free dev account, $0 spend cap).

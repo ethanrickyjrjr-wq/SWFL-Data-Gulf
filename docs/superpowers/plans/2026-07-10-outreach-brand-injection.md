@@ -66,11 +66,11 @@ export async function loadBrandFixtures(dir: string): Promise<LoadResult>;
 export function validateFixture(raw: unknown): { ok: true; fixture: BrandFixture } | { ok: false; reason: string };
 ```
 
-- [ ] **Step 1: Export `normalizeDomain` from targets.ts**
+- [x] **Step 1: Export `normalizeDomain` from targets.ts**
 
 In `lib/email/outreach/targets.ts` line 84, change `function normalizeDomain(` to `export function normalizeDomain(`. Run `bun test lib/email/outreach/` — all existing tests still pass (16+).
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 ```ts
 // lib/email/outreach/brand-fixtures.test.ts
@@ -157,12 +157,12 @@ describe("loadBrandFixtures", () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `bun test lib/email/outreach/brand-fixtures.test.ts`
 Expected: FAIL — `Cannot find module './brand-fixtures'`
 
-- [ ] **Step 4: Implement the loader**
+- [x] **Step 4: Implement the loader**
 
 ```ts
 // lib/email/outreach/brand-fixtures.ts
@@ -256,12 +256,12 @@ export async function loadBrandFixtures(dir: string): Promise<LoadResult> {
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `bun test lib/email/outreach/brand-fixtures.test.ts`
 Expected: PASS (8 tests). If the "REAL repo folder" test fails, a real fixture file is malformed — FIX THE FIXTURE FILE (report it), don't loosen the validator. (`agents.json`/`dbpr-all-corps-lee-collier.json` are not in `index.json.brokerages`, so they never reach the loader; the filter in that test is belt-and-suspenders.)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add lib/email/outreach/brand-fixtures.ts lib/email/outreach/brand-fixtures.test.ts lib/email/outreach/targets.ts
@@ -292,7 +292,7 @@ export function makeFixtureFirstEnrich(opts: {
 
 Resolution ladder (spec §A): fixture ≥ fixtureTrust → live scrape (trusted at ≥ scrapeTrust with a primary) → fixture at any confidence beating the scrape's → the scrape result as-is (campaign's own threshold then routes to house brand). `composeCampaign` is NOT touched: fixture provenance flows because `brandSource` echoes `enriched.source`.
 
-- [ ] **Step 1: Extend the `BrandEnrichment.source` union**
+- [x] **Step 1: Extend the `BrandEnrichment.source` union**
 
 In `lib/prospects/enrich-brand.ts`, change:
 
@@ -308,7 +308,7 @@ to:
 
 Run: `bun test lib/prospects/` — existing tests pass unchanged (additive union).
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 ```ts
 // lib/email/outreach/brand-resolver.test.ts
@@ -411,12 +411,12 @@ describe("makeFixtureFirstEnrich", () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `bun test lib/email/outreach/brand-resolver.test.ts`
 Expected: FAIL — `Cannot find module './brand-resolver'`
 
-- [ ] **Step 4: Implement the resolver**
+- [x] **Step 4: Implement the resolver**
 
 ```ts
 // lib/email/outreach/brand-resolver.ts
@@ -475,19 +475,19 @@ export function makeFixtureFirstEnrich(opts: ResolverOpts): (domain: string) => 
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `bun test lib/email/outreach/brand-resolver.test.ts`
 Expected: PASS (6 tests)
 
 Note: `normalizeDomain(raw)` returns `string | undefined` and handles scheme/`www.`/path/case (targets.ts). If the normalized-matching test fails on the path segment (`/agents`), check what `normalizeDomain` does with paths BEFORE changing anything — mirror its behavior on the fixture side rather than writing a second normalizer.
 
-- [ ] **Step 6: Run the full outreach + prospects suites**
+- [x] **Step 6: Run the full outreach + prospects suites**
 
 Run: `bun test lib/email/outreach/ lib/prospects/`
 Expected: ALL PASS (existing 16+ outreach, enrich-brand suites untouched)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add lib/email/outreach/brand-resolver.ts lib/email/outreach/brand-resolver.test.ts lib/prospects/enrich-brand.ts
@@ -506,7 +506,7 @@ git commit -m "feat(outreach): fixture-first brand resolver wrapping the enrich 
 - Consumes: `loadBrandFixtures` (Task 1), `makeFixtureFirstEnrich` (Task 2), existing `enrichBrand`/`composeCampaign`/run-report.
 - Produces: run report rows whose `brandSource` can now be `fixture:<slug>`; summary line `fixture_resolved: N`.
 
-- [ ] **Step 1: Wire the resolver into the CLI**
+- [x] **Step 1: Wire the resolver into the CLI**
 
 In `scripts/email/outreach-campaign.mts`, add imports next to line 34:
 
@@ -538,14 +538,18 @@ Where the CLI prints the summary, add one line after it:
 
 (If `ComposedMessage.brandSource` is typed narrower than `string` and the compiler complains about `startsWith`, widen NOTHING — the Task 2 union extension makes `fixture:${string}` part of the type; use `String(m.brandSource).startsWith(...)` only if genuinely needed.)
 
-- [ ] **Step 2: DRY smoke run — fixture-resolved recipient, zero paid calls**
+- [x] **Step 2: DRY smoke run — fixture-resolved recipient, zero paid calls**
 
 Create a scratch CSV OUTSIDE the repo (contact lists never commit), e.g. `%TEMP%\smoke-brand.csv`:
 
 ```csv
 email,name,domain,zip
-smoke-test@example.com,Test Agent,john-r-wood.com,33901
+smoke-test@example.com,Test Agent,johnrwood.com,33901
 ```
+
+(CORRECTED 07/10/2026 — the fixture's real `domain` field is `johnrwood.com`, no hyphens; the
+slug `john-r-wood` is hyphenated but the domain isn't. The hyphenated form fell through to
+`usedHouseBrand: true` on the live run — verify fixture domains before writing smoke CSVs.)
 
 Run: `bun scripts/email/outreach-campaign.mts --csv <path-to-smoke-brand.csv> --campaign smoke-brand`
 (Check the CLI's actual arg names at the top of `main()` before running — use whatever `arg()` defines; DRY_RUN is the default.)
@@ -557,12 +561,12 @@ Expected:
 - the preview HTML uses the green (#219653) as the brand primary
 - NO Haiku/scrape call happened (fixture ≥ 0.75 short-circuits — verify no scrape log line)
 
-- [ ] **Step 3: Full gates**
+- [x] **Step 3: Full gates**
 
 Run: `bun test lib/email/` then `bunx eslint scripts/email/outreach-campaign.mts lib/email/outreach/` then `bunx next build`
 Expected: suites green (1385+ lib/email), eslint clean, build green (loader is script-context only — if `next build` complains about `node:fs` in a client bundle, something imported `brand-fixtures.ts` from app code: that is a bug, fix the import, not the loader).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add scripts/email/outreach-campaign.mts
@@ -588,7 +592,7 @@ export function mapToCandidateFixture(raw: BrandfetchBrand, opts: { slug: string
 export function slugFromDomain(domain: string): string;
 ```
 
-- [ ] **Step 1: Probe the live API with the quota-free domain (operator key required)**
+- [x] **Step 1: Probe the live API with the quota-free domain (operator key required)**
 
 Precondition (operator): free dev account at developers.brandfetch.com, key added to `.env.local` as `brandfetch_key=…`, spend cap set to $0. **If the key is not in `.env.local` yet, STOP this task and do Task 5's dry-run-only steps; resume here when the key lands.**
 
@@ -599,7 +603,7 @@ Invoke-RestMethod -Uri "https://api.brandfetch.io/v2/brands/domain/brandfetch.co
 
 `brandfetch.com` lookups are quota-free (vendor-verified 07/10/2026). Read the saved JSON and NOTE the real discriminators (e.g. whether `logos[]` entries carry `type`/`theme`, whether `colors[]` carry `type: "brand" | "accent" | …`). Update the mapping rules in Step 3 to the REAL fields — the rules below are the default for the skeleton-only case.
 
-- [ ] **Step 2: Write the failing tests (against the committed probe file)**
+- [x] **Step 2: Write the failing tests (against the committed probe file)**
 
 ```ts
 // scripts/outreach/pilot-lib.test.mts
@@ -636,7 +640,7 @@ describe("mapToCandidateFixture", () => {
 });
 ```
 
-- [ ] **Step 3: Run to verify fail, then implement the mapper**
+- [x] **Step 3: Run to verify fail, then implement the mapper**
 
 Run: `bun test scripts/outreach/pilot-lib.test.mts` → FAIL (module missing). Then:
 
@@ -723,12 +727,12 @@ export function mapToCandidateFixture(
 
 NOTE on `qualityScore`: the reference shows it as a number but not its RANGE (123 placeholder). Check the probe file: if it's 0..1 use it directly as above; if 0..100 divide by 100. Pin whichever the probe shows and say so in a comment.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun test scripts/outreach/pilot-lib.test.mts`
 Expected: PASS (3 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/outreach/pilot-lib.mts scripts/outreach/pilot-lib.test.mts scripts/outreach/__fixtures__/brandfetch-sample.json
@@ -752,7 +756,7 @@ Modes:
 - `--domains <file>` → one domain per line, the fetch list (domains curated by operator/session from the rank output; name→domain automation is deliberately OUT — wrong-domain brands are worse than none).
 - Default DRY: prints the plan (which domains would fetch, which are skipped as already-curated). `--live` + key present → real fetches.
 
-- [ ] **Step 1: Write the CLI**
+- [x] **Step 1: Write the CLI**
 
 ```ts
 // scripts/outreach/brand-pilot.mts
@@ -910,7 +914,7 @@ else if (domains) await fetchMode(domains);
 else console.log("Usage: --rank <RE_rgn7.csv> | --domains <file> [--live]");
 ```
 
-- [ ] **Step 2: Dry-run smoke (no key needed)**
+- [x] **Step 2: Dry-run smoke (no key needed)**
 
 Create `%TEMP%\pilot-domains.txt`:
 
@@ -923,7 +927,7 @@ some-new-brokerage.com
 Run: `bun scripts/outreach/brand-pilot.mts --domains %TEMP%\pilot-domains.txt`
 Expected: `skip: fixture already held` for the two held domains, `fetch` for the new one, then "dry-run only"/"DRY RUN" line, ZERO network calls, zero files written.
 
-- [ ] **Step 3: Rank-mode smoke (needs the DBPR file)**
+- [x] **Step 3: Rank-mode smoke (needs the DBPR file)**
 
 ```powershell
 curl -L -o "$env:TEMP\RE_rgn7.csv" "https://www2.myfloridalicense.com/sto/file_download/extracts/RE_rgn7.csv"
@@ -932,12 +936,12 @@ bun scripts/outreach/brand-pilot.mts --rank "$env:TEMP\RE_rgn7.csv"
 
 Expected: top-100 employer list with counts. **First run: eyeball the raw CSV header + a few rows first** — if employer names contain quoted commas, the naive `split(",")` undercounts; switch the parser to reuse `splitCsvLine` from `lib/email/outreach/targets.ts` (export it, same pattern as `normalizeDomain`) BEFORE trusting the ranking.
 
-- [ ] **Step 4: Single-domain live probe (operator key + go required)**
+- [x] **Step 4: Single-domain live probe (operator key + go required)**
 
 Run: `bun scripts/outreach/brand-pilot.mts --domains <file-with-ONE-new-domain> --live`
 Expected: HTTP 200 + quota header line, one candidate fixture written (confirmed → `fixtures/real-estate-brands/`, else `unconfirmed/`), `index.json` updated, report file written. Re-run `bun test lib/email/outreach/brand-fixtures.test.ts` — the "REAL repo folder" test still passes (the new file validates).
 
-- [ ] **Step 5: Commit (pilot code + any confirmed fixture files from the probe)**
+- [x] **Step 5: Commit (pilot code + any confirmed fixture files from the probe)**
 
 ```bash
 git add scripts/outreach/brand-pilot.mts fixtures/real-estate-brands/
@@ -951,12 +955,12 @@ git commit -m "feat(outreach): brand-pilot CLI — DBPR ranking + Brandfetch bul
 **Files:**
 - Modify: `SESSION_LOG.md` (entry), `_AUDIT_AND_ROADMAP/build-queue.md` (sync)
 
-- [ ] **Step 1: Full test + lint + build gates**
+- [x] **Step 1: Full test + lint + build gates**
 
 Run: `bun test lib/email/ lib/prospects/ scripts/outreach/` then `bunx eslint lib/email/outreach/ scripts/outreach/ scripts/email/outreach-campaign.mts` then `bunx next build`
 Expected: all green.
 
-- [ ] **Step 2: Live-verify evidence (closes `outreach_brand_injection_live_verify`)**
+- [x] **Step 2: Live-verify evidence (closes `outreach_brand_injection_live_verify`)**
 
 One real DRY outreach run (Task 3 Step 2 command) over a CSV whose recipients include ≥1 fixture-held domain: run-report shows `brandSource: "fixture:<slug>"` with the fixture's exact `primary` hex, preview HTML renders those colors. Save the run-report path as evidence, then:
 
@@ -966,7 +970,7 @@ node scripts/check.mjs close outreach_brand_injection_live_verify
 
 (If the operator wants the check to stay open until a LIVE send uses a fixture brand, leave it open and note the DRY evidence in the check instead — ask, don't assume.)
 
-- [ ] **Step 3: SESSION_LOG + build-queue sync + commit**
+- [x] **Step 3: SESSION_LOG + build-queue sync + commit**
 
 Append the SESSION_LOG entry (what shipped, test counts, evidence path); sync `_AUDIT_AND_ROADMAP/build-queue.md`; commit docs. Push ONLY on operator instruction.
 
