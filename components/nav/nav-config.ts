@@ -28,7 +28,7 @@ export interface NavItem {
  * B2 grouped the flat tail under `Explore ▾` so the bar stays compact, not a flat
  * row of every surface. Current layout (after the nav+map follow-ups, commits
  * 7a37725 + b013ad2): the marquees Charts, Maps, Showcase, Projects, Alerts stay
- * top-level; Explore holds only Search (`/r`). Maps was PROMOTED out of the Explore
+ * top-level; Explore holds Search (`/r`) and Guides (`/guides`). Maps was PROMOTED out of the Explore
  * dropdown to a static top-level tab, and the old ZIP Reports entry (`/r/search`)
  * was retired. `/data-intel` is deliberately NOT here (internal-only — B6).
  *
@@ -38,7 +38,10 @@ export interface NavItem {
 export const NAV_GROUPS: NavItem[] = [
   {
     label: "Explore",
-    children: [{ label: "Search", href: "/r" }],
+    children: [
+      { label: "Search", href: "/r" },
+      { label: "Guides", href: "/guides" },
+    ],
   },
   { label: "Charts", href: "/charts" },
   { label: "Maps", href: "/map" },

@@ -27,6 +27,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
       // /r/zip-report has no index route (dynamic-only) — send people to the search entry.
       { label: "ZIP Reports", href: "/r/search" },
       { label: "Showcase", href: "/showcase" },
+      { label: "Guides", href: "/guides" },
       { label: "Demo", href: "/demo" },
       { label: "Projects", href: "/project" },
       { label: "Alerts", href: "/alerts" },

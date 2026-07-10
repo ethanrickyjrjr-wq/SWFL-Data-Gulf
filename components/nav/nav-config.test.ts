@@ -86,9 +86,9 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
       "Alerts",
     ]);
   });
-  it("keeps only Search under Explore (Maps promoted top-level, ZIP Reports retired)", () => {
+  it("keeps Search + Guides under Explore (Maps promoted top-level, ZIP Reports retired)", () => {
     const explore = NAV_GROUPS.find((n) => n.label === "Explore");
-    expect(explore?.children?.map((c) => c.href)).toEqual(["/r"]);
+    expect(explore?.children?.map((c) => c.href)).toEqual(["/r", "/guides"]);
   });
   it("exposes Maps as a top-level leaf at /map", () => {
     const maps = NAV_GROUPS.find((n) => n.label === "Maps");
@@ -123,6 +123,10 @@ describe("isItemActive (group lights when any child is active)", () => {
     expect(isItemActive("/r", explore)).toBe(true);
     expect(isItemActive("/r/env-swfl", explore)).toBe(true);
   });
+  it("lights Explore on /guides (new child)", () => {
+    expect(isItemActive("/guides", explore)).toBe(true);
+    expect(isItemActive("/guides/sourced-numbers", explore)).toBe(true);
+  });
   it("does NOT light Explore on a marquee route (incl. Maps, now top-level)", () => {
     expect(isItemActive("/charts", explore)).toBe(false);
     expect(isItemActive("/project/abc", explore)).toBe(false);
@@ -142,6 +146,10 @@ describe("activeChildHref (longest match wins in the dropdown)", () => {
   it("lights Search on any report path under /r", () => {
     expect(activeChildHref("/r", children)).toBe("/r");
     expect(activeChildHref("/r/env-swfl", children)).toBe("/r");
+  });
+  it("lights Guides on any guide article", () => {
+    expect(activeChildHref("/guides", children)).toBe("/guides");
+    expect(activeChildHref("/guides/email-design", children)).toBe("/guides");
   });
   it("returns null when nothing under Explore matches (incl. top-level Maps)", () => {
     expect(activeChildHref("/charts", children)).toBe(null);
