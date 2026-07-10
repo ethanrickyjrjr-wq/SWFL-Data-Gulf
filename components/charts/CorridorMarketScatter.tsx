@@ -36,6 +36,9 @@ export interface CorridorMarketScatterProps {
   loading?: boolean;
   className?: string;
   asOf?: string;
+  /** Footer source label after the as-of (e.g. a real citation, or "Sample data"
+   *  on fixture-backed demo surfaces). Omitted = date only, never a stamped claim. */
+  sourceLabel?: string;
 }
 
 export function CorridorMarketScatter({
@@ -43,6 +46,7 @@ export function CorridorMarketScatter({
   loading = false,
   className = "",
   asOf,
+  sourceLabel,
 }: CorridorMarketScatterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<HTMLDivElement>(null);
@@ -486,7 +490,8 @@ export function CorridorMarketScatter({
       </div>
       {asOf && (
         <p className="mt-2 font-mono text-[11px] tracking-wide" style={{ color: "#4a5a6a" }}>
-          as of {asOf} · SWFL fixture sample
+          as of {asOf}
+          {sourceLabel ? ` · ${sourceLabel}` : ""}
         </p>
       )}
     </div>

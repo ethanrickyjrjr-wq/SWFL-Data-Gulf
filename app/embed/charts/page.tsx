@@ -275,7 +275,7 @@ export default async function EmbedChartsPage() {
               permits coverage — see docs/data-coverage.md)
             </p>
           </header>
-          <CorridorMarketScatter data={joined} loading={false} />
+          <CorridorMarketScatter data={joined} loading={false} sourceLabel="Sample data" />
         </section>
 
         {floodChartProps && (

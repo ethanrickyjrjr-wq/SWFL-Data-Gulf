@@ -9,5 +9,5 @@ import type { ChartSpec } from "../chart-spec";
  */
 export function CorridorMarketScatterFrame({ spec }: { spec: ChartSpec }) {
   const data = (spec.options?.data ?? []) as JoinedCorridorRow[];
-  return <CorridorMarketScatter data={data} asOf={spec.asOf} />;
+  return <CorridorMarketScatter data={data} asOf={spec.asOf} sourceLabel={spec.source?.citation} />;
 }

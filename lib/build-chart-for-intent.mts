@@ -7,9 +7,10 @@ import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { CORRIDOR_ALIASES } from "@/refinery/lib/corridor-aliases.mts";
 import { fetchBrain } from "@/lib/fetch-brain";
 import { loadMetroTrend } from "@/lib/charts/load-metro-trend";
+import { corridorKey } from "@/refinery/lib/corridor-display.mts";
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import type { BrainOutputDetailTable } from "@/refinery/types/brain-output.mts";
 import type {
-  CorridorEntry,
   CorridorPermitsEntry,
   CorridorCentroidEntry,
   JoinedCorridorRow,
@@ -17,13 +18,14 @@ import type {
   ZHVITrendEntry,
 } from "@/types/viz";
 
-// The corridor fixtures (rents + permits) are a static "Jun 2026" sample; their
-// block-level `asOf` is the ISO keystone for that snapshot. The ZHVI fixture is a
-// SEPARATE file (`zhvi-trend.json`) whose series runs through its own last month —
-// its `asOf` is derived from that month, NOT this constant, so the chart never
-// claims a vintage newer than its data (CLAUDE.md data-provenance).
-const FIXTURE_ASOF = "2026-06-30";
-const FIXTURE_SOURCE = "SWFL fixture sample";
+// Rent + scatter read LIVE public.corridor_profiles (verified, non-deleted) —
+// the same predicate the embed asking-rent card and the cre-swfl source use.
+// Their `asOf` is derived from the rows' own metrics_verified_date/updated_at,
+// never a stamped constant (the old FIXTURE_ASOF fabricated a future vintage
+// over a frozen snapshot — the charts_vacancy_asof_fabricated incident). The
+// permits/centroid sidecars stay file-backed (they ARE the source of truth for
+// permit z-scores; see refinery/tools/regen-corridor-fixture.mts docs).
+const CORRIDOR_CITATION = "SWFL Data Gulf verified corridor metrics";
 
 async function loadFixture<T>(name: string): Promise<T> {
   const file = path.join(process.cwd(), "fixtures", name);
@@ -77,32 +79,97 @@ export async function buildChartForIntent(intent: ChartIntent): Promise<ChartSpe
   }
 }
 
-async function buildRentChart(): Promise<ChartSpec | null> {
-  const rents = await loadFixture<CorridorEntry[]>("corridor-rents.json");
+export interface CorridorProfileRow {
+  corridor_name: string;
+  city: string | null;
+  asking_rent_psf: number | null;
+  vacancy_rate_pct: number | null;
+  absorption_sqft: number | null;
+  metrics_verified_date: string | null;
+  updated_at: string | null;
+}
 
-  const rows = rents
-    .filter(
-      (c): c is CorridorEntry & { nnn_asking_rent_per_sqft: number } =>
-        c.nnn_asking_rent_per_sqft != null,
-    )
-    .sort((a, b) => b.nnn_asking_rent_per_sqft - a.nnn_asking_rent_per_sqft)
+/** PostgREST returns numeric columns as strings on some drivers — coerce
+ *  defensively (same treatment refinery/tools/regen-corridor-fixture.mts uses). */
+function num(v: unknown): number | null {
+  if (v == null) return null;
+  const n = typeof v === "string" ? parseFloat(v) : Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Real vintage for a corridor_profiles read: newest metrics_verified_date,
+ *  falling back to newest updated_at. Null when neither exists — the caller
+ *  then renders no chart, never a stamped constant. */
+export function corridorRowsAsOf(rows: CorridorProfileRow[]): string | null {
+  const verified = rows
+    .map((r) => r.metrics_verified_date)
+    .filter((d): d is string => !!d)
+    .sort();
+  if (verified.length > 0) return verified[verified.length - 1].slice(0, 10);
+  const updated = rows
+    .map((r) => r.updated_at)
+    .filter((d): d is string => !!d)
+    .sort();
+  return updated.length > 0 ? updated[updated.length - 1].slice(0, 10) : null;
+}
+
+/** Guarded live read of verified corridor rows; [] on any failure (credless
+ *  env, query error) so every consumer degrades to "no chart", never a 500. */
+async function loadCorridorProfiles(): Promise<CorridorProfileRow[]> {
+  try {
+    const supabase = createServiceRoleClientUntyped();
+    const { data, error } = await supabase
+      .from("corridor_profiles")
+      .select(
+        "corridor_name, city, asking_rent_psf, vacancy_rate_pct, absorption_sqft, metrics_verified_date, updated_at",
+      )
+      .is("deleted_at", null)
+      .eq("verification_status", "verified");
+    if (error || !data) return [];
+    return (data as Array<Record<string, unknown>>).map((r) => ({
+      corridor_name: String(r.corridor_name ?? ""),
+      city: r.city == null ? null : String(r.city),
+      asking_rent_psf: num(r.asking_rent_psf),
+      vacancy_rate_pct: num(r.vacancy_rate_pct),
+      absorption_sqft: num(r.absorption_sqft),
+      metrics_verified_date:
+        r.metrics_verified_date == null ? null : String(r.metrics_verified_date),
+      updated_at: r.updated_at == null ? null : String(r.updated_at),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/** Pure mapping: live corridor rows → asking-rent bar spec. Real vintage from
+ *  the rows themselves; null (no chart) under 3 rents or with no derivable date. */
+export function rentChartSpecFromRows(rows: CorridorProfileRow[]): ChartSpec | null {
+  const withRent = rows.filter(
+    (r): r is CorridorProfileRow & { asking_rent_psf: number } => r.asking_rent_psf != null,
+  );
+  const chartRows = withRent
+    .sort((a, b) => b.asking_rent_psf - a.asking_rent_psf)
     .slice(0, 12)
-    .map((c): [string, number] => [c.name, c.nnn_asking_rent_per_sqft]);
-
-  if (rows.length < 3) return null;
+    .map((r): [string, number] => [r.corridor_name, r.asking_rent_psf]);
+  const asOf = corridorRowsAsOf(withRent);
+  if (chartRows.length < 3 || !asOf) return null;
 
   const block: ChartBlock = {
     title: "SWFL Corridor NNN Asking Rents",
     columns: ["Corridor", "NNN Asking Rent ($/sqft)"],
-    rows,
+    rows: chartRows,
     chart_type: "bar",
     value_format: "currency",
-    asOf: FIXTURE_ASOF,
-    source: { citation: FIXTURE_SOURCE },
+    asOf,
+    source: { citation: CORRIDOR_CITATION },
   };
 
   if (!lintChartBlock(block).ok) return null;
   return { ...block, frameId: "bar-table" };
+}
+
+async function buildRentChart(): Promise<ChartSpec | null> {
+  return rentChartSpecFromRows(await loadCorridorProfiles());
 }
 
 /**
@@ -279,32 +346,29 @@ async function buildZhviChart(): Promise<ChartSpec | null> {
   return zhviChartSpecFromRows(rows, asOf);
 }
 
-async function buildScatterChart(): Promise<ChartSpec | null> {
+/** Pure mapping: live corridor rows + file-backed permit/centroid sidecars →
+ *  scatter spec. The alias walk keys on the SLUGIFIED corridor_name
+ *  (corridorKey), matching how the fixture ids were derived — never fuzzy. */
+export function scatterChartSpecFromRows(
+  liveRows: CorridorProfileRow[],
+  permits: CorridorPermitsEntry[],
+  centroids: CorridorCentroidEntry[],
+): ChartSpec | null {
   const aliasMap = CORRIDOR_ALIASES as Record<string, string | null | undefined>;
-
-  const [rents, permits, centroids] = await Promise.all([
-    loadFixture<CorridorEntry[]>("corridor-rents.json"),
-    loadFixture<CorridorPermitsEntry[]>("corridor-permits.json").catch(
-      () => [] as CorridorPermitsEntry[],
-    ),
-    loadFixture<CorridorCentroidEntry[]>("corridor-centroids.json").catch(
-      () => [] as CorridorCentroidEntry[],
-    ),
-  ]);
-
   const permitsById = new Map(permits.map((p) => [p.corridor_id, p]));
   const centroidsById = new Map(centroids.map((c) => [c.corridor_id, c]));
 
-  const rows: JoinedCorridorRow[] = rents.map((row) => {
-    const centroidId = aliasMap[row.id];
+  const rows: JoinedCorridorRow[] = liveRows.map((row) => {
+    const slug = corridorKey(row.corridor_name);
+    const centroidId = aliasMap[slug];
     const permitsEntry = centroidId == null ? null : (permitsById.get(centroidId) ?? null);
     const centroidEntry = centroidId == null ? null : (centroidsById.get(centroidId) ?? null);
     return {
-      id: row.id,
-      name: row.name,
-      submarket: row.submarket,
-      nnn_asking_rent_per_sqft: row.nnn_asking_rent_per_sqft,
-      vacancy_pct: row.vacancy_pct,
+      id: slug,
+      name: row.corridor_name,
+      submarket: row.city ?? "Unknown",
+      nnn_asking_rent_per_sqft: row.asking_rent_psf,
+      vacancy_pct: row.vacancy_rate_pct,
       absorption_sqft: row.absorption_sqft,
       permits: permitsEntry,
       centroid: centroidEntry,
@@ -314,7 +378,8 @@ async function buildScatterChart(): Promise<ChartSpec | null> {
   const plottable = rows.filter(
     (r) => r.nnn_asking_rent_per_sqft != null && r.vacancy_pct != null && r.permits != null,
   );
-  if (plottable.length < 3) return null;
+  const asOf = corridorRowsAsOf(liveRows);
+  if (plottable.length < 3 || !asOf) return null;
 
   // `options.data` carries the FULL JoinedCorridorRow[] UNTOUCHED — `permits`
   // (incl. n_current) and the `permits: null` no-coverage marker are preserved so
@@ -330,9 +395,22 @@ async function buildScatterChart(): Promise<ChartSpec | null> {
       c.name,
     ]),
     chart_type: "scatter",
-    asOf: FIXTURE_ASOF,
-    source: { citation: FIXTURE_SOURCE },
+    asOf,
+    source: { citation: CORRIDOR_CITATION },
     frameId: "corridor-scatter",
     options: { data: rows },
   };
+}
+
+async function buildScatterChart(): Promise<ChartSpec | null> {
+  const [liveRows, permits, centroids] = await Promise.all([
+    loadCorridorProfiles(),
+    loadFixture<CorridorPermitsEntry[]>("corridor-permits.json").catch(
+      () => [] as CorridorPermitsEntry[],
+    ),
+    loadFixture<CorridorCentroidEntry[]>("corridor-centroids.json").catch(
+      () => [] as CorridorCentroidEntry[],
+    ),
+  ]);
+  return scatterChartSpecFromRows(liveRows, permits, centroids);
 }
