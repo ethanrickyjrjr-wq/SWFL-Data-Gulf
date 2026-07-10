@@ -239,7 +239,7 @@ export const SEED_DOCS: SeedDoc[] = [
   {
     id: "market-spotlight",
     name: "Market Spotlight",
-    description: "Big headline number, KPIs, and a signal to watch.",
+    description: "Big headline number, KPIs, the trend chart behind it, and a signal to watch.",
     build: () => ({
       globalStyle: style(),
       blocks: [
@@ -257,6 +257,11 @@ export const SEED_DOCS: SeedDoc[] = [
             { value: "", label: "YoY Price" },
           ],
         }),
+        // Chart slot — upsertChartBlock replaces it in place (no authoring needed).
+        seedBlock("image", {
+          alt: "Market trend chart",
+          caption: "The 12-month trend behind the headline",
+        }),
         seedBlock("signal", {
           kicker: "Signal to Watch",
           title: "Name the one shift worth watching this month",
@@ -270,11 +275,12 @@ export const SEED_DOCS: SeedDoc[] = [
   {
     id: "just-sold",
     name: "Just Sold",
-    description: "Lead with the win, back it with numbers, sign off as the agent.",
+    description: "Photo of the win, the numbers behind it, sign off as the agent.",
     build: () => ({
       globalStyle: style(),
       blocks: [
         seedBlock("header"),
+        seedBlock("image", { alt: "Photo of the sold property", kind: "photo" }),
         seedBlock("hero", {
           kicker: "Just Sold",
           value: "",
@@ -436,10 +442,13 @@ export const SEED_DOCS: SeedDoc[] = [
     id: "luxury-market-report",
     name: "Luxury Market Report",
     description:
-      "Full-bleed photo hero, headline + stat side-by-side, market chart, two listing cards.",
+      "Serif masthead, wide-banner photo hero, headline + stat side-by-side, market chart, two listing cards.",
     build: () => ({
       globalStyle: {
         ...style(),
+        // Serif display for the masthead + hero value — the luxury register
+        // (magazine-issue precedent); body copy stays in the house sans.
+        displayFontFamily: "PLAYFAIR_SERIF",
         backdropColor: "#F0ECE6",
         primaryColor: "#1a1006",
         accentColor: "#B8860B",
@@ -447,11 +456,11 @@ export const SEED_DOCS: SeedDoc[] = [
       },
       blocks: [
         seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
-        // hero photo — full bleed
+        // hero photo — full-bleed wide banner (the 16:9 editorial cut)
         seedBlockGrid(
           "image",
           { x: 0, y: 2, w: 12, h: 5 },
-          { alt: "Property hero photo", kind: "photo", ratio: "4:3" },
+          { alt: "Property hero photo", kind: "photo", ratio: "16:9" },
         ),
         // headline left, median-price stat right — same row
         seedBlockGrid(
@@ -1108,7 +1117,8 @@ export const SEED_DOCS: SeedDoc[] = [
   {
     id: "monthly-digest",
     name: "Monthly Digest",
-    description: "Monthly KPIs, 12-month chart, insight + commentary side-by-side, agent sign-off.",
+    description:
+      "Monthly KPIs, two charts side-by-side, insight + commentary, the month in numbers, agent sign-off.",
     build: () => ({
       globalStyle: { ...style() },
       blocks: [
@@ -1134,12 +1144,21 @@ export const SEED_DOCS: SeedDoc[] = [
             ],
           },
         ),
+        // two charts side-by-side — weekly-pulse depth at monthly cadence
         seedBlockGrid(
           "image",
-          { x: 0, y: 8, w: 12, h: 5 },
+          { x: 0, y: 8, w: 6, h: 5 },
           {
             alt: "12-month price trend",
             caption: "12-Month Median Sale Price · SWFL",
+          },
+        ),
+        seedBlockGrid(
+          "image",
+          { x: 6, y: 8, w: 6, h: 5 },
+          {
+            alt: "Inventory trend chart",
+            caption: "Homes for Sale, Same Window",
           },
         ),
         seedBlockGrid(
@@ -1158,9 +1177,21 @@ export const SEED_DOCS: SeedDoc[] = [
             body: "Give your take — where things stand for buyers and sellers right now, in your own words.",
           },
         ),
-        seedBlockGrid("divider", { x: 0, y: 17, w: 12, h: 1 }),
-        seedBlockGrid("agent-card", { x: 0, y: 18, w: 12, h: 4 }),
-        seedBlockGrid("footer", { x: 0, y: 22, w: 12, h: 3, static: true }),
+        seedBlockGrid(
+          "list",
+          { x: 0, y: 17, w: 12, h: 4 },
+          {
+            title: "The month in numbers",
+            items: [
+              { lead: "SALES ·", text: "Give the month's closed-sales count and how it compares." },
+              { lead: "PRICE ·", text: "Give the median and the direction it moved." },
+              { lead: "SUPPLY ·", text: "Give inventory or months of supply and the trend." },
+            ],
+          },
+        ),
+        seedBlockGrid("divider", { x: 0, y: 21, w: 12, h: 1 }),
+        seedBlockGrid("agent-card", { x: 0, y: 22, w: 12, h: 4 }),
+        seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -1207,12 +1238,21 @@ export const SEED_DOCS: SeedDoc[] = [
             ],
           },
         ),
+        // two full-year charts side-by-side — price AND volume tell the year
         seedBlockGrid(
           "image",
-          { x: 0, y: 8, w: 12, h: 5 },
+          { x: 0, y: 8, w: 6, h: 5 },
           {
             alt: "Full-year price trend",
             caption: "Median Sale Price · Month by Month",
+          },
+        ),
+        seedBlockGrid(
+          "image",
+          { x: 6, y: 8, w: 6, h: 5 },
+          {
+            alt: "Full-year sales volume chart",
+            caption: "Homes Sold · Month by Month",
           },
         ),
         // {4,4,4} — three real blocks, not one multi-column pretending to be three.
@@ -1497,10 +1537,20 @@ export const SEED_DOCS: SeedDoc[] = [
           overlayBody: "A designed edition of what mattered in your market.",
           paddingY: "lg",
         }),
+        // Feature cards with image slots — imageUrl: "" declares the open slot
+        // (a column without the key stays image-less by design).
         seedBlock("multi-column", {
           columns: [
-            { heading: "Feature one", body: "A couple of lines that earn the click." },
-            { heading: "Feature two", body: "Aspirational context lifts time spent." },
+            {
+              imageUrl: "",
+              heading: "Feature one",
+              body: "A couple of lines that earn the click.",
+            },
+            {
+              imageUrl: "",
+              heading: "Feature two",
+              body: "Aspirational context lifts time spent.",
+            },
           ],
           paddingY: "lg",
         }),
