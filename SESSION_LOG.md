@@ -1,3 +1,24 @@
+## 2026-07-10 (Fable 5 · main) — Insiders Edition Phases A+B BUILT: desk + composer, mocked e2e green, STOPPED at operator gate
+
+Executed plan Tasks 1–9 inline (TDD, 8 commits dc7602ab..dd80fa89). Phase A: `_FABLE5/` desk
+(FABLE5.md, MINDMAP.md, playbook, desk/2026-07.md, retro TEMPLATE), desk parser + shape check
+(lib/email/insiders/desk.ts), SessionStart hook print-desk-status.mjs (live count against
+data_lake.news_articles_swfl via Accept-Profile header — table is NOT in public; columns probed:
+headline/article_url/body_text/source_name/published_date/swfl_relevance). Phase B: metered client
+learns claude-fable-5 (RATES $10/$50 — was $0-invisible; CallType insiders_author; beta.messages
+wrapped via generalized wrapMessageSurface — SDK 0.106.0 already types fallbacks +
+server-side-fallback-2026-06-01, no upgrade needed), IssueBudget $20 ledger, IssueDoc zod +
+structured-output schema + mock fixture, dossier assembler (brain OUTPUT slices + desk-merged news
++ ONE-tokenizer anchors), 2-pass author (draft+editor, refusal fallback→opus-4-8,
+INSIDERS_LIVE_AUTHOR belt), materializer (buildChartForQuestion → chartSpecToEmailImage →
+chartImageBlock; blocking lint: anchor/jargon/as-of-once/no-minted-source-urls), runner
+insiders-run.mts (weekly-read ladder clone + spend-headroom hint + ledger report). Evidence: 38
+tests green (insiders suite + spend-guard + runner helpers), `bunx next build` clean, mocked
+DRY_RUN e2e composed issue-2026-07.html — 40 brain outputs, 60 real news rows, 4,510 anchors,
+3 REAL charts hosted, as-of stated once, $0 spent. Checks: opened `insiders_ops_spend_rate_fable5`
+(ops repo rate mirror). NEXT: Task 10 STOP — operator go/no-go before the first live $20 authoring
+run (INSIDERS_LIVE_AUTHOR=1); Phases C/D after issue #1.
+
 ## 2026-07-10 (Fable 5 · main) — zip-page Phase E BUILT: narration on corridor + brain pages, ReportAi one-root, --surface all cron
 
 Executed `docs/superpowers/plans/2026-07-10-zip-page-phase-e-report-pages.md` (8 tasks, commit per
