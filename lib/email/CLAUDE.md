@@ -24,6 +24,12 @@
   labels like "Beds". Copy the `trend-snapshot` template. Charts need no authoring — reserve an
   `image` block and `upsertChartBlock` replaces it in place. Full playbook:
   `docs/superpowers/specs/2026-07-08-seed-slot-playbook-handoff.md`.
+- **CSV/formula-injection policy (pinned 07/10/2026):** contacts are stored RAW — import never
+  mangles a value (a leading `-` in a name or an `@handle` is legitimate data). The escape happens
+  at the EXIT: any code that GENERATES a CSV builds every cell via `escapeCsvCell`/`toCsvLine` from
+  `lib/email/csv-escape.ts` (quotes each cell, doubles `"`, `'`-prefixes formula triggers
+  `= + - @` tab/CR/LF + full-width variants — per OWASP CSV Injection). No exporter exists today;
+  that module is the one root when one ships. Never sanitize on import — wrong layer.
 - **Layout:** use `h-full` / `dvh`, never `h-screen`.
 - **Send is the paywall, builds are free** — watermark only; no build gate, no Stripe on creation.
 - **Email Lab tier DIAL has ONE root:** `lib/email/lab/capabilities.ts`. Every feature + every font
