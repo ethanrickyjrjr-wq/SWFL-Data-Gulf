@@ -1,3 +1,16 @@
+## 2026-07-11 (Opus 4.8 · main) — Chart-picker review + fallback-note honesty fix
+
+Reviewed the chart-picker-parity Option-2 work (storm-timeline + seasonal-radial SVG twins, routing in
+`lib/charts/spec-to-image.ts`, picker wiring) — all already on origin/main, build green, 50/50 chart tests
+pass. One real finding: the Email Lab "why you got a bar instead" note (`lib/email/build-doc.ts`) was
+written for donut/ranked and now lies for the two newly-pickable types — a user who picks "Seasonal rings"
+got told "This data has no period-over-period change." Fixed: storm-timeline/seasonal-radial now get an
+honest note ("needs per-event or per-corridor detail we don't have for this metric yet"). Kept the fix
+INLINE (didn't extract into `reshape-chart-type.ts` — a live parallel session holds a claim on it); the
+passthrough fits-logic is already locked by `reshape-chart-type.test.ts`. `bunx next build` green.
+Push carries one foreign already-committed commit (7bb8eb62, leepa-sold-median empty-tolerant hotfix).
+Next: nothing outstanding on this thread.
+
 ## 2026-07-11 (Opus 4.8 · main) — CORRECTION: Lee sold-median T1–5 are PUSHED (parallel safe-push carried them), + live-break hotfix
 
 Correcting my "Lee homes-only SOLD median" entry below: it says "NOT pushed" — WRONG (advisor caught it).

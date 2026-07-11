@@ -275,7 +275,9 @@ async function buildPromptChart(
       chartType && !chartTypeFits(cfq.chart, chartType)
         ? chartType === "donut"
           ? "A donut needs share-style data (counts that add to a whole) — showed a bar for this metric."
-          : "This data has no period-over-period change — showed a plain bar instead."
+          : chartType === "storm-timeline" || chartType === "seasonal-radial"
+            ? "That chart needs per-event or per-corridor detail we don't have for this metric yet — showed a bar instead."
+            : "This data has no period-over-period change — showed a plain bar instead."
         : undefined;
     const chart = chartType ? reshapeChartToType(cfq.chart, chartType) : cfq.chart;
     const accent = doc.globalStyle.accentColor || "#3DC9C0";
