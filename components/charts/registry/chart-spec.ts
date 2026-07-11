@@ -29,10 +29,11 @@ export interface ChartTheme {
  * The coarse shape of the data a frame consumes — declared on each registry
  * entry's `accepts`. NOTE: `pickFramesForData` (Phase 2g) does NOT read
  * `accepts`; it returns one frameId from a hardcoded priority ladder. `accepts`
- * is descriptive metadata only. The `seasonal-radial`/`zhvi-area` `time-series`
- * overlap is defused by `FrameDef.fixtureOnly`: seasonal-radial is fixture-only,
- * and both the picker and the deliverable binder drop fixture-only frames via
- * `isFixtureOnly()` — so even a future `accepts`-matching picker can't surface it.
+ * is descriptive metadata only. A `time-series`-labeled frame that is ALSO
+ * `fixtureOnly` (see `FrameDef.fixtureOnly`) is excluded from both the picker
+ * and the deliverable binder via `isFixtureOnly()` — the single source of
+ * truth for "cannot bind to live data" lives on the registry entry itself,
+ * never inferred from `accepts` overlap.
  */
 export type DataShape =
   | "time-series"
