@@ -54,9 +54,15 @@ Rejected: daily-asking-only (loses the sold benchmark); monthly-sold-only (hero 
    `--dry-run`, GHA monthly cron wrapper, `cadence_registry` entry, pipeline-freshness row, tests,
    `VolumeGuardError` on empty pull + `assert_content_fresh` (55d, monthly). Provenance = redfin.com.
 2. **Daily city asking rollup** — a per-city median list price for {cape_coral, fort_myers, naples}
-   from active inventory. Compute a **true** median over raw active listings in each city's ZIPs
-   (ZIP→city map) to avoid median-of-medians — expose as a view/rollup the desk reads. Daily cadence
-   (rides the existing active-listings refresh).
+   from active inventory. **CORRECTED 07/11/2026 (check `price_source_wire_off_stale_seed_table`):**
+   read the CLEANED view the desk already uses — `data_lake.listing_active_stats` /
+   `active_listings_residential_zip_stats` — NOT the raw seed `data_lake.active_listings_residential`.
+   The raw seed carries rental/staleness contamination fixed at the view level on 06/26/2026
+   (`docs/sql/20260625_active_listings_residential_zip_stats.sql`); querying it directly produced the
+   bogus "Collier asking $309k / 2× gap vs sold" this doc originally reported. From the clean rollup
+   Collier asking is ~$610k against Redfin sold ~$625k (within ~2.4%). Pin ONE authority (the desk's
+   existing `listing_active_stats` read); the two clean views disagree on Lee ($296k vs $445k), so do
+   not roll a fresh percentile off the raw table.
 3. **Desk wiring** (`lib/desk/loaders.ts`) — hero + price-trend read the **daily asking** series as
    the moving line and the **monthly sold** value as the anchor, labeled distinctly ("asking" vs
    "sold, as of MM/DD/YYYY"). Four-lane: never refuse; ZHVI stays the deepest fallback.

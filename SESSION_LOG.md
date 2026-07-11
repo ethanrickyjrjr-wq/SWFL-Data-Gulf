@@ -1,3 +1,18 @@
+## 2026-07-11 (Opus 4.8 · main) — CORRECTION: my part-1 asking figures were off a contaminated table; design doc fixed
+
+Correcting my own earlier entry below ("daily_truth median_sale_price: real fix is WRONG-LANE..."): the
+daily-ASKING numbers I reported (Collier ~$309k, Naples ~$279k, and the alarming "2× gap vs sold") were
+computed off the RAW seed `data_lake.active_listings_residential`, which carries rental/staleness
+contamination already fixed at the VIEW level 06/26/2026. Sonnet's reliable-sources mission caught it
+(RULE 0.5). Verified myself against the clean rollup the desk already reads (`listing_active_stats`):
+Collier asking ~$610k vs Redfin sold ~$625k — within ~2.4%, NO 2× gap. The gap was my query bug, not a
+market/source problem, so Naples/Collier reconciles at COUNTY grain (the incorporated-Naples-city vs
+broad-area mismatch is a separate, real geography question — check `naples_asking_vs_sold_geography`).
+Corrected `docs/superpowers/specs/2026-07-11-daily-price-dual-signal-design.md` part 2 to read the cleaned
+view, never the raw seed (check `price_source_wire_off_stale_seed_table`, opened by Sonnet). The Redfin
+city SOLD ingest (part 1, `62715c4b`) is unaffected — it's correct. Desk wiring untouched (claimed by a
+parallel session). No push.
+
 ## 2026-07-11 (Sonnet 5 · main) — Reliable-sources research mission: Naples/Collier "2x gap" is an internal query bug, not a missing source; 6 external sources verified live
 
 Research-only mission (`docs/handoff/2026-07-11-reliable-sources-research-mission.md`), findings in
