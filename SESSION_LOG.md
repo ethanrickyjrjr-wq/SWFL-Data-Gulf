@@ -31,6 +31,25 @@ license-detail scrape, "send is the verifier" — no Hunter/SMTP-probe) is captu
 NOT pushed. Staged explicit paths only; left parallel zip-scope-core session's files
 (`app/charts/page.tsx`, `core-scope.mts`, etc.) untouched.
 
+## 2026-07-10 (Fable 5 · main) — Vertical-plays round 2: horizontal engine spec + weighted research (legal + reachability + social)
+
+Operator asked to spec the horizontal engine, map ALL data + best sources, research phone/SMS rules,
+and run social listening (SteadyAPI Reddit/X/Insta = "new_steady") for pain points + net-new
+fast-monetization ideas, weighted by closeness. Ran 3 bounded crawl4ai subagents + ~55 live SteadyAPI
+Reddit calls (agent-side subs: InsuranceAgent, loanoriginators, HVAC/Roofing/Contractor/Plumbing).
+KEY FINDINGS: (1) Insurance = reachability JACKPOT — FL DFS free public bulk CSV
+(licenseesearch.fldfs.com/BulkDownload, AllValidLicensesIndividual.csv) carries email+phone+county+
+license-class; filter Lee/Collier + class 0220. (2) NMLS mortgage = per-record only, no bulk, no
+email/phone → scrape+enrich. (3) Contractors = phone/mail only, no email. (4) CHANNEL LEGALITY
+(current law, crawl4ai): email + direct mail are the ONLY clean cold channels; cold SMS dead (TCPA +
+A2P 10DLC carrier-block); cold calling needs FL FDACS telemarketer license; FCC one-to-one rule struck
+down 2025 — reshapes the "phone availability" play. (5) Social pain: insurance E&O/AI fear +
+captive→independent wave; LOs' real client is the referral agent + they buy leads + want per-property
+open-house sheets; contractors anti-SaaS/anti-AI + email-averse but actively resell leads. Wrote
+docs/vertical-plays/02 (horizontal engine spec + full data-sourcing map), 03 (weighted research,
+ranking = insurance first), updated README board (insurance→top, channel gaps) + 01 (contractor
+channel gated). Design mode only — no code, not through writing-plans. Insurance = next deep dive.
+
 ## 2026-07-10 (Fable 5 · main) — Vertical-plays board: non-RE industries to sell content/leads to (strategy docs, no code)
 
 Brainstorm per operator: which industries beyond RE agents can we serve with scheduled content /

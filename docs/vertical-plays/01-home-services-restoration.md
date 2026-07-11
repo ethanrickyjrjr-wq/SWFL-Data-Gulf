@@ -41,10 +41,14 @@ Checked the DBPR ingest columns directly (`ingest/pipelines/fl_dbpr_licenses/con
   county code, license number, statuses, dates. **No email. No phone. No address.**
 - **Applicant file** (`constr_app.csv`): name + full mailing address + **phone** + ext. Still **no email.**
 
-So contractors are reachable by **phone and direct mail** (applicants) — not email. Two implications:
+So contractors are reachable by **phone and direct mail** (applicants) — not email. But the channel is
+now legally gated (verified 07/10/2026, see `03-research-and-signals.md` §2):
 
-1. If we **sell leads to contractors**, reach is fine: phone/SMS/mail is exactly how lead-gen outreach
-   to trades already works. The email gap doesn't bite the lead-gen motion.
+1. **Cold text is dead** (TCPA consent + A2P 10DLC carrier-blocks cold marketing) and **cold calling
+   needs a Florida FDACS telemarketer license** plus DNC/autodialer compliance. So "cold-call/text the
+   contractor" is NOT an open lane. The realistic cold channel to contractors is **direct mail** (we
+   hold applicant addresses), with phone reserved for **opt-in/inbound** leads or a licensed calling
+   program. This is a material constraint on the motion — don't assume phone.
 2. The `licenses-swfl` *brain* holds only aggregates (counts, lapse rate). The contactable
    per-contractor list lives in the raw `data_lake.fl_dbpr_licenses` / `fl_dbpr_applicants` tables —
    we'd read those directly, not the brain.
@@ -77,8 +81,11 @@ The lowest-build, honest first pilot:
 2. Assemble a **roofing + restoration contractor list** for those ZIPs from the raw DBPR applicant
    table (name + phone + trade).
 3. Sell a **founding-price weekly intent feed** ("the 10 hottest renovation ZIPs in Lee/Collier this
-   week + the permits behind them") to 3–5 contractors by phone. Cash-in-hand, no email infra, no site.
-4. If it converts, *then* build the productized feed and decide whether it wants its own domain.
+   week + the permits behind them") to 3–5 contractors. Cold channel = **direct mail** (we have
+   applicant addresses) or a warm intro; phone only once they opt in (cold phone is gated — §2). No
+   email infra, no site needed for a first cash test.
+4. If it converts, *then* build the productized feed, sort the channel at scale (FDACS-licensed calling
+   vs. inbound funnel vs. mail), and decide whether it wants its own domain.
 
 ## Verify before pitching
 
