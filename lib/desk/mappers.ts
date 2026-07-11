@@ -36,6 +36,25 @@ export function directionOf(delta: number | null | undefined): DeskDirection {
   return delta > 0 ? "up" : "down";
 }
 
+/**
+ * A GEO-optimized quotable one-liner for a desk figure: answer-first, with the
+ * number, its OWN as-of, and the brand — the Cite-Sources + Statistics-Addition
+ * shape the Princeton GEO study links to +30-41% AI-citation lift. `scope` is
+ * injected ONLY when passed: region figures get "in Southwest Florida"; a
+ * national rate (30-yr mortgage) must NOT wear a regional label (geography
+ * honesty). Empty display → empty string (a dead feed never ships a hollow
+ * sentence).
+ */
+export function makeTakeaway(
+  d: { label: string; display: string; asOf?: string; sourceLabel: string },
+  scope?: string,
+): string {
+  if (!d.display) return "";
+  const where = scope ? ` in ${scope}` : "";
+  const asOf = d.asOf ? ` as of ${d.asOf}` : "";
+  return `${d.label}${where} is ${d.display}${asOf}, per ${d.sourceLabel}.`;
+}
+
 function median(values: number[]): number | null {
   if (values.length === 0) return null;
   const sorted = [...values].sort((a, b) => a - b);

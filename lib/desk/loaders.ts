@@ -23,6 +23,7 @@ import {
   fmtUsd,
   isPlausibleCut,
   latestDelta,
+  makeTakeaway,
   mD,
   mdY,
   rankMovers,
@@ -755,6 +756,17 @@ export async function loadDeskData(): Promise<DeskData> {
           }
         : null,
   };
+
+  // Quotable takeaways (Spec B GEO). Region KPIs + the price-cut gauge are
+  // SWFL-scoped; the 30-yr mortgage is a NATIONAL rate, so it gets no region
+  // clause. Hero city datums already name their city in the label, so no scope.
+  const SWFL = "Southwest Florida";
+  for (const d of kpis) {
+    const national = /mortgage/i.test(d.label);
+    d.takeaway = makeTakeaway(d, national ? undefined : SWFL);
+  }
+  if (gauges.priceReduced) gauges.priceReduced.takeaway = makeTakeaway(gauges.priceReduced, SWFL);
+  if (hero) for (const c of hero.cities) c.latest.takeaway = makeTakeaway(c.latest);
 
   return { ticker, hero, kpis, mix, pulse, movers, flash, gauges };
 }

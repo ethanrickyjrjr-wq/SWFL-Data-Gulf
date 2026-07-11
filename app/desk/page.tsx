@@ -170,6 +170,22 @@ export default async function DeskPage() {
                 ))}
               </div>
             ) : null}
+            {desk.kpis.some((k) => k.takeaway) ? (
+              <div className="mt-3 border-t border-white/5 px-1 pt-3">
+                <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-gray-600">
+                  In plain terms
+                </p>
+                <ul className="space-y-0.5">
+                  {desk.kpis
+                    .filter((k) => k.takeaway)
+                    .map((k) => (
+                      <li key={k.label} className="text-[11px] leading-4 text-gray-500">
+                        {k.takeaway}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
 
           {desk.pulse ? (
