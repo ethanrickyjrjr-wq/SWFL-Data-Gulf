@@ -1,3 +1,29 @@
+## 2026-07-11 (Fable 5 · main) — SWFL Data Desk /desk BUILT (Spec A: 1a terminal + 1b filing bridge); daily_truth prices found unvalued → ZHVI fallback
+
+Executed `2026-07-11-swfl-data-desk-design.md` per the handoff. New lake view
+`data_lake.listing_pulse_daily` (migration run + verified; aggregates transitions per day/class,
+seed-excluded — reproduces the spec's 07/08 example exactly and exposes 07/07's 31-event partial
+scan). `lib/desk/`: zone contract with the Spec-B `{label,value,unit,sourceLabel,asOf,takeaway?}`
+seam + pure mappers (partial-scan detector, $222M-cut clamp, delta-vs-prior-reading, day-0 rebase,
+movers noise guard ≥50 actives) — 19 bun tests green. `app/desk/`: SSR server page (revalidate 300,
+indexable, minimal Dataset JSON-LD via new `deskJsonLd` in lib/jsonld.ts), zones: wire ticker
+(CSS marquee, pause + reduced-motion), ZHVI-tab hero + %-since-start, KPI count-up row (labels are
+h3 so the highlighter captures per-tile provenance), inventory-mix strip (v2 filter-tab lane),
+Daily Market Pulse w/ partial-scan chips + "departures = reason not asserted", movers, text-only
+flash feed (no photos ⇒ no CDN leak; closings via resolveSoldPrice lake-only, luxury caveat),
+gauge cluster (existing MarketTemperatureGauge + new price-cut dial). Phase 1b: DeskHighlightBridge
+(maps desk datums → metric suggestions, publishes via the ONE ReportHighlightBridge, reportId
+`master`), PinToEmail frame-filer on brain-mirrored tiles (active-listings-swfl, home-values-swfl),
+`desk-price-trend` + `desk-pulse` registered in PANEL_CONFIGS + AddChartToProject, TurnIntoReportCta
+via lab-entry root (`anonymousLabArrival`, ref=desk). **Data findings (checks opened):**
+`daily_truth_median_sale_unvalued` — median_sale_price is ALL-NULL (19d × 3 cities), hero +
+desk-price-trend self-heal to the daily line when the writer fills;
+`insiders_desk_stats_mock_grounding` — pre-existing red grounding test from insiders commit
+16034e73, not this diff. Verified: `bunx next build` green, /desk prerenders with real values
+($339,000 median, 6.49% mortgage, 10× "as of 07/10/2026" stamps, zero vendor/MLS strings in HTML).
+Next: push (operator-gated) → live-verify deployed /desk (browser + a11y) → close
+`swfl_data_desk_live_verify`. Spec B untouched.
+
 ## 2026-07-11 (Opus 4.8 · main) — Records-request outbound engine SPECCED (component 3 of the data-acquisition engine); §119 verified live
 
 Operator: review + spec + plan `docs/vertical-plays/04-data-acquisition-engine.md`, lean = build the

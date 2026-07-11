@@ -70,6 +70,44 @@ export function brainJsonLd(display: DisplayBrain, slug: string): object[] {
   return [dataset, faq];
 }
 
+/** Minimal figure shape the desk Dataset needs — mirrors the /desk zone
+ *  contract ({label,value,unit?,sourceLabel,asOf}) without importing it. */
+export interface DeskJsonLdFigure {
+  label: string;
+  value: number;
+  unit?: string;
+  sourceLabel: string;
+  asOf?: string;
+}
+
+/**
+ * Dataset JSON-LD for the /desk live terminal — deliberately MINIMAL (name,
+ * publisher, spatial coverage, one PropertyValue per SSR'd figure). Spec B
+ * (discovery flywheel) enriches this same hook with temporalCoverage /
+ * license / distribution; wiring it from day 1 is the seam.
+ */
+export function deskJsonLd(figures: DeskJsonLdFigure[], dateModified?: string): object[] {
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      name: "SWFL Data Desk — daily Southwest Florida housing market figures",
+      description:
+        "Daily-refreshed Southwest Florida market terminal: median asking price, active inventory, price-cut share, mortgage rate, and daily listing-flow counts for Lee and Collier County.",
+      url: `${SITE}/desk`,
+      ...(dateModified ? { dateModified } : {}),
+      publisher: PUBLISHER,
+      spatialCoverage: SPATIAL,
+      variableMeasured: figures.map((f) => ({
+        "@type": "PropertyValue",
+        name: f.label,
+        value: f.value,
+        ...(f.unit ? { unitText: f.unit } : {}),
+      })),
+    },
+  ];
+}
+
 export function corridorJsonLd(
   corridor: CorridorNormalized,
   freshnessToken: string,

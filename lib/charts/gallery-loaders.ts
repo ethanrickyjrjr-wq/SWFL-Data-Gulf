@@ -130,6 +130,69 @@ export async function loadPassengers(supabase: Supabase): Promise<LoadedPanel> {
   }
 }
 
+// --- /desk panels ----------------------------------------------------------
+
+/** Series for the desk Daily Market Pulse panel (listing_pulse_daily view). */
+export const DESK_PULSE_SERIES: ChartSeriesDef[] = [
+  { key: "new_listings", label: "New listings", color: "#5bc97a", dash: "" }, // mangrove
+  { key: "price_cuts", label: "Price cuts", color: "#d4b370", dash: "8 5" }, // neutral-gold
+  { key: "departures", label: "Departures (reason not asserted)", color: "#807e76", dash: "2 5" },
+  { key: "sold", label: "Sold", color: "#3DC9C0", dash: "4 3" }, // gulf-teal
+];
+
+/** Daily transition counts — the desk pulse zone's savable chart. */
+export async function loadDeskPulsePanel(supabase: Supabase): Promise<LoadedPanel> {
+  try {
+    const { data, error } = await supabase
+      .schema("data_lake")
+      .from("listing_pulse_daily")
+      .select("day, new_listings, price_cuts, departures, sold")
+      .order("day", { ascending: true });
+    if (error) return { data: [], asOf: undefined, error: error.message };
+    const rows: ChartRow[] = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+      month: String(r.day),
+      new_listings: r.new_listings as number,
+      price_cuts: r.price_cuts as number,
+      departures: r.departures as number,
+      sold: r.sold as number,
+    }));
+    return { data: rows, asOf: rows.at(-1)?.month as string | undefined, error: null };
+  } catch (err) {
+    return { data: [], asOf: undefined, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+/**
+ * Desk price trend — the web-verified daily median-sale-price line when the
+ * feed carries values, else the monthly ZHVI lane (verified 07/11/2026 the
+ * daily feed is present but unvalued). Self-healing: the day daily_truth
+ * fills, saved copies of this panel start rendering the daily line.
+ */
+export async function loadDeskPriceTrend(supabase: Supabase): Promise<LoadedPanel> {
+  try {
+    const { data, error } = await supabase
+      .schema("data_lake")
+      .from("daily_truth")
+      .select("metric_key, area, period, value")
+      .eq("metric_key", "median_sale_price")
+      .not("value", "is", null)
+      .order("period", { ascending: true });
+    if (!error && data && data.length >= 2) {
+      const byDay = new Map<string, ChartRow>();
+      for (const r of data as { area: string; period: string; value: number }[]) {
+        const row = byDay.get(r.period) ?? { month: r.period };
+        row[r.area] = r.value;
+        byDay.set(r.period, row);
+      }
+      const rows = [...byDay.values()];
+      return { data: rows, asOf: rows.at(-1)?.month as string | undefined, error: null };
+    }
+  } catch {
+    // fall through to the ZHVI lane
+  }
+  return loadMetros(supabase, "zhvi_pivoted");
+}
+
 interface PanelConfig {
   rootId: string;
   eyebrow: string;
@@ -199,6 +262,25 @@ const PANEL_CONFIGS: PanelConfig[] = [
     valueFormat: "pct",
     series: TIER_YOY_SERIES,
     load: (db) => loadTierYoY(db),
+  },
+  {
+    rootId: "desk-price-trend",
+    eyebrow: "Southwest Florida",
+    title: "Median Home Price Trend",
+    subtitle: "Cape Coral · Fort Myers · Naples",
+    valueFormat: "usd",
+    series: SWFL_METRO_SERIES,
+    variant: "area",
+    load: (db) => loadDeskPriceTrend(db),
+  },
+  {
+    rootId: "desk-pulse",
+    eyebrow: "Southwest Florida",
+    title: "Daily Market Pulse",
+    subtitle: "New listings · price cuts · departures · sold, per scan day",
+    valueFormat: "count",
+    series: DESK_PULSE_SERIES,
+    load: (db) => loadDeskPulsePanel(db),
   },
 ];
 
