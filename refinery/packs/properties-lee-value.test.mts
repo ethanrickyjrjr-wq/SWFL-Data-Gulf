@@ -41,11 +41,13 @@ test("propertiesLeeValue pack: deterministic (skipTriageAgent + skipSynthesisAge
   assert.equal(propertiesLeeValue.skipSynthesisAgent, true);
 });
 
-test("propertiesLeeValue pack: source connectors wired (leepa + redfin-lee-market + fhfa-hpi)", () => {
+test("propertiesLeeValue pack: source connectors wired (leepa + redfin-lee-market + fhfa-hpi + leepa-sold-median)", () => {
   // Drift fix (2026-06-13): the redfin-lee build added leeMarketSource as a 3rd
   // connector but this assertion still expected 2 — it was red on main. Pinned
   // to 3 and the redfin_lee_market connector added below.
-  assert.equal(propertiesLeeValue.sources.length, 3);
+  // 2026-07-11: leepa_sold_median added as the 4th connector (homes-only sold
+  // median per ZIP from recorded deeds).
+  assert.equal(propertiesLeeValue.sources.length, 4);
   const leepa = propertiesLeeValue.sources.find((s) => s.source_id === "leepa_value_lee");
   assert.ok(leepa, "leepa_value_lee source must be wired");
   assert.equal(leepa!.trust_tier, 2);
@@ -55,6 +57,9 @@ test("propertiesLeeValue pack: source connectors wired (leepa + redfin-lee-marke
   const fhfa = propertiesLeeValue.sources.find((s) => s.source_id === "fhfa_hpi");
   assert.ok(fhfa, "fhfa_hpi source must be wired");
   assert.equal(fhfa!.trust_tier, 1);
+  const soldMedian = propertiesLeeValue.sources.find((s) => s.source_id === "leepa_sold_median");
+  assert.ok(soldMedian, "leepa_sold_median source must be wired");
+  assert.equal(soldMedian!.trust_tier, 2);
 });
 
 test("propertiesLeeValue pack: fixture round-trip produces expected metrics", async () => {
@@ -107,6 +112,81 @@ test("propertiesLeeValue pack: fixture round-trip produces expected metrics", as
   assert.deepEqual(result.drivers, []);
   assert.deepEqual(result.contradicts, []);
   assert.deepEqual(result.exogenous_signals, []);
+});
+
+test("propertiesLeeValue pack: homes-only sold median surfaces (metric + per-ZIP detail table, not the land-blend)", async () => {
+  const { leepaValueSource } = await import("../sources/leepa-value-source.mts");
+  const { leepaSoldMedianSource } = await import("../sources/leepa-sold-median-source.mts");
+  // Parcel fragments keep the pack out of the empty path; sold-median fragments
+  // drive the new metric + detail table.
+  const fragments = [...(await leepaValueSource.fetch()), ...(await leepaSoldMedianSource.fetch())];
+
+  propertiesLeeValue.corpusSummary!(
+    fragments as unknown as Parameters<NonNullable<typeof propertiesLeeValue.corpusSummary>>[0],
+  );
+  const result = propertiesLeeValue.outputProducer!({
+    pack: propertiesLeeValue,
+    version: 1,
+    refined_at: new Date().toISOString(),
+    citations: [],
+    facts: [],
+    recentNote: "",
+  } as unknown as Parameters<NonNullable<typeof propertiesLeeValue.outputProducer>>[0]);
+
+  // (a) county homes-only sold median metric — intensive, currency, in the homes band.
+  const m = result.key_metrics.find((k) => k.metric === "lee_sold_median_homes_only");
+  assert.ok(m, "lee_sold_median_homes_only metric must surface");
+  assert.equal(m!.variable_type, "intensive");
+  assert.equal(m!.display_format, "currency");
+  assert.ok(
+    (m!.value as number) > 200000,
+    `county median must be in the homes band, got ${m!.value}`,
+  );
+
+  // (b) per-ZIP detail table; 33972 reads the homes band, NOT the $35k land-blend.
+  const dt = (result.detail_tables ?? []).find((t) => t.id === "lee_sold_median_by_zip");
+  assert.ok(dt, "lee_sold_median_by_zip detail table must surface");
+  const row = dt!.rows.find((r) => r.key === "33972");
+  assert.ok(row, "33972 row must be present");
+  assert.ok(
+    (row!.cells.median_sale as number) > 200000,
+    `33972 sold median must be the homes band, not the $35k land-blend — got ${row!.cells.median_sale}`,
+  );
+
+  // (c) citation names Lee County Property Appraiser and leaks no placeholder tokens.
+  assert.ok(/Lee County Property Appraiser/.test(m!.source.citation));
+  assert.ok(!/\[config\]|\[internal\]|§/.test(m!.source.citation));
+});
+
+test("propertiesLeeValue pack: no stale 'last_sale_amount is null' claim anywhere in facts or OUTPUT", async () => {
+  // Fetch ALL real sources so the lee-market path (where the stale claim lived)
+  // is exercised — the stale string sat in a corpus fact, not the result object.
+  const { leepaValueSource } = await import("../sources/leepa-value-source.mts");
+  const { leeMarketSource } = await import("../sources/lee-market-source.mts");
+  const { fhfaHpiSource } = await import("../sources/fhfa-hpi-source.mts");
+  const { leepaSoldMedianSource } = await import("../sources/leepa-sold-median-source.mts");
+  const fragments = [
+    ...(await leepaValueSource.fetch()),
+    ...(await leeMarketSource.fetch()),
+    ...(await fhfaHpiSource.fetch()),
+    ...(await leepaSoldMedianSource.fetch()),
+  ];
+  const facts = propertiesLeeValue.corpusSummary!(
+    fragments as unknown as Parameters<NonNullable<typeof propertiesLeeValue.corpusSummary>>[0],
+  );
+  const result = propertiesLeeValue.outputProducer!({
+    pack: propertiesLeeValue,
+    version: 1,
+    refined_at: new Date().toISOString(),
+    citations: [],
+    facts: [],
+    recentNote: "",
+  } as unknown as Parameters<NonNullable<typeof propertiesLeeValue.outputProducer>>[0]);
+  const blob = JSON.stringify(facts) + JSON.stringify(result);
+  assert.ok(
+    !/last_sale_amount is null/i.test(blob),
+    "the stale 'LeePA last_sale_amount is null' claim must be gone — it is ~98% populated",
+  );
 });
 
 test("propertiesLeeValue pack: empty-snapshot path → neutral + zero-metrics fallback", () => {

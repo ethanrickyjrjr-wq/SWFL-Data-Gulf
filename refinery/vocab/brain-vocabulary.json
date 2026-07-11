@@ -3448,6 +3448,36 @@
       "status": "active",
       "scope_note": "Median (just_value âˆ’ taxable_value) / just_value Ã— 100 across parcels where cap_difference > 0 (actively benefiting from the Save-Our-Homes cap). Reads as a level metric describing how much of the tax base is locked behind the homestead cap. High = long-tenured ownership; low = recent turnover or non-homestead."
     },
+    "properties_lee_sold_median_homes_only": {
+      "id": "properties_lee_sold_median_homes_only",
+      "grade": { "reviewed_non_directional": true },
+      "prefLabel": "Lee County Homes-Only Sold Median (Recorded Deeds)",
+      "altLabels": [
+        "Lee sold median",
+        "Lee homes sold median",
+        "Lee homes-only median price"
+      ],
+      "raw_slugs": [
+        "lee_sold_median_homes_only"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "properties-lee-value",
+        "master"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "value_range": [
+        0,
+        100000000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Homes-only (single-family + condo, use_code 01/04) SOLD median per Lee County ZIP from LeePA recorded deeds — each parcel's latest qualified sale 2024+ over $20,000 (a stock of most-recent prices, not a transaction-flow median). Vacant land excluded — this is the sold, homes-only answer to the active-listing land-blend that reported ~$35k at 33972. County rollup is the headline; per-ZIP detail rides in the lee_sold_median_by_zip detail table, ZIPs under 20 qualifying sales reporting the county median (county_fallback). Level metric, emitted direction 'stable' — reviewed non-directional (a rising median is not mechanically bullish without controlling for mix)."
+    },
     "properties_lee_total_parcels": {
       "id": "properties_lee_total_parcels",
       "grade": { "reviewed_non_directional": true },
@@ -8825,6 +8855,7 @@
     "sales_velocity_per_1k": "properties_lee_sales_velocity_per_1k",
     "sales_velocity_zscore": "properties_lee_sales_velocity_zscore",
     "soh_gap_median_pct": "properties_lee_soh_gap_median_pct",
+    "lee_sold_median_homes_only": "properties_lee_sold_median_homes_only",
     "total_parcels": "properties_lee_total_parcels",
     "collier_homes_sold_zscore": "properties_collier_homes_sold_zscore",
     "collier_homes_sold_per_year": "properties_collier_homes_sold_per_year",

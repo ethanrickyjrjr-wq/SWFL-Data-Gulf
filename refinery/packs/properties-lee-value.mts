@@ -5,12 +5,18 @@ import type {
   BrainOutputMetric,
   BrainOutputMetricSource,
   BrainOutputProducerResult,
+  BrainOutputDetailTable,
 } from "../types/brain-output.mts";
 import {
   leepaValueSource,
   type LeepaSummaryNormalized,
   type SalesVelocityYearNormalized,
 } from "../sources/leepa-value-source.mts";
+import {
+  leepaSoldMedianSource,
+  type LeepaSoldMedianSummaryNormalized,
+  type LeepaSoldMedianZipRowNormalized,
+} from "../sources/leepa-sold-median-source.mts";
 import { fhfaHpiSource, type HpiSwflSummary } from "../sources/fhfa-hpi-source.mts";
 import {
   leeMarketSource,
@@ -88,6 +94,11 @@ let lastFetchedAt: string | null = null;
 let lastFhfaSummary: HpiSwflSummary | null = null;
 let lastLeeMarket: LeeMarketAggregates | null = null;
 
+// Homes-only SOLD median per ZIP (LeePA recorded deeds) — the sold answer to the
+// active-listing land-blend. Distinct grain/source from the Redfin market median.
+let lastSoldMedianSummary: LeepaSoldMedianSummaryNormalized | null = null;
+let lastSoldMedianZipRows: LeepaSoldMedianZipRowNormalized[] = [];
+
 function salesByYearFrom(fragments: RawFragment[]): Map<number, number> {
   const out = new Map<number, number>();
   for (const f of fragments) {
@@ -112,6 +123,28 @@ function fhfaSummaryFrom(fragments: RawFragment[]): HpiSwflSummary | null {
     if (n?.kind === "hpi-swfl-summary") return n;
   }
   return null;
+}
+
+// Strict === kind matching — "leepa-sold-median-*" must never cross-match the
+// parcel-grain "leepa-summary"/"leepa-sales-year" or the market-grain "lee-*".
+function soldMedianSummaryFrom(fragments: RawFragment[]): LeepaSoldMedianSummaryNormalized | null {
+  for (const f of fragments) {
+    const n = f.normalized as unknown as LeepaSoldMedianSummaryNormalized;
+    if (n?.kind === "leepa-sold-median-summary") return n;
+  }
+  return null;
+}
+
+function soldMedianZipRowsFrom(fragments: RawFragment[]): LeepaSoldMedianZipRowNormalized[] {
+  return fragments
+    .map((f) => f.normalized as unknown as LeepaSoldMedianZipRowNormalized)
+    .filter((n) => n?.kind === "leepa-sold-median-zip-row");
+}
+
+/** ISO YYYY-MM-DD → MM/DD/YYYY (RULE 5: as-of stated once, never a raw token). */
+function formatAsOf(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return y && m && d ? `${m}/${d}/${y}` : iso;
 }
 
 function populationStd(values: number[]): number {
@@ -275,6 +308,8 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
   lastAggregate = aggregate(salesByYear, summary);
   lastFetchedAt = allFragments[0]?.fetched_at ?? null;
   lastFhfaSummary = fhfaSummaryFrom(allFragments);
+  lastSoldMedianSummary = soldMedianSummaryFrom(allFragments);
+  lastSoldMedianZipRows = soldMedianZipRowsFrom(allFragments);
 
   // Lee market (Redfin county tracker — market-grain, separate from LeePA parcel-grain).
   const leeMarketSales = leeMarketSalesFrom(allFragments);
@@ -397,7 +432,7 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
       facts.push({
         topic: "metric:lee_median_sale_price_yoy",
         fact: `Lee median sale price YoY (${mkt.latestPeriod ?? "latest"}, Redfin All Residential)`,
-        value: `${mkt.medianSalePriceYoyPct > 0 ? "+" : ""}${fmtPct(mkt.medianSalePriceYoyPct)} year-over-year. Source: Redfin market tracker — NOT LeePA (LeePA last_sale_amount is null).`,
+        value: `${mkt.medianSalePriceYoyPct > 0 ? "+" : ""}${fmtPct(mkt.medianSalePriceYoyPct)} year-over-year. Source: Redfin market tracker (closing prices, market-grain) — distinct from the LeePA recorded-deed sold median (homes-only, each parcel's latest qualified sale).`,
         source_fragment_ids: [],
       });
     }
@@ -409,6 +444,22 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
         source_fragment_ids: [],
       });
     }
+  }
+
+  // Homes-only SOLD median (LeePA recorded deeds) — the sold answer to the
+  // active-listing land-blend. Per-ZIP detail rides in the detail table.
+  const sm = lastSoldMedianSummary;
+  if (sm) {
+    facts.push({
+      topic: "metric:lee_sold_median_homes_only",
+      fact: `Lee homes-only sold median (recorded deeds, as of ${formatAsOf(sm.as_of)})`,
+      value:
+        `Median of ${fmtInt(sm.county_n)} qualified single-family + condo sales recorded 2024+ (over $20,000): ` +
+        `$${fmtInt(sm.county_median)}. A SOLD median from recorded deeds — the homes-only counterpart to the ` +
+        `active-listing asking median. Per-ZIP detail in the sold-median-by-ZIP table; ZIPs under 20 qualifying ` +
+        `sales report this county median rather than a thin-sample number.`,
+      source_fragment_ids: [],
+    });
   }
 
   return facts;
@@ -616,6 +667,73 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
     }
   }
 
+  // Homes-only SOLD median per ZIP (LeePA recorded deeds) — county rollup metric
+  // + per-ZIP detail table. Homes-only (SF + condo) excludes the vacant-land tail
+  // that produced the $35k-at-33972 active-listing land-blend.
+  const detail_tables: BrainOutputDetailTable[] = [];
+  const sm = lastSoldMedianSummary;
+  if (sm) {
+    const soldMedianSource: BrainOutputMetricSource = {
+      url:
+        env.source === "live" && env.supabaseUrl
+          ? `${env.supabaseUrl}/rest/v1/leepa_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback`
+          : "fixture://refinery/__fixtures__/leepa-sold-median.sample.json",
+      fetched_at,
+      tier: 2,
+      citation:
+        env.source === "live"
+          ? `Lee County Property Appraiser (recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.leepa_sold_median_by_zip; each parcel's latest qualified sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of ${formatAsOf(sm.as_of)}.`
+          : `Lee County Property Appraiser (recorded deeds) — homes-only sold median per ZIP (fixture; refinery/__fixtures__/leepa-sold-median.sample.json). As of ${formatAsOf(sm.as_of)}.`,
+    };
+    key_metrics.push({
+      metric: "lee_sold_median_homes_only",
+      value: Math.round(sm.county_median),
+      direction: "stable",
+      label: `Lee homes-only sold median (single-family + condo, recorded deeds, as of ${formatAsOf(sm.as_of)})`,
+      variable_type: "intensive",
+      units: "USD",
+      display_format: "currency",
+      source: soldMedianSource,
+    });
+    if (lastSoldMedianZipRows.length) {
+      detail_tables.push({
+        id: "lee_sold_median_by_zip",
+        title: "Lee County homes-only sold median by ZIP (recorded deeds)",
+        grain: "zip",
+        columns: [
+          {
+            id: "median_sale",
+            label: "Homes-only sold median",
+            display_format: "currency",
+            units: "USD",
+          },
+          {
+            id: "home_sales_n",
+            label: "Qualifying home sales",
+            display_format: "count",
+            units: "count",
+          },
+          {
+            id: "county_fallback",
+            label: "County fallback (under 20 sales)",
+            display_format: "raw",
+          },
+        ],
+        rows: lastSoldMedianZipRows.map((r) => ({
+          key: r.zip,
+          label: r.zip,
+          cells: {
+            median_sale: r.median_sale,
+            home_sales_n: r.home_sales_n,
+            county_fallback: r.county_fallback,
+          },
+        })),
+        source: soldMedianSource,
+        note: `One row per Lee County ZIP. Homes-only = single-family + condo (vacant land excluded). Median of each parcel's latest qualified sale 2024+ over $20,000 — a stock of most-recent prices, not a transaction-flow median. ZIPs with fewer than 20 qualifying sales report the county median (county fallback = true), never a thin-sample ZIP median. As of ${formatAsOf(sm.as_of)}.`,
+      });
+    }
+  }
+
   const direction = directionFromZScore(agg.zScore);
   // Magnitude: |z| / 3, clamped to [0,1]. z=+3 ⇒ full magnitude.
   //   - When z is null (no current-year data), default to 0.3 so master still
@@ -683,6 +801,7 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
   return {
     conclusion: conclusionParts.join(" "),
     key_metrics,
+    detail_tables,
     caveats,
     direction,
     magnitude,
@@ -701,7 +820,7 @@ export const propertiesLeeValue: PackDefinition = {
   scope:
     "Lee County (FL) real-estate direction read — LeePA parcel-grain: sales-velocity z-score (current year vs trailing 3yr) + Save-Our-Homes gap median. Redfin county tracker (market-grain): homes-sold z-score + median sale price YoY + months of supply from data_lake.redfin_lee_market. Two sources, two grains; county-grain peer to properties-collier-value.",
   ttl_seconds: 2592000, // 30 days — both LeePA and Redfin refresh monthly
-  sources: [leepaValueSource, leeMarketSource, fhfaHpiSource],
+  sources: [leepaValueSource, leeMarketSource, fhfaHpiSource, leepaSoldMedianSource],
   input_brains: [],
   fitScore: (): number => 8,
   compositeCutoff: 0,
