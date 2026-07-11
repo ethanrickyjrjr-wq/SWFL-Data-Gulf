@@ -1,3 +1,13 @@
+## 2026-07-11 (Opus 4.8 · main) — Push: Airtable checks-mirror sync build (2-hourly cron)
+
+Pushed the `public.checks`→Airtable delta-sync build to main: sync-tracking columns migration
+(c2e2cea1), `resolveAirtableCreds` resolver + test (55090e1e), pure batching/field-mapping helpers +
+test (5673a409), the 195-line delta sync script (cf35e013), and a 2-hourly GHA cron wrapper (8030756b).
+Bundle also carries the already-logged speaker citation-cleaner refactor (09d8252a). Verified `bunx next
+build` green before push. Homes-only sold-median spec/plan/handoff (71466e00) was already on origin —
+not part of this push. RUNTIME DEPS (not yet verified live): the cron needs `AIRTABLE_*` gh secrets set
+to run, and the `public.checks` sync columns migration must be applied in prod before the sync writes.
+
 ## 2026-07-11 (Opus 4.8 · main) — Collapse 3 citation-display cleaners into one gated authority
 
 Follow-on to the `[config]` label leak: the scrub-then-ship pattern was re-derived ungated in 3 more
