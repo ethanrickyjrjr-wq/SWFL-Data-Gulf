@@ -33,7 +33,19 @@ export const LEE_INVENTORY_VALUES = [
   12892, 12353, 11160, 10670, 11041, 11692, 12045, 12332, 12676, 12442, 11981, 11347, 10575,
 ];
 
-// ── luxury-market-report (PRE-FIX) — Lee County top-tier home value, monthly ─
+// ── luxury-market-report — Naples/Collier $2M+ price bands, replacing the
+// former Lee County top-tier trend (chart-luxury-top-tier.svg, kept below as
+// LEE_TOP_TIER_VALUES for the record — the bug's own chart, no longer
+// rendered). realtor.com price-histogram aggregate (lake view
+// listing_price_histogram_swfl_latest), Collier County, active for-sale,
+// captured 07/11/2026. Segments + center total (378/412/284/152, sum 1226)
+// must equal the luxury-market-report hero's own "1,226" — the fix that
+// turns the coherence gate green.
+export const NAPLES_LUXURY_VALUES = [378, 412, 284, 152, 1226];
+
+// ── luxury-market-report (PRE-FIX, retained for the record — no longer
+// rendered by the generator; see NAPLES_LUXURY_VALUES above) — Lee County
+// top-tier home value, monthly ──
 export const LEE_TOP_TIER_VALUES = [
   801690, 789767, 777384, 765786, 760128, 758008, 754701, 752378, 750969, 750908, 750433, 748892,
   745575,
@@ -77,7 +89,7 @@ export const SEED_CHART_SERIES: Record<string, SeedSeries> = {
   "chart-zip-asking-bars.svg": { values: ZIP_ASKING_VALUES, unit: "currency" },
   "chart-lee-median-asking.svg": { values: LEE_ASKING_VALUES, unit: "currency" },
   "chart-lee-active-inventory.svg": { values: LEE_INVENTORY_VALUES, unit: "count" },
-  "chart-luxury-top-tier.svg": { values: LEE_TOP_TIER_VALUES, unit: "currency" },
+  "chart-luxury-naples-ring.svg": { values: NAPLES_LUXURY_VALUES, unit: "count" },
   "chart-zip33914-asking.svg": { values: ZIP_33914_VALUES, unit: "currency" },
   "chart-fm-rent.svg": { values: FM_RENT_VALUES, unit: "currency" },
   "chart-pmms-rate.svg": { values: PMMS_30YR_VALUES, unit: "percent" },

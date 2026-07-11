@@ -8,7 +8,11 @@
  * bklitComposedSvg → renderBklitStaticSvg), so previews show exactly the chart
  * geometry real built emails produce; this script only adds label chrome
  * (endpoint values, axis endpoints, per-bar labels) OUTSIDE the bklit subtree
- * — the same pattern email-svg.tsx itself uses for title/caption.
+ * — the same pattern email-svg.tsx itself uses for title/caption. The luxury
+ * ring is the one exception — donutShareSvg (lib/charts/svg/donut-share.ts)
+ * is a self-contained builder already used end-to-end by the real chart
+ * producer (buildChartForQuestion → donut-share → email PNG), so it's
+ * written directly, no bklit bridge needed.
  *
  * EVERY series below is real and named (four-lane honest, lane 1 or lane 3):
  * values were pulled live on 07/09/2026 and are inlined with their source so
@@ -23,11 +27,11 @@ import {
   bklitComposedSvg,
   type EmailTrendPoint,
 } from "../components/charts/vendor/bklit/email-svg";
+import { donutShareSvg, type DonutSegment } from "../lib/charts/svg/donut-share";
 import {
   ZIP_ASKING_VALUES,
   LEE_ASKING_VALUES,
   LEE_INVENTORY_VALUES,
-  LEE_TOP_TIER_VALUES,
   ZIP_33914_VALUES,
   FM_RENT_VALUES,
   PMMS_30YR_VALUES,
@@ -197,6 +201,30 @@ async function bars(def: BarsDef): Promise<void> {
   console.log("wrote", def.file);
 }
 
+interface DonutDef {
+  file: string;
+  segments: DonutSegment[];
+  total: number;
+  title: string;
+  accent: string;
+  source: string;
+  asOf: string;
+}
+
+async function donut(def: DonutDef): Promise<void> {
+  const svg = donutShareSvg(def.segments, {
+    title: def.title,
+    accent: def.accent,
+    total: def.total,
+    unit: "listings",
+    source: def.source,
+    asOf: def.asOf,
+    ground: "dark",
+  });
+  writeFileSync(join(OUT, def.file), svg);
+  console.log("wrote", def.file);
+}
+
 // ── 1. weekly-pulse header — median asking across the six biggest Lee ZIPs ──
 // Realtor.com market hotness per-ZIP (lake view market_heat_core_swfl),
 // month 2026-06, pulled 07/09/2026. Six largest Lee County ZIPs by active
@@ -253,29 +281,22 @@ const LEE_INVENTORY: EmailTrendPoint[] = LEE_INVENTORY_LABELS.map((label, i) => 
   value: LEE_INVENTORY_VALUES[i],
 }));
 
-// ── 4. luxury-market-report — Lee County top-tier home value, monthly ───────
-// Zillow Home Value Index top tier, averaged across Lee County ZIPs (lake
-// view tier_divergence_swfl), period_end 2025-05-31 → 2026-05-31, pulled
-// 07/09/2026.
-const LEE_TOP_TIER_LABELS = [
-  "2025-05-31",
-  "2025-06-30",
-  "2025-07-31",
-  "2025-08-31",
-  "2025-09-30",
-  "2025-10-31",
-  "2025-11-30",
-  "2025-12-31",
-  "2026-01-31",
-  "2026-02-28",
-  "2026-03-31",
-  "2026-04-30",
-  "2026-05-31",
+// ── 4. luxury-market-report — Naples/Collier luxury ring, $2M+ price bands ──
+// realtor.com price-histogram aggregate (lake view
+// listing_price_histogram_swfl_latest), Collier County, active for-sale,
+// captured 07/11/2026. Replaces the former Lee County top-tier trend line
+// (chart-luxury-top-tier.svg) — that chart's $802K high plotted UNDER the
+// $3.17M luxury headline, a real shipped incoherence caught by the
+// deliverable-coherence-gate. Segments + center total must read the SAME
+// number the luxury-market-report hero states (1,226) — see
+// docs/superpowers/plans/2026-07-11-deliverable-coherence-gate-plan.md Task 4.
+const NAPLES_LUXURY_SEGMENTS: DonutSegment[] = [
+  { label: "$2M–$3M", value: 378 },
+  { label: "$3M–$5M", value: 412 },
+  { label: "$5M–$10M", value: 284 },
+  { label: "$10M+", value: 152 },
 ];
-const LEE_TOP_TIER: EmailTrendPoint[] = LEE_TOP_TIER_LABELS.map((label, i) => ({
-  label,
-  value: LEE_TOP_TIER_VALUES[i],
-}));
+const NAPLES_LUXURY_TOTAL = 1226;
 
 // ── 5. neighborhood-report — ZIP 33914 (Cape Coral) median asking, monthly ──
 // Realtor.com market hotness (lake view market_heat_core_swfl), months
@@ -460,14 +481,14 @@ await trend({
   asOf: "2026-06-30",
   fmt: fmtInt,
 });
-await trend({
-  file: "chart-luxury-top-tier.svg",
-  points: LEE_TOP_TIER,
-  title: "Top-tier home value · Lee County",
+await donut({
+  file: "chart-luxury-naples-ring.svg",
+  segments: NAPLES_LUXURY_SEGMENTS,
+  total: NAPLES_LUXURY_TOTAL,
+  title: "Luxury Listings · Naples / Collier",
   accent: "#B8860B",
-  source: "Zillow Home Value Index, top tier",
-  asOf: "2026-05-31",
-  fmt: fmtK,
+  source: "SWFL Data Gulf, realtor.com price-histogram aggregate · listings, not homes",
+  asOf: "2026-07-11",
 });
 await trend({
   file: "chart-zip33914-asking.svg",

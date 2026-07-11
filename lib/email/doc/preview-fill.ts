@@ -253,9 +253,9 @@ const CHART_LEE_INVENTORY: Chart = {
   caption: "Homes for sale, same window · Lee County — Realtor.com via FRED",
 };
 const CHART_LUXURY: Chart = {
-  url: `${A}/chart-luxury-top-tier.svg`,
-  alt: "Lee County top-tier home value, May 2025 to May 2026",
-  caption: "Top-tier home value, 12 months — Zillow Home Value Index",
+  url: `${A}/chart-luxury-naples-ring.svg`,
+  alt: "Luxury listings by price tier, Naples / Collier County",
+  caption: "1,226 luxury listings priced above $2M · Naples / Collier — SWFL Data Gulf",
 };
 const CHART_33914: Chart = {
   url: `${A}/chart-zip33914-asking.svg`,
@@ -386,14 +386,14 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
   },
   "luxury-market-report": {
     hero: {
-      value: "$3,168,000",
-      label: "Median asking · $2M-plus listings · Lee County",
+      value: "1,226",
+      label: "Luxury Listings · Naples / Collier",
       prose:
-        "507 homes are listed above $2M county-wide; the top tier has repriced 7% in a year without losing depth.",
+        "1,226 listings are priced above $2M in Naples/Collier, top-heavy toward the very top: 152 above $10M.",
     },
     stats: [
-      { value: "507", label: "Active $2M+ Listings" },
-      { value: "−7.0%", label: "Top-Tier Value YoY" },
+      { value: "1,226", label: "Luxury Listings · Naples/Collier" },
+      { value: "152", label: "Listed Above $10M" },
     ],
     charts: [CHART_LUXURY],
     photos: [

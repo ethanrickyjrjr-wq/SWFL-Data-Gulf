@@ -6,7 +6,7 @@ describe("SEED_CHART_SERIES", () => {
     "chart-zip-asking-bars.svg",
     "chart-lee-median-asking.svg",
     "chart-lee-active-inventory.svg",
-    "chart-luxury-top-tier.svg",
+    "chart-luxury-naples-ring.svg",
     "chart-zip33914-asking.svg",
     "chart-fm-rent.svg",
     "chart-pmms-rate.svg",
@@ -33,11 +33,10 @@ describe("SEED_CHART_SERIES", () => {
     }
   });
 
-  it("chart-luxury-top-tier plots the $745K-$802K range (the bug's own chart, pre-fix)", () => {
-    const s = SEED_CHART_SERIES["chart-luxury-top-tier.svg"];
-    expect(Math.min(...s.values)).toBeCloseTo(745575, -2);
-    expect(Math.max(...s.values)).toBeCloseTo(801690, -2);
-    expect(s.unit).toBe("currency");
+  it("chart-luxury-naples-ring plots the real Naples $2M+ segments plus center total", () => {
+    const s = SEED_CHART_SERIES["chart-luxury-naples-ring.svg"];
+    expect(s.values).toEqual([378, 412, 284, 152, 1226]);
+    expect(s.unit).toBe("count");
   });
 
   it("chart-lee-home-values plots real ZHVI-average endpoints", () => {
