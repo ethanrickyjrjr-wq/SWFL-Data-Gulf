@@ -274,6 +274,62 @@ describe("scrubCaveatTechnical (PR3-B)", () => {
   });
 });
 
+describe("shortSourceLabel gate (source_label_config_leak)", () => {
+  // A source label is a NAME, not prose. scrubCaveatTechnical's placeholder
+  // tokens ([config]/[internal]/[ref]) are tripwires for internal identifiers —
+  // they must never ship in a label, the way they're already suppressed from
+  // caveats (isDisplayableCaveat). This is the cre-swfl leak: its citations
+  // embed a snake_case DB name, so the head scrubs to "SWFL Data Gulf [config]".
+  function labelFor(citation: string): string {
+    const d = toDisplayBrain(
+      parsedFixture({
+        key_metrics: [
+          metric({
+            metric: "leak_probe",
+            value: 1,
+            label: "Probe",
+            source: {
+              url: "https://example.test/m/leak_probe",
+              fetched_at: "2026-05-20T00:00:00Z",
+              tier: 2,
+              citation,
+            },
+          }),
+        ],
+      }),
+    );
+    return d.metrics[0].sourceLabel;
+  }
+
+  test("strips a [config] placeholder the head-scrub would otherwise ship", () => {
+    // The exact live leak: cre-swfl's corridor_profiles citation.
+    const label = labelFor(
+      "Brains Supabase corridor_profiles (verified, non-deleted) — median across 5 corridors reporting cap_rate_pct: 6.7%.",
+    );
+    assert.doesNotMatch(label, /\[config\]|\[internal\]|\[ref\]/);
+    // No dangling separator or trailing space left where the token was.
+    assert.doesNotMatch(label, /[—–-]\s*$/);
+    assert.doesNotMatch(label, /\s$/);
+    assert.equal(label, "SWFL Data Gulf");
+  });
+
+  test("falls back to the brand when the whole label scrubs away", () => {
+    // Head is nothing but an internal identifier → scrubs to a bare [config];
+    // must not ship an empty label.
+    const label = labelFor("chargeoff_pct — the only thing in the head");
+    assert.ok(label.length > 0, "label must not be empty");
+    assert.doesNotMatch(label, /\[config\]/);
+    assert.equal(label, "SWFL Data Gulf");
+  });
+
+  test("leaves a clean citation label untouched", () => {
+    assert.equal(
+      labelFor("MarketBeat SWFL CRE quarterly — median across 3 submarkets."),
+      "MarketBeat SWFL CRE quarterly",
+    );
+  });
+});
+
 describe("sanitizeProse path preservation (PR3-A)", () => {
   test("leaves a compound doc path containing a pack id intact", () => {
     const out = sanitizeProse("see docs/env-swfl-spike-findings.md for detail");

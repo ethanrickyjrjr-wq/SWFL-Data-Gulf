@@ -1,3 +1,16 @@
+## 2026-07-11 (Opus 4.8 · main) — Fix `source_label_config_leak`: gate scrub placeholder in shortSourceLabel
+
+`refinery/render/speaker.mts` `shortSourceLabel` scrubbed internal identifiers to the `[config]`
+tripwire token and then shipped it — cre-swfl citations start with `Brains Supabase corridor_profiles`,
+which the scrubber rewrites to `SWFL Data Gulf [config]`. Leaked 41× on `/r/cre-swfl` (metrics table +
+the `/r/*` GEO takeaway, both fed by `sourceLabel`); 0 on other brains. The caveat path already
+suppresses that token (`isDisplayableCaveat`); the label path had no gate. Fix (Layer 1, all brains):
+strip `[config]`/`[internal]`/`[ref]` + dangling separators after scrub, fall back to the brand if
+empty. TDD (3 new tests red→green). Verified: 46/46 speaker tests, `bunx next build` green, local SSR
+`/r/cre-swfl` 41→0, `/r/master` still 0. `source_label_config_leak` stays OPEN pending live post-deploy
+0-count. Opened `cre_swfl_citation_raw_db_identifiers` for the Layer-2 root (pack citations embed raw DB
+names; ask-first rebuild).
+
 ## 2026-07-11 (Opus 4.8 · main) — Desk discovery Task 3: robots answer-engine carve-out (operator-approved)
 
 Operator said yes to the moat-vs-reach carve-out. `app/robots.ts` now splits `SEARCH_INDEX`

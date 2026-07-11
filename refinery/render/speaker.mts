@@ -689,9 +689,19 @@ export function displayName(brainId: string): string {
  */
 function shortSourceLabel(citation: string): string {
   const head = citation.split(/\s+[—–]\s+|\s+via\s+|:\s|\s+\(/)[0].trim();
+  // A source label is a NAME, not prose. scrubCaveatTechnical's placeholders
+  // ([config]/[internal]/[ref]) are tripwires for internal identifiers — they
+  // must never ship in a label, exactly as isDisplayableCaveat suppresses them
+  // from caveats. Strip the tokens plus any separator/whitespace they leave
+  // dangling; if that empties the label, fall back to the house brand rather
+  // than shipping a bare placeholder (the cre-swfl `corridor_profiles` leak).
   const cleaned = scrubCaveatTechnical(head)
+    .replace(/\s*[—–-]?\s*\[(?:config|internal|ref)\]/gi, "")
+    .replace(/^\s*[—–-]\s*/g, "")
+    .replace(/\s*[—–-]\s*$/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
+  if (!cleaned) return "SWFL Data Gulf";
   return cleaned.length > 72 ? cleaned.slice(0, 71).trimEnd() + "…" : cleaned;
 }
 
