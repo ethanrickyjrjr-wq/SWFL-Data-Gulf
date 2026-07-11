@@ -1,6 +1,6 @@
 import { test } from "bun:test";
 import assert from "node:assert/strict";
-import { brainJsonLd, corridorJsonLd } from "./jsonld.ts";
+import { brainJsonLd, corridorJsonLd, deskJsonLd } from "./jsonld.ts";
 import type { DisplayBrain } from "../refinery/render/speaker.mts";
 import type { CorridorNormalized } from "../refinery/sources/cre-source.mts";
 
@@ -52,9 +52,7 @@ test("brainJsonLd: first block is Dataset", () => {
 
 test("brainJsonLd: Dataset url contains slug", () => {
   const [dataset] = brainJsonLd(minBrain, "env-swfl");
-  assert.ok(
-    ((dataset as Record<string, unknown>).url as string).includes("env-swfl"),
-  );
+  assert.ok(((dataset as Record<string, unknown>).url as string).includes("env-swfl"));
 });
 
 test("brainJsonLd: Dataset variableMeasured maps metrics", () => {
@@ -71,37 +69,21 @@ test("brainJsonLd: second block is FAQPage", () => {
 
 test("brainJsonLd: FAQPage first Q is conclusion-based", () => {
   const [, faq] = brainJsonLd(minBrain, "env-swfl");
-  const first = (
-    (faq as Record<string, unknown>).mainEntity as Record<string, unknown>[]
-  )[0];
+  const first = ((faq as Record<string, unknown>).mainEntity as Record<string, unknown>[])[0];
   assert.ok((first.name as string).toLowerCase().includes("outlook"));
-  assert.equal(
-    (first.acceptedAnswer as Record<string, unknown>).text,
-    minBrain.conclusion,
-  );
+  assert.equal((first.acceptedAnswer as Record<string, unknown>).text, minBrain.conclusion);
 });
 
 test("brainJsonLd: FAQPage capped at 8 entries", () => {
   const manyMetrics = Array.from({ length: 20 }, (_, i) => metric(i));
-  const [, faq] = brainJsonLd(
-    { ...minBrain, metrics: manyMetrics },
-    "env-swfl",
-  );
-  assert.ok(
-    ((faq as Record<string, unknown>).mainEntity as unknown[]).length <= 8,
-  );
+  const [, faq] = brainJsonLd({ ...minBrain, metrics: manyMetrics }, "env-swfl");
+  assert.ok(((faq as Record<string, unknown>).mainEntity as unknown[]).length <= 8);
 });
 
 test("brainJsonLd: empty conclusion drops the intro Q, no empty acceptedAnswer", () => {
   const manyMetrics = Array.from({ length: 20 }, (_, i) => metric(i));
-  const [, faq] = brainJsonLd(
-    { ...minBrain, conclusion: "", metrics: manyMetrics },
-    "env-swfl",
-  );
-  const entries = (faq as Record<string, unknown>).mainEntity as Record<
-    string,
-    unknown
-  >[];
+  const [, faq] = brainJsonLd({ ...minBrain, conclusion: "", metrics: manyMetrics }, "env-swfl");
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<string, unknown>[];
   for (const e of entries) {
     assert.notEqual((e.acceptedAnswer as Record<string, unknown>).text, "");
   }
@@ -111,13 +93,8 @@ test("brainJsonLd: empty conclusion drops the intro Q, no empty acceptedAnswer",
 
 test("brainJsonLd: FAQ metric answer embeds sourceUrl when present", () => {
   const [, faq] = brainJsonLd(minBrain, "env-swfl");
-  const entries = (faq as Record<string, unknown>).mainEntity as Record<
-    string,
-    unknown
-  >[];
-  const aalQ = entries.find((e) =>
-    (e.name as string).includes("AAL per policy"),
-  );
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<string, unknown>[];
+  const aalQ = entries.find((e) => (e.name as string).includes("AAL per policy"));
   assert.ok(aalQ, "expected an AAL metric FAQ entry");
   assert.ok(
     ((aalQ!.acceptedAnswer as Record<string, unknown>).text as string).includes(
@@ -133,13 +110,8 @@ test("brainJsonLd: FAQ metric answer is url-free when sourceUrl is empty", () =>
     metrics: [{ ...minBrain.metrics[0], sourceUrl: "" }],
   };
   const [, faq] = brainJsonLd(noUrl, "env-swfl");
-  const entries = (faq as Record<string, unknown>).mainEntity as Record<
-    string,
-    unknown
-  >[];
-  const aalQ = entries.find((e) =>
-    (e.name as string).includes("AAL per policy"),
-  );
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<string, unknown>[];
+  const aalQ = entries.find((e) => (e.name as string).includes("AAL per policy"));
   const text = (aalQ!.acceptedAnswer as Record<string, unknown>).text as string;
   assert.ok(!text.includes("http"), "no url when sourceUrl is empty");
   assert.ok(!text.includes("()"), "no dangling empty parens");
@@ -205,35 +177,19 @@ test("corridorJsonLd: Place name is the passed display name, never raw slug", ()
 
 test("corridorJsonLd: FAQPage includes cap rate question", () => {
   const [, faq] = corridorJsonLd(minCorridor, TOKEN, "Airport-Pulling");
-  const entries = (faq as Record<string, unknown>).mainEntity as Record<
-    string,
-    unknown
-  >[];
-  const capRateQ = entries.find((e) =>
-    (e.name as string).toLowerCase().includes("cap rate"),
-  );
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<string, unknown>[];
+  const capRateQ = entries.find((e) => (e.name as string).toLowerCase().includes("cap rate"));
   assert.ok(capRateQ, "expected a cap rate FAQ entry");
   assert.ok(
-    (
-      (capRateQ!.acceptedAnswer as Record<string, unknown>).text as string
-    ).includes("6.5%"),
+    ((capRateQ!.acceptedAnswer as Record<string, unknown>).text as string).includes("6.5%"),
   );
 });
 
 test("corridorJsonLd: null metrics are omitted from FAQ", () => {
   const [, faq] = corridorJsonLd(minCorridor, TOKEN, "Airport-Pulling");
-  const entries = (faq as Record<string, unknown>).mainEntity as Record<
-    string,
-    unknown
-  >[];
-  const absorptionQ = entries.find((e) =>
-    (e.name as string).toLowerCase().includes("absorption"),
-  );
-  assert.equal(
-    absorptionQ,
-    undefined,
-    "absorption_sqft is null — should not appear",
-  );
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<string, unknown>[];
+  const absorptionQ = entries.find((e) => (e.name as string).toLowerCase().includes("absorption"));
+  assert.equal(absorptionQ, undefined, "absorption_sqft is null — should not appear");
 });
 
 test("corridorJsonLd: pre-sourcing corridor emits Place only, no empty FAQPage", () => {
@@ -252,13 +208,8 @@ test("corridorJsonLd: pre-sourcing corridor emits Place only, no empty FAQPage",
 
 function capRateText(c: CorridorNormalized): string {
   const [, faq] = corridorJsonLd(c, TOKEN, "Airport-Pulling");
-  const entries = (faq as Record<string, unknown>).mainEntity as Record<
-    string,
-    unknown
-  >[];
-  const capQ = entries.find((e) =>
-    (e.name as string).toLowerCase().includes("cap rate"),
-  );
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<string, unknown>[];
+  const capQ = entries.find((e) => (e.name as string).toLowerCase().includes("cap rate"));
   return (capQ!.acceptedAnswer as Record<string, unknown>).text as string;
 }
 
@@ -291,21 +242,52 @@ test("corridorJsonLd: each metric uses its own per-metric source url", () => {
     vacancy_rate_source_url: "https://costar.example/vac",
   };
   const [, faq] = corridorJsonLd(c, TOKEN, "Airport-Pulling");
-  const entries = (faq as Record<string, unknown>).mainEntity as Record<
-    string,
-    unknown
-  >[];
-  const capQ = entries.find((e) =>
-    (e.name as string).toLowerCase().includes("cap rate"),
-  );
-  const vacQ = entries.find((e) =>
-    (e.name as string).toLowerCase().includes("vacancy"),
-  );
-  const capText = (capQ!.acceptedAnswer as Record<string, unknown>)
-    .text as string;
-  const vacText = (vacQ!.acceptedAnswer as Record<string, unknown>)
-    .text as string;
+  const entries = (faq as Record<string, unknown>).mainEntity as Record<string, unknown>[];
+  const capQ = entries.find((e) => (e.name as string).toLowerCase().includes("cap rate"));
+  const vacQ = entries.find((e) => (e.name as string).toLowerCase().includes("vacancy"));
+  const capText = (capQ!.acceptedAnswer as Record<string, unknown>).text as string;
+  const vacText = (vacQ!.acceptedAnswer as Record<string, unknown>).text as string;
   assert.ok(capText.includes("https://costar.example/cap"));
   assert.ok(!capText.includes("https://costar.example/vac"));
   assert.ok(vacText.includes("https://costar.example/vac"));
+});
+
+test("deskJsonLd: Dataset is accessible-for-free and has a creator", () => {
+  const [ds] = deskJsonLd([
+    { label: "Median list", value: 345000, sourceLabel: "SWFL Data Gulf" },
+  ]) as Record<string, unknown>[];
+  assert.equal(ds.isAccessibleForFree, true);
+  assert.equal((ds.creator as Record<string, unknown>)["@type"], "Organization");
+  assert.equal((ds.creator as Record<string, unknown>).name, "SWFL Data Gulf");
+});
+
+test("deskJsonLd: spatialCoverage names Lee and Collier", () => {
+  const [ds] = deskJsonLd([{ label: "x", value: 1, sourceLabel: "s" }]) as Record<
+    string,
+    unknown
+  >[];
+  const json = JSON.stringify(ds.spatialCoverage);
+  assert.ok(json.includes("Lee County"));
+  assert.ok(json.includes("Collier County"));
+});
+
+test("deskJsonLd: emits temporalCoverage when provided, omits when not", () => {
+  const [withTc] = deskJsonLd(
+    [{ label: "x", value: 1, sourceLabel: "s" }],
+    "2026-07-10",
+    "2026-05-01/2026-07-10",
+  ) as Record<string, unknown>[];
+  assert.equal(withTc.temporalCoverage, "2026-05-01/2026-07-10");
+  const [without] = deskJsonLd(
+    [{ label: "x", value: 1, sourceLabel: "s" }],
+    "2026-07-10",
+  ) as Record<string, unknown>[];
+  assert.equal("temporalCoverage" in without, false);
+});
+
+test("brainJsonLd: Dataset carries creator + isAccessibleForFree + temporalCoverage", () => {
+  const [ds] = brainJsonLd(minBrain, "env-swfl") as Record<string, unknown>[];
+  assert.equal(ds.isAccessibleForFree, true);
+  assert.equal((ds.creator as Record<string, unknown>).name, "SWFL Data Gulf");
+  assert.equal(ds.temporalCoverage, "2026-06-01"); // from minBrain.refinedAt
 });

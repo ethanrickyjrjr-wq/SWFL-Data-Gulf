@@ -17,6 +17,25 @@ const SPATIAL = {
   },
 };
 
+// Same brand entity as PUBLISHER — LLMs use consistent creator/publisher naming
+// as an entity-clarity signal, so this string must never fork.
+const CREATOR = { "@type": "Organization", name: "SWFL Data Gulf", url: SITE };
+
+// Emit `license` ONLY if this resolves to a real page — asserting a license we
+// don't publish is an invented fact. Set by Task 1 Step 1: /terms resolves
+// (app/terms/page.tsx publishes usage terms), so point at it.
+const LICENSE_URL = `${SITE}/terms`;
+
+// Spatial detail for the two core counties — Dataset Search reads spatialCoverage
+// to place the dataset; naming Lee + Collier is the geo-precision edge.
+const SPATIAL_LEE_COLLIER = {
+  ...SPATIAL,
+  containsPlace: [
+    { "@type": "AdministrativeArea", name: "Lee County, Florida" },
+    { "@type": "AdministrativeArea", name: "Collier County, Florida" },
+  ],
+};
+
 function question(name: string, text: string) {
   return {
     "@type": "Question",
@@ -34,6 +53,10 @@ export function brainJsonLd(display: DisplayBrain, slug: string): object[] {
     url: `${SITE}/r/${slug}`,
     dateModified: display.refinedAt,
     publisher: PUBLISHER,
+    creator: CREATOR,
+    isAccessibleForFree: true,
+    ...(LICENSE_URL ? { license: LICENSE_URL } : {}),
+    ...(display.refinedAt ? { temporalCoverage: display.refinedAt } : {}),
     spatialCoverage: SPATIAL,
     variableMeasured: display.metrics.map((m) => ({
       "@type": "PropertyValue",
@@ -86,7 +109,11 @@ export interface DeskJsonLdFigure {
  * (discovery flywheel) enriches this same hook with temporalCoverage /
  * license / distribution; wiring it from day 1 is the seam.
  */
-export function deskJsonLd(figures: DeskJsonLdFigure[], dateModified?: string): object[] {
+export function deskJsonLd(
+  figures: DeskJsonLdFigure[],
+  dateModified?: string,
+  temporalCoverage?: string,
+): object[] {
   return [
     {
       "@context": "https://schema.org",
@@ -96,8 +123,12 @@ export function deskJsonLd(figures: DeskJsonLdFigure[], dateModified?: string): 
         "Daily-refreshed Southwest Florida market terminal: median asking price, active inventory, price-cut share, mortgage rate, and daily listing-flow counts for Lee and Collier County.",
       url: `${SITE}/desk`,
       ...(dateModified ? { dateModified } : {}),
+      ...(temporalCoverage ? { temporalCoverage } : {}),
+      isAccessibleForFree: true,
       publisher: PUBLISHER,
-      spatialCoverage: SPATIAL,
+      creator: CREATOR,
+      ...(LICENSE_URL ? { license: LICENSE_URL } : {}),
+      spatialCoverage: SPATIAL_LEE_COLLIER,
       variableMeasured: figures.map((f) => ({
         "@type": "PropertyValue",
         name: f.label,

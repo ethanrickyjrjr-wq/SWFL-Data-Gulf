@@ -60,10 +60,11 @@ export default async function DeskPage() {
     asOf: d.asOf,
   }));
   const fk = sortKey(freshest);
-  const ld = deskJsonLd(
-    figures,
-    fk ? `${fk.slice(0, 4)}-${fk.slice(4, 6)}-${fk.slice(6, 8)}` : undefined,
-  );
+  const heroPts = desk.hero?.cities.flatMap((c) => c.points.map((p) => p.date)) ?? [];
+  const coverStart = heroPts.length ? [...heroPts].sort()[0] : undefined;
+  const coverEnd = fk ? `${fk.slice(0, 4)}-${fk.slice(4, 6)}-${fk.slice(6, 8)}` : undefined;
+  const temporalCoverage = coverStart && coverEnd ? `${coverStart}/${coverEnd}` : undefined;
+  const ld = deskJsonLd(figures, coverEnd, temporalCoverage);
 
   // Which KPI tiles are brain-mirrored → live frame pins (re-bind at each send).
   const tiles: KpiTile[] = desk.kpis.map((datum) => {
