@@ -2,10 +2,20 @@
 
 **07/10/2026.** Live research behind the vertical board. Method: ~55 live SteadyAPI Reddit calls this
 round (agent-side subs: r/InsuranceAgent, r/loanoriginators, r/HVAC, r/Roofing, r/Contractor,
-r/Plumbing, r/homeowners) + three bounded crawl4ai streams (FTSA/TCPA law, FL DFS insurance list, NMLS
-mortgage registry). New ground only — the closed rounds 1–4 (RE-agent pricing, CRE pain,
-comp-adjustment, cadence, Gmail-tab, showing-prep, pre-send QA) are NOT re-mined; see
-`docs/steadyapi-research/README.md`.
+r/Plumbing, r/homeowners) + a bounded X/Instagram token probe (below) + three bounded crawl4ai streams
+(FTSA/TCPA law, FL DFS insurance list, NMLS mortgage registry). New ground only — the closed rounds 1–4
+(RE-agent pricing, CRE pain, comp-adjustment, cadence, Gmail-tab, showing-prep, pre-send QA) are NOT
+re-mined; see `docs/steadyapi-research/README.md`.
+
+**Platform coverage note (X + Instagram).** The operator named Reddit, X, and Instagram. Reddit was the
+deep-mine surface this round (richest text pain points). Prior rounds logged X/IG as "empty for these
+niche queries" — but those empties were RE-centric tokens (`realtormarketing`, `realtoremail`). I
+probed the NEW-vertical tokens and they are **live, not empty**: Instagram `/search` returned 24 posts
+each for `insuranceagent`, `loanofficer`, `mortgagebroker`, `roofingbusiness`, `contractorlife`;
+Twitter `/search` returned 5–10 each. So X + IG are real, untapped surfaces for these verticals (unlike
+RE). This round captured counts only (IG captions carry no external URLs — engagement signal, not
+crawl-source; Twitter content-shape needs a field-map pass). **Follow-up: deep-mine X/IG captions +
+threads for these five tokens** — logged here so it isn't silently dropped.
 
 **How to read this file:** the ranking in Section 6 is the point. Everything above it is evidence.
 
@@ -134,10 +144,18 @@ addresses for RE, insurance, and contractor-applicants.
 
 Each play tagged with the board readiness it implies. This re-scores the board's Tier-A column.
 
-1. **Insurance-agent outreach (subscription + list-sale).** 🟢 Closest. Reason: the ONLY vertical with a
-   free native email+phone+county+class list, today. Two paths off one asset: sell the curated list
-   (cash now) and/or run the content engine (local flood/storm/reserve risk = content their clients
-   open). Blocked only by: channel-legality finalize (§2) + a content pack. **Do this adapter first.**
+1. **Insurance-agent outreach.** 🟢 #1 on **reachability** — the ONLY vertical with a free native
+   email+phone+county+class list today. But "reachable" ≠ "closest to revenue": both cash paths off that
+   list carry an unresolved question, so don't over-read this as settled.
+   - *List-sale* (cash-fastest, near-zero build) — but reselling public-record contacts to third parties
+     who then market to them is a **heavier liability posture** than us emailing them ourselves, and DNC
+     attaches to those phone numbers. The legal brief (§2) makes this lane more fraught, not less. Treat
+     as a real option but weigh the exposure.
+   - *Subscription content* — depends on the still-**unproven** "will a non-RE audience pay for weekly
+     content" gap, and our own Reddit finding that many insurance agents rank marketing *secondary* to a
+     rater/management system. The independent-agent-building-a-book is the segment that would pay.
+   Net: build the insurance adapter first because contact is free and legal by email — but validate one
+   cash path (start by pitching the content engine to a few independent agents) before scaling either.
 2. **Contractor intent-lead feed (lead-gen).** 🟡 Strong moat, live budget, accepted motion — but the
    channel just got harder: cold text is dead and cold calling needs an FDACS license, so delivery must
    be **direct mail, opt-in/inbound, or a licensed calling program**, not cold phone. Also blocked by a
