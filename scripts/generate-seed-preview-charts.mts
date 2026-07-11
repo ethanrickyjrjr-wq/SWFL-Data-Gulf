@@ -23,6 +23,17 @@ import {
   bklitComposedSvg,
   type EmailTrendPoint,
 } from "../components/charts/vendor/bklit/email-svg";
+import {
+  ZIP_ASKING_VALUES,
+  LEE_ASKING_VALUES,
+  LEE_INVENTORY_VALUES,
+  LEE_TOP_TIER_VALUES,
+  ZIP_33914_VALUES,
+  FM_RENT_VALUES,
+  PMMS_30YR_VALUES,
+  LEE_SALES_BY_MONTH_VALUES,
+  LEE_SALE_PRICE_VALUES,
+} from "../lib/email/doc/seed-chart-series";
 
 const OUT = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -191,187 +202,209 @@ async function bars(def: BarsDef): Promise<void> {
 // month 2026-06, pulled 07/09/2026. Six largest Lee County ZIPs by active
 // listing count: 33914 (601), 34135 (507), 33904 (483), 33993 (744),
 // 33908 (760), 33974 (468).
-const ZIP_ASKING = [
-  { label: "33914", value: 550000 },
-  { label: "34135", value: 525000 },
-  { label: "33904", value: 418500 },
-  { label: "33993", value: 409998 },
-  { label: "33908", value: 369900 },
-  { label: "33974", value: 326000 },
-];
+const ZIP_ASKING_LABELS = ["33914", "34135", "33904", "33993", "33908", "33974"];
+const ZIP_ASKING = ZIP_ASKING_LABELS.map((label, i) => ({ label, value: ZIP_ASKING_VALUES[i] }));
 // mean of the six shown medians — deterministic derivation, drawn as the line
 const ZIP_ASKING_AVG = Math.round(ZIP_ASKING.reduce((s, p) => s + p.value, 0) / ZIP_ASKING.length);
 
 // ── 2. weekly-pulse left — Lee County median asking price, monthly ──────────
 // Realtor.com via FRED (series MEDLISPRI15980; lake view fred_listing_swfl),
 // 2025-06-01 → 2026-06-01, pulled 07/09/2026.
-const LEE_ASKING: EmailTrendPoint[] = [
-  { label: "2025-06-01", value: 424950 },
-  { label: "2025-07-01", value: 415711 },
-  { label: "2025-08-01", value: 405000 },
-  { label: "2025-09-01", value: 399900 },
-  { label: "2025-10-01", value: 399900 },
-  { label: "2025-11-01", value: 399900 },
-  { label: "2025-12-01", value: 399949 },
-  { label: "2026-01-01", value: 399999 },
-  { label: "2026-02-01", value: 399900 },
-  { label: "2026-03-01", value: 399900 },
-  { label: "2026-04-01", value: 399600 },
-  { label: "2026-05-01", value: 399000 },
-  { label: "2026-06-01", value: 396850 },
+const LEE_ASKING_LABELS = [
+  "2025-06-01",
+  "2025-07-01",
+  "2025-08-01",
+  "2025-09-01",
+  "2025-10-01",
+  "2025-11-01",
+  "2025-12-01",
+  "2026-01-01",
+  "2026-02-01",
+  "2026-03-01",
+  "2026-04-01",
+  "2026-05-01",
+  "2026-06-01",
 ];
+const LEE_ASKING: EmailTrendPoint[] = LEE_ASKING_LABELS.map((label, i) => ({
+  label,
+  value: LEE_ASKING_VALUES[i],
+}));
 
 // ── 3. weekly-pulse right — Lee County homes for sale, monthly ──────────────
 // Realtor.com via FRED (series ACTLISCOU15980; lake view fred_listing_swfl),
 // 2025-06-01 → 2026-06-01, pulled 07/09/2026.
-const LEE_INVENTORY: EmailTrendPoint[] = [
-  { label: "2025-06-01", value: 12892 },
-  { label: "2025-07-01", value: 12353 },
-  { label: "2025-08-01", value: 11160 },
-  { label: "2025-09-01", value: 10670 },
-  { label: "2025-10-01", value: 11041 },
-  { label: "2025-11-01", value: 11692 },
-  { label: "2025-12-01", value: 12045 },
-  { label: "2026-01-01", value: 12332 },
-  { label: "2026-02-01", value: 12676 },
-  { label: "2026-03-01", value: 12442 },
-  { label: "2026-04-01", value: 11981 },
-  { label: "2026-05-01", value: 11347 },
-  { label: "2026-06-01", value: 10575 },
+const LEE_INVENTORY_LABELS = [
+  "2025-06-01",
+  "2025-07-01",
+  "2025-08-01",
+  "2025-09-01",
+  "2025-10-01",
+  "2025-11-01",
+  "2025-12-01",
+  "2026-01-01",
+  "2026-02-01",
+  "2026-03-01",
+  "2026-04-01",
+  "2026-05-01",
+  "2026-06-01",
 ];
+const LEE_INVENTORY: EmailTrendPoint[] = LEE_INVENTORY_LABELS.map((label, i) => ({
+  label,
+  value: LEE_INVENTORY_VALUES[i],
+}));
 
 // ── 4. luxury-market-report — Lee County top-tier home value, monthly ───────
 // Zillow Home Value Index top tier, averaged across Lee County ZIPs (lake
 // view tier_divergence_swfl), period_end 2025-05-31 → 2026-05-31, pulled
 // 07/09/2026.
-const LEE_TOP_TIER: EmailTrendPoint[] = [
-  { label: "2025-05-31", value: 801690 },
-  { label: "2025-06-30", value: 789767 },
-  { label: "2025-07-31", value: 777384 },
-  { label: "2025-08-31", value: 765786 },
-  { label: "2025-09-30", value: 760128 },
-  { label: "2025-10-31", value: 758008 },
-  { label: "2025-11-30", value: 754701 },
-  { label: "2025-12-31", value: 752378 },
-  { label: "2026-01-31", value: 750969 },
-  { label: "2026-02-28", value: 750908 },
-  { label: "2026-03-31", value: 750433 },
-  { label: "2026-04-30", value: 748892 },
-  { label: "2026-05-31", value: 745575 },
+const LEE_TOP_TIER_LABELS = [
+  "2025-05-31",
+  "2025-06-30",
+  "2025-07-31",
+  "2025-08-31",
+  "2025-09-30",
+  "2025-10-31",
+  "2025-11-30",
+  "2025-12-31",
+  "2026-01-31",
+  "2026-02-28",
+  "2026-03-31",
+  "2026-04-30",
+  "2026-05-31",
 ];
+const LEE_TOP_TIER: EmailTrendPoint[] = LEE_TOP_TIER_LABELS.map((label, i) => ({
+  label,
+  value: LEE_TOP_TIER_VALUES[i],
+}));
 
 // ── 5. neighborhood-report — ZIP 33914 (Cape Coral) median asking, monthly ──
 // Realtor.com market hotness (lake view market_heat_core_swfl), months
 // 2025-11 → 2026-06, pulled 07/09/2026.
-const ZIP_33914: EmailTrendPoint[] = [
-  { label: "2025-11-01", value: 599000 },
-  { label: "2025-12-01", value: 599725 },
-  { label: "2026-01-01", value: 599000 },
-  { label: "2026-02-01", value: 595750 },
-  { label: "2026-03-01", value: 589450 },
-  { label: "2026-04-01", value: 589925 },
-  { label: "2026-05-01", value: 574900 },
-  { label: "2026-06-01", value: 550000 },
+const ZIP_33914_LABELS = [
+  "2025-11-01",
+  "2025-12-01",
+  "2026-01-01",
+  "2026-02-01",
+  "2026-03-01",
+  "2026-04-01",
+  "2026-05-01",
+  "2026-06-01",
 ];
+const ZIP_33914: EmailTrendPoint[] = ZIP_33914_LABELS.map((label, i) => ({
+  label,
+  value: ZIP_33914_VALUES[i],
+}));
 
 // ── 6. investment-brief — Fort Myers typical asking rent, monthly ───────────
 // Zillow Observed Rent Index, averaged across Fort Myers ZIPs (lake view
 // zori_swfl), period_end 2025-04-30 → 2026-05-31, pulled 07/09/2026.
-const FM_RENT: EmailTrendPoint[] = [
-  { label: "2025-04-30", value: 1850 },
-  { label: "2025-05-31", value: 1843 },
-  { label: "2025-06-30", value: 1826 },
-  { label: "2025-07-31", value: 1823 },
-  { label: "2025-08-31", value: 1809 },
-  { label: "2025-09-30", value: 1807 },
-  { label: "2025-10-31", value: 1805 },
-  { label: "2025-11-30", value: 1807 },
-  { label: "2025-12-31", value: 1814 },
-  { label: "2026-01-31", value: 1806 },
-  { label: "2026-02-28", value: 1799 },
-  { label: "2026-03-31", value: 1787 },
-  { label: "2026-04-30", value: 1798 },
-  { label: "2026-05-31", value: 1807 },
+const FM_RENT_LABELS = [
+  "2025-04-30",
+  "2025-05-31",
+  "2025-06-30",
+  "2025-07-31",
+  "2025-08-31",
+  "2025-09-30",
+  "2025-10-31",
+  "2025-11-30",
+  "2025-12-31",
+  "2026-01-31",
+  "2026-02-28",
+  "2026-03-31",
+  "2026-04-30",
+  "2026-05-31",
 ];
+const FM_RENT: EmailTrendPoint[] = FM_RENT_LABELS.map((label, i) => ({
+  label,
+  value: FM_RENT_VALUES[i],
+}));
 
 // ── 7. rate-watch — 30-year fixed rate, weekly ──────────────────────────────
 // Freddie Mac Primary Mortgage Market Survey historical weekly data
 // (freddiemac.com/pmms), weeks 2025-07-03 → 2026-07-09, pulled 07/09/2026.
-const PMMS_30YR: EmailTrendPoint[] = [
-  { label: "2025-07-03", value: 6.67 },
-  { label: "2025-07-10", value: 6.72 },
-  { label: "2025-07-17", value: 6.75 },
-  { label: "2025-07-24", value: 6.74 },
-  { label: "2025-07-31", value: 6.72 },
-  { label: "2025-08-07", value: 6.63 },
-  { label: "2025-08-14", value: 6.58 },
-  { label: "2025-08-21", value: 6.58 },
-  { label: "2025-08-28", value: 6.56 },
-  { label: "2025-09-04", value: 6.5 },
-  { label: "2025-09-11", value: 6.35 },
-  { label: "2025-09-18", value: 6.26 },
-  { label: "2025-09-25", value: 6.3 },
-  { label: "2025-10-02", value: 6.34 },
-  { label: "2025-10-09", value: 6.3 },
-  { label: "2025-10-16", value: 6.27 },
-  { label: "2025-10-23", value: 6.19 },
-  { label: "2025-10-30", value: 6.17 },
-  { label: "2025-11-06", value: 6.22 },
-  { label: "2025-11-13", value: 6.24 },
-  { label: "2025-11-20", value: 6.26 },
-  { label: "2025-11-26", value: 6.23 },
-  { label: "2025-12-04", value: 6.19 },
-  { label: "2025-12-11", value: 6.22 },
-  { label: "2025-12-18", value: 6.21 },
-  { label: "2025-12-24", value: 6.18 },
-  { label: "2025-12-31", value: 6.15 },
-  { label: "2026-01-08", value: 6.16 },
-  { label: "2026-01-15", value: 6.06 },
-  { label: "2026-01-22", value: 6.09 },
-  { label: "2026-01-29", value: 6.1 },
-  { label: "2026-02-05", value: 6.11 },
-  { label: "2026-02-12", value: 6.09 },
-  { label: "2026-02-19", value: 6.01 },
-  { label: "2026-02-26", value: 5.98 },
-  { label: "2026-03-05", value: 6.0 },
-  { label: "2026-03-12", value: 6.11 },
-  { label: "2026-03-19", value: 6.22 },
-  { label: "2026-03-26", value: 6.38 },
-  { label: "2026-04-02", value: 6.46 },
-  { label: "2026-04-09", value: 6.37 },
-  { label: "2026-04-16", value: 6.3 },
-  { label: "2026-04-23", value: 6.23 },
-  { label: "2026-04-30", value: 6.3 },
-  { label: "2026-05-07", value: 6.37 },
-  { label: "2026-05-14", value: 6.36 },
-  { label: "2026-05-21", value: 6.51 },
-  { label: "2026-05-28", value: 6.53 },
-  { label: "2026-06-04", value: 6.48 },
-  { label: "2026-06-11", value: 6.52 },
-  { label: "2026-06-18", value: 6.47 },
-  { label: "2026-06-25", value: 6.49 },
-  { label: "2026-07-02", value: 6.43 },
-  { label: "2026-07-09", value: 6.49 },
+const PMMS_30YR_LABELS = [
+  "2025-07-03",
+  "2025-07-10",
+  "2025-07-17",
+  "2025-07-24",
+  "2025-07-31",
+  "2025-08-07",
+  "2025-08-14",
+  "2025-08-21",
+  "2025-08-28",
+  "2025-09-04",
+  "2025-09-11",
+  "2025-09-18",
+  "2025-09-25",
+  "2025-10-02",
+  "2025-10-09",
+  "2025-10-16",
+  "2025-10-23",
+  "2025-10-30",
+  "2025-11-06",
+  "2025-11-13",
+  "2025-11-20",
+  "2025-11-26",
+  "2025-12-04",
+  "2025-12-11",
+  "2025-12-18",
+  "2025-12-24",
+  "2025-12-31",
+  "2026-01-08",
+  "2026-01-15",
+  "2026-01-22",
+  "2026-01-29",
+  "2026-02-05",
+  "2026-02-12",
+  "2026-02-19",
+  "2026-02-26",
+  "2026-03-05",
+  "2026-03-12",
+  "2026-03-19",
+  "2026-03-26",
+  "2026-04-02",
+  "2026-04-09",
+  "2026-04-16",
+  "2026-04-23",
+  "2026-04-30",
+  "2026-05-07",
+  "2026-05-14",
+  "2026-05-21",
+  "2026-05-28",
+  "2026-06-04",
+  "2026-06-11",
+  "2026-06-18",
+  "2026-06-25",
+  "2026-07-02",
+  "2026-07-09",
 ];
+const PMMS_30YR: EmailTrendPoint[] = PMMS_30YR_LABELS.map((label, i) => ({
+  label,
+  value: PMMS_30YR_VALUES[i],
+}));
 
 // ── 8. monthly-digest — Lee County recorded sales by month ──────────────────
 // Lee County Property Appraiser recorded sales (lake view last_sale, vintage
 // 05/30/2026): count of arm's-length recordings (amount ≥ $10,000) per sale
 // month, 2025-05 → 2026-04. Pulled 07/09/2026.
-const LEE_SALES_BY_MONTH = [
-  { label: "May", value: 3779 },
-  { label: "Jun", value: 2997 },
-  { label: "Jul", value: 2983 },
-  { label: "Aug", value: 2727 },
-  { label: "Sep", value: 3071 },
-  { label: "Oct", value: 2709 },
-  { label: "Nov", value: 2512 },
-  { label: "Dec", value: 3111 },
-  { label: "Jan", value: 2602 },
-  { label: "Feb", value: 3064 },
-  { label: "Mar", value: 3849 },
-  { label: "Apr", value: 3636 },
+const LEE_SALES_BY_MONTH_LABELS = [
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
 ];
+const LEE_SALES_BY_MONTH = LEE_SALES_BY_MONTH_LABELS.map((label, i) => ({
+  label,
+  value: LEE_SALES_BY_MONTH_VALUES[i],
+}));
 const LEE_SALES_AVG = Math.round(
   LEE_SALES_BY_MONTH.reduce((s, p) => s + p.value, 0) / LEE_SALES_BY_MONTH.length,
 );
@@ -379,20 +412,24 @@ const LEE_SALES_AVG = Math.round(
 // ── 9. year-in-review — Lee County median recorded sale price, monthly ──────
 // Same LeePA recorded-sale set as #8 (amount ≥ $10,000), median per month,
 // 2025-05 → 2026-04. Pulled 07/09/2026.
-const LEE_SALE_PRICE: EmailTrendPoint[] = [
-  { label: "2025-05-01", value: 349999 },
-  { label: "2025-06-01", value: 325000 },
-  { label: "2025-07-01", value: 325000 },
-  { label: "2025-08-01", value: 316990 },
-  { label: "2025-09-01", value: 336000 },
-  { label: "2025-10-01", value: 325000 },
-  { label: "2025-11-01", value: 307950 },
-  { label: "2025-12-01", value: 327170 },
-  { label: "2026-01-01", value: 318500 },
-  { label: "2026-02-01", value: 325000 },
-  { label: "2026-03-01", value: 320000 },
-  { label: "2026-04-01", value: 330500 },
+const LEE_SALE_PRICE_LABELS = [
+  "2025-05-01",
+  "2025-06-01",
+  "2025-07-01",
+  "2025-08-01",
+  "2025-09-01",
+  "2025-10-01",
+  "2025-11-01",
+  "2025-12-01",
+  "2026-01-01",
+  "2026-02-01",
+  "2026-03-01",
+  "2026-04-01",
 ];
+const LEE_SALE_PRICE: EmailTrendPoint[] = LEE_SALE_PRICE_LABELS.map((label, i) => ({
+  label,
+  value: LEE_SALE_PRICE_VALUES[i],
+}));
 
 await bars({
   file: "chart-zip-asking-bars.svg",
