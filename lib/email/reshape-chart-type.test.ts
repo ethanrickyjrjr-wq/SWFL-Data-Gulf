@@ -213,3 +213,13 @@ test("PASSTHROUGH: a spec already in the target frameId is returned unchanged", 
   const already: ChartSpec = { ...usdSpec, frameId: "corridor-scatter" };
   expect(reshapeChartToType(already, "corridor-scatter")).toBe(already);
 });
+
+test("chartTypeFits: z-gauge is passthrough-only — false for any fabricated (multi-point) spec", () => {
+  expect(chartTypeFits(usdSpec, "z-gauge")).toBe(false);
+  expect(chartTypeFits(countSpec, "z-gauge")).toBe(false);
+});
+
+test("PASSTHROUGH: a spec already frameId z-gauge stays z-gauge when re-requested", () => {
+  const already: ChartSpec = { ...usdSpec, frameId: "z-gauge" };
+  expect(reshapeChartToType(already, "z-gauge")).toBe(already);
+});

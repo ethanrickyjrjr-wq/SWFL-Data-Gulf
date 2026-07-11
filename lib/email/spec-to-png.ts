@@ -31,6 +31,7 @@ import {
   extractCompositionData,
   resolveCompositionColors,
 } from "@/lib/charts/svg/composition";
+import { zGaugeSvg, extractGaugeData } from "@/lib/charts/svg/z-gauge";
 
 /** Map a ChartBlock value_format to the chart-image value root's ValueFormat. */
 function mapValueFormat(vf?: string): ValueFormat {
@@ -157,6 +158,11 @@ export async function chartSpecToEmailSvg(spec: ChartSpec, accent: string): Prom
             asOf: baseOpts.asOf,
           });
         }
+        break;
+      }
+      case "z-gauge": {
+        const gauge = extractGaugeData(o);
+        if (gauge) svg = zGaugeSvg(gauge, { title, source: baseOpts.source, asOf: baseOpts.asOf });
         break;
       }
     }

@@ -35,6 +35,7 @@ export const CHART_TYPE_OPTIONS: { type: ChartType; label: string }[] = [
   { type: "spark-grid", label: "KPI cards" },
   { type: "line-band", label: "Line" },
   { type: "composition", label: "Composition" },
+  { type: "z-gauge", label: "Gauge / index" },
 ];
 
 interface Pt {
@@ -97,6 +98,12 @@ export function chartTypeFits(spec: ChartSpec, type: ChartType): boolean {
       return spec.value_format === "count";
     case "ranked":
       return pts.some((p) => typeof p.delta === "number");
+    case "z-gauge":
+      // PASSTHROUGH ONLY: a single-value-vs-bound shape cannot be fabricated
+      // from a flat multi-point list — there is no bound/target to invent.
+      // buildChartForQuestion does not emit this frameId today (2026-07-11);
+      // this evaluates true only once/if a producer does.
+      return spec.frameId === "z-gauge";
     case "bar":
     case "dotplot":
     case "composed":

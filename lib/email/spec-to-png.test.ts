@@ -122,3 +122,21 @@ test("composition renders a real segmented-bar SVG from share-style options", as
   expect(svg).toContain("Flood exposure composition");
   expect(svg).toContain("357");
 });
+
+test("z-gauge renders a real gauge SVG from single-value-vs-bound options", async () => {
+  const spec = {
+    frameId: "z-gauge",
+    title: "Market heat index",
+    chart_type: "bar",
+    value_format: "index",
+    source: { citation: "market-heat-swfl" },
+    asOf: "2026-06-30",
+    options: { value: 75, baseline: 50, min: 0, max: 100, unit: "index" },
+  } as ChartSpec;
+
+  const svg = await chartSpecToEmailSvg(spec, "#0ea5e9");
+
+  expect(svg).not.toBeNull();
+  expect(svg).toContain("<svg");
+  expect(svg).toContain("Market heat index");
+});

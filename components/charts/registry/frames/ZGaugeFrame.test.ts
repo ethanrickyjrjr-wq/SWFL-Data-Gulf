@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { extractGaugeData } from "./ZGaugeFrame";
+import { extractGaugeData } from "@/lib/charts/svg/z-gauge";
 
 // ---------------------------------------------------------------------------
 // extractGaugeData — pure adapter logic, no DOM required
