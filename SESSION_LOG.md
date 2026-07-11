@@ -1,3 +1,20 @@
+## 2026-07-11 (Opus 4.8 · wt/deliverable-coherence-gate → main) — Deliverable coherence gate (chart↔headline) + Naples luxury ring
+
+Landed the 7-task `deliverable-coherence-gate` worktree build to main (audited, then operator-approved
+push). `assertHeroChartCoherence` (`lib/deliverable/chart-coherence.ts`) is now enforced at author-time
+(red CI test over all 9 chart-bearing templates, `preview-fill.test.ts`) and runtime (soft drop in
+`buildPromptChart` — never blocks the send). Replaced luxury-market-report's incoherent $3.17M-headline-
+over-$802K-top-tier-line with the real Naples/Collier $2M+ donut ring (378/412/284/152, center 1,226 —
+verified EXACT against `data_lake.listing_price_histogram_swfl_latest` this session). Task 7 adds a
+`luxury_price_bands_by_county` detail_table to `price-distribution-swfl` (RULE 1 OUTPUT-shape change,
+operator-approved) + `bindLuxuryPriceBandsDonut` via the reserved `table_id` seam — headline count and
+ring center read the same row, cannot disagree. Rebased clean onto origin/main (zero file overlap with
+the concurrent chart-picker/spec-to-png session's 6 commits). Verified post-rebase: 93/93 domain tests +
+4 catalog-mirror + vocab-coverage OK; `bunx next build` "Compiled successfully" (prerender dies only on
+missing worktree secrets). `deliverable_coherence_gate_live_verify` stays OPEN — the 6-line runtime glue
+in buildPromptChart needs live post-deploy verify; brain md regenerates via live GHA cron (not committed
+from the keyless worktree).
+
 ## 2026-07-11 (Opus 4.8 · main) — Fix `source_label_config_leak`: gate scrub placeholder in shortSourceLabel
 
 `refinery/render/speaker.mts` `shortSourceLabel` scrubbed internal identifiers to the `[config]`
