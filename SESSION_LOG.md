@@ -1,3 +1,30 @@
+## 2026-07-11 (Opus 4.8 · main) — SWFL Data Desk v2 = Spec B discovery/backlink flywheel: PLANNED + BUILT (Tasks 1–5), reviewed green; HELD for push
+
+Operator: "v1 built, check Fable 5's v2 notes, spec if you have to then plan." Fable 5's v2 trail = Spec A's
+"out of scope (v2 additive)" menu + the inventory-mix seam + the already-written companion **Spec B**
+(`2026-07-11-desk-discovery-flywheel-design.md`). Operator chose **Spec B**. Spec B was already brainstormed
+(RULE 3.5 satisfied) + registered (`desk_discovery_flywheel_live_verify`) → no new spec, wrote the execution
+plan `docs/superpowers/plans/2026-07-11-desk-discovery-flywheel-plan.md`. Executed subagent-driven (Opus
+implementers + reviewers per task, ledger at `.superpowers/sdd/progress.md`). Shipped, all `bunx next build`
+green, each task reviewed:
+- **T1** enrich Dataset JSON-LD on BOTH `deskJsonLd` + `brainJsonLd` (creator/isAccessibleForFree/conditional
+  license via real `/terms`/temporalCoverage + Lee+Collier spatial) → Google Dataset Search eligibility
+  (`b669dd5c` + fix `6ad68fe3`).
+- **T2** quotable answer-first takeaways in `/desk` SSR HTML; 30-yr mortgage KPI correctly carries NO
+  "Southwest Florida" clause (national rate — geography honesty) (`a2658b06`).
+- **T3** `/desk` added to sitemap, `daily` (`c42e04d8`).
+- **T4** embeddable attributed backlink widget `/embed/desk/pulse` (inherits existing `/embed/*` frame headers,
+  non-disableable "Source: SWFL Data Gulf ↗") (`93b61d6d`).
+- **T5** static `/llms.txt` route (`c08b475e` + `0aa589dd` force-static).
+- **T6 robots allowlist = NOT built** — operator-gated moat-vs-reach call (allow OAI-SearchBot/Claude-SearchBot/
+  PerplexityBot on `/desk`+`/r/*`, training bots stay blocked). Awaiting explicit yes/no before touching robots.ts.
+Final whole-branch review: READY TO MERGE, 0 Critical/Important. Deferred/opened checks: `r_star_report_takeaway`
+(Spec B item 2 /r/* takeaways, operator chose to defer), `desk_takeaway_national_scope_guard`,
+`desk_takeaway_polish`. **HELD for push (operator-gated):** the 5 flywheel commits are ahead of origin
+INTERLEAVED with 2 foreign commits (`0c682e7f` Fable5 handoff, `55759197` price-signal) from parallel sessions —
+safe-push would carry them; needs operator call before push. Live-verify (browser + a11y + Dataset validator)
+still open on deploy → closes `desk_discovery_flywheel_live_verify`.
+
 ## 2026-07-11 (Opus 4.8 · main) — CORRECTION: my part-1 asking figures were off a contaminated table; design doc fixed
 
 Correcting my own earlier entry below ("daily_truth median_sale_price: real fix is WRONG-LANE..."): the
