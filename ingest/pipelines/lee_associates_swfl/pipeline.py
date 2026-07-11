@@ -60,7 +60,8 @@ def _upsert_rows(rows: list[dict], db_url: str, dry_run: bool) -> int:
     import psycopg
     now = datetime.now(timezone.utc)
     _nullable = ("vacancy_rate", "asking_rent_nnn", "asking_rent_mf",
-                 "absorption_sqft", "sale_price_psf", "under_construction", "inventory_sf")
+                 "absorption_sqft", "sale_price_psf", "under_construction", "inventory_sf",
+                 "cap_rate")
     for r in rows:
         r["ingested_at"] = now
         for col in _nullable:
@@ -73,12 +74,12 @@ def _upsert_rows(rows: list[dict], db_url: str, dry_run: bool) -> int:
                 INSERT INTO data_lake.marketbeat_swfl
                   (id, source_name, submarket, sector, quarter,
                    vacancy_rate, asking_rent_nnn, asking_rent_mf, absorption_sqft,
-                   sale_price_psf, under_construction, inventory_sf,
+                   sale_price_psf, under_construction, inventory_sf, cap_rate,
                    geographic_type, report_label, verified, _ingested_at)
                 VALUES
                   (%(id)s, %(source_name)s, %(submarket)s, %(sector)s, %(quarter)s,
                    %(vacancy_rate)s, %(asking_rent_nnn)s, %(asking_rent_mf)s, %(absorption_sqft)s,
-                   %(sale_price_psf)s, %(under_construction)s, %(inventory_sf)s,
+                   %(sale_price_psf)s, %(under_construction)s, %(inventory_sf)s, %(cap_rate)s,
                    %(geographic_type)s, %(report_label)s, %(verified)s, %(ingested_at)s)
                 ON CONFLICT (id) DO UPDATE SET
                   vacancy_rate      = EXCLUDED.vacancy_rate,
@@ -88,6 +89,7 @@ def _upsert_rows(rows: list[dict], db_url: str, dry_run: bool) -> int:
                   sale_price_psf    = EXCLUDED.sale_price_psf,
                   under_construction= EXCLUDED.under_construction,
                   inventory_sf      = EXCLUDED.inventory_sf,
+                  cap_rate          = EXCLUDED.cap_rate,
                   _ingested_at      = EXCLUDED._ingested_at
                 """,
                 rows,
