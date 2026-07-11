@@ -43,8 +43,13 @@ export interface StatElement extends BaseElement {
 
 export interface ChartElement extends BaseElement {
   type: "chart";
-  /** EmailChartSpec — kept opaque here to keep lib/social refinery-free; rendered to SVG via chart-svg. */
+  /** The registry ChartSpec that produced this chart — kept typed `unknown` here
+   *  to keep lib/social refinery-free; carried for re-render / coherence context.
+   *  null while a manual "Add Chart" is still building. */
   spec: unknown;
+  /** The rasterized chart PNG (hosted in email-media, CORS-safe for Konva export).
+   *  Mirrors ImageElement.src. Empty/undefined = "still rendering" → placeholder. */
+  src?: string;
 }
 
 export interface CtaElement extends BaseElement {

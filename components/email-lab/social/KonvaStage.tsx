@@ -66,10 +66,10 @@ function ImageEl({
   el,
   geom,
 }: {
-  el: Extract<SocialElement, { type: "image" | "logo" }>;
+  el: Extract<SocialElement, { type: "image" | "logo" | "chart" }>;
   geom: ReturnType<typeof geomProps>;
 }) {
-  const [img, status] = useKonvaImage(el.src);
+  const [img, status] = useKonvaImage("src" in el ? (el.src ?? "") : "");
   if (status !== "loaded" || !img) {
     return <Rect {...geom} width={el.width} height={el.height} fill="#1f2d36" cornerRadius={6} />;
   }
@@ -127,9 +127,11 @@ function renderElement(
     case "logo":
       return <ImageEl el={el} geom={geom} />;
     case "chart":
-      // v1: a chart with no rasterized image src shows a placeholder; the chart is
-      // rendered to an image src in a later task.
-      return <Rect {...geom} width={el.width} height={el.height} fill="#1f2d36" cornerRadius={6} />;
+      // Same path as image/logo: a rasterized chart PNG (email-media, CORS-safe)
+      // loads via useKonvaImage's crossOrigin="anonymous" so stage.toDataURL()
+      // stays untainted. Empty src (still building / dropped by the coherence
+      // guard) keeps the grey placeholder — it means "loading", not "broken".
+      return <ImageEl el={el} geom={geom} />;
     default:
       return null;
   }

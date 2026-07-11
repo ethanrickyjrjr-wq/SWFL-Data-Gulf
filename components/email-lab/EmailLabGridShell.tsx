@@ -102,6 +102,7 @@ const SOCIAL_PALETTE: { type: SocialElement["type"]; label: string }[] = [
   { type: "cta", label: "Button + link" },
   { type: "image", label: "Image" },
   { type: "logo", label: "Logo" },
+  { type: "chart", label: "Chart" },
 ];
 const SOCIAL_FORMAT_LABEL: Record<SocialFormat, string> = {
   square: "Square 1:1",
@@ -1457,7 +1458,9 @@ export function EmailLabGridShell({
                   <button
                     key={p.type}
                     type="button"
-                    onClick={() => social.addElement(p.type)}
+                    onClick={() =>
+                      p.type === "chart" ? social.addChart() : social.addElement(p.type)
+                    }
                     className="rounded border border-white/10 px-2 py-1.5 text-[11px] text-white/60 hover:text-white/90"
                   >
                     {p.label}

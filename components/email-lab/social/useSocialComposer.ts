@@ -10,7 +10,7 @@ import { useRef, useState } from "react";
 import type Konva from "konva";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import { newDesign, designToSkeleton, applyDesignPatch } from "@/lib/social/design/serialize";
-import type { SocialDesign, SocialElement } from "@/lib/social/design/types";
+import type { SocialDesign, SocialElement, ChartElement } from "@/lib/social/design/types";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { mintBlockId } from "@/lib/email/doc/schema";
 import { findPlaceholder, type ShowcaseRecipe } from "@/lib/showcase/recipe";
@@ -33,6 +33,13 @@ function isDesign(d: unknown): d is SocialDesign {
     (d as SocialDesign).version === 1 &&
     Array.isArray((d as SocialDesign).elements)
   );
+}
+
+/** The placeholder a manual "Add Chart" pushes SYNCHRONOUSLY — empty src renders
+ *  the grey loading placeholder; the async build fills spec+src via updateElement.
+ *  Pure + exported so the "never blocks the UI" contract is unit-tested. */
+export function chartLoadingElement(id: string): ChartElement {
+  return { id, type: "chart", x: 80, y: 80, width: 500, height: 320, spec: null, src: "" };
 }
 
 export function useSocialComposer({
@@ -221,6 +228,59 @@ export function useSocialComposer({
     }
   }
 
+  // ── AI: build a REAL chart from the prompt and attach it (async; never blocks) ──
+  async function addChart() {
+    if (placeholderBlocked()) return;
+    const trimmed = prompt.trim();
+    const id = mintBlockId();
+    // 1) push the loading placeholder SYNCHRONOUSLY — the canvas shows it at once.
+    setDesign((d) => ({ ...d, elements: [...d.elements, chartLoadingElement(id)] }));
+    setSelectedId(id);
+    if (!trimmed) {
+      setAiError("Type what to chart in the box, then Add Chart.");
+      return;
+    }
+    setAiBusy(true);
+    setAiError(null);
+    setAiStatus(null);
+    try {
+      const res = await fetch("/api/email-lab/social/chart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: trimmed, scope, design }),
+      });
+      const data = (await res.json().catch(() => null)) as {
+        spec?: unknown;
+        src?: string;
+        dropped?: boolean;
+        reason?: string;
+        error?: string;
+      } | null;
+      if (data?.dropped) {
+        // Coherence guard rejected it — drop the placeholder, tell the user plainly.
+        setDesign((d) => ({ ...d, elements: d.elements.filter((e) => e.id !== id) }));
+        setSelectedId(null);
+        setAiStatus("Left the chart off — it didn't match the post's headline number.");
+        return;
+      }
+      if (!res.ok || !data?.src) {
+        setDesign((d) => ({ ...d, elements: d.elements.filter((e) => e.id !== id) }));
+        setSelectedId(null);
+        setAiError("Couldn't build that chart — try rephrasing, or add a bar/table version.");
+        return;
+      }
+      // 2) fill spec+src on the SAME element (updateElement by id).
+      updateElement({ ...chartLoadingElement(id), spec: data.spec ?? null, src: data.src });
+      setAiStatus("Added a chart built from real data — drag or resize it on the canvas.");
+    } catch {
+      setDesign((d) => ({ ...d, elements: d.elements.filter((e) => e.id !== id) }));
+      setSelectedId(null);
+      setAiError("Something went wrong — try again.");
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
   // ── AI: fill cited copy into a hand-built canvas (unchanged behavior) ─────────
   async function fill() {
     setAiBusy(true);
@@ -403,6 +463,7 @@ export function useSocialComposer({
     prompt,
     setPrompt,
     author,
+    addChart,
     fill,
     aiBusy,
     aiStatus,
