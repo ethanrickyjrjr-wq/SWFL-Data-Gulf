@@ -16,6 +16,7 @@ import {
 } from "../sources/stress-cancellations-source.mts";
 import { stressDelistSource, type DelistingsRow } from "../sources/stress-delistings-source.mts";
 import { subtractMonthsUtc, isoDate } from "../lib/dates.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 const BRAIN_ID = "seller-stress-swfl";
 
@@ -173,6 +174,10 @@ function sellerStressCorpusSummary(allFragments: RawFragment[]): SynthesisFact[]
   for (const key of allKeys) {
     const [zip, period] = key.split("|");
     if (!zip || !period) continue;
+    // Core scope (Lee + Collier = 57) only. Non-core SWFL + mailing/other-metro spillover otherwise
+    // inflate scoredZips + suppressedZips, and with them the "N of M ZIPs scored" count in the
+    // conclusion prose and key_metrics. One filter here scopes rows, count, and prose together.
+    if (!isCoreScope(zip)) continue;
     if (!byZip.has(zip)) byZip.set(zip, new Map());
     const zipMap = byZip.get(zip)!;
     const drop = dropRows.get(key);
@@ -586,7 +591,7 @@ export const sellerStressSwfl: PackDefinition = {
   public_label: "Seller Stress",
   domain: "real-estate",
   scope:
-    "SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre-shock baseline, derived from three Redfin Data Center Tier-1 Parquets: price_drops, contract_cancellations, and delistings_relistings. Signals: delistings rate (leading), price drop breadth (coincident), cancellation rate (lagging), avg drop depth (lagging), relisting rate (coincident). Covers 126 SWFL ZIPs, Apr 2019–present, monthly rolling-3-month periods. All math deterministic; no LLM synthesis.",
+    "SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre-shock baseline, derived from three Redfin Data Center Tier-1 Parquets: price_drops, contract_cancellations, and delistings_relistings. Signals: delistings rate (leading), price drop breadth (coincident), cancellation rate (lagging), avg drop depth (lagging), relisting rate (coincident). Covers the Lee + Collier core ZIP scope, Apr 2019–present, monthly rolling-3-month periods. All math deterministic; no LLM synthesis.",
   ttl_seconds: 30 * 24 * 60 * 60, // 30 days — matches Redfin monthly cadence
 
   sources: [stressDropsSource, stressCancSource, stressDelistSource],

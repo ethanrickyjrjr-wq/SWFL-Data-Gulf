@@ -20,6 +20,7 @@ import { lintFactsOnly } from "../validate/facts-only-lint.mts";
 import { lintInferenceBait } from "../validate/inference-bait-lint.mts";
 import { lintSmoothing } from "../validate/smoothing-lint.mts";
 import { lintGrainGuard } from "../validate/grain-guard-lint.mts";
+import { lintZipScope } from "../validate/zip-scope-lint.mts";
 import { hasFixtureSentinel } from "../lib/fixture-sentinels.mts";
 import { env } from "../config/env.mts";
 import {
@@ -538,13 +539,25 @@ export async function outputStage(
   // grain_boundary must name absences, not predictions, and finest_grain must
   // be well-formed. No-op when grain_boundary is absent (every leaf brain).
   const grainGuard = lintGrainGuard(brainOutput);
+  // Zip-scope: no ranked ZIP-grain detail row may key a ZIP outside core scope (Lee+Collier=57).
+  // The anti-rediscovery lock for the "of N SWFL ZIPs" denominator drift. No-op when a brain emits
+  // no 5-digit-ZIP-keyed rows (master, non-ZIP-grain leaves).
+  const zipScope = lintZipScope(brainOutput);
   // A LIVE build must never ship a fixture-mode sentinel lifted from a stale
   // upstream (the master v60/v61 leak). Scans the rendered markdown; never
   // fires in fixture mode (sentinels are expected there) nor on a clean live
   // build. Self-correcting — master can't be produced until its upstreams are
   // re-rendered live. Single-sourced patterns: refinery/lib/fixture-sentinels.
   const fixtureLeak = env.source === "live" && hasFixtureSentinel(markdown);
-  if (!spec.ok || !lint.ok || !bait.ok || !smoothing.ok || !grainGuard.ok || fixtureLeak) {
+  if (
+    !spec.ok ||
+    !lint.ok ||
+    !bait.ok ||
+    !smoothing.ok ||
+    !grainGuard.ok ||
+    !zipScope.ok ||
+    fixtureLeak
+  ) {
     const errs = [
       ...(fixtureLeak
         ? [
@@ -561,6 +574,7 @@ export async function outputStage(
         (v) =>
           `  grain-guard [${v.field}${v.index !== undefined ? `[${v.index}]` : ""}]: ${v.reason} — "${v.text}"`,
       ),
+      ...zipScope.violations.map((v) => `  zip-scope [${v.table}, ${v.key}]: ${v.reason}`),
     ].join("\n");
     throw new Error(
       `Stage 4: rendered pack failed validation — NOT writing brains/${pack.brain_id}.md\n${errs}`,

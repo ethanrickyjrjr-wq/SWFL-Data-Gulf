@@ -91,14 +91,47 @@ describe("seller-stress-swfl outputProducer", () => {
     );
   });
 
-  test("baseline suppression fires for ZIP 33932 (only 2 baseline obs)", () => {
-    sellerStressSwfl.corpusSummary!(allFragments);
+  test("baseline suppression fires for a core ZIP with only 2 baseline obs", () => {
+    // 34117 (Collier, core) with 2 baseline periods (< N_BASELINE_MIN=18) + 3 recent → enters
+    // scoring, baseline guard suppresses. Uses a core ZIP because non-core ZIPs are now filtered
+    // out before scoring (they can never appear in the detail table to be tested).
+    const thinZip = ["2019-01-01", "2019-02-01", "2026-01-01", "2026-02-01", "2026-03-01"].flatMap(
+      (p) => [
+        {
+          fragment_id: `drops|34117|${p}`,
+          source_id: "redfin_price_drops_swfl",
+          source_trust_tier: 3,
+          fetched_at: "2026-02-15T00:00:00.000Z",
+          raw: {},
+          normalized: {
+            zip_code: "34117",
+            period_begin: p,
+            pct_active_with_drops: 40,
+            avg_price_drop_pct: 5,
+          },
+        },
+        {
+          fragment_id: `delist|34117|${p}`,
+          source_id: "redfin_delistings_relistings_swfl",
+          source_trust_tier: 3,
+          fetched_at: "2026-02-15T00:00:00.000Z",
+          raw: {},
+          normalized: {
+            zip_code: "34117",
+            period_begin: p,
+            share_delisted_pct: 18,
+            share_relisted_pct: 3,
+          },
+        },
+      ],
+    ) as unknown as RawFragment[];
+    sellerStressSwfl.corpusSummary!([...allFragments, ...thinZip]);
     const result = sellerStressSwfl.outputProducer!({} as never);
     const allRows = result.detail_tables![0].rows;
     const suppressed = allRows.filter((r) => r.cells["baseline_suppressed"] === true);
     assert.ok(
       suppressed.length >= 1,
-      `expected at least 1 baseline-suppressed ZIP (33932 has 2 baseline obs), got 0`,
+      `expected at least 1 baseline-suppressed core ZIP (34117 has 2 baseline obs), got 0`,
     );
   });
 
@@ -183,9 +216,9 @@ describe("seller-stress-swfl rolling-12 trailing window (regression: early-year 
       ...monthsBetween("2019-01-01", "2021-12-01"),
       ...monthsBetween("2025-03-01", "2026-02-01"),
     ];
-    sellerStressSwfl.corpusSummary!(syntheticZip("99999", periods));
+    sellerStressSwfl.corpusSummary!(syntheticZip("33901", periods));
     const result = sellerStressSwfl.outputProducer!({} as never);
-    const row = result.detail_tables![0].rows.find((r) => r.key === "99999");
+    const row = result.detail_tables![0].rows.find((r) => r.key === "33901");
     assert.ok(row, "synthetic ZIP 99999 missing from detail table");
     assert.notStrictEqual(
       row!.cells["seller_stress_score"],
@@ -277,7 +310,7 @@ describe("seller-stress-swfl ceiling tuning (2026-06-14: unbunch the top decile)
   test("direction reads the raw composite (decoupled): a strongly-bearish corpus stays bearish", () => {
     // raw composite >> 0.6 → bearish regardless of SCORE_CEIL_SIGMA. This is the guard
     // against the coupling bug: widening the display ceiling must never move the call.
-    sellerStressSwfl.corpusSummary!(highStressZip("88888"));
+    sellerStressSwfl.corpusSummary!(highStressZip("34102"));
     const result = sellerStressSwfl.outputProducer!({} as never);
     assert.strictEqual(
       result.direction,
