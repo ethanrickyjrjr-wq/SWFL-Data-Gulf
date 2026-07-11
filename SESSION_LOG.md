@@ -1,3 +1,23 @@
+## 2026-07-11 (Opus 4.8 · main) — Cleaned the chart-wiring specs into a plannable set of 4; folded coherence guard + all-27-template audit across them
+
+Reviewed the parallel session's chart-builder audit + two specs (picker-parity, social-registry) and
+reconciled them with the coherence gate. Key finding fixed in-spec: the coherence guard as I first
+placed it was email-only (`buildPromptChart`), but Build 2 makes `buildChartForQuestion` the SHARED
+producer for social too — so social would ship the same chart-vs-headline bug class unguarded. Made
+the runtime guard cross-surface: email keeps its hook (now multi-chart aware), social's two new
+chart-attach paths (manual + AI-author) MUST call `assertHeroChartCoherence` at attach time, and
+picker-parity's 7 new types inherit the guard via the same seam. Also added to the specs: a
+`chartTypeFits` gate requirement per new picker type (else a gauge/composition of unsuitable data =
+new incoherence), a CORS verify-item on the social hosting bucket (`stage.toDataURL()` taints
+otherwise), and a surface-neutral chart `theme` option coordinated with Build 2's rasterizer
+extraction. Audited the current state of all 27 templates: 9 carry charts, exactly 1 incoherent
+today (luxury, $3.17M over an $802K line); the gate goes red on that one and green on the rest
+(including cross-unit + multi-chart cases — proving the rule's restraint). Wrote the 4th spec
+(`emailchartspec-retirement`, deferred — tracked by existing check `retire_emailchartspec_outreach`)
+so the set is a clean four, each handable to writing-plans:
+coherence-gate → picker-parity → social-registry → emailchartspec-retirement (dependency order noted
+in-spec). Docs only; no code touched this push.
+
 ## 2026-07-11 (Opus 4.8 · main) — Pipeline-problems: Path A scoped + act-today fixes (land-blend median $35k→$359k live, tripwire false-RED, CI real diagnosis, SteadyAPI key = 429 not dead)
 
 Operator picked "Path A now, Dagster REJECTED" (Prefect-vs-Airtable is his open call for the

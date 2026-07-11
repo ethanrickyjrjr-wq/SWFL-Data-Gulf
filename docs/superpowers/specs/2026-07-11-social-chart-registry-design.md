@@ -103,6 +103,37 @@ call: when the author model decides a chart belongs on the post, it follows the 
 `buildChartForQuestion` → rasterize → `ChartElement{spec, src}` path as step 4, not a separate
 code path — one producer function, called from two triggers (manual palette action, AI author).
 
+### 6. Coherence guard — REQUIRED, both triggers (cross-ref: `deliverable-coherence-gate`)
+
+The operator ruling is "guardrail everywhere." Social is a surface, so it gets the guard too — and
+because steps 4 and 5 route through the same `buildChartForQuestion` producer email uses, skipping
+it here is the one thing that would let this exact bug class (a chart that contradicts the post's
+headline) ship on social unguarded. Both the manual "Add Chart" (step 4) and the AI-author seed
+(step 5), at the point they attach the built chart to the post, call `assertHeroChartCoherence`
+(`lib/deliverable/chart-coherence.ts`, already shipped) comparing the chart's displayed magnitude
+against the post's headline / stat element. On a clear incoherence, drop the chart (leave the
+loading placeholder empty / do not attach) and log the reason — never block the compose. Runs
+server-side at attach time, where the spec + headline coexist, NOT at the `stage.toDataURL()`
+export. Add a `useSocialComposer` test asserting an incoherent chart is not attached.
+
+### 7. CORS on the social hosting bucket — VERIFY before shipping (RULE 0.4)
+
+`stage.toDataURL()` throws a security error on a *tainted* canvas — and the canvas taints if the
+hosted chart PNG comes from a bucket that does not return `Access-Control-Allow-Origin`. The Konva
+image load is CORS-safe (`crossOrigin="anonymous"`), but that only works if the destination bucket
+`lib/social/chart-image.ts` uploads to actually serves CORS headers. Before Build ships: confirm the
+social image bucket returns them (check the existing social image-upload path's bucket config); if it
+doesn't, fix the bucket CORS, or the first exported chart post fails at export. This is a
+verify-item, not an assumption.
+
+### 8. Chart theme — read the shared option (cross-ref: `deliverable-coherence-gate` §3a)
+
+The shared dispatch this build extracts (`lib/charts/spec-to-image.ts`) should pass a
+`ChartSpec.options.theme` (light | dark | brand-accent) through to the individual SVG builders, so a
+social post's chart can match the post's palette the same way an email's can. The theme handling
+lands in the builders (e.g. `donut-share.ts`) under the coherence-gate build; this build just makes
+sure the extracted dispatch forwards the option rather than dropping it.
+
 ## Testing
 
 - `lib/charts/spec-to-image.ts` (new shared module): unit tests asserting identical output to the

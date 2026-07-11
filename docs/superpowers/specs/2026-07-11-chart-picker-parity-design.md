@@ -67,6 +67,31 @@ mode) must be verified in-session against the current ECharts docs before writin
 assumed from training memory. This is the highest-effort item of the 5 and should be sequenced
 last within Phase B.
 
+### Phase B fit-gates — every new type needs a `chartTypeFits` guard (do not skip)
+
+A renderer is not enough. `chartTypeFits` (`build-doc.ts:262-267`) already refuses `donut` unless
+the data is share-style ("counts that add to a whole"), and falls back to a bar with a plain-English
+reason. Each of the 5 new types binds meaningful data ONLY under a shape condition — expose them
+without a fit-gate and you manufacture a new incoherence class:
+
+- `z-gauge` needs a single value against a max/target — reshaping a multi-point series into a gauge
+  picks an arbitrary needle. Gate: single salient value + a bound.
+- `composition` needs parts-of-a-whole (like donut). Gate: same share-style test.
+- `seasonal-radial` needs a cyclical/monthly series. Gate: 12-ish periodic points.
+- `storm-timeline` needs discrete dated events. Gate: a per-event detail table (the env-swfl emit).
+- `corridor-scatter` needs paired x/y per entity. Gate: two numeric columns.
+
+Each Phase-B frame ships its `chartTypeFits` case + the "showed a bar instead, here's why" fallback
+message alongside its renderer and picker option — three pieces per frame, not one.
+
+### Coherence guard (cross-ref: `deliverable-coherence-gate`)
+
+Exposing 7 more selectable charts adds 7 more ways a user's pick can contradict the headline. Every
+picker-selected chart already routes through `buildPromptChart`, where the coherence guard
+(`assertHeroChartCoherence`, shipped under `deliverable_coherence_gate_live_verify`) drops a chart
+whose magnitude clashes with the hero. No new wiring here — just do not add a bypass; the new types
+inherit the guard for free by going through the same seam.
+
 ### Rollout order
 
 Phase A ships alone first (near-zero risk, unblocks 2 real chart types immediately). Phase B ships

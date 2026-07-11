@@ -100,13 +100,38 @@ New test (on the existing seed-preview suite) iterates every chart-bearing templ
 exception is blessed by an explicit `COHERENCE_ALLOWLIST` annotation (template id + one-line
 reason) — strict: a human resolves it, silence is not allowed.
 
-### 3. Runtime enforcement — soft, in the existing seam
+### 3. Runtime enforcement — soft, AND cross-surface (not email-only)
 
-In `lib/email/build-doc.ts` `buildPromptChart` (where the AI-filled hero and the built chart
-first coexist), run the same assertion after the chart is built. A chart is a bonus, never a
-blocker (existing philosophy). On a clear incoherence: **drop the chart** (better no chart than a
-lying one) and `console.log` the reason; never block the send. Hang the assertion here rather than
-standing up a new gate — extends `buildPromptChart`, consistent with RULE C2.
+Run the same assertion wherever a chart and a headline first coexist, comparing the built chart's
+displayed magnitude against the surface's headline figure. A chart is a bonus, never a blocker
+(existing philosophy): on a clear incoherence **drop the chart** (better no chart than a lying one)
+and `console.log` the reason; never block the send. The assertion is the shared pure function from
+§1 — each surface calls it at its own assembly point (it cannot live inside the chart *producer*
+`buildChartForQuestion`, which never sees the headline):
+
+- **Email:** `lib/email/build-doc.ts` `buildPromptChart`, after the chart is built (extends the
+  existing seam, RULE C2). Handle **multi-chart** templates (`weekly-pulse`, `monthly-digest`,
+  `year-in-review` carry 2–3 charts) — check each chart against the hero, drop only the
+  incoherent one.
+- **Social — DEPENDENCY on `social-chart-registry` (Build 2).** That build lights up two brand-new
+  chart-attach paths (manual "Add Chart" and AI-author seeding) that both run the same
+  `buildChartForQuestion` producer email already uses. **Both MUST call `assertHeroChartCoherence`
+  against the post's headline/stat element at attach time**, or social becomes the one unguarded
+  surface and ships this exact bug class. This is not optional given the operator ruling
+  ("guardrail everywhere"): the social spec carries it as an explicit step, cross-referenced here.
+- **Picker parity (Build 1).** Exposing 7 more chart types to the Email Lab picker adds 7 more ways
+  a user-selected chart can mismatch the headline. Every picker-selected chart routes through the
+  same runtime drop, so no new type escapes the guard.
+
+### 3a. Chart "theme" — a surface-neutral option, not an email-only luxury hack
+
+The luxury ring needs a dark-ground + gold skin; charts today are always white, which clashes on
+any dark email or social post. Make this a `theme`/`ground` option on the `ChartSpec` (light |
+dark | brand-accent), read by the shared SVG dispatch. **Coordinate with Build 2**, which extracts
+that dispatch (`chartSpecToEmailSvg` → `lib/charts/spec-to-image.ts`): add the theme handling to the
+individual builder (`donut-share.ts`, a stable location) and have the extracted dispatch pass
+`options.theme` through — so email and social both render a branded chart from one path, and we
+don't both edit the moving dispatch and collide.
 
 ### 4. The Naples luxury ring — the fixture that proves the rule
 
@@ -144,6 +169,33 @@ chart's magnitude must cohere with its headline (same unit → headline within ~
 plotted range), enforced by `assertHeroChartCoherence` at author-time (CI test over all templates)
 and runtime (soft: drop the chart). An element type ships with its coherence rule — the pattern
 extends to pictures, commentary, examples."*
+
+## Current state — all 27 templates (audit, 07/11/2026)
+
+The operator asked that this take care of the current state of every deliverable, not just luxury.
+Probed `preview-fill.ts` + the seed chart series. Of the 27 `SEED_DOCS` templates, **9 carry a
+chart**; the other 18 (listing / relationship / letter / skeleton) render stats + photos, no chart,
+so the chart↔headline gate is n/a for them.
+
+The 9 chart-bearing templates and their coherence today:
+
+- `market-spotlight` — hero $290,000 vs Lee-asking line (~$396K–$400K). **Coherent** (within 3×).
+- `weekly-pulse` — no hero block; stats + 3 charts (ZIP $, Lee-asking $, inventory count).
+  **Coherent** (no hero to contradict; multi-chart).
+- `trend-snapshot` — hero $433,549 vs ZHVI area ($433K–$471K). **Coherent**.
+- `rate-watch` — hero 6.49% vs 30-yr rate line (~6%). **Coherent** (percent — gate abstains).
+- `luxury-market-report` — hero $3,168,000 vs top-tier line ($802K→$746K). **INCOHERENT** —
+  $3.17M is 4.0× above the chart top. This is the only failure and the fixture this build fixes.
+- `neighborhood-report` — hero $550,000 vs ZIP 33914 asking ($550K–$599K). **Coherent**.
+- `investment-brief` — hero $1,807 vs Fort Myers rent (~$1,800). **Coherent**.
+- `monthly-digest` — hero $330,500 (currency) vs sales-per-month + inventory (count). **Coherent**
+  (different units — gate correctly abstains; not a defect).
+- `year-in-review` — hero −8.1% (percent) vs sale-price $ + sales count. **Coherent** (cross-unit).
+
+So the author-time gate, run over all 9 today, goes **red on exactly one** (luxury) and green on
+the rest — including the cross-unit and multi-chart cases, which prove the rule's restraint. Fixing
+luxury turns the whole gate green; from then on any new incoherent template sample is a red build.
+This is how "all 27" are covered without hand-freezing anything: the gate is the standing audit.
 
 ## Staging
 
