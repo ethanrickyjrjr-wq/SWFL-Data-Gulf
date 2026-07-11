@@ -1,3 +1,24 @@
+## 2026-07-11 (Opus 4.8 · main) — TWO LIVE OUTAGES found by the triage sweep; open-issues doc corrected
+
+Final browser-verification pass over the last 15 `*_live_verify` checks (3 agents) closed 8 more and
+surfaced **two production outages that were hiding behind "unverified" checkboxes** — both reproduced
+independently by me, not taken on the agents' word:
+- **`mcp_post_transport_500`** — `POST /api/mcp` returns HTTP 500 (empty body) on a bare `initialize`.
+  Reproduced via raw curl (with and without a real project key) AND the official `@modelcontextprotocol/sdk`
+  client. `GET /api/mcp` = 200 and the rest of the site is healthy, so it's the POST transport specifically.
+  The ENTIRE Claude-facing tool surface is unreachable for any real client.
+- **`pdf_generation_500_prod`** (opened, priority 1) — `GET /api/deliverables/{id}/pdf` = HTTP 500 for all
+  four seeded examples, unauthenticated, while `/p/{id}` renders 200. PDF download is down; PDFs are half
+  the product promise.
+Plus `new_listing_hero_never_saves_subject_address` (the homepage hero's create-project call never sends
+`kind`/`subject_address` — verified by live network trace) and `sendtoself_modal_orphaned_after_grid_retire`
+(the funnel's OTP-capture modal was orphaned when block-canvas was retired 07/07 and never migrated).
+
+Ledger: 333 → 246 open, 116 closed today, 0 dropped, 9 new gaps opened. `docs/audit/2026-07-11-open-issues-after-triage.md`
+REWRITTEN — the first version (a6da0b37) predated these findings and understated the situation; the two
+outages are now P0 at the top. Housekeeping: 4 duplicate "Triage Verify" test projects were created live
+during the address-bug repro and need operator cleanup from `/project`.
+
 ## 2026-07-11 (Opus 4.8 · main) — COLLIER DONE: source unbroken + homes-only SOLD median LIVE ($625,000) + daily source-liveness guard
 
 Collier is built and live-verified end to end. (1) SOURCE UNBROKEN: repointed `collier_parcels` off the

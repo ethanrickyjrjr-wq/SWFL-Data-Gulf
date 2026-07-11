@@ -1,149 +1,170 @@
 # Open Issues — full inventory after the 07/11/2026 checks triage
 
-**As of:** 07/11/2026
-**Method:** 11 agents swept the entire open ledger, verifying each check against the live product, the
+**As of:** 07/11/2026 (updated after the final browser-verification pass)
+**Method:** 14 agents swept the entire open ledger, verifying each check against the live product, the
 code, or the data. Nothing was closed without observed evidence; nothing was dropped.
 
-**Result:** 333 open → **247 open**. 86 came off the board. 0 dropped. 5 new gaps found and logged.
-2 checks were *reopened* after their own agent decided the evidence wasn't good enough.
+**Result:** 333 open → **246 open**. 116 closed today. 0 dropped. **9 new gaps found and opened**, including
+**two live production outages nobody knew about.** 2 checks were *reopened* after their own agent decided
+the evidence wasn't good enough.
 
-Everything below is a real, currently-open problem confirmed this session — not a stale label.
+> **The real lesson of this sweep:** the checks that looked like lazy leftovers were not unverified —
+> they were **broken things wearing a checkbox**. Chasing the last 15 "easy" ones is exactly what
+> surfaced both outages below. A board that says "unverified" may be quietly saying "down".
 
 ---
 
-## P0 — Wrong in front of users right now
+## 🚨 P0 — LIVE OUTAGES (down in production right now)
 
-**The scope fixes shipped in code but the live brains were never rebuilt.** This is the single biggest
-finding, hit independently by five agents from five directions. The code says Lee + Collier. The live
-product still says six counties. Nothing rebuilt them, so the ledger *thought* these were handled.
+Both independently reproduced against `https://www.swfldatagulf.com` on 07/11/2026.
 
-- `zip_scope_core_live_verify` — the live brain still says **"111 of 126 ZIPs"**. The core-scope fix
-  never propagated.
-- `scope_hurricane_tracks_fl_6county` — `brains/hurricane-tracks-fl.md` last built 06/19, still
-  publishing six-county figures (9 landfalls / $93.6M / $3.39B).
-- `scope_storm_history_swfl_charlotte` — `brains/storm-history-swfl.md` (v21, 06/29) still declares
-  scope "LEE + COLLIER + CHARLOTTE". Code re-scope is real and tested; the brain is stale.
-- `scope_env_swfl_6county` — code fix committed **and pushed**; `brains/env-swfl.md` still shows the
-  stale six-county output.
+### 1. The MCP surface is dead — `mcp_post_transport_500`
+
+`POST /api/mcp` returns **HTTP 500 with an empty body** on a bare `initialize` call. Reproduced with raw
+curl (with a real minted project key AND with none) and with the official `@modelcontextprotocol/sdk`
+TypeScript client. `GET /api/mcp` returns 200, and the rest of the site is healthy — so this is the POST
+transport specifically.
+
+**Impact:** every tool on the Claude-facing surface (`swfl_fetch`, `swfl_project_add`, `swfl_project_build`,
+`swfl_project_list`, `swfl_project_handoff`) is **unreachable for any real client**. Anyone who connected
+Claude to the platform has a broken integration.
+
+### 2. PDF generation is dead — `pdf_generation_500_prod`
+
+`GET /api/deliverables/{id}/pdf` returns **HTTP 500 for all four seeded examples** (`example-one-pager`,
+`example-bov-lite`, `example-market-overview`, `example-client-email`), unauthenticated, on the public
+GET-by-id path — while `/p/{id}` renders 200 for the same deliverables.
+
+**Impact:** PDFs are half of what the product promises ("emails and PDFs, built and scheduled in five
+minutes"). The build works; the download is down.
+
+---
+
+## P1 — The scope fixes shipped in code but the live brains were never rebuilt
+
+Hit independently by five agents from five directions. The code says Lee + Collier. The live product still
+says six counties. Nothing rebuilt them, so the ledger *thought* these were handled.
+
+- `zip_scope_core_live_verify` — the live brain still says **"111 of 126 ZIPs"**.
+- `scope_hurricane_tracks_fl_6county` — `brains/hurricane-tracks-fl.md` last built 06/19, still publishing
+  six-county figures (9 landfalls / $93.6M / $3.39B).
+- `scope_storm_history_swfl_charlotte` — `brains/storm-history-swfl.md` (v21, 06/29) still declares scope
+  "LEE + COLLIER + CHARLOTTE". Code re-scope is real and tested; the brain is stale.
+- `scope_env_swfl_6county` — code fix committed **and pushed**; `brains/env-swfl.md` still emits the stale
+  six-county output.
 - `answer_smallN_headline_stat` — fix landed at `f184e3e4`; the live brain (v29) predates it.
-- `caveat_expiry_rebuild` — the top-level brain still served a 06/29 caveat on 07/11, because its
-  upstream is itself frozen at 06/29.
+- `caveat_expiry_rebuild` — the top-level brain still served a 06/29 caveat on 07/11 because its upstream
+  is itself frozen at 06/29.
 
-**Action:** one targeted rebuild of the affected brains likely closes this entire cluster and pulls a
-live overclaim off the site. This is the highest-value next move on the whole board.
+**A live scope OVERCLAIM is in front of users.** One targeted rebuild likely closes this whole cluster.
 
-Related, same family:
-- `env_swfl_metric_scope` — source-level top-6 selection still isn't core-scoped (only the detail table is).
-- `scope_more_brains_charlotte_leak`, `active_listings_zip_county_contamination` — 9 named out-of-scope
-  ZIPs still present in the live listings data (n=1 each), confirmed by lake query.
+Same family: `env_swfl_metric_scope` (top-6 source selection still not core-scoped) ·
+`scope_more_brains_charlotte_leak` · `active_listings_zip_county_contamination` (9 named out-of-scope ZIPs
+still live, n=1 each).
 
 ---
 
-## P1 — Features built on top of nothing (empty tables)
+## P2 — Other real bugs found during this sweep (newly opened)
 
-Confirmed live by direct query. The code exists; the data doesn't.
-
-- `communities_swfl_live_verify` — `data_lake.community_profiles`: **0 rows**.
-- `new_agent_radar_live_verify` — `public.dbpr_re_licensees`: **0 rows**.
-- `platform_arc_nudges_live_verify` — `email_sequences`: **0 rows**, never armed.
-- `email_lab_tracking_live_verify` — the events table exists but has **0 rows**; tracking has never
-  fired live.
-- `daily_truth_median_sale_unvalued` — 60/60 rows still `NULL` for median sale price; the desk falls
-  back to a monthly index.
-- `narratives_communities_surface` — 0 rows, not sitemap-published.
-- `empty_brain_content_detector` — the detector for exactly this class of failure is itself unbuilt.
-
----
-
-## P2 — Real bugs found during this sweep (newly opened)
-
-These were discovered *while verifying something else*. None existed on the board before today.
-
-- `new_listing_scope_address_missing_on_fresh_project` — a fresh listing project's `subject_address`
-  never reaches `scope.address` when the project has zero items, so the address-lane flyer **silently
-  never fires**. Root cause traced to `app/project/[id]/email-lab/page.tsx:172-191`.
-- `map_nfm_lehigh_fix_reapply` — the North Fort Myers / Lehigh map fixes were **lost in a revert** and
-  are still missing from the live map. Full history traced; they need re-landing.
-- `aeo_static_pages_missing_jsonld` — two static brain pages shadow the dynamic route and ship with
-  **zero structured data**, unlike every other brain page.
-- `social_chart_project_surface_gap` — the chart button works on the email grid but was never wired
-  into the project social page, which still shows a stale "coming soon".
+- `new_listing_hero_never_saves_subject_address` — the homepage "New Listing" hero's create-project call
+  (`app/email-lab/grid/EmailLabGridClient.tsx:112-125`) **never sends `kind`/`subject_address` at all**.
+  Confirmed live via network trace: the address never reaches the DB.
+- `new_listing_scope_address_missing_on_fresh_project` — and downstream, a fresh project's `subject_address`
+  never reaches `scope.address` when the project has zero items
+  (`app/project/[id]/email-lab/page.tsx:172-191`), so the address-lane flyer **silently never fires**.
+  Together these break that lane end to end.
+- `sendtoself_modal_orphaned_after_grid_retire` — `SendToSelfModal` (the funnel's actual OTP-capture
+  mechanic) is **never imported or rendered** in the current live authoring surface. It was orphaned when
+  block-canvas was retired on 07/07 and nothing migrated it.
+- `map_nfm_lehigh_fix_reapply` — the North Fort Myers / Lehigh map fixes were **lost in a revert** and are
+  still missing live.
+- `aeo_static_pages_missing_jsonld` — two static brain pages shadow the dynamic route and ship with **zero
+  structured data**.
+- `social_chart_project_surface_gap` — the chart button works on the email grid but was never wired into the
+  project social page, which still shows a stale "coming soon".
 - `master_conclusion_magnitude_descriptor` — residual jargon phrase in the top-level conclusion.
 
 ---
 
-## P3 — Automation that is broken, dark, or never fired
+## P3 — Features built on top of nothing (empty tables)
 
-- `cron_incident_chief_of_staff_nightly` — the nightly cron is **failing** (OIDC id-token permission).
-  A fix is committed locally (`b8ae2c7f`) but unverified until it runs.
+Confirmed by direct query. The code exists; the data doesn't.
+
+- `communities_swfl_live_verify` — `data_lake.community_profiles`: **0 rows**.
+- `new_agent_radar_live_verify` — `public.dbpr_re_licensees`: **0 rows**.
+- `platform_arc_nudges_live_verify` — `email_sequences`: **0 rows**, never armed.
+- `email_lab_tracking_live_verify` — events table exists, **0 rows**; tracking has never fired.
+- `funnel_demo_email_live_verify` — `outreach_recipients`: **0 rows**; no cycle has ever sent.
+- `daily_truth_median_sale_unvalued` — 60/60 rows still `NULL`; the desk falls back to a monthly index.
+- `narratives_communities_surface` — 0 rows, not sitemap-published.
+- `empty_brain_content_detector` — the detector for exactly this failure class is itself unbuilt.
+
+---
+
+## P4 — Automation that is broken, dark, or never fired
+
+- `cron_incident_chief_of_staff_nightly` — nightly cron **failing** (OIDC id-token permission). Fix pushed
+  (`b8ae2c7f`), unverified until it runs.
 - `typed_client_deferred_data_bugs` — the news-crawl cron **500s on every run**
-  (`app/api/cron/news-crawl/route.ts:40`, `projects.lat/lng`).
+  (`app/api/cron/news-crawl/route.ts:40`).
 - `news_pulse_scoring_cron_locate` — that same route is **absent from `vercel.json`** entirely.
-- `selfheal_rollback_bot_live_verify`, `selfheal_claude_triage_live_verify`,
-  `selfheal_preview_smoke_live_verify` — the self-heal bots run **dark** (`ARMED=false`, or 0 runs
-  ever, or only ever on `main`, never a preview). None has fired against a real incident.
-- `selfheal_vercel_rollback_token` — token minted and wired, but the rollback POST scope has never
-  been exercised.
-- `cron_incident_corridor_pulse_weekly` — intentionally paused pending a crawl4ai retrofit that hasn't
-  been done.
-- `lee_permits_capdetail_waf_429` — intermittent WAF blocking; one clean manual run does **not** prove
-  it fixed (this check was reopened for exactly that reason).
+- `selfheal_rollback_bot_live_verify` / `selfheal_claude_triage_live_verify` /
+  `selfheal_preview_smoke_live_verify` — the self-heal bots run **dark** (`ARMED=false`, or 0 runs ever, or
+  only ever on `main`). None has fired against a real incident.
+- `selfheal_vercel_rollback_token` — token wired, rollback POST scope never exercised.
+- `cron_incident_corridor_pulse_weekly` — paused pending a crawl4ai retrofit that hasn't been done.
+- `lee_permits_capdetail_waf_429` — intermittent WAF block; one clean manual run does NOT prove it fixed
+  (reopened for exactly that reason).
 - `lee_permits_issued_date_cursor_window_mismatch` — 94 rows still stuck at the fallback date.
 
 ---
 
-## P4 — Data quality / ingest gaps confirmed still real
+## P5 — Data quality / ingest gaps confirmed still real
 
 - `dbpr_licenses_dropped_street_address` — the CSV carries address/city/zip in columns 5/8/9/10;
   `constants.py` drops all four.
 - `market-details-swfl-land-blend-and-dupes` — the $30k/$34k land-blend distortion is unfixed.
+- `typed_client_data_lake_typing` — **worse than baseline**: untyped allowlist grew 13 → 25 files.
+- `collier_condo_unit_grain_gap` / `condo_multiunit_grain_systemic` / `marco_condo_address_match_failure` —
+  the condo/multi-unit grain problem, still systemic.
 - `steadyapi-429-rate-limited` — intermittent; unresolved billing question underneath.
-- `collier_condo_unit_grain_gap`, `condo_multiunit_grain_systemic`, `marco_condo_address_match_failure`
-  — the condo/multi-unit grain problem, still systemic.
-- `typed_client_data_lake_typing` — **worse than baseline**: the untyped allowlist grew from 13 to 25
-  files; the `data_lake` schema is still untyped.
-- `asof_formatter_fragmentation` — 3-way duplication confirmed still present.
+- `asof_formatter_fragmentation` — 3-way duplication still present.
 - `contacts_email_vs_public_lane` **[OVERDUE]** — two vCard parsers still unreconciled.
 - `sold_resolution_crosswalk_recheck` — still 0 lat/lon on departures.
 
 ---
 
-## P5 — Blocked on you (an agent structurally cannot close these)
+## P6 — Blocked on the operator (an agent structurally cannot close these)
 
-These need a human hand or a decision. They are not "forgotten" — they're gated.
+Not forgotten — gated.
 
-- Real sends / paid live runs: `link_click_routing_live_verify`, `showing_prep_packet_live_verify`,
+- **Real sends / paid live runs:** `link_click_routing_live_verify`, `showing_prep_packet_live_verify`,
   `multi_zip_city_chart_live_verify`, `engagement_staggered_send_live_verify`,
   `market_area_alerts_live_verify`, `email_s3_smoke_live_verify`.
-- Vendor/product decisions: `contacts_csv_injection_policy` **[OVERDUE]**, `seed_test_prestep_decision`,
-  `resend_account_upgraded`, `paid_path_wtp`, `cre_swfl_citation_raw_db_identifiers`,
-  `hero_white_pill_size`.
-- Infra flips: `email_digest_phase2_golive` (Vercel env), `api_b_open_rate_limit` (WAF dashboard rule),
+- **Decisions:** `contacts_csv_injection_policy` **[OVERDUE]**, `seed_test_prestep_decision`,
+  `resend_account_upgraded`, `paid_path_wtp`, `cre_swfl_citation_raw_db_identifiers`, `hero_white_pill_size`.
+- **Infra flips:** `email_digest_phase2_golive` (Vercel env), `api_b_open_rate_limit` (WAF dashboard rule),
   `anthropic_workspace_spend_limit`.
-- Auth-gated surfaces an agent can't reach: `project_cockpit_live_verify`, `p1_ai_surface_prod_verify`.
-- `stranded_bp_fold_worktree`, `stranded_bp_pipeline_census_worktree` — work stranded in worktrees,
-  needs a push.
+- **Auth-gated surfaces:** `project_cockpit_live_verify`, `p1_ai_surface_prod_verify`,
+  `lab_entry_root_live_verify` (signed-in half only).
+- **Stranded work:** `stranded_bp_fold_worktree`, `stranded_bp_pipeline_census_worktree` — need a push.
+
+### Housekeeping
+4 duplicate test projects ("Triage Verify 5100 SW 5th Pl") were created live under the operator's account
+while reproducing the New Listing address bug. Deletion was correctly auto-blocked as irreversible — they
+are still in `/project` awaiting operator cleanup.
 
 ---
 
-## Overdue (4)
+## Complete open inventory — all 246, by area
 
-- `contacts_email_vs_public_lane` — due 07/04
-- `contacts_csv_injection_policy` — due 07/04
-- `smoke_prod_runner_live_verify` — due 07/06 *(closed this sweep — 9/9 assertions passed)*
-- `fl_dbpr_applicants_rebaseline` — due 07/10 *(closed this sweep — re-baselined from two real counts)*
-
----
-
-## Complete open inventory — all 247, by area
-
-*(Generated live from the ledger on 07/11/2026. `check.mjs list` is always the source of truth.)*
+*(Generated live from the ledger on 07/11/2026. `node scripts/check.mjs list` is always the source of truth.)*
 
 ### aeo-jsonld (1)
 
 - `aeo_static_pages_missing_jsonld` — Static override pages (app/r/housing-swfl/, app/r/communities-swfl/) shadow the dynamic [slug] route and ship with NO JSON-LD at all, unlike every other brain page
 
-### brain-platform (113)
+### brain-platform (108)
 
 - `mcp_project_tools_live_verify` — their-Claude flow: fetch->add->build returns working /p/ URL; bad key clean error
 - `meter_uid_attribution` — Per-account paywall prerequisite: attribute gated actions (build/deliver_*/upload) to the owner uid, not the anon sdg_cid cookie
@@ -160,11 +181,9 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 - `listing_flyer_email_live_verify` — Listing to flyer email: scrape facts, transform layout, scraped comps chart live-verify
 - `grid_email_canvas_v2_live_verify` — Grid email canvas v2 - persistence, friction features, AI sections live-verify
 - `email_lab_text_styling_live_verify` — Email Lab: 14 fonts, block text formatting, image overlay opacity live-verify
-- `grid_lab_socials_live_verify` — Grid lab socials: schedule + status + per-platform output live-verify
 - `sold_resolution_latlon_crosswalk_live_verify` — Sold-resolution: lat/long parcel crosswalk (Lee) live-verify
 - `sold_resolution_crosswalk_recheck` — Re-run sold-resolution lat/long crosswalk spike after Jul 2 scheduled listing-lifecycle runs — active rows now have live lat/lon (99%), but the 2,709 current departures are all seed-origin with zero lat/lon; check for a lat/lon-bearing departure before building
 - `listing_lifecycle_coord_to_zip_backstop` — listing_lifecycle extract_api.py derives zip_code from the permalink slug only, no coord_to_zip lat/lon fallback like lee_permits/pipeline.py uses when site zip is missing/out-of-scope — not broken today (zip ~100% populated live) but inconsistent with the G1-compliant pattern; decide whether to backstop
-- `chart_palette_extension_live_verify` — On-brand chart palette extension + legible labels (Task B) live-verify
 - `listing_project_address_live_verify` — New Listing project + saved address live-verify
 - `sold_email_builder_live_verify` — Grounded Just-Sold email builder live-verify
 - `project_cockpit_live_verify` — Project cockpit — unified email + social workspace live-verify
@@ -175,15 +194,11 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 - `lee_permits_capdetail_waf_429` — lee_permits: CapDetail enrichment hit sustained Accela WAF 429s on GHA (07/03 manual live run) despite existing backoff/retry (3 retries, 1-3s/60s) in crawl_client.py -- most/all 95 rows lost issued_date (detail fetch empty), cursor's on_cursor_value_missing=exclude dropped them, 0 rows written. Only the 06-16 first-live-write has ever succeeded. Need: confirm Monday 07/06 cron result; if it also writes 0 rows, diagnose concurrency/backoff tuning or WAF escalation with ingest-engineer.
 - `unify_contact_stores_live_verify` — One canonical contact store (public.contacts) + unified vCard parser live-verify
 - `uncloseable_check_proof_live_verify` — Un-closeable check without live prod proof live-verify
-- `send_surface_hardening_live_verify` — Block-canvas public /p view + house-brand defaults + loud scheduler send failures live-verify
-- `lab_email_truth_guards_live_verify` — Lane-4 prompt anchors + menu-label fidelity + real unsubscribe binding live-verify
 - `cron_incident_corridor_pulse_weekly` — cron failure: corridor-pulse-weekly
 - `scheduled_send_minute_jitter` — Scheduled sends fire exactly on the hour — add minute jitter (Validity: ~70% of volume hits the first 10 min of each hour; evidence notes doc s11)
 - `gmail_shared_from_unsub_audit` — Verify Gmail Manage-Subscriptions one-click unsub on the shared From cannot blanket-suppress other agents' sends (evidence notes doc s11)
 - `spend_tripwire_live_verify` — Daily spend tripwire + advisor verdict live-verify
 - `communities_swfl_live_verify` — SWFL community intelligence — golf, fees, amenities, homes, nearby & distances live-verify
-- `address_spine_live_verify` — Address spine: typed address resolves to property + comps in the builder live-verify
-- `grid_lab_phone_live_verify` — Grid lab phone layout — Build/Preview tabs live-verify
 - `grid_lab_phone_layout_v2` — Grid lab phone layout v2 — operator wants a layout change-up later (candidates: fit-to-width Preview scale of the ~600px canvas, broader rework); starts with its own brainstorm + spec per RULE 3.5. Deferred 07/05/2026 — a lot in flight.
 - `lab_entry_root_live_verify` — One root for every email-lab entry - blank skeleton, project/address popups, autosave + leave guard live-verify
 - `multi_zip_city_chart_live_verify` — Multi-ZIP city ZIP-by-ZIP chart live-verify
@@ -214,7 +229,6 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 - `visual_regression_prepush_wiring` — Wire bun run test:visual into pre-push hook — currently manual step
 - `storybook_visual_regression_gap` — Storybook stories have no visual regression of their own (only react-email previews covered)
 - `visual_regression_ci_job` — No CI job runs Storybook tests or visual regression yet — everything local-only
-- `email_supply_contract_live_verify` — Email builder shared supply/design contract (M1) live-verify
 - `email_default_photo_ratio_build_thread` — Apply saved default_photo_ratio at build: thread it BuildArgs→AssembleArgs→assembleAuthoredDoc so authored photo blocks get props.ratio, + account-level ratio picker UI (column already accepted by /api/user/brand PATCH; needs new threading — deferred from M3-B type-lift 07/08/2026)
 - `seed_static_figures_bypass_invention_gate` — SEED_DOCS bake hard figures (rate-watch 6.75%, year-in-review 4,217, agent-spotlight 127/98%/phone) into figure-bearing fields the AI is meant to own. The no-invention moat (id-selection + author-doc.ts:880 prose lint) only governs MODEL-written numbers; seed-static numbers never cross it. CONFIRMED escape: tryParsePatch drops a block's patch per-block, applyPatch (build-doc.ts:362 'if (!p) return b') passes it through verbatim; docSkeleton also feeds the baked figure to the model as 'current text'. Fix: convert to the empty-value + instructional-label convention (trend-snapshot/skeleton-* already do) + add a zero-digit-in-figure-fields invariant test (mirrors author-recipes.ts). ALSO VERIFY: whether an unfilled seed can reach a real send (no doc-value lint found on send/blast path). Handoff: docs/superpowers/specs/2026-07-08-seed-slot-playbook-handoff.md
 - `deliverability_diagnostic_panel_live_verify` — Deliverability diagnostic panel live-verify
@@ -225,7 +239,6 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 - `seed_previews_recapture_after_enrichment` — Re-run bun scripts/capture-seed-previews.mts after email_cadence_enrichment lands (captures show pre-enrichment templates); same pass: add a 2nd chart variant so weekly-pulse's three chart slots don't repeat one chart, and re-audit SEED_PREVIEW_FILL figures' as-of dates
 - `tracked_links_domain_alignment_on_custom_sender` — When per-agent custom sending domains ship (domain-verify UI), wrapped /api/r links must ride the sender's domain or wrapping is skipped for those sends — misaligned tracking domain is the one real deliverability risk found in Q3 research (docs/steadyapi-research/2026-07-09-round3-q3-q4-answers.md)
 - `seed_test_prestep_decision` — Pick a lane for pre-send seed-testing: GlockApps API v2 (\/mo Essential, 360 credits) vs MailReach Spam Test API (credit-priced) vs reject monthly cost. Research done, feature shape validated (round1 item 14 + round2 tactic 5); spec blocked on vendor choice
-- `email_accent_ink_palette_gate_live_verify` — Accent-ink guards + brand palette contrast warn (Fence 6) live-verify
 - `answer_path_observability_live_verify` — Answer-path coverage snapshot + red-main sentinel live-verify
 - `engagement_staggered_send_live_verify` — Engagement-staggered blast sending (warm first, widen +2h) live-verify
 - `stagger_send_modal_surface` — Surface 'N sent now, M scheduled +2h' in the send modal - blast response now returns {sent, failed, scheduled} but the modal files were held by other live sessions on 07/09; UI line still unbuilt
@@ -258,6 +271,9 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 - `social_chart_project_surface_gap` — ProjectSocialClient.tsx (/project/[id]/social) missing Chart palette button + stale 'coming soon' inspector copy — chart-attach only wired on EmailLabGridShell.tsx (/email-lab/grid Social), found live-verifying social_chart_registry_live_verify 07/11
 - `new_listing_scope_address_missing_on_fresh_project` — New Listing project's subject_address never reaches build scope (empty items -> scope undefined, address-lane flyer never fires)
 - `map_nfm_lehigh_fix_reapply` — Re-apply NFM CDP clip + Lehigh CDP gap-fill to the LIVE public/map/lee-collier.svg (never landed there; only ever briefly on the dead public/maps/ copy, since gutted)
+- `new_listing_hero_never_saves_subject_address` — Homepage New Listing hero never persists subject_address to the project row
+- `sendtoself_modal_orphaned_after_grid_retire` — SendToSelfModal (lab-first funnel capture) never wired into the grid canvas — orphaned since block-canvas retirement
+- `pdf_generation_500_prod` — PDF download 500s in prod for every deliverable
 
 ### briefcase (3)
 
@@ -294,12 +310,12 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 ### cre-swfl (8)
 
 - `mhs_period_end_item_c` — MHS prior_12mo_ending=2026-03-31 is INFERRED (item C); re-verify period-end + cadence on mhsappraisal.com and mirror the reworded prior_12mo_ending_source into off-main load_mhs.py
-- `corridor_gap_north-naples` — Structural gap: North Naples has city_pulse news but 0 verified corridors
 - `corridor_gap_sanibel` — Structural gap: Sanibel has city_pulse news but 0 verified corridors
-- `corridor_gap_marco-island` — Structural gap: Marco Island has city_pulse news but 0 verified corridors
-- `corridor_gap_north-fort-myers` — Structural gap: North Fort Myers has city_pulse news but 0 verified corridors
-- `corridor_gap_east-naples` — Structural gap: East Naples has city_pulse news but 0 verified corridors
 - `corridor_gap_golden-gate` — Structural gap: Golden Gate has city_pulse news but 0 verified corridors
+- `corridor_gap_east-naples` — Structural gap: East Naples has city_pulse news but 0 verified corridors
+- `corridor_gap_north-naples` — Structural gap: North Naples has city_pulse news but 0 verified corridors
+- `corridor_gap_north-fort-myers` — Structural gap: North Fort Myers has city_pulse news but 0 verified corridors
+- `corridor_gap_marco-island` — Structural gap: Marco Island has city_pulse news but 0 verified corridors
 - `cre_swfl_citation_raw_db_identifiers` — cre-swfl key_metrics citations embed raw DB identifiers (corridor_profiles, cap_rate_pct, vacancy_rate_pct, seasonal_index) that surface as real snake_case in tier-3 raw audit and sit latent in ungated sourceFull; decide whether to rewrite to plain-English provenance at the pack (Layer 2 root fix; pack edit + rebuild = ask-first). Layer 1 symptom fix shipped in speaker.mts shortSourceLabel.
 
 ### daily-price-dual-signal (3)
@@ -316,11 +332,12 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 
 - `market-details-swfl-land-blend-and-dupes` — market_details_swfl: realtor.com ZIP medians are land-blended at the VENDOR (33972 sold $30k/list $34k vs rent $1,950) — needs a display-layer plausibility caveat, NOT a rewrite
 
-### data-quality (3)
+### data-quality (4)
 
 - `empty_brain_content_detector` — Brains pass freshness while content says 'no data yet' (communities-swfl, franchise-outcomes) — build a content-emptiness detector
 - `caveat_expiry_rebuild` — Stale caveats never expire: 06/29 macro-florida failure still served on 07/11 master — add caveat TTL/re-lift hygiene to rebuild
 - `tier_divergence_dag_orphan` — tier-divergence-swfl fully built+tested but never wired into rebuild DAG, 404s live — ship it or delete it
+- `pack_code_change_no_brain_invalidation` — A pack code fix never invalidates its brain — code-layer fixes stay unpublished until TTL expiry (root cause 6)
 
 ### email (13)
 
@@ -382,10 +399,10 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 
 ### homes-only-sold-median (2)
 
-- `collier_parcels_fdor_query_lockdown` — FDOR statewide cadastral now rejects all attribute-field WHERE (400) — collier_parcels ingest can't refresh, blocks Collier homes-only sold median
-- `active_listing_median_land_blend` — listing_active_stats median blends land parcels into 'median asking price' — ZIP 33972 reports $35k vs $355k SF; no property_type filter anywhere; interim-guard target for homes-only median
+- `leepa_zip_backfill_ingest_blocked_by_throttle` — LeePA rate-limited us (local IP): L12 count-only times out. Code is ready (zip_code column + keyset pull). Re-run the leepa parcel ingest once the throttle clears, then apply the view, verify 33972, rebuild, close homes_only_sold_median_live_verify
+- `leepa_http_fetch_blocked_needs_crawl4ai_path` — LeePA fingerprint-blocks plain HTTP (requests/httpx/curl all time out from our IP); only a real browser gets through. The committed leepa pipeline still uses the HTTP path — fine IF GitHub runners aren't blocked, UNVERIFIED. Verify the annual cron can still fetch; if blocked, wire the crawl4ai path (ingest/lib/crawl_client.py) into the leepa L12/L9/L10 fetch
 
-### ingest (17)
+### ingest (19)
 
 - `odd_scaffold_ready` — Operation Dumbo Drop — EVERY un-auto-ingestable source (rotating-URL PDF, paywall, manual portal, hand-keyed) ships the ODD-ready scaffold in the brain's SAME PR: empty-tolerant consumer + parked cadence entry (probe-excluded) + Tier-1 cold target + source_tag provenance + idempotent merge. Then the manual quarterly drop is a ZERO-CODE graduation (move cadence block to pipelines:), never a pipeline break or silent contamination.
 - `haiku_vs_sonnet_final_run` — ONE final comparison run on 07/08/2026 (3 days of fresh Sonnet-era TTL drift), append to verification/haiku-vs-sonnet-distill.md, then close
@@ -404,6 +421,8 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 - `source_liveness_registry_block` — Extend cadence_registry with source_liveness: {url,where,floor} + check_source_liveness() in check_freshness.py (mirror liveness_view pattern, C2 extend); makes every ArcGIS/REST source self-checking in the daily probe
 - `fema_probe_real_filter` — Pin FEMA NFHL real WHERE filter in probe_source_liveness.py - 1=1 504s on the national service; grep ingest/pipelines/fema for the DFIRM_ID/bbox it uses
 - `lee_no_second_parcel_source` — Do NOT add a second Lee parcel ingest - LeePA live 548,330; FDOR centroid CO_NO=46 (556,100) is a duplicate. Lee=LeePA, full stop. Kill any in-flight Lee-from-FDOR ingest
+- `leepa_citation_wrong_layer` — LEEPA_PARCELS_URL (MapServer layer 0) is 'Tangible Business Names', NOT parcels - never fetched, only used as the leepa citation source_url, so the Lee parcel citation points at the wrong layer. Point it at L12 just-value (the actual spine) or the service root.
+- `supabase_direct_conn_timeouts` — collier_parcels 364k merge died mid-load on 'connection to db.*.supabase.co:5432 timeout expired' (direct conn, no pooler). Added per-chunk retry+backoff as the fix. If this recurs across pipelines, move .dlt/secrets.toml to the Supavisor pooler host instead of the direct db host.
 
 ### lee-permits (1)
 
@@ -427,9 +446,10 @@ These need a human hand or a decision. They are not "forgotten" — they're gate
 
 - `market_trend_sweep_followup` — Whole-sweep follow-up: replicate the region-monthly-trend pattern to price-distribution / market-temperature / listing-momentum (via aggregate-at-source region-trend SQL views, since they read _latest) + the daily active-listings/listing-lifecycle inventory+DOM trend, once crons accumulate depth. Then the single charting wire (time-series detail_table -> zhvi-area/trendChartSvg) lights up trend lines in scheduled emails. NOTE: charting wire must prefer the varying-month trend table over market_heat_by_zip's constant month column.
 
-### mcp (1)
+### mcp (2)
 
 - `mcp_widget_host_bug_blocked` — Re-enable swfl_fetch MCP App widget when claude-ai-mcp#61/#165 close
+- `mcp_post_transport_500` — MCP POST /api/mcp 500s on every initialize call — whole write flow blocked
 
 ### mcp-connector (1)
 

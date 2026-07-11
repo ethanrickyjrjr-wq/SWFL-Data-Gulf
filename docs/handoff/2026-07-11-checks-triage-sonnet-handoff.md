@@ -171,6 +171,36 @@ Keep a running tally at the bottom of this doc so the next session (and the oper
   deleted 10). Stopping here for this session — 84 of the 104 `*_live_verify` checks and all 228 non-`_live_verify`
   checks remain for a future pass.
 
+- 2026-07-11 (Sonnet 5): targeted pass on 5 specific checks handed off directly (not the general
+  sweep order above). 1 closed, 4 left open — 3 of those with a genuine NEW bug found and its own
+  check opened this session (no silent deferrals):
+  `email_accent_ink_palette_gate_live_verify` **CLOSED** — live on prod grid lab, set Primary=Accent=
+  `#1B2A4A` (1.0:1, worst case), watched the amber Tier-B strip name the exact failing pair, Saved
+  without being blocked, then screenshotted the New Listing layout's CTA button rendering crisp white
+  ink on the hostile navy — Tier-A guard held.
+  `mcp_project_tools_live_verify` **left open** — worse than unverified: POST `/api/mcp` 500s on a bare
+  `initialize` call, reproduced 3x via curl AND via the real `@modelcontextprotocol/sdk` TypeScript
+  client against prod (both with a real minted project key and with none) — the entire MCP write
+  surface is currently unreachable over HTTP. Opened `mcp_post_transport_500`.
+  `listing_project_address_live_verify` **left open** — confirmed the sibling-found scope-gating bug
+  by reading page.tsx, AND found a second, earlier break live: the homepage "New Listing" hero's
+  create-project call (`EmailLabGridClient.tsx` `createAndEnter`) never sends `kind`/`subject_address`
+  at all — built a real test project this way, confirmed via network trace + a revisit that the
+  address never reached the DB. Opened `new_listing_hero_never_saves_subject_address`.
+  `funnel_demo_email_live_verify` **left open** — its own build session (SESSION_LOG 07/02) says
+  explicitly "stays OPEN — operator closes on live cycle-1 evidence"; confirmed `outreach_recipients`
+  is still 0 rows live and no cycle-1 send has happened since. Nothing to add — correctly gated on the
+  operator (domain purchase, DNS, CSV).
+  `lab_first_funnel_landing_live_verify` **left open** — confirmed anonymously via curl that the
+  zip-report CTA and ZIP-seeded lab both work live (real figures render), but `SendToSelfModal` (the
+  spec's whole point — OTP capture) is never imported/rendered anywhere in the current
+  `EmailLabGridClient.tsx` — orphaned when block-canvas was retired 07/07 and nothing migrated it.
+  Opened `sendtoself_modal_orphaned_after_grid_retire`.
+  Cleanup note: 4 duplicate "Triage Verify 5100 SW 5th Pl" test projects were created live under the
+  operator's own account while reproducing the address bug (deletion was correctly auto-blocked as
+  irreversible) — operator may want to delete them from `/project`.
+  Board not synced this pass (only 3 new opens + 1 close; sync will pick them up on its 2h cron).
+
 End state to aim for: every check that is *provably* done or *genuinely* dead is off the board, every remaining open check is real work with a clear reason it's still open, and a SESSION_LOG entry summarizing the sweep is written before any push of completed work.
 
 ---
