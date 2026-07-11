@@ -5,6 +5,7 @@ import dlt
 from ingest.lib.arcgis_paginator import (
     arcgis_count,
     paginate_arcgis,
+    paginate_arcgis_keyset,
     paginate_arcgis_tabular,
 )
 from ingest.lib.coercion import coerce_date as _coerce_esri_date, coerce_float as _coerce_float
@@ -154,7 +155,9 @@ def ingest_leepa_parcels_value(tier1_pipeline) -> None:
     today = date.today().isoformat()
 
     # Spine: L12 with geometry -> attributes (properties) + polygon in one pass.
-    features = list(paginate_arcgis(LEEPA_JUST_VALUE_URL))
+    # KEYSET on OBJECTID, not resultOffset: the offset walk silently truncated this
+    # layer at 40,000 of ~548k (the server stops reporting exceededTransferLimit).
+    features = list(paginate_arcgis_keyset(LEEPA_JUST_VALUE_URL))
     if not features:
         print("leepa just_value: 0 features — aborting Tier 2 promotion")
         return

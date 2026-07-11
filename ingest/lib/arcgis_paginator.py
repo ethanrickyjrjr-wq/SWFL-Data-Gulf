@@ -85,6 +85,70 @@ def paginate_arcgis_tabular(base_url, where="1=1", out_fields="*", page_size=200
         offset += len(features)
 
 
+def paginate_arcgis_keyset(
+    base_url,
+    where="1=1",
+    out_fields="*",
+    page_size=1000,
+    oid_field="OBJECTID",
+    geometry=True,
+    pause=0.15,
+):
+    """Sync generator over a LARGE ArcGIS layer, keyed on OBJECTID. Yields GeoJSON Features.
+
+    Why not `paginate_arcgis` (resultOffset)? On big layers the offset walk silently
+    TRUNCATES: LeePA layer 12 (~548k) stopped at 40,000 because the server quit
+    reporting `exceededTransferLimit`. Keysetting on OBJECTID (where OID > last,
+    ordered ascending) has no offset ceiling and fetched the full 548,325.
+
+    Also note the server may cap a page BELOW the requested page_size (LeePA's
+    maxRecordCount is 1000), so a short page is NOT the last page — we stop only when
+    OBJECTID stops advancing. `pause` throttles us so we stay welcome at the source.
+    """
+    last_oid = -1
+    while True:
+        params = {
+            "where": f"({where}) AND {oid_field}>{last_oid}",
+            "outFields": out_fields if out_fields == "*" else f"{out_fields},{oid_field}",
+            "orderByFields": f"{oid_field} ASC",
+            "returnGeometry": "true" if geometry else "false",
+            "outSR": "4326",
+            "f": "geojson" if geometry else "json",
+            "resultRecordCount": page_size,
+        }
+        data = None
+        for attempt in range(3):
+            try:
+                resp = requests.get(base_url, params=params, timeout=120)
+                if resp.status_code >= 500 and attempt < 2:
+                    time.sleep(2**attempt)
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+                break
+            except Exception:
+                if attempt == 2:
+                    raise
+                time.sleep(2**attempt)
+
+        features = (data or {}).get("features", [])
+        if not features:
+            break
+        max_oid = last_oid
+        for ft in features:
+            props = ft.get("properties") if geometry else ft.get("attributes")
+            oid = (props or {}).get(oid_field)
+            if isinstance(oid, int) and oid > max_oid:
+                max_oid = oid
+            yield ft
+        # Stop only on no forward progress — never on a short page.
+        if max_oid == last_oid:
+            break
+        last_oid = max_oid
+        if pause:
+            time.sleep(pause)
+
+
 def arcgis_count(base_url, where="1=1"):
     """Return the canonical row count for an ArcGIS layer via returnCountOnly=true.
     Used as a fail-fast gate: compare to actual paginated rows to detect dropped pages."""
