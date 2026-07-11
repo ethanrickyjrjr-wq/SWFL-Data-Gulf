@@ -177,9 +177,12 @@ export const ZIP_POPULATION_2020: ReadonlyMap<string, number> = new Map([
   // Common non-classified SWFL ZIPs appearing in the claims archive.
   ["33908", 27000], // South Fort Myers
   ["34103", 19000], // Naples
-  ["33950", 18000], // Punta Gorda
-  ["33952", 23000], // Port Charlotte
   ["34135", 18000], // Bonita Springs east
+  // NOTE: 33950 (Punta Gorda) / 33952 (Port Charlotte) intentionally removed
+  // 07/11/2026 — Charlotte County claims are already gated out upstream by
+  // SWFL_FIPS.includes(county_code) (SWFL_COUNTIES above has no Charlotte fips),
+  // so these two entries were dead/unreachable denominators (check
+  // flood_county_aal_30075_untraceable, thread 2 residual-hygiene item).
 ]);
 
 const FIXTURE_PATH = path.join(
