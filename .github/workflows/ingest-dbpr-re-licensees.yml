@@ -1,0 +1,44 @@
+name: DBPR RE Licensees (New-Agent Radar) — Weekly
+
+on:
+  schedule:
+    # Monday 12:00 UTC — weekly, staggered after the existing Monday DBPR cluster
+    # (rebuild 06:00, dbpr-press-releases 09:00, dbpr-public-notices 10:00, lee-permits 11:00).
+    # See docs/standards/pipeline-freshness.md §3.
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip DB writes"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run dbpr_re_licensees pipeline
+        env:
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          python -m ingest.pipelines.dbpr_re_licensees.pipeline $DRY_RUN_FLAG
