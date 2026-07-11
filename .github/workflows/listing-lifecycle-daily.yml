@@ -68,6 +68,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r ingest/requirements.txt
 
+      - name: Install Playwright browser
+        # Missing on 07/07 (28884444909/28874493335/28863961787): crawl4ai's browser leg needs the
+        # Chromium binary separately from the pip package. Its absence didn't crash the run — it
+        # silently degraded to a near-empty sweep (28 SteadyAPI calls vs. a normal ~4-7k), producing
+        # the 3-new/3-cuts/11-departure "partial scan" day surfaced on /desk. Fail loud instead.
+        run: playwright install chromium --with-deps
+
       - name: crawl4ai preflight (advisory)
         continue-on-error: true
         run: crawl4ai-doctor

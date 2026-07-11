@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   detectPartialScans,
+  flagCarryoverDays,
   isPlausibleCut,
   latestDelta,
   mdY,
@@ -42,6 +43,20 @@ describe("detectPartialScans", () => {
       false,
       false,
     ]);
+  });
+});
+
+describe("flagCarryoverDays", () => {
+  test("flags only the day right after a partial scan (real 07/07→07/08 window)", () => {
+    const totals = [1139, 31, 2073, 1279, 945];
+    const partials = detectPartialScans(totals);
+    expect(flagCarryoverDays(partials)).toEqual([false, false, true, false, false]);
+  });
+  test("first day can never carry over (no prior day); the day after a partial day does", () => {
+    expect(flagCarryoverDays([true, false])).toEqual([false, true]);
+  });
+  test("no partial days → nothing flagged", () => {
+    expect(flagCarryoverDays([false, false, false])).toEqual([false, false, false]);
   });
 });
 

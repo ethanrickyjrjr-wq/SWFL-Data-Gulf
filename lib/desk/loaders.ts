@@ -17,6 +17,7 @@ import { loadMetros } from "@/lib/charts/gallery-loaders";
 import { resolveSoldPrice } from "@/lib/listings/sold-price";
 import {
   detectPartialScans,
+  flagCarryoverDays,
   fmtCount,
   fmtPct,
   fmtUsd,
@@ -207,6 +208,7 @@ async function loadPulse(supabase: Supabase): Promise<PulseData | null> {
     if (error || !data || data.length === 0) return null;
     const rows = data as PulseRow[];
     const partials = detectPartialScans(rows.map((r) => r.total_events));
+    const carryovers = flagCarryoverDays(partials);
     const days: PulseDay[] = rows.map((r, i) => ({
       day: r.day,
       label: mD(r.day),
@@ -219,6 +221,7 @@ async function loadPulse(supabase: Supabase): Promise<PulseData | null> {
       withdrawn: r.withdrawn,
       total: r.total_events,
       partial: partials[i],
+      carryoverAfterPartial: carryovers[i],
     }));
     const asOf = mdY(
       rows

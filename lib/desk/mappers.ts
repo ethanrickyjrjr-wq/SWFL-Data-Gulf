@@ -66,6 +66,17 @@ export function detectPartialScans(totals: number[]): boolean[] {
   });
 }
 
+/**
+ * A day right after a partial-scan day likely absorbed some of the prior day's undetected
+ * activity — the diff engine only stamps the day it DETECTED a change, never a vendor-asserted
+ * event date (07/11/2026: confirmed SteadyAPI's `listed_date`/`days_on_market` are unpopulated
+ * for every row we hold, so there is no honest way to re-split the blend after the fact). This
+ * flags the day for a caveat label; it never re-buckets or estimates a split number.
+ */
+export function flagCarryoverDays(partials: boolean[]): boolean[] {
+  return partials.map((_, i) => i > 0 && partials[i - 1]);
+}
+
 export interface SeriesPoint {
   /** ISO date. */
   period: string;

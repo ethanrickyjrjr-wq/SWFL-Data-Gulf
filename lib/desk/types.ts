@@ -74,6 +74,9 @@ export interface PulseDay {
   total: number;
   /** Incomplete sweep (low coverage vs. window median) — labeled, never hidden. */
   partial: boolean;
+  /** Follows a partial-scan day — likely carries some of that day's undetected activity
+   *  (the diff engine can't re-split a blend it never dated independently). */
+  carryoverAfterPartial: boolean;
 }
 
 export interface PulseData {

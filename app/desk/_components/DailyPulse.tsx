@@ -61,6 +61,10 @@ export function DailyPulse({ pulse }: { pulse: PulseData }) {
                 <span className="mt-0.5 inline-block rounded border border-amber-400/40 px-1 font-mono text-[9px] uppercase tracking-wider text-amber-400/90">
                   partial scan — incomplete sweep, not a lull
                 </span>
+              ) : d.carryoverAfterPartial ? (
+                <span className="mt-0.5 inline-block rounded border border-gray-500/40 px-1 font-mono text-[9px] uppercase tracking-wider text-gray-400">
+                  may include activity missed by the prior partial scan
+                </span>
               ) : null}
             </div>
             <span className="hidden font-mono text-[11px] text-gray-500 tabular-nums sm:block">

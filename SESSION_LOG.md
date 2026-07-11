@@ -1,3 +1,43 @@
+## 2026-07-11 (Sonnet 5 · main) — 07/07 partial-scan root-caused + fixed; backfill confirmed impossible (live vendor check); carryover-day honesty label shipped; Hendry contamination found + follow-up written
+
+Operator asked to fix why 07/07's `/desk` pulse was a partial scan, backfill it from the 8th, and
+figure out why Hendry still shows on `/desk`. Three real outcomes, one dead end (reported, not faked):
+
+1. **Root cause of 07/07, FIXED.** `gh run view --log` on the three 07/07 `listing-lifecycle-daily`
+   runs (28863961787/28874493335/28884444909) showed 2 outright crashes + a "success" that made only
+   28 SteadyAPI calls (normal ~4-7k) — `BrowserType.launch: Executable doesn't exist`. The workflow
+   installed the `playwright` pip package but never ran `playwright install chromium`, so crawl4ai's
+   browser leg silently degraded instead of failing loud. Added the missing "Install Playwright
+   browser" step to `.github/workflows/listing-lifecycle-daily.yml` (mirrors the working pattern
+   already in `ingest-brevitas-listings.yml`).
+2. **Backfill (re-bucket 07/08's events back onto 07/07 via `listed_date`) — CONFIRMED IMPOSSIBLE,
+   not just skipped.** Queried `data_lake.listing_state` live: `listed_date` is NULL for all 34,405
+   `api_feed` rows (Lee+Collier+Hendry, 0% populated) — `extract_api.py` hardcodes it `None`. Fetched
+   SteadyAPI's live doc (`docs.steadyapi.com/collection.json`, RULE 0.4) to check whether the vendor
+   even sends a date field we're discarding: **it doesn't** — `/v1/real-estate/search`'s full response
+   shape (`property_id, price, status, permalink, photo_url, source_type, description, location,
+   flags, open_houses`) carries no date of any kind, only an `is_new_listing` boolean. Same is true for
+   price cuts/departures (diff-detected, never vendor-dated). There is no honest way to re-split 07/08
+   from 07/07 for ANY transition class — did not build a fake backfill.
+3. **Honesty fix shipped instead: carryover-day label.** New pure `flagCarryoverDays` in
+   `lib/desk/mappers.ts` (+ 3 tests) flags the day immediately after a partial scan; wired through
+   `PulseDay.carryoverAfterPartial` in `lib/desk/loaders.ts`/`types.ts`; `DailyPulse.tsx` now shows
+   "may include activity missed by the prior partial scan" on 07/08 instead of implying it was a
+   uniquely active day. No numbers re-bucketed or invented — labeling only. 22/22 desk tests green,
+   full `bunx next build` clean.
+4. **Hendry — NOT fixed this session** (operator: "it's just the SteadyAPI [view], leave it as a
+   follow up"). Traced it past the visible ticker tile: `data_lake.listing_active_stats`
+   (`docs/sql/20260630_listing_active_stats_api.sql`) has NO county filter in its `GROUPING SETS`, so
+   the `()` region total ("SWFL median ask" on desk's KPI row) is already a Lee+Collier+**Hendry**
+   blend, not just the standalone tile — Hendry is a deliberate 07/02 ingest-boundary decision
+   (`hendry_seed_orphans`) that zip-scope-core's ZIP-grain `isCoreScope` fix (07/11, earlier today)
+   never reached because this view's county/region rollups are computed in SQL, pre-TypeScript. 27
+   files read this view (brain pack `active-listings-swfl.mts`, homepage map, `market-context.ts`
+   client email copy) — likely the same blend elsewhere, not desk-only. Full writeup + recommended fix
+   shape: `docs/handoff/2026-07-11-desk-hendry-contamination-followup.md`. Check opened:
+   `desk_hendry_scope_leak` (due 07/25). Next: fresh session picks up the handoff doc, gets an explicit
+   operator scope decision (fix the shared view vs. desk-only) before touching `listing_active_stats`.
+
 ## 2026-07-11 (Opus 4.8 · main) — daily_truth median_sale_price: real fix is WRONG-LANE, not Gemini billing; built Redfin city-grain SOLD ingest (proven live); HELD for Ricky
 
 Operator: "why is this STILL set up incorrectly? median_sale_price — we have upgraded crawl4ai + new_steady
