@@ -7,7 +7,13 @@
 - **Outlook reality:** SVG icons render as text in Outlook — use the established fallback, don't ship raw SVG.
 - **Charts in deliverables** go through `buildChartForQuestion` (`lib/email/build-doc.ts`). Every plotted
   number is REAL (held brain / live-web-cited / upload-verified / user-stated) — the model selects points,
-  never writes a number. If a shape isn't built, offer bar/table — never "can't chart it".
+  never writes a number. If a shape isn't built, offer bar/table — never "can't chart it". **Every
+  chart-bearing deliverable: the chart's magnitude must cohere with its headline** (same unit → headline
+  within ~3× of the chart's plotted range), enforced by `assertHeroChartCoherence`
+  (`lib/deliverable/chart-coherence.ts`) at author-time (a red CI test over every `SEED_DOCS` template,
+  `preview-fill.test.ts`) and at runtime (soft: drop the chart, never block the send). An element type
+  ships with its coherence rule — the pattern extends to pictures, commentary, and examples
+  (`promised_deliverable_element_coherence_audit`).
 - **CAN-SPAM = 4 real requirements:** a working opt-out, accurate headers, no misleading subject, AND a
   valid physical postal address (business address, PO box, or mailbox service) in every commercial email
   (corrected 07/02/2026 per Shopify's FTC-sourced guide). The footer's `address` field is its home —
