@@ -85,6 +85,7 @@ Avoid stacking multiple workflows on the same day-of-month. Current schedule (re
 | Day 21 13:00                  | `zori-tier2-monthly.yml`      | monthly (T2 merge)    | Reads T1 Parquet from day 20 (1-day buffer)                                                              |
 | Day 25 13:00                  | `bls-laus-monthly.yml`        | monthly               | **Fixed 2026-05-27.** BLS LAUS state series releases ~3rd-4th week of M+1 (e.g. May 2026 → June 23 2026) |
 | Mondays 11:00                 | `lee-permits-weekly.yml`      | weekly                | Rolling Mon→Mon Accela scrape window                                                                     |
+| Mondays 12:00                 | `ingest-dbpr-re-licensees.yml`| weekly                | RE_rgn7.csv weekly refresh; staggered after the 06:00/09:00/10:00/11:00 Monday cluster                  |
 | Daily 11:00                   | `news-daily.yml`              | daily                 | News sources publish daily                                                                               |
 | Daily 06:00                   | `daily-rebuild.yml`           | daily (tooling)       | Refinery rebuild; off-cluster slot                                                                       |
 | Daily 14:00                   | `freshness-probe-daily.yml`   | daily (observability) | After 13:00 UTC ingest cluster                                                                           |

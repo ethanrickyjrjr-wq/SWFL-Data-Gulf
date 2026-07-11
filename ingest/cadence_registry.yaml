@@ -1108,6 +1108,31 @@ pipelines:
         source_url: "https://www2.myfloridalicense.com/public-notices/"
         source_label: "FL DBPR Public Notices Index"
 
+  - name: dbpr_re_licensees
+    lane: tier-2
+    cadence_days: 7
+    tolerance_multiplier: 3.0
+    freshness_table: public.dbpr_re_licensees
+    freshness_column: last_seen_at # non-dlt table; last_seen_at bumped every run (merge, not replace)
+    expected_rows_min: 15000 # ~50% of the 30,100 kept rows observed live 07/10/2026 (Lee 18,015 / Collier 12,085)
+    # Non-dlt pipeline — freshness checked via MAX(last_seen_at) on the table directly.
+    # Source: FL DBPR RE_rgn7.csv weekly extract (www2.myfloridalicense.com). Despite the
+    # "rgn7" name the live file is effectively statewide; we keep Lee + Collier only.
+    # SWFL scope: Lee + Collier only (individual agents, license_type "2501 ...").
+    # Cron: Monday 12:00 UTC via ingest-dbpr-re-licensees.yml.
+    # Consuming surface: outreach (public.new_re_agents view) — NOT a brain, no answer-engine gate.
+    # First run: <fill in after Task 7's live run>.
+    note: "Feeds the new-agent outreach radar (docs/superpowers/specs/2026-07-11-new-agent-radar-design.md). email column always NULL from this pipeline — populated later by a separate Chapter 119 records-request lane."
+    source_scope:
+      confirmed_total:
+        summary: "license_number, name (raw + split), address, county, license_type, rank, status, original/effective/expiration dates, employer name+license, alternate_license_number — Lee+Collier individual RE agents only"
+        source: "our ingest"
+      source_ceiling:
+        summary: "No email or phone anywhere in RE_rgn7.csv (verified: 23 columns, mailing address only). The DBPR online license-detail lookup also does not render email (verified live 07/10/2026 browser check) — email is public record but only obtainable via a Chapter 119 records request, tracked outside this pipeline."
+        as_of: "07/10/2026"
+        source_url: "https://www2.myfloridalicense.com/sto/file_download/extracts/RE_rgn7.csv"
+        source_label: "FL DBPR Real Estate Region 7 licensee bulk extract"
+
   - name: noaa_ghcn_rainfall
     lane: tier-2
     cadence_days: 30
