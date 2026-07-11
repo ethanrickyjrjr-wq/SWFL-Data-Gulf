@@ -3,6 +3,7 @@
 > **Recommended model:** ⚡ Sonnet
 
 
+
 **Date:** 2026-07-09
 **Check:** `template_preview_gallery_live_verify`
 **Status:** HANDOFF — design settled with operator 07/09/2026 (two review turns), not yet implemented.
@@ -138,3 +139,37 @@ pattern:
   picker; this spec is that item plus the site-placement half).
 - Slot rule (canvas stays skeleton): `lib/email/CLAUDE.md` + THE SLOT RULE header in
   `lib/email/doc/default-docs.ts`.
+
+## Post-build addendum (folded in 07/11/2026 — check `gallery_spec_research_foldin`)
+
+Folded in from the 07/09 build's crawl4ai research pass (RULE 0.4) and the built-deviations note,
+both previously recorded only in `SESSION_LOG.md` (the "feat(showcase): template preview gallery —
+filled previews for all 27 layouts" entry, 07/09/2026) and a fence-session transcript, per the
+07/09 blocked attempt (fence session `6a260319`'s live claim was in flight at the time).
+
+**RULE 0.4 research findings that shaped this build:**
+- **Stripo.email** validates committed fixed-width captures at scale (they run this pattern across
+  ~1,650 templates) plus a dual-CTA card treatment (Edit deep-link / Preview overlay) — the basis
+  for the grid picker's per-tile controls.
+- **RGE (Really Good Emails)** groups its gallery by job-to-be-done with count+pitch section
+  headers ("12 Just-Sold templates — ...") rather than a flat grid — the basis for `SeedGallery`'s
+  job-group sections.
+- **NN/g (Nielsen Norman Group)** card-pattern guidance: card internals should be visually
+  identical regardless of content type, and the whole card should be a single click target — the
+  basis for making the entire `SeedGallery` tile (not just a button) the `?seed=` link target.
+
+**Built-deviations from this spec's original assumptions (found during the 07/09 build):**
+- Nav link to /showcase was assumed missing (see Evidence base above); it in fact **already
+  existed** at `components/nav/SiteShell.tsx` → `nav-config.ts:45`. The spec's "no nav link" finding
+  was stale by the time of the build; no new nav wiring was needed.
+- `ShowcaseCard`/`ShowcaseOverlay` could **not** be reused unchanged for the seed picker — their
+  CTA is recipe-shaped (open a build recipe), which isn't the same interaction as picking a seed
+  template. Built a sibling component, `SeedGallery`, instead of extending `ShowcaseCard`.
+- Preview capture ran **after** the SEED_DOCS content/slot enrichment pass (`email_cadence_enrichment`),
+  per this spec's own "Order of work" sequencing note (enrichment → then capture) — captures reflect
+  the enriched templates, not the pre-enrichment placeholders.
+- **B4 (the operator-gated landing strip) was not built** — matches §4 item 4 above (explicit
+  operator yes required, never obtained); A + B1-B3 shipped without it.
+
+Full source material: `SESSION_LOG.md` 07/09/2026 entries ("feat(showcase): template preview
+gallery — filled previews for all 27 layouts" and the following "fence-polish follow-ups" entry).
