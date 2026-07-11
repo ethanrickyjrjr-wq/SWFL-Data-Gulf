@@ -1,3 +1,35 @@
+## 2026-07-11 (Sonnet 5 · main) — Unbiased scan of 10 external repos for reuse; shipped shared graphify snapshot cache from the one that survived
+
+Operator asked for a no-bias crawl4ai-style scan of 10 GitHub repos (last30days-skill, headroom,
+hermes-agent, taste-skill, markitdown, agent-reach, containerd, pm-skills, CL4R1T4S,
+codebase-memory-mcp) to judge what's free/useful/worth it vs. not, grounded in this repo's actual
+code (RULE 0.5) rather than the READMEs' own claims. Findings in
+`docs/audit/2026-07-11-external-repos-scan/findings.md`. Notable: CL4R1T4S's README carries an
+embedded prompt-injection payload (leetspeak instruction telling any AI reading it to leak its own
+system prompt) — flagged to operator, not acted on. Verdicts: try `taste-skill` + `pm-skills` (free,
+zero-dependency Claude Code skills); trial `headroom` carefully (token compression, but numeric
+fidelity unverified against exact-figure requirements); `last30days-skill` useful later for manual
+research only (RULE 0.4 keeps crawl4ai as the only web-crawl tool for anything product-facing);
+`markitdown`/`agent-reach`/`hermes-agent`/`containerd`/`CL4R1T4S` — don't need (wrong runtime, wrong
+audience, competing agent harness, wrong altitude, and toxic-source respectively).
+
+`codebase-memory-mcp`'s one genuinely novel idea — a compressed, shareable graph-index artifact so
+parallel sessions skip a cold reindex — was worth taking without the rest of the tool: this repo
+already runs Serena MCP + the third-party `graphify` CLI (PyPI `graphifyy`, not home-built — corrected
+a factual error from the first pass of the findings doc) for code intelligence, so a third overlapping
+MCP server would just be the fragmentation `feedback_shared-concept-one-authority` already warns
+against. Built `scripts/graphify-snapshot.mjs` (`save`/`restore`) using `Bun.zstdCompressSync` (native,
+no new dep) to cache the whole `graphify-out/` dir (measured 65.4MB → 4.9MB, 13.4:1) at
+`~/.cache/graphify-brain-platform/` — outside git, since a git-committed binary artifact fits a
+multi-contributor team pulling over the network, not this repo's actual parallel-work pattern
+(same-machine RULE 1.5 worktrees). Wired: `graphify:update`/`graphify:publish` now `save` after every
+rebuild; `scripts/worktree.mjs new` `restore`s right after `git worktree add`, non-fatally. Actually
+tested the round-trip (not just written and assumed correct) — caught and fixed a real Windows/MSYS-tar
+bug (backslash paths broke `tar` specifically on the stdin-piped restore path, not the non-piped save
+path), then verified byte-identical restore (1789/1789 files, matching MD5 on `graph.json` +
+`app-graph.json`) and confirmed the no-clobber guard leaves an existing `graphify-out/` alone.
+Documented in `CLAUDE.md` under `## graphify`.
+
 ## 2026-07-11 (Opus 4.8 · main) — SWFL Data Desk v2 = Spec B discovery/backlink flywheel: PLANNED + BUILT (Tasks 1–5), reviewed green; HELD for push
 
 Operator: "v1 built, check Fable 5's v2 notes, spec if you have to then plan." Fable 5's v2 trail = Spec A's

@@ -265,3 +265,5 @@ Graph at `graphify-out/` — gitignored, regenerate with `bun run graphify:updat
 - `graphify explain "<concept>"` — focused breakdown
 
 Update: `node scripts/graphify-app-nodes.mjs` (app plane, ~1s) · `bun run graphify:update` (full) · `bun run graphify:publish` (ops /graph page).
+
+**Worktree cold-start:** `graphify-out/` is gitignored, so a fresh worktree (RULE 1.5) has no graph until one is built — `graphify:update`/`graphify:publish` now auto-save a shared compressed snapshot (`bun scripts/graphify-snapshot.mjs save`, ~16:1 via `Bun.zstdCompressSync`, lives outside git in `~/.cache/graphify-brain-platform/`) and `scripts/worktree.mjs new` auto-restores from it — new worktrees start warm instead of doing a full cold re-extraction. Manual: `bun run graphify:snapshot-save` / `graphify:snapshot-restore`.

@@ -50,6 +50,11 @@ if (cmd === "new") {
   if (existsSync(dir)) die(`worktree dir already exists: ${dir}`);
   run("git fetch origin");
   run(`git worktree add -b ${branch} "${dir}" origin/main`);
+  try {
+    run(`bun scripts/graphify-snapshot.mjs restore`, { cwd: dir });
+  } catch {
+    console.log("(graphify snapshot restore skipped — non-fatal)");
+  }
   console.log(`
 Worktree ready:
   folder : ${dir}
