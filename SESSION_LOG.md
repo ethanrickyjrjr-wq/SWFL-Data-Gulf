@@ -110,6 +110,26 @@ green; ingest 7 + refinery 33 + vocab-coverage OK. NOT pushed (ahead 6 incl. for
 operator OK). REMAINING (operator-gated, spend + Tier-2 write): the 548k L12 prod ingest → view apply →
 brain rebuild → close `homes_only_sold_median_live_verify`.
 
+## 2026-07-11 (Opus 4.8 · main) — Durable artifacts: source-liveness probe + web-crawl rules + pipeline-check handoff (committed, push held)
+
+Operator (5th repeat of the same ask, justified fury): write it down so we stop rediscovering the FDOR
+break every week. Produced three durable artifacts + ran the correct ArcGIS check live:
+(1) `ingest/scripts/probe_source_liveness.py` — the UPSTREAM check the freshness probe structurally CAN'T
+do (it reads MAX(_dlt_loads.inserted_at) vs a 547-day window for collier_parcels = blind until ~Dec 2027).
+Hits each ArcGIS source's REAL query, asserts 200 + body-has-no-error + count≥floor (ArcGIS returns HTTP
+200 with a 400 inside — the exact false-green shape). RAN IT: centroid FIX LIVE 364,827, FDOT LIVE
+103,662, LeePA LIVE 548,330 (verified direct), FDOR/collier BROKEN, FEMA needs its real filter (1=1 504s
+on the national service). (2) `docs/standards/web-crawl-rules.md` — the crawl4ai rules (probe-first,
+escalation tiers, cache-fallback, don't-grep-dismiss, crawl4ai≠REST). NB filename deliberately has NO
+"crawl4ai" token — `*crawl4ai*` is gitignored, so a crawl4ai-named doc would never reach git. (3)
+`docs/handoff/2026-07-11-source-liveness-and-collier-handoff.md` — false-green root cause, correct check,
+live ArcGIS status, exact Collier repoint (centroid twin + add SALE_PRC1), homes-only DOR_UC filter, and a
+by-source-CLASS check playbook (A ArcGIS / B files / C crawl / D paid-API / E dlt-tables). Opened 4 checks
+(source_liveness_weekly_cron, source_liveness_registry_block, fema_probe_real_filter,
+lee_no_second_parcel_source). KEY WARNING: LeePA already holds 548,330 Lee parcels LIVE — pulling 556,100
+Lee rows from the FDOR centroid is a duplicate; Lee=LeePA, kill any in-flight Lee-from-FDOR ingest.
+Committed my explicit paths only; push HELD for operator.
+
 ## 2026-07-11 (Opus 4.8 · main) — Collier FDOR figured out: locked polygon service → live centroid twin (fix found, NOT pushed)
 
 Diagnosed `collier_parcels_fdor_query_lockdown` and found the fix live (research only — no code pushed).
