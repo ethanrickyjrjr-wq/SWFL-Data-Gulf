@@ -1,3 +1,21 @@
+## 2026-07-11 (Opus 4.8 · main) — Socials Round 2 direction: charts ARE the moat, kill the dark-only monotony
+
+Reviewed Claude Design's Round 1 look-book (5 lab templates @ square, populated + empty). It respected every
+renderer constraint and its empty states are genuinely good (three-stat reflows 2-up; tip-stack's single tip
+grows to fill; stat-absent keeps the panel) — keep those. But it produced the SAME CARD FIVE TIMES (kicker +
+rule + one rounded panel), went 100% dark when the crawl4ai reference gallery said light/neutral/high-contrast
+(never touched the `surface` #f0ede6 token it was handed), and shipped ZERO charts — despite `chart` being a
+first-class element and the chart-attach work being in-flight. That's the miss that matters: "$494K, -7.3%" is
+a poster any realtor makes in Canva; $494K WITH the 12-month line is data intelligence they structurally cannot
+make. The trend line IS the product. Root cause is MY brief (it asked for a dead-space fix + constraints, and
+got exactly that) -> Round 2 is prescriptive: `docs/handoff/2026-07-11-socials-round2-direction.md` — 3 mandates
+(charts on the majority of templates; a light/sand variant; max TWO of five may share the one-panel skeleton)
++ 4 required fixes (ZIP 33931 presented AS A STAT — a ZIP is an identifier, fill the slot from our data instead;
+an INVENTED listing "210 Estero Blvd $625K" cited to "MLS" — double violation, listings cite SWFL Data Gulf;
+doubled brand in the headline-cta watermark; unsourced tip claims). Handed it REAL lake data so nothing gets
+invented: 13-month ZHVI metro series (Fort Myers 331,602->305,704, -7.8%, monotonic) + per-ZIP trios
+(33901 $261,247 / -8.8% + rent $1,558 / -3.2% <- the three-stat fix; 33931; 34102), all Zillow as of 05/31/2026.
+
 ## 2026-07-11 (Opus 4.8 · main) — Full checks-ledger triage: 333 → 247 open, 0 dropped, 5 new gaps
 
 Swept the ENTIRE open ledger with 11 agents (1 scout + 10 parallel, disjoint ~32-check slices), each

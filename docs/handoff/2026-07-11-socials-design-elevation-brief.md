@@ -3,6 +3,8 @@
 **Date:** 07/11/2026 · **From:** build session (Opus 4.8) · **Surface:** socials (lab design system)
 **Goal:** make our social cards look *art-directed*, not scaffold-plain — without breaking a renderer that can only draw certain things.
 
+> **⚠ ROUND 1 IS DONE. READ `2026-07-11-socials-round2-direction.md` FIRST.** It carries the Round 1 verdict, three mandates (charts on the cards, a light/sand variant, compositional variety), four required fixes, and the **real lake data to plot** so nothing gets invented. This brief remains the constraints reference.
+
 ---
 
 ## What you're designing (and what you're NOT)
