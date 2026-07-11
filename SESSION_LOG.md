@@ -1,3 +1,32 @@
+## 2026-07-11 (Sonnet 5 · main) — Desk build reviewed + verified in isolation; daily_truth NULL root-caused to Gemini billing (not a code bug); Desk nav links added
+
+Operator asked to approve+push the desk build (`eaf6d1cc`) and to explain the `daily_truth`
+median_sale_price NULL finding from the prior session. Did NOT trust the prior session's own
+"bunx next build green" claim at face value (a live parallel session was committing to this same
+checkout throughout, so the shared tree was a moving target) — built `eaf6d1cc` alone in an isolated
+`git worktree` (`../bp-desk-verify`, real `.env.local`): compiled clean, TypeScript clean, `/desk`
+prerenders static (5m revalidate), zero errors. Read the ZHVI-fallback path directly (`lib/desk/
+loaders.ts` `loadTruthSeries`/`buildHeroFromTruth`/`buildHeroFromZhvi`) — confirms it correctly filters
+non-numeric `daily_truth` rows before building city series, so the hero/chart honestly fall through to
+Zillow ZHVI with the right `sourceLabel`, no fabrication. Root-caused the NULL question via live
+`gh run view --log` on `live-search-daily.yml` (not memory, not guessing): `daily_truth` is the RIGHT
+table (FRED mortgage leg proves table+writer work) and SteadyAPI is uninvolved (grepped `lib/desk` —
+zero references). `median_sale_price`'s only live cascade leg is Gemini grounded search (Firecrawl/
+Spider/Claude legs are documented stubs); every run since the pipeline's first execution (06/21/2026)
+through today has hit Gemini HTTP 429 **"Your prepayment credits are depleted"** — a Google AI Studio
+billing gap, not a code bug, and it will NOT self-heal on its own. Updated `daily_truth_median_sale_
+unvalued` check with the root cause + fix (add credits at ai.studio/projects, re-run
+`live_search_daily_median_price`). Push of `eaf6d1cc` was operator-approved in-conversation but blocked
+by the Claude Code auto-mode classifier (flagged the hook-documented `OPERATOR_APPROVED_PUSH=1` escape
+hatch as a possible bypass since this session had made no commit of its own yet) — held for Ricky to
+re-run directly or re-confirm. Separately: operator asked where `/desk` is linked from the site — it
+wasn't (no nav/footer entry). Added `{ label: "Desk", href: "/desk" }` to `NAV_GROUPS` (next to Charts)
+and `{ label: "Data Desk", href: "/desk" }` to the footer's Explore column + matching `nav-config.test.ts`
+assertion; 30/30 nav tests green, full `bunx next build` clean. Noted: a live parallel session on this
+same checkout auto-committed these 3 files under its own commit (`2e94decf`, accurate message, Ricky's
+git identity) before I ran `git commit` myself — flagged to operator as observed, not fixed (nothing
+broken, diff is exactly my change). Next: operator decides on the `eaf6d1cc` + `2e94decf` push.
+
 ## 2026-07-11 (Opus 4.8 · main) — DBPR new-agent radar pipeline BUILT (6 of 7 tasks); live write + push HELD for Ricky
 
 Executed `docs/superpowers/plans/2026-07-11-dbpr-re-licensees-pipeline.md`, Tasks 1–6 committed locally
