@@ -1,3 +1,63 @@
+## 2026-07-11 (Opus 4.8 · main) — Lee homes-only SOLD median per ZIP: full build (code-complete, prod ingest operator-gated)
+
+Executed the inherited Lee homes-only sold-median plan TDD, tasks 1–5. Also killed a live-config ghost:
+"SteadyAPI is down" is a STALE narrative — the `PHOTOS_API` gh secret was rotated 07/10 and the daily
+listing cron ran green 4× today, landing 29,907 fresh `listing_state` rows (07/11). No key leak (the
+local `.env.local` `new_steady` value is in ZERO tracked files); the only real gap is that local runs
+read `PHOTOS_API`, not `new_steady`. Corrected the audit/memory framing. On the build — confirmed the
+plan's premise live (RULE 0.5): `leepa_parcels.last_sale_amount` is 98% populated; homes-only eligible
+= 55,457 (SF+condo, 2024+, >$20k), county median **$371,298** (p25 $295k/p75 $543k). Shipped: (1) 46122de4
+`leepa_parcel_zip` crosswalk pipeline — L12 ring-centroids point-in-polygoned vs vendored TIGER ZCTAs via
+DuckDB spatial, OBJECTID keyset paging (L12 ~548k > the 100k resultOffset ceiling — a real truncation bug
+the plan's resultOffset fetch would've hit), 7 spatial tests + live keyset probe; (2) 91fc4a6e
+`leepa_sold_median_by_zip` view SQL (homes-only, arm's-length >$20k, min-N=20 county fallback), median
+logic validated live; (3) ffa72d7a source connector + fixture (6 tests); (4) c5a5e033 pack wiring —
+`lee_sold_median_homes_only` metric + `lee_sold_median_by_zip` detail table, KILLED the stale
+"last_sale_amount is null" caveat, registered vocab (concept + slug_index), 19 pack tests; (5) cadence +
+annual cron (crosswalk is geometrically stable → annual, correcting the plan's "30d"). `bunx next build`
+green; ingest 7 + refinery 33 + vocab-coverage OK. NOT pushed (ahead 6 incl. foreign commits — awaiting
+operator OK). REMAINING (operator-gated, spend + Tier-2 write): the 548k L12 prod ingest → view apply →
+brain rebuild → close `homes_only_sold_median_live_verify`.
+
+## 2026-07-11 (Opus 4.8 · main) — Collier FDOR figured out: locked polygon service → live centroid twin (fix found, NOT pushed)
+
+Diagnosed `collier_parcels_fdor_query_lockdown` and found the fix live (research only — no code pushed).
+ROOT CAUSE: FloridaGIO republished the statewide cadastral URL we ingest
+(`Florida_Statewide_Cadastral/FeatureServer/0`) as the full 2025 NAL — 364k Collier → 10.8M statewide
+rows, 14 fields → 100+ fields — and in doing so locked the query policy. Verified live: `where=1=1`,
+`OBJECTID=`, `IS NOT NULL` return 200; ANY attribute-equality (`CO_NO=21`) → HTTP-200-body-400 "Unable
+to perform query"; spatial bbox → HTTP 000 (hangs 40s). So `collier_parcels` silently no-ops (last real
+load 06/06) while the freshness probe reads FRESH — the "data≠green, right-data=green" false-green.
+Syntax levers (standardizedQueries=false, sqlFormat, quoting) are irrelevant — it's a service policy
+change, not our syntax (this exact query returned 364,827 on 06/06). Also corrected the stale constants.py
+comment: this 2025 layer uses the STANDARD FDOR alphabetical county code (Alachua=11 … Collier=21), and
+`CO_NO=21`=Collier is right — `OBJECTID=1` → CO_NO 11 = GAINESVILLE confirms the numbering.
+
+THE FIX (live-verified): FloridaGIO publishes a TWIN, `Florida_Statewide_Parcel_Centroid_Version/
+FeatureServer/0` ("FDOR Cadastral Centroids 2025") — point geometry, SAME 100+ NAL fields, NOT locked.
+`CO_NO=21` count = 364,827 (exact match to old expected) in 1s; the pipeline's exact keyset shape
+(`CO_NO=21 AND OBJECTID>last` ORDER BY OBJECTID) returns rows in ~3s. Crucially the republished NAL now
+carries `SALE_PRC1` (sale price — the old 14-field layer LACKED it) + SALE_YR1/MO1 + QUAL_CD1
+(qualified-sale code) + VI_CD1 + DOR_UC + `PHY_ZIPCD` (situs ZIP). So Collier gets homes-only SOLD median
+per ZIP from ONE source — BETTER than Lee (LeePA has no situs field → needs centroid→ZCTA spatial; Collier
+PHY_ZIPCD is native). Live proof: first 2,000 Collier rows → 148 real sales, 41 single-family (DOR_UC 001)
+sold 2023+ incl. $600k/2025/34117/QUAL-01, $615k/2024/34114. Change needed = repoint `COLLIER_CADASTRAL_URL`
++ add SALE_PRC1 to OUT_FIELDS/Tier-2 cols; keyset paging, CO_NO=21, guards all unchanged. Guard nuance:
+the centroid twin has a SOFTER guard — compound range + orderBy (SALE_YR1>=2024 AND SALE_PRC1>50000 ORDER
+BY SALE_PRC1 DESC) still 400s — but the pipeline needs NO server-side range filter; it pulls all 364,827
+and computes homes-only median downstream in SQL.
+
+HOMES-ONLY FILTER (verified vs FDOR/Polk-PA reference via crawl4ai + WebSearch, NOT memory): homes =
+DOR_UC prefix 01,02,04,05,06,08 (single-family, mobile, condo, coop, retirement, multi-family); vacant-res
+LAND (the $35k blend) = 00,09,99; commercial 10+. Condos (04) still parcel/folio grain only — see
+`collier_condo_unit_grain_gap`.
+
+CHECK STATUS: `active_listing_median_land_blend` is ALREADY fixed live in prod (verified this session via
+lake MCP: 33972 median $359,000/403, 33974 $325,000/655 — was $35k/$31k) — the homes-only interim guard
+shipped 07/11 (`c9748a6c`); ready to close. `collier_parcels_fdor_query_lockdown` fix identified above.
+`homes_only_sold_median_live_verify` now unblocked for Collier. NOTHING PUSHED — build (repoint + sold-
+median pack) awaits brainstorm + operator go.
+
 ## 2026-07-11 (Opus 4.8 · main) — Airtable checks-mirror: runtime deps DONE + live-verified end-to-end
 
 Completes the runtime deps the prior entry flagged as pending. Migration applied to prod (both sync
