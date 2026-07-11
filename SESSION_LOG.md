@@ -14,6 +14,24 @@ the concurrent chart-picker/spec-to-png session's 6 commits). Verified post-reba
 missing worktree secrets). `deliverable_coherence_gate_live_verify` stays OPEN — the 6-line runtime glue
 in buildPromptChart needs live post-deploy verify; brain md regenerates via live GHA cron (not committed
 from the keyless worktree).
+## 2026-07-11 (Fable 5 · main) — CORRECTION + spec v2: reconciled with sibling session's 05/06/07 (A on GHA; C gated); HELD for push
+
+Correcting my entry below (same session, written blind to a sibling session's same-day work). Facts:
+(1) Evidence files 00–04 were already committed by that session (36d83608 + neighbors); my 59c599eb
+added only the spec + — via directory staging, accidentally — their `07-plan-C-orchestrator-migration.md`
+(content theirs, committed intact). (2) The C0 "bleeding" items were already SHIPPED + PUSHED in
+`c9748a6c` (11:36): homes-only `listing_active_stats` migration live in prod (33972 $35,000→$359,000;
+33974 $31,360→$325,000), tripwire false-RED ended, MaterialRow stale test fixed. (3) Their
+`05-BUILD-SCOPE.md` (4 Opus scoping passes) supersedes my v1 on three load-bearing points: contaminated
+writers are non-dlt psycopg merges + a view → contracts gate on the candidate batch (Locus A) + at-rest
+probe (Locus B), not post-load dlt hooks; `checkout@v6` is now VALID → version checks resolve live tags,
+never a baked allowlist; A→C bridge = discipline, not Dagster shapes (05: "Dagster rejected"; 07: C
+conditional on a 60-day gate + port-don't-reinvent invariants). Spec rewritten as **v2 thin delta**
+binding 05/07 as normative: per-phase acceptance criteria, testing regime + deliberate-failure proofs,
+prescriptions enum, check linkage. `caveat_expiry_rebuild` = tracker for 05 Phase 3e. Unpushed stack:
+59c599eb (mine) + ab8341c4 (sibling, Airtable-mirror spec) — push held; foreign-commit bundling needs
+operator OK. Next: operator reviews spec v2 → writing-plans.
+
 ## 2026-07-11 (Fable 5 · main) — Pipeline-health DIAGNOSIS (4-agent sweep) + Data Contracts & Doctor spec (A→C); HELD for push
 
 Operator: daily pipeline pain — "tell me what's wrong." Four Sonnet sweeps (GHA runs/issues, checks

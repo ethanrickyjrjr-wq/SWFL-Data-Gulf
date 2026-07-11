@@ -1,119 +1,53 @@
-# Data Contracts + Doctor — Design (Path A, shaped for C)
+# Data Contracts + Doctor — Design (Path A now; Path C gated) — v2, reconciled
 
 **Date:** 2026-07-11 · **Check:** `data_contracts_doctor_live_verify`
-**Evidence base:** `docs/audit/2026-07-11-pipeline-problems/00-DIAGNOSIS.md` (+ evidence files 01–04, same folder). Every component below names the incident class it kills.
-**Industry pattern verified in-session (RULE 0.4):** Dagster asset checks / freshness policies / per-asset health (docs.dagster.io/guides/test/asset-checks, v1.13); Great Expectations declarative expectations + checkpoints (docs.greatexpectations.io, v1.18).
+**v2 note (same day):** v1 of this spec was written in parallel with — and before reading — the sibling session's scoping work. v2 defers to that work as normative and keeps only what it lacks. No architecture is duplicated here.
 
----
+## Normative sources (read in this order)
 
-## Problem
+1. `docs/audit/2026-07-11-pipeline-problems/00-DIAGNOSIS.md` — the why (5 root causes, evidence-cited).
+2. `docs/audit/2026-07-11-pipeline-problems/05-BUILD-SCOPE.md` — **the architecture and phases being built.** Spine (registry as single config truth) → Phase 1 content contracts (Locus A batch-gate + Locus B at-rest) → Phase 2 config-identity CI cross-check → Phase 3 watcher consolidation + doctor → Phase 4 GHA-native nightly chain. Operator decision recorded there: **A now, on GHA; Dagster rejected; Prefect-vs-Airtable open.**
+3. `docs/audit/2026-07-11-pipeline-problems/07-plan-C-orchestrator-migration.md` — Path C is **conditional and gated** (A stable ≥ 60 days + measured structural bottleneck + operator willing to run an always-on service), with invariants that C may never violate (port-don't-reinvent; registry stays config truth; doctor stays the health reporter; Locus B survives).
+4. `06-orchestrator-vendor-research.md` — vendor verdicts (live-doc verified 07/11/2026).
 
-Every health signal we have measures whether a *process* ran, not whether *data* exists and is right. Confirmed on 07/11/2026: a registry entry "confirmed via live dry-run" for a table that does not exist; a "30,100 rows observed" note over an empty table; green vendor runs coded to swallow a suspended subscription as "data gap"; a public ZIP median of $35,000 where the real single-family median is $354,999 because the live listings view never filters land or mislabeled rentals; ~70% of scheduled workflows invisible to both failure watchers; timeout-killed runs (`conclusion: cancelled`) invisible to all watchers; CI red through 35 consecutive pushes. Root causes 1–5 with citations: the diagnosis doc.
+## Corrections this v2 accepts from 05 (v1 was wrong on all three)
 
-## Goal
+- **Locus.** The contaminated writers are hand-rolled psycopg merges and `listing_active_stats` is a view with no pipeline — so contracts gate **on the candidate batch before merge** (quarantine/abort policies), not "post-load in dlt"; views get the at-rest tripwire only. v1's `enforce_contracts()`-after-`pipeline.run()` shape is superseded.
+- **Version checks resolve live.** `actions/checkout@v6` became valid between diagnosis and scope — a baked-in allowlist is the same rot class we're fixing. Per 05, resolve against maintained/live tags.
+- **A→C bridge is not Dagster-shaped.** v1's bridge table assumed Dagster; per 05/07 the only bridge A maintains is discipline: registry stays diffable YAML, `contracts.py` stays pure/DB-free/unit-tested, `doctor` reads run-status as one input. That keeps every C option (or no C at all) open.
 
-Checks travel with the data. Each table declares its contract; the contract is enforced *inside the pipeline run that writes the table*; the hand-synced wiring strings are machine-verified in CI; one `doctor` command joins declared truth against live reality and prescribes exact fixes. Every artifact is declarative and table-keyed so the later orchestrator migration (Path C) is mechanical translation, not redesign.
+## Already shipped before this spec (do not re-plan)
 
-**Non-goals (v1):** no Dagster adoption now; no new standalone watcher crons; no blanket gating of every table on day one; no ops-page UI (ops repo, parked); no refinery-side brain-content checks (parked, check opened); no caveat-expiry fix (parked, check opened). SteadyAPI billing is an operator action, not code.
+Commit `c9748a6c` (07/11/2026, sibling session): homes-only `listing_active_stats` migration applied to prod (ZIP 33972 median $35,000 → $359,000; 33974 $31,360 → $325,000), tripwire should-be-dark list corrected (6-day false RED ended), `MaterialRow` stale test fixed. Remaining act-today items live in 05 §Act-today: SteadyAPI **new-key** live test, CI fully green on main, plus the structural tripwire fix in Phase 3a.
 
-## Design principles
+## What this spec adds (the delta — nothing else is normative here)
 
-1. **Asset-keyed everything.** `quality_registry.yaml` is already keyed by physical table — it stays the one contract file. `cadence_registry.yaml` stays pipeline-keyed for scheduling truth. Doctor joins the two.
-2. **Extend, don't erect (C2 rule).** Every piece extends an existing seam: `quality_registry.yaml` + `check_data_quality.py` (SOLO-25), `ingest.lib.guards` (Gate 4), `check_freshness.py`, incident auto-capture, the Recurring Patterns catalog. Zero new frameworks.
-3. **In-process enforcement.** Error-severity failures on gated tables make the *writing run* exit 1 loud — caught by existing auto-capture. The daily at-rest sweep keeps its "observability, exit 0" contract unchanged as backstop.
-4. **Prescriptions, not stack traces.** Every failure class maps to exact fix text (the last30days doctor pattern), seeded from `docs/cron-rebuild-failures.md` → Recurring Patterns.
-5. **Warn-first rollout**, except the proven-broken listings family which gates day one.
+### 1. Acceptance criteria per 05-phase (close = live evidence, never dev attestation)
 
-## What we're building
+- **Spine:** every `pipelines:` entry carries `workflow:`; a deliberately wrong filename fails the Phase-2 static check. Zero freeform `# Cron:` comments remain load-bearing.
+- **Phase 1:** (a) the pre-fix contaminated listings batch (the 91 rental-priced "sale" rows + land blend), replayed as a fixture, is **quarantined** by `evaluate_batch()` with correct counts; (b) both known false-positive traps pass clean (523 legit sub-$20k land lots; 41,510 LeePA nominal-consideration transfers — no leepa price contract exists); (c) a synthetic >threshold contamination share **aborts** the run loud, and the incident logger captures it.
+- **Phase 2:** static mode red on each seeded drift fixture (bad workflow ref, `dlt_schema_name` absent from pipeline source, secret read but not in `env:`, missing `timeout-minutes`, `source_tag` mismatch); live mode, run against the 07/11 snapshot, flags exactly the two real-world cases (`redfin_city_swfl` never landed; `dbpr_re_licensees` 0 rows) — they are the fixtures until fixed.
+- **Phase 3:** manifest codegen — a new scheduled workflow added in a test branch fails the drift-test until regenerated; `classifyTermination` labels the leepa 4/4-cancelled history UNKNOWN-CANCEL and corridor-pulse's timeout kill TIMEOUT with `should_retry=false` (the money guard).
+- **Phase 4:** `assert_landed.py` report-only run names any stale nightly source; after cutover, master's freshness token dates today after the chain, and the email preflight refuses a stale token in a forced test.
+- **Doctor:** one run on live state produces one line per dataset + one per watcher, and every red line carries a prescription or an explicit "unknown class — evidence attached" (never an invented diagnosis).
 
-### C0 — Stop the bleeding (ships first, same build)
+### 2. Testing regime
 
-- **CI → green.** Fix the 7 failing tests on main (started as 1 `MaterialRow` test, grew under red). Accept: `ci.yml` green on main. *(Kills: RC5 ambient red.)*
-- **Listings contamination hotfix + its contract.** Patch the `listing_active_stats` path (migration: property-type filter + rental-price guard; raw tables untouched, consumers repointed same PR), re-verify ZIP 33972/33974 medians against the homes-only decomposition ($354,999 / $319,999 single-family medians per audit `03`). Ship the contract that would have caught it in the same PR and prove it: contract red against pre-fix data, green post-fix. *(Kills: RC2's live ~10x public error.)*
-- **Watcher blind spots.** `log-cron-incident.yml` + `heal-cron-failure.yml`: trigger on `conclusion ∈ {failure, cancelled, timed_out}` (today `== 'failure'` only — `log-cron-incident.yml:63`; 30 cancelled runs invisible, incl. corridor-pulse's 3-week death and leepa-annual 4/4-cancelled). Derive watch-lists from `.github/workflows/*.yml` cron presence instead of the two hardcoded lists (~53–55/77 scheduled workflows unwatched today). *(Kills: RC3 blind spots.)*
-- **Tripwire false RED.** Replace `checkPulseDark()`'s hardcoded pipeline list (`scripts/tripwire-scan.mjs:101`) with a config read (cadence registry pulse entries / explicit `tripwire: true` flag). *(Kills: the 6-day false RED, issue #106.)*
+- `contracts.py` is pure and DB-free: unit tests per contract type (`enum`, `range` WHERE-scoped, `sql_expectation`) plus the quarantine/abort policy math at the thresholds.
+- Deliberate-failure proofs stay in the repo: `leepa.last_sale_amount` (existing not_null proof), pre-fix listings batch (Phase-1 proof), seeded drift fixtures (Phase-2 proof), synthetic cancelled run (Phase-3 proof).
+- Read-only integration: `doctor --dry-run` < 2 min against live, correct on the two real broken tables.
+- Existing gates untouched: `bunx next build`, `pytest ingest/`, Gate 2/4/5 hooks, vocab coverage.
 
-### C1 — Contract engine (extend `quality_registry.yaml`)
+### 3. Prescriptions enum (doctor + incident handler share it)
 
-New test types alongside `not_null | unique | accepted_values`:
+`ACTION_VERSION · SECRET_NOT_WIRED · SCHEMA_NAME_DRIFT · TIMEOUT_KILL (should_retry=false) · GAP_SENTINEL (verify vendor account — dead key = green run) · NEVER_LANDED (registry claims, DB lacks) · ZERO_COVERAGE (DB has, registry lacks) · WAF_BLOCK · TRANSIENT (retry ≤ 2, then escalate) · UNKNOWN (print evidence, say so)`. Seeded from `docs/cron-rebuild-failures.md` Recurring Patterns; every enum member has a test asserting its fix-text names the file/workflow it applies to.
 
-- `range`: `{ col, test: range, min?, max?, severity }` — failing rows outside bounds.
-- `row_floor`: `{ test: row_floor, min, severity }` — table-level minimum row count for in-process assertion right after a write (cadence's `expected_rows_min` stays authoritative for the daily probe).
-- `sql_assert`: `{ name, test: sql_assert, sql, severity }` — named failing-row `SELECT count(*)` for semantic rules ("sales rows are never rental-priced non-land"). Read-only, single-statement, validated `SELECT` prefix, parameter-free, PR-reviewed like code.
-- `freshness_col` *(optional)*: `{ col, max_age_days, severity }` — age of `MAX(col)`; catches the `usgs_tier2` silent-stall class at table grain.
+### 4. Check linkage & tracking
 
-New per-table field: `gating: true|false` (default false). Gating applies **only** to the in-process runner; the at-rest sweep never gates.
+- `data_contracts_doctor_live_verify` closes only on: Phase 1–3 acceptance above green **live** + doctor's first real run archived in `verification/`.
+- Phase 4 (nightly chain) and its ask-first cron rewires get their own check at execution time (per 05 §sequencing flags).
+- Related checks already open: `empty_brain_content_detector` (not in 05's scope — stays open), `tier_divergence_dag_orphan` (Phase-2 live mode will surface it; closing requires the ship-or-delete decision), `caveat_expiry_rebuild` (tracked by 05 Phase 3e; check stays open as its tracker).
 
-Builders move to `ingest/quality/builders.py` (pure, psycopg3 Identifier/bound-param composition, unit-testable); `check_data_quality.py` re-imports for back-compat.
+## Out of scope
 
-### C2 — In-process runner (`ingest/lib/contracts.py`)
-
-`enforce_contracts(tables, *, source_tag) -> ContractReport`, called at the end of each wired pipeline's `run()` after load — the same seam as Gate-4 guards.
-
-- Any **error**-severity failure on a `gating: true` table → raise `ContractViolation` → run exits 1 loud → existing auto-capture opens the incident. **warn**/non-gating → stderr + report, never blocks.
-- Cost guard: per-table suite < 30s, measured in tests; `sql_assert`s on big tables must carry an indexed/windowed WHERE.
-- Phase-1 wiring (each cites its incident class): `rentals` + `market_aggregates` (vendor gap-sentinel), `listing_lifecycle` (property-type), `active_listings` scrape (land/rental mix), `live_search` (daily_truth NULL-19-days), `lee_permits` (silent no-op), `news_swfl` (date↔text, gains gating). Other pipelines opt in by registry entry only — no further code.
-
-### C3 — Wiring consistency suite (static, CI)
-
-`tests/wiring/wiring-consistency.test.mts` (bun:test — TS because it parses `.mts` packs). No DB access; < 10s; deterministic.
-
-1. Every cadence/quality table reference → pipeline dir exists, its workflow exists and has `timeout-minutes`.
-2. Every `data_lake.*` / `lake-tier1/` reference in `refinery/packs/**` + `refinery/sources/**` resolves to a registry entry → **unmonitored-upstream detector** (kills the `parcel_subdivision` / `communities-swfl` / legacy-`usgs_sites` class).
-3. Every `os.environ[...]` read in a pipeline appears in its workflow's `env:` block → kills secret-wired-not-passed (3 incidents).
-4. Workflow action versions ∈ allowlist → kills the `checkout@v6` class (3 incidents).
-5. `First run: <fill` registry placeholders fail after 14 days (6/7 stale today).
-6. Every pack in `refinery/packs/index.mts` is reachable in the rebuild DAG → kills the `tier-divergence-swfl` orphan class (built, never rendered, 404s live).
-
-### C4 — Doctor (`python -m ingest.doctor`)
-
-On-demand; no new cron in v1. Runs: (1) freshness probe (imported), (2) quality sweep (extended), (3) **live wiring joins** — every `dlt_schema_name` present in `_dlt_loads`, every `count_table` exists with count ≥ floor, DB schemas with no registry entry and registry entries with no DB presence → catches the `redfin_city_swfl` TABLE-MISSING and `dbpr_re_licensees` empty-table classes same-day, (4) shells `bun test tests/wiring/`, (5) **rollup**: one line per dataset — freshness | volume | contracts | wiring | VERDICT — plus one line per watcher (probe/tripwire/auto-capture last-ran; watch the watchers), (6) **prescriptions** from `ingest/doctor/prescriptions.yaml` seeded from Recurring Patterns (ACTION_VERSION → "bump to checkout@v4 in <file>"; SECRET_NOT_WIRED → "add <name> to env: of <workflow>"; TIMEOUT_KILL → "raise timeout-minutes in <file>; check spend-before-death"; GAP_SENTINEL → "verify vendor account — dead key produces green runs"; unknown class → print evidence, say so, never invent). Flags: `--json` (future ops panel), `--dry-run` (read-only, existing convention), `--strict` (exit 1 on any red; future cron use only).
-
-### C→C bridge (why this survives the migration)
-
-| This build | Dagster equivalent | Migration action |
-|---|---|---|
-| `quality_registry.yaml` entry | `@asset_check` | generate defs from YAML |
-| cadence `cadence_days`/tolerance/SLA | `FreshnessPolicy` | generate from YAML |
-| `enforce_contracts()` post-load | checks on materialization | drop the call; orchestrator owns it |
-| doctor rollup | asset health status | replaced by UI |
-| `prescriptions.yaml` | alert policies | port text |
-| wiring suite | obsolete (single config truth) | delete happily |
-
-Everything declarative, table-keyed, engine-agnostic: C = write the generator, not rewrite contracts.
-
-## Failure semantics summary
-
-In-process error+gating → exit 1 loud → auto-capture. In-process warn/non-gating → stderr + report. At-rest sweep → unchanged (exit 0, summary, `public.checks` rows). CI wiring suite → red PR, no DB, no flake surface. Doctor → informational unless `--strict`. Rollout: warn-first 7 days per table, flip to gating by PR; listings family gates day one.
-
-## Testing
-
-- Unit: every new builder (range/row_floor/sql_assert/freshness_col); prescriptions mapping covers every failure-class enum.
-- Deliberate-failure proofs: `leepa.last_sale_amount` stays the not_null proof; pre-fix listings data is the `sql_assert` proof (red before fix, green after).
-- Integration (read-only dev-run): doctor `--dry-run` completes < 2 min and correctly flags today's two real broken tables (`redfin_city_swfl` missing, `dbpr_re_licensees` empty) — real-world fixtures until fixed.
-- Wiring self-test: seeded violation fixtures (bad action version, unmonitored table ref, missing env var, DAG orphan) must each redden the suite.
-- Existing gates unaffected: `bunx next build`, `pytest ingest/`, Gate-5 pack tests.
-
-## Sequencing & acceptance
-
-1. **C0** — accept: ZIP 33972 median reflects homes-only; tripwire green; a test `cancelled` run opens an incident; CI green on main.
-2. **C1+C2** — accept: seeded bad row in a fixture table fails the writing run when gating; 7 pipelines wired warn-first.
-3. **C3** — accept: suite red on each seeded violation; green on main after fixing/allowlisting (with check refs) what it finds — it WILL find today's orphans.
-4. **C4** — accept: doctor on live 07/11 state flags the two real broken tables with correct prescriptions.
-5. Close `data_contracts_doctor_live_verify` on live evidence only.
-
-## Risks
-
-- **Alert fatigue reborn** → warn-first, gating-by-PR, doctor consolidates to one rollup; success metric is fewer red surfaces, not more.
-- **`sql_assert` misuse** → validated read-only SELECT, PR review; runner can't execute DDL/DML.
-- **Query cost** → 30s/table budget measured in tests; windowed WHERE on big tables.
-- **View-patch blast radius (listings)** → additive migration, raw tables untouched, before/after numbers verified in PR.
-- **Two-registries confusion** → deliberate (scheduling vs contracts); doctor is the join; documented in both file headers.
-
-## Out of scope → checks opened this session
-
-- `empty_brain_content_detector` — refinery-side "brain passes freshness while content says no data."
-- `caveat_expiry_rebuild` — stale caveats served indefinitely (06/29 failure still shown 07/11).
-- `tier_divergence_dag_orphan` — ship or delete the built-but-never-wired brain.
-- Ops-page doctor panel (`--json` consumer) — ops repo queue.
-- Path C orchestrator migration — revisit after this stabilizes; bridge table is the entry.
+Everything 05 lists, plus: no Dagster/Prefect adoption inside A (07 gates it); no ops-page work (ops repo); no `BrainOutput` type-lift for caveats (05 3e chose render-TTL for exactly that reason).
