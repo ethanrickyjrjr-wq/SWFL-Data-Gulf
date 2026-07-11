@@ -1,3 +1,26 @@
+## 2026-07-11 (Opus 4.8 · main) — Hendry OFF /desk: listing_active_stats scoped to Lee+Collier at the source (view), region total un-blended
+
+Operator re-raised the parked Hendry `/desk` leak ("how is Hendry still here… fix and get off /desk").
+Fixed at the SOURCE, not the symptom. Root cause (per the earlier follow-up handoff): `/desk` reads
+`data_lake.listing_active_stats` region/county ROLLUP rows directly — a grain the zip-scope-core pack
+fix (a ZIP-string predicate) can't reach, since the median is computed inside the view's GROUPING SETS
+before any TS sees it. A true median can't be un-blended in code, so the fix HAS to be in the view.
+
+- **View migration `docs/sql/20260711_listing_active_stats_core_counties.sql` — APPLIED LIVE.** Added
+  `AND btrim(county) IN ('Lee','Collier')` to the `active` CTE (Hendry drops from region + county + ZIP
+  grains at once). Verified on the live lake: Hendry now 0 rows at any grain; region "SWFL median ask"
+  recomputed $339,000 → **$345,000** (Hendry's 1,052 cheaper listings had dragged it down). Hendry STAYS
+  in `listing_state` (lake boundary, the deliberate 07/02 ingest decision) — only the DISPLAY rollup
+  narrowed. `/desk` (public, `revalidate=300`) self-corrects on next ISR pass; no redeploy.
+- **`refinery/lib/core-scope.mts` — added `CORE_SCOPE_COUNTY_NAMES` + `isCoreCounty`**, the county-grain
+  twin of `isCoreScope`, derived from the SAME crosswalk (primary-county-aligned name, so straddling
+  ZCTAs don't pull in Charlotte/Hendry). Self-checks size===2. 11/11 tests pass. This is the TS-side
+  authority for a future display-layer guard in `lib/desk/loaders.ts` (held by a parallel session now).
+- Ripple the operator OK'd: a Hendry-address email via `market-context.ts` now returns no active-listing
+  figures (Hendry isn't a display county). active-listings brain region metric shifts on the next rebuild.
+
+Next: wire `isCoreCounty` into `lib/desk/loaders.ts` as belt-and-suspenders when that file frees up.
+
 ## 2026-07-11 (Sonnet 5 · main) — 07/07 partial-scan root-caused + fixed; backfill confirmed impossible (live vendor check); carryover-day honesty label shipped; Hendry contamination found + follow-up written
 
 Operator asked to fix why 07/07's `/desk` pulse was a partial scan, backfill it from the 8th, and

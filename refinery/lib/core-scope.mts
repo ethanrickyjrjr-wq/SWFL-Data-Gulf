@@ -29,6 +29,8 @@ export const CORE_SCOPE_COUNTY_FIPS: ReadonlySet<string> = new Set(["12071", "12
 interface ZipCountyEntry {
   zip: string;
   primary_county: string;
+  counties?: string[];
+  county_names?: string[];
 }
 
 /**
@@ -58,4 +60,40 @@ export const TOTAL_CORE_ZIPS = CORE_SCOPE_ZIPS.size;
 /** True iff `zip` is one of the 57 Lee/Collier core ZIPs. Trims; empty/garbage → false. */
 export function isCoreScope(zip: string | number | null | undefined): boolean {
   return CORE_SCOPE_ZIPS.has(String(zip ?? "").trim());
+}
+
+/**
+ * The core county NAMES ({"Lee", "Collier"}), derived from the same crosswalk filter that builds
+ * CORE_SCOPE_ZIPS — so the ZIP universe and the county universe can never disagree. This is the
+ * county-grain twin of isCoreScope: rollup surfaces (region/county totals from
+ * data_lake.listing_active_stats) group by county NAME, a grain isCoreScope (a ZIP predicate)
+ * can't reach. Hendry is in the lake but not core, so it is excluded here too.
+ */
+export const CORE_SCOPE_COUNTY_NAMES: ReadonlySet<string> = new Set(
+  (zipCountyJson.entries as ZipCountyEntry[])
+    .filter((e) => CORE_SCOPE_COUNTY_FIPS.has(e.primary_county))
+    // county_names is index-aligned with counties; take the name for the PRIMARY county only —
+    // a ZCTA that straddles a line also lists its neighbor (Charlotte/Hendry), which is not core.
+    .map((e) => {
+      const idx = (e.counties ?? []).indexOf(e.primary_county);
+      return idx >= 0 ? e.county_names?.[idx] : undefined;
+    })
+    .filter((n): n is string => !!n),
+);
+
+// Same fail-loud posture as the ZIP self-check: if the crosswalk drifts, break at load.
+if (CORE_SCOPE_COUNTY_NAMES.size !== 2) {
+  throw new Error(
+    `core-scope: expected 2 core county names (Lee, Collier), derived ${CORE_SCOPE_COUNTY_NAMES.size} ` +
+      `[${[...CORE_SCOPE_COUNTY_NAMES].join(", ")}]. The swfl-zip-county.json crosswalk drifted.`,
+  );
+}
+
+/** True iff `name` is a core county ("Lee"/"Collier"). Strips a trailing " County", trims; garbage → false. */
+export function isCoreCounty(name: string | null | undefined): boolean {
+  return CORE_SCOPE_COUNTY_NAMES.has(
+    String(name ?? "")
+      .replace(/\s*County$/i, "")
+      .trim(),
+  );
 }

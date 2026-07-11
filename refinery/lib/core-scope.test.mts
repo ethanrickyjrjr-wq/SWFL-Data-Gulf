@@ -2,8 +2,10 @@ import { describe, expect, it } from "bun:test";
 import {
   CORE_SCOPE_ZIPS,
   CORE_SCOPE_COUNTY_FIPS,
+  CORE_SCOPE_COUNTY_NAMES,
   TOTAL_CORE_ZIPS,
   isCoreScope,
+  isCoreCounty,
 } from "./core-scope.mts";
 
 describe("core-scope", () => {
@@ -45,5 +47,31 @@ describe("core-scope", () => {
 
   it("trims surrounding whitespace before matching", () => {
     expect(isCoreScope(" 33901 ")).toBe(true);
+  });
+
+  it("derives the two core county NAMES from the same crosswalk (Lee, Collier)", () => {
+    expect(CORE_SCOPE_COUNTY_NAMES.size).toBe(2);
+    expect(CORE_SCOPE_COUNTY_NAMES.has("Lee")).toBe(true);
+    expect(CORE_SCOPE_COUNTY_NAMES.has("Collier")).toBe(true);
+  });
+
+  it("isCoreCounty accepts core counties, rejects Hendry and other SWFL counties", () => {
+    expect(isCoreCounty("Lee")).toBe(true);
+    expect(isCoreCounty("Collier")).toBe(true);
+    expect(isCoreCounty("Hendry")).toBe(false); // in the lake, not a display county
+    expect(isCoreCounty("Charlotte")).toBe(false);
+    expect(isCoreCounty("Sarasota")).toBe(false);
+  });
+
+  it("isCoreCounty strips a trailing ' County' and trims", () => {
+    expect(isCoreCounty("Lee County")).toBe(true);
+    expect(isCoreCounty(" Collier ")).toBe(true);
+    expect(isCoreCounty("collier")).toBe(false); // case-sensitive: matches the view's stored casing
+  });
+
+  it("isCoreCounty handles empty / garbage / null input", () => {
+    expect(isCoreCounty("")).toBe(false);
+    expect(isCoreCounty(null)).toBe(false);
+    expect(isCoreCounty(undefined)).toBe(false);
   });
 });
