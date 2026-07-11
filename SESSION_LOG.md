@@ -1,3 +1,20 @@
+## 2026-07-11 (Opus 4.8 · main) — Claude Design handoff: socials template-elevation brief + real "before" assets
+
+Assembled a paste-ready design handoff for elevating the 5 lab social templates (`lib/social/design/`),
+pushed so Claude Design (separate checkout) can see it. `docs/handoff/2026-07-11-socials-design-elevation-brief.md`
++ `docs/handoff/assets/2026-07-11-socials/` (12 real "before" card PNGs rendered via the live engine
+`renderSocialImage`/resvg with real Zillow ZHVI figures — RULE 1; `brand-kit.md`; the 5 SWFL logo files).
+crawl4ai research folded in (RULE 0.4): Sprout 05/2026 specs VALIDATE our 4 formats (square/portrait/story
+exact, landscape≈LinkedIn) but X feed is now 16:9 1600×900 (our 1200×630 crops — flagged); carousels =
+highest IG engagement (Buffer) → prioritize a multi-slide template; Canva realtor gallery as the aspirational
+target. Two non-obvious constraints captured that a design model would otherwise violate: (1) the published
+PNG is ALWAYS Liberation Sans/Serif (6 brand fonts collapse at raster; personality must come from
+weight/size/spacing/color, not typeface); (2) accent inconsistency — engine `#3DC9C0` vs lab `#0ea5b7`,
+standardize on `#3DC9C0`. Deliberately did NOT build a `designToSvg` before-board (advisor-confirmed: would
+hand Design a phantom of our output + backdoor the engine/lab unified-renderer decision). Docs+assets only;
+render script (`scripts/social/render-current-cards.mts`) kept LOCAL (Design needs the pixels, not the generator).
+Next (operator-directed): same treatment for desk/insider/emails if wanted.
+
 ## 2026-07-11 (Opus 4.8 · main) — Fixed the zip-seed env leak → full local `bun test` suite is 0-fail
 
 Follow-up to the two-reds fix: the full-suite zip-seed victim. Root cause: `refinery/config/env.mts:8`
