@@ -17,6 +17,8 @@
 //   • author-time — a test over EVERY chart-bearing template (strict, red CI).
 //   • runtime — lib/email/build-doc.ts buildPromptChart (soft: drop the chart).
 
+import type { ChartSpec } from "../../components/charts/registry/chart-spec";
+
 /** How a number reads. Only same-class currency/count magnitudes are compared;
  *  percent is excluded (ratios are meaningless near zero) and cross-class pairs
  *  ($ headline / % chart) are always coherent. */
@@ -129,4 +131,54 @@ export function parseHeroFigure(raw: string): HeroFigure | null {
 
   const unit: UnitClass = isCurrency ? "currency" : isPercent ? "percent" : "count";
   return { value, unit };
+}
+
+/** ChartBlock/ChartSpec value_format -> this module's UnitClass. Mirrors
+ *  lib/email/spec-to-png.ts's mapValueFormat, kept separate on purpose: that
+ *  one targets the SVG builders' ValueFormat, this one targets the coherence
+ *  comparison's coarser 4-way class. */
+function unitClassOf(vf: string | undefined): UnitClass {
+  switch (vf) {
+    case "usd":
+    case "currency":
+    case "aal":
+    case "rent":
+      return "currency";
+    case "percent":
+      return "percent";
+    case "count":
+      return "count";
+    default:
+      return "other";
+  }
+}
+
+/**
+ * Extract a ChartSpec's displayed magnitude for the coherence check. Covers
+ * the two shapes today's runtime callers actually produce: donut-share
+ * (segments + center total — the total MUST be included, else an honest
+ * donut false-flags against a whole-market headline) and bar-table (the
+ * numeric column). Returns null for any other frame or empty data — the
+ * caller then has nothing to compare, which `assertHeroChartCoherence`
+ * already treats as coherent.
+ */
+export function chartMagnitudeFromSpec(spec: ChartSpec): ChartMagnitude | null {
+  const unit = unitClassOf(spec.value_format as string | undefined);
+  const o = (spec.options ?? {}) as Record<string, unknown>;
+
+  if (spec.frameId === "donut-share" && Array.isArray(o.segments)) {
+    const segs = o.segments as { value: number }[];
+    const values = segs.map((s) => s.value).filter((v) => Number.isFinite(v));
+    if (typeof o.total === "number" && Number.isFinite(o.total)) values.push(o.total);
+    return values.length ? { values, unit } : null;
+  }
+
+  const rows = spec.rows as (string | number | null)[][] | undefined;
+  if (Array.isArray(rows) && rows.length) {
+    const valIdx = Array.isArray(spec.columns) && spec.columns.length > 1 ? 1 : rows[0].length - 1;
+    const values = rows.map((r) => Number(r[valIdx])).filter((v) => Number.isFinite(v));
+    if (values.length) return { values, unit };
+  }
+
+  return null;
 }

@@ -44,6 +44,11 @@ import { buildListingFlyer } from "@/lib/email/listing-flyer";
 import { fetchAreaComps, buildCompsSpec, deriveAreaUrl } from "@/lib/email/listing-comps";
 import { chartSpecToEmailImage, type EmailChartImage } from "@/lib/email/spec-to-png";
 import { buildChartForQuestion } from "@/lib/assistant/chart-for-question";
+import {
+  assertHeroChartCoherence,
+  chartMagnitudeFromSpec,
+} from "@/lib/deliverable/chart-coherence";
+import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
 import { reshapeChartToType, chartTypeFits, type ChartType } from "@/lib/email/reshape-chart-type";
 import { staleFigures } from "@/lib/assistant/freshness";
 import {
@@ -253,6 +258,13 @@ async function buildPromptChart(
     );
     if (!cfq?.chart) {
       console.log("[email-lab/chart] no chart matched for prompt:", prompt.slice(0, 80));
+      return null;
+    }
+    const hero = resolveHeadlineFigure(doc);
+    const magnitude = chartMagnitudeFromSpec(cfq.chart);
+    const coherence = assertHeroChartCoherence({ hero, chart: magnitude });
+    if (!coherence.coherent) {
+      console.log("[email-lab/chart] dropped incoherent chart:", coherence.reason);
       return null;
     }
     // The "pick your chart type" control re-shapes the SAME routed figures into the

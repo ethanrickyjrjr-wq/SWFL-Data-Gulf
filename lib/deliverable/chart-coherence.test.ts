@@ -1,5 +1,11 @@
 import { test, expect, describe } from "bun:test";
-import { assertHeroChartCoherence, parseHeroFigure, type CoherenceInput } from "./chart-coherence";
+import {
+  assertHeroChartCoherence,
+  parseHeroFigure,
+  chartMagnitudeFromSpec,
+  type CoherenceInput,
+} from "./chart-coherence";
+import type { ChartSpec } from "../../components/charts/registry/chart-spec";
 
 // The exact numbers from the shipped-broken Luxury Market Report: a $3.17M
 // "$2M+" headline over a Zillow top-third chart topping at $802K. This is the
@@ -110,5 +116,54 @@ describe("parseHeroFigure", () => {
   test("returns null when there is no number", () => {
     expect(parseHeroFigure("Median Sale Price")).toBeNull();
     expect(parseHeroFigure("")).toBeNull();
+  });
+});
+
+describe("chartMagnitudeFromSpec", () => {
+  test("extracts bar-table rows as count/currency values by value_format", () => {
+    const spec = {
+      title: "t",
+      columns: ["zip", "value"],
+      rows: [
+        ["33914", 550000],
+        ["34135", 525000],
+      ],
+      chart_type: "bar",
+      value_format: "usd",
+      frameId: "bar-table",
+    } as unknown as ChartSpec;
+    const mag = chartMagnitudeFromSpec(spec);
+    expect(mag).toEqual({ values: [550000, 525000], unit: "currency" });
+  });
+
+  test("extracts donut-share segments PLUS the center total", () => {
+    const spec = {
+      title: "t",
+      columns: ["segment", "share_pct"],
+      rows: [],
+      chart_type: "bar",
+      value_format: "count",
+      frameId: "donut-share",
+      options: {
+        segments: [
+          { label: "$2M-3M", value: 378 },
+          { label: "$3M-5M", value: 412 },
+        ],
+        total: 1226,
+      },
+    } as unknown as ChartSpec;
+    const mag = chartMagnitudeFromSpec(spec);
+    expect(mag).toEqual({ values: [378, 412, 1226], unit: "count" });
+  });
+
+  test("returns null for an unsupported/empty spec", () => {
+    const spec = {
+      title: "t",
+      columns: [],
+      rows: [],
+      chart_type: "bar",
+      frameId: "unknown-frame",
+    } as unknown as ChartSpec;
+    expect(chartMagnitudeFromSpec(spec)).toBeNull();
   });
 });
