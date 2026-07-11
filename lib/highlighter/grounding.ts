@@ -3,6 +3,7 @@ import type { BrainOutputMetric } from "../../refinery/types/brain-output.mts";
 import type { MethodologyEntry } from "../../refinery/lib/methodology-registry.mts";
 import { freshnessDirective } from "@/lib/assistant/system-prompt";
 import {
+  cleanCitationForDisplay,
   sanitizeProse,
   scrubBrainSlugs,
   scrubCaveatTechnical,
@@ -31,13 +32,6 @@ export interface GroundingInput {
   chartShown?: string;
 }
 
-/** Citations are author free text (e.g. "OpenFEMA … via data_lake.fema_nfip_claims,
- *  FL, SWFL core counties") — the same raw-schema/table leak class as caveats. Run
- *  through the same scrub so a table/column name never reaches the model's context. */
-function cleanCitation(citation: string): string {
-  return scrubCaveatTechnical(sanitizeProse(citation));
-}
-
 /** Inline a dossier's detail_tables as compact rows so cross-area lookups are in-context (R0). */
 function renderDetailTables(d: Dossier): string {
   if (!d.detail_tables || d.detail_tables.length === 0) return "";
@@ -48,7 +42,7 @@ function renderDetailTables(d: Dossier): string {
     // the customer must never see (CLEAN rule).
     const colLabel = new Map(t.columns.map((c) => [c.id, c.label]));
     out.push(
-      `  Table "${t.title}" (grain: ${t.grain}; source: ${cleanCitation(t.source.citation)}):`,
+      `  Table "${t.title}" (grain: ${t.grain}; source: ${cleanCitationForDisplay(t.source.citation)}):`,
     );
     for (const r of t.rows) {
       const cells = Object.entries(r.cells)
@@ -69,7 +63,7 @@ function renderKeyMetrics(d: Dossier): string {
     .map(
       (m: BrainOutputMetric) =>
         `  - ${scrubCaveatTechnical(m.label || m.metric)}: ${m.value}${
-          m.source?.citation ? ` [${cleanCitation(m.source.citation)}]` : ""
+          m.source?.citation ? ` [${cleanCitationForDisplay(m.source.citation)}]` : ""
         }`,
     )
     .join("\n");

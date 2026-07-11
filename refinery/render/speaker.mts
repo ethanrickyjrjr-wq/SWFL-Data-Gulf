@@ -681,27 +681,54 @@ export function displayName(brainId: string): string {
   return PACK_DISPLAY_NAMES[brainId] ?? humanizeBrainId(brainId);
 }
 
+/** The house brand — the fallback when a citation scrubs down to nothing. */
+const SOURCE_BRAND = "SWFL Data Gulf";
+
 /**
- * Collapse a (possibly long, possibly internal-laden) citation into a short,
- * clean source label for the metrics table. Cuts at the first natural break
- * (em/en-dash, " via ", colon, or " ("), scrubs internal identifiers, and caps
- * length so one cell can never become the unreadable wall.
+ * Strip scrubCaveatTechnical's placeholder tripwires ([config]/[internal]/[ref])
+ * out of a customer-facing string, plus any separator/whitespace they leave
+ * dangling, and collapse doubled spaces.
+ *
+ * The tokens are DELIBERATE tripwires: the caveat-suppression path
+ * (isDisplayableCaveat) must still SEE them to drop machine-internal caveats, so
+ * they have to survive the scrub. That means they can only be removed here, at
+ * the display consumers — never inside scrubCaveatTechnical itself.
  */
-function shortSourceLabel(citation: string): string {
-  const head = citation.split(/\s+[—–]\s+|\s+via\s+|:\s|\s+\(/)[0].trim();
-  // A source label is a NAME, not prose. scrubCaveatTechnical's placeholders
-  // ([config]/[internal]/[ref]) are tripwires for internal identifiers — they
-  // must never ship in a label, exactly as isDisplayableCaveat suppresses them
-  // from caveats. Strip the tokens plus any separator/whitespace they leave
-  // dangling; if that empties the label, fall back to the house brand rather
-  // than shipping a bare placeholder (the cre-swfl `corridor_profiles` leak).
-  const cleaned = scrubCaveatTechnical(head)
+function stripPlaceholderTokens(s: string): string {
+  return s
     .replace(/\s*[—–-]?\s*\[(?:config|internal|ref)\]/gi, "")
     .replace(/^\s*[—–-]\s*/g, "")
     .replace(/\s*[—–-]\s*$/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
-  if (!cleaned) return "SWFL Data Gulf";
+}
+
+/**
+ * The ONE authority for turning a raw metric `source.citation` into a full,
+ * customer-safe citation string: scrub internal identifiers, then strip the
+ * placeholder tripwires the scrub leaves behind. Every surface that shows a
+ * citation — the report detail block, the ZIP dossier `Source:` lines, the
+ * live-chat grounding context — routes through this. No surface re-derives
+ * scrub-then-ship; that duplication is exactly how `[config]` used to leak
+ * (source_label_config_leak). Falls back to the brand if nothing survives.
+ */
+export function cleanCitationForDisplay(citation: string): string {
+  const cleaned = stripPlaceholderTokens(scrubCaveatTechnical(sanitizeProse(citation)));
+  return cleaned || SOURCE_BRAND;
+}
+
+/**
+ * Collapse a (possibly long, possibly internal-laden) citation into a short,
+ * clean source label for the metrics table. Cuts at the first natural break
+ * (em/en-dash, " via ", colon, or " ("), scrubs internal identifiers, and caps
+ * length so one cell can never become the unreadable wall. Shares the same
+ * placeholder gate as cleanCitationForDisplay so a label can never ship a bare
+ * `[config]` (the cre-swfl `corridor_profiles` leak).
+ */
+function shortSourceLabel(citation: string): string {
+  const head = citation.split(/\s+[—–]\s+|\s+via\s+|:\s|\s+\(/)[0].trim();
+  const cleaned = stripPlaceholderTokens(scrubCaveatTechnical(head));
+  if (!cleaned) return SOURCE_BRAND;
   return cleaned.length > 72 ? cleaned.slice(0, 71).trimEnd() + "…" : cleaned;
 }
 
@@ -853,7 +880,7 @@ export function toDisplayBrain(brain: ParsedBrain): DisplayBrain {
       direction: m.direction,
       sourceLabel: shortSourceLabel(m.source.citation),
       sourceUrl: m.source.url,
-      sourceFull: scrubCaveatTechnical(sanitizeProse(m.source.citation)),
+      sourceFull: cleanCitationForDisplay(m.source.citation),
       fetchedAt: m.source.fetched_at,
       // Highlighter Reach — carry the dossier's precomputed suggestions, each
       // sanitized like every other display string. Absent on pre-lift brains.

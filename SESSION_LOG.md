@@ -1,3 +1,17 @@
+## 2026-07-11 (Opus 4.8 · main) — Collapse 3 citation-display cleaners into one gated authority
+
+Follow-on to the `[config]` label leak: the scrub-then-ship pattern was re-derived ungated in 3 more
+spots that receive raw brain citations — `speaker.sourceFull` (latent, unrendered) and two byte-identical
+`cleanCitation` copies in `lib/highlighter/grounding.ts` (live-chat grounding context) and
+`lib/zip-dossier.ts` (`/r/zip-report` + dossier `Source:` lines). Extracted ONE exported authority
+`cleanCitationForDisplay` in `speaker.mts` (scrub → strip `[config]`/`[internal]`/`[ref]` placeholders →
+brand fallback), shared `stripPlaceholderTokens` with `shortSourceLabel`, and routed all four paths
+through it — deleted both duplicate `cleanCitation`s (dropped now-unused `scrubCaveatTechnical` import in
+zip-dossier). One authority for the shared concept, per the extract-on-copy-#2 rule. TDD: 3 new
+`cleanCitationForDisplay` tests (49 speaker total). Verified: 49/49 speaker + 44/44 grounding+dossier,
+`bunx next build` green, local `/r/cre-swfl` + `/r/master` both still 0 `[config]`.
+`config_token_gate_missing_on_duplicate_citation_cleaners` stays open pending live post-deploy spot-check.
+
 ## 2026-07-11 (Opus 4.8 · main) — Spec+plan+handoff: Lee homes-only sold median per ZIP (docs only, unpushed)
 
 Brainstormed → speced → planned a homes-only county-deed sold median per ZIP. Live verification (RULE

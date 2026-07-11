@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
+  cleanCitationForDisplay,
   deCorridor,
   parseBrainMarkdown,
   sanitizeProse,
@@ -327,6 +328,30 @@ describe("shortSourceLabel gate (source_label_config_leak)", () => {
       labelFor("MarketBeat SWFL CRE quarterly — median across 3 submarkets."),
       "MarketBeat SWFL CRE quarterly",
     );
+  });
+});
+
+describe("cleanCitationForDisplay (the one citation-display authority)", () => {
+  test("strips placeholder tokens out of a FULL citation, not just the head", () => {
+    // The full detail-block / dossier / grounding string keeps its prose but
+    // must carry no scrub placeholder anywhere in it.
+    const out = cleanCitationForDisplay(
+      "Brains Supabase corridor_profiles (verified, non-deleted) — median across 5 corridors reporting cap_rate_pct: 6.7%.",
+    );
+    assert.doesNotMatch(out, /\[config\]|\[internal\]|\[ref\]/);
+    assert.match(out, /SWFL Data Gulf/); // brand rewrite survives
+    assert.match(out, /median across .* reporting/); // prose survives (sanitizeProse rewords "corridors")
+    assert.match(out, /6\.7%/);
+  });
+
+  test("falls back to the brand when the whole citation scrubs away", () => {
+    const out = cleanCitationForDisplay("corridor_profiles");
+    assert.equal(out, "SWFL Data Gulf");
+  });
+
+  test("leaves a clean citation untouched", () => {
+    const clean = "MarketBeat SWFL CRE quarterly — median across 3 submarkets.";
+    assert.equal(cleanCitationForDisplay(clean), clean);
   });
 });
 

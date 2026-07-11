@@ -21,7 +21,7 @@ import { BRAIN_CATALOG, type BrainCatalogEntry } from "../refinery/packs/catalog
 import {
   toDisplayBrain,
   sanitizeProse,
-  scrubCaveatTechnical,
+  cleanCitationForDisplay,
   type ParsedBrain,
 } from "../refinery/render/speaker.mts";
 import type { BrainOutputMetric } from "../refinery/types/brain-output.mts";
@@ -367,15 +367,11 @@ function coveredPlace(loc: EmittingInput): string | null {
 // Per-metric value formatting (mirrors fetch-brain's private formatDetailCell)
 // ---------------------------------------------------------------------------
 
-function cleanCitation(citation: string): string {
-  return scrubCaveatTechnical(sanitizeProse(citation));
-}
-
 /** Branch (b) text — a per-ZIP key_metric rendered as a clean block. */
 function renderMetricText(m: BrainOutputMetric, freshnessToken: string): string {
   return [
     `**${sanitizeProse(m.label)}** — ${formatMetricValue(m)}.`,
-    `Source: ${cleanCitation(m.source.citation)}`,
+    `Source: ${cleanCitationForDisplay(m.source.citation)}`,
     `_Freshness:_ \`${freshnessToken}\``,
   ].join("\n\n");
 }
@@ -418,7 +414,7 @@ function emitLine(
           freshnessToken: brain.freshness_token,
           origin: ctx.origin,
         }),
-        source_citation: cleanCitation(table.source.citation),
+        source_citation: cleanCitationForDisplay(table.source.citation),
         source_url: table.source.url,
       };
     }
@@ -432,7 +428,7 @@ function emitLine(
         coverage_label: `ZIP ${ctx.zip}`,
         is_true_zip: true,
         text: renderMetricText(m, brain.freshness_token),
-        source_citation: cleanCitation(m.source.citation),
+        source_citation: cleanCitationForDisplay(m.source.citation),
         source_url: m.source.url,
       };
     }
