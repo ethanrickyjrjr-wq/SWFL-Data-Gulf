@@ -223,3 +223,17 @@ test("PASSTHROUGH: a spec already frameId z-gauge stays z-gauge when re-requeste
   const already: ChartSpec = { ...usdSpec, frameId: "z-gauge" };
   expect(reshapeChartToType(already, "z-gauge")).toBe(already);
 });
+
+test("chartTypeFits: storm-timeline + seasonal-radial are passthrough-only (false for any fabricated spec)", () => {
+  expect(chartTypeFits(usdSpec, "storm-timeline")).toBe(false);
+  expect(chartTypeFits(countSpec, "storm-timeline")).toBe(false);
+  expect(chartTypeFits(usdSpec, "seasonal-radial")).toBe(false);
+  expect(chartTypeFits(countSpec, "seasonal-radial")).toBe(false);
+});
+
+test("PASSTHROUGH: a spec already frameId storm-timeline / seasonal-radial is returned unchanged", () => {
+  const storm: ChartSpec = { ...usdSpec, frameId: "storm-timeline" };
+  expect(reshapeChartToType(storm, "storm-timeline")).toBe(storm);
+  const radial: ChartSpec = { ...usdSpec, frameId: "seasonal-radial" };
+  expect(reshapeChartToType(radial, "seasonal-radial")).toBe(radial);
+});

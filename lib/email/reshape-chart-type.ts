@@ -36,6 +36,8 @@ export const CHART_TYPE_OPTIONS: { type: ChartType; label: string }[] = [
   { type: "line-band", label: "Line" },
   { type: "composition", label: "Composition" },
   { type: "z-gauge", label: "Gauge / index" },
+  { type: "storm-timeline", label: "Event timeline" },
+  { type: "seasonal-radial", label: "Seasonal rings" },
 ];
 
 interface Pt {
@@ -104,6 +106,13 @@ export function chartTypeFits(spec: ChartSpec, type: ChartType): boolean {
       // buildChartForQuestion does not emit this frameId today (2026-07-11);
       // this evaluates true only once/if a producer does.
       return spec.frameId === "z-gauge";
+    case "storm-timeline":
+    case "seasonal-radial":
+      // PASSTHROUGH ONLY (same rationale as z-gauge): a per-event-dated timeline
+      // or a per-corridor seasonal snapshot cannot be honestly fabricated from a
+      // flat (label, value) list — there is no per-event date, no per-corridor
+      // reading to invent. These render only when a producer emits that frameId.
+      return spec.frameId === type;
     case "bar":
     case "dotplot":
     case "composed":
