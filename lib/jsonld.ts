@@ -57,7 +57,7 @@ export function brainJsonLd(display: DisplayBrain, slug: string): object[] {
     isAccessibleForFree: true,
     ...(LICENSE_URL ? { license: LICENSE_URL } : {}),
     ...(display.refinedAt ? { temporalCoverage: display.refinedAt } : {}),
-    spatialCoverage: SPATIAL,
+    spatialCoverage: SPATIAL_LEE_COLLIER,
     variableMeasured: display.metrics.map((m) => ({
       "@type": "PropertyValue",
       name: m.label,

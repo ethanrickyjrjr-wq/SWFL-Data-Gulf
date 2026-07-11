@@ -285,6 +285,13 @@ test("deskJsonLd: emits temporalCoverage when provided, omits when not", () => {
   assert.equal("temporalCoverage" in without, false);
 });
 
+test("brainJsonLd: Dataset spatialCoverage names Lee and Collier", () => {
+  const [ds] = brainJsonLd(minBrain, "env-swfl") as Record<string, unknown>[];
+  const json = JSON.stringify(ds.spatialCoverage);
+  assert.ok(json.includes("Lee County"));
+  assert.ok(json.includes("Collier County"));
+});
+
 test("brainJsonLd: Dataset carries creator + isAccessibleForFree + temporalCoverage", () => {
   const [ds] = brainJsonLd(minBrain, "env-swfl") as Record<string, unknown>[];
   assert.equal(ds.isAccessibleForFree, true);
