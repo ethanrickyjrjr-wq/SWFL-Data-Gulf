@@ -1,3 +1,17 @@
+## 2026-07-10 (Opus 4.8 · main) — New-agent radar SPEC pushed; email lane kept local
+
+Specced the weekly DBPR new-agent radar and pushed the design doc only (spec, no code yet):
+`docs/superpowers/specs/2026-07-11-new-agent-radar-design.md`. Ingests `RE_rgn7.csv`
+(weekly, 21 cols, NO email) → `public.dbpr_re_licensees`, "new" = `original_license_date`
+within 90d (7d = this week), Lee+Collier individuals (`2501`), merge-on-license-number,
+`email` column built-in-NULL with COALESCE-safe merge, weekly GHA cron + `--dry-run` same PR.
+Check `new_agent_radar_live_verify` stays OPEN (pipeline not built). The sensitive email
+lane (FL 455.275/668.6076/Ch.119 public-records path, records-request vs. unverified
+license-detail scrape, "send is the verifier" — no Hunter/SMTP-probe) is captured LOCAL at
+`C:\Users\ethan\.local\bin\crawl4ai-agent-email-intel.md` (off-GitHub by name+location),
+NOT pushed. Staged explicit paths only; left parallel zip-scope-core session's files
+(`app/charts/page.tsx`, `core-scope.mts`, etc.) untouched.
+
 ## 2026-07-10 (Fable 5 · main) — Vertical-plays board: non-RE industries to sell content/leads to (strategy docs, no code)
 
 Brainstorm per operator: which industries beyond RE agents can we serve with scheduled content /
