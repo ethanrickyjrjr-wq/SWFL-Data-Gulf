@@ -43,6 +43,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   });
 
+  // ── Data Desk (/desk — the daily live terminal, highest recency signal) ───
+  entries.push({
+    url: `${ORIGIN}/desk`,
+    changeFrequency: "daily",
+    priority: 0.9,
+  });
+
   // ── Guides hub (/guides + /guides/[slug]) ─────────────────────────────────
   entries.push({
     url: `${ORIGIN}/guides`,
