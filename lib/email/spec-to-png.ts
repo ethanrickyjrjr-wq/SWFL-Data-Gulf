@@ -32,6 +32,8 @@ import {
   resolveCompositionColors,
 } from "@/lib/charts/svg/composition";
 import { zGaugeSvg, extractGaugeData } from "@/lib/charts/svg/z-gauge";
+import { stormTimelineSvg, type StormTimelineEvent } from "@/lib/charts/svg/storm-timeline";
+import { seasonalRadialSvg, type SeasonalRadialDatum } from "@/lib/charts/svg/seasonal-radial";
 
 /** Map a ChartBlock value_format to the chart-image value root's ValueFormat. */
 function mapValueFormat(vf?: string): ValueFormat {
@@ -163,6 +165,33 @@ export async function chartSpecToEmailSvg(spec: ChartSpec, accent: string): Prom
       case "z-gauge": {
         const gauge = extractGaugeData(o);
         if (gauge) svg = zGaugeSvg(gauge, { title, source: baseOpts.source, asOf: baseOpts.asOf });
+        break;
+      }
+      case "storm-timeline": {
+        // Vertical-column twin of the live recharts BarChart (TimelineFrame). The
+        // web frame stays on recharts; this hand-authored SVG matches its look for
+        // the email PNG (see lib/charts/svg/storm-timeline.ts header for why).
+        const events = o.events as StormTimelineEvent[] | undefined;
+        if (Array.isArray(events) && events.length)
+          svg = stormTimelineSvg(events, {
+            title,
+            accent: typeof o.accent === "string" ? o.accent : accent,
+            baseline: typeof o.baseline_usd === "number" ? o.baseline_usd : null,
+            yLabel: typeof o.y_label === "string" ? o.y_label : undefined,
+            source: baseOpts.source,
+            asOf: baseOpts.asOf,
+          });
+        break;
+      }
+      case "seasonal-radial": {
+        // Concentric-ring twin of the live recharts RadialBarChart (SeasonalRadialChart).
+        const data = o.data as SeasonalRadialDatum[] | undefined;
+        if (Array.isArray(data) && data.length)
+          svg = seasonalRadialSvg(data, {
+            title,
+            source: baseOpts.source,
+            asOf: baseOpts.asOf,
+          });
         break;
       }
     }

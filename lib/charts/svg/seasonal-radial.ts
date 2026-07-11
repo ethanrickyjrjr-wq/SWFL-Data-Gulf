@@ -166,7 +166,12 @@ export function seasonalRadialSvg(data: SeasonalRadialDatum[], opts: SeasonalRad
   const startAngle = 180;
   const fullSweep = 360; // 180° → -180°
 
-  const domainMax = Math.max(...rows.map((r) => r.value)) || 1;
+  // recharts routes the polar angle (value) axis through its nice-ticks combiner,
+  // so the domain max is NOT the raw data max — it's rounded UP to a "nice" ceiling
+  // (85 → 100). That's why the largest ring does not quite close the full circle on
+  // the live chart. Replicating the nice-round keeps the email PNG faithful (and it
+  // happens to agree with the component's own "0% → 100%" scale caption).
+  const domainMax = niceCeil(Math.max(...rows.map((r) => r.value))) || 1;
 
   rows.forEach((r, i) => {
     // Band index i (0 = innermost) → ring center radius, drawn thickness barSize.
@@ -214,6 +219,18 @@ export function seasonalRadialSvg(data: SeasonalRadialDatum[], opts: SeasonalRad
 
   parts.push(`</svg>`);
   return parts.join("");
+}
+
+/** Round a positive value UP to a "nice" ceiling (1/2/2.5/5 × 10ⁿ), approximating
+ *  recharts' nice-ticks domain rounding for the polar value axis. 85 → 100, 42 → 50,
+ *  8 → 10. Values ≤ 0 clamp to 1 so the sweep math never divides by zero. */
+function niceCeil(v: number): number {
+  if (v <= 0) return 1;
+  const exp = Math.floor(Math.log10(v));
+  const base = 10 ** exp;
+  const f = v / base; // 1 ≤ f < 10
+  const nice = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10;
+  return nice * base;
 }
 
 function esc(s: string): string {

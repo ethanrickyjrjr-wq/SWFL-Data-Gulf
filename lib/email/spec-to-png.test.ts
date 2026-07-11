@@ -140,3 +140,61 @@ test("z-gauge renders a real gauge SVG from single-value-vs-bound options", asyn
   expect(svg).toContain("<svg");
   expect(svg).toContain("Market heat index");
 });
+
+// 2026-07-11: storm-timeline + seasonal-radial render as hand-authored SVG twins
+// of the live recharts BarChart / RadialBarChart (the web frames stay on recharts,
+// unchanged). recharts can't render in single-pass SSR, so these two frames get
+// their own pure-SVG builders like every other non-bklit frame above.
+
+test("storm-timeline renders a vertical-column SVG from event options", async () => {
+  const spec = {
+    frameId: "storm-timeline",
+    title: "NFIP paid claims by storm",
+    chart_type: "bar",
+    value_format: "usd",
+    source: { citation: "env-swfl" },
+    asOf: "2026-06-30",
+    options: {
+      accent: "#e05c2e",
+      baseline_usd: 900_000_000,
+      events: [
+        { label: "Charley", date: "2004-08-13", amount_usd: 890_000_000 },
+        { label: "Ian", date: "2022-09-28", amount_usd: 4_800_000_000 },
+        { label: "Idalia", date: "2023-08-30", amount_usd: 320_000_000 },
+      ],
+    },
+  } as ChartSpec;
+
+  const svg = await chartSpecToEmailSvg(spec, "#0ea5e9");
+
+  expect(svg).not.toBeNull();
+  expect(svg).toContain("<svg");
+  expect(svg).toContain("NFIP paid claims by storm");
+  expect(svg).toContain("Ian 2022");
+  expect(svg).toContain("Baseline");
+});
+
+test("seasonal-radial renders a concentric-ring SVG from corridor options", async () => {
+  const spec = {
+    frameId: "seasonal-radial",
+    title: "Corridor Seasonality Index",
+    chart_type: "bar",
+    value_format: "index",
+    source: { citation: "cre-swfl" },
+    asOf: "2026-06-30",
+    options: {
+      data: [
+        { corridor: "US 41 - Downtown Fort Myers", seasonal_index: 0.85 },
+        { corridor: "Cape Coral SW", seasonal_index: 0.64 },
+        { corridor: "Lehigh Acres Industrial", seasonal_index: 0.18 },
+      ],
+    },
+  } as ChartSpec;
+
+  const svg = await chartSpecToEmailSvg(spec, "#0ea5e9");
+
+  expect(svg).not.toBeNull();
+  expect(svg).toContain("<svg");
+  expect(svg).toContain("CORRIDOR SEASONALITY INDEX");
+  expect(svg).toContain("85%");
+});
