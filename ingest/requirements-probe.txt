@@ -1,2 +1,5 @@
 psycopg[binary]>=3.2
 pyyaml>=6.0
+# probe_source_liveness.py — hits each upstream ArcGIS source with the pipeline's real
+# query (the check the DB-only freshness probe is structurally blind to).
+requests>=2.31

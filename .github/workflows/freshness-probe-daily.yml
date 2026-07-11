@@ -51,6 +51,18 @@ jobs:
             python -m ingest.scripts.check_data_quality
           fi
 
+      # UPSTREAM source-liveness. The two probes above read the DATABASE ("did we write
+      # lately") — they are structurally blind to a source that has silently started
+      # 400-ing, because a dead source writes nothing and the last good load keeps
+      # reading FRESH until the staleness window ages out (547 days for an annual
+      # source; collier_parcels would have stayed green until ~Dec 2027). This step
+      # hits each SOURCE with the pipeline's real query. It runs DAILY even though some
+      # of these sources are annual — liveness is checked on the CLOCK, not the cadence.
+      # Exits 1 (red run) on a BROKEN source: that loudness is the entire point.
+      - name: Upstream source-liveness probe (ArcGIS)
+        if: always()
+        run: python -m ingest.scripts.probe_source_liveness
+
       # External dead-man's-switch. if: always() is load-bearing here — the probe
       # exits 1 on an SLA breach (a WORKING alarm), and we must still confirm the
       # schedule fired. success() would spuriously alert HC whenever data is stale.

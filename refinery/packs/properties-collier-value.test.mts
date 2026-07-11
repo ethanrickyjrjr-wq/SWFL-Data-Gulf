@@ -41,8 +41,16 @@ test("propertiesCollierValue pack: deterministic (skipTriageAgent + skipSynthesi
   assert.equal(propertiesCollierValue.skipSynthesisAgent, true);
 });
 
-test("propertiesCollierValue pack: Redfin + FDOR parcel + FHFA sources wired", () => {
-  assert.equal(propertiesCollierValue.sources.length, 3);
+test("propertiesCollierValue pack: Redfin + FDOR parcel + FHFA + sold-median sources wired", () => {
+  // 2026-07-11: collier_sold_median added as the 4th connector (homes-only sold
+  // median per ZIP off the FDOR recorded-deed sale price — the sold counterpart to
+  // the active-listing asking median that land-blended vacant parcels).
+  assert.equal(propertiesCollierValue.sources.length, 4);
+  const soldMedian = propertiesCollierValue.sources.find(
+    (s) => s.source_id === "collier_sold_median",
+  );
+  assert.ok(soldMedian, "collier_sold_median source must be wired");
+  assert.equal(soldMedian!.trust_tier, 2);
   const redfin = propertiesCollierValue.sources.find(
     (s) => s.source_id === "redfin_collier_market",
   );
@@ -273,5 +281,70 @@ test("propertiesCollierValue pack: BEARISH scenario → brain direction is beari
     perYear!.value,
     7000,
     "non-headline property types must be filtered out — the filter is load-bearing for the bearish read",
+  );
+});
+
+test("propertiesCollierValue pack: homes-only sold median surfaces (metric + per-ZIP detail table, not the land-blend)", async () => {
+  const { collierParcelsSource } = await import("../sources/collier-parcels-source.mts");
+  const { collierSoldMedianSource } = await import("../sources/collier-sold-median-source.mts");
+  // Parcel fragments keep the pack out of the empty path; sold-median fragments
+  // drive the new metric + detail table.
+  const fragments = [
+    ...(await collierParcelsSource.fetch()),
+    ...(await collierSoldMedianSource.fetch()),
+  ];
+
+  propertiesCollierValue.corpusSummary!(
+    fragments as unknown as Parameters<NonNullable<typeof propertiesCollierValue.corpusSummary>>[0],
+  );
+  const result = propertiesCollierValue.outputProducer!({
+    pack: propertiesCollierValue,
+    version: 1,
+    refined_at: new Date().toISOString(),
+    citations: [],
+    facts: [],
+    recentNote: "",
+  } as unknown as Parameters<NonNullable<typeof propertiesCollierValue.outputProducer>>[0]);
+
+  // (a) county homes-only sold median metric — intensive, currency, in the homes band.
+  const m = result.key_metrics.find((k) => k.metric === "collier_sold_median_homes_only");
+  assert.ok(m, "collier_sold_median_homes_only metric must surface");
+  assert.equal(m!.variable_type, "intensive");
+  assert.equal(m!.display_format, "currency");
+  assert.ok(
+    (m!.value as number) > 200000,
+    `county median must be in the homes band (never the vacant-land tail), got ${m!.value}`,
+  );
+
+  // (b) per-ZIP detail table — every ZIP reads the homes band, NOT a land-blend.
+  const dt = (result.detail_tables ?? []).find((t) => t.id === "collier_sold_median_by_zip");
+  assert.ok(dt, "collier_sold_median_by_zip detail table must surface");
+  const naples = dt!.rows.find((r) => r.key === "34102");
+  assert.ok(naples, "34102 row must be present");
+  assert.ok(
+    (naples!.cells.median_sale as number) > 200000,
+    `34102 sold median must be the homes band, got ${naples!.cells.median_sale}`,
+  );
+
+  // (c) the min-N gate: a sub-20-sale ZIP reports the COUNTY median, flagged — never a
+  // thin-sample number presented as a real ZIP median.
+  const thin = dt!.rows.find((r) => r.key === "34140");
+  assert.ok(thin, "34140 (n=18) row must be present");
+  assert.equal(thin!.cells.county_fallback, true, "sub-20 ZIP must be flagged county_fallback");
+  assert.equal(
+    thin!.cells.median_sale,
+    m!.value,
+    "a county-fallback ZIP must report exactly the county median",
+  );
+
+  // (d) citation names the real source and leaks no placeholder tokens.
+  const cite = String(m!.source.citation);
+  assert.ok(
+    /Collier County Property Appraiser/i.test(cite),
+    `citation must name the source: ${cite}`,
+  );
+  assert.ok(
+    !/\[(config|internal|ref)\]/.test(cite),
+    `citation must not leak placeholders: ${cite}`,
   );
 });

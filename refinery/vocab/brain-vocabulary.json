@@ -3751,6 +3751,36 @@
       "status": "active",
       "scope_note": "Redfin months-of-supply for Lee County ('All Residential') at the latest published period: inventory divided by the monthly sales pace. Lower = tighter, seller-favorable (lower_is_bullish); higher = more buyer leverage. Level metric."
     },
+    "properties_collier_sold_median_homes_only": {
+      "id": "properties_collier_sold_median_homes_only",
+      "grade": { "reviewed_non_directional": true },
+      "prefLabel": "Collier County Homes-Only Sold Median (Recorded Deeds)",
+      "altLabels": [
+        "Collier sold median",
+        "Collier homes sold median",
+        "Collier homes-only median price"
+      ],
+      "raw_slugs": [
+        "collier_sold_median_homes_only"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "properties-collier-value",
+        "master"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "value_range": [
+        0,
+        100000000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Homes-only (single-family + condo, FDOR use code 001/004) SOLD median per Collier County ZIP from FDOR recorded deeds — each parcel's latest recorded sale 2024+ over $20,000 (a stock of most-recent prices, not a transaction-flow median). Vacant land excluded — this is the sold, homes-only answer to the active-listing land-blend. Situs ZIP is native to the FDOR roll, so unlike Lee there is no centroid-to-ZCTA derivation. County rollup is the headline; per-ZIP detail rides in the collier_sold_median_by_zip detail table, ZIPs under 20 qualifying sales reporting the county median (county_fallback). Level metric, emitted direction 'stable' — reviewed non-directional (a rising median is not mechanically bullish without controlling for mix)."
+    },
     "properties_collier_soh_gap_median_pct": {
       "id": "properties_collier_soh_gap_median_pct",
       "grade": { "reviewed_non_directional": true },

@@ -55,6 +55,34 @@ a `source_liveness` probe. Two ways to land it:
   This makes every ArcGIS/REST source self-checking in the daily probe. Do NOT push it blind — it touches
   the freshness system.
 
+### THE PROBE MUST MIRROR THE PIPELINE'S QUERY — not `returnCountOnly` (learned 07/11/2026)
+
+The first cut of the probe used `returnCountOnly=true` as the liveness signal. It **false-alarmed on
+Lee within an hour**: LeePA's server cannot reliably COUNT its 548k-row just-value layer — `returnCountOnly`
+intermittently 400s ("Failed to execute query") while a normal ROW FETCH on the same layer works fine.
+A count-based probe would have screamed BROKEN at Lee's parcel spine every morning, and a guard that
+cries wolf gets ignored — which is how you end up back at a false-green.
+
+**Rule: probe the query the pipeline actually runs (a cheap row fetch with the real WHERE + real fields).**
+It costs nothing in detection — the FDOR lockdown rejects the row fetch too — and it removes the false
+alarm. The count is kept only as a BEST-EFFORT volume signal: a source is never marked broken because
+its server is slow at counting.
+
+**Deliberate-failure proof (a guard that cannot fire is not a guard):** `probe_one` was run against the
+OLD locked FDOR polygon URL and correctly returned BROKEN, while all five live sources returned LIVE.
+Re-run that proof if you touch the probe.
+
+### Coverage: probe EVERY layer a pipeline reads
+
+`leepa` fetches THREE MapServer layers and left-joins them on FOLIOID: **L9 use-codes** (576,015),
+**L10 last-sale** (534,514), **L12 just-value** (548,330 — the join SPINE). A silent death in the
+use-code layer breaks the homes-only filter while the value layer still looks perfectly healthy — the
+median would quietly land-blend again. Probe all three, not just one.
+
+NB `LEEPA_PARCELS_URL` (MapServer layer 0) is **"Tangible Business Names", not parcels** — it is never
+fetched, only used as a citation string, so the leepa citation currently points at the wrong layer.
+Tracked: `leepa_citation_wrong_layer`. Deliberately NOT in the probe (we don't guard what we don't ingest).
+
 ### Live ArcGIS status (probed 07/11/2026)
 
 | Source | Endpoint (layer) | Real WHERE | Status 07/11 |
@@ -147,6 +175,23 @@ Those measure the past. To prove a source is alive you must hit the source. Clas
 (`probe_source_liveness.py`); B/C/D need the analogous upstream probe — spec'd, not yet built.
 
 ---
+
+## 5b. The 18-month blind window is not a Collier thing — it's 12 sources
+
+Nobody set an 18-month tolerance on purpose. `tolerance_multiplier` is a flat **1.5** on almost every
+source. On a weekly cadence that's ~10 days of slack (fine). On a 365-day cadence the SAME 1.5 becomes
+**547 days** — and it silently applies to every annual source. Measured 07/11/2026 from the registry:
+
+- **547-day (18-month) blind window — 12 sources:** collier_parcels, leepa, leepa_parcel_zip, fdot,
+  census_acs, census_cbp, bls_oews_swfl (+tier1), faf5, hurdat2_fl, mhs_permits_swfl, mhs_databook.
+- **180–225-day window:** fema, fhfa, fdle_crime_swfl, marketbeat_swfl, lee_associates_swfl,
+  fmb_recovery, colliers_industrial, bls_qcew.
+- **Total that can be dead 60+ days before the probe says a word: 55 sources.**
+
+**Fix (one-line, but touches the freshness system → brainstorm + approval):** stop scaling slack by
+cadence. Use an ADDITIVE grace instead — `threshold = cadence_days + grace_days` (grace ~14–30) — so an
+annual source flags ~2–4 weeks after its expected drop, not 6 months. This is a band-aid over the deeper
+write-time-vs-source-health blindness (§1–2); do BOTH: cap the window AND add the upstream probe.
 
 ## 6. Concrete to-do (open these as `checks`, don't leave as prose — RULE 2.4)
 

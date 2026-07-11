@@ -18,6 +18,11 @@ import {
   type CollierParcelsZipRowNormalized,
 } from "../sources/collier-parcels-source.mts";
 import { fhfaHpiSource, type HpiSwflSummary } from "../sources/fhfa-hpi-source.mts";
+import {
+  collierSoldMedianSource,
+  type CollierSoldMedianSummaryNormalized,
+  type CollierSoldMedianZipRowNormalized,
+} from "../sources/collier-sold-median-source.mts";
 import { env } from "../config/env.mts";
 import { fmtInt, fmtPct, fmtRatio } from "./lib/number-format.mts";
 
@@ -79,6 +84,33 @@ let lastFetchedAt: string | null = null;
 let lastZipRows: CollierParcelsZipRowNormalized[] = [];
 
 let lastFhfaSummary: HpiSwflSummary | null = null;
+
+let lastSoldMedianSummary: CollierSoldMedianSummaryNormalized | null = null;
+let lastSoldMedianZipRows: CollierSoldMedianZipRowNormalized[] = [];
+
+/** ISO (YYYY-MM-DD) -> MM/DD/YYYY. As-of dates are stated once, never as a raw token. */
+function formatAsOf(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return y && m && d ? `${m}/${d}/${y}` : iso;
+}
+
+// Strict === kind matching — "collier-sold-median-*" must never cross-match the
+// "collier-parcels-*" fragments off the same table.
+function soldMedianSummaryFrom(
+  fragments: RawFragment[],
+): CollierSoldMedianSummaryNormalized | null {
+  for (const f of fragments) {
+    const n = f.normalized as unknown as CollierSoldMedianSummaryNormalized;
+    if (n?.kind === "collier-sold-median-summary") return n;
+  }
+  return null;
+}
+
+function soldMedianZipRowsFrom(fragments: RawFragment[]): CollierSoldMedianZipRowNormalized[] {
+  return fragments
+    .map((f) => f.normalized as unknown as CollierSoldMedianZipRowNormalized)
+    .filter((n) => n?.kind === "collier-sold-median-zip-row");
+}
 
 function salesByYearFrom(fragments: RawFragment[]): Map<number, number> {
   const out = new Map<number, number>();
@@ -203,6 +235,8 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   lastFetchedAt = allFragments[0]?.fetched_at ?? null;
   lastZipRows = parcelsZipRowsFrom(allFragments);
   lastFhfaSummary = fhfaSummaryFrom(allFragments);
+  lastSoldMedianSummary = soldMedianSummaryFrom(allFragments);
+  lastSoldMedianZipRows = soldMedianZipRowsFrom(allFragments);
 
   const agg = lastAggregate;
   if (agg.yearsObserved === 0 && agg.totalParcels === 0) return [];
@@ -288,6 +322,22 @@ function collierCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
         `YoY: ${msa.yoy_change_pct != null ? `${msa.yoy_change_pct > 0 ? "+" : ""}${msa.yoy_change_pct}%` : "n/a"}. ` +
         `QoQ: ${msa.qoq_change_pct != null ? `${msa.qoq_change_pct > 0 ? "+" : ""}${msa.qoq_change_pct}%` : "n/a"}. ` +
         `Federal HPI benchmark for Collier County market price direction (purchase-only, traditional, quarterly).`,
+      source_fragment_ids: [],
+    });
+  }
+
+  // Homes-only SOLD median (FDOR recorded deeds) — the sold answer to the
+  // active-listing land-blend. Per-ZIP detail rides in the detail table.
+  const sm = lastSoldMedianSummary;
+  if (sm) {
+    facts.push({
+      topic: "metric:collier_sold_median_homes_only",
+      fact: `Collier homes-only sold median (recorded deeds, as of ${formatAsOf(sm.as_of)})`,
+      value:
+        `Median of ${fmtInt(sm.county_n)} single-family + condo sales recorded 2024+ (over $20,000): ` +
+        `$${fmtInt(sm.county_median)}. A SOLD median from recorded deeds — the homes-only counterpart to the ` +
+        `active-listing asking median. Per-ZIP detail in the sold-median-by-ZIP table; ZIPs under 20 qualifying ` +
+        `sales report this county median rather than a thin-sample number.`,
       source_fragment_ids: [],
     });
   }
@@ -444,6 +494,36 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     });
   }
 
+  // Homes-only SOLD median (FDOR recorded deeds) — the sold, homes-only answer to
+  // the vacant-land tail that produced the $35k active-listing land-blend.
+  const sm = lastSoldMedianSummary;
+  const soldMedianSource: BrainOutputMetricSource | null = sm
+    ? {
+        url:
+          env.source === "live" && env.supabaseUrl
+            ? `${env.supabaseUrl}/rest/v1/collier_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback`
+            : "fixture://refinery/__fixtures__/collier-sold-median.sample.json",
+        fetched_at,
+        tier: 2,
+        citation:
+          env.source === "live"
+            ? `Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.collier_sold_median_by_zip; each parcel's latest recorded sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of ${formatAsOf(sm.as_of)}.`
+            : `Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only sold median per ZIP (fixture; refinery/__fixtures__/collier-sold-median.sample.json). As of ${formatAsOf(sm.as_of)}.`,
+      }
+    : null;
+  if (sm && soldMedianSource) {
+    key_metrics.push({
+      metric: "collier_sold_median_homes_only",
+      value: Math.round(sm.county_median),
+      direction: "stable",
+      label: `Collier homes-only sold median (single-family + condo, recorded deeds, as of ${formatAsOf(sm.as_of)})`,
+      variable_type: "intensive",
+      units: "USD",
+      display_format: "currency",
+      source: soldMedianSource,
+    });
+  }
+
   const detail_tables: BrainOutputDetailTable[] = lastZipRows.length
     ? [
         {
@@ -486,6 +566,44 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         },
       ]
     : [];
+
+  if (sm && soldMedianSource && lastSoldMedianZipRows.length) {
+    detail_tables.push({
+      id: "collier_sold_median_by_zip",
+      title: "Collier County homes-only sold median by ZIP (recorded deeds)",
+      grain: "zip",
+      columns: [
+        {
+          id: "median_sale",
+          label: "Homes-only sold median",
+          display_format: "currency",
+          units: "USD",
+        },
+        {
+          id: "home_sales_n",
+          label: "Qualifying home sales",
+          display_format: "count",
+          units: "count",
+        },
+        {
+          id: "county_fallback",
+          label: "County fallback (under 20 sales)",
+          display_format: "raw",
+        },
+      ],
+      rows: lastSoldMedianZipRows.map((r) => ({
+        key: r.zip,
+        label: r.zip,
+        cells: {
+          median_sale: r.median_sale,
+          home_sales_n: r.home_sales_n,
+          county_fallback: r.county_fallback,
+        },
+      })),
+      source: soldMedianSource,
+      note: `One row per Collier County ZIP. Homes-only = single-family + condo (vacant land excluded). Median of each parcel's latest recorded sale 2024+ over $20,000 — a stock of most-recent prices, not a transaction-flow median. ZIPs with fewer than 20 qualifying sales report the county median (county fallback = true), never a thin-sample ZIP median. Situs ZIP comes native from the FDOR roll (no centroid-to-ZCTA derivation). As of ${formatAsOf(sm.as_of)}.`,
+    });
+  }
 
   const direction = directionFromZScore(agg.zScore);
   const magnitude = agg.zScore == null ? 0.3 : Math.min(1, Math.abs(agg.zScore) / 3);
@@ -554,7 +672,7 @@ export const propertiesCollierValue: PackDefinition = {
   scope:
     "Collier County (FL) real-estate read — homes-sold velocity z-score (current year vs trailing 3yr) + median sale price YoY + months of supply from the Redfin Data Center county tracker, plus parcel count + Save-Our-Homes gap median from the FDOR Statewide Cadastral (parcel-grain, CO_NO=21). County-grain peer to properties-lee-value.",
   ttl_seconds: 2592000, // 30 days — Redfin refreshes monthly
-  sources: [collierMarketSource, collierParcelsSource, fhfaHpiSource],
+  sources: [collierMarketSource, collierParcelsSource, fhfaHpiSource, collierSoldMedianSource],
   input_brains: [],
   fitScore: (): number => 8,
   compositeCutoff: 0,

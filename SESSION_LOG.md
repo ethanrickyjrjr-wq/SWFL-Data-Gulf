@@ -1,3 +1,38 @@
+## 2026-07-11 (Opus 4.8 · main) — COLLIER DONE: source unbroken + homes-only SOLD median LIVE ($625,000) + daily source-liveness guard
+
+Collier is built and live-verified end to end. (1) SOURCE UNBROKEN: repointed `collier_parcels` off the
+locked FDOR polygon layer (republished as the full 2025 NAL ~06/09; now 200-body-400s every attribute
+WHERE) onto the FloridaGIO CENTROID twin, which is NOT locked, carries the same 100+ NAL fields, and
+returns the exact 364,827 Collier count. Added `SALE_PRC1` (the old 14-field layer lacked it). Re-ingest
+landed LIVE: 73/73 chunks, 364,000 rows merged, 20,027 parcels carrying a real sale price. Hardened the
+chunk loader with retry+backoff after a live `db.*.supabase.co:5432 timeout expired` killed a 20-min run
+at chunk 2/73 (opened `supabase_direct_conn_timeouts`). (2) HOMES-ONLY SOLD MEDIAN LIVE:
+`data_lake.collier_sold_median_by_zip` applied + granted — **county median $625,000 over 16,730 qualifying
+home sales**, which independently reconciles with Redfin's ~$625k Collier sold anchor (different path,
+same number). All 22 Collier ZIPs; 34102 $1,703,750, 34145 (Marco) $995,000, 34112 $420,000; the sub-20
+min-N gate fires correctly (34137/34138/34140/34141 report the county median flagged `county_fallback`).
+Homes-only = DOR_UC 001/004, vacant land (000/009/099) excluded — verified against the FDOR/Polk-PA
+use-code reference, NOT memory. Collier needs NO crosswalk: situs ZIP (`phy_zipcd`) is native to the FDOR
+roll — symmetric with the sibling session's leepa `zip_code`-as-column pivot; both views are now a plain
+GROUP BY. Wired: source connector (empty-tolerant, degrades instead of aborting the brain build), pack
+metric + per-ZIP detail table, vocab slug, fixture built from REAL live rows. Verified: 16/16 pack tests,
+catalog mirror, vocab-coverage OK (41 brains), `bunx next build` compiled.
+
+(3) THE GUARD — "not 18 months later": `check_freshness` reads MAX(_dlt_loads.inserted_at) vs
+cadence*tolerance = **547 days** for collier_parcels, so the dead source would have read FRESH until
+~Dec 2027. A staleness threshold CANNOT catch this (an annual source legitimately has no new data for a
+year). Shipped `ingest/scripts/probe_source_liveness.py` and wired it into the DAILY freshness workflow —
+liveness is checked on the CLOCK, not the cadence. It imports each pipeline's REAL constants (cannot drift
+on a repoint), probes every layer a pipeline reads (leepa L9/L10/L12 — a dead use-code layer would silently
+land-blend the median while the value layer looks fine), and inspects the response BODY for the
+`{"error":{"code":400}}` ArcGIS hides inside an HTTP 200. KEY LESSON (it cost me a false alarm):
+`returnCountOnly` is the WRONG liveness signal — LeePA cannot reliably count its 548k-row layer and
+intermittently 400s on it, so a count-based probe screamed BROKEN at Lee's spine within an hour. The probe
+now runs THE QUERY THE PIPELINE RUNS (a cheap row fetch) and treats count as best-effort volume only.
+Deliberate-failure proof: it returns BROKEN on the old locked FDOR URL and LIVE on all 5 real sources.
+Also found `LEEPA_PARCELS_URL` (L0) is "Tangible Business Names", not parcels — never fetched, but it IS
+the leepa citation URL (`leepa_citation_wrong_layer`).
+
 ## 2026-07-11 (Opus 4.8 · main) — PIVOT (operator call): zip_code is a COLUMN on leepa_parcels, redundant crosswalk DELETED
 
 Operator caught a real design failure of mine and was right. I had built a separate `leepa_parcel_zip`

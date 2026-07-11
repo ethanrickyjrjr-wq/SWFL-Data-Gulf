@@ -1,0 +1,88 @@
+{
+  "_meta": {
+    "note": "Sample of data_lake.collier_sold_median_by_zip — Collier homes-only (FDOR use code 001/004 = single-family + condo) SOLD median per ZIP from FDOR recorded deeds. county_median/county_n are constant across rows (CROSS JOIN). Values are REAL rows read live from the view on 07/11/2026 (not synthetic): county median $625,000 over 16,730 qualifying home sales — which independently reconciles with Redfin's ~$625k Collier sold anchor. Includes 34140 (n=18) to exercise the sub-20 county_fallback path. Situs ZIP is native to the FDOR roll (phy_zipcd) — unlike Lee, no centroid-to-ZCTA derivation.",
+    "source": "Collier County Property Appraiser (FDOR tax roll, recorded deeds)"
+  },
+  "rows": [
+    {
+      "zip_code": "34120",
+      "home_sales_n": 2338,
+      "median_sale": 662750,
+      "county_fallback": false,
+      "county_median": 625000,
+      "county_n": 16730
+    },
+    {
+      "zip_code": "34114",
+      "home_sales_n": 1580,
+      "median_sale": 649200,
+      "county_fallback": false,
+      "county_median": 625000,
+      "county_n": 16730
+    },
+    {
+      "zip_code": "34112",
+      "home_sales_n": 1344,
+      "median_sale": 420000,
+      "county_fallback": false,
+      "county_median": 625000,
+      "county_n": 16730
+    },
+    {
+      "zip_code": "34145",
+      "home_sales_n": 1311,
+      "median_sale": 995000,
+      "county_fallback": false,
+      "county_median": 625000,
+      "county_n": 16730
+    },
+    {
+      "zip_code": "34119",
+      "home_sales_n": 1221,
+      "median_sale": 695000,
+      "county_fallback": false,
+      "county_median": 625000,
+      "county_n": 16730
+    },
+    {
+      "zip_code": "34110",
+      "home_sales_n": 1143,
+      "median_sale": 720000,
+      "county_fallback": false,
+      "county_median": 625000,
+      "county_n": 16730
+    },
+    {
+      "zip_code": "34108",
+      "home_sales_n": 882,
+      "median_sale": 1280000,
+      "county_fallback": false,
+      "county_median": 625000,
+      "county_n": 16730
+    },
+    {
+      "zip_code": "34102",
+      "home_sales_n": 644,
+      "median_sale": 1703750,
+      "county_fallback": false,
+      "county_median": 625000,
+      "county_n": 16730
+    },
+    {
+      "zip_code": "34117",
+      "home_sales_n": 406,
+      "median_sale": 557000,
+      "county_fallback": false,
+      "county_median": 625000,
+      "county_n": 16730
+    },
+    {
+      "zip_code": "34140",
+      "home_sales_n": 18,
+      "median_sale": 625000,
+      "county_fallback": true,
+      "county_median": 625000,
+      "county_n": 16730
+    }
+  ]
+}

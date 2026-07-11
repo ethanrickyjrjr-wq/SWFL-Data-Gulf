@@ -28,6 +28,7 @@ _TIER2_COLUMNS: dict = {
     "av_sd":     {"data_type": "double", "nullable": True},
     "av_nsd":    {"data_type": "double", "nullable": True},
     "tv_nsd":    {"data_type": "double", "nullable": True},
+    "sale_prc1": {"data_type": "double", "nullable": True},  # most-recent recorded sale price (homes-only sold median)
     "sale_yr1":  {"data_type": "bigint", "nullable": True},
     "sale_mo1":  {"data_type": "bigint", "nullable": True},
     "qual_cd1":  {"data_type": "text", "nullable": True},
@@ -53,6 +54,7 @@ def _normalize(attr_rows: list[dict]) -> list[dict]:
             "av_sd":     _coerce_float(a.get("AV_SD")),
             "av_nsd":    _coerce_float(a.get("AV_NSD")),
             "tv_nsd":    _coerce_float(a.get("TV_NSD")),
+            "sale_prc1": _coerce_float(a.get("SALE_PRC1")),
             "sale_yr1":  _coerce_int(a.get("SALE_YR1")),
             "sale_mo1":  _coerce_int(a.get("SALE_MO1")),
             "qual_cd1":  (str(a["QUAL_CD1"]) if a.get("QUAL_CD1") not in (None, "") else None),
@@ -102,8 +104,30 @@ def _promote_to_tier2(rows: list[dict], chunk_size: int = 5_000) -> None:
     n_chunks = (total + chunk_size - 1) // chunk_size
     for i in range(0, total, chunk_size):
         chunk = rows[i : i + chunk_size]
-        load_info = pipeline.run(_make_resource(chunk)())
-        load_info.raise_on_failed_jobs()
+        # Retry each chunk: this is 73 sequential loads, each opening its own connection
+        # to Supabase, and a SINGLE transient connection timeout on any one of them
+        # otherwise kills the whole ~20-minute run (observed live 07/11/2026:
+        # "connection to db.*.supabase.co:5432 failed: timeout expired" at chunk 2/73,
+        # after a clean 364,827-row fetch). The merge is idempotent on parcel_id, so a
+        # retried chunk is safe to re-apply.
+        last_exc: Exception | None = None
+        for attempt in range(4):
+            try:
+                load_info = pipeline.run(_make_resource(chunk)())
+                load_info.raise_on_failed_jobs()
+                last_exc = None
+                break
+            except Exception as exc:  # noqa: BLE001 — transient DB/connection errors
+                last_exc = exc
+                if attempt < 3:
+                    backoff = 2**attempt * 5  # 5s, 10s, 20s — let the connection settle
+                    print(
+                        f"  collier_parcels chunk {i // chunk_size + 1}/{n_chunks} "
+                        f"attempt {attempt + 1} failed ({type(exc).__name__}); retrying in {backoff}s"
+                    )
+                    time.sleep(backoff)
+        if last_exc is not None:
+            raise last_exc
         print(f"  collier_parcels chunk {i // chunk_size + 1}/{n_chunks} ({len(chunk)} rows)")
 
 
