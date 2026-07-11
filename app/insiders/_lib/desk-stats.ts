@@ -14,7 +14,10 @@
 
 // KNOWN-DEBT(data_lake: live market views live in the data_lake schema (typed public only))
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
-import { HOME_MAP_DATA } from "@/lib/landing/home-map-data";
+// ZIP → place-name is static geography (its own authority), NOT the quarantined
+// mock fixture — so this loader stays clear of the grounding-coverage guard while
+// still labeling ZIPs the same way the homepage map does.
+import { ZIP_PLACE_NAMES } from "@/lib/landing/zip-place-names";
 
 export interface DeskStats {
   /** Active residential listings, Lee + Collier (sum of per-ZIP counts). */
@@ -57,7 +60,7 @@ const usdShort = (n: number): string => {
 };
 
 const placeName = (zip: string, city?: string | null): string | null =>
-  HOME_MAP_DATA.placeNames[zip] ?? city ?? null;
+  ZIP_PLACE_NAMES[zip] ?? city ?? null;
 
 export async function loadDeskStats(now: Date = new Date()): Promise<DeskStats> {
   const monthName = now.toLocaleString("en-US", { month: "long", timeZone: "UTC" });

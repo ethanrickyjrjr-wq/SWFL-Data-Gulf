@@ -1,3 +1,33 @@
+## 2026-07-11 (Opus 4.8 · main) — Fixed two CI reds: grounding-guard desk-stats mock-import + the syncUserAudiences stack-overflow polluter
+
+Two operator-named CI failures, both root-caused (not patched-over) and green locally.
+
+1. **Grounding-coverage guard (check due 07/13).** `app/insiders/_lib/desk-stats.ts` imported the
+   quarantined mock module `lib/landing/home-map-data` — but ONLY for `HOME_MAP_DATA.placeNames[zip]`, a
+   static ZIP→place-name label, not a fabricated number. The guard's import-level check is blunt (any
+   import off-allowlist fails), so the fix follows the shared-concept→one-authority pattern: extracted the
+   ZIP→name map to its own non-mock authority `lib/landing/zip-place-names.ts`; `home-map-data.ts` now
+   imports FROM it (mock keeps only its `metrics` fixture) and desk-stats reads `ZIP_PLACE_NAMES` directly.
+   No allowlist growth (the guard says don't). Guard test 12/12 green.
+
+2. **syncUserAudiences "RangeError: Maximum call stack" (`ci-flaky-stackoverflow-polluter`).** These tests
+   were VICTIMS, not the bug. Root cause: `lib/email/__tests__/contact-import-replay.route.test.ts` captures
+   `realAudience = await import("../audience-sync")` then `mock.module("@/lib/email/audience-sync", () =>
+   ({...realAudience, syncUserAudiences: (...a) => active ? undefined : realAudience.syncUserAudiences(...a)}))`.
+   Its "leak guard" comment intended the inactive fall-through to delegate to the REAL fn — but bun 1.3.14
+   `mock.module` mutates the module namespace object IN PLACE, so `realAudience.syncUserAudiences` resolves
+   to the MOCK itself → self-delegation → infinite recursion. Because bun's mock.module is process-global,
+   this leaks to any file that touches these modules while inactive → the intermittent RangeError (different
+   victims per env = different file-adjacency ordering; Windows-local order didn't surface it, Linux CI did).
+   Confirmed the in-place-mutation mechanism with a minimal bun repro (hung/overflowed), and the fix (bind
+   the real fn to a const BEFORE mock.module) passes it. Applied to all 4 self-delegating mocks in the file
+   (service-role, upsert-contacts, audience-sync, marketing-client). Own tests + audience-sync + full
+   lib/email/lib/landing/lib/highlighter/app/insiders suites green (1558 pass, 0 fail).
+
+Out of scope, observed (checks opened, no silent deferral): the full-suite zip-seed victim is a SEPARATE
+env leak — `zip-seed.ts:53` captures `NEXT_PUBLIC_SITE_URL` into a module-level const at import time, frozen
+to a leaked `http://localhost:3000` in the full run. Not the stack-overflow; own fix (call-time env read).
+
 ## 2026-07-11 (Opus 4.8 · main) — Lee homes-only SOLD median per ZIP: full build (code-complete, prod ingest operator-gated)
 
 Executed the inherited Lee homes-only sold-median plan TDD, tasks 1–5. Also killed a live-config ghost:

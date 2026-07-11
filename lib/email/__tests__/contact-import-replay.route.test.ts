@@ -55,6 +55,20 @@ const realUpsert = await import("../upsert-contacts");
 const realAudience = await import("../audience-sync");
 const realMarketing = await import("../marketing-client");
 
+// Snapshot the real implementations into stable consts BEFORE mock.module runs.
+// bun's mock.module (1.3.14) mutates the module namespace object IN PLACE, so a
+// later `realAudience.syncUserAudiences` reference resolves to the MOCK itself —
+// the inactive fall-through then delegates to itself and overflows the stack
+// ("Maximum call stack size exceeded"). Because the mock is process-global, that
+// recursion leaks to any other test file that touches these modules while this
+// file is inactive (the intermittent syncUserAudiences RangeError). Binding the
+// real fn to a const here captures a reference the in-place mutation can't clobber;
+// the `...realX` spreads stay correct because the factory runs before the swap.
+const realCreateServiceRoleClient = realServiceRole.createServiceRoleClient;
+const realUpsertContacts = realUpsert.upsertContacts;
+const realSyncUserAudiences = realAudience.syncUserAudiences;
+const realGetMarketingResend = realMarketing.getMarketingResend;
+
 let active = false;
 
 mock.module("@/utils/supabase/service-role", () => ({
@@ -64,7 +78,7 @@ mock.module("@/utils/supabase/service-role", () => ({
       ? (makeFakeSupabase() as unknown as ReturnType<
           typeof realServiceRole.createServiceRoleClient
         >)
-      : realServiceRole.createServiceRoleClient(),
+      : realCreateServiceRoleClient(),
 }));
 mock.module("@/lib/email/upsert-contacts", () => ({
   ...realUpsert,
@@ -73,7 +87,7 @@ mock.module("@/lib/email/upsert-contacts", () => ({
     uid: string,
     rows: Parameters<typeof realUpsert.upsertContacts>[2],
   ) => {
-    if (!active) return realUpsert.upsertContacts(db, uid, rows);
+    if (!active) return realUpsertContacts(db, uid, rows);
     upsertCalls.push({ uid, rows: [...rows] });
     return { inserted: rows.length, updated: 0, skipped: 0 };
   },
@@ -81,14 +95,12 @@ mock.module("@/lib/email/upsert-contacts", () => ({
 mock.module("@/lib/email/audience-sync", () => ({
   ...realAudience,
   syncUserAudiences: async (...args: Parameters<typeof realAudience.syncUserAudiences>) =>
-    active ? undefined : realAudience.syncUserAudiences(...args),
+    active ? undefined : realSyncUserAudiences(...args),
 }));
 mock.module("@/lib/email/marketing-client", () => ({
   ...realMarketing,
   getMarketingResend: () =>
-    active
-      ? ({} as ReturnType<typeof realMarketing.getMarketingResend>)
-      : realMarketing.getMarketingResend(),
+    active ? ({} as ReturnType<typeof realMarketing.getMarketingResend>) : realGetMarketingResend(),
 }));
 
 // Import AFTER the mocks so the route binds the wrappers.
