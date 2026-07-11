@@ -1,3 +1,22 @@
+## 2026-07-11 (Opus 4.8 · main) — Records-request outbound engine BUILT + local-smoked (7-task plan executed); live_verify held for push
+
+Executed `docs/superpowers/plans/2026-07-11-records-request-engine.md` inline, 7 tasks, TDD. Shipped:
+`public.records_requests` migration (applied to prod Supabase — 20 cols verified) · three pure TS
+modules `lib/records-request/{state,template,send}.ts` with 15 bun tests green (lifecycle machine incl.
+the §119.07(4) `cost_quoted→cost_approved` gate; §119 draft template; transactional send that asserts
+NO marketing/unsubscribe fields) · `scripts/records-request.mts` operator CLI modeled on check.mjs
+(add/draft/send `--confirm`/ack/quote/approve-cost/fulfill/land/deny/withdraw/list) — live-smoked
+add→draft→list→withdraw against the prod table, correct §119 body rendered, terminal row filtered from
+open list · session-kickoff "Records reqs" gone-quiet surface (renders `none open ✓`, never throws).
+Seeded `dbpr_re_emails` + `fldor_collier_nal` as drafted candidates with NO contact_email (declined to
+invent a custodian address — the no-fabrication rule). Opened follow-up checks
+`dbpr_re_emails_confirm_lane` + `fldor_collier_nal_confirm_source`. DEVIATION from plan Task 7: did NOT
+close `records_request_engine_live_verify` — updated its detail and held it OPEN until push (the CLI
+isn't in origin yet; live_verify = prod evidence, not same-session dev attestation). Concurrency note:
+three sessions committing to this shared `main` (records-request + dbpr-re-licensees pipeline + Fable5
+desk), 12 commits ahead of origin, all linear/intact. Push held for operator. Ops lesson: never pipe
+`git commit` through `head` (SIGPIPE aborts it mid-lint-staged).
+
 ## 2026-07-11 (Fable 5 · main) — SWFL Data Desk /desk BUILT (Spec A: 1a terminal + 1b filing bridge); daily_truth prices found unvalued → ZHVI fallback
 
 Executed `2026-07-11-swfl-data-desk-design.md` per the handoff. New lake view
