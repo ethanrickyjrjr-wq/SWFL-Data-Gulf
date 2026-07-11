@@ -1,3 +1,23 @@
+## 2026-07-11 (Opus 4.8 · main) — Records-request outbound engine SPECCED (component 3 of the data-acquisition engine); §119 verified live
+
+Operator: review + spec + plan `docs/vertical-plays/04-data-acquisition-engine.md`, lean = build the
+records-request lane first. Probed the back-end (cadence_registry ODD seams + `checks` table pattern +
+new-agent-radar's deferred email lane are all real). Researched the vendor contract live (crawl4ai on
+`leg.state.fl.us/.../0119.07.html`): **FL Ch.119 has NO fixed response deadline** — §119.07(1) "at any
+reasonable time," custodian "must acknowledge … promptly and respond in good faith" (no day-count, unlike
+5/10-day states); **fees** §119.07(4)(a) up to **15¢/one-sided page**, actual cost otherwise, plus a
+**"special service charge"** (4)(d) "reasonable and based on the cost incurred" for extensive IT/clerical.
+Those two facts drive the design: no SLA timer → per-request `follow_up_days` "gone-quiet" nudge; the
+special-service-charge → explicit `cost_quoted → cost_approved` money gate. Operator corrected my "filing
+is manual" premise → it IS automatable (email), gated by operator approval: **draft → email you → you
+approve (`send --confirm`) → auto-send from hello@swfldatagulf.com → auto-file**. Spec:
+`docs/superpowers/specs/2026-07-11-records-request-engine-design.md` — `public.records_requests` table +
+`scripts/records-request.mjs` (modeled on check.mjs) + transactional Resend single-send (NOT the marketing
+batch/unsubscribe builders) + session-kickoff quiet-request surfacing. Seeds triaged (collier_parcels sale
+price EXCLUDED — "free in the same ArcGIS call" per cadence_registry, a Tier-2 miss not a request).
+Registered via new-build → check `records_request_engine_live_verify`. Next: operator spec review → plan.
+No product code touched; spec+session-log only.
+
 ## 2026-07-11 (Fable 5 · main) — SWFL Data Desk (/desk) specced: product (A) + discovery flywheel (B), from 4-stream research; handoff written
 
 Verified the /charts glow-up live (all 4 new panels draw on prod, closed `charts_glowup_live_verify`),
