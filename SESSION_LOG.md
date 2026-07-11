@@ -1,3 +1,24 @@
+## 2026-07-11 (Opus 4.8 · main) — Deliverable coherence rule: structural gate so a chart can't contradict its headline (root of the ugly $3.17M-over-$802K luxury email)
+
+Operator caught the Luxury Market Report template pairing a "$3,168,000 · $2M+" headline with a
+Zillow *top-third* chart running $802K→$746K — wrong metric AND ~4× magnitude gap, hand-authored by
+a past session. Diagnosed as structural: the headline and the chart are produced on independent
+paths that never have to agree, and the embarrassing artifact was authoring-time marketing fill, not
+builder output — so a runtime-only check would never have caught it. Operator ruling: "make sure
+this doesn't happen anymore — we need rules to building," and each promised element (chart/graph/
+picture/commentary/example) must ship WITH a coherence rule, enforced structurally not by model
+judgment. Shipped the core: `lib/deliverable/chart-coherence.ts` `assertHeroChartCoherence` — fires
+only on the mechanically safe slice (same unit currency/count, headline >3× outside the chart's
+displayed range), returns a named reason; a donut's center-total over its segments and any
+$-headline-over-%-chart stay coherent (no false positives). 14/14 tests green. Spec:
+`docs/superpowers/specs/2026-07-11-deliverable-coherence-gate-design.md`. Checks opened:
+`deliverable_coherence_gate_live_verify` (this build) + `promised_deliverable_element_coherence_audit`
+(follow-up — audit every promised deliverable, extend pattern to pictures/commentary/examples).
+NEXT: author-time CI gate running the check over every chart-bearing template (goes red on luxury
+first = proof), then the Naples/Collier $2M+ luxury ring as the fixture that turns it green + fixes
+the sample stats. Only my files staged (chart-coherence.ts/.test.ts, the spec, this log) — foreign
+uncommitted work (records-request.mts, desk-discovery plan, CLAUDE.md linter edit) left untouched.
+
 ## 2026-07-11 (Sonnet 5 · main) — Unbiased scan of 10 external repos for reuse; shipped shared graphify snapshot cache from the one that survived
 
 Operator asked for a no-bias crawl4ai-style scan of 10 GitHub repos (last30days-skill, headroom,
