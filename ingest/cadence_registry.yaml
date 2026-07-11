@@ -684,6 +684,23 @@ pipelines:
         as_of: "2026-06-13"
         source: "our ingest"
 
+  - name: redfin_city_swfl
+    lane: tier-2
+    cadence_days: 31
+    tolerance_multiplier: 2.0
+    dlt_schema_name: redfin_city_swfl # VERIFY after first run: SELECT DISTINCT schema_name FROM data_lake._dlt_loads WHERE schema_name LIKE '%redfin_city_swfl%'
+    expected_rows_min: 1700 # 90% of 1917 confirmed 07/11/2026 via live dry-run (cape_coral 655 / fort_myers 648 / naples 614; 5 property types; 2013..2026). Grows monthly.
+    count_table: data_lake.redfin_city_swfl
+    # Source: Redfin Data Center CITY market tracker (free public TSV, ~1 GB gz), filtered to Cape Coral / Fort Myers / Naples, FL. Refreshes ~monthly. The monthly source-faithful SOLD anchor beneath the daily ASKING line on the desk hero (daily-price-dual-signal). SteadyAPI/Redfin county grain can't serve a true city-grain sold median.
+    source_scope:
+      confirmed_total:
+        summary: "Monthly true-sold median sale price at city grain for the 3 desk-hero cities (Cape Coral, Fort Myers, Naples) — full period_end history, all property types, from Redfin's free city tracker"
+        source: "our ingest (redfin.com origin)"
+      source_ceiling:
+        summary: "Redfin's city tracker carries every FL place; the same pipeline is a config-only add for Bonita Springs, Estero, Marco Island, etc. (extend CITY_REGIONS + REGION_TO_AREA)."
+        as_of: "07/11/2026"
+        source_label: "Redfin Data Center city_market_tracker"
+
   - name: collier_parcels
     lane: tier-2
     cadence_days: 365

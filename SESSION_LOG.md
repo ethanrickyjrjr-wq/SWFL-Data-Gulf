@@ -1,3 +1,28 @@
+## 2026-07-11 (Opus 4.8 · main) — daily_truth median_sale_price: real fix is WRONG-LANE, not Gemini billing; built Redfin city-grain SOLD ingest (proven live); HELD for Ricky
+
+Operator: "why is this STILL set up incorrectly? median_sale_price — we have upgraded crawl4ai + new_steady
+— do it differently." Reframed the prior session's diagnosis: the NULLs (all 57 rows, status
+`all cascade legs returned no sourced number`, verified live) proximately come from the Gemini leg failing
+(billing 429), but the STRUCTURAL defect is the WRONG LANE — `median_sale_price` web-searches (lane 3) a
+number we already hold in lane 1, with 3 dead stub fallback legs. Even with Gemini credits it's wrong:
+sold price has NO daily source anywhere (deeds lag; our own sold-capture `listing_transitions` = 77 rows).
+Live-verified in-session (RULE 1, `new_steady` key + public files): SteadyAPI `/housing-market-details`
+is ZIP-only (city/county 422); Redfin *county* tracker is county-only; **Redfin free CITY tracker carries
+true-sold `median_sale_price` for Cape Coral/Fort Myers/Naples** (city grain, monthly); live active
+inventory (`active_listings_residential.city` + `list_price`) gives a true daily median ASKING price per
+city. Operator decision: show BOTH — daily asking line + monthly sold anchor, both source-faithful, labeled.
+BUILT + PROVEN this commit: `ingest/pipelines/redfin_city_swfl/` (streaming-gzip filter of the ~1 GB city
+tracker → `data_lake.redfin_city_swfl`, exact-region match excludes North Fort Myers / FM Beach / Naples
+Park) + 4 pytest green + monthly GHA cron (`redfin-city-swfl-monthly.yml`, Day 18 14:00) + cadence entry +
+pipeline-freshness §3 row. Live dry-run (zero writes): 1,917 rows (cape 655 / FM 648 / naples 614), 2013..
+2026, latest 2026-05-31 sold medians cape $369,900 / FM $339,000 / naples $1,235,000. NOT YET DONE (checks
+opened): daily-asking `lake_sql` leg + desk wiring (`lib/desk/loaders.ts` hero/trend) + retiring the dead
+Gemini price search (ripples into freshness-pulse pack + brain-vocabulary, Gate 5 — separate clean change).
+DISCREPANCY flagged (check `naples_asking_vs_sold_geography`): "Naples" = broad area in listings (asking
+~$279k) vs incorporated City of Naples in Redfin (sold ~$1.235M) — needs one consistent geography before
+wiring the Naples hero. Spec: `docs/superpowers/specs/2026-07-11-daily-price-dual-signal-design.md`. HELD
+for Ricky: push + first live ingest write.
+
 ## 2026-07-11 (Sonnet 5 · main) — Desk build reviewed + verified in isolation; daily_truth NULL root-caused to Gemini billing (not a code bug); Desk nav links added
 
 Operator asked to approve+push the desk build (`eaf6d1cc`) and to explain the `daily_truth`

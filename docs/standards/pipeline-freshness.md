@@ -79,6 +79,7 @@ Avoid stacking multiple workflows on the same day-of-month. Current schedule (re
 | Day 10 14:00                  | `storm-history-monthly.yml`   | monthly               | NOAA storm-events update (1hr after usgs to stagger)                                                     |
 | Day 12 13:00                  | `ingest-census-vip.yml`       | monthly               | VIP releases "first week"; 5-day buffer                                                                  |
 | Day 15 13:00                  | `redfin-monthly.yml`          | monthly               | Redfin ~3rd Friday; S3 last-mod observed ~14th                                                           |
+| Day 18 14:00                  | `redfin-city-swfl-monthly.yml`| monthly               | Redfin city tracker (~1 GB gz), same ~monthly refresh; staggered after redfin lee/collier (Day 18 12/13) |
 | Day 16 14:00                  | `ingest-bls-ppi.yml`          | monthly               | PPI ~day 15 (1-day buffer)                                                                               |
 | Day 17 13:00                  | `ingest-fred-g17.yml`         | monthly               | FRED G.17 ~day 16 (1-day buffer)                                                                         |
 | Day 20 13:00                  | `zori-tier1-monthly.yml`      | monthly (T1 fetch)    | Zillow Research refreshes monthly ~3rd week                                                              |
