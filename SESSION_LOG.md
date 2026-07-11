@@ -1,3 +1,22 @@
+## 2026-07-11 (Opus 4.8 · main) — PIVOT (operator call): zip_code is a COLUMN on leepa_parcels, redundant crosswalk DELETED
+
+Operator caught a real design failure of mine and was right. I had built a separate `leepa_parcel_zip`
+crosswalk: a second full pagination over LeePA layer 12 (548k parcels, 22m31s measured) landing a table
+keyed 1:1 on the SAME folioid as `leepa_parcels`. But the existing leepa ingest ALREADY walks all of L12
+(that's where `just_value` comes from, resources.py) — it just never asked for the geometry. Two passes
+over identical records, plus a redundant 1:1 table. ZIP is an ATTRIBUTE of the parcel, so it belongs on
+the parcel row. FIXED: L12 is now pulled WITH geometry (one geojson request returns attributes AND polygon
+— verified live), the site ZIP is derived from each parcel's own centroid in that same pass via the new
+shared `ingest/lib/zcta_assign.py` (`zip_by_folio`), and `zip_code` ships as a column on
+`data_lake.leepa_parcels`. Spatial assign is wrapped so a failure degrades zip_code to NULL rather than
+sinking the parcel ingest. DELETED: `ingest/pipelines/leepa_parcel_zip/*`, its tests, its cron, its cadence
+entry. The median view collapses to a plain GROUP BY on leepa_parcels — NO JOIN, no crosswalk. leepa cron
+timeout 30->90m (L12 now hauls ~240MB of geometry; the request COUNT is unchanged since that pass already
+made all 548 round-trips). Verified: 8 shared-lib tests green; live smoke over 300 L12 features = 300/300
+ZIP match, joined row carries zip_code 34134 beside just_value. Full-scale dry-run had already proven the
+derivation: 548,325 parcels, 548,323 matched (100%). Next: run the leepa ingest, apply the view, verify
+33972, rebuild, close `homes_only_sold_median_live_verify`.
+
 ## 2026-07-11 (Opus 4.8 · main) — Socials Round 2 direction: charts ARE the moat, kill the dark-only monotony
 
 Reviewed Claude Design's Round 1 look-book (5 lab templates @ square, populated + empty). It respected every

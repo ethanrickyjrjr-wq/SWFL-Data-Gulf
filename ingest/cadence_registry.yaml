@@ -721,14 +721,6 @@ pipelines:
         source_label: "FDOR Statewide Cadastral (ArcGIS FeatureServer)"
         summary: "135 fields total; we pull 13. Biggest miss: SALE_PRC1/SALE_PRC2 (actual sale price) — never pulled despite sale year/month/qualification being pulled in the same query. Also free in the same call: owner mailing address, building sqft, year built, land value/sqft."
 
-  - name: leepa_parcel_zip
-    lane: tier-2
-    cadence_days: 365
-    tolerance_multiplier: 1.5
-    dlt_schema_name: leepa_parcel_zip # VERIFY after first run: SELECT DISTINCT schema_name FROM data_lake._dlt_loads WHERE schema_name LIKE '%leepa_parcel_zip%'
-    expected_rows_min: 480000 # PLACEHOLDER — re-baseline to 90% of the first real load (L12 ~548k parcels with geometry; one crosswalk row each). Set from live count after the first prod run.
-    count_table: data_lake.leepa_parcel_zip
-    # Source: LeePA ParcelInfo MapServer layer 12 (parcel polygon geometry). Each parcel's outer-ring centroid is point-in-polygoned against vendored TIGER ZCTAs (public/maps/fl_zips.geojson) via DuckDB spatial -> folioid->zip_code crosswalk. Geometrically stable (annual, matches leepa-parcels); refresh catches new/split parcels. Consumed by properties-lee-value (homes-only sold median per ZIP, via data_lake.leepa_sold_median_by_zip). Keysets on OBJECTID to clear the 100k resultOffset ceiling.
 
   - name: fhfa
     lane: tier-2

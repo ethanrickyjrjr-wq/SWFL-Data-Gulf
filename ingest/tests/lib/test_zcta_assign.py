@@ -1,9 +1,9 @@
-"""Pure-logic tests for the Lee parcel -> ZIP spatial assignment.
+"""Pure-logic tests for centroid -> ZCTA site-ZIP assignment.
 
-Isolated: a fake 2-ZCTA GeoJSON, no network, no LeePA. DuckDB spatial does the
-point-in-polygon so the real join path is exercised, not a mock of it.
+Isolated: a fake 2-ZCTA GeoJSON, no network. DuckDB spatial does the real
+point-in-polygon, so the actual join path is exercised, not a mock of it.
 """
-from ingest.pipelines.leepa_parcel_zip.spatial import assign_zip, ring_centroid
+from ingest.lib.zcta_assign import assign_zip, ring_centroid, zip_by_folio
 
 _ZCTA = {
     "type": "FeatureCollection",
@@ -56,7 +56,6 @@ def test_every_parcel_gets_exactly_one_row():
 
 def test_ring_centroid_polygon_mean_of_outer_ring():
     geom = {"type": "Polygon", "coordinates": [[[0.0, 0.0], [0.0, 4.0], [4.0, 4.0], [4.0, 0.0], [0.0, 0.0]]]}
-    # mean of the 5 listed vertices (closing vertex repeats (0,0)): x=8/5, y=8/5
     assert ring_centroid(geom) == (8.0 / 5.0, 8.0 / 5.0)
 
 
@@ -71,3 +70,23 @@ def test_ring_centroid_multipolygon_uses_first_ring():
 def test_ring_centroid_none_geometry_returns_none():
     assert ring_centroid(None) is None
     assert ring_centroid({"type": "Polygon", "coordinates": []}) is None
+
+
+def test_zip_by_folio_maps_features_to_site_zip():
+    """The one call the parcel ingest makes: features -> {folioid: zip}."""
+    features = [
+        {
+            "properties": {"FOLIOID": 10289421, "Just": 250000},
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[-81.96, 26.64], [-81.96, 26.66], [-81.94, 26.66], [-81.94, 26.64], [-81.96, 26.64]]],
+            },
+        },
+        {   # no geometry -> absent from the map, never invented
+            "properties": {"FOLIOID": 99999999, "Just": 1},
+            "geometry": None,
+        },
+    ]
+    out = zip_by_folio(features, _ZCTA)
+    assert out["10289421"] == "33901"
+    assert "99999999" not in out

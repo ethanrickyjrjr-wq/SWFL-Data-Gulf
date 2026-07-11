@@ -11,6 +11,7 @@ from ingest.lib.coercion import coerce_date as _coerce_esri_date, coerce_float a
 from ingest.lib.guards import assert_vs_canonical
 from ingest.lib.storage_uploader import upload_csv_gz, upload_geojson_gz
 from ingest.lib.tier1_inventory import upsert_inventory_row
+from ingest.lib.zcta_assign import zip_by_folio as _zip_by_folio
 from .constants import (
     LEEPA_JUST_VALUE_URL,
     LEEPA_LAST_SALE_URL,
@@ -35,6 +36,10 @@ def ingest_leepa_parcels(pipeline) -> None:
 # Postgres table schema is stable across re-ingests. FOLIOID is the parcel key (PK).
 _TIER2_LEEPA_COLUMNS: dict = {
     "folioid":              {"data_type": "text",   "nullable": False, "primary_key": True},
+    # Site ZIP (G1: derived from the parcel's own centroid, never a mailing ZIP).
+    # An attribute OF the parcel, so it lives on the parcel row — not in a
+    # separate 1:1 crosswalk table. Comes free from the L12 pass we already make.
+    "zip_code":             {"data_type": "text",   "nullable": True},
     "just_value":           {"data_type": "double", "nullable": True},
     "market_value":         {"data_type": "double", "nullable": True},
     "assessed_value":       {"data_type": "double", "nullable": True},
@@ -53,10 +58,20 @@ _TIER2_LEEPA_COLUMNS: dict = {
 
 
 
-def _join_leepa(use_rows: list[dict], value_rows: list[dict], sale_rows: list[dict]) -> list[dict]:
-    """Left-join three layers on FOLIOID with the value layer as the spine (canonical parcel set)."""
+def _join_leepa(
+    use_rows: list[dict],
+    value_rows: list[dict],
+    sale_rows: list[dict],
+    zip_by_folio: dict[str, str | None] | None = None,
+) -> list[dict]:
+    """Left-join three layers on FOLIOID with the value layer as the spine (canonical parcel set).
+
+    `zip_by_folio` (folioid -> site ZIP, derived from the L12 geometry in the same
+    pass) is attached as a column. Absent/None => zip_code stays NULL; never invented.
+    """
     use_by_folio = {r.get("FOLIOID"): r for r in use_rows if r.get("FOLIOID")}
     sale_by_folio = {r.get("FOLIOID"): r for r in sale_rows if r.get("FOLIOID")}
+    zips = zip_by_folio or {}
     joined: list[dict] = []
     for v in value_rows:
         folio = v.get("FOLIOID")
@@ -66,6 +81,7 @@ def _join_leepa(use_rows: list[dict], value_rows: list[dict], sale_rows: list[di
         s = sale_by_folio.get(folio) or {}
         joined.append({
             "folioid":              folio,
+            "zip_code":             zips.get(str(folio)),
             "just_value":           _coerce_float(v.get("Just")),
             "market_value":         _coerce_float(v.get("Market")),
             "assessed_value":       _coerce_float(v.get("Assessed")),
@@ -128,21 +144,47 @@ def ingest_leepa_parcels_value(tier1_pipeline) -> None:
     """Pull layers 9/10/12 (use codes, last qualified sale, just value), archive each as
     Tier 1 CSV.gz with pointer rows, then join on FOLIOID and promote to
     data_lake.leepa_parcels. Layers 13/14/15 are intentionally skipped — their fields
-    are identical to layer 12, only their choropleth styling differs."""
+    are identical to layer 12, only their choropleth styling differs.
+
+    Layer 12 (the parcel spine) is pulled WITH geometry: one geojson request returns
+    the value attributes AND the polygon, so the site ZIP is derived from the parcel's
+    own centroid in the pass we already make — no second pagination over the same
+    548k parcels, and no 1:1 crosswalk table (zip_code is an attribute of the parcel).
+    """
     today = date.today().isoformat()
 
-    layers = [
-        ("just_value", LEEPA_JUST_VALUE_URL),
-        ("use_codes",  LEEPA_USE_CODES_URL),
-        ("last_sale",  LEEPA_LAST_SALE_URL),
-    ]
-    pulled: dict[str, list[dict]] = {}
-    for name, url in layers:
+    # Spine: L12 with geometry -> attributes (properties) + polygon in one pass.
+    features = list(paginate_arcgis(LEEPA_JUST_VALUE_URL))
+    if not features:
+        print("leepa just_value: 0 features — aborting Tier 2 promotion")
+        return
+    value_rows = [ft.get("properties") or {} for ft in features]
+
+    # Site ZIP from each parcel's own centroid (G1). Failure here must not sink the
+    # parcel ingest — zip_code simply stays NULL and the sold-median view reports less.
+    try:
+        zip_map = _zip_by_folio(features)
+        matched = sum(1 for z in zip_map.values() if z)
+        print(f"leepa zip_code: {matched}/{len(zip_map)} parcels matched a ZCTA")
+    except Exception as exc:  # noqa: BLE001 — degrade, never abort the parcel ingest
+        print(f"leepa zip_code: spatial assign failed ({exc}) — zip_code will be NULL this run")
+        zip_map = {}
+
+    pulled: dict[str, list[dict]] = {"just_value": value_rows}
+    for name, url in (("use_codes", LEEPA_USE_CODES_URL), ("last_sale", LEEPA_LAST_SALE_URL)):
         rows = list(paginate_arcgis_tabular(url))
         if not rows:
             print(f"leepa {name}: 0 rows — aborting Tier 2 promotion")
             return
         pulled[name] = rows
+
+    for name in ("just_value", "use_codes", "last_sale"):
+        rows = pulled[name]
+        url = {
+            "just_value": LEEPA_JUST_VALUE_URL,
+            "use_codes": LEEPA_USE_CODES_URL,
+            "last_sale": LEEPA_LAST_SALE_URL,
+        }[name]
         object_path = f"leepa/{name}/{today}.csv.gz"
         upload_csv_gz(TABULAR_BUCKET, object_path, rows, list(rows[0].keys()))
         upsert_inventory_row(
@@ -153,7 +195,7 @@ def ingest_leepa_parcels_value(tier1_pipeline) -> None:
     canonical = arcgis_count(LEEPA_JUST_VALUE_URL)
     assert_vs_canonical(len(pulled["just_value"]), canonical, label="leepa just_value")
 
-    joined = _join_leepa(pulled["use_codes"], pulled["just_value"], pulled["last_sale"])
+    joined = _join_leepa(pulled["use_codes"], pulled["just_value"], pulled["last_sale"], zip_map)
     if not joined:
         return
     _promote_leepa_to_tier2(joined)
