@@ -14,6 +14,28 @@ the concurrent chart-picker/spec-to-png session's 6 commits). Verified post-reba
 missing worktree secrets). `deliverable_coherence_gate_live_verify` stays OPEN — the 6-line runtime glue
 in buildPromptChart needs live post-deploy verify; brain md regenerates via live GHA cron (not committed
 from the keyless worktree).
+## 2026-07-11 (Fable 5 · main) — Pipeline-health DIAGNOSIS (4-agent sweep) + Data Contracts & Doctor spec (A→C); HELD for push
+
+Operator: daily pipeline pain — "tell me what's wrong." Four Sonnet sweeps (GHA runs/issues, checks
+ledger, live lake probe, brains/consumers) → `docs/audit/2026-07-11-pipeline-problems/` (00-DIAGNOSIS
++ 4 evidence files). Verdict: the system verifies EFFORT, not OUTCOMES — green cron/TTL/build-report
+all true while tables are empty, missing, or 10x wrong. Live finds: `listing_active_stats` has NO
+property_type filter → ZIP 33972 serves median $35,000 vs $354,999 real single-family (918 land vs
+385 home rows); `redfin_city_swfl` TABLE MISSING despite registry "confirmed via live dry-run";
+`dbpr_re_licensees` 0 rows vs "30,100 observed 07/10" note; SteadyAPI unverified since 07/07
+suspension (consuming crons last fired 07/06 + 07/04; gap-sentinel client makes a dead key = green
+run); both watcher workflows blind to `conclusion: cancelled` (30 runs, incl. corridor-pulse 3-week
+death) and ~70% of scheduled workflows outside watch lists; CI red 35 consecutive pushes; tripwire
+6-day false RED (hardcoded list). Industry mirror per RULE 0.4 fetched in-session: Dagster asset
+checks + GX expectations (checks live ON the data, run at load). Operator picked **A leading to C**
+→ spec `docs/superpowers/specs/2026-07-11-data-contracts-doctor-design.md`: C0 stop-the-bleeding
+(CI green, listings hotfix + gating contract, watcher conclusions widened + derived watch-lists,
+tripwire config-driven) · C1 contract engine extending `quality_registry.yaml`
+(range/row_floor/sql_assert/freshness_col + per-table gating) · C2 in-process `enforce_contracts()`
+· C3 static wiring-consistency CI suite · C4 `ingest.doctor` with prescriptions · C-bridge table
+(everything maps 1:1 to Dagster for the later migration). Registered `data_contracts_doctor_live_verify`;
+opened `empty_brain_content_detector`, `caveat_expiry_rebuild`, `tier_divergence_dag_orphan` (RULE 2.4).
+Operator-only item flagged: SteadyAPI billing page. Next: operator reviews spec → writing-plans → execute.
 
 ## 2026-07-11 (Opus 4.8 · main) — Fix `source_label_config_leak`: gate scrub placeholder in shortSourceLabel
 
