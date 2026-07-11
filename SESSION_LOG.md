@@ -1,3 +1,20 @@
+## 2026-07-11 (Opus 4.8 · main) — CORRECTION: Lee sold-median T1–5 are PUSHED (parallel safe-push carried them), + live-break hotfix
+
+Correcting my "Lee homes-only SOLD median" entry below: it says "NOT pushed" — WRONG (advisor caught it).
+All five commits (46122de4, 91fc4a6e, ffa72d7a, c5a5e033, fd271022) are ON origin/main: a concurrent
+charts/social session's `safe-push` rebased and flushed the whole ahead-stack (my work + the 6 prior "HELD"
+commits) — the `concurrent-rebase-push-carries-your-commits` hazard, live. The atomic unit (pack wiring +
+vocab in c5a5e033) landed WITH the crosswalk/view SQL, so no G3 split on origin. Because the code is now
+live, a latent break surfaced: `leepa-sold-median-source` LIVE-mode queries `data_lake.leepa_sold_median_by_zip`,
+which is NOT applied to prod yet — and Stage-1 `ingest()` fetches sources in a bare loop with NO per-source
+try/catch, so the source THROWING would abort the whole properties-lee-value live rebuild. Hotfix (committed,
+needs to reach origin before the next live rebuild): source is now EMPTY-TOLERANT — on a view-absent error it
+warns + returns [] (degrades to no sold-median until the view lands), mirroring collier's zip-rows pattern.
+Also hardened `assign_zip` with a DuckDB RTREE index (explicit GEOMETRY column) so the 548k×~980 ST_Contains
+join is index-accelerated, not a ~540M-pair nested loop risking the 30-min GHA runner (advisor's perf catch).
+7 spatial + 23 refinery tests green. Operator-gated tail unchanged: prod ingest → view apply → rebuild →
+close `homes_only_sold_median_live_verify`.
+
 ## 2026-07-11 (Opus 4.8 · main) — Fixed two CI reds: grounding-guard desk-stats mock-import + the syncUserAudiences stack-overflow polluter
 
 Two operator-named CI failures, both root-caused (not patched-over) and green locally.
@@ -81,6 +98,19 @@ HOMES-ONLY FILTER (verified vs FDOR/Polk-PA reference via crawl4ai + WebSearch, 
 DOR_UC prefix 01,02,04,05,06,08 (single-family, mobile, condo, coop, retirement, multi-family); vacant-res
 LAND (the $35k blend) = 00,09,99; commercial 10+. Condos (04) still parcel/folio grain only — see
 `collier_condo_unit_grain_gap`.
+
+PUBLISH CADENCE (from the service's own description): "property tax roll information provided by each of
+Florida's 67 county property appraisers to the Department EVERY JULY … data most recently received" — so
+it's an ANNUAL (July) refresh, NOT continuous; current layer is the 2025 roll, layer lastEditDate
+06/09/2026 (exactly why collier_parcels broke right after our 06/06 pull — the URL was republished ~06/09).
+Ch.119 redactions applied. Implication: feeds a sold-median-OF-RECORD (rolling qualified-sale history via
+SALE_YR1), not a this-week signal; for Lee, LeePA stays the fresher primary.
+
+LEE ALSO AVAILABLE on the same service: CO_NO=46 = Lee, count 556,100 (matches Lee's real parcel count;
+Lake=45 verified adjacent), identical rich schema incl native `PHY_ZIPCD` situs ZIP — which would REPLACE
+the centroid→ZCTA spatial derivation the current Lee homes-only plan needs. Nuance: an unordered Lee row
+fetch soft-times-out to [] (rows sit deep in the 10.8M table; COUNT is indexed/instant) — must use OBJECTID
+keyset paging (proven on Collier) which seeks fine. Service throttles rapid probing — space calls.
 
 CHECK STATUS: `active_listing_median_land_blend` is ALREADY fixed live in prod (verified this session via
 lake MCP: 33972 median $359,000/403, 33974 $325,000/655 — was $35k/$31k) — the homes-only interim guard

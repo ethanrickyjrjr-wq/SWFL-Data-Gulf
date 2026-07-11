@@ -46,10 +46,15 @@ def assign_zip(centroids: list[dict], zcta_geojson: dict) -> list[dict]:
             zpath = os.path.join(td, "zcta.geojson")
             with open(zpath, "w") as f:
                 json.dump(zcta_geojson, f)
-            con.execute(
-                "CREATE TABLE zcta AS SELECT ZCTA5CE10 AS zip_code, geom FROM ST_Read(?)",
-                [zpath],
-            )
+            # Explicit GEOMETRY column so the RTREE index below is accepted (a
+            # CREATE TABLE AS SELECT does not preserve the GEOMETRY type).
+            con.execute("CREATE TABLE zcta (zip_code TEXT, geom GEOMETRY)")
+            con.execute("INSERT INTO zcta SELECT ZCTA5CE10, geom FROM ST_Read(?)", [zpath])
+            # RTREE index so the ST_Contains join is index-accelerated, not a
+            # ~540M-pair nested loop (548k Lee parcels x ~980 FL ZCTAs) that would
+            # risk the 30-min GHA runner. Cheap on the tiny test set, load-bearing
+            # at prod scale.
+            con.execute("CREATE INDEX zcta_geom_idx ON zcta USING RTREE (geom)")
             con.execute("CREATE TABLE pts(folioid TEXT, lon DOUBLE, lat DOUBLE)")
             con.executemany(
                 "INSERT INTO pts VALUES (?,?,?)",

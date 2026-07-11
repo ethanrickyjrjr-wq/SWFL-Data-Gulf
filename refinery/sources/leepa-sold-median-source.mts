@@ -82,11 +82,16 @@ async function fetchLiveRows(): Promise<ViewRow[]> {
     .from(VIEW)
     .select("zip_code,home_sales_n,median_sale,county_fallback,county_median,county_n");
   if (resp.error) {
-    throw new Error(
-      `leepa-sold-median-source: ${SCHEMA}.${VIEW} query failed — ${resp.error.message}. ` +
-        "Confirm the leepa_parcel_zip crosswalk ingest ran and " +
-        "docs/sql/20260711_leepa_sold_median_by_zip.sql + leepa_parcel_zip_grant.sql were applied.",
+    // Empty-tolerant (ODD): the view may not be applied yet (crosswalk ingest +
+    // migration are operator-gated). Stage-1 ingest() fetches sources in a bare
+    // loop with NO per-source try/catch, so THROWING here would abort the whole
+    // properties-lee-value build. Degrade to "no sold median" instead.
+    console.warn(
+      `leepa-sold-median-source: ${SCHEMA}.${VIEW} query failed (${resp.error.message}) — ` +
+        "sold-median metric + detail table will be absent this build. Apply " +
+        "docs/sql/20260711_leepa_sold_median_by_zip.sql (+ leepa_parcel_zip_grant.sql) after the crosswalk ingest lands.",
     );
+    return [];
   }
   return (resp.data ?? []) as ViewRow[];
 }
