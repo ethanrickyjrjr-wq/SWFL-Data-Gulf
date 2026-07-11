@@ -81,6 +81,7 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
       "Explore",
       "Insiders",
       "Charts",
+      "Desk",
       "Maps",
       "Showcase",
       "Projects",
@@ -101,6 +102,11 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
     const maps = NAV_GROUPS.find((n) => n.label === "Maps");
     expect(maps?.href).toBe("/map");
     expect(maps?.children).toBeUndefined();
+  });
+  it("exposes Desk as a top-level leaf at /desk (live market terminal)", () => {
+    const desk = NAV_GROUPS.find((n) => n.label === "Desk");
+    expect(desk?.href).toBe("/desk");
+    expect(desk?.children).toBeUndefined();
   });
   it("does NOT surface /data-intel anywhere (internal-only, B6)", () => {
     const allHrefs = (item: NavItem): string[] => [
