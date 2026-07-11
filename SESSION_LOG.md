@@ -1,3 +1,22 @@
+## 2026-07-11 (Opus 4.8 · main) — DBPR new-agent radar pipeline BUILT (6 of 7 tasks); live write + push HELD for Ricky
+
+Executed `docs/superpowers/plans/2026-07-11-dbpr-re-licensees-pipeline.md`, Tasks 1–6 committed locally
+(6 commits, not pushed). Re-verified the load-bearing fact live before writing any code (RULE 0.4 / CLAUDE
+Rule 1 — plans are hypotheses): byte-range probe of RE_rgn7.csv confirmed the 23-column positional map
+field-for-field (307/307 sample rows = 23 cols) and proved BOTH filters load-bearing (license codes
+2501/2502/2504/2507 present; counties include Broward/Escambia/Pinellas/Out-of-State/blank — the file is
+statewide, NOT the "8 Region-7 counties" the spec prose claims; corrected that in constants.py docstring).
+Shipped: `public.dbpr_re_licensees` migration (applied to prod — 31 cols verified, table+`new_re_agents`
+view empty at 0) · `ingest/pipelines/dbpr_re_licensees/{__init__,constants,parse,pipeline}.py` · 23 pytest
+green (21 parse on real sampled rows + 2 dry-run/volume-guard); parse.py also proven on the live sample
+(307 raw → 145 kept, zero leaks) · weekly GHA cron `ingest-dbpr-re-licensees.yml` (Mon 12:00 UTC, drift
+test green) · cadence_registry entry + pipeline-freshness §3 row. LIVE DRY-RUN (zero writes) matched the
+plan exactly: 51,364 total → 30,100 kept (Lee 18,015 / Collier 12,085), all floors cleared. HELD for Ricky
+(Task 7 Step 2+): the ~30k-row first live write to public.* and the push. Check `new_agent_radar_live_verify`
+stays OPEN until the live run + its `# First run:` cadence backfill. email column always NULL here — the
+separate Chapter 119 records-request lane (built in the entry below this one) fills it via COALESCE. NEXT:
+Ricky calls the live run, then push.
+
 ## 2026-07-11 (Opus 4.8 · main) — Records-request outbound engine BUILT + local-smoked (7-task plan executed); live_verify held for push
 
 Executed `docs/superpowers/plans/2026-07-11-records-request-engine.md` inline, 7 tasks, TDD. Shipped:
