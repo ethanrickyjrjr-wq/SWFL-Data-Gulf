@@ -85,6 +85,44 @@ async function getOpenChecks(sbUrl, sbKey) {
   }
 }
 
+async function getOpenRecordsRequests(sbUrl, sbKey) {
+  const headers = { apikey: sbKey, Authorization: "Bearer " + sbKey };
+  try {
+    const res = await fetch(
+      `${sbUrl}/rest/v1/records_requests?state=in.(filed,acknowledged,cost_quoted,cost_approved,fulfilled)&select=request_key,target_agency,state,follow_up_days,filed_at,last_contact_at&order=last_contact_at.asc.nullsfirst&limit=200`,
+      { headers },
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+// Requests past their follow_up_days with no contact — the "gone quiet" nudge.
+function summariseQuietRequests(rows) {
+  if (!rows) return "(could not reach Supabase)";
+  const now = Date.now();
+  const quiet = rows.filter((r) => {
+    const since = r.last_contact_at ?? r.filed_at;
+    if (!since) return false;
+    return (now - new Date(since).getTime()) / 86400000 >= (r.follow_up_days ?? 14);
+  });
+  if (rows.length === 0) return "none open ✓";
+  if (quiet.length === 0) return `${rows.length} open, none quiet ✓`;
+  return (
+    `${rows.length} open, ${quiet.length} gone quiet:\n    · ` +
+    quiet
+      .slice(0, 6)
+      .map((r) => {
+        const since = r.last_contact_at ?? r.filed_at;
+        const days = Math.floor((now - new Date(since).getTime()) / 86400000);
+        return `${r.request_key} — ${r.target_agency} (${r.state}, ${days}d quiet)`;
+      })
+      .join("\n    · ")
+  );
+}
+
 // Newest open morning-brief issue -> top close-candidate lines. Best-effort:
 // public-repo unauthenticated REST; ANY failure returns "" (never block start).
 async function morningBriefBlock() {
@@ -154,6 +192,21 @@ async function main() {
     }
   } catch {
     checksLine = "(secrets read error)";
+  }
+
+  // Records requests gone quiet — surface so a filed request is never forgotten.
+  let requestsLine = "(secrets not found)";
+  try {
+    const secrets = readFileSync(SECRETS_PATH, "utf8");
+    const sbUrl =
+      parseTomlStr(secrets, "SUPABASE_URL") ?? parseTomlStr(secrets, "BRAINS_SUPABASE_URL");
+    const sbKey =
+      parseTomlStr(secrets, "SUPABASE_SERVICE_KEY") ??
+      parseTomlStr(secrets, "BRAINS_SUPABASE_SERVICE_KEY");
+    if (sbUrl && sbKey)
+      requestsLine = summariseQuietRequests(await getOpenRecordsRequests(sbUrl, sbKey));
+  } catch {
+    requestsLine = "(secrets read error)";
   }
 
   // Build queue from local markdown
@@ -228,6 +281,7 @@ async function main() {
       `${banner}\n\n` +
       `Last shipped : ${lastShip}\n` +
       `Open checks  : ${checksLine}\n` +
+      `Records reqs : ${requestsLine}\n` +
       `Build queue  : ${queueLine}\n` +
       clutterLine +
       flappersLine +
