@@ -49,11 +49,13 @@ function gblk<K extends BlockType>(
 }
 
 /** Same env-aware base the send routes use — local previews resolve locally,
- *  prod-built docs carry prod URLs. */
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com").replace(
-  /\/$/,
-  "",
-);
+ *  prod-built docs carry prod URLs. Read at CALL time, never a module-level const:
+ *  a const captures whatever NEXT_PUBLIC_SITE_URL held at first import, which in a
+ *  shared test process is whatever an earlier test left set (froze to a leaked
+ *  http://localhost:3000 in the full bun-test suite). */
+function siteBase(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com").replace(/\/$/, "");
+}
 
 /**
  * Builds the deterministic, ranked ZIP email. Returns null when the ZIP is out of
@@ -72,6 +74,7 @@ export async function buildZipSeedDoc(zip: string): Promise<EmailDoc | null> {
 
   if (!signals || signals.ranked.length === 0) return null;
 
+  const SITE = siteBase();
   const { ranked, place, hasFlood, fillColor, shapeFound, sources } = signals;
   // A place with no crosswalk name falls back to the ZIP itself — never let a
   // digit-only fallback leak into a prose sentence (figures ride blocks, not prose).

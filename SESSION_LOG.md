@@ -1,3 +1,17 @@
+## 2026-07-11 (Opus 4.8 · main) — Fixed the zip-seed env leak → full local `bun test` suite is 0-fail
+
+Follow-up to the two-reds fix: the full-suite zip-seed victim. Root cause: `refinery/config/env.mts:8`
+eagerly `process.loadEnvFile(".env.local")`s at import, loading `NEXT_PUBLIC_SITE_URL=http://localhost:3000`
+process-wide; any refinery test that imports it pollutes env for every later file. LOCAL-only (CI has no
+.env.local, so `loadEnvFile` throws→caught→var stays unset — which is why it never reddened CI, only local
+full runs). `zip-seed.ts` then froze that leaked value into a module-level `SITE` const at import time.
+Two-part fix, both minimal: (1) `zip-seed.ts` reads the base at CALL time (`siteBase()`) not module-load,
+so env changes are honored; (2) `zip-seed.test.ts` pins `NEXT_PUBLIC_SITE_URL` unset per test (save/delete
+in beforeEach, restore in afterEach) so the prod-default assertions are deterministic regardless of the
+ambient leak — the RULE 1 "make the flaky test deterministic" fix, not touching the intentional refinery
+loader. Verified: zip-seed 10/10 isolated AND the **full `bun test` suite now 5908 pass / 0 fail** (was
+4–6 fail). Closed `zip-seed-env-leak-module-const`.
+
 ## 2026-07-11 (Opus 4.8 · main) — Chart-picker review + fallback-note honesty fix
 
 Reviewed the chart-picker-parity Option-2 work (storm-timeline + seasonal-radial SVG twins, routing in

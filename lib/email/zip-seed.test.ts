@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach } from "bun:test";
+import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
 
 /**
  * ZIP email prebuild tests (spec: 2026-07-03-zip-email-reskin-design.md).
@@ -59,7 +59,20 @@ mock.module("./market-context", () => ({
 
 const { buildZipSeedDoc } = await import("./zip-seed");
 
+// These assertions expect the prod-built default base. The full LOCAL suite leaks
+// NEXT_PUBLIC_SITE_URL=http://localhost:3000 process-wide (refinery/config/env.mts
+// eagerly `process.loadEnvFile(".env.local")`s at import; CI has no .env.local so it
+// only bites locally). Pin the var unset per test so the base is deterministic
+// regardless of ambient leak, and restore it so we don't perturb other files.
+let savedSiteUrl: string | undefined;
+afterEach(() => {
+  if (savedSiteUrl === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+  else process.env.NEXT_PUBLIC_SITE_URL = savedSiteUrl;
+});
+
 beforeEach(() => {
+  savedSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  delete process.env.NEXT_PUBLIC_SITE_URL;
   helperCalls = [];
   signalsFixture = {
     ranked: [
