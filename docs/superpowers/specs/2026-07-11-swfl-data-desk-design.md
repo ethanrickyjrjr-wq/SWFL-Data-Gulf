@@ -1,150 +1,163 @@
-# SWFL Data Desk — live market terminal page (/desk)
+# SWFL Data Desk — live market terminal at /desk (Spec A: product + money path)
 
 **Date:** 2026-07-11 · **Check:** `swfl_data_desk_live_verify` · **Slug:** `swfl-data-desk`
-**Origin:** parked idea `desk_showpiece_parked`, unblocked once the /charts glow-up landed
-(it reuses the vendored bklit components). Operator picked the full-terminal scope and the
-`/desk` route on 07/10/2026.
+**Companion:** Spec B — `2026-07-11-desk-discovery-flywheel-design.md` (GEO / Dataset schema /
+embeddable widget / llms.txt / robots decision — cross-cutting, applies to /r/* too).
+**Origin:** parked idea `desk_showpiece_parked`, unblocked once /charts glow-up landed. Operator
+picked full-terminal scope + `/desk` route (07/10/2026), then asked for deep research on whether
+this earns paying users / brand / AI-discovery / deliverable reuse, or is just eye candy.
 
-## Problem
+## The verdict (why we build it)
 
-We have genuinely daily-refreshing SWFL data — daily sourced median sale prices, a daily
-mortgage rate, a daily listing state-machine (new / price-cut / sold), daily news — but nowhere
-that shows it off with any energy. /charts is a good static panel page; it does not feel alive,
-and it does not surface the daily event stream at all. The brand wants a showpiece: a
-Bloomberg-terminal-style "data desk" that makes the platform's data depth feel live — without
-faking a real-time market feed we don't have.
+**Not eye candy — but only if we build the connective tissue, not just the pretty terminal.**
+The research (4 parallel streams: design, GEO/growth, SteadyAPI capability, deliverable reuse)
+converged on one answer: the desk is worth building because it is three compounding assets at
+once — **(1)** a live product demo that funnels into our existing free-build → paid-send paywall,
+**(2)** a uniquely-cited daily dataset that is the highest-value content type for AI citation and
+the proven backlink-magnet pattern (Redfin Data Center / Zillow Research), and **(3)** a
+first-class research input, because the desk reads the same `data_lake` views the deliverable
+engine grounds on. **The make-or-break:** without the filing bridge (below), the desk is a
+beautiful dead-end — the one reuse path that works on a greenfield page (the site-wide
+highlighter) strips provenance and files sourceless numbers. With it, every desk figure becomes
+"pin this to my weekly client email," auto-refreshed and gate-checked each send. So the filing
+bridge is **core Phase 1, not a deferred nicety.**
 
 ## Goal
 
-One dark, data-dense page at `/desk` ("SWFL Data Desk") that reads like a live market terminal:
-a scrolling wire ticker, a liveness header, category tabs, a count-up KPI row, a hero price line
-with a gauge cluster, and a timestamped flash feed. Every number is real, cited, and as-of
-stamped; the "live" feel comes from honest motion (scroll, count-up, animated line draw) over
-daily-fresh data plus page revalidation — never from synthetic ticks.
+One dark, data-dense page at `/desk` ("SWFL Data Desk") that reads like a live market terminal
+AND is wired into the deliverable funnel. Every number real, cited, and carrying **its own** as-of
+date (the feeds have different vintages — never one blended "our data" stamp). The "live" feel is
+honest motion (scroll, count-up, on-load line-draw) over daily-fresh data plus revalidate — never
+synthetic ticks. The page is a **server component** that renders real values into SSR HTML (so the
+numbers are real for users AND readable by the AI crawlers we allow — client-hydrated numbers are
+invisible to them).
 
-## Research findings (crawl4ai, 07/10/2026)
+## Data sources — verified live 07/10/2026 (corrected from the first draft)
 
-Crawled real professional references (RULE 0.4). Sources and what we took:
+Correction that governs the build: the inventory KPI must NOT come from
+`active_listings_residential` — that is a legacy scrape covering out-of-scope Charlotte/Sarasota
+with an untrusted, inflated days-on-market column. Use the SteadyAPI spine and its aggregate views.
 
-- **MARKETWIRE live terminal** (`marketwire-terminal.com`) — concrete anatomy of a working live
-  terminal: a horizontally-scrolling top ticker of symbols with ▲/▼ colored deltas (repeated for
-  seamless loop); a `● LIVE` badge + dual clocks; category tabs (ALL / EQUITIES / MACRO / CRYPTO
-  / FX); a KPI tile grid; and a timestamped news-flash feed with severity tags (FLASH / URGENT /
-  BREAKING). A "25s NEWS REFRESH / 100% WEB SOURCED" liveness line. This is the template our six
-  zones map onto.
-- **Fintech/trading dashboard pattern catalog** (`adminlte.io/blog/fintech-banking-dashboard-templates`,
-  2026) — the standard finance-desk surfaces are KPI/net-worth tiles, a cash-flow line, a
-  transactions feed, and (for trading) P&L-by-desk + yield curve. Dark-first, data-dense is the
-  Bloomberg-terminal signature. Confirms our KPI-row + line + feed decomposition is the
-  professional norm, and that `@number-flow`-style count-ups and reveal animation are expected.
-- **Bloomberg Terminal UX ("conceal complexity")** — bot-walled on fetch, but the well-known
-  principle we adopt: extreme density is fine if complexity is progressively disclosed
-  (hover-for-detail, tabs to filter), not dumped at once.
-- Award-end references for the "cool" bar (Awwwards data-visualization collection, 2026 Webby
-  best-data-visualization winners) — noted for visual polish direction, not copied.
+- **`data_lake.listing_state`** — the SteadyAPI spine. 34,405 rows, 29,413 active across 67 core
+  ZIPs (Lee/Collier/Hendry), fresh daily (07/10/2026). Per-listing fill (active): photo 99%,
+  lat/lon 99%, list_price ~100%, beds 72%, sqft 69%, `reduced_amount` 45% (13,137 rows). Flags:
+  price_reduced 4,632, new_construction 4,293, pending 4,276, new_listing 2,347, foreclosure 129.
+  **No days-on-market, no listed_date, no baths (0.3%)** — DROP any DOM zone; the spine can't feed it.
+- **`data_lake.listing_transitions`** — the daily event/flow log. Fresh 07/10; real (non-seed)
+  flow spans 07/01–07/10. Fields: `from_state→to_state`, `price`, `price_delta`, `sold_price`,
+  `sold_date`, `seed`, `days_in_prev_state`. Example day (07/08/2026): 309 new · 488 price-cuts ·
+  703 → holding · 9 sold.
+- **`data_lake.listing_active_stats`** (per ZIP+county): `median_list_price`, `avg_list_price`,
+  `listing_count`. Market median list $339,000 (Lee $295,945 / Collier $610,000), fresh 07/10.
+- **`data_lake.listing_momentum_stats`** (per ZIP+county): `price_reduced_share`,
+  `new_listing_share`, `active_listing_count`. Market 15.7% reduced / 8% new, fresh 07/10.
+- **`data_lake.daily_truth`** — web-verified metric table (NOT listings). `median_sale_price` for
+  57 areas + `mortgage_30yr_fixed`, fresh 07/10. Independent lane; cite as web-verified. ~2 months
+  deep, so any price line is a real but short window — label it, don't pad.
+- **`data_lake.news_articles_swfl`** — daily headlines through 07/10; low volume (94 rows) → the
+  feed must be empty-tolerant, show most-recent N regardless of day.
+- **`data_lake.market_details_swfl_latest`** — market-temperature gauge (reuse `MarketTemperatureGauge`).
 
-**Translation to our context:** a real-estate market desk, not a trading terminal. Stock tickers
-→ SWFL daily prices + mortgage + listing events; equities red/green → mangrove/coral (our design
-language forbids stock red/green); "streaming" → daily-fresh + revalidate, honestly stamped.
+## Honesty guardrails (non-negotiable — the whole value prop is credibility)
 
-## Data — verified live in the lake (07/10/2026)
+- **Per-zone as-of, never one global stamp.** Spine 07/10, daily_truth 07/10, momentum 07/10,
+  histogram 07/06 — each zone shows its own MM/DD/YYYY. Blending them into one "as of" is a lie.
+- **Partial-scan annotation on the Daily Market Pulse.** Some days are incomplete sweeps (e.g.
+  07/07 showed only 3 new — an incomplete scan, not a market lull). Detect low-coverage days and
+  label them, or the flagship zone quietly discredits the page.
+- **"Holding" is an ambiguous departure, never "sold"/"delisted".** The state machine does not
+  assert why a listing left active.
+- **Solds = "recent notable closings" with the luxury caveat.** The sold set is budget-sampled,
+  prioritized by highest list price (median sampled sold ~$1.975M vs. market median list ~$339K).
+  Never label it market median sale price. Each sold carries its honesty tag (`sold` vs
+  `sold_price_pending` vs `last_list`, per `lib/listings/sold-price.ts`).
+- **Provenance scrub (reuse comp-helper's path):** citation says "SWFL Data Gulf" (+ realtor.com
+  homepage optionally); NEVER the vendor name, an MLS number, a permalink, or internal
+  `property_id`. **Photos via the watermark path** (`lib/media/listing-photo`), never the raw CDN URL.
+- **Clamp outliers:** e.g. one `reduced_amount` = $222M is a bad row — lead with median, not max/avg.
+- Every figure real + sourced; a dead feed hides its zone, never fabricates. No system nouns /
+  internal IDs / raw freshness tokens in visible copy. Up/down uses the gulf palette (mangrove/coral
+  direction), never stock red/green, and delta is always paired with an arrow — never color alone.
 
-Every zone is backed by a table confirmed present and current (latest row 07/10/2026):
+## Zones — Phase 1a (the terminal)
 
-- **`data_lake.daily_truth`** (17 cols; `metric_key, area, period, value, unit, source_url,
-  source_title, retrieved_at, ...`). Recent metrics present in the last 4 days:
-  `median_sale_price` for `cape_coral` / `fort_myers` / `naples`, and `mortgage_30yr_fixed:swfl`.
-  **Caveat:** 61 rows total — the daily feed is ~2 months deep (started ~early May 2026). The
-  hero line shows a real but short window; label it, do not pad it.
-- **`data_lake.listing_transitions`** (15 cols; `from_state, to_state, "at", price, price_delta,
-  sold_price, sold_date, address_key, ...`). 48,179 rows, current. Recent transitions include
-  `active→sold`, `active→holding`, `holding→active`. Event definitions for the wire:
-  - **SOLD** = `to_state = 'sold'` (has `sold_price` / `sold_date`).
-  - **PRICE CUT** = `price_delta < 0` on an active listing.
-  - **NEW** = first appearance as active (`to_state = 'active'` from a seed/new/empty prior
-    state) — confirm exact `from_state` sentinel for new during implementation.
-- **`data_lake.active_listings_residential`** (20 cols; `list_price, days_on_market, status,
-  zip_code, county, scraped_at, ...`). 38,728 rows across 92 ZIPs, current. **Caveat:** 92 ZIPs
-  includes non-core; apply the same core-scope (57) filter /charts uses (`refinery/lib/core-scope.mts`,
-  `isCoreScope`) for any "SWFL" count so we don't inflate inventory with Sarasota/Charlotte.
-- **`data_lake.news_articles_swfl`** (11 cols; `headline, article_url, source_name,
-  published_date, scraped_at, swfl_relevance, ...`). Published through 07/10/2026. **Caveat:**
-  94 rows total — sparse. The flash feed must be empty-tolerant and show the most-recent N
-  regardless of day, never require a per-day minimum.
+1. **Wire ticker** — daily median price per city + 30-yr mortgage (day-over-day ▲/▼ from
+   `daily_truth`) + today's pulse counts (new / price-cut / sold from `listing_transitions`).
+   CSS scroll, `prefers-reduced-motion` pauses.
+2. **Liveness header** — "SWFL DATA DESK · ● LIVE"; ● tooltip = "freshest daily data; updated
+   <formatted date>". Per-zone as-of stamps live in each zone, not here.
+3. **Hero — stat-hero + gradient area (default).** Big count-up median price + ▲/▼ delta over a
+   gradient-filled `daily_truth` trend (reuse `AreaChart` gradient + `ChartStatFlow` — both
+   vendored, zero new component). Secondary tab: **rebased % change from day-0** for the 3 cities
+   (reuse Profit/Loss Line with 0 = baseline, so a short window reads as "who's outperforming").
+4. **KPI stat-flow row** — median list price (`listing_active_stats`), active listings core-67
+   (`listing_state`), price-reduced share (`listing_momentum_stats`), 30-yr mortgage
+   (`daily_truth`), new-vs-sold today (`listing_transitions`). Count-up via `@number-flow/react`.
+   No DOM tile.
+5. **Daily Market Pulse** (flagship) — new / price-cut / departures / sold per day from
+   `listing_transitions`; partial-scan + "holding = ambiguous departure" labeling baked in.
+6. **Movers board** — top/bottom core ZIPs by price-reduced share / new-listing share / median
+   list (`listing_momentum_stats` + `listing_active_stats`). Horizontal Bar or delta+sparkline rows.
+7. **Flash feed** — `news_articles_swfl` headlines interleaved with notable listing events
+   (price cuts; recent notable closings with the luxury caveat). Timestamped, severity-tagged,
+   empty-tolerant.
+8. **Gauge cluster** — market-temperature (existing `MarketTemperatureGauge`) + a price-reduced-share
+   / inventory gauge (reuse vendored `Gauge`).
 
-Market-temperature gauge already live from `data_lake.market_details_swfl_latest` (reuse the
-existing `MarketTemperatureGauge`).
+## Filing bridge — Phase 1b (the money path, CORE not optional)
 
-## What we're building — six zones (top → bottom)
+Everything reuses `ProjectItem` (`lib/project/items.ts`) and the existing deliverable engine.
 
-1. **Wire ticker** — a horizontally-scrolling strip. Content: per-city median price + 30-yr
-   mortgage (each with a real day-over-day ▲/▼ delta from `daily_truth`), plus today's NEW /
-   PRICE CUT / SOLD counts from `listing_transitions`. Colored mangrove (up) / coral (down),
-   never stock red/green. Duplicated track for a seamless CSS scroll loop. Respects
-   `prefers-reduced-motion` (pauses).
-2. **Liveness header** — "SWFL DATA DESK · as of MM/DD/YYYY · ● LIVE". The `● LIVE` carries a
-   one-line tooltip: "freshest daily data; last refreshed <token>" (proof-of-live, data protocol
-   v3 rule 2). No raw `SWFL-…-YYYYMMDD` token in visible copy — formatted date only.
-3. **Category tabs** — ALL / PRICES / LISTINGS / MORTGAGE / NEWS. Filter which zones/feed rows
-   show. STORMS and PERMITS are intentionally excluded (historical/periodic, not daily — they
-   stay on /charts; including them would dilute the live frame).
-4. **KPI stat-flow row** — tiles: median sale price, active listings (core-scope 57), median
-   days-on-market, 30-yr mortgage, new-vs-sold today. Each: real value + ▲/▼ delta + as-of.
-   Count-up animation on mount via `@number-flow/react` (already vendored).
-5. **Hero live line + gauge cluster** — the `daily_truth` median-price line (3 cities), animated
-   draw on load (vendored bklit `Line` / `LineChart` with its built-in reveal), ~2-month window
-   labeled honestly; beside it a gauge cluster (market temperature + mortgage + active-inventory)
-   using the vendored `Gauge`.
-6. **Flash feed** — `news_articles_swfl` headlines interleaved with `listing_transitions` events,
-   newest first, each timestamped (MM/DD/YYYY) and severity-tagged (NEW / PRICE CUT / SOLD /
-   NEWS). Empty-tolerant: a zone with no fresh rows hides itself; never sample data.
+1. **`DeskHighlightBridge`** — twin of `ReportHighlightBridge`; publishes each KPI/zone datum's
+   `label / value / sourceLabel / asOf` to `report-context-store` so the already-site-wide
+   "File this figure" captures **real provenance** instead of an empty token. Highest leverage,
+   ~1 component.
+2. **Frame-backed "pin" on brain-backed tiles.** Active-listings count, busiest ZIP, and metro
+   home-value/rent are mirrored by brains (`active-listings-swfl.mts` emits
+   `key_metrics.active_listings_count_swfl` + `detail_tables.active_listings_by_zip`; ZHVI/ZORI
+   likewise). File these as **`frame`** items (`brain_id`, `frame_id`, `metric_keys`) — they
+   re-bind live at every send via `bindFrameSpec`, unchanged. This is the flywheel: "pin this to
+   my weekly client email" → `deliverableToScheduleRecipe` → auto-refreshed, gate-checked send.
+3. **Register desk charts for save.** Add desk chart rootIds to `PANEL_CONFIGS`
+   (`lib/charts/gallery-loaders.ts`) and drop `AddChartToProject` beside each desk chart → frozen
+   `chart` path via `saved_charts` works.
+4. **"Turn this into a branded report" CTA** per module → the free build flow (the PLG wedge;
+   the showpiece is a live demo, free build → paid send is the paywall).
 
-## Components — reuse vs. new build
-
-- **Reuse (no new vendoring):** `MarketTemperatureGauge`, the vendored bklit `Gauge` +
-  `Line`/`LineChart`, `@number-flow/react`. **Do NOT vendor bklit "Live Line"** — our data is
-  daily, so an animated `Line` draw + page revalidate is the honest equivalent; a streaming
-  component would imply ticks we don't have. (Operator confirmed 07/10/2026.)
-- **New components (client):** `WireTicker` (CSS-scroll strip), `FlashFeed` (timestamped
-  severity-tagged list), `DeskKpiRow` (count-up stat tiles), `DeskTabs` (category filter),
-  and the `/desk` page server component that composes them.
-- **New server loaders** (in `app/desk/` or `lib/desk/`, mirroring /charts loader style —
-  service-role client, `data_lake` schema, empty-tolerant try/catch, paginate over the 1000-row
-  PostgREST cap where needed):
-  - daily price line + mortgage series from `daily_truth`
-  - ticker deltas (latest vs prior day per metric) from `daily_truth` + today's event counts from
-    `listing_transitions`
-  - KPI aggregates (active count core-scope, median DOM, latest price, mortgage, new/sold today)
-  - flash feed (recent news + recent transitions, merged + sorted)
+Pure lake-view desk-only data (news story-count) is frozen-snapshot only unless later routed
+through a brain or `bindFrameSpec` is extended to accept a lake-view source (RULE C2: extend the
+binder seam, don't erect a new gate).
 
 ## Refresh & motion (honest "live")
 
-Server component with `export const revalidate = 300` (5 min) so each visit reflects the day's
-freshest data. All motion is presentational: ticker + feed scroll via CSS; KPI numbers count up
-on mount; the hero line draws itself once. No client polling that implies real-time; no synthetic
-value movement. `prefers-reduced-motion` disables scroll/count-up.
+Server component, `export const revalidate = 300`. Motion is presentational: ticker + feed scroll
+(CSS), KPI count-ups on mount (200–400 ms), hero line-draw once (`chart-reveal-clip`). Pair every
+delta with an arrow + label. Offer a pause/snapshot control. No client polling implying real-time;
+no synthetic movement; `prefers-reduced-motion` disables scroll/count-up. Dark-mode density rules:
+base `#0A0A0A–#111827`, elevation by 1px border not shadow, off-white text (`#F3F4F6`), tabular
+numerals so count-up digits don't shift width.
 
-## Honesty guardrails (rules of engagement)
+## Out of scope (v2 additive — named to control sprawl)
 
-- Every figure names a real source + carries an as-of MM/DD/YYYY (stated once per zone). No
-  invented numbers — a gap hides its element, never fabricates (RULE 0.7 four-lane; FOCUS rule 1).
-- Deltas are real day-over-day moves from `daily_truth` / `listing_state`, never synthetic ticks.
-- Core-scope (57) on every "SWFL" ZIP count (`isCoreScope`).
-- Mangrove/coral for up/down, never stock red/green.
-- `● LIVE` means freshest-daily + last-refreshed stamp, disclosed in the tooltip — not a claim of
-  a streaming market feed.
-- No system nouns / internal IDs / raw freshness tokens in visible copy.
+Watchlist (pinned ZIPs), ⌘K command bar, ZIP×metric correlation heatmap, mini-map choropleth
+(Mapbox), threshold-alert rail (condition-driven, distinct from the chronological feed), price-band
+affordability histogram, new-construction/foreclosure filter tabs, STORMS/PERMITS tabs, flash-event
+→ project-item bridge. All are real ideas; deferred to keep Phase 1 shippable.
 
-## Out of scope (v2)
+## Phasing
 
-- STORMS / PERMITS tabs; per-ZIP drill from a ticker row; "add to project" on desk zones;
-  a homepage-embeddable ticker band (component C from brainstorm); social/OG card of the desk.
-- Vendoring bklit Live Line (revisit only if a genuinely streaming feed lands).
+- **1a — terminal:** zones 1–8, corrected sources, per-zone as-of + partial-scan honesty, SSR
+  numbers, reuse existing Dataset JSON-LD from `lib/jsonld.ts` on /desk.
+- **1b — filing bridge:** DeskHighlightBridge, frame-backed pins, chart-save registration, "turn
+  into report" CTA. Ship close behind 1a; the ROI case needs it.
+- Discovery/backlink flywheel (Dataset schema extension, widget, llms.txt, robots) → **Spec B**.
 
-## Verification plan (closes `swfl_data_desk_live_verify`)
+## Verification (closes `swfl_data_desk_live_verify`)
 
-Live-verify on the deployed `/desk`: all six zones render with real values; ticker scrolls with
-real deltas; KPI numbers count up to verified figures; hero line draws the `daily_truth` series;
-flash feed shows real dated news/events; every zone shows an as-of MM/DD/YYYY and named source;
-empty-tolerance confirmed (no sample data on a dead feed); `prefers-reduced-motion` honored.
-Browser screenshot + a11y snapshot as artifact-level evidence (prod evidence, not dev attestation).
+Live-verify deployed `/desk`: all zones render real values; each shows its OWN as-of MM/DD/YYYY
+and named source; Daily Market Pulse annotates partial-scan days; solds labeled "notable closings"
+with luxury caveat, never market-median; inventory sourced from `listing_state` (67 core ZIPs, not
+the legacy scrape); no DOM tile; photos watermarked; provenance scrub holds (no vendor/MLS#/IDs);
+filing bridge works end-to-end (pin a brain-backed tile → schedule → a send re-binds fresh);
+numbers present in SSR HTML; `prefers-reduced-motion` honored. Browser screenshot + a11y snapshot
+as prod evidence.
