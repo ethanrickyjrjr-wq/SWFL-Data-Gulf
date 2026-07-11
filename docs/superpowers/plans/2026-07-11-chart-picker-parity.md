@@ -1075,6 +1075,17 @@ git commit -m "feat(charts): z-gauge PNG renderer + passthrough-only picker opti
 - Consumes: `renderBklitStaticSvg` from `components/charts/vendor/bklit/render-static.tsx` (existing — the SSR bridge is generic `@react-email/render` + SVG-extraction; despite its name it isn't bklit-component-specific, and reusing it here avoids a second bridge function).
 - Per the open decision above: passthrough-only gate. `storm-timeline` also carries its OWN known dependency (env-swfl's per-storm `detail_table` emit) — this task builds the renderer against fixture data; it does not bind live until that emit ships (tracked separately, matching the spec's non-goal).
 
+**⚠️ Correction found during execution (not in the original spec/plan text):** `lib/email/spec-to-png.ts` is a `.ts` file. TypeScript only allows JSX syntax (`<TimelineChartCore .../>`) inside `.tsx` files regardless of the `jsx` compiler option — a `.ts` file will fail to parse it. This task's Step 5 embeds JSX directly in that file's switch statement, so **Step 0 below (rename the file) must happen first.** Only 3 files import it (`lib/email/spec-to-png.test.ts`, `lib/email/build-doc.ts`, `lib/email/insiders/materialize.ts`), all via the extensionless specifier `"@/lib/email/spec-to-png"` / `"./spec-to-png"` — a rename requires zero import-path changes. This matches the existing codebase convention: `components/charts/vendor/bklit/email-svg.tsx` is already `.tsx` for exactly this reason (it embeds JSX for the same SSR-bridge purpose). Task 6 will find the file already renamed and needs no further action on this front.
+
+- [ ] **Step 0: Rename `spec-to-png.ts` → `spec-to-png.tsx`**
+
+```bash
+git mv lib/email/spec-to-png.ts lib/email/spec-to-png.tsx
+```
+
+Run: `bunx tsc --noEmit`
+Expected: clean (no import-path changes needed — all 3 importers use extensionless specifiers).
+
 - [ ] **Step 1: Extract the chart-only JSX into `TimelineChartCore`**
 
 Replace `components/charts/registry/frames/TimelineFrame.tsx` with (the only change: the `<ResponsiveContainer>...</ResponsiveContainer>` block becomes an exported `TimelineChartCore` function; `TimelineFrame` calls it):
