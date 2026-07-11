@@ -336,3 +336,27 @@ describe("buildRegistryCandidates — concept dedup", () => {
     expect(railContext.size).toBe(0);
   });
 });
+
+describe("buildRegistryCandidates — core-scope denominator (Lee+Collier=57)", () => {
+  test("non-core SWFL (Sarasota) and pure-leak (Manatee) rows are excluded from the ranking denominator", () => {
+    const { candidates } = buildRegistryCandidates(
+      "33914", // Cape Coral, core
+      tableMap({
+        "housing-swfl:housing_by_zip": {
+          rows: [
+            { key: "33914", cells: { median_sale_price: 485_000 } }, // core (Lee)
+            { key: "33901", cells: { median_sale_price: 300_000 } }, // core (Lee)
+            { key: "34102", cells: { median_sale_price: 900_000 } }, // core (Collier)
+            { key: "34285", cells: { median_sale_price: 700_000 } }, // Sarasota — non-core
+            { key: "34205", cells: { median_sale_price: 650_000 } }, // Manatee — pure leak
+          ],
+        },
+      }),
+    );
+    const price = candidates.find((c) => c.key === "median_sale_price")!;
+    // Denominator counts the 3 core rows only, NOT all 5. 485K is the middle of [300K,485K,900K].
+    expect(price.rankOf).toBe(3);
+    expect(price.rankPos).toBe(2);
+    expect(price.percentile).toBe(50);
+  });
+});

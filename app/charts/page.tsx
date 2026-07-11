@@ -31,6 +31,7 @@ import type { ChartRow, ChartSeriesDef, PivotedCityMonth } from "@/types/viz";
 import type { ValueFormat } from "@/lib/charts/format";
 // KNOWN-DEBT(data_lake: reads chart aggregates from the data_lake schema (typed public only))
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
+import { isCoreScope } from "@/refinery/lib/core-scope.mts";
 
 // 5 min: reduces post-migration stale window from 60 min to 5 min.
 // Data is purely Supabase PostgreSQL — no external API cost amplification.
@@ -141,9 +142,13 @@ async function loadMarketTemperature(
     const { data, error } = await supabase
       .schema("data_lake")
       .from("market_details_swfl_latest")
-      .select("local_hotness_score, captured_date");
+      .select("zip_code, local_hotness_score, captured_date");
     if (error) return { gauge: null };
-    return { gauge: mapMarketTemperature(data as MarketTempRow[] | null) };
+    // Core scope (57) only. Without this, non-core SWFL ZIPs (Sarasota/Charlotte) inflate BOTH the
+    // "N scored ZIPs" count AND the median hotness the dial reports as "SWFL". The lake view is the
+    // direct source here — neither the pack source-fix nor candidates.ts reaches this panel.
+    const rows = ((data ?? []) as { zip_code?: string }[]).filter((r) => isCoreScope(r.zip_code));
+    return { gauge: mapMarketTemperature(rows as MarketTempRow[]) };
   } catch {
     return { gauge: null };
   }
@@ -172,7 +177,8 @@ async function loadZipHeatmap(supabase: Supabase): Promise<{ grid: ZipHeatmapDat
       all.push(...((data ?? []) as ZipYoYRow[]));
       if (!data || data.length < pageSize) break;
     }
-    return { grid: mapZipHeatmap(all) };
+    // Core scope (57) only — the view carries ~109 ZIPs incl. non-core SWFL + spillover.
+    return { grid: mapZipHeatmap(all.filter((r) => isCoreScope(r.zip_code))) };
   } catch {
     return { grid: null };
   }

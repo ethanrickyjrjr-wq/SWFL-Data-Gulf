@@ -10,10 +10,13 @@ import { percentileOf, type SignalCandidate } from "./signal-rank";
 import { findGap, type MetricGapCoverage } from "@/lib/figures/metric-gaps";
 // KNOWN-DEBT(data_lake: census_acs_zcta lives in the data_lake schema (typed public only))
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
-import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
+import { isCoreScope, TOTAL_CORE_ZIPS } from "@/refinery/lib/core-scope.mts";
 
-/** Denominator for the flood key_metrics fallback (matches the page's historical constant). */
-export const TOTAL_SWFL_ZIPS = 57;
+/**
+ * Denominator for the flood key_metrics fallback. Derived from the single core-scope authority
+ * (Lee + Collier = 57) so the constant can never drift from the set the rankings actually use.
+ */
+export const TOTAL_SWFL_ZIPS = TOTAL_CORE_ZIPS;
 
 export interface GapSlot {
   metric_key: string;
@@ -631,7 +634,12 @@ export function buildRegistryCandidates(
       continue;
     }
 
+    // Rank against the 57-ZIP core universe only. A brain's detail table carries 94–126 keys
+    // (mailing/other-metro spillover + non-core SWFL counties); ranking against all of them is
+    // what inflated the "of N SWFL ZIPs" denominator card-to-card. Held-count: `n` = core ZIPs
+    // holding a finite value for this metric (may be <57 when coverage is partial — honest).
     const dist = data.rows
+      .filter((r) => isCoreScope(r.key))
       .map((r) => r.cells[spec.cell])
       .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
     const pct = percentileOf(dist, v);
@@ -818,7 +826,9 @@ export async function loadCensusSignals(zip: string): Promise<{
     const distribution = new Map<string, number[]>();
     for (const raw of data as unknown as Record<string, unknown>[]) {
       const geoId = typeof raw.geo_id === "string" ? raw.geo_id : "";
-      if (!/^\d{5}$/.test(geoId) || !resolveZip(geoId).in_scope) continue;
+      // Core scope (57), not in_scope (100). in_scope pooled Sarasota/Charlotte/Hendry into the
+      // income/poverty/employment distributions — measuring Naples partly against sugarcane towns.
+      if (!/^\d{5}$/.test(geoId) || !isCoreScope(geoId)) continue;
       for (const [col, key] of Object.entries(CENSUS_KEY_BY_COLUMN)) {
         const n = Number(raw[col]);
         if (!Number.isFinite(n) || raw[col] == null) continue;
