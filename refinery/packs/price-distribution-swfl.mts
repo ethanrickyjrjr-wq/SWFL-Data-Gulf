@@ -62,6 +62,28 @@ export function countyBuckets(county: PriceDistributionCounty): CountyBuckets {
   };
 }
 
+interface LuxuryBands {
+  county: string;
+  band2to3m: number;
+  band3to5m: number;
+  band5to10m: number;
+  band10mPlus: number;
+}
+
+/** $2M+ sub-bands (spec: deliverable-coherence-gate Task 7) — the live-build
+ *  coupling for the Naples luxury ring: this county's total_2m_plus is the
+ *  SAME number a Luxury Market Report's headline states, so the two cannot
+ *  disagree. */
+export function luxuryBands(county: PriceDistributionCounty): LuxuryBands {
+  return {
+    county: county.county,
+    band2to3m: sumBand(county, 2_000_000, 3_000_000),
+    band3to5m: sumBand(county, 3_000_000, 5_000_000),
+    band5to10m: sumBand(county, 5_000_000, 10_000_000),
+    band10mPlus: sumBand(county, 10_000_000, null),
+  };
+}
+
 function pct(n: number, total: number): number {
   return total > 0 ? Math.round((1000 * n) / total) / 10 : 0;
 }
@@ -200,6 +222,37 @@ function priceDistributionOutputProducer(_out: PackOutput): BrainOutputProducerR
       source: tableSource,
     },
   ];
+
+  const luxuryTableSource = makeSource(
+    `SWFL active $2M+ for-sale listings by price band, per county, as of ${asOf}`,
+    fetchedAt,
+    url,
+  );
+  const luxury = summary.counties.map(luxuryBands);
+  detail_tables.push({
+    id: "luxury_price_bands_by_county",
+    title: "SWFL active $2M+ for-sale listings by price band and county",
+    grain: "county",
+    columns: [
+      { id: "band_2m_3m", label: "$2M–$3M", display_format: "count", units: "listings" },
+      { id: "band_3m_5m", label: "$3M–$5M", display_format: "count", units: "listings" },
+      { id: "band_5m_10m", label: "$5M–$10M", display_format: "count", units: "listings" },
+      { id: "band_10m_plus", label: "$10M+", display_format: "count", units: "listings" },
+      { id: "total_2m_plus", label: "Total $2M+", display_format: "count", units: "listings" },
+    ],
+    rows: luxury.map((b) => ({
+      key: b.county,
+      label: b.county,
+      cells: {
+        band_2m_3m: b.band2to3m,
+        band_3m_5m: b.band3to5m,
+        band_5m_10m: b.band5to10m,
+        band_10m_plus: b.band10mPlus,
+        total_2m_plus: b.band2to3m + b.band3to5m + b.band5to10m + b.band10mPlus,
+      },
+    })),
+    source: luxuryTableSource,
+  });
 
   const conclusion =
     `Of ${region.total.toLocaleString("en-US")} active SWFL for-sale listings (as of ${asOf}), ` +

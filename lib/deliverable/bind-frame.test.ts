@@ -683,3 +683,100 @@ describe("blockToSpec", () => {
     );
   });
 });
+
+describe("bindFrameSpec — luxury_price_bands_by_county donut (table_id-driven)", () => {
+  const luxuryTable = detailTable({
+    id: "luxury_price_bands_by_county",
+    title: "SWFL active $2M+ for-sale listings by price band and county",
+    grain: "county",
+    columns: [
+      { id: "band_2m_3m", label: "$2M–$3M" },
+      { id: "band_3m_5m", label: "$3M–$5M" },
+      { id: "band_5m_10m", label: "$5M–$10M" },
+      { id: "band_10m_plus", label: "$10M+" },
+      { id: "total_2m_plus", label: "Total $2M+" },
+    ],
+    rows: [
+      {
+        key: "Collier",
+        label: "Collier",
+        cells: {
+          band_2m_3m: 378,
+          band_3m_5m: 412,
+          band_5m_10m: 284,
+          band_10m_plus: 152,
+          total_2m_plus: 1226,
+        },
+      },
+      {
+        key: "Lee",
+        label: "Lee",
+        cells: {
+          band_2m_3m: 200,
+          band_3m_5m: 150,
+          band_5m_10m: 90,
+          band_10m_plus: 25,
+          total_2m_plus: 465,
+        },
+      },
+    ],
+  });
+
+  test("binds the Collier row as a donut-share spec, total == sum of its own segments", () => {
+    const o = output({ refined_at: "2026-07-11T00:00:00Z", detail_tables: [luxuryTable] });
+    const spec = bindFrameSpec(o, {
+      frame_id: "donut-share",
+      table_id: "luxury_price_bands_by_county",
+    });
+    expect(spec).not.toBeNull();
+    expect(spec!.frameId).toBe("donut-share");
+    expect(spec!.asOf).toBe("2026-07-11");
+    const options = spec!.options as {
+      segments: { label: string; value: number }[];
+      total: number;
+    };
+    expect(options.total).toBe(1226);
+    expect(options.segments.reduce((s, x) => s + x.value, 0)).toBe(1226);
+    expect(options.segments).toHaveLength(4);
+    // provenance carried verbatim, never sanitized
+    expect(spec!.source?.citation).toBe("Example provenance citation");
+  });
+
+  test("falls back to the first row when no Collier row is present", () => {
+    const leeOnly = detailTable({
+      id: "luxury_price_bands_by_county",
+      grain: "county",
+      columns: luxuryTable.columns,
+      rows: [luxuryTable.rows[1]], // Lee only
+    });
+    const o = output({ detail_tables: [leeOnly] });
+    const spec = bindFrameSpec(o, {
+      frame_id: "donut-share",
+      table_id: "luxury_price_bands_by_county",
+    });
+    expect(spec).not.toBeNull();
+    const options = spec!.options as { total: number };
+    expect(options.total).toBe(465);
+  });
+
+  test("absent luxury_price_bands_by_county table → null (caller drops, no substitution)", () => {
+    const o = output({ detail_tables: [] });
+    expect(
+      bindFrameSpec(o, { frame_id: "donut-share", table_id: "luxury_price_bands_by_county" }),
+    ).toBeNull();
+  });
+
+  test("without table_id, bindDonutShare falls through to its existing key_metrics path unaffected", () => {
+    const o = output({
+      key_metrics: [
+        metric({ metric: "p1", value: 0.6, label: "Owner occupied", display_format: "ratio" }),
+        metric({ metric: "p2", value: 0.4, label: "Renter occupied", display_format: "ratio" }),
+      ],
+    });
+    const spec = bindFrameSpec(o, { frame_id: "donut-share" });
+    expect(spec).not.toBeNull();
+    expect(spec!.frameId).toBe("donut-share");
+    const options = spec!.options as { segments: unknown[] };
+    expect(options.segments).toHaveLength(2);
+  });
+});

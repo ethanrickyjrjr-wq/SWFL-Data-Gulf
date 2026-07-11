@@ -493,6 +493,43 @@ function firstLevelColumn(
   return null;
 }
 
+/** Naples/Collier luxury donut — bound from the luxury_price_bands_by_county
+ *  detail_table (price-distribution-swfl), filtered to Collier (the
+ *  ultra-luxury county per the deliverable-coherence-gate fixture). Center
+ *  total is the SAME total_2m_plus the deliverable's headline reads — they
+ *  cannot disagree because both come from one row. */
+function bindLuxuryPriceBandsDonut(
+  output: BrainOutput,
+  req: FrameBindRequest,
+  asOf: string,
+): ChartSpec | null {
+  const table = findDetailTable(output, "luxury_price_bands_by_county");
+  if (!table) return null;
+  const row = table.rows.find((r) => r.key === "Collier") ?? table.rows[0];
+  if (!row) return null;
+
+  const segments = [
+    { label: "$2M–$3M", value: cellNum(row.cells.band_2m_3m) ?? 0 },
+    { label: "$3M–$5M", value: cellNum(row.cells.band_3m_5m) ?? 0 },
+    { label: "$5M–$10M", value: cellNum(row.cells.band_5m_10m) ?? 0 },
+    { label: "$10M+", value: cellNum(row.cells.band_10m_plus) ?? 0 },
+  ].filter((s) => s.value > 0);
+  const total = cellNum(row.cells.total_2m_plus);
+  if (segments.length < 2 || total === null) return null;
+
+  return {
+    title: req.title ?? `Luxury Listings · ${row.label}`,
+    columns: ["band", "count"],
+    rows: segments.map((s) => [s.label, s.value]),
+    chart_type: "bar",
+    value_format: "count",
+    asOf,
+    source: sourceOf(table.source),
+    frameId: "donut-share",
+    options: { segments, total, unit: "listings" },
+  };
+}
+
 /** donut-share — parts-of-a-whole from share metrics (the composition shape, drawn
  *  as a donut). Needs >= 2 slices; adds an honest complement if they undershoot. */
 function bindDonutShare(
@@ -500,6 +537,9 @@ function bindDonutShare(
   req: FrameBindRequest,
   asOf: string,
 ): ChartSpec | null {
+  if (req.table_id === "luxury_price_bands_by_county") {
+    return bindLuxuryPriceBandsDonut(output, req, asOf);
+  }
   const slugs = req.metric_keys?.length ? req.metric_keys : autoShareSlugs(output);
   const metrics = slugs
     .map((s) => metricBySlug(output, s))
