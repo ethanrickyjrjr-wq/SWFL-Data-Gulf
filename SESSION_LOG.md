@@ -1,3 +1,19 @@
+## 2026-07-10 (Fable 5 · main) — Vertical-plays board: non-RE industries to sell content/leads to (strategy docs, no code)
+
+Brainstorm per operator: which industries beyond RE agents can we serve with scheduled content /
+lead signals, and how to monetize. Operator steer: paywall is NOT fixed (lead-gen / subscription /
+cash / licensing all fair), and a play need not live on swfldatagulf.com. Grounded in a real
+data probe — read `licenses-swfl`, `permits-swfl`, `storm-history-swfl` packs +
+`fl-dbpr-licenses-source.mts` + `ingest/.../fl_dbpr_licenses/constants.py`. Key verified finding:
+DBPR license file has NO email/phone/address; applicant file adds mailing address + phone but still
+NO email → email-acquisition is the #1 shared blocker; contractors reachable by phone/mail only.
+Advisor flagged (and I corrected) a crossed premise: home-services' moat is intent data = a lead-gen
+moat, not a subscription-newsletter moat. Wrote `docs/vertical-plays/`: README (scored board, 12
+plays across 3 tiers + cross-cutting gap list), `00-current-motion-monetization.md` (better ways to
+monetize the RE brand-injection engine NOW — reframe horizontal + per-seat/per-brokerage over
+per-send), `01-home-services-restoration.md` (deep dive, lead-gen motion, fastest-cash path).
+Living folder — re-score as we ship features / land data. No code touched; not pushed to writing-plans.
+
 ## 2026-07-10 (Sonnet 5 · main) — Outreach brand-injection plan CLOSED: Task 5 live pilot + Task 6 gates, check closed
 
 Operator greenlit Task 5 (bulk pilot CLI) after Task 4's probe landed. Step 2 dry-run
