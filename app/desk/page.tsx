@@ -203,6 +203,14 @@ export default async function DeskPage() {
               }
             >
               <DailyPulse pulse={desk.pulse} />
+              <div className="mt-4 flex flex-col gap-1.5">
+                <span className="text-[11px] text-gray-500">
+                  Embed this on your site — attribution links back to the Desk:
+                </span>
+                <code className="block overflow-x-auto rounded bg-white/5 px-2 py-1 font-mono text-[10px] text-gray-400">
+                  {`<iframe src="https://www.swfldatagulf.com/embed/desk/pulse" width="360" height="180" style="border:0" loading="lazy" title="SWFL Data Desk"></iframe>`}
+                </code>
+              </div>
             </DeskZone>
           ) : null}
 
