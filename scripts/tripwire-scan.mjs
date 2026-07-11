@@ -106,7 +106,11 @@ function checkPulseDark() {
     yellows.push("PULSE: gh unavailable — could not verify workflow states");
     return;
   }
-  for (const wf of ["Corridor pulse weekly", "City pulse daily"]) {
+  // Dark-list = pulse workflows deliberately kept disabled pending the crawl4ai retrofit.
+  // "City pulse daily" was legitimately RE-ENABLED (retrofit closed) and is now a live daily ingest
+  // feeding the digest — it was left in this hardcoded list, producing a 6-day false RED (07/11/2026).
+  // Removed. Phase 3 replaces this literal with a manifest-derived should_be_dark field.
+  for (const wf of ["Corridor pulse weekly"]) {
     const row = list.split("\n").find((l) => l.startsWith(wf));
     if (!row) yellows.push(`PULSE: workflow '${wf}' not found in gh list`);
     else if (/disabled/.test(row)) greens.push(`PULSE DARK — '${wf}' disabled`);

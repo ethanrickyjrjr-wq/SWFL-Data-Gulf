@@ -1,3 +1,44 @@
+## 2026-07-11 (Opus 4.8 · main) — Pipeline-problems: Path A scoped + act-today fixes (land-blend median $35k→$359k live, tripwire false-RED, CI real diagnosis, SteadyAPI key = 429 not dead)
+
+Operator picked "Path A now, Dagster REJECTED" (Prefect-vs-Airtable is his open call for the
+config-truth layer). Fanned 4 Opus scoping passes → `docs/audit/2026-07-11-pipeline-problems/05-BUILD-SCOPE.md`
+(night-chain via GHA needs+workflow_call+row-gate, content contracts at load, config-identity
+cross-check CI, doctor+cancelled-run fix; all converge on making the cadence registry the single
+source of config truth). Two scoping corrections to the diagnosis: the contaminated writers are
+hand-rolled psycopg merges (not dlt) + listing_active_stats is a VIEW; and actions/checkout@v6 is
+VALID today (v6 shipped since).
+
+Act-today, all live-verified:
+- **$35k land-blend (the material one).** `listing_active_stats` had no property_type filter → land
+  parcels (7,285 rows, ~21% of sale rows, median $46,490) dragged every ZIP/county/region median.
+  New migration `docs/sql/20260711_listing_active_stats_homes_only.sql` (property_type<>'land' +
+  list_price>=20000 to drop the 91 rental-priced mislabels incl. the Marco 10 Tampa Pl condo cluster).
+  APPLIED to prod + verified direct-Postgres: 33972 $35,000→$359,000 (403 homes), 33974
+  $31,360→$325,000 (655 homes), Lee region $365,000, Collier $649,900. Added defensive btrim() in the
+  GROUP (WHERE already btrimmed; raw-county GROUP would split a future dirty value). Investigated a
+  count=1 "Lee $319,900" region row → NOT contamination: it's the (county,zip) set emitting a bucket
+  for one listing with a NULL zip; region median is correct. Homes-only per operator ("land price has
+  nothing to do with home price"); land stays in the lake, can be its own surface later.
+- **Tripwire false-RED (6 days).** `scripts/tripwire-scan.mjs` checkPulseDark hardcoded
+  ["Corridor pulse weekly","City pulse daily"]; City pulse was legitimately re-enabled (gh: active) →
+  removed it, kept Corridor (gh: disabled_manually). Ends the false RED.
+- **CI red = NOT 6 fresh bugs.** Fixed the 1 real one: `MaterialRow.test.tsx` hardcoded old seed copy
+  ("Sale Price · Cape Coral") after the hero became an instructional slot label per the 07/08 seed
+  playbook → now asserts hero-over-tagline precedence against the seed's actual copy (7/7 green).
+  syncUserAudiences(CI×5)/zip-seed(local×2) PASS in isolation, fail only in the full suite with
+  different victims per env → flaky global-state polluter ("Maximum call stack", Bun mock.module/spyOn
+  leak). grounding-guard = the already-tracked Jul 13 mock→live item.
+- **SteadyAPI new PHOTOS_API key (operator asked).** Dispatched dry-run (run 29157510684, Collier):
+  key made 66 live calls (NOT 401/403 = valid) then hit HTTP 429, scan discarded, run still GREEN
+  (gap-masking). Throttled/over-cap, not a dead key — needs operator billing check.
+
+Checks opened (no silent deferral): `ci-flaky-stackoverflow-polluter`, `steadyapi-429-rate-limited`,
+`market-details-swfl-land-blend-and-dupes` (the "what else": market_details_swfl has the SAME land
+blend live — 33972 sold median $30,000 vs rent $1,950 — plus duplicate rows; it's a pipeline-written
+table so it needs a run_details normalizer fix + backfill, a separate/bigger job than the view swap;
+the durable class fix is Path A Phase 1 content-contracts). Staged only my files; left the orphaned
+`06-orchestrator-vendor-research.md` (killed Dagster spike) untracked for the Prefect/Airtable call.
+
 ## 2026-07-11 (Opus 4.8 · main) — Deliverable coherence rule: structural gate so a chart can't contradict its headline (root of the ugly $3.17M-over-$802K luxury email)
 
 Operator caught the Luxury Market Report template pairing a "$3,168,000 · $2M+" headline with a

@@ -90,8 +90,17 @@ describe("MaterialRow", () => {
 
   test("titles a real header-first seed from its hero, not the brand tagline", () => {
     const justSold = SEED_DOCS.find((s) => s.id === "just-sold")!;
-    const d: DeliverableRow = { ...base, doc: justSold.build() };
-    expect(deriveTitle(d)).toBe("Sale Price · Cape Coral");
+    const doc = justSold.build();
+    const d: DeliverableRow = { ...base, doc };
+    // Assert against the seed's ACTUAL hero copy (not a hardcoded literal) so this
+    // can't rot when seed copy changes — as it did when the hero became an
+    // instructional slot label per the 07/08 seed-slot playbook. The real invariant
+    // is the FIELD precedence: deriveTitle picks the hero over the header tagline.
+    const heroBlock = doc.blocks.find((b) => b.type === "hero")!;
+    const headerBlock = doc.blocks.find((b) => b.type === "header");
+    const expectedHero = heroBlock.props.label ?? heroBlock.props.value;
+    expect(deriveTitle(d)).toBe(expectedHero);
+    expect(deriveTitle(d)).not.toBe(headerBlock?.props.tagline);
   });
 
   test("version count string for 1 version is 'Updated 1×'", () => {
