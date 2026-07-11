@@ -26,6 +26,11 @@ import { donutShareSvg } from "@/lib/charts/svg/donut-share";
 import { dotPlotSvg } from "@/lib/charts/svg/dot-plot";
 import { sparkGridSvg } from "@/lib/charts/svg/spark-grid";
 import { lineBandSvg } from "@/lib/charts/svg/line-band";
+import {
+  compositionSvg,
+  extractCompositionData,
+  resolveCompositionColors,
+} from "@/lib/charts/svg/composition";
 
 /** Map a ChartBlock value_format to the chart-image value root's ValueFormat. */
 function mapValueFormat(vf?: string): ValueFormat {
@@ -141,6 +146,19 @@ export async function chartSpecToEmailSvg(spec: ChartSpec, accent: string): Prom
             baseOpts,
           );
         break;
+      case "composition": {
+        const { segments, callout } = extractCompositionData(o);
+        if (segments.length) {
+          const colors = resolveCompositionColors(segments, spec.theme);
+          svg = compositionSvg(segments, colors, {
+            title,
+            callout,
+            source: baseOpts.source,
+            asOf: baseOpts.asOf,
+          });
+        }
+        break;
+      }
     }
 
     // Fallbacks: zhvi-area / any options.data time series, then bar-table.

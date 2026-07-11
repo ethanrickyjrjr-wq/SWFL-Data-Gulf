@@ -97,3 +97,28 @@ test("chartSpecToEmailSvg never throws (rejects) on a malformed zhvi-area spec",
   const svg = await chartSpecToEmailSvg(spec, "#0ea5e9");
   expect(svg).toBeNull();
 });
+
+test("composition renders a real segmented-bar SVG from share-style options", async () => {
+  const spec = {
+    frameId: "composition",
+    title: "Flood exposure composition",
+    chart_type: "bar",
+    value_format: "count",
+    source: { citation: "env-swfl" },
+    asOf: "2026-06-30",
+    options: {
+      segments: [
+        { label: "SFHA (in flood zone)", valuePct: 32 },
+        { label: "Outside SFHA", valuePct: 68 },
+      ],
+      callout: "357× AAL multiplier",
+    },
+  } as ChartSpec;
+
+  const svg = await chartSpecToEmailSvg(spec, "#0ea5e9");
+
+  expect(svg).not.toBeNull();
+  expect(svg).toContain("<svg");
+  expect(svg).toContain("Flood exposure composition");
+  expect(svg).toContain("357");
+});

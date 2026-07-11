@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { extractCompositionData, resolveCompositionColors } from "./CompositionFrame";
+import { extractCompositionData, resolveCompositionColors } from "@/lib/charts/svg/composition";
 
 /**
  * Pure-function tests for CompositionFrame's data-adapter.

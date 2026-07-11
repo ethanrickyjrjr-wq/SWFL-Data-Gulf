@@ -191,3 +191,25 @@ test("isTimeSeries is false for categorical (ZIP/city) data", () => {
   expect(isTimeSeries(countSpec)).toBe(false);
   expect(isTimeSeries(trendSpec)).toBe(true);
 });
+
+test("chartTypeFits: composition needs additive (count) data, same test as donut", () => {
+  expect(chartTypeFits(countSpec, "composition")).toBe(true);
+  expect(chartTypeFits(usdSpec, "composition")).toBe(false);
+});
+
+test("count data → composition computes each point's share of the total (never invents a percent)", () => {
+  const out = reshapeChartToType(countSpec, "composition");
+  expect(out.frameId).toBe("composition");
+  const segs = out.options?.segments as { label: string; valuePct: number }[];
+  const total = 7412 + 2749 + 298;
+  expect(segs[0].valuePct).toBeCloseTo((7412 / total) * 100, 5);
+});
+
+test("GUARDRAIL: composition on price (usd) data falls back to a bar", () => {
+  expect(reshapeChartToType(usdSpec, "composition").frameId).toBe("bar-table");
+});
+
+test("PASSTHROUGH: a spec already in the target frameId is returned unchanged", () => {
+  const already: ChartSpec = { ...usdSpec, frameId: "corridor-scatter" };
+  expect(reshapeChartToType(already, "corridor-scatter")).toBe(already);
+});

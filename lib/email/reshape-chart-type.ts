@@ -12,7 +12,18 @@
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
 export type ChartType =
-  "bar" | "ranked" | "donut" | "dotplot" | "composed" | "spark-grid" | "line-band";
+  | "bar"
+  | "ranked"
+  | "donut"
+  | "dotplot"
+  | "composed"
+  | "spark-grid"
+  | "line-band"
+  | "composition"
+  | "z-gauge"
+  | "seasonal-radial"
+  | "storm-timeline"
+  | "corridor-scatter";
 
 /** The user-facing labels for the control (kept here so UI + engine share one list). */
 export const CHART_TYPE_OPTIONS: { type: ChartType; label: string }[] = [
@@ -23,6 +34,7 @@ export const CHART_TYPE_OPTIONS: { type: ChartType; label: string }[] = [
   { type: "composed", label: "Bar + trend line" },
   { type: "spark-grid", label: "KPI cards" },
   { type: "line-band", label: "Line" },
+  { type: "composition", label: "Composition" },
 ];
 
 interface Pt {
@@ -81,6 +93,7 @@ export function chartTypeFits(spec: ChartSpec, type: ChartType): boolean {
   if (pts.length < 2) return false;
   switch (type) {
     case "donut":
+    case "composition":
       return spec.value_format === "count";
     case "ranked":
       return pts.some((p) => typeof p.delta === "number");
@@ -112,6 +125,13 @@ export function reshapeChartToType(spec: ChartSpec, type: ChartType): ChartSpec 
   // NO OLD DATA: never reshape a time series into a categorical shape (that slices the
   // oldest points). Keep the trend — its renderer shows the recent window.
   if (isTimeSeries(spec)) return spec;
+  // PASSTHROUGH: some target types (z-gauge, corridor-scatter, seasonal-radial,
+  // storm-timeline) can never be honestly fabricated from a flat bar-table —
+  // there is no bound/target, no x/y pair, no per-corridor snapshot, no per-
+  // event date in a generic (label, value) list. When the routed spec is
+  // ALREADY that shape (e.g. buildChartForIntent's corridor-scatter case),
+  // keep it as-is rather than force it through the categorical reshape below.
+  if (spec.frameId === type) return spec;
   // GUARDRAIL: a requested shape the data can't honor (donut of medians, ranked
   // without a delta) falls back to a plain bar — never a misleading chart.
   if (type !== "bar" && !chartTypeFits(spec, type)) return reshapeChartToType(spec, "bar");
@@ -219,6 +239,19 @@ export function reshapeChartToType(spec: ChartSpec, type: ChartType): ChartSpec 
           valueFormat: spec.value_format,
         },
       } as ChartSpec;
+    case "composition": {
+      const total = pts.reduce((a, p) => a + p.value, 0) || 1;
+      return {
+        ...base,
+        columns: cols,
+        rows: pts.map((p) => [p.label, p.value]),
+        chart_type: "bar",
+        frameId: "composition",
+        options: {
+          segments: pts.map((p) => ({ label: p.label, valuePct: (p.value / total) * 100 })),
+        },
+      } as ChartSpec;
+    }
     case "bar":
     default:
       return {
