@@ -1,0 +1,32 @@
+{
+  "_meta": {
+    "note": "Sample of data_lake.leepa_sold_median_by_zip — Lee homes-only (use_code 01/04) sold median per ZIP from LeePA recorded deeds. county_median/county_n are constant across rows (CROSS JOIN). Values illustrative but in-band: county median ~$371k (validated live 07/11/2026: 55,457 eligible homes).",
+    "source": "Lee County Property Appraiser (recorded deeds)"
+  },
+  "rows": [
+    {
+      "zip_code": "33972",
+      "home_sales_n": 912,
+      "median_sale": 330000,
+      "county_fallback": false,
+      "county_median": 371298,
+      "county_n": 55457
+    },
+    {
+      "zip_code": "33901",
+      "home_sales_n": 287,
+      "median_sale": 355000,
+      "county_fallback": false,
+      "county_median": 371298,
+      "county_n": 55457
+    },
+    {
+      "zip_code": "33902",
+      "home_sales_n": 8,
+      "median_sale": 371298,
+      "county_fallback": true,
+      "county_median": 371298,
+      "county_n": 55457
+    }
+  ]
+}
