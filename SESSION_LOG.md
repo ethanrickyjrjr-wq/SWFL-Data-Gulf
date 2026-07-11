@@ -1,3 +1,22 @@
+## 2026-07-11 (Fable 5 · main) — zip-scope-core: spec corrected (found /charts gap) + render-time fix BUILT & verified (code held for push go)
+
+Reviewed the zip-scope-core spec (already on main at 5dd4d506) per operator "why are we so off."
+Verified the diagnosis empirically: registry cards rank against each brain's whole detail table
+(`candidates.ts:634`, unscoped `dist`), census against 6-county `in_scope` (100 ZIPs). Brains emit
+90–126 ZIP keys (seller-stress 126→55 core, housing 124→54, home-values 109→53) — confirmed by
+token-scan vs `fixtures/swfl-zip-county.json` (Lee 35 + Collier 22 = 57). **Spec coverage GAP found
+and corrected:** `/charts` panels read `data_lake.*` views DIRECTLY (`market_details_swfl_latest`,
+`zhvi_zip_yoy_monthly`) — bypassing BOTH `candidates.ts` and brain `--- OUTPUT ---`, so neither the
+consumer fix nor the pack source-fix reaches them; the temperature dial was doubly wrong (count AND
+median). Spec now has §3.5 (per-loader lake filter) + reframes §3 as the immediate rebuild-free fix +
+a held-count≠uniform-count operator note. **Render-time fix built + verified (`bunx next build` clean,
+19+7+12 tests green):** new `refinery/lib/core-scope.mts` (`isCoreScope`/`CORE_SCOPE_ZIPS`=57, G1-pure,
+build-time 57-assert) + test; `candidates.ts` registry dist filter + census `in_scope`→`isCoreScope`
++ `TOTAL_SWFL_ZIPS` derives from core; `app/charts/page.tsx` 2 leaking loaders scoped (metro/tier
+loaders are city/tier-pivoted, no ZIP leak — left alone). CODE COMMITTED LOCAL, held for explicit
+push go (touches live zip-report + /charts). §2 pack source-fix + §5 lint + §4 page-guard are the
+spend-gated rebuild follow-on — `zip_scope_core_live_verify` stays OPEN. This push = spec+log only.
+
 ## 2026-07-10 (Opus 4.8 · main) — New-agent radar SPEC pushed; email lane kept local
 
 Specced the weekly DBPR new-agent radar and pushed the design doc only (spec, no code yet):

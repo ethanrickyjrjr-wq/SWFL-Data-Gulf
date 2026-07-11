@@ -73,6 +73,14 @@ counts/prose — ranks against the same 57-ZIP core universe. Denominators are *
 lists the actual number of core ZIPs holding a finite value for that metric — may be <57 when a brain's
 coverage is partial; that is honest, not inconsistent). No out-of-region ZIP ever inflates a count again.
 
+**Held-count is not uniform-count — say so to the operator.** After the fix, cards read `of 52`, `of 48`,
+`of 57` — all ≤57, but still *different from each other* because coverage varies by metric (you cannot rank
+a ZIP on a metric it holds no value for). That is the correct, honest behavior; the drift the operator saw
+("of 124 … of 67") was two problems — too-big **and** inconsistent — and held-count fixes "too-big" while
+leaving honest per-metric variation. A uniform "of 57 everywhere" is available as an alternative (pad the
+denominator to the full core set), at the cost of implying ranks over ZIPs that have no data. Ship held-count;
+hand the operator the switch.
+
 ## Approaches considered
 
 - **A — Source-fix at the brain + shared `core_scope` predicate + Stage-4 lint (CHOSEN).** Fixes cards,
@@ -106,12 +114,32 @@ listing-momentum-swfl, active-listings-swfl, seller-stress-swfl, investor-zip-sw
 `investor-zip-swfl` already filters on `in_scope` → switch it to `isCoreScope`. This is the single conceptual
 cut; it cascades to the page cards, `/charts`, and prose because all of them read `--- OUTPUT ---`.
 
-### 3. Consumer belt-and-suspenders — `lib/zip-report/candidates.ts`
+### 3. Consumer fix — `lib/zip-report/candidates.ts` — THIS IS THE IMMEDIATE FIX (reframed 07/11 review)
+Not "belt-and-suspenders." This is the layer that corrects **every page-card denominator the instant it
+deploys — zero brain rebuild, zero Sonnet spend, zero pack risk.** The `dist` at `candidates.ts:634` is
+built from `data.rows` (the brain's whole detail table) and `percentileOf(dist, v).rankOf = dist.length`
+— that is the drift, and it lives entirely at render time. Filtering `dist` fixes it now; the source-fix
+(§2) + rebuild only re-bakes the same result into the brain OUTPUT and the prose. Do §3 first.
 - `buildRegistryCandidates`: filter the ranking distribution to `isCoreScope(row.key)` before
-  `percentileOf`. Redundant after the source-fix, but keeps the page honest if a rebuild lags.
-- `loadCensusSignals`: swap `resolveZip(geoId).in_scope` → `isCoreScope(geoId)`.
+  `percentileOf` — i.e. `data.rows.filter((r) => isCoreScope(r.key))` before `.map(cells[spec.cell])`.
+- `loadCensusSignals`: swap `resolveZip(geoId).in_scope` → `isCoreScope(geoId)` (candidates.ts:821).
 - Held-count denominators fall out: `percentileOf`'s `n` = count of core ZIPs with a finite value.
 - Reconcile the `TOTAL_SWFL_ZIPS = 57` constant to derive from `CORE_SCOPE_ZIPS.size` (single source).
+
+### 3.5. `/charts` reads the LAKE directly — its own separate fix (NEW — 07/11 review gap)
+**Correction to this spec's original claim.** `/charts` does *not* flow through `candidates.ts`, and it does
+*not* read the brain `--- OUTPUT ---` either. Each panel in `app/charts/page.tsx` selects straight from a
+`data_lake.*` view — verified: `market_details_swfl_latest` (temperature dial, `zipCount = scores.length`),
+`zhvi_zip_yoy_monthly` (ZIP heatmap, 109 ZIPs), `zhvi_pivoted` (home-value momentum), `tier_divergence_pivoted`.
+Because it bypasses both the consumer path **and** the pack, **neither §2 nor §3 touches `/charts`.** The
+temperature dial is doubly wrong: non-core ZIPs inflate both `zipCount` *and* the median hotness.
+Each ZIP-grained chart loader needs its own scope filter at the lake-read:
+- `loadMarketTemperature` (page.tsx:137): select must include `zip_code`, then filter rows to `isCoreScope`
+  before `mapMarketTemperature` (which today receives no key and cannot self-filter).
+- `loadZipHeatmap` (page.tsx:155): already selects `zip_code` → add `.filter(isCoreScope)` on the paged rows.
+- `loadHomeValueMomentum` / tier panels: audit whether the pivoted views carry per-ZIP columns; scope if so.
+- Airport/passenger and other non-ZIP panels: out of scope, leave alone.
+This is a distinct code cut from §3 and ships with it (both are render-time, rebuild-free).
 
 ### 4. Page-guard migration — one audited consumer
 `app/r/zip-report/[zip]/page.tsx` + `metadata.ts`: render/metadata guard moves `in_scope` → `isCoreScope`
@@ -130,17 +158,24 @@ compliant: extends the existing Stage-4 seam, not a new gate architecture.
 ```
 swfl-zip-county.json ──▶ core-scope.mts (CORE_SCOPE_ZIPS=57, isCoreScope)
                               │
-        ┌─────────────────────┼───────────────────────────┐
-        ▼                     ▼                            ▼
-  pack zipRows filter   candidates.ts (registry     zip-report page guard
-  (source-fix, §2)       dist + census, §3)          (isCoreScope, §4)
-        │                     │                            │
-        ▼                     ▼                            ▼
-  brains/*.md OUTPUT    held-count denominators      non-core → outside-coverage
-  (page + /charts +     (#X of ≤57, consistent)
-   prose all scoped)
-        ▲
-   Stage-4 zip-scope-lint (§5) fails any out-of-core row
+   ┌──────────────┬───────────┼──────────────┬─────────────────┐
+   ▼              ▼           ▼              ▼                 ▼
+candidates.ts  /charts     pack zipRows   zip-report page   Stage-4
+(§3 registry   loaders     filter          guard (§4)        zip-scope-lint
+ dist+census)  (§3.5 lake  (source-fix,   isCoreScope       (§5) fails any
+ RENDER-TIME   read filter) §2) REBUILD                      out-of-core row
+   │              │           │              │
+   ▼              ▼           ▼              ▼
+page cards     dial/heatmap brains/*.md   non-core →
+held-count     scoped       OUTPUT+prose  outside-coverage
+(#X of ≤57)                 re-baked
+
+Fix layers, in order:
+  1. RENDER-TIME (§3 + §3.5) — fixes card + chart denominators NOW, no rebuild, no Sonnet spend.
+  2. REBUILD (§2) — re-bakes the same scoping into brain OUTPUT and fixes the "126 SWFL ZIPs" PROSE
+     (prose is baked into brains/*.md conclusions; only a rebuild changes it). Spend-gated, greenlight first.
+  3. LINT (§5) — permanent regression lock.
+NOTE: §2 does NOT reach /charts (it reads the lake, not OUTPUT) — that is why §3.5 exists.
 ```
 
 ## Testing
@@ -156,10 +191,15 @@ swfl-zip-county.json ──▶ core-scope.mts (CORE_SCOPE_ZIPS=57, isCoreScope)
 
 ## Rollout / cost
 
-- Pack edits + `core-scope.mts` + consumer edits + lint ship together (atomic — vocab/catalog gates).
-- Rebuild each affected brain with `--target-only` (never `master --force`), then a master cascade.
-  ~9 Sonnet synthesis calls — **spend heads-up before the first live rebuild run** (per the spend rule).
-- Verify row-key counts on each rebuilt brain drop to ≤57 core before pushing.
+Sequenced so the operator gets correct denominators **before** any spend:
+1. **Render-time cut (ship first):** `core-scope.mts` + `candidates.ts` (§3) + `/charts` loaders (§3.5)
+   + tests. Verify with `bunx next build`. Corrects every card + chart denominator on deploy. No pack
+   touch, no Sonnet spend — safe to ship on its own.
+2. **Rebuild cut (greenlight-gated):** pack `zipRows` filters (§2) + Stage-4 lint (§5) ship together
+   (atomic — vocab/catalog gates). Rebuild each affected brain with `--target-only` (never `master --force`),
+   then a master cascade. ~9 Sonnet synthesis calls — **spend heads-up before the first live rebuild run**
+   (per the spend rule). This fixes the baked-in "126 SWFL ZIPs" prose that render-time cannot reach.
+   Verify row-key counts on each rebuilt brain drop to ≤57 core before pushing.
 
 ## Follow-ups (own checks — not this spec's code)
 
