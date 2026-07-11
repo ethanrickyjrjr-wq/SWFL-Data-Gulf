@@ -1,0 +1,41 @@
+name: Airtable checks sync
+
+# Delta-syncs open public.checks rows into the read-only Airtable mirror.
+# Spec: docs/superpowers/specs/2026-07-11-checks-airtable-mirror-design.md
+# Check: checks_airtable_mirror_live_verify
+#
+# Every 2 hours, not hourly — the spec's cost math keeps this comfortably
+# under Airtable's free-tier 1,000-calls/month cap at this repo's observed
+# checks-ledger velocity (~33 opens+updates/day, ~15-20 closes/day).
+
+on:
+  schedule:
+    - cron: "23 */2 * * *" # off the top-of-hour congestion, same convention as tripwire-hourly.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: airtable-checks-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+
+      - name: Run Airtable checks sync
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+          AIRTABLE_CHECKS_BASE_ID: ${{ secrets.AIRTABLE_CHECKS_BASE_ID }}
+          AIRTABLE_CHECKS_TABLE_ID: ${{ secrets.AIRTABLE_CHECKS_TABLE_ID }}
+        run: node scripts/airtable-checks-sync.mjs
