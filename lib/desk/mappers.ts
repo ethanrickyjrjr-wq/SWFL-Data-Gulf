@@ -5,6 +5,11 @@
 
 import type { DeskDirection } from "./types";
 
+// makeTakeaway lives in lib/geo-takeaway.ts — the one shared authority for the
+// GEO quotable sentence, also used by /r/* report pages. Re-exported here so
+// existing desk imports don't need to change.
+export { makeTakeaway } from "../geo-takeaway";
+
 /** ISO date or timestamp → MM/DD/YYYY (the one date convention in copy). */
 export function mdY(iso: string | null | undefined): string | undefined {
   if (!iso) return undefined;
@@ -34,25 +39,6 @@ export function fmtPct(n: number, digits = 1): string {
 export function directionOf(delta: number | null | undefined): DeskDirection {
   if (delta == null || delta === 0) return "flat";
   return delta > 0 ? "up" : "down";
-}
-
-/**
- * A GEO-optimized quotable one-liner for a desk figure: answer-first, with the
- * number, its OWN as-of, and the brand — the Cite-Sources + Statistics-Addition
- * shape the Princeton GEO study links to +30-41% AI-citation lift. `scope` is
- * injected ONLY when passed: region figures get "in Southwest Florida"; a
- * national rate (30-yr mortgage) must NOT wear a regional label (geography
- * honesty). Empty display → empty string (a dead feed never ships a hollow
- * sentence).
- */
-export function makeTakeaway(
-  d: { label: string; display: string; asOf?: string; sourceLabel: string },
-  scope?: string,
-): string {
-  if (!d.display) return "";
-  const where = scope ? ` in ${scope}` : "";
-  const asOf = d.asOf ? ` as of ${d.asOf}` : "";
-  return `${d.label}${where} is ${d.display}${asOf}, per ${d.sourceLabel}.`;
 }
 
 function median(values: number[]): number | null {

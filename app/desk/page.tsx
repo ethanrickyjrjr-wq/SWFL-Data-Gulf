@@ -149,6 +149,17 @@ export default async function DeskPage() {
               }
             >
               <DeskHero hero={desk.hero} />
+              {desk.hero.cities.some((c) => c.latest.takeaway) ? (
+                <ul className="mt-3 space-y-0.5">
+                  {desk.hero.cities
+                    .filter((c) => c.latest.takeaway)
+                    .map((c) => (
+                      <li key={c.latest.label} className="text-[11px] leading-4 text-gray-500">
+                        {c.latest.takeaway}
+                      </li>
+                    ))}
+                </ul>
+              ) : null}
             </DeskZone>
           ) : null}
 
@@ -244,7 +255,16 @@ export default async function DeskPage() {
             {desk.gauges.marketTemp ? (
               <MarketTemperatureGauge gauge={desk.gauges.marketTemp} />
             ) : null}
-            {desk.gauges.priceReduced ? <DeskGaugePanel datum={desk.gauges.priceReduced} /> : null}
+            {desk.gauges.priceReduced ? (
+              <div>
+                <DeskGaugePanel datum={desk.gauges.priceReduced} />
+                {desk.gauges.priceReduced.takeaway ? (
+                  <p className="mt-2 text-[11px] leading-4 text-gray-500">
+                    {desk.gauges.priceReduced.takeaway}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
 

@@ -570,6 +570,7 @@ export async function loadDeskData(): Promise<DeskData> {
       display: fmtCount(stats.region.listing_count),
       sourceLabel: SPINE_SOURCE,
       asOf: spineAsOf,
+      plural: true,
     });
   }
   if (momentum.region?.price_reduced_share != null) {
@@ -580,6 +581,7 @@ export async function loadDeskData(): Promise<DeskData> {
       display: fmtPct(momentum.region.price_reduced_share),
       sourceLabel: SPINE_SOURCE,
       asOf: momentum.asOf ?? spineAsOf,
+      plural: true,
     });
   }
   if (mortgageLd) {
@@ -597,6 +599,7 @@ export async function loadDeskData(): Promise<DeskData> {
       deltaNote: mortgageLd.prevPeriod
         ? `vs. prior reading ${mdY(mortgageLd.prevPeriod)}`
         : undefined,
+      national: true,
     });
   }
   if (latestPulseDay) {
@@ -608,6 +611,7 @@ export async function loadDeskData(): Promise<DeskData> {
       sourceLabel: SPINE_SOURCE,
       asOf: mdY(latestPulseDay.day),
       deltaNote: latestPulseDay.partial ? "partial scan — incomplete sweep" : undefined,
+      plural: true,
     });
     kpis.push({
       label: "Confirmed sold, latest scan",
@@ -758,12 +762,12 @@ export async function loadDeskData(): Promise<DeskData> {
   };
 
   // Quotable takeaways (Spec B GEO). Region KPIs + the price-cut gauge are
-  // SWFL-scoped; the 30-yr mortgage is a NATIONAL rate, so it gets no region
-  // clause. Hero city datums already name their city in the label, so no scope.
+  // SWFL-scoped; `national`/`plural` are explicit flags set at each push site
+  // above — never inferred from label text. Hero city datums already name
+  // their city in the label, so no scope.
   const SWFL = "Southwest Florida";
   for (const d of kpis) {
-    const national = /mortgage/i.test(d.label);
-    d.takeaway = makeTakeaway(d, national ? undefined : SWFL);
+    d.takeaway = makeTakeaway(d, d.national ? undefined : SWFL);
   }
   if (gauges.priceReduced) gauges.priceReduced.takeaway = makeTakeaway(gauges.priceReduced, SWFL);
   if (hero) for (const c of hero.cities) c.latest.takeaway = makeTakeaway(c.latest);

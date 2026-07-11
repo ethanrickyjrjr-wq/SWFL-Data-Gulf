@@ -21,6 +21,13 @@ export interface DeskDatum {
   asOf?: string;
   /** Spec B fills this; empty in Spec A. */
   takeaway?: string;
+  /** True ONLY for a national figure (e.g. 30-yr mortgage) — takeaway omits the
+   *  Southwest Florida scope clause. Explicit, set at construction — never
+   *  inferred from the label text. */
+  national?: boolean;
+  /** True when `label` is a grammatical plural ("Active listings") — takeaway
+   *  uses "are" instead of "is". */
+  plural?: boolean;
   delta?: number;
   deltaDisplay?: string;
   direction?: DeskDirection;

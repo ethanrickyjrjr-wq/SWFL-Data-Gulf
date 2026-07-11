@@ -1,3 +1,24 @@
+## 2026-07-11 (Sonnet 5 · main) — Desk discovery follow-ups Tasks 1+2: takeaway grammar/scope fix + /r/* GEO takeaway; Tasks 3/4 handed off
+
+Closed `desk_takeaway_national_scope_guard` + `desk_takeaway_polish`: `DeskDatum` gained explicit
+`national?`/`plural?` flags (replacing the `/mortgage/i` label regex in `lib/desk/loaders.ts`);
+`makeTakeaway` now picks "is"/"are" correctly; the two previously-computed-but-never-rendered
+takeaways (`gauges.priceReduced`, hero city `.latest`) now render in `app/desk/page.tsx`. Closed
+`r_star_report_takeaway`: extracted `makeTakeaway` to `lib/geo-takeaway.ts` (one shared authority —
+`/desk` re-exports via `lib/desk/mappers.ts`, `/r/[slug]` imports directly, per the shared-concept
+rule) and wired a number-first takeaway sentence under the conclusion on `/r/*` report pages,
+picking the lead metric via the existing cre-swfl rollup filter. Verified: `bun test` 28/28, `bunx
+next build` green, live SSR `curl` checks on `/desk`, `/r/master`, `/r/cre-swfl`.
+
+Found + flagged (not fixed): verifying `/r/cre-swfl` surfaced `shortSourceLabel` (speaker.mts:690)
+emitting the literal string `"[config]"` into a customer-facing citation, 23x on that one page —
+pre-existing, unrelated to this change. Opened check `source_label_config_leak` per RULE 2.4 instead
+of a silent log note.
+
+Tasks 3 (robots carve-out, needs operator yes/no) + 4 (deploy-time live-verify) handed off in
+`docs/handoff/2026-07-11-desk-discovery-followups-task3-4-handoff.md` — full diffs/runbook already
+in `docs/superpowers/plans/2026-07-11-desk-discovery-followups-plan.md`, nothing left to re-plan.
+
 ## 2026-07-11 (Opus 4.8 · main) — Cleaned the chart-wiring specs into a plannable set of 4; folded coherence guard + all-27-template audit across them
 
 Reviewed the parallel session's chart-builder audit + two specs (picker-parity, social-registry) and

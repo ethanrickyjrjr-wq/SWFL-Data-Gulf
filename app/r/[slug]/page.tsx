@@ -42,6 +42,7 @@ import {
   type MetricBox,
 } from "../cre-swfl/cre-metrics";
 import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
+import { makeTakeaway } from "@/lib/geo-takeaway";
 import { loadNarrative } from "../../../lib/narratives/store";
 import { NarrativeSections } from "../../../components/narratives/NarrativeSections";
 
@@ -170,6 +171,26 @@ export default async function ReportPage({ params }: PageProps) {
       direction: m.direction,
     }));
 
+  // Number-first GEO takeaway (Spec B item 2). Leads with the first real
+  // metric — reusing the same cre-swfl rollup filter as summaryMetrics so a
+  // MarketBeat city/area/county rollup or the current-events signal list
+  // never becomes the "headline" figure for that one brain. No scope clause:
+  // display.scope already states the report's scope in the header above.
+  const isRealMetric = (m: { label: string }) =>
+    slug !== "cre-swfl" ||
+    (!parseMBCityLabel(m.label) &&
+      !isMBRollup(m.label) &&
+      !/current-events signals/i.test(m.label));
+  const leadMetric = display.metrics.find(isRealMetric);
+  const reportTakeaway = leadMetric
+    ? makeTakeaway({
+        label: leadMetric.label,
+        display: leadMetric.value,
+        asOf: asOfFromIso(leadMetric.fetchedAt) ?? undefined,
+        sourceLabel: leadMetric.sourceLabel,
+      })
+    : "";
+
   const pageContent = (
     <>
       <Breadcrumbs trail={reportTrail(display.title)} />
@@ -201,6 +222,7 @@ export default async function ReportPage({ params }: PageProps) {
         <p className="mt-6 text-lg leading-8 text-gray-200">
           <AnswerText text={display.conclusion} />
         </p>
+        {reportTakeaway ? <p className="mt-2 text-sm text-gray-500">{reportTakeaway}</p> : null}
       </section>
 
       {/* ── Baked narrative — ONE renderer root, additive (absent row = today's page) ── */}
