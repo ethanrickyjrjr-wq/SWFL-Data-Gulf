@@ -137,6 +137,27 @@ no synthetic movement; `prefers-reduced-motion` disables scroll/count-up. Dark-m
 base `#0A0A0A–#111827`, elevation by 1px border not shadow, off-white text (`#F3F4F6`), tabular
 numerals so count-up digits don't shift width.
 
+## Seams for Spec B (build A so B is a bolt-on, not a rewrite)
+
+Spec A must leave these hooks in place so the discovery/backlink flywheel needs no reshaping of
+the desk:
+
+- **Numbers live in SSR HTML.** The page is a server component; every figure + as-of is rendered
+  server-side (client components only animate what the server already emitted). B's whole
+  citability premise depends on this — never hydrate a number from a client fetch.
+- **Per-zone provenance contract.** Every zone loader returns a typed result carrying
+  `{ label, value, unit, sourceLabel, asOf }` plus an optional `takeaway?: string` (empty in A).
+  B fills the takeaway with the quotable one-liner and reads the same shape to emit Dataset
+  `variableMeasured` and the embed payload — no loader reshaping.
+- **Emit the existing Dataset JSON-LD on /desk from day 1** (reuse `lib/jsonld.ts`, even minimal).
+  B enriches it (temporalCoverage / spatialCoverage / license); the hook must already be wired.
+- **Shared "turn this into a report" CTA slot** (Spec A Phase 1b builds it; B reuses it for the
+  email-capture / deep-link variants).
+- **Each zone is a standalone component reading one loader**, so B's embeddable attributed widget
+  can reuse a single zone (e.g., the price ticker) without extracting it from the page.
+- **Leave /desk fully indexable** (no `noindex`), so B's robots decision is a pure `robots.ts`
+  edit with nothing to undo on the page.
+
 ## Out of scope (v2 additive — named to control sprawl)
 
 Watchlist (pinned ZIPs), ⌘K command bar, ZIP×metric correlation heatmap, mini-map choropleth

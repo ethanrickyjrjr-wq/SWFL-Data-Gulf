@@ -1,3 +1,21 @@
+## 2026-07-11 (Fable 5 · main) — SWFL Data Desk (/desk) specced: product (A) + discovery flywheel (B), from 4-stream research; handoff written
+
+Verified the /charts glow-up live (all 4 new panels draw on prod, closed `charts_glowup_live_verify`),
+then brainstormed the parked `desk_showpiece_parked` into a live market-terminal page at `/desk`.
+Operator asked to weigh real value, not just visuals. Ran 4 parallel research streams (crawl4ai
+design + GEO/growth; code/lake probes of SteadyAPI capability + deliverable reuse). Verdict: not
+eye candy IF the filing bridge is built — brain-backed KPI tiles file as self-refreshing `frame`
+items into the free-build→paid-send funnel; also a uniquely-cited daily dataset (AI-citation +
+backlink asset) and a first-class research input. Split into two committed specs: A =
+`2026-07-11-swfl-data-desk-design.md` (terminal + filing bridge; corrected sources — `listing_state`
+spine + aggregate views NOT the legacy scrape, DROP DOM; per-zone as-of; partial-scan + luxury-sold
+honesty; + "Seams for Spec B" so B bolts on). B = `2026-07-11-desk-discovery-flywheel-design.md`
+(SSR numbers, Dataset JSON-LD extension → Google Dataset Search, embeddable attributed backlink
+widget, llms.txt last; robots.txt answer-engine carve-out framed as an operator moat-vs-reach
+decision, NOT auto-implemented). Handoff: `docs/handoff/2026-07-11-swfl-data-desk-handoff.md`.
+Checks: `swfl_data_desk_live_verify`, `desk_discovery_flywheel_live_verify`. Next: execute Spec A
+Phase 1a→1b per the handoff. No code touched; specs+handoff only.
+
 ## 2026-07-11 (Fable 5 · main) — zip-scope-core COMPLETE: all 12 ZIP packs scoped to Lee+Collier core (57), lint armed, gates green
 
 Finished the source layer. All 12 ZIP-emitting packs now filter to the shared core-scope authority
