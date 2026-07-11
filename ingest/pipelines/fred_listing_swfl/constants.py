@@ -18,5 +18,5 @@ SERIES_MAP: dict[str, dict] = {
 # Realtor.com data starts July 2016.
 OBSERVATION_START = "2016-07-01"
 
-SOURCE_URL = "https://fred.stlouisfed.org/categories/32287"
+SOURCE_URL = "https://fred.stlouisfed.org/release?rid=462"
 BUCKET = "lake-tier1"
