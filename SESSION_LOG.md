@@ -1,3 +1,16 @@
+## 2026-07-11 (Opus 4.8 · main) — Desk discovery Task 3: robots answer-engine carve-out (operator-approved)
+
+Operator said yes to the moat-vs-reach carve-out. `app/robots.ts` now splits `SEARCH_INDEX`
+(`OAI-SearchBot`, `Claude-SearchBot`, `PerplexityBot`) out of the blanket block and allowlists them on
+`/desk` + `/r/` only (`Allow: /desk`, `Allow: /r/`, `Disallow: /`) — public data becomes citable in
+answer engines (GEO reach) while every TRAINING bot (GPTBot/ClaudeBot/CCBot/…) and the non-search
+answer engines (meta-webindexer, Amzn-SearchBot, YouBot, DuckAssistBot, Google-NotebookLM) stay fully
+blocked. Still advisory — the training-bot block's real teeth are the WAF. Verified: `bunx next build`
+green, live `curl localhost/robots.txt` shows the 3 search bots Allow the two paths / Disallow the
+rest, training bots still Disallow: /. Closes `desk_robots_answer_engine_carveout`. Also reconciled the
+three Tasks-1/2 checks that `f32e71b4` shipped but left open in the ledger (national_scope_guard,
+takeaway_polish, r_star_report_takeaway). Task 4 (live-verify) fires after the next prod deploy.
+
 ## 2026-07-11 (Sonnet 5 · main) — Desk discovery follow-ups Tasks 1+2: takeaway grammar/scope fix + /r/* GEO takeaway; Tasks 3/4 handed off
 
 Closed `desk_takeaway_national_scope_guard` + `desk_takeaway_polish`: `DeskDatum` gained explicit

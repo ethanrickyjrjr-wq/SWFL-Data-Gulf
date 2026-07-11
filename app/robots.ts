@@ -34,6 +34,13 @@ const ORIGIN = "https://www.swfldatagulf.com";
  * OAI-AdsBot). These fire only when a real user pastes our URL into an assistant
  * — a citation/discovery channel, not bulk harvest — and several ignore robots
  * anyway. To switch to a strict-lockdown posture, move them into AI_ANSWER_ENGINES.
+ *
+ * ANSWER-ENGINE SEARCH CARVE-OUT (operator-approved 07/11/2026) — the three
+ * search/index bots below (OAI-SearchBot, Claude-SearchBot, PerplexityBot) are
+ * allowlisted on the two public showpiece paths (/desk, /r/) ONLY, so our public
+ * data is citable inside answer engines (GEO reach) while the TRAINING bots stay
+ * blocked everywhere (moat unchanged — public data citable, not fed to training
+ * corpora). Still advisory; the training-bot block's real teeth are the WAF.
  */
 
 // ── AI TRAINING crawlers — ingest content to train/improve models. ──────────
@@ -83,6 +90,12 @@ const BLOCKED = [...AI_TRAINING, ...AI_ANSWER_ENGINES];
  * Next.js robots.txt. An array `userAgent` emits one `User-Agent: X / Disallow: /`
  * block per token (verified against Next.js v16 robots metadata docs).
  */
+// Answer-engine SEARCH indexers allowlisted on the public showpiece paths only
+// (operator-approved carve-out 07/11/2026). Split out of BLOCKED so the TRAINING
+// bots + the non-search answer engines stay fully blocked everywhere.
+const SEARCH_INDEX = ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot"];
+const TRAINING_AND_OTHER_ANSWER = BLOCKED.filter((b) => !SEARCH_INDEX.includes(b));
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
@@ -90,8 +103,11 @@ export default function robots(): MetadataRoute.Robots {
       // and all live user-fetch agents — is welcome; only the API tree is off-limits
       // (raw JSON should never be indexed as pages).
       { userAgent: "*", allow: "/", disallow: "/api/" },
-      // AI training + answer-engine crawlers: full block.
-      { userAgent: BLOCKED, disallow: "/" },
+      // AI training + non-search answer engines: full block (moat unchanged).
+      { userAgent: TRAINING_AND_OTHER_ANSWER, disallow: "/" },
+      // Answer-engine SEARCH indexers: allowed ONLY on the two public showpiece
+      // paths, blocked everywhere else (public data citable; synthesis stays private).
+      { userAgent: SEARCH_INDEX, allow: ["/desk", "/r/"], disallow: "/" },
     ],
     sitemap: `${ORIGIN}/sitemap.xml`,
   };
