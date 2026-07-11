@@ -26,13 +26,12 @@ export interface NavItem {
  * (NN/g: unfamiliar nomenclature is a top cause of navigation cognitive strain).
  *
  * B2 grouped the flat tail under `Explore ▾` so the bar stays compact, not a flat
- * row of every surface. Current layout (after the nav+map follow-ups, commits
- * 7a37725 + b013ad2): the marquees Charts, Maps, Showcase, Projects, Alerts stay
- * top-level; Explore holds Search (`/r`) and Guides (`/guides`). Maps was PROMOTED out of the Explore
- * dropdown to a static top-level tab, and the old ZIP Reports entry (`/r/search`)
- * was retired. `/data-intel` is deliberately NOT here (internal-only — B6). Desk
- * (`/desk`, the live market terminal) joined top-level next to Charts on 07/11/2026
- * — same public/no-auth tier, same live-data family.
+ * row of every surface. Explore holds Search (`/r`) and Guides (`/guides`); the
+ * marquees Insiders, Desk, Showcase, Projects, Charts, Maps, Alerts stay top-level
+ * in that pinned order (operator ruling 07/11/2026). Maps was PROMOTED out of the
+ * Explore dropdown to a static top-level tab, and the old ZIP Reports entry
+ * (`/r/search`) was retired. `/data-intel` is deliberately NOT here (internal-only
+ * — B6).
  *
  * The deterministic guards in `nav-config.test.ts` encode this exact shape — change
  * NAV_GROUPS and update that test in the SAME commit, or CI goes red.
@@ -48,11 +47,11 @@ export const NAV_GROUPS: NavItem[] = [
   // The campaign centerpiece rides top-level, right after Explore (spec
   // 2026-07-10-insiders-page-design.md) — not buried as a dropdown child.
   { label: "Insiders", href: "/insiders" },
-  { label: "Charts", href: "/charts" },
   { label: "Desk", href: "/desk" },
-  { label: "Maps", href: "/map" },
   { label: "Showcase", href: "/showcase" },
   { label: "Projects", href: "/project" },
+  { label: "Charts", href: "/charts" },
+  { label: "Maps", href: "/map" },
   { label: "Alerts", href: "/alerts" },
 ];
 

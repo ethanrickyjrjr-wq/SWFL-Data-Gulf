@@ -171,7 +171,7 @@ async function draft(args: string[]) {
 async function send(args: string[]) {
   const { positionals, flags } = parseArgs(args);
   const [key] = positionals;
-  if (!key) fail("send <request_key> [--confirm]");
+  if (!key) fail("send <request_key> [--confirm] [--email]");
   const row = await getRow(key);
   if (row.state !== "drafted") fail(`send only from drafted (state is ${row.state})`);
   const body = bodyFor(row);
@@ -199,8 +199,10 @@ async function send(args: string[]) {
   }
 
   // Approved. A tracked portal (audit trail) is preferred when present — that is the
-  // whole point of this engine; fall back to email only when no portal exists.
-  if (row.portal_url) {
+  // whole point of this engine; fall back to email only when no portal exists, or when
+  // the operator explicitly asks for the email lane with --email (e.g. the portal is a
+  // manual ticket form that can't be filed by this CLI).
+  if (row.portal_url && !flags.email) {
     console.log(
       `PORTAL FILING (preferred — tracked) — paste the body below into: ${row.portal_url}\n\n${body}`,
     );

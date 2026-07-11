@@ -80,11 +80,11 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
     expect(NAV_GROUPS.map((n) => n.label)).toEqual([
       "Explore",
       "Insiders",
-      "Charts",
       "Desk",
-      "Maps",
       "Showcase",
       "Projects",
+      "Charts",
+      "Maps",
       "Alerts",
     ]);
   });
