@@ -30,16 +30,16 @@ test("the leading corridor prefix is trimmed for the legend (US 41 - X → X)", 
   expect(svg).not.toContain("US 41 - Downtown Fort Myers");
 });
 
-test("domain nice-rounds so the max ring does NOT close the full circle (85 → /100)", () => {
-  // With domain [0,100], value 85 sweeps 306° — the arc's large-arc-flag is set
-  // (>180°) but the sweep is < 360°, so the ring is NOT a full split-circle. A
-  // full closure would require two 180° sub-arcs; assert the max value's arc is a
-  // single sector by counting arc commands is brittle, so instead assert the arc
-  // is present and the SVG stays well-formed.
+test("domain is [0, dataMax] — VERIFIED recharts skips nice-widening on the angleAxis", () => {
+  // The value axis is NOT nice-widened (see the seasonal-radial.ts domainMax
+  // comment citing the recharts source): the max-value ring sweeps the full circle.
+  // A single-datum chart is therefore its own max → a full-sweep value arc, which
+  // annularSector renders as TWO sub-arcs (split to avoid a degenerate 360° arc).
   const svg = seasonalRadialSvg([{ corridor: "Max", seasonal_index: 0.85 }], {});
-  expect(svg).toContain("<path");
-  // A fully-closed ring would emit the innermost value at the extreme; here 85 < 100
-  // domain so the sweep leaves a gap — the SVG has exactly one value arc + its track.
+  // One ring = 1 background track path + 1 value-arc path (each a full circle,
+  // internally split into two sub-arcs within a single <path> d attribute).
+  const pathCount = (svg.match(/<path /g) ?? []).length;
+  expect(pathCount).toBe(2);
   expect(svg).toContain("85%");
 });
 
