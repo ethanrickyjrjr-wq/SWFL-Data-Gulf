@@ -39,12 +39,49 @@ export interface DonutShareOpts {
   source?: string;
   asOf?: string;
   width?: number;
+  /** Background this chart sits on. "light" (default) matches today's white
+   *  canvas byte-for-byte. "dark" is the luxury/premium skin (dark ground +
+   *  gold-friendly ramp). "brand-accent" washes the background in the passed
+   *  `accent` color with light text — for a branded, high-contrast card. */
+  ground?: "light" | "dark" | "brand-accent";
 }
 
-const GRID = "#EAECEF";
-const AXIS_TEXT = "#6B7280";
-const TITLE_FILL = "#1F2937";
-const LABEL_FILL = "#374151";
+interface GroundPalette {
+  bg: string;
+  title: string;
+  label: string;
+  axis: string;
+  grid: string;
+}
+
+function resolveGround(ground: DonutShareOpts["ground"], accent: string): GroundPalette {
+  switch (ground) {
+    case "dark":
+      return {
+        bg: "#12100B",
+        title: "#F5E6C8",
+        label: "#E8D9B5",
+        axis: "#A89768",
+        grid: "#2A2620",
+      };
+    case "brand-accent":
+      return {
+        bg: accent,
+        title: "#ffffff",
+        label: "#ffffff",
+        axis: "#F0F0F0",
+        grid: "rgba(255,255,255,0.25)",
+      };
+    default:
+      return {
+        bg: "#ffffff",
+        title: "#1F2937",
+        label: "#374151",
+        axis: "#6B7280",
+        grid: "#EAECEF",
+      };
+  }
+}
 
 /** Point on the ring (center of the stroke) at `angle` radians (0 = right). */
 function ringPoint(cx: number, cy: number, r: number, angle: number): [number, number] {
@@ -63,6 +100,7 @@ export function donutShareSvg(segments: DonutSegment[], opts: DonutShareOpts): s
   const W = opts.width ?? 600;
   const fmt: ValueFormat = opts.valueFormat ?? "count";
   const accent = opts.accent && /^#?[0-9a-fA-F]{6}$/.test(opts.accent) ? opts.accent : "#2563EB";
+  const palette = resolveGround(opts.ground, accent);
 
   // Cap at 6 segments; drop non-positive values from the geometry.
   const rows = segments.filter((s) => Number.isFinite(s.value) && s.value > 0).slice(0, 6);
@@ -90,12 +128,12 @@ export function donutShareSvg(segments: DonutSegment[], opts: DonutShareOpts): s
 
   const head = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`,
-    `<rect width="${W}" height="${H}" fill="#ffffff"/>`,
-    `<text x="40" y="28" font-family="Arial" font-size="15" font-weight="bold" fill="${TITLE_FILL}">${esc(opts.title)}</text>`,
+    `<rect width="${W}" height="${H}" fill="${palette.bg}"/>`,
+    `<text x="40" y="28" font-family="Arial" font-size="15" font-weight="bold" fill="${palette.title}">${esc(opts.title)}</text>`,
   ];
 
   const caption = captionParts.length
-    ? `<text x="40" y="${H - 12}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${esc(captionParts.join(" · "))}</text>`
+    ? `<text x="40" y="${H - 12}" font-family="Arial" font-size="10" fill="${palette.axis}">${esc(captionParts.join(" · "))}</text>`
     : "";
 
   const sum = rows.reduce((acc, s) => acc + s.value, 0);
@@ -105,16 +143,17 @@ export function donutShareSvg(segments: DonutSegment[], opts: DonutShareOpts): s
   if (rows.length === 0 || sum <= 0) {
     return [
       ...head,
-      `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${GRID}" stroke-width="${thickness}"/>`,
-      `<text x="${cx}" y="${cy + 4}" text-anchor="middle" font-family="Arial" font-size="13" fill="${AXIS_TEXT}">No data</text>`,
+      `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${palette.grid}" stroke-width="${thickness}"/>`,
+      `<text x="${cx}" y="${cy + 4}" text-anchor="middle" font-family="Arial" font-size="13" fill="${palette.axis}">No data</text>`,
       caption,
       `</svg>`,
     ].join("");
   }
 
   // Resolve a color per segment: explicit segment color wins; else an on-brand,
-  // grayscale-distinct extension of the accent (extendPalette). White canvas.
-  const generated = extendPalette([accent], rows.length, { background: "#ffffff" });
+  // grayscale-distinct extension of the accent (extendPalette), against THIS
+  // chart's ground so generated colors stay distinct on a dark canvas too.
+  const generated = extendPalette([accent], rows.length, { background: palette.bg });
   const colorOf = (i: number, s: DonutSegment) => s.color ?? generated[i] ?? accent;
 
   // Arc segments — start at top (-90°), sweep clockwise.
@@ -144,11 +183,11 @@ export function donutShareSvg(segments: DonutSegment[], opts: DonutShareOpts): s
 
   // Center total + unit label.
   const center = [
-    `<text x="${cx}" y="${cy - 2}" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="${TITLE_FILL}">${esc(formatAxisTick(fmt, total))}</text>`,
+    `<text x="${cx}" y="${cy - 2}" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="${palette.title}">${esc(formatAxisTick(fmt, total))}</text>`,
   ];
   if (opts.unit) {
     center.push(
-      `<text x="${cx}" y="${cy + 18}" text-anchor="middle" font-family="Arial" font-size="11" fill="${AXIS_TEXT}">${esc(opts.unit)}</text>`,
+      `<text x="${cx}" y="${cy + 18}" text-anchor="middle" font-family="Arial" font-size="11" fill="${palette.axis}">${esc(opts.unit)}</text>`,
     );
   }
 
@@ -161,9 +200,9 @@ export function donutShareSvg(segments: DonutSegment[], opts: DonutShareOpts): s
     const label = s.label.length > 22 ? `${s.label.slice(0, 21)}…` : s.label;
     legend.push(
       `<rect x="${legendX}" y="${ty}" width="${swatch}" height="${swatch}" rx="2" fill="${esc(color)}"/>`,
-      `<text x="${legendX + swatch + 8}" y="${ty + swatch - 1}" font-family="Arial" font-size="12" fill="${LABEL_FILL}">${esc(label)}</text>`,
-      `<text x="${W - 24}" y="${ty + swatch - 1}" text-anchor="end" font-family="Arial" font-size="12" font-weight="bold" fill="${TITLE_FILL}">${esc(formatAxisTick(fmt, s.value))}</text>`,
-      `<text x="${W - 24}" y="${ty + swatch + 12}" text-anchor="end" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${esc(pct)}%</text>`,
+      `<text x="${legendX + swatch + 8}" y="${ty + swatch - 1}" font-family="Arial" font-size="12" fill="${palette.label}">${esc(label)}</text>`,
+      `<text x="${W - 24}" y="${ty + swatch - 1}" text-anchor="end" font-family="Arial" font-size="12" font-weight="bold" fill="${palette.title}">${esc(formatAxisTick(fmt, s.value))}</text>`,
+      `<text x="${W - 24}" y="${ty + swatch + 12}" text-anchor="end" font-family="Arial" font-size="10" fill="${palette.axis}">${esc(pct)}%</text>`,
     );
   });
 

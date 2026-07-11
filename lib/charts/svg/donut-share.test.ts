@@ -116,4 +116,58 @@ describe("donutShareSvg", () => {
     });
     expect(svg.toLowerCase()).toContain("#ff0000");
   });
+
+  it("defaults to the light ground (byte-identical to no ground option)", () => {
+    const withDefault = donutShareSvg(
+      [
+        { label: "A", value: 60 },
+        { label: "B", value: 40 },
+      ],
+      {
+        title: "Test",
+        accent: "#2563EB",
+      },
+    );
+    const withExplicitLight = donutShareSvg(
+      [
+        { label: "A", value: 60 },
+        { label: "B", value: 40 },
+      ],
+      { title: "Test", accent: "#2563EB", ground: "light" },
+    );
+    expect(withExplicitLight).toBe(withDefault);
+    expect(withDefault).toContain('fill="#ffffff"');
+  });
+
+  it("dark ground renders a dark background and light text", () => {
+    const svg = donutShareSvg(
+      [
+        { label: "A", value: 60 },
+        { label: "B", value: 40 },
+      ],
+      {
+        title: "Test",
+        accent: "#B8860B",
+        ground: "dark",
+      },
+    );
+    expect(svg).not.toContain('fill="#ffffff"');
+    expect(svg).toMatch(/<rect width="600" height="\d+" fill="#[A-Fa-f0-9]{6}"\/>/);
+    expect(svg).toContain('fill="#12100B"');
+  });
+
+  it("brand-accent ground uses the passed accent as background", () => {
+    const svg = donutShareSvg(
+      [
+        { label: "A", value: 60 },
+        { label: "B", value: 40 },
+      ],
+      {
+        title: "Test",
+        accent: "#7B3FC7",
+        ground: "brand-accent",
+      },
+    );
+    expect(svg).toContain('fill="#7B3FC7"');
+  });
 });
