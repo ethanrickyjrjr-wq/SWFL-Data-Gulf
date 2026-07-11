@@ -109,6 +109,49 @@ test("ranked → ranked keeps the real delta chips", () => {
   expect(items[0].delta).toBe(-5.6);
 });
 
+test("chartTypeFits: spark-grid + line-band always fit ≥2 points (degenerate series/no band, never fabricated)", () => {
+  expect(chartTypeFits(usdSpec, "spark-grid")).toBe(true);
+  expect(chartTypeFits(usdSpec, "line-band")).toBe(true);
+});
+
+test("usd → spark-grid maps each point to a KPI card with a single-value (degenerate) series", () => {
+  const out = reshapeChartToType(usdSpec, "spark-grid");
+  expect(out.frameId).toBe("spark-grid");
+  const cards = out.options?.cards as { label: string; value: number; series: number[] }[];
+  expect(cards).toHaveLength(3);
+  expect(cards[0]).toEqual({
+    label: "33921",
+    value: 2975000,
+    series: [2975000],
+    valueFormat: "usd",
+  });
+});
+
+test("spark-grid caps at 4 cards (matches sparkGridSvg's own cap)", () => {
+  const wide: ChartSpec = {
+    ...countSpec,
+    rows: [
+      ["A", 1],
+      ["B", 2],
+      ["C", 3],
+      ["D", 4],
+      ["E", 5],
+    ],
+  };
+  const out = reshapeChartToType(wide, "spark-grid");
+  expect((out.options?.cards as unknown[]).length).toBe(4);
+});
+
+test("usd → line-band maps each point to a plain point with no lo/hi (no fabricated confidence band)", () => {
+  const out = reshapeChartToType(usdSpec, "line-band");
+  expect(out.frameId).toBe("line-band");
+  const data = out.options?.data as { label: string; value: number; lo?: number; hi?: number }[];
+  expect(data).toHaveLength(3);
+  expect(data[0]).toEqual({ label: "33921", value: 2975000 });
+  expect(data[0].lo).toBeUndefined();
+  expect(data[0].hi).toBeUndefined();
+});
+
 test("a 1-point / non-reshapeable spec is returned unchanged", () => {
   const tiny: ChartSpec = { ...countSpec, rows: [["Lee", 7412]] };
   expect(reshapeChartToType(tiny, "donut").frameId).toBe("bar-table");

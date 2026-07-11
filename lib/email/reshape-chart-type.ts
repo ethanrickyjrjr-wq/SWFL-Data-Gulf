@@ -11,7 +11,8 @@
 
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
-export type ChartType = "bar" | "ranked" | "donut" | "dotplot" | "composed";
+export type ChartType =
+  "bar" | "ranked" | "donut" | "dotplot" | "composed" | "spark-grid" | "line-band";
 
 /** The user-facing labels for the control (kept here so UI + engine share one list). */
 export const CHART_TYPE_OPTIONS: { type: ChartType; label: string }[] = [
@@ -20,6 +21,8 @@ export const CHART_TYPE_OPTIONS: { type: ChartType; label: string }[] = [
   { type: "donut", label: "Donut / share" },
   { type: "dotplot", label: "Dot vs average" },
   { type: "composed", label: "Bar + trend line" },
+  { type: "spark-grid", label: "KPI cards" },
+  { type: "line-band", label: "Line" },
 ];
 
 interface Pt {
@@ -84,6 +87,8 @@ export function chartTypeFits(spec: ChartSpec, type: ChartType): boolean {
     case "bar":
     case "dotplot":
     case "composed":
+    case "spark-grid":
+    case "line-band":
     default:
       return true;
   }
@@ -178,6 +183,42 @@ export function reshapeChartToType(spec: ChartSpec, type: ChartType): ChartSpec 
         },
       } as ChartSpec;
     }
+    case "spark-grid":
+      return {
+        ...base,
+        columns: cols,
+        rows: pts.map((p) => [p.label, p.value]),
+        chart_type: "bar",
+        frameId: "spark-grid",
+        options: {
+          // Each card's "series" is the point's own value alone — a degenerate
+          // 1-length sparkline (sparkGridSvg renders no polyline below 2 points).
+          // No fabricated history: a flat category list has no per-item past.
+          cards: pts.slice(0, 4).map((p) => ({
+            label: p.label,
+            value: p.value,
+            series: [p.value],
+            valueFormat: spec.value_format,
+          })),
+        },
+      } as ChartSpec;
+    case "line-band":
+      return {
+        ...base,
+        columns: cols,
+        rows: pts.map((p) => [p.label, p.value]),
+        // "bar" (not "area"): keeps this spec re-reshapeable — `isTimeSeries`
+        // would treat chart_type "area" as a trend and freeze further reshapes,
+        // but these labels are categories (ZIPs/cities), not real dates.
+        chart_type: "bar",
+        frameId: "line-band",
+        options: {
+          // No lo/hi — there is no confidence interval in a flat category
+          // list; lineBandSvg already renders a plain line when absent.
+          data: pts.map((p) => ({ label: p.label, value: p.value })),
+          valueFormat: spec.value_format,
+        },
+      } as ChartSpec;
     case "bar":
     default:
       return {
