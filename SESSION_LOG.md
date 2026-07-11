@@ -1,3 +1,16 @@
+## 2026-07-11 (Opus 4.8 · main) — Airtable checks-mirror: runtime deps DONE + live-verified end-to-end
+
+Completes the runtime deps the prior entry flagged as pending. Migration applied to prod (both sync
+columns verified `200`/null). Created Airtable base `appQSRnaKhHPo3mMT` / table `tbl88lQu6D4XUG0At`
+("Open Checks", 8 fields) via airtable-mcp; normalized the unquoted `AIRTABLE_TOKEN` in `.dlt/secrets.toml`
+to valid quoted TOML (it was unreadable by `resolveAirtableCreds`) and added `AIRTABLE_CHECKS_BASE_ID`/
+`TABLE_ID` there + as gh secrets. Vendor-verified the `performUpsert`/delete contract against live Airtable
+docs (crawl4ai) and confirmed `public.checks` has NO `updated_at` trigger — so stamping `airtable_synced_at`
+doesn't re-dirty rows and the free-tier cost model holds. Live-verify (closed `checks_airtable_mirror_live_verify`):
+backfilled 333 open rows (synced 333); idle re-run = 0 dirty / 0 Airtable calls; smoke check appeared on
+open (1 match) and disappeared on close (deleted 1, search 0). The 5 code commits were already on origin
+(a concurrent sibling push carried them); this pushes only SESSION_LOG + the plan-complete marker.
+
 ## 2026-07-11 (Opus 4.8 · main) — Push: Airtable checks-mirror sync build (2-hourly cron)
 
 Pushed the `public.checks`→Airtable delta-sync build to main: sync-tracking columns migration
