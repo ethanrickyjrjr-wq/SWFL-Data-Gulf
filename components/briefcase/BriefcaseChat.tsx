@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useChatStream, parseChatFrame, type ChatFrame } from "@/lib/assistant/use-chat-stream";
+import { useIsTouchDevice } from "@/lib/chat/use-is-touch-device";
 import { useProjectThread } from "@/lib/chat/use-project-thread";
 import { useBriefcase } from "@/components/briefcase/BriefcaseProvider";
 import { useAiContext } from "@/components/briefcase/use-ai-context";
@@ -50,6 +51,10 @@ async function drainSseText(res: Response): Promise<string> {
 export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string[] }) {
   const briefcase = useBriefcase();
   const pathname = usePathname();
+  // Touch devices have no reliable Shift modifier (see AskPage.tsx) — Enter must
+  // insert a newline there instead of submitting; the Send button is the only
+  // way to submit on touch.
+  const isTouchDevice = useIsTouchDevice();
 
   // Active project — drives per-project thread isolation.
   const aiContext = useAiContext();
@@ -436,6 +441,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
+            if (isTouchDevice) return;
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               submit(input);

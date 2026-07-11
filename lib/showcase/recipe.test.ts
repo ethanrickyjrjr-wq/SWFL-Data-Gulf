@@ -1,5 +1,12 @@
 import { describe, it, expect } from "bun:test";
-import { NEED_LABELS, brandGaps, findPlaceholder, type BrandNeed } from "./recipe";
+import {
+  NEED_LABELS,
+  brandGaps,
+  findPlaceholder,
+  recipeDestination,
+  type BrandNeed,
+} from "./recipe";
+import { SHOWCASES } from "./registry";
 
 describe("findPlaceholder", () => {
   it("returns the exact span of the [[blank]] including brackets", () => {
@@ -37,6 +44,53 @@ describe("brandGaps", () => {
 
   it("returns [] when every need is filled", () => {
     expect(brandGaps(needs, { agent_name: "a", photo_url: "b", brokerage: "c" })).toEqual([]);
+  });
+});
+
+describe("recipeDestination", () => {
+  it("routes a social-target recipe to /social-lab when there is no project", () => {
+    const dest = recipeDestination({
+      prompt: "Build a social post for [[your city or ZIP]]",
+      needs: ["agent_name"],
+      target: "social",
+    });
+    expect(dest.startsWith("/social-lab?")).toBe(true);
+  });
+
+  it("routes a social-target recipe to /project/<id>/social inside a project", () => {
+    const dest = recipeDestination(
+      {
+        prompt: "Build a social post for [[your city or ZIP]]",
+        needs: ["agent_name"],
+        target: "social",
+      },
+      { projectId: "proj-123" },
+    );
+    expect(dest.startsWith("/project/proj-123/social?")).toBe(true);
+  });
+
+  it("routes an email-target (default) recipe to /email-lab/grid, not social", () => {
+    const dest = recipeDestination({
+      prompt: "Build an email for [[your listing address]]",
+      needs: ["agent_name"],
+    });
+    expect(dest.startsWith("/email-lab/grid?")).toBe(true);
+  });
+
+  it("every social-target recipe in the live registry routes through recipeDestination to a social builder", () => {
+    const socialRecipes = SHOWCASES.flatMap((s) => s.slides)
+      .map((sl) => sl.recipe)
+      .filter((r): r is NonNullable<typeof r> => !!r && r.target === "social");
+    expect(socialRecipes.length).toBeGreaterThan(0);
+    for (const recipe of socialRecipes) {
+      expect(recipeDestination(recipe)).toBe(
+        "/social-lab?" +
+          new URLSearchParams({
+            recipe: recipe.prompt,
+            ...(recipe.needs.length > 0 ? { recipeNeeds: recipe.needs.join(",") } : {}),
+          }).toString(),
+      );
+    }
   });
 });
 

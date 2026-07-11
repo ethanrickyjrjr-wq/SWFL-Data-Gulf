@@ -2,6 +2,8 @@
 
 > **Recommended model:** ⚡ Sonnet — 9 tasks
 
+
+
 **Purpose:** rounds 1–2 settled 18 items and left the rest open. This file is the triage of what's
 left: which open questions are actually load-bearing for a build decision right now, the exact
 question to answer, where to look, and what a found/not-found result changes. Run Tier 1 first;
@@ -61,7 +63,7 @@ credits on them.
   filter=top|hot, client-side on "CMA", "comps", "adjustment", "appraisal gap". Comment-fetch hits.
 - **Changes:** the default adjustment set + display order in the comp helper spec.
 
-### Q3. Does click/redirect link-tracking actually hurt Gmail placement? (crawl4ai ONLY)
+### Q3. Does click/redirect link-tracking actually hurt Gmail placement? (crawl4ai ONLY) — ANSWERED, see `2026-07-09-round3-q3-q4-answers.md`
 - **Why now:** round-2's Gmail playbook (tactic #2) claims tracking links hurt deliverability
   "more than images" — but that's one Reddit account, and we have a live tracking-link feature
   (`/api/r` wrapping, `email_lab_tracking_live_verify` open). Before speccing a
@@ -75,7 +77,7 @@ credits on them.
 - **Changes:** whether the toggle gets specced at all, and whether our wrapped-link default
   flips or just moves to a custom tracking domain (which may fully resolve the concern).
 
-### Q4. Seed-test mechanics: vendor, API, or DIY? (crawl4ai ONLY)
+### Q4. Seed-test mechanics: vendor, API, or DIY? (crawl4ai ONLY) — ANSWERED, see `2026-07-09-round3-q3-q4-answers.md`
 - **Why now:** pre-send seed-testing is the validated shape of the deliverability panel (round1
   item 14 + round2 tactic #5) and a HOLD-FOR-RESEARCH build candidate. The spec can't be written
   without knowing the mechanics.
