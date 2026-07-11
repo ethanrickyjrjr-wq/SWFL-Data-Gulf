@@ -1,3 +1,31 @@
+## 2026-07-11 (Sonnet 5 · main) — Reliable-sources research mission: Naples/Collier "2x gap" is an internal query bug, not a missing source; 6 external sources verified live
+
+Research-only mission (`docs/handoff/2026-07-11-reliable-sources-research-mission.md`), findings in
+`docs/handoff/2026-07-11-reliable-sources-findings.md`. No pipeline code touched.
+
+- **Part A headline finding (RULE 0.5 saved a wrong build):** the mission brief's "Collier asking
+  $309,000 across 9,229 listings vs Redfin sold $625,000" reproduces a rental/staleness contamination
+  bug already fixed at the VIEW level on 2026-06-26 (`docs/sql/20260625_active_listings_residential_zip_stats.sql`),
+  just not at the raw-table level — querying `data_lake.active_listings_residential` directly (instead
+  of `_zip_stats` or `listing_state`/`listing_active_stats`) reproduces the exact $309k/9,229 figure.
+  Three independent live reads all land Collier within 3-8% of Redfin's sold anchor, Lee within 6-22% —
+  no 2x gap anywhere. This **contradicts** the in-flight `daily-price-dual-signal` design doc, which
+  names the raw seed table as the daily-asking source; flagged in the findings doc + new check
+  `price_source_wire_off_stale_seed_table`. Naples CITY-grain mismatch is real and separate (geography,
+  not property type) — added live evidence to existing check `naples_asking_vs_sold_geography`.
+- **Part B/C external verification (4 parallel research agents, crawl4ai live fetches only):** Realtor.com
+  Data Library (ADOPT, free ZIP-grain CSVs, not property-type split), Zillow ZHVI (adopt-partial, smoothed
+  index not source-faithful), FRED rid=462 (confirmed correct, fixes `fred_listing_swfl_wrong_source_url`),
+  Collier permits Applied-series (confirmed live, cheap add), Lee GIS permit FeatureServers (confirmed
+  live but **frozen since March 2025** — corrects the 07/08 vendor-ceiling audit's "replace Accela" framing,
+  do NOT retire the Accela cron on this), WINK News RSS (ADOPT — new check `news_wink_rss_adopt`, best
+  replacement for the dead leegov/collier.gov scrapes), Lee & Associates Naples PDFs + Brevitas for-sale
+  (both confirmed live, both trivial adds), Crexi (new unopened gap found — lease-only hardcoded exactly
+  like Brevitas was, new check `crexi_lease_only_hardcoded`). SteadyAPI fragility given an explicit
+  CAN/CANNOT verdict: aggregates replaceable free, per-listing/sold/rentals are not.
+- 9 checks opened/updated this session (see findings doc for full list); no code changed, nothing pushed
+  yet — awaiting operator green-light on which sources to build.
+
 ## 2026-07-11 (Opus 4.8 · main) — Hendry OFF /desk: listing_active_stats scoped to Lee+Collier at the source (view), region total un-blended
 
 Operator re-raised the parked Hendry `/desk` leak ("how is Hendry still here… fix and get off /desk").
