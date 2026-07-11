@@ -40,6 +40,7 @@ import {
 import { env } from "../config/env.mts";
 import { medianOf } from "../lib/stats.mts";
 import { fmtUsd } from "./lib/number-format.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 /**
  * env-swfl — Southwest Florida flood-hazard exposure derived directly from
@@ -259,6 +260,34 @@ function stormTotalsFrom(fragments: RawFragment[]): {
     totals: hits.map((h) => h.normalized as unknown as NfipStormTotal),
     fetched_at: earliest,
   };
+}
+
+/**
+ * Core-scope the per-ZIP flood-loss surface. The full windowed list from
+ * fema-nfip-source ranks EVERY SWFL ZIP with a claim (Lee + Collier + Hendry +
+ * any leaked mailing/other-metro ZIP) — ~124 keys in the live archive. The
+ * flood_by_zip detail table and its percentile column must count against ONE
+ * denominator: the Lee + Collier core universe (57). This drops non-core rows
+ * AND recomputes the percentile rank across the core-filtered set, so the
+ * "percentile across SWFL ZIPs with claims" column derives from core, not the
+ * inflated full list.
+ *
+ * Rank formula is verbatim from fema-nfip-source's aggregateZipRollupTop6
+ * (linear percentile, 100 = highest AAL) so the table matches the top-6
+ * key_metrics by construction. ONLY the flood ZIP surface is scoped here —
+ * rainfall (NOAA), water (USGS), the per-storm timeline, and the SWFL-wide
+ * NFHL/NFIP regional aggregates are untouched.
+ */
+function scopeZipWindowToCore(zips: NfipZipAggregate[]): NfipZipAggregate[] {
+  const core = zips.filter((z) => isCoreScope(z.zip));
+  const sorted = [...core].sort(
+    (a, b) => b.aal_usd_per_insured_property - a.aal_usd_per_insured_property,
+  );
+  const n = sorted.length;
+  return sorted.map((z, i) => ({
+    ...z,
+    aal_pct_swfl_rank: n === 1 ? 100 : Math.round(((n - 1 - i) / (n - 1)) * 10000) / 100,
+  }));
 }
 
 function buildSnapshot(rows: EnvSwflNormalized[]): EnvSnapshot {
@@ -611,9 +640,26 @@ function envSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   snapshot.zipAggregates = zipHit.aggs;
   snapshot.zip_aggregates_fetched_at = zipHit.fetched_at;
 
+  // Flood-loss ZIP surface is scoped to the Lee + Collier core (57). The
+  // flood_by_zip detail table rows AND their percentile denominator derive from
+  // this filtered, re-ranked list — non-core SWFL (Hendry) + mailing/other-metro
+  // spillover otherwise inflate the "of N SWFL ZIPs" denominator.
   const fullHit = zipWindowFullFrom(allFragments);
-  snapshot.zipWindowFull = fullHit.zips;
+  const coreWindow = scopeZipWindowToCore(fullHit.zips);
+  snapshot.zipWindowFull = coreWindow;
   snapshot.zip_window_full_fetched_at = fullHit.fetched_at;
+
+  // Re-rank the top-6 per-ZIP metrics + conclusion prose against the SAME core
+  // denominator the flood_by_zip table now uses, so "percentile across SWFL
+  // ZIPs" means the Lee + Collier core set everywhere it appears. Guarded on
+  // membership: a top-6 ZIP absent from the core window (e.g. a synthetic-fixture
+  // aggregate injected without a window-full fragment) keeps its incoming rank.
+  // Mode/direction read aal + barrier class, never this rank, so the vote cannot
+  // move — this is display consistency only, not a change to regional logic.
+  const coreRankByZip = new Map(coreWindow.map((z) => [z.zip, z.aal_pct_swfl_rank]));
+  snapshot.zipAggregates = snapshot.zipAggregates.map((z) =>
+    coreRankByZip.has(z.zip) ? { ...z, aal_pct_swfl_rank: coreRankByZip.get(z.zip)! } : z,
+  );
 
   const stormHit = stormTotalsFrom(allFragments);
   snapshot.stormTotals = stormHit.totals;

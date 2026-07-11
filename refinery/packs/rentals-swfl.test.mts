@@ -7,6 +7,12 @@ import { env } from "../config/env.mts";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+// Real Lee (12071) + Collier (12021) core-scope ZIPs. The pack now filters the detail table + all
+// counts to the 57 Lee/Collier core ZIPs (refinery/lib/core-scope.mts), so producer fixtures MUST
+// use real core ZIPs or every row is dropped. Verified against fixtures/swfl-zip-county.json:
+// 33901/33914/33919/33931 = Lee, 34102 = Collier.
+const CORE_ZIPS = ["33901", "33914", "33919", "33931", "34102"] as const;
+
 /**
  * Build a 13-month series for a single ZIP that yields a target rent_yoy_pct
  * at the latest period. We anchor `t-12 = 1000` and set `t = 1000 * (1 + yoy/100)`.
@@ -53,7 +59,7 @@ function buildZipSeries(
 function bandFixture(yoy_pct: number, n = 5): ZoriZipRow[] {
   const rows: ZoriZipRow[] = [];
   for (let i = 0; i < n; i++) {
-    const zip = String(34000 + i).padStart(5, "0");
+    const zip = CORE_ZIPS[i % CORE_ZIPS.length];
     rows.push(...buildZipSeries(zip, yoy_pct));
   }
   return rows;
@@ -127,11 +133,11 @@ describe("rentals-swfl buildSnapshot", () => {
   it("handles ZIPs with no 12-month history (YoY null)", () => {
     const rows: ZoriZipRow[] = [
       {
-        zip_code: "34999",
+        zip_code: "34120",
         period_end: "2026-04-30",
         rent_index: 2000,
-        metro: "Cape Coral-Fort Myers, FL",
-        county_name: "Lee County",
+        metro: "Naples-Marco Island, FL",
+        county_name: "Collier County",
         city: "Short Series",
       },
     ];
@@ -147,7 +153,7 @@ describe("rentals-swfl buildSnapshot", () => {
 /** Build N view-shaped rows (one per ZIP) with a pre-computed YoY. */
 function bandViewFixture(yoy_pct: number, n = 5): ZoriZipLatestRow[] {
   return Array.from({ length: n }, (_, i) => ({
-    zip_code: String(34000 + i).padStart(5, "0"),
+    zip_code: CORE_ZIPS[i % CORE_ZIPS.length],
     metro: "Cape Coral-Fort Myers, FL",
     county_name: "Lee County",
     city: "Test City",

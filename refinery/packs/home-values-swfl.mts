@@ -10,6 +10,7 @@ import type {
 import { zhviZipLatestSource, type ZhviZipLatestRow } from "../sources/zhvi-zip-latest-source.mts";
 import { env } from "../config/env.mts";
 import { fmtUsd } from "./lib/number-format.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 const BRAIN_ID = "home-values-swfl";
 
@@ -157,7 +158,11 @@ function homeValuesCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   lastSnapshot = null;
   lastFetchedAt = null;
 
-  const rows = rowsFromFragments(allFragments);
+  // Core scope (Lee + Collier = 57) only. Non-core SWFL + mailing/other-metro spillover otherwise
+  // inflate zips_covered, and with it the "N ZIPs" count in the corpus prose, the coverage metric,
+  // the "N of M ZIPs lack a look-back" / "Only N SWFL ZIPs" caveats, the conclusion prose, and the
+  // per-ZIP detail rows. One filter at the single ZIP-entry point scopes rows, count, and prose together.
+  const rows = rowsFromFragments(allFragments).filter((r) => isCoreScope(r.zip_code));
   if (rows.length === 0) return [];
 
   const snap = buildSnapshotFromViewRows(rows);

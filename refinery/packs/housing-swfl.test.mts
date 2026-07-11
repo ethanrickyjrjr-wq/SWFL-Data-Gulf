@@ -21,7 +21,7 @@ import type { HousingZipRow } from "../sources/housing-source.mts";
 
 function row(p: Partial<HousingZipRow>): HousingZipRow {
   return {
-    zip_code: "00000",
+    zip_code: "33901",
     period_begin: "2026-01-01",
     period_end: "2026-03-31",
     parent_metro_region: "Cape Coral, FL",
@@ -70,17 +70,12 @@ describe("housing-swfl helpers", () => {
     });
     test("prefers a published value when Redfin provides one", () => {
       assert.equal(
-        monthsOfSupply(
-          row({ months_of_supply: 4.2, inventory: 9999, homes_sold: 1 }),
-        ),
+        monthsOfSupply(row({ months_of_supply: 4.2, inventory: 9999, homes_sold: 1 })),
         4.2,
       );
     });
     test("null when inputs are missing", () => {
-      assert.equal(
-        monthsOfSupply(row({ inventory: null, homes_sold: 100 })),
-        null,
-      );
+      assert.equal(monthsOfSupply(row({ inventory: null, homes_sold: 100 })), null);
     });
   });
 
@@ -91,10 +86,7 @@ describe("housing-swfl helpers", () => {
         row({ inventory: 50, homes_sold: 10 }),
       ]);
       // (150 * 3) / 40 = 11.25
-      assert.ok(
-        m !== null && Math.abs((m as number) - 11.25) < 1e-9,
-        `got ${m}`,
-      );
+      assert.ok(m !== null && Math.abs((m as number) - 11.25) < 1e-9, `got ${m}`);
     });
     test("a thin-sample ZIP does not blow up the regional figure", () => {
       const m = aggregateMonthsOfSupply([
@@ -105,10 +97,7 @@ describe("housing-swfl helpers", () => {
       assert.ok(m !== null && (m as number) < 12, `got ${m}`);
     });
     test("null when no row has a real sales count", () => {
-      assert.equal(
-        aggregateMonthsOfSupply([row({ inventory: 100, homes_sold: 0 })]),
-        null,
-      );
+      assert.equal(aggregateMonthsOfSupply([row({ inventory: 100, homes_sold: 0 })]), null);
     });
   });
 

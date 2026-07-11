@@ -9,6 +9,7 @@ import type {
 } from "../types/brain-output.mts";
 import { mhsPermitsSource, type MhsPermitNormalized } from "../sources/mhs-permits-source.mts";
 import { env } from "../config/env.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 /**
  * permits-commercial-swfl — SWFL commercial building permits (Maxwell, Hendry &
@@ -59,7 +60,7 @@ export interface MhsSnapshot {
   totalSf: number;
   /** Per-submarket aggregates, sorted by value_usd desc. */
   bySubmarket: SubmarketAgg[];
-  /** Per-ZIP aggregates (in-scope ZIPs only), sorted by count desc. */
+  /** Per-ZIP aggregates (core-scope ZIPs only — Lee + Collier), sorted by count desc. */
   byZip: ZipAgg[];
   /** Rows whose jurisdiction had no crosswalk mapping (submarket_slug null). */
   unmappedCount: number;
@@ -143,10 +144,14 @@ export function buildSnapshot(rows: MhsPermitNormalized[]): MhsSnapshot {
   }
   const bySubmarket = Array.from(submarketMap.values()).sort((a, b) => b.value_usd - a.value_usd);
 
-  // By ZIP (in-scope only — the source already NULLed out-of-scope ZIPs)
+  // By ZIP — core scope only (Lee 12071 + Collier 12021 = 57). The source scope-gates
+  // to the 6-county footprint (resolveZip().in_scope), so a non-core SWFL ZIP
+  // (Charlotte/Sarasota/Glades/Hendry) can still reach here and inflate the ranked ZIP-grain
+  // table's "of N SWFL ZIPs" denominator. One filter at this ZIP-entry point keeps the
+  // commercial_permits_by_zip detail rows core-only (Stage-4 zip-scope-lint enforces it).
   const zipMap = new Map<string, ZipAgg>();
   for (const r of rows) {
-    if (r.zip_code === null) continue;
+    if (r.zip_code === null || !isCoreScope(r.zip_code)) continue;
     const a = zipMap.get(r.zip_code) ?? {
       zip_code: r.zip_code,
       count: 0,
@@ -361,11 +366,11 @@ function buildDetailTables(snapshot: MhsSnapshot, fetched_at: string): BrainOutp
         },
       })),
       source: buildSource(
-        " — site ZIP from project_address, scope-gated to the 6-county footprint",
+        " — site ZIP from project_address, ranked against the Lee + Collier core ZIP universe",
         snapshot,
         fetched_at,
       ),
-      note: `${snapshot.withZipCount} of ${snapshot.totalCount} permits resolved an in-scope site ZIP; the rest had no geocodable address and are absent here (counted in the submarket totals).`,
+      note: `Ranked against the Lee + Collier core ZIP universe. ${snapshot.withZipCount} of ${snapshot.totalCount} permits resolved a site ZIP; permits in non-core counties or without a geocodable address are absent here (still counted in the submarket totals).`,
     });
   }
 

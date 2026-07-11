@@ -10,6 +10,7 @@ import type {
 } from "../types/brain-output.mts";
 import { makeBrainInputSource, type BrainInputNormalized } from "../sources/brain-input-source.mts";
 import { resolveZip } from "../lib/zip-resolver.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 /**
  * investor-zip-swfl — the per-ZIP investor composite.
@@ -23,9 +24,10 @@ import { resolveZip } from "../lib/zip-resolver.mts";
  *
  * Join contract (the #1 risk — kept explicit, never a regex sweep):
  *   - The card universe is the UNION of value+rent ZIPs, each gated through
- *     resolveZip(zip).in_scope so out-of-scope MSA spillover (e.g. Manatee ZIPs
- *     the shared Zillow metro filter pulls in) is dropped at the canonical
- *     6-county authority — NOT trimmed by hand.
+ *     isCoreScope(zip) so non-core SWFL (Sarasota/Charlotte/Glades/Hendry) and
+ *     out-of-scope MSA spillover (e.g. Manatee ZIPs the shared Zillow metro
+ *     filter pulls in) are dropped at the core-scope authority (Lee + Collier =
+ *     57) — NOT trimmed by hand.
  *   - Flood is a LEFT-JOIN overlay: env-swfl only surfaces its top-N highest-AAL
  *     ZIPs (aggregateZipRollupTop6), so for each ZIP we read the flood value by
  *     EXACT constructed key. A miss → flood fields null, the card is still
@@ -167,14 +169,18 @@ export function buildSnapshot(
   const rentByZip = detailRowsByZip(rentOut, "rentals_by_zip");
   const floodMetrics = metricsBySlug(envOut);
 
-  // Universe = union of value + rent ZIPs, gated to the canonical 6-county scope.
+  // Universe = union of value + rent ZIPs, gated to core scope (Lee + Collier = 57).
   const universe = new Set<string>();
   for (const zip of valueByZip.keys()) universe.add(zip);
   for (const zip of rentByZip.keys()) universe.add(zip);
 
   const cards: InvestorCard[] = [];
   for (const zip of universe) {
-    if (!resolveZip(zip).in_scope) continue; // drop MSA spillover (e.g. Manatee)
+    // Core scope (Lee 12071 + Collier 12021 = 57) only — narrower than resolveZip().in_scope
+    // (6-county, 100 ZIPs). Drops non-core SWFL (Sarasota/Charlotte/Glades/Hendry) AND
+    // MSA spillover (e.g. Manatee) in one predicate, so cards, counts, and prose all recompute
+    // from the same core-filtered set.
+    if (!isCoreScope(zip)) continue;
 
     const vRow = valueByZip.get(zip);
     const rRow = rentByZip.get(zip);
@@ -316,8 +322,8 @@ function buildSourceMeta(fetched_at: string): BrainOutputMetricSource {
       "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: " +
       "home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and " +
       "flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; " +
-      "flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: 6-county SWFL " +
-      "authority (fixtures/swfl-zip-county.json).",
+      "flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier " +
+      "core SWFL scope (fixtures/swfl-zip-county.json).",
   };
 }
 
@@ -331,7 +337,7 @@ function investorOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     if (!snap?.upstream_available.rent) missing.push("rentals-swfl (rent)");
     return {
       conclusion:
-        "investor-zip-swfl produced no ZIP cards this build — no in-scope ZIP carried both a value and a rent observation.",
+        "investor-zip-swfl produced no ZIP cards this build — no core-scope ZIP carried both a value and a rent observation.",
       key_metrics: [],
       caveats: [
         `Upstream coverage was insufficient${missing.length ? ` (missing: ${missing.join(", ")})` : ""}. ` +
@@ -354,7 +360,7 @@ function investorOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     metric: "investor_zip_cards_covered",
     value: snap.cards_covered,
     direction: "stable",
-    label: "Count of SWFL ZIP investor cards (value + rent present, in-scope)",
+    label: "Count of SWFL ZIP investor cards (value + rent present, core scope)",
     variable_type: "extensive",
     units: "count",
     display_format: "count",
@@ -579,7 +585,7 @@ function investorOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         ],
         rows,
         source,
-        note: "One investor card per in-scope SWFL ZIP carrying a value or rent observation. Gross rent yield = ZORI rent x 12 / ZHVI value x 100; null when value or rent is absent (never a divide-by-zero), AND suppressed (with yield_flag set) when outside the 2-12% plausibility band — value and rent indices are not comparable in vacation/seasonal markets (e.g. barrier islands), where ZORI's luxury-rental basket and ZHVI's condo/land-depressed value produce an implausible ratio. Flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100; null where the yield is unassessable or env-swfl does not surface that ZIP (its top-AAL ZIPs only). Raw value, rent, and flood facts are retained on suppressed cards. STR revenue is null pending an AirDNA feed (source_tag available_on_request).",
+        note: "One investor card per core-scope (Lee + Collier) SWFL ZIP carrying a value or rent observation. Gross rent yield = ZORI rent x 12 / ZHVI value x 100; null when value or rent is absent (never a divide-by-zero), AND suppressed (with yield_flag set) when outside the 2-12% plausibility band — value and rent indices are not comparable in vacation/seasonal markets (e.g. barrier islands), where ZORI's luxury-rental basket and ZHVI's condo/land-depressed value produce an implausible ratio. Flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100; null where the yield is unassessable or env-swfl does not surface that ZIP (its top-AAL ZIPs only). Raw value, rent, and flood facts are retained on suppressed cards. STR revenue is null pending an AirDNA feed (source_tag available_on_request).",
       },
     ],
   };

@@ -11,6 +11,7 @@ import {
   type ActiveRentalsSummary,
   type RentalStatRow,
 } from "../sources/active-rentals-source.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 const SOURCE_ID = "active_rentals_swfl";
 
@@ -214,6 +215,12 @@ export const activeRentalsSwfl: PackDefinition = {
     lastFetchedAt = fragment?.fetched_at ?? null;
 
     if (!lastSummary || !lastSummary.region) return [];
+    // Core scope (Lee + Collier = 57) only. The rental_listing_stats sweep emits ZIP rows for
+    // non-core SWFL + mailing/other-metro spillover; unfiltered they leak into the
+    // active_rentals_by_zip detail table and the "N ZIPs covered" prose count below. One filter
+    // at this earliest ZIP-entry point scopes both, since outputProducer reads this same summary.
+    // Region + county rows stay whole (region = Lee + Collier, both core; the only ZIP-grain leak).
+    lastSummary.by_zip = lastSummary.by_zip.filter((r) => isCoreScope(r.zip_code));
     const r = lastSummary.region;
     return [
       {

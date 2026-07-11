@@ -1,3 +1,19 @@
+## 2026-07-11 (Fable 5 · main) — zip-scope-core COMPLETE: all 12 ZIP packs scoped to Lee+Collier core (57), lint armed, gates green
+
+Finished the source layer. All 12 ZIP-emitting packs now filter to the shared core-scope authority
+(`refinery/lib/core-scope.mts`, `isCoreScope`) at their single earliest ZIP-entry point, so detail
+rows, ZIP counts, and conclusion/caveat prose all derive from the Lee+Collier core set. Packs:
+seller-stress (reference), housing, home-values, rentals, investor-zip (switched off the 6-county
+in_scope predicate), market-heat, active-listings, listing-momentum, active-rentals, env-swfl (flood
+window only — rainfall/water untouched), permits-swfl, permits-commercial. 11 done via parallel
+subagents against the seller-stress reference; each verified core-only + its own bun:test green.
+Stage-4 `zip-scope-lint` now global (fails any 5-digit-ZIP detail row outside core). Gate 5 caught a
+catalog scope-string drift (seller-stress "Covers 126 SWFL ZIPs" → core wording) — synced. Full pack
+suite 445 pass / 0 fail; vocab coverage OK. Known boundary (own check): env-swfl could still emit a
+stray non-core key_metric for a top-6 flood ZIP; not fixed because it would move the regional
+direction vote, and the lint doesn't gate metric slugs. Next: push + targeted rebuilds to publish
+corrected prose, then close zip_scope_core_live_verify.
+
 ## 2026-07-11 (Fable 5 · main) — zip-scope-core: spec corrected (found /charts gap) + render-time fix BUILT & verified (code held for push go)
 
 Reviewed the zip-scope-core spec (already on main at 5dd4d506) per operator "why are we so off."

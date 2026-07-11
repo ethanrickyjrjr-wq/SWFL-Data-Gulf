@@ -10,6 +10,7 @@ import type {
   BrainOutputDetailTable,
 } from "../types/brain-output.mts";
 import { housingSource, type HousingZipRow } from "../sources/housing-source.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 const BRAIN_ID = "housing-swfl";
 const TOP_N = 3;
@@ -271,7 +272,11 @@ function housingCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   lastFetchedAt = null;
   lastRows = [];
 
-  const rows = rowsFromFragments(allFragments);
+  // Core scope (Lee + Collier = 57) only. Non-core SWFL + mailing/other-metro spillover otherwise
+  // inflate zip_count (→ the "Only N SWFL ZIPs in corpus" caveat and the "across N ZIPs" conclusion),
+  // the per-ZIP detail table, and the metro/hottest/priciest cuts. This is the single chokepoint
+  // where ZIPs enter the snapshot build — one filter here scopes rows, count, and prose together.
+  const rows = rowsFromFragments(allFragments).filter((r) => isCoreScope(r.zip_code));
   if (rows.length === 0) return [];
 
   const snap = buildSnapshot(rows);

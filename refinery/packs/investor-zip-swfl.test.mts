@@ -81,8 +81,10 @@ function envOutput(
   return { detail_tables: [], key_metrics } as unknown as BrainOutput;
 }
 
-// In-scope SWFL ZIPs used below: 33931 (Lee/FMB), 34102 (Collier/Naples),
-// 34135 (Lee/Bonita). Out-of-scope: 34216 (Manatee, North Port MSA spillover).
+// Core-scope SWFL ZIPs used below (Lee 12071 / Collier 12021): 33931 (Lee/FMB),
+// 34102 (Collier/Naples), 34135 (Lee/Bonita). Non-core: 34232 (Sarasota, 12115 —
+// in the 6-county in_scope set but OUTSIDE core scope, so it must be dropped by
+// isCoreScope even though the old in_scope gate would have kept it).
 
 describe("investor-zip-swfl buildSnapshot — the join contract", () => {
   it("full card: value + rent + flood -> gross yield AND flood-adjusted cap rate computed", () => {
@@ -153,13 +155,15 @@ describe("investor-zip-swfl buildSnapshot — the join contract", () => {
     expect(Number.isFinite(c.gross_rent_yield_pct as never)).toBe(false);
   });
 
-  it("out-of-scope ZIP (34216 Manatee) is dropped at the canonical scope gate", () => {
+  it("non-core in_scope ZIP (34232 Sarasota) is dropped at the core-scope gate", () => {
+    // 34232 is in the 6-county in_scope set (Sarasota, 12115) but NOT core (Lee/Collier),
+    // so the switch from resolveZip().in_scope to isCoreScope must now drop it.
     const snap = buildSnapshot(
-      valueOutput([valueRow("34216", 700000), valueRow("33931", 680000)]),
-      rentOutput([rentRow("34216", 3000), rentRow("33931", 3200)]),
+      valueOutput([valueRow("34232", 700000), valueRow("33931", 680000)]),
+      rentOutput([rentRow("34232", 3000), rentRow("33931", 3200)]),
       envOutput({}),
     );
-    expect(snap.cards.map((c) => c.zip)).toEqual(["33931"]); // 34216 dropped
+    expect(snap.cards.map((c) => c.zip)).toEqual(["33931"]); // 34232 dropped (non-core)
   });
 
   it("exact-key flood join: another ZIP's flood slug does NOT leak into this card", () => {

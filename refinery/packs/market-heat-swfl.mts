@@ -17,6 +17,7 @@ import {
   marketHeatHotnessSource,
   type MarketHeatHotnessRow,
 } from "../sources/market-heat-hotness-source.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 const BRAIN_ID = "market-heat-swfl";
 
@@ -240,15 +241,22 @@ export function marketHeatCorpusSummary(allFragments: RawFragment[]): SynthesisF
   const coreByZip = new Map<string, Map<string, MarketHeatCoreRow>>();
   const hotnessLatest = new Map<string, MarketHeatHotnessRow>();
 
+  // Core scope (Lee + Collier = 57) only. This is the earliest point ZIPs enter the producer;
+  // filtering here scopes every downstream surface at once — scored/suppressed lists, the
+  // market_heat_by_zip detail rows, region-trend medians, and the conclusion/caveat ZIP counts
+  // (all derived from `scored.length`/`suppressed.length`). Non-core SWFL + mailing/other-metro
+  // spillover otherwise inflate the ~99 raw ZIPs above the core universe.
   for (const f of allFragments) {
     if (f.source_id === "realtor_market_heat_core_swfl") {
       const r = f.normalized as MarketHeatCoreRow;
       if (!r.zip_code || !r.month) continue;
+      if (!isCoreScope(r.zip_code)) continue;
       if (!coreByZip.has(r.zip_code)) coreByZip.set(r.zip_code, new Map());
       coreByZip.get(r.zip_code)!.set(r.month, r);
     } else if (f.source_id === "realtor_market_heat_hotness_swfl") {
       const r = f.normalized as MarketHeatHotnessRow;
       if (!r.zip_code || !r.month) continue;
+      if (!isCoreScope(r.zip_code)) continue;
       const prev = hotnessLatest.get(r.zip_code);
       if (!prev || r.month > prev.month) hotnessLatest.set(r.zip_code, r);
     }

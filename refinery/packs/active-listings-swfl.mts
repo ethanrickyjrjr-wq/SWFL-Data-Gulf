@@ -11,6 +11,7 @@ import {
   type ActiveListingsResidentialSummary,
   type ResidentialStatRow,
 } from "../sources/active-listings-residential-source.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 const SOURCE_ID = "active_listings_residential";
 
@@ -242,7 +243,16 @@ export const activeListingsSwfl: PackDefinition = {
         f.source_id === SOURCE_ID &&
         (f.normalized as { kind?: string }).kind === "active-listings-residential-summary",
     );
-    lastSummary = fragment ? (fragment.normalized as ActiveListingsResidentialSummary) : null;
+    // Core scope (Lee + Collier = 57) only, applied once at the earliest point ZIPs enter the
+    // producer. by_zip carries mailing/other-metro + non-core SWFL spillover (~67 rows incl.
+    // non-core) otherwise. Filtering the stored summary here scopes BOTH the active_listings_by_zip
+    // detail table (outputProducer reads summary.by_zip) AND the "N ZIPs covered" count in the
+    // corpusSummary fact below — one filter, both surfaces. Region/county grains are not ZIP-keyed
+    // and stay as-is.
+    const rawSummary = fragment ? (fragment.normalized as ActiveListingsResidentialSummary) : null;
+    lastSummary = rawSummary
+      ? { ...rawSummary, by_zip: rawSummary.by_zip.filter((r) => isCoreScope(r.zip_code)) }
+      : null;
     lastFetchedAt = fragment?.fetched_at ?? null;
 
     if (!lastSummary || !lastSummary.region) return [];

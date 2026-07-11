@@ -20,6 +20,7 @@ import {
   getCollierDroppedRowCounts,
 } from "../sources/collier-permits-source.mts";
 import { assignCorridor, type CorridorCentroid } from "../lib/corridor-assignment.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 import { displayNameFor } from "../lib/corridor-display.mts";
 import {
   generateCurrentWindow,
@@ -259,7 +260,13 @@ export function buildSnapshot(
       arr.push(p);
       byCorridorBucket.set(k, arr);
     }
-    if (p.zip_code) {
+    // Core scope (Lee + Collier = 57) only. A Lee/Collier permit can still carry a
+    // ZIP outside the core universe (mailing-ZIP spillover, an out-of-scope ZCTA);
+    // that would seed a non-core row in both the per-ZIP key_metrics slugs and the
+    // `permits_by_zip` detail table. One filter at the earliest chokepoint scopes
+    // both together and leaves corridor-grain metrics untouched. Doubles as the
+    // existing null-zip guard.
+    if (p.zip_code && isCoreScope(p.zip_code)) {
       const k = `${p.zip_code}::${p.bucket}::${p.county}`;
       const arr = byZipBucket.get(k) ?? [];
       arr.push(p);

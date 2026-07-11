@@ -31,7 +31,13 @@ function makeFragment(): RawFragment {
     kind: "listing-momentum-summary",
     region: row(null, null, 27000, 18.5, 9.0),
     by_county: [row("Lee", null, 20000, 20.0, 8.5), row("Collier", null, 7000, 14.2, 10.0)],
-    by_zip: [row("Lee", "33901", 800, 22.0, 7.0), row("Collier", "34120", 500, 15.0, 12.0)],
+    by_zip: [
+      row("Lee", "33901", 800, 22.0, 7.0), // Lee (12071) — core
+      row("Collier", "34120", 500, 15.0, 12.0), // Collier (12021) — core
+      // 33948 = Charlotte (12015) — a REAL SWFL ZIP but OUTSIDE core scope (Lee+Collier). The pack's
+      // core-scope filter must drop it from the by-ZIP detail table. From fixtures/swfl-zip-county.json.
+      row("Charlotte", "33948", 300, 10.0, 5.0),
+    ],
     latest_scraped_at: NOW,
     source_url: "fixture://listing-momentum",
   };
@@ -69,7 +75,16 @@ test("listing-momentum-swfl: per-county and per-ZIP shares ride in detail_tables
   const byCounty = result.detail_tables?.find((t) => t.id === "listing_momentum_by_county");
   const byZip = result.detail_tables?.find((t) => t.id === "listing_momentum_by_zip");
   assert.ok(byCounty && byCounty.rows.length === 2, "expected a 2-row by-county table");
-  assert.ok(byZip && byZip.rows.length === 2, "expected a 2-row by-ZIP table");
+  // 3 by_zip rows in → 2 out: 33901 (Lee) + 34120 (Collier) survive, 33948 (Charlotte) is dropped
+  // by the core-scope filter (Lee + Collier only).
+  assert.ok(
+    byZip && byZip.rows.length === 2,
+    "expected a 2-row by-ZIP table (non-core 33948 filtered)",
+  );
+  assert.ok(
+    !byZip!.rows.some((r) => r.key === "33948"),
+    "non-core ZIP 33948 (Charlotte) must be filtered out of the by-ZIP detail table",
+  );
   assert.equal(byZip!.grain, "zip");
   const lee = byCounty!.rows.find((r) => r.key === "Lee");
   assert.equal(lee?.cells.price_reduced_share, 20.0);

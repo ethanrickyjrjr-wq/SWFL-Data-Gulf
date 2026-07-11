@@ -44,11 +44,15 @@ function buildZipSeries(
   }));
 }
 
+// Real Lee (12071) + Collier (12021) core ZIPs — the pack now filters to core scope
+// (refinery/lib/core-scope.mts), so any fixture ZIP that reaches the production path must be
+// a real core ZIP or it is dropped before the snapshot. Verified against fixtures/swfl-zip-county.json.
+const CORE_TEST_ZIPS = ["33901", "33914", "33919", "33931", "34102", "34117", "34120"];
+
 function bandFixture(yoy_pct: number, n = 5): ZhviZipRow[] {
   const rows: ZhviZipRow[] = [];
   for (let i = 0; i < n; i++) {
-    const zip = String(34000 + i).padStart(5, "0");
-    rows.push(...buildZipSeries(zip, yoy_pct));
+    rows.push(...buildZipSeries(CORE_TEST_ZIPS[i]!, yoy_pct));
   }
   return rows;
 }
@@ -121,7 +125,7 @@ describe("home-values-swfl buildSnapshot", () => {
   it("handles ZIPs with no 12-month history (YoY null)", () => {
     const rows: ZhviZipRow[] = [
       {
-        zip_code: "34999",
+        zip_code: "33931",
         period_end: "2026-04-30",
         home_value: 700000,
         metro: "Cape Coral-Fort Myers, FL",
@@ -141,7 +145,7 @@ describe("home-values-swfl buildSnapshot", () => {
 /** Build N view-shaped rows (one per ZIP) with a pre-computed YoY. */
 function bandViewFixture(yoy_pct: number, n = 5): ZhviZipLatestRow[] {
   return Array.from({ length: n }, (_, i) => ({
-    zip_code: String(34000 + i).padStart(5, "0"),
+    zip_code: CORE_TEST_ZIPS[i]!,
     metro: "Cape Coral-Fort Myers, FL",
     county_name: "Lee County",
     city: "Test City",

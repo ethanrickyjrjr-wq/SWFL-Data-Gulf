@@ -12,6 +12,7 @@ import {
   type MomentumRow,
 } from "../sources/listing-momentum-source.mts";
 import { fmtPct } from "./lib/number-format.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 const SOURCE_ID = "listing_momentum_swfl";
 
@@ -220,6 +221,14 @@ export const listingMomentumSwfl: PackDefinition = {
     );
     lastSummary = fragment ? (fragment.normalized as ListingMomentumSummary) : null;
     lastFetchedAt = fragment?.fetched_at ?? null;
+
+    // Core scope (Lee + Collier = 57) only. The live view emits ~67 ZIP rows including non-core SWFL
+    // counties + mailing/other-metro spillover. This ONE filter at the ZIP-entry point scopes BOTH
+    // the by-ZIP detail table (built downstream in outputProducer from lastSummary.by_zip) AND the
+    // "N ZIPs" count in the corpus fact below — region/county grains are unaffected.
+    if (lastSummary) {
+      lastSummary.by_zip = lastSummary.by_zip.filter((r) => isCoreScope(r.zip_code));
+    }
 
     if (!lastSummary || !lastSummary.region) return [];
     const r = lastSummary.region;

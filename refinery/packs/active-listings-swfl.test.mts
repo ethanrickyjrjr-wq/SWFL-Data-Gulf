@@ -38,7 +38,13 @@ function makeFragment(regionDom: number | null = null): RawFragment {
     kind: "active-listings-residential-summary",
     region: row(null, null, 10459, 496470, regionDom),
     by_county: [row("Lee", null, 7412, 414900, null), row("Collier", null, 2749, 912000, null)],
-    by_zip: [row("Lee", "33993", 722, 399000, null), row("Collier", "34120", 464, 715000, null)],
+    // Two real core ZIPs (33993 Lee, 34120 Collier) + one real non-core SWFL ZIP (33950 Charlotte)
+    // to prove the core-scope filter drops non-core rows from the by_zip detail table.
+    by_zip: [
+      row("Lee", "33993", 722, 399000, null),
+      row("Collier", "34120", 464, 715000, null),
+      row("Charlotte", "33950", 311, 350000, null),
+    ],
     latest_scraped_at: NOW,
     source_url: "fixture://listing-active-stats",
   };
@@ -91,8 +97,13 @@ test("active-listings-swfl: per-county and per-ZIP rows ride in detail_tables", 
   const byCounty = result.detail_tables?.find((t) => t.id === "active_listings_by_county");
   const byZip = result.detail_tables?.find((t) => t.id === "active_listings_by_zip");
   assert.ok(byCounty && byCounty.rows.length === 2, "expected a 2-row by-county table");
-  assert.ok(byZip && byZip.rows.length === 2, "expected a 2-row by-ZIP table");
+  // 3 by_zip rows in, but 33950 (Charlotte) is non-core and filtered → 2 core rows remain.
+  assert.ok(byZip && byZip.rows.length === 2, "expected a 2-row by-ZIP table (non-core dropped)");
   assert.equal(byZip!.grain, "zip");
+  assert.ok(
+    !byZip!.rows.some((r) => r.key === "33950"),
+    "non-core ZIP 33950 (Charlotte) must be filtered out of the by-ZIP detail table",
+  );
   const zip33993 = byZip!.rows.find((r) => r.key === "33993");
   assert.equal(zip33993?.cells.listing_count, 722);
 });

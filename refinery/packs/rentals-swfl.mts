@@ -10,6 +10,7 @@ import type {
 import { zoriZipLatestSource, type ZoriZipLatestRow } from "../sources/zori-zip-latest-source.mts";
 import { env } from "../config/env.mts";
 import { fmtUsd } from "./lib/number-format.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 const BRAIN_ID = "rentals-swfl";
 
@@ -148,9 +149,17 @@ let lastSnapshot: RentalsSnapshot | null = null;
 let lastFetchedAt: string | null = null;
 
 function rowsFromFragments(fragments: RawFragment[]): ZoriZipLatestRow[] {
-  return fragments
-    .map((f) => f.normalized as unknown as ZoriZipLatestRow)
-    .filter((r): r is ZoriZipLatestRow => !!r && typeof r === "object");
+  return (
+    fragments
+      .map((f) => f.normalized as unknown as ZoriZipLatestRow)
+      .filter((r): r is ZoriZipLatestRow => !!r && typeof r === "object")
+      // Core scope (Lee + Collier = 57) only. Filtering at this single earliest ZIP-entry point scopes
+      // EVERY downstream number together: the corpus-overview row/ZIP count, the per-ZIP detail rows,
+      // zips_covered/zips_with_yoy, the regional median, and the "N SWFL ZIPs in the corpus" caveats +
+      // the ZIP count in the conclusion prose. Non-core SWFL + mailing/other-metro spillover is dropped
+      // before any count or snapshot is built. (isCoreScope trims + rejects empty/garbage.)
+      .filter((r) => isCoreScope(r.zip_code))
+  );
 }
 
 function rentalsCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
