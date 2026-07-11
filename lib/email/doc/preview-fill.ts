@@ -40,6 +40,27 @@
 
 import type { EmailDoc } from "./types";
 import { DEFAULT_BLOCK_PROPS } from "./default-docs";
+import { parseHeroFigure, type HeroFigure } from "@/lib/deliverable/chart-coherence";
+
+/**
+ * The doc's headline figure for coherence-checking: a `hero` block's value if
+ * the template renders one, else the first `metric-card` block's metricValue
+ * (trend-snapshot has no hero block -- its real headline is the metric-card).
+ * Null when neither block type is present. Shared by the author-time gate
+ * (preview-fill.test.ts) and the live runtime hook (build-doc.ts) -- ONE
+ * definition of "this doc's headline," never two.
+ */
+export function resolveHeadlineFigure(doc: EmailDoc): HeroFigure | null {
+  for (const b of doc.blocks) {
+    if (b.type === "hero" && b.props.value) return parseHeroFigure(b.props.value);
+  }
+  for (const b of doc.blocks) {
+    if (b.type === "metric-card" && b.props.metricValue) {
+      return parseHeroFigure(String(b.props.metricValue));
+    }
+  }
+  return null;
+}
 
 export interface PreviewFillData {
   /** Stamped by the gallery overlay caption ("Live SWFL data · MM/DD/YYYY"). */

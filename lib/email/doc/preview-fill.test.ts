@@ -178,3 +178,63 @@ describe("previewFill", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+import { assertHeroChartCoherence } from "../../deliverable/chart-coherence";
+import { SEED_CHART_SERIES } from "./seed-chart-series";
+import { resolveHeadlineFigure } from "./preview-fill";
+
+/** Basename of a committed chart asset URL ("/showcase/.../chart-x.svg" -> "chart-x.svg"). */
+function assetBasename(url: string): string {
+  return url.split("/").pop() ?? url;
+}
+
+// A real, human-reasoned exception -- template id + why. Empty today: the
+// luxury fixture (Task 4) is the fix, not an allowlisted exception. Adding an
+// entry here is a deliberate, reviewed call -- never a way to silence red CI.
+const COHERENCE_ALLOWLIST: Record<string, string> = {};
+
+describe("chart<->headline coherence gate (deliverable-coherence-gate)", () => {
+  const CHART_BEARING_TEMPLATES = [
+    "market-spotlight",
+    "weekly-pulse",
+    "trend-snapshot",
+    "rate-watch",
+    "luxury-market-report",
+    "neighborhood-report",
+    "investment-brief",
+    "monthly-digest",
+    "year-in-review",
+  ];
+
+  it("covers exactly the 9 chart-bearing templates (catches a new one silently gaining a chart)", () => {
+    const actual = SEED_DOCS.filter((seed) => {
+      const urls = chartUrls(previewFill(seed.build(), { seedId: seed.id }));
+      return urls.length > 0;
+    }).map((s) => s.id);
+    expect(new Set(actual)).toEqual(new Set(CHART_BEARING_TEMPLATES));
+  });
+
+  it("every chart-bearing template's headline coheres with every one of its charts", () => {
+    const failures: string[] = [];
+    for (const id of CHART_BEARING_TEMPLATES) {
+      const seed = SEED_DOCS.find((s) => s.id === id);
+      if (!seed) throw new Error(`no SEED_DOCS entry for ${id}`);
+      const filled = previewFill(seed.build(), { seedId: id });
+      const hero = resolveHeadlineFigure(filled);
+      const urls = chartUrls(filled);
+      for (const url of urls) {
+        const basename = assetBasename(url);
+        const series = SEED_CHART_SERIES[basename];
+        if (!series) throw new Error(`${id}: no SEED_CHART_SERIES entry for ${basename}`);
+        const result = assertHeroChartCoherence({
+          hero,
+          chart: { values: series.values, unit: series.unit },
+        });
+        if (!result.coherent && !COHERENCE_ALLOWLIST[id]) {
+          failures.push(`${id} (${basename}): ${result.reason}`);
+        }
+      }
+    }
+    expect(failures, failures.join("\n")).toEqual([]);
+  });
+});
