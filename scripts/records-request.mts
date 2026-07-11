@@ -10,7 +10,9 @@ import { draftRequestBody, draftSubject } from "../lib/records-request/template.
 import { sendRecordsRequest, type EmailSender } from "../lib/records-request/send.ts";
 
 const SECRETS_PATH = resolve(process.cwd(), ".dlt/secrets.toml");
-const FROM = "SWFL Data Gulf <hello@swfldatagulf.com>";
+const SENDER_NAME = process.env.DIGEST_SENDER_NAME ?? "SWFL Data Gulf";
+const SENDER_ADDRESS = process.env.DIGEST_SENDER_ADDRESS ?? "hello@swfldatagulf.com";
+const FROM = `${SENDER_NAME} <${SENDER_ADDRESS}>`;
 
 function fail(msg: string): never {
   console.error(`records-request: ${msg}`);
