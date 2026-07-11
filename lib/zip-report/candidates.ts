@@ -706,8 +706,9 @@ export function buildZipCandidates(input: CandidateInput): {
     let rankPos: number | undefined;
     let rankOf: number | undefined;
     if (input.floodRows.length > 1) {
+      // Core scope (57) only — the flood table carries non-core SWFL ZIPs (env-swfl emits ~124).
       const pct = percentileOf(
-        input.floodRows.map((r) => r.aal),
+        input.floodRows.filter((r) => isCoreScope(r.zip)).map((r) => r.aal),
         f.aal,
       );
       percentile = pct?.percentile ?? null;
@@ -735,7 +736,10 @@ export function buildZipCandidates(input: CandidateInput): {
   // ── Permits — competes only where the Lee Accela feed covers (count > 0).
   const permitCount = input.permitsCounts.get(input.zip) ?? 0;
   if (permitCount > 0) {
-    const dist = [...input.permitsCounts.values()].filter((n) => n > 0);
+    // Core scope (57) only — drop any stray non-core (mailing) ZIP from the Lee Accela ranking.
+    const dist = [...input.permitsCounts.entries()]
+      .filter(([z, n]) => n > 0 && isCoreScope(z))
+      .map(([, n]) => n);
     const pct = percentileOf(dist, permitCount);
     candidates.push({
       key: "permits_90d",

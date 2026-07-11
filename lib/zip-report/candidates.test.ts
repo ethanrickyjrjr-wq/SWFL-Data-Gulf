@@ -337,6 +337,36 @@ describe("buildRegistryCandidates — concept dedup", () => {
   });
 });
 
+describe("buildZipCandidates — core-scope on flood + permits", () => {
+  test("flood: non-core ZIP rows are excluded from the ranking denominator", () => {
+    const floodRows = [
+      { zip: "33914", aal: 500, pctRank: null }, // core (Cape Coral)
+      { zip: "34102", aal: 100, pctRank: null }, // core (Naples)
+      { zip: "34285", aal: 30_000, pctRank: null }, // Sarasota — non-core
+      { zip: "33950", aal: 25_000, pctRank: null }, // Charlotte — non-core
+    ];
+    const { candidates } = buildZipCandidates(baseInput({ floodRows, floodForZip: floodRows[0] }));
+    const flood = candidates.find((c) => c.key === "flood_aal")!;
+    // Denominator = 2 core rows, not 4. 500 is the top (lowest loss) of [100, 500].
+    expect(flood.rankOf).toBe(2);
+  });
+
+  test("permits: a stray non-core ZIP is dropped from the Accela ranking", () => {
+    const { candidates } = buildZipCandidates(
+      baseInput({
+        zip: "33901", // Fort Myers, core
+        permitsCounts: new Map([
+          ["33901", 120], // core
+          ["33914", 40], // core
+          ["34205", 200], // Manatee leak — must not count
+        ]),
+      }),
+    );
+    const permits = candidates.find((c) => c.key === "permits_90d")!;
+    expect(permits.rankOf).toBe(2); // 33901 + 33914 only
+  });
+});
+
 describe("buildRegistryCandidates — core-scope denominator (Lee+Collier=57)", () => {
   test("non-core SWFL (Sarasota) and pure-leak (Manatee) rows are excluded from the ranking denominator", () => {
     const { candidates } = buildRegistryCandidates(
