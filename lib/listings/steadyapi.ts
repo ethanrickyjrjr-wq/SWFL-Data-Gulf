@@ -125,7 +125,12 @@ export function normalizeResult(raw: RawResult, city: string, state: string): Li
     bedrooms: beds != null && Number.isFinite(beds) ? beds : null,
     bathrooms: null,
     squareFootage: sqft != null && Number.isFinite(sqft) ? sqft : null,
-    lotSize: null,
+    // Listing.lotSize is ACRES by convention (select.ts sets it from the lake's
+    // lot_acres column) — SteadyAPI's description.lot_sqft is square feet, so convert.
+    lotSize:
+      lotSqft != null && Number.isFinite(lotSqft) && lotSqft > 0
+        ? Math.round((lotSqft / 43560) * 100) / 100
+        : null,
     yearBuilt: null,
     status: typeof raw.status === "string" ? raw.status : "for_sale",
     price: price != null && Number.isFinite(price) ? price : null,

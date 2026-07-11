@@ -34,3 +34,27 @@ describe("normalizeResult — property type honesty", () => {
     expect(l?.propertyType).toBe("Residential");
   });
 });
+
+// lotSize was hardcoded to null even when description.lot_sqft was present — capture it,
+// converted sqft->acres to match the Listing.lotSize convention (select.ts sets it from the
+// lake's lot_acres column, i.e. acres not sqft).
+describe("normalizeResult — lot_sqft capture", () => {
+  const base = {
+    property_id: "123",
+    price: { amount: 400000 },
+    status: "for_sale",
+    permalink: "https://www.realtor.com/x/1403-NE-19th-Ter_Cape-Coral_FL_33909_M1",
+    photo_url: "https://ap.rdcpix.com/x.webp",
+    location: { lat: 26.6, lon: -81.9, county_fips: "12071" },
+  };
+
+  test("description.lot_sqft present → lotSize converted to acres, not dropped to null", () => {
+    const l = normalizeResult({ ...base, description: { lot_sqft: 21780 } }, "Cape Coral", "FL");
+    expect(l?.lotSize).toBe(0.5); // 21780 / 43560
+  });
+
+  test("no lot_sqft → lotSize stays null (never a fabricated 0)", () => {
+    const l = normalizeResult({ ...base, description: { beds: 3 } }, "Cape Coral", "FL");
+    expect(l?.lotSize).toBeNull();
+  });
+});
