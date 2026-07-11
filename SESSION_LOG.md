@@ -1,3 +1,29 @@
+## 2026-07-11 (Opus 4.8 · main) — Full checks-ledger triage: 333 → 247 open, 0 dropped, 5 new gaps
+
+Swept the ENTIRE open ledger with 11 agents (1 scout + 10 parallel, disjoint ~32-check slices), each
+verifying against the live product / code / data. Every close carries observed evidence (HTTP status +
+body, browser screenshot, lake row count, passing test, gh run log) — the proof gate did its job and
+nothing was rubber-stamped. **333 → 247 open, 86 cleared, 0 dropped** (nothing was honestly dead), 2
+checks REOPENED by their own agent after the evidence didn't hold (`lee_permits_capdetail_waf_429` —
+one clean manual run ≠ an intermittent WAF fix; `scope_storm_history_swfl_charlotte` — code fixed but
+brain never rebuilt). 5 NEW real gaps found while verifying and opened per RULE 2.4.
+
+**P0 finding (the big one), hit independently by 5 agents:** scope fixes are IN THE CODE but the live
+brains were NEVER REBUILT — `zip_scope_core` still serves "111 of 126 ZIPs", hurricane-tracks-fl (06/19)
+still publishes 6-county figures, storm-history-swfl v21 still declares scope "LEE+COLLIER+CHARLOTTE",
+env-swfl still emits stale 6-county output. A live scope OVERCLAIM is in front of users while the ledger
+believed it was handled. One targeted rebuild likely closes the cluster. Full inventory of all 247
+remaining open issues (P0–P5 + per-area list) written to
+`docs/audit/2026-07-11-open-issues-after-triage.md`; sweep spec in
+`docs/handoff/2026-07-11-checks-triage-sonnet-handoff.md`.
+
+Agent code fixes riding this push (5): SteadyAPI `normalizeResult` no longer nulls `lot_sqft`
+(fc1eef97); dead Charlotte ZIP denominators pruned from fema-nfip-source (da221f0c); briefcase
+touch-submit (ad251929); `id-token: write` for the failing chief-of-staff cron OIDC (b8ae2c7f);
+lee-associates `cap_rate` no longer silently discarded + column added (4a23ff21). Airtable mirror synced
+(57 rows deleted from the board). Parallel sessions' uncommitted work in the shared tree deliberately
+NOT staged.
+
 ## 2026-07-11 (Opus 4.8 · main) — Claude Design handoff: socials template-elevation brief + real "before" assets
 
 Assembled a paste-ready design handoff for elevating the 5 lab social templates (`lib/social/design/`),
