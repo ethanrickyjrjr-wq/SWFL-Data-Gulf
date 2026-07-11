@@ -2,6 +2,9 @@
 // pages. Ranked LAST in the discovery plan (summary quality dominates the lift);
 // keep it short and differentiated, not an exhaustive brain dump.
 
+// Constant body → statically generate + CDN-cache (plan: "keep it static").
+export const dynamic = "force-static";
+
 const SITE = "https://www.swfldatagulf.com";
 
 const BODY = `# SWFL Data Gulf
