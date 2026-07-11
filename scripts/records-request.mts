@@ -119,6 +119,33 @@ async function add(args: string[]) {
   console.log(`added: ${request_key} [drafted]`);
 }
 
+// Patch editable fields on an existing row (e.g. pin a records-custodian address
+// handed in later). Does not touch state — use the lifecycle verbs for that.
+async function set(args: string[]) {
+  const { positionals, flags } = parseArgs(args);
+  const [key] = positionals;
+  if (!key)
+    fail(
+      'set <request_key> [--contact <email>] [--portal <url>] [--follow-up <days>] [--basis "…"] [--notes "…"]',
+    );
+  await getRow(key); // fail loud if the key is unknown
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (flags.contact) patch.contact_email = flags.contact;
+  if (flags.portal) patch.portal_url = flags.portal;
+  if (flags["follow-up"]) patch.follow_up_days = Number(flags["follow-up"]);
+  if (flags.basis) patch.statute_basis = flags.basis;
+  if (flags.notes) patch.notes = flags.notes;
+  const changed = Object.keys(patch).filter((k) => k !== "updated_at");
+  if (!changed.length)
+    fail("set: nothing to change — pass --contact/--portal/--follow-up/--basis/--notes");
+  await rest(`records_requests?request_key=eq.${encodeURIComponent(key)}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify(patch),
+  });
+  console.log(`set ${key}: ${changed.join(", ")}`);
+}
+
 function bodyFor(row: { target_agency: string; dataset: string; statute_basis: string }): string {
   return draftRequestBody({
     targetAgency: row.target_agency,
@@ -171,11 +198,13 @@ async function send(args: string[]) {
     return;
   }
 
-  // Approved. Portal-only rows print the body + URL and file; email rows send.
-  if (!row.contact_email) {
-    if (!row.portal_url) fail(`${key} has neither contact_email nor portal_url — cannot file`);
-    console.log(`PORTAL FILING — paste the body below into: ${row.portal_url}\n\n${body}`);
-  } else {
+  // Approved. A tracked portal (audit trail) is preferred when present — that is the
+  // whole point of this engine; fall back to email only when no portal exists.
+  if (row.portal_url) {
+    console.log(
+      `PORTAL FILING (preferred — tracked) — paste the body below into: ${row.portal_url}\n\n${body}`,
+    );
+  } else if (row.contact_email) {
     const { Resend } = await import("resend");
     const client = new Resend(resendKey()) as unknown as EmailSender;
     const r = await sendRecordsRequest(client, {
@@ -186,6 +215,8 @@ async function send(args: string[]) {
     });
     if (!r.ok) fail(`send failed (state left drafted): ${r.error}`); // a failed send must NOT look filed
     console.log(`sent to ${row.contact_email}`);
+  } else {
+    fail(`${key} has neither portal_url nor contact_email — cannot file`);
   }
   await transition(key, "send", { filed_at: new Date().toISOString(), request_body: body });
 }
@@ -219,6 +250,9 @@ const [cmd, ...args] = process.argv.slice(2);
 switch (cmd) {
   case "add":
     await add(args);
+    break;
+  case "set":
+    await set(args);
     break;
   case "draft":
     await draft(args);
@@ -260,7 +294,7 @@ switch (cmd) {
     break;
   default:
     console.log(
-      "usage: bun scripts/records-request.mts <add|draft|send|ack|quote|approve-cost|fulfill|land|deny|withdraw|list>",
+      "usage: bun scripts/records-request.mts <add|set|draft|send|ack|quote|approve-cost|fulfill|land|deny|withdraw|list>",
     );
     process.exit(cmd ? 1 : 0);
 }
