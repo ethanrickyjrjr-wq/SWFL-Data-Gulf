@@ -1,3 +1,17 @@
+## 2026-07-11 (Opus 4.8 · main) — Spec+plan+handoff: Lee homes-only sold median per ZIP (docs only, unpushed)
+
+Brainstormed → speced → planned a homes-only county-deed sold median per ZIP. Live verification (RULE
+0.4/0.5) broke the kickoff premise on BOTH counties: Lee's `last_sale_amount` is already populated (96%;
+reproduced 44,578 SF @ $385k / 10,879 condo @ $295k / 17,612 vacant @ $50k live) — the pack caveat +
+`leepa-no-sale-price` memory claiming NULL are STALE; Lee's only gap is ZIP, not a column (no situs field
+on any of 24 LeePA layers → derive via centroid→ZCTA DuckDB spatial vs `public/maps/fl_zips.geojson`).
+Collier's "easy add" is the broken one: FDOR Cadastral now 400s every attribute WHERE (only `1=1` works),
+so `collier_parcels` silently no-ops (last load 06/06) yet reads FRESH 35d — the "data≠green, right
+data=green" example. Opened checks `collier_parcels_fdor_query_lockdown`, `active_listing_median_land_blend`
+(the real "$35k @ 33972" land-blend = active-asking `listing_active_stats`, no property_type filter), and
+build `homes_only_sold_median_live_verify`. Scope (operator): Lee now, Collier fast-follow. Wrote
+spec + Lee TDD plan (5 tasks) + handoff. Docs only, nothing pushed — awaiting push confirmation.
+
 ## 2026-07-11 (Opus 4.8 · wt/deliverable-coherence-gate → main) — Deliverable coherence gate (chart↔headline) + Naples luxury ring
 
 Landed the 7-task `deliverable-coherence-gate` worktree build to main (audited, then operator-approved
