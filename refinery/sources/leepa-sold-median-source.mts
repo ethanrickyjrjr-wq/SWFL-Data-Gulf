@@ -10,8 +10,9 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 /**
  * leepa-sold-median source connector — Lee County homes-only SOLD median per ZIP,
  * from LeePA recorded-deed sale prices already live in data_lake.leepa_parcels,
- * grouped by the centroid->ZCTA crosswalk (data_lake.leepa_parcel_zip) through the
- * data_lake.leepa_sold_median_by_zip view.
+ * grouped by that table's own zip_code column (the site ZIP, derived from each
+ * parcel's centroid during the parcel ingest) through the
+ * data_lake.leepa_sold_median_by_zip view — a plain GROUP BY, no join.
  *
  * This is the SOLD answer (what deeds closed at), distinct from the active-listing
  * asking median. Homes-only (use_code 01/04) excludes the vacant-land tail that
@@ -82,14 +83,15 @@ async function fetchLiveRows(): Promise<ViewRow[]> {
     .from(VIEW)
     .select("zip_code,home_sales_n,median_sale,county_fallback,county_median,county_n");
   if (resp.error) {
-    // Empty-tolerant (ODD): the view may not be applied yet (crosswalk ingest +
-    // migration are operator-gated). Stage-1 ingest() fetches sources in a bare
-    // loop with NO per-source try/catch, so THROWING here would abort the whole
-    // properties-lee-value build. Degrade to "no sold median" instead.
+    // Empty-tolerant (ODD): the view may not be applied yet. Stage-1 ingest()
+    // fetches sources in a bare loop with NO per-source try/catch, so THROWING
+    // here would abort the whole properties-lee-value build. Degrade to "no sold
+    // median" instead.
     console.warn(
       `leepa-sold-median-source: ${SCHEMA}.${VIEW} query failed (${resp.error.message}) — ` +
         "sold-median metric + detail table will be absent this build. Apply " +
-        "docs/sql/20260711_leepa_sold_median_by_zip.sql (+ leepa_parcel_zip_grant.sql) after the crosswalk ingest lands.",
+        "docs/sql/20260711_leepa_sold_median_by_zip.sql (+ leepa_sold_median_grant.sql); " +
+        "it reads leepa_parcels.zip_code, populated by the leepa parcel ingest.",
     );
     return [];
   }
