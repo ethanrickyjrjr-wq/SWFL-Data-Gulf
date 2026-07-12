@@ -17,6 +17,8 @@ import argparse
 import sys
 from datetime import date, datetime, timezone
 
+from ingest.lib.guards import ContentContractError
+from ingest.quality.contracts import evaluate_batch
 from ingest.pipelines.listing_lifecycle import distill
 from ingest.pipelines.listing_lifecycle.distill import address_key_to_street
 from ingest.pipelines.listing_lifecycle.address_key import address_key
@@ -132,6 +134,37 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
                   f"recheck={plan_stats['rechecks_checked']}/{plan_stats['rechecks_available']} "
                   f"dropped={plan_stats['dropped']}; priority=list_price desc -> sold set skews "
                   f"higher-value)", flush=True)
+
+        # ── LOCUS A: content contracts, on the batch that ACTUALLY LANDS. ────────────────
+        # HERE, and not at diff_states: ups/trans are mutated in place between the two
+        # (county/days_on_market set above; apply_off_market_resolutions rewrites states to
+        # sold/withdrawn and attaches sold_price). A gate at diff_states would evaluate a
+        # batch that is not the one that lands.
+        #
+        # ctx carries source_name: it is NOT a batch-row column (distill._STATE_COLS omits it;
+        # upsert_state injects it as a scalar), so without ctx the price floor's
+        # `source_name = 'api_feed'` predicate is unevaluable at this locus.
+        #
+        # evaluate_batch is PURE — it never raises. Abort comes back as data and the raise
+        # happens here, in the orchestrator, which is the only place that knows what a run is.
+        # COVERAGE GAP, stated: this gates upsert_state only. append_transitions (whose
+        # _TRANS_COLS carries price/price_delta/sold_price) and update_sold_price (a targeted
+        # out-of-band UPDATE guarded only by `sold_price > 0`) carry the same price class and
+        # are NOT gated. Check: listing_lifecycle_ungated_write_paths.
+        ups, quarantined, cstats = evaluate_batch(
+            ups, "data_lake.listing_state", ctx={"source_name": src_name}
+        )
+        if cstats["abort"]:
+            raise ContentContractError(cstats["abort_reason"])
+        for c in cstats["contracts"]:
+            if c["status"] != "PASS":
+                print(f"[contract] {county}: {c['name']} {c['status']} — "
+                      f"{c['violations']} of {c['in_scope']} in-scope ({c['share_pct']}%) "
+                      f"policy={c['policy']}"
+                      + (f" detail={c['detail']}" if c.get("detail") else ""), flush=True)
+        if quarantined:
+            print(f"[contract] {county}: QUARANTINED {len(quarantined)} rows — "
+                  f"merging the clean {len(ups):,}", flush=True)
 
         n_u = distill.upsert_state(ups, source_name=src_name, dry_run=dry_run)
         n_t = distill.append_transitions(trans, source_name=src_name, dry_run=dry_run)
