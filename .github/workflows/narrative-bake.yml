@@ -28,6 +28,24 @@ on:
         description: "Bypass cadence + delta gates (full rebake)"
         type: boolean
         default: false
+  # Reusable entry point for the nightly ordered chain (nightly-chain.yml) — the
+  # chain calls this by `needs: rebuild`, which SUPERSEDES the workflow_run trigger
+  # above: a reusable workflow emits no workflow_run event of its own (the run
+  # belongs to the caller), so once the chain is the only invoker of Daily Brain
+  # Rebuild, that trigger stops firing. Intended. The `if:` guard below still
+  # evaluates true here (github.event_name is the CALLER's event, not workflow_run).
+  workflow_call:
+    inputs:
+      surface:
+        description: "Surface to bake (zip | corridor | brain | all)"
+        required: false
+        type: string
+        default: "all"
+      force:
+        description: "Bypass cadence + delta gates (full rebake)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -39,14 +57,23 @@ jobs:
     runs-on: ubuntu-latest
     # 90: the job now polls the Message Batch to completion (~1h typical worst
     # case) instead of making per-key synchronous calls. In-script deadline is
-    # 80 min (BAKE_POLL_DEADLINE_MS) — on overrun it exits 0 loud and the next
-    # run's Phase 0 collects the persisted batch.
+    # BAKE_POLL_DEADLINE_MS (env below pins it to 45 min for the chain; in-script
+    # default is 80) — on overrun it exits 0 loud and the next run's Phase 0
+    # collects the persisted batch.
     timeout-minutes: 90
     env:
       # SPEND GUARD — explicit, reviewable per-run cap (ingest/CLAUDE.md rule:
       # caps live as visible workflow lines, never code defaults). The metered
       # client's daily/monthly SpendCapError seam applies on top.
       NARRATIVE_BAKE_RUN_CAP_USD: "1.00"
+      # TIME GUARD for the chain. The bake is the chain's single largest term and
+      # has NEVER been measured — all 4 runs in its history were cadence skips.
+      # In-script default is 80 min (BAKE_POLL_DEADLINE_MS, bake-narratives.mts:96)
+      # under a 90-min job ceiling; 45 min keeps the chain's tail bounded. On
+      # overrun the script exits 0 LOUD and the next run collects the persisted
+      # batch (see the timeout-minutes comment below) — a bounded bake is safe by
+      # design, not a data loss. 08d §5b.
+      BAKE_POLL_DEADLINE_MS: "2700000"   # 45 min
       BAKE_CADENCE: ${{ vars.BAKE_CADENCE }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

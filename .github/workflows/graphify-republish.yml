@@ -21,6 +21,12 @@ on:
         description: "Build the graph but skip commit+push to the ops repo"
         required: false
         default: "false"
+  # Reusable entry point for the nightly chain — but the chain's graphify leg is
+  # GATED OFF by default (see nightly-chain.yml's `if: vars.CHAIN_GRAPHIFY_ENABLED`).
+  # This workflow has NEVER succeeded: 0-for-2, both runs dead at "Checkout
+  # swfldatagulf-ops" — the cross-repo REBUILD_PAT scope gap its own comment above
+  # predicted. Flip the repo variable to 'true' only once it has one green run.
+  workflow_call:
 
 concurrency:
   group: graphify-republish

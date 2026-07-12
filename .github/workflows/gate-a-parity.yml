@@ -13,6 +13,8 @@ on:
     # :23 = off the top-of-hour congestion (GitHub schedule delays peak at :00).
     - cron: "23 7 * * *"
   workflow_dispatch: {}
+  # Reusable entry point for the nightly ordered chain (nightly-chain.yml).
+  workflow_call:
 
 # One parity run at a time (a manual dispatch landing on the nightly can't race it).
 concurrency:

@@ -21,6 +21,14 @@ on:
         description: "Force rebuild even if fresh (true/false)"
         required: false
         default: "false"
+  # Reusable entry point for the nightly ordered chain (nightly-chain.yml). NO
+  # inputs: this workflow reads `github.event.inputs.pack_id`/`.force`, which are
+  # empty under workflow_call, so PACK falls back to 'master' and FORCE_FLAG to ''.
+  # That is correct for the chain — the ingests land fresh rows immediately before
+  # this runs, so rebuild_due.py fires and the rebuild does FULL work every night
+  # (the 27s p50 in the run history is the "already fresh, skip" path; a real
+  # refinery run is 410-963s — 08d correction (a)).
+  workflow_call:
 
 # Serialize rebuilds so overlapping runs (a manual dispatch landing while a
 # scheduled run is mid-build, or several dispatches stacked up) can't race each
