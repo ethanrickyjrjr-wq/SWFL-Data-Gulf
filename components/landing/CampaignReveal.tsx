@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
+import { EMAIL_LAB_LANDING, openZipLab } from "@/lib/lab-entry/destination";
 import type { CampaignDemo } from "@/lib/landing/campaign-demo";
 
 /**
@@ -18,8 +18,11 @@ import type { CampaignDemo } from "@/lib/landing/campaign-demo";
  *  - One pass of motion, started when the stage scrolls into view; base state is the
  *    FINISHED composition, so no-JS and prefers-reduced-motion both read it static
  *    (NN/g: everything must read with animations off).
- *  - The demo controls are decorative spans, not buttons — the one real control is
- *    the "Build yours free" link.
+ *  - The stage LOOKS like the product, so it must BEHAVE like a door (operator,
+ *    07/11/2026: "i couldn't click any buttons or write") — the whole card is one
+ *    anchor into the real builder carrying this exact campaign's ZIP; the pieces
+ *    inside stay spans (never a dead input on the front door). Typing lives in the
+ *    hero bar above and in the builder it opens.
  */
 export default function CampaignReveal({ demo }: { demo: CampaignDemo }) {
   const ref = useRef<HTMLElement>(null);
@@ -53,12 +56,10 @@ export default function CampaignReveal({ demo }: { demo: CampaignDemo }) {
         A place goes in. <span>A campaign comes out.</span>
       </h2>
 
-      <div
+      <a
         className="cr-stage"
-        role="img"
-        aria-label={`Example: a market-update campaign for ${demo.place} built from live figures — ${demo.figures
-          .map((f) => `${f.label} ${f.value} (${f.source})`)
-          .join(", ")}`}
+        href={openZipLab(demo.zip, { ref: "home-reveal" })}
+        aria-label={`Open this ${demo.place} market update in the builder — free, yours to edit`}
       >
         {/* ── The ask: a real place, typed ─────────────────────────────── */}
         <div className="cr-bar cr-anim" style={d(0.1)}>
@@ -115,7 +116,11 @@ export default function CampaignReveal({ demo }: { demo: CampaignDemo }) {
             </span>
           </div>
         </div>
-      </div>
+
+        <span className="cr-open-hint cr-anim" style={d(3.8 + demo.figures.length * 0.4)}>
+          Click the campaign — it opens in the builder, yours to edit →
+        </span>
+      </a>
 
       <p className="cr-caption">
         Real figures, live right now — each one carrying its source. You review the first send; the
