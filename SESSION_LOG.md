@@ -1,3 +1,65 @@
+## 2026-07-11 (Opus 4.8 · main) — TWO LIVE PRODUCTION OUTAGES found + fixed (MCP 500, PDF 500); root cause 6 named
+
+Asked to map where the work lands and validate `docs/audit/2026-07-11-open-issues-after-triage.md`.
+That doc is **correct** — it lists 247, the ledger reads 244, and the delta reconciles exactly (5 closed
++ 2 opened since). Every P0 claim spot-checked against the real brain files came back verbatim. Three
+corrections written to `docs/audit/2026-07-11-where-we-land.md`.
+
+**Two outages, both live, both now FIXED and verified in prod (not in the diff):**
+
+- **MCP** — `POST /api/mcp` 500'd on every call for **8 days**. `auth.ts` did `throw new Response(401)`
+  on the belief, stated in its own comment, that "Next.js App Router returns a thrown Response directly."
+  It does not — that is the Remix idiom. Next *returns* responses; a thrown non-Error is an unhandled
+  exception → bare 500. Went live the instant `MCP_BEARER_TOKEN` was set in Vercel (07/03/2026). Vercel's
+  log proves it, recording the thrown object verbatim as an error with `responseStatusCode: 500`.
+  **The tests were green the whole time because they asserted the *throw*, never the status a client
+  receives.** Fixed → `unauthorizedResponse(): Promise<Response | null>`; callers return the denial.
+  THREE routes carried it (POST + DELETE /api/mcp, POST /api/templates/render — the third found by
+  `next build`, not grep). Prod now returns **401**. (`031b05da`)
+- **PDF** — every deliverable PDF 500'd, and so did PDF-attached blasts. `lib/pdf/extract.ts` imported
+  `pdf-parse` at **module scope**; it pulls in `pdfjs-dist`, which needs `DOMMatrix`/`ImageData`/`Path2D`
+  — absent in serverless Node, so merely *loading* it throws. `lib/pdf/index.ts` re-exports `extract.ts`,
+  so every importer of the `@/lib/pdf` barrel dragged pdfjs in — **including the two routes that only
+  ever WRITE a PDF and never read one.** The PDF reader was killing the PDF writer. Fixed → lazy
+  `await import("pdf-parse")` inside the one function that reads. Prod now returns real PDF bytes
+  (HTTP 200, `application/pdf`, `%PDF` magic, verified on two live ids). (`8a7f780b`)
+
+**I was wrong twice on the MCP cause before getting it right** — blamed an `@modelcontextprotocol/sdk`
+1.29-vs-1.26 export break and wrote it into the audit doc as "proven." Disproved it myself (the 1.29.0
+tarball ships every file; the handler returns 200 at both versions). A parallel push carried that false
+claim to origin before I caught it; corrected in `66d2e579`. Recording it because a wrong "proven" claim
+is worse than none.
+
+**ROOT CAUSE 6 (not in `00-DIAGNOSIS`, not closed by the build spec):** a pack code fix **never
+invalidates its brain**. `brainStatus()` is `refined_at + ttl_seconds` with **no code fingerprint**
+anywhere in the refinery. So a data-layer fix (the $35k median SQL) ships instantly, while a code-layer
+fix (re-scoping 6 counties to 2) waits out the TTL — and `hurricane-tracks-fl` / `storm-history-swfl`
+carry **365-day TTLs**, so their out-of-scope figures would have stayed live until **June 2027** with
+every watcher green. This reconciles the contradiction inside our own audit set: "all 40 brains are
+within their freshness contracts" (TRUE) and "those brains are wrong" (TRUE) — **freshness measures data
+age, never code version.** Check opened: `pack_code_change_no_brain_invalidation`.
+
+**Rebuild set SPLITS — do not sweep it as one.** Verified per-brain in code: `hurricane-tracks-fl`,
+`storm-history-swfl`, `env-swfl`, `seller-stress-swfl` ARE correctly re-scoped → force-rebuild is safe.
+`econ-dev-swfl` (`:22/:343/:360`) and `licenses-swfl`'s DBPR sources are **NOT** — rebuilding those today
+republishes the Charlotte overclaim **stamped with today's date**, destroying the stale build-date that is
+the only signal we have. **`econ-dev-swfl`'s TTL expires 07/14** — the cron will do it to us unprompted.
+Clock + hazard written onto `scope_more_brains_charlotte_leak` (due 07/14).
+
+**Also taken out:** Charlotte removed from the **live MCP scope copy** (`server.ts:64`/`:68` told every
+connecting Claude the lake covers "Lee, Collier, Charlotte" — no rebuild would ever have fixed that);
+4 duplicate repro projects deleted (all had `subject_address` NULL — the very bug they were reproducing);
+`/api/templates` added to the rate-limit prefixes (it rides the MCP bearer gate, renders HTML on every
+POST, and was unthrottled).
+
+**Next:** operator removing `MCP_BEARER_TOKEN` from Vercel — MCP costs us nothing (it is the *user's*
+Claude), writes are gated by an independent 256-bit capability key (verified: all 3 write tools call
+`authorize()`; `handoff` is keyless-by-design and writes only anonymous claim tokens), `/api/mcp` is
+already rate-limited, and the audit's real spend hole (`/api/converse`, `/api/welcome/chat`) is deleted.
+Then: re-scope `econ-dev-swfl` before 07/14, force-rebuild Group A (sequence the leaves so master
+synthesizes once), close root cause 6. PDF gap remains: **17 of 37 deliverables are the narrative shape
+with no PDF path at all** (honest 422, not a crash) — check `narrative_deliverable_no_pdf_path`.
+
 ## 2026-07-11 (Fable 5 · main) — Insiders desk first triage + /desk v2 wave built (⌘K, watchlist, alerts, histogram, correlation, Wire filing)
 
 Two jobs. (1) **Insiders desk triage** (first real one): 48 lake rows → 16 handpicked entries in
