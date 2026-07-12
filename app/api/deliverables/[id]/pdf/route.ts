@@ -4,7 +4,9 @@
 //
 //  • GET  — render the SAVED `deliverables.doc` by id (durable link; used by the
 //           Materials Hub row + any share context). Public-read like /p/[id],
-//           but revoked/trashed deliverables 404.
+//           but revoked/trashed deliverables 404. A row with no parseable doc
+//           (all six narrative templates) 307s to /p/[id]/print — the doc-report
+//           skin — so no live deliverable ever dead-ends here (422 retired).
 //  • POST — render a doc passed in the body (the Email Lab's LIVE, maybe-unsaved
 //           edits). Auth-gated to a signed-in user.
 import { cookies } from "next/headers";
@@ -43,13 +45,13 @@ function pdfResponse(buffer: Buffer, filename: string): Response {
   });
 }
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = createServiceRoleClient();
 
   const { data } = await db
     .from("deliverables")
-    .select("doc, status, deleted_at, data_as_of")
+    .select("doc, status, deleted_at, data_as_of, template")
     .eq("id", id)
     .maybeSingle();
   if (!data || data.status === "revoked" || data.deleted_at) {
@@ -58,7 +60,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const parsed = EmailDocSchema.safeParse(data.doc);
   if (!parsed.success) {
-    return new Response("no PDF available for this deliverable", { status: 422 });
+    // No parseable doc → this deliverable's PDF is the doc-report print skin.
+    // Complement of the print route's guard (it redirects HERE only when this exact
+    // parse SUCCEEDS on a block-canvas row), so the pair can never cycle. Covers all
+    // six narrative templates AND a block-canvas row with a corrupt doc — every live
+    // id yields a PDF-shaped outcome; only revoked/trashed/missing 404.
+    return Response.redirect(new URL(`/p/${id}/print`, req.url), 307);
   }
 
   const buffer = await renderEmailDocToBuffer(parsed.data, { asOf: fmtAsOf(data.data_as_of) });
