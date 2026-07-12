@@ -18,6 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { MANIFEST_PATH, SHOULD_BE_DARK, zombieCrons, darkDrift } from "./lib/watch-manifest.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const DAILY_CEILING_USD = 5.0; // locked decree 07/05/2026 (ingest/CLAUDE.md)
@@ -46,17 +47,50 @@ function sh(cmd) {
   return execSync(cmd, { encoding: "utf8", cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] });
 }
 
-function paidWorkflows() {
-  const dir = path.join(ROOT, ".github", "workflows");
-  const out = [];
-  for (const f of fs.readdirSync(dir).filter((x) => /\.ya?ml$/.test(x))) {
-    const text = fs.readFileSync(path.join(dir, f), "utf8");
-    if (/ANTHROPIC_API_KEY/.test(text)) {
-      const nm = text.match(/^name:\s*["']?(.+?)["']?\s*$/m);
-      out.push({ file: f, name: nm ? nm[1].trim() : f });
-    }
+// The manifest is ONE truth with three consumers: the two watcher YAMLs (codegen),
+// this scan, and (Phase 3c) doctor. Regenerate: node scripts/build-watch-lists.mjs --write --with-state
+function watchManifest() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(ROOT, MANIFEST_PATH), "utf8"));
+  } catch {
+    yellows.push(
+      `MANIFEST: ${MANIFEST_PATH} unreadable — run \`node scripts/build-watch-lists.mjs --write --with-state\``,
+    );
+    return [];
   }
-  return out;
+}
+
+// Live workflow state beats the committed snapshot: `gh workflow enable` changes it
+// out-of-band with no commit. Falls back to the manifest's last observed value.
+function withLiveState(entries) {
+  let raw;
+  try {
+    raw = sh(
+      'gh api "repos/:owner/:repo/actions/workflows?per_page=100" --paginate --jq ".workflows[] | [.path, .state] | @tsv"',
+    );
+  } catch {
+    yellows.push("STATE: gh unavailable — using the manifest's last observed workflow states");
+    return entries;
+  }
+  const states = {};
+  for (const line of raw.trim().split("\n").filter(Boolean)) {
+    const [p, state] = line.split("\t");
+    states[p] = state;
+  }
+  return entries.map((e) => {
+    const s = states[`.github/workflows/${e.file}`];
+    return s === undefined ? e : { ...e, disabled: s !== "active" };
+  });
+}
+
+// PAID = the workflow passes secrets.ANTHROPIC_API_KEY into a step env. The old bare
+// /ANTHROPIC_API_KEY/ substring test flagged tripwire-hourly.yml:9 and weekly-read.yml:8
+// — the two files whose comments say "No ANTHROPIC_API_KEY here" — so a manual dispatch
+// of either raised a spurious MANUAL PAID DISPATCH red. One authority now: the manifest.
+function paidWorkflows() {
+  return watchManifest()
+    .filter((e) => e.paid)
+    .map((e) => ({ file: e.file, name: e.name }));
 }
 
 // ---------- check 1: today's spend vs the $5 ceiling -------------------------
@@ -98,23 +132,48 @@ async function checkSpend() {
 
 // ---------- check 2: pulse workflows stay dark -------------------------------
 
+// Was a hardcoded ["Corridor pulse weekly"] literal, which is exactly how "City pulse
+// daily" — legitimately re-enabled — produced a 6-day false RED (07/11/2026). The
+// declaration now lives in ONE place: SHOULD_BE_DARK in scripts/lib/watch-manifest.mjs.
 function checkPulseDark() {
-  let list = "";
-  try {
-    list = sh("gh workflow list --all");
-  } catch {
-    yellows.push("PULSE: gh unavailable — could not verify workflow states");
+  const entries = withLiveState(watchManifest());
+  const declared = entries.filter((e) => e.should_be_dark);
+  if (declared.length === 0) {
+    yellows.push(
+      "PULSE: no workflow is declared dark — check SHOULD_BE_DARK in scripts/lib/watch-manifest.mjs",
+    );
     return;
   }
-  // Dark-list = pulse workflows deliberately kept disabled pending the crawl4ai retrofit.
-  // "City pulse daily" was legitimately RE-ENABLED (retrofit closed) and is now a live daily ingest
-  // feeding the digest — it was left in this hardcoded list, producing a 6-day false RED (07/11/2026).
-  // Removed. Phase 3 replaces this literal with a manifest-derived should_be_dark field.
-  for (const wf of ["Corridor pulse weekly"]) {
-    const row = list.split("\n").find((l) => l.startsWith(wf));
-    if (!row) yellows.push(`PULSE: workflow '${wf}' not found in gh list`);
-    else if (/disabled/.test(row)) greens.push(`PULSE DARK — '${wf}' disabled`);
-    else reds.push(`PULSE ACTIVE — '${wf}' is ENABLED before the crawl4ai retrofit closed`);
+  for (const e of darkDrift(entries)) {
+    reds.push(`PULSE ACTIVE — '${e.name}' (${e.file}) is ENABLED. ${SHOULD_BE_DARK[e.file]}`);
+  }
+  for (const e of declared.filter((e) => e.disabled === true)) {
+    greens.push(`PULSE DARK — '${e.name}' disabled at the API`);
+  }
+  for (const e of declared.filter((e) => e.disabled === null)) {
+    yellows.push(`PULSE: state unknown for '${e.name}' — manifest has no observed state`);
+  }
+}
+
+// ---------- check 2b: zombie crons (the class NOTHING else can see) -----------
+// Disabled at the GitHub API while an uncommented `cron:` still sits in source. Both
+// the registry and the YAML claim these are scheduled, the freshness probe expects
+// fresh rows from them, and `gh workflow enable` resumes them instantly with no
+// code-level guard. Phase 2 CANNOT see this class (--static reads files, --live reads
+// data_lake; neither reads workflow state). Live 07/11/2026: 4, orphaning 6 registry
+// entries. YELLOW, not RED: a deliberately-disabled workflow is precisely tripwire's
+// definition of yellow — "legitimate only if the operator remembers authorizing it".
+function checkZombieCrons() {
+  const zombies = zombieCrons(withLiveState(watchManifest()));
+  if (zombies.length === 0) {
+    greens.push("ZOMBIE CRON — none: every disabled workflow also has its cron commented out");
+    return;
+  }
+  for (const z of zombies) {
+    yellows.push(
+      `ZOMBIE CRON — '${z.name}' (${z.file}) is disabled at the API but its cron is LIVE in source. ` +
+        `Comment the cron out, or re-enable the workflow. Until then the registry expects rows it will never get.`,
+    );
   }
 }
 
@@ -339,6 +398,7 @@ const isMain = (() => {
 if (isMain) {
   await checkSpend();
   checkPulseDark();
+  checkZombieCrons();
   checkPaidDispatches();
   checkGuards();
   checkValveAudit();
