@@ -147,6 +147,47 @@ zones + zero `[config]`/raw-token leaks. Deferred WITH reasons → `docs/handoff
 filter tabs descoped — loader reshape). NOTE: `bun add cmdk` touched package.json/bun.lock claimed by a
 parallel session — verified only my cmdk line differs from HEAD, nothing clobbered. Committed local,
 NOT pushed (new dep + live surface = operator diff-review).
+## 2026-07-12 (Fable 5 · wt/dcd) — Phase 2: config-identity cross-check — real registry driven GREEN
+
+**Shipped (10 commits, `7e60d3ba..` this).** `ingest/tools/check-registry-identity.mts` + lib: rules
+A–F (workflow liveness, producer/zombie, secrets-wired, timeouts, uses:-vs-LIVE-tags, source_name
+identity), CLI with fail-OPEN exit contract, `known_drift` suppression tied to OPEN checks-ledger
+keys, `--live` (zero-coverage from pg_class base tables, ghost target, dlt-never-landed, row floor,
+identity-column check), pre-push **Gate 7** (verified live: seeded drift → PUSH BLOCKED exit 2) +
+ci.yml static gate + live ADVISORY step. 43 bun tests green.
+
+**Baseline before (exit 1, 11 REDs):** workflow_dark ×3 (collier_permits, city_pulse_corridors ×2) ·
+no_producer ×2 (usgs_tier2, mhs_databook) · zombie ×3 (usgs_tier2, dbpr_sirs_submissions,
+mhs_databook) · parked_but_scheduled (sba_foia_franchise_outcomes) · schema_static (leepa) ·
+secret_not_wired (news_swfl). **After: `registry-identity: OK [static]`, exit 0.**
+Resolutions: ONE code fix (news-swfl-ingest.yml aliases DATABASE_URL — the novelty dedup guard could
+never trip in CI); dispatch_only on 3 dark-cron entries + mhs_databook (manual PDF drop — Rule B now
+reads workflow:none+dispatch_only as a stated manual source); leepa `schema_static: unverifiable`;
+usgs_tier2 + sba known_drift naming open checks. dbpr_sirs zombie was a PARSER gap (pwsh
+self-hosted-runner `& "$env:VENV_PY" -m …` — module regex widened + locked by test).
+
+**--live baseline (advisory exit 0), verbatim REDs after exempt reconciliation:**
+community_profiles + neighborhood_stats + parcel_subdivision [zero_coverage] ·
+redfin_city_swfl [ghost_target + dlt_never_landed] · fgcu_reri_indicators [row_floor_breach] ·
+dbpr_re_licensees [row_floor_breach] · news_swfl [dlt_never_landed]. All carried by checks
+(parcel_subdivision_zero_coverage · communities_tables_zero_coverage · identity_live_red_baseline).
+The plan predicted leepa_parcel_zip [ghost_target] too — it has NO registry entry, so nothing flags;
+prediction assumed an entry that does not exist.
+
+**coverage_exempt reconciliation (plan-internal collision resolved):** Task 10's proposed block used
+different tables + reason tokens than the Spine's committed enum. Kept ONE authority: extended the
+Spine enum (+5 reasons: derived_snapshot, static_seed, client_upload_surface, runtime_cache,
+secondary_pipeline_table — each verified against a real in-tree writer) and added 7 rows
+(view_vintages, source_totals, mhs_jurisdiction_xwalk, user_mls_listings/stats, geo_anchor_cache,
+listing_transitions). The 3 REAL gaps stayed RED on purpose.
+
+**tsconfig:** `ingest` added to exclude (Bun island like refinery/scripts — Bun.* globals aren't in
+the Next tsc surface; only the 8 new bun-tested .mts files live there). `bunx next build` ✓.
+
+**Checks opened:** usgs_tier2_orphan · sba_franchise_parked_but_live ·
+parcel_subdivision_zero_coverage · pack_legacy_table_read · registry_identity_live_gating ·
+communities_tables_zero_coverage · identity_live_red_baseline.
+
 ## 2026-07-12 (Fable 5 · wt/dcd) — Phase 1: content contracts (contracts.py + Locus B; Locus A built, HELD)
 
 **Shipped (7 commits, `7e82a98c..e46dce77`).** `ingest/quality/contracts.py` — pure, DB-free contract

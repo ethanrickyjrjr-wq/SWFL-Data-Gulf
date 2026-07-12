@@ -596,6 +596,8 @@ pipelines:
   - name: city_pulse_corridors
     workflow: corridor-pulse-weekly.yml
     consuming_pack: [corridor-pulse-swfl, cre-swfl]
+    dispatch_only: true # corridor-pulse PAUSED 07/05/2026 for paid-web_search spend control
+      # (see corridor-pulse-weekly.yml header); cron commented out — dispatch-only until retrofit.
     lane: tier-1
     cadence_days: 7
     tolerance_multiplier: 3.0
@@ -737,6 +739,11 @@ pipelines:
   - name: usgs_tier2
     workflow: none
     consuming_pack: env-swfl
+    known_drift: # RULE 2.4 — the zombie verdict is real; the DECISION (delete vs repoint) is the
+      # operator's. env-swfl reads data_lake.usgs_daily LIVE and it has been frozen since
+      # 2026-05-19. Suppressed to WARN only while the named check stays open.
+      - { rule: zombie_target, check: usgs_tier2_orphan }
+      - { rule: no_producer_workflow, check: usgs_tier2_orphan } # same condition, Rule-A facet
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -781,6 +788,9 @@ pipelines:
   - name: leepa
     workflow: leepa-parcels-annual.yml
     consuming_pack: properties-lee-value
+    schema_static: unverifiable # resources.py builds pipeline_name=f"leepa_t2_{token_hex(4)}"
+      # at RUNTIME — the static dlt schema literal can never appear in code or _dlt_loads.
+      # Freshness/volume key on count_table, never the phantom schema name.
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -945,6 +955,8 @@ pipelines:
   - name: collier_permits
     workflow: collier-permits-monthly.yml
     consuming_pack: permits-swfl
+    dispatch_only: true # cron deliberately commented out (pending a dry-run probe of the crawl4ai
+      # port proving out on lee_permits first) — no schedule fires; a stated fact, not a gap.
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -1372,6 +1384,7 @@ pipelines:
   - name: city_pulse_corridors_tier2
     workflow: corridor-pulse-weekly.yml
     consuming_pack: [corridor-pulse-swfl, cre-swfl]
+    dispatch_only: true # same pause as city_pulse_corridors — one workflow backs both entries.
     lane: tier-2
     cadence_days: 7
     tolerance_multiplier: 3.0 # 21-day window: tolerates 2 quiet news Sundays, trips on 3+ weeks silent
@@ -1441,6 +1454,9 @@ pipelines:
   - name: mhs_databook
     workflow: none
     consuming_pack: cre-swfl
+    dispatch_only: true # MANUAL SOURCE: a human drops the MHS Databook PDF (workflow: none).
+      # No code writer exists by design; the identity check reads workflow:none + dispatch_only
+      # as a stated manual source, never a zombie.
     lane: tier-2
     cadence_days: 365 # MHS publishes ANNUALLY — 2026 Data Book pub 2026-03-13 (verified mhsappraisal.com 2026-06-05; 403 on auto-fetch → true ODD source)
     tolerance_multiplier: 1.5
@@ -1855,6 +1871,10 @@ not_yet_running:
   - name: sba_foia_franchise_outcomes
     workflow: franchise-outcomes-quarterly.yml
     consuming_pack: franchise-outcomes
+    known_drift: # parked entry whose cron REALLY fires (Jul 15) — check_freshness never probes
+      # not_yet_running:, so its first landing would be invisible. Promote-vs-comment is the
+      # operator's call; tracked by the named check.
+      - { rule: parked_but_scheduled, check: sba_franchise_parked_but_live }
     lane: tier-1-duckdb
     cadence_days: 90 # SBA FOIA updates quarterly
     tolerance_multiplier: 1.5
@@ -2053,3 +2073,35 @@ coverage_exempt:
   - table: public.data_readiness_alerts
     reason: event_driven_app_cron
     note: "Phase 3C T-60 email preflight (app/api/cron/data-readiness/route.ts, a Vercel cron). No lake write; appends alerts only in the T-75min window before an actual send. ZERO rows on a quiet day is CORRECT."
+
+  # Added 07/12/2026 — Phase 2 --live zero-coverage sweep. Each row names its real writer
+  # (verified in-tree). The three REAL gaps deliberately NOT exempted: parcel_subdivision
+  # (check parcel_subdivision_zero_coverage), community_profiles + neighborhood_stats
+  # (check communities_tables_zero_coverage) — a RED that produces a decision.
+  - table: data_lake.view_vintages
+    reason: derived_snapshot
+    note: "PIT capture of our own zhvi/zori views — capture_view_vintages.py via view-vintages-monthly.yml (day 26). Not a vendor source; promote-to-pipelines decision rides check coverage_exempt_confirm_three."
+
+  - table: data_lake.source_totals
+    reason: derived_signal_write_back
+    note: "/census source-ceiling snapshot rows (migrations/20260707_source_totals.sql; census audit tooling writes, ops repo reads latest per pipeline_name). Derived ops telemetry, not a source."
+
+  - table: data_lake.mhs_jurisdiction_xwalk
+    reason: static_seed
+    note: "Jurisdiction crosswalk seeded by the J3 migration; read by ingest/pipelines/mhs_permits_swfl/geocode.py:155. Never re-written on a cadence."
+
+  - table: data_lake.user_mls_listings
+    reason: client_upload_surface
+    note: "Client RESO/MLS upload surface — lib/reso/sync.ts writes it per user connection (migrations/20260625_user_mls_data_lake.sql). App-side, not ingest."
+
+  - table: data_lake.user_mls_stats
+    reason: client_upload_surface
+    note: "Aggregates over user_mls_listings — same lib/reso writer, same class."
+
+  - table: data_lake.geo_anchor_cache
+    reason: runtime_cache
+    note: "Geocode-ladder cache (ingest/lib/geo_ladder.py; migrations/20260710_pulse_geo.sql). Opportunistic inserts on pulse distills; 0 new rows on a quiet day is CORRECT."
+
+  - table: data_lake.listing_transitions
+    reason: secondary_pipeline_table
+    note: "listing_lifecycle's transition LOG — written in the same run as listing_state (the entry's freshness/count target; migration 20260627_listing_lifecycle.sql). Registered pipeline, second table."

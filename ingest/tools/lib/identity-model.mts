@@ -172,7 +172,13 @@ export function parseWorkflow(repo: RepoView, file: string): WorkflowFacts | nul
     const envKeys = new Set<string>([...wfEnv, ...Object.keys(asMap(j.env))]);
     for (const s of steps) for (const k of Object.keys(asMap(s.env))) envKeys.add(k);
     const runText = steps.map((s) => String(s.run ?? "")).join("\n");
-    const modules = [...runText.matchAll(/python\s+-m\s+([A-Za-z0-9_.]+)/g)].map((m) => m[1]);
+    // Two shapes: `python -m <mod>` (ubuntu runners) and `& "$env:VENV_PY" -m ingest.<mod>`
+    // (the Windows self-hosted runner, dbpr-sirs-monthly.yml) — the interpreter token is a
+    // pwsh variable there, so the fallback keys on our package namespace instead.
+    const modules = [
+      ...[...runText.matchAll(/python\s+-m\s+([A-Za-z0-9_.]+)/g)].map((m) => m[1]),
+      ...[...runText.matchAll(/\s-m\s+(ingest\.[A-Za-z0-9_.]+)/g)].map((m) => m[1]),
+    ];
     // A job that `uses:` a workflow file is a reusable-workflow CALLER: GitHub
     // ignores timeout-minutes there and does not propagate caller env (08g A/B).
     const jobUses = typeof j.uses === "string" ? j.uses : null;

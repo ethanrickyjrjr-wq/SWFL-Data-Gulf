@@ -84,6 +84,26 @@ describe("parseWorkflow", () => {
   test("returns null for a workflow file that does not exist", () => {
     expect(parseWorkflow(repo, "ghost.yml")).toBeNull();
   });
+
+  test("extracts a module from the pwsh self-hosted-runner shape (& $env:VENV_PY -m ...)", () => {
+    const pwshRepo = new MemRepo({
+      ".github/workflows/dbpr-sirs-monthly.yml": `
+name: DBPR SIRS
+on:
+  workflow_dispatch:
+jobs:
+  ingest:
+    runs-on: [self-hosted, swfl-local]
+    timeout-minutes: 45
+    steps:
+      - name: Run ingest
+        run: |
+          & "$env:VENV_PY" -m ingest.pipelines.dbpr_sirs.pipeline @pyArgs
+`,
+    });
+    const job = parseWorkflow(pwshRepo, "dbpr-sirs-monthly.yml")!.jobs[0];
+    expect(job.modules).toEqual(["ingest.pipelines.dbpr_sirs.pipeline"]);
+  });
 });
 
 describe("moduleDir", () => {

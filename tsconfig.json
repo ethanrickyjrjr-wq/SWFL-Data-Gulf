@@ -38,6 +38,7 @@
     "tools",
     "ops",
     "scripts",
+    "ingest",
     "mcp-widget",
     "**/*.test.ts",
     "**/*.test.tsx",

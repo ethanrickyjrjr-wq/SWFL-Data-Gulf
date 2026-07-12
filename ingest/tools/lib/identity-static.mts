@@ -121,6 +121,11 @@ export function checkProducer(reg: Registry, repo: RepoView): Finding[] {
   const out: Finding[] = [];
   for (const { entry, parked } of allEntries(reg)) {
     if (parked) continue; // a parked entry has no producer by definition
+    // `workflow: none` + `dispatch_only: true` = a STATED manual source (mhs_databook:
+    // a human drops the PDF). No code writer exists by design — that is the declared
+    // truth, not a zombie. An entry with workflow: none and NO dispatch_only still
+    // zombies (usgs_tier2) until an operator decision lands in known_drift.
+    if (entry.workflow === "none" && entry.dispatch_only === true) continue;
     const target = targetOf(entry);
     if (!target) continue; // tier-1 inventory_id entries carry no SQL target
 

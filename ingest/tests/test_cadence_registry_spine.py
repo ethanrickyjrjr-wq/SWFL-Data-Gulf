@@ -268,6 +268,15 @@ COVERAGE_EXEMPT_REASONS = {
     "derived_signal_write_back",# app cron appends derived rows; 0 rows on a quiet day is CORRECT
     "bounded_delete_sweep",     # a retention DELETE, not a data source
     "event_driven_app_cron",    # Vercel cron, no lake write; 0 rows on a quiet day is CORRECT
+    # Added 07/12/2026 with Phase 2's --live zero-coverage sweep (each verified against a
+    # real writer in-tree before exemption — no invented reasons):
+    "derived_snapshot",         # PIT capture of our own views (view_vintages); promote-to-entry
+                                # decision rides check coverage_exempt_confirm_three
+    "static_seed",              # crosswalk/reference seeded by migration, read-only afterwards
+    "client_upload_surface",    # written by the app's client-upload path (lib/reso), not ingest
+    "runtime_cache",            # cache table a library maintains opportunistically (geo_ladder)
+    "secondary_pipeline_table", # a REGISTERED pipeline's second table; the entry's freshness
+                                # target is its primary. Names the owning entry in the note.
 }
 
 
