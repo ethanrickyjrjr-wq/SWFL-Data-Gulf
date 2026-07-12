@@ -344,6 +344,85 @@ pipelines:
   });
 });
 
+// --- scanner blind spots closed 07/12/2026: bare-SDK implicit reads + shared-lib reads ---
+const WF_DISTILL = `
+name: PDF distill daily
+on:
+  schedule:
+    - cron: "0 7 * * *"
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Run
+        env:
+          ANTHROPIC_API_KEY: \${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL: \${{ secrets.SUPABASE_URL }}
+          PYTHONUNBUFFERED: "1"
+        run: python -m ingest.pipelines.pdf_distill.pipeline
+`;
+const WF_DISTILL_UNWIRED = `
+name: PDF distill daily (no env)
+on:
+  schedule:
+    - cron: "0 7 * * *"
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Run
+        run: python -m ingest.pipelines.pdf_distill.pipeline
+`;
+
+function sdkSecretsRepo(registryYaml: string) {
+  const repo = new MemRepo({
+    "ingest/cadence_registry.yaml": registryYaml,
+    ".github/workflows/pdf-distill.yml": WF_DISTILL,
+    ".github/workflows/pdf-distill-unwired.yml": WF_DISTILL_UNWIRED,
+    // Bare SDK construction — the key read happens INSIDE the anthropic package.
+    "ingest/pipelines/pdf_distill/pipeline.py":
+      "import anthropic\nclient = anthropic.Anthropic()\n",
+    // Shared lib the pipeline may or may not import — no import analysis exists.
+    "ingest/lib/storage_uploader.py": 'url = os.environ["SUPABASE_URL"]\n',
+  });
+  return { repo, reg: loadRegistry(repo) };
+}
+
+describe("checkSecretsWired — implicit + shared-lib reads", () => {
+  test("bare Anthropic() + lib SUPABASE_URL + PYTHONUNBUFFERED: zero findings when wired", () => {
+    const { repo, reg } = sdkSecretsRepo(`
+pipelines:
+  - name: pdf_distill
+    workflow: pdf-distill.yml
+`);
+    expect(checkSecretsWired(reg, repo)).toEqual([]);
+  });
+
+  test("RED: bare Anthropic() with ANTHROPIC_API_KEY not wired is secret_not_wired", () => {
+    const { repo, reg } = sdkSecretsRepo(`
+pipelines:
+  - name: pdf_distill
+    workflow: pdf-distill-unwired.yml
+`);
+    const red = checkSecretsWired(reg, repo).filter((f) => f.severity === "red");
+    expect(red.map((f) => f.rule)).toEqual(["secret_not_wired"]);
+    expect(red[0].registrySide).toContain("ANTHROPIC_API_KEY");
+  });
+
+  test("asymmetry guard: an ingest/lib read never demands wiring (no SUPABASE_URL red)", () => {
+    const { repo, reg } = sdkSecretsRepo(`
+pipelines:
+  - name: pdf_distill
+    workflow: pdf-distill-unwired.yml
+`);
+    const findings = checkSecretsWired(reg, repo);
+    expect(findings.some((f) => f.registrySide.includes("SUPABASE_URL"))).toBe(false);
+    expect(findings.some((f) => f.otherSide.includes("storage_uploader"))).toBe(false);
+  });
+});
+
 import { checkActionVersions, checkTimeouts, type TagResolver } from "./identity-static.mts";
 
 const WF_NO_TIMEOUT = `

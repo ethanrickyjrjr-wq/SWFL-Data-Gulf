@@ -220,11 +220,22 @@ export function checkProducer(reg: Registry, repo: RepoView): Finding[] {
 /** Credential-shaped env names. A config knob (LISTINGS_MIN_ROWS, NEWS_ADAPTIVE) is not one. */
 const SECRET_SHAPE = /(_API_KEY|_KEY|_TOKEN|_SECRET|_CREDENTIALS|_URL|_URI|_DSN|_PROXY|_PASSWORD)$/;
 
-/** dlt reads this natively — no os.getenv call appears, so it can never be "unread". */
-const IMPLICIT_READS = new Set(["DESTINATION__POSTGRES__CREDENTIALS"]);
+/** Read natively by something that is not our code — no os.getenv call can ever appear. */
+const IMPLICIT_READS = new Set([
+  "DESTINATION__POSTGRES__CREDENTIALS", // dlt reads it inside the library
+  "PYTHONUNBUFFERED", // the interpreter itself reads it
+]);
 
 const READ_RE =
   /os\.environ\.get\(\s*["']([A-Z][A-Z0-9_]*)["']|os\.environ\[\s*["']([A-Z][A-Z0-9_]*)["']\s*\]|os\.getenv\(\s*["']([A-Z][A-Z0-9_]*)["']/g;
+
+/**
+ * `anthropic.Anthropic()` / `AsyncAnthropic()` with NO args reads ANTHROPIC_API_KEY
+ * inside the SDK — the env read our regex hunts for never appears in our source.
+ * Argful construction (`Anthropic(api_key=...)`) is excluded: there the key arrives
+ * via a visible os.environ read that READ_RE already catches.
+ */
+const SDK_IMPLICIT_RE = /\b(?:Async)?Anthropic\(\s*\)/;
 
 /** One record per SOURCE LINE, so an `X or Y` fallback chain is judged as a unit. */
 function envReadLines(
@@ -238,6 +249,7 @@ function envReadLines(
       const src = repo.read(file) ?? "";
       src.split("\n").forEach((text, i) => {
         const names = [...text.matchAll(READ_RE)].map((m) => m[1] ?? m[2] ?? m[3]).filter(Boolean);
+        if (SDK_IMPLICIT_RE.test(text)) names.push("ANTHROPIC_API_KEY");
         if (names.length > 0)
           out.push({ file, line: i + 1, names: [...new Set(names)] as string[] });
       });
@@ -248,6 +260,12 @@ function envReadLines(
 
 export function checkSecretsWired(reg: Registry, repo: RepoView): Finding[] {
   const out: Finding[] = [];
+  // Shared-lib reads satisfy the SURPLUS direction only. A wired key that ingest/lib
+  // consumes is plausibly live (storage_uploader reads SUPABASE_URL/SUPABASE_SERVICE_KEY
+  // for 44 workflows), but with no import analysis a lib read is never attributed to a
+  // specific pipeline — so it can suppress `secret_wired_unread`, never demand wiring
+  // via `secret_not_wired`.
+  const libReadNames = new Set(envReadLines(repo, ["ingest/lib"]).flatMap((r) => r.names));
   for (const { entry, parked } of allEntries(reg)) {
     if (parked) continue;
     const wf = entry.workflow;
@@ -284,7 +302,7 @@ export function checkSecretsWired(reg: Registry, repo: RepoView): Finding[] {
     }
 
     for (const key of wired) {
-      if (IMPLICIT_READS.has(key) || readNames.has(key)) continue;
+      if (IMPLICIT_READS.has(key) || readNames.has(key) || libReadNames.has(key)) continue;
       out.push({
         rule: "secret_wired_unread",
         entry: entry.name,

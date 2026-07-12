@@ -1,10 +1,14 @@
 """Fallback-cascade + provenance + anomaly engine for data_lake.daily_truth.
 
 Normal path: ONE Gemini grounded search returns a number + its real source URL, loaded to
-the brain. Cascade (Gemini -> Firecrawl -> Spider -> Claude) is the uptime FAILSAFE: if a leg
+the brain. The cascade (Gemini -> crawl4ai placeholder) is the uptime FAILSAFE: if a leg
 yields no usable SOURCED result, fall through to the next. The only integrity gate is a real
 source URL present (never a memory/training number); LittleBird is denylisted. A big day-over-day
 move vs OUR OWN prior value triggers a second-source confirm before it reaches the brain.
+
+Spider and Claude legs REMOVED 07/12/2026: Spider is retired (crawl4ai replaced it), and
+Anthropic never runs search — crawl4ai captures, Anthropic writes (operator decree; twin of
+the no-paid-web_search-on-cron rule in ingest/CLAUDE.md). Both were dead stubs returning None.
 
 External legs (gemini_grounded, firecrawl_search, _prior_value, _second_source_value, _fred_latest)
 do IO and are monkeypatched in tests; the pure logic + orchestration is fully unit-tested.
@@ -194,21 +198,7 @@ def gemini_grounded(question: str) -> Candidate | None:
 
 def firecrawl_search(question: str, denylist: list[str]) -> Candidate | None:
     """Stub — Firecrawl removed. crawl4ai has no web-search API; wire a URL-seeded
-    crawl4ai leg here once Gemini/Claude supply candidate URLs from an upstream leg."""
-    return None
-
-
-def spider_search(question: str, denylist: list[str]) -> Candidate | None:
-    """Deeper failsafe tier. Spider's in-repo client has no query->results search (only URL scrape),
-    so this returns None for now rather than invent a contract or emit a memory number. Wire when a
-    Spider search endpoint is added, or seed it with a URL from an upstream leg."""
-    return None
-
-
-def claude_last_resort(question: str) -> Candidate | None:
-    """Last-resort failsafe. Claude must attach a REAL fetched source URL (e.g. via its web_search tool)
-    to be usable — a number from the model's memory is rejected. Returns None until web_search is wired
-    (verify the Anthropic web_search tool surface per Rule 1 before enabling)."""
+    crawl4ai leg here once an upstream leg supplies candidate URLs."""
     return None
 
 
@@ -226,8 +216,6 @@ def run_cascade(cfg: dict, area: str) -> Candidate | None:
     for make in (
         lambda: gemini_grounded(q),
         lambda: firecrawl_search(q, dl),
-        lambda: spider_search(q, dl),
-        lambda: claude_last_resort(q),
     ):
         c = make()
         if c and c.source_url and not is_denylisted(c.source_url, dl):
