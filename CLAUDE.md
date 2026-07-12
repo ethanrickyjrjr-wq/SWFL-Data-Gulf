@@ -93,6 +93,8 @@ gh workflow run daily-rebuild.yml --repo ethanrickyjrjr-wq/SWFL-Data-Gulf -f pac
 ```
 `pack_id=master` (default) = full cascade. `pack_id=<brain-id>` = that brain + master only. Use the targeted form when debugging. The daily cron without `--force` is fine — it skips TTL-fresh brains automatically.
 
+**Preferred dispatch form (07/12/2026, closes `tripwire_dispatch_acceptance_ergonomics`):** `OPERATOR_APPROVED_PAID_RUN=1 node scripts/dispatch-rebuild.mjs <brain-id> --reason "<decree>"` — fires the same targeted dispatch AND auto-appends the `accepted_dispatch_runs` entry in `verification/tripwire-accepted.json` (then commit that file same session). A raw `gh workflow run` stays RED on the hourly tripwire until hand-accepted — the wrapper is the recognition channel, the bypass arm is untouched.
+
 ---
 
 # RULE 1.5 — PARALLEL-SESSION ISOLATION (EXPERIMENTAL)
