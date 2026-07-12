@@ -118,6 +118,50 @@ describe("buildEmailDocOccurrence", () => {
     expect(await buildEmailDocOccurrence("deliv-1", deps)).toBeNull();
   });
 
+  test("applies the link ladder before render and logs each applied fallback", async () => {
+    const logs: string[] = [];
+    const NEEDY: EmailDoc = {
+      globalStyle: STYLE,
+      blocks: [
+        { id: "f1", type: "footer", props: { websiteUrl: "https://agent.com" } },
+        { id: "b1", type: "button", props: { label: "View", url: "" } },
+      ],
+    };
+    let renderedDoc: EmailDoc | null = null;
+    const { deps } = makeDeps({
+      buildDoc: async () => NEEDY,
+      renderDoc: async (doc) => {
+        renderedDoc = doc;
+        return "<html><body>x</body></html>";
+      },
+      log: (l) => logs.push(l),
+    });
+    const out = await buildEmailDocOccurrence("deliv-1", deps);
+    expect(out).not.toBeNull();
+    const btn = renderedDoc!.blocks.find((b) => b.id === "b1")! as { props: { url?: string } };
+    expect(btn.props.url).toBe("https://agent.com");
+    expect(logs.some((l) => l.includes("link-fallback"))).toBe(true);
+  });
+
+  test("hostedUrl dep is the last ladder rung when the doc holds no links", async () => {
+    const NEEDY: EmailDoc = {
+      globalStyle: STYLE,
+      blocks: [{ id: "b1", type: "button", props: { label: "View", url: "" } }],
+    };
+    let renderedDoc: EmailDoc | null = null;
+    const { deps } = makeDeps({
+      buildDoc: async () => NEEDY,
+      renderDoc: async (doc) => {
+        renderedDoc = doc;
+        return "<html><body>x</body></html>";
+      },
+      hostedUrl: "https://www.swfldatagulf.com/p/deliv-1",
+    });
+    await buildEmailDocOccurrence("deliv-1", deps);
+    const btn = renderedDoc!.blocks.find((b) => b.id === "b1")! as { props: { url?: string } };
+    expect(btn.props.url).toBe("https://www.swfldatagulf.com/p/deliv-1");
+  });
+
   test("occurrence html binds the doc footer's #unsubscribe to the broadcast token", async () => {
     const { deps } = makeDeps({
       renderDoc: async () => `<html><body><a href="#unsubscribe">Unsubscribe</a></body></html>`,

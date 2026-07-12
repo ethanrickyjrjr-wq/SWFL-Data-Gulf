@@ -19,6 +19,8 @@ import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { getMarketingResend } from "@/lib/email/marketing-client";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint";
+import { applyLinkFallbacks, subjectListingUrl } from "@/lib/email/link-audit";
+import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import { deriveProjectName } from "@/lib/project/derive-name";
 import { applyUserBrandToProject } from "@/lib/project/apply-brand";
 import { logActivity } from "@/lib/project/activity";
@@ -130,7 +132,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const webUrl = `${BASE_URL}/project/${projectId}/email-lab?did=${deliverableId}`;
-    let html = await renderEmailDocHtml(parsed.data);
+    // Dead-link floor: the funnel self-send has no link popup, so a labeled
+    // button/card with no destination falls down the ladder (doc-held links →
+    // the recipient's own lab page). Never a dead button in the first email.
+    const ladder = applyLinkFallbacks(parsed.data, {
+      listingUrl: subjectListingUrl(parsed.data),
+      brandWebsiteUrl: brandWebsiteUrl(parsed.data),
+      replyMailto: null,
+      hostedUrl: webUrl,
+    });
+    let html = await renderEmailDocHtml(ladder.doc);
     html = withSelfSendFooter(html, webUrl);
     // Fake-link tripwire — every href/src verbatim from the doc or platform.
     const gate = lintCompiledHtml(html, collectAllowedUrls(parsed.data, [], null, null, webUrl));

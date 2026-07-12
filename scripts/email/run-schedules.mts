@@ -368,6 +368,7 @@ async function main(): Promise<void> {
         return (result.payload?.doc as EmailDoc | undefined) ?? rawDoc;
       },
       renderDoc: renderEmailDocHtml,
+      hostedUrl: `${SITE_URL}/p/${deliverableId}`,
       log: (line) => console.log(line),
     });
   }
@@ -426,6 +427,7 @@ async function main(): Promise<void> {
             };
           },
           renderDoc: renderEmailDocHtml,
+          hostedUrl: `${SITE_URL}/p/${row.deliverable_id}`,
           log: (line) => console.log(line),
         });
         if (frozen) return frozen;

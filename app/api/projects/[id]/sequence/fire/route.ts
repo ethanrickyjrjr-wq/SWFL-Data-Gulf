@@ -95,6 +95,7 @@ function buildOnceDeps(admin: Admin): ProcessDeps {
           };
         },
         renderDoc: renderEmailDocHtml,
+        hostedUrl: SITE_URL ? `${SITE_URL}/p/${row.deliverable_id}` : null,
         log: (l) => console.log(l),
       });
       if (!frozen) throw new Error(`send-now: deliverable ${row.deliverable_id} missing/invalid`);

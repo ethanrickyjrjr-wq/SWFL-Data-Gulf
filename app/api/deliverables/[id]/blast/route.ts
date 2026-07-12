@@ -43,6 +43,12 @@ import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { renderEmailDocToBuffer, pdfFilename } from "@/lib/pdf";
 import { logActivity } from "@/lib/project/activity";
 import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint";
+import {
+  applyLinkFallbacks,
+  subjectListingUrl,
+  type AppliedFallback,
+} from "@/lib/email/link-audit";
+import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import { blastTags } from "@/lib/email/blast-tags";
 import { cohortIndex } from "@/lib/email/variant-cohort";
 import {
@@ -254,6 +260,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const includePdf = body?.include_pdf === true && deliverable.template === "block-canvas";
   let htmlByVariant: string[] = [];
   let pdfBuffer: Buffer | null = null;
+  let linkFallbacks: AppliedFallback[] = [];
 
   if (deliverable.template === "block-canvas") {
     // Render the SAME block-canvas HTML the Email Lab preview shows — through
@@ -264,16 +271,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!parsedDoc.success) {
       return NextResponse.json({ error: "invalid email document" }, { status: 422 });
     }
+    // Dead-link floor: any click-promising slot still empty at send time gets the
+    // fallback ladder (listing page → brand site → hosted /p page). Every rung is
+    // doc-held or the platform's own webUrl, so the url-lint below still admits
+    // the laddered HTML. A blast never ships a dead button.
+    const ladder = applyLinkFallbacks(parsedDoc.data, {
+      listingUrl: subjectListingUrl(parsedDoc.data),
+      brandWebsiteUrl: brandWebsiteUrl(parsedDoc.data),
+      replyMailto: null, // blast replies ride the reply-to header, not a body CTA
+      hostedUrl: webUrl,
+    });
+    const sendDoc = ladder.doc;
+    linkFallbacks = ladder.applied;
     const ctas = variantTestRaw?.ctas;
     const docsToRender =
       ctas && ctas.length > 1
-        ? ctas.map((label) => withCtaLabel(parsedDoc.data, label))
+        ? ctas.map((label) => withCtaLabel(sendDoc, label))
         : ctas && ctas.length === 1
-          ? [withCtaLabel(parsedDoc.data, ctas[0])]
-          : [parsedDoc.data];
+          ? [withCtaLabel(sendDoc, ctas[0])]
+          : [sendDoc];
     htmlByVariant = await Promise.all(docsToRender.map((d) => renderEmailDocHtml(d)));
     if (includePdf) {
-      pdfBuffer = await renderEmailDocToBuffer(parsedDoc.data);
+      pdfBuffer = await renderEmailDocToBuffer(sendDoc);
     }
   } else {
     // jsonb read: the typed row carries items_snapshot/narrative as Json; the builder
@@ -550,5 +569,5 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
   }
 
-  return NextResponse.json({ sent, failed, scheduled, suppressed });
+  return NextResponse.json({ sent, failed, scheduled, suppressed, link_fallbacks: linkFallbacks });
 }

@@ -16,6 +16,8 @@ import { deriveEmailDocSubject } from "./emaildoc-subject";
 import type { BuildScope } from "./build-doc";
 import { bindUnsubscribeHref } from "./bind-unsubscribe";
 import { UNSUBSCRIBE_TOKEN } from "./scheduler";
+import { applyLinkFallbacks, subjectListingUrl } from "./link-audit";
+import { brandWebsiteUrl } from "./inject-photo";
 
 /** The deliverable fields the lane reads (a `deliverables` row is a superset). */
 export interface EmailDocDeliverable {
@@ -39,6 +41,10 @@ export interface EmailDocOccurrenceDeps {
   buildDoc: (args: { prompt: string; rawDoc: EmailDoc; scope?: BuildScope }) => Promise<EmailDoc>;
   /** Render an EmailDoc to email HTML (EmailDocEmail via @react-email/render). */
   renderDoc: (doc: EmailDoc) => Promise<string>;
+  /** The deliverable's hosted /p/<id> page — the terminal link-ladder rung. A cron
+   *  send has no human to answer the link popup, so an unresolved click-promising
+   *  slot falls here rather than shipping dead. Optional: absent → doc-held rungs only. */
+  hostedUrl?: string | null;
   log?: (line: string) => void;
 }
 
@@ -91,7 +97,22 @@ export async function buildEmailDocOccurrence(
   const prompt = stored || refreshPrompt(scope);
 
   const freshDoc = await deps.buildDoc({ prompt, rawDoc: parsed.data, scope });
-  const rendered = await deps.renderDoc(freshDoc);
+
+  // Dead-link floor: no human answers a popup on a cron send, so any
+  // click-promising slot still empty after the rebuild gets the fallback ladder
+  // (listing page → brand site → reply → hosted /p page). Logged, never blocking.
+  const ladder = applyLinkFallbacks(freshDoc, {
+    listingUrl: subjectListingUrl(freshDoc),
+    brandWebsiteUrl: brandWebsiteUrl(freshDoc),
+    replyMailto: null,
+    hostedUrl: deps.hostedUrl ?? null,
+  });
+  for (const a of ladder.applied) {
+    log(`[emaildoc] link-fallback applied: block=${a.blockId} rung=${a.rung}`);
+  }
+  const sendDoc = ladder.doc;
+
+  const rendered = await deps.renderDoc(sendDoc);
   const emailDocHtml = bindUnsubscribeHref(rendered, UNSUBSCRIBE_TOKEN);
-  return { subject: deriveEmailDocSubject(freshDoc), body: "", emailDocHtml };
+  return { subject: deriveEmailDocSubject(sendDoc), body: "", emailDocHtml };
 }
