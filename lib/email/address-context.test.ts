@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { loadAddressFigures } from "./address-context";
+import { loadAddressCompContext, loadAddressFigures } from "./address-context";
 import type { CompDeps } from "@/lib/assistant/comp-helper";
 import type { NearbyComp, SoldEvent } from "@/lib/listings/steadyapi";
 
@@ -19,6 +19,7 @@ const comp = (over: Partial<NearbyComp>): NearbyComp => ({
   estimateValue: null,
   estimateDate: null,
   propertyId: null,
+  sourceUrl: null,
   ...over,
 });
 
@@ -49,6 +50,43 @@ const happyDeps: CompDeps = {
     pid === "p1" ? { soldPrice: 462500, soldDate: "2026-05-20" } : null,
   enrichN: 1,
 };
+
+describe("loadAddressCompContext", () => {
+  test("returns figures AND the raw comps from ONE comp fetch", async () => {
+    let calls = 0;
+    const ctx = await loadAddressCompContext("123 Main St, Cape Coral", {
+      ...happyDeps,
+      fetchNearby: async () => {
+        calls++;
+        return [
+          comp({
+            propertyId: "p1",
+            listPrice: 450000,
+            sourceUrl: "https://www.realtor.com/realestateandhomes-detail/x_M1-2",
+          }),
+        ];
+      },
+    });
+    expect(calls).toBe(1);
+    expect(ctx.figures.length).toBe(1);
+    expect(ctx.comps[0]?.sourceUrl).toBe(
+      "https://www.realtor.com/realestateandhomes-detail/x_M1-2",
+    );
+  });
+
+  test("empty-tolerant: no address → empty context, no fetch", async () => {
+    let calls = 0;
+    const ctx = await loadAddressCompContext(null, {
+      ...happyDeps,
+      fetchNearby: async () => {
+        calls++;
+        return [];
+      },
+    });
+    expect(ctx).toEqual({ figures: [], comps: [] });
+    expect(calls).toBe(0);
+  });
+});
 
 describe("loadAddressFigures", () => {
   test("comps become cited figures — honest price kinds, MM/DD/YYYY as-of", async () => {

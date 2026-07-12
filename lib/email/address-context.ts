@@ -36,21 +36,28 @@ function isoToMDY(iso: string | null): string | undefined {
   return m ? `${m[2]}/${m[3]}/${m[1]}` : undefined;
 }
 
+export interface AddressCompContext {
+  figures: MarketFigure[];
+  comps: RenderComp[];
+}
+
 /**
- * Nearby sold comps for a subject address, as cited figures. Empty-tolerant:
- * missing address, geocode miss, out-of-footprint, no comps, or any vendor
- * failure → [] (the build proceeds exactly as without an address). Inherits
- * compsForAddress's ≤3-vendor-call cap.
+ * Nearby sold comps for a subject address — ONE compsForAddress call feeding both
+ * consumers: cited figures for the AI's data feed AND the raw comps for the linked
+ * rows block (sold-comp-blocks). Empty-tolerant: missing address, geocode miss,
+ * out-of-footprint, no comps, or any vendor failure → empty context (the build
+ * proceeds exactly as without an address). Inherits the ≤3-vendor-call cap —
+ * NEVER call compsForAddress separately in the same build.
  */
-export async function loadAddressFigures(
+export async function loadAddressCompContext(
   address: string | null | undefined,
   deps: CompDeps = {},
-): Promise<MarketFigure[]> {
+): Promise<AddressCompContext> {
   const subject = String(address ?? "").trim();
-  if (!subject) return [];
+  if (!subject) return { figures: [], comps: [] };
   try {
     const result = await compsForAddress(subject, deps);
-    return result.comps.flatMap((c, i) => {
+    const figures = result.comps.flatMap((c, i) => {
       if (c.price == null) return [];
       return [
         {
@@ -62,7 +69,16 @@ export async function loadAddressFigures(
         },
       ];
     });
+    return { figures, comps: result.comps };
   } catch {
-    return [];
+    return { figures: [], comps: [] };
   }
+}
+
+/** Back-compat wrapper — figure-only callers keep their shape. */
+export async function loadAddressFigures(
+  address: string | null | undefined,
+  deps: CompDeps = {},
+): Promise<MarketFigure[]> {
+  return (await loadAddressCompContext(address, deps)).figures;
 }
