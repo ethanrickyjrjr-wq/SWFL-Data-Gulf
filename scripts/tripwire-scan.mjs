@@ -93,6 +93,31 @@ function paidWorkflows() {
     .map((e) => ({ file: e.file, name: e.name }));
 }
 
+// ---------- decreed-dispatch recognition --------------------------------------
+// Spec check 3's RED had two arms: "the operator did it (they'll recognize it)
+// or a bypass". RULE 1's locked targeted-rebuild procedure (pack_id=<brain-id>)
+// made session dispatches routine, so the recognition arm needs a
+// machine-checkable channel or the tripwire is red all day on decreed work
+// (10 dispatches on 07/12/2026 = 24h of hourly RED + issue #106 spam). Same
+// covenant as accepted_live_keys: a committed, reviewable acceptance in
+// verification/tripwire-accepted.json silences the RED and grants NOTHING —
+// an unlisted dispatch is still the bypass arm, RED.
+function acceptedDispatchRuns() {
+  try {
+    return (
+      JSON.parse(fs.readFileSync(path.join(ROOT, "verification", "tripwire-accepted.json"), "utf8"))
+        .accepted_dispatch_runs ?? []
+    );
+  } catch {
+    return [];
+  }
+}
+
+// Pure — exported for the unit test, like classifyWorktree.
+export function classifyDispatch({ url, acceptedUrls }) {
+  return acceptedUrls.includes(url) ? "yellow" : "red";
+}
+
 // ---------- check 1: today's spend vs the $5 ceiling -------------------------
 
 async function checkSpend() {
@@ -199,10 +224,19 @@ function checkPaidDispatches() {
       new Date(r.createdAt).getTime() >= cutoff,
   );
   if (hits.length === 0) greens.push("DISPATCH — zero manual runs of paid workflows in 24h");
-  for (const h of hits)
-    reds.push(
-      `MANUAL PAID DISPATCH — '${h.workflowName}' ${h.createdAt} (${h.conclusion ?? "in progress"}) ${h.url}`,
-    );
+  const accepted = acceptedDispatchRuns();
+  const acceptedUrls = accepted.map((a) => a.run_url);
+  for (const h of hits) {
+    const line = `'${h.workflowName}' ${h.createdAt} (${h.conclusion ?? "in progress"}) ${h.url}`;
+    if (classifyDispatch({ url: h.url, acceptedUrls }) === "yellow") {
+      const note = accepted.find((a) => a.run_url === h.url)?.note;
+      yellows.push(
+        `DECREED DISPATCH (accepted in tripwire-accepted.json) — ${line}${note ? ` — ${note}` : ""}`,
+      );
+    } else {
+      reds.push(`MANUAL PAID DISPATCH — ${line}`);
+    }
+  }
 
   const fails = runs.filter(
     (r) =>

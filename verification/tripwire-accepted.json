@@ -2,5 +2,68 @@
   "accepted_live_keys": ["ANTHROPIC_API_KEY"],
   "accepted_on": "07/05/2026",
   "accepted_by": "operator (in conversation: 'Mark it')",
-  "note": "Operator refilled credits and restored the live Anthropic key in .env.local by hand. Pulse distill runs Haiku until more prepared, then switches to Sonnet. Sessions still may not spend without in-conversation approval (paid-run valve covenant) — this acceptance only silences the quarantine RED, it grants nothing."
+  "note": "Operator refilled credits and restored the live Anthropic key in .env.local by hand. Pulse distill runs Haiku until more prepared, then switches to Sonnet. Sessions still may not spend without in-conversation approval (paid-run valve covenant) — this acceptance only silences the quarantine RED, it grants nothing.",
+  "dispatch_note": "Each accepted_dispatch_runs entry is ONE workflow_dispatch run the operator recognizes (RULE 1 targeted rebuilds). Acceptance turns that run's tripwire RED into a listed YELLOW; it grants nothing going forward — every new decreed dispatch needs its own entry in the same session that fired it.",
+  "accepted_dispatch_runs": [
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29172318569",
+      "pack": "properties-lee-value",
+      "accepted_on": "07/12/2026",
+      "note": "targeted rebuild (RULE 1 form) — properties-lee-value build session, 07/11"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29178979073",
+      "pack": "properties-lee-value",
+      "accepted_on": "07/12/2026",
+      "note": "targeted rebuild (RULE 1 form) — properties-lee-value build session, 07/12"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29179215715",
+      "pack": "econ-dev-swfl",
+      "accepted_on": "07/12/2026",
+      "note": "Charlotte re-scope rebuild batch, 07/12 session"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29179246241",
+      "pack": "news-swfl",
+      "accepted_on": "07/12/2026",
+      "note": "Charlotte re-scope rebuild batch, 07/12 session"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29179280303",
+      "pack": "env-swfl",
+      "accepted_on": "07/12/2026",
+      "note": "Charlotte re-scope rebuild batch, 07/12 session"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29179443583",
+      "pack": "storm-history-swfl",
+      "accepted_on": "07/12/2026",
+      "note": "Charlotte re-scope rebuild batch, 07/12 session"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29179461590",
+      "pack": "hurricane-tracks-fl",
+      "accepted_on": "07/12/2026",
+      "note": "Charlotte re-scope rebuild batch, 07/12 session"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29179477513",
+      "pack": "seller-stress-swfl",
+      "accepted_on": "07/12/2026",
+      "note": "Charlotte re-scope rebuild batch, 07/12 session"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29179495252",
+      "pack": "fgcu-reri",
+      "accepted_on": "07/12/2026",
+      "note": "Charlotte named-source-exception rebuild — operator ruling, SESSION_LOG 07/12"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29179748173",
+      "pack": "master",
+      "accepted_on": "07/12/2026",
+      "note": "master cascade after the 07/12 targeted rebuilds"
+    }
+  ]
 }

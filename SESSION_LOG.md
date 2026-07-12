@@ -192,6 +192,22 @@ spec REMOVES it, `as_of` (MM/DD/YYYY) replaces it in every contract. Registered 
 (check viz_archetypes_live_verify). Spec: docs/superpowers/specs/2026-07-12-viz-archetypes-design.md.
 Next: operator spec review → writing-plans → implement.
 
+## 2026-07-12 (Fable 5 · wt/tripwire-accept → main) — Tripwire red-loop killed: decreed dispatches get a committed acceptance channel
+
+Operator: "GitHub rolling back on red over and over — fix it." Evidence first: NO prod rollback ever
+fired — all 20 recent 'Rollback on red — Prod' runs are "All green" no-ops (smoke 9/9), prod never
+reverted. The real reds: (1) CI ×3 (00:10–02:58Z) — trigger-list drift test, already fixed by
+55b49605, CI green since 03:14; (2) Tripwire hourly RED on every run: checkPaidDispatches flags
+EVERY workflow_dispatch of a paid workflow in a 24h window, and tonight's 10 operator-account
+targeted rebuilds (RULE 1 form — fgcu-reri, Charlotte re-scope batch ×6, properties-lee-value ×2,
+master; spend ledger $0.07) would keep it red hourly until ~04:00Z tomorrow, re-commenting issue
+#106 each time. Fix (extends the existing acceptance seam, RULE C2): tripwire-accepted.json gains
+accepted_dispatch_runs[]; the scan lists an accepted run URL as YELLOW (the spec's "operator
+recognizes it" arm, now machine-checkable), unlisted stays RED (bypass arm intact). Tonight's 10
+runs accepted with per-pack notes. classifyDispatch exported pure + 3 unit tests. Verify: next
+hourly Tripwire run (~05:58Z) should be green. Residual (check opened): future decreed dispatches
+still need a manual acceptance entry — decide whether the RULE 1 procedure/escape hatch should
+auto-append it.
 ## 2026-07-12 (Fable 5 · main) — fgcu-reri: Charlotte kept as a NAMED-SOURCE EXCEPTION (operator ruling)
 
 Operator ruled on scope_fgcu_reri_charlotte: exception, not re-scope — RERI genuinely publishes
