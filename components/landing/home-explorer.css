@@ -251,7 +251,6 @@
 .home-explorer .hero-suggest-name {font-weight:600;font-size:14px}
 .home-explorer .hero-suggest-place {font-size:12px;color:var(--text-tertiary)}
 .home-explorer .hero-mode-row {display:flex;justify-content:center;gap:8px;margin:18px 0 10px}
-.home-explorer .hero-mode-tab.active {border-color:var(--gulf-teal);color:var(--gulf-teal)}
 .home-explorer .hero-gets {margin-top:10px;color:var(--text-tertiary);font-size:13px}
 .home-explorer .hero-ask-panel {margin-top:14px;text-align:left;background:var(--gulf-slate);border:1px solid var(--gulf-slate-hi);border-radius:10px;padding:16px 18px}
 .home-explorer .hero-ask-working {color:var(--text-tertiary);font-size:14px}
