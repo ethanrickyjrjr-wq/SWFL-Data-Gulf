@@ -570,12 +570,10 @@ pipelines:
     lane: tier-1 # HYBRID: freshness via _tier1_inventory (inventory_id), rows via count_table
       # below. Do NOT flip to tier-2 — it has no freshness_table/dlt_schema_name, so
       # check_tier2_entry would have nothing to query.
-    cadence_days: 1 # RECONCILED 07/11/2026: .github/workflows/city-pulse-daily.yml:10 is
-      # `cron: "0 9 * * *"` = DAILY. The "WEEKLY cost mode" note was stale prose (the workflow was
-      # re-enabled daily 07/07/2026, per its own :4-7 header). cadence_days drives STALE/FRESH
-      # *display* only — never an exit code (check_freshness.py:338) — so this is not a gating
-      # change. freshness_sla stays 10/21 until the nightly chain is green; tightening to 2/4 is
-      # check city_pulse_sla_tighten.
+    cadence_days: 1 # RECONCILED 07/11/2026: DAILY. Was `cron: "0 9 * * *"` in
+      # city-pulse-daily.yml; that standalone cron RETIRED 07/12/2026 — the workflow is now
+      # clocked nightly by nightly-chain.yml (workflow_call member). cadence_days drives
+      # STALE/FRESH *display* only — never an exit code (check_freshness.py:338).
     tolerance_multiplier: 3.0
     inventory_id: lake-tier1/city_pulse/
     inventory_key_type: prefix
@@ -589,15 +587,18 @@ pipelines:
       # new rows by design (the pipeline prunes expired rows), so a "landed today" row count
       # would false-abort a quiet night. Steady state ~207.
     freshness_sla:
-      warn_after_days: 10   # scaled for weekly cost mode; restore 2/4 with daily cadence at launch
-      error_after_days: 21  # 3× weekly cadence — three dark weeks is a production defect
+      # TIGHTENED 07/12/2026 (check city_pulse_sla_tighten): precondition met — the nightly
+      # chain's first green end-to-end run (29180619318) landed city_pulse 215 rows >= floor 50.
+      # 10/21 was scaled for the retired weekly cost mode.
+      warn_after_days: 2    # one missed nightly run is a warning
+      error_after_days: 4   # 4 dark days on a daily cadence is a production defect
     # web_search current-events capture for the SWFL cities; distilled into
     # data_lake.city_pulse (Tier-2) and read by the city-pulse-swfl brain.
     # First run: <fill on first successful GHA run>.
-    note: "RE-ENABLED 07/05/2026 in weekly cost mode (operator: build data cheaply pre-launch): cron Wednesday 09:00 UTC, distill on Haiku, capture stays Sonnet web_search. At launch: daily cadence + freshness_sla 2/4."
+    note: "RE-ENABLED 07/05/2026 in weekly cost mode (operator: build data cheaply pre-launch): cron Wednesday 09:00 UTC, distill on Haiku, capture stays Sonnet web_search. At launch: daily cadence + freshness_sla 2/4. DONE 07/12/2026: daily via nightly-chain.yml, SLA 2/4 (check city_pulse_sla_tighten)."
     source_scope:
       confirmed_total:
-        summary: "13 named SWFL cities scanned weekly: Lehigh Acres, Cape Coral, Fort Myers, Naples, Estero, Bonita Springs, Fort Myers Beach, Sanibel, North Fort Myers, Marco Island, East Naples, North Naples, Golden Gate"
+        summary: "13 named SWFL cities scanned daily: Lehigh Acres, Cape Coral, Fort Myers, Naples, Estero, Bonita Springs, Fort Myers Beach, Sanibel, North Fort Myers, Marco Island, East Naples, North Naples, Golden Gate"
         source: "our ingest"
       source_ceiling:
         summary: "Real, named Lee/Collier places absent from the scan list: Immokalee, Ave Maria, Everglades City, Goodland, Chokoloskee, Copeland (Collier); Captiva, Pine Island (Matlacha/St. James City/Bokeelia), Alva, San Carlos Park (Lee) — same code path, config-only addition."
