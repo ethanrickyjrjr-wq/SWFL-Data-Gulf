@@ -147,6 +147,22 @@ zones + zero `[config]`/raw-token leaks. Deferred WITH reasons → `docs/handoff
 filter tabs descoped — loader reshape). NOTE: `bun add cmdk` touched package.json/bun.lock claimed by a
 parallel session — verified only my cmdk line differs from HEAD, nothing clobbered. Committed local,
 NOT pushed (new dep + live surface = operator diff-review).
+## 2026-07-12 (Fable 5 · wt/dcd) — BUILD COMPLETE (autonomous scope): data-contracts+doctor, 8 phases, 37 commits — checkpoint handed to operator
+
+Every phase of `docs/superpowers/plans/2026-07-11-data-contracts-doctor-tdd.md` that could be built
+without touching a live surface is DONE and verified: Phase 0 (CI unred) · Spine · Phase 1 (Locus B
+live-baselined) · Phase 2 (real registry GREEN through the identity gate; Gate 7 proven blocking) ·
+3a/3b (manifest + classifier) · 3c (doctor + archived first live run) · Phase 4 Task 2 (row gate,
+live-proven) · 3e Task 1 (caveat TTL predicate). Final sweep: **253 pytest + 56 bun + 73 node:test
+green · --static exit 0 · next build clean**. Working tree holds ONE deliberate uncommitted file
+(the watcher drift test — pairs with ASK-FIRST Task 4). Plan bugs found and fixed in flight: 6
+(C-1-class fake-cursor IndexError, Rule-B test/impl disagreement, dlt_never_landed vs
+schema_static, assert_landed syntax garbage + clock-dependent tests, stale action-tag snapshot,
+coverage_exempt authority collision) — each documented in its commit. Checks opened this build: 20.
+Build-queue synced. **Push withheld — operator gates it**; the ASK-FIRST batch is in the checkpoint
+message (Locus-A gates, ledger-writing probe, watcher rewiring, doctor wiring/flip, nightly chain +
+cutover, TTL wiring, SteadyAPI probe).
+
 ## 2026-07-12 (Fable 5 · wt/dcd) — Phase 4 Task 2: assert_landed row gate BUILT + live-proven; chain wiring HELD
 
 **Shipped.** `ingest/scripts/assert_landed.py` — the nightly row gate (N-1 corrected: reads
