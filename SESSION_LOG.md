@@ -54,6 +54,24 @@ the gating exit code never fires) + stale ADVISORY comments updated. The 3d prob
 NOT DONE (separate approval; check_freshness/check_data_quality report bodies + their ledger syncs
 untouched). Verify: post-push dispatch must conclude `failure` (16 reds today) with the doctor step
 as the failing step, not a timeout kill.
+## 2026-07-12 (Fable 5 · main) — viz-archetypes SPEC: generalize the 5 showcase viz templates (brainstormed, registered, spec committed)
+
+Operator asked whether the showcase "Visual templates" cards can take any data-that-goes-together
+with brand injected. Probe: brand is already 2 tokens everywhere; the gap is the v1 scope cut —
+data arrays hardcoded in 3 shells (scatter/bars/timeline), domain copy baked into all 5. Brainstormed
+per RULE 3.5; operator locked: curated recipe registry (~2 builds/layout from lake data), AI
+commentary in-template (per-item notes + card-level read, written at build time by ONE Sonnet call
+over the filled rows, cached, cron-refreshed — public GET never calls a model), all five cards go
+fully generic, showcase previews go real, mechanism = data_json token + per-archetype zod contracts.
+RESEARCH (crawl4ai, RULE 0.4): WHATWG HTML spec (html.spec.whatwg.org, script-content restrictions)
+— unbalanced `<!--`/`<script` in a script element never closes the block; sanctioned fix = escape
+`<` as \x3C (aka \\u003c), so the serializer MUST escape `<` after JSON.stringify (kills `</script`
+breakout). Vega-Lite (vega.github.io/vega-lite) data/mark/encoding/config split reviewed and
+rejected as contract model — our mark+encoding stays baked into art-directed shells. Also caught:
+the shells' footer `Last computed · {{freshness_token}}` slot ships the raw token user-facing —
+spec REMOVES it, `as_of` (MM/DD/YYYY) replaces it in every contract. Registered via new-build.mjs
+(check viz_archetypes_live_verify). Spec: docs/superpowers/specs/2026-07-12-viz-archetypes-design.md.
+Next: operator spec review → writing-plans → implement.
 
 ## 2026-07-12 (Fable 5 · main) — fgcu-reri: Charlotte kept as a NAMED-SOURCE EXCEPTION (operator ruling)
 
