@@ -147,6 +147,29 @@ zones + zero `[config]`/raw-token leaks. Deferred WITH reasons → `docs/handoff
 filter tabs descoped — loader reshape). NOTE: `bun add cmdk` touched package.json/bun.lock claimed by a
 parallel session — verified only my cmdk line differs from HEAD, nothing clobbered. Committed local,
 NOT pushed (new dep + live surface = operator diff-review).
+## 2026-07-12 (Fable 5 · wt/dcd) — Phase 3a/3b: watch manifest + termination classifier BUILT; live watcher rewiring HELD
+
+**Shipped (3 commits, `fdc7252f` + `91b0dc90` + `001c2570`).** `scripts/lib/watch-manifest.mjs`
+(pure parser/selectors/money-guard, 17 tests) · `scripts/build-watch-lists.mjs` generator ·
+committed `.github/_watch-manifest.json` (103 workflows / 82 scheduled / 15 paid, built with live
+`gh api` workflow states) · `classifyTermination()` appended to classify-cron-failure.mjs (13 tests,
+real-run fixtures; TIMEOUT→never-retry beats SUPERSEDED; UNKNOWN_CANCEL prints evidence, never
+guesses) · cron-run.mjs manifest glue (loadWatchManifest/manifestEntry/hasNewerRun).
+
+**What it caught, live:** exactly **4 zombie crons** (dbpr-sirs, fgcu-reri, marketbeat, rsw-airport
+— API-disabled with uncommented crons in source, orphaning 6 registry entries; the class Phase 2
+structurally cannot see) → check `zombie_cron_reenable_guard`.
+
+**HELD [ASK-FIRST] for the operator checkpoint:** Task 4 (regenerate both watcher `workflows:`
+arrays — logger 29→81 watched, healer 27→80; incidents WILL open for silently-failing crons like
+graphify-republish 0-for-2), Task 5 (tripwire reads the manifest — kills the bare-substring paid
+false-positive on tripwire-hourly/weekly-read), Task 8 (widen both watcher `if:` gates to admit
+cancelled/timed_out), Task 9 (wire classifyTermination into both handlers). Task 3's drift test is
+WRITTEN + verified red (2/2 — the 65% blind spot made loud) but deliberately UNCOMMITTED: it goes
+green only with Task 4, and landing it alone would red CI (the plan's own note: land 3+4 together).
+
+**Checks opened:** `zombie_cron_reenable_guard` · `ci_github_lib_tests_unenforced`.
+
 ## 2026-07-12 (Fable 5 · wt/dcd) — Phase 2: config-identity cross-check — real registry driven GREEN
 
 **Shipped (10 commits, `7e60d3ba..` this).** `ingest/tools/check-registry-identity.mts` + lib: rules
