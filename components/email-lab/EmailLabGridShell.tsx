@@ -55,6 +55,8 @@ import { useSocialComposer } from "./social/useSocialComposer";
 import { SocialElementInspector } from "./social/SocialElementInspector";
 import { PhotosPanel } from "./PhotosPanel";
 import { MediaPanel } from "./MediaPanel";
+import { DatasetBrowser } from "./DatasetBrowser";
+import { placeLoadedBlocks } from "./dataset-browser-core";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import type { SocialElement } from "@/lib/social/design/types";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
@@ -331,6 +333,7 @@ export function EmailLabGridShell({
   // Brand starts CLOSED and sits low — operator ruling 07/03/2026 ("lead with
   // what they can do"; brand was hogging the rail).
   const [showBrand, setShowBrand] = useState(false);
+  const [showDatasets, setShowDatasets] = useState(false);
   const [showSeeds, setShowSeeds] = useState(false);
   const [showBlocks, setShowBlocks] = useState(false);
   // Brand-reveal registration — inert today (/email-lab/grid is chrome-free, no
@@ -646,6 +649,16 @@ export function EmailLabGridShell({
     commit({ ...doc, blocks: [...doc.blocks, { ...block, layout } as EmailBlock] });
     setSelectedId(block.id);
     setShowBlocks(false);
+  }
+
+  /** Place freshly-materialized dataset blocks under the canvas content —
+   *  values baked, bindings remembered; one commit = one undo frame. */
+  function addDatasetBlocks(loaded: EmailBlock[]) {
+    const placed = placeLoadedBlocks(doc.blocks, loaded);
+    if (placed.length === 0) return;
+    commit({ ...doc, blocks: [...doc.blocks, ...placed] });
+    setSelectedId(placed[0].id);
+    setShowDatasets(false);
   }
 
   /** Duplicate a block — fresh id, content cloned, placed below; movable. */
@@ -1658,6 +1671,22 @@ export function EmailLabGridShell({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── Datasets — data-bound blocks from the curated registry (paid dial) ── */}
+          {mode === "email" && caps.datasets && (
+            <div className="border-b border-white/8 px-4 pb-4 pt-3">
+              <button
+                onClick={() => setShowDatasets((v) => !v)}
+                className="flex w-full items-center justify-between py-1 text-[10px] uppercase tracking-[0.15em] text-white/35 hover:text-white/60"
+              >
+                <span>Datasets</span>
+                <span className={`transition-transform ${showDatasets ? "rotate-180" : ""}`}>
+                  ▾
+                </span>
+              </button>
+              {showDatasets && <DatasetBrowser onLoad={addDatasetBlocks} />}
             </div>
           )}
 

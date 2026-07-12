@@ -29,6 +29,19 @@ describe("registry", () => {
       expect(`${e.label} ${e.description}`).not.toMatch(/concoction|registry|binding|lane|brain/i);
     }
   });
+  it("param metadata carries enum options + required flags (zod introspection pin)", () => {
+    const idx = concoctionIndex();
+    const asking = idx.find((e) => e.id === "asking-price-trend")!;
+    expect(asking.params).toEqual([
+      { key: "area", required: true, options: ["cape_coral", "fort_myers", "naples"] },
+    ]);
+    const zip = idx.find((e) => e.id === "zip-listing-activity")!;
+    expect(zip.params).toEqual([
+      { key: "county", required: false, options: ["Lee", "Collier", "Hendry"] },
+    ]);
+    const corridors = idx.find((e) => e.id === "corridor-profiles")!;
+    expect(corridors.params).toEqual([]);
+  });
   it("every defaultLayout slice references declared columns (all defs)", () => {
     for (const def of CONCOCTIONS) {
       const keys = new Set(def.columns.map((c) => c.key));
