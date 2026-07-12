@@ -178,11 +178,84 @@ anything.
 
 ### Step 0 — today, before anything else
 
-1. **Commit the 08 research pack.** It is untracked and irreplaceable (~6.5M tokens of verification).
-2. **Fix `mcp_post_transport_500`.** The MCP write flow is returning 500 on every call, right now.
-3. **Re-scope `econ-dev-swfl` in code.** Its TTL expires **07/14**. If it rebuilds before the code is
+**Two live production outages outrank everything else on this board, including the brain rebuild.**
+Both were found by the checks sweep, both independently confirmed here, and both were sitting on the
+board wearing the word "unverified." That is the real lesson of the triage: *those checks weren't
+lazy leftovers — they were outages wearing a checkbox.*
+
+> **Correction (both root causes below are now PROVEN from production logs; an earlier revision of
+> this file blamed the MCP outage on an `@modelcontextprotocol/sdk` 1.29-vs-1.26 export-path break.
+> That was WRONG — I disproved it by fetching the 1.29.0 tarball, which ships every file in question,
+> and by driving the real handler at both versions: it returns 200 at each. The SDK is innocent. The
+> real causes are below. Both are FIXED in code, pending deploy.)**
+
+1. **`mcp_post_transport_500` — the MCP surface is dead.** `POST /api/mcp` returns 500 on every call.
+   **Root cause, quoted from the production log** — Vercel records the thrown object verbatim:
+
+   ```
+   level=error  message="Response { status: 401, headers: {... Mcp-Session-Id} }"
+   requestPath=/api/mcp  responseStatusCode=500
+   ```
+
+   `app/api/mcp/auth.ts` did `throw new Response(401)`, on the belief — stated in its own comment —
+   that *"Next.js App Router returns a thrown Response directly to the caller."* **It does not.** That
+   is the Remix / React Router idiom. Next route handlers **return** a Response; a thrown non-Error is
+   an unhandled exception, answered with a bare 500. It went live the moment `MCP_BEARER_TOKEN` was
+   actually set in Vercel (created 07/03/2026) — so the surface has been dark for eight days. Verified
+   live: prod returns 500 for a missing token **and** for a well-formed wrong one, where 401 is owed.
+   **The unit tests stayed green the whole time because they asserted the *throw*
+   (`expect(caught).toBeInstanceOf(Response)`), never the status a client receives.**
+   **Fixed** (`031b05da`): `assertAuthorized` → `unauthorizedResponse(): Promise<Response | null>`;
+   callers return the denial. **Three** routes carried the identical bug — `POST` and `DELETE
+   /api/mcp`, plus `POST /api/templates/render`, which only `next build` found, not grep.
+
+   **Still needs you:** the fix makes the gate *honest* (401, not 500). It does **not reopen** the
+   surface — `MCP_BEARER_TOKEN` is still set, so external clients stay locked out. If `/api/mcp` is
+   meant to be public (CLAUDE.md lists it as a live surface; `api_b_open_rate_limit` describes it as
+   open JSON, no auth), **that env var has to come out of Vercel.** Infra flip — your call.
+
+2. **PDF generation is dead — and so are PDF-attached blasts.** Every deliverable PDF download 500s
+   (all four seeded examples), while the pages render fine. PDFs are **half of what the product
+   promises**. **Root cause, from the production log:**
+
+   ```
+   Failed to load external module pdf-parse: ReferenceError: DOMMatrix is not defined
+   Cannot load "@napi-rs/canvas" ... pdfjs-dist/legacy/build/pdf.mjs
+   ```
+
+   `lib/pdf/extract.ts` imported `pdf-parse` at **module scope**. `pdf-parse` pulls in `pdfjs-dist`,
+   which needs browser graphics globals (`DOMMatrix`/`ImageData`/`Path2D`) that **do not exist in the
+   Vercel serverless Node runtime** — merely *loading* it there throws. And because `lib/pdf/index.ts`
+   re-exports `extract.ts`, **every importer of the `@/lib/pdf` barrel dragged pdfjs in — including the
+   two routes that only ever *write* a PDF and never read one.** The PDF *reader* was killing the PDF
+   *writer*. Blast radius was one route wider than the sweep found: `.../blast` (attach-PDF on a send)
+   has the same import and the same 500.
+   **Fixed** (`8a7f780b`): `await import("pdf-parse")` inside the one function that reads. Guard test
+   asserts nothing behind the barrel statically imports pdfjs — proven to catch it (2 fail against the
+   old file, 4 pass against the fix).
+
+   **Why every local test passed while prod was down:** the failure only reproduces inside a serverless
+   bundle. A dev box has `DOMMatrix`. This is root cause 1 of the diagnosis — *green measures process,
+   not outcome* — aimed at the app tier instead of the data tier.
+
+3. **Commit the 08 research pack.** It is untracked and irreplaceable (~6.5M tokens of verification).
+
+4. **Re-scope `econ-dev-swfl` in code.** Its TTL expires **07/14**. If it rebuilds before the code is
    fixed, the automation republishes the Charlotte overclaim with a fresh date and we lose the only
    signal we have. `licenses-swfl` is the same problem on a 07/29 clock.
+
+### Also found by the sweep (real bugs, lower blast radius)
+
+- **The homepage "New Listing" button never saves the address** — that lane is broken end to end.
+  Matches `new_listing_scope_address_missing_on_fresh_project` (P2): a fresh project's
+  `subject_address` never reaches `scope.address` when the project has zero items, so the
+  address-lane flyer silently never fires.
+- **The email-capture modal was orphaned** when the block shell was retired on 07/07.
+- **Housekeeping:** 4 duplicate test projects ("Triage Verify 5100 SW 5th Pl") are sitting in the
+  account from the address-bug repro and want deleting.
+
+**Ledger:** 333 → 245 open. 116 closed today, every one against observed evidence. (245, not 244 — I
+opened `pack_code_change_no_brain_invalidation` for root cause 6.)
 
 ### Step 1 — pull the live overclaim off the site (hours, not days)
 
