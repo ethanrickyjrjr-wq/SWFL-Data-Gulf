@@ -427,3 +427,279 @@ def build_health_lines(
         lines.append(line)
 
     return lines
+
+
+# ── collectors (the ONLY I/O in this file) ────────────────────────────────────
+
+import argparse  # noqa: E402
+import json  # noqa: E402
+import os  # noqa: E402
+import sys  # noqa: E402
+from datetime import datetime, timezone  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+from ingest.lib import gh_runs  # noqa: E402
+from ingest.scripts.check_data_quality import (  # noqa: E402
+    load_quality_registry,
+    run_value_tests,
+)
+
+# Phase 2 (content contracts) ships run_content_contracts -- the Locus-B reader. Doctor's
+# health line is "worst of {freshness, volume, CONTENT, run-status}" (spec §7 3c). Wiring
+# only run_value_tests leaves Phase 2's ENTIRE signal dark in the health model. Import it
+# softly so doctor still runs before Phase 2 lands -- and SAY SO in the output rather than
+# reporting a half-signal as whole.
+try:
+    from ingest.scripts.check_data_quality import run_content_contracts  # noqa: E402
+
+    CONTENT_ENGINE = "value_tests+content_contracts"
+except ImportError:  # Phase 2 not landed yet
+    run_content_contracts = None
+    CONTENT_ENGINE = "value_tests only - Phase 2 content contracts NOT landed"
+from ingest.scripts.check_freshness import (  # noqa: E402
+    _get_connection,
+    check_sla_violations,
+    load_registry,
+    run_probe,
+)
+
+_REGISTRY_PATH = Path(__file__).parent.parent / "cadence_registry.yaml"
+
+# FLAGGED ASSUMPTION — this must match Phase 3a's emit path (spec §7 3a names the file but
+# not its location). Reconcile at integration; doctor fail-softs if it is absent.
+_MANIFEST_PATH = Path(__file__).parent.parent.parent / ".github" / "_watch-manifest.json"
+
+
+def load_manifest(path: str | Path | None = None) -> dict[str, dict]:
+    """{workflow_file: manifest_entry}. FAIL-SOFT: Phase 3a may not have landed yet, and a
+    missing manifest must degrade the run-status domain (timeout_minutes unknown ->
+    TIMEOUT_KILL unreachable -> those lines fall to UNKNOWN+evidence), never crash doctor."""
+    p = Path(path or _MANIFEST_PATH)
+    if not p.exists():
+        return {}
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    entries = data if isinstance(data, list) else data.get("workflows", [])
+    return {e["file"]: e for e in entries if isinstance(e, dict) and e.get("file")}
+
+
+def collect_relkinds(conn, schemas: list[str]) -> dict[str, str]:
+    """{'data_lake.listing_active_stats': 'v'} — from pg_catalog.pg_class, NEVER
+    information_schema. Absent from the result = the relation does not exist (ghost table)."""
+    with conn.cursor() as cur:
+        cur.execute(RELKIND_SQL, (list(schemas),))
+        return {f"{s}.{t}": k for s, t, k in cur.fetchall()}
+
+
+def collect_ledger(conn) -> list[dict]:
+    """Open public.checks rows, READ-ONLY. Same Postgres, same connection — the ledger is
+    NOT a separate cred domain. Doctor never writes here (check_data_quality.sync_quality_checks
+    and check_freshness.sync_gap_checks own these keys; a second writer double-opens)."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT check_key, project, label FROM public.checks"
+            " WHERE state = 'open' ORDER BY created_at DESC LIMIT 1000"
+        )
+        return [{"check_key": k, "project": p, "label": lbl} for k, p, lbl in cur.fetchall()]
+
+
+def collect_gh(manifest_by_file: dict[str, dict], *, max_backfill: int = 40):
+    """(summaries_by_workflow_file, gh_error). Bulk first, targeted backfill only for the
+    workflows the bulk window missed — a weekly/monthly/annual workflow with no run in a
+    500-run window is a WINDOW artifact, and calling it NEVER_RAN would be a false RED."""
+    now = datetime.now(timezone.utc)
+    try:
+        workflows = gh_runs.fetch_workflows(limit=200)  # default is 50; we have ~83
+        runs = gh_runs.fetch_runs(limit=500)  # default is 20
+    except gh_runs.GhUnavailable as exc:
+        return {}, str(exc)
+
+    idx = gh_runs.index_workflows(workflows)
+    summaries = gh_runs.summarize_runs(runs, idx, now=now, manifest_by_file=manifest_by_file)
+
+    need = gh_runs.workflows_needing_backfill(summaries)[:max_backfill]
+    backfilled: dict[str, list[dict]] = {}
+    for fname in need:
+        try:
+            backfilled[fname] = gh_runs.fetch_runs_for_workflow(idx[fname]["path"], limit=5)
+        except gh_runs.GhUnavailable:
+            continue  # leave it NO_RUNS_IN_WINDOW (yellow) — never promote to a false RED
+    if backfilled:
+        summaries = gh_runs.apply_backfill(
+            summaries, backfilled, now=now, manifest_by_file=manifest_by_file
+        )
+    return summaries, None
+
+
+# ── output ────────────────────────────────────────────────────────────────────
+
+JSON_SCHEMA_VERSION = 1
+
+
+def to_json(lines: list[dict], *, gh_error: str | None, manifest_ok: bool) -> dict:
+    """FROZEN CONTRACT — the ops /census page consumes this. Do not change a key without
+    changing the census reader in the ops repo in the same breath (test_doctor.py pins it)."""
+    counts = {"green": 0, "yellow": 0, "red": 0}
+    for l in lines:
+        counts[l["health"]] = counts.get(l["health"], 0) + 1
+    return {
+        "schema_version": JSON_SCHEMA_VERSION,
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "counts": {**counts, "total": len(lines)},
+        "coverage": {
+            "datasets": len(lines),
+            "with_workflow": sum(1 for l in lines if l["workflow"]),
+            "with_content_contracts": sum(
+                1 for l in lines if l["content"]["status"] != "NO_CONTRACT"
+            ),
+            "gh": f"unavailable: {gh_error}" if gh_error else "ok",
+            "manifest": "ok" if manifest_ok else "missing",
+        },
+        "datasets": lines,
+    }
+
+
+_ICON = {"green": "🟢", "yellow": "🟡", "red": "🔴"}
+
+
+def format_report(payload: dict) -> str:
+    c = payload["counts"]
+    cov = payload["coverage"]
+    out = [
+        f"## doctor — pipeline health · {payload['generated_at']}\n",
+        f"**{c['red']} red · {c['yellow']} yellow · {c['green']} green** of {c['total']} datasets. "
+        f"Workflow joined: {cov['with_workflow']}/{cov['datasets']} · "
+        f"content contracts: {cov['with_content_contracts']}/{cov['datasets']} · "
+        f"gh: {cov['gh']} · manifest: {cov['manifest']}\n",
+        "| Dataset | Kind | Fresh | Volume | Content | Run | Health |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for l in sorted(
+        payload["datasets"],
+        key=lambda x: ({"red": 0, "yellow": 1, "green": 2}[x["health"]], x["dataset"]),
+    ):
+        out.append(
+            f"| `{l['dataset']}` | {l['kind']} | {l['freshness']['status']} | {l['volume']['status']}"
+            f" | {l['content']['status']} | {l['run']['status']} | {_ICON[l['health']]} {l['health']} |"
+        )
+    reds = [l for l in payload["datasets"] if l["health"] == "red"]
+    if reds:
+        out.append("\n### Prescriptions\n")
+    for l in reds:
+        p = l["prescription"]
+        if p:
+            out.append(
+                f"🔴 **`{l['dataset']}` — {p['code']}** (should_retry={str(p['should_retry']).lower()})"
+            )
+            out.append(f"   - fix: {p['fix']}")
+            if p["evidence"]:
+                out.append(f"   - evidence: {p['evidence']}")
+        for f in l["content"]["failing"]:
+            rows = f"{f['failing_rows']:,}" if f.get("failing_rows") is not None else "—"
+            out.append(
+                f"🔴 **`{l['dataset']}` — content contract failed**: `{f['table']}.{f['col']}` "
+                f"{f['test']} ({f['severity']}) — {rows} failing rows. "
+                f"Fix the data or the contract in `ingest/quality/quality_registry.yaml`."
+            )
+        if l["open_checks"]:
+            out.append(f"   - open checks: {', '.join(l['open_checks'])}")
+    return "\n".join(out) + "\n"
+
+
+# ── main ──────────────────────────────────────────────────────────────────────
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="doctor — one health line per dataset.")
+    ap.add_argument(
+        "--json", action="store_true", help="Emit the machine payload (backs the /census ops page)."
+    )
+    ap.add_argument("--cron", action="store_true", help="Write the report to $GITHUB_STEP_SUMMARY.")
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print to stdout. Doctor is read-only by construction; this only redirects output.",
+    )
+    ap.add_argument(
+        "--fail-on",
+        choices=["red"],
+        default=None,
+        help="Exit 1 when any dataset is red. OMITTED = ADVISORY (exit 0 always).",
+    )
+    args = ap.parse_args(argv)
+
+    manifest = load_manifest()
+    registry = load_registry(_REGISTRY_PATH)
+    quality_registry = load_quality_registry()
+    quality_tables = list((quality_registry.get("tables") or {}).keys())
+
+    gh_summaries, gh_error = collect_gh(manifest)
+
+    try:
+        conn = _get_connection()
+    except Exception as exc:  # noqa: BLE001 — advisory, never fail CI on a connection issue
+        sys.stdout.write(
+            f"## doctor\n\n⚠️ DB connection failed — doctor skipped this run.\n\n```\n{exc}\n```\n"
+        )
+        return 0
+
+    try:
+        pipeline_results, view_results = run_probe(conn, registry)
+        sla_errors, _ = check_sla_violations(pipeline_results)
+        value_results = run_value_tests(conn, quality_registry)
+        if run_content_contracts is not None:
+            # Phase 2's content contracts fold into the SAME result shape
+            # ({table, col, test, severity, failing_rows, status}), so content_severity()
+            # consumes them unchanged.
+            value_results = value_results + run_content_contracts(conn, quality_registry)
+        ledger_rows = collect_ledger(conn)
+        tables = [
+            t
+            for t in (
+                [resolve_table(e) for e in registry.get("pipelines", []) or []] + quality_tables
+            )
+            if t
+        ]
+        schemas = sorted({t.split(".", 1)[0] for t in tables})
+        relkinds = collect_relkinds(conn, schemas)
+    except Exception as exc:  # noqa: BLE001 — advisory contract, mirrors both probes
+        sys.stdout.write(f"## doctor\n\n⚠️ doctor errored — partial result.\n\n```\n{exc}\n```\n")
+        return 0
+    finally:
+        conn.close()
+
+    lines = build_health_lines(
+        registry=registry,
+        pipeline_results=pipeline_results,
+        view_results=view_results,
+        sla_errors=set(sla_errors),
+        value_results=value_results,
+        ledger_rows=ledger_rows,
+        gh_summaries=gh_summaries,
+        gh_error=gh_error,
+        manifest_by_file=manifest,
+        relkinds=relkinds,
+        quality_tables=quality_tables,
+    )
+    payload = to_json(lines, gh_error=gh_error, manifest_ok=bool(manifest))
+
+    if args.json:
+        sys.stdout.write(json.dumps(payload, indent=2, default=str) + "\n")
+    else:
+        report = format_report(payload)
+        step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        if args.dry_run or not step_summary or not args.cron:
+            sys.stdout.buffer.write(report.encode("utf-8"))
+        else:
+            with open(step_summary, "a", encoding="utf-8") as fh:
+                fh.write(report)
+
+    if args.fail_on == "red" and payload["counts"]["red"] > 0:
+        return 1
+    return 0  # ADVISORY by default (spec §7 3c: ship advisory, flip after one green confirm)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

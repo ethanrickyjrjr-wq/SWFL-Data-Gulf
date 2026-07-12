@@ -444,3 +444,88 @@ def test_THE_INVARIANT_every_red_line_carries_a_prescription_or_a_failing_conten
         if has_rx:
             assert l["prescription"]["fix"], "a prescription with empty fix-text is a placeholder"
             assert l["prescription"]["code"] in rx.DOCTOR_ASSIGNABLE
+
+
+# ── --json contract (frozen: /census consumes this) ───────────────────────────
+
+def test_json_top_level_shape_is_frozen():
+    lines = doctor.build_health_lines(
+        registry=REGISTRY, pipeline_results=PIPELINE_RESULTS, view_results=[], sla_errors=set(),
+        value_results=[], ledger_rows=[], gh_summaries=GH, gh_error=None, manifest_by_file={},
+        relkinds=RELKINDS, quality_tables=[],
+    )
+    payload = doctor.to_json(lines, gh_error=None, manifest_ok=True)
+    assert set(payload) == {"schema_version", "generated_at", "counts", "coverage", "datasets"}
+    assert payload["schema_version"] == 1
+    assert set(payload["counts"]) == {"green", "yellow", "red", "total"}
+    assert set(payload["coverage"]) == {
+        "datasets", "with_workflow", "with_content_contracts", "gh", "manifest",
+    }
+    assert payload["counts"]["total"] == len(payload["datasets"])
+    assert payload["generated_at"].endswith("Z")
+
+
+def test_json_dataset_element_shape_is_frozen():
+    lines = doctor.build_health_lines(
+        registry=REGISTRY, pipeline_results=PIPELINE_RESULTS, view_results=[], sla_errors=set(),
+        value_results=[], ledger_rows=[], gh_summaries=GH, gh_error=None, manifest_by_file={},
+        relkinds=RELKINDS, quality_tables=[],
+    )
+    payload = doctor.to_json(lines, gh_error=None, manifest_ok=True)
+    d = payload["datasets"][0]
+    assert set(d) == {
+        "dataset", "table", "kind", "lane", "workflow", "pipeline",
+        "freshness", "volume", "content", "run", "view",
+        "health", "prescription", "open_checks",
+    }
+    assert set(d["freshness"]) == {"status", "severity", "age_days", "last_run"}
+    assert set(d["volume"]) == {"status", "severity", "landed", "min_rows"}
+    assert set(d["content"]) == {"status", "severity", "failing"}
+    assert set(d["run"]) == {"status", "severity", "last_conclusion", "last_success_at",
+                             "consecutive_failures", "url", "cron_in_source"}
+
+
+def test_json_reports_gh_unavailable_rather_than_pretending():
+    lines = doctor.build_health_lines(
+        registry=REGISTRY, pipeline_results=PIPELINE_RESULTS, view_results=[], sla_errors=set(),
+        value_results=[], ledger_rows=[], gh_summaries={}, gh_error="gh 403", manifest_by_file={},
+        relkinds=RELKINDS, quality_tables=[],
+    )
+    payload = doctor.to_json(lines, gh_error="gh 403", manifest_ok=False)
+    assert payload["coverage"]["gh"] == "unavailable: gh 403"
+    assert payload["coverage"]["manifest"] == "missing"
+
+
+# ── report ────────────────────────────────────────────────────────────────────
+
+def test_report_prints_the_prescription_fix_text_on_every_red_line():
+    lines = doctor.build_health_lines(
+        registry=REGISTRY, pipeline_results=PIPELINE_RESULTS, view_results=[], sla_errors=set(),
+        value_results=[], ledger_rows=[], gh_summaries=GH, gh_error=None, manifest_by_file={},
+        relkinds=RELKINDS, quality_tables=[],
+    )
+    text = doctor.format_report(doctor.to_json(lines, gh_error=None, manifest_ok=True))
+    assert "NEVER_LANDED" in text
+    assert "data_lake.redfin_city_swfl" in text     # the fix names the table
+    assert "redfin.yml" in text                     # ...and the workflow
+    assert "🔴" in text
+
+
+def test_manifest_loader_failsofts_on_a_missing_file():
+    assert doctor.load_manifest("/nope/_watch-manifest.json") == {}
+
+
+# ── relkind SQL is parameterised, not interpolated ────────────────────────────
+
+def test_collect_relkinds_binds_schemas_as_a_param():
+    from unittest.mock import MagicMock
+    cur = MagicMock()
+    cur.fetchall.return_value = [("data_lake", "listing_active_stats", "v")]
+    conn = MagicMock()
+    conn.cursor.return_value.__enter__ = MagicMock(return_value=cur)
+    conn.cursor.return_value.__exit__ = MagicMock(return_value=False)
+    out = doctor.collect_relkinds(conn, ["data_lake"])
+    assert out == {"data_lake.listing_active_stats": "v"}
+    sql_arg, params = cur.execute.call_args[0]
+    assert "pg_catalog.pg_class" in sql_arg
+    assert params == (["data_lake"],)
