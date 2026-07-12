@@ -50,4 +50,14 @@ describe("homepage spine (static pins)", () => {
     expect(doors).toContain("/insiders");
     expect(doors).not.toContain("/guides");
   });
+
+  test("stats-bar figures are tappable facts (FactChip seam, not a new system)", () => {
+    const hero = read("components/landing/Hero.tsx");
+    expect(hero).toContain("FactChip");
+    expect(hero).toContain("useHighlighterContext");
+    // Rail rows must NOT get chips — they are already buttons (nested-button hazard).
+    expect(hero.slice(hero.indexOf("rail-top-list"), hero.indexOf("rail-footer"))).not.toContain(
+      "FactChip",
+    );
+  });
 });

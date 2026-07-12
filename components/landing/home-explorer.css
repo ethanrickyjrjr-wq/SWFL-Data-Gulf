@@ -95,6 +95,7 @@
 .home-explorer .stat-value {font-family:var(--font-geist-mono),monospace;font-size:30px;font-weight:600}
 .home-explorer .stat-sub {font-size:11px;color:var(--text-tertiary);margin-top:2px}
 .home-explorer .stat-tag {display:inline-block;margin-top:5px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:rgba(91,201,122,.1);color:var(--mangrove)}
+.home-explorer .stats-hint {grid-column:1/-1;margin:0;padding:6px 16px 12px;color:var(--text-tertiary);font-size:12px;text-align:center}
 
 /* ── Proof strip ── */
 .home-explorer .proof-strip {border-top:1px solid var(--gulf-slate);background:var(--gulf-midnight);padding:14px 32px}

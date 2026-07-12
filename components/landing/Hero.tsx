@@ -10,6 +10,9 @@ import {
   type HomeMapPayload,
   type MetricKey,
 } from "@/lib/landing/home-map-types";
+import { FactChip } from "@/components/highlighter/FactChip";
+import { classifyFact } from "@/lib/highlighter/use-highlight";
+import { useHighlighterContext } from "@/lib/highlighter/context";
 
 /**
  * Homepage hero — Lane B Phase 1 (specs: 2026-07-03-homepage-rebuild-design.md
@@ -45,6 +48,9 @@ const fmt = (val: number, format: "currency" | "number") => {
 export default function Hero({ payload }: { payload: Payload }) {
   const { data, badge, stats } = payload;
   const router = useRouter();
+  // App-root HighlighterProvider seam (same as /r metrics tables): when present,
+  // stats-bar figures become tappable facts; when absent, plain text.
+  const hctx = useHighlighterContext();
 
   const availableMetrics = useMemo(
     () => METRIC_ORDER.filter((k) => data.metrics[k] !== undefined),
@@ -336,11 +342,25 @@ export default function Hero({ payload }: { payload: Payload }) {
             {stats.map((s) => (
               <div className="stat-cell" key={s.label}>
                 <div className="stat-label">{s.label}</div>
-                <div className="stat-value">{s.value}</div>
+                <div className="stat-value">
+                  {hctx ? (
+                    <FactChip
+                      value={s.value}
+                      factType={classifyFact(s.value)}
+                      context={`${s.label} — ${s.sub}`}
+                      onActivate={hctx.onActivate}
+                    />
+                  ) : (
+                    s.value
+                  )}
+                </div>
                 <div className="stat-sub">{s.sub}</div>
                 <div className="stat-tag">{s.tag}</div>
               </div>
             ))}
+            <p className="stats-hint">
+              Tap any figure — or select any sentence on this page — to ask about it.
+            </p>
           </div>
         )}
       </div>

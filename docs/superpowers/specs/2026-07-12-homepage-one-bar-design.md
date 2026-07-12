@@ -115,6 +115,12 @@ wiring an existing seam, not a new gate (RULE 3 C2).
 One static caption near the map (no ticker, no animation): "Tap any figure — or select any
 sentence on this page — to ask about it."
 
+**Implementation deviation (07/12/2026):** rail Top-ZIP values are inside
+`<button class="rail-top-row">` rows that already open the ZIP report — nesting a
+FactChip button there is invalid HTML and a click conflict. Chips therefore ride the
+stats-bar figures only; the rail rows keep their existing click-through. The caption
+covers both affordances.
+
 ### Copy
 
 Headline must pass the descriptive-header litmus test (reading it alone tells you what we
