@@ -85,9 +85,9 @@ commentary in-template (per-item notes + card-level read, written at build time 
 over the filled rows, cached, cron-refreshed — public GET never calls a model), all five cards go
 fully generic, showcase previews go real, mechanism = data_json token + per-archetype zod contracts.
 RESEARCH (crawl4ai, RULE 0.4): WHATWG HTML spec (html.spec.whatwg.org, script-content restrictions)
-— unbalanced `<!--`/`<script` in a script element never closes the block; sanctioned fix = escape
-`<` as \x3C (aka \\u003c), so the serializer MUST escape `<` after JSON.stringify (kills `</script`
-breakout). Vega-Lite (vega.github.io/vega-lite) data/mark/encoding/config split reviewed and
+— unbalanced `<!--`/`<script` in a script element never closes the block; the spec-sanctioned
+remedy is escaping `<` as \x3C (aka \\u003c), so the serializer MUST escape `<` after
+JSON.stringify (neutralizes `</script` breakout). Vega-Lite (vega.github.io/vega-lite) data/mark/encoding/config split reviewed and
 rejected as contract model — our mark+encoding stays baked into art-directed shells. Also caught:
 the shells' footer `Last computed · {{freshness_token}}` slot ships the raw token user-facing —
 spec REMOVES it, `as_of` (MM/DD/YYYY) replaces it in every contract. Registered via new-build.mjs
