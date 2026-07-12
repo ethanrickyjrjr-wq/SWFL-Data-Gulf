@@ -3,7 +3,7 @@ name: Pipeline freshness probe (daily)
 on:
   schedule:
     # 14:00 UTC = 10 AM ET, after the 13:00 UTC ingest cluster runs.
-    # Non-gating: this is observability, not enforcement.
+    # GATING since 07/12/2026: the doctor step exits 1 on any red dataset (operator-approved).
     - cron: "0 14 * * *"
   workflow_dispatch:
     inputs:
@@ -21,7 +21,10 @@ jobs:
   probe:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # 10, not 5: the pre-doctor job ran ~4m15s (source-liveness alone ~3m40s); adding the
+    # doctor (~50s) crossed 5m and the runner killed a fully-green run at the ceiling
+    # (run 29179535786, 07/12/2026).
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -55,16 +58,17 @@ jobs:
 
       # doctor — one health line per dataset: worst of {freshness, volume, content, run-status}
       # + a prescription. Imports check_freshness + check_data_quality (does not re-query) and
-      # joins the gh run-status domain over `gh`. ADVISORY: exits 0 always; --fail-on red is
-      # the deliberate, separately-approved flip. Read-only — writes no row and no ledger entry.
-      - name: doctor (pipeline health — advisory)
+      # joins the gh run-status domain over `gh`. GATING (operator-approved 07/12/2026): exits 1
+      # on any red dataset — a red morning is loud ON PURPOSE until the dataset is fixed or
+      # coverage_exempt-ed. Read-only — writes no row and no ledger entry.
+      - name: doctor (pipeline health — gating)
         if: always()
         env:
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python -m ingest.scripts.doctor --cron
+        run: python -m ingest.scripts.doctor --cron --fail-on red
 
       # UPSTREAM source-liveness. The two probes above read the DATABASE ("did we write
       # lately") — they are structurally blind to a source that has silently started

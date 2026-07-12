@@ -1,3 +1,18 @@
+## 2026-07-12 (Fable 5 · wt/dcd → main) — Doctor GATING flip (T12): daily probe now fails on any red dataset; timeout 5→10
+
+Task 10 acceptance verified live (run 29179535786): doctor section in the cron's step summary with
+`gh: ok · manifest: ok` — 16 red · 26 yellow · 30 green of 72 datasets, workflow joined 71/72,
+prescriptions attached (zombie disabled_manually crons, NEVER_LANDED ghost registry entries,
+listing_state price-floor 21-row contract fail all named). One live defect found by that run: the
+doctor's ~50s pushed the job past `timeout-minutes: 5` (total 5m04s) — every step green, then the
+runner killed it (`conclusion: cancelled`; the just-landed classifier correctly sees TIMEOUT /
+never-retry). Flip commit: `--fail-on red` on the doctor step (operator-approved — red mornings are
+loud ON PURPOSE until the 16 are fixed or coverage_exempt-ed) + `timeout-minutes: 10` (without it
+the gating exit code never fires) + stale ADVISORY comments updated. The 3d probe-body fold stays
+NOT DONE (separate approval; check_freshness/check_data_quality report bodies + their ledger syncs
+untouched). Verify: post-push dispatch must conclude `failure` (16 reds today) with the doctor step
+as the failing step, not a timeout kill.
+
 ## 2026-07-12 (Fable 5 · main) — fgcu-reri: Charlotte kept as a NAMED-SOURCE EXCEPTION (operator ruling)
 
 Operator ruled on scope_fgcu_reri_charlotte: exception, not re-scope — RERI genuinely publishes
