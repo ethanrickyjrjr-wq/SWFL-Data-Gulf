@@ -325,3 +325,96 @@ def test_load_contracts_reads_the_real_registry_for_listing_state():
         "listing_state_home_price_floor",
         "listing_state_property_type_allowlist",
     ]
+
+
+# ── Locus-B SQL builders ───────────────────────────────────────────────────────
+
+from psycopg import sql as pgsql  # noqa: E402
+
+from ingest.quality.contracts import (  # noqa: E402
+    CONTRACT_BUILDERS,
+    assert_read_only,
+    build_enum_sql,
+    build_range_sql,
+    build_sql_expectation_sql,
+)
+
+
+def _render(q):
+    return q.as_string(None)
+
+
+def test_range_sql_is_composable_and_binds_its_bounds():
+    """Structural safety, same guarantee as check_data_quality's builders: a raw f-string
+    would be a plain `str` and fail the isinstance."""
+    q, params = build_range_sql("data_lake.listing_state", _PRICE_FLOOR)
+    assert isinstance(q, pgsql.Composable)
+    assert 20000 in params
+
+
+def test_range_sql_counts_nulls_as_failing_when_allow_null_is_false():
+    """The three-valued-logic hole, closed in SQL too: without the explicit `IS NULL` leg,
+    `sold_to_rent_ratio < 4.0` is NULL for a NULL ratio and the row SILENTLY PASSES."""
+    q, _ = build_range_sql("data_lake.market_details_swfl",
+                           {"col": "r", "min": 4.0, "max": 40.0, "where": []})
+    r = _render(q)
+    assert '"r" IS NULL' in r
+    assert '"r" < %s' in r and '"r" > %s' in r
+
+
+def test_range_sql_omits_the_null_leg_when_allow_null_is_true():
+    q, _ = build_range_sql("t.x", {"col": "r", "min": 1, "allow_null": True, "where": []})
+    assert '"r" IS NULL' not in _render(q)
+
+
+def test_enum_sql_uses_the_locked_all_array_form_not_NOT_IN():
+    """`NOT IN %s` is a psycopg3 SyntaxError — the list adapts to a PG ARRAY, not a tuple."""
+    q, params = build_enum_sql("data_lake.listing_state", _PTYPE_ENUM)
+    r = _render(q)
+    assert "ALL(%s::text[])" in r
+    assert "NOT IN %s" not in r
+    assert params[-1] == _PTYPE_ENUM["allowed"]
+
+
+def test_where_conditions_compile_to_bound_params_never_interpolated_literals():
+    """SQL-injection guarantee for the one place the registry supplies values."""
+    q, params = build_range_sql("data_lake.listing_state", _PRICE_FLOOR)
+    r = _render(q)
+    assert "api_feed" not in r and "single_family" not in r   # never in the SQL text
+    assert "api_feed" in params                               # always in the params
+    assert '"sqft" IS NOT NULL' in r                          # not_null takes no param
+
+
+def test_sql_expectation_passes_the_registry_sql_through():
+    q, params = build_sql_expectation_sql(
+        "data_lake.listing_active_stats",
+        {"failing_rows_sql": "SELECT count(*) FROM data_lake.listing_active_stats"},
+    )
+    assert isinstance(q, pgsql.Composable)
+    assert params == []
+
+
+@pytest.mark.parametrize("bad", [
+    "SELECT 1; DROP TABLE data_lake.listing_state",
+    "DELETE FROM data_lake.listing_state",
+    "UPDATE data_lake.listing_state SET list_price = 0",
+    "TRUNCATE data_lake.listing_state",
+    "SELECT 1 INTO x",
+])
+def test_sql_expectation_rejects_anything_that_is_not_read_only(bad):
+    """The registry is a checked-in file at the same trust level as source — but a probe that
+    can mutate the lake is a category error, and one pasted DELETE would be silent and total."""
+    with pytest.raises(ContractConfigError):
+        assert_read_only(bad)
+
+
+def test_the_real_registry_sql_is_all_read_only():
+    from ingest.quality.contracts import load_contracts as lc
+    for table in ("data_lake.listing_active_stats", "data_lake.market_details_swfl"):
+        for c in lc(table):
+            if c["type"] == "sql_expectation":
+                assert_read_only(c["failing_rows_sql"])   # raises if not
+
+
+def test_every_contract_type_has_a_locus_b_builder():
+    assert set(CONTRACT_BUILDERS) == {"range", "enum", "sql_expectation"}

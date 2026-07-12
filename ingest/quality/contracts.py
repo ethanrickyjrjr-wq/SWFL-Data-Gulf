@@ -306,3 +306,155 @@ def evaluate_batch(
         stats["abort"] = True
         stats["abort_reason"] = " | ".join(abort_reasons)
     return clean, quarantined, stats
+
+
+# ── Locus-B failing-row SQL builders (pure — no DB, unit-testable) ─────────────
+#
+# Each builder returns (query, params) where `query` is a psycopg.sql.Composable and the
+# query is a failing-row count(*). A contract passes iff the count is 0 — dbt's model, and
+# the same one check_data_quality's build_not_null_sql already uses. SQL injection is
+# neutralized STRUCTURALLY: every identifier routes through psycopg.sql.Identifier, every
+# registry value through a bound parameter.
+
+import re  # noqa: E402
+
+_FORBIDDEN_SQL = re.compile(
+    r"\b(insert|update|delete|drop|alter|truncate|create|grant|revoke|copy|into|"
+    r"vacuum|call|do)\b",
+    re.IGNORECASE,
+)
+
+
+def assert_read_only(sql: str) -> None:
+    """A contract's SQL is a PROBE. It may only SELECT.
+
+    quality_registry.yaml is a checked-in file at the same trust level as source code, so this
+    is not an injection defence — it is a category guard. One pasted DELETE in a probe that
+    runs daily against prod would be silent and total."""
+    if ";" in sql:
+        raise ContractConfigError(
+            "contract SQL contains ';' — one statement only, no statement chaining"
+        )
+    hit = _FORBIDDEN_SQL.search(sql)
+    if hit:
+        raise ContractConfigError(
+            f"contract SQL contains the non-read-only keyword {hit.group(0)!r} — probes SELECT only"
+        )
+
+
+def _table_ident(table: str):
+    from psycopg import sql as pgsql
+
+    return pgsql.Identifier(*table.split("."))
+
+
+# where-op -> SQL. Mirrors WHERE_OPS one-for-one; keep the two in step or Locus A and Locus B
+# start disagreeing about which rows are in scope.
+def _where_sql(conds: list[dict] | None):
+    """[(Composable, params)] -> one AND-ed Composable + the flat param list."""
+    from psycopg import sql as pgsql
+
+    frags, params = [], []
+    for cond in conds or []:
+        col, op, val = cond.get("col"), cond.get("op"), cond.get("value")
+        ident = pgsql.Identifier(col)
+        if op == "not_null":
+            frags.append(pgsql.SQL("{} IS NOT NULL").format(ident))
+        elif op == "is_null":
+            frags.append(pgsql.SQL("{} IS NULL").format(ident))
+        elif op == "in":
+            frags.append(pgsql.SQL("{}::text = ANY(%s::text[])").format(ident))
+            params.append([str(v) for v in val])
+        elif op == "not_in":
+            # LOCKED psycopg3 idiom (check_data_quality.py:107-110). `NOT IN %s` is a
+            # SyntaxError: psycopg3 adapts a list to a PG ARRAY, not a SQL tuple.
+            frags.append(pgsql.SQL("{}::text <> ALL(%s::text[])").format(ident))
+            params.append([str(v) for v in val])
+        elif op in ("eq", "ne", "lt", "lte", "gt", "gte"):
+            sym = {"eq": "=", "ne": "<>", "lt": "<", "lte": "<=", "gt": ">", "gte": ">="}[op]
+            frags.append(pgsql.SQL("{} " + sym + " %s").format(ident))
+            params.append(val)
+        else:
+            raise ContractConfigError(f"unknown where op {op!r} (have: {sorted(WHERE_OPS)})")
+    if not frags:
+        return pgsql.SQL("TRUE"), params
+    return pgsql.SQL(" AND ").join(frags), params
+
+
+def build_range_sql(table: str, spec: dict):
+    """count(*) of in-scope rows whose col falls outside [min, max] (or is NULL)."""
+    from psycopg import sql as pgsql
+
+    col = spec.get("col")
+    lo, hi = spec.get("min"), spec.get("max")
+    if lo is None and hi is None:
+        raise ContractConfigError(
+            f"range contract {spec.get('name')!r} declares neither min nor max"
+        )
+    ident = pgsql.Identifier(col)
+    scope_sql, params = _where_sql(spec.get("where"))
+
+    legs = []
+    if not spec.get("allow_null", False):
+        # The explicit NULL leg. Without it `col < %s` is NULL for a NULL col and the row
+        # SILENTLY PASSES — the three-valued-logic hole the band contract shipped with.
+        legs.append(pgsql.SQL("{} IS NULL").format(ident))
+    if lo is not None:
+        legs.append(pgsql.SQL("{} < %s").format(ident))
+        params.append(lo)
+    if hi is not None:
+        legs.append(pgsql.SQL("{} > %s").format(ident))
+        params.append(hi)
+
+    q = pgsql.SQL("SELECT count(*) FROM {tbl} WHERE ({scope}) AND ({legs})").format(
+        tbl=_table_ident(table), scope=scope_sql, legs=pgsql.SQL(" OR ").join(legs)
+    )
+    return q, params
+
+
+def build_enum_sql(table: str, spec: dict):
+    """count(*) of in-scope rows whose col carries a token outside the allowlist (or is NULL)."""
+    from psycopg import sql as pgsql
+
+    col = spec.get("col")
+    allowed = spec.get("allowed")
+    if not allowed:
+        raise ContractConfigError(f"enum contract {spec.get('name')!r} has an empty allowed list")
+    ident = pgsql.Identifier(col)
+    scope_sql, params = _where_sql(spec.get("where"))
+
+    legs = []
+    if not spec.get("allow_null", False):
+        legs.append(pgsql.SQL("{} IS NULL").format(ident))
+    legs.append(pgsql.SQL("{}::text <> ALL(%s::text[])").format(ident))
+    params.append([str(v) for v in allowed])
+
+    q = pgsql.SQL("SELECT count(*) FROM {tbl} WHERE ({scope}) AND ({legs})").format(
+        tbl=_table_ident(table), scope=scope_sql, legs=pgsql.SQL(" OR ").join(legs)
+    )
+    return q, params
+
+
+def build_sql_expectation_sql(table: str, spec: dict):
+    """Pass the registry's hand-written failing-row SQL through, read-only-linted.
+
+    Cross-row / cross-table by nature (a median, a JOIN against another table) — there is no
+    predicate DSL that expresses the land-drag oracle, and inventing one would be a worse lie
+    than a checked-in query. `table` is unused (the SQL names its own tables) but kept in the
+    signature so every builder dispatches identically."""
+    from psycopg import sql as pgsql
+
+    raw = spec.get("failing_rows_sql")
+    if not raw:
+        raise ContractConfigError(
+            f"sql_expectation {spec.get('name')!r} has no failing_rows_sql"
+        )
+    assert_read_only(raw)
+    return pgsql.SQL(raw), []
+
+
+CONTRACT_BUILDERS = {
+    "range": build_range_sql,
+    "enum": build_enum_sql,
+    "sql_expectation": build_sql_expectation_sql,
+}
