@@ -5,13 +5,16 @@ import { PLATFORMS, platformMeta } from "../social/platforms";
 import { SocialIcon } from "@/components/email-lab/social-icons";
 import { fontStack, SECTION_PAD, MUTED, BORDER } from "./styles";
 import { legibleInk } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function FooterBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: FooterProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const hasContact = props.phone || props.email || props.websiteUrl;
@@ -38,7 +41,7 @@ export function FooterBlock({
       <Hr style={{ borderColor: BORDER, margin: "0 0 14px" }} />
 
       {/* Company + address */}
-      {props.companyName || props.address ? (
+      {props.companyName || props.address || scope ? (
         <Text
           style={{
             fontFamily: font,
@@ -48,18 +51,30 @@ export function FooterBlock({
             lineHeight: "1.6",
           }}
         >
-          {props.companyName ?? ""}
-          {props.address ? (
+          <EditableText
+            value={props.companyName ?? ""}
+            path="companyName"
+            scope={scope}
+            placeholder="Company"
+          />
+          {props.address || scope ? (
             <>
               <br />
-              {props.address}
+              <EditableText
+                value={props.address ?? ""}
+                path="address"
+                scope={scope}
+                placeholder="Postal address (CAN-SPAM)"
+              />
             </>
           ) : null}
         </Text>
       ) : null}
 
-      {/* Contact line — phone · email · website */}
-      {hasContact ? (
+      {/* Contact line — phone · email · website. Phone types in place; email and
+          website are link plumbing (inspector-owned), shown as static remainder
+          on the canvas; the server branch keeps today's joined string verbatim. */}
+      {hasContact || scope ? (
         <Text
           style={{
             fontFamily: font,
@@ -69,13 +84,28 @@ export function FooterBlock({
             lineHeight: "1.6",
           }}
         >
-          {[
-            props.phone,
-            props.email,
-            props.websiteUrl ? props.websiteUrl.replace(/^https?:\/\//, "") : null,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
+          {scope ? (
+            <>
+              <EditableText
+                value={props.phone ?? ""}
+                path="phone"
+                scope={scope}
+                placeholder="Phone"
+              />
+              {[props.email, props.websiteUrl ? props.websiteUrl.replace(/^https?:\/\//, "") : null]
+                .filter(Boolean)
+                .map((s) => ` · ${s}`)
+                .join("")}
+            </>
+          ) : (
+            [
+              props.phone,
+              props.email,
+              props.websiteUrl ? props.websiteUrl.replace(/^https?:\/\//, "") : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")
+          )}
         </Text>
       ) : null}
 

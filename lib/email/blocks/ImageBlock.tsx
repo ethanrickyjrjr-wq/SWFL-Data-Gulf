@@ -2,13 +2,16 @@
 import { Img, Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, ImageProps } from "../doc/types";
 import { fontStack, MUTED, CARD_BG, BORDER } from "./styles";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function ImageBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: ImageProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const hasOverlay = Boolean(props.overlayTitle || props.overlayBody);
@@ -38,8 +41,13 @@ export function ImageBlock({
             textAlign: align,
           }}
         >
-          {props.overlayTitle ? (
-            <Text
+          {props.overlayTitle || scope ? (
+            <EditableText
+              as={Text}
+              value={props.overlayTitle ?? ""}
+              path="overlayTitle"
+              scope={scope}
+              placeholder="Headline"
               style={{
                 fontFamily: font,
                 fontSize: "30px",
@@ -48,12 +56,16 @@ export function ImageBlock({
                 margin: "0 0 12px",
                 lineHeight: "1.2",
               }}
-            >
-              {props.overlayTitle}
-            </Text>
+            />
           ) : null}
-          {props.overlayBody ? (
-            <Text
+          {props.overlayBody || scope ? (
+            <EditableText
+              as={Text}
+              value={props.overlayBody ?? ""}
+              path="overlayBody"
+              scope={scope}
+              multiline
+              placeholder="Supporting text"
               style={{
                 fontFamily: font,
                 fontSize: "16px",
@@ -61,9 +73,7 @@ export function ImageBlock({
                 margin: 0,
                 lineHeight: "1.5",
               }}
-            >
-              {props.overlayBody}
-            </Text>
+            />
           ) : null}
         </Section>
       </Section>
@@ -125,8 +135,13 @@ export function ImageBlock({
       ) : (
         imgEl
       )}
-      {props.caption ? (
-        <Text
+      {props.caption || scope ? (
+        <EditableText
+          as={Text}
+          value={props.caption ?? ""}
+          path="caption"
+          scope={scope}
+          placeholder="Caption"
           style={{
             fontFamily: font,
             fontSize: "12px",
@@ -135,9 +150,7 @@ export function ImageBlock({
             margin: "8px 0",
             padding: "0 24px",
           }}
-        >
-          {props.caption}
-        </Text>
+        />
       ) : null}
     </Section>
   );

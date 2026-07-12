@@ -4,13 +4,16 @@ import type { EmailGlobalStyle, HeaderProps } from "../doc/types";
 import { displayFontStack, fontStack, SECTION_PAD } from "./styles";
 import { DISPLAY_FONT_CLASS } from "./email-head";
 import { legibleInk } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function HeaderBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: HeaderProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const displayFont = displayFontStack(globalStyle);
@@ -30,9 +33,14 @@ export function HeaderBlock({
           style={{ maxHeight: "42px", maxWidth: "180px", margin: "0 0 8px", display: "block" }}
         />
       ) : null}
-      {props.companyName ? (
-        <Text
+      {props.companyName || scope ? (
+        <EditableText
+          as={Text}
           className={DISPLAY_FONT_CLASS}
+          value={props.companyName ?? ""}
+          path="companyName"
+          scope={scope}
+          placeholder="Company"
           style={{
             fontFamily: displayFont,
             fontSize: "18px",
@@ -40,21 +48,22 @@ export function HeaderBlock({
             color: legibleInk("#ffffff", bg, 4.5),
             margin: 0,
           }}
-        >
-          {props.companyName}
-        </Text>
+        />
       ) : null}
-      {props.tagline ? (
-        <Text
+      {props.tagline || scope ? (
+        <EditableText
+          as={Text}
+          value={props.tagline ?? ""}
+          path="tagline"
+          scope={scope}
+          placeholder="Tagline"
           style={{
             fontFamily: font,
             fontSize: "12px",
             color: legibleInk(globalStyle.accentColor, bg, 4.5),
             margin: "4px 0 0",
           }}
-        >
-          {props.tagline}
-        </Text>
+        />
       ) : null}
     </Section>
   );

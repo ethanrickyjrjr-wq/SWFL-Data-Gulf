@@ -3,13 +3,16 @@ import { Section, Row, Column, Img, Text, Link } from "@react-email/components";
 import type { AgentCardProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, SECTION_PAD, MUTED, BORDER, CARD_BG } from "./styles";
 import { legibleInk } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function AgentCardBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: AgentCardProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   return (
@@ -39,8 +42,13 @@ export function AgentCardBlock({
           </Column>
         ) : null}
         <Column style={{ verticalAlign: "top" }}>
-          {props.name ? (
-            <Text
+          {props.name || scope ? (
+            <EditableText
+              as={Text}
+              value={props.name ?? ""}
+              path="name"
+              scope={scope}
+              placeholder="Agent name"
               style={{
                 fontFamily: font,
                 fontSize: "15px",
@@ -48,17 +56,26 @@ export function AgentCardBlock({
                 color: globalStyle.primaryColor,
                 margin: 0,
               }}
-            >
-              {props.name}
-            </Text>
+            />
           ) : null}
-          {props.title ? (
-            <Text style={{ fontFamily: font, fontSize: "12px", color: MUTED, margin: "2px 0 0" }}>
-              {props.title}
-            </Text>
+          {props.title || scope ? (
+            <EditableText
+              as={Text}
+              value={props.title ?? ""}
+              path="title"
+              scope={scope}
+              placeholder="Title"
+              style={{ fontFamily: font, fontSize: "12px", color: MUTED, margin: "2px 0 0" }}
+            />
           ) : null}
-          {props.bio ? (
-            <Text
+          {props.bio || scope ? (
+            <EditableText
+              as={Text}
+              value={props.bio ?? ""}
+              path="bio"
+              scope={scope}
+              multiline
+              placeholder="Short bio…"
               style={{
                 fontFamily: font,
                 fontSize: "13px",
@@ -66,14 +83,17 @@ export function AgentCardBlock({
                 color: globalStyle.textColor,
                 margin: "8px 0 0",
               }}
-            >
-              {props.bio}
-            </Text>
+            />
           ) : null}
-          {props.phone ? (
-            <Text style={{ fontFamily: font, fontSize: "12px", color: MUTED, margin: "8px 0 0" }}>
-              {props.phone}
-            </Text>
+          {props.phone || scope ? (
+            <EditableText
+              as={Text}
+              value={props.phone ?? ""}
+              path="phone"
+              scope={scope}
+              placeholder="Phone"
+              style={{ fontFamily: font, fontSize: "12px", color: MUTED, margin: "8px 0 0" }}
+            />
           ) : null}
           {props.ctaLabel && props.ctaUrl ? (
             <Text style={{ margin: "8px 0 0" }}>
@@ -86,7 +106,8 @@ export function AgentCardBlock({
                   color: legibleInk(globalStyle.accentColor, CARD_BG, 4.5),
                 }}
               >
-                {props.ctaLabel} →
+                <EditableText value={props.ctaLabel} path="ctaLabel" scope={scope} />
+                {" →"}
               </Link>
             </Text>
           ) : null}

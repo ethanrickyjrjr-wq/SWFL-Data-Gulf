@@ -44,7 +44,7 @@ export function BlockRenderer({
     : undefined;
   switch (block.type) {
     case "header":
-      return <HeaderBlock props={block.props} globalStyle={globalStyle} />;
+      return <HeaderBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "hero":
       return <HeroBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "stats":
@@ -56,7 +56,7 @@ export function BlockRenderer({
     case "text":
       return <TextBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "image":
-      return <ImageBlock props={block.props} globalStyle={globalStyle} />;
+      return <ImageBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "listing":
       return <ListingBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "multi-column":
@@ -66,19 +66,19 @@ export function BlockRenderer({
     case "metric-card":
       return <MetricCardBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "agent-card":
-      return <AgentCardBlock props={block.props} globalStyle={globalStyle} />;
+      return <AgentCardBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "agent-hero":
-      return <AgentHeroBlock props={block.props} globalStyle={globalStyle} />;
+      return <AgentHeroBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "social-icons":
       return (
         <SocialIconsBlock props={block.props} globalStyle={globalStyle} emailRender={emailRender} />
       );
     case "button":
-      return <ButtonBlock props={block.props} globalStyle={globalStyle} />;
+      return <ButtonBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "divider":
       return <DividerBlock props={block.props} globalStyle={globalStyle} />;
     case "footer":
-      return <FooterBlock props={block.props} globalStyle={globalStyle} />;
+      return <FooterBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "sources":
       return <SourcesBlock props={block.props} globalStyle={globalStyle} />;
     default:

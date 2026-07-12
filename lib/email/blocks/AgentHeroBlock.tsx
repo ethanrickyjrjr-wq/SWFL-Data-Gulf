@@ -5,6 +5,7 @@ import { Section, Img, Text, Link } from "@react-email/components";
 import type { AgentHeroProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, CARD_BG, BORDER, MUTED } from "./styles";
 import { legibleInk } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 const PHOTO_HEIGHT = 300;
 const PLACEHOLDER_BG = "#1a2e35";
@@ -12,9 +13,11 @@ const PLACEHOLDER_BG = "#1a2e35";
 export function AgentHeroBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: AgentHeroProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   return (
@@ -58,8 +61,13 @@ export function AgentHeroBlock({
           borderTop: `3px solid ${globalStyle.accentColor}`,
         }}
       >
-        {props.name ? (
-          <Text
+        {props.name || scope ? (
+          <EditableText
+            as={Text}
+            value={props.name ?? ""}
+            path="name"
+            scope={scope}
+            placeholder="Agent name"
             style={{
               fontFamily: font,
               fontSize: "22px",
@@ -69,12 +77,15 @@ export function AgentHeroBlock({
               margin: "0 0 4px",
               letterSpacing: "-0.3px",
             }}
-          >
-            {props.name}
-          </Text>
+          />
         ) : null}
-        {props.designation ? (
-          <Text
+        {props.designation || scope ? (
+          <EditableText
+            as={Text}
+            value={props.designation ?? ""}
+            path="designation"
+            scope={scope}
+            placeholder="Designation"
             style={{
               fontFamily: font,
               fontSize: "12px",
@@ -84,17 +95,21 @@ export function AgentHeroBlock({
               textTransform: "uppercase",
               letterSpacing: "0.08em",
             }}
-          >
-            {props.designation}
-          </Text>
+          />
         ) : null}
       </Section>
 
       {/* Tagline + CTA */}
-      {props.tagline || (props.ctaLabel && props.ctaUrl) ? (
+      {props.tagline || (props.ctaLabel && props.ctaUrl) || scope ? (
         <Section style={{ padding: "16px 24px", borderBottom: `1px solid ${BORDER}` }}>
-          {props.tagline ? (
-            <Text
+          {props.tagline || scope ? (
+            <EditableText
+              as={Text}
+              value={props.tagline ?? ""}
+              path="tagline"
+              scope={scope}
+              multiline
+              placeholder="Tagline…"
               style={{
                 fontFamily: font,
                 fontSize: "14px",
@@ -102,9 +117,7 @@ export function AgentHeroBlock({
                 color: MUTED,
                 margin: "0 0 10px",
               }}
-            >
-              {props.tagline}
-            </Text>
+            />
           ) : null}
           {props.ctaLabel && props.ctaUrl ? (
             <Text style={{ margin: 0 }}>
@@ -118,7 +131,8 @@ export function AgentHeroBlock({
                   textDecoration: "none",
                 }}
               >
-                {props.ctaLabel} →
+                <EditableText value={props.ctaLabel} path="ctaLabel" scope={scope} />
+                {" →"}
               </Link>
             </Text>
           ) : null}
