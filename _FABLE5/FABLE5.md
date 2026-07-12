@@ -41,4 +41,7 @@ ledger land in `insiders-runs/<stamp>/`. Sends are operator commands only
 
 ## State of the desk (≤5 lines, update each visit)
 
+- 07/11/2026: first real triage — 48 rows → 16 picks (dual-source Gannett dupes + junk removed).
+  July thesis candidate: luxury diffusing outward from Naples. No weight-5; Marco Hilton decision
+  07/31 is the nearest event-mini candidate. No issues shipped yet; composer being built (Phase B).
 - 07/10/2026: desk opened; no issues shipped yet; composer being built (Phase B).

@@ -1,3 +1,26 @@
+## 2026-07-11 (Fable 5 · main) — Insiders desk first triage + /desk v2 wave built (⌘K, watchlist, alerts, histogram, correlation, Wire filing)
+
+Two jobs. (1) **Insiders desk triage** (first real one): 48 lake rows → 16 handpicked entries in
+`_FABLE5/desk/2026-07.md` (every story runs on BOTH naplesnews.com + news-press.com — Gannett dupes —
+plus index/about-us junk; deduped). July thesis candidate: luxury diffusing outward from Naples. No
+weight-5; Marco Hilton's 07/31 planning decision is the nearest event-mini. Parser-verified, frontmatter
++ FABLE5.md state updated. (2) **/desk v2 additions** (spec `2026-07-12-desk-v2-additions-design.md`,
+check `desk_v2_additions_live_verify`, operator-approved scope "all of it, do what you can"): ⌘K command
+bar (`cmdk@1.1.1`, registry-verified; hand-rolled overlay so only cmdk's documented core is depended on;
+zone jumps + core-ZIP → zip-report + pin/report actions), watchlist (localStorage `desk_watchlist_v1`,
+`useSyncExternalStore` after the repo's set-state-in-effect hard error fired, pure helpers tested),
+threshold-alert rail (`lib/desk/alerts.ts`, code-owned constants, partial/carryover-day suppression —
+live HTML already shows a real fire: 266 cuts vs 232 new on 07/11), price-band histogram (NEW view
+`data_lake.listing_price_bands` applied + verified — region total 20,822 reconciles the Active-listings
+KPI exactly; 7-day staleness gate), ZIP×metric Pearson heatmap (pure `correlation.ts`, min-pair-n 10,
+n=52 live, vendored-heatmap call-site pattern), Wire file-this (kind:"note" with verbatim provenance +
+disclosure). Gates: lib/desk 36/0, eslint clean, `bunx next build` ✓, served /desk HTML shows all new
+zones + zero `[config]`/raw-token leaks. Deferred WITH reasons → `docs/handoff/2026-07-11-desk-v2-deferred-handoff.md`
+(choropleth blocked on the 33931-welded SVG; STORMS/PERMITS tabs blocked on the dead permits feed;
+filter tabs descoped — loader reshape). NOTE: `bun add cmdk` touched package.json/bun.lock claimed by a
+parallel session — verified only my cmdk line differs from HEAD, nothing clobbered. Committed local,
+NOT pushed (new dep + live surface = operator diff-review).
+
 ## 2026-07-11 (Fable 5 · main) — Send/PDF/brand/funnel readiness audit; funnel repairs + pdf-parse containment committed
 
 Operator ask: "emails and PDFs in order — send, build in bulk, inject brands/logos, visitors land right."

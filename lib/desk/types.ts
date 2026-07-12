@@ -124,6 +124,42 @@ export interface FlashItem {
   disclosure?: string;
 }
 
+/** One core ZIP's stat bundle — the watchlist rail + ⌘K jump list read this.
+ *  Display strings preformatted server-side (SSR numbers, client only filters). */
+export interface WatchZipRow {
+  zip: string;
+  county: string | null;
+  activeCount: number;
+  medianListDisplay?: string;
+  priceCutShareDisplay?: string;
+  newListingShareDisplay?: string;
+}
+
+/** One price band of the affordability histogram (from
+ *  data_lake.listing_price_bands — aggregated in SQL, never raw rows). */
+export interface PriceBand {
+  band: string;
+  count: number;
+}
+
+export interface PriceBandsData {
+  /** Region-wide bands in ascending price order. */
+  bands: PriceBand[];
+  total: number;
+  asOf?: string;
+  sourceLabel: string;
+}
+
+/** Metric×metric Pearson matrix computed across core ZIPs (lib/desk/correlation). */
+export interface CorrelationData {
+  labels: string[];
+  matrix: (number | null)[][];
+  /** Smallest complete-case ZIP count across pairs — stated in the zone copy. */
+  zipCount: number;
+  asOf?: string;
+  sourceLabel: string;
+}
+
 export interface DeskGauges {
   /** Median hotness dial input — reuses MarketTempGaugeData upstream shape. */
   marketTemp: { medianHotness: number; zipCount: number; asOf?: string } | null;
@@ -142,4 +178,10 @@ export interface DeskData {
   movers: MoversData | null;
   flash: FlashItem[];
   gauges: DeskGauges;
+  /** Every core ZIP with stats — watchlist rail + ⌘K jump list (v2). */
+  watch: WatchZipRow[];
+  /** Price-band histogram (v2) — null hides the zone. */
+  bands: PriceBandsData | null;
+  /** ZIP×metric correlation matrix (v2) — null hides the zone. */
+  correlation: CorrelationData | null;
 }

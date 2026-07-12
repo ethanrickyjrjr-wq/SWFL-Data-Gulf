@@ -1,4 +1,5 @@
 import type { MoversData, MoverRow } from "@/lib/desk/types";
+import { WatchButton } from "./WatchButton";
 
 function Board({ title, rows, color }: { title: string; rows: MoverRow[]; color: string }) {
   if (rows.length === 0) return null;
@@ -8,7 +9,8 @@ function Board({ title, rows, color }: { title: string; rows: MoverRow[]; color:
       <h3 className="text-[11px] uppercase tracking-wider text-gray-500">{title}</h3>
       <ul className="mt-2 flex flex-col gap-1.5">
         {rows.map((r) => (
-          <li key={r.zip} className="grid grid-cols-[64px_1fr_auto] items-center gap-2">
+          <li key={r.zip} className="grid grid-cols-[auto_64px_1fr_auto] items-center gap-2">
+            <WatchButton zip={r.zip} />
             <span className="font-mono text-xs text-gray-300 tabular-nums">
               {r.zip}
               {r.county ? <span className="block text-[9px] text-gray-600">{r.county}</span> : null}

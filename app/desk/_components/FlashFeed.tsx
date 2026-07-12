@@ -1,4 +1,5 @@
 import type { FlashItem } from "@/lib/desk/types";
+import { FileFlashItem } from "./FileFlashItem";
 
 const KIND_STYLE: Record<FlashItem["kind"], { label: string; className: string }> = {
   news: { label: "NEWS", className: "border-gulf-teal/40 text-gulf-teal" },
@@ -39,6 +40,9 @@ export function FlashFeed({ items }: { items: FlashItem[] }) {
               ) : (
                 <span className="min-w-0 truncate text-sm text-gray-200">{it.headline}</span>
               )}
+              <span className="ml-auto">
+                <FileFlashItem item={it} />
+              </span>
             </div>
             {it.detail ? <p className="pl-1 font-mono text-xs text-gray-400">{it.detail}</p> : null}
             {it.disclosure ? (

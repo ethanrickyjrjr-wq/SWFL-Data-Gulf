@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { PageShell } from "@/components/PageShell";
 import { MarketTemperatureGauge } from "@/components/charts";
+import { PriceBandHistogram } from "@/components/charts/PriceBandHistogram";
+import { DeskCorrelationHeatmap } from "@/components/charts/DeskCorrelationHeatmap";
 import { AddChartToProject } from "@/app/charts/AddChartToProject";
 import { deskJsonLd, type DeskJsonLdFigure } from "@/lib/jsonld";
 import { loadDeskData } from "@/lib/desk/loaders";
+import { deriveAlerts } from "@/lib/desk/alerts";
 import type { DeskDatum } from "@/lib/desk/types";
 import { DeskZone } from "./_components/DeskZone";
 import { WireTicker } from "./_components/WireTicker";
@@ -17,6 +20,14 @@ import { DeskGaugePanel } from "./_components/DeskGaugePanel";
 import { DeskHighlightBridge } from "./_components/DeskHighlightBridge";
 import { TurnIntoReportCta } from "./_components/TurnIntoReportCta";
 import { PinToEmail } from "./_components/PinToEmail";
+import { DeskAlertRail } from "./_components/DeskAlertRail";
+import { DeskWatchlist } from "./_components/DeskWatchlist";
+import {
+  DeskCommandBar,
+  type CommandPin,
+  type CommandRecipe,
+  type CommandZone,
+} from "./_components/DeskCommandBar";
 
 // Fully indexable on purpose (SPEC-B SEAM: the robots decision is a pure
 // robots.ts edit later — nothing to undo here).
@@ -91,6 +102,33 @@ export default async function DeskPage() {
     return { datum };
   });
 
+  // ⌘K command bar inputs — navigation/actions only, no data of its own.
+  const alerts = deriveAlerts(desk);
+  const commandZones: CommandZone[] = [
+    ...(desk.hero ? [{ id: "desk-hero", label: "Home price trend" }] : []),
+    ...(alerts.length > 0 ? [{ id: "desk-alerts", label: "Alerts" }] : []),
+    ...(desk.pulse ? [{ id: "desk-pulse", label: "Daily market pulse" }] : []),
+    ...(desk.movers ? [{ id: "desk-movers", label: "Movers — core ZIPs" }] : []),
+    ...(desk.flash.length > 0 ? [{ id: "desk-flash", label: "The Wire" }] : []),
+    ...(desk.bands ? [{ id: "desk-bands", label: "Asking-price bands" }] : []),
+    ...(desk.correlation ? [{ id: "desk-correlation", label: "Signal correlation" }] : []),
+  ];
+  const commandPins: CommandPin[] = tiles
+    .filter((t): t is KpiTile & { pin: NonNullable<KpiTile["pin"]> } => !!t.pin)
+    .map((t) => ({ title: t.datum.label, pin: t.pin }));
+  const commandRecipes: CommandRecipe[] = [
+    {
+      label: "Home price trend",
+      recipe:
+        "Build a branded client email around the Southwest Florida home price trend for Cape Coral, Fort Myers, and Naples.",
+    },
+    {
+      label: "Today's market pulse",
+      recipe:
+        "Build a branded client email around today's Southwest Florida market pulse — new listings, price cuts, and confirmed sales.",
+    },
+  ];
+
   return (
     <div className="min-h-dvh bg-navy-dark font-sans text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
@@ -117,9 +155,17 @@ export default async function DeskPage() {
               Live
             </span>
           </div>
-          <p className="font-mono text-xs text-gray-500">
-            Every figure carries its own source and date.
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="font-mono text-xs text-gray-500">
+              Every figure carries its own source and date.
+            </p>
+            <DeskCommandBar
+              zones={commandZones}
+              zips={desk.watch}
+              pins={commandPins}
+              recipes={commandRecipes}
+            />
+          </div>
         </header>
       </PageShell>
 
@@ -199,6 +245,14 @@ export default async function DeskPage() {
             ) : null}
           </div>
 
+          <DeskAlertRail alerts={alerts} />
+
+          <DeskWatchlist
+            rows={desk.watch}
+            asOf={desk.movers?.asOf}
+            sourceLabel={desk.movers?.sourceLabel ?? "SWFL Data Gulf"}
+          />
+
           {desk.pulse ? (
             <DeskZone
               id="desk-pulse"
@@ -264,6 +318,35 @@ export default async function DeskPage() {
                   </p>
                 ) : null}
               </div>
+            ) : null}
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {desk.bands ? (
+              <DeskZone
+                id="desk-bands"
+                title="Asking-Price Bands"
+                note="Where today's active inventory sits by asking price — counts reconcile with the Active listings figure above (same filter set)."
+                asOf={desk.bands.asOf}
+                sourceLabel={desk.bands.sourceLabel}
+                actions={
+                  <TurnIntoReportCta recipe="Build a branded client email around where Southwest Florida's active listings sit by asking-price band." />
+                }
+              >
+                <PriceBandHistogram bands={desk.bands} />
+              </DeskZone>
+            ) : null}
+
+            {desk.correlation ? (
+              <DeskZone
+                id="desk-correlation"
+                title="Signal Correlation"
+                note={`How four market signals moved together across ${desk.correlation.zipCount} core ZIPs — descriptive association, not cause and not a forecast.`}
+                asOf={desk.correlation.asOf}
+                sourceLabel={desk.correlation.sourceLabel}
+              >
+                <DeskCorrelationHeatmap data={desk.correlation} />
+              </DeskZone>
             ) : null}
           </div>
         </div>

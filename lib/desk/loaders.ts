@@ -31,7 +31,9 @@ import {
   type MomentumRow,
   type SeriesPoint,
 } from "./mappers";
+import { correlationMatrix, type CorrelationMetric } from "./correlation";
 import type {
+  CorrelationData,
   DeskData,
   DeskDatum,
   DeskGauges,
@@ -39,9 +41,11 @@ import type {
   HeroCitySeries,
   HeroData,
   MoversData,
+  PriceBandsData,
   PulseData,
   PulseDay,
   TickerEntry,
+  WatchZipRow,
 } from "./types";
 
 type Supabase = SupabaseClient;
@@ -420,6 +424,51 @@ async function loadMarketTemp(supabase: Supabase): Promise<MarketTempGaugeData |
 }
 
 // ---------------------------------------------------------------------------
+// listing_price_bands — affordability histogram (aggregated in SQL)
+// ---------------------------------------------------------------------------
+
+interface PriceBandRow {
+  county: string | null;
+  band_order: number;
+  band: string;
+  listing_count: number;
+  latest_scraped_at: string | null;
+}
+
+/** Freshness gate: a histogram older than this is hidden, not shown stale. */
+const PRICE_BANDS_MAX_AGE_DAYS = 7;
+
+async function loadPriceBands(supabase: Supabase): Promise<PriceBandsData | null> {
+  try {
+    const { data, error } = await supabase
+      .schema("data_lake")
+      .from("listing_price_bands")
+      .select("county, band_order, band, listing_count, latest_scraped_at")
+      .is("county", null)
+      .order("band_order", { ascending: true });
+    if (error || !data || data.length === 0) return null;
+    const rows = data as PriceBandRow[];
+    const latest = rows
+      .map((r) => r.latest_scraped_at)
+      .filter((d): d is string => !!d)
+      .sort()
+      .at(-1);
+    if (!latest) return null;
+    const ageDays = (Date.now() - new Date(latest).getTime()) / 86_400_000;
+    if (!Number.isFinite(ageDays) || ageDays > PRICE_BANDS_MAX_AGE_DAYS) return null;
+    const bands = rows.map((r) => ({ band: r.band, count: r.listing_count }));
+    return {
+      bands,
+      total: bands.reduce((s, b) => s + b.count, 0),
+      asOf: mdY(latest),
+      sourceLabel: SPINE_SOURCE,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Hero — daily_truth first; ZHVI monthly fallback (four-lane: never refuse)
 // ---------------------------------------------------------------------------
 
@@ -526,6 +575,7 @@ export async function loadDeskData(): Promise<DeskData> {
     newConstruction,
     pending,
     foreclosures,
+    bands,
   ] = await Promise.all([
     loadTruthSeries(supabase),
     loadActiveStats(supabase),
@@ -538,6 +588,7 @@ export async function loadDeskData(): Promise<DeskData> {
     countActiveFlag(supabase, "flag_new_construction"),
     countActiveFlag(supabase, "flag_pending"),
     countActiveFlag(supabase, "flag_foreclosure"),
+    loadPriceBands(supabase),
   ]);
 
   // Hero: the web-verified daily price line when it carries values, else the
@@ -677,6 +728,49 @@ export async function loadDeskData(): Promise<DeskData> {
         }
       : null;
 
+  // --- Watchlist rows + ⌘K jump list (every core ZIP, SSR-formatted) ------
+  const watch: WatchZipRow[] = momentum.zips
+    .filter((r) => r.zip_code && isCoreScope(r.zip_code))
+    .map((r) => ({
+      zip: r.zip_code as string,
+      county: r.county,
+      activeCount: r.active_listing_count ?? 0,
+      medianListDisplay:
+        r.zip_code && medianByZip.has(r.zip_code)
+          ? fmtUsd(medianByZip.get(r.zip_code) as number)
+          : undefined,
+      priceCutShareDisplay:
+        r.price_reduced_share != null ? fmtPct(r.price_reduced_share) : undefined,
+      newListingShareDisplay: r.new_listing_share != null ? fmtPct(r.new_listing_share) : undefined,
+    }))
+    .sort((a, b) => a.zip.localeCompare(b.zip));
+
+  // --- ZIP×metric correlation (deterministic Pearson, lib/desk/correlation) --
+  const CORRELATION_METRICS: CorrelationMetric[] = [
+    { key: "median", label: "Median asking price" },
+    { key: "active", label: "Active listings" },
+    { key: "cuts", label: "Price-cut share" },
+    { key: "fresh", label: "New-listing share" },
+  ];
+  const corrRows = momentum.zips
+    .filter((r) => r.zip_code && isCoreScope(r.zip_code))
+    .map((r) => ({
+      median: r.zip_code ? (medianByZip.get(r.zip_code) ?? null) : null,
+      active: r.active_listing_count,
+      cuts: r.price_reduced_share,
+      fresh: r.new_listing_share,
+    }));
+  const corr = correlationMatrix(corrRows, CORRELATION_METRICS);
+  const correlation: CorrelationData | null = corr
+    ? {
+        labels: corr.labels,
+        matrix: corr.matrix,
+        zipCount: corr.minPairN,
+        asOf: momentum.asOf ?? spineAsOf,
+        sourceLabel: SPINE_SOURCE,
+      }
+    : null;
+
   // --- Flash feed (news + notable events, newest first) -------------------
   const flash: FlashItem[] = [...news, ...cuts, ...closings]
     .sort((a, b) => {
@@ -772,5 +866,5 @@ export async function loadDeskData(): Promise<DeskData> {
   if (gauges.priceReduced) gauges.priceReduced.takeaway = makeTakeaway(gauges.priceReduced, SWFL);
   if (hero) for (const c of hero.cities) c.latest.takeaway = makeTakeaway(c.latest);
 
-  return { ticker, hero, kpis, mix, pulse, movers, flash, gauges };
+  return { ticker, hero, kpis, mix, pulse, movers, flash, gauges, watch, bands, correlation };
 }
