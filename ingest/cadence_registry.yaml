@@ -44,6 +44,9 @@ pipelines:
   # Sourced metrics: value + real source URL from the cascade; anomaly check vs OUR OWN prior value
   # (anomaly_threshold_pct is per-metric). Writes data_lake.daily_truth (consumer: freshness-pulse brain).
   - name: live_search_daily_median_price
+    workflow: live-search-daily.yml
+    consuming_pack: freshness-pulse
+    nightly: true
     lane: tier-2
     cadence_days: 1
     tolerance_multiplier: 1.5
@@ -80,6 +83,9 @@ pipelines:
         source_label: "our own live-search cascade (no fixed vendor API)"
 
   - name: live_search_daily_mortgage
+    workflow: live-search-daily.yml
+    consuming_pack: freshness-pulse
+    nightly: true
     lane: tier-2
     cadence_days: 1
     tolerance_multiplier: 1.5
@@ -113,6 +119,8 @@ pipelines:
   # Verified: SELECT id, updated_at FROM data_lake._tier1_inventory WHERE id = '<id>'
 
   - name: zori_swfl_duckdb
+    workflow: zori-tier1-monthly.yml
+    consuming_pack: rentals-swfl
     lane: tier-1-duckdb
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -131,6 +139,8 @@ pipelines:
         source_label: "Zillow Research Data"
 
   - name: zhvi_swfl_duckdb
+    workflow: zhvi-tier1-monthly.yml
+    consuming_pack: home-values-swfl
     lane: tier-1-duckdb
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -149,6 +159,8 @@ pipelines:
         source_label: "Zillow Research Data"
 
   - name: tier_divergence_swfl_duckdb
+    workflow: tier-divergence-tier1-monthly.yml
+    consuming_pack: tier-divergence-swfl
     lane: tier-1-duckdb
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -168,6 +180,8 @@ pipelines:
         source_label: "Zillow Research Data"
 
   - name: redfin_swfl
+    workflow: redfin-monthly.yml
+    consuming_pack: housing-swfl
     lane: tier-1-duckdb
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -186,6 +200,8 @@ pipelines:
         source_label: "Redfin Data Center"
 
   - name: redfin_price_drops
+    workflow: redfin-price-drops-monthly.yml
+    consuming_pack: seller-stress-swfl
     lane: tier-1-duckdb
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -201,6 +217,8 @@ pipelines:
         source: "our ingest (126 ZIPs)"
 
   - name: redfin_contract_cancellations
+    workflow: redfin-contract-cancellations-monthly.yml
+    consuming_pack: seller-stress-swfl
     lane: tier-1-duckdb
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -216,6 +234,8 @@ pipelines:
         source: "our ingest (126 ZIPs)"
 
   - name: redfin_delistings_relistings
+    workflow: redfin-delistings-relistings-monthly.yml
+    consuming_pack: seller-stress-swfl
     lane: tier-1-duckdb
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -231,6 +251,8 @@ pipelines:
         source: "our ingest (126 ZIPs)"
 
   - name: hurdat2_fl
+    workflow: hurdat2-annual.yml
+    consuming_pack: hurricane-tracks-fl
     lane: tier-1-duckdb
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -248,6 +270,8 @@ pipelines:
         source_label: "NOAA National Hurricane Center (HURDAT2)"
 
   - name: storm_history_swfl
+    workflow: storm-history-monthly.yml
+    consuming_pack: storm-history-swfl
     lane: tier-1-duckdb
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -265,6 +289,8 @@ pipelines:
         source_label: "NOAA Storm Events Database"
 
   - name: usgs
+    workflow: usgs-monthly.yml
+    consuming_pack: env-swfl
     lane: tier-1-duckdb
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -285,6 +311,8 @@ pipelines:
   # ── Tier-1 prefix (date-partitioned cold storage) ─────────────────────────
   # Verified: SELECT id FROM data_lake._tier1_inventory WHERE id LIKE '<prefix>%' ORDER BY updated_at DESC LIMIT 1
   - name: faf5
+    workflow: faf5-annual.yml
+    consuming_pack: logistics-swfl
     lane: tier-1
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -303,6 +331,8 @@ pipelines:
         source_label: "FHWA/BTS Freight Analysis Framework 5"
 
   - name: fred_g17
+    workflow: ingest-fred-g17.yml
+    consuming_pack: none
     lane: tier-1
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -320,6 +350,8 @@ pipelines:
         source_label: "FRED (St. Louis Fed)"
 
   - name: fred_laus_alfred
+    workflow: fred-laus-alfred-monthly.yml
+    consuming_pack: none
     lane: tier-1
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -334,6 +366,8 @@ pipelines:
         source_label: "FRED ALFRED (vintage LAUS)"
 
   - name: fred_listing_swfl
+    workflow: ingest-fred-listing-swfl.yml
+    consuming_pack: none
     lane: tier-1
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -356,6 +390,8 @@ pipelines:
         source_label: "FRED — Housing Inventory Core Metrics (Realtor.com)"
 
   - name: market_heat_swfl
+    workflow: ingest-market-heat-swfl.yml
+    consuming_pack: market-heat-swfl
     lane: tier-1
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -378,6 +414,8 @@ pipelines:
         source_label: "Realtor.com Economic Research Data Library"
 
   - name: bls_ppi
+    workflow: ingest-bls-ppi.yml
+    consuming_pack: none
     lane: tier-1
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -402,6 +440,8 @@ pipelines:
         source_label: "BLS Producer Price Index — Industry Factsheets"
 
   - name: bls_oews_swfl_tier1
+    workflow: bls-oews-annual.yml
+    consuming_pack: labor-demand-swfl
     lane: tier-1
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -425,6 +465,8 @@ pipelines:
         source_label: "BLS CES/SAE"
 
   - name: census_vip
+    workflow: ingest-census-vip.yml
+    consuming_pack: none
     lane: tier-1
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -442,6 +484,9 @@ pipelines:
         source_label: "Census Bureau Construction Spending (VIP/C30)"
 
   - name: city_pulse
+    workflow: city-pulse-daily.yml
+    consuming_pack: city-pulse-swfl
+    nightly: true
     lane: tier-1
     cadence_days: 7 # WEEKLY cost mode 07/05/2026 (pre-launch data building) — restore 1 at launch
     tolerance_multiplier: 3.0
@@ -464,6 +509,8 @@ pipelines:
         source_label: "Wikipedia Lee County / Collier County community lists"
 
   - name: city_pulse_corridors
+    workflow: corridor-pulse-weekly.yml
+    consuming_pack: [corridor-pulse-swfl, cre-swfl]
     lane: tier-1
     cadence_days: 7
     tolerance_multiplier: 3.0
@@ -493,6 +540,8 @@ pipelines:
   # It does not always match the pipeline dir name or the pipeline_name= argument.
   # Every value below was read directly from the live _dlt_loads table.
   - name: bls_laus
+    workflow: bls-laus-monthly.yml
+    consuming_pack: macro-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -511,6 +560,8 @@ pipelines:
         source_label: "BLS LAUS"
 
   - name: bls_qcew
+    workflow: bls-qcew-quarterly.yml
+    consuming_pack: macro-swfl
     lane: tier-2
     cadence_days: 90
     tolerance_multiplier: 1.5
@@ -529,6 +580,8 @@ pipelines:
         source_label: "BLS QCEW"
 
   - name: bls_oews_swfl
+    workflow: bls-oews-annual.yml
+    consuming_pack: labor-demand-swfl
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -552,6 +605,8 @@ pipelines:
         source_label: "BLS CES/SAE"
 
   - name: census_cbp
+    workflow: census-cbp-annual.yml
+    consuming_pack: macro-florida
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -571,6 +626,8 @@ pipelines:
         source_label: "Census Building Permits Survey"
 
   - name: census_acs
+    workflow: census-acs-annual.yml
+    consuming_pack: lib/zip-summary
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -593,6 +650,8 @@ pipelines:
         source_label: "Census SAIPE"
 
   - name: usgs_tier2
+    workflow: none
+    consuming_pack: env-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -613,6 +672,8 @@ pipelines:
         source_label: "USGS National Water Information System"
 
   - name: fema
+    workflow: fema-nfip-quarterly.yml
+    consuming_pack: [env-swfl, hurricane-tracks-fl]
     lane: tier-2
     cadence_days: 90
     tolerance_multiplier: 2.0
@@ -633,6 +694,8 @@ pipelines:
         source_label: "FEMA OpenFEMA"
 
   - name: leepa
+    workflow: leepa-parcels-annual.yml
+    consuming_pack: properties-lee-value
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -657,6 +720,8 @@ pipelines:
         summary: "24 layers total (not the ~4 assumed). We pull layers 0, 9, 10, 12; layers 1-8 confirmed as cartographic label duplicates of value layers 13-18 (not a gap). Layers 19-23 (Non CT Sales, Land Type, Delinquent Tax Advertising, Cert of Title Sales, Comparable Sales) are genuinely unexamined — field schemas UNCONFIRMED as of 07/08/2026 (repeated live-query timeouts against gissvr.leepa.org for those specific layer IDs; retry from a clean session)."
 
   - name: redfin_collier
+    workflow: redfin-collier-monthly.yml
+    consuming_pack: properties-collier-value
     lane: tier-2
     cadence_days: 31
     tolerance_multiplier: 2.0
@@ -671,6 +736,8 @@ pipelines:
         source: "our ingest"
 
   - name: redfin_lee
+    workflow: redfin-lee-monthly.yml
+    consuming_pack: properties-lee-value
     lane: tier-2
     cadence_days: 31
     tolerance_multiplier: 2.0
@@ -685,6 +752,8 @@ pipelines:
         source: "our ingest"
 
   - name: redfin_city_swfl
+    workflow: redfin-city-swfl-monthly.yml
+    consuming_pack: none
     lane: tier-2
     cadence_days: 31
     tolerance_multiplier: 2.0
@@ -702,6 +771,8 @@ pipelines:
         source_label: "Redfin Data Center city_market_tracker"
 
   - name: collier_parcels
+    workflow: collier-parcels-annual.yml
+    consuming_pack: properties-collier-value
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -723,6 +794,8 @@ pipelines:
 
 
   - name: fhfa
+    workflow: fhfa-hpi-quarterly.yml
+    consuming_pack: [properties-collier-value, properties-lee-value]
     lane: tier-2
     cadence_days: 90
     tolerance_multiplier: 2.0
@@ -742,6 +815,8 @@ pipelines:
         source_label: "FHFA House Price Index"
 
   - name: fdot
+    workflow: fdot-aadt-annual.yml
+    consuming_pack: [traffic-swfl, logistics-swfl-nowcast]
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -762,6 +837,8 @@ pipelines:
         source_label: "FDOT GIS Open Data"
 
   - name: lee_permits
+    workflow: lee-permits-weekly.yml
+    consuming_pack: permits-swfl
     lane: tier-2
     cadence_days: 7
     tolerance_multiplier: 3.0
@@ -781,6 +858,8 @@ pipelines:
         source_label: "Lee County GIS (ArcGIS Online org)"
 
   - name: collier_permits
+    workflow: collier-permits-monthly.yml
+    consuming_pack: permits-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -801,6 +880,8 @@ pipelines:
         source_label: "Collier County Building Permit Reports"
 
   - name: fl_dor_tdt
+    workflow: fl-dor-tdt-monthly.yml
+    consuming_pack: tourism-tdt
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.5
@@ -822,6 +903,8 @@ pipelines:
         source_label: "FL Dept. of Revenue, Office of Tax Research (Form 3)"
 
   - name: fl_dor_sales_tax
+    workflow: fl-dor-sales-tax-monthly.yml
+    consuming_pack: sector-credit-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -841,6 +924,8 @@ pipelines:
         source_label: "FL Dept. of Revenue, Office of Tax Research (Form 10)"
 
   - name: fdle_crime_swfl
+    workflow: fdle-crime-quarterly.yml
+    consuming_pack: safety-swfl
     lane: tier-2
     cadence_days: 90
     tolerance_multiplier: 2.0
@@ -863,6 +948,8 @@ pipelines:
         source_label: "FBI Crime Data Explorer (NIBRS)"
 
   - name: zori_swfl_tier2
+    workflow: zori-tier2-monthly.yml
+    consuming_pack: rentals-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -884,6 +971,8 @@ pipelines:
         source_label: "Zillow Research Data"
 
   - name: zhvi_swfl_tier2
+    workflow: zhvi-tier2-monthly.yml
+    consuming_pack: home-values-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -905,6 +994,8 @@ pipelines:
         source_label: "Zillow Research Data"
 
   - name: tier_divergence_swfl_tier2
+    workflow: tier-divergence-tier2-monthly.yml
+    consuming_pack: tier-divergence-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -926,6 +1017,8 @@ pipelines:
         source_label: "Zillow Research Data"
 
   - name: fgcu_reri_indicators
+    workflow: fgcu-reri-monthly.yml
+    consuming_pack: fgcu-reri
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -950,6 +1043,8 @@ pipelines:
         source_label: "FGCU RERI Indicators Dashboard"
 
   - name: swfl_inc
+    workflow: swfl-inc-weekly.yml
+    consuming_pack: econ-dev-swfl
     lane: tier-2
     cadence_days: 7
     tolerance_multiplier: 3.0
@@ -975,6 +1070,8 @@ pipelines:
         source_label: "SWFL Inc. blog"
 
   - name: dbpr_press_releases
+    workflow: dbpr-press-releases-weekly.yml
+    consuming_pack: news-swfl
     lane: tier-2
     cadence_days: 7
     tolerance_multiplier: 3.0
@@ -1003,6 +1100,8 @@ pipelines:
         source_label: "FL DBPR Press Releases"
 
   - name: rsw_airport_monthly
+    workflow: rsw-airport-monthly.yml
+    consuming_pack: rsw-airport
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -1026,6 +1125,8 @@ pipelines:
         source_label: "Lee County Port Authority reports"
 
   - name: dbpr_sirs_submissions
+    workflow: dbpr-sirs-monthly.yml
+    consuming_pack: condo-sirs-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -1053,6 +1154,8 @@ pipelines:
         source_label: "FL DBPR SIRS Reporting Database (Qlik Sense)"
 
   - name: fl_dbpr_licenses
+    workflow: ingest-fl-dbpr-licenses.yml
+    consuming_pack: licenses-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -1077,6 +1180,8 @@ pipelines:
         summary: "35 license boards total; we use 2. Community Association Managers board pairs directly with condo SIRS data we already pull (dbpr_sirs_submissions) — the standout unpulled complement. Separately (07/08/2026, see check dbpr_licenses_dropped_street_address): the source CSV (CONSTRUCTIONLICENSE_1.csv, 22 columns) carries full street address in already-downloaded columns 5-10, but our column map drops them — zero ZIP-grain license data today."
 
   - name: fl_dbpr_applicants
+    workflow: ingest-fl-dbpr-licenses.yml
+    consuming_pack: licenses-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -1101,6 +1206,8 @@ pipelines:
         source_label: "FL DBPR Construction Applicants bulk extract"
 
   - name: dbpr_public_notices
+    workflow: dbpr-public-notices-weekly.yml
+    consuming_pack: news-swfl
     lane: tier-2
     cadence_days: 7
     tolerance_multiplier: 3.0
@@ -1127,6 +1234,8 @@ pipelines:
         source_label: "FL DBPR Public Notices Index"
 
   - name: dbpr_re_licensees
+    workflow: ingest-dbpr-re-licensees.yml
+    consuming_pack: none
     lane: tier-2
     cadence_days: 7
     tolerance_multiplier: 3.0
@@ -1152,6 +1261,8 @@ pipelines:
         source_label: "FL DBPR Real Estate Region 7 licensee bulk extract"
 
   - name: noaa_ghcn_rainfall
+    workflow: noaa-ghcn-rainfall-monthly.yml
+    consuming_pack: env-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -1174,6 +1285,8 @@ pipelines:
         source_label: "NOAA GHCN-Daily"
 
   - name: city_pulse_corridors_tier2
+    workflow: corridor-pulse-weekly.yml
+    consuming_pack: [corridor-pulse-swfl, cre-swfl]
     lane: tier-2
     cadence_days: 7
     tolerance_multiplier: 3.0 # 21-day window: tolerates 2 quiet news Sundays, trips on 3+ weeks silent
@@ -1190,6 +1303,8 @@ pipelines:
     # writes; its coverage delta is identical to that entry's source_scope (see above).
 
   - name: marketbeat_swfl
+    workflow: marketbeat-pdf-ingest.yml
+    consuming_pack: cre-swfl
     lane: tier-2
     cadence_days: 90 # C&W publishes quarterly
     tolerance_multiplier: 2.0
@@ -1214,6 +1329,8 @@ pipelines:
         source_label: "Cushman & Wakefield MarketBeat"
 
   - name: colliers_industrial
+    workflow: marketbeat-pdf-ingest.yml
+    consuming_pack: cre-swfl
     lane: tier-2
     cadence_days: 90 # Colliers publishes quarterly
     tolerance_multiplier: 2.5
@@ -1237,6 +1354,8 @@ pipelines:
         source_label: "Colliers International Research"
 
   - name: mhs_databook
+    workflow: none
+    consuming_pack: cre-swfl
     lane: tier-2
     cadence_days: 365 # MHS publishes ANNUALLY — 2026 Data Book pub 2026-03-13 (verified mhsappraisal.com 2026-06-05; 403 on auto-fetch → true ODD source)
     tolerance_multiplier: 1.5
@@ -1264,6 +1383,8 @@ pipelines:
         source_label: "MHS Appraisal 2026 Data Book"
 
   - name: swfl_search_demand
+    workflow: swfl-search-demand-monthly.yml
+    consuming_pack: none
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
@@ -1295,6 +1416,8 @@ pipelines:
   # stamps submarket_slug + scope-gated site zip_code (geocode.py, G2). Manual
   # PDF drop remains zero-code — only --url/--year change each March.
   - name: mhs_permits_swfl
+    workflow: ingest-mhs-permits-swfl.yml
+    consuming_pack: permits-commercial-swfl
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
@@ -1329,6 +1452,8 @@ pipelines:
   # Wave 1: Crexi active listings; Wave 2: local broker PDFs; Wave 3: EDC narrative.
 
   - name: crexi_listings
+    workflow: ingest-crexi-listings.yml
+    consuming_pack: cre-swfl
     lane: tier-2
     probe_mode: odd_window
     cadence_days: 7
@@ -1352,6 +1477,8 @@ pipelines:
         summary: "300+ active for-sale/lease listings exist county-wide across Lee/Collier in the categories checked alone — our coverage today is a small slice (2 submarkets, 1-4 leases/city)."
 
   - name: brevitas_listings
+    workflow: ingest-brevitas-listings.yml
+    consuming_pack: cre-swfl
     lane: tier-2
     probe_mode: odd_window
     cadence_days: 7
@@ -1372,6 +1499,8 @@ pipelines:
         source_label: "Brevitas"
 
   - name: lee_associates_swfl
+    workflow: ingest-lee-associates-swfl.yml
+    consuming_pack: cre-swfl
     lane: tier-2
     probe_mode: odd_window
     cadence_days: 90
@@ -1396,6 +1525,8 @@ pipelines:
   # svn_florida_swfl — RETIRED 2026-06-22: svncp.com publishes deal press releases only, not vacancy/rent/absorption surveys. Stub exited 1. Dead end.
 
   - name: estero_edc
+    workflow: ingest-local-cre-context.yml
+    consuming_pack: cre-swfl
     lane: tier-2
     probe_mode: odd_window
     cadence_days: 30
@@ -1417,6 +1548,8 @@ pipelines:
         source_label: "Estero EDC (estero-fl.gov)"
 
   - name: fmb_recovery
+    workflow: ingest-local-cre-context.yml
+    consuming_pack: cre-swfl
     lane: tier-2
     probe_mode: odd_window
     cadence_days: 90
@@ -1438,6 +1571,8 @@ pipelines:
         source_label: "Fort Myers Beach recovery projects dashboard"
 
   - name: news_swfl
+    workflow: news-swfl-ingest.yml
+    consuming_pack: app/insiders
     lane: tier-2
     cadence_days: 1
     tolerance_multiplier: 1.5
@@ -1457,6 +1592,8 @@ pipelines:
         source_label: "gulfshorebusiness.com, winknews.com, gulfcoastnewsnow.com, wgcu.org/news, capecoralbreeze.com, floridaweekly.com"
 
   - name: active_listings
+    workflow: active-listings-daily.yml
+    consuming_pack: none
     lane: tier-2
     cadence_days: 1
     tolerance_multiplier: 3.0
@@ -1478,6 +1615,9 @@ pipelines:
         source_label: "regional listings source (base URL undisclosed by design)"
 
   - name: listing_lifecycle
+    workflow: listing-lifecycle-daily.yml
+    consuming_pack: active-listings-swfl
+    nightly: true
     lane: tier-2
     cadence_days: 1
     tolerance_multiplier: 3.0
@@ -1516,6 +1656,8 @@ pipelines:
   # fires for WAF/budget surprises before trusting it unattended. Append-with-captured_at time
   # series; brains read the _latest views. Migration: docs/sql/20260630_market_aggregates_tables.sql.
   - name: market_aggregates_histogram
+    workflow: ingest-market-aggregates-histogram.yml
+    consuming_pack: price-distribution-swfl
     lane: tier-2
     cadence_days: 7 # weekly — price-band inventory is list-side (moves weekly)
     tolerance_multiplier: 3.0
@@ -1534,6 +1676,8 @@ pipelines:
         source_label: "realtor.com (via SteadyAPI — price histogram)"
 
   - name: market_aggregates_details
+    workflow: ingest-market-aggregates-details.yml
+    consuming_pack: market-temperature-swfl
     lane: tier-2
     cadence_days: 30 # monthly — realtor.com ZIP-grain aggregates only refresh monthly
     tolerance_multiplier: 2.0
@@ -1565,6 +1709,8 @@ pipelines:
   # vendor path carried no WAF risk — confirmed clean here too. Thin proof (1 run) like
   # market_aggregates above — watch the first 1-2 scheduled fires for surprises.
   - name: rentals_swfl
+    workflow: ingest-rentals.yml
+    consuming_pack: active-rentals-swfl
     lane: tier-2
     cadence_days: 7 # weekly — matches the SteadyAPI sole-spine plan's weekly rentals sweep
     tolerance_multiplier: 3.0
@@ -1600,6 +1746,8 @@ not_yet_running:
   # ODD-ready: empty-tolerant consumer (REFINERY_FRANCHISE_SOURCE defaults to fixture),
   #   source_tag provenance in Parquet, idempotent overwrite, parked cadence (probe-excluded).
   - name: sba_foia_franchise_outcomes
+    workflow: franchise-outcomes-quarterly.yml
+    consuming_pack: franchise-outcomes
     lane: tier-1-duckdb
     cadence_days: 90 # SBA FOIA updates quarterly
     tolerance_multiplier: 1.5
@@ -1629,6 +1777,8 @@ not_yet_running:
   # freshness_table + expected_rows_min. Until then it is probe-excluded (the
   # probe reads only `pipelines:`), so no false LOW_VOLUME / STALE alerts.
   - name: airdna_str_swfl
+    workflow: none
+    consuming_pack: investor-zip-swfl
     lane: tier-1-duckdb
     cadence_days: 30 # AirDNA refreshes monthly (lags ~1-2 weeks)
     tolerance_multiplier: 2.0
@@ -1675,6 +1825,8 @@ not_yet_running:
   # token instead of the land/single_family heuristic, define the property_type-scoped freshness view,
   # then move this block to `pipelines:`.
   - name: land_manufactured_swfl
+    workflow: none
+    consuming_pack: active-listings-swfl
     lane: tier-2
     cadence_days: 30
     tolerance_multiplier: 2.0
