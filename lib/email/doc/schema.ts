@@ -356,6 +356,9 @@ export const EmailDocSchema = z.object({
   blocks: z.array(BlockSchema).min(1).max(20),
   subjectVariants: z.array(z.string().max(90)).max(4).optional(),
   ctaVariants: z.array(z.string().max(40)).max(4).optional(),
+  // Engine/user-owned dataset-freshness dial (see EmailDoc in ./types) — not in
+  // the patch/author schemas, so the AI can never flip it (strip mode).
+  datasetsAlwaysFresh: z.boolean().optional(),
 });
 
 // ── AI content patch ────────────────────────────────────────────────────────

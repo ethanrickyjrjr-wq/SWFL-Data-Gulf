@@ -56,7 +56,8 @@ import { SocialElementInspector } from "./social/SocialElementInspector";
 import { PhotosPanel } from "./PhotosPanel";
 import { MediaPanel } from "./MediaPanel";
 import { DatasetBrowser } from "./DatasetBrowser";
-import { placeLoadedBlocks } from "./dataset-browser-core";
+import { DatasetChip } from "./DatasetChip";
+import { placeLoadedBlocks, shouldAutoRefresh } from "./dataset-browser-core";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import type { SocialElement } from "@/lib/social/design/types";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
@@ -334,6 +335,15 @@ export function EmailLabGridShell({
   // what they can do"; brand was hogging the rail).
   const [showBrand, setShowBrand] = useState(false);
   const [showDatasets, setShowDatasets] = useState(false);
+  // Dataset freshness (zero-cost open: ONE metadata compare, no re-bakes, no
+  // tokens; operator rules 07/12/2026). stale=false + currentAsOf=null ⇒ the
+  // binding can't refresh (kept values). Auto-refresh arms on the FIRST EDIT.
+  const [datasetStaleness, setDatasetStaleness] = useState<
+    Record<string, { stale: boolean; currentAsOf: string | null }>
+  >({});
+  const [datasetBusy, setDatasetBusy] = useState(false);
+  const datasetAutoRanRef = useRef(false);
+  const initialBoundRef = useRef(initialDoc.blocks.filter((b) => b.binding));
   const [showSeeds, setShowSeeds] = useState(false);
   const [showBlocks, setShowBlocks] = useState(false);
   // Brand-reveal registration — inert today (/email-lab/grid is chrome-free, no
@@ -358,6 +368,7 @@ export function EmailLabGridShell({
     if (idleRef.current) clearTimeout(idleRef.current);
     setHistory((h) => pushDoc(h, next));
     onDocChange?.(next);
+    armDatasetAutoRefresh(next);
   }
 
   /** Content auto-height correction from the grid canvas — replace present in place,
@@ -380,6 +391,7 @@ export function EmailLabGridShell({
       editingRef.current = false;
     }, 500);
     onDocChange?.(next);
+    armDatasetAutoRefresh(next);
   }
 
   // ── AI: Build the whole email (author engine) ───────────────────────────────
@@ -659,6 +671,132 @@ export function EmailLabGridShell({
     commit({ ...doc, blocks: [...doc.blocks, ...placed] });
     setSelectedId(placed[0].id);
     setShowDatasets(false);
+  }
+
+  // ── Dataset freshness + refresh (operator rules 07/12/2026) ────────────────
+  // Open = ONE metadata compare (no re-bakes, no tokens). Update chips per
+  // block; Update-all in the rail; the per-doc always-fresh dial arms on the
+  // FIRST EDIT ACTION (armDatasetAutoRefresh below), never the open.
+  useEffect(() => {
+    const bound = initialBoundRef.current;
+    if (bound.length === 0) return;
+    let alive = true;
+    void fetch("/api/concoctions", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "freshness", blocks: bound }),
+    })
+      .then((r) => r.json())
+      .then(
+        (json: { staleness?: Record<string, { stale: boolean; currentAsOf: string | null }> }) => {
+          if (alive && json?.staleness) setDatasetStaleness(json.staleness);
+        },
+      )
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  async function postDatasetAction(
+    body: unknown,
+  ): Promise<{ block?: EmailBlock; unrefreshable?: boolean } | null> {
+    try {
+      const res = await fetch("/api/concoctions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      return (await res.json().catch(() => null)) as {
+        block?: EmailBlock;
+        unrefreshable?: boolean;
+      } | null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Replace re-baked blocks in ONE commit (one undo frame) + settle their chips. */
+  function commitDatasetReplacements(pairs: [string, EmailBlock][], base?: EmailDoc) {
+    const d = base ?? doc;
+    const map = new Map(pairs);
+    commit({ ...d, blocks: d.blocks.map((b) => map.get(b.id) ?? b) });
+    setDatasetStaleness((m) => {
+      const next = { ...m };
+      for (const [id, nb] of pairs)
+        next[id] = { stale: false, currentAsOf: nb.binding?.asOf ?? null };
+      return next;
+    });
+  }
+
+  function markUnrefreshable(id: string) {
+    setDatasetStaleness((m) => ({ ...m, [id]: { stale: false, currentAsOf: null } }));
+  }
+
+  async function refreshDatasetBlock(target: EmailBlock, params?: Record<string, string>) {
+    setDatasetBusy(true);
+    try {
+      const json = await postDatasetAction({
+        action: "rebind",
+        block: target,
+        ...(params ? { params } : {}),
+      });
+      if (json?.block) commitDatasetReplacements([[target.id, json.block]]);
+      else if (json?.unrefreshable) markUnrefreshable(target.id);
+    } finally {
+      setDatasetBusy(false);
+    }
+  }
+
+  async function turnDatasetBlock(target: EmailBlock, newType: BlockType) {
+    if (newType === target.type) return;
+    setDatasetBusy(true);
+    try {
+      const json = await postDatasetAction({ action: "turn-into", block: target, newType });
+      if (json?.block) commitDatasetReplacements([[target.id, json.block]]);
+      else if (json?.unrefreshable) markUnrefreshable(target.id);
+    } finally {
+      setDatasetBusy(false);
+    }
+  }
+
+  async function updateAllDatasets(base: EmailDoc) {
+    const staleIds = new Set(
+      Object.entries(datasetStaleness)
+        .filter(([, s]) => s.stale)
+        .map(([id]) => id),
+    );
+    const targets = base.blocks.filter((b) => staleIds.has(b.id));
+    if (targets.length === 0) return;
+    setDatasetBusy(true);
+    try {
+      const pairs: [string, EmailBlock][] = [];
+      for (const t of targets) {
+        const json = await postDatasetAction({ action: "rebind", block: t });
+        if (json?.block) pairs.push([t.id, json.block]);
+        else if (json?.unrefreshable) markUnrefreshable(t.id);
+      }
+      if (pairs.length) commitDatasetReplacements(pairs, base);
+    } finally {
+      setDatasetBusy(false);
+    }
+  }
+
+  /** Called from commit()/liveEdit() — the first edit of the session re-bakes
+   *  stale bindings when the doc's always-fresh dial is on. Ran-once ref is set
+   *  BEFORE the async work so the refresh's own commit can never re-trigger. */
+  function armDatasetAutoRefresh(next: EmailDoc) {
+    const anyStale = Object.values(datasetStaleness).some((s) => s.stale);
+    if (
+      !shouldAutoRefresh({
+        alwaysFresh: Boolean(next.datasetsAlwaysFresh),
+        alreadyRan: datasetAutoRanRef.current,
+        anyStale,
+      })
+    )
+      return;
+    datasetAutoRanRef.current = true;
+    void updateAllDatasets(next);
   }
 
   /** Duplicate a block — fresh id, content cloned, placed below; movable. */
@@ -1541,6 +1679,22 @@ export function EmailLabGridShell({
                   The AI sees the whole layout — every block and where it sits — so it changes this
                   one and reflows the neighbors.
                 </p>
+                {selectedBlock.binding && (
+                  <DatasetChip
+                    binding={selectedBlock.binding}
+                    blockType={selectedBlock.type}
+                    stale={datasetStaleness[selectedBlock.id]?.stale ?? false}
+                    unrefreshable={
+                      datasetStaleness[selectedBlock.id] !== undefined &&
+                      !datasetStaleness[selectedBlock.id].stale &&
+                      datasetStaleness[selectedBlock.id].currentAsOf === null
+                    }
+                    busy={datasetBusy}
+                    onUpdate={() => void refreshDatasetBlock(selectedBlock)}
+                    onTurnInto={(t) => void turnDatasetBlock(selectedBlock, t)}
+                    onRebind={(p) => void refreshDatasetBlock(selectedBlock, p)}
+                  />
+                )}
                 <div className="mt-3 rounded-lg bg-white p-3 text-gray-900">
                   <BlockInspector
                     block={selectedBlock}
@@ -1686,7 +1840,31 @@ export function EmailLabGridShell({
                   ▾
                 </span>
               </button>
-              {showDatasets && <DatasetBrowser onLoad={addDatasetBlocks} />}
+              {showDatasets && (
+                <>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <label className="flex items-center gap-1.5 text-[10px] text-white/45">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(doc.datasetsAlwaysFresh)}
+                        onChange={(e) => commit({ ...doc, datasetsAlwaysFresh: e.target.checked })}
+                      />
+                      Keep always fresh
+                    </label>
+                    {Object.values(datasetStaleness).filter((s) => s.stale).length > 0 && (
+                      <button
+                        type="button"
+                        disabled={datasetBusy}
+                        onClick={() => void updateAllDatasets(doc)}
+                        className="rounded bg-[#f59e0b] px-2 py-1 text-[10px] font-semibold text-[#0a1419] disabled:opacity-40"
+                      >
+                        Update all ({Object.values(datasetStaleness).filter((s) => s.stale).length})
+                      </button>
+                    )}
+                  </div>
+                  <DatasetBrowser onLoad={addDatasetBlocks} />
+                </>
+              )}
             </div>
           )}
 

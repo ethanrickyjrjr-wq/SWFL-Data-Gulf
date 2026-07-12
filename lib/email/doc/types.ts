@@ -435,4 +435,8 @@ export interface EmailDoc {
   /** Up to 4 AI-authored CTA-label alternatives for the doc's button block.
    *  Absent → today's single button_label. */
   ctaVariants?: string[];
+  /** Per-doc "keep always fresh" dial for data-bound (dataset) blocks: when on,
+   *  the FIRST EDIT ACTION of a session re-bakes stale bindings — never the
+   *  open (an accidental open costs nothing; operator rule 07/12/2026). */
+  datasetsAlwaysFresh?: boolean;
 }

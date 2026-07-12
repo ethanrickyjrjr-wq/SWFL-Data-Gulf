@@ -56,6 +56,17 @@ export function cleanParams(values: Record<string, string>): Record<string, stri
   );
 }
 
+/** The edit-armed auto-refresh rule (operator, 07/12/2026): fire exactly once
+ *  per session, only when the per-doc dial is on AND something is actually
+ *  stale — and only from an EDIT action, never an open. */
+export function shouldAutoRefresh(s: {
+  alwaysFresh: boolean;
+  alreadyRan: boolean;
+  anyStale: boolean;
+}): boolean {
+  return s.alwaysFresh && !s.alreadyRan && s.anyStale;
+}
+
 function bottomY(blocks: EmailBlock[]): number {
   return blocks.reduce((max, b) => {
     const l = b.layout;

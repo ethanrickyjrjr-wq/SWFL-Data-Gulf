@@ -39,6 +39,20 @@ describe("paramsComplete + cleanParams", () => {
   });
 });
 
+describe("shouldAutoRefresh", () => {
+  it("fires only when the dial is on, nothing ran yet, and something is stale", async () => {
+    const { shouldAutoRefresh } = await import("./dataset-browser-core");
+    expect(shouldAutoRefresh({ alwaysFresh: true, alreadyRan: false, anyStale: true })).toBe(true);
+    expect(shouldAutoRefresh({ alwaysFresh: false, alreadyRan: false, anyStale: true })).toBe(
+      false,
+    );
+    expect(shouldAutoRefresh({ alwaysFresh: true, alreadyRan: true, anyStale: true })).toBe(false);
+    expect(shouldAutoRefresh({ alwaysFresh: true, alreadyRan: false, anyStale: false })).toBe(
+      false,
+    );
+  });
+});
+
 describe("placeLoadedBlocks", () => {
   const existing = [
     { id: "e1", type: "text", props: {}, layout: { x: 0, y: 0, w: 12, h: 3 } },
