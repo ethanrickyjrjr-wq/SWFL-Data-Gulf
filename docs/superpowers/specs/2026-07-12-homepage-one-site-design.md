@@ -135,6 +135,27 @@ Parked (files kept, imports removed — same pattern as 07/03): `ProofStrip`, `C
   `source=homepage-band`; pill reads "Ask AI" and does not auto-open on `/`.
 - `get_access_dead_anchor` check closes on the same deploy evidence.
 
+## v2 — the centerpiece (operator-approved 07/11/2026: "Ok. Good job. Make it correct")
+
+The homepage's OWN idea — the transformation no inner page shows: **a place goes in, a campaign
+comes out**, performed once on screen.
+
+- `lib/landing/campaign-demo.ts` (pure, 5 bun tests): picks the busiest live market (top
+  active-listings ZIP, falling back to top-value) from the SAME rows the map draws; every figure
+  carries its own source · date stamp; returns null on sample/missing data → section hides. No
+  minted street address — the bar types a real place name (static geography), campaign = Market
+  Update.
+- `components/landing/CampaignReveal.tsx`: demo bar (typed place + Market Update chip) → a LIGHT
+  email doc assembling (subject → figure rows with stamps → **AI-commentary slot as labeled
+  skeleton, never invented prose**) → social square + "Scheduled · weekly" + "Ready to send"
+  pills. One pass, IntersectionObserver-started; base DOM = finished composition so no-JS and
+  prefers-reduced-motion read it static. Demo controls are decorative spans; the one real
+  control is "Build yours free" → `EMAIL_LAB_LANDING`.
+- `components/landing/SiteDoors.tsx`: three one-line text doors (Desk / Insiders / Guides) —
+  links with scent, deliberately NOT previews (memory `feedback_homepage-grammar-not-collage`).
+- Spine: hero → campaign reveal → doors → map proof → pricing → FAQ → final CTA. GuidesStrip
+  joins the parked set (its cards were an inner-page transplant of /guides content).
+
 ## Out of scope
 - SourcesGate membership/blur behavior (only the dead href moves).
 - Deleting parked components; `/embed/waitlist` + `/api/waitlist` (separate live surface).

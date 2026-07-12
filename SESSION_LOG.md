@@ -1,3 +1,20 @@
+## 2026-07-11 (Fable 5 · main) — Homepage v2 centerpiece BUILT + prod-verified: "A place goes in. A campaign comes out."
+
+Operator approved the v2 pitch ("Ok. Good job. Make it correct"). Built the homepage's OWN idea —
+the transformation no inner page shows, correct by construction: `lib/landing/campaign-demo.ts`
+(pure, 5 tests) picks the busiest LIVE market from the same rows the map draws (today: Cape Coral NW
+33993) — every figure carries its own source · date stamp, null on sample data → section hides, NO
+minted street address (bar types a real place, campaign = Market Update). `CampaignReveal` = demo bar
+→ light email doc assembling (subject → stamped figure rows → AI-read slot as LABELED skeleton, never
+invented prose) → social square + Scheduled/Ready pills; one IntersectionObserver-started pass; base
+DOM = finished composition so no-JS + prefers-reduced-motion read it static; demo controls are
+decorative spans, the one real control is "Build yours free". `SiteDoors` = three one-line text doors
+(Desk/Insiders/Guides), links not previews. Spine: hero → reveal → doors → map (+stats) → pricing →
+FAQ → CTA; GuidesStrip joins the parked set. Gates: lib/landing 14/0 · `bunx next build` ✓ ·
+prod-build served + fingerprinted ("This week in Cape Coral NW (33993)", zero stripped-block
+markers) + desktop/mobile full-page screenshots — doc figures match the map's own stats bar (same
+loader, same busiest ZIP). Spec §v2 appended. Still nothing pushed — operator diff-review.
+
 ## 2026-07-11 (Fable 5 · main) — CORRECTION: operator rejected the v1 homepage middle as collage; borrowed blocks stripped
 
 Operator on `3e5cce30`: "We don't need ticker and same things on every page. Thought the homepage

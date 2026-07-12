@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
 import Hero from "@/components/landing/Hero";
 import HeroCampaign from "@/components/landing/HeroCampaign";
-import GuidesStrip from "@/components/landing/GuidesStrip";
+import CampaignReveal from "@/components/landing/CampaignReveal";
+import SiteDoors from "@/components/landing/SiteDoors";
 import PricingStrip from "@/components/landing/PricingStrip";
 import ObjectionFaq from "@/components/landing/ObjectionFaq";
+import { buildCampaignDemo } from "@/lib/landing/campaign-demo";
 import { loadHomeMapData } from "@/lib/landing/load-home-map-data";
 import "@/components/landing/home-explorer.css";
 
@@ -14,26 +16,32 @@ export const metadata: Metadata = {
     "Type your next listing's address and pick a campaign — new listing, just sold, coming to market, or a market update. We build the emails and socials from live Southwest Florida data, every number sourced, and send them on your schedule. Free to build, no credit card.",
 };
 
-// INTERIM state (operator review 07/11/2026, spec
-// docs/superpowers/specs/2026-07-12-homepage-one-site-design.md §Post-review):
-// the v1 "one-site" middle transplanted inner-page devices (Insiders wire ticker,
-// desk-tile door, Insiders capture band) — rejected as collage. Stripped here;
-// what SURVIVED review lives outside this file: one nav bar sitewide + real CTAs
-// (SiteShell), FAQ scope fix, Ask AI pill rename + no auto-open on `/`. The
-// homepage's OWN centerpiece (address → campaign transformation) ships as v2
-// after operator sign-off. Parked (files kept, not imported): ProofStrip,
-// Capabilities, DeliverableShowcase, WeeklyReadCapture, Waitlist,
-// ComparisonSection, MCPInstall, Charts.
+// v2 spine (spec docs/superpowers/specs/2026-07-12-homepage-one-site-design.md §v2,
+// operator-approved 07/11/2026): the homepage's OWN centerpiece — a place goes in, a
+// campaign comes out, performed once on screen from the SAME live rows the map draws
+// (buildCampaignDemo returns null on sample data → no centerpiece, never demo'd
+// fixtures). Nothing borrowed from inner pages (memory
+// feedback_homepage-grammar-not-collage): the doors are one-line links, not previews.
+// Section order: hero → campaign reveal → doors → map proof → pricing → FAQ → CTA.
+// Parked (files kept, not imported): ProofStrip, Capabilities, DeliverableShowcase,
+// WeeklyReadCapture, GuidesStrip, Waitlist, ComparisonSection, MCPInstall, Charts.
 export const revalidate = 3600;
 
 export default async function Home() {
   const payload = await loadHomeMapData();
+  const demo = buildCampaignDemo({
+    value: payload.data.metrics.value,
+    activity: payload.data.metrics.activity,
+    dom: payload.data.metrics.dom,
+    placeNames: payload.data.placeNames,
+  });
 
   return (
     <main className="home-explorer relative">
       <HeroCampaign />
+      {demo && <CampaignReveal demo={demo} />}
+      <SiteDoors />
       <Hero payload={payload} />
-      <GuidesStrip />
       <PricingStrip />
       <ObjectionFaq />
       <section className="final-cta">
