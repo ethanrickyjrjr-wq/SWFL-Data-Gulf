@@ -34,3 +34,52 @@ export function fetchLogTail(id, lines = 200) {
     return `(could not fetch logs: ${oneLine})`;
   }
 }
+
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+// .github/scripts/lib/ -> .github/_watch-manifest.json. Module-relative, so it resolves
+// identically whether the handler runs from the repo root (CI) or from .github/scripts
+// (the dry-run subprocess test).
+const MANIFEST = resolve(HERE, "../../_watch-manifest.json");
+
+/** The generated watch manifest. [] if absent — a missing manifest must never crash a watcher. */
+export function loadWatchManifest() {
+  try {
+    return JSON.parse(readFileSync(MANIFEST, "utf8"));
+  } catch {
+    return [];
+  }
+}
+
+/** The manifest entry for a workflow_run payload, keyed by workflow filename. */
+export function manifestEntry(run) {
+  const file = (run.path || "").split("/").pop();
+  if (!file) return null;
+  return loadWatchManifest().find((e) => e.file === file) ?? null;
+}
+
+/**
+ * Did a NEWER run of this workflow start after the given one? Only meaningful for a
+ * workflow that declares `cancel-in-progress` — the caller MUST gate on that, so this
+ * gh call never fires in prod today (no scheduled workflow declares it). Returns false
+ * on any error: an unproven "superseded" must never silence a real cancel.
+ */
+export function hasNewerRun(run) {
+  const file = (run.path || "").split("/").pop();
+  const started = Date.parse(run.run_started_at ?? run.created_at ?? "");
+  if (!file || !Number.isFinite(started)) return false;
+  try {
+    const out = execSync(`gh run list --workflow=${file} --limit 10 --json databaseId,createdAt`, {
+      encoding: "utf8",
+      env: process.env,
+    });
+    return JSON.parse(out).some(
+      (r) => r.databaseId !== run.id && Date.parse(r.createdAt) > started,
+    );
+  } catch {
+    return false;
+  }
+}

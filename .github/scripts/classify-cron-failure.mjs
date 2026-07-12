@@ -240,3 +240,127 @@ export function shouldRetry(klass) {
 export function needsLlm(klass) {
   return klass === "DATA_EMPTY" || klass === "SCHEMA_DRIFT" || klass === "UNKNOWN";
 }
+
+// ---------------------------------------------------------------------------
+// TERMINATION classifier — the classes the watchers used to drop on the floor.
+//
+// THE VENDOR FACT THIS RESTS ON: a job that hits its `timeout-minutes` ceiling
+// surfaces at the RUN level as conclusion `cancelled`, NOT `timed_out`. Proven on
+// this repo — corridor-pulse-weekly runs 27903898570 (06/21), 28321195281 (06/28)
+// and 28739416924 (07/05) are each event=schedule, conclusion=cancelled, ~45.3 min
+// wall clock against the 45-minute ceiling then in force. The workflow's own comment
+// records the kills (corridor-pulse-weekly.yml:31-36). A gate that only admits
+// `conclusion == 'failure'` — which is exactly what both watchers did — is blind to
+// all three, which is how a full paid web_search sweep burned three times with zero
+// rows kept and no incident.
+//
+// PURE. The gh lookup for `hasNewerRun` lives in lib/cron-run.mjs and is only
+// consulted when the workflow actually declares `cancel-in-progress` — no scheduled
+// workflow does today, so it costs nothing in prod.
+
+/** A run within this fraction of its ceiling was killed by it, not by chance. */
+export const TIMEOUT_RATIO = 0.95;
+
+/**
+ * @param {{conclusion:string,event:string,run_started_at?:string,updated_at?:string}} run
+ * @param {{file:string,timeout_minutes:number|null,cancel_in_progress:boolean}|null} wf manifest entry
+ * @param {boolean} hasNewerRun
+ * @returns {{klass:string,reason:string,should_retry:boolean|null,prescription:string,elapsed_minutes:number|null,timeout_ratio:number|null}}
+ */
+export function classifyTermination(run, wf, hasNewerRun = false) {
+  const file = wf?.file || (run.path || "").split("/").pop() || "unknown workflow";
+  const ceiling = wf?.timeout_minutes ?? null;
+
+  const started = run.run_started_at ? Date.parse(run.run_started_at) : NaN;
+  const ended = run.updated_at ? Date.parse(run.updated_at) : NaN;
+  const elapsed =
+    Number.isFinite(started) && Number.isFinite(ended) && ended >= started
+      ? Math.round(((ended - started) / 60000) * 100) / 100
+      : null;
+  const ratio =
+    elapsed !== null && ceiling ? Math.round((elapsed / ceiling) * 10000) / 10000 : null;
+  const base = { elapsed_minutes: elapsed, timeout_ratio: ratio };
+
+  // A `failure` keeps its existing home: the log-tail classify() decides the class
+  // and shouldRetry() decides the retry. Not this function's call.
+  if (run.conclusion === "failure") {
+    return { klass: "FAILURE", reason: "", should_retry: null, prescription: "", ...base };
+  }
+
+  if (run.conclusion !== "cancelled" && run.conclusion !== "timed_out") {
+    return {
+      klass: "OTHER",
+      reason: `conclusion=${run.conclusion} — not a termination class`,
+      should_retry: false,
+      prescription: "",
+      ...base,
+    };
+  }
+
+  // Scope the cancelled path to SCHEDULED runs. A cancelled dispatch is a human
+  // pressing stop (3 of leepa's 4 cancels), not a pipeline incident.
+  if (run.event !== "schedule") {
+    return {
+      klass: "OTHER",
+      reason: `conclusion=${run.conclusion} on a ${run.event} run — out of scope (only scheduled runs raise a termination incident)`,
+      should_retry: false,
+      prescription: "",
+      ...base,
+    };
+  }
+
+  const timeoutRx =
+    `Run hit its ceiling: ${elapsed ?? "?"} min elapsed against \`timeout-minutes: ${ceiling ?? "?"}\` in ` +
+    `${file}${ratio !== null ? ` (${Math.round(ratio * 100)}% of the ceiling)` : ""}. ` +
+    `Raise \`timeout-minutes\` in ${file} or shorten the job. DO NOT RE-RUN: the run already spent its full budget — ` +
+    `corridor-pulse burned three consecutive 45-minute kills (06/21, 06/28, 07/05) at full API spend and kept zero rows.`;
+
+  // GitHub's own timed_out conclusion needs no ceiling math.
+  if (run.conclusion === "timed_out") {
+    return {
+      klass: "TIMEOUT",
+      reason: `GitHub reported \`timed_out\` for ${file}. ${timeoutRx}`,
+      should_retry: false, // MONEY GUARD
+      prescription: "TIMEOUT_KILL",
+      ...base,
+    };
+  }
+
+  // TIMEOUT is checked BEFORE SUPERSEDED on purpose: a run that already burned its
+  // full budget is never "merely superseded" — the money guard wins the tie.
+  if (ratio !== null && ratio >= TIMEOUT_RATIO) {
+    return {
+      klass: "TIMEOUT",
+      reason: timeoutRx,
+      should_retry: false, // MONEY GUARD
+      prescription: "TIMEOUT_KILL",
+      ...base,
+    };
+  }
+
+  if (wf?.cancel_in_progress && hasNewerRun) {
+    return {
+      klass: "SUPERSEDED",
+      reason: `${file} declares \`cancel-in-progress\` and a newer run exists — this run was self-cancelled by the concurrency group. Not an incident.`,
+      should_retry: false,
+      prescription: "SUPERSEDED",
+      ...base,
+    };
+  }
+
+  // Neither. Print the evidence and say so — never invent a diagnosis (spec §11 UNKNOWN).
+  const why =
+    ceiling === null
+      ? `${file} declares no \`timeout-minutes\`, so a ceiling kill cannot be ruled in or out`
+      : `${elapsed ?? "?"} min elapsed is only ${ratio !== null ? Math.round(ratio * 100) : "?"}% of its ${ceiling}-min ceiling, so this was not a timeout kill`;
+  return {
+    klass: "UNKNOWN_CANCEL",
+    reason:
+      `Scheduled run of ${file} was CANCELLED with no known cause: ${why}, and the workflow does not declare ` +
+      `\`cancel-in-progress\` with a newer run to supersede it. Evidence: elapsed=${elapsed ?? "?"} min, ceiling=${ceiling ?? "none"}, ` +
+      `ratio=${ratio ?? "n/a"}. Someone or something cancelled it out-of-band. Needs a human — do not guess.`,
+    should_retry: false,
+    prescription: "UNKNOWN",
+    ...base,
+  };
+}
