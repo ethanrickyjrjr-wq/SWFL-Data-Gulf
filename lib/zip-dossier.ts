@@ -168,15 +168,16 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   "logistics-swfl": { grains: ["region"], covers: "all" },
   // FDOT-AADT activity proxy for the SWFL region — region footprint; no county gate.
   "logistics-swfl-nowcast": { grains: ["region"], covers: "all" },
-  // NOAA Storm Events history, Lee + Collier + Charlotte.
+  // NOAA Storm Events history, Lee + Collier core (Charlotte removed 07/07/2026 scope lock).
   // Region-first: the pack emits a SWFL-wide aggregate rollup, not per-county rows.
-  "storm-history-swfl": { grains: ["region", "county"], covers: [LEE, COLLIER, CHARLOTTE] },
+  "storm-history-swfl": { grains: ["region", "county"], covers: LEE_COLLIER },
   // FGCU RERI monthly regional indicators — region footprint; no county gate.
   "fgcu-reri": { grains: ["region"], covers: "all" },
   // FBI CDE NIBRS property-crime rate, Lee + Collier.
   "safety-swfl": { grains: ["county"], covers: LEE_COLLIER },
-  // SWFL Inc. economic-development announcements — Lee + Collier + Charlotte.
-  "econ-dev-swfl": { grains: ["region"], covers: [LEE, COLLIER, CHARLOTTE] },
+  // SWFL Inc. economic-development announcements — Lee + Collier core
+  // (charlotte rows excluded in-pack since 07/2026 re-scope).
+  "econ-dev-swfl": { grains: ["region"], covers: LEE_COLLIER },
   // RSW + PGD enplanements — regional airport demand; no county gate.
   "rsw-airport": { grains: ["region"], covers: "all" },
   // Daily city pulse for 7 cities in Lee + Collier.
@@ -185,8 +186,9 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   "corridor-pulse-swfl": { grains: ["corridor"], covers: LEE_COLLIER },
   // BLS OEWS by MSA (Cape Coral-Fort Myers + Naples-Marco Island).
   "labor-demand-swfl": { grains: ["msa"], covers: LEE_COLLIER },
-  // FL DBPR enforcement — Lee, Collier, Charlotte, Sarasota, Hendry (5-county).
-  "news-swfl": { grains: ["region"], covers: [LEE, COLLIER, CHARLOTTE, SARASOTA, HENDRY] },
+  // FL DBPR enforcement — Lee + Collier core (5-county scrape filtered in-pack
+  // since the 07/2026 re-scope).
+  "news-swfl": { grains: ["region"], covers: LEE_COLLIER },
   // FL DBPR Construction (06) + Electrical (08) license counts, Lee + Collier.
   "licenses-swfl": { grains: ["county"], covers: LEE_COLLIER },
   // DBPR SIRS confirmed filings, Lee + Collier.

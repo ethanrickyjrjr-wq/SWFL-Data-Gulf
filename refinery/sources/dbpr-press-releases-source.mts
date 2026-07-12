@@ -22,7 +22,10 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
  *   topics               text[]      — regulatory topic tags (nullable until enriched)
  *   affected_industries  text[]      — directly named industries (nullable until enriched)
  *   geographic_mentions  text[]      — FL counties/cities named (nullable until enriched)
- *   is_swfl_relevant     boolean     — Lee/Collier/Charlotte/Sarasota/Hendry mention
+ *   is_swfl_relevant     boolean     — ingest-era 5-county mention flag (Lee/Collier/
+ *                                      Charlotte/Sarasota/Hendry). SUPERSEDED in-pack:
+ *                                      news-swfl recomputes relevance from
+ *                                      geographic_mentions against Lee/Collier only.
  *   scraped_at           timestamptz — when the row was scraped
  *
  * Window: last 365 days (DBPR releases ~4-5/month; 1y covers ~60 releases).
@@ -31,12 +34,7 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 const SOURCE_ID = "dbpr_press_releases";
 const TABLE = "dbpr_press_releases";
 
-const FIXTURE_PATH = path.join(
-  process.cwd(),
-  "refinery",
-  "__fixtures__",
-  "news-swfl.sample.json",
-);
+const FIXTURE_PATH = path.join(process.cwd(), "refinery", "__fixtures__", "news-swfl.sample.json");
 
 export interface DbprPressReleaseNormalized {
   kind: "dbpr-press-release";
@@ -67,9 +65,7 @@ function toDateStr(v: unknown): string | null {
   return null;
 }
 
-function normalize(
-  row: Record<string, unknown>,
-): DbprPressReleaseNormalized | null {
+function normalize(row: Record<string, unknown>): DbprPressReleaseNormalized | null {
   const source_url = str(row.source_url);
   const title = str(row.title);
   if (!source_url || !title) return null;
@@ -90,9 +86,7 @@ function normalize(
 async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
   const raw = await readFile(FIXTURE_PATH, "utf-8");
   const data = JSON.parse(raw) as { rows?: unknown[] } | unknown[];
-  const rows: unknown[] = Array.isArray(data)
-    ? data
-    : ((data as { rows?: unknown[] }).rows ?? []);
+  const rows: unknown[] = Array.isArray(data) ? data : ((data as { rows?: unknown[] }).rows ?? []);
   return rows as Record<string, unknown>[];
 }
 
@@ -109,9 +103,7 @@ async function fetchRows(): Promise<Record<string, unknown>[]> {
     .gte("published_date", cutoffDate)
     .order("published_date", { ascending: false });
   if (error) {
-    throw new Error(
-      `dbpr-press-releases-source: ${TABLE} query failed — ${error.message}`,
-    );
+    throw new Error(`dbpr-press-releases-source: ${TABLE} query failed — ${error.message}`);
   }
   return (data ?? []) as Record<string, unknown>[];
 }

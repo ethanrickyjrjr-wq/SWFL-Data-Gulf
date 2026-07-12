@@ -3,8 +3,7 @@ import assert from "node:assert/strict";
 
 process.env["REFINERY_SOURCE"] = "fixture";
 
-const { econDevSwfl, isQualifying, QUALIFYING_CATEGORIES } =
-  await import("./econ-dev-swfl.mts");
+const { econDevSwfl, isQualifying, QUALIFYING_CATEGORIES } = await import("./econ-dev-swfl.mts");
 const { swflIncSource } = await import("../sources/swfl-inc-source.mts");
 
 import type { RawFragment } from "../types/fragment.mts";
@@ -43,10 +42,7 @@ function frag(over: Partial<SwflIncNormalized> = {}): RawFragment {
   } as RawFragment;
 }
 
-function metricValue(
-  out: { key_metrics: { metric: string; value: unknown }[] },
-  name: string,
-) {
+function metricValue(out: { key_metrics: { metric: string; value: unknown }[] }, name: string) {
   return out.key_metrics.find((m) => m.metric === name)?.value;
 }
 
@@ -62,18 +58,10 @@ test("econ-dev-swfl: deterministic flags", () => {
 
 test("econ-dev-swfl: isQualifying includes project categories, excludes the rest", () => {
   for (const cat of QUALIFYING_CATEGORIES) {
-    assert.equal(
-      isQualifying({ category: cat }),
-      true,
-      `${cat} should qualify`,
-    );
+    assert.equal(isQualifying({ category: cat }), true, `${cat} should qualify`);
   }
   for (const cat of ["partnership", "workforce", null, "", "event"]) {
-    assert.equal(
-      isQualifying({ category: cat }),
-      false,
-      `${cat} should NOT qualify`,
-    );
+    assert.equal(isQualifying({ category: cat }), false, `${cat} should NOT qualify`);
   }
 });
 
@@ -98,14 +86,47 @@ test("econ-dev-swfl: announcement count counts only qualifying rows in the windo
   );
 
   const caveat = out.caveats.find((c) => c.includes("qualifying categories"));
-  assert.ok(
-    caveat,
-    "expected the qualifying-categories signal-to-noise caveat",
+  assert.ok(caveat, "expected the qualifying-categories signal-to-noise caveat");
+  assert.ok(caveat!.startsWith("2 of 4"), `caveat should report 2 of 4; got: ${caveat}`);
+});
+
+// ── Test 3b: out-of-core county rows are excluded from every count ────────────
+
+test("econ-dev-swfl: charlotte rows are excluded (Lee + Collier core scope)", () => {
+  const fragments = [
+    frag({ county: "lee", category: "relocation", announced_date: daysAgo(20) }),
+    frag({ county: "swfl", category: "grant", announced_date: daysAgo(30) }),
+    // Out of core scope — must not count anywhere (CLAUDE.md SCOPE lock 07/07/2026):
+    frag({
+      county: "charlotte",
+      category: "expansion",
+      announced_date: daysAgo(25),
+      investment_usd: 99_000_000,
+      jobs: 500,
+    }),
+  ];
+
+  econDevSwfl.corpusSummary!(fragments);
+  const out = econDevSwfl.outputProducer!({} as never);
+
+  assert.equal(
+    metricValue(out, "econ_dev_announcements_90d"),
+    2,
+    "charlotte row must be excluded from the 90-day count",
   );
-  assert.ok(
-    caveat!.startsWith("2 of 4"),
-    `caveat should report 2 of 4; got: ${caveat}`,
+  assert.equal(
+    metricValue(out, "econ_dev_investment_usd_90d"),
+    undefined,
+    "charlotte row's investment must not leak into the disclosed-investment sum",
   );
+  assert.equal(
+    metricValue(out, "econ_dev_jobs_90d"),
+    undefined,
+    "charlotte row's jobs must not leak into the disclosed-jobs sum",
+  );
+  // The signal-to-noise caveat's denominator must also exclude the charlotte row.
+  const caveat = out.caveats.find((c) => c.includes("qualifying categories"));
+  assert.ok(caveat!.startsWith("2 of 2"), `expected "2 of 2"; got: ${caveat}`);
 });
 
 // ── Test 4: prior-window momentum also restricted to qualifying ───────────────

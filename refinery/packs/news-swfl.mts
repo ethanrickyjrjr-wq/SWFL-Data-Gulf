@@ -14,6 +14,7 @@ import {
   dbprPublicNoticesSource,
   type DbprPublicNoticeNormalized,
 } from "../sources/dbpr-public-notices-source.mts";
+import { PLACES } from "../lib/places-swfl.mts";
 import { env } from "../config/env.mts";
 
 /**
@@ -21,9 +22,18 @@ import { env } from "../config/env.mts";
  *
  * Two sources:
  *   SourceA: dbpr_press_releases — Sonnet-enriched, aggregate narrative,
- *            SWFL flag + topics + affected_industries. Soft signal (announced activity).
+ *            geographic mentions + topics + affected_industries. Soft signal (announced activity).
  *   SourceB: dbpr_public_notices — hard-parsed, individual case-level,
- *            county + industry + violation_type, all rows SWFL. Hard signal (confirmed actions).
+ *            county + industry + violation_type. Hard signal (confirmed actions).
+ *
+ * Scope: Lee + Collier core (CLAUDE.md SCOPE lock 07/07/2026). Press-release
+ * relevance is recomputed IN-PACK from geographic_mentions against the
+ * canonical Lee/Collier place list — the ingest-era is_swfl_relevant flag was
+ * 5-county (Lee/Collier/Charlotte/Sarasota/Hendry) and is no longer trusted.
+ * Public notices are county-exact; non-core counties in the scrape
+ * (Charlotte/Sarasota/Manatee/Hendry/Monroe) are dropped before any count.
+ * The statewide total (dbpr_total_releases_90d) deliberately keeps every
+ * press release — it is context for the core-relevant subset.
  *
  * Key metrics (9 total):
  *   SourceA momentum (3): dbpr_swfl_releases_90d, dbpr_swfl_releases_prior_90d, dbpr_total_releases_90d
@@ -44,10 +54,10 @@ import { env } from "../config/env.mts";
 // Both sources convert to this shape in corpusSummary.
 interface DbprEnforcementNormalized {
   source: "press_releases" | "public_notices";
-  county: string | null; // exact for notices; first SWFL county from geographic_mentions for releases
+  county: string | null; // exact for notices; core county matched from geographic_mentions for releases
   industry: string | null; // affected_industries[0] (releases) or industry field (notices)
   violation_type: "unlicensed_activity" | "disciplinary" | null; // null for press releases
-  is_swfl_relevant: boolean; // enricher flag (releases) or always true (notices)
+  is_swfl_relevant: boolean; // Lee/Collier core mention (releases, recomputed in-pack); true for notices (county-filtered upstream)
   published_date: string | null; // published_date (releases) or response_deadline (notices)
   topics: string[]; // from releases; [] for notices
   is_construction: boolean;
@@ -71,65 +81,78 @@ const CONSTRUCTION_INDUSTRIES = new Set([
 const ABT_INDUSTRIES = new Set(["hospitality", "abt", "beverage", "tobacco"]);
 
 function isConstruction(industry: string | null): boolean {
-  return (
-    industry != null && CONSTRUCTION_INDUSTRIES.has(industry.toLowerCase())
-  );
+  return industry != null && CONSTRUCTION_INDUSTRIES.has(industry.toLowerCase());
 }
 
 function isAbt(industries: string[]): boolean {
   return industries.some((i) => ABT_INDUSTRIES.has(i.toLowerCase()));
 }
 
-const SWFL_COUNTIES = [
-  "lee",
-  "collier",
-  "charlotte",
-  "sarasota",
-  "hendry",
-  "manatee",
-  "monroe",
+// ── Lee + Collier core scope (CLAUDE.md SCOPE lock 07/07/2026) ────────────────
+
+/** Notices are county-exact — keep only the core counties. */
+const CORE_NOTICE_COUNTIES = new Set(["lee", "collier"]);
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Core place names from the canonical place resolver (places-swfl.mts), so a
+ * "Fort Myers"-only or "Naples"-only mention still resolves to its county —
+ * DBPR mentions are free text and often name a city, never the county. Word-
+ * boundary matched: "Iona" must not fire inside "International", "Lee" must
+ * not fire inside "Leesburg".
+ */
+const CORE_MENTION_MATCHERS: { re: RegExp; county: "Lee" | "Collier" }[] = [
+  { re: /\blee\b/, county: "Lee" },
+  { re: /\bcollier\b/, county: "Collier" },
+  ...Object.values(PLACES)
+    .filter((p) => p.county === "Lee" || p.county === "Collier")
+    .map((p) => ({
+      re: new RegExp(`\\b${escapeRegex(p.display.toLowerCase())}\\b`),
+      county: p.county as "Lee" | "Collier",
+    })),
 ];
 
-function firstSwflCounty(mentions: string[]): string | null {
+/** First Lee/Collier county a release's geographic mentions resolve to, or null. */
+export function coreCountyForMentions(mentions: string[]): "Lee" | "Collier" | null {
   for (const m of mentions) {
     const lower = m.toLowerCase();
-    for (const c of SWFL_COUNTIES) {
-      if (lower.includes(c)) return c.charAt(0).toUpperCase() + c.slice(1);
+    for (const { re, county } of CORE_MENTION_MATCHERS) {
+      if (re.test(lower)) return county;
     }
   }
   return null;
 }
 
 // ── Source normalizers ────────────────────────────────────────────────────────
-function toPressReleaseEnforcement(
-  r: DbprPressReleaseNormalized,
-): DbprEnforcementNormalized {
+function toPressReleaseEnforcement(r: DbprPressReleaseNormalized): DbprEnforcementNormalized {
   const industry = r.affected_industries[0] ?? null;
+  // Core relevance recomputed from mentions — NOT the ingest-era 5-county flag.
+  const coreCounty = coreCountyForMentions(r.geographic_mentions);
   return {
     source: "press_releases",
-    county: firstSwflCounty(r.geographic_mentions),
+    county: coreCounty,
     industry,
     violation_type: null,
-    is_swfl_relevant: r.is_swfl_relevant,
+    is_swfl_relevant: coreCounty !== null,
     published_date: r.published_date,
     topics: r.topics,
-    is_construction:
-      isConstruction(industry) || r.topics.includes("construction"),
+    is_construction: isConstruction(industry) || r.topics.includes("construction"),
     is_abt:
       isAbt(r.affected_industries) ||
       r.topics.some((t) => ["ABT", "hospitality", "beverage"].includes(t)),
   };
 }
 
-function toNoticeEnforcement(
-  n: DbprPublicNoticeNormalized,
-): DbprEnforcementNormalized {
+function toNoticeEnforcement(n: DbprPublicNoticeNormalized): DbprEnforcementNormalized {
   return {
     source: "public_notices",
     county: n.county,
     industry: n.industry,
     violation_type: n.violation_type,
-    is_swfl_relevant: true, // all public notices are SWFL by construction
+    is_swfl_relevant: true, // notices reaching here already passed the core-county filter
     published_date: n.response_deadline, // best proxy for event recency
     topics: [],
     is_construction: isConstruction(n.industry),
@@ -161,15 +184,15 @@ function makeSource(
 function newsSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const pressRows = allFragments
     .map((f) => f.normalized as unknown as DbprPressReleaseNormalized)
-    .filter(
-      (n): n is DbprPressReleaseNormalized => n?.kind === "dbpr-press-release",
-    );
+    .filter((n): n is DbprPressReleaseNormalized => n?.kind === "dbpr-press-release");
 
+  // Core-county gate: the scrape carries Charlotte/Sarasota/Manatee/Hendry/
+  // Monroe notices — out of the Lee + Collier core scope, dropped here so no
+  // downstream count ever sees them.
   const noticeRows = allFragments
     .map((f) => f.normalized as unknown as DbprPublicNoticeNormalized)
-    .filter(
-      (n): n is DbprPublicNoticeNormalized => n?.kind === "dbpr-public-notice",
-    );
+    .filter((n): n is DbprPublicNoticeNormalized => n?.kind === "dbpr-public-notice")
+    .filter((n) => CORE_NOTICE_COUNTIES.has(n.county.toLowerCase()));
 
   lastFetchedAt = allFragments[0]?.fetched_at ?? null;
 
@@ -183,7 +206,7 @@ function newsSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const cutoff90 = daysBefore(90);
   const swflRecent = pressRows.filter(
     (r) =>
-      r.is_swfl_relevant &&
+      coreCountyForMentions(r.geographic_mentions) !== null &&
       r.published_date !== null &&
       r.published_date >= cutoff90,
   );
@@ -193,8 +216,8 @@ function newsSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
       topic: "dbpr_news_snapshot",
       fact: "DBPR enforcement pulse — latest 90 days",
       value:
-        `DBPR SWFL-relevant press releases (last 90 days): ${swflRecent.length}. ` +
-        `Public notices (all SWFL): ${noticeRows.length}. ` +
+        `DBPR Lee/Collier-relevant press releases (last 90 days): ${swflRecent.length}. ` +
+        `Public notices (Lee + Collier): ${noticeRows.length}. ` +
         `Total enforcement records: ${lastEnforcement.length}.`,
       source_fragment_ids: [],
     },
@@ -204,16 +227,13 @@ function newsSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
 // ── outputProducer ────────────────────────────────────────────────────────────
 function newsSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const rows = lastEnforcement;
-  const fetchedAt =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetchedAt = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (rows.length === 0) {
     return {
       conclusion: "news-swfl: no DBPR enforcement data available.",
       key_metrics: [],
-      caveats: [
-        "dbpr_press_releases and dbpr_public_notices both returned 0 rows.",
-      ],
+      caveats: ["dbpr_press_releases and dbpr_public_notices both returned 0 rows."],
       direction: "neutral",
       magnitude: 0,
       drivers: [],
@@ -229,10 +249,7 @@ function newsSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   // ── SourceA: press releases (direction vote anchor) ───────────────────────
   const pressRows = rows.filter((r) => r.source === "press_releases");
   const swflRecent = pressRows.filter(
-    (r) =>
-      r.is_swfl_relevant &&
-      r.published_date !== null &&
-      r.published_date >= cutoff90,
+    (r) => r.is_swfl_relevant && r.published_date !== null && r.published_date >= cutoff90,
   );
   const swflPrior = pressRows.filter(
     (r) =>
@@ -360,8 +377,7 @@ function newsSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const noticesAbt = recentNotices.filter((r) => r.is_abt);
   key_metrics.push({
     metric: "dbpr_notices_abt_90d",
-    label:
-      "ABT/hospitality enforcement notices, last 90 days (DBPR public notices — hard-parsed)",
+    label: "ABT/hospitality enforcement notices, last 90 days (DBPR public notices — hard-parsed)",
     value: noticesAbt.length,
     // "stable" — no prior-window query for public notices; trend needs more data history.
     direction: "stable",
@@ -400,9 +416,7 @@ function newsSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   });
 
   // Geographic: SourceB exact county splits
-  const noticesLee = recentNotices.filter(
-    (r) => r.county?.toLowerCase() === "lee",
-  );
+  const noticesLee = recentNotices.filter((r) => r.county?.toLowerCase() === "lee");
   key_metrics.push({
     metric: "dbpr_notices_lee_90d",
     label: "Lee County enforcement notices, last 90 days (DBPR public notices)",
@@ -418,13 +432,10 @@ function newsSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     ),
   });
 
-  const noticesCollier = recentNotices.filter(
-    (r) => r.county?.toLowerCase() === "collier",
-  );
+  const noticesCollier = recentNotices.filter((r) => r.county?.toLowerCase() === "collier");
   key_metrics.push({
     metric: "dbpr_notices_collier_90d",
-    label:
-      "Collier County enforcement notices, last 90 days (DBPR public notices)",
+    label: "Collier County enforcement notices, last 90 days (DBPR public notices)",
     value: noticesCollier.length,
     direction: "stable",
     variable_type: "extensive",
@@ -457,7 +468,7 @@ function newsSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   );
   if (recentNotices.length > 0) {
     parts.push(
-      `${recentNotices.length} individual enforcement notice${recentNotices.length === 1 ? "" : "s"} active in SWFL (${noticesConstruction.length} construction unlicensed, ${noticesAbt.length} ABT/hospitality).`,
+      `${recentNotices.length} individual enforcement notice${recentNotices.length === 1 ? "" : "s"} active in Lee and Collier counties (${noticesConstruction.length} construction unlicensed, ${noticesAbt.length} ABT/hospitality).`,
     );
   }
   if (swflPrior.length > 0) {
@@ -479,8 +490,7 @@ function newsSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
       .map(([t]) => t);
-    if (topTopics.length > 0)
-      parts.push(`Top press release topics: ${topTopics.join(", ")}.`);
+    if (topTopics.length > 0) parts.push(`Top press release topics: ${topTopics.join(", ")}.`);
   }
   parts.push(
     "Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).",
@@ -489,8 +499,9 @@ function newsSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const caveats: string[] = [
     "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
     "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
-    "SWFL relevance in press releases determined by geographic mentions — releases without explicit county names may be undercounted.",
-    `${allRecent.length - swflRecent.length} of ${allRecent.length} recent releases were statewide with no SWFL geographic mention.`,
+    "Relevance in press releases is determined by Lee/Collier geographic mentions (county or place names) — releases without an explicit place name may be undercounted.",
+    "Scope is the Lee + Collier core: enforcement records attributed to other counties in the scrape (Charlotte, Sarasota, Manatee, Hendry, Monroe) are excluded from every count.",
+    `${allRecent.length - swflRecent.length} of ${allRecent.length} recent releases were statewide with no Lee/Collier geographic mention.`,
   ];
   if (env.source === "fixture") {
     caveats.unshift(
@@ -526,7 +537,7 @@ export const newsSwfl: PackDefinition = {
   public_label: "News Signals",
   domain: "macro",
   scope:
-    "FL DBPR enforcement pulse for SWFL — weekly scrape of press releases (announced sweeps) and public notices (confirmed individual actions). Tracks regulatory enforcement across construction, ABT/hospitality, and real estate for Lee, Collier, Charlotte, Sarasota, and Hendry counties.",
+    "FL DBPR enforcement pulse for SWFL — weekly scrape of press releases (announced sweeps) and public notices (confirmed individual actions). Tracks regulatory enforcement across construction, ABT/hospitality, and real estate for Lee and Collier counties.",
   ttl_seconds: 604800, // 7 days — matches weekly ingest cadence
 
   sources: [dbprPressReleasesSource, dbprPublicNoticesSource],
@@ -549,7 +560,7 @@ export const newsSwfl: PackDefinition = {
     "news-swfl: DBPR enforcement pulse for SWFL — press releases (SourceA, Sonnet-inferred) + public notices (SourceB, hard-parsed) feeding 9 deterministic key metrics.",
   prompts: {
     triageContext:
-      "These fragments are DBPR enforcement records from two sources: dbpr_press_releases (Sonnet-enriched aggregate) and dbpr_public_notices (hard-parsed individual cases). All public notice rows are SWFL by construction; press releases are SWFL-filtered by geographic_mentions.",
+      "These fragments are DBPR enforcement records from two sources: dbpr_press_releases (Sonnet-enriched aggregate) and dbpr_public_notices (hard-parsed individual cases). Notices are filtered to Lee + Collier counties in-pack; press-release relevance is recomputed from Lee/Collier geographic mentions.",
     synthesisContext:
       "This pack runs no synthesis agent (skipSynthesisAgent). All metrics are produced deterministically by newsSwflOutputProducer from the two source streams.",
   },

@@ -18,7 +18,8 @@ import { buildSourceCitationUrl } from "../lib/citation-url.mts";
  *   id              text    -- MD5 slug of title + date
  *   title           text    -- announcement headline
  *   announced_date  date    -- date of the announcement
- *   county          text    -- lee | collier | charlotte | swfl
+ *   county          text    -- lee | collier | charlotte | swfl (the consuming
+ *                              pack gates to lee/collier/swfl — core scope)
  *   category        text    -- relocation | expansion | grant | infrastructure | partnership | workforce
  *   investment_usd  numeric -- total investment amount in USD (nullable)
  *   jobs            integer -- new job count (nullable)
@@ -98,9 +99,7 @@ function normalize(row: Record<string, unknown>): SwflIncNormalized | null {
 async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
   const raw = await readFile(FIXTURE_PATH, "utf-8");
   const data = JSON.parse(raw) as { rows?: unknown[] } | unknown[];
-  const rows: unknown[] = Array.isArray(data)
-    ? data
-    : ((data as { rows?: unknown[] }).rows ?? []);
+  const rows: unknown[] = Array.isArray(data) ? data : ((data as { rows?: unknown[] }).rows ?? []);
   return rows as Record<string, unknown>[];
 }
 
@@ -117,9 +116,7 @@ async function fetchRows(): Promise<Record<string, unknown>[]> {
     .gte("announced_date", cutoffDate)
     .order("announced_date", { ascending: false });
   if (error) {
-    throw new Error(
-      `swfl-inc-source: ${TABLE} query failed — ${error.message}`,
-    );
+    throw new Error(`swfl-inc-source: ${TABLE} query failed — ${error.message}`);
   }
   return (data ?? []) as Record<string, unknown>[];
 }
@@ -134,8 +131,7 @@ export const swflIncSource: SourceConnector = {
       env.source === "fixture"
         ? `fixture://refinery/__fixtures__/econ-dev-swfl.sample.json`
         : buildSourceCitationUrl(TABLE, {
-            label:
-              "SWFL Inc. Economic Development Announcements — Lee County EDO",
+            label: "SWFL Inc. Economic Development Announcements — Lee County EDO",
             source: "SWFL Inc.",
             brain: "econ-dev-swfl",
             date_col: "announced_date",

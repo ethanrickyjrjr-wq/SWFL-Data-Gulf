@@ -1,3 +1,45 @@
+## 2026-07-11 (Fable 5 · main) — Charlotte re-scope COMMITTED (56910dfe, isolated worktree); push + Group-A rebuilds await the operator's word
+
+econ-dev's TTL expires 07/14 (live refined_at 2026-07-07T09:40Z + 7d) — the cron would restamp the
+"Lee + Collier + Charlotte" overclaim with a fresh date (Opus 07/11 warning). Fix is built + gated:
+- econ-dev-swfl: county gate (lee/collier/swfl kept; charlotte excluded from every count, sum, and the
+  caveat denominator) + scope/header/grain_boundary re-worded; catalog mirror; new exclusion test.
+- news-swfl: press-release relevance recomputed IN-PACK from geographic_mentions against the canonical
+  Lee/Collier place list ("Fort Myers"-only mention counts, "Charlotte County"-only doesn't; word-
+  boundary matching so Leesburg/"International" can't fire) — the ingest-era 5-county is_swfl_relevant
+  flag is no longer trusted; public notices county-gated to Lee+Collier (the scrape carries
+  Charlotte/Sarasota/Manatee/Hendry/Monroe); statewide-total metric deliberately unchanged; catalog
+  mirror; new 5-test file.
+- Vocab: 4 dbpr_* scope_notes re-scoped + STALE 6-county env_flood_losses_swfl_recent_named_storms_usd
+  note fixed to Lee+Collier+Hendry (fema-nfip-source has been 3-county since 07/07 — the note wasn't).
+- lib/zip-dossier BRAIN_GEO covers → LEE_COLLIER for econ-dev-swfl, news-swfl, AND storm-history-swfl
+  (storm-history's covers had been stale since its 07/07 code re-scope).
+- fgcu-reri UNTOUCHED — RERI genuinely publishes tri-county; operator ruling pending
+  (check scope_fgcu_reri_charlotte).
+Gates: 51/0 tests (both packs + catalog mirror + corridor-aliases + zip-dossier) · vocab --all OK
+(41 brains) · eslint 0. Commit 56910dfe built in worktree ../bp-rescope-land ISOLATED off origin/main —
+local main carried 3 unpushed foreign commits (email-link-destinations docs + homepage demo fix), NOT
+bundled. Autonomous push DENIED by the push lock (correctly — "fix and rebuild" is not the word
+"push"); this entry rides the commit for when the operator lands it. AFTER PUSH, in order (each
+pack_id-targeted + force, NEVER master --force; all six leaves AND master are deterministic — 0 LLM
+calls): econ-dev-swfl → news-swfl → env-swfl → storm-history-swfl → hurricane-tracks-fl →
+seller-stress-swfl. Group A deliberately NOT dispatched before econ-dev's fix+rebuild so master never
+re-synthesizes over the un-fixed econ-dev output. Fallback if not pushed by 07/13: pull econ-dev from
+the 07/14 cron (engine off) — parked loudly, never silently. Then close scope_more_brains_charlotte_leak /
+scope_env_swfl_6county / scope_hurricane_tracks_fl_6county on live-scope evidence.
+FLAPPER TRIAGE (rides this commit): the "daily-rebuild 10x" chronic-flapper stat was 10 June-era
+ledger rows still wearing "pending triage" — now all 10 diagnosed in docs/cron-rebuild-failures.md:
+3x vocab-orphan (durably fixed by Gate 2), 2x push-race (durably fixed by the workflow's rebase-retry
+loop), 1x S3-secret-not-wired (fixed), 1x one-off Stage-4 validator abort (protective), and 3x a NEW
+named class — transient Anthropic egress flake (Connection error / socket closed) during full cascades,
+which also caused the 06-29 schedule red (28366563563; CRON-DIAG mislabels it deterministic). That class
+self-heals and hard-HOLDs (prior master serves — data-safe); durable retry fix parked as check
+daily_rebuild_egress_flake_retry. Verdict on green: trustworthy since 07/03 — real failures are loud via
+four independent layers (rebuild_due gate, hard-HOLD fail step, runner-kill sentinel, freeze watchdog),
+the 07/03 fdot red proved the loud path end-to-end, and 20-second "successes" are legitimate gate-skips.
+chronicFlappers now reports only freshness-probe-daily (4x) — untriaged, out of this order's scope,
+still surfaced at every session start.
+
 ## 2026-07-11 (Fable 5 · main) — Homepage v2 centerpiece BUILT + prod-verified: "A place goes in. A campaign comes out."
 
 Operator approved the v2 pitch ("Ok. Good job. Make it correct"). Built the homepage's OWN idea —

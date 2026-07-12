@@ -1777,7 +1777,7 @@
       ],
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across all 6 SWFL counties (FIPS 12071 Lee, 12021 Collier, 12015 Charlotte, 12043 Glades, 12051 Hendry, 12115 Sarasota) in the named SWFL-impacting storm years (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024). Storm list hardcoded in refinery/sources/fema-nfip-source.mts with a LAST_REVIEWED date; update when a new named storm hits SWFL."
+      "scope_note": "Sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the SWFL core counties (FIPS 12071 Lee, 12021 Collier, 12051 Hendry; Charlotte/Glades/Sarasota removed 07/07/2026 scope lock) in the named SWFL-impacting storm years (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024). Storm list hardcoded in refinery/sources/fema-nfip-source.mts with a LAST_REVIEWED date; update when a new named storm hits SWFL."
     },
     "env_flood_losses_swfl_baseline_annual_usd": {
       "id": "env_flood_losses_swfl_baseline_annual_usd",
@@ -6953,7 +6953,7 @@
       "unit": "releases",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Count of DBPR press releases in the last 90 days where is_swfl_relevant=true (geographic mention Sonnet-inferred). Direction vote anchor for news-swfl."
+      "scope_note": "Count of DBPR press releases in the last 90 days whose geographic mentions name Lee or Collier County or a Lee/Collier place (Lee + Collier core scope; recomputed in-pack from geographic_mentions, superseding the ingest-era 5-county is_swfl_relevant flag). Direction vote anchor for news-swfl."
     },
     "dbpr_swfl_releases_prior_90d": {
       "id": "dbpr_swfl_releases_prior_90d",
@@ -6976,7 +6976,7 @@
       "unit": "releases",
       "direction_concept": null,
       "status": "active",
-      "scope_note": "Count of SWFL-relevant DBPR press releases in the 90-180 day window. Paired with dbpr_swfl_releases_90d to compute momentum direction."
+      "scope_note": "Count of Lee/Collier-relevant DBPR press releases in the 90-180 day window (same core-scope mention rule as dbpr_swfl_releases_90d). Paired with dbpr_swfl_releases_90d to compute momentum direction."
     },
     "dbpr_total_releases_90d": {
       "id": "dbpr_total_releases_90d",
@@ -7024,7 +7024,7 @@
         "direction_polarity": "higher_is_bullish"
       },
       "status": "active",
-      "scope_note": "Hard-parsed DBPR public notices with violation_type=unlicensed_activity and construction industry in SWFL. Rising = bullish (recovery signal — enforcement follows demand)."
+      "scope_note": "Hard-parsed DBPR public notices with violation_type=unlicensed_activity and construction industry in Lee + Collier (core scope; Charlotte/Sarasota/Manatee/Hendry/Monroe notices in the scrape are excluded). Rising = bullish (recovery signal — enforcement follows demand)."
     },
     "dbpr_releases_construction_90d": {
       "id": "dbpr_releases_construction_90d",
@@ -7075,7 +7075,7 @@
         "direction_polarity": "lower_is_bullish"
       },
       "status": "active",
-      "scope_note": "Hard-parsed DBPR public notices with ABT or hospitality industry in SWFL. Rising = bearish (compliance stress signal)."
+      "scope_note": "Hard-parsed DBPR public notices with ABT or hospitality industry in Lee + Collier (core scope; non-core counties in the scrape are excluded). Rising = bearish (compliance stress signal)."
     },
     "dbpr_releases_abt_90d": {
       "id": "dbpr_releases_abt_90d",

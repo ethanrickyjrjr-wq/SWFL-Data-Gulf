@@ -14,8 +14,9 @@ import { isoTimestamp, expiresDate } from "../lib/dates.mts";
  * Table: public.dbpr_public_notices
  * (ingest/pipelines/dbpr_public_notices, weekly cron via dbpr-public-notices-weekly.yml)
  *
- * All rows are SWFL by construction (Lee, Collier, Charlotte, Sarasota, Manatee, Hendry, Monroe).
- * Fields are hard-parsed from PDF text — not Sonnet-inferred.
+ * The scrape lands rows for Lee, Collier, Charlotte, Sarasota, Manatee, Hendry,
+ * and Monroe; the consuming pack (news-swfl) filters to the Lee + Collier core
+ * scope before any count. Fields are hard-parsed from PDF text — not Sonnet-inferred.
  *
  * Columns read:
  *   pdf_url           text        — PDF URL (unique key)
@@ -66,9 +67,7 @@ function toDateStr(v: unknown): string | null {
   return null;
 }
 
-function normalize(
-  row: Record<string, unknown>,
-): DbprPublicNoticeNormalized | null {
+function normalize(row: Record<string, unknown>): DbprPublicNoticeNormalized | null {
   const pdf_url = str(row.pdf_url);
   const county = str(row.county);
   if (!pdf_url || !county) return null;
@@ -96,9 +95,7 @@ function normalize(
 async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
   const raw = await readFile(FIXTURE_PATH, "utf-8");
   const data = JSON.parse(raw) as { rows?: unknown[] } | unknown[];
-  const rows = Array.isArray(data)
-    ? data
-    : ((data as { rows?: unknown[] }).rows ?? []);
+  const rows = Array.isArray(data) ? data : ((data as { rows?: unknown[] }).rows ?? []);
   return rows as Record<string, unknown>[];
 }
 
@@ -115,9 +112,7 @@ async function fetchRows(): Promise<Record<string, unknown>[]> {
     .gte("response_deadline", cutoffDate)
     .order("response_deadline", { ascending: false });
   if (error)
-    throw new Error(
-      `dbpr-public-notices-source: ${TABLE} query failed — ${error.message}`,
-    );
+    throw new Error(`dbpr-public-notices-source: ${TABLE} query failed — ${error.message}`);
   return (data ?? []) as Record<string, unknown>[];
 }
 

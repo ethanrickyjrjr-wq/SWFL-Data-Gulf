@@ -6,10 +6,7 @@ import type {
   BrainOutputMetric,
   BrainOutputDirection,
 } from "../types/brain-output.mts";
-import {
-  swflIncSource,
-  type SwflIncNormalized,
-} from "../sources/swfl-inc-source.mts";
+import { swflIncSource, type SwflIncNormalized } from "../sources/swfl-inc-source.mts";
 import { env } from "../config/env.mts";
 
 /**
@@ -19,8 +16,10 @@ import { env } from "../config/env.mts";
  * Source: public.swfl_inc_announcements (ingest/pipelines/swfl_inc,
  * cron Monday 08:00 UTC via swfl-inc-weekly.yml).
  *
- * Coverage: Lee + Collier + Charlotte counties (all announcements from the
- * official Lee County economic development organization's news feed).
+ * Coverage: Lee + Collier counties (the feed is the official Lee County
+ * economic development organization; Collier appears via partnerships and
+ * co-announcements). Rows tagged with any other county (e.g. charlotte) are
+ * excluded from every count — CLAUDE.md SCOPE lock 07/07/2026.
  *
  * Key metrics:
  *   econ_dev_announcements_90d   — count of announcements in last 90 days
@@ -59,15 +58,23 @@ function daysBefore(days: number): string {
  * they're typically events/MOUs, not capital projects. Calibration knob;
  * documented in SOURCED.md#econ-dev-swfl-qualifying-categories.
  */
-export const QUALIFYING_CATEGORIES = [
-  "relocation",
-  "expansion",
-  "grant",
-  "infrastructure",
-];
+export const QUALIFYING_CATEGORIES = ["relocation", "expansion", "grant", "infrastructure"];
 
 export function isQualifying(r: Pick<SwflIncNormalized, "category">): boolean {
   return QUALIFYING_CATEGORIES.includes(r.category ?? "");
+}
+
+/**
+ * Core-scope county gate (CLAUDE.md SCOPE lock 07/07/2026): only Lee + Collier
+ * announcements count, plus "swfl" region-wide rows (the normalizer's default
+ * for unattributed announcements from this Lee-County-EDO feed). Any other
+ * county tag — charlotte today, anything else the scraper ever classifies —
+ * is out of core scope and excluded from every metric.
+ */
+export const CORE_ANNOUNCEMENT_COUNTIES = new Set(["lee", "collier", "swfl"]);
+
+export function isCoreAnnouncement(r: Pick<SwflIncNormalized, "county">): boolean {
+  return CORE_ANNOUNCEMENT_COUNTIES.has(r.county);
 }
 
 function makeSource(
@@ -85,12 +92,11 @@ function makeSource(
 
 // ── corpusSummary ─────────────────────────────────────────────────────────────
 
-function econDevSwflCorpusSummary(
-  allFragments: RawFragment[],
-): SynthesisFact[] {
+function econDevSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const rows = allFragments
     .map((f) => f.normalized as unknown as SwflIncNormalized)
-    .filter((n): n is SwflIncNormalized => n?.kind === "swfl-inc-announcement");
+    .filter((n): n is SwflIncNormalized => n?.kind === "swfl-inc-announcement")
+    .filter(isCoreAnnouncement);
 
   lastRows = rows;
   lastFetchedAt = allFragments[0]?.fetched_at ?? null;
@@ -102,10 +108,7 @@ function econDevSwflCorpusSummary(
 
   // Momentum counts only qualifying econ-dev categories (see isQualifying).
   const recent = rows.filter(
-    (r) =>
-      r.announced_date !== null &&
-      r.announced_date >= cutoff90 &&
-      isQualifying(r),
+    (r) => r.announced_date !== null && r.announced_date >= cutoff90 && isQualifying(r),
   );
   const prior = rows.filter(
     (r) =>
@@ -145,21 +148,16 @@ function econDevSwflCorpusSummary(
 
 // ── outputProducer ────────────────────────────────────────────────────────────
 
-function econDevSwflOutputProducer(
-  _out: PackOutput,
-): BrainOutputProducerResult {
+function econDevSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const rows = lastRows;
-  const fetchedAt =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetchedAt = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (rows.length === 0) {
     return {
       conclusion:
         "econ-dev-swfl: no SWFL Inc. announcement data available — table may be empty or pipeline has not yet run.",
       key_metrics: [],
-      caveats: [
-        "swfl_inc_announcements table returned 0 rows. Run the swfl-inc-weekly pipeline.",
-      ],
+      caveats: ["swfl_inc_announcements table returned 0 rows. Run the swfl-inc-weekly pipeline."],
       direction: "neutral",
       magnitude: 0,
       drivers: [],
@@ -174,14 +172,10 @@ function econDevSwflOutputProducer(
 
   // Window all dated rows (any category) for the signal-to-noise caveat, then
   // restrict the momentum count to qualifying econ-dev categories.
-  const recentAll = rows.filter(
-    (r) => r.announced_date !== null && r.announced_date >= cutoff90,
-  );
+  const recentAll = rows.filter((r) => r.announced_date !== null && r.announced_date >= cutoff90);
   const priorAll = rows.filter(
     (r) =>
-      r.announced_date !== null &&
-      r.announced_date >= cutoff180 &&
-      r.announced_date < cutoff90,
+      r.announced_date !== null && r.announced_date >= cutoff180 && r.announced_date < cutoff90,
   );
   const recent = recentAll.filter(isQualifying);
   const prior = priorAll.filter(isQualifying);
@@ -189,9 +183,7 @@ function econDevSwflOutputProducer(
   const recentInv = recent.reduce((s, r) => s + (r.investment_usd ?? 0), 0);
   const recentJobs = recent.reduce((s, r) => s + (r.jobs ?? 0), 0);
 
-  const sourceUrl =
-    rows.find((r) => r.source_url)?.source_url ??
-    "https://www.swflinc.com/blog/";
+  const sourceUrl = rows.find((r) => r.source_url)?.source_url ?? "https://www.swflinc.com/blog/";
 
   const key_metrics: BrainOutputMetric[] = [];
 
@@ -340,7 +332,8 @@ function econDevSwflOutputProducer(
     exogenous_signals: [],
     grain_boundary: {
       not_available: [
-        "Systematic Collier and Charlotte coverage — the feed is the Lee County EDO (SWFL Inc.); other counties appear only when announced via partnerships",
+        "Systematic Collier coverage — the feed is the Lee County EDO (SWFL Inc.); Collier appears only when announced via partnerships and co-announcements",
+        "Charlotte County (or any other out-of-core county) announcements — outside the Lee + Collier core scope and excluded from every count",
         "Investment and job figures beyond what is disclosed at announcement — no audited or updated totals",
         "Sub-county grain — announcements are county-attributed only (no ZIP, corridor, or parcel detail)",
       ],
@@ -357,7 +350,7 @@ export const econDevSwfl: PackDefinition = {
   public_label: "Economic Development",
   domain: "macro",
   scope:
-    "Southwest Florida economic development project announcements — weekly scrape of SWFL Inc. (Lee County EDO) news feed. Tracks project count, disclosed investment, and announced job creation for Lee + Collier + Charlotte counties.",
+    "Southwest Florida economic development project announcements — weekly scrape of SWFL Inc. (Lee County EDO) news feed. Tracks project count, disclosed investment, and announced job creation for Lee + Collier counties.",
   ttl_seconds: 604800, // 7 days — matches weekly ingest cadence
 
   sources: [swflIncSource],
