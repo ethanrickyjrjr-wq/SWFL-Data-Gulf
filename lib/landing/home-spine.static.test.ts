@@ -6,7 +6,7 @@
 // other input-bearing component (pinned here). This is the regression that
 // caused the rebuild — it must not return silently.
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
@@ -59,5 +59,16 @@ describe("homepage spine (static pins)", () => {
     expect(hero.slice(hero.indexOf("rail-top-list"), hero.indexOf("rail-footer"))).not.toContain(
       "FactChip",
     );
+  });
+
+  test("the deleted theater stays deleted", () => {
+    for (const gone of [
+      "components/landing/CampaignReveal.tsx",
+      "components/landing/HeroCampaign.tsx",
+      "lib/landing/campaign-demo.ts",
+    ]) {
+      expect(existsSync(join(process.cwd(), gone))).toBe(false);
+    }
+    expect(read("components/landing/home-explorer.css")).not.toContain(".cr-");
   });
 });
