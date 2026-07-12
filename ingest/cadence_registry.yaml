@@ -1609,7 +1609,16 @@ pipelines:
     freshness_column: scraped_at
     expected_rows_min: 1 # daily news; a quiet day may legitimately publish 0-1 articles — rebaseline when baseline volume is confirmed
     dlt_schema_name: data_lake
-    source_tag: news_crawl
+    # source_tag: news_crawl  — DELETED 07/11/2026. It was the ONLY source_tag: FIELD in the registry
+    # and it was a phantom: nothing in ingest/scripts/ or ingest/lib/ reads `source_tag` (the
+    # freshness and volume probes both filter on `source_name` — check_freshness.py:238, :382),
+    # and 'news_crawl' has no literal in ingest/pipelines/news_swfl/*.py — it is the app cron
+    # ROUTE name (/api/cron/news-crawl). The pipeline stamps per-outlet source_name values
+    # ('naples_daily_news', normalizer.py:46). A registry field nothing reads is the exact class
+    # that false-REDded daily_truth for two weeks (see this file's :52-54).
+    # (Unrelated: data_lake.daily_truth has a real source_tag COLUMN — engine.py:67 — but it is
+    # 'live_search' for every row, so the live_search entries discriminate on metric_key via
+    # count_filter, not on source_tag. See :55/:89.)
     note: "4 SWFL sources via crawl4ai. Cron at /api/cron/news-crawl scores + inserts into project_events. Novelty guard (2026-07-05): published_date = first-seen (carried forward pre-merge); assert_content_fresh 7d gate trips when no NEW article_url appears — news has no real content date, so staleness = no novelty."
     source_scope:
       confirmed_total:

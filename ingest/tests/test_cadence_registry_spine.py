@@ -236,3 +236,23 @@ def test_orphan_writers_are_not_nightly_gated():
         "active_listings' table (active_listings_residential) has no live consumer -- "
         "active-listings-swfl reads listing_active_stats over listing_state (08h D7)"
     )
+
+
+def test_no_entry_carries_a_source_tag_field():
+    """check_freshness.py scopes on `source_name` (:238 freshness, :382 volume).
+    `source_tag` is read by NOTHING in ingest/scripts/ or ingest/lib/ (index #4).
+    Its single occurrence -- news_swfl -> news_crawl -- is a phantom with no matching
+    literal in the pipeline code ('news_crawl' is the app cron ROUTE name,
+    /api/cron/news-crawl; the pipeline stamps per-outlet source_name values like
+    'naples_daily_news', normalizer.py:46). A registry field nothing reads is exactly
+    the class that cost two weeks of false-RED. Identity lives in `source_name:`.
+
+    NOT to be confused with daily_truth's source_tag COLUMN (engine.py:67), which is real
+    but useless as a discriminator -- it is 'live_search' for both metrics. That job belongs
+    to count_filter/metric_key (Task 3). A registry `source_tag:` FIELD remains forbidden.
+    """
+    tagged = [e["name"] for e in _entries() if "source_tag" in e]
+    assert not tagged, (
+        f"`source_tag:` is read by nothing — use `source_name:` (the column "
+        f"check_freshness.py actually filters on). Remove from: {tagged}"
+    )
