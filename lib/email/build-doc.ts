@@ -41,7 +41,12 @@ import { isListingIntent, isNewListingRecipePrompt } from "@/lib/email/listing-i
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { fetchListingFacts, type ListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
-import { fetchAreaComps, buildCompsSpec, deriveAreaUrl } from "@/lib/email/listing-comps";
+import { compsForAddress } from "@/lib/assistant/comp-helper";
+import {
+  buildSoldCompsSpec,
+  soldCompsListBlock,
+  upsertSoldCompsBlock,
+} from "@/lib/email/sold-comp-blocks";
 import { chartSpecToEmailImage, type EmailChartImage } from "@/lib/email/spec-to-png";
 import { buildChartForQuestion } from "@/lib/assistant/chart-for-question";
 import {
@@ -473,28 +478,35 @@ export async function buildContentDoc({
       }
       let flyer = buildListingFlyer(facts, doc);
 
-      // Comps chart — fetch active listings from the same area page and build a
-      // bar chart with the subject highlighted. Best-effort: ships without chart
-      // on any failure. Never fabricates a price; falls back to no chart, not
-      // to a macro index.
-      if (url) {
-        const comps = await fetchAreaComps(url, facts).catch(() => []);
-        const areaUrl = deriveAreaUrl(url);
-        if (comps.length >= 2 && areaUrl) {
-          const accent = doc.globalStyle?.accentColor ?? "#2563eb";
-          const spec = buildCompsSpec(comps, facts, areaUrl);
-          if (spec) {
-            const chartImg = await chartSpecToEmailImage(
-              spec,
-              accent,
-              `comps-${facts.zip ?? "swfl"}-${Date.now()}`,
-            ).catch(() => null);
-            if (chartImg) {
-              flyer = upsertChartBlock(flyer, chartImageBlock(chartImg));
-            }
-          }
+      // Comps — nearby RECORDED SALES (the chat comp lane: geocode → sold comps →
+      // ≤2 exact-sale enrichments, ≤3 vendor calls, no LLM). Sold comps justify the
+      // asking price without advertising purchasable competitors (operator decision
+      // 07/11/2026). Chart + linked rows ("View →" to each comp's captured
+      // realtor.com page). Best-effort: any miss ships the flyer without them.
+      const compRes = facts.address ? await compsForAddress(facts.address).catch(() => null) : null;
+      const comps = compRes?.comps ?? [];
+      const subjectPrice = Number((facts.price ?? "").replace(/[^0-9]/g, "")) || null;
+      const spec = buildSoldCompsSpec(
+        comps,
+        {
+          street: facts.address?.split(",")[0]?.trim() ?? "This home",
+          listPrice: subjectPrice,
+        },
+        new Date().toISOString().slice(0, 10),
+      );
+      if (spec) {
+        const accent = doc.globalStyle?.accentColor ?? "#2563eb";
+        const chartImg = await chartSpecToEmailImage(
+          spec,
+          accent,
+          `comps-${facts.zip ?? "swfl"}-${Date.now()}`,
+        ).catch(() => null);
+        if (chartImg) {
+          flyer = upsertChartBlock(flyer, chartImageBlock(chartImg));
         }
       }
+      const compRows = soldCompsListBlock(comps);
+      if (compRows) flyer = upsertSoldCompsBlock(flyer, compRows);
 
       const reparsed = EmailDocSchema.safeParse(flyer);
       if (reparsed.success) {
