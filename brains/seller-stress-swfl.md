@@ -1,12 +1,12 @@
-<!-- FRESHNESS: v7 | Token: SWFL-7421-v7-20260629 -->
+<!-- FRESHNESS: v8 | Token: SWFL-7421-v8-20260712 -->
 ---
 brain_id: seller-stress-swfl
-version: 7
-refined_at: 2026-06-29T18:40:30Z
-freshness_token: SWFL-7421-v7-20260629
+version: 8
+refined_at: 2026-07-12T04:17:26Z
+freshness_token: SWFL-7421-v8-20260712
 ttl_seconds: 2592000
 context_type: user_saved_reference
-scope: SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre-shock baseline, derived from three Redfin Data Center Tier-1 Parquets: price_drops, contract_cancellations, and delistings_relistings. Signals: delistings rate (leading), price drop breadth (coincident), cancellation rate (lagging), avg drop depth (lagging), relisting rate (coincident). Covers 126 SWFL ZIPs, Apr 2019–present, monthly rolling-3-month periods. All math deterministic; no LLM synthesis.
+scope: SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre-shock baseline, derived from three Redfin Data Center Tier-1 Parquets: price_drops, contract_cancellations, and delistings_relistings. Signals: delistings rate (leading), price drop breadth (coincident), cancellation rate (lagging), avg drop depth (lagging), relisting rate (coincident). Covers the Lee + Collier core ZIP scope, Apr 2019–present, monthly rolling-3-month periods. All math deterministic; no LLM synthesis.
 ---
 
 # User-Saved Reference Context
@@ -20,7 +20,7 @@ and treat the rest as reference only.
 
 ```reference
 CONTEXT TYPE: user_saved_reference
-SCOPE: SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre-shock baseline, derived from three Redfin Data Center Tier-1 Parquets: price_drops, contract_cancellations, and delistings_relistings. Signals: delistings rate (leading), price drop breadth (coincident), cancellation rate (lagging), avg drop depth (lagging), relisting rate (coincident). Covers 126 SWFL ZIPs, Apr 2019–present, monthly rolling-3-month periods. All math deterministic; no LLM synthesis.
+SCOPE: SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre-shock baseline, derived from three Redfin Data Center Tier-1 Parquets: price_drops, contract_cancellations, and delistings_relistings. Signals: delistings rate (leading), price drop breadth (coincident), cancellation rate (lagging), avg drop depth (lagging), relisting rate (coincident). Covers the Lee + Collier core ZIP scope, Apr 2019–present, monthly rolling-3-month periods. All math deterministic; no LLM synthesis.
 
 --- HOW THE USER LIKES TO WORK ---
 - Answer seller stress questions at ZIP grain using the detail_table. Do not invent a score for a suppressed ZIP.
@@ -29,39 +29,39 @@ SCOPE: SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                    | verified   | expires
-s01 | Redfin Data Center — price_drops ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/            | 2026-06-29 | 2026-07-29
-s02 | Redfin Data Center — contract_cancellations ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/ | 2026-06-29 | 2026-07-29
-s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/  | 2026-06-29 | 2026-07-29
+s01 | Redfin Data Center — price_drops ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/            | 2026-07-12 | 2026-08-11
+s02 | Redfin Data Center — contract_cancellations ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/ | 2026-07-12 | 2026-08-11
+s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/  | 2026-07-12 | 2026-08-11
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"seller_stress_summary","fact":"Redfin SWFL seller stress composite","value":"111 ZIPs scored (15 suppressed), SWFL median stress score = 61.3/100, latest period = 2026-03-01.","src":"s01","date":"2026-06-29"}
+  {"id":"f001","topic":"seller_stress_summary","fact":"Redfin SWFL seller stress composite","value":"52 ZIPs scored (3 suppressed), SWFL median stress score = 60.9/100, latest period = 2026-03-01.","src":"s01","date":"2026-07-12"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "seller-stress-swfl",
-  "version": 7,
-  "refined_at": "2026-06-29T18:40:30Z",
-  "expires": "2026-07-29T18:40:30Z",
+  "version": 8,
+  "refined_at": "2026-07-12T04:17:26Z",
+  "expires": "2026-08-11T04:17:26Z",
   "ttl_seconds": 2592000,
   "direction": "bearish",
-  "magnitude": 0.53,
+  "magnitude": 0.52,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL seller stress is elevated at 61/100 (bearish threshold: ≥65). 111 of 126 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 33983 (100), 34207 (92), 33954 (86). Leading signal: 13.8% median delistings rate.",
+  "conclusion": "SWFL seller stress is elevated at 61/100 (bearish threshold: ≥65). 52 of 55 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 34145 (84), 33903 (78), 33973 (72). Leading signal: 15.5% median delistings rate.",
   "key_metrics": [
     {
       "metric": "seller_stress_score_swfl",
-      "value": 61.3,
+      "value": 60.9,
       "direction": "rising",
-      "label": "SWFL median seller stress score (0-100) at 2026-03-01 — 111 ZIPs scored vs 2019–2021 baseline",
+      "label": "SWFL median seller stress score (0-100) at 2026-03-01 — 52 ZIPs scored vs 2019–2021 baseline",
       "variable_type": "intensive",
       "units": "score (0-100)",
       "display_format": "raw",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-29T18:40:27Z",
+        "fetched_at": "2026-07-12T04:17:24Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -72,7 +72,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
     },
     {
       "metric": "seller_stress_delistings_rate_swfl",
-      "value": 13.77,
+      "value": 15.51,
       "direction": "rising",
       "label": "SWFL median delistings rate (share of listings pulled off market without selling) — leading indicator",
       "variable_type": "intensive",
@@ -80,7 +80,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-29T18:40:27Z",
+        "fetched_at": "2026-07-12T04:17:24Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -91,7 +91,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
     },
     {
       "metric": "seller_stress_price_drops_rate_swfl",
-      "value": 46.05,
+      "value": 47.08,
       "direction": "rising",
       "label": "SWFL median share of active listings with a price reduction — coincident indicator",
       "variable_type": "intensive",
@@ -99,7 +99,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-29T18:40:27Z",
+        "fetched_at": "2026-07-12T04:17:24Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -110,7 +110,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
     },
     {
       "metric": "seller_stress_cancellation_rate_swfl",
-      "value": 13.03,
+      "value": 12.75,
       "direction": "stable",
       "label": "SWFL median contract cancellation rate (% of pending sales cancelled) — lagging ~30-60 days",
       "variable_type": "intensive",
@@ -118,7 +118,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-29T18:40:27Z",
+        "fetched_at": "2026-07-12T04:17:24Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -129,7 +129,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
     },
     {
       "metric": "seller_stress_avg_drop_depth_swfl",
-      "value": 4.36,
+      "value": 4.515000000000001,
       "direction": "rising",
       "label": "SWFL median average price reduction size among listings that received a cut — lagging indicator",
       "variable_type": "intensive",
@@ -137,7 +137,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-29T18:40:27Z",
+        "fetched_at": "2026-07-12T04:17:24Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -202,62 +202,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       ],
       "rows": [
         {
-          "key": "33983",
-          "label": "33983",
-          "cells": {
-            "seller_stress_score": 100,
-            "share_delisted_pct": 14.23,
-            "pct_active_with_drops": 49.49,
-            "cancellation_rate_pct": 20.05,
-            "avg_price_drop_pct": 4.51,
-            "share_relisted_pct": 4.19,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34207",
-          "label": "34207",
-          "cells": {
-            "seller_stress_score": 91.5,
-            "share_delisted_pct": 11.43,
-            "pct_active_with_drops": 44.37,
-            "cancellation_rate_pct": 21.62,
-            "avg_price_drop_pct": 5.3,
-            "share_relisted_pct": 5.92,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33954",
-          "label": "33954",
-          "cells": {
-            "seller_stress_score": 85.6,
-            "share_delisted_pct": 11.95,
-            "pct_active_with_drops": 42.99,
-            "cancellation_rate_pct": 16.89,
-            "avg_price_drop_pct": 3.61,
-            "share_relisted_pct": 4.72,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33981",
-          "label": "33981",
-          "cells": {
-            "seller_stress_score": 84.3,
-            "share_delisted_pct": 11.05,
-            "pct_active_with_drops": 47.5,
-            "cancellation_rate_pct": 22.07,
-            "avg_price_drop_pct": 3.88,
-            "share_relisted_pct": 8.4,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "34145",
           "label": "34145",
           "cells": {
@@ -272,118 +216,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34251",
-          "label": "34251",
-          "cells": {
-            "seller_stress_score": 83.6,
-            "share_delisted_pct": 12.95,
-            "pct_active_with_drops": 41.46,
-            "cancellation_rate_pct": 37.65,
-            "avg_price_drop_pct": 4.44,
-            "share_relisted_pct": 9.87,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33980",
-          "label": "33980",
-          "cells": {
-            "seller_stress_score": 83.3,
-            "share_delisted_pct": 13.55,
-            "pct_active_with_drops": 43.02,
-            "cancellation_rate_pct": 14.7,
-            "avg_price_drop_pct": 4.65,
-            "share_relisted_pct": 5.29,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34287",
-          "label": "34287",
-          "cells": {
-            "seller_stress_score": 81.5,
-            "share_delisted_pct": 12.09,
-            "pct_active_with_drops": 51.6,
-            "cancellation_rate_pct": 19.95,
-            "avg_price_drop_pct": 3.97,
-            "share_relisted_pct": 5.27,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33952",
-          "label": "33952",
-          "cells": {
-            "seller_stress_score": 81.3,
-            "share_delisted_pct": 13.77,
-            "pct_active_with_drops": 47.05,
-            "cancellation_rate_pct": 24.91,
-            "avg_price_drop_pct": 4.74,
-            "share_relisted_pct": 6.93,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34224",
-          "label": "34224",
-          "cells": {
-            "seller_stress_score": 80.7,
-            "share_delisted_pct": 12.09,
-            "pct_active_with_drops": 42.91,
-            "cancellation_rate_pct": 18.76,
-            "avg_price_drop_pct": 4.42,
-            "share_relisted_pct": 4.21,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34237",
-          "label": "34237",
-          "cells": {
-            "seller_stress_score": 80.3,
-            "share_delisted_pct": 19.56,
-            "pct_active_with_drops": 44,
-            "cancellation_rate_pct": 14.9,
-            "avg_price_drop_pct": 4.62,
-            "share_relisted_pct": 7.33,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33947",
-          "label": "33947",
-          "cells": {
-            "seller_stress_score": 79.1,
-            "share_delisted_pct": 9.75,
-            "pct_active_with_drops": 48.73,
-            "cancellation_rate_pct": 20.54,
-            "avg_price_drop_pct": 4.46,
-            "share_relisted_pct": 8.12,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34291",
-          "label": "34291",
-          "cells": {
-            "seller_stress_score": 78.4,
-            "share_delisted_pct": 10.47,
-            "pct_active_with_drops": 37.25,
-            "cancellation_rate_pct": 15,
-            "avg_price_drop_pct": 3.6,
-            "share_relisted_pct": 1.86,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33903",
           "label": "33903",
           "cells": {
@@ -393,76 +225,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 24.87,
             "avg_price_drop_pct": 4.9,
             "share_relisted_pct": 9.33,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34235",
-          "label": "34235",
-          "cells": {
-            "seller_stress_score": 77.8,
-            "share_delisted_pct": 13.02,
-            "pct_active_with_drops": 41.32,
-            "cancellation_rate_pct": 18.8,
-            "avg_price_drop_pct": 4.36,
-            "share_relisted_pct": 5.12,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33946",
-          "label": "33946",
-          "cells": {
-            "seller_stress_score": 77,
-            "share_delisted_pct": 8.41,
-            "pct_active_with_drops": 60.26,
-            "cancellation_rate_pct": 10.09,
-            "avg_price_drop_pct": 5.36,
-            "share_relisted_pct": 5.13,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34292",
-          "label": "34292",
-          "cells": {
-            "seller_stress_score": 74.5,
-            "share_delisted_pct": 12.57,
-            "pct_active_with_drops": 52.63,
-            "cancellation_rate_pct": 18.2,
-            "avg_price_drop_pct": 3.88,
-            "share_relisted_pct": 4.47,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34286",
-          "label": "34286",
-          "cells": {
-            "seller_stress_score": 72.8,
-            "share_delisted_pct": 7.41,
-            "pct_active_with_drops": 39.54,
-            "cancellation_rate_pct": 23.18,
-            "avg_price_drop_pct": 3.36,
-            "share_relisted_pct": 5.36,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33948",
-          "label": "33948",
-          "cells": {
-            "seller_stress_score": 72.5,
-            "share_delisted_pct": 9.1,
-            "pct_active_with_drops": 49.1,
-            "cancellation_rate_pct": 21.15,
-            "avg_price_drop_pct": 4.03,
-            "share_relisted_pct": 6.04,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -510,20 +272,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "33950",
-          "label": "33950",
-          "cells": {
-            "seller_stress_score": 70.9,
-            "share_delisted_pct": 14.26,
-            "pct_active_with_drops": 50.1,
-            "cancellation_rate_pct": 17.66,
-            "avg_price_drop_pct": 4.92,
-            "share_relisted_pct": 4.71,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33922",
           "label": "33922",
           "cells": {
@@ -538,20 +286,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34238",
-          "label": "34238",
-          "cells": {
-            "seller_stress_score": 70.3,
-            "share_delisted_pct": 11.9,
-            "pct_active_with_drops": 50.22,
-            "cancellation_rate_pct": 15.42,
-            "avg_price_drop_pct": 3.87,
-            "share_relisted_pct": 5.31,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33901",
           "label": "33901",
           "cells": {
@@ -561,20 +295,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 12.74,
             "avg_price_drop_pct": 5.78,
             "share_relisted_pct": 8.71,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34211",
-          "label": "34211",
-          "cells": {
-            "seller_stress_score": 69.6,
-            "share_delisted_pct": 8.6,
-            "pct_active_with_drops": 35.02,
-            "cancellation_rate_pct": 8.25,
-            "avg_price_drop_pct": 3.25,
-            "share_relisted_pct": 5.17,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -608,20 +328,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34205",
-          "label": "34205",
-          "cells": {
-            "seller_stress_score": 68.7,
-            "share_delisted_pct": 12.45,
-            "pct_active_with_drops": 48.01,
-            "cancellation_rate_pct": 16.41,
-            "avg_price_drop_pct": 5,
-            "share_relisted_pct": 6.51,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33991",
           "label": "33991",
           "cells": {
@@ -645,20 +351,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 5.96,
             "avg_price_drop_pct": 4.55,
             "share_relisted_pct": 5.01,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34234",
-          "label": "34234",
-          "cells": {
-            "seller_stress_score": 67.1,
-            "share_delisted_pct": 12.89,
-            "pct_active_with_drops": 41.26,
-            "cancellation_rate_pct": 22.86,
-            "avg_price_drop_pct": 5.63,
-            "share_relisted_pct": 6.39,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -720,20 +412,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34240",
-          "label": "34240",
-          "cells": {
-            "seller_stress_score": 66.4,
-            "share_delisted_pct": 10.28,
-            "pct_active_with_drops": 41.07,
-            "cancellation_rate_pct": 11.39,
-            "avg_price_drop_pct": 3.74,
-            "share_relisted_pct": 4.5,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "34117",
           "label": "34117",
           "cells": {
@@ -748,48 +426,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "33955",
-          "label": "33955",
-          "cells": {
-            "seller_stress_score": 65.9,
-            "share_delisted_pct": 14.32,
-            "pct_active_with_drops": 47.78,
-            "cancellation_rate_pct": 12.16,
-            "avg_price_drop_pct": 4.2,
-            "share_relisted_pct": 4.04,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34203",
-          "label": "34203",
-          "cells": {
-            "seller_stress_score": 65.9,
-            "share_delisted_pct": 14.09,
-            "pct_active_with_drops": 45.39,
-            "cancellation_rate_pct": 10.1,
-            "avg_price_drop_pct": 3.9,
-            "share_relisted_pct": 5.96,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34210",
-          "label": "34210",
-          "cells": {
-            "seller_stress_score": 65.3,
-            "share_delisted_pct": 14.01,
-            "pct_active_with_drops": 50.52,
-            "cancellation_rate_pct": 15.58,
-            "avg_price_drop_pct": 5.01,
-            "share_relisted_pct": 4,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33904",
           "label": "33904",
           "cells": {
@@ -799,20 +435,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 20.71,
             "avg_price_drop_pct": 4.43,
             "share_relisted_pct": 7.86,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33953",
-          "label": "33953",
-          "cells": {
-            "seller_stress_score": 64.8,
-            "share_delisted_pct": 14.41,
-            "pct_active_with_drops": 41.27,
-            "cancellation_rate_pct": 8.99,
-            "avg_price_drop_pct": 4.17,
-            "share_relisted_pct": 4.05,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -846,34 +468,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34236",
-          "label": "34236",
-          "cells": {
-            "seller_stress_score": 63.4,
-            "share_delisted_pct": 14.5,
-            "pct_active_with_drops": 44.34,
-            "cancellation_rate_pct": 7.25,
-            "avg_price_drop_pct": 5.56,
-            "share_relisted_pct": 4.15,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34285",
-          "label": "34285",
-          "cells": {
-            "seller_stress_score": 63.3,
-            "share_delisted_pct": 13.56,
-            "pct_active_with_drops": 46.7,
-            "cancellation_rate_pct": 13.45,
-            "avg_price_drop_pct": 5.24,
-            "share_relisted_pct": 4.31,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "34113",
           "label": "34113",
           "cells": {
@@ -883,20 +477,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 9.99,
             "avg_price_drop_pct": 4.83,
             "share_relisted_pct": 4.79,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34289",
-          "label": "34289",
-          "cells": {
-            "seller_stress_score": 62.5,
-            "share_delisted_pct": 18.69,
-            "pct_active_with_drops": 38.89,
-            "cancellation_rate_pct": 2.06,
-            "avg_price_drop_pct": 3.96,
-            "share_relisted_pct": 10.97,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -916,20 +496,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34288",
-          "label": "34288",
-          "cells": {
-            "seller_stress_score": 61.9,
-            "share_delisted_pct": 8.11,
-            "pct_active_with_drops": 35.97,
-            "cancellation_rate_pct": 12.95,
-            "avg_price_drop_pct": 3.11,
-            "share_relisted_pct": 4.6,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33913",
           "label": "33913",
           "cells": {
@@ -939,20 +505,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 11.78,
             "avg_price_drop_pct": 3.67,
             "share_relisted_pct": 5.43,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34293",
-          "label": "34293",
-          "cells": {
-            "seller_stress_score": 61.5,
-            "share_delisted_pct": 9.65,
-            "pct_active_with_drops": 46.05,
-            "cancellation_rate_pct": 12.05,
-            "avg_price_drop_pct": 3.77,
-            "share_relisted_pct": 4.68,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -1056,48 +608,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "33982",
-          "label": "33982",
-          "cells": {
-            "seller_stress_score": 60,
-            "share_delisted_pct": 10.3,
-            "pct_active_with_drops": 42.92,
-            "cancellation_rate_pct": 12.63,
-            "avg_price_drop_pct": 4.27,
-            "share_relisted_pct": 5.71,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34209",
-          "label": "34209",
-          "cells": {
-            "seller_stress_score": 59.4,
-            "share_delisted_pct": 12.9,
-            "pct_active_with_drops": 44.69,
-            "cancellation_rate_pct": 12.15,
-            "avg_price_drop_pct": 4.48,
-            "share_relisted_pct": 5.44,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34222",
-          "label": "34222",
-          "cells": {
-            "seller_stress_score": 59.2,
-            "share_delisted_pct": 7.55,
-            "pct_active_with_drops": 44.33,
-            "cancellation_rate_pct": 13.51,
-            "avg_price_drop_pct": 3.82,
-            "share_relisted_pct": 7.05,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33916",
           "label": "33916",
           "cells": {
@@ -1168,20 +678,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34242",
-          "label": "34242",
-          "cells": {
-            "seller_stress_score": 58,
-            "share_delisted_pct": 13.07,
-            "pct_active_with_drops": 41.33,
-            "cancellation_rate_pct": 14.22,
-            "avg_price_drop_pct": 5.58,
-            "share_relisted_pct": 5.3,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33908",
           "label": "33908",
           "cells": {
@@ -1191,34 +687,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 12.76,
             "avg_price_drop_pct": 4.63,
             "share_relisted_pct": 7.42,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34221",
-          "label": "34221",
-          "cells": {
-            "seller_stress_score": 57.2,
-            "share_delisted_pct": 9.2,
-            "pct_active_with_drops": 43.44,
-            "cancellation_rate_pct": 9.48,
-            "avg_price_drop_pct": 3.5,
-            "share_relisted_pct": 4.41,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34232",
-          "label": "34232",
-          "cells": {
-            "seller_stress_score": 57.1,
-            "share_delisted_pct": 10.7,
-            "pct_active_with_drops": 46.59,
-            "cancellation_rate_pct": 10.9,
-            "avg_price_drop_pct": 4.28,
-            "share_relisted_pct": 4.94,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -1238,20 +706,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34239",
-          "label": "34239",
-          "cells": {
-            "seller_stress_score": 56.8,
-            "share_delisted_pct": 9.93,
-            "pct_active_with_drops": 46.05,
-            "cancellation_rate_pct": 20.81,
-            "avg_price_drop_pct": 4.96,
-            "share_relisted_pct": 5.3,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "34108",
           "label": "34108",
           "cells": {
@@ -1266,34 +720,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34202",
-          "label": "34202",
-          "cells": {
-            "seller_stress_score": 56.2,
-            "share_delisted_pct": 9.79,
-            "pct_active_with_drops": 46.7,
-            "cancellation_rate_pct": 10.28,
-            "avg_price_drop_pct": 3.98,
-            "share_relisted_pct": 3.94,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34275",
-          "label": "34275",
-          "cells": {
-            "seller_stress_score": 55.9,
-            "share_delisted_pct": 11.46,
-            "pct_active_with_drops": 40.96,
-            "cancellation_rate_pct": 10.83,
-            "avg_price_drop_pct": 3.75,
-            "share_relisted_pct": 3.67,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "34112",
           "label": "34112",
           "cells": {
@@ -1303,34 +729,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 9.72,
             "avg_price_drop_pct": 4.73,
             "share_relisted_pct": 5.85,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34219",
-          "label": "34219",
-          "cells": {
-            "seller_stress_score": 55.7,
-            "share_delisted_pct": 7.22,
-            "pct_active_with_drops": 46.98,
-            "cancellation_rate_pct": 9.5,
-            "avg_price_drop_pct": 3.1,
-            "share_relisted_pct": 2.87,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34229",
-          "label": "34229",
-          "cells": {
-            "seller_stress_score": 55.7,
-            "share_delisted_pct": 9.45,
-            "pct_active_with_drops": 47.24,
-            "cancellation_rate_pct": 16.6,
-            "avg_price_drop_pct": 5.28,
-            "share_relisted_pct": 5.31,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -1364,34 +762,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34231",
-          "label": "34231",
-          "cells": {
-            "seller_stress_score": 55.1,
-            "share_delisted_pct": 12.54,
-            "pct_active_with_drops": 43.88,
-            "cancellation_rate_pct": 17.56,
-            "avg_price_drop_pct": 4.82,
-            "share_relisted_pct": 7.07,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34212",
-          "label": "34212",
-          "cells": {
-            "seller_stress_score": 55,
-            "share_delisted_pct": 8.84,
-            "pct_active_with_drops": 41.42,
-            "cancellation_rate_pct": 10.92,
-            "avg_price_drop_pct": 3.15,
-            "share_relisted_pct": 5.98,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33971",
           "label": "33971",
           "cells": {
@@ -1401,48 +771,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 13.47,
             "avg_price_drop_pct": 3.08,
             "share_relisted_pct": 3.8,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34208",
-          "label": "34208",
-          "cells": {
-            "seller_stress_score": 54.6,
-            "share_delisted_pct": 12.08,
-            "pct_active_with_drops": 40.43,
-            "cancellation_rate_pct": 13.36,
-            "avg_price_drop_pct": 3.29,
-            "share_relisted_pct": 3.81,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34243",
-          "label": "34243",
-          "cells": {
-            "seller_stress_score": 54.5,
-            "share_delisted_pct": 10.3,
-            "pct_active_with_drops": 47.12,
-            "cancellation_rate_pct": 17.06,
-            "avg_price_drop_pct": 3.85,
-            "share_relisted_pct": 4.71,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34217",
-          "label": "34217",
-          "cells": {
-            "seller_stress_score": 54.2,
-            "share_delisted_pct": 11.17,
-            "pct_active_with_drops": 44.26,
-            "cancellation_rate_pct": 10.88,
-            "avg_price_drop_pct": 4.51,
-            "share_relisted_pct": 3.97,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -1518,62 +846,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34241",
-          "label": "34241",
-          "cells": {
-            "seller_stress_score": 48.8,
-            "share_delisted_pct": 5.65,
-            "pct_active_with_drops": 40.43,
-            "cancellation_rate_pct": 15.4,
-            "avg_price_drop_pct": 4.41,
-            "share_relisted_pct": 2.46,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34223",
-          "label": "34223",
-          "cells": {
-            "seller_stress_score": 48.4,
-            "share_delisted_pct": 10.24,
-            "pct_active_with_drops": 43.19,
-            "cancellation_rate_pct": 8.8,
-            "avg_price_drop_pct": 4.84,
-            "share_relisted_pct": 4.41,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34228",
-          "label": "34228",
-          "cells": {
-            "seller_stress_score": 48.2,
-            "share_delisted_pct": 8.98,
-            "pct_active_with_drops": 48.12,
-            "cancellation_rate_pct": 7.98,
-            "avg_price_drop_pct": 5.17,
-            "share_relisted_pct": 4.79,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34233",
-          "label": "34233",
-          "cells": {
-            "seller_stress_score": 47.6,
-            "share_delisted_pct": 9.05,
-            "pct_active_with_drops": 43.88,
-            "cancellation_rate_pct": 14.19,
-            "avg_price_drop_pct": 3.95,
-            "share_relisted_pct": 2.63,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33966",
           "label": "33966",
           "cells": {
@@ -1616,20 +888,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34216",
-          "label": "34216",
-          "cells": {
-            "seller_stress_score": 46,
-            "share_delisted_pct": 6.7,
-            "pct_active_with_drops": 41.49,
-            "cancellation_rate_pct": 10.76,
-            "avg_price_drop_pct": 6.08,
-            "share_relisted_pct": 2.86,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "33917",
           "label": "33917",
           "cells": {
@@ -1639,20 +897,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "cancellation_rate_pct": 13.03,
             "avg_price_drop_pct": 4.15,
             "share_relisted_pct": 6.48,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34201",
-          "label": "34201",
-          "cells": {
-            "seller_stress_score": 45.8,
-            "share_delisted_pct": 6.61,
-            "pct_active_with_drops": 52.01,
-            "cancellation_rate_pct": 6.05,
-            "avg_price_drop_pct": 4.42,
-            "share_relisted_pct": 7.05,
             "periods_scored": 12,
             "baseline_suppressed": false
           }
@@ -1672,62 +916,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34133",
-          "label": "34133",
-          "cells": {
-            "seller_stress_score": 39.3,
-            "share_delisted_pct": 15.42,
-            "pct_active_with_drops": 24.68,
-            "cancellation_rate_pct": 16.14,
-            "avg_price_drop_pct": 3.99,
-            "share_relisted_pct": null,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33945",
-          "label": "33945",
-          "cells": {
-            "seller_stress_score": 37.9,
-            "share_delisted_pct": 17.35,
-            "pct_active_with_drops": 37.02,
-            "cancellation_rate_pct": 16.14,
-            "avg_price_drop_pct": 3.32,
-            "share_relisted_pct": 12.34,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34204",
-          "label": "34204",
-          "cells": {
-            "seller_stress_score": 37.7,
-            "share_delisted_pct": 13.22,
-            "pct_active_with_drops": 42.31,
-            "cancellation_rate_pct": 0,
-            "avg_price_drop_pct": 4.48,
-            "share_relisted_pct": null,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "34215",
-          "label": "34215",
-          "cells": {
-            "seller_stress_score": 37.4,
-            "share_delisted_pct": 19.14,
-            "pct_active_with_drops": 34.04,
-            "cancellation_rate_pct": 8.07,
-            "avg_price_drop_pct": 3.44,
-            "share_relisted_pct": 6.81,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
           "key": "34139",
           "label": "34139",
           "cells": {
@@ -1742,48 +930,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
           }
         },
         {
-          "key": "34276",
-          "label": "34276",
-          "cells": {
-            "seller_stress_score": 20.4,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": 21.94,
-            "cancellation_rate_pct": 0,
-            "avg_price_drop_pct": 2.58,
-            "share_relisted_pct": null,
-            "periods_scored": 12,
-            "baseline_suppressed": false
-          }
-        },
-        {
-          "key": "33918",
-          "label": "33918",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 1,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "33932",
-          "label": "33932",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 0,
-            "baseline_suppressed": true
-          }
-        },
-        {
           "key": "34101",
           "label": "34101",
           "cells": {
@@ -1794,20 +940,6 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "avg_price_drop_pct": null,
             "share_relisted_pct": null,
             "periods_scored": 0,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "34136",
-          "label": "34136",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 5,
             "baseline_suppressed": true
           }
         },
@@ -1838,137 +970,11 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
             "periods_scored": 8,
             "baseline_suppressed": true
           }
-        },
-        {
-          "key": "34146",
-          "label": "34146",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 8,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "34250",
-          "label": "34250",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 12,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "34270",
-          "label": "34270",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 0,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "34272",
-          "label": "34272",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 0,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "34274",
-          "label": "34274",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 12,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "34277",
-          "label": "34277",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 12,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "34280",
-          "label": "34280",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 3,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "34282",
-          "label": "34282",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 12,
-            "baseline_suppressed": true
-          }
-        },
-        {
-          "key": "34295",
-          "label": "34295",
-          "cells": {
-            "seller_stress_score": null,
-            "share_delisted_pct": null,
-            "pct_active_with_drops": null,
-            "cancellation_rate_pct": null,
-            "avg_price_drop_pct": null,
-            "share_relisted_pct": null,
-            "periods_scored": 0,
-            "baseline_suppressed": true
-          }
         }
       ],
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-06-29T18:40:27Z",
+        "fetched_at": "2026-07-12T04:17:24Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       }
@@ -1978,7 +984,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
     "~50% of SWFL transactions are all-cash (Lee County, Attom 2024) — rate-sensitive national thresholds do not apply; this score is calibrated to SWFL's own 2019–2021 baseline.",
     "Hurricane Ian (Sept 2022) produced a natural spike; scores from Oct 2022–Mar 2023 reflect forced delistings, not organic seller stress — treat as a labeled distress event, not a trend.",
     "Condo segment is not separated in this score; SB 4-D special assessment delistings inflate stress in condo-heavy ZIPs (e.g., Marco Island corridor). See `condo-sirs-swfl` for the condo-specific read.",
-    "15 ZIPs suppressed (insufficient baseline data in 2019–2021 or no recent observations)."
+    "3 ZIPs suppressed (insufficient baseline data in 2019–2021 or no recent observations)."
   ],
   "contradicts": [],
   "confidence": 0.6,
@@ -1990,7 +996,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-29T18:40:30Z"
+    "computed_at": "2026-07-12T04:17:26Z"
   },
   "exogenous_signals": []
 }
@@ -1999,5 +1005,5 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
 - seller-stress-swfl: deterministic composite seller stress score at ZIP grain from 3 Redfin Data Center Tier-1 parquets.
 
 --- RECENT NOTES ---
-- 2026-06-29: pack refined by the Refinery — 1 fact(s) from 3 source(s).
+- 2026-07-12: pack refined by the Refinery — 1 fact(s) from 3 source(s).
 ```
