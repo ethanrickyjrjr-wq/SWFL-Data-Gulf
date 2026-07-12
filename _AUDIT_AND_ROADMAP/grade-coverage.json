@@ -8,7 +8,7 @@
     "row-candidate": 45,
     "gradeable": 195,
     "reviewed-display": 42,
-    "moat-fuel": 0,
+    "moat-fuel": 7,
     "needs-window": 23,
     "backtest_clean": 11
   },
@@ -1988,6 +1988,132 @@
       "backtest_clean": false
     },
     {
+      "slug": "freshness_median_asking_price_cape_coral_usd",
+      "concept_id": "freshness_median_asking_price_cape_coral_usd",
+      "bucket": "moat-fuel",
+      "gateVector": {
+        "slug": "freshness_median_asking_price_cape_coral_usd",
+        "concept_id": "freshness_median_asking_price_cape_coral_usd",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": null,
+        "category": "real-estate",
+        "value_type": "currency",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "freshness_median_asking_price_fort_myers_usd",
+      "concept_id": "freshness_median_asking_price_fort_myers_usd",
+      "bucket": "moat-fuel",
+      "gateVector": {
+        "slug": "freshness_median_asking_price_fort_myers_usd",
+        "concept_id": "freshness_median_asking_price_fort_myers_usd",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": null,
+        "category": "real-estate",
+        "value_type": "currency",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "freshness_median_asking_price_naples_usd",
+      "concept_id": "freshness_median_asking_price_naples_usd",
+      "bucket": "moat-fuel",
+      "gateVector": {
+        "slug": "freshness_median_asking_price_naples_usd",
+        "concept_id": "freshness_median_asking_price_naples_usd",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": null,
+        "category": "real-estate",
+        "value_type": "currency",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "freshness_median_sale_price_cape_coral_usd",
+      "concept_id": "freshness_median_sale_price_cape_coral_usd",
+      "bucket": "moat-fuel",
+      "gateVector": {
+        "slug": "freshness_median_sale_price_cape_coral_usd",
+        "concept_id": "freshness_median_sale_price_cape_coral_usd",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": null,
+        "category": "real-estate",
+        "value_type": "currency",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "freshness_median_sale_price_fort_myers_usd",
+      "concept_id": "freshness_median_sale_price_fort_myers_usd",
+      "bucket": "moat-fuel",
+      "gateVector": {
+        "slug": "freshness_median_sale_price_fort_myers_usd",
+        "concept_id": "freshness_median_sale_price_fort_myers_usd",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": null,
+        "category": "real-estate",
+        "value_type": "currency",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "freshness_median_sale_price_naples_usd",
+      "concept_id": "freshness_median_sale_price_naples_usd",
+      "bucket": "moat-fuel",
+      "gateVector": {
+        "slug": "freshness_median_sale_price_naples_usd",
+        "concept_id": "freshness_median_sale_price_naples_usd",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": null,
+        "category": "real-estate",
+        "value_type": "currency",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
       "slug": "freshness_mortgage_30yr_fixed_pct",
       "concept_id": "freshness_mortgage_30yr_fixed_pct",
       "bucket": "gradeable",
@@ -2007,6 +2133,27 @@
       "gradeable": true,
       "reason": null,
       "backtest_clean": false
+    },
+    {
+      "slug": "freshness_zip_pulse_median_price_approx",
+      "concept_id": "freshness_zip_pulse_median_price_approx",
+      "bucket": "moat-fuel",
+      "gateVector": {
+        "slug": "freshness_zip_pulse_median_price_approx",
+        "concept_id": "freshness_zip_pulse_median_price_approx",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": null,
+        "category": "real-estate",
+        "value_type": "currency",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
     },
     {
       "slug": "golf_bundled_community_share_swfl",
