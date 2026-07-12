@@ -147,6 +147,40 @@ zones + zero `[config]`/raw-token leaks. Deferred WITH reasons → `docs/handoff
 filter tabs descoped — loader reshape). NOTE: `bun add cmdk` touched package.json/bun.lock claimed by a
 parallel session — verified only my cmdk line differs from HEAD, nothing clobbered. Committed local,
 NOT pushed (new dep + live surface = operator diff-review).
+## 2026-07-12 (Fable 5 · wt/dcd) — Phase 1: content contracts (contracts.py + Locus B; Locus A built, HELD)
+
+**Shipped (7 commits, `7e82a98c..e46dce77`).** `ingest/quality/contracts.py` — pure, DB-free contract
+engine. `evaluate_batch(rows, table, ctx) -> (clean, quarantined, stats)` at the merge locus;
+failing-row SQL builders at the at-rest locus. Both read one `content_contracts:` block in
+`quality_registry.yaml`, so a predicate cannot drift between the gate and the tripwire.
+`ContentContractError` added to `ingest/lib/guards.py`. Locus B wired as `run_content_contracts`
+in `check_data_quality.py` (+ the `contract_fail_` prefix in the auto-close LIKE list — omit it and
+a contract check opens and never closes). **Locus A merge gates (listing_lifecycle +
+market_aggregates) NOT wired — ASK-FIRST per plan; both go to the operator checkpoint.**
+First non-dry-run probe (writes contract_fail_ ledger rows) also operator-gated (C-6).
+
+**Live at-rest baseline (`check_data_quality --dry-run`, this session):** price floor **21**
+failing · sold/rent band watch **2** (the known-accepted 33972 + 33920) · everything else **0** —
+exactly the research pack's predictions, row for row.
+
+**Four spec corrections implemented, each of which would have shipped a bug:** the tautological
+land-drag tripwire replaced with the label-independent oracle (`beds IS NOT NULL OR sqft IS NOT
+NULL`, `ON (county, zip)`) + a pure relabel proof (naive GREEN at ratio 0.102, corrected FIRES);
+price floor `report`-only with the sqft-present/4-type-allowlist scope (twin rows
+19327CONGRESSIONALCT17G vs 4324MAILBOXAVE127 now agree); no enum on `sale_or_rent` (vacuously
+green); band seeds 33972+33920 known-accepted + rent coverage floor ≥45/54.
+
+**Suite:** ingest/tests/quality 79 green + replay fixture 12 green + check_data_quality 18 green.
+Plan-fixture bug found+fixed (its _FakeCursor IndexError'd sync's row[1]; production path correct).
+
+**Deferred, each with a `checks` row (RULE 2.4):** `listing_lifecycle_ungated_write_paths` ·
+`contracts_backfill_and_purge` · `market_details_band_quarantine_flip` ·
+`listing_active_stats_inflated_median_ceiling` · `listing_state_holding_rent_artifacts`.
+(The plan's 6th, `active_listings_orphan_ship_or_delete`, was NOT opened — it duplicates the
+Spine's `active_listings_ship_or_delete`; one concept, one check.)
+
+**Next:** Phase 2 — `check-registry-identity.mts`. Push withheld (operator-gated).
+
 ## 2026-07-12 (Fable 5 · wt/dcd) — The Spine: cadence_registry is the single source of config truth
 
 **Shipped (4 commits, `2d4e80d5..4ac98cf1` + header/checks commit).** All 74 registry entries (71
