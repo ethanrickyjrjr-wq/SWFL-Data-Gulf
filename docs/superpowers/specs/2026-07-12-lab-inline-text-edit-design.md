@@ -37,7 +37,9 @@ authoring/patching contract does not change at all.
 
 New pure module `lib/email/blocks/editable-text.tsx`:
 
-- A `CanvasEditContext` (React context, default `null`). The grid canvas provides
+- An explicit `EditScope` prop threaded by `BlockRenderer` (no React context — a
+  module-scope createContext would poison the pure block modules for any future
+  server-component importer). The grid canvas provides
   `{ commit(blockId, path, nextText) }`; the send/export paths provide nothing.
 - `<EditableText value path style as … />` renders the text node. Context absent
   (server `render()`, `emailRender`, compile-grid) → plain static markup, exactly
