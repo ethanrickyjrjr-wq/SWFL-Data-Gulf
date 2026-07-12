@@ -54,7 +54,9 @@ def resolve(cfg: dict) -> list[engine.DailyTruthRow]:
         elif cfg.get("fetch_mode") == "lake":
             rows.append(engine.resolve_metric_lake(cfg, area))
         else:
-            rows.append(engine.resolve_metric_search(cfg, area))
+            # `search` mode retired 07/12/2026 (see engine docstring) — an unknown mode
+            # must exit 1 LOUD, never silently write nothing or fall back to a guess.
+            raise ValueError(f"unknown fetch_mode {cfg.get('fetch_mode')!r} for {cfg.get('metric_key')!r}")
     return rows
 
 
@@ -93,10 +95,10 @@ def main() -> None:
                 f"src={r.source_url} anomaly={r.anomaly_flag} reason={r.status_reason}"
             )
     if args.dry_run:
-        print(f"-- dry-run: {len(all_rows)} rows, search queries fired={engine.query_count()} (not written)")
+        print(f"-- dry-run: {len(all_rows)} rows (not written)")
         return
     n = upsert(all_rows)
-    print(f"-- wrote {n} rows; search queries fired={engine.query_count()}")
+    print(f"-- wrote {n} rows")
 
 
 if __name__ == "__main__":

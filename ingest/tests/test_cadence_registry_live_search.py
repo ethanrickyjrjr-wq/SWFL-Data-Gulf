@@ -20,7 +20,8 @@ def test_every_live_search_config_is_well_formed():
     assert entries, "expected at least one live_search_config entry"
     for k, v in entries.items():
         c = v["live_search_config"]
-        assert c["fetch_mode"] in ("search", "api"), k
+        # `search` mode retired 07/12/2026 with the cascade (engine docstring has the history).
+        assert c["fetch_mode"] in ("api", "lake"), k
         assert c["metric_key"] and isinstance(c["areas"], list) and c["areas"], k
         assert c["unit"] in ("usd", "pct", "count"), k
         lo, hi = c["expected_range"]
@@ -28,10 +29,10 @@ def test_every_live_search_config_is_well_formed():
         assert 0 < c["tolerance_pct"] <= 50, k
         # per-metric anomaly band (vs our OWN prior value, not vendor) — required, real value
         assert 0 < c["anomaly_threshold_pct"] <= 100, k
-        if c["fetch_mode"] == "search":
-            assert c["questions"] and isinstance(c.get("denylist_domains", []), list), k
-        else:
+        if c["fetch_mode"] == "api":
             assert c["api_config"]["provider"] and c["api_config"]["series_id"], k
+        else:
+            assert c["lake_config"]["source_url"], k
 
 
 def test_freshness_table_is_daily_truth():

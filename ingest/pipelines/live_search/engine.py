@@ -1,53 +1,31 @@
-"""Fallback-cascade + provenance + anomaly engine for data_lake.daily_truth.
+"""Provenance + anomaly engine for data_lake.daily_truth.
 
-Normal path: ONE Gemini grounded search returns a number + its real source URL, loaded to
-the brain. The cascade (Gemini -> crawl4ai placeholder) is the uptime FAILSAFE: if a leg
-yields no usable SOURCED result, fall through to the next. The only integrity gate is a real
-source URL present (never a memory/training number); LittleBird is denylisted. A big day-over-day
-move vs OUR OWN prior value triggers a second-source confirm before it reaches the brain.
+Two fetch modes:
+  api  — deterministic pull from an authoritative API we hold the URL for (FRED).
+  lake — deterministic median from OUR OWN cleaned inventory view (no search, no LLM).
 
-Spider and Claude legs REMOVED 07/12/2026: Spider is retired (crawl4ai replaced it), and
-Anthropic never runs search — crawl4ai captures, Anthropic writes (operator decree; twin of
-the no-paid-web_search-on-cron rule in ingest/CLAUDE.md). Both were dead stubs returning None.
+Integrity gates: a real source URL on every row, expected_range, and an anomaly check vs
+OUR OWN prior value — a big day-over-day move is stored FLAGGED and held for human review,
+never narrated.
 
-External legs (gemini_grounded, firecrawl_search, _prior_value, _second_source_value, _fred_latest)
-do IO and are monkeypatched in tests; the pure logic + orchestration is fully unit-tested.
+The web-search fetch mode (Gemini grounded cascade + Firecrawl/Spider/Claude failsafe legs)
+was REMOVED 07/12/2026 with the retirement of its only consumer, the median_sale_price
+web-search (19 straight NULL days — no daily source exists; spec
+docs/superpowers/specs/2026-07-11-daily-price-dual-signal-design.md). Spider is retired
+(crawl4ai replaced it) and Anthropic never runs search — crawl4ai captures, Anthropic
+writes (operator decree; twin of the no-paid-web_search-on-cron rule in ingest/CLAUDE.md).
 
-Three fetch modes: search (the cascade above), api (deterministic authoritative API, e.g. FRED),
-lake (deterministic median from OUR OWN cleaned inventory view — no search, no LLM; added
-07/12/2026 when the median_sale_price web-search was retired for chasing a daily number that
-has no daily source).
+External IO (_prior_value, _fred_latest, _lake_median_asking) is monkeypatched in tests;
+the pure logic + orchestration is fully unit-tested.
 """
 
 from __future__ import annotations
 
 import os
-import re
 from dataclasses import dataclass, field
 from datetime import date
-from statistics import median
-
-import time
 
 import requests
-
-
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")  # Gemini 3 stable; confirm grounding live (STEP 0)
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
-DENYLIST_DEFAULT = ("littlebird",)  # LittleBird Realty — always thrown out; extend via metric_config.denylist_domains
-
-_MONEY = re.compile(r"\$?\s*(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([KkMm])?")
-
-# --- billing instrumentation (the $14/1k unit is the search query, not the prompt) ---
-_QUERY_COUNT = {"n": 0}
-
-
-def record_queries(n: int) -> None:
-    _QUERY_COUNT["n"] += int(n or 0)
-
-
-def query_count() -> int:
-    return _QUERY_COUNT["n"]
 
 
 @dataclass
@@ -84,143 +62,10 @@ def _today() -> str:
     return date.today().isoformat()
 
 
-def extract_numbers(text: str) -> list[float]:
-    out: list[float] = []
-    for raw, suffix in _MONEY.findall(text or ""):
-        n = float(raw.replace(",", ""))
-        s = (suffix or "").lower()
-        if s == "k":
-            n *= 1_000
-        elif s == "m":
-            n *= 1_000_000
-        out.append(n)
-    return out
-
-
-def _follow_redirect(url: str) -> str:
-    r = requests.head(url, allow_redirects=True, timeout=20)
-    return r.url
-
-
-def resolve_source_url(url: str) -> str:
-    return _follow_redirect(url) if "vertexaisearch.cloud.google.com" in (url or "") else (url or "")
-
-
-def _domain_of(url: str) -> str:
-    m = re.match(r"https?://([^/]+)/?", url or "")
-    host = (m.group(1).lower() if m else "")
-    return re.sub(r"^www\.", "", host)
-
-
-def _scrape_text(url: str) -> str:
-    from ingest.lib.extract_client import ExtractError, scrape_with_fallback  # lazy: avoid import cost at test time
-
-    try:
-        return scrape_with_fallback(url, formats=("markdown",)) or ""
-    except (ExtractError, Exception):  # noqa: BLE001 - a verify failure must never crash a run
-        return ""
-
-
-def is_denylisted(url: str, denylist: list[str]) -> bool:
-    dom = _domain_of(resolve_source_url(url)) if "vertexaisearch" in (url or "") else _domain_of(url or "")
-    terms = tuple(denylist or ()) + DENYLIST_DEFAULT
-    return any(t.lower() in dom for t in terms)
-
-
-def verify_on_page(value: float, source_url: str, denylist_domains: list[str], tolerance_pct: float) -> bool:
-    """OPTIONAL on-page re-check. OPEN APERTURE: any real source allowed; only denylisted is rejected."""
-    if is_denylisted(source_url, denylist_domains):
-        return False
-    text = _scrape_text(resolve_source_url(source_url))
-    tol = abs(value) * tolerance_pct / 100.0
-    return any(abs(n - value) <= tol for n in extract_numbers(text))
-
-
-def cross_check(cands: list[Candidate], tolerance_pct: float) -> tuple[int, Candidate | None]:
-    """Used at BOOTSTRAP / anomaly confirm (NOT the daily path). How many sources agree within tolerance."""
-    if not cands:
-        return 0, None
-    vals = [c.value for c in cands]
-    m = median(vals)
-    tol = abs(m) * tolerance_pct / 100.0
-    agree = [c for c in cands if abs(c.value - m) <= tol]
-    winner = min(agree or cands, key=lambda c: abs(c.value - m))
-    return len(agree), winner
-
-
-# --- CASCADE LEGS (failsafe order; each returns ONE sourced Candidate or None) ---
-def gemini_grounded(question: str) -> Candidate | None:
-    """REAL normal-path leg: Gemini grounded search -> number + groundingChunk URL. None if no grounding (= memory).
-    429 retried up to 3 attempts with exponential backoff (5s, 10s). Other 4xx/5xx: fail immediately."""
-    key = os.environ.get("GEMINI_API_KEY")
-    if not key:
-        print("[gemini] no GEMINI_API_KEY set — skipping leg")
-        return None
-    for attempt in range(3):
-        if attempt > 0:
-            delay = 5 * (2 ** (attempt - 1))  # 5s, 10s
-            print(f"[gemini] 429 — retry {attempt}/2 in {delay}s")
-            time.sleep(delay)
-        try:
-            resp = requests.post(
-                f"{GEMINI_URL}?key={key}",
-                json={"contents": [{"parts": [{"text": question}]}], "tools": [{"google_search": {}}]},
-                timeout=60,
-            )
-            if resp.status_code == 429:
-                print(f"[gemini] HTTP 429 (attempt {attempt + 1}/3): {resp.text[:200]}")
-                continue  # retry with backoff
-            if not resp.ok:
-                print(f"[gemini] HTTP {resp.status_code}: {resp.text[:400]}")
-                return None  # non-429 errors: don't retry
-            data = resp.json()
-            cand = (data.get("candidates") or [{}])[0]
-            gm = cand.get("groundingMetadata") or {}
-            record_queries(len(gm.get("webSearchQueries") or []))
-            chunks = gm.get("groundingChunks") or []
-            if not chunks:  # GROUNDING GATE: no fetched source -> the number is memory -> reject
-                print(f"[gemini] no groundingChunks for: {question[:80]} — finish_reason={cand.get('finishReason')}")
-                return None
-            text = " ".join(p.get("text", "") for p in (cand.get("content", {}) or {}).get("parts", []) or [])
-            nums = extract_numbers(text)
-            web = chunks[0].get("web") or {}
-            url = resolve_source_url(web.get("uri") or "")
-            if not nums or not url:
-                print(f"[gemini] grounded but no parseable number in: {text[:120]}")
-                return None
-            return Candidate(nums[0], _domain_of(url), url, "gemini", grounded=True, source_title=web.get("title", ""))
-        except (requests.RequestException, ValueError, KeyError, IndexError) as exc:
-            print(f"[gemini] exception: {type(exc).__name__}: {exc}")
-            return None
-    print("[gemini] all 3 attempts hit 429 — rate limited, giving up")
-    return None
-
-
-def firecrawl_search(question: str, denylist: list[str]) -> Candidate | None:
-    """Stub — Firecrawl removed. crawl4ai has no web-search API; wire a URL-seeded
-    crawl4ai leg here once an upstream leg supplies candidate URLs."""
-    return None
-
-
 def _question(cfg: dict, area: str) -> str:
     label = area.replace("_", " ").title()
     q = (cfg.get("questions") or ["{area_label}"])[0]
     return q.replace("{area_label}", label)
-
-
-def run_cascade(cfg: dict, area: str) -> Candidate | None:
-    dl = cfg.get("denylist_domains", [])
-    q = _question(cfg, area)
-    # FAILSAFE, in order; legs are resolved by name at call time (monkeypatch-friendly) and called
-    # lazily so the first leg returning a SOURCED, non-denylisted Candidate short-circuits the rest.
-    for make in (
-        lambda: gemini_grounded(q),
-        lambda: firecrawl_search(q, dl),
-    ):
-        c = make()
-        if c and c.source_url and not is_denylisted(c.source_url, dl):
-            return c
-    return None  # nothing sourced -> NULL + reason (never a memory guess)
 
 
 # --- ANOMALY (vs OUR OWN prior daily_truth row; NOT the vendor) ---
@@ -241,14 +86,6 @@ def _prior_value(metric_key: str, area: str) -> float | None:
             return float(row[0]) if row and row[0] is not None else None
     except Exception:  # noqa: BLE001 - no prior / DB unreachable -> treat as no baseline
         return None
-
-
-def _second_source_value(cfg: dict, area: str) -> float | None:
-    """One re-run from a DIFFERENT source (the Firecrawl leg) to confirm a big move."""
-    c = firecrawl_search(_question(cfg, area), cfg.get("denylist_domains", []))
-    if c and c.source_url and not is_denylisted(c.source_url, cfg.get("denylist_domains", [])):
-        return c.value
-    return None
 
 
 def _snapshot(cfg: dict) -> dict:
@@ -275,26 +112,15 @@ def _row(winner: Candidate, cfg: dict, area: str, anomaly_flag: bool, anomaly_de
 
 def finalize_with_anomaly(winner: Candidate | None, cfg: dict, area: str) -> DailyTruthRow:
     if winner is None or not winner.source_url:
-        return _null_row(cfg, area, "all cascade legs returned no sourced number")
+        return _null_row(cfg, area, "no sourced number")
     lo, hi = cfg["expected_range"]
     if not (lo <= winner.value <= hi):
         return _null_row(cfg, area, f"value {winner.value} outside expected_range")
     prior = _prior_value(cfg["metric_key"], area)
     delta = None if not prior else (winner.value - prior) / prior * 100.0
-    agreement_n = 1
     if delta is not None and abs(delta) > cfg["anomaly_threshold_pct"]:
-        second = _second_source_value(cfg, area)  # cron a 2nd run, DIFFERENT source
-        confirmed = second is not None and abs(second - winner.value) / winner.value * 100.0 <= cfg["anomaly_threshold_pct"]
-        if confirmed:
-            agreement_n = 2
-        else:
-            return _row(winner, cfg, area, True, delta, agreement_n)  # stored, HELD for human review
-    return _row(winner, cfg, area, False, delta, agreement_n)
-
-
-def resolve_metric_search(cfg: dict, area: str) -> DailyTruthRow:
-    """NORMAL path: one cascade pass -> anomaly -> row."""
-    return finalize_with_anomaly(run_cascade(cfg, area), cfg, area)
+        return _row(winner, cfg, area, True, delta, 1)  # stored, FLAGGED, held for human review
+    return _row(winner, cfg, area, False, delta, 1)
 
 
 def _fred_latest(series_id: str) -> tuple[float, str] | None:
@@ -373,15 +199,4 @@ def resolve_metric_lake(cfg: dict, area: str) -> DailyTruthRow:
         grounded=True,
         source_title="SWFL Data Gulf active-listing inventory",
     )
-    return finalize_with_anomaly(winner, cfg, area)
-
-
-def bootstrap_metric(cfg: dict, area: str) -> DailyTruthRow:
-    """FIRST run for a metric: gather 2-3 sources and confirm they agree closely before setting the baseline."""
-    dl = cfg.get("denylist_domains", [])
-    q = _question(cfg, area)
-    cands = [c for c in (gemini_grounded(q), firecrawl_search(q, dl)) if c and c.source_url and not is_denylisted(c.source_url, dl)]
-    if not cands:
-        return _null_row(cfg, area, "bootstrap: no sourced number from any leg")
-    n, winner = cross_check(cands, cfg.get("tolerance_pct", 10))
     return finalize_with_anomaly(winner, cfg, area)

@@ -1,2 +1,2 @@
-"""Live-search freshness engine: a fallback cascade (Gemini -> crawl4ai placeholder)
-that writes sourced, anomaly-checked values to data_lake.daily_truth."""
+"""Daily-truth freshness engine: deterministic api/lake fetch modes writing sourced,
+anomaly-checked values to data_lake.daily_truth. (Web-search mode retired 07/12/2026.)"""
