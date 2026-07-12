@@ -14,9 +14,10 @@
 // clipped taller content (the reported Sources-line / stat-tile cut-off). Auto-height
 // corrections route through onChangeDoc with { autoHeightOnly: true } so the shell
 // patches them in place (no undo frame).
-import { useCallback, useMemo, useRef, useEffect } from "react";
+import { useCallback, useMemo, useRef, useEffect, useState } from "react";
 import { applyTextAtPath } from "@/lib/email/doc/edit-path";
 import type { EditCommit } from "@/lib/email/blocks/editable-text";
+import { LINK_PROP, COLOR_PROP } from "@/lib/email/lab/block-edit-maps";
 import { toast } from "sonner";
 import ReactGridLayout, {
   verticalCompactor,
@@ -132,6 +133,21 @@ function GridBlock({
   const contentRef = useRef<HTMLDivElement>(null);
   const locked = block.type === "footer" && block.layout?.static;
 
+  // Pill popovers (link / background color) — commit through the same inline-edit
+  // path; empty link / "Default" color commit `undefined`, which deletes the key
+  // so the component's `??` fallbacks re-apply.
+  const [popover, setPopover] = useState<"link" | "color" | null>(null);
+  const linkProp = LINK_PROP[block.type];
+  const colorProp = COLOR_PROP[block.type];
+  const propsRec = block.props as Record<string, unknown>;
+  const currentLink = linkProp ? ((propsRec[linkProp] as string | undefined) ?? "") : "";
+  const currentColor = colorProp
+    ? ((propsRec[colorProp] as string | undefined) ?? "#ffffff")
+    : "#ffffff";
+  // Derived, not effect-synced (set-state-in-effect is a hard lint error here):
+  // deselecting hides the popover; the pill buttons re-select as they open.
+  const activePopover = selected ? popover : null;
+
   // Measure the block's NATURAL content height (the inner wrapper is not stretched,
   // so offsetHeight is the true content height, independent of the current cell) and
   // report the rows it needs. Re-fires on any content/width reflow via the observer.
@@ -190,6 +206,34 @@ function GridBlock({
         >
           ✦
         </button>
+        {edit && linkProp && (
+          <button
+            type="button"
+            aria-label="Edit link"
+            title="Link"
+            onClick={() => {
+              onSelect(block.id);
+              setPopover((p) => (selected && p === "link" ? null : "link"));
+            }}
+            className="px-1 text-sm leading-none text-gray-400 hover:text-gulf-teal"
+          >
+            🔗
+          </button>
+        )}
+        {edit && colorProp && (
+          <button
+            type="button"
+            aria-label="Edit background color"
+            title="Background"
+            onClick={() => {
+              onSelect(block.id);
+              setPopover((p) => (selected && p === "color" ? null : "color"));
+            }}
+            className="px-1 text-sm leading-none text-gray-400 hover:text-gulf-teal"
+          >
+            ▨
+          </button>
+        )}
         {(block.type === "image" || block.type === "listing") && onEditPhoto && (
           <button
             type="button"
@@ -224,6 +268,64 @@ function GridBlock({
           ✕
         </button>
       </div>
+
+      {/* anchored pill popover — link / background color */}
+      {activePopover && edit && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="absolute right-1 top-8 z-30 flex items-center gap-1.5 rounded-md bg-white p-2 shadow-md ring-1 ring-gray-200"
+        >
+          {activePopover === "link" && linkProp && (
+            <form
+              className="flex items-center gap-1.5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const v = new FormData(e.currentTarget).get("url");
+                const url = typeof v === "string" ? v.trim() : "";
+                edit.commit(block.id, linkProp, url === "" ? undefined : url);
+                setPopover(null);
+              }}
+            >
+              <input
+                name="url"
+                type="url"
+                defaultValue={currentLink}
+                placeholder="https://…"
+                className="w-52 rounded border border-gray-300 px-2 py-1 text-xs text-gray-900"
+              />
+              <button
+                type="submit"
+                className="rounded bg-gulf-teal px-2 py-1 text-xs font-semibold text-[#06231f]"
+              >
+                Save
+              </button>
+            </form>
+          )}
+          {activePopover === "color" && colorProp && (
+            <>
+              <input
+                type="color"
+                defaultValue={/^#[0-9a-fA-F]{6}$/.test(currentColor) ? currentColor : "#ffffff"}
+                onBlur={(e) => {
+                  edit.commit(block.id, colorProp, e.currentTarget.value);
+                  setPopover(null);
+                }}
+                className="h-7 w-9 cursor-pointer rounded border border-gray-300"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  edit.commit(block.id, colorProp, undefined);
+                  setPopover(null);
+                }}
+                className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:text-gray-900"
+              >
+                Default
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Clicks flow INTO the content now (inline editing); block-select still
           works via bubbling to this wrapper. Anchors are intercepted so a linked
