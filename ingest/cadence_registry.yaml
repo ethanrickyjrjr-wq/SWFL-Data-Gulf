@@ -36,6 +36,62 @@
 #                            # so only genuinely dead sources trigger it, not transient delays.
 #                            # DB-connection failure and probe errors always exit 0 (build 03 invariant).
 #
+#   SPINE fields (added 07/11/2026 — the registry is the single source of config truth):
+#     workflow: <name>.yml   REQUIRED on every entry. The .github/workflows/ file that runs it.
+#                            `none` = a STATED FACT (no workflow writes this entry: usgs_tier2 is a
+#                            zombie whose producing module was deleted; mhs_databook is a manual PDF
+#                            drop). Absence of the field = a GAP the Phase-2 cross-check flags.
+#                            May be non-unique: one workflow can back several entries
+#                            (live-search-daily.yml -> 2, marketbeat-pdf-ingest.yml -> 3,
+#                            bls-oews-annual.yml -> 2, ingest-fl-dbpr-licenses.yml -> 2,
+#                            ingest-local-cre-context.yml -> 2). That is structure, not error.
+#                            THIS FIELD IS AUTHORITATIVE. The freeform `# Cron: <file>.yml` comments
+#                            scattered through this file are NON-AUTHORITATIVE PROSE — kept only for
+#                            the cron timing / stagger rationale they carry, which this field does
+#                            not capture. A comment may never again be the SOLE carrier of a
+#                            workflow filename: test_cadence_registry_spine.py enforces it.
+#     consuming_pack: <v>    REQUIRED on every entry. What reads this source. One of:
+#                              a pack id            e.g. env-swfl
+#                              a flow list          e.g. [env-swfl, hurricane-tracks-fl]
+#                              a non-pack repo path e.g. lib/zip-summary (census_acs),
+#                                                        app/insiders (news_swfl)
+#                                                   — a pack-ONLY check would RED a healthy source
+#                              none                 a STATED FACT: nothing reads it. Ten entries are
+#                                                   in this state today; that is a real finding, not
+#                                                   a missing value.
+#     nightly: true          OPTIONAL, opt-in. GATE MEMBERSHIP, NOT CADENCE: assert_landed.py
+#                            (the nightly chain's row gate) asserts this entry landed TODAY (UTC)
+#                            AND count(*) >= expected_rows_min. Absence = not gated (safe default).
+#                            Exactly 4 entries carry it: live_search x2, listing_lifecycle,
+#                            city_pulse — pinned in ingest/tests/test_cadence_registry_spine.py so
+#                            a 5th member is a conscious edit. active_listings runs daily but is
+#                            NOT gated (its table feeds nothing live); market_aggregates_* are
+#                            weekly/monthly.
+#     count_filter: {column: <col>, value: <literal>}
+#                            REQUIRED on a `nightly:` entry whose count target (count_table, else
+#                            freshness_table) is ALSO claimed by another `nightly:` entry. Both
+#                            live_search entries count data_lake.daily_truth and neither has a
+#                            source_name, so without this each would satisfy its own row floor with
+#                            the OTHER metric's rows — a dead feed reading LANDED forever. The
+#                            discriminator is metric_key (median_sale_price / mortgage_30yr_fixed);
+#                            daily_truth's source_tag column cannot do it — it is the literal
+#                            'live_search' for both (engine.py:67). Read ONLY by assert_landed.py;
+#                            check_volume_entry scopes on source_name and ignores it.
+#     THE ROW FLOOR IS `expected_rows_min`. There is deliberately NO `min_rows:` field — a second
+#     floor beside an existing one is a hand-synced pair, i.e. the drift class this build kills.
+#     THERE IS NO `source_tag:` FIELD. Source identity is `source_name:` — the column
+#     check_freshness.py actually filters on (:238 freshness, :382 volume). A `source_tag:` was
+#     deleted 07/11/2026 because nothing read it (see the news_swfl entry). (data_lake.daily_truth
+#     does have a source_tag COLUMN; that is unrelated — see count_filter above.)
+#     TIER-1 + count_table IS NOT A CONFIG ERROR. check_volume_entry skips tier-1
+#     (check_freshness.py:369-371), so a tier-1 entry carrying count_table + expected_rows_min is
+#     gated by assert_landed.py instead — city_pulse is the case. The doctor must read that as
+#     GATED_BY_ASSERT_LANDED (green), never as a broken volume config (red).
+#
+#   coverage_exempt:  top-level list at the END of this file. Live lake tables with rows and no
+#                     pipelines: entry that are consciously NOT sources. Suppresses Phase 2's
+#                     ZERO_COVERAGE red — and nothing else.
+#
 # Naming note: dlt_schema_name is the schema_name column in _dlt_loads, NOT the
 # pipeline_name argument in pipeline.py (they sometimes differ — see verified values below).
 

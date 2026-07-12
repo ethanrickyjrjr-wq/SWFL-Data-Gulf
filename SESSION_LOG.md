@@ -147,6 +147,49 @@ zones + zero `[config]`/raw-token leaks. Deferred WITH reasons → `docs/handoff
 filter tabs descoped — loader reshape). NOTE: `bun add cmdk` touched package.json/bun.lock claimed by a
 parallel session — verified only my cmdk line differs from HEAD, nothing clobbered. Committed local,
 NOT pushed (new dep + live surface = operator diff-review).
+## 2026-07-12 (Fable 5 · wt/dcd) — The Spine: cadence_registry is the single source of config truth
+
+**Shipped (4 commits, `2d4e80d5..4ac98cf1` + header/checks commit).** All 74 registry entries (71
+`pipelines:` + 3 `not_yet_running:`) now carry `workflow:` and `consuming_pack:`; 4 carry
+`nightly: true`; the 2 that share a count target carry `count_filter:`. New top-level
+`coverage_exempt:` block (6 tables). Enforced by `ingest/tests/test_cadence_registry_spine.py`
+(14 tests) — a new entry without `workflow:` fails `pytest ingest/`. Every SPINE value re-verified
+against the tree before writing (64 workflow files exist; 38 pack ids + 2 repo paths resolve).
+
+**The bug this phase caught before it shipped (`count_filter:`, not in the spec at all):**
+`live_search_daily_median_price` and `live_search_daily_mortgage` both declare
+`freshness_table: data_lake.daily_truth` — the same table — and neither carries a `source_name`
+(`daily_truth` has no such column). Phase 4's row gate counts rows against `expected_rows_min`, so
+mortgage's floor of **1** would have been satisfied by the median metric's **3 rows/day**: a mortgage
+feed that never landed again would still have read **LANDED**, forever. Fixed with
+`count_filter: {column: metric_key, value: …}` — `metric_key` is the only discriminating column
+(`daily_truth.source_tag` is the hardcoded string `live_search` for both metrics, `engine.py:67`).
+The test derives the shared-target set FROM the registry, so a third nightly entry aimed at a claimed
+table fails on day one.
+
+**Deviations from spec §3, forced by the research pack:** no `min_rows:` (duplicates
+`expected_rows_min`; corrected stale floors instead — `listing_lifecycle` 9,000 → 28,000, `city_pulse`
+→ 50 new); no `source_tag:` (read by nothing; deleted the one phantom); `active_listings` NOT gated
+(table feeds nothing live, 08h D7 — verified verbatim in-tree); `city_pulse` keeps `lane: tier-1` +
+gains `count_table:`, `cadence_days` 7→1 reconciled to its real daily cron (verified in-workflow).
+
+**Zero live-behavior change, proven:** `check_volume_entry` never gates (`check_freshness.py:354-355`),
+exit-1 only from `freshness_sla.error_after_days` (`:944-945`), `cadence_days` is display-only
+(`:338`), tier-1 returns before `count_table` is read (`:369-371`). No `freshness_sla` touched.
+`check_freshness --dry-run` exits 0 post-change.
+
+**Found while verifying (not mine, pre-existing on HEAD):**
+`test_check_freshness.py::test_tier2_fresh_not_stale` is clock-flaky — `check_freshness.py:337`
+ages UTC-stamped loads with LOCAL `date.today()`, so every ET evening `age_days` goes to `-1`.
+That is the local-vs-UTC class 08f flagged. → check `check_freshness_local_vs_utc_age`.
+
+**Checks opened:** `active_listings_ship_or_delete` · `city_pulse_sla_tighten` ·
+`coverage_exempt_confirm_three` · `check_freshness_local_vs_utc_age`.
+**Note:** full-tree `pytest ingest/` is impractical in-session (>10 min; 12 files env-blocked on the
+crawl4ai venv) — regression proof is the scoped registry-consumer suites (26 passed + the known
+clock flake). Push deliberately withheld: operator-gated (worktree wt/dcd lands via
+`worktree.mjs land dcd` after diff review).
+
 ## 2026-07-12 (Fable 5 · wt/dcd) — Data-contracts+doctor Phase 0: CI unred — drift test learns the 2nd intentional exclusion
 
 Executing `docs/superpowers/plans/2026-07-11-data-contracts-doctor-tdd.md` in worktree `bp-dcd` (RULE 1.5 —
