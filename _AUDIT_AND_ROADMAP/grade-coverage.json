@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07",
+  "generated_at": "2026-07-12",
   "spec": "docs/superpowers/plans/2026-06-03-row-tier/sweep-spec.md",
   "note": "Regenerable artifact — never hand-edit. Regenerate: bun refinery/tools/grade-config-sweep.mts. Adjudications live in the `checks` ledger, not here.",
   "summary": {
@@ -7,7 +7,7 @@
     "invalid-polarity": 0,
     "row-candidate": 45,
     "gradeable": 195,
-    "reviewed-display": 40,
+    "reviewed-display": 42,
     "moat-fuel": 0,
     "needs-window": 23,
     "backtest_clean": 11
@@ -4529,6 +4529,27 @@
       "backtest_clean": null
     },
     {
+      "slug": "properties_collier_sold_median_homes_only",
+      "concept_id": "properties_collier_sold_median_homes_only",
+      "bucket": "reviewed-display",
+      "gateVector": {
+        "slug": "properties_collier_sold_median_homes_only",
+        "concept_id": "properties_collier_sold_median_homes_only",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": null,
+        "category": "real-estate",
+        "value_type": "currency",
+        "window_days": 180,
+        "reviewed_non_directional": true
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
       "slug": "properties_collier_total_parcels",
       "concept_id": "properties_collier_total_parcels",
       "bucket": "reviewed-display",
@@ -4689,6 +4710,27 @@
         "raw_polarity": null,
         "category": "real-estate",
         "value_type": "percentage",
+        "window_days": 180,
+        "reviewed_non_directional": true
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "properties_lee_sold_median_homes_only",
+      "concept_id": "properties_lee_sold_median_homes_only",
+      "bucket": "reviewed-display",
+      "gateVector": {
+        "slug": "properties_lee_sold_median_homes_only",
+        "concept_id": "properties_lee_sold_median_homes_only",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": null,
+        "category": "real-estate",
+        "value_type": "currency",
         "window_days": 180,
         "reviewed_non_directional": true
       },
