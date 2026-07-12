@@ -8464,167 +8464,6 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "Median of the HOA fee-range midpoints across SWFL marketed communities with both fee bounds known. Cited to named real-estate sources; community-level range, not a per-home due."
-    }
-  },
-  "ordered_collections": {
-    "cre_corridor_evolution_stages": {
-      "id": "cre_corridor_evolution_stages",
-      "prefLabel": "Corridor Evolution Stage â€” Ordered by Operator Friendliness",
-      "type": "skos:OrderedCollection",
-      "ordering_criterion": "operator-friendliness descending",
-      "ordered_members": [
-        "growing",
-        "stable",
-        "repositioning",
-        "declining"
-      ],
-      "member_notes": {
-        "growing": "Falling cap rate and/or vacancy, active development flags. Best landlord position.",
-        "stable": "Cap rate and vacancy flat. Healthy equilibrium; limited upside.",
-        "repositioning": "Tenant mix or use changing. Cap rate / vacancy may diverge. Watch flags closely.",
-        "declining": "Rising cap rate and/or vacancy, outmigration signals. Tenant-market territory."
-      }
-    },
-    "cre_active_listings_estero_asking_rent_psf": {
-      "id": "cre_active_listings_estero_asking_rent_psf",
-      "grade": {
-        "direction_polarity": "higher_is_bullish"
-      },
-      "prefLabel": "Estero Active Listing Median Asking Rent PSF (Crexi)",
-      "altLabels": [
-        "Estero asking rent listings"
-      ],
-      "raw_slugs": [
-        "cre_active_listings_estero_asking_rent_psf"
-      ],
-      "category": "cre",
-      "domain": [
-        "real-estate"
-      ],
-      "source_brains": [
-        "cre-swfl"
-      ],
-      "value_type": "rate",
-      "unit": "USD/sqft",
-      "value_range": [
-        0,
-        500
-      ],
-      "direction_concept": "qual_metric_trajectory",
-      "status": "active",
-      "scope_note": "Median asking rent per sqft from Crexi available commercial listings in Estero, FL. No broker aggregate survey covers this submarket. Available-listings only; does not represent total submarket inventory."
-    },
-    "cre_active_listings_estero_available_sqft": {
-      "id": "cre_active_listings_estero_available_sqft",
-      "grade": {
-        "direction_polarity": "lower_is_bullish"
-      },
-      "prefLabel": "Estero Total Available Sqft on Crexi",
-      "altLabels": [
-        "Estero available sqft listings"
-      ],
-      "raw_slugs": [
-        "cre_active_listings_estero_available_sqft"
-      ],
-      "category": "cre",
-      "domain": [
-        "real-estate"
-      ],
-      "source_brains": [
-        "cre-swfl"
-      ],
-      "value_type": "count",
-      "unit": "sqft",
-      "direction_concept": "qual_metric_trajectory",
-      "status": "active",
-      "scope_note": "Total sqft of available commercial listings on Crexi in Estero, FL. Sum of sqft across active listings only — not a vacancy rate (no total inventory denominator)."
-    },
-    "cre_active_listings_fort_myers_beach_asking_rent_psf": {
-      "id": "cre_active_listings_fort_myers_beach_asking_rent_psf",
-      "grade": {
-        "direction_polarity": "higher_is_bullish"
-      },
-      "prefLabel": "Fort Myers Beach Active Listing Median Asking Rent PSF (Crexi)",
-      "altLabels": [
-        "FMB asking rent listings",
-        "Fort Myers Beach asking rent listings"
-      ],
-      "raw_slugs": [
-        "cre_active_listings_fort_myers_beach_asking_rent_psf"
-      ],
-      "category": "cre",
-      "domain": [
-        "real-estate"
-      ],
-      "source_brains": [
-        "cre-swfl"
-      ],
-      "value_type": "rate",
-      "unit": "USD/sqft",
-      "value_range": [
-        0,
-        500
-      ],
-      "direction_concept": "qual_metric_trajectory",
-      "status": "active",
-      "scope_note": "Median asking rent per sqft from Crexi available commercial listings in Fort Myers Beach, FL. No broker aggregate survey covers this submarket. Available-listings only."
-    },
-    "cre_active_listings_fort_myers_beach_available_sqft": {
-      "id": "cre_active_listings_fort_myers_beach_available_sqft",
-      "grade": {
-        "direction_polarity": "lower_is_bullish"
-      },
-      "prefLabel": "Fort Myers Beach Total Available Sqft on Crexi",
-      "altLabels": [
-        "FMB available sqft listings"
-      ],
-      "raw_slugs": [
-        "cre_active_listings_fort_myers_beach_available_sqft"
-      ],
-      "category": "cre",
-      "domain": [
-        "real-estate"
-      ],
-      "source_brains": [
-        "cre-swfl"
-      ],
-      "value_type": "count",
-      "unit": "sqft",
-      "direction_concept": "qual_metric_trajectory",
-      "status": "active",
-      "scope_note": "Total sqft of available commercial listings on Crexi in Fort Myers Beach, FL. Sum of sqft across active listings only — not a vacancy rate."
-    },
-    "sba_franchise_survival_table": {
-      "id": "sba_franchise_survival_table",
-      "prefLabel": "SBA Franchise Survival Detail Table",
-      "altLabels": [
-        "franchise survival per-brand table"
-      ],
-      "category": "credit-risk",
-      "domain": [
-        "finance"
-      ],
-      "source_brains": [
-        "franchise-outcomes"
-      ],
-      "status": "active",
-      "scope_note": "detail_table id 'franchise_survival' emitted by the franchise-outcomes pack. One row per SBA franchise brand in Lee & Collier counties. Columns: survival_rate (0–1 ratio over resolved loans; null = not yet assessable), n_paid_in_full, n_charged_off, n_loans (total incl. active), total_gross_approval (USD). Not a key_metrics slug — registered here for documentation only; check-vocab-coverage does not scan detail_table ids."
-    },
-    "cre_corridor_seasonality_table": {
-      "id": "cre_corridor_seasonality_table",
-      "prefLabel": "CRE Corridor Seasonality Detail Table",
-      "altLabels": [
-        "corridor seasonality per-corridor table"
-      ],
-      "category": "real-estate",
-      "domain": [
-        "real-estate"
-      ],
-      "source_brains": [
-        "cre-swfl"
-      ],
-      "status": "active",
-      "scope_note": "detail_table id 'corridor_seasonality' emitted by the cre-swfl pack. One row per verified SWFL CRE corridor that has a non-null seasonal_index. Columns: seasonal_index (ratio 0–1; 0 = no seasonality, 1 = extreme seasonality). Row key = raw corridor name; label = displayNameFor() display name. Not a key_metrics slug — registered here for documentation only; check-vocab-coverage does not scan detail_table ids. PROVENANCE (verified 2026-06-12): corridor_profiles.seasonal_index is populated only by curator/editorial process (Supabase Studio direct edits). corridor_profiles has zero cadence_registry entries — no ingest pipeline, dlt run, PDF import, or ODD feed targets this column today. corridor_grounded reads corridor_profiles (to enumerate verified corridors) but writes only to lake-tier1 NDJSON, not back to corridor_profiles. TRIPWIRE: if any feed later populates seasonal_index automatically, the null semantics invert from 'not yet editorially assigned' to 'window not filled yet'. At that point: (1) the SeasonalRadialChart empty-state copy ('No seasonality data available.') must be revisited; (2) the non-null filter in bindSeasonalRadial and creSwflOutputProducer must be re-evaluated for cadence-window semantics; (3) the row-vs-brain classification may need an ODD scaffold review. Flag this before activating any such feed."
     },
     "freshness_median_sale_price_cape_coral_usd": {
       "id": "freshness_median_sale_price_cape_coral_usd",
@@ -8796,6 +8635,58 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "Per-ZIP pulse median price PROJECTION from the freshness-pulse Baseline-Delta machine — today's county-grain fresh delta applied to that ZIP's vendor baseline (ZHVI/Redfin). source_tag='approx', an [INFERENCE] (never a cited ZIP fact), superseded by the next ZIP-grain vendor file; a same-period vendor value wins. Today these ride in the freshness_by_zip detail_table (cells, not key_metrics — check-vocab-coverage does not scan detail_table ids); the pattern is registered now so a future key_metrics emission never orphans. Mirrors env-swfl's swfl_zip_*_flood_aal_usd_per_insured_property per-ZIP pattern."
+    }
+  },
+  "ordered_collections": {
+    "cre_corridor_evolution_stages": {
+      "id": "cre_corridor_evolution_stages",
+      "prefLabel": "Corridor Evolution Stage â€” Ordered by Operator Friendliness",
+      "type": "skos:OrderedCollection",
+      "ordering_criterion": "operator-friendliness descending",
+      "ordered_members": [
+        "growing",
+        "stable",
+        "repositioning",
+        "declining"
+      ],
+      "member_notes": {
+        "growing": "Falling cap rate and/or vacancy, active development flags. Best landlord position.",
+        "stable": "Cap rate and vacancy flat. Healthy equilibrium; limited upside.",
+        "repositioning": "Tenant mix or use changing. Cap rate / vacancy may diverge. Watch flags closely.",
+        "declining": "Rising cap rate and/or vacancy, outmigration signals. Tenant-market territory."
+      }
+    },
+    "sba_franchise_survival_table": {
+      "id": "sba_franchise_survival_table",
+      "prefLabel": "SBA Franchise Survival Detail Table",
+      "altLabels": [
+        "franchise survival per-brand table"
+      ],
+      "category": "credit-risk",
+      "domain": [
+        "finance"
+      ],
+      "source_brains": [
+        "franchise-outcomes"
+      ],
+      "status": "active",
+      "scope_note": "detail_table id 'franchise_survival' emitted by the franchise-outcomes pack. One row per SBA franchise brand in Lee & Collier counties. Columns: survival_rate (0–1 ratio over resolved loans; null = not yet assessable), n_paid_in_full, n_charged_off, n_loans (total incl. active), total_gross_approval (USD). Not a key_metrics slug — registered here for documentation only; check-vocab-coverage does not scan detail_table ids."
+    },
+    "cre_corridor_seasonality_table": {
+      "id": "cre_corridor_seasonality_table",
+      "prefLabel": "CRE Corridor Seasonality Detail Table",
+      "altLabels": [
+        "corridor seasonality per-corridor table"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "cre-swfl"
+      ],
+      "status": "active",
+      "scope_note": "detail_table id 'corridor_seasonality' emitted by the cre-swfl pack. One row per verified SWFL CRE corridor that has a non-null seasonal_index. Columns: seasonal_index (ratio 0–1; 0 = no seasonality, 1 = extreme seasonality). Row key = raw corridor name; label = displayNameFor() display name. Not a key_metrics slug — registered here for documentation only; check-vocab-coverage does not scan detail_table ids. PROVENANCE (verified 2026-06-12): corridor_profiles.seasonal_index is populated only by curator/editorial process (Supabase Studio direct edits). corridor_profiles has zero cadence_registry entries — no ingest pipeline, dlt run, PDF import, or ODD feed targets this column today. corridor_grounded reads corridor_profiles (to enumerate verified corridors) but writes only to lake-tier1 NDJSON, not back to corridor_profiles. TRIPWIRE: if any feed later populates seasonal_index automatically, the null semantics invert from 'not yet editorially assigned' to 'window not filled yet'. At that point: (1) the SeasonalRadialChart empty-state copy ('No seasonality data available.') must be revisited; (2) the non-null filter in bindSeasonalRadial and creSwflOutputProducer must be re-evaluated for cadence-window semantics; (3) the row-vs-brain classification may need an ODD scaffold review. Flag this before activating any such feed."
     }
   },
   "slug_index": {

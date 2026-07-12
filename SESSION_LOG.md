@@ -19,6 +19,25 @@ commit — check nightly_chain_cron_cutover (lights chain cron + retires 8 stand
 narrative-bake's 06:23 EDT violation, one commit, zero duplicate-paid window); (b) caveat-TTL wiring
 at 4-output.mts (check caveat_expiry_rebuild); (c) assert_landed report-only → gating after a clean
 week; (d) 3d probe-body fold (unapproved).
+## 2026-07-12 (Fable 5 · main) — fix(vocab): 4th ordered_collections orphan killed at the class — 7 concepts moved into concepts, 4 stale cre duplicates deleted, structure test locks it
+
+Operator's safe-push hit (1) a build-queue.md rebase conflict — resolved by keeping origin's newer
+data-contracts line and re-adding the narrative-PDF entry — then (2) the vocab pre-push gate:
+freshness_median_asking_price_{cape_coral,fort_myers,naples}_usd orphaned. Root cause is the
+RECURRING class, not the daily-price commit alone: the 06/29 fix COPIED the 4 cre_active_listings_*
+concepts into `concepts` but left identical duplicates in `ordered_collections`, so every later
+session appending "at the end of concepts" anchored after the last concept-looking entry and landed
+one section too low. Victims since: freshness_median_sale_price_* (never bit — NULL values never
+emitted into key_metrics), freshness_zip_pulse_median_price_approx (its raw_slug_patterns
+registration was INERT — pattern resolver also reads concepts only), now the asking trio (real
+values → gate fired). Fix: surgical line move of all 7 into `concepts` (305→312), deleted the 4
+duplicates; `ordered_collections` back to its 3 true collections (the bait is gone). NEW
+`refinery/vocab/vocabulary-structure.test.mts` (3 tests): no concept-shaped entry in
+ordered_collections · every slug_index target exists in concepts · concept id === key. Verified:
+resolver probes all 5 slugs incl. the previously-dead swfl_zip_*_pulse pattern · vocab-coverage
+--all 41 brains OK · corridor-aliases + patterns 16/16. Pre-rebase commit e6a268b4 inspected: the
+misfile was in the original commit (its "vocab-coverage green" claim didn't hold at artifact
+level), NOT a rebase-merge artifact.
 
 ## 2026-07-12 (Fable 5 · wt/dcd → main) — Chain group built: Locus-A market_aggregates gate · email freshness preflight · 8 members reusable · nightly-chain.yml DISPATCH-ONLY
 
