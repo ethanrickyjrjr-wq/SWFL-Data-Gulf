@@ -6,13 +6,16 @@ import { Section, Img, Text, Link } from "@react-email/components";
 import type { EmailGlobalStyle, ListingProps } from "../doc/types";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
 import { legibleInk } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function ListingBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: ListingProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const bg = props.sectionBg ?? CARD_BG;
@@ -49,8 +52,13 @@ export function ListingBlock({
     >
       {photo ? props.linkUrl ? <Link href={props.linkUrl}>{photo}</Link> : photo : null}
 
-      {props.badge ? (
-        <Text
+      {props.badge || scope ? (
+        <EditableText
+          as={Text}
+          value={props.badge ?? ""}
+          path="badge"
+          scope={scope}
+          placeholder="Badge"
           style={{
             display: "inline-block",
             fontFamily: font,
@@ -64,13 +72,16 @@ export function ListingBlock({
             borderRadius: "4px",
             margin: photo ? "12px 0 0" : "0",
           }}
-        >
-          {props.badge}
-        </Text>
+        />
       ) : null}
 
-      {props.price ? (
-        <Text
+      {props.price || scope ? (
+        <EditableText
+          as={Text}
+          value={props.price ?? ""}
+          path="price"
+          scope={scope}
+          placeholder="$0"
           style={{
             fontFamily: font,
             fontSize: "22px",
@@ -79,19 +90,38 @@ export function ListingBlock({
             color: legibleInk(globalStyle.primaryColor, bg, 3),
             margin: "10px 0 0",
           }}
-        >
-          {props.price}
-        </Text>
+        />
       ) : null}
 
-      {specs ? (
+      {scope ? (
+        // Canvas: per-field editable spans with the identical separators; the
+        // server branch below keeps today's joined string byte-for-byte.
+        <Text style={{ fontFamily: font, fontSize: "13px", color: MUTED, margin: "4px 0 0" }}>
+          <EditableText value={props.beds ?? ""} path="beds" scope={scope} placeholder="3" /> bd
+          {"   ·   "}
+          <EditableText value={props.baths ?? ""} path="baths" scope={scope} placeholder="2" /> ba
+          {"   ·   "}
+          <EditableText
+            value={props.sqft ?? ""}
+            path="sqft"
+            scope={scope}
+            placeholder="1,200"
+          />{" "}
+          sqft
+        </Text>
+      ) : specs ? (
         <Text style={{ fontFamily: font, fontSize: "13px", color: MUTED, margin: "4px 0 0" }}>
           {specs}
         </Text>
       ) : null}
 
-      {props.address ? (
-        <Text
+      {props.address || scope ? (
+        <EditableText
+          as={Text}
+          value={props.address ?? ""}
+          path="address"
+          scope={scope}
+          placeholder="Address"
           style={{
             fontFamily: font,
             fontSize: "13px",
@@ -99,9 +129,7 @@ export function ListingBlock({
             color: globalStyle.textColor,
             margin: "4px 0 0",
           }}
-        >
-          {props.address}
-        </Text>
+        />
       ) : null}
 
       {props.linkUrl ? (

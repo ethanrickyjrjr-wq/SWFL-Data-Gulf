@@ -58,13 +58,13 @@ export function BlockRenderer({
     case "image":
       return <ImageBlock props={block.props} globalStyle={globalStyle} />;
     case "listing":
-      return <ListingBlock props={block.props} globalStyle={globalStyle} />;
+      return <ListingBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "multi-column":
       return <MultiColumnBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "list":
       return <ListBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "metric-card":
-      return <MetricCardBlock props={block.props} globalStyle={globalStyle} />;
+      return <MetricCardBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "agent-card":
       return <AgentCardBlock props={block.props} globalStyle={globalStyle} />;
     case "agent-hero":

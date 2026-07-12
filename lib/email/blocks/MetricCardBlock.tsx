@@ -15,13 +15,16 @@ import { Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, MetricCardProps } from "../doc/types";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
 import { isDarkBg, legibleAccent, ON_DARK_TITLE, ON_DARK_MUTED } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function MetricCardBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: MetricCardProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const bg = props.sectionBg ?? globalStyle.surfaceColor ?? CARD_BG;
@@ -41,8 +44,13 @@ export function MetricCardBlock({
         borderBottom: `1px solid ${BORDER}`,
       }}
     >
-      {props.metricValue ? (
-        <Text
+      {props.metricValue || scope ? (
+        <EditableText
+          as={Text}
+          value={props.metricValue ?? ""}
+          path="metricValue"
+          scope={scope}
+          placeholder="$0"
           style={{
             fontFamily: font,
             fontSize: "30px",
@@ -52,12 +60,15 @@ export function MetricCardBlock({
             color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
             margin: 0,
           }}
-        >
-          {props.metricValue}
-        </Text>
+        />
       ) : null}
-      {props.metricLabel ? (
-        <Text
+      {props.metricLabel || scope ? (
+        <EditableText
+          as={Text}
+          value={props.metricLabel ?? ""}
+          path="metricLabel"
+          scope={scope}
+          placeholder="Metric label"
           style={{
             fontFamily: font,
             fontSize: "11px",
@@ -67,14 +78,17 @@ export function MetricCardBlock({
             color: muted,
             margin: "6px 0 0",
           }}
-        >
-          {props.metricLabel}
-        </Text>
+        />
       ) : null}
-      {props.sub ? (
-        <Text style={{ fontFamily: font, fontSize: "12px", color: muted, margin: "2px 0 0" }}>
-          {props.sub}
-        </Text>
+      {props.sub || scope ? (
+        <EditableText
+          as={Text}
+          value={props.sub ?? ""}
+          path="sub"
+          scope={scope}
+          placeholder="Sub line"
+          style={{ fontFamily: font, fontSize: "12px", color: muted, margin: "2px 0 0" }}
+        />
       ) : null}
 
       {pct !== null ? (
@@ -108,7 +122,33 @@ export function MetricCardBlock({
         </table>
       ) : null}
 
-      {captions.length > 0 ? (
+      {scope ? (
+        // Canvas: per-field editable spans; the server branch keeps today's
+        // joined captions byte-for-byte.
+        <Text
+          style={{
+            fontFamily: font,
+            fontSize: "12px",
+            fontWeight: 600,
+            color: accent,
+            margin: "8px 0 0",
+          }}
+        >
+          <EditableText
+            value={props.rankText ?? ""}
+            path="rankText"
+            scope={scope}
+            placeholder="#rank"
+          />
+          {"  ·  "}
+          <EditableText
+            value={props.movementText ?? ""}
+            path="movementText"
+            scope={scope}
+            placeholder="↑ change"
+          />
+        </Text>
+      ) : captions.length > 0 ? (
         <Text
           style={{
             fontFamily: font,

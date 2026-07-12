@@ -97,6 +97,46 @@ describe("multi-column block", () => {
   it("server clean", () => expectClean(b));
 });
 
+describe("listing block", () => {
+  const b: EmailBlock = {
+    id: "li1",
+    type: "listing",
+    props: {
+      badge: "Just Sold",
+      price: "$485K",
+      beds: "3",
+      baths: "2",
+      sqft: "1,850",
+      address: "123 Main St",
+    },
+  };
+  it("canvas paths", () =>
+    expect(pathsIn(b)).toEqual(["badge", "price", "beds", "baths", "sqft", "address"]));
+  it("server: specs line stays the joined string", () => {
+    expect(serverHtml(b)).toContain("3 bd   ·   2 ba   ·   1,850 sqft");
+  });
+  it("server clean", () => expectClean(b));
+});
+
+describe("metric-card block", () => {
+  const b: EmailBlock = {
+    id: "m1",
+    type: "metric-card",
+    props: {
+      metricValue: "$495K",
+      metricLabel: "Median",
+      sub: "90-day",
+      rankText: "#2 of 54",
+      movementText: "↑ 6.8% YoY",
+    },
+  };
+  it("canvas paths", () =>
+    expect(pathsIn(b)).toEqual(["metricValue", "metricLabel", "sub", "rankText", "movementText"]));
+  it("server: captions stay joined", () =>
+    expect(serverHtml(b)).toContain("#2 of 54  ·  ↑ 6.8% YoY"));
+  it("server clean", () => expectClean(b));
+});
+
 describe("text block", () => {
   const b: EmailBlock = { id: "t1", type: "text", props: { body: "Hello", align: "left" } };
   it("canvas: body is editable", () => expect(pathsIn(b)).toEqual(["body"]));
