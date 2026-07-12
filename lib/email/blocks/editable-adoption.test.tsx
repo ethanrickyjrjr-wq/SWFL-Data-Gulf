@@ -51,6 +51,52 @@ describe("signal block", () => {
   it("server clean", () => expectClean(b));
 });
 
+describe("stats block", () => {
+  const b: EmailBlock = {
+    id: "st1",
+    type: "stats",
+    props: {
+      stats: [
+        { value: "34", label: "DOM" },
+        { value: "3.2", label: "Supply" },
+      ],
+    },
+  };
+  it("canvas paths (side-by-side)", () =>
+    expect(pathsIn(b)).toEqual([
+      "stats.0.value",
+      "stats.0.label",
+      "stats.1.value",
+      "stats.1.label",
+    ]));
+  it("server clean", () => expectClean(b));
+});
+
+describe("list block", () => {
+  const b: EmailBlock = {
+    id: "l1",
+    type: "list",
+    props: {
+      title: "Events",
+      items: [{ lead: "JUL 12 ·", text: "Open house", linkUrl: "https://x.test" }],
+    },
+  };
+  it("canvas paths", () => expect(pathsIn(b)).toEqual(["title", "items.0.lead", "items.0.text"]));
+  it("server clean", () => expectClean(b));
+});
+
+describe("multi-column block", () => {
+  const b: EmailBlock = {
+    id: "mc1",
+    type: "multi-column",
+    props: { columns: [{ heading: "H", body: "B", linkUrl: "https://x.test", linkLabel: "More" }] },
+  };
+  it("canvas paths", () =>
+    expect(pathsIn(b)).toEqual(["columns.0.heading", "columns.0.body", "columns.0.linkLabel"]));
+  it("server: link label text unchanged", () => expect(serverHtml(b)).toContain("More →"));
+  it("server clean", () => expectClean(b));
+});
+
 describe("text block", () => {
   const b: EmailBlock = { id: "t1", type: "text", props: { body: "Hello", align: "left" } };
   it("canvas: body is editable", () => expect(pathsIn(b)).toEqual(["body"]));

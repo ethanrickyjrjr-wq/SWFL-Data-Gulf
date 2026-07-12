@@ -7,13 +7,16 @@ import { Section, Text, Link } from "@react-email/components";
 import type { EmailGlobalStyle, ListProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
 import { isDarkBg, legibleAccent, legibleInk, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function ListBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: ListProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const items = props.items ?? [];
@@ -29,8 +32,13 @@ export function ListBlock({
         borderBottom: `1px solid ${BORDER}`,
       }}
     >
-      {props.title ? (
-        <Text
+      {props.title || scope ? (
+        <EditableText
+          as={Text}
+          value={props.title ?? ""}
+          path="title"
+          scope={scope}
+          placeholder="List title"
           style={{
             fontFamily: font,
             fontSize: "17px",
@@ -38,9 +46,7 @@ export function ListBlock({
             color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
             margin: "0 0 10px",
           }}
-        >
-          {props.title}
-        </Text>
+        />
       ) : null}
       <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0}>
         <tbody>
@@ -60,7 +66,7 @@ export function ListBlock({
                     padding: "5px 10px 5px 0",
                   }}
                 >
-                  {item.lead}
+                  <EditableText value={item.lead ?? ""} path={`items.${i}.lead`} scope={scope} />
                 </td>
               ) : null}
               <td
@@ -75,7 +81,12 @@ export function ListBlock({
                   width: "100%",
                 }}
               >
-                {item.text}
+                <EditableText
+                  value={item.text}
+                  path={`items.${i}.text`}
+                  scope={scope}
+                  placeholder="Row text…"
+                />
                 {item.linkUrl ? (
                   <>
                     {"  "}

@@ -48,7 +48,9 @@ export function BlockRenderer({
     case "hero":
       return <HeroBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "stats":
-      return <StatsBlock props={block.props} globalStyle={globalStyle} colPx={colPx} />;
+      return (
+        <StatsBlock props={block.props} globalStyle={globalStyle} colPx={colPx} scope={scope} />
+      );
     case "signal":
       return <SignalBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "text":
@@ -58,9 +60,9 @@ export function BlockRenderer({
     case "listing":
       return <ListingBlock props={block.props} globalStyle={globalStyle} />;
     case "multi-column":
-      return <MultiColumnBlock props={block.props} globalStyle={globalStyle} />;
+      return <MultiColumnBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "list":
-      return <ListBlock props={block.props} globalStyle={globalStyle} />;
+      return <ListBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "metric-card":
       return <MetricCardBlock props={block.props} globalStyle={globalStyle} />;
     case "agent-card":

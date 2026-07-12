@@ -12,13 +12,16 @@ import { Section, Img, Text, Link } from "@react-email/components";
 import type { EmailGlobalStyle, MultiColumnProps } from "../doc/types";
 import { fontStack, sectionPad, BORDER, CARD_BG } from "./styles";
 import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function MultiColumnBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: MultiColumnProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const columns = props.columns ?? [];
@@ -73,8 +76,13 @@ export function MultiColumnBlock({
               />
             ) : null}
 
-            {c.heading ? (
-              <Text
+            {c.heading || scope ? (
+              <EditableText
+                as={Text}
+                value={c.heading ?? ""}
+                path={`columns.${i}.heading`}
+                scope={scope}
+                placeholder="Heading"
                 style={{
                   fontFamily: font,
                   fontSize: "15px",
@@ -82,13 +90,17 @@ export function MultiColumnBlock({
                   color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
                   margin: "0 0 4px",
                 }}
-              >
-                {c.heading}
-              </Text>
+              />
             ) : null}
 
-            {c.body ? (
-              <Text
+            {c.body || scope ? (
+              <EditableText
+                as={Text}
+                value={c.body ?? ""}
+                path={`columns.${i}.body`}
+                scope={scope}
+                multiline
+                placeholder="Body…"
                 style={{
                   fontFamily: font,
                   fontSize: "13px",
@@ -96,9 +108,7 @@ export function MultiColumnBlock({
                   color: onDark ? ON_DARK_BODY : globalStyle.textColor,
                   margin: 0,
                 }}
-              >
-                {c.body}
-              </Text>
+              />
             ) : null}
 
             {c.linkUrl ? (
@@ -114,7 +124,12 @@ export function MultiColumnBlock({
                       : globalStyle.accentColor,
                   }}
                 >
-                  {c.linkLabel || "Learn more"} →
+                  <EditableText
+                    value={c.linkLabel || "Learn more"}
+                    path={`columns.${i}.linkLabel`}
+                    scope={scope}
+                  />
+                  {" →"}
                 </Link>
               </Text>
             ) : null}

@@ -6,6 +6,7 @@
 import { Section, Row, Column, Text } from "@react-email/components";
 import type { EmailGlobalStyle, StatsProps } from "../doc/types";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
+import { EditableText, type EditScope } from "./editable-text";
 
 /** Side-by-side needs ~180px per cell for a "$630,000"-class value at 32px.
  *  Full width (600/3 = 200) keeps the classic row; any grid column tighter
@@ -16,12 +17,14 @@ export function StatsBlock({
   props,
   globalStyle,
   colPx,
+  scope,
 }: {
   props: StatsProps;
   globalStyle: EmailGlobalStyle;
   /** Rendered column width in px when the block sits in a grid column
    *  (compile-grid passes it; the free stacker and the canvas don't). */
   colPx?: number;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const stats = props.stats ?? [];
@@ -43,7 +46,12 @@ export function StatsBlock({
                 padding: i === stats.length - 1 ? "4px 8px" : "4px 8px 14px",
               }}
             >
-              <Text
+              <EditableText
+                as={Text}
+                value={s.value}
+                path={`stats.${i}.value`}
+                scope={scope}
+                placeholder="0"
                 style={{
                   fontFamily: font,
                   fontSize: "22px",
@@ -52,12 +60,15 @@ export function StatsBlock({
                   color: globalStyle.primaryColor,
                   margin: 0,
                 }}
-              >
-                {s.value}
-              </Text>
-              <Text style={{ fontFamily: font, fontSize: "11px", color: MUTED, margin: "2px 0 0" }}>
-                {s.label}
-              </Text>
+              />
+              <EditableText
+                as={Text}
+                value={s.label}
+                path={`stats.${i}.label`}
+                scope={scope}
+                placeholder="Label"
+                style={{ fontFamily: font, fontSize: "11px", color: MUTED, margin: "2px 0 0" }}
+              />
             </Column>
           </Row>
         ))}
@@ -70,7 +81,12 @@ export function StatsBlock({
       <Row>
         {stats.map((s, i) => (
           <Column key={i} style={{ textAlign: "center", padding: "8px" }}>
-            <Text
+            <EditableText
+              as={Text}
+              value={s.value}
+              path={`stats.${i}.value`}
+              scope={scope}
+              placeholder="0"
               style={{
                 fontFamily: font,
                 fontSize: "32px",
@@ -79,12 +95,15 @@ export function StatsBlock({
                 color: globalStyle.primaryColor,
                 margin: 0,
               }}
-            >
-              {s.value}
-            </Text>
-            <Text style={{ fontFamily: font, fontSize: "11px", color: MUTED, margin: "4px 0 0" }}>
-              {s.label}
-            </Text>
+            />
+            <EditableText
+              as={Text}
+              value={s.label}
+              path={`stats.${i}.label`}
+              scope={scope}
+              placeholder="Label"
+              style={{ fontFamily: font, fontSize: "11px", color: MUTED, margin: "4px 0 0" }}
+            />
           </Column>
         ))}
       </Row>
