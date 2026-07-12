@@ -154,15 +154,20 @@ test("assertManifestSane — a scheduled workflow with no timeout-minutes is a h
 const FLEET = [
   { name: "City pulse daily", file: "city-pulse-daily.yml", scheduled: true },
   { name: "Daily Brain Rebuild", file: "daily-rebuild.yml", scheduled: true },
+  { name: "Chief of staff nightly", file: "chief-of-staff-nightly.yml", scheduled: true },
   { name: "Tripwire hourly", file: "tripwire-hourly.yml", scheduled: true },
   { name: "CI", file: "ci.yml", scheduled: false },
 ];
 
 test("loggerWatchNames — every scheduled workflow except the watch-exempt ones", () => {
-  assert.deepEqual(loggerWatchNames(FLEET), ["City pulse daily", "Daily Brain Rebuild"]);
+  assert.deepEqual(loggerWatchNames(FLEET), [
+    "Chief of staff nightly",
+    "City pulse daily",
+    "Daily Brain Rebuild",
+  ]);
 });
 
-test("healWatchNames — logger's set minus the one intentional exclusion", () => {
+test("healWatchNames — logger's set minus BOTH intentional exclusions (kept in lockstep with trigger-list-drift.test.mjs)", () => {
   assert.deepEqual(healWatchNames(FLEET), ["City pulse daily"]);
 });
 

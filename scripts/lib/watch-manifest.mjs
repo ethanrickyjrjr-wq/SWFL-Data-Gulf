@@ -28,8 +28,18 @@ export const WATCH_EXEMPT = {
     "Self-reporting alarm: it opens its own `TRIPWIRE RED` issue and then `exit 1`s by design (tripwire-hourly.yml:47-62). Watching it would open a duplicate cron-incident issue + check every hour it is RED.",
 };
 
-// Watched by the logger, never auto-healed: it owns refinery/lib/master-freeze-watchdog.mts.
-export const HEAL_EXCLUDED_NAME = "Daily Brain Rebuild";
+// Watched by the logger, never auto-healed. Keyed by workflow NAME (the watcher lists
+// are name-keyed). Kept in lockstep with .github/scripts/trigger-list-drift.test.mjs's
+// EXCLUDED list — that test is the drift guard on this very set.
+//   Daily Brain Rebuild   — owns refinery/lib/master-freeze-watchdog.mts + the vocab
+//                           pre-push gate; must never be auto-healed.
+//   Chief of staff nightly — propose-only Sonnet workflow with its own kill switch
+//                           (CHIEF_OF_STAFF_ENABLED); an L0 auto-rerun is an unattended
+//                           paid LLM call. Its plan (2026-07-10 Task 5) wires the
+//                           incident LOGGER only, never the healer.
+export const HEAL_EXCLUDED_NAMES = ["Daily Brain Rebuild", "Chief of staff nightly"];
+/** @deprecated back-compat alias; use HEAL_EXCLUDED_NAMES. */
+export const HEAL_EXCLUDED_NAME = HEAL_EXCLUDED_NAMES[0];
 
 // A re-run of these re-fires a send. Never auto-retry, regardless of failure class.
 export const SEND_SIDE_EFFECT = {
@@ -135,7 +145,7 @@ export function loggerWatchNames(entries) {
 }
 
 export function healWatchNames(entries) {
-  return loggerWatchNames(entries).filter((n) => n !== HEAL_EXCLUDED_NAME);
+  return loggerWatchNames(entries).filter((n) => !HEAL_EXCLUDED_NAMES.includes(n));
 }
 
 /**
