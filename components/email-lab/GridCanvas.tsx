@@ -15,6 +15,8 @@
 // corrections route through onChangeDoc with { autoHeightOnly: true } so the shell
 // patches them in place (no undo frame).
 import { useCallback, useMemo, useRef, useEffect } from "react";
+import { applyTextAtPath } from "@/lib/email/doc/edit-path";
+import type { EditCommit } from "@/lib/email/blocks/editable-text";
 import { toast } from "sonner";
 import ReactGridLayout, {
   verticalCompactor,
@@ -113,6 +115,7 @@ function GridBlock({
   onEditPhoto,
   onRemove,
   onAutoHeight,
+  edit,
 }: {
   block: EmailBlock;
   globalStyle: EmailGlobalStyle;
@@ -123,6 +126,8 @@ function GridBlock({
   onEditPhoto?: (id: string) => void;
   onRemove: (id: string) => void;
   onAutoHeight: (id: string, rows: number) => void;
+  /** Inline-edit commits (EditableText blur, pill popovers) — GridCanvas builds it. */
+  edit?: { commit: EditCommit };
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const locked = block.type === "footer" && block.layout?.static;
@@ -220,12 +225,18 @@ function GridBlock({
         </button>
       </div>
 
-      {/* pointer-events off so the wrapper owns the click/select. The inner div is
-          NOT height-constrained, so its offsetHeight is the true content height we
-          measure for auto-height. */}
-      <div className="pointer-events-none h-full">
+      {/* Clicks flow INTO the content now (inline editing); block-select still
+          works via bubbling to this wrapper. Anchors are intercepted so a linked
+          block never navigates mid-design. The inner div is NOT height-constrained,
+          so its offsetHeight is the true content height we measure for auto-height. */}
+      <div
+        className="h-full"
+        onClickCapture={(e) => {
+          if ((e.target as HTMLElement).closest("a")) e.preventDefault();
+        }}
+      >
         <div ref={contentRef}>
-          <BlockRenderer block={block} globalStyle={globalStyle} />
+          <BlockRenderer block={block} globalStyle={globalStyle} edit={edit} />
         </div>
       </div>
     </div>
@@ -289,6 +300,18 @@ export function GridCanvas({
     },
     [onChangeDoc],
   );
+
+  // Inline-edit commits (EditableText blur, pill popovers) — one write path
+  // through applyTextAtPath into a NORMAL undo frame (unlike autoHeightOnly).
+  const handleEditCommit = useCallback<EditCommit>(
+    (blockId, path, text) => {
+      const cur = docRef.current;
+      const blocks = cur.blocks.map((b) => (b.id === blockId ? applyTextAtPath(b, path, text) : b));
+      onChangeDoc({ ...cur, blocks });
+    },
+    [onChangeDoc],
+  );
+  const edit = useMemo(() => ({ commit: handleEditCommit }), [handleEditCommit]);
 
   // RGL fires onLayoutChange once on mount (after compaction) and after every
   // drag/resize. Commit ONLY a real geometry change vs the baseline we fed in.
@@ -367,6 +390,7 @@ export function GridCanvas({
                     onEditPhoto={onEditPhoto}
                     onRemove={remove}
                     onAutoHeight={onAutoHeight}
+                    edit={edit}
                   />
                 </div>
               ))}

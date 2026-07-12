@@ -291,3 +291,16 @@ body {
   animation: brand-reveal-pulse 1s ease-out 2;
   border-radius: 12px;
 }
+
+/* Email Lab inline editing (EditableText) — canvas-only affordances */
+[data-edit-path] {
+  cursor: text;
+}
+[data-edit-path]:focus {
+  outline: 1px dashed #3dc9c0;
+  outline-offset: 2px;
+}
+[data-edit-path]:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+}

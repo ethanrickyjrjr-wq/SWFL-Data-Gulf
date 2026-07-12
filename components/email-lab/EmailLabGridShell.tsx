@@ -977,6 +977,9 @@ export function EmailLabGridShell({
   // Keyboard: ⌘Z / ⌘⇧Z undo-redo, Escape deselects.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // Typing in an inline-editable node: let the browser's native text-level
+      // undo/Escape work; the doc-level shortcuts stay out of the field.
+      if ((e.target as HTMLElement | null)?.isContentEditable) return;
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
         editingRef.current = false;
@@ -992,6 +995,14 @@ export function EmailLabGridShell({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  // Rail auto-scroll: selecting a block brings the "Now editing" editor into
+  // view (it sits below the Build-with-AI section and was invisible on a normal
+  // screen — the 07/12/2026 "can't change the text" report). DOM-only effect.
+  const nowEditingRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (selectedId) nowEditingRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedId]);
 
   const busy = aiLoading || exporting;
   const selectedWidth = selectedBlock ? (selectedBlock.layout?.w ?? GRID_COLS) : null;
@@ -1503,7 +1514,7 @@ export function EmailLabGridShell({
           {/* ── NOW EDITING (re-targets to the selected block) ── */}
           {mode === "email" &&
             (selectedBlock ? (
-              <div className="border-b border-white/8 px-4 pb-4 pt-4">
+              <div ref={nowEditingRef} className="border-b border-white/8 px-4 pb-4 pt-4">
                 <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-[#f59e0b]">
                   Now editing
                 </p>
