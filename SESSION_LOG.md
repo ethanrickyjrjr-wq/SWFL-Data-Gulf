@@ -147,6 +147,25 @@ zones + zero `[config]`/raw-token leaks. Deferred WITH reasons → `docs/handoff
 filter tabs descoped — loader reshape). NOTE: `bun add cmdk` touched package.json/bun.lock claimed by a
 parallel session — verified only my cmdk line differs from HEAD, nothing clobbered. Committed local,
 NOT pushed (new dep + live surface = operator diff-review).
+## 2026-07-12 (Fable 5 · wt/dcd) — Phase 4 Task 2: assert_landed row gate BUILT + live-proven; chain wiring HELD
+
+**Shipped.** `ingest/scripts/assert_landed.py` — the nightly row gate (N-1 corrected: reads
+`expected_rows_min`+`count_table`+`count_filter`, opts out ONLY on absence of a countable table;
+`min_rows` never existed here). 14 tests incl. the REAL-registry N-1 lock (all 4 nightly entries
+resolve floor+target; active_listings ABSENT per N-2) + a zero-nightly-entries-is-RED guard.
+Live `--dry-run` at 02:45 UTC: all 4 sources correctly STALE (yesterday's landings — the exact
+verdict the gate must give before tonight's ingests; in the chain it runs AFTER them), exit 0.
+Two plan bugs fixed in-flight: a stray duplicated `)/continue` (syntax error) in the plan's own
+code block, and clock-DEPENDENT main() tests (fixture date == one specific day — the flake class
+this build fights) made clock-independent via utc_today(). Windows-console UTF-8 reconfigure added.
+
+**HELD [ASK-FIRST] (N-3/N-7):** Task 1 (email freshness preflight — can stop a live customer
+send), Tasks 3+4 (workflow_call on 8 LIVE workflow files incl. narrative-bake's paid env change),
+Task 5 (nightly-chain.yml — dispatch-only per N-3, but needs 3+4 and a main-branch dispatch proof),
+Task 6 (external clock), Task 7 (cron cutover — zero-duplicate-paid-work window requires the same
+commit as the chain's cron). Per the phase's own correction: the 6 AM ceiling is NOT certified on a
+schedule: head (drift +2h07..+5h29 measured); dispatch-primary is the design.
+
 ## 2026-07-12 (Fable 5 · wt/dcd) — Phase 3c: doctor BUILT + first live run archived (72 datasets, 16R/26Y/30G, 62s)
 
 **Shipped (5 commits, `15961bdc..eb8c9587`).** `ingest/lib/prescriptions.py` (10-member shared enum,
