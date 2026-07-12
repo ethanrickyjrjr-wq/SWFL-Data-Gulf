@@ -56,7 +56,6 @@ export default function Hero({ payload }: { payload: Payload }) {
   const svgHostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
   // Imperative hover handlers are wired once at SVG injection; they read the
   // active metric through this ref so recoloring never rewires them.
   const metricRef = useRef<MetricKey>(metric);
@@ -238,17 +237,9 @@ export default function Hero({ payload }: { payload: Payload }) {
     });
   }, [svgReady, active, activeT]);
 
-  const submitSearch = () => {
-    const val = (searchRef.current?.value ?? "").trim();
-    if (!val) return;
-    // One ZIP truth: the report route (the rail rows open the lab instead).
-    router.push(/^\d{5}$/.test(val) ? `/r/zip-report/${val}` : `/ask?q=${encodeURIComponent(val)}`);
-  };
-
-  // Agent-first re-flip (spec 2026-07-05-agent-first-homepage-design.md): the
-  // headline hero moved to components/landing/HeroCampaign.tsx; this component
-  // is now the proof-of-data section — same map, rail, stats, and report/ask
-  // search, retitled and demoted below the fold. Mechanics unchanged.
+  // One-bar rebuild (spec 2026-07-12-homepage-one-bar): this component is the
+  // trust section — map, rail, stats. Its own search input is GONE; the hero
+  // bar above is the page's ONE input. Mechanics otherwise unchanged.
   return (
     <section>
       <div className="map-section" id="data">
@@ -257,38 +248,8 @@ export default function Hero({ payload }: { payload: Payload }) {
           <h2 className="map-heading">The data your campaigns are built on</h2>
           <p className="map-sub">
             Live Southwest Florida market signals, cited to the source. Click any ZIP — map or list
-            — for its full report: the numbers, what just moved, and what&rsquo;s down the road.
+            — for its full report. Looking for somewhere specific? Use the bar above.
           </p>
-          <div className="search-wrap">
-            <div className="search-bar">
-              <svg
-                className="search-icon"
-                width="16"
-                height="16"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-              <input
-                ref={searchRef}
-                className="search-input"
-                type="text"
-                placeholder="Search ZIP code, city, or neighborhood…"
-                aria-label="Search by ZIP code, city, or neighborhood"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") submitSearch();
-                }}
-              />
-              <button className="search-btn" type="button" onClick={submitSearch}>
-                Search
-              </button>
-            </div>
-          </div>
           <div className="filter-row">
             {availableMetrics.map((k) => (
               <button
