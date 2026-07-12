@@ -256,3 +256,47 @@ def test_no_entry_carries_a_source_tag_field():
         f"`source_tag:` is read by nothing — use `source_name:` (the column "
         f"check_freshness.py actually filters on). Remove from: {tagged}"
     )
+
+
+# Machine-readable reasons a live table can legitimately have no pipelines: entry.
+# Phase 2's --live zero-coverage check suppresses a RED only for tables listed under
+# coverage_exempt: with one of these reasons.
+COVERAGE_EXEMPT_REASONS = {
+    "defunct_source",           # vendor API decommissioned; rows are a legacy artifact
+    "legacy_scheduled_drop",    # superseded by a live pipeline on another lane; DROP pending
+    "brain_write_back",         # written by refinery stage-4, not by ingest
+    "derived_signal_write_back",# app cron appends derived rows; 0 rows on a quiet day is CORRECT
+    "bounded_delete_sweep",     # a retention DELETE, not a data source
+    "event_driven_app_cron",    # Vercel cron, no lake write; 0 rows on a quiet day is CORRECT
+}
+
+
+def test_coverage_exempt_block_exists_and_is_well_formed():
+    """Without this block the Phase-2 zero-coverage check cannot tell a REAL source gap
+    (parcel_subdivision: 220,875 rows, zero registry mentions) from an INTENTIONAL
+    non-source write (project_feed). 08h: the prose exclusion block is comments, not
+    machine-readable."""
+    exempt = REG.get("coverage_exempt")
+    assert isinstance(exempt, list) and exempt, "top-level `coverage_exempt:` list is missing"
+    for row in exempt:
+        table = row.get("table")
+        assert table and "." in table, f"coverage_exempt entry needs a schema-qualified table: {row!r}"
+        assert row.get("reason") in COVERAGE_EXEMPT_REASONS, (
+            f"{table}: reason {row.get('reason')!r} not in {sorted(COVERAGE_EXEMPT_REASONS)}"
+        )
+        assert row.get("note"), f"{table}: coverage_exempt needs a `note:` saying WHY"
+    tables = [r["table"] for r in exempt]
+    assert len(tables) == len(set(tables)), f"duplicate coverage_exempt tables: {tables}"
+
+
+def test_coverage_exempt_does_not_shadow_a_live_pipeline():
+    """A table cannot be both a monitored source and exempt from coverage — that is a
+    contradiction, and whichever check ran last would win."""
+    exempt = {r["table"] for r in REG["coverage_exempt"]}
+    monitored = set()
+    for e in _pipelines():
+        for key in ("freshness_table", "count_table"):
+            if e.get(key):
+                monitored.add(e[key])
+    overlap = exempt & monitored
+    assert not overlap, f"table is both monitored and coverage_exempt: {sorted(overlap)}"

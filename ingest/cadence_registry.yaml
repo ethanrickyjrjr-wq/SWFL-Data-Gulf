@@ -1891,6 +1891,9 @@ not_yet_running:
         source_label: "realtor.com (via SteadyAPI)"
 
 # ── Tables intentionally excluded from the probe — DO NOT ADD ────────────────
+# NARRATIVE ONLY. The machine-readable authority is the `coverage_exempt:` block at the
+# END OF THIS FILE — Phase 2's zero-coverage check reads that, not these comments. Keep the
+# two in sync: an entry here with no coverage_exempt row will be RED-flagged as a source gap.
 # These tables have rows in Postgres but no active ingest pipeline. Adding them
 # would create false-FRESH signal or meaningless LOW_VOLUME noise. Investigated
 # 2026-05-31; decisions are final until a new ingest pipeline is explicitly built.
@@ -1958,3 +1961,39 @@ not_yet_running:
 #   Tolerances: ingest/data-verification-tolerances.yaml
 #   Brain-first / destructive-write gates DON'T apply (no lake write). PROBE FIRST
 #   does in spirit: the grounded web_search call is the probe (graceful null on fail).
+
+# ── coverage_exempt: the machine-readable half of the exclusion block above ──────────────
+# Phase 2's --live zero-coverage check ("a live lake table with rows and no pipelines: entry
+# is RED") reads THIS. Without it the check false-floods on every intentional non-source
+# write and becomes noise nobody reads. The narrative for each row is in the comment block
+# above; the `note:` here is the one-line why.
+#
+# SCOPE — what coverage_exempt does NOT do: it suppresses the ZERO-COVERAGE assertion only.
+# It does NOT bless a pack reading one of these tables. env-swfl live-queries
+# data_lake.usgs_sites (usgs-water-source.mts:33 SITES_TABLE='usgs_sites') even though that
+# table is exempt and frozen since 2026-05-19 — that is a SEPARATE Phase-2 RED ("pack reads a
+# legacy/excluded table", spec section 6). Two assertions, two answers. Do not collapse them.
+coverage_exempt:
+  - table: data_lake.dbhydro_stations
+    reason: defunct_source
+    note: "SFWMD DBHYDRO API decommissioned (OAuth wall on new REST). 12,937 rows are a legacy artifact; no pipeline writes this table. History: docs/API_BLUEPRINTS_DBHYDRO.md."
+
+  - table: data_lake.usgs_sites
+    reason: legacy_scheduled_drop
+    note: "900 rows from a deprecated dlt pipeline. The live USGS workflow (usgs-monthly.yml) writes Parquet to Tier-1 only. DROP scheduled once env-swfl migrates to Parquet (docs/superpowers/plans/2026-05-19-usgs-postgres-to-parquet-migration.md). STILL LIVE-READ by env-swfl via usgs-water-source.mts:33 — that read is a separate Phase-2 RED, not suppressed by this exemption."
+
+  - table: data_lake.fdot_freight_nowcast_shock_log
+    reason: brain_write_back
+    note: "Written by refinery/sources/fdot-freight-source.mts during stage-4 brain execution, not by ingest. Same category as public.predictions — wrong layer for an ingest guard; the pack owns its own write-back integrity."
+
+  - table: public.project_feed
+    reason: derived_signal_write_back
+    note: "Piece 3 signal layer. scripts/project-feed/change-detection.mts appends a data-change row ONLY when a tracked per-ZIP brain metric moves. ZHVI/ZORI refresh ~monthly, so ZERO rows on a quiet day is CORRECT — a daily STALE/LOW_VOLUME assertion would be a guaranteed false alarm. GHA: project-feed-change-detection-daily.yml."
+
+  - table: public.deliverables
+    reason: bounded_delete_sweep
+    note: "FINAL BOSS Piece 4 retention sweep hard-deletes deliverables soft-trashed >7d ago. Not a data source. On most days it deletes ZERO rows. GHA: deliverables-retention-sweep-daily.yml."
+
+  - table: public.data_readiness_alerts
+    reason: event_driven_app_cron
+    note: "Phase 3C T-60 email preflight (app/api/cron/data-readiness/route.ts, a Vercel cron). No lake write; appends alerts only in the T-75min window before an actual send. ZERO rows on a quiet day is CORRECT."
