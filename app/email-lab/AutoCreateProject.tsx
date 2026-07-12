@@ -33,10 +33,12 @@ export function AutoCreateProject({
     if (recipeNeeds) params.set("recipeNeeds", recipeNeeds);
     if (addr) params.set("addr", addr);
     const q = params.size > 0 ? `?${params.toString()}` : "";
+    // An address arrival is a listing project — persist the subject on the row
+    // (not just in the redirect query) so the address lane survives return visits.
     fetch("/api/projects", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({}),
+      body: JSON.stringify(addr ? { title: addr, kind: "listing", subject_address: addr } : {}),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("create failed"))))
       .then((data: { id?: string }) => {

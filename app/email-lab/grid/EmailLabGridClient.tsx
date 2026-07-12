@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { EmailLabGridShell } from "@/components/email-lab/EmailLabGridShell";
+import { SendToSelfModal } from "@/components/email-lab/SendToSelfModal";
 import { seedById, SEED_DOCS } from "@/lib/email/doc/default-docs";
 import { DEFAULT_H } from "@/components/email-lab/GridCanvas";
 import { ensureGridLayouts } from "@/lib/email/doc/grid-layouts";
@@ -24,6 +25,7 @@ export function EmailLabGridClient({
   addr,
   recipe,
   recipeNeeds,
+  refCode,
   signedIn,
   offeredProject,
 }: {
@@ -32,6 +34,7 @@ export function EmailLabGridClient({
   addr?: string | null;
   recipe?: string | null;
   recipeNeeds?: string | null;
+  refCode?: string | null;
   signedIn: boolean;
   offeredProject: { id: string; title: string } | null;
 }) {
@@ -76,6 +79,12 @@ export function EmailLabGridClient({
   const [dirty, setDirty] = useState(false);
   const guard = useLeaveGuard({ dirty });
 
+  // Lab-first funnel capture (spec 2026-07-03-lab-first-funnel-landing): the
+  // anonymous visitor's exit ramp is "Send this to yourself" → inline OTP →
+  // project + one send. The shell owns the live doc; hold it for send time.
+  const currentDocRef = useRef<EmailDoc>(initialDoc);
+  const [sendOpen, setSendOpen] = useState(false);
+
   const [confirmOpen, setConfirmOpen] = useState(plan.projectConfirm);
   // The address popup only matters for the ANONYMOUS recipe arrival — a signed-in
   // recipe rides into a project, where the in-project client shows the popup.
@@ -112,10 +121,16 @@ export function EmailLabGridClient({
   async function createAndEnter(name: string) {
     setCreating(true);
     try {
+      // The hero's typed address is the project's subject — persist it on the row
+      // (kind:"listing" + subject_address), not just in the arrival URL, or every
+      // return visit loses the address lane (comps feed, campaign arm-CTA).
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ title: name }),
+        body: JSON.stringify({
+          title: name,
+          ...(addr ? { kind: "listing", subject_address: addr } : {}),
+        }),
       });
       const data = (await res.json().catch(() => null)) as { id?: string } | null;
       if (data?.id) intoProject(data.id);
@@ -146,7 +161,10 @@ export function EmailLabGridClient({
         autoGenerate={build != null}
         // The popup owns the blank now; don't also seed it into the Build box.
         initialRecipe={build || plan.addressPopup ? null : initialRecipe}
-        onDocChange={() => setDirty(true)}
+        onDocChange={(d) => {
+          currentDocRef.current = d;
+          setDirty(true);
+        }}
         // Address-first scope: a property email's subject is the ADDRESS (comps
         // ride scope.address, and the feed is NOT narrowed to a ZIP), so ZIP is
         // just one derived layer among many. The email is ZIP-scoped ONLY when the
@@ -166,9 +184,27 @@ export function EmailLabGridClient({
             <span className="rounded bg-gulf-teal px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[#0a1419]">
               Grid · paid
             </span>
+            {!signedIn && (
+              <button
+                type="button"
+                onClick={() => setSendOpen(true)}
+                className="btn-gradient ml-2 rounded-lg px-3 py-1.5 text-xs font-semibold text-navy-dark"
+              >
+                Send this to yourself
+              </button>
+            )}
           </span>
         }
       />
+      {!signedIn && (
+        <SendToSelfModal
+          open={sendOpen}
+          onClose={() => setSendOpen(false)}
+          getDoc={() => currentDocRef.current}
+          zip={zip}
+          refCode={refCode}
+        />
+      )}
       {confirmOpen && offeredProject && (
         <ProjectConfirmPopup
           projectTitle={offeredProject.title}

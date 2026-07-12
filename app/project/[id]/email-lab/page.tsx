@@ -185,8 +185,14 @@ export default async function ProjectEmailLabPage({
                 value: scope.place,
                 address: arrivalAddr ?? project.subject_address ?? undefined,
               }
-            : arrivalAddr
-              ? { kind: "region", value: "swfl", address: arrivalAddr }
+            : (arrivalAddr ?? project.subject_address)
+              ? {
+                  kind: "region",
+                  value: "swfl",
+                  // A fresh listing project has zero items (no zip/place scope yet)
+                  // but a saved subject address — it must still feed the address lane.
+                  address: arrivalAddr ?? project.subject_address ?? undefined,
+                }
               : undefined
       }
       initialDoc={initialDoc}

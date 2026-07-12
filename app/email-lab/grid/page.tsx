@@ -25,6 +25,9 @@ export default async function EmailLabGridPage({
   const addr = (sp.addr ?? "").trim() || null;
   const recipe = sp.recipe ?? null;
   const recipeNeeds = sp.recipeNeeds ?? null;
+  // Outreach attribution — rides the anonymous funnel into SendToSelfModal's
+  // claim-and-send (the /email-lab redirect preserves it; consume it here).
+  const refCode = (sp.ref ?? "").trim() || null;
 
   const supabase = createClient(await cookies());
   const {
@@ -66,6 +69,7 @@ export default async function EmailLabGridPage({
       addr={addr}
       recipe={recipe}
       recipeNeeds={recipeNeeds}
+      refCode={refCode}
       signedIn={false}
       offeredProject={null}
     />
