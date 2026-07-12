@@ -111,6 +111,11 @@ export function shouldMountHighlighter(pathname: string | null): boolean {
  *                  never overlay before the user gets value, never block content on
  *                  mobile). Desktop keeps the funnel pop — its popover doesn't bury
  *                  the page. Caller reads matchMedia at the sm breakpoint (639px).
+ *  - NOT `home`    the homepage's funnel is its own hero (address bar + campaign
+ *                  chips) — popping a panel over it competes with the primary action
+ *                  (operator pick 07/12/2026, spec 2026-07-12-homepage-one-site;
+ *                  NN/g: no popups before value on the front door). Deep entries
+ *                  (/charts, generic pages) keep the hook.
  * Pure (no React, no DOM) so it's unit-tested directly. The caller passes RESOLVED auth
  * (it holds off while `useSession()` is still loading) and a freshly read visit flag.
  */
@@ -119,6 +124,7 @@ export function shouldAutoOpenPill(opts: {
   authed: boolean;
   bridged: boolean;
   phone: boolean;
+  home: boolean;
 }): boolean {
-  return opts.firstVisit && !opts.authed && !opts.bridged && !opts.phone;
+  return opts.firstVisit && !opts.authed && !opts.bridged && !opts.phone && !opts.home;
 }

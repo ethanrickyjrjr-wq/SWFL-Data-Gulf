@@ -23,7 +23,7 @@ const GENERIC_TIPS = [
   "Highlight any figure to ask about it",
   "Compare any two SWFL ZIPs",
   "Ask “what’s driving this?”",
-  "Open AI + Briefcase (bottom-right) to chat",
+  "Open Ask AI (bottom-right) to chat",
   "Every answer cites its source — or declines",
 ];
 
@@ -61,7 +61,9 @@ export function DiscoveryTicker({ onReport }: { onReport: boolean }) {
   return (
     <div
       id="discovery-ticker"
-      className="pointer-events-none fixed right-3 top-3 z-40 hidden max-w-[18rem] sm:block"
+      // top-16 clears the site bar (fixed z-50 on home, sticky z-40 elsewhere) — at
+      // top-3 the tip rendered UNDERNEATH the transparent home bar's CTA cluster.
+      className="pointer-events-none fixed right-3 top-16 z-40 hidden max-w-[18rem] sm:block"
       aria-hidden="true"
     >
       <div

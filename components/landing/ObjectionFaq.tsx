@@ -9,7 +9,7 @@ const FAQS: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is this only Lee and Collier counties?",
-    a: "The map covers Lee and Collier today. Answers and reports draw on data across six Southwest Florida counties, and coverage keeps widening.",
+    a: "The map and our own data run deepest in Lee and Collier today. When a report needs a figure beyond that, it fills from a named public source — or a document you hand us — and cites it either way. Never invented.",
   },
   {
     q: "Do I need a credit card?",

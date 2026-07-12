@@ -1,3 +1,37 @@
+## 2026-07-11 (Fable 5 · main) — Homepage one-site redesign BUILT + prod-build verified; commit local, push pending operator
+
+Operator: "Insiders/Desk/Guides all better than the homepage… make it all feel like one site; move/cut
+what we need; crawl4ai frontend research; work on the AI pill if you have to." Brainstormed (approaches
+A/B/C), operator picked **B + all recommended forks** (Get Access → "Build one free"/EMAIL_LAB_LANDING;
+Insiders capture on home; pill renamed "Ask AI" + no auto-open on `/`). Spec:
+`docs/superpowers/specs/2026-07-12-homepage-one-site-design.md` · check `homepage_one_site_live_verify` opened.
+
+**RULE 0.4 research (crawl4ai; files stay local):** NN/g homepage principles — primary nav prominent on
+the homepage, reveal content via REAL examples, no popups before value (flags our first-visit auto-open
+pill on `/`); NN/g consistency #4 (Jakob's Law, one pattern set); Julian Shapiro — Purchase Rate =
+Desire − (Labor + Confusion), descriptive-header litmus; Harry Dry — above-fold formula + "would this
+help me sell in person? If not, remove it"; hex.tech — live ticker + real product as hero visual.
+
+**Built (18 files):** ONE nav bar sitewide — HomeBar deleted, AppBar renders on `/` transparent→solid
+on scroll, identical tabs; dead `#waitlist` CTA killed in all 6 spots (4 nav → "Build one free" via
+EMAIL_LAB_LANDING import; 2 report SourcesGate → /login). Page spine 10 sections → 8: hero (untouched)
+→ NEW live wire (reuses insiders WireTicker + `.ins-wire`; pure builder `lib/landing/home-wire.ts`,
+5 bun tests; items disjoint from door tiles) → map (stats-bar removed) → NEW ProductDoors (data door =
+payload.stats live tiles → /desk; deliverables door = 3 REAL seed-preview webps → seedGalleryDestination
++ /showcase) → NEW InsidersBand (reuses InsidersCapture, `source="homepage-band"`, serif via one
+insiders.css) → guides → pricing → FAQ (**six-county overclaim fixed** → Lee+Collier + named-source
+fill) → final CTA. Parked (kept, unimported): ProofStrip/Capabilities/DeliverableShowcase/WeeklyReadCapture.
+Pill: label "Ask AI" everywhere (pill/panel/ticker/aria), `shouldAutoOpenPill` gains `home` (never
+auto-opens on `/`); DiscoveryTicker moved top-3→top-16 (rendered UNDER the transparent bar's CTA).
+
+**Gates:** touched suites 147/0 + new wire tests 5/5 · `bunx next build` ✓ ×2 · **prod-build driven**
+(next start + chrome-devtools): `/` desktop+mobile + `/desk` screenshots — product nav on home, wire
+scrolling LIVE figures (Naples ZHVI $641,887, rents), doors' live tiles + real webps, serif band,
+pill closed on first visit. Found + killed two ORPHANED `next start` servers (07/03 + 07/11!) that were
+serving the fresh `.next` on my probe ports — fingerprint-before-trust added to new
+`.claude/skills/verify/SKILL.md`. NOT pushed — operator diff-review; `get_access_dead_anchor` +
+`homepage_one_site_live_verify` close on deploy evidence.
+
 ## 2026-07-11 (Opus 4.8 · main) — TWO LIVE PRODUCTION OUTAGES found + fixed (MCP 500, PDF 500); root cause 6 named
 
 Asked to map where the work lands and validate `docs/audit/2026-07-11-open-issues-after-triage.md`.

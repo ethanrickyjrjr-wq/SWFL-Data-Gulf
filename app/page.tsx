@@ -2,17 +2,18 @@ import type { Metadata } from "next";
 import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
 import Hero from "@/components/landing/Hero";
 import HeroCampaign from "@/components/landing/HeroCampaign";
-import ProofStrip, { type ProofItem } from "@/components/landing/ProofStrip";
-import Capabilities from "@/components/landing/Capabilities";
-import DeliverableShowcase, {
-  type ShowcaseFigures,
-} from "@/components/landing/DeliverableShowcase";
+import ProductDoors from "@/components/landing/ProductDoors";
+import InsidersBand from "@/components/landing/InsidersBand";
 import GuidesStrip from "@/components/landing/GuidesStrip";
 import PricingStrip from "@/components/landing/PricingStrip";
-import WeeklyReadCapture from "@/components/landing/WeeklyReadCapture";
 import ObjectionFaq from "@/components/landing/ObjectionFaq";
+import { WireTicker } from "@/app/insiders/_components/wire-ticker";
+import { loadDeskStats } from "@/app/insiders/_lib/desk-stats";
+import { loadMetroTrend } from "@/lib/charts/load-metro-trend";
+import { buildHomeWire } from "@/lib/landing/home-wire";
 import { loadHomeMapData } from "@/lib/landing/load-home-map-data";
 import "@/components/landing/home-explorer.css";
+import "@/app/insiders/insiders.css";
 
 export const metadata: Metadata = {
   title: "SWFL Data Gulf — Your listing's marketing, built and sent for you",
@@ -20,59 +21,37 @@ export const metadata: Metadata = {
     "Type your next listing's address and pick a campaign — new listing, just sold, coming to market, or a market update. We build the emails and socials from live Southwest Florida data, every number sourced, and send them on your schedule. Free to build, no credit card.",
 };
 
-// Lane B Phase 1 (spec: docs/superpowers/specs/2026-07-03-homepage-rebuild-design.md).
-// Server component: the hero map + stats render from live lake rows loaded here
-// (hourly revalidate; per-metric fixture fallback keeps the page alive when the
-// lake isn't reachable). Section order per spec: hero → proof → personas →
-// showcase → pricing → weekly-read capture → FAQ → repeat CTA.
-// Parked (files kept, not imported): Waitlist (replaced by WeeklyReadCapture),
-// ComparisonSection, MCPInstall, Charts.
+// One-site spine (spec: docs/superpowers/specs/2026-07-12-homepage-one-site-design.md).
+// Server component: the wire + doors + map render from live lake rows loaded here
+// (hourly revalidate; each loader is empty-tolerant, so a degraded lake hides items
+// instead of inventing them). Section order: hero → live wire → map proof → two doors
+// (data / deliverables) → Insiders capture → guides → pricing → FAQ → repeat CTA.
+// Parked (files kept, not imported): ProofStrip + Capabilities + DeliverableShowcase +
+// WeeklyReadCapture (this page's capture is the Insiders band — operator pick
+// 07/12/2026), plus the older Waitlist, ComparisonSection, MCPInstall, Charts.
 export const revalidate = 3600;
 
 export default async function Home() {
-  const payload = await loadHomeMapData();
-  const { data, anySample } = payload;
+  const [payload, desk, zhvi, zori] = await Promise.all([
+    loadHomeMapData(),
+    loadDeskStats(),
+    loadMetroTrend("zhvi_pivoted"),
+    loadMetroTrend("zori_pivoted"),
+  ]);
 
-  const proofItems: ProofItem[] = anySample
-    ? []
-    : [
-        { name: "Zillow ZHVI", asOf: data.metrics.value?.asOf },
-        { name: "SWFL Data Gulf listings", asOf: data.metrics.activity?.asOf },
-        { name: "U.S. Census TIGER" },
-      ];
-
-  // Showcase preview figures: the highest-value mapped ZIP, live rows only.
-  let showcase: ShowcaseFigures | null = null;
-  const valueMetric = data.metrics.value;
-  if (valueMetric && !valueMetric.sample) {
-    const top = Object.entries(valueMetric.data).sort((a, b) => b[1] - a[1])[0];
-    if (top) {
-      const [zip, val] = top;
-      const usd = (n: number) =>
-        n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${Math.round(n / 1000)}K`;
-      const listings = data.metrics.activity?.sample ? undefined : data.metrics.activity?.data[zip];
-      const domDays = data.metrics.dom?.sample ? undefined : data.metrics.dom?.data[zip];
-      showcase = {
-        zip,
-        place: data.placeNames[zip] ?? zip,
-        value: usd(val),
-        listings: listings !== undefined ? listings.toLocaleString("en-US") : undefined,
-        dom: domDays !== undefined ? `${Math.round(domDays)} days` : undefined,
-        asOf: valueMetric.asOf,
-      };
-    }
-  }
+  // The wire carries the metro indices + news desk; the data door carries the desk
+  // headline stats — deliberately disjoint sets (see lib/landing/home-wire.ts).
+  const wire = buildHomeWire({ desk, zhvi, zori });
 
   return (
     <main className="home-explorer relative">
       <HeroCampaign />
+      <WireTicker items={wire.items} note={wire.note} />
       <Hero payload={payload} />
-      <ProofStrip items={proofItems} zipCount={Object.keys(data.placeNames).length} />
-      <Capabilities />
-      <DeliverableShowcase figures={showcase} />
+      <ProductDoors stats={payload.stats} />
+      <InsidersBand />
       <GuidesStrip />
       <PricingStrip />
-      <WeeklyReadCapture />
       <ObjectionFaq />
       <section className="final-cta">
         <h2 className="final-cta-headline">Every number sourced. Every send automatic.</h2>

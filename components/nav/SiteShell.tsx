@@ -2,14 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
 import { LoginModal } from "@/components/landing/LoginModal";
 import { revealBrandPanel } from "@/lib/brand/reveal-brand-panel";
-import { signedInLabArrival } from "@/lib/lab-entry/destination";
+import { signedInLabArrival, EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
 import {
   NAV_GROUPS,
   ACCOUNT_MENU,
@@ -23,16 +22,23 @@ import {
 } from "./nav-config";
 
 /**
- * THE one auth-aware navigation shell, mounted once in the root layout in place of
- * the old split (`Header` on `/` only + `GlobalNav` everywhere else — the split that
- * sealed home into an island, Root-cause R1). It reads the visitor's own session
- * client-side (same shape as the components it replaces; no new server PII surface)
- * and renders one of two variants:
- *   • HOME (`/`)         — premium transparent-over-hero bar (motion intro, scroll-to-
- *                          solid), marketing anchors + one app door, loud Get Access.
- *   • APP (every else)   — solid sticky bar with the primary NAV_GROUPS tabs + account.
+ * THE one auth-aware navigation shell, mounted once in the root layout. Since the
+ * homepage-one-site redesign (spec 2026-07-12-homepage-one-site-design.md) it renders
+ * ONE bar — the product tabs (NAV_GROUPS) — on every page INCLUDING `/`. The old split
+ * (marketing HomeBar on `/`, product AppBar elsewhere) hid Insiders/Desk/Guides from the
+ * front door and swapped nav identity on the first click (NN/g homepage principle 4.3:
+ * primary navigation belongs in a highly noticeable place; consistency heuristic #4).
+ *
+ * The homepage keeps its premium feel as a VISUAL variant only: on `/` the same bar is
+ * fixed + transparent over the hero and solidifies on scroll. Same tabs, same logo, same
+ * account cluster — one wayfinding grammar sitewide.
+ *
+ * The logged-out CTA is "Build one free" → EMAIL_LAB_LANDING (operator pick 07/12/2026;
+ * builds are free, login is captured at save/send). The old "Get Access" → #waitlist
+ * pointed at an anchor nothing renders (check `get_access_dead_anchor`).
+ *
  * It renders NOTHING on `SHELL_HIDDEN_PREFIXES` (white-label `/p/*`,`/embed/*` + the
- * auth screens). The marketing/app data + helpers live in ./nav-config (pure, tested);
+ * auth screens). The nav data + helpers live in ./nav-config (pure, tested);
  * re-exported below so the README seam resolves from "@/components/nav/SiteShell".
  */
 
@@ -46,7 +52,7 @@ export {
   isHiddenPath,
 } from "./nav-config";
 
-/** Sign the visitor out, then send them home. Shared by both variants. */
+/** Sign the visitor out, then send them home. */
 async function signOut() {
   const supabase = createClient();
   await supabase.auth.signOut();
@@ -79,247 +85,54 @@ export function SiteShell() {
 
   if (hidden) return null;
 
-  const isHome = pathname === "/";
   return (
     <>
-      {isHome ? (
-        <HomeBar user={user} onLogin={() => setLoginOpen(true)} />
-      ) : (
-        <AppBar user={user} pathname={pathname} onLogin={() => setLoginOpen(true)} />
-      )}
+      <AppBar
+        user={user}
+        pathname={pathname ?? "/"}
+        isHome={pathname === "/"}
+        onLogin={() => setLoginOpen(true)}
+      />
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </>
   );
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * HOME variant — the landing's premium bar preserved (was components/landing/Header).
- * Transparent over the hero, solidifies on scroll, motion intro. Marketing anchors +
- * ONE real app door ("Explore the Data" → /r) so the hero keeps its scroll-nav AND
- * gains a door into the product. Get Access stays the loudest element (revenue path).
- * ──────────────────────────────────────────────────────────────────────────── */
-function HomeBar({ user, onLogin }: { user: User | null; onLogin: () => void }) {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <header
-      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "border-b border-white/10 bg-black/70 backdrop-blur-xl"
-          : "border-b border-transparent bg-transparent"
-      }`}
-    >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-8">
-        <motion.div
-          initial={{ opacity: 0, x: -20, scale: 0.95, filter: "blur(8px)" }}
-          animate={{ opacity: 1, x: 0, scale: 1, filter: "blur(0px)" }}
-          transition={{ duration: 0.6, type: "spring", stiffness: 100, damping: 15 }}
-        >
-          <Link
-            href={homeHref(user)}
-            className="flex items-center gap-3"
-            aria-label="SWFL Data Gulf — home"
-          >
-            <Image src="/logo.png" alt="" width={44} height={44} className="rounded-xl" />
-            <span className="text-xl font-semibold tracking-tight text-white">SWFL Data Gulf</span>
-          </Link>
-        </motion.div>
-
-        <motion.nav
-          aria-label="Main"
-          initial={{ opacity: 0, x: 20, scale: 0.95, filter: "blur(8px)" }}
-          animate={{ opacity: 1, x: 0, scale: 1, filter: "blur(0px)" }}
-          transition={{ duration: 0.6, delay: 0.1, type: "spring", stiffness: 100, damping: 15 }}
-          className="hidden items-center gap-8 md:flex"
-        >
-          <ul className="flex items-center gap-8">
-            <li>
-              <HomeAnchor href="#comparison">How It Works</HomeAnchor>
-            </li>
-            <li>
-              <HomeAnchor href="#data">Live Data</HomeAnchor>
-            </li>
-            <li>
-              {/* The one app door off the marketing hero (R1 fix). */}
-              <Link
-                href="/r"
-                className="group relative font-medium text-teal-primary transition-colors hover:text-white"
-              >
-                Explore the Data
-                <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-teal-primary transition-all group-hover:w-full" />
-              </Link>
-            </li>
-          </ul>
-          {user ? (
-            <div className="flex items-center gap-3">
-              {/* Straight-to-cockpit door: a blank grid canvas, no project pick. */}
-              <Link
-                href={signedInLabArrival()}
-                className="btn-gradient rounded-xl px-5 py-2.5 text-sm font-medium text-navy-dark transition-all"
-              >
-                New Campaign
-              </Link>
-              <Link
-                href="/project"
-                className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10"
-              >
-                My Projects
-              </Link>
-              <button
-                type="button"
-                onClick={() => void signOut()}
-                className="text-sm text-gray-400 transition-colors hover:text-white"
-              >
-                Sign out
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={onLogin}
-                className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10"
-              >
-                Log In
-              </button>
-              <motion.a
-                href="#waitlist"
-                whileHover={{ scale: 1.05, y: -1 }}
-                whileTap={{ scale: 0.98 }}
-                className="btn-gradient rounded-xl px-6 py-2.5 font-medium text-navy-dark transition-all"
-              >
-                Get Access
-              </motion.a>
-            </div>
-          )}
-        </motion.nav>
-
-        <button
-          type="button"
-          className="p-2 text-white md:hidden"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen((o) => !o)}
-        >
-          <Hamburger open={mobileOpen} />
-        </button>
-      </div>
-
-      {mobileOpen && (
-        <nav
-          aria-label="Main"
-          className="flex flex-col gap-4 border-t border-white/10 bg-black/90 px-6 py-4 backdrop-blur-xl md:hidden"
-        >
-          <ul className="flex flex-col gap-4">
-            <li>
-              <Link
-                href="#comparison"
-                className="block text-gray-300 hover:text-white"
-                onClick={() => setMobileOpen(false)}
-              >
-                How It Works
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#data"
-                className="block text-gray-300 hover:text-white"
-                onClick={() => setMobileOpen(false)}
-              >
-                Live Data
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/r"
-                className="block font-medium text-teal-primary hover:text-white"
-                onClick={() => setMobileOpen(false)}
-              >
-                Explore the Data
-              </Link>
-            </li>
-          </ul>
-          <div className="border-t border-white/10 pt-3">
-            {user ? (
-              <div className="flex flex-col gap-3">
-                <Link
-                  href={signedInLabArrival()}
-                  className="btn-gradient block rounded-xl px-6 py-2.5 text-center font-medium text-navy-dark"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  New Campaign
-                </Link>
-                <Link
-                  href="/project"
-                  className="rounded-full border border-white/20 px-4 py-2 text-center text-sm font-medium text-white"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  My Projects
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => void signOut()}
-                  className="text-left text-sm text-gray-400 hover:text-white"
-                >
-                  Sign out
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    onLogin();
-                  }}
-                  className="w-full rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white"
-                >
-                  Log In
-                </button>
-                <a
-                  href="#waitlist"
-                  onClick={() => setMobileOpen(false)}
-                  className="btn-gradient block rounded-xl px-6 py-2.5 text-center font-medium text-navy-dark"
-                >
-                  Get Access
-                </a>
-              </div>
-            )}
-          </div>
-        </nav>
-      )}
-    </header>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
- * APP variant — the solid sticky bar (was components/nav/GlobalNav). Primary tabs
- * from NAV_GROUPS with aria-current; logged-in → an account disclosure (NOT a
- * role="menu" — MDN reserves that for app command menus, not nav links).
+ * The bar. Primary tabs from NAV_GROUPS with aria-current; logged-in → an account
+ * disclosure (NOT a role="menu" — MDN reserves that for app command menus, not nav
+ * links). On `/` (isHome) the bar is fixed + transparent over the hero and turns
+ * solid past 20px of scroll — the visual signature of the front door, on the same
+ * skeleton every other page uses.
  * ──────────────────────────────────────────────────────────────────────────── */
 function AppBar({
   user,
   pathname,
+  isHome,
   onLogin,
 }: {
   user: User | null;
   pathname: string;
+  isHome: boolean;
   onLogin: () => void;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const barRef = useRef<HTMLElement>(null);
 
   const closeAccount = useCallback(() => setAccountOpen(false), []);
   const closeExplore = useCallback(() => setExploreOpen(false), []);
+
+  // Home-only scroll solidify (listener sets state, not the effect body — the
+  // set-state-in-effect ban doesn't apply to event handlers).
+  useEffect(() => {
+    if (!isHome) return;
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isHome]);
 
   // Brand's local claim: a page already showing a brand editor takes the click
   // (opens + scrolls + pulses its own panel); otherwise fall through to the
@@ -331,9 +144,6 @@ function AppBar({
   }, []);
 
   // One outside-click / Escape listener for BOTH bar disclosures (account + Explore).
-  // Clicking inside the bar never closes via this path (barRef contains the target);
-  // opening one trigger explicitly closes the other (see the toggle handlers) so the
-  // two popovers can't stack open.
   const anyOpen = accountOpen || exploreOpen;
   useEffect(() => {
     if (!anyOpen) return;
@@ -358,11 +168,17 @@ function AppBar({
   const email = user?.email ?? "";
   const initial = (email[0] ?? "?").toUpperCase();
 
+  // Solid chrome everywhere; on home it starts transparent and earns the chrome
+  // on scroll (mobile menu open forces solid so the sheet never floats on glass).
+  const solid = "border-b border-white/10 bg-navy-dark/95 backdrop-blur-xl";
+  const barClass = isHome
+    ? `fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
+        scrolled || mobileOpen ? solid : "border-b border-transparent bg-transparent"
+      }`
+    : `sticky top-0 z-40 ${solid}`;
+
   return (
-    <header
-      ref={barRef}
-      className="sticky top-0 z-40 border-b border-white/10 bg-navy-dark/95 backdrop-blur-xl"
-    >
+    <header ref={barRef} className={barClass}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <div className="flex items-center gap-6">
           <Link
@@ -424,7 +240,7 @@ function AppBar({
                     </li>
                   );
                 }
-                // A leaf marquee (Charts / Showcase / Projects / Alerts).
+                // A leaf marquee (Insiders / Desk / Showcase / Projects / Charts / Maps / Alerts).
                 return (
                   <li key={item.href} className="relative">
                     <Link
@@ -519,11 +335,12 @@ function AppBar({
               >
                 Log In
               </button>
+              {/* Call-to-value, not "Get Access" (NN/g 4.1) — and a real destination. */}
               <Link
-                href="/#waitlist"
+                href={EMAIL_LAB_LANDING}
                 className="btn-gradient rounded-xl px-5 py-2 text-sm font-medium text-navy-dark"
               >
-                Get Access
+                Build one free
               </Link>
             </>
           )}
@@ -642,11 +459,11 @@ function AppBar({
                   Log In
                 </button>
                 <Link
-                  href="/#waitlist"
+                  href={EMAIL_LAB_LANDING}
                   onClick={() => setMobileOpen(false)}
                   className="btn-gradient rounded-xl px-5 py-2 text-center text-sm font-medium text-navy-dark"
                 >
-                  Get Access
+                  Build one free
                 </Link>
               </div>
             )}
@@ -660,25 +477,14 @@ function AppBar({
 /* ── small shared pieces ──────────────────────────────────────────────────── */
 
 /**
- * The "you-are-here" marker for the active app-bar tab: a static 2px teal underline.
+ * The "you-are-here" marker for the active bar tab: a static 2px teal underline.
  * Teal is the SYSTEM/brand color — the sentiment colors (mangrove/coral/gold) stay
  * reserved for data direction, so navigation never borrows them. Positioned against
- * the tab's own padding box (`inset-x-3` matches the tab's `px-3`), this is the
- * committed form of the hover-grown underline `HomeAnchor` uses, so the home bar and
- * the app bar share one wayfinding grammar.
+ * the tab's own padding box (`inset-x-3` matches the tab's `px-3`).
  */
 function ActiveMarker() {
   return (
     <span className="absolute inset-x-3 -bottom-1 h-0.5 rounded-full bg-teal-primary" aria-hidden />
-  );
-}
-
-function HomeAnchor({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link href={href} className="group relative text-gray-400 transition-colors hover:text-white">
-      {children}
-      <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-teal-primary transition-all group-hover:w-full" />
-    </Link>
   );
 }
 

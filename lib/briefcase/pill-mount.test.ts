@@ -138,29 +138,70 @@ describe("isAiChromeFree (clean reviewer/marketing pages — nav stays, AI goes)
 });
 
 describe("shouldAutoOpenPill (first-visit funnel pop, at most once, desktop only)", () => {
-  it("opens for a brand-new anonymous DESKTOP visitor on the standalone pill", () => {
+  it("opens for a brand-new anonymous DESKTOP visitor on a deep-entry page", () => {
     expect(
-      shouldAutoOpenPill({ firstVisit: true, authed: false, bridged: false, phone: false }),
+      shouldAutoOpenPill({
+        firstVisit: true,
+        authed: false,
+        bridged: false,
+        phone: false,
+        home: false,
+      }),
     ).toBe(true);
+  });
+  it("NEVER auto-opens on the homepage — the hero IS the funnel there (spec 2026-07-12)", () => {
+    expect(
+      shouldAutoOpenPill({
+        firstVisit: true,
+        authed: false,
+        bridged: false,
+        phone: false,
+        home: true,
+      }),
+    ).toBe(false);
   });
   it("NEVER auto-opens on a phone — the sheet would bury the page before first value", () => {
     expect(
-      shouldAutoOpenPill({ firstVisit: true, authed: false, bridged: false, phone: true }),
+      shouldAutoOpenPill({
+        firstVisit: true,
+        authed: false,
+        bridged: false,
+        phone: true,
+        home: false,
+      }),
     ).toBe(false);
   });
   it("stays closed for a returning visitor (visit counter already bumped)", () => {
     expect(
-      shouldAutoOpenPill({ firstVisit: false, authed: false, bridged: false, phone: false }),
+      shouldAutoOpenPill({
+        firstVisit: false,
+        authed: false,
+        bridged: false,
+        phone: false,
+        home: false,
+      }),
     ).toBe(false);
   });
   it("stays closed for a logged-in user even on a first visit (already past the funnel)", () => {
     expect(
-      shouldAutoOpenPill({ firstVisit: true, authed: true, bridged: false, phone: false }),
+      shouldAutoOpenPill({
+        firstVisit: true,
+        authed: true,
+        bridged: false,
+        phone: false,
+        home: false,
+      }),
     ).toBe(false);
   });
   it("never auto-opens the bridged report dock (reportId present)", () => {
     expect(
-      shouldAutoOpenPill({ firstVisit: true, authed: false, bridged: true, phone: false }),
+      shouldAutoOpenPill({
+        firstVisit: true,
+        authed: false,
+        bridged: true,
+        phone: false,
+        home: false,
+      }),
     ).toBe(false);
   });
 });

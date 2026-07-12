@@ -182,7 +182,7 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
   return (
     <div className="flex flex-col gap-3 text-sm text-[#f0ede6]">
       <div className="flex items-center justify-between">
-        <span className="font-semibold text-gulf-teal">AI + Briefcase</span>
+        <span className="font-semibold text-gulf-teal">Ask AI</span>
         <span className="text-[10px] text-gray-500">context-aware</span>
       </div>
 

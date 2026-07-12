@@ -10,9 +10,10 @@ import { readVisits, type PillPage } from "@/lib/briefcase/visits";
 import { shouldAutoOpenPill } from "@/lib/briefcase/pill-mount";
 
 /**
- * A-3 — the ONE unified "AI + Briefcase" pill. A single bottom-right button on
- * every page (replaces the per-/r/* AskAiFab + Briefcase tray), badge = draft count
- * from the root BriefcaseProvider.
+ * A-3 — the ONE unified "Ask AI" pill (labeled "AI + Briefcase" until the 07/12/2026
+ * one-site pass — Briefcase vocabulary now lives inside the panel). A single
+ * bottom-right button on every page (replaces the per-/r/* AskAiFab + Briefcase tray),
+ * badge = draft count from the root BriefcaseProvider.
  *
  * Mode (operator decision — Option 1, dock preserved):
  *  - BRIDGED (reportId present): AppShell mounts this once at the app root and passes the
@@ -53,9 +54,9 @@ export function AiBriefcasePill({
   const session = useSession();
   const count = briefcase?.draftItems.length ?? 0;
   const bridged = typeof reportId === "string" && reportId.length > 0;
-  // Inside a project the panel renders as the project assistant (no funnel), so the
-  // pill introduces itself as the AI — "Briefcase" is prospect-facing vocabulary.
-  const label = page.kind === "project" ? "Ask AI" : "AI + Briefcase";
+  // ONE label everywhere (07/12/2026 operator pick, spec 2026-07-12-homepage-one-site):
+  // "Ask AI" is plain user language; "Briefcase" vocabulary lives inside the panel.
+  const label = "Ask AI";
 
   const [open, setOpen] = useState(false);
   // One-shot guard so the funnel pop fires at most once per page load: right after it
@@ -75,7 +76,8 @@ export function AiBriefcasePill({
   if (!autoOpenResolved && session !== null) {
     setAutoOpenResolved(true);
     const phone = typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches;
-    if (shouldAutoOpenPill({ firstVisit, authed: session.authed, bridged, phone })) {
+    const home = page.kind === "home";
+    if (shouldAutoOpenPill({ firstVisit, authed: session.authed, bridged, phone, home })) {
       setOpen(true);
     }
   }
@@ -99,7 +101,7 @@ export function AiBriefcasePill({
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
-          aria-label={open ? "Close AI and Briefcase" : "Open AI and Briefcase"}
+          aria-label={open ? "Close Ask AI" : "Open Ask AI"}
           className="btn-gradient relative flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-navy-dark shadow-lg shadow-black/40 transition-transform hover:scale-105 active:scale-95"
         >
           <svg className="h-4 w-4 shrink-0" viewBox="0 0 512 512" fill="none" aria-hidden="true">
@@ -140,7 +142,7 @@ export function AiBriefcasePill({
       {open && !bridged && (
         <div
           role="dialog"
-          aria-label="AI and Briefcase"
+          aria-label="Ask AI"
           // PHONE: the sheet sits above the pill (z-57 > z-56) and spans the full
           // width, so it COVERS the Close pill — the always-visible header X below
           // is the sheet's own close (07/05/2026 fix; the panel had none). Cap at
@@ -153,7 +155,7 @@ export function AiBriefcasePill({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Close AI and Briefcase"
+              aria-label="Close Ask AI"
               className="absolute right-2 top-1.5 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
             >
               <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">

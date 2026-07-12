@@ -448,8 +448,10 @@ function SourcesGate({ sourceCount }: { sourceCount: number }) {
         ))}
       </div>
       <div className="px-4 pb-4 pt-2">
+        {/* A "Members only" gate is a login story — the old /#waitlist anchor pointed
+            at a section nothing renders (check get_access_dead_anchor). */}
         <Link
-          href="/#waitlist"
+          href="/login"
           className="inline-flex items-center gap-2 btn-gradient text-navy-dark px-5 py-2 rounded-lg text-sm font-semibold"
         >
           Get access to unlock sources

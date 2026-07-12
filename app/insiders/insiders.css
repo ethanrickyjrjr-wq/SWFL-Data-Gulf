@@ -805,3 +805,47 @@
     transition: none;
   }
 }
+
+/* ── Homepage band (components/landing/InsidersBand — spec 2026-07-12) ────
+   The flagship's grammar on the front door, from THIS one stylesheet: the band
+   wraps itself in `.insiders-page` so the serif/kicker/capture rules above
+   apply verbatim. Only the band-specific spacing lives here. */
+
+.ins-band {
+  padding: 4.5rem 1.5rem 5rem;
+  text-align: center;
+  border-top: 1px solid var(--gulf-slate);
+}
+.ins-band .ins-capture {
+  margin-left: auto;
+  margin-right: auto;
+}
+.ins-band-h {
+  font-family: var(--ins-serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin-top: 1.1rem;
+  text-wrap: balance;
+}
+.ins-band-sub {
+  margin: 1rem auto 0;
+  max-width: 36rem;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.72));
+}
+.ins-band-sub strong {
+  color: #fff;
+  font-weight: 600;
+}
+.ins-band-link {
+  margin-top: 1.4rem;
+  font-size: 0.85rem;
+}
+.ins-band-link a {
+  color: var(--gulf-teal);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -267,3 +267,36 @@
 .home-explorer .guides-strip-desc {flex:1;font-size:13px;line-height:1.5;color:var(--text-secondary);padding:6px 16px 0}
 .home-explorer .guides-strip-more {font-size:13px;font-weight:500;color:var(--gulf-teal);padding:10px 16px 16px}
 @media (max-width: 860px) {.home-explorer .guides-strip-cards {grid-template-columns:1fr}}
+
+/* ── Two doors: data + deliverables (spec 2026-07-12-homepage-one-site) ──
+   The data door's tiles reuse .stat-label/.stat-sub from the retired stats bar
+   (styles kept above); the LIVE badge reuses .ins-pulse from insiders.css,
+   which the page imports for the wire + band. */
+.home-explorer .doors {padding:72px 32px;background:var(--gulf-midnight);border-top:1px solid var(--gulf-slate)}
+.home-explorer .doors-grid {display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1120px;margin:40px auto 0}
+.home-explorer .door {display:flex;flex-direction:column;background:var(--gulf-deep);border:1px solid var(--gulf-slate);border-radius:14px;padding:26px 26px 24px}
+.home-explorer .door-head {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.home-explorer .door-kicker {font-family:var(--font-geist-mono),monospace;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-primary)}
+.home-explorer .door-live {display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(61,201,192,.4);border-radius:100px;padding:3px 10px;font-family:var(--font-geist-mono),monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gulf-teal)}
+.home-explorer .door-desc {font-size:14px;color:var(--text-secondary);line-height:1.65;margin-bottom:18px;max-width:52ch}
+.home-explorer .door-tiles {display:grid;grid-template-columns:repeat(3,1fr);gap:2px;border:1px solid var(--gulf-slate);border-radius:10px;overflow:hidden;margin-bottom:18px}
+.home-explorer .door-tile {background:var(--gulf-midnight);padding:14px 14px 12px}
+.home-explorer .door-tile-value {font-family:var(--font-geist-mono),monospace;font-size:22px;font-weight:600}
+.home-explorer .door-tile-tag {margin-top:4px;font-size:10px;color:var(--gulf-teal)}
+.home-explorer .door-previews {display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.home-explorer .door-preview {display:flex;flex-direction:column;gap:7px;text-decoration:none;color:inherit}
+.home-explorer .door-preview-art {position:relative;display:block;aspect-ratio:3/4;border:1px solid var(--gulf-slate-hi);border-radius:10px;overflow:hidden;background:#fff;transition:border-color .15s,transform .15s}
+.home-explorer .door-preview:hover .door-preview-art {border-color:var(--gulf-teal);transform:translateY(-2px)}
+.home-explorer .door-preview-img {object-fit:cover;object-position:top}
+.home-explorer .door-preview-name {font-size:12px;font-weight:500;color:var(--text-secondary);text-align:center}
+.home-explorer .door-preview:hover .door-preview-name {color:var(--text-primary)}
+.home-explorer .door-preview:focus-visible .door-preview-art {outline:2px solid var(--gulf-teal);outline-offset:2px}
+.home-explorer .door-caption {font-size:11px;color:var(--text-tertiary);margin-bottom:18px}
+.home-explorer .door-links {margin-top:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.home-explorer .door-more {font-size:13px;font-weight:500;color:var(--gulf-teal);text-decoration:none}
+.home-explorer .door-more:hover {text-decoration:underline}
+@media (max-width: 860px) {
+  .home-explorer .doors {padding:56px 20px}
+  .home-explorer .doors-grid {grid-template-columns:1fr}
+  .home-explorer .door-tiles {grid-template-columns:1fr 1fr}
+}
