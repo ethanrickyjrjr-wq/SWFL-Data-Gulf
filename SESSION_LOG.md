@@ -147,6 +147,26 @@ zones + zero `[config]`/raw-token leaks. Deferred WITH reasons → `docs/handoff
 filter tabs descoped — loader reshape). NOTE: `bun add cmdk` touched package.json/bun.lock claimed by a
 parallel session — verified only my cmdk line differs from HEAD, nothing clobbered. Committed local,
 NOT pushed (new dep + live surface = operator diff-review).
+## 2026-07-12 (Fable 5 · wt/dcd) — Phase 3c: doctor BUILT + first live run archived (72 datasets, 16R/26Y/30G, 62s)
+
+**Shipped (5 commits, `15961bdc..eb8c9587`).** `ingest/lib/prescriptions.py` (10-member shared enum,
+fix-text names its file, DOCTOR_ASSIGNABLE boundary; 16 tests) · `ingest/lib/gh_runs.py` (run-status
+domain, bulk+targeted-backfill so a monthly workflow is never a false NEVER_RAN; 11 tests) ·
+`ingest/scripts/doctor.py` (pure 4-signal join with the no-false-green volume rule [D-1: city_pulse
+countable→GATED_BY_ASSERT_LANDED green], content signal WIRED via run_content_contracts [D-2],
+prescribe() with UNKNOWN+evidence-never-invents, frozen --json contract for /census, advisory CLI;
+50 tests). Spec registered (`pipeline_doctor_live_verify` opened via new-build.mjs).
+
+**First live run (read-only, archived in verification/doctor-first-run.{md,json}):** 72 datasets,
+16 red / 26 yellow / 30 green, 62s (< the 2-min §10 budget), workflow joined 71/72, gh ok,
+manifest ok, content engine = value_tests+content_contracts. Every red carried a prescription or a
+failing contract — the §9 invariant held on live data.
+
+**HELD [ASK-FIRST]:** Task 10 (wire doctor into freshness-probe-daily.yml — widens live cron
+permissions to actions:read, D-8) · Task 12 (flip --fail-on red + fold the probe body).
+**Checks opened:** `pipeline_doctor_live_verify` · `doctor_rx_workflow_disabled_member` ·
+`doctor_rx_content_contract_member`.
+
 ## 2026-07-12 (Fable 5 · wt/dcd) — Phase 3a/3b: watch manifest + termination classifier BUILT; live watcher rewiring HELD
 
 **Shipped (3 commits, `fdc7252f` + `91b0dc90` + `001c2570`).** `scripts/lib/watch-manifest.mjs`
