@@ -43,6 +43,9 @@ import { GridCanvas, DEFAULT_H } from "./GridCanvas";
 import { BlockInspector } from "./BlockInspector";
 import { BLOCK_MENU } from "./AddBlockPanel";
 import { applyBrand } from "@/lib/email/brand/apply-brand";
+import { auditDocLinks, subjectListingUrl, type LinkAsk } from "@/lib/email/link-audit";
+import { brandWebsiteUrl } from "@/lib/email/inject-photo";
+import { LinkAskModal } from "./LinkAskModal";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { ScheduleSendModal } from "./ScheduleSendModal";
 import { ScheduleSocialModal } from "./ScheduleSocialModal";
@@ -261,6 +264,10 @@ export function EmailLabGridShell({
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   // The AI's last "what I just did" line, shown in the panel ("Built the whole email…").
   const [aiStatus, setAiStatus] = useState<string | null>(null);
+  // Post-build link asks: click-promising slots (labeled button / listing card /
+  // link-label) the build left with no destination. One dismissible modal; the
+  // send-time fallback ladder is the floor, so skipping is always safe.
+  const [linkAsks, setLinkAsks] = useState<LinkAsk[]>([]);
   // "Make this →" recipe flow (spec: 2026-07-03-email-lab-make-this-design.md):
   // the injected showcase recipe rides until its build fires, so the Build click
   // can guard the unfilled [[blank]] and run the brand-gap yes/no.
@@ -409,6 +416,7 @@ export function EmailLabGridShell({
           const normalized = normalizeAuthorHeights(applyBrand(parsed.data, brandTokens));
           commit(normalized);
           setSelectedId(null);
+          setLinkAsks(auditDocLinks(normalized));
           // A dedicated build path (e.g. Showing Prep) may carry its own explainer —
           // what this doc actually is, since that's not obvious from the prompt alone.
           setAiStatus(
@@ -489,7 +497,10 @@ export function EmailLabGridShell({
       };
       if (data.doc) {
         const parsed = EmailDocSchema.safeParse(data.doc);
-        if (parsed.success) commit(parsed.data);
+        if (parsed.success) {
+          commit(parsed.data);
+          setLinkAsks(auditDocLinks(parsed.data));
+        }
       }
       if (data.applied === false && data.message) setAiMessage(data.message);
       else if (data.chartNote) setAiMessage(data.chartNote);
@@ -1793,6 +1804,51 @@ export function EmailLabGridShell({
             setPhotopeaBlockId(null);
           }}
           onClose={() => setPhotopeaBlockId(null)}
+        />
+      )}
+
+      {linkAsks.length > 0 && (
+        <LinkAskModal
+          asks={linkAsks}
+          suggestions={[
+            ...(() => {
+              const l = subjectListingUrl(doc);
+              return l ? [{ label: "The listing page", url: l }] : [];
+            })(),
+            ...(() => {
+              const w = brandWebsiteUrl(doc);
+              return w ? [{ label: "Your website", url: w }] : [];
+            })(),
+            ...(() => {
+              const f = doc.blocks.find((b) => b.type === "footer");
+              const email = f && f.type === "footer" ? f.props.email : undefined;
+              return email ? [{ label: "Reply by email", url: `mailto:${email}` }] : [];
+            })(),
+          ]}
+          onApply={(answers) => {
+            // ONE commit for all answers — sequential per-block writes would each
+            // clone the same pre-modal doc and lose every write but the last.
+            const blocks = doc.blocks.map((b) => {
+              const mine = answers.filter((a) => a.ask.blockId === b.id);
+              if (mine.length === 0) return b;
+              if (b.type === "button") {
+                return { ...b, props: { ...b.props, url: mine[0].url } };
+              }
+              if (b.type === "listing") {
+                return { ...b, props: { ...b.props, linkUrl: mine[0].url } };
+              }
+              if (b.type === "multi-column") {
+                const byCol = new Map(mine.map((a) => [a.ask.columnIndex, a.url]));
+                const columns = (b.props.columns ?? []).map((c, i) =>
+                  byCol.has(i) ? { ...c, linkUrl: byCol.get(i) } : c,
+                );
+                return { ...b, props: { ...b.props, columns } };
+              }
+              return b;
+            });
+            commit({ ...doc, blocks });
+          }}
+          onClose={() => setLinkAsks([])}
         />
       )}
     </div>
