@@ -3,10 +3,10 @@
 // Email-safe: rows are a real <table> (no <ul> — bullet spacing is uneven across
 // clients). `lead` is a short bold prefix cell (a date tag, a rank); rows with no
 // lead span the full width. Renders nothing when items is empty.
-import { Section, Text } from "@react-email/components";
+import { Section, Text, Link } from "@react-email/components";
 import type { EmailGlobalStyle, ListProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
-import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
+import { isDarkBg, legibleAccent, legibleInk, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
 
 export function ListBlock({
   props,
@@ -76,6 +76,25 @@ export function ListBlock({
                 }}
               >
                 {item.text}
+                {item.linkUrl ? (
+                  <>
+                    {"  "}
+                    <Link
+                      href={item.linkUrl}
+                      style={{
+                        fontFamily: font,
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        color: onDark
+                          ? legibleAccent(globalStyle.accentColor, bg)
+                          : legibleInk(globalStyle.accentColor, bg, 4.5),
+                      }}
+                    >
+                      View →
+                    </Link>
+                  </>
+                ) : null}
               </td>
             </tr>
           ))}

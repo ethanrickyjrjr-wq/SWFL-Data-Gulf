@@ -190,6 +190,9 @@ export interface MultiColumnProps extends BlockBase {
 export interface ListItem {
   lead?: string;
   text: string;
+  /** Optional row click-through ("View →"). USER/ENGINE-owned like every link
+   *  field — no AI patch path exists for list items' linkUrl. */
+  linkUrl?: string;
 }
 
 /** A titled row list — events, tips, links-as-text. Renders as email-safe table

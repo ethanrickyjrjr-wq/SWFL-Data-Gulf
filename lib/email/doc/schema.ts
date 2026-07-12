@@ -151,6 +151,7 @@ const MultiColumnPropsSchema = z.object({
 const ListItemSchema = z.object({
   lead: z.string().max(24).optional(),
   text: z.string().max(200),
+  linkUrl: z.string().optional(),
 });
 
 const ListPropsSchema = z.object({

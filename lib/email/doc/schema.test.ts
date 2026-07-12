@@ -99,7 +99,11 @@ const fullDoc: EmailDoc = {
       props: {
         title: "Upcoming events",
         items: [
-          { lead: "JUL 12 ·", text: "Farmers market returns to the Cape" },
+          {
+            lead: "JUL 12 ·",
+            text: "Farmers market returns to the Cape",
+            linkUrl: "https://www.realtor.com/realestateandhomes-detail/x_M1-2",
+          },
           { text: "New flood-zone maps take effect" },
         ],
         paddingY: "sm",
