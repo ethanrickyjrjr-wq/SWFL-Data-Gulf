@@ -31,6 +31,26 @@ function expectClean(block: EmailBlock) {
   expect(html).not.toContain("data-placeholder");
 }
 
+describe("hero block", () => {
+  const b: EmailBlock = {
+    id: "h1",
+    type: "hero",
+    props: { kicker: "K", value: "$485K", label: "L", prose: "P" },
+  };
+  it("canvas paths", () => expect(pathsIn(b)).toEqual(["kicker", "value", "label", "prose"]));
+  it("server clean", () => expectClean(b));
+});
+
+describe("signal block", () => {
+  const b: EmailBlock = {
+    id: "sg1",
+    type: "signal",
+    props: { kicker: "K", title: "T", body: "B" },
+  };
+  it("canvas paths", () => expect(pathsIn(b)).toEqual(["kicker", "title", "body"]));
+  it("server clean", () => expectClean(b));
+});
+
 describe("text block", () => {
   const b: EmailBlock = { id: "t1", type: "text", props: { body: "Hello", align: "left" } };
   it("canvas: body is editable", () => expect(pathsIn(b)).toEqual(["body"]));

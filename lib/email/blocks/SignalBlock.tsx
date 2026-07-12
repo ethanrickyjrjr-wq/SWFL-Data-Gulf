@@ -3,13 +3,16 @@ import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, SignalProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
 import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function SignalBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: SignalProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const boxBg = props.bgColor ?? "#F0F9FA";
@@ -31,8 +34,13 @@ export function SignalBlock({
           padding: "16px 18px",
         }}
       >
-        {props.kicker ? (
-          <Text
+        {props.kicker || scope ? (
+          <EditableText
+            as={Text}
+            value={props.kicker ?? ""}
+            path="kicker"
+            scope={scope}
+            placeholder="Kicker"
             style={{
               fontFamily: font,
               fontSize: "11px",
@@ -44,12 +52,15 @@ export function SignalBlock({
               textTransform: "uppercase",
               margin: "0 0 6px",
             }}
-          >
-            {props.kicker}
-          </Text>
+          />
         ) : null}
-        {props.title ? (
-          <Text
+        {props.title || scope ? (
+          <EditableText
+            as={Text}
+            value={props.title ?? ""}
+            path="title"
+            scope={scope}
+            placeholder="Headline"
             style={{
               fontFamily: font,
               fontSize: "18px",
@@ -57,12 +68,16 @@ export function SignalBlock({
               color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
               margin: "0 0 6px",
             }}
-          >
-            {props.title}
-          </Text>
+          />
         ) : null}
-        {props.body ? (
-          <Text
+        {props.body || scope ? (
+          <EditableText
+            as={Text}
+            value={props.body ?? ""}
+            path="body"
+            scope={scope}
+            multiline
+            placeholder="What's the signal…"
             style={{
               fontFamily: font,
               fontSize: "14px",
@@ -70,9 +85,7 @@ export function SignalBlock({
               color: onDark ? ON_DARK_BODY : globalStyle.textColor,
               margin: 0,
             }}
-          >
-            {props.body}
-          </Text>
+          />
         ) : null}
       </Section>
     </Section>

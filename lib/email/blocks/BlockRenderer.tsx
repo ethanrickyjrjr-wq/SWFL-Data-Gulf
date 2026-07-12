@@ -46,11 +46,11 @@ export function BlockRenderer({
     case "header":
       return <HeaderBlock props={block.props} globalStyle={globalStyle} />;
     case "hero":
-      return <HeroBlock props={block.props} globalStyle={globalStyle} />;
+      return <HeroBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "stats":
       return <StatsBlock props={block.props} globalStyle={globalStyle} colPx={colPx} />;
     case "signal":
-      return <SignalBlock props={block.props} globalStyle={globalStyle} />;
+      return <SignalBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "text":
       return <TextBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "image":

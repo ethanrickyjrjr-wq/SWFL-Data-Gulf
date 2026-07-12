@@ -4,13 +4,16 @@ import type { EmailGlobalStyle, HeroProps } from "../doc/types";
 import { displayFontStack, fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
 import { DISPLAY_FONT_CLASS } from "./email-head";
 import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_MUTED, ON_DARK_TITLE } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function HeroBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: HeroProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const displayFont = displayFontStack(globalStyle);
@@ -30,8 +33,13 @@ export function HeroBlock({
         ...(clipping ? { borderLeft: `4px solid ${clipAccent}` } : {}),
       }}
     >
-      {props.kicker ? (
-        <Text
+      {props.kicker || scope ? (
+        <EditableText
+          as={Text}
+          value={props.kicker ?? ""}
+          path="kicker"
+          scope={scope}
+          placeholder="Kicker"
           style={{
             fontFamily: font,
             fontSize: "11px",
@@ -45,13 +53,16 @@ export function HeroBlock({
             // values/bottoms against its partner (operator flag 07/05/2026).
             ...(clipping ? { minHeight: "34px" } : {}),
           }}
-        >
-          {props.kicker}
-        </Text>
+        />
       ) : null}
-      {props.value ? (
-        <Text
+      {props.value || scope ? (
+        <EditableText
+          as={Text}
           className={DISPLAY_FONT_CLASS}
+          value={props.value ?? ""}
+          path="value"
+          scope={scope}
+          placeholder="$0"
           style={{
             fontFamily: displayFont,
             fontSize: "48px",
@@ -60,24 +71,31 @@ export function HeroBlock({
             color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
             margin: 0,
           }}
-        >
-          {props.value}
-        </Text>
+        />
       ) : null}
-      {props.label ? (
-        <Text
+      {props.label || scope ? (
+        <EditableText
+          as={Text}
+          value={props.label ?? ""}
+          path="label"
+          scope={scope}
+          placeholder="Label"
           style={{
             fontFamily: font,
             fontSize: "13px",
             color: onDark ? ON_DARK_MUTED : MUTED,
             margin: "6px 0 0",
           }}
-        >
-          {props.label}
-        </Text>
+        />
       ) : null}
-      {props.prose ? (
-        <Text
+      {props.prose || scope ? (
+        <EditableText
+          as={Text}
+          value={props.prose ?? ""}
+          path="prose"
+          scope={scope}
+          multiline
+          placeholder="Add a sentence…"
           style={{
             fontFamily: font,
             fontSize: "16px",
@@ -85,9 +103,7 @@ export function HeroBlock({
             color: onDark ? ON_DARK_BODY : globalStyle.textColor,
             margin: "14px 0 0",
           }}
-        >
-          {props.prose}
-        </Text>
+        />
       ) : null}
     </Section>
   );
