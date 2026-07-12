@@ -13,6 +13,21 @@ push; scope_fgcu_reri_charlotte closes on live evidence.
 Operator: the side-by-side boards left the card half-empty next to The Wire. `MoversBoard.tsx`
 wrapper drops `md:flex-row` — price-cuts board now stacks above new-listings (`gap-8`), filling the
 card's grid-stretched height. One-line class change, no data or logic touched.
+## 2026-07-12 (Fable 5 · wt/dcd → main) — DCD landed: watcher fleet 29→81, tripwire manifest-driven, TIMEOUT money guard, Locus A gate; doctor wired ADVISORY into the daily probe
+
+Operator: "do it" (land wt/dcd + the doctor gating flip). Landed the 5 held commits — rebased clean
+onto origin/main (`26802169`; zero file overlap with the sibling Charlotte re-scope `d264e548` or the
+daily rebuild): watcher trigger lists regenerated from the manifest (29/82 → 81 logger / 79 healer)
++ CI drift guard · tripwire reads the manifest (paid false-positive dead, hardcoded dark list dead,
+4 zombie crons surfaced) · cancelled/timed_out scheduled runs admitted + `classifyTermination`
+(TIMEOUT never auto-retries — money guard; UNKNOWN_CANCEL still opens an incident) · Locus A
+contract gate on `listing_lifecycle` upsert_state. Verified post-rebase: 125/0 node:test
+(.github/scripts + scripts/lib incl. the drift guard) + 4/0 pytest contract gate. Task 10 (P3c):
+doctor wired into `freshness-probe-daily.yml` as an ADVISORY step — `permissions:` widened with
+`actions: read` (explicit block = unspecified scopes NONE), `GH_TOKEN` injected,
+`python -m ingest.scripts.doctor --cron` between the data-quality and source-liveness steps;
+drift test 4/0 after the edit. The gating flip (T12, operator-approved) goes in the NEXT push once
+a live dispatch shows `gh: ok`; the 3d probe-body fold was NOT approved and is untouched.
 
 ## 2026-07-11 (Fable 5 · main) — Charlotte re-scope COMMITTED (56910dfe, isolated worktree); push + Group-A rebuilds await the operator's word
 
