@@ -14,6 +14,8 @@ on:
 
 permissions:
   contents: read
+  actions: read # doctor's run-status domain: `gh run list` / `gh workflow list` 403 without it.
+  # With an explicit permissions block, unspecified scopes default to NONE.
 
 jobs:
   probe:
@@ -50,6 +52,19 @@ jobs:
           else
             python -m ingest.scripts.check_data_quality
           fi
+
+      # doctor — one health line per dataset: worst of {freshness, volume, content, run-status}
+      # + a prescription. Imports check_freshness + check_data_quality (does not re-query) and
+      # joins the gh run-status domain over `gh`. ADVISORY: exits 0 always; --fail-on red is
+      # the deliberate, separately-approved flip. Read-only — writes no row and no ledger entry.
+      - name: doctor (pipeline health — advisory)
+        if: always()
+        env:
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python -m ingest.scripts.doctor --cron
 
       # UPSTREAM source-liveness. The two probes above read the DATABASE ("did we write
       # lately") — they are structurally blind to a source that has silently started
