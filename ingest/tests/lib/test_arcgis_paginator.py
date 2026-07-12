@@ -5,10 +5,13 @@ F1 = {"type": "Feature", "geometry": None, "properties": {"id": 1}}
 F2 = {"type": "Feature", "geometry": None, "properties": {"id": 2}}
 
 
-def _resp(features, status=200):
+def _resp(features, exceeded=False, status=200):
+    # Real ArcGIS servers set exceededTransferLimit=true on every page that has
+    # more rows behind it; paginate_arcgis stops the walk when the flag is absent
+    # or false (bcd26d79 — same contract the tabular tests below pin).
     r = MagicMock()
     r.status_code = status
-    r.json.return_value = {"features": features}
+    r.json.return_value = {"features": features, "exceededTransferLimit": exceeded}
     r.raise_for_status = MagicMock()
     return r
 
@@ -22,15 +25,24 @@ class TestPaginateArcgis:
 
     def test_stops_on_empty_page(self):
         from ingest.lib.arcgis_paginator import paginate_arcgis
-        with patch("requests.get", side_effect=[_resp([F1, F2]), _resp([])]):
+        with patch("requests.get", side_effect=[_resp([F1, F2], exceeded=True), _resp([])]):
             results = list(paginate_arcgis(FAKE_URL, page_size=2))
         assert len(results) == 2
 
     def test_paginates_multiple_full_pages(self):
         from ingest.lib.arcgis_paginator import paginate_arcgis
-        with patch("requests.get", side_effect=[_resp([F1, F2]), _resp([F1])]):
+        with patch("requests.get", side_effect=[_resp([F1, F2], exceeded=True), _resp([F1])]):
             results = list(paginate_arcgis(FAKE_URL, page_size=2))
         assert len(results) == 3
+
+    def test_stops_when_transfer_limit_not_exceeded(self):
+        from ingest.lib.arcgis_paginator import paginate_arcgis
+        # A full page WITHOUT the flag is the last page — the 2-of-3 bug this
+        # suite was red on for 8 weeks is now the pinned behavior.
+        with patch("requests.get", return_value=_resp([F1, F2])) as mock_get:
+            results = list(paginate_arcgis(FAKE_URL, page_size=2))
+        assert len(results) == 2
+        assert mock_get.call_count == 1
 
     def test_includes_bbox_in_params(self):
         from ingest.lib.arcgis_paginator import paginate_arcgis
