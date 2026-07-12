@@ -54,6 +54,27 @@ the gating exit code never fires) + stale ADVISORY comments updated. The 3d prob
 NOT DONE (separate approval; check_freshness/check_data_quality report bodies + their ledger syncs
 untouched). Verify: post-push dispatch must conclude `failure` (16 reds today) with the doctor step
 as the failing step, not a timeout kill.
+## 2026-07-12 (Fable 5 · main) — Narrative PDF path BUILT: doc-report skin for every shape + unpdf serverless reader (awaiting operator push)
+
+The 17-of-37 narrative-shape PDF gap (check `narrative_deliverable_no_pdf_path`) closed at the
+route layer, per the operator-approved spec (`docs/superpowers/specs/2026-07-12-pdf-narrative-path-design.md`,
+plan committed alongside): `/p/[id]/print` drops its email-only 422 and renders EVERY narrative
+template through the existing doc-report skin (block-canvas with a parseable doc 307s to its bytes
+route); `GET /api/deliverables/[id]/pdf` 307s docless rows to the print skin — the 422 is retired,
+every live id yields a PDF-shaped outcome, only revoked/trashed/missing 404. The two redirects
+branch on the SAME `EmailDocSchema.safeParse(doc)` predicate in opposite directions, so they can
+never cycle (both loop directions test-pinned). Reader: `pdf-parse` → `unpdf@1.6.2` (serverless
+PDF.js build, loads without DOMMatrix on Vercel — crawl4ai-verified) inside `parsePdfText`, same
+null-degrade contract; TDD caught that pdfjs v5 REJECTS a Node Buffer (and Buffer passes
+`instanceof Uint8Array`) — re-wrapped as a bare Uint8Array view; writer→reader round-trip test +
+no-eager-pdfjs guard extended to unpdf. Commits `4a0a721a` (reader) · `392ca24b` (print route) ·
+`5e2297f3` (pdf GET). Gates: 31/0 across lib/pdf + both route suites · `bunx next build` ✓.
+De-scoped, stated: PDF attachments stay block-canvas-only; /p/[id] page buttons untouched.
+Next (operator): push → prod probes (narrative id 307→print 200; block-canvas id `%PDF`) → close
+`narrative_deliverable_no_pdf_path` + `pdf_narrative_path_live_verify` on that evidence. The
+extraction fallback lane can't be forced live without a Claude failure — its evidence is the
+round-trip unit test + the serverless build loading; recorded honestly, not overclaimed.
+
 ## 2026-07-12 (Fable 5 · main) — viz-archetypes SPEC: generalize the 5 showcase viz templates (brainstormed, registered, spec committed)
 
 Operator asked whether the showcase "Visual templates" cards can take any data-that-goes-together
