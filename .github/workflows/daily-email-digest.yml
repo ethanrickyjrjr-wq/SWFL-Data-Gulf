@@ -92,6 +92,19 @@ jobs:
             done
           fi
 
+      # The freshness preflight (scripts/email/freshness-preflight.mts) exits 1
+      # rather than send a digest built on a stale master. That is the ALERT —
+      # surface it. The HC heartbeat below is if: always() and only catches
+      # "the cron never fired", never "it fired and refused".
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { GITHUB_RUN_ID, GITHUB_REPOSITORY } = process.env;
+            const runUrl = `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
+            core.warning(`Daily digest FAILED or REFUSED (stale master?). Check: ${runUrl}`);
+
       - name: Healthchecks.io heartbeat
         if: always()
         run: |

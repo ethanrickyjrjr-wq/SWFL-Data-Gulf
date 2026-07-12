@@ -6,6 +6,7 @@ import type { DigestPayload, EmailLog, MetricDelta, ZipMetricSnapshot } from "./
 import { ZIP_FOCUS } from "./types.ts";
 import { fetchDigestData } from "./fetch-digest-data.mts";
 import { readMostRecentLog, writeLog, isTodayAlreadySent, getNextIssueNumber } from "./log-io.mts";
+import { assertMasterFreshToday, StaleMasterError } from "./freshness-preflight.mts";
 import { DigestEmail } from "./DigestEmail.tsx";
 
 // Threshold constants — sourced in EMAIL.md SOURCED THRESHOLDS
@@ -180,6 +181,17 @@ function buildDeltaText(current: DigestPayload, prevLog: EmailLog | null): strin
 
 async function main() {
   const today = new Date().toISOString().slice(0, 10);
+
+  // FRESHNESS PREFLIGHT (spec §8). Runs BEFORE the idempotency guard: a refusal
+  // must not consume the day's send slot, burn an issue number, or write a log.
+  // The red run IS the alert (see the Notify-on-failure step in the workflow).
+  try {
+    assertMasterFreshToday(today);
+  } catch (err) {
+    if (!(err instanceof StaleMasterError)) throw err;
+    console.error(`[DIGEST REFUSED] ${err.message}`);
+    process.exit(1);
+  }
 
   // Idempotency guard (EMAIL.md Rule 8)
   if (isTodayAlreadySent(today)) {
