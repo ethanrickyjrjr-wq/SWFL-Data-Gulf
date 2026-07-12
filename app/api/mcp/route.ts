@@ -1,6 +1,6 @@
 import { createMcpHandler } from "mcp-handler";
 import { buildMcpServer } from "./server";
-import { assertAuthorized } from "./auth";
+import { unauthorizedResponse } from "./auth";
 import { buildReportIdList } from "./inventory";
 
 /**
@@ -103,12 +103,14 @@ export async function GET(): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  await assertAuthorized(request);
+  const denied = await unauthorizedResponse(request);
+  if (denied) return denied;
   return handler(request);
 }
 
 export async function DELETE(request: Request): Promise<Response> {
-  await assertAuthorized(request);
+  const denied = await unauthorizedResponse(request);
+  if (denied) return denied;
   return handler(request);
 }
 

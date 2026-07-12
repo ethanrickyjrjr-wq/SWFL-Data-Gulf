@@ -1,4 +1,4 @@
-import { assertAuthorized } from "@/app/api/mcp/auth";
+import { unauthorizedResponse } from "@/app/api/mcp/auth";
 import {
   renderHtmlTemplate,
   InvalidSlugError,
@@ -51,7 +51,8 @@ export async function GET(request: Request): Promise<Response> {
  * Returns text/html with `Content-Disposition: inline`. PDF is v2 (stub below).
  */
 export async function POST(request: Request): Promise<Response> {
-  await assertAuthorized(request); // throws Response(401) when configured + bad
+  const denied = await unauthorizedResponse(request); // 401 when configured + bad token
+  if (denied) return denied;
 
   const body = (await request.json().catch(() => null)) as {
     slug?: unknown;
