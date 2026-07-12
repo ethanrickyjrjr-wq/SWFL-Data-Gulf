@@ -595,7 +595,7 @@ pipelines:
     # web_search current-events capture for the SWFL cities; distilled into
     # data_lake.city_pulse (Tier-2) and read by the city-pulse-swfl brain.
     # First run: <fill on first successful GHA run>.
-    note: "RE-ENABLED 07/05/2026 in weekly cost mode (operator: build data cheaply pre-launch): cron Wednesday 09:00 UTC, distill on Haiku, capture stays Sonnet web_search. At launch: daily cadence + freshness_sla 2/4. DONE 07/12/2026: daily via nightly-chain.yml, SLA 2/4 (check city_pulse_sla_tighten)."
+    note: "RE-ENABLED 07/05/2026 in weekly cost mode (operator: build data cheaply pre-launch). RETROFIT 07/07/2026: capture = crawl4ai-fed news lake (data_lake.news_articles_swfl; zero paid web_search), distill = one claude-sonnet-4-6 call per city WITH matched content, rows written deterministically by distill.py (psycopg). DONE 07/12/2026: daily via nightly-chain.yml, SLA 2/4 (check city_pulse_sla_tighten)."
     source_scope:
       confirmed_total:
         summary: "13 named SWFL cities scanned daily: Lehigh Acres, Cape Coral, Fort Myers, Naples, Estero, Bonita Springs, Fort Myers Beach, Sanibel, North Fort Myers, Marco Island, East Naples, North Naples, Golden Gate"
