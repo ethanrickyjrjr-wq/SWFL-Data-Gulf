@@ -18,6 +18,7 @@ import type { ColumnSpec, ConcoctionDef, ConcoctionRow, DefaultBlockSpec } from 
 import { evaluateGuards } from "./guards";
 import { formatValue } from "./format";
 import { buildChartBlock } from "./chart-block";
+import { getConcoction } from "./registry";
 
 export interface MaterializeDeps {
   sb: unknown;
@@ -239,4 +240,93 @@ export async function materializeLoad(
     });
   }
   return { blocks, asOf };
+}
+
+/** A binding that can't be re-run: missing, foreign-versioned, unknown def, or
+ *  params the def's CURRENT schema rejects. Callers keep the baked values and
+ *  flag "can't refresh" — degrade, never break the doc. */
+export class BindingUnrefreshable extends Error {}
+
+async function rematerialize(
+  block: EmailBlock,
+  targetType: EmailBlock["type"],
+  newParams: Record<string, string | number>,
+  deps: MaterializeDeps,
+): Promise<EmailBlock> {
+  const binding = block.binding;
+  if (!binding) throw new BindingUnrefreshable("block has no binding");
+  if (binding.v !== BINDING_VERSION) {
+    throw new BindingUnrefreshable(`binding version ${binding.v} != ${BINDING_VERSION}`);
+  }
+  if (binding.lane !== "lake" || !binding.concoctionId) {
+    throw new BindingUnrefreshable(`lane ${binding.lane} is not re-loadable from the registry`);
+  }
+  const def = getConcoction(binding.concoctionId);
+  if (!def) throw new BindingUnrefreshable(`unknown dataset ${binding.concoctionId}`);
+
+  let parsed: Record<string, string | number>;
+  try {
+    parsed = def.params.parse({ ...binding.params, ...newParams }) as Record<
+      string,
+      string | number
+    >;
+  } catch (e) {
+    throw new BindingUnrefreshable(
+      `params no longer valid for ${def.id}: ${e instanceof Error ? e.message : String(e)}`,
+    );
+  }
+
+  const rows = await def.load(deps.sb, parsed);
+  if (rows.length === 0) throw new BindingUnrefreshable(`${def.id}: no rows`);
+  const asOf = def.asOf(rows);
+  const spec: DefaultBlockSpec = {
+    type: targetType,
+    slice: binding.slice,
+    layout: block.layout ?? { x: 0, y: 0, w: 12, h: 4 },
+  };
+
+  let rebuilt: EmailBlock | null = null;
+  if (targetType === "image" && chartAllowed(def, rows, spec)) {
+    try {
+      rebuilt = await buildChartBlock(
+        def,
+        rows,
+        spec,
+        { asOf, hostPng: deps.hostPng, ids: () => block.id },
+        parsed,
+      );
+    } catch {
+      rebuilt = mapSliceToBlock(def, rows, spec, () => block.id);
+    }
+  } else {
+    rebuilt = mapSliceToBlock(def, rows, spec, () => block.id);
+  }
+  if (!rebuilt)
+    throw new BindingUnrefreshable(`${def.id}: slice no longer renders as ${targetType}`);
+
+  return {
+    ...rebuilt,
+    id: block.id,
+    layout: block.layout ? { ...block.layout } : rebuilt.layout,
+    binding: { ...binding, params: parsed, slice: binding.slice, asOf },
+  } as EmailBlock;
+}
+
+/** rebind: same block, new params — values follow, identity/layout/slice stay. */
+export async function rebindBlock(
+  block: EmailBlock,
+  newParams: Record<string, string | number>,
+  deps: MaterializeDeps,
+): Promise<EmailBlock> {
+  return rematerialize(block, block.type, newParams, deps);
+}
+
+/** turn-into: same binding, different block type (Notion semantics — nothing
+ *  is lost; data the new shape doesn't use is simply set aside). */
+export async function turnIntoBlock(
+  block: EmailBlock,
+  newType: EmailBlock["type"],
+  deps: MaterializeDeps,
+): Promise<EmailBlock> {
+  return rematerialize(block, newType, {}, deps);
 }
