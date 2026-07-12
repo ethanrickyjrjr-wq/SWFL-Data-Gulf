@@ -17,6 +17,9 @@ import argparse
 import sys
 from datetime import date
 
+from ingest.lib.guards import ContentContractError
+from ingest.quality.contracts import evaluate_batch
+
 from . import db
 from .constants import COUNTY_LOCATIONS, swfl_zip_counties
 from .resources import fetch_market_details, fetch_price_histogram, intended_call_counts
@@ -60,6 +63,32 @@ def run_details(*, dry_run: bool = False, today: str | None = None) -> dict:
         if res["row"]:
             rows.append(res["row"])
         calls += res["calls"]
+    # ── LOCUS A: content contracts on the whole-batch details load. ─────────────────────
+    # THE ONLY clean whole-batch site of the three loci: run_details accumulates `rows` across
+    # every ZIP and merges ONCE, so the contamination SHARE here really is a share of the whole
+    # load — which is what the abort model assumes. (listing_lifecycle merges per county by
+    # design, so its abort has per-county semantics.)
+    #
+    # policy is `report`: the band drops NOTHING. Withholding a ZIP row changes what
+    # market-temperature-swfl ships (47 ZIPs instead of 49) — a live-surface change, ask-first.
+    # Check: market_details_band_quarantine_flip.
+    #
+    # The abort path is for a vendor UNITS FLIP (sold_to_rent_ratio annual -> monthly): the whole
+    # fleet goes out of band at once — share+count trips at full scale, if_no_clean_rows backstops
+    # a 100%-flipped partial batch under the count floor — and the run STOPS rather than landing
+    # ~49 uninterpretable ratios behind a green cron.
+    # No gate on run_histogram: listing_price_histogram_swfl carries no content contract.
+    rows, quarantined, cstats = evaluate_batch(rows, _DET_TABLE)
+    if cstats["abort"]:
+        raise ContentContractError(cstats["abort_reason"])
+    for c in cstats["contracts"]:
+        if c["status"] != "PASS":
+            print(f"[contract] {c['name']} {c['status']} — {c['violations']} of "
+                  f"{c['in_scope']} in-scope ({c['share_pct']}%) policy={c['policy']}"
+                  + (f" detail={c['detail']}" if c.get("detail") else ""), flush=True)
+    if quarantined:
+        print(f"[contract] QUARANTINED {len(quarantined)} ZIP rows — merging the clean "
+              f"{len(rows)}", flush=True)
     n = db.upsert(_DET_TABLE, _DET_COLS, _DET_CONFLICT, rows, dry_run=dry_run)
     intended = intended_call_counts()["details"]
     print(f"[budget] details = {calls if not dry_run else intended} housing-market-details calls "
