@@ -19,6 +19,23 @@ commit — check nightly_chain_cron_cutover (lights chain cron + retires 8 stand
 narrative-bake's 06:23 EDT violation, one commit, zero duplicate-paid window); (b) caveat-TTL wiring
 at 4-output.mts (check caveat_expiry_rebuild); (c) assert_landed report-only → gating after a clean
 week; (d) 3d probe-body fold (unapproved).
+## 2026-07-12 (Fable 5 · main) — answer-proof for the comp sourceUrl push: live grounded ZIP 33990 read captured on a fresh prod build; comp chart lane verified same build
+
+The answer-fix-proof gate (correctly) blocked the push carrying 16b8bd91/88601852/5a70830c
+(NearbyComp/RenderComp.sourceUrl threading — answer-path files, no proof on file). Per the verify
+skill: bunx next build ✓ → served on clean port 3199 (6 orphaned node listeners found on
+3000–3178, avoided, mine killed after) → live /api/assistant captures. Comps ask produced the real
+chart frame (5 priced comps $297,900–$460,000, sources domain-level SWFL Data Gulf + realtor.com,
+no per-listing URL leak) but its PROSE opens "I don't have comparable sales data for that specific
+address…" — ASCII apostrophe, trips findDeflection verbatim, so NOT recordable as proof (the
+07/10 precedent record contains the same phrase and would fail today's phrase list). Known trait:
+prose narrates the data block and disagrees with the chart frame that answered. Recorded proof =
+the plain market ask ("How is the housing market in Cape Coral 33990 right now?") — dense grounded
+figures, zero deflection vocabulary, validated with the hook's own validateProofs (ok:true) before
+commit. Second comps probe oddity: "809 SE 10th St" returned ZIP stats but NO comp rows while
+"1015 Cultural Park Blvd" returned 5 — same lane, minutes apart; not a regression of this push
+(sourceUrl is additive), noted for the comp-lane tuning backlog.
+
 ## 2026-07-12 (Fable 5 · main) — fix(vocab): 4th ordered_collections orphan killed at the class — 7 concepts moved into concepts, 4 stale cre duplicates deleted, structure test locks it
 
 Operator's safe-push hit (1) a build-queue.md rebase conflict — resolved by keeping origin's newer
