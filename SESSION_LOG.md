@@ -149,6 +149,11 @@ parallel session — verified only my cmdk line differs from HEAD, nothing clobb
 NOT pushed (new dep + live surface = operator diff-review).
 ## 2026-07-12 (Fable 5 · wt/dcd) — BUILD COMPLETE (autonomous scope): data-contracts+doctor, 8 phases, 37 commits — checkpoint handed to operator
 
+ALLOW_PAID_SURFACE=1 override recorded for this push: check-no-new-paid-surface flagged
+scripts/lib/watch-manifest.mjs's three ANTHROPIC_API_KEY mentions — they are the `paid:`
+DETECTOR regex (secrets-context match powering the never-auto-retry money guard) plus two
+comments; no client, no call, no spend. Detection-only surface, deliberately added.
+
 Every phase of `docs/superpowers/plans/2026-07-11-data-contracts-doctor-tdd.md` that could be built
 without touching a live surface is DONE and verified: Phase 0 (CI unred) · Spine · Phase 1 (Locus B
 live-baselined) · Phase 2 (real registry GREEN through the identity gate; Gate 7 proven blocking) ·
