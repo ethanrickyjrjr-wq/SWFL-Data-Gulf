@@ -147,4 +147,11 @@ describe("EmailDocEmail renderer (Task 20 acceptance)", () => {
       expect(html.length).toBeGreaterThan(100);
     }
   });
+
+  it("sendable HTML carries zero canvas-edit artifacts", async () => {
+    const html = (await render(EmailDocEmail({ doc: ALL_BLOCKS_DOC }))).toLowerCase();
+    expect(html).not.toContain("contenteditable");
+    expect(html).not.toContain("data-edit-path");
+    expect(html).not.toContain("data-placeholder");
+  });
 });

@@ -1,6 +1,7 @@
 // lib/email/blocks/BlockRenderer.tsx — PURE. Switch on block.type → component.
 // Shared by the canvas DOM view AND the server render() export. No "use client".
 import type { EmailBlock, EmailGlobalStyle } from "../doc/types";
+import type { EditCommit, EditScope } from "./editable-text";
 import { HeaderBlock } from "./HeaderBlock";
 import { HeroBlock } from "./HeroBlock";
 import { StatsBlock } from "./StatsBlock";
@@ -24,6 +25,7 @@ export function BlockRenderer({
   globalStyle,
   colPx,
   emailRender,
+  edit,
 }: {
   block: EmailBlock;
   globalStyle: EmailGlobalStyle;
@@ -33,7 +35,13 @@ export function BlockRenderer({
   /** True on the sendable-HTML paths (EmailDocRenderer, compile-grid) — canvas-only
    *  affordances (empty-state placeholders) must not reach a recipient. */
   emailRender?: boolean;
+  /** Canvas-editing hook (GridCanvas passes it; server callers never do).
+   *  Present → adopted components render their text via EditableText. */
+  edit?: { commit: EditCommit };
 }) {
+  const scope: EditScope | undefined = edit
+    ? { blockId: block.id, commit: edit.commit }
+    : undefined;
   switch (block.type) {
     case "header":
       return <HeaderBlock props={block.props} globalStyle={globalStyle} />;
@@ -44,7 +52,7 @@ export function BlockRenderer({
     case "signal":
       return <SignalBlock props={block.props} globalStyle={globalStyle} />;
     case "text":
-      return <TextBlock props={block.props} globalStyle={globalStyle} />;
+      return <TextBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "image":
       return <ImageBlock props={block.props} globalStyle={globalStyle} />;
     case "listing":

@@ -3,13 +3,16 @@ import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, TextProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
 import { isDarkBg, ON_DARK_BODY } from "./on-dark";
+import { EditableText, type EditScope } from "./editable-text";
 
 export function TextBlock({
   props,
   globalStyle,
+  scope,
 }: {
   props: TextProps;
   globalStyle: EmailGlobalStyle;
+  scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const bg = props.sectionBg ?? CARD_BG;
@@ -21,8 +24,14 @@ export function TextBlock({
         borderBottom: `1px solid ${BORDER}`,
       }}
     >
-      {props.body ? (
-        <Text
+      {props.body || scope ? (
+        <EditableText
+          as={Text}
+          value={props.body ?? ""}
+          path="body"
+          scope={scope}
+          multiline
+          placeholder="Write your message…"
           style={{
             fontFamily: font,
             fontSize: "16px",
@@ -32,9 +41,7 @@ export function TextBlock({
             margin: 0,
             whiteSpace: "pre-line",
           }}
-        >
-          {props.body}
-        </Text>
+        />
       ) : null}
     </Section>
   );
