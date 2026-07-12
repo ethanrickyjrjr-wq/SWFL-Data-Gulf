@@ -50,7 +50,11 @@ def test_parse_steadyapi_parses_permalink_and_photo():
     assert r["photo_url"].endswith(".webp")
     assert r["list_price"] == 374900
     assert r["beds"] == 4
-    assert r["property_type"] == "single_family"  # has beds -> a home, not land
+    # No type_hint -> honest "other" (4114768b: /search rows carry NO type field;
+    # the type comes from the build_type_lookup sweep, never invented from beds).
+    assert r["property_type"] == "other"
+    hinted = parse_steadyapi(_STEADYAPI_ROW, city="Cape Coral", state="FL", type_hint="single_family")
+    assert hinted["property_type"] == "single_family"
     assert r["days_on_market"] is None            # SteadyAPI gives no list date / DOM
 
 
@@ -210,13 +214,17 @@ def test_fetch_steadyapi_no_key_is_a_gap():
 
 def test_scan_county_api_labels_counts_and_reports_call_budget(monkeypatch):
     monkeypatch.setenv("PHOTOS_API", "p")
-    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True, 1, None)):
+    # Both seams mocked: 1 unfiltered page + 4 type-sweep pages per city. The budget
+    # line must report REAL pages spent — type sweeps included (4114768b), or the
+    # $1-cap accounting undercounts by 4x.
+    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True, 1, None)), \
+         patch.object(extract_api, "build_type_lookup", return_value=({}, 4)):
         out = extract_api.scan_county_api("Lee", known_ids={"5493101642"})
     assert out["count"] >= 1
     assert out["exhausted"] is True
     assert out["last_status"] == 200
     assert all(r["county"] == "Lee" for r in out["rows"])
-    assert out["search_calls"] == len(extract_api.SWFL_CITY_SEED["Lee"])  # 1 page/city, mocked
+    assert out["search_calls"] == len(extract_api.SWFL_CITY_SEED["Lee"]) * (1 + 4)
     assert out["enrich_calls"] == 0                  # the one row is already in known_ids
 
 
@@ -237,12 +245,15 @@ def test_scan_county_api_truncated_city_marks_incomplete(monkeypatch):
 
 def test_scan_county_api_dry_run_never_calls_nearby_home_values(monkeypatch):
     # The regression this whole fix targets: a --dry-run invocation must not detonate the budget.
+    # dry_run DELIBERATELY still fires the cheap search + type sweeps (scan_county_api docstring —
+    # the gate needs the real page count); the invariant is the EXPENSIVE seam: /nearby-home-values
+    # enrich must never fire.
     monkeypatch.setenv("PHOTOS_API", "p")
     with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True, 1, None)), \
          patch.object(extract_api.requests, "get") as mock_get:
         extract_api.scan_county_api("Lee", known_ids=set(), dry_run=True)
-    mock_get.assert_not_called()                     # fetch_steadyapi_city is mocked out above;
-                                                       # this proves enrich made no real request either
+    enrich_urls = [c.args[0] for c in mock_get.call_args_list if "nearby-home-values" in str(c.args[0])]
+    assert enrich_urls == []
 
 
 def test_fetch_steadyapi_city_returns_four_tuple_with_total(monkeypatch):

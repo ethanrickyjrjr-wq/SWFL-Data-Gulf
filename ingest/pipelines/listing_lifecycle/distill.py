@@ -238,17 +238,24 @@ def append_transitions(
 
 def log_source_total(value: int, source_label: str, *, dry_run: bool = False) -> None:
     """Insert one row into data_lake.source_totals — the source's own current-total claim, read by
-    /ops/census to detect silent ingestion drift (Task 11 of the pipeline-data-census plan)."""
+    /ops/census to detect silent ingestion drift (Task 11 of the pipeline-data-census plan).
+
+    Loud-but-SOFT on failure: this is an observability ledger, not the pipeline's data — a missing
+    table (migration not yet applied) or a transient write error must never fail a nightly leg
+    whose upserts/transitions already committed."""
     if dry_run:
         print(f"[dry-run] would log source_total={value} ({source_label})", flush=True)
         return
-    with _get_conn() as conn, conn.cursor() as cur:
-        cur.execute(
-            "INSERT INTO data_lake.source_totals (pipeline_name, source_label, value, method) "
-            "VALUES (%s, %s, %s, %s)",
-            ("listing_lifecycle", source_label, value, "api_meta_total"),
-        )
-        conn.commit()
+    try:
+        with _get_conn() as conn, conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO data_lake.source_totals (pipeline_name, source_label, value, method) "
+                "VALUES (%s, %s, %s, %s)",
+                ("listing_lifecycle", source_label, value, "api_meta_total"),
+            )
+            conn.commit()
+    except Exception as e:  # noqa: BLE001 — any ledger failure is warn-and-continue by design
+        print(f"[warn] source_totals write failed ({source_label}): {e}", flush=True)
 
 
 def load_price_pending_solds(
