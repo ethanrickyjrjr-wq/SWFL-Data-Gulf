@@ -79,8 +79,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   // No model key (offline/dev) → Claude vision is unavailable, but a text-layer
-  // PDF can still be read with zero API cost via pdf-parse. Try that first; only
-  // image-only / unreadable PDFs fall through to "skipped".
+  // PDF can still be read with zero API cost via the text-layer fallback (unpdf).
+  // Try that first; only image-only / unreadable PDFs fall through to "skipped".
   if (agentsAreMocked()) {
     try {
       const sr = createServiceRoleClient();
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             extracted_text: fb.text,
             extraction_status: "done",
           });
-          return NextResponse.json({ status: "done", via: "pdf-parse" });
+          return NextResponse.json({ status: "done", via: "text-layer" });
         }
       }
     } catch {
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   await patchItemById(supabase, id, itemId, { extraction_status: "processing" });
 
   // Held outside the try so the downloaded bytes survive into the catch, where
-  // the zero-cost pdf-parse text-layer fallback can reuse them.
+  // the zero-cost text-layer fallback (unpdf) can reuse them.
   let pdfBytes: Buffer | null = null;
 
   try {
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           extracted_text: fb.text,
           extraction_status: "done",
         });
-        return NextResponse.json({ status: "done", via: "pdf-parse" });
+        return NextResponse.json({ status: "done", via: "text-layer" });
       }
     }
     const reason = err instanceof Error ? err.message : "extraction failed";

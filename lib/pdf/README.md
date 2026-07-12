@@ -63,9 +63,14 @@ Do not re-litigate these from memory; they were read from the installed SDK/type
   (Helvetica / Times-Roman) — `EmailDocPdf` maps the doc font family onto those.
 - **react-pdf@10.4.1** → bundles **pdfjs-dist@5.4.296**. Worker file is
   `pdfjs-dist/build/pdf.worker.min.mjs` (ESM). Browser-only.
-- **pdf-parse@2.4.5**: import `{ PDFParse } from "pdf-parse"` (the **main** export —
-  `pdf-parse/node` only exports `getHeader`). `new PDFParse({ data: bytes })` (field
-  is `data`, not `buffer`); `getText() → { text, pages, total }`; call `destroy()`.
+- **unpdf@1.6.2**: the text-layer reader (replaced `pdf-parse` 07/12/2026). Bundles a
+  SERVERLESS build of PDF.js (v5.6.205 — browser refs stripped, worker inlined), so it
+  loads without `DOMMatrix` on Vercel. Surface: `getDocumentProxy(data: Uint8Array) →
+  Promise<PDFDocumentProxy>`; `extractText(pdf, { mergePages: true }) → { totalPages,
+  text: string }`; free via `pdf.destroy()`. **pdfjs v5 REJECTS a Node `Buffer`**
+  ("provide binary data as `Uint8Array`") — re-wrap as a bare Uint8Array view first;
+  `instanceof Uint8Array` alone waves Buffers through. Verified in-session:
+  https://github.com/unjs/unpdf
 
 ## Invariants
 

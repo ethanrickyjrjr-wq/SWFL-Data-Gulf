@@ -38,7 +38,7 @@ function hasStaticImportOf(source: string, spec: string): boolean {
 }
 
 describe("lib/pdf — the writer never statically loads the reader", () => {
-  const BROWSER_ONLY = ["pdf-parse", "pdfjs-dist"];
+  const BROWSER_ONLY = ["unpdf", "pdf-parse", "pdfjs-dist"];
 
   it("the @/lib/pdf barrel reaches real files (guard is not vacuous)", () => {
     const files = barrelReachableFiles();
@@ -53,9 +53,9 @@ describe("lib/pdf — the writer never statically loads the reader", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("extract.ts still uses pdf-parse — lazily, inside the function", () => {
+  it("extract.ts still uses unpdf — lazily, inside the function", () => {
     const src = readFileSync(join(PDF_DIR, "extract.ts"), "utf8");
-    expect(hasStaticImportOf(src, "pdf-parse")).toBe(false);
-    expect(src).toContain('await import("pdf-parse")');
+    expect(hasStaticImportOf(src, "unpdf")).toBe(false);
+    expect(src).toContain('await import("unpdf")');
   });
 });

@@ -2,33 +2,24 @@
 //
 // Used by /api/projects/[id]/extract-pdf when Claude vision fails or is skipped.
 // Claude is still primary (it handles scanned/image-only PDFs that have no text
-// layer); pdf-parse catches text-layer PDFs that Claude missed, at no token cost.
+// layer); the text-layer read catches PDFs Claude missed, at no token cost.
 //
-// Vendor surface verified IN-SESSION against the installed package (RULE 0.4):
-//  • `PDFParse` is the MAIN export — NOT `pdf-parse/node` (that subpath only
-//    exports `getHeader`). Confirmed: require('pdf-parse').PDFParse is a function.
-//  • Constructor takes LoadParameters → the binary field is `data` (NOT `buffer`),
-//    accepting Buffer/Uint8Array/ArrayBuffer; a Node Buffer is converted to
-//    Uint8Array automatically.
-//  • getText() → TextResult { text: string; pages: PageTextResult[]; total: number }.
-//  • destroy() frees the worker — always call it.
+// Engine: `unpdf` (unjs) — its bundled PDF.js is a SERVERLESS build (browser-specific
+// references stripped, worker inlined), so unlike the stock `pdfjs-dist` that
+// `pdf-parse` pulled in, it loads without DOMMatrix/ImageData/Path2D and therefore
+// works in the Vercel serverless Node runtime. Verified in-session against the
+// installed package + https://github.com/unjs/unpdf (RULE 0.4).
 //
 // LOADED LAZILY, ON PURPOSE — do not hoist this back to a module-scope import.
-// `pdf-parse` pulls in `pdfjs-dist`, which needs browser graphics globals
-// (`DOMMatrix`, `ImageData`, `Path2D`) and an optional `@napi-rs/canvas`. None of
-// those exist in the Vercel serverless Node runtime, so merely *loading* the module
-// there throws `ReferenceError: DOMMatrix is not defined`. Because `lib/pdf/index.ts`
-// re-exports this file, a module-scope import made every importer of the "@/lib/pdf"
-// barrel load pdfjs — including the two routes that only *write* PDFs and never read
-// one. That took PDF download (`/api/deliverables/[id]/pdf`) and PDF-attached blasts
-// (`.../blast`) to a hard 500 in production while every local test passed, since Node
-// on a dev box happens to have the globals. Reading a PDF is the only thing that needs
-// pdfjs; pay for it inside the one function that reads.
+// `lib/pdf/index.ts` re-exports this file, and two routes behind that barrel only
+// ever WRITE PDFs; a module-scope reader import is dead bundle weight for them and
+// once took prod down when the reader couldn't load at all (see
+// lib/pdf/__tests__/no-eager-pdfjs.test.ts — the guard that keeps this invariant).
 
 export interface PdfTextResult {
   /** Concatenated document text (trimmed, non-empty). */
   text: string;
-  /** Page count, from TextResult.total. */
+  /** Page count, from extractText's totalPages. */
   pages: number;
 }
 
@@ -39,23 +30,28 @@ export interface PdfTextResult {
 export async function parsePdfText(
   data: ArrayBuffer | Uint8Array | Buffer,
 ): Promise<PdfTextResult | null> {
-  // The Vercel serverless runtime can't load pdfjs at all (no DOMMatrix) — an
-  // environment that can't read PDFs degrades to null like an unreadable PDF,
-  // instead of throwing from inside callers' catch blocks (extract-pdf route
-  // calls this as its OWN error fallback).
-  const mod = await import("pdf-parse").catch(() => null);
+  const mod = await import("unpdf").catch(() => null);
   if (!mod) return null;
-  const { PDFParse } = mod;
-  const bytes = data instanceof Uint8Array ? data : new Uint8Array(data as ArrayBuffer);
-  const parser = new PDFParse({ data: bytes });
+  // pdfjs v5 REJECTS a Node Buffer outright ("Please provide binary data as
+  // `Uint8Array`, rather than `Buffer`") — and Buffer IS a Uint8Array subclass,
+  // so a plain instanceof check waves it through. Re-wrap as a bare Uint8Array
+  // view (no copy) whenever the prototype isn't exactly Uint8Array.
+  const bytes =
+    data instanceof Uint8Array
+      ? Object.getPrototypeOf(data) === Uint8Array.prototype
+        ? data
+        : new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
+      : new Uint8Array(data as ArrayBuffer);
+  let pdf: Awaited<ReturnType<typeof mod.getDocumentProxy>> | null = null;
   try {
-    const res = await parser.getText();
-    const text = res.text?.trim() ?? "";
-    if (!text) return null;
-    return { text, pages: res.total };
+    pdf = await mod.getDocumentProxy(bytes);
+    const { totalPages, text } = await mod.extractText(pdf, { mergePages: true });
+    const trimmed = text.trim();
+    if (!trimmed) return null;
+    return { text: trimmed, pages: totalPages };
   } catch {
     return null;
   } finally {
-    await parser.destroy().catch(() => {});
+    await pdf?.destroy().catch(() => {});
   }
 }
