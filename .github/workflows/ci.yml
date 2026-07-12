@@ -35,7 +35,7 @@ jobs:
       # dot-dirs and these are node:test, not bun:test — so they need their own step
       # or they ship unenforced.
       - name: Test .github scripts (node:test)
-        run: node --test .github/scripts/*.test.mjs scripts/lib/*.test.mjs
+        run: node --test .github/scripts/*.test.mjs scripts/lib/*.test.mjs .claude/hooks/*.test.mjs
 
       # Dead-code detector (Operation July task 20). PHASE 1: REPORT-ONLY — knip.jsonc
       # sets rules.files to "warn", so this exits 0 and only prints the candidate orphan

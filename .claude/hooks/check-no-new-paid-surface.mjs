@@ -28,6 +28,7 @@
 // Fail-OPEN on internal/git errors — a broken guard must never wedge the agent.
 
 import { execSync } from "node:child_process";
+import { resolvePushCwd } from "./push-context.mjs";
 
 const BANNER = "=".repeat(72);
 const MARKER =
@@ -45,20 +46,23 @@ let raw = "";
 process.stdin.setEncoding("utf8");
 process.stdin.on("data", (c) => (raw += c));
 process.stdin.on("end", () => {
-  let cmd = "";
+  let payload;
   try {
-    cmd = String(JSON.parse(raw || "{}")?.tool_input?.command ?? "");
+    payload = JSON.parse(raw || "{}");
   } catch {
     process.exit(0);
   }
+  const cmd = String(payload?.tool_input?.command ?? "");
   if (!isPush(cmd)) process.exit(0);
   if (/\bALLOW_PAID_SURFACE=1\b/.test(cmd)) process.exit(0);
 
   let diff = "";
   try {
+    // Judge the repo the push targets (worktree pushes — see push-context.mjs).
     diff = execSync("git diff origin/main...HEAD --unified=0", {
       encoding: "utf8",
       maxBuffer: 64 * 1024 * 1024,
+      cwd: resolvePushCwd(payload),
     });
   } catch {
     process.exit(0); // fail open — e.g. no origin/main yet

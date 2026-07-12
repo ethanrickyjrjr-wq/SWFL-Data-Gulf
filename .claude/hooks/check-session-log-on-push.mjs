@@ -4,6 +4,7 @@
 // session to leave a breadcrumb before pushing.
 
 import { execSync } from "node:child_process";
+import { resolvePushCwd } from "./push-context.mjs";
 
 let raw = "";
 process.stdin.setEncoding("utf8");
@@ -19,6 +20,7 @@ process.stdin.on("end", () => {
   if (!isGitPush(cmd)) {
     process.exit(0);
   }
+  REPO_CWD = resolvePushCwd(payload);
 
   // Determine the comparison base: upstream if it exists, else origin/main.
   let base = "";
@@ -91,8 +93,12 @@ function isGitPush(cmd) {
   return /(^|\s|&&|;|\|\|)\s*git\s+push(\s|$)/.test(cmd) || /safe-push(\.mjs)?\b/.test(cmd);
 }
 
+// Set from the push command itself — a worktree push checks THAT repo's
+// SESSION_LOG state, not the main checkout's (see push-context.mjs).
+let REPO_CWD = process.cwd();
+
 function sh(c) {
-  return execSync(c, { stdio: ["ignore", "pipe", "ignore"] })
+  return execSync(c, { stdio: ["ignore", "pipe", "ignore"], cwd: REPO_CWD })
     .toString()
     .trim();
 }

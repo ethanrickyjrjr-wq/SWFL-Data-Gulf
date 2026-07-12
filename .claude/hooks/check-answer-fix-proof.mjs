@@ -31,6 +31,7 @@
 
 import { execSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { resolvePushCwd } from "./push-context.mjs";
 
 const BANNER = "=".repeat(72);
 const PROOF_LEDGER = "verification/answer-proofs.jsonl";
@@ -248,8 +249,12 @@ export function validateProofs(proofs, nowMs) {
   };
 }
 
+// Set from the push command itself (worktree pushes are judged in THEIR repo,
+// never against the main checkout's unpushed foreign commits — see push-context.mjs).
+let REPO_CWD = process.cwd();
+
 function sh(c) {
-  return execSync(c, { stdio: ["ignore", "pipe", "ignore"] })
+  return execSync(c, { stdio: ["ignore", "pipe", "ignore"], cwd: REPO_CWD })
     .toString()
     .trim();
 }
@@ -263,6 +268,7 @@ function main(raw) {
   }
   const cmd = String(payload?.tool_input?.command ?? "");
   if (!isGitPush(cmd)) process.exit(0);
+  REPO_CWD = resolvePushCwd(payload);
 
   // Comparison base: upstream if set, else origin/main. Mirrors the other hooks.
   let base = "";

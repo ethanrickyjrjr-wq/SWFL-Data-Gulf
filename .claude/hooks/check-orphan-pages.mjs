@@ -16,6 +16,7 @@
 
 import { execSync } from "node:child_process";
 import { resolve } from "node:path";
+import { resolvePushCwd } from "./push-context.mjs";
 
 const BANNER = "=".repeat(72);
 
@@ -31,6 +32,7 @@ process.stdin.on("end", () => {
   }
   const cmd = String(payload?.tool_input?.command ?? "");
   if (!isGitPush(cmd)) process.exit(0);
+  REPO_CWD = resolvePushCwd(payload);
 
   // Deliberate operator opt-in → allow (and log it).
   if (/\bALLOW_ORPHAN_PAGE=1\b/.test(cmd)) {
@@ -108,15 +110,19 @@ function isGitPush(cmd) {
   return /(^|\s|&&|;|\|\|)\s*git\s+push(\s|$)/.test(cmd) || /safe-push(\.mjs)?\b/.test(cmd);
 }
 
+// Set from the push command itself — a worktree push is judged in THAT repo
+// (see push-context.mjs).
+let REPO_CWD = process.cwd();
+
 function sh(c) {
-  return execSync(c, { stdio: ["ignore", "pipe", "ignore"] })
+  return execSync(c, { stdio: ["ignore", "pipe", "ignore"], cwd: REPO_CWD })
     .toString()
     .trim();
 }
 
 function run(c) {
   try {
-    const out = execSync(c, { stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" });
+    const out = execSync(c, { stdio: ["ignore", "pipe", "pipe"], encoding: "utf8", cwd: REPO_CWD });
     return { ran: true, code: 0, out };
   } catch (err) {
     if (typeof err?.status !== "number") {

@@ -15,6 +15,7 @@
 // by the other pre-push gates in this repo).
 
 import { execSync } from "node:child_process";
+import { resolvePushCwd } from "./push-context.mjs";
 
 const DEFER_RE =
   /\bdefer(?:red|ral)?\b|\bparked\b|CONFIRM-DEFER|graduation-time work|not (?:fixed|resolved|addressed) here|leaving? for later|\bpunted?\b/i;
@@ -38,6 +39,7 @@ process.stdin.on("end", () => {
   if (process.env.ALLOW_DEFER_WITHOUT_CHECK === "1") {
     process.exit(0);
   }
+  REPO_CWD = resolvePushCwd(payload);
 
   let base = "";
   try {
@@ -117,8 +119,12 @@ function isGitPush(cmd) {
   return /(^|\s|&&|;|\|\|)\s*git\s+push(\s|$)/.test(cmd) || /safe-push(\.mjs)?\b/.test(cmd);
 }
 
+// Set from the push command itself — a worktree push is judged in THAT repo
+// (see push-context.mjs).
+let REPO_CWD = process.cwd();
+
 function sh(c) {
-  return execSync(c, { stdio: ["ignore", "pipe", "ignore"] })
+  return execSync(c, { stdio: ["ignore", "pipe", "ignore"], cwd: REPO_CWD })
     .toString()
     .trim();
 }

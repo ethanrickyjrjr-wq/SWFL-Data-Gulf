@@ -41,6 +41,7 @@
 //   • Runs alongside check-session-log-on-push.mjs; both must pass.
 
 import { execSync } from "node:child_process";
+import { resolvePushCwd } from "./push-context.mjs";
 
 const BANNER = "=".repeat(72);
 
@@ -71,6 +72,7 @@ process.stdin.on("end", () => {
   }
   const cmd = String(payload?.tool_input?.command ?? "");
   if (!isGitPush(cmd)) process.exit(0);
+  REPO_CWD = resolvePushCwd(payload);
 
   // Comparison base: upstream if set, else origin/main. Mirrors the session-log hook.
   let base = "";
@@ -338,8 +340,12 @@ function isGitPush(cmd) {
   return /(^|\s|&&|;|\|\|)\s*git\s+push(\s|$)/.test(cmd) || /safe-push(\.mjs)?\b/.test(cmd);
 }
 
+// Set from the push command itself — worktree pushes get gated in THEIR repo
+// (see push-context.mjs), and the gates' test commands run there too.
+let REPO_CWD = process.cwd();
+
 function sh(c) {
-  return execSync(c, { stdio: ["ignore", "pipe", "ignore"] })
+  return execSync(c, { stdio: ["ignore", "pipe", "ignore"], cwd: REPO_CWD })
     .toString()
     .trim();
 }
@@ -351,6 +357,7 @@ function run(c) {
     const out = execSync(c, {
       stdio: ["ignore", "pipe", "pipe"],
       encoding: "utf8",
+      cwd: REPO_CWD,
     });
     return { ran: true, code: 0, out };
   } catch (err) {
