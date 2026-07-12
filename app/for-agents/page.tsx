@@ -73,9 +73,8 @@ export default function ForAgentsPage() {
           Southwest Florida market intelligence you can stand behind.
         </h1>
         <p className="mt-4 text-lg text-neutral-600 dark:text-neutral-300">
-          A member-only workspace for licensed agents in Lee, Collier, Charlotte, Sarasota, Glades,
-          and Hendry counties. Every number is computed in code and tied to its source — nothing is
-          estimated or invented by an AI.
+          A member-only workspace for licensed agents across Southwest Florida. Every number is
+          computed in code and tied to its source — nothing is estimated or invented by an AI.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-4">
           <Link
@@ -158,7 +157,8 @@ export default function ForAgentsPage() {
           </Link>
         </div>
         <p className="mt-6 text-sm text-neutral-500">
-          Serving Lee, Collier, Charlotte, Sarasota, Glades, and Hendry counties.
+          We cover Lee and Collier County in depth — and fill wider Southwest Florida asks from
+          named sources.
         </p>
       </section>
     </PageShell>

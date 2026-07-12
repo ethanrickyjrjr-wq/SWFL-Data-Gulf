@@ -523,7 +523,7 @@ function buildCoverageCaveats(
     .filter((n): n is string => Boolean(n));
   const phrase = cats.length ? ` (e.g. ${cats.slice(0, 3).join(", ")})` : "";
   return [
-    `${county} County is inside our six-county footprint and the ${coveredCount} ` +
+    `${county} County is inside our Southwest Florida coverage and the ${coveredCount} ` +
       `read${coveredCount === 1 ? "" : "s"} above cover it, but some data sets${phrase} ` +
       `hold Lee/Collier data only and don't extend to ${county} yet — they're left ` +
       `out rather than guessed.`,

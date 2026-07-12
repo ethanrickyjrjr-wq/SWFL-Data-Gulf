@@ -47,7 +47,7 @@ export default function ReportIndexPage() {
         </div>
       </section>
 
-      <ReportFooter note="We cover the six-county Southwest Florida footprint — Lee, Collier, Charlotte, Glades, Hendry, and Sarasota." />
+      <ReportFooter note="We cover Lee and Collier County in depth — and fill wider Southwest Florida asks from named sources." />
     </ReportShell>
   );
 }
