@@ -202,3 +202,126 @@ def test_enum_flags_a_raw_vendor_token_a_bypassed_normalizer_would_land():
 
 def test_enum_null_is_a_violation_when_allow_null_false():
     assert enum_violations([_row(property_type=None)], None, _PTYPE_ENUM) == [0]
+
+
+# ── evaluate_batch: purity, policy, abort math ─────────────────────────────────
+
+from ingest.quality.contracts import evaluate_batch, load_contracts  # noqa: E402
+
+_REG_REPORT = {"tables": {"t": {"content_contracts": [
+    {"name": "floor", "type": "range", "locus": "both", "policy": "report", "severity": "error",
+     "col": "p", "min": 100, "where": [],
+     "abort_if": {"share_pct_gt": 5.0, "violations_gte": 25, "if_no_clean_rows": True}},
+]}}}
+
+_REG_QUARANTINE = {"tables": {"t": {"content_contracts": [
+    {"name": "allow", "type": "enum", "locus": "both", "policy": "quarantine", "severity": "error",
+     "col": "k", "allowed": ["a"], "allow_null": False, "where": [],
+     "abort_if": {"share_pct_gt": 50.0, "violations_gte": 500, "if_no_clean_rows": True}},
+]}}}
+
+
+def test_report_policy_drops_nothing_but_counts_everything():
+    """Correction #2, encoded: a price floor is a SIGNAL, not a licence to drop rows.
+    Real manufactured-home SALES run continuously from $2,000 to $59,900 — no floor
+    separates them from rent artifacts, so `report` must never remove a row."""
+    rows = [{"p": 50}, {"p": 500}]
+    clean, quarantined, stats = evaluate_batch(rows, "t", registry=_REG_REPORT)
+    assert clean == rows and quarantined == []
+    c = stats["contracts"][0]
+    assert (c["violations"], c["in_scope"], c["status"]) == (1, 2, "VIOLATIONS")
+    assert c["share_pct"] == pytest.approx(50.0)
+    assert stats["abort"] is False  # 1 violation < violations_gte 25
+
+
+def test_quarantine_policy_removes_offenders_and_merges_the_clean_rest():
+    rows = [{"k": "a"}, {"k": "condos"}, {"k": "a"}]
+    clean, quarantined, stats = evaluate_batch(rows, "t", registry=_REG_QUARANTINE)
+    assert clean == [{"k": "a"}, {"k": "a"}]
+    assert quarantined == [{"k": "condos"}]
+    assert (stats["rows_in"], stats["rows_clean"], stats["rows_quarantined"]) == (3, 2, 1)
+    assert stats["abort"] is False
+
+
+def test_evaluate_batch_never_raises_on_a_violation():
+    """PURITY CONTRACT. The abort RAISE lives in the merge orchestrator, never here —
+    that keeps contracts.py importable and testable with no DB and no guards dependency."""
+    clean, quarantined, stats = evaluate_batch([{"p": 1}] * 1000, "t", registry=_REG_REPORT)
+    assert stats["abort"] is True          # returned as data...
+    assert isinstance(stats["abort_reason"], str)   # ...with a reason string
+    assert len(clean) == 1000              # ...and report policy still dropped nothing
+
+
+def test_abort_needs_BOTH_share_and_count_a_small_recovery_batch_survives():
+    """A 169-row recovery batch carrying 3 bad rows is 1.78% share. A share-only rule at
+    1% would have ABORTED a legitimate recovery run. Real batches: 7 rows (07/07), 364
+    (07/08), 21,142 (07/10)."""
+    rows = [{"p": 1}] * 3 + [{"p": 500}] * 166       # 3/169 = 1.78% share, 3 violations
+    _, _, stats = evaluate_batch(rows, "t", registry=_REG_REPORT)
+    assert stats["contracts"][0]["share_pct"] == pytest.approx(100 * 3 / 169, abs=1e-4)
+    assert stats["abort"] is False                    # 3 < violations_gte 25
+
+
+def test_abort_fires_when_share_AND_count_both_breach():
+    rows = [{"p": 1}] * 30 + [{"p": 500}] * 70       # 30% > 5.0 and 30 >= 25
+    _, _, stats = evaluate_batch(rows, "t", registry=_REG_REPORT)
+    assert stats["abort"] is True
+    assert "floor" in stats["abort_reason"]
+
+
+def test_if_no_clean_rows_aborts_a_tiny_100pct_contaminated_batch():
+    """The silent-total-loss hole (08h §5): a 100%-contaminated batch UNDER violations_gte
+    would quarantine every row, merge zero, and exit GREEN. A 7-row batch really happened
+    (07/07/2026)."""
+    rows = [{"k": "condos"}] * 7                     # 100% share but only 7 < 500
+    clean, quarantined, stats = evaluate_batch(rows, "t", registry=_REG_QUARANTINE)
+    assert clean == [] and len(quarantined) == 7
+    assert stats["abort"] is True
+    assert "no clean rows" in stats["abort_reason"]
+
+
+def test_an_empty_batch_is_a_clean_no_op():
+    clean, quarantined, stats = evaluate_batch([], "t", registry=_REG_REPORT)
+    assert (clean, quarantined, stats["abort"]) == ([], [], False)
+
+
+def test_a_table_with_no_contracts_passes_everything_through_untouched():
+    """41,510 leepa_parcels nominal-consideration transfers are protected by TABLE-SCOPING:
+    no price contract is authored for that table. A naive `last_sale_amount >= 20000` floor
+    would quarantine 71,388 legitimate quitclaim / family transfers."""
+    rows = [{"folioid": "x", "last_sale_amount": 100}]
+    clean, quarantined, stats = evaluate_batch(rows, "data_lake.leepa_parcels", registry=_REG_REPORT)
+    assert clean == rows and quarantined == [] and stats["contracts"] == []
+
+
+def test_a_malformed_contract_SKIPs_loudly_and_never_reports_a_pass():
+    reg = {"tables": {"t": {"content_contracts": [
+        {"name": "typo", "type": "range", "locus": "both", "policy": "report",
+         "severity": "error", "col": "p", "min": 1,
+         "where": [{"col": "nonexistent_col", "op": "not_null"}]},
+    ]}}}
+    clean, _, stats = evaluate_batch([{"p": 5}], "t", registry=reg)
+    c = stats["contracts"][0]
+    assert c["status"] == "SKIP"          # NOT "PASS"
+    assert "nonexistent_col" in c["detail"]
+    assert clean == [{"p": 5}]            # a broken contract never takes down a load
+
+
+def test_probe_only_contracts_are_skipped_at_the_merge_locus():
+    """A sql_expectation is cross-row (a median, a JOIN) — not evaluable on a batch of dicts.
+    locus: probe means Locus B only, and evaluate_batch must not pretend otherwise."""
+    reg = {"tables": {"t": {"content_contracts": [
+        {"name": "tripwire", "type": "sql_expectation", "locus": "probe", "policy": "report",
+         "severity": "error", "failing_rows_sql": "SELECT count(*) FROM t"},
+    ]}}}
+    clean, _, stats = evaluate_batch([{"p": 1}], "t", registry=reg)
+    assert stats["contracts"] == []       # not evaluated, not faked as a pass
+    assert clean == [{"p": 1}]
+
+
+def test_load_contracts_reads_the_real_registry_for_listing_state():
+    got = load_contracts("data_lake.listing_state")
+    assert [c["name"] for c in got] == [
+        "listing_state_home_price_floor",
+        "listing_state_property_type_allowlist",
+    ]

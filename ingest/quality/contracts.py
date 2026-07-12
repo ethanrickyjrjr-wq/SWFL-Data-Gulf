@@ -160,3 +160,149 @@ ROW_EVALUATORS = {
     "range": range_violations,
     "enum": enum_violations,
 }
+
+
+# ── registry loading ───────────────────────────────────────────────────────────
+
+from pathlib import Path  # noqa: E402
+
+_REGISTRY_PATH = Path(__file__).parent / "quality_registry.yaml"
+
+MERGE_LOCI = ("merge", "both")   # evaluated by evaluate_batch (Locus A)
+PROBE_LOCI = ("probe", "both")   # evaluated by check_data_quality (Locus B)
+
+
+def load_registry(path: str | Path = _REGISTRY_PATH) -> dict:
+    import yaml
+
+    with open(path, encoding="utf-8") as fh:
+        return yaml.safe_load(fh) or {}
+
+
+def load_contracts(table: str, registry: dict | None = None) -> list[dict]:
+    """The `content_contracts:` list for one physical table — [] if it has none.
+
+    [] is the protection mechanism for data_lake.leepa_parcels: 41,510 of its 528,130
+    non-null last_sale_amount values are legitimate $1-9,999 nominal-consideration /
+    quitclaim / family transfers. NO price contract is authored for that table, and a
+    naive `>= 20000` floor would quarantine 71,388 real deeds."""
+    reg = registry if registry is not None else load_registry()
+    return ((reg.get("tables") or {}).get(table) or {}).get("content_contracts") or []
+
+
+# ── evaluate_batch (Locus A) ───────────────────────────────────────────────────
+
+
+def _abort_check(spec: dict, in_scope: int, violations: int, share_pct: float) -> str | None:
+    """The reason string if this contract's abort_if trips, else None.
+
+    abort  <=>  (share_pct > share_pct_gt AND violations >= violations_gte)
+            OR  (if_no_clean_rows AND in_scope > 0 AND violations == in_scope)
+
+    BOTH conditions on the first branch, never either. A share-only rule aborts a 7-row
+    recovery batch over 1 bad row; a count-only rule aborts a 34k load over noise. The
+    second branch closes the inverse hole: a 100%-contaminated batch UNDER the count floor
+    would quarantine every row, merge zero, and exit green."""
+    cfg = spec.get("abort_if") or {}
+    name = spec.get("name")
+    share_gt = cfg.get("share_pct_gt")
+    count_gte = cfg.get("violations_gte")
+    if (share_gt is not None and count_gte is not None
+            and share_pct > share_gt and violations >= count_gte):
+        return (
+            f"[content-contract] {name}: {violations:,} of {in_scope:,} in-scope rows violate "
+            f"({share_pct:.3f}% > {share_gt}% AND {violations:,} >= {count_gte:,}) — the feed "
+            f"changed shape; aborting rather than merging a bulk leak"
+        )
+    if cfg.get("if_no_clean_rows") and in_scope > 0 and violations == in_scope:
+        return (
+            f"[content-contract] {name}: ALL {in_scope:,} in-scope rows violate — no clean rows "
+            f"left to merge. A silent 100%-contaminated batch below the count floor would have "
+            f"quarantined everything and exited green; aborting instead"
+        )
+    return None
+
+
+def evaluate_batch(
+    rows: list[dict],
+    table: str,
+    ctx: dict | None = None,
+    registry: dict | None = None,
+) -> tuple[list[dict], list[dict], dict]:
+    """Evaluate every merge-locus contract for `table` against the candidate batch.
+
+    PURE. Never raises on a violation. Never opens a DB connection. Returns
+    (clean, quarantined, stats). The orchestrator decides what to DO:
+
+        clean, quarantined, stats = evaluate_batch(ups, "data_lake.listing_state",
+                                                   ctx={"source_name": src_name})
+        if stats["abort"]:
+            raise ContentContractError(stats["abort_reason"])
+        ups = clean
+
+    The raise lives in the caller by design — that keeps this module importable and
+    unit-testable with no ingest.lib.guards dependency and no database.
+
+    `ctx` supplies BATCH-SCALAR columns absent from the row dicts. On listing_state that is
+    `source_name`: _STATE_COLS (distill.py:77-89) omits it and upsert_state injects it as a
+    scalar at merge time (distill.py:200), so without ctx a source_name predicate is
+    unevaluable at Locus A."""
+    contracts = [c for c in load_contracts(table, registry)
+                 if c.get("locus", "both") in MERGE_LOCI]
+    stats: dict = {
+        "table": table, "rows_in": len(rows), "rows_clean": len(rows),
+        "rows_quarantined": 0, "abort": False, "abort_reason": None, "contracts": [],
+    }
+    drop: set[int] = set()
+    abort_reasons: list[str] = []
+
+    for spec in contracts:
+        ctype = spec.get("type")
+        policy = spec.get("policy", "report")
+        base = {
+            "name": spec.get("name"), "type": ctype, "policy": policy,
+            "severity": spec.get("severity", "warn"),
+        }
+        evaluator = ROW_EVALUATORS.get(ctype)
+        if evaluator is None:
+            stats["contracts"].append({
+                **base, "in_scope": None, "violations": None, "share_pct": None,
+                "status": "SKIP",
+                "detail": f"contract type {ctype!r} is not row-evaluable at the merge locus",
+            })
+            continue
+        try:
+            where = spec.get("where")
+            in_scope_idx = [i for i, r in enumerate(rows) if row_matches_where(r, ctx, where)]
+            viol_idx = evaluator(rows, ctx, spec)
+        except ContractConfigError as exc:
+            # A CONFIG bug. SKIP loudly — never report a pass, never take down the load.
+            stats["contracts"].append({
+                **base, "in_scope": None, "violations": None, "share_pct": None,
+                "status": "SKIP", "detail": str(exc),
+            })
+            continue
+
+        in_scope, violations = len(in_scope_idx), len(viol_idx)
+        share_pct = (100.0 * violations / in_scope) if in_scope else 0.0
+        stats["contracts"].append({
+            **base, "in_scope": in_scope, "violations": violations,
+            "share_pct": round(share_pct, 4),
+            "status": "PASS" if violations == 0 else "VIOLATIONS",
+            "detail": None,
+        })
+
+        if policy == "quarantine":
+            drop.update(viol_idx)
+        reason = _abort_check(spec, in_scope, violations, share_pct)
+        if reason:
+            abort_reasons.append(reason)
+
+    clean = [r for i, r in enumerate(rows) if i not in drop]
+    quarantined = [r for i, r in enumerate(rows) if i in drop]
+    stats["rows_clean"] = len(clean)
+    stats["rows_quarantined"] = len(quarantined)
+    if abort_reasons:
+        stats["abort"] = True
+        stats["abort_reason"] = " | ".join(abort_reasons)
+    return clean, quarantined, stats
