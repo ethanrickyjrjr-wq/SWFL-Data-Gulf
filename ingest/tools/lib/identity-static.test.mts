@@ -545,3 +545,69 @@ coverage_exempt:
     expect(rules.filter((r) => r === "malformed_annotation")).toHaveLength(2);
   });
 });
+
+import { applyKnownDrift, runStaticChecks } from "./identity-static.mts";
+
+describe("runStaticChecks + applyKnownDrift", () => {
+  test("runs every rule and returns the union", () => {
+    const { repo, reg } = versionRepo(`
+pipelines:
+  - name: foo
+    workflow: no-timeout.yml
+    source_tag: bogus
+`);
+    const rules = runStaticChecks(reg, repo, TAGS)
+      .map((f) => f.rule)
+      .sort();
+    expect(rules).toContain("timeout_missing");
+    expect(rules).toContain("source_tag_field_forbidden");
+    expect(rules).toContain("action_major_behind");
+  });
+
+  test("known_drift demotes a RED to WARN — and only for the named rule", () => {
+    const findings = [
+      {
+        rule: "zombie_target",
+        entry: "usgs_tier2",
+        severity: "red" as const,
+        registrySide: "a",
+        otherSide: "b",
+        fix: "c",
+      },
+      {
+        rule: "row_floor_breach",
+        entry: "usgs_tier2",
+        severity: "red" as const,
+        registrySide: "a",
+        otherSide: "b",
+        fix: "c",
+      },
+      {
+        rule: "zombie_target",
+        entry: "other",
+        severity: "red" as const,
+        registrySide: "a",
+        otherSide: "b",
+        fix: "c",
+      },
+    ];
+    const reg = loadRegistry(
+      new MemRepo({
+        "ingest/cadence_registry.yaml": `
+pipelines:
+  - name: usgs_tier2
+    known_drift:
+      - rule: zombie_target
+        check: usgs_tier2_orphan
+`,
+      }),
+    );
+    const { blocking, suppressed } = applyKnownDrift(reg, findings);
+    expect(suppressed.map((f) => `${f.entry}:${f.rule}`)).toEqual(["usgs_tier2:zombie_target"]);
+    expect(blocking.map((f) => `${f.entry}:${f.rule}`)).toEqual([
+      "usgs_tier2:row_floor_breach",
+      "other:zombie_target",
+    ]);
+    expect(suppressed[0].fix).toContain("usgs_tier2_orphan");
+  });
+});

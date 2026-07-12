@@ -485,3 +485,62 @@ export function checkIdentityFields(reg: Registry, repo: RepoView): Finding[] {
   }
   return out;
 }
+
+export function runStaticChecks(reg: Registry, repo: RepoView, tags: TagResolver): Finding[] {
+  // Every rule is independently fail-open: a thrown rule degrades to a WARN and
+  // never flips the exit code (same contract as pre-push Gate 2/5).
+  const rules: Array<[string, () => Finding[]]> = [
+    ["workflow_liveness", () => checkWorkflowLiveness(reg, repo)],
+    ["producer", () => checkProducer(reg, repo)],
+    ["secrets", () => checkSecretsWired(reg, repo)],
+    ["timeouts", () => checkTimeouts(reg, repo)],
+    ["action_versions", () => checkActionVersions(reg, repo, tags)],
+    ["identity_fields", () => checkIdentityFields(reg, repo)],
+  ];
+  const out: Finding[] = [];
+  for (const [name, fn] of rules) {
+    try {
+      out.push(...fn());
+    } catch (err) {
+      out.push({
+        rule: "rule_crashed",
+        entry: name,
+        severity: "warn",
+        registrySide: `static rule \`${name}\``,
+        otherSide: `threw: ${(err as Error)?.message ?? err}`,
+        fix: "Fail-open: this rule was skipped, not passed. Fix the tool.",
+      });
+    }
+  }
+  return out;
+}
+
+/** A RED becomes a WARN only when the entry names it in known_drift with an OPEN checks key. */
+export function applyKnownDrift(
+  reg: Registry,
+  findings: Finding[],
+): { blocking: Finding[]; suppressed: Finding[] } {
+  const map = new Map<string, string>();
+  for (const { entry } of allEntries(reg)) {
+    for (const kd of entry.known_drift ?? []) {
+      if (kd?.rule && kd?.check) map.set(`${entry.name}:${kd.rule}`, kd.check);
+    }
+  }
+  const blocking: Finding[] = [];
+  const suppressed: Finding[] = [];
+  for (const f of findings) {
+    const check = map.get(`${f.entry}:${f.rule}`);
+    if (f.severity === "red" && check) {
+      suppressed.push({
+        ...f,
+        severity: "warn",
+        fix: `KNOWN DRIFT — tracked by check \`${check}\`. ${f.fix}`,
+      });
+    } else if (f.severity === "red") {
+      blocking.push(f);
+    } else {
+      suppressed.push(f);
+    }
+  }
+  return { blocking, suppressed };
+}
