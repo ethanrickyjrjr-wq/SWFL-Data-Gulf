@@ -363,6 +363,10 @@ export function authorSystem(opts: {
   /** Advisory deliverable-type recipe (author-recipes.ts) — appended verbatim.
    *  Absent → the generic prompt, byte-identical to before recipes existed. */
   recipe?: string;
+  /** Advisory Datasets section (lib/concoctions/author-section.ts) — appended
+   *  verbatim when the prompt resolved a dataset; digit-free by test. Absent →
+   *  byte-identical to before datasets existed. */
+  datasets?: string;
 }): string {
   const parts: string[] = [
     "You are the design+copy author for SWFL Data Gulf, a Southwest Florida real " +
@@ -399,6 +403,7 @@ export function authorSystem(opts: {
     );
   }
   if (opts.recipe) parts.push(opts.recipe);
+  if (opts.datasets) parts.push(opts.datasets);
   return parts.join("\n\n");
 }
 

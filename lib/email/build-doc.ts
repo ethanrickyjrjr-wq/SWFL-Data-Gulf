@@ -19,6 +19,8 @@ import {
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { AUTHORABLE_TYPES } from "@/lib/email/doc/block-contract";
 import { resolveRecipe, recipeSection } from "@/lib/email/author-recipes";
+import { resolveConcoction, datasetsSection } from "@/lib/concoctions/author-section";
+import { seedResolvedDataset } from "@/lib/concoctions/seed-authored";
 import {
   loadMarketFigures,
   loadLifecycleDigest,
@@ -986,6 +988,9 @@ export async function authorDoc({
     hasPhoto: !!photoRes,
     assetMenu,
     recipe: resolvedRecipe ? recipeSection(resolvedRecipe) : undefined,
+    // Datasets awareness rides only when the prompt resolves one (advisory,
+    // digit-free) — a non-matching build stays byte-identical.
+    datasets: resolveConcoction(null, prompt) ? datasetsSection() : undefined,
   });
   const baseUser = effectiveScope?.value
     ? `User request: ${prompt}\nScope: ${effectiveScope.kind ?? "area"} ${effectiveScope.value}`
@@ -1098,7 +1103,18 @@ export async function authorDoc({
   // Stripping only shortens strings, so the doc still validates; parse once more
   // defensively and fall back to the current doc on the (unexpected) miss.
   const finalParse = EmailDocSchema.safeParse(doc);
-  const finalDoc = finalParse.success ? finalParse.data : currentDoc;
+  let finalDoc = finalParse.success ? finalParse.data : currentDoc;
+
+  // Dataset seeding (lib/concoctions/seed-authored.ts): prompt resolved a
+  // dataset + params derivable from scope → append its engine-baked blocks
+  // under the authored layout. Additive + fail-soft; re-parse defensively.
+  if (finalParse.success) {
+    const seeded = await seedResolvedDataset(finalDoc, prompt, effectiveScope ?? null);
+    if (seeded.seededLabel) {
+      const seededParse = EmailDocSchema.safeParse(seeded.doc);
+      if (seededParse.success) finalDoc = seededParse.data;
+    }
+  }
 
   return {
     payload: {
