@@ -39,7 +39,13 @@ export interface PdfTextResult {
 export async function parsePdfText(
   data: ArrayBuffer | Uint8Array | Buffer,
 ): Promise<PdfTextResult | null> {
-  const { PDFParse } = await import("pdf-parse");
+  // The Vercel serverless runtime can't load pdfjs at all (no DOMMatrix) — an
+  // environment that can't read PDFs degrades to null like an unreadable PDF,
+  // instead of throwing from inside callers' catch blocks (extract-pdf route
+  // calls this as its OWN error fallback).
+  const mod = await import("pdf-parse").catch(() => null);
+  if (!mod) return null;
+  const { PDFParse } = mod;
   const bytes = data instanceof Uint8Array ? data : new Uint8Array(data as ArrayBuffer);
   const parser = new PDFParse({ data: bytes });
   try {
