@@ -1,3 +1,23 @@
+## 2026-07-12 (Fable 5 · wt/dcd → main) — Chain group built: Locus-A market_aggregates gate · email freshness preflight · 8 members reusable · nightly-chain.yml DISPATCH-ONLY
+
+Operator-approved batch (Q2 remainder + Q4). (1) market_aggregates run_details gate — the one clean
+whole-batch site; 8 tests; plan slip falsified: at fleet scale the share+count abort branch trips
+before if_no_clean_rows (proven by test, comment corrected); dry-run: no [contract] line, rows=0.
+(2) Email freshness preflight (P4 T1): build-digest refuses BEFORE the idempotency guard when
+master's freshness_token isn't today's — fails closed on missing/unparseable; red run is the alert
+(Notify step added; HC heartbeat can't see "ran and refused"). 6 tests via the real freshnessToken
+producer. (3) workflow_call on all 8 chain members (T3+4) — county/dry_run inputs on the listing
+pair (case-blocks untouched; inputs.* populated under workflow_call), bare on the rest;
+narrative-bake gets BAKE_POLL_DEADLINE_MS=45min (approved paid env change). (4) nightly-chain.yml
+(T5): one head, needs:-ordered, row gate report-only, graphify if:-gated off, NO schedule: block
+per N-3 — cron lights only in the cutover commit (check: nightly_chain_cron_cutover). Supported-
+keyword table re-verified against live GitHub docs in-session (RULE 0.4). Manifest regenerated in
+the same commit (N-5; Nightly Chain scheduled:false). Local: parse-validated all 10 files; 30/30
+watcher tests; bunx next build ✓. Pre-existing red found + check-opened:
+arcgis_paginator_local_red_ci_green (local 2-of-3 vs CI green, untouched since 9ce2acb3). Next in
+this session: push → chain dry-run dispatch → real chain run → first non-dry-run data-quality probe
+→ report to operator with the two held asks (cron cutover · caveat-TTL at 4-output.mts).
+
 ## 2026-07-12 (Fable 5 · wt/dcd → main) — Doctor GATING flip (T12): daily probe now fails on any red dataset; timeout 5→10
 
 Task 10 acceptance verified live (run 29179535786): doctor section in the cron's step summary with
