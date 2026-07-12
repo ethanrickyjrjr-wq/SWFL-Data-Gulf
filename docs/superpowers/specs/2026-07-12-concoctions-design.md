@@ -68,7 +68,8 @@ Deterministic given (def, params, rows); mapper tests pin the arithmetic on raw-
 
 - **Sent** — frozen forever (an inbox can't be edited). Unchanged platform law.
 - **Scheduled/recurring** — auto: every occurrence re-materializes each binding at send time (extends the existing schedule-recipe lane). This is the "auto update like our current scheduled emails" behavior, preserved.
-- **Drafts** — Google-pattern: on open, compare each binding's cached `asOf` to the source's current as-of (cheap); stale blocks wear an Update chip; canvas offers Update all. Airtable-pattern dial on top: per-doc "keep always fresh" toggle auto-refreshes on open. Numbers never move mid-edit without a user action. Chart refresh re-renders the hosted PNG — a deliberate action with visible progress, not per-keystroke.
+- **Drafts** — Google-pattern nudge is the default: on open, compare each binding's cached `asOf` to the source's current as-of (a metadata compare — no loaders re-run, no tokens spent); stale blocks wear an Update chip; canvas offers Update all. Airtable-pattern dial on top: per-doc "keep always fresh" toggle — and its trigger is the FIRST EDIT ACTION in a session, never the open (operator, 07/12: an accidental open must cost nothing). Numbers never move mid-edit without a user action or that armed toggle. Chart refresh re-renders the hosted PNG — visible progress, not per-keystroke.
+- **Refresh spends no AI tokens.** Re-materialization is deterministic (loader re-run + chart PNG re-render). AI-written prose (commentary/read blocks) is NEVER auto-rewritten on refresh — a stale-commentary chip invites the user to regenerate it explicitly.
 
 ### 5. Guards + coherence (three structural layers)
 
