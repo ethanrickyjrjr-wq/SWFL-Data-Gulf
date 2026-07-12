@@ -1,3 +1,25 @@
+## 2026-07-11 (Fable 5 · main) — Send/PDF/brand/funnel readiness audit; funnel repairs + pdf-parse containment committed
+
+Operator ask: "emails and PDFs in order — send, build in bulk, inject brands/logos, visitors land right."
+Three read-only audit agents (send path / bulk+brand / landing funnel) + my own live probes. Committed (NOT pushed):
+- `f7895cf8` fix(pdf): parsePdfText degrades to null when pdf-parse can't load — follow-up to the parallel
+  session's `8a7f780b` (pdfjs needs DOMMatrix, absent on Vercel; the extract-pdf route called the fallback
+  from inside its own catch → request 500 + item stuck "processing"). lib/pdf 15/0.
+- `fced47fe` fix(funnel): both standalone create paths now persist `kind:"listing"`+`subject_address`
+  (hero address survives return visits); fresh-project region scope threads `project.subject_address`
+  (address-lane comps fire); SendToSelfModal rewired into the grid surface (anonymous header button +
+  live-doc ref + `?ref=` attribution threaded through /email-lab/grid). lab-entry 27/0, next build exit 0.
+  Live-verify checks stay open until deploy.
+My PDF-outage diagnosis independently converged on the same root cause `8a7f780b` fixed (all 3 routes
+importing @/lib/pdf dead at module load; POST probes + X-Matched-Path:/500 evidence) — blast route was
+down too, not just PDF download. NEW checks opened: `get_access_dead_anchor` (nav "Get Access" ×4 + 2
+report CTAs → #waitlist, which no live page renders — loudest CTA scrolls to nothing, needs operator
+destination pick), `blast_bounce_complaint_suppression` (complained/bounced contacts re-blasted next send),
+`pdf_reader_fallback_serverless` (pdfjs can never load on Vercel; fallback now degrades, never works).
+Send-readiness verdict in the session report: env/account items (Resend plan, Vercel env, domain verify)
++ Tier-1 safety gaps (unsub two-surface sync, blast suppression, no content lint on send path, CAN-SPAM
+address placeholder) before a real bulk send. Next: operator diff-review + push (2 outage fixes ride it).
+
 ## 2026-07-11 (Opus 4.8 · main) — Data-contracts+doctor: research pack (§13) + TDD build plan. Spec found WRONG in 6 places.
 
 Closed spec §13 ("Open for Fable 5 tonight") with a 27-agent read-only research fan-out (~6.5M tokens; live
