@@ -10,6 +10,15 @@ import type { EmailDeliverableRow } from "@/lib/deliverable/email-deliverable";
 // land in spam). Each recipient gets a one-click unsubscribe (List-Unsubscribe
 // header for Gmail + an in-body footer link as the CAN-SPAM floor).
 //
+// Send-safety floor (spec: 2026-07-12-send-safety-floor-design.md): before any
+// send, (1) a real physical postal address must exist (deliverable branding →
+// account brand profile, else 422 — CAN-SPAM) and rides the injected footer;
+// (2) candidates who hard-bounced/complained on a prior blast or are
+// bounced/unsubscribed in any platform ledger are excluded via
+// lib/email/suppression.ts (the one suppression authority) and reported back
+// as `suppressed` — Resend's account-level suppression list is only the
+// transport backstop.
+//
 // Split-send (variant_test): an optional { subjects?, ctas? } on the request body
 // cohort-hashes each recipient (cohortIndex, Task 8) into 2-4 groups, deterministically
 // and stably across a retried/partial send. subjects-only and ctas-only tests are both
@@ -21,7 +30,10 @@ import type { EmailDeliverableRow } from "@/lib/deliverable/email-deliverable";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { getMarketingResend } from "@/lib/email/marketing-client";
+import { getSuppressedContacts } from "@/lib/email/suppression";
+import { resolvePostalAddress } from "@/lib/email/postal-address";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import { bindUnsubscribeHref } from "@/lib/email/bind-unsubscribe";
 import { buildEmailDeliverableModel } from "@/lib/deliverable/email-deliverable";
@@ -59,6 +71,10 @@ function escAttr(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
 
+function escText(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 /** Replace {{merge_tags}} with per-recipient values. Case-insensitive. */
 function withMergeTags(html: string, c: { name: string | null; email: string }): string {
   const firstName = (c.name ?? "").split(/\s+/)[0] || "there";
@@ -69,14 +85,18 @@ function withMergeTags(html: string, c: { name: string | null; email: string }):
     .replace(/\{\{email\}\}/gi, c.email);
 }
 
-/** Per-recipient unsubscribe + view-online footer, injected before </body>. */
-function withFooter(html: string, webUrl: string, unsubUrl: string): string {
+/** Per-recipient unsubscribe + view-online footer, injected before </body>.
+ *  identityLine = "<sender name> · <physical postal address>" — the CAN-SPAM
+ *  floor (a valid postal address in every commercial email); the route 422s
+ *  before rendering when no real address exists, so this never falls back to
+ *  a bare city line. */
+function withFooter(html: string, webUrl: string, unsubUrl: string, identityLine: string): string {
   const footer =
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px">` +
     `<tr><td style="padding:20px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;color:#8a8a8a">` +
     `<a href="${escAttr(webUrl)}" style="color:#8a8a8a">View this report online</a> &middot; ` +
     `<a href="${escAttr(unsubUrl)}" style="color:#8a8a8a">Unsubscribe</a><br>` +
-    `SWFL Data Gulf &middot; Fort Myers, FL` +
+    escText(identityLine) +
     `</td></tr></table>`;
   return html.includes("</body>") ? html.replace("</body>", `${footer}</body>`) : html + footer;
 }
@@ -137,6 +157,31 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "deliverable is not ready" }, { status: 400 });
   }
 
+  // CAN-SPAM floor (send-safety spec): every commercial email carries a valid
+  // physical postal address. The deliverable's own branding wins, else the
+  // account brand profile; nothing real → refuse the send — a hardcoded city
+  // line never meets the floor, and we never invent an address.
+  const brandingBlob = (deliverable.branding ?? {}) as Record<string, unknown> & { name?: string };
+  let postalAddress = resolvePostalAddress(brandingBlob, null);
+  if (!postalAddress) {
+    const { data: brandProfile } = await supabase
+      .from("user_brand_profiles")
+      .select("business_address")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    postalAddress = resolvePostalAddress(null, brandProfile?.business_address ?? null);
+  }
+  if (!postalAddress) {
+    return NextResponse.json(
+      {
+        error: "postal_address_missing",
+        message:
+          "CAN-SPAM requires a valid physical postal address in every commercial email. Add your business address in Brand settings, then send again.",
+      },
+      { status: 422 },
+    );
+  }
+
   // Split-send content moat: every subject/CTA in variant_test must already be
   // one of the doc's own AI-authored variants (doc.subjectVariants/ctaVariants
   // — populated only after filterAnchoredVariants + cleanTellText at build
@@ -167,7 +212,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   // Recipients: own, not unsubscribed.
-  const { data: contacts, error: contactsErr } = await supabase
+  const { data: candidates, error: contactsErr } = await supabase
     .from("contacts")
     .select("id, email, name")
     .in("id", contactIds)
@@ -176,8 +221,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (contactsErr) {
     return NextResponse.json({ error: "contacts fetch failed" }, { status: 500 });
   }
-  if (!contacts || contacts.length === 0) {
+  if (!candidates || candidates.length === 0) {
     return NextResponse.json({ error: "no sendable contacts" }, { status: 400 });
+  }
+
+  // Suppression union (send-safety spec): a candidate who hard-bounced or
+  // complained on a prior blast, or is bounced/unsubscribed in ANY platform
+  // ledger (outreach / weekly-read / subscribers — all the same From: domain),
+  // is excluded before the send. Resend's account-level suppression list is
+  // the transport backstop; this keeps quota and sent-stats honest and honors
+  // cross-lane opt-outs. Service-role: the platform ledgers have no
+  // user-facing read policy, and we look up only this user's own contacts.
+  const suppression = await getSuppressedContacts(createServiceRoleClient(), candidates);
+  const contacts = candidates.filter((c) => !suppression.has(c.id));
+  const suppressed = [...suppression.entries()].map(([contactId, reason]) => ({
+    id: contactId,
+    reason,
+  }));
+  if (contacts.length === 0) {
+    return NextResponse.json({ error: "no sendable contacts", suppressed }, { status: 400 });
   }
 
   // Render the REAL report once (same engine as /p/[id]); per-recipient we only
@@ -258,8 +320,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // Deliverability-safe sender: verified platform address, agent's name shown,
   // agent's account email as reply-to.
-  const branding = (deliverable.branding ?? {}) as { name?: string };
-  const senderName = branding.name?.trim() || process.env.DIGEST_SENDER_NAME || "SWFL Data Gulf";
+  const senderName =
+    brandingBlob.name?.trim() || process.env.DIGEST_SENDER_NAME || "SWFL Data Gulf";
+  // Footer identity: the advertiser's name + their real postal address (resolved
+  // in the preflight above — the send never reaches here without one).
+  const identityLine = `${senderName} · ${postalAddress}`;
   const senderAddress = process.env.DIGEST_SENDER_ADDRESS || process.env.RESEND_FROM_EMAIL;
   if (!senderAddress) {
     return NextResponse.json({ error: "sender_not_configured" }, { status: 503 });
@@ -338,7 +403,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const subject = subjectByVariant[cohort] ?? subjectByVariant[0];
     const unsubUrl = `${BASE_URL}/api/unsubscribe?id=${c.id}`;
     const finalHtml = withMergeTags(
-      bindUnsubscribeHref(withFooter(html, webUrl, unsubUrl), unsubUrl),
+      bindUnsubscribeHref(withFooter(html, webUrl, unsubUrl, identityLine), unsubUrl),
       c,
     );
     return {
@@ -485,5 +550,5 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
   }
 
-  return NextResponse.json({ sent, failed, scheduled });
+  return NextResponse.json({ sent, failed, scheduled, suppressed });
 }

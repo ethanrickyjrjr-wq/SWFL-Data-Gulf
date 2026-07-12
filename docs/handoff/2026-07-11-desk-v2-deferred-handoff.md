@@ -1,24 +1,20 @@
-# Handoff — /desk v2 deferred items (choropleth, STORMS/PERMITS tabs, filter tabs)
+# Handoff — /desk v2 deferred items (STORMS/PERMITS tabs, filter tabs)
 
 **Date:** 2026-07-11 · **Parent spec:** `docs/superpowers/specs/2026-07-12-desk-v2-additions-design.md`
 **What shipped instead:** ⌘K command bar, watchlist, alert rail, price-band histogram, correlation
 heatmap, Wire file-this bridge — all built 07/11/2026 (check `desk_v2_additions_live_verify`).
 
-These three were deliberately NOT built. Each has a concrete blocker; none is a scope cut for
-convenience.
+## ~~1. Mini-map choropleth~~ — BUILT 07/12/2026, no longer deferred
 
-## 1. Mini-map choropleth
-
-- **Blocker:** the served contractor SVG (`/maps/lee-collier.svg`) welds Fort Myers Beach (33931)
-  to the mainland — the SAME standing hold that pulled `ZipChoropleth` from the zip-report County
-  section. Do not ship the desk mini-map off that basemap; it would put a known-wrong geography on
-  the flagship data page.
-- **Ready when unblocked:** `components/charts/ZipChoropleth.tsx` + `lib/report/zip-choropleth-data.ts`
-  are built, tested, and kept current. Per-ZIP values to color: `desk.watch` rows (already in the
-  page payload) or `listing_active_stats` medians.
-- **Unblock paths:** (a) corrected contractor SVG lands → re-run `scripts/clean-contractor-map.mjs`,
-  verify 33931 is a real island, mount; or (b) decide Mapbox GL — new dep + token + design pass,
-  NOT a bolt-on (spec it separately if chosen).
+Operator ruling: reuse the map that already works on the homepage and /map. The first draft of this
+handoff blamed the wrong asset — the welded-33931 hold applies to `public/maps/lee-collier.svg`
+(plural, the `ZipChoropleth` basemap), while the homepage/`/map` page run `MapCanvas` over
+`public/map/lee-collier.svg` (singular), which is live in front of users daily. Built: `MapCanvas`
+gained an additive `override?: MetricDef` prop (fixture path byte-identical when absent; live path
+colors via the homepage's `blendedT`/`rampColor` math from `home-map-types`), and /desk mounts it
+as the "Asking-Price Map" zone with per-ZIP median asking prices the loader already held (zero new
+queries, ≥20-ZIP floor, brand ramp per the 07/03/2026 operator ruling). `ZipChoropleth` + its
+welded-SVG hold stay as-is for the zip-report County section — that hold was never about this asset.
 
 ## 2. STORMS / PERMITS tabs
 

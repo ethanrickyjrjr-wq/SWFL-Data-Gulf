@@ -4,6 +4,7 @@ import { PageShell } from "@/components/PageShell";
 import { MarketTemperatureGauge } from "@/components/charts";
 import { PriceBandHistogram } from "@/components/charts/PriceBandHistogram";
 import { DeskCorrelationHeatmap } from "@/components/charts/DeskCorrelationHeatmap";
+import { MapCanvas } from "@/components/charts/MapCanvas";
 import { AddChartToProject } from "@/app/charts/AddChartToProject";
 import { deskJsonLd, type DeskJsonLdFigure } from "@/lib/jsonld";
 import { loadDeskData } from "@/lib/desk/loaders";
@@ -112,6 +113,7 @@ export default async function DeskPage() {
     ...(desk.flash.length > 0 ? [{ id: "desk-flash", label: "The Wire" }] : []),
     ...(desk.bands ? [{ id: "desk-bands", label: "Asking-price bands" }] : []),
     ...(desk.correlation ? [{ id: "desk-correlation", label: "Signal correlation" }] : []),
+    ...(desk.map ? [{ id: "desk-map", label: "Asking-price map" }] : []),
   ];
   const commandPins: CommandPin[] = tiles
     .filter((t): t is KpiTile & { pin: NonNullable<KpiTile["pin"]> } => !!t.pin)
@@ -334,6 +336,21 @@ export default async function DeskPage() {
                 }
               >
                 <PriceBandHistogram bands={desk.bands} />
+              </DeskZone>
+            ) : null}
+
+            {desk.map ? (
+              <DeskZone
+                id="desk-map"
+                title="Asking-Price Map"
+                note="Median asking price per ZIP — darker is lower, gold to coral is higher; gray means no active listings in scope. Click a ZIP to open its page."
+                asOf={desk.map.asOf}
+                sourceLabel="SWFL Data Gulf"
+                actions={
+                  <TurnIntoReportCta recipe="Build a branded client email around how median asking prices vary across Southwest Florida ZIP codes." />
+                }
+              >
+                <MapCanvas county="both" override={desk.map} className="h-[420px] rounded-xl" />
               </DeskZone>
             ) : null}
 

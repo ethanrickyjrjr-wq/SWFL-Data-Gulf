@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { HOME_MAP_DATA as DATA, type FixtureMetricKey } from "@/lib/landing/home-map-data";
+import { blendedT, NO_DATA_FILL, rampColor, type MetricDef } from "@/lib/landing/home-map-types";
 
 // Lee County ZIPs (source of truth: fixtures/swfl-zip-county.json)
 const LEE_ZIPS = new Set([
@@ -45,10 +46,16 @@ const LEE_ZIPS = new Set([
 interface Props {
   county?: "Lee" | "Collier" | "both";
   metric?: FixtureMetricKey;
+  /** LIVE metric override — when set, the fixture (`metric`) is never read:
+   *  colors come from `override.data` via the homepage's blended rank+log ramp
+   *  (home-map-types), missing ZIPs paint NO_DATA_FILL. This is how surfaces
+   *  outside the homepage (e.g. /desk) reuse this map with real lake values
+   *  without touching the import-quarantined mock path. */
+  override?: MetricDef;
   className?: string;
 }
 
-export function MapCanvas({ county = "both", metric = "flood", className = "" }: Props) {
+export function MapCanvas({ county = "both", metric = "flood", override, className = "" }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<{
     zip: string;
@@ -77,7 +84,14 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
       const [r2, g2, b2] = hexToRgb(c2);
       return `rgb(${Math.round(lerp(r1, r2, t))},${Math.round(lerp(g1, g2, t))},${Math.round(lerp(b1, b2, t))})`;
     };
+    // Live-override path: blended rank+log position (operator-ruled ramp math,
+    // same as the homepage's live map) computed ONCE per data set.
+    const overrideT = override ? blendedT(override.data) : null;
     const getColor = (zip: string, m: FixtureMetricKey) => {
+      if (override) {
+        if (override.data[zip] === undefined) return NO_DATA_FILL;
+        return rampColor(overrideT?.[zip] ?? 0.5, override.c0, override.c1, override.c2);
+      }
       const md = DATA.metrics[m];
       const val = md.data[zip];
       if (val === undefined) return "#2a3942"; // no-data: visible neutral, NOT the bg
@@ -137,7 +151,7 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
               if (isDot(p)) return;
               p.style.filter = "brightness(1.22)";
             });
-            const md = DATA.metrics[metric];
+            const md = override ?? DATA.metrics[metric];
             const val = md.data[zip];
             const rect = host.getBoundingClientRect();
             const me = e as MouseEvent;
@@ -304,7 +318,7 @@ export function MapCanvas({ county = "both", metric = "flood", className = "" }:
     return () => {
       cancelled = true;
     };
-  }, [county, metric]);
+  }, [county, metric, override]);
 
   return (
     // .home-explorer wrapper activates home-explorer.css coast + county-outline rules

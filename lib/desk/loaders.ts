@@ -771,6 +771,34 @@ export async function loadDeskData(): Promise<DeskData> {
       }
     : null;
 
+  // --- Asking-price map (homepage MapCanvas, live override) ---------------
+  // Reuses the medians already in memory — zero extra queries. Fewer than 20
+  // valued ZIPs → zone hides (a sparse map reads as broken, not as data).
+  const mapData: Record<string, number> = {};
+  for (const z of stats.zips) {
+    if (z.zip_code && isCoreScope(z.zip_code) && z.median_list_price != null) {
+      mapData[z.zip_code] = z.median_list_price;
+    }
+  }
+  const mapValues = Object.values(mapData);
+  const map =
+    mapValues.length >= 20
+      ? {
+          label: "Median asking price",
+          sublabel: "Active-listing median asking price per ZIP",
+          format: "currency" as const,
+          data: mapData,
+          low: Math.min(...mapValues),
+          high: Math.max(...mapValues),
+          // The homepage's brand ramp (operator ruling 07/03/2026): dark slate
+          // base, gold→coral where values run high.
+          c0: "#33525e",
+          c1: "#d4b370",
+          c2: "#e08158",
+          asOf: spineAsOf,
+        }
+      : null;
+
   // --- Flash feed (news + notable events, newest first) -------------------
   const flash: FlashItem[] = [...news, ...cuts, ...closings]
     .sort((a, b) => {
@@ -866,5 +894,5 @@ export async function loadDeskData(): Promise<DeskData> {
   if (gauges.priceReduced) gauges.priceReduced.takeaway = makeTakeaway(gauges.priceReduced, SWFL);
   if (hero) for (const c of hero.cities) c.latest.takeaway = makeTakeaway(c.latest);
 
-  return { ticker, hero, kpis, mix, pulse, movers, flash, gauges, watch, bands, correlation };
+  return { ticker, hero, kpis, mix, pulse, movers, flash, gauges, watch, bands, correlation, map };
 }

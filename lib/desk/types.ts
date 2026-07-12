@@ -7,6 +7,8 @@
 // with the quotable one-liner by B. Everything here is JSON-serializable
 // (server loaders → client zone components cross the RSC boundary).
 
+import type { MetricDef } from "@/lib/landing/home-map-types";
+
 export type DeskDirection = "up" | "down" | "flat";
 
 /** One desk figure with its OWN provenance. `asOf` is MM/DD/YYYY — the feeds
@@ -184,4 +186,7 @@ export interface DeskData {
   bands: PriceBandsData | null;
   /** ZIP×metric correlation matrix (v2) — null hides the zone. */
   correlation: CorrelationData | null;
+  /** Live per-ZIP asking-price map (v2) — the SAME MetricDef shape + component
+   *  the homepage map runs on (MapCanvas `override`); null hides the zone. */
+  map: MetricDef | null;
 }

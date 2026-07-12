@@ -39,6 +39,31 @@ four independent layers (rebuild_due gate, hard-HOLD fail step, runner-kill sent
 the 07/03 fdot red proved the loud path end-to-end, and 20-second "successes" are legitimate gate-skips.
 chronicFlappers now reports only freshness-probe-daily (4x) — untriaged, out of this order's scope,
 still surfaced at every session start.
+## 2026-07-12 (Fable 5 · main) — Send-safety floor BUILT: blast suppression union + CAN-SPAM postal address
+
+Operator audit item 2 ("first real blast can burn the domain") executed. Research (crawl4ai,
+07/12): Resend's `email.bounced` is PERMANENT-rejection only (temporary = `delivery_delayed`,
+unlogged) so any logged bounce is hard; Resend keeps an account-level suppression list
+(bounce/complaint → transport-suppressed) — but a vendor-suppressed send still burns paid quota +
+counts "sent" in our stats, and OUR other ledgers' unsubscribes never reach it. Built:
+`lib/email/suppression.ts` — THE suppression authority (pure `decideSuppressions` core + chunked
+service-role wrapper, 10 tests): union of blast `email_events` (bounced/complained by contact_id)
++ `outreach_recipients`/`weekly_read_subscribers` (bounced/unsubscribed) + `email_subscribers`
+(bounced/complained/unsubscribed) by case-insensitive email; `engaged` never suppresses; reason
+precedence complained > bounced > unsubscribed. Blast route now filters candidates through it,
+records only ATTEMPTED ids in `email_blasts.contact_ids`, returns `suppressed: [{id, reason}]`,
+400s when all suppressed. Events stay append-only (blast-events.ts property kept — filter at send
+time, never a status flip). CAN-SPAM: `lib/email/postal-address.ts` (5 tests) resolves deliverable
+`branding.business_address` → `user_brand_profiles.business_address`; route 422s
+`postal_address_missing` BEFORE quota/render when neither exists; injected footer now renders
+"{sender} · {real postal address}" (HTML-escaped) instead of hardcoded "Fort Myers, FL". Gates:
+lib/email 1438/0 · `bunx next build` ✓. Spec: `2026-07-12-send-safety-floor-design.md`. Checks:
+opened `suppression_authority_cron_lanes` (weekly-read/outreach runners adopt the union) +
+`platform_postal_address_operator` (claim-and-send's platform postal line is an operator-owned
+fact — can't be filled without it; + DIGEST_SENDER_ADDRESS/domain-verify-UI/Resend-plan);
+`send_safety_floor_live_verify` open until a prod 422-then-send proof. `contacts_email_vs_public_lane`
+stays open: the union bridges the LEDGERS at send time; the email_contacts/contacts table
+reconciliation + vCard parser dedupe remain. NOT pushed — operator review.
 
 ## 2026-07-11 (Fable 5 · main) — Homepage v2 centerpiece BUILT + prod-verified: "A place goes in. A campaign comes out."
 
@@ -166,6 +191,20 @@ already rate-limited, and the audit's real spend hole (`/api/converse`, `/api/we
 Then: re-scope `econ-dev-swfl` before 07/14, force-rebuild Group A (sequence the leaves so master
 synthesizes once), close root cause 6. PDF gap remains: **17 of 37 deliverables are the narrative shape
 with no PDF path at all** (honest 422, not a crash) — check `narrative_deliverable_no_pdf_path`.
+
+## 2026-07-12 (Fable 5 · main) — /desk asking-price map: mini-map UN-deferred, built on the homepage's working MapCanvas
+
+Operator caught the deferral resting on the wrong asset: the welded-33931 hold is about
+`public/maps/lee-collier.svg` (plural, ZipChoropleth's basemap), NOT the homepage/`/map` asset
+`public/map/lee-collier.svg` (singular) that MapCanvas serves users daily. Built: `MapCanvas` gains an
+additive `override?: MetricDef` prop — fixture path byte-identical when absent (import-quarantine
+allowlist untouched; desk never renders mock), live path colors via the homepage's `blendedT`/
+`rampColor` (home-map-types) — and /desk mounts an "Asking-Price Map" zone from per-ZIP median asking
+prices the loader already held (zero new queries, ≥20-ZIP floor, brand ramp, per-zone as-of). Verified:
+prerendered /desk HTML carries the live medians ($319,000 @ 33901, $525,000 @ 33914 …), lib/desk 36/0,
+eslint clean, `bunx next build` ✓. Bookkeeping: `desk_v2_deferred_items` closed w/ evidence →
+`desk_v2_deferred_tabs` opened (STORMS/PERMITS + filter tabs remain); handoff doc corrected in place.
+ZipChoropleth's zip-report hold stands — that one really is the welded asset.
 
 ## 2026-07-11 (Fable 5 · main) — Insiders desk first triage + /desk v2 wave built (⌘K, watchlist, alerts, histogram, correlation, Wire filing)
 
