@@ -101,6 +101,8 @@ describe("pastedLinkComp — gate order (fetch-free by construction)", () => {
       price: 650000,
       priceKind: "last_list",
       priceDate: null,
+      // The user-pasted page, verbatim (lane-4 link — carried since 07/11/2026).
+      sourceUrl: LINK,
     });
     expect(out.source).toEqual({
       label: "beach-homes.com",
