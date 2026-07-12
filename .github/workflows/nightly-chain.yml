@@ -11,27 +11,32 @@ name: Nightly Chain
 # ends up consuming YESTERDAY's ingests. One head + `needs:` pays drift ONCE and
 # makes the internal order deterministic. (08d §6)
 #
-# ─── TRIGGER: DISPATCH-ONLY UNTIL CUTOVER ────────────────────────────────────
-# `schedule:` is NOT trusted as the head. Measured on this repo's overnight slot
+# ─── TRIGGER: SCHEDULE IS THE BACKSTOP, NOT THE CERTIFICATION ────────────────
+# CUTOVER 07/12/2026 (check nightly_chain_cron_cutover): this cron lit in the
+# same commit that retired the 8 members' standalone crons — zero duplicate-paid
+# window (correction N-3). Precondition met: one green dispatched end-to-end run
+# (29180619318, 9m25s, all 4 nightly sources LANDED).
+#
+# `schedule:` is a BACKSTOP head only. Measured on this repo's overnight slot
 # over 16 real fires: it lands +2h07m to +5h29m LATE (median +3h07m), and moving
-# off the top of the hour (the new `23 4`) did not fix it. `workflow_dispatch`
-# starts in ~4 SECONDS (run 28353096175: created 06:29:37, job started 06:29:41).
+# off the top of the hour did not fix it. `workflow_dispatch` starts in ~4
+# SECONDS (run 28353096175: created 06:29:37, job started 06:29:41).
 #
 # Operator constraint (07/11/2026): the chain starts after 11 PM-12 AM Eastern and
 # NOTHING is still running at 6:00 AM Eastern. EXECUTION fits easily (~26 min
 # typical, ~2h36m at every measured worst, ~3h25m if every job runs to its YAML
 # ceiling). The TRIGGER is the binding term: worst-drift + a normal 60-min bake
-# lands 07:00 EDT — over. So a `schedule:` head cannot certify the constraint.
-#
-# NO `schedule:` block here YET — deliberately (correction N-3). While the 8
-# standalone crons still run, a scheduled chain would DUPLICATE the paid SteadyAPI
-# sweep, the Sonnet rebuild, and the bake every night. The chain's cron lights in
-# the SAME [ASK-FIRST] commit that retires the superseded standalone crons —
-# zero duplicate-paid-work window. Until then: repository_dispatch (the intended
-# external clock) and workflow_dispatch (the manual head) are the only triggers.
-# 08d §3-§5.
+# lands 07:00 EDT — over. The 6 AM ceiling is therefore NOT certified until an
+# external clock fires repository_dispatch nightly (08d §5a; check
+# nightly_chain_external_clock). Typical nights still clear it by 1.5-2.5h.
 
 on:
+  schedule:
+    # 04:23 UTC = 12:23 AM EDT / 11:23 PM EST — the slot daily-rebuild's retired
+    # cron held: front of the operator's overnight window in BOTH DST regimes,
+    # :23 = off the top-of-hour congestion band (GitHub schedule delays peak at
+    # :00 and heavily-loaded slots can be DROPPED entirely).
+    - cron: "23 4 * * *"
   repository_dispatch:
     types: [nightly-chain]
   workflow_dispatch:

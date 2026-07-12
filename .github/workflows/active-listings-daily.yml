@@ -16,11 +16,21 @@ name: ingest-active-listings
 # CRAWL4AI_PROXY wired (dormant until secret is set — activates for WAF escalation fallback).
 
 on:
-  schedule:
-    - cron: "0 9 * * *"    # Collier
-    - cron: "0 12 * * *"   # Lee
-    - cron: "0 15 * * *"   # Charlotte
-    - cron: "0 18 * * *"   # Sarasota
+  # ── CRON RETIRED 07/12/2026: superseded by nightly-chain.yml ────────────────
+  # This workflow is now invoked by `needs:` from the chain (on: workflow_call).
+  # A second clock here would re-create the bug the chain exists to kill: 8
+  # independently-scheduled members each paying their OWN GitHub scheduler drift
+  # (+45m to +5h29m), which made the effective execution ORDER random — the exact
+  # mechanism by which the nightly rebuild consumed yesterday's ingests. 08d §6.
+  # The chain's matrix is [Lee, Collier] — the Charlotte/Sarasota daytime legs
+  # retire with the crons (not real coverage; see active_listings_ship_or_delete).
+  # Commented, not deleted: reverting the cutover is one uncomment away.
+  #
+  # schedule:
+  #   - cron: "0 9 * * *"    # Collier
+  #   - cron: "0 12 * * *"   # Lee
+  #   - cron: "0 15 * * *"   # Charlotte
+  #   - cron: "0 18 * * *"   # Sarasota
   workflow_dispatch:
     inputs:
       county:

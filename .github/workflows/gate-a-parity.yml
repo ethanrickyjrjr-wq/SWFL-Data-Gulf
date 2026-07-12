@@ -7,11 +7,14 @@ name: GATE A — DB parity (zhvi/zori view ⇆ pack)
 # describe.skip on PRs (assert nothing, no connects).
 
 on:
-  # Re-armed 2026-06-20 after the credit freeze. Gated by ENGINE_ENABLED
-  # (job-level if:) — flip with `node scripts/engine.mjs off|on`.
-  schedule:
-    # :23 = off the top-of-hour congestion (GitHub schedule delays peak at :00).
-    - cron: "23 7 * * *"
+  # ── CRON RETIRED 07/12/2026: superseded by nightly-chain.yml ────────────────
+  # Invoked by `needs: rebuild` from the chain (on: workflow_call below), so
+  # parity now runs against the JUST-REBUILT brains instead of on its own
+  # drifting clock (08d §6). ENGINE_ENABLED gate still applies (job-level if:).
+  # Commented, not deleted: reverting the cutover is one uncomment away.
+  #
+  # schedule:
+  #   - cron: "23 7 * * *"
   workflow_dispatch: {}
   # Reusable entry point for the nightly ordered chain (nightly-chain.yml).
   workflow_call:

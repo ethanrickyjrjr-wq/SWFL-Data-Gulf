@@ -23,10 +23,20 @@ name: ingest-listing-lifecycle
 # Source URL is NOT in the repo: read from the LISTING_LIFECYCLE_BASE_URL secret.
 
 on:
-  schedule:
-    - cron: "0 9 * * *"    # Lee     (heaviest — ~7.4k listings)
-    - cron: "0 12 * * *"   # Collier
-    - cron: "0 15 * * *"   # Hendry  (lightest — ~1.2k listings, added 2026-07-02; staggered 3 h like the rest)
+  # ── CRON RETIRED 07/12/2026: superseded by nightly-chain.yml ────────────────
+  # Invoked by `needs:` from the chain (on: workflow_call), matrix
+  # [Lee, Collier, Hendry] — same counties, one clock. A second clock here would
+  # re-create the independent-drift bug the chain exists to kill (each member
+  # paid +45m..+5h29m of its own drift; execution order was random — 08d §6).
+  # The 3h stagger existed to dodge the source's sustained-burst 403 throttle
+  # from ONE IP; the chain's matrix legs each run on their own runner/IP, so
+  # requests never accumulate the way a single all-county pass would.
+  # Commented, not deleted: reverting the cutover is one uncomment away.
+  #
+  # schedule:
+  #   - cron: "0 9 * * *"    # Lee     (heaviest — ~7.4k listings)
+  #   - cron: "0 12 * * *"   # Collier
+  #   - cron: "0 15 * * *"   # Hendry  (lightest — ~1.2k listings, added 2026-07-02; staggered 3 h like the rest)
   workflow_dispatch:
     inputs:
       county:

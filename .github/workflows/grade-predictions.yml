@@ -14,7 +14,15 @@ name: Grade Predictions
 
 on:
   workflow_run:
-    workflows: ["Daily Brain Rebuild"] # exact name — .github/workflows/daily-rebuild.yml
+    # CUTOVER 07/12/2026: the rebuild now runs as a CALLED workflow inside
+    # "Nightly Chain" (nightly-chain.yml) — a reusable workflow emits NO
+    # workflow_run event of its own, so without the chain entry this trigger
+    # would silently never fire again. "Daily Brain Rebuild" stays for manual
+    # rebuild dispatches (a standalone dispatch still emits workflow_run).
+    # Chain-night gating: the success-only `if:` below now requires the WHOLE
+    # chain green; a night where the rebuild passed but a later leg failed skips
+    # grading — the queue drains on the next green night (grader is idempotent).
+    workflows: ["Daily Brain Rebuild", "Nightly Chain"] # exact names — daily-rebuild.yml / nightly-chain.yml
     types: [completed]
   workflow_dispatch:
     inputs:

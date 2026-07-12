@@ -1,8 +1,13 @@
 // Drift guard: the heal workflow must watch EXACTLY the logger's watched set,
 // MINUS the intentional exclusions below. The two trigger lists are SUPPOSED to
 // differ by exactly those entries:
-//   - "Daily Brain Rebuild" — owns refinery/lib/master-freeze-watchdog.mts and
-//     the vocab pre-push gate; must never be auto-healed.
+//   - "Nightly Chain" — contains the Daily Brain Rebuild (master-freeze-watchdog
+//     owner), the paid SteadyAPI sweep, and the Anthropic bake as CALLED
+//     workflows; its own YAML never matches the manifest's `paid` regex
+//     (secrets: inherit), so this exclusion is the money guard. Replaced
+//     "Daily Brain Rebuild" here at the 07/12/2026 cron cutover — the rebuild's
+//     cron retired, so it left the watched lists entirely (it stays in
+//     HEAL_EXCLUDED_NAMES as defense in depth).
 //   - "Chief of staff nightly" — propose-only Sonnet workflow with its own kill
 //     switch (CHIEF_OF_STAFF_ENABLED); an L0 auto-rerun is an unattended paid
 //     LLM call on failure. Its plan (2026-07-10-chief-of-staff-nightly.md Task 5)
@@ -44,7 +49,7 @@ function extractWorkflowList(yamlText) {
 const heal = extractWorkflowList(readFileSync(WF("heal-cron-failure.yml"), "utf8"));
 const log = extractWorkflowList(readFileSync(WF("log-cron-incident.yml"), "utf8"));
 
-const EXCLUDED = ["Daily Brain Rebuild", "Chief of staff nightly"];
+const EXCLUDED = ["Nightly Chain", "Chief of staff nightly"];
 
 test("trigger lists parsed (guard against a silent empty-list false pass)", () => {
   assert.ok(heal.length > 5, `heal watched set looks empty/unparsed: ${heal.length}`);

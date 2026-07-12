@@ -6,8 +6,13 @@ on:
   # Task 6). Dry-run confirmed on the runner: zero web_search billing, 11 Sonnet
   # distill calls, $0.86 total (run 28883520933). Corridor pulse stays dark —
   # see corridor-pulse-weekly.yml.
-  schedule:
-    - cron: "0 9 * * *"
+  # ── CRON RETIRED 07/12/2026: superseded by nightly-chain.yml ────────────────
+  # Invoked by `needs:` from the chain (on: workflow_call below). A second clock
+  # here would re-create the independent-drift bug the chain exists to kill
+  # (08d §6). Commented, not deleted: reverting the cutover is one uncomment away.
+  #
+  # schedule:
+  #   - cron: "0 9 * * *"
   workflow_dispatch:
     inputs:
       dry_run:

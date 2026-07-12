@@ -63,7 +63,10 @@ const { workflowName, workflowDisplayName } = deriveWorkflowName(run);
 const INCIDENT_TAG = `[cron-failure:${workflowName}]`;
 
 // Defense in depth — Daily Brain Rebuild owns master-freeze-watchdog; never auto-heal it.
-const EXCLUDED = workflowName === "daily-rebuild";
+// Nightly Chain CONTAINS the rebuild (plus the paid SteadyAPI sweep + Anthropic bake) as
+// called workflows, and its own YAML never matches the manifest's `paid` regex
+// (secrets: inherit) — so it gets the same hard exclusion (07/12/2026 cutover).
+const EXCLUDED = workflowName === "daily-rebuild" || workflowName === "nightly-chain";
 const onMain = !run.head_branch || run.head_branch === "main";
 
 if (mode === "triage") triage();

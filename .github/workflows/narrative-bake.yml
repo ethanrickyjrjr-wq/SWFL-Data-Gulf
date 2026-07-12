@@ -14,11 +14,18 @@ on:
   workflow_run:
     workflows: ["Daily Brain Rebuild"]
     types: [completed]
-  # BACKSTOP — GitHub docs: heavily-loaded schedules can be DROPPED entirely.
-  # If the rebuild never fired, this still bakes once a day; the delta gate
-  # makes a redundant firing cost ~$0 (unchanged keys skip before any API call).
-  schedule:
-    - cron: "23 10 * * *"
+  # ── CRON RETIRED 07/12/2026 ──────────────────────────────────────────────────
+  # This was `23 10` = 06:23 AM EDT — PAST the operator's 6:00 AM Eastern ceiling,
+  # in production, every day. It existed as a backstop against GitHub DROPPING the
+  # rebuild's schedule; the chain now invokes this workflow by `needs: rebuild`
+  # from a single clocked head, so the backstop's job is done by the head's own
+  # backstop. The workflow_run trigger above stays but is inert under the chain
+  # (a reusable workflow emits no workflow_run event of its own) — it still fires
+  # after a MANUAL daily-rebuild dispatch, where the delta gate makes a redundant
+  # bake cost ~$0. Commented, not deleted: revert is one uncomment away.
+  #
+  # schedule:
+  #   - cron: "23 10 * * *"
   workflow_dispatch:
     inputs:
       surface:

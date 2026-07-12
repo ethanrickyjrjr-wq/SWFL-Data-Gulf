@@ -12,7 +12,7 @@
   {
     "name": "ingest-active-listings",
     "file": "active-listings-daily.yml",
-    "scheduled": true,
+    "scheduled": false,
     "timeout_minutes": 30,
     "cancel_in_progress": false,
     "paid": false,
@@ -112,7 +112,7 @@
   {
     "name": "City pulse daily",
     "file": "city-pulse-daily.yml",
-    "scheduled": true,
+    "scheduled": false,
     "timeout_minutes": 45,
     "cancel_in_progress": false,
     "paid": true,
@@ -182,7 +182,7 @@
   {
     "name": "Daily Brain Rebuild",
     "file": "daily-rebuild.yml",
-    "scheduled": true,
+    "scheduled": false,
     "timeout_minutes": 30,
     "cancel_in_progress": false,
     "paid": true,
@@ -392,7 +392,7 @@
   {
     "name": "GATE A — DB parity (zhvi/zori view ⇆ pack)",
     "file": "gate-a-parity.yml",
-    "scheduled": true,
+    "scheduled": false,
     "timeout_minutes": 20,
     "cancel_in_progress": false,
     "paid": false,
@@ -632,7 +632,7 @@
   {
     "name": "ingest-listing-lifecycle",
     "file": "listing-lifecycle-daily.yml",
-    "scheduled": true,
+    "scheduled": false,
     "timeout_minutes": 60,
     "cancel_in_progress": false,
     "paid": false,
@@ -642,10 +642,10 @@
   {
     "name": "Live Search Daily (sourced freshness)",
     "file": "live-search-daily.yml",
-    "scheduled": true,
+    "scheduled": false,
     "timeout_minutes": 25,
     "cancel_in_progress": false,
-    "paid": true,
+    "paid": false,
     "should_be_dark": false,
     "disabled": false
   },
@@ -672,7 +672,7 @@
   {
     "name": "narrative-bake",
     "file": "narrative-bake.yml",
-    "scheduled": true,
+    "scheduled": false,
     "timeout_minutes": 90,
     "cancel_in_progress": false,
     "paid": true,
@@ -692,7 +692,7 @@
   {
     "name": "Nightly Chain",
     "file": "nightly-chain.yml",
-    "scheduled": false,
+    "scheduled": true,
     "timeout_minutes": 10,
     "cancel_in_progress": false,
     "paid": false,

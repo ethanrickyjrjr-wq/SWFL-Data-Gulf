@@ -19,8 +19,32 @@ import {
   type RepoView,
 } from "./identity-model.mts";
 
+/** Workflows that own a nightly ordered chain. A member invoked from a head by a
+ *  job-level `uses:` is CLOCKED even though it carries no cron of its own — the
+ *  07/12/2026 cutover retired the members' standalone crons on purpose (08d §6:
+ *  8 independent clocks each paid their own scheduler drift, making execution
+ *  order random). Honored ONLY while the head itself has a live cron: if the
+ *  chain's cron is ever commented out, its members really are dark again and
+ *  workflow_dark fires for each one. */
+const CHAIN_HEADS = ["nightly-chain.yml"];
+
+function chainClockedMembers(repo: RepoView): Set<string> {
+  const out = new Set<string>();
+  for (const head of CHAIN_HEADS) {
+    const facts = repo.exists(workflowPath(head)) ? parseWorkflow(repo, head) : null;
+    if (!facts || facts.crons.length === 0) continue; // a dark head clocks nothing
+    for (const j of facts.jobs) {
+      if (!j.callsReusable) continue;
+      const base = (j.callsReusable.split("/").pop() ?? "").replace(/@.*$/, "");
+      if (base) out.add(base);
+    }
+  }
+  return out;
+}
+
 export function checkWorkflowLiveness(reg: Registry, repo: RepoView): Finding[] {
   const out: Finding[] = [];
+  const chained = chainClockedMembers(repo);
   for (const { entry, parked } of allEntries(reg)) {
     const wf = entry.workflow;
     const dispatchOnly = entry.dispatch_only === true;
@@ -68,24 +92,27 @@ export function checkWorkflowLiveness(reg: Registry, repo: RepoView): Finding[] 
     const facts = parseWorkflow(repo, wf);
     if (!facts) continue; // unparseable — fail open, another rule surfaces it
 
-    if (facts.crons.length === 0 && !parked && !dispatchOnly) {
+    if (facts.crons.length === 0 && !parked && !dispatchOnly && !chained.has(wf)) {
       out.push({
         rule: "workflow_dark",
         entry: entry.name,
         severity: "red",
         registrySide: `entry is ACTIVE (cadence_days: ${entry.cadence_days ?? "?"}) and declares \`workflow: ${wf}\``,
         otherSide: `.github/workflows/${wf} has no uncommented cron — dispatch-only, so the source silently ages out`,
-        fix: "GAP_SENTINEL — restore the cron, or annotate the entry `dispatch_only: true` / `parked: true` (a stated fact beats silence).",
+        fix: "GAP_SENTINEL — restore the cron, annotate the entry `dispatch_only: true` / `parked: true`, or invoke it by `uses:` from a cron-carrying chain head (a stated fact beats silence).",
       });
     }
 
-    if (facts.crons.length > 0 && parked) {
+    if ((facts.crons.length > 0 || chained.has(wf)) && parked) {
       out.push({
         rule: "parked_but_scheduled",
         entry: entry.name,
         severity: "red",
         registrySide: `entry sits in not_yet_running:/parked — check_freshness.py never probes it`,
-        otherSide: `.github/workflows/${wf} fires on cron "${facts.crons.join('", "')}"`,
+        otherSide:
+          facts.crons.length > 0
+            ? `.github/workflows/${wf} fires on cron "${facts.crons.join('", "')}"`
+            : `.github/workflows/${wf} is invoked nightly by a chain head (${CHAIN_HEADS.join(", ")})`,
         fix: "ZERO_COVERAGE — promote it to pipelines: in the same commit the cron goes live, or comment the cron out.",
       });
     }

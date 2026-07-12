@@ -69,7 +69,7 @@ test("log-cron-incident.yml watches EVERY scheduled workflow (minus the watch-ex
   );
 });
 
-test("heal-cron-failure.yml watches the logger's set minus Daily Brain Rebuild", () => {
+test("heal-cron-failure.yml watches the logger's set minus the heal-excluded names", () => {
   const actual = extractWorkflowList(
     readFileSync(resolve(WF_DIR, "heal-cron-failure.yml"), "utf8"),
   );

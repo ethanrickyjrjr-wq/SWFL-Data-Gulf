@@ -32,12 +32,26 @@ export const WATCH_EXEMPT = {
 // are name-keyed). Kept in lockstep with .github/scripts/trigger-list-drift.test.mjs's
 // EXCLUDED list — that test is the drift guard on this very set.
 //   Daily Brain Rebuild   — owns refinery/lib/master-freeze-watchdog.mts + the vocab
-//                           pre-push gate; must never be auto-healed.
+//                           pre-push gate; must never be auto-healed. Its cron retired
+//                           07/12/2026 (nightly-chain cutover), so it left the watch
+//                           lists — the entry stays as defense in depth if the cron
+//                           ever returns.
+//   Nightly Chain         — CONTAINS the rebuild (and the paid SteadyAPI sweep + the
+//                           Anthropic bake) as called workflows. Its own YAML never
+//                           matches the `paid` regex (secrets: inherit — no literal
+//                           key string), so autoRetryAllowed() alone would NOT stop
+//                           an L0 rerun; this exclusion is what does. An auto-heal of
+//                           the chain would auto-heal the rebuild, defeating the
+//                           Daily Brain Rebuild exclusion above.
 //   Chief of staff nightly — propose-only Sonnet workflow with its own kill switch
 //                           (CHIEF_OF_STAFF_ENABLED); an L0 auto-rerun is an unattended
 //                           paid LLM call. Its plan (2026-07-10 Task 5) wires the
 //                           incident LOGGER only, never the healer.
-export const HEAL_EXCLUDED_NAMES = ["Daily Brain Rebuild", "Chief of staff nightly"];
+export const HEAL_EXCLUDED_NAMES = [
+  "Daily Brain Rebuild",
+  "Nightly Chain",
+  "Chief of staff nightly",
+];
 /** @deprecated back-compat alias; use HEAL_EXCLUDED_NAMES. */
 export const HEAL_EXCLUDED_NAME = HEAL_EXCLUDED_NAMES[0];
 

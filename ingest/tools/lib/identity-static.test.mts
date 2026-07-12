@@ -120,6 +120,76 @@ pipelines:
   });
 });
 
+// ── Chain-clocked members (07/12/2026 cron cutover) ─────────────────────────
+// A member with no cron of its own is NOT dark while a cron-carrying chain head
+// invokes it by `uses:`; if the head's cron goes dark, the member is dark again.
+
+const WF_CHAIN_HEAD = `
+name: Nightly Chain
+on:
+  schedule:
+    - cron: "23 4 * * *"
+jobs:
+  member:
+    uses: ./.github/workflows/collier-permits-monthly.yml
+    secrets: inherit
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: python -m ingest.scripts.assert_landed --dry-run
+`;
+
+const WF_CHAIN_HEAD_DARK = WF_CHAIN_HEAD.replace('- cron: "23 4 * * *"', '# - cron: "23 4 * * *"')
+  .replace("schedule:", "# schedule:")
+  .concat("");
+
+function buildChain(registryYaml: string, headYaml: string) {
+  const repo = new MemRepo({
+    "ingest/cadence_registry.yaml": registryYaml,
+    ".github/workflows/nightly-chain.yml": headYaml,
+    ".github/workflows/collier-permits-monthly.yml": WF_DARK,
+    "ingest/pipelines/collier_permits/pipeline.py": "x = 1\n",
+  });
+  return { repo, reg: loadRegistry(repo) };
+}
+
+describe("checkWorkflowLiveness — chain-clocked members", () => {
+  const REG_ACTIVE = `
+pipelines:
+  - name: collier_permits
+    workflow: collier-permits-monthly.yml
+    cadence_days: 1
+`;
+
+  test("GREEN: a cronless member is CLOCKED while a cron-carrying head uses: it", () => {
+    const { repo, reg } = buildChain(REG_ACTIVE, WF_CHAIN_HEAD);
+    expect(checkWorkflowLiveness(reg, repo)).toEqual([]);
+  });
+
+  test("RED: the same member goes dark again when the head's own cron is commented out", () => {
+    const { repo, reg } = buildChain(REG_ACTIVE, WF_CHAIN_HEAD_DARK);
+    const f = checkWorkflowLiveness(reg, repo);
+    expect(f.map((x) => x.rule)).toEqual(["workflow_dark"]);
+    expect(f[0].entry).toBe("collier_permits");
+  });
+
+  test("RED: a PARKED entry whose cronless workflow is chain-clocked is parked_but_scheduled", () => {
+    const { repo, reg } = buildChain(
+      `
+pipelines: []
+not_yet_running:
+  - name: collier_permits
+    workflow: collier-permits-monthly.yml
+`,
+      WF_CHAIN_HEAD,
+    );
+    const f = checkWorkflowLiveness(reg, repo);
+    expect(f.map((x) => x.rule)).toEqual(["parked_but_scheduled"]);
+    expect(f[0].otherSide).toContain("invoked nightly by a chain head");
+  });
+});
+
 import { checkProducer } from "./identity-static.mts";
 
 const WF_USGS = `

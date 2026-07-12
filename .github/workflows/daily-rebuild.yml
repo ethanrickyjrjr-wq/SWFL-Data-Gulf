@@ -1,16 +1,15 @@
 name: Daily Brain Rebuild
 
 on:
-  # Re-armed 2026-06-20 after the credit freeze. Gated by the ENGINE_ENABLED
-  # repo variable (job-level if:) — flip with `node scripts/engine.mjs off|on`.
-  schedule:
-    # 04:23 UTC = 12:23 AM EDT / 11:23 PM EST — front of the operator's overnight
-    # window, off the top-of-hour congestion (GitHub docs: schedule delays peak
-    # at :00 and jobs can be dropped; observed drift here was 2.3-4.1h on the old
-    # 06:00 slot). Early anchor costs zero freshness: no lake-writing cron fires
-    # 04:23-09:00 UTC. narrative-bake chains on this workflow's completion.
-    # Spec: 2026-07-10-batch-narrative-bake-design.md §4.
-    - cron: "23 4 * * *"
+  # ── CRON RETIRED 07/12/2026: superseded by nightly-chain.yml ────────────────
+  # The chain inherited this exact slot (23 4 = 12:23 AM EDT / 11:23 PM EST) as
+  # its backstop head and invokes this workflow by `needs: row-gate` AFTER the
+  # ingests land — killing the bug where this cron fired before any ingest and
+  # rebuilt on YESTERDAY's data (08d §6). ENGINE_ENABLED gate still applies
+  # (job-level if:). Commented, not deleted: revert is one uncomment away.
+  #
+  # schedule:
+  #   - cron: "23 4 * * *"
   workflow_dispatch:
     inputs:
       pack_id:

@@ -24,7 +24,6 @@ on:
       - "BLS QCEW quarterly"
       - "Census ACS annual"
       - "Census CBP annual"
-      - "City pulse daily"
       - "Collier parcels annual (FDOR cadastral)"
       - "DBPR Press Releases weekly"
       - "DBPR Public Notices — Weekly SWFL"
@@ -45,14 +44,12 @@ on:
       - "FL DOR TDT monthly"
       - "FL DOR sales tax monthly"
       - "FRED ALFRED LAUS monthly"
-      - "GATE A — DB parity (zhvi/zori view ⇆ pack)"
       - "Graphify Republish"
       - "HURDAT2 FL annual"
       - "Home-Values + Investor Composite monthly"
       - "Lee County permits weekly"
       - "LeePA parcels annual"
       - "Lifecycle-arc nudges (daily)"
-      - "Live Search Daily (sourced freshness)"
       - "NOAA GHCN rainfall monthly"
       - "Pipeline freshness probe (daily)"
       - "Project-feed change detection (daily)"
@@ -81,11 +78,9 @@ on:
       - "census-vip monthly"
       - "fred-g17 monthly"
       - "fred-listing-swfl monthly"
-      - "ingest-active-listings"
       - "ingest-brevitas-listings"
       - "ingest-crexi-listings"
       - "ingest-lee-associates-swfl"
-      - "ingest-listing-lifecycle"
       - "ingest-local-cre-context"
       - "ingest-market-aggregates-details"
       - "ingest-market-aggregates-histogram"
@@ -93,7 +88,6 @@ on:
       - "ingest-rentals"
       - "market-heat-swfl monthly"
       - "marketbeat-pdf-ingest"
-      - "narrative-bake"
       - "notion-sync-weekly"
       - "social-pulse-scan"
       - "view_vintages monthly capture"
@@ -126,7 +120,8 @@ jobs:
       github.event.workflow_run.conclusion == 'timed_out') &&
       github.event.workflow_run.event == 'schedule') ||
       github.event_name == 'workflow_dispatch') &&
-      github.event.workflow_run.name != 'Daily Brain Rebuild'
+      github.event.workflow_run.name != 'Daily Brain Rebuild' &&
+      github.event.workflow_run.name != 'Nightly Chain'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:

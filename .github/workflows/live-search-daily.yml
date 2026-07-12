@@ -1,10 +1,14 @@
 name: Live Search Daily (sourced freshness)
 
 on:
-  schedule:
-    # 12:00 UTC = 8 AM ET — after overnight vendor publishes, before market hours.
-    # Slot confirmed free: daily-rebuild 0 6, city-pulse 0 9, freshness-probe 0 14.
-    - cron: "0 12 * * *"
+  # ── CRON RETIRED 07/12/2026: superseded by nightly-chain.yml ────────────────
+  # Invoked by `needs:` from the chain (on: workflow_call below). A second clock
+  # here would re-create the independent-drift bug the chain exists to kill
+  # (08d §6). Commented, not deleted: reverting the cutover is one uncomment away.
+  #
+  # schedule:
+  #   # 12:00 UTC = 8 AM ET — after overnight vendor publishes, before market hours.
+  #   - cron: "0 12 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
