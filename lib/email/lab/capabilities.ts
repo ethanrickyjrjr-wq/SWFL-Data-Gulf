@@ -33,6 +33,8 @@ export interface EmailLabCapabilities {
   socialCalendar: boolean;
   /** Lab-entry root: project/address popups + autosave + leave guard. */
   labEntry: boolean;
+  /** Datasets browser + data-bound blocks (concoctions) on the grid canvas. */
+  datasets: boolean;
 }
 
 // ── THE DIAL. Route every feature here; that's the whole build. ───────────────
@@ -48,6 +50,8 @@ export const FEATURE_ROUTING: Record<keyof EmailLabCapabilities, Routing> = {
   socialCalendar: "paid-only",
   // Free and paid get identical entry + safety behavior (spec 2026-07-06 §D).
   labEntry: "both",
+  // Data-bound blocks ride the grid canvas — paid lane by construction.
+  datasets: "paid-only",
 };
 
 /** Does `tier` get something routed `routing`? */

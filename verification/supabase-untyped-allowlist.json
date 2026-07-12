@@ -23,5 +23,6 @@
   "lib/listings/select.ts",
   "lib/zip-report/candidates.ts",
   "lib/zip-summary/load.ts",
-  "app/api/webhooks/resend/route.ts"
+  "app/api/webhooks/resend/route.ts",
+  "app/api/concoctions/route.ts"
 ]
