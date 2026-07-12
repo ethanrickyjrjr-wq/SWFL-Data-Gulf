@@ -56,6 +56,15 @@ pipelines:
     # the table is single-writer (live_search only). The filter made both the ops ledger and
     # check_freshness.py error out -> FALSE RED while data was fresh (fixed 07/05/2026).
     expected_rows_min: 1
+    count_filter: { column: metric_key, value: median_sale_price } # R1 — WITHOUT THIS THE GATE
+      # IS A LIE. This entry and live_search_daily_mortgage share freshness_table
+      # data_lake.daily_truth, and daily_truth has no source_name column (see :52-54), so a bare
+      # COUNT(*) mixes the two metrics: each would satisfy its floor with the OTHER's rows.
+      # `metric_key` is the ONLY discriminating column — daily_truth.source_tag is the hardcoded
+      # string 'live_search' for BOTH (engine.py:67). Value verified end-to-end:
+      # live_search_config.metric_key (:62) -> engine.py:268/275/337 `metric_key=cfg["metric_key"]`
+      # -> the metric_key column (pipeline.py:23-24). Read ONLY by Phase 4's assert_landed —
+      # check_volume_entry scopes on source_name (check_freshness.py:382) and ignores this key.
     freshness_sla:
       warn_after_days: 2    # past 1.5× tolerance threshold; log WARN but keep exit 0
       error_after_days: 4   # 4× cadence — genuinely dead (transient outages resolve in <2d)
@@ -93,6 +102,10 @@ pipelines:
     freshness_column: retrieved_at
     # NO source_name filter — same source_tag/source_name mismatch as median_price above (fixed 07/05/2026).
     expected_rows_min: 1
+    count_filter: { column: metric_key, value: mortgage_30yr_fixed } # R1 — see the twin comment on
+      # live_search_daily_median_price. Value from live_search_config.metric_key (:93). This is the
+      # entry the mask hurt most: 1 row/day (areas: ["swfl"]) against a median metric writing 3/day,
+      # so a dead mortgage feed would have hidden behind median rows indefinitely.
     note: "Daily 30-yr fixed mortgage from FRED MORTGAGE30US (weekly Thu; api mode = authoritative, no search). Was false-RED on ops until 07/05/2026 (source_name filter vs source_tag column — removed)."
     live_search_config:
       fetch_mode: api
@@ -487,11 +500,27 @@ pipelines:
     workflow: city-pulse-daily.yml
     consuming_pack: city-pulse-swfl
     nightly: true
-    lane: tier-1
-    cadence_days: 7 # WEEKLY cost mode 07/05/2026 (pre-launch data building) — restore 1 at launch
+    lane: tier-1 # HYBRID: freshness via _tier1_inventory (inventory_id), rows via count_table
+      # below. Do NOT flip to tier-2 — it has no freshness_table/dlt_schema_name, so
+      # check_tier2_entry would have nothing to query.
+    cadence_days: 1 # RECONCILED 07/11/2026: .github/workflows/city-pulse-daily.yml:10 is
+      # `cron: "0 9 * * *"` = DAILY. The "WEEKLY cost mode" note was stale prose (the workflow was
+      # re-enabled daily 07/07/2026, per its own :4-7 header). cadence_days drives STALE/FRESH
+      # *display* only — never an exit code (check_freshness.py:338) — so this is not a gating
+      # change. freshness_sla stays 10/21 until the nightly chain is green; tightening to 2/4 is
+      # check city_pulse_sla_tighten.
     tolerance_multiplier: 3.0
     inventory_id: lake-tier1/city_pulse/
     inventory_key_type: prefix
+    count_table: data_lake.city_pulse # the tier-2 table the pipeline ALSO writes (distill.py
+      # write_rows, raw psycopg). Required for the nightly row gate: check_volume_entry skips
+      # tier-1 (check_freshness.py:369-371), so adding this is INERT for the daily probe —
+      # assert_landed.py (Phase 4) reads count_table directly. Phase 3c's doctor must read
+      # tier-1 + count_table + expected_rows_min as GATED_BY_ASSERT_LANDED (green), not as a
+      # broken volume config (red). No count_filter: this table is single-writer, unshared.
+    expected_rows_min: 50 # TABLE-TOTAL non-expired floor, NOT per-run-new. Quiet cities emit 0
+      # new rows by design (the pipeline prunes expired rows), so a "landed today" row count
+      # would false-abort a quiet night. Steady state ~207.
     freshness_sla:
       warn_after_days: 10   # scaled for weekly cost mode; restore 2/4 with daily cadence at launch
       error_after_days: 21  # 3× weekly cadence — three dark weeks is a production defect
@@ -1594,6 +1623,14 @@ pipelines:
   - name: active_listings
     workflow: active-listings-daily.yml
     consuming_pack: none
+    # NOT nightly-gated, despite a daily cron (08h D7 / index correction). This pipeline's table,
+    # data_lake.active_listings_residential, FEEDS NOTHING LIVE: the note below claims
+    # refinery/packs/active-listings-swfl.mts as consumer, but that pack reads
+    # data_lake.listing_active_stats — a view over listing_state, written by listing_lifecycle.
+    # Proof: active-listings-residential-source.mts:27 `const VIEW = "listing_active_stats"`;
+    # lib/email/sole-spine.test.ts:8 `const DEAD_VIEW = "active_listings_residential"`;
+    # lib/landing/load-home-map-data.ts:13. Gating this would guard a corpse while the real table
+    # silently empties. SHIP-OR-DELETE decision: check active_listings_ship_or_delete.
     lane: tier-2
     cadence_days: 1
     tolerance_multiplier: 3.0
@@ -1629,9 +1666,14 @@ pipelines:
       # Hendry ADDED 2026-07-02 (operator call reversing the 07/01 decree; hendry_seed_orphans decision):
       # daily cron 15:00 UTC, no catchup flip — the first scan auto-baselines as is_seed; the 298 old
       # lifecycle_seed Hendry rows stay inert history under lifecycle_seed (excluded by this source_name).
-    expected_rows_min: 9000 # PLACEHOLDER — live api_feed count already 31,709 (Collier 8,819 + Lee
-      # 22,890, runs 28495956344/28496497637), 3x this floor. Scope is Lee+Collier+Hendry (Hendry adds
-      # ~1.2k). Rebaseline to ~90% of live 3-county count once a few daily cycles are in.
+    expected_rows_min: 28000 # REBASELINED 07/11/2026 from the 9,000 placeholder: ~90% of the live
+      # api_feed count (31,709 = Collier 8,819 + Lee 22,890; runs 28495956344/28496497637), per 08h N2.
+      # The old floor would have passed a table that had silently lost 70% of its rows. This is the
+      # NIGHTLY GATE floor as well as the probe's LOW_VOLUME floor — one floor, one authority; there
+      # is deliberately no separate min_rows. Non-gating on the daily probe (check_freshness.py:354-355
+      # — LOW_VOLUME always exits 0); it becomes blocking only via Phase 4's assert_landed.py.
+      # No count_filter needed: `source_name: api_feed` (above) already scopes this count to a table
+      # no other nightly entry claims — so Hendry's inert lifecycle_seed rows are excluded too.
     # GRADUATED 2026-07-01: moved up from not_yet_running: — schedule uncommented in
     # .github/workflows/listing-lifecycle-daily.yml. WAF proven clean on both heavyweight counties from
     # the same GHA runner IP; no [skip]/[warn] 403 in either log. Hendry scheduled 2026-07-02.

@@ -124,3 +124,115 @@ def test_no_cron_comment_is_the_sole_carrier_of_a_workflow_filename():
         "the class this Spine kills. Add the workflow to the entry's `workflow:` field.\n  "
         + "\n  ".join(orphans)
     )
+
+
+def test_nightly_flag_marks_exactly_the_gate_set():
+    """Adding a 5th gate member must be a conscious edit to NIGHTLY_GATE_SET, never
+    a silent default. Absence of `nightly:` = not gated (the safe default)."""
+    flagged = {e["name"] for e in _pipelines() if e.get("nightly") is True}
+    assert flagged == NIGHTLY_GATE_SET, (
+        f"nightly gate drift.\n  extra:   {sorted(flagged - NIGHTLY_GATE_SET)}\n"
+        f"  missing: {sorted(NIGHTLY_GATE_SET - flagged)}"
+    )
+
+
+def test_every_nightly_entry_is_countable_by_assert_landed():
+    """assert_landed.py (Phase 4) needs a table to COUNT and a floor to compare it to.
+    city_pulse is lane:tier-1 with no freshness_table -- it MUST carry an explicit
+    count_table or it silently drops out of the gate (index correction #6)."""
+    by_name = {e["name"]: e for e in _pipelines()}
+    for name in sorted(NIGHTLY_GATE_SET):
+        e = by_name[name]
+        target = e.get("count_table") or e.get("freshness_table")
+        assert target, f"{name}: nightly but no count_table/freshness_table to COUNT"
+        assert "." in target, f"{name}: count target {target!r} is not schema-qualified"
+        floor = e.get("expected_rows_min")
+        assert isinstance(floor, int) and floor > 0, (
+            f"{name}: nightly but expected_rows_min is {floor!r}. "
+            "The floor is expected_rows_min -- there is NO separate min_rows field."
+        )
+
+
+def test_shared_count_targets_require_a_count_filter():
+    """R1 -- THE MASKING BUG.
+
+    Two nightly entries both point at data_lake.daily_truth (:50 median, :86 mortgage) and
+    neither carries a source_name (:52-54 -- daily_truth has no such column). A bare
+    COUNT(*) >= expected_rows_min therefore satisfies MORTGAGE'S floor of 1 with the
+    MEDIAN metric's rows: if mortgage never lands again, the gate still reads LANDED.
+    count_filter is the per-metric discriminator that makes each count honest.
+
+    daily_truth's writer column `source_tag` CANNOT do this: engine.py:67 hardcodes
+    source_tag='live_search' for BOTH metrics. The discriminating column is `metric_key`
+    (registry :62 median_sale_price / :93 mortgage_30yr_fixed -> engine.py:268/275/337
+    `metric_key=cfg["metric_key"]` -> daily_truth.metric_key, pipeline.py:23-24).
+
+    THE RULE IS COMPUTED FROM THE REGISTRY, NOT HARDCODED: any nightly entry whose count
+    target is claimed by another nightly entry must declare its own filter. A third entry
+    pointed at an already-claimed table fails here on day one.
+
+    Column EXISTENCE in the live table is deliberately NOT asserted here -- that is a DB
+    question and it is Phase 2's job (same reasoning as D2). This test is structural.
+    """
+    IDENT = re.compile(r"^[a-z_][a-z0-9_]*$")
+
+    targets: dict[str, list[dict]] = {}
+    for e in _pipelines():
+        if e.get("nightly") is not True:
+            continue
+        target = e.get("count_table") or e.get("freshness_table")
+        targets.setdefault(str(target), []).append(e)
+
+    shared = {t: es for t, es in targets.items() if len(es) > 1}
+
+    # Vacuity guard: names the ONE shared target we know exists today, so this test can
+    # never silently degrade into a no-op. The RULE above stays computed.
+    assert "data_lake.daily_truth" in shared, (
+        "data_lake.daily_truth is the known shared nightly count target (both live_search "
+        f"entries write it). Computed shared set is {sorted(shared)} -- if daily_truth is no "
+        "longer shared, re-derive this guard before deleting it."
+    )
+
+    for target, es in sorted(shared.items()):
+        for e in es:
+            others = [x["name"] for x in es if x is not e]
+            cf = e.get("count_filter")
+            assert isinstance(cf, dict), (
+                f"{e['name']}: nightly, shares count target {target} with {others}, and declares "
+                "NO count_filter. assert_landed would count the other entry's rows and read "
+                "LANDED on a source that never landed. Add: "
+                "count_filter: {{ column: <discriminator>, value: <literal the pipeline writes> }}"
+            )
+            assert IDENT.match(str(cf.get("column") or "")), (
+                f"{e['name']}: count_filter.column must be a bare column identifier "
+                f"(assert_landed interpolates it as an SQL identifier), got {cf.get('column')!r}"
+            )
+            assert cf.get("value") not in (None, ""), (
+                f"{e['name']}: count_filter.value is required — the literal the pipeline "
+                "actually writes to that column."
+            )
+        values = [e["count_filter"]["value"] for e in es]
+        assert len(values) == len(set(values)), (
+            f"{target}: nightly entries {[e['name'] for e in es]} claim the SAME count_filter "
+            f"value {values} — the filter does not discriminate them, so the mask is still open."
+        )
+
+
+def test_no_entry_carries_a_min_rows_field():
+    """`min_rows` would duplicate `expected_rows_min` (index correction #6). One
+    floor, one authority -- a second floor is the hand-synced-pair drift class."""
+    dupes = [e["name"] for e in _entries() if "min_rows" in e]
+    assert not dupes, f"`min_rows:` duplicates `expected_rows_min:` -- remove from {dupes}"
+
+
+def test_orphan_writers_are_not_nightly_gated():
+    """active_listings' table feeds nothing live (08h D7); market_aggregates_* are
+    weekly/monthly (08h D12). Gating any of them guards a corpse or demands a daily
+    landing that by design never comes."""
+    by_name = {e["name"]: e for e in _pipelines()}
+    for name in ("active_listings", "market_aggregates_histogram", "market_aggregates_details"):
+        assert by_name[name].get("nightly") is not True, f"{name} must NOT be nightly-gated"
+    assert by_name["active_listings"]["consuming_pack"] == "none", (
+        "active_listings' table (active_listings_residential) has no live consumer -- "
+        "active-listings-swfl reads listing_active_stats over listing_state (08h D7)"
+    )
