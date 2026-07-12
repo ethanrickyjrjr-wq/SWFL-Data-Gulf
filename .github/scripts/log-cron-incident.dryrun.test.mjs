@@ -46,3 +46,45 @@ test("maybe-resolve dry-run closes the check and never pushes to main", () => {
   assert.match(out, /would close check cron_incident_freshness_probe_daily/);
   assert.doesNotMatch(out, /git push|flip|OPEN row/i);
 });
+
+// --- Termination classes (Phase 3b). Fixtures are REAL runs; see
+// --- .github/scripts/classify-termination.test.mjs for the provenance of each.
+
+// leepa-parcels-annual run 27558172620 — the one SCHEDULED cancel of its 4.
+// 30m 19s against a 90-min ceiling: not a timeout, no cancel-in-progress -> UNKNOWN_CANCEL.
+const LEEPA_CANCELLED = {
+  id: 27558172620,
+  html_url: "https://x/runs/27558172620",
+  conclusion: "cancelled",
+  event: "schedule",
+  head_branch: "main",
+  run_started_at: "2026-06-15T15:44:55Z",
+  updated_at: "2026-06-15T16:15:14Z",
+  name: "LeePA parcels annual",
+  path: ".github/workflows/leepa-parcels-annual.yml",
+};
+
+// A cancelled DISPATCH (leepa 26459301120) — a human pressing stop. Never an incident.
+const LEEPA_CANCELLED_DISPATCH = {
+  ...LEEPA_CANCELLED,
+  id: 26459301120,
+  event: "workflow_dispatch",
+};
+
+test("record-failure dry-run opens an incident for a cancelled SCHEDULED run (the blind spot)", () => {
+  const out = runDryRun("record-failure", LEEPA_CANCELLED);
+  assert.match(out, /would open check cron_incident_leepa_parcels_annual/);
+  assert.match(out, /UNKNOWN_CANCEL/);
+  assert.doesNotMatch(out, /git push/i);
+});
+
+test("record-failure dry-run SKIPS a cancelled dispatch run (a human pressed stop)", () => {
+  const out = runDryRun("record-failure", LEEPA_CANCELLED_DISPATCH);
+  assert.doesNotMatch(out, /would open check/);
+  assert.match(out, /skip/i);
+});
+
+test("record-failure dry-run still opens an incident for a plain failure (no regression)", () => {
+  const out = runDryRun("record-failure", FRESHNESS_FAIL);
+  assert.match(out, /would open check cron_incident_freshness_probe_daily/);
+});

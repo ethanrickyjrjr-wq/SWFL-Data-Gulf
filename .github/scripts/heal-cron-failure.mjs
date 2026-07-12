@@ -21,8 +21,15 @@ import {
 } from "node:fs";
 import { execSync } from "node:child_process";
 import { resolve } from "node:path";
-import { classify, isFreshnessProbe, shouldRetry, needsLlm } from "./classify-cron-failure.mjs";
-import { deriveWorkflowName, fetchLogTail } from "./lib/cron-run.mjs";
+import {
+  classify,
+  isFreshnessProbe,
+  shouldRetry,
+  needsLlm,
+  classifyTermination,
+} from "./classify-cron-failure.mjs";
+import { deriveWorkflowName, fetchLogTail, manifestEntry, hasNewerRun } from "./lib/cron-run.mjs";
+import { autoRetryAllowed } from "../../scripts/lib/watch-manifest.mjs";
 
 const argv = process.argv.slice(2);
 const mode = argv.find((a) => a.startsWith("--mode="))?.slice(7);
@@ -71,21 +78,48 @@ function triage() {
   let should = false;
   let llm = false;
 
-  if (run.conclusion === "failure" && onMain && !EXCLUDED) {
+  const wf = manifestEntry(run);
+  const term = classifyTermination(
+    run,
+    wf,
+    wf?.cancel_in_progress ? hasNewerRun(run) : false, // gh call ONLY if the workflow can self-cancel
+  );
+
+  if (term.klass === "FAILURE" && onMain && !EXCLUDED) {
     const c = classify(fetchLogTail(run.id));
     klass = c.klass;
     signal = c.signal;
-    should = shouldRetry(klass) && run.run_attempt === 1 && !isFreshnessProbe(workflowName);
-    // Fuzzy classes get the LLM. A "transient" that already retried and failed again
-    // (attempt >= 2) clearly wasn't transient — escalate it to a diagnosis too.
+    // MONEY GUARD, three ways: only TRANSIENT retries; only the first attempt; and
+    // NEVER a paid workflow or a sender (a re-run re-spends / re-sends). The watched
+    // set went from 27 to ~80 workflows in Phase 3a — this is what keeps that safe.
+    should =
+      shouldRetry(klass) &&
+      run.run_attempt === 1 &&
+      !isFreshnessProbe(workflowName) &&
+      autoRetryAllowed(wf);
+    // A "transient" that already retried and failed again clearly wasn't transient.
     llm = needsLlm(klass) || (klass === "TRANSIENT" && run.run_attempt > 1);
+  } else if ((term.klass === "TIMEOUT" || term.klass === "UNKNOWN_CANCEL") && onMain && !EXCLUDED) {
+    // MONEY GUARD: a run that hit its ceiling already spent its full budget. Never
+    // re-run it (corridor-pulse burned 3 x 45 min of paid web_search and kept zero
+    // rows). And no LLM: a cancelled run has no failed-log to read, and the
+    // termination reason already carries its own evidence.
+    klass = term.klass;
+    signal = term.prescription;
+    should = false;
+    llm = false;
+    log(term.reason);
   } else {
-    log(`triage skipped: conclusion=${run.conclusion} onMain=${onMain} excluded=${EXCLUDED}`);
+    log(
+      `triage skipped: termination=${term.klass} conclusion=${run.conclusion} onMain=${onMain} excluded=${EXCLUDED}`,
+    );
   }
 
   writeOutputs({
     class: klass,
-    signal: signal.replace(/[\r\n]+/g, " ").slice(0, 120),
+    signal: String(signal)
+      .replace(/[\r\n]+/g, " ")
+      .slice(0, 120),
     should_retry: String(should),
     needs_llm: String(llm),
   });
@@ -99,6 +133,18 @@ function retry() {
     return log(`skip retry: run_attempt=${run.run_attempt} (already retried)`);
   if (isFreshnessProbe(workflowName))
     return log("skip retry: freshness probe (a real stale-data signal)");
+  // Defense in depth: a stale should_retry output can never re-run a killed or
+  // paid job. autoRetryAllowed is the manifest money guard; the conclusion guard
+  // makes "a cancelled/timed-out run is never re-run" structural.
+  const wf = manifestEntry(run);
+  if (!autoRetryAllowed(wf))
+    return log(
+      `skip retry: ${wf?.paid ? "PAID workflow — a re-run re-spends" : "send-side-effect or unknown workflow"}`,
+    );
+  if (run.conclusion !== "failure")
+    return log(
+      `skip retry: conclusion=${run.conclusion} — a cancelled/timed-out run is never re-run`,
+    );
   try {
     sh(`gh run rerun ${run.id} --failed`);
     log(`L0: re-ran failed jobs of run ${run.id}`);

@@ -16,8 +16,8 @@
 import { readFileSync, writeFileSync, unlinkSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { resolve } from "node:path";
-import { classify, isLocalModule } from "./classify-cron-failure.mjs";
-import { deriveWorkflowName, fetchLogTail } from "./lib/cron-run.mjs";
+import { classify, isLocalModule, classifyTermination } from "./classify-cron-failure.mjs";
+import { deriveWorkflowName, fetchLogTail, manifestEntry, hasNewerRun } from "./lib/cron-run.mjs";
 
 const argv = process.argv.slice(2);
 const dryRun = argv.includes("--dry-run");
@@ -64,15 +64,38 @@ else maybeResolve();
 // ---------------------------------------------------------------------------
 
 function recordFailure() {
-  if (conclusion !== "failure") return log(`skip: conclusion is ${conclusion}`);
   if (headBranch && headBranch !== "main")
     return log(`skip: head_branch is ${headBranch}, not main`);
 
-  const logTail = fetchLogTail(runId);
-  const cls = classify(logTail);
-  let suggestedAction = cls.suggestedAction;
-  if (cls.klass === "MISSING_DEP" && isLocalModule(cls.signal)) {
-    suggestedAction = `\`${cls.signal}\` matches a local module in this repo — this is an import-path bug, NOT a missing PyPI package. Do not add it to requirements.txt; fix the import.`;
+  // A `timeout-minutes` kill lands as conclusion `cancelled` (corridor-pulse: 3
+  // scheduled 45-minute kills, full API spend, zero rows kept, zero incidents). The
+  // old `conclusion !== 'failure'` guard was blind to the whole class.
+  const wf = manifestEntry(run);
+  const term = classifyTermination(
+    run,
+    wf,
+    wf?.cancel_in_progress ? hasNewerRun(run) : false, // gh call ONLY if the workflow can self-cancel
+  );
+  if (term.klass === "OTHER") return log(`skip: ${term.reason || `conclusion is ${conclusion}`}`);
+  if (term.klass === "SUPERSEDED") return log(`skip: ${term.reason}`);
+
+  let cls;
+  let suggestedAction;
+  let logTail = "";
+  if (term.klass === "FAILURE") {
+    logTail = fetchLogTail(runId);
+    cls = classify(logTail);
+    suggestedAction = cls.suggestedAction;
+    if (cls.klass === "MISSING_DEP" && isLocalModule(cls.signal)) {
+      suggestedAction = `\`${cls.signal}\` matches a local module in this repo — this is an import-path bug, NOT a missing PyPI package. Do not add it to requirements.txt; fix the import.`;
+    }
+  } else {
+    // TIMEOUT / UNKNOWN_CANCEL. `gh run view --log-failed` returns nothing for a
+    // cancelled run, so there is no log tail to classify — the termination reason IS
+    // the diagnosis, and it carries its own evidence.
+    cls = { klass: term.klass, signal: term.prescription };
+    suggestedAction = term.reason;
+    logTail = term.reason;
   }
   const detail = `${cls.klass}${cls.signal ? ` — ${cls.signal}` : ""} · ${runUrl}`;
 
