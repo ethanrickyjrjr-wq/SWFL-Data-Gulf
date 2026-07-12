@@ -22,6 +22,13 @@ const RATE_LIMITED_PREFIXES = [
   "/p/",
   "/api/assistant",
   "/api/claim",
+  // /api/templates shares the MCP bearer gate (app/api/templates/render reuses
+  // unauthorizedResponse). The moment MCP_BEARER_TOKEN is unset — the documented
+  // beta posture, "MCP runs OPEN" — this route goes public too, and it renders HTML
+  // server-side on every POST. Public + unauthenticated + does CPU work on demand is
+  // the same shape as the routes above, so it gets the same first-line burst limit.
+  // Its GET preview was already public and unthrottled.
+  "/api/templates",
 ];
 
 function isRateLimited(pathname: string): boolean {
