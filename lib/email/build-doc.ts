@@ -41,7 +41,7 @@ import { isListingIntent, isNewListingRecipePrompt } from "@/lib/email/listing-i
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { fetchListingFacts, type ListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
-import { compsForAddress } from "@/lib/assistant/comp-helper";
+import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import {
   buildSoldCompsSpec,
   soldCompsListBlock,
@@ -80,7 +80,7 @@ import {
 } from "@/lib/email/author-doc";
 import { voiceGuard, cleanTellText } from "@/lib/email/voice-guard";
 import { extractNumbers } from "@/lib/deliverable/narrative-lint";
-import { loadAddressFigures } from "@/lib/email/address-context";
+import { loadAddressCompContext, type AddressCompContext } from "@/lib/email/address-context";
 import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
 import { findPlaceholder } from "@/lib/showcase/recipe";
 
@@ -135,19 +135,21 @@ async function fetchMasterDossier(scope?: BuildScope): Promise<string> {
  *  via the web lane and drop the superseded held ones BEFORE composing the prompt. */
 export async function fetchLakeParts(
   scope?: BuildScope,
-): Promise<{ figures: MarketFigure[]; dossier: string }> {
-  const [marketFigures, lifecycleFigure, dossier, addressFigures] = await Promise.all([
+): Promise<{ figures: MarketFigure[]; dossier: string; addressComps: RenderComp[] }> {
+  const [marketFigures, lifecycleFigure, dossier, addressCtx] = await Promise.all([
     loadMarketFigures(scope).catch(() => []),
     loadLifecycleDigest(scope).catch(() => null),
     fetchMasterDossier(scope).catch(() => ""),
-    loadAddressFigures(scope?.address).catch(() => []),
+    loadAddressCompContext(scope?.address).catch(
+      () => ({ figures: [], comps: [] }) as AddressCompContext,
+    ),
   ]);
   const figures = [
     ...marketFigures,
     ...(lifecycleFigure ? [lifecycleFigure] : []),
-    ...addressFigures,
+    ...addressCtx.figures,
   ];
-  return { figures, dossier };
+  return { figures, dossier, addressComps: addressCtx.comps };
 }
 
 /** Compose the prompt-context string the fill AI reads from cited figures + the dossier. */
@@ -638,11 +640,25 @@ export async function buildContentDoc({
   // A template's EMPTY sources accordion is an open slot the patch can't write
   // (ContentPatch has no sources key) — seed it from the figures the filled doc
   // actually cites, web-verified ones with their urls (email_sources_accordion_autofill).
-  const sourcedDoc = fillEmptySourcesBlock(
+  let sourcedDoc = fillEmptySourcesBlock(
     reparsed.data,
     lakeParts.figures,
     web.verified.map((v) => ({ label: v.label, value: v.value, url: v.url })),
   );
+
+  // Comp/listing-intent builds carrying a subject address get the LINKED sold-comp
+  // rows ("View →" to each captured realtor.com page) — same one comp fetch that
+  // fed the figures above, upsert-idempotent for scheduled rebuilds.
+  const wantsCompRows =
+    (lakeParts.addressComps?.length ?? 0) > 0 &&
+    (isListingIntent(prompt) || /\b(comps?|comparables?|recent sales)\b/i.test(prompt));
+  if (wantsCompRows) {
+    const compRows = soldCompsListBlock(lakeParts.addressComps);
+    if (compRows) {
+      const withRows = EmailDocSchema.safeParse(upsertSoldCompsBlock(sourcedDoc, compRows));
+      if (withRows.success) sourcedDoc = withRows.data;
+    }
+  }
 
   return {
     payload: {
