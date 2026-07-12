@@ -19,6 +19,12 @@
 //                  breaks a fast bun:test per-pack assertion (e.g. "sources wired").
 //                  vitest/subprocess per-pack tests (zhvi/zori view parity) only
 //                  resolve in CI, so they are skipped local-side, never blocked.
+//   7. REGISTRY IDENTITY — a cadence_registry / workflow / pipeline edit that drifts
+//                  one of the hand-synced identity strings (workflow ref, dlt schema,
+//                  source_name, secret-in-env, timeout, action version). Runs
+//                  `check-registry-identity.mts --static` — files only, no DB, no
+//                  network (tags come from the maintained ingest/tools/action-tags.json
+//                  allowlist and fail OPEN). Same block/exit contract as Gate 2/5.
 //
 // NOTE — what this hook can and cannot catch: it stops DETERMINISTIC failures
 // (drift, orphans, lockfile). It does NOT and cannot reliably stop a FLAKY test
@@ -257,6 +263,41 @@ process.stdin.on("end", () => {
           `THIS commit — grains finest-first; covers = the CountyFips[] it actually holds,\n` +
           `or "all" for a region/national footprint — then retry.\n\n` +
           truncate(geo.out),
+      );
+    }
+  }
+
+  // ---- Gate 7: registry ⇆ workflow ⇆ pipeline identity ----------------------
+  // The wrong-letter class: a registry field that disagrees with the workflow YAML
+  // or the pipeline Python goes silent for WEEKS (source_tag-vs-source_name cost two
+  // weeks of false-RED on daily_truth; usgs_tier2 names a writer that does not exist
+  // and env-swfl reads the frozen table live). --static reads FILES only — no DB, no
+  // gh — so it is hook-safe, and every sub-check that cannot run degrades to a WARN
+  // rather than a block (fail-OPEN, same as Gate 2/5).
+  const identityTouched = changed.some(
+    (f) =>
+      f === "ingest/cadence_registry.yaml" ||
+      f.startsWith(".github/workflows/") ||
+      ((f.startsWith("ingest/pipelines/") || f.startsWith("ingest/duckdb_pipelines/")) &&
+        f.endsWith(".py")),
+  );
+  if (identityTouched) {
+    const identity = run("bun ingest/tools/check-registry-identity.mts --static");
+    if (identity.ran && identity.code !== 0) {
+      block(
+        "REGISTRY IDENTITY — a config identity string drifted from the code it names",
+        `A cadence_registry entry disagrees with the workflow YAML or the pipeline\n` +
+          `Python it points at. Each failure below names BOTH sides.\n\n` +
+          `Fix ONE of:\n` +
+          `  • correct the drifting side (the usual answer — e.g. wire the secret into\n` +
+          `    the workflow \`env:\`, or align dlt_schema_name with \`pipeline_name=\`);\n` +
+          `  • state the truth structurally (\`dispatch_only: true\`, \`parked: true\`,\n` +
+          `    \`schema_static: unverifiable\`, or a \`coverage_exempt: {table, reason}\`);\n` +
+          `  • if it needs an operator decision, open a check and record it:\n` +
+          `      node scripts/check.mjs open <project> <key> "<label>"\n` +
+          `    then add \`known_drift: [{rule: <rule>, check: <key>}]\` to the entry.\n` +
+          `    (RULE 2.4 — no silent deferrals. A prose note is not a deferral.)\n\n` +
+          truncate(identity.out),
       );
     }
   }

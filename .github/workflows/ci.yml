@@ -43,3 +43,21 @@ jobs:
       # triaged clean, to fail the build on newly-orphaned modules (phase 2).
       - name: Dead code (knip, report-only)
         run: bunx --bun knip
+
+      # Config-identity cross-check. --static is files-only and matches the pre-push
+      # Gate 7 exactly, so a push that bypassed the hook still fails here.
+      - name: Registry identity (static)
+        run: bun ingest/tools/check-registry-identity.mts --static
+
+      # --live adds data_lake reads. ADVISORY on purpose (the tool exits 0 and prints):
+      # on the current snapshot redfin_city_swfl / dbpr_re_licensees / leepa_parcel_zip
+      # are all genuinely RED, and a blocking live gate on day one reds main — the exact
+      # false-red disease this build exists to kill. Flip to `--live --gate` after one
+      # green confirm (tracked by check `registry_identity_live_gating`).
+      # NOTE: `gh secret set` is step 1; THIS env: block is step 2.
+      - name: Registry identity (live, advisory)
+        if: github.event_name == 'push'
+        env:
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          GH_TOKEN: ${{ github.token }}
+        run: bun ingest/tools/check-registry-identity.mts --live
