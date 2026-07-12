@@ -192,7 +192,7 @@ function chartAllowed(def: AnyDef, rows: ConcoctionRow[], spec: DefaultBlockSpec
 }
 
 /** load: concoction + params → its default block set, bindings stamped. */
- 
+
 export async function materializeLoad(
   def: AnyDef,
   params: Record<string, string | number>,
@@ -210,7 +210,13 @@ export async function materializeLoad(
     let block: EmailBlock | null = null;
     if (spec.type === "image" && chartAllowed(def, rows, spec)) {
       try {
-        block = await buildChartBlock(def, rows, spec, { asOf, hostPng: deps.hostPng, ids });
+        block = await buildChartBlock(
+          def,
+          rows,
+          spec,
+          { asOf, hostPng: deps.hostPng, ids },
+          parsed as Record<string, string | number>,
+        );
         block = { ...block, layout: { ...spec.layout } };
       } catch {
         block = mapSliceToBlock(def, rows, spec, ids); // degrade, never refuse

@@ -143,11 +143,33 @@ describe("materializeLoad", () => {
     const items = (block!.props as { items: { text: string }[] }).items;
     expect(items[0].text).toContain("Cap rate");
   });
-  it("chart stub failure degrades in materializeLoad too (list in place of image)", async () => {
-    const { blocks } = await materializeLoad(corridorProfiles, {}, { sb: stubSb(CORRIDOR_ROWS) });
-    // Task 5: chart-block is a stub that throws → the image slice lands as a list.
+  it("chart failure (hosting unavailable) degrades in materializeLoad too — list in place of image", async () => {
+    const { blocks } = await materializeLoad(
+      corridorProfiles,
+      {},
+      {
+        sb: stubSb(CORRIDOR_ROWS),
+        hostPng: async () => {
+          throw new Error("no host in test");
+        },
+      },
+    );
     expect(blocks.some((b) => b.type === "image")).toBe(false);
     expect(blocks.filter((b) => b.type === "list").length).toBeGreaterThanOrEqual(2);
+  });
+  it("with hosting available the image slice renders as a real chart block", async () => {
+    const { blocks } = await materializeLoad(
+      corridorProfiles,
+      {},
+      {
+        sb: stubSb(CORRIDOR_ROWS),
+        hostPng: async (k) => `https://cdn/x/${k}`,
+      },
+    );
+    const img = blocks.find((b) => b.type === "image");
+    expect(img).toBeDefined();
+    expect((img!.props as { kind?: string }).kind).toBe("chart");
+    expect(img!.binding?.concoctionId).toBe("corridor-profiles");
   });
   it("empty rows → labeled throw", async () => {
     await expect(materializeLoad(corridorProfiles, {}, { sb: stubSb([]) })).rejects.toThrow(
