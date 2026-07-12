@@ -1,3 +1,25 @@
+## 2026-07-12 (Fable 5 · wt/dcd → main) — CHAIN GREEN END-TO-END: dry-run caught the founding bug, real run landed all 4 sources; cutover now waits on the operator
+
+Verification triple, all on run evidence. (1) Probe dispatch 29180433007: conclusion FAILURE with the
+doctor gating step as the ONLY red (16 known reds), every other step green incl. the live
+ledger-writing data-quality probe — the T12 flip works, not a timeout kill; ledger steady-state
+(exactly 1 contract_fail row, the known 21-row price floor; no spurious opens/closes). (2) Chain
+DRY-RUN 29180433582: green; all 8 workflow_call contracts parsed by GitHub's parser, both matrices
+fanned out, secrets reached members; row gate's FIRST live judgment: live_search LANDED (60+4 rows —
+the chain's own leg had just written them) while city_pulse + listing_lifecycle correctly named
+STALE — the dry-run lifecycle legs are literally "green runs that wrote zero rows," and the gate
+caught the founding bug on first execution (report-only: named, didn't block). (3) REAL run
+29180619318: GREEN END-TO-END in 9m25s — all 4 nightly sources LANDED (listing_lifecycle 34,701 >=
+floor 28,000 · city_pulse 215 >= 50 · live_search 63 + 4), Locus-A gate live in-chain ([contract]
+Lee: price floor 13 of 12,171 in-scope, 0.1068%, policy=report), [budget] 266 SteadyAPI calls (Lee),
+rebuild took the CORRECT TTL-skip (04:23 cron had rebuilt 35 min earlier — full-work proof belongs
+to post-cutover nights), bake cadence-skipped (Sat/weekly), parity real + green, graphify skipped
+behind its var. city_pulse_sla_tighten precondition is now MET. HELD FOR OPERATOR: (a) cron cutover
+commit — check nightly_chain_cron_cutover (lights chain cron + retires 8 standalone incl.
+narrative-bake's 06:23 EDT violation, one commit, zero duplicate-paid window); (b) caveat-TTL wiring
+at 4-output.mts (check caveat_expiry_rebuild); (c) assert_landed report-only → gating after a clean
+week; (d) 3d probe-body fold (unapproved).
+
 ## 2026-07-12 (Fable 5 · wt/dcd → main) — Chain group built: Locus-A market_aggregates gate · email freshness preflight · 8 members reusable · nightly-chain.yml DISPATCH-ONLY
 
 Operator-approved batch (Q2 remainder + Q4). (1) market_aggregates run_details gate — the one clean
