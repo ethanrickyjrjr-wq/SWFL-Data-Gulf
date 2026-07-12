@@ -1,0 +1,2857 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-12T02:39:27Z",
+  "counts": {
+    "green": 30,
+    "yellow": 26,
+    "red": 16,
+    "total": 72
+  },
+  "coverage": {
+    "datasets": 72,
+    "with_workflow": 71,
+    "with_content_contracts": 7,
+    "gh": "ok",
+    "manifest": "ok"
+  },
+  "datasets": [
+    {
+      "dataset": "live_search_daily_median_price",
+      "table": "data_lake.daily_truth",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "live-search-daily.yml",
+      "pipeline": "live_search_daily_median_price",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 0,
+        "last_run": "2026-07-11"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 64,
+        "min_rows": 1
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-11T12:57:08Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29153495045",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "live_search_daily_mortgage",
+      "table": "data_lake.daily_truth",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "live-search-daily.yml",
+      "pipeline": "live_search_daily_mortgage",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 0,
+        "last_run": "2026-07-11"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 64,
+        "min_rows": 1
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-11T12:57:08Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29153495045",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "zori_swfl_duckdb",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "zori-tier1-monthly.yml",
+      "pipeline": "zori_swfl_duckdb",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 21,
+        "last_run": "2026-06-20"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "zhvi_swfl_duckdb",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "zhvi-tier1-monthly.yml",
+      "pipeline": "zhvi_swfl_duckdb",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 13,
+        "last_run": "2026-06-28"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "tier_divergence_swfl_duckdb",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "tier-divergence-tier1-monthly.yml",
+      "pipeline": "tier_divergence_swfl_duckdb",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 20,
+        "last_run": "2026-06-21"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "redfin_swfl",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "redfin-monthly.yml",
+      "pipeline": "redfin_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 26,
+        "last_run": "2026-06-15"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "redfin_price_drops",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "redfin-price-drops-monthly.yml",
+      "pipeline": "redfin_price_drops",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 26,
+        "last_run": "2026-06-15"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "redfin_contract_cancellations",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "redfin-contract-cancellations-monthly.yml",
+      "pipeline": "redfin_contract_cancellations",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 26,
+        "last_run": "2026-06-15"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "redfin_delistings_relistings",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "redfin-delistings-relistings-monthly.yml",
+      "pipeline": "redfin_delistings_relistings",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 26,
+        "last_run": "2026-06-15"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "hurdat2_fl",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "hurdat2-annual.yml",
+      "pipeline": "hurdat2_fl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 40,
+        "last_run": "2026-06-01"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-01T18:31:59Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/26774116273",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "storm_history_swfl",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "storm-history-monthly.yml",
+      "pipeline": "storm_history_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 1,
+        "last_run": "2026-07-10"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-10T16:10:25Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29106417648",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "usgs",
+      "table": null,
+      "kind": "tier-1-duckdb",
+      "lane": "tier-1-duckdb",
+      "workflow": "usgs-monthly.yml",
+      "pipeline": "usgs",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 1,
+        "last_run": "2026-07-10"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-10T15:25:08Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29103585009",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "faf5",
+      "table": null,
+      "kind": "tier-1",
+      "lane": "tier-1",
+      "workflow": "faf5-annual.yml",
+      "pipeline": "faf5",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 52,
+        "last_run": "2026-05-20"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-14T06:46:31Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/27491047049",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "fred_g17",
+      "table": null,
+      "kind": "tier-1",
+      "lane": "tier-1",
+      "workflow": "ingest-fred-g17.yml",
+      "pipeline": "fred_g17",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 24,
+        "last_run": "2026-06-17"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-17T16:38:45Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/27704624843",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "fred_laus_alfred",
+      "table": null,
+      "kind": "tier-1",
+      "lane": "tier-1",
+      "workflow": "fred-laus-alfred-monthly.yml",
+      "pipeline": "fred_laus_alfred",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 14,
+        "last_run": "2026-06-27"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-27T15:19:12Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28293262366",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "fred_listing_swfl",
+      "table": null,
+      "kind": "tier-1",
+      "lane": "tier-1",
+      "workflow": "ingest-fred-listing-swfl.yml",
+      "pipeline": "fred_listing_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 4,
+        "last_run": "2026-07-07"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-07T15:37:23Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28878805513",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "market_heat_swfl",
+      "table": null,
+      "kind": "tier-1",
+      "lane": "tier-1",
+      "workflow": "ingest-market-heat-swfl.yml",
+      "pipeline": "market_heat_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 3,
+        "last_run": "2026-07-08"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-08T15:05:41Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28953099301",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "bls_ppi",
+      "table": null,
+      "kind": "tier-1",
+      "lane": "tier-1",
+      "workflow": "ingest-bls-ppi.yml",
+      "pipeline": "bls_ppi",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 25,
+        "last_run": "2026-06-16"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-16T18:30:10Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/27639279982",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "bls_oews_swfl_tier1",
+      "table": null,
+      "kind": "tier-1",
+      "lane": "tier-1",
+      "workflow": "bls-oews-annual.yml",
+      "pipeline": "bls_oews_swfl_tier1",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 41,
+        "last_run": "2026-05-31"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NEVER_RAN",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `bls-oews-annual.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow bls-oews-annual.yml has never run (confirmed by a targeted `gh run list --workflow` backfill, not merely absent from the bulk window)."
+      }
+    },
+    {
+      "dataset": "census_vip",
+      "table": null,
+      "kind": "tier-1",
+      "lane": "tier-1",
+      "workflow": "ingest-census-vip.yml",
+      "pipeline": "census_vip",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 29,
+        "last_run": "2026-06-12"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-12T16:13:48Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/27428030996",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "city_pulse",
+      "table": "data_lake.city_pulse",
+      "kind": "table",
+      "lane": "tier-1",
+      "workflow": "city-pulse-daily.yml",
+      "pipeline": "city_pulse",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 0,
+        "last_run": "2026-07-11"
+      },
+      "volume": {
+        "status": "GATED_BY_ASSERT_LANDED",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-11T10:17:08Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29149098850",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "city_pulse_corridors",
+      "table": null,
+      "kind": "tier-1",
+      "lane": "tier-1",
+      "workflow": "corridor-pulse-weekly.yml",
+      "pipeline": "city_pulse_corridors",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 6,
+        "last_run": "2026-07-05"
+      },
+      "volume": {
+        "status": "NOT_APPLICABLE",
+        "severity": "green",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "DISABLED",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": false
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "bls_laus",
+      "table": "data_lake.bls_laus",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "bls-laus-monthly.yml",
+      "pipeline": "bls_laus",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 16,
+        "last_run": "2026-06-25"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 340,
+        "min_rows": 295
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-25T15:39:28Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28182015499",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "bls_qcew",
+      "table": "data_lake.bls_qcew",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "bls-qcew-quarterly.yml",
+      "pipeline": "bls_qcew",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 46,
+        "last_run": "2026-05-26"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 32,
+        "min_rows": 28
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-05-26T15:52:42Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/26459294477",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "bls_oews_swfl",
+      "table": "data_lake.bls_oews_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "bls-oews-annual.yml",
+      "pipeline": "bls_oews_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 41,
+        "last_run": "2026-05-31"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 220,
+        "min_rows": 198
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NEVER_RAN",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `bls-oews-annual.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow bls-oews-annual.yml has never run (confirmed by a targeted `gh run list --workflow` backfill, not merely absent from the bulk window)."
+      }
+    },
+    {
+      "dataset": "census_cbp",
+      "table": "data_lake.census_cbp_fl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "census-cbp-annual.yml",
+      "pipeline": "census_cbp",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 26,
+        "last_run": "2026-06-15"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 255563,
+        "min_rows": 230006
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-15T15:35:55Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/27557641898",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "census_acs",
+      "table": "data_lake.census_acs_zcta",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "census-acs-annual.yml",
+      "pipeline": "census_acs",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 17,
+        "last_run": "2026-06-24"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 100,
+        "min_rows": 90
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NEVER_RAN",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `census-acs-annual.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow census-acs-annual.yml has never run (confirmed by a targeted `gh run list --workflow` backfill, not merely absent from the bulk window)."
+      }
+    },
+    {
+      "dataset": "usgs_tier2",
+      "table": "data_lake.usgs_daily",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "none",
+      "pipeline": "usgs_tier2",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 53,
+        "last_run": "2026-05-19"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 605,
+        "min_rows": 544
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_WORKFLOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": null
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "fema",
+      "table": "data_lake.fema_nfip_claims",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "fema-nfip-quarterly.yml",
+      "pipeline": "fema",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 28,
+        "last_run": "2026-06-13"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 448425,
+        "min_rows": 403542
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "TIMEOUT",
+        "severity": "red",
+        "last_conclusion": "cancelled",
+        "last_success_at": "2026-06-13T22:23:57Z",
+        "consecutive_failures": 1,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28744412719",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "TIMEOUT_KILL",
+        "should_retry": false,
+        "fix": "Run hit its ceiling and was killed \u2014 raise `timeout-minutes` in `.github/workflows/fema-nfip-quarterly.yml`, or shrink the batch. DO NOT RE-RUN: should_retry=false. A retry re-burns the identical spend and hits the identical ceiling.",
+        "evidence": "cancelled at >=95% of timeout-minutes; https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28744412719"
+      }
+    },
+    {
+      "dataset": "leepa",
+      "table": "data_lake.leepa_parcels",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "leepa-parcels-annual.yml",
+      "pipeline": "leepa",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 54,
+        "last_run": "2026-05-18"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 548798,
+        "min_rows": 493918
+      },
+      "content": {
+        "status": "PASS",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "redfin_collier",
+      "table": "data_lake.redfin_collier_market",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "redfin-collier-monthly.yml",
+      "pipeline": "redfin_collier",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 23,
+        "last_run": "2026-06-18"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 782,
+        "min_rows": 700
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "redfin_lee",
+      "table": "data_lake.redfin_lee_market",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "redfin-lee-monthly.yml",
+      "pipeline": "redfin_lee",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 23,
+        "last_run": "2026-06-18"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 660,
+        "min_rows": 594
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "redfin_city_swfl",
+      "table": "data_lake.redfin_city_swfl",
+      "kind": "missing",
+      "lane": "tier-2",
+      "workflow": "redfin-city-swfl-monthly.yml",
+      "pipeline": "redfin_city_swfl",
+      "freshness": {
+        "status": "MISSING",
+        "severity": "red",
+        "age_days": null,
+        "last_run": null
+      },
+      "volume": {
+        "status": "UNRESOLVED",
+        "severity": "red",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "NEVER_LANDED",
+        "should_retry": false,
+        "fix": "`ingest/cadence_registry.yaml` claims table `data_lake.redfin_city_swfl` but the DB has no successful load for it. Either dispatch `.github/workflows/redfin-city-swfl-monthly.yml` once and confirm it lands, or delete the registry entry. A registry entry pointing at a ghost table reads FRESH forever.",
+        "evidence": "freshness=MISSING volume=UNRESOLVED pg_class kind=missing"
+      }
+    },
+    {
+      "dataset": "collier_parcels",
+      "table": "data_lake.collier_parcels",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "collier-parcels-annual.yml",
+      "pipeline": "collier_parcels",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 0,
+        "last_run": "2026-07-11"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 290973,
+        "min_rows": 261000
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-20T14:14:53Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/27873716538",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "fhfa",
+      "table": "data_lake.fhfa_hpi",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "fhfa-hpi-quarterly.yml",
+      "pipeline": "fhfa",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 3,
+        "last_run": "2026-07-08"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 184817,
+        "min_rows": 119903
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-08T15:17:20Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28953913464",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "fdot",
+      "table": "data_lake.fdot_aadt_fl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "fdot-aadt-annual.yml",
+      "pipeline": "fdot",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 8,
+        "last_run": "2026-07-03"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 103662,
+        "min_rows": 93295
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "CANCELLED",
+        "severity": "yellow",
+        "last_conclusion": "cancelled",
+        "last_success_at": "2026-05-26T15:52:59Z",
+        "consecutive_failures": 1,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/27558406110",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "lee_permits",
+      "table": "data_lake.lee_building_permits",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "lee-permits-weekly.yml",
+      "pipeline": "lee_permits",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 3,
+        "last_run": "2026-07-08"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 289,
+        "min_rows": 5
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-08T00:21:44Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28908149044",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "collier_permits",
+      "table": "data_lake.collier_building_permits",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "collier-permits-monthly.yml",
+      "pipeline": "collier_permits",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 45,
+        "last_run": "2026-05-27"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 4975,
+        "min_rows": 4477
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "DISABLED",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": false
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "fl_dor_tdt",
+      "table": "public.fl_dor_tdt_collections",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "fl-dor-tdt-monthly.yml",
+      "pipeline": "fl_dor_tdt",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 44,
+        "last_run": "2026-05-28"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 666,
+        "min_rows": 599
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-20T11:55:16Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/27870409461",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "fl_dor_sales_tax",
+      "table": "public.fl_dor_sales_tax",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "fl-dor-sales-tax-monthly.yml",
+      "pipeline": "fl_dor_sales_tax",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 26,
+        "last_run": "2026-06-15"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 40140,
+        "min_rows": 36126
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-06-15T16:20:04Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/27560296646",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "fdle_crime_swfl",
+      "table": "public.fdle_crime_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "fdle-crime-quarterly.yml",
+      "pipeline": "fdle_crime_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 10,
+        "last_run": "2026-07-01"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 8,
+        "min_rows": 4
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-01T14:52:10Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28526483952",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "zori_swfl_tier2",
+      "table": "data_lake.zori_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "zori-tier2-monthly.yml",
+      "pipeline": "zori_swfl_tier2",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 20,
+        "last_run": "2026-06-21"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 5277,
+        "min_rows": 4666
+      },
+      "content": {
+        "status": "PASS",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": {
+        "status": "VIEW_STALE",
+        "detail": "SUPABASE_URL or SUPABASE_SERVICE_KEY not set \u2014 view probe skipped"
+      },
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "zhvi_swfl_tier2",
+      "table": "data_lake.zhvi_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "zhvi-tier2-monthly.yml",
+      "pipeline": "zhvi_swfl_tier2",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 13,
+        "last_run": "2026-06-28"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 34031,
+        "min_rows": 1
+      },
+      "content": {
+        "status": "PASS",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": {
+        "status": "VIEW_STALE",
+        "detail": "SUPABASE_URL or SUPABASE_SERVICE_KEY not set \u2014 view probe skipped"
+      },
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "tier_divergence_swfl_tier2",
+      "table": "data_lake.tier_divergence_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "tier-divergence-tier2-monthly.yml",
+      "pipeline": "tier_divergence_swfl_tier2",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 19,
+        "last_run": "2026-06-22"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 39308,
+        "min_rows": 107
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": {
+        "status": "VIEW_STALE",
+        "detail": "SUPABASE_URL or SUPABASE_SERVICE_KEY not set \u2014 view probe skipped"
+      },
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "fgcu_reri_indicators",
+      "table": "public.fgcu_reri_indicators",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "fgcu-reri-monthly.yml",
+      "pipeline": "fgcu_reri_indicators",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 36,
+        "last_run": "2026-06-05"
+      },
+      "volume": {
+        "status": "LOW_VOLUME",
+        "severity": "red",
+        "landed": 10,
+        "min_rows": 16
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "DISABLED",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `fgcu-reri-monthly.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow fgcu-reri-monthly.yml carries a cron in source but its state at the GitHub API is disabled_manually \u2014 a schedule nobody is running. No enum member covers this class yet (check doctor_rx_workflow_disabled_member)."
+      }
+    },
+    {
+      "dataset": "swfl_inc",
+      "table": "public.swfl_inc_announcements",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "swfl-inc-weekly.yml",
+      "pipeline": "swfl_inc",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 5,
+        "last_run": "2026-07-06"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 32,
+        "min_rows": 28
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "dbpr_press_releases",
+      "table": "public.dbpr_press_releases",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "dbpr-press-releases-weekly.yml",
+      "pipeline": "dbpr_press_releases",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 5,
+        "last_run": "2026-07-06"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 151,
+        "min_rows": 135
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-06T12:35:03Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28791886406",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "rsw_airport_monthly",
+      "table": "public.rsw_airport_monthly",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "rsw-airport-monthly.yml",
+      "pipeline": "rsw_airport_monthly",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 27,
+        "last_run": "2026-06-14"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 2580,
+        "min_rows": 2322
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "DISABLED",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `rsw-airport-monthly.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow rsw-airport-monthly.yml carries a cron in source but its state at the GitHub API is disabled_manually \u2014 a schedule nobody is running. No enum member covers this class yet (check doctor_rx_workflow_disabled_member)."
+      }
+    },
+    {
+      "dataset": "dbpr_sirs_submissions",
+      "table": "data_lake.dbpr_sirs_submissions",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "dbpr-sirs-monthly.yml",
+      "pipeline": "dbpr_sirs_submissions",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 19,
+        "last_run": "2026-06-22"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 1358,
+        "min_rows": 50
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "DISABLED",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `dbpr-sirs-monthly.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow dbpr-sirs-monthly.yml carries a cron in source but its state at the GitHub API is disabled_manually \u2014 a schedule nobody is running. No enum member covers this class yet (check doctor_rx_workflow_disabled_member)."
+      }
+    },
+    {
+      "dataset": "fl_dbpr_licenses",
+      "table": "data_lake.fl_dbpr_licenses",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-fl-dbpr-licenses.yml",
+      "pipeline": "fl_dbpr_licenses",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 6,
+        "last_run": "2026-07-05"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 12448,
+        "min_rows": 5000
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-05T11:25:39Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28739175641",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "fl_dbpr_applicants",
+      "table": "data_lake.fl_dbpr_applicants",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-fl-dbpr-licenses.yml",
+      "pipeline": "fl_dbpr_applicants",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 6,
+        "last_run": "2026-07-05"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 8769,
+        "min_rows": 7800
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-05T11:25:39Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28739175641",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "dbpr_public_notices",
+      "table": "public.dbpr_public_notices",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "dbpr-public-notices-weekly.yml",
+      "pipeline": "dbpr_public_notices",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 5,
+        "last_run": "2026-07-06"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 11,
+        "min_rows": 1
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-06T13:36:22Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28795645284",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "dbpr_re_licensees",
+      "table": "public.dbpr_re_licensees",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-dbpr-re-licensees.yml",
+      "pipeline": "dbpr_re_licensees",
+      "freshness": {
+        "status": "MISSING",
+        "severity": "red",
+        "age_days": null,
+        "last_run": null
+      },
+      "volume": {
+        "status": "LOW_VOLUME",
+        "severity": "red",
+        "landed": 0,
+        "min_rows": 15000
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NEVER_RAN",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "NEVER_LANDED",
+        "should_retry": false,
+        "fix": "`ingest/cadence_registry.yaml` claims table `public.dbpr_re_licensees` but the DB has no successful load for it. Either dispatch `.github/workflows/ingest-dbpr-re-licensees.yml` once and confirm it lands, or delete the registry entry. A registry entry pointing at a ghost table reads FRESH forever.",
+        "evidence": "freshness=MISSING volume=LOW_VOLUME pg_class kind=table"
+      }
+    },
+    {
+      "dataset": "noaa_ghcn_rainfall",
+      "table": "data_lake.noaa_ghcn_rainfall",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "noaa-ghcn-rainfall-monthly.yml",
+      "pipeline": "noaa_ghcn_rainfall",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 6,
+        "last_run": "2026-07-05"
+      },
+      "volume": {
+        "status": "LOW_VOLUME",
+        "severity": "red",
+        "landed": 6,
+        "min_rows": 8
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `noaa-ghcn-rainfall-monthly.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "line is red but no signal is red: freshness=FRESH volume=LOW_VOLUME content=NO_CONTRACT run=NO_RUNS_IN_WINDOW"
+      }
+    },
+    {
+      "dataset": "city_pulse_corridors_tier2",
+      "table": "data_lake.city_pulse_corridors",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "corridor-pulse-weekly.yml",
+      "pipeline": "city_pulse_corridors_tier2",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 6,
+        "last_run": "2026-07-05"
+      },
+      "volume": {
+        "status": "NO_FLOOR",
+        "severity": "yellow",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "DISABLED",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": false
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "marketbeat_swfl",
+      "table": "data_lake.marketbeat_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "marketbeat-pdf-ingest.yml",
+      "pipeline": "marketbeat_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 32,
+        "last_run": "2026-06-09"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 109,
+        "min_rows": 100
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "DISABLED",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `marketbeat-pdf-ingest.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow marketbeat-pdf-ingest.yml carries a cron in source but its state at the GitHub API is disabled_manually \u2014 a schedule nobody is running. No enum member covers this class yet (check doctor_rx_workflow_disabled_member)."
+      }
+    },
+    {
+      "dataset": "colliers_industrial",
+      "table": "data_lake.marketbeat_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "marketbeat-pdf-ingest.yml",
+      "pipeline": "colliers_industrial",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 32,
+        "last_run": "2026-06-09"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 132,
+        "min_rows": 120
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "DISABLED",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `marketbeat-pdf-ingest.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow marketbeat-pdf-ingest.yml carries a cron in source but its state at the GitHub API is disabled_manually \u2014 a schedule nobody is running. No enum member covers this class yet (check doctor_rx_workflow_disabled_member)."
+      }
+    },
+    {
+      "dataset": "mhs_databook",
+      "table": "data_lake.marketbeat_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "none",
+      "pipeline": "mhs_databook",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 36,
+        "last_run": "2026-06-05"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 48,
+        "min_rows": 45
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_WORKFLOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": null
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "swfl_search_demand",
+      "table": "public.swfl_search_demand",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "swfl-search-demand-monthly.yml",
+      "pipeline": "swfl_search_demand",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 9,
+        "last_run": "2026-07-02"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 1650,
+        "min_rows": 742
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_RUNS_IN_WINDOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "mhs_permits_swfl",
+      "table": "data_lake.mhs_permits_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-mhs-permits-swfl.yml",
+      "pipeline": "mhs_permits_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 32,
+        "last_run": "2026-06-09"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 281,
+        "min_rows": 250
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NEVER_RAN",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `ingest-mhs-permits-swfl.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow ingest-mhs-permits-swfl.yml has never run (confirmed by a targeted `gh run list --workflow` backfill, not merely absent from the bulk window)."
+      }
+    },
+    {
+      "dataset": "crexi_listings",
+      "table": "data_lake.active_listings_cre",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-crexi-listings.yml",
+      "pipeline": "crexi_listings",
+      "freshness": {
+        "status": "WINDOW_OPEN",
+        "severity": "yellow",
+        "age_days": 6,
+        "last_run": "2026-07-05"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 61,
+        "min_rows": 1
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-05T12:09:26Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28740291549",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "brevitas_listings",
+      "table": "data_lake.active_listings_cre",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-brevitas-listings.yml",
+      "pipeline": "brevitas_listings",
+      "freshness": {
+        "status": "OVERDUE",
+        "severity": "red",
+        "age_days": 19,
+        "last_run": "2026-06-22"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 1,
+        "min_rows": 1
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "RED",
+        "severity": "red",
+        "last_conclusion": "failure",
+        "last_success_at": null,
+        "consecutive_failures": 2,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28743175614",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "TRANSIENT",
+        "should_retry": true,
+        "fix": "Transient failure in `.github/workflows/ingest-brevitas-listings.yml` \u2014 retry up to 2x. If it fails a third time it is NOT transient: escalate and classify it for real.",
+        "evidence": "2 consecutive failure(s); https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28743175614"
+      }
+    },
+    {
+      "dataset": "lee_associates_swfl",
+      "table": "data_lake.marketbeat_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-lee-associates-swfl.yml",
+      "pipeline": "lee_associates_swfl",
+      "freshness": {
+        "status": "WAITING",
+        "severity": "green",
+        "age_days": 32,
+        "last_run": "2026-06-09"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 20,
+        "min_rows": 18
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NEVER_RAN",
+        "severity": "red",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": {
+        "code": "UNKNOWN",
+        "should_retry": false,
+        "fix": "Unknown class for `ingest-lee-associates-swfl.yml` \u2014 evidence is attached below; NO diagnosis was invented. Triage by hand, then add the class to `ingest/lib/prescriptions.py` (and mirror the literal in the Phase-3b incident handler \u2014 the enum is shared).",
+        "evidence": "workflow ingest-lee-associates-swfl.yml has never run (confirmed by a targeted `gh run list --workflow` backfill, not merely absent from the bulk window)."
+      }
+    },
+    {
+      "dataset": "estero_edc",
+      "table": "data_lake.local_cre_context",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-local-cre-context.yml",
+      "pipeline": "estero_edc",
+      "freshness": {
+        "status": "WAITING",
+        "severity": "green",
+        "age_days": 10,
+        "last_run": "2026-07-01"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 6,
+        "min_rows": 6
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-01T05:20:16Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28495422043",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "fmb_recovery",
+      "table": "data_lake.local_cre_context",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-local-cre-context.yml",
+      "pipeline": "fmb_recovery",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 10,
+        "last_run": "2026-07-01"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 8,
+        "min_rows": 8
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-01T05:20:16Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28495422043",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "news_swfl",
+      "table": "data_lake.news_articles_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "news-swfl-ingest.yml",
+      "pipeline": "news_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 0,
+        "last_run": "2026-07-11"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 99,
+        "min_rows": 1
+      },
+      "content": {
+        "status": "PASS",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-11T08:07:05Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29145607374",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "active_listings",
+      "table": "data_lake.active_listings_residential",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "active-listings-daily.yml",
+      "pipeline": "active_listings",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 0,
+        "last_run": "2026-07-11"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 39050,
+        "min_rows": 2000
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-11T19:02:42Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29164564427",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "green",
+      "prescription": null
+    },
+    {
+      "dataset": "listing_lifecycle",
+      "table": "data_lake.listing_state",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "listing-lifecycle-daily.yml",
+      "pipeline": "listing_lifecycle",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 0,
+        "last_run": "2026-07-11"
+      },
+      "volume": {
+        "status": "OK",
+        "severity": "green",
+        "landed": 34637,
+        "min_rows": 28000
+      },
+      "content": {
+        "status": "FAIL",
+        "severity": "red",
+        "failing": [
+          {
+            "table": "data_lake.listing_state",
+            "col": "list_price",
+            "test": "listing_state_home_price_floor",
+            "severity": "error",
+            "failing_rows": 21,
+            "status": "FAIL"
+          }
+        ]
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-11T15:45:47Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29158512871",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "red",
+      "prescription": null
+    },
+    {
+      "dataset": "market_aggregates_histogram",
+      "table": "data_lake.listing_price_histogram_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-market-aggregates-histogram.yml",
+      "pipeline": "market_aggregates_histogram",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 5,
+        "last_run": "2026-07-06"
+      },
+      "volume": {
+        "status": "NO_FLOOR",
+        "severity": "yellow",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-06T14:28:02Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28799038695",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "market_aggregates_details",
+      "table": "data_lake.market_details_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-market-aggregates-details.yml",
+      "pipeline": "market_aggregates_details",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 7,
+        "last_run": "2026-07-04"
+      },
+      "volume": {
+        "status": "NO_FLOOR",
+        "severity": "yellow",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "FAIL",
+        "severity": "yellow",
+        "failing": [
+          {
+            "table": "data_lake.market_details_swfl",
+            "col": null,
+            "test": "market_details_sold_rent_band_watch",
+            "severity": "warn",
+            "failing_rows": 2,
+            "status": "FAIL"
+          }
+        ]
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-04T14:22:44Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28709107709",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "rentals_swfl",
+      "table": "data_lake.rental_listings_swfl",
+      "kind": "table",
+      "lane": "tier-2",
+      "workflow": "ingest-rentals.yml",
+      "pipeline": "rentals_swfl",
+      "freshness": {
+        "status": "FRESH",
+        "severity": "green",
+        "age_days": 5,
+        "last_run": "2026-07-06"
+      },
+      "volume": {
+        "status": "NO_FLOOR",
+        "severity": "yellow",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "NO_CONTRACT",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "GREEN",
+        "severity": "green",
+        "last_conclusion": "success",
+        "last_success_at": "2026-07-06T15:16:32Z",
+        "consecutive_failures": 0,
+        "url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/28802272415",
+        "cron_in_source": true
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    },
+    {
+      "dataset": "data_lake.listing_active_stats",
+      "table": "data_lake.listing_active_stats",
+      "kind": "view",
+      "lane": null,
+      "workflow": null,
+      "pipeline": null,
+      "freshness": {
+        "status": "NO_REGISTRY_ENTRY",
+        "severity": "yellow",
+        "age_days": null,
+        "last_run": null
+      },
+      "volume": {
+        "status": "NO_REGISTRY_ENTRY",
+        "severity": "yellow",
+        "landed": null,
+        "min_rows": null
+      },
+      "content": {
+        "status": "PASS",
+        "severity": "green",
+        "failing": []
+      },
+      "run": {
+        "status": "NO_WORKFLOW",
+        "severity": "yellow",
+        "last_conclusion": null,
+        "last_success_at": null,
+        "consecutive_failures": 0,
+        "url": null,
+        "cron_in_source": null
+      },
+      "view": null,
+      "open_checks": [],
+      "health": "yellow",
+      "prescription": null
+    }
+  ]
+}
