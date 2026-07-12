@@ -13,6 +13,7 @@ import type { SynthesizedEvent } from "../types/event.mts";
 import { citationId, factId } from "../lib/ids.mts";
 import { isoDate, isoTimestamp } from "../lib/dates.mts";
 import { expiresFor } from "../lib/freshness.mts";
+import { caveatIsFresh, CAVEAT_TTL_DAYS } from "../lib/caveat-ttl.mts";
 import { writeStage } from "../lib/raw-store.mts";
 import { renderMasterIndex } from "../render/master-index.mts";
 import { validateSpec } from "../validate/spec-validator.mts";
@@ -187,6 +188,13 @@ export async function harvestUpstreams(
     if (degradedIds.has(upstream.id) && read.kind === "ok") {
       const today = new Date().toISOString().slice(0, 10);
       const lastDate = read.output.refined_at.slice(0, 10);
+      // ⚠️ COUPLED TEMPLATE. `DEGRADE_CAVEAT` in refinery/lib/caveat-ttl.mts mirrors
+      // this string byte-for-byte — it is the ONE caveat in the fleet whose embedded
+      // date means "when this caveat was born", which is what makes it TTL-able at
+      // the re-lift filter below. Edit this string and the regex silently stops
+      // matching, the TTL fails open, and a frozen degradation notice re-ships
+      // forever. The "template mirror" test in refinery/lib/caveat-ttl.test.mts goes
+      // RED if you do. Fix both.
       degradationCaveats.push(
         `Upstream brain '${upstream.id}' failed to rebuild on ${today}; using last good read from ${lastDate} (v${read.output.version}).`,
       );
@@ -435,7 +443,18 @@ export async function outputStage(
   // run attributeError over the direct sources and append a caveat naming the
   // weakest contributor. brain-input wrappers are excluded — their share of
   // the error already lives in the upstream brain's own attribution chain.
-  const caveats = [...distilled.caveats];
+  // Stale-caveat TTL. `distilled.caveats` is the INHERITED + producer-authored set:
+  // master re-lifts every passing upstream's baked caveats (refinery/packs/master.mts:188)
+  // on every build, so a degradation notice minted once re-ships daily for as long as the
+  // degraded upstream stays skipped-fresh — up to 30 days. caveatIsFresh drops ONLY the
+  // engine's emission-dated `failed to rebuild on {date}` template (minted above) once it
+  // is past the TTL; every other caveat — content caveats with old source dates,
+  // methodology notes, local-context facts, the two sibling engine templates — has no
+  // template match and is KEPT unconditionally. See refinery/lib/caveat-ttl.mts for why a
+  // bare date-scan here would delete 34 of the fleet's 40 dated caveats.
+  const caveats = distilled.caveats.filter((c) =>
+    caveatIsFresh(c, new Date(refined_at), CAVEAT_TTL_DAYS),
+  );
   if (confidence < ATTRIBUTION_CAVEAT_THRESHOLD) {
     const directSources = pack.sources.filter((s) => !s.source_id.startsWith("brain-input:"));
     if (directSources.length > 0) {
@@ -455,6 +474,15 @@ export async function outputStage(
   // the weakest-contributor caveat stay at the top of the list — staleness is
   // the DAG-integrity footnote, not the headline. Empty array (every upstream
   // fresh) → no-op.
+  // DO NOT apply the caveat TTL to these two. They are CURRENT-BUILD TRUTH, minted by
+  // harvestUpstreams seconds ago, and both would be corrupted by a date filter:
+  //   - stalenessCaveats embed the upstream's own EXPIRY date, which for a genuinely-
+  //     stale upstream is BY DEFINITION already in the past — a TTL here would silently
+  //     delete a live staleness signal on the build where it first fires.
+  //   - degradationCaveats carry TODAY's date, so a filter is a no-op anyway.
+  // The freeze the TTL fixes is a time-passing effect on the DOWNSTREAM RE-LIFT (the
+  // distilled.caveats filter above), never at the bake-in point. (The design spec said
+  // to filter here; it was wrong.)
   caveats.push(...stalenessCaveats);
   caveats.push(...degradationCaveats);
 
