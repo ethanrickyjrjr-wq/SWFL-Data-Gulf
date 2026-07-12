@@ -17,6 +17,7 @@ import { z } from "zod";
 import type {
   AgentCardProps,
   AgentHeroProps,
+  BlockBinding,
   BlockLayout,
   ButtonProps,
   DividerProps,
@@ -306,6 +307,27 @@ const LayoutSchema = z.object({
   static: z.boolean().optional(),
 }) satisfies z.ZodType<BlockLayout>;
 
+// Data binding (concoctions) — ENGINE-OWNED like `layout`, merged the same way.
+// NOT listed in BlockContentPatchSchema or AuthoredBlockSchema: their strip mode
+// IS the fence (binding-fence.test.ts pins it).
+const BindingSliceSchema = z.object({
+  measures: z.array(z.string().min(1)).min(1),
+  dimension: z.string().optional(),
+  filter: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+  topN: z.number().int().positive().optional(),
+});
+
+const BindingSchema = z.object({
+  v: z.number().int().positive(),
+  lane: z.enum(["lake", "upload", "web", "user"]),
+  concoctionId: z.string().optional(),
+  params: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+  bundleRef: z.string().optional(),
+  slice: BindingSliceSchema,
+  asOf: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/),
+  sourceLine: z.string().min(1),
+}) satisfies z.ZodType<BlockBinding>;
+
 const BlockSchema = z
   .discriminatedUnion("type", [
     z.object({ id: idIn, type: z.literal("header"), props: HeaderPropsSchema }),
@@ -326,7 +348,7 @@ const BlockSchema = z
     z.object({ id: idIn, type: z.literal("footer"), props: FooterPropsSchema }),
     z.object({ id: idIn, type: z.literal("sources"), props: SourcesPropsSchema }),
   ])
-  .and(z.object({ layout: LayoutSchema.optional() }))
+  .and(z.object({ layout: LayoutSchema.optional(), binding: BindingSchema.optional() }))
   .transform((b) => ({ ...b, id: b.id ?? mintBlockId() }));
 
 export const EmailDocSchema = z.object({

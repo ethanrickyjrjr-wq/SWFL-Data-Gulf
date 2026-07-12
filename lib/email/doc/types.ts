@@ -340,6 +340,40 @@ export interface BlockPropsMap {
   sources: SourcesProps;
 }
 
+// ── Data binding (concoctions) ──────────────────────────────────────────────
+// ENGINE-OWNED like `layout`: written only by the materializer
+// (lib/concoctions/materialize.ts). The AI patch/author schemas never list it,
+// so strip mode drops any attempt (binding-fence.test.ts). Props still carry
+// BAKED values — a binding is memory (refresh/rebind/turn-into/provenance),
+// never render plumbing; every renderer and export path reads props only.
+
+export const BINDING_VERSION = 1;
+
+export type BindingLane = "lake" | "upload" | "web" | "user";
+
+/** Which slice of the bundle this block renders. */
+export interface BindingSlice {
+  measures: string[];
+  dimension?: string;
+  filter?: Record<string, string | number>;
+  topN?: number;
+}
+
+export interface BlockBinding {
+  /** Binding schema version — old versions degrade to "can't refresh", never throw. */
+  v: number;
+  lane: BindingLane;
+  /** lane "lake": registry id + params. */
+  concoctionId?: string;
+  params?: Record<string, string | number>;
+  /** lanes "upload" | "web" | "user": reference to the extracted/cited/stated bundle. */
+  bundleRef?: string;
+  slice: BindingSlice;
+  /** MM/DD/YYYY at materialization — the chip + staleness compare read this. */
+  asOf: string;
+  sourceLine: string;
+}
+
 /**
  * Optional grid position (react-grid-layout v2 item shape; the block `id` is the
  * RGL item `i`). PAID-tier only: a block with NO `layout` renders stacked exactly
@@ -366,7 +400,13 @@ export interface BlockLayout {
  * `layout` is optional grid positioning (paid tier); absent = stacked (free tier).
  */
 export type EmailBlock = {
-  [K in BlockType]: { id: string; type: K; props: BlockPropsMap[K]; layout?: BlockLayout };
+  [K in BlockType]: {
+    id: string;
+    type: K;
+    props: BlockPropsMap[K];
+    layout?: BlockLayout;
+    binding?: BlockBinding;
+  };
 }[BlockType];
 
 /** Narrow `EmailBlock` to a single type's variant (used by block components). */
