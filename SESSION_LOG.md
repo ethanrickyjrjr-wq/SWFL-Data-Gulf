@@ -1,3 +1,7 @@
+## 2026-07-12 (Fable 5 · main) — viz-archetypes queue line pushed (`2b8b1512`); writing-plans starts
+
+Correcting note for the viz-archetypes entry further down: the build-queue line landed in its own commit `2b8b1512` (the file claim released late), pushed now on operator approval. Next in this session: implementation plan for `docs/superpowers/specs/2026-07-12-viz-archetypes-design.md` via writing-plans.
+
 ## 2026-07-12 (Fable 5 · main) — registry doctor: 197→95 warns; live-search dead keys + dead legs removed
 
 Operator asked why the registry doctor was "all WARN" — answer: all-WARN IS the passing state (REDs block; the 3 real drifts are known_drift-demoted), but 118 of the 197 warns were scanner blind spots, not signal. Fixed both: (1) `ingest/lib` reads now satisfy the surplus direction ONLY (storage_uploader's SUPABASE_URL/SERVICE_KEY killed 88 false warns; asymmetric on purpose — a lib read never demands wiring, no import analysis exists), (2) bare `Anthropic()`/`AsyncAnthropic()` counts as an implicit ANTHROPIC_API_KEY read line (SDK reads env internally; fixes dbpr/marketbeat false warns AND makes the not-wired direction catch a bare-SDK pipeline with no key). PYTHONUNBUFFERED joined IMPLICIT_READS (interpreter-native). 3 new tests, 30/30 green.
