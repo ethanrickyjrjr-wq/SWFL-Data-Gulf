@@ -35,6 +35,24 @@ export interface CampaignDemo {
 
 const usdFull = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
+/**
+ * The map-rail crosswalk labels disambiguate sibling ZIPs ("Cape Coral NW",
+ * "Naples (Downtown)") — useful in a ranked list, but nobody TYPES that
+ * (operator correction 07/11/2026: "Cape Coral NW really isn't a place").
+ * The demo speaks like a person: strip the parenthetical and any trailing
+ * directional token; the ZIP in the subject carries the precision instead.
+ */
+export function naturalPlace(label: string): string {
+  const cleaned = label
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .replace(
+      /\s+(NW|NE|SW|SE|N|S|E|W|Northwest|Northeast|Southwest|Southeast|North|South|East|West)$/i,
+      "",
+    )
+    .trim();
+  return cleaned.length > 0 ? cleaned : label;
+}
+
 function topZip(metric: DemoMetricIn | undefined): string | null {
   if (!metric || metric.sample) return null;
   let best: string | null = null;
@@ -64,7 +82,7 @@ export function buildCampaignDemo(inputs: {
   const zip = busiest && value.data[busiest] !== undefined ? busiest : topZip(value);
   if (!zip) return null;
 
-  const place = placeNames[zip] ?? zip;
+  const place = placeNames[zip] ? naturalPlace(placeNames[zip]) : zip;
   const figures: CampaignDemoFigure[] = [
     {
       label: "Median home value",
