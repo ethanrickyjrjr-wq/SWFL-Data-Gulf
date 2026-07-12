@@ -147,6 +147,16 @@ zones + zero `[config]`/raw-token leaks. Deferred WITH reasons → `docs/handoff
 filter tabs descoped — loader reshape). NOTE: `bun add cmdk` touched package.json/bun.lock claimed by a
 parallel session — verified only my cmdk line differs from HEAD, nothing clobbered. Committed local,
 NOT pushed (new dep + live surface = operator diff-review).
+## 2026-07-12 (Fable 5 · wt/dcd) — Data-contracts+doctor Phase 0: CI unred — drift test learns the 2nd intentional exclusion
+
+Executing `docs/superpowers/plans/2026-07-11-data-contracts-doctor-tdd.md` in worktree `bp-dcd` (RULE 1.5 —
+`ingest/cadence_registry.yaml` carries an uncommitted parallel-session hunk on main). Phase 0 Task 0.1: the
+standing ci.yml red (35 pushes) is down to ONE deterministic failure — `trigger-list-drift.test.mjs`: the
+chief-of-staff build (07/10) wired `log-cron-incident.yml` per its plan Task 5 but the drift test only
+allowed one exclusion. Fix: "Chief of staff nightly" becomes a SECOND intentional exclusion (propose-only
+Sonnet workflow, own kill switch — an L0 auto-rerun would be an unattended paid LLM call; logger-only was
+the builder's documented intent). Zero live-behavior change. Local: node:test 79/0. Green-on-main confirm
+lands with the operator-gated push.
 
 ## 2026-07-11 (Fable 5 · main) — Send/PDF/brand/funnel readiness audit; funnel repairs + pdf-parse containment committed
 
