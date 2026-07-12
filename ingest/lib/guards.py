@@ -45,6 +45,26 @@ class FetchHealthError(RuntimeError):
     pass
 
 
+class ContentContractError(RuntimeError):
+    """Raised pre-merge when a content contract's violating SHARE says the feed changed shape.
+
+    Distinct from VolumeGuardError on purpose, and this is the whole point: the row COUNT is
+    healthy — 34k rows landed, every volume guard is green — while the row CONTENT is wrong
+    (rental-priced rows in a sales table; land blended into a homes median). Every guard in
+    this module is structurally blind to that class. That is how a "$35,000 median asking
+    price" for ZIP 33972 shipped behind a fleet of green crons.
+
+    NOT raised for ordinary violations: those quarantine (drop the offending rows, merge the
+    clean rest) or report (count them, drop nothing). This is raised ONLY when a contract's
+    abort_if trips — a bulk leak, not a tail. contracts.evaluate_batch() is pure and never
+    raises; the merge orchestrator inspects stats["abort"] and raises this.
+
+    Cron-failure classification: CONTENT_CONTRACT -> the feed's shape changed;
+    should_retry = false. A retry re-lands the identical bad rows."""
+
+    pass
+
+
 def assert_content_fresh(
     newest,
     max_age_days: int,

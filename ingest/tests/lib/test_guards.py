@@ -233,3 +233,33 @@ class TestAssertFetchHealth:
         # blind-retry), never conflated with a volume or content-stale failure.
         assert not issubclass(FetchHealthError, VolumeGuardError)
         assert not issubclass(FetchHealthError, ContentStaleError)
+
+
+# ── ContentContractError (content contracts, Phase 1) ───────────────────────────
+
+
+def test_content_contract_error_is_its_own_runtime_error():
+    """A content violation is NOT a volume problem: the row COUNT is healthy (34k landed),
+    the row CONTENT is wrong. Every existing guard here is blind to that, so the class must
+    be distinct for GHA log parsing and cron-failure classification."""
+    from ingest.lib.guards import (
+        ContentContractError,
+        ContentStaleError,
+        FetchHealthError,
+        VolumeGuardError,
+    )
+
+    assert issubclass(ContentContractError, RuntimeError)
+    for sibling in (VolumeGuardError, ContentStaleError, FetchHealthError):
+        assert not issubclass(ContentContractError, sibling)
+        assert not issubclass(sibling, ContentContractError)
+
+
+def test_content_contract_error_docstring_names_the_no_retry_prescription():
+    """The doctor prescriptions enum (spec §11) keys off this: a content violation means the
+    feed changed shape, so retrying re-lands the same bad rows. should_retry = false."""
+    from ingest.lib.guards import ContentContractError
+
+    doc = ContentContractError.__doc__ or ""
+    assert "should_retry" in doc
+    assert "false" in doc.lower()
