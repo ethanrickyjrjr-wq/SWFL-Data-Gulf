@@ -115,9 +115,16 @@ concurrency:
 
 jobs:
   triage:
+    # Same widening as the logger: a cancelled SCHEDULED run may be a timeout kill.
+    # heal-cron-failure.mjs::classifyTermination forces should_retry=false AND
+    # needs_llm=false for every termination class, so a cancelled run is never re-run
+    # (the money guard) and never reaches the LLM.
     if: >
       vars.CRON_HEAL_ENABLED != 'false' &&
       (github.event.workflow_run.conclusion == 'failure' ||
+      ((github.event.workflow_run.conclusion == 'cancelled' ||
+      github.event.workflow_run.conclusion == 'timed_out') &&
+      github.event.workflow_run.event == 'schedule') ||
       github.event_name == 'workflow_dispatch') &&
       github.event.workflow_run.name != 'Daily Brain Rebuild'
     runs-on: ubuntu-latest

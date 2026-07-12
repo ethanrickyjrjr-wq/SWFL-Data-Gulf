@@ -110,9 +110,19 @@ concurrency:
 
 jobs:
   record_failure:
+    # A `timeout-minutes` kill surfaces as conclusion `cancelled`, not `timed_out`
+    # (corridor-pulse runs 27903898570 / 28321195281 / 28739416924 — three scheduled
+    # 45-minute kills, full paid API spend, zero rows kept, zero incidents). The old
+    # `conclusion == 'failure'` gate was blind to the entire class. cancelled/timed_out
+    # are admitted for CLASSIFICATION only, and only for SCHEDULED runs — a cancelled
+    # dispatch is a human pressing stop. log-cron-incident.mjs::classifyTermination
+    # then decides: TIMEOUT -> incident, SUPERSEDED -> silent skip, UNKNOWN_CANCEL -> incident.
     if: >
       vars.CRON_INCIDENT_LOGGER_ENABLED != 'false' &&
-      github.event.workflow_run.conclusion == 'failure'
+      (github.event.workflow_run.conclusion == 'failure' ||
+      ((github.event.workflow_run.conclusion == 'cancelled' ||
+      github.event.workflow_run.conclusion == 'timed_out') &&
+      github.event.workflow_run.event == 'schedule'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
