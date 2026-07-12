@@ -782,6 +782,27 @@ export function EmailLabGridShell({
     }
   }
 
+  /** Flatten the doc's data story into a social PNG and download it. The canvas
+   *  keeps its layers — only the exported copy is flattened ("export as"). */
+  async function exportDatasetCard(format: string) {
+    setDatasetBusy(true);
+    try {
+      const res = await fetch("/api/concoctions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "social", blocks: doc.blocks, format }),
+      });
+      const json = (await res.json().catch(() => null)) as { pngBase64?: string } | null;
+      if (!json?.pngBase64) return;
+      const a = document.createElement("a");
+      a.href = `data:image/png;base64,${json.pngBase64}`;
+      a.download = `swfl-card-${format}.png`;
+      a.click();
+    } finally {
+      setDatasetBusy(false);
+    }
+  }
+
   /** Called from commit()/liveEdit() — the first edit of the session re-bakes
    *  stale bindings when the doc's always-fresh dial is on. Ran-once ref is set
    *  BEFORE the async work so the refresh's own commit can never re-trigger. */
@@ -1863,6 +1884,35 @@ export function EmailLabGridShell({
                     )}
                   </div>
                   <DatasetBrowser onLoad={addDatasetBlocks} />
+                  {doc.blocks.some((b) => b.binding) && (
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <select
+                        id="dataset-card-format"
+                        defaultValue="square"
+                        className="min-w-0 flex-1 rounded border border-white/10 bg-[#0a1822] px-1.5 py-1 text-[10px] text-white/60"
+                        aria-label="Card size"
+                      >
+                        {(Object.keys(SOCIAL_FORMATS) as SocialFormat[]).map((f) => (
+                          <option key={f} value={f}>
+                            {f}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={datasetBusy}
+                        onClick={() => {
+                          const sel = document.getElementById(
+                            "dataset-card-format",
+                          ) as HTMLSelectElement | null;
+                          void exportDatasetCard(sel?.value ?? "square");
+                        }}
+                        className="rounded bg-gulf-teal/80 px-2 py-1 text-[10px] font-semibold text-[#0a1419] disabled:opacity-40"
+                      >
+                        Export card (PNG)
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </div>

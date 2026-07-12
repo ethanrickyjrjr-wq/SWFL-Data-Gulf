@@ -13,6 +13,8 @@ import {
   type MaterializeDeps,
 } from "./materialize";
 import { checkDocFreshness } from "./freshness";
+import { exportSocialPng } from "./social-export";
+import { isSocialFormat } from "@/lib/social/formats";
 
 const ParamsRecord = z.record(z.string(), z.union([z.string(), z.number()]));
 
@@ -28,6 +30,11 @@ const ActionSchema = z.discriminatedUnion("action", [
     newType: z.enum(TURN_TARGETS),
   }),
   z.object({ action: z.literal("freshness"), blocks: z.array(z.unknown()).max(40) }),
+  z.object({
+    action: z.literal("social"),
+    blocks: z.array(z.unknown()).min(1).max(40),
+    format: z.string(),
+  }),
 ]);
 
 export type ConcoctionActionBody = z.infer<typeof ActionSchema>;
@@ -78,6 +85,11 @@ export async function runConcoctionAction(
       case "freshness": {
         const staleness = await checkDocFreshness(a.blocks as EmailBlock[], { sb: deps.sb });
         return { staleness };
+      }
+      case "social": {
+        if (!isSocialFormat(a.format)) return { error: `unknown format ${a.format}`, status: 400 };
+        const png = await exportSocialPng(a.blocks as EmailBlock[], a.format);
+        return { pngBase64: png.toString("base64"), format: a.format };
       }
     }
   } catch (e) {
