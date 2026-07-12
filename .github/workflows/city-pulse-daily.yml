@@ -18,6 +18,11 @@ on:
         description: "Single city by exact name (blank = all 7)"
         required: false
         default: ""
+  # Reusable entry point for the nightly chain. NO inputs declared on purpose:
+  # this workflow reads `github.event.inputs.*` (the workflow_dispatch context),
+  # which is empty under workflow_call — so a chain call runs the full region-wide,
+  # non-dry-run path. That IS what the chain wants.
+  workflow_call:
 
 permissions:
   contents: read

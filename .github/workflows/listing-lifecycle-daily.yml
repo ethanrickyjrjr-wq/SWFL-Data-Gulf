@@ -42,6 +42,24 @@ on:
         description: "Dry-run: search sweep + diff, print [budget], NO DB write, NO enrich calls"
         type: boolean
         default: true
+  # Reusable entry point for the nightly ordered chain (nightly-chain.yml).
+  # dry_run DEFAULTS TRUE here, exactly as it does for workflow_dispatch above and
+  # for the same reason: SteadyAPI calls cost money, so a caller that FORGETS to
+  # pass dry_run must not burn budget. nightly-chain.yml passes `dry_run: false`
+  # explicitly. A forgotten flag then shows up as assert_landed STALE (loud red),
+  # never as a silent paid run.
+  workflow_call:
+    inputs:
+      county:
+        description: "Limit to one SWFL county, e.g. 'Lee' (blank = all SWFL_COUNTIES)"
+        required: false
+        type: string
+        default: ""
+      dry_run:
+        description: "Dry-run: search sweep + diff, print [budget], NO DB write, NO enrich calls"
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   ingest:

@@ -31,6 +31,24 @@ on:
         description: "Dry-run (extract only, no DB write)"
         type: boolean
         default: false
+  # Reusable entry point for the nightly ordered chain (nightly-chain.yml). The
+  # chain drives counties with a matrix instead of the 4 staggered crons above.
+  # NOTE: `github.event.schedule` is EMPTY under workflow_call (a called workflow
+  # sees its CALLER's event), so the "Resolve county" case-block falls through to
+  # its `*)` arm and reads `inputs.county` — which IS populated here. That is why
+  # this block is the whole change; do not touch the case-block.
+  workflow_call:
+    inputs:
+      county:
+        description: "Limit to one SWFL county, e.g. 'Collier' (blank = all)"
+        required: false
+        type: string
+        default: ""
+      dry_run:
+        description: "Dry-run (extract only, no DB write)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   ingest:
