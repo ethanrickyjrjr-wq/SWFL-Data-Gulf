@@ -343,3 +343,205 @@ pipelines:
     expect(all.every((f) => f.severity !== "red")).toBe(true);
   });
 });
+
+import { checkActionVersions, checkTimeouts, type TagResolver } from "./identity-static.mts";
+
+const WF_NO_TIMEOUT = `
+name: No timeout
+on:
+  schedule:
+    - cron: "0 9 * * *"
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: python -m ingest.pipelines.foo.pipeline
+`;
+const WF_CALLER = `
+name: Nightly chain
+on:
+  schedule:
+    - cron: "5 4 * * *"
+jobs:
+  ingest:
+    uses: ./.github/workflows/city-pulse-daily.yml
+    secrets: inherit
+`;
+const WF_BAD_ACTION = `
+name: Bad action
+on:
+  schedule:
+    - cron: "0 9 * * *"
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v99
+      - run: python -m ingest.pipelines.foo.pipeline
+`;
+
+// LIVE FACT (gh api repos/actions/checkout/tags, re-verified 2026-07-12): v7 is
+// latest, v6 exists and resolves. Both must be accepted.
+const TAGS: TagResolver = {
+  tags: (action) =>
+    action === "actions/checkout"
+      ? ["v7.0.0", "v6.0.3", "v6.0.2", "v6.0.1", "v6.0.0", "v5.0.0", "v4.2.2"]
+      : null,
+};
+
+function versionRepo(registryYaml: string, extra: Record<string, string> = {}) {
+  const repo = new MemRepo({
+    "ingest/cadence_registry.yaml": registryYaml,
+    ".github/workflows/no-timeout.yml": WF_NO_TIMEOUT,
+    ".github/workflows/caller.yml": WF_CALLER,
+    ".github/workflows/bad-action.yml": WF_BAD_ACTION,
+    "ingest/pipelines/foo/pipeline.py": "x = 1\n",
+    ...extra,
+  });
+  return { repo, reg: loadRegistry(repo) };
+}
+
+describe("checkTimeouts", () => {
+  test("RED: a job with steps and no timeout-minutes", () => {
+    const { repo, reg } = versionRepo(`
+pipelines:
+  - name: foo
+    workflow: no-timeout.yml
+`);
+    const f = checkTimeouts(reg, repo);
+    expect(f.map((x) => x.rule)).toEqual(["timeout_missing"]);
+    expect(f[0].otherSide).toContain("job `ingest` has no timeout-minutes");
+  });
+
+  test("GREEN: a reusable-workflow CALLER job is exempt (GitHub ignores timeout-minutes there)", () => {
+    const { repo, reg } = versionRepo(`
+pipelines:
+  - name: chain
+    workflow: caller.yml
+`);
+    expect(checkTimeouts(reg, repo)).toEqual([]);
+  });
+});
+
+describe("checkActionVersions", () => {
+  test("GREEN: @v6 resolves even though v7 is latest — never bake a version literal", () => {
+    const { repo, reg } = versionRepo(`
+pipelines:
+  - name: foo
+    workflow: no-timeout.yml
+`);
+    const f = checkActionVersions(reg, repo, TAGS);
+    expect(f.filter((x) => x.severity === "red")).toEqual([]);
+    expect(f.map((x) => x.rule)).toEqual(["action_major_behind"]);
+    expect(f[0].severity).toBe("warn");
+    expect(f[0].otherSide).toContain("v7");
+  });
+
+  test("RED: a pinned ref that resolves against NO live tag", () => {
+    const { repo, reg } = versionRepo(`
+pipelines:
+  - name: foo
+    workflow: bad-action.yml
+`);
+    const f = checkActionVersions(reg, repo, TAGS).filter((x) => x.severity === "red");
+    expect(f.map((x) => x.rule)).toEqual(["action_version_unresolvable"]);
+    expect(f[0].registrySide).toContain("actions/checkout@v99");
+    expect(f[0].otherSide).toContain("v7.0.0");
+  });
+
+  test("WARN + skip (fail-OPEN) when tags cannot be resolved at all", () => {
+    const { repo, reg } = versionRepo(`
+pipelines:
+  - name: foo
+    workflow: no-timeout.yml
+`);
+    const offline: TagResolver = { tags: () => null };
+    const f = checkActionVersions(reg, repo, offline);
+    expect(f.every((x) => x.severity === "warn")).toBe(true);
+    expect(f.map((x) => x.rule)).toEqual(["action_tags_unresolved"]);
+  });
+});
+
+import { checkIdentityFields } from "./identity-static.mts";
+
+const WF_DBPR = `
+name: DBPR RE licensees weekly
+on:
+  schedule:
+    - cron: "0 12 * * 1"
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Run
+        env:
+          DESTINATION__POSTGRES__CREDENTIALS: \${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: python -m ingest.pipelines.dbpr_re_licensees.pipeline
+`;
+
+function identityRepo(registryYaml: string) {
+  const repo = new MemRepo({
+    "ingest/cadence_registry.yaml": registryYaml,
+    ".github/workflows/ingest-dbpr-re-licensees.yml": WF_DBPR,
+    "ingest/pipelines/dbpr_re_licensees/pipeline.py": 'row["source_tag"] = "dbpr_re_rgn7"\n',
+  });
+  return { repo, reg: loadRegistry(repo) };
+}
+
+describe("checkIdentityFields", () => {
+  test("RED: any `source_tag:` field at all — nothing in ingest/ reads it", () => {
+    const { repo, reg } = identityRepo(`
+pipelines:
+  - name: news_swfl
+    workflow: ingest-dbpr-re-licensees.yml
+    source_tag: news_crawl
+`);
+    const f = checkIdentityFields(reg, repo).filter((x) => x.rule === "source_tag_field_forbidden");
+    expect(f).toHaveLength(1);
+    expect(f[0].registrySide).toContain("source_tag: news_crawl");
+    expect(f[0].otherSide).toContain("check_freshness.py");
+    expect(f[0].otherSide).toContain("source_name");
+  });
+
+  test("GREEN: source_name whose literal IS in the pipeline python", () => {
+    const { repo, reg } = identityRepo(`
+pipelines:
+  - name: dbpr_re_licensees
+    workflow: ingest-dbpr-re-licensees.yml
+    freshness_table: public.dbpr_re_licensees
+    source_name: dbpr_re_rgn7
+`);
+    expect(checkIdentityFields(reg, repo)).toEqual([]);
+  });
+
+  test("RED: source_name literal absent from the pipeline python (one-letter drift)", () => {
+    const { repo, reg } = identityRepo(`
+pipelines:
+  - name: dbpr_re_licensees
+    workflow: ingest-dbpr-re-licensees.yml
+    freshness_table: public.dbpr_re_licensees
+    source_name: dbpr_re_rgn8
+`);
+    const f = checkIdentityFields(reg, repo);
+    expect(f.map((x) => x.rule)).toEqual(["source_name_literal_absent"]);
+    expect(f[0].registrySide).toContain("dbpr_re_rgn8");
+    expect(f[0].otherSide).toContain("ingest/pipelines/dbpr_re_licensees");
+  });
+
+  test("RED: a malformed known_drift / coverage_exempt annotation", () => {
+    const { repo, reg } = identityRepo(`
+pipelines:
+  - name: dbpr_re_licensees
+    workflow: ingest-dbpr-re-licensees.yml
+    known_drift:
+      - rule: row_floor_breach
+coverage_exempt:
+  - table: data_lake.view_vintages
+`);
+    const rules = checkIdentityFields(reg, repo).map((x) => x.rule);
+    expect(rules.filter((r) => r === "malformed_annotation")).toHaveLength(2);
+  });
+});

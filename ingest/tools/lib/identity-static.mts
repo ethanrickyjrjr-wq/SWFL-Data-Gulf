@@ -294,3 +294,194 @@ export function checkSecretsWired(reg: Registry, repo: RepoView): Finding[] {
   }
   return out;
 }
+
+/**
+ * Tag resolution. NEVER a baked version literal.
+ *
+ * LIVE FACT (gh api repos/actions/checkout/{tags,releases/latest}, re-verified 2026-07-12):
+ *   v7.0.0 published 2026-06-18 → latest major = v7
+ *   v6.0.0 published 2025-11-20 → v6 EXISTS and resolves (101 workflows pin it)
+ * 00-DIAGNOSIS's "actions/checkout@v6 (nonexistent version)" is REFUTED — the label
+ * was already false at the incident dates. A hardcoded expected-major would have
+ * false-flagged v6 in June AND be blind to v7 today. That is why this resolves
+ * against live/maintained tags and asserts only "the ref exists".
+ *
+ * tag-exists != compatible: v7.0.0 blocks fork-PR checkout on workflow_run (we use
+ * workflow_run in 4 workflows) and moved to ESM. So a newer major is a WARN, never
+ * a RED, and NOTHING here tells anyone to mass-bump.
+ */
+export interface TagResolver {
+  /** Tag names for `owner/repo`, or null when unresolvable (offline / no gh) → fail OPEN. */
+  tags(action: string): string[] | null;
+}
+
+function majorOf(ref: string): string | null {
+  const m = ref.match(/^v(\d+)/);
+  return m ? m[1] : null;
+}
+
+export function checkTimeouts(reg: Registry, repo: RepoView): Finding[] {
+  const out: Finding[] = [];
+  const seen = new Set<string>();
+  for (const { entry } of allEntries(reg)) {
+    const wf = entry.workflow;
+    if (!wf || wf === "none" || seen.has(wf)) continue;
+    seen.add(wf);
+    const facts = parseWorkflow(repo, wf);
+    if (!facts) continue;
+    for (const job of facts.jobs) {
+      // 08g DRIFT A: timeout-minutes is NOT a supported keyword on a job that
+      // `uses:` a reusable workflow — GitHub ignores it. Demanding it there is a
+      // permanent false RED (and invites someone to "fix" it with an ignored key).
+      if (job.callsReusable) continue;
+      if (job.timeoutMinutes === null) {
+        out.push({
+          rule: "timeout_missing",
+          entry: entry.name,
+          severity: "red",
+          registrySide: `entry runs via \`workflow: ${wf}\``,
+          otherSide: `job \`${job.id}\` has no timeout-minutes — a hung run burns the full 6h GHA ceiling`,
+          fix: "TIMEOUT_KILL — add `timeout-minutes:` to the job (see fdot-aadt-annual.yml: an untimed kill left the table EMPTY for 18 days).",
+        });
+      }
+    }
+  }
+  return out;
+}
+
+export function checkActionVersions(reg: Registry, repo: RepoView, tags: TagResolver): Finding[] {
+  const out: Finding[] = [];
+  const seenWf = new Set<string>();
+  const warnedUnresolved = new Set<string>();
+  for (const { entry } of allEntries(reg)) {
+    const wf = entry.workflow;
+    if (!wf || wf === "none" || seenWf.has(wf)) continue;
+    seenWf.add(wf);
+    const facts = parseWorkflow(repo, wf);
+    if (!facts) continue;
+    for (const ref of facts.jobs.flatMap((j) => j.usesRefs)) {
+      if (ref.startsWith("./")) continue; // local reusable workflow — not a marketplace action
+      const [action, pin] = ref.split("@");
+      if (!action || !pin) continue;
+      const known = tags.tags(action);
+      if (known === null) {
+        if (!warnedUnresolved.has(action)) {
+          warnedUnresolved.add(action);
+          out.push({
+            rule: "action_tags_unresolved",
+            entry: entry.name,
+            severity: "warn",
+            registrySide: `.github/workflows/${wf} pins \`${ref}\``,
+            otherSide: `tags for ${action} are unresolvable here (no gh / offline / not in ingest/tools/action-tags.json)`,
+            fix: "Fail-open: run `bun ingest/tools/check-registry-identity.mts --refresh-tags` to update the maintained allowlist.",
+          });
+        }
+        continue;
+      }
+      const exact = known.includes(pin);
+      const major = majorOf(pin);
+      const floating = major !== null && known.some((t) => t.startsWith(`v${major}.`));
+      if (!exact && !floating) {
+        out.push({
+          rule: "action_version_unresolvable",
+          entry: entry.name,
+          severity: "red",
+          registrySide: `.github/workflows/${wf} pins \`${ref}\``,
+          otherSide: `live tags for ${action} are [${known.slice(0, 6).join(", ")}…] — nothing resolves \`${pin}\``,
+          fix: "ACTION_VERSION — repin to a tag that exists. (Resolved against live tags, never a baked literal.)",
+        });
+        continue;
+      }
+      const latestMajor = known
+        .map((t) => Number(majorOf(t) ?? -1))
+        .reduce((a, b) => Math.max(a, b), -1);
+      if (major !== null && latestMajor > Number(major)) {
+        out.push({
+          rule: "action_major_behind",
+          entry: entry.name,
+          severity: "warn",
+          registrySide: `.github/workflows/${wf} pins \`${ref}\` (resolves — GREEN)`,
+          otherSide: `latest major for ${action} is v${latestMajor}`,
+          fix:
+            "Advisory ONLY. Tag-exists != compatible — do NOT mass-bump. (checkout v7 blocks fork-PR " +
+            "checkout on workflow_run, which 4 of our workflows use, and moved to ESM.)",
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The identity column is `source_name`. check_freshness.py scopes BOTH the
+ * freshness MAX() (:238) and the volume COUNT(*) (:382) on `WHERE source_name = %s`.
+ * `source_tag` is read by NOTHING in ingest/scripts/ or ingest/lib/ — the registry's
+ * one source_tag: field (news_swfl -> news_crawl) is a phantom with no code literal.
+ * That is the exact class that false-REDded daily_truth for two weeks.
+ */
+export function checkIdentityFields(reg: Registry, repo: RepoView): Finding[] {
+  const out: Finding[] = [];
+
+  for (const ex of reg.coverage_exempt ?? []) {
+    if (!ex?.table || !ex?.reason) {
+      out.push({
+        rule: "malformed_annotation",
+        entry: ex?.table ?? "coverage_exempt[?]",
+        severity: "red",
+        registrySide: `coverage_exempt entry ${JSON.stringify(ex)}`,
+        otherSide: "requires both `table:` and `reason:` — a bare table name is a silent exemption",
+        fix: "Give every exemption a stated reason (brain_writeback / runtime_cache / static_seed / derived_snapshot).",
+      });
+    }
+  }
+
+  for (const { entry } of allEntries(reg)) {
+    for (const kd of entry.known_drift ?? []) {
+      if (!kd?.rule || !kd?.check) {
+        out.push({
+          rule: "malformed_annotation",
+          entry: entry.name,
+          severity: "red",
+          registrySide: `known_drift entry ${JSON.stringify(kd)}`,
+          otherSide: "requires both `rule:` and `check:` (an OPEN key in the `checks` ledger)",
+          fix: 'RULE 2.4 — no silent deferrals. `node scripts/check.mjs open <project> <key> "<label>"`, then name that key here.',
+        });
+      }
+    }
+
+    if (entry.source_tag !== undefined) {
+      out.push({
+        rule: "source_tag_field_forbidden",
+        entry: entry.name,
+        severity: "red",
+        registrySide: `entry declares \`source_tag: ${entry.source_tag}\``,
+        otherSide:
+          "nothing in ingest/scripts/ or ingest/lib/ reads source_tag — check_freshness.py scopes on " +
+          "source_name (:238 freshness MAX, :382 volume COUNT). The field is a phantom.",
+        fix:
+          "SCHEMA_NAME_DRIFT — delete `source_tag:`. If the writer really stamps a discriminator, " +
+          "declare it as `source_name:` AND confirm the target table has that column (--live).",
+      });
+    }
+
+    if (entry.source_name !== undefined) {
+      const { existing } = producingDirs(entry, repo);
+      if (existing.length === 0) continue; // zombie — rule B owns it
+      const srcs = existing.flatMap((d) => repo.pyFiles(d)).map((f) => repo.read(f) ?? "");
+      const lit = entry.source_name;
+      if (!srcs.some((s) => s.includes(`"${lit}"`) || s.includes(`'${lit}'`))) {
+        out.push({
+          rule: "source_name_literal_absent",
+          entry: entry.name,
+          severity: "red",
+          registrySide: `entry declares \`source_name: ${lit}\` (the probe scopes every query on it)`,
+          otherSide: `no such literal anywhere in ${existing.join(", ")}`,
+          fix:
+            "SCHEMA_NAME_DRIFT — a one-letter drift here makes every freshness/volume query match ZERO " +
+            "rows and the source false-REDs forever. Align the registry value with the writer's literal.",
+        });
+      }
+    }
+  }
+  return out;
+}
