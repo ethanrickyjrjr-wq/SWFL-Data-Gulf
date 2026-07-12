@@ -8,6 +8,11 @@ county data") + vocab scope_note on fgcu_reri_home_prices_charlotte_pct_change. 
 caveat — removing it becomes a failing scope-leak tripwire. Gates: fgcu+catalog 9/0 · vocab --all OK
 (41 brains) · eslint 0. Rebuild (pack_id=fgcu-reri, deterministic, 0 LLM calls) dispatched after this
 push; scope_fgcu_reri_charlotte closes on live evidence.
+## 2026-07-12 (Fable 5 · main) — Desk: Movers — Core ZIPs boards stacked vertically
+
+Operator: the side-by-side boards left the card half-empty next to The Wire. `MoversBoard.tsx`
+wrapper drops `md:flex-row` — price-cuts board now stacks above new-listings (`gap-8`), filling the
+card's grid-stretched height. One-line class change, no data or logic touched.
 
 ## 2026-07-11 (Fable 5 · main) — Charlotte re-scope COMMITTED (56910dfe, isolated worktree); push + Group-A rebuilds await the operator's word
 

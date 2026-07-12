@@ -38,7 +38,7 @@ function Board({ title, rows, color }: { title: string; rows: MoverRow[]; color:
 export function MoversBoard({ movers }: { movers: MoversData }) {
   return (
     <div>
-      <div className="flex flex-col gap-6 md:flex-row md:gap-8">
+      <div className="flex flex-col gap-8">
         <Board title="Highest share of price cuts" rows={movers.priceCutShare} color="#d4b370" />
         <Board
           title="Highest share of new listings"
