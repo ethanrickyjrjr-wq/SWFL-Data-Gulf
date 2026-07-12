@@ -169,3 +169,261 @@ def run_severity(summary: dict | None, gh_error: str | None) -> tuple[str, str]:
         # can see this class; the manifest + gh state can.
         return ("DISABLED", "red" if summary.get("cron_in_source") else "yellow")
     return (status, _RUN_SEVERITY.get(status, "yellow"))
+
+
+# ── prescription assignment ───────────────────────────────────────────────────
+
+from ingest.lib import prescriptions as rx  # noqa: E402
+
+
+def _rx(code: str, *, line: dict, evidence: str = "") -> dict:
+    return {
+        "code": code,
+        "should_retry": rx.should_retry(code),
+        "fix": rx.fix_text(
+            code,
+            workflow=line.get("workflow"),
+            table=line.get("table"),
+            pipeline=line.get("pipeline"),
+            subject=line.get("workflow") or line.get("table") or line.get("dataset"),
+        ),
+        "evidence": evidence,
+    }
+
+
+def prescribe(line: dict) -> dict | None:
+    """(observed signal shape) -> enum member. PURE. First match wins.
+
+    Doctor can only assign DOCTOR_ASSIGNABLE — the six members its four signals can
+    actually observe. ACTION_VERSION / SECRET_NOT_WIRED / SCHEMA_NAME_DRIFT come from
+    Phase 2's check-registry-identity.mts at PR TIME (it fails the PR and writes no ledger
+    row — nothing for doctor to see). WAF_BLOCK needs the failed run's LOG (the incident
+    handler's surface). Anything else red and unclassifiable -> UNKNOWN WITH EVIDENCE.
+    A red line never carries an invented diagnosis.
+
+    Returns None for a green/yellow line, and None for a red whose ONLY red signal is
+    content — a failing contract already names its table, column, test and failing-row
+    count, which is a better diagnosis than any enum member we have. format_report
+    enforces that every red line carries a prescription OR >=1 failing content test.
+    """
+    if line["health"] != "red":
+        return None
+
+    fresh = line["freshness"]
+    vol = line["volume"]
+    content = line["content"]
+    run = line["run"]
+
+    # 1 — a live table with rows and no registry entry at all.
+    if line["kind"] == "coverage_only":
+        return _rx(
+            rx.ZERO_COVERAGE,
+            line=line,
+            evidence=f"{line['table']} has rows; ingest/cadence_registry.yaml has no entry for it.",
+        )
+
+    # 2 — the run burned its ceiling. NEVER retry (money guard).
+    if run["status"] == "TIMEOUT":
+        return _rx(
+            rx.TIMEOUT_KILL,
+            line=line,
+            evidence=f"cancelled at >=95% of timeout-minutes; {run.get('url') or 'no run url'}",
+        )
+
+    # 3 — green run, no data. A dead vendor key returns an empty 200.
+    if run["status"] == "GREEN" and (
+        vol["status"] == "LOW_VOLUME" or vol.get("landed") == 0 or fresh["status"] == "MISSING"
+    ):
+        return _rx(
+            rx.GAP_SENTINEL,
+            line=line,
+            evidence=f"last run succeeded ({run.get('url') or 'no url'}) but volume="
+            f"{vol['status']} landed={vol.get('landed')} freshness={fresh['status']}",
+        )
+
+    # 4 — registry claims it, the DB does not have it.
+    if fresh["status"] == "MISSING" or vol["status"] == "UNRESOLVED" or line["kind"] == "missing":
+        return _rx(
+            rx.NEVER_LANDED,
+            line=line,
+            evidence=f"freshness={fresh['status']} volume={vol['status']} "
+            f"pg_class kind={line['kind']}",
+        )
+
+    # 5 — one or two failures is transient. Three is a class.
+    if run["status"] == "RED" and run.get("consecutive_failures", 0) <= 2:
+        return _rx(
+            rx.TRANSIENT,
+            line=line,
+            evidence=f"{run.get('consecutive_failures')} consecutive failure(s); "
+            f"{run.get('url') or 'no run url'}",
+        )
+
+    # 6 — red, and no class fits. SAY SO. Attach the evidence. Invent nothing.
+    if run["severity"] == "red":
+        if run["status"] == "DISABLED":
+            ev = (
+                f"workflow {line.get('workflow')} carries a cron in source but its state at the "
+                f"GitHub API is disabled_manually — a schedule nobody is running. No enum member "
+                f"covers this class yet (check doctor_rx_workflow_disabled_member)."
+            )
+        elif run["status"] == "NEVER_RAN":
+            ev = (
+                f"workflow {line.get('workflow')} has never run (confirmed by a targeted "
+                f"`gh run list --workflow` backfill, not merely absent from the bulk window)."
+            )
+        else:
+            ev = (
+                f"{run.get('consecutive_failures')} consecutive failure(s), last conclusion="
+                f"{run.get('last_conclusion')}; {run.get('url') or 'no run url'} — no class is "
+                f"inferable from run metadata alone. Read the log."
+            )
+        return _rx(rx.UNKNOWN, line=line, evidence=ev)
+
+    # 7 — the only red is content. The failing contract IS the diagnosis.
+    if content["severity"] == "red":
+        return None
+
+    # 8 — red with no red signal is a bug in worst_of; say UNKNOWN rather than stay silent.
+    return _rx(
+        rx.UNKNOWN,
+        line=line,
+        evidence=f"line is red but no signal is red: freshness={fresh['status']} "
+        f"volume={vol['status']} content={content['status']} run={run['status']}",
+    )
+
+
+# ── the join ──────────────────────────────────────────────────────────────────
+
+from ingest.scripts.check_freshness import _slug  # noqa: E402
+
+# public.checks keys that are TABLE-scoped (check_data_quality.py:51-52, plus Phase 1's
+# contract prefix). Doctor READS these; it never writes them — check_data_quality owns
+# quality_fail_/schema_drift_ and check_freshness owns corridor_gap_. A second writer
+# would double-open every key.
+_TABLE_CHECK_PREFIXES = ("quality_fail_", "schema_drift_", "contract_fail_")
+
+
+def _checks_for_table(table: str | None, ledger_rows: list[dict]) -> list[str]:
+    if not table:
+        return []
+    stems = tuple(p + _slug(table) for p in _TABLE_CHECK_PREFIXES)
+    return sorted(r["check_key"] for r in ledger_rows if r["check_key"].startswith(stems))
+
+
+def build_health_lines(
+    *,
+    registry: dict,
+    pipeline_results: list[dict],
+    view_results: list[dict],
+    sla_errors: set[str],
+    value_results: list[dict],
+    ledger_rows: list[dict],
+    gh_summaries: dict[str, dict],
+    gh_error: str | None,
+    manifest_by_file: dict[str, dict],
+    relkinds: dict[str, str],
+    quality_tables: list[str],
+) -> list[dict]:
+    """PURE. One health line per dataset = worst of {freshness, volume, content, run}.
+
+    Two kinds of line:
+      - a REGISTRY line, one per `pipelines:` entry (joined to its table, its contracts,
+        its workflow's runs, its open ledger checks, and its view-liveness probe);
+      - a COVERAGE_ONLY line, one per quality-registry table with NO registry entry —
+        which is exactly how ZERO_COVERAGE surfaces (the parcel_subdivision class, and
+        the ONLY way data_lake.listing_active_stats — a VIEW with no pipeline — gets a
+        health line at all).
+    """
+    by_name = {r["name"]: r for r in pipeline_results}
+    views_by_pipeline = {v["pipeline"]: v for v in view_results}
+    lines: list[dict] = []
+    covered_tables: set[str] = set()
+
+    for entry in registry.get("pipelines", []) or []:
+        name = entry["name"]
+        result = by_name.get(name)
+        if result is None:
+            # run_probe's lane dispatch ends in `else: continue` (check_freshness.py:645-646),
+            # silently dropping any entry that is neither tier-1 nor tier-2. A registry entry
+            # with NO probe result is itself a finding, not a pass.
+            result = {"name": name, "status": "MISSING", "age_days": None, "last_run": None,
+                      "volume_status": None, "volume_landed": None, "volume_min": None}
+
+        table = resolve_table(entry)
+        if table:
+            covered_tables.add(table)
+        kind = kind_from_relkind(relkinds.get(table)) if table else entry.get("lane", "tier-1")
+
+        f_sev = freshness_severity(result, sla_errors)
+        v_status, v_sev = volume_severity(entry, result)
+        c_status, c_sev, c_failing = content_severity(table, value_results)
+
+        workflow = entry.get("workflow")
+        summary = gh_summaries.get(workflow) if workflow else None
+        r_status, r_sev = run_severity(summary, gh_error if workflow else None)
+
+        view = views_by_pipeline.get(name)
+        view_sev = "yellow" if (view and view["status"] != "VIEW_FRESH") else "green"
+
+        line = {
+            "dataset": name,
+            "table": table,
+            "kind": kind,
+            "lane": entry.get("lane"),
+            "workflow": workflow,
+            "pipeline": name,
+            "freshness": {"status": result["status"], "severity": f_sev,
+                          "age_days": result.get("age_days"),
+                          "last_run": str(result.get("last_run") or "") or None},
+            "volume": {"status": v_status, "severity": v_sev,
+                       "landed": result.get("volume_landed"), "min_rows": result.get("volume_min")},
+            "content": {"status": c_status, "severity": c_sev, "failing": c_failing},
+            "run": {
+                "status": r_status,
+                "severity": r_sev,
+                "last_conclusion": (summary or {}).get("last_conclusion"),
+                "last_success_at": (summary or {}).get("last_success_at"),
+                "consecutive_failures": (summary or {}).get("consecutive_failures", 0),
+                "url": (summary or {}).get("url"),
+                "cron_in_source": (summary or {}).get("cron_in_source"),
+            },
+            "view": {"status": view["status"], "detail": view["detail"]} if view else None,
+            "open_checks": _checks_for_table(table, ledger_rows),
+        }
+        line["health"] = worst_of(f_sev, v_sev, c_sev, r_sev, view_sev)
+        line["prescription"] = prescribe(line)
+        lines.append(line)
+
+    # Coverage-only: a table the quality registry knows and the cadence registry does not.
+    for table in sorted(set(quality_tables) - covered_tables):
+        c_status, c_sev, c_failing = content_severity(table, value_results)
+        line = {
+            "dataset": table,
+            "table": table,
+            "kind": "view" if kind_from_relkind(relkinds.get(table)) == "view" else "coverage_only",
+            "lane": None,
+            "workflow": None,
+            "pipeline": None,
+            "freshness": {"status": "NO_REGISTRY_ENTRY", "severity": "yellow",
+                          "age_days": None, "last_run": None},
+            "volume": {"status": "NO_REGISTRY_ENTRY", "severity": "yellow",
+                       "landed": None, "min_rows": None},
+            "content": {"status": c_status, "severity": c_sev, "failing": c_failing},
+            "run": {"status": "NO_WORKFLOW", "severity": "yellow", "last_conclusion": None,
+                    "last_success_at": None, "consecutive_failures": 0, "url": None,
+                    "cron_in_source": None},
+            "view": None,
+            "open_checks": _checks_for_table(table, ledger_rows),
+        }
+        # A VIEW with no pipeline (listing_active_stats) is NOT a coverage gap — it is
+        # correctly registry-less, and Locus B is its only possible gate (spec §5). A base
+        # TABLE with rows and no registry entry IS the ZERO_COVERAGE gap.
+        if line["kind"] == "coverage_only":
+            line["health"] = "red"
+        else:
+            line["health"] = worst_of(c_sev, "yellow")
+        line["prescription"] = prescribe(line)
+        lines.append(line)
+
+    return lines
