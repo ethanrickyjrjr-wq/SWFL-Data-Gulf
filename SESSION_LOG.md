@@ -1,3 +1,17 @@
+## 2026-07-11 (Fable 5 · main) — CORRECTION: operator rejected the v1 homepage middle as collage; borrowed blocks stripped
+
+Operator on `3e5cce30`: "We don't need ticker and same things on every page. Thought the homepage
+would be made better, not just things from other pages thrown on." He's right — the middle was built
+by transplanting inner-page devices (Insiders WireTicker + capture band, desk-tile door), which is
+exactly what the cited NN/g P1.3 warns against (homepage must stay visually DISTINCT). Stripped
+same-session: page back to hero → map(+stats bar restored) → guides → pricing → FAQ → CTA;
+ProductDoors/InsidersBand/home-wire deleted; css additions removed. SURVIVED review (operator's own
+picks, untouched): one nav sitewide + "Build one free" CTA, SourcesGate → /login, FAQ scope fix,
+Ask AI rename + no `/` auto-open, DiscoveryTicker top-16. Spec carries a post-review correction
+block; memory `feedback_homepage-grammar-not-collage` written. `bunx next build` ✓. v2 = the
+homepage's OWN centerpiece (address → campaign transformation) — design first, operator sign-off,
+THEN build. Still nothing pushed.
+
 ## 2026-07-11 (Fable 5 · main) — Homepage one-site redesign BUILT + prod-build verified; commit local, push pending operator
 
 Operator: "Insiders/Desk/Guides all better than the homepage… make it all feel like one site; move/cut

@@ -28,9 +28,7 @@ import {
  * and injected client-side.
  */
 
-// stats left this component 07/12/2026 — the door tiles render them (ProductDoors);
-// the map section stays purely map + rail (spec 2026-07-12-homepage-one-site-design.md).
-type Payload = Pick<HomeMapPayload, "data" | "badge">;
+type Payload = Pick<HomeMapPayload, "data" | "badge" | "stats">;
 
 const zipReportHref = (zip: string) => `/r/zip-report/${zip}`;
 
@@ -45,7 +43,7 @@ const fmt = (val: number, format: "currency" | "number") => {
 };
 
 export default function Hero({ payload }: { payload: Payload }) {
-  const { data, badge } = payload;
+  const { data, badge, stats } = payload;
   const router = useRouter();
 
   const availableMetrics = useMemo(
@@ -371,6 +369,19 @@ export default function Hero({ payload }: { payload: Payload }) {
             </div>
           </div>
         </div>
+
+        {stats.length > 0 && (
+          <div className="stats-bar">
+            {stats.map((s) => (
+              <div className="stat-cell" key={s.label}>
+                <div className="stat-label">{s.label}</div>
+                <div className="stat-value">{s.value}</div>
+                <div className="stat-sub">{s.sub}</div>
+                <div className="stat-tag">{s.tag}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

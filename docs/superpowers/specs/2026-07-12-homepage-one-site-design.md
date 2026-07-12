@@ -1,5 +1,16 @@
 # Homepage one-site redesign
 
+> **POST-REVIEW CORRECTION (07/11/2026, operator):** the §Design middle — wire ticker, two-door
+> section, Insiders band — was REJECTED after build: "We don't need ticker and same things on
+> every page. Thought the homepage would be made better, not just things from other pages thrown
+> on." Transplanting inner-page devices is a collage, not a design; the same NN/g source this
+> spec cites (P1.3) requires the homepage to stay *visually distinct* from inner pages. Those
+> blocks were stripped same-day. What SURVIVED review: one nav sitewide, dead-CTA kills
+> (nav → "Build one free", SourcesGate → /login), FAQ scope fix, Ask AI pill rename + no
+> auto-open on `/`, DiscoveryTicker position fix. The homepage's OWN centerpiece (the
+> address → campaign transformation, which no inner page shows) is the v2 design — separate
+> operator sign-off before build. Memory: `feedback_homepage-grammar-not-collage`.
+
 **Date:** 2026-07-12
 **Check:** `homepage_one_site_live_verify`
 **Operator brief (07/12/2026):** "Insiders, Desk, Guides, all excellent. Only problem is they are all
