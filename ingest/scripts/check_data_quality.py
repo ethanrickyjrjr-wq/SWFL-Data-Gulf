@@ -47,9 +47,17 @@ import yaml
 sys.path.insert(0, str(Path(__file__).parent))
 from check_freshness import _get_connection, _slug  # noqa: E402
 
+from ingest.quality.contracts import (  # noqa: E402
+    CONTRACT_BUILDERS,
+    ContractConfigError,
+    PROBE_LOCI,
+    load_contracts,
+)
+
 _QUALITY_PROJECT = "data-quality"
 _QUALITY_PREFIX = "quality_fail_"
 _SCHEMA_PREFIX = "schema_drift_"
+_CONTRACT_PREFIX = "contract_fail_"
 
 _REGISTRY_PATH = Path(__file__).parent.parent / "quality" / "quality_registry.yaml"
 _BASELINE_DIR = Path(__file__).parent.parent / "quality" / "schema_baselines"
@@ -123,6 +131,56 @@ _BUILDERS = {
     "unique": lambda t, spec: build_unique_sql(t, spec["col"]),
     "accepted_values": lambda t, spec: build_accepted_values_sql(t, spec["col"], spec["values"]),
 }
+
+
+# ── Locus B: content contracts (the same registry block Locus A's evaluate_batch reads) ──
+
+
+def run_content_contracts(conn, registry: dict) -> list[dict]:
+    """Run every probe-locus content contract at rest. Same result shape as run_value_tests
+    ({table, col, test, severity, failing_rows, status}) so the formatter and the checks-ledger
+    sync compose unchanged, and so doctor (spec §7 3c) gets ONE content signal, not two.
+
+    `test` carries the CONTRACT NAME (not a type) — the names are unique per table and are what
+    the check_key, the summary row and the prescription all key on.
+
+    This is the ONLY locus a bare VIEW has: data_lake.listing_active_stats has no pipeline, no
+    batch and no merge call, so there is no Locus A for it at all.
+
+    Per-query try/rollback, exactly like run_value_tests: the probe ALWAYS exits 0
+    (module docstring) — a missing table or a malformed contract can never break the run."""
+    results: list[dict] = []
+    for table in (registry.get("tables") or {}):
+        for spec in load_contracts(table, registry):
+            if spec.get("locus", "both") not in PROBE_LOCI:
+                continue
+            base = {
+                "table": table,
+                "col": spec.get("col"),
+                "test": spec.get("name"),
+                "severity": spec.get("severity", "warn"),
+            }
+            builder = CONTRACT_BUILDERS.get(spec.get("type"))
+            if builder is None:
+                results.append({**base, "failing_rows": None, "status": "SKIP",
+                                "detail": f"unknown contract type '{spec.get('type')}'"})
+                continue
+            try:
+                query, params = builder(table, spec)
+                with conn.cursor() as cur:
+                    cur.execute(query, params)
+                    failing = cur.fetchone()[0]
+            except (ContractConfigError, Exception) as exc:  # noqa: BLE001 — observability
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+                results.append({**base, "failing_rows": None, "status": "SKIP",
+                                "detail": str(exc)})
+                continue
+            results.append({**base, "failing_rows": failing,
+                            "status": "PASS" if failing == 0 else "FAIL"})
+    return results
 
 
 def run_value_tests(conn, registry: dict) -> list[dict]:
@@ -274,7 +332,12 @@ def _schema_check_key(table: str, col: str) -> str:
     return f"{_SCHEMA_PREFIX}{_slug(table)}_{col}"
 
 
-def sync_quality_checks(conn, value_results: list[dict], schema_results: list[dict]) -> dict:
+def _contract_check_key(table: str, name: str) -> str:
+    return f"{_CONTRACT_PREFIX}{_slug(table)}_{name}"
+
+
+def sync_quality_checks(conn, value_results: list[dict], schema_results: list[dict],
+                        contract_results: list[dict] | None = None) -> dict:
     """Open/auto-close public.checks rows for error-severity value-test fails and
     TYPE_CHANGED schema drifts. Scoped to project=data-quality (so a same-prefixed
     key from another project can never be silently auto-closed). Idempotent;
@@ -297,6 +360,14 @@ def sync_quality_checks(conn, value_results: list[dict], schema_results: list[di
                     f"Schema drift: {s['table']}.{d['col']} type changed "
                     f"{d['baseline_type']} -> {d['live_type']}"
                 )
+
+    for c in contract_results or []:
+        if c["severity"] == "error" and c["status"] == "FAIL":
+            key = _contract_check_key(c["table"], c["test"])
+            want[key] = (
+                f"Content contract fail: {c['table']} {c['test']} "
+                f"({c['failing_rows']:,} failing rows)"
+            )
 
     opened: list[str] = []
     closed: list[str] = []
@@ -334,13 +405,17 @@ def sync_quality_checks(conn, value_results: list[dict], schema_results: list[di
             # state in ('open','dropped') -> leave as-is.
 
         # Auto-close: any open data-quality auto-check whose condition cleared.
+        # THREE prefixes, not two. Omit _CONTRACT_PREFIX here and a contract check opens and
+        # then NEVER closes — a permanently-open stale check, which is exactly the false-RED
+        # class this build exists to kill. The failure is silent; this comment is the guard.
         # Scoped to _QUALITY_PROJECT; prefix-OR parenthesized so it binds before
         # the state filter.
         cur.execute(
             "SELECT id, check_key FROM public.checks"
             " WHERE project = %s AND state='open'"
-            " AND (check_key LIKE %s OR check_key LIKE %s)",
-            (_QUALITY_PROJECT, _QUALITY_PREFIX + "%", _SCHEMA_PREFIX + "%"),
+            " AND (check_key LIKE %s OR check_key LIKE %s OR check_key LIKE %s)",
+            (_QUALITY_PROJECT, _QUALITY_PREFIX + "%", _SCHEMA_PREFIX + "%",
+             _CONTRACT_PREFIX + "%"),
         )
         for cid, key in cur.fetchall():
             if key not in want:
@@ -411,6 +486,29 @@ def format_schema_drift(results: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def format_content_contracts(results: list[dict]) -> str:
+    """Content-contract section: surface FAIL/SKIP; clean ✅ when all pass."""
+    if not results:
+        return ""
+    alerting = [r for r in results if r["status"] != "PASS"]
+    lines = ["\n### Content contracts — the checks that travel with the data\n"]
+    if not alerting:
+        lines.append(f"✅ All {len(results)} content contracts pass.\n")
+        return "\n".join(lines) + "\n"
+    lines += [
+        "| Table | Contract | Severity | Failing rows | Status |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for r in alerting:
+        sev = f"{_SEV_ICON.get(r['severity'], '')} {r['severity']}"
+        failing = f"{r['failing_rows']:,}" if r["failing_rows"] is not None else "—"
+        detail = f" ({r['detail']})" if r.get("detail") else ""
+        lines.append(
+            f"| `{r['table']}` | {r['test']} | {sev} | {failing} | {r['status']}{detail} |"
+        )
+    return "\n".join(lines) + "\n"
+
+
 # ── main ────────────────────────────────────────────────────────────────────────
 
 
@@ -468,11 +566,12 @@ def main(argv: list[str] | None = None) -> int:
 
         value_results = run_value_tests(conn, registry)
         schema_results = run_schema_drift(conn, registry)
+        contract_results = run_content_contracts(conn, registry)
 
         sync = None
         if not args.dry_run:
             try:
-                sync = sync_quality_checks(conn, value_results, schema_results)
+                sync = sync_quality_checks(conn, value_results, schema_results, contract_results)
             except Exception as exc:  # noqa: BLE001 — never gate on a ledger error
                 try:
                     conn.rollback()
@@ -497,6 +596,7 @@ def main(argv: list[str] | None = None) -> int:
     summary = "## Data-Quality Probe\n"
     summary += format_value_tests(value_results)
     summary += format_schema_drift(schema_results)
+    summary += format_content_contracts(contract_results)
     if sync and "error" in sync:
         summary += f"\n_checks-ledger sync skipped: `{sync['error']}`_\n"
     elif sync:
