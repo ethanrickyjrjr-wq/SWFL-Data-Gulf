@@ -24,6 +24,27 @@
 # rows (news 64 rows, zhvi 33,922, zori 5,277, leepa 548,798). leepa.last_sale_amount
 # has 20,668 NULLs and is intentionally NOT seeded — it is the deliberate-failure
 # proof column for the not_null detector.
+#
+# Per-table fields (continued) — CONTENT CONTRACTS (added 07/11/2026):
+#   content_contracts: list of {name, type, locus, policy, severity, ...}
+#     type:     range          — WHERE-scoped numeric floor/ceiling. Row-evaluable.
+#               enum           — WHERE-scoped allowlist.               Row-evaluable.
+#               sql_expectation— cross-row / cross-table (a median, a JOIN). NOT row-evaluable;
+#                                locus MUST be `probe`.
+#     locus:    merge (Locus A, in the pipeline, on the batch, pre-merge)
+#               probe (Locus B, at rest, in check_data_quality.py — the ONLY locus a VIEW has)
+#               both
+#     policy:   report      — count the violations, DROP NOTHING (row disposition)
+#               quarantine  — drop the offenders, merge the clean rest
+#     abort_if: {share_pct_gt, violations_gte, if_no_clean_rows} — RUN disposition, independent
+#               of policy. BOTH share_pct_gt AND violations_gte must breach; share_pct is a
+#               PERCENT (0-100) of the IN-SCOPE rows in the batch. A `report` contract still
+#               kills the run on a genuine feed-shape change.
+#
+# TWO VOCABULARIES, ONE COLUMN NAME — do not copy a contract between these tables:
+#   listing_state.property_type       holds NORMALIZED tokens (PROPERTY_TYPE_MAP's codomain).
+#   rental_listings_swfl.property_type holds RAW SteadyAPI tokens (condos, townhomes,
+#   duplex_triplex, mobile, apartment). A contract copy-pasted either way fires on 100% of rows.
 
 tables:
   data_lake.news_articles_swfl:
@@ -56,3 +77,298 @@ tables:
       - { col: folioid, test: not_null, severity: error }
       - { col: folioid, test: unique,   severity: error }
     schema_baseline: true
+
+  # ── CONTENT CONTRACTS ────────────────────────────────────────────────────────
+  # Authored 07/11/2026 against the live lake. Every threshold below survived an
+  # adversarial verification that tried to make it fire on a legit row or miss a known-bad
+  # one. Read docs/audit/2026-07-11-pipeline-problems/08b + 08h before changing a number.
+
+  data_lake.listing_state:
+    content_contracts:
+
+      # ── R1: the home-price floor. POLICY IS `report` AND MUST STAY `report`. ───────────
+      # A price floor is a SIGNAL, not a licence to drop rows. Two independent verifiers
+      # proved the specced `property_type NOT IN ('land','other')` scope DELETES REAL
+      # INVENTORY: 4324 Mailbox Ave #127 ($9,900), 567 Peace Ct #2120 ($2,000) and
+      # 648 Suwanee Dr #2190 ($3,000) are VERIFIED-live active for-sale mobile homes
+      # (MHVillage / Trulia / Zillow, 07/11/2026) that realtor.com types "single family".
+      # The cohort runs CONTINUOUSLY from $2,000 to $59,900+ — no floor separates it.
+      #
+      # SCOPE, and why each clause is here:
+      #   sqft IS NOT NULL   — the ONE discriminator that works. It splits the sqft-NULL
+      #                        TRUE-price mobile homes (real sales, keep) from the sqft-present
+      #                        CORRUPTED-price real houses (e.g. 526 Wabasso Ave S, Lehigh
+      #                        33974: carried at $5,000, actually a 1,563sf 2024-built home
+      #                        asking $369,900). It also puts the two 33903 TWIN rows —
+      #                        19327CONGRESSIONALCT17G ($10,000, `other`) and 4324MAILBOXAVE127
+      #                        ($9,900, `single_family`), identical on every other observable —
+      #                        on the SAME side. The token scope gave them opposite verdicts.
+      #   type ALLOWLIST     — `land` (522 legit sub-$20k lots) and `other` (61 land-lease-park
+      #                        manufactured sales) are OUT OF SCOPE, never "excluded by a
+      #                        threshold". Also keeps `residential` out (Source-B holding rows).
+      #   source_name        — supplied by BATCH CTX at Locus A: it is NOT a batch-row column
+      #                        (distill._STATE_COLS omits it; upsert_state injects it as a
+      #                        scalar at distill.py:200).
+      # Live: 21 offenders / 19,116 in-scope = 0.110%. All 21 verified bad, 0 verified-real.
+      # Known miss (accepted, stated): a rental-priced row with NULL sqft, and any rent artifact
+      # above $20,000 — Arbor Trace annual-rate rentals reach $49,000 while a real sale in the
+      # same building starts at $54,900. Price cannot separate that cohort at ANY threshold; the
+      # real fix is a vendor status field. The floor buys the obvious class, not the tail.
+      - name: listing_state_home_price_floor
+        type: range
+        locus: both
+        policy: report
+        severity: error
+        col: list_price
+        min: 20000
+        allow_null: false
+        where:
+          - { col: source_name,   op: eq,       value: api_feed }
+          - { col: sale_or_rent,  op: eq,       value: sale }
+          - { col: state,         op: eq,       value: active }
+          - { col: list_price,    op: not_null }
+          - { col: sqft,          op: not_null }
+          - { col: property_type, op: in,       value: [single_family, condo, townhouse, multi_family] }
+        # Unreachable on today's data under ANY batching (only 21 offenders exist region-wide,
+        # scattered across ~10 ZIPs — no batch can assemble 25). It fires on a genuine feed-shape
+        # change: 5% of a 14,110-row Lee sweep = 706 rows. That is what abort is for.
+        # violations_gte is load-bearing: real batches are 7 rows (07/07), 364 (07/08), 21,142
+        # (07/10). A share-only rule aborts the nightly chain over 1 bad row in a recovery run.
+        abort_if: { share_pct_gt: 5.0, violations_gte: 25, if_no_clean_rows: true }
+
+      # ── E1: the property_type vocabulary-collision guard. ─────────────────────────────
+      # ALLOWLIST = the UNION of BOTH writers' code-reachable codomains, NOT the live active
+      # mix. Authoring it from the 6-value active mix (or from
+      # 20260711_listing_active_stats_homes_only.sql:16-17's comment, which lists the same six)
+      # quarantines the 2,996 legitimate `residential` rows — and at the BATCH locus that is
+      # 10.18% of Collier's 07/01 cutover batch with 899 rows: a HARD ABORT of an 8,833-row load.
+      #   residential  — extract.py:140's Source-B token; catchup.py:92 flipped those rows into
+      #                  source_name='api_feed'. 2,996 live, median $359,900 Lee / $770,000
+      #                  Collier. `property_type='residential'` <=> `status IS NULL` <=>
+      #                  `property_id IS NULL`, zero exceptions. DO NOT REMOVE until that
+      #                  population is 0.
+      #   manufactured — in PROPERTY_TYPE_MAP (constants_api.py:60), 0 rows live. Allowed so
+      #                  widening STEADYAPI_TYPE_FILTERS cannot red the nightly chain before the
+      #                  registry catches up.
+      # HONEST SCOPE: this catches NOTHING today and cannot be violated by any vendor input —
+      # map_property_type (extract_api.py:69-70) sends every unknown token to "other", so the
+      # codomain is CLOSED at 7 tokens, all 7 allowlisted. It fires ONLY on a CODE change (a
+      # bypassed normalizer, a new PROPERTY_TYPE_MAP token). It is a drift tripwire. If it is
+      # ever credited with covering the $6k Marco Island cluster, the range contract gets
+      # dropped and that cluster ships forever.
+      # NO enum on `sale_or_rent`: VACUOUSLY GREEN — both writers hardcode "sale"
+      # (extract_api.py:139, extract.py:144). The contamination is a PRICE signal, not a label.
+      - name: listing_state_property_type_allowlist
+        type: enum
+        locus: both
+        policy: quarantine
+        severity: error
+        col: property_type
+        allow_null: false
+        allowed: [single_family, condo, townhouse, multi_family, land, other, manufactured, residential]
+        where: []
+        # Reachable violations are BIMODAL (~0% or ~100%) — there is no gradient to threshold.
+        # 0.50 puts the one real historical collision (7.75% Lee / 10.18% Collier / 100% scrape,
+        # measured AT THE BATCH LOCUS) uniformly on the quarantine side — a human widens the
+        # allowlist — while still firing hard on the ~100% bypassed-normalizer case. A 10% line
+        # would CUT THROUGH THE MIDDLE of one root-cause event and split it by county.
+        abort_if: { share_pct_gt: 50.0, violations_gte: 500, if_no_clean_rows: true }
+
+  # ── data_lake.listing_active_stats — a VIEW. Locus B is the ONLY locus it has. ───────
+  # CREATE OR REPLACE VIEW (docs/sql/20260711_listing_active_stats_homes_only.sql:34); no
+  # pipeline writes it (one grep hit in ingest/, and that is a consumer comment). No batch,
+  # no merge call, nothing to quarantine, nothing to abort. Its job is to RED the table the
+  # moment the display predicate regresses. information_schema.columns exposes a view's
+  # columns, so read_live_schema and the count(*) builders work against it unchanged.
+  data_lake.listing_active_stats:
+    content_contracts:
+
+      # ── C2: the land-drag tripwire. THE ORACLE IS LABEL-INDEPENDENT ON PURPOSE. ────────
+      # THE SPECCED VERSION WAS A TAUTOLOGY. It recomputed a "correct" homes-only median with
+      # a WHERE clause that was a BYTE-FOR-BYTE COPY of the view's own (`property_type <>
+      # 'land'`) — comparing the implementation against itself. Live: 49 of 52 rows had ratio
+      # EXACTLY 1.0000, so `median < 0.5 * median` is ARITHMETICALLY UNSATISFIABLE.
+      #
+      # And property_type is DERIVED, not vendor-supplied: `/search` returns NO property-type
+      # field on any row (verified live 07/07/2026); extract_api.py:69-70 is
+      # `PROPERTY_TYPE_MAP.get(raw, "other")`, which SILENTLY DEFAULTS any unmapped value —
+      # a bug that has ALREADY HAPPENED ONCE (test_extract_api.py:64-65). Under that drift the
+      # original ~10x $35k bug RETURNS IN FULL while the tautological tripwire reports GREEN
+      # (33972 -> true ratio 0.102, reported 1.000).
+      #
+      # THE FIX (both changes are load-bearing):
+      #  1. Oracle keys on `(beds IS NOT NULL OR sqft IS NOT NULL)` — RAW VENDOR FIELDS,
+      #     genuinely independent of PROPERTY_TYPE_MAP, which is where the drift lives.
+      #     Structural: 6,802 of 6,806 land rows are beds-less AND sqft-less; 0 of 5,629 condo,
+      #     0 of 526 townhouse, 1 of 12,687 single_family.
+      #  2. JOIN ON (county, zip), never `USING (zip_code)`. Three ZIPs (34110, 34119, 33971)
+      #     exist under BOTH counties; USING fans them out and a 6-listing Lee slice gets
+      #     compared against a 473-row POOLED median, bypassing the small-N guard. Live vector.
+      #
+      # Verified 07/11/2026: 0 rows today (min ratio 0.9664 -> 1.93x margin), and it FIRES at
+      # 0.102 / 0.117 on 33972 / 33974 under the exact relabel the naive version sleeps through.
+      # Keep 0.5. Honest caveat: this trades one assumption (the label) for another (beds/sqft
+      # presence). A strict improvement, not a proof.
+      # NAMED GAP (check `listing_active_stats_inflated_median_ceiling`): one-sided. A regression
+      # that INFLATES the median passes silently. No verified upper-ratio distribution exists for
+      # the corrected oracle, so no ceiling is invented here.
+      - name: listing_active_stats_land_blend_tripwire
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: error
+        failing_rows_sql: |
+          WITH correct AS (
+            SELECT btrim(county) AS county, zip_code,
+                   percentile_cont(0.5) WITHIN GROUP (ORDER BY list_price) AS homes_only_median,
+                   count(*) AS homes_cnt
+            FROM data_lake.listing_state
+            WHERE source_name = 'api_feed' AND state = 'active' AND sale_or_rent = 'sale'
+              AND list_price IS NOT NULL AND list_price >= 20000
+              AND btrim(county) = ANY (ARRAY['Lee','Collier'])
+              AND (beds IS NOT NULL OR sqft IS NOT NULL)
+            GROUP BY 1, 2
+          )
+          SELECT count(*)
+          FROM data_lake.listing_active_stats v
+          JOIN correct c ON v.county = c.county AND v.zip_code = c.zip_code
+          WHERE c.homes_cnt >= 25
+            AND v.median_list_price < 0.5 * c.homes_only_median
+
+      # ── C2b: the property-type-INDEPENDENT backstop. ──────────────────────────────────
+      # C2's oracle catches a re-blend. This catches a label CORRUPTION so total that both
+      # sides of C2 inherit it. Lowest LEGIT shipped ZIP median (n>=30) is $139,900 (33903,
+      # 543 homes, only 5.8% land — a genuinely cheap North Fort Myers ZIP). Worst contaminated
+      # value pre-hotfix was $31,360 (33974) / $35,000 (33972). $75,000 sits 1.87x below the
+      # lowest legit and 2.14x above the worst known-bad.
+      # `listing_count >= 30` is LOAD-BEARING, not tidiness: it alone suppresses the n=1 phantom
+      # ZIPs (33975 @ $20,000, 33095 @ $28,000, 33467 @ $30,000, 33792 @ $39,900) — all under
+      # the floor and all CORRECT one-listing medians. Without it: 4 guaranteed false positives.
+      - name: listing_active_stats_median_absolute_floor
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: error
+        failing_rows_sql: |
+          SELECT count(*)
+          FROM data_lake.listing_active_stats
+          WHERE zip_code IS NOT NULL AND county IS NOT NULL
+            AND listing_count >= 30
+            AND median_list_price < 75000
+
+  data_lake.market_details_swfl:
+    content_contracts:
+
+      # ── C3: the sold/rent band, at the MERGE locus (the batch is one capture — no history). ─
+      # `sold_to_rent_ratio` is the vendor's own sold / ANNUAL rent (verified: 0 of 49 rows
+      # deviate >2% from sold/(12*rent)). Read the rate AS WRITTEN (data-protocol v3 rule 4).
+      # BAND derived from the LIVE distribution, never from a remembered "typical 100-200x":
+      #   ordered live ratios (n=49): 1.28 (33972 - BAD) . 1.90 (33920 - BAD) . [3.7x GAP] .
+      #   7.12 (33903 - LEGIT) . 7.38 . ... median 11.4 ... . 21.14 (33914 - LEGIT MAX).
+      #   Lower 4.0 = geometric mean of 1.90 and 7.12 (3.68), rounded. Economically: a
+      #   price-to-rent under 4 means a home repays its price in <4 years of gross rent —
+      #   impossible in SWFL. Upper 40.0 = <2.5% gross yield, nationally extreme.
+      #   A naive 200x-MONTHLY cap would FALSE-FIRE on 33914 Cape Coral (253.7x) and 34105
+      #   Naples (240x), both legit. That is why the band is annual and data-derived.
+      # KNOWN-ACCEPTED (this is why the contract is GREEN on commit #1 instead of RED):
+      #   33972 (sold $30,000 / rent $1,950 -> 1.28) and 33920 Alva (84.3% LAND; $88,750 /
+      #   $3,900 -> 1.90) are TRUE positives of upstream realtor.com land-drag. We cannot
+      #   decompose a vendor aggregate, so we cannot repair them. Excluded by ZIP so a THIRD
+      #   contaminated ZIP fires loud — and kept VISIBLE by the `_watch` twin below.
+      # POLICY report, not quarantine: withholding a ZIP row changes what market-temperature-swfl
+      # ships (47 ZIPs instead of 49). That is a live-surface change — ask-first, not Phase 1.
+      # Tracked: check `market_details_band_quarantine_flip`.
+      - name: market_details_sold_rent_band
+        type: range
+        locus: merge
+        policy: report
+        severity: error
+        col: sold_to_rent_ratio
+        min: 4.0
+        max: 40.0
+        allow_null: false     # a NULL ratio with both prices present is a VIOLATION, not a pass
+        where:
+          - { col: median_sold_price, op: not_null }
+          - { col: median_rent_price, op: not_null }
+          - { col: zip_code, op: not_in, value: ["33972", "33920"] }
+        # A 54-row table can NEVER abort on the count branch (2 offenders < 25) — correct: a tiny
+        # table's "share" is not a shape signal. `if_no_clean_rows` is the real guard here: a
+        # vendor UNITS FLIP (annual -> monthly) puts all 49 out of band at once, and that must
+        # stop the run rather than land 49 uninterpretable ratios.
+        abort_if: { share_pct_gt: 5.0, violations_gte: 25, if_no_clean_rows: true }
+
+      # C3 at rest. Same band, same exclusion, scoped to the LATEST capture (the table is an
+      # accumulating time series — an unscoped count would sum every historical capture).
+      - name: market_details_sold_rent_band_at_rest
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: error
+        failing_rows_sql: |
+          SELECT count(*)
+          FROM data_lake.market_details_swfl
+          WHERE captured_date = (SELECT max(captured_date) FROM data_lake.market_details_swfl)
+            AND median_sold_price IS NOT NULL
+            AND median_rent_price IS NOT NULL
+            AND zip_code NOT IN ('33972', '33920')
+            AND (sold_to_rent_ratio IS NULL
+                 OR sold_to_rent_ratio < 4.0
+                 OR sold_to_rent_ratio > 40.0)
+
+      # The known-accepted pair, kept VISIBLE. No exclusion; `warn` severity means it surfaces in
+      # the run summary and opens NO checks row. Reports 2 today. If it ever reports 3, the
+      # error-severity twin above has already fired on the new one.
+      - name: market_details_sold_rent_band_watch
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: warn
+        failing_rows_sql: |
+          SELECT count(*)
+          FROM data_lake.market_details_swfl
+          WHERE captured_date = (SELECT max(captured_date) FROM data_lake.market_details_swfl)
+            AND median_sold_price IS NOT NULL
+            AND median_rent_price IS NOT NULL
+            AND (sold_to_rent_ratio IS NULL
+                 OR sold_to_rent_ratio < 4.0
+                 OR sold_to_rent_ratio > 40.0)
+
+      # ── C3b: the COVERAGE FLOOR. Without this the band is SATISFIABLE BY HAVING NO DATA. ──
+      # The band's WHERE requires `median_rent_price IS NOT NULL`, so a rent-column OUTAGE makes
+      # rows VANISH — it does NOT trip the band. If rent coverage collapsed from 49 ZIPs to 3,
+      # the band returns 0 rows and reports GREEN. 5 ZIPs already carry a NULL rent (1 Lee,
+      # 4 Collier), which is a coverage gap, not contamination. Floor 45 of 54 = today's 49 with
+      # 4 rows of slack. Returns 1 (failing) on collapse, 0 otherwise.
+      - name: market_details_rent_coverage_floor
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: error
+        failing_rows_sql: |
+          SELECT CASE
+                   WHEN count(*) FILTER (WHERE median_rent_price IS NOT NULL) < 45 THEN 1
+                   ELSE 0
+                 END
+          FROM data_lake.market_details_swfl
+          WHERE captured_date = (SELECT max(captured_date) FROM data_lake.market_details_swfl)
+
+      # ── C3c: the units check (free). ──────────────────────────────────────────────────
+      # `sold_to_rent_ratio` is vendor-computed and ANNUAL: 0 of 49 rows deviate >2% from
+      # median_sold_price / (12 * median_rent_price). Safe to read as written — which is exactly
+      # why we assert it. If that identity ever breaks, the vendor silently changed the column's
+      # UNITS, and every threshold above becomes meaningless while still reporting green.
+      - name: market_details_ratio_units_check
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: warn
+        failing_rows_sql: |
+          SELECT count(*)
+          FROM data_lake.market_details_swfl
+          WHERE captured_date = (SELECT max(captured_date) FROM data_lake.market_details_swfl)
+            AND median_sold_price IS NOT NULL
+            AND median_rent_price IS NOT NULL
+            AND median_rent_price > 0
+            AND sold_to_rent_ratio IS NOT NULL
+            AND abs(sold_to_rent_ratio
+                    - (median_sold_price::numeric / median_rent_price / 12)) >= 0.05
