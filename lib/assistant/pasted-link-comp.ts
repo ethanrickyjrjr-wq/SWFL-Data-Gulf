@@ -64,6 +64,8 @@ function toRenderComp(facts: ListingFacts): RenderComp {
     price: numOrNull(facts.price),
     priceKind,
     priceDate: null,
+    // The page the USER pasted — verbatim (their own lane-4 link, never minted).
+    sourceUrl: facts.sourceUrl ?? null,
   };
 }
 

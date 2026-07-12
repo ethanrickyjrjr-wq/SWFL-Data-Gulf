@@ -40,6 +40,9 @@ export interface RenderComp {
   priceKind: PriceKind;
   /** ISO date behind the price (sold date / AVM date); null for a last-list. */
   priceDate: string | null;
+  /** Captured realtor.com detail URL for FUNCTIONAL links (email comp rows).
+   *  Chat prose + compSources ignore it — citations stay domain-level. */
+  sourceUrl: string | null;
 }
 
 export interface CompResult {
@@ -282,6 +285,7 @@ export async function compsForAddress(address: string, deps: CompDeps = {}): Pro
       price,
       priceKind,
       priceDate,
+      sourceUrl: c.sourceUrl ?? null,
     };
   });
 

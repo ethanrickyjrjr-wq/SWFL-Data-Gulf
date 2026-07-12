@@ -37,6 +37,7 @@ function comp(over: Partial<NearbyComp>): NearbyComp {
     estimateValue: 428000,
     estimateDate: "2026-05-01",
     propertyId: "M-1",
+    sourceUrl: null,
     ...over,
   };
 }
@@ -52,6 +53,24 @@ function baseDeps(over: Partial<CompDeps> = {}): CompDeps {
     ...over,
   };
 }
+
+describe("RenderComp sourceUrl carry-through (functional link, 07/11/2026 unlock)", () => {
+  it("carries each comp's captured sourceUrl; chat prose/citations stay untouched elsewhere", async () => {
+    const url =
+      "https://www.realtor.com/realestateandhomes-detail/1403-NE-19th-Ter_Cape-Coral_FL_33909_M54931-01642";
+    const res = await compHelper(
+      "what are comps near 3412 Atlantic Circle, Cape Coral?",
+      baseDeps({
+        fetchNearby: async () => [
+          comp({ propertyId: "M-1", sourceUrl: url }),
+          comp({ propertyId: "M-2" }),
+        ],
+      }),
+    );
+    expect(res.comps[0]?.sourceUrl).toBe(url);
+    expect(res.comps[1]?.sourceUrl).toBeNull();
+  });
+});
 
 describe("looksLikeCompAsk — cheap gate", () => {
   it("fires on comp / value asks about a specific property", () => {
