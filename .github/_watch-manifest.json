@@ -1,0 +1,1032 @@
+[
+  {
+    "name": "Activation Sequence",
+    "file": "activation-sequence.yml",
+    "scheduled": false,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-active-listings",
+    "file": "active-listings-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Airtable checks sync",
+    "file": "airtable-checks-sync.yml",
+    "scheduled": true,
+    "timeout_minutes": 5,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "BLS LAUS monthly",
+    "file": "bls-laus-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "BLS OEWS SWFL annual",
+    "file": "bls-oews-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "BLS QCEW quarterly",
+    "file": "bls-qcew-quarterly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Rebuild Example Deliverables",
+    "file": "build-example-deliverables.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Census ACS annual",
+    "file": "census-acs-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Census CBP annual",
+    "file": "census-cbp-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Chief of staff nightly",
+    "file": "chief-of-staff-nightly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "CI",
+    "file": "ci.yml",
+    "scheduled": false,
+    "timeout_minutes": null,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "City pulse daily",
+    "file": "city-pulse-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 45,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Claude Code Automation",
+    "file": "claude-code-automation.yml",
+    "scheduled": false,
+    "timeout_minutes": null,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Claude — deploy incident triage",
+    "file": "claude-deploy-triage.yml",
+    "scheduled": false,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Collier parcels annual (FDOR cadastral)",
+    "file": "collier-parcels-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 45,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Collier County permits monthly",
+    "file": "collier-permits-monthly.yml",
+    "scheduled": false,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": true
+  },
+  {
+    "name": "Corridor pulse weekly",
+    "file": "corridor-pulse-weekly.yml",
+    "scheduled": false,
+    "timeout_minutes": 90,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": true,
+    "disabled": true
+  },
+  {
+    "name": "Daily Email Digest",
+    "file": "daily-email-digest.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Daily Brain Rebuild",
+    "file": "daily-rebuild.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Data-readiness verification (hourly)",
+    "file": "data-readiness-cron.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Data Targets (daily)",
+    "file": "data-targets-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 5,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "DBPR Press Releases weekly",
+    "file": "dbpr-press-releases-weekly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "DBPR Public Notices — Weekly SWFL",
+    "file": "dbpr-public-notices-weekly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "DBPR SIRS Submissions — Monthly SWFL",
+    "file": "dbpr-sirs-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": true
+  },
+  {
+    "name": "Deliverables retention sweep (daily)",
+    "file": "deliverables-retention-sweep-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "deptry",
+    "file": "deptry.yml",
+    "scheduled": false,
+    "timeout_minutes": null,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Render Email Assets",
+    "file": "email-assets.yml",
+    "scheduled": false,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Email Scheduler",
+    "file": "email-scheduler.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "FAF5 freight annual (S3 parquet cold lane)",
+    "file": "faf5-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "FDLE crime quarterly",
+    "file": "fdle-crime-quarterly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "FDOT AADT annual",
+    "file": "fdot-aadt-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 40,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "FEMA NFIP quarterly",
+    "file": "fema-nfip-quarterly.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "FGCU RERI monthly",
+    "file": "fgcu-reri-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": true
+  },
+  {
+    "name": "FHFA HPI quarterly",
+    "file": "fhfa-hpi-quarterly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "FL DOR sales tax monthly",
+    "file": "fl-dor-sales-tax-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "FL DOR TDT monthly",
+    "file": "fl-dor-tdt-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "SBA FOIA Franchise Outcomes Tier 1 quarterly",
+    "file": "franchise-outcomes-quarterly.yml",
+    "scheduled": true,
+    "timeout_minutes": 45,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "FRED ALFRED LAUS monthly",
+    "file": "fred-laus-alfred-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Pipeline freshness probe (daily)",
+    "file": "freshness-probe-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 5,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "GATE A — DB parity (zhvi/zori view ⇆ pack)",
+    "file": "gate-a-parity.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Grade Predictions",
+    "file": "grade-predictions.yml",
+    "scheduled": false,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Graphify Republish",
+    "file": "graphify-republish.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Heal cron failure",
+    "file": "heal-cron-failure.yml",
+    "scheduled": false,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Home-Values + Investor Composite monthly",
+    "file": "home-values-investor-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "HURDAT2 FL annual",
+    "file": "hurdat2-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "bls-ppi monthly",
+    "file": "ingest-bls-ppi.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-brevitas-listings",
+    "file": "ingest-brevitas-listings.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "census-vip monthly",
+    "file": "ingest-census-vip.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-crexi-listings",
+    "file": "ingest-crexi-listings.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "DBPR RE Licensees (New-Agent Radar) — Weekly",
+    "file": "ingest-dbpr-re-licensees.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "FL DBPR contractor licenses monthly",
+    "file": "ingest-fl-dbpr-licenses.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "fred-g17 monthly",
+    "file": "ingest-fred-g17.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "fred-listing-swfl monthly",
+    "file": "ingest-fred-listing-swfl.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-lee-associates-swfl",
+    "file": "ingest-lee-associates-swfl.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-local-cre-context",
+    "file": "ingest-local-cre-context.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-market-aggregates-details",
+    "file": "ingest-market-aggregates-details.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-market-aggregates-histogram",
+    "file": "ingest-market-aggregates-histogram.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "market-heat-swfl monthly",
+    "file": "ingest-market-heat-swfl.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-mhs-permits-swfl",
+    "file": "ingest-mhs-permits-swfl.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-rentals",
+    "file": "ingest-rentals.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Lee County permits weekly",
+    "file": "lee-permits-weekly.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "LeePA parcels annual",
+    "file": "leepa-parcels-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 90,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Lifecycle-arc nudges (daily)",
+    "file": "lifecycle-nudges-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ingest-listing-lifecycle",
+    "file": "listing-lifecycle-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 60,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Live Search Daily (sourced freshness)",
+    "file": "live-search-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 25,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Log cron incident",
+    "file": "log-cron-incident.yml",
+    "scheduled": false,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "marketbeat-pdf-ingest",
+    "file": "marketbeat-pdf-ingest.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": true
+  },
+  {
+    "name": "narrative-bake",
+    "file": "narrative-bake.yml",
+    "scheduled": true,
+    "timeout_minutes": 90,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "SWFL business news ingest daily",
+    "file": "news-swfl-ingest.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "NOAA GHCN rainfall monthly",
+    "file": "noaa-ghcn-rainfall-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "notion-sync-weekly",
+    "file": "notion-sync-weekly.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Outreach Demo Cadence",
+    "file": "outreach-demo.yml",
+    "scheduled": false,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Outreach Drip",
+    "file": "outreach-drip.yml",
+    "scheduled": false,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Project-feed change detection (daily)",
+    "file": "project-feed-change-detection-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "pulse-pool-evict",
+    "file": "pulse-pool-evict.yml",
+    "scheduled": false,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Redfin SWFL city market monthly",
+    "file": "redfin-city-swfl-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 45,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Redfin Collier market monthly",
+    "file": "redfin-collier-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Redfin Contract Cancellations Tier 1 monthly",
+    "file": "redfin-contract-cancellations-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Redfin Delistings & Relistings Tier 1 monthly",
+    "file": "redfin-delistings-relistings-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Redfin Lee market monthly",
+    "file": "redfin-lee-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Redfin SWFL Tier 1 monthly",
+    "file": "redfin-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Redfin Price Drops Tier 1 monthly",
+    "file": "redfin-price-drops-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Rollback on red — Prod",
+    "file": "rollback-on-red.yml",
+    "scheduled": false,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "RSW Airport monthly",
+    "file": "rsw-airport-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": true
+  },
+  {
+    "name": "Smoke — Prod",
+    "file": "smoke-prod.yml",
+    "scheduled": false,
+    "timeout_minutes": 15,
+    "cancel_in_progress": true,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Social Engagement Poll",
+    "file": "social-engagement-poll.yml",
+    "scheduled": false,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "social-pulse-scan",
+    "file": "social-pulse-scan.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Social Scheduler",
+    "file": "social-scheduler.yml",
+    "scheduled": false,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "SWFL storm history Tier 1 monthly",
+    "file": "storm-history-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "SWFL Inc. economic dev weekly",
+    "file": "swfl-inc-weekly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "SWFL search demand monthly",
+    "file": "swfl-search-demand-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Tier Divergence SWFL Tier 1 fetch monthly",
+    "file": "tier-divergence-tier1-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 25,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Tier Divergence SWFL Tier 2 load monthly",
+    "file": "tier-divergence-tier2-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Tripwire hourly",
+    "file": "tripwire-hourly.yml",
+    "scheduled": true,
+    "timeout_minutes": 5,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "USGS SWFL Tier 1 monthly",
+    "file": "usgs-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "view_vintages monthly capture",
+    "file": "view-vintages-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Property Watch digest (daily)",
+    "file": "watch-digest-daily.yml",
+    "scheduled": false,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Property Watch scan (daily)",
+    "file": "watch-scan-daily.yml",
+    "scheduled": false,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "Market Area Alerts Cadence",
+    "file": "weekly-read.yml",
+    "scheduled": false,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ZHVI SWFL Tier 1 fetch monthly",
+    "file": "zhvi-tier1-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ZHVI SWFL Tier 2 load monthly",
+    "file": "zhvi-tier2-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ZORI SWFL Tier 1 fetch monthly",
+    "file": "zori-tier1-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  },
+  {
+    "name": "ZORI SWFL Tier 2 load monthly",
+    "file": "zori-tier2-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": false
+  }
+]
