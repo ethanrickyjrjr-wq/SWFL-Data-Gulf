@@ -1,0 +1,162 @@
+name: Nightly Chain
+
+# ONE head. Everything after it is ordered by `needs:` — not by 8 independent
+# clocks racing each other.
+#
+# THE BUG THIS FIXES: today all 8 members are separately scheduled, and each pays
+# its OWN independent GitHub scheduler drift — measured: active-listings ~+1h,
+# listing-lifecycle +45m..+1h19, city-pulse +1h17..+3h07, live-search +57m..+3h12,
+# gate-a +1h38..+3h58, rebuild +2h07..+5h29. The effective execution order is
+# therefore RANDOM, which is precisely the mechanism by which the nightly rebuild
+# ends up consuming YESTERDAY's ingests. One head + `needs:` pays drift ONCE and
+# makes the internal order deterministic. (08d §6)
+#
+# ─── TRIGGER: DISPATCH-ONLY UNTIL CUTOVER ────────────────────────────────────
+# `schedule:` is NOT trusted as the head. Measured on this repo's overnight slot
+# over 16 real fires: it lands +2h07m to +5h29m LATE (median +3h07m), and moving
+# off the top of the hour (the new `23 4`) did not fix it. `workflow_dispatch`
+# starts in ~4 SECONDS (run 28353096175: created 06:29:37, job started 06:29:41).
+#
+# Operator constraint (07/11/2026): the chain starts after 11 PM-12 AM Eastern and
+# NOTHING is still running at 6:00 AM Eastern. EXECUTION fits easily (~26 min
+# typical, ~2h36m at every measured worst, ~3h25m if every job runs to its YAML
+# ceiling). The TRIGGER is the binding term: worst-drift + a normal 60-min bake
+# lands 07:00 EDT — over. So a `schedule:` head cannot certify the constraint.
+#
+# NO `schedule:` block here YET — deliberately (correction N-3). While the 8
+# standalone crons still run, a scheduled chain would DUPLICATE the paid SteadyAPI
+# sweep, the Sonnet rebuild, and the bake every night. The chain's cron lights in
+# the SAME [ASK-FIRST] commit that retires the superseded standalone crons —
+# zero duplicate-paid-work window. Until then: repository_dispatch (the intended
+# external clock) and workflow_dispatch (the manual head) are the only triggers.
+# 08d §3-§5.
+
+on:
+  repository_dispatch:
+    types: [nightly-chain]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run the ingests + report-only row gate (no DB writes, no rebuild)"
+        type: boolean
+        default: false
+
+# Literal group string, NEVER ${{ github.workflow }}: a called workflow reports its
+# CALLER's name in that context, so a shared group + cancel-in-progress makes the
+# caller cancel itself (08g fact 2c). cancel-in-progress: false — a second head
+# landing on a still-running run must QUEUE, never kill it mid-rebuild.
+concurrency:
+  group: nightly-chain
+  cancel-in-progress: false
+
+jobs:
+  # ── T1: the 4 ingests, in parallel ────────────────────────────────────────
+  # The standalone crons stagger the listing counties 3h apart to dodge the
+  # source's sustained-burst 403 throttle. A matrix does NOT re-create that risk:
+  # each matrix leg is its own runner (its own IP), so requests never ACCUMULATE
+  # against one IP the way a single all-county pass would. Do not collapse these
+  # into one all-county call.
+  listings:
+    name: ingest · active listings
+    strategy:
+      fail-fast: false          # a Collier 403 must never discard Lee's landed rows
+      matrix:
+        county: [Lee, Collier]
+    uses: ./.github/workflows/active-listings-daily.yml
+    with:
+      county: ${{ matrix.county }}
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets: inherit
+
+  lifecycle:
+    name: ingest · listing lifecycle
+    strategy:
+      fail-fast: false
+      matrix:
+        county: [Lee, Collier, Hendry]
+    uses: ./.github/workflows/listing-lifecycle-daily.yml
+    with:
+      county: ${{ matrix.county }}
+      # EXPLICIT. The called workflow's workflow_call default is `true` on purpose
+      # (SteadyAPI calls cost money — a caller that forgets must not burn budget).
+      # The chain is the one caller that means it.
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets: inherit
+
+  pulse:
+    name: ingest · city pulse
+    uses: ./.github/workflows/city-pulse-daily.yml
+    secrets: inherit
+
+  live-search:
+    name: ingest · live search
+    uses: ./.github/workflows/live-search-daily.yml
+    secrets: inherit
+
+  # ── T2: the row gate ──────────────────────────────────────────────────────
+  # THE POINT OF THE WHOLE CHAIN. Nothing downstream runs until every `nightly:
+  # true` source has actually LANDED ROWS TODAY (UTC). A green ingest that wrote
+  # zero rows must not produce a green rebuild on yesterday's data.
+  # This is a normal job (not a `uses:`), so timeout-minutes IS supported here.
+  row-gate:
+    name: gate · assert_landed
+    needs: [listings, lifecycle, pulse, live-search]
+    if: always()   # a partial ingest must still be JUDGED, not silently skipped
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      # Slim: the gate needs only psycopg + pyyaml.
+      - name: Install probe dependencies
+        run: pip install -r ingest/requirements-probe.txt
+
+      - name: Assert every nightly source landed today (UTC)
+        env:
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        # SHIP REPORT-ONLY FIRST (spec §15 step 6): --dry-run always exits 0, so
+        # the gate NAMES what would have blocked without blocking. Remove the flag
+        # only after a week of clean nightly reports — that is Task 7's precondition.
+        run: python -m ingest.scripts.assert_landed --dry-run
+
+  # ── T3: rebuild ───────────────────────────────────────────────────────────
+  rebuild:
+    name: rebuild · brains
+    needs: [row-gate]
+    if: ${{ inputs.dry_run != true }}
+    uses: ./.github/workflows/daily-rebuild.yml
+    secrets: inherit
+
+  # ── T4: bake ──────────────────────────────────────────────────────────────
+  # Chained by `needs:`, which SUPERSEDES narrative-bake's own workflow_run
+  # trigger — a reusable workflow emits no workflow_run event of its own.
+  bake:
+    name: bake · narratives
+    needs: [rebuild]
+    uses: ./.github/workflows/narrative-bake.yml
+    secrets: inherit
+
+  # ── T5: warm + parity, in parallel ────────────────────────────────────────
+  # graphify has NEVER succeeded (0-for-2, both dead at the cross-repo checkout —
+  # REBUILD_PAT has no scope on swfldatagulf-ops). `continue-on-error` is NOT a
+  # supported keyword on a calling job (re-verified against live GitHub docs
+  # 07/12/2026), so it cannot be quarantined that way — a chained graphify would
+  # redden the chain EVERY NIGHT. `if:` IS supported, so the leg is declared but
+  # gated OFF by default. Flip vars.CHAIN_GRAPHIFY_ENABLED to 'true' the day the
+  # PAT scope is fixed and it has one green run. Zero edits here.
+  warm:
+    name: warm · graphify republish
+    needs: [rebuild]
+    if: ${{ vars.CHAIN_GRAPHIFY_ENABLED == 'true' && inputs.dry_run != true }}
+    uses: ./.github/workflows/graphify-republish.yml
+    secrets: inherit
+
+  parity:
+    name: verify · gate-a parity
+    needs: [rebuild]
+    uses: ./.github/workflows/gate-a-parity.yml
+    secrets: inherit

@@ -690,6 +690,16 @@
     "disabled": false
   },
   {
+    "name": "Nightly Chain",
+    "file": "nightly-chain.yml",
+    "scheduled": false,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "NOAA GHCN rainfall monthly",
     "file": "noaa-ghcn-rainfall-monthly.yml",
     "scheduled": true,
