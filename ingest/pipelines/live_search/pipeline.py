@@ -51,6 +51,8 @@ def resolve(cfg: dict) -> list[engine.DailyTruthRow]:
     for area in cfg.get("areas", []):
         if cfg.get("fetch_mode") == "api":
             rows.append(engine.resolve_metric_api(cfg, area))
+        elif cfg.get("fetch_mode") == "lake":
+            rows.append(engine.resolve_metric_lake(cfg, area))
         else:
             rows.append(engine.resolve_metric_search(cfg, area))
     return rows

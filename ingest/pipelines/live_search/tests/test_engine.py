@@ -109,3 +109,35 @@ def test_api_mode_fred_happy_path(monkeypatch):
                unit="pct", expected_range=(2.0, 12.0))
     row = engine.resolve_metric_api(cfg, area="swfl")
     assert row.value == 6.52 and row.engine == "fred" and row.verified_on_page is True
+
+
+# --- lake mode (deterministic own-inventory median; no search, no LLM) ---
+def test_lake_mode_sources_from_own_inventory(monkeypatch):
+    monkeypatch.setattr(engine, "_lake_median_asking", lambda area: 400000.0)
+    monkeypatch.setattr(engine, "_prior_value", lambda mk, a: 398000)
+    cfg = _cfg(metric_key="median_asking_price", fetch_mode="lake")
+    row = engine.resolve_metric_lake(cfg, "cape_coral")
+    assert row.value == 400000.0 and row.engine == "lake"
+    assert "swfldatagulf.com" in row.source_url
+    assert row.anomaly_flag is False
+
+
+def test_lake_mode_null_when_view_empty(monkeypatch):
+    monkeypatch.setattr(engine, "_lake_median_asking", lambda area: None)
+    row = engine.resolve_metric_lake(_cfg(fetch_mode="lake"), "cape_coral")
+    assert row.value is None and "lake" in (row.status_reason or "")
+
+
+def test_lake_mode_range_gate_catches_contamination(monkeypatch):
+    # A land-blend regression would crater the city median (the 33972 class) —
+    # the expected_range gate must NULL it with a reason, never narrate it.
+    monkeypatch.setattr(engine, "_lake_median_asking", lambda area: 35000.0)
+    row = engine.resolve_metric_lake(_cfg(fetch_mode="lake"), "cape_coral")
+    assert row.value is None and "expected_range" in (row.status_reason or "")
+
+
+def test_lake_mode_big_move_vs_own_prior_flagged(monkeypatch):
+    monkeypatch.setattr(engine, "_lake_median_asking", lambda area: 500000.0)
+    monkeypatch.setattr(engine, "_prior_value", lambda mk, a: 400000)  # +25% >> 8% threshold
+    row = engine.resolve_metric_lake(_cfg(fetch_mode="lake"), "cape_coral")
+    assert row.value == 500000.0 and row.anomaly_flag is True

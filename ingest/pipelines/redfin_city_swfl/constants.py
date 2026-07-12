@@ -1,9 +1,11 @@
-"""Constants for the Redfin Data Center → SWFL city market-tracker ingest.
+"""Constants for the Redfin Data Center → FL city market-tracker ingest.
 
 Source is a FREE static file on Redfin's public S3 bucket (no auth, no metered
 API, no scraping) — the national CITY-level "market tracker" gzipped TSV (sibling
 of the county tracker `redfin_lee`/`redfin_collier` stream). We stream it,
-decompress incrementally, and keep only the three SWFL desk-hero cities.
+decompress incrementally, and keep EVERY Florida city — separation happens in the
+lake, not at ingest (operator directive 07/12/2026: "bring in all the data and
+separate in lake"; adding a city downstream is a query, never a pipeline PR).
 
 City grain is what the daily desk hero needs for a source-faithful SOLD anchor:
 `/housing-market-details` (SteadyAPI) is ZIP-only and the Redfin *county* tracker
@@ -19,12 +21,20 @@ REDFIN_CITY_TRACKER_URL = (
     "/redfin_market_tracker/city_market_tracker.tsv000.gz"
 )
 
-# Exact REGION strings for the three desk-hero cities (verbatim, verified live
-# 07/11/2026). Matching is EXACT after a cheap substring gate so sibling places
-# ("North Fort Myers, FL", "Fort Myers Beach, FL", "Naples Park, FL") are excluded.
-CITY_REGIONS = ("Cape Coral, FL", "Fort Myers, FL", "Naples, FL")
+# Ingest keeps every region with this exact suffix (Florida-wide; other states
+# would be paid storage with no consumer). Matching is on the parsed REGION cell,
+# suffix-exact, so "Naples, ME" / "Miami, OH" style collisions are excluded.
+FL_REGION_SUFFIX = ", FL"
 
-# desk `area` slug <- exact Redfin REGION (the desk hero keys on these slugs).
+# The three desk-hero cities (verbatim REGION strings, verified live 07/11/2026).
+# NOT an ingest filter anymore — this is the consumer-side selection the desk
+# reads, and the ingest's own landing guard (all three must be present in every
+# pull, or the run goes red).
+DESK_HERO_REGIONS = ("Cape Coral, FL", "Fort Myers, FL", "Naples, FL")
+
+# desk `area` slug <- exact Redfin REGION for the hero trio. Slugs for ALL rows
+# are DERIVED (resources._area_slug); this map is pinned by tests so the derived
+# slugs can never drift from what the desk hero keys on.
 REGION_TO_AREA = {
     "Cape Coral, FL": "cape_coral",
     "Fort Myers, FL": "fort_myers",

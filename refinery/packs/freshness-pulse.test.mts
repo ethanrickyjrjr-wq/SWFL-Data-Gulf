@@ -27,7 +27,7 @@ import type { DailyTruthRow } from "../sources/daily-truth-source.mts";
 function row(p: Partial<DailyTruthRow> = {}): DailyTruthRow {
   return {
     kind: "daily-truth",
-    metric_key: "median_sale_price",
+    metric_key: "median_asking_price",
     area: "cape_coral",
     period: "2026-06-15",
     value: 362000,
@@ -71,12 +71,12 @@ test("cited county facts become key_metrics with a source receipt", () => {
     zipBaselines: [],
   });
   const slugs = out.key_metrics.map((m) => m.metric);
-  expect(slugs).toContain("freshness_median_sale_price_cape_coral_usd");
+  expect(slugs).toContain("freshness_median_asking_price_cape_coral_usd");
   expect(slugs).toContain("freshness_mortgage_30yr_fixed_pct");
   // every cited metric carries a real source URL (CITE rule) + its as-of period.
   expect(out.key_metrics.every((m) => !!m.source.url)).toBe(true);
   const price = out.key_metrics.find(
-    (m) => m.metric === "freshness_median_sale_price_cape_coral_usd",
+    (m) => m.metric === "freshness_median_asking_price_cape_coral_usd",
   );
   expect(price?.value).toBe(362000);
   expect(price?.source.url).toBe("https://www.redfin.com/x");
@@ -91,8 +91,8 @@ test("a HELD anomaly never enters key_metrics (waits for human review)", () => {
     zipBaselines: [],
   });
   const slugs = out.key_metrics.map((m) => m.metric);
-  expect(slugs).toContain("freshness_median_sale_price_cape_coral_usd");
-  expect(slugs).not.toContain("freshness_median_sale_price_naples_usd");
+  expect(slugs).toContain("freshness_median_asking_price_cape_coral_usd");
+  expect(slugs).not.toContain("freshness_median_asking_price_naples_usd");
 });
 
 test("a memory number with NO source_url is dropped (the MOAT)", () => {
@@ -188,6 +188,6 @@ test("pack wiring: corpusSummary stashes rows, outputProducer reads them", () =>
   const out = freshnessPulse.outputProducer!({} as PackOutput);
   expect(out.direction).toBe("neutral");
   expect(out.key_metrics.map((m) => m.metric)).toContain(
-    "freshness_median_sale_price_cape_coral_usd",
+    "freshness_median_asking_price_cape_coral_usd",
   );
 });

@@ -58,7 +58,10 @@ const CITY_DEFS = [
 ] as const;
 
 // ---------------------------------------------------------------------------
-// daily_truth (web-verified lane) — price series per city + mortgage rate
+// daily_truth — daily ASKING price series per city (lake-computed) + mortgage.
+// The median_sale_price web-search metric was RETIRED 07/12/2026 (19 days of
+// all-NULL rows — no daily sold source exists); the daily lane is now
+// median_asking_price, deterministic from our own cleaned active inventory.
 // ---------------------------------------------------------------------------
 
 interface TruthRow {
@@ -70,15 +73,14 @@ interface TruthRow {
 }
 
 interface TruthSeries {
-  /** Non-null daily price points per city — EMPTY when the feed carries no
-   *  values (verified 07/11/2026: all median_sale_price rows are unvalued). */
-  pricesByCity: Map<string, SeriesPoint[]>;
+  /** Non-null daily median ASKING points per city (fills from 07/12/2026). */
+  askingByCity: Map<string, SeriesPoint[]>;
   mortgage: { points: SeriesPoint[]; sourceTitle: string | null };
 }
 
 async function loadTruthSeries(supabase: Supabase): Promise<TruthSeries> {
   const empty: TruthSeries = {
-    pricesByCity: new Map(),
+    askingByCity: new Map(),
     mortgage: { points: [], sourceTitle: null },
   };
   try {
@@ -86,27 +88,65 @@ async function loadTruthSeries(supabase: Supabase): Promise<TruthSeries> {
       .schema("data_lake")
       .from("daily_truth")
       .select("metric_key, area, period, value, source_title")
-      .in("metric_key", ["median_sale_price", "mortgage_30yr_fixed"])
+      .in("metric_key", ["median_asking_price", "mortgage_30yr_fixed"])
       .order("period", { ascending: true });
     if (error || !data) return empty;
     const rows = data as TruthRow[];
-    const pricesByCity = new Map<string, SeriesPoint[]>();
+    const askingByCity = new Map<string, SeriesPoint[]>();
     const mortgagePoints: SeriesPoint[] = [];
     let mortgageSource: string | null = null;
     for (const r of rows) {
       if (typeof r.value !== "number" || !Number.isFinite(r.value)) continue;
-      if (r.metric_key === "median_sale_price") {
-        const list = pricesByCity.get(r.area) ?? [];
+      if (r.metric_key === "median_asking_price") {
+        const list = askingByCity.get(r.area) ?? [];
         list.push({ period: r.period, value: r.value });
-        pricesByCity.set(r.area, list);
+        askingByCity.set(r.area, list);
       } else if (r.metric_key === "mortgage_30yr_fixed") {
         mortgagePoints.push({ period: r.period, value: r.value });
         mortgageSource = r.source_title ?? mortgageSource;
       }
     }
-    return { pricesByCity, mortgage: { points: mortgagePoints, sourceTitle: mortgageSource } };
+    return { askingByCity, mortgage: { points: mortgagePoints, sourceTitle: mortgageSource } };
   } catch {
     return empty;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// redfin_city_swfl — monthly closed-sale median per city (the SOLD anchor).
+// True city-grain sold medians (redfin.com provenance), monthly cadence.
+// ---------------------------------------------------------------------------
+
+interface SoldRow {
+  area: string;
+  period_end: string;
+  median_sale_price: number | null;
+}
+
+async function loadSoldSeries(supabase: Supabase): Promise<Map<string, SeriesPoint[]>> {
+  try {
+    const { data, error } = await supabase
+      .schema("data_lake")
+      .from("redfin_city_swfl")
+      .select("area, period_end, median_sale_price")
+      .eq("property_type", "All Residential")
+      .in(
+        "area",
+        CITY_DEFS.map((c) => c.key),
+      )
+      .not("median_sale_price", "is", null)
+      .order("period_end", { ascending: true });
+    if (error || !data) return new Map();
+    const byCity = new Map<string, SeriesPoint[]>();
+    for (const r of data as SoldRow[]) {
+      if (typeof r.median_sale_price !== "number") continue;
+      const list = byCity.get(r.area) ?? [];
+      list.push({ period: r.period_end, value: r.median_sale_price });
+      byCity.set(r.area, list);
+    }
+    return byCity;
+  } catch {
+    return new Map();
   }
 }
 
@@ -469,16 +509,72 @@ async function loadPriceBands(supabase: Supabase): Promise<PriceBandsData | null
 }
 
 // ---------------------------------------------------------------------------
-// Hero — daily_truth first; ZHVI monthly fallback (four-lane: never refuse)
+// Hero — dual signal: daily ASKING line (our inventory) with a monthly SOLD
+// anchor (redfin.com); sold-only next; ZHVI the deepest fallback (never refuse)
 // ---------------------------------------------------------------------------
 
-function buildHeroFromTruth(truth: TruthSeries): HeroData | null {
+function soldAnchorDatum(sold: Map<string, SeriesPoint[]>, cityKey: string): DeskDatum | undefined {
+  const latest = sold.get(cityKey)?.at(-1);
+  if (!latest) return undefined;
+  return {
+    label: "Closed-sale median (monthly)",
+    value: latest.value,
+    unit: "USD",
+    display: fmtUsd(latest.value),
+    sourceLabel: "redfin.com",
+    asOf: mdY(latest.period),
+  };
+}
+
+function buildHeroFromAsking(
+  truth: TruthSeries,
+  sold: Map<string, SeriesPoint[]>,
+): HeroData | null {
   const cities: HeroCitySeries[] = [];
   for (const def of CITY_DEFS) {
-    const points = truth.pricesByCity.get(def.key) ?? [];
+    const points = truth.askingByCity.get(def.key) ?? [];
     if (points.length < 2) continue;
     const ld = latestDelta(points);
     if (!ld) continue;
+    cities.push({
+      key: def.key,
+      label: def.label,
+      color: def.color,
+      latest: {
+        label: `${def.label} median asking price`,
+        value: ld.latest,
+        unit: "USD",
+        display: fmtUsd(ld.latest),
+        sourceLabel: SPINE_SOURCE,
+        asOf: mdY(ld.latestPeriod),
+        delta: ld.delta ?? undefined,
+        deltaDisplay: ld.delta != null ? fmtUsd(Math.abs(ld.delta)) : undefined,
+        direction: ld.direction,
+        deltaNote: ld.prevPeriod ? `vs. ${mdY(ld.prevPeriod)}` : undefined,
+      },
+      points: points.map((p) => ({ date: p.period, value: p.value })),
+      anchor: soldAnchorDatum(sold, def.key),
+    });
+  }
+  if (cities.length === 0) return null;
+  const n = Math.max(...cities.map((c) => c.points.length));
+  const first = cities[0].points[0]?.date;
+  return {
+    cities,
+    asOf: cities[0].latest.asOf,
+    sourceLabel: SPINE_SOURCE,
+    windowNote: `${n} daily asking readings since ${mdY(first) ?? "the window opened"} — live active-listing medians (asking, not sold); the closed-sale anchor steps monthly`,
+  };
+}
+
+function buildHeroFromSold(sold: Map<string, SeriesPoint[]>): HeroData | null {
+  const cities: HeroCitySeries[] = [];
+  for (const def of CITY_DEFS) {
+    const points = (sold.get(def.key) ?? []).slice(-24);
+    if (points.length < 2) continue;
+    const ld = latestDelta(points);
+    if (!ld) continue;
+    const prevMonth = ld.prevPeriod?.slice(0, 7);
     cities.push({
       key: def.key,
       label: def.label,
@@ -488,24 +584,25 @@ function buildHeroFromTruth(truth: TruthSeries): HeroData | null {
         value: ld.latest,
         unit: "USD",
         display: fmtUsd(ld.latest),
-        sourceLabel: "Web-verified daily read",
+        sourceLabel: "redfin.com",
         asOf: mdY(ld.latestPeriod),
         delta: ld.delta ?? undefined,
         deltaDisplay: ld.delta != null ? fmtUsd(Math.abs(ld.delta)) : undefined,
         direction: ld.direction,
-        deltaNote: ld.prevPeriod ? `vs. ${mdY(ld.prevPeriod)}` : undefined,
+        deltaNote: prevMonth
+          ? `vs. ${prevMonth.slice(5)}/${prevMonth.slice(0, 4)} (monthly)`
+          : undefined,
       },
       points: points.map((p) => ({ date: p.period, value: p.value })),
     });
   }
   if (cities.length === 0) return null;
-  const n = Math.max(...cities.map((c) => c.points.length));
-  const first = cities[0].points[0]?.date;
   return {
     cities,
     asOf: cities[0].latest.asOf,
-    sourceLabel: "Web-verified daily read",
-    windowNote: `${n} daily readings since ${mdY(first) ?? "the window opened"} — a real but short window`,
+    sourceLabel: "redfin.com",
+    windowNote:
+      "Monthly closed-sale median per city, trailing 24 months — true sold prices; the daily asking line takes over as its window fills",
   };
 }
 
@@ -565,6 +662,7 @@ export async function loadDeskData(): Promise<DeskData> {
 
   const [
     truth,
+    sold,
     stats,
     momentum,
     pulse,
@@ -578,6 +676,7 @@ export async function loadDeskData(): Promise<DeskData> {
     bands,
   ] = await Promise.all([
     loadTruthSeries(supabase),
+    loadSoldSeries(supabase),
     loadActiveStats(supabase),
     loadMomentum(supabase),
     loadPulse(supabase),
@@ -591,10 +690,14 @@ export async function loadDeskData(): Promise<DeskData> {
     loadPriceBands(supabase),
   ]);
 
-  // Hero: the web-verified daily price line when it carries values, else the
-  // monthly ZHVI lane (self-healing — the daily line takes over the day the
-  // feed fills; verified empty 07/11/2026).
-  const hero = buildHeroFromTruth(truth) ?? (await buildHeroFromZhvi(supabase));
+  // Hero ladder (dual-signal, self-healing as feeds fill):
+  //   1. daily ASKING line + monthly SOLD anchor (needs ≥2 asking days)
+  //   2. monthly SOLD line (true closed-sale medians, redfin.com)
+  //   3. monthly ZHVI (smoothed index) — deepest fallback, never refuse
+  const hero =
+    buildHeroFromAsking(truth, sold) ??
+    buildHeroFromSold(sold) ??
+    (await buildHeroFromZhvi(supabase));
 
   const spineAsOf = mdY(stats.region?.latest_scraped_at ?? undefined);
   const mortgageLd = latestDelta(truth.mortgage.points);

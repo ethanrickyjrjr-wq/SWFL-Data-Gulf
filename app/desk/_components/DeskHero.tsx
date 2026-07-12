@@ -118,6 +118,14 @@ export function DeskHero({ hero }: { hero: HeroData }) {
               </span>
             ) : null}
           </div>
+          {active.anchor ? (
+            <p className="mt-2 font-mono text-[11px] text-gray-500">
+              {active.anchor.label}: <span className="text-gray-300">{active.anchor.display}</span>
+              {" · "}
+              {active.anchor.sourceLabel}
+              {active.anchor.asOf ? ` · as of ${active.anchor.asOf}` : ""}
+            </p>
+          ) : null}
           <div className="mt-4">
             <AreaChart data={areaRows} xDataKey="date" aspectRatio="3 / 1">
               <Grid horizontal />

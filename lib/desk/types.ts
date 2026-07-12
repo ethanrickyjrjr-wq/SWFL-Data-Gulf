@@ -56,6 +56,10 @@ export interface HeroCitySeries {
   latest: DeskDatum;
   /** ISO date + value, chronological. Client converts to Date for the chart. */
   points: Array<{ date: string; value: number }>;
+  /** The monthly closed-sale median beneath the daily asking line (dual-signal:
+   *  asking moves daily, sold is the true anchor and steps monthly). Absent when
+   *  the sold feed has no row for this city. */
+  anchor?: DeskDatum;
 }
 
 export interface HeroData {

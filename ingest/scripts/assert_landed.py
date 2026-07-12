@@ -73,13 +73,19 @@ def _last_run(conn, entry: dict[str, Any]) -> date | None:
 
 
 def _count_rows(conn, entry: dict[str, Any]) -> int | None:
-    """count(*) for one entry, scoped by source_name AND the optional count_filter.
+    """count for one entry, scoped by source_name AND the optional count_filter.
 
     Table resolution mirrors check_volume_entry (check_freshness.py:373-377):
         count_table -> freshness_table -> data_lake.<dlt_schema_name>
 
-    `count_filter: {column: metric_key, value: median_sale_price}` is the Spine
+    `count_filter: {column: metric_key, value: median_asking_price}` is the Spine
     field that unmasks the two live_search entries sharing data_lake.daily_truth.
+
+    `count_nonnull: <column>` switches count(*) to count(<column>) — an OUTCOME
+    floor, not an effort floor. WHY (07/12/2026): the retired median_sale_price
+    metric wrote 3 value=NULL rows every night for 19 straight days and this gate
+    read LANDED throughout, because NULL rows are still rows. A feed whose declared
+    value column is all-NULL now goes LOW_ROWS instead of green.
 
     Returns None — NEVER 0 — on an unresolvable table or ANY DB error. A silently
     absent table must be UNRESOLVED (red), not "0 rows" and not "not applicable".
@@ -103,8 +109,14 @@ def _count_rows(conn, entry: dict[str, Any]) -> int | None:
         clauses.append(sql.SQL("{} = %s").format(sql.Identifier(cf["column"])))
         params.append(cf["value"])
 
-    query = sql.SQL("SELECT count(*) FROM {}.{}").format(
-        sql.Identifier(schema), sql.Identifier(name)
+    nonnull_col = entry.get("count_nonnull")
+    count_expr = (
+        sql.SQL("count({})").format(sql.Identifier(nonnull_col))
+        if nonnull_col
+        else sql.SQL("count(*)")
+    )
+    query = sql.SQL("SELECT {} FROM {}.{}").format(
+        count_expr, sql.Identifier(schema), sql.Identifier(name)
     )
     if clauses:
         query = query + sql.SQL(" WHERE ") + sql.SQL(" AND ").join(clauses)

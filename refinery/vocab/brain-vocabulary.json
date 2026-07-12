@@ -8648,7 +8648,7 @@
       "unit": "USD",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Today's cited median residential sale price for Cape Coral, FL from the daily freshness layer (data_lake.daily_truth, fetch_mode=search). One grounded source's current figure, provenance-gated to a real source URL (never a model-memory number) and screened against our own prior value for anomalies. Surfaces between the slower monthly Redfin/ZHVI vendor refreshes; the vendor re-anchors the baseline on its native cadence (plan file 05)."
+      "scope_note": "RETIRED FEED 07/12/2026 — the median_sale_price web-search wrote 19 days of NULL-only rows (no daily sold source exists) and was removed from the registry; no new values can ever emit under this slug. Registered for historic brains only. Successor: freshness_median_asking_price_cape_coral_usd (daily asking, own inventory) + the monthly sold anchor in data_lake.redfin_city_swfl."
     },
     "freshness_median_sale_price_fort_myers_usd": {
       "id": "freshness_median_sale_price_fort_myers_usd",
@@ -8672,7 +8672,7 @@
       "unit": "USD",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Today's cited median residential sale price for Fort Myers, FL from the daily freshness layer (data_lake.daily_truth, fetch_mode=search). One grounded source's current figure, provenance-gated to a real source URL and anomaly-screened against our own prior value. Bridges the gap between the slower monthly vendor refreshes."
+      "scope_note": "RETIRED FEED 07/12/2026 — the median_sale_price web-search wrote 19 days of NULL-only rows (no daily sold source exists) and was removed from the registry; no new values can ever emit under this slug. Registered for historic brains only. Successor: freshness_median_asking_price_fort_myers_usd (daily asking, own inventory) + the monthly sold anchor in data_lake.redfin_city_swfl."
     },
     "freshness_median_sale_price_naples_usd": {
       "id": "freshness_median_sale_price_naples_usd",
@@ -8696,7 +8696,82 @@
       "unit": "USD",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Today's cited median residential sale price for Naples, FL (Collier) from the daily freshness layer (data_lake.daily_truth, fetch_mode=search). One grounded source's current figure, provenance-gated to a real source URL and anomaly-screened against our own prior value. Bridges the gap between the slower monthly vendor refreshes."
+      "scope_note": "RETIRED FEED 07/12/2026 — the median_sale_price web-search wrote 19 days of NULL-only rows (no daily sold source exists) and was removed from the registry; no new values can ever emit under this slug. Registered for historic brains only. Successor: freshness_median_asking_price_naples_usd (daily asking, own inventory) + the monthly sold anchor in data_lake.redfin_city_swfl."
+    },
+    "freshness_median_asking_price_cape_coral_usd": {
+      "id": "freshness_median_asking_price_cape_coral_usd",
+      "prefLabel": "Cape Coral — Today's Median Asking Price",
+      "altLabels": [
+        "Cape Coral current median asking price",
+        "Cape Coral median list price today",
+        "Cape Coral daily asking price"
+      ],
+      "raw_slugs": [
+        "freshness_median_asking_price_cape_coral_usd"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "freshness-pulse",
+        "master"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Today's median ASKING (list) price for active home listings in Cape Coral, FL, from the daily freshness layer (data_lake.daily_truth, fetch_mode=lake): a deterministic median over our own cleaned inventory view (data_lake.listing_active_homes — homes only, no land, no rental mislabels). Asking, never sold — the sold companion is the monthly city-grain median in data_lake.redfin_city_swfl. Replaced the retired median_sale_price web-search 07/12/2026. Anomaly-screened against our own prior value; range gate catches a land-blend regression."
+    },
+    "freshness_median_asking_price_fort_myers_usd": {
+      "id": "freshness_median_asking_price_fort_myers_usd",
+      "prefLabel": "Fort Myers — Today's Median Asking Price",
+      "altLabels": [
+        "Fort Myers current median asking price",
+        "Fort Myers median list price today",
+        "Fort Myers daily asking price"
+      ],
+      "raw_slugs": [
+        "freshness_median_asking_price_fort_myers_usd"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "freshness-pulse",
+        "master"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Today's median ASKING (list) price for active home listings in Fort Myers, FL, from the daily freshness layer (data_lake.daily_truth, fetch_mode=lake): a deterministic median over our own cleaned inventory view (data_lake.listing_active_homes). Asking, never sold — the sold companion is the monthly city-grain median in data_lake.redfin_city_swfl. Replaced the retired median_sale_price web-search 07/12/2026."
+    },
+    "freshness_median_asking_price_naples_usd": {
+      "id": "freshness_median_asking_price_naples_usd",
+      "prefLabel": "Naples — Today's Median Asking Price",
+      "altLabels": [
+        "Naples current median asking price",
+        "Naples median list price today",
+        "Naples daily asking price"
+      ],
+      "raw_slugs": [
+        "freshness_median_asking_price_naples_usd"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "freshness-pulse",
+        "master"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Today's median ASKING (list) price for active home listings in Naples, FL (Collier), from the daily freshness layer (data_lake.daily_truth, fetch_mode=lake): a deterministic median over our own cleaned inventory view (data_lake.listing_active_homes). Asking, never sold — the sold companion is the monthly city-grain median in data_lake.redfin_city_swfl. Replaced the retired median_sale_price web-search 07/12/2026."
     },
     "freshness_zip_pulse_median_price_approx": {
       "id": "freshness_zip_pulse_median_price_approx",
@@ -8743,6 +8818,9 @@
     "freshness_median_sale_price_cape_coral_usd": "freshness_median_sale_price_cape_coral_usd",
     "freshness_median_sale_price_fort_myers_usd": "freshness_median_sale_price_fort_myers_usd",
     "freshness_median_sale_price_naples_usd": "freshness_median_sale_price_naples_usd",
+    "freshness_median_asking_price_cape_coral_usd": "freshness_median_asking_price_cape_coral_usd",
+    "freshness_median_asking_price_fort_myers_usd": "freshness_median_asking_price_fort_myers_usd",
+    "freshness_median_asking_price_naples_usd": "freshness_median_asking_price_naples_usd",
     "freshness_mortgage_30yr_fixed_pct": "freshness_mortgage_30yr_fixed_pct",
     "commercial_permits_count": "commercial_permits_count",
     "commercial_permits_value_usd": "commercial_permits_value_usd",

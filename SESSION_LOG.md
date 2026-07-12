@@ -55,6 +55,36 @@ NOT DONE (separate approval; check_freshness/check_data_quality report bodies + 
 untouched). Verify: post-push dispatch must conclude `failure` (16 reds today) with the doctor step
 as the failing step, not a timeout kill.
 ## 2026-07-12 (Fable 5 · main) — Narrative PDF path BUILT: doc-report skin for every shape + unpdf serverless reader (awaiting operator push)
+## 2026-07-12 (Fable 5 · main) — Dual-signal price SHIPPED: median_sale_price web-search retired, lake-mode asking metric live, FL-wide Redfin city sold anchor, outcome floor on the nightly gate
+
+Operator asked "why is daily_truth median_sale_price all-NULL" → root cause: fetch_mode:search
+metric chasing a daily city-grain SOLD median that has NO daily source anywhere; only the Gemini
+leg was live (3 stub fallbacks), so 19 nights wrote value=NULL — and assert_landed's count(*)
+floor read LANDED throughout (NULL rows are rows). Executed the operator-approved 07/11
+dual-signal spec + operator directives ("please do"; "bring in all the data and separate in lake"):
+(1) RETIRED `live_search_daily_median_price` from cadence_registry; replaced with
+`live_search_daily_median_asking` — new engine fetch_mode:lake (`resolve_metric_lake`), a
+deterministic median over the NEW `data_lake.listing_active_homes` authority view (migration
+20260712 extracts the 07/11 homes-only/no-land/≥20k predicate so desk rollups + writer share ONE
+cleaning authority; `listing_active_stats` redefined on top, output verified bit-identical).
+First real rows written + verified IN THE TABLE: Cape Coral $400,000 / Fort Myers $325,000 /
+Naples $662,450 (07/12/2026, engine=lake, zero search spend). Rides the existing
+live-search-daily cron. (2) OUTCOME FLOOR: new Spine field `count_nonnull: value` →
+assert_landed counts count(value) not count(*); the 19-nights-of-NULLs-reads-green class is
+structurally dead (BOTH live_search entries carry it — asking + mortgage).
+(3) redfin_city_swfl widened to EVERY FL city (slug derived from REGION;
+hero-trio slugs test-pinned; landing guard REDs if a desk city vanishes from the pull) — the
+07/11 "confirmed via live dry-run" table never existed because the only write path was a monthly
+cron that never fired; live run relaunched this session (first attempt killed overnight).
+(4) Desk hero + gallery price-trend now ladder asking-daily (+ monthly redfin.com sold anchor
+rendered under the stat) → sold-monthly → ZHVI; freshness-pulse emits
+freshness_median_asking_price_{city}_usd (vocab registered same commit, old sale-price slugs
+kept for historic brains with RETIRED scope_notes; catalog scope mirrored, Gate 5 green).
+Suites: 53 pytest + 21 bun + vocab-coverage 41 brains + `bunx next build` all green.
+INCIDENT: a parallel session's safe-push stashed this session's 19 modified files at 01:02 AM
+("viz-push-rebase-stash") and died mid-rebase on a build-queue.md conflict; the orphaned rebase
+sat 10h. Recovered: `rebase --abort` (their commits intact on main), `stash apply` (all 19 files
+back), full re-verify green. Stash entry retained until this work is committed.
 
 The 17-of-37 narrative-shape PDF gap (check `narrative_deliverable_no_pdf_path`) closed at the
 route layer, per the operator-approved spec (`docs/superpowers/specs/2026-07-12-pdf-narrative-path-design.md`,

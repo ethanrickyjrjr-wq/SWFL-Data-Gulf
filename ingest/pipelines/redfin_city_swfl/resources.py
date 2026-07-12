@@ -1,5 +1,6 @@
-"""Stream the free Redfin CITY market tracker, keep the three SWFL desk-hero
-cities, and merge them into data_lake.redfin_city_swfl (Tier 2).
+"""Stream the free Redfin CITY market tracker, keep EVERY Florida city, and
+merge them into data_lake.redfin_city_swfl (Tier 2). Separation (desk-hero trio,
+future Bonita/Estero/Marco reads) happens in the lake, not at ingest.
 
 No scraping, no metered API — a plain streaming GET of a public gzipped TSV
 (~1 GB compressed). We decompress incrementally and filter line by line so the
@@ -11,12 +12,13 @@ adds new rows or revises existing ones; re-running never re-ingests from scratch
 """
 from __future__ import annotations
 
+import re
 import zlib
 from typing import Iterator
 
 import requests
 
-from .constants import CITY_REGIONS, REDFIN_CITY_TRACKER_URL, REGION_TO_AREA
+from .constants import DESK_HERO_REGIONS, FL_REGION_SUFFIX, REDFIN_CITY_TRACKER_URL, REGION_TO_AREA
 
 # dlt is imported lazily inside the write path so the dry-run / streaming reader
 # (requests + zlib only) works without the dlt dependency installed.
@@ -80,16 +82,25 @@ def _coerce(col: str, raw: str):
     return v
 
 
+def _area_slug(region: str) -> str:
+    """Derived desk slug for ANY FL region: 'Cape Coral, FL' -> 'cape_coral',
+    'Port St. Lucie, FL' -> 'port_st_lucie'. Pinned against REGION_TO_AREA by
+    tests so the hero trio's slugs can never drift."""
+    name = region[: -len(FL_REGION_SUFFIX)] if region.endswith(FL_REGION_SUFFIX) else region
+    return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
+
+
 def _row_from_cells(cells: list[str], idx: dict[str, int]) -> dict | None:
-    """Build one kept row if REGION is EXACTLY one of our three cities, else None.
-    Exact match (not the substring gate) so 'North Fort Myers, FL' etc. are dropped."""
+    """Build one kept row if REGION is a Florida city (suffix-exact ', FL'), else
+    None — 'Naples, ME' / other states are dropped on the parsed cell, never on
+    the raw line."""
     region_i = idx.get("REGION")
     if region_i is None or region_i >= len(cells):
         return None
     region = _unquote(cells[region_i])
-    if region not in REGION_TO_AREA:
+    if not region.endswith(FL_REGION_SUFFIX):
         return None
-    row: dict = {"area": REGION_TO_AREA[region]}
+    row: dict = {"area": _area_slug(region)}
     for src, dst in _KEEP.items():
         i = idx.get(src)
         row[dst] = _coerce(dst, cells[i]) if (i is not None and i < len(cells)) else None
@@ -99,10 +110,11 @@ def _row_from_cells(cells: list[str], idx: dict[str, int]) -> dict | None:
 
 
 def iter_city_rows(url: str = REDFIN_CITY_TRACKER_URL) -> Iterator[dict]:
-    """Yield the three SWFL cities' rows from the gzipped city tracker as dicts.
+    """Yield every Florida city's rows from the gzipped city tracker as dicts.
 
     Streams + decompresses incrementally; a cheap substring gate skips the
-    ~99.9% of lines that aren't one of our cities before any tab-splitting.
+    ~97% of lines that aren't Florida before any tab-splitting (the parsed-cell
+    suffix check in _row_from_cells is the correctness filter).
     """
     resp = requests.get(url, stream=True, timeout=900)
     resp.raise_for_status()
@@ -122,13 +134,13 @@ def iter_city_rows(url: str = REDFIN_CITY_TRACKER_URL) -> Iterator[dict]:
                 idx = {name: i for i, name in enumerate(header)}
                 have_header = True
                 continue
-            if not any(c in line for c in CITY_REGIONS):  # fast pre-filter
+            if FL_REGION_SUFFIX not in line:  # fast pre-filter
                 continue
             row = _row_from_cells(line.split("\t"), idx)
             if row is not None:
                 yield row
     # flush any final buffered line
-    if have_header and pending and any(c in pending for c in CITY_REGIONS):
+    if have_header and pending and FL_REGION_SUFFIX in pending:
         row = _row_from_cells(pending.split("\t"), idx)
         if row is not None:
             yield row
@@ -153,19 +165,24 @@ def _make_resource(rows: list[dict]):
 
 
 def ingest_redfin_city(url: str = REDFIN_CITY_TRACKER_URL) -> int:
-    """Download + filter + merge the three SWFL cities into data_lake.redfin_city_swfl."""
+    """Download + filter + merge every FL city into data_lake.redfin_city_swfl."""
     import dlt
 
     from ingest.lib.guards import VolumeGuardError, assert_content_fresh
 
     rows = list(iter_city_rows(url))
     if not rows:
-        # An empty pull (Redfin renamed a REGION or moved the URL) is a REAL failure, not a
-        # green no-op. Raise so the cron goes red instead of exiting 0 with stale data narrated live.
+        # An empty pull (Redfin changed the REGION format or moved the URL) is a REAL failure,
+        # not a green no-op. Raise so the cron goes red instead of exiting 0 with stale data.
         raise VolumeGuardError(
-            "redfin_city_swfl: returned 0 rows — no Cape Coral/Fort Myers/Naples rows found "
-            "(check CITY_REGIONS filter / URL)"
+            "redfin_city_swfl: returned 0 rows — no ', FL' regions found (check URL / REGION format)"
         )
+    # Landing guard on the load-bearing consumer: the desk hero reads these three. A pull that
+    # is broadly fine but lost one of them (Redfin renamed a REGION) must go red, not green.
+    got_regions = {r["region"] for r in rows}
+    missing = [c for c in DESK_HERO_REGIONS if c not in got_regions]
+    if missing:
+        raise VolumeGuardError(f"redfin_city_swfl: desk-hero region(s) missing from pull: {missing}")
     # Content-freshness: the newest period_end the source produced THIS run (ISO text). Monthly
     # tracker -> 55d gate (content lag + one cadence + buffer), matching redfin_lee.
     newest_period_end = max(r["period_end"] for r in rows if r.get("period_end"))
@@ -177,5 +194,8 @@ def ingest_redfin_city(url: str = REDFIN_CITY_TRACKER_URL) -> int:
     )
     load_info = pipeline.run(_make_resource(rows)())
     load_info.raise_on_failed_jobs()
-    print(f"redfin_city_swfl: merged {len(rows)} SWFL city rows into data_lake.redfin_city_swfl")
+    print(
+        f"redfin_city_swfl: merged {len(rows)} FL city rows "
+        f"({len(got_regions)} regions) into data_lake.redfin_city_swfl"
+    )
     return len(rows)

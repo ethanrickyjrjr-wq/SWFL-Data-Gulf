@@ -163,10 +163,14 @@ export async function loadDeskPulsePanel(supabase: Supabase): Promise<LoadedPane
 }
 
 /**
- * Desk price trend — the web-verified daily median-sale-price line when the
- * feed carries values, else the monthly ZHVI lane (verified 07/11/2026 the
- * daily feed is present but unvalued). Self-healing: the day daily_truth
- * fills, saved copies of this panel start rendering the daily line.
+ * Desk price trend — three lanes, most-alive first (dual-signal, 07/12/2026):
+ *   1. daily median ASKING price per city — daily_truth `median_asking_price`,
+ *      computed deterministically from our own cleaned active inventory
+ *      (the retired `median_sale_price` web-search never carried a value);
+ *   2. monthly closed-sale median per city — data_lake.redfin_city_swfl
+ *      (true sold, city grain, redfin.com provenance);
+ *   3. monthly ZHVI (smoothed index) — the deepest fallback.
+ * Self-healing: saved copies of this panel upgrade lanes as feeds fill.
  */
 export async function loadDeskPriceTrend(supabase: Supabase): Promise<LoadedPanel> {
   try {
@@ -174,10 +178,10 @@ export async function loadDeskPriceTrend(supabase: Supabase): Promise<LoadedPane
       .schema("data_lake")
       .from("daily_truth")
       .select("metric_key, area, period, value")
-      .eq("metric_key", "median_sale_price")
+      .eq("metric_key", "median_asking_price")
       .not("value", "is", null)
       .order("period", { ascending: true });
-    if (!error && data && data.length >= 2) {
+    if (!error && data && data.length > 0) {
       const byDay = new Map<string, ChartRow>();
       for (const r of data as { area: string; period: string; value: number }[]) {
         const row = byDay.get(r.period) ?? { month: r.period };
@@ -185,7 +189,34 @@ export async function loadDeskPriceTrend(supabase: Supabase): Promise<LoadedPane
         byDay.set(r.period, row);
       }
       const rows = [...byDay.values()];
-      return { data: rows, asOf: rows.at(-1)?.month as string | undefined, error: null };
+      // >= 2 DISTINCT days — a single-day "line" reads as a broken chart.
+      if (rows.length >= 2) {
+        return { data: rows, asOf: rows.at(-1)?.month as string | undefined, error: null };
+      }
+    }
+  } catch {
+    // fall through to the sold lane
+  }
+  try {
+    const { data, error } = await supabase
+      .schema("data_lake")
+      .from("redfin_city_swfl")
+      .select("area, period_end, median_sale_price")
+      .eq("property_type", "All Residential")
+      .in("area", ["cape_coral", "fort_myers", "naples"])
+      .not("median_sale_price", "is", null)
+      .order("period_end", { ascending: true });
+    if (!error && data && data.length > 0) {
+      const byMonth = new Map<string, ChartRow>();
+      for (const r of data as { area: string; period_end: string; median_sale_price: number }[]) {
+        const row = byMonth.get(r.period_end) ?? { month: r.period_end };
+        row[r.area] = r.median_sale_price;
+        byMonth.set(r.period_end, row);
+      }
+      const rows = [...byMonth.values()].slice(-24);
+      if (rows.length >= 2) {
+        return { data: rows, asOf: rows.at(-1)?.month as string | undefined, error: null };
+      }
     }
   } catch {
     // fall through to the ZHVI lane
@@ -267,7 +298,8 @@ const PANEL_CONFIGS: PanelConfig[] = [
     rootId: "desk-price-trend",
     eyebrow: "Southwest Florida",
     title: "Median Home Price Trend",
-    subtitle: "Cape Coral · Fort Myers · Naples",
+    subtitle:
+      "Cape Coral · Fort Myers · Naples — daily asking medians once the live window fills; monthly sold / typical-value history meanwhile",
     valueFormat: "usd",
     series: SWFL_METRO_SERIES,
     variant: "area",

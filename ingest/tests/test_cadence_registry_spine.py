@@ -29,8 +29,8 @@ REG = yaml.safe_load(REG_TEXT)
 #     (08h D7 — active-listings-swfl reads listing_active_stats over listing_state).
 #   market_aggregates_* are EXCLUDED: weekly / monthly, not nightly (08h D12).
 NIGHTLY_GATE_SET = {
-    "live_search_daily_median_price",
-    "live_search_daily_mortgage",
+    "live_search_daily_median_asking",  # renamed 07/12/2026: median_sale_price web-search retired
+    "live_search_daily_mortgage",       # -> lake-mode median_asking_price (own inventory)
     "listing_lifecycle",
     "city_pulse",
 }
@@ -164,7 +164,7 @@ def test_shared_count_targets_require_a_count_filter():
 
     daily_truth's writer column `source_tag` CANNOT do this: engine.py:67 hardcodes
     source_tag='live_search' for BOTH metrics. The discriminating column is `metric_key`
-    (registry :62 median_sale_price / :93 mortgage_30yr_fixed -> engine.py:268/275/337
+    (registry: median_asking_price / mortgage_30yr_fixed -> engine.py
     `metric_key=cfg["metric_key"]` -> daily_truth.metric_key, pipeline.py:23-24).
 
     THE RULE IS COMPUTED FROM THE REGISTRY, NOT HARDCODED: any nightly entry whose count

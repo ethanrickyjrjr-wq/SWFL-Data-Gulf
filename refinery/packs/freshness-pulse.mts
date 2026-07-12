@@ -44,7 +44,7 @@ const BRAIN_ID = "freshness-pulse";
 // Pack scope — DUPLICATED VERBATIM in refinery/packs/catalog.mts (Gate 5 checks
 // catalog ⇆ PER_PACK_REGISTRY parity on id/domain/scope/ttl). Edit both together.
 export const FRESHNESS_PULSE_SCOPE =
-  "SWFL daily sourced freshness snapshot — today's cited median sale price (Cape Coral / Fort Myers / Naples) and 30-year fixed mortgage rate, each provenance-gated to a real source URL, with ZIP-grain Baseline-Delta projections ([INFERENCE]).";
+  "SWFL daily sourced freshness snapshot — today's cited median asking price (Cape Coral / Fort Myers / Naples, from live active-listing inventory) and 30-year fixed mortgage rate, each provenance-gated to a real source URL, with ZIP-grain Baseline-Delta projections ([INFERENCE]).";
 
 const FRESHNESS_PULSE_TTL = 86400; // 1 day — daily pulse
 
@@ -81,7 +81,9 @@ function humanArea(area: string): string {
 }
 
 const METRIC_LABELS: Record<string, string> = {
-  median_sale_price: "median sale price",
+  // median_sale_price retired 07/12/2026 (web-search wrote 19 days of NULLs; no
+  // daily sold source exists) — replaced by the lake-computed asking metric.
+  median_asking_price: "median asking price",
   mortgage_30yr_fixed: "30-year fixed mortgage rate",
 };
 
@@ -103,7 +105,7 @@ function unitLabel(unit: string): string {
 // this same commit (ship-contract-together).
 //
 // ⚠ ORPHAN GUARD: this templates a slug for ANY (metric, area, unit) the registry
-// produces. Today live_search_config holds exactly median_sale_price × {cape_coral,
+// produces. Today live_search_config holds exactly median_asking_price × {cape_coral,
 // fort_myers, naples} (usd) + mortgage, all four registered. ADDING a new area or
 // metric to ingest/cadence_registry.yaml WITHOUT registering its slug in the SAME
 // commit orphans master's stage-2.5 normalize — and a template literal evades the

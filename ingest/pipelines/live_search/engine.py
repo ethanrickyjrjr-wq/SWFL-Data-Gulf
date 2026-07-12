@@ -8,6 +8,11 @@ move vs OUR OWN prior value triggers a second-source confirm before it reaches t
 
 External legs (gemini_grounded, firecrawl_search, _prior_value, _second_source_value, _fred_latest)
 do IO and are monkeypatched in tests; the pure logic + orchestration is fully unit-tested.
+
+Three fetch modes: search (the cascade above), api (deterministic authoritative API, e.g. FRED),
+lake (deterministic median from OUR OWN cleaned inventory view — no search, no LLM; added
+07/12/2026 when the median_sale_price web-search was retired for chasing a daily number that
+has no daily source).
 """
 
 from __future__ import annotations
@@ -338,6 +343,49 @@ def resolve_metric_api(cfg: dict, area: str) -> DailyTruthRow:
         source_url=api.get("source_url"), source_title="FRED", engine="fred",
         agreement_n=1, verified_on_page=True, source_tag="live_search", metric_config=_snapshot(cfg),
     )
+
+
+def _lake_median_asking(area: str) -> float | None:
+    """Median list price for one city from OUR OWN cleaned active inventory
+    (data_lake.listing_active_homes — THE authority view: api_feed + active +
+    sale + Lee/Collier + homes-only + >=20k; see docs/sql/20260712_*.sql).
+    Area slug -> city label mirrors the desk convention: cape_coral -> 'Cape Coral'."""
+    import psycopg
+
+    from ingest.scripts.migrate_nfip_flood_zone_current import _uri
+
+    city = area.replace("_", " ").title()
+    try:
+        with psycopg.connect(_uri(), connect_timeout=15) as conn, conn.cursor() as cur:
+            cur.execute(
+                "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY list_price) "
+                "FROM data_lake.listing_active_homes WHERE upper(btrim(city)) = upper(%s)",
+                (city,),
+            )
+            row = cur.fetchone()
+            return float(row[0]) if row and row[0] is not None else None
+    except Exception:  # noqa: BLE001 - DB unreachable -> NULL row + reason, never a guess
+        return None
+
+
+def resolve_metric_lake(cfg: dict, area: str) -> DailyTruthRow:
+    """LAKE mode: deterministic median from our own lake — no search, no LLM, no
+    vendor. Provenance is SWFL Data Gulf's live active-listing inventory. Reuses
+    the range + anomaly-vs-own-prior machinery so a contamination regression
+    (e.g. land blending back into the rollup) is flagged, not narrated."""
+    value = _lake_median_asking(area)
+    if value is None:
+        return _null_row(cfg, area, "lake: no active home rows for city (view empty or DB unreachable)")
+    lake = cfg.get("lake_config") or {}
+    winner = Candidate(
+        value,
+        "swfldatagulf.com",
+        lake.get("source_url", "https://www.swfldatagulf.com/desk"),
+        "lake",
+        grounded=True,
+        source_title="SWFL Data Gulf active-listing inventory",
+    )
+    return finalize_with_anomaly(winner, cfg, area)
 
 
 def bootstrap_metric(cfg: dict, area: str) -> DailyTruthRow:

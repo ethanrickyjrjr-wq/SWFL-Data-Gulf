@@ -174,3 +174,60 @@ def test_REAL_registry_every_nightly_entry_has_a_floor_and_a_countable_target():
         target = e.get("count_table") or e.get("freshness_table")
         assert target, f"{e['name']}: nightly but no countable target"
         assert e.get("expected_rows_min") is not None, f"{e['name']}: no expected_rows_min floor"
+
+
+# --- _count_rows SQL construction (count_nonnull: the OUTCOME floor) -----------
+class _RecCursor:
+    def __init__(self):
+        self.q = None
+        self.params = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def execute(self, q, params):
+        self.q = q
+        self.params = params
+
+    def fetchone(self):
+        return (7,)
+
+
+class _RecConn(FakeConn):
+    def __init__(self):
+        self._cur = _RecCursor()
+
+    def cursor(self):
+        return self._cur
+
+
+def test_count_nonnull_counts_the_value_column_not_rows():
+    """OUTCOME floor. `count_nonnull: value` must emit count("value") — NULL-valued
+    rows excluded — never count(*). The retired median_sale_price metric wrote 3
+    all-NULL rows/night for 19 nights and read LANDED under count(*); this is the
+    hole that made a dead feed green."""
+    conn = _RecConn()
+    entry = {
+        "name": "live_search_daily_median_asking",
+        "count_table": "data_lake.daily_truth",
+        "count_filter": {"column": "metric_key", "value": "median_asking_price"},
+        "count_nonnull": "value",
+    }
+    assert al._count_rows(conn, entry) == 7
+    q = repr(conn._cur.q)
+    assert "Identifier('value')" in q, q
+    assert "count(*)" not in q, q
+    # count_filter still scopes the WHERE — the two floors compose.
+    assert conn._cur.params == ["median_asking_price"]
+
+
+def test_count_without_nonnull_field_stays_count_star():
+    """No `count_nonnull:` -> unchanged count(*). The field is opt-in per entry;
+    tables without a single truth-bearing column keep the row floor."""
+    conn = _RecConn()
+    entry = {"name": "listing_lifecycle", "count_table": "data_lake.listing_state"}
+    assert al._count_rows(conn, entry) == 7
+    assert "count(*)" in repr(conn._cur.q)

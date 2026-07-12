@@ -73,7 +73,7 @@
 #                            live_search entries count data_lake.daily_truth and neither has a
 #                            source_name, so without this each would satisfy its own row floor with
 #                            the OTHER metric's rows — a dead feed reading LANDED forever. The
-#                            discriminator is metric_key (median_sale_price / mortgage_30yr_fixed);
+#                            discriminator is metric_key (median_asking_price / mortgage_30yr_fixed);
 #                            daily_truth's source_tag column cannot do it — it is the literal
 #                            'live_search' for both (engine.py:67). Read ONLY by assert_landed.py;
 #                            check_volume_entry scopes on source_name and ignores it.
@@ -96,10 +96,16 @@
 # pipeline_name argument in pipeline.py (they sometimes differ — see verified values below).
 
 pipelines:
-  # ── Tier-2 live-search freshness (daily; cascade Gemini->Firecrawl->Spider->Claude) ──
-  # Sourced metrics: value + real source URL from the cascade; anomaly check vs OUR OWN prior value
+  # ── Tier-2 daily freshness (daily_truth writers: lake / api / search modes) ──
+  # Sourced metrics: value + real source URL; anomaly check vs OUR OWN prior value
   # (anomaly_threshold_pct is per-metric). Writes data_lake.daily_truth (consumer: freshness-pulse brain).
-  - name: live_search_daily_median_price
+  # RETIRED 07/12/2026: live_search_daily_median_price (fetch_mode: search, metric_key
+  # median_sale_price). It web-searched a daily city-grain SOLD median that has no daily source
+  # anywhere — 19 straight days of NULL rows ("all cascade legs returned no sourced number";
+  # only the Gemini leg was ever live, its 3 fallbacks are stubs). Replaced by the lake-mode
+  # ASKING metric below (deterministic, our own inventory) + the monthly SOLD anchor in
+  # data_lake.redfin_city_swfl. Spec: docs/superpowers/specs/2026-07-11-daily-price-dual-signal-design.md
+  - name: live_search_daily_median_asking
     workflow: live-search-daily.yml
     consuming_pack: freshness-pulse
     nightly: true
@@ -112,40 +118,42 @@ pipelines:
     # the table is single-writer (live_search only). The filter made both the ops ledger and
     # check_freshness.py error out -> FALSE RED while data was fresh (fixed 07/05/2026).
     expected_rows_min: 1
-    count_filter: { column: metric_key, value: median_sale_price } # R1 — WITHOUT THIS THE GATE
+    count_filter: { column: metric_key, value: median_asking_price } # R1 — WITHOUT THIS THE GATE
       # IS A LIE. This entry and live_search_daily_mortgage share freshness_table
       # data_lake.daily_truth, and daily_truth has no source_name column (see :52-54), so a bare
       # COUNT(*) mixes the two metrics: each would satisfy its floor with the OTHER's rows.
       # `metric_key` is the ONLY discriminating column — daily_truth.source_tag is the hardcoded
-      # string 'live_search' for BOTH (engine.py:67). Value verified end-to-end:
-      # live_search_config.metric_key (:62) -> engine.py:268/275/337 `metric_key=cfg["metric_key"]`
-      # -> the metric_key column (pipeline.py:23-24). Read ONLY by Phase 4's assert_landed —
+      # string 'live_search' for BOTH (engine.py:67). Read ONLY by Phase 4's assert_landed —
       # check_volume_entry scopes on source_name (check_freshness.py:382) and ignores this key.
+    count_nonnull: value # OUTCOME floor, not effort floor: count(value), not count(*), so a
+      # NULL-valued row can never satisfy expected_rows_min. The retired median_sale_price
+      # metric wrote 3 NULL rows/night for 19 days while this gate read LANDED — that class
+      # is now structurally impossible (assert_landed.py counts the named column). 07/12/2026.
     freshness_sla:
       warn_after_days: 2    # past 1.5× tolerance threshold; log WARN but keep exit 0
       error_after_days: 4   # 4× cadence — genuinely dead (transient outages resolve in <2d)
-    note: "Daily sourced median sale price; cascade Gemini->Firecrawl->Spider->Claude; anomaly vs own prior. Was false-RED on ops until 07/05/2026 (source_name filter vs source_tag column — removed)."
+    note: "Daily median ASKING price per desk city — lake mode: deterministic median over data_lake.listing_active_homes (the cleaned homes-only authority view), no search, no LLM. Anomaly vs own prior; expected_range gate catches a land-blend regression. Replaced the retired median_sale_price web-search 07/12/2026."
     live_search_config:
-      fetch_mode: search
-      metric_key: median_sale_price
+      fetch_mode: lake
+      metric_key: median_asking_price
       areas: ["cape_coral", "fort_myers", "naples"]
       questions:
-        - "What is the current median home sale price in {area_label}, Florida?"
-        - "{area_label} FL median home sale price this month"
-      denylist_domains: ["littlebird"]
-      vendor_anchor_table: data_lake.redfin_lee_market
+        - "median asking (list) price, active home listings, {area_label}, Florida — own-lake rollup"
+      denylist_domains: []
+      vendor_anchor_table: data_lake.redfin_city_swfl
+      lake_config: { source_url: "https://www.swfldatagulf.com/desk" }
       unit: usd
-      expected_range: [200000, 900000]
+      expected_range: [150000, 900000]
       tolerance_pct: 10
       anomaly_threshold_pct: 8
     source_scope:
       confirmed_total:
-        summary: "Daily median home sale price, 3 areas (Cape Coral, Fort Myers, Naples) via live-search cascade — only the Gemini-grounded leg is actually live; Firecrawl/Spider/Claude legs are stubbed no-ops"
+        summary: "Daily median asking price, 3 desk cities (Cape Coral, Fort Myers, Naples), computed from our own cleaned active-listing inventory (listing_active_homes authority view; Cape Coral $400,000 / Fort Myers $325,000 / Naples $662,450 verified live 07/12/2026)"
         source: "our ingest"
       source_ceiling:
-        summary: "4 real SWFL sub-markets used elsewhere in this platform (city_pulse, listing_lifecycle) are absent from this cascade's areas list: Bonita Springs, Estero, Marco Island, Immokalee — same code path, config-only addition. Also only one metric is templated (median sale price); the same daily cascade could answer active-inventory-count or median-DOM per city with a new question template."
-        as_of: "07/08/2026"
-        source_label: "our own live-search cascade (no fixed vendor API)"
+        summary: "Any city with active inventory in the lake is a config-only areas addition (Bonita Springs, Estero, Marco Island, Lehigh Acres...). Same lake mode could answer active-count or median-DOM per city. The SOLD companion lives in data_lake.redfin_city_swfl (monthly, every FL city)."
+        as_of: "07/12/2026"
+        source_label: "our own active-listing inventory (data_lake.listing_active_homes)"
 
   - name: live_search_daily_mortgage
     workflow: live-search-daily.yml
@@ -159,9 +167,12 @@ pipelines:
     # NO source_name filter — same source_tag/source_name mismatch as median_price above (fixed 07/05/2026).
     expected_rows_min: 1
     count_filter: { column: metric_key, value: mortgage_30yr_fixed } # R1 — see the twin comment on
-      # live_search_daily_median_price. Value from live_search_config.metric_key (:93). This is the
-      # entry the mask hurt most: 1 row/day (areas: ["swfl"]) against a median metric writing 3/day,
-      # so a dead mortgage feed would have hidden behind median rows indefinitely.
+      # live_search_daily_median_asking. This is the entry the mask hurt most: 1 row/day
+      # (areas: ["swfl"]) against a median metric writing 3/day, so a dead mortgage feed would
+      # have hidden behind median rows indefinitely.
+    count_nonnull: value # OUTCOME floor — count(value), never count(*); a FRED outage writes a
+      # value=NULL row with a status_reason, and that row must not satisfy the floor. 07/12/2026,
+      # twin of the median_asking entry above.
     note: "Daily 30-yr fixed mortgage from FRED MORTGAGE30US (weekly Thu; api mode = authoritative, no search). Was false-RED on ops until 07/05/2026 (source_name filter vs source_tag column — removed)."
     live_search_config:
       fetch_mode: api
@@ -855,14 +866,18 @@ pipelines:
     dlt_schema_name: redfin_city_swfl # VERIFY after first run: SELECT DISTINCT schema_name FROM data_lake._dlt_loads WHERE schema_name LIKE '%redfin_city_swfl%'
     expected_rows_min: 1700 # 90% of 1917 confirmed 07/11/2026 via live dry-run (cape_coral 655 / fort_myers 648 / naples 614; 5 property types; 2013..2026). Grows monthly.
     count_table: data_lake.redfin_city_swfl
-    # Source: Redfin Data Center CITY market tracker (free public TSV, ~1 GB gz), filtered to Cape Coral / Fort Myers / Naples, FL. Refreshes ~monthly. The monthly source-faithful SOLD anchor beneath the daily ASKING line on the desk hero (daily-price-dual-signal). SteadyAPI/Redfin county grain can't serve a true city-grain sold median.
+    # Source: Redfin Data Center CITY market tracker (free public TSV, ~1 GB gz), filtered to EVERY
+    # Florida city (widened from 3 desk cities 07/12/2026, operator directive: bring in all the data,
+    # separate in the lake). Refreshes ~monthly. The monthly source-faithful SOLD anchor beneath the
+    # daily ASKING line on the desk hero (daily-price-dual-signal). SteadyAPI/Redfin county grain
+    # can't serve a true city-grain sold median.
     source_scope:
       confirmed_total:
-        summary: "Monthly true-sold median sale price at city grain for the 3 desk-hero cities (Cape Coral, Fort Myers, Naples) — full period_end history, all property types, from Redfin's free city tracker"
+        summary: "Monthly true-sold median sale price at city grain for every Florida city in Redfin's free city tracker (desk reads the Cape Coral / Fort Myers / Naples slice; any other FL city is a query, not a pipeline change) — full period_end history, all property types"
         source: "our ingest (redfin.com origin)"
       source_ceiling:
-        summary: "Redfin's city tracker carries every FL place; the same pipeline is a config-only add for Bonita Springs, Estero, Marco Island, etc. (extend CITY_REGIONS + REGION_TO_AREA)."
-        as_of: "07/11/2026"
+        summary: "The national file also carries every non-FL city (no consumer today) and per-property-type breakouts we already land. Ceiling within FL: none — the whole state's city grain is ingested."
+        as_of: "07/12/2026"
         source_label: "Redfin Data Center city_market_tracker"
 
   - name: collier_parcels
