@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 /**
- * Three quiet doors (spec 2026-07-12 §v2) — one-line text links, deliberately NOT
+ * Two quiet doors (spec 2026-07-12 one-bar) — one-line text links, deliberately NOT
  * previews: the inner pages keep their own devices (operator correction 07/11/2026,
  * memory feedback_homepage-grammar-not-collage). Just enough scent to route.
+ * Guides left the doors row for its own full card section (GuidesStrip).
  */
 const DOORS = [
   {
@@ -15,11 +16,6 @@ const DOORS = [
     href: "/insiders",
     kicker: "The Insiders Edition",
     line: "The monthly read, written by AI and fact-checked by machine. Free.",
-  },
-  {
-    href: "/guides",
-    kicker: "Guides",
-    line: "How the system works — and the builder features you might miss.",
   },
 ];
 

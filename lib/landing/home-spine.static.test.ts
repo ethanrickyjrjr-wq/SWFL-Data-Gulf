@@ -1,0 +1,53 @@
+// lib/landing/home-spine.static.test.ts
+//
+// Source-level pins for the one-bar homepage (spec 2026-07-12). The one-input
+// invariant is compositional: HeroBar renders exactly one <input> (its own
+// render test), Hero contains none (pinned here), and the page imports no
+// other input-bearing component (pinned here). This is the regression that
+// caused the rebuild — it must not return silently.
+import { describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf8");
+
+describe("homepage spine (static pins)", () => {
+  const page = read("app/page.tsx");
+
+  test("the demo theater is gone", () => {
+    expect(page).not.toContain("CampaignReveal");
+    expect(page).not.toContain("buildCampaignDemo");
+    expect(page).not.toContain("HeroCampaign");
+  });
+
+  test("no second input-bearing component is imported", () => {
+    expect(page).not.toContain("WeeklyReadCapture");
+    expect(page).not.toContain("Waitlist");
+  });
+
+  test("the spine is bar → map → doors → guides → pricing → faq", () => {
+    const order = [
+      "<HeroBar",
+      "<Hero ",
+      "<SiteDoors",
+      "<GuidesStrip",
+      "<PricingStrip",
+      "<ObjectionFaq",
+    ].map((tag) => page.indexOf(tag));
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+  });
+
+  test("the map section has no input of its own", () => {
+    const hero = read("components/landing/Hero.tsx");
+    expect(hero).not.toContain("<input");
+    expect(hero).not.toContain("search-bar");
+  });
+
+  test("doors are Desk + Insiders only — Guides is a full section now", () => {
+    const doors = read("components/landing/SiteDoors.tsx");
+    expect(doors).toContain("/desk");
+    expect(doors).toContain("/insiders");
+    expect(doors).not.toContain("/guides");
+  });
+});
