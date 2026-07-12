@@ -5905,7 +5905,7 @@
       "unit": "%",
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
-      "scope_note": "Year-over-year percentage change in Charlotte County single-family median home prices per FGCU RERI monthly report. ~2-month data lag."
+      "scope_note": "Year-over-year percentage change in Charlotte County single-family median home prices per FGCU RERI monthly report. ~2-month data lag. Deliberate named-source exception to the Lee + Collier core scope (operator ruling 07/11/2026): the series is RERI's own published tri-county data, always county-labeled."
     },
     "fgcu_reri_active_listings_pct_change": {
       "id": "fgcu_reri_active_listings_pct_change",

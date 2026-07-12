@@ -5,10 +5,7 @@ import type {
   BrainOutputMetric,
   BrainOutputDirection,
 } from "../types/brain-output.mts";
-import {
-  fgcuReriSource,
-  type ReriNormalized,
-} from "../sources/fgcu-reri-source.mts";
+import { fgcuReriSource, type ReriNormalized } from "../sources/fgcu-reri-source.mts";
 import type { RawFragment } from "../types/fragment.mts";
 import type { SynthesisFact } from "../types/event.mts";
 
@@ -20,7 +17,12 @@ const SOURCE_ID = "fgcu_reri_indicators";
  *
  * Source: public.fgcu_reri_indicators (ingest/pipelines/fgcu_reri_indicators)
  * Cadence: monthly ~4th of month, ~2-month data lag.
- * Coverage: Lee + Collier + Charlotte counties.
+ * Coverage: FGCU RERI publishes tri-county (Lee / Collier / Charlotte), kept
+ * as-published — a DELIBERATE named-source exception to the Lee + Collier core
+ * scope (operator ruling 07/11/2026, check scope_fgcu_reri_charlotte; same
+ * pattern as traffic-swfl's Ian-recovery index). The Charlotte series is RERI's
+ * own published, county-labeled data, cited to RERI — never a claim that the
+ * SWFL lake holds Charlotte data.
  *
  * 8 indicators per report month:
  *   airport_activity, tourist_tax_revenues, taxable_sales, unemployment_rate,
@@ -58,9 +60,7 @@ function sign(n: number): string {
   return n >= 0 ? "+" : "";
 }
 
-function metricDirection(
-  value: number | null,
-): "rising" | "falling" | "stable" {
+function metricDirection(value: number | null): "rising" | "falling" | "stable" {
   if (value == null) return "stable";
   return value > 0 ? "rising" : value < 0 ? "falling" : "stable";
 }
@@ -82,17 +82,14 @@ function makeSource(
 
 function fgcuReriOutputProducer(_out: PackOutput): BrainOutputProducerResult {
   const rows = lastRows;
-  const fetchedAt =
-    lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const fetchedAt = lastFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   if (rows.length === 0) {
     return {
       conclusion:
         "fgcu-reri: no RERI indicator data available — table may be empty or pipeline has not yet run.",
       key_metrics: [],
-      caveats: [
-        "fgcu_reri_indicators table returned 0 rows. Run the fgcu-reri-monthly pipeline.",
-      ],
+      caveats: ["fgcu_reri_indicators table returned 0 rows. Run the fgcu-reri-monthly pipeline."],
       direction: "neutral",
       magnitude: 0,
       drivers: [],
@@ -114,14 +111,9 @@ function fgcuReriOutputProducer(_out: PackOutput): BrainOutputProducerResult {
 
   // Helper: find row by indicator + county in latest month
   const find = (indicator: string, county = "swfl") =>
-    latest.find((r) => r.indicator === indicator && r.county === county) ??
-    null;
+    latest.find((r) => r.indicator === indicator && r.county === county) ?? null;
 
-  const addMetric = (
-    slug: string,
-    label: string,
-    row: ReriNormalized | null,
-  ) => {
+  const addMetric = (slug: string, label: string, row: ReriNormalized | null) => {
     if (!row || row.pct_change == null) return;
     const unit = row.pct_change_unit === "percentage points" ? "pp" : "%";
     key_metrics.push({
@@ -153,11 +145,7 @@ function fgcuReriOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     "RERI Tourist Tax Revenues YoY",
     find("tourist_tax_revenues"),
   );
-  addMetric(
-    "fgcu_reri_taxable_sales_pct_change",
-    "RERI Taxable Sales YoY",
-    find("taxable_sales"),
-  );
+  addMetric("fgcu_reri_taxable_sales_pct_change", "RERI Taxable Sales YoY", find("taxable_sales"));
   addMetric(
     "fgcu_reri_unemployment_rate_pct_change",
     "RERI Unemployment Rate YoY Δ",
@@ -223,21 +211,13 @@ function fgcuReriOutputProducer(_out: PackOutput): BrainOutputProducerResult {
 
   const parts: string[] = [];
   if (airRow?.pct_change != null)
-    parts.push(
-      `airport activity ${sign(airRow.pct_change)}${fmt(airRow.pct_change)}%`,
-    );
+    parts.push(`airport activity ${sign(airRow.pct_change)}${fmt(airRow.pct_change)}%`);
   if (taxRow?.pct_change != null)
-    parts.push(
-      `tourist tax ${sign(taxRow.pct_change)}${fmt(taxRow.pct_change)}%`,
-    );
+    parts.push(`tourist tax ${sign(taxRow.pct_change)}${fmt(taxRow.pct_change)}%`);
   if (unempRow?.pct_change != null)
-    parts.push(
-      `unemployment ${sign(unempRow.pct_change)}${fmt(unempRow.pct_change)}pp`,
-    );
+    parts.push(`unemployment ${sign(unempRow.pct_change)}${fmt(unempRow.pct_change)}pp`);
   if (permitsRow?.pct_change != null)
-    parts.push(
-      `SF permits ${sign(permitsRow.pct_change)}${fmt(permitsRow.pct_change)}%`,
-    );
+    parts.push(`SF permits ${sign(permitsRow.pct_change)}${fmt(permitsRow.pct_change)}%`);
 
   const conclusion =
     `FGCU RERI ${latestMonth} — ${parts.join(", ")}. ` +
@@ -249,12 +229,10 @@ function fgcuReriOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     key_metrics,
     caveats: [
       `Data lag: FGCU RERI publishes indicators ~4th of each month; data reflects ~2 months prior (report_month ${latestMonth} → reference period ends ~${latestMonth}).`,
+      "Charlotte County figures are FGCU RERI's own published tri-county series and are always labeled by county — regional coverage here is deliberately wider than the Lee + Collier core; the Charlotte series comes from the named source, not from this platform's own county data.",
     ],
     direction,
-    magnitude: Math.min(
-      Math.max(bullish, bearish) / Math.max(bullish + bearish, 1),
-      1,
-    ),
+    magnitude: Math.min(Math.max(bullish, bearish) / Math.max(bullish + bearish, 1), 1),
     drivers: [],
     overrides: [],
     contradicts: [],
@@ -277,7 +255,8 @@ export const fgcuReri: PackDefinition = {
   brain_id: "fgcu-reri",
   public_label: "FGCU RERI",
   domain: "macro",
-  scope: "Southwest Florida — FGCU RERI monthly regional economic indicators",
+  scope:
+    "Southwest Florida — FGCU RERI monthly regional economic indicators. RERI publishes tri-county (Lee, Collier, Charlotte); the Charlotte series is RERI's own published, county-labeled data — a deliberate named-source exception to the Lee + Collier core data scope.",
   ttl_seconds: 30 * 24 * 60 * 60, // 30 days
 
   sources: [fgcuReriSource],
@@ -296,8 +275,7 @@ export const fgcuReri: PackDefinition = {
       .filter(Boolean);
     lastRows = rows;
     lastFetchedAt = rows[0]
-      ? (allFragments.find((f) => f.source_id === SOURCE_ID)?.fetched_at ??
-        null)
+      ? (allFragments.find((f) => f.source_id === SOURCE_ID)?.fetched_at ?? null)
       : null;
     // skipSynthesisAgent: these facts ARE the brain's SAVED FACTS. Each RERI
     // row becomes one SynthesisFact; the raw row fields (indicator, county, …)
@@ -308,9 +286,7 @@ export const fgcuReri: PackDefinition = {
         const r = f.normalized as ReriNormalized;
         const unit = r.pct_change_unit === "percentage points" ? "pp" : "%";
         const value =
-          r.pct_change == null
-            ? "n/a"
-            : `${sign(r.pct_change)}${fmt(r.pct_change)}${unit}`;
+          r.pct_change == null ? "n/a" : `${sign(r.pct_change)}${fmt(r.pct_change)}${unit}`;
         return {
           ...r,
           topic: `reri:${r.indicator}:${r.county}`,
@@ -330,7 +306,7 @@ export const fgcuReri: PackDefinition = {
     "The user expects master to weigh these regional indicators against the structural reads from the other brains.",
   ],
   activeProject:
-    "fgcu-reri: monthly SWFL regional economic indicators (8 series across Lee + Collier + Charlotte) from FGCU's Regional Economic Research Institute, ~2-month data lag.",
+    "fgcu-reri: monthly SWFL regional economic indicators (8 series across Lee + Collier + Charlotte — tri-county is RERI's published grain, a deliberate named-source exception to the Lee + Collier core scope) from FGCU's Regional Economic Research Institute, ~2-month data lag.",
   prompts: {
     triageContext:
       "These fragments are recent fgcu_reri_indicators rows — one dated, cited YoY change per indicator/county. Decision-relevant by construction; the pack is pure deterministic selection (skipTriageAgent).",

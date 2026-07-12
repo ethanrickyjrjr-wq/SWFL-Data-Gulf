@@ -251,7 +251,8 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
   {
     id: "fgcu-reri",
     domain: "macro",
-    scope: "Southwest Florida — FGCU RERI monthly regional economic indicators",
+    scope:
+      "Southwest Florida — FGCU RERI monthly regional economic indicators. RERI publishes tri-county (Lee, Collier, Charlotte); the Charlotte series is RERI's own published, county-labeled data — a deliberate named-source exception to the Lee + Collier core data scope.",
     ttl_seconds: 86400 * 30,
   },
   {

@@ -22,8 +22,7 @@ function makeReriFragment(
     indicator,
     county,
     pct_change,
-    pct_change_unit:
-      indicator === "unemployment_rate" ? "percentage points" : "percent",
+    pct_change_unit: indicator === "unemployment_rate" ? "percentage points" : "percent",
     source_url: "https://www.fgcu.edu/cob/reri/",
   };
   return {
@@ -44,10 +43,7 @@ test("fgcu-reri: fixture source returns > 0 fragments", async () => {
   assert.equal(fragments[0].source_id, "fgcu_reri_indicators");
   const norm = fragments[0].normalized as ReriNormalized;
   assert.equal(norm.kind, "reri-row");
-  assert.ok(
-    norm.report_month.match(/^\d{4}-\d{2}$/),
-    "report_month should be YYYY-MM",
-  );
+  assert.ok(norm.report_month.match(/^\d{4}-\d{2}$/), "report_month should be YYYY-MM");
 });
 
 // ── Test 2: corpusSummary populates expected indicator keys ───────────────────
@@ -57,14 +53,8 @@ test("fgcu-reri: corpusSummary extracts indicator rows", async () => {
   const summary = fgcuReri.corpusSummary!(fragments);
   assert.ok(summary.length > 0, "corpusSummary should return rows");
   const indicators = summary.map((s) => (s as ReriNormalized).indicator);
-  assert.ok(
-    indicators.includes("airport_activity"),
-    "should include airport_activity",
-  );
-  assert.ok(
-    indicators.includes("unemployment_rate"),
-    "should include unemployment_rate",
-  );
+  assert.ok(indicators.includes("airport_activity"), "should include airport_activity");
+  assert.ok(indicators.includes("unemployment_rate"), "should include unemployment_rate");
 });
 
 // ── Test 3: outputProducer returns valid BrainOutput shape ────────────────────
@@ -73,9 +63,7 @@ test("fgcu-reri: outputProducer returns BrainOutput with key_metrics", async () 
   const fragments = await fgcuReriSource.fetch();
   fgcuReri.corpusSummary!(fragments); // populate closure state
 
-  const result = fgcuReri.outputProducer!(
-    {} as Parameters<typeof fgcuReri.outputProducer>[0],
-  );
+  const result = fgcuReri.outputProducer!({} as Parameters<typeof fgcuReri.outputProducer>[0]);
 
   assert.ok(result.key_metrics.length > 0, "should have key_metrics");
   const slugs = result.key_metrics.map((m) => m.metric);
@@ -89,6 +77,13 @@ test("fgcu-reri: outputProducer returns BrainOutput with key_metrics", async () 
   );
   assert.ok(result.conclusion.length > 0, "conclusion should be non-empty");
   assert.ok(result.grain_boundary, "grain_boundary should be set");
+  // The Charlotte series rides only under the named-source-exception caveat
+  // (operator ruling 07/11/2026) — if the caveat disappears, the tri-county
+  // read stops being labeled as RERI's own data and becomes a scope leak.
+  assert.ok(
+    result.caveats.some((c) => c.includes("Charlotte") && c.includes("named source")),
+    "expected the named-source-exception caveat for the Charlotte series",
+  );
 });
 
 // ── Test 4: direction is one of the valid enum values ─────────────────────────
@@ -97,9 +92,7 @@ test("fgcu-reri: direction is a valid BrainOutputDirection", async () => {
   const fragments = await fgcuReriSource.fetch();
   fgcuReri.corpusSummary!(fragments);
 
-  const result = fgcuReri.outputProducer!(
-    {} as Parameters<typeof fgcuReri.outputProducer>[0],
-  );
+  const result = fgcuReri.outputProducer!({} as Parameters<typeof fgcuReri.outputProducer>[0]);
 
   const valid = ["bullish", "bearish", "mixed", "neutral"];
   assert.ok(
@@ -136,18 +129,12 @@ test("fgcu-reri: polarity regression — rising unemployment = mixed, not bullis
     makeReriFragment("unemployment_rate", "swfl", 5),
     // all other direct indicators positive: +3% — should be BULLISH
     ...DIRECT_INDICATORS.map((ind) =>
-      makeReriFragment(
-        ind,
-        ind === "home_prices_single_family" ? "lee" : "swfl",
-        3,
-      ),
+      makeReriFragment(ind, ind === "home_prices_single_family" ? "lee" : "swfl", 3),
     ),
   ];
 
   fgcuReri.corpusSummary!(fragments);
-  const result = fgcuReri.outputProducer!(
-    {} as Parameters<typeof fgcuReri.outputProducer>[0],
-  );
+  const result = fgcuReri.outputProducer!({} as Parameters<typeof fgcuReri.outputProducer>[0]);
 
   assert.equal(
     result.direction,

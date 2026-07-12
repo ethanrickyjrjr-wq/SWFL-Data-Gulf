@@ -1,3 +1,14 @@
+## 2026-07-12 (Fable 5 · main) — fgcu-reri: Charlotte kept as a NAMED-SOURCE EXCEPTION (operator ruling)
+
+Operator ruled on scope_fgcu_reri_charlotte: exception, not re-scope — RERI genuinely publishes
+tri-county, and the series is always county-labeled. The exception is now explicit in the artifact
+(traffic-swfl Ian-index pattern): pack header + scope string + catalog mirror + activeProject + a new
+always-on caveat ("the Charlotte series comes from the named source, not from this platform's own
+county data") + vocab scope_note on fgcu_reri_home_prices_charlotte_pct_change. New test pins the
+caveat — removing it becomes a failing scope-leak tripwire. Gates: fgcu+catalog 9/0 · vocab --all OK
+(41 brains) · eslint 0. Rebuild (pack_id=fgcu-reri, deterministic, 0 LLM calls) dispatched after this
+push; scope_fgcu_reri_charlotte closes on live evidence.
+
 ## 2026-07-11 (Fable 5 · main) — Charlotte re-scope COMMITTED (56910dfe, isolated worktree); push + Group-A rebuilds await the operator's word
 
 econ-dev's TTL expires 07/14 (live refined_at 2026-07-07T09:40Z + 7d) — the cron would restamp the
