@@ -243,10 +243,12 @@ export interface RawNearbyProperty {
   source?: { id?: unknown };
 }
 
-/** A nearby comparable, MLS-SCRUBBED at this boundary: `listing_id`, `href`,
- *  `permalink`, and `source.id` are dropped and never placed on this object. The
- *  realtor.com `property_id` survives ONLY as the internal `propertyId` handle for
- *  the +1 sold-event lookup — the render layer never emits it. */
+/** A nearby comparable. MLS ids stay scrubbed at this boundary: `listing_id` and
+ *  `source.id` are dropped and never placed on this object; `propertyId` survives
+ *  ONLY as the internal +1 sold-event join key — the render layer never emits it.
+ *  `permalink` is CARRIED (canonicalized) as `sourceUrl` since the 07/11/2026
+ *  operator unlock: it is the comp's functional click-through link. Citations are
+ *  unaffected — they stay domain-level ("SWFL Data Gulf · realtor.com"). */
 export interface NearbyComp {
   addressLine: string;
   city: string;
@@ -264,6 +266,9 @@ export interface NearbyComp {
   estimateDate: string | null;
   /** Internal realtor.com join key for the +1 sold-event lookup — NEVER surfaced. */
   propertyId: string | null;
+  /** Captured realtor.com detail URL (canonicalized permalink), or null. A
+   *  functional link destination — never a citation, never surfaced as an id. */
+  sourceUrl: string | null;
 }
 
 /** Normalize one raw property into a scrubbed NearbyComp. Null when there is no
@@ -294,6 +299,7 @@ export function normalizeNearbyComp(raw: RawNearbyProperty): NearbyComp | null {
     estimateValue: best ? toNum(best.value) : null,
     estimateDate: best && typeof best.date === "string" ? best.date : null,
     propertyId,
+    sourceUrl: canonicalRealtorUrl(raw.permalink) ?? null,
   };
 }
 

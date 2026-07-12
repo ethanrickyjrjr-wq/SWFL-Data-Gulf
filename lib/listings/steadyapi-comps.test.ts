@@ -75,15 +75,33 @@ describe("normalizeNearbyComp — MLS scrub at the boundary (structural, not AI-
     expect(comp!.estimateValue).toBe(428000);
     expect(comp!.estimateDate).toBe("2026-05-01");
 
-    // Structural scrub: none of the ids/urls are present as keys or values.
-    const asJson = JSON.stringify(comp);
+    // Structural scrub: ids stay dropped. `sourceUrl` is the ONE realtor.com-bearing
+    // field (the captured permalink — functional link, operator unlock 07/11/2026),
+    // so the no-id JSON sweep runs on the comp WITHOUT it.
     expect(comp as Record<string, unknown>).not.toHaveProperty("permalink");
     expect(comp as Record<string, unknown>).not.toHaveProperty("href");
     expect(comp as Record<string, unknown>).not.toHaveProperty("listing_id");
     expect(comp as Record<string, unknown>).not.toHaveProperty("source");
+    const { sourceUrl: _link, ...scrubbed } = comp! as Record<string, unknown>;
+    const asJson = JSON.stringify(scrubbed);
     expect(asJson).not.toContain("M54931-01642"); // the permalink M-code
     expect(asJson).not.toContain("realtor.com"); // the href host
     expect(asJson).not.toContain("2988776655"); // the listing_id
+  });
+
+  it("carries the captured permalink as sourceUrl, canonicalized", () => {
+    const comp = normalizeNearbyComp(NEARBY_PROP);
+    expect(comp!.sourceUrl).toBe(
+      "https://www.realtor.com/realestateandhomes-detail/1403-NE-19th-Ter_Cape-Coral_FL_33909_M54931-01642",
+    );
+  });
+
+  it("sourceUrl is null when the response has no permalink", () => {
+    const comp = normalizeNearbyComp({
+      property_id: "999",
+      address: { line: "424 28th St" },
+    });
+    expect(comp?.sourceUrl).toBeNull();
   });
 
   it("carries the internal propertyId for the +1 sold-event lookup (never rendered)", () => {
