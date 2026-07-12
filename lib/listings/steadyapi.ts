@@ -33,6 +33,24 @@ function cityToSlug(city: string, state = "FL"): string {
   return `${city.trim().replace(/\s+/g, "-")}_${state}`;
 }
 
+/** realtor.com detail-page base, observed VERBATIM in SteadyAPI /search responses
+ *  (docs.steadyapi.com, verified 07/11/2026). Used ONLY to promote a bare slug the
+ *  same API returns on the nearby lanes — never to mint a URL from an address. */
+const RDC_DETAIL_BASE = "https://www.realtor.com/realestateandhomes-detail/";
+
+/** Canonicalize a SteadyAPI `permalink` into a realtor.com detail URL, or undefined.
+ *  Accepts exactly two shapes: the full detail URL (verbatim pass-through) and the
+ *  bare slug (one path segment, e.g. "765-Geary-St_San-Francisco_CA_94109_M24733-64190").
+ *  Anything else — other hosts, other paths, junk — is refused (capture-only moat). */
+export function canonicalRealtorUrl(permalink: unknown): string | undefined {
+  if (typeof permalink !== "string") return undefined;
+  const p = permalink.trim();
+  if (!p) return undefined;
+  if (p.startsWith(RDC_DETAIL_BASE) && p.length > RDC_DETAIL_BASE.length) return p;
+  if (/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(p)) return RDC_DETAIL_BASE + p;
+  return undefined;
+}
+
 interface RawResult {
   property_id?: unknown;
   price?: { amount?: unknown; display?: unknown };
@@ -80,6 +98,7 @@ export function normalizeResult(raw: RawResult, city: string, state: string): Li
         : null;
   const photoUrl = typeof raw.photo_url === "string" && raw.photo_url ? raw.photo_url : undefined;
   const permalink = typeof raw.permalink === "string" ? raw.permalink : "";
+  const listingUrl = canonicalRealtorUrl(permalink);
   // last path segment: "1403-NE-19th-Ter_Cape-Coral_FL_33909_M54931-01642"
   const lastSegment = permalink.split("/").pop() ?? "";
   const slugParts = lastSegment.split("_");
@@ -141,6 +160,7 @@ export function normalizeResult(raw: RawResult, city: string, state: string): Li
     mlsName: typeof raw.source_type === "string" ? raw.source_type : null,
     mlsNumber: null,
     photoUrl,
+    ...(listingUrl ? { listingUrl } : {}),
   };
 }
 

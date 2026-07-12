@@ -37,9 +37,10 @@ export interface Listing {
   mlsNumber: string | null;
   /** MLS listing photo from SteadyAPI (realtor.com CDN). Undefined when not enriched. */
   photoUrl?: string;
-  /** Feed-carried listing page URL, VERBATIM (broker-site feed). Never constructed
-   *  from an id (handoff §2.3 — minted URLs 404). Unset until the wave-5 feed
-   *  join populates it; the artifact-link resolver treats absence as "no link". */
+  /** Listing page URL, VERBATIM as captured (broker-site feed, or the realtor.com
+   *  detail permalink captured from the SteadyAPI response — operator unlock
+   *  07/11/2026). Never constructed from an id (handoff §2.3 — minted URLs 404).
+   *  The artifact-link resolver treats absence as "no link". */
   listingUrl?: string;
 }
 

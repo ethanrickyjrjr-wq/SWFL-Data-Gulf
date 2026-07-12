@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import {
+  canonicalRealtorUrl,
   normalizeNearbyComp,
+  normalizeResult,
   parseSoldEvent,
   fetchNearbyValues,
   fetchSoldEvent,
@@ -35,6 +37,29 @@ const NEARBY_BODY = {
   },
 };
 
+describe("canonicalRealtorUrl — capture-only permalink canonicalizer", () => {
+  it("passes a full realtor.com detail URL through verbatim", () => {
+    const u =
+      "https://www.realtor.com/realestateandhomes-detail/5604-Creekmore-Dr_Oklahoma-City_OK_73179_M77577-41161";
+    expect(canonicalRealtorUrl(u)).toBe(u);
+  });
+
+  it("promotes a bare slug to the canonical detail URL", () => {
+    expect(canonicalRealtorUrl("765-Geary-St_San-Francisco_CA_94109_M24733-64190")).toBe(
+      "https://www.realtor.com/realestateandhomes-detail/765-Geary-St_San-Francisco_CA_94109_M24733-64190",
+    );
+  });
+
+  it("refuses anything else — no minted URLs", () => {
+    expect(canonicalRealtorUrl("")).toBeUndefined();
+    expect(canonicalRealtorUrl(undefined)).toBeUndefined();
+    expect(canonicalRealtorUrl(42)).toBeUndefined();
+    expect(canonicalRealtorUrl("https://example.com/whatever")).toBeUndefined();
+    expect(canonicalRealtorUrl("two/segments_M1-2")).toBeUndefined();
+    expect(canonicalRealtorUrl("has spaces_M1-2")).toBeUndefined();
+  });
+});
+
 describe("normalizeNearbyComp — MLS scrub at the boundary (structural, not AI-trust)", () => {
   it("keeps only the comp facts and drops every realtor.com id from the surfaced fields", () => {
     const comp = normalizeNearbyComp(NEARBY_PROP);
@@ -68,6 +93,30 @@ describe("normalizeNearbyComp — MLS scrub at the boundary (structural, not AI-
 
   it("returns null for a property with no usable address", () => {
     expect(normalizeNearbyComp({} as RawNearbyProperty)).toBeNull();
+  });
+});
+
+describe("normalizeResult permalink capture (search lane)", () => {
+  const base = {
+    property_id: "1234567890",
+    price: { amount: 500000 },
+    photo_url: "https://cdn.example.com/p.jpg",
+  };
+
+  it("carries a slug permalink as the canonical listingUrl", () => {
+    const l = normalizeResult(
+      { ...base, permalink: "1403-NE-19th-Ter_Cape-Coral_FL_33909_M54931-01642" },
+      "Cape Coral",
+      "FL",
+    );
+    expect(l?.listingUrl).toBe(
+      "https://www.realtor.com/realestateandhomes-detail/1403-NE-19th-Ter_Cape-Coral_FL_33909_M54931-01642",
+    );
+  });
+
+  it("leaves listingUrl unset when there is no usable permalink", () => {
+    const l = normalizeResult({ ...base, permalink: "" }, "Cape Coral", "FL");
+    expect(l?.listingUrl).toBeUndefined();
   });
 });
 
