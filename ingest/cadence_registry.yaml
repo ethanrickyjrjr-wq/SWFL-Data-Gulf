@@ -863,8 +863,10 @@ pipelines:
     lane: tier-2
     cadence_days: 31
     tolerance_multiplier: 2.0
-    dlt_schema_name: redfin_city_swfl # VERIFY after first run: SELECT DISTINCT schema_name FROM data_lake._dlt_loads WHERE schema_name LIKE '%redfin_city_swfl%'
-    expected_rows_min: 1700 # 90% of 1917 confirmed 07/11/2026 via live dry-run (cape_coral 655 / fort_myers 648 / naples 614; 5 property types; 2013..2026). Grows monthly.
+    dlt_schema_name: redfin_city_swfl # VERIFIED 07/12/2026 after first live load: _dlt_loads schema_name = 'redfin_city_swfl'
+    expected_rows_min: 350000 # 90% of 389,986 rows / 896 FL regions VERIFIED IN THE TABLE 07/12/2026 after
+      # the first live load (not a dry-run count). Hero-trio slice matches the 07/11 dry-run exactly:
+      # cape_coral 655 / fort_myers 648 / naples 614. Grows monthly.
     count_table: data_lake.redfin_city_swfl
     # Source: Redfin Data Center CITY market tracker (free public TSV, ~1 GB gz), filtered to EVERY
     # Florida city (widened from 3 desk cities 07/12/2026, operator directive: bring in all the data,
