@@ -1,3 +1,39 @@
+## 2026-07-11 (Opus 4.8 · main) — Data-contracts+doctor: research pack (§13) + TDD build plan. Spec found WRONG in 6 places.
+
+Closed spec §13 ("Open for Fable 5 tonight") with a 27-agent read-only research fan-out (~6.5M tokens; live
+DB SELECT-only, real `gh run` history, crawl4ai on live GHA docs), then authored the per-task TDD build plan.
+Nothing was built; no repo file was modified by an agent; no pipeline was triggered.
+
+**The research falsified the spec in six places** — each would have shipped a bug (`08-FABLE5-RESEARCH-INDEX.md`):
+1. The `land_drags_median` tripwire is a **tautology** — its recompute copies the view's own WHERE clause
+   byte-for-byte (49/52 live rows have ratio exactly 1.0000; `median < 0.5*median` is unsatisfiable). And
+   `property_type` is **derived, not vendor-supplied** (`PROPERTY_TYPE_MAP.get(raw,"other")` silently defaults —
+   this bug already happened once). Under a relabel the $35k bug **returns while the tripwire reports GREEN**.
+   Corrected oracle is label-independent (`beds`/`sqft`) and joins `(county,zip)`, verified to fire at 0.102.
+2. The `range` price floor as specced **deletes real listings** (manufactured-home SALES in N Fort Myers
+   lease-lot parks, $8,900–$14,900) — ships as `report`, never `quarantine`. Two independent verifiers agreed.
+3. Caveat-TTL: filter at `4-output.mts:438` **only** — `:458-459` carry current-build-truth; a bare date-scan
+   regex would false-drop the live permits-swfl "Collier is stale" caveat. Template-anchored.
+4. `source_tag` is **read by nothing** (`check_freshness` scopes on `source_name`); the registry's one
+   `source_tag:` is a phantom. The Spine's contribution there is a *subtraction*.
+5. Inventories are `74 ↔ 75 ↔ 83 active-cron (79 firing)`, not the spec's `74↔78↔77`. 4 workflows carry live
+   crons in source but are API-disabled, orphaning 6 entries — a class **neither Phase-2 mode can structurally see**.
+6. doctor/assert_landed can't be built as specced: `nightly:`/`min_rows:` don't exist, `min_rows` duplicates
+   `expected_rows_min`, local-vs-UTC bug, and `city_pulse` can't be volume-gated as modeled.
+
+**Operator's 6 AM Eastern ceiling: CONFIRMED** from measured run history — chain starts 00:05 EDT, finishes
+~00:42 typical / ~01:19 worst (4.8x headroom). Found `narrative-bake.yml` firing at **06:23 AM EDT — already
+past the ceiling, in production today**; `graphify-republish` has never once succeeded (0/2).
+
+**The plan's own critics earned their keep:** two adversarial passes caught that the parallel phase authors had
+invented three names for one concept — Phase 4's row gate read a field the Spine forbids, so it would have
+**counted zero rows in production while CI stayed green** (the founding "green ≠ data" defect, rebuilt inside its
+own fix), and doctor would have red-flagged a healthy source every morning. Both fixed in the task code; an
+Integration Contract now pins the shared vocabulary. Plan: 62 tasks, 296 steps, 28 [ASK-FIRST] markers.
+
+Artifacts: `docs/audit/2026-07-11-pipeline-problems/08-FABLE5-RESEARCH-INDEX.md` + `08a`–`08h` ·
+`docs/superpowers/plans/2026-07-11-data-contracts-doctor-tdd.md`. Nothing pushed; nothing built.
+
 ## 2026-07-11 (Opus 4.8 · main) — TWO LIVE OUTAGES found by the triage sweep; open-issues doc corrected
 
 Final browser-verification pass over the last 15 `*_live_verify` checks (3 agents) closed 8 more and
