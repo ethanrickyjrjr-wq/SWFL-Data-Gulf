@@ -6,7 +6,8 @@
 // its last twenty-four months are −$619/mo. BOTH ARE TRUE. The insight lives in the
 // comparison — which is why we fit a fixed MENU of windows rather than picking one.
 //
-// Two ways a window can lie, and both are closed here:
+// ONE LAW GOVERNS THIS FILE: A WINDOW MUST NEVER WEAR A LABEL THAT OUTRUNS ITS DATA.
+// Four ways a window can break it, and all four are closed here:
 //
 //   1. TOO FEW POINTS. A straight line through six points looks authoritative and
 //      means nothing. A window under MIN_FIT_POINTS is DROPPED FROM THE MENU —
@@ -19,6 +20,20 @@
 //      lying, which is the same failure as a 12-month moving average emitted under
 //      the key `trend`. `full` and `ex-boom` are not trailing windows; the rule does
 //      not apply to them.
+//
+//   3. AN EXCLUSION THAT EXCLUDED NOTHING. On a series that never spanned the boom —
+//      say, 18 months starting 12/2024 — `ex-boom` drops ZERO points, fits a line
+//      byte-identical to `full`, and still arrives labeled "excluding the 2021–2022
+//      run-up". A reader concludes the series covered the boom and we stripped it out.
+//      It didn't, and we didn't: the label outruns the data, one window over from
+//      rule 2. So when `ex-boom` excludes nothing it is DROPPED — it is merely `full`
+//      under a misleading name, and `full` is already on the menu.
+//
+//   4. A POINT FROM THE FUTURE. The whole menu is "as of asOf". A point dated LATER
+//      than asOf belongs in NO window — it would inflate "last 12 months" with data
+//      the label says isn't there, and quietly move `full`'s end date past the as-of
+//      we published. Every window is clipped to asOf first — `full` and `ex-boom`
+//      included, because "as of X" means AS OF X.
 //
 // The comparison ACROSS these windows is code's job, not the model's — that verdict
 // lands in a later task and appends to this module.
@@ -51,7 +66,18 @@ function monthsBack(asOf: Date, months: number): Date {
   return new Date(Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth() - months + 1, 1));
 }
 
-function select(points: readonly FitPoint[], w: FitWindow, asOf: Date): FitPoint[] {
+/**
+ * NOTHING LATER THAN `asOf` ENTERS ANY WINDOW. Run once, before selection, so every
+ * window — `full` and `ex-boom` included — inherits the clip. An Invalid Date has a
+ * NaN time and every comparison against it is false, so it drops out here too.
+ */
+function clipToAsOf(points: readonly FitPoint[], asOf: Date): FitPoint[] {
+  const limit = asOf.getTime();
+  return points.filter((p) => p && p.when instanceof Date && p.when.getTime() <= limit);
+}
+
+/** `points` is ALREADY clipped to asOf; `earliest` is their true minimum, hoisted. */
+function select(points: readonly FitPoint[], w: FitWindow, asOf: Date, earliest: Date): FitPoint[] {
   if (w === "ex-boom") {
     return points.filter((p) => !BOOM_YEARS.has(p.when.getUTCFullYear()));
   }
@@ -59,13 +85,13 @@ function select(points: readonly FitPoint[], w: FitWindow, asOf: Date): FitPoint
 
   const months = TRAILING_MONTHS[w];
   const cut = monthsBack(asOf, months);
-  if (points.length === 0) return [];
   // THE REACH-BACK RULE. A trailing window may only be OFFERED when the data actually
   // reaches back to its cut date. Otherwise an 18-month fit ships labeled "last 10
   // years" — the window's name would be doing the lying. Returning no points here lets
   // the MIN_FIT_POINTS floor below drop the window from the menu entirely.
-  // Not sorted-safe by assumption: take the true minimum, never points[0].
-  const earliest = points.reduce((m, p) => (p.when < m ? p.when : m), points[0].when);
+  // STRICTLY greater: a series whose earliest point lands EXACTLY on the cut DOES
+  // reach back to it, and must keep the window. `>=` here would silently delete the
+  // 12m window from every series that starts precisely twelve months out.
   if (earliest > cut) return [];
   return points.filter((p) => p.when >= cut);
 }
@@ -91,15 +117,28 @@ function labelFor(w: FitWindow): string {
 /**
  * Fit every window the series HONESTLY EARNS.
  *
- * A window is offered only when it has at least MIN_FIT_POINTS points AND (if it is a
- * trailing window) the series reaches back to its cut date. Everything else is dropped
- * from the menu — a thin or short-reaching window is worse than no window, because it
- * arrives wearing a label that outruns its data.
+ * A window is offered only when it has at least MIN_FIT_POINTS points, AND (if it is a
+ * trailing window) the series reaches back to its cut date, AND (if it is `ex-boom`) it
+ * actually excluded something. Everything else is dropped from the menu — a thin, a
+ * short-reaching, or an excluded-nothing window is worse than no window, because it
+ * arrives wearing a label that outruns its data. Nothing dated after `asOf` is fitted.
  */
 export function fitWindows(points: readonly FitPoint[], asOf: Date): WindowFit[] {
+  const inScope = clipToAsOf(points, asOf);
+  if (inScope.length === 0) return [];
+
+  // Hoisted: ONE pass for the reach-back rule, not one per trailing window.
+  // Not sorted-safe by assumption — take the true minimum, never inScope[0].
+  const earliest = inScope.reduce((m, p) => (p.when < m ? p.when : m), inScope[0].when);
+
   const out: WindowFit[] = [];
   for (const w of FIT_WINDOWS) {
-    const sel = select(points, w, asOf);
+    const sel = select(inScope, w, asOf, earliest);
+    // AN EXCLUSION THAT EXCLUDED NOTHING IS A LIE. If this series never spanned the
+    // boom, `ex-boom` dropped zero points and is byte-identical to `full` — but wears
+    // a label claiming we removed a run-up that was never in the data. `full` already
+    // says this, honestly. Drop the impostor.
+    if (w === "ex-boom" && sel.length === inScope.length) continue;
     if (sel.length < MIN_FIT_POINTS) continue; // dropped, not drawn
     const fit = fitLine(sel);
     if (!fit) continue;
