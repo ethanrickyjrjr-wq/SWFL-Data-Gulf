@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { fitWindows, FIT_WINDOWS } from "./series-fit";
-import type { FitPoint } from "./fit-line";
+import { fitWindows, FIT_WINDOWS, trendVerdict } from "./series-fit";
+import type { WindowFit } from "./series-fit";
+import type { Fit, FitPoint } from "./fit-line";
 
 /** Monthly points from 06/2015 through 05/2026 on a line, as our real series run. */
 function monthly(from: Date, n: number, base: number, slope: number): FitPoint[] {
@@ -121,5 +122,112 @@ describe("fitWindows", () => {
   it("never throws on an empty or tiny series", () => {
     expect(() => fitWindows([], AS_OF)).not.toThrow();
     expect(fitWindows([], AS_OF)).toEqual([]);
+  });
+});
+
+/** Build a WindowFit from the REAL numbers computed on the lake 07/13/2026. */
+function wf(
+  window: WindowFit["window"],
+  slope: number,
+  r2: number,
+  n: number,
+  ci: [number, number],
+): WindowFit {
+  const fit: Fit = {
+    slope,
+    intercept: 0,
+    r2,
+    n,
+    se: 0,
+    ci,
+    established: ci[0] > 0 || ci[1] < 0,
+    tight: r2 >= 0.7,
+    from: "06/30/2015",
+    to: "05/31/2026",
+    at: () => 0,
+  };
+  return { window, label: String(window), fit };
+}
+
+describe("trendVerdict — the comparison is CODE's job, never the model's", () => {
+  it("CAPE CORAL -> plateau (long-run up; the last 24 months establish NOTHING)", () => {
+    const v = trendVerdict([
+      wf("full", 1931, 0.787, 132, [1755, 2107]),
+      wf("ex-boom", 1802, 0.882, 108, [1674, 1930]),
+      wf("5y", -472, 0.105, 60, [-833, -111]),
+      wf("24m", -619, 0.151, 24, [-1245, 7]), // CONTAINS ZERO
+      wf("12m", 1395, 0.205, 12, [-343, 3132]),
+    ])!;
+    expect(v.kind).toBe("plateau");
+    expect(v.tight).toBe(true);
+    // The recent slope's SIGN may not be read: its interval crosses zero.
+    expect(v.claim.sentence).not.toContain("619");
+  });
+
+  it("LEHIGH ACRES -> reversed (eleven years up; two years down HARD, both strong)", () => {
+    const v = trendVerdict([
+      wf("full", 1979, 0.887, 132, [1855, 2103]),
+      wf("ex-boom", 1923, 0.908, 108, [1804, 2042]),
+      wf("5y", 740, 0.213, 60, [366, 1113]),
+      wf("24m", -1844, 0.843, 24, [-2183, -1504]), // established, OPPOSITE
+      wf("12m", -1977, 0.694, 12, [-2808, -1146]),
+    ])!;
+    expect(v.kind).toBe("reversed");
+    expect(v.tight).toBe(true);
+  });
+
+  it("SANIBEL -> plateau, LOOSE (direction IS solid; the FIT is not)", () => {
+    const v = trendVerdict([
+      wf("full", 3446, 0.334, 131, [2590, 4302]),
+      wf("ex-boom", 3055, 0.423, 108, [2361, 3748]),
+      wf("5y", -2384, 0.041, 59, [-5435, 667]),
+      wf("24m", 317, 0.0, 24, [-9734, 10368]), // establishes nothing
+      wf("12m", 13899, 0.072, 12, [-17557, 45355]),
+    ])!;
+    expect(v.kind).toBe("plateau");
+    // "noisy" and "no direction" are DIFFERENT claims. Sanibel's direction is real.
+    expect(v.tight).toBe(false);
+  });
+
+  it("no-direction when the LONG window establishes nothing", () => {
+    const v = trendVerdict([
+      wf("full", 120, 0.01, 132, [-400, 640]), // CI contains zero
+      wf("24m", 50, 0.0, 24, [-900, 1000]),
+    ])!;
+    expect(v.kind).toBe("no-direction");
+  });
+
+  it("intact when CURRENT agrees with LONG", () => {
+    const v = trendVerdict([
+      wf("ex-boom", 1800, 0.88, 108, [1670, 1930]),
+      wf("24m", 1500, 0.75, 24, [1100, 1900]), // same sign, established
+    ])!;
+    expect(v.kind).toBe("intact");
+  });
+
+  it("returns null when there is no LONG window at all", () => {
+    expect(trendVerdict([])).toBeNull();
+    expect(trendVerdict([wf("24m", 100, 0.9, 24, [50, 150])])).toBeNull();
+  });
+
+  it("THE LICENSE: the verdict is a SettledClaim the claim gate already honors", () => {
+    const v = trendVerdict([
+      wf("ex-boom", 1802, 0.882, 108, [1674, 1930]),
+      wf("24m", -619, 0.151, 24, [-1245, 7]),
+    ])!;
+    // Same shape as compareToSet/settledCount: a sentence + its numeral anchors.
+    expect(typeof v.claim.sentence).toBe("string");
+    expect(Array.isArray(v.claim.anchors)).toBe(true);
+    // Every numeral in the sentence is anchored, so no unanchored-number violation.
+    expect(v.claim.anchors.length).toBeGreaterThan(0);
+  });
+
+  it("THE FALSIFIER IS COMPUTED, never a blank for the model to fill", () => {
+    const v = trendVerdict([
+      wf("ex-boom", 1802, 0.882, 108, [1674, 1930]),
+      wf("24m", -619, 0.151, 24, [-1245, 7]),
+    ])!;
+    expect(Number.isFinite(v.falsifier.value)).toBe(true);
+    expect(v.falsifier.sentence.length).toBeGreaterThan(0);
   });
 });

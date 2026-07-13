@@ -35,9 +35,10 @@
 //      we published. Every window is clipped to asOf first — `full` and `ex-boom`
 //      included, because "as of X" means AS OF X.
 //
-// The comparison ACROSS these windows is code's job, not the model's — that verdict
-// lands in a later task and appends to this module.
+// The comparison ACROSS these windows is code's job, not the model's — see
+// `trendVerdict` at the foot of this module.
 
+import { numeralsIn, type SettledClaim } from "@/lib/deliverable/claims";
 import { fitLine, MIN_FIT_POINTS, type Fit, type FitPoint } from "./fit-line";
 
 export const FIT_WINDOWS = ["full", "10y", "5y", "24m", "12m", "ex-boom"] as const;
@@ -145,4 +146,111 @@ export function fitWindows(points: readonly FitPoint[], asOf: Date): WindowFit[]
     out.push({ window: w, label: labelFor(w), fit });
   }
   return out;
+}
+
+export type VerdictKind = "intact" | "reversed" | "plateau" | "no-direction";
+
+export interface Verdict {
+  kind: VerdictKind;
+  /** R² of the LONG window >= TIGHT_R2. "Loose" ≠ "no direction". */
+  tight: boolean;
+  long: WindowFit;
+  current: WindowFit | null;
+  /**
+   * THE LICENSE. A settled sentence — the same shape `compareToSet` and
+   * `settledCount` return. `auditClaims` lets a trajectory through ONLY as a
+   * verbatim restatement of a settled sentence, so handing this to the narrator
+   * is what permits it to say "climbing" at all. A trajectory the model invents
+   * on its own still dies in the gate. NO CHANGE TO claims.ts IS NEEDED.
+   */
+  claim: SettledClaim;
+  /** Computed, never a blank. A spec that asks the model for a number is a lie. */
+  falsifier: { value: number; sentence: string };
+}
+
+const usd0 = (n: number) => `$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
+
+/**
+ * The comparison across windows — COMPUTED. The model never sees the window table
+ * and therefore cannot draw its own trajectory between rows of it. (sphere-weekly
+ * wrote "the gap is widening" from a single level; that is the failure this stops.)
+ *
+ * LONG    = ex-boom if present, else full.
+ * CURRENT = 24m, fixed. 12m's interval establishes almost nothing; 5y is not "now".
+ *
+ * A window whose CI contains zero has NO READABLE DIRECTION. Its sign is never used.
+ */
+export function trendVerdict(fits: readonly WindowFit[]): Verdict | null {
+  const long = fits.find((f) => f.window === "ex-boom") ?? fits.find((f) => f.window === "full");
+  if (!long) return null;
+
+  const current = fits.find((f) => f.window === "24m") ?? null;
+  const tight = long.fit.tight;
+  const dir = (n: number) => (n > 0 ? "up" : "down");
+
+  // The LONG window doesn't establish a direction → we say nothing about direction.
+  if (!long.fit.established) {
+    const sentence =
+      `Over the ${long.label} this series does not follow a straight line — ` +
+      `its trend is not statistically distinguishable from flat.`;
+    return {
+      kind: "no-direction",
+      tight,
+      long,
+      current,
+      claim: { sentence, anchors: numeralsIn(sentence) },
+      falsifier: {
+        value: 0,
+        sentence: `A direction becomes readable only once a fitted slope's 95% interval clears zero.`,
+      },
+    };
+  }
+
+  const longRate = `${usd0(long.fit.slope)} a month`;
+  const longDir = dir(long.fit.slope);
+  const climb = longDir === "up" ? "climbing" : "falling";
+
+  let kind: VerdictKind;
+  let sentence: string;
+
+  if (!current || !current.fit.established) {
+    // PLATEAU — the long run is real; the recent window establishes NOTHING. We may
+    // not read the recent slope's sign at all, so it is absent from the sentence.
+    kind = "plateau";
+    sentence =
+      `Across the ${long.label} this market has been ${climb} ${longRate} ` +
+      `(${long.fit.from} to ${long.fit.to}). The last 24 months do not establish a ` +
+      `direction either way — that is a plateau, not a turn.`;
+  } else if (dir(current.fit.slope) === longDir) {
+    kind = "intact";
+    sentence =
+      `Across the ${long.label} this market has been ${climb} ${longRate}, and the ` +
+      `last 24 months are still ${climb}, at ${usd0(current.fit.slope)} a month.`;
+  } else {
+    kind = "reversed";
+    const nowDir = dir(current.fit.slope) === "up" ? "climbing" : "falling";
+    sentence =
+      `Across the ${long.label} this market was ${climb} ${longRate}. Over the last ` +
+      `24 months it has been ${nowDir}, at ${usd0(current.fit.slope)} a month. ` +
+      `The direction has turned.`;
+  }
+
+  // THE FALSIFIER, COMPUTED. The long-run line's own lower bound is the number the
+  // next print must clear for the trend to hold.
+  const bound = longDir === "up" ? long.fit.ci[0] : long.fit.ci[1];
+  const falsifier = {
+    value: bound,
+    sentence:
+      `This read breaks if the next two months move against the fitted line by more ` +
+      `than ${usd0(bound)} a month.`,
+  };
+
+  return {
+    kind,
+    tight,
+    long,
+    current,
+    claim: { sentence, anchors: numeralsIn(sentence) },
+    falsifier,
+  };
 }
