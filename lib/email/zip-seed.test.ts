@@ -39,6 +39,7 @@ function sig(over: Partial<RankedSignal>): RankedSignal {
 // Mutable fixtures the mocks read — reset per test.
 let signalsFixture: RankedZipSignals | null;
 let lifecycleFixture: MarketFigure | null;
+let narrativeFixture: unknown = null;
 let helperCalls: { zip: string; opts: unknown }[] = [];
 
 mock.module("../zip-report/load-ranked-signals", () => ({
@@ -46,6 +47,10 @@ mock.module("../zip-report/load-ranked-signals", () => ({
     helperCalls.push({ zip, opts });
     return Promise.resolve(signalsFixture);
   },
+}));
+
+mock.module("../narratives/store", () => ({
+  loadNarrative: () => Promise.resolve(narrativeFixture),
 }));
 
 // Spread the REAL module — a partial mock leaks process-wide in bun on Linux CI:
@@ -121,6 +126,7 @@ beforeEach(() => {
     source: "SWFL Data Gulf",
     as_of: "07/02/2026",
   } as MarketFigure;
+  narrativeFixture = null; // default: NOT yet baked → code-composed fallback
 });
 
 describe("buildZipSeedDoc", () => {
@@ -183,13 +189,82 @@ describe("buildZipSeedDoc", () => {
     expect(doc!.globalStyle.primaryColor).toBe("#1F2937");
   });
 
-  test("commentary prose carries NO digits", async () => {
+  test("UNBAKED ZIP → code-composed fallback commentary, prose carries NO digits", async () => {
     const doc = await buildZipSeedDoc("33914");
     // the commentary text block sits before the sources text block
     const texts = doc!.blocks.filter((b) => b.type === "text");
     const commentary = texts[0].props as { body: string };
     expect(commentary.body).not.toMatch(/\d/);
     expect(commentary.body.toLowerCase()).toContain("cape coral");
+  });
+
+  // The AI's read of the page IS the email's commentary (operator 07/13/2026: "the AI
+  // is the builder" — stop hand-composing one sad sentence in code). Baked narration
+  // legitimately CARRIES digits: it restates held figures verbatim, and the bake's own
+  // no-invention validator is what guarantees they're real. So the digit-free rule
+  // governs the code-composed fallback ONLY — never the baked read.
+  describe("baked narration", () => {
+    const NARRATION =
+      "Cape Coral's flood exposure is what sets it apart right now, at $4.2K a year per home " +
+      "— third-highest of 57 ZIPs we track. Median home value sits at $421K, down 2.1% from a " +
+      "year ago, and the market has been busy: 41 price cuts and 28 new listings in the last 30 days.";
+
+    beforeEach(() => {
+      narrativeFixture = {
+        surface: "zip",
+        surface_key: "33914",
+        sections: {
+          narration: NARRATION,
+          outlook: [
+            {
+              text: "[INFERENCE] Price cuts at this pace could keep values soft into the fall.",
+              base: "41 price cuts in the last 30 days",
+              falsifier: "cuts falling below 20 in a 30-day window",
+            },
+          ],
+        },
+        inputs_hash: "h",
+        sources: [],
+        model: "claude-sonnet-4-6",
+        baked_at: "2026-07-13T00:00:00Z",
+      };
+    });
+
+    test("the baked read REPLACES the hand-composed sentence", async () => {
+      const doc = await buildZipSeedDoc("33914");
+      const commentary = doc!.blocks.filter((b) => b.type === "text")[0].props as { body: string };
+      expect(commentary.body).toBe(NARRATION);
+      expect(commentary.body).not.toContain("the figure that most sets");
+    });
+
+    test("the read gets room to breathe — taller than the one-line fallback", async () => {
+      const baked = await buildZipSeedDoc("33914");
+      const bakedH = baked!.blocks.filter((b) => b.type === "text")[0].layout!.h;
+      narrativeFixture = null;
+      const unbaked = await buildZipSeedDoc("33914");
+      const fallbackH = unbaked!.blocks.filter((b) => b.type === "text")[0].layout!.h;
+      expect(bakedH).toBeGreaterThan(fallbackH);
+    });
+
+    test("the outlook rides in as a Down the road block, carrying its falsifier", async () => {
+      const doc = await buildZipSeedDoc("33914");
+      const signals = doc!.blocks.filter((b) => b.type === "signal");
+      const outlook = signals.find(
+        (b) => (b.props as { title?: string }).title === "Down the road",
+      );
+      const body = (outlook!.props as { body: string }).body;
+      expect(body).toContain("[INFERENCE]");
+      expect(body).toContain("cuts falling below 20");
+    });
+
+    test("no outlook items → no Down the road block (never an empty box)", async () => {
+      (narrativeFixture as { sections: { outlook: unknown[] } }).sections.outlook = [];
+      const doc = await buildZipSeedDoc("33914");
+      const titles = doc!.blocks
+        .filter((b) => b.type === "signal")
+        .map((b) => (b.props as { title?: string }).title);
+      expect(titles).not.toContain("Down the road");
+    });
   });
 
   test("shape not found → no image block, identity hero full width", async () => {

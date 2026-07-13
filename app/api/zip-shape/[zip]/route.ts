@@ -25,9 +25,22 @@
 // day-to-day; a different `?fill=` is a different cached URL.
 
 import { NextResponse } from "next/server";
-import { extractZipShape } from "@/lib/map/extract-zip-shape";
+import { extractPlaceShape } from "@/lib/map/extract-zip-shape";
 
 export const runtime = "nodejs";
+
+/** A place is a SET of ZIPs (Cape Coral is six, not one — operator 07/13/2026), so
+ *  the path segment accepts a comma-joined list and renders them as one silhouette.
+ *  A bare 5-digit ZIP is just the one-element case — every existing caller is
+ *  unchanged. Capped so a hand-typed URL can't fan out into an unbounded parse. */
+const MAX_ZIPS = 16;
+
+export function parseZipParam(raw: string): string[] | null {
+  const zips = raw.split(",").map((z) => z.trim());
+  if (zips.length === 0 || zips.length > MAX_ZIPS) return null;
+  if (!zips.every((z) => /^\d{5}$/.test(z))) return null;
+  return [...new Set(zips)];
+}
 
 const W = 800;
 const H = 520;
@@ -61,12 +74,13 @@ function cardSvg(inner: string, viewBox: string, fill: string): string {
 
 export async function GET(req: Request, { params }: { params: Promise<{ zip: string }> }) {
   const { zip } = await params;
-  if (!/^\d{5}$/.test(zip)) {
+  const zips = parseZipParam(zip);
+  if (!zips) {
     return NextResponse.json({ error: "invalid_zip" }, { status: 400 });
   }
   const fill = safeFill(new URL(req.url).searchParams.get("fill"));
 
-  const { svgMarkup, found } = extractZipShape(zip);
+  const { svgMarkup, found } = extractPlaceShape(zips);
   if (!found) return NextResponse.json({ error: "unknown_zip" }, { status: 404 });
 
   const vbMatch = svgMarkup.match(/viewBox="([^"]+)"/);

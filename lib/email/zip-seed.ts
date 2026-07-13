@@ -32,6 +32,7 @@ import { NEUTRAL_SKELETON_STYLE } from "./doc/skeleton-style";
 import type { BlockLayout, BlockOf, BlockPropsMap, BlockType, EmailDoc } from "./doc/types";
 import { loadLifecycleDigest } from "./market-context";
 import { loadRankedZipSignals } from "../zip-report/load-ranked-signals";
+import { loadNarrative } from "../narratives/store";
 import type { RankedSignal } from "../zip-report/signal-rank";
 
 /** Seed-style grid block: default props + overrides + a grid layout (every block
@@ -65,11 +66,14 @@ function siteBase(): string {
 export async function buildZipSeedDoc(zip: string): Promise<EmailDoc | null> {
   if (!/^\d{5}$/.test(zip)) return null;
 
-  // Parallel pulls: the ranked-signal pool (same as the webpage) + the lifecycle
-  // "what just moved" digest. Each is empty-tolerant.
-  const [signals, lifecycle] = await Promise.all([
+  // Parallel pulls: the ranked-signal pool (same as the webpage), the lifecycle
+  // "what just moved" digest, and the BAKED NARRATION — the AI's read of this very
+  // ZIP, written from the same assembly root the report page renders
+  // (lib/narratives/zip-inputs.ts → assembleZipReport). Each is empty-tolerant.
+  const [signals, lifecycle, narrative] = await Promise.all([
     loadRankedZipSignals(zip, { censusPolicy: "income-only" }),
     loadLifecycleDigest({ kind: "zip", value: zip }),
+    loadNarrative("zip", zip),
   ]);
 
   if (!signals || signals.ranked.length === 0) return null;
@@ -124,26 +128,42 @@ export async function buildZipSeedDoc(zip: string): Promise<EmailDoc | null> {
     y += 4;
   }
 
-  // ── Commentary (digit-free): names the signal that most sets this ZIP apart,
-  // never its number — the number already rides the card. Composed in code (no
-  // LLM call); a fuller "what it means" paragraph is what the visitor gets by
-  // opening/editing the doc in the Email Lab (AI-patch path, unchanged). ──
-  // Skip candidates whose extremity is a known Census artifact (institutional-
-  // population ZIP), not a real distinguishing condition — see census-values.ts.
-  const lead = ranked.find((s) => s.leadEligible !== false);
-  const leadTopic = lead
-    ? lead.label
-        .replace(/\([^)]*\)/g, "") // drop "(90 Days)" etc — no digits in prose
-        .replace(/[0-9]/g, "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase()
-    : "";
-  const commentary = leadTopic
-    ? `Right now, the figure that most sets ${placeLabel} apart is its ${leadTopic}.`
-    : `Here's where ${placeLabel} stands this week — every figure below is pulled live and cited.`;
-  blocks.push(gblk("text", { x: 0, y, w: 12, h: 2 }, { body: commentary, align: "left" }));
-  y += 2;
+  // ── Commentary — THE AI'S READ OF THIS ZIP. ────────────────────────────────
+  // The narration is the SAME text the report page renders: baked by the writer in
+  // lib/narratives/ from `assembleZipReport` — the one assembly root this email's
+  // cards also come from — so the email can never say something the page doesn't.
+  // Every figure in it is a held value restated verbatim (the bake's no-invention
+  // validator enforces that); it costs ZERO tokens here (a read, not a call), so a
+  // drive-by map click stays free.
+  //
+  // FALLBACK when a ZIP hasn't been baked yet: the old code-composed sentence —
+  // digit-free, names the leading signal, never its number. Skips candidates whose
+  // extremity is a Census artifact or a trace count (leadEligible: false — see
+  // census-values.ts and signal-rank.ts's sampleThin).
+  const narration = narrative?.sections?.narration?.trim();
+  let commentary: string;
+  if (narration) {
+    commentary = narration;
+  } else {
+    const lead = ranked.find((s) => s.leadEligible !== false);
+    const leadTopic = lead
+      ? lead.label
+          .replace(/\([^)]*\)/g, "") // drop "(90 Days)" etc — no digits in prose
+          .replace(/[0-9]/g, "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase()
+      : "";
+    commentary = leadTopic
+      ? `Right now, the figure that most sets ${placeLabel} apart is its ${leadTopic}.`
+      : `Here's where ${placeLabel} stands this week — every figure below is pulled live and cited.`;
+  }
+  // A ~200-word read needs room; the one-line fallback doesn't.
+  const commentaryH = narration ? 8 : 2;
+  blocks.push(
+    gblk("text", { x: 0, y, w: 12, h: commentaryH }, { body: commentary, align: "left" }),
+  );
+  y += commentaryH;
 
   // ── Market motion — the lifecycle digest sentence (a held, cited value). ──
   if (lifecycle) {
@@ -160,6 +180,23 @@ export async function buildZipSeedDoc(zip: string): Promise<EmailDoc | null> {
       ),
     );
     y += 4;
+  }
+
+  // ── Down the road — the baked outlook, same items the page shows. Each one is
+  // already tagged [INFERENCE], hedged, and carries the audited base figure it
+  // stands on plus a falsifier (enforced by lib/narratives/validate.ts) — so this
+  // rides into the inbox under the same no-invention contract as everything else. ──
+  const outlook = narrative?.sections?.outlook ?? [];
+  if (outlook.length > 0) {
+    const body = outlook.map((o) => `${o.text} Watch for: ${o.falsifier}`).join("\n\n");
+    blocks.push(
+      gblk(
+        "signal",
+        { x: 0, y, w: 12, h: 5 },
+        { kicker: "Looking ahead", title: "Down the road", body },
+      ),
+    );
+    y += 5;
   }
 
   // ── Sources + CTA + footer ────────────────────────────────────────────────

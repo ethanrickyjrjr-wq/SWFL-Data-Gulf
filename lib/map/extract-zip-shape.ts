@@ -195,25 +195,54 @@ export interface ZipShapeResult {
   found: boolean;
 }
 
+/** Wrap one or more already-extracted ZIP groups in a viewBox fitted to ALL of
+ *  them — the shared tail of the single-ZIP and whole-place paths. */
+function shapeFromGroups(groups: string[]): ZipShapeResult {
+  if (groups.length === 0) return { svgMarkup: "", found: false };
+  const merged = groups.join("");
+
+  const { minX, minY, maxX, maxY } = parseBounds(merged);
+  const w = maxX - minX;
+  const h = maxY - minY;
+  // Pad by 15% of the larger dimension, min 20 units
+  const pad = Math.max(20, Math.max(w, h) * 0.15);
+  const vb = `${minX - pad} ${minY - pad} ${w + pad * 2} ${h + pad * 2}`;
+
+  // Strip classes/styles — the page CSS applies all visual treatment
+  const cleaned = merged.replace(/\sclass="[^"]*"/g, "").replace(/\sstyle="[^"]*"/g, "");
+
+  const svgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" aria-hidden="true">${cleaned}</svg>`;
+  return { svgMarkup, found: true };
+}
+
+function readMapSvg(): string {
+  return fs.readFileSync(path.join(process.cwd(), "public", "map", "lee-collier.svg"), "utf-8");
+}
+
 export function extractZipShape(zip: string): ZipShapeResult {
   try {
-    const svgPath = path.join(process.cwd(), "public", "map", "lee-collier.svg");
-    const full = fs.readFileSync(svgPath, "utf-8");
-    const group = extractGroupContent(full, zip);
+    const group = extractGroupContent(readMapSvg(), zip);
     if (!group) return { svgMarkup: "", found: false };
+    return shapeFromGroups([group]);
+  } catch {
+    return { svgMarkup: "", found: false };
+  }
+}
 
-    const { minX, minY, maxX, maxY } = parseBounds(group);
-    const w = maxX - minX;
-    const h = maxY - minY;
-    // Pad by 15% of the larger dimension, min 20 units
-    const pad = Math.max(20, Math.max(w, h) * 0.15);
-    const vb = `${minX - pad} ${minY - pad} ${w + pad * 2} ${h + pad * 2}`;
-
-    // Strip classes/styles — the page CSS applies all visual treatment
-    const cleaned = group.replace(/\sclass="[^"]*"/g, "").replace(/\sstyle="[^"]*"/g, "");
-
-    const svgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" aria-hidden="true">${cleaned}</svg>`;
-    return { svgMarkup, found: true };
+/**
+ * The cutout for a WHOLE PLACE — every ZIP the place spans, drawn as one
+ * silhouette in a single viewBox fitted to their combined bounds. Cape Coral is
+ * six ZIPs, not one (operator, 07/13/2026: a place deliverable shows the place,
+ * never a lone ZIP). A ZIP the contractor map doesn't hold is skipped, never
+ * faked; `found` is false only when NONE resolve.
+ */
+export function extractPlaceShape(zips: string[]): ZipShapeResult {
+  try {
+    const svg = readMapSvg();
+    const groups = zips
+      .map((z) => extractGroupContent(svg, z))
+      .filter((g): g is string => g !== null);
+    return shapeFromGroups(groups);
   } catch {
     return { svgMarkup: "", found: false };
   }
