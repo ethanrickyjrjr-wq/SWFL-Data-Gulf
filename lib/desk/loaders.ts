@@ -526,6 +526,34 @@ function soldAnchorDatum(sold: Map<string, SeriesPoint[]>, cityKey: string): Des
   };
 }
 
+/** Comparison tab reads up to this many trailing months of the SOLD series —
+ *  real per-city history already in the lake (redfin_city_swfl), so "% since
+ *  start" means something instead of a 2-day flat line off the brand-new
+ *  daily asking lane. */
+const REBASE_TRAILING_MONTHS = 12;
+
+function buildRebaseFromSold(sold: Map<string, SeriesPoint[]>): HeroData["rebase"] {
+  const cities: NonNullable<HeroData["rebase"]>["cities"] = [];
+  for (const def of CITY_DEFS) {
+    const points = (sold.get(def.key) ?? []).slice(-REBASE_TRAILING_MONTHS);
+    if (points.length < 2) continue;
+    cities.push({
+      key: def.key,
+      label: def.label,
+      color: def.color,
+      points: points.map((p) => ({ date: p.period, value: p.value })),
+    });
+  }
+  if (cities.length === 0) return undefined;
+  const n = Math.max(...cities.map((c) => c.points.length));
+  const first = cities[0].points[0]?.date;
+  return {
+    cities,
+    sourceLabel: "redfin.com",
+    windowNote: `${n} monthly closed-sale medians per city since ${mdY(first) ?? "the trailing window"} — the daily asking line above is too fresh to show a real trend yet, so this comparison rides the deeper sold-price history instead`,
+  };
+}
+
 function buildHeroFromAsking(
   truth: TruthSeries,
   sold: Map<string, SeriesPoint[]>,
@@ -564,6 +592,7 @@ function buildHeroFromAsking(
     asOf: cities[0].latest.asOf,
     sourceLabel: SPINE_SOURCE,
     windowNote: `${n} daily asking readings since ${mdY(first) ?? "the window opened"} — live active-listing medians (asking, not sold); the closed-sale anchor steps monthly`,
+    rebase: buildRebaseFromSold(sold),
   };
 }
 

@@ -13,16 +13,19 @@ import type { HeroData } from "@/lib/desk/types";
 
 const UP = "#5bc97a"; // mangrove
 const DOWN = "#e08158"; // sunset-coral
+/** Matches lib/desk/loaders.ts REBASE_TRAILING_MONTHS — display copy only. */
+const REBASE_MONTHS_LABEL = "year";
 
 const usdFull = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
 const pct1 = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
 
 /**
  * Hero — big count-up price over a gradient area of the same series. Tabs pick
- * a city; the last tab rebases all three to % change from the window's first
- * reading (0 = day-0 baseline), so a short window honestly reads as "who's
- * outperforming" rather than faking depth. All values arrive SSR'd from the
- * server; NumberFlow only animates what the server already rendered.
+ * a city; the last tab rebases all three to % change from the comparison
+ * window's first reading. That window is `hero.rebase` (a full trailing year
+ * of monthly sold prices) when the daily asking lane is too new to trend on
+ * its own — never the 2-day asking series itself. All values arrive SSR'd
+ * from the server; NumberFlow only animates what the server already rendered.
  */
 export function DeskHero({ hero }: { hero: HeroData }) {
   const [tab, setTab] = useState<string>(hero.cities[0]?.key ?? "rebased");
@@ -37,9 +40,11 @@ export function DeskHero({ hero }: { hero: HeroData }) {
     [active],
   );
 
+  const rebaseCities = hero.rebase?.cities ?? hero.cities;
+
   const rebasedRows = useMemo(() => {
-    if (hero.cities.length === 0) return [];
-    const perCity = hero.cities.map((c) => ({
+    if (rebaseCities.length === 0) return [];
+    const perCity = rebaseCities.map((c) => ({
       key: c.key,
       series: rebaseFromFirst(c.points.map((p) => ({ period: p.date, value: p.value }))),
     }));
@@ -53,7 +58,7 @@ export function DeskHero({ hero }: { hero: HeroData }) {
       }
     }
     return [...byDate.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, row]) => row);
-  }, [hero.cities]);
+  }, [rebaseCities]);
 
   if (hero.cities.length === 0) return null;
 
@@ -89,7 +94,7 @@ export function DeskHero({ hero }: { hero: HeroData }) {
               : "border-[#22414f] text-gray-500 hover:text-gray-300"
           }`}
         >
-          % since start
+          {hero.rebase ? `% over the ${REBASE_MONTHS_LABEL}` : "% since start"}
         </button>
       </div>
 
@@ -146,20 +151,20 @@ export function DeskHero({ hero }: { hero: HeroData }) {
       ) : (
         <div>
           <h3 className="text-xs uppercase tracking-wider text-gray-500">
-            Change since{" "}
-            {hero.windowNote.toLowerCase().includes("monthly") ? "the window opened" : "day 0"} —
-            all three cities
+            {hero.rebase
+              ? `Change over the trailing ${REBASE_MONTHS_LABEL} — all three cities`
+              : `Change since ${hero.windowNote.toLowerCase().includes("monthly") ? "the window opened" : "day 0"} — all three cities`}
           </h3>
           <div className="mt-4">
             <LineChart data={rebasedRows} xDataKey="date" aspectRatio="3 / 1">
               <Grid horizontal />
-              {hero.cities.map((c) => (
+              {rebaseCities.map((c) => (
                 <Line key={c.key} dataKey={c.key} stroke={c.color} strokeWidth={2} />
               ))}
               <XAxis />
               <ChartTooltip
                 rows={(point) =>
-                  hero.cities.map((c) => ({
+                  rebaseCities.map((c) => ({
                     color: c.color,
                     label: c.label,
                     value: pct1(typeof point[c.key] === "number" ? (point[c.key] as number) : 0),
@@ -170,7 +175,9 @@ export function DeskHero({ hero }: { hero: HeroData }) {
           </div>
         </div>
       )}
-      <p className="mt-3 text-xs text-gray-500">{hero.windowNote}</p>
+      <p className="mt-3 text-xs text-gray-500">
+        {tab === "rebased" ? (hero.rebase?.windowNote ?? hero.windowNote) : hero.windowNote}
+      </p>
     </div>
   );
 }

@@ -1,3 +1,23 @@
+## 2026-07-13 (Sonnet 5 · main) — /desk hero "% since start" no longer rides a 2-day-old series
+
+Operator, furious: hero chart flat/"1 day difference", Cape Coral missing from the rebased tab despite
+showing blue in the key. Root-caused both to one fact, verified live against `data_lake.daily_truth`:
+`median_asking_price` only has 2 rows per city (07/11 pipeline swap in `58704d85` retired the 19-day
+NULL-only `median_sale_price`, per operator-approved 07/11 dual-signal spec — traced start to finish in
+this file, not an unauthorized touch). At n=2, Fort Myers is exactly flat (0.00%) and Cape Coral is
+-0.00025% — visually identical, and Fort Myers draws second so it fully occludes Cape Coral's line
+(confirmed via zoomed screenshot: the visible flat line is green, not teal). Operator's call: don't gate
+the tab, go find the year of real data instead — it was already sitting unused in the lake.
+Fix: `hero.rebase` (new optional field, `lib/desk/types.ts`) carries a trailing-12-month series built
+from `redfin_city_swfl` sold medians (`buildRebaseFromSold`, `lib/desk/loaders.ts`) — real per-city
+history already ingested (132-157 monthly rows per core city, back to ~2011-2015). `DeskHero.tsx`'s
+"% since start" tab (now "% over the year") reads `hero.rebase.cities` when present, falls back to the
+daily asking series otherwise (unaffected: the individual city tabs still show live daily asking price).
+Zero invented numbers — same lake, different series for a different purpose. Verified live: built,
+`bunx tsc --noEmit` clean, `mappers.test.ts` 22/22, `bun run build` green, served locally on :3910 against
+prod Supabase — all three cities now show distinct real lines with actual seasonal shape.
+Files: `lib/desk/types.ts`, `lib/desk/loaders.ts`, `app/desk/_components/DeskHero.tsx`. Pushed.
+
 ## 2026-07-13 (Opus 4.8 · main) — ALL 12 RECIPES BUILT. And the lesson: invention is CLAIM-shaped, not number-shaped.
 
 Operator: *"fan out an opus for each showcase… MAKE SURE EACH BUTTON CREATES THE SAME EXACT THING."*

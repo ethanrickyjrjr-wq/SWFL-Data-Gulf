@@ -68,6 +68,20 @@ export interface HeroData {
   sourceLabel: string;
   /** Honest window caption, e.g. "19 daily readings since 06/12/2026". */
   windowNote: string;
+  /** Longer-window basis for the "% since start" comparison tab, used ONLY
+   *  when `cities[].points` is too short (fresh daily lane) to read as a
+   *  trend — sourced from the deeper monthly sold history we already hold,
+   *  never invented. Absent → the comparison tab falls back to `cities`. */
+  rebase?: {
+    cities: Array<{
+      key: string;
+      label: string;
+      color: string;
+      points: Array<{ date: string; value: number }>;
+    }>;
+    sourceLabel: string;
+    windowNote: string;
+  };
 }
 
 /** One day of the Daily Market Pulse (from data_lake.listing_pulse_daily). */
