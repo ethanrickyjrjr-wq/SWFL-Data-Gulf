@@ -14,6 +14,17 @@ const AGENT_FIELDS = [
   "photo_url",
   "license",
   "brokerage",
+  // THE FIELD THAT WAS NEVER SAVED. The Brand panel has had a bio textarea
+  // (BrandingBlock.tsx), it maps to an AGENT_BIO token (branding-to-tokens.ts), and
+  // apply-brand.ts renders it onto the agent card — but `agent_bio` appeared NOWHERE in
+  // this file and no migration ever created the column. An agent typed their bio and the
+  // save silently dropped it: "type it once, we'll remember" was false for the bio.
+  // Column added by migrations/20260713_agent_profile.sql.
+  //
+  // What it stores is a TEMPLATE, not finished prose: the agent's own words plus live
+  // {{farm.*}} tokens, resolved at BUILD time (lib/brand/bio-tokens.ts). A market figure
+  // frozen into saved text is a lie with a delay — never store a resolved number here.
+  "agent_bio",
 ] as const;
 type AgentField = (typeof AGENT_FIELDS)[number];
 

@@ -106,10 +106,19 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
     movementText: "",
     // No barPct: a bar restates a held percentile — absent means no bar renders.
   },
+  // ⚠️ THE AI DELIBERATELY SKIPS BRAND BLOCKS — so whatever is defaulted here is what a
+  // RECIPIENT READS. `name`/`title`/`ctaLabel` are the HOUSE BRAND (real, sendable, per
+  // the 07/05/2026 ruling). But `bio` and `tagline` were LOREM INSTRUCTIONS ("A short bio
+  // that builds trust with your readers"), and nothing ever overwrote them: verified live
+  // on 07/13 — that exact sentence rendered into the SENT New Listing email, under the
+  // agent's own name. An instruction to the author is never copy for the reader.
+  //
+  // They are now "" — and the blocks already omit an empty line on the sendable paths
+  // (AgentCardBlock: `props.bio || scope`), so the gap simply closes.
   "agent-card": {
     name: HOUSE_BRAND.companyName,
     title: "Market Intelligence",
-    bio: "A short bio that builds trust with your readers.",
+    bio: "",
     phone: "",
     ctaLabel: "Get in touch",
   },
@@ -118,7 +127,7 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
     alt: "Agent photo",
     name: HOUSE_BRAND.companyName,
     designation: HOUSE_BRAND.tagline,
-    tagline: "Tell readers what makes you the right agent for them.",
+    tagline: "",
     ctaLabel: "Schedule a call",
     ctaUrl: "",
   },

@@ -49,6 +49,7 @@ import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { recipeByKey, recipeFromPrompt } from "@/lib/deliverable/recipes";
 import { builderFor } from "@/lib/deliverable/recipes/index";
 import { resolveSubject } from "@/lib/deliverable/recipes/shared";
+import { resolveDocBio } from "@/lib/brand/bio-tokens";
 import { fetchListingFacts, type ListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
 import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
@@ -1008,9 +1009,21 @@ export async function authorDoc({
         );
       }
       if (parsed.success) {
+        // THE AGENT'S BIO, RESOLVED LATE. The saved bio is a TEMPLATE — the agent's own
+        // words plus live {{farm.*}} tokens — because a market figure frozen into saved
+        // text is a lie with a delay: it rots inside the signature block of every email
+        // they send, under their name, and they will never go back and edit it. Resolving
+        // HERE means the figure is true the day it is sent, and it re-resolves forever.
+        // A bio with no tokens is untouched; an unresolvable one collapses to the agent's
+        // own words. Never a stray "{{...}}" to a recipient.
+        const withBio = await resolveDocBio(
+          parsed.data,
+          scope?.kind === "zip" ? { kind: "zip", value: scope.value } : undefined,
+        ).catch(() => ({ doc: parsed.data, citations: [] }));
+
         return {
           payload: {
-            doc: parsed.data,
+            doc: withBio.doc,
             applied: true,
             replacedLayout: true,
             ...(resolvedSubject
