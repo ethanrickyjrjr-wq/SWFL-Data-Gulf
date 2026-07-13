@@ -14,6 +14,75 @@ The single lesson that produced most of this list:
 
 ---
 
+## 0 — THE ACTUAL PRODUCT (operator, 07/13/2026 — this is the priority)
+
+**Nothing we have gets deleted.** Every design, recipe and layout that exists today STAYS as
+a **choice a user can pick.** The work below is ADDITIVE — more options, not different ones.
+
+### 0.1 Build the campaigns out FULLY, end to end
+
+**What.** A campaign is not a pile of emails a user builds one at a time. **The user schedules
+the FIRST one, and we take care of the rest.** They pick the campaign, give us the address,
+and the whole sequence — Coming Soon → New Listing → Open House → Price Improved → Market
+Comps → Under Contract → Just Sold — is authored, scheduled, and released at the right points
+in the sales process, automatically.
+
+**Why.** This is the product. Everything else is a component of it. Today a user gets one
+email per click and has to come back seven times. That is not "set it once."
+
+**Same design across the whole sequence.** All seven emails wear the ONE chrome
+(`lib/email/lifecycle-chrome.ts`): same ribbon band, same centred address-over-price, same
+hairline spec strip, same signature and footer. Only the ribbon WORD, the numbers, the middle
+content and the CTA change. **The user's brand rides through every email untouched**
+(`globalStyle` is sticky — the chrome is the SHAPE, the brand is the SKIN). Six emails
+arriving over six weeks must read as one campaign from one agent.
+
+**How.**
+- The scheduling spine already exists in part (`schedule_suggestion`, the cadence registry,
+  the arc strip, `buildWeek` for social). **It is not wired to the recipe system.**
+- A campaign needs: an ordered list of recipe keys, a trigger per step (listed → open house →
+  price change → pending → closed), and a send schedule. `lib/showcase/registry.ts` already
+  models a campaign as an ordered set of slides — **the slide order IS the campaign order.**
+- The steps that are EVENT-driven (went pending, sold) cannot be scheduled by date. They need
+  a trigger, or the agent confirms the milestone and the next email fires.
+- **`scheduleSuggestion` is currently LOST on every recipe build** (see §4) — fix that first,
+  it is the thread the whole thing hangs on.
+
+**Where.** `lib/showcase/registry.ts` (campaign order) · `lib/deliverable/recipes.ts` (the
+keys) · `lib/email/lifecycle-chrome.ts` (the one look) · the schedule/cadence surface ·
+`lib/email/build-doc.ts` (where `scheduleSuggestion` is dropped).
+
+### 0.2 Build the SHOWCASES we had — with the research — so users get OPTIONS
+
+**What.** The showcase examples were researched (crawl4ai evidence is cited throughout
+`lib/email/author-recipes.ts`: Mailchimp single-column, Klaviyo welcome benchmarks, Vero
+inverted pyramid, Litmus typography, NN/g scanning, Luxury Presence one-CTA, Sprout Social
+serialised content). **That research is real and it must not be thrown away.** The designs
+themselves live as hand-written HTML in `public/showcase/*/live/*.html`.
+
+**Those designs need to be BUILDABLE — not just screenshots.** A user picking a campaign
+should be choosing between REAL, researched designs that the builder can actually produce for
+their address.
+
+**Why it matters.** Right now the researched design exists only as a picture. The block types
+now carry a design vocabulary (`align`, `ribbon`, `order`, `emphasis`, `variant:"strip"`), so
+the sample's look IS expressible — it just has to be encoded, once per showcase, as a chrome
+the recipes can wear.
+
+**How.** For each showcase (listing-to-close · agent-launch · market-pulse · launch-blitz):
+read its hand-written HTML, encode its look as a chrome (the way `lifecycle-chrome.ts` encodes
+the listing-to-close look), and let the user PICK which chrome their campaign wears. **Keep
+the research citations attached** — they are the reason the design is what it is, and they are
+part of the pitch.
+
+**The user picks. We build.** Options, not a single opinion.
+
+**Where.** `public/showcase/*/live/*.html` (the researched designs) ·
+`lib/email/author-recipes.ts` (the cited research — do not delete it) ·
+`lib/email/lifecycle-chrome.ts` (the pattern to copy) · `lib/showcase/registry.ts`.
+
+---
+
 ## 1 — BLOCKING (a user hits these today)
 
 ### 1.1 The showcase samples sell fiction we cannot build
@@ -75,6 +144,36 @@ and delete the commentary.
 ---
 
 ## 2 — DESIGN (the operator called this out directly)
+
+### 2.0 THE CAMPAIGN DID NOT LOOK LIKE A CAMPAIGN — **fixed at the root, migration in flight**
+
+**What.** Operator: *"each email would have the same look, just different information. I want
+to make sure that is the case."* **It was not.** Seven lifecycle emails, **seven different
+layouts** — each built by a different worker, in a different file, with its own idea of a grid,
+because there was nothing to build ONTO:
+
+```
+new-listing     header · RIBBON · photo · hero(center) · ONE 6-cell STRIP · text · …
+coming-soon     header · photo · hero(LEFT) · stats[3] · stats[3] · text · …
+market-comps    header · hero(LEFT) · photo · stats[3] · stats[2] · chart · list · …
+under-contract  header · photo · hero(LEFT) · stats[3] · stats[3] · stats[3] · stats[1]  ← a WALL
+just-sold       header · photo · hero(LEFT) · stats[3] · stats[3] · text · list · …
+open-house      header · photo · hero(LEFT) · stats[2] · stats[3] · text · cta · card · …
+price-reduced   header · hero(LEFT) · stats[2] · photo · stats[3] · stats[3] · NO agent card
+```
+
+**Why it matters.** A subscriber walking the campaign from Coming Soon to Sold would have
+received seven emails that looked like they came from **seven different companies**. That is
+not a campaign; it is a pile — and the campaign is the product.
+
+**How (done).** `lib/email/lifecycle-chrome.ts` — ONE layout. A recipe supplies the ribbon
+word, the numbers, its own middle content and a CTA; it does not get to invent a shape. Brand
+stays sticky (`globalStyle`, header, agent card, footer ride through untouched — the chrome is
+the SHAPE, the brand is the SKIN). `lib/deliverable/campaign-coherence.test.ts` fails the suite
+if any of the seven drifts.
+
+**Where.** `lib/email/lifecycle-chrome.ts` · `lib/email/listing-flyer.ts` (the reference, now a
+thin chrome call) · the six `lib/deliverable/recipes/*.ts` being migrated onto it.
 
 ### 2.1 Numbers are visually FLAT in every deliverable
 
