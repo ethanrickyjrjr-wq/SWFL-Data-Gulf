@@ -1,385 +1,293 @@
-# Follow-ups from the deliverable session — 07/13/2026
+# FOLLOW-UPS — the deliverable engine, 07/13/2026
 
-**Everything here was found by building the twelve recipes for real and looking at the
-rendered artifacts.** Nothing is from memory. Each item says WHAT, WHY, HOW, WHERE.
+Everything here was found by building the twelve recipes for real, rendering them, and having
+adversarial verifiers try to break them. Nothing is from memory. Each item: **WHAT · WHY ·
+HOW · WHERE.**
 
-The single lesson that produced most of this list:
-
-> **Invention is CLAIM-shaped, not NUMBER-shaped.** Four of seven deliverables shipped a
-> falsehood, and **not one contained an invented number**. Every figure was correctly
-> sourced; what was invented was the *claim drawn between* correctly-sourced numbers —
-> a comparison, a trajectory, a count, a sequence, a location, a motive. A digit lint
-> cannot see any of them. `lib/deliverable/claims.ts` closes it. **The same hole is wide
-> open on the social path.**
+**Nothing we have is deleted.** Every design, recipe and layout stays as a **choice**. All of
+this is **additive** — more options, not different ones.
 
 ---
 
-## 0 — THE ACTUAL PRODUCT (operator, 07/13/2026 — this is the priority)
+## THE ONE LESSON
 
-**Nothing we have gets deleted.** Every design, recipe and layout that exists today STAYS as
-a **choice a user can pick.** The work below is ADDITIVE — more options, not different ones.
+> **INVENTION IS CLAIM-SHAPED, NOT NUMBER-SHAPED.**
 
-### 0.0 THE SEVEN LISTING EMAILS EXIST AND WORK — 07/13/2026
+Four of seven deliverables shipped a falsehood, and **not one contained an invented number**.
+Every figure was correctly sourced; what was invented was **the claim drawn between**
+correctly-sourced numbers — a comparison, a trajectory, a count, a sequence, a location, a
+motive, a **feature**, or a real number **wearing the name of a quantity we do not hold**.
 
-**Status: BUILT.** All seven listing-lifecycle emails build from an address alone, through the
-real Lab door, with every value traced to a real source:
+`lib/deliverable/claims.ts` closes it structurally: code computes the relation, the narrator
+gets the RESULT and **no raw set**. It has been beaten **three times** by classes it did not
+enumerate. **Assume there is a fourth.**
+
+---
+
+# 0 — THE PRODUCT (do these first)
+
+## 0.0 STATUS — the seven listing emails EXIST AND WORK
 
 `coming-soon` · `new-listing` · `open-house` · `price-reduced` · `market-comps` ·
 `under-contract` · `just-sold`
 
-They all wear **ONE design** (`lib/email/lifecycle-chrome.ts`) — the showcase sample's design:
-accent ribbon band (the word changes, the band does not) · full-bleed photo · centred address
-over the price · one hairline spec strip · the recipe's own middle content · narrative ·
-agent card · one CTA · CAN-SPAM footer. **The user's brand rides through untouched.**
-`campaign-coherence.test.ts` fails the suite if any of the seven drifts.
+All build from an address alone, through the real Lab door. All wear **ONE design**
+(`lib/email/lifecycle-chrome.ts`) — the showcase sample's design: accent ribbon (the word
+changes, the band does not) · photo · centred address over price · one hairline spec strip ·
+the recipe's own middle · narrative · agent card · one CTA · footer. **Brand rides through
+untouched.** `campaign-coherence.test.ts` fails the suite if any of the seven drifts.
 
-Every one runs the claim gate (no invented comparison, trajectory, count, sequence, location
-or motive) and the open-slot contract (an unsourceable cell is an invitation on the canvas and
-does not exist in the sent email).
+**What is NOT built: the campaign that runs itself.**
 
-**What is NOT built: the campaign that runs itself.** That is §0.1.
+## 0.1 BUILD THE CAMPAIGN — end to end, JUST IN TIME
 
-### 0.1 Build the campaigns out FULLY, end to end
+**⚠️ DO NOT BUILD ALL SEVEN AT ONCE. A HOUSE CAN SELL TOMORROW.**
 
-**What.** A campaign is not a pile of emails a user builds one at a time. **The user schedules
-the FIRST one, and we take care of the rest.** They pick the campaign, give us the address,
-and the whole sequence — Coming Soon → New Listing → Open House → Price Improved → Market
-Comps → Under Contract → Just Sold — is authored, scheduled, and released at the right points
-in the sales process, automatically.
+Operator: *"We don't want the campaign to build all at once because a house can sell the next
+day. We just want to show the user the path, so get them to finish."*
 
-**Why.** This is the product. Everything else is a component of it. Today a user gets one
-email per click and has to come back seven times. That is not "set it once."
+Seven emails built up front is waste (the house goes pending on day three and five are dead)
+and wrong (the numbers are stale by send time). Show **THE PATH**; build **just in time**.
 
-**Same design across the whole sequence.** All seven emails wear the ONE chrome
-(`lib/email/lifecycle-chrome.ts`): same ribbon band, same centred address-over-price, same
-hairline spec strip, same signature and footer. Only the ribbon WORD, the numbers, the middle
-content and the CTA change. **The user's brand rides through every email untouched**
-(`globalStyle` is sticky — the chrome is the SHAPE, the brand is the SKIN). Six emails
-arriving over six weeks must read as one campaign from one agent.
+**THE FLOW:**
 
-**⚠️ DO NOT BUILD THE WHOLE CAMPAIGN AT ONCE. A HOUSE CAN SELL TOMORROW.**
-
-Operator, 07/13/2026: *"We don't want the campaign to build all at once because a house can
-sell the next day. We just want to show the user the path, so get them to finish."*
-
-Building seven emails up front is waste (the house goes under contract on day three and five
-of them are dead) **and** it is wrong (the numbers would be stale by the time they send). Each
-email is built **JUST IN TIME**, shortly before it is due. What the user sees up front is
-**THE PATH** — the whole sequence laid out — because seeing the path is what makes them
-finish setting it up.
-
-**THE BUILD PROCESS (operator's flow, verbatim in substance):**
-
-1. **User clicks BUILD CAMPAIGN.** Picks the campaign, gives us the **address**.
-2. **The FIRST email is produced immediately** — and it collects, up front, **everything we do
+1. **User clicks BUILD CAMPAIGN** → picks the campaign → gives the **address**.
+2. **The FIRST email is produced immediately**, and it collects **UP FRONT everything we do
    not hold about the property**:
-   - the **DESCRIPTION** (no vendor sells MLS remarks — this is a lane-2 fact the agent
-     pastes, and it becomes the narrator's source of truth for the WHOLE campaign);
+   - the **DESCRIPTION** — no vendor sells MLS remarks; it is a lane-2 fact the agent pastes,
+     and it becomes the narrator's source of truth **for the whole campaign**;
    - the **SPECIFIC COMPS** the agent wants to argue with;
-   - anything else the sequence will need later (open-house date/time, etc.).
-   **Ask ONCE, save it, reuse it for all seven.** The point is that the user can build the
-   campaign QUICKLY — one sitting, one set of questions.
-3. **The user schedules the first email.** The rest of the path is shown, not built.
-4. **When the SECOND email comes due, the user is TOLD we are building it** — and can **edit
-   it before the send date**. Not a surprise send. A heads-up, then a window.
-5. **Then: "your third email goes out in 2 days."** It is **built automatically from all the
-   saved information**, and the user can edit it.
-6. **And so on, through the sequence.** Build → notify → editable window → send. Every time.
+   - the **open-house date and time**, and anything else the sequence needs later.
+   **Ask ONCE. Save it. Reuse it for all seven.** The user builds the campaign in one sitting.
+3. **The user schedules the first email.** The rest of the path is **shown, not built**.
+4. **When the SECOND comes due, the user is TOLD we are building it** — and can **edit it
+   before the send date**. Never a surprise send.
+5. **"Your third email goes out in 2 days"** — built automatically from the **saved
+   information**, and the user can edit it.
+6. **And so on.** Build → notify → editable window → send.
 
-The agent's job becomes: set it up once, then approve. Ours: never surprise them, never send
-something they have not had a chance to see, and never build an email for a house that has
-already sold.
-
-**How (the mechanics).**
-- The scheduling spine partly exists (`schedule_suggestion`, the cadence registry, the arc
-  strip, `buildWeek` for social). **It is not wired to the recipe system.**
+**MECHANICS:**
 - A campaign needs: an ordered list of recipe keys, a **per-step trigger**, a send schedule,
-  and a **saved property dossier** (the lane-2 answers from step 2 — description, comps, dates)
-  that every later email reads from.
-- **Steps 4–7 are EVENT-driven** (went pending, sold, price changed) and **cannot be scheduled
-  by date**. They fire on a trigger, or the agent confirms the milestone and the next email
-  builds. **A campaign must be able to STOP** — the house sold, the sequence ends.
-- **`scheduleSuggestion` is currently LOST on every recipe build** (see §4). Fix that first —
-  it is the thread the whole thing hangs on.
+  and a **saved property dossier** (the step-2 answers) every later email reads from.
+- **The pending / sold / price-change steps are EVENT-DRIVEN.** They cannot be scheduled by
+  date — they fire on a trigger, or the agent confirms the milestone.
+- **THE CAMPAIGN MUST BE ABLE TO STOP.** The house sold; the sequence ends.
+- **FIRST BLOCKER: `scheduleSuggestion` is LOST on every recipe build.** It is the thread the
+  whole thing hangs on. Fix it first.
 - `lib/showcase/registry.ts` already models a campaign as an ordered set of slides — **the
   slide order IS the campaign order.**
 
-**Placement (operator, 07/13/2026): SHOWCASE FIRST.** Put the built campaign in the showcase,
-**beside the hand-written HTML version**, so the two can be compared. The homepage hero
-already has a "Campaign" pill — **do not touch it yet**; the operator will wire the other
+**WHERE:** `lib/showcase/registry.ts` · `lib/deliverable/recipes.ts` ·
+`lib/email/lifecycle-chrome.ts` · `lib/email/build-doc.ts` · the schedule/cadence surface.
+**CHECK:** `campaigns_end_to_end_scheduled` · `campaign_just_in_time_build_flow`.
+
+## 0.2 PLACEMENT — showcase first
+
+**Put the built campaign in the SHOWCASE, beside the hand-written HTML version**, so the two
+can be compared. **Do not touch the homepage "Campaign" pill** — the operator wires the other
 surfaces later.
 
-**Where.** `lib/showcase/registry.ts` (campaign order) · `lib/deliverable/recipes.ts` (the
-keys) · `lib/email/lifecycle-chrome.ts` (the one look) · the schedule/cadence surface ·
-`lib/email/build-doc.ts` (where `scheduleSuggestion` is dropped).
+**WHERE:** `app/showcase/page.tsx` (`ShowcaseGrid`, `CampaignExamples`, `SeedGallery`).
 
-### 0.2 Build the SHOWCASES we had — with the research — so users get OPTIONS
+## 0.3 BUILD THE SHOWCASE DESIGNS — with the research — so users get OPTIONS
 
-**What.** The showcase examples were researched (crawl4ai evidence is cited throughout
-`lib/email/author-recipes.ts`: Mailchimp single-column, Klaviyo welcome benchmarks, Vero
-inverted pyramid, Litmus typography, NN/g scanning, Luxury Presence one-CTA, Sprout Social
-serialised content). **That research is real and it must not be thrown away.** The designs
-themselves live as hand-written HTML in `public/showcase/*/live/*.html`.
+The showcase looks were **researched** (Mailchimp single-column, Klaviyo welcome benchmarks,
+Vero inverted pyramid, Litmus typography, NN/g scanning, Luxury Presence one-CTA, Sprout
+Social serialised content — all cited in `lib/email/author-recipes.ts`). **That research is
+real and must not be thrown away.**
 
-**Those designs need to be BUILDABLE — not just screenshots.** A user picking a campaign
-should be choosing between REAL, researched designs that the builder can actually produce for
-their address.
+Today those designs exist **only as hand-written HTML** — a picture the builder cannot
+produce. The block types now carry a design vocabulary (`align`, `ribbon`, `order`,
+`emphasis`, `variant:"strip"`), so the look **is** expressible.
 
-**Why it matters.** Right now the researched design exists only as a picture. The block types
-now carry a design vocabulary (`align`, `ribbon`, `order`, `emphasis`, `variant:"strip"`), so
-the sample's look IS expressible — it just has to be encoded, once per showcase, as a chrome
-the recipes can wear.
+**HOW:** for each showcase (listing-to-close · agent-launch · market-pulse · launch-blitz),
+read its HTML, encode its look as a **chrome** (the way `lifecycle-chrome.ts` encodes
+listing-to-close), and let the **user pick** which chrome their campaign wears. **Keep the
+research citations attached** — they are the reason the design is what it is.
 
-**How.** For each showcase (listing-to-close · agent-launch · market-pulse · launch-blitz):
-read its hand-written HTML, encode its look as a chrome (the way `lifecycle-chrome.ts` encodes
-the listing-to-close look), and let the user PICK which chrome their campaign wears. **Keep
-the research citations attached** — they are the reason the design is what it is, and they are
-part of the pitch.
+**Operator: set up TWO campaigns with DIFFERENT designs that do the same thing, side by
+side**, so there is an order to pick from.
 
-**The user picks. We build.** Options, not a single opinion.
-
-**Where.** `public/showcase/*/live/*.html` (the researched designs) ·
-`lib/email/author-recipes.ts` (the cited research — do not delete it) ·
-`lib/email/lifecycle-chrome.ts` (the pattern to copy) · `lib/showcase/registry.ts`.
+**WHERE:** `public/showcase/*/live/*.html` · `lib/email/author-recipes.ts` (**do not delete
+the citations**) · `lib/email/lifecycle-chrome.ts` (the pattern) · `lib/showcase/registry.ts`.
+**CHECK:** `showcase_designs_buildable_as_options`.
 
 ---
 
-## 1 — BLOCKING (a user hits these today)
+# 1 — BLOCKING (a user hits these today)
 
-### 1.1 The showcase samples sell fiction we cannot build
+## 1.1 Under Contract's SAMPLE has a hole no address can fill
 
-**What.** The 18 hand-written HTML samples in `public/showcase/*/live/` promise numbers
-that do not exist.
-**Why it matters.** A customer clicks "Make this" expecting what they were shown. They
-cannot get it — not because the builder is weak, but because **the data was never there.**
-The samples were drawn without checking.
+The showcase slide promises *"pending in 90 days while rivals sit at 238 and 279"* and
+*"85 pendings, 31 at $2M+"*. **The vendor returns NULL for days-on-market and there is no
+contract date anywhere.** Its hero slot is a number **no house will ever fill**.
 
-- `465 Gordonia Road` (the whole Latitude 26 campaign) **is fictional and does not
-  resolve.** Never use it as an acceptance target.
-- **Under Contract** — "pending in 90 days while rival estates sit at 238 and 279 days",
-  "85 pendings, 31 of them at $2M+". **The vendor returns NULL for days-on-market. There
-  is no contract date anywhere in our data.** The registry prompt then *told the builder to
-  lead with that number*, and it duly fabricated *"went under contract after 75 days."*
-  **A spec that asks for a number no lane holds is an instruction to lie.**
-- **Market Comps** — "six live comparable listings". The real set is **2 recorded sales +
-  4 valuations**.
-- "156 of Collier's 8,067 active homes at $10M+" — not reproducible.
+*A sample is a sample* — the house need not exist. But a layout whose centrepiece cannot be
+sourced is broken for **every** address. **Re-concept or re-shoot that slide.**
+**CHECK:** `under_contract_showcase_premise_unsourceable`.
 
-**How.** Re-shoot every sample **from the real builder**, against `326 Shore Dr, Fort Myers
-33905` (the known-good fixture: $595,000 · 3 bd · 3.5 ba · 2,847 sqft · 0.26 ac). Delete
-the hand-written HTML. `scripts/capture-showcase.mjs` currently only screenshots the
-fiction — point it at the builder instead.
-**Where.** `public/showcase/*/live/*.html` · `scripts/capture-showcase.mjs` ·
-`lib/showcase/registry.ts` (the `whatsHappening` / `howAiHandled` copy also describes the
-fiction).
-**Check.** `under_contract_showcase_premise_unsourceable`.
+## 1.2 The social path has NO no-invention gate at all
 
-### 1.2 The social path has NO no-invention gate at all
+A social post can ship a **fabricated number today**. Its sourcing rules are **prose in a
+prompt** — advisory, unverified. `applyDesignPatch` confines the model to TEXT fields, which
+stops a fake *photo* but **not a fake number**: `stat.value` is free text the model writes.
+Same sourced lake feed as email, **ungated on the way out**.
 
-**What.** A social post can ship a fabricated number **today**.
-**Why.** `SOCIAL_SOURCING_RULES` is **prose in a prompt** — advisory, unverified.
-`applyDesignPatch` confines the model to TEXT fields, which stops a fake *photo* but
-**not a fake number**: `stat.value` is a text field the model writes freely. Social pulls
-the *same sourced lake feed* as email and then hands it to a model **with no gate on the
-way out**.
-**How.** `lib/deliverable/claims.ts` was written to be **liftable** — apply `auditClaims`
-+ `CLAIM_PROHIBITION` to the social author, fail-closed. Also decide the contract: social
-is **not** `RecipeBuilder`-shaped (two live systems — the Konva composer via "Make this",
-and `buildWeek` via the socials campaign — and **neither touches `RECIPE_BUILDERS`**).
-**Where.** `lib/social/design/author.ts` · `lib/email/social-calendar/build-week.ts`.
-**Check.** `social_path_has_no_no_invention_gate`.
+`claims.ts` was built to be **liftable** onto it. Also: two live social systems, neither
+touches the recipe dispatch table.
+**WHERE:** `lib/social/design/author.ts` · `lib/email/social-calendar/build-week.ts`.
+**CHECK:** `social_path_has_no_no_invention_gate`.
 
-### 1.3 The gallery preview inverts the operator's own ruling and models invention
+## 1.3 The gallery preview inverts the operator's ruling and models invention
 
-**What.** `preview-fill.ts`'s `price-reduced` preview puts the **cut** in `hero.value`
-(`−$25,000`) and demotes the price to the label — the **exact inverse** of the ruling (cut
-*above* price, smaller, accent-colored). Its commentary is hard-coded invention: *"a
-$25,000 move on asking says the seller is serious… the ones that reprice decisively are
-the ones that close"* — a seller-**motive** claim and a market claim, **modeled by the
-product's own preview.**
-**How.** Rebuild the preview from the real builder's output, or at minimum invert the hero
-and delete the commentary.
-**Where.** `lib/email/doc/preview-fill.ts` (~line 635).
-**Check.** `preview_fill_price_reduced_inverts_ruling`.
+`preview-fill.ts`'s `price-reduced` preview puts the **cut** in the hero value (`−$25,000`)
+and demotes the price to the label — **the exact inverse** of the ruling. Its commentary is
+hard-coded invention: *"a $25,000 move on asking says the seller is serious… the ones that
+reprice decisively are the ones that close"* — a seller-**motive** claim, modelled by the
+product's own preview.
+**WHERE:** `lib/email/doc/preview-fill.ts` (~line 635).
+**CHECK:** `preview_fill_price_reduced_inverts_ruling`.
 
 ---
 
-## 2 — DESIGN (the operator called this out directly)
+# 2 — DESIGN
 
-### 2.0 THE CAMPAIGN DID NOT LOOK LIKE A CAMPAIGN — **fixed at the root, migration in flight**
+## 2.1 Numbers are still flat everywhere OUTSIDE the listing strip
 
-**What.** Operator: *"each email would have the same look, just different information. I want
-to make sure that is the case."* **It was not.** Seven lifecycle emails, **seven different
-layouts** — each built by a different worker, in a different file, with its own idea of a grid,
-because there was nothing to build ONTO:
+`StatItem.emphasis` now exists and the listing spec strip uses it (`$/Sq Ft` primary, `Type`
+muted). **The other 27 templates and the area recipes have no order of importance** — every
+cell still renders at identical weight.
 
-```
-new-listing     header · RIBBON · photo · hero(center) · ONE 6-cell STRIP · text · …
-coming-soon     header · photo · hero(LEFT) · stats[3] · stats[3] · text · …
-market-comps    header · hero(LEFT) · photo · stats[3] · stats[2] · chart · list · …
-under-contract  header · photo · hero(LEFT) · stats[3] · stats[3] · stats[3] · stats[1]  ← a WALL
-just-sold       header · photo · hero(LEFT) · stats[3] · stats[3] · text · list · …
-open-house      header · photo · hero(LEFT) · stats[2] · stats[3] · text · cta · card · …
-price-reduced   header · hero(LEFT) · stats[2] · photo · stats[3] · stats[3] · NO agent card
-```
+**HOW:** give each template and area recipe an emphasis/rank. **One primary figure per
+deliverable; everything else recedes.** Enforce it the way `assertHeroChartCoherence` already
+enforces chart/headline magnitude.
+**WHERE:** `lib/email/doc/default-docs.ts` (27 seeds) · the area recipe builders.
+**CHECK:** `stat_number_visual_hierarchy`.
 
-**Why it matters.** A subscriber walking the campaign from Coming Soon to Sold would have
-received seven emails that looked like they came from **seven different companies**. That is
-not a campaign; it is a pile — and the campaign is the product.
+## 2.2 The seeds should BE the sample design, not a plainer one
 
-**How (done).** `lib/email/lifecycle-chrome.ts` — ONE layout. A recipe supplies the ribbon
-word, the numbers, its own middle content and a CTA; it does not get to invent a shape. Brand
-stays sticky (`globalStyle`, header, agent card, footer ride through untouched — the chrome is
-the SHAPE, the brand is the SKIN). `lib/deliverable/campaign-coherence.test.ts` fails the suite
-if any of the seven drifts.
-
-**Where.** `lib/email/lifecycle-chrome.ts` · `lib/email/listing-flyer.ts` (the reference, now a
-thin chrome call) · the six `lib/deliverable/recipes/*.ts` being migrated onto it.
-
-### 2.1 Numbers are visually FLAT in every deliverable
-
-**What.** `StatItem` is `{ value: string; label: string }`. **That is the entire type.**
-No size, no color, no weight, no rank.
-**Why.** A recipe **cannot say which number matters**, because the type has nowhere to say
-it. Every cell renders at identical weight and color; only the cell *count* changes the
-size. So `$209/sq ft` — the number that wins a listing argument — renders at exactly the
-same weight as `Type: Residential`, which nobody cares about. There are only two tiers:
-the hero (one big number) and then an undifferentiated wall.
-**How.** Type-lift `StatItem` with an `emphasis` / `rank` field, and have **each recipe
-declare its order of importance** rather than emitting cells in whatever order the vendor
-returned. **Atomic type-lift**: `StatItem` changes ship with a backfill of every template
-in the same commit.
-**Where.** `lib/email/doc/types.ts` (`StatItem`) · `lib/email/blocks/StatsBlock.tsx` ·
-all 27 `SEED_DOCS` · all 12 recipe builders.
-**Check.** `stat_number_visual_hierarchy`.
+The listing family is now dragged onto the chrome automatically (the collision test forces
+it). **The newsletter and editorial seeds are still plain.** They should get the same
+treatment: the sample's design, not a second, lesser one.
 
 ---
 
-## 3 — THE AGENT PROFILE (pieces 2-UI and 3)
+# 3 — THE AGENT PROFILE (pieces 2-UI and 3)
 
-Full brief: `docs/superpowers/plans/2026-07-13-agent-profile-handoff.md`.
-Spec: `docs/superpowers/specs/2026-07-13-agent-profile-design.md`.
-
-**Done + committed (`f1d9de8c`):** the `agent_bio` column (it never existed — the save
-silently dropped the bio), the `agent_profile_facts` store (one fact, one row, one
-**source**, `NOT NULL` + `CHECK` — a fact with no provenance *cannot be written*), and the
-token resolver that makes the bio **update itself** (a market figure frozen into saved
+**Done:** the `agent_bio` column (it **never existed** — the save silently dropped the bio),
+`agent_profile_facts` (one fact, one row, one **source**; `NOT NULL` + `CHECK`, so **a fact
+with no provenance cannot be written** — an invented credential is structurally impossible),
+and the token resolver that makes the bio **update itself** (a market figure frozen into saved
 text is *a lie with a delay*).
 
 **Remaining:**
-- **2-UI** — the "Your story" section: the AI interviews, saves each fact **verbatim**
-  with `source: agent_stated`, and drafts the bio **template** (tokens, never numbers).
-  Fail-closed on `auditClaims`.
-- **3 — the growth loop** — a build that needs a fact we don't hold **records the gap**;
-  the panel shows *"three things would make your emails stronger"*, each naming the
-  deliverable that wanted it; the AI asks; the answer is saved. Today a gap opens a popup
-  and is then **forgotten**.
-**Check.** `agent_profile_live_verify`.
+- **2-UI** — the "Your story" section: the AI interviews, saves each fact **verbatim** with
+  `source: agent_stated`, drafts the bio **template** (tokens, never numbers). Fail-closed on
+  `auditClaims`.
+- **3 — the growth loop** — a build that needs a fact we don't hold **records the gap**; the
+  panel shows *"three things would make your emails stronger"*, each naming the deliverable
+  that wanted it; the AI asks; the answer is saved. **Today a gap opens a popup and is then
+  forgotten.**
+
+**WHERE:** `docs/superpowers/plans/2026-07-13-agent-profile-handoff.md` (full brief).
+**CHECK:** `agent_profile_live_verify`.
 
 ---
 
-## 4 — ENGINE DEBT (found while building; none of it blocks a user yet)
+# 4 — ENGINE DEBT
 
 | What | Why it bites | Where |
 |---|---|---|
-| **Three render engines disagree** | The canvas drew chart axes the emailed PNG lacked — *the preview lied about what the recipient got*. An Outlook-breaking 3-column table **passed a Chromium screenshot**. | `GridCanvas`/`BlockRenderer` · `EmailDocRenderer`/`compile-grid` · `lib/pdf` |
-| **`compile-grid` ghost column** | An empty cell in a **multi-column** row still emits a phantom `<div>`. Unreachable from the flyer (full-bleed rows), but a user-built 2-col row hits it. ~4-line fix. | `lib/email/compile-grid.ts` |
-| **`upsertChartBlock` drops `layout`** | Its own comment claims "id and position preserved" — it rebuilds `{id,type,props}` and **loses the grid position**. | `lib/email/inject-chart.ts` |
-| **Chart source caption overflows the canvas** | `rankedDeltaSvg` draws the source line at x=150 with no wrap/clamp — it **clipped "· as of 04/30/2026" clean off the PNG**. *An as-of the reader cannot see is an as-of we never stated.* Clips ANY long citation on ANY recipe. | `lib/charts/svg/ranked-delta.ts` |
-| **The shared chart producer binds YoY, not MoM** | `findRankedDeltaPair` takes the *first* delta column sharing a stem, and `value_yoy_pct` is declared before `value_mom_pct` — so a "month-over-month" email would ship **−8% YoY chips** under a MoM headline. | `refinery/lib/chart-from-metrics.mts` |
-| **`hero` and `signal` don't honor `emailRender`** | R0 generalized the open-slot contract to `stats`/`image`/`text`, but an empty **hero** would still ship a naked label. R0 is half-done. | `lib/email/blocks/{HeroBlock,SignalBlock}.tsx` |
-| **`scheduleSuggestion` is lost on every recipe build** | The recipe lane returns early without it — so *"Schedule it every Tuesday morning"* (load-bearing, the author emits `schedule_suggestion` from it) is **dead on the recipe path**. | `lib/email/build-doc.ts` |
-| **`RecipeBuildContext` comment is FALSE for area recipes** | It claims the dispatcher resolves the ZIP/city scope. It does not — `zipFromPromptPlace` runs *after* dispatch, so **every area builder re-resolves the place itself** (three copies now). | `lib/deliverable/recipes/index.ts` |
-| **Untyped `data_lake` reads** | Generated types cover `public` only, so every `data_lake` read uses the untyped hatch. A renamed column becomes a **runtime null**, not a compile error. | `verification/supabase-untyped-allowlist.json` · check `review_reply_untyped_zhvi_view_read` |
+| **The vendor has the FULL price history and we don't read it** | `/property-tax-history` returns `Listed $765,000 → $699,975 → $595,000`. So `reduced_amount` is only the **last** cut; the true cut from the original ask is **$170,000**. Reading it makes Price Improved *stronger*, not just safer. | check `listing_price_history_original_ask` |
+| **`scheduleSuggestion` is LOST on every recipe build** | The campaign hangs on it. | `lib/email/build-doc.ts` |
+| **Three render engines disagree** | The canvas drew chart axes the emailed PNG lacked. An Outlook-breaking 3-column table **passed a Chromium screenshot**. | GridCanvas · compile-grid · lib/pdf |
+| **`hero` and `signal` don't honor `emailRender`** | An empty hero still ships a naked label. The open-slot contract is half-done. | `lib/email/blocks/{HeroBlock,SignalBlock}.tsx` |
+| **`upsertChartBlock` drops `layout`** | Its comment claims "position preserved". It isn't. | `lib/email/inject-chart.ts` |
+| **The chart caption overflows and CLIPS the as-of date off the PNG** | *An as-of the reader cannot see is an as-of we never stated.* Clips any long citation on any recipe. | `lib/charts/svg/ranked-delta.ts` |
+| **The shared chart producer binds YoY, not MoM** | A "month-over-month" email would ship **−8% YoY** chips. | `refinery/lib/chart-from-metrics.mts` |
+| **`compile-grid` ghost column** | An empty cell in a multi-column row emits a phantom `<div>`. | `lib/email/compile-grid.ts` |
+| **`RecipeBuildContext` comment is FALSE for area recipes** | It claims the dispatcher resolves the ZIP/city scope. It doesn't — every area builder re-resolves it (three copies). | `lib/deliverable/recipes/index.ts` |
+| **Untyped `data_lake` reads** | Generated types cover `public` only. A renamed column is a **runtime null**, not a compile error. | check `review_reply_untyped_zhvi_view_read` |
+| **The gazetteer doesn't hold real SWFL places** | North Fort Myers, East/North Naples, Bonita Beach now correctly **refuse** (open slot) instead of resolving to a neighbour — but they are real places an agent farms. Register them with **real, sourced ZIPs**. **Do not invent ZIPs to make the match work.** | check `gazetteer_missing_swfl_places` |
+| **`sphere-weekly`** | Refuted on its structural guarantee; needs one more pass. | `lib/deliverable/recipes/sphere-weekly.ts` |
 
 ---
 
-## 5 — WHAT TO RESEARCH WITH crawl4ai, AND PUT INTO CODE
+# 5 — RESEARCH WITH crawl4ai, AND **PUT IT IN CODE**
 
-**The point is not to read — it is to encode.** Each of these should end as a **rule in
-code or a test**, not a paragraph in a doc. RULE 0.4: research the outside answer, write
-the evidence into `SESSION_LOG.md`, then build from it.
+**The point is not to read — it is to encode.** Each ends as a **rule or a test**, not a
+paragraph.
 
-### 5.1 Email rendering reality (highest value — we shipped a Chromium-only email)
+## 5.1 Email rendering reality — HIGHEST VALUE (we shipped a Chromium-only email)
 
-**Research:** Outlook/Word rendering engine limits, `mso` conditionals, table-layout rules,
-what actually breaks in Outlook 2016/365 vs Apple Mail vs Gmail. Sources: **Litmus**,
-**Email on Acid**, **Can I Email** (caniemail.com — it has a machine-readable dataset),
-**Campaign Monitor's CSS support tables**.
+**Research:** Outlook/Word engine limits, `mso` conditionals, table-layout rules. Sources:
+**caniemail.com** (machine-readable dataset), **Litmus**, **Email on Acid**, **Campaign
+Monitor CSS tables**.
 **Encode as:** a lint over `compileGrid` output — every row's widths sum ≤ 12, no ghost
-tables, no `width="1800"`, no unsupported CSS property. **A screenshot is not proof for an
-email.** This is exactly the class that passed a Chromium screenshot and would have
-shipped broken.
+tables, no `width="1800"`, no unsupported CSS. **A screenshot is not proof for an email.**
 
-### 5.2 Visual hierarchy of numbers in email
+## 5.2 Visual hierarchy of numbers
 
-**Research:** how financial/real-estate newsletters rank figures — size ratios, color as
-emphasis, position. Sources: **storytellingwithdata.com** (make it clear where to look; one
-emphasized thing, everything else recedes), **NN/g on data tables and scanning**,
-**Litmus typography guidance**, real chartbooks (dailychartbook, thechartreport).
-**Encode as:** the `StatItem` emphasis/rank field (§2.1) + a coherence rule — *a
-deliverable may have exactly ONE primary figure; everything else recedes.* Enforce it the
-way `assertHeroChartCoherence` already enforces chart/headline magnitude.
+**Research:** how financial/real-estate newsletters rank figures — size ratios, colour,
+position. **storytellingwithdata.com** (one emphasised thing; everything else recedes),
+**NN/g** on scanning and data tables, **Litmus** typography.
+**Encode as:** the `StatItem.emphasis` rank across all templates + a coherence rule — **one
+primary figure per deliverable**, enforced like `assertHeroChartCoherence`.
 
-### 5.3 What real-estate vendors actually sell (so a spec can never ask for a lie again)
+## 5.3 A FIELD → VENDOR CAPABILITY MATRIX, and a SPEC-TIME GATE ← the deepest fix
 
-**Research:** for each field a recipe wants — days-on-market, contract date, sold price,
-MLS remarks — **which vendor actually sells it, and at what grain.** We already know: no
-vendor sells MLS remarks (all 18 SteadyAPI endpoints checked 07/13); `daysOnMarket` is
-null; there is no contract date. **What we do not know is what a paid tier or a different
-vendor would give us.**
-**Encode as:** a **field→source capability matrix in code**, and a **spec-time gate**: a
-recipe whose prompt names a figure with no source in the matrix **fails the build of the
-registry**, not the build of the email. *That is the fix for "the spec asked for a
-fabrication."*
+**Research:** for every field a recipe wants — days-on-market, contract date, sold price, MLS
+remarks, **price history** — *which vendor actually sells it, at what grain, and what does the
+field actually MEAN.*
 
-### 5.4 Anti-hallucination in generative UI/copy (make the claim gate stronger)
+We already know: no vendor sells MLS remarks; `daysOnMarket` is null; there is no contract
+date; and **`reduced_amount` is the LAST cut, not the cut from the original ask** — a
+distinction that shipped a falsehood.
 
-**Research:** current practice on constraining LLM output to a fact set — structured
-generation, "cite-or-abstain", claim-level verification, NLI-based entailment checks
-against a source set. Sources: Anthropic's own tool-use/citations docs, recent work on
-groundedness/faithfulness metrics.
-**Encode as:** upgrade `auditClaims` from regex backstop to an **entailment check** — every
-sentence must be entailed by the settled fact set, or it is dropped. The regexes are a net;
-entailment is a floor. **Keep the structural rule regardless: the narrator receives no raw
-set to compare.**
+**Encode as:** a **capability matrix in code**, plus a **spec-time gate**: a recipe whose
+prompt names a figure with no source in the matrix **fails the build of the REGISTRY**, not
+the build of the email.
 
-### 5.5 CAN-SPAM / deliverability, once sends scale
+> **A SPEC THAT NAMES A FIGURE NO LANE HOLDS IS AN INSTRUCTION TO LIE, AND THE MODEL WILL
+> OBEY IT.** That is not a model failure. It is a spec failure. This gate is the fix.
 
-**Research:** already partly done (4 real requirements, corrected 07/02). Refresh on:
-reply-rate as a sender-trust signal, DMARC/BIMI, list-hygiene.
-**Encode as:** the footer already enforces address + unsubscribe. Add a **pre-send lint**:
-no misleading subject, a working opt-out, a valid postal address.
+## 5.4 Anti-hallucination — upgrade the gate from regex to entailment
+
+**Research:** constraining LLM output to a fact set — structured generation, cite-or-abstain,
+claim-level verification, NLI entailment against a source set.
+**Encode as:** every shipped sentence must be **entailed by the settled fact set**, or it is
+dropped. The regexes are a net; entailment is a floor. **Keep the structural rule regardless:
+the narrator receives no raw set.**
+**CHECK:** `claims_gate_entailment_upgrade`.
+
+## 5.5 CAN-SPAM / deliverability
+
+Already partly done (4 real requirements). Refresh on reply-rate as a trust signal, DMARC,
+BIMI, list hygiene.
+**Encode as:** a pre-send lint — working opt-out, accurate headers, no misleading subject,
+valid postal address.
 
 ---
 
-## 6 — Playbook corrections (fold into `docs/standards/deliverable-playbook.md`)
+# 6 — WHAT THE VERIFIERS CAUGHT (keep them; they pay for themselves)
 
-Every worker was required to audit its own Part 6 entry. The playbook is not merely
-stale — **it has entries that CAUSE bugs**:
+Every one of these was in the **sendable bytes**, and every one was signed off by an author
+who had opened the screenshot:
 
-- **A KEY COLLISION.** Part 6 assigns `market-pulse` as the key for **both** Monthly Market
-  Pulse **and** The Social Cut. It would have sent two workers at one key.
-- **The roster is wrong** — "these **five** lifecycle recipes" when there are **seven**.
-  `open-house` and `price-reduced` have **no entry at all**.
-- **It states the drift bug BACKWARDS** — it claims the agent-launch follow-up and the
-  "Headlines vs Here" slide "are the SAME prompt". **They were not.** They differed by a
-  trailing sentence, and *that difference is the entire drift story*. Calling them
-  identical is what hid it.
-- **"The skeleton probably already exists — load it"** is **actively harmful** for
-  Coming Soon: every listing seed is **address-forward** (hero label literally "Price and
-  address"), so loading one leaves an open slot **inviting the user to paste back the
-  address the recipe exists to suppress.**
-- **It omits the biggest address-leak vector** — `authorListingNarrative` builds its fact
-  sheet **from `facts.address`**. Handing it raw `ctx.facts` types the street into the
-  model's context and relies on a framing sentence to stop it echoing back.
-- **The operator's price-cut ruling is buried mid-bullet inside the *lot-size* landmine**,
-  where it reads as if it belongs to lot sizes.
-- **R-numbers in the playbook and the code disagree**, so two workers cited different
-  numbers for the same recipe.
-- **Parts 4 and 9 are stale** — `stats`/`image`/`text` now honor `emailRender`;
-  `hero`/`signal` still do not. R0 is half-done, not un-done.
-- **NEW SECTION NEEDED — the claim gate.** A comparison is a factual claim. Compute it in
-  code, hand the narrator the result, and **give it no raw set to derive a new relation
-  from.** A banned-word list was tried and lost ("street" was banned; the model wrote
-  "on Shore Dr").
+- *"$209/sq ft sits **below** the $213 median"* — **$209 is ABOVE it.** The argument of a
+  price-defense email, inverted.
+- *"went under contract after **75 days**"* — the vendor's DOM is **null**.
+- *"came down by $104,975 **from the original ask**"* — it's the **last** cut; the real one is
+  **$170,000**. **Written by CODE, in two files.** *(And the playbook's own rule caused it.)*
+- *"the gap is **widening**"* — from ONE data point.
+- *"**five** of those six ZIPs"* — it was **four**.
+- *"All **6** comparable homes are recorded sales"* — it was **two**. (Digit counts sailed
+  past a lint that only caught spelled ones.)
+- *"From the **dock**…"* — **no source holds a dock.**
+- *"I farm **North Fort Myers**"* → a fully-cited email **about Fort Myers**.
+- Coming Soon printed a criterion (**$536K–$655K**) that **did not reproduce its own number**
+  (a reader gets 330, not the 328 printed in gold).
+
+**A green test suite was green for all of these.** Do not skip the adversarial pass, and make
+it **re-derive every comparison with arithmetic** — a reversed inequality looks exactly like a
+correct one.
