@@ -1,3 +1,25 @@
+## 2026-07-13 (Opus 4.8 · main) — ONE DELIVERABLE THAT ACTUALLY WORKS + the playbook. New Listing, end to end, every field sourced.
+
+Operator: "WHERE ARE THE FUCKING PHOTOS... WHERE IS THE FUCKING RECIPE WE MADE?" Then: "Do we build anything correct?" The honest answer was **no** — and the reason is worse than a bug.
+
+**The showcase example was never built by the product.** `d3292777` vendored the Latitude 26 lifecycle emails as 729 lines of hand-written HTML into `public/showcase/`; `capture-showcase.mjs` only screenshots them. No code path can produce that flyer. We show customers a mock-up and hand them whatever the builder improvises. There was no reference implementation to copy — only a hand-drawn target and a machine that had never hit it.
+
+**Why every recipe was a grab-bag.** `planArrival` returns `{kind:"blank"}` for EVERY recipe arrival → the client loads `skeleton-clean-white` → **all 27 committed skeletons** (`new-listing`, `just-sold`, `open-house`, `price-reduced`…) are skipped and a model improvises on an empty page. Four separate things are called a "recipe" and none are wired together: a prompt string (showcase registry), an advisory prose nudge the model may ignore and that is forbidden digits (`author-recipes.ts`), 27 positioned skeletons (`default-docs.ts`), and a coded grid (`listing-flyer.ts`). **The designs are in the repo. The build path never loads them.** 15 of 17 recipes land in the free author (no photo, no property facts) — including 4 of the 5 emails in the "one listing, teaser to sold" campaign.
+
+**The door bug (fixed).** The property lane was gated on `scope.address`, which only the homepage hero sets. The Lab campaign button and Showcase seed the prompt TEXT only, so the address existed nowhere but the prompt string → gate failed → free author → "Typical asking rent", no photo, no price. `authorDoc` now reads the subject from the field OR the prompt (`subjectAddressFromPrompt`) and is the ONE authority on which. Showcase's address popup was hard-gated to `!signedIn` — a signed-in user with no project got no confirm, no popup, no build: a blank canvas. Fixed.
+
+**We were discarding data we already paid for.** `lotSize` (0.26 ac) and `propertyType` were in the vendor row and never mapped — the flyer rendered naked "Lot"/"Type" labels over data we held. `baths` is genuinely absent from `/search`, but `/nearby-home-values` — **an endpoint we already call** — returns beds/baths/sqft, and a property is the nearest property to its own coordinates, so the subject comes back as its own first row (326 Shore Dr → baths **3.5**). Never missing; never read.
+
+**No vendor sells us MLS remarks** (checked all 18 SteadyAPI real-estate endpoints; realtor.com blocks the page). The listing description is a **lane-2 fact — the agent pastes it** and it becomes the narrator's source of truth. Handed only the spec cells and told "use only these facts", the model could only recite them back — which is exactly the robot sentence that shipped.
+
+**New Listing now:** address in → real house out. Photo (mirrored to our storage), $595,000, 3 / 3.5 / 2,847 / $209 / 0.26 ac / Residential — a cell renders ONLY if sourced, and one we can't fill does not exist. **No chart** (operator: a listing's visual is the property; a two-bar was/now is a fact wearing a chart costume). Prose = the agent's description tightened, no invented qualities, no added pitch. Reachable from every door. Built through `authorDoc` with nothing but a prompt.
+
+**PLAYBOOK: `docs/standards/deliverable-playbook.md`** — the paths (5 doors → 1 route → 3 builders → 2 lanes → 3 renderers), the four registries called "recipe", and the four rules every failure tonight violated: resolve the subject once from a real record · a cell renders only if sourced · a chart only when the deliverable is ABOUT a number, and about the subject · the model writes prose and nothing else, from sources you hand it. Plus the six questions to answer per recipe. Coming Soon / Comps / Under Contract / Sold are the SAME resolved house wearing a different hat.
+
+**STILL BROKEN — blocks every user:** the SteadyAPI key does not exist in production under the name the code reads (`PHOTOS_API`). Prod has one called `new_steady`. Until reconciled, every New Listing build on the live site resolves to nothing and ships the empty $0 flyer regardless of this commit. Check opened.
+
+55 tests pass. `next build` clean.
+
 ## 2026-07-13 (Opus 4.8 · main) — EMAIL LAB: the popup he demanded ALREADY EXISTED. It was wired to one door out of two.
 
 Operator: "either one i click it just puts words in AI box and i don't even know they are there... JUST POP UP A FUCKING BOX FOR ADDRESS." He was right on every count, and the humiliating part is the fix was already in the repo.

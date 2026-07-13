@@ -15,7 +15,7 @@
 // keyed by CITY; we page it and match the subject by its canonicalized street line
 // ("16447 Rainbow Meadows Court" ≡ the record's "16447 Rainbow Meadows Ct").
 import { geocodeAddress, type GeocodeFn } from "@/lib/geo/geocode-address";
-import { fetchPhotoListings } from "./steadyapi";
+import { fetchPhotoListings, fetchNearbyValues } from "./steadyapi";
 import type { Listing } from "./rentcast";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
@@ -28,7 +28,16 @@ export type FetchListingsFn = (opts: {
   location?: string;
 }) => Promise<Listing[]>;
 
+/** The bath lane's fetcher — injectable so the offline test never touches the network. */
+export type FetchNearbyFn = (opts: {
+  lat: number;
+  lon: number;
+  limit?: number;
+}) => Promise<{ addressLine: string; baths: number | null }[]>;
+
 export interface ResolveSubjectDeps {
+  /** Nearby-values fetcher (the ONLY source of a bath count — /search carries none). */
+  fetchNearby?: FetchNearbyFn;
   /** Injectable geocoder — tests never touch Mapbox/Census. */
   geocode?: GeocodeFn;
   /** Injectable city listings feed — tests never touch SteadyAPI. */
@@ -167,6 +176,19 @@ function toFacts(l: Listing, geoZip: string | null, subject: string): ListingFac
     beds: l.bedrooms != null ? String(l.bedrooms) : undefined,
     baths: l.bathrooms != null ? String(l.bathrooms) : undefined,
     sqft: l.squareFootage != null ? String(l.squareFootage) : undefined,
+    // The vendor row DOES carry these two and we were dropping them on the floor —
+    // the flyer has always read facts.lotSize / facts.propertyType (the scrape lane
+    // fills them), so the address lane rendered "Lot" and "Type" as bare labels over
+    // data we already held. lotSize is ACRES by convention (see steadyapi.ts).
+    lotSize: l.lotSize != null ? `${l.lotSize} ac` : undefined,
+    propertyType: l.propertyType || undefined,
+    yearBuilt: l.yearBuilt != null ? String(l.yearBuilt) : undefined,
+    lat: typeof l.latitude === "number" ? l.latitude : undefined,
+    lon: typeof l.longitude === "number" ? l.longitude : undefined,
+    // What we can actually SAY about this house (the feed carries no MLS remarks).
+    ...(l.isNewConstruction != null ? { isNewConstruction: l.isNewConstruction } : {}),
+    ...(l.isPriceReduced != null ? { isPriceReduced: l.isPriceReduced } : {}),
+    ...(l.priceReduction != null ? { priceReduction: usd(l.priceReduction) } : {}),
     photos: l.photoUrl ? [l.photoUrl] : [],
     // The flyer uses sourceUrl for the hero photo link + the CTA; keep it on our
     // own site, never the realtor.com permalink (never surface a vendor deep link).
@@ -187,6 +209,9 @@ export async function resolveSubjectListing(
   if (!subject) return null;
 
   const fetchListings = deps.fetchListings ?? fetchPhotoListings;
+  // Default to the real endpoint in prod; the offline test injects a stub so resolving a
+  // subject still makes ZERO live calls (the contract this file has always held).
+  const fetchNearby: FetchNearbyFn = deps.fetchNearby ?? fetchNearbyValues;
   const maxPages = Math.max(1, deps.maxPages ?? 4);
   const PAGE = 200;
 
@@ -219,7 +244,7 @@ export async function resolveSubjectListing(
     try {
       const direct = await fetchListings({ city, state: "FL", location: slug, limit: PAGE });
       const hit = direct.find(matches);
-      if (hit) return toFacts(hit, geo.zip, subject);
+      if (hit) return withBaths(toFacts(hit, geo.zip, subject), target, fetchNearby);
     } catch {
       /* fall through to the city scan */
     }
@@ -236,8 +261,34 @@ export async function resolveSubjectListing(
     }
     if (!rows.length) break;
     const hit = rows.find(matches);
-    if (hit) return toFacts(hit, geo.zip, subject);
+    if (hit) return withBaths(toFacts(hit, geo.zip, subject), target, fetchNearby);
     if (rows.length < PAGE) break; // last (short) page — no more to scan
   }
   return null;
+}
+
+/**
+ * BATHS. The /search row carries beds, sqft and lot — and no bath count at all, which
+ * is why every listing in the product shipped a blank "Baths" cell. It isn't missing
+ * from the vendor, only from that endpoint: /nearby-home-values returns beds/baths/sqft,
+ * and a property is always the nearest property to its OWN coordinates, so the subject
+ * comes back as its own first row (verified live 07/13/2026 — 326 Shore Dr → baths 3.5).
+ *
+ * One extra call, keyed by the lat/lon we already hold. Best-effort by contract: any
+ * miss leaves baths undefined and the cell simply doesn't render. Never invents a count.
+ */
+async function withBaths(
+  facts: ListingFacts,
+  target: string,
+  fetchNearby: FetchNearbyFn,
+): Promise<ListingFacts> {
+  if (facts.baths || facts.lat == null || facts.lon == null) return facts;
+  try {
+    const nearby = await fetchNearby({ lat: facts.lat, lon: facts.lon, limit: 25 });
+    const self = nearby.find((c) => canonStreet(c.addressLine) === target);
+    if (self?.baths != null) facts.baths = String(self.baths);
+  } catch {
+    /* baths stay absent — an empty cell is dropped, never faked */
+  }
+  return facts;
 }

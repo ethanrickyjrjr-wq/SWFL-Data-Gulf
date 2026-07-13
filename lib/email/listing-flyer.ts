@@ -128,18 +128,27 @@ export function buildListingFlyer(facts: ListingFacts, current: EmailDoc): Email
   // 4. Spec strip — two rows of fixed labels. Real values fill in; a spec we don't
   //    hold stays an EMPTY cell (never a 0, never invented). Row A is always the
   //    beds/baths/sqft the record carries; row B is computed/enrichment.
-  const specsA: StatItem[] = [
-    { value: facts.beds ?? "", label: "Beds" },
-    { value: facts.baths ?? "", label: "Baths" },
-    { value: withCommas(facts.sqft) ?? "", label: "Sq Ft" },
+  // A cell we can't source DOES NOT EXIST. The old code emitted every label with an
+  // empty value, so a listing with no bath count shipped a naked "Baths" heading with
+  // nothing under it — which reads as broken, not as honest. The rule is now
+  // structural: a spec with a real value becomes a cell; a spec without one is gone.
+  // (Still never a 0, still never invented — absent means absent.)
+  const spec = (value: string | undefined, label: string): StatItem[] =>
+    value && value.trim() ? [{ value: value.trim().slice(0, 24), label }] : [];
+  const specs: StatItem[] = [
+    ...spec(facts.beds, "Beds"),
+    ...spec(facts.baths, "Baths"),
+    ...spec(withCommas(facts.sqft), "Sq Ft"),
+    ...spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft"),
+    ...spec(facts.lotSize, "Lot"),
+    ...spec(shortType(facts.propertyType) || undefined, "Type"),
+    ...spec(facts.yearBuilt, "Built"),
   ];
-  const specsB: StatItem[] = [
-    { value: pricePerSqft(facts.price, facts.sqft) ?? "", label: "$/Sq Ft" },
-    { value: (facts.lotSize ?? "").slice(0, 24), label: "Lot" },
-    { value: shortType(facts.propertyType), label: "Type" },
-  ];
-  push({ id: createBlock("stats").id, type: "stats", props: { stats: specsA } }, 2);
-  push({ id: createBlock("stats").id, type: "stats", props: { stats: specsB } }, 2);
+  // Lay them out three-to-a-row, so a row is only emitted if it has real cells.
+  for (let i = 0; i < specs.length; i += 3) {
+    const row = specs.slice(i, i + 3);
+    push({ id: createBlock("stats").id, type: "stats", props: { stats: row } }, 2);
+  }
 
   // 5. Commentary — the real MLS remarks if we have them, else an EMPTY slot the
   //    AI fills with one honest paragraph (numbers stay in the cells above).

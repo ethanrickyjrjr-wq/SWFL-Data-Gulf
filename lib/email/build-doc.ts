@@ -39,7 +39,12 @@ import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/in
 import { loadListingContext, renderListingsBlock } from "@/lib/listings/select";
 import { deriveListingPhoto } from "@/lib/media/listing-photo";
 import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
-import { isListingIntent, isNewListingRecipePrompt } from "@/lib/email/listing-intent";
+import {
+  isListingIntent,
+  isNewListingRecipePrompt,
+  subjectAddressFromPrompt,
+  listingDescriptionFromPrompt,
+} from "@/lib/email/listing-intent";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { fetchListingFacts, type ListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
@@ -797,19 +802,6 @@ async function callAuthor(
 }
 
 // ── Listing-flyer slot fillers (the coded grid; only the blanks get filled) ───
-/** Fill the empty kind:"chart" image slot's url IN PLACE — keeps its grid layout,
- *  which upsertChartBlock would strip. Only an empty chart slot is touched. */
-function fillChartSlot(doc: EmailDoc, url: string, linkUrl?: string): EmailDoc {
-  return {
-    ...doc,
-    blocks: doc.blocks.map((b) =>
-      b.type === "image" && b.props.kind === "chart" && !b.props.url
-        ? { ...b, props: { ...b.props, url, ...(linkUrl ? { linkUrl } : {}) } }
-        : b,
-    ),
-  };
-}
-
 /** Drop the empty chart slot when no chart resolved — never ship an empty box. */
 function dropEmptyChartSlot(doc: EmailDoc): EmailDoc {
   return {
@@ -837,7 +829,11 @@ function fillNarrative(doc: EmailDoc, body: string): EmailDoc {
  *  ONLY the real record facts. Best-effort: nothing real to say (no price/beds/
  *  sqft), or any failure → null (the slot stays empty for the user to fill). Never
  *  invents — the model is told to state no number that isn't in the facts. */
-async function authorListingNarrative(facts: ListingFacts): Promise<string | null> {
+
+async function authorListingNarrative(
+  facts: ListingFacts,
+  context?: string,
+): Promise<string | null> {
   // Nothing real to describe → leave the slot empty (never improvise a house).
   if (!facts.price && !facts.beds && !facts.sqft) return null;
   const lines = [
@@ -848,18 +844,56 @@ async function authorListingNarrative(facts: ListingFacts): Promise<string | nul
     facts.sqft && `Square feet: ${facts.sqft}`,
     facts.lotSize && `Lot: ${facts.lotSize}`,
     facts.propertyType && `Type: ${facts.propertyType}`,
+    facts.yearBuilt && `Year built: ${facts.yearBuilt}`,
     facts.city && `City: ${facts.city}`,
+    facts.zip && `ZIP: ${facts.zip}`,
+    facts.isNewConstruction && `This is NEW CONSTRUCTION (vendor-stated).`,
+    facts.isPriceReduced &&
+      facts.priceReduction &&
+      `The price was REDUCED by ${facts.priceReduction} from its original ask.`,
+    facts.remarks && `The listing's own description: ${facts.remarks.slice(0, 1200)}`,
+    context && `Recent sales nearby (background only — this email is NOT about comps):\n${context}`,
   ].filter(Boolean);
+  // The old prompt handed the model the spec cells and said "use ONLY these facts" —
+  // so the only sentence it COULD write was the cells read back ("a 3-bedroom,
+  // 2,847 square-foot home offered at $595,000"), printed directly under a grid that
+  // already says exactly that. Write like a listing description instead: say what the
+  // home IS and what the neighborhood context means, and let the grid carry the specs.
   const system =
-    `You write ONE short paragraph (2-3 sentences) for a "just listed" real-estate ` +
-    `email about a specific home. Use ONLY the facts provided. Do NOT state any number, ` +
-    `price, or statistic that is not in the facts. No hype, no invented market claims, no ` +
-    `fake amenities. Return ONLY the paragraph text — no preamble, no quotes.`;
-  const user = `FACTS:\n${lines.join("\n")}\n\nWrite the paragraph.`;
+    `You write the property description for a "just listed" real-estate email — the ` +
+    `paragraph an agent puts under the photo. Two to four sentences.\n\n` +
+    `THIS EMAIL IS ABOUT THE HOUSE. Not the market, not the comps. A buyer reading it ` +
+    `wants to know what this property IS.\n\n` +
+    `IF THE AGENT'S OWN LISTING DESCRIPTION IS PROVIDED, IT IS THE SOURCE OF TRUTH and ` +
+    `your job is to TIGHTEN it into email prose — pull the details that make this home ` +
+    `distinctive (the setting, the water, the rooms, the standout features) and cut the ` +
+    `rest. Do not reproduce it at full length, and do not flatten it into generalities: ` +
+    `the specifics ARE the value. Without it, lead with what is most distinctive and ` +
+    `true from the facts — new construction, a price that has come down, scale, the lot.\n\n` +
+    `THE SPEC GRID ALREADY SHOWS price, beds, baths, square feet, lot, and type directly ` +
+    `above your paragraph. Do NOT list them back. A description that recites the specs is ` +
+    `a failure. Nearby sales are BACKGROUND ONLY — do not turn this into a comps ` +
+    `analysis; at most one clause may touch the market, and only if it serves the house.\n\n` +
+    `WHEN YOU USE THE AGENT'S WORDS, KEEP THEM TRUE. "Five-minute idle to open water" does ` +
+    `not become "five minutes to the river" — if you restate a detail, restate what it ` +
+    `actually said. And never add a selling claim of your own: "priced to move", "won't ` +
+    `last", "a rare opportunity" are YOUR words, not facts about the house. Describe; ` +
+    `do not pitch.\n\n` +
+    `HARD RULES. Every number you write must appear in the facts given. And a FACT ABOUT ` +
+    `THE HOME IS NOT ONLY A NUMBER: you may not assert a view, a waterfront, a pool, a ` +
+    `renovation, a garage, a school, a floor plan, a finish, a builder, or a neighborhood ` +
+    `character unless the facts state it. You are describing a house you have never seen — ` +
+    `you know its price, size, lot, type, and what sold near it, and NOTHING ELSE. If a ` +
+    `sentence needs a detail you were not given, cut the sentence. Write about what the ` +
+    `size and the lot and the comparable sales actually support. No hype ("stunning", ` +
+    `"dream home", "won't last"), no exclamation marks. Plain, confident, specific. ` +
+    `Return ONLY the paragraph.`;
+  const user = `FACTS:\n${lines.join("\n")}\n\nWrite the description.`;
   try {
     const msg = await getAnthropic("email_build").messages.create({
-      model: EMAIL_MODEL_HAIKU,
-      max_tokens: 400,
+      // Prose quality is the whole job here; Haiku wrote the robot sentence.
+      model: EMAIL_MODEL_SONNET,
+      max_tokens: 500,
       system,
       messages: [{ role: "user", content: user }],
     });
@@ -897,19 +931,37 @@ export async function authorDoc({
   // instead of letting the free author improvise a generic ZIP/comp card with no
   // house photo. A resolve miss returns the "paste your link or add a photo" ask —
   // never the placeholder grid (that would invent numbers), never a blocked build.
-  if (scope?.address && isNewListingRecipePrompt(prompt)) {
+  // The address reaches us by EITHER of the two doors, and this lane is the ONE
+  // authority on which: the homepage hero has an address FIELD (→ scope.address),
+  // while the Email Lab's campaign button only seeds the recipe TEXT — there the
+  // address the user types over the [[blank]] exists nowhere but the prompt. Gating
+  // on scope alone is what sent every in-lab campaign build to the free author, which
+  // improvised the photo-less ZIP grab-bag ("Typical asking rent") instead of the
+  // flyer. Read both; a caller that has neither still falls through untouched.
+  const subjectAddress = isNewListingRecipePrompt(prompt)
+    ? (scope?.address ?? subjectAddressFromPrompt(prompt))
+    : null;
+  if (subjectAddress) {
     // Never refuse (RULE 0.7). Resolve the real record; on a miss fall back to an
     // address-only skeleton so the coded flyer grid ALWAYS lands on the canvas —
     // empty photo dropzone + empty cells the user fills. This reverses the 07/07
     // "ask for a link/photo" behavior per operator (07/08/2026): the branded grid
     // appears every time; empty cells ≠ the killed grab-bag (no invented numbers,
     // no generic ZIP/comp improviser — just blanks to fill).
-    const resolved = await resolveSubjectListing(scope.address).catch(() => null);
+    const resolved = await resolveSubjectListing(subjectAddress).catch(() => null);
     const facts: ListingFacts = resolved ?? {
-      address: scope.address,
+      address: subjectAddress,
       photos: [],
       sourceUrl: BASE_URL,
     };
+    // LANE 2 — the agent's own listing description, pasted into the build box. No vendor
+    // sells us MLS remarks, so this is the ONLY source for what the home actually is
+    // (the water, the rooms, the finishes). It never overwrites a description the record
+    // already carries; it fills the gap the feed leaves.
+    if (!facts.remarks) {
+      const pasted = listingDescriptionFromPrompt(prompt);
+      if (pasted) facts.remarks = pasted;
+    }
     if (facts.photos[0]) {
       // Same durable-copy rule as the URL flyer: host OUR crop, so a re-send
       // months later never depends on the vendor CDN (miss keeps the original).
@@ -918,23 +970,37 @@ export async function authorDoc({
     }
     let flyer = buildListingFlyer(facts, currentDoc);
 
-    // Fill the chart slot IN PLACE (preserve its grid layout). buildPromptChart is
-    // a bonus; on any miss we drop the empty slot rather than ship an empty box.
-    const chartScope = facts.zip ? { kind: "zip", value: facts.zip } : scope;
-    let chartUrl: string | null = null;
-    try {
-      const chart = await buildPromptChart(prompt, flyer, chartScope, chartType);
-      if (chart) chartUrl = chart.image.url;
-    } catch {
-      /* chart is a bonus */
-    }
-    flyer = chartUrl
-      ? fillChartSlot(flyer, chartUrl, brandWebsiteUrl(currentDoc))
-      : dropEmptyChartSlot(flyer);
+    // Fill the chart slot IN PLACE (preserve its grid layout). A ZIP home-value index
+    // says nothing about a house — the chart an agent actually wants on a listing is
+    // THIS HOME against the recent sales around it. We hold both halves: the subject's
+    // list price (the record above) and the nearby sold comps. On any miss we drop the
+    // empty slot rather than ship an empty box (a chart is a bonus, never a blocker).
+    // NO CHART ON A NEW LISTING (operator, 07/13/2026). This email's visual IS the
+    // property — the photo. A ZIP index says nothing about the house; a comps bar turns
+    // it into a comps email; and the price then-vs-now was two bars, which is a fact
+    // wearing a chart costume. A deliverable gets a chart when it is ABOUT a number.
+    // This one is about a home, so the slot is dropped rather than filled with filler.
+    // The comps and price-move shapes belong to the Comps / price-improved recipes and
+    // are specified in docs/standards/deliverable-playbook.md — including the rule that
+    // a comp must have beds AND sqft, or it's a vacant lot being charted against a house.
+    flyer = dropEmptyChartSlot(flyer);
 
-    // Fill the ONE commentary blank — best-effort; numbers stay in the cells.
+    // Fill the ONE commentary blank. The agent's remarks are the narrator's SOURCE, not
+    // the body — buildListingFlyer prefills the slot with the raw remarks, and
+    // fillNarrative skips a slot that isn't empty, so leaving it would ship 2,000
+    // characters of raw MLS copy instead of email prose. Clear it, then author.
+    // No comps context: this email is about the house, and handing the narrator a comp
+    // set is what turned the paragraph into a market analysis last round.
     const narrative = await authorListingNarrative(facts);
-    if (narrative) flyer = fillNarrative(flyer, narrative);
+    if (narrative) {
+      flyer = {
+        ...flyer,
+        blocks: flyer.blocks.map((b) =>
+          b.type === "text" ? { ...b, props: { ...b.props, body: "" } } : b,
+        ),
+      };
+      flyer = fillNarrative(flyer, narrative);
+    }
 
     const parsed = EmailDocSchema.safeParse(flyer);
     if (parsed.success) {
@@ -943,7 +1009,7 @@ export async function authorDoc({
           doc: parsed.data,
           applied: true,
           replacedLayout: true,
-          listing: { subject: facts.address ?? scope.address, resolved: Boolean(resolved) },
+          listing: { subject: facts.address ?? subjectAddress, resolved: Boolean(resolved) },
         },
       };
     }

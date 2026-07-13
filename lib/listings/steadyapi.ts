@@ -53,7 +53,10 @@ export function canonicalRealtorUrl(permalink: unknown): string | undefined {
 
 interface RawResult {
   property_id?: unknown;
-  price?: { amount?: unknown; display?: unknown };
+  /** `reduced_amount` is the size of the CUT, not the old price — the old price is
+   *  amount + reduced_amount (verified live 07/13/2026: $595,000 + $104,975 cut,
+   *  display "$595,000 (Reduced $104,975)"). */
+  price?: { amount?: unknown; display?: unknown; reduced_amount?: unknown };
   status?: unknown;
   permalink?: unknown;
   photo_url?: unknown;
@@ -67,11 +70,20 @@ interface RawResult {
     lat?: unknown;
     lon?: unknown;
     county_fips?: unknown;
+    street_view_url?: unknown;
   };
+  /** Real, vendor-stated characteristics of the LISTING — the only descriptive facts
+   *  this endpoint carries. A new-listing email is about the house, and these are what
+   *  we can say about it without inventing: is it new construction, was the price cut,
+   *  is it actually new to market, is it coming soon. */
   flags?: {
     is_new_listing?: unknown;
     is_price_reduced?: unknown;
     is_new_construction?: unknown;
+    is_coming_soon?: unknown;
+    is_pending?: unknown;
+    is_contingent?: unknown;
+    is_foreclosure?: unknown;
   };
 }
 
@@ -161,6 +173,24 @@ export function normalizeResult(raw: RawResult, city: string, state: string): Li
     mlsNumber: null,
     photoUrl,
     ...(listingUrl ? { listingUrl } : {}),
+    // The descriptive half of the row — dropped until 07/13/2026, which is why a
+    // "new listing" email had nothing to SAY about the house and fell back to reciting
+    // its own spec cells. These are vendor-stated, never inferred.
+    ...(typeof raw.price?.reduced_amount === "number" && raw.price.reduced_amount > 0
+      ? { priceReduction: raw.price.reduced_amount }
+      : {}),
+    ...(typeof raw.flags?.is_new_construction === "boolean"
+      ? { isNewConstruction: raw.flags.is_new_construction }
+      : {}),
+    ...(typeof raw.flags?.is_price_reduced === "boolean"
+      ? { isPriceReduced: raw.flags.is_price_reduced }
+      : {}),
+    ...(typeof raw.flags?.is_new_listing === "boolean"
+      ? { isNewListing: raw.flags.is_new_listing }
+      : {}),
+    ...(typeof raw.location?.street_view_url === "string" && raw.location.street_view_url
+      ? { streetViewUrl: raw.location.street_view_url }
+      : {}),
   };
 }
 

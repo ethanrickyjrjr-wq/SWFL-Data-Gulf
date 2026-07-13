@@ -86,9 +86,14 @@ export function EmailLabGridClient({
   const [sendOpen, setSendOpen] = useState(false);
 
   const [confirmOpen, setConfirmOpen] = useState(plan.projectConfirm);
-  // The address popup only matters for the ANONYMOUS recipe arrival — a signed-in
-  // recipe rides into a project, where the in-project client shows the popup.
-  const [addressOpen, setAddressOpen] = useState(plan.addressPopup && !signedIn);
+  // ASK FOR THE ADDRESS, ALWAYS. This used to be `plan.addressPopup && !signedIn` on
+  // the theory that a signed-in recipe rides into a project, where the in-project
+  // client shows the popup. It only rides if there IS a project: `plan.projectConfirm`
+  // is false when offeredProject is null, so a signed-in user with no project got no
+  // confirm, no popup, and no build — they picked a showcase recipe and landed on a
+  // BLANK CANVAS. The render below already sequences these (`!confirmOpen &&
+  // addressOpen`), so the confirm still comes first when there IS a project to offer.
+  const [addressOpen, setAddressOpen] = useState(plan.addressPopup);
   const [creating, setCreating] = useState(false);
 
   // Remount-build: the shell's autoGenerate effect fires ONE build off

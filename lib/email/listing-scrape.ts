@@ -32,6 +32,13 @@ export interface ListingFacts {
   yearBuilt?: string;
   propertyType?: string;
   remarks?: string; // the marketing description, verbatim
+  /** Vendor-stated listing characteristics — what a NEW LISTING email is actually
+   *  about. The feed carries no MLS remarks, so these are the real descriptive facts
+   *  we hold about the house itself. Absent = not stated; never inferred. */
+  isNewConstruction?: boolean;
+  isPriceReduced?: boolean;
+  /** The SIZE of the cut. Old price = price + priceReduction. */
+  priceReduction?: string;
   photos: string[]; // absolute listing photo URLs
   lat?: number; // from GeoCoordinates — used for comps chart
   lon?: number;

@@ -42,6 +42,17 @@ export interface Listing {
    *  07/11/2026). Never constructed from an id (handoff §2.3 — minted URLs 404).
    *  The artifact-link resolver treats absence as "no link". */
   listingUrl?: string;
+  /** The SIZE OF THE PRICE CUT (not the old price — old = price + priceReduction).
+   *  Present only when the vendor reports a reduction. */
+  priceReduction?: number;
+  /** Vendor-stated listing characteristics — the only DESCRIPTIVE facts the feed
+   *  carries, and the ones a listing email is actually about. Absent = not stated;
+   *  never inferred. */
+  isNewConstruction?: boolean;
+  isPriceReduced?: boolean;
+  isNewListing?: boolean;
+  /** Google Street View still for this address, from the vendor's own row. */
+  streetViewUrl?: string;
 }
 
 const str = (v: unknown): string => (typeof v === "string" ? v : "");

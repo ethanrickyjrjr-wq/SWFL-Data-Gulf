@@ -61,11 +61,20 @@ const listFrom =
   async ({ offset }) =>
     pages[offset ?? 0] ?? [];
 
+// The bath lane's fetcher, stubbed. /search carries NO bath count, so a bath can only
+// come from /nearby-home-values — but this suite is offline by contract, so every call
+// injects this. A resolve must still make ZERO live vendor calls.
+const noNearby = async () => [];
+
 describe("resolveSubjectListing", () => {
   test("resolves a Lee address to its record — Court≡Ct, photo + real numbers", async () => {
     const facts = await resolveSubjectListing(
       "16447 Rainbow Meadows Court, Fort Myers, Florida 33908",
-      { geocode: geocodeReturning("33908"), fetchListings: listFrom({ 0: [SUBJECT] }) },
+      {
+        fetchNearby: noNearby,
+        geocode: geocodeReturning("33908"),
+        fetchListings: listFrom({ 0: [SUBJECT] }),
+      },
     );
     expect(facts).not.toBeNull();
     expect(facts!.photos[0]).toBe("https://ap.rdcpix.com/abc/16447.jpg");
@@ -80,6 +89,7 @@ describe("resolveSubjectListing", () => {
   test("out of the Lee/Collier footprint → null (no vendor call needed)", async () => {
     let called = 0;
     const facts = await resolveSubjectListing("100 Main St, Miami, FL 33101", {
+      fetchNearby: noNearby,
       geocode: geocodeReturning("99999"), // resolves to no SWFL county
       fetchListings: async () => {
         called++;
@@ -92,6 +102,7 @@ describe("resolveSubjectListing", () => {
 
   test("no matching record in the city → null", async () => {
     const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
+      fetchNearby: noNearby,
       geocode: geocodeReturning("33908"),
       fetchListings: listFrom({ 0: [mkListing({ addressLine1: "9 Elsewhere Blvd" })] }),
     });
@@ -103,6 +114,7 @@ describe("resolveSubjectListing", () => {
       mkListing({ addressLine1: `${i} Nowhere Ln` }),
     );
     const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
+      fetchNearby: noNearby,
       geocode: geocodeReturning("33908"),
       fetchListings: listFrom({ 0: fullPage, 200: [SUBJECT] }),
     });
@@ -111,6 +123,7 @@ describe("resolveSubjectListing", () => {
 
   test("no for-sale listings (no key / empty feed) → null", async () => {
     const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
+      fetchNearby: noNearby,
       geocode: geocodeReturning("33908"),
       fetchListings: async () => [],
     });
@@ -120,6 +133,50 @@ describe("resolveSubjectListing", () => {
   test("empty address → null", async () => {
     expect(await resolveSubjectListing("")).toBeNull();
     expect(await resolveSubjectListing(null)).toBeNull();
+  });
+
+  // The bath lane. /search carries beds, sqft and lot but NO bath count, so every
+  // listing shipped a blank "Baths" cell. The count is not missing from the vendor —
+  // /nearby-home-values returns beds/baths/sqft, and a property is the nearest property
+  // to its OWN coordinates, so the subject comes back as its own row (verified live
+  // 07/13/2026: 326 Shore Dr → baths 3.5).
+  test("fills baths from the nearby lane when the listing row has none", async () => {
+    const noBaths = mkListing({
+      addressLine1: "16447 Rainbow Meadows Ct",
+      price: 1159150,
+      bedrooms: 4,
+      bathrooms: null, // /search never returns this
+      squareFootage: 4195,
+      latitude: 26.5,
+      longitude: -81.9,
+      photoUrl: "https://ap.rdcpix.com/abc/16447.jpg",
+    });
+    const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
+      geocode: geocodeReturning("33908"),
+      fetchListings: listFrom({ 0: [noBaths] }),
+      fetchNearby: async () => [
+        { addressLine: "9 Somewhere Else Dr", baths: 9 },
+        { addressLine: "16447 Rainbow Meadows Ct", baths: 3.5 }, // the subject's own row
+      ],
+    });
+    expect(facts!.baths).toBe("3.5");
+  });
+
+  test("a bath count is never invented — no nearby match leaves the cell absent", async () => {
+    const noBaths = mkListing({
+      addressLine1: "16447 Rainbow Meadows Ct",
+      bedrooms: 4,
+      bathrooms: null,
+      latitude: 26.5,
+      longitude: -81.9,
+      photoUrl: "https://ap.rdcpix.com/abc/16447.jpg",
+    });
+    const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
+      geocode: geocodeReturning("33908"),
+      fetchListings: listFrom({ 0: [noBaths] }),
+      fetchNearby: async () => [{ addressLine: "9 Somewhere Else Dr", baths: 9 }],
+    });
+    expect(facts!.baths).toBeUndefined();
   });
 });
 
