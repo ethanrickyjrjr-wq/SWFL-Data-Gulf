@@ -1,405 +1,268 @@
-# The Deliverable Playbook — and the handoff brief for finishing the other recipes
+# The Deliverable Playbook
 
-**Written 07/13/2026.** Everything here was verified against running code and live vendor
-calls on that date. Nothing in it is from memory. Where something is unverified, it says so.
-
-**Who this is for:** an agent picking up the deliverable engine cold, who will fan out one
-worker per recipe. Read Parts 1–5 before dispatching anything. Part 6 is the per-recipe
-assignment. Part 7 is how a worker proves it's done. Part 8 is what will bite you.
+**Rewritten 07/13/2026**, after all twelve recipes were built for real and adversarially
+verified. Everything here was checked against running code, a live database, and rendered
+artifacts on that date. **Where the previous version was wrong, it says so** — it was wrong
+in ways that *caused* bugs, and that is worth knowing.
 
 ---
 
-## Part 0 — The one-paragraph situation
+## Part 0 — Read this first
 
-The product shows customers beautiful example emails and then hands them something else.
-The examples were never built by the product: `d3292777` **vendored the Latitude 26
-lifecycle emails as 729 lines of hand-written HTML** into `public/showcase/`, and
-`scripts/capture-showcase.mjs` only opens those files in a browser and screenshots them.
-No code path could produce them. Meanwhile every recipe click opened a **blank page** and
-asked a model to improvise, ignoring the 27 real skeletons committed in the repo.
+The product used to show customers beautiful example emails and hand them something else.
+The examples **were never built by the product**: 18 hand-written HTML files were vendored
+into `public/showcase/`, and `capture-showcase.mjs` only screenshots them.
 
-On 07/13/2026, **New Listing** was made to actually work, end to end, from the address
-alone. It is the reference implementation. Your job is to do the same for the rest, using
-its pattern — **but they are not all the same**, and Part 6 says how each differs.
+**All twelve recipes are now built, registered, and dispatch from one key.** But the
+samples still promise things the data cannot give (Part 8), and that is now the biggest
+lie left in the product.
 
 ---
 
-## Part 1 — The paths (what happens when a user clicks "build")
+## Part 1 — The one thing to understand
 
-### The doors — five, and they differ in ONE thing: what `scope` they hand the builder
+> **INVENTION IS CLAIM-SHAPED, NOT NUMBER-SHAPED.**
 
-| Door | Passes |
-|---|---|
-| Homepage hero | `{ address }` — it has an address field |
-| Email Lab campaign button | **nothing** — the address lives only in the prompt text |
-| Showcase "Make this →" | **nothing** |
-| Project lab (`/project/[id]/email-lab`) | the project's `subject_address` |
-| ZIP door (map / report "email this") | `{ kind: "zip", value }` |
+On 07/13, seven workers built seven deliverables. **Four shipped a falsehood**, and every
+author had "verified it by eye". Here is what shipped:
 
-This is why the *same* recipe produced a photo flyer from the homepage and a ZIP grab-bag
-("Typical asking rent", no photo, no price) from the Lab. The property lane was gated on
-`scope.address`, and three of five doors never set it.
+- *"$209/sq ft sits just **below** the $213 median — and below the two recorded sales,
+  which closed at $173 and $195."* — **$209 is ABOVE both.** The central argument of a
+  price-defense email, inverted.
+- *"went under contract after **75 days** on market"* — no source holds a days-to-contract
+  interval. The vendor's DOM is **null**.
+- *"the seller had reduced the price **before** a contract was reached"* — we hold a cut
+  AMOUNT. No cut date. No contract date. **No ordering.**
+- *"the gap is **widening**"* — given ONE national LEVEL and no trend. **A level is not a
+  direction.**
+- *"**five** of those six ZIPs"* — the true count was **four**.
+- *"on **Shore Dr**"* — we hold no street relationship. Only "nearby". (It had been banned
+  from the word "street".)
 
-**Fixed 07/13:** `authorDoc` now reads the subject from the field **or** the prompt
-(`subjectAddressFromPrompt`, `lib/email/listing-intent.ts`) and is the ONE authority on
-which. **Never re-gate a lane on how a door happens to pass something.**
+**NOT ONE OF THOSE CONTAINS AN INVENTED NUMBER.** Every figure was correctly sourced. What
+was invented was **the claim drawn between correctly-sourced numbers** — a comparison, a
+trajectory, a count, a sequence, a location. A digit lint cannot see any of them.
 
-All doors POST to `app/api/email-lab/ai/route.ts`.
+And one more, which is worse than all of them:
 
-### The builders — that one route picks between THREE
-
-1. `authorDoc` (`lib/email/build-doc.ts`) — when `build === true || mode === "author"`.
-   **This is the one you want.** Inside it are two lanes:
-   - the **subject-listing lane** — resolves the real house, builds the fixed flyer grid;
-   - the **free author** — knows only ZIP aggregates + nearby sold comps. No photo, no
-     property. **This is the grab-bag**, and it is where 15 of 17 recipes still land.
-2. `buildContentDoc` (same file) — the patch path. Its rich-flyer branch is gated on a
-   **pasted URL**. If you wire a door here by accident you reintroduce the original bug.
-3. the **showing-prep assembler** — intercepts before either when the prompt looks like a
-   showing prep (`isShowingPrepPrompt`).
-
-### The renderers — one document, THREE engines
-
-Canvas (`GridCanvas` → `BlockRenderer`), sendable email HTML (`EmailDocRenderer` /
-`compile-grid`), and PDF. **They disagree.** The ZIP trend chart drew full axes on the
-canvas and shipped as an axis-less line in the email — so the preview lied about what the
-recipient would get. Assume nothing renders the same in all three until you check.
+- *"I farm **North Fort Myers**"* → the builder resolved **Fort Myers** and shipped a
+  confident, beautifully-cited email **about the wrong city**. Every number in it real,
+  correctly sourced, and about the wrong place. **A gap is honest. A confidently wrong
+  subject is a lie that looks exactly like the truth.**
 
 ---
 
-## Part 2 — Four different things are called a "recipe", and none are wired together
+## Part 2 — The claim gate (`lib/deliverable/claims.ts`)
 
-| Where | What a "recipe" is there |
-|---|---|
-| `lib/showcase/registry.ts` | a **prompt string** with a `[[blank]]` — what the buttons seed |
-| `lib/email/author-recipes.ts` | 11 **advisory prose nudges** appended to the model's system prompt. Its own header says *"The model MAY deviate — nothing here is enforced."* Test-enforced to contain **zero digits**. There is **no `new-listing` entry at all.** |
-| `lib/email/doc/default-docs.ts` | **27 positioned skeletons** — real grids: `new-listing`, `just-sold`, `open-house`, `price-reduced`, `listing-feature`, `neighborhood-report`, `investment-brief`, `monthly-digest`, `year-in-review`… |
-| `lib/email/listing-flyer.ts` | a **hard-coded grid** built in TypeScript |
+**Structural, not lexical.** A banned-word list was tried and lost.
 
-**THE DISEASE.** `planArrival` (`lib/lab-entry/arrival.ts`) returns `{ kind: "blank" }` for
-**every** recipe arrival. The client then loads `skeleton-clean-white` — an empty page. All
-27 skeletons are skipped and a model improvises on a blank canvas.
+1. **CODE computes** the relation, the count, the ordering — `compareToSet`, `settledCount`.
+2. The narrator receives the **result** as a settled English sentence.
+3. The narrator receives **NO raw pair, NO raw set, NO row list.** *It cannot compare two
+   numbers it was never given two of.* **This is the defense.**
+4. `auditClaims` is a **FAIL-CLOSED BACKSTOP** — on any hit, the paragraph is **dropped to
+   an open slot**. Never shipped, never "best-effort".
+5. Print `CLAIM_PROHIBITION` into the narrator's system prompt, so the model is told the
+   exact rule the lint enforces.
 
-**The designs are in the repo. The build path never loads them.** This is still true today
-and is the single highest-leverage thing left to fix.
+**Your done-condition is greppable: the narrator receives no raw set.** Not "a verifier
+didn't complain" — that recursion never terminates.
+
+**The lint has been beaten TWICE, so do not trust it alone:**
+
+- *Round 1:* it matched only **spelled** counts, so `"All 6 comparable homes are recorded
+  sales"` shipped cleanly — **false**, and the digits were already in the allow-set because
+  the settled sentences supplied them. **An absent control, not a beatable one.**
+- *Round 2:* it was silent on **layout self-reference**. The narrator has **zero layout
+  knowledge** — it never sees the document — and the layout *moves* underneath it (an empty
+  row is omitted, a chart is dropped). *"The chart below"* becomes a visible lie.
+
+Both are closed. Assume there is a third. Upgrade to entailment
+(check `claims_gate_entailment_upgrade`).
 
 ---
 
 ## Part 3 — The four rules
 
-Every failure found on 07/13 violated one of these.
+### 1. Resolve the subject ONCE, from a real record
 
-### 1. Resolve the subject once, from a real record
+The dispatcher does it (`resolveSubject`, `lib/deliverable/recipes/shared.ts`). **NEVER
+WRITE A SECOND RESOLVER.** The address reaches the builder from the field **or** the
+prompt; the *builder* decides, never the door.
 
-A deliverable has a **subject** — a house, a ZIP, a farm area, an agent. Resolve it ONCE,
-from a real source, before any layout happens. Never let a model infer the subject from
-prose. Read it from the field **or** the prompt; the builder decides, not the door.
+**A subject we cannot resolve must cost an OPEN SLOT — never a neighbouring one.**
 
-### 2. A cell renders only if it is sourced — but an unfillable cell becomes an OPEN SLOT, not a lie
+### 2. A cell renders only if it is sourced — an unfillable cell is an OPEN SLOT, not a lie
 
-Three distinct states, and they are not the same:
+- **sourced** → render it.
+- **not sourced** → on the canvas, an open slot the user can fill; in the **sent email it
+  does not exist**. Never a zero. Never a naked label.
+- **invented** → forbidden, always. The only hard block in the product.
 
-- **sourced** → render the value.
-- **not sourced, and we could never source it** (a bath count the vendor doesn't carry) →
-  on the canvas it is an **open slot the user can fill**; in the **sent email it does not
-  exist**. Never a zero. Never a naked label with nothing under it.
-- **invented** → forbidden, always. This is the only hard block in the product.
+**Before deciding a field is unfillable, check whether we already fetch it and throw it
+away.** `lotSize` and `propertyType` were in the vendor row and never mapped; `baths` was on
+an endpoint we already call.
 
-See **Part 4** — this is the contract, and it is currently only half-built.
+### 3. A chart only when the deliverable is ABOUT a number — and about the SUBJECT
 
-**Before you decide a field is unfillable, check whether you are already fetching it and
-throwing it away.** `lotSize` (0.26 ac) and `propertyType` were in the vendor row and never
-mapped. `baths` was on `/nearby-home-values` — **an endpoint we already call** — and never
-read. Both rendered as empty labels over data we held.
+A new-listing email is about a **house**; its visual is the photo. **No chart.** An area
+index on a listing tells a buyer nothing. A comps bar turns it into a comps email. **Two
+bars (was/now) is a fact wearing a chart costume — write the fact.**
 
-### 3. A chart only when the deliverable is ABOUT a number — and it must be about the subject
-
-- A **new-listing** email is about a **house**. Its visual is the photo. **No chart.**
-- An area index chart on a listing tells a buyer nothing about the listing.
-- A comps bar on a listing email turns it into a comps email.
-- Two bars (was/now) is a fact wearing a chart costume. Write the fact.
-
-A **Market Comps** email, by contrast, IS about a number — so it gets the chart. Chart the
-subject, not the area around it. If the deliverable isn't about a number, ship no chart; an
-empty slot is worse than no slot.
+An **empty chart box is worse than no chart.** Policy `none` → `dropEmptyChartSlot`.
 
 ### 4. The model writes prose. Nothing else.
 
-Not layout. Not which cells exist. Not numbers.
+Not layout. Not which cells exist. Not numbers. Not comparisons, counts, trajectories,
+sequences, locations, motives — **see Part 2.**
 
-Prose is only as good as what you hand it. Handed the spec cells and told "use only these
-facts", the only sentence it can write is the cells read back — which is exactly what it
-wrote, printed under a grid that already said the same thing.
+**A fact about a home is not only a number.** A view, a pool, a renovation, a floor plan, a
+finish is equally an invention if it wasn't given. (A model once guessed "waterfront
+character" and happened to be **right**. Guessing correctly is luck, not sourcing.)
 
-Hand it **sources**, and forbid the rest:
+**No vendor sells us MLS remarks** — all 18 SteadyAPI endpoints checked 07/13/2026;
+realtor.com blocks the page. So a listing description is a **lane-2 fact: the agent pastes
+it.** With no paste, the narrator has **no source for a paragraph at all** — so it writes
+none, and the slot stays open. That is correct behaviour, not a failure.
 
-- every number must appear in the facts given;
-- **a fact about the home is not only a number** — a view, a waterfront, a pool, a
-  renovation, a school, a finish is equally an invention if it wasn't given. (The model
-  guessed "waterfront character" and happened to be *right*. Guessing correctly is luck,
-  not sourcing.)
-- when using the user's own words, **keep them true** — an "idle to open water" does not
-  become "minutes to the river";
-- **never add a selling claim of its own** — "priced to move", "won't last", "a rare
-  opportunity" are the model's words, not facts about the house.
+### The four lanes, in order
 
-### The four lanes for filling a gap, in order
-
-our data → **the user's own text / upload** → a named web source → a figure the user states.
-
-**Never refuse the build. Never invent.** For a listing description specifically: **no
-vendor sells us MLS remarks.** All 18 SteadyAPI real-estate endpoints were checked on
-07/13/2026 — `/search` returns `beds`, `sqft`, `lot_sqft` and flags, and nothing else
-descriptive; realtor.com blocks the page. So the description is a **lane-2 fact: the agent
-pastes it**, and it becomes the narrator's source of truth.
+our data → **the user's own text/upload** → a named web source → a figure the user states.
+**Never refuse the build. Never invent.**
 
 ---
 
-## Part 4 — THE OPEN-SLOT CONTRACT (read this before building any recipe)
+## Part 4 — The open-slot contract
 
-**Operator ruling, 07/13/2026:** *"For info we don't have, we leave open with instructions
-for the user to paste or add. If a photo, a button to open files or a link to add —
-whichever is the easiest path."*
+**Operator ruling:** *"For info we don't have, we leave open with instructions for the user
+to paste or add."*
 
-This is the rule that keeps "never invent" from becoming "never build". A gap is not a
-blocker and it is not a blank — **it is an invitation, addressed to the user, on the
-canvas, that never reaches the recipient.**
+`emailRender` is the mechanism. **`stats`, `image` and `text` honor it** (an empty cell is a
+"+ Add" affordance on canvas and **absent** from the sent email; a row with no surviving
+cell is omitted; an empty image is a dropzone with a file-picker and a paste-a-link).
 
-### The mechanism already exists — generalize it, don't invent it
+⚠️ **`hero` and `signal` still do NOT honor it.** An empty hero would ship a naked label.
+*(This corrects the previous playbook, which claimed only `SocialIconsBlock` honored it —
+that was true when written and is no longer.)*
 
-`lib/email/blocks/BlockRenderer.tsx` takes an `emailRender` flag, documented in the file as:
-
-> *"True on the sendable-HTML paths (EmailDocRenderer, compile-grid) — canvas-only
-> affordances (empty-state placeholders) must not reach a recipient."*
-
-**Today only `SocialIconsBlock` honors it** (`if (entries.length === 0 && emailRender) return null`).
-`stats`, `image`, and `text` blocks do not. That is the gap.
-
-**What a worker must build (verified as NOT done):**
-
-1. **Empty stat cell** → on canvas, renders as an editable placeholder showing its label and
-   an obvious "add" affordance. On `emailRender`, the cell is **omitted** (and if a row has
-   no surviving cells, the row is omitted).
-2. **Empty image slot** → on canvas, renders a **dropzone with a file-picker button and a
-   "paste a link" input**. `EmailLabGridShell.uploadNewPhoto(file)` already exists — wire the
-   empty slot to it rather than writing a second uploader. On `emailRender`, omitted.
-3. **Empty text slot** → on canvas, a placeholder whose text is an **instruction**
-   ("Paste your listing description — we'll tighten it"). On `emailRender`, omitted.
-
-**The label is the instruction.** This is already the house rule for seed templates
-(`lib/email/CLAUDE.md`, "THE SLOT RULE": *a label is an instruction to whoever fills the
-slot, not a caption*). Extend it to gaps: the label tells the user what to paste.
-
-### Honest status of the reference implementation
-
-New Listing currently **drops** an unsourced cell at build time (`listing-flyer.ts`). That
-satisfies "never ship a naked label" but **not** "leave it open for the user to fill" — the
-operator explicitly asked for the latter for Baths. **Reconciling these is the first task
-in the fan-out** (Part 6, task R0) and it must land before, or alongside, the other recipes,
-because every one of them depends on it.
+**NEVER default an instruction into a brand block.** The AI deliberately skips brand blocks,
+so whatever is defaulted there **ships verbatim**. The agent-card bio defaulted to *"A short
+bio that builds trust with your readers"* and was verified rendering into a **sent** email
+under an agent's own name. Two seed cards likewise emailed coaching notes to real
+recipients.
 
 ---
 
-## Part 5 — The reference implementation: New Listing
+## Part 5 — The reference implementation
 
-Read the code before copying it: `authorDoc`'s subject-listing lane in
-`lib/email/build-doc.ts`, plus `lib/listings/resolve-subject.ts` and
-`lib/email/listing-flyer.ts`.
+`lib/deliverable/recipes/new-listing.ts`. Read it before writing yours. Copy the **shape**,
+not the framing.
 
-- **Subject spine** — the listing address, from `scope.address` OR the prompt.
-- **Resolve** — `resolveSubjectListing(address)`: geocode (Mapbox) → **Lee (12071) /
-  Collier (12021) gate** → SteadyAPI `/search` by address slug → match on canonicalized
-  street line. Then `withBaths()` makes ONE extra call to `/nearby-home-values` for the bath
-  count (the subject is the nearest property to its own coordinates, so it comes back as its
-  own first row).
-- **Photo** — the vendor's `photo_url`, **mirrored into our own Supabase storage**
-  (`mirrorHeroPhoto`) so a re-send months later doesn't depend on the vendor CDN.
-- **Skeleton** — the coded flyer grid (`buildListingFlyer`).
-- **Cells** — price · beds · baths · sqft · $/sqft · lot · type. Each renders only if
-  sourced. (`$/sqft` is computed from price ÷ sqft — both must parse, or the cell is gone.)
-- **Chart** — **none**.
-- **Prose** — the agent's pasted description, tightened. No invented qualities, no pitch.
-- **Framing** — "New Listing" kicker, price + address hero, "View the Full Listing" CTA.
+**Live fixture:** `326 Shore Dr, Fort Myers, FL 33905` → $595,000 · 3 bd · 3.5 ba · 2,847
+sqft · $209/sqft · 0.26 ac · Residential, with a real photo.
 
-**Live proof (07/13/2026, 326 Shore Dr, Fort Myers 33905):** resolves to $595,000 · 3 beds ·
-3.5 baths · 2,847 sqft · $209/sqft · 0.26 ac · Residential, with the real photo. Vendor also
-returns `is_new_construction: true` and `price.reduced_amount: 104975` (the size of the
-**cut**, not the old price — old = price + reduction).
+⚠️ **`465 Gordonia Road` (the Latitude 26 showcase house) IS FICTIONAL and does not
+resolve.** Do **not** use the hand-written showcase HTML as an acceptance target.
 
 ---
 
-## Part 6 — The assignments
+## Part 6 — The twelve recipes
 
-**There are 17 recipe entries but only 12 DISTINCT recipes** — several slides reuse the
-campaign's exact prompt verbatim. **Do not dispatch two workers onto the same prompt.**
-Dedupe first; the duplicates are noted below.
+**All twelve are registered in `lib/deliverable/recipes/index.ts`.** The registry
+(`lib/deliverable/recipes.ts`) is the authority on skeleton · prose · subject spine · chart
+policy. **A surface may only POINT at a key; it may never redefine one.**
 
-Every worker answers the same six questions, then builds. **The answers are the only thing
-that differs between recipes.**
+*(The previous playbook had a **key collision** — it assigned `market-pulse` to both Monthly
+Market Pulse and The Social Cut, and would have sent two workers at one key. It also said
+"these **five** lifecycle recipes" when there are **seven**, and had no entry at all for
+`open-house` or `price-reduced`. Its R-numbers disagreed with the code. All corrected here.)*
 
-1. **Subject spine** — what gets resolved? (a listing address · a ZIP / city · an agent · nothing)
-2. **Skeleton** — which committed grid from `default-docs.ts`? **It probably already exists. Load it.**
-3. **Cells** — which facts, each with a real source. Unsourced → open slot (Part 4). Never a zero.
-4. **Chart** — is this deliverable ABOUT a number? If not, none.
-5. **Prose source** — what may the model draw from? Hand it those; forbid everything else.
-6. **Framing** — kicker, hero, CTA. This is the hat. The facts underneath are often the same.
+### The listing lifecycle — ONE resolved house, seven hats
 
-### R0 — THE OPEN-SLOT CONTRACT (do this FIRST; everything else depends on it)
+| Key | Chart | The thing that will bite you |
+|---|---|---|
+| `new-listing` | **none** | The reference. Its visual IS the photo. |
+| `coming-soon` | scarcity | **The street address must not leak** — not the hero, the alt text, the subject line, the CTA url, **or the narrator's fact sheet.** `authorListingNarrative` builds its facts FROM `facts.address`: hand it raw `ctx.facts` and you have typed the street into the model's context. De-identify, then redact the output. |
+| `market-comps` | comps-bar | **A comp must have beds AND sqft, or it is a vacant lot.** Filter by DATA, never by guessing at the name. The set is **2 recorded sales + 4 valuations** — *not* "six live listings". Say so on the email's face. |
+| `under-contract` | **none** | **Its old prompt REQUESTED A FABRICATION** — "lead with how fast it went pending" — and no lane holds a days-to-contract interval. The builder obeyed and invented one. Now: **time ON market**, which we do hold. |
+| `just-sold` | comps-bar | The vendor's `price` is an **ASK**. A sold price is a different thing. `/property-tax-history` returns the last recorded *transfer*, which may be a 2023 land sale on a new-construction lot — **a real number answering the wrong question.** No close → open slot. |
+| `open-house` | **none** | The **date and time are in no vendor feed.** Lane-2/4 — the agent supplies them. Open slots, never a placeholder date. |
+| `price-reduced` | **none** | **`reduced_amount` is the size of the CUT, not the old price.** old = price + cut. Operator: show the cut **above** the price, smaller, in the accent color. |
 
-Generalize `emailRender` empty-state suppression to `stats`, `image`, and `text` blocks, and
-build the canvas affordances: file-picker + paste-a-link for an empty image, editable
-placeholder for an empty cell, instruction placeholder for an empty text slot. Reconcile
-`listing-flyer.ts` so an unsourced cell becomes an **open slot** rather than being dropped at
-build time. See Part 4.
+### The area / agent recipes — a different spine. **Do not force the flyer.**
 
-### The listing lifecycle — the SAME resolved house wearing different hats
+`ctx.facts` is **null**. The subject is a ZIP, a city, or the agent.
 
-These five all share the New Listing subject spine and resolver. **Reuse it. Do not write a
-second resolver.** They differ only in framing, cells, chart, and prose source.
+| Key | Chart | The thing that will bite you |
+|---|---|---|
+| `agent-brand-intro` | zip-by-zip | Two spines at once (farm area + anchor listing). **The anchor's city must not contaminate the farm area.** |
+| `agent-launch` | **none** | **Exactly ONE hard number in the whole letter, and no chart.** A cross-SWFL ranking chart landed in a personal letter live on 07/05. |
+| `sphere-weekly` | **none** | The headline is a **lane-3 fact** — a named web source, *not in our lake*. Cite it or leave it open. **Never substitute one of our own figures for a "national headline".** |
+| `review-reply` | area-trend | Pure lake data; genuinely about numbers, so it charts. |
+| `market-pulse` | zip-mom-move | ⚠️ **The shared chart producer binds YoY, not MoM** (`findRankedDeltaPair` takes the first delta column sharing a stem). A "month-over-month" email would ship **−8% YoY chips**. And the ranked frame draws **max 8 rows** — a 10-ZIP place cannot show ten bars. |
 
-- **R1 · New Listing** — ✅ **DONE.** The reference. Don't re-do it.
-  *(The campaign seed and the "New Listing" slide are the SAME prompt — one recipe.)*
-  Note: the seed prompt still asks for "a chart of the ZIP's home-value trend". The operator
-  killed that chart. **Update the registry prompt to stop promising it.**
+**Skeletons:** *"it probably already exists, load it"* is **NOT universally true** — and
+believing it is harmful. Every listing seed is **address-forward** (hero label literally
+"Price and address"), so `coming-soon` loading one leaves an open slot **inviting the user to
+paste back the address the recipe exists to suppress.** A coded grid in your own file is
+legitimate (`buildListingFlyer` is one).
 
-- **R2 · Coming Soon** — *"hold the street address back, use real county inventory counts to
-  show how scarce homes like it are, one CTA to join a private preview list."*
-  Subject: the same house, but the **address is suppressed** (that's the whole point — do not
-  leak it into the hero, the photo alt text, or the subject line). Cells: scarcity counts from
-  live county inventory, not the spec grid. Chart: possibly a scarcity count — it IS about a
-  number. Framing: teaser, private-preview CTA.
-
-- **R3 · Market Comps** — *"six live comparable listings nearby with each price and price per
-  square foot, a price bar chart, and a straight case for my asking price."*
-  **This is the recipe the comps chart belongs to.** `compsForAddress` (`lib/assistant/comp-helper.ts`)
-  is the source. **HARD RULE, learned the hard way: a comp must have `beds` AND `sqft`, or it is
-  a vacant lot.** The nearby set mixes bare land in with homes (315 Shore Dr: `beds:null,
-  baths:null, sqft:null, lotSqft:16640`, sold $127.5k) and charting land against a 2,847 sqft
-  house makes the ask look like a bargain for a fake reason — the narrator then wrote a sentence
-  on that misreading. Filter by data, not by guessing at the name. Include the subject as its own
-  bar (we have its list price; the chat comp lane deliberately omits a subject bar because *its*
-  subject has no price — that reasoning does not apply here).
-
-- **R4 · Under Contract** — *"lead with how fast it went pending compared to the ZIP's typical
-  days on market, and invite backup offers."*
-  Subject: the same house. The headline is a **comparison number** (its DOM vs the ZIP's typical
-  DOM) — so this one IS about a number and earns a chart or a stat. **Check the vendor actually
-  returns `daysOnMarket`: on the row we inspected it was `null`.** If it's null, that's an open
-  slot with an instruction, not a made-up number.
-
-- **R5 · Sold** — *"set the close among the week's real sales nearby, and end with a private
-  home-valuation offer for my readers."*
-  Subject: the same house, now sold. Cells: the close price. Uses the comps set as *context*
-  (the week's real sales), so R3's land filter applies here too. Framing: sold hero,
-  valuation-offer CTA.
-
-### The area / agent recipes — a different spine entirely
-
-These have **no listing subject**. Do not force the flyer on them. Their subject is a ZIP or
-a city, and the free-author lane is *legitimate* for them — but it must load a real skeleton
-instead of a blank page.
-
-- **R6 · Agent Brand Intro** (`launch-blitz`) — *"a ZIP-by-ZIP asking-price chart from live
-  listings, my name and headshot up front, and my newest listing as the anchor."*
-  Two spines at once: a **farm area** (ZIP/city) AND the agent's **newest listing** as anchor.
-  Needs the agent's **headshot** — a photo we don't have → open slot with a file-picker (Part 4).
-
-- **R7 · Agent Launch / "The Letter"** (`agent-launch`) — *personal letter, one real market
-  insight, a numbered what-happens-next, one reply CTA, photo beside the letter not above it.*
-  *(The campaign seed and the "The Letter" slide are the SAME prompt — one recipe.)*
-  Mostly the agent's own voice + ONE cited market number. Headshot → open slot.
-
-- **R8 · Weekly Sphere Update / "Headlines vs Here"** — *"one national or Florida headline
-  number set beside my own area's number, one honest read of the gap, invite readers to reply
-  with their address and the word REVIEW."*
-  *(The agent-launch follow-up and the "Headlines vs Here" slide are the SAME prompt — one recipe.)*
-  The headline number is a **lane-3 fact (a named web source)** — it is not in our lake. Cite it
-  or leave it an open slot. Never invent it.
-
-- **R9 · The REVIEW Reply** — *"the current home-value level and trend, days on market, and
-  active inventory, each cited, with one honest read."*
-  A one-area snapshot. Pure lake data. This one is genuinely about numbers → chart is right.
-
-- **R10 · Monthly Market Pulse** (`market-pulse`) — *"every ZIP's month-over-month home-value
-  move, one snapshot chart, and one honest read of the trend."*
-  ⚠️ **The campaign seed, "The Ask", AND "The Pulse Email" are all the SAME prompt — three
-  entries, ONE recipe.** Build once.
-
-### Social surfaces — a different renderer, confirm before building
-
-- **R11 · Social Pack — 4 Formats** (`launch-blitz`) and **R12 · The Social Cut** (`market-pulse`).
-  These are **social**, not email. There are two unwired social systems in this repo. **Confirm
-  which one is live before writing anything** — do not assume the email path applies.
+**Social** (`social-pack`, `social-cut`) is **NOT `RecipeBuilder`-shaped** and is
+deliberately unregistered. Two live systems; neither touches the dispatch table; and **the
+social path has NO no-invention gate at all** (check
+`social_path_has_no_no_invention_gate`).
 
 ---
 
-## Part 7 — How a worker proves it's done
+## Part 7 — How you prove it
 
-**Do not claim a recipe works because the code looks right.** Every claim on 07/13 that
-wasn't backed by a rendered artifact turned out to be wrong at least once.
+**Do NOT claim it works because the code looks right.** Every unproven claim on 07/13 turned
+out wrong at least once — and in the round after that, **every re-fix was refuted again.**
 
-The loop that works:
+1. Build through the **real path**: `authorDoc({ prompt, rawDoc, recipeKey })` with **NO
+   scope** — that is the Lab door, the one that was broken.
+2. Render with `renderEmailDocHtml` — the same renderer a send uses.
+3. **LOOK AT IT.** Screenshot and open the image. Grepping the HTML is not looking at it.
+4. **RE-DERIVE EVERY COMPARISON WITH ARITHMETIC.** Do not read it — **compute** it. *"$209
+   is below $195"* reads fine and is false. **A reversed inequality looks exactly like a
+   correct one.**
+5. **Run the real row grouper and `compileGrid`.** Assert every row's widths sum ≤ 12, no
+   ghost tables, no `width="1800"`. **A picture that looks right in Chromium is not proof for
+   an email** — a 3-column 1800px Outlook table passed a browser screenshot.
+6. Trace **every rendered value and every clause of prose** to a source.
 
-1. **Build it through the real path.** Call `authorDoc` with a prompt and NO scope — that is
-   the Lab door, the one that was broken. If it only works with `scope.address` handed in, it
-   is not fixed.
-2. **Render it with the real renderer** — `renderEmailDocHtml(doc)`, the same one a send uses.
-3. **Look at it.** Screenshot the HTML (Playwright via the pinned crawl4ai venv at
-   `C:\Users\ethan\crawl4ai-venv\Scripts\python.exe`) and actually open the image. Grepping the
-   HTML is not looking at it — a chart PNG that ships with no axis labels greps fine.
-4. **Trace every field to a source.** Photo, each cell, each number in the prose. If you can't
-   name where a value came from, it is invented and the build is wrong.
-5. **Verify against a REAL subject.** `326 Shore Dr, Fort Myers, FL 33905` resolves and is the
-   known-good fixture. ⚠️ **`465 Gordonia Road` (the Latitude 26 showcase house) does NOT
-   resolve — it is fictional.** Do not use the hand-written showcase HTML as an acceptance
-   target; the builder cannot reproduce it from real data, and trying will waste hours.
-
-**Definition of done for a recipe:** built from the prompt alone through `authorDoc`; every
-rendered value traced to a real source; no naked labels and no zeros; every gap is an open slot
-with an instruction; the chart is present only if the deliverable is about a number; tests pass;
-`bunx eslint --max-warnings=0` and `bunx next build` clean; and a screenshot of the rendered
-email is attached to the report.
+`authorDoc` now **logs loudly** when a builder's doc fails schema and falls back to the
+generic author. If you see that, **what rendered was not your recipe.**
 
 ---
-PRODUCTION KEY IS IN VERCEL PHOTO_API
 
-## Part 8 — Landmines (each of these cost real time on 07/13)
+## Part 8 — What is still a lie
 
-  
-- **ESLint runs at `--max-warnings=0` in the pre-commit hook.** An unused function fails the
-  commit. If you orphan code, delete it — **never `--no-verify`** (forbidden by CLAUDE.md).
-- **`fillNarrative` skips a text block that already has content.** `buildListingFlyer` prefills
-  the commentary slot with raw remarks, so if you leave it, 2,000 characters of raw MLS copy ship
-  instead of authored prose. Clear the slot, then author.
-- **The canvas lies about the email.** Three renderers; the preview drew chart axes the emailed
-  PNG didn't have. Verify the *sent* artifact.
-- **The vendor's `reduced_amount` is the size of the CUT, not the old price.** Old = price + cut.
-- **`lotSize` is ACRES by convention** in our `Listing` type; SteadyAPI's `description.lot_sqft`
-  is square feet. The normalizer converts. Don't double-convert.  SHOW THE REDUCED AMOUNT IN A DIFFERENT COLOR ABOVE PRICE in smaller font- Price cut- 
-- **Prettier reformats touched files** on commit — diff with `git diff -w` to see real changes.
+**The showcase samples promise numbers that do not exist.** They were drawn without checking.
+
+- `465 Gordonia Road` **is fictional.**
+- **Under Contract** — *"pending in 90 days while rival estates sit at 238 and 279"*,
+  *"85 pendings, 31 at $2M+"*. **None of it is sourceable.**
+- **Market Comps** — *"six live comparable listings"*. The real set is 2 sales + 4
+  valuations.
+
+**A spec that asks for a number no lane holds is an instruction to lie, and the model will
+obey it.** That is not a model failure. It is a spec failure.
+
+Full list, with what to fix and what to research:
+`_AUDIT_AND_ROADMAP/2026-07-13-deliverable-followups.md`.
+
+---
+
+## Part 9 — Landmines
+
+- **`fillNarrative` SKIPS a text block that already has content.** A skeleton that prefills
+  the commentary slot ships raw MLS copy instead of authored prose. **Clear, then author.**
+- **`lotSize` is ACRES** in our type; the vendor's `lot_sqft` is square feet. The normalizer
+  converts. **Do not double-convert.**
+- **The canvas lies about the email.** Three render engines disagree.
+- **ESLint runs at `--max-warnings=0`** in the pre-commit hook. An unused function fails the
+  commit. **Never `--no-verify`.**
+- **`mock.module` replaces the WHOLE module** for every importer in the test process. Spread
+  the real module, or you will silently strip exports and break innocent files.
 - **The git index is shared with parallel sessions.** Stage explicit paths; never `git add -A`.
-
----
-
-## Part 9 — State as of 07/13/2026 (commit `e36f1b8e`)
-
-**Working:**
-- the subject address reaches the property lane from **every** door;
-- Showcase/buttons/ homepage asks for the address instead of dropping the user on a blank canvas;
-- `lotSize` + `propertyType` mapped (were fetched and discarded); `baths` resolved from
-  `/nearby-home-values` (was never missing — just never read);
-- an unsourced cell no longer renders as a naked label; give directions to paste needed information or Photo uploads
-- the pasted listing description is the narrator's source of truth;
-- no chart on a new listing;
-- New Listing builds correctly from the prompt alone. 55 tests pass.
-
-**Not working / not built:**
-- **the production key** (above) — blocks every user;
-- **the open-slot contract** (Part 4) — only `SocialIconsBlock` honors `emailRender`; an
-  unsourced cell is dropped at build time rather than offered to the user;
-- `planArrival` still opens a blank page for every recipe — **all 27 skeletons unused**;
-- **15 of 17 recipes still land in the free-author grab-bag**;
-- three render engines still disagree; the emailed area chart still ships without axes;
-- one document, three builders — a recipe still means different things depending on the door;  build each one through one 
-  door correctly at the root, then make small adjustments at different doors.  make sure all doors are accounted for!!
-- the New Listing registry prompt still promises a ZIP-trend chart that no longer ships.  FIX IT!!!

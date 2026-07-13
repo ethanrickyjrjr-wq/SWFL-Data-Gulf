@@ -1,3 +1,31 @@
+## 2026-07-13 (Opus 4.8 · main) — ALL 12 RECIPES BUILT. And the lesson: invention is CLAIM-shaped, not number-shaped.
+
+Operator: *"fan out an opus for each showcase… MAKE SURE EACH BUTTON CREATES THE SAME EXACT THING."*
+
+**The disease.** A recipe's IDENTITY was its **prompt string**, and three registries owned one concept with no shared authority (showcase prompts · the lab's 11 author-recipes · 27 seed skeletons). They collided *by name* and diverged in behavior. Proof it was already broken: the agent-launch follow-up and the "Headlines vs Here" slide were one deliverable carried as two strings differing by a trailing sentence. And the one working lane was gated on a **regex** — `isNewListingRecipePrompt` — which Coming Soon, Comps, Under Contract and Sold all missed despite carrying a real address. **Fifteen of seventeen recipes died on a single `if`.**
+
+**Now:** a RECIPE KEY is the identity. Every door carries `?rkey=`; `authorDoc` dispatches on it. All 12 builders registered (every one was **inert** — the dispatch table was still comments). `recipes.parity.test.ts` fails the suite if any surface re-types a prompt, if two doors disagree, if a pill's input contradicts its declared subject, or if a chart-less recipe's prompt still promises a chart (the New Listing prompt did).
+
+**THE FINDING THAT COST THE DAY.** Seven workers built seven deliverables. **FOUR shipped a falsehood**, each signed off by an author who had opened the screenshot. `"$209/sq ft sits BELOW the $213 median — and below the two recorded sales at $173 and $195"` ($209 is ABOVE both — the argument of a price-defense email, **inverted**). `"went under contract after 75 days"` (vendor DOM is **null**). `"the seller reduced the price BEFORE a contract was reached"` (we hold a cut AMOUNT — no dates, **no ordering**). `"the gap is widening"` (given ONE level, no trend). `"five of those six ZIPs"` (it was four). `"on Shore Dr"` (banned from the word "street"; it used the suffix).
+
+**NOT ONE CONTAINS AN INVENTED NUMBER.** Every figure correctly sourced. What was invented was **the claim drawn between correctly-sourced numbers**. Our no-invention lint tokenizes DIGITS; invention is CLAIM-shaped. Seven workers independently rediscovered the same hole.
+
+`lib/deliverable/claims.ts` closes it, **structurally**: code computes the relation/count/ordering; the narrator gets the RESULT as a settled sentence and **no raw set** — *it cannot compare two numbers it was never given two of*. `auditClaims` is a fail-closed backstop → an open slot, never a shipped guess. A banned-word list was tried and **lost**.
+
+**The gate itself was then beaten TWICE by adversarial verifiers** — and both holes were mine: it matched only **spelled** counts (so `"All 6 comparable homes are recorded sales"` shipped clean and false, its digits already in the allow-set from the settled sentences — *an absent control, not a beatable one*), and it was silent on **layout self-reference** (the narrator has zero layout knowledge; the layout *moves* under it). Both closed. **Assume there is a third.**
+
+**THE WORST BUG, and it shipped through the normal Lab door:** `"I farm North Fort Myers"` resolved to **Fort Myers**. The needle matcher substring-matched, so a real, distinct Lee County community became its neighbour — and the recipe built a confident, beautifully-cited email **about the wrong city**, every number real and about the wrong place. *A gap is honest; a confidently wrong subject is a lie that looks exactly like the truth.* The gazetteer can now **say it doesn't know a place** → open slot, never a neighbour.
+
+**Also shipped:** the open-slot contract (`stats`/`image`/`text` honor `emailRender`; an empty stat used to render **"0"** — a zero, i.e. an invented number, to a recipient); the 4 seed/button collisions closed (two seed cards were **emailing coaching notes** to real people — *"Say why this is a good value now… a motivated seller means room to negotiate"*); the agent-card bio placeholder (*"A short bio that builds trust with your readers"*) verified rendering into a **sent** email under an agent's own name; `dropEmptyChartSlot` left a **5-row void** in the one deliverable we had shipped.
+
+**THE AGENT PROFILE** — `agent_bio` was a **phantom field** (textarea + token + render, but **no column, no API entry**; the save silently dropped it). Now real, and **it updates itself**: the saved text carries `{{farm.home_value}}` tokens resolved at BUILD time with source + as-of. Move the lake, the sent bio moves, the agent edited nothing. `agent_profile_facts` stores one fact per row with a `source` column that is `NOT NULL` + `CHECK` — **a fact with no provenance cannot be written**, so an invented credential is structurally impossible.
+
+**Status: 8 of 12 verified clean.** market-comps/agent-brand-intro/agent-launch were refuted only for the three shared-root holes now fixed. sphere-weekly needs one more look.
+
+**NOT DONE (all in `checks`):** the showcase samples still sell fiction (465 Gordonia Rd doesn't exist; "six live comps" are 2 sales + 4 valuations; the Under Contract story is unsourceable) · the **social path has NO no-invention gate at all** · numbers are visually FLAT (`StatItem` has no emphasis field, so a recipe *cannot say which number matters*) · the agent-profile AI drafter + growth loop.
+
+**Follow-ups + what to research with crawl4ai (and encode in CODE, not a doc):** `_AUDIT_AND_ROADMAP/2026-07-13-deliverable-followups.md`.
+
 ## 2026-07-13 (Opus 4.8 · main) — ONE RECIPE KEY. Every button, every showcase card, every lab choice now builds the same thing.
 
 Operator: *"MAKE SURE EACH BUTTON EACH TOUCHES CREATES THE SAME EXACT THING FOR THE SAME BUTTONS/SHOWCASE CARD/EMAIL LAB CHOICE."* It could not, and the reason was structural.
