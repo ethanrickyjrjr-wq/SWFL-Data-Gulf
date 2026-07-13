@@ -3,18 +3,45 @@ import { Img, Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, ImageProps } from "../doc/types";
 import { fontStack, MUTED, CARD_BG, BORDER } from "./styles";
 import { EditableText, type EditScope } from "./editable-text";
+import { ImageSlot } from "./OpenSlot";
 
 export function ImageBlock({
   props,
   globalStyle,
+  emailRender,
   scope,
 }: {
   props: ImageProps;
   globalStyle: EmailGlobalStyle;
+  /** True on the sendable-HTML paths — an image we never sourced is an OPEN SLOT on
+   *  the canvas (file picker + paste-a-link) and DOES NOT EXIST in the email. The
+   *  gray "Image" box used to ship to real recipients. */
+  emailRender?: boolean;
   scope?: EditScope;
 }) {
   const font = fontStack(globalStyle.fontFamily);
   const hasOverlay = Boolean(props.overlayTitle || props.overlayBody);
+
+  // Nothing to show: no picture AND no overlay text. (An overlay with no url is a
+  // DELIBERATE colored panel — it carries content, so it ships.) A caption alone is
+  // not content: a caption under nothing is a naked label.
+  if (!props.url && !hasOverlay) {
+    if (emailRender) return null;
+    const isChart = props.kind === "chart";
+    // The label IS the instruction: the alt text says what belongs here.
+    const instruction = isChart
+      ? (props.alt ?? "Chart")
+      : props.alt
+        ? `Add the photo — ${props.alt}`
+        : "Add a photo";
+    return (
+      <Section
+        style={{ backgroundColor: props.sectionBg ?? CARD_BG, borderBottom: `1px solid ${BORDER}` }}
+      >
+        <ImageSlot instruction={instruction} font={font} scope={scope} isChart={isChart} />
+      </Section>
+    );
+  }
 
   if (hasOverlay) {
     const overlayBg = props.overlayBg ?? "rgba(0,0,0,0.45)";
@@ -100,9 +127,11 @@ export function ImageBlock({
     ? { aspectRatio: (props.ratio ?? "3:2").replace(":", " / "), objectFit: "cover" as const }
     : {};
 
-  const imgEl = props.url ? (
+  // Past the empty-slot guard above, a non-overlay image ALWAYS has a url — the old
+  // "Image" placeholder box (which shipped to recipients) is gone with it.
+  const imgEl = (
     <Img
-      src={props.url}
+      src={props.url ?? ""}
       alt={props.alt ?? ""}
       style={{
         width: "100%",
@@ -112,17 +141,6 @@ export function ImageBlock({
         ...photoRatioStyle,
       }}
     />
-  ) : (
-    <Section
-      style={{
-        padding: "48px 24px",
-        textAlign: "center",
-        backgroundColor: "#F3F4F6",
-        border: `1px dashed ${BORDER}`,
-      }}
-    >
-      <Text style={{ fontFamily: font, fontSize: "13px", color: MUTED, margin: 0 }}>Image</Text>
-    </Section>
   );
   return (
     <Section

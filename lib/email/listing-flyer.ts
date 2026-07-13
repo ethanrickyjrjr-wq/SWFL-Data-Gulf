@@ -125,26 +125,32 @@ export function buildListingFlyer(facts: ListingFacts, current: EmailDoc): Email
     3,
   );
 
-  // 4. Spec strip — two rows of fixed labels. Real values fill in; a spec we don't
-  //    hold stays an EMPTY cell (never a 0, never invented). Row A is always the
-  //    beds/baths/sqft the record carries; row B is computed/enrichment.
-  // A cell we can't source DOES NOT EXIST. The old code emitted every label with an
-  // empty value, so a listing with no bath count shipped a naked "Baths" heading with
-  // nothing under it — which reads as broken, not as honest. The rule is now
-  // structural: a spec with a real value becomes a cell; a spec without one is gone.
-  // (Still never a 0, still never invented — absent means absent.)
-  const spec = (value: string | undefined, label: string): StatItem[] =>
-    value && value.trim() ? [{ value: value.trim().slice(0, 24), label }] : [];
+  // 4. Spec strip — fixed labels; the record's real values fill them in.
+  //
+  // THE OPEN-SLOT CONTRACT (operator, 07/13/2026): "for info we don't have, we leave
+  // open with instructions for the user to paste or add." A spec we can't source is
+  // therefore NOT dropped at build time (07/13's earlier behavior, which fixed the
+  // naked-label bug by deleting the invitation with it) and NOT a fake 0. It stays a
+  // cell with an EMPTY value: on the canvas that is an editable open slot whose LABEL
+  // is the instruction ("Baths" — type it in); on the sendable-HTML paths StatsBlock
+  // drops the unfilled cell, and drops the whole row when none survive
+  // (`emailRender`, BlockRenderer.tsx). Never a zero, never invented, never a naked
+  // label to a recipient — and still an invitation to the user.
+  const spec = (value: string | undefined, label: string): StatItem => ({
+    value: value && value.trim() ? value.trim().slice(0, 24) : "",
+    label,
+  });
   const specs: StatItem[] = [
-    ...spec(facts.beds, "Beds"),
-    ...spec(facts.baths, "Baths"),
-    ...spec(withCommas(facts.sqft), "Sq Ft"),
-    ...spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft"),
-    ...spec(facts.lotSize, "Lot"),
-    ...spec(shortType(facts.propertyType) || undefined, "Type"),
-    ...spec(facts.yearBuilt, "Built"),
+    spec(facts.beds, "Beds"),
+    spec(facts.baths, "Baths"),
+    spec(withCommas(facts.sqft), "Sq Ft"),
+    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft"),
+    spec(facts.lotSize, "Lot"),
+    spec(shortType(facts.propertyType) || undefined, "Type"),
+    spec(facts.yearBuilt, "Built"),
   ];
-  // Lay them out three-to-a-row, so a row is only emitted if it has real cells.
+  // Three to a row. Rows that end up entirely unsourced exist on the canvas (to fill)
+  // and vanish from the email.
   for (let i = 0; i < specs.length; i += 3) {
     const row = specs.slice(i, i + 3);
     push({ id: createBlock("stats").id, type: "stats", props: { stats: row } }, 2);

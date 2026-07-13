@@ -60,13 +60,30 @@ test("flyer preserves the user's brand + company identity (sticky)", () => {
   expect(header?.type === "header" && header.props.companyName).toBe("Gulf Coast Realty");
 });
 
-test("flyer omits specs it doesn't have — never fabricates a 0", () => {
+// THE OPEN-SLOT CONTRACT (07/13/2026). This test used to assert the OPPOSITE — that an
+// unsourced spec was dropped at build time. That killed the naked label and the
+// invitation with it; the operator asked for the invitation back (Baths was the
+// example). A spec we can't source is now an EMPTY cell: the user fills it on the
+// canvas, and StatsBlock drops it on the sendable paths (emailRender). The email-side
+// half of this contract is pinned in lib/email/blocks/open-slot.test.tsx.
+test("an unsourced spec is an OPEN SLOT to fill — never a 0, never invented", () => {
   const sparse: ListingFacts = { price: "$1,200,000", photos: [], sourceUrl: "https://x/y" };
   const doc = buildListingFlyer(sparse, brandedCurrentDoc());
-  const stats = doc.blocks.find((b) => b.type === "stats");
-  if (stats && stats.type === "stats") {
-    for (const cell of stats.props.stats) expect(cell.value).not.toBe("0");
-  }
+  const cells = doc.blocks.flatMap((b) => (b.type === "stats" ? b.props.stats : []));
+
+  // Every spec label is present as a slot the user can fill…
+  expect(cells.map((c) => c.label)).toEqual([
+    "Beds",
+    "Baths",
+    "Sq Ft",
+    "$/Sq Ft",
+    "Lot",
+    "Type",
+    "Built",
+  ]);
+  // …and every unsourced one is EMPTY — no zero, no guess.
+  for (const cell of cells) expect(cell.value).toBe("");
+
   const hero = doc.blocks.find((b) => b.type === "hero");
   expect(hero?.type === "hero" && hero.props.value).toBe("$1,200,000");
 });

@@ -1,7 +1,7 @@
 // lib/email/blocks/BlockRenderer.tsx — PURE. Switch on block.type → component.
 // Shared by the canvas DOM view AND the server render() export. No "use client".
 import type { EmailBlock, EmailGlobalStyle } from "../doc/types";
-import type { EditCommit, EditScope } from "./editable-text";
+import type { EditCommit, EditScope, SlotUpload } from "./editable-text";
 import { HeaderBlock } from "./HeaderBlock";
 import { HeroBlock } from "./HeroBlock";
 import { StatsBlock } from "./StatsBlock";
@@ -33,14 +33,21 @@ export function BlockRenderer({
    *  (compile-grid passes it) — lets width-sensitive blocks pick a narrow layout. */
   colPx?: number;
   /** True on the sendable-HTML paths (EmailDocRenderer, compile-grid) — canvas-only
-   *  affordances (empty-state placeholders) must not reach a recipient. */
+   *  affordances (empty-state placeholders) must not reach a recipient.
+   *
+   *  THE OPEN-SLOT CONTRACT (operator, 07/13/2026): a fact we could not source is an
+   *  invitation ON THE CANVAS ("paste it", "add the photo") and DOES NOT EXIST in the
+   *  sent email — never a zero, never a naked label, never invented. Honored by
+   *  `stats` (empty cell dropped; a row with no surviving cell dropped), `image`
+   *  (empty slot dropped), `text` (unwritten paragraph dropped) and `social-icons`. */
   emailRender?: boolean;
   /** Canvas-editing hook (GridCanvas passes it; server callers never do).
-   *  Present → adopted components render their text via EditableText. */
-  edit?: { commit: EditCommit };
+   *  Present → adopted components render their text via EditableText, and an open
+   *  image slot gets the shell's file-picker (`upload` — one uploader, not a copy). */
+  edit?: { commit: EditCommit; upload?: SlotUpload };
 }) {
   const scope: EditScope | undefined = edit
-    ? { blockId: block.id, commit: edit.commit }
+    ? { blockId: block.id, commit: edit.commit, upload: edit.upload }
     : undefined;
   switch (block.type) {
     case "header":
@@ -49,14 +56,34 @@ export function BlockRenderer({
       return <HeroBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "stats":
       return (
-        <StatsBlock props={block.props} globalStyle={globalStyle} colPx={colPx} scope={scope} />
+        <StatsBlock
+          props={block.props}
+          globalStyle={globalStyle}
+          colPx={colPx}
+          emailRender={emailRender}
+          scope={scope}
+        />
       );
     case "signal":
       return <SignalBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "text":
-      return <TextBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
+      return (
+        <TextBlock
+          props={block.props}
+          globalStyle={globalStyle}
+          emailRender={emailRender}
+          scope={scope}
+        />
+      );
     case "image":
-      return <ImageBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
+      return (
+        <ImageBlock
+          props={block.props}
+          globalStyle={globalStyle}
+          emailRender={emailRender}
+          scope={scope}
+        />
+      );
     case "listing":
       return <ListingBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "multi-column":

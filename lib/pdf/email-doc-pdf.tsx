@@ -149,7 +149,11 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
     }
 
     case "stats": {
-      const stats = block.props.stats ?? [];
+      // THE OPEN-SLOT CONTRACT — the PDF is a recipient artifact like the email: an
+      // unsourced cell does not exist here either (it shipped as a naked label), and a
+      // row with no surviving cell is gone. Never a zero, never invented.
+      const stats = (block.props.stats ?? []).filter((st) => (st.value ?? "").trim());
+      if (stats.length === 0) return null;
       return (
         <View style={[s.section, { flexDirection: "row" }]}>
           {stats.map((st, i) => (
@@ -236,7 +240,8 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
 
     case "text": {
       const p = block.props;
-      if (!p.body) return <View style={s.section} />;
+      // Unwritten paragraph → no block at all (an empty padded band shipped before).
+      if (!(p.body ?? "").trim()) return null;
       return (
         <View style={s.section}>
           <Text
@@ -256,15 +261,12 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
 
     case "image": {
       const p = block.props;
+      // An unfilled photo/chart slot is an invitation on the CANVAS only — it does not
+      // exist in the PDF (the gray "Image" box used to print for a real reader).
+      if (!p.url) return null;
       return (
         <View style={{ borderBottomWidth: 1, borderBottomColor: BORDER }}>
-          {p.url ? (
-            <Image src={p.url} style={{ width: "100%" }} />
-          ) : (
-            <View style={{ paddingVertical: 40, alignItems: "center", backgroundColor: "#F3F4F6" }}>
-              <Text style={{ fontFamily: font, fontSize: 12, color: MUTED }}>Image</Text>
-            </View>
-          )}
+          <Image src={p.url} style={{ width: "100%" }} />
           {p.caption ? (
             <Text
               style={{

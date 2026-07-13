@@ -16,9 +16,19 @@ import type * as React from "react";
 
 export type EditCommit = (blockId: string, path: string, text: string | undefined) => void;
 
+/** Upload a file the user picked/dropped on an OPEN SLOT → the hosted URL (null on
+ *  a miss). The shell owns the ONE uploader (EmailLabGridShell.uploadPhotoFile →
+ *  /api/email-lab/media | /api/projects/:id/email-media); the slot only asks for a
+ *  URL and commits it to ITS OWN block, so filling a slot never depends on which
+ *  block happens to be selected. */
+export type SlotUpload = (file: File) => Promise<string | null>;
+
 export interface EditScope {
   blockId: string;
   commit: EditCommit;
+  /** Present on the canvas when the shell wired an uploader; absent → an open
+   *  image slot offers "paste a link" only (never a broken file button). */
+  upload?: SlotUpload;
 }
 
 export function escapeHtml(s: string): string {

@@ -16,7 +16,7 @@
 // patches them in place (no undo frame).
 import { useCallback, useMemo, useRef, useEffect, useState } from "react";
 import { applyTextAtPath } from "@/lib/email/doc/edit-path";
-import type { EditCommit } from "@/lib/email/blocks/editable-text";
+import type { EditCommit, SlotUpload } from "@/lib/email/blocks/editable-text";
 import { LINK_PROP, COLOR_PROP } from "@/lib/email/lab/block-edit-maps";
 import { toast } from "sonner";
 import ReactGridLayout, {
@@ -127,8 +127,9 @@ function GridBlock({
   onEditPhoto?: (id: string) => void;
   onRemove: (id: string) => void;
   onAutoHeight: (id: string, rows: number) => void;
-  /** Inline-edit commits (EditableText blur, pill popovers) — GridCanvas builds it. */
-  edit?: { commit: EditCommit };
+  /** Inline-edit commits (EditableText blur, pill popovers) + the open-slot uploader
+   *  — GridCanvas builds it. */
+  edit?: { commit: EditCommit; upload?: SlotUpload };
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const locked = block.type === "footer" && block.layout?.static;
@@ -354,6 +355,7 @@ export function GridCanvas({
   onAddBlock,
   onBlockAi,
   onEditPhoto,
+  onUploadPhoto,
 }: {
   doc: EmailDoc;
   selectedId: string | null;
@@ -369,6 +371,10 @@ export function GridCanvas({
   onBlockAi?: (id: string) => void;
   /** Edit-photo button (image / listing) → shell opens the photos panel. */
   onEditPhoto?: (id: string) => void;
+  /** THE OPEN-SLOT CONTRACT: an empty image slot's file-picker/drop uploads through
+   *  the shell's ONE uploader and hands back the hosted URL; the slot commits it to
+   *  its own block. Absent → the slot still offers "paste a link". */
+  onUploadPhoto?: (file: File) => Promise<string | null>;
 }) {
   // Stable layout identity → RGL doesn't recompact on unrelated re-renders. Also the
   // BASELINE we diff writebacks against.
@@ -413,7 +419,10 @@ export function GridCanvas({
     },
     [onChangeDoc],
   );
-  const edit = useMemo(() => ({ commit: handleEditCommit }), [handleEditCommit]);
+  const edit = useMemo(
+    () => ({ commit: handleEditCommit, upload: onUploadPhoto }),
+    [handleEditCommit, onUploadPhoto],
+  );
 
   // RGL fires onLayoutChange once on mount (after compaction) and after every
   // drag/resize. Commit ONLY a real geometry change vs the baseline we fed in.
