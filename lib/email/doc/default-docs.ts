@@ -509,7 +509,21 @@ export const SEED_DOCS: SeedDoc[] = [
     id: "new-listing",
     name: "New Listing",
     description:
-      "Hero property photo, price + address headline, beds/baths/sqft stats, AI paragraph, CTA.",
+      "Hero property photo, price + address headline, the full spec grid, AI paragraph, CTA.",
+    // THE SEED CARD AND THE NEW LISTING BUTTON ARE THE SAME DELIVERABLE (operator,
+    // 07/13/2026: "make sure each button touches creates the same exact thing for the
+    // same buttons / showcase card / email lab choice"). They were not: this seed gave
+    // ONE 3-cell spec row and no agent card, while the button (buildListingFlyer) gives
+    // SEVEN spec slots and an agent card. Same name, different email.
+    //
+    // This grid now MIRRORS buildListingFlyer's output with empty facts — the seed card
+    // is that flyer unfilled, the button is that flyer filled from the resolved house.
+    // Structure identical, one has values. seed-recipe-parity.test.ts fails the suite if
+    // these two ever drift apart again. (The chart slot is absent on purpose: a new
+    // listing ships NO chart — its visual is the photo.)
+    //
+    // Every value is "" per THE SLOT RULE — an empty value is an OPEN SLOT the user or
+    // the AI fills, and the LABEL is the instruction. Never a zero, never a demo figure.
     build: () => ({
       globalStyle: {
         ...style(),
@@ -527,17 +541,13 @@ export const SEED_DOCS: SeedDoc[] = [
         ),
         seedBlockGrid(
           "hero",
-          { x: 0, y: 8, w: 12, h: 4 },
-          {
-            kicker: "Just Listed",
-            value: "",
-            label: "Price and address",
-            prose: "",
-          },
+          { x: 0, y: 8, w: 12, h: 3 },
+          { kicker: "New Listing", value: "", label: "Price and address", prose: "" },
         ),
+        // The spec grid, three to a row — the same seven cells the resolver fills.
         seedBlockGrid(
           "stats",
-          { x: 0, y: 12, w: 6, h: 4 },
+          { x: 0, y: 11, w: 12, h: 2 },
           {
             stats: [
               { value: "", label: "Beds" },
@@ -547,14 +557,25 @@ export const SEED_DOCS: SeedDoc[] = [
           },
         ),
         seedBlockGrid(
-          "text",
-          { x: 6, y: 12, w: 6, h: 4 },
+          "stats",
+          { x: 0, y: 13, w: 12, h: 2 },
           {
-            body: "Write a few sentences on what makes this home stand out — let the layout, upgrades, or location lead.",
+            stats: [
+              { value: "", label: "$/Sq Ft" },
+              { value: "", label: "Lot" },
+              { value: "", label: "Type" },
+            ],
           },
         ),
-        seedBlockGrid("button", { x: 0, y: 16, w: 12, h: 2 }, { label: "Schedule a Showing" }),
-        seedBlockGrid("footer", { x: 0, y: 18, w: 12, h: 3, static: true }),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 15, w: 12, h: 2 },
+          { stats: [{ value: "", label: "Built" }] },
+        ),
+        seedBlockGrid("text", { x: 0, y: 17, w: 12, h: 4 }, { body: "", align: "left" }),
+        seedBlockGrid("agent-card", { x: 0, y: 21, w: 12, h: 4 }),
+        seedBlockGrid("button", { x: 0, y: 25, w: 12, h: 2 }, { label: "View the Full Listing" }),
+        seedBlockGrid("footer", { x: 0, y: 27, w: 12, h: 3, static: true }),
       ],
     }),
   },

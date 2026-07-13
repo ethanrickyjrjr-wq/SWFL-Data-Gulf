@@ -66,15 +66,38 @@ export async function resolveSubject(address: string, prompt: string): Promise<R
   return { facts, resolved: Boolean(hit) };
 }
 
-/** Drop an unfilled chart slot. An EMPTY CHART BOX IS WORSE THAN NO CHART — if your
- *  recipe's chart policy is "none", or its chart failed to resolve, call this. A
- *  chart is a bonus, never a blocker, and never a reason to refuse a build. */
+/** Drop an unfilled chart slot, AND CLOSE THE HOLE IT LEAVES.
+ *
+ *  An EMPTY CHART BOX IS WORSE THAN NO CHART — if your recipe's chart policy is
+ *  "none", or its chart failed to resolve, call this. A chart is a bonus, never a
+ *  blocker, and never a reason to refuse a build.
+ *
+ *  The original only FILTERED. Blocks carry absolute grid positions, so removing a
+ *  5-row chart from the middle of the flyer left a 5-row VOID between the description
+ *  and the agent card — and since New Listing drops its chart by design, that void
+ *  was in the one deliverable we had shipped. Filtering a positioned block is not the
+ *  same as removing it; everything below has to come up. */
 export function dropEmptyChartSlot(doc: EmailDoc): EmailDoc {
+  const isEmptyChart = (b: EmailDoc["blocks"][number]) =>
+    b.type === "image" && b.props.kind === "chart" && !b.props.url;
+
+  const dropped = doc.blocks.filter(isEmptyChart);
+  if (dropped.length === 0) return doc;
+
+  const kept = doc.blocks.filter((b) => !isEmptyChart(b));
   return {
     ...doc,
-    blocks: doc.blocks.filter(
-      (b) => !(b.type === "image" && b.props.kind === "chart" && !b.props.url),
-    ),
+    blocks: kept.map((b) => {
+      if (!b.layout) return b;
+      // Everything strictly BELOW a removed block rises by that block's height. A
+      // block sharing the removed row (a multi-column sibling) must NOT move.
+      const rise = dropped.reduce((sum, d) => {
+        const dy = d.layout?.y ?? 0;
+        const dh = d.layout?.h ?? 0;
+        return b.layout!.y >= dy + dh ? sum + dh : sum;
+      }, 0);
+      return rise > 0 ? { ...b, layout: { ...b.layout, y: b.layout.y - rise } } : b;
+    }),
   };
 }
 
