@@ -4,7 +4,7 @@
 // expansion pushed every half-width stats seed ~100px past the 600px container
 // (the stair-stepped captures of 07/10/2026).
 import { Section, Row, Column, Text } from "@react-email/components";
-import type { EmailGlobalStyle, StatsProps } from "../doc/types";
+import type { EmailGlobalStyle, StatItem, StatsProps } from "../doc/types";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
 import { EditableText, type EditScope } from "./editable-text";
 import { OPEN_SLOT_INK } from "./OpenSlot";
@@ -50,15 +50,30 @@ export function StatsBlock({
     borderBottom: `1px solid ${BORDER}`,
   };
 
+  // ── WHICH NUMBER MATTERS (07/13/2026) ───────────────────────────────────────
+  // Operator: "we need to make numbers different sizes and maybe colors in accordance
+  // with importance… just looks bad." He was right, and the cause was structural: every
+  // cell rendered at identical weight and colour, so $209/sq ft (which wins a listing
+  // argument) looked exactly like "Type: Residential" (which nobody cares about).
+  //
+  // `emphasis` is per-cell and OPTIONAL — an undefined cell renders exactly as before.
+  //   primary → larger, in the ACCENT colour. The one the eye should land on.
+  //   muted   → smaller and quieter. Present, but not competing.
+  const strip = props.variant === "strip";
+  const sizeFor = (e: StatItem["emphasis"], base: string) =>
+    e === "primary" ? (strip ? "20px" : "30px") : e === "muted" ? (strip ? "13px" : "18px") : base;
+  const colorFor = (e: StatItem["emphasis"]) =>
+    e === "primary" ? globalStyle.accentColor : e === "muted" ? MUTED : globalStyle.primaryColor;
+
   // An open cell on the canvas: the label stays (it IS the instruction — "Baths"
   // tells the user what to type) and the value wears a dashed "fill me" outline with
   // an add affordance instead of a "0" placeholder that reads as a real figure.
-  const valueStyle = (empty: boolean, size: string) => ({
+  const valueStyle = (empty: boolean, size: string, emphasis?: StatItem["emphasis"]) => ({
     fontFamily: font,
-    fontSize: empty && scope ? "18px" : size,
+    fontSize: empty && scope ? "18px" : sizeFor(emphasis, size),
     fontWeight: 700,
     letterSpacing: "0.01em",
-    color: empty && scope ? MUTED : globalStyle.primaryColor,
+    color: empty && scope ? MUTED : colorFor(emphasis),
     margin: 0,
     ...(empty && scope ? { ...OPEN_SLOT_INK, padding: "4px 8px" } : {}),
   });
@@ -97,6 +112,68 @@ export function StatsBlock({
     );
   }
 
+  // THE SPEC STRIP — one delicate hairline-ruled row, the spec line a real listing flyer
+  // runs under the price. Five cells in a STRIP read as a spec line; five cells in a GRID
+  // read as a wall. Same data, entirely different email.
+  if (strip) {
+    return (
+      <Section
+        style={{
+          ...sectionStyle,
+          borderTop: `1px solid ${globalStyle.accentColor}`,
+          borderBottom: `1px solid ${globalStyle.accentColor}`,
+          padding: "14px 20px",
+        }}
+        data-stats-variant="strip"
+      >
+        <Row>
+          {cells.map(({ stat, i, empty }) => (
+            <Column key={i} style={{ textAlign: "center", padding: "2px 6px" }}>
+              <EditableText
+                as={Text}
+                value={stat.value}
+                path={`stats.${i}.value`}
+                scope={scope}
+                placeholder="+ Add"
+                style={valueStyle(empty, "17px", stat.emphasis)}
+              />
+              <EditableText
+                as={Text}
+                value={stat.label}
+                path={`stats.${i}.label`}
+                scope={scope}
+                placeholder="Label"
+                style={{
+                  fontFamily: font,
+                  fontSize: "9px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: MUTED,
+                  margin: "3px 0 0",
+                }}
+              />
+            </Column>
+          ))}
+        </Row>
+        {/* The provenance of a DERIVED cell, stated where the reader can see it — the
+            sample says "*Computed from list price ÷ listed square footage" and it should. */}
+        {props.footnote ? (
+          <Text
+            style={{
+              fontFamily: font,
+              fontSize: "9px",
+              color: MUTED,
+              textAlign: "center",
+              margin: "8px 0 0",
+            }}
+          >
+            {props.footnote}
+          </Text>
+        ) : null}
+      </Section>
+    );
+  }
+
   return (
     <Section style={sectionStyle}>
       <Row>
@@ -108,7 +185,7 @@ export function StatsBlock({
               path={`stats.${i}.value`}
               scope={scope}
               placeholder="+ Add"
-              style={valueStyle(empty, "32px")}
+              style={valueStyle(empty, "32px", stat.emphasis)}
             />
             <EditableText
               as={Text}

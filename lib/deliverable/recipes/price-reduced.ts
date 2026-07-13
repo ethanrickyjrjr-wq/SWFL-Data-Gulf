@@ -370,7 +370,13 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
       {
         id: seedButton?.id ?? createBlock("button").id,
         type: "button",
-        props: { label: seedLabel || "See the New Price", url: facts.sourceUrl },
+        // NOT "See the New Price" (operator, 07/13/2026: *"why would the button be SEE THE
+        // NEW PRICE when we already show the price"*). The email's entire job is showing the
+        // new price — the hero IS the new price, with the cut above it. A button pointing at
+        // what the reader is already looking at asks them to do nothing.
+        //
+        // A price cut exists to get people through the door. So the CTA is the NEXT ACTION.
+        props: { label: seedLabel || "Schedule a Showing", url: facts.sourceUrl },
       },
       { x: 0, y, w: 12, h: 2 },
     ),

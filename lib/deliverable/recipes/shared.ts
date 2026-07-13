@@ -20,6 +20,7 @@ import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
 import { listingDescriptionFromPrompt } from "@/lib/email/listing-intent";
+import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc } from "@/lib/email/doc/types";
 
@@ -211,11 +212,31 @@ export async function authorListingNarrative(
       // Prose quality is the whole job here; Haiku wrote the robot sentence.
       model: EMAIL_MODEL_SONNET,
       max_tokens: 500,
-      system,
+      system: `${system}\n\n${CLAIM_PROHIBITION}`,
       messages: [{ role: "user", content: user }],
     });
     const t = msg.content[0]?.type === "text" ? msg.content[0].text.trim() : "";
-    return t || null;
+    if (!t) return null;
+
+    // THE CLAIM GATE, on the shared listing narrator. It was wired into the individual
+    // recipes and NOT into here — so the reference implementation itself still invented.
+    // Caught live 07/13/2026: "room to spread across a scale that is UNCOMMON FOR THE PRICE
+    // POINT" — a comparison against a set it was never shown — and, earlier, "a generous
+    // floor plan with room to live large", a floor plan we do not hold.
+    //
+    // Every fact it was handed is a settled claim; anything it derives on top is not.
+    // FAIL CLOSED: the paragraph is dropped to an OPEN SLOT rather than shipped. A missing
+    // paragraph is honest; a confident false one is not.
+    const settled = lines.map((l) => ({ sentence: String(l), anchors: numeralsIn(String(l)) }));
+    const violations = auditClaims(t, settled);
+    if (violations.length > 0) {
+      console.warn(
+        `[narrative] DROPPED — the narrator made ${violations.length} claim(s) it was not given: ` +
+          violations.map((v) => `${v.kind}("${v.match}")`).join(", "),
+      );
+      return null;
+    }
+    return t;
   } catch {
     return null;
   }

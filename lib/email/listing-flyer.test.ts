@@ -30,19 +30,57 @@ function brandedCurrentDoc(): EmailDoc {
   return doc;
 }
 
-test("flyer leads with the property and puts real facts in the right slots", () => {
+/** The hero that carries the PRICE — not the ribbon-only hero above the photo. */
+function priceHero(doc: ReturnType<typeof buildListingFlyer>) {
+  return doc.blocks.find((b) => b.type === "hero" && !b.props.ribbon);
+}
+/** The one spec STRIP. */
+function strip(doc: ReturnType<typeof buildListingFlyer>) {
+  return doc.blocks.find((b) => b.type === "stats" && b.props.variant === "strip");
+}
+
+// THE SAMPLE'S LAYOUT (07/13/2026). Operator: "we just need to be able to build what the
+// example looks like with real data. That is all everything is."
+//
+// The hand-drawn sample runs: an accent RIBBON, the photo, then CENTRED — the address in
+// display serif over the price in the accent colour — then ONE hairline spec strip. Ours
+// ran a left-aligned 11px kicker, a near-black price, and two chunky rows of three
+// identical cells. That was never a builder failure: the design was INEXPRESSIBLE, because
+// the blocks had no align, no ribbon, no order, and no per-cell emphasis.
+test("flyer builds THE SAMPLE'S LAYOUT — ribbon, centred address over price, one spec strip", () => {
   const doc = buildListingFlyer(FACTS, brandedCurrentDoc());
 
-  const hero = doc.blocks.find((b) => b.type === "hero");
+  // The ribbon is its own band, ABOVE the photo — a design element, not a caption.
+  const ribbon = doc.blocks.find((b) => b.type === "hero" && b.props.ribbon);
+  expect(ribbon?.type === "hero" && ribbon.props.kicker).toBe("New Listing");
+  const photoIdx = doc.blocks.findIndex((b) => b.type === "image" && b.props.kind === "photo");
+  expect(doc.blocks.indexOf(ribbon!)).toBeLessThan(photoIdx);
+
+  const hero = priceHero(doc);
   expect(hero?.type === "hero" && hero.props.value).toBe("$20,895,000");
   expect(hero?.type === "hero" && (hero.props.label ?? "")).toContain("Hickory");
+  // The address leads; the price is the headline number under it, centred.
+  expect(hero?.type === "hero" && hero.props.order).toBe("label-first");
+  expect(hero?.type === "hero" && hero.props.align).toBe("center");
 
-  const stats = doc.blocks.find((b) => b.type === "stats");
-  expect(stats?.type === "stats" && stats.props.stats).toEqual([
-    { value: "5", label: "Beds" },
-    { value: "7", label: "Baths" },
-    { value: "7,453", label: "Sq Ft" },
+  // ONE strip, in reading order — not two rows of three.
+  const s = strip(doc);
+  expect(s?.type === "stats" && s.props.stats.map((c) => c.label)).toEqual([
+    "Beds",
+    "Baths",
+    "Sq Ft",
+    "Lot",
+    "$/Sq Ft",
+    "Type",
   ]);
+
+  // WHICH NUMBER MATTERS: $/sq ft wins a listing argument; Type is context.
+  const cells = s?.type === "stats" ? s.props.stats : [];
+  expect(cells.find((c) => c.label === "$/Sq Ft")?.emphasis).toBe("primary");
+  expect(cells.find((c) => c.label === "Type")?.emphasis).toBe("muted");
+
+  // A DERIVED cell states its provenance where the reader can see it.
+  expect(s?.type === "stats" && s.props.footnote).toContain("Computed from list price");
 
   const photo = doc.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
   expect(photo?.type === "image" && (photo.props.url ?? "")).toContain("225076926");
@@ -72,19 +110,11 @@ test("an unsourced spec is an OPEN SLOT to fill — never a 0, never invented", 
   const cells = doc.blocks.flatMap((b) => (b.type === "stats" ? b.props.stats : []));
 
   // Every spec label is present as a slot the user can fill…
-  expect(cells.map((c) => c.label)).toEqual([
-    "Beds",
-    "Baths",
-    "Sq Ft",
-    "$/Sq Ft",
-    "Lot",
-    "Type",
-    "Built",
-  ]);
+  expect(cells.map((c) => c.label)).toEqual(["Beds", "Baths", "Sq Ft", "Lot", "$/Sq Ft", "Type"]);
   // …and every unsourced one is EMPTY — no zero, no guess.
   for (const cell of cells) expect(cell.value).toBe("");
 
-  const hero = doc.blocks.find((b) => b.type === "hero");
+  const hero = priceHero(doc);
   expect(hero?.type === "hero" && hero.props.value).toBe("$1,200,000");
 });
 
@@ -99,11 +129,10 @@ test("every block carries a grid layout — the coded grid, not a stack", () => 
   expect(footer?.layout?.static).toBe(true);
 });
 
-test("computes $/sq ft into the second spec row from real price + sqft", () => {
+test("computes $/sq ft into the spec strip from real price + sqft", () => {
   const doc = buildListingFlyer(FACTS, brandedCurrentDoc()); // $20,895,000 / 7453
-  const rowB = doc.blocks.filter((b) => b.type === "stats")[1];
-  const ppsf =
-    rowB?.type === "stats" ? rowB.props.stats.find((c) => c.label === "$/Sq Ft") : undefined;
+  const s = strip(doc);
+  const ppsf = s?.type === "stats" ? s.props.stats.find((c) => c.label === "$/Sq Ft") : undefined;
   expect(ppsf?.value).toBe("$2,804"); // 20,895,000 / 7,453 = 2,803.97 → rounds to 2,804
 });
 

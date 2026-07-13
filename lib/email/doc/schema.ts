@@ -53,6 +53,10 @@ export function mintBlockId(): string {
 const color = () => z.string();
 const paddingY = () => z.enum(["none", "sm", "md", "lg"]).optional();
 const sectionBg = () => z.string().optional();
+/** THE DESIGN VOCABULARY (BlockBase.align). USER-OWNED: it is deliberately ABSENT from
+ *  ContentPatchSchema / AuthoredDocSchema below, so the AI can never write it. The model
+ *  writes message content; the code decides how the document LOOKS. */
+const align = () => z.enum(["left", "center", "right"]).optional();
 
 // ── Per-block prop schemas ──────────────────────────────────────────────────
 // `satisfies z.ZodType<…>` ties each schema to its interface in ./types.ts so a
@@ -75,17 +79,28 @@ const HeroPropsSchema = z.object({
   linkUrl: z.string().optional(),
   paddingY: paddingY(),
   sectionBg: sectionBg(),
+  align: align(),
+  ribbon: z.boolean().optional(),
+  order: z.enum(["value-first", "label-first"]).optional(),
 }) satisfies z.ZodType<HeroProps>;
 
 const StatItemSchema = z.object({
   value: z.string().max(24),
   label: z.string().max(60),
+  emphasis: z.enum(["primary", "muted"]).optional(),
 });
 
 const StatsPropsSchema = z.object({
-  stats: z.array(StatItemSchema).min(1).max(3),
+  // A "grid" is 2–3 chunky cells. A "strip" is the delicate hairline spec line a listing
+  // flyer runs under the price, and it carries more — five reads as a spec line, five in a
+  // grid reads as a wall. The AI is still capped at 3 (AuthoredStatSchema): the model writes
+  // CONTENT, the code builds LAYOUT.
+  stats: z.array(StatItemSchema).min(1).max(6),
+  variant: z.enum(["grid", "strip"]).optional(),
+  footnote: z.string().max(120).optional(),
   paddingY: paddingY(),
   sectionBg: sectionBg(),
+  align: align(),
 }) satisfies z.ZodType<StatsProps>;
 
 const SignalPropsSchema = z.object({

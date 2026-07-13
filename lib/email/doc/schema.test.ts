@@ -247,19 +247,41 @@ test("rejects a malformed block (unknown type) — not coerced", () => {
   expect(EmailDocSchema.safeParse(bad).success).toBe(false);
 });
 
-test("rejects a block whose props violate a constraint (stats > 3 cells)", () => {
+// The cap moved from 3 to 6 on 07/13/2026, for the SPEC STRIP — a listing flyer runs one
+// hairline line of six cells (beds · baths · sq ft · lot · $/sq ft · type). Six cells in a
+// STRIP read as a spec line; six in a GRID read as a wall. The AI is still capped at 3
+// (AuthoredStatSchema): the model writes CONTENT, the code builds LAYOUT.
+test("a stats block accepts a six-cell spec strip", () => {
+  const strip = {
+    globalStyle: DEFAULT_GLOBAL_STYLE,
+    blocks: [
+      {
+        type: "stats",
+        props: {
+          variant: "strip",
+          stats: [
+            { value: "3", label: "Beds" },
+            { value: "3.5", label: "Baths" },
+            { value: "2,847", label: "Sq Ft" },
+            { value: "0.26 ac", label: "Lot" },
+            { value: "$209", label: "$/Sq Ft", emphasis: "primary" },
+            { value: "Residential", label: "Type", emphasis: "muted" },
+          ],
+        },
+      },
+    ],
+  };
+  expect(EmailDocSchema.safeParse(strip).success).toBe(true);
+});
+
+test("rejects a block whose props violate a constraint (stats > 6 cells)", () => {
   const bad = {
     globalStyle: DEFAULT_GLOBAL_STYLE,
     blocks: [
       {
         type: "stats",
         props: {
-          stats: [
-            { value: "1", label: "a" },
-            { value: "2", label: "b" },
-            { value: "3", label: "c" },
-            { value: "4", label: "d" },
-          ],
+          stats: Array.from({ length: 7 }, (_, i) => ({ value: String(i), label: `c${i}` })),
         },
       },
     ],

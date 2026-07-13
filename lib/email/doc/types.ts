@@ -73,6 +73,18 @@ export interface BlockBase {
   paddingY?: PaddingSize;
   /** Hex — overrides CARD_BG (#ffffff) for this block's outer Section only. */
   sectionBg?: string;
+  /**
+   * THE DESIGN VOCABULARY. Default "left" — every existing doc is unchanged.
+   *
+   * The blocks used to have NO way to express design: BlockBase had padding and a
+   * background colour, and that was all. So a recipe could not say "centre this", and the
+   * hand-drawn samples — which were raw HTML and could do anything — were literally
+   * INEXPRESSIBLE in the document model. That is why the built email never looked like the
+   * example, and it was never a builder problem. It was a vocabulary problem.
+   *
+   * Reuses the existing `TextAlign` (TextProps already carried one) so the two cannot drift.
+   */
+  align?: TextAlign;
 }
 
 // ── Per-block prop interfaces ───────────────────────────────────────────────
@@ -94,15 +106,44 @@ export interface HeroProps extends BlockBase {
   label?: string;
   prose?: string;
   linkUrl?: string;
+  /** Render the kicker as a full-width ACCENT RIBBON above the hero ("◆ NEW LISTING ◆"),
+   *  instead of an 11px caption. USER-OWNED. Default off — existing docs unchanged. */
+  ribbon?: boolean;
+  /** "label-first" puts the LABEL above the VALUE — the address over the price, which is
+   *  how a listing flyer actually reads. Default "value-first" (today's behavior). */
+  order?: "value-first" | "label-first";
 }
 
 export interface StatItem {
   value: string;
   label: string;
+  /**
+   * WHICH NUMBER MATTERS. Operator, 07/13/2026: *"we need to make numbers different sizes
+   * and maybe colors in accordance with importance. also the order of where numbers go
+   * based on importance. just looks bad."*
+   *
+   * He was right, and the reason was structural: StatItem was `{value, label}` — full stop.
+   * A recipe had NO WAY TO SAY a number mattered, so `$209/sq ft` (which wins a listing
+   * argument) rendered at exactly the same weight as `Type: Residential` (which nobody
+   * cares about). Every cell identical; only the cell COUNT changed the size.
+   *
+   * Default undefined = today's uniform weight, so nothing existing shifts.
+   */
+  emphasis?: "primary" | "muted";
 }
 
 export interface StatsProps extends BlockBase {
-  stats: StatItem[]; // 2–3 KPI cells
+  stats: StatItem[]; // 2–3 KPI cells (a "strip" carries more, smaller)
+  /**
+   * "grid" (default) = today's chunky equal cells.
+   * "strip" = ONE delicate hairline-ruled row of small cells — the spec line a real listing
+   * flyer runs under the price. Five cells in a strip read as a spec line; five cells in a
+   * grid read as a wall.
+   */
+  variant?: "grid" | "strip";
+  /** A footnote under a strip ("*Computed from list price ÷ listed square footage") — the
+   *  provenance of a DERIVED cell, stated where the reader can see it. */
+  footnote?: string;
 }
 
 export interface SignalProps extends BlockBase {

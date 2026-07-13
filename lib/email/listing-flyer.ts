@@ -94,7 +94,14 @@ export function buildListingFlyer(facts: ListingFacts, current: EmailDoc): Email
   // 1. Header — keep the agent's branded header (company, logo, colors).
   push(keepOrDefault(current, "header"), 2);
 
-  // 2. Hero PHOTO — the real first listing photo, else an EMPTY photo block the
+  // 2. THE RIBBON — a full-width accent band, between the header and the photo. This is
+  //    the sample's "◆ NEW LISTING ◆" bar, and it is a design element in its own right.
+  push(
+    { id: createBlock("hero").id, type: "hero", props: { kicker: "New Listing", ribbon: true } },
+    1,
+  );
+
+  // 3. Hero PHOTO — the real first listing photo, else an EMPTY photo block the
   //    canvas renders as a drag-drop upload (never refuse, never a stock image).
   push(
     facts.photos[0]
@@ -111,18 +118,27 @@ export function buildListingFlyer(facts: ListingFacts, current: EmailDoc): Email
     6,
   );
 
-  // 3. Hero — "New Listing" ribbon kicker + price + address lead the email.
+  // 4. Hero — THE SAMPLE'S LAYOUT, now expressible.
+  //
+  // Operator, 07/13/2026: "we just need to be able to build what the example looks like
+  // with real data. That is all everything is."
+  //
+  // The sample reads, centred: the ADDRESS in display serif, then the PRICE large and in
+  // the accent colour. Ours read left-aligned, a near-black price, address as an
+  // afterthought. The design was not hard to build — it was INEXPRESSIBLE: HeroProps had no
+  // align, no ribbon, no order. It does now, so the flyer can finally say what it means.
   push(
     {
       id: createBlock("hero").id,
       type: "hero",
       props: {
-        kicker: "New Listing",
+        align: "center",
+        order: "label-first", // the address IS the subject; the price is the headline under it
         value: facts.price ?? "",
         label: addressLine ?? "",
       },
     },
-    3,
+    4,
   );
 
   // 4. Spec strip — fixed labels; the record's real values fill them in.
@@ -136,25 +152,50 @@ export function buildListingFlyer(facts: ListingFacts, current: EmailDoc): Email
   // drops the unfilled cell, and drops the whole row when none survive
   // (`emailRender`, BlockRenderer.tsx). Never a zero, never invented, never a naked
   // label to a recipient — and still an invitation to the user.
-  const spec = (value: string | undefined, label: string): StatItem => ({
+  const spec = (
+    value: string | undefined,
+    label: string,
+    emphasis?: StatItem["emphasis"],
+  ): StatItem => ({
     value: value && value.trim() ? value.trim().slice(0, 24) : "",
     label,
+    ...(emphasis ? { emphasis } : {}),
   });
+
+  // THE SPEC LINE, not a wall of cells. The sample runs ONE delicate hairline-ruled strip
+  // under the price — beds · sq ft · lot · $/sq ft · type. Ours ran two chunky rows of
+  // three, every cell the same weight, so "$209/Sq Ft" (which wins a listing argument) sat
+  // at exactly the same size as "Type: Residential" (which nobody reads).
+  //
+  // `$/Sq Ft` is emphasised BECAUSE IT IS THE ARGUMENT, and `Type` is muted because it is
+  // context. That is the operator's "numbers by importance", finally sayable.
+  // ONE strip, six cells — the whole spec line, in reading order. A second row for the
+  // leftovers left a lonely "3.5 Baths" floating on its own, which looks like a mistake
+  // because it IS one: an orphan row is what you get when the layout has no way to rank
+  // its cells and just spills them.
   const specs: StatItem[] = [
     spec(facts.beds, "Beds"),
     spec(facts.baths, "Baths"),
     spec(withCommas(facts.sqft), "Sq Ft"),
-    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft"),
     spec(facts.lotSize, "Lot"),
-    spec(shortType(facts.propertyType) || undefined, "Type"),
-    spec(facts.yearBuilt, "Built"),
+    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft", "primary"),
+    spec(shortType(facts.propertyType) || undefined, "Type", "muted"),
   ];
-  // Three to a row. Rows that end up entirely unsourced exist on the canvas (to fill)
-  // and vanish from the email.
-  for (let i = 0; i < specs.length; i += 3) {
-    const row = specs.slice(i, i + 3);
-    push({ id: createBlock("stats").id, type: "stats", props: { stats: row } }, 2);
-  }
+  push(
+    {
+      id: createBlock("stats").id,
+      type: "stats",
+      props: {
+        stats: specs,
+        variant: "strip",
+        // The provenance of the one DERIVED cell, stated where the reader can see it.
+        ...(pricePerSqft(facts.price, facts.sqft)
+          ? { footnote: "*Computed from list price ÷ listed square footage." }
+          : {}),
+      },
+    },
+    3,
+  );
 
   // 5. Commentary — the real MLS remarks if we have them, else an EMPTY slot the
   //    AI fills with one honest paragraph (numbers stay in the cells above).

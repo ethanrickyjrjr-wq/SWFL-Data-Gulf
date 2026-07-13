@@ -560,48 +560,49 @@ export const SEED_DOCS: SeedDoc[] = [
       },
       blocks: [
         seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        // The accent RIBBON — its own band, ABOVE the photo. A design element, not a caption.
+        seedBlockGrid("hero", { x: 0, y: 2, w: 12, h: 1 }, { kicker: "New Listing", ribbon: true }),
         seedBlockGrid(
           "image",
-          { x: 0, y: 2, w: 12, h: 6 },
+          { x: 0, y: 3, w: 12, h: 6 },
           { alt: "Property photo", kind: "photo", ratio: "3:2" },
         ),
+        // The ADDRESS leads, centred, in display serif; the PRICE is the headline number
+        // under it, in the accent colour. That is how a listing flyer actually reads.
         seedBlockGrid(
           "hero",
-          { x: 0, y: 8, w: 12, h: 3 },
-          { kicker: "New Listing", value: "", label: "Price and address", prose: "" },
+          { x: 0, y: 9, w: 12, h: 4 },
+          {
+            value: "",
+            label: "Price and address",
+            prose: "",
+            align: "center",
+            order: "label-first",
+          },
         ),
-        // The spec grid, three to a row — the same seven cells the resolver fills.
+        // ONE hairline spec strip, in reading order. $/Sq Ft is emphasised because it WINS
+        // THE ARGUMENT; Type is muted because it is context. Two chunky rows of identical
+        // cells is what you get when the layout has no way to rank them.
         seedBlockGrid(
           "stats",
-          { x: 0, y: 11, w: 12, h: 2 },
+          { x: 0, y: 13, w: 12, h: 3 },
           {
+            variant: "strip",
+            footnote: "*Computed from list price ÷ listed square footage.",
             stats: [
               { value: "", label: "Beds" },
               { value: "", label: "Baths" },
               { value: "", label: "Sq Ft" },
-            ],
-          },
-        ),
-        seedBlockGrid(
-          "stats",
-          { x: 0, y: 13, w: 12, h: 2 },
-          {
-            stats: [
-              { value: "", label: "$/Sq Ft" },
               { value: "", label: "Lot" },
-              { value: "", label: "Type" },
+              { value: "", label: "$/Sq Ft", emphasis: "primary" as const },
+              { value: "", label: "Type", emphasis: "muted" as const },
             ],
           },
         ),
-        seedBlockGrid(
-          "stats",
-          { x: 0, y: 15, w: 12, h: 2 },
-          { stats: [{ value: "", label: "Built" }] },
-        ),
-        seedBlockGrid("text", { x: 0, y: 17, w: 12, h: 4 }, { body: "", align: "left" }),
-        seedBlockGrid("agent-card", { x: 0, y: 21, w: 12, h: 4 }),
-        seedBlockGrid("button", { x: 0, y: 25, w: 12, h: 2 }, { label: "View the Full Listing" }),
-        seedBlockGrid("footer", { x: 0, y: 27, w: 12, h: 3, static: true }),
+        seedBlockGrid("text", { x: 0, y: 16, w: 12, h: 4 }, { body: "", align: "left" }),
+        seedBlockGrid("agent-card", { x: 0, y: 20, w: 12, h: 4 }),
+        seedBlockGrid("button", { x: 0, y: 24, w: 12, h: 2 }, { label: "View the Full Listing" }),
+        seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -934,7 +935,9 @@ export const SEED_DOCS: SeedDoc[] = [
         // it asked for TWO claims we cannot source — a seller's MOTIVE and a negotiating
         // position. The product's own template was instructing the user to invent.
         seedBlockGrid("text", { x: 0, y: 15, w: 12, h: 4 }, { body: "", align: "left" }),
-        seedBlockGrid("button", { x: 0, y: 19, w: 12, h: 2 }, { label: "See the New Price" }),
+        // NOT "See the New Price" — the email already IS the new price. A CTA must ask for
+        // the NEXT action, not point at what the reader is looking at.
+        seedBlockGrid("button", { x: 0, y: 19, w: 12, h: 2 }, { label: "Schedule a Showing" }),
         seedBlockGrid("footer", { x: 0, y: 21, w: 12, h: 3, static: true }),
       ],
     }),

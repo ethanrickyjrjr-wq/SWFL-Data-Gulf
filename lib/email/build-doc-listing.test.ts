@@ -39,7 +39,9 @@ test("buildContentDoc replaces the canvas with a property flyer for a listing pr
   const doc = res.payload.doc as {
     blocks: Array<{ type: string; props: Record<string, unknown> }>;
   };
-  const hero = doc.blocks.find((b) => b.type === "hero");
+  // The flyer now leads with an accent RIBBON band (its own hero, kicker only) above the
+  // photo — so the hero carrying the PRICE is the one that is not the ribbon.
+  const hero = doc.blocks.find((b) => b.type === "hero" && !b.props.ribbon);
   expect(hero?.props.value).toBe("$20,895,000");
   const stats = doc.blocks.find((b) => b.type === "stats");
   expect((stats?.props.stats as Array<unknown>)?.[0]).toEqual({ value: "5", label: "Beds" });
