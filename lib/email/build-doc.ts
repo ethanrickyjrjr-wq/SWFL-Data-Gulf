@@ -338,6 +338,37 @@ async function resolveHeroPhoto(
 // ── Content patch (the AI fills CONTENT into the fixed skeleton) ─────────────
 const TEXT_KEYS = ["kicker", "value", "label", "prose", "title", "body", "caption", "alt"] as const;
 
+/**
+ * Held, number-bearing fields the AI may READ but never WRITE.
+ *
+ * These are the figures the reader actually SEES — a metric card's value, a
+ * listing's price. They are deliberately outside `BlockContentPatchSchema`, so a
+ * patch touching them is stripped (that fence is untouched by this list). But they
+ * were also missing from `docSkeleton`, which is the AI's VIEW of the doc — so a
+ * metric-card serialized to the model as `(metric-card): {}`, i.e. BLANK. The
+ * writer was composing prose about an email whose six headline numbers it could
+ * not see (operator, 07/13/2026: "how can the AI not read what the page says and
+ * talk about it?"). It couldn't. Now it can.
+ *
+ * This also closes the loop the operator asked for: when a USER hand-edits a card
+ * to their own figure (BlockInspector writes metricValue directly — lane 4 of the
+ * four-lane moat), the next rewrite SEES the user's number and writes about THAT.
+ * Read access is what makes the AI's prose track the doc it's actually in.
+ */
+const HELD_FIGURE_KEYS = [
+  "metricValue",
+  "metricLabel",
+  "sub",
+  "rankText",
+  "movementText",
+  "price",
+  "beds",
+  "baths",
+  "sqft",
+  "address",
+  "badge",
+] as const;
+
 export function docSkeleton(doc: EmailDoc): string {
   const lines = doc.blocks.map((b) => {
     const props = b.props as Record<string, unknown>;
@@ -346,7 +377,15 @@ export function docSkeleton(doc: EmailDoc): string {
       if (props[k] !== undefined && props[k] !== "") text[k] = props[k];
     }
     if (b.type === "stats") text.stats = props.stats;
-    return `  "${b.id}" (${b.type}): ${JSON.stringify(text)}`;
+
+    const held: Record<string, unknown> = {};
+    for (const k of HELD_FIGURE_KEYS) {
+      if (props[k] !== undefined && props[k] !== "") held[k] = props[k];
+    }
+    const heldPart = Object.keys(held).length
+      ? ` [held figures on this block — READ ONLY, reference them in your prose, never rewrite them: ${JSON.stringify(held)}]`
+      : "";
+    return `  "${b.id}" (${b.type}): ${JSON.stringify(text)}${heldPart}`;
   });
   return lines.join("\n");
 }
@@ -363,6 +402,8 @@ function contentPatchSystem(lakeContext: string, hasChart: boolean): string {
 You receive an EmailDoc skeleton (block ids + current text) and real lake data. Return ONLY a JSON content patch — a flat object mapping block id → updated text fields. No markdown fences, no commentary outside the JSON object.${dataBlock}
 
 Allowed text fields per block: kicker, value, label, prose, title, body, caption, alt, tagline, stats (array of AT MOST 3 {value, label}; keep each value short — a number/figure, not a sentence).
+
+HELD FIGURES ALREADY IN THE DOC — a block may carry "[held figures on this block — READ ONLY …]". Those are REAL, already-sourced numbers the reader can see on the page (a metric card's value, a listing's price), and they may have been set by the user themselves. TREAT THEM AS TRUE and write about them: name them, weave them together, say what they mean. You may NOT rewrite them (any attempt is discarded), and you must restate them VERBATIM — same rounding, same units — if you quote one.
 
 DATA SOURCING — four lanes, in order. NEVER leave a requested field empty because you "don't have the number":
 1. LAKE DATA above — use verbatim (value · source · as-of).

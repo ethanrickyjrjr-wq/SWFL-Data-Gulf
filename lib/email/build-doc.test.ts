@@ -1,5 +1,14 @@
 import { test, expect, mock, afterAll } from "bun:test";
-import { tryParsePatch, dropSuperseded, unfilledPlaceholderMiss, cityZipsFor } from "./build-doc";
+import {
+  tryParsePatch,
+  dropSuperseded,
+  unfilledPlaceholderMiss,
+  cityZipsFor,
+  docSkeleton,
+  applyPatch,
+} from "./build-doc";
+import { BlockContentPatchSchema } from "./doc/schema";
+import type { EmailDoc } from "./doc/types";
 import type { MarketFigure } from "@/lib/email/market-context";
 import * as anthropicModule from "@/refinery/agents/anthropic.mts";
 import * as chartForQuestionModule from "@/lib/assistant/chart-for-question";
@@ -196,4 +205,85 @@ test("cityZipsFor returns undefined for a single-ZIP place, an off-list place, a
     cityZipsFor({ place: "Somewhere", zip: "00001", zips: ["00001", "00002"] }),
   ).toBeUndefined();
   expect(cityZipsFor(undefined)).toBeUndefined();
+});
+
+// ── docSkeleton: the AI's VIEW of the doc ───────────────────────────────────
+// The held, number-bearing fields (metricValue/price/…) sit outside the content-patch
+// allowlist so the AI can never WRITE them — but they were also missing from the AI's
+// READ, so a metric-card serialized as blank and the writer composed prose about an
+// email whose headline numbers it couldn't see. Read yes, write no (07/13/2026).
+
+function docWith(blocks: EmailDoc["blocks"]): EmailDoc {
+  return { globalStyle: {} as EmailDoc["globalStyle"], blocks };
+}
+
+test("docSkeleton SHOWS the AI a metric card's held value (it used to serialize blank)", () => {
+  const skeleton = docSkeleton(
+    docWith([
+      {
+        id: "m1",
+        type: "metric-card",
+        props: {
+          metricValue: "645",
+          metricLabel: "Active Inventory",
+          rankText: "#2 of 54 SWFL ZIPs",
+        },
+      },
+    ] as unknown as EmailDoc["blocks"]),
+  );
+  expect(skeleton).toContain("645");
+  expect(skeleton).toContain("Active Inventory");
+  expect(skeleton).toContain("#2 of 54 SWFL ZIPs");
+  expect(skeleton).toContain("READ ONLY");
+});
+
+test("docSkeleton shows a listing's held price so prose can talk about the home", () => {
+  const skeleton = docSkeleton(
+    docWith([
+      { id: "l1", type: "listing", props: { price: "$525,000", beds: "3", address: "12 Gulf Bl" } },
+    ] as unknown as EmailDoc["blocks"]),
+  );
+  expect(skeleton).toContain("$525,000");
+  expect(skeleton).toContain("12 Gulf Bl");
+});
+
+test("a USER-EDITED card value is what the AI sees — its prose tracks the user's number", () => {
+  // BlockInspector writes metricValue directly (lane 4: the user's own figure).
+  const skeleton = docSkeleton(
+    docWith([
+      { id: "m1", type: "metric-card", props: { metricValue: "$1.2M", metricLabel: "My Listing" } },
+    ] as unknown as EmailDoc["blocks"]),
+  );
+  expect(skeleton).toContain("$1.2M");
+  expect(skeleton).toContain("My Listing");
+});
+
+test("READ does not become WRITE — a patch aimed at a held figure is still stripped", () => {
+  const patch = BlockContentPatchSchema.parse({
+    body: "new prose",
+    metricValue: "$999K", // the AI trying to rewrite a held number
+    price: "$1",
+  });
+  expect(patch.body).toBe("new prose");
+  expect(patch).not.toHaveProperty("metricValue");
+  expect(patch).not.toHaveProperty("price");
+
+  // …and applying it leaves the held value untouched on the block.
+  const doc = docWith([
+    { id: "m1", type: "metric-card", props: { metricValue: "645", body: "old" } },
+  ] as unknown as EmailDoc["blocks"]);
+  const out = applyPatch(doc, { m1: patch }) as EmailDoc;
+  const props = out.blocks[0].props as Record<string, unknown>;
+  expect(props.metricValue).toBe("645");
+  expect(props.body).toBe("new prose");
+});
+
+test("a block with no held figures gets no READ ONLY annotation (no noise)", () => {
+  const skeleton = docSkeleton(
+    docWith([
+      { id: "t1", type: "text", props: { body: "just prose" } },
+    ] as unknown as EmailDoc["blocks"]),
+  );
+  expect(skeleton).toContain("just prose");
+  expect(skeleton).not.toContain("READ ONLY");
 });
