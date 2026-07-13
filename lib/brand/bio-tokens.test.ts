@@ -7,7 +7,16 @@ import { describe, expect, it, mock, beforeEach } from "bun:test";
 import type { MarketFigure } from "@/lib/email/market-context";
 
 let FIGURES: MarketFigure[] = [];
+
+// SPREAD THE REAL MODULE. `mock.module` replaces the WHOLE module for every importer in
+// the test process — so returning only `loadMarketFigures` silently stripped
+// `figuresToPromptBlock`, `loadLifecycleDigest` and `singleSourcePerMetric` from
+// market-context, and build-doc (which imports all three) failed to load. That took out
+// 12 unrelated tests in modules that merely sit downstream of build-doc, and the failures
+// pointed at innocent files. Mock the ONE function; keep everything else real.
+const realMarketContext = await import("@/lib/email/market-context");
 mock.module("@/lib/email/market-context", () => ({
+  ...realMarketContext,
   loadMarketFigures: async () => FIGURES,
 }));
 

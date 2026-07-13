@@ -42,6 +42,49 @@ describe("the five falsehoods that actually shipped", () => {
     expect(v.some((x) => x.kind === "word-count")).toBe(true);
   });
 
+  it("catches a count written in DIGITS — the hole that beat the FIRST version of this gate", () => {
+    // ROUND 2. The original WORD_COUNT matched only SPELLED numbers, so these three
+    // shipped CLEANLY past both gates — verified live against market-comps — because the
+    // digits 2/4/6 were already in the anchor allow-set: the settled sentences supply
+    // them. An absent control, not a beatable one.
+    //
+    // Truth for that set: 2 of 6 are recorded sales. Every sentence below is FALSE.
+    for (const lie of [
+      "All 6 comparable homes are recorded sales.",
+      "4 of 6 comparable homes are recorded sales.",
+      "The 6 recorded sales support the asking price.",
+    ]) {
+      const v = auditClaims(lie, []);
+      expect(
+        v.some((x) => x.kind === "word-count"),
+        `did not catch: ${lie}`,
+      ).toBe(true);
+    }
+  });
+
+  it("CORRUPTION-ON-RESTATE: the true settled count passes; the SAME sentence with a swapped digit does not", () => {
+    // The real failure mode. The structural rule (no raw set) stops the narrator DERIVING
+    // a count — but it is HANDED settled count sentences, and nothing stopped it restating
+    // one with a digit swapped. Only prompt-prose did, and this file's own thesis is that
+    // prose is not a control.
+    const settled = settledCount(2, 6, {
+      noun: "comparable homes",
+      predicate: "in the set are recorded sales",
+    });
+    expect(settled.sentence).toBe("2 of 6 comparable homes in the set are recorded sales.");
+
+    // Restated verbatim → legitimate. Code authored this claim.
+    expect(auditClaims(settled.sentence, [settled])).toEqual([]);
+
+    // The same shape with the digit swapped → a FALSE claim, and it must not ship.
+    const corrupted = "4 of 6 comparable homes in the set are recorded sales.";
+    expect(auditClaims(corrupted, [settled]).some((x) => x.kind === "word-count")).toBe(true);
+
+    // …and with the quantifier swapped.
+    const alsoCorrupted = "All 6 comparable homes in the set are recorded sales.";
+    expect(auditClaims(alsoCorrupted, [settled]).some((x) => x.kind === "word-count")).toBe(true);
+  });
+
   it("catches the STREET CLAIM that beat a ban on the word 'street' (market-comps)", () => {
     // The model was banned from saying "street" and wrote "on Shore Dr". Match the
     // SUFFIX, not the noun — this is why a banned-word list is not the defense.

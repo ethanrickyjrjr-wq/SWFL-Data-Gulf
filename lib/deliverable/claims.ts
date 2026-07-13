@@ -154,10 +154,35 @@ const COMPARATIVE_PHRASE =
 const TRAJECTORY =
   /\b(widening|narrowing|shrinking|growing|rising|falling|climbing|dropping|accelerat\w+|slow(ing|ed)|cooling|heating|reversing|rebound\w*|recover\w+|trending|momentum|picking up|tapering|steady(ing)?|flattening|stabiliz\w+)\b/i;
 
-/** A COUNT stated in WORDS — the digit lint's blind spot by construction.
- *  market-pulse: "five of those six ZIPs" over a set whose true answer was four. */
-const WORD_COUNT =
-  /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|most|majority|all|none|every|each|both|several|many|few)\s+(of\s+)?(the\s+|those\s+|these\s+)?\w*\s*(zips?|homes?|sales?|listings?|comps?|properties|areas?|neighborhoods?|of them)\b/i;
+/**
+ * A COUNT — the class that has now beaten TWO rounds of this gate.
+ *
+ * Round 1: market-pulse wrote "five of those six ZIPs" over a set whose true answer was
+ * FOUR. A count spelled in words carries no digits, so the DIGIT lint sailed past it.
+ * That is why WORD_COUNT exists.
+ *
+ * Round 2 — and this one is worse: **WORD_COUNT only matched SPELLED numbers.** So
+ * "All 6 comparable homes are recorded sales" passed CLEANLY — true or false — because
+ * the numerals were written as digits, and the digits 2/4/6 were ALREADY IN THE
+ * ANCHOR ALLOW-SET: the settled sentences themselves supply them ("above 2 of 6 and
+ * below 4"). Demonstrated live against market-comps: three FALSE digit-counts shipped
+ * past both gates undetected. That was not a beatable control — it was an ABSENT one.
+ *
+ * THE REAL FAILURE MODE IS **CORRUPTION-ON-RESTATE**, not derivation. The structural
+ * defense (hand the narrator no raw set) genuinely stops it from *deriving* a new count.
+ * But it is HANDED settled count sentences — and nothing stopped it restating one with a
+ * swapped digit or a swapped predicate. Only prompt-prose stood in the way, and this
+ * file's own thesis is that you cannot enumerate your way out of natural language.
+ *
+ * So: a count is matched in EITHER form, and (see `auditClaims`) a count-shaped sentence
+ * must be a VERBATIM restatement of a settled one. Anything else is dropped.
+ */
+const COUNT_ENTITY = String.raw`(zips?|homes?|sales?|listings?|comps?|comparables?|properties|areas?|neighborhoods?|of them)`;
+const COUNT_QUANTIFIER = String.raw`(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|most|majority|all|none|every|each|both|several|many|few|\d+)`;
+const COUNT = new RegExp(
+  String.raw`\b(all\s+)?${COUNT_QUANTIFIER}\s+(of\s+)?(the\s+|those\s+|these\s+)?\w*\s*${COUNT_ENTITY}\b`,
+  "i",
+);
 
 /** A SEQUENCE of events. under-contract asserted the price was cut "BEFORE a contract
  *  was reached" — we hold a cut AMOUNT and nothing else. No cut date, no contract date,
@@ -225,7 +250,10 @@ export function auditClaims(prose: string, settled: readonly SettledClaim[]): Cl
       ["comparative", COMPARATIVE_QUANT],
       ["comparative", COMPARATIVE_PHRASE],
       ["trajectory", TRAJECTORY],
-      ["word-count", WORD_COUNT],
+      // A count survives ONLY as a verbatim restatement of a settled sentence (the
+      // `settledText.includes` guard above). Any other count — spelled OR in digits — is
+      // the narrator counting for itself, which it may never do.
+      ["word-count", COUNT],
       ["sequence", SEQUENCE],
       ["spatial", SPATIAL],
       ["motive", MOTIVE],
