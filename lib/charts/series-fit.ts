@@ -97,7 +97,7 @@ function select(points: readonly FitPoint[], w: FitWindow, asOf: Date, earliest:
   return points.filter((p) => p.when >= cut);
 }
 
-function labelFor(w: FitWindow): string {
+export function labelFor(w: FitWindow): string {
   switch (w) {
     case "full":
       return "full history";
@@ -164,8 +164,28 @@ export interface Verdict {
    * on its own still dies in the gate. NO CHANGE TO claims.ts IS NEEDED.
    */
   claim: SettledClaim;
-  /** Computed, never a blank. A spec that asks the model for a number is a lie. */
-  falsifier: { value: number; sentence: string };
+  /**
+   * THE FALSIFIER — AND IT IS A `SettledClaim` IN ITS OWN RIGHT.
+   *
+   * It MUST be handed to the narrator in the settled set ALONGSIDE `claim`:
+   *
+   *     auditClaims(prose, [verdict.claim, verdict.falsifier])   // <- BOTH
+   *
+   * Pass only `claim` and the gate EATS THE FALSIFIER — it reads as `comparative`
+   * ("moves against the fitted line by MORE THAN $1,674 a month") plus
+   * `unanchored-number` (that bound appears in no other settled sentence). It fails
+   * closed, so the paragraph is dropped to an open slot and the falsifier never
+   * reaches the page.
+   *
+   * That is not a cosmetic loss. A trend read IS an inference, and the rules of
+   * engagement require every [INFERENCE] to carry its base value AND ONE FALSIFIER
+   * in visible copy. A falsifier the gate deletes is a falsifier we did not ship —
+   * which means we could not ship a compliant inference at all. Settling it here is
+   * what makes the whole verdict shippable.
+   *
+   * `value` is the COMPUTED bound — never a blank for a model to fill.
+   */
+  falsifier: SettledClaim & { value: number };
 }
 
 const usd0 = (n: number) => `$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
@@ -191,18 +211,18 @@ export function trendVerdict(fits: readonly WindowFit[]): Verdict | null {
   // The LONG window doesn't establish a direction → we say nothing about direction.
   if (!long.fit.established) {
     const sentence =
-      `Over the ${long.label} this series does not follow a straight line — ` +
+      `Across the ${long.label}, this series does not follow a straight line — ` +
       `its trend is not statistically distinguishable from flat.`;
+    const falsSentence = `A direction becomes readable only once a fitted slope's 95% interval clears zero.`;
     return {
       kind: "no-direction",
       tight,
       long,
       current,
       claim: { sentence, anchors: numeralsIn(sentence) },
-      falsifier: {
-        value: 0,
-        sentence: `A direction becomes readable only once a fitted slope's 95% interval clears zero.`,
-      },
+      // Zero IS the computed bound here: the interval must clear it before any
+      // direction may be read. It is a number we derived, not a blank.
+      falsifier: { value: 0, sentence: falsSentence, anchors: numeralsIn(falsSentence) },
     };
   }
 
@@ -213,37 +233,53 @@ export function trendVerdict(fits: readonly WindowFit[]): Verdict | null {
   let kind: VerdictKind;
   let sentence: string;
 
+  // THE WINDOW IS A CLAUSE, NOT A MID-SENTENCE OBJECT.
+  //
+  // `long.label` is one of TWO shapes: "full history", or "full history, excluding the
+  // 2021–2022 run-up". The second ALREADY CONTAINS A COMMA, so dropping it into a bare
+  // prepositional slot — `Across the ${label} this market has been…` — reads fine for
+  // the first and ships a RUN-ON for the second, verbatim:
+  //
+  //   "Across the full history, excluding the 2021–2022 run-up this market has been
+  //    climbing $1,802 a month."
+  //
+  // This is customer copy that goes out over an agent's signature to their client list.
+  // So the window is FRONTED AND CLOSED with its own comma — grammatical under BOTH
+  // labels — and the exclusion still travels in the prose, because an exclusion the
+  // reader never sees is a lie by omission.
+  const across = `Across the ${long.label},`;
+
   if (!current || !current.fit.established) {
     // PLATEAU — the long run is real; the recent window establishes NOTHING. We may
     // not read the recent slope's sign at all, so it is absent from the sentence.
     kind = "plateau";
     sentence =
-      `Across the ${long.label} this market has been ${climb} ${longRate} ` +
+      `${across} this market has been ${climb} ${longRate} ` +
       `(${long.fit.from} to ${long.fit.to}). The last 24 months do not establish a ` +
       `direction either way — that is a plateau, not a turn.`;
   } else if (dir(current.fit.slope) === longDir) {
     kind = "intact";
+    // Two sentences, not one comma-spliced chain: with the ex-boom label the single
+    // sentence carried four commas before it reached its second clause.
     sentence =
-      `Across the ${long.label} this market has been ${climb} ${longRate}, and the ` +
-      `last 24 months are still ${climb}, at ${usd0(current.fit.slope)} a month.`;
+      `${across} this market has been ${climb} ${longRate}. The last 24 months are ` +
+      `still ${climb}, at ${usd0(current.fit.slope)} a month.`;
   } else {
     kind = "reversed";
     const nowDir = dir(current.fit.slope) === "up" ? "climbing" : "falling";
     sentence =
-      `Across the ${long.label} this market was ${climb} ${longRate}. Over the last ` +
+      `${across} this market was ${climb} ${longRate}. Over the last ` +
       `24 months it has been ${nowDir}, at ${usd0(current.fit.slope)} a month. ` +
       `The direction has turned.`;
   }
 
-  // THE FALSIFIER, COMPUTED. The long-run line's own lower bound is the number the
-  // next print must clear for the trend to hold.
+  // THE FALSIFIER, COMPUTED — and SETTLED, so the gate lets it through. The long-run
+  // line's own bound nearest zero is the number the next prints must clear for the
+  // trend to hold. Anchored exactly as `claim` is: every numeral it states is its own.
   const bound = longDir === "up" ? long.fit.ci[0] : long.fit.ci[1];
-  const falsifier = {
-    value: bound,
-    sentence:
-      `This read breaks if the next two months move against the fitted line by more ` +
-      `than ${usd0(bound)} a month.`,
-  };
+  const falsSentence =
+    `This read breaks if the next two months move against the fitted line by more ` +
+    `than ${usd0(bound)} a month.`;
 
   return {
     kind,
@@ -251,6 +287,6 @@ export function trendVerdict(fits: readonly WindowFit[]): Verdict | null {
     long,
     current,
     claim: { sentence, anchors: numeralsIn(sentence) },
-    falsifier,
+    falsifier: { value: bound, sentence: falsSentence, anchors: numeralsIn(falsSentence) },
   };
 }

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import { fitWindows, FIT_WINDOWS, trendVerdict } from "./series-fit";
-import type { WindowFit } from "./series-fit";
+import { fitWindows, FIT_WINDOWS, labelFor, trendVerdict } from "./series-fit";
+import type { Verdict, WindowFit } from "./series-fit";
 import type { Fit, FitPoint } from "./fit-line";
+// THE REAL GATE, not a stand-in. The verdict's whole reason to exist is that it
+// SURVIVES this function — asserting against a mock would prove nothing.
+import { auditClaims } from "@/lib/deliverable/claims";
 
 /** Monthly points from 06/2015 through 05/2026 on a line, as our real series run. */
 function monthly(from: Date, n: number, base: number, slope: number): FitPoint[] {
@@ -146,7 +149,10 @@ function wf(
     to: "05/31/2026",
     at: () => 0,
   };
-  return { window, label: String(window), fit };
+  // The REAL label, from the one authority that mints it. A stub label here would let
+  // the ex-boom run-on (below) sail through a green test — the run-on only exists
+  // because the shipped ex-boom label carries a comma of its own.
+  return { window, label: labelFor(window), fit };
 }
 
 describe("trendVerdict — the comparison is CODE's job, never the model's", () => {
@@ -230,4 +236,91 @@ describe("trendVerdict — the comparison is CODE's job, never the model's", () 
     expect(Number.isFinite(v.falsifier.value)).toBe(true);
     expect(v.falsifier.sentence.length).toBeGreaterThan(0);
   });
+});
+
+/**
+ * ONE VERDICT OF EACH KIND — and every one of them takes `ex-boom` as its LONG window,
+ * because ex-boom's label is the one that carries a comma of its own and is therefore the
+ * hard case for both the gate and the grammar. A fix that lands on one kind is not a fix.
+ */
+const VERDICTS: Record<Verdict["kind"], Verdict> = {
+  plateau: trendVerdict([
+    wf("ex-boom", 1802, 0.882, 108, [1674, 1930]),
+    wf("24m", -619, 0.151, 24, [-1245, 7]), // CONTAINS ZERO — no readable direction
+  ])!,
+  intact: trendVerdict([
+    wf("ex-boom", 1802, 0.882, 108, [1674, 1930]),
+    wf("24m", 1500, 0.75, 24, [1100, 1900]), // same sign, established
+  ])!,
+  reversed: trendVerdict([
+    wf("ex-boom", 1923, 0.908, 108, [1804, 2042]),
+    wf("24m", -1844, 0.843, 24, [-2183, -1504]), // established, OPPOSITE
+  ])!,
+  "no-direction": trendVerdict([
+    wf("ex-boom", 120, 0.01, 108, [-400, 640]), // the LONG window's CI contains zero
+    wf("24m", 50, 0.0, 24, [-900, 1000]),
+  ])!,
+};
+
+/**
+ * THE VERDICT MUST SURVIVE THE REAL GATE — CLAIM **AND** FALSIFIER.
+ *
+ * A trend read is an [INFERENCE], and this platform's rules of engagement require every
+ * inference to carry its base value AND ONE FALSIFIER in visible copy. The falsifier says
+ * "…by MORE THAN $1,674 a month" — which is comparative-shaped and carries a numeral no
+ * other settled sentence holds. So unless the falsifier is ITSELF settled, `auditClaims`
+ * eats it, the paragraph fails closed to an open slot, and we cannot ship a compliant
+ * inference AT ALL. Hence `falsifier: SettledClaim & { value: number }`.
+ */
+describe("trendVerdict SURVIVES auditClaims — the real gate, not a stand-in", () => {
+  for (const [kind, v] of Object.entries(VERDICTS)) {
+    it(`${kind}: claim and falsifier BOTH pass when BOTH are in the settled set`, () => {
+      const settled = [v.claim, v.falsifier];
+      expect(auditClaims(v.claim.sentence, settled)).toEqual([]);
+      expect(auditClaims(v.falsifier.sentence, settled)).toEqual([]);
+      // And together, as the narrator actually restates them — one paragraph.
+      expect(auditClaims(`${v.claim.sentence} ${v.falsifier.sentence}`, settled)).toEqual([]);
+    });
+  }
+
+  // THE FIX IS LOAD-BEARING, and this is the test that proves it. Hand the gate the claim
+  // ALONE — exactly what the old `{ value, sentence }` type forced on every caller, since
+  // a bare object could not go in a `SettledClaim[]` — and the falsifier DIES.
+  it("the falsifier is EATEN when it is not itself settled — the reason it is a SettledClaim", () => {
+    for (const v of Object.values(VERDICTS)) {
+      expect(auditClaims(v.falsifier.sentence, [v.claim]).length).toBeGreaterThan(0);
+    }
+  });
+
+  // THE GATE IS NOT INERT. Everything above passes because CODE authored the sentence.
+  // A trajectory the MODEL wrote for itself still dies — that is the whole point.
+  it("a trajectory the narrator invented for itself still FAILS", () => {
+    expect(auditClaims("Prices in Cape Coral are climbing.", []).length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * THE SENTENCE IS CUSTOMER COPY. It goes out over an agent's signature to their client
+ * list, so it has to read as English under BOTH window labels — "full history" AND
+ * "full history, excluding the 2021–2022 run-up", which carries a comma of its own.
+ *
+ * Shipped before this test existed, verbatim:
+ *   "Across the full history, excluding the 2021–2022 run-up this market has been
+ *    climbing $1,802 a month."
+ */
+describe("the verdict sentence reads as English under the ex-boom label", () => {
+  for (const [kind, v] of Object.entries(VERDICTS)) {
+    it(`${kind}: no run-on, and the exclusion is still disclosed`, () => {
+      expect(v.long.window).toBe("ex-boom"); // the hard label, on every kind
+      // THE RUN-ON: "…the 2021–2022 run-up this market has been climbing…"
+      expect(v.claim.sentence).not.toContain("run-up this");
+      expect(v.claim.sentence).toContain("run-up, this");
+      // AN UNDISCLOSED EXCLUSION IS A LIE BY OMISSION. It survives the rewrite.
+      expect(v.claim.sentence).toContain("excluding");
+      expect(v.claim.sentence).toContain("2021");
+      expect(v.claim.sentence).toContain("2022");
+      // The narrator has never seen the document; the sentence may not point at it.
+      expect(v.claim.sentence).not.toMatch(/\b(above|below|as shown)\b/i);
+    });
+  }
 });
