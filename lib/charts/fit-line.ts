@@ -91,8 +91,15 @@ export function tQuantile975(df: number): number {
 /** Least-squares fit over a dated series. `null` when it cannot honestly be fit. */
 export function fitLine(points: readonly FitPoint[]): Fit | null {
   const pts = (points ?? [])
-    .filter((p) => p && p.when instanceof Date && Number.isFinite(p.y))
-    .slice()
+    // `instanceof Date` is TRUE for an Invalid Date (`new Date("garbage")`), whose
+    // getUTCFullYear() is NaN. Without the getTime() check, ONE unparseable date
+    // poisons the whole fit into a CONFIDENT-LOOKING NaN object — slope NaN, ci
+    // [NaN, NaN], `established: false`, `from: "NaN/NaN/NaN"` — and "established:
+    // false" reads as "we checked, there is no trend" when the truth is "we could
+    // not fit this at all". A bad fit must be NULL, never a NaN wearing a Fit's face.
+    .filter(
+      (p) => p && p.when instanceof Date && !Number.isNaN(p.when.getTime()) && Number.isFinite(p.y),
+    )
     .sort((a, b) => a.when.getTime() - b.when.getTime());
 
   const n = pts.length;
@@ -126,6 +133,18 @@ export function fitLine(points: readonly FitPoint[]): Fit | null {
   const df = n - 2;
   // Floating-point can make a perfect fit's SSE a hair negative.
   const se = Math.sqrt(Math.max(0, sse / df) / sxx);
+  // BELT AND SUSPENDERS. A degenerate fit is NULL, never a NaN-filled Fit object.
+  // Nothing downstream may ever receive `established: false` as the answer to a
+  // question we could not compute — that is a lie dressed as a finding.
+  if (
+    !Number.isFinite(slope) ||
+    !Number.isFinite(intercept) ||
+    !Number.isFinite(r2) ||
+    !Number.isFinite(se)
+  ) {
+    return null;
+  }
+
   const t = tQuantile975(df);
   const ci: [number, number] = [slope - t * se, slope + t * se];
   const established = ci[0] > 0 || ci[1] < 0;
