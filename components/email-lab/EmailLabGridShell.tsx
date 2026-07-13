@@ -77,6 +77,8 @@ import { campaignFollowUpForPrompt, campaignKeyForPrompt } from "@/lib/campaigns
 import {
   brandGaps,
   findPlaceholder,
+  inputKindForPrompt,
+  typableGaps,
   NEED_LABELS,
   type BrandNeed,
   type ShowcaseRecipe,
@@ -202,6 +204,11 @@ export interface EmailLabGridShellProps {
   initialAiPrompt?: string;
   /** …and fire ONE author build on mount (project auto-fill path). */
   autoGenerate?: boolean;
+  /** Brand fields the auto-building recipe PRINTS. Given, the mount build waits for
+   *  the account brand and asks for whatever is still missing instead of authoring an
+   *  email signed "Company / Tagline". The arrival carries the recipe's `needs` here
+   *  because the filled prompt it builds from no longer carries the recipe itself. */
+  autoBuildNeeds?: readonly BrandNeed[];
   /** Cross-page "Make this →" handoff — the pill and the /showcase page both
    *  carry a recipe here via `?recipe=<prompt>&recipeNeeds=<comma needs>`
    *  (lib/project/lab-redirect.ts). Seeds the SAME pendingRecipe/gap-guard
@@ -232,6 +239,7 @@ export function EmailLabGridShell({
   scope,
   initialAiPrompt,
   autoGenerate,
+  autoBuildNeeds,
   initialRecipe,
   headerSlot,
   aiPlaceholder = "Describe the whole email — the AI lays it out on the grid with real SWFL numbers…",
@@ -328,6 +336,19 @@ export function EmailLabGridShell({
   // any brand fields the recipe prints) that the click used to swallow silently.
   const [startRecipe, setStartRecipe] = useState<ShowcaseRecipe | null>(null);
   const brandPrefillAttempted = useRef(false);
+  // Arrival brand gate: the account brand has been read (or failed to read), and the
+  // fields the arriving recipe prints that we still don't have. The mount build waits
+  // on the first and is held by the second.
+  const [brandLoaded, setBrandLoaded] = useState(false);
+  const [autoBuildGaps, setAutoBuildGaps] = useState<BrandNeed[] | null>(null);
+  const autoBuildFired = useRef(false);
+  // Async callbacks (mount effects) capture a stale `branding` — the ref is what they
+  // read so the build signs with the brand that actually landed, not the empty blob
+  // the component mounted with.
+  const brandingRef = useRef(branding);
+  useEffect(() => {
+    brandingRef.current = branding;
+  }, [branding]);
   // Set whenever the Brand panel edits a field (applyBranding); cleared once that
   // change has actually reached projects.branding. The main Save button used to only
   // persist the doc — a brand edit that was never separately re-saved from inside the
@@ -461,40 +482,83 @@ export function EmailLabGridShell({
     }
   }
 
-  // Auto-build on mount (project email tab lands on a generated email, not a
-  // blank grid). Mirrors the retired block shell's autoGenerate effect; author
-  // path here because the grid composes whole layouts.
+  // Auto-build on mount (a recipe arrival lands on a generated email, not a blank
+  // grid). Two things gate it, and both are the fix for "the email shipped unsigned":
+  //
+  //   1. It WAITS for the account brand (brandLoaded). It used to race the prefill
+  //      and usually won, authoring against branding = {} — so a user whose name was
+  //      saved in their account still got "Company / Tagline" in the header.
+  //   2. If the recipe PRINTS brand fields we still don't have, it asks first
+  //      (autoBuildGaps → the same popup the card path uses) instead of building an
+  //      email signed by a placeholder. Asking is the whole point; the build is never
+  //      refused (the popup's Build is always enabled in brand-only mode).
+  /** The mount build itself — shared by the clean path and the post-popup replay. */
+  async function runAutoBuild(brandPatch?: Record<string, string>) {
+    const nextBranding = brandPatch
+      ? { ...brandingRef.current, ...brandPatch }
+      : brandingRef.current;
+    setAiLoading(true);
+    try {
+      const res = await fetch("/api/email-lab/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: (initialAiPrompt ?? "").trim(),
+          doc: brandPatch ? applyBrand(doc, brandingToTokens(nextBranding)) : doc,
+          scope,
+          build: true,
+          recipeId: nextBranding.preferred_recipe || undefined,
+        }),
+      });
+      const data = (await res.json()) as { doc?: unknown; applied?: boolean; message?: string };
+      if (data.applied === false) {
+        setAiMessage(data.message ?? "The AI couldn't build the layout — try rephrasing.");
+        return;
+      }
+      if (data.doc) {
+        const parsed = EmailDocSchema.safeParse(data.doc);
+        if (parsed.success) {
+          // brandTokens (the prop) is undefined on the standalone grid, so falling
+          // back to the live brand is what actually signs the built doc.
+          const tokens = brandTokens ?? brandingToTokens(nextBranding);
+          commit(normalizeAuthorHeights(applyBrand(parsed.data, tokens)));
+          setSelectedId(null);
+        }
+      }
+    } catch {
+      setAiMessage("Something went wrong — try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   useEffect(() => {
-    if (!autoGenerate) return;
-    fetch("/api/email-lab/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        prompt: (initialAiPrompt ?? "").trim(),
-        doc,
-        scope,
-        build: true,
-        recipeId: branding.preferred_recipe || undefined,
-      }),
-    })
-      .then((r) => r.json())
-      .then((data: { doc?: unknown; applied?: boolean; message?: string }) => {
-        if (data.applied === false) {
-          setAiMessage(data.message ?? "The AI couldn't build the layout — try rephrasing.");
-          return;
-        }
-        if (data.doc) {
-          const parsed = EmailDocSchema.safeParse(data.doc);
-          if (parsed.success) {
-            commit(normalizeAuthorHeights(applyBrand(parsed.data, brandTokens)));
-            setSelectedId(null);
-          }
-        }
-      })
-      .catch(() => setAiMessage("Something went wrong — try again."))
-      .finally(() => setAiLoading(false));
+    if (!autoGenerate || !brandLoaded || autoBuildFired.current) return;
+    const gaps = typableGaps(autoBuildNeeds ?? [], brandingRef.current);
+    if (gaps.length > 0) {
+      setAutoBuildGaps(gaps);
+      setAiLoading(false); // the spinner must not sit under the popup
+      return;
+    }
+    autoBuildFired.current = true;
+    void runAutoBuild();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [brandLoaded, autoGenerate]);
+
+  /** Popup submit on the arrival path: bank the brand, then run the held build. */
+  function buildAfterBrand(_value: string, brandPatch: Record<string, string>) {
+    setAutoBuildGaps(null);
+    autoBuildFired.current = true;
+    if (Object.keys(brandPatch).length > 0) {
+      applyBranding({ ...brandingRef.current, ...brandPatch });
+      void fetch("/api/user/brand", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(brandPatch),
+      });
+    }
+    void runAutoBuild(brandPatch);
+  }
 
   // ── AI: Fill content into the current layout (content patch — words/numbers) ──
   async function runFill(text: string) {
@@ -579,19 +643,6 @@ export function EmailLabGridShell({
       return;
     }
     setStartRecipe(recipe);
-  }
-
-  /** Which word the popup asks for. The blank's own hint is the only honest signal —
-   *  an area/farm/ZIP recipe must not be asked for a street address. */
-  function startInputKind(recipe: ShowcaseRecipe): "address" | "area" {
-    const hint = findPlaceholder(recipe.prompt)?.hint.toLowerCase() ?? "";
-    return /area|farm|zip|city|neighborhood|market/.test(hint) ? "area" : "address";
-  }
-
-  /** Brand fields the recipe prints that we don't have — minus the headshot, which is
-   *  an upload the Brand panel owns and can't be typed into a popup. */
-  function startGaps(recipe: ShowcaseRecipe): BrandNeed[] {
-    return brandGaps(recipe.needs, branding).filter((g) => g !== "photo_url");
   }
 
   /** The one submit out of the popup: bank the brand fields they typed, fill the
@@ -1221,9 +1272,19 @@ export function EmailLabGridShell({
     }
   }
 
-  // On first Brand-accordion open, load the account brand profile (mirrors free).
+  // Account brand — loaded ON MOUNT, not on the first Brand-accordion open.
+  //
+  // It used to wait for `showBrand`, which meant a signed-in user with a saved brand
+  // carried EMPTY branding for the whole session unless they happened to click
+  // "Brand". The auto-build then fired against {} and the email went out signed
+  // "Company / Tagline" — the brand they'd already typed was sitting in their account
+  // the entire time. "Type it once, we'll remember" has to survive a page load, and
+  // the gap-gate below can't ask an honest question about a brand it never read.
+  //
+  // Signed out this 401s → `{}` → every need reads as a gap, which is correct: they
+  // have no account brand, so the popup asks. It never throws.
   useEffect(() => {
-    if (!showBrand || brandPrefillAttempted.current) return;
+    if (brandPrefillAttempted.current) return;
     brandPrefillAttempted.current = true;
     fetch("/api/user/brand")
       .then((r) => (r.ok ? r.json() : {}))
@@ -1236,6 +1297,13 @@ export function EmailLabGridShell({
           for (const k of ["agent_name", "photo_url", "license", "brokerage", "preferred_recipe"]) {
             if (!next[k] && typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
           }
+          // The old prefill pulled name/photo/license/brokerage and NOTHING else, so
+          // business_address — the CAN-SPAM footer line, and a brand `need` the gap
+          // gate asks about — could never arrive from the account. It got re-asked on
+          // every visit even when it was saved.
+          for (const k of ["business_address", "contact_email", "contact_phone", "website_url"]) {
+            if (!next[k] && typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
+          }
           const scheme = defaultScheme(data);
           PALETTE_SLOT_KEYS.forEach((k, i) => {
             if (!prev[k] && scheme[i]) next[k] = scheme[i];
@@ -1243,8 +1311,12 @@ export function EmailLabGridShell({
           return next;
         });
       })
-      .catch(() => {});
-  }, [showBrand]);
+      .catch(() => {})
+      // Load-bearing: the auto-build waits on this, so it MUST flip on every path
+      // (401, network error, malformed body) or a recipe arrival would hang forever
+      // on a spinner instead of building.
+      .finally(() => setBrandLoaded(true));
+  }, []);
 
   // Keyboard: ⌘Z / ⌘⇧Z undo-redo, Escape deselects.
   useEffect(() => {
@@ -2107,14 +2179,33 @@ export function EmailLabGridShell({
         ))}
       </div>
 
+      {/* Arrival brand gate — the recipe came in already filled (nothing to ask about
+          the PLACE), but it prints brand fields the account doesn't have. Ask, then run
+          the held build. Without this the email auto-built signed "Company / Tagline". */}
+      {autoBuildGaps && autoBuildGaps.length > 0 && (
+        <AddressPopup
+          inputKind={null}
+          initialValue=""
+          gaps={autoBuildGaps}
+          onCancel={() => {
+            // Cancel = build it anyway. A build is never refused (RULE 0.7); they just
+            // get the placeholder signature they chose.
+            setAutoBuildGaps(null);
+            autoBuildFired.current = true;
+            void runAutoBuild();
+          }}
+          onBuild={buildAfterBrand}
+        />
+      )}
+
       {/* Click a campaign or an example → the SAME popup the arrival door already used:
           ask for the address/area (and any brand field the email prints), then BUILD.
           Replaces the old silent seed of a Build box that was scrolled off-screen. */}
       {startRecipe && (
         <AddressPopup
-          inputKind={startInputKind(startRecipe)}
+          inputKind={inputKindForPrompt(startRecipe.prompt)}
           initialValue=""
-          gaps={startGaps(startRecipe)}
+          gaps={typableGaps(startRecipe.needs, branding)}
           onCancel={() => {
             setStartRecipe(null);
             setPendingRecipe(null);

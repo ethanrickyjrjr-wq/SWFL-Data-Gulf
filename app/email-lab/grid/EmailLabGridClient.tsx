@@ -7,7 +7,12 @@ import { seedById, SEED_DOCS } from "@/lib/email/doc/default-docs";
 import { DEFAULT_H } from "@/components/email-lab/GridCanvas";
 import { ensureGridLayouts } from "@/lib/email/doc/grid-layouts";
 import type { EmailDoc } from "@/lib/email/doc/types";
-import { findPlaceholder, type BrandNeed, type ShowcaseRecipe } from "@/lib/showcase/recipe";
+import {
+  findPlaceholder,
+  inputKindForPrompt,
+  type BrandNeed,
+  type ShowcaseRecipe,
+} from "@/lib/showcase/recipe";
 import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 import { planArrival } from "@/lib/lab-entry/arrival";
 import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
@@ -120,7 +125,10 @@ export function EmailLabGridClient({
     if (addr) params.set("addr", addr);
     if (zip) params.set("zip", zip);
     const q = params.toString();
-    window.location.href = `${projectEmailLabBase(projectId)}${q ? `?${q}` : ""}`;
+    // assign(), not `location.href =` — same hard navigation (the server must re-read
+    // the session cookie), but an assignment to a global trips react-hooks/immutability
+    // and would block any commit that touches this file.
+    window.location.assign(`${projectEmailLabBase(projectId)}${q ? `?${q}` : ""}`);
   }
 
   async function createAndEnter(name: string) {
@@ -144,11 +152,17 @@ export function EmailLabGridClient({
     }
   }
 
+  // Brand typed into the arrival popup by a signed-out visitor — seeds the remounted
+  // shell so the build it fires is SIGNED. Signed-in visitors leave this empty: the
+  // shell reads their saved brand from the account on mount.
+  const [arrivalBrand, setArrivalBrand] = useState<Record<string, string>>({});
+
   // Fill the recipe's [[blank]] with the popup value, then remount the shell to
-  // build it (anonymous only — a signed-in recipe never reaches this popup).
-  function buildWithAddress(value: string) {
+  // build it.
+  function buildWithAddress(value: string, brandPatch: Record<string, string>) {
     setAddressOpen(false);
     if (!initialRecipe) return;
+    if (Object.keys(brandPatch).length > 0) setArrivalBrand(brandPatch);
     const ph = findPlaceholder(initialRecipe.prompt);
     const filled = ph
       ? initialRecipe.prompt.slice(0, ph.start) + value + initialRecipe.prompt.slice(ph.end)
@@ -157,6 +171,12 @@ export function EmailLabGridClient({
     setBuildKey((k) => k + 1);
   }
 
+  // A signed-out visitor has no account brand (that route 401s), so every field the
+  // recipe prints is a gap — collect them HERE, in the box that's already open, rather
+  // than making them answer a second popup after the remount. Signed-in: leave it to
+  // the shell, which reads the real account brand and only asks for what's missing.
+  const arrivalGaps = signedIn ? [] : (initialRecipe?.needs ?? []).filter((n) => n !== "photo_url");
+
   return (
     <>
       <EmailLabGridShell
@@ -164,6 +184,11 @@ export function EmailLabGridClient({
         initialDoc={initialDoc}
         initialAiPrompt={build?.prompt}
         autoGenerate={build != null}
+        // The filled prompt no longer carries the recipe, so the recipe's brand needs
+        // ride separately — without them the mount build can't tell whether the email
+        // it's about to author would go out signed by a placeholder.
+        autoBuildNeeds={initialRecipe?.needs}
+        initialBranding={Object.keys(arrivalBrand).length > 0 ? arrivalBrand : undefined}
         // The popup owns the blank now; don't also seed it into the Build box.
         initialRecipe={build || plan.addressPopup ? null : initialRecipe}
         onDocChange={(d) => {
@@ -221,10 +246,13 @@ export function EmailLabGridClient({
           onNewProject={createAndEnter}
         />
       )}
-      {!confirmOpen && addressOpen && recipeBlank && (
+      {!confirmOpen && addressOpen && recipeBlank && initialRecipe && (
         <AddressPopup
-          inputKind="address"
+          // Was hardcoded "address", so a farm/area recipe ("…about [[your city or
+          // ZIP]]") demanded a street address. The blank's own hint decides now.
+          inputKind={inputKindForPrompt(initialRecipe.prompt) ?? "address"}
           initialValue={addr ?? ""}
+          gaps={arrivalGaps}
           onBuild={buildWithAddress}
           onCancel={() => setAddressOpen(false)}
         />

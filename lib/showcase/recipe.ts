@@ -49,6 +49,28 @@ export function brandGaps(
   return needs.filter((k) => !(branding[k] ?? "").trim());
 }
 
+/** A headshot is an upload the Brand panel owns — it can't be typed into a popup,
+ *  so the ask-before-build boxes leave it out rather than dead-ending on it. */
+export function typableGaps(
+  needs: readonly BrandNeed[],
+  branding: Record<string, string>,
+): BrandNeed[] {
+  return brandGaps(needs, branding).filter((k) => k !== "photo_url");
+}
+
+/**
+ * What the ask-before-build popup should ask for — read from the [[blank]]'s own
+ * hint, never assumed. The arrival door used to hardcode "address", so a farm/area
+ * recipe ("...about [[your city or ZIP]]") demanded a street address. The hint is
+ * the only honest signal, and BOTH doors read it here so they can't drift apart.
+ * null = the prompt carries no blank, so there's no place to ask for.
+ */
+export function inputKindForPrompt(prompt: string): "address" | "area" | null {
+  const hint = findPlaceholder(prompt)?.hint.toLowerCase();
+  if (!hint) return null;
+  return /area|farm|zip|city|neighborhood|market|region/.test(hint) ? "area" : "address";
+}
+
 /**
  * THE ROOT for "Make this →" navigation — every host that carries a recipe to
  * a builder (the /showcase page, the AI-chat pill's BriefcasePanel, and any

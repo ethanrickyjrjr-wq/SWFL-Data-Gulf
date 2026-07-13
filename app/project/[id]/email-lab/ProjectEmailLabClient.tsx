@@ -9,7 +9,7 @@ import { defaultDoc, seedById, SEED_DOCS, type SeedDoc } from "@/lib/email/doc/d
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
 import { ArcStrip, type ArcSequence } from "@/components/email-lab/ArcStrip";
-import { findPlaceholder, type ShowcaseRecipe } from "@/lib/showcase/recipe";
+import { findPlaceholder, inputKindForPrompt, type ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { planArrival } from "@/lib/lab-entry/arrival";
 import { reconcileAddress, addressItem } from "@/lib/lab-entry/address-reconcile";
 import { AddressPopup } from "@/components/lab-entry/AddressPopup";
@@ -489,9 +489,11 @@ export function ProjectEmailLabClient({
         />
       )}
 
-      {addressOpen && recipeBlank && (
+      {addressOpen && recipeBlank && initialRecipe && (
         <AddressPopup
-          inputKind={recipeBlank.hint.toLowerCase().includes("address") ? "address" : "area"}
+          // Third copy of "which word do we ask for" — now the one shared rule, so the
+          // three doors into this popup can't drift apart again.
+          inputKind={inputKindForPrompt(initialRecipe.prompt) ?? "address"}
           initialValue={subjectAddress ?? ""}
           onBuild={onAddressBuild}
           onCancel={() => setAddressOpen(false)}

@@ -20,6 +20,24 @@ Operator: "WHERE ARE THE FUCKING PHOTOS... WHERE IS THE FUCKING RECIPE WE MADE?"
 
 55 tests pass. `next build` clean.
 
+## 2026-07-13 (Opus 4.8 · main) — THE BRAND WAS NEVER LOADED. It waited for a click on an accordion nobody clicks.
+
+Closes `arrival_prefilled_recipe_skips_brand_gate` (opened earlier today). The check said "the arrival skips the brand gate." True, but the cause was worse and simpler:
+
+**`/api/user/brand` was only ever fetched when the Brand accordion was OPENED** (`if (!showBrand || brandPrefillAttempted.current) return`). So a signed-in user with a saved brand carried `branding = {}` for the entire session unless they happened to click "Brand" — a collapsed grey row at the bottom of the rail. The mount build then authored against an empty blob and the email went out signed **"Company / Tagline"**, while the name they'd typed sat in their account the whole time. Every "type it once and we'll remember" promise this product makes was false the moment you reloaded the page.
+
+Two more, found in the same seam:
+- **`business_address` was not in the prefill list at all** — the prefill pulled name/photo/license/brokerage and nothing else. The CAN-SPAM footer field could never arrive from the account, so it got re-asked forever even when saved.
+- **The arrival popup hardcoded `inputKind="address"`**, so an area/farm recipe ("…about `[[your city or ZIP]]`") demanded a street address. Three files each had their own rule for this question; they're now one shared `inputKindForPrompt()` in `lib/showcase/recipe.ts`.
+
+FIXED: brand prefills ON MOUNT (401 when signed out → `{}` → every need reads as a gap, which is correct); the auto-build WAITS for it (`brandLoaded`) instead of racing it; and if the recipe still prints fields we don't have, it asks — a place-less "Sign this email" popup, the same `AddressPopup` root — instead of authoring a placeholder-signed email. Cancel still builds (RULE 0.7 — a build is never refused); the point is that the question now gets asked at all. The built doc is signed with the LIVE brand (`brandTokens ?? brandingToTokens(...)`) — the prop is undefined on the standalone grid, which is the other half of why nothing was ever branded there.
+
+VERIFIED on a prod build (`next start`, chrome-devtools): the exact URL that shipped an unsigned email this morning now holds the build, asks, and then authors signed — page innerText check: name TRUE, brokerage TRUE, CAN-SPAM address TRUE, "Company/Tagline" FALSE, real Cape Coral figures ($339,699 median value, −7.3% YoY, 563 active). 1 paid author call.
+
+Also fixed en route: `window.location.href =` in `EmailLabGridClient` tripped `react-hooks/immutability` and would have blocked any commit touching that file → `location.assign()`, same hard navigation.
+
+---
+
 ## 2026-07-13 (Opus 4.8 · main) — EMAIL LAB: the popup he demanded ALREADY EXISTED. It was wired to one door out of two.
 
 Operator: "either one i click it just puts words in AI box and i don't even know they are there... JUST POP UP A FUCKING BOX FOR ADDRESS." He was right on every count, and the humiliating part is the fix was already in the repo.
