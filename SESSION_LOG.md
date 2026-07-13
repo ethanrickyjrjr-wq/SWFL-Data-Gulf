@@ -1,3 +1,30 @@
+## 2026-07-13 (Opus 4.8 · main) — ONE RECIPE KEY. Every button, every showcase card, every lab choice now builds the same thing.
+
+Operator: *"MAKE SURE EACH BUTTON EACH TOUCHES CREATES THE SAME EXACT THING FOR THE SAME BUTTONS/SHOWCASE CARD/EMAIL LAB CHOICE."* It could not, and the reason was structural.
+
+**Three registries owned one concept, with no shared authority.** Showcase/campaign/hero recipes were identified by their **prompt string**; the lab's recipe picker by an `author-recipes` id (11 advisory prose nudges); the seed gallery by a `SEED_DOCS` id (27 real grids, three gallery surfaces). They collided *by name* and diverged in behavior. Proof it was already broken before anyone touched it: the agent-launch **follow-up** and the "Headlines vs Here" **slide** are one deliverable carried as two prompt strings differing by a trailing `"Schedule it every Tuesday morning."` — so the builder treated them as two recipes. A user typing their address over the `[[blank]]` could reroute their own build.
+
+**Fifteen of seventeen recipes died on a single `if`.** The working flyer lane was gated on `isNewListingRecipePrompt(prompt)` — a **regex**. Coming Soon, Comps, Under Contract and Sold all carry a real address in their prompt, and every one of them missed that regex, so they resolved no subject and fell into the free author's photo-less grab-bag.
+
+**Now: a RECIPE KEY is the identity.** Every door carries `?rkey=`; `authorDoc` dispatches on it. The skeleton is the one structural authority, the author-recipe is the prose layer, the prompt is seed TEXT. `registry.ts` no longer holds a single prompt literal — a surface may only POINT at a recipe, never redefine one.
+
+- `lib/deliverable/recipes.ts` — 14 keys: skeleton · prose · subject spine · chart policy. Thin by design; it must never restate what the skeleton already owns.
+- `recipes/{index,shared,new-listing}.ts` — the builder contract, the ONE subject resolver (never write a second), and New Listing as the reference implementation.
+- `recipes.parity.test.ts` — **the oracle.** Fails if a surface re-types a prompt, if two doors offering one key disagree, if a pill's address/area input contradicts its recipe's declared subject, if a key is lost through any URL hop, or if a chart-less recipe's prompt still promises a chart (the New Listing prompt did — it advertised a ZIP-trend chart the operator had killed).
+- The other session's `inputKindForPrompt` (address-vs-area, derived from the `[[blank]]` hint) folded into the registry's declared `subject`. A declared fact beats one re-derived from prose. Kept as the legacy bridge for keyless links.
+
+**The open-slot contract (Part 4) shipped.** `emailRender` existed and was documented as exactly this, but **only `SocialIconsBlock` honored it.** Now `stats`/`image`/`text` do: an empty cell is a canvas "+ Add" affordance and is ABSENT from the sent email; a row with no surviving cell is omitted; an empty image slot is a dropzone (file picker + drag-drop + paste-a-link); an empty text slot is an instruction. The old stat placeholder was `"0"` — a zero, i.e. an invented number, shipping to recipients. Same contract applied to the PDF engine, which was printing naked labels to real readers.
+
+**The seed card and the button were different emails.** The 4th collision: seed `new-listing` gave one 3-cell spec row and no agent card; the button gave seven spec slots and an agent card. The seed now mirrors the flyer, unfilled. Found while fixing it: `dropEmptyChartSlot` only *filtered* — blocks carry absolute grid positions, so removing the 5-row chart left a **5-row void** between the description and the agent card, in the one deliverable we had actually shipped. It closes the hole now.
+
+**Live-verified, not assumed:** `326 Shore Dr, Fort Myers 33905` → $595,000 · 3 bd · 3.5 ba · 2,847 sqft · 0.26 ac · Residential, with a real photo.
+
+**Next:** 11 recipe builders + a social recon are fanned out (one Opus each, adversarially verified, each correcting its own playbook Part 6 entry). `open-house` and `price-reduced` are orphan skeletons getting a real build path. Social is recon-first — the playbook is explicit that two unwired social systems exist.
+
+**Deferred, checked, not forgotten:** `email_save_nudge_two_moments` — pre-build yes/no brand-save nudge + post-build "SAVE YOUR PROJECT AND BRAND / Unsubscribe any time" email popup. Builds stay UNGATED (send is the paywall).
+
+**Known gap:** an empty cell inside a **multi-column** row still emits a ghost column in `compile-grid` (unreachable from the flyer — every row is full-bleed — but a user-built 2-col row with an empty cell gets a phantom column).
+
 ## 2026-07-13 (Opus 4.8 · main) — ONE DELIVERABLE THAT ACTUALLY WORKS + the playbook. New Listing, end to end, every field sourced.
 
 Operator: "WHERE ARE THE FUCKING PHOTOS... WHERE IS THE FUCKING RECIPE WE MADE?" Then: "Do we build anything correct?" The honest answer was **no** — and the reason is worse than a bug.
