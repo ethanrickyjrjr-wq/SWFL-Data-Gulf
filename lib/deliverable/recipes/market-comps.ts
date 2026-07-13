@@ -40,15 +40,40 @@
 //
 // ── THE OTHER HONESTY PROBLEM: NOT EVERY COMP IS A SALE ───────────────────────
 // `compsForAddress` tags each price: a recorded `sold`, a realtor.com `estimate`
-// (AVM), or a `last_list`. On the live fixture only 2 of 6 are recorded sales; the
-// rest are current valuations. Every number is sourced — so this constrains the
-// PROSE, it never blocks the build. The price kind survives into all three surfaces
-// the reader sees: the chart bar suffix "(est.)" (buildSoldCompsSpec), the row's own
-// "Sold 08/29/2025" / "Estimated 06/08/2026" line, and the stat cell's label, which
-// states the mix outright. The narrator is handed the kind on every comp and is
-// forbidden, in the system prompt, from calling a valuation a sale.
+// (AVM), or a `last_list`. On the live fixture only 2 of 5 real homes are recorded
+// sales; the rest are current valuations. Every number is sourced — so this constrains
+// the PROSE, it never blocks the build. The registry prompt no longer promises "six
+// LIVE comparable listings" (it never had six live listings to give), and the MIX is
+// now stated on FOUR surfaces the reader cannot miss: the chart bar suffix "(est.)"
+// (buildSoldCompsSpec), the evidence table's TITLE, each row's own "Sold 08/29/2025" /
+// "Estimated value 06/08/2026" line, and the stat cell's label. The narrator is handed
+// the mix as a SETTLED COUNT — it never counts anything itself.
+//
+// ── THE CLAIM GATE (lib/deliverable/claims.ts) — WIRED HERE ───────────────────
+// This recipe is the reason claims.ts exists. It shipped, to a rendered artifact, a
+// comparison that was INVERTED (see the guard block above `buildPriceCase`). The fix is
+// structural and it is greppable:
+//
+//   `buildNarratorPrompt(facts, pc)` DOES NOT TAKE THE COMP ARRAY. It cannot. There is
+//   no `RenderComp` in its signature, so there is no raw comp set for it to serialize,
+//   so the model is never handed two comp numbers to draw a third claim between. The old
+//   version passed `compLines` — every comp's address, price, sq ft and $/sq ft — and
+//   then asked the model, politely, not to compare them. It compared them.
+//
+// Every relation is computed in code (`compareToSet`, `settledCount`, `buildPriceCase`)
+// and handed over as a SETTLED ENGLISH SENTENCE. `auditClaims` is the fail-closed
+// backstop underneath: any violation and the narrator's paragraph is DROPPED to an open
+// slot — the code-authored verdict still ships, because it is true by construction.
 
 import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
+import {
+  auditClaims,
+  CLAIM_PROHIBITION,
+  compareToSet,
+  numeralsIn,
+  settledCount,
+  type SettledClaim,
+} from "@/lib/deliverable/claims";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { createBlock, DEFAULT_GLOBAL_STYLE } from "@/lib/email/doc/default-docs";
@@ -161,17 +186,29 @@ function compRow(c: RenderComp): ListItem {
   };
 }
 
-/** "2 recorded sales, 4 valuations" — the mix, stated on the face of the email so a
- *  reader can never mistake an AVM for a sale. Singular/plural handled; a zero side is
- *  simply not mentioned. */
-function mixLabel(comps: RenderComp[]): string {
+/** "(2 recorded sales, 3 valuations)" — THE MIX. The registry prompt used to promise
+ *  "six LIVE comparable listings" and the set is nothing of the kind: it is recorded
+ *  sales plus current valuations. So the mix is stated on the FACE of the email, in the
+ *  stat cell AND on the evidence table's own title, and a reader can never mistake an
+ *  AVM for a sale. Singular/plural handled; a zero side is simply not mentioned. */
+function mixParen(comps: RenderComp[]): string {
   const sold = comps.filter((c) => c.priceKind === "sold").length;
   const rest = comps.length - sold;
   const parts = [
     sold ? `${sold} recorded ${sold === 1 ? "sale" : "sales"}` : "",
     rest ? `${rest} ${rest === 1 ? "valuation" : "valuations"}` : "",
   ].filter(Boolean);
-  return parts.length ? `Comparable homes (${parts.join(", ")})` : "Comparable homes";
+  return parts.length ? ` (${parts.join(", ")})` : "";
+}
+
+/** The stat cell's label — "Comparable homes (2 recorded sales, 3 valuations)". */
+function mixLabel(comps: RenderComp[]): string {
+  return `Comparable homes${mixParen(comps)}`;
+}
+
+/** The evidence table's title — the mix again, where the rows actually are. */
+function mixTitle(comps: RenderComp[]): string {
+  return `The comparable homes${mixParen(comps)}`;
 }
 
 /** Editorial fallback palette — applied ONLY when the incoming brand is still the house
@@ -332,13 +369,17 @@ export function buildCompsGrid(
 
   // 7. The evidence table. Omitted entirely when there is nothing real to list (a
   //    `list` needs >= 1 row — an empty shell is not a slot, it is a lie).
+  //
+  //    THE TITLE CARRIES THE MIX. The set is NOT six live listings; it is recorded sales
+  //    plus current valuations, and the title says so directly over the rows — a reader
+  //    who skips the stat cell still cannot mistake an AVM for a sale.
   if (comps.length) {
     push(
       {
         id: createBlock("list").id,
         type: "list",
         props: {
-          title: "The comparable homes",
+          title: mixTitle(comps),
           items: comps.map(compRow),
         },
       },
@@ -443,9 +484,17 @@ export interface PriceCase {
   lowerCount: number;
   higherCount: number;
   levelCount: number;
+  /** THE MIX, counted in code. The narrator never counts — it is handed the count. */
+  soldCount: number;
+  estCount: number;
   subjectIsLargest: boolean;
   /** The comparative sentences, AUTHORED IN CODE. The only comparison this email makes. */
   verdict: string;
+  /** The verdict, sentence by sentence, as SETTLED CLAIMS (claims.ts). This is the ONLY
+   *  channel by which a relation reaches the narrator: as a finished English sentence
+   *  with its numerals as the anchor allow-set. `auditClaims` checks the narrator's
+   *  prose against exactly these. */
+  claims: SettledClaim[];
 }
 
 /** "$173 and $195" · "$173, $195 and $210" */
@@ -501,11 +550,22 @@ export function buildPriceCase(facts: ListingFacts, comps: RenderComp[]): PriceC
             : "within";
   }
 
-  // POSITION IN THE SET — the exact counts. This is what kills the "falls at the low end
-  // of that band" class of error: we state the true position instead of characterizing it.
+  // POSITION IN THE SET — `compareToSet` (claims.ts) OWNS this relation. It takes the
+  // subject and the set of integers and returns the settled English sentence; there is no
+  // model anywhere near it and no room for one. This is what kills the "falls at the low
+  // end of that band" class of error — the shipped lie said exactly that while $209 sat
+  // BELOW a $210–$266 band entirely. We state the true position instead of characterizing it.
+  const setClaim = compareToSet(
+    subjectPpsf,
+    priced.map((x) => x.ppsf),
+    { unit: "usd", noun: "asking price per square foot" },
+  );
   const lowerCount = priced.filter((x) => x.ppsf < subjectPpsf).length;
   const higherCount = priced.filter((x) => x.ppsf > subjectPpsf).length;
   const levelCount = n - lowerCount - higherCount;
+
+  const soldCount = priced.filter((x) => x.c.priceKind === "sold").length;
+  const estCount = n - soldCount;
 
   const subjSqft = num(facts.sqft);
   const subjectIsLargest =
@@ -544,17 +604,9 @@ export function buildPriceCase(facts: ListingFacts, comps: RenderComp[]): PriceC
     );
   }
 
-  sentences.push(
-    higherCount === n
-      ? `Every one of the ${homes} carries a higher price per square foot.`
-      : lowerCount === n
-        ? `Every one of the ${homes} carries a lower price per square foot.`
-        : `Of the ${homes}, ${lowerCount} ${lowerCount === 1 ? "carries" : "carry"} a lower ` +
-          `price per square foot and ${higherCount} ${higherCount === 1 ? "carries" : "carry"} ` +
-          `a higher one` +
-          (levelCount ? `; ${levelCount} ${levelCount === 1 ? "matches" : "match"} it` : "") +
-          `.`,
-  );
+  // The position sentence is compareToSet's, verbatim — a shared, tested, code-owned
+  // comparison. It never comes from here and it never comes from the model.
+  if (setClaim) sentences.push(setClaim.sentence);
 
   if (subjectIsLargest && subjSqft != null) {
     sentences.push(
@@ -572,9 +624,87 @@ export function buildPriceCase(facts: ListingFacts, comps: RenderComp[]): PriceC
     lowerCount,
     higherCount,
     levelCount,
+    soldCount,
+    estCount,
     subjectIsLargest,
     verdict: sentences.join(" "),
+    // EVERY verdict sentence is a settled claim. `auditClaims` skips a sentence the
+    // narrator restates verbatim from here, and allows exactly the numerals these carry.
+    claims: sentences.map((s) => ({ sentence: s, anchors: numeralsIn(s) })),
   };
+}
+
+/**
+ * EVERYTHING THE NARRATOR IS ALLOWED TO KNOW — as settled sentences, and nothing else.
+ *
+ * NOTE THE SIGNATURE: it takes the PriceCase, NOT the comps. There is no `RenderComp`
+ * here, so there is no raw comp set to serialize, so the model is never handed two comp
+ * numbers to draw a third claim between. That is the whole defense. The old version
+ * passed every comp's address, price, sq ft and $/sq ft and then asked the model not to
+ * compare them — and it compared them, backwards, into a shipped artifact.
+ *
+ * The returned list is BOTH the model's fact sheet AND the audit's allow-set: a numeral
+ * the narrator writes that appears in none of these sentences was invented, full stop.
+ */
+/**
+ * THE MIX AND THE CAVEAT — counted in code (`settledCount`), and PRINTED. Not handed to
+ * the narrator to say, because saying it REQUIRES A COUNT and a count is exactly what the
+ * narrator may not do. market-pulse's narrator wrote "five of those six ZIPs" over a set
+ * whose true answer was four; a word-count carries no digits, so a digit lint sails
+ * straight past it.
+ *
+ * Caught live on the first run of this rebuild: handed the mix as a fact and asked what
+ * the evidence IS, the model wrote "Four of the six figures… the two recorded sales…" — a
+ * word-count of its own, dropped by the gate, taking a true paragraph down with it. The
+ * fault was the DESIGN, not the model: the mix belonged in the printed sentence all along.
+ * If a fact can only be stated as a count, CODE STATES IT.
+ */
+export function mixClaims(pc: PriceCase): SettledClaim[] {
+  const noun = "comparable homes";
+  const mix =
+    pc.estCount === 0
+      ? settledCount(pc.soldCount, pc.n, { noun, predicate: "are recorded sales" })
+      : pc.soldCount === 0
+        ? settledCount(pc.estCount, pc.n, {
+            noun,
+            predicate: "are current valuations — estimates, not sales",
+          })
+        : settledCount(pc.soldCount, pc.n, {
+            noun,
+            predicate: "are recorded sales; the rest are current valuations — estimates, not sales",
+          });
+  return [mix, { sentence: `None of it is adjusted for condition.`, anchors: [] }];
+}
+
+/** The COMPLETE code-authored paragraph: every comparison, the mix, the caveat. True by
+ *  construction, and it ships whether or not the narrator's sentences survive the gate. */
+export function evidenceParagraph(pc: PriceCase): string {
+  return [pc.verdict, ...mixClaims(pc).map((c) => c.sentence)].join(" ");
+}
+
+export function narratorClaims(facts: ListingFacts, pc: PriceCase): SettledClaim[] {
+  const claim = (sentence: string): SettledClaim => ({ sentence, anchors: numeralsIn(sentence) });
+  const out: SettledClaim[] = [...pc.claims, ...mixClaims(pc)];
+
+  // The SUBJECT's own record — scalars, each one a fact on its own, none of them a set.
+  if (facts.price) out.push(claim(`The asking price is ${facts.price}.`));
+  const spec = [
+    facts.beds && `${facts.beds} bedrooms`,
+    facts.baths && `${facts.baths} bathrooms`,
+    num(facts.sqft) && `${num(facts.sqft)!.toLocaleString("en-US")} square feet`,
+    facts.lotSize && `a ${facts.lotSize} lot`,
+  ].filter(Boolean);
+  if (spec.length) out.push(claim(`The home has ${joinAnd(spec as string[])}.`));
+  if (facts.yearBuilt) out.push(claim(`The home was built in ${facts.yearBuilt}.`));
+  if (facts.isNewConstruction) {
+    out.push(claim(`The home is new construction, per the listing record.`));
+  }
+  if (facts.isPriceReduced && facts.priceReduction) {
+    out.push(
+      claim(`The asking price has already come down by ${facts.priceReduction} from the original.`),
+    );
+  }
+  return out;
 }
 
 /**
@@ -774,6 +904,71 @@ export function contextViolations(
  *
  * Never invents. No computable comparison → null, and the slot stays an OPEN SLOT.
  */
+export function buildNarratorPrompt(
+  facts: ListingFacts,
+  pc: PriceCase,
+): { system: string; user: string; settled: SettledClaim[] } {
+  const settled = narratorClaims(facts, pc);
+
+  const system =
+    `You write the CONTEXT sentences of a real-estate MARKET COMPS email — the one an ` +
+    `agent sends to make the case that the asking price is right. Two or three sentences. ` +
+    `Plain, confident, specific.\n\n` +
+    // THE PROHIBITION, VERBATIM FROM THE GATE. The model is told the exact rule the lint
+    // enforces, so a violation is a refusal to follow an explicit instruction rather than
+    // a surprise. Keep this line — it is the contract between the prompt and auditClaims.
+    `${CLAIM_PROHIBITION}\n\n` +
+    `*** THE COMPARISON IS ALREADY WRITTEN AND YOU DO NOT GET TO MAKE ANOTHER ONE. ***\n` +
+    `It was computed from the records — not by you — and it is printed IMMEDIATELY BEFORE ` +
+    `your sentences, in the same paragraph. Do not restate it, do not re-derive it, do not ` +
+    `soften it, do not contradict it.\n\n` +
+    `THESE WORDS ARE FORBIDDEN. Using any of them, in any form, voids your paragraph:\n` +
+    BANNED_CONTEXT_PHRASES.map((p) => `"${p}"`).join(", ") +
+    `.\nThat list includes the bare word "than", and it means EVERY use of it — "rather ` +
+    `than" and "other than" void the paragraph exactly like "higher than" does. If a ` +
+    `sentence wants "than", rewrite the sentence without it: "estimates rather than sales" ` +
+    `becomes "estimates, not sales". Every one of these words is a way of placing one thing ` +
+    `against another, and the code has already done that.\n\n` +
+    `YOUR JOB IS NARROW, AND IT IS THE ONE THING THE PRINTED SENTENCES CANNOT DO: say WHAT ` +
+    `THIS HOME IS. New construction. The lot. A price that has already come down. Then ` +
+    `close by inviting the reader to talk it through.\n\n` +
+    `WHAT IS ALREADY PRINTED, AND WHICH YOU MUST NOT REPEAT: every comparison, the make-up ` +
+    `of the evidence (how many are recorded sales, how many are current valuations), and ` +
+    `the fact that none of it is adjusted for condition. All of that is stated for you, ` +
+    `directly above your sentences. Do not restate it and do not count anything — a count ` +
+    `is a factual claim, it is already made, and if you make one of your own your paragraph ` +
+    `is voided even when it happens to be right.\n\n` +
+    `DO NOT RECITE THE SPEC EITHER. The grid directly above your paragraph already prints ` +
+    `the price, the beds, the baths, the square feet and the lot. A paragraph that reads ` +
+    `them back is a wasted paragraph.\n\n` +
+    `HARD RULES. Every number you write must appear VERBATIM in the settled facts — same ` +
+    `digits, same commas. Never compute a new one, never round differently, never estimate. ` +
+    `A FACT ABOUT A HOME IS NOT ONLY A NUMBER: you may not assert a view, a waterfront, a ` +
+    `pool, a renovation, a garage, a school, a finish, a builder, a condition, or a ` +
+    `character for the subject OR for any comparable unless the facts state it. You have ` +
+    `never seen these houses, and you do not know where the comparables are beyond ` +
+    `"nearby" — never name a road, not even the subject's own.\n\n` +
+    `AND A MARKET RULE IS NOT A FACT EITHER. Do not prop the argument up on a general ` +
+    `claim you were not given — "price per square foot compresses as size increases", ` +
+    `"new construction commands a premium". Those are assertions about a market you were ` +
+    `handed no evidence for, and they are inventions exactly like a made-up number. Never ` +
+    `add a selling claim of your own either: "priced to move", "won't last", "a rare ` +
+    `opportunity" are YOUR words, not facts. No hype, no exclamation marks.\n\n` +
+    `Return ONLY your two or three sentences.`;
+
+  // THE ENTIRE FACT SHEET. Settled sentences, nothing else — no comp rows, no comp
+  // prices, no comp addresses, no set of anything. There is nothing here to compare.
+  const user =
+    `THE SETTLED FACTS. This is EVERYTHING you know. Each line was computed from the ` +
+    `records and is already true:\n` +
+    settled.map((s) => `- ${s.sentence}`).join("\n") +
+    `\n\nALREADY PRINTED, IMMEDIATELY BEFORE YOUR SENTENCES — DO NOT REPEAT ANY OF IT:\n` +
+    `${evidenceParagraph(pc)}\n\n` +
+    `Write your two or three sentences: what this home is, and the invitation.`;
+
+  return { system, user, settled };
+}
+
 export async function authorCompsCase(
   facts: ListingFacts,
   comps: RenderComp[],
@@ -783,77 +978,9 @@ export async function authorCompsCase(
   const pc = buildPriceCase(facts, comps);
   if (!pc) return null;
 
-  const compLines = comps.map((c) => {
-    const ppsf = perSqft(c.price, c.sqft);
-    return (
-      `- ${c.addressLine}: ${usd(c.price as number)} — ${priceKindPhrase(c)}` +
-      `${c.beds != null ? `, ${c.beds} beds` : ""}` +
-      `${c.sqft != null ? `, ${c.sqft.toLocaleString("en-US")} sq ft` : ""}` +
-      `${ppsf ? `, ${usd(ppsf)}/sq ft` : ""}`
-    );
-  });
-
-  const soldCount = comps.filter((c) => c.priceKind === "sold").length;
-  const estCount = comps.length - soldCount;
-
-  const facts_ = [
-    facts.address && `Subject address: ${facts.address}`,
-    facts.price && `Subject ASKING price: ${facts.price}`,
-    facts.beds && `Subject beds: ${facts.beds}`,
-    facts.baths && `Subject baths: ${facts.baths}`,
-    facts.sqft && `Subject square feet: ${facts.sqft}`,
-    facts.lotSize && `Subject lot: ${facts.lotSize}`,
-    facts.isNewConstruction && `The subject is NEW CONSTRUCTION (vendor-stated).`,
-    facts.isPriceReduced &&
-      facts.priceReduction &&
-      `The subject's price was REDUCED by ${facts.priceReduction} from its original ask.`,
-  ].filter(Boolean);
-
-  const system =
-    `You write the CONTEXT sentences of a real-estate MARKET COMPS email — the one an ` +
-    `agent sends to make the case that the asking price is right. Two or three sentences. ` +
-    `Plain, confident, specific.\n\n` +
-    `*** THE COMPARISON IS ALREADY WRITTEN AND YOU DO NOT GET TO MAKE ANOTHER ONE. ***\n` +
-    `A comparison is a factual claim, and it was computed from the records — not by you. ` +
-    `It is quoted below as THE VERDICT and it will be printed IMMEDIATELY BEFORE your ` +
-    `sentences, in the same paragraph. Do not restate it, do not re-derive it, do not ` +
-    `soften it, do not contradict it, and do not draw a comparison of your own.\n\n` +
-    `THESE WORDS ARE FORBIDDEN. Using any of them, in any form, voids your paragraph:\n` +
-    BANNED_CONTEXT_PHRASES.map((p) => `"${p}"`).join(", ") +
-    `.\nYes, that includes the bare word "than" — do not write "rather than", "more than" ` +
-    `or anything else that uses it. Every one of these is a way of placing one number ` +
-    `against another, and the code has already done that.\n\n` +
-    `YOUR JOB is what the verdict cannot say: WHAT THIS HOME IS and WHAT THIS EVIDENCE IS. ` +
-    `Draw only on the facts below — new construction, the lot, a price that has already ` +
-    `come down, the square footage, and the makeup of the comp set. In this set there ` +
-    `${soldCount === 1 ? "is" : "are"} ${soldCount} recorded ` +
-    `${soldCount === 1 ? "sale" : "sales"} and ${estCount} current ` +
-    `${estCount === 1 ? "valuation" : "valuations"}, and none of it is adjusted for ` +
-    `condition — a reader is entitled to know that. Close by inviting the conversation.\n\n` +
-    `THE HONEST DISTINCTION YOU MUST NOT BLUR: "Sold <date>" is a recorded sale. ` +
-    `"Estimated value <date>" is a current valuation, NOT a sale. "Last listed" is an ` +
-    `asking price, NOT a sale. You may NEVER write that a home "sold for" a figure that ` +
-    `is a valuation.\n\n` +
-    `HARD RULES. Every number you write must appear verbatim in the facts below — never ` +
-    `compute a new one, never round differently, never estimate. A FACT ABOUT A HOME IS ` +
-    `NOT ONLY A NUMBER: you may not assert a view, a waterfront, a pool, a renovation, a ` +
-    `garage, a school, a finish, a builder, a condition, or a character for the subject OR ` +
-    `for any comp unless the facts state it. You have never seen these houses, and you do ` +
-    `not know where the comps are beyond "nearby" — never place one on a named street.\n\n` +
-    `AND A MARKET RULE IS NOT A FACT EITHER. Do not prop the argument up on a general ` +
-    `claim you were not given — "price per square foot compresses as size increases", ` +
-    `"new construction commands a premium". Those are assertions about a market you were ` +
-    `handed no evidence for, and they are inventions exactly like a made-up number. Never ` +
-    `add a selling claim of your own either: "priced to move", "won't last", "a rare ` +
-    `opportunity" are YOUR words, not facts. No hype, no exclamation marks.\n\n` +
-    `Return ONLY your two or three sentences.`;
-
-  const user =
-    `THE VERDICT (already computed, already written, printed directly before your ` +
-    `sentences — do not repeat it):\n${pc.verdict}\n\n` +
-    `SUBJECT (the home whose asking price is being defended):\n${facts_.join("\n")}\n\n` +
-    `THE COMPARABLE HOMES (every one has beds and square footage — vacant land was ` +
-    `already excluded):\n${compLines.join("\n")}\n\nWrite the context sentences.`;
+  // The comps are used to COMPUTE the case (above) and to LINT the output (below). They
+  // are never used to PROMPT — buildNarratorPrompt cannot even see them.
+  const { system, user, settled } = buildNarratorPrompt(facts, pc);
 
   let context = "";
   try {
@@ -868,10 +995,21 @@ export async function authorCompsCase(
     context = "";
   }
 
-  // THE GATE. The verdict is true by construction and always ships. The narrator's
-  // context ships ONLY if it made no comparison and invented no number.
+  // THE GATE — FAIL-CLOSED. The verdict is true by construction and always ships. The
+  // narrator's context ships ONLY if it drew no claim of its own and invented no number.
+  //
+  // TWO LINTS, both fail-closed, and they check different things:
+  //   • auditClaims (claims.ts) — the SHAPES a source cannot support: a comparison, a
+  //     trajectory, a count, a sequence, a location relation, a motive, and any numeral
+  //     that appears in no settled sentence. The shared gate, and the primary one.
+  //   • contextViolations (below) — this recipe's own extra: the banned comparative
+  //     vocabulary, and the ROAD-SUFFIX ban that catches "on Shore Dr" (a ban on the word
+  //     "street" did not — the model just wrote the road's actual name).
   if (context) {
-    const violations = contextViolations(context, facts, comps, pc);
+    const violations = [
+      ...auditClaims(context, settled).map((v) => `${v.kind}: "${v.match}"`),
+      ...contextViolations(context, facts, comps, pc),
+    ];
     if (violations.length) {
       console.error(
         `[market-comps] narrator context DROPPED — ${violations.length} violation(s): ` +
@@ -881,7 +1019,11 @@ export async function authorCompsCase(
     }
   }
 
-  return context ? `${pc.verdict} ${context}` : pc.verdict;
+  // The code-authored evidence ALWAYS ships — comparisons, mix, caveat. The narrator's
+  // colour ships only if it cleared both gates. A missing sentence is honest; a confident
+  // false one is not.
+  const evidence = evidenceParagraph(pc);
+  return context ? `${evidence} ${context}` : evidence;
 }
 
 /** Fill the chart slot IN PLACE (preserving its grid position), like upsertChartBlock

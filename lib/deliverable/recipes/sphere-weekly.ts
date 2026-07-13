@@ -32,13 +32,64 @@
 //      numbers side by side ARE the picture; a chart under them would be a third thing
 //      competing with the one idea. `dropEmptyChartSlot` runs anyway as the guard: an
 //      empty chart box is worse than no chart.
-//   5. PROSE — ONE paragraph: the honest read of the gap, handed ONLY the figures on
-//      the page (each naming its own geography), forbidden arithmetic and forbidden
-//      any CAUSE it was not given. Two strikes at the number gate → an OPEN SLOT,
-//      never a stripped fragment and never an invented figure.
+//   5. PROSE — ONE paragraph whose FACTUAL SPINE IS WRITTEN IN CODE (see THE CLAIM
+//      GATE below). The model writes only what the gap MEANS, is handed no figure it
+//      could relate to another, and is audited fail-closed. Two strikes → the model's
+//      sentences are DROPPED and the code-computed spine ships alone beside an open
+//      slot. Never a stripped fragment, never an invented figure, never an invented
+//      relation.
 //   6. FRAMING — "What the headlines say" / "Here at home" kickers on the pair, one
 //      "The gap" signal, and a reply-with-REVIEW CTA. Same shape every Tuesday: a
 //      weekly earns its open habit by looking identical week to week.
+//
+// ── THE CLAIM GATE — WHY THIS FILE WAS REWRITTEN (07/13/2026) ────────────────
+//
+// THREE OF SIX LIVE RUNS OF THIS RECIPE ASSERTED THAT THE GAP WAS MOVING.
+//
+//     "the gap is widening"
+//
+// We had handed the narrator exactly ONE national figure — one reading, one moment —
+// and NO national trend of any kind. **A LEVEL IS NOT A DIRECTION. You cannot see
+// motion in a single point in time.** The claim was false, and it was false without
+// containing a single invented number: the national figure was correctly web-sourced
+// and cited, the local figure was correctly read from the lake. What was invented was
+// the CLAIM DRAWN BETWEEN two correctly-sourced numbers.
+//
+// The old gate here (`unanchoredNumbers`, now deleted) tokenized DIGITS. "The gap is
+// widening" carries no digits, so it sailed straight through — and it always would
+// have. Invention is CLAIM-shaped, not number-shaped.
+//
+// The fix is structural, not lexical (a banned-word list was tried on a sibling recipe
+// and LOST — it banned "street" and the model wrote "on Shore Dr"):
+//
+//   1. CODE computes the relation. `settledGap` compares the two dollar figures with
+//      integer arithmetic and returns the direction as a settled English sentence.
+//      `settledLocalTrend` reads the SIGN of the one real trend we hold (the ZIP's
+//      year-over-year) and states it. Both are true by construction.
+//   2. Those settled sentences ARE the opening of the shipped paragraph. Code owns the
+//      relation; the model never states it, so it can never invert it.
+//   3. THE NARRATOR IS HANDED THE SETTLED SENTENCES AND NOTHING ELSE. It never sees the
+//      national figure, never sees the local figure, never sees the supporting row.
+//      `narratorFacts` is built from `SettledClaim.sentence` strings — grep it: no
+//      `MarketFigure` and no `Headline` reaches the model. **IT CANNOT COMPARE TWO
+//      NUMBERS IT WAS NEVER GIVEN TWO OF, AND IT CANNOT TREND ONE POINT.**
+//   4. `auditClaims` (lib/deliverable/claims.ts) runs FAIL-CLOSED over the model's
+//      sentences — comparison, trajectory, count, sequence, spatial, motive, and any
+//      numeral no settled fact anchors. One repair round naming the exact offending
+//      phrase; still dirty → the model's prose is DROPPED ENTIRELY. Never patched,
+//      never stripped, never best-effort.
+//   5. `CLAIM_PROHIBITION` is printed verbatim into the narrator's system prompt, so
+//      the model is told the exact rule the lint enforces.
+//   6. `contradictsDirection` is a recipe-local backstop on top of the shared audit,
+//      and it is here because I traced the shared regex against THIS recipe's own
+//      phrasing and found the hole: `COMPARATIVE_QUANT` only fires when a positional
+//      word sits within 40 characters of a QUANTITY token, and "sits above the national
+//      figure" contains none of them ($ · digit · % · median · average · comparable ·
+//      comps · the set · ask · price · sales · listings · market). So the shared gate
+//      would NOT catch an inverted gap sentence written the way this email writes it.
+//      This check is not a banned-word list: code already computed the truth, and this
+//      only looks for its NEGATION — an "above" word when the arithmetic said below.
+//      REPORTED as a claims.ts hardening (add "figure"/"number"/"national" to QUANTITY).
 //
 // *** THE HEADLINE NUMBER IS A LANE-3 FACT — A NAMED WEB SOURCE. IT IS NOT IN OUR
 //     LAKE. *** We do not hold a national figure and we never will from this pipeline.
@@ -73,7 +124,8 @@ import {
 import { PLACE_ZIP_CROSSWALK } from "@/refinery/lib/geography-gazetteer.mts";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
-import { anchorsExactly, extractNumbers, normalizeNumber } from "@/lib/deliverable/narrative-lint";
+import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
+import type { SettledClaim } from "@/lib/deliverable/claims";
 import { dropEmptyChartSlot } from "./shared";
 import type {
   BlockLayout,
@@ -152,6 +204,30 @@ export interface PairPlan {
   domain: string;
   /** The lookup itself. */
   request: ExternalRequest;
+  /** The SUBJECT of the code-computed gap sentence, carrying the geography the `here`
+   *  figure actually measures ("The median home value in Cape Coral (33904)", "The Lee
+   *  County median sale price"). A county figure never gets quietly handed to a ZIP. */
+  hereSubject: string;
+  /** The lake key of the year-over-year figure for THIS SAME metric. The only trend we
+   *  hold — and it must belong to the metric on the page, or the settled trend sentence
+   *  would be about a different number than the one it follows. */
+  yoyKey: string;
+}
+
+/**
+ * The gap sentence's subject, built from the figure's OWN label so the geography can
+ * never drift off the number.
+ *
+ *   "Median home value — Cape Coral (33904)"  → "The median home value in Cape Coral (33904)"
+ *   "Lee County median sale price"            → "The Lee County median sale price"
+ *
+ * The em-dash form is market-context.ts's "<metric> — <place>" label; anything else is
+ * already a full noun phrase and is used as written. PURE; exported for the test.
+ */
+export function subjectFromLabel(label: string): string {
+  const [metric, where] = label.split(/\s+—\s+/);
+  const m = metric.trim();
+  return where ? `The ${m.toLowerCase()} in ${where.trim()}` : `The ${m}`;
 }
 
 /**
@@ -184,6 +260,8 @@ export function planPair(figures: readonly MarketFigure[]): PairPlan | null {
         search_query:
           "Zillow Home Value Index United States average home value latest month home values page",
       },
+      hereSubject: subjectFromLabel(homeValue.label),
+      yoyKey: "home_value_yoy",
     };
   }
 
@@ -197,6 +275,8 @@ export function planPair(figures: readonly MarketFigure[]): PairPlan | null {
         label: "United States median home sale price",
         search_query: "Redfin United States housing market median sale price latest month",
       },
+      hereSubject: subjectFromLabel(countySale.label),
+      yoyKey: "county_sale_yoy",
     };
   }
 
@@ -327,63 +407,310 @@ export function supportingCells(figures: readonly MarketFigure[], zip: string): 
   ];
 }
 
-// ── 4. THE PROSE: one honest read of the gap ─────────────────────────────────
+// ── 4. THE CLAIM GATE: the relation is computed in CODE ──────────────────────
+
+/** A formatted whole-dollar figure back to its integer. `usd()` (market-context) and
+ *  `usdHeadline` (above) both emit exactly "$367,969", so the parse is the inverse of
+ *  the formatter and nothing else is accepted. Anything unparseable → null → NO gap
+ *  sentence → no read at all. We never guess a relation we could not compute.
+ *  PURE; exported for the test. */
+export function parseUsd(value: string): number | null {
+  const m = /^\$([\d,]+)$/.exec(value.trim());
+  if (!m) return null;
+  const n = Number(m[1].replace(/,/g, ""));
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
+/** A formatted percent back to its signed number. `pct()` (market-context) emits a
+ *  UNICODE MINUS (U+2212), not a hyphen — parse both, or every decline reads as a rise.
+ *  PURE; exported for the test. */
+export function parsePct(value: string): number | null {
+  const m = /^([+\-−])?(\d+(?:\.\d+)?)\s*%$/.exec(value.trim());
+  if (!m) return null;
+  const n = Number(m[2]);
+  if (!Number.isFinite(n)) return null;
+  return m[1] === "-" || m[1] === "−" ? -n : n;
+}
+
+/** Which side of the national figure the local one is on. Decided by integer comparison.
+ *  There is no room for a model here. */
+export type GapDirection = "below" | "above" | "level";
+
+/** The gap, settled. `direction` is the arithmetic; `sentence` is the English a reader
+ *  sees and the narrator is allowed to know. */
+export interface SettledGap extends SettledClaim {
+  direction: GapDirection;
+}
 
 /**
- * THE NUMBER GATE. Every numeric token in the paragraph must appear VERBATIM in the
- * facts we handed the narrator. A number the model worked out itself (a difference, a
- * percentage gap, "about $80k cheaper") has no source and a reader cannot tell — a
- * derived number is still an invented one.
+ * THE FUNCTION THIS RECIPE NEEDED. Compare the local figure to the national one IN CODE
+ * and return the result as a settled sentence.
  *
- * Reuses the ONE tokenizer/anchor root (lib/deliverable/narrative-lint) — never a second
- * regex. Two carve-outs, both learned in live runs on this pipeline:
- *   • THE SIGN LIVES IN THE WORD. Our held YoY figure is "−6.8%"; the only natural
- *     English for it is "values are DOWN 6.8%". Anchoring only the signed token rejects
- *     the true sentence. The MAGNITUDE must be verbatim; the direction is carried by the
- *     prose. A fabricated number still cannot anchor.
- *   • A YEAR IS A CALENDAR REFERENCE, NOT A FIGURE — including a hyphenated one
- *     ("mid-2024" tokenizes as "-2024").
+ * The sentence carries NEITHER NUMBER. It does not need to: the two figures are printed
+ * large, side by side, directly above this paragraph. What the reader is missing is the
+ * RELATION between them — so that is the only thing this sentence adds, and code, not a
+ * language model, decides which way it points.
+ *
+ * Its only numeral is the ZIP inside the figure's own label, which is what lets the
+ * narrator name the area without inventing one.
+ *
+ * Unparseable either side → null → there is no honest relation to state, so there is no
+ * read. PURE; exported for the test.
+ */
+export function settledGap(plan: PairPlan, headline: Headline): SettledGap | null {
+  const local = parseUsd(plan.here.value);
+  const national = parseUsd(headline.value);
+  if (local === null || national === null) return null;
+
+  const direction: GapDirection = local < national ? "below" : local > national ? "above" : "level";
+  const sentence =
+    direction === "level"
+      ? `${plan.hereSubject} is the same as the national figure beside it.`
+      : `${plan.hereSubject} sits ${direction} the national figure beside it.`;
+  return { direction, sentence, anchors: numeralsIn(sentence) };
+}
+
+/**
+ * THE ONLY TREND WE HOLD, and it is LOCAL. Our lake carries this ZIP's year-over-year
+ * change; NO SOURCE IN THIS PIPELINE CARRIES A NATIONAL TREND, and one national reading
+ * at one moment can never become one. So the direction of the LOCAL number over the last
+ * year is stated here, in code, from the SIGN of a real figure — and the direction of the
+ * GAP is stated NOWHERE, because nothing we hold knows it.
+ *
+ * That is the whole defect this rewrite exists to close: three of six live runs said the
+ * gap was "widening". A level is not a direction.
  *
  * PURE; exported for the test.
  */
-export function unanchoredNumbers(paragraph: string, facts: readonly string[]): string[] {
-  const anchors = new Set<string>();
-  for (const line of facts) {
-    for (const tok of extractNumbers(line)) {
-      const n = normalizeNumber(tok);
-      if (!n) continue;
-      anchors.add(n);
-      if (n.startsWith("-")) anchors.add(n.slice(1));
-    }
-  }
-  const bareYear = (t: string) =>
-    !/[$%]/.test(t) && /^(?:19|20)\d{2}$/.test(normalizeNumber(t).replace(/^-/, ""));
-  return extractNumbers(paragraph).filter((t) => !bareYear(t) && !anchorsExactly(t, anchors));
+export function settledLocalTrend(
+  figures: readonly MarketFigure[],
+  plan: PairPlan,
+): SettledClaim | null {
+  const yoy = figures.find((f) => f.key === plan.yoyKey);
+  if (!yoy) return null;
+  const p = parsePct(yoy.value);
+  if (p === null) return null;
+
+  const magnitude = Math.abs(p).toFixed(1);
+  const sentence =
+    p === 0
+      ? `It is unchanged from a year ago.`
+      : `It is ${p < 0 ? "down" : "up"} ${magnitude}% from a year ago.`;
+  return { sentence, anchors: numeralsIn(sentence) };
 }
 
-/** Every fact the narrator is allowed to know, each one naming its OWN geography and
- *  its OWN source — that is what stops a national figure being re-attributed to the ZIP,
- *  or a county figure to a neighborhood. PURE; exported for the test. */
-export function factLines(
-  headline: Headline | null,
-  here: MarketFigure | null,
-  supporting: readonly MarketFigure[],
-): string[] {
-  const lines: string[] = [];
-  if (headline)
-    lines.push(
-      `- ${headline.label}: ${headline.value} (${headline.host}, read ${headline.readOn}) — ` +
-        `this is the NATIONAL figure.`,
+/**
+ * THE NEGATION CHECK — a recipe-local backstop under the shared audit.
+ *
+ * `auditClaims`'s COMPARATIVE_QUANT only fires when a positional word sits within 40
+ * characters of a QUANTITY token ($ · digit · % · median · average · comparable · comps ·
+ * the set · ask · price · sales · listings · market). THIS EMAIL'S OWN SENTENCE — "sits
+ * above the national figure" — contains not one of them, so the shared gate would let an
+ * INVERTED gap through. That is the exact class of failure (market-comps) the gate exists
+ * for, and I am not shipping into a hole I can see.
+ *
+ * This is not a banned-word list. Code has already computed the truth; this looks only for
+ * its NEGATION — an "above" word when the arithmetic said BELOW. A narrator that AGREES
+ * with code costs nothing; a narrator that contradicts it loses its paragraph.
+ *
+ * PURE; exported for the test.
+ */
+const ABOVE_WORDS =
+  /\b(above|higher|pricier|costlier|dearer|steeper|richer|exceeds?|exceeding|outpaces?|outpacing|premium)\b/i;
+const BELOW_WORDS =
+  /\b(below|beneath|lower|cheaper|less expensive|trails?|trailing|lags?|discount)\b/i;
+
+export function contradictsDirection(prose: string, direction: GapDirection): string[] {
+  const wrong =
+    direction === "below"
+      ? [ABOVE_WORDS]
+      : direction === "above"
+        ? [BELOW_WORDS]
+        : [ABOVE_WORDS, BELOW_WORDS];
+  return wrong.map((re) => re.exec(prose)?.[0]).filter((m): m is string => Boolean(m));
+}
+
+/**
+ * A DEFINITION CLAIM — a statement about what the figure MEASURES, or about what buyers
+ * and sellers actually DID.
+ *
+ * CAUGHT IN MY OWN SECOND LIVE RUN OF THIS REWRITE, and it is the reason this check
+ * exists rather than a paragraph I waved through:
+ *
+ *   "the local median reflects what sellers have actually accepted in this zip code
+ *    over the past year"
+ *
+ * That is FALSE. The figure is Zillow's ZHVI — a modelled home-VALUE INDEX. It is not a
+ * record of accepted offers, not a sale price, and not a transaction of any kind. The
+ * model was handed the words "median home value" and invented a definition for them.
+ *
+ * It carries no number, no comparison, no trajectory, no count — every shape the claim
+ * gate hunts — so it sailed through clean. The lesson is the same one that produced
+ * claims.ts: invention is CLAIM-shaped, and a new claim shape needs a new gate. The
+ * narrator knows the figure's NAME and nothing about its construction; it therefore may
+ * not say what it means, what it reflects, or what anybody paid.
+ *
+ * THE FOURTH LIVE RUN then produced the same shape wearing a different coat:
+ *
+ *   "a reading that is down from a year ago is the number a lender or assessor will see
+ *    when valuing the asset today"
+ *
+ * A lender does not look at Zillow's index; an assessor does not either. That is a claim
+ * about how the WORLD works, asserted with total confidence, and we were given no fact
+ * about any lender, appraiser, assessor or bank. So the third parties are named here too:
+ * the narrator has license to talk about A BUYER and AN OWNER — the two people the email
+ * is for — and about NOBODY ELSE.
+ *
+ * REPORTED as a claims.ts lift — every recipe that hands a metric's label to a narrator
+ * has this hole.
+ *
+ * PURE; exported for the test.
+ */
+const MECHANISM =
+  /\b(reflects?|represents?|measures?|captures?|is based on|amounts? to|boils down to|tells you what|means that)\b|\b(sellers?|buyers?|owners?|homes?)\b[^.!?]{0,30}?\b(accepted|paid|sold for|sold at|listed at|closed at|agreed|received|changed hands|walked away with)\b|\b(lenders?|appraisers?|assessors?|underwriters?|banks?|insurers?|realtors?)\b/i;
+
+export function mechanismClaims(prose: string): string[] {
+  const m = MECHANISM.exec(prose);
+  return m ? [m[0]] : [];
+}
+
+/**
+ * THE TRAJECTORY HOLE — closed here because it is MY defect and I found it in MY OWN
+ * FIFTH LIVE RUN of the fix that was supposed to close it.
+ *
+ * claims.ts's TRAJECTORY matches GERUNDS — widening, narrowing, shrinking, growing,
+ * rising, falling — but not the BARE VERBS they come from. So:
+ *
+ *   "the gap is widening"     → CAUGHT (the sentence that shipped three times)
+ *   "the gap will widen"      → SAILS THROUGH
+ *   "watch whether it narrows" → SAILS THROUGH   ← my run 5 wrote exactly this
+ *
+ * Same invented direction, different inflection. A model told not to say "widening" says
+ * "widen", exactly as the one told not to say "street" said "Shore Dr".
+ *
+ * Run 5's sentence was, in fairness, INTERROGATIVE and therefore honest — it named that
+ * we cannot tell. I am killing it anyway, because I cannot separate "watch whether it
+ * narrows" from "it will narrow" with a word test, and of the two errors available —
+ * losing an honest falsifier sentence, or shipping an invented prediction — only one is
+ * a hard block. The repair round then produces the falsifier that does survive ("Watch
+ * next month's reading of the same two numbers."), which three other live runs wrote
+ * unprompted. The cost is close to zero and the hole is shut.
+ *
+ * REPORTED as the claims.ts fix: TRAJECTORY should match the verb stems, not the -ing.
+ *
+ * PURE; exported for the test.
+ */
+const TRAJECTORY_VERB =
+  /\b(widen|narrow|shrink|grow|rise|fall|climb|drop|cool|heat|rebound|recover|accelerate|decelerate|stabiliz\w*|stabilis\w*|flatten|tighten|loosen|reverse|converge|diverge)(s|ed)?\b/i;
+
+export function trajectoryVerbs(prose: string): string[] {
+  const m = TRAJECTORY_VERB.exec(prose);
+  return m ? [m[0]] : [];
+}
+
+/**
+ * THE BOUNDARY — and the one gate here that is not a word-hunt.
+ *
+ * By live run 7 I had closed "widening", then "widen", then "reflects what sellers
+ * accepted", then "a lender will see" — and the model wrote:
+ *
+ *   "local equity is NOT KEEPING PACE with WHAT THE BROADER MARKET IS DOING"
+ *
+ * That is my original defect in a fourth coat. It asserts the national market is DOING
+ * something (we hold ONE national number, at ONE moment) and that the local side is
+ * losing ground against it (a comparative TRAJECTORY between two levels, one of which has
+ * no trend at all). It carries no number, no gerund, no bare verb, no "-ing" — so every
+ * lint above it, including claims.ts's, sailed past.
+ *
+ * I could add "keeping pace" to a list. I would then be beaten by "falling behind", and
+ * after that by "the country is pulling away". THAT IS THE RECURSION THE BANNED-WORD LIST
+ * ALWAYS LOSES, and I am not going to keep playing it.
+ *
+ * SO DRAW THE BOUNDARY INSTEAD. Every falsehood this rewrite produced — runs 2, 4, 5 and
+ * 7 — came from the model ELABORATING ON THE NATIONAL SIDE, on the metric's construction,
+ * or on third parties. It has legitimate business with exactly ONE thing: what the LOCAL
+ * number's POSITION means to a buyer or an owner. The relation between the two figures is
+ * already stated, in code, in the sentence directly above its own.
+ *
+ * *** THE NATIONAL SIDE BELONGS TO CODE. THE MODEL DOES NOT GET TO TOUCH IT. ***
+ *
+ * This is a rule about WHAT MAY BE WRITTEN ABOUT, not about which synonyms are spelled
+ * how — so it closes the class rather than one member of it. Three of the four clean runs
+ * never mentioned the national side at all; the cost is near zero and the surface is gone.
+ *
+ * PURE; exported for the test.
+ */
+const BEYOND_THE_LOCAL =
+  /\b(national\w*|nationwide|countrywide|the country|the u\.?s\.?a?\b|america\w*|the (broader|wider|overall|rest of the) market|other markets|most markets|elsewhere|keep(ing|s)? pace|catch(ing|es)? up|fall(ing|s)? behind|pull(ing|s)? away|los(e|ing) ground|gain(ing|s)? ground|in step)\b/i;
+
+export function beyondTheLocal(prose: string): string[] {
+  const m = BEYOND_THE_LOCAL.exec(prose);
+  return m ? [m[0]] : [];
+}
+
+export interface ReadViolation {
+  kind: string;
+  match: string;
+}
+
+/**
+ * FAIL-CLOSED. Every unsupported claim shape in the model's sentences.
+ *
+ * `auditClaims` (the shared gate) + `contradictsDirection` (the hole above it). A
+ * non-empty result means DO NOT SHIP THESE SENTENCES — one repair round, then they are
+ * dropped and the code-computed spine ships alone. PURE; exported for the test.
+ */
+export function auditRead(
+  prose: string,
+  settled: readonly SettledClaim[],
+  direction: GapDirection,
+): ReadViolation[] {
+  const out: ReadViolation[] = [...auditClaims(prose, settled)];
+
+  // Sentence by sentence, and a SETTLED sentence is skipped — exactly as `auditClaims`
+  // does it. Code's own spine says "sits below the national figure"; restating a claim
+  // code authored is the narrator's job, and it must not condemn the paragraph it is in.
+  const settledText = settled.map((s) => s.sentence.toLowerCase()).join("   ");
+  for (const raw of prose.split(/(?<=[.!?])\s+/)) {
+    const s = raw.trim();
+    if (!s) continue;
+    if (settledText.includes(s.toLowerCase().replace(/[.!?]+$/, ""))) continue;
+
+    out.push(
+      ...contradictsDirection(s, direction).map((match) => ({
+        kind: "contradicts-the-computed-gap",
+        match,
+      })),
+      ...mechanismClaims(s).map((match) => ({ kind: "mechanism", match })),
+      ...trajectoryVerbs(s).map((match) => ({ kind: "trajectory", match })),
+      ...beyondTheLocal(s).map((match) => ({ kind: "beyond-the-settled", match })),
     );
-  if (here)
-    lines.push(
-      `- ${here.label}: ${here.value} (${here.source}${here.as_of ? `, as of ${here.as_of}` : ""}) — ` +
-        `this is the LOCAL figure.`,
-    );
-  for (const f of supporting) {
-    lines.push(`- ${f.label}: ${f.value} (${f.source}${f.as_of ? `, as of ${f.as_of}` : ""})`);
   }
-  return lines;
+  return out;
+}
+
+/**
+ * EVERYTHING THE NARRATOR IS ALLOWED TO KNOW — and it is ONLY settled sentences.
+ *
+ * *** GREP THIS. *** The model's user message is built from `SettledClaim.sentence`
+ * strings and the area's name. No `MarketFigure`, no `Headline`, no figure list, no
+ * supporting row reaches it. It never sees the national number. It never sees the local
+ * number. It is given ONE side of nothing and a relation that is already decided.
+ *
+ * IT CANNOT COMPARE TWO NUMBERS IT WAS NEVER GIVEN TWO OF, AND IT CANNOT TREND ONE POINT.
+ *
+ * PURE; exported for the test.
+ */
+export function narratorFacts(area: SphereArea, settled: readonly SettledClaim[]): string {
+  return (
+    `AREA: ${area.label}\n\n` +
+    `WHAT IS ALREADY WRITTEN. These sentences were computed in code from real figures, ` +
+    `and they are ALREADY PRINTED as the opening of the paragraph you are continuing:\n` +
+    settled.map((s) => `- ${s.sentence}`).join("\n") +
+    `\n\nThat is everything you know. You have been given NO figure, NO national number, ` +
+    `NO second reading of anything, and NO trend in the gap. There is nothing here for ` +
+    `you to compare, count, order, or extend. Write what it MEANS.`
+  );
 }
 
 /** The `signal` block's body is capped at 500 characters by `SignalPropsSchema`.
@@ -413,71 +740,145 @@ export function fitSignalBody(read: string | null, max: number = MAX_READ): stri
   return out.length > 0 ? out : null;
 }
 
+/** The system prompt. `CLAIM_PROHIBITION` is printed into it VERBATIM so the model is
+ *  told the exact rule `auditClaims` enforces — a violation is then a refusal to follow
+ *  an explicit instruction, not a surprise.
+ *
+ *  The extra clauses below are not decoration. Each one names a shape the shared lint
+ *  catches whose most natural English wording a model reaches for by reflex — "every
+ *  home" (a COUNT), "someone looking to buy" (a MOTIVE), "into 2027" (an unanchored
+ *  numeral). The gate is fail-closed, so an honest paragraph phrased that way is LOST.
+ *  Telling the model the phrasing that survives is how you get a paragraph at all. */
 const READ_SYSTEM =
-  `You write ONE paragraph — the "honest read of the gap" in a weekly market email an ` +
-  `agent sends to their own sphere (past clients, friends, neighbours). THREE OR FOUR ` +
-  `sentences, and UNDER 450 CHARACTERS IN TOTAL — it lands in a small callout box, and a ` +
-  `longer paragraph does not fit. Count as you write; brevity here is a hard constraint, ` +
-  `not a preference.\n\n` +
-  `WHAT THIS EMAIL IS: two numbers, side by side, directly above your paragraph — a ` +
-  `NATIONAL headline figure and the reader's OWN area's figure for the same measure. ` +
-  `Your job is the gap between them.\n\n` +
-  `DO NOT READ THE PAIR BACK. The two numbers are already printed, large, right above ` +
-  `you. A paragraph that restates them is a failure. Say what the difference MEANS for ` +
-  `someone who owns a home there, or wants one. One connected thought.\n\n` +
-  `BE HONEST ABOUT THE DIRECTION. If the local number is below the national one, say so ` +
-  `plainly. If local values are falling, say they are falling. Do not reframe a decline ` +
-  `as an opportunity, and never add a selling claim of your own — "now is the time", "a ` +
-  `great moment to list", "won't last" are YOUR words, not facts about this market.\n\n` +
-  `END BY NAMING WHAT WOULD CHANGE THIS READ — one sentence, the thing you would watch ` +
-  `that would flip it. Never hedge the whole read into mush.\n\n` +
-  `NEVER DO ARITHMETIC. You may not compute, derive, subtract, total, or estimate a ` +
-  `number, and you may not write an approximation of one ("about $80,000 below", "roughly ` +
-  `a fifth cheaper", "a 20% gap"). If a number is not written VERBATIM in the facts ` +
-  `below, you may not write it — a number you worked out yourself has no source, and a ` +
-  `reader cannot tell the difference. Same rounding, same units, or leave it out. You may ` +
-  `always say "below", "above", "cheaper", "faster" without a number.\n\n` +
-  `EVERY FACT NAMES ITS OWN PLACE. One of the facts below is NATIONAL and one is LOCAL, ` +
-  `and each says exactly which geography it measures. A county figure is a county figure: ` +
-  `you may not quietly hand it to a neighbourhood. Attribute each number to the place its ` +
-  `label names, and to no other.\n\n` +
-  `ONE NATIONAL FIGURE IS ONE FIGURE, NOT A DISTRIBUTION. You were given a single ` +
-  `national number. You may compare this area to THAT NUMBER and to nothing else — never ` +
-  `to "most U.S. markets", "other states", "the rest of Florida", "similar areas", or any ` +
-  `spread, ranking, or typical case you were not shown. (A live draft wrote "sellers here ` +
-  `are working harder for less than owners in most U.S. markets" off a single national ` +
-  `average. That is a claim about a distribution nobody gave you.)\n\n` +
+  `You write the SECOND HALF of one short paragraph in a weekly market email an agent ` +
+  `sends to their own sphere (past clients, friends, neighbours).\n\n` +
+  `THE FIRST SENTENCES ARE ALREADY WRITTEN — in code, from real figures — and they are ` +
+  `shown to you. They state the gap between a NATIONAL headline number and this area's ` +
+  `own number for the same measure. Both numbers are printed large, side by side, ` +
+  `directly above the paragraph. YOU DO NOT STATE THE GAP AND YOU DO NOT REPEAT THOSE ` +
+  `SENTENCES. You write what the gap MEANS — TWO OR THREE sentences, and nothing else.\n\n` +
+  `${CLAIM_PROHIBITION}\n\n` +
+  `DO NOT WRITE ABOUT THE NATIONAL SIDE AT ALL. How the two figures relate is ALREADY ` +
+  `STATED, in the sentence directly above yours. You know ONE national number and NOTHING ` +
+  `ELSE about the country — not what its market is doing, not whether it is moving, not how ` +
+  `anywhere else compares. So never write "national", "nationwide", "the U.S.", "the ` +
+  `broader market", "keeping pace", "catching up", "falling behind". (A live draft wrote ` +
+  `"local equity is not keeping pace with what the broader market is doing" — a claim about ` +
+  `a national trend that does not exist.) YOUR SUBJECT IS THE LOCAL NUMBER'S POSITION AND ` +
+  `WHAT IT MEANS TO A BUYER OR AN OWNER. Nothing else is yours to write.\n\n` +
+  `YOU HAVE NO TREND. You were given ONE national reading, for ONE moment in time. So you ` +
+  `cannot say the gap is widening, narrowing, closing, growing, holding, or moving in any ` +
+  `direction at all. A LEVEL IS NOT A DIRECTION — you cannot see motion in a single point ` +
+  `in time. (A live draft of THIS EXACT EMAIL wrote "the gap is widening" off one national ` +
+  `number. That sentence is the reason this rule exists, and it is the one sentence that ` +
+  `will get your entire paragraph deleted.)\n\n` +
+  `WRITE NO NUMBER AND NO YEAR. Not a figure, not a percentage, not a date, not "2027". ` +
+  `Every number is already on the page.\n\n` +
+  `YOU DO NOT KNOW WHAT THE NUMBER IS. You were given its NAME and nothing about how it is ` +
+  `built. You do not know what it includes, how it is calculated, or what any buyer or ` +
+  `seller actually paid, accepted, listed at, or closed at. So you may not say what the ` +
+  `figure "reflects", "represents", "measures" or "means" — and you may never say what ` +
+  `sellers accepted or buyers paid. (A live draft wrote "the local median reflects what ` +
+  `sellers have actually accepted". It does not; it is a modelled index, not a record of ` +
+  `any sale. That is an invented fact and it deletes your paragraph.) Write about what the ` +
+  `number's POSITION means for a person — never about what the number is.\n\n` +
+  `THERE ARE ONLY TWO PEOPLE IN THIS EMAIL: a buyer and an owner. You may not mention a ` +
+  `lender, an appraiser, an assessor, a bank, an underwriter, an insurer or a realtor, and ` +
+  `you may not say what any of them would do, see, or think. You were given no fact about ` +
+  `any of them. (A live draft wrote "the number a lender or assessor will see when valuing ` +
+  `the asset". No lender looks at this figure. That is an invented fact about the world.)\n\n` +
+  `SAY IT THE WAY THAT SURVIVES:\n` +
+  `- Call the reader "a buyer" or "an owner". NEVER "someone looking to buy", "anyone ` +
+  `hoping to sell", "a motivated seller" — those are motives, and you know nobody's.\n` +
+  `- Never put a quantity word in front of a noun: not "every home", not "most owners", ` +
+  `not "all of them", not "half the market". You counted nothing.\n` +
+  `- Never rank, never say "in line with", "on par with", "at the low end".\n\n` +
   `A FACT IS NOT ONLY A NUMBER. You may not name a CAUSE you were not given: interest ` +
-  `rates, insurance costs, hurricanes, new construction, snowbirds, migration, inventory ` +
-  `you were not shown, a national policy. You were told NONE of these, so you may not ` +
-  `assert any of them, not even as a possibility. If a sentence needs something you were ` +
-  `not given, cut the sentence.\n\n` +
+  `rates, insurance costs, hurricanes, new construction, snowbirds, migration, inventory, ` +
+  `a national policy. You were told NONE of these, so you may not assert any of them, not ` +
+  `even as a possibility.\n\n` +
+  `END BY NAMING WHAT YOU WOULD WATCH — one sentence, a thing to CHECK, not a prediction. ` +
+  `"Watch next month's reading of the same two numbers." IS THE SHAPE; write that sentence ` +
+  `or one just like it. Do NOT list what the gap might do — not "hold, narrow, or widen", ` +
+  `not "see whether it closes". Naming the options is still naming a direction, and you ` +
+  `have no direction to name. Never hedge the whole read into mush, and never add a selling ` +
+  `claim ("now is the time", "a great moment to list") — those are your words, not facts ` +
+  `about this market.\n\n` +
   `No hype, no exclamation marks, no jargon, no headings, no greeting, no sign-off. Plain ` +
-  `and specific. Return ONLY the paragraph.`;
+  `and specific. Return ONLY your two or three sentences.`;
+
+/** What the narrator is told when it breaks a rule — named by SHAPE, so the repair is
+ *  the model deleting a claim rather than guessing at what offended us. */
+const REPAIR: Record<string, string> = {
+  trajectory:
+    `That is a TRAJECTORY — a claim that something is MOVING. You were given ONE reading, ` +
+    `for ONE moment. Nothing you know can tell you which way anything is moving. Delete it.`,
+  comparative:
+    `That is a COMPARISON, and you were not given two numbers to compare. The only relation ` +
+    `that exists is the one already written for you. Delete it.`,
+  "contradicts-the-computed-gap":
+    `That word points the WRONG WAY. The direction of the gap was computed in code and is ` +
+    `stated in the sentences above yours; you have just contradicted it. Delete it.`,
+  mechanism:
+    `That says what the figure IS, what somebody paid or accepted, or what a lender or ` +
+    `assessor would do. You were given the number's NAME and nothing else — not how it is ` +
+    `built, not one transaction, not one fact about any institution. Delete it.`,
+  "beyond-the-settled":
+    `That is about the NATIONAL side, or about one side keeping up with the other. Neither ` +
+    `is yours. You hold ONE national number and nothing else about the country — no trend, ` +
+    `no market, no motion. How the two figures relate is already written above your ` +
+    `sentences. Write only about the LOCAL number's position and what it means to a buyer ` +
+    `or an owner. Delete it.`,
+  "word-count": `That is a COUNT. You counted nothing and were given no set. Delete it.`,
+  sequence: `That is an ORDER OF EVENTS. You were given no dates. Delete it.`,
+  spatial: `That is a LOCATION claim. You were given no streets. Delete it.`,
+  motive: `That is a MOTIVE. You never know why anyone did anything. Delete it.`,
+  "unanchored-number":
+    `That number is in nothing you were given. Write no numbers at all — they are already ` +
+    `printed on the page.`,
+};
+
+/** The read that ships in the "The gap" callout. */
+export interface GapRead {
+  /** The signal body: the code-computed spine, plus the model's meaning when it passed. */
+  body: string;
+  /** True when the model's sentences were DROPPED. The spine still ships (code wrote it,
+   *  it is true by arithmetic) and the agent gets an open slot to write the meaning
+   *  themselves — but not one word the model wrote reaches a recipient. */
+  proseDropped: boolean;
+}
 
 /**
- * The read. THE MODEL WRITES PROSE. NOTHING ELSE (playbook Part 3, rule 4) — not
- * layout, not which cells exist, not numbers.
+ * The read. CODE WRITES THE FACTS; THE MODEL WRITES ONLY WHAT THEY MEAN.
  *
- * One call, then ONE repair round naming the offending numbers (the same shape as the
- * author path's own regenerate-once loop). A draft that still won't anchor is DROPPED,
- * not shipped and not stripped into a fragment: the read becomes an OPEN SLOT the agent
- * writes themselves, and an open slot never reaches a recipient.
+ * The spine (`settled`) is already true — `settledGap` compared the two figures with
+ * integer arithmetic and `settledLocalTrend` read the sign of a real percentage. The
+ * model is handed those SENTENCES and nothing else (`narratorFacts`), so there is no
+ * pair in its context to invert and no series to extend.
  *
- * With only ONE side of the pair there is no gap to read — we say nothing rather than
- * improvise half a contrast. Best-effort throughout; never invents.
+ * `auditRead` then runs FAIL-CLOSED over what it wrote. One repair round naming the exact
+ * offending phrase and the shape it belongs to; a second failure and THE MODEL'S PROSE IS
+ * DROPPED — not stripped, not patched, not best-effort. The spine ships alone and the
+ * agent is handed an open slot.
+ *
+ * Never throws; never returns an unaudited sentence.
  */
 export async function authorGapRead(
-  headline: Headline | null,
-  here: MarketFigure | null,
-  supporting: readonly MarketFigure[],
-  areaLabel: string,
-): Promise<string | null> {
-  if (!headline || !here) return null; // no pair → no gap → no read. Never improvise one.
-  const facts = factLines(headline, here, supporting);
+  area: SphereArea,
+  gap: SettledGap,
+  settled: readonly SettledClaim[],
+): Promise<GapRead> {
+  const spine = settled.map((s) => s.sentence).join(" ");
+  const dropped: GapRead = { body: spine, proseDropped: true };
+
+  // What is left of the callout after the code-written spine. A model paragraph that
+  // cannot fit is one `fitSignalBody` would trim anyway — tell it the real budget.
+  const budget = MAX_READ - spine.length - 1;
+  if (budget < 80) return dropped; // no room for prose → the spine is the read.
+
   const user =
-    `AREA: ${areaLabel}\n\nFACTS (the only things you know):\n${facts.join("\n")}\n\n` +
-    `Write the read of the gap.`;
+    `${narratorFacts(area, settled)}\n\n` +
+    `Write your two or three sentences — what this MEANS. Under ${budget} characters.`;
 
   const ask = async (content: string): Promise<string | null> => {
     try {
@@ -495,39 +896,34 @@ export async function authorGapRead(
     }
   };
 
-  /** A draft is usable only if EVERY number in it anchors verbatim to the facts. */
-  const anchored = (t: string) => unanchoredNumbers(t, facts).length === 0;
-
   const first = await ask(user);
-  if (!first) return null;
-  if (anchored(first) && first.length <= MAX_READ) return first;
+  if (!first) return dropped;
 
-  // ONE repair round, naming BOTH problems (the same shape as the author path's own
-  // regenerate-once loop): the numbers it invented, and the length that would sink the
-  // whole build. Length is not cosmetic here — see MAX_READ.
-  const bad = unanchoredNumbers(first, facts);
-  const problems: string[] = [];
-  if (bad.length > 0)
+  const clean = (t: string): boolean =>
+    auditRead(t, settled, gap.direction).length === 0 && t.length <= budget;
+  if (clean(first)) return { body: `${spine} ${first}`, proseDropped: false };
+
+  // ONE repair round. Name the exact phrase AND the shape it belongs to — the same
+  // regenerate-once loop the author path runs, but over CLAIMS, not digits.
+  const problems: string[] = auditRead(first, settled, gap.direction).map(
+    (v) => `You wrote "${v.match}". ${REPAIR[v.kind] ?? "You were not given that. Delete it."}`,
+  );
+  if (first.length > budget)
     problems.push(
-      `Your previous draft wrote ${bad.map((b) => `"${b}"`).join(", ")} — ` +
-        `${bad.length === 1 ? "that number is" : "those numbers are"} not in the facts above. ` +
-        `You worked ${bad.length === 1 ? "it" : "them"} out yourself, which means no source ` +
-        `can be named for ${bad.length === 1 ? "it" : "them"}. Use only numbers written ` +
-        `verbatim above, or none at all.`,
-    );
-  if (first.length > MAX_READ)
-    problems.push(
-      `Your previous draft ran ${first.length} characters. The hard limit is 450. Cut it to ` +
-        `three or four short sentences and keep the sentence that names what would change ` +
-        `this read.`,
+      `Your draft ran ${first.length} characters. The hard limit is ${budget}. Cut it to two ` +
+        `short sentences and keep the one that names what you would watch.`,
     );
 
-  const retry = await ask(`${user}\n\n${problems.join("\n\n")}`);
-  if (retry && anchored(retry)) return fitSignalBody(retry);
-  // The retry invented a number or never came back. Fall back to the FIRST draft only if
-  // ITS numbers were all real — trimmed to whole sentences. Never ship an unanchored one.
-  if (anchored(first)) return fitSignalBody(first);
-  return null; // two strikes → an open slot, never an invented figure
+  const retry = await ask(
+    `${user}\n\nYour previous draft was REJECTED.\n\n${problems.join("\n\n")}\n\n` +
+      `Rewrite. If a sentence needs something you were not given, CUT THE SENTENCE — a ` +
+      `shorter true paragraph beats a longer one that guesses.`,
+  );
+  if (retry && clean(retry)) return { body: `${spine} ${retry}`, proseDropped: false };
+
+  // Two strikes. The model's sentences do not ship — not one of them, not trimmed, not
+  // patched. The spine is code-written and true; the meaning becomes an open slot.
+  return dropped;
 }
 
 // ── 5. SCHEDULING (the load-bearing sentence) ────────────────────────────────
@@ -605,7 +1001,9 @@ export interface GridInput {
   headline: Headline | null;
   here: MarketFigure | null;
   supporting: StatItem[];
-  read: string | null;
+  /** The gap callout. `body` always starts with the code-computed spine; `proseDropped`
+   *  says the model's sentences were gated out and the agent gets an open slot instead. */
+  read: GapRead | null;
   citations: SourceCitation[];
 }
 
@@ -705,20 +1103,29 @@ export function buildGrid(input: GridInput): EmailDoc {
     );
   }
 
-  // THE READ. Sourced → the `signal` callout the prose recipe calls for. Unsourced →
-  // a `text` OPEN SLOT: on the canvas a dashed, editable placeholder; on the sendable
-  // paths TextBlock drops it entirely (`emailRender`). SignalBlock does NOT honor
-  // emailRender, so an empty signal would ship an empty branded box — it is never built.
-  if (read) {
+  // THE READ. The `signal` callout the prose recipe calls for, and its body ALWAYS opens
+  // with the code-computed spine — the relation, decided by arithmetic, never by a model.
+  // `fitSignalBody` is the last belt against SignalPropsSchema's 500-char cap (see
+  // MAX_READ: an over-long body fails EmailDocSchema and the whole recipe silently falls
+  // through to the generic author).
+  //
+  // AND WHEN THE MODEL'S SENTENCES WERE GATED OUT (`proseDropped`), a `text` OPEN SLOT
+  // rides under the callout: on the canvas a dashed, editable placeholder inviting the
+  // agent to write the meaning themselves; on the sendable paths TextBlock drops it
+  // entirely (`emailRender`), so the recipient gets the true spine and no lie. SignalBlock
+  // does NOT honor emailRender, so an empty signal is never built.
+  const body = read ? fitSignalBody(read.body) : null;
+  if (body) {
     push(
       {
         id: createBlock("signal").id,
         type: "signal",
-        props: { kicker: "The gap", body: read },
+        props: { kicker: "The gap", body },
       },
       5,
     );
-  } else {
+  }
+  if (!read || read.proseDropped) {
     push({ id: createBlock("text").id, type: "text", props: { body: "", align: "left" } }, 4);
   }
 
@@ -793,8 +1200,23 @@ export async function buildSphereWeekly(ctx: RecipeBuildContext): Promise<EmailD
     supporting.some((s) => s.value && s.label === f.label),
   );
 
-  // The read — handed the pair and the supporting figures, and NOTHING else.
-  const read = await authorGapRead(headline, here, supportingFigures, area.label).catch(() => null);
+  // ── THE CLAIM GATE ──────────────────────────────────────────────────────────
+  // The RELATION between the two figures is computed HERE, in code, by integer
+  // comparison — and so is the direction of the one real trend we hold. The narrator is
+  // then handed those SETTLED SENTENCES and NOTHING ELSE: not the national figure, not
+  // the local figure, not the supporting row. It has no pair to invert and no series to
+  // extend. `authorGapRead` audits what it writes fail-closed and drops it on a second
+  // violation. (`supportingFigures` renders in the stats row; it NEVER reaches the model.)
+  const gap = plan && headline ? settledGap(plan, headline) : null;
+  const settled: SettledClaim[] = gap
+    ? [gap, ...(plan ? [settledLocalTrend(figures, plan)] : [])].filter(
+        (s): s is SettledClaim => s !== null,
+      )
+    : [];
+  const spine = settled.map((s) => s.sentence).join(" ");
+  const read: GapRead | null = gap
+    ? await authorGapRead(area, gap, settled).catch(() => ({ body: spine, proseDropped: true }))
+    : null;
 
   // Citations: every HELD figure the page renders (house style, one entry per source,
   // carrying its as-of) plus the web-verified headline WITH its publisher URL.

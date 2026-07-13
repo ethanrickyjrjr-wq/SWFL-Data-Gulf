@@ -8,21 +8,25 @@
 import { describe, expect, test } from "bun:test";
 import {
   anchorAddressFromPrompt,
-  areaReadFacts,
   brandAgentCard,
   brandAgentName,
   brandHeadshot,
   buildZipAskingSpec,
   latestAsOfIso,
   mdyToIso,
+  placesNamedIn,
   resolveFarmArea,
+  settledAreaClaims,
   spelledCounts,
   splitAnchorFromArea,
+  stripAnchorSpans,
   toZipAsks,
   unanchoredQuantities,
+  violationsIn,
   type ZipAsk,
 } from "./agent-brand-intro";
 import { DEFAULT_BLOCK_PROPS, SEED_DOCS } from "@/lib/email/doc/default-docs";
+import { EmailDocSchema } from "@/lib/email/doc/schema";
 import type { EmailDoc } from "@/lib/email/doc/types";
 
 const SEED =
@@ -98,6 +102,26 @@ describe("the anchor listing can never hijack the farm area", () => {
       "a unit number and a post-directional",
       `${SEED} Newest listing: 1234 Gulf Shore Blvd N #501, Naples, FL 34102.`,
     ],
+
+    // ── THE ONE THAT ACTUALLY SHIPPED. Reproduced end-to-end through authorDoc on
+    // 07/13/2026: hero "Fort Myers, Florida", chart "What homes are asking in Fort
+    // Myers". THREE holes, each on its own sufficient:
+    //   (a) "500 Bayfront" has no street suffix, no "FL", no ZIP — the address scrub
+    //       matched NOTHING and cut NOTHING.
+    //   (b) the farm cue selected a CLAUSE, and "with" is not a clause boundary, so the
+    //       "cued" text still held Fort Myers.
+    //   (c) "cape coral" and "fort myers" are BOTH ten characters, so the crosswalk's
+    //       longest-needle-first sort TIED and gazetteer order picked the city. The farm
+    //       area was decided by a stable sort.
+    [
+      "THE SHIPPED BUG — a suffix-less street, no comma, no state, no ZIP",
+      "I farm Cape Coral with my newest listing at 500 Bayfront in Fort Myers.",
+    ],
+    [
+      "the same, with the anchor named first",
+      "My newest listing is 500 Bayfront in Fort Myers. I farm Cape Coral.",
+    ],
+    ["no cue on the anchor at all, one sentence", "I farm Cape Coral. 500 Bayfront, Fort Myers."],
   ];
 
   for (const [name, prompt] of phrasings) {
@@ -153,6 +177,69 @@ describe("the anchor listing can never hijack the farm area", () => {
     expect(area).not.toContain("Fort Myers");
     expect(area).not.toContain("33905");
     expect(addresses[0]).toBe(ANCHOR);
+  });
+});
+
+// ── THE FALLBACK FAILS CLOSED ───────────────────────────────────────────────────
+//
+// The declared span (lane 2) is the anchor-proof lane. Lane 3 exists for a prompt with
+// NO farm cue — and there, a place we cannot attribute must never be guessed at. The old
+// code called the crosswalk on the whole surviving text, and the crosswalk ALWAYS returns
+// something. Returning something is exactly the bug.
+describe("with no farm cue, ambiguity is refused — never resolved", () => {
+  test("two places and nothing saying which is the farm → null, never a coin flip", () => {
+    // Both cities named, no cue, and the anchor is not in an address shape the scrub can
+    // see. There is no honest answer here — so there is no answer.
+    expect(
+      resolveFarmArea("Agent intro email. Cape Coral. My newest place, 500 Bayfront, Fort Myers."),
+    ).toBeNull();
+  });
+
+  test("the anchor's city alone is never promoted to the farm area", () => {
+    // The suffix-less shape the address scrub cannot see. The ANCHOR-SPAN filter catches
+    // it instead — two filters, neither of which has to fire for the other to hold.
+    expect(
+      resolveFarmArea("Build an agent intro. My newest listing at 500 Bayfront in Fort Myers."),
+    ).toBeNull();
+    expect(stripAnchorSpans("My newest listing at 500 Bayfront in Fort Myers.")).not.toContain(
+      "Fort Myers",
+    );
+  });
+
+  test("one unambiguous place, no cue → that IS the farm area", () => {
+    expect(
+      resolveFarmArea(`My newest listing is ${"326 Shore Dr, Fort Myers, FL 33905"}. Cape Coral.`)
+        ?.place,
+    ).toBe("Cape Coral");
+  });
+});
+
+// ── THE SHADOWING TRAP ──────────────────────────────────────────────────────────
+//
+// `zipFromPromptPlace` scans needles LONGEST FIRST. Enumerating places over sliding
+// windows without anchoring each hit to its start word makes a LONGER later needle EAT a
+// shorter earlier one: "Estero and Fort Myers" reads as ["Fort Myers"] alone — one place,
+// unanimous, confident, and WRONG. An Estero agent would get a Fort Myers email and the
+// ambiguity gate would never fire, because it would never see the ambiguity.
+describe("every place is enumerated — a longer needle never eats a shorter one", () => {
+  test("a short place before a long one survives", () => {
+    expect(placesNamedIn("Estero and Fort Myers")).toEqual(["Estero", "Fort Myers"]);
+    expect(placesNamedIn("I farm Estero, my listing is in Fort Myers")).toContain("Estero");
+  });
+
+  test("a place is counted ONCE, at its longest form", () => {
+    expect(placesNamedIn("Fort Myers Beach")).toEqual(["Fort Myers Beach"]);
+    expect(placesNamedIn("Cape Coral")).toEqual(["Cape Coral"]);
+  });
+
+  test("both cities in the shipped bug are seen — which is why it is refused", () => {
+    expect(
+      placesNamedIn("I farm Cape Coral with my newest listing at 500 Bayfront in Fort Myers"),
+    ).toEqual(["Cape Coral", "Fort Myers"]);
+  });
+
+  test("no SWFL place named → nothing", () => {
+    expect(placesNamedIn("Build an agent-introduction email")).toEqual([]);
   });
 });
 
@@ -247,38 +334,177 @@ describe("the chart spec", () => {
   });
 });
 
-describe("the narrator's figures are computed in CODE", () => {
-  // DETERMINISTIC MATH, NARRATIVE PROSE. The model kept deriving the high-to-low spread
-  // itself ("a spread of about $180,900") — arithmetic on two cited numbers is still an
-  // UNSOURCED number under our own no-invention lint. So the spread is handed to it.
-  test("the high, the low, and the GAP are all given as facts", () => {
-    const facts = areaReadFacts(AREA, [
-      { zip: "33914", medianList: 525000 },
-      { zip: "33909", medianList: 344100 },
-    ]);
-    const joined = facts.join("\n");
-    expect(joined).toContain("Highest median asking price: $525,000 (33914)");
-    expect(joined).toContain("Lowest median asking price: $344,100 (33909)");
-    expect(joined).toContain("Gap between the highest and lowest ZIP: $180,900");
-    expect(joined).toContain("ZIPs with live for-sale listings in this chart: 2");
+// ── THE CLAIM GATE (lib/deliverable/claims.ts) ──────────────────────────────────
+//
+// Invention is CLAIM-shaped, not number-shaped. Four of seven deliverables shipped a
+// falsehood on 07/13 with every underlying figure correctly sourced — what was invented
+// was the claim drawn BETWEEN correctly-sourced numbers.
+//
+// THE DONE-CONDITION IS STRUCTURAL, AND THIS IS THE TEST OF IT: the narrator receives no
+// raw set. It cannot compare two ZIPs because it was never handed two.
+describe("the narrator is never given anything to compare", () => {
+  const ROWS: ZipAsk[] = [
+    { zip: "33914", medianList: 525000 },
+    { zip: "33991", medianList: 457500 },
+    { zip: "33990", medianList: 412000 },
+    { zip: "33909", medianList: 344100 },
+  ];
+
+  // THE STRUCTURAL DONE-CONDITION. The old facts list was one line PER ZIP — the raw set,
+  // handed straight to a model, which is how market-pulse wrote "five of those six ZIPs"
+  // over a set whose true count was four.
+  test("NO RAW SET: the per-ZIP rows appear nowhere in what the model is handed", () => {
+    const handed = settledAreaClaims(AREA, ROWS)
+      .map((s) => s.sentence)
+      .join("\n");
+    // The middle of the distribution does not exist as far as the narrator is concerned.
+    expect(handed).not.toContain("33991");
+    expect(handed).not.toContain("457,500");
+    expect(handed).not.toContain("33990");
+    expect(handed).not.toContain("412,000");
   });
 
-  // A COUNT SPELLED IN WORDS IS STILL A COUNT. `extractNumbers` is digit-based, so
-  // "the four ZIPs in between" (6 − 2 = 4, arithmetic the MODEL did) walked straight
-  // through the anchor gate. It is normalized to digits and gated with the rest.
-  test("a spelled-out count is gated exactly like a digit", () => {
-    const facts = areaReadFacts(AREA, [
-      { zip: "33914", medianList: 525000 },
-      { zip: "33991", medianList: 457500 },
-      { zip: "33909", medianList: 344100 },
-    ]);
+  // Every relation is decided by integer arithmetic, in code. Re-derived by hand:
+  //   count   — 4 rows carry a median asking price; Cape Coral spans 6 ZIPs → "4 of 6".
+  //   low     — min(525000, 457500, 412000, 344100) = 344,100 (33909).
+  //   high    — max(...)                            = 525,000 (33914).
+  //   spread  — 525000 − 344100                     = 180,900.
+  test("the count, the ordering and the spread are all computed in CODE", () => {
+    const handed = settledAreaClaims(AREA, ROWS)
+      .map((s) => s.sentence)
+      .join("\n");
+    expect(handed).toContain("4 of 6 ZIP codes in Cape Coral");
+    expect(handed).toContain("$344,100 in 33909");
+    expect(handed).toContain("$525,000 in 33914");
+    expect(handed).toContain("a spread of $180,900");
+  });
+
+  test("all-of is stated as ALL, never as a bare count", () => {
+    const handed = settledAreaClaims({ place: "Estero", zips: ["33928", "34135"] }, [
+      { zip: "33928", medianList: 700000 },
+      { zip: "34135", medianList: 600000 },
+    ])
+      .map((s) => s.sentence)
+      .join("\n");
+    expect(handed).toContain("All 2 ZIP codes in Estero");
+    expect(handed).toContain("a spread of $100,000"); // 700,000 − 600,000
+  });
+
+  // FAIL-CLOSED BACKSTOP. Structure is the defense; this is the net under it. Each of
+  // these is a real 07/13 failure re-aimed at THIS recipe's data.
+  describe("auditClaims drops the paragraph rather than ship the claim", () => {
+    const settled = settledAreaClaims(AREA, ROWS);
+    const bad = (prose: string) => violationsIn(prose, settled);
+
+    test("a COMPARISON the model drew itself", () => {
+      // market-comps' exact failure: a relation between two figures, asserted by a model.
+      expect(bad("33991 sits above the median asking price.").length).toBeGreaterThan(0);
+    });
+    test("a TRAJECTORY, from levels that hold no trend at all", () => {
+      // sphere-weekly: "the gap is widening", given ONE level and no time series.
+      expect(bad("The gap between the ZIPs is widening.").length).toBeGreaterThan(0);
+    });
+    test("a COUNT the model did itself", () => {
+      // market-pulse: "five of those six ZIPs". No digits in it — a digit lint sails past.
+      expect(bad("Most of the ZIPs ask above the middle.").length).toBeGreaterThan(0);
+    });
+    test("a MOTIVE — we never know why anyone did anything", () => {
+      expect(bad("Sellers here are motivated.").length).toBeGreaterThan(0);
+    });
+    test("a number that anchors to nothing we handed it", () => {
+      expect(bad("Asking runs as high as $525,001.").length).toBeGreaterThan(0);
+    });
+
+    // AND IT DOES NOT EAT AN HONEST PARAGRAPH. A gate that fires on the truth costs a
+    // deliverable its prose and teaches the next author to weaken it.
+    test("the settled sentences themselves pass, restated verbatim", () => {
+      const honest =
+        `${settled[0].sentence} ${settled[1].sentence} ` +
+        `These are asking prices on live listings, not what homes sold for.`;
+      expect(bad(honest)).toEqual([]);
+    });
+  });
+
+  // ── WHY AN ANCHOR GATE IS NOT ENOUGH, IN ONE TEST ─────────────────────────────
+  //
+  // "the four ZIPs in between" is a claim the model DERIVED (a count of the ZIPs strictly
+  // between the top and the bottom). We never gave it that count.
+  //
+  // But the settled count sentence legitimately reads "4 of 6 ZIP codes…" — so the digit
+  // "4" IS in the anchor set, and the ANCHOR GATE PASSES IT. A number-shaped lint cannot
+  // tell a sourced 4 from a coincidentally-equal derived 4, because the invention is not
+  // in the number. It is in the CLAIM.
+  //
+  // `auditClaims` catches it on SHAPE — a count, stated in words, that code did not make.
+  // That is the whole thesis of the claim gate, and this is the test of it.
+  test("a derived count slips the ANCHOR gate and is caught by the CLAIM gate", () => {
+    const settled = settledAreaClaims(AREA, ROWS);
+    const facts = settled.map((s) => s.sentence);
+
     expect(spelledCounts("the four ZIPs in between")).toEqual(["4"]);
     expect(spelledCounts("one of them is on the water")).toEqual([]); // pronominal, not a count
-    expect(unanchoredQuantities("the four ZIPs in between", facts)).toEqual(["4"]);
-    expect(
-      unanchoredQuantities("across the 3 ZIP codes, asking runs $525,000 to $344,100", facts),
-    ).toEqual([]);
+
+    // The digit lint is blind here: "4" is a legitimately sourced anchor.
+    expect(unanchoredQuantities("the four ZIPs in between", facts)).toEqual([]);
+    // The claim lint is not.
+    expect(violationsIn("the four ZIPs in between", settled)).toContainEqual(
+      expect.stringContaining("word-count"),
+    );
+
+    // And a genuinely unsourced FIGURE is still caught by the anchor gate.
     expect(unanchoredQuantities("asking runs to $525,001", facts)).toEqual(["$525,001"]);
+  });
+});
+
+// ── THE OPEN SLOT MUST SURVIVE THE SCHEMA ───────────────────────────────────────
+//
+// THE CRUELEST BUG IN THIS BUILD, AND IT WAS MINE. The open-slot instruction I added to
+// PREVENT the wrong-city email was 138 characters. `StatItem.label` is `z.string().max(60)`
+// (doc/schema.ts:82). So the doc failed validation — and authorDoc's answer to an invalid
+// builder doc is to DISCARD THE BUILDER AND RUN THE GENERIC AUTHOR, which scans the whole
+// prompt for a place and shipped a FORT MYERS email to the Cape Coral agent, hero and all.
+//
+// Caught only by rendering it and counting the cities. A mechanism that fails the schema
+// does not degrade — it hands the build to something with no guard at all.
+describe("an open-slot label can never break the doc schema", () => {
+  // The REAL gate — EmailDocSchema is exactly what authorDoc validates the builder's doc
+  // against before deciding whether to keep it or fall back to the generic author.
+  const docWithStatLabel = (label: string): EmailDoc => {
+    const d = blank();
+    return {
+      ...d,
+      blocks: [
+        ...d.blocks,
+        {
+          id: "s1",
+          type: "stats",
+          props: { stats: [{ value: "", label }] },
+        } as EmailDoc["blocks"][number],
+      ],
+    };
+  };
+
+  test("every open-slot label this builder can emit survives EmailDocSchema", () => {
+    const labels = [
+      'Which area do you farm? Add "I farm <city or ZIP>"', // the no-farm-area slot
+      "Price",
+      "Beds",
+      "Baths",
+      "Sq Ft",
+      "$/Sq Ft",
+      "Lot",
+    ];
+    for (const l of labels) {
+      expect(EmailDocSchema.safeParse(docWithStatLabel(l)).success).toBe(true);
+    }
+  });
+
+  test("and the schema really does reject the 138-char one that shipped (teeth)", () => {
+    const tooLong =
+      'which area do you farm? add "I farm Cape Coral" (or your ZIP) to the build box, ' +
+      "and we'll chart what homes are asking there, ZIP by ZIP";
+    expect(tooLong.length).toBeGreaterThan(60);
+    expect(EmailDocSchema.safeParse(docWithStatLabel(tooLong)).success).toBe(false);
   });
 });
 

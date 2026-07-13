@@ -28,9 +28,11 @@
 //      about a number, so it charts: one ranked bar per ZIP (the ZIP's home value),
 //      each carrying its OWN month-over-month chip. Built in CODE from the brain's
 //      audited detail table; the model never touches a plotted figure.
-//   5. PROSE — the `monthly-newsletter` voice. The narrator is handed the per-ZIP
-//      rows and NOTHING else, and may not write a number that isn't in them. It
-//      writes the one honest read. It does not choose cells, layout, or figures.
+//   5. PROSE — the `monthly-newsletter` voice, behind THE CLAIM GATE
+//      (lib/deliverable/claims.ts). The narrator is handed SETTLED SENTENCES and
+//      NOTHING ELSE — no ZIP rows, no value list, no set of any kind. Every count,
+//      ranking and range in this email is computed in CODE. It writes the one honest
+//      read. It does not choose cells, layout, figures, or relations.
 //   6. FRAMING — the month's pulse for the named place: the chart is the lead, the
 //      stats are the hook, the read closes. The source + as-of ride the chart
 //      caption in MM/DD/YYYY — never the raw internal token.
@@ -59,6 +61,52 @@
 // table PROJECTED to the MoM delta column. No second binder, no second producer, no
 // number the model ever sees before it is drawn. See the report: the clean fix is a
 // delta-column preference on `bindRankedDeltaSpec`, which collapses this to one root.
+//
+// ── THE CLAIM GATE — WHY THE NARRATOR NO LONGER SEES THE ZIP ROWS ──────────────
+//
+// THE DEFECT (live, 07/13/2026): handed the six Cape Coral rows and told "do not
+// count the ZIPs yourself", Sonnet wrote **"Five of those six ZIPs"** — and the true
+// answer was FOUR. Every underlying figure was correctly sourced. What was invented
+// was the CLAIM DRAWN BETWEEN them. A word-count carries no digits, so the number
+// lint sailed straight past it, and the hand-rolled WORD_COUNT_RE that used to live
+// in this file was reproducibly bypassed in the live build.
+//
+// You cannot enumerate your way out of natural language, and you cannot instruct a
+// model out of a set it is holding. **A MODEL GIVEN A SET WILL COUNT IT.** So it is
+// no longer given one:
+//
+//   1. CODE computes every relation — the counts (`settledCount`), the ranking, the
+//      range, the coverage — in `settledPulseFacts` below.
+//   2. The narrator receives those as SETTLED ENGLISH SENTENCES and NOTHING ELSE.
+//      `pulseUserMessage` takes `SettledClaim[]`, not `ZipMove[]` — the SIGNATURE is
+//      the gate. There is no row list, no value array, no `moves` in the prompt. It
+//      cannot count six ZIPs it was never shown six of.
+//   3. CODE ALSO WRITES EVERY FACTUAL SENTENCE. The model contributes only the closing
+//      sentence, and that sentence may contain NO DIGIT AT ALL (`auditConnective` runs
+//      `auditClaims` with an EMPTY settled set, so every claim shape fires and every
+//      numeral is unanchored). The model cannot invert a comparison or miscount a set
+//      because it does not write comparisons or counts.
+//
+//      This is not belt-and-braces, it is the measured fix. Told to copy the settled
+//      sentences VERBATIM, Sonnet copied them and glued a clause on ("All 6 ZIPs
+//      tracked here moved lower this month, and the moves were narrow throughout") —
+//      three drafts out of three, every one of them TRUE, every one of them dropped,
+//      because the extra clause breaks `auditClaims`' verbatim exemption and the gate
+//      then flags CODE's own claim inside the model's sentence. A gate that eats true
+//      prose is the failure claims.ts warns about in its own header. So the model
+//      stopped retyping facts. Now the spine is verbatim BY CONSTRUCTION.
+//   4. `CLAIM_PROHIBITION` is printed into the system prompt, so the model is told the
+//      exact rule the lint enforces.
+//   5. FAIL-CLOSED, WITH A CODE-AUTHORED FLOOR: a bad closing sentence is DROPPED and
+//      the settled spine still ships (every sentence in it is code's). If the ASSEMBLED
+//      paragraph somehow still fails `auditRead`, the whole read becomes an OPEN SLOT —
+//      never shipped, never best-effort. A missing paragraph is honest; a confident
+//      false one is not.
+//
+// The done-condition here is structural and greppable: **`pulseUserMessage` cannot
+// receive a set — its parameter type is `SettledClaim[]`** (proved in the test, which
+// asserts every numeral in the prompt is one CODE settled, and that the mid-pack rows
+// are literally absent from it).
 
 import { fetchBrain } from "@/lib/fetch-brain";
 import { bindRankedDeltaSpec } from "@/lib/deliverable/ranked-delta-bind";
@@ -72,7 +120,14 @@ import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
-import { anchorsExactly, extractNumbers, normalizeNumber } from "@/lib/deliverable/narrative-lint";
+import {
+  auditClaims,
+  numeralsIn,
+  settledCount,
+  CLAIM_PROHIBITION,
+  type ClaimViolation,
+  type SettledClaim,
+} from "@/lib/deliverable/claims";
 import { formatDisplayDate } from "@/lib/format-date";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
@@ -327,137 +382,261 @@ export function tally(moves: ZipMove[]): MonthTally {
   return { total, fell, rose, flat, uniform: fell === total || rose === total };
 }
 
-/** A word-count the model invented ("five of the six ZIPs"). It carries NO DIGITS,
- *  so the number gate cannot see it — and it was wrong the first time we looked. */
-const WORD_COUNT_RE =
-  /\b(one|two|three|four|five|six|seven|eight|nine|ten)\s+of\s+(?:the\s+)?(?:\w+\s+)?zips?\b/i;
-/** Unsourced grouping — a claim about "how many" that we never handed it. */
-const VAGUE_GROUP_RE = /\b(most|majority|half|a few|several|a handful)\b/i;
-/** A universal claim is only allowed when the month ACTUALLY was universal. */
-const UNIVERSAL_RE = /\b(every|all|each)\s+(?:\w+\s+){0,2}zips?\b/i;
-
-/** Every number in the read must be one we handed it, and every COUNT must be one we
- *  computed. Returns the offending tokens — empty means the paragraph is clean. */
-export function readViolations(
-  read: string,
-  allowed: ReadonlySet<string>,
-  t: MonthTally,
-): string[] {
-  const bad: string[] = [];
-  for (const tok of extractNumbers(read)) {
-    if (!anchorsExactly(tok, allowed)) bad.push(tok);
-  }
-  const wc = read.match(WORD_COUNT_RE);
-  if (wc) bad.push(wc[0]);
-  const vg = read.match(VAGUE_GROUP_RE);
-  if (vg) bad.push(vg[0]);
-  const uni = read.match(UNIVERSAL_RE);
-  // "every ZIP fell" is a FACT when every ZIP did fall, and a fabrication when it
-  // didn't. The tally — not the model — decides which.
-  if (uni && !t.uniform) bad.push(uni[0]);
-  return bad;
-}
-
-/** The numbers the narrator is allowed to write: the held row figures, the ZIPs, the
- *  computed counts, and the as-of date. Nothing else exists for it. */
-export function allowedNumbers(moves: ZipMove[], t: MonthTally, asOf: string): Set<string> {
-  const set = new Set<string>();
-  const add = (s: string) => {
-    const n = normalizeNumber(s);
-    if (n) set.add(n);
-  };
-  for (const m of moves) {
-    add(m.zip);
-    add(String(m.value));
-    add(String(m.mom));
-    add(String(Math.abs(m.mom))); // the sign may ride in the words ("down 0.39%")
-  }
-  for (const c of [t.total, t.fell, t.rose, t.flat]) add(String(c));
-  for (const part of asOf.split("/")) add(part);
-  add(asOf.replace(/\//g, ""));
-  return set;
-}
-
-/** The one honest read. The narrator gets the rows and NOTHING else, and may not
- *  write a number that is not among them. Prose only — never a cell, never a figure,
- *  never the layout. It is linted, retried ONCE on a violation, and if it still
- *  can't stay inside the facts the slot is left an OPEN SLOT — a paragraph we cannot
- *  verify never ships. */
-async function authorPulseRead(opts: {
+/**
+ * EVERY RELATION IN THIS EMAIL, DECIDED BY INTEGER COMPARISON — never by a model.
+ *
+ * This is the whole fix. The narrator used to be handed the ZIP ROWS and told not to
+ * count them; it counted them, and it counted them WRONG ("five of those six ZIPs";
+ * the answer was four). A model given a set will count the set. So the set stops here:
+ * this function turns the rows into SETTLED ENGLISH SENTENCES, and those sentences —
+ * not the rows — are the only thing `authorPulseRead` ever sends.
+ *
+ * Every sentence below is a claim CODE is making, and each is checkable by hand:
+ *   • COVERAGE  — `settledCount(held, spans)` → "8 of 9 ZIPs in Fort Myers…", never
+ *                 "every ZIP" while we hold fewer.
+ *   • DIRECTION — `settledCount(fell|rose|flat, total)`. THE DEFECT'S DIRECT FIX.
+ *   • THE MOVER + THE SPREAD — a ranking IS a comparison, so CODE ranks (max |move|)
+ *                 and CODE takes the min/max. The HIGHEST-VALUE ZIP is deliberately not
+ *                 a sentence: it is already a stat cell, and a read that recites the
+ *                 stat row is this recipe's own definition of a failed read.
+ *   • TRUNCATION — the frame draws 8 bars; if the place has more ZIPs, the copy says so.
+ *   • AS-OF     — MM/DD/YYYY, stated once, never the raw internal token.
+ *
+ * The noun is "ZIPs tracked here" and not "tracked ZIPs" ON PURPOSE: `auditClaims`'
+ * WORD_COUNT check keys on a quantifier sitting directly before the word "ZIPs", so a
+ * paraphrase like "four of the six ZIPs tracked here" is still caught. Put a word
+ * between the count and the noun and you open the exact hole this gate exists to close.
+ */
+export function settledPulseFacts(opts: {
   place: string;
   moves: ZipMove[];
-  mover: ZipMove;
-  asOf: string;
-  citation: string;
-  shown: number;
+  /** How many ZIPs the place actually spans (coverage denominator). */
   requested: number;
-}): Promise<string | null> {
-  const { place, moves, mover, asOf, citation, shown, requested } = opts;
-  const t = tally(moves);
-  const allowed = allowedNumbers(moves, t, asOf);
-  const rows = moves
-    .map(
-      (m) =>
-        `- ZIP ${m.zip}${m.city ? ` (${m.city})` : ""}: ${fmtUsd(m.value)}, ${fmtMom(m.mom)} month over month`,
-    )
-    .join("\n");
+  /** How many bars the chart can actually draw (truncation). */
+  shown: number;
+  asOf: string;
+}): SettledClaim[] {
+  const { place, moves, requested, shown, asOf } = opts;
+  const out: SettledClaim[] = [];
+  if (!moves.length) return out;
 
-  const system =
-    `You write the one honest read under a monthly market-pulse email for a real-estate ` +
-    `agent's list. Three to five sentences, one paragraph.\n\n` +
+  const settle = (sentence: string): SettledClaim => ({ sentence, anchors: numeralsIn(sentence) });
+  const t = tally(moves);
+  const NOUN = "ZIPs tracked here";
+
+  // COVERAGE — the honest "8 of 9", and ONLY when there is a gap worth being honest
+  // about. Full coverage needs no sentence; the direction count below already carries
+  // the denominator. A single-ZIP subject has no coverage story at all.
+  if (requested > 1 && t.total < requested) {
+    out.push(
+      settledCount(t.total, requested, {
+        noun: `ZIPs in ${place}`,
+        predicate: "carry a published home value this month",
+      }),
+    );
+  }
+
+  // DIRECTION — the count the model got wrong, now an integer filter. Zero-count
+  // directions are OMITTED: "0 of 6 ZIPs rose" is noise, not a fact worth a sentence.
+  if (t.total >= 2) {
+    if (t.fell)
+      out.push(settledCount(t.fell, t.total, { noun: NOUN, predicate: "moved lower this month" }));
+    if (t.rose)
+      out.push(settledCount(t.rose, t.total, { noun: NOUN, predicate: "moved higher this month" }));
+    if (t.flat)
+      out.push(settledCount(t.flat, t.total, { noun: NOUN, predicate: "held flat this month" }));
+  } else {
+    const only = moves[0];
+    const dir = only.mom < 0 ? "moved lower" : only.mom > 0 ? "moved higher" : "held flat";
+    out.push(settle(`ZIP ${only.zip} ${dir} this month, at ${fmtMom(only.mom)}.`));
+  }
+
+  // THE MOVER AND THE SPREAD — a ranking IS a comparison, so CODE ranks. Together these
+  // are the read's actual job: whether the month was broad or concentrated.
+  //
+  // The HIGHEST-VALUE ZIP is deliberately NOT here. It is already a stat cell, and a
+  // paragraph that restates the stat row is the recipe's own definition of a failed read.
+  if (t.total >= 2) {
+    const mover = biggestMover(moves)!;
+    out.push(settle(`The largest monthly move was ZIP ${mover.zip}, at ${fmtMom(mover.mom)}.`));
+    const lo = Math.min(...moves.map((m) => m.mom));
+    const hi = Math.max(...moves.map((m) => m.mom));
+    if (lo !== hi) out.push(settle(`The monthly moves span ${fmtMom(lo)} to ${fmtMom(hi)}.`));
+  }
+
+  // TRUNCATION — the reader sees 8 bars; the copy never implies they saw twelve.
+  if (shown < t.total) {
+    out.push(settle(`The chart shows ${shown} of the ${t.total} ${NOUN}, ranked by home value.`));
+  }
+
+  // THE AS-OF — MM/DD/YYYY, once. Its digits are also what anchor the date in the prose.
+  if (asOf) out.push(settle(`These figures are as of ${asOf}.`));
+
+  return out;
+}
+
+/**
+ * Typographic variance is not a claim.
+ *
+ * `auditClaims` exempts a settled sentence the narrator restates VERBATIM by substring
+ * match. Our sentences carry a U+2212 minus ("−0.39%"); a model that retypes it with an
+ * ASCII hyphen has restated the SAME fact, but the substring match misses — and the
+ * settled sentence then gets audited as if the model had derived it, and an honest
+ * paragraph is dropped to an open slot for a glyph.
+ *
+ * So normalize BOTH sides identically before auditing. This changes no claim and
+ * relaxes no check — every regex in claims.ts and every numeral it extracts is
+ * indifferent to which dash character was typed.
+ */
+function normalizeGlyphs(s: string): string {
+  return s
+    .replace(/[−–—]/g, "-")
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/ /g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Run the fail-closed backstop over an assembled paragraph. Exported so the test can
+ *  prove the gate catches the exact sentence that shipped on 07/13/2026. */
+export function auditRead(read: string, settled: readonly SettledClaim[]): ClaimViolation[] {
+  return auditClaims(
+    normalizeGlyphs(read),
+    settled.map((s) => ({ ...s, sentence: normalizeGlyphs(s.sentence) })),
+  );
+}
+
+/**
+ * THE CONNECTIVE'S GATE — `auditClaims` at FULL STRENGTH, with an EMPTY settled set.
+ *
+ * Passing `[]` means nothing is exempt and no numeral is anchored: every claim shape
+ * fires, and ANY digit at all is an `unanchored-number`. That is exactly right. The
+ * connective is the one part of the paragraph the model owns, and the model owns NO
+ * QUANTITIES — not even a true one. Every number, count, ranking, range and date in this
+ * read is written by `settledPulseFacts`. The model writes the sentence that has no facts
+ * in it, and if it smuggles one in, its sentence is thrown away and the code-authored
+ * spine ships alone.
+ */
+export function auditConnective(text: string): ClaimViolation[] {
+  return auditClaims(normalizeGlyphs(text), []);
+}
+
+/**
+ * THE READ = CODE'S SENTENCES + THE MODEL'S ONE NON-FACTUAL SENTENCE.
+ *
+ * WHY THE MODEL NO LONGER RETYPES A FACT (measured live, 07/13/2026, three of three
+ * drafts): handed the settled sentences and told to copy them verbatim, Sonnet copied
+ * them and then GLUED A CLAUSE ON — "All 6 ZIPs tracked here moved lower this month,
+ * and the moves were narrow throughout." Every one of those drafts was TRUE. But the
+ * added clause breaks `auditClaims`' verbatim-restatement exemption, so the gate then
+ * flagged the code-authored claim sitting inside the model's sentence, and all three
+ * honest paragraphs were dropped to an open slot. A gate that eats true prose is the
+ * failure mode claims.ts warns about in its own header.
+ *
+ * So the model is no longer asked to retype a fact. CODE concatenates the settled
+ * sentences — they are verbatim BY CONSTRUCTION, and therefore exempt by construction —
+ * and the model contributes only the closing sentence, which is permitted no quantities
+ * at all. The model cannot invert a comparison, miscount a set, or invent a range,
+ * because it does not write any of them.
+ */
+export function composePulseRead(
+  settled: readonly SettledClaim[],
+  connective: string | null,
+): string {
+  const spine = settled.map((s) => s.sentence).join(" ");
+  const tail = (connective ?? "").trim();
+  return tail ? `${spine} ${tail}` : spine;
+}
+
+/** THE ENTIRE USER MESSAGE THE NARRATOR EVER SEES.
+ *
+ *  It takes `SettledClaim[]` — NOT `ZipMove[]`. That type signature IS the gate: there
+ *  is no parameter here through which a row, a value list, or a set of any kind could
+ *  reach the model. Exported so the test can assert it, rather than trusting a grep. */
+export function pulseUserMessage(place: string, settled: readonly SettledClaim[]): string {
+  return (
+    `PLACE: ${place}\n\n` +
+    `THE PARAGRAPH SO FAR — already written, in code. You are NOT rewriting these, and you ` +
+    `are NOT restating them. They will appear above your sentence:\n` +
+    settled.map((s) => `${s.sentence}`).join("\n") +
+    `\n\nNow write the ONE closing sentence (two at the very most) that follows them. No ` +
+    `numbers.`
+  );
+}
+
+/** The narrator's system prompt. It PRINTS `CLAIM_PROHIBITION` verbatim, so the model is
+ *  told the exact rule `auditClaims` enforces — a violation is then a refusal to follow
+ *  an explicit instruction rather than a surprise. */
+export function pulseSystemPrompt(shown: number): string {
+  return (
+    `You write the CLOSING SENTENCE of the honest read in a monthly market-pulse email for ` +
+    `a real-estate agent's list.\n\n` +
     `WHAT THIS EMAIL IS: a monthly newsletter. Recurring, plain, and useful — the reader ` +
     `opens it to find out which way their area moved last month. Consistent and calm beats ` +
     `dramatic; this lands every month.\n\n` +
     `WHAT THE READER ALREADY SEES: a chart of ${shown} ZIP${shown === 1 ? "" : "s"} — each ` +
-    `ZIP's home value as a bar, with its month-over-month move as a chip — and a stat row. ` +
-    `Do NOT read the chart back to them ZIP by ZIP. Your job is the READ: what the pattern ` +
-    `means, whether it is broad or concentrated, and what it does not tell us.\n\n` +
-    `HARD RULES.\n` +
-    `- Every number you write must appear VERBATIM in the ZIP ROWS or the TALLY below. ` +
-    `You may not average them, total them, round them into a new figure, or describe a ` +
-    `number you were not given. If a sentence needs a number you don't have, cut it.\n` +
-    `- DO NOT COUNT THE ZIPS YOURSELF. The TALLY below already says how many rose, fell, ` +
-    `and held flat — those are the only counts that exist. Never write "five of the six", ` +
-    `"most ZIPs", "half of them", or any grouping you were not handed. (Asked to count, ` +
-    `you will get it wrong, and a wrong count is a fabricated fact.)\n` +
-    `- A month-over-month move is ONE MONTH. Never call it a year, a trend of years, a ` +
-    `crash, or a recovery. Do not forecast, and do not tell anyone to buy or sell.\n` +
-    `- Never add a claim of your own about the homes, the schools, the water, the weather, ` +
-    `the "tier" or "segment" a ZIP belongs to, or WHY values moved — you were given values ` +
-    `and their moves, and NOTHING else. Do not label a ZIP "entry-level" or "luxury".\n` +
+    `ZIP's home value as a bar, with its monthly move as a chip — a stat row, and the ` +
+    `sentences printed below, which are ALREADY WRITTEN and will sit directly above yours.\n\n` +
+    `YOUR JOB IS THE ONE SENTENCE THOSE FACTS DO NOT CONTAIN: what the month means, whether ` +
+    `it is broad or concentrated, and what a single month does not tell anyone. One ` +
+    `sentence. Two at the very most.\n\n` +
+    `YOU HAVE NOT BEEN GIVEN THE ZIP ROWS, AND YOU WILL NOT BE. You cannot see the ` +
+    `individual values or moves, so you cannot count, rank, or compare them — every count, ` +
+    `ranking and range in this email was computed in code and is already written above.\n\n` +
+    `**WRITE NO NUMBER. NOT ONE DIGIT.** Not a percentage, not a ZIP, not a dollar figure, ` +
+    `not a date, not a count — not even one that appears in the sentences above. Those ` +
+    `sentences already say them; your sentence is the part with no numbers in it. A digit ` +
+    `in your sentence gets your sentence thrown away.\n\n` +
+    `DO NOT RESTATE, SUMMARIZE, OR REFER BACK TO the sentences above ("as shown", "these ` +
+    `moves"). Do not open with a connector that leans on them ("That said", "Still"). Write ` +
+    `a sentence that stands on its own and adds the meaning.\n\n` +
+    CLAIM_PROHIBITION +
+    `\n\n` +
+    `PHRASING (these get your sentence thrown away, so read them):\n` +
+    `- Never write a word about movement over time — not "cooling", "rebounding", ` +
+    `"rising", "falling", "widening", "trending", "momentum", "steady", "slowing" — not ` +
+    `even to deny one. One month is a LEVEL, not a DIRECTION.\n` +
+    `- Never write a count or a grouping — not "every ZIP", not "most of them", not "half".\n` +
+    `- Never compare anything to anything — no "above", "below", "in line with", "the ` +
+    `highest", "the largest".\n` +
+    `- Do not forecast, and do not tell anyone to buy or sell. Never guess WHY values ` +
+    `moved, and never label a ZIP "entry-level" or "luxury".\n` +
     `- No hype ("stunning", "red hot", "won't last"), no exclamation marks, no corporate ` +
-    `filler ("in today's dynamic market"). Plain, confident, specific.\n` +
-    `- State the as-of date once, as ${asOf}. Do not invent a different date.\n\n` +
-    `Return ONLY the paragraph.`;
+    `filler ("in today's dynamic market"). Plain, confident, specific.\n\n` +
+    `Return ONLY your closing sentence.`
+  );
+}
 
-  const tallyLine =
-    `TALLY (computed in code — the ONLY counts that exist): of ${t.total} ZIPs, ` +
-    `${t.fell} fell, ${t.rose} rose, ${t.flat} were flat.`;
+/**
+ * The one honest read.
+ *
+ * THE NARRATOR RECEIVES NO ROWS — no values, no moves, no ZIP list, nothing it could draw
+ * a relation from. And it now writes no fact either: CODE writes every factual sentence,
+ * the model writes the closing sentence, and that sentence is permitted no quantities.
+ *
+ * FAIL-CLOSED, WITH A CODE-AUTHORED FLOOR. The model's sentence is audited against an
+ * EMPTY settled set (nothing exempt, no digit anchored). Violate, and its sentence is
+ * DROPPED — and the read still ships, because the spine underneath it is entirely code's
+ * own settled sentences. Then the ASSEMBLED paragraph is audited once more; if even that
+ * fails, the whole read becomes an OPEN SLOT. A paragraph we cannot trace never ships.
+ */
+async function authorPulseRead(opts: {
+  place: string;
+  settled: SettledClaim[];
+  shown: number;
+}): Promise<string | null> {
+  const { place, settled, shown } = opts;
+  if (!settled.length) return null;
 
-  // COVERAGE HONESTY: we hold a value for the ZIPs below, not necessarily for every
-  // ZIP the place spans (Fort Myers spans 9; the index publishes 8). "Every ZIP in
-  // Fort Myers" would be an overclaim, so the qualifier is mandatory, not optional.
-  const coverageLine =
-    t.total < requested
-      ? `COVERAGE: this place spans ${requested} ZIPs and we hold a value for ${t.total} of them. ` +
-        `You may NOT say "every ZIP in ${place}" — say "every ZIP tracked here" or name the count.`
-      : `COVERAGE: we hold a value for all ${t.total} ZIPs this place spans.`;
-
-  const user =
-    `PLACE: ${place}\n` +
-    `AS OF: ${asOf}\n` +
-    `SOURCE: ${citation}\n` +
-    `${coverageLine}\n` +
-    `${tallyLine}\n` +
-    `THE BIGGEST MOVER (computed in code, not by you): ZIP ${mover.zip}, ${fmtMom(mover.mom)}\n\n` +
-    `ZIP ROWS (the ONLY numbers you may use):\n${rows}\n\n` +
-    `Write the read.`;
+  const system = pulseSystemPrompt(shown);
+  const user = pulseUserMessage(place, settled);
 
   const ask = async (userMsg: string): Promise<string | null> => {
     try {
       const msg = await getAnthropic("email_build").messages.create({
         model: EMAIL_MODEL_SONNET,
-        max_tokens: 500,
+        max_tokens: 300,
         system,
         messages: [{ role: "user", content: userMsg }],
       });
@@ -468,26 +647,48 @@ async function authorPulseRead(opts: {
     }
   };
 
+  let connective: string | null = null;
   const first = await ask(user);
-  if (!first) return null;
-  const bad = readViolations(first, allowed, t);
-  if (!bad.length) return first;
+  if (first) {
+    const bad = auditConnective(first);
+    if (!bad.length) connective = first;
+    else {
+      // ONE repair round, naming the offending shapes.
+      const retry = await ask(
+        `${user}\n\nYour previous sentence asserted things you were NOT given — each of ` +
+          `these is a claim you invented or a number you may not write:\n` +
+          bad.map((b) => `- ${b.kind}: "${b.match}"`).join("\n") +
+          `\n\nWrite it again with NO number and NO claim — no count, no comparison, no ` +
+          `direction of travel. Just the meaning. A shorter true sentence beats a longer ` +
+          `one that guesses.`,
+      );
+      const stillBad = retry ? auditConnective(retry) : [{ kind: "motive", match: "no reply" }];
+      if (retry && !stillBad.length) connective = retry;
+      else {
+        // The model's sentence is DROPPED. The read still ships — the spine below it is
+        // code's own settled sentences, every one of them true by construction.
+        console.warn(
+          "[market-pulse] closing sentence rejected twice — shipping the settled spine alone:",
+          stillBad.map((v) => `${v.kind}:"${v.match}"`).join(", "),
+        );
+      }
+    }
+  }
 
-  // ONE repair round, naming the offenders. Then: if it still can't stay inside the
-  // facts, the slot stays OPEN. An unverifiable paragraph never ships.
-  const retry = await ask(
-    `${user}\n\nYour previous draft asserted things you were NOT given:\n` +
-      bad.map((b) => `- "${b}"`).join("\n") +
-      `\n\nRewrite it using ONLY the ZIP ROWS and the TALLY. Do not count anything yourself, ` +
-      `and do not round a figure into a new one — quote them exactly as written.`,
-  );
-  if (!retry) return null;
-  const stillBad = readViolations(retry, allowed, t);
-  if (!stillBad.length) return retry;
-  // Operator-facing: the read is an OPEN SLOT, and we say why rather than shipping a
-  // sentence we cannot trace. Never reaches the recipient.
-  console.warn("[market-pulse] read rejected twice — leaving it an open slot:", stillBad);
-  return null;
+  const read = composePulseRead(settled, connective);
+
+  // THE LAST GATE. The spine is exempt by construction; this catches anything that got
+  // past the connective's own audit once the two are sitting in one paragraph. On a hit,
+  // there is no "best effort" — the read becomes an OPEN SLOT.
+  const bad = auditRead(read, settled);
+  if (bad.length) {
+    console.warn(
+      "[market-pulse] assembled read failed the claim gate — leaving it an open slot:",
+      bad.map((v) => `${v.kind}:"${v.match}"`).join(", "),
+    );
+    return null;
+  }
+  return read;
 }
 
 /** Carry the agent's brand through: globalStyle + the identity blocks (header,
@@ -648,19 +849,19 @@ export async function buildMarketPulse(ctx: RecipeBuildContext): Promise<EmailDo
   // An empty chart box is worse than no chart — a chart is a bonus, never a blocker.
   if (!charted) doc = dropEmptyChartSlot(doc);
 
-  // 6 · PROSE — the model writes the read. Nothing else. The seed prefills the text
-  //     slot with its authoring instruction, and fillNarrative SKIPS a slot that
-  //     already has content — so clear first, then author (the landmine that shipped
-  //     2,000 characters of raw copy on the listing flyer).
-  const read = await authorPulseRead({
+  // 6 · PROSE — behind THE CLAIM GATE. Code settles every relation FIRST; the narrator
+  //     is handed those sentences and NOTHING ELSE (no rows, no set, nothing to count).
+  //     The seed prefills the text slot with its authoring instruction, and
+  //     fillNarrative SKIPS a slot that already has content — so clear first, then
+  //     author (the landmine that shipped 2,000 characters of raw copy on the flyer).
+  const settled = settledPulseFacts({
     place: area.place,
     moves,
-    mover,
-    asOf,
-    citation: publicCitation(table.source.citation),
-    shown,
     requested: area.zips.length,
+    shown,
+    asOf,
   });
+  const read = await authorPulseRead({ place: area.place, settled, shown });
 
   // CLEAR FIRST, ALWAYS — even when we have no read.
   //

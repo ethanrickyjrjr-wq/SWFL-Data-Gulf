@@ -13,18 +13,23 @@
 
 import { describe, expect, test } from "bun:test";
 import {
-  allowedNumbers,
+  auditConnective,
+  auditRead,
   biggestMover,
   chartCaption,
   chartTitleFor,
+  composePulseRead,
   fmtMom,
   momChartSpec,
   movesForZips,
   publicCitation,
-  readViolations,
+  pulseSystemPrompt,
+  pulseUserMessage,
   resolveArea,
+  settledPulseFacts,
   tally,
 } from "./market-pulse";
+import { CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import type { RecipeBuildContext } from "./index";
 import type { BrainOutput, BrainOutputDetailTable } from "@/refinery/types/brain-output.mts";
 
@@ -211,46 +216,256 @@ describe("title — it never claims more ZIPs than the reader can see", () => {
   });
 });
 
-describe("prose gate — the model writes prose, never a number and never a count", () => {
+// ── THE CLAIM GATE ────────────────────────────────────────────────────────────
+//
+// THE DEFECT: given the six real Cape Coral rows and told in plain English not to
+// count them, Sonnet wrote "Five of those six ZIPs" — and the answer was FOUR.
+//
+// A MIXED month is what exposes it, so the block below builds one: the six REAL Cape
+// rows with the signs of two flipped. It is a CONSTRUCTED scenario, not a claim about
+// Cape Coral — it exists so the true count (4 fell, 2 rose) is a number a wrong answer
+// can actually be wrong about. Six rows all falling cannot catch an off-by-one.
+const MIXED: Array<[string, number, number]> = [
+  // [zip, home_value_zhvi, value_mom_pct] — real values; 33904 and 33914 flipped positive.
+  ["33904", 342030, +0.05],
+  ["33909", 298038, -0.31],
+  ["33914", 422133, +0.12],
+  ["33990", 325571, -0.22],
+  ["33991", 361732, -0.19],
+  ["33993", 330214, -0.39],
+];
+const MIXED_TABLE: BrainOutputDetailTable = {
+  ...TABLE,
+  rows: MIXED.map(([zip, value, mom]) => ({
+    key: zip,
+    label: zip,
+    cells: {
+      city: "Cape Coral",
+      latest_period: "2026-04-30",
+      home_value_zhvi: value,
+      value_yoy_pct: -7.5,
+      value_mom_pct: mom,
+    },
+  })),
+};
+
+describe("the claim gate — CODE counts, and the narrator is never given a set to count", () => {
   const moves = movesForZips(
-    TABLE,
-    CAPE.map(([z]) => z),
+    MIXED_TABLE,
+    MIXED.map(([z]) => z),
   );
-  const t = tally(moves);
-  const allowed = allowedNumbers(moves, t, "04/30/2026");
+  const settled = settledPulseFacts({
+    place: "Cape Coral",
+    moves,
+    requested: 6,
+    shown: 6,
+    asOf: "04/30/2026",
+  });
+  const sentences = settled.map((s) => s.sentence);
 
-  test("the tally is computed in code, not counted by the model", () => {
-    expect(t).toEqual({ total: 6, fell: 6, rose: 0, flat: 0, uniform: true });
+  test("the tally is an integer filter, not a model's guess", () => {
+    // 33909, 33990, 33991, 33993 fell = FOUR. 33904, 33914 rose = TWO. 4 + 2 = 6.
+    expect(tally(moves)).toEqual({ total: 6, fell: 4, rose: 2, flat: 0, uniform: false });
   });
 
-  test("a held figure quoted verbatim passes", () => {
-    const ok = "ZIP 33993 fell −0.39% on a $330,214 base, as of 04/30/2026.";
-    expect(readViolations(ok, allowed, t)).toEqual([]);
+  test("THE DEFECT, FIXED: the settled count says FOUR — the number the model wrote was five", () => {
+    expect(sentences).toContain("4 of 6 ZIPs tracked here moved lower this month.");
+    expect(sentences).toContain("2 of 6 ZIPs tracked here moved higher this month.");
+    // The falsehood that shipped. It must exist NOWHERE in what the narrator is handed.
+    expect(sentences.join(" ")).not.toContain("5 of 6");
+    expect(pulseUserMessage("Cape Coral", settled).toLowerCase()).not.toContain("five");
   });
 
-  test("a number we never handed it is caught (a rounded figure is still invented)", () => {
-    expect(readViolations("Values slipped about −0.3% across the city.", allowed, t)).toContain(
-      "−0.3%",
+  test("a zero-count direction is omitted, not stated as a fact ('0 of 6 rose' is noise)", () => {
+    const allFell = settledPulseFacts({
+      place: "Cape Coral",
+      moves: movesForZips(
+        TABLE,
+        CAPE.map(([z]) => z),
+      ),
+      requested: 6,
+      shown: 6,
+      asOf: "04/30/2026",
+    }).map((s) => s.sentence);
+    expect(allFell).toContain("All 6 ZIPs tracked here moved lower this month.");
+    expect(allFell.some((s) => s.includes("0 of 6"))).toBe(false);
+  });
+
+  test("the ranking is CODE's — the mover is a selection, the spread a min/max", () => {
+    // |−0.39| is the largest of {0.05, 0.31, 0.12, 0.22, 0.19, 0.39} → 33993.
+    expect(sentences).toContain("The largest monthly move was ZIP 33993, at −0.39%.");
+    // The spread runs from the true min (−0.39) to the true max (+0.12), signs intact.
+    expect(sentences).toContain("The monthly moves span −0.39% to +0.12%.");
+    // The HIGHEST-VALUE ZIP is a STAT CELL, not a sentence. A read that recites the
+    // stat row is the recipe's own definition of a failed read.
+    expect(sentences.join(" ")).not.toContain("highest home value");
+  });
+
+  test("the as-of is stated once, MM/DD/YYYY, and its digits anchor the prose", () => {
+    expect(sentences).toContain("These figures are as of 04/30/2026.");
+  });
+
+  // ── THE DONE-CONDITION: THE NARRATOR RECEIVES NO RAW SET ────────────────────
+  test("THE NARRATOR RECEIVES NO RAW SET — no unsettled ZIP, value, or move reaches it", () => {
+    const msg = pulseUserMessage("Cape Coral", settled);
+    const settledNumerals = new Set(settled.flatMap((s) => s.anchors));
+    // Every numeral in the entire prompt is one CODE settled. Nothing else got in.
+    for (const n of msg.match(/\d[\d,.]*/g) ?? []) {
+      expect(settledNumerals.has(n.replace(/[.,]$/, ""))).toBe(true);
+    }
+    // Concretely: the mid-pack rows are INVISIBLE to the model. It cannot compare,
+    // rank or count them, because it was never given them.
+    for (const hidden of ["298038", "298,038", "325,571", "361,732", "342,030", "33990", "33991"]) {
+      expect(msg).not.toContain(hidden);
+    }
+  });
+
+  test("the model's own sentence may carry NO quantity — not even a true one", () => {
+    // auditConnective runs the gate with an EMPTY settled set: nothing is exempt and no
+    // digit is anchored. Every number in this read is CODE's, including the true ones.
+    expect(auditConnective("The moves were narrow across the board.")).toEqual([]);
+    expect(
+      auditConnective("4 of 6 ZIPs tracked here moved lower this month.").some(
+        (x) => x.kind === "unanchored-number",
+      ),
+    ).toBe(true);
+    expect(auditConnective("The market is cooling.").some((x) => x.kind === "trajectory")).toBe(
+      true,
     );
+    expect(auditConnective("Most ZIPs slipped.").some((x) => x.kind === "word-count")).toBe(true);
   });
 
-  test("THE LIVE FAILURE: an invented word-count is caught ('five of the six ZIPs')", () => {
-    // Sonnet wrote exactly this on 07/13/2026. The true answer was four. It carries no
-    // digits, so a digit-only lint sails right past it.
-    const bad = "Five of the six ZIPs fell between −0.05% and −0.22%.";
-    expect(readViolations(bad, allowed, t).length).toBeGreaterThan(0);
+  test("the spine ships even when the model's sentence is thrown away", () => {
+    const spineOnly = composePulseRead(settled, null);
+    expect(spineOnly).toContain("4 of 6 ZIPs tracked here moved lower this month.");
+    // And a code-authored spine ALWAYS passes the assembled gate — it is verbatim by
+    // construction, so nothing in it can be flagged as a model-derived relation.
+    expect(auditRead(spineOnly, settled)).toEqual([]);
   });
 
-  test("vague grouping is caught — 'most ZIPs' is a count we never gave it", () => {
-    expect(readViolations("Most ZIPs slipped this month.", allowed, t).length).toBeGreaterThan(0);
+  test("a clean closing sentence composes onto the spine and the whole thing passes", () => {
+    const read = composePulseRead(settled, "It was a split month, and one month is a level.");
+    expect(auditRead(read, settled)).toEqual([]);
+    expect(read.endsWith("It was a split month, and one month is a level.")).toBe(true);
   });
 
-  test("'every ZIP fell' is a FACT when every ZIP fell, and a fabrication when it didn't", () => {
-    const claim = "Every ZIP moved lower.";
-    expect(readViolations(claim, allowed, t)).toEqual([]); // uniform: all 6 fell
-    const mixed = tally([...moves.slice(0, 5), { ...moves[5], mom: 0.4 }]);
-    expect(mixed.uniform).toBe(false);
-    expect(readViolations(claim, allowed, mixed).length).toBeGreaterThan(0);
+  test("the prohibition the lint enforces is printed into the system prompt", () => {
+    const sys = pulseSystemPrompt(6);
+    expect(sys).toContain(CLAIM_PROHIBITION);
+    expect(sys).toContain("YOU HAVE NOT BEEN GIVEN THE ZIP ROWS");
+  });
+
+  // ── THE FAIL-CLOSED BACKSTOP ────────────────────────────────────────────────
+  test("THE LIVE FALSEHOOD is caught: 'Five of those six ZIPs' (the answer was four)", () => {
+    const v = auditRead("Five of those six ZIPs moved lower this month.", settled);
+    expect(v.some((x) => x.kind === "word-count")).toBe(true);
+  });
+
+  test("a count spelled out around the settled noun is still caught", () => {
+    // The hole a padded noun would open: "four of the six ZIPs tracked here". The
+    // quantifier sits directly before "ZIPs", so WORD_COUNT still sees it.
+    expect(
+      auditRead("Four of the six ZIPs tracked here moved lower.", settled).some(
+        (x) => x.kind === "word-count",
+      ),
+    ).toBe(true);
+    expect(
+      auditRead("Most ZIPs slipped this month.", settled).some((x) => x.kind === "word-count"),
+    ).toBe(true);
+  });
+
+  test("a number no settled fact anchors is caught (a rounded figure is still invented)", () => {
+    const v = auditRead("Values slipped about 0.3% across the city.", settled);
+    expect(v.some((x) => x.kind === "unanchored-number" && x.match === "0.3")).toBe(true);
+  });
+
+  test("an invented TRAJECTORY is caught — one month is a level, not a direction", () => {
+    expect(
+      auditRead("The market is cooling across the city.", settled).some(
+        (x) => x.kind === "trajectory",
+      ),
+    ).toBe(true);
+  });
+
+  test("a settled sentence restated VERBATIM passes — that is the narrator's whole job", () => {
+    expect(auditRead(sentences.join(" "), settled)).toEqual([]);
+  });
+
+  test("a settled sentence retyped with an ASCII hyphen still passes (a glyph is not a claim)", () => {
+    // Our sentences carry a U+2212 minus. A model that retypes it as an ASCII hyphen has
+    // restated the SAME fact — dropping an honest paragraph over a dash would be the gate
+    // eating true prose.
+    const retyped = "The largest monthly move was ZIP 33993, at -0.39%.";
+    expect(auditRead(retyped, settled)).toEqual([]);
+  });
+});
+
+describe("coverage — the copy never claims 'every ZIP' while we hold fewer", () => {
+  test("a coverage gap is stated as a count: Fort Myers spans 9, the index publishes 8", () => {
+    const eight = Array.from({ length: 8 }, (_, i) => ({
+      zip: `3390${i}`,
+      city: "Fort Myers",
+      value: 200000 + i * 1000,
+      mom: -0.1 - i / 100,
+      period: "2026-04-30",
+    }));
+    const s = settledPulseFacts({
+      place: "Fort Myers",
+      moves: eight,
+      requested: 9,
+      shown: 8,
+      asOf: "04/30/2026",
+    }).map((x) => x.sentence);
+    expect(s).toContain("8 of 9 ZIPs in Fort Myers carry a published home value this month.");
+    expect(s.join(" ")).not.toContain("every ZIP");
+  });
+
+  test("TRUNCATION is stated too — the frame draws 8 bars, so a 12-ZIP place says so", () => {
+    const twelve = Array.from({ length: 12 }, (_, i) => ({
+      zip: `341${String(i).padStart(2, "0")}`,
+      city: "Naples",
+      value: 500000 + i * 1000,
+      mom: -0.1,
+      period: "2026-04-30",
+    }));
+    const s = settledPulseFacts({
+      place: "Naples",
+      moves: twelve,
+      requested: 12,
+      shown: 8,
+      asOf: "04/30/2026",
+    }).map((x) => x.sentence);
+    expect(s).toContain("The chart shows 8 of the 12 ZIPs tracked here, ranked by home value.");
+  });
+
+  test("a single-ZIP subject gets a singular sentence, never 'All 1 ZIPs'", () => {
+    const one = movesForZips(TABLE, ["33993"]);
+    const s = settledPulseFacts({
+      place: "33993",
+      moves: one,
+      requested: 1,
+      shown: 1,
+      asOf: "04/30/2026",
+    });
+    expect(s.map((x) => x.sentence)).toContain("ZIP 33993 moved lower this month, at −0.39%.");
+    expect(s.map((x) => x.sentence).join(" ")).not.toContain("All 1");
+    // And it still composes into a shippable read that passes the gate.
+    expect(auditRead(composePulseRead(s, null), s)).toEqual([]);
+  });
+
+  test("FULL coverage states no coverage sentence — the direction count carries the denominator", () => {
+    const s = settledPulseFacts({
+      place: "Cape Coral",
+      moves: movesForZips(
+        TABLE,
+        CAPE.map(([z]) => z),
+      ),
+      requested: 6,
+      shown: 6,
+      asOf: "04/30/2026",
+    }).map((x) => x.sentence);
+    expect(s.join(" ")).not.toContain("carry a published home value");
+    expect(s).toContain("All 6 ZIPs tracked here moved lower this month.");
   });
 });
 

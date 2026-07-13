@@ -9,9 +9,13 @@ import { test, expect } from "bun:test";
 import {
   BANNED_CONTEXT_PHRASES,
   buildCompsGrid,
+  buildNarratorPrompt,
   buildPriceCase,
   contextViolations,
+  evidenceParagraph,
+  narratorClaims,
 } from "./market-comps";
+import { auditClaims, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import { SEED_DOCS } from "@/lib/email/doc/default-docs";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import type { RenderComp } from "@/lib/assistant/comp-helper";
@@ -143,11 +147,21 @@ test("every stat label fits the schema cap (a 61-char label kills the build)", (
   expect(statsOf(doc).every((c) => c.label.length <= 60 && c.value.length <= 24)).toBe(true);
 });
 
-test("the price-kind mix is stated on the face of the email", () => {
+test("the price-kind mix is stated on the face of the email — cell AND table title", () => {
+  // The registry prompt used to promise "six LIVE comparable listings". The set is not
+  // that: it is recorded sales plus current valuations. The email says so where the rows
+  // are, not just in a stat label a reader can skim past.
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
   const mix = statsOf(doc).find((c) => c.label.startsWith("Comparable homes"));
   expect(mix?.value).toBe("5");
   expect(mix?.label).toBe("Comparable homes (2 recorded sales, 3 valuations)");
+
+  const table = listOf(doc);
+  expect(table?.type === "list" && table.props.title).toBe(
+    "The comparable homes (2 recorded sales, 3 valuations)",
+  );
+  // ...and the word "listings" is never used for this set anywhere in the doc.
+  expect(JSON.stringify(doc)).not.toContain("listings");
 });
 
 test("a valuation is never dressed as a sale in a row", () => {
@@ -303,19 +317,38 @@ test("the verdict's direction word always matches the arithmetic — above, belo
   }
 });
 
-test("position in the set is COUNTED, never characterized as a 'low end of the band'", () => {
+test("position in the set is COUNTED by compareToSet, never characterized as a 'low end'", () => {
   // The second false claim in the same paragraph: "the subject falls at the low end of
-  // that band" when $209 sat BELOW a $210–$266 band entirely. We state counts instead.
+  // that band" when $209 sat BELOW a $210–$266 band entirely. The position sentence is
+  // now authored by claims.ts `compareToSet` — an integer compare, no room for a model.
   const pc = buildPriceCase(SUBJECT, HOMES);
+  // 209 is above 173 and 195 (2 comps); below 210, 231 and 266 (3 comps). Range 173–266.
   expect(pc?.verdict).toContain(
-    "Of the 5 comparable homes, 2 carry a lower price per square foot and 3 carry a higher one.",
+    "The asking price per square foot sits inside the range of the set ($173 to $266), " +
+      "above 2 of 5 and below 3.",
   );
   expect(pc?.verdict).not.toMatch(/low end|high end|band/i);
+  expect(pc?.lowerCount).toBe(2);
+  expect(pc?.higherCount).toBe(3);
 
-  // Below every comp → we say exactly that, not "at the low end".
-  const cheap = buildPriceCase({ ...SUBJECT, price: "$200,000" }, HOMES); // $70/sq ft
+  // Below every comp → compareToSet says exactly that, not "at the low end".
+  // $200,000 / 2,847 = $70. Every comp ($173…$266) is above it.
+  const cheap = buildPriceCase({ ...SUBJECT, price: "$200,000" }, HOMES);
+  expect(cheap?.subjectPpsf).toBe(70);
   expect(cheap?.higherCount).toBe(5);
-  expect(cheap?.verdict).toContain("Every one of the 5 comparable homes carries a higher price");
+  expect(cheap?.verdict).toContain(
+    "The asking price per square foot is below every comparable in the set " +
+      "(which run from $173 to $266).",
+  );
+
+  // Above every comp → the mirror. $800,000 / 2,847 = $281 > $266.
+  const rich = buildPriceCase({ ...SUBJECT, price: "$800,000" }, HOMES);
+  expect(rich?.subjectPpsf).toBe(281);
+  expect(rich?.lowerCount).toBe(5);
+  expect(rich?.verdict).toContain(
+    "The asking price per square foot is above every comparable in the set " +
+      "(which run from $173 to $266).",
+  );
 });
 
 test("a valuation is never counted as a recorded sale in the comparison", () => {
@@ -410,11 +443,161 @@ test("a SOURCED sale date is one token, not three unsourced numbers", () => {
   );
 });
 
-test("clean context passes — the guard costs colour only when the narrator misbehaves", () => {
+test("clean context passes BOTH gates — the guard costs colour only on misbehavior", () => {
+  // Note what is NOT here: any count. The narrator used to write "Two of the five figures
+  // are recorded sales" — a count it did itself. Counts are settled now (settledCount), so
+  // a count in the narrator's own prose is a violation even when it happens to be right.
   const clean =
-    "This is new construction on a 0.26-acre lot, and the ask has already come down by " +
-    "$104,975 from where it started. Two of the five figures are recorded sales; the rest " +
-    "are current valuations, and none of them are adjusted for condition. Happy to walk " +
-    "through the records with you.";
+    "This is new construction on a 0.26 ac lot, and the ask has already come down by " +
+    "$104,975 from the original. The figures here are not adjusted for condition. " +
+    "Happy to walk you through the records.";
   expect(contextViolations(clean, SUBJECT, HOMES, PC)).toEqual([]);
+  expect(auditClaims(clean, narratorClaims(SUBJECT, PC))).toEqual([]);
+});
+
+// ── THE CLAIM GATE — THE STRUCTURAL DONE-CONDITION ───────────────────────────
+//
+// The done-condition is not "a verifier didn't complain" (that recursion never
+// terminates). It is STRUCTURAL and GREPPABLE: THE NARRATOR RECEIVES NO RAW COMP SET.
+// It cannot compare two numbers it was never given two of.
+
+test("THE NARRATOR RECEIVES NO RAW COMP SET — not one comp address, not one comp price", () => {
+  const { system, user } = buildNarratorPrompt(SUBJECT, PC);
+  const everything = `${system}\n${user}`;
+
+  // Not one comparable's ADDRESS reaches the model. (It once wrote "comparable homes on
+  // the same street" about 141 and 143 Coral Dr — because it had been handed them.)
+  for (const c of HOMES) {
+    expect(everything).not.toContain(c.addressLine);
+  }
+  // Not one comparable's PRICE reaches the model — the raw set is what a new comparison
+  // gets drawn over.
+  for (const p of [300000, 385000, 366400, 335437, 680900]) {
+    expect(everything).not.toContain(p.toLocaleString("en-US"));
+  }
+  // Nor one comparable's SQ FT, nor a per-comp $/sq ft that no settled sentence states.
+  // ($231 is 143 Coral Dr's; $173/$195/$210/$266 DO appear — inside settled sentences
+  // that assert the relation over them, which is the sanctioned channel.)
+  for (const s of [1736, 1976, 1744, 1452, 2557]) {
+    expect(everything).not.toContain(s.toLocaleString("en-US"));
+  }
+  expect(everything).not.toContain("$231");
+  // And no per-comp sale DATE — a date it never sees is a date it cannot order.
+  expect(everything).not.toContain("08/29/2025");
+
+  // The signature is the proof, and it is greppable: buildNarratorPrompt(facts, pc).
+  // There is no RenderComp in it. There is no comp array to serialize. THAT is the fix —
+  // the old version passed `compLines` and asked the model, politely, not to compare them.
+  expect(buildNarratorPrompt.length).toBe(2);
+});
+
+test("CLAIM_PROHIBITION is printed into the narrator's system prompt, verbatim", () => {
+  // The model is TOLD the exact rule the lint enforces, so a violation is a refusal to
+  // follow an explicit instruction rather than a surprise.
+  const { system } = buildNarratorPrompt(SUBJECT, PC);
+  expect(system).toContain(CLAIM_PROHIBITION);
+});
+
+test("every fact the narrator gets is a SETTLED SENTENCE — the mix is a settled COUNT", () => {
+  const settled = narratorClaims(SUBJECT, PC);
+  const sentences = settled.map((s) => s.sentence);
+  // The count is computed (settledCount) and PRINTED — never left to the model. 2 + 3 = 5.
+  expect(sentences).toContain(
+    "2 of 5 comparable homes are recorded sales; the rest are current valuations — " +
+      "estimates, not sales.",
+  );
+  expect(sentences).toContain("None of it is adjusted for condition.");
+  // The subject's own record — scalars, each a fact on its own, never a set.
+  expect(sentences).toContain("The asking price is $595,000.");
+  expect(sentences).toContain("The home is new construction, per the listing record.");
+  expect(sentences).toContain(
+    "The asking price has already come down by $104,975 from the original.",
+  );
+  // Every numeral the narrator is allowed to write comes from these sentences and only these.
+  const anchors = new Set(settled.flatMap((s) => s.anchors));
+  for (const n of ["209", "210", "173", "195", "266", "595,000", "104,975", "2,847", "0.26"]) {
+    expect(anchors.has(n)).toBe(true);
+  }
+  // A comp price it never saw is not an anchor — writing it is an invention by definition.
+  expect(anchors.has("366,400")).toBe(false);
+  expect(anchors.has("231")).toBe(false);
+});
+
+test("the code-authored paragraph passes its own gate — zero violations, by construction", () => {
+  // If the paragraph we ALWAYS ship could not clear the lint, the lint would be wrong.
+  expect(auditClaims(evidenceParagraph(PC), narratorClaims(SUBJECT, PC))).toEqual([]);
+});
+
+test("THE MIX IS PRINTED IN CODE, because stating it REQUIRES A COUNT", () => {
+  // Caught live on the first run of this rebuild: handed the mix as a fact and asked what
+  // the evidence IS, the narrator wrote "Four of the six figures… the two recorded sales…".
+  // A word-count of its own — dropped by the gate, taking a TRUE paragraph with it. The
+  // fault was the design: if a fact can only be said as a count, CODE says it.
+  const para = evidenceParagraph(PC);
+  expect(para).toContain(
+    "2 of 5 comparable homes are recorded sales; the rest are current valuations — " +
+      "estimates, not sales.",
+  );
+  expect(para).toContain("None of it is adjusted for condition.");
+  // And the narrator's own word-count is a violation even when it happens to be right.
+  const settled = narratorClaims(SUBJECT, PC);
+  expect(
+    auditClaims("Two of the five homes are recorded sales.", settled).some(
+      (h) => h.kind === "word-count",
+    ),
+  ).toBe(true);
+
+  // An all-sold set never says "the rest are valuations" — there is no rest.
+  const allSold = buildPriceCase(
+    SUBJECT,
+    HOMES.map((c) => ({ ...c, priceKind: "sold" as const })),
+  );
+  expect(evidenceParagraph(allSold!)).toContain("All 5 comparable homes are recorded sales.");
+  expect(evidenceParagraph(allSold!)).not.toContain("the rest");
+
+  // An all-valuation set never implies a sale it does not hold.
+  const allEst = buildPriceCase(
+    SUBJECT,
+    HOMES.map((c) => ({ ...c, priceKind: "estimate" as const })),
+  );
+  expect(evidenceParagraph(allEst!)).toContain(
+    "All 5 comparable homes are current valuations — estimates, not sales.",
+  );
+  expect(evidenceParagraph(allEst!)).not.toMatch(/recorded sale/i);
+});
+
+test("auditClaims CATCHES THE SHIPPED LIE, and every claim shape that made it possible", () => {
+  const settled = narratorClaims(SUBJECT, PC);
+
+  // The exact sentence that shipped. $209 is ABOVE $173 and ABOVE $195.
+  const shipped =
+    "At $209 per square foot, the asking price for 326 Shore Dr sits just below the $213 " +
+    "median — and below the two recorded sales on Shore Dr, which closed at $173 and $195 " +
+    "per square foot.";
+  const hits = auditClaims(shipped, settled);
+  expect(hits.some((h) => h.kind === "comparative")).toBe(true);
+  expect(hits.some((h) => h.kind === "spatial")).toBe(true); // "on Shore Dr"
+  expect(hits.some((h) => h.kind === "unanchored-number" && h.match === "213")).toBe(true);
+
+  // The siblings' falsehoods, in this recipe's own gate. Every one of them is a claim
+  // drawn between correctly-sourced numbers; not one contains an invented number.
+  expect(auditClaims("The gap is widening.", settled).some((h) => h.kind === "trajectory")).toBe(
+    true,
+  );
+  expect(
+    auditClaims("Five of those six homes are sales.", settled).some((h) => h.kind === "word-count"),
+  ).toBe(true);
+  expect(
+    auditClaims("The price was cut before a contract was reached.", settled).some(
+      (h) => h.kind === "sequence",
+    ),
+  ).toBe(true);
+  expect(auditClaims("The seller is motivated.", settled).some((h) => h.kind === "motive")).toBe(
+    true,
+  );
+  expect(
+    auditClaims("The ask is in line with the comps.", settled).some(
+      (h) => h.kind === "comparative",
+    ),
+  ).toBe(true);
 });

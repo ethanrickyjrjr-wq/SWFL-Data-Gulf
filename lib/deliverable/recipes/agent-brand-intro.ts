@@ -44,9 +44,12 @@
 //     home-value TREND — a modelled Zillow index of every home, not live asking prices.
 //     Wrong chart. A hand-built `bar-table` ChartSpec is the precedent
 //     (`buildSoldCompsSpec`). Too few priced ZIPs → drop the slot, never an empty box.
-//  5. PROSE — ONE authored paragraph, and it may only read the CHART'S OWN FIGURES.
-//     We know NOTHING about this agent, so the model writes NOTHING about them: the
-//     personal introduction is an open TEXT slot in the agent's own words.
+//  5. PROSE — ONE authored paragraph, and IT NEVER SEES THE ZIP-BY-ZIP SET. The
+//     relations over that set (the count, the top, the bottom, the spread) are computed
+//     in CODE and handed over as settled English sentences (lib/deliverable/claims.ts).
+//     The narrator cannot compare two ZIPs because it was never given two. We know
+//     NOTHING about this agent, so the model writes NOTHING about them: the personal
+//     introduction is an open TEXT slot in the agent's own words.
 //     (`authorListingNarrative` is house-specific and is deliberately not used here.)
 //  6. FRAMING — headshot + name up front, the farm area's asking-price spread as the
 //     evidence, the agent's newest listing as the anchor, one CTA.
@@ -65,6 +68,13 @@ import {
   chartMagnitudeFromSpec,
 } from "@/lib/deliverable/chart-coherence";
 import { anchorsExactly, extractNumbers, normalizeNumber } from "@/lib/deliverable/narrative-lint";
+import {
+  auditClaims,
+  numeralsIn,
+  settledCount,
+  CLAIM_PROHIBITION,
+  type SettledClaim,
+} from "@/lib/deliverable/claims";
 import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
 import { loadMarketFigures, type MarketFigure } from "@/lib/email/market-context";
 import { resolveSubject, dropEmptyChartSlot } from "./shared";
@@ -82,26 +92,54 @@ const MIN_ZIPS_FOR_CHART = 3;
 // ── The farm area (spine A) ──────────────────────────────────────────────────
 //
 // THE WHOLE POINT OF THIS SECTION: the farm area and the anchor listing live in the
-// SAME string, and they are usually in DIFFERENT CITIES. The crosswalk reads a bare
-// ZIP before a place name, so with the anchor's address left in the text a Cape Coral
-// agent gets a FORT MYERS email — real numbers, wrong place. Every rendered value in
-// this deliverable (chart, hero, CTA, sources, prose) hangs off this one resolution.
+// SAME string, and they are usually in DIFFERENT CITIES. Every rendered value in this
+// deliverable (chart, hero, CTA, sources, prose) hangs off this one resolution — so a
+// wrong resolution is a perfectly-faithful email about the wrong city, and no narrator
+// gate can see it. The prose is TRUE. The SUBJECT is wrong.
 //
-// THE FIRST FIX WAS WRONG AND SHIPPED THE BUG. It cut out the address that
-// `subjectAddressFromPrompt` returns — but that matcher is /(listing|property|home|
-// house)\s+at\s+…/, so it returns NULL for "my newest listing IS 326 Shore Dr, …",
-// for "326 Shore Dr, … is my newest listing", for "Anchor: 326 Shore Dr, …". A guard
-// that only fires when a narrow matcher fires FAILS OPEN, and the failure is silent.
+// ── TWO FIXES BEFORE THIS ONE FAILED OPEN, AND SHIPPED THE BUG ───────────────
 //
-// SO THE ANCHOR IS NEVER TRUSTED TO ANNOUNCE ITSELF. We split the prompt into clauses,
-// mark any clause that OPENS a street address, eat that address's own city/state/ZIP
-// tail, and resolve the farm area ONLY from the clauses that are left. The address
-// detector is structural (a house number + a street suffix, or a house number + a
-// Florida ZIP in the same breath) — "I closed 42 homes" is not an address.
+// FIX 1 cut out the address `subjectAddressFromPrompt` returns. That matcher is
+// /(listing|property|home|house)\s+at\s+…/ — NULL for "my newest listing IS 326 Shore
+// Dr", for "Anchor: 326 Shore Dr". A guard that fires only when a narrow matcher fires
+// is not a guard.
 //
-// AND IT FAILS CLOSED. Over-excision costs us a build (we fall through to the generic
-// author with a LOUD log). Under-excision costs a Cape Coral agent a Fort Myers email.
-// Every ambiguity in here is therefore resolved toward dropping text, never keeping it.
+// FIX 2 (the code this replaces) scrubbed street addresses structurally and then read
+// the farm area from "the clauses that are left". It STILL shipped Fort Myers to a Cape
+// Coral agent. Reproduced end-to-end 07/13/2026:
+//
+//   "I farm Cape Coral with my newest listing at 500 Bayfront in Fort Myers."
+//     → resolveFarmArea() === "Fort Myers"       ← the agent farms CAPE CORAL
+//
+// THREE independent holes, each individually sufficient:
+//   (a) The address detector demanded a street SUFFIX, or "FL", or a 5-digit ZIP.
+//       "500 Bayfront" has NONE of the three. Nothing was excised at all.
+//   (b) The farm cue selected a CLAUSE, and "with" is not a clause boundary — so the
+//       "cued" text still held the anchor's city.
+//   (c) `parseReplyIntent` sorts its needles longest-first. "cape coral" and
+//       "fort myers" are BOTH ten characters. The tie is broken by gazetteer order.
+//       The farm area was decided by a stable sort. That is not a resolution.
+//
+// ── WHY THIS ONE CANNOT FAIL OPEN ───────────────────────────────────────────
+//
+// STOP SCRUBBING THE ANCHOR OUT AND HOPING. Read the farm area from a span the anchor
+// CANNOT OCCUPY. A place name earns the farm role from the CUE THAT INTRODUCES IT, and
+// the two roles read DISJOINT text:
+//
+//   FARM SPAN   — the text after "I farm" / "my farm area is" / "my market is", ending
+//                 at the first HARD STOP. The anchor listing is ALWAYS introduced by its
+//                 own cue ("my newest listing…", "Anchor:") or by punctuation, and every
+//                 one of those IS a hard stop. The anchor's city cannot get in.
+//   ANCHOR SPAN — the text after a listing cue, to the end of that sentence.
+//   NEUTRAL     — everything else, with addresses AND anchor spans removed.
+//
+// And the fallback DEMANDS UNANIMITY. With no farm cue we enumerate EVERY SWFL place
+// left in the neutral text: exactly one → that is the farm area; zero or two-or-more →
+// NULL, LOUDLY. So an under-excision no longer costs a wrong city — it costs an OPEN
+// SLOT that asks which area to feature. Both failure directions now land on honest.
+//
+// The old `splitAnchorFromArea` scrub is KEPT — as the second of two filters, not as
+// the guard. It no longer has to fire for the resolution to hold.
 
 export interface FarmArea {
   place: string;
@@ -250,7 +288,12 @@ export function splitAnchorFromArea(prompt: string): AnchorSplit {
 
 /** The two EXISTING crosswalk roots, composed — no third scan of the gazetteer appears
  *  in the repo. `parseReplyIntent` turns a bare ZIP *or* a place name into an entry;
- *  `zipFromPromptPlace` expands that place into ALL its ZIPs. Never invents a place. */
+ *  `zipFromPromptPlace` expands that place into ALL its ZIPs. Never invents a place.
+ *
+ *  CALL THIS ON A SPAN, NEVER ON THE WHOLE PROMPT. Handed two places it returns ONE,
+ *  and which one is decided by needle length and then by gazetteer order — "cape coral"
+ *  and "fort myers" are both ten characters, and the tie-break shipped the wrong city.
+ *  It is a resolver for text we have already proven holds ONE role. */
 function crosswalkArea(text: string): FarmArea | null {
   const intent = parseReplyIntent(text);
   if (!intent.place) return null;
@@ -258,51 +301,188 @@ function crosswalkArea(text: string): FarmArea | null {
   return spread ? { place: spread.place, zips: spread.zips } : null;
 }
 
-/** The agent SAYING where they farm. The recipe's own seed reads "…for my farm area
- *  [[your city or ZIP]] —", so this cue is the prompt's normal shape; when several
- *  places survive the scrub, the one they CALLED their farm area wins. */
-const FARM_CUE = /\b(?:farm(?:s|ing)?\s+area|farm area|i\s+farm|my\s+(?:area|market|town|city))\b/i;
+/**
+ * EVERY distinct SWFL place named in a span — not the first one, ALL of them.
+ *
+ * This is what makes the fallback fail CLOSED: `crosswalkArea` cannot tell you that a
+ * span is AMBIGUOUS, it just picks. This can, so the caller can refuse.
+ *
+ * Composed from the EXISTING `zipFromPromptPlace` root — a windowed scan over it, not a
+ * third copy of the gazetteer needle table (there are already two; a third is how the
+ * crosswalk drifts).
+ *
+ * ANCHORED, longest-first. Two traps, both real:
+ *   • Longest window first, so "Fort Myers Beach" yields ONE place, not also "Fort Myers".
+ *   • The hit must START at word `i` — proven by re-running the window MINUS its first
+ *     word and requiring the place to change. Without it, "Estero and Fort Myers" reads
+ *     as ["Fort Myers"] alone (the longer needle shadows Estero from index 0) and an
+ *     ESTERO agent gets a unanimous, confident, wrong Fort Myers email.
+ */
+export function placesNamedIn(text: string): string[] {
+  const words = String(text ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
+  const out: string[] = [];
+  for (let i = 0; i < words.length; i++) {
+    for (let n = Math.min(4, words.length - i); n >= 1; n--) {
+      const hit = zipFromPromptPlace(words.slice(i, i + n).join(" "));
+      if (!hit) continue;
+      // Does the same place still match without word `i`? Then it does not START here,
+      // and recording it now would consume — and lose — whatever place DOES start here.
+      const shifted = zipFromPromptPlace(words.slice(i + 1, i + n).join(" "));
+      if (shifted && shifted.place === hit.place) continue;
+      if (!out.includes(hit.place)) out.push(hit.place);
+      break;
+    }
+  }
+  return out;
+}
+
+/** THE AGENT SAYING WHERE THEY FARM. The recipe's own seed is "…for my farm area
+ *  [[your city or ZIP]] —", so this is the prompt's normal shape. A trailing "is"/"in"
+ *  is eaten so the span starts on the place itself. */
+const FARM_CUE =
+  /\b(?:i\s+(?:farm|work|sell)|farm(?:ing)?\s+area|my\s+(?:farm\s+area|farm|area|market|town|city|neighborhood))\b(?:\s+(?:is|in|are))?\s*[:,-]?\s*/i;
+
+/** WHERE THE FARM SPAN ENDS. Everything that could introduce the OTHER spine is here:
+ *  clause punctuation, the em-dash the seed itself uses, and every word that opens a new
+ *  role. "I farm Cape Coral WITH my newest listing at…" — "with" is the whole ballgame.
+ *
+ *  No SWFL place name contains any of these as a WHOLE word (checked against the
+ *  gazetteer: "Fort Myers" is not "for", "Sanibel" is not "and", "Pine Island" is not
+ *  "i"), so a stop word can never truncate a real place. */
+const FARM_SPAN_STOP =
+  /[.,;:!?\n]|—|–|\s+-\s+|\b(?:with|and|but|plus|where|while|when|because|listing|listings|property|properties|home|homes|house|houses|anchor|newest|featuring|including|my|our|we|i)\b/i;
+
+/** THE LISTING CUE. What follows it, to the end of that sentence, is the ANCHOR — its
+ *  street, its city, its ZIP. None of it may ever be read as the farm area. */
+const ANCHOR_CUE = /\b(?:listing|property|home|house|anchor|address)\s*(?:at|is|:)\s*/i;
 
 /**
- * THE FARM AREA. Precedence, and every lane is one the anchor listing cannot reach:
+ * Cut every anchor span — a listing cue and the rest of ITS SENTENCE — out of the text.
  *
- *   1. `zip` — the ZIP door's own scope. A field, not free text. Uncontaminatable.
- *   2. The clauses that carry a farm-area cue, AFTER the address scrub.
- *   3. Every clause that survives the address scrub.
- *   4. NOTHING → null, LOUDLY. If the only SWFL place in the prompt sits inside the
- *      agent's listing address, we do NOT assume they farm where their listing sits —
- *      that is a claim about the AGENT with no source. The build falls through to the
- *      generic author. A silent wrong-city email is worse than no email.
+ * To the END OF THE SENTENCE, deliberately: an address's city, state and ZIP are
+ * COMMA-separated ("326 Shore Dr, Fort Myers, FL 33905"), so a comma cannot end it.
+ *
+ * This is the second of the two filters that keep a listing's city out of the fallback
+ * (the first is the street-address scrub). It catches exactly what that one misses — a
+ * suffix-less street with no state and no ZIP, "500 Bayfront in Fort Myers" — because it
+ * keys on the CUE the agent wrote, not on the shape of the address.
+ *
+ * It NEVER runs before the farm cue is read. "…listing is 326 Shore Dr, Fort Myers, FL
+ * 33905 and I farm Cape Coral" runs to the end of the sentence and would eat the farm
+ * area too — which is exactly why the agent's own DECLARATION is resolved first, off the
+ * untouched prompt, and this only ever guards the fallback.
+ */
+function splitAnchorCues(prompt: string): { rest: string; spans: string[] } {
+  let text = String(prompt ?? "");
+  const spans: string[] = [];
+  const cue = new RegExp(ANCHOR_CUE.source, "i");
+  for (let guard = 0; guard < 8; guard++) {
+    const m = cue.exec(text);
+    if (!m) break;
+    const from = m.index;
+    const after = text.slice(from + m[0].length);
+    const end = after.search(/[.!?\n]|—|–/);
+    spans.push((end === -1 ? after : after.slice(0, end)).trim());
+    text = text.slice(0, from) + " " + (end === -1 ? "" : after.slice(end));
+  }
+  return { rest: text, spans };
+}
+
+export function stripAnchorSpans(prompt: string): string {
+  return splitAnchorCues(prompt).rest;
+}
+
+/**
+ * THE FARM AREA. Four lanes, and NOT ONE of them can be reached by the anchor listing.
+ *
+ *   1. `zip` — the ZIP door's own scope. A FIELD, not free text. Uncontaminatable.
+ *   2. THE DECLARED SPAN — the text after the agent's own farm cue, ending at the first
+ *      hard stop. The anchor is introduced by its own cue or by punctuation, and both
+ *      are hard stops, so no phrasing of the anchor can enter this span.
+ *   3. THE NEUTRAL TEXT, AND ONLY IF IT IS UNANIMOUS — every SWFL place left after the
+ *      street addresses AND the anchor spans are cut. Exactly one → that is the farm
+ *      area. Two or more → we CANNOT TELL, so we do not guess.
+ *   4. NULL, LOUDLY. Zero places, or a genuine conflict. We never infer that an agent
+ *      farms where their listing happens to sit — that is a claim about THEM with no
+ *      source. The caller does NOT refuse the build (RULE 0.7): it ships the deliverable
+ *      with the area slots OPEN and an instruction. A hole is honest. A wrong city is not.
  */
 export function resolveFarmArea(prompt: string, zip?: string): FarmArea | null {
   if (zip) {
     const scoped = crosswalkArea(zip);
     if (scoped) return scoped;
   }
-  const { areaClauses } = splitAnchorFromArea(prompt);
+  const text = String(prompt ?? "");
 
-  const cued = areaClauses.filter((c) => FARM_CUE.test(c));
-  if (cued.length) {
-    const declared = crosswalkArea(cued.join(", "));
+  // LANE 2 — THE DECLARATION. Read off the UNTOUCHED prompt: the agent said it, and no
+  // filter may be allowed to eat it. The span itself is what makes this safe.
+  const cue = FARM_CUE.exec(text);
+  if (cue) {
+    const after = text.slice(cue.index + cue[0].length);
+    const stop = after.search(FARM_SPAN_STOP);
+    const declared = crosswalkArea(stop === -1 ? after : after.slice(0, stop));
     if (declared) return declared;
   }
-  return crosswalkArea(areaClauses.join(", "));
+
+  // LANE 3 — THE NEUTRAL TEXT, AND IT MUST BE UNANIMOUS. Both filters run; neither has
+  // to fire for the other to hold.
+  const { areaClauses } = splitAnchorFromArea(stripAnchorSpans(text));
+  const named = placesNamedIn(areaClauses.join(" , "));
+  if (named.length === 1) {
+    const only = crosswalkArea(named[0]);
+    if (only) return only;
+  }
+  if (named.length > 1) {
+    console.error(
+      `[agent-brand-intro] AMBIGUOUS FARM AREA — the prompt names ${named.join(" and ")} ` +
+        `and no farm cue says which one the agent farms. Refusing to guess; the area slots ` +
+        `stay OPEN. Add "I farm <city or ZIP>" to the build box.`,
+    );
+  }
+  return null;
 }
 
 /**
  * The anchor listing's address — spine B, LANE 2 (the agent's own words).
  *
- * `subjectAddressFromPrompt` is the shared root and the recipe grammar's own matcher,
- * so it goes first. But it only knows "…listing at <ADDRESS>", and an agent writes
- * "my newest listing IS 326 Shore Dr, Fort Myers, FL 33905" — so when it misses we
- * take the address span the farm-area scrub already had to find. Same detector, same
- * span: the text we refuse to read the area from IS the anchor.
+ * THE SAME MACHINERY, READ THE OTHER WAY. Every filter that keeps a listing's city OUT
+ * of the farm area is, by construction, a detector OF the listing — so the anchor is
+ * resolved from exactly the text the farm area refuses to read. The two spines can never
+ * disagree about which words belong to which, because one definition produces both.
+ *
+ * Three lanes, widest-known first:
+ *   1. `subjectAddressFromPrompt` — the shared root and the recipe grammar's own matcher.
+ *      It only knows "…listing AT <ADDRESS>".
+ *   2. The street-address scrub's own span — catches "listing IS 326 Shore Dr, Fort
+ *      Myers, FL 33905" and "Anchor: …", which lane 1 returns null for.
+ *   3. THE ANCHOR SPAN — what follows a listing cue, to the end of its sentence. This is
+ *      the only lane that sees a SUFFIX-LESS street with no state and no ZIP ("500
+ *      Bayfront in Fort Myers"), which is the shape that shipped the bug.
+ *
+ * A span with no digit in it is not an address (an agent writing "my newest listing as
+ * the anchor" has named nothing) → null → an OPEN SLOT. Never a guessed house.
  */
 export function anchorAddressFromPrompt(prompt: string): string | null {
+  const isAddress = (s: string): boolean => /\d/.test(s) && s.trim().length >= 6;
+  // The address is RENDERED (it is the anchor hero's label), so a trailing sentence mark
+  // ships: "500 Bayfront in Fort Myers." was in the rendered email. `subjectAddressFromPrompt`
+  // strips a trailing comma but not a period — trim here rather than reach into a shared file.
+  const clean = (s: string): string =>
+    s
+      .trim()
+      .replace(/^(?:at|in|is|located\s+at)\s+/i, "")
+      .replace(/[.,;\s]+$/, "");
+
   const declared = subjectAddressFromPrompt(prompt);
-  if (declared) return declared;
+  if (declared) return clean(declared);
+
   const cut = splitAnchorFromArea(prompt).addresses[0]?.trim() ?? "";
-  return cut && /\d/.test(cut) && cut.length >= 6 ? cut : null;
+  if (isAddress(cut)) return clean(cut);
+
+  const span = splitAnchorCues(prompt).spans.find(isAddress) ?? "";
+  return span ? clean(span) : null;
 }
 
 // ── The asking-price chart (live listings, per ZIP) ──────────────────────────
@@ -404,22 +584,47 @@ export function buildZipAskingSpec(
 const usd = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
 /**
- * DETERMINISTIC MATH, NARRATIVE PROSE (Brain Factory rule 2). Every figure the narrator
- * may use is computed HERE, in code, from the real lake rows — including the spread,
- * which is the one number it kept deriving on its own. A model-derived difference of two
- * cited numbers is still an UNSOURCED number (our own `lintAuthoredProse` would strip it),
- * so we hand it over instead of letting the model do the arithmetic.
+ * THE CLAIM GATE, WIRED (lib/deliverable/claims.ts).
+ *
+ * THE OLD VERSION OF THIS FUNCTION HANDED THE NARRATOR THE RAW SET — one line per ZIP,
+ * `Median asking price in 33914: $525,000`, six of them. Every figure correctly sourced,
+ * and a model holding six numbers WILL draw a relation between them: "four of the six sit
+ * above $400,000", "the spread is widening", "33991 outpaces its neighbors". Not one of
+ * those contains an invented NUMBER, and every one of them is an invented CLAIM. That is
+ * precisely how market-pulse shipped "five of those six ZIPs" over a set whose true count
+ * was four, and how market-comps inverted a price defense.
+ *
+ * SO THE NARRATOR IS NOT GIVEN THE SET. It is given two sentences that CODE wrote:
+ *
+ *   1. THE COUNT — `settledCount`, integer arithmetic. The exact function market-pulse
+ *      needed. `rows.length` is the ZIPs that actually carry a median asking price;
+ *      `area.zips.length` is every ZIP the city spans. The predicate says only what we
+ *      can prove ("show a median asking price in this chart") — NOT "have homes for sale",
+ *      which would be a claim about the ZIPs we hold nothing for.
+ *   2. THE SPREAD — the top, the bottom and the difference, ordered and subtracted in
+ *      code. The model kept deriving this itself ("a spread of about $180,900"), and
+ *      arithmetic on two cited numbers is still an UNSOURCED number.
+ *
+ * THE PER-ZIP ROWS APPEAR NOWHERE IN THE RETURN VALUE. That is the structural
+ * done-condition and it is greppable: the narrator cannot compare two ZIPs because it was
+ * never handed two. The chart still plots all of them — the chart is drawn by code.
+ *
+ * (No `compareToSet` here: there is no honest SUBJECT to compare against this set. The
+ * anchor listing is, by the whole premise of this recipe, usually in a DIFFERENT CITY, so
+ * pricing it against the farm area's ZIPs would be a comparison across unlike things —
+ * a true sentence about nothing. The gate's job here is to PREVENT a comparison over the
+ * set, not to manufacture one.)
  */
-export function areaReadFacts(area: FarmArea, rows: ZipAsk[]): string[] {
+export function settledAreaClaims(area: FarmArea, rows: ZipAsk[]): SettledClaim[] {
   const hi = rows[0];
   const lo = rows[rows.length - 1];
+  const spread = `Asking prices run from ${usd(lo.medianList)} in ${lo.zip} to ${usd(hi.medianList)} in ${hi.zip}, a spread of ${usd(hi.medianList - lo.medianList)}.`;
   return [
-    `Farm area: ${area.place}, Florida`,
-    `ZIPs with live for-sale listings in this chart: ${rows.length}`,
-    ...rows.map((r) => `Median asking price in ${r.zip}: ${usd(r.medianList)}`),
-    `Highest median asking price: ${usd(hi.medianList)} (${hi.zip})`,
-    `Lowest median asking price: ${usd(lo.medianList)} (${lo.zip})`,
-    `Gap between the highest and lowest ZIP: ${usd(hi.medianList - lo.medianList)}`,
+    settledCount(rows.length, area.zips.length, {
+      noun: `ZIP codes in ${area.place}`,
+      predicate: "show a median asking price in this chart",
+    }),
+    { sentence: spread, anchors: numeralsIn(spread) },
   ];
 }
 
@@ -491,39 +696,68 @@ export function unanchoredQuantities(text: string, facts: string[]): string[] {
   ];
 }
 
+/** Every violation in a draft: the claim gate's shapes, plus the digit/spelled-count
+ *  anchor check. Both fail-closed to the SAME place — an open slot. */
+export function violationsIn(text: string, settled: readonly SettledClaim[]): string[] {
+  return [
+    ...auditClaims(text, settled).map((v) => `${v.kind}: "${v.match}"`),
+    ...unanchoredQuantities(
+      text,
+      settled.map((s) => s.sentence),
+    ).map((q) => `unsourced quantity: "${q}"`),
+  ];
+}
+
 export async function authorAreaRead(area: FarmArea, rows: ZipAsk[]): Promise<string | null> {
   if (rows.length < 2) return null;
-  const facts = areaReadFacts(area, rows);
+  const settled = settledAreaClaims(area, rows);
+  const facts = settled.map((s) => s.sentence);
+
+  // CLAIM_PROHIBITION is printed VERBATIM into the system prompt, so the model is told the
+  // exact rule `auditClaims` enforces — a violation is then a refusal to follow an explicit
+  // instruction, not a surprise. Prompt and lint stay in lockstep by construction.
+  // THE SHAPE IS DICTATED, NOT SUGGESTED. `auditClaims` exempts a sentence only when it is
+  // a settled fact restated (it substring-matches against the settled text) — so a model
+  // that MERGES two settled sentences, or adds a clause to one, or re-words it, produces a
+  // sentence code never authored, and the gate correctly kills the whole paragraph.
+  // Asked to "say them naturally" it re-worded every time and the slot went open on EVERY
+  // build: an honest hole, but a hole. Told to reproduce each fact VERBATIM as its own
+  // sentence and given a worked example, it complies (3/3 live). Constrain the shape and
+  // the model succeeds; leave it open and a fail-closed gate silently eats the deliverable.
   const system =
-    `You write ONE short paragraph — two or three sentences — reading the asking-price ` +
-    `spread across a real-estate agent's farm area. It sits directly under a bar chart of ` +
-    `these exact figures, in an email introducing the agent to their neighbors.\n\n` +
-    `HARD RULES.\n` +
-    `- Every number you write must appear VERBATIM in the FIGURES below — same digits, same ` +
-    `commas. Do NO arithmetic of your own: no averages, no percentages, no differences you ` +
-    `worked out. The gap between the top and bottom ZIP is given to you; use it as written.\n` +
-    `- A COUNT SPELLED IN WORDS IS STILL A NUMBER. Do not write "the four ZIPs in between" ` +
-    `or "six neighborhoods" — that is arithmetic you did. Write counts as the digits given ` +
-    `in the FIGURES, or do not write them.\n` +
+    `You write ONE short paragraph introducing a real-estate agent's farm area to their ` +
+    `neighbors. It sits directly under a bar chart of the asking prices in that area.\n\n` +
+    `${CLAIM_PROHIBITION}\n\n` +
+    `HOW TO WRITE IT. You are given SETTLED FACTS — computed in code from real listing data, ` +
+    `already true. Reproduce each one as its OWN complete sentence, WORD FOR WORD, in the ` +
+    `order given. Do not merge them, do not add a clause to them, do not re-word them: a ` +
+    `re-worded comparison is a NEW comparison, and it will be rejected.\n` +
+    `You may add ONE sentence before them and ONE after. Those sentences must assert NO fact ` +
+    `of any kind — no number, no comparison, no count, no quality of the area.\n\n` +
+    `EXAMPLE of the required shape:\n` +
+    `"Here is what homes are asking across the area right now. <SETTLED FACT 1, VERBATIM> ` +
+    `<SETTLED FACT 2, VERBATIM> These are asking prices on live listings, not what homes ` +
+    `sold for."\n\n` +
+    `ALSO FORBIDDEN HERE.\n` +
     `- You know NOTHING about the agent — not their name, their record, their years in the ` +
     `business, their specialty. Write NOTHING about them.\n` +
-    `- You know nothing about these ZIPs beyond the asking prices below: no neighborhoods, ` +
-    `no canals, no waterfront, no schools, no new construction, no "up-and-coming". A ` +
-    `quality is as much an invention as a number.\n` +
-    `- Never add a selling claim ("a great time to buy", "won't last", "opportunity"). ` +
-    `Describe the spread; do not pitch it.\n` +
-    `- These are ASKING prices on live listings, not sale prices. Say so, and never call ` +
-    `them what homes sold for.\n` +
-    `- No hype, no exclamation marks, no jargon. Plain, confident, specific. ` +
-    `Return ONLY the paragraph.`;
+    `- You know nothing about these ZIPs beyond the settled facts: no neighborhoods, no ` +
+    `canals, no waterfront, no schools, no new construction, no "up-and-coming". A quality ` +
+    `is as much an invention as a number.\n` +
+    `- These are ASKING prices on live listings, not sale prices. Never call them what homes ` +
+    `sold for.\n` +
+    `- No hype, no exclamation marks, no jargon. Plain and specific. Return ONLY the paragraph.`;
   const ask = (extra?: string): string =>
-    `FIGURES:\n${facts.join("\n")}\n\n` + (extra ? `${extra}\n\n` : "") + `Write the paragraph.`;
+    `SETTLED FACTS (reproduce each one verbatim; derive nothing else):\n` +
+    `${facts.map((f) => `- ${f}`).join("\n")}\n\n` +
+    (extra ? `${extra}\n\n` : "") +
+    `Write the paragraph.`;
 
   try {
     const client = getAnthropic("email_build");
-    // ONE retry with the violation NAMED — the same shape the deliverable lint uses
-    // (regenerate once, then hard-strip). The gate never softens: a second failure and
-    // the paragraph is thrown away, slot OPEN. We never keep an unsourced quantity.
+    // ONE retry with the violation NAMED. Then FAIL CLOSED: the paragraph is thrown away
+    // and the slot stays OPEN. Never "best-effort" it — a missing paragraph is honest, a
+    // confident false one is not.
     let retryNote: string | undefined;
     for (let attempt = 0; attempt < 2; attempt++) {
       const msg = await client.messages.create({
@@ -534,18 +768,17 @@ export async function authorAreaRead(area: FarmArea, rows: ZipAsk[]): Promise<st
       });
       const text = msg.content[0]?.type === "text" ? msg.content[0].text.trim() : "";
       if (!text) return null;
-      const unanchored = unanchoredQuantities(text, facts);
-      if (!unanchored.length) return text;
+      const bad = violationsIn(text, settled);
+      if (!bad.length) return text;
       console.log(
-        `[agent-brand-intro] unanchored quantity (attempt ${attempt + 1}):`,
-        unanchored.join(", "),
+        `[agent-brand-intro] CLAIM GATE rejected draft ${attempt + 1}: ${bad.join(" · ")}`,
       );
       retryNote =
-        `YOUR LAST DRAFT WAS REJECTED. It contained ${unanchored.join(", ")}, which is not in ` +
-        `the FIGURES above — you worked it out yourself. Rewrite with ONLY the figures given, ` +
-        `counts included, and spell no number in words.`;
+        `YOUR LAST DRAFT WAS REJECTED. It contained — ${bad.join("; ")} — none of which you ` +
+        `were given. You DREW those yourself, and drawing a conclusion is the one thing you ` +
+        `may not do. Rewrite using ONLY the settled facts, in their own words.`;
     }
-    console.log("[agent-brand-intro] dropped the paragraph — the slot stays OPEN");
+    console.log("[agent-brand-intro] CLAIM GATE: dropped the paragraph — the slot stays OPEN");
     return null;
   } catch {
     return null;
@@ -640,10 +873,18 @@ function at<T extends EmailBlock>(block: T, y: number, h: number, opts?: Partial
 /** A stat cell: sourced → the value; unsourced → an EMPTY cell, which is an editable
  *  open slot on the canvas (its LABEL is the instruction) and does not exist in the
  *  sent email (StatsBlock drops it under `emailRender`, and drops the whole row when
- *  none survive). Never a zero. */
+ *  none survive). Never a zero.
+ *
+ *  THE LABEL IS CLAMPED TO 60 BECAUSE THE SCHEMA IS: `StatItem.label` is
+ *  `z.string().max(60)` (doc/schema.ts:82). A 138-character open-slot instruction failed
+ *  validation, and authorDoc's response to an invalid doc is to DISCARD THE BUILDER AND
+ *  FALL BACK TO THE GENERIC AUTHOR — which resolved the place by scanning the whole
+ *  prompt and shipped a FORT MYERS email to the Cape Coral agent. The open-slot mechanism
+ *  I added to PREVENT the wrong city was, for one build, the thing that CAUSED it (seen in
+ *  the render, 07/13/2026). A cell can no longer break the schema. */
 const cell = (value: string | undefined, label: string): StatItem => ({
   value: value && value.trim() ? value.trim().slice(0, 24) : "",
-  label,
+  label: label.slice(0, 60),
 });
 
 // ── The builder ──────────────────────────────────────────────────────────────
@@ -651,22 +892,22 @@ const cell = (value: string | undefined, label: string): StatItem => ({
 export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<EmailDoc | null> {
   const { prompt, currentDoc, zip } = ctx;
 
-  // SPINE A — THE FARM AREA. Resolved from the clauses no street address can reach
-  // (`resolveFarmArea` → `splitAnchorFromArea`). It never sees the anchor listing, so
-  // there is no phrasing of the anchor that can move it: not "listing at 326 Shore Dr",
-  // not "listing IS 326 Shore Dr", not "326 Shore Dr … is my newest listing".
+  // SPINE A — THE FARM AREA. Read from the agent's own DECLARED SPAN, or from a
+  // UNANIMOUS neutral text. There is no phrasing of the anchor listing that can move it.
+  //
+  // NULL IS A LEGITIMATE, SHIPPABLE OUTCOME — and it must NOT `return null`. Returning
+  // null falls through to the generic author, which resolves a place by scanning the
+  // WHOLE prompt through the same tie-broken crosswalk that caused this bug — so the
+  // wrong-city email would ship anyway, just from a different builder. Instead we build
+  // the deliverable with every area-dependent slot OPEN and an instruction in its label.
+  // Never refuse the build (RULE 0.7); never invent the subject.
   const area = resolveFarmArea(prompt, zip);
   if (!area) {
-    // The prompt names no SWFL place OUTSIDE the anchor's own address. We will not
-    // assume an agent farms where their listing happens to sit — that is a claim about
-    // them with no source, and it is exactly how a Cape Coral agent got a Fort Myers
-    // email. Fall through to the generic author, loudly, rather than guess a city.
     console.error(
-      "[agent-brand-intro] NO FARM AREA — the prompt names no SWFL place outside the " +
-        "anchor listing's address. Refusing to infer the farm area from the listing; " +
-        "falling through to the generic author.",
+      "[agent-brand-intro] NO FARM AREA — the prompt declares no farm area we can trust. " +
+        "Refusing to infer it from the anchor listing's city (that is a claim about the " +
+        "AGENT with no source). Building with the area slots OPEN.",
     );
-    return null;
   }
 
   // SPINE B — THE ANCHOR LISTING, LANE 2: the agent's own words. `ctx.facts` is null for
@@ -682,22 +923,24 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
         .catch(() => null)
     : null;
 
-  // THE CHART — live asking prices per ZIP. A chart is a bonus, never a blocker.
-  const { rows, asOf } = await loadAskingByZip(area.zips);
-  const spec = buildZipAskingSpec(area, rows, asOf);
+  // THE CHART — live asking prices per ZIP. A chart is a bonus, never a blocker. No farm
+  // area → no ZIPs → no chart. We never chart a city the agent did not name.
+  const { rows, asOf } = await loadAskingByZip(area?.zips ?? []);
+  const spec = area ? buildZipAskingSpec(area, rows, asOf) : null;
   const accent = currentDoc.globalStyle.accentColor || "#3DC9C0";
   const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
-  const slug = area.place.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-  const chart = spec
-    ? await chartSpecToEmailImage(
-        spec,
-        accent,
-        `email-charts/zip-asking-${slug}-${asOf}-${tint}.png`,
-      ).catch(() => null)
-    : null;
+  const slug = (area?.place ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const chart =
+    spec && area
+      ? await chartSpecToEmailImage(
+          spec,
+          accent,
+          `email-charts/zip-asking-${slug}-${asOf}-${tint}.png`,
+        ).catch(() => null)
+      : null;
 
   // THE ONE PARAGRAPH — the chart's own figures, nothing else. No chart → no read.
-  const areaRead = chart ? await authorAreaRead(area, rows) : null;
+  const areaRead = chart && area ? await authorAreaRead(area, rows) : null;
 
   const headshot = brandHeadshot(currentDoc);
   const agentName = brandAgentName(currentDoc);
@@ -741,6 +984,8 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
   // 3. The name, up front. The value is the agent's REAL name from the brand or nothing
   //    at all — never a placeholder. With no name the hero is still honest copy (a kicker
   //    and the place); with one it is the 48px display line the recipe asks for.
+  //    NO FARM AREA → NO PLACE LINE. A hero that names a city we could not resolve is the
+  //    exact lie this recipe exists to stop; an empty label simply renders nothing.
   push(
     {
       id: createBlock("hero").id,
@@ -748,7 +993,7 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
       props: {
         kicker: "Meet your agent",
         value: agentName ?? "",
-        label: `${area.place}, Florida`,
+        label: area ? `${area.place}, Florida` : "",
       },
     },
     3,
@@ -765,26 +1010,49 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
 
   // 6. THE CHART — asking prices by ZIP across the farm area. This deliverable IS about
   //    a number, so it earns one. Unresolved → the slot is dropped below, never an empty
-  //    box. (The alt doubles as the canvas instruction on the empty-slot path.)
-  push(
-    chart
-      ? // caption: "" ON PURPOSE. The rasterized chart already draws its own title and
-        // its "SWFL Data Gulf · as of MM/DD/YYYY" provenance line INSIDE the PNG, so the
-        // block caption printed the identical sentence a second time under the image
-        // (seen in the render, 07/13/2026). One citation, one place.
-        chartImageBlock({ url: chart.url, alt: chart.alt, caption: "", linkUrl: siteUrl })
-      : {
-          id: createBlock("image").id,
-          type: "image",
-          props: {
-            url: "",
-            kind: "chart",
-            alt: `Median asking price by ZIP — ${area.place}`,
-            caption: "",
-          },
+  //    box.
+  if (chart) {
+    // caption: "" ON PURPOSE. The rasterized chart already draws its own title and its
+    // "SWFL Data Gulf · as of MM/DD/YYYY" provenance line INSIDE the PNG, so the block
+    // caption printed the identical sentence a second time under the image (seen in the
+    // render, 07/13/2026). One citation, one place.
+    push(chartImageBlock({ url: chart.url, alt: chart.alt, caption: "", linkUrl: siteUrl }), 5);
+  } else if (area) {
+    push(
+      {
+        id: createBlock("image").id,
+        type: "image",
+        props: {
+          url: "",
+          kind: "chart",
+          alt: `Median asking price by ZIP — ${area.place}`,
+          caption: "",
         },
-    5,
-  );
+      },
+      5,
+    );
+  } else {
+    // NO FARM AREA — THE LOUD FAILURE, MADE VISIBLE. A `stats` cell is the one open-slot
+    // mechanism that is PROVABLY both: StatsBlock renders an empty cell's LABEL on the
+    // canvas (the label IS the instruction — playbook Part 4) and returns null for it
+    // under `emailRender`, dropping the whole row when no cell survives. So the agent is
+    // asked which area to feature, and the recipient sees nothing at all.
+    //
+    // Not an empty `image` block: `dropEmptyChartSlot` removes those entirely, and the
+    // question would vanish with them.
+    //
+    // AND THE LABEL MUST FIT IN 60 CHARS (schema.ts:82). Over that, the doc is invalid,
+    // authorDoc throws the builder away, and the GENERIC author ships the wrong-city
+    // email this whole recipe exists to prevent. `cell()` clamps; keep it short anyway.
+    push(
+      {
+        id: createBlock("stats").id,
+        type: "stats",
+        props: { stats: [cell(undefined, 'Which area do you farm? Add "I farm <city or ZIP>"')] },
+      },
+      2,
+    );
+  }
 
   // 7. The one authored paragraph — the chart's figures read back honestly, or an open
   //    slot. Written straight into the block: this grid has TWO text slots, and
@@ -860,25 +1128,32 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
       id: createBlock("sources").id,
       type: "sources",
       props: {
-        sources: chart
-          ? [
-              {
-                label: `Active for-sale listings — median asking price by ZIP, ${area.place}`,
-                url: BASE_URL,
-              },
-            ]
-          : [],
+        sources:
+          chart && area
+            ? [
+                {
+                  label: `Active for-sale listings — median asking price by ZIP, ${area.place}`,
+                  url: BASE_URL,
+                },
+              ]
+            : [],
       },
     },
     2,
   );
 
-  // 10. One CTA.
+  // 10. One CTA. Its label NAMES THE PLACE — so with no farm area it must not name one.
+  //     "See what's for sale in Fort Myers" under a Cape Coral agent's headshot is the
+  //     same lie as the hero. Buttons do not honor `emailRender`, so this one degrades to
+  //     honest copy instead of vanishing.
   push(
     {
       id: createBlock("button").id,
       type: "button",
-      props: { label: `See what's for sale in ${area.place}`, url: siteUrl },
+      props: {
+        label: area ? `See what's for sale in ${area.place}` : "See what's for sale",
+        url: siteUrl,
+      },
     },
     2,
   );
