@@ -287,3 +287,29 @@ test("a block with no held figures gets no READ ONLY annotation (no noise)", () 
   expect(skeleton).toContain("just prose");
   expect(skeleton).not.toContain("READ ONLY");
 });
+
+test("docSkeleton SHOWS a list's rows and a multi-column's cards (stats was the only array it saw)", () => {
+  const skeleton = docSkeleton(
+    docWith([
+      {
+        id: "li1",
+        type: "list",
+        props: { title: "Top ZIPs", items: [{ lead: "33914", text: "525,000 median ask" }] },
+      },
+      {
+        id: "mc1",
+        type: "multi-column",
+        props: {
+          columns: [
+            { heading: "Buyers", body: "more room to negotiate" },
+            { heading: "Sellers", body: "price to the comps" },
+          ],
+        },
+      },
+    ] as unknown as EmailDoc["blocks"]),
+  );
+  expect(skeleton).toContain("33914");
+  expect(skeleton).toContain("525,000 median ask");
+  expect(skeleton).toContain("Buyers");
+  expect(skeleton).toContain("price to the comps");
+});

@@ -376,7 +376,14 @@ export function docSkeleton(doc: EmailDoc): string {
     for (const k of TEXT_KEYS) {
       if (props[k] !== undefined && props[k] !== "") text[k] = props[k];
     }
+    // Array-shaped content. `stats` was the ONLY one the AI could see; a `list`'s
+    // rows and a `multi-column`'s cards serialized as nothing, so the writer was
+    // blind to them too (07/13/2026 audit — same class as the metric-card blindness
+    // below). These ARE writable (they're in BlockContentPatchSchema), so the model
+    // needs to see what's already there to edit rather than clobber it.
     if (b.type === "stats") text.stats = props.stats;
+    if (b.type === "list") text.items = props.items;
+    if (b.type === "multi-column") text.columns = props.columns;
 
     const held: Record<string, unknown> = {};
     for (const k of HELD_FIGURE_KEYS) {

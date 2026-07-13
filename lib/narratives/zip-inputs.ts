@@ -1,5 +1,6 @@
 import { assembleZipReport } from "../zip-report/assemble";
 import { loadParsedBrain } from "../fetch-brain";
+import { isCoreScope } from "@/refinery/lib/core-scope.mts";
 import { selectDossierLines } from "../zip-dossier";
 import { asOfFromToken } from "../project/as-of";
 import type { BakeFact, BakeInputs, SourceRef } from "./types";
@@ -11,11 +12,21 @@ import type { BakeFact, BakeInputs, SourceRef } from "./types";
  * never cite a figure the page doesn't hold.
  */
 
-/** Every ZIP the housing registry ranks — the Phase B bake population. */
+/**
+ * The bake population — CORE SCOPE ONLY (Lee + Collier).
+ *
+ * The housing table carries 94–126 keys: mailing-ZIP and other-metro spillover on
+ * top of the real coverage. Unfiltered, this listed 91 ZIPs and would have PAID a
+ * model to write market narration for Venice/Sarasota (34292, 34293) — places we do
+ * not cover. Every ranked ZIP-grain display surface goes through `isCoreScope`
+ * (spec 2026-07-11-zip-scope-core-design.md); this one was written without it and
+ * silently re-opened the leak. Scope is 57 core ZIPs, and the test below pins it —
+ * a new surface that forgets this gate now turns RED instead of quietly costing money.
+ */
 export async function listZipSurfaceKeys(): Promise<string[]> {
   const housing = await loadParsedBrain("housing-swfl");
   const rows = housing?.output.detail_tables?.find((t) => t.id === "housing_by_zip")?.rows ?? [];
-  return rows.map((r) => r.key).filter((k) => /^\d{5}$/.test(k));
+  return rows.map((r) => r.key).filter((k) => /^\d{5}$/.test(k) && isCoreScope(k));
 }
 
 function stripStatAnnotation(text: string): string {
