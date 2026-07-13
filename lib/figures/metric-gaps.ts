@@ -24,8 +24,10 @@ export interface MetricGap {
   extra_domains: readonly string[];
 }
 
-/** Cape Coral ZIPs absent from the Lee Accela feed (spec, operator-traced 07/03/2026). */
-export const CAPE_CORAL_ZIPS = ["33904", "33909", "33914", "33990", "33991"] as const;
+/** Cape Coral ZIPs absent from the Lee Accela feed (spec, operator-traced 07/03/2026).
+ *  33993 added 07/13/2026 — it was missing from the original trace, so it never got the
+ *  gap slot and one stray county permit ranked it #23 of 23 (the one-permit crowning). */
+export const CAPE_CORAL_ZIPS = ["33904", "33909", "33914", "33990", "33991", "33993"] as const;
 
 export const FIND_METRIC_GAPS: readonly MetricGap[] = [
   {

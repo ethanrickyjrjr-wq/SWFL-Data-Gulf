@@ -81,6 +81,41 @@ describe("rankSignals", () => {
   });
 });
 
+describe("rankSignals — sampleThin guard (the 33993 one-permit crowning, 07/12/2026)", () => {
+  test("a sampleThin candidate at percentile 0 cannot outrank a modest real signal", () => {
+    const ranked = rankSignals([
+      cand({ key: "permits_90d", percentile: 0, rankPos: 23, rankOf: 23, sampleThin: true }),
+      cand({ key: "median_sale_price", percentile: 60, rankPos: 23, rankOf: 57 }),
+    ]);
+    expect(ranked[0].key).toBe("median_sale_price");
+  });
+
+  test("sampleThin zeroes extremity but held movement still counts", () => {
+    const thin = rankSignals([
+      cand({
+        key: "a",
+        percentile: 0,
+        sampleThin: true,
+        movementPct: 10,
+        movementText: "↑ 10% YoY",
+      }),
+    ])[0];
+    const moveOnly = rankSignals([
+      cand({ key: "a", movementPct: 10, movementText: "↑ 10% YoY" }),
+    ])[0];
+    expect(thin.score).toBeCloseTo(moveOnly.score, 10);
+  });
+
+  test("sampleThin still displays: rank/percentile fields pass through untouched", () => {
+    const r = rankSignals([
+      cand({ key: "a", percentile: 0, rankPos: 23, rankOf: 23, sampleThin: true }),
+    ])[0];
+    expect(r.rankPos).toBe(23);
+    expect(r.rankOf).toBe(23);
+    expect(r.percentile).toBe(0);
+  });
+});
+
 describe("rankSignals — footnote passthrough", () => {
   test("an optional footnote on a candidate survives ranking unchanged, and doesn't affect score", () => {
     const withFootnote = rankSignals([

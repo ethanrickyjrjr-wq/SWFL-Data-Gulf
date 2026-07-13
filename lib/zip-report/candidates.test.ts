@@ -174,6 +174,90 @@ describe("buildZipCandidates — permits + gaps", () => {
   });
 });
 
+describe("buildZipCandidates — thin permit counts (the 33993 one-permit crowning, 07/12/2026)", () => {
+  test("city-permitted ZIP with a stray trace count → Find-it gap slot, NOT an n=1 candidate", () => {
+    const { candidates, gaps } = buildZipCandidates(
+      baseInput({
+        zip: "33914",
+        permitsCounts: new Map([
+          ["33914", 1],
+          ["33901", 120],
+        ]),
+      }),
+    );
+    expect(candidates.find((c) => c.key === "permits_90d")).toBeUndefined();
+    expect(gaps.length).toBe(1);
+    expect(gaps[0].coverage.name).toBe("City of Cape Coral permitting");
+  });
+
+  test("33993 is a Cape Coral city-permitting ZIP — zero rows → gap slot, never invisible", () => {
+    const { candidates, gaps } = buildZipCandidates(
+      baseInput({ zip: "33993", permitsCounts: new Map([["33901", 120]]) }),
+    );
+    expect(candidates.find((c) => c.key === "permits_90d")).toBeUndefined();
+    expect(gaps.length).toBe(1);
+    expect(gaps[0].coverage.name).toBe("City of Cape Coral permitting");
+  });
+
+  test("city-permitted ZIP with a real count (city feed landed) competes normally", () => {
+    const { candidates, gaps } = buildZipCandidates(
+      baseInput({
+        zip: "33914",
+        permitsCounts: new Map([
+          ["33914", 80],
+          ["33901", 120],
+        ]),
+      }),
+    );
+    const p = candidates.find((c) => c.key === "permits_90d");
+    expect(p?.covered).toBe(true);
+    expect(p?.sampleThin).toBeFalsy();
+    expect(gaps).toEqual([]);
+  });
+
+  test("non-city ZIP with a tiny count still shows the card but is sampleThin + never lead-eligible", () => {
+    const { candidates } = buildZipCandidates(
+      baseInput({
+        zip: "33901",
+        permitsCounts: new Map([
+          ["33901", 2],
+          ["33903", 40],
+          ["33916", 15],
+        ]),
+      }),
+    );
+    const p = candidates.find((c) => c.key === "permits_90d")!;
+    expect(p.sampleThin).toBe(true);
+    expect(p.leadEligible).toBe(false);
+    expect(p.display).toBe("2");
+  });
+});
+
+describe("buildRegistryCandidates — thinBelow floor on count metrics", () => {
+  test("commercial permits below the floor → sampleThin + not lead-eligible; healthy peer unaffected", () => {
+    const tables = tableMap({
+      "permits-commercial-swfl:commercial_permits_by_zip": {
+        rows: [
+          { key: "33914", cells: { count: 1 } },
+          { key: "33901", cells: { count: 30 } },
+          { key: "34102", cells: { count: 12 } },
+        ],
+        source: { label: "Lee County", url: "https://example.com" },
+      },
+    });
+    const thin = buildRegistryCandidates("33914", tables).candidates.find(
+      (c) => c.key === "commercial_permits",
+    )!;
+    expect(thin.sampleThin).toBe(true);
+    expect(thin.leadEligible).toBe(false);
+    const healthy = buildRegistryCandidates("33901", tables).candidates.find(
+      (c) => c.key === "commercial_permits",
+    )!;
+    expect(healthy.sampleThin).toBeFalsy();
+    expect(healthy.leadEligible).not.toBe(false);
+  });
+});
+
 describe("buildZipCandidates — census", () => {
   test("census value gets percentile from its SWFL distribution", () => {
     const { candidates } = buildZipCandidates(

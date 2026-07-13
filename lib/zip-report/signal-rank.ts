@@ -41,7 +41,20 @@ export interface SignalCandidate {
    * Omitted (undefined) means eligible, same as `true`.
    */
   leadEligible?: boolean;
+  /**
+   * True when the candidate's VALUE is a raw count too small to support a
+   * distinction claim (set by the candidate builder, e.g. a ZIP holding 1
+   * permit at the bottom of a thin feed — the 33993 one-permit crowning,
+   * 07/12/2026). Display fields pass through untouched (the held value and its
+   * rank are real and still render); only the EXTREMITY term is zeroed, so a
+   * trace count can neither top the ranking nor be crowned the lead (builders
+   * set `leadEligible: false` alongside). Held movement still scores.
+   */
+  sampleThin?: boolean;
 }
+
+/** Raw counts below this can't claim distinction — see `sampleThin`. */
+export const THIN_COUNT_FLOOR = 5;
 
 export interface RankedSignal extends SignalCandidate {
   score: number;
@@ -97,7 +110,7 @@ export function rankSignals(candidates: SignalCandidate[]): RankedSignal[] {
   const scored: RankedSignal[] = candidates
     .filter((c) => c.covered)
     .map((c) => {
-      const extremity = c.percentile == null ? 0 : Math.abs(c.percentile - 50) / 50;
+      const extremity = c.sampleThin || c.percentile == null ? 0 : Math.abs(c.percentile - 50) / 50;
       const movement = c.movementPct == null ? 0 : Math.min(Math.abs(c.movementPct) / 20, 1);
       const extremityTerm = 0.6 * extremity;
       const movementTerm = 0.4 * movement;

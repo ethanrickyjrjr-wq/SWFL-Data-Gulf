@@ -6,7 +6,7 @@
 // census ACS covariates + their SWFL distribution. Pure math over held values —
 // percentiles/ranks are computed from held distributions, movement restates held
 // deltas. No invented numbers; an absent metric simply doesn't compete.
-import { percentileOf, type SignalCandidate } from "./signal-rank";
+import { percentileOf, THIN_COUNT_FLOOR, type SignalCandidate } from "./signal-rank";
 import { findGap, type MetricGapCoverage } from "@/lib/figures/metric-gaps";
 // KNOWN-DEBT(data_lake: census_acs_zcta lives in the data_lake schema (typed public only))
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
@@ -114,6 +114,9 @@ export interface ZipMetricSource {
     row: ZipDetailRow,
     v: number,
   ) => { movementPct: number | null; movementText?: string };
+  /** Raw-count metrics only: a value below this renders normally but is
+   *  `sampleThin` — it can't top the ranking or be crowned the lead. */
+  thinBelow?: number;
 }
 
 // Reuses the existing module-private `fmtUsdShort`/`arrow` helpers already defined
@@ -277,6 +280,7 @@ export const ZIP_METRIC_SOURCES: ZipMetricSource[] = [
     label: "Commercial Permits",
     sub: "Issued, current year",
     display: fmtCount,
+    thinBelow: THIN_COUNT_FLOOR,
   },
 
   // ── Collier-only: assessed value + Save-Our-Homes gap ──
@@ -659,6 +663,7 @@ export function buildRegistryCandidates(
     }
 
     rawValueByKey.set(spec.key, v);
+    const thin = spec.thinBelow != null && v < spec.thinBelow;
     candidates.push({
       key: spec.key,
       label: spec.label,
@@ -671,6 +676,7 @@ export function buildRegistryCandidates(
       movementText,
       covered: true,
       source: data.source,
+      ...(thin ? { sampleThin: true, leadEligible: false } : {}),
     });
   }
 
@@ -734,13 +740,22 @@ export function buildZipCandidates(input: CandidateInput): {
   }
 
   // ── Permits — competes only where the Lee Accela feed covers (count > 0).
+  // A city-permitted ZIP (own portal — structurally absent from the Lee feed) with
+  // only a trace count is COVERAGE NOISE, not coverage: one stray county permit must
+  // not flip it from the honest Find-it slot into an n=1 ranking (the 33993
+  // one-permit crowning, 07/12/2026). A real count there (city ingest landed)
+  // competes normally.
   const permitCount = input.permitsCounts.get(input.zip) ?? 0;
-  if (permitCount > 0) {
+  const cityGap = findGap("permits_90d", input.zip);
+  if (permitCount > 0 && !(cityGap && permitCount < THIN_COUNT_FLOOR)) {
     // Core scope (57) only — drop any stray non-core (mailing) ZIP from the Lee Accela ranking.
     const dist = [...input.permitsCounts.entries()]
       .filter(([z, n]) => n > 0 && isCoreScope(z))
       .map(([, n]) => n);
     const pct = percentileOf(dist, permitCount);
+    // A trace count elsewhere still renders (held value, real rank) but can't
+    // claim distinction — see SignalCandidate.sampleThin.
+    const thin = permitCount < THIN_COUNT_FLOOR;
     candidates.push({
       key: "permits_90d",
       label: "New Permits (90 Days)",
@@ -752,17 +767,15 @@ export function buildZipCandidates(input: CandidateInput): {
       movementPct: null,
       covered: true,
       source: input.permitsSource,
+      ...(thin ? { sampleThin: true, leadEligible: false } : {}),
     });
-  } else {
+  } else if (cityGap) {
     // Structurally-absent source → Find-it slot (never an em-dash, never a fake zero).
-    const gap = findGap("permits_90d", input.zip);
-    if (gap) {
-      gaps.push({
-        metric_key: "permits_90d",
-        label: "New Permits (90 Days)",
-        coverage: gap.coverage,
-      });
-    }
+    gaps.push({
+      metric_key: "permits_90d",
+      label: "New Permits (90 Days)",
+      coverage: cityGap.coverage,
+    });
   }
 
   // ── Census — joins the same ranked pool; percentile from the SWFL ACS distribution.
