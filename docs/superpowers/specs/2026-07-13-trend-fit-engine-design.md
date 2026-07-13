@@ -144,13 +144,57 @@ Three conclusions, each load-bearing for the design:
 
 Cross-city, same metric, full-history window, single-family: Lehigh Acres +$1,979/mo (R² 0.887)
 · Cape Coral +$1,931 (0.787) · North Fort Myers +$1,728 (0.776) · Bonita Springs +$3,674 (0.775)
-· Fort Myers +$2,005 (0.745) · Marco Island +$10,267 (0.720) · Estero +$2,836 (0.685) · **Naples
-+$16,201 (0.409)** · **Sanibel +$3,446 (0.334)**.
+· Fort Myers +$2,005 (0.745) · Marco Island +$10,267 (0.720) · Estero +$2,836 (0.685) · Naples
++$16,201 (0.409) · Sanibel +$3,446 (0.334).
 
-Sanibel's 0.334 means **we do not need a hand-curated "exclude Hurricane Ian" window**. The weak
-fit IS the signal: the gate refuses the confident line and the read says "Sanibel does not follow
-a trend line; Ian reset that market in 2022." The mechanism produces the insight instead of us
-curating it.
+### THE PINNED FIXTURES — computed with intervals, not asserted
+
+**An earlier draft of this spec pinned two test expectations it had never computed, and BOTH were
+false.** It claimed "Lehigh Acres → trend intact" and "Sanibel → does not follow a line," inferring
+each from a single full-history R². Computing them refuted both. This is the exact failure the
+playbook names ("a spec that asks for a number no lane holds is an instruction to lie") and it is
+recorded here so the next reader does not repeat it.
+
+Computed 07/13/2026 via `regr_slope` / `regr_r2` / `regr_sxx` / `regr_syy` / `regr_sxy`, with
+`SE(b) = sqrt(((Syy − Sxy²/Sxx)/(n−2))/Sxx)` and a 95% interval. Format: window · n · slope · R² ·
+t · 95% CI.
+
+**Cape Coral, FL → verdict `plateau`, LONG `tight`**
+- full · 132 · +1,931 · 0.787 · t 21.94 · [1755, 2107] — established
+- ex-boom · 108 · **+1,802** · **0.882** · t 28.10 · [1674, 1930] — established (LONG)
+- 5y · 60 · −472 · 0.105 · t −2.61 · [−833, −111] — **established despite R² 0.105**
+- **24m · 24 · −619 · 0.151 · t −1.98 · [−1245, +7] — CONTAINS ZERO → not established** (CURRENT)
+- 12m · 12 · +1,395 · 0.205 · t 1.61 · [−343, +3132] — not established
+
+LONG established up, CURRENT not established → **plateau**. The direction of the recent slope
+(−619) may not be read or narrated at all: its interval crosses zero.
+
+**Lehigh Acres, FL → verdict `reversed`, LONG `tight`**
+- full · 132 · +1,979 · 0.887 · t 31.89 · [1855, 2103] — established
+- ex-boom · 108 · **+1,923** · **0.908** · t 32.33 · [1804, 2042] — established (LONG)
+- 5y · 60 · +740 · 0.213 · t 3.96 · [366, 1113] — established (weak R², real direction)
+- **24m · 24 · −1,844 · 0.843 · t −10.87 · [−2183, −1504] — established, OPPOSITE** (CURRENT)
+- 12m · 12 · −1,977 · 0.694 · t −4.76 · [−2808, −1146] — established
+
+LONG established up, CURRENT established DOWN → **reversed**. A genuine, high-confidence
+inflection: eleven years up, the last two years down hard, and both fits are strong. **This is the
+reversal fixture — the earlier draft called it "intact."**
+
+**Sanibel, FL → verdict `plateau`, LONG `loose`**
+- full · 131 · +3,446 · 0.334 · t 8.05 · [2590, 4302] — established
+- ex-boom · 108 · **+3,055** · **0.423** · t 8.81 · [2361, 3748] — established (LONG)
+- 5y · 59 · −2,384 · 0.041 · t −1.56 · [−5435, +667] — not established
+- **24m · 24 · +317 · 0.000 · t 0.06 · [−9734, +10368] — not established** (CURRENT)
+- 12m · 12 · +13,899 · 0.072 · t 0.88 · [−17557, +45355] — not established
+
+**Sanibel is the `loose` fixture, not the `no-direction` one.** Its long-run direction IS
+statistically solid (+$3,055/mo, CI excludes zero) — it is the *fit* that is loose (R² 0.42), so
+months swing far off the line. "Noisy" and "no direction" are different claims and the earlier
+draft conflated them. Ian is the obvious cause of the scatter; the read may say so ONLY if a
+sourced event is in scope (rules of engagement) — the verdict itself says only `plateau/loose`.
+
+Sanibel's 12m slope (+$13,899/mo, CI ±31,000) is the single best argument for the CI gate: an R²
+bar would reject it for the wrong reason, while the interval says exactly why it is worthless.
 
 ---
 
@@ -200,17 +244,64 @@ and the model writes "on Shore Dr").
 3. The narrator receives the verdict as a SETTLED ENGLISH SENTENCE.
 4. The narrator receives NO window table, NO row list, NO set — nothing it could compare.
 
-The verdict is a deterministic classification over `(longRun, recent)` fits:
+### THE GATE IS THE CONFIDENCE INTERVAL, NOT R² (corrected 07/13/2026 under review)
 
-- long-run strong, recent weak and near-flat → **plateau against a strong long-run climb**
-- long-run strong, recent strong, same sign → **the long-run trend is intact**
-- long-run strong, recent strong, opposite sign → **the trend has reversed**
-- every window weak → **this series does not follow a line** (name a disruption ONLY if a sourced
-  event exists; otherwise say only that it does not fit)
+The first draft gated the direction on R². **That is statistically wrong, and our own data proves
+it.** Cape Coral's 5-year window has R² 0.105 — garbage by any R² bar, so the draft design would
+have discarded it. But its slope is −$472/mo with SE 181, t = −2.61, and a 95% interval of
+**[−833, −111] — which excludes zero.** That slope is real. Lehigh Acres' 5-year window is the
+same story: R² 0.213 (weak) but CI [366, 1113], solidly positive.
 
-Exact thresholds are pinned in the implementation plan and unit-tested against the Cape Coral /
-Sanibel / Lehigh Acres fixtures above. The cross-window insight is real — it is simply **code's
-job, not the model's**. Deterministic math, narrative prose.
+**R² and significance answer different questions.** R² = "how tightly do the points hug the line."
+The t-interval = "is the direction real." A large-n series can have a certain direction and a
+loose fit at the same time — which is exactly what a noisy market looks like.
+
+So there are **two independent outputs**, and conflating them was the bug:
+
+- **GATE — is the direction established?** The 95% CI on the slope excludes zero.
+  `SE(b) = sqrt( (SSE/(n−2)) / Sxx )`, `CI = b ± t*(n−2, 0.975)·SE(b)` (Simple linear regression,
+  standard normality-based interval — crawl4ai, 07/13/2026). **If the CI contains zero, the sign
+  of the slope MAY NOT BE READ AT ALL.** Not by code, not by the narrator.
+- **QUALIFIER — is the fit tight or loose?** R². It never gates; it grades. A `loose` verdict says
+  "the direction holds but individual months swing far off the line."
+
+A real t-table is required (df = n−2). Do not hardcode 1.96 — at n = 12, df = 10, t\* = 2.228.
+
+### The window mapping — NAMED, because it is outcome-determining
+
+The reviewer was right that `(longRun, recent)` was underspecified, and the spec's own numbers show
+the verdict flips depending on the mapping. It is now fixed and defended:
+
+- **LONG = `ex-boom` when available, else `full`.** Ex-boom is the better estimate of the
+  underlying trend precisely because removing the 2021–22 shock *tightens* the fit (Cape Coral
+  R² 0.787 → 0.882; Lehigh 0.887 → 0.908).
+- **CURRENT = `24m`. Fixed.** Not 12m: at n = 12 the interval is so wide it almost never
+  establishes anything (Cape Coral 12m CI spans −343 to +3,132; Sanibel 12m spans ±31,000) — it is
+  mostly noise wearing a slope. Not 5y: five years is not "now," and it still contains the boom
+  tail. 24 monthly points is enough to detect a real move when one exists (Lehigh's 24m clears at
+  t = −10.87) and short enough to mean the present.
+- `5y` / `12m` / `10y` remain in the menu as **context**, never as the verdict's inputs.
+
+### The verdict
+
+Four outcomes, over `(LONG, CURRENT)`, each already CI-gated:
+
+- LONG established · CURRENT **not** established → **`plateau`** ("a strong long-run climb; the
+  last two years do not establish a direction")
+- LONG established · CURRENT established, **same** sign → **`intact`**
+- LONG established · CURRENT established, **opposite** sign → **`reversed`**
+- LONG **not** established → **`no-direction`** (name a disruption ONLY if a sourced event exists;
+  otherwise say only that it does not fit a line)
+
+Plus the R² qualifier on LONG: `tight` (≥ 0.7) or `loose` (< 0.7).
+
+**Note on `no-direction`:** with 130+ monthly points the interval is narrow, so a long-run drift is
+almost always detectable — `no-direction` will be rare on long windows and common on short ones.
+That is correct behavior, not a gap: the CI gate bites hardest exactly where n is small, which is
+where a naive slope lies loudest.
+
+The cross-window insight is real — it is simply **code's job, not the model's**. Deterministic
+math, narrative prose.
 
 ### The trajectory word is CODE OUTPUT, not a model choice
 
@@ -233,6 +324,40 @@ input + a term check on its output; not a banned-word list, which was tried and 
 
 **This gates the READ, not the math.** Phase 1 (`fit-line.ts` + `series-fit.ts` + `trendVerdict`)
 has no model in it and is unblocked.
+
+### THE HEAD-ON COLLISION: today the claim gate KILLS a trend read
+
+This is not a wiring detail. It is the integration.
+
+`auditClaims` already enforces a `trajectory` kind, and `CLAIM_PROHIBITION` already names six
+shapes (`COMPARISON`, `TRAJECTORY`, `COUNT`, `SEQUENCE`, `LOCATION`, `MOTIVE`). There is a live,
+passing test:
+
+```
+expect(gateLetterProse("Prices in Cape Coral are climbing.", s)).toBe("")
+```
+
+**The gate drops that sentence today.** It is precisely the sentence this whole feature exists to
+write. Shipped as-is, a trend read is gated to an empty string on every surface.
+
+The gate is not wrong — it is *correct given its world*. Until now we never computed a fit, so
+**every** trajectory claim WAS an invention (`sphere-weekly`: "the gap is widening," off one level
+and no trend). The gate encodes "a level is not a direction."
+
+**The fit is the LICENSE.** `trendVerdict` is the first thing in the codebase that can legitimately
+establish a direction, so the gate must learn about it:
+
+> A trajectory claim is permitted **only** when a settled `Verdict` is in scope for the series it
+> names AND the claim's direction matches that verdict. Absent a verdict, or contradicting one, it
+> is dropped exactly as today.
+
+**Extend `auditClaims`. Do NOT build a second checker.** (Repo rule: one authority per shared
+concept — extract on copy #2. A parallel trajectory checker is the copy.) Concretely: `auditClaims`
+takes an optional licensing `Verdict[]`; `CLAIM_PROHIBITION` gains the licensing clause so the
+prompt and the lint stay in lockstep — which `claims.test.ts:196` already asserts as a red test.
+
+This also answers "does the narrator introduce a trajectory term absent from the verdict": it
+cannot, because the gate strips any trajectory the verdict does not license, **fail-closed**.
 
 ### Three more, from the playbook rewrite (`ea2e45d3`, 07/13/2026)
 
@@ -270,18 +395,36 @@ send.
 
 ### 1. `lib/charts/fit-line.ts` — the math (pure, no I/O)
 
+**`fitLine` OWNS the x-encoding. Callers never supply x.** A reviewer flagged that the
+"fixture-parity trap" below is a symptom of a weak API: if two callers index time differently they
+get different slopes from identical data, and a warning comment does not prevent that. So the
+signature takes **dates**, and derives x internally as an absolute month index from the series'
+own origin:
+
 ```ts
 export interface Fit {
-  slope: number;          // per x-step (per month for a monthly series)
+  slope: number;             // per MONTH (the unit is owned, not implied)
   intercept: number;
-  r2: number;             // 0..1
+  r2: number;                // 0..1 — the QUALIFIER (tight/loose). Never the gate.
   n: number;
-  from: string;           // MM/DD/YYYY of first fitted point
-  to: string;             // MM/DD/YYYY of last fitted point
-  at(x: number): number;  // the fitted line at any x — NOT last-observed-anchored
+  se: number;                // standard error of the slope
+  ci: [number, number];      // 95% interval, df = n-2, real t-table (NOT 1.96)
+  established: boolean;      // ci excludes zero — THE GATE. Direction unreadable if false.
+  from: string;              // MM/DD/YYYY of the first fitted point
+  to: string;                // MM/DD/YYYY of the last fitted point
+  at(when: Date): number;    // the fitted line — NOT last-observed-anchored
 }
-export function fitLine(points: { x: number; y: number }[]): Fit | null;
+export function fitLine(points: { when: Date; y: number }[]): Fit | null;
 ```
+
+Because x is derived from each point's real date, **the `ex-boom` gap survives automatically** —
+there is no contiguous re-indexing for an implementer to "tidy up," because there is no caller-
+supplied index to tidy. The type system enforces the convention the old comment only asked for.
+
+**Compute R² directly from the residuals. Do NOT call `pearson()`** (`lib/desk/correlation.ts`).
+The identity R² = r² is true, but that function carries `CORRELATION_MIN_ZIPS = 10` while `fitLine`
+uses `MIN_FIT_POINTS = 12` — a series of n = 10 or 11 would pass one guard and fail the other.
+Two gates, one concept, different numbers. Keep them apart.
 
 Absorbs `trailingSlope` (`tier-projection-series.ts`) and **fixes its quirk**: that function
 anchors extrapolation at the *last observed value*, not the fitted line's endpoint. A reusable
@@ -372,26 +515,43 @@ Opened as checks, not built here (RULE 2.4 — no silent deferrals).
 
 ## Testing
 
-### ⚠️ FIXTURE-PARITY TRAP — read before writing `fitLine`
+### ⚠️ FIXTURE-PARITY — x is an ABSOLUTE month index
 
-The fits pinned in this spec were computed in SQL with x as an **absolute month index**:
-`DATE_DIFF('month', DATE '2015-06-01', period_end)`. The TypeScript `fitLine` **must use the same
-encoding** or it will not reproduce these numbers.
+The fits pinned in this spec were computed in SQL with x as an **absolute month index**
+(`DATE_DIFF('month', DATE '2015-06-01', period_end)`). `fitLine` reproduces this because it derives
+x from each point's real date (see §1) rather than accepting a caller-supplied index.
 
-**The `ex-boom` window is the landmine: it has a GAP** (2021–22 is dropped). If an implementer
-"tidies" the code by re-indexing each window to a contiguous `0..n`, the ex-boom slope silently
-diverges from the pinned +$1,802 / R² 0.882 — and the fixture that proves the whole design stops
-reproducing. **The gap must stay in x.** Do not clean this up.
+**The `ex-boom` window is the reason this matters: it has a GAP** (2021–22 dropped). Re-indexing
+each window to a contiguous `0..n` would silently change the ex-boom slope away from the pinned
++$1,802 / R² 0.882. The date-owning signature makes that unrepresentable — but if anyone ever
+"optimizes" `fitLine` to take a raw `x`, this is what breaks and it will break silently.
 
 ### Cases
 
 - `fitLine` unit: known-slope fixtures; `n < 12` → null; zero variance → null; never throws. Assert
   the intercept-based line (the anti-regression test for `trailingSlope`'s last-observed anchor).
+  Assert R² is computed from residuals, not delegated to `pearson()`.
+- **Interval math:** `se`, `ci`, `established` pinned against the computed fixtures. Explicitly
+  assert a **real t-table** (df = n−2; at n = 12, t\* = 2.228 — a hardcoded 1.96 fails this test).
+- **The gate is the CI, not R² — the regression test for this spec's own bug:** Cape Coral 5y has
+  R² 0.105 and MUST come back `established: true` (CI [−833, −111]). An R²-thresholded
+  implementation fails here. Conversely Sanibel 24m (R² 0.000, CI [−9734, +10368]) must be
+  `established: false`.
 - `fitWindows`: thin windows dropped, not drawn. `ex-boom` label always discloses its exclusion.
-- `trendVerdict`: pinned against the **real** fixtures in this spec — Cape Coral → plateau; Sanibel
-  (R² 0.334) → does-not-follow-a-line; Lehigh Acres (R² 0.887) → trend intact.
-- **Claim-gate test (the important one):** the narrator's input contains NO window table and NO row
-  set. Assert structurally, not by string-matching the prose.
+- **`trendVerdict` — pinned against the COMPUTED fixtures above, all three distinct:**
+  Cape Coral → `plateau` / LONG `tight` · Lehigh Acres → `reversed` / LONG `tight` · Sanibel →
+  `plateau` / LONG `loose`. (`no-direction` is not exercised by these three; it needs its own
+  fixture — do not ship the branch untested.)
+- **Claim gate (the important one).** Two halves:
+  1. Structural: the narrator's input contains NO window table and NO row set. Assert on the input,
+     never by string-matching prose.
+  2. Licensing: a trajectory claim with **no** verdict in scope is still dropped (the existing
+     `gateLetterProse("Prices in Cape Coral are climbing.") === ""` test must keep passing
+     unchanged); a trajectory claim **matching** a settled verdict passes; a trajectory claim
+     **contradicting** the verdict is dropped. `CLAIM_PROHIBITION` must name the licensing rule —
+     `claims.test.ts:196` already red-tests prompt/lint lockstep.
+- Layout self-reference: the read contains no "above"/"below"/"as shown" (playbook Part 2, Round 2
+  — the narrator has zero layout knowledge and the gated line may be absent).
 - Coherence: a read whose stated direction contradicts its cited fit is a red test.
 - Renderer parity: the web frame and the email SVG draw the same `{slope, intercept}`.
 - `bunx next build` before any push (never `npx tsc`).
