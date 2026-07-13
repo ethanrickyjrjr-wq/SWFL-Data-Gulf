@@ -38,10 +38,62 @@ const NEEDLES: { needle: string; place: string; zips: string[] }[] = (() => {
  *  must use the full `zips` list — collapsing to `zip` alone silently drops most
  *  of the city (fixed 07/06/2026: the first cut of this file did exactly that).
  *  Never invents a ZIP; a place absent from the sourced crosswalk is undefined. */
+/**
+ * A place-name QUALIFIER. If one of these sits immediately before a matched needle, the
+ * text is naming a DIFFERENT place than the needle — and one this crosswalk does not hold.
+ *
+ * "North Fort Myers" is not Fort Myers. It is a distinct, real community in Lee County
+ * with its own ZIPs. But " fort myers " is a substring of " north fort myers ", so the
+ * matcher below happily returned **Fort Myers** — and the recipe then built a confident,
+ * beautifully-cited email about the WRONG CITY, on the ordinary Lab door. Verified live
+ * on 07/13/2026: "I farm North Fort Myers" → Fort Myers · "East Naples"/"North Naples" →
+ * Naples · "Bonita Beach" → Bonita Springs.
+ *
+ * That is worse than a missing figure. A gap is honest; a confidently wrong city is a lie
+ * the agent will send to their own sphere under their own name.
+ */
+const QUALIFIER_BEFORE =
+  /\b(north|south|east|west|northeast|northwest|southeast|southwest|upper|lower|old|new|greater|downtown|central)$/;
+
+/** A place-noun AFTER a needle means the same thing: "Bonita Beach" is not "Bonita
+ *  Springs", and "Fort Myers Shores" is not "Fort Myers". */
+const SUFFIX_AFTER =
+  /^(beach|shores?|island|isles?|park|gardens?|heights|estates?|village|acres|bay|point|springs|harbou?r)\b/;
+
+/**
+ * Find the first (most specific) known SWFL place named in free text — or REFUSE.
+ *
+ * A place we do not hold must resolve to NOTHING, so the caller leaves an open slot and
+ * asks. It must never silently resolve to a NEIGHBOURING city. "I do not know this place"
+ * is an answer; a wrong city is not.
+ */
 export function zipFromPromptPlace(
   text: string,
 ): { place: string; zip: string; zips: string[] } | undefined {
-  const padded = ` ${normalize(text)} `;
-  const hit = NEEDLES.find((n) => n.needle && padded.includes(` ${n.needle} `));
-  return hit ? { place: hit.place, zip: hit.zips[0], zips: hit.zips } : undefined;
+  const norm = normalize(text);
+  const padded = ` ${norm} `;
+
+  const known = new Set(NEEDLES.map((n) => n.needle));
+
+  for (const n of NEEDLES) {
+    if (!n.needle) continue;
+    const at = padded.indexOf(` ${n.needle} `);
+    if (at < 0) continue;
+
+    // What sits either side of the match, in the ORIGINAL text?
+    const before = padded.slice(0, at).trimEnd(); // words preceding the needle
+    const after = padded.slice(at + n.needle.length + 2).trimStart(); // words following it
+
+    // "north fort myers" — the needle is only PART of the place the text names. Unless the
+    // FULL phrase is itself a needle we hold, we do not know this place.
+    const qualifier = QUALIFIER_BEFORE.exec(before)?.[1];
+    if (qualifier && !known.has(`${qualifier} ${n.needle}`)) return undefined;
+
+    // "bonita beach" — same, on the other side.
+    const suffix = SUFFIX_AFTER.exec(after)?.[1];
+    if (suffix && !known.has(`${n.needle} ${suffix}`)) return undefined;
+
+    return { place: n.place, zip: n.zips[0], zips: n.zips };
+  }
+  return undefined;
 }

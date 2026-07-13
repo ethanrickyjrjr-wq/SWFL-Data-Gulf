@@ -96,6 +96,36 @@ describe("the five falsehoods that actually shipped", () => {
     const v = auditClaims("A $25,000 move on asking says the seller is serious.", []);
     expect(v.some((x) => x.kind === "motive")).toBe(true);
   });
+
+  it("catches a claim about the EMAIL'S OWN LAYOUT — the narrator has never seen it", () => {
+    // price-reduced's narrator wrote "what you see in the grid above" — of a grid it had
+    // never been shown. And the layout MOVES underneath it: the open-slot contract omits an
+    // empty row, a chart gets dropped. "The chart below" then becomes a visible lie in an
+    // email the agent signed.
+    for (const lie of [
+      "The details are in the grid above.",
+      "As you can see below, the market has its own view.",
+      "The chart below tells the rest of the story.",
+      "Full specs are shown above.",
+    ]) {
+      const v = auditClaims(lie, []);
+      expect(
+        v.some((x) => x.kind === "artifact-positional"),
+        `did not catch: ${lie}`,
+      ).toBe(true);
+    }
+  });
+
+  it("does NOT eat an honest settled comparison that happens to contain 'below'", () => {
+    // "priced $104,975 below its original ask" is a legitimate, sourced fact — the cut is
+    // real. A gate that drops honest prose is a gate nobody keeps, and the deliverable
+    // ships with a hole instead of a sentence.
+    const settled = {
+      sentence: "New construction, priced $104,975 below its original ask.",
+      anchors: ["104,975"],
+    };
+    expect(auditClaims(settled.sentence, [settled])).toEqual([]);
+  });
 });
 
 describe("code computes the relation; the narrator only restates it", () => {

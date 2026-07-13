@@ -198,6 +198,36 @@ const SEQUENCE = new RegExp(
   "i",
 );
 
+/**
+ * A claim about THE EMAIL'S OWN LAYOUT.
+ *
+ * The narrator has ZERO LAYOUT KNOWLEDGE — it is handed facts, never a document. So it can
+ * never truthfully assert where something sits, and every such sentence is a guess the
+ * READER can check at a glance.
+ *
+ * Caught live 07/13/2026: price-reduced's narrator wrote "what you see in the grid above",
+ * of a grid it had never seen; agent-launch shipped a positional claim about where a figure
+ * sat. And the layout MOVES underneath it — the open-slot contract omits an empty row, a
+ * chart is dropped — so "the chart below" becomes a lie about an email the agent signed.
+ *
+ * The gate was STRUCTURAL on numbers and DECORATIVE here. Not any more.
+ */
+// LAYOUT nouns only — things that have a POSITION in the document. NOT "price"/"specs":
+// those are CONTENT, and "priced $104,975 below its original ask" is a legitimate settled
+// comparison, not a layout claim. A gate that eats honest prose is a gate nobody keeps.
+const ARTIFACT_NOUN = String.raw`(figures?|charts?|graphs?|tables?|photos?|images?|grids?|notes?|letters?|signatures?|cards?|buttons?|links?|sections?|lists?)`;
+const ARTIFACT_POSITIONAL = new RegExp(
+  [
+    // "the chart below", "the grid above"
+    String.raw`\bthe ${ARTIFACT_NOUN} (above|below|beside|opposite)\b`,
+    // "below, the chart shows…" / "above you'll find the figure"
+    String.raw`\b(above|below|beside|alongside|attached|enclosed)\b[^.!?]{0,25}?\b${ARTIFACT_NOUN}\b`,
+    // "as you can see above", "shown below", "pictured here"
+    String.raw`\b(you can see|as you (can )?see|shown|pictured|listed)\b[^.!?]{0,20}?\b(above|below|here|attached|opposite)\b`,
+  ].join("|"),
+  "i",
+);
+
 /** A SPATIAL relationship. "nearby" is the ONLY location claim the vendor's nearby
  *  endpoint supports. market-comps wrote "on the same street" — and beat a ban on the
  *  WORD "street" by writing "on Shore Dr". So match the SUFFIXES, not the noun. */
@@ -218,6 +248,7 @@ export interface ClaimViolation {
     | "sequence"
     | "spatial"
     | "motive"
+    | "artifact-positional"
     | "unanchored-number";
   match: string;
 }
@@ -257,6 +288,10 @@ export function auditClaims(prose: string, settled: readonly SettledClaim[]): Cl
       ["sequence", SEQUENCE],
       ["spatial", SPATIAL],
       ["motive", MOTIVE],
+      // The narrator has never seen the document. It cannot say where anything sits — and
+      // the layout MOVES under it (an empty row is omitted, a chart is dropped), so a
+      // positional claim becomes a visible lie in an email the agent signed.
+      ["artifact-positional", ARTIFACT_POSITIONAL],
     ];
     for (const [kind, re] of checks) {
       const m = re.exec(s);
