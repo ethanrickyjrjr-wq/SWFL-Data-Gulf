@@ -231,8 +231,7 @@ export function ShowcaseOverlay({
                       Build your own version
                     </p>
                     <p className="mt-1 text-[11px] leading-relaxed text-gray-300">
-                      One click fills the email lab&rsquo;s AI box with this exact prompt, real data
-                      included — you only type your own address in the highlighted spot.
+                      We rebuild this one for you, on real data — you just tell us where.
                     </p>
                     <button
                       type="button"

@@ -1,3 +1,23 @@
+## 2026-07-13 (Opus 4.8 · main) — EMAIL LAB: the popup he demanded ALREADY EXISTED. It was wired to one door out of two.
+
+Operator: "either one i click it just puts words in AI box and i don't even know they are there... JUST POP UP A FUCKING BOX FOR ADDRESS." He was right on every count, and the humiliating part is the fix was already in the repo.
+
+Three findings, all confirmed in code:
+
+1. **DUPLICATE SURFACES.** `CampaignQuickStart` and `ExamplesAccordion` sat back-to-back in the email rail. Both are thin reads over the SAME `SHOWCASES` registry, both wired to the SAME `handleUseRecipe`. The rail showed New Listing / Agent Launch / Newsletter as blurb cards, then showed those exact three showcases again as artwork cards. Two skins, one registry, stacked. Removed the blurb row from the email rail — the example cards carry the artwork, so you SEE it before you start it. (`CampaignQuickStart` still renders on the hub + social cockpit, where no examples list exists.) Supersedes the 07/07 "AI on top, Start a Campaign below it" placement, which is what created the double.
+
+2. **THE CLICK WAS INVISIBLE — and `AddressPopup` already fixed this, for the other door.** `handleUseRecipe` wrote the recipe prompt into the Build textarea at the TOP of a scrolling rail and selected the `[[blank]]` — while the user is scrolled DOWN looking at the cards. Words went into a box that was off-screen. Meanwhile `components/lab-entry/AddressPopup.tsx` has said, in its own header, since the day it was written: *"Replaces the off-screen in-textarea [[blank]] with a centered one-field popup."* It was wired ONLY to the ARRIVAL door (homepage/showcase carry). The in-lab door never got it. Now both doors land on it — ONE ROOT. Extended it to also collect the brand fields the artifact PRINTS (name, brokerage, CAN-SPAM address), so there is one box and one Build instead of build → amber nag → hunt for a form.
+
+3. **"Add my info" opened a panel you couldn't see, and "Brand saved" was a LIE when signed out.** The button ran bare `setShowBrand(true)` — expanding the Brand accordion ~1,500px below the viewport, so the amber box vanished and nothing appeared to happen. The repo already had `pulseBrandPanel` (open + scroll + glow), used correctly in `ProjectWorkspace` and never called here. Every caller now goes through one `openBrandPanel()`. Worse: `saveBrandGlobal` did `void fetch("/api/user/brand", …)` — fire-and-forget. That route 401s with no session, so a signed-out save threw the failure on the floor and the panel still announced "Brand saved" over a save that never happened. The response is now load-bearing, and a 401 opens the email-code form the site already ships (`LoginForm`, `signInWithOtp` + `shouldCreateUser: true` = signup AND signin) — given a new `onSignedIn` it finishes IN PLACE instead of hard-navigating, so the half-built email survives the sign-up and the interrupted save replays.
+
+VERIFIED on a real prod build (`next start`, fingerprinted, chrome-devtools): clicked Agent Launch → popup asked "Area or ZIP" + the three brand fields → typed → Build → *"Built the whole email from one line — 10 blocks laid out on the grid"*, brand landed in the header AND the CAN-SPAM footer, follow-up chip armed. 2 paid author calls burned in verification.
+
+Files: `components/email-lab/EmailLabGridShell.tsx`, `components/lab-entry/AddressPopup.tsx`, `components/landing/LoginModal.tsx`, `app/login/login-form.tsx`, `components/showcase/ShowcaseOverlay.tsx` (its copy still promised the old "fills the AI box… type in the highlighted spot" behavior).
+
+NEW CHECK — `arrival_prefilled_recipe_skips_brand_gate`: an arrival whose recipe has NO `[[blank]]` auto-builds with zero brand check, so it ships unsigned (Company/Tagline placeholders). Found while verifying; the in-lab door now collects brand, the arrival door still doesn't.
+
+---
+
 ## 2026-07-13 (Opus 4.8 · main) — ROOT CAUSE: a pack fix inside its TTL NEVER SHIPS. The 07/10 ZIP-scope fix was dead on arrival for 2 weeks.
 
 Operator: "WE JUST FUCKING FIXED ALL OF THIS." He was right. 07/10's `97c9af60` ("scope all 12 ZIP packs to Lee+Collier core (57)") is real, correct, on main — and never reached a single user. `brainStatus` (refinery/lib/dag.mts) decided freshness from `refined_at` + `ttl_seconds` and NOTHING ELSE, so housing-swfl sat inside its TTL and every daily rebuild since said "fresh — skip". `brains/housing-swfl.md` was last built 06/29 — 11 days BEFORE the fix — and still carried 124 ZIP keys incl. Bradenton (34205), Sarasota (34236), Punta Gorda, Port Charlotte. Every downstream surface read that stale artifact. **A data-age TTL is structurally blind to a code change: every pack fix made inside a TTL window has died this way, silently, forever.**

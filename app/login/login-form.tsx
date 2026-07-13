@@ -21,7 +21,16 @@ type Step = "email" | "code";
  * verify we navigate with a full reload so the server re-reads the freshly
  * written session cookie before rendering the gated route.
  */
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({
+  next,
+  onSignedIn,
+}: {
+  next: string;
+  /** Given → verify does NOT navigate; the caller keeps the page (and its unsaved
+   *  work) and finishes the job in place. Used by the in-lab brand save, which must
+   *  not hard-reload the canvas out from under a half-built email. */
+  onSignedIn?: () => void | Promise<void>;
+}) {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -84,6 +93,14 @@ export function LoginForm({ next }: { next: string }) {
     if (error) {
       setPending(false);
       setErrorMessage("That code is invalid or expired. Request a new one.");
+      return;
+    }
+    // Stay-in-place mode: the session cookie is written, so the caller's next fetch is
+    // authed. No navigation — a hard reload here would discard whatever they were
+    // building on the page that asked us to sign them in.
+    if (onSignedIn) {
+      await onSignedIn();
+      setPending(false);
       return;
     }
     // Hard navigation so the server re-reads the new session cookie. Same-origin

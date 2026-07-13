@@ -7,9 +7,16 @@ import { LoginForm } from "@/app/login/login-form";
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** Given → sign-in finishes in place and hands back here instead of navigating,
+   *  so the caller can complete what the user was actually trying to do. */
+  onSignedIn?: () => void | Promise<void>;
+  /** Say what the sign-in is FOR. A bare "Sign in" over someone's half-built email
+   *  reads as a wall; "Save your brand" reads as the thing they just clicked. */
+  title?: string;
+  blurb?: string;
 }
 
-export function LoginModal({ open, onClose }: Props) {
+export function LoginModal({ open, onClose, onSignedIn, title, blurb }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,12 +61,12 @@ export function LoginModal({ open, onClose }: Props) {
           </svg>
         </button>
         <h2 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
-          Sign in
+          {title ?? "Sign in"}
         </h2>
         <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-          Enter your email. We&rsquo;ll send you a sign-in code.
+          {blurb ?? "Enter your email. We’ll send you a sign-in code."}
         </p>
-        <LoginForm next="/project" />
+        <LoginForm next="/project" onSignedIn={onSignedIn} />
       </div>
     </div>,
     document.body,

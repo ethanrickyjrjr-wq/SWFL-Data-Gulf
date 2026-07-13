@@ -13,7 +13,7 @@
 // brand bridge (applyBrand from lib/email/brand/apply-brand.ts, ONE root), seeds,
 // blocks, photos, save/send/schedule/PDF, undo-redo, plus the grid + author +
 // width presets. Tier differences come from capabilitiesFor(tier), never hardcoded.
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { CHART_TYPE_OPTIONS, type ChartType } from "@/lib/email/reshape-chart-type";
 import { RECIPE_IDS, RECIPE_LABELS } from "@/lib/email/author-recipes";
@@ -69,9 +69,10 @@ const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.Fi
   ssr: false,
 });
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
+import { AddressPopup } from "@/components/lab-entry/AddressPopup";
+import { LoginModal } from "@/components/landing/LoginModal";
 import { registerBrandPanel, pulseBrandPanel } from "@/lib/brand/reveal-brand-panel";
 import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
-import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 import { campaignFollowUpForPrompt, campaignKeyForPrompt } from "@/lib/campaigns";
 import {
   brandGaps,
@@ -318,6 +319,14 @@ export function EmailLabGridShell({
   const [palettes, setPalettes] = useState<BrandPalette[]>([]);
   const [brandSaving, setBrandSaving] = useState(false);
   const [brandSavedMsg, setBrandSavedMsg] = useState<string | null>(null);
+  // Signed-out brand save → the account-creating email-code form, then the save
+  // completes in place. The palettes computed for the interrupted save ride here so
+  // the replay writes exactly what they clicked Save on.
+  const [authOpen, setAuthOpen] = useState(false);
+  const pendingPalettesRef = useRef<BrandPalette[] | null>(null);
+  // The campaign/example start box — non-null while it's asking for the address (and
+  // any brand fields the recipe prints) that the click used to swallow silently.
+  const [startRecipe, setStartRecipe] = useState<ShowcaseRecipe | null>(null);
   const brandPrefillAttempted = useRef(false);
   // Set whenever the Brand panel edits a field (applyBranding); cleared once that
   // change has actually reached projects.branding. The main Save button used to only
@@ -350,14 +359,14 @@ export function EmailLabGridShell({
   // account menu renders) but any future in-grid caller of revealBrandPanel()
   // gets open+scroll+pulse for free (spec 2026-07-05-account-quick-access).
   const brandRevealRef = useRef<HTMLDivElement>(null);
-  useEffect(
-    () =>
-      registerBrandPanel(() => {
-        setShowBrand(true);
-        requestAnimationFrame(() => pulseBrandPanel(brandRevealRef.current));
-      }),
-    [],
-  );
+  // The panel sits below the fold, past Campaigns/Examples/Start-from. Expanding it
+  // without scrolling to it reads as "the button did nothing" — so opening it ALWAYS
+  // travels: open + scroll into view + pulse. Every caller goes through here.
+  const openBrandPanel = useCallback(() => {
+    setShowBrand(true);
+    requestAnimationFrame(() => pulseBrandPanel(brandRevealRef.current));
+  }, []);
+  useEffect(() => registerBrandPanel(openBrandPanel), [openBrandPanel]);
 
   // history helpers (coalesced field edits → meaningful undo frames)
   const editingRef = useRef(false);
@@ -542,30 +551,77 @@ export function EmailLabGridShell({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── "Make this →" (showcase recipe → Build box, blank pre-selected) ─────────
+  // ── "Make this →" / "Start →" (campaign card or example → BUILD) ────────────
+  // Used to seed the Build textarea at the top of the rail and select the [[blank]].
+  // From a card halfway down a scrolling rail that is invisible: the click wrote
+  // words into a box that was off-screen, so it read as doing nothing at all. Now
+  // the click opens a box that ASKS for what the recipe is missing, and then builds.
   function handleUseRecipe(recipe: ShowcaseRecipe) {
     // Capture the campaign second step NOW — the prompt is still the registry's
-    // verbatim seed; after this the user types over the [[blank]].
+    // verbatim seed; after this the [[blank]] gets replaced.
     const follow = campaignFollowUpForPrompt(recipe.prompt);
     setCampaignFollowUp(follow ? { label: follow.label, recipe: follow.recipe } : null);
     setFollowUpArmed(false);
     setCampaignKey(campaignKeyForPrompt(recipe.prompt));
     setPendingRecipe(recipe);
     setRecipeGaps(null);
+    setRecipeHint(null);
     setAiStatus(null);
     setAiMessage(null);
     setAiPrompt(recipe.prompt);
+
+    // Nothing to ask for → don't interrupt. Click, build, done.
+    const needsInput =
+      findPlaceholder(recipe.prompt) !== null || brandGaps(recipe.needs, branding).length > 0;
+    if (!needsInput) {
+      setPendingRecipe(null);
+      void runAuthor(recipe.prompt);
+      return;
+    }
+    setStartRecipe(recipe);
+  }
+
+  /** Which word the popup asks for. The blank's own hint is the only honest signal —
+   *  an area/farm/ZIP recipe must not be asked for a street address. */
+  function startInputKind(recipe: ShowcaseRecipe): "address" | "area" {
+    const hint = findPlaceholder(recipe.prompt)?.hint.toLowerCase() ?? "";
+    return /area|farm|zip|city|neighborhood|market/.test(hint) ? "area" : "address";
+  }
+
+  /** Brand fields the recipe prints that we don't have — minus the headshot, which is
+   *  an upload the Brand panel owns and can't be typed into a popup. */
+  function startGaps(recipe: ShowcaseRecipe): BrandNeed[] {
+    return brandGaps(recipe.needs, branding).filter((g) => g !== "photo_url");
+  }
+
+  /** The one submit out of the popup: bank the brand fields they typed, fill the
+   *  [[blank]], and build — no second trip to the rail, no amber nag afterwards. */
+  function startFromPopup(filled: string, brandPatch: Record<string, string>) {
+    const recipe = startRecipe;
+    if (!recipe) return;
+    setStartRecipe(null);
+
+    if (Object.keys(brandPatch).length > 0) {
+      applyBranding({ ...branding, ...brandPatch });
+      // "Type it once — we'll remember" has to be true. Signed-out this 401s and is
+      // dropped on purpose: the build must NOT be held hostage to a sign-up, and the
+      // Brand panel's Save still offers them the account afterwards.
+      void fetch("/api/user/brand", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(brandPatch),
+      });
+    }
+
     const ph = findPlaceholder(recipe.prompt);
-    setRecipeHint(
-      ph ? `Type ${ph.hint} over the highlighted part, then hit Build the email.` : null,
-    );
-    // Selection after React commits the new value — replaces the [[blank]] as they type.
-    setTimeout(() => {
-      const el = aiBoxRef.current;
-      if (!el) return;
-      el.focus();
-      if (ph) el.setSelectionRange(ph.start, ph.end);
-    }, 0);
+    const prompt =
+      ph && filled
+        ? recipe.prompt.slice(0, ph.start) + filled + recipe.prompt.slice(ph.end)
+        : recipe.prompt;
+    setAiPrompt(prompt);
+    setPendingRecipe(null);
+    setRecipeGaps(null);
+    void runAuthor(prompt);
   }
 
   /** True (and nags + re-selects) while a recipe's [[blank]] is still unfilled. */
@@ -582,15 +638,17 @@ export function EmailLabGridShell({
     return true;
   }
 
+  // Live, not frozen: the nag names what Brand is STILL missing right now. Filling a
+  // field in the Brand panel empties this on its own, so the amber box retires itself
+  // instead of nagging for info you just typed in.
+  const liveGaps = pendingRecipe ? brandGaps(pendingRecipe.needs, branding) : [];
+
   /** Build-button pre-flight: no placeholder garbage, then the brand-gap yes/no. */
   function buildFromPanel() {
     if (placeholderBlocked()) return;
-    if (pendingRecipe) {
-      const gaps = brandGaps(pendingRecipe.needs, branding);
-      if (gaps.length > 0 && recipeGaps === null) {
-        setRecipeGaps(gaps);
-        return;
-      }
+    if (pendingRecipe && liveGaps.length > 0 && recipeGaps === null) {
+      setRecipeGaps(liveGaps);
+      return;
     }
     proceedBuild();
   }
@@ -886,6 +944,22 @@ export function EmailLabGridShell({
     if (brandDirty) await saveBrandToProject();
   }
 
+  /** The account-level write. Was `void fetch(...)` — fire-and-forget, so a signed-out
+   *  401 hit the floor and the panel still announced "Brand saved" over a save that
+   *  never happened. The response is now load-bearing: 401 is a SIGN-UP moment, not a
+   *  failure, and the caller turns it into one. */
+  async function patchUserBrand(
+    nextPalettes: BrandPalette[],
+  ): Promise<"ok" | "unauthorized" | "failed"> {
+    const res = await fetch("/api/user/brand", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...branding, color_palettes: nextPalettes }),
+    });
+    if (res.ok) return "ok";
+    return res.status === 401 ? "unauthorized" : "failed";
+  }
+
   async function saveBrandGlobal(): Promise<boolean> {
     setBrandSaving(true);
     setBrandSavedMsg(null);
@@ -899,15 +973,34 @@ export function EmailLabGridShell({
         ];
         setPalettes(nextPalettes);
       }
-      void fetch("/api/user/brand", {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...branding, color_palettes: nextPalettes }),
-      });
-      const ok = projectId ? await saveBrandToProject() : true;
+      const account = await patchUserBrand(nextPalettes);
+      // No account yet → don't fail, and don't lie. Hold the save, sign them up with
+      // the email-code form we already ship (signInWithOtp shouldCreateUser), and
+      // finish this exact save on the other side. Nothing typed is lost.
+      if (account === "unauthorized") {
+        pendingPalettesRef.current = nextPalettes;
+        setAuthOpen(true);
+        return false;
+      }
+      const ok = account === "ok" && (projectId ? await saveBrandToProject() : true);
       setBrandSavedMsg(ok ? "Brand saved" : "Save failed");
       return ok;
     } finally {
+      setBrandSaving(false);
+    }
+  }
+
+  /** Post-OTP: the session cookie is live and we never left the page, so replay the
+   *  save they clicked before we interrupted them. */
+  async function finishBrandSaveAfterSignIn(): Promise<void> {
+    setAuthOpen(false);
+    setBrandSaving(true);
+    try {
+      const account = await patchUserBrand(pendingPalettesRef.current ?? palettes);
+      const ok = account === "ok" && (projectId ? await saveBrandToProject() : true);
+      setBrandSavedMsg(ok ? "Saved to your account" : "Save failed");
+    } finally {
+      pendingPalettesRef.current = null;
       setBrandSaving(false);
     }
   }
@@ -1518,19 +1611,16 @@ export function EmailLabGridShell({
                   Fill
                 </button>
               </div>
-              {recipeGaps && recipeGaps.length > 0 && (
+              {recipeGaps && liveGaps.length > 0 && (
                 <div className="mt-2.5 rounded-md border border-[#f59e0b]/30 bg-[#f59e0b]/10 px-2.5 py-2">
                   <p className="text-[11px] leading-relaxed text-[#fbbf24]">
-                    This example uses {recipeGaps.map((g) => NEED_LABELS[g]).join(", ")} — Brand
-                    doesn&rsquo;t have {recipeGaps.length === 1 ? "it" : "them"} yet.
+                    This example uses {liveGaps.map((g) => NEED_LABELS[g]).join(", ")} — Brand
+                    doesn&rsquo;t have {liveGaps.length === 1 ? "it" : "them"} yet.
                   </p>
                   <div className="mt-2 flex gap-2">
                     <button
                       type="button"
-                      onClick={() => {
-                        setRecipeGaps(null);
-                        setShowBrand(true);
-                      }}
+                      onClick={openBrandPanel}
                       className="flex-1 rounded-md bg-[#f59e0b] px-2 py-1.5 text-[11px] font-semibold text-[#1a1206] transition-opacity hover:opacity-90"
                     >
                       Add my info
@@ -1554,12 +1644,17 @@ export function EmailLabGridShell({
             </div>
           )}
 
-          {/* ── Start a campaign — seeds the Build box above via handleUseRecipe ── */}
-          {mode === "email" && <CampaignQuickStart surface="email" onUseRecipe={handleUseRecipe} />}
-
-          {/* ── Examples — LEAD, open on first visit (operator ruling 07/03/2026 PM:
-              "lead with what they can do"; supersedes the same-day closed-by-default
-              ruling — examples now ACT via Make-this recipes). ── */}
+          {/* ── Examples — the ONE campaign surface (operator ruling 07/13/2026).
+              CampaignQuickStart used to sit right here too, directly above this: both
+              are thin reads over the SAME SHOWCASES registry, so the email rail showed
+              New Listing / Agent Launch / Newsletter as blurb cards and then showed the
+              exact same three showcases again as example cards, back to back, wired to
+              the same handleUseRecipe. Two skins, one registry, stacked — indefensible.
+              The example cards win: they carry the artwork, so you SEE the thing before
+              you start it. The blurb row is gone from this rail (CampaignQuickStart is
+              still the right component on the hub and the social cockpit, where no
+              examples list renders). Supersedes the 07/07 "Start a Campaign below the
+              AI box" placement, which is what created the double. ── */}
           {mode === "email" && (
             <ExamplesAccordion surface="email" defaultOpen onUseRecipe={handleUseRecipe} />
           )}
@@ -2011,6 +2106,37 @@ export function EmailLabGridShell({
           </button>
         ))}
       </div>
+
+      {/* Click a campaign or an example → the SAME popup the arrival door already used:
+          ask for the address/area (and any brand field the email prints), then BUILD.
+          Replaces the old silent seed of a Build box that was scrolled off-screen. */}
+      {startRecipe && (
+        <AddressPopup
+          inputKind={startInputKind(startRecipe)}
+          initialValue=""
+          gaps={startGaps(startRecipe)}
+          onCancel={() => {
+            setStartRecipe(null);
+            setPendingRecipe(null);
+          }}
+          onBuild={startFromPopup}
+        />
+      )}
+
+      {/* Signed-out "Save to my account" → the same email-code form the site already
+          uses to sign people up. It finishes in place (onSignedIn) rather than
+          navigating, so the email on the canvas survives the sign-up. */}
+      <LoginModal
+        open={authOpen}
+        onClose={() => {
+          setAuthOpen(false);
+          pendingPalettesRef.current = null;
+          setBrandSavedMsg("Not saved — you need an account to keep your brand.");
+        }}
+        onSignedIn={finishBrandSaveAfterSignIn}
+        title="Save your brand"
+        blurb="Enter your email and we’ll send you a code. Your brand saves to your account so you only type it once — your email stays right where it is."
+      />
 
       {sendOpen && sendId && (
         <ContactPickerModal
