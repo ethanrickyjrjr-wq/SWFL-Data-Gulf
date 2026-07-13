@@ -2,6 +2,12 @@
 //
 // R6 · OPEN HOUSE — the acceptance oracle for THE OPEN-SLOT CONTRACT.
 //
+// It wears the CAMPAIGN CHROME (lib/email/lifecycle-chrome.ts), same as its six siblings:
+//   header · RIBBON("Open House") · photo · hero(address over price) · spec strip
+//          · narrative · agent card · CTA(RSVP) · footer
+// The shape is pinned by campaign-coherence.test.ts. What THIS suite pins is the sourcing —
+// and the fact that the two cells this email is ABOUT can never be sourced at all.
+//
 // The date and the time of an open house are in NO vendor feed (all 18 SteadyAPI
 // endpoints checked 07/13/2026). They are a lane-2/lane-4 fact: the agent supplies
 // them. So this recipe is the cleanest test in the fan-out of the one rule that keeps
@@ -135,20 +141,23 @@ describe("THE OPEN-SLOT CONTRACT — the date and time are never invented", () =
     expect(html).not.toMatch(/>\s*0\s*</);
   });
 
-  test("once the agent fills the moment, it ships — and up front", async () => {
+  test("once the agent fills the moment, it ships — and it LEADS the strip", async () => {
     const doc = await build(SHORE_DR);
-    // Simulate the canvas edit: the agent types the date and time into the open cells.
+    // Simulate the canvas edit: the agent types into the open cells. A real edit patches
+    // `stats.<i>.value` — it does NOT replace props — so variant and emphasis survive.
+    const fill: Record<string, string> = {
+      "Open House Date": "Sat, Jul 19",
+      "Open House Time": "1–4 PM",
+    };
     const filled: EmailDoc = {
       ...doc,
       blocks: doc.blocks.map((b) =>
-        b.type === "stats" && b.props.stats.some((s) => s.label === "Open House Date")
+        b.type === "stats"
           ? {
               ...b,
               props: {
-                stats: [
-                  { value: "Sat, Jul 19", label: "Open House Date" },
-                  { value: "1–4 PM", label: "Open House Time" },
-                ],
+                ...b.props,
+                stats: b.props.stats.map((s) => ({ ...s, value: fill[s.label] ?? s.value })),
               },
             }
           : b,
@@ -160,8 +169,14 @@ describe("THE OPEN-SLOT CONTRACT — the date and time are never invented", () =
     // The label now reads as a CAPTION under the value — which is why it was never
     // written as a canvas-only imperative ("Add the date here").
     expect(html).toContain("Open House Date");
-    // Up front: the moment renders BEFORE the asking price.
-    expect(html.indexOf("Sat, Jul 19")).toBeLessThan(html.indexOf("$595,000"));
+
+    // UP FRONT — as far up as the open-slot contract allows. The campaign chrome puts the
+    // ADDRESS over the PRICE in the hero (that is the shape all seven emails share, and
+    // HeroBlock ships any label it carries, so an instruction can never live there). The
+    // moment therefore leads the very next element: the first two cells of the spec strip,
+    // in the accent colour, ahead of the specs and well ahead of the paragraph.
+    expect(html.indexOf("Sat, Jul 19")).toBeLessThan(html.indexOf("2,847"));
+    expect(html.indexOf("1–4 PM")).toBeLessThan(html.indexOf(NARRATIVE));
   });
 });
 
@@ -169,20 +184,61 @@ describe("THE OPEN-SLOT CONTRACT — the date and time are never invented", () =
 describe("the cells — each renders only if sourced", () => {
   test("the specs are the resolved record's own values", async () => {
     const doc = await build(SHORE_DR);
-    expect(labelled(doc, "Asking Price")).toEqual({ value: "$595,000", label: "Asking Price" });
-    expect(labelled(doc, "Beds / Baths")).toEqual({ value: "3 / 3.5", label: "Beds / Baths" });
+    expect(labelled(doc, "Beds")).toEqual({ value: "3", label: "Beds" });
+    expect(labelled(doc, "Baths")).toEqual({ value: "3.5", label: "Baths" });
     expect(labelled(doc, "Sq Ft")).toEqual({ value: "2,847", label: "Sq Ft" });
   });
 
-  test("the hero is the address — never the seed's 'Date, time, and address' label", async () => {
+  test("the strip does NOT argue the price — no $/sq ft, no lot, no type", async () => {
+    // An invitation is not a price announcement. Those three cells are the argument
+    // New Listing and Price Improved make; carrying them here turns a "come see it"
+    // into a valuation, which is also exactly the drift the narrator is forbidden.
     const doc = await build(SHORE_DR);
-    const hero = blockOf(doc, "hero");
-    expect(hero?.type).toBe("hero");
-    if (hero?.type !== "hero") throw new Error("no hero");
-    expect(hero.props.kicker).toBe("You're Invited · Open House");
-    expect(hero.props.value).toBe("326 Shore Dr");
-    expect(hero.props.label).toBe("Fort Myers, FL 33905");
-    // HeroBlock has no emailRender gate: any label it carries SHIPS. So the seed's
+    expect(labelled(doc, "$/Sq Ft")).toBeUndefined();
+    expect(labelled(doc, "Lot")).toBeUndefined();
+    expect(labelled(doc, "Type")).toBeUndefined();
+    // …and the strip carries no derived cell, so it needs no provenance footnote.
+    const strip = doc.blocks.find((b) => b.type === "stats");
+    expect(strip?.type === "stats" && strip.props.footnote).toBeFalsy();
+  });
+
+  test("ONE spec strip — the campaign's hairline row, never a wall of stat grids", async () => {
+    const doc = await build(SHORE_DR);
+    const rows = doc.blocks.filter((b) => b.type === "stats");
+    expect(rows).toHaveLength(1);
+    if (rows[0].type !== "stats") throw new Error("no strip");
+    expect(rows[0].props.variant).toBe("strip");
+    // The moment LEADS it, and it is the cell the eye should land on.
+    expect(rows[0].props.stats.map((s) => s.label)).toEqual([
+      "Open House Date",
+      "Open House Time",
+      "Beds",
+      "Baths",
+      "Sq Ft",
+    ]);
+    expect(rows[0].props.stats[0].emphasis).toBe("primary");
+    expect(rows[0].props.stats[1].emphasis).toBe("primary");
+  });
+
+  test("the campaign chrome: RIBBON('Open House') then the ADDRESS over the PRICE", async () => {
+    const doc = await build(SHORE_DR);
+    const heroes = doc.blocks.filter((b) => b.type === "hero");
+    expect(heroes).toHaveLength(2);
+    if (heroes[0].type !== "hero" || heroes[1].type !== "hero") throw new Error("no heroes");
+
+    // 1. The RIBBON — the one element identical in SHAPE and different in WORD across all
+    //    seven emails. It is what tells a reader which email in the campaign this is.
+    expect(heroes[0].props.ribbon).toBe(true);
+    expect(heroes[0].props.kicker).toBe("Open House");
+
+    // 2. The SUBJECT hero — centred, address over price. Same as every sibling email.
+    expect(heroes[1].props.ribbon).toBeFalsy();
+    expect(heroes[1].props.align).toBe("center");
+    expect(heroes[1].props.order).toBe("label-first");
+    expect(heroes[1].props.value).toBe("$595,000");
+    expect(heroes[1].props.label).toBe("326 Shore Dr, Fort Myers, FL 33905");
+
+    // HeroBlock has no emailRender gate: any label it carries SHIPS. So the seed's old
     // instruction label must never survive into a built doc.
     const html = await renderEmailDocHtml(doc);
     expect(html).not.toContain("Date, time, and address");
@@ -198,10 +254,20 @@ describe("the cells — each renders only if sourced", () => {
     expect(img.props.linkUrl).toBe("https://www.swfldatagulf.com");
   });
 
-  test("a bed count with no bath count re-labels the cell — a label never lies", async () => {
+  test("a bed count with no bath count leaves the BATH cell open — never a lying label", async () => {
+    // This recipe used to jam beds and baths into ONE cell, so a missing bath count made
+    // "3" sit under a "Beds / Baths" label — a lie told by a label, the same class of
+    // failure as a naked one. The campaign strip gives each its own cell, so the gap can
+    // simply BE a gap: an open slot on the canvas, absent from the email.
     const doc = await build({ ...SHORE_DR, baths: undefined });
     expect(labelled(doc, "Beds")).toEqual({ value: "3", label: "Beds" });
+    expect(labelled(doc, "Baths")).toEqual({ value: "", label: "Baths" });
     expect(labelled(doc, "Beds / Baths")).toBeUndefined();
+
+    const html = await renderEmailDocHtml(doc);
+    expect(html).toContain("Beds");
+    expect(html).not.toContain("Baths"); // the unsourced cell does not reach a recipient
+    expect(html).not.toMatch(/>\s*0\s*</);
   });
 
   test("an UNRESOLVED subject still lands the branded grid — as open slots", async () => {
@@ -334,7 +400,11 @@ describe("THE REAL PATH — authorDoc, from the prompt alone, with NO scope", ()
       subject: "326 Shore Dr, Fort Myers, FL 33905",
       resolved: true,
     });
-    expect(labelled(doc, "Asking Price")?.value).toBe("$595,000");
+    // The price is the HERO number (the campaign shape: address over price); the strip
+    // carries the specs, and the moment stays open for the agent.
+    const hero = doc.blocks.filter((b) => b.type === "hero")[1];
+    expect(hero?.type === "hero" && hero.props.value).toBe("$595,000");
+    expect(labelled(doc, "Sq Ft")?.value).toBe("2,847");
     expect(labelled(doc, "Open House Date")?.value).toBe("");
 
     const html = await renderEmailDocHtml(doc);

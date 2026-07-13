@@ -1,30 +1,34 @@
 // lib/deliverable/recipes/price-reduced.ts
 //
 // R7 · PRICE IMPROVED — the same resolved house as New Listing, wearing the hat of
-// a price CUT. Lead with the cut.
+// a price CUT. Now a THIN CHROME CALL.
 //
-// This was an ORPHAN skeleton: `price-reduced` has lived in SEED_DOCS since the
-// template gallery shipped, and no button ever offered it. So the seed card was the
-// only thing a user could reach, and nothing in the product could FILL it. This
-// builder gives it a build path, so the card and the button are one deliverable.
+// ── WHY THIS FILE SHRANK (07/13/2026) ────────────────────────────────────────────
 //
-// The six answers (playbook Part 6):
+// It used to own its own grid: header · hero(LEFT) · stats[2] · photo · stats[3] ·
+// stats[3] · text · CTA · footer — and NO agent card at all. Six sibling recipes each
+// owned a different grid, so a subscriber walking the campaign from Coming Soon to Sold
+// got seven emails that looked like seven different companies. That is not a campaign;
+// it is a pile.
 //
-//   1. SUBJECT — the listing address, from the field OR the prompt. The dispatcher
-//      already resolved it (ctx.facts). We never write a second resolver.
-//   2. SKELETON — the committed `price-reduced` grid in SEED_DOCS. Loaded by key.
-//      Its shape (hero LEFT, price-story stats RIGHT, photo, paragraph, CTA) and its
-//      palette are the skeleton's; the divergences are named in THE SEED REWRITE below.
-//   3. CELLS — the cut · the new price · the previous price · beds · baths · sq ft ·
-//      $/sq ft · lot · type. Each renders only if sourced. Days on Market is NOT a
-//      field our record carries at all, so it is an OPEN SLOT — never a zero.
-//   4. CHART — NONE (declared on the key). Two bars, was and now, is a fact wearing a
-//      chart costume. WRITE THE FACT: it is the kicker, the hero, and one stat cell.
-//      dropEmptyChartSlot enforces the policy in code.
-//   5. PROSE — the vendor record + the agent's pasted description (lane 2), under the
-//      TIGHTEST prohibition list in the fan-out. See THE INVENTION TRAP below.
-//   6. FRAMING — the cut as an accent kicker ABOVE the price, the new price as the
-//      hero, the address under it, one CTA to the listing.
+// The layout now lives in ONE place — `buildLifecycleEmail` (lib/email/lifecycle-chrome.ts):
+//
+//   header · RIBBON · photo · hero(centred: ADDRESS over PRICE) · spec strip
+//          · [middle] · narrative · agent card · CTA · footer
+//
+// What this recipe still owns — and ONLY this:
+//   • the RIBBON WORD ...... "Price Improved"
+//   • the HERO KICKER ...... "Price cut $104,975" — the accent line ABOVE the price,
+//                            smaller (the operator's ruling; see THE TREATMENT below)
+//   • the SPEC CELLS ....... the campaign's six + the PREVIOUS PRICE, the anchor that
+//                            makes the cut checkable
+//   • the MIDDLE ........... NOTHING. No chart (declared on the key): was-and-now is
+//                            two bars, which is a fact wearing a chart costume.
+//   • the CTA .............. "Schedule a Showing" — the NEXT action, never "See the New
+//                            Price" (the email IS the new price)
+//   • the FRAMING .......... the narrator's prohibition list — where the lie would ship
+//
+// It does NOT own the shape, and it does not own the brand. Both are the chrome's.
 //
 // ── THE ARITHMETIC (probed live, 07/13/2026 — get this backwards and we ship a lie
 //    about someone's house) ──────────────────────────────────────────────────────
@@ -41,8 +45,9 @@
 //   `ListingFacts.priceReduction` is ALREADY the formatted string "$104,975" (the
 //   normalizer ran `usd()` in resolve-subject.ts). DO NOT convert it again. We parse
 //   the digits back out ONCE, add, and re-format — the only derivation in this file,
-//   and it is the same class as the reference implementation's $/sqft (a value
-//   computed from two numbers the vendor stated, never back-solved from one).
+//   and it is the same class as the shared strip's $/sqft (a value computed from two
+//   numbers the vendor stated, never back-solved from one). Its provenance is printed
+//   under the strip, where the reader can see it.
 //
 // ── THE INVENTION TRAP: this recipe's narrator is where a lie would actually ship ─
 //
@@ -63,7 +68,8 @@
 //   new price means": you can now buy THIS house — with its real, cited features — at
 //   this price. So the paragraph describes the HOUSE. The numbers stay in the grid.
 
-import { seedById, createBlock, DEFAULT_GLOBAL_STYLE } from "@/lib/email/doc/default-docs";
+import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
+import { listingSpecs, spec, specFootnote } from "@/lib/email/listing-flyer";
 import {
   authorListingNarrative,
   clearNarrativeSlots,
@@ -72,38 +78,7 @@ import {
 } from "./shared";
 import type { RecipeBuildContext } from "./index";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
-import type { BlockLayout, EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
-
-/** The committed grid this recipe fills. Declared on the key (recipes.ts); the
- *  constant is only the fallback if the registry entry is ever unassigned. */
-const SEED_ID = "price-reduced";
-
-/** Reuse the current canvas doc's block of a type — the agent's brand (header, the
- *  CAN-SPAM footer) is STICKY and we never author one. Falls back to the skeleton's. */
-function stick(current: EmailDoc, seed: EmailDoc, type: EmailBlock["type"]): EmailBlock {
-  return (
-    current.blocks.find((b) => b.type === type) ??
-    seed.blocks.find((b) => b.type === type) ??
-    createBlock(type)
-  );
-}
-
-/** The seed's own block of a type (palette, kicker, labels — the skeleton's authority). */
-function seedBlockOf(seed: EmailDoc, type: EmailBlock["type"]): EmailBlock | undefined {
-  return seed.blocks.find((b) => b.type === type);
-}
-
-/** Position a block on the 12-col grid. */
-function at<T extends EmailBlock>(block: T, layout: BlockLayout): T {
-  return { ...block, layout };
-}
-
-/** "2847" → "2,847". Undefined in → undefined (an open slot, never a fabricated 0). */
-function withCommas(n?: string): string | undefined {
-  const digits = (n ?? "").replace(/[^\d]/g, "");
-  if (!digits) return undefined;
-  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
+import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 
 /** The digits of a money string → a number. "$104,975" → 104975. Anything that isn't
  *  a positive finite number → undefined, and every cell that depended on it becomes
@@ -137,50 +112,22 @@ export function previousPrice(facts: ListingFacts): string | undefined {
  * THE OPERATOR'S TREATMENT, verbatim (07/13/2026): "SHOW THE REDUCED AMOUNT IN A
  * DIFFERENT COLOR ABOVE PRICE IN SMALLER FONT — Price cut."
  *
- * The hero KICKER is exactly that slot, and it already has exactly that styling —
- * HeroBlock.tsx renders it directly above `value` at fontSize 11px (the value is
- * 40px) in `globalStyle.accentColor` (the price renders in the text color). So the
- * treatment is the document model's own, not a new component and not an inline hack:
+ * The chrome's `heroKicker` is exactly that slot, and it already has exactly that
+ * styling — HeroBlock renders a non-ribbon kicker at 11px, in `globalStyle.accentColor`,
+ * above the hero's own lines. The chrome's hero is centred and label-first, so the
+ * campaign's subject block reads:
  *
- *     PRICE CUT $104,975     ← 11px, accent (#E05A00 on this skeleton)
- *     $595,000               ← 40px, text color
- *     326 Shore Dr, Fort Myers, FL 33905
+ *     PRICE CUT $104,975                  ← 11px, accent
+ *     326 Shore Dr, Fort Myers, FL 33905  ← 27px display serif
+ *     $595,000                            ← 48px accent
  *
- * No cut → EMPTY kicker, and HeroBlock drops a falsy kicker on the sendable path
- * (`props.kicker || scope`), so a house with no reduction never ships the words
- * "Price cut" over nothing.
+ * So the treatment is the document model's own, not a new component and not an inline
+ * hack. No cut → an EMPTY kicker, and the chrome omits a falsy kicker entirely, so a
+ * house with no reduction never ships the words "Price cut" over nothing.
  */
 export function priceCutKicker(facts: ListingFacts): string {
   if (!facts.isPriceReduced || !facts.priceReduction) return "";
   return `Price cut ${facts.priceReduction}`;
-}
-
-/** List price ÷ listed square footage → "$209". Both must parse; anything missing →
- *  undefined (an open slot, never a fabricated value). This is the NEW price per
- *  square foot — which is the whole point of showing it on a price-cut email. */
-function pricePerSqft(facts: ListingFacts): string | undefined {
-  const p = money(facts.price);
-  const s = money(facts.sqft);
-  if (p === undefined || s === undefined) return undefined;
-  return usd(p / s);
-}
-
-/** A short, cell-sized property-type label (the stat cell caps at 24 chars). */
-function shortType(t?: string): string | undefined {
-  if (!t) return undefined;
-  const seg =
-    t
-      .split(/\s[-–—]\s/)
-      .pop()
-      ?.trim() || t.trim();
-  return seg.slice(0, 24) || undefined;
-}
-
-/** A stat cell. An unsourced value stays EMPTY — on the canvas that is an editable
- *  open slot whose LABEL is the instruction; on the sendable paths StatsBlock drops
- *  the cell, and drops the whole row when none survive. Never a zero. */
-function cell(value: string | undefined, label: string): StatItem {
-  return { value: value && value.trim() ? value.trim().slice(0, 24) : "", label };
 }
 
 /** The address, composed from the record's STRUCTURED fields.
@@ -189,7 +136,12 @@ function cell(value: string | undefined, label: string): StatItem {
  *  a stray comma before the ZIP (seen live 07/13/2026). city/state/zip are the same
  *  record's own fields and compose cleanly. The raw address is the fallback for a
  *  subject the vendor never matched (the typed address is all we have, and it is
- *  still real). Nothing here is invented — only re-punctuated. */
+ *  still real). Nothing here is invented — only re-punctuated.
+ *
+ *  ⚠️ REPORTED, NOT FIXED: `addressLineOf` in lib/email/listing-flyer.ts (the shared
+ *  root every lifecycle recipe reads) returns `facts.address` RAW, so the rest of the
+ *  campaign still ships the stray comma. This helper should be lifted into that root —
+ *  one authority per shared concept — but that file is not mine to edit. */
 function addressLine(facts: ListingFacts): string {
   const full = (facts.address ?? "").trim();
   const comma = full.indexOf(",");
@@ -201,201 +153,117 @@ function addressLine(facts: ListingFacts): string {
   return locality ? `${street}, ${locality}` : full;
 }
 
+/**
+ * THE SPEC STRIP — the campaign's shared spec line, with the PREVIOUS PRICE in front
+ * and TYPE dropped to make room.
+ *
+ * `listingSpecs` is the line every lifecycle email wears (Beds · Baths · Sq Ft · Lot ·
+ * $/Sq Ft · Type), so this strip stays a true sibling of New Listing's — same order,
+ * same emphasis grammar: ONE primary ($/Sq Ft, the number that wins a listing argument)
+ * and ONE muted.
+ *
+ * What this email adds is the ANCHOR: the previous price, the cell that makes the cut
+ * CHECKABLE (previous − cut = current, and a reader can do it in their head). It is
+ * `muted` deliberately — it is the number that has been SUPERSEDED, and it must never
+ * out-shout the price the reader can actually pay (the 48px accent hero).
+ *
+ * ⚠️ SOMETHING HAD TO GO, AND THE REASON IS NOT AESTHETIC. `EmailDocSchema` caps a stats
+ * row at SIX cells. A seventh does not merely crowd the strip — it FAILS VALIDATION, and
+ * build-doc then falls through to the GENERIC AUTHOR. Caught only by building through the
+ * real `authorDoc` path (07/13/2026): the fallback email it produced wrote *"one of the
+ * sharpest values on the waterfront today"* and *"Fort Myers values have pulled back from
+ * their 2023 peak"* — the exact market inventions this recipe's framing exists to forbid.
+ * A cell count is a NO-INVENTION CONCERN here, not a layout preference. The doc-parses
+ * test below is the guard.
+ *
+ * TYPE is the cell that goes. It is the muted context cell in every listing strip, and on
+ * an email whose entire subject is A NUMBER THAT MOVED, "Residential" is the one cell a
+ * reader will never use. The anchor takes its slot.
+ *
+ * "Days on Market" — the old grid's second cell — is also gone. We hold no such field:
+ * not "the vendor returned null", but "we never modeled it". A permanently-empty ghost in
+ * a hairline strip is dead weight on every canvas and absent from every sent email. A cell
+ * no lane can ever fill is not an open slot; it is clutter.
+ */
+function priceStrip(facts: ListingFacts, previous?: string): StatItem[] {
+  return [
+    spec(previous, "Previous Price", "muted"),
+    ...listingSpecs(facts).filter((c) => c.label !== "Type"),
+  ];
+}
+
+/** Provenance for the strip's DERIVED cells, stated where the reader can see it. The
+ *  $/sqft note is the campaign's shared sentence (`specFootnote`); the previous-price
+ *  note is this recipe's, because this recipe is the only one that derives it. */
+function priceStripFootnote(facts: ListingFacts, previous?: string): string | undefined {
+  const notes = [specFootnote(facts)];
+  if (previous) notes.push("Previous price = this asking price plus the reduction on record.");
+  const kept = notes.filter((n): n is string => Boolean(n));
+  if (kept.length === 0) return undefined;
+  const line = kept.join(" ");
+  return line.startsWith("*") ? line : `*${line}`;
+}
+
 export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailDoc | null> {
-  const { facts, currentDoc, recipe } = ctx;
+  const { facts, currentDoc } = ctx;
   // No subject → there is no price to have improved. Fall through to the generic
   // author rather than announcing a cut on a house that doesn't exist.
   if (!facts) return null;
 
-  const seed = seedById(recipe.skeleton ?? SEED_ID)?.build();
-  if (!seed) return null; // a skeleton that vanished degrades; it never throws
-
-  // Brand-or-skeleton: a real user brand carries through untouched; only a canvas
-  // still on the house default adopts the skeleton's price-cut palette.
-  const brandIsHouse = currentDoc.globalStyle.accentColor === DEFAULT_GLOBAL_STYLE.accentColor;
-  const globalStyle = brandIsHouse ? { ...seed.globalStyle } : { ...currentDoc.globalStyle };
-
   // ── THE THREE NUMBERS. Each appears exactly ONCE, and they check each other:
   //    previous − cut = current. A reader can do the arithmetic and it holds.
-  const kicker = priceCutKicker(facts); // "Price cut $104,975" — vendor's reduced_amount
+  const kicker = priceCutKicker(facts); // "Price cut $104,975" — the vendor's reduced_amount
   const previous = previousPrice(facts); // "$699,975"          — current + cut
   const photo = facts.photos[0];
 
-  const blocks: EmailBlock[] = [];
+  // THE ONE LAYOUT. Brand (globalStyle, header, agent card, footer) is STICKY and lifted
+  // from the canvas — we never author a user's colours or their signature.
+  let doc = buildLifecycleEmail(currentDoc, {
+    ribbon: "Price Improved",
 
-  // 1. Header — the agent's branded header, sticky.
-  blocks.push(at(stick(currentDoc, seed, "header"), { x: 0, y: 0, w: 12, h: 2 }));
+    // The real listing photo, already mirrored into OUR storage by the resolver (a
+    // re-send months from now must not depend on the vendor CDN). Unsourced → `null`,
+    // and the chrome lays down a dropzone the agent fills; the sent email omits it.
+    photo: photo
+      ? { url: photo, alt: facts.address ?? "Featured property", linkUrl: facts.sourceUrl }
+      : null,
 
-  // 2. THE HERO — the operator's treatment. The cut sits ABOVE the price, smaller and
-  //    in the accent color (the kicker slot's own styling); the new price is the hero
-  //    value; the address is under it. A house with no reduction ships an empty kicker,
-  //    which HeroBlock omits — never the words "Price cut" over nothing.
-  const seedHero = seedBlockOf(seed, "hero");
-  blocks.push(
-    at(
-      {
-        id: seedHero?.id ?? createBlock("hero").id,
-        type: "hero",
-        props: {
-          kicker,
-          value: facts.price ?? "",
-          label: addressLine(facts),
-          prose: "",
-        },
-      },
-      { x: 0, y: 2, w: 6, h: 4 },
-    ),
-  );
+    // The hero: the CUT above, the ADDRESS, then the NEW price. An empty kicker is
+    // dropped by the chrome — never "Price cut" over nothing.
+    heroKicker: kicker,
+    heroValue: facts.price ?? "",
+    heroLabel: addressLine(facts),
 
-  // 3. THE PRICE STORY — beside the hero, per the skeleton.
-  //
-  //    "Previous Price" is the anchor that makes the cut checkable. It is DERIVED
-  //    (current + cut) from two vendor-stated numbers — the same class as $/sqft.
-  //
-  //    "Days on Market" is an OPEN SLOT, and honestly so: `ListingFacts` carries no
-  //    days-on-market field at all — not "the vendor returned null", but "we never
-  //    modeled it". The agent knows it; the label is the instruction; the sent email
-  //    omits the cell entirely. Never a zero, never a guess.
-  //
-  //    The seed's third cell ("Price Drop") is deliberately GONE: the operator moved
-  //    the cut into the hero, and printing $104,975 twice, six inches apart, is noise.
-  blocks.push(
-    at(
-      {
-        id: seedBlockOf(seed, "stats")?.id ?? createBlock("stats").id,
-        type: "stats",
-        props: { stats: [cell(previous, "Previous Price"), cell(undefined, "Days on Market")] },
-      },
-      { x: 6, y: 2, w: 6, h: 4 },
-    ),
-  );
+    specs: priceStrip(facts, previous),
+    specFootnote: priceStripFootnote(facts, previous),
 
-  // 4. The photo. Sourced → the real listing photo, already mirrored into OUR storage
-  //    by the resolver (a re-send months from now must not depend on the vendor CDN).
-  //    Unsourced → an OPEN SLOT: the canvas renders a file-picker + paste-a-link
-  //    dropzone whose instruction is the alt text; the email omits it entirely.
-  const seedImage = seedBlockOf(seed, "image");
-  blocks.push(
-    at(
-      {
-        id: seedImage?.id ?? createBlock("image").id,
-        type: "image",
-        props: {
-          url: photo ?? "",
-          kind: "photo",
-          ratio: "4:3", // the skeleton's own ratio
-          alt: facts.address ?? "Property photo",
-          ...(photo && facts.sourceUrl ? { linkUrl: facts.sourceUrl } : {}),
-        },
-      },
-      { x: 0, y: 6, w: 12, h: 5 },
-    ),
-  );
+    // NO MIDDLE. No chart (declared on the key): was-and-now is TWO BARS, which is a
+    // fact wearing a chart costume — so we wrote the fact instead (the kicker, the hero,
+    // the anchor cell). No comps bar either: this email is about a HOUSE, not a market.
 
-  // 5/6. THE KEY SPECS — required by the recipe's own prompt ("the home's key specs")
-  //      and absent from the seed entirely (reported). Same seven-slot vocabulary as
-  //      the reference flyer, minus "Built" (this record carries no yearBuilt, and a
-  //      third row holding one perpetually-empty cell is a worse card than two full
-  //      rows). $/Sq Ft is computed on the NEW price — which is the entire point of
-  //      showing it on a price-cut email.
-  blocks.push(
-    at(
-      {
-        id: createBlock("stats").id,
-        type: "stats",
-        props: {
-          stats: [
-            cell(facts.beds, "Beds"),
-            cell(facts.baths, "Baths"),
-            cell(withCommas(facts.sqft), "Sq Ft"),
-          ],
-        },
-      },
-      { x: 0, y: 11, w: 12, h: 2 },
-    ),
-  );
-  blocks.push(
-    at(
-      {
-        id: createBlock("stats").id,
-        type: "stats",
-        props: {
-          stats: [
-            cell(pricePerSqft(facts), "$/Sq Ft"),
-            cell(facts.lotSize, "Lot"),
-            cell(shortType(facts.propertyType), "Type"),
-          ],
-        },
-      },
-      { x: 0, y: 13, w: 12, h: 2 },
-    ),
-  );
+    // The narrative is authored BELOW, and only from a real descriptive source. An empty
+    // string here is an OPEN SLOT: an instruction on the canvas, absent from the email.
+    narrative: "",
 
-  // 7. The paragraph — authored below. EMPTY here: the seed PREFILLS this body with
-  //    "Say why this is a good value now — what changed, and why a motivated seller
-  //    means room to negotiate." TextBlock ships any non-empty body, so left alone
-  //    that canvas hint reaches the recipient as if it were the agent's prose — and it
-  //    is not merely filler, it is a coaching note that asks for two claims we cannot
-  //    source (a motivated seller, room to negotiate). It is cleared unconditionally.
-  const seedText = seedBlockOf(seed, "text");
-  blocks.push(
-    at(
-      {
-        id: seedText?.id ?? createBlock("text").id,
-        type: "text",
-        props: { body: "", align: "left" },
-      },
-      { x: 0, y: 15, w: 12, h: 4 },
-    ),
-  );
+    // NOT "See the New Price" (operator, 07/13/2026: *"why would the button be SEE THE
+    // NEW PRICE when we already show the price"*). The email's entire job is showing the
+    // new price — the hero IS the new price, with the cut above it. A button pointing at
+    // what the reader is already looking at asks them to do nothing.
+    //
+    // A price cut exists to get people through the door. So the CTA is the NEXT ACTION.
+    ctaLabel: "Schedule a Showing",
+    ctaUrl: facts.sourceUrl,
+  });
 
-  // 8. The agent card — ONLY if the canvas already has one. We never `createBlock` a
-  //    default: its default props are HOUSE_BRAND placeholder prose ("A short bio that
-  //    builds trust with your readers"), and AgentCardBlock takes NO `emailRender`
-  //    flag — so a defaulted card ships that placeholder to a real recipient. Sticky
-  //    brand or nothing.
-  const agentCard = currentDoc.blocks.find((b) => b.type === "agent-card");
-  let y = 19;
-  if (agentCard) {
-    blocks.push(at(agentCard, { x: 0, y, w: 12, h: 4 }));
-    y += 4;
-  }
+  // NO CHART. The chrome emits none, so this is a no-op today; it is the policy stated in
+  // code, and it guards a chart slot ever arriving from anywhere. An empty chart box is
+  // worse than no chart.
+  doc = dropEmptyChartSlot(doc);
 
-  // 9. The CTA — the skeleton's own label. It points at our citation root, never a
-  //    vendor permalink (listing-citation policy).
-  const seedButton = seedBlockOf(seed, "button");
-  const seedLabel = seedButton?.type === "button" ? (seedButton.props.label ?? "").trim() : "";
-  blocks.push(
-    at(
-      {
-        id: seedButton?.id ?? createBlock("button").id,
-        type: "button",
-        // NOT "See the New Price" (operator, 07/13/2026: *"why would the button be SEE THE
-        // NEW PRICE when we already show the price"*). The email's entire job is showing the
-        // new price — the hero IS the new price, with the cut above it. A button pointing at
-        // what the reader is already looking at asks them to do nothing.
-        //
-        // A price cut exists to get people through the door. So the CTA is the NEXT ACTION.
-        props: { label: seedLabel || "Schedule a Showing", url: facts.sourceUrl },
-      },
-      { x: 0, y, w: 12, h: 2 },
-    ),
-  );
-  y += 2;
-
-  // 10. Footer — the agent's CAN-SPAM footer (address, socials, unsubscribe). Sticky.
-  blocks.push(at(stick(currentDoc, seed, "footer"), { x: 0, y, w: 12, h: 3, static: true }));
-
-  // NO CHART. Declared on the key: was-and-now is TWO BARS, which is a fact wearing a
-  // chart costume — so we wrote the fact instead (the kicker, the hero, the stat). The
-  // seed carries no chart block, so this is a no-op today; it is the policy stated in
-  // code, and it guards a chart slot ever arriving from the skeleton.
-  let doc = dropEmptyChartSlot({ globalStyle, blocks });
-
-  // THE PROSE. Clear FIRST and UNCONDITIONALLY — fillNarrative SKIPS a text block that
-  // already has content, so a null narrative (no key, no facts, a failed call) would
-  // otherwise leave the seed's coaching note sitting in the slot. Then fill, only if
-  // the model gave us something real. A gap stays an OPEN SLOT, never a fabrication.
+  // Clear FIRST and UNCONDITIONALLY — `fillNarrative` SKIPS a text block that already has
+  // content, so any prefilled body (a skeleton's coaching note, a stale draft) would sit
+  // there and ship as if it were the agent's prose. Clear, then fill only if the model
+  // gave us something real. A gap stays an OPEN SLOT, never a fabrication.
   doc = clearNarrativeSlots(doc);
 
   // ── NO DESCRIPTION → NO PARAGRAPH. THE SLOT STAYS OPEN. ──────────────────────
@@ -424,7 +292,7 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
   // So: the paragraph is authored ONLY from a real descriptive source. With none, the
   // slot stays OPEN — on the canvas TextBlock renders its instruction ("Paste your
   // text here — we'll tighten it") and the agent pastes the remarks they already own;
-  // in the SENT email the block does not exist (TextBlock, emailRender). The grid, the
+  // in the SENT email the block does not exist (TextBlock, emailRender). The strip, the
   // photo and the cut still carry the email. Never refuse, never invent.
   if (!facts.remarks?.trim()) return doc;
 
@@ -471,7 +339,7 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
       "• WHAT YOU MAY WRITE: what a buyer actually GETS at this price — the home itself, from " +
       "the agent's description. That IS what the new price means. Describe the house."
     : // The vendor does not flag this house as reduced, and we hold no previous price.
-      // The grid renders the cut cells as OPEN SLOTS for the agent; the narrator is told
+      // The strip renders the cut cells as OPEN SLOTS for the agent; the narrator is told
       // NOTHING about a cut, because a framing that says "lead with the reduction" when
       // there is no sourced reduction is an invitation to invent one.
       "A listing update for a home on the market. The asking price shown is its CURRENT " +

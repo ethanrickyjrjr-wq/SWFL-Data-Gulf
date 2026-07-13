@@ -11,6 +11,7 @@ import {
   buildCompsGrid,
   buildNarratorPrompt,
   buildPriceCase,
+  compsFootnote,
   contextViolations,
   evidenceParagraph,
   narratorClaims,
@@ -116,6 +117,19 @@ function canvas(): EmailDoc {
 const statsOf = (doc: EmailDoc) =>
   doc.blocks.flatMap((b) => (b.type === "stats" ? b.props.stats : []));
 const listOf = (doc: EmailDoc) => doc.blocks.find((b) => b.type === "list");
+const footnoteOf = (doc: EmailDoc) =>
+  doc.blocks.flatMap((b) => (b.type === "stats" ? [b.props.footnote ?? ""] : [])).join(" ");
+
+/** The chrome's block sequence, in document order (lib/email/lifecycle-chrome.ts). */
+const spineOf = (doc: EmailDoc) =>
+  [...doc.blocks]
+    .sort((a, b) => (a.layout?.y ?? 0) - (b.layout?.y ?? 0))
+    .map((b) => {
+      if (b.type === "hero") return b.props.ribbon ? "hero:ribbon" : "hero:subject";
+      if (b.type === "stats") return b.props.variant === "strip" ? "stats:strip" : "stats:grid";
+      if (b.type === "image") return `image:${String(b.props.kind ?? "?")}`;
+      return b.type;
+    });
 
 // ── THE LOAD-BEARING RULE ────────────────────────────────────────────────────
 
@@ -132,29 +146,41 @@ test("the vacant lot never reaches the chart, the table, or the math", () => {
 test("the $/sq ft math is computed from real pairs only — never back-solved", () => {
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
   const cells = statsOf(doc);
-  // Subject: $595,000 / 2,847 sq ft = $209.
-  expect(cells.find((c) => c.label === "$/Sq Ft — this home")?.value).toBe("$209");
+  // Subject: $595,000 / 2,847 sq ft = $209. It is the cell that WINS THE ARGUMENT, so it
+  // is the one the strip emphasises — it renders larger, in the brand's accent.
+  const mine = cells.find((c) => c.label === "$/Sq Ft — this home");
+  expect(mine?.value).toBe("$209");
+  expect(mine?.emphasis).toBe("primary");
   // Comps (land excluded): 173, 195, 210, 231, 266 → median 210, range 173–266.
-  const med = cells.find((c) => c.label.startsWith("$/Sq Ft — median"));
-  expect(med?.value).toBe("$210");
-  // The spread rides in the LABEL — a 9-character value wraps mid-value in a stat cell.
-  expect(med?.label).toBe("$/Sq Ft — median of the comps ($173–$266 across the set)");
+  expect(cells.find((c) => c.label === "$/Sq Ft — comp median")?.value).toBe("$210");
+  // The SPREAD rides in the strip's footnote — a strip cell is a 9px caption in a sixth
+  // of the email's width, and "$173–$266 across the set" wrapped to five ragged lines there.
+  expect(footnoteOf(doc)).toContain("run from $173 to $266");
   // Had the $139,800 lot survived, the low bound would have collapsed the range.
 });
 
-test("every stat label fits the schema cap (a 61-char label kills the build)", () => {
+test("every stat cell fits the schema caps (a 61-char label kills the build)", () => {
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
   expect(statsOf(doc).every((c) => c.label.length <= 60 && c.value.length <= 24)).toBe(true);
+  // The footnote's cap is 120 — and it is never TRUNCATED to fit, because a sliced
+  // "$173–$26" is a wrong number. The longest candidate that fits is chosen whole.
+  for (const n of [1, 2, 3, 4, 5]) {
+    const fn = compsFootnote(SUBJECT, HOMES.slice(0, n));
+    expect(fn!.length).toBeLessThanOrEqual(120);
+    expect(fn!.endsWith(".")).toBe(true);
+  }
 });
 
-test("the price-kind mix is stated on the face of the email — cell AND table title", () => {
+test("the price-kind mix is stated on the face of the email — footnote AND table title", () => {
   // The registry prompt used to promise "six LIVE comparable listings". The set is not
   // that: it is recorded sales plus current valuations. The email says so where the rows
-  // are, not just in a stat label a reader can skim past.
+  // are, and again directly under the strip — never only in a label a reader skims past.
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
-  const mix = statsOf(doc).find((c) => c.label.startsWith("Comparable homes"));
-  expect(mix?.value).toBe("5");
-  expect(mix?.label).toBe("Comparable homes (2 recorded sales, 3 valuations)");
+  const count = statsOf(doc).find((c) => c.label === "Comparable homes");
+  expect(count?.value).toBe("5");
+  expect(count?.emphasis).toBe("muted"); // the SCALE of the evidence, not the evidence
+
+  expect(footnoteOf(doc)).toContain("The 5 comparable homes (2 recorded sales, 3 valuations)");
 
   const table = listOf(doc);
   expect(table?.type === "list" && table.props.title).toBe(
@@ -188,10 +214,12 @@ test("a valuation is never dressed as a sale in a row", () => {
 test("no comps → the grid still lands, with open slots and no zeros", () => {
   const doc = buildCompsGrid(SUBJECT, [], canvas());
   const cells = statsOf(doc);
-  const evidence = cells.filter((c) => c.label.startsWith("$/Sq Ft — median"));
+  const evidence = cells.filter((c) => c.label === "$/Sq Ft — comp median");
   expect(evidence[0]?.value).toBe(""); // an OPEN SLOT — never "$0", never a naked label
   expect(cells.every((c) => c.value !== "0" && c.value !== "$0")).toBe(true);
   expect(listOf(doc)).toBeUndefined(); // no rows → no empty table shell
+  // ...and the footnote never claims a mix over an empty set.
+  expect(footnoteOf(doc)).not.toContain("comparable home");
   expect(doc.blocks.some((b) => b.type === "hero")).toBe(true); // the grid still lands
 });
 
@@ -204,17 +232,48 @@ test("an unsourced cell is absent from the SENT email, present on the canvas", a
   const doc = buildCompsGrid(bare, [], canvas());
   const html = await renderEmailDocHtml(doc);
   // The email carries no naked label whose cell we could not source.
-  expect(html).not.toContain("$/Sq Ft — median of the comps");
-  expect(html).not.toContain("Comparable homes (");
+  expect(html).not.toContain("$/Sq Ft — comp median");
+  expect(html).not.toContain("Comparable homes");
   // ...and no zero snuck in where a number was missing.
   expect(html).not.toContain(">$0<");
 });
 
-// ── THE STRUCTURE ────────────────────────────────────────────────────────────
+// ── THE CAMPAIGN CHROME ──────────────────────────────────────────────────────
+//
+// Operator, 07/13/2026: *"EACH EMAIL WOULD HAVE THE SAME LOOK, JUST DIFFERENT
+// INFORMATION."* This recipe used to own its own grid (hero-left · photo · stats[3] ·
+// stats[2] · chart · list) — one of seven layouts across seven emails from one agent.
+// The shape now comes from `buildLifecycleEmail`, and it is not this file's to change.
+// campaign-coherence.test.ts is the cross-recipe oracle; these are the same rule, here.
+
+test("it wears the campaign chrome — the SAME shape as every other lifecycle email", () => {
+  const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
+  expect(spineOf(doc)).toEqual([
+    "header",
+    "hero:ribbon", // ← the campaign's spine: same band, different word
+    "image:photo",
+    "hero:subject", // ← centred, ADDRESS over PRICE
+    "stats:strip", // ← ONE hairline row, never a wall of stat grids
+    "image:chart", // ┐ MY MIDDLE — the only place this email legitimately differs
+    "list", // ┘
+    "text",
+    "sources", // ← MY TAIL
+    "agent-card",
+    "button",
+    "footer",
+  ]);
+});
 
 test("every block is positioned, so it compiles through the GRID renderer", () => {
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
   expect(doc.blocks.every((b) => b.layout)).toBe(true);
+  // ...and the chrome stacks them with no gap and no overlap: y_next = y + h.
+  const ordered = [...doc.blocks].sort((a, b) => (a.layout?.y ?? 0) - (b.layout?.y ?? 0));
+  let y = 0;
+  for (const b of ordered) {
+    expect(b.layout!.y).toBe(y);
+    y += b.layout!.h;
+  }
 });
 
 test("the chart slot is reserved, empty, and its own kind", () => {
@@ -235,11 +294,28 @@ test("the commentary slot is EMPTY so fillNarrative can write into it", () => {
   expect(text?.type === "text" && text.props.body).toBe("");
 });
 
-test("the hero wears the Market Comps hat, not the New Listing one", () => {
+test("the RIBBON wears the Market Comps hat; the HERO carries the claim it defends", () => {
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
-  const hero = doc.blocks.find((b) => b.type === "hero");
-  expect(hero?.type === "hero" && hero.props.kicker).toBe("Market Comps");
+  const heroes = doc.blocks.filter((b) => b.type === "hero");
+
+  // The ribbon is the ONE element that says which email in the campaign this is.
+  const ribbon = heroes.find((b) => b.type === "hero" && b.props.ribbon);
+  expect(ribbon?.type === "hero" && ribbon.props.kicker).toBe("Market Comps");
+
+  // The subject hero is the CLAIM under examination: the ask, centred under the address.
+  const hero = heroes.find((b) => b.type === "hero" && !b.props.ribbon);
   expect(hero?.type === "hero" && hero.props.value).toBe("$595,000");
+  expect(hero?.type === "hero" && hero.props.label).toBe(SUBJECT.address);
+  expect(hero?.type === "hero" && hero.props.align).toBe("center");
+  expect(hero?.type === "hero" && hero.props.order).toBe("label-first");
+});
+
+test("the CTA asks for the NEXT ACTION — never a pointer at what they are looking at", () => {
+  // The operator's example of the failure: "See the New Price" on an email whose whole
+  // job IS the new price. A comps email's next action is the conversation, not the comps.
+  const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
+  const cta = doc.blocks.find((b) => b.type === "button");
+  expect(cta?.type === "button" && cta.props.label).toBe("Talk Through These Numbers");
 });
 
 test("brand is sticky — a real user brand is never overwritten", () => {
@@ -510,12 +586,10 @@ test("every fact the narrator gets is a SETTLED SENTENCE — the mix is a settle
   // The subject's own record — scalars, each a fact on its own, never a set.
   expect(sentences).toContain("The asking price is $595,000.");
   expect(sentences).toContain("The home is new construction, per the listing record.");
-  expect(sentences).toContain(
-    "The asking price has already come down by $104,975 from the original.",
-  );
+  expect(sentences).toContain("The asking price has already come down by $104,975.");
   // Every numeral the narrator is allowed to write comes from these sentences and only these.
   const anchors = new Set(settled.flatMap((s) => s.anchors));
-  for (const n of ["209", "210", "173", "195", "266", "595,000", "104,975", "2,847", "0.26"]) {
+  for (const n of ["209", "210", "173", "195", "266", "595000", "104975", "2847", "0.26"]) {
     expect(anchors.has(n)).toBe(true);
   }
   // A comp price it never saw is not an anchor — writing it is an invention by definition.

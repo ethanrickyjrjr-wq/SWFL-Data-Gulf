@@ -44,6 +44,7 @@ import {
   settlePriceCut,
   settleStatus,
   timingClaims,
+  timingLine,
   type MarketTiming,
   type NarratorInput,
 } from "./under-contract";
@@ -245,17 +246,15 @@ describe("settleAreaTiming — the count is an integer comparison, never a model
 describe("settlePriceCut — the AMOUNT is sourced; the ORDER never was", () => {
   it("states the amount and places it in NO order against anything", () => {
     const claim = settlePriceCut(FACTS)!;
-    expect(claim.sentence).toBe(
-      "The asking price came down by $104,975 from the original ask, to $595,000.",
-    );
+    expect(claim.sentence).toBe("The asking price came down by $104,975, to $595,000.");
     // Both numerals become anchors — the ONLY digits the narrator may then type.
-    expect(claim.anchors).toEqual(["104,975", "595,000"]);
+    expect(claim.anchors).toEqual(["104975", "595000"]);
     expect(claim.sentence).not.toMatch(/before|after|then|once/i);
   });
 
   it("omits the current ask when we do not hold one", () => {
     expect(settlePriceCut({ ...FACTS, price: undefined })?.sentence).toBe(
-      "The asking price came down by $104,975 from the original ask.",
+      "The asking price came down by $104,975.",
     );
   });
 
@@ -512,12 +511,62 @@ describe("loadAreaTiming — the ZIP's median, and its COMMENSURABLE peer set", 
 // 5. The grid.
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("buildUnderContractGrid — the six answers, rendered", () => {
-  it("leads with the PRICE, not a fabricated interval", () => {
-    const hero = fullDoc().blocks.find((b) => b.type === "hero");
-    expect(hero?.type === "hero" && hero.props.kicker).toBe("Under Contract");
+/** The doc's block sequence, the way campaign-coherence.test.ts reads it. */
+const spineOf = (doc: EmailDoc): string[] =>
+  [...doc.blocks]
+    .sort((a, b) => (a.layout?.y ?? 0) - (b.layout?.y ?? 0))
+    .map((b) => {
+      if (b.type === "hero") return b.props.ribbon ? "hero:ribbon" : "hero:subject";
+      if (b.type === "stats") return b.props.variant === "strip" ? "stats:strip" : "stats:grid";
+      if (b.type === "image") return `image:${String(b.props.kind ?? "?")}`;
+      return b.type;
+    });
+
+const heroOf = (doc: EmailDoc, ribbon: boolean) =>
+  doc.blocks.find((b) => b.type === "hero" && Boolean(b.props.ribbon) === ribbon);
+
+describe("buildUnderContractGrid — it wears the CAMPAIGN CHROME, not a grid of its own", () => {
+  // ── THE MIGRATION (07/13/2026) ─────────────────────────────────────────────
+  // This recipe used to emit FOUR STACKED STAT GRIDS — 3 + 3 + 3 + 1, ten chunky
+  // 32px cells, a WALL — while New Listing ran one hairline spec strip. Seven
+  // lifecycle emails, seven layouts, "one campaign" that read as seven companies.
+  // Operator: "EACH EMAIL WOULD HAVE THE SAME LOOK, JUST DIFFERENT INFORMATION."
+  // The shape now comes from `buildLifecycleEmail`, and these tests pin that.
+
+  it("*** THE WALL IS GONE *** — the campaign has ONE stat device, and it is the STRIP", () => {
+    const s = spineOf(fullDoc());
+    // FOUR of these is what shipped. Zero is the contract.
+    expect(s.filter((x) => x === "stats:grid")).toEqual([]);
+    // The house's spec line, plus this recipe's own TIMING line. Both strips.
+    expect(s.filter((x) => x === "stats:strip").length).toBe(2);
+  });
+
+  it("wears the campaign spine, in the campaign's order", () => {
+    const s = spineOf(fullDoc());
+    expect(s.slice(0, 5)).toEqual([
+      "header",
+      "hero:ribbon", // the ONE element that says which email in the campaign this is
+      "image:photo",
+      "hero:subject", // centred: ADDRESS over PRICE
+      "stats:strip", // ONE hairline spec line — never a wall
+    ]);
+    expect(s.slice(-3)).toEqual(["agent-card", "button", "footer"]);
+    // Exactly one narrative slot and exactly one CTA.
+    expect(s.filter((x) => x === "text").length).toBe(1);
+    expect(s.filter((x) => x === "button").length).toBe(1);
+  });
+
+  it("the RIBBON carries the word; the HERO carries address over price", () => {
+    const doc = fullDoc();
+    expect(heroOf(doc, true)?.type === "hero" && heroOf(doc, true)!.props.kicker).toBe(
+      "Under Contract",
+    );
+    const hero = heroOf(doc, false);
     expect(hero?.type === "hero" && hero.props.value).toBe("$595,000");
     expect(hero?.type === "hero" && hero.props.label).toBe(FACTS.address);
+    // The chrome centres it and puts the ADDRESS first — that is how a flyer reads.
+    expect(hero?.type === "hero" && hero.props.align).toBe("center");
+    expect(hero?.type === "hero" && hero.props.order).toBe("label-first");
   });
 
   it("SETS THE TWO CLOCKS SIDE BY SIDE — and LABELS them as different quantities", () => {
@@ -534,20 +583,53 @@ describe("buildUnderContractGrid — the six answers, rendered", () => {
     expect(cellFor(doc, "Days on Market")).toBeUndefined();
   });
 
-  it("sources every house cell from the resolved record — $/sqft is computed, not guessed", () => {
+  it("NO TIMING CELL IS EMPHASISED — a comparison drawn in typography is still a claim", () => {
+    // `emphasis: "primary"` says WHICH NUMBER WINS THE ARGUMENT. The whole point of the
+    // timing line is that these two clocks are NOT commensurable and make NO argument
+    // against each other (see THE NON-COMMENSURABILITY). Weighting one over the other
+    // would assert the relation the prose is structurally forbidden from writing.
+    const timingCells = timingLine({
+      listedOn: LISTED_ON,
+      daysListed: DAYS_LISTED,
+      timing: TIMING,
+      zip: "33905",
+    });
+    const stats = timingCells.type === "stats" ? timingCells.props.stats : [];
+    expect(stats.every((c) => c.emphasis === undefined)).toBe(true);
+    // …and it is a STRIP. The campaign has exactly one stat device.
+    expect(timingCells.type === "stats" && timingCells.props.variant).toBe("strip");
+  });
+
+  it("the SPEC STRIP is the shared listing spec line — the same six cells New Listing wears", () => {
     const doc = fullDoc();
-    expect(cellFor(doc, "List Price")?.value).toBe("$595,000");
+    // ONE authority (`listingSpecs`), so a subscriber who got the New Listing email in
+    // April sees the identical spec line here in July.
     expect(cellFor(doc, "Beds")?.value).toBe("3");
     expect(cellFor(doc, "Baths")?.value).toBe("3.5");
     expect(cellFor(doc, "Sq Ft")?.value).toBe("2,847");
-    expect(cellFor(doc, "$/Sq Ft")?.value).toBe("$209"); // 595000 / 2847 = 208.99…
     expect(cellFor(doc, "Lot")?.value).toBe("0.26 ac");
+    expect(cellFor(doc, "$/Sq Ft")?.value).toBe("$209"); // 595000 / 2847 = 208.99…
+    expect(cellFor(doc, "$/Sq Ft")?.emphasis).toBe("primary"); // it wins the argument
     expect(cellFor(doc, "Type")?.value).toBe("Residential");
+    expect(cellFor(doc, "Type")?.emphasis).toBe("muted"); // context, not competing
+  });
+
+  it("the PRICE is stated ONCE — it left the cells when it moved into the hero", () => {
+    // The old grid printed the ask in a "List Price" cell AND nowhere else useful; the
+    // chrome's hero is the price's home. Two statements of one number is a wall, not a flyer.
+    expect(cellFor(fullDoc(), "List Price")).toBeUndefined();
+  });
+
+  it("the derived cell states its provenance — the strip carries the footnote", () => {
+    const strip = fullDoc().blocks.find((b) => b.type === "stats" && b.props.variant === "strip");
+    expect(strip?.type === "stats" && strip.props.footnote).toContain("Computed from list price");
   });
 
   it("asks for the backup offer — that is the whole point of this email", () => {
     const btn = fullDoc().blocks.find((b) => b.type === "button");
     expect(btn?.type === "button" && btn.props.label).toBe("Submit a Backup Offer");
+    // The CTA asks for the NEXT ACTION. It never points at what the reader is already
+    // looking at ("See the New Price" on the price-cut email — the operator's example).
   });
 
   it("leaves the commentary slot EMPTY for the narrator (fillNarrative skips a filled one)", () => {
@@ -564,7 +646,7 @@ describe("buildUnderContractGrid — the six answers, rendered", () => {
     expect(chart).toBeUndefined();
   });
 
-  it("stacks with no void — dropping the chart must not leave a 5-row hole", () => {
+  it("stacks with no void — every block sits directly under the one above it", () => {
     const laid = fullDoc()
       .blocks.map((b) => b.layout!)
       .sort((a, b) => a.y - b.y);
@@ -573,6 +655,21 @@ describe("buildUnderContractGrid — the six answers, rendered", () => {
       expect(l.y).toBe(cursor);
       cursor += l.h;
     }
+  });
+
+  it("THE BRAND IS STICKY — the chrome is the SHAPE, the user's colours are the SKIN", () => {
+    const branded: EmailDoc = {
+      globalStyle: { ...DEFAULT_GLOBAL_STYLE, accentColor: "#123456" },
+      blocks: [],
+    };
+    const doc = buildUnderContractGrid({
+      facts: FACTS,
+      current: branded,
+      listedOn: LISTED_ON,
+      daysListed: DAYS_LISTED,
+      timing: TIMING,
+    });
+    expect(doc.globalStyle.accentColor).toBe("#123456");
   });
 });
 
@@ -587,31 +684,39 @@ describe("THE OPEN-SLOT CONTRACT — a gap is an invitation, never a zero", () =
       timing: null,
     });
 
-  it("an unsourced list date and an unsourced age are INSTRUCTIONS, never a 0", () => {
+  it("an unsourced list date and an unsourced age are OPEN SLOTS, never a 0", () => {
+    // THE SLOT RULE (lib/email/CLAUDE.md): the LABEL is the instruction. "Days Since
+    // Listed" over an empty value tells the user exactly what to type; on the canvas
+    // it wears a dashed "+ Add" affordance. A "0" would read as a real figure.
     const cells = statsOf(blindDoc());
-    expect(cells.find((c) => c.label.startsWith("Listed —"))?.value).toBe("");
-    expect(cells.find((c) => c.label.startsWith("Days Since Listed —"))?.value).toBe("");
+    expect(cells.find((c) => c.label === "Listed")?.value).toBe("");
+    expect(cells.find((c) => c.label === "Days Since Listed")?.value).toBe("");
     expect(cells.some((c) => c.value === "0")).toBe(false);
   });
 
-  it("an unsourced area median is an INSTRUCTION, never a fabricated benchmark", () => {
-    expect(statsOf(blindDoc()).find((c) => c.label.startsWith("Typical days to sell"))?.value).toBe(
-      "",
-    );
+  it("an unsourced area median is an OPEN SLOT, never a fabricated benchmark", () => {
+    // No timing → we cannot even name the ZIP off the row, so the label falls back to
+    // the generic form. Either way the VALUE is empty: we never invent a benchmark.
+    const cells = statsOf(blindDoc());
+    expect(cells.find((c) => c.label.startsWith("Typical Days to Sell"))?.value).toBe("");
   });
 
-  it("still leads with the price — the hero is never a naked kicker", () => {
-    const hero = blindDoc().blocks.find((b) => b.type === "hero");
+  it("still leads with the price — the subject hero is never a naked ribbon", () => {
+    const hero = heroOf(blindDoc(), false);
     expect(hero?.type === "hero" && hero.props.value).toBe("$595,000");
+    expect(hero?.type === "hero" && hero.props.label).toBe(FACTS.address);
   });
 
   it("NO open slot reaches the recipient — it is a canvas affordance only", async () => {
     const html = await renderEmailDocHtml(blindDoc());
-    expect(html).not.toContain("type how long it has been listed");
-    expect(html).not.toContain("add your area's figure");
+    // Every cell in the timing line is unsourced → StatsBlock drops each cell, and a
+    // row with no surviving cell does not exist in the sent email at all.
     expect(html).not.toContain("Days Since Listed");
+    expect(html).not.toContain("Typical Days to Sell");
+    expect(html).not.toContain("Listed");
     // …while the sourced facts DO ship.
     expect(html).toContain("$595,000");
+    expect(html).toContain("Under Contract"); // the ribbon always rides
   });
 
   it("an unsourced spec is an instruction, and the sent email simply omits it", async () => {
@@ -689,7 +794,7 @@ describe("timingClaims — INVENTION CLASS 3: a claim about time", () => {
   it("PASSES an honest transaction paragraph — the guard is sharp, not merely loud", () => {
     const good =
       "This home is under contract. It is new construction. The asking price came down by " +
-      "$104,975 from the original ask, to $595,000. Backup offers are still being accepted.";
+      "$104,975, to $595,000. Backup offers are still being accepted.";
     expect(timingClaims(good)).toEqual([]);
     expect(proseViolations(good, narratorSources(INPUT).join(" "), INPUT.settled)).toEqual([]);
   });
@@ -767,7 +872,7 @@ describe("fallbackNote — deterministic, zero model, and it FABRICATES NOTHING"
     const note = fallbackNote(INPUT);
     expect(note).toBe(
       "This home is under contract. It is new construction. " +
-        "The asking price came down by $104,975 from the original ask, to $595,000. " +
+        "The asking price came down by $104,975, to $595,000. " +
         `3 of 6 ZIP codes in the Cape Coral, FL metro have a longer typical time-to-sell than 33905 ${CITE}. ` +
         "Backup offers are still being accepted — if this one was on your list, it is " +
         "worth putting your position on paper now.",

@@ -72,7 +72,9 @@
 //
 // So both figures ride as CELLS, each labelled for exactly the quantity it is
 // ("Days Since Listed" — a running age; "Typical Days to Sell" — a completed
-// median over sold homes). Two precisely-labelled facts in a grid assert nothing.
+// median over sold homes). Two precisely-labelled facts side by side in a strip
+// assert nothing — and NEITHER IS EMPHASISED, because `emphasis` says which number
+// wins the argument, and a comparison drawn in TYPOGRAPHY is still a comparison.
 // The falsifiable sentence — "in line with" — is what shipped, and the narrator is
 // now structurally incapable of writing it: IT IS HANDED NEITHER NUMBER.
 //
@@ -113,12 +115,26 @@
 // ── THE SIX ANSWERS (playbook Part 6) ───────────────────────────────────────
 //   1. SUBJECT — the listing address, already resolved into `ctx.facts`. NO SECOND
 //      RESOLVER; we only ENRICH with the list date, the same shape as `withBaths`.
-//   2. SKELETON — a coded grid. There is no `under-contract` SEED_DOC.
-//   3. CELLS — listed · days since listed · the ZIP's typical · price · beds ·
-//      baths · sqft · $/sqft · lot · type.
+//   2. SKELETON — `buildLifecycleEmail`. THE CAMPAIGN'S ONE LAYOUT (see below).
+//   3. CELLS — the campaign spec strip (beds · baths · sqft · lot · $/sqft · type),
+//      plus THIS recipe's own middle: the TIMING line (listed · days since listed ·
+//      the ZIP's typical days to sell).
 //   4. CHART — NONE. The registry says `chart: "none"`; the slot is never created.
 //   5. PROSE — this recipe's own narrator, wired to the claim gate.
-//   6. FRAMING — "Under Contract" kicker, price hero, backup-offer CTA.
+//   6. FRAMING — the "Under Contract" ribbon, address-over-price hero, backup-offer CTA.
+//
+// ── THE LAYOUT IS NOT MINE (07/13/2026) ─────────────────────────────────────
+//
+// This file used to own its own grid, and so did the other six lifecycle recipes —
+// seven files, seven layouts, one "campaign" that read as seven different companies.
+// THIS ONE WAS THE WORST OF THEM: it emitted FOUR STACKED STAT GRIDS (3 + 3 + 3 + 1) —
+// a wall of chunky cells where a listing flyer runs one hairline spec line.
+//
+// Operator: *"EACH EMAIL WOULD HAVE THE SAME LOOK, JUST DIFFERENT INFORMATION."*
+//
+// The shape now lives in ONE place — `lib/email/lifecycle-chrome.ts`. This recipe
+// supplies the RIBBON WORD, the numbers, its own MIDDLE and a CTA. It does not get to
+// invent a shape. Nothing about the SOURCING changed: every guard below is untouched.
 
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
@@ -126,19 +142,14 @@ import { fetchNearbyValues } from "@/lib/listings/steadyapi";
 import { canonStreet } from "@/lib/listings/resolve-subject";
 import { loadParsedBrain } from "@/lib/fetch-brain";
 import { asOfFromToken } from "@/lib/project/as-of";
-import { createBlock, DEFAULT_GLOBAL_STYLE } from "@/lib/email/doc/default-docs";
-import { heroPhotoBlock } from "@/lib/email/inject-photo";
+import { createBlock } from "@/lib/email/doc/default-docs";
+import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
+import { addressLineOf, listingSpecs, spec, specFootnote } from "@/lib/email/listing-flyer";
 import { auditClaims, numeralsIn, settledCount, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import { clearNarrativeSlots, fillNarrative } from "./shared";
 import type { SettledClaim } from "@/lib/deliverable/claims";
 import type { RecipeBuildContext } from "./index";
-import type {
-  BlockLayout,
-  EmailBlock,
-  EmailDoc,
-  FontFamily,
-  StatItem,
-} from "@/lib/email/doc/types";
+import type { EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
 // ── The vendor lane: the LIST DATE (the fact `/search` does not carry) ────────
@@ -467,9 +478,36 @@ export function settleNewConstruction(facts: ListingFacts): SettledClaim | null 
  */
 export function settlePriceCut(facts: ListingFacts): SettledClaim | null {
   if (!facts.isPriceReduced || !facts.priceReduction) return null;
+
+  // ⚠️ "FROM THE ORIGINAL ASK" WAS A CODE-AUTHORED FALSEHOOD. Removed 07/13/2026.
+  //
+  // The vendor's price history for the acceptance fixture, pulled live:
+  //     2026-04-29  Listed         $765,000   ← the ORIGINAL ask
+  //     2026-06-09  Price Changed  $699,975
+  //     2026-07-01  Price Changed  $595,000   ← current
+  //
+  // `reduced_amount` = 104,975 = 699,975 − 595,000. It is **THE MOST RECENT CUT** — NOT the
+  // cut from the original ask, which is 765,000 − 595,000 = **$170,000**.
+  //
+  // So "came down by $104,975 from the original ask" understated the real cut by $65,025,
+  // and implied an original ask of $699,975 — a price this home held only as a MID-CYCLE
+  // step. A back-solved number is still an invented one.
+  //
+  // This is THIS FILE'S OWN REFUTED DISEASE, reincarnated one layer up: a real, correctly
+  // sourced number **wearing the name of a quantity we do not hold** — structurally
+  // identical to "went under contract after 75 days on market." And it was worse, because
+  // CODE wrote it and wrapped it in a SettledClaim, which is the narrator's licence to
+  // repeat it.
+  //
+  // Delete the word "original" and the sentence becomes TRUE: $104,975 IS exactly the last
+  // cut, and $595,000 IS exactly where it landed. State only that.
+  //
+  // (The true original ask and the full $170,000 cut ARE sourceable — /property-tax-history
+  // carries the whole price history. Reading it is an upgrade, not a fix; tracked as
+  // `listing_price_history_original_ask`.)
   const sentence = facts.price
-    ? `The asking price came down by ${facts.priceReduction} from the original ask, to ${facts.price}.`
-    : `The asking price came down by ${facts.priceReduction} from the original ask.`;
+    ? `The asking price came down by ${facts.priceReduction}, to ${facts.price}.`
+    : `The asking price came down by ${facts.priceReduction}.`;
   return { sentence, anchors: numeralsIn(sentence) };
 }
 
@@ -484,67 +522,74 @@ export function settleAll(facts: ListingFacts, timing: MarketTiming | null): Set
   ].filter((s): s is SettledClaim => s !== null);
 }
 
-// ── The coded grid ───────────────────────────────────────────────────────────
+// ── THE LAYOUT: THE CAMPAIGN CHROME, PLUS ONE MIDDLE BLOCK ───────────────────
 //
-// Mirrors buildListingFlyer's shape (brand-sticky chrome, hero photo, hero, spec
-// rows, commentary, agent card, CTA, footer) because this is the same house — but the
-// HERO leads with the price, the first spec row is the TIMING row, and the CTA asks
-// for a backup offer.
+// What this recipe used to do, and why it was the worst offender in the pile:
 //
-// REPORTED FOR EXTRACTION: this is copy #2 of that grid. Coming Soon, Just Sold and
-// Price Improved will each need copy #3/#4/#5. A parameterized
-// `listingFlyerGrid({ kicker, heroValue, leadStats, ctaLabel })` in listing-flyer.ts
-// is the right home for it — I cannot make that edit (shared file, parallel build).
+//   header · photo · hero(LEFT) · stats[3] · stats[3] · stats[3] · stats[1]
+//
+// FOUR STACKED STAT GRIDS. Ten chunky 32px cells in four rows — a WALL. The strip
+// variant exists precisely to replace that: "five cells in a STRIP read as a spec
+// line; five cells in a GRID read as a wall" (StatsBlock). Same data, entirely
+// different email. `buildLifecycleEmail` now owns the shape:
+//
+//   header · RIBBON("Under Contract") · photo · hero(address over price) · SPEC STRIP
+//          · [THE TIMING LINE — this recipe's own middle] · narrative
+//          · agent card · CTA("Submit a Backup Offer") · footer
+//
+// The spec strip is the SAME six cells the New Listing flyer wears (`listingSpecs`),
+// off the SAME resolved record — one shared authority, so a subscriber who got the
+// New Listing email in April sees the identical spec line here in July. The PRICE
+// moved out of the cells and into the hero, where the chrome puts it, so it is stated
+// once and not twice.
 
-const EDITORIAL_STYLE = {
-  primaryColor: "#0A2A2C",
-  accentColor: "#B98F45",
-  fontFamily: "BOOK_SERIF" as FontFamily,
-  displayFontFamily: "PLAYFAIR_SERIF" as FontFamily,
-  textColor: "#23302F",
-  backdropColor: "#EFE9DD",
-};
-
-function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock {
-  return current.blocks.find((b) => b.type === type) ?? createBlock(type);
-}
-
-function withCommas(n?: string): string | undefined {
-  const digits = (n ?? "").replace(/[^\d]/g, "");
-  return digits ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : undefined;
-}
-
-/** price ÷ sqft. Both must parse, or the cell is an open slot — never fabricated. */
-function pricePerSqft(price?: string, sqft?: string): string | undefined {
-  const p = Number((price ?? "").replace(/[^\d.]/g, ""));
-  const s = Number((sqft ?? "").replace(/[^\d.]/g, ""));
-  if (!p || !s || !Number.isFinite(p) || !Number.isFinite(s)) return undefined;
-  return "$" + Math.round(p / s).toLocaleString("en-US");
-}
-
-function shortType(t?: string): string | undefined {
-  if (!t) return undefined;
-  const seg =
-    t
-      .split(/\s[-–—]\s/)
-      .pop()
-      ?.trim() || t.trim();
-  return seg.slice(0, 24) || undefined;
-}
-
-/** A stat cell. A value we cannot source becomes an OPEN SLOT: an empty value whose
- *  LABEL is the instruction (the house rule — lib/email/CLAUDE.md, THE SLOT RULE).
- *  On the canvas that is an editable invitation; under `emailRender` StatsBlock drops
- *  the cell, and drops the row when none survive. Never a zero, never a naked label. */
-function cell(value: string | undefined, label: string, instruction: string): StatItem {
-  const v = value?.trim();
-  return v
-    ? { value: v.slice(0, 24), label: label.slice(0, 60) }
-    : { value: "", label: instruction.slice(0, 60) };
-}
-
-function at<T extends EmailBlock>(block: T, y: number, h: number, opts?: Partial<BlockLayout>): T {
-  return { ...block, layout: { x: 0, y, w: 12, h, ...opts } };
+/**
+ * THIS RECIPE'S ONE MIDDLE BLOCK — THE TIMING LINE.
+ *
+ * The registry prompt asks to "set its time on the market against the area's typical
+ * days on market." SET AGAINST — *in the LAYOUT*. Two precisely-labelled facts sitting
+ * side by side, related by NO SENTENCE, anywhere, ever (see THE NON-COMMENSURABILITY
+ * in the header: `median_dom` is a COMPLETED duration over homes that SOLD; the
+ * subject's is a RUNNING count on a home that has not).
+ *
+ *   Listed            — a DATE we hold (the vendor's `list_date`). Asserts no interval.
+ *   Days Since Listed — today − list_date. A RUNNING AGE. The label says exactly that:
+ *     never "Days on Market" (an MLS term of art whose clock stops at pending), never
+ *     "Days to Contract" (held by no source — that is the fabrication that shipped).
+ *   Typical Days to Sell in {zip} — `median_dom`. The label says TO SELL because that
+ *     is what it measures.
+ *
+ * NO CELL IS EMPHASISED. Emphasis says WHICH NUMBER WINS THE ARGUMENT — and the whole
+ * point of this line is that these two clocks make no argument against each other. A
+ * `primary` here would be a comparison drawn in typography, and a comparison is a
+ * factual claim whichever layer states it.
+ *
+ * It is a STRIP, not a grid: the campaign has exactly one stat device, and a wall of
+ * chunky cells is the thing this migration exists to delete. PURE.
+ */
+export function timingLine(opts: {
+  listedOn: string | null;
+  daysListed: number | null;
+  timing: MarketTiming | null;
+  zip?: string;
+}): EmailBlock {
+  const { listedOn, daysListed, timing } = opts;
+  const zip = timing?.zip ?? opts.zip;
+  const cells: StatItem[] = [
+    spec(listedOn ?? undefined, "Listed"),
+    spec(daysListed == null ? undefined : String(daysListed), "Days Since Listed"),
+    spec(
+      timing ? String(timing.areaDom) : undefined,
+      zip ? `Typical Days to Sell in ${zip}` : "Typical Days to Sell Nearby",
+    ),
+  ];
+  return {
+    id: createBlock("stats").id,
+    type: "stats",
+    props: { stats: cells, variant: "strip" },
+    // The chrome reads `layout.h` to stack it; x/y are re-assigned there.
+    layout: { x: 0, y: 0, w: 12, h: 3 },
+  };
 }
 
 export interface UnderContractGridOpts {
@@ -558,153 +603,45 @@ export interface UnderContractGridOpts {
   timing: MarketTiming | null;
 }
 
-/** PURE: facts → the positioned EmailDoc. No I/O, so the test drives it with fixture
- *  data and makes zero live calls. */
+/** PURE: facts → the positioned EmailDoc, wearing the campaign chrome. No I/O, so the
+ *  test drives it with fixture data and makes zero live calls.
+ *
+ *  Never refuses (RULE 0.7): no photo → a canvas dropzone; no list date → an open slot
+ *  whose LABEL is the instruction; no area median → an open slot. Never a zero. */
 export function buildUnderContractGrid(opts: UnderContractGridOpts): EmailDoc {
   const { facts, current, listedOn, daysListed, timing } = opts;
 
-  // Brand is STICKY — a real user brand carries through untouched; only a still-house
-  // default falls back to the editorial palette.
-  const brandIsHouse = current.globalStyle.accentColor === DEFAULT_GLOBAL_STYLE.accentColor;
-  const globalStyle = brandIsHouse
-    ? { ...current.globalStyle, ...EDITORIAL_STYLE }
-    : { ...current.globalStyle };
-
-  const addressLine =
-    facts.address ?? ([facts.city, facts.state].filter(Boolean).join(", ") || undefined);
-
-  const blocks: EmailBlock[] = [];
-  let y = 0;
-  const push = (block: EmailBlock, h: number, o?: Partial<BlockLayout>) => {
-    blocks.push(at(block, y, h, o));
-    y += h;
-  };
-
-  // 1. Header — the agent's branded header.
-  push(keepOrDefault(current, "header"), 2);
-
-  // 2. Hero PHOTO — the real listing photo (mirrored into our storage by the
-  //    resolver), else an EMPTY image block: a drag-drop upload on the canvas,
-  //    absent from the email.
-  push(
-    facts.photos[0]
-      ? heroPhotoBlock({
+  return buildLifecycleEmail(current, {
+    // The ONE word that tells a reader which email in the campaign this is.
+    ribbon: "Under Contract",
+    photo: facts.photos[0]
+      ? {
           url: facts.photos[0],
           alt: facts.address ?? "Property under contract",
           linkUrl: facts.sourceUrl,
-        })
-      : {
-          id: createBlock("image").id,
-          type: "image",
-          props: { url: "", kind: "photo", alt: facts.address ?? "Property under contract" },
-        },
-    6,
-  );
-
-  // 3. Hero — "Under Contract" + the PRICE.
-  //
-  //    The old hero led with "75 days on market" — the fabricated interval, in the
-  //    largest type on the page. The price is what a backup-offer reader actually
-  //    needs and it is a hard sourced fact. The hero has no emailRender suppression,
-  //    so it must never be a naked kicker: with no price, the kicker still carries the
-  //    address in its label.
-  push(
-    {
-      id: createBlock("hero").id,
-      type: "hero",
-      props: {
-        kicker: "Under Contract",
-        value: (facts.price ?? "").slice(0, 24),
-        label: addressLine ?? "",
-      },
-    },
-    3,
-  );
-
-  // 4a. THE TIMING ROW — the spec's "time on the market, set against the area's
-  //     typical." SET AGAINST, in the LAYOUT: two precisely-labelled facts side by
-  //     side. Not related by any sentence, anywhere, ever.
-  //
-  //     Listed            — a DATE we hold (vendor list_date). Asserts no interval.
-  //     Days Since Listed — today − list_date. A RUNNING AGE. The label says exactly
-  //       that: not "Days on Market" (an MLS term of art whose clock stops at
-  //       pending) and never "Days to Contract" (held by no source; the fabrication).
-  //     Typical Days to Sell in {zip} — median_dom. The label says TO SELL because
-  //       that is what it measures: a COMPLETED duration over homes that SOLD. The
-  //       two labels name two different quantities on their face, which is the point
-  //       — and neither number is ever handed to the narrator, so the email can never
-  //       contain the sentence that relates them.
-  const zip = timing?.zip ?? facts.zip;
-  push(
-    {
-      id: createBlock("stats").id,
-      type: "stats",
-      props: {
-        stats: [
-          cell(listedOn ?? undefined, "Listed", "Listed — type the date it hit the market"),
-          cell(
-            daysListed == null ? undefined : String(daysListed),
-            "Days Since Listed",
-            "Days Since Listed — type how long it has been listed",
-          ),
-          cell(
-            timing ? String(timing.areaDom) : undefined,
-            zip ? `Typical Days to Sell in ${zip}` : "Typical Days to Sell Nearby",
-            "Typical days to sell — add your area's figure",
-          ),
-        ],
-      },
-    },
-    2,
-  );
-
-  // 4b. The house itself — a backup-offer reader needs to know what they'd be
-  //     backing up on. Every cell sourced from the resolved vendor record.
-  const specs: StatItem[] = [
-    cell(facts.price, "List Price", "List Price — type the asking price"),
-    cell(facts.beds, "Beds", "Beds — type the bedroom count"),
-    cell(facts.baths, "Baths", "Baths — type the bathroom count"),
-    cell(withCommas(facts.sqft), "Sq Ft", "Sq Ft — type the living area"),
-    cell(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft", "$/Sq Ft — needs price and sq ft"),
-    cell(facts.lotSize, "Lot", "Lot — type the lot size"),
-    cell(shortType(facts.propertyType), "Type", "Type — type the property type"),
-  ];
-  for (let i = 0; i < specs.length; i += 3) {
-    push(
-      { id: createBlock("stats").id, type: "stats", props: { stats: specs.slice(i, i + 3) } },
-      2,
-    );
-  }
-
-  // 5. Commentary — EMPTY here by design. The builder clears every text slot and the
-  //    narrator writes into it (fillNarrative SKIPS a slot that already has content —
-  //    that landmine shipped 2,000 characters of raw MLS copy once already).
-  push({ id: createBlock("text").id, type: "text", props: { body: "", align: "left" } }, 4);
-
-  // 6. NO CHART SLOT. The registry declares `chart: "none"` and the slot is never
-  //    CREATED — not "reserved then dropped". dom-vs-area needed this home's
-  //    days-to-contract as its subject bar; that bar can never be honestly drawn, and
-  //    a box that could only ever be empty should not be built. A fabricated
-  //    comparison rendered as a PICTURE is worse than in prose: a chart reads as
-  //    measured. New Listing, the reference implementation, also ships no chart.
-
-  // 7. Agent card — the agent's own, if the canvas had one.
-  push(keepOrDefault(current, "agent-card"), 4);
-
-  // 8. CTA — the whole ask of this email.
-  push(
-    {
-      id: createBlock("button").id,
-      type: "button",
-      props: { label: "Submit a Backup Offer", url: facts.sourceUrl },
-    },
-    2,
-  );
-
-  // 9. Footer — CAN-SPAM address, socials, unsubscribe. The agent's own.
-  push(keepOrDefault(current, "footer"), 3, { static: true });
-
-  return { globalStyle, blocks };
+        }
+      : null,
+    // Address over price — the chrome centres it. The old hero led with "75 days on
+    // market": the fabricated interval, in the largest type on the page.
+    heroValue: facts.price ?? "",
+    heroLabel: addressLineOf(facts),
+    // The campaign's spec line, from the shared authority. Identical to New Listing's.
+    specs: listingSpecs(facts),
+    specFootnote: specFootnote(facts),
+    // THIS RECIPE'S OWN CONTENT. There is NO CHART: the registry declares
+    // `chart: "none"` and the slot is never CREATED — not "reserved then dropped".
+    // dom-vs-area needed this home's days-to-contract as its subject bar; that bar can
+    // never be honestly drawn, and a fabricated comparison rendered as a PICTURE is
+    // worse than one in prose — a chart reads as measured.
+    middle: [timingLine({ listedOn, daysListed, timing, zip: facts.zip })],
+    // "" = an OPEN SLOT. The builder clears every text slot and the narrator writes
+    // into it (fillNarrative SKIPS a slot that already has content — that landmine
+    // shipped 2,000 characters of raw MLS copy once already).
+    narrative: "",
+    // THE NEXT ACTION — not a restatement of what the reader is already looking at.
+    ctaLabel: "Submit a Backup Offer",
+    ctaUrl: facts.sourceUrl,
+  });
 }
 
 // ── PROSE — and why this recipe does NOT use `authorListingNarrative` ────────

@@ -12,10 +12,12 @@ import {
   buildJustSoldSpec,
   closeFrom,
   realSaleComps,
-  statRows,
+  soldFootnote,
+  soldSpecs,
   subjectRow,
   withSubjectRowFacts,
 } from "./just-sold";
+import type { StatItem } from "@/lib/email/doc/types";
 import type { RenderComp } from "@/lib/assistant/comp-helper";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
@@ -133,7 +135,12 @@ describe("withSubjectRowFacts — the SOLD-SUBJECT gap", () => {
   });
 });
 
-describe("statRows — THE PAIRING RULE (found by looking at the render)", () => {
+// ── THE SPEC STRIP. The campaign chrome (lib/email/lifecycle-chrome.ts) gives every
+// lifecycle email ONE hairline row; the recipe only chooses the cells. The old two
+// stat GRIDS are gone — that layout was one of the seven that made a campaign look
+// like seven companies. The sourcing rules underneath did not change, so every guard
+// below is the same guard, now asserted against the strip.
+describe("soldSpecs — THE PAIRING RULE (found by looking at the render)", () => {
   const active: ListingFacts = {
     address: "326 Shore Dr",
     price: "$595,000", // the ASK — the house has not sold
@@ -144,47 +151,110 @@ describe("statRows — THE PAIRING RULE (found by looking at the render)", () =>
     sourceUrl: "x",
   };
 
-  it("with NO close, the list price does NOT render — an ask alone under a JUST SOLD kicker reads as the close", () => {
-    // StatsBlock drops empty cells on emailRender and centers a LONE survivor at
-    // hero scale. With only "List Price" left, the email said the house closed at
-    // its asking price — every word true, the page still lying.
-    const [sale] = statRows(active, null);
-    expect(sale.map((c) => c.value)).toEqual(["", "", ""]);
-    expect(sale.map((c) => c.label)).toEqual(["Sale Price", "List Price", "List-to-Sale"]);
+  const cell = (strip: StatItem[], label: string) => strip.find((c) => c.label === label);
+
+  it("is ONE strip — the chrome's single hairline row, never a wall of stat grids", () => {
+    const strip = soldSpecs(active, { price: 613_850, date: "2026-05-20" });
+    expect(strip.map((c) => c.label)).toEqual([
+      "Beds",
+      "Baths",
+      "Sq Ft",
+      "$/Sq Ft",
+      "List Price",
+      "List-to-Sale",
+    ]);
   });
 
-  it("NEVER puts the list price in the Sale Price cell", () => {
-    const [sale] = statRows(active, null);
-    expect(sale.find((c) => c.label === "Sale Price")?.value).toBe("");
-    expect(sale.map((c) => c.value).join()).not.toContain("595,000");
+  it("NEVER carries the close — the hero says it once, and once is enough", () => {
+    // The old layout printed the hero's own $300,000 again, at the same scale, in a
+    // stat row directly beneath it. The HTML greps clean; only the screenshot showed it.
+    const strip = soldSpecs(active, { price: 613_850, date: "2026-05-20" });
+    expect(strip.some((c) => c.label === "Sale Price")).toBe(false);
+    expect(strip.map((c) => c.value).join()).not.toContain("613,850");
   });
 
-  it("with a close, the sale row fills and list-to-sale is computed from TWO sourced numbers", () => {
-    const [sale] = statRows(active, { price: 613_850, date: "2026-05-20" });
-    expect(sale[0]).toEqual({ value: "$613,850", label: "Sale Price" });
-    expect(sale[1]).toEqual({ value: "$595,000", label: "List Price" });
-    expect(sale[2]).toEqual({ value: "103.2%", label: "List-to-Sale" }); // 613850/595000
+  it("with NO close, the list price does NOT render — an ask under a JUST SOLD ribbon reads as the close", () => {
+    // With the close an open slot, "$595,000 / List Price" standing in the strip under
+    // a gold JUST SOLD ribbon says the house closed at its asking price. Every word
+    // true; the page still lying. All-or-nothing on the PAIR.
+    const strip = soldSpecs(active, null);
+    expect(cell(strip, "List Price")?.value).toBe("");
+    expect(cell(strip, "List-to-Sale")?.value).toBe("");
+    expect(strip.map((c) => c.value).join()).not.toContain("595,000");
   });
 
-  it("with a close but NO ask (the REAL sold-house case), the whole row stays open — the hero already carries the close", () => {
-    // The for-sale feed cannot see a sold home, so `facts.price` is absent. Rendering
-    // the lone "Sale Price" cell repeated the hero's own $300,000 directly beneath
-    // it, at the same scale. A comparison row with nothing to compare is not a row.
+  it("with a close, the ask + list-to-sale fill, computed from TWO sourced numbers", () => {
+    const strip = soldSpecs(active, { price: 613_850, date: "2026-05-20" });
+    expect(cell(strip, "List Price")).toEqual({
+      value: "$595,000",
+      label: "List Price",
+      emphasis: "muted",
+    });
+    expect(cell(strip, "List-to-Sale")).toEqual({
+      value: "103.2%", // 613850 / 595000
+      label: "List-to-Sale",
+      emphasis: "primary",
+    });
+  });
+
+  it("$/Sq Ft is the SALE price ÷ sq ft — never the ask ÷ sq ft", () => {
+    // 613850 / 2847 = $216. The ask would have given $209 — a real number answering
+    // the wrong question, which is this recipe's whole disease.
+    expect(cell(soldSpecs(active, { price: 613_850, date: null }), "$/Sq Ft")?.value).toBe("$216");
+    // No close → no sold $/sq ft. It does NOT quietly fall back to the ask.
+    expect(cell(soldSpecs(active, null), "$/Sq Ft")?.value).toBe("");
+  });
+
+  it("with a close but NO ask (the REAL sold-house case), the price cells stay open", () => {
+    // The for-sale feed cannot see a sold home, so `facts.price` is absent. The hero
+    // carries the close on its own; a comparison cell with nothing to compare is not a cell.
     const sold: ListingFacts = { address: "330 Shore Dr", photos: [], sourceUrl: "x" };
-    const [sale] = statRows(sold, { price: 300_000, date: "2025-08-29" });
-    expect(sale.map((c) => c.value)).toEqual(["", "", ""]); // never back-solved, never duplicated
+    const strip = soldSpecs(sold, { price: 300_000, date: "2025-08-29" });
+    expect(cell(strip, "List Price")?.value).toBe("");
+    expect(cell(strip, "List-to-Sale")?.value).toBe(""); // never back-solved from one number
   });
 
   it("an unsourced spec is an OPEN SLOT, never a zero", () => {
     const bare: ListingFacts = { address: "x", photos: [], sourceUrl: "x" };
-    const [, home] = statRows(bare, null);
-    expect(home.map((c) => c.value)).toEqual(["", "", ""]);
-    expect(home.map((c) => c.value).join()).not.toContain("0");
+    const strip = soldSpecs(bare, null);
+    expect(strip.map((c) => c.value)).toEqual(["", "", "", "", "", ""]);
+    expect(strip.map((c) => c.value).join()).not.toContain("0");
   });
 
   it("formats sqft with a comma", () => {
-    const [, home] = statRows(active, null);
-    expect(home[2]).toEqual({ value: "2,847", label: "Sq Ft" });
+    expect(cell(soldSpecs(active, null), "Sq Ft")?.value).toBe("2,847");
+  });
+});
+
+describe("soldFootnote — a derived cell says where it came from", () => {
+  const active: ListingFacts = {
+    address: "326 Shore Dr",
+    price: "$595,000",
+    sqft: "2847",
+    photos: [],
+    sourceUrl: "x",
+  };
+
+  it("names BOTH derivations when both cells rendered", () => {
+    const note = soldFootnote(active, { price: 613_850, date: null });
+    expect(note).toContain("$/Sq Ft is the sale price ÷ listed square footage");
+    expect(note).toContain("List-to-Sale is the sale price ÷ the list price");
+  });
+
+  it("names only what rendered — a sold house with no ask has no list-to-sale", () => {
+    const sold: ListingFacts = {
+      address: "330 Shore Dr",
+      sqft: "1736",
+      photos: [],
+      sourceUrl: "x",
+    };
+    const note = soldFootnote(sold, { price: 300_000, date: null });
+    expect(note).toContain("$/Sq Ft");
+    expect(note).not.toContain("List-to-Sale");
+  });
+
+  it("is absent with no close — nothing was computed, so nothing is claimed", () => {
+    expect(soldFootnote(active, null)).toBeUndefined();
   });
 });
 

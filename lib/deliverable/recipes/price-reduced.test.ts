@@ -1,6 +1,7 @@
 // lib/deliverable/recipes/price-reduced.test.ts
 //
-// R7 · PRICE IMPROVED — the acceptance oracle for THE ARITHMETIC OF A PRICE CUT.
+// R7 · PRICE IMPROVED — the acceptance oracle for THE ARITHMETIC OF A PRICE CUT,
+// now built on THE ONE CAMPAIGN CHROME (lib/email/lifecycle-chrome.ts).
 //
 // This recipe's failure mode is not an ugly email. It is a LIE ABOUT SOMEONE'S HOUSE.
 //
@@ -14,8 +15,13 @@
 // The second failure mode is the NARRATOR. open-house.ts found (live) that Sonnet,
 // handed the cut, wrote itself a market rationale every time. We cannot take the cut
 // away from it — the cut is this recipe's entire hat — so the framing forbids the
-// inventions by name, and the tests below assert the seed's own coaching note (which
-// asks for TWO of them: "a motivated seller", "room to negotiate") never survives.
+// inventions by name, and the tests below assert no coaching note ever survives.
+//
+// The third — new, 07/13/2026 — is DRIFT. This email used to own its own grid (hero
+// LEFT, a 2-cell price block beside it, TWO stacked stat rows, and no agent card at
+// all), and so did its six siblings. Seven emails in one campaign, seven layouts. The
+// chrome tests below pin it back onto the shared spine; campaign-coherence.test.ts is
+// the cross-recipe oracle.
 //
 // Fully offline: the Anthropic client and the photo mirror are stubbed, so this suite
 // makes ZERO network calls and costs nothing to run.
@@ -24,6 +30,7 @@ import { test, expect, mock, afterAll, describe } from "bun:test";
 import * as realAnthropic from "@/refinery/agents/anthropic.mts";
 import * as realMirror from "@/lib/media/hero-photo";
 import { RECIPES } from "@/lib/deliverable/recipes";
+import { EmailDocSchema } from "@/lib/email/doc/schema";
 import type { RecipeBuildContext } from "./index";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
@@ -50,7 +57,7 @@ const SHORE_DR: ListingFacts = {
   sourceUrl: "https://www.swfldatagulf.com",
 };
 
-const NARRATIVE = "A three-bedroom home on a quarter-acre lot east of the river.";
+const NARRATIVE = "A three-bedroom home on a quarter-acre lot.";
 
 // mock.module is process-global and mock.restore() does NOT undo it — snapshot and
 // restore, the repo's established pattern (lib/email/build-doc-listing.test.ts).
@@ -102,9 +109,108 @@ const statsRows = (doc: EmailDoc): StatItem[][] =>
 const allCells = (doc: EmailDoc): StatItem[] => statsRows(doc).flat();
 const cellNamed = (doc: EmailDoc, label: string): StatItem | undefined =>
   allCells(doc).find((c) => c.label === label);
+
+/** The chrome lays down TWO hero blocks: the RIBBON band (kicker only) and the SUBJECT
+ *  hero (address over price). This is the subject one. */
 const heroOf = (doc: EmailDoc) =>
-  doc.blocks.find((b) => b.type === "hero")?.props as
-    { kicker?: string; value?: string; label?: string } | undefined;
+  doc.blocks.find((b) => b.type === "hero" && !b.props.ribbon)?.props as
+    { kicker?: string; value?: string; label?: string; align?: string; order?: string } | undefined;
+const ribbonOf = (doc: EmailDoc) =>
+  doc.blocks.find((b) => b.type === "hero" && b.props.ribbon)?.props as
+    { kicker?: string } | undefined;
+const spine = (doc: EmailDoc): string[] =>
+  [...doc.blocks]
+    .sort((a, b) => (a.layout?.y ?? 0) - (b.layout?.y ?? 0))
+    .map((b) => {
+      if (b.type === "hero") return b.props.ribbon ? "hero:ribbon" : "hero:subject";
+      if (b.type === "stats") return b.props.variant === "strip" ? "stats:strip" : "stats:grid";
+      if (b.type === "image") return `image:${String(b.props.kind ?? "?")}`;
+      return b.type;
+    });
+
+// ── THE CAMPAIGN CHROME — this email is a SIBLING, not a one-off ────────────────
+
+describe("it wears the one campaign chrome", () => {
+  test("the spine is the campaign's, in order", async () => {
+    const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
+    // header · RIBBON · photo · hero(address over price) · spec strip · narrative
+    //        · agent card · CTA · footer. The recipe owns the WORDS, never the SHAPE.
+    expect(spine(doc)).toEqual([
+      "header",
+      "hero:ribbon",
+      "image:photo",
+      "hero:subject",
+      "stats:strip",
+      "text",
+      "agent-card",
+      "button",
+      "footer",
+    ]);
+  });
+
+  test("the ribbon word is what says WHICH email this is", async () => {
+    const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
+    expect(ribbonOf(doc)!.kicker).toBe("Price Improved");
+  });
+
+  test("ONE hairline strip — never the two stacked stat walls this file used to emit", async () => {
+    const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
+    expect(statsRows(doc)).toHaveLength(1);
+    expect(spine(doc).filter((s) => s === "stats:grid")).toHaveLength(0);
+  });
+
+  test("the agent SIGNS it — this recipe used to ship no agent card at all", async () => {
+    const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
+    expect(doc.blocks.some((b) => b.type === "agent-card")).toBe(true);
+  });
+
+  test("the hero is CENTRED, address over price — like every other email in the campaign", async () => {
+    const hero = heroOf((await buildPriceReduced(ctx(SHORE_DR)))!)!;
+    expect(hero.align).toBe("center");
+    expect(hero.order).toBe("label-first");
+  });
+
+  test("the CTA asks for the NEXT ACTION, never 'See the New Price'", async () => {
+    const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
+    const buttons = doc.blocks.filter((b) => b.type === "button");
+    expect(buttons).toHaveLength(1);
+    // Operator, 07/13/2026: "why would the button be SEE THE NEW PRICE when we already
+    // show the price". The hero IS the new price. A button pointing at what the reader
+    // is already looking at asks them to do nothing.
+    expect((buttons[0]!.props as { label?: string }).label).toBe("Schedule a Showing");
+    const html = await renderEmailDocHtml(doc);
+    expect(html).not.toContain("See the New Price");
+  });
+
+  test("the BRAND is sticky — a user's colours are never authored over", async () => {
+    const branded = defaultDoc();
+    branded.globalStyle = { ...branded.globalStyle, accentColor: "#123456" };
+    const doc = (await buildPriceReduced(ctx(SHORE_DR, branded)))!;
+    expect(doc.globalStyle.accentColor).toBe("#123456");
+  });
+
+  test("THE BUILT DOC PARSES — an invalid doc silently becomes the GENERIC AUTHOR", async () => {
+    // THE BUG THIS TEST EXISTS FOR (caught 07/13/2026, and ONLY by building through the
+    // real authorDoc path — this suite and campaign-coherence.test.ts were both GREEN):
+    //
+    // The strip carried SEVEN cells. `EmailDocSchema` caps a stats row at SIX. So the
+    // builder returned a doc that FAILED VALIDATION, build-doc fell through to the
+    // generic author, and the email the user actually got was written by a model with no
+    // framing at all: "one of the sharpest values on the waterfront today", "Fort Myers
+    // values have pulled back meaningfully from their 2023 peak" — a market analysis, a
+    // comparison, and a value judgment, which are the three things this recipe's entire
+    // framing exists to forbid. Every no-invention guard in this file was bypassed by a
+    // CELL COUNT.
+    //
+    // A recipe that fails to parse does not fail loudly. It fails as a DIFFERENT EMAIL.
+    for (const f of [SHORE_DR, WITH_REMARKS, { ...SHORE_DR, isPriceReduced: false }]) {
+      const doc = (await buildPriceReduced(ctx(f)))!;
+      const parsed = EmailDocSchema.safeParse(doc);
+      expect(parsed.success, JSON.stringify(parsed.error?.issues?.slice(0, 3))).toBe(true);
+      for (const row of statsRows(doc)) expect(row.length).toBeLessThanOrEqual(6);
+    }
+  });
+});
 
 // ── THE ARITHMETIC — the lie-guard ──────────────────────────────────────────────
 
@@ -144,8 +250,8 @@ describe("the cut renders ABOVE the price, smaller, in a different color", () =>
   test("the kicker carries the cut and the hero value carries the new price", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
     const hero = heroOf(doc)!;
-    // HeroBlock renders kicker directly above value, at 11px (value: 40px) in
-    // globalStyle.accentColor (the value renders in the text color). That IS the ruling.
+    // The chrome's hero renders a non-ribbon kicker at 11px in globalStyle.accentColor,
+    // above the address (27px) and the price (48px accent). That IS the ruling.
     expect(hero.kicker).toBe("Price cut $104,975");
     expect(hero.value).toBe("$595,000");
   });
@@ -166,7 +272,8 @@ describe("the cut renders ABOVE the price, smaller, in a different color", () =>
 
   test("a house with NO reduction never ships the words 'Price cut' over nothing", async () => {
     const doc = (await buildPriceReduced(ctx({ ...SHORE_DR, isPriceReduced: false })))!;
-    expect(heroOf(doc)!.kicker).toBe("");
+    // A falsy kicker is dropped by the chrome entirely — the prop never lands.
+    expect(heroOf(doc)!.kicker ?? "").toBe("");
     // …and the previous-price cell is an OPEN SLOT, not a fabricated anchor.
     expect(cellNamed(doc, "Previous Price")!.value).toBe("");
     // The recipe presupposes a cut; with none, it still BUILDS (RULE 0.7 — never refuse).
@@ -177,26 +284,46 @@ describe("the cut renders ABOVE the price, smaller, in a different color", () =>
 // ── CELLS: sourced, or an open slot. Never a zero. ──────────────────────────────
 
 describe("every cell is sourced or open", () => {
+  test("the strip is the campaign's spec line, with the price ANCHOR in front", async () => {
+    const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
+    // The shared line (listingSpecs) minus TYPE — the muted context cell nobody reads on
+    // an email whose subject is a number that MOVED. It had to go: six is the schema's
+    // hard cap on a stats row, and the anchor earns the slot.
+    expect(allCells(doc).map((c) => c.label)).toEqual([
+      "Previous Price",
+      "Beds",
+      "Baths",
+      "Sq Ft",
+      "Lot",
+      "$/Sq Ft",
+    ]);
+  });
+
   test("the key specs come from the record", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
     expect(cellNamed(doc, "Beds")!.value).toBe("3");
     expect(cellNamed(doc, "Baths")!.value).toBe("3.5");
     expect(cellNamed(doc, "Sq Ft")!.value).toBe("2,847");
     expect(cellNamed(doc, "Lot")!.value).toBe("0.26 ac"); // ACRES — never re-converted
-    expect(cellNamed(doc, "Type")!.value).toBe("Residential");
   });
 
-  test("$/Sq Ft is computed on the NEW price", async () => {
+  test("$/Sq Ft is computed on the NEW price, and WINS the strip", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
     // 595,000 ÷ 2,847 = $209. The cut is the point; the new $/sqft is what it bought.
     expect(cellNamed(doc, "$/Sq Ft")!.value).toBe("$209");
+    expect(cellNamed(doc, "$/Sq Ft")!.emphasis).toBe("primary");
   });
 
-  test("Days on Market is an OPEN SLOT — we hold no such field at all", async () => {
+  test("the previous price is MUTED — it must never out-shout the price you can pay", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
-    const dom = cellNamed(doc, "Days on Market")!;
-    expect(dom.value).toBe(""); // never a 0, never a guess
-    expect(dom.label).toBe("Days on Market"); // the label IS the instruction
+    expect(cellNamed(doc, "Previous Price")!.emphasis).toBe("muted");
+  });
+
+  test("both DERIVED cells state their provenance under the strip", async () => {
+    const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
+    const strip = doc.blocks.find((b) => b.type === "stats")!.props as { footnote?: string };
+    expect(strip.footnote).toContain("list price ÷ listed square footage");
+    expect(strip.footnote).toContain("Previous price = this asking price plus the reduction");
   });
 
   test("NOT ONE cell is a zero", async () => {
@@ -229,6 +356,12 @@ describe("no chart", () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
     const photo = doc.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
     expect((photo!.props as { url?: string }).url).toBe(SHORE_DR.photos[0]);
+  });
+
+  test("no photo → an OPEN SLOT (a canvas dropzone), never a stock image", async () => {
+    const doc = (await buildPriceReduced(ctx({ ...SHORE_DR, photos: [] })))!;
+    const photo = doc.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
+    expect((photo!.props as { url?: string }).url).toBe("");
   });
 });
 
@@ -271,11 +404,11 @@ describe("the narrator", () => {
     expect(body).toBe(NARRATIVE);
   });
 
-  test("the seed's coaching note NEVER survives into the body", async () => {
-    // The committed skeleton prefills this slot with "Say why this is a good value
-    // now — what changed, and why a motivated seller means room to negotiate."
-    // fillNarrative SKIPS a non-empty text block, so an uncleared slot ships it — a
-    // canvas note asking for two claims we cannot source, sent as the agent's prose.
+  test("no coaching note EVER survives into the body", async () => {
+    // The committed skeleton once prefilled this slot with "Say why this is a good value
+    // now — what changed, and why a motivated seller means room to negotiate." A canvas
+    // note asking for two claims we cannot source, sent as the agent's prose.
+    // fillNarrative SKIPS a non-empty text block, so the slot is cleared FIRST, always.
     for (const f of [SHORE_DR, WITH_REMARKS]) {
       const doc = (await buildPriceReduced(ctx(f)))!;
       const body =
@@ -285,7 +418,7 @@ describe("the narrator", () => {
     }
   });
 
-  test("a failed narrator leaves an OPEN SLOT, not the coaching note", async () => {
+  test("a failed narrator leaves an OPEN SLOT, not a half-written pitch", async () => {
     mock.module("@/refinery/agents/anthropic.mts", () => ({
       ...realAnthropic,
       getAnthropic: () => ({
@@ -298,7 +431,7 @@ describe("the narrator", () => {
     }));
     const doc = (await buildPriceReduced(ctx(WITH_REMARKS)))!;
     const body = (doc.blocks.find((b) => b.type === "text")!.props as { body?: string }).body ?? "";
-    expect(body).toBe(""); // cleared, and left open — never the seed's pitch note
+    expect(body).toBe(""); // cleared, and left open — never a fabrication
     // restore the good narrator for the tests below
     mock.module("@/refinery/agents/anthropic.mts", () => ({
       ...realAnthropic,
@@ -337,30 +470,31 @@ describe("the narrator", () => {
 // ── THE SENT ARTIFACT. The canvas lies about the email; verify the real renderer. ─
 
 describe("the sendable email (renderEmailDocHtml — what the recipient actually gets)", () => {
-  test("the cut, the new price and the previous price all ship", async () => {
+  test("the ribbon, the cut, the new price and the previous price all ship", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
     const html = await renderEmailDocHtml(doc);
+    expect(html).toContain("Price Improved"); // the campaign ribbon band
     expect(html).toContain("Price cut $104,975");
     expect(html).toContain("$595,000");
     expect(html).toContain("$699,975");
     expect(html).toContain("326 Shore Dr, Fort Myers, FL 33905");
   });
 
-  test("the OPEN SLOT does not exist in the email — no naked label to a recipient", async () => {
-    const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
+  test("an OPEN SLOT does not exist in the email — no naked label to a recipient", async () => {
+    // Drop the one cell we cannot source on this fixture and confirm the label vanishes
+    // from the sent bytes while its sourced siblings survive (StatsBlock, emailRender).
+    const doc = (await buildPriceReduced(ctx({ ...SHORE_DR, lotSize: undefined })))!;
     const html = await renderEmailDocHtml(doc);
-    // On the canvas "Days on Market" is an editable invitation. In the SENT email the
-    // cell is dropped entirely (StatsBlock, emailRender) — never a label over nothing.
-    expect(html).not.toContain("Days on Market");
-    // The row survives because its sibling cell IS sourced.
-    expect(html).toContain("Previous Price");
+    expect(cellNamed(doc, "Lot")!.value).toBe(""); // an open slot on the canvas…
+    expect(html).not.toContain(">Lot<"); // …and absent from the email
+    expect(html).toContain("Previous Price"); // the strip itself survives
   });
 
   test("a house with no cut sends no price-cut language at all", async () => {
     const doc = (await buildPriceReduced(ctx({ ...SHORE_DR, isPriceReduced: false })))!;
     const html = await renderEmailDocHtml(doc);
     expect(html).not.toContain("Price cut");
-    expect(html).not.toContain("Previous Price"); // the whole row is unsourced → gone
+    expect(html).not.toContain("Previous Price"); // the cell is unsourced → dropped
     expect(html).toContain("$595,000"); // the honest current ask still ships
   });
 });

@@ -3,31 +3,45 @@
 // R3 · MARKET COMPS — the EVIDENCE email. The one deliverable in the lifecycle that
 // is genuinely ABOUT a number, so it is the one that earns the comps chart.
 //
-// The six answers (playbook Part 6):
+// ── THE LAYOUT IS NOT MINE. IT IS THE CAMPAIGN'S. ─────────────────────────────
+//
+// Operator, 07/13/2026: *"EACH EMAIL WOULD HAVE THE SAME LOOK, JUST DIFFERENT
+// INFORMATION."* It was not the case. This file used to own its own grid — hero-left,
+// photo, stats[3], stats[2], chart, list — and so did the other six, each invented by a
+// different worker because there was nothing to build ONTO. Seven emails from one agent
+// that looked like seven different companies.
+//
+// The shape now comes from ONE place: `buildLifecycleEmail` (lib/email/lifecycle-chrome.ts).
+//
+//   header · RIBBON · photo · hero(centred: address over price) · spec strip
+//          · [MY MIDDLE: the comps chart + the evidence table] · narrative
+//          · [MY TAIL: the sources] · agent card · CTA · footer
+//
+// What is MINE is the ribbon word ("Market Comps"), which cells ride the strip, the
+// chart, the table, the sources and the CTA. THE SHAPE IS NOT MINE TO CHANGE. Enforced
+// by campaign-coherence.test.ts.
+//
+// The five answers that ARE still mine (playbook Part 6):
 //
 //   1. SUBJECT — the same resolved house as New Listing. The dispatcher resolved it
 //      (resolveSubject); we never resolve twice. What is DIFFERENT here is that the
 //      subject's own list price is the CLAIM the email defends — so no price, no
 //      argument (we still ship the grid; the case just becomes an open slot).
-//   2. SKELETON — a coded grid in THIS file. `buildListingFlyer` is not reusable: it
-//      hard-codes the "New Listing" kicker, a "View the Full Listing" CTA and a
-//      ZIP-trend chart slot. Wrong hat, wrong chart, and it is shared with R1/R5/R7,
-//      so it cannot be bent without breaking them. No committed SEED_DOCS grid holds
-//      a comp-evidence shape either (the 27 were checked). Coded grid it is.
-//   3. CELLS — the terms of the comparison, each from a real record:
-//        row A (the subject): beds · sq ft · $/sq ft   (vendor row; $/sq ft = price÷sqft)
-//        row B (the evidence): comp median $/sq ft · comp $/sq ft range · the mix
-//      Every one is code-computed from the live comp set. Unsourced → open slot.
-//   4. CHART — comps-bar, and the SUBJECT IS ITS OWN BAR (we hold its list price;
+//   2. CELLS — the strip carries the TERMS OF THE COMPARISON, not a wall of stat rows:
+//        beds · baths · sq ft · $/sq ft THIS HOME (primary — it wins the argument)
+//        · $/sq ft COMP MEDIAN · the comp count (muted)
+//      The footnote under the strip states the derivation, the MIX and the spread.
+//      Every value is code-computed from the live comp set. Unsourced → open slot.
+//   3. CHART — comps-bar, and the SUBJECT IS ITS OWN BAR (we hold its list price;
 //      the chat comp lane omits a subject bar only because ITS subject has no price —
 //      that reasoning does not transfer, so do not cargo-cult it here).
-//   5. PROSE — the straight case for the asking price. This recipe deliberately does
+//   4. PROSE — the straight case for the asking price. This recipe deliberately does
 //      NOT use `authorListingNarrative`: that narrator is told "THIS EMAIL IS ABOUT
 //      THE HOUSE, not the market, not the comps… do not turn this into a market
 //      analysis", which is exactly the email we are writing. It would refuse the job.
 //      Ours permits the price argument and keeps every no-invention guardrail.
-//   6. FRAMING — "Market Comps" kicker, the ASK + address as the hero (it is the claim
-//      under examination), the comp table as the body, one honest read as the close.
+//   5. CTA — "Talk Through These Numbers". The next action, never a pointer back at the
+//      comps the reader is already looking at.
 //
 // ── THE HARD RULE, LEARNED THE HARD WAY ──────────────────────────────────────
 // *** A COMP MUST HAVE beds AND sqft, OR IT IS A VACANT LOT. ***
@@ -76,8 +90,9 @@ import {
 } from "@/lib/deliverable/claims";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
-import { createBlock, DEFAULT_GLOBAL_STYLE } from "@/lib/email/doc/default-docs";
-import { heroPhotoBlock } from "@/lib/email/inject-photo";
+import { createBlock } from "@/lib/email/doc/default-docs";
+import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
+import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
 import { buildSoldCompsSpec } from "@/lib/email/sold-comp-blocks";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import {
@@ -87,14 +102,7 @@ import {
 import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
 import { clearNarrativeSlots, dropEmptyChartSlot, fillNarrative } from "./shared";
 import type { RecipeBuildContext } from "./index";
-import type {
-  BlockLayout,
-  EmailBlock,
-  EmailDoc,
-  FontFamily,
-  ListItem,
-  StatItem,
-} from "@/lib/email/doc/types";
+import type { EmailBlock, EmailDoc, ListItem, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
 /** How many comparable HOMES the email shows. The registry prompt says six; if the
@@ -201,203 +209,137 @@ function mixParen(comps: RenderComp[]): string {
   return parts.length ? ` (${parts.join(", ")})` : "";
 }
 
-/** The stat cell's label — "Comparable homes (2 recorded sales, 3 valuations)". */
-function mixLabel(comps: RenderComp[]): string {
-  return `Comparable homes${mixParen(comps)}`;
-}
-
 /** The evidence table's title — the mix again, where the rows actually are. */
 function mixTitle(comps: RenderComp[]): string {
   return `The comparable homes${mixParen(comps)}`;
 }
 
-/** Editorial fallback palette — applied ONLY when the incoming brand is still the house
- *  default. A real user brand carries through untouched. (Same rule as the flyer: brand
- *  is STICKY and is never authored.) */
-const EDITORIAL_STYLE = {
-  primaryColor: "#0A2A2C",
-  accentColor: "#B98F45",
-  fontFamily: "BOOK_SERIF" as FontFamily,
-  displayFontFamily: "PLAYFAIR_SERIF" as FontFamily,
-  textColor: "#23302F",
-  backdropColor: "#EFE9DD",
-};
-
-/** Reuse the canvas's own block of a type (brand/identity is sticky), else a default. */
-function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock {
-  return current.blocks.find((b) => b.type === type) ?? createBlock(type);
+/** Every comp's $/sq ft, ascending. The set this whole email argues over. */
+function compPpsfs(comps: RenderComp[]): number[] {
+  return comps
+    .map((c) => perSqft(c.price, c.sqft))
+    .filter((v): v is number => v != null)
+    .sort((a, b) => a - b);
 }
 
-/** Attach the 12-col grid layout so the doc compiles through the POSITIONED renderer
- *  (compile-grid). A block with no `layout` silently falls to the free stacker — a
- *  DIFFERENT engine (playbook Part 1: "the canvas lies about the email"). */
-function at<T extends EmailBlock>(block: T, y: number, h: number, opts?: Partial<BlockLayout>): T {
-  return { ...block, layout: { x: 0, y, w: 12, h, ...opts } };
+/**
+ * THE SPEC STRIP — the campaign's one hairline row, carrying THE TERMS OF THE COMPARISON.
+ *
+ * This used to be TWO chunky stat grids stacked on each other (row A: the subject; row B:
+ * the evidence) — a wall, and a shape no other email in the campaign wore. The strip is
+ * the campaign's, so the comps email says the same things in the same row: the subject's
+ * spec line, then the ONE number that wins the argument, then the set it is judged against.
+ *
+ *   $/Sq Ft — this home  is `primary`: it IS the claim, and it renders in the accent.
+ *   Comparable homes     is `muted`: it is the scale of the evidence, not the evidence.
+ *
+ * An unsourced value is "" — an OPEN SLOT on the canvas (the label is the instruction)
+ * and ABSENT from the sent email. Never a zero, never a made-up median.
+ */
+export function compsSpecs(facts: ListingFacts, comps: RenderComp[]): StatItem[] {
+  const medianPpsf = median(compPpsfs(comps));
+  return [
+    spec(facts.beds, "Beds"),
+    spec(facts.baths, "Baths"),
+    spec(num(facts.sqft)?.toLocaleString("en-US"), "Sq Ft"),
+    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft — this home", "primary"),
+    spec(medianPpsf ? usd(medianPpsf) : undefined, "$/Sq Ft — comp median"),
+    spec(comps.length ? String(comps.length) : undefined, "Comparable homes", "muted"),
+  ];
 }
 
-/** The coded evidence grid. Pure: no I/O, invents nothing — an unsourced cell is left
- *  EMPTY (an open slot on the canvas, absent from the sent email; never a zero). */
-export function buildCompsGrid(
-  facts: ListingFacts,
-  comps: RenderComp[],
-  current: EmailDoc,
-): EmailDoc {
-  const brandIsHouse = current.globalStyle.accentColor === DEFAULT_GLOBAL_STYLE.accentColor;
-  const globalStyle = brandIsHouse
-    ? { ...current.globalStyle, ...EDITORIAL_STYLE }
-    : { ...current.globalStyle };
+/**
+ * THE FOOTNOTE UNDER THE STRIP — the derivation, THE MIX, and the spread.
+ *
+ * The mix used to ride in a stat LABEL ("Comparable homes (2 recorded sales, 3
+ * valuations)"). A grid cell could carry 48 characters; a STRIP cell is a 9px uppercase
+ * caption in a sixth of the email's width, and that label would have wrapped to five
+ * ragged lines and dragged the whole strip out of shape. The footnote is the element the
+ * strip already has for exactly this — full width, centred, under the row.
+ *
+ * So the mix is STILL on the face of the email, on four surfaces a reader cannot miss:
+ * here, the evidence table's own title, each row's "Sold 08/29/2025" / "Estimated value
+ * 06/08/2026" line, and the chart's "(est.)" bar suffix.
+ *
+ * Never truncated mid-number: the schema caps a footnote at 120 characters, so we pick
+ * the longest CANDIDATE that fits rather than slicing a "$173–$266" in half.
+ */
+export function compsFootnote(facts: ListingFacts, comps: RenderComp[]): string | undefined {
+  const derived = pricePerSqft(facts.price, facts.sqft) ? "*$/Sq Ft = price ÷ listed sq ft." : "";
 
-  const addressLine =
-    facts.address ?? ([facts.city, facts.state].filter(Boolean).join(", ") || undefined);
-  const subjectPpsf = perSqft(num(facts.price), num(facts.sqft));
-  const compPpsf = comps.map((c) => perSqft(c.price, c.sqft)).filter((v): v is number => v != null);
-  const medianPpsf = median(compPpsf);
-  const loPpsf = compPpsf.length ? Math.min(...compPpsf) : null;
-  const hiPpsf = compPpsf.length ? Math.max(...compPpsf) : null;
+  const ppsf = compPpsfs(comps);
+  const lo = ppsf[0];
+  const hi = ppsf[ppsf.length - 1];
+  const range = !ppsf.length
+    ? ""
+    : lo === hi
+      ? ` run at ${usd(lo)}`
+      : ` run from ${usd(lo)} to ${usd(hi)}`;
+  const homes = comps.length === 1 ? "home" : "homes";
+  const mix = comps.length
+    ? `The ${comps.length} comparable ${homes}${mixParen(comps)}${range}.`
+    : "";
 
-  const blocks: EmailBlock[] = [];
-  let y = 0;
-  const push = (block: EmailBlock, h: number, opts?: Partial<BlockLayout>) => {
-    blocks.push(at(block, y, h, opts));
-    y += h;
-  };
+  const full = [derived, mix].filter(Boolean).join(" ");
+  // Longest-that-fits, in order of what a reader loses least by losing.
+  for (const candidate of [full, mix, derived]) {
+    if (candidate && candidate.length <= 120) return candidate;
+  }
+  return undefined;
+}
 
-  // 1. Header — the agent's own branded header, kept.
-  push(keepOrDefault(current, "header"), 2);
+/** A block, positioned. The chrome re-places it (x/y/w are its call) but reads `h`. */
+function sized<T extends EmailBlock>(block: T, h: number): T {
+  return { ...block, layout: { x: 0, y: 0, w: 12, h } };
+}
 
-  // 2. Hero — the CLAIM this email defends: the ask, on this address.
-  push(
-    {
-      id: createBlock("hero").id,
-      type: "hero",
-      props: {
-        kicker: "Market Comps",
-        value: facts.price ?? "",
-        label: addressLine ?? "",
-      },
-    },
-    3,
-  );
-
-  // 3. The subject's photo — it identifies the house whose price is on trial. No photo
-  //    → an EMPTY image block, which the canvas renders as a file-picker dropzone and
-  //    the email omits entirely (the open-slot contract, Part 4).
-  push(
-    facts.photos[0]
-      ? heroPhotoBlock({
-          url: facts.photos[0],
-          alt: facts.address ?? "The subject property",
-          linkUrl: facts.sourceUrl,
-        })
-      : {
-          id: createBlock("image").id,
-          type: "image",
-          props: { url: "", kind: "photo", alt: facts.address ?? "The subject property" },
-        },
-    6,
-  );
-
-  // 4. Row A — the TERMS of the comparison, from the subject's vendor record. These are
-  //    the three numbers a comp is judged on; the price itself is already the hero.
-  // An unsourced value is "" — an OPEN SLOT on the canvas (the label is its instruction),
-  // dropped from the sent email by StatsBlock's `emailRender`. Never a zero. The slices
-  // are the schema's own caps (value 24, label 60): a cell that overruns them would fail
-  // EmailDocSchema and take the whole build down with it.
-  const cell = (value: string | undefined, label: string): StatItem => ({
-    value: value && value.trim() ? value.trim().slice(0, 24) : "",
-    label: label.slice(0, 60),
-  });
-  push(
-    {
-      id: createBlock("stats").id,
-      type: "stats",
-      props: {
-        stats: [
-          cell(facts.beds, "Beds"),
-          cell(num(facts.sqft)?.toLocaleString("en-US"), "Sq Ft"),
-          cell(subjectPpsf ? `${usd(subjectPpsf)}` : undefined, "$/Sq Ft — this home"),
-        ],
-      },
-    },
-    2,
-  );
-
-  // 5. Row B — the EVIDENCE, computed in code from the live comp set (deterministic
-  //    math, never an LLM). Empty when no comp survived the land filter: an open slot,
-  //    never a zero and never a made-up median.
-  //
-  //    THE RANGE LIVES IN THE LABEL, NOT IN A VALUE. A stat VALUE renders in the display
-  //    serif at a third of the email's width, and "$173–$266" wraps mid-value there — I
-  //    watched it break across two lines in the rendered PNG. Labels are small text and
-  //    wrap gracefully (they already run to two lines), so the spread rides there, where
-  //    it is just as visible and cannot break ugly.
-  const spread =
-    loPpsf && hiPpsf && loPpsf !== hiPpsf ? ` (${usd(loPpsf)}–${usd(hiPpsf)} across the set)` : "";
-  push(
-    {
-      id: createBlock("stats").id,
-      type: "stats",
-      props: {
-        stats: [
-          cell(
-            medianPpsf ? `${usd(medianPpsf)}` : undefined,
-            `$/Sq Ft — median of the comps${spread}`,
-          ),
-          cell(comps.length ? String(comps.length) : undefined, mixLabel(comps)),
-        ],
-      },
-    },
-    2,
-  );
-
-  // 6. Chart slot — the comps bar, subject included. Filled in place by the builder
-  //    below (preserving this layout), or DROPPED if it can't be built. An empty chart
-  //    box is worse than no chart.
-  push(
-    {
-      id: createBlock("image").id,
-      type: "image",
-      props: {
-        url: "",
-        kind: "chart",
-        alt: `Asking price vs nearby comparable homes`,
-        caption: "",
-      },
-    },
-    6,
-  );
-
-  // 7. The evidence table. Omitted entirely when there is nothing real to list (a
-  //    `list` needs >= 1 row — an empty shell is not a slot, it is a lie).
-  //
-  //    THE TITLE CARRIES THE MIX. The set is NOT six live listings; it is recorded sales
-  //    plus current valuations, and the title says so directly over the rows — a reader
-  //    who skips the stat cell still cannot mistake an AVM for a sale.
-  if (comps.length) {
-    push(
+/**
+ * MY MIDDLE — the comps bar chart and the evidence table. This is the ONE place the
+ * campaign's emails legitimately differ, and it is the whole reason this email exists.
+ *
+ * The chart slot is reserved EMPTY and filled in place below (or dropped — an empty chart
+ * box is worse than no chart). The table is omitted entirely when there is nothing real to
+ * list: a `list` needs >= 1 row, and an empty shell is not a slot, it is a lie.
+ */
+function compsMiddle(comps: RenderComp[]): EmailBlock[] {
+  const blocks: EmailBlock[] = [
+    sized(
       {
-        id: createBlock("list").id,
-        type: "list",
+        id: createBlock("image").id,
+        type: "image",
         props: {
-          title: mixTitle(comps),
-          items: comps.map(compRow),
+          url: "",
+          kind: "chart",
+          alt: "Asking price vs nearby comparable homes",
+          caption: "",
         },
       },
-      Math.max(4, comps.length + 2),
+      6,
+    ),
+  ];
+  if (comps.length) {
+    blocks.push(
+      sized(
+        {
+          id: createBlock("list").id,
+          type: "list",
+          props: { title: mixTitle(comps), items: comps.map(compRow) },
+        },
+        Math.max(4, comps.length + 2),
+      ),
     );
   }
+  return blocks;
+}
 
-  // 8. Commentary — the straight case for the asking price. EMPTY here; the narrator
-  //    fills it (fillNarrative). Unwritten → an open slot with an instruction on the
-  //    canvas, absent from the email.
-  push({ id: createBlock("text").id, type: "text", props: { body: "", align: "left" } }, 4);
-
-  // 9. Sources — the collapsed accordion. Rules of engagement #1: sources ride in the
-  //    collapsed list, never inline in the prose. Domain-level, never a vendor name,
-  //    never an MLS id. Empty comp set → no citation to make, so no block.
+/** MY TAIL — the collapsed sources accordion. Rules of engagement #1: sources ride in the
+ *  collapsed list, never inline in the prose. Domain-level, never a vendor name, never an
+ *  MLS id. Empty comp set → no citation to make, so no block. */
+function compsTail(comps: RenderComp[]): EmailBlock[] {
   const sources = compSources({ comps, asOf: "", needs: [] });
-  if (sources.length) {
-    push(
+  if (!sources.length) return [];
+  return [
+    sized(
       {
         id: createBlock("sources").id,
         type: "sources",
@@ -407,26 +349,48 @@ export function buildCompsGrid(
         },
       },
       3,
-    );
-  }
+    ),
+  ];
+}
 
-  // 10. Agent card — kept from the canvas.
-  push(keepOrDefault(current, "agent-card"), 4);
-
-  // 11. CTA. The ask of a comps email is a CONVERSATION about the number, not a tour.
-  push(
-    {
-      id: createBlock("button").id,
-      type: "button",
-      props: { label: "Talk Through These Numbers", url: facts.sourceUrl },
-    },
-    2,
-  );
-
-  // 12. Footer — the agent's CAN-SPAM footer, kept.
-  push(keepOrDefault(current, "footer"), 3, { static: true });
-
-  return { globalStyle, blocks };
+/**
+ * THE COMPS EMAIL, WEARING THE CAMPAIGN'S CHROME.
+ *
+ * Pure: no I/O, invents nothing. The SHAPE comes from `buildLifecycleEmail` and is not
+ * mine; the ribbon word, the cells, the middle, the tail and the CTA are. Brand is STICKY
+ * — the chrome lifts the agent's header, agent card, footer and colours off the canvas,
+ * so a comps email arriving three weeks after the New Listing is visibly the same sender.
+ */
+export function buildCompsGrid(
+  facts: ListingFacts,
+  comps: RenderComp[],
+  current: EmailDoc,
+): EmailDoc {
+  return buildLifecycleEmail(current, {
+    ribbon: "Market Comps",
+    // The subject's photo — it identifies the house whose price is on trial. No photo →
+    // a canvas dropzone, absent from the sent email (the open-slot contract).
+    photo: facts.photos[0]
+      ? {
+          url: facts.photos[0],
+          alt: facts.address ?? "The subject property",
+          linkUrl: facts.sourceUrl,
+        }
+      : null,
+    // The hero is the CLAIM this email defends: the ask, on this address.
+    heroValue: facts.price ?? "",
+    heroLabel: addressLineOf(facts),
+    specs: compsSpecs(facts, comps),
+    specFootnote: compsFootnote(facts, comps),
+    middle: compsMiddle(comps),
+    // EMPTY — the narrator fills it (fillNarrative). Unwritten → an open slot.
+    narrative: "",
+    tail: compsTail(comps),
+    // The ask of a comps email is a CONVERSATION about the number, not a tour — and never
+    // a pointer back at the comps the reader is already looking at.
+    ctaLabel: "Talk Through These Numbers",
+    ctaUrl: facts.sourceUrl,
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -701,7 +665,13 @@ export function narratorClaims(facts: ListingFacts, pc: PriceCase): SettledClaim
   }
   if (facts.isPriceReduced && facts.priceReduction) {
     out.push(
-      claim(`The asking price has already come down by ${facts.priceReduction} from the original.`),
+      // ⚠️ NOT "from the original". `reduced_amount` is the MOST RECENT cut — the vendor's
+      // price history for the fixture runs $765,000 → $699,975 → $595,000, so $104,975 is the
+      // LAST cut, and the cut from the ORIGINAL ask is $170,000. Saying "from the original"
+      // understates it by $65,025 and implies an original ask the house never had at listing.
+      // A real number wearing the name of a quantity we do not hold is still invented.
+      // (Playbook Part 8.5. The true original IS sourceable — /property-tax-history.)
+      claim(`The asking price has already come down by ${facts.priceReduction}.`),
     );
   }
   return out;

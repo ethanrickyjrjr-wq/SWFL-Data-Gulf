@@ -293,35 +293,48 @@ export const SEED_DOCS: SeedDoc[] = [
     // a days-to-contract or days-to-sale interval for a subject property. A cell we can
     // never fill honestly is not an open slot — it is an invitation to invent one, and
     // a builder did exactly that ("went under contract after 75 days on market").
+    // It wears the CAMPAIGN CHROME (lib/email/lifecycle-chrome.ts) — the same shape as its
+    // six siblings, so a subscriber walking the campaign sees one agent, not seven.
     build: () => ({
       globalStyle: style(),
       blocks: [
-        seedBlock("header"),
-        seedBlock("image", { alt: "Photo of the sold property", kind: "photo" }),
-        seedBlock("hero", {
-          kicker: "Just Sold",
-          value: "",
-          label: "Sale price and where it sold",
-          prose: "",
-        }),
-        seedBlock("stats", {
-          stats: [
-            { value: "", label: "Sale Price" },
-            { value: "", label: "List Price" },
-            { value: "", label: "List-to-Sale" },
-          ],
-        }),
-        seedBlock("stats", {
-          stats: [
-            { value: "", label: "Beds" },
-            { value: "", label: "Baths" },
-            { value: "", label: "Sq Ft" },
-          ],
-        }),
-        seedBlock("text", { body: "", align: "left" }),
-        seedBlock("agent-card"),
-        seedBlock("button", { label: "What's My Home Worth?" }),
-        seedBlock("footer"),
+        seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }),
+        seedBlockGrid("hero", { x: 0, y: 2, w: 12, h: 1 }, { kicker: "Just Sold", ribbon: true }),
+        seedBlockGrid(
+          "image",
+          { x: 0, y: 3, w: 12, h: 6 },
+          { alt: "Photo of the sold property", kind: "photo" },
+        ),
+        seedBlockGrid(
+          "hero",
+          { x: 0, y: 9, w: 12, h: 4 },
+          {
+            value: "",
+            label: "The close and where it sold",
+            prose: "",
+            align: "center",
+            order: "label-first",
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 13, w: 12, h: 3 },
+          {
+            variant: "strip",
+            stats: [
+              { value: "", label: "Beds" },
+              { value: "", label: "Baths" },
+              { value: "", label: "Sq Ft" },
+              { value: "", label: "$/Sq Ft" },
+              { value: "", label: "List Price", emphasis: "muted" as const },
+              { value: "", label: "List-to-Sale", emphasis: "primary" as const },
+            ],
+          },
+        ),
+        seedBlockGrid("text", { x: 0, y: 16, w: 12, h: 4 }, { body: "", align: "left" }),
+        seedBlockGrid("agent-card", { x: 0, y: 20, w: 12, h: 4 }),
+        seedBlockGrid("button", { x: 0, y: 24, w: 12, h: 2 }, { label: "What's My Home Worth?" }),
+        seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -810,42 +823,39 @@ export const SEED_DOCS: SeedDoc[] = [
         accentColor: "#4A7C59",
         textColor: "#2A3828",
       },
+      // It wears the CAMPAIGN CHROME — same shape as its six siblings.
       blocks: [
         seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
+        seedBlockGrid("hero", { x: 0, y: 2, w: 12, h: 1 }, { kicker: "Open House", ribbon: true }),
         seedBlockGrid(
           "image",
-          { x: 0, y: 2, w: 12, h: 6 },
+          { x: 0, y: 3, w: 12, h: 6 },
           { alt: "Property exterior", kind: "photo", ratio: "3:2" },
         ),
         seedBlockGrid(
           "hero",
-          { x: 0, y: 8, w: 12, h: 4 },
+          { x: 0, y: 9, w: 12, h: 4 },
           {
-            kicker: "You're Invited · Open House",
             value: "",
-            label: "Date, time, and address",
+            label: "Price and address",
             prose: "",
+            align: "center",
+            order: "label-first",
           },
         ),
-        // The DATE and TIME are in no vendor feed — the agent supplies them. They are
-        // OPEN SLOTS whose labels are the instruction, never a placeholder date.
+        // The DATE and TIME are in NO vendor feed — the agent supplies them. They LEAD the
+        // strip (they are the point of this email) and they are OPEN SLOTS whose labels are
+        // the instruction. Never a placeholder date, never a zero.
         seedBlockGrid(
           "stats",
-          { x: 0, y: 12, w: 12, h: 3 },
+          { x: 0, y: 13, w: 12, h: 3 },
           {
+            variant: "strip",
             stats: [
-              { value: "", label: "Open House Date" },
-              { value: "", label: "Open House Time" },
-            ],
-          },
-        ),
-        seedBlockGrid(
-          "stats",
-          { x: 0, y: 15, w: 12, h: 3 },
-          {
-            stats: [
-              { value: "", label: "Asking Price" },
-              { value: "", label: "Beds / Baths" },
+              { value: "", label: "Open House Date", emphasis: "primary" as const },
+              { value: "", label: "Open House Time", emphasis: "primary" as const },
+              { value: "", label: "Beds" },
+              { value: "", label: "Baths" },
               { value: "", label: "Sq Ft" },
             ],
           },
@@ -854,9 +864,9 @@ export const SEED_DOCS: SeedDoc[] = [
         // of sentences that get someone off the couch…"), and TextBlock ships any
         // non-empty body: a user who picked this card and hit send EMAILED THAT SENTENCE
         // to real people. An instruction to the author is not copy for the reader.
-        seedBlockGrid("text", { x: 0, y: 18, w: 7, h: 4 }, { body: "", align: "left" }),
-        seedBlockGrid("button", { x: 7, y: 18, w: 5, h: 4 }, { label: "RSVP for the Open House" }),
-        seedBlockGrid("agent-card", { x: 0, y: 22, w: 12, h: 4 }),
+        seedBlockGrid("text", { x: 0, y: 16, w: 12, h: 4 }, { body: "", align: "left" }),
+        seedBlockGrid("agent-card", { x: 0, y: 20, w: 12, h: 4 }),
+        seedBlockGrid("button", { x: 0, y: 24, w: 12, h: 2 }, { label: "RSVP for the Open House" }),
         seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
       ],
     }),
@@ -875,57 +885,45 @@ export const SEED_DOCS: SeedDoc[] = [
         accentColor: "#E05A00",
         textColor: "#3D1800",
       },
+      // It wears the CAMPAIGN CHROME — same shape as its six siblings. The CUT rides in the
+      // hero's kicker: the accent line ABOVE the price, smaller (the operator's ruling).
+      // "Days on Market" is GONE: no source we hold carries a days-to-contract interval, and
+      // a cell we can never fill honestly is an invitation to invent one.
       blocks: [
         seedBlockGrid("header", { x: 0, y: 0, w: 12, h: 2 }, { companyName: "", tagline: "" }),
         seedBlockGrid(
           "hero",
-          { x: 0, y: 2, w: 6, h: 4 },
-          {
-            kicker: "Price Reduced",
-            value: "",
-            label: "New Asking Price",
-            prose: "",
-          },
-        ),
-        // "Price Drop" is GONE from this row: the operator moved the cut ABOVE the price
-        // (the hero kicker — smaller, accent-colored), so printing $104,975 twice, six
-        // inches apart, is noise.
-        seedBlockGrid(
-          "stats",
-          { x: 6, y: 2, w: 6, h: 4 },
-          {
-            stats: [
-              { value: "", label: "Previous Price" },
-              { value: "", label: "Days on Market" },
-            ],
-          },
+          { x: 0, y: 2, w: 12, h: 1 },
+          { kicker: "Price Improved", ribbon: true },
         ),
         seedBlockGrid(
           "image",
-          { x: 0, y: 6, w: 12, h: 5 },
+          { x: 0, y: 3, w: 12, h: 6 },
           { alt: "Property photo", kind: "photo", ratio: "4:3" },
         ),
-        // The spec grid the recipe's own prompt promises ("the home's key specs") — the
-        // seed had NONE.
         seedBlockGrid(
-          "stats",
-          { x: 0, y: 11, w: 12, h: 2 },
+          "hero",
+          { x: 0, y: 9, w: 12, h: 4 },
           {
-            stats: [
-              { value: "", label: "Beds" },
-              { value: "", label: "Baths" },
-              { value: "", label: "Sq Ft" },
-            ],
+            value: "",
+            label: "Price and address",
+            prose: "",
+            align: "center",
+            order: "label-first",
           },
         ),
         seedBlockGrid(
           "stats",
-          { x: 0, y: 13, w: 12, h: 2 },
+          { x: 0, y: 13, w: 12, h: 3 },
           {
+            variant: "strip",
             stats: [
-              { value: "", label: "$/Sq Ft" },
+              { value: "", label: "Previous Price", emphasis: "muted" as const },
+              { value: "", label: "Beds" },
+              { value: "", label: "Baths" },
+              { value: "", label: "Sq Ft" },
               { value: "", label: "Lot" },
-              { value: "", label: "Type" },
+              { value: "", label: "$/Sq Ft", emphasis: "primary" as const },
             ],
           },
         ),
@@ -934,11 +932,12 @@ export const SEED_DOCS: SeedDoc[] = [
         // negotiate") straight into real sends: TextBlock ships any non-empty body. Worse,
         // it asked for TWO claims we cannot source — a seller's MOTIVE and a negotiating
         // position. The product's own template was instructing the user to invent.
-        seedBlockGrid("text", { x: 0, y: 15, w: 12, h: 4 }, { body: "", align: "left" }),
+        seedBlockGrid("text", { x: 0, y: 16, w: 12, h: 4 }, { body: "", align: "left" }),
+        seedBlockGrid("agent-card", { x: 0, y: 20, w: 12, h: 4 }),
         // NOT "See the New Price" — the email already IS the new price. A CTA must ask for
         // the NEXT action, not point at what the reader is looking at.
-        seedBlockGrid("button", { x: 0, y: 19, w: 12, h: 2 }, { label: "Schedule a Showing" }),
-        seedBlockGrid("footer", { x: 0, y: 21, w: 12, h: 3, static: true }),
+        seedBlockGrid("button", { x: 0, y: 24, w: 12, h: 2 }, { label: "Schedule a Showing" }),
+        seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
       ],
     }),
   },

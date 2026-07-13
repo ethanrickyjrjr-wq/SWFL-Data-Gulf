@@ -1,100 +1,98 @@
 // lib/deliverable/recipes/coming-soon.ts
 //
-// R2 · COMING SOON — the teaser that builds a private-preview list before the sign
-// goes up. The SAME resolved house as New Listing, wearing a different hat.
+// R2 · COMING SOON — the teaser that builds a private-preview list before the sign goes
+// up. The SAME resolved house as New Listing, wearing a different hat — and now, wearing
+// THE SAME CHROME.
 //
-// The six answers (playbook Part 6):
+// ── WHAT CHANGED, AND WHY (07/13/2026) ──────────────────────────────────────
 //
-//   1. SUBJECT — the same listing address as new-listing, resolved ONCE by the
-//      dispatcher (ctx.facts). *** BUT THE STREET ADDRESS IS SUPPRESSED. *** That is
-//      the entire point of this recipe, and the address is sitting right there in
-//      ctx.facts waiting to be leaked. It must not reach the hero, the photo alt
-//      text, the subject line, the CTA url, or the prose. Suppression here is
-//      STRUCTURAL, not a request: this file never reads `facts.address` into a
-//      rendered field, it strips address/city/ZIP out of the narrator's fact sheet
-//      (a framing sentence asking a model nicely is not a guarantee — see
-//      `teaserFacts`), and it redacts the street out of the model's OUTPUT as well
-//      (`redactStreetLine`). A narrative that still leaks is DROPPED to an open slot.
-//      Geography still ships — but only at the grain a teaser is allowed: the CITY in
-//      the hero and the COUNTY in the scarcity block, both written by code, never by
-//      the model.
-//   2. SKELETON — a coded grid in THIS file (like buildListingFlyer). No committed
-//      SEED_DOC fits: every listing skeleton in default-docs.ts (`new-listing`,
-//      `listing-feature`, `skeleton-listing-showcase`, `open-house`, `price-reduced`)
-//      is address-FORWARD — it positions the street address as the hero label
-//      ("Price and address") under a "New Listing" kicker. Loading one and blanking
-//      that slot would leave an open slot whose label INVITES the user to paste the
-//      address back in, which is the exact opposite of this deliverable. And
-//      `buildListingFlyer` hardcodes `alt: facts.address` on the hero photo plus a
-//      "New Listing" kicker, so it cannot be reused either. Reported as a shared-file
-//      proposal instead: a `coming-soon` seed mirroring this grid.
-//   3. CELLS — the home (beds · baths · sq ft), then SCARCITY from LIVE COUNTY
-//      INVENTORY: `data_lake.listing_state` (populated daily by
-//      ingest/pipelines/listing_lifecycle) carries every active for-sale listing with
-//      its county, list price, beds and sqft. Three real counts, no spec grid, no
-//      invention. Any count we cannot source → an OPEN SLOT, never a zero.
-//      LAND FILTER (the same hard rule the comps chart learned): a row with no beds
-//      and no sqft is a VACANT LOT, not a home — 6,567 of Lee County's 20,560 active
-//      rows are bare land. Counting them as "homes" would inflate the denominator and
-//      make the scarcity claim a lie. Filter BY DATA (`beds` and `sqft` non-null),
-//      never by guessing at `property_type`.
-//   4. CHART — inventory-scarcity. This deliverable IS about a number ("how few homes
-//      like this one exist"), and the number is about the SUBJECT (its price band, its
-//      beds, its size). A three-tier funnel: all active homes → in this price range →
-//      beds + size match too. If the counts don't load, the slot is DROPPED
-//      (`dropEmptyChartSlot`) — an empty chart box is worse than no chart.
-//   5. PROSE — a teaser, authored from a DE-IDENTIFIED fact sheet (no address, no
-//      city, no ZIP, remarks street-redacted) and forbidden from naming a location at
-//      all. It describes the HOME. Numbers, geography and the scarcity claim are
-//      code's job, not the model's.
-//   6. FRAMING — "Coming Soon" kicker, price + city hero (never the street), a
-//      private-preview CTA.
+// This file used to own its own grid: header · photo · hero(LEFT) · stats[3] · stats[3] ·
+// text · chart · sources · card · CTA · footer. New Listing owned a different one. So did
+// the other five. Seven lifecycle emails, seven layouts, because there was nothing to
+// build ONTO. A subscriber walking the campaign from Coming Soon to Sold got seven emails
+// that looked like seven different companies. That is not a campaign; it is a pile.
+//
+// The layout now lives in ONE place — `buildLifecycleEmail` (lib/email/lifecycle-chrome.ts):
+//
+//   header · RIBBON · photo · hero(centred, LABEL over PRICE) · spec strip
+//          · [MY MIDDLE] · narrative · [MY TAIL] · agent card · CTA · footer
+//
+// I supply the RIBBON WORD ("Coming Soon"), the hero numbers, which spec cells, my own
+// middle (the scarcity strip + the funnel chart), a tail (the sources note) and the CTA.
+// I do not get to invent a shape. Pinned by lib/deliverable/campaign-coherence.test.ts.
+//
+// ── THE ONE THING THIS RECIPE CANNOT GET WRONG ──────────────────────────────
+//
+// *** THE STREET ADDRESS IS SUPPRESSED. *** That is the entire point of the deliverable,
+// and the address is sitting right there in ctx.facts waiting to leak. It must not reach
+// the hero, the photo alt text, the subject line, the CTA url, the prose — or the
+// NARRATOR'S FACT SHEET. Suppression is STRUCTURAL, not a request:
+//
+//   • this file never reads `facts.address` into a rendered field — the hero LABEL is the
+//     CITY (that is why `heroLabel` is `where`, not `addressLineOf(facts)`, which is the
+//     one place the campaign chrome would happily have printed it);
+//   • it strips address/city/state/ZIP out of the model's fact sheet before the model ever
+//     sees them (`teaserFacts`) — a framing sentence asking a model nicely is not a
+//     guarantee;
+//   • it redacts the street out of the model's OUTPUT as well (`redactStreetLine`), and a
+//     paragraph that STILL leaks is DROPPED to an open slot (`leaksStreet`).
+//
+// Migrating to the chrome does not weaken any of that. The chrome's photo open-slot alt is
+// `heroLabel` — the CITY — so even the dropzone names no street.
+//
+// Geography still ships, but only at the grain a teaser is allowed: the CITY in the hero
+// and the COUNTY in the scarcity block, both written by code, never by the model.
+//
+// ── THE REST OF THE SIX ANSWERS (playbook Part 6) ───────────────────────────
+//
+//   CELLS — the spec strip is the home (beds · baths · sq ft · $/sq ft · type), the shared
+//     cells every lifecycle email wears, MINUS the LOT: a lot size plus a city narrows a
+//     parcel search further than a teaser should. `$/Sq Ft` is the emphasised cell (it is
+//     the one that wins the argument) and its footnote states that it is derived.
+//   MIDDLE — SCARCITY, from LIVE COUNTY INVENTORY: `data_lake.listing_state` (populated
+//     daily by ingest/pipelines/listing_lifecycle) carries every active for-sale listing
+//     with its county, list price, beds and sqft. Three real counts, no invention. Any
+//     count we cannot source → an OPEN SLOT, never a zero.
+//     LAND FILTER (the same hard rule the comps chart learned): a row with no beds and no
+//     sqft is a VACANT LOT, not a home — 6,567 of Lee County's 20,560 active rows are bare
+//     land. Counting them as "homes" would inflate the denominator and make the scarcity
+//     claim a lie. Filter BY DATA (`beds` and `sqft` non-null), never by guessing at
+//     `property_type`.
+//   CHART — inventory-scarcity. This deliverable IS about a number ("how few homes like
+//     this one exist"), and the number is about the SUBJECT (its price band, its beds, its
+//     size). A three-tier funnel: all active homes → in this price range → beds + size
+//     match too. If the counts don't load the chart is simply never pushed — an empty
+//     chart box is worse than no chart.
+//   PROSE — a teaser, authored from a DE-IDENTIFIED fact sheet and forbidden from naming a
+//     location at all. It describes the HOME. Numbers, geography and the scarcity claim are
+//     code's job, not the model's.
+//   CTA — "Join the Private Preview List". The NEXT ACTION, not a restatement of the email.
 //
 // LIVE PROOF (07/13/2026, 326 Shore Dr, Fort Myers 33905 → $595,000 · 3 bd · 3.5 ba ·
-// 2,847 sq ft · Lee County): 13,122 active Lee County homes · 1,062 priced
-// $536K–$655K · 328 that also match on beds and size.
+// 2,847 sq ft · Lee County): 13,122 active Lee County homes · 1,062 priced $536K–$655K ·
+// 328 that also match on beds and size.
 
-import { createBlock, DEFAULT_GLOBAL_STYLE } from "@/lib/email/doc/default-docs";
-import { brandWebsiteUrl, heroPhotoBlock } from "@/lib/email/inject-photo";
+import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
+import { createBlock } from "@/lib/email/doc/default-docs";
+import { brandWebsiteUrl } from "@/lib/email/inject-photo";
+import { pricePerSqft, shortType, spec, specFootnote } from "@/lib/email/listing-flyer";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 // KNOWN-DEBT(data_lake: listing_state lives in the data_lake schema, which the typed
 // Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import zipCounty from "@/fixtures/swfl-zip-county.json";
-import {
-  authorListingNarrative,
-  clearNarrativeSlots,
-  dropEmptyChartSlot,
-  fillNarrative,
-} from "./shared";
+import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
 import type { RecipeBuildContext } from "./index";
+import type { LifecycleChrome } from "@/lib/email/lifecycle-chrome";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
-import type {
-  BlockLayout,
-  EmailBlock,
-  EmailDoc,
-  FontFamily,
-  StatItem,
-} from "@/lib/email/doc/types";
+import type { EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
 
 /** The citation + CTA fallback root. HARDCODED, exactly as lib/listings/resolve-subject.ts
  *  hardcodes its `sourceUrl`: a citation always points at SWFL Data Gulf. Reading
  *  NEXT_PUBLIC_SITE_URL here would ship "http://localhost:3000" as the source link of
  *  every locally-built doc (observed 07/13/2026 in the first proof run). */
 const SITE = "https://www.swfldatagulf.com";
-
-/** The teaser palette — applied ONLY when the incoming brand is still the house
- *  default (a blank brand). A real user brand carries through untouched, exactly as
- *  buildListingFlyer does it. Brand is sticky; we never author one. */
-const TEASER_STYLE = {
-  primaryColor: "#111A2E",
-  accentColor: "#C9A227",
-  fontFamily: "BOOK_SERIF" as FontFamily,
-  displayFontFamily: "PLAYFAIR_SERIF" as FontFamily,
-  textColor: "#22293A",
-  backdropColor: "#F1EEE8",
-};
 
 // ── Street suppression ───────────────────────────────────────────────────────
 // The one thing this recipe cannot get wrong. Everything below is deterministic;
@@ -202,16 +200,34 @@ export interface Scarcity {
   asOfIso: string;
 }
 
-/** The comparison band: ±10% of the list price, at least the subject's bed count, and
- *  at least 80% of its size (floored to a clean 50 sq ft so the label reads honestly
- *  and the query matches the label exactly). Pure. */
+/**
+ * The comparison band: ±10% of the list price, at least the subject's bed count, and at
+ * least 80% of its size.
+ *
+ * ⚠️ THE QUERY MUST USE THE NUMBERS THE EMAIL PRINTS. Fixed 07/13/2026.
+ *
+ * This used to query the RAW band (595,000 × 0.9 = 535,500 … × 1.1 = 654,500) and then let
+ * `usdShort` round it FOR THE LABEL ONLY — so the email printed the criterion
+ * **"$536K–$655K"** while the count behind it was computed over **$535,500–$654,500**.
+ *
+ * A reader who took the email's own stated criterion and re-ran it got **330**, not the
+ * **328** printed in gold. The number is REAL — it is not invented — but the disclosed
+ * method does not reproduce it, and CHECKABILITY is the entire reason we print the band at
+ * all ("a stated band is what keeps 'how scarce' from reading as a number we made up").
+ *
+ * The sqft floor already had this discipline — it is floored to a clean 50 precisely so the
+ * query matches the label. The price band never got it. It does now: ROUND FIRST, THEN
+ * QUERY, so the criterion the reader sees is the criterion the count was computed over.
+ */
 export function scarcityBand(
   price: number,
   sqft: number,
 ): { bandLo: number; bandHi: number; sqftFloor: number } {
+  // Round to the same thousand `usdShort` renders, BEFORE the query sees it.
+  const toK = (n: number) => Math.round(n / 1000) * 1000;
   return {
-    bandLo: Math.round(price * 0.9),
-    bandHi: Math.round(price * 1.1),
+    bandLo: toK(price * 0.9),
+    bandHi: toK(price * 1.1),
     sqftFloor: Math.floor((sqft * 0.8) / 50) * 50,
   };
 }
@@ -312,13 +328,32 @@ export async function loadScarcity(
   }
 }
 
-/** The scarcity cells. Every value is a real count; every label states the criterion
- *  that produced it, so the reader can see exactly what is being counted. */
+/**
+ * The scarcity cells — MY MIDDLE, and a hairline STRIP, not a chunky stat grid.
+ *
+ * Every value is a real count; every label states the criterion that produced it, so the
+ * reader can see exactly what is being counted. The funnel narrows left to right, so the
+ * emphasis does too: the county total is CONTEXT (`muted`), and the last cell — the homes
+ * that actually match this one — is the number that wins the argument (`primary`). Before
+ * StatItem carried `emphasis` a recipe had no way to say that, and all three counts
+ * rendered at identical weight, which is how a punchline reads as a wall.
+ */
 export function scarcityStats(s: Scarcity): StatItem[] {
   return [
-    { value: count(s.countyHomes), label: `Active homes · ${s.county} County` },
-    { value: count(s.inBand), label: `Priced ${usdShort(s.bandLo)}–${usdShort(s.bandHi)}` },
-    { value: count(s.comparable), label: `…that also match beds + size` },
+    spec(count(s.countyHomes), `Active homes · ${s.county} County`, "muted"),
+    spec(count(s.inBand), `Priced ${usdShort(s.bandLo)}–${usdShort(s.bandHi)}`),
+    spec(count(s.comparable), `…that also match beds + size`, "primary"),
+  ];
+}
+
+/** The scarcity cells when the counts did NOT load: three OPEN SLOTS whose LABELS are the
+ *  instruction on the canvas. Absent from the sent email (StatsBlock drops empty cells).
+ *  Never a zero, never a naked label to a recipient, and never a refusal (RULE 0.7). */
+export function scarcityOpenSlots(): StatItem[] {
+  return [
+    spec(undefined, "Active homes in your county — add the count"),
+    spec(undefined, "How many are in this price range"),
+    spec(undefined, "How many match beds + size"),
   ];
 }
 
@@ -354,29 +389,35 @@ export function scarcityChartSpec(s: Scarcity): ChartSpec {
   } as ChartSpec;
 }
 
-// ── The coded grid ───────────────────────────────────────────────────────────
-
-function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock {
-  return current.blocks.find((b) => b.type === type) ?? createBlock(type);
-}
-
-function at<T extends EmailBlock>(block: T, y: number, h: number, opts?: Partial<BlockLayout>): T {
-  return { ...block, layout: { x: 0, y, w: 12, h, ...opts } };
-}
+// ── The build ────────────────────────────────────────────────────────────────
 
 function withCommas(n?: string): string | undefined {
   const digits = String(n ?? "").replace(/[^\d]/g, "");
   return digits ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : undefined;
 }
 
-/** A stat cell: sourced → the value; unsourced → an EMPTY value, i.e. an OPEN SLOT
- *  whose LABEL is the instruction on the canvas, and which StatsBlock drops from the
- *  sent email (`emailRender`). Never a zero, never a naked label to a recipient. */
-function spec(value: string | undefined, label: string): StatItem {
-  return { value: value && value.trim() ? value.trim().slice(0, 24) : "", label };
+const num = (s?: string): number => Number(String(s ?? "").replace(/[^\d.]/g, "")) || 0;
+
+/** The hero's LABEL — the CITY, never the street. The campaign chrome puts this line
+ *  ABOVE the price, exactly where New Listing prints its address. This function is the
+ *  reason it prints a city instead. */
+export function teaserWhere(facts: ListingFacts): string {
+  const city = facts.city?.trim() || "";
+  return city ? `${city}, ${facts.state?.trim() || "FL"}` : "Southwest Florida";
 }
 
-const num = (s?: string): number => Number(String(s ?? "").replace(/[^\d.]/g, "")) || 0;
+/** The spec strip — the shared lifecycle cells MINUS the LOT. A lot size plus a city
+ *  narrows a parcel search further than a teaser should, and the cell is the only one in
+ *  `listingSpecs` that helps locate the house rather than describe it. */
+export function teaserSpecs(facts: ListingFacts): StatItem[] {
+  return [
+    spec(facts.beds, "Beds"),
+    spec(facts.baths, "Baths"),
+    spec(withCommas(facts.sqft), "Sq Ft"),
+    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft", "primary"),
+    spec(shortType(facts.propertyType) || undefined, "Type", "muted"),
+  ];
+}
 
 export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc | null> {
   const { facts, currentDoc } = ctx;
@@ -384,15 +425,10 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
   // shipping an empty teaser (never refuse a build, but never fake a house either).
   if (!facts) return null;
 
-  const brandIsHouse = currentDoc.globalStyle.accentColor === DEFAULT_GLOBAL_STYLE.accentColor;
-  const globalStyle = brandIsHouse
-    ? { ...currentDoc.globalStyle, ...TEASER_STYLE }
-    : { ...currentDoc.globalStyle };
-
   // THE ONLY GEOGRAPHY THAT SHIPS: the city (hero) and the county (scarcity). Both
   // written here, in code. `facts.address` is never read into a rendered field.
   const city = facts.city?.trim() || "";
-  const where = city ? `${city}, ${facts.state?.trim() || "FL"}` : "Southwest Florida";
+  const where = teaserWhere(facts);
   const county = countyForZip(facts.zip);
 
   // Live county inventory. A miss → open slots + no chart, never an invented count.
@@ -402,8 +438,49 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
       )
     : null;
 
-  // The chart. Only when the counts are real; otherwise the slot is dropped below.
-  const accent = globalStyle.accentColor || "#C9A227";
+  const ctaUrl = brandWebsiteUrl(currentDoc) ?? SITE;
+
+  // The chrome, minus the parts that need a rendered chart. Declared ONCE so the shell
+  // pass below and the real pass cannot drift apart.
+  const chrome: LifecycleChrome = {
+    ribbon: "Coming Soon",
+    // The alt text is the classic leak: buildListingFlyer sets `alt: facts.address`, and
+    // alt text is READ ALOUD by screen readers and shown when images are blocked — which
+    // is most of Outlook. It says the CITY. The link goes to the agent's own site, never
+    // a listing page for this house. No photo → the chrome's dropzone, whose alt is the
+    // heroLabel (the city) — so even the open slot names no street.
+    photo: facts.photos[0]
+      ? {
+          url: facts.photos[0],
+          alt: city
+            ? `Coming soon — a home in ${city}`
+            : "Coming soon — a home in Southwest Florida",
+          linkUrl: ctaUrl,
+        }
+      : null,
+    // The hero: the CITY over the PRICE. New Listing puts the ADDRESS there; that one
+    // substitution is this deliverable.
+    heroValue: facts.price ?? "",
+    heroLabel: where,
+    specs: teaserSpecs(facts),
+    specFootnote: specFootnote(facts),
+    // The narrator's slot stays EMPTY here and is authored into below — and only from
+    // lane-2 material. See the block comment at the narrator.
+    narrative: "",
+    ctaLabel: "Join the Private Preview List",
+    ctaUrl,
+  };
+
+  // THE ACCENT THE EMAIL WILL ACTUALLY WEAR. The chrome owns the brand-or-editorial
+  // decision (a real user brand rides through untouched; a blank house brand gets the
+  // campaign's editorial palette), and the chart PNG has to be tinted with the SAME
+  // accent or the picture is a different brand from the email around it. Re-deriving that
+  // rule here would duplicate a constant the chrome owns and let the two drift, so we ASK
+  // it: one extra call to a pure function, zero I/O.
+  const accent = buildLifecycleEmail(currentDoc, chrome).globalStyle.accentColor;
+
+  // The chart. Only ever rendered from counts that are real; a failure simply means the
+  // block is never pushed. An empty chart box is worse than no chart.
   const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
   const chart = scarcity
     ? await chartSpecToEmailImage(
@@ -413,172 +490,67 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
       ).catch(() => null)
     : null;
 
-  const ctaUrl = brandWebsiteUrl(currentDoc) ?? SITE;
-
-  const blocks: EmailBlock[] = [];
-  let y = 0;
-  const push = (block: EmailBlock, h: number, opts?: Partial<BlockLayout>) => {
-    blocks.push(at(block, y, h, opts));
-    y += h;
-  };
-
-  // 1. Header — the agent's branded header (sticky).
-  push(keepOrDefault(currentDoc, "header"), 2);
-
-  // 2. Hero PHOTO. The alt text is the classic leak: buildListingFlyer sets
-  //    `alt: facts.address`, and alt text is READ ALOUD by screen readers and shown
-  //    when images are blocked — which is most of Outlook. It says the city, never the
-  //    street. The link goes to the agent's site, never a listing page for this house.
-  push(
-    facts.photos[0]
-      ? heroPhotoBlock({
-          url: facts.photos[0],
-          alt: city
-            ? `Coming soon — a home in ${city}`
-            : "Coming soon — a home in Southwest Florida",
-          linkUrl: ctaUrl,
-        })
-      : {
-          id: createBlock("image").id,
-          type: "image",
-          props: {
-            url: "",
-            kind: "photo",
-            alt: "Add the teaser photo — an exterior or a detail shot, no street sign",
-          },
-        },
-    6,
-  );
-
-  // 3. Hero — "Coming Soon" + the price + the CITY. Never the street.
-  push(
-    {
-      id: createBlock("hero").id,
-      type: "hero",
-      props: {
-        kicker: "Coming Soon",
-        value: facts.price ?? "",
-        label: where,
-      },
-    },
-    3,
-  );
-
-  // 4. The home — enough to make "a home like this" mean something, and nothing that
-  //    locates it. No address, no ZIP, no lot (a lot size plus a city narrows a parcel
-  //    search further than a teaser should).
-  push(
+  // ── MY MIDDLE — the scarcity content ──────────────────────────────────────
+  // A hairline STRIP (never a stacked stat grid — that is the wall the campaign chrome
+  // exists to kill), then the funnel that draws it.
+  const middle: EmailBlock[] = [
     {
       id: createBlock("stats").id,
       type: "stats",
       props: {
-        stats: [
-          spec(facts.beds, "Beds"),
-          spec(facts.baths, "Baths"),
-          spec(withCommas(facts.sqft), "Sq Ft"),
-        ],
+        stats: scarcity ? scarcityStats(scarcity) : scarcityOpenSlots(),
+        variant: "strip",
       },
+      layout: { x: 0, y: 0, w: 12, h: 3 },
     },
-    2,
-  );
-
-  // 5. SCARCITY — live county inventory. Sourced → three real counts. Unsourced →
-  //    three OPEN SLOTS whose labels tell the user exactly what to put there. Never a
-  //    zero, never a guess.
-  push(
-    {
-      id: createBlock("stats").id,
-      type: "stats",
-      props: {
-        stats: scarcity
-          ? scarcityStats(scarcity)
-          : [
-              spec(undefined, "Active homes in your county — add the count"),
-              spec(undefined, "How many are in this price range"),
-              spec(undefined, "How many match beds + size"),
-            ],
-      },
-    },
-    2,
-  );
-
-  // 6. The teaser paragraph. Empty here; authored below (and left an OPEN SLOT if the
-  //    narrator has nothing safe to say).
-  push({ id: createBlock("text").id, type: "text", props: { body: "", align: "left" } }, 4);
-
-  // 7. The scarcity chart. Empty when the counts didn't load — dropEmptyChartSlot
-  //    removes it below rather than shipping an empty box.
-  push(
-    {
+  ];
+  if (chart) {
+    middle.push({
       id: createBlock("image").id,
       type: "image",
-      props: {
-        url: chart?.url ?? "",
-        kind: "chart",
-        alt: chart?.alt ?? "Active-inventory scarcity",
-        caption: chart?.caption ?? "",
-      },
-    },
-    5,
-  );
-
-  // 8. Sources — the citation AND the methodology, in the collapsed list (rules of
-  //    engagement: sources ride in the collapsed list, not inline). This is where the
-  //    band is DISCLOSED: the counts are real, and the stated criterion is what makes
-  //    them checkable rather than a number we asserted.
-  if (scarcity) {
-    push(
-      {
-        id: createBlock("sources").id,
-        type: "sources",
-        props: {
-          sources: [
-            {
-              label: `Active for-sale homes, ${scarcity.county} County — as of ${mdY(scarcity.asOfIso)}`,
-              url: SITE,
-            },
-          ],
-          note: `"Like this one" = list price ${usdShort(scarcity.bandLo)}–${usdShort(scarcity.bandHi)}, ${scarcity.bedFloor}+ beds, ${count(scarcity.sqftFloor)}+ sq ft. Vacant land excluded.`.slice(
-            0,
-            200,
-          ),
-        },
-      },
-      3,
-    );
+      props: { url: chart.url, kind: "chart", alt: chart.alt, caption: chart.caption },
+      layout: { x: 0, y: 0, w: 12, h: 5 },
+    });
   }
 
-  // 9. Agent card — sticky.
-  push(keepOrDefault(currentDoc, "agent-card"), 4);
-
-  // 10. CTA — the private preview list. The url is the agent's own site (or ours);
-  //     it never carries the address as a slug, a query param, or anything else.
-  push(
-    {
-      id: createBlock("button").id,
-      type: "button",
-      props: { label: "Join the Private Preview List", url: ctaUrl },
-    },
-    2,
-  );
-
-  // 11. Footer — CAN-SPAM, sticky.
-  push(keepOrDefault(currentDoc, "footer"), 3, { static: true });
+  // ── MY TAIL — the sources note ────────────────────────────────────────────
+  // The citation AND the methodology, in the collapsed list (rules of engagement: sources
+  // ride in the collapsed list, not inline). This is where the band is DISCLOSED: the
+  // counts are real, and the stated criterion is what makes them checkable rather than a
+  // number we asserted.
+  const tail: EmailBlock[] = scarcity
+    ? [
+        {
+          id: createBlock("sources").id,
+          type: "sources",
+          props: {
+            sources: [
+              {
+                label: `Active for-sale homes, ${scarcity.county} County — as of ${mdY(scarcity.asOfIso)}`,
+                url: SITE,
+              },
+            ],
+            note: `"Like this one" = list price ${usdShort(scarcity.bandLo)}–${usdShort(scarcity.bandHi)}, ${scarcity.bedFloor}+ beds, ${count(scarcity.sqftFloor)}+ sq ft. Vacant land excluded.`.slice(
+              0,
+              200,
+            ),
+          },
+          layout: { x: 0, y: 0, w: 12, h: 3 },
+        },
+      ]
+    : [];
 
   let doc: EmailDoc = {
-    globalStyle,
-    blocks,
-    // THE SUBJECT LINE. deriveEmailDocSubject falls back to the hero's LABEL, so
-    // without this the subject would be bare geography. Written deterministically from
-    // the city — a model never touches it, so it can never smuggle the street into it.
+    ...buildLifecycleEmail(currentDoc, { ...chrome, middle, tail }),
+    // THE SUBJECT LINE. deriveEmailDocSubject falls back to a hero's LABEL, so without
+    // this the subject would be bare geography. Written deterministically from the city —
+    // a model never touches it, so it can never smuggle the street into it.
     subjectVariants: [
       city
         ? `Coming soon in ${city} — before it hits the market`
         : "Coming soon — before it hits the market",
     ],
   };
-
-  if (!chart) doc = dropEmptyChartSlot(doc);
 
   // ── The narrator ───────────────────────────────────────────────────────────
   // It gets a DE-IDENTIFIED fact sheet. authorListingNarrative builds its prompt from
@@ -591,22 +563,22 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
 
   // *** THE NARRATOR RUNS ONLY ON LANE-2 MATERIAL. ***
   //
-  // Proven on the first live run of this recipe (07/13/2026). With no pasted
-  // description, the only facts the narrator holds are the spec cells sitting directly
-  // above its own paragraph — and, told to describe a house it cannot see, it INVENTED:
+  // Proven on the first live run of this recipe (07/13/2026). With no pasted description,
+  // the only facts the narrator holds are the spec cells sitting directly above its own
+  // paragraph — and, told to describe a house it cannot see, it INVENTED:
   //
   //   "…across a layout that gives each room room to breathe. The original ask has been
   //    adjusted by just over $100,000, bringing this build to market at a figure the
   //    builder has now committed to."
   //
-  // A floor plan we were never given, and an intention we never had. Both are exactly
-  // what playbook rule 4 forbids ("a fact about the home is NOT ONLY A NUMBER — a view,
-  // a waterfront, a pool, a renovation, a finish is equally an invention if it wasn't
-  // given"), and the shared system prompt already forbade both — it did it anyway.
-  // Asking harder is not a fix; removing the incentive is. No vendor sells us MLS
-  // remarks (all 18 SteadyAPI endpoints, 07/13/2026), so the description is a LANE-2
-  // fact: the agent pastes it. Without it there is nothing honest to say that the grid
-  // does not already say, and the paragraph is an OPEN SLOT — not an improvisation.
+  // A floor plan we were never given, and an intention we never had. Both are exactly what
+  // playbook rule 4 forbids ("a fact about the home is NOT ONLY A NUMBER — a view, a
+  // waterfront, a pool, a renovation, a finish is equally an invention if it wasn't
+  // given"), and the shared system prompt already forbade both — it did it anyway. Asking
+  // harder is not a fix; removing the incentive is. No vendor sells us MLS remarks (all 18
+  // SteadyAPI endpoints, 07/13/2026), so the description is a LANE-2 fact: the agent
+  // pastes it. Without it there is nothing honest to say that the grid does not already
+  // say, and the paragraph is an OPEN SLOT — not an improvisation.
   const teaserFacts: ListingFacts = {
     ...facts,
     address: undefined,
@@ -638,9 +610,9 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
   const cleaned = raw ? redactStreetLine(raw, street) : null;
   const narrative = cleaned && !leaksStreet(cleaned, street) ? cleaned : null;
 
-  // LANDMINE: fillNarrative SKIPS a text block that already has content. This grid
-  // leaves the commentary slot empty on purpose, but clearNarrativeSlots keeps that
-  // true even if a sticky block ever arrives pre-filled.
+  // LANDMINE: fillNarrative SKIPS a text block that already has content. The chrome leaves
+  // the commentary slot empty on purpose, but clearNarrativeSlots keeps that true even if
+  // a sticky block ever arrives pre-filled.
   if (narrative) doc = fillNarrative(clearNarrativeSlots(doc), narrative);
 
   return doc;

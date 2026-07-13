@@ -3,26 +3,37 @@
 // R5 · JUST SOLD — the same resolved house, now closed. Set the close among the
 // week's real sales nearby, and end with a private home-valuation offer.
 //
+// ── IT WEARS THE CAMPAIGN CHROME (07/13/2026) ────────────────────────────────────
+//
+// This file used to own its own grid: header · photo · hero(LEFT) · stats[3] ·
+// stats[3] · text · list. Six sibling recipes each owned a DIFFERENT one, so a
+// subscriber walking Coming Soon → Sold got seven emails that looked like seven
+// different companies. The layout now lives in ONE place — `buildLifecycleEmail`
+// (lib/email/lifecycle-chrome.ts) — and this recipe supplies only what legitimately
+// differs: the RIBBON WORD, the hero numbers, the spec cells, its own MIDDLE
+// (the comps bar + the sold-comps list), and the CTA. It does not get a shape.
+//
 // The six answers (playbook Part 6):
 //
 //   1. SUBJECT — the same house as New Listing, resolved ONCE by the dispatcher
 //      (ctx.facts). NO SECOND RESOLVER.
-//   2. SKELETON — the committed "just-sold" grid (SEED_DOCS). Loaded, not rebuilt.
-//      It is missing a narrative slot and a CTA, which this builder inserts; see
-//      SKELETON GAPS below.
-//   3. CELLS — the CLOSE PRICE is the headline. It is the one number this email
-//      exists for, and it is the one number the vendor does not sell us. See THE
+//   2. SKELETON — none of its own. `buildLifecycleEmail`, the campaign chrome.
+//      Brand (globalStyle, header, agent card, footer) is lifted from the canvas.
+//   3. CELLS — the CLOSE PRICE is the hero. It is the one number this email exists
+//      for, and it is the one number the vendor does not sell us. See THE
 //      CLOSE-PRICE PROBE below: unsourced → an OPEN SLOT the agent fills, never a
 //      list price wearing a sold hat, never a zero.
 //   4. CHART — comps-bar, and ONLY when the close is sourced. The subject's own bar
 //      IS the point ("set the close among the week's real sales"); a bar chart of
 //      six neighbours with no subject bar is an AREA chart on a listing email —
-//      exactly the failure playbook rule 3 names. No close → drop the chart, keep
-//      the sold-comps LIST (honest context that needs no subject bar).
+//      exactly the failure playbook rule 3 names. No close → no chart at all (the
+//      chrome only positions the middle blocks it is handed, so there is no empty
+//      slot left behind), and the sold-comps LIST still carries the context.
 //   5. PROSE — the house's own facts + the agent's pasted description, with the
 //      close (when sourced) and the nearby sales as BACKGROUND. Never a pitch.
-//   6. FRAMING — "Just Sold" hero, the close over the address, a private
-//      home-valuation CTA.
+//   6. FRAMING — "Just Sold" ribbon, the address over the CLOSE, a private
+//      home-valuation CTA (the NEXT action — never "see the sale price" on an email
+//      whose whole job is the sale price).
 //
 // ── THE CLOSE-PRICE PROBE (live, 07/13/2026 — the honest answer this recipe owes) ─
 //
@@ -54,48 +65,27 @@
 // ABSENT from the sent email. The agent who just closed the house knows the number;
 // county recording lags by weeks, so this is the COMMON case, not the edge case.
 //
-// ── SKELETON GAPS (reported, not edited — default-docs.ts is not mine) ───────────
-// The committed "just-sold" grid has NO text block (so fillNarrative would silently
-// drop the authored paragraph) and NO button (so the valuation CTA has nowhere to
-// go). This builder inserts both. It also prefills hero.label and hero.prose with
-// INSTRUCTIONS ("Say what made this sale notable…") which would ship verbatim to a
-// recipient — they are overwritten/cleared here. See the final report.
-//
 // ── LANDMINES HONORED ────────────────────────────────────────────────────────────
 // • A COMP MUST HAVE beds AND sqft, OR IT IS A VACANT LOT. Confirmed live in this
 //   subject's own sold set: 315 Shore Dr — beds null, sqft null, lotSqft 16640,
 //   $127,500. Charting bare land against a 2,847 sqft house makes the close look
 //   like a steal for a fake reason. Filter BY DATA, never by guessing at the name.
 // • The subject is excluded from its own comp set (it is never its own comp).
+// • THE PAIRING RULE — see `soldSpecs`. A price cell that is not the close may only
+//   appear ALONGSIDE the close, never instead of it.
 
 import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { canonStreet } from "@/lib/listings/resolve-subject";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
-import { chartImageBlock, upsertChartBlock } from "@/lib/email/inject-chart";
-import { soldCompsListBlock, upsertSoldCompsBlock } from "@/lib/email/sold-comp-blocks";
-import { seedById, createBlock, DEFAULT_GLOBAL_STYLE } from "@/lib/email/doc/default-docs";
-import {
-  authorListingNarrative,
-  clearNarrativeSlots,
-  dropEmptyChartSlot,
-  fillNarrative,
-} from "./shared";
+import { chartImageBlock } from "@/lib/email/inject-chart";
+import { soldCompsListBlock } from "@/lib/email/sold-comp-blocks";
+import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
+import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
+import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
 import type { RecipeBuildContext } from "./index";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
-import type { EmailBlock, EmailDoc, FontFamily, StatItem } from "@/lib/email/doc/types";
+import type { EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
-
-/** Editorial fallback palette — applied ONLY when the incoming brand is still the
- *  house default (a blank brand). A real user brand carries through untouched.
- *  Mirrors listing-flyer.ts so the lifecycle emails look like one family. */
-const EDITORIAL_STYLE = {
-  primaryColor: "#0A2A2C",
-  accentColor: "#B98F45",
-  fontFamily: "BOOK_SERIF" as FontFamily,
-  displayFontFamily: "PLAYFAIR_SERIF" as FontFamily,
-  textColor: "#23302F",
-  backdropColor: "#EFE9DD",
-};
 
 /** A recorded sale of the SUBJECT itself — the only thing that may fill the close. */
 interface SubjectClose {
@@ -209,9 +199,93 @@ export function withSubjectRowFacts(facts: ListingFacts, row: RenderComp | null)
 }
 
 /**
+ * THE SPEC STRIP — the campaign's ONE hairline row, wearing the sold hat.
+ *
+ * The chrome gives every lifecycle email the same strip; what differs is WHICH CELLS
+ * and which one wins the argument. On a sold email that is LIST-TO-SALE (primary, in
+ * the accent): it is the only number here the hero has not already said, and it is
+ * the whole reason a farm list opens this. The ask is `muted` — it is context to the
+ * close, not a headline of its own.
+ *
+ * THE CLOSE IS NOT IN THE STRIP. The hero carries it. The previous layout put it in
+ * a stat row directly beneath the hero and printed the same $300,000 twice, at the
+ * same scale — a bug the HTML greps clean for and only the screenshot shows.
+ *
+ * ── THE PAIRING RULE (found by LOOKING at the render, 07/13/2026) ────────────────
+ * A PRICE CELL THAT IS NOT THE CLOSE MAY ONLY APPEAR ALONGSIDE THE CLOSE. With the
+ * close unsourced and the ask known, the open-slot contract correctly dropped the
+ * empty sale cell — which left "$595,000 / List Price" standing alone under a gold
+ * JUST SOLD ribbon. Every word on the page was true and the page still said the
+ * house closed at its asking price. So `List Price` and `List-to-Sale` are
+ * all-or-nothing on the PAIR: no close → three open slots on the canvas (the agent
+ * knows both numbers) and NO price cells in the sent email. An element ships with
+ * its coherence rule; this is it.
+ *
+ * $/SQ FT IS THE SALE PRICE ÷ SQUARE FEET — never the ask ÷ square feet. A sold
+ * email's $/sq ft is a claim about what the market PAID. Two sourced figures in, one
+ * rate out (the same shape as the flyer's), never back-solved from one of them.
+ */
+export function soldSpecs(facts: ListingFacts, close: SubjectClose | null): StatItem[] {
+  const listPrice = num(facts.price);
+  const pair = close && listPrice ? { close: close.price, list: listPrice } : null;
+  // Derived from the CLOSE, or not at all. `pricePerSqft` parses digits out of both.
+  const soldPerSqft = close ? pricePerSqft(usd(close.price), facts.sqft) : undefined;
+  return [
+    spec(facts.beds, "Beds"),
+    spec(facts.baths, "Baths"),
+    spec(withCommas(facts.sqft), "Sq Ft"),
+    spec(soldPerSqft, "$/Sq Ft"),
+    spec(pair ? usd(pair.list) : undefined, "List Price", "muted"),
+    spec(
+      pair ? `${Math.round((pair.close / pair.list) * 1000) / 10}%` : undefined,
+      "List-to-Sale",
+      "primary",
+    ),
+  ];
+}
+
+/**
+ * THE ACCENT THE EMAIL WILL ACTUALLY WEAR — which is NOT always the canvas's.
+ *
+ * `buildLifecycleEmail` owns the brand decision: a real user brand rides through
+ * untouched, while a still-default (blank) brand gets the editorial palette. The
+ * chart PNG is baked BEFORE that call, so passing `currentDoc.globalStyle.accentColor`
+ * bakes the CANVAS's accent — and on a blank brand that is the house teal, under a
+ * GOLD "Just Sold" ribbon. Found by screenshotting the render, 07/13/2026: teal bars,
+ * gold everything else. The "seven companies" disease, at element scale, inside one email.
+ *
+ * So ASK THE CHROME rather than copying its palette here — one authority per shared
+ * concept. A throwaway build with empty chrome is a pure function call; it costs
+ * nothing and can never drift from whatever the chrome decides next.
+ */
+function chromeAccent(current: EmailDoc): string {
+  const probe = buildLifecycleEmail(current, {
+    ribbon: "",
+    photo: null,
+    heroValue: "",
+    heroLabel: "",
+    specs: [],
+    ctaLabel: "",
+  });
+  return probe.globalStyle.accentColor ?? "#2563eb";
+}
+
+/** Provenance for the DERIVED cells, stated where the reader can see it. Names only
+ *  the cells that actually rendered — a footnote for a cell that is an open slot is
+ *  itself a claim that something was computed. */
+export function soldFootnote(facts: ListingFacts, close: SubjectClose | null): string | undefined {
+  const parts: string[] = [];
+  if (close && pricePerSqft(usd(close.price), facts.sqft)) {
+    parts.push("$/Sq Ft is the sale price ÷ listed square footage");
+  }
+  if (close && num(facts.price)) parts.push("List-to-Sale is the sale price ÷ the list price");
+  return parts.length > 0 ? `*${parts.join("; ")}.` : undefined;
+}
+
+/**
  * The comps bar — the close set among the week's real sales. The SUBJECT'S OWN BAR
  * is what makes this a chart about the subject rather than about the area, so it is
- * required: no close → no chart (the caller drops the slot).
+ * required: no close → no chart (the caller omits it from the middle entirely).
  */
 export function buildJustSoldSpec(
   comps: RenderComp[],
@@ -248,56 +322,6 @@ export function buildJustSoldSpec(
   } as ChartSpec;
 }
 
-/** Reuse the canvas doc's block of a type (brand/identity is STICKY — never authored). */
-function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock {
-  return current.blocks.find((b) => b.type === type) ?? createBlock(type);
-}
-
-/**
- * THE SALE + THE HOME, as two stat rows. Every cell is sourced or an OPEN SLOT —
- * never a zero, never a naked label (StatsBlock drops an empty cell on emailRender
- * and drops the row when none survive; on the canvas the LABEL is the instruction).
- *
- * ── THE PAIRING RULE (both halves found by LOOKING at the render, 07/13/2026) ────
- * THE SALE ROW IS A COMPARISON ROW. It needs BOTH the close and the ask, or it says
- * nothing the hero has not already said — and StatsBlock renders a LONE surviving
- * cell CENTERED AT HERO SCALE, which is exactly how both of these shipped:
- *
- *  • close unsourced, ask known → the open-slot contract correctly dropped the empty
- *    "Sale Price" cell, which left "$595,000 / List Price" alone, huge, directly
- *    under a gold JUST SOLD kicker. Every word on the page was true and the page
- *    still said the house closed at its asking price. The HTML greps clean — only
- *    the screenshot shows it.
- *  • close sourced, ask unknown (the REAL sold-house case, since the for-sale feed
- *    cannot see a sold home) → the hero showed "$300,000" and the row repeated
- *    "$300,000 / Sale Price" directly beneath it at the same scale. Same number twice.
- *
- * So the row is all-or-nothing on the PAIR: missing either number → three open slots
- * on the canvas (the agent knows both) and NO row in the email. The HERO carries the
- * close on its own regardless. An element ships with its coherence rule; this is it.
- */
-export function statRows(facts: ListingFacts, close: SubjectClose | null): StatItem[][] {
-  const listPrice = num(facts.price);
-  // The comparison exists only when BOTH numbers do. The ratio is a rate over two
-  // SOURCED figures (like $/sqft on the flyer) — never back-solved from one of them.
-  const pair = close && listPrice ? { close: close.price, list: listPrice } : null;
-  const cell = (value: string | undefined, label: string): StatItem => ({
-    value: value && value.trim() ? value.trim().slice(0, 24) : "",
-    label,
-  });
-  return [
-    [
-      cell(pair ? usd(pair.close) : undefined, "Sale Price"),
-      cell(pair ? usd(pair.list) : undefined, "List Price"),
-      cell(
-        pair ? `${Math.round((pair.close / pair.list) * 1000) / 10}%` : undefined,
-        "List-to-Sale",
-      ),
-    ],
-    [cell(facts.beds, "Beds"), cell(facts.baths, "Baths"), cell(withCommas(facts.sqft), "Sq Ft")],
-  ];
-}
-
 export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc | null> {
   const { facts: resolved, currentDoc } = ctx;
   // No subject → nothing to announce as sold. Fall through to the generic author
@@ -325,142 +349,73 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   // Vacant lots out, AVM estimates out, the subject out. See realSaleComps.
   const comps = realSaleComps(allComps, street);
 
-  // ── SKELETON — the committed "just-sold" grid, loaded (never rebuilt).
-  const seed = seedById("just-sold")?.build();
-  if (!seed) return null; // the registry names a skeleton that must exist
+  // ── THE MIDDLE — the only place this email legitimately differs from its siblings.
+  const middle: EmailBlock[] = [];
 
-  // Brand-or-ours: a real user brand carries through untouched; the editorial
-  // palette lands only on a still-default (blank) brand.
-  const brandIsHouse = currentDoc.globalStyle.accentColor === DEFAULT_GLOBAL_STYLE.accentColor;
-  const globalStyle = brandIsHouse
-    ? { ...currentDoc.globalStyle, ...EDITORIAL_STYLE }
-    : { ...currentDoc.globalStyle };
-
-  const rows = statRows(facts, close);
-  const soldOn = isoToMDY(close?.date ?? null);
-
-  const blocks: EmailBlock[] = [];
-  let statsEmitted = false;
-  for (const block of seed.blocks) {
-    switch (block.type) {
-      // Brand + identity are STICKY — lift the agent's own header/footer/card.
-      case "header":
-      case "footer":
-      case "agent-card":
-        blocks.push(keepOrDefault(currentDoc, block.type));
-        break;
-
-      // The photo of the win. Empty when the vendor had none (a genuinely SOLD house
-      // is not in the for-sale feed, so it often has none) → an OPEN SLOT: a
-      // file-picker dropzone on the canvas, absent from the email. Never stock art.
-      case "image":
-        blocks.push({
-          ...block,
-          props: {
-            ...block.props,
-            url: facts.photos[0] ?? "",
-            alt: facts.address ?? "The home that just sold",
-            ...(facts.photos[0] ? { linkUrl: facts.sourceUrl } : {}),
-          },
-        });
-        break;
-
-      // The sold hero. value = THE CLOSE, or "" (an editable open slot on the canvas,
-      // nothing at all in the email — HeroBlock renders the value only when it has
-      // one). NEVER facts.price: that is the ASK, and an ask in a sold hero is a lie.
-      //
-      // LANDMINE: the committed skeleton prefills `label` and `prose` with
-      // INSTRUCTIONS ("Sale price and where it sold", "Say what made this sale
-      // notable…"). Those are written for a human filling the canvas — shipped as-is
-      // they reach the recipient verbatim. Overwrite the label; clear the prose.
-      case "hero":
-        blocks.push({
-          ...block,
-          props: {
-            ...block.props,
-            kicker: "Just Sold",
-            value: close ? usd(close.price) : "",
-            label: [street || facts.address, soldOn && `Sold ${soldOn}`]
-              .filter(Boolean)
-              .join(" · "),
-            prose: "",
-          },
-        });
-        break;
-
-      // THE SALE + THE HOME. The skeleton reserves the spec rows; we fill them ONCE.
-      // (Expanding `rows` on every stats block the skeleton carries would emit the whole
-      // grid once per reserved row — four rows where two belong.)
-      case "stats":
-        if (!statsEmitted) {
-          statsEmitted = true;
-          for (const row of rows) {
-            blocks.push({ id: createBlock("stats").id, type: "stats", props: { stats: row } });
-          }
-        }
-        break;
-
-      default:
-        blocks.push(block);
-        break;
-    }
-  }
-
-  // The skeleton now RESERVES the narrative slot and the CTA (they were genuinely
-  // missing when this was written, and the seed card was the poorer for it — a user who
-  // picked "Just Sold" from the gallery got a card with nowhere to write and nothing to
-  // click). These inserts are the FALLBACK for a canvas that lacks them, not an
-  // unconditional append: doing both is how the doc grew two of each.
-  if (!blocks.some((b) => b.type === "text")) {
-    const cardIdx = blocks.findIndex((b) => b.type === "agent-card");
-    const narrativeSlot: EmailBlock = {
-      id: createBlock("text").id,
-      type: "text",
-      props: { body: "", align: "left" },
-    };
-    blocks.splice(cardIdx === -1 ? blocks.length : cardIdx, 0, narrativeSlot);
-  }
-
-  // The valuation offer IS this recipe's CTA (the whole reason a sold email goes to a
-  // farm list), so it cannot be optional — but it also must not be doubled.
-  if (!blocks.some((b) => b.type === "button")) {
-    const footerIdx = blocks.findIndex((b) => b.type === "footer");
-    const cta: EmailBlock = {
-      id: createBlock("button").id,
-      type: "button",
-      props: { label: "What's My Home Worth?", url: facts.sourceUrl },
-    };
-    blocks.splice(footerIdx === -1 ? blocks.length : footerIdx, 0, cta);
-  }
-
-  let doc: EmailDoc = { globalStyle, blocks };
-
-  // ── CHART — comps-bar, and ONLY with the subject's own bar. Without the close
-  // there is no subject bar, and six neighbours' sales on a listing email is an AREA
-  // chart — the failure rule 3 names. Drop the slot; the comp LIST still carries the
-  // context honestly. (A chart PNG is baked at author time, so a close typed into the
-  // open slot later cannot retroactively enter it — reported as a known limitation.)
-  const spec = close
+  // CHART — comps-bar, and ONLY with the subject's own bar. Without the close there
+  // is no subject bar, and six neighbours' sales on a listing email is an AREA chart
+  // — the failure rule 3 names. No close → the chart is never built, so there is no
+  // empty box to drop (the chrome positions only the blocks it is handed). The comp
+  // LIST below still carries the context honestly. (A chart PNG is baked at author
+  // time, so a close typed into the open slot later cannot retroactively enter it —
+  // reported as a known limitation.)
+  const chartSpec = close
     ? buildJustSoldSpec(
         comps,
         { street: street || "This home", close: close.price },
         new Date().toISOString().slice(0, 10),
       )
     : null;
-  if (spec) {
+  if (chartSpec) {
     const chartImg = await chartSpecToEmailImage(
-      spec,
-      globalStyle.accentColor ?? "#2563eb",
+      chartSpec,
+      // The accent the CHROME will land on — never the canvas's. See chromeAccent.
+      chromeAccent(currentDoc),
       `just-sold-${facts.zip ?? "swfl"}-${Date.now()}`,
     ).catch(() => null);
-    if (chartImg) doc = upsertChartBlock(doc, chartImageBlock(chartImg));
+    // An empty chart box is worse than no chart — a failed render simply doesn't ride.
+    if (chartImg)
+      middle.push({ ...chartImageBlock(chartImg), layout: { x: 0, y: 0, w: 12, h: 6 } });
   }
-  // An empty chart box is worse than no chart.
-  doc = dropEmptyChartSlot(doc);
 
-  // ── The week's real sales, as linked rows. Vacant-lot-filtered, subject excluded.
+  // THE WEEK'S REAL SALES, as linked rows. Vacant-lot-filtered, subject excluded.
   const compRows = soldCompsListBlock(comps);
-  if (compRows) doc = upsertSoldCompsBlock(doc, compRows);
+  if (compRows) middle.push({ ...compRows, layout: { x: 0, y: 0, w: 12, h: 5 } });
+
+  const soldOn = isoToMDY(close?.date ?? null);
+  const footnote = soldFootnote(facts, close);
+
+  // ── THE CAMPAIGN CHROME. One layout, seven emails, one agent.
+  let doc = buildLifecycleEmail(currentDoc, {
+    ribbon: "Just Sold",
+    // The photo of the win. A genuinely SOLD house is not in the for-sale feed, so it
+    // often has none → an OPEN SLOT: a dropzone on the canvas, absent from the sent
+    // email. Never stock art, never a refusal.
+    photo: facts.photos[0]
+      ? {
+          url: facts.photos[0],
+          alt: facts.address ?? "The home that just sold",
+          linkUrl: facts.sourceUrl,
+        }
+      : null,
+    // THE CLOSE — or "" (an editable open slot on the canvas, nothing at all in the
+    // email). NEVER facts.price: that is the ASK, and an ask in a sold hero is a lie.
+    heroValue: close ? usd(close.price) : "",
+    heroLabel: addressLineOf(facts),
+    // The one accent line above the address: WHEN it sold. Only ever the recorded
+    // date of the recorded sale — no close, no date, no kicker.
+    ...(close && soldOn ? { heroKicker: `Sold ${soldOn}` } : {}),
+    specs: soldSpecs(facts, close),
+    ...(footnote ? { specFootnote: footnote } : {}),
+    middle,
+    // The narrator's slot is left OPEN here and authored into below (fillNarrative
+    // SKIPS a text block that already has content).
+    narrative: "",
+    // THE NEXT ACTION. Never "See the Sale Price" on the email whose whole job is the
+    // sale price — the valuation offer IS why a sold email goes to a farm list.
+    ctaLabel: "What's My Home Worth?",
+    ...(facts.sourceUrl ? { ctaUrl: facts.sourceUrl } : {}),
+  });
 
   // ── PROSE. The model writes prose and nothing else. The close rides in the FRAMING
   // (so the paragraph may state it) and the nearby sales ride in as BACKGROUND. When

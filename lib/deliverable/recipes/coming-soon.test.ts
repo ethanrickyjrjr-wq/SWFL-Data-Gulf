@@ -4,10 +4,18 @@
 // NEVER SHIPS. It is sitting in ctx.facts, and every rendered surface — hero, photo
 // alt, subject line, CTA url, prose — is a place it could leak out of.
 //
+// 07/13/2026 — the recipe now wears the CAMPAIGN CHROME (lib/email/lifecycle-chrome.ts),
+// so the layout assertions below moved with it: the hero is now TWO blocks (the accent
+// RIBBON, then the centred subject hero whose LABEL rides above the price), and the
+// scarcity counts are a hairline STRIP rather than a second chunky stat grid. The
+// suppression did not move an inch — and the chrome added one new surface to defend,
+// the photo DROPZONE, whose alt text the chrome derives from the hero label. That is
+// exactly why the hero label is the CITY.
+//
 // These tests make ZERO network calls on purpose. buildComingSoon short-circuits its
 // three impure lanes when the subject has no price/beds/sqft (loadScarcity guards on
 // them, chartSpecToEmailImage is only reached with a scarcity, and
-// authorListingNarrative returns null when all three are absent) — so the STRUCTURAL
+// authorListingNarrative is only reached with pasted remarks) — so the STRUCTURAL
 // suppression and the open-slot contract are asserted deterministically. The model's
 // OUTPUT is guarded by redactStreetLine/leaksStreet, which are pure and tested here
 // directly against a paragraph that does name the street.
@@ -21,13 +29,15 @@ import {
   scarcityBand,
   scarcityChartSpec,
   scarcityStats,
+  teaserSpecs,
+  teaserWhere,
   usdShort,
   type Scarcity,
 } from "./coming-soon";
 import { defaultDoc } from "@/lib/email/doc/default-docs";
 import { RECIPES } from "@/lib/deliverable/recipes";
 import type { RecipeBuildContext } from "./index";
-import type { EmailDoc } from "@/lib/email/doc/types";
+import type { EmailBlock, EmailDoc } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
 const SUBJECT = "326 Shore Dr, Fort Myers, FL 33905";
@@ -42,6 +52,22 @@ function allText(doc: EmailDoc): string {
   };
   doc.blocks.forEach((b) => walk(b.props));
   return out.join("\n");
+}
+
+/** The doc's blocks in RENDER order (the chrome positions on the grid, not the array). */
+function ordered(doc: EmailDoc): EmailBlock[] {
+  return [...doc.blocks].sort((a, b) => (a.layout?.y ?? 0) - (b.layout?.y ?? 0));
+}
+
+/** The accent RIBBON — the campaign's spine, and the one block that says WHICH email. */
+function ribbonOf(doc: EmailDoc) {
+  return doc.blocks.find((b) => b.type === "hero" && b.props.ribbon);
+}
+
+/** The SUBJECT hero — the centred block whose LABEL rides above the PRICE. On every other
+ *  lifecycle email that label is the street address. On this one it is the city. */
+function subjectHeroOf(doc: EmailDoc) {
+  return doc.blocks.find((b) => b.type === "hero" && !b.props.ribbon);
 }
 
 function ctxFor(facts: Partial<ListingFacts>): RecipeBuildContext {
@@ -89,12 +115,27 @@ describe("the street address never ships", () => {
     expect(alt).not.toContain("Shore");
   });
 
-  test("the hero is Coming Soon + the city — never the street", async () => {
+  test("the RIBBON says which email this is, and the centred hero is the CITY over the price — never the street", async () => {
     const doc = await buildComingSoon(TEASER_CTX);
-    const hero = doc!.blocks.find((b) => b.type === "hero");
-    const p = hero!.props as { kicker?: string; label?: string };
-    expect(p.kicker).toBe("Coming Soon");
+
+    const ribbon = ribbonOf(doc!);
+    expect(ribbon, "the accent ribbon is the campaign's spine").toBeDefined();
+    expect((ribbon!.props as { kicker?: string }).kicker).toBe("Coming Soon");
+
+    // THE ONE SUBSTITUTION THAT IS THIS DELIVERABLE. The chrome prints heroLabel above
+    // the price; New Listing hands it the street address. This one hands it a city.
+    const hero = subjectHeroOf(doc!);
+    const p = hero!.props as { label?: string; order?: string; align?: string };
     expect(p.label).toBe("Fort Myers, FL");
+    expect(p.label).not.toContain("Shore");
+    expect(p.order, "label over value — the campaign's centred hero").toBe("label-first");
+    expect(p.align).toBe("center");
+  });
+
+  test("teaserWhere is the city, and falls back to the region — never to the street", () => {
+    expect(teaserWhere({ city: "Naples", state: "FL" } as ListingFacts)).toBe("Naples, FL");
+    expect(teaserWhere({ city: "Cape Coral" } as ListingFacts)).toBe("Cape Coral, FL");
+    expect(teaserWhere({ address: SUBJECT } as ListingFacts)).toBe("Southwest Florida");
   });
 
   test("the subject line is a teaser with no street in it", async () => {
@@ -102,13 +143,64 @@ describe("the street address never ships", () => {
     expect(doc!.subjectVariants?.[0]).toBe("Coming soon in Fort Myers — before it hits the market");
   });
 
-  test("the CTA is the private-preview list and its url carries no address", async () => {
+  test("the CTA asks for the NEXT ACTION, and its url carries no address", async () => {
     const doc = await buildComingSoon(TEASER_CTX);
     const btn = doc!.blocks.find((b) => b.type === "button");
     const p = btn!.props as { label?: string; url?: string };
     expect(p.label).toBe("Join the Private Preview List");
     expect(p.url ?? "").not.toContain("326");
     expect((p.url ?? "").toLowerCase()).not.toContain("shore");
+  });
+});
+
+describe("it wears the campaign chrome — same look as every other lifecycle email", () => {
+  test("the spine is header · ribbon · photo · hero · strip · … · agent card · CTA · footer", async () => {
+    const doc = await buildComingSoon(TEASER_CTX);
+    const spine = ordered(doc!).map((b) => {
+      if (b.type === "hero") return b.props.ribbon ? "hero:ribbon" : "hero:subject";
+      if (b.type === "stats") return b.props.variant === "strip" ? "stats:strip" : "stats:grid";
+      if (b.type === "image") return `image:${String(b.props.kind ?? "?")}`;
+      return b.type;
+    });
+
+    expect(spine.slice(0, 5)).toEqual([
+      "header",
+      "hero:ribbon",
+      "image:photo",
+      "hero:subject",
+      "stats:strip",
+    ]);
+    expect(spine.slice(-3)).toEqual(["agent-card", "button", "footer"]);
+    // The scarcity counts are a hairline STRIP. A stacked stat GRID is the wall the
+    // chrome exists to kill — under-contract shipped four of them.
+    expect(spine.filter((x) => x === "stats:grid")).toHaveLength(0);
+    expect(spine.filter((x) => x === "stats:strip")).toHaveLength(2);
+    expect(spine.filter((x) => x === "button")).toHaveLength(1);
+  });
+
+  test("the spec strip is the shared lifecycle line, MINUS the lot (a lot + a city locates a parcel)", () => {
+    const cells = teaserSpecs({
+      price: "$595,000",
+      beds: "3",
+      baths: "3.5",
+      sqft: "2847",
+      lotSize: "0.26 ac",
+      propertyType: "Residential - Single Family",
+    } as ListingFacts);
+
+    expect(cells.map((c) => c.label)).toEqual(["Beds", "Baths", "Sq Ft", "$/Sq Ft", "Type"]);
+    expect(cells.map((c) => c.label)).not.toContain("Lot");
+    expect(cells.map((c) => c.value)).toEqual(["3", "3.5", "2,847", "$209", "Single Family"]);
+    // The cell that wins the argument is the emphasised one; type is context.
+    expect(cells[3].emphasis).toBe("primary");
+    expect(cells[4].emphasis).toBe("muted");
+  });
+
+  test("the brand is sticky — the agent's colours ride through untouched", async () => {
+    const branded = defaultDoc();
+    branded.globalStyle = { ...branded.globalStyle, accentColor: "#123456" };
+    const doc = await buildComingSoon({ ...TEASER_CTX, currentDoc: branded });
+    expect(doc!.globalStyle.accentColor).toBe("#123456");
   });
 });
 
@@ -158,15 +250,15 @@ describe("redactStreetLine / leaksStreet — the guard on the MODEL's output", (
 describe("scarcity — real counts, disclosed criterion, never a zero for a gap", () => {
   test("the band is ±10% of price and 80% of size, floored to a clean 50 sq ft", () => {
     expect(scarcityBand(595000, 2847)).toEqual({
-      bandLo: 535500,
-      bandHi: 654500,
+      bandLo: 536000,
+      bandHi: 655000,
       sqftFloor: 2250,
     });
   });
 
   test("usdShort keeps a cell label readable", () => {
-    expect(usdShort(535500)).toBe("$536K");
-    expect(usdShort(654500)).toBe("$655K");
+    expect(usdShort(536000)).toBe("$536K");
+    expect(usdShort(655000)).toBe("$655K");
     expect(usdShort(10_000_000)).toBe("$10M");
   });
 
@@ -182,18 +274,18 @@ describe("scarcity — real counts, disclosed criterion, never a zero for a gap"
     countyHomes: 13122,
     inBand: 1062,
     comparable: 328,
-    bandLo: 535500,
-    bandHi: 654500,
+    bandLo: 536000,
+    bandHi: 655000,
     bedFloor: 3,
     sqftFloor: 2250,
     asOfIso: "2026-07-13",
   };
 
-  test("the cells restate the real counts and state what is being counted", () => {
+  test("the cells restate the real counts, state what is being counted, and emphasise the punchline", () => {
     expect(scarcityStats(S)).toEqual([
-      { value: "13,122", label: "Active homes · Lee County" },
+      { value: "13,122", label: "Active homes · Lee County", emphasis: "muted" },
       { value: "1,062", label: "Priced $536K–$655K" },
-      { value: "328", label: "…that also match beds + size" },
+      { value: "328", label: "…that also match beds + size", emphasis: "primary" },
     ]);
   });
 
@@ -220,7 +312,7 @@ describe("the open-slot contract — a gap is an invitation, never a zero", () =
   test("unsourced scarcity leaves three EMPTY cells whose labels are the instruction", async () => {
     const doc = await buildComingSoon(TEASER_CTX); // no price/beds/sqft → no counts
     const stats = doc!.blocks.filter((b) => b.type === "stats");
-    expect(stats).toHaveLength(2);
+    expect(stats).toHaveLength(2); // the spec strip, then the scarcity strip
     const scarcityRow = stats[1].props as { stats: { value: string; label: string }[] };
     for (const cell of scarcityRow.stats) {
       expect(cell.value).toBe(""); // an OPEN SLOT — never a 0, never a naked label
@@ -241,10 +333,12 @@ describe("the open-slot contract — a gap is an invitation, never a zero", () =
     }
   });
 
-  test("an unresolved chart DROPS the slot — an empty chart box is worse than no chart", async () => {
+  test("an unresolved chart is never pushed — an empty chart box is worse than no chart", async () => {
     const doc = await buildComingSoon(TEASER_CTX);
     const charts = doc!.blocks.filter((b) => b.type === "image" && b.props.kind === "chart");
     expect(charts).toHaveLength(0);
+    // …and no sources block either: with no counts there is no methodology to disclose.
+    expect(doc!.blocks.filter((b) => b.type === "sources")).toHaveLength(0);
   });
 
   test("no subject → fall through to the generic author (never a faked house)", async () => {
@@ -252,25 +346,17 @@ describe("the open-slot contract — a gap is an invitation, never a zero", () =
     expect(doc).toBeNull();
   });
 
-  test("an empty photo becomes a dropzone whose label instructs — and still names no street", async () => {
+  test("an empty photo becomes the chrome's dropzone — and it still names no street", async () => {
     const doc = await buildComingSoon(
       ctxFor({ address: SUBJECT, city: "Fort Myers", state: "FL" }),
     );
     const img = doc!.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
     const p = img!.props as { url?: string; alt?: string };
     expect(p.url).toBe("");
-    expect(p.alt).toContain("Add the teaser photo");
+    // The chrome derives the dropzone's alt from the hero LABEL. On this recipe that
+    // label is the CITY — which is precisely why the open slot cannot leak the house.
+    expect(p.alt).toBe("Fort Myers, FL");
     expect(p.alt).not.toContain("Shore");
-  });
-});
-
-describe("brand is sticky — a recipe never authors one", () => {
-  test("the agent's header, agent card and footer carry through from the canvas", async () => {
-    const doc = await buildComingSoon(TEASER_CTX);
-    const types = doc!.blocks.map((b) => b.type);
-    expect(types).toContain("header");
-    expect(types).toContain("agent-card");
-    expect(types).toContain("footer");
-    expect(types[types.length - 1]).toBe("footer");
+    expect(p.alt).not.toMatch(/\b326\b/);
   });
 });

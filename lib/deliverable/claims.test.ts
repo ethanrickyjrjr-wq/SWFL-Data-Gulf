@@ -116,6 +116,41 @@ describe("the five falsehoods that actually shipped", () => {
     }
   });
 
+  it("catches the INVENTED DOCK — a fact about a home is not only a number", () => {
+    // The agent's own description (the ONLY descriptive source we hold) said:
+    //   "Direct Gulf-access canal home with a five-minute idle to open water."
+    // The narrator shipped:
+    //   "From the dock, it's a five-minute idle to open water."
+    // NO SOURCE HOLDS A DOCK. The model added a physical structure to someone's house, in an
+    // email that agent would have signed. Same disease as the model that once guessed
+    // "waterfront character" and happened to be right — guessing correctly is luck.
+    const facts = {
+      sentence:
+        "The listing's own description: Direct Gulf-access canal home with a five-minute idle to open water.",
+      anchors: [],
+    };
+    const v = auditClaims("From the dock, it's a five-minute idle to open water.", [facts]);
+    expect(v.some((x) => x.kind === "unsourced-feature" && x.match === "dock")).toBe(true);
+
+    // …and a feature the description DOES hold passes clean. The gate must not eat the
+    // agent's own words back out of their own email.
+    expect(
+      auditClaims("A Gulf-access canal home, five minutes at idle to open water.", [facts]).filter(
+        (x) => x.kind === "unsourced-feature",
+      ),
+    ).toEqual([]);
+  });
+
+  it("does NOT flag an honest number just because the facts wrote it without a comma", () => {
+    // Live bug: the FACTS said "Square feet: 2847" and the correctly-sourced prose said
+    // "2,847 sq ft" — and the gate flagged its own true number as unanchored. It failed
+    // CLOSED, so it cost prose rather than truth. But a gate that eats honest sentences is a
+    // gate nobody keeps.
+    const facts = { sentence: "Square feet: 2847", anchors: numeralsIn("Square feet: 2847") };
+    const v = auditClaims("The home offers 2,847 square feet.", [facts]);
+    expect(v.filter((x) => x.kind === "unanchored-number")).toEqual([]);
+  });
+
   it("does NOT eat an honest settled comparison that happens to contain 'below'", () => {
     // "priced $104,975 below its original ask" is a legitimate, sourced fact — the cut is
     // real. A gate that drops honest prose is a gate nobody keeps, and the deliverable
@@ -181,14 +216,32 @@ describe("a settled fact may be restated; a NEW relation may not be derived", ()
 });
 
 describe("honest prose survives the gate", () => {
-  it("a plain descriptive paragraph with no claims passes clean", () => {
-    // The paragraph a listing description SHOULD produce: describes the home, asserts
-    // no relation, counts nothing, sequences nothing.
+  it("a plain descriptive paragraph passes clean — WHEN THE FACTS HOLD ITS FEATURES", () => {
+    // The paragraph a listing description SHOULD produce: it describes the home from the
+    // agent's own pasted words, asserts no relation, counts nothing, sequences nothing.
+    // The pool and the lanai are in the SOURCE, so the narrator may say them.
+    const facts = {
+      sentence:
+        "The listing's own description: Gulf access with no bridges, a heated saltwater pool, a covered lanai, ground-floor primary suite.",
+      anchors: [],
+    };
     const v = auditClaims(
       "Direct Gulf access with no bridges, and a heated saltwater pool under a covered lanai. The primary suite sits on the ground floor.",
-      [],
+      [facts],
     );
     expect(v).toEqual([]);
+  });
+
+  it("…and the SAME paragraph is refused when the facts hold none of it", () => {
+    // Handed NO description, the narrator has no source for a pool or a lanai — so it may
+    // not write one. This is the whole rule: with no source, it writes NOTHING, and the slot
+    // stays open for the agent to fill.
+    const v = auditClaims(
+      "Direct Gulf access with no bridges, and a heated saltwater pool under a covered lanai.",
+      [],
+    );
+    expect(v.some((x) => x.kind === "unsourced-feature" && x.match === "pool")).toBe(true);
+    expect(v.some((x) => x.kind === "unsourced-feature" && x.match === "lanai")).toBe(true);
   });
 });
 
@@ -199,7 +252,10 @@ describe("the prompt and the lint stay in lockstep", () => {
     }
   });
 
-  it("numeralsIn pulls the anchors a paragraph must be checked against", () => {
-    expect(numeralsIn("$595,000 at 2,847 sq ft is $209")).toEqual(["595,000", "2,847", "209"]);
+  it("numeralsIn NORMALISES separators, so '2,847' and '2847' are the same anchor", () => {
+    // The live bug: facts said "2847", prose said "2,847", and the gate called its own true
+    // number invented.
+    expect(numeralsIn("$595,000 at 2,847 sq ft is $209")).toEqual(["595000", "2847", "209"]);
+    expect(numeralsIn("Square feet: 2847")).toEqual(["2847"]);
   });
 });

@@ -118,9 +118,91 @@ export function settledCount(
   return { sentence, anchors: numeralsIn(sentence) };
 }
 
-/** Every numeral in a string — the anchor set a narrator's digits are checked against. */
+/**
+ * Every numeral in a string, NORMALISED — the anchor set a narrator's digits are checked
+ * against.
+ *
+ * BUG, found live 07/13/2026: this used to keep the thousands separator, so the FACTS said
+ * `Square feet: 2847` while the honest, correctly-sourced prose said `2,847 sq ft` — and the
+ * gate flagged its own true number as unanchored. It failed CLOSED, so it cost us prose
+ * rather than truth, but it was still wrong: a gate that eats honest sentences is a gate
+ * nobody keeps. Strip separators on BOTH sides so "2,847" and "2847" are the same anchor.
+ */
 export function numeralsIn(text: string): string[] {
-  return (text.match(/\d[\d,.]*/g) ?? []).map((n) => n.replace(/[.,]$/, ""));
+  return (text.match(/\d[\d,.]*/g) ?? [])
+    .map((n) => n.replace(/[.,]$/, "")) // trailing punctuation, not a decimal
+    .map((n) => n.replace(/,/g, "")); // 2,847 → 2847
+}
+
+/**
+ * A FACT ABOUT A HOME IS NOT ONLY A NUMBER.
+ *
+ * The playbook has said this since the first day, and the LINT never enforced it — the anchor
+ * check covered numerals and nothing else. So the gate happily passed:
+ *
+ *   remarks (the agent's own words, the ONLY descriptive source we hold):
+ *     "Direct Gulf-access canal home with a five-minute idle to open water…"
+ *   what the narrator shipped:
+ *     "FROM THE DOCK, it's a five-minute idle to open water."
+ *
+ * **No source holds a dock.** The model added a physical structure to someone's house, in an
+ * email that agent would have signed. It is the same disease as the model that once guessed
+ * "waterfront character" and happened to be right — guessing correctly is luck, not sourcing.
+ *
+ * So features get the SAME closed-world treatment as numbers: a feature named in the prose
+ * must be named in the facts. Anything else is invented, and the paragraph is dropped.
+ */
+const HOME_FEATURES = [
+  "dock",
+  "boat lift",
+  "boat slip",
+  "seawall",
+  "pool",
+  "spa",
+  "hot tub",
+  "lanai",
+  "patio",
+  "deck",
+  "balcony",
+  "garage",
+  "carport",
+  "roof",
+  "fireplace",
+  "granite",
+  "quartz",
+  "marble",
+  "hardwood",
+  "tile",
+  "stainless",
+  "waterfront",
+  "canal",
+  "gulf access",
+  "lake",
+  "river",
+  "beach",
+  "golf",
+  "gated",
+  "guest house",
+  "casita",
+  "elevator",
+  "wine cellar",
+  "impact windows",
+  "hurricane shutters",
+  "solar",
+  "fence",
+  "workshop",
+  "office",
+  "den",
+  "loft",
+  "basement",
+  "attic",
+  "view",
+] as const;
+
+/** Every home FEATURE named in a string — the anchor set for physical claims. */
+export function featuresIn(text: string): string[] {
+  const t = (text ?? "").toLowerCase();
+  return HOME_FEATURES.filter((f) => new RegExp(`\\b${f}\\b`, "i").test(t));
 }
 
 // ── THE FAIL-CLOSED BACKSTOP ───────────────────────────────────────────────
@@ -249,7 +331,8 @@ export interface ClaimViolation {
     | "spatial"
     | "motive"
     | "artifact-positional"
-    | "unanchored-number";
+    | "unanchored-number"
+    | "unsourced-feature";
   match: string;
 }
 
@@ -267,6 +350,11 @@ export function auditClaims(prose: string, settled: readonly SettledClaim[]): Cl
   const out: ClaimViolation[] = [];
   const settledText = settled.map((s) => s.sentence.toLowerCase()).join("   ");
   const allowedNumerals = new Set(settled.flatMap((s) => s.anchors));
+  // A FACT ABOUT A HOME IS NOT ONLY A NUMBER. Features get the SAME closed-world treatment:
+  // a feature named in the prose must be named in the facts. This is the check that "FROM THE
+  // DOCK, it's a five-minute idle to open water" sailed straight through — the agent's own
+  // description said "a five-minute idle to open water" and never once said dock.
+  const allowedFeatures = new Set(settled.flatMap((s) => featuresIn(s.sentence)));
 
   // Check sentence by sentence, so a settled sentence the narrator restated verbatim
   // does not condemn the paragraph it appears in.
@@ -301,6 +389,13 @@ export function auditClaims(prose: string, settled: readonly SettledClaim[]): Cl
     // Any numeral the narrator wrote that no settled fact contains is unanchored.
     for (const n of numeralsIn(s)) {
       if (!allowedNumerals.has(n)) out.push({ kind: "unanchored-number", match: n });
+    }
+
+    // Any FEATURE the narrator named that no settled fact contains is invented. A dock, a
+    // pool, a view, a fireplace — each is a physical claim about someone's house, in an
+    // email they will sign. "You are describing a house you have never seen."
+    for (const f of featuresIn(s)) {
+      if (!allowedFeatures.has(f)) out.push({ kind: "unsourced-feature", match: f });
     }
   }
   return out;

@@ -187,7 +187,7 @@ Market Pulse and The Social Cut, and would have sent two workers at one key. It 
 | `under-contract` | **none** | **Its old prompt REQUESTED A FABRICATION** — "lead with how fast it went pending" — and no lane holds a days-to-contract interval. The builder obeyed and invented one. Now: **time ON market**, which we do hold. |
 | `just-sold` | comps-bar | The vendor's `price` is an **ASK**. A sold price is a different thing. `/property-tax-history` returns the last recorded *transfer*, which may be a 2023 land sale on a new-construction lot — **a real number answering the wrong question.** No close → open slot. |
 | `open-house` | **none** | The **date and time are in no vendor feed.** Lane-2/4 — the agent supplies them. Open slots, never a placeholder date. |
-| `price-reduced` | **none** | **`reduced_amount` is the size of the CUT, not the old price.** old = price + cut. Operator: show the cut **above** the price, smaller, in the accent color. |
+| `price-reduced` | **none** | **`reduced_amount` is the MOST RECENT cut — NOT the cut from the original ask.** price + cut = the **PREVIOUS** price, not the **ORIGINAL** one. *(This playbook said "old = price + cut" and that was WRONG — see the correction below.)* Operator: show the cut **above** the price, smaller, in the accent color. |
 
 ### The area / agent recipes — a different spine. **Do not force the flyer.**
 
@@ -251,6 +251,39 @@ obey it.** That is not a model failure. It is a spec failure.
 
 Full list, with what to fix and what to research:
 `_AUDIT_AND_ROADMAP/2026-07-13-deliverable-followups.md`.
+
+---
+
+## Part 8.5 — A CORRECTION TO THIS PLAYBOOK (07/13/2026)
+
+**This document told you `old price = price + cut`. That is WRONG, and a recipe obeyed it and
+shipped a falsehood.**
+
+The vendor's live price history for the acceptance fixture (326 Shore Dr):
+
+```
+2026-04-29  Listed          $765,000   ← the ORIGINAL ask
+2026-06-09  Price Changed   $699,975
+2026-07-01  Price Changed   $595,000   ← current
+```
+
+`reduced_amount` = **104,975** = 699,975 − 595,000. It is **the MOST RECENT CUT.**
+
+- `price + cut` = **$699,975** — the **PREVIOUS** price. ✅ true, and safe to label that way.
+- The cut **from the original ask** = 765,000 − 595,000 = **$170,000**. ❌ **not** `reduced_amount`.
+
+Under Contract wrote *"came down by $104,975 **from the original ask**"* — understating the
+real cut by **$65,025**, and implying an original ask of $699,975, a price the home held only
+as a mid-cycle step. **A real number wearing the name of a quantity we do not hold is still an
+invented figure.** It is the same disease as *"went under contract after 75 days"* — and it was
+worse, because **CODE** wrote it, not the model.
+
+**AND THE UPSIDE:** `/property-tax-history` **carries the full price history.** The original
+ask and the true total cut are **real, sourceable numbers we simply were not reading.** Read
+them. (Check: `listing_price_history_original_ask`.)
+
+**The general rule this proves:** *derivable ≠ source-faithful.* Before you name a quantity,
+ask what the vendor actually measured — not what arithmetic you can do to its fields.
 
 ---
 
