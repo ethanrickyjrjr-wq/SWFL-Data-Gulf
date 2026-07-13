@@ -42,7 +42,8 @@ describe("mixed-lane canvas", () => {
     const doc = EmailDocSchema.parse({ globalStyle: STYLE, blocks: all }) as EmailDoc;
     const html = await renderEmailDocHtml(doc);
 
-    expect(html).toContain("SWFL Data Gulf verified corridor metrics");
+    // The ampersand is HTML-escaped in the rendered email, so match around it.
+    expect(html).toContain("Wakefield MarketBeat — Southwest Florida Retail, Q4 2025");
     expect(html).toContain("$21.50");
     expect(html).toContain("Provided by operator");
     expect(html).toContain("$60.84"); // a lake value, verbatim

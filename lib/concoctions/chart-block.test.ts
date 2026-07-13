@@ -74,7 +74,9 @@ describe("buildChartBlock", () => {
     const props = block.props as { url?: string; kind?: string; caption?: string };
     expect(props.kind).toBe("chart");
     expect(props.url).toContain("concoctions/corridor-profiles/");
-    expect(props.caption).toContain("SWFL Data Gulf verified corridor metrics");
+    expect(props.caption).toContain(
+      "Cushman & Wakefield MarketBeat — Southwest Florida Retail, Q4 2025",
+    );
     expect(props.caption).toContain("As of 05/22/2026");
   });
   it("date dimension → trend chart; key is stable across identical calls", async () => {

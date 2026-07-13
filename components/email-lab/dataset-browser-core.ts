@@ -68,4 +68,4 @@ export function shouldAutoRefresh(s: {
 
 // Placement lives in lib (the server-side author seeder shares it); re-exported
 // here so the lab components keep one import root.
-export { placeLoadedBlocks } from "@/lib/concoctions/place-blocks";
+export { placeLoadedBlocks, insertDatasetBlocks } from "@/lib/concoctions/place-blocks";

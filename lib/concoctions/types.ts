@@ -34,6 +34,26 @@ export interface ColumnSpec {
   guards?: ColumnGuards;
   /** Probe-facts worth keeping next to the column (e.g. why a guard exists). */
   note?: string;
+  /**
+   * GRAIN — the dimension this measure is actually HELD at, when that is coarser
+   * than one row. Names another column's key (e.g. "submarket").
+   *
+   * Omitted = the measure is measured per row, and may be ranked/crowned/charted
+   * row-by-row. Set = the value is SHARED by every row in the group, so ranking
+   * rows on it is a lie: it invents an order that the source never asserted.
+   *
+   * 07/13/2026, the incident that made this law: corridor asking rent and vacancy
+   * are Cushman & Wakefield SUBMARKET figures stamped onto each corridor inside
+   * the submarket. Three Naples corridors all carry $60.84 / 1.8%. The lab crowned
+   * "Waterside Shops — $60.84" as the top corridor and charted three identical
+   * bars. Distribution guards could not catch it: spread, distinctness and null
+   * share ALL passed. Spread is not grain.
+   *
+   * The materializer honors this by COLLAPSING rows to the grain before any shape
+   * that ranks or crowns — which is also the better chart (15 real submarkets,
+   * genuinely different rents) rather than a padded list of duplicates.
+   */
+  grain?: string;
 }
 
 export type ConcoctionRow = Record<string, string | number | null>;

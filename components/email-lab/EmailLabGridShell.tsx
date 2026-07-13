@@ -57,7 +57,7 @@ import { PhotosPanel } from "./PhotosPanel";
 import { MediaPanel } from "./MediaPanel";
 import { DatasetBrowser } from "./DatasetBrowser";
 import { DatasetChip } from "./DatasetChip";
-import { placeLoadedBlocks, shouldAutoRefresh } from "./dataset-browser-core";
+import { insertDatasetBlocks, shouldAutoRefresh } from "./dataset-browser-core";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import type { SocialElement } from "@/lib/social/design/types";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
@@ -664,12 +664,19 @@ export function EmailLabGridShell({
   }
 
   /** Place freshly-materialized dataset blocks under the canvas content —
-   *  values baked, bindings remembered; one commit = one undo frame. */
+   *  values baked, bindings remembered; one commit = one undo frame.
+   *
+   *  BEFORE THE FOOTER, always. A blind append put the data underneath the
+   *  unsubscribe line (found on the 07/13/2026 live-verify — the email read
+   *  footer-then-content). Same rule the author engine already follows in
+   *  lib/email/author-doc.ts: find the footer, splice ahead of it, and only
+   *  push to the end when the doc has no footer at all. */
   function addDatasetBlocks(loaded: EmailBlock[]) {
-    const placed = placeLoadedBlocks(doc.blocks, loaded);
-    if (placed.length === 0) return;
-    commit({ ...doc, blocks: [...doc.blocks, ...placed] });
-    setSelectedId(placed[0].id);
+    if (loaded.length === 0) return;
+    const blocks = insertDatasetBlocks(doc.blocks, loaded);
+    const added = blocks.find((b) => !doc.blocks.some((o) => o.id === b.id));
+    commit({ ...doc, blocks });
+    if (added) setSelectedId(added.id);
     setShowDatasets(false);
   }
 

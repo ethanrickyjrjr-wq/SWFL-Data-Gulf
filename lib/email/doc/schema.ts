@@ -150,7 +150,12 @@ const MultiColumnPropsSchema = z.object({
 }) satisfies z.ZodType<MultiColumnProps>;
 
 const ListItemSchema = z.object({
-  lead: z.string().max(24).optional(),
+  // 40, not 24: a lead can be a real published place name, and truncating one
+  // mangles it. "South Fort Myers/San Carlos" — a Cushman & Wakefield submarket
+  // we quote verbatim — is 27 characters. The AI-authored cap stays at 24
+  // (authoredText below) so models keep writing terse leads; only data-derived
+  // leads, which carry names we do not get to shorten, use the extra room.
+  lead: z.string().max(40).optional(),
   text: z.string().max(200),
   linkUrl: z.string().optional(),
 });

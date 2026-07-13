@@ -3,9 +3,17 @@ import { materializeLoad, mapSliceToBlock } from "./materialize";
 import { corridorProfiles } from "./defs/corridor-profiles";
 import { stubSb } from "./defs/test-stub";
 
+// Mirrors the real table, which since migration 20260713_corridor_submarket_grain
+// carries the submarket each corridor sits in. Rent/vacancy/absorption/cap rate
+// are held at THAT grain (see types.ts ColumnSpec.grain), so a fixture without it
+// is not a corridor row — it is an uncitable figure, and the materializer is
+// right to refuse to render it. One submarket per corridor here keeps the collapse
+// an identity so these tests still measure what they were written to measure;
+// grain.test.ts covers the shared-figure case that caused the incident.
 export const CORRIDOR_ROWS = [
   {
     corridor_name: "Alico Industrial",
+    submarket: "South Fort Myers/San Carlos",
     city: "Fort Myers",
     corridor_type: "industrial flex",
     evolution_direction: "growing",
@@ -19,6 +27,7 @@ export const CORRIDOR_ROWS = [
   },
   {
     corridor_name: "Estero Blvd",
+    submarket: "The Islands",
     city: "Fort Myers Beach",
     corridor_type: "beachfront",
     evolution_direction: "repositioning",
@@ -32,6 +41,7 @@ export const CORRIDOR_ROWS = [
   },
   {
     corridor_name: "Pine Ridge Rd",
+    submarket: "North Naples",
     city: "Naples",
     corridor_type: "medical",
     evolution_direction: "stable",
@@ -45,6 +55,7 @@ export const CORRIDOR_ROWS = [
   },
   {
     corridor_name: "Immokalee Rd",
+    submarket: "East Naples",
     city: "Naples",
     corridor_type: "strip",
     evolution_direction: "stable",
@@ -58,6 +69,7 @@ export const CORRIDOR_ROWS = [
   },
   {
     corridor_name: "Cape Coral Pkwy",
+    submarket: "Cape Coral",
     city: "Cape Coral",
     corridor_type: "suburban",
     evolution_direction: "growing",
@@ -122,7 +134,7 @@ describe("materializeLoad", () => {
     )!;
     const items = (block.props as { items: { lead?: string; text: string }[] }).items;
     expect(items).toHaveLength(Math.min(spec.slice.topN ?? 6, CORRIDOR_ROWS.length));
-    expect(items[0].text).toContain("Estero Blvd");
+    expect(items[0].text).toContain("The Islands"); // the SUBMARKET the figure is held at, not a corridor that shares it
     expect(items[0].text).toContain("$60.84");
   });
   it("guard-failing chart slice degrades to a LIST of the same verbatim values, never a lying axis", () => {
@@ -186,7 +198,9 @@ describe("materializeLoad", () => {
       () => `s-${n++}`,
     )!;
     const props = block.props as { sources: { label?: string }[]; note?: string };
-    expect(props.sources[0].label).toBe("SWFL Data Gulf verified corridor metrics");
+    expect(props.sources[0].label).toBe(
+      "Cushman & Wakefield MarketBeat — Southwest Florida Retail, Q4 2025",
+    );
     expect(props.note).toBe("As of 06/01/2026");
   });
 });

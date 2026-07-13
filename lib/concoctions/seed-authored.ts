@@ -12,7 +12,7 @@ import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { getConcoction } from "./registry";
 import { materializeLoad, type MaterializeDeps } from "./materialize";
-import { placeLoadedBlocks } from "./place-blocks";
+import { insertDatasetBlocks } from "./place-blocks";
 import { resolveConcoction, paramsFromScope } from "./author-section";
 
 /** EmailDocSchema's block cap — seeding never pushes a doc over it. */
@@ -40,8 +40,12 @@ export async function seedResolvedDataset(
     if (loaded.length === 0 || doc.blocks.length + loaded.length > MAX_DOC_BLOCKS) {
       return { doc, seededLabel: null };
     }
-    const placed = placeLoadedBlocks(doc.blocks, loaded);
-    return { doc: { ...doc, blocks: [...doc.blocks, ...placed] }, seededLabel: def.label };
+    // Above the footer — same rule as the lab (insertDatasetBlocks is the one
+    // authority; a blind append put seeded data under the unsubscribe line).
+    return {
+      doc: { ...doc, blocks: insertDatasetBlocks(doc.blocks, loaded) },
+      seededLabel: def.label,
+    };
   } catch {
     return { doc, seededLabel: null };
   }

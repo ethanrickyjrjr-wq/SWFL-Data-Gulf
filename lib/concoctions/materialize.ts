@@ -15,7 +15,7 @@
 import type { EmailBlock } from "@/lib/email/doc/types";
 import { BINDING_VERSION } from "@/lib/email/doc/types";
 import type { ColumnSpec, ConcoctionDef, ConcoctionRow, DefaultBlockSpec } from "./types";
-import { evaluateGuards } from "./guards";
+import { collapseToGrain, evaluateGuards, topValueIsTied } from "./guards";
 import { formatValue } from "./format";
 import { buildChartBlock } from "./chart-block";
 import { getConcoction } from "./registry";
@@ -30,6 +30,35 @@ type AnyDef = ConcoctionDef<any>;
 
 function colOf(def: AnyDef, key: string): ColumnSpec | undefined {
   return def.columns.find((c) => c.key === key);
+}
+
+/**
+ * THE GRAIN SEAM. Every shape goes through this before it ranks, crowns or plots.
+ *
+ * When the slice's lead measure declares a `grain` (the dimension it is really
+ * held at), the rows are collapsed to that grain and the slice's dimension is
+ * rewritten to it. So a chart of corridor rent — where rent is a submarket figure
+ * repeated across the corridors inside it — becomes a chart of SUBMARKET rent:
+ * one bar per submarket, genuinely different values, no invented ranking of
+ * corridors that the source never ranked.
+ *
+ * Rows with a null grain value fall out here (see collapseToGrain): an uncited
+ * figure must not be rendered as a figure.
+ */
+function applyGrain(
+  def: AnyDef,
+  rows: ConcoctionRow[],
+  spec: DefaultBlockSpec,
+): { rows: ConcoctionRow[]; spec: DefaultBlockSpec } {
+  const lead = colOf(def, spec.slice.measures[0]);
+  const grainKey = lead?.grain;
+  if (!grainKey || !colOf(def, grainKey)) return { rows, spec };
+  const collapsed = collapseToGrain(rows, grainKey);
+  if (collapsed.length === 0) return { rows: [], spec };
+  return {
+    rows: collapsed,
+    spec: { ...spec, slice: { ...spec.slice, dimension: grainKey } },
+  };
 }
 
 /** The row a hero/metric/stats block profiles. Time-series slices (dimension
@@ -108,13 +137,17 @@ function listBlock(
  */
 export function mapSliceToBlock(
   def: AnyDef,
-  rows: ConcoctionRow[],
-  spec: DefaultBlockSpec,
+  allRows: ConcoctionRow[],
+  rawSpec: DefaultBlockSpec,
   ids: () => string,
 ): EmailBlock | null {
-  if (rows.length === 0) return null;
+  if (allRows.length === 0) return null;
   const id = ids();
-  const asOf = def.asOf(rows);
+  // as-of is a property of the SOURCE, so it reads the full row set — collapsing
+  // for a shape must not change the date we stamp on it.
+  const asOf = def.asOf(allRows);
+  const { rows, spec } = applyGrain(def, allRows, rawSpec);
+  if (rows.length === 0) return null;
 
   switch (spec.type) {
     case "sources":
@@ -135,13 +168,16 @@ export function mapSliceToBlock(
       if (!value) return null;
       const dimCol = spec.slice.dimension ? colOf(def, spec.slice.dimension) : undefined;
       const dimVal = dimCol ? formatValue(row[dimCol.key], dimCol.format) : "";
+      // NO CROWNING A TIE. If the top value is shared, naming one holder of it
+      // asserts a winner the source never named — state the figure, not a victor.
+      const tied = topValueIsTied(rows, col.key);
       return {
         id,
         type: "hero",
         props: {
           kicker: def.label.toUpperCase(),
           value,
-          label: dimVal ? `${col.label} · ${dimVal}` : col.label,
+          label: dimVal && !tied ? `${col.label} · ${dimVal}` : col.label,
         },
         layout: { ...spec.layout },
       };
@@ -153,7 +189,10 @@ export function mapSliceToBlock(
       const metricValue = formatValue(row[col.key], col.format);
       if (!metricValue) return null;
       const dimCol = spec.slice.dimension ? colOf(def, spec.slice.dimension) : undefined;
-      const sub = dimCol ? formatValue(row[dimCol.key], dimCol.format) : undefined;
+      const sub =
+        dimCol && !topValueIsTied(rows, col.key)
+          ? formatValue(row[dimCol.key], dimCol.format)
+          : undefined;
       return {
         id,
         type: "metric-card",
@@ -185,11 +224,24 @@ export function mapSliceToBlock(
 }
 
 /** True when the slice may render as a chart: its axis measure and dimension
- *  both exist and the measure's distribution guards pass on the live rows. */
+ *  both exist and the measure's distribution guards pass on the live rows.
+ *  Judged on the GRAIN-COLLAPSED rows — an axis is only honest about the rows it
+ *  actually plots, and those are the collapsed ones. */
 function chartAllowed(def: AnyDef, rows: ConcoctionRow[], spec: DefaultBlockSpec): boolean {
   const col = colOf(def, spec.slice.measures[0]);
   if (!col || !spec.slice.dimension || !colOf(def, spec.slice.dimension)) return false;
   return evaluateGuards(rows, col).ok;
+}
+
+/** The rows + slice a chart will actually plot: grain-collapsed, so a submarket
+ *  figure is drawn once per submarket instead of once per corridor that shares it. */
+function chartInputs(
+  def: AnyDef,
+  rows: ConcoctionRow[],
+  spec: DefaultBlockSpec,
+): { rows: ConcoctionRow[]; spec: DefaultBlockSpec; allowed: boolean } {
+  const g = applyGrain(def, rows, spec);
+  return { ...g, allowed: g.rows.length > 0 && chartAllowed(def, g.rows, g.spec) };
 }
 
 /** load: concoction + params → its default block set, bindings stamped. */
@@ -209,12 +261,13 @@ export async function materializeLoad(
   const blocks: EmailBlock[] = [];
   for (const spec of def.defaultLayout) {
     let block: EmailBlock | null = null;
-    if (spec.type === "image" && chartAllowed(def, rows, spec)) {
+    const chart = spec.type === "image" ? chartInputs(def, rows, spec) : null;
+    if (chart?.allowed) {
       try {
         block = await buildChartBlock(
           def,
-          rows,
-          spec,
+          chart.rows,
+          chart.spec,
           { asOf, hostPng: deps.hostPng, ids },
           parsed as Record<string, string | number>,
         );
@@ -286,12 +339,13 @@ async function rematerialize(
   };
 
   let rebuilt: EmailBlock | null = null;
-  if (targetType === "image" && chartAllowed(def, rows, spec)) {
+  const chart = targetType === "image" ? chartInputs(def, rows, spec) : null;
+  if (chart?.allowed) {
     try {
       rebuilt = await buildChartBlock(
         def,
-        rows,
-        spec,
+        chart.rows,
+        chart.spec,
         { asOf, hostPng: deps.hostPng, ids: () => block.id },
         parsed,
       );

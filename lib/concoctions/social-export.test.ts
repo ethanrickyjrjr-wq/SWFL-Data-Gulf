@@ -23,7 +23,7 @@ describe("blocksToSocialModel", () => {
     expect(model.headline.length).toBeGreaterThan(0);
     expect(model.headline).toContain("$60.84"); // hero value restated verbatim
     expect(model.stat?.value).toBe("$60.84");
-    expect(model.source).toBe("SWFL Data Gulf verified corridor metrics");
+    expect(model.source).toBe("Cushman & Wakefield MarketBeat — Southwest Florida Retail, Q4 2025");
     expect(model.as_of).toBe("06/01/2026");
     // the internal freshness token NEVER ships on a card
     expect("freshness_token" in model).toBe(false);

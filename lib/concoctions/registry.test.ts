@@ -15,7 +15,7 @@ describe("registry", () => {
     );
   });
   it("getConcoction resolves and misses safely", () => {
-    expect(getConcoction("corridor-profiles")?.label).toBe("Commercial corridors");
+    expect(getConcoction("corridor-profiles")?.label).toBe("Commercial rents & vacancy");
     expect(getConcoction("nope")).toBeUndefined();
   });
   it("index is picker/AI-safe: no digits in descriptions (no smuggled figures), params listed", () => {

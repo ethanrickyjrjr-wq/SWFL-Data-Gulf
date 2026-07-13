@@ -39,7 +39,7 @@ describe("seedResolvedDataset", () => {
       null,
       DEPS,
     );
-    expect(seededLabel).toBe("Commercial corridors");
+    expect(seededLabel).toBe("Commercial rents & vacancy");
     expect(doc.blocks.length).toBeGreaterThan(BASE_DOC.blocks.length);
     const seeded = doc.blocks.filter((b) => b.binding);
     expect(seeded.length).toBeGreaterThan(0);
