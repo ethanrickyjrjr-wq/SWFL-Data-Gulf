@@ -361,18 +361,11 @@ with an instruction; the chart is present only if the deliverable is about a num
 email is attached to the report.
 
 ---
+PRODUCTION KEY IS IN VERCEL PHOTO_API
 
 ## Part 8 — Landmines (each of these cost real time on 07/13)
 
-- **THE PRODUCTION KEY — nothing you build reaches a user until this is fixed.** The SteadyAPI
-  key does not exist in Vercel production under the name the code reads (`process.env.PHOTOS_API`,
-  `lib/listings/steadyapi.ts`). Production has a variable called **`new_steady`**. Every New
-  Listing build on the live site therefore resolves to `null` and ships the empty `$0` flyer,
-  regardless of any code fix. Open check: `steadyapi_key_missing_in_production`. **It is a config
-  change, not code.** (The key is misnamed anyway — it's the Steady key wearing a "photos" label.)
-- **`resolve-subject.test.ts` is OFFLINE BY CONTRACT.** Every dependency is injected. Adding a
-  live vendor call inside the resolver made the suite hit the network and time out. Any new
-  fetcher must be injectable via `ResolveSubjectDeps` and stubbed in the test.
+  
 - **ESLint runs at `--max-warnings=0` in the pre-commit hook.** An unused function fails the
   commit. If you orphan code, delete it — **never `--no-verify`** (forbidden by CLAUDE.md).
 - **`fillNarrative` skips a text block that already has content.** `buildListingFlyer` prefills
@@ -382,7 +375,7 @@ email is attached to the report.
   PNG didn't have. Verify the *sent* artifact.
 - **The vendor's `reduced_amount` is the size of the CUT, not the old price.** Old = price + cut.
 - **`lotSize` is ACRES by convention** in our `Listing` type; SteadyAPI's `description.lot_sqft`
-  is square feet. The normalizer converts. Don't double-convert.
+  is square feet. The normalizer converts. Don't double-convert.  SHOW THE REDUCED AMOUNT IN A DIFFERENT COLOR ABOVE PRICE in smaller font- Price cut- 
 - **Prettier reformats touched files** on commit — diff with `git diff -w` to see real changes.
 - **The git index is shared with parallel sessions.** Stage explicit paths; never `git add -A`.
 
@@ -392,10 +385,10 @@ email is attached to the report.
 
 **Working:**
 - the subject address reaches the property lane from **every** door;
-- Showcase asks for the address instead of dropping the user on a blank canvas;
+- Showcase/buttons/ homepage asks for the address instead of dropping the user on a blank canvas;
 - `lotSize` + `propertyType` mapped (were fetched and discarded); `baths` resolved from
   `/nearby-home-values` (was never missing — just never read);
-- an unsourced cell no longer renders as a naked label;
+- an unsourced cell no longer renders as a naked label; give directions to paste needed information or Photo uploads
 - the pasted listing description is the narrator's source of truth;
 - no chart on a new listing;
 - New Listing builds correctly from the prompt alone. 55 tests pass.
@@ -407,5 +400,6 @@ email is attached to the report.
 - `planArrival` still opens a blank page for every recipe — **all 27 skeletons unused**;
 - **15 of 17 recipes still land in the free-author grab-bag**;
 - three render engines still disagree; the emailed area chart still ships without axes;
-- one document, three builders — a recipe still means different things depending on the door;
-- the New Listing registry prompt still promises a ZIP-trend chart that no longer ships.
+- one document, three builders — a recipe still means different things depending on the door;  build each one through one 
+  door correctly at the root, then make small adjustments at different doors.  make sure all doors are accounted for!!
+- the New Listing registry prompt still promises a ZIP-trend chart that no longer ships.  FIX IT!!!
