@@ -19,6 +19,26 @@ The single lesson that produced most of this list:
 **Nothing we have gets deleted.** Every design, recipe and layout that exists today STAYS as
 a **choice a user can pick.** The work below is ADDITIVE — more options, not different ones.
 
+### 0.0 THE SEVEN LISTING EMAILS EXIST AND WORK — 07/13/2026
+
+**Status: BUILT.** All seven listing-lifecycle emails build from an address alone, through the
+real Lab door, with every value traced to a real source:
+
+`coming-soon` · `new-listing` · `open-house` · `price-reduced` · `market-comps` ·
+`under-contract` · `just-sold`
+
+They all wear **ONE design** (`lib/email/lifecycle-chrome.ts`) — the showcase sample's design:
+accent ribbon band (the word changes, the band does not) · full-bleed photo · centred address
+over the price · one hairline spec strip · the recipe's own middle content · narrative ·
+agent card · one CTA · CAN-SPAM footer. **The user's brand rides through untouched.**
+`campaign-coherence.test.ts` fails the suite if any of the seven drifts.
+
+Every one runs the claim gate (no invented comparison, trajectory, count, sequence, location
+or motive) and the open-slot contract (an unsourceable cell is an invitation on the canvas and
+does not exist in the sent email).
+
+**What is NOT built: the campaign that runs itself.** That is §0.1.
+
 ### 0.1 Build the campaigns out FULLY, end to end
 
 **What.** A campaign is not a pile of emails a user builds one at a time. **The user schedules
@@ -37,16 +57,57 @@ content and the CTA change. **The user's brand rides through every email untouch
 (`globalStyle` is sticky — the chrome is the SHAPE, the brand is the SKIN). Six emails
 arriving over six weeks must read as one campaign from one agent.
 
-**How.**
-- The scheduling spine already exists in part (`schedule_suggestion`, the cadence registry,
-  the arc strip, `buildWeek` for social). **It is not wired to the recipe system.**
-- A campaign needs: an ordered list of recipe keys, a trigger per step (listed → open house →
-  price change → pending → closed), and a send schedule. `lib/showcase/registry.ts` already
-  models a campaign as an ordered set of slides — **the slide order IS the campaign order.**
-- The steps that are EVENT-driven (went pending, sold) cannot be scheduled by date. They need
-  a trigger, or the agent confirms the milestone and the next email fires.
-- **`scheduleSuggestion` is currently LOST on every recipe build** (see §4) — fix that first,
+**⚠️ DO NOT BUILD THE WHOLE CAMPAIGN AT ONCE. A HOUSE CAN SELL TOMORROW.**
+
+Operator, 07/13/2026: *"We don't want the campaign to build all at once because a house can
+sell the next day. We just want to show the user the path, so get them to finish."*
+
+Building seven emails up front is waste (the house goes under contract on day three and five
+of them are dead) **and** it is wrong (the numbers would be stale by the time they send). Each
+email is built **JUST IN TIME**, shortly before it is due. What the user sees up front is
+**THE PATH** — the whole sequence laid out — because seeing the path is what makes them
+finish setting it up.
+
+**THE BUILD PROCESS (operator's flow, verbatim in substance):**
+
+1. **User clicks BUILD CAMPAIGN.** Picks the campaign, gives us the **address**.
+2. **The FIRST email is produced immediately** — and it collects, up front, **everything we do
+   not hold about the property**:
+   - the **DESCRIPTION** (no vendor sells MLS remarks — this is a lane-2 fact the agent
+     pastes, and it becomes the narrator's source of truth for the WHOLE campaign);
+   - the **SPECIFIC COMPS** the agent wants to argue with;
+   - anything else the sequence will need later (open-house date/time, etc.).
+   **Ask ONCE, save it, reuse it for all seven.** The point is that the user can build the
+   campaign QUICKLY — one sitting, one set of questions.
+3. **The user schedules the first email.** The rest of the path is shown, not built.
+4. **When the SECOND email comes due, the user is TOLD we are building it** — and can **edit
+   it before the send date**. Not a surprise send. A heads-up, then a window.
+5. **Then: "your third email goes out in 2 days."** It is **built automatically from all the
+   saved information**, and the user can edit it.
+6. **And so on, through the sequence.** Build → notify → editable window → send. Every time.
+
+The agent's job becomes: set it up once, then approve. Ours: never surprise them, never send
+something they have not had a chance to see, and never build an email for a house that has
+already sold.
+
+**How (the mechanics).**
+- The scheduling spine partly exists (`schedule_suggestion`, the cadence registry, the arc
+  strip, `buildWeek` for social). **It is not wired to the recipe system.**
+- A campaign needs: an ordered list of recipe keys, a **per-step trigger**, a send schedule,
+  and a **saved property dossier** (the lane-2 answers from step 2 — description, comps, dates)
+  that every later email reads from.
+- **Steps 4–7 are EVENT-driven** (went pending, sold, price changed) and **cannot be scheduled
+  by date**. They fire on a trigger, or the agent confirms the milestone and the next email
+  builds. **A campaign must be able to STOP** — the house sold, the sequence ends.
+- **`scheduleSuggestion` is currently LOST on every recipe build** (see §4). Fix that first —
   it is the thread the whole thing hangs on.
+- `lib/showcase/registry.ts` already models a campaign as an ordered set of slides — **the
+  slide order IS the campaign order.**
+
+**Placement (operator, 07/13/2026): SHOWCASE FIRST.** Put the built campaign in the showcase,
+**beside the hand-written HTML version**, so the two can be compared. The homepage hero
+already has a "Campaign" pill — **do not touch it yet**; the operator will wire the other
+surfaces later.
 
 **Where.** `lib/showcase/registry.ts` (campaign order) · `lib/deliverable/recipes.ts` (the
 keys) · `lib/email/lifecycle-chrome.ts` (the one look) · the schedule/cadence surface ·
