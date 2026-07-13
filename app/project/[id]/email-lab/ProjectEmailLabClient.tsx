@@ -9,7 +9,7 @@ import { defaultDoc, seedById, SEED_DOCS, type SeedDoc } from "@/lib/email/doc/d
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
 import { ArcStrip, type ArcSequence } from "@/components/email-lab/ArcStrip";
-import { findPlaceholder, inputKindForPrompt, type ShowcaseRecipe } from "@/lib/showcase/recipe";
+import { findPlaceholder, inputKindForRecipe, type ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { planArrival } from "@/lib/lab-entry/arrival";
 import { reconcileAddress, addressItem } from "@/lib/lab-entry/address-reconcile";
 import { AddressPopup } from "@/components/lab-entry/AddressPopup";
@@ -245,6 +245,8 @@ export function ProjectEmailLabClient({
     const params = new URLSearchParams();
     if (initialRecipe) {
       params.set("recipe", initialRecipe.prompt);
+      // The identity rides every hop, or the next page routes on prompt text again.
+      if (initialRecipe.key) params.set("rkey", initialRecipe.key);
       if (initialRecipe.needs.length > 0) params.set("recipeNeeds", initialRecipe.needs.join(","));
     }
     params.set("addr", address);
@@ -493,7 +495,7 @@ export function ProjectEmailLabClient({
         <AddressPopup
           // Third copy of "which word do we ask for" — now the one shared rule, so the
           // three doors into this popup can't drift apart again.
-          inputKind={inputKindForPrompt(initialRecipe.prompt) ?? "address"}
+          inputKind={inputKindForRecipe(initialRecipe) ?? "address"}
           initialValue={subjectAddress ?? ""}
           onBuild={onAddressBuild}
           onCancel={() => setAddressOpen(false)}

@@ -134,6 +134,10 @@ export function heroDestination(entry: HeroCampaignEntry, opts: { filled: string
       ? entry.recipe.prompt.slice(0, ph.start) + filled + entry.recipe.prompt.slice(ph.end)
       : entry.recipe.prompt;
   const params = new URLSearchParams({ recipe: prompt });
+  // The pill's IDENTITY, carried beside its seed text. A pill is the one door with no
+  // example to look at — the user just types an address — so it is the door that most
+  // needs the build to be the recipe's, not a regex's guess at the sentence.
+  if (entry.recipe.key) params.set("rkey", entry.recipe.key);
   if (entry.recipe.needs.length > 0) params.set("recipeNeeds", entry.recipe.needs.join(","));
   // Address spine (build 2): listing chips carry the subject address so the lab
   // scope can pull the listing's own nearby sold comps into the figure feed. Only

@@ -81,6 +81,11 @@ export async function POST(req: NextRequest) {
     build?: boolean;
     // Explicit deliverable-type recipe pick (M3) — overrides keyword detection.
     recipeId?: string;
+    // THE RECIPE KEY (?rkey= — lib/deliverable/recipes.ts). The deliverable's identity,
+    // carried from whichever door the user clicked. This is what the builder dispatches
+    // on, so the hero pill, the showcase card, the campaign button and the lab pick all
+    // produce the SAME thing. Distinct from `recipeId` above, which is the PROSE recipe.
+    recipeKey?: string;
   };
   const prompt = body.prompt ?? "";
 
@@ -116,6 +121,7 @@ export async function POST(req: NextRequest) {
             assets: caller?.assets,
             replyEmail: caller?.email,
             recipeId: body.recipeId,
+            recipeKey: body.recipeKey,
           })
         : await buildContentDoc({
             prompt,

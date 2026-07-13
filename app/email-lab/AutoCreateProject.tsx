@@ -14,11 +14,14 @@ export function AutoCreateProject({
   zip = null,
   recipe = null,
   recipeNeeds = null,
+  rkey = null,
   addr = null,
 }: {
   zip?: string | null;
   recipe?: string | null;
   recipeNeeds?: string | null;
+  /** The recipe KEY — the deliverable's identity, carried into the fresh project. */
+  rkey?: string | null;
   addr?: string | null;
 }) {
   const router = useRouter();
@@ -30,6 +33,7 @@ export function AutoCreateProject({
     const params = new URLSearchParams();
     if (zip && /^\d{5}$/.test(zip)) params.set("zip", zip);
     if (recipe) params.set("recipe", recipe);
+    if (rkey) params.set("rkey", rkey);
     if (recipeNeeds) params.set("recipeNeeds", recipeNeeds);
     if (addr) params.set("addr", addr);
     const q = params.size > 0 ? `?${params.toString()}` : "";

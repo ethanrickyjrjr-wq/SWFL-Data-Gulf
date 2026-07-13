@@ -6,6 +6,7 @@ import type { ProjectItem } from "@/lib/project/items";
 import { signedUploadUrls } from "@/lib/project/signed-upload-url";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import type { BrandNeed, ShowcaseRecipe } from "@/lib/showcase/recipe";
+import { isRecipeKey } from "@/lib/deliverable/recipes";
 import { ProjectEmailLabClient } from "./ProjectEmailLabClient";
 
 export const runtime = "nodejs";
@@ -68,7 +69,13 @@ export default async function ProjectEmailLabPage({
     .map((s) => s.trim())
     .filter(Boolean) as BrandNeed[];
   const initialRecipe: ShowcaseRecipe | null = recipePrompt
-    ? { prompt: recipePrompt, needs: recipeNeeds }
+    ? {
+        // The deliverable's identity (?rkey=). Without it, an in-project build routes
+        // on prompt text — the bug that let one recipe become two.
+        key: isRecipeKey(sp.rkey) ? sp.rkey : undefined,
+        prompt: recipePrompt,
+        needs: recipeNeeds,
+      }
     : null;
   // A hero handoff carries the typed listing address as ?addr= — it becomes the
   // build's effective scope address (comps), overriding the project's stored one.

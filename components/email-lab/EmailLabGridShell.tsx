@@ -285,6 +285,11 @@ export function EmailLabGridShell({
   // can guard the unfilled [[blank]] and run the brand-gap yes/no.
   const aiBoxRef = useRef<HTMLTextAreaElement>(null);
   const [pendingRecipe, setPendingRecipe] = useState<ShowcaseRecipe | null>(initialRecipe ?? null);
+  // THE ACTIVE DELIVERABLE'S IDENTITY. Held separately from `pendingRecipe` because
+  // that gets cleared the moment a build starts — but the build still needs to know
+  // WHICH deliverable it is. This is what the builder dispatches on, so a user typing
+  // their address over the [[blank]] can no longer reroute the build to another recipe.
+  const [activeRecipeKey, setActiveRecipeKey] = useState<string | null>(initialRecipe?.key ?? null);
   // Campaign second step — set when the Build box was seeded by a campaign
   // button whose registry entry carries a followUp (matched by seed prompt at
   // seed time, before the user edits the [[blank]]); armed (visible) only after
@@ -441,6 +446,10 @@ export function EmailLabGridShell({
           build: true,
           chartType: chartType === "auto" ? undefined : chartType,
           recipeId: branding.preferred_recipe || undefined,
+          // The DELIVERABLE's identity (distinct from recipeId, which is the prose
+          // recipe). Absent for an organically typed prompt — that still falls through
+          // to the generic author exactly as before.
+          recipeKey: activeRecipeKey || undefined,
         }),
       });
       const data = (await res.json()) as {
@@ -628,6 +637,10 @@ export function EmailLabGridShell({
     setFollowUpArmed(false);
     setCampaignKey(campaignKeyForPrompt(recipe.prompt));
     setPendingRecipe(recipe);
+    // Latch the identity the moment the user picks the recipe — from the showcase
+    // card, the examples accordion, a campaign button, or the follow-up chip. Every
+    // one of those hands us the SAME registry object now, so they cannot disagree.
+    setActiveRecipeKey(recipe.key ?? null);
     setRecipeGaps(null);
     setRecipeHint(null);
     setAiStatus(null);
@@ -1178,21 +1191,36 @@ export function EmailLabGridShell({
     }
   }
 
+  /** THE uploader — one root. Uploads a picked/dropped file and returns the hosted
+   *  URL (null on a miss). Two callers: the photos panel (`uploadNewPhoto`, which
+   *  applies it to the selection) and an OPEN IMAGE SLOT on the canvas, which commits
+   *  the URL to its OWN block (never the selection — an unselected slot would have
+   *  appended a stray image block). */
+  const uploadPhotoFile = useCallback(
+    async (file: File): Promise<string | null> => {
+      setPromotingPath("__upload__");
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const endpoint = projectId
+          ? `/api/projects/${projectId}/email-media`
+          : "/api/email-lab/media";
+        const res = await fetch(endpoint, { method: "PUT", body: fd });
+        if (!res.ok) return null;
+        const { url } = (await res.json()) as { url: string };
+        return url;
+      } catch {
+        return null;
+      } finally {
+        setPromotingPath(null);
+      }
+    },
+    [projectId],
+  );
+
   async function uploadNewPhoto(file: File) {
-    setPromotingPath("__upload__");
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const endpoint = projectId
-        ? `/api/projects/${projectId}/email-media`
-        : "/api/email-lab/media";
-      const res = await fetch(endpoint, { method: "PUT", body: fd });
-      if (!res.ok) return;
-      const { url } = (await res.json()) as { url: string };
-      applyPhotoUrl(url);
-    } finally {
-      setPromotingPath(null);
-    }
+    const url = await uploadPhotoFile(file);
+    if (url) applyPhotoUrl(url);
   }
 
   // ── export ──────────────────────────────────────────────────────────────────
@@ -1585,6 +1613,7 @@ export function EmailLabGridShell({
                 setSelectedId(id);
                 setPhotopeaBlockId(id);
               }}
+              onUploadPhoto={uploadPhotoFile}
             />
           ) : (
             <SocialComposer composer={social} />

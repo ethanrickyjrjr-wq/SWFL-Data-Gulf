@@ -87,6 +87,9 @@ describe("recipeDestination", () => {
         "/social-lab?" +
           new URLSearchParams({
             recipe: recipe.prompt,
+            // The recipe KEY rides with the seed text now — it is the identity the
+            // builder dispatches on, so every destination carries it.
+            ...(recipe.key ? { rkey: recipe.key } : {}),
             ...(recipe.needs.length > 0 ? { recipeNeeds: recipe.needs.join(",") } : {}),
           }).toString(),
       );

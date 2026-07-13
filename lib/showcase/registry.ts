@@ -9,6 +9,12 @@
 
 import type { ShowcaseRecipe } from "./recipe";
 import type { Cadence } from "@/lib/email/schedule-cadence";
+// THE RECIPES THEMSELVES LIVE IN ONE PLACE (lib/deliverable/recipes.ts). This file
+// owns only the STORYTELLING around them — the card art, the step titles, the
+// what-happened/how-the-AI-did-it captions. It used to own the prompts too, which is
+// how the same deliverable ended up with two different prompt strings on two
+// surfaces. A slide now POINTS at a recipe; it never redefines one.
+import { RECIPES } from "@/lib/deliverable/recipes";
 
 /** Quick-start campaign metadata — a Showcase that is ALSO a one-click campaign
  *  gets this. `surface` is the BUTTON placement lane (which quick-start row it
@@ -97,11 +103,7 @@ export const SHOWCASES: Showcase[] = [
       blurb: "Announce a new listing with cited specs, a price chart, and an honest market read.",
       status: "live",
       surface: "email",
-      seedRecipe: {
-        prompt:
-          "Build a new-listing announcement email for my listing at [[your listing address]] — key specs, price per square foot, a chart of the ZIP's home-value trend, and one honest line about where that market sits.",
-        needs: ["agent_name", "brokerage", "business_address"],
-      },
+      seedRecipe: RECIPES["new-listing"],
     },
     cadenceRefresh: {
       daily: ["the live active-listing count and asking prices nearby"],
@@ -122,11 +124,7 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Counted the live for-sale inventory and found the angle itself: only 156 of Collier's 8,067 active homes sit at $10M+.",
         liveHref: "/showcase/listing-to-close/live/01-coming-soon.html",
-        recipe: {
-          prompt:
-            "Build a coming-soon teaser email for my listing at [[your listing address]] — hold the street address back, use real county inventory counts to show how scarce homes like it are, and one CTA to join a private preview list.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["coming-soon"],
       },
       {
         image: "/showcase/listing-to-close/step-2.webp",
@@ -136,11 +134,7 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Charted the ZIP's value index and wrote the honest read — the reset has stopped resetting — instead of a hype line.",
         liveHref: "/showcase/listing-to-close/live/02-new-listing.html",
-        recipe: {
-          prompt:
-            "Build a new-listing announcement email for my listing at [[your listing address]] — key specs, price per square foot, a chart of the ZIP's home-value trend, and one honest line about where that market sits.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["new-listing"],
       },
       {
         image: "/showcase/listing-to-close/step-3.webp",
@@ -151,11 +145,7 @@ export const SHOWCASES: Showcase[] = [
           "Picked six live comps in the same ZIP and computed each $/sq ft in code, then argued the premium straight: the case is the land.",
         liveHref: "/showcase/listing-to-close/live/03-comps.html",
         receipt: "Numbers, not adjectives — every figure traces to the listing feed snapshot.",
-        recipe: {
-          prompt:
-            "Build a market-comps email for my listing at [[your listing address]] — six live comparable listings nearby with each price and price per square foot, a price bar chart, and a straight case for my asking price.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["market-comps"],
       },
       {
         image: "/showcase/listing-to-close/step-4.webp",
@@ -165,11 +155,7 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Corroborated the story with the ZIP's own numbers — 85 pendings, 31 of them at $2M+ — to convert losing bidders into backup offers.",
         liveHref: "/showcase/listing-to-close/live/04-pending.html",
-        recipe: {
-          prompt:
-            "Build an under-contract announcement email for my listing at [[your listing address]] — lead with how fast it went pending compared to the ZIP's typical days on market, and invite backup offers.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["under-contract"],
       },
       {
         image: "/showcase/listing-to-close/step-5.webp",
@@ -179,11 +165,7 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Placed the close inside the actual sale wave it belonged to, then turned proof into the next lead.",
         liveHref: "/showcase/listing-to-close/live/05-sold.html",
-        recipe: {
-          prompt:
-            "Build a just-sold email for my listing at [[your listing address]] — set the close among the week's real sales nearby, and end with a private home-valuation offer for my readers.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["just-sold"],
       },
     ],
   },
@@ -218,11 +200,7 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/launch-blitz/live/agent-intro.html",
         receipt:
           "One CTA per email — “give readers three things to click and they often click nothing” (Luxury Presence, 2026).",
-        recipe: {
-          prompt:
-            "Build an agent-introduction email for my farm area [[your city or ZIP]] — a ZIP-by-ZIP asking-price chart from live listings, my name and headshot up front, and my newest listing as the anchor.",
-          needs: ["agent_name", "photo_url", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["agent-brand-intro"],
       },
       {
         image: "/showcase/launch-blitz/step-2.webp",
@@ -235,12 +213,7 @@ export const SHOWCASES: Showcase[] = [
         socialBoard: "launch-blitz",
         receipt:
           "Data-hook first lines and a local + broad hashtag mix are the current lead-generating pattern for agent social (The Close, 2026).",
-        recipe: {
-          prompt:
-            "Build a social post for my farm area [[your city or ZIP]] — a data-hook caption from live listings and a local + broad hashtag mix.",
-          needs: ["agent_name", "brokerage", "business_address"],
-          target: "social",
-        },
+        recipe: RECIPES["social-pack"],
       },
     ],
   },
@@ -256,18 +229,14 @@ export const SHOWCASES: Showcase[] = [
         "Introduce yourself to your sphere with a real market insight — then a weekly update that sends itself.",
       status: "live",
       surface: "email",
-      seedRecipe: {
-        prompt:
-          "Build my agent-launch announcement email introducing me to my sphere — open like a personal letter about why I got into real estate here, lead with one real market insight about [[your city or ZIP]], a short numbered what-happens-next of what I'll send each week, and one reply CTA. My photo sits beside the letter, not above it.",
-        needs: ["agent_name", "photo_url", "brokerage", "business_address"],
-      },
+      seedRecipe: RECIPES["agent-launch"],
       followUp: {
         label: "schedule your weekly sphere update",
-        recipe: {
-          prompt:
-            "Build a weekly sphere market update for [[your city or ZIP]] — one national or Florida headline number set beside my own area's number, one honest read of the gap, and end by inviting readers to reply with their address and the word REVIEW for their home's snapshot. Schedule it every Tuesday morning.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        // THE DRIFT: this used to be its own prompt literal, and it differed from the
+        // "Headlines vs Here" slide's literal by one trailing sentence — so the same
+        // deliverable built two different ways depending on which button you pressed.
+        // Both now point at the one recipe.
+        recipe: RECIPES["sphere-weekly"],
       },
     },
     cadenceRefresh: {
@@ -291,11 +260,7 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/agent-launch/live/01-letter.html",
         receipt:
           "Personal welcome emails outperform generic ones 2–3x; the founder-note pattern (real photo, origin line, reply prompt) is the person-brand play (Sequenzy / Omnisend, 2026).",
-        recipe: {
-          prompt:
-            "Build my agent-launch announcement email introducing me to my sphere — open like a personal letter about why I got into real estate here, lead with one real market insight about [[your city or ZIP]], a short numbered what-happens-next of what I'll send each week, and one reply CTA. My photo sits beside the letter, not above it.",
-          needs: ["agent_name", "photo_url", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["agent-launch"],
       },
       {
         image: "/showcase/agent-launch/step-2.webp",
@@ -307,11 +272,7 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/agent-launch/live/02-headlines-vs-here.html",
         receipt:
           "Replies are among the strongest sender-trust signals mailbox providers count — a reply-first CTA builds deliverability, not just conversation (Validity, 2026).",
-        recipe: {
-          prompt:
-            "Build a weekly sphere market update for [[your city or ZIP]] — one national or Florida headline number set beside my own area's number, one honest read of the gap, and end by inviting readers to reply with their address and the word REVIEW for their home's snapshot.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["sphere-weekly"],
       },
       {
         image: "/showcase/agent-launch/step-3.webp",
@@ -323,11 +284,7 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/agent-launch/live/03-review-snapshot.html",
         receipt:
           "A home-value ask is the highest-click hook in agent marketing; answering it with cited data is the trust play (practitioner consensus, r/realtors, 2026).",
-        recipe: {
-          prompt:
-            "Build a one-area home-value snapshot email for [[your city or ZIP]] — the current home-value level and trend, days on market, and active inventory, each cited, with one honest read.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["review-reply"],
       },
     ],
   },
@@ -342,11 +299,9 @@ export const SHOWCASES: Showcase[] = [
       blurb: "A recurring monthly market brief that rebuilds itself from fresh data — set it once.",
       status: "live",
       surface: "email",
-      seedRecipe: {
-        prompt:
-          "Build a monthly market-pulse email for [[your city or ZIP]] — every ZIP's month-over-month home-value move, one snapshot chart, and one honest read of the trend.",
-        needs: ["agent_name", "brokerage", "business_address"],
-      },
+      // The campaign seed, "The Ask", and "The Pulse Email" were three copies of one
+      // prompt. Three entries, ONE recipe — they all point here now.
+      seedRecipe: RECIPES["market-pulse"],
     },
     cadenceRefresh: {
       daily: ["the live active-listing counts and prices"],
@@ -367,11 +322,7 @@ export const SHOWCASES: Showcase[] = [
         howAiHandled:
           "Reads the ask, locks the schedule, and takes over sourcing, charting, and writing from here.",
         liveHref: "/showcase/market-pulse/live/ask.html",
-        recipe: {
-          prompt:
-            "Build a monthly market-pulse email for [[your city or ZIP]] — every ZIP's month-over-month home-value move, one snapshot chart, and one honest read of the trend.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["market-pulse"],
       },
       {
         image: "/showcase/market-pulse/step-2.webp",
@@ -383,11 +334,7 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/market-pulse/live/pulse-email.html",
         receipt:
           "Market-update newsletters are the top-performing real-estate email type; single column, one CTA, subject under 40 characters (Luxury Presence, 2026).",
-        recipe: {
-          prompt:
-            "Build a monthly market-pulse email for [[your city or ZIP]] — every ZIP's month-over-month home-value move, one snapshot chart, and one honest read of the trend.",
-          needs: ["agent_name", "brokerage", "business_address"],
-        },
+        recipe: RECIPES["market-pulse"],
       },
       {
         image: "/showcase/market-pulse/step-3.webp",
@@ -400,12 +347,7 @@ export const SHOWCASES: Showcase[] = [
         socialBoard: "market-pulse",
         receipt:
           "Serialized, recurring content keeps audiences returning — 57% of consumers want original series (Sprout Social, 2026).",
-        recipe: {
-          prompt:
-            "Build a social post for [[your city or ZIP]]'s monthly market pulse — the biggest ZIP move as the headline stat, values matching your email.",
-          needs: ["agent_name", "brokerage", "business_address"],
-          target: "social",
-        },
+        recipe: RECIPES["social-cut"],
       },
       {
         image: "/showcase/market-pulse/step-4.webp",

@@ -46,6 +46,9 @@ import {
   listingDescriptionFromPrompt,
 } from "@/lib/email/listing-intent";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
+import { recipeByKey, recipeFromPrompt } from "@/lib/deliverable/recipes";
+import { builderFor } from "@/lib/deliverable/recipes/index";
+import { resolveSubject } from "@/lib/deliverable/recipes/shared";
 import { fetchListingFacts, type ListingFacts } from "@/lib/email/listing-scrape";
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
 import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
@@ -488,6 +491,14 @@ export interface BuildArgs {
    *  a reply CTA, authored buttons get the engine-owned `mailto:` to this address —
    *  the same address blast sends already use as reply-to. Never model-written. */
   replyEmail?: string;
+  /** THE RECIPE KEY (`?rkey=` — lib/deliverable/recipes.ts). THIS is the identity a
+   *  build routes on: it is what makes the hero pill, the showcase card, the campaign
+   *  button and the lab pick produce the SAME deliverable. Identity used to be the
+   *  prompt STRING, so a user typing over the [[blank]] — or one surface re-typing a
+   *  prompt with an extra sentence — silently forked one deliverable into two.
+   *  Absent (an old link, an organic typed ask) → we fall back to matching the prompt
+   *  against the registry, and then to the generic author. Never throws on a stale key. */
+  recipeKey?: string;
   /** An explicit deliverable-type recipe chosen in the lab, or a saved
    *  `preferred_recipe` (M3 — recipes are user-SELECTABLE). Overrides keyword
    *  detection; unknown/empty falls back to detection. Advisory only (RULE C2). */
@@ -915,6 +926,7 @@ export async function authorDoc({
   assets,
   replyEmail,
   recipeId: recipeOverride,
+  recipeKey,
 }: BuildArgs): Promise<BuildResult> {
   const docParsed = EmailDocSchema.safeParse(rawDoc);
   if (!docParsed.success) {
@@ -938,9 +950,71 @@ export async function authorDoc({
   // on scope alone is what sent every in-lab campaign build to the free author, which
   // improvised the photo-less ZIP grab-bag ("Typical asking rent") instead of the
   // flyer. Read both; a caller that has neither still falls through untouched.
-  const subjectAddress = isNewListingRecipePrompt(prompt)
-    ? (scope?.address ?? subjectAddressFromPrompt(prompt))
-    : null;
+  // ── RECIPE DISPATCH — identity, not a regex ────────────────────────────────
+  // The key is the identity (lib/deliverable/recipes.ts). Resolve it from `rkey`,
+  // and fall back to matching the prompt against the registry for old links and
+  // stored arc steps. An organic typed ask matches nothing and falls straight
+  // through to the generic author, byte-identical to before.
+  //
+  // What this replaces: `isNewListingRecipePrompt(prompt)` — a REGEX that was the
+  // only gate into the working lane. Coming Soon, Comps, Under Contract and Sold all
+  // carry a real address in their prompt and every one of them missed that regex, so
+  // they resolved no subject and fell into the free author's photo-less grab-bag.
+  // Fifteen of seventeen recipes died on that one `if`.
+  const activeRecipe = recipeByKey(recipeKey) ?? recipeFromPrompt(prompt);
+  const recipeBuilder = activeRecipe ? builderFor(activeRecipe.key) : null;
+
+  if (activeRecipe && recipeBuilder) {
+    // Resolve the SUBJECT once, from a real record, before any layout happens. The
+    // address reaches us by EITHER door — a field (homepage hero) or the prompt text
+    // (the Lab's campaign button seeds only the recipe TEXT, so the address the user
+    // types over the [[blank]] exists nowhere else). This lane is the ONE authority
+    // on which; never re-gate a lane on how a door happens to pass something.
+    const subject =
+      activeRecipe.subject === "address"
+        ? (scope?.address ?? subjectAddressFromPrompt(prompt))
+        : null;
+    const resolvedSubject = subject ? await resolveSubject(subject, prompt) : null;
+
+    const built = await recipeBuilder({
+      recipe: activeRecipe,
+      prompt,
+      currentDoc,
+      facts: resolvedSubject?.facts ?? null,
+      resolved: resolvedSubject?.resolved ?? false,
+      zip: scope?.kind === "zip" ? scope.value : undefined,
+    }).catch(() => null);
+
+    if (built) {
+      const parsed = EmailDocSchema.safeParse(built);
+      if (parsed.success) {
+        return {
+          payload: {
+            doc: parsed.data,
+            applied: true,
+            replacedLayout: true,
+            ...(resolvedSubject
+              ? {
+                  listing: {
+                    subject: resolvedSubject.facts.address ?? subject!,
+                    resolved: resolvedSubject.resolved,
+                  },
+                }
+              : {}),
+          },
+        };
+      }
+      // Defensive only: a malformed doc falls through to the generic author below.
+    }
+  }
+
+  // ── LEGACY subject-listing lane ────────────────────────────────────────────
+  // Still reachable for a prompt that names a listing but resolves to no recipe key
+  // and no builder. Deleting it would REGRESS those asks to the free author.
+  const subjectAddress =
+    !recipeBuilder && isNewListingRecipePrompt(prompt)
+      ? (scope?.address ?? subjectAddressFromPrompt(prompt))
+      : null;
   if (subjectAddress) {
     // Never refuse (RULE 0.7). Resolve the real record; on a miss fall back to an
     // address-only skeleton so the coded flyer grid ALWAYS lands on the canvas —

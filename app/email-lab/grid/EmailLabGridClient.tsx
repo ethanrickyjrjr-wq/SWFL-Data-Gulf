@@ -9,10 +9,11 @@ import { ensureGridLayouts } from "@/lib/email/doc/grid-layouts";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import {
   findPlaceholder,
-  inputKindForPrompt,
+  inputKindForRecipe,
   type BrandNeed,
   type ShowcaseRecipe,
 } from "@/lib/showcase/recipe";
+import { isRecipeKey } from "@/lib/deliverable/recipes";
 import { projectEmailLabBase } from "@/lib/lab-entry/destination";
 import { planArrival } from "@/lib/lab-entry/arrival";
 import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
@@ -30,6 +31,7 @@ export function EmailLabGridClient({
   addr,
   recipe,
   recipeNeeds,
+  rkey,
   refCode,
   signedIn,
   offeredProject,
@@ -39,12 +41,18 @@ export function EmailLabGridClient({
   addr?: string | null;
   recipe?: string | null;
   recipeNeeds?: string | null;
+  /** The recipe KEY (?rkey=) — the deliverable's identity. */
+  rkey?: string | null;
   refCode?: string | null;
   signedIn: boolean;
   offeredProject: { id: string; title: string } | null;
 }) {
   const initialRecipe: ShowcaseRecipe | null = recipe
     ? {
+        // The key is what the builder routes on. A door that sent a prompt but no key
+        // (an old link) leaves it undefined, and the builder falls back to matching the
+        // prompt — so nothing breaks, it just loses the immunity to prompt edits.
+        key: isRecipeKey(rkey) ? rkey : undefined,
         prompt: recipe,
         needs: (recipeNeeds ?? "")
           .split(",")
@@ -120,6 +128,9 @@ export function EmailLabGridClient({
     const params = new URLSearchParams();
     if (initialRecipe) {
       params.set("recipe", initialRecipe.prompt);
+      // The identity has to survive the hop into the project, or the in-project build
+      // routes on prompt text again and we are back to the bug.
+      if (initialRecipe.key) params.set("rkey", initialRecipe.key);
       if (initialRecipe.needs.length > 0) params.set("recipeNeeds", initialRecipe.needs.join(","));
     }
     if (addr) params.set("addr", addr);
@@ -249,8 +260,10 @@ export function EmailLabGridClient({
       {!confirmOpen && addressOpen && recipeBlank && initialRecipe && (
         <AddressPopup
           // Was hardcoded "address", so a farm/area recipe ("…about [[your city or
-          // ZIP]]") demanded a street address. The blank's own hint decides now.
-          inputKind={inputKindForPrompt(initialRecipe.prompt) ?? "address"}
+          // ZIP]]") demanded a street address. The RECIPE decides now: its subject
+          // spine is declared on its key, and a declared fact beats one re-derived
+          // from the sentence. Falls back to the blank's hint for keyless legacy links.
+          inputKind={inputKindForRecipe(initialRecipe) ?? "address"}
           initialValue={addr ?? ""}
           gaps={arrivalGaps}
           onBuild={buildWithAddress}

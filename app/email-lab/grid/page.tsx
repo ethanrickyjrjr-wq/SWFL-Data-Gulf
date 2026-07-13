@@ -25,6 +25,10 @@ export default async function EmailLabGridPage({
   const addr = (sp.addr ?? "").trim() || null;
   const recipe = sp.recipe ?? null;
   const recipeNeeds = sp.recipeNeeds ?? null;
+  // THE RECIPE KEY — the deliverable's identity, set by whichever door sent them
+  // here (hero pill, showcase card, campaign button, lab example). `recipe` above is
+  // only the seed TEXT the user types over; this is what the builder routes on.
+  const rkey = sp.rkey ?? null;
   // Outreach attribution — rides the anonymous funnel into SendToSelfModal's
   // claim-and-send (the /email-lab redirect preserves it; consume it here).
   const refCode = (sp.ref ?? "").trim() || null;
@@ -44,7 +48,15 @@ export default async function EmailLabGridPage({
     if (!row) {
       // Zero projects: make one and carry the recipe/zip/addr into it, where the
       // in-project client runs the same arrival (blank skeleton + address popup).
-      return <AutoCreateProject zip={zip} recipe={recipe} recipeNeeds={recipeNeeds} addr={addr} />;
+      return (
+        <AutoCreateProject
+          zip={zip}
+          recipe={recipe}
+          recipeNeeds={recipeNeeds}
+          rkey={rkey}
+          addr={addr}
+        />
+      );
     }
     const seedDoc = zip ? await buildZipSeedDoc(zip) : null;
     return (
@@ -54,6 +66,7 @@ export default async function EmailLabGridPage({
         addr={addr}
         recipe={recipe}
         recipeNeeds={recipeNeeds}
+        rkey={rkey}
         signedIn
         offeredProject={{ id: row.id, title: row.title ?? "your project" }}
       />
@@ -69,6 +82,7 @@ export default async function EmailLabGridPage({
       addr={addr}
       recipe={recipe}
       recipeNeeds={recipeNeeds}
+      rkey={rkey}
       refCode={refCode}
       signedIn={false}
       offeredProject={null}
