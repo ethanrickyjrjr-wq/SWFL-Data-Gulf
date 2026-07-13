@@ -1,3 +1,29 @@
+## 2026-07-13 (Sonnet 5 · main) — /desk hero city tabs: months-of-supply trend, not a 2-day asking line; killed confessional copy
+
+Follow-up to the "% over the year" fix below. Operator liked the rebased tab, then flagged the 3
+individual city tabs still chart the 2-day `median_asking_price` line, and separately caught leftover
+internal-reasoning copy ("the daily asking line above is too fresh to show a real trend yet...") shipped
+into the rebase caption — pulled that immediately, replaced with a plain factual line.
+Operator's ask: research (crawl4ai, not memory) what pairs well with a price-trend chart, then check what
+we hold. Crawled Redfin's own `data-center-metrics-definitions` page (verbatim glossary: months-of-supply
+= "length of time to sell existing supply at current pace... higher supply indicates a buyer's market,
+lower indicates a seller's market") — then independently corroborated it's the standard pairing, not just
+Redfin's own opinion of its own metric: Zillow Research uses months'-supply as a leading indicator in its
+home-price-appreciation forecasting model, and AEI's Housing Center's flagship dashboard is literally
+titled "Home Price Appreciation Index and Months' Remaining Inventory" (crawled directly, methodology
+confirms "seven months is generally considered the demarcation point between a buyer's and seller's
+market"). `redfin_city_swfl` already carries `months_of_supply` in the SAME query as sold price (132-157
+real monthly rows per core city) — zero new data source.
+Fix: `HeroCitySeries.trend` (new optional field) carries the months-of-supply series; `buildHeroFromAsking`
+populates it (`lib/desk/loaders.ts`, `loadSoldSeries` now returns `{sold, monthsSupply}` from one query).
+`DeskHero.tsx`'s individual-city AREA chart reads `active.trend?.points` when present, falls back to the
+daily asking line otherwise. Headline $ number, delta, and the "closed-sale monthly" anchor line are
+UNCHANGED — only the chart's own series swapped, with its own caption underneath naming what's plotted.
+The "% over the year" tab is untouched (still `hero.rebase`, still sold-price). Verified live: typecheck
+clean, `mappers.test.ts` 22/22, `bun run build` green, served on :3910 against prod Supabase — Cape Coral's
+individual tab now shows a real 24-month up-and-down months-of-supply trend instead of a flat line.
+Files: `lib/desk/types.ts`, `lib/desk/loaders.ts`, `app/desk/_components/DeskHero.tsx`.
+
 ## 2026-07-13 (Sonnet 5 · main) — /desk hero "% since start" no longer rides a 2-day-old series
 
 Operator, furious: hero chart flat/"1 day difference", Cape Coral missing from the rebased tab despite

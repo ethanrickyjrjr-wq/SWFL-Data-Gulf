@@ -18,6 +18,7 @@ const REBASE_MONTHS_LABEL = "year";
 
 const usdFull = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
 const pct1 = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
+const months1 = (v: number) => `${v.toFixed(1)} mo`;
 
 /**
  * Hero — big count-up price over a gradient area of the same series. Tabs pick
@@ -33,7 +34,7 @@ export function DeskHero({ hero }: { hero: HeroData }) {
 
   const areaRows = useMemo(
     () =>
-      (active?.points ?? []).map((p) => ({
+      (active?.trend?.points ?? active?.points ?? []).map((p) => ({
         date: new Date(`${p.date.slice(0, 10)}T00:00:00Z`),
         value: p.value,
       })),
@@ -140,13 +141,20 @@ export function DeskHero({ hero }: { hero: HeroData }) {
                 rows={(point) => [
                   {
                     color: active.color,
-                    label: active.label,
-                    value: usdFull(typeof point.value === "number" ? point.value : 0),
+                    label: active.trend?.label ?? active.label,
+                    value: active.trend
+                      ? months1(typeof point.value === "number" ? point.value : 0)
+                      : usdFull(typeof point.value === "number" ? point.value : 0),
                   },
                 ]}
               />
             </AreaChart>
           </div>
+          {active.trend ? (
+            <p className="mt-2 text-[11px] text-gray-500">
+              {active.trend.label} — monthly, {active.trend.sourceLabel}
+            </p>
+          ) : null}
         </div>
       ) : (
         <div>

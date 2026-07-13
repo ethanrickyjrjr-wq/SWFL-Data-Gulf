@@ -60,6 +60,15 @@ export interface HeroCitySeries {
    *  asking moves daily, sold is the true anchor and steps monthly). Absent when
    *  the sold feed has no row for this city. */
   anchor?: DeskDatum;
+  /** A complementary monthly market-trend series charted for this city INSTEAD
+   *  of `points` when present — months of supply, a real price-direction
+   *  indicator (not just "more rows than the 2-day asking line"). Absent →
+   *  the chart falls back to `points`. */
+  trend?: {
+    points: Array<{ date: string; value: number }>;
+    label: string;
+    sourceLabel: string;
+  };
 }
 
 export interface HeroData {

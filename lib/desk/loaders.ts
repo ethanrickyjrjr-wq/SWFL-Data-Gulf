@@ -121,32 +121,49 @@ interface SoldRow {
   area: string;
   period_end: string;
   median_sale_price: number | null;
+  months_of_supply: number | null;
 }
 
-async function loadSoldSeries(supabase: Supabase): Promise<Map<string, SeriesPoint[]>> {
+interface CityMonthlySeries {
+  sold: Map<string, SeriesPoint[]>;
+  /** Buyer's/seller's-market gauge (Redfin's own definition ties it directly
+   *  to price direction — lower supply = seller's market = price pressure
+   *  up). Same table, same monthly cadence, same real per-city history as
+   *  the sold anchor. */
+  monthsSupply: Map<string, SeriesPoint[]>;
+}
+
+async function loadSoldSeries(supabase: Supabase): Promise<CityMonthlySeries> {
+  const empty: CityMonthlySeries = { sold: new Map(), monthsSupply: new Map() };
   try {
     const { data, error } = await supabase
       .schema("data_lake")
       .from("redfin_city_swfl")
-      .select("area, period_end, median_sale_price")
+      .select("area, period_end, median_sale_price, months_of_supply")
       .eq("property_type", "All Residential")
       .in(
         "area",
         CITY_DEFS.map((c) => c.key),
       )
-      .not("median_sale_price", "is", null)
       .order("period_end", { ascending: true });
-    if (error || !data) return new Map();
-    const byCity = new Map<string, SeriesPoint[]>();
+    if (error || !data) return empty;
+    const sold = new Map<string, SeriesPoint[]>();
+    const monthsSupply = new Map<string, SeriesPoint[]>();
     for (const r of data as SoldRow[]) {
-      if (typeof r.median_sale_price !== "number") continue;
-      const list = byCity.get(r.area) ?? [];
-      list.push({ period: r.period_end, value: r.median_sale_price });
-      byCity.set(r.area, list);
+      if (typeof r.median_sale_price === "number") {
+        const list = sold.get(r.area) ?? [];
+        list.push({ period: r.period_end, value: r.median_sale_price });
+        sold.set(r.area, list);
+      }
+      if (typeof r.months_of_supply === "number") {
+        const list = monthsSupply.get(r.area) ?? [];
+        list.push({ period: r.period_end, value: r.months_of_supply });
+        monthsSupply.set(r.area, list);
+      }
     }
-    return byCity;
+    return { sold, monthsSupply };
   } catch {
-    return new Map();
+    return empty;
   }
 }
 
@@ -550,13 +567,23 @@ function buildRebaseFromSold(sold: Map<string, SeriesPoint[]>): HeroData["rebase
   return {
     cities,
     sourceLabel: "redfin.com",
-    windowNote: `${n} monthly closed-sale medians per city since ${mdY(first) ?? "the trailing window"} — the daily asking line above is too fresh to show a real trend yet, so this comparison rides the deeper sold-price history instead`,
+    windowNote: `${n} monthly closed-sale medians per city since ${mdY(first) ?? "the trailing window"} — true sold prices, redfin.com`,
   };
 }
+
+/** Individual city chart reads up to this many trailing months of months-of-
+ *  supply — same real per-city history as the sold anchor, chosen because
+ *  it's a genuine price-direction indicator (Zillow's HPA forecasting model
+ *  and AEI's Housing Center both pair months'-supply with home-price trend;
+ *  Redfin's own definition ties it to buyer's/seller's-market direction),
+ *  not just a metric that happens to have more rows than the 2-day asking
+ *  line. */
+const TREND_TRAILING_MONTHS = 24;
 
 function buildHeroFromAsking(
   truth: TruthSeries,
   sold: Map<string, SeriesPoint[]>,
+  monthsSupply: Map<string, SeriesPoint[]>,
 ): HeroData | null {
   const cities: HeroCitySeries[] = [];
   for (const def of CITY_DEFS) {
@@ -564,6 +591,7 @@ function buildHeroFromAsking(
     if (points.length < 2) continue;
     const ld = latestDelta(points);
     if (!ld) continue;
+    const trendPoints = (monthsSupply.get(def.key) ?? []).slice(-TREND_TRAILING_MONTHS);
     cities.push({
       key: def.key,
       label: def.label,
@@ -582,6 +610,14 @@ function buildHeroFromAsking(
       },
       points: points.map((p) => ({ date: p.period, value: p.value })),
       anchor: soldAnchorDatum(sold, def.key),
+      trend:
+        trendPoints.length >= 2
+          ? {
+              points: trendPoints.map((p) => ({ date: p.period, value: p.value })),
+              label: `${def.label} months of supply`,
+              sourceLabel: "redfin.com",
+            }
+          : undefined,
     });
   }
   if (cities.length === 0) return null;
@@ -691,7 +727,7 @@ export async function loadDeskData(): Promise<DeskData> {
 
   const [
     truth,
-    sold,
+    citySeries,
     stats,
     momentum,
     pulse,
@@ -724,8 +760,8 @@ export async function loadDeskData(): Promise<DeskData> {
   //   2. monthly SOLD line (true closed-sale medians, redfin.com)
   //   3. monthly ZHVI (smoothed index) — deepest fallback, never refuse
   const hero =
-    buildHeroFromAsking(truth, sold) ??
-    buildHeroFromSold(sold) ??
+    buildHeroFromAsking(truth, citySeries.sold, citySeries.monthsSupply) ??
+    buildHeroFromSold(citySeries.sold) ??
     (await buildHeroFromZhvi(supabase));
 
   const spineAsOf = mdY(stats.region?.latest_scraped_at ?? undefined);
