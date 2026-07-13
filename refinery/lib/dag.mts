@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { PackDefinition } from "../types/pack.mts";
+import { packCodeChanged } from "./pack-hash.mts";
 
 /**
  * In-memory DAG resolver over the pack registry.
@@ -41,9 +42,7 @@ export function resolveBuildOrder(
     const pack = PACKS[id];
     if (!pack) {
       const known = Object.keys(PACKS).join(", ") || "(none)";
-      throw new Error(
-        `DAG: pack "${id}" not found in registry. Known packs: ${known}`,
-      );
+      throw new Error(`DAG: pack "${id}" not found in registry. Known packs: ${known}`);
     }
     inStack.add(id);
     for (const upstream of pack.input_brains) {
@@ -63,10 +62,7 @@ export function resolveBuildOrder(
  * Used by `--list-consumers` and by future staleness invalidation (when X
  * is rebuilt, downstream consumers may want a heads-up).
  */
-export function walkConsumers(
-  brainId: string,
-  PACKS: Record<string, PackDefinition>,
-): string[] {
+export function walkConsumers(brainId: string, PACKS: Record<string, PackDefinition>): string[] {
   return Object.values(PACKS)
     .filter((p) => p.input_brains.some((e) => e.id === brainId))
     .map((p) => p.id)
@@ -88,10 +84,7 @@ export function walkConsumers(
  *     that THROWS on cycles; walkUpstream is read-only telemetry and stays
  *     soft so it works even on a partially-broken registry.
  */
-export function walkUpstream(
-  brainId: string,
-  PACKS: Record<string, PackDefinition>,
-): string[] {
+export function walkUpstream(brainId: string, PACKS: Record<string, PackDefinition>): string[] {
   const visited = new Set<string>();
 
   function visit(id: string): void {
@@ -154,7 +147,17 @@ export async function brainStatus(brainId: string): Promise<BrainStatus> {
 
   const expiresMs = refinedMs + ttl * 1000;
   const expiresAt = new Date(expiresMs).toISOString().slice(0, 10);
-  const stale = Date.now() > expiresMs;
+
+  // CODE CHANGE BEATS THE TTL. A data-age TTL cannot see that the pack was fixed,
+  // so a pack change inside the window is skipped as "fresh" forever: the 07/10
+  // ZIP-scope fix shipped to main and every daily rebuild since said "housing-swfl
+  // is fresh — skip", leaving a 06/29 artifact carrying Bradenton and Sarasota in
+  // front of every user for two weeks. `pack_hash` stamps the source the brain was
+  // built from; if the pack on disk no longer matches, the brain IS stale no matter
+  // how young its data is. Pre-stamp brains return false here (see pack-hash.mts),
+  // so merging this can never touch off an unapproved mass rebuild.
+  const codeChanged = packCodeChanged(brainId, frontmatterValue(md, "pack_hash"));
+  const stale = codeChanged || Date.now() > expiresMs;
   return {
     kind: stale ? "stale" : "fresh",
     expires_at: expiresAt,
