@@ -37,6 +37,17 @@ import type { EmailDoc } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { Recipe, RecipeKey } from "@/lib/deliverable/recipes";
 import { buildNewListing } from "./new-listing";
+import { buildComingSoon } from "./coming-soon";
+import { buildMarketComps } from "./market-comps";
+import { buildUnderContract } from "./under-contract";
+import { buildJustSold } from "./just-sold";
+import { buildOpenHouse } from "./open-house";
+import { buildPriceReduced } from "./price-reduced";
+import { buildAgentBrandIntro } from "./agent-brand-intro";
+import { buildAgentLaunch } from "./agent-launch";
+import { buildSphereWeekly } from "./sphere-weekly";
+import { buildReviewReply } from "./review-reply";
+import { buildMarketPulse } from "./market-pulse";
 
 /** What every builder is handed. The subject is ALREADY resolved — do not re-resolve. */
 export interface RecipeBuildContext {
@@ -66,22 +77,29 @@ export type RecipeBuilder = (ctx: RecipeBuildContext) => Promise<EmailDoc | null
  */
 export const RECIPE_BUILDERS: Partial<Record<RecipeKey, RecipeBuilder>> = {
   // ── The listing lifecycle — ONE resolved house, different hats ──────────────
-  "new-listing": buildNewListing, // ✅ the reference implementation
-  // "coming-soon":       R2  — address SUPPRESSED; scarcity from live county inventory
-  // "market-comps":      R3  — the comps bar lives HERE; a comp needs beds AND sqft
-  // "under-contract":    R4  — DOM vs the area's typical; vendor DOM came back null
-  // "just-sold":         R5  — the close among the week's real sales
-  // "open-house":        R6  — a house and a MOMENT; no chart
-  // "price-reduced":     R7  — the cut ABOVE the price, smaller, different color
-  // ── The area / agent recipes — a different spine; do NOT force the flyer ────
-  // "agent-brand-intro": R8  — farm area + newest listing; headshot is an open slot
-  // "agent-launch":      R9  — the letter; ONE hard number, no chart
-  // "sphere-weekly":     R10 — headline number is a LANE-3 web fact; cite or leave open
-  // "review-reply":      R11 — pure lake data; genuinely about numbers, so it charts
-  // "market-pulse":      R12 — every ZIP's month-over-month move
-  // ── Social — a DIFFERENT renderer; confirm which system is live first ───────
-  // "social-pack":       R13
-  // "social-cut":        R14
+  "new-listing": buildNewListing, // the reference implementation
+  "coming-soon": buildComingSoon, // address SUPPRESSED; scarcity from live county inventory
+  "market-comps": buildMarketComps, // the comps bar lives HERE; a comp needs beds AND sqft
+  "under-contract": buildUnderContract, // time on market vs the area's typical
+  "just-sold": buildJustSold, // the close among the week's real sales
+  "open-house": buildOpenHouse, // a house and a MOMENT; no chart
+  "price-reduced": buildPriceReduced, // the cut ABOVE the price, smaller, different color
+  // ── The area / agent recipes — a different spine; the flyer is NOT forced ───
+  "agent-brand-intro": buildAgentBrandIntro, // farm area + newest listing; headshot is an open slot
+  "agent-launch": buildAgentLaunch, // the letter; ONE hard number, no chart
+  "sphere-weekly": buildSphereWeekly, // headline number is a LANE-3 web fact, cited
+  "review-reply": buildReviewReply, // pure lake data; genuinely about numbers, so it charts
+  "market-pulse": buildMarketPulse, // every ZIP's month-over-month move
+  // ── Social — a DIFFERENT renderer, and a DIFFERENT contract ────────────────
+  // NOT RecipeBuilder-shaped, and deliberately not registered here. Recon (07/13/2026)
+  // found TWO live social systems: the "Make this →" button on a social slide lands in
+  // the Konva composer (authorSocialPost → SocialDesign), while the "New Listing Socials"
+  // campaign lands in buildWeek (→ EmailDoc cards). Neither touches this table.
+  // ⚠️ AND THE SOCIAL PATH HAS NO NO-INVENTION GATE AT ALL: its four-lane rules are prose
+  // in a prompt, and `stat.value` is a free-text field the model writes. Same sourced lake
+  // feed as email, ungated on the way out. Tracked as `social_path_has_no_no_invention_gate`.
+  // lib/deliverable/claims.ts was built to be liftable onto it.
+  // "social-pack" / "social-cut" — see the check before wiring either.
 };
 
 /** The builder for a key, or null if this recipe isn't built yet. */

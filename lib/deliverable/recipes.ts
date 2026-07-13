@@ -176,8 +176,12 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     // THIS is the recipe the comps chart belongs to. Include the subject as its
     // own bar — we have its list price.
     chart: "comps-bar",
+    // The prompt used to promise "six LIVE comparable LISTINGS". They are not that: the
+    // set that comes back is a MIX — recorded sales plus current valuations. Promising
+    // live listings and shipping valuations is a lie told by the spec, before the
+    // builder writes a line. The email now states the mix on its face; this says so too.
     prompt:
-      "Build a market-comps email for my listing at [[your listing address]] — six live comparable listings nearby with each price and price per square foot, a price bar chart, and a straight case for my asking price.",
+      "Build a market-comps email for my listing at [[your listing address]] — six comparable homes nearby, each with its price and price per square foot, a price bar chart, and a straight case for my asking price.",
     needs: ["agent_name", "brokerage", "business_address"],
   },
   "under-contract": {
@@ -186,12 +190,23 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     skeleton: null,
     prose: null,
     subject: "address",
-    // The headline IS a comparison number, so this one earns a chart — but the
-    // vendor's daysOnMarket came back NULL on the row we inspected. If it's null
-    // that is an OPEN SLOT with an instruction, never a made-up number.
-    chart: "dom-vs-area",
+    // ⚠️ THIS PROMPT USED TO REQUEST A FABRICATION, AND IT GOT ONE.
+    //
+    // It read: "lead with how fast it went pending compared to the ZIP's typical days
+    // on market." NO SOURCE WE HAVE CARRIES A DAYS-TO-CONTRACT INTERVAL — the vendor's
+    // daysOnMarket is null on the fixture, and there is no contract date anywhere. The
+    // builder did as it was told and invented one: "went under contract after 75 days
+    // on market," plus a sequence ("the seller had reduced the price BEFORE a contract
+    // was reached") that no source orders. A spec that asks for a number no lane holds
+    // is not a spec — it is an instruction to lie, and the model complied.
+    //
+    // The honest version leads with WHEN IT WAS LISTED (which we do hold) against the
+    // area's typical days on market (which we also hold), and never claims how long the
+    // contract took. `chart` is "none" for the same reason: dom-vs-area needs this home's
+    // days-to-contract as its subject bar, and that bar can never be honestly drawn.
+    chart: "none",
     prompt:
-      "Build an under-contract announcement email for my listing at [[your listing address]] — lead with how fast it went pending compared to the ZIP's typical days on market, and invite backup offers.",
+      "Build an under-contract announcement email for my listing at [[your listing address]] — announce it's under contract, set its time on the market against the area's typical days on market, and invite backup offers.",
     needs: ["agent_name", "brokerage", "business_address"],
   },
   "just-sold": {

@@ -276,6 +276,14 @@ export const SEED_DOCS: SeedDoc[] = [
     id: "just-sold",
     name: "Just Sold",
     description: "Photo of the win, the numbers behind it, sign off as the agent.",
+    // MIRRORS what the Just Sold BUTTON builds (lib/deliverable/recipes/just-sold.ts).
+    // The seed card is that deliverable unfilled; the button is it filled from the
+    // resolved house. seed-recipe-parity.test.ts fails the suite if they drift.
+    //
+    // "Days on Market" is GONE from the spec row on purpose: no source we hold carries
+    // a days-to-contract or days-to-sale interval for a subject property. A cell we can
+    // never fill honestly is not an open slot — it is an invitation to invent one, and
+    // a builder did exactly that ("went under contract after 75 days on market").
     build: () => ({
       globalStyle: style(),
       blocks: [
@@ -285,16 +293,25 @@ export const SEED_DOCS: SeedDoc[] = [
           kicker: "Just Sold",
           value: "",
           label: "Sale price and where it sold",
-          prose: "Say what made this sale notable — over asking, days on market, a bidding war.",
+          prose: "",
         }),
         seedBlock("stats", {
           stats: [
             { value: "", label: "Sale Price" },
-            { value: "", label: "Days on Market" },
-            { value: "", label: "List-to-Sale %" },
+            { value: "", label: "List Price" },
+            { value: "", label: "List-to-Sale" },
           ],
         }),
+        seedBlock("stats", {
+          stats: [
+            { value: "", label: "Beds" },
+            { value: "", label: "Baths" },
+            { value: "", label: "Sq Ft" },
+          ],
+        }),
+        seedBlock("text", { body: "", align: "left" }),
         seedBlock("agent-card"),
+        seedBlock("button", { label: "What's My Home Worth?" }),
         seedBlock("footer"),
       ],
     }),
@@ -800,9 +817,21 @@ export const SEED_DOCS: SeedDoc[] = [
             prose: "",
           },
         ),
+        // The DATE and TIME are in no vendor feed — the agent supplies them. They are
+        // OPEN SLOTS whose labels are the instruction, never a placeholder date.
         seedBlockGrid(
           "stats",
           { x: 0, y: 12, w: 12, h: 3 },
+          {
+            stats: [
+              { value: "", label: "Open House Date" },
+              { value: "", label: "Open House Time" },
+            ],
+          },
+        ),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 15, w: 12, h: 3 },
           {
             stats: [
               { value: "", label: "Asking Price" },
@@ -811,16 +840,14 @@ export const SEED_DOCS: SeedDoc[] = [
             ],
           },
         ),
-        seedBlockGrid(
-          "text",
-          { x: 0, y: 15, w: 7, h: 4 },
-          {
-            body: "Write a couple of sentences that get someone off the couch — great light, an updated kitchen, whatever's true here.",
-          },
-        ),
-        seedBlockGrid("button", { x: 7, y: 15, w: 5, h: 4 }, { label: "Get Directions" }),
-        seedBlockGrid("agent-card", { x: 0, y: 19, w: 12, h: 4 }),
-        seedBlockGrid("footer", { x: 0, y: 23, w: 12, h: 3, static: true }),
+        // body MUST be "" — THE SLOT RULE. This carried a coaching note ("Write a couple
+        // of sentences that get someone off the couch…"), and TextBlock ships any
+        // non-empty body: a user who picked this card and hit send EMAILED THAT SENTENCE
+        // to real people. An instruction to the author is not copy for the reader.
+        seedBlockGrid("text", { x: 0, y: 18, w: 7, h: 4 }, { body: "", align: "left" }),
+        seedBlockGrid("button", { x: 7, y: 18, w: 5, h: 4 }, { label: "RSVP for the Open House" }),
+        seedBlockGrid("agent-card", { x: 0, y: 22, w: 12, h: 4 }),
+        seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -850,13 +877,15 @@ export const SEED_DOCS: SeedDoc[] = [
             prose: "",
           },
         ),
+        // "Price Drop" is GONE from this row: the operator moved the cut ABOVE the price
+        // (the hero kicker — smaller, accent-colored), so printing $104,975 twice, six
+        // inches apart, is noise.
         seedBlockGrid(
           "stats",
           { x: 6, y: 2, w: 6, h: 4 },
           {
             stats: [
-              { value: "", label: "Original Price" },
-              { value: "", label: "Price Drop" },
+              { value: "", label: "Previous Price" },
               { value: "", label: "Days on Market" },
             ],
           },
@@ -866,15 +895,38 @@ export const SEED_DOCS: SeedDoc[] = [
           { x: 0, y: 6, w: 12, h: 5 },
           { alt: "Property photo", kind: "photo", ratio: "4:3" },
         ),
+        // The spec grid the recipe's own prompt promises ("the home's key specs") — the
+        // seed had NONE.
         seedBlockGrid(
-          "text",
-          { x: 0, y: 11, w: 12, h: 3 },
+          "stats",
+          { x: 0, y: 11, w: 12, h: 2 },
           {
-            body: "Say why this is a good value now — what changed, and why a motivated seller means room to negotiate.",
+            stats: [
+              { value: "", label: "Beds" },
+              { value: "", label: "Baths" },
+              { value: "", label: "Sq Ft" },
+            ],
           },
         ),
-        seedBlockGrid("button", { x: 0, y: 14, w: 12, h: 2 }, { label: "See the New Price" }),
-        seedBlockGrid("footer", { x: 0, y: 16, w: 12, h: 3, static: true }),
+        seedBlockGrid(
+          "stats",
+          { x: 0, y: 13, w: 12, h: 2 },
+          {
+            stats: [
+              { value: "", label: "$/Sq Ft" },
+              { value: "", label: "Lot" },
+              { value: "", label: "Type" },
+            ],
+          },
+        ),
+        // body MUST be "" — THE SLOT RULE. This shipped a coaching note ("Say why this is
+        // a good value now — what changed, and why a motivated seller means room to
+        // negotiate") straight into real sends: TextBlock ships any non-empty body. Worse,
+        // it asked for TWO claims we cannot source — a seller's MOTIVE and a negotiating
+        // position. The product's own template was instructing the user to invent.
+        seedBlockGrid("text", { x: 0, y: 15, w: 12, h: 4 }, { body: "", align: "left" }),
+        seedBlockGrid("button", { x: 0, y: 19, w: 12, h: 2 }, { label: "See the New Price" }),
+        seedBlockGrid("footer", { x: 0, y: 21, w: 12, h: 3, static: true }),
       ],
     }),
   },

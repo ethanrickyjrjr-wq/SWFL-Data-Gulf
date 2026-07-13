@@ -987,6 +987,26 @@ export async function authorDoc({
 
     if (built) {
       const parsed = EmailDocSchema.safeParse(built);
+      // A RECIPE THAT FAILS VALIDATION MUST NOT LOOK LIKE A RECIPE THAT WORKED.
+      //
+      // This used to fall through to the generic author in silence, and that is the
+      // disease wearing a lab coat: the user asked for a specific deliverable, the
+      // builder produced a malformed one, and they got the free-author grab-bag with
+      // no signal that anything went wrong. Caught live on 07/13 — the weekly's honest
+      // read came back at 696 chars against a 500-char cap, the doc failed to parse,
+      // and the fallback quietly seated a Lee County lake figure in the NATIONAL
+      // headline slot. It rendered. It looked fine. It was a lane-3 violation.
+      //
+      // We still never refuse a build (RULE 0.7) — the generic author below is a real
+      // email, not a failure page. But this is now LOUD, so a broken recipe is
+      // discoverable instead of camouflaged.
+      if (!parsed.success) {
+        console.error(
+          `[recipe:${activeRecipe.key}] builder produced an INVALID doc — falling back to the generic author. ` +
+            `The user asked for "${activeRecipe.label}" and will NOT get it. Issues: ` +
+            JSON.stringify(parsed.error.issues.slice(0, 5)),
+        );
+      }
       if (parsed.success) {
         return {
           payload: {
