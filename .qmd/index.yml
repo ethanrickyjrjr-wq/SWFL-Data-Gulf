@@ -1,0 +1,35 @@
+collections:
+  brains:
+    path: C:\Users\ethan\dev\brain-platform\brains
+    pattern: "**/*.md"
+    context:
+      "": Leaf-brain markdown reports — cited SWFL real-estate/economic facts, one file per data domain (permits, listings, macro, tourism, etc.)
+  docs:
+    path: C:\Users\ethan\dev\brain-platform\docs
+    pattern: "**/*.md"
+    context:
+      "": Specs, plans, handoffs, audits, and standards docs for the brain-platform build — includes docs/superpowers/plans and docs/superpowers/specs
+  audit-roadmap:
+    path: C:\Users\ethan\dev\brain-platform\_AUDIT_AND_ROADMAP
+    pattern: "**/*.md"
+    context:
+      "": Build queue and audit/roadmap tracking docs
+  assistant:
+    path: C:\Users\ethan\dev\brain-platform\_ASSISTANT
+    pattern: "**/*.md"
+    context:
+      "": In-flight session briefs and research notes for the current work
+  session-log:
+    path: C:/Users/ethan/dev/brain-platform
+    pattern: SESSION_LOG.md
+    context:
+      "": Append-only chronological log of every session's shipped work, newest entries at top
+  project-claude:
+    path: C:/Users/ethan/dev/brain-platform
+    pattern: CLAUDE.md
+    context:
+      "": Root project instructions — house rules, gates, architecture discipline
+models:
+  embed: hf:ggml-org/embeddinggemma-300M-GGUF/embeddinggemma-300M-Q8_0.gguf
+  generate: hf:tobil/qmd-query-expansion-1.7B-gguf/qmd-query-expansion-1.7B-q4_k_m.gguf
+  rerank: hf:ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF/qwen3-reranker-0.6b-q8_0.gguf
