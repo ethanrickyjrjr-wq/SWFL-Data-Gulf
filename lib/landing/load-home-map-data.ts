@@ -22,13 +22,27 @@
 //
 // KNOWN-DEBT(data_lake: market views live in the data_lake schema (typed public only))
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
+import { CORE_SCOPE_ZIPS } from "@/refinery/lib/core-scope.mts";
 import type { HomeMapData, HomeMapPayload, HomeStatCell, MetricDef } from "./home-map-types";
 import { HOME_MAP_DATA } from "./home-map-data";
 
 export type { HomeMapPayload, HomeStatCell } from "./home-map-types";
 
-/** The ZIP set the contractor SVG can draw — rows outside it are dropped. */
-const MAP_ZIPS = new Set(Object.keys(HOME_MAP_DATA.placeNames));
+/**
+ * SCOPE COMES FROM THE SCOPE ROOT — Lee + Collier, 57 ZIPs (core-scope.mts).
+ *
+ * This used to be `new Set(Object.keys(HOME_MAP_DATA.placeNames))` — a SECOND
+ * hand-maintained 57-ZIP list that happened to agree with core scope, but only
+ * because someone kept them in sync by hand. Two lists that must match is not one
+ * root; it's a drift waiting to happen (07/13/2026: the lake holds 56 out-of-scope
+ * ZIPs in home values alone — Sarasota, Charlotte, Bradenton — so a map reading a
+ * stale private list would paint counties we don't cover).
+ *
+ * Place names stay in zip-place-names.ts, but they are LABELS, not scope. The key
+ * set there is pinned to core scope by zip-place-names.test.ts, so a ZIP with no
+ * label turns RED instead of rendering an unnamed shape.
+ */
+const MAP_ZIPS = CORE_SCOPE_ZIPS;
 
 const usdShort = (n: number): string => {
   if (n >= 1_000_000_000) return "$" + (n / 1_000_000_000).toFixed(1) + "B";

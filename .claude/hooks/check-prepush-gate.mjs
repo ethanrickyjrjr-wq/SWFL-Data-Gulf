@@ -304,6 +304,22 @@ process.stdin.on("end", () => {
     }
   }
 
+  // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
+  // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
+  // still reopened twice, because nothing FORCED a new surface to call it: the
+  // narrative bake enumerated 91 ZIPs off a Gulf-coast-wide feed and was one Monday
+  // from paying a model to write about Bradenton; the homepage map kept its own
+  // private 57-ZIP list that agreed only by hand. The lake really does hold
+  // out-of-scope rows (home values: 109 ZIPs, 56 Sarasota/Charlotte/mailing), so an
+  // ungated ZIP-grain read is a live leak, not a theory. Fail-closed on touched files.
+  const scope = run("node scripts/check-zip-scope-gate.mjs");
+  if (scope.ran && scope.code !== 0) {
+    block(
+      "ZIP scope root — a ZIP-grain surface bypasses isCoreScope (Lee + Collier, 57)",
+      truncate(scope.out),
+    );
+  }
+
   // ---- Gate 3: secret-wiring reminder (advisory, never blocks) --------------
   const touchedPipelineOrWorkflow = changed.some(
     (f) =>
