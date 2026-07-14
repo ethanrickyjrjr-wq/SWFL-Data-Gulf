@@ -1,3 +1,37 @@
+## 2026-07-14 (Opus 4.8 · main) — SOCIAL DESIGN ROOT: PUSHED + HANDOFF, AND EMAIL'S COLOUR IS THE HOLE
+
+Pushed `7fba5b72` / `6226906d` / `ce697d14`. Handoff written:
+`docs/superpowers/handoffs/2026-07-14-social-design-root-handoff.md` — the sibling of today's
+`2026-07-14-email-design-root-handoff.md` (different session, same problem, two halves).
+
+**Disclosure: my push carried a foreign commit.** `git log origin/main..HEAD` showed only my three
+commits when I checked. The parallel session committed in the gap, and `safe-push` rebased and
+carried `5a4a0e6a` (backlit fit / desk chart) to main with mine. Their work, their authorship,
+published without their say. The known safe-push landmine — the check has to happen AT push time,
+not before it. Nothing broken; recording it so it isn't rediscovered as a mystery.
+
+**The find that outranks everything else here: email's colour never got the treatment.** Email's
+`scale.ts` landed today (`1aad57ca`) and fixed TYPE — its own header says it does **not** govern
+colour. Measured right after it landed: `lib/email/blocks/*` holds **30 DISTINCT raw hex literals,
+and exactly 2 of them are brand tokens.** The rest are invented greys and navies. So the design-root
+work is half-done across the product, and the half that's missing is the one that ships a wrong
+brand colour — which is precisely the bug I just fixed on social. → check `email_blocks_colour_unfenced`.
+
+**The blocker inside it, and it is an operator/Design call, not a refactor:** most of those 30 are
+NEUTRAL GREYS, and **the brand has no grey ramp.** `globals.css` has surfaces, accents, and text —
+no neutrals. So four render paths each invented one (`#9CA3AF`, `#6B7280`, `#E5E7EB`). Pick the ramp
+first or the colour work stalls halfway. → check `brand_has_no_grey_scale`.
+
+**Two checks unblocked by email's landing.** `email_social_share_type_root`: verified the fork —
+email's WEIGHT ladder (600/500/400/500) is **byte-identical** to social's. Extract WEIGHT + the
+composite shape; do NOT unify the px or role names (a canvas has no h2; an email has no
+display-stat). `social_card_reads_brand_root`: claim released, and its TEAL/NAVY are byte-identical
+to brand tokens — a pure dedupe, zero appearance change.
+
+**Live appearance changes now on main:** unbranded social accent `#0ea5b7` → `#3dc9c0` (branded
+projects unaffected — this only ever governed the fallback); unbranded social text `#ffffff` →
+`#f0ede6`; Konva loading placeholder → `--gulf-slate-hi`.
+
 ## 2026-07-14 (Opus 4.8 · main) — TREND FIT PHASE 2: THE PANEL CALLED "HOME PRICE TREND" WAS DRAWING MONTHS OF SUPPLY
 
 Phase 2 surfaces A + B are live on `/desk`. The fit engine now has production consumers.
