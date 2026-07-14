@@ -97,6 +97,36 @@ function select(points: readonly FitPoint[], w: FitWindow, asOf: Date, earliest:
   return points.filter((p) => p.when >= cut);
 }
 
+/**
+ * WHY THIS WINDOW EXISTS — in the reader's words, on the surface, where they are looking.
+ *
+ * Only `ex-boom` needs one, and it needs one badly. Every other window is self-explaining
+ * ("last 5 years" explains itself). `ex-boom` announces that we took two years out of the
+ * arithmetic, and until now the product said WHAT we had removed and never WHY — and never
+ * mentioned that the removed months are still drawn on the chart, because only the fitted
+ * LINE skips them. A reader who sees "excluding the 2021–2022 run-up" and no reason has been
+ * handed a fact they cannot evaluate, and the honest conclusion for them to draw is that we
+ * are hiding something.
+ *
+ * THE REASON IS STATISTICAL, AND IT IS THE ONLY REASON WE MAY GIVE. A straight line fitted
+ * across a single steep run-up inherits that run-up's slope for the entire history. That is
+ * a fact about least squares, and we can state it. Why the run-up HAPPENED is a causal claim
+ * about the world that this module has no source for and will not invent — no "pandemic
+ * migration", no "rate shock". We say what the arithmetic does. We do not narrate history.
+ *
+ * The note also does the thing the operator had to ask for out loud: it tells the reader the
+ * data is still there, and how to put it back.
+ */
+export function windowNote(w: FitWindow): string | null {
+  if (w !== "ex-boom") return null;
+  return (
+    `Those months are still on the chart — only the fitted line skips them. A single steep ` +
+    `run-up pulls a straight line's slope across the whole history, so this window shows the ` +
+    `pace with 2021 and 2022 left out. Compare it with the full history to see how much of ` +
+    `the pace is the run-up.`
+  );
+}
+
 export function labelFor(w: FitWindow): string {
   switch (w) {
     case "full":
@@ -301,13 +331,32 @@ export function windowRead(w: WindowFit): {
  * and therefore cannot draw its own trajectory between rows of it. (sphere-weekly
  * wrote "the gap is widening" from a single level; that is the failure this stops.)
  *
- * LONG    = ex-boom if present, else full.
+ * LONG    = FULL HISTORY. Everything the series holds, nothing removed.
  * CURRENT = 24m, fixed. 12m's interval establishes almost nothing; 5y is not "now".
  *
  * A window whose CI contains zero has NO READABLE DIRECTION. Its sign is never used.
+ *
+ * ── WHY THE HEADLINE NO LONGER SILENTLY DROPS THE BOOM ──────────────────────
+ *
+ * This preferred `ex-boom` — so the default read on /desk, the one that loaded before a
+ * reader clicked anything, was "Across the full history, EXCLUDING THE 2021–2022 RUN-UP,
+ * this market was climbing $1,794 a month." We removed two years from the arithmetic and
+ * put the result in the hero. The label disclosed WHAT we had done and never once said
+ * WHY, or that the excluded months were still sitting right there on the chart.
+ *
+ * The statistical argument for excluding it is real — a single steep run-up drags a
+ * straight line's slope across the whole history — but it is an ADJUSTMENT, and an
+ * adjustment does not get to be the default just because we can defend it. The number a
+ * reader meets first should be the plain one, computed over everything we hold. Taking the
+ * run-up out is a thing they can CHOOSE, on the window menu, with the reason stated
+ * (`windowNote` below) and the data never leaving the picture.
+ *
+ * `ex-boom` stays the fallback: a series can in principle hold no `full` window, and the
+ * fixtures exercise that path deliberately — its label is the one carrying a comma of its
+ * own, and it is still the hard case for the gate and the grammar wherever it lands.
  */
 export function trendVerdict(fits: readonly WindowFit[]): Verdict | null {
-  const long = fits.find((f) => f.window === "ex-boom") ?? fits.find((f) => f.window === "full");
+  const long = fits.find((f) => f.window === "full") ?? fits.find((f) => f.window === "ex-boom");
   if (!long) return null;
 
   const current = fits.find((f) => f.window === "24m") ?? null;

@@ -1,3 +1,43 @@
+## 2026-07-14 (Opus 4.8 · main) — WE WERE QUIETLY DELETING TWO YEARS FROM THE HEADLINE AND NEVER SAYING WHY
+
+Operator, on seeing the window menu: *"Do we say why it was deleted? Keep it in and explain and let
+people take it out? Everyone will wonder what is going on. Do you explain it???"*
+
+**No, we did not. And it was worse than "we don't explain it": we DEFAULTED to it.** `trendVerdict`
+picked `ex-boom` as the long window whenever the series earned it, so the read that loaded on `/desk`
+before anyone clicked anything was *"Across the full history, **excluding the 2021–2022 run-up**, this
+market was climbing $1,794 a month."* We removed two years from the arithmetic, put the result in the
+hero, disclosed **what** we had done, and never once said **why** — or that the excluded months were
+still sitting right there on the chart.
+
+The statistical argument for excluding it is real (a single steep run-up pulls a straight line's slope
+across the whole history) — but that makes it an **adjustment**, and an adjustment does not get to be the
+default just because we can defend it. The first number a reader meets should be the plain one.
+
+**Three changes:**
+1. **`long` = FULL HISTORY.** Default is now `$1,912 a month` across everything we hold, nothing removed.
+   `ex-boom` stays the fallback (and the phase-1 fixtures still exercise it — they build fits with no
+   `full` window on purpose, because ex-boom's label is the one carrying a comma of its own and is the
+   hard case for the gate and the grammar wherever it lands). All 258 chart tests still green.
+2. **`windowNote()`** — the WHY, in the reader's words, on the surface: *"Those months are still on the
+   chart — only the fitted line skips them. A single steep run-up pulls a straight line's slope across
+   the whole history, so this window shows the pace with 2021 and 2022 left out. Compare it with the full
+   history to see how much of the pace is the run-up."* The reason we give is **statistical, and that is
+   the only reason we may give** — why the run-up *happened* is a causal claim about the world this module
+   has no source for and will not invent. No "pandemic migration", no "rate shock". We say what the
+   arithmetic does; we do not narrate history.
+3. **Killed the jargon.** The button said **"Ex-boom"** — our word, not a reader's, on a control the
+   customer clicks, which rules-of-engagement #5 forbids in user-facing copy. It also told them nothing:
+   someone who doesn't already know what we mean by "the boom" cannot learn it from the word "ex-boom".
+   Now: **"Without the 2021–22 run-up"**.
+
+**The mechanic the operator asked for was already built — we just never told anyone.** The excluded months
+are NEVER removed from the picture: selecting that window still draws every 2021 and 2022 point, and only
+the fitted LINE skips them. Verified live — the run-up spike is visibly on the chart while the fit passes
+straight through it.
+
+---
+
 ## 2026-07-14 (Opus 4.8 · main) — LEE PARCELS HANDOFF, AND THE OTHER RECIPES (5 OF 6, ON PURPOSE)
 
 **My community work already landed inside someone else's push.** `c9a33b06` (the detail-page parser

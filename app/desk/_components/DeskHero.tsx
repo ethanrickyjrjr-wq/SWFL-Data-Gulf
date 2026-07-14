@@ -49,7 +49,11 @@ const WINDOW_LABEL: Record<string, string> = {
   "5y": "5 yr",
   "24m": "2 yr",
   "12m": "1 yr",
-  "ex-boom": "Ex-boom",
+  // NOT "Ex-boom". That is our word, not a reader's — internal jargon on a button the
+  // customer clicks, which the rules of engagement forbid in user-facing copy. It also
+  // told them nothing: a reader who does not already know what we mean by "the boom"
+  // cannot find out from the word "ex-boom".
+  "ex-boom": "Without the 2021–22 run-up",
 };
 
 function WindowButton({
@@ -372,6 +376,16 @@ export function DeskHero({ hero }: { hero: HeroData }) {
                 {read.claim}
               </p>
               <p className="mt-1 text-[12px] leading-5 text-gray-500">{read.falsifier}</p>
+              {/* WHY THIS WINDOW EXISTS. Only the run-up window carries one, and without it
+                  a reader is handed an adjustment they cannot evaluate — "excluding the
+                  2021–2022 run-up" with no reason reads as us hiding something. It also
+                  says the excluded months are STILL ON THE CHART: only the fitted line
+                  skips them, and nothing is ever removed from the picture. */}
+              {picked?.note ? (
+                <p className="mt-2 border-t border-[#22414f]/60 pt-2 text-[11px] leading-5 text-gray-500">
+                  {picked.note}
+                </p>
+              ) : null}
             </div>
           ) : null}
         </div>

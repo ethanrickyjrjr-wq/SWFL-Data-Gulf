@@ -50,7 +50,7 @@
 // the recent line falls, and the turn the copy claims is a thing you can point at.
 
 import type { Fit, FitPoint } from "./fit-line";
-import { windowRead, type FitWindow, type Verdict, type WindowFit } from "./series-fit";
+import { windowNote, windowRead, type FitWindow, type Verdict, type WindowFit } from "./series-fit";
 
 /** A straight line in DATA space. Two points is all a straight line has. */
 export interface FitCurve {
@@ -239,6 +239,12 @@ export interface WindowView {
   window: FitWindow;
   /** The window's own disclosure label. `ex-boom`'s names the exclusion; it travels. */
   label: string;
+  /**
+   * WHY this window exists, when it needs saying. Only `ex-boom` does — and a surface that
+   * offers "excluding the 2021–2022 run-up" without it is handing a reader an adjustment
+   * they cannot evaluate. Render it whenever it is present.
+   */
+  note: string | null;
   /** Line if this window's direction is established, fan if not. Never both, never neither. */
   layer: FitLayer;
   claim: string;
@@ -256,6 +262,7 @@ export function windowViews(fits: readonly WindowFit[]): WindowView[] {
     return {
       window: w.window,
       label: w.label,
+      note: windowNote(w.window),
       layer: layerFor(w),
       claim: read.claim.sentence,
       falsifier: read.falsifier.sentence,
@@ -339,6 +346,7 @@ export function hydrateOverlay(o: SerializedFitOverlay): FitOverlay {
 export interface SerializedWindowView {
   window: FitWindow;
   label: string;
+  note: string | null;
   layer: SerializedFitLayer;
   claim: string;
   falsifier: string;
@@ -355,6 +363,7 @@ export function serializeWindowViews(views: readonly WindowView[]): SerializedWi
     return {
       window: v.window,
       label: v.label,
+      note: v.note,
       layer: outLayer(v.layer),
       claim: v.claim,
       falsifier: v.falsifier,
