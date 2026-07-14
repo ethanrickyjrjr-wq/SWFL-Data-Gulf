@@ -1,3 +1,67 @@
+## 2026-07-14 (Opus 4.8 · main) — LEDGER SWEEP: the checks ledger is NOT stale, it is an unranked backlog. 331 -> 317. Live breakage found buried in it.
+
+Operator asked whether Ansible would help "keep track of everything." It would not — it is agentless IT
+automation (config management / app deployment over SSH), verified in-session against its own README via
+crawl4ai (RULE 0.4). Nothing to do with work tracking. Then: "we just did that yesterday, fan out and get
+it done." Yesterday's ten-cluster fan-out was INVESTIGATE-ONLY (it surfaced the silent-rebuild bug); nothing
+was closed. So this session executed.
+
+**The discriminator that reframed the job.** `storm_history_stale_3county_label` showed OPEN while yesterday's
+log said "check closed" and the label fix + brain rebuild (v22->v23) had genuinely landed. Probed: pack source
+reads "Lee + Collier core", `brains/storm-history-swfl.md:33` reads "SWFL counties (LEE+COLLIER)", zero
+occurrences of "all 3 SWFL counties". The FIX was real; the CLOSE was narrated in prose and never executed
+against `public.checks`. Closed it with evidence. Note the ledger REFUSES a bare close (`--evidence` is
+mandatory) — that guard is why drift accumulates silently rather than producing fake closes.
+
+**Sweep.** 331 open / 67 `*_live_verify` (operator-only by construction) / 265 candidates. 12 agents, ~22
+checks each, READ-ONLY on code (two+ parallel sessions were live-editing `ingest/pipelines/` and
+`lib/deliverable/recipes/` — unsupervised parallel editors in a shared dirty tree is how you destroy
+in-flight work). Each probed the named file/symbol and classified ALREADY_DONE / STILL_REAL /
+OPERATOR_GATED / UNCLEAR, biased hard toward leaving open. Result verified against the live ledger, not the
+agents' word: **331 -> 317, 15 closed.**
+
+**The finding: the ledger is honest.** ~5% stale-close rate. It is not 331 rows of fiction — it is a real
+backlog nobody has ever ranked. Several deferrals carry comments IN CODE that name their own check key.
+Tested and REFUTED my own aged-tail theory: 13 of 14 sweep closes are <=11d old (oldest 28d). Stale closes
+are RECENTLY-COMPLETED work whose close never fired — not an old forgotten cohort. The aged tail is
+genuinely-never-built backlog. A second age-targeted pass would surface ~nothing; that is a ranking decision,
+not a sweep.
+
+**LIVE BREAKAGE the pile was hiding (none of this is stale):**
+- **Locked Lee+Collier scope is VIOLATED on served content.** Code re-scoped 07/07. `brains/env-swfl.md:9`
+  (v24) still says "across the 6 SWFL counties (Lee, Collier, Charlotte, Glades, Hendry, Sarasota)" and
+  serves live Charlotte/Glades/Sarasota facts; `brains/hurricane-tracks-fl.md:36` still emits "SWFL 6-county
+  footprint"; `brains/listing-momentum-swfl.md` (v4) still emits "33935 (Hendry)"/"33440 (Hendry)". CHAINED:
+  a force-rebuild will NOT fix these because forced rebuilds silently no-op green — that is exactly
+  `env_hurricane_forced_rebuild_silent_degrade`. Two checks, one blocker, and neither entry said so.
+- **`data_lake.fema_nfip_claims` is 0 rows** and env-swfl + hurricane-tracks-fl both read it.
+- **Red crons, right now:** daily digest (broke TODAY, run 29347029902, prior 7 green), freshness-probe-daily
+  (4 straight), corridor-pulse-weekly (dead since 07/05), graphify-republish (3 straight), crexi (Cloudflare),
+  brevitas (4 straight 403).
+- **A parked pipeline's cron fires 07/15:** `sba_foia_franchise_outcomes` is `parked: true` in the registry
+  while `franchise-outcomes-quarterly.yml:8` cron is uncommented.
+- **Price-floor contract is WORSENING:** label says 18 offenders; the contract now fails 29 rows, and
+  `listing_state` state='active' holds 40 rows under $10k (min $600).
+- **The staleness guard is inert:** `pack-hash.mts:57` `if (!stamped) return false` — only 5 of 42 brains
+  carry a `pack_hash` stamp, so a pack code change fails to invalidate 37 brains. Heals as each rebuilds.
+
+**Ledger mechanism gaps (why the number never falls):** 67 `*_live_verify` can only be closed by the operator
+and never decay · deliberate tripwires (`row_tier_t1_transitive_invalidation`, `row_tier_t2_tenancy_seam`,
+`odd_scaffold_ready`, `dbpr_sirs_intentionally_disabled_waf_block`) self-describe as permanent watch-markers
+with NO completion state and will pollute the open count forever — they need a `parked` state distinct from
+`open` · duplicates exist (`m2_fences_bounds_of_space` == `phase1_canvas_span_accent_warnings`) · the
+SessionStart banner reported "200 open" against a true 317. The banner itself is stale.
+
+**Opened (RULE 2.4, no silent deferrals):** `active_listings_rail_citations_never_render` (active-listings-swfl
+registers 3 rail citations but is absent from `REGISTRY_PACK_IDS` — they silently never render),
+`capture_method_second_breadth_recheck` (the 2-week recheck `verification/capture-method-comparison.md:126`
+calls for had no owner), `zip_narration_residual_unbaked` (47 of 91 ZIPs baked; 44 still fall back).
+**Reframed:** `source_totals_migration_apply` — the migration IS applied (table + grants live); the real bug
+is that it writes 0 rows. Closing it on its old title would have buried a possible live write bug.
+
+**NOT done:** zero code edits (parallel sessions live in the tree). No fixes applied. Next: the scope
+violation + silent-degrade chain is the only thing actively lying to users — fix that pair first, then the
+red crons, then rank what's left.
 ## 2026-07-14 (Sonnet 5 · main) — 5 doctor-red follow-ups fixed after auditing the baseline handoff doc.
 
 Operator asked me to find issues in `docs/handoff/2026-07-14-doctor-red-baseline-handoff.md` (same-day
