@@ -20,7 +20,9 @@ import {
   TYPE,
   accent,
   compact,
+  contentHeight,
   decor,
+  fits,
   ink,
   type SocialTheme,
   type TypeRole,
@@ -65,13 +67,14 @@ describe("type — one ladder, every format", () => {
     }
   });
 
-  it("landscape is scaled UP, not down (it is the wide format, not the small one)", () => {
-    // The whole point. Landscape is 1200 wide — displayed WIDER than a square, so
-    // its type must be BIGGER, never 42% smaller.
-    expect(widthScale("landscape")).toBeGreaterThan(1);
-    expect(widthScale("square")).toBe(1);
+  it("landscape is NOT shrunk — it gets the same type as a square", () => {
+    // THE min(W,H) BUG, nailed shut. Landscape (1200x630) is the only format where
+    // height < width, so it alone sized off 630 and came out ~42% smaller than every
+    // other format — a label at 18px, roughly 7pt once a phone downscales the feed
+    // image. Every one of these surfaces displays fit-to-WIDTH; height never touches
+    // how big the text looks. Landscape is not the small format. It never was.
     for (const role of ROLES) {
-      expect(typeOf(role, "landscape").fontSize).toBeGreaterThan(typeOf(role, "square").fontSize);
+      expect(typeOf(role, "landscape").fontSize).toBe(typeOf(role, "square").fontSize);
     }
   });
 
@@ -102,6 +105,62 @@ describe("type — one ladder, every format", () => {
     expect(compact("display", 2)).toBe("title");
     expect(compact("label")).toBe("label"); // never below the floor
     expect(TYPE[compact("headline")]).toBeLessThan(TYPE.headline);
+  });
+
+  it("type is NEVER scaled UP into a shorter canvas", () => {
+    // Pure width-scaling would hand landscape a 1.11x uplift — typographically
+    // "correct" (it displays wider) and a trap: it OVERFLOWS landscape's 462px
+    // content box by 106px instead of 55px. ~10% of apparent size is not worth
+    // double the overflow on the tightest canvas we have.
+    for (const f of FORMATS) {
+      expect(widthScale(f), `${f} must not scale type up`).toBeLessThanOrEqual(1);
+    }
+  });
+});
+
+// ── The vertical budget — the thing min(W,H) was silently paying for ─────────
+//
+// Deleting min(W,H) without replacing it would just move the bug. These tests make
+// the landscape constraint EXPLICIT, so Round 2 cannot migrate the templates and be
+// surprised by a stack running off a 630px canvas.
+describe("fit — landscape is short, and the system says so out loud", () => {
+  it("landscape has by far the tightest vertical budget", () => {
+    expect(contentHeight("landscape")).toBe(462);
+    for (const f of FORMATS) {
+      if (f === "landscape") continue;
+      expect(contentHeight(f)).toBeGreaterThan(contentHeight("landscape"));
+    }
+  });
+
+  it("a full headline+body+CTA stack does NOT fit landscape — and DOES fit square", () => {
+    // THE trap this suite exists to catch. It is not a bug in the ladder; a 630px
+    // canvas genuinely cannot carry a 2-line headline at 108px. The template must
+    // compact or drop an element — it must NOT shrink type below the floor, which
+    // is exactly what min(W,H) was doing to buy this room.
+    const full = [
+      { role: "headline" as const, lines: 2 },
+      { role: "body" as const, lines: 2 },
+      { role: "body" as const, lines: 1 }, // the CTA
+    ];
+    expect(fits(full, "landscape")).toBe(false);
+    expect(fits(full, "square")).toBe(true);
+    expect(fits(full, "portrait")).toBe(true);
+  });
+
+  it("compact() is what buys landscape the room — and it is enough", () => {
+    const compacted = [
+      { role: compact("headline"), lines: 2 }, // title
+      { role: "body" as const, lines: 1 },
+      { role: "body" as const, lines: 1 },
+    ];
+    expect(fits(compacted, "landscape")).toBe(true);
+  });
+
+  it("even the biggest role clears the floor on the tightest canvas", () => {
+    // Sanity: compacting is a LAYOUT answer, never a legibility one.
+    expect(typeOf(compact("headline"), "landscape").fontSize).toBeGreaterThanOrEqual(
+      MIN_LEGIBLE_PX,
+    );
   });
 });
 

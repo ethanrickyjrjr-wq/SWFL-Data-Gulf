@@ -30,8 +30,13 @@ CSS. There was nothing to import. So everyone re-typed.
 `tokens.test.ts` (it parses the real CSS and fails on drift). Adding a color? **globals.css FIRST**,
 then `tokens.ts`, then watch the test go green.
 
-**A raw hex under `lib/social/design/**` or `components/email-lab/social/**` is an ESLint error.**
-There is no allowlist and none is expected — in this lane a hand-typed hex is never correct.
+**A raw hex STRING LITERAL under `lib/social/design/**` or `components/email-lab/social/**` is an
+ESLint error.** No allowlist, and none is expected — in this lane a hand-typed hex is never correct.
+
+Scope, honestly: the rule matches `"#rrggbb"` literals, which is what reaches the canvas. It does
+**not** catch a Tailwind arbitrary value (`bg-[#0a141a]` inside a `className`) — that string doesn't
+start with `#`. Composer *chrome* still has a few of those. They never touch rendered post output, so
+they're out of scope for now, not secretly covered.
 
 ## Type: five roles, one ladder — and NEVER `min(W,H)`
 
@@ -43,14 +48,22 @@ Roles, ratio 1.5 from a 32px floor: `display` 162 · `headline` 108 · `title` 7
 `label` 32. Need something smaller? **Step down the ladder with `compact(role)` — do not invent a
 multiplier.** `label` is the floor and the floor is enforced.
 
-**Type scales off WIDTH, not `min(W,H)`.** Every one of these surfaces displays an image *fit to
-width*, so height never touches how big the text looks. `min(W,H)` was a vertical-overflow hack
-wearing a legibility decision's clothes, and it cost landscape (1200×630 — the only format where
-height < width) **~42% of its type size**: a label that rendered 30px on a square rendered 18px on
-landscape, roughly 7pt once a phone downscales the feed image.
+**Type scales off WIDTH, not `min(W,H)` — and is never scaled UP.** Every one of these surfaces
+displays an image *fit to width*, so height never touches how big the text looks. `min(W,H)` was a
+vertical-overflow hack wearing a legibility decision's clothes, and it cost landscape (1200×630 — the
+only format where height < width) **~42% of its type size**: a label that rendered 30px on a square
+rendered 18px on landscape, roughly 7pt once a phone downscales the feed image. **Landscape now gets
+exactly the same px as a square.** (Pure width-scaling would give it a 1.11× uplift — technically
+right, since it displays wider. It also doubles the overflow below. Not worth ~10% of apparent size.)
 
-Landscape's real constraint is its 630px of height. Solve that where it belongs — **drop a role or
-shorten the copy, and let the bounds test fail you.** Never by shrinking type below the floor.
+**Landscape's real constraint is its 630px height, and now you can CHECK it.** Its content box is
+**462px** — the tightest we have by a mile (story's is 1651). A headline+body+CTA stack comes to
+517px: it **does not fit**, and that is a fact about a 630px canvas, not a flaw in the ladder.
+
+    fits([{ role: "headline", lines: 2 }, { role: "body", lines: 2 }], "landscape")  // false
+
+**Compact or drop an element. NEVER shrink the type** — buying vertical room by shrinking type is
+precisely what `min(W,H)` was doing, on every format at once, to solve a problem only landscape had.
 
 ## Color is decided by ROLE, not by theme — so the light theme needs no ternaries
 

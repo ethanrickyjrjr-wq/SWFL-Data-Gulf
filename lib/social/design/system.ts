@@ -209,10 +209,30 @@ export interface TypeStyle {
   fontStyle: string;
 }
 
-/** Width scale for a format. Landscape (1200w) gets 1.11x; the rest are 1.0.
- *  NOT min(W,H) — see the header. */
+/**
+ * The format's type scale. NOT `min(W,H)` — see the header.
+ *
+ * Capped at 1.0: **never scale type UP into a canvas that is SHORTER.** Pure
+ * width-scaling would give landscape (1200w) a 1.11x uplift, which is
+ * typographically "correct" — it is displayed wider, so 1.11x holds apparent size
+ * constant. It is also a trap, and the numbers say so plainly. Landscape's content
+ * box is 462px tall (630 - 2x84 margin), and a headline+body+CTA stack comes to:
+ *
+ *      at 1.11x → 568px  (OVERFLOWS by 106px)
+ *      at 1.00x → 517px  (OVERFLOWS by  55px)
+ *      compacted → 414px / 378px  (FITS)
+ *
+ * So the uplift buys ~10% of apparent size and costs DOUBLE the overflow on the
+ * tightest canvas we have. Not a trade worth making. Landscape gets the same px as
+ * a square and must still compact — which is a real structural fact about a 630px
+ * canvas, not a shortcoming of the ladder. `fits()` below is how a template checks.
+ *
+ * (In practice every current format therefore scales 1.0. The cap is kept as a
+ * function, not deleted, so a future wide-AND-tall format scales correctly and a
+ * future short one can never shrink type below the floor again.)
+ */
 export function widthScale(format: SocialFormat): number {
-  return SOCIAL_FORMATS[format].width / REF_WIDTH;
+  return Math.min(1, SOCIAL_FORMATS[format].width / REF_WIDTH);
 }
 
 /**
@@ -235,6 +255,46 @@ export function type(role: TypeRole, format: SocialFormat): TypeStyle {
 export function compact(role: TypeRole, steps = 1): TypeRole {
   const i = LADDER.indexOf(role);
   return LADDER[Math.max(0, i - steps)];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FIT — the vertical budget, as a number a template can check.
+//
+// The old `min(W,H)` existed to stop a stack overrunning the short landscape strip.
+// Deleting it without replacing it would just move the bug. This is the replacement:
+// the constraint is now EXPLICIT and CHECKABLE, instead of being paid for silently
+// in type size on every format at once.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** The margin templates use (W * 0.07) — matches `dims()` in templates.ts. */
+export function margin(format: SocialFormat): number {
+  return Math.round(SOCIAL_FORMATS[format].width * 0.07);
+}
+
+/** The vertical space a stack actually has, after margins. Landscape's is 462px —
+ *  the tightest budget we have, by a wide margin (story's is 1651). */
+export function contentHeight(format: SocialFormat): number {
+  return SOCIAL_FORMATS[format].height - 2 * margin(format);
+}
+
+/** The height of a stack of roles, where each entry is a role and its line count.
+ *  Gaps use the same `H * 0.03` templates already use. */
+export function stackHeight(
+  items: Array<{ role: TypeRole; lines?: number }>,
+  format: SocialFormat,
+): number {
+  const gap = Math.round(SOCIAL_FORMATS[format].height * 0.03);
+  const h = items.reduce((sum, it) => sum + type(it.role, format).lineHeight * (it.lines ?? 1), 0);
+  return h + gap * Math.max(0, items.length - 1);
+}
+
+/** Does this stack fit the format's content box? A template asking for a role it
+ *  cannot afford should `compact()` or drop an element — NOT shrink the type. */
+export function fits(
+  items: Array<{ role: TypeRole; lines?: number }>,
+  format: SocialFormat,
+): boolean {
+  return stackHeight(items, format) <= contentHeight(format);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

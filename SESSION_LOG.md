@@ -1,3 +1,39 @@
+## 2026-07-14 (Opus 4.8 · main) — LANDSCAPE: THE FIX INVERTED THE BUG, AND NOTHING WAS GUARDING THE NEW ONE
+
+Correction on top of `2b5365bc`, caught in review before Round 2 could inherit it.
+
+Killing `min(W,H)` fixed landscape type being too SMALL (a 0.028 label = 18px, ~7pt on a phone). But
+my `widthScale` then handed landscape a **1.11x uplift** — typographically correct (it displays
+wider) and a trap, because landscape is the SHORT canvas. Computed it instead of arguing about it:
+
+    landscape content box = 462px (630 - 2x84 margin) — the tightest we have; story's is 1651
+    headline(2 lines) + body(2) + CTA  @1.11x = 568px  → OVERFLOWS by 106px
+                                       @1.00x = 517px  → OVERFLOWS by  55px
+                                       compacted      = 414px  → FITS
+
+So the uplift bought ~10% of apparent size and cost DOUBLE the overflow. Dropped it: `widthScale` is
+now capped at 1.0 — **never scale type UP into a shorter canvas.** Landscape gets the same px as a
+square, which still kills the 42% shrink.
+
+**The deeper miss: my own claim was vacuous.** `system.ts` said "the bounds test fails a stack that
+does not fit" — but `type()` has ZERO consumers today (templates still run `base*multiplier`), and
+every bounds test in the repo exercises the OLD sizing. Round 2 could have migrated, watched the old
+tests stay green, and shipped landscape posts running off the canvas. Fixed by making the constraint
+a real primitive, not a comment: `contentHeight()` / `stackHeight()` / `fits()`, plus tests that
+assert a full stack does NOT fit landscape and DOES fit square. The check
+`social_templates_migrate_to_type_system` now names the INVERTED risk and makes a landscape bounds
+test its definition-of-done — the old text framed landscape as "too small," which is the bug we just
+fixed, not the one it's about to have.
+
+Two more holes closed: the drift test was **one-directional** (TS→CSS), so adding a var to
+`globals.css` and forgetting `tokens.ts` stayed green — while `lib/social/CLAUDE.md` tells people to
+add it to globals.css FIRST. That instruction is now actually enforced. And the ESLint fence does NOT
+catch Tailwind's `bg-[#0a141a]` form (the literal doesn't start with `#`); CLAUDE.md said "a raw hex
+is an ESLint error" — overclaim, now scoped honestly to string literals, which is what reaches the
+canvas.
+
+**Verified:** 739 tests green, `bunx next build` clean, ESLint clean.
+
 ## 2026-07-14 (Opus 4.8 · main) — THE SOCIAL DESIGN ROOT: WE HAVE BEEN SHIPPING THE WRONG BRAND TEAL
 
 **Every unbranded social post we have ever rendered shipped in a teal that is not our teal.** The

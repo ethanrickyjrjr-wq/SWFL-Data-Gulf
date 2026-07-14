@@ -51,6 +51,33 @@ describe("BRAND mirrors app/globals.css", () => {
     expect(cssValue).toBe(BRAND[token].toLowerCase());
   });
 
+  it("every PALETTE var in globals.css has a BRAND token (drift, the other way)", () => {
+    // The test above walks TS→CSS, so adding a color to globals.css and forgetting
+    // tokens.ts would stay GREEN — and lib/social/CLAUDE.md tells people to add it
+    // to globals.css FIRST. That instruction is only true if this direction is
+    // checked too.
+    //
+    // Scope: the palette groups only. globals.css also holds SEMANTIC aliases
+    // (--brand-primary: var(--gulf-teal)) and rgba tints, which are compositions of
+    // tokens, not tokens — they resolve through the cascade and no canvas needs them.
+    const PALETTE_PREFIXES = [
+      "--gulf-",
+      "--text-",
+      "--mangrove",
+      "--sunset-",
+      "--coral-",
+      "--neutral-",
+    ];
+    const mapped = new Set(Object.values(CSS_VAR_BY_TOKEN));
+    const missing = [...vars.keys()].filter(
+      (v) => PALETTE_PREFIXES.some((p) => v.startsWith(p)) && !mapped.has(v),
+    );
+    expect(
+      missing,
+      `these palette vars exist in globals.css with no BRAND token — add them to lib/brand/tokens.ts: ${missing.join(", ")}`,
+    ).toEqual([]);
+  });
+
   it("every BRAND value is lowercase (so one grep finds every use)", () => {
     for (const [k, v] of Object.entries(BRAND)) {
       expect(v, `BRAND.${k} must be lowercase hex`).toBe(v.toLowerCase());
