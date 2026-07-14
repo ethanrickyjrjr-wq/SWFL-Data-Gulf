@@ -58,6 +58,27 @@ sittings total, then verdict and close. Check: `capture_method_quality_compare`.
 
 ## Results
 
+### CORRECTION 07/14/2026 (read before trusting the CORRIDOR half of sitting 1 below)
+
+The corridor retrofit commit (`f4cad5ec`) landed 07/07/2026 10:43 ET. Sitting 1 below used
+07/05/2026 as the "new" corridor run — that's BEFORE the cutover, still the old web_search method.
+Verified live: `pg.data_lake.city_pulse_corridors` has **zero rows** captured after the retrofit
+landed — corridor hasn't run on the new method even once yet (weekly cadence, next run pending).
+So the corridor "source concentration" finding below compared two OLD-method runs (06/14 vs 07/05)
+against each other, not old vs. new. The CITY half is unaffected (07/05 old / 07/08–07/14 new
+straddles the same 07/07 cutover correctly).
+
+What this changes: the diagnosis is still right, but the evidence for corridor specifically is
+stronger than sitting 1 gives it credit for, not weaker. Corridor's `city_pulse_corridors`
+pipeline reads from the exact same `data_lake.news_articles_swfl` lake as city (confirmed live:
+`news_articles_swfl`'s only source_name values are `fort_myers_news_press`, `naples_daily_news`,
+`lee_county_govt`, `collier_county_govt` — the same 4 entries in `news_swfl/fetcher.py`'s
+`SOURCES`). Corridor's rich 07/05 source mix (`gulfshorebusiness.com`, `businessobserverfl.com`,
+`colliers.com`, etc.) came entirely from the old web_search method. Corridor's FIRST live run on
+the new pipeline — whenever the weekly cron next fires — will draw from the same narrow 4-source
+lake city already shows, and will very likely collapse to the same concentration, or worse (corridor
+had 6 diverse sources historically vs. city's 2). Fix this BEFORE that first live run, not after.
+
 ### Sitting 1 — 07/14/2026
 
 **Method note (read before trusting the verdict below):** the rubric's missed-story/new-only
