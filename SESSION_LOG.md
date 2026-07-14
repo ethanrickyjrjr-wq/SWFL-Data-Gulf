@@ -1,3 +1,15 @@
+## 2026-07-14 (Sonnet 5 · main) — Handoff: wiring today's community/parcel data into the builder + AI commentary
+
+Docs-only follow-up to the Lee-parcels build below. Wrote
+`docs/handoff/2026-07-14-community-data-into-builder-handoff.md` tracing the path from the
+data landed today to the operator's ask (every email + AI commentary, pre-fill community
+context). Key finding: `communities-swfl` is already wired into `master` and just needs a
+rebuild, but its `detail_tables` lookup reads `community_profiles` (still 0 rows), not
+`neighborhood_stats` (now full) — so the ~30,800 non-marketed communities have no queryable
+lookup surface yet even post-rebuild. Four injection points identified (ListingFacts,
+universal recipe line, AUTHOR engine MENU, builder UI option), address→community join and
+lookup-path decision called out as the two real blockers, in order. No code changed.
+
 ## 2026-07-14 (Sonnet 5 · main) — LEE PARCELS LANDED: 383,487 rows, "broken partition" was stale, wrong NAL lane skipped entirely
 
 Executed the handoff (`docs/superpowers/plans/2026-07-14-lee-parcels-handoff.md`) but not via its own
