@@ -1,3 +1,11 @@
+## 2026-07-14 (Sonnet 5 · main) — ZIP FOOTER: OPERATOR WANTED ALL THREE CITIES, ALWAYS.
+
+Quick follow-up to the entry below: the ZIP-coverage footer conditionally showed only the active
+city's ZIPs on a single-city tab, all three only on the rebase tab. Operator wanted all three
+always. `DeskHero.tsx` now maps `hero.cities` unconditionally instead of branching on `active`.
+Verified: rebuilt, served on a throwaway port, fingerprinted the SSR'd HTML for all three cities'
+ZIP lists, screenshotted on the Cape Coral tab showing Fort Myers/Naples ZIPs too.
+
 ## 2026-07-14 (Sonnet 5 · main) — TOOLTIP DOT DIDN'T RESPECT discreteInteraction; ZIP FOOTER ADDED.
 
 Operator flagged the desk hero's hover dot floating off the price line. Reproduced live via DOM

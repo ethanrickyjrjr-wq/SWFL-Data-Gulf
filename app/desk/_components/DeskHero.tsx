@@ -432,11 +432,9 @@ export function DeskHero({ hero }: { hero: HeroData }) {
         {tab === "rebased" ? (hero.rebase?.windowNote ?? hero.windowNote) : hero.windowNote}
       </p>
       <p className="mt-1 text-[11px] text-gray-600">
-        {active
-          ? `${active.label} (city limits, not the wider mailing area): ZIPs ${CITY_ZIP_COVERAGE[active.key] ?? "n/a"} — city-data.com`
-          : `City limits, not the wider mailing area — ${rebaseCities
-              .map((c) => `${c.label} ${CITY_ZIP_COVERAGE[c.key] ?? "n/a"}`)
-              .join(" · ")} — city-data.com`}
+        City limits, not the wider mailing area —{" "}
+        {hero.cities.map((c) => `${c.label} ${CITY_ZIP_COVERAGE[c.key] ?? "n/a"}`).join(" · ")} —
+        city-data.com
       </p>
     </div>
   );
