@@ -37,6 +37,7 @@
 // unifying RHYTHM, not appearance. Templates stay as different as they are today;
 // they just stop each inventing their own type scale.
 import type { CSSProperties } from "react";
+import { WEIGHT as SHARED_WEIGHT, type TypeStep } from "@/lib/brand/weight";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPE — the scale. 05-color-and-type.md §"Scale (rem, 16px base)", ×16 to px
@@ -59,17 +60,18 @@ const LADDER: TypeRole[] = ["mono", "caption", "body", "h2", "metric", "h1", "he
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WEIGHT — §"Stack": "Weight 600 for hero, 500 for section headers" · "Weight 400
-// for body, 500 for emphasis" · mono "Weight 500".
+// for body, 500 for emphasis" · mono "Weight 500". The four values shared with
+// social live in `lib/brand/weight.ts` (docs/superpowers/handoffs/2026-07-14-
+// social-design-root-handoff.md — "extract WEIGHT, not the px or the role
+// names"); `mono` has no social equivalent (a canvas has no monospace role), so
+// it stays local.
 //
 // NOTE: the doc does not state a weight for the card/metric LABEL. It is not body
 // prose — it is an emphasised micro-heading — so it takes the doc's `emphasis`
 // weight (500). That is a real weight from the document, not a new one.
 // ─────────────────────────────────────────────────────────────────────────────
 export const WEIGHT = {
-  display: 600,
-  sectionHeader: 500,
-  body: 400,
-  emphasis: 500,
+  ...SHARED_WEIGHT,
   mono: 500,
 } as const;
 
@@ -165,10 +167,15 @@ export interface TextOpts {
 
 /** The type step for a role, complete and self-consistent. Spread it into `style`. */
 export function text(role: TypeRole, opts: TextOpts = {}): CSSProperties {
-  const style: CSSProperties = {
-    fontSize: `${TYPE[role]}px`,
-    lineHeight: String(leadingFor(role)),
+  const step: TypeStep = {
+    fontSize: TYPE[role],
+    lineHeight: leadingFor(role), // unitless ratio, e.g. 1.55 — email's own unit
     fontWeight: opts.weight ?? weightFor(role),
+  };
+  const style: CSSProperties = {
+    fontSize: `${step.fontSize}px`,
+    lineHeight: String(step.lineHeight),
+    fontWeight: step.fontWeight,
   };
   if (isDisplay(role)) style.letterSpacing = TRACK.display;
   if (opts.numeric) Object.assign(style, NUMERIC);

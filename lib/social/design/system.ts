@@ -59,8 +59,11 @@
 //    floor) and ILLEGAL as a label (3.46 < 4.5). One number, two verdicts, decided
 //    by role. Nobody has to remember that; the table does.
 import { BRAND } from "@/lib/brand/tokens";
+import { WEIGHT, type TypeStep } from "@/lib/brand/weight";
 import { legibleInk } from "@/lib/email/blocks/on-dark";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
+
+export { WEIGHT };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THEME
@@ -149,15 +152,10 @@ export type TypeRole = keyof typeof TYPE;
 /** Smallest → largest. Order is load-bearing (`compact()` walks DOWN it). */
 const LADDER: TypeRole[] = ["label", "body", "title", "headline", "display"];
 
-/** WEIGHT — the same three-step ladder as email (app/_design/05-color-and-type.md:
- *  "Weight 600 for hero, 500 for section headers", "400 for body, 500 for emphasis").
- *  Shared VALUES, local mapping: a social canvas has no <h2>, it has roles. */
-export const WEIGHT = {
-  display: 600,
-  sectionHeader: 500,
-  body: 400,
-  emphasis: 500,
-} as const;
+// WEIGHT — the same three-step ladder as email (app/_design/05-color-and-type.md:
+// "Weight 600 for hero, 500 for section headers", "400 for body, 500 for emphasis").
+// Shared VALUES (`lib/brand/weight.ts`), local mapping: a social canvas has no <h2>,
+// it has roles. Re-exported above so a consumer of this module still finds it here.
 
 /** LEADING — tight on display type (a 162px headline at 1.5 leading would eat the
  *  canvas), open on body. Mirrors email's split at the same boundary. */
@@ -200,7 +198,9 @@ export const CONTRAST_FLOOR: Record<TypeRole, number> = {
   label: 4.5,
 };
 
-export interface TypeStyle {
+/** The composite shape (`lib/brand/weight.ts`) plus the one field a canvas needs
+ *  that CSS doesn't: a Konva `fontStyle` string. */
+export interface TypeStyle extends TypeStep {
   /** Scaled to the format's width. Always >= MIN_LEGIBLE_PX. */
   fontSize: number;
   /** Absolute px. Never absent — an unset leading is how email's stats got clipped. */

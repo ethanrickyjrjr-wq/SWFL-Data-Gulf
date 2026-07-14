@@ -15,14 +15,16 @@
 import { barChartSvg, trendChartSvg, svgToPng, type TrendPoint } from "@/lib/email/chart-image";
 import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
+import { BRAND } from "@/lib/brand/tokens";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
 
 const W = 1200;
 const H = 630;
 const M = 56; // outer margin
-// Verbatim --gulf-teal (app/globals.css:14). SVG can't resolve CSS vars.
-const TEAL = "#3DC9C0";
-const NAVY = "#0A1419";
+const TEAL = BRAND.teal;
+const NAVY = BRAND.midnight;
+// No brand grey ramp exists yet (check `brand_has_no_grey_scale`) — stays a private
+// hex until one lands; adding one here would be a fourth invented grey, not a fix.
 const GREY = "#6B7280";
 
 // Mirror of the (unexported) ChartValueFormat→ValueFormat map in
