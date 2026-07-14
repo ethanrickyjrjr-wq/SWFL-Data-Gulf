@@ -33,12 +33,14 @@
 //
 // Every one of these surfaces displays an image FIT TO WIDTH. Height never touches
 // how big the text looks. On-screen size = fontSize x (displayWidth / canvasWidth),
-// so to hold apparent size constant, type must track WIDTH. It does now.
+// so type tracks WIDTH — and is CAPPED at 1.0, because scaling type UP into a
+// canvas that is SHORTER just inverts the bug. Landscape gets a square's px.
+// (`widthScale` carries the arithmetic that settled it.)
 //
-// Landscape's real constraint — 630px of height — is solved where it belongs: the
-// bounds test fails a stack that does not fit, and the template drops a role or
-// shortens its copy. It is NOT solved by shrinking type below the legibility floor,
-// which is what min(W,H) was quietly doing.
+// Landscape's real constraint — 630px of height, a 462px content box — is solved
+// where it belongs: `fits()` says no, and the template `compact()`s a role or drops
+// an element. It is NOT solved by shrinking type below the legibility floor on every
+// format at once, which is what min(W,H) was quietly doing to buy landscape room.
 //
 // ── THE TWO RULES THAT KILL THE BUG CLASS BY CONSTRUCTION ────────────────────
 //
@@ -121,7 +123,8 @@ export const THEMES: Record<SocialTheme, ThemeSurfaces> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** The canvas width the px below are authored against. Three of four formats ARE
- *  1080 wide; landscape (1200) scales up by 1.11. */
+ *  1080 wide, and landscape (1200) is capped at 1.0 rather than scaled up — see
+ *  `widthScale`. So in practice every current format renders these px verbatim. */
 export const REF_WIDTH = 1080;
 
 /** The smallest type that survives a feed downscale, at REF_WIDTH. Asserted by
