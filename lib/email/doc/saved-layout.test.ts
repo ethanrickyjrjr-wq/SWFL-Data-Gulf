@@ -231,6 +231,44 @@ describe("roles, not ids", () => {
     expect((out.blocks[0].props as Record<string, unknown>).ribbon).toBe(true);
   });
 
+  // THE COLLISION. Positional ordinals alone are not enough: the lifecycle grid has TWO
+  // hero blocks — hero#0 is the ribbon ("New Listing"), hero#1 is the price/address —
+  // and both are body-zone, so dragging the price above the ribbon is a legal edit. With
+  // naive ordinals the saved price hero matches the fresh RIBBON and the price vanishes
+  // into a kicker. Not a leak (the leak test stays green), which is exactly why it needed
+  // its own test: it silently scrambles the thing "every grid the same way" promises.
+  it("reordering two same-type blocks does NOT swap their content", () => {
+    const layout = doc([
+      blk("s1", "hero", { value: "$1", sub: "123 Old St" }), // price hero, moved FIRST
+      blk("s2", "hero", { kicker: "New Listing", ribbon: true }), // ribbon, now SECOND
+    ]);
+    const fresh = doc([
+      blk("f1", "hero", { kicker: "New Listing", ribbon: true }),
+      blk("f2", "hero", { value: "$595,000", sub: "12345 New Ave" }),
+    ]);
+    const out = applySavedLayout(fresh, layout);
+    const first = out.blocks[0].props as Record<string, unknown>;
+    const second = out.blocks[1].props as Record<string, unknown>;
+    expect(first.value).toBe("$595,000"); // the price hero is still the price hero
+    expect(first.sub).toBe("12345 New Ave");
+    expect(second.ribbon).toBe(true); // the ribbon is still the ribbon
+    expect(second.kicker).toBe("New Listing");
+  });
+
+  it("a photo and a chart image are never confused for each other", () => {
+    const layout = doc([
+      blk("s1", "image", { kind: "chart" }), // they put the chart ABOVE the photo
+      blk("s2", "image", { kind: "photo", ratio: "16:9" }),
+    ]);
+    const fresh = doc([
+      blk("f1", "image", { kind: "photo", url: "house.jpg" }),
+      blk("f2", "image", { kind: "chart", url: "chart.svg" }),
+    ]);
+    const out = applySavedLayout(fresh, layout);
+    expect((out.blocks[0].props as Record<string, unknown>).url).toBe("chart.svg");
+    expect((out.blocks[1].props as Record<string, unknown>).url).toBe("house.jpg");
+  });
+
   it("blocksByRole indexes by type + ordinal", () => {
     expect([...blocksByRole(FRESH_BUILD).keys()]).toContain("hero#0");
     expect([...blocksByRole(POISONED_LAYOUT).keys()]).toContain("text#1");

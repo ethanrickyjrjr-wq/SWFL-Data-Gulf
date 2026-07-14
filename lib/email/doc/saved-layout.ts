@@ -110,6 +110,82 @@ const BRAND_BLOCK_TYPES: ReadonlySet<string> = new Set([
   "social-icons",
 ]);
 
+/**
+ * THE DISCRIMINATOR — what tells two blocks of the SAME TYPE apart.
+ *
+ * Type + position is not enough, and the lifecycle grid is the proof: it carries TWO
+ * `hero` blocks — the ribbon ("New Listing") and the price/address — and TWO `image`
+ * blocks — the house photo and the chart. All are body-zone, and fences are soft for
+ * the user, so dragging the price hero above the ribbon is a legal edit. On position
+ * alone, the saved price hero then matches the fresh RIBBON: the price is poured into
+ * a kicker slot and vanishes. No data leaks (it is all the new listing's), which is
+ * exactly why it is dangerous — it silently scrambles the one thing this feature
+ * promises. Caught in review, 07/14/2026.
+ *
+ * These props are what the block IS, not what it says. A type with no entry has no
+ * same-type sibling worth distinguishing, so it falls through to position — which is
+ * byte-identical to the old behavior.
+ */
+const DISCRIMINATORS: Record<string, readonly string[]> = {
+  hero: ["ribbon"],
+  image: ["kind"],
+};
+
+/** A block's role-within-its-type ("ribbon=true", "kind=photo"), or "" if its type has
+ *  no siblings to tell apart. */
+function discriminator(block: EmailBlock): string {
+  const keys = DISCRIMINATORS[block.type];
+  if (!keys) return "";
+  const props = block.props as Record<string, unknown>;
+  return keys.map((k) => `${k}=${String(props[k] ?? "")}`).join("|");
+}
+
+/**
+ * Pair each SAVED block with its counterpart in the FRESH build. Two passes, so the
+ * strong signal wins before position is consulted:
+ *
+ *   1. DISCRIMINATOR — a saved ribbon hero takes the fresh ribbon hero, wherever either
+ *      sits. This is what survives a reorder.
+ *   2. POSITION — whatever is left over, in order (a type with no discriminator, e.g.
+ *      three `text` blocks, matches exactly as it always did).
+ *
+ * Each fresh block is consumed once, so two saved blocks can never claim the same one.
+ * Returns: saved-block index → its fresh counterpart. Absent = a block the user ADDED.
+ */
+function matchCounterparts(fresh: EmailDoc, layout: EmailDoc): Map<number, EmailBlock> {
+  const byType = new Map<string, EmailBlock[]>();
+  for (const b of fresh.blocks) {
+    const pool = byType.get(b.type) ?? [];
+    pool.push(b);
+    byType.set(b.type, pool);
+  }
+
+  const consumed = new Set<EmailBlock>();
+  const matched = new Map<number, EmailBlock>();
+
+  layout.blocks.forEach((saved, i) => {
+    const sig = discriminator(saved);
+    const hit = (byType.get(saved.type) ?? []).find(
+      (f) => !consumed.has(f) && discriminator(f) === sig,
+    );
+    if (hit) {
+      consumed.add(hit);
+      matched.set(i, hit);
+    }
+  });
+
+  layout.blocks.forEach((saved, i) => {
+    if (matched.has(i)) return;
+    const hit = (byType.get(saved.type) ?? []).find((f) => !consumed.has(f));
+    if (hit) {
+      consumed.add(hit);
+      matched.set(i, hit);
+    }
+  });
+
+  return matched;
+}
+
 /** A block's stable identity across builds: type + ordinal among its own type. */
 export function roleKey(type: string, ordinal: number): string {
   return `${type}#${ordinal}`;
@@ -210,8 +286,9 @@ export function stripToLayout(doc: EmailDoc): EmailDoc {
  * photo, sourced cells, authored commentary, chart policy honored. `layout` is the
  * user's saved shape. Returns the fresh build wearing the user's grid.
  *
- * Per block in the SAVED order:
- *   • a fresh counterpart exists (same role) → the user's shape + the FRESH content.
+ * Per block in the SAVED order (counterparts paired by `matchCounterparts` — by what
+ * the block IS, then by position, so a reorder can't swap two same-type blocks):
+ *   • a fresh counterpart exists → the user's shape + the FRESH content.
  *     This is the 90% case: they reordered, resized, restyled, recolored.
  *   • no counterpart (a block the user ADDED) → their block, content cleared. An
  *     OPEN SLOT — the canvas affordance for "unsourced", never a zero, never the
@@ -225,13 +302,10 @@ export function stripToLayout(doc: EmailDoc): EmailDoc {
  * Pure. No I/O, no model call, invents nothing.
  */
 export function applySavedLayout(fresh: EmailDoc, layout: EmailDoc): EmailDoc {
-  const freshByRole = blocksByRole(fresh);
-  const seen = new Map<string, number>();
+  const counterparts = matchCounterparts(fresh, layout);
 
-  const blocks = layout.blocks.map((saved) => {
-    const n = seen.get(saved.type) ?? 0;
-    seen.set(saved.type, n + 1);
-    const counterpart = freshByRole.get(roleKey(saved.type, n));
+  const blocks = layout.blocks.map((saved, i) => {
+    const counterpart = counterparts.get(i);
 
     // Brand chrome carries whole — and prefers the FRESH copy when one exists,
     // because the builder lifted that from the live canvas (their brand as it is
