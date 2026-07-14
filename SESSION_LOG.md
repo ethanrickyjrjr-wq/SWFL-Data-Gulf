@@ -43,6 +43,38 @@ reliably-complete stations. 15 new tests.
 operator's hands-on go-ahead to re-provision the `swfl-local` self-hosted runner before crexi comes back;
 watch noaa_ghcn_rainfall's next scheduled run (08/05) for the new floor + coverage log.
 
+## 2026-07-14 (Opus 4.8 · main) — COLLIER DEED-FEED HANDOFF: killed the "just wire realtor.com" plan with a Lee calibration.
+
+Brainstormed (RULE 3.5) the Collier current-sold problem left open by the sold-median fix below, with a
+crawl4ai research pass (RULE 0.4). Handoff: `docs/handoff/2026-07-14-collier-deed-feed-handoff.md`.
+
+**The finding that changed the design.** The obvious plan was to wire the already-ingested
+`data_lake.market_details_swfl` (realtor.com per-ZIP median_sold_price, current, both counties). I
+calibrated it against recorded deeds in **Lee** — the one county where we hold BOTH methods — and it
+fails: 13/34 ZIPs agree within 7%, but **9/34 are off by >25%**, worst being **33972 at $30,000 vs
+deeds' $345,000 (-91%)**. Cause: the vendor exposes property type as a SEARCH FILTER, never as an
+output field, so `median_sold_price` is an all-types median **with vacant land in it** — the same $35k
+land-blend our homes-only views exist to prevent. The failure tracks thin/coastal/land-heavy ZIPs =
+exactly Collier's character, where we'd have NO deed truth to catch it. A ZHVI plausibility band
+(55-160%) catches the catastrophic cases — incl. a Collier one we'd have shipped blind (**34138, sold
+at 41% of its value index**) — but not the ±25-50% mid-range. Rejected.
+
+**Operator decision: go straight for the deed feed, ship no interim figure.** A correct county number
+beats a wrong ZIP number.
+
+**Why Collier is stuck:** Lee reads the appraiser's OWN live GIS server (`gissvr.leepa.org` Layer 10 =
+last qualified sale, ~6wk lag). Collier reads the FDOR statewide NAL = the ANNUAL tax roll (confirmed
+on floridarevenue.com: assessed Jan 1, submitted mid-year) — zero 2026 sales, max June 2025. Structural,
+not a bug. `collier_parcels/constants.py` calls FDOR "the auto-ingestable equivalent of Lee's LeePA
+feed" — true on coverage, FALSE on freshness, and that line seeded the confusion.
+
+**Leads handed off (probed live):** `maps.collierappraiser.com` resolves (404 on the ArcGIS path — host
+exists, path differs) · `gis.colliercountyfl.gov` 503 · `collierappraiser.com/downloads/` 200 but a
+"Page Unavailable" splash · Clerk of Courts official records (302/301) as the heavier fallback. Every
+CCPA surface is a JS app, so crawl4ai returns empty and URL-guessing is a dead end — the handoff says to
+drive it with Claude-in-Chrome and read the XHR the property search fires. Validation method is written
+down too: Lee is now the calibration county, and Redfin's Collier COUNTY median is the roll-up check.
+
 ## 2026-07-14 (Opus 4.8 · main) — SOLD-MEDIAN STALE-BLEND FIX: both sold views were publishing a 2.5-year stock median, ~6.6% high in a falling market.
 
 Operator asked to verify `docs/handoff/2026-07-14-zip-sold-price-third-reference-handoff.md` ("are we
