@@ -103,8 +103,7 @@ jobs:
         # the 3-new/3-cuts/11-departure "partial scan" day surfaced on /desk. Fail loud instead.
         run: playwright install chromium --with-deps
 
-      - name: crawl4ai preflight (advisory)
-        continue-on-error: true
+      - name: crawl4ai preflight
         run: crawl4ai-doctor
 
       - name: Resolve county

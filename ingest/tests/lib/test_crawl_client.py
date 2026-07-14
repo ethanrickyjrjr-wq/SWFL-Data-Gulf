@@ -14,6 +14,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+pytest.importorskip("crawl4ai")  # this module needs the pinned crawl4ai venv, not system Python
+
 import ingest.lib.crawl_client as mod
 from ingest.lib.crawl_client import (
     Crawl4aiError,

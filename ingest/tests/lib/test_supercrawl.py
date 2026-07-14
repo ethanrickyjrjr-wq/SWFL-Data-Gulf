@@ -4,6 +4,10 @@ Pure-unit tests need no browser/network. Browser tests use raw:// HTML (no netwo
 local headless Chromium — they mirror ingest/tests/lib/test_crawl4ai_client.py. The prove-it
 battle-test lives in ingest/lib/supercrawl4ai_bench.py.
 """
+import pytest
+
+pytest.importorskip("crawl4ai")  # this module needs the pinned crawl4ai venv, not system Python
+
 from ingest.lib.supercrawl import (
     SuperConfig,
     SuperResult,

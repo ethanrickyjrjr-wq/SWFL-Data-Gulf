@@ -82,8 +82,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r ingest/requirements.txt
 
-      - name: crawl4ai preflight (advisory)
-        continue-on-error: true
+      - name: crawl4ai preflight
         run: crawl4ai-doctor
 
       - name: Resolve county

@@ -14,6 +14,8 @@ import json
 
 import pytest
 
+pytest.importorskip("crawl4ai")  # this module needs the pinned crawl4ai venv, not system Python
+
 from ingest.lib import extract_client
 from ingest.lib.crawl_client import Crawl4aiError
 from ingest.lib.firecrawl_client import FirecrawlError

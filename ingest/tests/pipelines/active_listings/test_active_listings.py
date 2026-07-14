@@ -1,6 +1,10 @@
 """Deterministic tests for the active listings normalizer + card parser (no network)."""
 from __future__ import annotations
 
+import pytest
+
+pytest.importorskip("crawl4ai")  # extract.py needs the pinned crawl4ai venv, not system Python
+
 from ingest.pipelines.active_listings.distill import normalize
 from ingest.pipelines.active_listings.extract import _parse_cards
 

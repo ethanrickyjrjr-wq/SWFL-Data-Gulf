@@ -5,6 +5,10 @@ Accela-specific date-search / pagination / wait-predicate JS the lee_permits pip
 via Crawl4aiSession.step(). They belong with the pipeline, not the generic crawl4ai client.
 Pure string assertions — no browser, no network.
 """
+import pytest
+
+pytest.importorskip("crawl4ai")  # this module needs the pinned crawl4ai venv, not system Python
+
 from ingest.pipelines.lee_permits.scraper import (
     GRID_OR_TERMINAL_WAIT,
     _committed_date,

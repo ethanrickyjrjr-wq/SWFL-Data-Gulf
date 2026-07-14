@@ -58,4 +58,50 @@ sittings total, then verdict and close. Check: `capture_method_quality_compare`.
 
 ## Results
 
-(appended per run — nothing yet; retrofit not landed as of 07/05/2026)
+### Sitting 1 — 07/14/2026
+
+**Method note (read before trusting the verdict below):** the rubric's missed-story/new-only
+diagnosis assumes both methods can run over the SAME calendar window. That's no longer possible —
+the old web_search method was retired wholesale when the retrofit landed, so there is no live old
+run to diff against a live new run for the same day. What follows is a volume + source-breadth
+comparison (old baseline run vs. new method's recent runs), which is a weaker signal than the
+rubric intended but is real, queried data, not vibes. Story-level miss/new-only diagnosis cannot
+be honestly run anymore; do not force a PARITY/BETTER/WORSE score from it.
+
+**CITY — old (07/05/2026 single run) vs. new (07/08–07/14/2026, 7 days aggregated), 3 cities:**
+
+- Cape Coral: old 3 facts / 2 source domains (1 run) vs. new 9 facts / 2 source domains (7 days).
+- Marco Island: old 3 facts / 1 domain vs. new 5 facts / 2 domains.
+- Naples: old 3 facts / 1 domain (`gulfshorebusiness.com`) vs. new 51 facts / 2 domains
+  (`naplesnews.com`, `news-press.com` — both Gannett/USA Today Network SWFL papers, effectively one
+  newsroom family).
+
+**CORRIDOR — old (06/14/2026) vs. new (07/05/2026):**
+
+- Old: 8 facts across 6 distinct domains (`mhsappraisal.com`, `capecoral.gov`, `linkedin.com`,
+  `naiburnsscalo.com`, `gulfshorebusiness.com`, `bizjournals.com`) — no single source over 25%.
+- New: 86 facts across 5 domains, but `gulfshorebusiness.com` alone supplies 57 of 86 (66%);
+  `businessobserverfl.com` 15, `leegov.com` 11, `colliercountyfl.gov` 2, `colliers.com` 1.
+
+**Fact count: NEW wins clearly, by a wide margin, at both grains.**
+
+**Source breadth: this is where it's not a clean win.** Both grains show the same shape — far more
+facts, but concentrated in 1–2 dominant sources rather than spread across the mix the old method
+drew from. Root-caused, not guessed: `ingest/pipelines/news_swfl/fetcher.py`'s `SOURCES` list —
+the outlet list both city_pulse and city_pulse_corridors match against — has exactly **4** entries:
+`naplesnews.com`, `news-press.com`, `leegov.com`, `colliercountyfl.gov`. `gulfshorebusiness.com`,
+`businessobserverfl.com`, `colliers.com`, `bizjournals.com`, `mhsappraisal.com`, `naiburnsscalo.com`
+— every non-Gannett, non-government source that shows up in the new-method rows above — are NOT in
+that list, meaning corridor's wider domain mix comes from a different discovery path than city's
+fixed 4-URL section scrape (not traced further here — out of scope for this comparison). For city
+specifically, Gulfshore Business (a real outlet the OLD method cited for Naples) is now absent
+entirely — not because it stopped covering Naples, but because city_pulse never looks at it.
+
+**Verdict: BETTER on volume, an OUTLET GAP on breadth (rubric category (a), not a matcher problem).**
+The fix named in the rubric applies directly: add the missing outlets to `SOURCES` (Gulfshore
+Business is the highest-value addition — it already proved itself relevant in both the old baseline
+and the new corridor capture, just not the city one). Tracked: `news_swfl_outlet_list_narrow`.
+
+Second sitting (~2 weeks out, per the original scale) should re-check source breadth after that fix
+lands, not before — re-running the same query against an unchanged 4-source list would just repeat
+this finding.
