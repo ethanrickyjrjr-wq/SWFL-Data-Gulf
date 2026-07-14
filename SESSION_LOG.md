@@ -1,3 +1,21 @@
+## 2026-07-14 (Opus 4.8 · main) — TREND FIT PHASE 2 HANDOFF, AND TWO CHECKS THAT WERE ALREADY FIXED
+
+**No, there is no trend chart on /desk.** `/desk` has had a Home Price Trend panel for a while (`app/desk/page.tsx:181`, zone `desk-hero`, fed by ZHVI `home_value_zhvi_regional_median`) — it draws the series and **no fitted line, no slope, no trend read**. `trendVerdict` still has **zero production consumers**. That was phase 1's deliberate stopping point, and it is what made today's six-defect prose fix free.
+
+Wrote `docs/superpowers/specs/2026-07-14-trend-fit-phase2-handoff.md` — the four phase-2 surfaces (renderers drawing the line · desk trend block · Email Lab preset · narrator), the renderer contract, and the verified landmines.
+
+**The contract, in one line: branch on `falsifier.valueLow`, NOT on `kind`.** `valueLow === null` ⇒ a real one-sided threshold, draw the line. `valueLow !== null` ⇒ the sentence names a band that straddles flat; neither edge breaks anything, so draw the band or draw nothing. `plateau` lands on **both** sides of that rule — which is exactly why `kind` is the wrong discriminator.
+
+**Two open checks were already fixed and nobody closed them.** Verified in source, then closed:
+- `desk_correlation_no_significance_test` → fixed by `e804c772`. `lib/desk/correlation.ts` exports `criticalR(n)` + an `established[i][j]` matrix, and the heatmap honors it ("A cell is coloured only if its r is ESTABLISHED"). The 0.2–0.6 noise band no longer wears the colour of signal.
+- `airport_movingaverage_called_trend` → fixed by `dc4eb864`. The key is `smoothed`, not `trend`.
+
+This is the RULE 2.4 failure mode in miniature, running the other way: a check that outlives its fix costs a future session a rediscovery just as surely as a gap that never got a check. **Close on landing.**
+
+**Next:** desk trend block first — shortest path to a live artifact against a series we already draw. First thing to verify there: how many monthly points the ZHVI series actually holds and how far back it reaches (`MIN_FIT_POINTS` = 12; trailing windows are DROPPED when the data does not reach their cut date). If it only earns `full` and `12m`, the menu is two rows, and that is the honest answer.
+
+---
+
 ## 2026-07-14 (Opus 4.8 · main) — FOUR BUGS THE OPERATOR FOUND BY LOOKING, AND WHY LOOKING WAS THE ONLY WAY
 
 Operator asked for a dev site with every email on it so he could triage keep/change/kill. Built
