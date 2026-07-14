@@ -97,10 +97,17 @@ displayable (8) — gate a platform picker off the `Platform` union in `channels
 
 ## Still-open forks (checks, not folklore)
 
-- `render-social-image.ts` and `lib/charts/social-card.ts` still hold private greys
-  (`#9CA3AF`, `#6B7280`, `#E5E7EB`) — **the brand has no neutral grey scale**, so each path invented
-  one. Adding a grey ramp is a design decision, not a refactor. → check `brand_has_no_grey_scale`.
-- `render-social-image.ts` still runs its own type scale. → check `social_render_engine_off_system`.
+- **The grey ramp landed (07/14/2026):** `BRAND.shellMist/shellLine/shellFill/shellMuted/shellInk`
+  (`lib/brand/tokens.ts`, mirrored in `app/globals.css`). `lib/charts/social-card.ts` and
+  `lib/social/chart-svg.ts` (the bar-track fill) read it now. `render-social-image.ts`'s `#9CA3AF`
+  is deliberately UNTOUCHED — it's rendered as caption/watermark TEXT on a theme-controlled canvas
+  (default dark, but a brand can set it light), and the ramp's roles were measured against white
+  only. Swapping the literal without re-deriving contrast per-theme would be a silent appearance
+  risk, not a dedupe — that work belongs to the item below, not this one.
+- `render-social-image.ts` still runs its own type scale AND its own untested color contrast.
+  → check `social_render_engine_off_system` (operator look first — it's an appearance change).
+- `lib/email/blocks/*` still holds ~30 raw hexes (mostly the same pre-ramp greys, now nameable).
+  → check `email_blocks_colour_unfenced`.
 
 ## The rule that generalizes
 

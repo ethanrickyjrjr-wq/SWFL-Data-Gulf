@@ -147,3 +147,26 @@ describe("brand contrast facts (WCAG AA: 4.5 normal text · 3 large text)", () =
     expect(contrastRatio(BRAND.sandMuted, BRAND.deep)).toBeGreaterThanOrEqual(4.5);
   });
 });
+
+// ── The shell (neutral) ramp — same posture as the hued palette above ────────
+//
+// email's canvas is literal white (`EmailDocRenderer.tsx`), not `sand` — so the
+// shell ramp is measured against white, the surface it actually renders on.
+describe("shell ramp — a placeholder fill is not a caption color", () => {
+  it("shellFill is DECORATIVE-ONLY on white — it fails even the large-text floor", () => {
+    expect(contrastRatio(BRAND.shellFill, "#ffffff")).toBeLessThan(3);
+  });
+
+  it("shellMuted clears normal-text AA on white — captions and footers may use it", () => {
+    expect(contrastRatio(BRAND.shellMuted, "#ffffff")).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("shellInk is comfortably safe body/heading ink on white", () => {
+    expect(contrastRatio(BRAND.shellInk, "#ffffff")).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("shellMist and shellLine are near-white — never text, background/hairline only", () => {
+    expect(contrastRatio(BRAND.shellMist, "#ffffff")).toBeLessThan(1.5);
+    expect(contrastRatio(BRAND.shellLine, "#ffffff")).toBeLessThan(1.5);
+  });
+});

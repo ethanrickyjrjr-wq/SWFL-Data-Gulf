@@ -30,6 +30,18 @@
      Mirrored in lib/brand/tokens.ts (BRAND.sandPanel); tokens.test.ts locks them. */
   --gulf-sand-panel: #e7e2d7;
 
+  /* Neutral ("shell") — hue-less chrome: hairlines, placeholder fills, muted
+     copy. Every renderer that needed a grey (email blocks, the social card, the
+     chart track) independently reached for a Tailwind grey stop by hand; this is
+     that convergence, named once. --shell-fill is NON-TEXT (2.54:1 on white,
+     decorative/placeholder only — the grey twin of --gulf-teal on sand).
+     Mirrored in lib/brand/tokens.ts (BRAND.shell*); tokens.test.ts locks them. */
+  --shell-mist: #f9fafb;
+  --shell-line: #e5e7eb;
+  --shell-fill: #9ca3af;
+  --shell-muted: #6b7280;
+  --shell-ink: #374151;
+
   --background: var(--gulf-midnight);
   --foreground: var(--text-primary);
 

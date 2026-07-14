@@ -101,6 +101,24 @@ export const BRAND = {
    *  The sibling of `slateHi`. This is the one genuinely new token the light theme
    *  needed; every other light-theme value already existed in the palette. */
   sandPanel: "#e7e2d7",
+
+  // ── Neutral ("shell") ───────────────────────────────────────────────────────
+  // Hue-less chrome. Every renderer that needed a grey (email blocks, the social
+  // card, the chart track) independently reached for a Tailwind grey stop by
+  // hand — this names the convergence instead of leaving it scattered.
+  /** `--shell-mist` — light section background (email footer/card bg). */
+  shellMist: "#f9fafb",
+  /** `--shell-line` — hairline / border / chart track / placeholder dash. */
+  shellLine: "#e5e7eb",
+  /** `--shell-fill` — decorative placeholder FILL only. 2.54:1 on white — fails
+   *  even large-text AA, so this is NEVER a word. The grey twin of `teal` on
+   *  `sand` (also decorative-only there). */
+  shellFill: "#9ca3af",
+  /** `--shell-muted` — muted text: captions, footer citations, labels. 4.83:1
+   *  on white, clears WCAG AA normal text. */
+  shellMuted: "#6b7280",
+  /** `--shell-ink` — body/heading text on light surfaces. 10.31:1 on white. */
+  shellInk: "#374151",
 } as const;
 
 export type BrandToken = keyof typeof BRAND;
@@ -131,6 +149,11 @@ export const CSS_VAR_BY_TOKEN: Record<BrandToken, string> = {
   sandFaint: "--text-tertiary",
   onAccent: "--text-on-accent",
   sandPanel: "--gulf-sand-panel",
+  shellMist: "--shell-mist",
+  shellLine: "--shell-line",
+  shellFill: "--shell-fill",
+  shellMuted: "--shell-muted",
+  shellInk: "--shell-ink",
 };
 
 /** Every hex the brand legitimately contains — the allowlist a "no raw hex" lint

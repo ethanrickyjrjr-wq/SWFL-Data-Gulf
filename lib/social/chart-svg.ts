@@ -5,6 +5,7 @@
 // without importing @resvg/resvg-js. renderChart itself is import-safe (no native bin).
 import { renderChart } from "@/lib/email/templates/charts/chart-renderer";
 import type { EmailChartSpec } from "@/lib/email/templates/charts/chart-types";
+import { BRAND } from "@/lib/brand/tokens";
 
 /** XML-escape so any data-derived text is inert inside the SVG. */
 export function esc(s: string | number): string {
@@ -89,7 +90,7 @@ export function nativeBarSvg(
     const barW = Math.max(2, Math.round((r.value / max) * trackW));
     return [
       `<text x="0" y="${y + rowH * 0.62}" font-size="22" fill="${esc(neutral)}">${esc(clip(r.label, 18))}</text>`,
-      `<rect x="${labelW}" y="${y + rowH * 0.2}" width="${trackW}" height="${rowH * 0.6}" rx="6" fill="#E5E7EB"/>`,
+      `<rect x="${labelW}" y="${y + rowH * 0.2}" width="${trackW}" height="${rowH * 0.6}" rx="6" fill="${BRAND.shellLine}"/>`,
       `<rect x="${labelW}" y="${y + rowH * 0.2}" width="${barW}" height="${rowH * 0.6}" rx="6" fill="${esc(accent)}"/>`,
       `<text x="${labelW + trackW + 12}" y="${y + rowH * 0.62}" font-size="22" font-weight="bold" fill="${esc(neutral)}">${esc(r.value)}</text>`,
     ].join("");

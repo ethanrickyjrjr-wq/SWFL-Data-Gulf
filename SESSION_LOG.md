@@ -1,3 +1,39 @@
+## 2026-07-14 (Sonnet 5 · main) — THE GREY RAMP: PINNED, NOT INVENTED
+
+Follow-up to the social-design-root handoff work (see the "TWO UNBLOCKED ITEMS" entry below).
+`brand_has_no_grey_scale` was explicitly an operator/design call, not a refactor — asked before
+touching it. Operator: "pin it now."
+
+**Inventoried real usage first (RULE 0.5), not a fresh guess.** Grepped every neutral hex actually in
+play across `lib/email/blocks/*.tsx`, `render-social-image.ts`, `chart-svg.ts`, `social-card.ts`: 9
+distinct raw hexes, nearly all Tailwind's default grey stops reached for independently (3 different
+"dark text" values inside the SAME file, `OpenSlot.tsx`). Ran each through the repo's own
+`contrastRatio` against white (email's real canvas — `EmailDocRenderer.tsx` is literal `#ffffff`, not
+`sand`) to ground the roles instead of eyeballing them.
+
+**Landed: `BRAND.shellMist/shellLine/shellFill/shellMuted/shellInk`** — 5 steps,
+`app/globals.css` first then `lib/brand/tokens.ts` (same drift-tested pattern as the hued palette).
+`shellFill` (#9ca3af) is flagged NON-TEXT (2.54:1 on white, fails even large-text AA) — the grey twin
+of `teal` on `sand`. `shellMuted` (#6b7280, 4.83:1) and `shellInk` (#374151, 10.31:1) both clear
+normal-text AA. New contrast-fact tests in `tokens.test.ts` lock all 5.
+
+**Wired the two unambiguous consumers, left the ambiguous one alone.** `social-card.ts`'s `GREY` and
+`chart-svg.ts`'s bar-track fill now read `BRAND.shellMuted`/`shellLine` — both fixed backgrounds,
+zero appearance change. Did NOT touch `render-social-image.ts`'s `#9CA3AF`: it's rendered as TEXT on
+a theme-controlled canvas (default dark, but brand-overridable), and on dark that same value reads
+6.77:1 — safe — while on white it would fail. Renaming it without re-deriving contrast per-theme
+would be a silent appearance risk wearing a dedupe's clothes; that belongs to
+`social_render_engine_off_system` (already flagged "operator look first"), not this pass.
+
+Checks closed: `brand_has_no_grey_scale`. `lib/social/CLAUDE.md`'s "still-open forks" note updated to
+match. `email_blocks_colour_unfenced` (30 hexes, ~10 files) is now unblocked but NOT started — it's
+"the biggest one" per the handoff and needs its own pass, not a tail-end add to this one.
+
+Verified: `bun test` (lib/brand, lib/social, lib/charts) green, `tsc --noEmit` clean on touched files,
+eslint clean.
+
+---
+
 ## 2026-07-14 (Opus 4.8 · main) — WE WERE QUIETLY DELETING TWO YEARS FROM THE HEADLINE AND NEVER SAYING WHY
 
 Operator, on seeing the window menu: *"Do we say why it was deleted? Keep it in and explain and let

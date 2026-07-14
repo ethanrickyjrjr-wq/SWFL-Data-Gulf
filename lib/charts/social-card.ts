@@ -23,9 +23,7 @@ const H = 630;
 const M = 56; // outer margin
 const TEAL = BRAND.teal;
 const NAVY = BRAND.midnight;
-// No brand grey ramp exists yet (check `brand_has_no_grey_scale`) — stays a private
-// hex until one lands; adding one here would be a fourth invented grey, not a fix.
-const GREY = "#6B7280";
+const GREY = BRAND.shellMuted; // footer/label text on the card's white background
 
 // Mirror of the (unexported) ChartValueFormat→ValueFormat map in
 // lib/email/spec-to-png.ts — duplicated, not imported: that file is claimed by
