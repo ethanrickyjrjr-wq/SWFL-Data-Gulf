@@ -459,6 +459,33 @@ export interface Database {
         };
         Relationships: [];
       };
+      contact_segments: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          filter: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          filter: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          filter?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       contacts: {
         Row: {
           id: string;
@@ -469,6 +496,7 @@ export interface Database {
           tags: string[];
           unsubscribed: boolean;
           created_at: string;
+          attribs: Json;
         };
         Insert: {
           id?: string;
@@ -479,6 +507,7 @@ export interface Database {
           tags?: string[];
           unsubscribed?: boolean;
           created_at?: string;
+          attribs?: Json;
         };
         Update: {
           id?: string;
@@ -489,6 +518,7 @@ export interface Database {
           tags?: string[];
           unsubscribed?: boolean;
           created_at?: string;
+          attribs?: Json;
         };
         Relationships: [];
       };
