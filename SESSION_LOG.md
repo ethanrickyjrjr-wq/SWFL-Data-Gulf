@@ -1,3 +1,53 @@
+## 2026-07-14 (Opus 4.8 · main) — LEE PARCELS HANDOFF, AND THE OTHER RECIPES (5 OF 6, ON PURPOSE)
+
+**My community work already landed inside someone else's push.** `c9a33b06` (the detail-page parser
++ under-contract) plus the loose remainder — the `shared.ts` narrator wiring, `deIdentifyCommunity`,
+`community-facts.test.ts` — rode in on `a35012c3`. Verified all six pieces present in the committed
+tree, rebased rather than re-committed. Nothing lost. Tree green: 985 pass, 0 fail.
+
+**THE OTHER RECIPES: 5 of 6, and the 6th is a deliberate NO.** `authorListingNarrative` takes
+`ListingFacts`, and the community facts ride on it — so ONE edit to the shared narrator wired
+**new-listing, just-sold, open-house, price-reduced** at once (26/28/15/37 tests pass). Extracted
+`communitySourceLine` to a single authority in `listing-detail.ts` on copy #2 rather than duplicating it.
+
+**coming-soon had a real leak, caught by reading the spread.** `teaserFacts = { ...facts }` now
+carries `community` — and `community.subdivision` is "Bay Colony", a name that identifies the very
+listing the teaser exists to withhold. Every other identifying field is explicitly stripped there;
+the community NAME had to be too, or a spread operator silently undoes the whole recipe.
+`deIdentifyCommunity()` drops the name, keeps the amenities ("a gated golf community with a pool"
+is the best thing a teaser can say, and points at nothing).
+
+**market-comps is NOT wired, and that is the finding, not laziness.** Its location ban is ABSOLUTE,
+not fact-gated like `inventedAttributes` — and it exists to stop a DIFFERENT lie: the model calling
+141 and 143 Coral Dr "comparable homes on the same street" as 326 Shore Dr. That email is about
+price, not the house. Wiring community prose in re-opens that vector for no gain. Check opened
+(`market_comps_community_deliberately_unwired`) with the alternative spelled out — operator's call.
+
+**LEE PARCELS HANDOFF** — `docs/superpowers/plans/2026-07-14-lee-parcels-handoff.md`. Two doors are
+already closed and I proved both rather than assuming:
+- **FDOR ArcGIS centroid layer 400s on Lee.** `CO_NO=46` record-queries fail on BOTH statewide
+  layers (count works, records don't). Our own `constants.py` says so. Do not "just change CO_NO".
+- **LeePA cannot name a community.** Pulled layer 12's field list live: `FOLIOID · Just · Market ·
+  Assessed · Taxable · SOHCap · Building · Land`. **No `PHY_ADDR1`, no `S_LEGAL`.** And
+  `data_lake.leepa_parcels` (548,798 rows) matches — folio, ZIP, values, nothing else. LeePA knows
+  what a Lee parcel is WORTH; it cannot say what it is CALLED.
+
+**The lane that works: the FDOR NAL file** (Name-Address-Legal real-property roll), per county, bulk
+download — the same data the broken FeatureServer is derived from (our Collier `OUT_FIELDS` ARE NAL
+column names). Annual: July 1 preliminary / October initial-final / post-certification final, and
+only the current version is posted.
+
+**HONEST GAP: I did not resolve the Lee NAL URL.** The FDOR tax-roll directory is a JS-rendered
+SharePoint listing and crawl4ai returned zero file entries. I refused to invent one. That is step 1
+of the handoff, with a browser-driven lane and a `geodata.floridagio.gov` fallback. Check opened
+(`lee_parcels_nal_url_unresolved`).
+
+Handoff also carries the landmines with their evidence: the condo fan-out (33 raw rows for ONE
+parcel — dedup on `parcel_id`, the bug that inflated Collier condos 100,847 → 169,047), the
+byte-identical normalizer requirement, and the measured address join — **naive 3.5%, canonicalized
+80.2% matched / 77.2% resolving to exactly ONE community**, using the `addressKey()` we already own.
+Fan-out rule: exactly one distinct subdivision → that's the community; more than one → NO community,
+never the most common. A wrong community now licenses wrong prose.
 ## 2026-07-14 (Opus 4.8 · main) — THE LAYOUT ROOT: ONE SEAM WRITES EVERY POSITION, AND A FLAT STACK NO LONGER PASSES
 
 **Phase 3 of the email design root.** `lib/email/doc/finalize-doc.ts` is now the ONLY code in the
