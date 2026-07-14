@@ -183,6 +183,15 @@ export interface PriceBandsData {
 export interface CorrelationData {
   labels: string[];
   matrix: (number | null)[][];
+  /** established[i][j] = that pair's |r| clears its OWN critical value at 95%
+   *  (lib/desk/correlation `isEstablished`). FALSE = indistinguishable from zero:
+   *  the cell renders NEUTRAL no matter how large r looks, and says why. Without
+   *  this, the heatmap coloured the whole 0.2–0.6 band as signal when at n = 10
+   *  the critical r is 0.632 — i.e. it painted noise. */
+  established: boolean[][];
+  /** pairN[i][j] = that pair's OWN complete-case ZIP count — what the tooltip
+   *  states. Each pair is judged against this, never the global minimum. */
+  pairN: number[][];
   /** Smallest complete-case ZIP count across pairs — stated in the zone copy. */
   zipCount: number;
   asOf?: string;

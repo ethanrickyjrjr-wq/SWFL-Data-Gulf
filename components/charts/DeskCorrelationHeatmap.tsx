@@ -20,17 +20,30 @@ import type { CorrelationData } from "@/lib/desk/types";
 // (same trick as ZipMomentumHeatmap; the vendored cells quantize counts 0–4).
 const BUCKET_LABELS = ["≤ −0.6", "−0.6 to −0.2", "−0.2 to 0.2", "0.2 to 0.6", "≥ 0.6"];
 
+/** The middle bucket — "we cannot tell this apart from zero". */
+const NEUTRAL = 2;
+
 const LEVEL_STYLES = YOY_BUCKET_COLORS.map((color) => ({
   color,
   fillMode: "solid",
   pattern: "none",
 })) as unknown as HeatmapLevelStyles;
 
-function bucket(r: number | null): number {
-  if (r == null) return 2;
+/**
+ * A cell is coloured only if its r is ESTABLISHED — distinguishable from zero at
+ * 95% against that pair's OWN n (lib/desk/correlation `isEstablished`).
+ *
+ * The buckets colour everything from |r| = 0.2 up, but at n = 10 the critical r is
+ * 0.632: the whole 0.2–0.6 band was noise wearing the colour of signal. An
+ * unestablished cell is NOT a weak correlation, it is NOT A CORRELATION, so it
+ * renders neutral no matter how large r looks — and the tooltip says why. Greying
+ * it without saying so would just be a quieter lie.
+ */
+function bucket(r: number | null, established: boolean): number {
+  if (r == null || !established) return NEUTRAL;
   if (r <= -0.6) return 0;
   if (r < -0.2) return 1;
-  if (r < 0.2) return 2;
+  if (r < 0.2) return NEUTRAL;
   if (r < 0.6) return 3;
   return 4;
 }
@@ -41,6 +54,8 @@ function CorrelationTooltip({ data }: { data: CorrelationData }) {
   if (!tooltipData) return null;
   const { column, row, x, y } = tooltipData;
   const r = data.matrix[column]?.[row];
+  const established = data.established[column]?.[row] ?? false;
+  const n = data.pairN[column]?.[row];
   return (
     <TooltipBox
       animate={false}
@@ -60,6 +75,13 @@ function CorrelationTooltip({ data }: { data: CorrelationData }) {
         <div className="text-chart-tooltip-foreground text-sm">
           {typeof r === "number" ? `r = ${r >= 0 ? "+" : ""}${r.toFixed(2)}` : "no data"}
         </div>
+        {/* SAY WHY IT IS GREY. A cell silently greyed is its own kind of lie — the
+            reader would just call it a weak correlation. It is not a correlation. */}
+        {typeof r === "number" && !established ? (
+          <div className="mt-1 text-chart-tooltip-muted text-xs">
+            not distinguishable from zero{typeof n === "number" ? ` (n = ${n})` : ""}
+          </div>
+        ) : null}
       </div>
     </TooltipBox>
   );
@@ -78,7 +100,7 @@ export function DeskCorrelationHeatmap({ data }: { data: CorrelationData }) {
     bin: ci,
     bins: col.map((r, ri) => ({
       bin: ri,
-      count: bucket(r),
+      count: bucket(r, data.established[ci]?.[ri] ?? false),
       date: new Date(Date.UTC(2000, 0, ri + 1)),
     })),
   }));
@@ -139,7 +161,9 @@ export function DeskCorrelationHeatmap({ data }: { data: CorrelationData }) {
       </div>
       <p className="mt-3 text-xs text-gray-500">
         How these market signals moved together across {data.zipCount} Lee + Collier ZIP codes —
-        descriptive association only, not cause and not a forecast.
+        descriptive association only, not cause and not a forecast. A pair is coloured only when its
+        r clears the 95% critical value for its own ZIP count; pairs that do not are neutral, not
+        weak — hover one to see why.
       </p>
     </div>
   );

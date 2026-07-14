@@ -933,6 +933,11 @@ export async function loadDeskData(): Promise<DeskData> {
     ? {
         labels: corr.labels,
         matrix: corr.matrix,
+        // Each pair carries its OWN verdict + its OWN n. A cell that does not clear
+        // its critical r is not a weak correlation — it is NOT A CORRELATION, and
+        // the heatmap renders it neutral rather than colouring noise.
+        established: corr.established,
+        pairN: corr.pairN,
         zipCount: corr.minPairN,
         asOf: momentum.asOf ?? spineAsOf,
         sourceLabel: SPINE_SOURCE,
