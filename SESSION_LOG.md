@@ -1,3 +1,33 @@
+## 2026-07-13 (Sonnet 5 · main) — The luxury ring WAS shipped 07/11 — the showcase gallery was just showing a stale screenshot
+
+Operator, furious, pointed at a `/showcase` screenshot of Luxury Market Report still showing the
+broken pre-fix layout ($3,168,000 headline over a declining $802K→$746K Zillow top-tier line) and
+asked whether the 07/11 `deliverable-coherence-gate` fix (the Naples/Collier $2M+ donut ring) had
+ever actually landed, or whether this was a second, different "luxury" thing nobody connected.
+
+**There is only one Luxury Market Report.** The 07/11 fix is real and live in `main`
+(`lib/email/doc/preview-fill.ts`/`default-docs.ts`/`seed-chart-series.ts`, commit range ending
+`bd36a739`) — building the template today (Email Lab, or any live render) correctly shows the ring.
+**Root cause of what the operator saw:** `/showcase`'s gallery tiles render a *committed static
+`.webp` screenshot* (`public/showcase/seed-previews/<id>.webp`), not a live render — and
+`scripts/capture-seed-previews.mts`'s own comment says as much: "re-run after any SEED_DOCS visual
+change, `seed-previews.test.ts` only guards asset EXISTENCE, not freshness." Confirmed via
+`git log`: `luxury-market-report.webp` was last captured `be61e1d8` on 07/10 — one day **before**
+the 07/11 fix — and nobody re-ran the capture script after landing it. The `deliverable_coherence_gate_live_verify`
+check (opened 07/11, meant to catch exactly this) sat untouched for 2 days instead of being walked.
+
+**Fix:** ran `bun scripts/capture-seed-previews.mts`, regenerating all 27 seed-preview `.webp`
+tiles from current template data. Visually confirmed `luxury-market-report.webp` now shows the
+Naples ring (378/412/284/152, center "1k listings") coherent with the "1,226" hero. 4 other tiles
+also changed (`new-listing`, `open-house`, `price-reduced`, `just-sold`) — stale since the
+`campaign_chrome_one_look` lifecycle-chrome migration (`bf77c817`) and never recaptured either.
+Closed `deliverable_coherence_gate_live_verify` with evidence. **New bug found while reviewing
+those 4:** each renders its beds/baths/sqft (or price/drop/DOM) stat trio TWICE, back to back, in
+one row — logged as `lifecycle_chrome_dup_stats_row`, not fixed this session (out of scope for the
+ask at hand). **Lesson:** a data/logic fix to a `SEED_DOCS` template is invisible on `/showcase`
+until someone remembers to re-run the capture script — that's a freshness gate with no enforcement,
+worth a real fix (hash-gate the capture, not just existence) rather than relying on memory next time.
+
 ## 2026-07-13 (Sonnet 5 · main) — /desk Signal Correlation: real diverging colors, tooltip stopped clipping
 
 Operator flagged two screenshots of the /desk Signal Correlation heatmap: "colors suck" and "make the
