@@ -1,3 +1,45 @@
+## 2026-07-14 (Opus 4.8 · main) — SOLD-MEDIAN STALE-BLEND FIX: both sold views were publishing a 2.5-year stock median, ~6.6% high in a falling market.
+
+Operator asked to verify `docs/handoff/2026-07-14-zip-sold-price-third-reference-handoff.md` ("are we
+correct — how far are we from the real answer"). Verdict in `docs/handoff/2026-07-14-zip-sold-price-VERDICT.md`.
+
+**The value figure on the page was already RIGHT.** Cape Coral 33904 sold median confirmed by FOUR
+independent sources at ~$337k–$340k: LeePA recorded deeds trailing-90d $337,450 · Redfin MLS 3mo-ending-May
+$337,000 (crawl4ai) · Zillow ZHVI $339,699 (the figure we display) · realtor.com $340,000. Spread <1%.
+Nothing to fix on the number.
+
+**But the handoff's recommended next step would have shipped a wrong number.** `leepa_sold_median_by_zip`
+selected "2024+ latest-sale-per-parcel" — a STOCK, not a transaction flow (its own SQL comment said so).
+In a market down 7.3% YoY it blended 2024 ($380k) into 2026 ($340k) and returned **$362,250** — +6.6% vs
+truth, and it is LIVE in the `properties-lee-value` pack today. Wiring it into emails as the handoff
+proposed would have made our *correct* ZHVI look wrong by $22k.
+
+FIXED (`docs/sql/20260714_sold_median_recency_window.sql`, applied): both Lee + Collier sold views now use a
+ROLLING 12-MONTH window anchored on max(sale date) in the data (never current_date — both feeds lag), plus a
+new `data_through` column so the as-of travels with the number. 33904 now returns $340,000; Lee county median
+$355,298 vs Redfin's $360,000 (1.3% apart; the old blend said $370,000, 2.8% high). 35/38 Lee ZIPs still clear
+the min-N=20 gate. Additive column only — connectors select explicit columns, no pack contract change. Source
++ pack tests green (6 + 33 pass).
+
+Also corrected: the handoff's "67-day DOM here" is **Lee COUNTY** (Redfin, 05/31/2026), not 33904 — 33904's
+DOM in `listing_active_stats` is NULL (0 of 560 actives carry one). And the measured explanation for the
+list-vs-value gap: it is concentrated in single-family (asks $524,999, closes $434,787 = +20.7%); condos are
+nearly efficient (+5.8%). Most of that is length-biased sampling, not seller delusion — Redfin puts 33904
+sale-to-list at 95.3% with 44.7% of listings cutting price.
+
+**Operator's question — "don't we have sold from SteadyAPI elsewhere?" — YES, and I was wrong to skip it.**
+`data_lake.market_details_swfl` (SteadyAPI, origin realtor.com) already holds per-ZIP `median_sold_price` +
+`median_days_on_market` for BOTH counties (Lee 34 ZIPs, Collier 20), captured 07/01–07/04/2026. Ingested,
+UNWIRED. It is the only CURRENT sold number we hold for Collier.
+
+Two checks opened (RULE 2.4): `leepa_sold_count_undercount_vs_mls` (we hold 102 recorded sales for 33904 in
+May; Redfin reports 291 sold — ~3x undercount; median matches but selection bias unquantified) and
+`collier_sold_median_is_a_year_stale` (collier_parcels has ZERO 2026 sales — FDOR annual roll, structurally
+~12mo behind; must never be labelled current).
+
+NEXT: wiring `market_details_swfl` into `loadMarketFigures` is a new figure key = new feature → needs
+brainstorming (RULE 3.5) before code. Not done here.
+
 ## 2026-07-14 (Sonnet 5 · main) — MLS/RESO live-verified: the pipe already works, just uncredentialed (19 days parked)
 
 Operator asked to find one solid IDX/MLS we can use now and eventually pay for (DOM, sales, new
