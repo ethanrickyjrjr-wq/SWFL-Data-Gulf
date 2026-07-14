@@ -156,36 +156,44 @@ playbook names ("a spec that asks for a number no lane holds is an instruction t
 recorded here so the next reader does not repeat it.
 
 Computed 07/13/2026 via `regr_slope` / `regr_r2` / `regr_sxx` / `regr_syy` / `regr_sxy`, with
-`SE(b) = sqrt(((Syy − Sxy²/Sxx)/(n−2))/Sxx)` and a 95% interval. Format: window · n · slope · R² ·
-t · 95% CI.
+`SE(b) = sqrt(((Syy − Sxy²/Sxx)/(n−2))/Sxx)` and a 95% interval.
+
+**⚠️ CORRECTED 07/13/2026 (final review).** The first version of this table computed every interval
+with a fixed **t ≈ 2.00**, which is wrong: t\* is df-specific (df = n−2). At n = 12, t\* = 2.228, so
+the 12-month interval was **11% too narrow**. The intervals below are recomputed with the real
+t-table (`tQuantile975`, the shipped implementation). **No `established` verdict changed** — all
+three verdicts below stand — but do NOT pin `fitLine`'s real output against the old numbers; they
+were an artifact of the oracle SQL, not of the code.
+
+Format: window · n · slope · R² · t\* · 95% CI.
 
 **Cape Coral, FL → verdict `plateau`, LONG `tight`**
-- full · 132 · +1,931 · 0.787 · t 21.94 · [1755, 2107] — established
-- ex-boom · 108 · **+1,802** · **0.882** · t 28.10 · [1674, 1930] — established (LONG)
-- 5y · 60 · −472 · 0.105 · t −2.61 · [−833, −111] — **established despite R² 0.105**
-- **24m · 24 · −619 · 0.151 · t −1.98 · [−1245, +7] — CONTAINS ZERO → not established** (CURRENT)
-- 12m · 12 · +1,395 · 0.205 · t 1.61 · [−343, +3132] — not established
+- full · 132 · +1,931 · 0.787 · t\* 1.978 · [1757, 2105] — established
+- ex-boom · 108 · **+1,802** · **0.882** · t\* 1.983 · [1675, 1929] — established (LONG)
+- 5y · 60 · −472 · 0.105 · t\* 2.002 · [−834, −110] — **established despite R² 0.105**
+- **24m · 24 · −619 · 0.151 · t\* 2.074 · [−1268, +30] — CONTAINS ZERO → not established** (CURRENT)
+- 12m · 12 · +1,395 · 0.205 · t\* 2.228 · [−541, +3331] — not established
 
 LONG established up, CURRENT not established → **plateau**. The direction of the recent slope
 (−619) may not be read or narrated at all: its interval crosses zero.
 
 **Lehigh Acres, FL → verdict `reversed`, LONG `tight`**
-- full · 132 · +1,979 · 0.887 · t 31.89 · [1855, 2103] — established
-- ex-boom · 108 · **+1,923** · **0.908** · t 32.33 · [1804, 2042] — established (LONG)
-- 5y · 60 · +740 · 0.213 · t 3.96 · [366, 1113] — established (weak R², real direction)
-- **24m · 24 · −1,844 · 0.843 · t −10.87 · [−2183, −1504] — established, OPPOSITE** (CURRENT)
-- 12m · 12 · −1,977 · 0.694 · t −4.76 · [−2808, −1146] — established
+- full · 132 · +1,979 · 0.887 · t\* 1.978 · [1856, 2102] — established
+- ex-boom · 108 · **+1,923** · **0.908** · t\* 1.983 · [1806, 2040] — established (LONG)
+- 5y · 60 · +740 · 0.213 · t\* 2.002 · [366, 1114] — established (weak R², real direction)
+- **24m · 24 · −1,844 · 0.843 · t\* 2.074 · [−2197, −1491] — established, OPPOSITE** (CURRENT)
+- 12m · 12 · −1,977 · 0.694 · t\* 2.228 · [−2904, −1050] — established
 
 LONG established up, CURRENT established DOWN → **reversed**. A genuine, high-confidence
 inflection: eleven years up, the last two years down hard, and both fits are strong. **This is the
 reversal fixture — the earlier draft called it "intact."**
 
 **Sanibel, FL → verdict `plateau`, LONG `loose`**
-- full · 131 · +3,446 · 0.334 · t 8.05 · [2590, 4302] — established
-- ex-boom · 108 · **+3,055** · **0.423** · t 8.81 · [2361, 3748] — established (LONG)
-- 5y · 59 · −2,384 · 0.041 · t −1.56 · [−5435, +667] — not established
-- **24m · 24 · +317 · 0.000 · t 0.06 · [−9734, +10368] — not established** (CURRENT)
-- 12m · 12 · +13,899 · 0.072 · t 0.88 · [−17557, +45355] — not established
+- full · 131 · +3,446 · 0.334 · t\* 1.979 · [2599, 4293] — established
+- ex-boom · 108 · **+3,055** · **0.423** · t\* 1.983 · [2367, 3743] — established (LONG)
+- 5y · 59 · −2,384 · 0.041 · t\* 2.002 · [−5438, +670] — not established
+- **24m · 24 · +317 · 0.000 · t\* 2.074 · [−10106, +10740] — not established** (CURRENT)
+- 12m · 12 · +13,899 · 0.072 · t\* 2.228 · [−21143, +48941] — not established
 
 **Sanibel is the `loose` fixture, not the `no-direction` one.** Its long-run direction IS
 statistically solid (+$3,055/mo, CI excludes zero) — it is the *fit* that is loose (R² 0.42), so
