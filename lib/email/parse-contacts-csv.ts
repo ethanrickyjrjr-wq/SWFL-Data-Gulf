@@ -6,6 +6,9 @@
  *   name    — optional
  *   tags    — optional; cell value is semicolon- OR pipe-separated tags
  *
+ * Any other header becomes an `attribs` key (lowercased header → trimmed cell
+ * value), capped at MAX_ATTRIBS_PER_ROW columns; empty cells are omitted.
+ *
  * Per-row `tags` are merged with the caller-supplied `bodyTags` (applies the
  * same tag list to every row, e.g. from the JSON request body). Duplicates are
  * removed; all tags are lowercased and trimmed.
@@ -21,6 +24,7 @@ export interface ContactRow {
   email: string;
   name: string | null;
   tags: string[];
+  attribs?: Record<string, string>;
 }
 
 export interface ParseResult {
@@ -33,6 +37,10 @@ export interface ParseResult {
 // (the row count itself is bounded downstream in upsert-contacts).
 const MAX_TAGS_PER_ROW = 50;
 const MAX_TAG_LEN = 64;
+
+// Cap on unrecognised columns captured into `attribs` per row (defensive —
+// a wide malicious header row shouldn't carry an unbounded key set).
+const MAX_ATTRIBS_PER_ROW = 50;
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -177,6 +185,11 @@ export function parseContactsCsv(csv: string, bodyTags: string[] = []): ParseRes
     return { rows: [], skippedCount: 0 };
   }
 
+  const attribCols = headers
+    .map((h, idx) => ({ h, idx }))
+    .filter(({ h, idx }) => h && idx !== emailCol && idx !== nameCol && idx !== tagsCol)
+    .slice(0, MAX_ATTRIBS_PER_ROW);
+
   const rows: ContactRow[] = [];
   let skippedCount = 0;
 
@@ -199,10 +212,17 @@ export function parseContactsCsv(csv: string, bodyTags: string[] = []): ParseRes
     const rowTags = parseTags(rawTags);
     const mergedTags = mergeTags(bodyTags, rowTags);
 
+    const attribs: Record<string, string> = {};
+    for (const { h, idx } of attribCols) {
+      const v = (fields[idx] ?? "").trim();
+      if (v) attribs[h] = v;
+    }
+
     rows.push({
       email,
       name: rawName.trim() || null,
       tags: mergedTags,
+      attribs,
     });
   }
 

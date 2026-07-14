@@ -68,7 +68,7 @@ export function parseVcards(text: string): VcardParseResult {
       skipped++;
       skip_reasons.push(`vCard ${name ?? "unknown"}: no valid email`);
     } else {
-      rows.push({ email, name, phone, tags: [] });
+      rows.push({ email, name, phone, tags: [], attribs: {} });
     }
     fn = "";
     nName = "";

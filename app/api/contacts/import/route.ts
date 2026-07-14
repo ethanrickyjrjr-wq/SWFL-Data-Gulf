@@ -48,7 +48,13 @@ export async function POST(req: NextRequest) {
       result.skip_reasons.push(`${parsed.skippedCount} row(s) had no valid email`);
     }
     // The CSV parser doesn't emit phone; leave it null (extend the parser if needed).
-    rows = parsed.rows.map((r) => ({ email: r.email, name: r.name, phone: null, tags: r.tags }));
+    rows = parsed.rows.map((r) => ({
+      email: r.email,
+      name: r.name,
+      phone: null,
+      tags: r.tags,
+      attribs: r.attribs ?? {},
+    }));
   }
 
   if (rows.length > MAX_ROWS) {

@@ -8,6 +8,7 @@ export interface Contact {
   email: string;
   phone: string | null;
   tags: string[];
+  attribs: Record<string, string>;
   unsubscribed: boolean;
   created_at: string;
 }
@@ -18,6 +19,7 @@ export interface ContactRow {
   email: string;
   phone: string | null;
   tags: string[];
+  attribs: Record<string, string>;
 }
 
 export interface ImportResult {

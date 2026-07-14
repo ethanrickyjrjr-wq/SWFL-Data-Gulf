@@ -18,6 +18,7 @@ describe("parseVcards", () => {
       name: "Jane Doe",
       phone: "239-555-0100",
       tags: [],
+      attribs: {},
     });
   });
 
