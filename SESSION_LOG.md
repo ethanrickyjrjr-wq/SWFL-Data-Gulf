@@ -1,3 +1,26 @@
+## 2026-07-14 (Opus 4.8 · main) — THE COMMUNITY NAME SHIPS EVERYWHERE. I OVER-READ THE TEASER RULE.
+
+**Corrected same session, operator caught it.** When community facts first landed on `ListingFacts`,
+coming-soon's `{ ...facts }` spread started carrying `subdivision` into a fact sheet whose every
+other identifying field is deliberately stripped — so I stripped it too, and built a
+`deIdentifyCommunity()` to do it. **That was wrong, and it was wrong in the way that matters: it
+withheld the single most useful fact the email holds.**
+
+The coming-soon recipe suppresses **the DOORSTEP — street, number, ZIP — not the MAP.** "Coming soon
+in Bay Colony" IS the email; it is the line that makes a sphere lean in. Nobody drives to a
+subdivision and knocks on it. I pattern-matched "identifying field → strip it" and never asked what
+the suppression was actually FOR.
+
+**Now: every recipe names the community. No exceptions, and no path to opt out.**
+`deIdentifyCommunity()` and the `deIdentify` option are DELETED from source — `communitySourceLine`
+is single-arg, so no caller can even ask for the name to be dropped (a test asserts the arity).
+coming-soon's framing now explicitly PERMITS the community and the city while still forbidding the
+street, house number, full address and ZIP. The real suppression is untouched and still structural:
+address/city/state/ZIP stripped from the fact sheet, street redacted from the output, and a
+paragraph that STILL carries the street is dropped entirely (`leaksStreet` — which never matched a
+subdivision anyway, so naming the community trips nothing).
+
+982 pass, 0 fail. `next build` clean.
 ## 2026-07-14 (Opus 4.8 · main) — PHASE 4: THE CAMPAIGN SPENDS ITS COLUMNS, AND THE RENDER OVERRULED THE PLAN
 
 **The campaign is no longer a flat stack.** The agent card and the CTA now share ONE row — they

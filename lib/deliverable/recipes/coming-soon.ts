@@ -40,8 +40,19 @@
 // Migrating to the chrome does not weaken any of that. The chrome's photo open-slot alt is
 // `heroLabel` — the CITY — so even the dropzone names no street.
 //
-// Geography still ships, but only at the grain a teaser is allowed: the CITY in the hero
-// and the COUNTY in the scarcity block, both written by code, never by the model.
+// WHAT IS SUPPRESSED IS THE DOORSTEP, NOT THE MAP (07/14/2026). The COMMUNITY ships BY NAME
+// — "coming soon in Bay Colony" is the entire appeal of this email, and a community is not an
+// address: nobody drives to a subdivision and knocks on it. So `facts.community` rides into
+// the narrator intact, and the framing explicitly PERMITS the community and the city while
+// still forbidding the street, the house number, the full address and the ZIP.
+//
+// (This briefly went the other way. When community facts first landed on `ListingFacts`, the
+// `{ ...facts }` spread started carrying `subdivision` into a fact sheet whose every other
+// identifying field was stripped, and the reflex was to strip it too. That was over-reading
+// the rule: the recipe suppresses the HOUSE, not the neighbourhood it is in. Corrected.)
+//
+// Geography ships at the grain a teaser is allowed: the COMMUNITY in the prose, the CITY in
+// the hero, the COUNTY in the scarcity block — the last two written by code, never the model.
 //
 // ── THE REST OF THE SIX ANSWERS (playbook Part 6) ───────────────────────────
 //
@@ -82,7 +93,6 @@ import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import zipCounty from "@/fixtures/swfl-zip-county.json";
 import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
-import { deIdentifyCommunity } from "@/lib/listings/listing-detail";
 import type { RecipeBuildContext } from "./index";
 import type { ChromeBlock, LifecycleChrome } from "@/lib/email/lifecycle-chrome";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
@@ -600,29 +610,27 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
     state: undefined,
     zip: undefined,
     remarks: facts.remarks ? redactStreetLine(facts.remarks, street) : undefined,
-    // THE SPREAD IS THE LEAK. `...facts` now carries `community`, and `community.subdivision`
-    // is "Bay Colony" — a name that identifies the very listing this email exists to withhold.
-    // Every other identifying field on this object is explicitly stripped above; the community
-    // NAME has to be stripped too, or a spread operator quietly undoes the whole recipe.
-    // The amenities themselves are safe and are the best thing a teaser can say: "a gated golf
-    // community with a pool" builds anticipation without pointing at which one.
-    community: deIdentifyCommunity(facts.community),
+    // THE COMMUNITY RIDES, BY NAME. What is withheld is the STREET ADDRESS — the house — not
+    // the community it sits in. "Coming soon in Bay Colony" is the teaser working as intended:
+    // it is exactly the line that makes an agent's sphere lean in, and a buyer cannot walk up
+    // to a community and knock on it. The suppression that matters is still absolute below
+    // (street, number, ZIP — stripped from the facts, redacted out of the output, and a
+    // paragraph that STILL carries the street is dropped entirely by `leaksStreet`).
+    community: facts.community,
   };
 
   const raw = teaserFacts.remarks
     ? await authorListingNarrative(teaserFacts, {
-        // Belt AND braces: the name is already stripped from the facts, and the source line
-        // itself is rendered with its own "do not name the community" instruction.
-        deIdentifyCommunity: true,
         framing:
-          "A COMING-SOON TEASER. This home is not yet on the market and its LOCATION IS " +
-          "DELIBERATELY WITHHELD — that is the point of the email. You must NOT name or " +
-          "hint at a street, a street number, an address, a ZIP code, a subdivision, a " +
-          "city, or a neighborhood, even if one appears in the description you were given; " +
-          "write around them. Tighten the agent's description into two or three sentences " +
-          "of anticipation and close on the fact that it will be shown privately first. " +
-          "Describe ONLY what that description actually says — you may not add a room, a " +
-          "layout, a finish, a view, a builder's intention, or any quality it does not " +
+          "A COMING-SOON TEASER. This home is not yet on the market and its STREET ADDRESS IS " +
+          "DELIBERATELY WITHHELD — that is the point of the email. You must NOT name or hint " +
+          "at a street, a street number, a full address, or a ZIP code, even if one appears " +
+          "in the description you were given; write around them. YOU MAY name the COMMUNITY " +
+          "and the CITY — 'coming soon in Bay Colony' is the whole appeal of this email, and " +
+          "a community is not a doorstep. Tighten the agent's description into two or three " +
+          "sentences of anticipation and close on the fact that it will be shown privately " +
+          "first. Describe ONLY what that description actually says — you may not add a room, " +
+          "a layout, a finish, a view, a builder's intention, or any quality it does not " +
           "state. Do not claim the home is rare or scarce; the email's own figures make " +
           "that case.",
       }).catch(() => null)

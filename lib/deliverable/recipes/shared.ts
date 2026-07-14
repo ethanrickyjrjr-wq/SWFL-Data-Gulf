@@ -154,7 +154,7 @@ export function clearNarrativeSlots(doc: EmailDoc): EmailDoc {
  */
 export async function authorListingNarrative(
   facts: ListingFacts,
-  opts: { framing?: string; context?: string; deIdentifyCommunity?: boolean } = {},
+  opts: { framing?: string; context?: string } = {},
 ): Promise<string | null> {
   // Nothing real to describe → leave the slot empty (never improvise a house).
   if (!facts.price && !facts.beds && !facts.sqft) return null;
@@ -180,7 +180,7 @@ export async function authorListingNarrative(
     // read the page — and absent must stay SILENT: the HARD RULES below gate the vocabulary on
     // this fact being present, so "no community line" means the model may not mention golf at all,
     // NOT that the community lacks it.
-    communitySourceLine(facts.community, { deIdentify: opts.deIdentifyCommunity }),
+    communitySourceLine(facts.community),
     opts.context && `Background context (NOT the subject of this email):\n${opts.context}`,
   ].filter(Boolean);
 

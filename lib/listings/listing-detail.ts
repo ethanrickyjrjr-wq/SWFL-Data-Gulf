@@ -166,14 +166,11 @@ export function parseListingDetail(html: string, sourceUrl: string): ListingDeta
  * the community has one — NOT that this home has a private one. The word-guards match words and
  * cannot tell those apart, so the distinction has to be carried in the source text itself.
  *
- * `opts.deIdentify` drops the community NAME and keeps the amenities — for the coming-soon
- * teaser, whose entire job is withholding the location. "A gated golf community with a pool"
- * is safe; "Bay Colony" hands over the listing.
+ * THE NAME ALWAYS SHIPS. Every recipe names the community — including the coming-soon teaser.
+ * That email withholds the DOORSTEP (street, number, ZIP), not the map: "coming soon in Bay
+ * Colony" is the whole appeal, and nobody drives to a subdivision and knocks on it.
  */
-export function communitySourceLine(
-  f: ListingDetailFacts | undefined,
-  opts: { deIdentify?: boolean } = {},
-): string | null {
+export function communitySourceLine(f: ListingDetailFacts | undefined): string | null {
   if (!f || !f.ok) return null;
   const parts: string[] = [];
   if (f.communityFeatures.length)
@@ -182,28 +179,14 @@ export function communitySourceLine(
   if (f.otherAmenities.length) parts.push(`Also noted: ${f.otherAmenities.join(", ")}`);
   if (parts.length === 0) return null;
 
-  const where = !opts.deIdentify && f.subdivision ? ` (${f.subdivision})` : "";
-  const naming = opts.deIdentify
-    ? ` DO NOT NAME THE COMMUNITY, and do not name any amenity that would identify it — you may ` +
-      `say it is gated, or that it has golf or a pool, and nothing that points to WHICH one.`
-    : "";
+  const where = f.subdivision ? ` (${f.subdivision})` : "";
 
   return (
-    `THE COMMUNITY${where}, from the listing's own detail page. THESE DESCRIBE THE COMMUNITY, ` +
-    `NOT THIS HOUSE — a pool here is the COMMUNITY's pool, and golf here means the COMMUNITY ` +
-    `has golf. You may say the community has them. You may NOT say this home has them.${naming}` +
-    `\n${parts.join("\n")}`
+    `THE COMMUNITY${where}, from the listing's own detail page. NAME IT. THESE DESCRIBE THE ` +
+    `COMMUNITY, NOT THIS HOUSE — a pool here is the COMMUNITY's pool, and golf here means the ` +
+    `COMMUNITY has golf. You may say the community has them. You may NOT say this home has ` +
+    `them.\n${parts.join("\n")}`
   );
-}
-
-/** Strip the identifying NAME, keep the amenities. For the coming-soon teaser, which spreads
- *  `...facts` — so without this the subdivision rides straight into the model's context and the
- *  whole point of the email (the location is withheld) is lost to a spread operator. */
-export function deIdentifyCommunity(
-  f: ListingDetailFacts | undefined,
-): ListingDetailFacts | undefined {
-  if (!f) return undefined;
-  return { ...f, subdivision: null };
 }
 
 // NO FETCHER LIVES HERE, DELIBERATELY.
