@@ -1,3 +1,21 @@
+## 2026-07-14 (Sonnet 5 · main) — HANDOFF WRITTEN FOR THE 4 REMAINING DOCTOR REDS.
+
+Follow-up to the earlier doctor-gate entry (17 red -> ~4 red, commit `e6490b03`). Operator asked
+for a handoff on the remaining 4 (`brevitas_listings`, `crexi_listings`, `noaa_ghcn_rainfall`,
+`listing_lifecycle`) and to confirm none of them need a night-schedule fix. Checked: none are
+daily — brevitas/crexi are weekly, noaa_ghcn_rainfall is monthly, all three already sit inside the
+documented 11:00-14:00 UTC stagger band (`docs/standards/pipeline-freshness.md` §3);
+`listing_lifecycle`'s actual daily cadence runs via `nightly-chain.yml` at 04:23 UTC (12:23 AM ET,
+the genuine overnight slot) — already correct. Nothing to fix on timing.
+
+Wrote `docs/handoff/2026-07-14-doctor-red-baseline-handoff.md`. New finding while researching
+crexi_listings for the doc: its 07/12 failure is `Blocked by anti-bot protection: Cloudflare JS
+challenge` — landing within days of brevitas's own block starting (06/28). Flagged as likely the
+SAME root cause (GitHub Actions datacenter IP reputation with Cloudflare, same class of problem
+`dbpr_sirs`/`qix.py` already hit and left a `CRAWL4AI_PROXY` residential-proxy lane unprovisioned
+for) rather than two independent site changes — the handoff recommends checking that connection
+before writing two separate scraper fixes.
+
 ## 2026-07-14 (Sonnet 5 · main) — FOUND WHY "SILENT" REBUILD FAILURES ARE SILENT: exit-code gate never ran for targeted single-pack rebuilds.
 
 Ten-cluster investigate-only fan-out over the 200+ open-checks ledger surfaced
