@@ -99,6 +99,28 @@ base value + one falsifier in visible copy (first call site:
 `components/charts/TierProjectionChart.tsx`). Not compatible with Brush (upstream docs) —
 Brush is not vendored.
 
+**Explicit `yDomain` + cadence-aware date labels (2026-07-14)** — two additive patches to shared
+plumbing, both real bugs, both latent in EVERY bklit time-series chart:
+
+1. **`yDomain?: [number, number]`** on `line-chart.tsx` → `time-series-chart-shell.tsx`. The shell gives
+   any all-positive series a ZERO BASELINE (`resolveTimeSeriesYDomain`). That is right for an area chart
+   — the fill's height IS the magnitude — and ruinous for a zoomed line: two years of Cape Coral medians
+   live between $350k and $410k, so a real $1,201-a-month slide rendered as a FLAT LINE. An explicit
+   domain now wins. **The obligation travels with it:** a caller that truncates the axis MUST render a
+   `<YAxis />` and must not draw a filled area (an area whose base is not zero overstates every movement
+   by the height of the crop). A cropped axis that doesn't say where it starts is the oldest chart lie
+   there is.
+2. **`pickDateFmt`** in `chart-formatters.ts`, replacing the hardcoded `shortDateFmt` in the shell's
+   `dateLabels`. `shortDateFmt` is month+day with NO YEAR, so an eleven-year axis rendered
+   `Jun 29 · Mar 30 · Dec 30` — five labels that read as five dates inside one year. The test is
+   **CADENCE, not span**: a span threshold still leaves a 12-month window yearless (and it spans two
+   calendar years), and lowering it far enough to catch that would hit short DAILY series, where
+   month+year collapses every tick in a month to one string and the axis dedupes them away (`seenLabels`
+   in `x-axis.tsx`) — losing ticks to fix years. Median point spacing ≥ 20 days ⇒ monthly ⇒ the day is
+   noise and the year is essential.
+
+Both worth upstreaming.
+
 **FitGlow — the backlit fit, added to the underlay slot (2026-07-14)** — new file
 `fit-glow.tsx` (ours, not upstream), plus a ONE-LINE additive patch to `chart-child-passthrough.ts`
 adding `"FitGlow"` to `UNDERLAY_COMPONENT_NAMES`. The shell routes children to render slots BY

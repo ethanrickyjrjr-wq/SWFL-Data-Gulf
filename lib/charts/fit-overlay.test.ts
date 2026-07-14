@@ -6,7 +6,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { fitLine, type FitPoint } from "./fit-line";
-import { fitWindows, trendVerdict, type Verdict } from "./series-fit";
+import { fitWindows, trendVerdict, windowRead, type Verdict } from "./series-fit";
 import {
   fitOverlay,
   hydrateOverlay,
@@ -14,6 +14,8 @@ import {
   overlayClaims,
   serializeOverlay,
   verdictAgreesWithOverlay,
+  windowClaims,
+  windowViews,
 } from "./fit-overlay";
 import { fitTrendSvg } from "./svg/fit-trend";
 
@@ -261,6 +263,91 @@ describe("the observed series is drawn IN FRONT of the fit — the z-order is th
     const fitted = o.long.line!.to.y;
     expect(Math.round(last)).not.toBe(Math.round(fitted)); // the fixture must actually differ
     expect(svg).toContain(`$${Math.round(last / 1000)}k`);
+  });
+});
+
+describe("THE WINDOW MENU — every row earns its own line AND its own sentence", () => {
+  const pts = series(132, 180_000, 1_900, 25_000);
+  const fits = fitWindows(pts, ASOF);
+  const views = windowViews(fits);
+
+  test("the menu is exactly what fitWindows earned — never a synthesized row", () => {
+    expect(views.map((v) => v.window)).toEqual(fits.map((f) => f.window));
+    // Nothing thin, short-reaching, or excluded-nothing gets a button.
+    for (const f of fits) expect(f.fit.n).toBeGreaterThanOrEqual(12);
+  });
+
+  test("EVERY row has a line XOR a fan — never both, never neither", () => {
+    for (const v of views) {
+      const hasLine = !!v.layer.line;
+      const hasFan = !!v.layer.fan;
+      expect(hasLine !== hasFan).toBe(true);
+      // A fan may never leak a direction — that is the sign we ruled unreadable.
+      if (hasFan) expect(v.layer.direction).toBeNull();
+    }
+  });
+
+  test("NO WINDOW'S FALSIFIER IS ALREADY TRUE THE MOMENT IT IS PRINTED", () => {
+    // The phase-1 bug, one window over: a claim of "$1,500/mo" under a falsifier saying
+    // "breaks below $1,674/mo". A slope sits STRICTLY inside its own interval, so keying
+    // each read to its OWN window makes this construction impossible to violate. Proven,
+    // not asserted.
+    for (const f of fits) {
+      if (!f.fit.established) continue;
+      const nearestZero = f.fit.slope > 0 ? f.fit.ci[0] : f.fit.ci[1];
+      expect(Math.abs(f.fit.slope)).toBeGreaterThan(Math.abs(nearestZero));
+    }
+  });
+
+  test("an unestablished window quotes its band ONLY in the falsifier, never in the claim", () => {
+    // Load-bearing against the gate: the band falsifier has no comparative shape, so the
+    // only thing keeping it settled is `unanchored-number` — its edges must appear in NO
+    // other settled sentence. Quote an edge in the claim and the falsifier walks through
+    // unsettled and gets deleted.
+    const usd0 = (n: number) => `$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
+    for (const f of fits) {
+      if (f.fit.established) continue;
+      const { claim, falsifier } = windowRead(f);
+      // The BAND EDGES are the numerals that matter. ("last 12 months" carries a numeral
+      // too — that is the window's NAME, not a pace, and anchoring it costs nothing.)
+      expect(claim.sentence).not.toContain(usd0(f.fit.ci[0]));
+      expect(claim.sentence).not.toContain(usd0(f.fit.ci[1]));
+      expect(falsifier.sentence).toContain(usd0(f.fit.ci[0]));
+      expect(falsifier.sentence).toContain(usd0(f.fit.ci[1]));
+      expect(falsifier.valueLow).not.toBeNull();
+      // And no comparative shape — "more than"/"less than" is what the gate reads as a
+      // threshold. A band is not a threshold and must not be dressed as one.
+      expect(falsifier.sentence).not.toContain("more than");
+      expect(falsifier.sentence).not.toContain("less than");
+    }
+  });
+
+  test("BOTH sentences go to the gate, per window", () => {
+    for (const f of fits) {
+      const claims = windowClaims(f);
+      expect(claims).toHaveLength(2);
+      expect(claims[0].sentence).not.toBe(claims[1].sentence);
+    }
+  });
+
+  test("the ex-boom row still discloses the exclusion in its label", () => {
+    const exb = views.find((v) => v.window === "ex-boom");
+    if (exb) {
+      expect(exb.label).toContain("excluding the 2021–2022 run-up");
+      expect(exb.claim).toContain("excluding the 2021–2022 run-up");
+    }
+  });
+
+  test("PRINT THE MENU — every row, as a reader would see it", () => {
+    console.log(`\n──── THE WINDOW MENU (${views.length} rows earned) ────`);
+    for (const v of views) {
+      console.log(
+        `\n  [${v.window}] ${v.layer.line ? "LINE" : "FAN "}  ${v.layer.direction ?? "no direction"}`,
+      );
+      console.log(`     ${v.claim}`);
+      console.log(`     ${v.falsifier}`);
+    }
+    expect(views.length).toBeGreaterThan(0);
   });
 });
 

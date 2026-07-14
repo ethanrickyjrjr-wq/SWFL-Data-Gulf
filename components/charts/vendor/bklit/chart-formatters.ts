@@ -9,40 +9,50 @@ export const monthYearFmt = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-/** Eighteen months, in ms. Past this, a label without a year is guessing. */
-const YEARLESS_LABEL_LIMIT_MS = 18 * 30 * 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+/** Points spaced at least this far apart are a MONTHLY series, not a daily one. */
+const MONTHLY_CADENCE_DAYS = 20;
 
 /**
  * PICK A DATE LABEL THAT CANNOT LIE ABOUT ITS OWN SPAN.
  *
- * `shortDateFmt` is month + day and carries NO YEAR, which is correct for the short,
- * fresh series these charts were first built for. On a long one it is a trap: /desk's
- * home-price panel spans ELEVEN YEARS, and its axis rendered
+ * `shortDateFmt` is month + day and carries NO YEAR, which is correct for the short, fresh,
+ * DAILY series these charts were first built for. On a monthly series it is a trap. /desk's
+ * home-price panel spans eleven years and its axis rendered
  *
  *     Jun 29 · Mar 30 · Dec 30 · Aug 30 · May 30
  *
- * — five labels that read as five dates inside a single year, on a chart whose entire
- * subject is a decade of movement. The day-of-month is noise there (these are monthly
- * closing figures; "29" vs "30" means nothing) and the year, the one thing a reader
- * needs, was the thing omitted.
+ * — five labels that read as five dates inside one year, on a chart whose whole subject is a
+ * decade of movement. The day-of-month there is NOISE (these are month-end closing figures;
+ * "29" vs "30" means nothing at all) and the year — the one thing a reader actually needs —
+ * was the thing omitted.
  *
- * So the format follows the DOMAIN, not the chart type: under eighteen months, days
- * matter and the year is obvious; past that, the year matters and the day never did.
- * Every bklit time-series chart inherits this — the bug was latent in all of them and
- * only became visible when a panel finally got long enough to expose it.
+ * THE TEST IS CADENCE, NOT SPAN. Span was the obvious rule and it is wrong twice over. A
+ * 12-month window is only ~365 days, so a span threshold leaves it labelled "Jun 29 … May 30"
+ * — still yearless, still spanning two calendar years, still ambiguous. And pushing the
+ * threshold down to catch it would then hit SHORT DAILY series, where month+year collapses
+ * every tick in a month to one string and the axis DEDUPES them away (see `seenLabels` in
+ * x-axis.tsx) — an axis losing its ticks to fix an axis losing its years.
+ *
+ * Cadence answers both. If the points are a month or more apart, the day is meaningless and
+ * the year is essential. If they are daily, the day is the point. Every bklit time-series
+ * chart inherits this; the bug was latent in all of them and only surfaced when a panel
+ * finally got long enough to show it.
  */
 export function pickDateFmt(dates: readonly Date[]): Intl.DateTimeFormat {
-  if (dates.length < 2) return shortDateFmt;
-  let lo = Number.POSITIVE_INFINITY;
-  let hi = Number.NEGATIVE_INFINITY;
-  for (const d of dates) {
-    const t = d?.getTime?.();
-    if (typeof t !== "number" || Number.isNaN(t)) continue;
-    if (t < lo) lo = t;
-    if (t > hi) hi = t;
-  }
-  if (!Number.isFinite(lo) || !Number.isFinite(hi)) return shortDateFmt;
-  return hi - lo > YEARLESS_LABEL_LIMIT_MS ? monthYearFmt : shortDateFmt;
+  const ts = dates
+    .map((d) => d?.getTime?.())
+    .filter((t): t is number => typeof t === "number" && !Number.isNaN(t))
+    .sort((a, b) => a - b);
+  if (ts.length < 2) return shortDateFmt;
+
+  // The MEDIAN gap, not the mean — one hole in a daily series must not promote it to monthly.
+  const gaps: number[] = [];
+  for (let i = 1; i < ts.length; i++) gaps.push(ts[i] - ts[i - 1]);
+  gaps.sort((a, b) => a - b);
+  const median = gaps[Math.floor(gaps.length / 2)];
+
+  return median >= MONTHLY_CADENCE_DAYS * DAY_MS ? monthYearFmt : shortDateFmt;
 }
 
 export const weekdayDateFmt = new Intl.DateTimeFormat("en-US", {

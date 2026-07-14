@@ -88,7 +88,17 @@ function resolveTimeSeriesYDomain(
   data: Record<string, unknown>[],
   dataKeys: string[],
   yScaleDomainMax: number | undefined,
+  yDomain: [number, number] | undefined,
 ): [number, number] {
+  // AN EXPLICIT DOMAIN WINS. Everything below assumes an all-positive series wants a ZERO
+  // BASELINE — correct for an area chart, where the fill's height IS the magnitude, and
+  // ruinous for a zoomed price line: two years of Cape Coral medians live between $350k and
+  // $410k, and against a zero baseline a real $1,201/mo slide renders as a flat line. The
+  // caller that zooms is the caller that knows, so it may say so — and when it does it takes
+  // on the obligation that comes with a truncated axis: SHOW THE Y LABELS. An axis that does
+  // not start at zero and does not say where it starts is the oldest chart lie there is.
+  if (yDomain) return yDomain;
+
   if (yScaleDomainMax != null && yScaleDomainMax > 0) {
     return [0, yScaleDomainMax * 1.1];
   }
@@ -138,6 +148,12 @@ export interface TimeSeriesChartInnerProps {
   composedStackGap?: number;
   /** When set, drives the y-axis max instead of scanning `lines` (e.g. stacked bar totals). */
   yScaleDomainMax?: number;
+  /**
+   * Explicit [min, max]. Overrides the zero-baseline default — for zoomed views where the
+   * variation is small next to the level. A caller that uses this MUST render a `<YAxis />`:
+   * a truncated axis that doesn't say where it starts is the oldest chart lie there is.
+   */
+  yDomain?: [number, number];
   /** Loading vs ready — drives chart phase until transition orchestration lands. */
   chartStatus?: ChartStatus;
   loadingLabel?: string;
@@ -183,6 +199,7 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
   composedStackOffsets,
   composedStackGap,
   yScaleDomainMax,
+  yDomain,
   chartStatus = DEFAULT_CHART_STATUS,
   loadingLabel,
   yDomainTween = true,
@@ -201,9 +218,10 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
       const axisGroups = groupLinesByYAxisId(lines);
       const usesDefaultOnly = axisGroups.size === 1 && axisGroups.has(DEFAULT_Y_AXIS_ID);
       const domainMax = usesDefaultOnly && yScaleDomainMax != null ? yScaleDomainMax : undefined;
-      return resolveTimeSeriesYDomain(sourceData, dataKeys, domainMax);
+      const explicit = usesDefaultOnly ? yDomain : undefined;
+      return resolveTimeSeriesYDomain(sourceData, dataKeys, domainMax, explicit);
     },
-    [lines, yScaleDomainMax],
+    [lines, yScaleDomainMax, yDomain],
   );
 
   const skeletonData = useMemo(() => {

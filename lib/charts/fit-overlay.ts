@@ -50,7 +50,7 @@
 // the recent line falls, and the turn the copy claims is a thing you can point at.
 
 import type { Fit, FitPoint } from "./fit-line";
-import type { Verdict, WindowFit } from "./series-fit";
+import { windowRead, type FitWindow, type Verdict, type WindowFit } from "./series-fit";
 
 /** A straight line in DATA space. Two points is all a straight line has. */
 export interface FitCurve {
@@ -211,6 +211,64 @@ export function verdictAgreesWithOverlay(verdict: Verdict, overlay: FitOverlay):
   return falsifierNamesABand ? bandWindow.fan !== null : bandWindow.line !== null;
 }
 
+// ── THE WINDOW MENU ─────────────────────────────────────────────────────────
+//
+// The engine's opening thesis is that ONE FIT IS A LIAR BY OMISSION — Cape Coral runs
+// +$1,912/mo over its full history and −$1,201/mo over the last twenty-four months, and
+// BOTH ARE TRUE. The insight lives in the comparison, which is why `fitWindows` fits a
+// MENU rather than picking a window.
+//
+// Until now the desk drew two rows of that menu and threw the other four away. A window
+// view is one row, drawn on its own: the chart zooms to that window's span, draws that
+// window's fit, and prints that window's own read.
+//
+// TWO RULES TRAVEL WITH IT.
+//
+// 1. RENDER THE MENU YOU ARE HANDED. `fitWindows` has already dropped every window this
+//    series does not honestly earn — under 12 points, not reaching back to its cut date,
+//    or (for `ex-boom`) excluding nothing. A renderer NEVER synthesizes a missing row. If
+//    a city earns two windows, the menu is two buttons, and that is the honest answer.
+//
+// 2. EVERY ROW CARRIES ITS OWN SENTENCE. A drawn line IS a trajectory — a reader follows
+//    it and hears "climbing" whether or not a word says so. A window is drawable only
+//    because `windowRead` licensed it, and its falsifier ships with it. A menu without
+//    per-window prose is a fistful of ungated trajectory claims wearing the costume of a
+//    zoom control.
+
+export interface WindowView {
+  window: FitWindow;
+  /** The window's own disclosure label. `ex-boom`'s names the exclusion; it travels. */
+  label: string;
+  /** Line if this window's direction is established, fan if not. Never both, never neither. */
+  layer: FitLayer;
+  claim: string;
+  falsifier: string;
+}
+
+/**
+ * The whole menu, each row read on its own terms. Same `layerFor` branch as the verdict
+ * overlay — there is still exactly ONE place in this codebase that decides whether a line
+ * may be drawn, and this is not a second one.
+ */
+export function windowViews(fits: readonly WindowFit[]): WindowView[] {
+  return fits.map((w) => {
+    const read = windowRead(w);
+    return {
+      window: w.window,
+      label: w.label,
+      layer: layerFor(w),
+      claim: read.claim.sentence,
+      falsifier: read.falsifier.sentence,
+    };
+  });
+}
+
+/** The two sentences for ONE window, in the shape the gate demands. Always pass BOTH. */
+export function windowClaims(w: WindowFit) {
+  const read = windowRead(w);
+  return [read.claim, read.falsifier];
+}
+
 // ── THE TRANSPORT ───────────────────────────────────────────────────────────
 //
 // The overlay is built on the SERVER (that is where the lake is) and painted on the
@@ -276,6 +334,38 @@ export function hydrateOverlay(o: SerializedFitOverlay): FitOverlay {
     falsifier: o.falsifier,
     direction: o.direction,
   };
+}
+
+export interface SerializedWindowView {
+  window: FitWindow;
+  label: string;
+  layer: SerializedFitLayer;
+  claim: string;
+  falsifier: string;
+  /** The window's span, ISO — what the chart zooms to. `ex-boom` spans the full history. */
+  from: string;
+  to: string;
+}
+
+export function serializeWindowViews(views: readonly WindowView[]): SerializedWindowView[] {
+  return views.map((v) => {
+    // Every layer is a line OR a fan, never neither — `layerFor` guarantees it — so one of
+    // these two is always present and the span is never invented.
+    const curve = v.layer.line ?? v.layer.fan!.hi;
+    return {
+      window: v.window,
+      label: v.label,
+      layer: outLayer(v.layer),
+      claim: v.claim,
+      falsifier: v.falsifier,
+      from: curve.from.when.toISOString(),
+      to: curve.to.when.toISOString(),
+    };
+  });
+}
+
+export function hydrateWindowLayer(v: SerializedWindowView): FitLayer {
+  return inLayer(v.layer);
 }
 
 /**

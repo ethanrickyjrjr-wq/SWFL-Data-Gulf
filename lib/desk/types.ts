@@ -7,7 +7,7 @@
 // with the quotable one-liner by B. Everything here is JSON-serializable
 // (server loaders → client zone components cross the RSC boundary).
 
-import type { SerializedFitOverlay } from "@/lib/charts/fit-overlay";
+import type { SerializedFitOverlay, SerializedWindowView } from "@/lib/charts/fit-overlay";
 import type { MetricDef } from "@/lib/landing/home-map-types";
 
 export type DeskDirection = "up" | "down" | "flat";
@@ -79,6 +79,11 @@ export interface HeroCitySeries {
    *  series is too short to fit honestly (< 12 monthly points), which is a real
    *  answer and not an error: we draw no trend rather than a thin one. */
   fit?: SerializedFitOverlay;
+  /** THE WINDOW MENU — every window this city's series HONESTLY EARNS, each with its own
+   *  fitted layer and its own two sentences. `fitWindows` has already dropped the ones it
+   *  does not earn; the UI renders exactly these rows and NEVER synthesizes a missing one.
+   *  A city with a short series gets a short menu, and that is the honest answer. */
+  windows?: SerializedWindowView[];
 }
 
 export interface HeroData {

@@ -220,6 +220,83 @@ export interface Verdict {
 const usd0 = (n: number) => `$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
 
 /**
+ * ONE WINDOW, READ ON ITS OWN TERMS — the sentence a single row of the menu earns.
+ *
+ * `trendVerdict` compares TWO windows and calls the market. This does not call anything:
+ * it reads one window, in isolation, because a reader who has just clicked "last 5 years"
+ * is asking about the last five years and nothing else.
+ *
+ * IT IS STILL A LICENCE. A drawn line IS a trajectory — a reader follows it and hears
+ * "climbing" whether or not a word says so — so every window a renderer is allowed to
+ * draw must arrive with the sentence that permits it and the falsifier that stakes it.
+ * A window menu without per-window prose would be four ungated trajectory claims wearing
+ * the costume of a zoom control.
+ *
+ * The two constructions are the SAME ones `trendVerdict` uses, deliberately:
+ *
+ *   established    a rate, and a one-sided threshold keyed to THIS window's own interval.
+ *                  A slope always sits strictly inside its own CI, so |slope| > |bound
+ *                  nearest zero| ALWAYS — the falsifier cannot be already-true when
+ *                  printed. (That is the exact bug that shipped in phase 1, from keying a
+ *                  short-run claim to a long-run bound. Every read here stands on its own
+ *                  window, so the mismatch has nowhere to enter.)
+ *
+ *   not            NO DIRECTION, and the band quoted AS A BAND. The claim carries no
+ *                  numerals at all — and that is load-bearing, not terse. The band
+ *                  falsifier has no comparative shape, so the only thing keeping it
+ *                  settled is `unanchored-number`: its edges appear in no other settled
+ *                  sentence. Quote a band edge in the CLAIM as well and you hand the gate
+ *                  that numeral as an anchor, and the falsifier walks through unsettled
+ *                  and is deleted. The two sentences are load-bearing against each other.
+ */
+export function windowRead(w: WindowFit): {
+  claim: SettledClaim;
+  falsifier: SettledClaim & { value: number; valueLow: number | null };
+} {
+  const { fit, label } = w;
+  // FRONTED AND CLOSED with its own comma — `ex-boom`'s label already contains one
+  // ("full history, excluding the 2021–2022 run-up"), and a bare prepositional slot
+  // ships a run-on for it. Same construction, same reason, as trendVerdict.
+  const across = `Across the ${label},`;
+
+  if (!fit.established) {
+    const [lo, hi] = fit.ci; // lo <= 0 <= hi, or `established` would be true
+    const sentence =
+      `${across} this market does not establish a direction either way — over this ` +
+      `stretch its pace never separates from flat.`;
+    const falsSentence =
+      `This read breaks the first time this window settles on a direction of its own — ` +
+      `today its pace still runs anywhere from a ${usd0(lo)} a month slide to a ` +
+      `${usd0(hi)} a month climb, which is why we do not call one.`;
+    return {
+      claim: { sentence, anchors: numeralsIn(sentence) },
+      falsifier: {
+        value: hi,
+        valueLow: lo,
+        sentence: falsSentence,
+        anchors: numeralsIn(falsSentence),
+      },
+    };
+  }
+
+  const up = fit.slope > 0;
+  const climb = up ? "climbing" : "falling";
+  const beat = up ? "climb" : "fall";
+  // The bound NEAREST ZERO — the slowest pace this window still supports.
+  const value = up ? fit.ci[0] : fit.ci[1];
+  const sentence =
+    `${across} this market has been ${climb} ${usd0(fit.slope)} a month ` +
+    `(${fit.from} to ${fit.to}).`;
+  const falsSentence =
+    `This read breaks if this window ${beat}s by less than ${usd0(value)} a month — ` +
+    `the slowest pace it still supports.`;
+  return {
+    claim: { sentence, anchors: numeralsIn(sentence) },
+    falsifier: { value, valueLow: null, sentence: falsSentence, anchors: numeralsIn(falsSentence) },
+  };
+}
+
+/**
  * The comparison across windows — COMPUTED. The model never sees the window table
  * and therefore cannot draw its own trajectory between rows of it. (sphere-weekly
  * wrote "the gap is widening" from a single level; that is the failure this stops.)

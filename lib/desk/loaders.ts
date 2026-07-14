@@ -14,7 +14,12 @@ import {
   type MarketTempRow,
 } from "@/lib/charts/market-temperature-series";
 import { loadMetros } from "@/lib/charts/gallery-loaders";
-import { fitOverlay, serializeOverlay } from "@/lib/charts/fit-overlay";
+import {
+  fitOverlay,
+  serializeOverlay,
+  serializeWindowViews,
+  windowViews,
+} from "@/lib/charts/fit-overlay";
 import { fitWindows, trendVerdict } from "@/lib/charts/series-fit";
 import { resolveSoldPrice } from "@/lib/listings/sold-price";
 import {
@@ -723,6 +728,10 @@ function buildHeroFromSold(
           }
         : undefined,
       fit: verdict ? serializeOverlay(fitOverlay(verdict)) : undefined,
+      // THE MENU THIS SERIES EARNED — nothing more. `fitWindows` already dropped every
+      // window that would wear a label outrunning its data, so whatever survives here is
+      // exactly what the UI may offer. It never adds a row back.
+      windows: fits.length > 0 ? serializeWindowViews(windowViews(fits)) : undefined,
     });
   }
   if (cities.length === 0) return null;

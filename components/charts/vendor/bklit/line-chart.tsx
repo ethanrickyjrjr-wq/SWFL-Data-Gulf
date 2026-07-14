@@ -30,6 +30,12 @@ import { TimeSeriesChartInner } from "./time-series-chart-shell";
 export interface LineChartProps {
   /** Data array - each item should have a date field and numeric values */
   data: Record<string, unknown>[];
+  /**
+   * Explicit y [min, max] — overrides the zero-baseline default. For zoomed views where the
+   * variation is small next to the level (two years of a $370k price move ~$29k, and against
+   * a zero baseline that renders FLAT). Callers using this MUST render a `<YAxis />`.
+   */
+  yDomain?: [number, number];
   /** Key in data for the x-axis (date). Default: "date" */
   xDataKey?: string;
   /** Chart margins */
@@ -151,6 +157,7 @@ interface ChartInnerProps {
   loadingLabel?: string;
   yDomainTweenDuration: number;
   yDomainTween: boolean;
+  yDomain?: [number, number];
   xDomain?: [Date, Date];
   xDomainSlotCount?: number;
   tweenYDomainOnXDomainChange?: boolean;
@@ -173,6 +180,7 @@ function ChartInner({
   loadingLabel,
   yDomainTweenDuration,
   yDomainTween,
+  yDomain,
   xDomain,
   xDomainSlotCount,
   tweenYDomainOnXDomainChange,
@@ -207,6 +215,7 @@ function ChartInner({
       xDataKey={xDataKey}
       xDomain={xDomain}
       xDomainSlotCount={xDomainSlotCount}
+      yDomain={yDomain}
       yDomainTween={yDomainTween}
       yDomainTweenDuration={yDomainTweenDuration}
     >
@@ -229,6 +238,7 @@ export function LineChart({
   loadingLabel,
   yDomainTweenDuration = DEFAULT_Y_DOMAIN_TWEEN_MS,
   yDomainTween = true,
+  yDomain,
   xDomain,
   xDomainSlotCount,
   tweenYDomainOnXDomainChange = false,
@@ -279,6 +289,7 @@ export function LineChart({
           xDataKey={xDataKey}
           xDomain={xDomain}
           xDomainSlotCount={xDomainSlotCount}
+          yDomain={yDomain}
           yDomainTween={yDomainTween}
           yDomainTweenDuration={yDomainTweenDuration}
         >
@@ -317,6 +328,7 @@ export function LineChart({
             xDataKey={xDataKey}
             xDomain={xDomain}
             xDomainSlotCount={xDomainSlotCount}
+            yDomain={yDomain}
             yDomainTween={yDomainTween}
             yDomainTweenDuration={yDomainTweenDuration}
           >

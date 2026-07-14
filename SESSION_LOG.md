@@ -1,3 +1,32 @@
+## 2026-07-14 (Sonnet 5 · main) — SOCIAL DESIGN ROOT HANDOFF: THE TWO UNBLOCKED ITEMS
+
+Worked the `docs/superpowers/handoffs/2026-07-14-social-design-root-handoff.md` "not done" table.
+Of 6 checks, 4 stayed correctly blocked (`social_templates_migrate_to_type_system` waits on the Round-2
+template rebuild; `social_render_engine_off_system` is an appearance change needing operator look;
+`brand_has_no_grey_scale` is an operator/design call — asked, didn't invent; `email_blocks_colour_unfenced`
+is downstream of the grey ramp). Shipped the 2 that were genuinely unblocked, both zero-appearance-change:
+
+- **`email_social_share_type_root`** — new `lib/brand/weight.ts` holds the WEIGHT ladder (600/500/400/500,
+  byte-identical between email and social per the handoff) and the composite `TypeStep` shape
+  (fontSize+lineHeight+fontWeight together — the same invariant that stopped email's stat-clipping bug).
+  `lib/email/blocks/scale.ts` and `lib/social/design/system.ts` both import it now (email spreads in its
+  own `mono: 500`, which has no social equivalent). Did NOT unify px or role names per the handoff's
+  explicit instruction. `lib/brand/weight.test.ts` drift-guards the two re-exports.
+- **`social_card_reads_brand_root`** — `lib/charts/social-card.ts`'s `TEAL`/`NAVY` now read
+  `BRAND.teal`/`BRAND.midnight` from `lib/brand/tokens.ts` instead of hand-typed hex. `GREY` (`#6B7280`)
+  deliberately left alone — it waits on the grey-ramp decision, adding one here would be a fourth
+  invented grey.
+
+Verified: `bun test` (lib/brand, lib/email/blocks, lib/social/design, lib/charts) all green, `tsc --noEmit`
+clean on touched files (repo has pre-existing unrelated errors in `lib/deliverable/recipes/coming-soon.ts`
+from a concurrent session's uncommitted work — not touched), eslint clean including the no-raw-hex fence.
+
+Both checks closed with evidence. Next: operator ruling on `brand_has_no_grey_scale` unblocks the
+biggest remaining item, `email_blocks_colour_unfenced` (30 raw hexes in `lib/email/blocks/*`, only 2
+brand tokens).
+
+---
+
 ## 2026-07-14 (Opus 4.8 · main) — THE COMMUNITY DATA: GOLF AND THE POOL WERE ON A PAGE WE ALREADY FETCH
 
 **Operator, furious, was right.** "We brought in all the data on communities and golf and amenities —
@@ -76,6 +105,56 @@ to brand tokens — a pure dedupe, zero appearance change.
 **Live appearance changes now on main:** unbranded social accent `#0ea5b7` → `#3dc9c0` (branded
 projects unaffected — this only ever governed the fallback); unbranded social text `#ffffff` →
 `#f0ede6`; Konva loading placeholder → `--gulf-slate-hi`.
+
+## 2026-07-14 (Opus 4.8 · main) — THE WINDOW MENU: WE WERE COMPUTING SIX FITS AND DRAWING TWO
+
+Operator asked whether we could focus on fewer years — was there a toggle? There wasn't, and that was
+why the recent turn was a sliver: the 24-month line is 18% of an eleven-year axis. But the engine was
+already computing the answer and **throwing it away** — `fitWindows` fits a menu of six windows and the
+desk drew two of them. All three cities earn all six.
+
+**A drawn line IS a trajectory.** A reader follows it and hears "climbing" whether or not a word says so.
+So the menu is not a zoom control — every row is a new claim, and every row ships its own claim AND its
+own falsifier (`windowRead`, `lib/charts/series-fit.ts`). Established → a rate plus a one-sided threshold
+keyed to **that window's own interval** (a slope sits strictly inside its own CI, so the falsifier
+**cannot** be already-true when printed — the exact bug phase 1 shipped by keying a short-run claim to a
+long-run bound). Not established → **no direction**, band quoted as a band, and the claim carries no band
+numerals at all (quote an edge in the claim and the gate anchors it, and the falsifier walks through
+unsettled and gets deleted).
+
+Still exactly ONE place decides whether a line may be drawn — `layerFor` in `fit-overlay.ts`. The menu
+calls it. It did not get its own copy of the branch.
+
+**The zoom turned out to be a chart-honesty problem, not a UI problem.** bklit gives any all-positive
+series a ZERO BASELINE — right for an area chart, where the fill's height IS the magnitude, and ruinous
+for a zoomed price line: two years of Cape Coral lives between $350k and $410k, so a real **$1,201/mo
+slide rendered as a FLAT LINE**. Zooming in to see the turn and being shown a flat line is worse than not
+zooming. So a zoomed window truncates the axis and takes the obligation that comes with it: **Y LABELS
+ON** (a cropped axis that doesn't say where it starts is the oldest chart lie there is) and **NO FILL**
+(an area whose base isn't zero overstates every movement by the height of the crop). Zoomed views are
+lines. Vendor patch: explicit `yDomain` on `line-chart` → the shared shell, logged in NOTICE.md.
+
+**Two more defects, both caught by looking.**
+1. **The fan rendered GREY** on the dark panel — neutral-gold at 0.16 over `#0f1d24` washes out. Grey is
+   this app's colour for MISSING DATA, so a washed-out fan silently refiled our own finding under "we
+   don't know." It is not missing data; it is a finding. Raised to 0.28 on dark.
+2. **The 1-year axis lost its years** (`Jun 29 … May 30` — two calendar years, no year shown). My first
+   fix thresholded on SPAN, and span is wrong twice: a 12-month window is only ~365 days, and lowering
+   the threshold enough to catch it would hit short DAILY series, where month+year collapses every tick
+   in a month to one string and the axis **dedupes them away** — losing ticks to fix years. **The test is
+   CADENCE, not span**: median point spacing ≥ 20 days ⇒ monthly ⇒ the day is noise, the year essential.
+
+Live-verified on all six rows: `2 yr` shows the turn (y `340k–400k`, labelled; fit falling $385k→$358k),
+`1 yr` shows a **fan with no line** and copy that refuses to call it, `Ex-boom` carries its full
+exclusion disclosure in the tooltip and the printed claim (the short button label shortens a button,
+never a disclosure). 407 tests, 0 fail.
+
+**Build note (not ours):** the repo-wide typecheck is currently RED on
+`lib/deliverable/recipes/coming-soon.ts` — a parallel session's UNCOMMITTED working-tree edit
+(`'id' does not exist in type 'ChromeBlock'`). Our files compile; that file is not in this commit, so
+main stays green. Flagging it rather than touching their work.
+
+---
 
 ## 2026-07-14 (Opus 4.8 · main) — TREND FIT PHASE 2: THE PANEL CALLED "HOME PRICE TREND" WAS DRAWING MONTHS OF SUPPLY
 

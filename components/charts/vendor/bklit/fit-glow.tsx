@@ -101,12 +101,18 @@ export function FitGlow({ layers, yAxisId }: FitGlowProps) {
           if (!hi || !lo) return null;
           // NO STROKE ON THE EDGES. An edge drawn as a line is a line, and a reader will
           // follow it as one — which is the exact thing this shape exists to refuse.
+          //
+          // 0.28, not the 0.16 the light-background SVG uses. Neutral-gold at 0.16 over this
+          // panel's near-black (#0f1d24) washes out to a flat GREY — and grey is this app's
+          // colour for MISSING DATA. "No direction established" is not missing data: it is a
+          // finding, from a series we fitted in full. A washed-out fan silently refiles our
+          // own answer under "we don't know."
           return (
             <path
               key={`fit-fan-${i}`}
               d={`M ${hi.x1},${hi.y1} L ${hi.x2},${hi.y2} L ${lo.x2},${lo.y2} L ${lo.x1},${lo.y1} Z`}
               fill={hue}
-              fillOpacity={0.16}
+              fillOpacity={0.28}
               stroke="none"
             />
           );
