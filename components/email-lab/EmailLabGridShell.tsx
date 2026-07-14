@@ -69,7 +69,7 @@ const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.Fi
   ssr: false,
 });
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
-import { AddressPopup } from "@/components/lab-entry/AddressPopup";
+import { AddressPopup, type SavedLayoutOffer } from "@/components/lab-entry/AddressPopup";
 import { LoginModal } from "@/components/landing/LoginModal";
 import { registerBrandPanel, pulseBrandPanel } from "@/lib/brand/reveal-brand-panel";
 import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
@@ -290,6 +290,25 @@ export function EmailLabGridShell({
   // WHICH deliverable it is. This is what the builder dispatches on, so a user typing
   // their address over the [[blank]] can no longer reroute the build to another recipe.
   const [activeRecipeKey, setActiveRecipeKey] = useState<string | null>(initialRecipe?.key ?? null);
+
+  // ── THE USER'S OWN GRID ─────────────────────────────────────────────────────
+  // Operator, 07/13/2026: *"WHATEVER THEY MAKE, THAT IS HOW IT SAVES. ASK THEM —
+  // WOULD YOU LIKE TO USE THE LAYOUT YOU CREATED FOR 123 STREET, OR START FRESH."*
+  // THE OFFER lives here (do they already have a grid for this recipe?); THE SAVE is
+  // the effect further down. Declared this high because the arrival auto-build gate
+  // WAITS on `layoutOfferResolved` — it must not fire before we know whether to ask.
+  const [savedLayoutOffer, setSavedLayoutOffer] = useState<SavedLayoutOffer | null>(null);
+  // Set ONLY from the fetch's .finally (an async callback — never synchronously inside
+  // an effect body, which is a hard lint error here and a cascading-render bug).
+  const [layoutOfferChecked, setLayoutOfferChecked] = useState(false);
+  // DERIVED, not state: no recipe → nothing to look up → already resolved, so a
+  // non-recipe arrival never stalls behind a fetch it doesn't need.
+  const layoutOfferResolved = !activeRecipeKey || layoutOfferChecked;
+  const layoutOfferFetchedFor = useRef<string | null>(null);
+  const layoutBaselineRef = useRef<string | null>(null);
+  const layoutSubjectRef = useRef<string | null>(null);
+  const layoutSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Campaign second step — set when the Build box was seeded by a campaign
   // button whose registry entry carries a followUp (matched by seed prompt at
   // seed time, before the user edits the [[blank]]); armed (visible) only after
@@ -430,7 +449,14 @@ export function EmailLabGridShell({
   }
 
   // ── AI: Build the whole email (author engine) ───────────────────────────────
-  async function runAuthor(text: string) {
+  /** `opts.useSavedLayout` is the user's answer to "use the layout you built for 123
+   *  Street?" — the server loads THEIR grid (RLS-scoped) and reshapes this build into
+   *  it. `opts.subjectLabel` is what they typed, kept only to name the layout back to
+   *  them next time. */
+  async function runAuthor(
+    text: string,
+    opts: { useSavedLayout?: boolean; subjectLabel?: string } = {},
+  ) {
     const trimmed = text.trim();
     if (!trimmed) return;
     setAiLoading(true);
@@ -450,6 +476,7 @@ export function EmailLabGridShell({
           // recipe). Absent for an organically typed prompt — that still falls through
           // to the generic author exactly as before.
           recipeKey: activeRecipeKey || undefined,
+          useSavedLayout: opts.useSavedLayout === true,
         }),
       });
       const data = (await res.json()) as {
@@ -457,6 +484,7 @@ export function EmailLabGridShell({
         applied?: boolean;
         message?: string;
         note?: string;
+        listing?: { subject?: string };
       };
       // Only treat it as a real build when the engine actually authored — the
       // author path echoes the INPUT doc with applied:false on a miss, so guarding
@@ -469,6 +497,11 @@ export function EmailLabGridShell({
         if (parsed.success) {
           const normalized = normalizeAuthorHeights(applyBrand(parsed.data, brandTokens));
           commit(normalized);
+          // The grid AS BUILT. Everything they do to it from here is THEIR layout —
+          // and until they do something, there is nothing personal to save.
+          layoutBaselineRef.current = JSON.stringify(normalized);
+          layoutSubjectRef.current =
+            data.listing?.subject ?? opts.subjectLabel ?? layoutSubjectRef.current;
           setSelectedId(null);
           setLinkAsks(auditDocLinks(normalized));
           // A dedicated build path (e.g. Showing Prep) may carry its own explainer —
@@ -502,7 +535,7 @@ export function EmailLabGridShell({
   //      email signed by a placeholder. Asking is the whole point; the build is never
   //      refused (the popup's Build is always enabled in brand-only mode).
   /** The mount build itself — shared by the clean path and the post-popup replay. */
-  async function runAutoBuild(brandPatch?: Record<string, string>) {
+  async function runAutoBuild(brandPatch?: Record<string, string>, useSavedLayout = false) {
     const nextBranding = brandPatch
       ? { ...brandingRef.current, ...brandPatch }
       : brandingRef.current;
@@ -517,9 +550,19 @@ export function EmailLabGridShell({
           scope,
           build: true,
           recipeId: nextBranding.preferred_recipe || undefined,
+          // The arrival door never sent the deliverable's identity — it leaned on the
+          // server re-deriving it from the prompt text. The saved layout is keyed on
+          // the IDENTITY, so it has to ride explicitly.
+          recipeKey: activeRecipeKey || undefined,
+          useSavedLayout,
         }),
       });
-      const data = (await res.json()) as { doc?: unknown; applied?: boolean; message?: string };
+      const data = (await res.json()) as {
+        doc?: unknown;
+        applied?: boolean;
+        message?: string;
+        listing?: { subject?: string };
+      };
       if (data.applied === false) {
         setAiMessage(data.message ?? "The AI couldn't build the layout — try rephrasing.");
         return;
@@ -530,7 +573,11 @@ export function EmailLabGridShell({
           // brandTokens (the prop) is undefined on the standalone grid, so falling
           // back to the live brand is what actually signs the built doc.
           const tokens = brandTokens ?? brandingToTokens(nextBranding);
-          commit(normalizeAuthorHeights(applyBrand(parsed.data, tokens)));
+          const normalized = normalizeAuthorHeights(applyBrand(parsed.data, tokens));
+          commit(normalized);
+          // The grid AS BUILT — edits from here are what make it theirs.
+          layoutBaselineRef.current = JSON.stringify(normalized);
+          layoutSubjectRef.current = data.listing?.subject ?? layoutSubjectRef.current;
           setSelectedId(null);
         }
       }
@@ -542,20 +589,30 @@ export function EmailLabGridShell({
   }
 
   useEffect(() => {
-    if (!autoGenerate || !brandLoaded || autoBuildFired.current) return;
+    // Wait for the layout lookup too. An arrival with a pre-filled address (the
+    // homepage hero) auto-builds with NO popup — so without this wait, the door most
+    // people come through would silently rebuild the standard grid and never ask
+    // whether they wanted the one they made. "They aren't forced to start over every
+    // build" has to be true on EVERY door, not just the ones that happen to stop.
+    if (!autoGenerate || !brandLoaded || !layoutOfferResolved || autoBuildFired.current) return;
     const gaps = typableGaps(autoBuildNeeds ?? [], brandingRef.current);
-    if (gaps.length > 0) {
-      setAutoBuildGaps(gaps);
+    if (gaps.length > 0 || savedLayoutOffer) {
+      setAutoBuildGaps(gaps); // may be [] — the popup then carries ONLY the layout ask
       setAiLoading(false); // the spinner must not sit under the popup
       return;
     }
     autoBuildFired.current = true;
     void runAutoBuild();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brandLoaded, autoGenerate]);
+  }, [brandLoaded, autoGenerate, layoutOfferResolved, savedLayoutOffer]);
 
-  /** Popup submit on the arrival path: bank the brand, then run the held build. */
-  function buildAfterBrand(_value: string, brandPatch: Record<string, string>) {
+  /** Popup submit on the arrival path: bank the brand, take their layout answer, then
+   *  run the held build. */
+  function buildAfterBrand(
+    _value: string,
+    brandPatch: Record<string, string>,
+    useSavedLayout = false,
+  ) {
     setAutoBuildGaps(null);
     autoBuildFired.current = true;
     if (Object.keys(brandPatch).length > 0) {
@@ -566,7 +623,7 @@ export function EmailLabGridShell({
         body: JSON.stringify(brandPatch),
       });
     }
-    void runAutoBuild(brandPatch);
+    void runAutoBuild(brandPatch, useSavedLayout);
   }
 
   // ── AI: Fill content into the current layout (content patch — words/numbers) ──
@@ -660,7 +717,11 @@ export function EmailLabGridShell({
 
   /** The one submit out of the popup: bank the brand fields they typed, fill the
    *  [[blank]], and build — no second trip to the rail, no amber nag afterwards. */
-  function startFromPopup(filled: string, brandPatch: Record<string, string>) {
+  function startFromPopup(
+    filled: string,
+    brandPatch: Record<string, string>,
+    useSavedLayout = false,
+  ) {
     const recipe = startRecipe;
     if (!recipe) return;
     setStartRecipe(null);
@@ -685,7 +746,7 @@ export function EmailLabGridShell({
     setAiPrompt(prompt);
     setPendingRecipe(null);
     setRecipeGaps(null);
-    void runAuthor(prompt);
+    void runAuthor(prompt, { useSavedLayout, subjectLabel: filled });
   }
 
   /** True (and nags + re-selects) while a recipe's [[blank]] is still unfilled. */
@@ -1345,6 +1406,53 @@ export function EmailLabGridShell({
       // on a spinner instead of building.
       .finally(() => setBrandLoaded(true));
   }, []);
+
+  // THE OFFER. Fetched when a recipe becomes active, so the popup can name the listing
+  // they built their grid for ("Use the layout you built for 326 Shore Dr") — a thing
+  // they remember making, unlike "your saved template".
+  const offerRecipeKey = activeRecipeKey ?? startRecipe?.key ?? null;
+  useEffect(() => {
+    if (!offerRecipeKey || layoutOfferFetchedFor.current === offerRecipeKey) return;
+    layoutOfferFetchedFor.current = offerRecipeKey;
+    fetch(`/api/email-lab/layout?recipe=${encodeURIComponent(offerRecipeKey)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { hasLayout?: boolean; subjectLabel?: string | null } | null) => {
+        if (d?.hasLayout) setSavedLayoutOffer({ subjectLabel: d.subjectLabel ?? null });
+      })
+      .catch(() => {})
+      // Checked either way — a failed lookup must never wedge a build behind a
+      // spinner. No offer → the standard grid, exactly as before.
+      .finally(() => setLayoutOfferChecked(true));
+  }, [offerRecipeKey]);
+
+  // THE SAVE — "WHATEVER THEY MAKE, THAT IS HOW IT SAVES." Once they EDIT the built
+  // grid, that grid becomes theirs for this recipe. `layoutBaselineRef` is the doc
+  // EXACTLY as the builder produced it, so the grid only becomes "theirs" once they
+  // change something: without that guard we would save the standard grid back as a
+  // personal layout and then offer it to them, which is an ask that means nothing.
+  //
+  // Signed out → the PUT 401s and is dropped silently. A layout is a convenience,
+  // never a gate on a build (RULE 0.7).
+  useEffect(() => {
+    if (!activeRecipeKey || !layoutBaselineRef.current) return;
+    if (JSON.stringify(doc) === layoutBaselineRef.current) return; // untouched — not theirs yet
+
+    if (layoutSaveTimer.current) clearTimeout(layoutSaveTimer.current);
+    layoutSaveTimer.current = setTimeout(() => {
+      void fetch("/api/email-lab/layout", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          recipeKey: activeRecipeKey,
+          doc,
+          subjectLabel: layoutSubjectRef.current,
+        }),
+      }).catch(() => {});
+    }, 4_000);
+    return () => {
+      if (layoutSaveTimer.current) clearTimeout(layoutSaveTimer.current);
+    };
+  }, [doc, activeRecipeKey]);
 
   // Keyboard: ⌘Z / ⌘⇧Z undo-redo, Escape deselects.
   useEffect(() => {
@@ -2211,11 +2319,12 @@ export function EmailLabGridShell({
       {/* Arrival brand gate — the recipe came in already filled (nothing to ask about
           the PLACE), but it prints brand fields the account doesn't have. Ask, then run
           the held build. Without this the email auto-built signed "Company / Tagline". */}
-      {autoBuildGaps && autoBuildGaps.length > 0 && (
+      {autoBuildGaps !== null && (autoBuildGaps.length > 0 || savedLayoutOffer) && (
         <AddressPopup
           inputKind={null}
           initialValue=""
           gaps={autoBuildGaps}
+          savedLayout={savedLayoutOffer}
           onCancel={() => {
             // Cancel = build it anyway. A build is never refused (RULE 0.7); they just
             // get the placeholder signature they chose.
@@ -2235,6 +2344,7 @@ export function EmailLabGridShell({
           inputKind={inputKindForPrompt(startRecipe.prompt)}
           initialValue=""
           gaps={typableGaps(startRecipe.needs, branding)}
+          savedLayout={savedLayoutOffer}
           onCancel={() => {
             setStartRecipe(null);
             setPendingRecipe(null);

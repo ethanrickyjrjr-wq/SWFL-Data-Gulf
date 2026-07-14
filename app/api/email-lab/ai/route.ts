@@ -13,6 +13,7 @@ import { assembleShowingPrepDoc } from "@/lib/email/showing-prep-assemble";
 import { SHOWING_PREP_INTRO_NOTE } from "@/lib/email/showing-prep-copy";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { seedById } from "@/lib/email/doc/default-docs";
+import { loadUserLayout } from "@/lib/email/doc/layout-store";
 
 /** The caller's media library for the author's ASSET MENU (newest 24) plus their
  *  account email (the engine-owned reply-CTA destination — the same address every
@@ -86,6 +87,10 @@ export async function POST(req: NextRequest) {
     // on, so the hero pill, the showcase card, the campaign button and the lab pick all
     // produce the SAME thing. Distinct from `recipeId` above, which is the PROSE recipe.
     recipeKey?: string;
+    // "Use the layout you built for 326 Shore Dr" — the user said yes at the popup.
+    // We load THEIR saved grid for this recipe and reshape the fresh build into it.
+    // Absent/false → the standard coded grid, byte-identical to before this shipped.
+    useSavedLayout?: boolean;
   };
   const prompt = body.prompt ?? "";
 
@@ -111,6 +116,14 @@ export async function POST(req: NextRequest) {
       }
 
       const caller = isAuthor ? await loadCaller() : null;
+      // THE USER'S OWN GRID. Loaded server-side off the cookie-auth'd session (RLS —
+      // "FOR THEM ONLY"), never accepted from the client: a layout posted in the body
+      // would let one user shape another's build. Only when they answered yes at the
+      // popup, and only for a recipe — an organic typed ask has no saved shape.
+      const savedLayout =
+        isAuthor && body.useSavedLayout && body.recipeKey
+          ? await loadUserLayout(body.recipeKey).catch(() => null)
+          : null;
       const { httpStatus, payload } = isAuthor
         ? await authorDoc({
             prompt,
@@ -122,6 +135,7 @@ export async function POST(req: NextRequest) {
             replyEmail: caller?.email,
             recipeId: body.recipeId,
             recipeKey: body.recipeKey,
+            savedLayout,
           })
         : await buildContentDoc({
             prompt,

@@ -3,6 +3,39 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export interface Database {
   public: {
     Tables: {
+      agent_profile_facts: {
+        Row: {
+          id: string;
+          user_id: string;
+          key: string;
+          value: string;
+          source: string;
+          source_detail: string | null;
+          captured_at: string;
+          superseded_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          key: string;
+          value: string;
+          source: string;
+          source_detail?: string | null;
+          captured_at?: string;
+          superseded_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          key?: string;
+          value?: string;
+          source?: string;
+          source_detail?: string | null;
+          captured_at?: string;
+          superseded_by?: string | null;
+        };
+        Relationships: [];
+      };
       api_usage_log: {
         Row: {
           id: string;
@@ -312,6 +345,8 @@ export interface Database {
           created_at: string;
           updated_at: string;
           proof: Json | null;
+          airtable_record_id: string | null;
+          airtable_synced_at: string | null;
         };
         Insert: {
           id?: string;
@@ -330,6 +365,8 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           proof?: Json | null;
+          airtable_record_id?: string | null;
+          airtable_synced_at?: string | null;
         };
         Update: {
           id?: string;
@@ -348,6 +385,8 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           proof?: Json | null;
+          airtable_record_id?: string | null;
+          airtable_synced_at?: string | null;
         };
         Relationships: [];
       };
@@ -491,6 +530,9 @@ export interface Database {
           character_citations: Json | null;
           character_generated_at: string | null;
           character_fact_pack_vintage: string | null;
+          submarket: string | null;
+          submarket_source_url: string | null;
+          submarket_as_of: string | null;
         };
         Insert: {
           id?: string;
@@ -529,6 +571,9 @@ export interface Database {
           character_citations?: Json | null;
           character_generated_at?: string | null;
           character_fact_pack_vintage?: string | null;
+          submarket?: string | null;
+          submarket_source_url?: string | null;
+          submarket_as_of?: string | null;
         };
         Update: {
           id?: string;
@@ -567,6 +612,9 @@ export interface Database {
           character_citations?: Json | null;
           character_generated_at?: string | null;
           character_fact_pack_vintage?: string | null;
+          submarket?: string | null;
+          submarket_source_url?: string | null;
+          submarket_as_of?: string | null;
         };
         Relationships: [];
       };
@@ -831,6 +879,108 @@ export interface Database {
           last_seen_at?: string | null;
           scraped_at?: string | null;
           created_at?: string | null;
+        };
+        Relationships: [];
+      };
+      dbpr_re_licensees: {
+        Row: {
+          license_number: string;
+          alternate_license_number: string | null;
+          licensee_name: string;
+          first_name: string | null;
+          middle: string | null;
+          last_name: string | null;
+          dba_name: string | null;
+          rank: string | null;
+          license_type: string | null;
+          address1: string | null;
+          address2: string | null;
+          address3: string | null;
+          city: string | null;
+          state: string | null;
+          zip: string | null;
+          county_code: string | null;
+          county_name: string;
+          primary_status: string | null;
+          secondary_status: string | null;
+          original_license_date: string | null;
+          status_effective_date: string | null;
+          license_expiration_date: string | null;
+          employer_name: string | null;
+          employer_license_number: string | null;
+          email: string | null;
+          email_source: string | null;
+          source_tag: string;
+          source_url: string | null;
+          as_of_date: string | null;
+          first_seen_at: string;
+          last_seen_at: string;
+        };
+        Insert: {
+          license_number: string;
+          alternate_license_number?: string | null;
+          licensee_name: string;
+          first_name?: string | null;
+          middle?: string | null;
+          last_name?: string | null;
+          dba_name?: string | null;
+          rank?: string | null;
+          license_type?: string | null;
+          address1?: string | null;
+          address2?: string | null;
+          address3?: string | null;
+          city?: string | null;
+          state?: string | null;
+          zip?: string | null;
+          county_code?: string | null;
+          county_name: string;
+          primary_status?: string | null;
+          secondary_status?: string | null;
+          original_license_date?: string | null;
+          status_effective_date?: string | null;
+          license_expiration_date?: string | null;
+          employer_name?: string | null;
+          employer_license_number?: string | null;
+          email?: string | null;
+          email_source?: string | null;
+          source_tag?: string;
+          source_url?: string | null;
+          as_of_date?: string | null;
+          first_seen_at?: string;
+          last_seen_at?: string;
+        };
+        Update: {
+          license_number?: string;
+          alternate_license_number?: string | null;
+          licensee_name?: string;
+          first_name?: string | null;
+          middle?: string | null;
+          last_name?: string | null;
+          dba_name?: string | null;
+          rank?: string | null;
+          license_type?: string | null;
+          address1?: string | null;
+          address2?: string | null;
+          address3?: string | null;
+          city?: string | null;
+          state?: string | null;
+          zip?: string | null;
+          county_code?: string | null;
+          county_name?: string;
+          primary_status?: string | null;
+          secondary_status?: string | null;
+          original_license_date?: string | null;
+          status_effective_date?: string | null;
+          license_expiration_date?: string | null;
+          employer_name?: string | null;
+          employer_license_number?: string | null;
+          email?: string | null;
+          email_source?: string | null;
+          source_tag?: string;
+          source_url?: string | null;
+          as_of_date?: string | null;
+          first_seen_at?: string;
+          last_seen_at?: string;
         };
         Relationships: [];
       };
@@ -1905,6 +2055,108 @@ export interface Database {
         };
         Relationships: [];
       };
+      new_re_agents: {
+        Row: {
+          license_number: string | null;
+          alternate_license_number: string | null;
+          licensee_name: string | null;
+          first_name: string | null;
+          middle: string | null;
+          last_name: string | null;
+          dba_name: string | null;
+          rank: string | null;
+          license_type: string | null;
+          address1: string | null;
+          address2: string | null;
+          address3: string | null;
+          city: string | null;
+          state: string | null;
+          zip: string | null;
+          county_code: string | null;
+          county_name: string | null;
+          primary_status: string | null;
+          secondary_status: string | null;
+          original_license_date: string | null;
+          status_effective_date: string | null;
+          license_expiration_date: string | null;
+          employer_name: string | null;
+          employer_license_number: string | null;
+          email: string | null;
+          email_source: string | null;
+          source_tag: string | null;
+          source_url: string | null;
+          as_of_date: string | null;
+          first_seen_at: string | null;
+          last_seen_at: string | null;
+        };
+        Insert: {
+          license_number?: string | null;
+          alternate_license_number?: string | null;
+          licensee_name?: string | null;
+          first_name?: string | null;
+          middle?: string | null;
+          last_name?: string | null;
+          dba_name?: string | null;
+          rank?: string | null;
+          license_type?: string | null;
+          address1?: string | null;
+          address2?: string | null;
+          address3?: string | null;
+          city?: string | null;
+          state?: string | null;
+          zip?: string | null;
+          county_code?: string | null;
+          county_name?: string | null;
+          primary_status?: string | null;
+          secondary_status?: string | null;
+          original_license_date?: string | null;
+          status_effective_date?: string | null;
+          license_expiration_date?: string | null;
+          employer_name?: string | null;
+          employer_license_number?: string | null;
+          email?: string | null;
+          email_source?: string | null;
+          source_tag?: string | null;
+          source_url?: string | null;
+          as_of_date?: string | null;
+          first_seen_at?: string | null;
+          last_seen_at?: string | null;
+        };
+        Update: {
+          license_number?: string | null;
+          alternate_license_number?: string | null;
+          licensee_name?: string | null;
+          first_name?: string | null;
+          middle?: string | null;
+          last_name?: string | null;
+          dba_name?: string | null;
+          rank?: string | null;
+          license_type?: string | null;
+          address1?: string | null;
+          address2?: string | null;
+          address3?: string | null;
+          city?: string | null;
+          state?: string | null;
+          zip?: string | null;
+          county_code?: string | null;
+          county_name?: string | null;
+          primary_status?: string | null;
+          secondary_status?: string | null;
+          original_license_date?: string | null;
+          status_effective_date?: string | null;
+          license_expiration_date?: string | null;
+          employer_name?: string | null;
+          employer_license_number?: string | null;
+          email?: string | null;
+          email_source?: string | null;
+          source_tag?: string | null;
+          source_url?: string | null;
+          as_of_date?: string | null;
+          first_seen_at?: string | null;
+          last_seen_at?: string | null;
+        };
+        Relationships: [];
+      };
       ops_ideas: {
         Row: {
           id: string;
@@ -2569,6 +2821,75 @@ export interface Database {
           next_send_at?: string | null;
           sent_at?: string[];
           status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      records_requests: {
+        Row: {
+          id: string;
+          request_key: string;
+          target_agency: string;
+          dataset: string;
+          statute_basis: string;
+          contact_email: string | null;
+          portal_url: string | null;
+          state: string;
+          follow_up_days: number;
+          cost_quoted_usd: number | null;
+          cost_approved_usd: number | null;
+          request_body: string | null;
+          received_ref: string | null;
+          landed_target: string | null;
+          notes: string | null;
+          source_tag: string;
+          filed_at: string | null;
+          last_contact_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          request_key: string;
+          target_agency: string;
+          dataset: string;
+          statute_basis?: string;
+          contact_email?: string | null;
+          portal_url?: string | null;
+          state?: string;
+          follow_up_days?: number;
+          cost_quoted_usd?: number | null;
+          cost_approved_usd?: number | null;
+          request_body?: string | null;
+          received_ref?: string | null;
+          landed_target?: string | null;
+          notes?: string | null;
+          source_tag?: string;
+          filed_at?: string | null;
+          last_contact_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          request_key?: string;
+          target_agency?: string;
+          dataset?: string;
+          statute_basis?: string;
+          contact_email?: string | null;
+          portal_url?: string | null;
+          state?: string;
+          follow_up_days?: number;
+          cost_quoted_usd?: number | null;
+          cost_approved_usd?: number | null;
+          request_body?: string | null;
+          received_ref?: string | null;
+          landed_target?: string | null;
+          notes?: string | null;
+          source_tag?: string;
+          filed_at?: string | null;
+          last_contact_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -3366,6 +3687,7 @@ export interface Database {
           surface_dark_color: string | null;
           preferred_recipe: string | null;
           default_photo_ratio: string | null;
+          agent_bio: string | null;
         };
         Insert: {
           id?: string;
@@ -3408,6 +3730,7 @@ export interface Database {
           surface_dark_color?: string | null;
           preferred_recipe?: string | null;
           default_photo_ratio?: string | null;
+          agent_bio?: string | null;
         };
         Update: {
           id?: string;
@@ -3450,6 +3773,7 @@ export interface Database {
           surface_dark_color?: string | null;
           preferred_recipe?: string | null;
           default_photo_ratio?: string | null;
+          agent_bio?: string | null;
         };
         Relationships: [];
       };
@@ -3507,6 +3831,33 @@ export interface Database {
           connected_at?: string;
           last_synced_at?: string | null;
           error_message?: string | null;
+        };
+        Relationships: [];
+      };
+      user_recipe_layouts: {
+        Row: {
+          user_id: string;
+          recipe_key: string;
+          layout: Json;
+          subject_label: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          recipe_key: string;
+          layout: Json;
+          subject_label?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          recipe_key?: string;
+          layout?: Json;
+          subject_label?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };

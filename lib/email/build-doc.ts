@@ -18,6 +18,7 @@ import {
 } from "@/lib/email/doc/schema";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { AUTHORABLE_TYPES } from "@/lib/email/doc/block-contract";
+import { applySavedLayout } from "@/lib/email/doc/saved-layout";
 import { resolveRecipe, recipeSection } from "@/lib/email/author-recipes";
 import { resolveConcoction, datasetsSection } from "@/lib/concoctions/author-section";
 import { seedResolvedDataset } from "@/lib/concoctions/seed-authored";
@@ -504,6 +505,17 @@ export interface BuildArgs {
    *  `preferred_recipe` (M3 — recipes are user-SELECTABLE). Overrides keyword
    *  detection; unknown/empty falls back to detection. Advisory only (RULE C2). */
   recipeId?: string | null;
+  /** THE USER'S OWN GRID for this recipe — "build 12345 Street the same way I built
+   *  123 Street" (lib/email/doc/saved-layout.ts). A CONTENT-STRIPPED EmailDoc: shape,
+   *  style and their brand chrome, and not one figure, sentence or photo from the
+   *  listing they built it for.
+   *
+   *  The route loads it ONLY when the user answered "use my layout" at the popup, so
+   *  absent = the standard coded grid, byte-identical to today. It is applied AFTER
+   *  the builder runs — the builder still sources every cell for the new subject, and
+   *  this only reshapes its output. Never a gate: an unusable layout degrades to the
+   *  standard grid rather than blocking the build. */
+  savedLayout?: EmailDoc | null;
 }
 
 export interface BuildResult {
@@ -928,6 +940,7 @@ export async function authorDoc({
   replyEmail,
   recipeId: recipeOverride,
   recipeKey,
+  savedLayout,
 }: BuildArgs): Promise<BuildResult> {
   const docParsed = EmailDocSchema.safeParse(rawDoc);
   if (!docParsed.success) {
@@ -1009,6 +1022,34 @@ export async function authorDoc({
         );
       }
       if (parsed.success) {
+        // ── THE USER'S OWN GRID ────────────────────────────────────────────────
+        // "IF IT IS 123 STREET, WE BUILD 12345 STREET THE SAME WAY WITH EVERY GRID
+        // THE SAME — BUT WITH DATA AND COMMENTARY FOR 12345 STREET" (operator,
+        // 07/13/2026). The builder above already did the honest work: it resolved the
+        // NEW subject, sourced every cell, mirrored the real photo and authored the
+        // commentary. All this does is pour that fresh, correct build into the shape
+        // the user already chose — their block order, their spans, their style, the
+        // blocks they deleted stay deleted.
+        //
+        // WHY IT SITS HERE, IN THE DISPATCHER, AND NOT IN EACH BUILDER: one seam
+        // serves all thirteen recipes (RULE C2 — extend an existing seam, never erect
+        // a new gate per builder). And it runs AFTER the build, never instead of it,
+        // so the no-invention gate, the chart policy and the sourced cells are all
+        // untouched. A saved layout can change what an email LOOKS like. It can never
+        // change what an email KNOWS.
+        const shaped = savedLayout ? applySavedLayout(parsed.data, savedLayout) : parsed.data;
+        // The reshape is pure, but a layout saved against an older block schema could
+        // still produce a doc the schema rejects. Degrade to the standard grid — the
+        // user gets their deliverable, just not their shape. Never a blocked build.
+        const shapedParsed = savedLayout ? EmailDocSchema.safeParse(shaped) : parsed;
+        if (savedLayout && !shapedParsed.success) {
+          console.error(
+            `[recipe:${activeRecipe.key}] saved layout produced an INVALID doc — falling back to the standard grid. ` +
+              `Issues: ${JSON.stringify(shapedParsed.error.issues.slice(0, 5))}`,
+          );
+        }
+        const finalDoc = shapedParsed.success ? shapedParsed.data : parsed.data;
+
         // THE AGENT'S BIO, RESOLVED LATE. The saved bio is a TEMPLATE — the agent's own
         // words plus live {{farm.*}} tokens — because a market figure frozen into saved
         // text is a lie with a delay: it rots inside the signature block of every email
@@ -1017,9 +1058,9 @@ export async function authorDoc({
         // A bio with no tokens is untouched; an unresolvable one collapses to the agent's
         // own words. Never a stray "{{...}}" to a recipient.
         const withBio = await resolveDocBio(
-          parsed.data,
+          finalDoc,
           scope?.kind === "zip" ? { kind: "zip", value: scope.value } : undefined,
-        ).catch(() => ({ doc: parsed.data, citations: [] }));
+        ).catch(() => ({ doc: finalDoc, citations: [] }));
 
         return {
           payload: {

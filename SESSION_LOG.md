@@ -1,3 +1,20 @@
+## 2026-07-14 (Opus 4.8 · main) — THE USER'S OWN GRID: "build 12345 Street the same way I built 123 Street"
+
+Operator: *"WHATEVER THEY MAKE, THAT IS HOW IT SAVES… ASK THEM — WOULD YOU LIKE TO USE THE LAYOUT YOU CREATED FOR 123 STREET, OR START FRESH. IF IT IS 123 STREET, WE BUILD 12345 STREET THE SAME WAY WITH EVERY GRID THE SAME — BUT WITH DATA AND COMMENTARY FOR 12345 STREET. WHY CAN'T WE DO THIS?"*
+
+**Why we couldn't: nothing ever persisted a user's grid.** A recipe's layout is generated in code on every build (`buildListingFlyer` → `buildLifecycleEmail`), and when the build ended the user's edits died with it. No table, no save, no ask. Not hard — never wired. (`Recipe.skeleton` advertises itself as "the ONE structural authority for this recipe's grid" and has **zero consumers** — a decoy. Don't build on it.)
+
+**THE RULE: shape is yours, content is always fresh or empty.** The coded builder still runs — it resolves the new subject, sources every cell, mirrors the real photo, authors the commentary, honors the chart policy. Only then is its output poured into the user's saved shape. A `CONTENT_KEY` is *never* read off a saved layout, so no figure, sentence or photo from the old house can physically survive. That makes "NOT WITH THE SAME INFORMATION" structural, not a promise. Enforced by a leak test over a layout poisoned with the old listing in every field.
+
+- `lib/email/doc/saved-layout.ts` — the pure engine. `stripToLayout` (save) + `applySavedLayout` (rebuild). Matching is by ROLE (type + ordinal), never by id — `mintBlockId` is random per build, so a saved block and its fresh counterpart never share one. 20 tests.
+- `lib/email/doc/layout-store.ts` + `migrations/20260713_user_recipe_layouts.sql` — one row per (user, recipe), RLS-scoped ("FOR THEM ONLY"). Stored content-stripped: the old house's price never enters the DB. **Applied.**
+- `build-doc.ts` `authorDoc` — the reshape sits in the DISPATCHER, one seam for all 13 recipes (RULE C2), AFTER the builder, never instead of it. An unusable layout degrades to the standard grid; never a blocked build.
+- `AddressPopup` — THE ASK ("Use that layout" / "Start fresh"), naming the listing they built it for. The arrival auto-build gate now WAITS on the layout lookup: the homepage-hero door auto-builds with no popup, so without that wait the door most people use would silently skip the ask.
+
+**Two landmines found while writing the tests.** (1) `address` is the LISTING's street address on a hero and the **CAN-SPAM business postal address** on a footer — one key, two meanings; the naive content rule was deleting a legally required field from every commercial email. Brand chrome (header/footer/agent-card/social-icons) now carries wholesale. (2) A stats block interleaves shape and content in ONE array — the cell SET is grid setup ("I cut $/Sq Ft and put Lot first"), the values are the listing's. Cells carry; values re-source by label; an unmatched cell is an open slot, never the old figure.
+
+Verify: 2447 tests pass · `bunx tsc` clean · `bunx next build` compiles, `/api/email-lab/layout` registered. Checks open: `saved_layout_live_verify` (real end-to-end run), `saved_layout_added_block_open_slot` (a block the user ADDED returns as an open slot — the AI fill pass doesn't run over reshaped docs yet).
+
 ## 2026-07-13 (Sonnet 5 · main) — The luxury ring WAS shipped 07/11 — the showcase gallery was just showing a stale screenshot
 
 Operator, furious, pointed at a `/showcase` screenshot of Luxury Market Report still showing the
