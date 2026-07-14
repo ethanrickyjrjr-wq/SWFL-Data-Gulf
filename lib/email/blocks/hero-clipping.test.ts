@@ -5,6 +5,7 @@
 import { describe, expect, it } from "bun:test";
 import { render } from "@react-email/render";
 import { HeroBlock } from "./HeroBlock";
+import { lines } from "./scale";
 import { DEFAULT_GLOBAL_STYLE } from "../doc/default-docs";
 
 const gs = { ...DEFAULT_GLOBAL_STYLE, accentColor: "#A98A4E" };
@@ -50,5 +51,7 @@ it("clipping kicker reserves two lines so a side-by-side pair can never stagger"
       globalStyle: gs,
     }),
   );
-  expect(html).toContain("min-height:34px");
+  // DERIVED, never pinned to a literal. The old assertion hardcoded 34px — two lines of an
+  // 11px kicker — which silently broke the moment the kicker became a real scale step.
+  expect(html).toContain(`min-height:${lines("caption", 2)}`);
 });

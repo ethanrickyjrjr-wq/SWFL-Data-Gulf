@@ -2,6 +2,7 @@
 import { Section, Img, Text } from "@react-email/components";
 import type { EmailGlobalStyle, HeaderProps } from "../doc/types";
 import { displayFontStack, fontStack, SECTION_PAD } from "./styles";
+import { text, space } from "./scale";
 import { DISPLAY_FONT_CLASS } from "./email-head";
 import { legibleInk } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
@@ -30,7 +31,7 @@ export function HeaderBlock({
         <Img
           src={props.logoUrl}
           alt={props.companyName ?? ""}
-          style={{ maxHeight: "42px", maxWidth: "180px", margin: "0 0 8px", display: "block" }}
+          style={{ maxHeight: "42px", maxWidth: "180px", margin: space(0, 0, 8), display: "block" }}
         />
       ) : null}
       {props.companyName || scope ? (
@@ -43,8 +44,7 @@ export function HeaderBlock({
           placeholder="Company"
           style={{
             fontFamily: displayFont,
-            fontSize: "18px",
-            fontWeight: 700,
+            ...text("h2"),
             color: legibleInk("#ffffff", bg, 4.5),
             margin: 0,
           }}
@@ -59,9 +59,9 @@ export function HeaderBlock({
           placeholder="Tagline"
           style={{
             fontFamily: font,
-            fontSize: "12px",
+            ...text("caption"),
             color: legibleInk(globalStyle.accentColor, bg, 4.5),
-            margin: "4px 0 0",
+            margin: space(4, 0, 0),
           }}
         />
       ) : null}

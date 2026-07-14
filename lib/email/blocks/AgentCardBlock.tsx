@@ -2,6 +2,7 @@
 import { Section, Row, Column, Img, Text, Link } from "@react-email/components";
 import type { AgentCardProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, SECTION_PAD, MUTED, BORDER, CARD_BG } from "./styles";
+import { text, space, WEIGHT } from "./scale";
 import { legibleInk } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 
@@ -51,8 +52,7 @@ export function AgentCardBlock({
               placeholder="Agent name"
               style={{
                 fontFamily: font,
-                fontSize: "15px",
-                fontWeight: 700,
+                ...text("body", { weight: WEIGHT.emphasis }),
                 color: globalStyle.primaryColor,
                 margin: 0,
               }}
@@ -65,7 +65,7 @@ export function AgentCardBlock({
               path="title"
               scope={scope}
               placeholder="Title"
-              style={{ fontFamily: font, fontSize: "12px", color: MUTED, margin: "2px 0 0" }}
+              style={{ fontFamily: font, ...text("caption"), color: MUTED, margin: space(4, 0, 0) }}
             />
           ) : null}
           {props.bio || scope ? (
@@ -78,10 +78,9 @@ export function AgentCardBlock({
               placeholder="Short bio…"
               style={{
                 fontFamily: font,
-                fontSize: "13px",
-                lineHeight: "1.6",
+                ...text("body"),
                 color: globalStyle.textColor,
-                margin: "8px 0 0",
+                margin: space(8, 0, 0),
               }}
             />
           ) : null}
@@ -92,17 +91,16 @@ export function AgentCardBlock({
               path="phone"
               scope={scope}
               placeholder="Phone"
-              style={{ fontFamily: font, fontSize: "12px", color: MUTED, margin: "8px 0 0" }}
+              style={{ fontFamily: font, ...text("caption"), color: MUTED, margin: space(8, 0, 0) }}
             />
           ) : null}
           {props.ctaLabel && props.ctaUrl ? (
-            <Text style={{ margin: "8px 0 0" }}>
+            <Text style={{ margin: space(8, 0, 0) }}>
               <Link
                 href={props.ctaUrl}
                 style={{
                   fontFamily: font,
-                  fontSize: "13px",
-                  fontWeight: 600,
+                  ...text("caption", { weight: WEIGHT.emphasis }),
                   color: legibleInk(globalStyle.accentColor, CARD_BG, 4.5),
                 }}
               >

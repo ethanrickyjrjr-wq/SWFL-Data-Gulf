@@ -16,6 +16,76 @@ This is the RULE 2.4 failure mode in miniature, running the other way: a check t
 
 ---
 
+## 2026-07-14 (Opus 4.8 · main) — THE DESIGN SYSTEM IS NOW CODE. IT WAS MARKDOWN, AND MARKDOWN CANNOT BE IMPORTED.
+
+Phase 1+2 of the email design root (plan: operator-approved, `docs/handoff/2026-07-14-email-design-root-handoff.md`).
+Operator: *"WE HAVE RULES FOR SPACING EVERYTHING. ARE WE USING THEM"* — we were not, and this is why.
+
+**THE DIAGNOSIS.** `app/_design/05-color-and-type.md` (8px grid · 7-step type scale · line-heights ·
+weights · tabular figures) was researched for days, written down, committed — **and read by ZERO CODE.**
+It is markdown. Markdown cannot be imported. So every session that ever built an email block read the
+doc (or didn't), hand-typed numbers, and moved on; nothing could catch a wrong value because there was
+nothing to check against. Measured, not guessed: **17 distinct font sizes** where the scale defines 7
+(no block used 28/36/44/64 — four of our own steps went unused) · **30 fontWeight declarations, ZERO
+compliant** (all 600/700/800; the doc says 400/500/600) · **`tabular-nums` used ZERO times**, though the
+doc requires it on every numeric cell · and the mechanical cause of "uneven": **~30 text nodes set no
+lineHeight at all** and therefore silently inherited `@react-email`'s injected **ABSOLUTE `24px`** line
+box — the 32px stat value rendered at ratio **0.75** (that is the clipping the operator screenshotted),
+the 9px strip label at **2.67**. Nothing shared a rhythm because nothing shared a root.
+**Twin finding:** `author-recipes.ts` (the Mailchimp/Klaviyo/Vero/Litmus layout research) says of itself
+*"advisory… the model MAY deviate — nothing here is enforced."* **Two researched systems. Both correct.
+Both prose. Neither executable.**
+
+**THE ROOT — `lib/email/blocks/scale.ts`.** The executable form of the doc. Every number is lifted from
+it with the source line cited; **nothing was invented.** The load-bearing API decision: `text(role)`
+returns fontSize **and** lineHeight **and** fontWeight TOGETHER — *a size cannot be chosen without its
+leading*, so the injected-24px bug is unreachable from the API, not merely fixed. `SPACE` is a typed
+union (4/8/12/16/24/32/48/64/96) so an off-grid literal is a **compile error**. `lines(role, n)` derives
+reserved heights from the type instead of hand-typing them.
+
+**ROUTED: all 18 block components + `styles.ts` + `compile-grid.ts`.** 17 font sizes → the 7 steps.
+30 weights → 600/500/400. Tabular figures: 0 → every figure. The `28px` gutter (off-grid, on every
+section of every block, one string in `styles.ts`) → the doc's 24. `compile-grid` was injecting
+`line-height:1.5` onto every multi-column cell — a leading that is not in the system, silently re-leading
+any child that did not override it. Gone.
+
+**THE IMPORTANCE DIAL WAS INVERTED.** Operator, 07/13: *"more important numbers are larger fonts."*
+`emphasis` existed and ran BACKWARDS: in the grid variant `primary` rendered at **30px** while a plain
+cell rendered at **32px** — the important number was SMALLER than the boring one, winning only on colour
+— and the **stacked** path passed no emphasis argument at all, dropping the dial entirely. That stacked
+path fires exactly when a stats block sits in a narrow multi-column column, i.e. **the very layout the
+fence system exists to produce** — so landing `finalizeDoc()` first would have silently killed the dial
+the moment it started working. Pixels had to go first; that ordering was forced, not preferred.
+Now `statRole()` is monotonic BY CONSTRUCTION (primary > plain > muted, at every density), pinned by test.
+
+**FOUND ONLY BY LOOKING, twice.** (1) Making `$209` bigger immediately **staggered the label row** —
+`$/SQ FT` sat lower than `BEDS`. Emphasis without a shared baseline just relocates the mess. The value
+row now reserves ONE line box at the row's tallest step (`lines()`), so every label lands on the same
+baseline whatever the emphasis. (2) The `hero-clipping` test pinned `min-height:34px` — a magic number
+encoding "two lines of an 11px kicker" — which went wrong the instant the kicker became a real step. Now
+derived from the scale; it cannot go stale.
+
+**THE GUARD THAT DID NOT EXIST — `scale.test.ts`.** Renders all 27 templates and asserts every
+`font-size`, `line-height`, `padding` and `margin` in the produced HTML is a member of the scale.
+**A hand-typed pixel is now a red test.** Also pins the dial's monotonicity.
+
+**DENSITY (operator ruling).** The compact spec strip had no step in the doc and was therefore invented
+(17/20/13/9px). Ruling: a strip is a DENSITY variant, not a second scale — it shifts one step DOWN the
+existing ladder (36→28, 28→16, 16→14). No new numbers, ever.
+
+**Operator ruling honoured: KEEP EVERY DESIGN AS A CHOICE.** Colours, block order and per-template look
+are untouched — we unified RHYTHM, not appearance. Before/after of all 27 captured; seed-preview tiles
+recaptured (they are committed screenshots and go stale the instant styling moves — this is the trap
+that produced the luxury-ring incident).
+
+**NOT DONE (next):** `finalizeDoc()` — `assembleAuthoredDoc` still has exactly ONE caller
+(`build-doc.ts:1410`, the AI path) while **18 other producers hand-position their own docs** and the 7
+listing builders emit 100% `w:12`. Checks: `email_design_system_one_exit_seam`,
+`one_catalog_seeds_get_recipe_keys`, `showcase_designs_buildable_as_options`.
+
+Verify: **2,669 tests pass, 0 fail** · `bunx tsc --noEmit` clean · `scale.test.ts` 6/6 green · all 41
+emails rendered live at `/dev-emails` and eyeballed.
+
 ## 2026-07-14 (Opus 4.8 · main) — FOUR BUGS THE OPERATOR FOUND BY LOOKING, AND WHY LOOKING WAS THE ONLY WAY
 
 Operator asked for a dev site with every email on it so he could triage keep/change/kill. Built

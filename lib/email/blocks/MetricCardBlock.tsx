@@ -14,6 +14,7 @@
 import { Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, MetricCardProps } from "../doc/types";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
+import { text, label, space, WEIGHT, METRIC_ROW_PAD } from "./scale";
 import { isDarkBg, legibleAccent, ON_DARK_TITLE, ON_DARK_MUTED } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 
@@ -53,10 +54,7 @@ export function MetricCardBlock({
           placeholder="$0"
           style={{
             fontFamily: font,
-            fontSize: "30px",
-            fontWeight: 700,
-            lineHeight: 1.1,
-            letterSpacing: "0.01em",
+            ...text("metric", { numeric: true }),
             color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
             margin: 0,
           }}
@@ -71,12 +69,10 @@ export function MetricCardBlock({
           placeholder="Metric label"
           style={{
             fontFamily: font,
-            fontSize: "11px",
-            fontWeight: 600,
+            ...label(),
             textTransform: "uppercase",
-            letterSpacing: "0.05em",
             color: muted,
-            margin: "6px 0 0",
+            margin: space(8, 0, 0),
           }}
         />
       ) : null}
@@ -87,7 +83,7 @@ export function MetricCardBlock({
           path="sub"
           scope={scope}
           placeholder="Sub line"
-          style={{ fontFamily: font, fontSize: "12px", color: muted, margin: "2px 0 0" }}
+          style={{ fontFamily: font, ...text("caption"), color: muted, margin: space(4, 0, 0) }}
         />
       ) : null}
 
@@ -98,7 +94,7 @@ export function MetricCardBlock({
           cellPadding={0}
           cellSpacing={0}
           border={0}
-          style={{ borderCollapse: "collapse", width: "100%", margin: "12px 0 0" }}
+          style={{ borderCollapse: "collapse", width: "100%", margin: space(METRIC_ROW_PAD, 0, 0) }}
         >
           <tbody>
             <tr>
@@ -128,10 +124,9 @@ export function MetricCardBlock({
         <Text
           style={{
             fontFamily: font,
-            fontSize: "12px",
-            fontWeight: 600,
+            ...text("caption", { weight: WEIGHT.emphasis }),
             color: accent,
-            margin: "8px 0 0",
+            margin: space(8, 0, 0),
           }}
         >
           <EditableText
@@ -152,10 +147,9 @@ export function MetricCardBlock({
         <Text
           style={{
             fontFamily: font,
-            fontSize: "12px",
-            fontWeight: 600,
+            ...text("caption", { weight: WEIGHT.emphasis }),
             color: accent,
-            margin: "8px 0 0",
+            margin: space(8, 0, 0),
           }}
         >
           {captions.join("  ·  ")}

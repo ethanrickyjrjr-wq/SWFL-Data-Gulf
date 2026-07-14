@@ -8,6 +8,7 @@ import type { EmailGlobalStyle, ListProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
 import { isDarkBg, legibleAccent, legibleInk, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
+import { text, pad, space, WEIGHT, TABLE_ROW_PAD } from "./scale";
 
 export function ListBlock({
   props,
@@ -41,10 +42,9 @@ export function ListBlock({
           placeholder="List title"
           style={{
             fontFamily: font,
-            fontSize: "17px",
-            fontWeight: 700,
+            ...text("h2"),
             color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
-            margin: "0 0 10px",
+            margin: space(0, 0, 8),
           }}
         />
       ) : null}
@@ -56,26 +56,21 @@ export function ListBlock({
                 <td
                   style={{
                     fontFamily: font,
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    // ⚠️ SUPERSEDED BY THE SCALE ROOT. This 24px is a magic number — the correct
-                    // fix is `lib/email/blocks/scale.ts`, where a size cannot be chosen without
-                    // its line-height. Delete this literal when the blocks adopt the scale.
+                    // THE RAGGED ROW, FIXED AT THE ROOT. The lead (the price) and the body
+                    // cell (the address) are PEERS ON ONE LINE — so they take the SAME type
+                    // step, and the lead is distinguished by WEIGHT and COLOUR, not by size.
+                    // Identical step → identical line box → baselines align by construction.
                     //
-                    // THE RAGGED ROW. The lead had no line-height, so its 13px text sat in a
-                    // ~16px line box while the 15px body cell beside it sat in a 24px one
-                    // (15 × 1.6). Both cells are top-aligned, so the two line boxes started
-                    // together and their BASELINES landed ~5px apart — the price floated
-                    // above the address it belongs to ("Recent sales nearby" read as two
-                    // columns that had drifted). Pinning the lead to the body's line box
-                    // (15px × 1.6 = 24px) puts both baselines on the same line.
-                    lineHeight: "24px",
+                    // The earlier fix pinned the lead to `lineHeight: "24px"` — a magic number
+                    // that only worked because the body cell happened to be 15px × 1.6. It
+                    // would have silently re-broken the moment either size moved. This cannot.
+                    ...text("body", { weight: WEIGHT.emphasis, numeric: true }),
                     color: onDark
                       ? legibleAccent(globalStyle.accentColor, bg)
                       : globalStyle.accentColor,
                     whiteSpace: "nowrap",
                     verticalAlign: "top",
-                    padding: "5px 10px 5px 0",
+                    padding: space(TABLE_ROW_PAD, 8, TABLE_ROW_PAD, 0),
                   }}
                 >
                   <EditableText value={item.lead ?? ""} path={`items.${i}.lead`} scope={scope} />
@@ -85,11 +80,10 @@ export function ListBlock({
                 colSpan={item.lead ? 1 : 2}
                 style={{
                   fontFamily: font,
-                  fontSize: "15px",
-                  lineHeight: "1.6",
+                  ...text("body"),
                   color: onDark ? ON_DARK_BODY : globalStyle.textColor,
                   verticalAlign: "top",
-                  padding: "5px 0",
+                  padding: pad(TABLE_ROW_PAD, 0),
                   width: "100%",
                 }}
               >
@@ -106,8 +100,7 @@ export function ListBlock({
                       href={item.linkUrl}
                       style={{
                         fontFamily: font,
-                        fontSize: "13px",
-                        fontWeight: 600,
+                        ...text("caption", { weight: WEIGHT.emphasis }),
                         whiteSpace: "nowrap",
                         color: onDark
                           ? legibleAccent(globalStyle.accentColor, bg)

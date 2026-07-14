@@ -4,6 +4,7 @@ import type { EmailGlobalStyle, FooterProps } from "../doc/types";
 import { PLATFORMS, platformMeta } from "../social/platforms";
 import { SocialIcon } from "@/components/email-lab/social-icons";
 import { fontStack, SECTION_PAD, MUTED, BORDER } from "./styles";
+import { text, space } from "./scale";
 import { legibleInk } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 
@@ -38,17 +39,16 @@ export function FooterBlock({
 
   return (
     <Section style={{ backgroundColor: "#F9FAFB", padding: SECTION_PAD }}>
-      <Hr style={{ borderColor: BORDER, margin: "0 0 14px" }} />
+      <Hr style={{ borderColor: BORDER, margin: space(0, 0, 16) }} />
 
       {/* Company + address */}
       {props.companyName || props.address || scope ? (
         <Text
           style={{
             fontFamily: font,
-            fontSize: "11px",
+            ...text("caption"),
             color: MUTED,
-            margin: "0 0 6px",
-            lineHeight: "1.6",
+            margin: space(0, 0, 8),
           }}
         >
           <EditableText
@@ -78,10 +78,9 @@ export function FooterBlock({
         <Text
           style={{
             fontFamily: font,
-            fontSize: "11px",
+            ...text("caption"),
             color: MUTED,
-            margin: "0 0 6px",
-            lineHeight: "1.6",
+            margin: space(0, 0, 8),
           }}
         >
           {scope ? (
@@ -111,7 +110,7 @@ export function FooterBlock({
 
       {/* Social links — icon + text, ordered by socialOrder */}
       {footerSocials.length ? (
-        <Text style={{ fontFamily: font, fontSize: "11px", margin: "0 0 8px" }}>
+        <Text style={{ fontFamily: font, ...text("caption"), margin: space(0, 0, 8) }}>
           {footerSocials.map((soc, i) => (
             <Link
               key={`${soc.type}-${i}`}
@@ -133,7 +132,7 @@ export function FooterBlock({
       ) : null}
 
       {/* Unsubscribe — always rendered when set; legally required */}
-      <Text style={{ fontFamily: font, fontSize: "10px", color: MUTED, margin: "8px 0 0" }}>
+      <Text style={{ fontFamily: font, ...text("mono"), color: MUTED, margin: space(8, 0, 0) }}>
         {props.unsubscribeUrl ? (
           <Link href={props.unsubscribeUrl} style={{ color: MUTED, textDecoration: "underline" }}>
             Unsubscribe

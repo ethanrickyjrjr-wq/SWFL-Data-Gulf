@@ -8,6 +8,7 @@ import type { EmailGlobalStyle, SocialIconsProps, SocialPlatformEntry } from "..
 import { platformMeta, domainFromUrl } from "../social/platforms";
 import { SocialIcon } from "@/components/email-lab/social-icons";
 import { fontStack, SECTION_PAD, CARD_BG, BORDER, MUTED } from "./styles";
+import { text } from "./scale";
 import { legibleInk } from "./on-dark";
 
 const SIZE_PX: Record<NonNullable<SocialIconsProps["iconSize"]>, number> = {
@@ -69,7 +70,7 @@ export function SocialIconsBlock({
         <Text
           style={{
             fontFamily: font,
-            fontSize: "13px",
+            ...text("caption"),
             color: MUTED,
             margin: 0,
             textAlign: "center",
@@ -111,7 +112,7 @@ export function SocialIconsBlock({
               textDecoration: "none",
               color: labelColor,
               fontFamily: font,
-              fontSize: "13px",
+              ...text("caption"),
               marginRight: isRow ? "16px" : 0,
               marginBottom: isRow ? "4px" : "10px",
               justifyContent: isRow ? "center" : "flex-start",

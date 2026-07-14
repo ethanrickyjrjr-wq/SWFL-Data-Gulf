@@ -2,6 +2,7 @@
 import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, SignalProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
+import { text, label, pad, space } from "./scale";
 import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 
@@ -31,7 +32,7 @@ export function SignalBlock({
           backgroundColor: boxBg,
           borderLeft: `4px solid ${globalStyle.accentColor}`,
           borderRadius: "6px",
-          padding: "16px 18px",
+          padding: pad(16, 16),
         }}
       >
         {props.kicker || scope ? (
@@ -43,14 +44,12 @@ export function SignalBlock({
             placeholder="Kicker"
             style={{
               fontFamily: font,
-              fontSize: "11px",
-              fontWeight: 700,
+              ...label(),
               color: onDark
                 ? legibleAccent(globalStyle.accentColor, boxBg)
                 : globalStyle.accentColor,
-              letterSpacing: "0.08em",
               textTransform: "uppercase",
-              margin: "0 0 6px",
+              margin: space(0, 0, 8),
             }}
           />
         ) : null}
@@ -63,10 +62,9 @@ export function SignalBlock({
             placeholder="Headline"
             style={{
               fontFamily: font,
-              fontSize: "18px",
-              fontWeight: 700,
+              ...text("h2"),
               color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
-              margin: "0 0 6px",
+              margin: space(0, 0, 8),
             }}
           />
         ) : null}
@@ -80,8 +78,7 @@ export function SignalBlock({
             placeholder="What's the signal…"
             style={{
               fontFamily: font,
-              fontSize: "14px",
-              lineHeight: "1.65",
+              ...text("body"),
               color: onDark ? ON_DARK_BODY : globalStyle.textColor,
               margin: 0,
             }}

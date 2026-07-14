@@ -57,6 +57,7 @@ import { Html, Head, Body, Container } from "@react-email/components";
 import { emailHeadChildren, msoFontPin } from "./blocks/email-head";
 import { BlockRenderer } from "./blocks/BlockRenderer";
 import { colSpanToPx, GRID_COLS } from "./grid-schema";
+import { TYPE, LEADING } from "./blocks/scale";
 import { groupRows as groupRowEntries } from "./doc/row-grouping";
 import type { EmailBlock, EmailDoc, EmailGlobalStyle } from "./doc/types";
 
@@ -101,9 +102,13 @@ function ghostRowHtml(cols: { html: string; px: number }[]): string {
     `width="${totalPx}" align="center" style="width:${totalPx}px;"><tr><![endif]-->`;
   for (const c of cols) {
     inner += `<!--[if mso]><td width="${c.px}" valign="top" style="vertical-align:top;"><![endif]-->`;
+    // The column wrapper's own type is INHERITED default only — every block inside it
+    // sets its own step from the scale. It was hardcoding `font-size:14px;line-height:1.5`,
+    // and 1.5 is not a leading in the design system (body is 1.55). A wrapper that
+    // invents a line-height silently re-leads any child that doesn't override it.
     inner +=
       `<div style="display:inline-block;width:100%;max-width:${c.px}px;` +
-      `vertical-align:top;font-size:14px;line-height:1.5;text-align:left;">${c.html}</div>`;
+      `vertical-align:top;font-size:${TYPE.caption}px;line-height:${LEADING.body};text-align:left;">${c.html}</div>`;
     inner += `<!--[if mso]></td><![endif]-->`;
   }
   inner += `<!--[if mso]></tr></table><![endif]-->`;

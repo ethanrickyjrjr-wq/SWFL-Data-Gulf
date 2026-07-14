@@ -11,6 +11,7 @@
 import { Section, Img, Text, Link } from "@react-email/components";
 import type { EmailGlobalStyle, MultiColumnProps } from "../doc/types";
 import { fontStack, sectionPad, BORDER, CARD_BG } from "./styles";
+import { text, pad, space, WEIGHT } from "./scale";
 import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 
@@ -51,7 +52,7 @@ export function MultiColumnBlock({
               maxWidth: `${maxW}px`,
               minWidth: `${minW}px`,
               boxSizing: "border-box",
-              padding: "0 8px",
+              padding: pad(0, 8),
               textAlign: "left",
             }}
           >
@@ -85,10 +86,9 @@ export function MultiColumnBlock({
                 placeholder="Heading"
                 style={{
                   fontFamily: font,
-                  fontSize: "15px",
-                  fontWeight: 700,
+                  ...text("body", { weight: WEIGHT.emphasis }),
                   color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
-                  margin: "0 0 4px",
+                  margin: space(0, 0, 4),
                 }}
               />
             ) : null}
@@ -103,8 +103,7 @@ export function MultiColumnBlock({
                 placeholder="Body…"
                 style={{
                   fontFamily: font,
-                  fontSize: "13px",
-                  lineHeight: "1.6",
+                  ...text("body"),
                   color: onDark ? ON_DARK_BODY : globalStyle.textColor,
                   margin: 0,
                 }}
@@ -112,13 +111,12 @@ export function MultiColumnBlock({
             ) : null}
 
             {c.linkUrl ? (
-              <Text style={{ margin: "6px 0 0" }}>
+              <Text style={{ margin: space(8, 0, 0) }}>
                 <Link
                   href={c.linkUrl}
                   style={{
                     fontFamily: font,
-                    fontSize: "13px",
-                    fontWeight: 600,
+                    ...text("caption", { weight: WEIGHT.emphasis }),
                     color: onDark
                       ? legibleAccent(globalStyle.accentColor, bg)
                       : globalStyle.accentColor,

@@ -4,6 +4,7 @@
 import { Section, Img, Text, Link } from "@react-email/components";
 import type { AgentHeroProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, CARD_BG, BORDER, MUTED } from "./styles";
+import { text, label, pad, space, WEIGHT, CARD_PAD } from "./scale";
 import { legibleInk } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 
@@ -47,7 +48,7 @@ export function AgentHeroBlock({
             justifyContent: "center",
           }}
         >
-          <Text style={{ fontFamily: font, fontSize: "13px", color: "#ffffff50", margin: 0 }}>
+          <Text style={{ fontFamily: font, ...text("caption"), color: "#ffffff50", margin: 0 }}>
             Agent photo
           </Text>
         </Section>
@@ -57,7 +58,7 @@ export function AgentHeroBlock({
       <Section
         style={{
           backgroundColor: globalStyle.primaryColor,
-          padding: "18px 24px",
+          padding: pad(16, CARD_PAD),
           borderTop: `3px solid ${globalStyle.accentColor}`,
         }}
       >
@@ -70,12 +71,10 @@ export function AgentHeroBlock({
             placeholder="Agent name"
             style={{
               fontFamily: font,
-              fontSize: "22px",
-              fontWeight: 800,
+              ...text("h2"),
               // 22px/800 = WCAG large text → 3:1 floor (spec D3)
               color: legibleInk("#ffffff", globalStyle.primaryColor, 3),
-              margin: "0 0 4px",
-              letterSpacing: "-0.3px",
+              margin: space(0, 0, 4),
             }}
           />
         ) : null}
@@ -88,12 +87,10 @@ export function AgentHeroBlock({
             placeholder="Designation"
             style={{
               fontFamily: font,
-              fontSize: "12px",
-              fontWeight: 600,
+              ...label(),
               color: legibleInk(globalStyle.accentColor, globalStyle.primaryColor, 4.5),
               margin: 0,
               textTransform: "uppercase",
-              letterSpacing: "0.08em",
             }}
           />
         ) : null}
@@ -101,7 +98,7 @@ export function AgentHeroBlock({
 
       {/* Tagline + CTA */}
       {props.tagline || (props.ctaLabel && props.ctaUrl) || scope ? (
-        <Section style={{ padding: "16px 24px", borderBottom: `1px solid ${BORDER}` }}>
+        <Section style={{ padding: pad(16, CARD_PAD), borderBottom: `1px solid ${BORDER}` }}>
           {props.tagline || scope ? (
             <EditableText
               as={Text}
@@ -112,10 +109,9 @@ export function AgentHeroBlock({
               placeholder="Tagline…"
               style={{
                 fontFamily: font,
-                fontSize: "14px",
-                lineHeight: "1.6",
+                ...text("body"),
                 color: MUTED,
-                margin: "0 0 10px",
+                margin: space(0, 0, 8),
               }}
             />
           ) : null}
@@ -125,8 +121,7 @@ export function AgentHeroBlock({
                 href={props.ctaUrl}
                 style={{
                   fontFamily: font,
-                  fontSize: "13px",
-                  fontWeight: 700,
+                  ...text("caption", { weight: WEIGHT.emphasis }),
                   color: legibleInk(globalStyle.accentColor, CARD_BG, 4.5),
                   textDecoration: "none",
                 }}

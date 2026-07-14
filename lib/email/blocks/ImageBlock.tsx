@@ -2,6 +2,7 @@
 import { Img, Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, ImageProps } from "../doc/types";
 import { fontStack, MUTED, CARD_BG, BORDER } from "./styles";
+import { text, pad, space, CARD_PAD } from "./scale";
 import { EditableText, type EditScope } from "./editable-text";
 import { ImageSlot } from "./OpenSlot";
 
@@ -64,7 +65,7 @@ export function ImageBlock({
         <Section
           style={{
             backgroundColor: overlayBg,
-            padding: "60px 40px",
+            padding: pad(64, 48),
             textAlign: align,
           }}
         >
@@ -77,11 +78,10 @@ export function ImageBlock({
               placeholder="Headline"
               style={{
                 fontFamily: font,
-                fontSize: "30px",
+                ...text("h2"),
                 fontWeight: "700",
                 color: textColor,
-                margin: "0 0 12px",
-                lineHeight: "1.2",
+                margin: space(0, 0, 12),
               }}
             />
           ) : null}
@@ -95,10 +95,9 @@ export function ImageBlock({
               placeholder="Supporting text"
               style={{
                 fontFamily: font,
-                fontSize: "16px",
+                ...text("body"),
                 color: textColor,
                 margin: 0,
-                lineHeight: "1.5",
               }}
             />
           ) : null}
@@ -162,11 +161,11 @@ export function ImageBlock({
           placeholder="Caption"
           style={{
             fontFamily: font,
-            fontSize: "12px",
+            ...text("caption"),
             color: MUTED,
             textAlign: "center",
-            margin: "8px 0",
-            padding: "0 24px",
+            margin: space(8, 0),
+            padding: pad(0, CARD_PAD),
           }}
         />
       ) : null}

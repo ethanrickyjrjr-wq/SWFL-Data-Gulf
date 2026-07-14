@@ -11,6 +11,7 @@ import { Link, Section, Text } from "@react-email/components";
 import { cleanCitations } from "@/lib/citations/clean-url";
 import type { EmailGlobalStyle, SourcesProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER, MUTED } from "./styles";
+import { text, space } from "./scale";
 import { legibleInk } from "./on-dark";
 
 export function SourcesBlock({
@@ -37,15 +38,14 @@ export function SourcesBlock({
         <summary
           style={{
             fontFamily: font,
-            fontSize: "12px",
-            fontWeight: 700,
+            ...text("mono"),
             color: MUTED,
             cursor: "pointer",
           }}
         >
           Sources ({cited.length})
         </summary>
-        <div style={{ marginTop: "10px" }}>
+        <div style={{ marginTop: 8 }}>
           {cited.map((c, i) =>
             c.linkable && c.href ? (
               <Text
@@ -61,10 +61,9 @@ export function SourcesBlock({
                 key={`${c.label}-${i}`}
                 style={{
                   fontFamily: font,
-                  fontSize: "11px",
-                  lineHeight: "1.6",
+                  ...text("mono"),
                   color: MUTED,
-                  margin: "0 0 4px",
+                  margin: space(0, 0, 4),
                 }}
               >
                 {c.label}
@@ -77,9 +76,9 @@ export function SourcesBlock({
         <Text
           style={{
             fontFamily: font,
-            fontSize: "11px",
+            ...text("mono"),
             color: MUTED,
-            margin: "10px 0 0",
+            margin: space(8, 0, 0),
           }}
         >
           {props.note}

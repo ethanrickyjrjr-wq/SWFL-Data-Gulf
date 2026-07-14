@@ -2,6 +2,7 @@
 import { Section, Button, Text } from "@react-email/components";
 import type { ButtonProps, EmailGlobalStyle } from "../doc/types";
 import { fontStack, SECTION_PAD, CARD_BG, BORDER } from "./styles";
+import { text, pad, WEIGHT } from "./scale";
 import { legibleInk } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 
@@ -20,11 +21,10 @@ export function ButtonBlock({
   const sharedStyle = {
     backgroundColor: bg,
     color: legibleInk("#ffffff", bg, 4.5),
-    padding: "14px 32px",
+    padding: pad(16, 32),
     borderRadius: "8px",
     fontFamily: font,
-    fontSize: "15px",
-    fontWeight: 600,
+    ...text("body", { weight: WEIGHT.emphasis }),
     textDecoration: "none",
     display: "inline-block",
   };

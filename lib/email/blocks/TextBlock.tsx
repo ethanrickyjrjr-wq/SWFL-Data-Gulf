@@ -2,6 +2,7 @@
 import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, TextProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
+import { text, pad } from "./scale";
 import { isDarkBg, ON_DARK_BODY } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 import { OPEN_SLOT_INK } from "./OpenSlot";
@@ -45,15 +46,14 @@ export function TextBlock({
           placeholder="Paste your text here — we'll tighten it."
           style={{
             fontFamily: font,
-            fontSize: "16px",
-            lineHeight: "1.75",
+            ...text("body"),
             color: isDarkBg(bg) ? ON_DARK_BODY : globalStyle.textColor,
             textAlign: props.align ?? "left",
             margin: 0,
             whiteSpace: "pre-line",
             // Empty + on the canvas → the dashed "yours to fill" outline.
             ...(scope && !(props.body ?? "").trim()
-              ? { ...OPEN_SLOT_INK, padding: "10px 12px" }
+              ? { ...OPEN_SLOT_INK, padding: pad(8, 12) }
               : {}),
           }}
         />

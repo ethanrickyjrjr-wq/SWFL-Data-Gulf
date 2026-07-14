@@ -5,6 +5,7 @@
 import { Section, Img, Text, Link } from "@react-email/components";
 import type { EmailGlobalStyle, ListingProps } from "../doc/types";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
+import { text, label, pad, space, WEIGHT } from "./scale";
 import { legibleInk } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 
@@ -62,13 +63,11 @@ export function ListingBlock({
           style={{
             display: "inline-block",
             fontFamily: font,
-            fontSize: "10px",
-            fontWeight: 700,
-            letterSpacing: "0.06em",
+            ...label(),
             textTransform: "uppercase",
             color: legibleInk("#06231f", globalStyle.accentColor, 4.5),
             backgroundColor: globalStyle.accentColor,
-            padding: "3px 8px",
+            padding: pad(4, 8),
             borderRadius: "4px",
             margin: photo ? "12px 0 0" : "0",
           }}
@@ -84,11 +83,10 @@ export function ListingBlock({
           placeholder="$0"
           style={{
             fontFamily: font,
-            fontSize: "22px",
-            fontWeight: 700,
+            ...text("metric", { numeric: true }),
             // 22px/700 = WCAG large text → 3:1 floor (spec D3)
             color: legibleInk(globalStyle.primaryColor, bg, 3),
-            margin: "10px 0 0",
+            margin: space(8, 0, 0),
           }}
         />
       ) : null}
@@ -96,7 +94,14 @@ export function ListingBlock({
       {scope ? (
         // Canvas: per-field editable spans with the identical separators; the
         // server branch below keeps today's joined string byte-for-byte.
-        <Text style={{ fontFamily: font, fontSize: "13px", color: MUTED, margin: "4px 0 0" }}>
+        <Text
+          style={{
+            fontFamily: font,
+            ...text("caption", { numeric: true }),
+            color: MUTED,
+            margin: space(4, 0, 0),
+          }}
+        >
           <EditableText value={props.beds ?? ""} path="beds" scope={scope} placeholder="3" /> bd
           {"   ·   "}
           <EditableText value={props.baths ?? ""} path="baths" scope={scope} placeholder="2" /> ba
@@ -110,7 +115,14 @@ export function ListingBlock({
           sqft
         </Text>
       ) : specs ? (
-        <Text style={{ fontFamily: font, fontSize: "13px", color: MUTED, margin: "4px 0 0" }}>
+        <Text
+          style={{
+            fontFamily: font,
+            ...text("caption", { numeric: true }),
+            color: MUTED,
+            margin: space(4, 0, 0),
+          }}
+        >
           {specs}
         </Text>
       ) : null}
@@ -124,22 +136,22 @@ export function ListingBlock({
           placeholder="Address"
           style={{
             fontFamily: font,
-            fontSize: "13px",
-            lineHeight: "1.5",
+            ...text("caption", { numeric: true }),
+            ...text("caption"),
             color: globalStyle.textColor,
-            margin: "4px 0 0",
+            margin: space(4, 0, 0),
           }}
         />
       ) : null}
 
       {props.linkUrl ? (
-        <Text style={{ margin: "8px 0 0" }}>
+        <Text style={{ margin: space(8, 0, 0) }}>
           <Link
             href={props.linkUrl}
             style={{
               fontFamily: font,
-              fontSize: "13px",
-              fontWeight: 600,
+              ...text("caption", { numeric: true }),
+              ...text("caption", { weight: WEIGHT.emphasis }),
               color: legibleInk(globalStyle.accentColor, bg, 4.5),
             }}
           >

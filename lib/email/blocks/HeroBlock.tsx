@@ -2,6 +2,7 @@
 import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, HeroProps } from "../doc/types";
 import { displayFontStack, fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
+import { text, label, lines, pad, space, CARD_PAD } from "./scale";
 import { DISPLAY_FONT_CLASS } from "./email-head";
 import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_MUTED, ON_DARK_TITLE } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
@@ -39,13 +40,11 @@ export function HeroBlock({
   // bar in the sample — a design element, not a caption.
   const ribbon =
     props.ribbon && props.kicker ? (
-      <Section style={{ backgroundColor: accent, padding: "9px 28px" }}>
+      <Section style={{ backgroundColor: accent, padding: pad(8, CARD_PAD) }}>
         <Text
           style={{
             fontFamily: font,
-            fontSize: "12px",
-            fontWeight: 700,
-            letterSpacing: "0.22em",
+            ...label(),
             textTransform: "uppercase",
             textAlign: "center",
             color: isDarkBg(accent) ? "#ffffff" : "#1a1a1a",
@@ -70,12 +69,10 @@ export function HeroBlock({
         placeholder="Address"
         style={{
           fontFamily: displayFont,
-          fontSize: "27px",
-          lineHeight: "1.25",
-          fontWeight: 400,
+          ...text("h2"),
           color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
           textAlign,
-          margin: "0 0 10px",
+          margin: space(0, 0, 8),
         }}
       />
     ) : null;
@@ -99,17 +96,15 @@ export function HeroBlock({
           placeholder="Kicker"
           style={{
             fontFamily: font,
-            fontSize: "11px",
-            fontWeight: 700,
+            ...label(),
             color: accent,
-            letterSpacing: "0.08em",
             textTransform: "uppercase",
             textAlign,
-            margin: "0 0 8px",
+            margin: space(0, 0, 8),
             // Clipping heros sit in side-by-side PAIRS — reserve two kicker
             // lines so a wrapped kicker on one card can never stagger the
             // values/bottoms against its partner (operator flag 07/05/2026).
-            ...(clipping ? { minHeight: "34px" } : {}),
+            ...(clipping ? { minHeight: lines("caption", 2) } : {}),
           }}
         />
       ) : null}
@@ -128,9 +123,7 @@ export function HeroBlock({
           placeholder="$0"
           style={{
             fontFamily: displayFont,
-            fontSize: "48px",
-            lineHeight: "1.1",
-            fontWeight: 700,
+            ...text("h1", { numeric: true }),
             // THE PRICE IS THE ACCENT when the address leads it — that is the hierarchy the
             // sample has and ours did not: one gold number the eye lands on.
             color: labelFirst ? accent : onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
@@ -150,10 +143,10 @@ export function HeroBlock({
           placeholder="Label"
           style={{
             fontFamily: font,
-            fontSize: "13px",
+            ...text("caption"),
             color: onDark ? ON_DARK_MUTED : MUTED,
             textAlign,
-            margin: "6px 0 0",
+            margin: space(8, 0, 0),
           }}
         />
       ) : null}
@@ -168,11 +161,10 @@ export function HeroBlock({
           placeholder="Add a sentence…"
           style={{
             fontFamily: font,
-            fontSize: "16px",
-            lineHeight: "1.65",
+            ...text("body"),
             color: onDark ? ON_DARK_BODY : globalStyle.textColor,
             textAlign,
-            margin: "14px 0 0",
+            margin: space(16, 0, 0),
           }}
         />
       ) : null}

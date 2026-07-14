@@ -8,6 +8,18 @@ import type { EmailGlobalStyle, StatItem, StatsProps } from "../doc/types";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
 import { EditableText, type EditScope } from "./editable-text";
 import { OPEN_SLOT_INK } from "./OpenSlot";
+import {
+  text,
+  label,
+  statRole,
+  lines,
+  pad,
+  space,
+  WEIGHT,
+  TYPE,
+  METRIC_ROW_PAD,
+  type TypeRole,
+} from "./scale";
 
 /** Side-by-side needs ~180px per cell for a "$630,000"-class value at 32px.
  *  Full width (600/3 = 200) keeps the classic row; any grid column tighter
@@ -59,23 +71,61 @@ export function StatsBlock({
   // `emphasis` is per-cell and OPTIONAL — an undefined cell renders exactly as before.
   //   primary → larger, in the ACCENT colour. The one the eye should land on.
   //   muted   → smaller and quieter. Present, but not competing.
-  const strip = props.variant === "strip";
-  const sizeFor = (e: StatItem["emphasis"], base: string) =>
-    e === "primary" ? (strip ? "20px" : "30px") : e === "muted" ? (strip ? "13px" : "18px") : base;
+  // ── IT WAS INVERTED, AND IT WAS DROPPED (both fixed 07/14/2026) ─────────────
+  //
+  // The old sizeFor() read:
+  //     primary → strip ? 20px : 30px    muted → strip ? 13px : 18px    base → 32px (grid)
+  //
+  // So in the GRID variant a `primary` cell rendered at 30px while a PLAIN cell
+  // rendered at 32px — THE IMPORTANT NUMBER WAS SMALLER THAN THE BORING ONE. The
+  // dial ran backwards, and only won on colour. And the STACKED path below called
+  // valueStyle(empty, "22px") with no emphasis argument at all, so it dropped the
+  // dial entirely — the exact path a narrow multi-column column triggers, i.e. the
+  // path the fence system exists to produce.
+  //
+  // Now: `statRole()` (scale.ts) is monotonic BY CONSTRUCTION — primary > plain >
+  // muted, at every density, pinned by scale.test.ts. Density is the `strip` flag:
+  // a strip walks one step DOWN the real ladder rather than inventing 20/13/17/9px.
+  const density = props.variant === "strip" ? "strip" : "grid";
   const colorFor = (e: StatItem["emphasis"]) =>
     e === "primary" ? globalStyle.accentColor : e === "muted" ? MUTED : globalStyle.primaryColor;
 
   // An open cell on the canvas: the label stays (it IS the instruction — "Baths"
   // tells the user what to type) and the value wears a dashed "fill me" outline with
   // an add affordance instead of a "0" placeholder that reads as a real figure.
-  const valueStyle = (empty: boolean, size: string, emphasis?: StatItem["emphasis"]) => ({
+  //
+  // `numeric: true` — a stat value is ALWAYS a figure, and the design system requires
+  // tabular figures on every numeric cell so columns of numbers align. Before today
+  // that rule had zero implementations anywhere in the email renderer.
+  // ── THE LABEL BASELINE (07/14/2026) ─────────────────────────────────────────
+  //
+  // Making the important number BIGGER immediately staggered the label row: with
+  // $209 at a taller step than "3" and "Residential", each cell's label sat at a
+  // different height and the row read as ragged — the exact "uneven" complaint,
+  // reappearing one layer down. Emphasis without a shared baseline just moves the
+  // mess around.
+  //
+  // So the VALUE ROW reserves ONE line box, sized at the tallest step present in
+  // THIS row. Every label then starts at the same y, whatever the emphasis. Derived
+  // from the scale (`lines()`), never a hand-typed height, so it tracks the type.
+  const tallest = cells.reduce<TypeRole>(
+    (max, { stat }) => {
+      const r = statRole(stat.emphasis, density);
+      return TYPE[r] > TYPE[max] ? r : max;
+    },
+    statRole(undefined, density),
+  );
+
+  const valueStyle = (empty: boolean, emphasis?: StatItem["emphasis"]) => ({
     fontFamily: font,
-    fontSize: empty && scope ? "18px" : sizeFor(emphasis, size),
-    fontWeight: 700,
-    letterSpacing: "0.01em",
+    ...(empty && scope
+      ? text("body", { weight: WEIGHT.emphasis })
+      : text(statRole(emphasis, density), { numeric: true })),
     color: empty && scope ? MUTED : colorFor(emphasis),
     margin: 0,
-    ...(empty && scope ? { ...OPEN_SLOT_INK, padding: "4px 8px" } : {}),
+    // One shared line box → one shared label baseline across the whole row.
+    minHeight: lines(tallest, 1),
+    ...(empty && scope ? { ...OPEN_SLOT_INK, padding: pad(4, 8) } : {}),
   });
 
   if (stacked) {
@@ -86,7 +136,7 @@ export function StatsBlock({
             <Column
               style={{
                 textAlign: "left",
-                padding: pos === cells.length - 1 ? "4px 8px" : "4px 8px 14px",
+                padding: pos === cells.length - 1 ? pad(4, 8) : space(4, 8, 16),
               }}
             >
               <EditableText
@@ -95,7 +145,7 @@ export function StatsBlock({
                 path={`stats.${i}.value`}
                 scope={scope}
                 placeholder="+ Add"
-                style={valueStyle(empty, "22px")}
+                style={valueStyle(empty, stat.emphasis)}
               />
               <EditableText
                 as={Text}
@@ -103,7 +153,7 @@ export function StatsBlock({
                 path={`stats.${i}.label`}
                 scope={scope}
                 placeholder="Label"
-                style={{ fontFamily: font, fontSize: "11px", color: MUTED, margin: "2px 0 0" }}
+                style={{ fontFamily: font, ...label(), color: MUTED, margin: space(4, 0, 0) }}
               />
             </Column>
           </Row>
@@ -115,27 +165,27 @@ export function StatsBlock({
   // THE SPEC STRIP — one delicate hairline-ruled row, the spec line a real listing flyer
   // runs under the price. Five cells in a STRIP read as a spec line; five cells in a GRID
   // read as a wall. Same data, entirely different email.
-  if (strip) {
+  if (density === "strip") {
     return (
       <Section
         style={{
           ...sectionStyle,
           borderTop: `1px solid ${globalStyle.accentColor}`,
           borderBottom: `1px solid ${globalStyle.accentColor}`,
-          padding: "14px 20px",
+          padding: pad(12, 16),
         }}
         data-stats-variant="strip"
       >
         <Row>
           {cells.map(({ stat, i, empty }) => (
-            <Column key={i} style={{ textAlign: "center", padding: "2px 6px" }}>
+            <Column key={i} style={{ textAlign: "center", padding: pad(4, 8) }}>
               <EditableText
                 as={Text}
                 value={stat.value}
                 path={`stats.${i}.value`}
                 scope={scope}
                 placeholder="+ Add"
-                style={valueStyle(empty, "17px", stat.emphasis)}
+                style={valueStyle(empty, stat.emphasis)}
               />
               <EditableText
                 as={Text}
@@ -143,14 +193,7 @@ export function StatsBlock({
                 path={`stats.${i}.label`}
                 scope={scope}
                 placeholder="Label"
-                style={{
-                  fontFamily: font,
-                  fontSize: "9px",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color: MUTED,
-                  margin: "3px 0 0",
-                }}
+                style={{ fontFamily: font, ...label(), color: MUTED, margin: space(4, 0, 0) }}
               />
             </Column>
           ))}
@@ -161,10 +204,10 @@ export function StatsBlock({
           <Text
             style={{
               fontFamily: font,
-              fontSize: "9px",
+              ...text("mono"),
               color: MUTED,
               textAlign: "center",
-              margin: "8px 0 0",
+              margin: space(8, 0, 0),
             }}
           >
             {props.footnote}
@@ -178,14 +221,14 @@ export function StatsBlock({
     <Section style={sectionStyle}>
       <Row>
         {cells.map(({ stat, i, empty }) => (
-          <Column key={i} style={{ textAlign: "center", padding: "8px" }}>
+          <Column key={i} style={{ textAlign: "center", padding: pad(METRIC_ROW_PAD, 8) }}>
             <EditableText
               as={Text}
               value={stat.value}
               path={`stats.${i}.value`}
               scope={scope}
               placeholder="+ Add"
-              style={valueStyle(empty, "32px", stat.emphasis)}
+              style={valueStyle(empty, stat.emphasis)}
             />
             <EditableText
               as={Text}
@@ -193,7 +236,7 @@ export function StatsBlock({
               path={`stats.${i}.label`}
               scope={scope}
               placeholder="Label"
-              style={{ fontFamily: font, fontSize: "11px", color: MUTED, margin: "4px 0 0" }}
+              style={{ fontFamily: font, ...label(), color: MUTED, margin: space(4, 0, 0) }}
             />
           </Column>
         ))}
