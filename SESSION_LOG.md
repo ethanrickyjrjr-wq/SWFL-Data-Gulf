@@ -1,3 +1,38 @@
+## 2026-07-14 (Opus 4.8 · main) — THE FALSIFIER THAT WAS ALREADY TRUE WHEN WE PRINTED IT
+
+Prose pass on `trendVerdict` (`lib/charts/series-fit.ts`) before phase 2 wires four renderers to it. Closes `trend_verdict_prose_before_renderer`. Zero production consumers today — which is exactly why now.
+
+The check named three defects. Fixing the second one **uncovered a fourth that was worse than all three**, and only printing the real sentences caught it — the 30-test suite was green over it.
+
+**The four:**
+
+1. **Jargon in an agent's email.** The no-direction falsifier read *"A direction becomes readable only once a fitted slope's 95% interval clears zero."* Three pieces of jargon (rules of engagement #5) — and not a falsifier at all: it describes our arithmetic, and states no condition that could ever come true or fail to. `value: 0` was not a base value either; zero is a fact about our method, not about the market. Now it quotes the **band** — the honest base value of an unestablished fit: *"The pace could be anything from a $400 a month slide to a $640 a month climb — a spread that still includes flat, so we do not call one."*
+
+2. **A rate described as a deviation.** *"…move against the fitted line by more than $1,674 a month"* called `ci[0]` a permitted wobble around the line when it is a **lower bound on the pace**. Read literally it was a far weaker test than intended: a climb collapsing from $1,802/mo to dead flat never "moves against the line", so the read survived its own refutation — the market had to actively *decline* before we'd admit anything.
+
+3. **Voice split.** no-direction said "this series"; the other three said "this market". Same town, one email.
+
+4. **THE ONE THE TESTS MISSED — a falsifier refuted by its own claim, two sentences earlier:**
+
+   > "The last 24 months are still climbing, at **$1,500** a month.
+   >  This read breaks if the next two months climb by less than **$1,674** a month."
+
+   $1,500 *is* less than $1,674. `reversed` was worse: it announced the market had **turned** and was **falling** $1,844/mo — then staked the read on the next two months **climbing** $1,804. Dead on arrival.
+
+   **Cause: a window mismatch, and it is this module's own opening thesis turned against us.** `long.fit.ci` bounds the *eleven-year* pace; "the next two months" is short-run. Cape Coral runs +$1,931/mo over eleven years and −$619/mo over twenty-four months and **both are true** — so a short-run pace under the long-run bound isn't a broken trend, it's Tuesday. A falsifier keyed there fires on noise always, which is the same as not having one.
+
+**THE RULE: the falsifier and the claim must stand on the same window.** intact/reversed key to the **current** window (the leading edge, and the contested half of the sentence); plateau stakes the **turn** it denies; no-direction stakes the long band. A fit's slope always sits strictly inside its own interval, so |slope| > |bound nearest zero| **always** — the construction now *cannot* be already-true when printed. That is the assertion locked in (`NO FALSIFIER IS ALREADY TRUE THE MOMENT IT IS PRINTED`), and it is the guard the old suite lacked.
+
+**Fifth, found on the way:** `plateau` also fires when there is **no 24m window at all** — an 18-month series can't reach back two years — and the sentence still reported *"The last 24 months do not establish a direction either way."* **We never fit those months. They don't exist.** That is the label-outruns-its-data sin this module opens with, committed by the verdict itself, and a falsifier keyed to a null window would have thrown on top of it. Now it says so plainly and stakes the long run instead.
+
+**For phase 2 — branch on `falsifier.valueLow`, NOT on `kind`.** `valueLow === null` ⇒ `value` is a real one-sided threshold, draw the line. `valueLow !== null` ⇒ the sentence names a **band that straddles flat**; neither edge breaks anything and one line there is a lie. `plateau` appears on **both** sides of that rule, which is why `kind` is the wrong discriminator. Left open (`plateau_kind_covers_two_situations`): whether to split the kind outright — that's a contract change + RULE 3.5, not a prose pass.
+
+49 tests green in the file (was 30), 1078 across `lib/charts` + `lib/deliverable`, typecheck clean. Verdict prose still survives the real `auditClaims` gate on all four kinds — and still **dies** when the falsifier isn't itself settled. Note the no-direction falsifier reaches that death by a different route than the rest: both its numbers are the claim's own band edges, so `unanchored-number` can't fire — it's the `comparative` shape ("more than $640") that kills it. Word it "a climb **steeper than** $640" and it sails through unsettled, because `steeper than` is in no regex. The wording is load-bearing.
+
+**Next:** phase 2 — the renderers drawing the line, the Email Lab preset, the desk trend block, the narrator.
+
+---
+
 ## 2026-07-14 (Opus 4.8 · main) — THE USER'S OWN GRID: "build 12345 Street the same way I built 123 Street"
 
 Operator: *"WHATEVER THEY MAKE, THAT IS HOW IT SAVES… ASK THEM — WOULD YOU LIKE TO USE THE LAYOUT YOU CREATED FOR 123 STREET, OR START FRESH. IF IT IS 123 STREET, WE BUILD 12345 STREET THE SAME WAY WITH EVERY GRID THE SAME — BUT WITH DATA AND COMMENTARY FOR 12345 STREET. WHY CAN'T WE DO THIS?"*

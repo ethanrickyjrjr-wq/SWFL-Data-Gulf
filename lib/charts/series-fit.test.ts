@@ -267,10 +267,17 @@ const VERDICTS: Record<Verdict["kind"], Verdict> = {
  *
  * A trend read is an [INFERENCE], and this platform's rules of engagement require every
  * inference to carry its base value AND ONE FALSIFIER in visible copy. The falsifier says
- * "…by MORE THAN $1,674 a month" — which is comparative-shaped and carries a numeral no
- * other settled sentence holds. So unless the falsifier is ITSELF settled, `auditClaims`
- * eats it, the paragraph fails closed to an open slot, and we cannot ship a compliant
- * inference AT ALL. Hence `falsifier: SettledClaim & { value: number }`.
+ * "…climb by LESS THAN $1,674 a month" — which is comparative-shaped, and (on the
+ * directional kinds) carries a numeral no other settled sentence holds. So unless the
+ * falsifier is ITSELF settled, `auditClaims` eats it, the paragraph fails closed to an
+ * open slot, and we cannot ship a compliant inference AT ALL. Hence
+ * `falsifier: SettledClaim & { value: number; valueLow: number | null }`.
+ *
+ * NOTE the no-direction falsifier reaches the same death by a DIFFERENT route: both its
+ * numbers are the claim's own band edges, so `unanchored-number` CANNOT fire on it. It is
+ * the `comparative` shape ("more than $640") that kills it. Word it any other way — "a
+ * climb STEEPER THAN $640" — and it sails through the gate unsettled, because `steeper
+ * than` is in no regex. The wording is load-bearing; that is what the loop below proves.
  */
 describe("trendVerdict SURVIVES auditClaims — the real gate, not a stand-in", () => {
   for (const [kind, v] of Object.entries(VERDICTS)) {
@@ -323,4 +330,180 @@ describe("the verdict sentence reads as English under the ex-boom label", () => 
       expect(v.claim.sentence).not.toMatch(/\b(above|below|as shown)\b/i);
     });
   }
+});
+
+/**
+ * THE PROSE PASS — three defects, caught before phase 2 wired FOUR renderers to them.
+ *
+ * Every sentence in this module is customer copy: it leaves over an agent's signature,
+ * to their client list. It is held to the rules of engagement like any other copy we
+ * ship, and it was failing them in three separate ways.
+ */
+describe("the verdict is CLIENT COPY — it obeys the rules of engagement", () => {
+  // DEFECT 1 — JARGON IN AN AGENT'S EMAIL (rules of engagement #5: no jargon).
+  // The no-direction falsifier shipped THREE pieces in one sentence: "A direction becomes
+  // readable only once a FITTED SLOPE's 95% INTERVAL CLEARS ZERO." That is a note about
+  // our arithmetic, mailed to somebody's client.
+  const JARGON =
+    /\b(fitted (slope|line)|95%|confidence interval|interval clears|statistically|significan\w+|p-value|r²|r2|regression|least.squares|slope|std|standard error)\b/i;
+
+  for (const [kind, v] of Object.entries(VERDICTS)) {
+    it(`${kind}: neither the claim nor the falsifier speaks statistics`, () => {
+      expect(v.claim.sentence).not.toMatch(JARGON);
+      expect(v.falsifier.sentence).not.toMatch(JARGON);
+    });
+
+    // DEFECT 3 — THE VOICE SPLIT. no-direction said "this series"; the other three said
+    // "this market". Same town, same email, two different subjects — one of which tells
+    // the reader they are looking at a spreadsheet.
+    it(`${kind}: the subject is "this market", never "this series"`, () => {
+      expect(v.claim.sentence).toContain("this market");
+      expect(v.claim.sentence).not.toContain("this series");
+    });
+
+    // A FALSIFIER NAMES A BREAKING CONDITION — a pace the market would have to print.
+    // "A direction becomes readable once…" names none: nothing it describes could ever
+    // come true or fail to. Every kind states a dollar pace per month.
+    it(`${kind}: the falsifier states a PACE the market could actually print`, () => {
+      expect(v.falsifier.sentence).toMatch(/breaks/i);
+      expect(v.falsifier.sentence).toMatch(/\$[\d,]+ a month/);
+    });
+  }
+
+  // DEFECT 2 — THE BOUND IS A RATE, AND THE SENTENCE CALLED IT A DEVIATION.
+  //
+  // Shipped: "…the next two months move AGAINST the fitted line by more than $1,674 a
+  // month." `ci[0]` is the slowest CLIMB the history supports — not a permitted wobble
+  // around the line. Read literally, the old sentence was a far weaker test than the one
+  // we meant: Cape Coral's climb could collapse from $1,802 a month to DEAD FLAT without
+  // ever "moving against the line by more than $1,674", so the read survived its own
+  // refutation. It only broke once the market actively fell.
+  it("the directional falsifier breaks on a SLOWING climb, not only on a decline", () => {
+    const v = VERDICTS.intact; // 24m ci [1100, 1900]
+    expect(v.falsifier.sentence).toContain("climb by less than $1,100 a month");
+    // The old framing, and the jargon it carried in with it. Never again.
+    expect(v.falsifier.sentence).not.toMatch(/against/i);
+  });
+
+  it("a FALLING market's falsifier breaks on a slowing fall — the mirror of the above", () => {
+    const v = trendVerdict([
+      wf("ex-boom", -1802, 0.88, 108, [-1930, -1674]), // established DOWN
+      wf("24m", -1500, 0.75, 24, [-1900, -1100]),
+    ])!;
+    expect(v.kind).toBe("intact"); // same sign, both established
+    expect(v.falsifier.sentence).toContain("fall by less than $1,100 a month");
+    expect(v.falsifier.value).toBe(-1100); // the bound NEAREST ZERO — ci[1] when down
+  });
+
+  /**
+   * DEFECT 2, ONE LAYER DOWN — **THE FALSIFIER THAT WAS ALREADY TRUE WHEN PRINTED.**
+   *
+   * Fixing the rate/deviation confusion exposed the bug underneath it. The threshold came
+   * from the LONG window's interval, but the sentence tested the NEXT TWO MONTHS — and the
+   * claim, two sentences earlier, had already reported a recent pace on the wrong side of
+   * it. Shipped, in one breath:
+   *
+   *   "The last 24 months are still climbing, at $1,500 a month.
+   *    This read breaks if the next two months climb by less than $1,674 a month."
+   *
+   * $1,500 is less than $1,674. The read refuted itself. `reversed` was worse: it declared
+   * the market had TURNED and was FALLING $1,844 a month, then staked the read on the next
+   * two months CLIMBING $1,804.
+   *
+   * The cause is the module's own opening thesis: an eleven-year bound and a two-month
+   * horizon are different windows, and they disagree freely (+$1,931/mo over eleven years,
+   * −$619/mo over twenty-four months, BOTH TRUE). So the horizon and the bound must come
+   * from THE SAME WINDOW — and this is the assertion that holds them there.
+   */
+  it("NO FALSIFIER IS ALREADY TRUE THE MOMENT IT IS PRINTED", () => {
+    // A one-sided threshold is keyed to the window whose pace the claim reports, and a
+    // fit's slope always sits strictly INSIDE its own interval. So |slope| > |bound
+    // nearest zero|, ALWAYS: the market the claim just described cannot already have
+    // failed the test the falsifier just set.
+    for (const kind of ["intact", "reversed"] as const) {
+      const v = VERDICTS[kind];
+      expect(v.falsifier.valueLow).toBeNull(); // a real threshold
+      expect(Math.abs(v.current!.fit.slope)).toBeGreaterThan(Math.abs(v.falsifier.value));
+      // …and it is keyed to the CURRENT window — the one the sentence is about.
+      expect(v.falsifier.sentence).toContain("the last 24 months");
+    }
+    // The band kinds cannot be already-true either: a band drawn from the data STRADDLES
+    // flat by construction, so the very data that drew it has not cleared it.
+    for (const kind of ["plateau", "no-direction"] as const) {
+      const v = VERDICTS[kind];
+      expect(v.falsifier.valueLow).not.toBeNull();
+      expect(v.falsifier.valueLow!).toBeLessThanOrEqual(0);
+      expect(v.falsifier.value).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  // A REVERSED READ STAKES THE TURN — not the old direction resuming. The long-run bound
+  // demanded a market we had just called FALLING go back to climbing $1,804 a month.
+  it("reversed: the falsifier stakes the TURN, in the turn's own direction", () => {
+    const v = VERDICTS.reversed; // 24m −1844, ci [−2183, −1504]
+    expect(v.claim.sentence).toContain("The direction has turned.");
+    expect(v.falsifier.sentence).toContain("fall by less than $1,504 a month");
+    expect(v.falsifier.sentence).toContain("the turn still supports");
+    expect(v.falsifier.value).toBe(-1504);
+  });
+
+  // DEFECT 1, THE OTHER HALF — `value: 0` IS NOT A BASE VALUE.
+  // The rules require an inference to carry the audited base value. Zero was the number
+  // the interval had to clear, which is a fact about our method, not about the market.
+  // The honest base value of an unestablished fit is the SPREAD it still allows.
+  it("no-direction: the base value is the BAND, and the falsifier breaks on EITHER edge", () => {
+    const v = VERDICTS["no-direction"]; // ex-boom ci [-400, 640]
+    // The band is quoted in the copy — that is the base value a reader can check.
+    expect(v.claim.sentence).toContain("$400 a month slide");
+    expect(v.claim.sentence).toContain("$640 a month climb");
+    // TWO-SIDED, and it must be: a one-sided break would have to pick a side, and picking
+    // a side means reading the sign of a slope this module just ruled UNREADABLE.
+    expect(v.falsifier.sentence).toContain("climb of more than $640 a month");
+    expect(v.falsifier.sentence).toContain("slide of more than $400 a month");
+    expect(v.falsifier.value).toBe(640); // climb edge
+    expect(v.falsifier.valueLow).toBe(-400); // slide edge
+    expect(v.falsifier.value).not.toBe(0); // the old sentinel
+  });
+
+  // A PLATEAU DENIES A TURN, so that is what it stakes — one-sided, and keyed to the LONG
+  // direction, which IS readable. The recent band is quoted as a BAND: Cape's runs from a
+  // $1,245/mo fall to a $7/mo climb — a hair from establishing the turn, still touching
+  // flat. "$7 a month" is where the band ENDS. A sentence calling it a breaking pace would
+  // be lying about its own number, so no sentence here does.
+  it("plateau: the break is the TURN; the band's edges are quoted as a band, not a threshold", () => {
+    const v = VERDICTS.plateau; // long UP; 24m ci [-1245, 7]
+    expect(v.falsifier.sentence).toContain("establish a fall of their own");
+    expect(v.falsifier.sentence).toContain("from a $1,245 a month fall to a $7 a month climb");
+    // The band edge is NEVER dressed up as a pace that breaks something.
+    expect(v.falsifier.sentence).not.toMatch(/(more|less) than \$7\b/);
+    expect(v.falsifier.valueLow).toBe(-1245);
+    expect(v.falsifier.value).toBe(7);
+  });
+
+  /**
+   * THE VERDICT REPORTED A FINDING FROM A WINDOW IT NEVER FIT.
+   *
+   * `plateau` also fires when there is NO 24m window at all — an 18-month series cannot
+   * reach back two years, so `fitWindows` never offers one. The sentence said anyway:
+   * "The last 24 months do not establish a direction either way." We did not fit the last
+   * 24 months. They do not exist. That is the label-outrunning-its-data sin this module
+   * opens with, committed by the verdict itself — and a falsifier keyed to a null window
+   * would have thrown on top of it.
+   */
+  it("plateau with NO recent window: says so, and stakes the long run instead", () => {
+    const v = trendVerdict([wf("full", 1802, 0.88, 18, [1674, 1930])])!; // no 24m at all
+    expect(v.kind).toBe("plateau");
+    expect(v.current).toBeNull();
+    // It may not report a finding about months it never fitted.
+    expect(v.claim.sentence).not.toContain("do not establish");
+    expect(v.claim.sentence).toContain("We hold no two-year window");
+    // With no recent window the only claim is the long run — so THAT is what it stakes,
+    // on the long run's own horizon. A real threshold, not a band.
+    expect(v.falsifier.sentence).toContain("full-history pace to less than $1,674 a month");
+    expect(v.falsifier.value).toBe(1674);
+    expect(v.falsifier.valueLow).toBeNull();
+    // And it still survives the real gate, both ways.
+    expect(auditClaims(v.falsifier.sentence, [v.claim, v.falsifier])).toEqual([]);
+    expect(auditClaims(v.falsifier.sentence, [v.claim]).length).toBeGreaterThan(0);
+  });
 });

@@ -172,7 +172,7 @@ export interface Verdict {
    *     auditClaims(prose, [verdict.claim, verdict.falsifier])   // <- BOTH
    *
    * Pass only `claim` and the gate EATS THE FALSIFIER — it reads as `comparative`
-   * ("moves against the fitted line by MORE THAN $1,674 a month") plus
+   * ("climb by LESS THAN $1,674 a month") and, for the directional kinds, also as
    * `unanchored-number` (that bound appears in no other settled sentence). It fails
    * closed, so the paragraph is dropped to an open slot and the falsifier never
    * reaches the page.
@@ -183,9 +183,31 @@ export interface Verdict {
    * which means we could not ship a compliant inference at all. Settling it here is
    * what makes the whole verdict shippable.
    *
+   * A FALSIFIER IS A BREAKING CONDITION, NOT A METHOD NOTE. "A direction becomes
+   * readable once a fitted slope's 95% interval clears zero" is neither — it describes
+   * how we did the arithmetic, states no condition that could break anything, and
+   * ships three pieces of jargon into copy an agent signs (rules of engagement #5).
+   * Every sentence here names a PACE the market would have to actually print.
+   *
    * `value` is the COMPUTED bound — never a blank for a model to fill.
+   *
+   * THE ONE RULE A RENDERER NEEDS — and it is `valueLow`, not `kind`:
+   *
+   *   valueLow === null   `value` IS A REAL THRESHOLD. One pace, one side; the read holds
+   *                       while the market beats it. DRAW THE LINE. (intact, reversed,
+   *                       and the plateau with no recent window.)
+   *   valueLow !== null   THE SENTENCE NAMES A BAND, NOT A THRESHOLD. `value` is its climb
+   *                       edge, `valueLow` its slide edge, and the band STRADDLES FLAT.
+   *                       Neither edge is a pace that breaks anything, so a renderer that
+   *                       draws one line here is drawing a lie — and it may not pick the
+   *                       "likelier" side, because picking a side means reading the sign of
+   *                       a slope this module has just ruled UNREADABLE. Draw the band or
+   *                       draw nothing. (no-direction, and the plateau with a recent band.)
+   *
+   * Branch on `valueLow`. Branching on `kind` gets `plateau` wrong — it is the one kind
+   * that appears on BOTH sides of this rule.
    */
-  falsifier: SettledClaim & { value: number };
+  falsifier: SettledClaim & { value: number; valueLow: number | null };
 }
 
 const usd0 = (n: number) => `$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
@@ -208,31 +230,6 @@ export function trendVerdict(fits: readonly WindowFit[]): Verdict | null {
   const tight = long.fit.tight;
   const dir = (n: number) => (n > 0 ? "up" : "down");
 
-  // The LONG window doesn't establish a direction → we say nothing about direction.
-  if (!long.fit.established) {
-    const sentence =
-      `Across the ${long.label}, this series does not follow a straight line — ` +
-      `its trend is not statistically distinguishable from flat.`;
-    const falsSentence = `A direction becomes readable only once a fitted slope's 95% interval clears zero.`;
-    return {
-      kind: "no-direction",
-      tight,
-      long,
-      current,
-      claim: { sentence, anchors: numeralsIn(sentence) },
-      // Zero IS the computed bound here: the interval must clear it before any
-      // direction may be read. It is a number we derived, not a blank.
-      falsifier: { value: 0, sentence: falsSentence, anchors: numeralsIn(falsSentence) },
-    };
-  }
-
-  const longRate = `${usd0(long.fit.slope)} a month`;
-  const longDir = dir(long.fit.slope);
-  const climb = longDir === "up" ? "climbing" : "falling";
-
-  let kind: VerdictKind;
-  let sentence: string;
-
   // THE WINDOW IS A CLAUSE, NOT A MID-SENTENCE OBJECT.
   //
   // `long.label` is one of TWO shapes: "full history", or "full history, excluding the
@@ -247,39 +244,162 @@ export function trendVerdict(fits: readonly WindowFit[]): Verdict | null {
   // So the window is FRONTED AND CLOSED with its own comma — grammatical under BOTH
   // labels — and the exclusion still travels in the prose, because an exclusion the
   // reader never sees is a lie by omission.
+  //
+  // Hoisted ABOVE the no-direction return: all four kinds open on the same clause, and
+  // THE SUBJECT IS `this market` IN ALL FOUR. no-direction used to say "this series" —
+  // the same voice split that tells a reader the other three are about their town and
+  // this one is about a spreadsheet. It is the same town either way.
   const across = `Across the ${long.label},`;
+
+  // The LONG window doesn't establish a direction → we say nothing about direction.
+  if (!long.fit.established) {
+    // THE BAND STRADDLES FLAT, AND ITS TWO EDGES ARE THE BASE VALUE. Saying only "no
+    // trend" hands the reader nothing to check. The honest content of an unestablished
+    // fit is the SPREAD the data still allows — quote it, in dollars a month.
+    const [lo, hi] = long.fit.ci; // lo <= 0 <= hi, or `established` would be true
+    const sentence =
+      `${across} this market has no readable direction. The pace could be anything from ` +
+      `a ${usd0(lo)} a month slide to a ${usd0(hi)} a month climb — a spread that still ` +
+      `includes flat, so we do not call one.`;
+    // THE FALSIFIER IS TWO-SIDED, AND IT MUST BE. A one-sided break ("breaks if it
+    // climbs past X") would have to pick a side, and picking a side means reading the
+    // sign of a slope we have just ruled unreadable — the exact law this module opens
+    // with. So BOTH edges ship, and the market breaks the read by clearing EITHER.
+    const falsSentence =
+      `This read breaks the first time the market holds one direction for two months ` +
+      `running — a climb of more than ${usd0(hi)} a month, or a slide of more than ` +
+      `${usd0(lo)} a month.`;
+    return {
+      kind: "no-direction",
+      tight,
+      long,
+      current,
+      claim: { sentence, anchors: numeralsIn(sentence) },
+      falsifier: {
+        value: hi,
+        valueLow: lo,
+        sentence: falsSentence,
+        anchors: numeralsIn(falsSentence),
+      },
+    };
+  }
+
+  const longRate = `${usd0(long.fit.slope)} a month`;
+  const longDir = dir(long.fit.slope);
+  const climb = longDir === "up" ? "climbing" : "falling";
+
+  // THE FALSIFIER AND THE CLAIM MUST STAND ON THE SAME WINDOW.
+  //
+  // This shipped, and it was refuted the moment it was printed:
+  //
+  //   claim:     "…still climbing, at $1,500 a month."
+  //   falsifier: "…breaks if the next two months climb by less than $1,674 a month."
+  //
+  // $1,500 IS less than $1,674. The read broke itself in its own second sentence. The
+  // `reversed` verdict was worse — it announced the market had TURNED and was now
+  // FALLING $1,844 a month, then staked itself on the next two months CLIMBING $1,804.
+  //
+  // The cause is a window mismatch, and it is the module's own opening thesis turned
+  // against us: `long.fit.ci` bounds the ELEVEN-YEAR pace, and two months is not eleven
+  // years. Cape Coral runs +$1,931/mo over eleven years and −$619/mo over twenty-four
+  // months, AND BOTH ARE TRUE — so a short-run pace under the long-run bound is not a
+  // broken trend, it is Tuesday. A falsifier keyed there fires on noise, always, which
+  // is the same as not having one.
+  //
+  // So each kind is falsified ON THE WINDOW ITS CLAIM IS ABOUT:
+  //
+  //   intact / reversed  the CURRENT window — the leading edge, and the contested part
+  //                      of the sentence. A fit's slope always sits strictly INSIDE its
+  //                      own interval, so |slope| > |bound nearest zero| ALWAYS: this
+  //                      construction CANNOT be already-true when printed.
+  //   plateau            the recent BAND. What a plateau denies is a TURN, so it breaks
+  //                      when the recent window establishes one against the long run.
+  //   no-direction       the long band (above).
+  const beat = longDir === "up" ? "climb" : "fall";
+
+  let kind: VerdictKind;
+  let sentence: string;
+  let falsSentence: string;
+  let value: number;
+  let valueLow: number | null = null;
 
   if (!current || !current.fit.established) {
     // PLATEAU — the long run is real; the recent window establishes NOTHING. We may
     // not read the recent slope's sign at all, so it is absent from the sentence.
     kind = "plateau";
-    sentence =
-      `${across} this market has been ${climb} ${longRate} ` +
-      `(${long.fit.from} to ${long.fit.to}). The last 24 months do not establish a ` +
-      `direction either way — that is a plateau, not a turn.`;
-  } else if (dir(current.fit.slope) === longDir) {
-    kind = "intact";
-    // Two sentences, not one comma-spliced chain: with the ex-boom label the single
-    // sentence carried four commas before it reached its second clause.
-    sentence =
-      `${across} this market has been ${climb} ${longRate}. The last 24 months are ` +
-      `still ${climb}, at ${usd0(current.fit.slope)} a month.`;
-  } else {
-    kind = "reversed";
-    const nowDir = dir(current.fit.slope) === "up" ? "climbing" : "falling";
-    sentence =
-      `${across} this market was ${climb} ${longRate}. Over the last ` +
-      `24 months it has been ${nowDir}, at ${usd0(current.fit.slope)} a month. ` +
-      `The direction has turned.`;
-  }
 
-  // THE FALSIFIER, COMPUTED — and SETTLED, so the gate lets it through. The long-run
-  // line's own bound nearest zero is the number the next prints must clear for the
-  // trend to hold. Anchored exactly as `claim` is: every numeral it states is its own.
-  const bound = longDir === "up" ? long.fit.ci[0] : long.fit.ci[1];
-  const falsSentence =
-    `This read breaks if the next two months move against the fitted line by more ` +
-    `than ${usd0(bound)} a month.`;
+    if (!current) {
+      // NO RECENT WINDOW AT ALL — and we must not say otherwise. This branch used to
+      // assert "the last 24 months do not establish a direction either way" about a
+      // window WE NEVER FIT: a series 18 months long has no 24m window (it cannot reach
+      // back that far), so the sentence reported a finding from data that does not
+      // exist. That is the label-outruns-its-data sin this module opens with, committed
+      // by the verdict itself. With no recent window, the only claim on the table is the
+      // long-run one — so the long run's own bound is what a refit has to keep clearing,
+      // and the horizon is that same window extending. Matched, not mismatched.
+      value = longDir === "up" ? long.fit.ci[0] : long.fit.ci[1];
+      sentence =
+        `${across} this market has been ${climb} ${longRate} ` +
+        `(${long.fit.from} to ${long.fit.to}). We hold no two-year window for it, so ` +
+        `there is nothing recent to set against that.`;
+      falsSentence =
+        `This read breaks if the months ahead pull the full-history pace to less than ` +
+        `${usd0(value)} a month — the slowest ${beat} this history still supports.`;
+    } else {
+      // The recent band STRADDLES FLAT — that is what "establishes nothing" means. Quote
+      // it: it is the honest base value of the recent window, and its shape is the whole
+      // story. Cape Coral's runs from a $1,245/mo fall to a $7/mo climb — almost entirely
+      // on the falling side, a hair from establishing a turn, but still touching flat. A
+      // reader can SEE why we won't call it.
+      //
+      // The break is ONE-SIDED and keyed to the LONG direction (which IS readable): a
+      // plateau denies a TURN, so it breaks when the recent window establishes movement
+      // AGAINST the long run. The band's edges are quoted as a BAND, never as thresholds
+      // — "$7 a month" is where the band ends, not a pace that breaks anything, and a
+      // sentence that called it one would be lying about its own number.
+      const turn = longDir === "up" ? "fall" : "climb";
+      valueLow = current.fit.ci[0];
+      value = current.fit.ci[1];
+      sentence =
+        `${across} this market has been ${climb} ${longRate} ` +
+        `(${long.fit.from} to ${long.fit.to}). The last 24 months do not establish a ` +
+        `direction either way — that is a plateau, not a turn.`;
+      falsSentence =
+        `This read breaks the first time the last 24 months establish a ${turn} of ` +
+        `their own — today their pace still runs anywhere from a ${usd0(valueLow)} a ` +
+        `month fall to a ${usd0(value)} a month climb, which is why we do not call a turn.`;
+    }
+  } else {
+    // BOTH remaining kinds are falsified on the CURRENT window, in one construction.
+    const curDir = dir(current.fit.slope);
+    const curVerb = curDir === "up" ? "climb" : "fall";
+    value = curDir === "up" ? current.fit.ci[0] : current.fit.ci[1];
+
+    if (curDir === longDir) {
+      kind = "intact";
+      // Two sentences, not one comma-spliced chain: with the ex-boom label the single
+      // sentence carried four commas before it reached its second clause.
+      sentence =
+        `${across} this market has been ${climb} ${longRate}. The last 24 months are ` +
+        `still ${climb}, at ${usd0(current.fit.slope)} a month.`;
+      falsSentence =
+        `This read breaks if the last 24 months ${curVerb} by less than ${usd0(value)} ` +
+        `a month — the slowest pace this recent run still supports.`;
+    } else {
+      kind = "reversed";
+      const nowDir = curDir === "up" ? "climbing" : "falling";
+      sentence =
+        `${across} this market was ${climb} ${longRate}. Over the last ` +
+        `24 months it has been ${nowDir}, at ${usd0(current.fit.slope)} a month. ` +
+        `The direction has turned.`;
+      // THE TURN IS THE CLAIM, SO THE TURN IS WHAT WE STAKE. It breaks if the new
+      // direction stops holding — not if the OLD one fails to resume, which is what the
+      // long-run bound was absurdly demanding of a market we had just called reversed.
+      falsSentence =
+        `This read breaks if the last 24 months ${curVerb} by less than ${usd0(value)} ` +
+        `a month — the slowest pace the turn still supports.`;
+    }
+  }
 
   return {
     kind,
@@ -287,6 +407,6 @@ export function trendVerdict(fits: readonly WindowFit[]): Verdict | null {
     long,
     current,
     claim: { sentence, anchors: numeralsIn(sentence) },
-    falsifier: { value: bound, sentence: falsSentence, anchors: numeralsIn(falsSentence) },
+    falsifier: { value, valueLow, sentence: falsSentence, anchors: numeralsIn(falsSentence) },
   };
 }
