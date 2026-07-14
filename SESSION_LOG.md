@@ -1,3 +1,34 @@
+## 2026-07-13 (Sonnet 5 · main) — /desk Signal Correlation: real diverging colors, tooltip stopped clipping
+
+Operator flagged two screenshots of the /desk Signal Correlation heatmap: "colors suck" and "make the
+pop ups move to the front." Both were real bugs, not taste calls.
+
+**Colors:** `DeskCorrelationHeatmap.tsx` was borrowing `YOY_BUCKET_COLORS` (tuned for price-YoY buckets).
+On the dark card, the neutral band (coral at 25% opacity) rendered as plain mud, and the two positive
+buckets (teal at 45% vs 100% opacity) were nearly indistinguishable. Gave it its own
+`CORRELATION_BUCKET_COLORS` off existing brand tokens — solid `--sunset-coral`/`--coral-dim` for
+negative, `--gulf-haze` (a genuinely different blue-gray hue, not an alpha blend) for neutral,
+`--gulf-teal-dim`/`--gulf-teal` for positive.
+
+**Tooltip clipping:** root cause was `node_modules/@visx/responsive`'s `ParentSize`, which hardcodes
+`overflow: hidden` on the div it uses to measure the chart. The vendored `TooltipBox` portaled into a
+node living inside that box, so any tooltip needing to render past the chart's own edges got sliced —
+confirmed live, it was exactly the bottom-right diagonal cell in the operator's screenshot. Fixed in the
+shared `TooltipBox` (`components/charts/vendor/bklit/tooltip/tooltip-box.tsx`): it now portals to
+`document.body`, anchored via `getBoundingClientRect()` at the chart's actual screen position, so it
+escapes every ancestor clip. All existing flip/spring math is untouched — it still runs in
+container-local pixels, just inside a shifted `position: fixed` origin instead of a real DOM-nested one.
+This fixes every heatmap tooltip site-wide (also `ZipMomentumHeatmap`), not just this chart.
+
+Verified live: `bunx next build` clean, `bun test lib/charts/zip-heatmap-series.test.ts
+lib/desk/correlation.test.ts` 19/19 pass, then served the production build and hovered the exact cells
+from both screenshots via claude-in-chrome — colors now clearly separated, tooltip fully in front, no
+clipping.
+
+**Note:** this push also carries two docs-only commits from a concurrent Opus 4.8 session
+(`dbee58b2`, `92f3033b` — SESSION_LOG + spec-fixture-math correction, already reflected in code on
+`main`) that were sitting ahead of `origin/main` unpushed when this session started.
+
 ## 2026-07-13 (Opus 4.8 · main) — A slope whose confidence interval crosses zero has no direction. Code, not the model, says which way a market is going.
 
 Operator: *"DO WE HAVE LOGISTIC REGRESSION CHARTS / LINEAR Regression / SVMs / KNN... most important is linear regression. would like to be able to use it anywhere."*

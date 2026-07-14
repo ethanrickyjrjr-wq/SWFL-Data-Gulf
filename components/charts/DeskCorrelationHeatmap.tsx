@@ -11,7 +11,6 @@ import {
 } from "./vendor/bklit/heatmap";
 import type { HeatmapColumn } from "./vendor/bklit/heatmap/heatmap-context";
 import { TooltipBox } from "./vendor/bklit/tooltip";
-import { YOY_BUCKET_COLORS } from "@/lib/charts/zip-heatmap-series";
 import type { CorrelationData } from "@/lib/desk/types";
 
 // Five diverging buckets over r ∈ [−1, 1]; the gulf coral→teal ramp reads
@@ -23,7 +22,23 @@ const BUCKET_LABELS = ["≤ −0.6", "−0.6 to −0.2", "−0.2 to 0.2", "0.2 t
 /** The middle bucket — "we cannot tell this apart from zero". */
 const NEUTRAL = 2;
 
-const LEVEL_STYLES = YOY_BUCKET_COLORS.map((color) => ({
+/**
+ * Own palette, not YOY_BUCKET_COLORS (that one's tuned for price-YoY buckets,
+ * not correlation strength). Solid brand tokens, not alpha-blended ones — on
+ * this dark card a 25%-opacity coral neutral read as plain mud, and the two
+ * positive buckets at 45% vs 100% opacity were nearly the same color.
+ * `--gulf-haze` is a genuinely different hue (blue-gray) for neutral, and the
+ * `-dim` tokens are already distinct solid steps rather than opacity math.
+ */
+const CORRELATION_BUCKET_COLORS = [
+  "var(--sunset-coral)",
+  "var(--coral-dim)",
+  "var(--gulf-haze)",
+  "var(--gulf-teal-dim)",
+  "var(--gulf-teal)",
+] as const;
+
+const LEVEL_STYLES = CORRELATION_BUCKET_COLORS.map((color) => ({
   color,
   fillMode: "solid",
   pattern: "none",
@@ -153,7 +168,7 @@ export function DeskCorrelationHeatmap({ data }: { data: CorrelationData }) {
           <span key={label} className="flex items-center gap-1">
             <span
               className="inline-block h-2.5 w-2.5 rounded-sm"
-              style={{ background: YOY_BUCKET_COLORS[i] }}
+              style={{ background: CORRELATION_BUCKET_COLORS[i] }}
             />
             {label}
           </span>
