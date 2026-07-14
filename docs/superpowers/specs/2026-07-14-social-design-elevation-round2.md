@@ -1,5 +1,62 @@
 # Social design elevation — Round 2 (Claude Design look-book)
 
+**Status:** approved — **Section A SUPERSEDED 07/14/2026 by the design root (see below).**
+Sections B, C, and the new templates stand as written.
+
+---
+
+## AMENDMENT 07/14/2026 — the root landed first, and it moves three things
+
+Before building Round 2, we audited the code this spec sits on and found social had the same
+disease email had: **the house palette existed in four hand-typed copies, and one of them was
+wrong.** The canvas accent defaulted to `#0ea5b7` — *a teal that is not our teal*. Every unbranded
+post we ever rendered shipped in the wrong brand color. Root cause: `app/globals.css` was the brand
+root, but a canvas has no cascade and resvg cannot parse CSS, so every render path re-typed the hex
+by hand. There was nothing to import.
+
+There is now: **`lib/brand/tokens.ts`** (the CSS palette, importable, drift-tested against the real
+`globals.css`) and **`lib/social/design/system.ts`** (type + theme + contrast, resolved by role).
+Round 2 builds on those. Three corrections follow.
+
+**1. Section A's tokens mostly already existed — and the theming approach is replaced.**
+`PANEL` (`#1c3340`) is `--gulf-slate-hi`. `ACCENT_DIM` (`#2a8c85`) is `--gulf-teal-dim`. The sand
+surface (`#f0ede6`) is `--text-primary`. Design read our palette correctly; the spec just didn't know
+it was already there. Only `PANEL_LIGHT` was genuinely new (now `--gulf-sand-panel`).
+
+More importantly: **the spec's "simple per-field ternaries" in every template is the bypass pattern
+this whole effort exists to kill.** Across 7 templates × N fields, a template can still pick a wrong
+color, and nothing catches it. Replaced by role-resolved color — a template calls
+`ink(role, theme, on)` / `accent(role, theme, on)` / `decor(theme)` and **cannot** get an unreadable
+value back. No ternaries, no hex, no theme branch per field.
+
+**2. `ACCENT_DIM` is only half-right, and the half that's wrong would have shipped.**
+The spec calls `#2a8c85` "the tested default" for "numbers/chart-stroke color on the light theme."
+Measured (WebAIM, reproduced exactly by our own `contrastRatio`):
+
+- `#2a8c85` on sand `#f0ede6` = **3.46:1** → clears WCAG AA **large text (3:1)**, **fails normal
+  text (4.5:1)**. So it is legal for a metric *number* and **illegal for a label or caption.**
+- `#3dc9c0` on sand = **1.74:1** → fails even the large-text floor. **Decorative only** — a CTA fill
+  or a chart stroke, never a word.
+- The spec's "CTA fill always stays full accent regardless of theme" is **verified**: teal fill with
+  `--text-on-accent` ink reads **9.15:1 on either canvas.**
+
+`CONTRAST_FLOOR` binds the floor to the role, so nobody has to remember which case they're in.
+
+**3. A bug the spec didn't know about — `min(W,H)` is costing landscape 42% of its type.**
+Templates size type off `base = Math.min(W, H)`. Landscape (1200×630) is the only format where
+height < width, so it alone sizes off 630 while square/portrait/story size off 1080. A `0.028` label
+renders **30px on square and 18px on landscape** — roughly 7pt after a phone downscales the feed
+image. Type now scales off **width** (these surfaces all fit-to-width; height never affects apparent
+size). Landscape's real 630px height constraint is solved by dropping a role or shortening copy, with
+the bounds test as the gate — not by shrinking type below the legibility floor.
+
+**Consequence for Round 2's build:** the 5 existing templates still carry their own `base *
+multiplier` scales. They are migrated to `type(role, format)` as Round 2 rebuilds them (it is
+touching all 5 anyway for theme + chart). A raw hex under `lib/social/design/**` is now an ESLint
+error. Conventions: `lib/social/CLAUDE.md`.
+
+---
+
 **Status:** approved, ready for planning
 **Source:** `Socials Look-Book - Round 2.dc.html` (final; identical to the copy inside
 `Socials design elevation brief.zip`), commissioned via the outbound brief in

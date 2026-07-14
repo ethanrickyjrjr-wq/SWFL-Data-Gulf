@@ -12,6 +12,7 @@ import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import { newDesign, designToSkeleton, applyDesignPatch } from "@/lib/social/design/serialize";
 import type { SocialDesign, SocialElement, ChartElement } from "@/lib/social/design/types";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
+import { tokensFromBranding } from "@/lib/social/design/templates";
 import { mintBlockId } from "@/lib/email/doc/schema";
 import { findPlaceholder, type ShowcaseRecipe } from "@/lib/showcase/recipe";
 
@@ -48,11 +49,12 @@ export function useSocialComposer({
   branding,
   initialRecipe,
 }: UseSocialComposerArgs) {
+  // The canvas tokens come from the ONE resolver (tokensFromBranding) — this hook
+  // used to re-derive them with its own hand-typed defaults, which was copy #2 of
+  // the palette and carried the wrong teal. A second copy of a fallback is a second
+  // brand. See lib/brand/tokens.ts.
   const tokens = brandingToTokens(branding);
-  const primary = tokens.PRIMARY ?? "#0f1d24";
-  const accent = tokens.ACCENT ?? "#0ea5b7";
-  const text = tokens.TEXT ?? "#ffffff";
-  const logoUrl = tokens.LOGO_URL;
+  const { primary, accent, text, logoUrl } = tokensFromBranding(tokens);
 
   // Default to 4:5 portrait — Meta's current recommended feed ratio (first-party
   // ads guide: "Ratio 4:5 · 1440×1800") and Sprout Social concur; square (1:1) is

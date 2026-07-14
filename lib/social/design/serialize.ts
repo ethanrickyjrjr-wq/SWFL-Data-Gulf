@@ -1,9 +1,13 @@
 // lib/social/design/serialize.ts
 import type { SocialFormat } from "@/lib/social/formats";
 import type { SocialDesign, SocialElement } from "@/lib/social/design/types";
+import { THEMES } from "@/lib/social/design/system";
 
+/** A blank canvas, on the default (dark) theme. The background is the THEME's
+ *  canvas — not a hand-typed navy. This file used to carry its own `#0f1d24`,
+ *  which was copy #3 of the palette (lib/brand/tokens.ts explains the other four). */
 export function newDesign(format: SocialFormat): SocialDesign {
-  return { version: 1, format, background: "#0f1d24", elements: [] };
+  return { version: 1, format, background: THEMES.dark.canvas, elements: [] };
 }
 
 export function serializeDesign(d: SocialDesign): string {

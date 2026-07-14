@@ -25,6 +25,11 @@
   --text-tertiary: #807e76;
   --text-on-accent: #0a1419;
 
+  /* Light ("sand") theme. --text-primary doubles as the light CANVAS; this is the
+     panel that sits on it — the sibling of --gulf-slate-hi on the dark canvas.
+     Mirrored in lib/brand/tokens.ts (BRAND.sandPanel); tokens.test.ts locks them. */
+  --gulf-sand-panel: #e7e2d7;
+
   --background: var(--gulf-midnight);
   --foreground: var(--text-primary);
 

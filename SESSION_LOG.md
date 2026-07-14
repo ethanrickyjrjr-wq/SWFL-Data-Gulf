@@ -1,3 +1,70 @@
+## 2026-07-14 (Opus 4.8 · main) — THE SOCIAL DESIGN ROOT: WE HAVE BEEN SHIPPING THE WRONG BRAND TEAL
+
+**Every unbranded social post we have ever rendered shipped in a teal that is not our teal.** The
+canvas accent defaulted to `#0ea5b7`. The brand teal is `#3dc9c0`. Nobody chose `#0ea5b7`; someone
+typed a teal from memory, three more files copied it (`design/templates.ts`,
+`design/serialize.ts`, `design/chart-attach.ts`, `useSocialComposer.ts`), and no test held it —
+`design/__tests__/tokens.test.ts` asserts `surfaceDark` and **never asserts the accent**. That is
+how it survived.
+
+**Root cause, and it is structural, not sloppiness.** `app/globals.css` IS the brand root and says
+so in its own comment: *"must use these tokens, NOT the raw hex."* But a canvas has no cascade,
+resvg cannot parse CSS, and an email client has no `var()`. **There was no importable palette.** So
+all five paths that render a social image re-typed it by hand — `lib/charts/social-card.ts` even
+documents the workaround instead of fixing it: *"Verbatim --gulf-teal (app/globals.css:14). SVG
+can't resolve CSS vars."* Five places building the same thing, exactly as the operator suspected.
+
+**Built the two roots.**
+- **`lib/brand/tokens.ts`** — the palette, importable. `tokens.test.ts` parses the REAL `globals.css`
+  off disk and fails on drift, so the two cannot diverge. Adding a color? globals.css first.
+- **`lib/social/design/system.ts`** — the sibling of email's `scale.ts`. Same construction, different
+  px (1080 canvas vs 600 email — the numbers don't transfer, the system does). `type(role, format)`
+  returns **size + leading + weight together**; `ink()/accent()/decor()` return a color already
+  contrast-checked for that role.
+
+**`min(W,H)` was costing landscape 42% of its type size.** Templates size off `base = min(W,H)`.
+Landscape (1200×630) is the only format where height < width, so it alone sizes off 630. A `0.028`
+label renders **30px on square and 18px on landscape** — about 7pt once a phone downscales the feed
+image. These surfaces all display fit-to-width, so type now scales off **width**. The comment in
+`templates.ts` admitted it was a vertical-overflow hack; it had been doing a legibility decision's
+job for months.
+
+**The spec was half-wrong about its own accent, and the wrong half would have shipped.** Round 2
+called `#2a8c85` "the tested default" for light-theme numbers. Measured (WebAIM — and our own
+`contrastRatio` reproduces it exactly): **3.46:1 on sand.** That clears WCAG AA large text (3:1) and
+**fails normal text (4.5:1)** — legal as a metric number, illegal as a label. Full teal on sand is
+**1.74:1**: decorative only, never a word. A teal CTA reads **9.15:1 in both themes**, so the spec's
+"CTA never dims" is verified. `CONTRAST_FLOOR` binds the floor to the ROLE, so the light theme needs
+**no per-field ternary** — which is what the spec prescribed and what would have re-created the
+bypass. Spec amended in place; Sections B/C stand.
+
+**The fence.** Raw hex under `lib/social/design/**` + `components/email-lab/social/**` is now an
+ESLint error (`no-restricted-syntax`, zero new deps — mirrors the repo's own untyped-Supabase ban).
+No allowlist and none expected: in that lane a hand-typed hex is never right. Verified it FIRES by
+feeding it `#0ea5b7`. Rules: **`lib/social/CLAUDE.md`** (new), wired into `inject-focus.mjs` so it
+loads on every edit in the area.
+
+Two tests caught ME, which is the point: `--text-tertiary` is 4.23:1 on its own dark canvas (I
+asserted it was safe — it is large-text-only *everywhere*), and `legibleInk` was demoting social
+labels to email's `#111827` grey. Fixed by letting `legibleInk` take its fallback neutrals (additive,
+email's defaults unchanged).
+
+**Research:** crawl4ai, two Sonnet passes. DTCG's composite `typography` token is independently the
+same shape as `text(role)` — validation, not a reason to adopt the toolchain. Style Dictionary /
+stylelint / DTCG JSON all rejected as multi-platform machinery we have no use for. Carbon's line is
+the argument: *"You cannot implement light or dark mode without using color tokens everywhere. Hard
+coded values will not change when the mode is switched."*
+
+**Verified:** 733 tests green (`lib/social lib/brand lib/email/blocks lib/charts`), `bunx next build`
+clean, ESLint clean + provably firing.
+
+**Next:** Round 2's 7 templates build ON the system (it touches all 5 existing ones anyway).
+5 checks opened — `social_templates_migrate_to_type_system`, `brand_has_no_grey_scale` (the palette
+has NO neutral grey; 4 paths each invented one — a design call, not a refactor),
+`social_render_engine_off_system`, `social_card_reads_brand_root` (blocked: parallel session's claim),
+`email_social_share_type_root` (extract the shared weight ladder AFTER `scale.ts` lands — refusing to
+refactor under a live session).
+
 ## 2026-07-14 (Opus 4.8 · main) — TREND FIT PHASE 2 HANDOFF, AND TWO CHECKS THAT WERE ALREADY FIXED
 
 **No, there is no trend chart on /desk.** `/desk` has had a Home Price Trend panel for a while (`app/desk/page.tsx:181`, zone `desk-hero`, fed by ZHVI `home_value_zhvi_regional_median`) — it draws the series and **no fitted line, no slope, no trend read**. `trendVerdict` still has **zero production consumers**. That was phase 1's deliberate stopping point, and it is what made today's six-defect prose fix free.

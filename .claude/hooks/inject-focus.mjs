@@ -33,7 +33,13 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /** Directories that carry a location-scoped CLAUDE.md (Class-B conventions). */
-export const AREA_DIRS = ["ingest/", "refinery/packs/", "lib/email/", "lib/assistant/"];
+export const AREA_DIRS = [
+  "ingest/",
+  "refinery/packs/",
+  "lib/email/",
+  "lib/assistant/",
+  "lib/social/",
+];
 
 /** The Class-A canon — the cross-cutting beliefs the operator repeats. Factual
  *  reminders, NOT imperative system commands. Fallback when _ASSISTANT/RULES.md

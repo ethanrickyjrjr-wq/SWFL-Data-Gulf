@@ -15,6 +15,8 @@
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import type { SocialDesign, SocialElement } from "@/lib/social/design/types";
 import { BRAND_FONTS, isFontFamily } from "@/lib/brand/fonts";
+import { BRAND } from "@/lib/brand/tokens";
+import { THEMES } from "@/lib/social/design/system";
 import type { FontFamily } from "@/lib/email/doc/types";
 
 export interface TemplateTokens {
@@ -32,11 +34,19 @@ export interface TemplateTokens {
   surfaceDark: string;
 }
 
-/** brandingToTokens() emits a flat Record — read the 8 slots the canvas uses, with
- *  v1 defaults. Font tokens are FontFamily KEYS resolved through the one registry
+/** brandingToTokens() emits a flat Record — read the 8 slots the canvas uses. A
+ *  project's own brand wins; the FALLBACK is the house palette, read from the one
+ *  root (`lib/brand/tokens.ts`), never hand-typed here.
+ *
+ *  Font tokens are FontFamily KEYS resolved through the one registry
  *  (lib/brand/fonts) to browser stacks; an unknown key falls back to the default
- *  family, never raw text. surfaceDark's default equals the old hardcoded primary
- *  default, so unbranded output is pixel-identical. */
+ *  family, never raw text.
+ *
+ *  CORRECTED 07/14/2026 — the accent default was `#0ea5b7`, a teal that is not our
+ *  teal. Nobody chose it; it was typed from memory and copied into four files, so
+ *  every unbranded post we ever rendered shipped in the wrong brand color. It is
+ *  now `BRAND.teal` (#3dc9c0). A project that sets its own accent is unaffected —
+ *  this only ever governed the fallback. */
 export function tokensFromBranding(t: Record<string, string>): TemplateTokens {
   const font = (key: string): string => {
     const v = t[key];
@@ -44,14 +54,14 @@ export function tokensFromBranding(t: Record<string, string>): TemplateTokens {
     return BRAND_FONTS[fam].previewStack;
   };
   return {
-    primary: t.PRIMARY || "#0f1d24",
-    accent: t.ACCENT || "#0ea5b7",
-    text: t.TEXT || "#ffffff",
+    primary: t.PRIMARY || BRAND.deep,
+    accent: t.ACCENT || BRAND.teal,
+    text: t.TEXT || BRAND.sand,
     logoUrl: t.LOGO_URL || undefined,
     fontDisplay: font("FONT_DISPLAY"),
     fontBody: font("FONT_BODY"),
-    surface: t.SURFACE || "#f0ede6",
-    surfaceDark: t.SURFACE_DARK || "#0f1d24",
+    surface: t.SURFACE || THEMES.light.canvas,
+    surfaceDark: t.SURFACE_DARK || THEMES.dark.canvas,
   };
 }
 

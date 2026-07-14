@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, type RefObject } from "react";
 import { Stage, Layer, Rect, Text, Image as KonvaImg, Group, Transformer } from "react-konva";
 import type Konva from "konva";
 import { SOCIAL_FORMATS } from "@/lib/social/formats";
+import { THEMES } from "@/lib/social/design/system";
 import { safeInsetPercents, hasChromeSafeZone } from "@/lib/social/safe-zones";
 import type { SocialDesign, SocialElement } from "@/lib/social/design/types";
 import { useKonvaImage } from "./use-konva-image";
@@ -71,7 +72,18 @@ function ImageEl({
 }) {
   const [img, status] = useKonvaImage("src" in el ? (el.src ?? "") : "");
   if (status !== "loaded" || !img) {
-    return <Rect {...geom} width={el.width} height={el.height} fill="#1f2d36" cornerRadius={6} />;
+    // The still-loading placeholder. Was a hand-typed #1f2d36 — near the brand's
+    // panel color but not it. A placeholder is still a surface; it reads from the
+    // root like every other surface does.
+    return (
+      <Rect
+        {...geom}
+        width={el.width}
+        height={el.height}
+        fill={THEMES.dark.panel}
+        cornerRadius={6}
+      />
+    );
   }
   return <KonvaImg {...geom} image={img} width={el.width} height={el.height} />;
 }

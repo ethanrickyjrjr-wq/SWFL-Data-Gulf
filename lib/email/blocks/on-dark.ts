@@ -21,11 +21,24 @@ export function isDarkBg(bg?: string): boolean {
 /** Keep `preferred` ink when it clears `floor` on `bg`; else fall to the readable
  *  NEUTRAL FOR THAT BG — white on dark, #111827 on light (readableLabel, ONE root).
  *  Floors per WCAG AA (spec 2026-07-09-email-accent-ink-palette-gate-design.md §2):
- *  4.5 functional text · 3 large text + non-text. Non-hex input passes through. */
-export function legibleInk(preferred: string, bg: string, floor = 3): string {
+ *  4.5 functional text · 3 large text + non-text. Non-hex input passes through.
+ *
+ *  `neutrals` overrides the pair we fall BACK to. Email keeps white/#111827 (its
+ *  block palette). The social canvas passes its BRAND neutrals, because a demotion
+ *  that lands on a non-brand grey is how a palette forks — this function is the one
+ *  root for the DECISION, and the caller owns the colors it decides between. */
+export function legibleInk(
+  preferred: string,
+  bg: string,
+  floor = 3,
+  neutrals?: { light?: string; dark?: string },
+): string {
   if (!parseHex(preferred) || !parseHex(bg)) return preferred;
   if (contrastRatio(preferred, bg) >= floor) return preferred;
-  return readableLabel(bg, { dark: "#111827", light: "#ffffff" });
+  return readableLabel(bg, {
+    dark: neutrals?.dark ?? "#111827",
+    light: neutrals?.light ?? "#ffffff",
+  });
 }
 
 /** Keep an accent that still pops on a dark band; fall to the readable neutral

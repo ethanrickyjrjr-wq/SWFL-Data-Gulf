@@ -5,6 +5,7 @@
 // AI author (Build 2b). Path: buildChartForQuestion (moat-safe; model never writes
 // a number) → chartSpecToEmailSvg (the shared bridge, same SVG email uses) →
 // svgToPng → host in email-media → COHERENCE guard (drop, never block) → {spec, src}.
+import { BRAND } from "@/lib/brand/tokens";
 import { buildChartForQuestion } from "@/lib/assistant/chart-for-question";
 import { chartSpecToEmailSvg } from "@/lib/charts/spec-to-image";
 import { svgToPng } from "@/lib/email/chart-image";
@@ -69,7 +70,10 @@ export async function buildSocialChartAttach(
     const coherence = evaluateChartCoherence(cfq.chart, args.hero);
     if (!coherence.coherent) return { dropped: true, reason: coherence.reason };
 
-    const accent = (cfq.chart.theme?.accent as string | undefined) ?? "#0ea5b7";
+    // The chart's own accent when it has one, else the BRAND accent — never a
+    // hand-typed teal. This line read `?? "#0ea5b7"` until 07/14/2026: a teal that
+    // is not our teal, copied into four files. See lib/brand/tokens.ts.
+    const accent = (cfq.chart.theme?.accent as string | undefined) ?? BRAND.teal;
     const svg = await chartSpecToEmailSvg(cfq.chart, accent);
     if (!svg) return null;
 

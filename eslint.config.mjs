@@ -92,6 +92,39 @@ const eslintConfig = defineConfig([
       "no-restricted-imports": "off",
     },
   },
+  // ── NO RAW HEX ON THE SOCIAL CANVAS ────────────────────────────────────────
+  //
+  // A canvas/SVG renderer cannot read `var(--gulf-teal)`, so for years every one
+  // re-typed the palette by hand. That is how the social canvas ended up rendering
+  // `#0ea5b7` — a teal that is not our teal — in four files at once, and how the
+  // house navy came to exist as both #0f1d24 and #0a1419 depending on the path.
+  //
+  // `lib/brand/tokens.ts` is the importable palette; `lib/social/design/system.ts`
+  // resolves it per theme and per role. In this lane a raw hex is NEVER correct, so
+  // the ban is clean — no allowlist, and none is expected. (Contrast with magic
+  // NUMBERS, which are legitimate everywhere and are governed by the TYPE ladder's
+  // union type instead — a compile error beats a lint rule.)
+  //
+  // This ban is fast local feedback, not the safety net. The net is the render-time
+  // contrast + floor assertions in lib/social/design/system.test.ts, which catch a
+  // wrong value that no source-level rule can see (an ABSENT lineHeight is the bug
+  // that clipped every email stat, and it is invisible to a linter).
+  {
+    files: ["lib/social/design/**/*.{ts,tsx}", "components/email-lab/social/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value=/^#[0-9a-fA-F]{3,8}$/]",
+          message:
+            "Raw hex on the social canvas. Import the palette instead: BRAND.* (lib/brand/tokens.ts) " +
+            "for a token, or ink()/accent()/decor()/THEMES (lib/social/design/system.ts) for a color " +
+            "resolved by theme + role. A hand-typed hex is how the canvas shipped the wrong brand teal.",
+        },
+      ],
+    },
+  },
   ...storybook.configs["flat/recommended"],
 ]);
 
