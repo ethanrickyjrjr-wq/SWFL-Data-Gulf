@@ -33,6 +33,17 @@ Twin of RULE 0.5: **0.5 = read OUR files; 0.4 = research the outside answer.** D
 
 **crawl4ai files NEVER go to GitHub.** The `.gitignore` pattern `*crawl4ai*` covers everything — source, tests, audit dumps, scraped docs, specs, plans, cache. If you create a crawl4ai file, it stays local. Never `git add` anything matching `*crawl4ai*`.
 
+**FULL-SCOPE-FIRST (locked 07/14/2026).** Before writing or extending any ingest pipeline against a
+source, enumerate the FULL field/column list the source actually exposes (its schema/metadata
+endpoint, vendor docs, or a live probe) — not just the fields the immediate task needs. Write the
+scope into that pipeline's `source_scope` block in `ingest/cadence_registry.yaml`
+(`confirmed_total` = what we pull, `source_ceiling` = what's available but unpulled, cited
+source_url + as_of) — it renders automatically on `/ops/census`, no ops-repo change needed. List
+the full scope to the operator BEFORE writing any ingest code, every time, new source or existing.
+Postmortem: `parcel_subdivision` pulled 7 of 120 fields off the FDOR statewide parcel layer for over
+a week — sale price/date, living area, year built, land value, neighborhood/market-area codes all
+sat unused in the same already-open response.
+
 ---
 
 # RULE 0.5 — PROBE FIRST: CODE, THEN SPEC

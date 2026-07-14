@@ -21,6 +21,7 @@
   "lib/email/market-context.ts",
   "lib/email/usage.ts",
   "lib/landing/load-home-map-data.ts",
+  "lib/listings/community-lookup.ts",
   "lib/listings/select.ts",
   "lib/narratives/batch-store.ts",
   "lib/narratives/store.ts",

@@ -910,14 +910,14 @@ pipelines:
     source_scope:
       confirmed_total:
         value: 290973
-        as_of: "2026-06-06"
-        source: "our ingest (unique PARCEL_ID; 13 of 135 fields pulled)"
+        as_of: "07/14/2026"
+        source: "our ingest (unique PARCEL_ID; 15 of 120 fields pulled: jv/jv_hmstd/av_hmstd/av_sd/av_nsd/tv_nsd, sale_prc1/yr1/mo1+qual_cd1/vi_cd1, phy_zipcd, dor_uc, pa_uc — SALE_PRC1 etc. added 07/11/2026 when the layer was repointed off the broken 14-field cadastral URL to the centroid twin; confirmed live 07/14/2026: 290,973 rows, 34,747 with a positive sale_prc1)"
       source_ceiling:
-        value: 135
-        as_of: "07/07/2026"
-        source_url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Cadastral/FeatureServer/0"
-        source_label: "FDOR Statewide Cadastral (ArcGIS FeatureServer)"
-        summary: "135 fields total; we pull 13. Biggest miss: SALE_PRC1/SALE_PRC2 (actual sale price) — never pulled despite sale year/month/qualification being pulled in the same query. Also free in the same call: owner mailing address, building sqft, year built, land value/sqft."
+        value: 120
+        as_of: "07/14/2026"
+        source_url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0"
+        source_label: "FDOR Statewide Parcel Centroid (ArcGIS FeatureServer) — same layer parcel_subdivision reads"
+        summary: "120 fields total (re-verified 07/14/2026 — the old '135 fields' note was against the since-abandoned broken cadastral URL). Deliberately NOT duplicated here: S_LEGAL/PHY_ADDR1 (subdivision identity — that's parcel_subdivision's job), TOT_LVG_AR/ACT_YR_BLT/EFF_YR_BLT/LND_VAL/NBRHD_CD/MKT_AR (physical/geography — going into parcel_subdivision's widened pull instead, not duplicated per-pipeline). See check collier_parcels_parcel_subdivision_redundant_scrape — both pipelines already hit this identical layer for overlapping Collier parcels; real consolidation is a separate design task, not done here."
 
   - name: parcel_subdivision
     workflow: parcel-subdivision-annual.yml

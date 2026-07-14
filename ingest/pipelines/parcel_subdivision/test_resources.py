@@ -29,6 +29,53 @@ def test_normalize_maps_type_and_stems_name():
     assert r[0]["county"] == "collier"
 
 
+def test_normalize_maps_widened_fields_07_14():
+    """RULE 0.4 FULL-SCOPE-FIRST widening — sale/physical/geography fields the
+    original 7-field pull left unused on the same already-fetched layer."""
+    feats = [{"attributes": {
+        "PARCEL_ID": "P5", "S_LEGAL": "X", "DOR_UC": "001",
+        "SALE_PRC1": "425000", "SALE_YR1": 2025, "SALE_MO1": "6",
+        "QUAL_CD1": "01", "VI_CD1": "I",
+        "SALE_PRC2": "300000", "SALE_YR2": 2018, "SALE_MO2": "11",
+        "QUAL_CD2": "11", "VI_CD2": "I",
+        "TOT_LVG_AR": "2150", "ACT_YR_BLT": 2005, "EFF_YR_BLT": 2015,
+        "LND_VAL": "80000", "NO_BULDNG": 1, "NO_RES_UNT": 1,
+        "NBRHD_CD": "0412", "MKT_AR": "12", "ASMNT_YR": 2025,
+    }}]
+    r = _normalize(feats, "collier")[0]
+    assert r["sale_price_1"] == 425000.0
+    assert r["sale_year_1"] == 2025
+    assert r["sale_month_1"] == 6
+    assert r["qual_cd_1"] == "01"
+    assert r["vi_cd_1"] == "I"
+    assert r["sale_price_2"] == 300000.0
+    assert r["sale_year_2"] == 2018
+    assert r["qual_cd_2"] == "11"
+    assert r["living_area_sqft"] == 2150.0
+    assert r["actual_year_built"] == 2005
+    assert r["effective_year_built"] == 2015
+    assert r["land_value"] == 80000.0
+    assert r["building_count"] == 1
+    assert r["residential_unit_count"] == 1
+    assert r["neighborhood_code"] == "0412"
+    assert r["market_area"] == "12"
+    assert r["assessment_year"] == 2025
+
+
+def test_normalize_widened_fields_null_when_source_omits_them():
+    """A parcel with no recorded sale (never sold, or pre-digitization) must yield
+    None, not 0 or an empty string — a 0 sale price would look like a real $0 sale."""
+    feats = [{"attributes": {"PARCEL_ID": "P6", "S_LEGAL": "X", "DOR_UC": "001"}}]
+    r = _normalize(feats, "collier")[0]
+    assert r["sale_price_1"] is None
+    assert r["sale_year_1"] is None
+    assert r["qual_cd_1"] is None
+    assert r["living_area_sqft"] is None
+    assert r["actual_year_built"] is None
+    assert r["neighborhood_code"] is None
+    assert r["assessment_year"] is None
+
+
 def test_normalize_drops_non_residential():
     feats = [{"attributes": {"PARCEL_ID": "P2", "S_LEGAL": "X", "DOR_UC": "010"}}]  # 010 = commercial
     assert _normalize(feats, "collier") == []

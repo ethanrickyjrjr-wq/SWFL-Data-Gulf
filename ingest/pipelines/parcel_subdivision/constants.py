@@ -41,7 +41,17 @@ CENTROID_URL = (
 # layer finding for Collier — CO_NO=21/46 confirmed by returned city names + count).
 CO_NO = {"collier": 21, "lee": 46}
 
-OUT_FIELDS = "OBJECTID,PARCEL_ID,S_LEGAL,DOR_UC,JV,PHY_ZIPCD,PHY_ADDR1"
+# Widened 07/14/2026 (CLAUDE.md RULE 0.4 FULL-SCOPE-FIRST) — this layer is the full 120-field
+# DOR NAL file; the original 7-field pull left sale price/date, physical facts, and DOR's own
+# neighborhood code sitting unused in the same response. Owner/fiduciary PII (OWN_*, FIDU_*)
+# deliberately excluded. See docs/handoff/2026-07-14-community-data-into-builder-handoff.md.
+OUT_FIELDS = (
+    "OBJECTID,PARCEL_ID,S_LEGAL,DOR_UC,JV,PHY_ZIPCD,PHY_ADDR1,"
+    "SALE_PRC1,SALE_YR1,SALE_MO1,QUAL_CD1,VI_CD1,"
+    "SALE_PRC2,SALE_YR2,SALE_MO2,QUAL_CD2,VI_CD2,"
+    "TOT_LVG_AR,ACT_YR_BLT,EFF_YR_BLT,LND_VAL,NO_BULDNG,NO_RES_UNT,"
+    "NBRHD_CD,MKT_AR,ASMNT_YR"
+)
 
 PAGE_SIZE = 2000
 

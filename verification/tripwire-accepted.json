@@ -64,6 +64,12 @@
       "pack": "master",
       "accepted_on": "07/12/2026",
       "note": "master cascade after the 07/12 targeted rebuilds"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29369231598",
+      "pack": "communities-swfl",
+      "accepted_on": "07/14/2026",
+      "note": "Operator-approved 07/14/2026: neighborhood_stats has had real rows (31,110) since today's earlier session; communities-swfl master input still showed 'no community data yet' as of 07/13. Rebuild independent of the parcel_subdivision field-widening re-ingest still running in background. (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }

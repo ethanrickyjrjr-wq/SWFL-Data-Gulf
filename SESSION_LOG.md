@@ -1,3 +1,43 @@
+## 2026-07-14 (Sonnet 5 · main) — communities-swfl rebuild dispatched (operator-approved); FULL-SCOPE-FIRST rule added after finding parcel_subdivision pulled 7 of 120 FDOR fields.
+
+Picked up `docs/handoff/2026-07-14-community-data-into-builder-handoff.md`. Before touching the Gap 1
+address->community join, discovered `parcel_subdivision` (FDOR Statewide Parcel Centroid layer) only pulls
+7 of 120 available fields — sale price/date+qualification codes, living area, year built, land value,
+DOR neighborhood/market-area codes all sat unused. Found the SAME pattern already documented for the sibling
+`collier_parcels` pipeline on 07/07/2026 and never acted on. Operator: "why are we not extracting this and
+more" + decreed a standing rule — CLAUDE.md RULE 0.4 now has a FULL-SCOPE-FIRST addendum: enumerate a
+source's full field list into `source_scope` (`ingest/cadence_registry.yaml`) BEFORE writing ingest code;
+it renders on `/ops/census` automatically, no ops-repo change needed. Opened checks
+`fdor_parcel_layer_only_7_of_120_fields` and `collier_parcels_parcel_subdivision_redundant_scrape` (both
+pipelines hit the identical ArcGIS layer for overlapping Collier parcels — real consolidation is a separate
+design task, not done here). Corrected `collier_parcels`' stale source_scope (it already got SALE_PRC1 etc.
+on 07/11 when repointed off the broken cadastral URL — the 07/07 note predated that fix).
+
+Widened `parcel_subdivision`'s `OUT_FIELDS`/Tier-2 schema (constants.py + resources.py): sale 1+2
+price/year/month/qual_cd/vi_cd (raw, not interpreted — DOR qualification-code semantics unverified),
+living_area_sqft, actual/effective_year_built, land_value, building/unit counts, neighborhood_code,
+market_area, assessment_year. Owner/fiduciary PII deliberately excluded. 6 new pytest cases (fields present
++ fields-absent-yields-null), live-probed against 5 real Collier parcels before committing to the shape.
+Kicked off the real re-ingest (both counties, merge-upsert on parcel_id) in background — still running at
+push time (ArcGIS fetch phase is the slow part; schema/data land per-chunk once fetch completes). Will
+follow up with confirmed_total once it lands.
+
+Built Gap 1 — `lib/listings/community-lookup.ts`: `matchSubdivision()` (pure, TDD'd fan-out-ambiguity-first
+per advisor guidance — 537 real Collier+Lee address groups resolve to 2+ distinct subdivision_name, worst
+case 273 parcels/4 names), `houseNumberToken()` + an anchored `ILIKE 'N %'` DB filter (bounds the query to
+real candidates instead of pulling a whole zip's ~15-27K rows per lookup), `resolveCommunityForAddress()`,
+`resolveCommunityStats()` (neighborhood_stats join on the resolved key). 9/9 bun tests, clean `bunx next
+build`. Closed check `parcel_subdivision_orphaned_no_readers`. NOT yet wired into ListingFacts (Gap 3,
+separate follow-up).
+
+Dispatched `communities-swfl` brain rebuild (operator-approved, `scripts/dispatch-rebuild.mjs`) —
+independent of the field-widening (only reads neighborhood_stats, unaffected). Run:
+https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29369231598.
+
+**Next:** confirm re-ingest landed (row/column counts), update parcel_subdivision's source_scope to
+confirmed_total, confirm the communities-swfl rebuild's master dossier now shows real community stats,
+then Gap 2 (per-community lookup surface) needs its own brainstorm — two real shape options, not decided.
+
 ## 2026-07-14 (Opus 4.8 · main) — LEDGER SWEEP: the checks ledger is NOT stale, it is an unranked backlog. 331 -> 317. Live breakage found buried in it.
 
 Operator asked whether Ansible would help "keep track of everything." It would not — it is agentless IT

@@ -17,7 +17,7 @@ import time
 
 import requests
 
-from ingest.lib.coercion import coerce_float as _coerce_float
+from ingest.lib.coercion import coerce_float as _coerce_float, coerce_int as _coerce_int
 from ingest.lib.guards import assert_vs_canonical
 
 from .constants import (
@@ -32,7 +32,9 @@ _QUALIFIER_RE = re.compile(SUBDIVISION_QUALIFIER_PATTERN)
 _NON_ALNUM_RE = re.compile(r"[^A-Z0-9 ]")
 _WHITESPACE_RE = re.compile(r"\s+")
 
-# Tier-2 column hints — parcel_id is the key (PK).
+# Tier-2 column hints — parcel_id is the key (PK). Widened 07/14/2026 (RULE 0.4
+# FULL-SCOPE-FIRST) — sale/physical/geography fields the original 7-field pull left
+# unused on the same already-fetched layer. Owner/fiduciary PII deliberately excluded.
 _TIER2_COLUMNS: dict = {
     "parcel_id":        {"data_type": "text", "nullable": False, "primary_key": True},
     "county":           {"data_type": "text", "nullable": False},
@@ -41,6 +43,32 @@ _TIER2_COLUMNS: dict = {
     "zip":              {"data_type": "text", "nullable": True},
     "subdivision_name": {"data_type": "text", "nullable": True},
     "phy_addr1":        {"data_type": "text", "nullable": True},
+    # Most recent recorded sale. qual_cd/vi_cd kept RAW — arm's-length semantics
+    # not yet verified against the DOR NAL format spec, so no filtering here.
+    "sale_price_1":     {"data_type": "double", "nullable": True},
+    "sale_year_1":      {"data_type": "bigint", "nullable": True},
+    "sale_month_1":     {"data_type": "bigint", "nullable": True},
+    "qual_cd_1":        {"data_type": "text", "nullable": True},
+    "vi_cd_1":          {"data_type": "text", "nullable": True},
+    # Second most recent recorded sale.
+    "sale_price_2":     {"data_type": "double", "nullable": True},
+    "sale_year_2":      {"data_type": "bigint", "nullable": True},
+    "sale_month_2":     {"data_type": "bigint", "nullable": True},
+    "qual_cd_2":        {"data_type": "text", "nullable": True},
+    "vi_cd_2":          {"data_type": "text", "nullable": True},
+    # Physical facts.
+    "living_area_sqft": {"data_type": "double", "nullable": True},
+    "actual_year_built": {"data_type": "bigint", "nullable": True},
+    "effective_year_built": {"data_type": "bigint", "nullable": True},
+    "land_value":       {"data_type": "double", "nullable": True},
+    "building_count":   {"data_type": "bigint", "nullable": True},
+    "residential_unit_count": {"data_type": "bigint", "nullable": True},
+    # DOR's own geography codes — not yet used for identity; stored alongside
+    # subdivision_name, not replacing it (a grain swap is a separate decision).
+    "neighborhood_code": {"data_type": "text", "nullable": True},
+    "market_area":      {"data_type": "text", "nullable": True},
+    # Tax-roll assessment year the value fields above actually reflect.
+    "assessment_year":  {"data_type": "bigint", "nullable": True},
 }
 
 
@@ -68,6 +96,11 @@ def _normalize(feats: list[dict], county: str) -> list[dict]:
         if not pid:
             continue
         zipcd = a.get("PHY_ZIPCD")
+
+        def _str_or_none(key: str) -> str | None:
+            v = a.get(key)
+            return (str(v).strip() or None) if v not in (None, "") else None
+
         out.append({
             "parcel_id": str(pid),
             "county": county,
@@ -76,6 +109,25 @@ def _normalize(feats: list[dict], county: str) -> list[dict]:
             "zip": (str(zipcd) if zipcd not in (None, "") else None),
             "subdivision_name": _stem(a.get("S_LEGAL")),
             "phy_addr1": (str(a["PHY_ADDR1"]).strip() or None) if a.get("PHY_ADDR1") else None,
+            "sale_price_1": _coerce_float(a.get("SALE_PRC1")),
+            "sale_year_1": _coerce_int(a.get("SALE_YR1")),
+            "sale_month_1": _coerce_int(a.get("SALE_MO1")),
+            "qual_cd_1": _str_or_none("QUAL_CD1"),
+            "vi_cd_1": _str_or_none("VI_CD1"),
+            "sale_price_2": _coerce_float(a.get("SALE_PRC2")),
+            "sale_year_2": _coerce_int(a.get("SALE_YR2")),
+            "sale_month_2": _coerce_int(a.get("SALE_MO2")),
+            "qual_cd_2": _str_or_none("QUAL_CD2"),
+            "vi_cd_2": _str_or_none("VI_CD2"),
+            "living_area_sqft": _coerce_float(a.get("TOT_LVG_AR")),
+            "actual_year_built": _coerce_int(a.get("ACT_YR_BLT")),
+            "effective_year_built": _coerce_int(a.get("EFF_YR_BLT")),
+            "land_value": _coerce_float(a.get("LND_VAL")),
+            "building_count": _coerce_int(a.get("NO_BULDNG")),
+            "residential_unit_count": _coerce_int(a.get("NO_RES_UNT")),
+            "neighborhood_code": _str_or_none("NBRHD_CD"),
+            "market_area": _str_or_none("MKT_AR"),
+            "assessment_year": _coerce_int(a.get("ASMNT_YR")),
         })
     return out
 
