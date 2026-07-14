@@ -16,9 +16,20 @@ Verified live 2026-07-05 / re-verified 2026-07-06:
     Esri pattern instead: `returnIdsOnly=true` (returns all 364,827 IDs in one call)
     then fetch by `objectIds` in batches (resources.py). `returnCountOnly=true`
     (bare, no LIKE/centroid) works and is used for the canonical count.
-  - CO_NO=46 (Lee) record queries 400 on BOTH statewide layers (count works, records
-    don't) — a broken Lee partition. Lee is ingested from a SEPARATE source (see
-    ingest/pipelines/lee_parcel_subdivision, follow-up F1). Do not pull Lee here.
+
+CORRECTION 2026-07-14 — the "CO_NO=46 (Lee) is a broken partition" claim that used
+to live here was STALE. It was diagnosed with the OLD keyset-pagination query shape
+(the same shape that produced Collier's false "dead zone" above), never retested
+against the returnIdsOnly+objectIds fix. Verified live 07/14/2026: where=(CO_NO=46)
+-> 556,100 Lee parcels; returnIdsOnly returns all 556,100 OIDs cleanly; objectIds
+batch-fetches at the start, a random 250-id sample spread across the WHOLE range,
+and the tail of the range all returned full S_LEGAL/PHY_ADDR1/PARCEL_ID (0 nulls in
+a 250-row random sample) — real Cape Coral/Bonita Springs/Lehigh Acres/North Fort
+Myers addresses and legal descriptions, DOR_UC distribution matching the expected
+home-type codes. Lee needs no separate source or spatial join — same layer, same
+retrieval code as Collier, just CO_NO=46. (`verification/communities-lee-source-
+probe.md`'s spatial-join recommendation was scoped to LeePA's OWN services, which
+really do lack a subdivision-name field — it never tried this statewide layer.)
 """
 
 CENTROID_URL = (
@@ -26,9 +37,9 @@ CENTROID_URL = (
     "/Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0/query"
 )
 
-# EMPIRICALLY verified Collier filter for THIS layer (matches collier_parcels'
-# cadastral-layer finding — CO_NO=21 confirmed by returned city names + count).
-CO_NO = {"collier": 21}  # lee(46) record-queries 400 here — see constants docstring.
+# EMPIRICALLY verified filters for THIS layer (matches collier_parcels' cadastral-
+# layer finding for Collier — CO_NO=21/46 confirmed by returned city names + count).
+CO_NO = {"collier": 21, "lee": 46}
 
 OUT_FIELDS = "OBJECTID,PARCEL_ID,S_LEGAL,DOR_UC,JV,PHY_ZIPCD,PHY_ADDR1"
 

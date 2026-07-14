@@ -1,5 +1,17 @@
 # Lee parcels — handoff (07/14/2026)
 
+> **STATUS UPDATE 07/14/2026, same day:** §2's whole NAL-file lane turned out to be
+> unnecessary. The "CO_NO=46 (Lee) is a broken partition" claim in §1's LeePA section
+> and in `constants.py` was stale — diagnosed against the OLD keyset-pagination query
+> shape, never retested against the `returnIdsOnly`+`objectIds` fix that unblocked
+> Collier's identical symptom (commit `c892771b`, 07/06). Retested live: Lee works
+> fine on the same statewide centroid layer, same retrieval code, just `CO_NO=46`.
+> `constants.py` carries the full correction + evidence. Step 1's NAL-URL resolution
+> (and `lee_parcels_nal_url_unresolved`) is moot — closed. `ingest/pipelines/
+> parcel_subdivision` now takes both counties (`--county collier|lee|both`); §3
+> (condo dedup) and §4 (address join) landmines still apply once Lee data lands.
+> See project memory `project_lee-parcels-naples-fix-unblocks.md`.
+
 **The goal in one line:** get Lee County parcels into `data_lake.parcel_subdivision` — the SAME
 table Collier already fills — so a build on a Lee address can name its community, its home count,
 and its median value. Today Lee gets **nothing**.

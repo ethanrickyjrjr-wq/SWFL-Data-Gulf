@@ -1,0 +1,44 @@
+name: Neighborhood stats annual (aggregate parcel_subdivision)
+
+on:
+  schedule:
+    # 2hr after parcel-subdivision-annual.yml (13:00 UTC) so same-day refreshes are
+    # picked up; idempotent either way against a stale run.
+    - cron: "0 15 24 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — read + aggregate only; skip the neighborhood_stats write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  aggregate:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run neighborhood_stats aggregation
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run"
+          fi
+          python -m ingest.duckdb_pipelines.neighborhood_stats.pipeline $ARGS

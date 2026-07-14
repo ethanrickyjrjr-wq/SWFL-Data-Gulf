@@ -6,9 +6,11 @@ from ingest.pipelines.parcel_subdivision import resources
 from ingest.pipelines.parcel_subdivision.resources import (
     _fetch_all_object_ids,
     _fetch_object_id_batch,
-    _iter_collier_attrs,
+    _iter_county_attrs,
     _normalize,
     _stem,
+    fetch_parcel_subdivisions,
+    ingest_parcel_subdivisions,
 )
 
 
@@ -61,7 +63,23 @@ def test_fetch_all_object_ids_parses_and_sorts():
         "ingest.pipelines.parcel_subdivision.resources._request",
         return_value={"objectIds": [3, 1, 2]},
     ):
-        assert _fetch_all_object_ids() == [1, 2, 3]
+        assert _fetch_all_object_ids("collier") == [1, 2, 3]
+
+
+def test_fetch_all_object_ids_uses_the_requested_countys_co_no():
+    """Lee (CO_NO=46) verified live 07/14/2026: returnIdsOnly + objectIds works
+    fine on this same statewide layer — the constants.py 'broken partition' note
+    was stale (diagnosed against the old keyset-pagination shape, pre-07/06 fix).
+    This asserts the where clause carries the RIGHT county's CO_NO, not just any."""
+    captured = {}
+
+    def fake_request(params, **kwargs):
+        captured.update(params)
+        return {"objectIds": [46046]}
+
+    with patch("ingest.pipelines.parcel_subdivision.resources._request", side_effect=fake_request):
+        assert _fetch_all_object_ids("lee") == [46046]
+    assert captured["where"] == "CO_NO=46"
 
 
 def test_fetch_all_object_ids_raises_on_error_body():
@@ -70,7 +88,7 @@ def test_fetch_all_object_ids_raises_on_error_body():
         return_value={"error": {"code": 400, "message": "boom"}},
     ):
         try:
-            _fetch_all_object_ids()
+            _fetch_all_object_ids("collier")
             assert False, "expected RuntimeError"
         except RuntimeError as e:
             assert "returnIdsOnly failed" in str(e)
@@ -143,7 +161,7 @@ def test_object_id_batch_skips_a_lone_unservable_id():
     assert resources.SKIPPED_OBJECT_IDS == [99]
 
 
-def test_iter_collier_attrs_batches_the_full_id_list():
+def test_iter_county_attrs_batches_the_full_id_list():
     """One returnIdsOnly call, then objectIds fetches in batches of batch_size —
     every id lands exactly once."""
     ids = list(range(1, 2501))  # 2500 ids -> 3 batches at batch_size=1000
@@ -155,9 +173,29 @@ def test_iter_collier_attrs_batches_the_full_id_list():
         return {"features": [{"attributes": {"OBJECTID": o}} for o in oids]}
 
     with patch("ingest.pipelines.parcel_subdivision.resources._request", side_effect=fake_request):
-        got = [f["attributes"]["OBJECTID"] for f in _iter_collier_attrs(batch_size=1000)]
+        got = [f["attributes"]["OBJECTID"] for f in _iter_county_attrs("collier", batch_size=1000)]
     assert sorted(got) == ids
     assert len(got) == 2500  # no dupes, no drops
+
+
+def test_fetch_parcel_subdivisions_tags_the_requested_county():
+    """fetch_parcel_subdivisions('lee') must query CO_NO=46 and stamp county='lee'
+    on every normalized row — this is the generalized replacement for the old
+    Collier-only fetch_collier_parcel_subdivisions()."""
+    def fake_request(params, **kwargs):
+        if params.get("returnIdsOnly") == "true":
+            assert params["where"] == "CO_NO=46"
+            return {"objectIds": [1]}
+        return {"features": [{"attributes": {
+            "PARCEL_ID": "L1", "S_LEGAL": "CAPE CORAL UNIT 82", "DOR_UC": "001",
+            "JV": 400000, "PHY_ZIPCD": 33993, "PHY_ADDR1": "1 X AVE",
+        }}]}
+
+    with patch("ingest.pipelines.parcel_subdivision.resources._request", side_effect=fake_request):
+        rows = fetch_parcel_subdivisions("lee")
+    assert len(rows) == 1
+    assert rows[0]["county"] == "lee"
+    assert rows[0]["subdivision_name"] == "CAPE CORAL"
 
 
 def test_dor_code_is_zero_padded_before_lookup():
@@ -165,3 +203,22 @@ def test_dor_code_is_zero_padded_before_lookup():
     feats = [{"attributes": {"PARCEL_ID": "P4", "S_LEGAL": "X", "DOR_UC": "1"}}]
     r = _normalize(feats, "collier")
     assert r[0]["property_type"] == "single-family"
+
+
+def test_ingest_does_not_leak_skipped_ids_into_the_next_countys_run():
+    """Both counties now run through the same module-level SKIPPED_OBJECT_IDS
+    list in one process (pipeline.py loops county-by-county). A skip recorded
+    while fetching Collier must not still be sitting there — and get misreported
+    as a Lee skip — when ingest_parcel_subdivisions('lee') runs next."""
+    resources.SKIPPED_OBJECT_IDS.clear()
+    resources.SKIPPED_OBJECT_IDS.append(999999)  # simulate a skip left over from a prior county's run
+
+    with patch("ingest.pipelines.parcel_subdivision.resources.arcgis_count", return_value=1), \
+         patch("ingest.pipelines.parcel_subdivision.resources.fetch_parcel_subdivisions", return_value=[
+             {"parcel_id": "L1", "county": "lee", "property_type": "single-family",
+              "just_value": 1.0, "zip": "33901", "subdivision_name": "X", "phy_addr1": "1 X"},
+         ]), \
+         patch("ingest.pipelines.parcel_subdivision.resources._promote_to_tier2"):
+        ingest_parcel_subdivisions("lee")
+
+    assert resources.SKIPPED_OBJECT_IDS == []

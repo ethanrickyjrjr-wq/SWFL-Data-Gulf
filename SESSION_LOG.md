@@ -1,3 +1,47 @@
+## 2026-07-14 (Sonnet 5 · main) — LEE PARCELS LANDED: 383,487 rows, "broken partition" was stale, wrong NAL lane skipped entirely
+
+Executed the handoff (`docs/superpowers/plans/2026-07-14-lee-parcels-handoff.md`) but not via its own
+§2 — the plan's NAL-file-download lane (unresolved SharePoint URL, `lee_parcels_nal_url_unresolved`)
+was never needed. Live-tested the FDOR statewide centroid layer's `returnIdsOnly`+`objectIds` pattern
+(the exact fix that unblocked Collier's identical "400 on record queries, count works" symptom,
+commit `c892771b` 07/06) against Lee's `CO_NO=46` — clean across the full 556,100-id range (start/
+mid/random-250-sample/tail), zero nulls. `constants.py`'s "broken Lee partition" note was diagnosed
+against the OLD keyset-pagination shape and never retested; corrected.
+
+**Also reconciled against a real conflicting decree** (caught mid-build, operator narrowed it):
+`lee_no_second_parcel_source` (07/11) said "Lee=LeePA, full stop, kill any in-flight Lee-from-FDOR
+ingest" — literal wording that would have blocked this. Verified `properties-lee-value.mts` docstrings
+itself "Single source: data_lake.leepa_parcels" with zero references to `parcel_subdivision` — the
+sold-price/value brain is untouched. This build is community/address-identity only (a capability
+LeePA's own services structurally lack — no subdivision-name field on any of its 24 MapServer layers,
+per `verification/communities-lee-source-probe.md` 07/06). Precedent: Collier already runs the same
+split (`collier_parcels` feeds the brain's value metric; `parcel_subdivision` separately carries
+`just_value` for neighborhood_stats' per-community median). Closed with the reconciliation on record.
+
+**Shipped:** `ingest/pipelines/parcel_subdivision` generalized to `--county collier|lee|both` (17/17
+tests, TDD — including a real cross-county `SKIPPED_OBJECT_IDS` leak caught by a failing test first).
+Registry + GHA cron added for BOTH `parcel_subdivision` and `neighborhood_stats` — neither had one
+before (`parcel-subdivision-annual.yml` day 24 13:00 UTC, `neighborhood-stats-annual.yml` +2hr stagger).
+`ingest/duckdb_pipelines/neighborhood_stats/pipeline.py` is a NEW driver — `agg.py` was a tested pure
+function only, never wired to Postgres (SESSION_LOG 07/06 flagged "no precedent in this repo for
+DuckDB reading a Tier-2 Postgres table directly"); read/write go straight through psycopg (matching
+`pulse_lake.py`'s pattern), aggregation still runs through `agg.py`'s tested GROUP BY unmodified.
+
+**Live, verified:** Lee ingest — 383,487 home rows merged, 0 skipped OBJECTIDs, all `parcel_id`
+distinct (no condo fan-out). `neighborhood_stats` — 31,110 communities (12,684 Lee + 18,426 Collier),
+home counts reconcile exactly against `parcel_subdivision`. Registry floor updated to the confirmed
+combined total (604,362 rows, 90% floor). Checked: no ID-level join exists between Lee's FDOR pull and
+`leepa_parcels` (Collier's `parcel_subdivision`/`collier_parcels` share the same STRAP `parcel_id`;
+Lee's `ALT_KEY` — DOR's NAL slot for the local folio — is blank for every Lee row sampled, `folioid`
+has no STRAP counterpart) — opened `lee_fdor_leepa_no_join_key` as a tracked followup, operator asked
+for it explicitly.
+
+Closed: `lee_parcels_zero_coverage`, `lee_parcels_nal_url_unresolved`, `parcel_subdivision_zero_coverage`,
+`communities_tables_zero_coverage`, `lee_no_second_parcel_source` (narrowed + reconciled). Opened:
+`lee_fdor_leepa_no_join_key`, `community_profiles_zero_coverage` (split off — still genuinely unbuilt,
+separate Phase 2 scrape). Still open: `parcel_subdivision_orphaned_no_readers` (the address→community
+build-path wiring, plan §4/§6, not done this session).
+
 ## 2026-07-14 (Sonnet 5 · main) — HANDOFF WRITTEN FOR THE 4 REMAINING DOCTOR REDS.
 
 Follow-up to the earlier doctor-gate entry (17 red -> ~4 red, commit `e6490b03`). Operator asked

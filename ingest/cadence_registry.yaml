@@ -919,6 +919,38 @@ pipelines:
         source_label: "FDOR Statewide Cadastral (ArcGIS FeatureServer)"
         summary: "135 fields total; we pull 13. Biggest miss: SALE_PRC1/SALE_PRC2 (actual sale price) — never pulled despite sale year/month/qualification being pulled in the same query. Also free in the same call: owner mailing address, building sqft, year built, land value/sqft."
 
+  - name: parcel_subdivision
+    workflow: parcel-subdivision-annual.yml
+    consuming_pack: communities-swfl
+    lane: tier-2
+    cadence_days: 365
+    tolerance_multiplier: 1.5
+    dlt_schema_name: parcel_subdivision
+    expected_rows_min: 543926 # 90% of 604,362 (collier 220,875 + lee 383,487) confirmed live 07/14/2026
+    count_table: data_lake.parcel_subdivision
+    # Source: FDOR Statewide Parcel Centroid ArcGIS FeatureServer (CO_NO=21 Collier, CO_NO=46 Lee)
+    # — same layer, same retrieval code for both counties (returnIdsOnly+objectIds; see
+    # ingest/pipelines/parcel_subdivision/constants.py's 07/14/2026 correction — the prior
+    # "Lee is a broken partition" note was stale, diagnosed against the old keyset-pagination
+    # shape). Annual NAL-derived roll; monthly idempotent retry catches the refresh, same
+    # pattern as collier_parcels. Consumed by communities-swfl (address->community resolution,
+    # neighborhood_stats aggregation). Docs: docs/superpowers/plans/2026-07-14-lee-parcels-handoff.md
+
+  - name: neighborhood_stats
+    workflow: neighborhood-stats-annual.yml
+    consuming_pack: communities-swfl
+    lane: tier-2
+    cadence_days: 365
+    tolerance_multiplier: 1.5
+    expected_rows_min: 1 # nascent — first real run 07/14/2026, no stable baseline yet (per pipeline-freshness.md rule (e))
+    count_table: data_lake.neighborhood_stats
+    # Not a dlt pipeline — no dlt_schema_name. Reads data_lake.parcel_subdivision straight
+    # through psycopg (no DuckDB<->Postgres precedent existed before this — see
+    # ingest/duckdb_pipelines/neighborhood_stats/pipeline.py), aggregates in an in-memory
+    # DuckDB table via agg.py's tested GROUP BY, upserts data_lake.neighborhood_stats with a
+    # plain ON CONFLICT. Scheduled 2hr after parcel-subdivision-annual.yml so a same-day
+    # refresh is picked up; idempotent either way. Consumed by communities-swfl (home count +
+    # median just-value per community).
 
   - name: fhfa
     workflow: fhfa-hpi-quarterly.yml

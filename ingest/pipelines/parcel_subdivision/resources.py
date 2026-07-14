@@ -1,14 +1,14 @@
-"""Pull Collier County parcel names from the FDOR centroid-version FeatureServer
-and merge them into data_lake.parcel_subdivision (Tier 2).
+"""Pull Collier + Lee County parcel names from the FDOR centroid-version
+FeatureServer and merge them into data_lake.parcel_subdivision (Tier 2).
 
-Gives every Collier home its raw platted-subdivision name (`S_LEGAL`, stemmed) +
+Gives every home its raw platted-subdivision name (`S_LEGAL`, stemmed) +
 property_type + just_value, the backbone the alias reconciler
 (refinery/lib/subdivision-aliases.mts) rolls up to marketed communities and
 `ingest/duckdb_pipelines/neighborhood_stats` aggregates per subdivision.
 
-Lee is NOT pulled here — FDOR's CO_NO=46 partition 400s on record queries on
-this layer (see constants.py docstring). Lee lands via a separate pipeline
-(follow-up F1).
+Both counties come off the SAME statewide layer with the SAME retrieval code —
+see constants.py's 07/14/2026 correction for why Lee doesn't need a separate
+source after all.
 """
 from __future__ import annotations
 
@@ -153,20 +153,20 @@ def _request(params: dict, retries: int = _MAX_ATTEMPTS) -> dict:
     raise RuntimeError("unreachable")  # loop always returns or raises on last_attempt
 
 
-def _fetch_all_object_ids() -> list[int]:
-    """All Collier OBJECTIDs via `returnIdsOnly=true` — the official Esri pattern
-    for a layer that won't paginate (docs: returnIdsOnly returns up to 1M
+def _fetch_all_object_ids(county: str) -> list[int]:
+    """All of one county's OBJECTIDs via `returnIdsOnly=true` — the official Esri
+    pattern for a layer that won't paginate (docs: returnIdsOnly returns up to 1M
     conforming IDs in one response, then fetch by objectIds).
 
-    Verified live 07/06/2026: this layer soft-400s ("Invalid query parameters")
-    on `where=(CO_NO=21) AND OBJECTID>N` + orderByFields + resultRecordCount deep
-    pagination at specific cursors, but returnIdsOnly returned all 364,827 Collier
-    OIDs cleanly in a single request, and every one of those "failing" OIDs proved
-    individually queryable via objectIds (with S_LEGAL intact). The bug was the
-    keyset-pagination query shape, not the source data — there is no dead zone."""
-    body = _request({"where": f"CO_NO={CO_NO['collier']}", "returnIdsOnly": "true", "f": "json"})
+    Verified live 07/06/2026 (Collier) and 07/14/2026 (Lee): this layer soft-400s
+    ("Invalid query parameters") on `where=(CO_NO=N) AND OBJECTID>N` + orderByFields
+    + resultRecordCount deep pagination at specific cursors, but returnIdsOnly
+    returns every OID cleanly in a single request, and those OIDs prove individually
+    queryable via objectIds (with S_LEGAL intact). The bug was the keyset-pagination
+    query shape, not the source data — there is no dead zone, for either county."""
+    body = _request({"where": f"CO_NO={CO_NO[county]}", "returnIdsOnly": "true", "f": "json"})
     if "objectIds" not in body:
-        raise RuntimeError(f"collier parcel_subdivision returnIdsOnly failed: {body.get('error', body)}")
+        raise RuntimeError(f"{county} parcel_subdivision returnIdsOnly failed: {body.get('error', body)}")
     return sorted(int(x) for x in (body["objectIds"] or []))
 
 
@@ -202,27 +202,27 @@ def _fetch_object_id_batch(oids: list[int]) -> list[dict]:
         return body.get("features", [])
     if lone:  # only reachable via a soft-400 (transport raised above)
         SKIPPED_OBJECT_IDS.append(oids[0])
-        print(f"  parcel_subdivision (collier): OBJECTID {oids[0]} unservable even alone — skipped: {reason}")
+        print(f"  parcel_subdivision: OBJECTID {oids[0]} unservable even alone — skipped: {reason}")
         return []
     mid = len(oids) // 2
-    print(f"  parcel_subdivision (collier): objectIds batch of {len(oids)} failed ({reason}) — splitting")
+    print(f"  parcel_subdivision: objectIds batch of {len(oids)} failed ({reason}) — splitting")
     return _fetch_object_id_batch(oids[:mid]) + _fetch_object_id_batch(oids[mid:])
 
 
-def _iter_collier_attrs(batch_size: int = _BATCH_SIZE):
-    """Retrieve every Collier parcel: one returnIdsOnly call for the full OBJECTID
-    list, then fetch in batches by objectIds."""
-    oids = _fetch_all_object_ids()
+def _iter_county_attrs(county: str, batch_size: int = _BATCH_SIZE):
+    """Retrieve every parcel for one county: one returnIdsOnly call for the full
+    OBJECTID list, then fetch in batches by objectIds."""
+    oids = _fetch_all_object_ids(county)
     total_batches = (len(oids) + batch_size - 1) // batch_size
     for n, i in enumerate(range(0, len(oids), batch_size), start=1):
         if n % 20 == 0:
-            print(f"  parcel_subdivision (collier): objectIds batch {n}/{total_batches}")
+            print(f"  parcel_subdivision ({county}): objectIds batch {n}/{total_batches}")
         yield from _fetch_object_id_batch(oids[i : i + batch_size])
 
 
-def fetch_collier_parcel_subdivisions() -> list[dict]:
-    """Fetch all Collier (CO_NO=21) parcel names via returnIdsOnly + objectIds batching, normalized."""
-    return _normalize(list(_iter_collier_attrs()), "collier")
+def fetch_parcel_subdivisions(county: str) -> list[dict]:
+    """Fetch all of one county's parcel names via returnIdsOnly + objectIds batching, normalized."""
+    return _normalize(list(_iter_county_attrs(county)), county)
 
 
 def arcgis_count(where: str) -> int:
@@ -233,22 +233,23 @@ def arcgis_count(where: str) -> int:
     return int(resp.json().get("count", 0))
 
 
-def ingest_collier_parcel_subdivisions() -> int:
-    """Pull Collier parcel names from the FDOR centroid layer and promote to Tier 2."""
-    where = f"CO_NO={CO_NO['collier']}"
+def ingest_parcel_subdivisions(county: str) -> int:
+    """Pull one county's parcel names from the FDOR centroid layer and promote to Tier 2."""
+    where = f"CO_NO={CO_NO[county]}"
     canonical = arcgis_count(where)
-    rows = fetch_collier_parcel_subdivisions()
+    rows = fetch_parcel_subdivisions(county)
     if SKIPPED_OBJECT_IDS:
         print(
-            f"parcel_subdivision (collier): WARNING - {len(SKIPPED_OBJECT_IDS)} OBJECTID(s) "
+            f"parcel_subdivision ({county}): WARNING - {len(SKIPPED_OBJECT_IDS)} OBJECTID(s) "
             f"unqueryable on the source layer, skipped: {SKIPPED_OBJECT_IDS}"
         )
+        SKIPPED_OBJECT_IDS.clear()
     if not rows:
-        print("parcel_subdivision (collier): 0 rows — aborting Tier 2 promotion")
+        print(f"parcel_subdivision ({county}): 0 rows — aborting Tier 2 promotion")
         return 0
-    # canonical counts ALL Collier parcels (incl. non-home/vacant); rows is home-only
-    # after the DOR filter, so compare against a floor, not a 1:1 assertion.
-    assert_vs_canonical(len(rows), canonical, floor=0.5, label="collier parcel_subdivision (home subset)")
+    # canonical counts ALL parcels for the county (incl. non-home/vacant); rows is
+    # home-only after the DOR filter, so compare against a floor, not a 1:1 assertion.
+    assert_vs_canonical(len(rows), canonical, floor=0.5, label=f"{county} parcel_subdivision (home subset)")
     _promote_to_tier2(rows)
-    print(f"parcel_subdivision (collier): merged {len(rows)} homes into data_lake.parcel_subdivision")
+    print(f"parcel_subdivision ({county}): merged {len(rows)} homes into data_lake.parcel_subdivision")
     return len(rows)
