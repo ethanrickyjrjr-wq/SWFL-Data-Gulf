@@ -4,6 +4,7 @@ import {
   FEATURE_ROUTING,
   FONT_ROUTING,
   capabilitiesFor,
+  emailLabTierFor,
   fontsFor,
   type EmailLabCapabilities,
   type Routing,
@@ -62,4 +63,11 @@ test("tiers are frozen and resolvable", () => {
   expect(capabilitiesFor("paid")).toBe(paid);
   expect(Object.isFrozen(free)).toBe(true);
   expect(Object.isFrozen(paid)).toBe(true);
+});
+
+test("emailLabTierFor maps billing_subscriptions.tier to the binary dial tier", () => {
+  expect(emailLabTierFor("free")).toBe("free");
+  expect(emailLabTierFor("starter")).toBe("paid");
+  expect(emailLabTierFor("growth")).toBe("paid");
+  expect(emailLabTierFor("pro")).toBe("paid");
 });

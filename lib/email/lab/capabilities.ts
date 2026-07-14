@@ -35,6 +35,9 @@ export interface EmailLabCapabilities {
   labEntry: boolean;
   /** Datasets browser + data-bound blocks (concoctions) on the grid canvas. */
   datasets: boolean;
+  /** Attribute + engagement conditions in the contact picker (lib/email/segments).
+   *  Tag-only filtering stays available everywhere. */
+  contactSegments: boolean;
 }
 
 // ── THE DIAL. Route every feature here; that's the whole build. ───────────────
@@ -52,6 +55,7 @@ export const FEATURE_ROUTING: Record<keyof EmailLabCapabilities, Routing> = {
   labEntry: "both",
   // Data-bound blocks ride the grid canvas — paid lane by construction.
   datasets: "paid-only",
+  contactSegments: "paid-only",
 };
 
 /** Does `tier` get something routed `routing`? */
@@ -95,4 +99,11 @@ export const FONT_ROUTING: Record<FontFamily, Routing> = {
 /** The fonts a tier may offer, in declaration order. The picker maps over this. */
 export function fontsFor(tier: EmailLabTier): FontFamily[] {
   return (Object.keys(FONT_ROUTING) as FontFamily[]).filter((f) => reaches(FONT_ROUTING[f], tier));
+}
+
+/** Maps a billing_subscriptions.tier string (free/starter/growth/pro — see
+ *  lib/email/usage.ts TIER_LIMITS) to the binary EmailLabTier this dial uses.
+ *  Anything other than "free" counts as paid. */
+export function emailLabTierFor(billingTier: string): EmailLabTier {
+  return billingTier === "free" ? "free" : "paid";
 }
