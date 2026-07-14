@@ -1,3 +1,38 @@
+## 2026-07-14 (Sonnet 5 · main) — MLS/RESO live-verified: the pipe already works, just uncredentialed (19 days parked)
+
+Operator asked to find one solid IDX/MLS we can use now and eventually pay for (DOM, sales, new
+listings, price cuts, community info). Found we already built this: `lib/reso/` (Phase 1,
+`docs/superpowers/plans/2026-06-25-mls-reso-integration.md`) shipped 06/25 — client, sync, DB
+tables, API routes, `/settings/mls` UI, `/for-agents` public page for the Bridge vendor
+application — then sat uncredentialed. Confirmed zero RESO/MLS/Bridge/Trestle secrets exist
+anywhere (`gh secret list`); `data_lake.user_mls_listings`/`user_mls_stats` tables exist
+(migrations ran) but 0 rows.
+
+**Live-proved the actual pipe today, not just the spec.** Bridge Interactive
+(`bridgedataoutput.com`, target for `swfl_mls` board) auto-grants every new application a Test
+dataset — found its public token live via the API Explorer UI
+(`access_token=6baca547742c6f96a6ff71b138424f21`, `dataset=test`) and ran our unmodified
+`lib/reso/client.ts` against it: 3 real rows back with `DaysOnMarket`, `OnMarketDate`,
+`OriginalListPrice` vs `ListPrice` (price cuts), `ClosePrice`/`CloseDate` (sales), and
+`SubdivisionName`/`AssociationFee`/`AssociationAmenities` (community) — every field category
+asked for, confirmed via our own code path, not a hand-rolled curl. Test data is synthetic
+(Bridge's own docs say so) — proves the pipe, not real Lee County listings.
+
+**Real gap found for Trestle/Cotality** (target for `nabor`/Collier board): it authenticates via
+OAuth2 `client_credentials` token exchange, not the static Bearer token our `ResoClient` sends —
+works fine for Bridge (matches their "Server token" model) but will NOT work against Trestle
+as-is. Needs a small token-exchange step added before NABOR can go live — scoped, not built.
+
+**Flagged, not closed:** `boards.ts`'s `swfl_mls=Bridge`/`nabor=Trestle` mapping is inherited from
+a third party's (Repliers') site description, never independently reconfirmed with either MLS
+board directly — Lee's old board domain (royalpalmcoastrealtor.com) is dead. Confirming this is
+step 1 of registering with either vendor anyway, not extra work.
+
+Full findings + reproduce commands + next-steps ordering:
+`docs/handoff/2026-07-14-mls-reso-live-verify-handoff.md`. Next: operator registers a Bridge
+account (self-serve, free, business identity — not something to automate) and confirms the board
+mapping with Lee's MLS + NABOR directly.
+
 ## 2026-07-14 (Sonnet 5 · main) — Handoff: wiring today's community/parcel data into the builder + AI commentary
 
 Docs-only follow-up to the Lee-parcels build below. Wrote
