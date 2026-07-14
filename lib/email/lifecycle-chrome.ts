@@ -29,12 +29,27 @@
 // EVERY listing-lifecycle email is THIS, in THIS order:
 //
 //   header · RIBBON · photo · hero(centred, address over price) · spec strip
-//          · [the recipe's own middle] · narrative · agent card · CTA · footer
+//          · [the recipe's own middle] · narrative · [agent card | CTA] · footer
 //
 // A recipe may change: the RIBBON WORD, the hero numbers, which spec cells, its own MIDDLE
 // blocks (a comps chart, a scarcity funnel, a sold-comps list), and the CTA. **It may not
 // change the chrome.** That is the point — the chrome is what makes six emails read as one
 // campaign from one agent.
+//
+// ── THE ONE MULTI-COLUMN ROW (Phase 4, 07/14/2026) ──────────────────────────
+//
+// The agent card and the CTA share a row — `{7,5}`. Everything else is full-bleed, and
+// that is a DECISION, not an oversight. Two rows were rejected on the evidence:
+//
+//   photo + hero `{7,5}` — a listing flyer's grammar on PAPER, which is 8.5in wide. At 600px
+//   it drops the photo to ~350px (the photo IS the product) and wraps "326 Shore Dr, Fort
+//   Myers Beach, FL 33931" over four lines in a ~250px column, so the price stops reading as
+//   a headline. The flat full-bleed photo wins at this width.
+//
+// Adding a column here is one line — `newRow: false`. That is deliberately easy and
+// deliberately load-bearing: see `lifecycle-chrome.test.ts`, which pins this row's shape AND
+// pins the photo/hero as full-bleed, so a future session re-litigates the design in the open
+// instead of drifting into it.
 //
 // BRAND IS STICKY AND UNTOUCHED. globalStyle, the header, the agent card and the footer are
 // lifted from whatever is on the canvas, so a user's colours and identity ride through every
@@ -116,18 +131,31 @@ function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock 
   return current.blocks.find((b) => b.type === type) ?? createBlock(type);
 }
 
-/** A full-bleed row of the chrome. The chrome names WHAT and HOW TALL; `finalizeDoc` alone
- *  decides WHERE. There is no `at()` any more — nothing here can write an x or a y. */
-function row(block: Omit<EmailBlock, "layout">, height: number, isStatic?: true): PlanEntry {
+/** One thing the chrome says: WHAT, HOW TALL, HOW WIDE, and whether it opens a new row.
+ *  It still cannot write an x or a y — `finalizeDoc` alone decides WHERE. `newRow: false`
+ *  is the entire vocabulary for "put me beside the last block"; `groupIntoRows` breaks on
+ *  it, and the seam snaps the resulting pair onto a blessed multiset. */
+function cell(
+  block: Omit<EmailBlock, "layout">,
+  height: number,
+  span: number,
+  newRow: boolean,
+  isStatic?: true,
+): PlanEntry {
   return {
     id: block.id,
     type: block.type,
     props: block.props as Record<string, unknown>,
-    span: GRID_COLS,
-    newRow: true,
+    span,
+    newRow,
     height,
     ...(isStatic ? { isStatic: true } : {}),
   };
+}
+
+/** A full-bleed row — the chrome's default, and still what most of it is. */
+function row(block: Omit<EmailBlock, "layout">, height: number, isStatic?: true): PlanEntry {
+  return cell(block, height, GRID_COLS, true, isStatic);
 }
 
 /**
@@ -228,18 +256,36 @@ export function buildLifecycleEmail(current: EmailDoc, chrome: LifecycleChrome):
   // The tail is a sources list — a CLOSE-zone block. The seam sorts it above the footer.
   for (const t of chrome.tail ?? []) entries.push(row(t.block, t.height ?? 3));
 
-  // 8. THE AGENT — sticky. Same signature on every email in the campaign.
-  entries.push(row(keepOrDefault(current, "agent-card"), 4));
-
-  // 9. THE CTA — the next action, never a restatement of what they are looking at.
+  // 8+9. THE AGENT AND THE ASK — ONE ROW, NOT TWO.
+  //
+  // These were two stacked full-width cards carrying ONE idea: "here's me, here's the ask."
+  // `{7,5}` is a blessed pair (BLESSED_ROW_SPANS[2]), so the seam honours it exactly rather
+  // than snapping it.
+  //
+  // WHY {7,5} AND NOT {8,4} — this was settled by RENDERING it, not by taste. At {8,4} the CTA
+  // column is 200px, and the button is shrink-to-fit inside it: "RSVP for the Open House" broke
+  // over THREE lines while the agent card sat in empty space. A cramped three-line button is
+  // worse than the full-width button it replaced — the CTA is the most important click in the
+  // email. At {7,5} (350/250) the worst label in the campaign is two clean lines. If you add a
+  // recipe with a longer CTA, RENDER IT AND LOOK before you ship it.
+  //
+  // WHY THIS IS SAFE AT EVERY WIDTH — the hybrid columns the compiler emits stack in SOURCE
+  // ORDER on a phone (cerberusemail.com/hybrid-responsive, re-verified in-session 07/14/2026).
+  // So the agent card leads and the CTA follows: the exact order a phone shows TODAY, with the
+  // button back at full width and its full tap target. Desktop gains the signature-plus-action
+  // row; mobile loses nothing. The CTA must therefore stay SECOND — reversing these two lines
+  // would put the ask above the agent on every phone.
+  entries.push(cell(keepOrDefault(current, "agent-card"), 4, 7, true));
   entries.push(
-    row(
+    cell(
       {
         id: createBlock("button").id,
         type: "button",
         props: { label: chrome.ctaLabel, ...(chrome.ctaUrl ? { url: chrome.ctaUrl } : {}) },
       },
       2,
+      5,
+      false, // ← THE LEVER. Not the span: this is what puts it BESIDE the agent card.
     ),
   );
 
@@ -261,6 +307,8 @@ export const LIFECYCLE_SPINE = [
   "stats:strip",
   // …the recipe's own middle blocks may appear here…
   "text",
+  // …the agent card and the CTA share ONE row — agent-card `{7}` then button `{5}`. They are
+  // listed in source order, which is also the order a phone stacks them in.
   "agent-card",
   "button",
   // …and its tail (a sources list) lands HERE — the seam's zone fence sorts CLOSE-zone

@@ -1,3 +1,46 @@
+## 2026-07-14 (Opus 4.8 · main) — PHASE 4: THE CAMPAIGN SPENDS ITS COLUMNS, AND THE RENDER OVERRULED THE PLAN
+
+**The campaign is no longer a flat stack.** The agent card and the CTA now share ONE row — they
+always carried one idea ("here's me, here's the ask") in two stacked full-width cards. All seven
+listing emails, verified in the rendered HTML: exactly one ghost-table multi-column row each,
+350px + 250px. Closes `email_lifecycle_uses_grid_columns`.
+
+**The lever was never the span — it was `newRow`.** `lifecycle-chrome`'s `row()` helper hardcoded
+`newRow: true` on every entry, so `groupIntoRows` could never put two blocks together no matter what
+span you asked for. Split it into `cell(block, height, span, newRow)`; `row()` is now the full-bleed
+default on top of it. One `false` is the whole feature.
+
+**`{8,4}` was the handoff's recommendation. I shipped `{7,5}`, because I rendered it.** At `{8,4}`
+the CTA column is 200px and the button is shrink-to-fit inside it: **"RSVP for the Open House" broke
+over THREE lines** while the agent card sat in white space. A cramped 3-line button is strictly worse
+than the full-width one it replaced — the CTA is the most important click in the email. `{7,5}`
+(350/250) holds the campaign's worst label in two clean lines. Green tests said nothing about this;
+only looking did. **Photo+hero `{7,5}` — the handoff's other candidate — was REJECTED** for the same
+reason (a ~350px photo, and the centred address wrapping over four lines until the price stops being
+a headline). Both the shipped row AND the rejection are now pinned in `lifecycle-chrome.test.ts` —
+the file the chrome's own header has claimed exists since 07/13 and which never did.
+
+**"One file, that is the entire blast radius" was wrong, and the tests are why.** Four seed cards
+(`new-listing`, `just-sold`, `open-house`, `price-reduced`) are the EMPTY version of the same
+deliverable, and `seed-recipe-parity.test.ts` holds them to the builder's exact widths — so they
+moved with it (and their 4 committed showcase tiles were recaptured; the other 23 were byte-identical,
+so the capture is deterministic). Three more tests **asserted the flat stack as an invariant**:
+`w === 12` on every block, and a per-BLOCK cursor (`y_next = y + h`) that quietly encoded "one block
+per row." Re-grained to the ROW (`y_next = y + the row's TALLEST block`) — same invariant, no gap and
+no overlap, at the grain it always meant. Real radius: 1 builder, 4 seeds, 4 tests, 4 tiles.
+2,470 pass / 0 fail · `bunx next build` exit 0.
+
+**RULE 0.4 CORRECTION — the handoff's own render command fires paid model calls, and I fixed the doc.**
+It said "run it WITHOUT `--env-file`, because Bun's `.env` overrides the shell." That is exactly
+backwards and it is what caused the seven live calls it warned about. Verified against
+`bun.com/docs/runtime/environment-variables` in-session: Bun **auto-loads `.env`, `.env.<NODE_ENV>`,
+AND `.env.local`** — and our `ANTHROPIC_API_KEY` lives in `.env.local`. The script's guard is only a
+`console.warn`, not a block. `--env-file` OVERRIDES the default set, so pointing it at an EMPTY file
+is the only thing that actually suppresses the key. Both renders this session: no warn line, zero
+model calls, zero spend. Handoff doc corrected at the source.
+
+---
+
 ## 2026-07-14 (Sonnet 5 · main) — THE GREY RAMP: PINNED, NOT INVENTED
 
 Follow-up to the social-design-root handoff work (see the "TWO UNBLOCKED ITEMS" entry below).

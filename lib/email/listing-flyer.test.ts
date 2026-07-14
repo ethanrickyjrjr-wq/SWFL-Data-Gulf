@@ -120,10 +120,20 @@ test("an unsourced spec is an OPEN SLOT to fill — never a 0, never invented", 
 
 test("every block carries a grid layout — the coded grid, not a stack", () => {
   const doc = buildListingFlyer(FACTS, brandedCurrentDoc());
+  for (const b of doc.blocks) expect(b.layout).toBeDefined();
+
+  // Full-bleed everywhere EXCEPT the one row the chrome deliberately splits: the agent card
+  // and the CTA carry one idea ("here's me, here's the ask"), so they ride together at {7,5}.
+  // This assertion used to read `w === 12` for EVERY block — it was true, and it was the flat
+  // stack the layout system was bought to eliminate. Full-bleed is now the DEFAULT, not the law.
   for (const b of doc.blocks) {
-    expect(b.layout).toBeDefined();
-    expect(b.layout && b.layout.w).toBe(12);
+    const expected = b.type === "agent-card" ? 7 : b.type === "button" ? 5 : 12;
+    expect(b.layout!.w).toBe(expected);
   }
+  const agent = doc.blocks.find((b) => b.type === "agent-card")!;
+  const cta = doc.blocks.find((b) => b.type === "button")!;
+  expect(agent.layout!.y).toBe(cta.layout!.y); // ONE row, not two.
+
   // footer is locked (static) so a drag can't move the unsubscribe block.
   const footer = doc.blocks.find((b) => b.type === "footer");
   expect(footer?.layout?.static).toBe(true);

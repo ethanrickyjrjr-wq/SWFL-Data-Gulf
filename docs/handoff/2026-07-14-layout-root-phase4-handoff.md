@@ -88,6 +88,30 @@ engines. A builder that skips the seam ships a visibly broken email.
 
 ## Phase 4 — THE JOB. Make the campaign use its columns.
 
+> **✅ SHIPPED 07/14/2026 — `{7,5}`, agent card beside the CTA. Read the corrections below before
+> you trust the rest of this section.**
+>
+> - **The pairing that shipped is agent-card `{7}` + CTA `{5}`, and ONLY that one.** The
+>   photo+hero `{7,5}` candidate below was **rejected on the render**: at a 600px canvas it drops
+>   the photo to ~350px (the photo IS the product) and wraps the centred address over four lines,
+>   which stops the price reading as a headline. That rejection is now pinned by a test in
+>   `lifecycle-chrome.test.ts` — delete it deliberately or not at all.
+> - **`{8,4}` — the section's first recommendation — was TRIED AND REJECTED.** It renders a 200px
+>   CTA column, and the button is shrink-to-fit inside it: *"RSVP for the Open House" broke over
+>   THREE lines* while the agent card sat in empty space. A cramped 3-line button is worse than the
+>   full-width one it replaced. `{7,5}` (350/250) holds the campaign's worst label in two clean
+>   lines. **This was settled by rendering it, not by reasoning about it — do the same.**
+> - **"One file: `lifecycle-chrome.ts`. That is the entire blast radius" was WRONG.** Four seed
+>   cards (`new-listing`, `just-sold`, `open-house`, `price-reduced`) are the *empty version of the
+>   same deliverable* and `seed-recipe-parity.test.ts` holds them to the builder's exact widths — so
+>   they moved too. And three tests (`listing-flyer`, `market-comps`, `under-contract`) **asserted
+>   the flat stack itself** (`w === 12` on every block; a per-BLOCK cursor `y_next = y + h`). They
+>   were re-grained to the ROW, which is what they always meant. Real blast radius: 1 builder,
+>   4 seeds, 4 tests, 4 committed tiles.
+>
+> **Checks:** `email_lifecycle_uses_grid_columns` (opened 07/14/2026) —
+> **closed by this work**.
+
 **Checks:** `email_lifecycle_uses_grid_columns` (opened 07/14/2026) ·
 `email_design_system_one_exit_seam` (closed by Phase 3).
 
@@ -126,12 +150,22 @@ only.
 Not a green test. **Render them and look:**
 
 ```
-bun scripts/dev-render-listing-emails.mts     # 7 emails, real 326 Shore Dr data, zero model calls
+bun --env-file=/tmp/empty.env scripts/dev-render-listing-emails.mts   # 7 emails, zero model calls
 ```
 
-⚠️ **Run it WITHOUT `--env-file`.** Bun's `.env` overrides the shell, so `ANTHROPIC_API_KEY` gets
-picked up anyway and the narrator fires for real money (this bit me on 07/14 — seven live calls).
-The deterministic path is the point of the script.
+⚠️ **CORRECTED 07/14/2026 — this instruction used to say the OPPOSITE, and following it is what
+fired the seven live calls it warned about.** It read "run it WITHOUT `--env-file`." That is exactly
+backwards. Verified against Bun's own docs in-session (`bun.com/docs/runtime/environment-variables`):
+
+- Bun **auto-loads `.env`, `.env.<NODE_ENV>`, AND `.env.local`** (in increasing precedence). Our
+  `ANTHROPIC_API_KEY` lives in **`.env.local`** — so the bare `bun scripts/…` command loads the key,
+  the narrator fires, and it costs real money. The script's guard is only a `console.warn`.
+- **`--env-file` OVERRIDES which files Bun loads.** Pointing it at an EMPTY file is the only thing
+  that actually suppresses the key.
+
+So: pass `--env-file=<an empty file>`. You know it worked when the run prints **no**
+`[warn] ANTHROPIC_API_KEY is set` line. Shell-unsetting the var does NOT work — Bun's `.env` files
+override the shell.
 
 Output lands in `public/dev-emails/*.html` (gitignored). `file://` URLs are blocked in the browser
 tool — serve them: `python -m http.server 4599` from that directory.

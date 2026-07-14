@@ -332,9 +332,11 @@ export const SEED_DOCS: SeedDoc[] = [
           },
         ),
         seedBlockGrid("text", { x: 0, y: 16, w: 12, h: 4 }, { body: "", align: "left" }),
-        seedBlockGrid("agent-card", { x: 0, y: 20, w: 12, h: 4 }),
-        seedBlockGrid("button", { x: 0, y: 24, w: 12, h: 2 }, { label: "What's My Home Worth?" }),
-        seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
+        // The agent and the ask share ONE row ({7,5}) — mirrors buildLifecycleEmail, which is
+        // the authority for this card's shape (seed-recipe-parity.test.ts holds them equal).
+        seedBlockGrid("agent-card", { x: 0, y: 20, w: 7, h: 4 }),
+        seedBlockGrid("button", { x: 7, y: 20, w: 5, h: 2 }, { label: "What's My Home Worth?" }),
+        seedBlockGrid("footer", { x: 0, y: 24, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -613,9 +615,11 @@ export const SEED_DOCS: SeedDoc[] = [
           },
         ),
         seedBlockGrid("text", { x: 0, y: 16, w: 12, h: 4 }, { body: "", align: "left" }),
-        seedBlockGrid("agent-card", { x: 0, y: 20, w: 12, h: 4 }),
-        seedBlockGrid("button", { x: 0, y: 24, w: 12, h: 2 }, { label: "View the Full Listing" }),
-        seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
+        // The agent and the ask share ONE row ({7,5}) — mirrors buildLifecycleEmail, which is
+        // the authority for this card's shape (seed-recipe-parity.test.ts holds them equal).
+        seedBlockGrid("agent-card", { x: 0, y: 20, w: 7, h: 4 }),
+        seedBlockGrid("button", { x: 7, y: 20, w: 5, h: 2 }, { label: "View the Full Listing" }),
+        seedBlockGrid("footer", { x: 0, y: 24, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -865,9 +869,11 @@ export const SEED_DOCS: SeedDoc[] = [
         // non-empty body: a user who picked this card and hit send EMAILED THAT SENTENCE
         // to real people. An instruction to the author is not copy for the reader.
         seedBlockGrid("text", { x: 0, y: 16, w: 12, h: 4 }, { body: "", align: "left" }),
-        seedBlockGrid("agent-card", { x: 0, y: 20, w: 12, h: 4 }),
-        seedBlockGrid("button", { x: 0, y: 24, w: 12, h: 2 }, { label: "RSVP for the Open House" }),
-        seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
+        // The agent and the ask share ONE row ({7,5}) — mirrors buildLifecycleEmail, which is
+        // the authority for this card's shape (seed-recipe-parity.test.ts holds them equal).
+        seedBlockGrid("agent-card", { x: 0, y: 20, w: 7, h: 4 }),
+        seedBlockGrid("button", { x: 7, y: 20, w: 5, h: 2 }, { label: "RSVP for the Open House" }),
+        seedBlockGrid("footer", { x: 0, y: 24, w: 12, h: 3, static: true }),
       ],
     }),
   },
@@ -933,11 +939,13 @@ export const SEED_DOCS: SeedDoc[] = [
         // it asked for TWO claims we cannot source — a seller's MOTIVE and a negotiating
         // position. The product's own template was instructing the user to invent.
         seedBlockGrid("text", { x: 0, y: 16, w: 12, h: 4 }, { body: "", align: "left" }),
-        seedBlockGrid("agent-card", { x: 0, y: 20, w: 12, h: 4 }),
+        // The agent and the ask share ONE row ({7,5}) — mirrors buildLifecycleEmail, which is
+        // the authority for this card's shape (seed-recipe-parity.test.ts holds them equal).
+        seedBlockGrid("agent-card", { x: 0, y: 20, w: 7, h: 4 }),
         // NOT "See the New Price" — the email already IS the new price. A CTA must ask for
         // the NEXT action, not point at what the reader is looking at.
-        seedBlockGrid("button", { x: 0, y: 24, w: 12, h: 2 }, { label: "Schedule a Showing" }),
-        seedBlockGrid("footer", { x: 0, y: 26, w: 12, h: 3, static: true }),
+        seedBlockGrid("button", { x: 7, y: 20, w: 5, h: 2 }, { label: "Schedule a Showing" }),
+        seedBlockGrid("footer", { x: 0, y: 24, w: 12, h: 3, static: true }),
       ],
     }),
   },

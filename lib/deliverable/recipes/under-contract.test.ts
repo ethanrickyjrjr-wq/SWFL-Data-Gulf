@@ -649,14 +649,19 @@ describe("buildUnderContractGrid — it wears the CAMPAIGN CHROME, not a grid of
     expect(chart).toBeUndefined();
   });
 
-  it("stacks with no void — every block sits directly under the one above it", () => {
-    const laid = fullDoc()
-      .blocks.map((b) => b.layout!)
-      .sort((a, b) => a.y - b.y);
+  it("stacks with no void — every ROW sits directly under the one above it", () => {
+    // This walked every BLOCK (cursor += h), which quietly asserted one block per row — true
+    // only while the campaign was a flat stack. The agent card and the CTA now share a row at
+    // unequal heights (4 and 2), so the cursor advances by the row's TALLEST block. Same
+    // invariant (no void, no overlap); the grain is the row, which is what it always meant.
+    const rows = new Map<number, number>(); // y → tallest h
+    for (const l of fullDoc().blocks.map((b) => b.layout!)) {
+      rows.set(l.y, Math.max(rows.get(l.y) ?? 0, l.h));
+    }
     let cursor = 0;
-    for (const l of laid) {
-      expect(l.y).toBe(cursor);
-      cursor += l.h;
+    for (const y of [...rows.keys()].sort((a, b) => a - b)) {
+      expect(y).toBe(cursor);
+      cursor += rows.get(y)!;
     }
   });
 

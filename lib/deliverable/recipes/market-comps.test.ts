@@ -271,12 +271,20 @@ test("it wears the campaign chrome — the SAME shape as every other lifecycle e
 test("every block is positioned, so it compiles through the GRID renderer", () => {
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
   expect(doc.blocks.every((b) => b.layout)).toBe(true);
-  // ...and the chrome stacks them with no gap and no overlap: y_next = y + h.
-  const ordered = [...doc.blocks].sort((a, b) => (a.layout?.y ?? 0) - (b.layout?.y ?? 0));
+
+  // ...and the chrome stacks ROWS with no gap and no overlap: y_next = y + the row's TALLEST
+  // block. This walked every BLOCK (y_next = y + h), which quietly asserted one block per row —
+  // true only while the campaign was a flat stack. The agent card and the CTA now share a row
+  // at unequal heights (4 and 2), which is exactly the case the band rule exists to handle.
+  const rows = new Map<number, number>(); // y → tallest h
+  for (const b of doc.blocks) {
+    const { y, h } = b.layout!;
+    rows.set(y, Math.max(rows.get(y) ?? 0, h));
+  }
   let y = 0;
-  for (const b of ordered) {
-    expect(b.layout!.y).toBe(y);
-    y += b.layout!.h;
+  for (const rowY of [...rows.keys()].sort((a, b) => a - b)) {
+    expect(rowY).toBe(y);
+    y += rows.get(rowY)!;
   }
 });
 
