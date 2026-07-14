@@ -18,7 +18,14 @@ jobs:
   ingest:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 45, not 30: run 28744412719 (07/05/2026) got killed at the 30m ceiling with ZERO
+    # visible progress in the log — a red herring. resources.py's print() calls had no
+    # flush=True, so on a non-TTY GHA runner stdout block-buffers and a hard kill loses
+    # whatever was in the buffer; the retry math (5xx backoff up to 300s x up to 6
+    # attempts, possibly across 2+ pages) can legitimately eat 25+ min even in a run
+    # that would otherwise succeed. Fixed the logging blindness (flush=True everywhere
+    # in ingest/pipelines/fema/) AND gave real retry headroom.
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v6

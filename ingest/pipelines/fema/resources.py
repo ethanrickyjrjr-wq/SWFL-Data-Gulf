@@ -132,7 +132,7 @@ def _promote_nfip_to_tier2(rows: list[dict]) -> None:
     # weeks. Guard the pinned zip column pre-replace so a broken mapping can't wipe good data.
     nonnull_zip = sum(1 for r in normalized if (r.get("reported_zipcode") or "").strip())
     zip_rate = nonnull_zip / len(normalized) if normalized else 0.0
-    print(f"  reported_zipcode non-null rate: {zip_rate:.1%} ({nonnull_zip:,}/{len(normalized):,})")
+    print(f"  reported_zipcode non-null rate: {zip_rate:.1%} ({nonnull_zip:,}/{len(normalized):,})", flush=True)
     if zip_rate < 0.5:
         raise VolumeGuardError(
             f"[volume-guard] fema_nfip_claims: reported_zipcode non-null {zip_rate:.1%} < 50% floor "
@@ -148,8 +148,8 @@ def _promote_nfip_to_tier2(rows: list[dict]) -> None:
     zone_rate = nonnull_zone / len(normalized) if normalized else 0.0
     nonnull_zone_cur = sum(1 for r in normalized if (r.get("flood_zone_current") or "").strip())
     zone_cur_rate = nonnull_zone_cur / len(normalized) if normalized else 0.0
-    print(f"  flood_zone non-null rate: {zone_rate:.1%} ({nonnull_zone:,}/{len(normalized):,})")
-    print(f"  flood_zone_current non-null rate: {zone_cur_rate:.1%} ({nonnull_zone_cur:,}/{len(normalized):,})")
+    print(f"  flood_zone non-null rate: {zone_rate:.1%} ({nonnull_zone:,}/{len(normalized):,})", flush=True)
+    print(f"  flood_zone_current non-null rate: {zone_cur_rate:.1%} ({nonnull_zone_cur:,}/{len(normalized):,})", flush=True)
     if zone_rate < 0.5:
         raise VolumeGuardError(
             f"[volume-guard] fema_nfip_claims: flood_zone non-null {zone_rate:.1%} < 50% floor "
@@ -213,7 +213,7 @@ def _fetch_all_nfip_claims() -> list[dict]:
                 if attempt == 5 or resp.status_code < 500:
                     raise
                 wait = min(30 * 2 ** attempt, 300)
-                print(f"  FEMA API {resp.status_code} at skip={skip}, retry {attempt+1}/5 in {wait}s...")
+                print(f"  FEMA API {resp.status_code} at skip={skip}, retry {attempt+1}/5 in {wait}s...", flush=True)
                 time.sleep(wait)
             except (
                 requests.ConnectionError,
@@ -226,7 +226,7 @@ def _fetch_all_nfip_claims() -> list[dict]:
                 if attempt == 5:
                     raise
                 wait = min(30 * 2 ** attempt, 300)
-                print(f"  FEMA connection/stream error at skip={skip}, retry {attempt+1}/5 in {wait}s...")
+                print(f"  FEMA connection/stream error at skip={skip}, retry {attempt+1}/5 in {wait}s...", flush=True)
                 time.sleep(wait)
         data = resp.json()
         batch = data.get("value") or data.get("FimaNfipClaims", [])
@@ -234,7 +234,7 @@ def _fetch_all_nfip_claims() -> list[dict]:
             break
         rows.extend(batch)
         if skip % 10000 == 0:
-            print(f"  FEMA NFIP: fetched {len(rows):,} rows (skip={skip})...")
+            print(f"  FEMA NFIP: fetched {len(rows):,} rows (skip={skip})...", flush=True)
         if len(batch) < page_size:
             break
         skip += len(batch)
@@ -270,11 +270,11 @@ def ingest_nfip_claims(pipeline) -> None:
             pack_id="env-swfl",
             source_url=NFIP_CLAIMS_URL,
         )
-        print(f"  Tier 1 pointer written: {len(rows):,} rows → {object_path}")
+        print(f"  Tier 1 pointer written: {len(rows):,} rows → {object_path}", flush=True)
     except Exception as exc:
-        print(f"  WARNING: Tier 1 write failed (non-fatal) — {exc}")
+        print(f"  WARNING: Tier 1 write failed (non-fatal) — {exc}", flush=True)
 
     # Tier 2 (hot consumer cache for env-swfl brain): normalized 15-column table in data_lake.fema_nfip_claims.
-    print(f"  Promoting {len(rows):,} rows to Tier 2 (data_lake.fema_nfip_claims)...")
+    print(f"  Promoting {len(rows):,} rows to Tier 2 (data_lake.fema_nfip_claims)...", flush=True)
     _promote_nfip_to_tier2(rows)
-    print(f"  Tier 2 load complete.")
+    print(f"  Tier 2 load complete.", flush=True)

@@ -22,6 +22,8 @@ from typing import Any
 
 import fitz  # PyMuPDF
 
+from ingest.lib.api_usage import RunBudget
+
 try:
     import anthropic as _anthropic
 
@@ -318,7 +320,7 @@ Return a JSON array of these objects, nothing else.
 MIN_TEXT_CHARS = 200  # below this triggers vision fallback
 
 
-def _vision_extract(page: fitz.Page, quarter: str, source_name: str) -> list[dict[str, Any]]:
+def _vision_extract(page: fitz.Page, quarter: str, source_name: str, budget: RunBudget) -> list[dict[str, Any]]:
     if not _ANTHROPIC_AVAILABLE:
         return []
     mat = fitz.Matrix(2, 2)
@@ -341,7 +343,8 @@ def _vision_extract(page: fitz.Page, quarter: str, source_name: str) -> list[dic
     )
     from ingest.lib.api_usage import log_api_usage
 
-    log_api_usage(model=msg.model, call_type="ingest_marketbeat", usage=msg.usage)
+    cost = log_api_usage(model=msg.model, call_type="ingest_marketbeat", usage=msg.usage)
+    budget.charge(cost)  # raises RunBudgetExceeded past the cap — propagates to kill the run
     import json
 
     raw = msg.content[0].text.strip()
@@ -378,7 +381,7 @@ def _vision_extract(page: fitz.Page, quarter: str, source_name: str) -> list[dic
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def extract_pdf(pdf_path: Path) -> list[dict[str, Any]]:
+def extract_pdf(pdf_path: Path, budget: RunBudget) -> list[dict[str, Any]]:
     """
     Extract submarket rows from a MarketBeat or Colliers PDF.
     Returns a list of row dicts ready for loader.py upsert.
@@ -407,7 +410,7 @@ def extract_pdf(pdf_path: Path) -> list[dict[str, Any]]:
         for page in doc:
             text = page.get_text()
             if len(text) < MIN_TEXT_CHARS:
-                rows = _vision_extract(page, quarter, source)
+                rows = _vision_extract(page, quarter, source, budget)
                 if rows:
                     break
 

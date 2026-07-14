@@ -1,3 +1,48 @@
+## 2026-07-14 (Sonnet 5 · main) — DOCTOR GATE WAS RIGHT TO BE LOUD: 17 REDS WORKED DOWN TO ~4.
+
+Operator flagged the daily freshness probe (run 29345067777) as broken. Root cause: `05483c41`
+(07/12, operator-approved) flipped `freshness-probe-daily.yml`'s `doctor` step to `--fail-on red`
+without first confirming the baseline was clean. My first local `doctor --dry-run` undercounted
+(5 red) because the local `gh` CLI crashed on first invocation, masking every run-status-driven red
+as generic `GH_UNAVAILABLE` yellow — operator caught this ("more than 5 red, a ton of yellow")
+before I acted on the wrong number. Re-ran clean: **17 red** across 8 root-cause classes. Operator's
+call: don't mute the gate, fix the reds. Left `--fail-on red` as-is and worked the list.
+
+Fixed for real: re-enabled 3 zombie-disabled crons (`fgcu-reri-monthly`, `rsw-airport-monthly`
+— both had a clean last run before being disabled, this was ordinary drift) directly; the 4th
+(`marketbeat-pdf-ingest`) calls `ANTHROPIC_API_KEY` on its cron with no `RunBudget` cap, so
+`ingest/pipelines/marketbeat_pdf/extractor.py` + `pipeline.py` now thread a
+`RunBudget("marketbeat_pdf", default_usd=1.0)` into the Haiku vision-fallback call, mirroring
+`city_pulse`'s pattern, verified via `py_compile` + live `--dry-run` (18 PDFs, 251 rows, 0 errors)
+before re-enabling. Dispatched all 4 never-run workflows (`bls-oews-annual`, `census-acs-annual`,
+`ingest-mhs-permits-swfl`, `ingest-lee-associates-swfl`) dry-run then real — all 4 succeeded, all 4
+now green (they'd simply never been triggered once despite live crons). `fema-nfip-quarterly`'s
+TIMEOUT_KILL turned out to be a real logging bug, not just a slow run: none of its `print()` calls
+used `flush=True`, so on GHA's non-TTY piped stdout the buffer never flushed before the 30-min kill
+— the log showed 29 minutes of total silence that was actually lost progress. Added `flush=True`
+throughout `ingest/pipelines/fema/{pipeline,resources}.py` and bumped `timeout-minutes` 30→45 to
+give the 5xx-retry backoff math real headroom.
+
+**Mistake, caught and corrected same session:** I re-enabled `dbpr-sirs-monthly` as part of the
+"zombie cron" batch without reading its code first (violates RULE 0.5). Its own
+`ingest/pipelines/dbpr_sirs/qix.py` docstring documents the cron is INTENTIONALLY disabled —
+GitHub's datacenter IPs get silently WAF-blocked by the DBPR site, so it's meant to run locally
+(home IP) until a residential proxy is purchased (`CRAWL4AI_PROXY` wiring already exists, just no
+proxy provisioned). Re-disabled it and opened `dbpr_sirs_intentionally_disabled_waf_block` so it
+doesn't get re-flagged as a zombie next time. Spot-checked `listing_lifecycle`'s content-contract
+failures (18 rows): 9 are single_family listings priced at exactly $5,000 across 7 different ZIPs
+— a repeated round number, not market variance, almost certainly a vendor placeholder or a
+rent-value leak into `list_price`. Logged the evidence on the existing check; needs a raw SteadyAPI
+payload pull to diagnose for real, not a contract-floor guess.
+
+Remaining red (~4): `brevitas_listings` + `crexi_listings` (real 403/failures, need actual scraper
+investigation — not a today-fix), `noaa_ghcn_rainfall` (cron healthy, floor just ahead of the data,
+should self-resolve), `listing_lifecycle` (see above). `parcel_subdivision` / `neighborhood_stats`
+cleared or are clearing on their own via another session's live WIP — untouched by me. Opened
+`pipelines_never_ran_cluster` (closed by the dispatches above — leaving open one cycle for
+confirmation), `fema_nfip_timeout_kill`, `noaa_ghcn_rainfall_low_volume_baseline`. Closed
+`zombie_cron_reenable_guard`.
+
 ## 2026-07-14 (Sonnet 5 · main) — ZIP FOOTER: OPERATOR WANTED ALL THREE CITIES, ALWAYS.
 
 Quick follow-up to the entry below: the ZIP-coverage footer conditionally showed only the active

@@ -25,6 +25,8 @@ import re
 import sys
 from pathlib import Path
 
+from ingest.lib.api_usage import RunBudget, RunBudgetExceeded
+
 from .extractor import extract_pdf, quarter_from_filename, source_from_filename
 from .loader import already_loaded, upsert_rows
 
@@ -42,7 +44,7 @@ def _find_pdfs(base_dir: Path) -> list[Path]:
     )
 
 
-def process_pdf(pdf_path: Path, dry_run: bool = False, force: bool = False) -> int:
+def process_pdf(pdf_path: Path, budget: RunBudget, dry_run: bool = False, force: bool = False) -> int:
     """
     Extract + upsert one PDF. Returns number of rows written (0 on skip).
     """
@@ -59,7 +61,7 @@ def process_pdf(pdf_path: Path, dry_run: bool = False, force: bool = False) -> i
 
     print(f"[extract] {pdf_path.name} -> {source} {quarter}", flush=True)
     try:
-        rows = extract_pdf(pdf_path)
+        rows = extract_pdf(pdf_path, budget)
     except ValueError as e:
         print(f"[error] {pdf_path.name}: {e}", file=sys.stderr, flush=True)
         return 0
@@ -105,12 +107,20 @@ def run(args: argparse.Namespace) -> None:
         print("No MarketBeat/Colliers PDFs found to process.", flush=True)
         sys.exit(0)
 
+    # Hard run budget (operator guard 07/05/2026, same pattern as city_pulse): the only
+    # paid call left is the Haiku vision fallback (~2k tokens/page, fires only on scanned
+    # pages), so quarterly runs structurally ceiling well under $1. Crossing it means the
+    # run is misbehaving — abort loudly rather than silently drain the account.
+    budget = RunBudget("marketbeat_pdf", default_usd=1.0, env_var="MARKETBEAT_PDF_MAX_USD")
+
     total = 0
     errors = 0
     for pdf in pdfs:
         try:
-            n = process_pdf(pdf, dry_run=args.dry_run, force=args.force)
+            n = process_pdf(pdf, budget, dry_run=args.dry_run, force=args.force)
             total += n
+        except RunBudgetExceeded:
+            raise  # blown budget kills the whole run — never continue to the next PDF
         except Exception as e:
             print(f"[error] {pdf.name}: {e}", file=sys.stderr, flush=True)
             errors += 1
