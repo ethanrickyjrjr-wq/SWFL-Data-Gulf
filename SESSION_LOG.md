@@ -31,7 +31,8 @@ step 1 of registering with either vendor anyway, not extra work.
 Full findings + reproduce commands + next-steps ordering:
 `docs/handoff/2026-07-14-mls-reso-live-verify-handoff.md`. Next: operator registers a Bridge
 account (self-serve, free, business identity — not something to automate) and confirms the board
-mapping with Lee's MLS + NABOR directly.
+mapping with Lee's MLS + NABOR directly. Opened check `mls_reso_vendor_registration` for the
+4 remaining blockers (Bridge signup, board-vendor confirm, real feed application, Trestle OAuth).
 
 ## 2026-07-14 (Sonnet 5 · main) — Handoff: wiring today's community/parcel data into the builder + AI commentary
 
