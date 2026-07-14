@@ -3,7 +3,7 @@
 // THE CAMPAIGN'S SHAPE — pinned.
 //
 // Phase 3 gave the chrome a layout system. Phase 4 is where it finally spends it: the agent
-// card and the CTA share ONE row (`{8,4}`) instead of stacking as two full-width cards for
+// card and the CTA share ONE row (`{7,5}`) instead of stacking as two full-width cards for
 // one idea. This file exists because of the exact trap the Phase 3 handoff named:
 //
 //   A FLAT `w:12` STACK IS PERFECTLY CONFORMANT. Every row sums to 12. It passes the seam,
@@ -15,11 +15,16 @@
 // things, and the second is the unusual one:
 //
 //   1. WHAT WE BUILT — the agent/CTA row is real, blessed, and in the right source order.
-//   2. WHAT WE REJECTED — the photo and the hero are still FULL-BLEED. `{7,5}` there was
-//      considered and turned down on the evidence (a ~350px photo, and an address wrapping
-//      four lines in a ~250px column). Pinning a rejection means the next session that wants
-//      it has to delete a test with a reason in it, in the open — instead of drifting into a
-//      redesign nobody agreed to. A design decision that isn't enforced is a preference.
+//   2. WHAT WE REJECTED — the photo and the hero are still FULL-BLEED. Splitting THEM into a
+//      `{7,5}` row was considered and turned down on the evidence (a ~350px photo, when the
+//      photo IS the product; and the centred address wrapping over four lines in a ~250px
+//      column until the price stops reading as a headline). Pinning a rejection means the next
+//      session that wants it has to delete a test with a reason in it, in the open — instead
+//      of drifting into a redesign nobody agreed to. An unenforced design decision is a
+//      preference.
+//
+// (Both the shipped row and the rejected one are `{7,5}` — that is a coincidence of the
+// blessed registry, not a link. The shipped one is agent+CTA; photo+hero stays full-bleed.)
 
 import { describe, expect, it } from "bun:test";
 
