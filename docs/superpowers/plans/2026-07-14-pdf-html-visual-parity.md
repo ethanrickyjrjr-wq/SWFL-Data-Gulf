@@ -29,6 +29,7 @@
 - Create: `lib/pdf/__tests__/pixel-utils.ts` (+ `.test.ts`) — `findContentBoundingBox`, `findMarkerBoundingBox`, `boundingBoxRatio`, `resizeNearestNeighbor`. Pure, no I/O.
 - Create: `lib/pdf/__tests__/visual-parity-fixtures.ts` — synthetic two-marker-color test image (as a `data:` URI) + the header/agent-hero/page-break `EmailDoc` fixtures.
 - Create: `lib/pdf/__tests__/rasterize.ts` (+ `.test.ts`) — `rasterizeHtml`, `rasterizePdfPage`, plus the react-pdf-Image-accepts-a-data-URI smoke test.
+- Create: `lib/pdf/__tests__/rasterize-html-worker.mjs` — a standalone Node script `rasterizeHtml` spawns as a subprocess. **Discovered during implementation, not anticipated in the design pass:** `chromium.launch()` hangs indefinitely when called directly from the Bun runtime on this (Windows) machine — the browser process actually launches (a real pid), but Bun never completes the `--remote-debugging-pipe` handshake. Verified with a minimal repro (works under plain Node, hangs under `bun run` too — not a `bun:test`-specific issue). This is a known, unresolved upstream limitation (oven-sh/bun issues #27977, #23826, #15679, #10120), not a bug in this code. PDF rasterization (`pdf-to-img` + `canvas`) has no such problem and stays in-process.
 - Create: `lib/pdf/__tests__/pdf-html-visual-parity.test.ts` — the actual acceptance gate: region-strict (Layer 1) + full-page loose (Layer 2) for both fixtures, plus the page-break-bleed check.
 
 ---
