@@ -121,6 +121,18 @@ plumbing, both real bugs, both latent in EVERY bklit time-series chart:
 
 Both worth upstreaming.
 
+**Tooltip dot ignores `discreteInteraction` (2026-07-14)** — one-line additive patch to
+`tooltip/chart-tooltip.tsx`. On a dense/discrete series (`dateLabels.length > 60` —
+`discreteInteraction`), the crosshair line and the floating tooltip box already both go
+INSTANT (`animate={!discreteInteraction}` / `boxMotion.animate`), but `<TooltipDot>` was never
+passed the same flag — it always springs (`stiffness: 300, damping: 30`, ~250ms settle) toward
+the hovered point regardless of dataset size. On a noisy monthly series (desk hero's 157-month
+sold-price line) a normal hover distance jumps the target value by a lot, so the spring visibly
+lags: caught live via DOM inspection mid-hover, X had settled to within 2px of the true point
+while Y was still 44px short of it — the dot visibly floating off the line the crosshair and box
+had already snapped to. Fix: `<TooltipDot animate={!discreteInteraction} .../>`, matching the
+other two. Worth upstreaming.
+
 **FitGlow — the backlit fit, added to the underlay slot (2026-07-14)** — new file
 `fit-glow.tsx` (ours, not upstream), plus a ONE-LINE additive patch to `chart-child-passthrough.ts`
 adding `"FitGlow"` to `UNDERLAY_COMPONENT_NAMES`. The shell routes children to render slots BY

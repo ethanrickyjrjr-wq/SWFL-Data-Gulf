@@ -89,6 +89,18 @@ const pct1 = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
 const months1 = (v: number) => `${v.toFixed(1)} mo`;
 
 /**
+ * Redfin's "city" grain (redfin_city_swfl) tracks INCORPORATED CITY LIMITS, not the broader
+ * mailing-address area a ZIP-code site would call "Naples" or "Fort Myers" — Naples' limits are
+ * a small, wealthy coastal core, which is why its city-level median reads far above the wider
+ * Naples market. Source: city-data.com (incorporated-city ZIP lists), verified live 07/14/2026.
+ */
+const CITY_ZIP_COVERAGE: Record<string, string> = {
+  cape_coral: "33903, 33904, 33909, 33914, 33990, 33991",
+  fort_myers: "33901, 33907, 33912, 33916, 33917, 33966",
+  naples: "34101, 34102, 34103, 34104, 34105, 34112",
+};
+
+/**
  * Hero — big count-up price over a gradient area of the same series. Tabs pick
  * a city; the last tab rebases all three to % change from the comparison
  * window's first reading. That window is `hero.rebase` (a full trailing year
@@ -418,6 +430,13 @@ export function DeskHero({ hero }: { hero: HeroData }) {
       )}
       <p className="mt-3 text-xs text-gray-500">
         {tab === "rebased" ? (hero.rebase?.windowNote ?? hero.windowNote) : hero.windowNote}
+      </p>
+      <p className="mt-1 text-[11px] text-gray-600">
+        {active
+          ? `${active.label} (city limits, not the wider mailing area): ZIPs ${CITY_ZIP_COVERAGE[active.key] ?? "n/a"} — city-data.com`
+          : `City limits, not the wider mailing area — ${rebaseCities
+              .map((c) => `${c.label} ${CITY_ZIP_COVERAGE[c.key] ?? "n/a"}`)
+              .join(" · ")} — city-data.com`}
       </p>
     </div>
   );

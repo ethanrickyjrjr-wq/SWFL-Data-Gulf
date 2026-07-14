@@ -1,3 +1,26 @@
+## 2026-07-14 (Sonnet 5 · main) — TOOLTIP DOT DIDN'T RESPECT discreteInteraction; ZIP FOOTER ADDED.
+
+Operator flagged the desk hero's hover dot floating off the price line. Reproduced live via DOM
+inspection mid-hover: X had settled to 2px of the true point, Y was still 44px short of it — a
+`motion`-spring animation lag. Root cause in the vendored chart lib
+(`components/charts/vendor/bklit/tooltip/chart-tooltip.tsx`): `discreteInteraction`
+(`dateLabels.length > 60`, true for our 157-month series) already forces the crosshair line and
+the floating tooltip box to skip animation and snap instantly — `<TooltipDot>` was never wired to
+the same flag, so it kept springing (250ms settle) toward a fast-moving hover target on noisy
+monthly data, visibly detaching from the line the other two elements had already snapped to. Fix:
+`<TooltipDot animate={!discreteInteraction} .../>`, matching the other two — one-line patch,
+documented in `NOTICE.md` alongside today's two other same-file vendor fixes. Verified: rebuilt,
+served on a throwaway port, reproduced the pre-fix 44px gap via DOM query, then confirmed post-fix
+the dot lands exactly on the real curve at the crosshair (screenshotted both).
+
+Also answered operator's "why is Naples $1.2M" question: Redfin's `redfin_city_swfl` "city" grain
+tracks INCORPORATED city limits, not the wider mailing-address area — Naples' city limits are a
+small (~19k pop), extremely wealthy coastal core (ZIPs 34101-34105, 34112), while Cape
+Coral/Fort Myers' city limits are large ordinary-market areas. Cross-checked against our own live
+`active_listings_residential_zip_stats` (34102 alone: $2.499M median list, 120 listings — enough
+volume to pull the whole city bucket up). Added a small ZIP-coverage footer line to `DeskHero.tsx`
+(city-data.com sourced) so this is visible on the page instead of only in chat.
+
 ## 2026-07-14 (Sonnet 5 · main) — DESK HERO REBASE TAB SHIPPED A VERTICAL SPIKE. FIXED.
 
 Yesterday's `buildHeroFromSold` rewrite (0ce12bfa → f719a128, "hero rides the deep price series")
