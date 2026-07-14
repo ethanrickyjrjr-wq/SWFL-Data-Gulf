@@ -92,6 +92,7 @@ import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { createBlock } from "@/lib/email/doc/default-docs";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
+import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
 import { buildSoldCompsSpec } from "@/lib/email/sold-comp-blocks";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
@@ -288,9 +289,9 @@ export function compsFootnote(facts: ListingFacts, comps: RenderComp[]): string 
   return undefined;
 }
 
-/** A block, positioned. The chrome re-places it (x/y/w are its call) but reads `h`. */
-function sized<T extends EmailBlock>(block: T, h: number): T {
-  return { ...block, layout: { x: 0, y: 0, w: 12, h } };
+/** A block and the row height it wants. WHERE it lands is the seam's call, never ours. */
+function sized(block: Omit<EmailBlock, "layout">, h: number): ChromeBlock {
+  return { block, height: h };
 }
 
 /**
@@ -301,8 +302,8 @@ function sized<T extends EmailBlock>(block: T, h: number): T {
  * box is worse than no chart). The table is omitted entirely when there is nothing real to
  * list: a `list` needs >= 1 row, and an empty shell is not a slot, it is a lie.
  */
-function compsMiddle(comps: RenderComp[]): EmailBlock[] {
-  const blocks: EmailBlock[] = [
+function compsMiddle(comps: RenderComp[]): ChromeBlock[] {
+  const blocks: ChromeBlock[] = [
     sized(
       {
         id: createBlock("image").id,
@@ -335,7 +336,7 @@ function compsMiddle(comps: RenderComp[]): EmailBlock[] {
 /** MY TAIL — the collapsed sources accordion. Rules of engagement #1: sources ride in the
  *  collapsed list, never inline in the prose. Domain-level, never a vendor name, never an
  *  MLS id. Empty comp set → no citation to make, so no block. */
-function compsTail(comps: RenderComp[]): EmailBlock[] {
+function compsTail(comps: RenderComp[]): ChromeBlock[] {
   const sources = compSources({ comps, asOf: "", needs: [] });
   if (!sources.length) return [];
   return [

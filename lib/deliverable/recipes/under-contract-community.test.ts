@@ -1,6 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { communitySourceLine, narratorSources, inventedAttributes } from "./under-contract";
-import { emptyDetailFacts, parseListingDetail } from "@/lib/listings/listing-detail";
+import { narratorSources, inventedAttributes } from "./under-contract";
+// `communitySourceLine` moved to listing-detail.ts — ONE authority, now that the shared listing
+// narrator needs it too (it was born here when under-contract was its only caller).
+import {
+  communitySourceLine,
+  emptyDetailFacts,
+  parseListingDetail,
+} from "@/lib/listings/listing-detail";
 import type { SettledClaim } from "@/lib/deliverable/claims";
 
 const URL_ = "https://www.johnrwood.com/listing/225082845/8665-bay-colony-drive-naples-fl-34108/";

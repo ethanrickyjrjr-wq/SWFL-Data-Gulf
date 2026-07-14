@@ -82,11 +82,12 @@ import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import zipCounty from "@/fixtures/swfl-zip-county.json";
 import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
+import { deIdentifyCommunity } from "@/lib/listings/listing-detail";
 import type { RecipeBuildContext } from "./index";
-import type { LifecycleChrome } from "@/lib/email/lifecycle-chrome";
+import type { ChromeBlock, LifecycleChrome } from "@/lib/email/lifecycle-chrome";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
-import type { EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
+import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 
 /** The citation + CTA fallback root. HARDCODED, exactly as lib/listings/resolve-subject.ts
  *  hardcodes its `sourceUrl`: a citation always points at SWFL Data Gulf. Reading
@@ -493,30 +494,34 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
   // ── MY MIDDLE — the scarcity content ──────────────────────────────────────
   // A hairline STRIP (never a stacked stat grid — that is the wall the campaign chrome
   // exists to kill), then the funnel that draws it.
-  const middle: EmailBlock[] = [
+  const middle: ChromeBlock[] = [
     {
-      id: createBlock("stats").id,
-      type: "stats",
-      props: {
-        stats: scarcity ? scarcityStats(scarcity) : scarcityOpenSlots(),
-        variant: "strip",
+      block: {
+        id: createBlock("stats").id,
+        type: "stats",
+        props: {
+          stats: scarcity ? scarcityStats(scarcity) : scarcityOpenSlots(),
+          variant: "strip",
+        },
       },
-      layout: { x: 0, y: 0, w: 12, h: 3 },
+      height: 3,
     },
   ];
   if (chart) {
     middle.push({
-      id: createBlock("image").id,
-      type: "image",
-      // NO CAPTION. The rendered chart already draws its own title ("Homes like this
-      // one in Lee County") AND its own source line ("SWFL Data Gulf · as of ...").
-      // Passing chart.caption printed both a SECOND time underneath the image —
-      // title and provenance, stated twice, in the one email that is supposed to be
-      // about scarcity. `alt` still carries the full sentence for screen readers and
-      // for the images-off fallback, which is where that text belongs. Every other
-      // recipe already omits the caption here; this was the one that didn't.
-      props: { url: chart.url, kind: "chart", alt: chart.alt },
-      layout: { x: 0, y: 0, w: 12, h: 5 },
+      block: {
+        id: createBlock("image").id,
+        type: "image",
+        // NO CAPTION. The rendered chart already draws its own title ("Homes like this
+        // one in Lee County") AND its own source line ("SWFL Data Gulf · as of ...").
+        // Passing chart.caption printed both a SECOND time underneath the image —
+        // title and provenance, stated twice, in the one email that is supposed to be
+        // about scarcity. `alt` still carries the full sentence for screen readers and
+        // for the images-off fallback, which is where that text belongs. Every other
+        // recipe already omits the caption here; this was the one that didn't.
+        props: { url: chart.url, kind: "chart", alt: chart.alt },
+      },
+      height: 5,
     });
   }
 
@@ -525,24 +530,26 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
   // ride in the collapsed list, not inline). This is where the band is DISCLOSED: the
   // counts are real, and the stated criterion is what makes them checkable rather than a
   // number we asserted.
-  const tail: EmailBlock[] = scarcity
+  const tail: ChromeBlock[] = scarcity
     ? [
         {
-          id: createBlock("sources").id,
-          type: "sources",
-          props: {
-            sources: [
-              {
-                label: `Active for-sale homes, ${scarcity.county} County — as of ${mdY(scarcity.asOfIso)}`,
-                url: SITE,
-              },
-            ],
-            note: `"Like this one" = list price ${usdShort(scarcity.bandLo)}–${usdShort(scarcity.bandHi)}, ${scarcity.bedFloor}+ beds, ${count(scarcity.sqftFloor)}+ sq ft. Vacant land excluded.`.slice(
-              0,
-              200,
-            ),
+          block: {
+            id: createBlock("sources").id,
+            type: "sources",
+            props: {
+              sources: [
+                {
+                  label: `Active for-sale homes, ${scarcity.county} County — as of ${mdY(scarcity.asOfIso)}`,
+                  url: SITE,
+                },
+              ],
+              note: `"Like this one" = list price ${usdShort(scarcity.bandLo)}–${usdShort(scarcity.bandHi)}, ${scarcity.bedFloor}+ beds, ${count(scarcity.sqftFloor)}+ sq ft. Vacant land excluded.`.slice(
+                0,
+                200,
+              ),
+            },
           },
-          layout: { x: 0, y: 0, w: 12, h: 3 },
+          height: 3,
         },
       ]
     : [];
@@ -593,10 +600,20 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
     state: undefined,
     zip: undefined,
     remarks: facts.remarks ? redactStreetLine(facts.remarks, street) : undefined,
+    // THE SPREAD IS THE LEAK. `...facts` now carries `community`, and `community.subdivision`
+    // is "Bay Colony" — a name that identifies the very listing this email exists to withhold.
+    // Every other identifying field on this object is explicitly stripped above; the community
+    // NAME has to be stripped too, or a spread operator quietly undoes the whole recipe.
+    // The amenities themselves are safe and are the best thing a teaser can say: "a gated golf
+    // community with a pool" builds anticipation without pointing at which one.
+    community: deIdentifyCommunity(facts.community),
   };
 
   const raw = teaserFacts.remarks
     ? await authorListingNarrative(teaserFacts, {
+        // Belt AND braces: the name is already stripped from the facts, and the source line
+        // itself is rendered with its own "do not name the community" instruction.
+        deIdentifyCommunity: true,
         framing:
           "A COMING-SOON TEASER. This home is not yet on the market and its LOCATION IS " +
           "DELIBERATELY WITHHELD — that is the point of the email. You must NOT name or " +

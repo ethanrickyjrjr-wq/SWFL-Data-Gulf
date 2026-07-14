@@ -140,17 +140,21 @@ import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { fetchNearbyValues } from "@/lib/listings/steadyapi";
 import { canonStreet } from "@/lib/listings/resolve-subject";
+// ONE AUTHORITY for the community fact + its "these are the COMMUNITY's, not the HOUSE's"
+// warning — this recipe held the only copy until the shared listing narrator needed it too.
+import { communitySourceLine } from "@/lib/listings/listing-detail";
 import type { ListingDetailFacts } from "@/lib/listings/listing-detail";
 import { loadParsedBrain } from "@/lib/fetch-brain";
 import { asOfFromToken } from "@/lib/project/as-of";
 import { createBlock } from "@/lib/email/doc/default-docs";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
+import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, listingSpecs, spec, specFootnote } from "@/lib/email/listing-flyer";
 import { auditClaims, numeralsIn, settledCount, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import { clearNarrativeSlots, fillNarrative } from "./shared";
 import type { SettledClaim } from "@/lib/deliverable/claims";
 import type { RecipeBuildContext } from "./index";
-import type { EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
+import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
 // ── The vendor lane: the LIST DATE (the fact `/search` does not carry) ────────
@@ -573,7 +577,7 @@ export function timingLine(opts: {
   daysListed: number | null;
   timing: MarketTiming | null;
   zip?: string;
-}): EmailBlock {
+}): ChromeBlock {
   const { listedOn, daysListed, timing } = opts;
   const zip = timing?.zip ?? opts.zip;
   const cells: StatItem[] = [
@@ -585,11 +589,12 @@ export function timingLine(opts: {
     ),
   ];
   return {
-    id: createBlock("stats").id,
-    type: "stats",
-    props: { stats: cells, variant: "strip" },
-    // The chrome reads `layout.h` to stack it; x/y are re-assigned there.
-    layout: { x: 0, y: 0, w: 12, h: 3 },
+    block: {
+      id: createBlock("stats").id,
+      type: "stats",
+      props: { stats: cells, variant: "strip" },
+    },
+    height: 3,
   };
 }
 
@@ -890,40 +895,6 @@ export interface NarratorInput {
   /** LANE 1 — the listing's own detail page: does the COMMUNITY have golf, a pool, a gate.
    *  Absent when we could not read the page — and absent must mean SILENT, not "no golf". */
   community?: ListingDetailFacts;
-}
-
-/**
- * The community line — LANE 1, the listing's own detail page.
- *
- * WHY THIS UNLOCKS THE WORD-BAN WITHOUT TOUCHING IT. `inventedAttributes` flags an
- * attribute word only when the paragraph says it and the SOURCES do not. "golf", "pool",
- * "gated" were never banned outright — they were banned because we held no fact stating
- * them, so any use was invention. Put the fact in the sources and the word legitimises
- * itself; leave the fact out (fetch failed) and the guard still hard-blocks it. The gate
- * is the FACT, not the vocabulary — so a page we could not read degrades to silence, which
- * is the whole point.
- *
- * THE TRAP THIS LINE IS WORDED TO AVOID: these are the COMMUNITY's amenities, not the
- * house's. "Pool" in this list means the community has a pool — it does NOT mean this home
- * has a private one. `inventedAttributes` matches words and cannot tell those two apart, so
- * the distinction has to be carried HERE, in the source text, and restated in the prompt.
- */
-export function communitySourceLine(f: ListingDetailFacts | undefined): string | null {
-  if (!f || !f.ok) return null;
-  const parts: string[] = [];
-  if (f.communityFeatures.length)
-    parts.push(`Community features: ${f.communityFeatures.join(", ")}`);
-  if (f.amenities.length) parts.push(`Community amenities: ${f.amenities.join(", ")}`);
-  if (f.otherAmenities.length) parts.push(`Also noted: ${f.otherAmenities.join(", ")}`);
-  if (parts.length === 0) return null;
-
-  const where = f.subdivision ? ` (${f.subdivision})` : "";
-  return (
-    `THE COMMUNITY${where}, from the listing's own detail page. THESE DESCRIBE THE ` +
-    `COMMUNITY, NOT THIS HOUSE — a pool here is the COMMUNITY's pool, and golf here means ` +
-    `the COMMUNITY has golf. You may say the community has them. You may NOT say this home ` +
-    `has them.\n${parts.join("\n")}`
-  );
 }
 
 /** PURE: `NarratorInput` → the exact source lines the model is shown. Exported so a

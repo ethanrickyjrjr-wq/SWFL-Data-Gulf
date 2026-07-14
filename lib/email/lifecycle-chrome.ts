@@ -43,8 +43,20 @@
 // Enforced by lifecycle-chrome.test.ts — a recipe that drifts fails the suite.
 
 import { createBlock, DEFAULT_GLOBAL_STYLE } from "./doc/default-docs";
+import { finalizeDoc } from "./doc/finalize-doc";
+import type { PlanEntry } from "./doc/finalize-doc";
+import { GRID_COLS } from "./grid-schema";
 import { heroPhotoBlock } from "./inject-photo";
-import type { BlockLayout, EmailBlock, EmailDoc, FontFamily, StatItem } from "./doc/types";
+import type { EmailBlock, EmailDoc, FontFamily, StatItem } from "./doc/types";
+
+/** A block a recipe contributes to its own MIDDLE or TAIL, plus the row height it wants.
+ *  A recipe says WHAT and HOW TALL. It does not say WHERE — `finalizeDoc` owns x/y, and
+ *  this type is why a recipe can no longer smuggle a position in a fake `layout` literal. */
+export interface ChromeBlock {
+  block: Omit<EmailBlock, "layout">;
+  /** Row height, 1–6. Omitted → the chrome's default for that slot. */
+  height?: number;
+}
 
 /** Editorial fallback palette — applied ONLY when the incoming brand is still the house
  *  default (a blank brand). A REAL USER BRAND CARRIES THROUGH UNTOUCHED. */
@@ -82,7 +94,7 @@ export interface LifecycleChrome {
 
   /** THE RECIPE'S OWN CONTENT — a comps chart, a scarcity funnel, a sold-comps list.
    *  This is where the emails legitimately differ. Rides between the strip and the prose. */
-  middle?: EmailBlock[];
+  middle?: ChromeBlock[];
 
   /** The narrative slot's body. "" = an open slot (canvas placeholder, absent from email).
    *  The narrator writes here, and only when it has a real source. */
@@ -93,8 +105,10 @@ export interface LifecycleChrome {
   ctaLabel: string;
   ctaUrl?: string;
 
-  /** Blocks that ride AFTER the narrative and before the agent card (a sources list). */
-  tail?: EmailBlock[];
+  /** Blocks that ride after the narrative — a sources list. NOTE: `sources` is a CLOSE-zone
+   *  block, so the seam's zone fence lands it just above the footer (where the design system
+   *  says sources go, and where the AI author has always put them) rather than mid-email. */
+  tail?: ChromeBlock[];
 }
 
 /** Reuse the current doc's block of a type (identity/brand is STICKY), else a fresh one. */
@@ -102,8 +116,18 @@ function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock 
   return current.blocks.find((b) => b.type === type) ?? createBlock(type);
 }
 
-function at<T extends EmailBlock>(block: T, y: number, h: number, opts?: Partial<BlockLayout>): T {
-  return { ...block, layout: { x: 0, y, w: 12, h, ...opts } };
+/** A full-bleed row of the chrome. The chrome names WHAT and HOW TALL; `finalizeDoc` alone
+ *  decides WHERE. There is no `at()` any more — nothing here can write an x or a y. */
+function row(block: Omit<EmailBlock, "layout">, height: number, isStatic?: true): PlanEntry {
+  return {
+    id: block.id,
+    type: block.type,
+    props: block.props as Record<string, unknown>,
+    span: GRID_COLS,
+    newRow: true,
+    height,
+    ...(isStatic ? { isStatic: true } : {}),
+  };
 }
 
 /**
@@ -121,100 +145,110 @@ export function buildLifecycleEmail(current: EmailDoc, chrome: LifecycleChrome):
     ? { ...current.globalStyle, ...EDITORIAL_STYLE }
     : { ...current.globalStyle };
 
-  const blocks: EmailBlock[] = [];
-  let y = 0;
-  const push = (block: EmailBlock, h: number, opts?: Partial<BlockLayout>) => {
-    blocks.push(at(block, y, h, opts));
-    y += h;
-  };
+  const entries: PlanEntry[] = [];
 
   // 1. HEADER — the agent's own, sticky.
-  push(keepOrDefault(current, "header"), 2);
+  entries.push(row(keepOrDefault(current, "header"), 2));
 
   // 2. THE RIBBON — a full-width accent band. This is the campaign's spine: the ONE element
   //    that is identical in shape and different in word across all seven emails.
-  push(
-    { id: createBlock("hero").id, type: "hero", props: { kicker: chrome.ribbon, ribbon: true } },
-    1,
+  entries.push(
+    row(
+      { id: createBlock("hero").id, type: "hero", props: { kicker: chrome.ribbon, ribbon: true } },
+      1,
+    ),
   );
 
   // 3. THE PHOTO — the real one, else an open slot (a canvas dropzone, absent from the email).
-  push(
-    chrome.photo
-      ? heroPhotoBlock(chrome.photo)
-      : {
-          id: createBlock("image").id,
-          type: "image",
-          props: { url: "", kind: "photo", alt: chrome.heroLabel || "Featured property" },
-        },
-    6,
+  entries.push(
+    row(
+      chrome.photo
+        ? heroPhotoBlock(chrome.photo)
+        : {
+            id: createBlock("image").id,
+            type: "image",
+            props: { url: "", kind: "photo", alt: chrome.heroLabel || "Featured property" },
+          },
+      6,
+    ),
   );
 
   // 4. THE HERO — centred, ADDRESS over PRICE, the price in the accent colour.
-  push(
-    {
-      id: createBlock("hero").id,
-      type: "hero",
-      props: {
-        align: "center",
-        order: "label-first",
-        value: chrome.heroValue,
-        label: chrome.heroLabel,
-        ...(chrome.heroKicker ? { kicker: chrome.heroKicker } : {}),
+  entries.push(
+    row(
+      {
+        id: createBlock("hero").id,
+        type: "hero",
+        props: {
+          align: "center",
+          order: "label-first",
+          value: chrome.heroValue,
+          label: chrome.heroLabel,
+          ...(chrome.heroKicker ? { kicker: chrome.heroKicker } : {}),
+        },
       },
-    },
-    4,
+      4,
+    ),
   );
 
   // 5. THE SPEC STRIP — one hairline row. Emphasis says which number matters.
   if (chrome.specs.length > 0) {
-    push(
-      {
-        id: createBlock("stats").id,
-        type: "stats",
-        props: {
-          stats: chrome.specs,
-          variant: "strip",
-          ...(chrome.specFootnote ? { footnote: chrome.specFootnote } : {}),
+    entries.push(
+      row(
+        {
+          id: createBlock("stats").id,
+          type: "stats",
+          props: {
+            stats: chrome.specs,
+            variant: "strip",
+            ...(chrome.specFootnote ? { footnote: chrome.specFootnote } : {}),
+          },
         },
-      },
-      3,
+        3,
+      ),
     );
   }
 
   // 6. THE RECIPE'S OWN CONTENT — the only place the emails legitimately diverge.
-  for (const block of chrome.middle ?? []) push(block, block.layout?.h ?? 5);
+  for (const m of chrome.middle ?? []) entries.push(row(m.block, m.height ?? 5));
 
   // 7. THE NARRATIVE — "" is an OPEN SLOT: an instruction on the canvas, absent from the
   //    sent email. The narrator writes here only when it has a real source.
-  push(
-    {
-      id: createBlock("text").id,
-      type: "text",
-      props: { body: chrome.narrative ?? "", align: "left" },
-    },
-    4,
+  entries.push(
+    row(
+      {
+        id: createBlock("text").id,
+        type: "text",
+        props: { body: chrome.narrative ?? "", align: "left" },
+      },
+      4,
+    ),
   );
 
-  for (const block of chrome.tail ?? []) push(block, block.layout?.h ?? 3);
+  // The tail is a sources list — a CLOSE-zone block. The seam sorts it above the footer.
+  for (const t of chrome.tail ?? []) entries.push(row(t.block, t.height ?? 3));
 
   // 8. THE AGENT — sticky. Same signature on every email in the campaign.
-  push(keepOrDefault(current, "agent-card"), 4);
+  entries.push(row(keepOrDefault(current, "agent-card"), 4));
 
   // 9. THE CTA — the next action, never a restatement of what they are looking at.
-  push(
-    {
-      id: createBlock("button").id,
-      type: "button",
-      props: { label: chrome.ctaLabel, ...(chrome.ctaUrl ? { url: chrome.ctaUrl } : {}) },
-    },
-    2,
+  entries.push(
+    row(
+      {
+        id: createBlock("button").id,
+        type: "button",
+        props: { label: chrome.ctaLabel, ...(chrome.ctaUrl ? { url: chrome.ctaUrl } : {}) },
+      },
+      2,
+    ),
   );
 
   // 10. THE FOOTER — sticky, CAN-SPAM, locked so a drag can't move the unsubscribe.
-  push(keepOrDefault(current, "footer"), 3, { static: true });
+  entries.push(row(keepOrDefault(current, "footer"), 3, true));
 
-  return { globalStyle, blocks };
+  // THE SEAM. The chrome named the blocks and their heights; the layout root alone decides
+  // where they land. This function cannot write an x or a y, and that is the point.
+  return finalizeDoc({ globalStyle, entries });
 }
 
 /** The chrome's block sequence, for the coherence test. A lifecycle email that does not
@@ -227,8 +261,10 @@ export const LIFECYCLE_SPINE = [
   "stats:strip",
   // …the recipe's own middle blocks may appear here…
   "text",
-  // …and its tail…
   "agent-card",
   "button",
+  // …and its tail (a sources list) lands HERE — the seam's zone fence sorts CLOSE-zone
+  // blocks below the body, so sources sit just above the footer. Same place the AI author
+  // has always put them. One rule, both paths.
   "footer",
 ] as const;

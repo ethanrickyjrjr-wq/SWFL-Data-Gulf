@@ -594,10 +594,13 @@ describe("buildUnderContractGrid — it wears the CAMPAIGN CHROME, not a grid of
       timing: TIMING,
       zip: "33905",
     });
-    const stats = timingCells.type === "stats" ? timingCells.props.stats : [];
+    // `timingLine` now hands the chrome a PLAN entry — the block plus the row height it
+    // wants — because a recipe no longer gets to say WHERE its block lands. Unwrap it.
+    const block = timingCells.block;
+    const stats = block.type === "stats" ? block.props.stats : [];
     expect(stats.every((c) => c.emphasis === undefined)).toBe(true);
     // …and it is a STRIP. The campaign has exactly one stat device.
-    expect(timingCells.type === "stats" && timingCells.props.variant).toBe("strip");
+    expect(block.type === "stats" && block.props.variant).toBe("strip");
   });
 
   it("the SPEC STRIP is the shared listing spec line — the same six cells New Listing wears", () => {

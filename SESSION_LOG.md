@@ -1,3 +1,56 @@
+## 2026-07-14 (Opus 4.8 · main) — THE LAYOUT ROOT: ONE SEAM WRITES EVERY POSITION, AND A FLAT STACK NO LONGER PASSES
+
+**Phase 3 of the email design root.** `lib/email/doc/finalize-doc.ts` is now the ONLY code in the
+repo that writes an `x` or a `y`. The AI author and `buildLifecycleEmail` (and therefore all 7
+listing recipes) both end at `finalizeDoc(plan)`. `lifecycle-chrome`'s `at()`/`push()` are DELETED —
+it cannot express a position any more. The 7 recipes hand over `{block, height}` and hold zero
+`layout` literals.
+
+**The postmortem's count was wrong, and reading the code is what made this cheap.** It said "18
+paths hand-position; the 7 listing builders emit flat w:12." The 7 recipes had ALREADY been
+consolidated onto `buildLifecycleEmail` on 07/13 — ONE function, not seven. Real hand-positioners
+remaining: THREE (`sphere-weekly`, `review-reply`, `agent-brand-intro`). The grep turned "rebuild 18
+paths" into "change one function." Don't trust an inventory you didn't run.
+
+**The height policy was the live landmine.** `row-grouping.ts` groups blocks into a visual row by
+BAND OVERLAP (`y < rowBottom`). The author path used `y = row index, h = 1`; lifecycle accumulated
+`y` by a real 1–6 `h`. Both are internally sound — and feeding lifecycle's real heights through the
+author's y-by-row-index scheme would have SILENTLY MERGED THE HEADER AND THE RIBBON into a
+two-column row. Resolution: `height` is OPTIONAL on a plan entry, defaults to 1, and `y` advances by
+the row's TALLEST entry — reproducing both schemes exactly. There is now exactly one height policy.
+Do not add a second.
+
+**The guard tests PROVENANCE, not shape — because a flat w:12 stack is perfectly conformant.** Every
+row sums to 12. It passes any structural assertion you can write, and it is precisely the email the
+layout system was bought to eliminate. So `design-system-reachability.test.ts` (11/11) asserts (1) a
+Symbol marker stamped by `finalizeDoc` — dropped by `JSON.stringify`, but carried through the
+`{...doc}` spreads the recipes actually do — and (2) a `KNOWN_BYPASS` ledger of the 14 files still
+writing a `layout` literal, which MAY ONLY SHRINK. A new hand-positioner fails the test.
+
+**ONE visual change, intended, found by LOOKING and not by a test:** a `sources` block is CLOSE-zone,
+so the seam's zone fence sorts it above the FOOTER instead of above the agent card (`coming-soon`,
+`market-comps` — the only two recipes with a tail). That is where the design system always said
+sources go, and where the AI author already put them. Rendered all 7 to `public/dev-emails` and read
+them in a browser.
+
+**NOT DONE, and it is the whole point of the next session:** `finalizeDoc` positions what the plan
+SAYS. Every listing email is still 100% `span: 12` — a flat stack of full-width cards, now blessed.
+**The seam did not buy the layout. It bought the ABILITY to have one.** Phase 4 is
+`lib/email/lifecycle-chrome.ts` actually saying `span: 6`. Check: `email_lifecycle_uses_grid_columns`.
+Handoff: `docs/handoff/2026-07-14-layout-root-phase4-handoff.md`.
+
+**Spend disclosure:** `dev-render-listing-emails.mts` is built for zero model calls, but Bun's `.env`
+overrides the shell, so `ANTHROPIC_API_KEY` was picked up anyway and the narrator fired 7 live calls.
+Small, real, unintended. Recorded in the handoff so the next session doesn't repeat it.
+
+**Parallel-session note:** the 4 listing recipes in this commit also carry session dd3862f9's
+in-progress community-facts work (`communitySourceLine`, `deIdentifyCommunity`, the Bay Colony spread
+leak). The files could not be separated — `git checkout` on either half would have destroyed the
+other. Operator approved bundling (option B). Tree is green with both halves in.
+
+Verify: `bun test lib/email lib/charts lib/deliverable components/email-lab` → 2731 pass / 0 fail ·
+`bunx tsc --noEmit` → clean.
+
 ## 2026-07-14 (Sonnet 5 · main) — SOCIAL DESIGN ROOT HANDOFF: THE TWO UNBLOCKED ITEMS
 
 Worked the `docs/superpowers/handoffs/2026-07-14-social-design-root-handoff.md` "not done" table.

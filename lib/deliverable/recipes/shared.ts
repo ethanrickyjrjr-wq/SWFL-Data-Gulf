@@ -21,6 +21,7 @@ import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
 import { listingDescriptionFromPrompt } from "@/lib/email/listing-intent";
 import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
+import { communitySourceLine } from "@/lib/listings/listing-detail";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc } from "@/lib/email/doc/types";
 
@@ -153,7 +154,7 @@ export function clearNarrativeSlots(doc: EmailDoc): EmailDoc {
  */
 export async function authorListingNarrative(
   facts: ListingFacts,
-  opts: { framing?: string; context?: string } = {},
+  opts: { framing?: string; context?: string; deIdentifyCommunity?: boolean } = {},
 ): Promise<string | null> {
   // Nothing real to describe → leave the slot empty (never improvise a house).
   if (!facts.price && !facts.beds && !facts.sqft) return null;
@@ -173,6 +174,13 @@ export async function authorListingNarrative(
       facts.priceReduction &&
       `The price was REDUCED by ${facts.priceReduction} from its original ask.`,
     facts.remarks && `The listing's own description: ${facts.remarks.slice(0, 1200)}`,
+    // THE COMMUNITY — golf, pool, gated, clubhouse — off the listing's own detail page, which
+    // `fetchListingFacts` already had in hand. Every recipe on this shared narrator (new-listing,
+    // just-sold, open-house, price-reduced) gets it from this one line. Absent when we could not
+    // read the page — and absent must stay SILENT: the HARD RULES below gate the vocabulary on
+    // this fact being present, so "no community line" means the model may not mention golf at all,
+    // NOT that the community lacks it.
+    communitySourceLine(facts.community, { deIdentify: opts.deIdentifyCommunity }),
     opts.context && `Background context (NOT the subject of this email):\n${opts.context}`,
   ].filter(Boolean);
 
@@ -203,7 +211,16 @@ export async function authorListingNarrative(
     `character unless the facts state it. You are describing a house you have never seen — ` +
     `you know its price, size, lot, type, and what sold near it, and NOTHING ELSE. If a ` +
     `sentence needs a detail you were not given, cut the sentence. No hype ("stunning", ` +
-    `"dream home", "won't last"), no exclamation marks. Plain, confident, specific. ` +
+    `"dream home", "won't last"), no exclamation marks. Plain, confident, specific.\n\n` +
+    // The community line is the ONE thing that lifts the golf/pool/gate prohibition above —
+    // and only for the community, only when the fact is actually present.
+    `THE COMMUNITY. If — and ONLY if — a "THE COMMUNITY" fact line is present above, you may ` +
+    `say that the COMMUNITY has golf, a pool, a clubhouse, tennis, or that it is gated. Name ` +
+    `only what that line lists. These belong to the COMMUNITY, never to this house: "the ` +
+    `community has a pool" is allowed, "the home has a pool" is a fabrication and the ` +
+    `paragraph is thrown away. If there is NO community line, say NOTHING about golf, a pool, ` +
+    `a gate or amenities — its absence means we could not read the page, NOT that the ` +
+    `community lacks them. Never write that a community lacks something.\n\n` +
     `Return ONLY the paragraph.`;
 
   const user = `FACTS:\n${lines.join("\n")}\n\nWrite the description.`;

@@ -257,9 +257,13 @@ test("it wears the campaign chrome — the SAME shape as every other lifecycle e
     "image:chart", // ┐ MY MIDDLE — the only place this email legitimately differs
     "list", // ┘
     "text",
-    "sources", // ← MY TAIL
     "agent-card",
     "button",
+    // MY TAIL. It used to sit above the agent card; the seam's zone fence sorts CLOSE-zone
+    // blocks below the body, so a sources list now lands where the design system always said
+    // it goes — directly above the footer, which is where the AI author has always put it.
+    // One rule, both paths. This is the ONE visual change the layout root made.
+    "sources",
     "footer",
   ]);
 });

@@ -22,18 +22,14 @@
 // model emits `span` + `new_row`; THIS module derives bounds-correct {x,y,w,h}.
 
 import { defaultPropsFor } from "./doc/default-docs";
-import {
-  KNOWN_BLOCK_TYPES,
-  BANDABLE_TYPES,
-  BLOCK_CONTRACT,
-  ZONE_RANK,
-  BLESSED_ROW_SPANS,
-  ACCENT_BUDGET,
-} from "./doc/block-contract";
-import { mintBlockId } from "./doc/schema";
+import { KNOWN_BLOCK_TYPES, BANDABLE_TYPES, ACCENT_BUDGET } from "./doc/block-contract";
+import { finalizeDoc } from "./doc/finalize-doc";
+import type { PlanEntry } from "./doc/finalize-doc";
+// Fence 1 lives in the seam now. Re-exported so the existing fence tests keep testing the
+// ONE implementation rather than a copy that could drift from it.
+export { snapRowSpans } from "./doc/finalize-doc";
 import type { AuthoredBlock, AuthoredDoc } from "./doc/schema";
 import type {
-  BlockLayout,
   BlockType,
   EmailBlock,
   EmailDoc,
@@ -407,19 +403,17 @@ export function authorSystem(opts: {
   return parts.join("\n\n");
 }
 
-// ── Assembly: authored blocks → a positioned EmailDoc ─────────────────────────
+// ── Assembly: authored blocks → a PLAN, handed to the layout root ─────────────
+//
+// The fences (blessed spans, zone order, the block cap, positions) used to live at the
+// tail of this file, reachable only from here. They now live in `doc/finalize-doc.ts` —
+// the ONE seam every builder ends at. What stays here is the part that is genuinely
+// AI-only and means nothing to a hand-written builder: resolving figure ids against the
+// menu, the accent budget (Fence 5), the anchor guard on stat literals and subject
+// variants, reserving an offered-but-unplaced chart/photo, and the sources autofill.
 
-function isStructural(t: BlockType): boolean {
-  return t === "header" || t === "footer" || t === "divider";
-}
-
-interface Entry {
-  type: BlockType;
-  span: number;
-  newRow: boolean;
-  props: Record<string, unknown>;
-  isStatic?: boolean;
-}
+/** The author's entry is just a plan entry. Same type, one name. */
+type Entry = PlanEntry;
 
 /** Fill a content block's text fields from the author's output, leaving identity/
  *  brand/structural defaults intact (applyBrand owns those). Number-bearing fields
@@ -715,58 +709,10 @@ function buildEntry(
   };
 }
 
-// ── The fences, applied HARD (AI path only) ──────────────────────────────────
-// deriveLayout is not exported and is called ONLY by assembleAuthoredDoc, so every
-// clamp here binds the AI author and NOTHING the user does on the canvas. The
-// canvas (react-grid-layout) has its own layout path and only WARNS the user.
-
-/** Fence 1 — snap a row's spans onto the nearest blessed multiset (the layout
- *  variety space in block-contract.ts). Orientation is preserved: whichever side
- *  was bigger stays bigger (flip-to-correct owns left↔right). Every blessed set
- *  sums to 12, so a snapped row butts edge-to-edge with no separate pad/trim.
- *  A row length outside the registry (never produced here — rows cap at 3) falls
- *  back to the old clamp-and-pad so the engine stays total. Exported for tests. */
-export function snapRowSpans(spans: number[]): number[] {
-  const clamped = spans.map((s) => Math.max(1, Math.min(GRID_COLS, Math.round(s))));
-  const blessed = BLESSED_ROW_SPANS[clamped.length];
-  if (!blessed) return padTrimToGrid(clamped);
-  // rank the positions by descending span; match against the (descending) blessed set
-  const byRank = clamped.map((s, i) => ({ s, i })).sort((a, b) => b.s - a.s || a.i - b.i);
-  const vals = byRank.map((x) => x.s);
-  let best = blessed[0];
-  let bestCost = Infinity;
-  for (const cand of blessed) {
-    const cost = cand.reduce((acc, v, k) => acc + Math.abs(v - vals[k]), 0);
-    if (cost < bestCost) {
-      bestCost = cost;
-      best = cand;
-    }
-  }
-  const out = new Array<number>(clamped.length);
-  byRank.forEach((x, rank) => {
-    out[x.i] = best[rank];
-  });
-  return out;
-}
-
-/** Old behavior kept as the >3-column fallback: trim the largest down, then pad
- *  round-robin, until the row sums to exactly 12. */
-function padTrimToGrid(spans: number[]): number[] {
-  const out = [...spans];
-  while (out.reduce((a, b) => a + b, 0) > GRID_COLS) {
-    const idx = out.indexOf(Math.max(...out));
-    out[idx] = Math.max(1, out[idx] - 1);
-    if (out[idx] === 1 && out.every((s) => s === 1)) break;
-  }
-  let rem = GRID_COLS - out.reduce((a, b) => a + b, 0);
-  let i = 0;
-  while (rem > 0) {
-    out[i % out.length] += 1;
-    rem -= 1;
-    i += 1;
-  }
-  return out;
-}
+// ── The one AI-only fence that stays here (Fence 5) ──────────────────────────
+// Fence 5 binds the MODEL, not a builder: a hand-authored template deliberately owns its
+// colours ("keep every design as a choice"), so clamping its accent bands would collapse
+// the templates onto one look. The layout fences (1, 2, 3) are shared and live in the seam.
 
 /** Fence 5 — hold accent bands to the budget (emphasis is budgeted, not banned).
  *  After ACCENT_BUDGET accents, further `band:"accent"` are downgraded to `light`
@@ -781,79 +727,6 @@ export function clampAccentBudget(blocks: AuthoredBlock[]): AuthoredBlock[] {
     }
     return { ...b, band: "light" };
   });
-}
-
-/** Fence 2 — stable sort into zone order (open leads, close trails); the footer is
- *  forced absolute-last so a CLOSE sibling (sources / social row) can never sit
- *  under it. Stable, so within-zone order and every `new_row` grouping survives. */
-function sortEntriesByZone(entries: Entry[]): Entry[] {
-  const rank = (e: Entry) =>
-    e.type === "footer" ? ZONE_RANK.close + 1 : ZONE_RANK[BLOCK_CONTRACT[e.type].zone];
-  return entries
-    .map((e, i) => ({ e, i }))
-    .sort((a, b) => rank(a.e) - rank(b.e) || a.i - b.i)
-    .map((x) => x.e);
-}
-
-/** Group entries into rows (structural blocks + new_row force a break; ≤3 per row)
- *  and derive bounds-correct {x,y,w,h}: each row fills 12 columns, y increments by
- *  row, height is a uniform advisory 1 (email height is content-driven). Footer is
- *  marked static. This is what makes a no-react-grid-layout engine sound.
- *  Fences 1 (blessed spans) & 2 (zones) are enforced HERE — the AI-only path. */
-function deriveLayout(rawEntries: Entry[]): EmailBlock[] {
-  const entries = sortEntriesByZone(rawEntries);
-  const rows: Entry[][] = [];
-  let cur: Entry[] = [];
-  const flush = () => {
-    if (cur.length) {
-      rows.push(cur);
-      cur = [];
-    }
-  };
-  for (const e of entries) {
-    if (isStructural(e.type)) {
-      flush();
-      rows.push([e]);
-      continue;
-    }
-    if (e.newRow) flush();
-    cur.push(e);
-    if (cur.length >= 3) flush();
-  }
-  flush();
-
-  const out: EmailBlock[] = [];
-  let y = 0;
-  for (const row of rows) {
-    // Fence 1 — snap the row onto the nearest blessed multiset (single blocks →
-    // full-bleed [12]; every blessed set already sums to 12).
-    const spans = snapRowSpans(row.map((e) => e.span));
-    let x = 0;
-    row.forEach((e, idx) => {
-      const w = spans[idx];
-      const layout: BlockLayout = { x, y, w, h: 1, ...(e.isStatic ? { static: true } : {}) };
-      out.push({
-        id: mintBlockId(),
-        type: e.type,
-        props: e.props,
-        layout,
-      } as unknown as EmailBlock);
-      x += w;
-    });
-    y += 1;
-  }
-  return out;
-}
-
-const MAX_BLOCKS = 20; // mirrors EmailDocSchema blocks .max(20)
-
-/** Trim to the schema's block cap while ALWAYS preserving the footer (CAN-SPAM). */
-function capBlocks(entries: Entry[]): Entry[] {
-  if (entries.length <= MAX_BLOCKS) return entries;
-  const footer = entries.find((e) => e.type === "footer");
-  const rest = entries.filter((e) => e !== footer);
-  const kept = rest.slice(0, footer ? MAX_BLOCKS - 1 : MAX_BLOCKS);
-  return footer ? [...kept, footer] : kept;
 }
 
 /** Assemble a positioned EmailDoc from the model's authored output. PURE. Brand is
@@ -970,12 +843,14 @@ export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
   );
   const ctaVariants = filterAnchoredVariants(ctaSource?.cta_variants, anchors).slice(0, 4);
 
-  return {
+  // The author carries no heights — every entry falls to the seam's default of 1, which is
+  // exactly the uniform advisory height this path emitted when it owned the layout itself.
+  return finalizeDoc({
     globalStyle,
-    blocks: deriveLayout(capBlocks(entries)),
+    entries,
     ...(subjectVariants.length ? { subjectVariants } : {}),
     ...(ctaVariants.length ? { ctaVariants } : {}),
-  };
+  });
 }
 
 // ── The no-invention prose lint (gateNarrative philosophy, applied to blocks) ──

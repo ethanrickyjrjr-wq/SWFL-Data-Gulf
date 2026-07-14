@@ -80,11 +80,12 @@ import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import { chartImageBlock } from "@/lib/email/inject-chart";
 import { soldCompsListBlock } from "@/lib/email/sold-comp-blocks";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
+import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
 import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
 import type { RecipeBuildContext } from "./index";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
-import type { EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
+import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
 /** A recorded sale of the SUBJECT itself — the only thing that may fill the close. */
@@ -350,7 +351,7 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   const comps = realSaleComps(allComps, street);
 
   // ── THE MIDDLE — the only place this email legitimately differs from its siblings.
-  const middle: EmailBlock[] = [];
+  const middle: ChromeBlock[] = [];
 
   // CHART — comps-bar, and ONLY with the subject's own bar. Without the close there
   // is no subject bar, and six neighbours' sales on a listing email is an AREA chart
@@ -374,13 +375,12 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
       `just-sold-${facts.zip ?? "swfl"}-${Date.now()}`,
     ).catch(() => null);
     // An empty chart box is worse than no chart — a failed render simply doesn't ride.
-    if (chartImg)
-      middle.push({ ...chartImageBlock(chartImg), layout: { x: 0, y: 0, w: 12, h: 6 } });
+    if (chartImg) middle.push({ block: chartImageBlock(chartImg), height: 6 });
   }
 
   // THE WEEK'S REAL SALES, as linked rows. Vacant-lot-filtered, subject excluded.
   const compRows = soldCompsListBlock(comps);
-  if (compRows) middle.push({ ...compRows, layout: { x: 0, y: 0, w: 12, h: 5 } });
+  if (compRows) middle.push({ block: compRows, height: 5 });
 
   const soldOn = isoToMDY(close?.date ?? null);
   const footnote = soldFootnote(facts, close);

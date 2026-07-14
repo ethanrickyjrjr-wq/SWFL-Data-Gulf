@@ -151,6 +151,61 @@ export function parseListingDetail(html: string, sourceUrl: string): ListingDeta
   return facts;
 }
 
+/**
+ * The community fact, rendered for a narrator's source list. ONE AUTHORITY — every recipe that
+ * tells a model about the community reads it from here, so the "these are the COMMUNITY's, not
+ * the HOUSE's" warning cannot drift out of one copy.
+ *
+ * WHY THIS UNLOCKS THE WORD-BANS WITHOUT EDITING THEM. The prose guards flag an attribute word
+ * only when the PARAGRAPH says it and the SOURCES do not. "golf"/"pool" were never banned
+ * outright — we simply held no fact stating them, so any use WAS invention. Put the fact in the
+ * sources and the word legitimises itself; leave it out (fetch failed) and the guard still
+ * hard-blocks it. The gate is the FACT, not the vocabulary.
+ *
+ * THE TRAP IT IS WORDED AGAINST: these belong to the COMMUNITY, not the house. "Pool" here means
+ * the community has one — NOT that this home has a private one. The word-guards match words and
+ * cannot tell those apart, so the distinction has to be carried in the source text itself.
+ *
+ * `opts.deIdentify` drops the community NAME and keeps the amenities — for the coming-soon
+ * teaser, whose entire job is withholding the location. "A gated golf community with a pool"
+ * is safe; "Bay Colony" hands over the listing.
+ */
+export function communitySourceLine(
+  f: ListingDetailFacts | undefined,
+  opts: { deIdentify?: boolean } = {},
+): string | null {
+  if (!f || !f.ok) return null;
+  const parts: string[] = [];
+  if (f.communityFeatures.length)
+    parts.push(`Community features: ${f.communityFeatures.join(", ")}`);
+  if (f.amenities.length) parts.push(`Community amenities: ${f.amenities.join(", ")}`);
+  if (f.otherAmenities.length) parts.push(`Also noted: ${f.otherAmenities.join(", ")}`);
+  if (parts.length === 0) return null;
+
+  const where = !opts.deIdentify && f.subdivision ? ` (${f.subdivision})` : "";
+  const naming = opts.deIdentify
+    ? ` DO NOT NAME THE COMMUNITY, and do not name any amenity that would identify it — you may ` +
+      `say it is gated, or that it has golf or a pool, and nothing that points to WHICH one.`
+    : "";
+
+  return (
+    `THE COMMUNITY${where}, from the listing's own detail page. THESE DESCRIBE THE COMMUNITY, ` +
+    `NOT THIS HOUSE — a pool here is the COMMUNITY's pool, and golf here means the COMMUNITY ` +
+    `has golf. You may say the community has them. You may NOT say this home has them.${naming}` +
+    `\n${parts.join("\n")}`
+  );
+}
+
+/** Strip the identifying NAME, keep the amenities. For the coming-soon teaser, which spreads
+ *  `...facts` — so without this the subdivision rides straight into the model's context and the
+ *  whole point of the email (the location is withheld) is lost to a spread operator. */
+export function deIdentifyCommunity(
+  f: ListingDetailFacts | undefined,
+): ListingDetailFacts | undefined {
+  if (!f) return undefined;
+  return { ...f, subdivision: null };
+}
+
 // NO FETCHER LIVES HERE, DELIBERATELY.
 //
 // `lib/email/listing-scrape.ts#fetchListingFacts` already fetches this exact page — through
