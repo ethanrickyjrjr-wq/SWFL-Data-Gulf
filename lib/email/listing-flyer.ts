@@ -82,12 +82,15 @@ export function listingSpecs(facts: ListingFacts, daysOnMarket?: number | null):
   // instead (its clock stopped at a pending date we do not hold) simply does not apply here.
   // So this cell is for ACTIVE listings ONLY. Never pass it on under-contract or just-sold.
   //
-  // And a fresh listing reads ONE, not zero — "1 Day on Market" is the most persuasive number
-  // on a new-listing email, not a dead cell. Singular label at 1, because "1 Days" is sloppy.
+  // And a fresh listing reads ONE, not zero — "1" here is the most persuasive number on a
+  // new-listing email, not a dead cell.
+  //
+  // THE LABEL IS "DOM" (operator, 07/14/2026). A cell is 94px (568 ÷ 6); "Days on Market"
+  // wrapped to three lines and left "MEDIAN"/"DAYS ON"/"MARKET" reading as separate things.
+  // Short label, whole number, no wrap — and it needs no singular/plural branch, because DOM
+  // is DOM at 1 and at 83.
   const dom =
-    daysOnMarket != null && daysOnMarket >= 0
-      ? spec(String(daysOnMarket), daysOnMarket === 1 ? "Day on Market" : "Days on Market")
-      : undefined;
+    daysOnMarket != null && daysOnMarket >= 0 ? spec(String(daysOnMarket), "DOM") : undefined;
 
   return [
     spec(facts.beds, "Beds"),
@@ -96,7 +99,7 @@ export function listingSpecs(facts: ListingFacts, daysOnMarket?: number | null):
     spec(facts.lotSize, "Lot"),
     spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft", "primary"),
     // TYPE YIELDS ITS SLOT. The strip holds six, and `price-reduced` already drops this exact
-    // cell — "the one cell a reader will never use." "Residential" loses to "1 Day on Market".
+    // cell — "the one cell a reader will never use." "Residential" loses to a DOM of 1.
     // No days held (vendor miss) → Type keeps the slot, so nothing is ever left blank.
     dom ?? spec(shortType(facts.propertyType) || undefined, "Type", "muted"),
   ];

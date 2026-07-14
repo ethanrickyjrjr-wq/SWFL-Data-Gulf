@@ -176,27 +176,29 @@ test("blank brand gets the editorial palette; a real brand is preserved", () => 
 // "Days Since Listed" hedge exists for under-contract, whose clock stopped at a pending
 // date we do not hold. These tests pin the three things that make it honest.
 
-test("days on market takes the Type cell — 'Residential' loses to a real number", () => {
+test("DOM takes the Type cell — 'Residential' loses to a real number", () => {
   const doc = buildListingFlyer(FACTS, brandedCurrentDoc(), 12);
   const s = strip(doc);
   const cells = s?.type === "stats" ? s.props.stats : [];
 
-  expect(cells.map((c) => c.label)).toContain("Days on Market");
+  expect(cells.map((c) => c.label)).toContain("DOM");
   expect(cells.map((c) => c.label)).not.toContain("Type");
-  expect(cells.find((c) => c.label === "Days on Market")?.value).toBe("12");
+  expect(cells.find((c) => c.label === "DOM")?.value).toBe("12");
   // Still a SIX-cell strip — the slot is taken, not added. Seven cells would not fit.
   expect(cells).toHaveLength(6);
 });
 
-test("a fresh listing reads ONE, not zero — and the label goes singular", () => {
-  // The whole reason this cell was missing: it was dismissed as "~0 on a new listing".
-  // It is 1. "1 Day on Market" is the most persuasive number on the email.
+test("the label is DOM — a 94px cell has no room to spell it out", () => {
+  // Operator, 07/14/2026: "JUST MAKE IT DOM… WHY ARE YOU WRITING IT OUT WHEN WE HAVE NO SPACE."
+  // A wrapped cell is 568/6 = 94px. "Days on Market" ran to three lines and read as separate
+  // words. DOM is DOM at 1 and at 83 — so there is no singular/plural branch to get wrong.
   const s = strip(buildListingFlyer(FACTS, brandedCurrentDoc(), 1));
   const cells = s?.type === "stats" ? s.props.stats : [];
-  const dom = cells.find((c) => c.label.startsWith("Day"));
+  const dom = cells.find((c) => c.label === "DOM");
 
+  // A fresh listing reads ONE, not zero — the dismissal that kept this cell out of the model.
   expect(dom?.value).toBe("1");
-  expect(dom?.label).toBe("Day on Market"); // never "1 Days on Market"
+  expect(cells.map((c) => c.label)).not.toContain("Days on Market");
 });
 
 test("no list date held (a vendor miss) → Type keeps its slot, never a blank cell", () => {
@@ -206,6 +208,6 @@ test("no list date held (a vendor miss) → Type keeps its slot, never a blank c
     const s = strip(buildListingFlyer(FACTS, brandedCurrentDoc(), miss));
     const cells = s?.type === "stats" ? s.props.stats : [];
     expect(cells.map((c) => c.label)).toContain("Type");
-    expect(cells.map((c) => c.label)).not.toContain("Days on Market");
+    expect(cells.map((c) => c.label)).not.toContain("DOM");
   }
 });

@@ -109,12 +109,12 @@ export const SEED_PREVIEW_FILL: PreviewFillData = {
   },
   stats: [
     { value: "$223", label: "Median $ / Sq Ft" },
-    // "83", not "83 days" — the label ALREADY says Days on Market, so the unit was printed
-    // TWICE. It is also the one cell that broke the wrapped spec strip: a two-word emphasised
-    // value does not fit a 94px cell (568 ÷ 6) and split across two lines, and it is the number
-    // the strip exists to land. Every other cell here already puts the unit in the label
-    // ("2,010" / "Sq Ft"). Same figure, same source — only the redundant unit is gone.
-    { value: "83", label: "Median Days on Market" },
+    // "83" + "Median DOM" — was `"83 days"` + `"Median Days on Market"`, which printed the unit
+    // TWICE and did not fit. A strip cell is 94px (568 ÷ 6): the value split across two lines and
+    // the label ran to three, leaving "MEDIAN" alone on its own line so it read as two separate
+    // things. Short label, whole number, no wrap. "Median DOM" is already this file's own
+    // convention (see the per-seed lists below). Same figure, same source.
+    { value: "83", label: "Median DOM" },
     { value: "−8.1%", label: "Home Values YoY" },
     { value: "21,934", label: "Homes for Sale" },
     { value: "16.3%", label: "Listings With a Price Cut" },

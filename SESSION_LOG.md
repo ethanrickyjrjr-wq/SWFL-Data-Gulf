@@ -42,6 +42,20 @@ paragraph that STILL carries the street is dropped entirely (`leaksStreet` — w
 subdivision anyway, so naming the community trips nothing).
 
 982 pass, 0 fail. `next build` clean.
+## 2026-07-14 (Opus 4.8 · main) — THE LABEL IS "DOM"
+
+**Operator: "JUST MAKE IT DOM. WHY ARE YOU WRITING IT OUT WHEN WE HAVE NO SPACE."** Correct, and it
+also deletes code. A wrapped strip cell is 94px (568 ÷ 6): "Days on Market" ran to three lines and
+left "MEDIAN" stranded on its own line, which is what made it read as two separate facts in the first
+place. `DOM` is `DOM` at 1 and at 83 — so the singular/plural branch I had just written is gone too.
+
+Both surfaces, because they are different code paths and the operator was looking at the TILE, not the
+email: the live cell (`listingSpecs`) and the showcase filler (`preview-fill`, whose per-seed lists
+ALREADY used "Median DOM" — the long form was the odd one out). I argued once that DOM is jargon for a
+homeowner; overruled, and the repo's own convention was against me. Argue once, then ship.
+
+---
+
 ## 2026-07-14 (Opus 4.8 · main) — DAYS ON MARKET: WE HELD IT ALL ALONG, AND "IT WOULD BE ZERO" WAS THE EXCUSE
 
 **Operator: "I WANT DAYS ON MARKET." We have it. It is now on the New Listing email.** Opens
