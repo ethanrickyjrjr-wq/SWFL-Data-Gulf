@@ -39,6 +39,8 @@ function toValueFormat(vf?: string): ValueFormat {
       return "pct";
     case "count":
       return "count";
+    case "number":
+      return "number";
     default:
       return "index";
   }

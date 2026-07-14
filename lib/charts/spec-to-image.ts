@@ -41,8 +41,10 @@ function mapValueFormat(vf?: string): ValueFormat {
       return "pct";
     case "count":
       return "count";
+    case "number":
+      return "number"; // exact + separators; NOT "index" (see lib/charts/format.ts)
     default:
-      return "index"; // "number" / unset / unknown → unitless
+      return "index"; // unset / unknown → unitless
   }
 }
 

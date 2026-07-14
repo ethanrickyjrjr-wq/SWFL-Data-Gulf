@@ -5,7 +5,15 @@
 // the RSC boundary aborts `next build` at prerender. This separation is the fix
 // for the 2026-06-13 build break (see app/_design/07-charts-and-dataviz.md §6).
 
-export type ValueFormat = "usd" | "rent" | "count" | "pct" | "index";
+// "number" — a UNITLESS EXACT count: 13122 → "13,122". It did not exist, so the six
+// specs that asked for it (the coming-soon scarcity funnel among them) fell through
+// mapValueFormat's default to "index", whose formatter is `toFixed(0)` — no separator.
+// The funnel therefore rendered "13122 · 1065 · 330" directly beneath stat cells
+// reading "13,122". Same figure, two spellings, in one email.
+//
+// "index" is NOT a substitute: it exists for a value rebased to 100 at a base month,
+// where a thousands separator would be wrong. A count is not an index.
+export type ValueFormat = "usd" | "rent" | "count" | "number" | "pct" | "index";
 
 /** Y-axis + tooltip number formatting, chosen by a serializable token. */
 export function formatChartValue(format: ValueFormat, value: number): string {
@@ -20,6 +28,9 @@ export function formatChartValue(format: ValueFormat, value: number): string {
       if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
       if (value >= 1_000) return `${Math.round(value / 1_000)}k`;
       return `${Math.round(value)}`;
+    case "number":
+      // Exact, with separators — restates the stat cell digit for digit.
+      return Math.round(value).toLocaleString("en-US");
     case "pct":
       return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
     case "index":

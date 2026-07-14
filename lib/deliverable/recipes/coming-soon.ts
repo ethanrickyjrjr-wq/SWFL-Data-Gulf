@@ -508,7 +508,14 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
     middle.push({
       id: createBlock("image").id,
       type: "image",
-      props: { url: chart.url, kind: "chart", alt: chart.alt, caption: chart.caption },
+      // NO CAPTION. The rendered chart already draws its own title ("Homes like this
+      // one in Lee County") AND its own source line ("SWFL Data Gulf · as of ...").
+      // Passing chart.caption printed both a SECOND time underneath the image —
+      // title and provenance, stated twice, in the one email that is supposed to be
+      // about scarcity. `alt` still carries the full sentence for screen readers and
+      // for the images-off fallback, which is where that text belongs. Every other
+      // recipe already omits the caption here; this was the one that didn't.
+      props: { url: chart.url, kind: "chart", alt: chart.alt },
       layout: { x: 0, y: 0, w: 12, h: 5 },
     });
   }

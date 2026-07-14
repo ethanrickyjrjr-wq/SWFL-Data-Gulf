@@ -15,6 +15,10 @@ function toChartValueFormat(f: ValueFormat): ChartValueFormat {
       return "percent";
     case "count":
       return "count";
+    // The wire vocabulary has no "index" — both unitless internal formats land on
+    // "number" here. They differ only in RENDERING: "number" carries thousands
+    // separators (a count: 13,122), "index" does not (a value rebased to 100).
+    case "number":
     case "index":
       return "number";
   }

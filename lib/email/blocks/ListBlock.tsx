@@ -58,6 +58,18 @@ export function ListBlock({
                     fontFamily: font,
                     fontSize: "13px",
                     fontWeight: 700,
+                    // ⚠️ SUPERSEDED BY THE SCALE ROOT. This 24px is a magic number — the correct
+                    // fix is `lib/email/blocks/scale.ts`, where a size cannot be chosen without
+                    // its line-height. Delete this literal when the blocks adopt the scale.
+                    //
+                    // THE RAGGED ROW. The lead had no line-height, so its 13px text sat in a
+                    // ~16px line box while the 15px body cell beside it sat in a 24px one
+                    // (15 × 1.6). Both cells are top-aligned, so the two line boxes started
+                    // together and their BASELINES landed ~5px apart — the price floated
+                    // above the address it belongs to ("Recent sales nearby" read as two
+                    // columns that had drifted). Pinning the lead to the body's line box
+                    // (15px × 1.6 = 24px) puts both baselines on the same line.
+                    lineHeight: "24px",
                     color: onDark
                       ? legibleAccent(globalStyle.accentColor, bg)
                       : globalStyle.accentColor,

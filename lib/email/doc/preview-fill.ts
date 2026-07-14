@@ -460,8 +460,11 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
     ],
     signals: [
       {
-        title: "Rents have stabilized after a two-year glide",
-        body: "Fort Myers typical rent bottomed near $1,787 in March and is back to $1,807 — flat rents plus softer prices move the math toward buyers.",
+        // NO TRAJECTORY WORD. $1,787 → $1,807 is a $20 move; "stabilized" and "bottomed"
+        // were asserting a direction that a move this small cannot establish (the same
+        // claim trendVerdict was built to stop — see lib/charts/series-fit.ts).
+        title: "Rents flat while prices soften",
+        body: "Fort Myers typical rent was $1,787 in March and is $1,807 now — a $20 move. Flat rents against softer prices move the math toward buyers.",
       },
     ],
   },
@@ -511,8 +514,10 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
     // slot-honest instructions, so an unfilled signal would leak them.
     signals: [
       {
-        title: "The reset found its floor",
-        body: "Values across Lee County ZIPs closed the year down 8.1% — but April's 3,636 recorded sales say demand never left. The story now is selection, not retreat.",
+        // "found its floor" asserted the decline had ENDED. An 8.1% fall says values went
+        // down; it says nothing about where they settle. Trajectory word removed.
+        title: "Values closed the year down 8.1%",
+        body: "Values across Lee County ZIPs closed the year down 8.1%, while April recorded 3,636 sales. Whether the decline has run its course is not something these figures show.",
       },
     ],
   },
@@ -522,8 +527,9 @@ export const SEED_ASSIGNMENTS: Record<string, SeedAssignment> = {
     hero: {
       value: "−8.1%",
       label: "Lee County home values · 12-month change",
-      prose:
-        "From $471,582 to $433,549 in twelve months — the year the market reset found its floor.",
+      // Was: "…the year the market reset found its floor." The two figures support the
+      // 8.1% decline and nothing beyond it. State the move; do not name its future.
+      prose: "From $471,582 to $433,549 in twelve months — an 8.1% decline.",
     },
     stats: [
       { value: "$433,549", label: "Average ZIP Home Value" },
@@ -859,7 +865,39 @@ export function previewFill(
   const nextListing = consumer(assign?.listings, cycler(fill.listings));
   const nextPhoto = consumer(assign?.photos, cycler(fill.photos));
   const nextComment = consumer(assign?.commentary, cycler(fill.commentary));
-  const nextStat = cycler(assign?.stats ?? fill.stats);
+  // THE DUPLICATE-ROW BUG. This was `cycler(assign?.stats ?? fill.stats)` — a cycler
+  // WRAPS (pool[i++ % len]), so a seed carrying 3 stats against a 6-cell strip printed
+  // 1,2,3,1,2,3 and shipped the same three figures twice in one row (market-spotlight,
+  // new-listing, open-house, price-reduced, just-sold). The templates were widened from
+  // 3 cells to 5-6; the per-seed fill lists were not.
+  //
+  // Now it matches every other filler in this file: consume the seed's own list, then
+  // fall through to the GLOBAL pool — six real, distinct, sourced figures — instead of
+  // repeating. A repeat is not a slot; it is the same fact printed twice.
+  //
+  // AND IT DEDUPES. A plain fallback still collided: just-sold and price-reduced each
+  // carry "83 days" themselves, and the global pool's second entry is "83 days" too — so
+  // the row printed it twice anyway. The invariant is not "don't wrap", it is: A FIGURE
+  // APPEARS AT MOST ONCE IN A STAT ROW. Enforced here, pinned by preview-fill.test.ts.
+  const usedStats = new Set<string>();
+  const poolStat = cycler(fill.stats);
+  const takeAssigned = consumer(assign?.stats, () => poolStat());
+  const nextStat = () => {
+    for (
+      let attempt = 0;
+      attempt < fill.stats.length + (assign?.stats?.length ?? 0) + 1;
+      attempt++
+    ) {
+      const s = attempt === 0 ? takeAssigned() : poolStat();
+      if (!usedStats.has(s.value)) {
+        usedStats.add(s.value);
+        return s;
+      }
+    }
+    // Pool exhausted with no unused figure left. The slot rule says an unsourced cell is
+    // an OPEN SLOT, not a filler — better an empty cell than the same number twice.
+    return { value: "", label: "" };
+  };
   const nextChart = consumer(assign?.charts, () => fill.chart);
   const nextSignal = consumer(assign?.signals, () => ({
     title: "Values drift lower while buyers regain leverage",

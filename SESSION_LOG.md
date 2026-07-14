@@ -1,3 +1,66 @@
+## 2026-07-14 (Opus 4.8 · main) — FOUR BUGS THE OPERATOR FOUND BY LOOKING, AND WHY LOOKING WAS THE ONLY WAY
+
+Operator asked for a dev site with every email on it so he could triage keep/change/kill. Built
+`/dev-emails` (dev-only, unlinked, gitignored renders): the 7 listing emails **as actually built** (real
+326 Shore Dr data), then the 14 recipes, then the 27 templates — all rendered LIVE from code, never from
+the committed `.webp` screenshots that went stale and burned us on the luxury ring. He then found four
+real defects in ten minutes of scrolling. All four are fixed here. **Nothing was found by a test; every
+one was found by a human looking at a rendered email.**
+
+**1. The duplicate stat row** (closes `lifecycle_chrome_dup_stats_row`). Market Spotlight printed
+`$330,500 | 3,636 | 83 days | $330,500 | 3,636 | 83 days` — three facts, each stated twice, reading as
+two independent findings that agree. Root cause: `preview-fill.ts:868` was the ONE filler in the file
+using a **cycler** (`pool[i++ % len]` — wraps) where `nextListing`/`nextPhoto`/`nextComment` all use a
+**consumer** (falls through to the global pool). Templates were widened from 3 stat cells to 5–6; the
+per-seed fill lists never were, so it wrapped. Now consumes, then falls through, **and dedupes** — a
+plain fallback still collided because just-sold/price-reduced each carry "83 days" and the global pool's
+2nd entry is also "83 days". Invariant pinned in `preview-fill.test.ts`: **a figure appears at most once
+in a stat row**, asserted over all 27 templates.
+
+**2. The chart said `13122` where the cell above it said `13,122`.** `ValueFormat` had **no unitless-exact
+format at all**. Six specs asked for `value_format: "number"` (it compiled only because `coming-soon.ts`
+casts `as ChartSpec`); `mapValueFormat` fell through to `"index"`, whose formatter is `toFixed(0)` — no
+separator. `"index"` is for a value rebased to 100, where a separator is *wrong*; a count is not an index.
+Added the real `"number"` step (`toLocaleString`) + routed it through both mappers. Widening the union
+correctly broke one now-non-exhaustive switch (`save-gallery/route.ts`) — which is what a type is for.
+
+**3. `coming-soon` printed its chart's title and source twice** — the rendered SVG already draws both; the
+image block was ALSO passing `chart.caption`. Every other recipe already omits it. `alt` still carries the
+sentence for screen readers.
+
+**4. The ragged price/address row.** `ListBlock`'s 13px gold lead had no `lineHeight` beside a 15px body
+cell at `1.6`; both top-aligned → line boxes of ~16px vs 24px → baselines ~5px apart. Pinned the lead to
+the body's box. **This fix is a magic number and says so in a comment** — see the root cause below.
+
+**Also: four hand-written trajectory claims removed from the demo copy** — "The reset found its floor"
+(×2) and "Rents have stabilized… bottomed near $1,787" (a $20 move). This is the EXACT claim killed on
+07/13 by `trendVerdict — the trajectory word is CODE OUTPUT` — but that fix landed in `lib/charts/` and
+had zero reach into hand-written prose in `preview-fill.ts`. Not a regression: a second copy of the same
+lie, in a file the fix could not see. Check opened: `demo_copy_has_no_trajectory_gate`.
+
+**THE ROOT CAUSE UNDER ALL OF IT (measured, not guessed).** `app/_design/05-color-and-type.md` — the 8px
+grid, the type scale, the line-heights, the weights, the tabular figures — is **read by zero code**. It is
+markdown; markdown cannot be imported. So: **17 font sizes** in use where the scale defines 7 (no block
+uses 28/36/44/64); **30 `fontWeight` declarations, zero compliant**; **`tabular-nums` used zero times**;
+and — the mechanical cause of "uneven" — **~30 text nodes set no `lineHeight` and silently inherit
+`@react-email`'s injected absolute `24px` line box**, so the 32px stat value renders at ratio **0.75**
+(that's the clipping) and the 9px strip label at **2.67**. The same headline figure renders at five sizes
+across blocks (Hero 48 · Stats 32 · MetricCard 30 · Listing 22 · List lead 13); nothing coordinates them.
+Twin finding: `author-recipes.ts` (the days of Mailchimp/Klaviyo/Vero/Litmus research) describes itself as
+*"advisory… the model MAY deviate — nothing here is enforced."* **Two researched systems. Both correct.
+Both prose. Neither executable.** That is why every session re-eyeballs numbers instead of inheriting.
+
+**Next (planned, operator-approved, NOT started):** `lib/email/blocks/scale.ts` — the executable form of
+the design doc, with `text(step, density)` so a size cannot be chosen without its line-height; all 18
+blocks route through it; `scale.test.ts` turns a hand-typed px into a red test. Then the `emphasis` dial
+(today **inverted** in the grid variant — `primary` renders 30px where a plain cell renders 32px — and
+silently **dropped** in the stacked path, which is exactly the path a multi-column row triggers). Then
+`finalizeDoc()` (`email_design_system_one_exit_seam`). Operator ruling: **keep every design as a choice —
+unify rhythm, not appearance.**
+
+Verify: 2,630 tests green (`lib/email` + `lib/charts` + `lib/deliverable`) · `bunx tsc --noEmit` clean.
+NOT PUSHED.
+
 ## 2026-07-14 (Opus 4.8 · main) — THE FALSIFIER THAT WAS ALREADY TRUE WHEN WE PRINTED IT
 
 Prose pass on `trendVerdict` (`lib/charts/series-fit.ts`) before phase 2 wires four renderers to it. Closes `trend_verdict_prose_before_renderer`. Zero production consumers today — which is exactly why now.

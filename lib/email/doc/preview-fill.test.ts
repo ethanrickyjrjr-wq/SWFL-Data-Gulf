@@ -238,3 +238,36 @@ describe("chart<->headline coherence gate (deliverable-coherence-gate)", () => {
     expect(failures, failures.join("\n")).toEqual([]);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE DUPLICATE-ROW PIN.
+//
+// Shipped live and was screenshotted by the operator on 07/14/2026: Market Spotlight
+// printed "$330,500 | 3,636 | 83 days | $330,500 | 3,636 | 83 days" — one row, three
+// facts, each stated twice. Root cause: the stats filler used a CYCLER (wraps at the
+// end of the pool) while every other filler in preview-fill.ts used a CONSUMER (falls
+// through to the global pool). The templates were widened from 3 stat cells to 5-6;
+// the per-seed fill lists were never widened to match, so the cycler wrapped.
+//
+// The invariant is not "don't wrap". It is: A FIGURE APPEARS AT MOST ONCE IN A ROW.
+// Repeating a number is not a filled slot — it is the same fact asserted twice, which
+// reads as two independent findings that agree. Cheaper to pin than to re-find.
+describe("a stat row never prints the same figure twice", () => {
+  it("holds for every seed template", () => {
+    const offenders: string[] = [];
+    for (const seed of SEED_DOCS) {
+      const doc = previewFill(seed.build(), { seedId: seed.id });
+      for (const block of doc.blocks) {
+        if (block.type !== "stats") continue;
+        const values = block.props.stats.map((s) => s.value).filter(Boolean);
+        const repeated = [...new Set(values.filter((v, i) => values.indexOf(v) !== i))];
+        if (repeated.length > 0) {
+          offenders.push(
+            `${seed.id}: repeats ${repeated.join(", ")} — row was [${values.join(" | ")}]`,
+          );
+        }
+      }
+    }
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+});
