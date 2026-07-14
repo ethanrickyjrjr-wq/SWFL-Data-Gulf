@@ -1,3 +1,66 @@
+## 2026-07-14 (Opus 4.8 · main) — TREND FIT PHASE 2: THE PANEL CALLED "HOME PRICE TREND" WAS DRAWING MONTHS OF SUPPLY
+
+Phase 2 surfaces A + B are live on `/desk`. The fit engine now has production consumers.
+
+**The handoff's premise was wrong, and the code said so.** It claimed `/desk` renders the ZHVI series
+and the work was to fit it. It doesn't. `buildHeroFromAsking` was the live path (the asking lane has
+≥2 days), and it charted **months of supply** — under a `$369,900` price headline, in a zone titled
+**Home Price Trend**. Months of supply is a real price-direction indicator and a defensible thing to
+show; it is not a price, and an area chart under a dollar figure reads as that dollar figure. The panel
+named a price trend and drew something else. Operator called it: redraw the hero on price.
+
+**What it rides now:** monthly closed-sale medians from `redfin_city_swfl` — **132 months** (Cape Coral,
+Fort Myers) and **157** (Naples), every one valued, verified against the lake. That depth is what earns
+the full window menu, and it is the series `trendVerdict` was built against (its comments quote Cape
+Coral's +$1,931/mo). Months of supply and the live asking median are now **stated figures**, in their own
+units, where they can't be mistaken for the price. Sold LEADS the hero ladder; asking was never a trend
+— two days is a reading.
+
+**One module decides what may be drawn: `lib/charts/fit-overlay.ts`.** Both renderers — the live bklit
+chart and the static SVG (email/deliverables) — consume its model and branch on nothing. The rule is
+per-window `established`: established ⇒ **draw the line**; not ⇒ **draw the fan, with no line inside it**.
+`verdictAgreesWithOverlay` holds that against the copy's `falsifier.valueLow` encoding, so the picture and
+the sentence cannot come apart. Renderers: `lib/charts/svg/fit-trend.ts` (pure SVG string, web + email,
+one root) and `components/charts/vendor/bklit/fit-glow.tsx` (underlay slot — above grid, **below** the
+series; the fit is an inference about the data, so it renders behind it).
+
+**Corrected the reading that nearly shipped.** "valueLow !== null ⇒ draw the band or draw nothing" does
+NOT mean a plateau draws no line. A plateau's LONG window IS established — its claim says so out loud —
+and it is the RECENT window that establishes nothing. Each window gets the rule on its own terms: the long
+run earns its line, the last 24 months earn a fan. Drawn together that IS the plateau, and on Naples you
+can now SEE why we won't call it. `reversed` is the same construction, and Cape Coral is live proof.
+
+**FOUR defects, and NOT ONE was caught by a test. Every one was caught by looking.** (The suite was green
+over all four, exactly as it was green over phase 1's six.)
+1. **`observedWithin` deleted the boom from the CHART.** It clipped the observed series to the long
+   window's span — and the long window is `ex-boom`, which starts *after* the run-up. The fit correctly
+   excluded 2021–22; the picture then excluded it too, and the x-axis quietly began in 2023. The label
+   describes what we did to the FIT. It is not a licence to withhold the data. Now `observedForChart` —
+   all of it, always.
+2. **`direction` shipped "up" on a market we called REVERSED.** It read the LONG window, so Cape Coral —
+   long run +$1,794/mo, last 24 months **−$1,201/mo**, copy saying "the direction has turned" — handed
+   every badge and arrow keyed to it the word *up*. Now the most recent **readable** direction
+   (`current?.direction ?? long.direction`); an unreadable window contributes `null` and correctly defers.
+   No fixture reversed. Real data did.
+3. **The x-axis had no years.** `shortDateFmt` is month+day, hardcoded in the shared bklit shell, so an
+   ELEVEN-YEAR axis rendered `Jun 29 · Mar 30 · Dec 30 · Aug 30 · May 30` — five labels that read as five
+   dates inside one year. Latent in every bklit time-series chart; only visible once a panel got long
+   enough. Fixed at the root (`pickDateFmt`, span-aware).
+4. **The fit and the data wore the same colour.** Fort Myers' city colour IS mangrove — the exact green
+   the fit uses for "climbing" — so the claim was indistinguishable from the fact it was drawn from.
+   Naples' is neutral-gold, the fan's "no direction" hue. On a single-series chart the city colour carries
+   no information; the trend colour carries all of it. Observed now takes a constant data colour when a fit
+   is present.
+
+**Verified live**, not asserted: clean `.next`, `next start` on 3199 (killed an orphan first — it served a
+STALE build behind a 200), fingerprinted the served HTML, screenshotted all three cities. Two reversed, one
+plateau — all three verdict shapes rendering from real data. 251 chart tests, 5585 overall, 0 fail.
+
+**Still open:** the Email Lab preset (surface C — the frame exists and is web/email-shared, but is not
+registered as a chart frame) and the narrator (surface D). Checks opened for both.
+
+---
+
 ## 2026-07-14 (Opus 4.8 · main) — LANDSCAPE: THE FIX INVERTED THE BUG, AND NOTHING WAS GUARDING THE NEW ONE
 
 Correction on top of `2b5365bc`, caught in review before Round 2 could inherit it.

@@ -99,6 +99,18 @@ base value + one falsifier in visible copy (first call site:
 `components/charts/TierProjectionChart.tsx`). Not compatible with Brush (upstream docs) —
 Brush is not vendored.
 
+**FitGlow — the backlit fit, added to the underlay slot (2026-07-14)** — new file
+`fit-glow.tsx` (ours, not upstream), plus a ONE-LINE additive patch to `chart-child-passthrough.ts`
+adding `"FitGlow"` to `UNDERLAY_COMPONENT_NAMES`. The shell routes children to render slots BY
+DISPLAY NAME, and the underlay slot is the only one that paints above the grid but BELOW the
+series. That placement is the whole point: the fitted trend is an `[INFERENCE]` about the
+observed series, so it must render behind it — in the default bucket it would paint a claim on
+top of the fact it was derived from, and on a straight line the claim wins the eye. Draws a
+glow as a stroke stack (one path, three widths), never an SVG `<filter>` blur — a filter is one
+silent rasterizer drop away from a chart that still looks finished. What it may draw is decided
+entirely by `lib/charts/fit-overlay.ts`; this component branches on nothing. Not upstreamable as-is
+(the underlay set is upstream's).
+
 **Static clip-id collision fork (2026-07-10)** — upstream `line-chart.tsx` and
 `composed-chart.tsx` hardcode `clipPathId="chart-grow-clip"` / `"composed-chart-grow-clip"`.
 `url(#id)` resolves DOCUMENT-WIDE to the FIRST matching element, so with several LineCharts

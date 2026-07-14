@@ -61,7 +61,11 @@ const CLIP_EXCLUDED_COMPONENT_NAMES = new Set([
   "LiveYAxis",
 ]);
 
-const UNDERLAY_COMPONENT_NAMES = new Set(["ReferenceArea", "BarColumnTrack"]);
+// FitGlow is the BACKLIT FIT and it belongs here, not in the default (pre-overlay)
+// bucket: the fitted trend is an inference about the data and must render BEHIND the
+// series it was fitted from. In the default bucket it would paint on top — a claim
+// drawn over the fact it came from. See components/charts/vendor/bklit/fit-glow.tsx.
+const UNDERLAY_COMPONENT_NAMES = new Set(["ReferenceArea", "BarColumnTrack", "FitGlow"]);
 
 /** Markers render after the interaction overlay so they stay clickable. */
 export function isPostOverlayComponent(child: ReactElement): boolean {

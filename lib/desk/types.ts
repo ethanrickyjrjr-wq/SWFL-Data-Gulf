@@ -7,6 +7,7 @@
 // with the quotable one-liner by B. Everything here is JSON-serializable
 // (server loaders → client zone components cross the RSC boundary).
 
+import type { SerializedFitOverlay } from "@/lib/charts/fit-overlay";
 import type { MetricDef } from "@/lib/landing/home-map-types";
 
 export type DeskDirection = "up" | "down" | "flat";
@@ -69,6 +70,15 @@ export interface HeroCitySeries {
     label: string;
     sourceLabel: string;
   };
+  /** Months of supply — kept as a stated figure rather than charted under a PRICE
+   *  headline, where a reader reasonably reads the area as the price. */
+  supply?: DeskDatum;
+  /** THE BACKLIT TREND. What may be drawn over this city's series, and the two
+   *  sentences that must ship with it. Built by `fitOverlay` on the server — the
+   *  ONE authority on whether a direction may be read at all. Absent when the
+   *  series is too short to fit honestly (< 12 monthly points), which is a real
+   *  answer and not an error: we draw no trend rather than a thin one. */
+  fit?: SerializedFitOverlay;
 }
 
 export interface HeroData {

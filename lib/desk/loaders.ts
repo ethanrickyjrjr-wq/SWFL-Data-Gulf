@@ -14,6 +14,8 @@ import {
   type MarketTempRow,
 } from "@/lib/charts/market-temperature-series";
 import { loadMetros } from "@/lib/charts/gallery-loaders";
+import { fitOverlay, serializeOverlay } from "@/lib/charts/fit-overlay";
+import { fitWindows, trendVerdict } from "@/lib/charts/series-fit";
 import { resolveSoldPrice } from "@/lib/listings/sold-price";
 import {
   detectPartialScans,
@@ -632,14 +634,52 @@ function buildHeroFromAsking(
   };
 }
 
-function buildHeroFromSold(sold: Map<string, SeriesPoint[]>): HeroData | null {
+/**
+ * THE HERO — the closed-sale median, its FULL history, with the fitted trend behind it.
+ *
+ * This zone is titled "Home Price Trend", and until 07/14/2026 it charted MONTHS OF
+ * SUPPLY under a price headline. Months of supply is a real price-direction indicator
+ * and a defensible thing to show — but it is not a price, and an area chart under a
+ * dollar figure reads as that dollar figure. The panel named a price trend and drew
+ * something else.
+ *
+ * So the hero rides the one deep PRICE series we actually hold: monthly closed-sale
+ * medians from redfin.com — 132 months for Cape Coral and Fort Myers, 157 for Naples,
+ * every one of them valued (verified against the lake 07/14/2026). That depth is what
+ * earns the full window menu, and it is the series `trendVerdict` was built and tested
+ * against. Months of supply keeps its place as a stated figure (`supply`), where it can
+ * be read for what it is instead of mistaken for a price.
+ *
+ * NOT sliced to 24 months. The whole thesis of the fit engine is that one window is a
+ * liar by omission — the long run and the last two years are BOTH true and the insight
+ * is in the comparison. Handing it a pre-truncated series would delete the comparison
+ * before it could be made.
+ */
+function buildHeroFromSold(
+  sold: Map<string, SeriesPoint[]>,
+  asking: Map<string, SeriesPoint[]>,
+  monthsSupply: Map<string, SeriesPoint[]>,
+): HeroData | null {
   const cities: HeroCitySeries[] = [];
   for (const def of CITY_DEFS) {
-    const points = (sold.get(def.key) ?? []).slice(-24);
+    const points = sold.get(def.key) ?? [];
     if (points.length < 2) continue;
     const ld = latestDelta(points);
     if (!ld) continue;
     const prevMonth = ld.prevPeriod?.slice(0, 7);
+
+    // The fit runs on the SAME points the chart draws. If it ever ran on a different
+    // slice, the line would be drawn from numbers the reader cannot see.
+    const asOfDate = new Date(`${ld.latestPeriod.slice(0, 10)}T00:00:00Z`);
+    const fits = fitWindows(
+      points.map((p) => ({ when: new Date(`${p.period.slice(0, 10)}T00:00:00Z`), y: p.value })),
+      asOfDate,
+    );
+    const verdict = trendVerdict(fits);
+
+    const liveAsking = asking.get(def.key)?.at(-1);
+    const supply = monthsSupply.get(def.key)?.at(-1);
+
     cities.push({
       key: def.key,
       label: def.label,
@@ -659,15 +699,44 @@ function buildHeroFromSold(sold: Map<string, SeriesPoint[]>): HeroData | null {
           : undefined,
       },
       points: points.map((p) => ({ date: p.period, value: p.value })),
+      // The live asking median rides along as the FRESH signal — it moves daily, while
+      // the sold anchor steps monthly. It is a different question ("what are they
+      // asking?") and it is labelled as one.
+      anchor: liveAsking
+        ? {
+            label: "Live asking median",
+            value: liveAsking.value,
+            unit: "USD",
+            display: fmtUsd(liveAsking.value),
+            sourceLabel: SPINE_SOURCE,
+            asOf: mdY(liveAsking.period),
+          }
+        : undefined,
+      supply: supply
+        ? {
+            label: "Months of supply",
+            value: supply.value,
+            unit: "months",
+            display: `${supply.value.toFixed(1)} mo`,
+            sourceLabel: "redfin.com",
+            asOf: mdY(supply.period),
+          }
+        : undefined,
+      fit: verdict ? serializeOverlay(fitOverlay(verdict)) : undefined,
     });
   }
   if (cities.length === 0) return null;
+  const n = Math.max(...cities.map((c) => c.points.length));
+  const first = cities[0].points[0]?.date;
   return {
     cities,
     asOf: cities[0].latest.asOf,
     sourceLabel: "redfin.com",
-    windowNote:
-      "Monthly closed-sale median per city, trailing 24 months — true sold prices; the daily asking line takes over as its window fills",
+    // No [INFERENCE] language here: the zone renders this note at the TOP and DeskHero
+    // renders it again at the bottom, so anything put in it is said twice. The trend read
+    // carries its own [INFERENCE] tag, its base value and its falsifier, in the copy block
+    // that sits directly under the chart — which is where a reader is actually looking.
+    windowNote: `${n} monthly closed-sale medians per city since ${mdY(first) ?? "the window opened"} — true sold prices, redfin.com`,
   };
 }
 
@@ -755,13 +824,19 @@ export async function loadDeskData(): Promise<DeskData> {
     loadPriceBands(supabase),
   ]);
 
-  // Hero ladder (dual-signal, self-healing as feeds fill):
-  //   1. daily ASKING line + monthly SOLD anchor (needs ≥2 asking days)
-  //   2. monthly SOLD line (true closed-sale medians, redfin.com)
+  // Hero ladder — the zone is called "Home Price Trend", so it leads with the deepest
+  // real PRICE series and the fitted trend over it:
+  //   1. monthly SOLD line (closed-sale medians, redfin.com) + the backlit fit
+  //   2. daily ASKING line — only if the sold feed is empty; too short to fit
   //   3. monthly ZHVI (smoothed index) — deepest fallback, never refuse
+  //
+  // Sold LEADS now (it trailed the 2-day asking lane until 07/14/2026). A trend needs
+  // history: the fit engine drops any window under 12 points, and two days of asking is
+  // not a trend at any window — it is a reading. The asking median is still on the panel,
+  // as the live figure it actually is.
   const hero =
+    buildHeroFromSold(citySeries.sold, truth.askingByCity, citySeries.monthsSupply) ??
     buildHeroFromAsking(truth, citySeries.sold, citySeries.monthsSupply) ??
-    buildHeroFromSold(citySeries.sold) ??
     (await buildHeroFromZhvi(supabase));
 
   const spineAsOf = mdY(stats.region?.latest_scraped_at ?? undefined);

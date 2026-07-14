@@ -8,11 +8,32 @@ import { Grid } from "@/components/charts/vendor/bklit/grid";
 import { XAxis } from "@/components/charts/vendor/bklit/x-axis";
 import { ChartTooltip } from "@/components/charts/vendor/bklit/tooltip";
 import { ChartStatFlow } from "@/components/charts/vendor/bklit/chart-stat-flow";
+import { FitGlow } from "@/components/charts/vendor/bklit/fit-glow";
+import { hydrateOverlay, type FitLayer } from "@/lib/charts/fit-overlay";
 import { rebaseFromFirst } from "@/lib/desk/mappers";
 import type { HeroData } from "@/lib/desk/types";
 
 const UP = "#5bc97a"; // mangrove
 const DOWN = "#e08158"; // sunset-coral
+
+/**
+ * THE DATA'S OWN COLOUR, when a fitted trend is drawn behind it.
+ *
+ * The city palette and the trend palette COLLIDE. Fort Myers' colour is mangrove — the
+ * exact green the fit uses to mean "climbing" — so its observed line and its fitted line
+ * rendered in the same green and the claim became indistinguishable from the fact it was
+ * drawn from. Naples' colour is neutral-gold, the same hue the fan uses to mean "no
+ * direction can be read here."
+ *
+ * On a single-series chart the city colour carries NO information anyway — the tab already
+ * says which city it is. The trend colour carries all of it. So when a fit is present the
+ * observed series takes the constant data colour and the palette is free to mean what it
+ * says. (The "% since start" tab plots three cities at once and keeps their colours; there
+ * is no fit there, and nothing to collide with.)
+ *
+ * lib/charts/svg/fit-trend.ts pins its observed series the same way, for the same reason.
+ */
+const DATA = "#3DC9C0"; // gulf-teal
 /** Matches lib/desk/loaders.ts REBASE_TRAILING_MONTHS — display copy only. */
 const REBASE_MONTHS_LABEL = "year";
 
@@ -40,6 +61,26 @@ export function DeskHero({ hero }: { hero: HeroData }) {
       })),
     [active],
   );
+
+  /**
+   * The fit crosses the RSC boundary as ISO strings and is rehydrated here — the ONLY
+   * thing that happens to it on the client. It is NOT rebuilt, and the client never
+   * re-decides what may be drawn: a second copy of that branch is a second chance to
+   * draw a line over a market the server just ruled directionless.
+   *
+   * The fit belongs to the series the chart is DRAWING. When `trend` is present the
+   * chart draws that instead (a different series, a different unit) — so the fit is
+   * withheld, because a price trend glowing behind a months-of-supply line is a lie
+   * that would look completely convincing.
+   */
+  const fitLayers: FitLayer[] | null = useMemo(() => {
+    if (!active?.fit || active.trend) return null;
+    const o = hydrateOverlay(active.fit);
+    return [o.long, o.current].filter((l): l is FitLayer => !!l);
+  }, [active]);
+
+  // The fit's palette only means something if the data isn't wearing it too. See DATA.
+  const seriesColor = fitLayers ? DATA : (active?.color ?? DATA);
 
   const rebaseCities = hero.rebase?.cities ?? hero.cities;
 
@@ -124,23 +165,36 @@ export function DeskHero({ hero }: { hero: HeroData }) {
               </span>
             ) : null}
           </div>
-          {active.anchor ? (
-            <p className="mt-2 font-mono text-[11px] text-gray-500">
-              {active.anchor.label}: <span className="text-gray-300">{active.anchor.display}</span>
+          {/* The live asking median and months of supply are STATED, not charted. Both
+              are real and both belong on a price panel — but an area drawn under a
+              dollar headline reads as that dollar figure, and months of supply is not
+              a price. It is now said in the unit it is actually in. */}
+          {[active.anchor, active.supply].filter(Boolean).map((d) => (
+            <p key={d!.label} className="mt-2 font-mono text-[11px] text-gray-500">
+              {d!.label}: <span className="text-gray-300">{d!.display}</span>
               {" · "}
-              {active.anchor.sourceLabel}
-              {active.anchor.asOf ? ` · as of ${active.anchor.asOf}` : ""}
+              {d!.sourceLabel}
+              {d!.asOf ? ` · as of ${d!.asOf}` : ""}
             </p>
-          ) : null}
+          ))}
           <div className="mt-4">
             <AreaChart data={areaRows} xDataKey="date" aspectRatio="3 / 1">
               <Grid horizontal />
-              <Area dataKey="value" stroke={active.color} fill={active.color} fillOpacity={0.35} />
+              {/* THE BACKLIT FIT — an underlay, so it paints BEHIND the series below.
+                  What it draws (a line, a fan, or nothing) was decided on the server by
+                  lib/charts/fit-overlay.ts; this renders it and decides nothing. */}
+              {fitLayers ? <FitGlow layers={fitLayers} /> : null}
+              <Area
+                dataKey="value"
+                stroke={seriesColor}
+                fill={seriesColor}
+                fillOpacity={fitLayers ? 0.14 : 0.35}
+              />
               <XAxis />
               <ChartTooltip
                 rows={(point) => [
                   {
-                    color: active.color,
+                    color: seriesColor,
                     label: active.trend?.label ?? active.label,
                     value: active.trend
                       ? months1(typeof point.value === "number" ? point.value : 0)
@@ -154,6 +208,20 @@ export function DeskHero({ hero }: { hero: HeroData }) {
             <p className="mt-2 text-[11px] text-gray-500">
               {active.trend.label} — monthly, {active.trend.sourceLabel}
             </p>
+          ) : null}
+          {/* THE TREND READ — and it ships as a PAIR or not at all. The claim without
+              its falsifier is an [INFERENCE] with nothing staked on it, which the rules
+              of engagement forbid; the engine computes both, so neither is optional. */}
+          {active.fit && fitLayers ? (
+            <div className="mt-3 border-l-2 border-[#22414f] pl-3">
+              <p className="text-[13px] leading-5 text-gray-300">
+                <span className="mr-1.5 font-mono text-[10px] uppercase tracking-wider text-gray-500">
+                  [inference]
+                </span>
+                {active.fit.claim}
+              </p>
+              <p className="mt-1 text-[12px] leading-5 text-gray-500">{active.fit.falsifier}</p>
+            </div>
           ) : null}
         </div>
       ) : (

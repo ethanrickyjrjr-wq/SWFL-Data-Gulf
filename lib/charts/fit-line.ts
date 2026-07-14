@@ -47,8 +47,35 @@ export interface Fit {
   from: string;
   /** MM/DD/YYYY of the last fitted point. */
   to: string;
+  /**
+   * The same two dates, UNFORMATTED. A renderer needs the window's real endpoints to
+   * draw anything, and `from`/`to` are display strings — round-tripping MM/DD/YYYY back
+   * into a Date to get them is a parse we would be inventing, on a value this module
+   * already holds. Carry them; never re-derive them.
+   */
+  fromDate: Date;
+  toDate: Date;
   /** The FITTED line at any date — never anchored to the last observed value. */
   at(when: Date): number;
+  /**
+   * THE FAN OF PACES THIS WINDOW SUPPORTS, at any date — `[lower, upper]`.
+   *
+   * NOT a prediction interval, and it must never be labelled as one. It is the
+   * family of lines through this fit's centre whose slope lies inside `ci` — the
+   * confidence interval ON THE PACE, drawn. Its two edges are exactly the two
+   * paces `trendVerdict`'s falsifier names in words ("its pace still runs anywhere
+   * from a $1,245 a month fall to a $7 a month climb"), which is the whole point:
+   * THE CHART AND THE SENTENCE ARE THE SAME CLAIM. A textbook prediction band would
+   * draw a region we never claimed and invite a reader to hear "prices will land in
+   * here" — a promise this engine does not make and cannot keep.
+   *
+   * A least-squares line always passes through (mean x, mean y), so the fan PINCHES
+   * TO A POINT at the centroid and widens toward both ends. That pinch is not an
+   * artifact — it says something true: we know the middle of this history far better
+   * than we know its edges, and the further you walk from the centre the less the
+   * pace pins the level down.
+   */
+  bandAt(when: Date): [number, number];
 }
 
 export interface FitPoint {
@@ -160,6 +187,18 @@ export function fitLine(points: readonly FitPoint[]): Fit | null {
     tight: r2 >= TIGHT_R2,
     from: mdy(pts[0].when),
     to: mdy(pts[n - 1].when),
+    fromDate: pts[0].when,
+    toDate: pts[n - 1].when,
     at: (when: Date) => intercept + slope * monthsBetween(origin, when),
+    // Pivoted on the CENTROID (mx, my), which the fitted line passes through by
+    // construction — so `at()` is this fan's midline at every date, and the three
+    // curves can never drift apart. Rebuilding the pivot from `intercept` in a
+    // renderer would be back-solving a number this module already holds.
+    bandAt: (when: Date): [number, number] => {
+      const dx = monthsBetween(origin, when) - mx;
+      const a = my + ci[0] * dx;
+      const b = my + ci[1] * dx;
+      return a <= b ? [a, b] : [b, a];
+    },
   };
 }
