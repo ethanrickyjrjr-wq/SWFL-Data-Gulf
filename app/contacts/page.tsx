@@ -16,14 +16,19 @@ export default function ContactsPage() {
 
   async function load() {
     const res = await fetch("/api/contacts");
-    if (res.ok) setContacts(await res.json());
+    if (res.ok) {
+      // GET /api/contacts now returns { contacts, tier } (was a bare array) —
+      // this page only needs the list, so it drops tier on the floor.
+      const body = await res.json();
+      setContacts(body.contacts ?? []);
+    }
   }
   useEffect(() => {
     // Inline fetch (not `load()`) so the linter sees the async boundary —
     // setState happens in a .then callback, never synchronously in the effect.
     fetch("/api/contacts")
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setContacts)
+      .then((r) => (r.ok ? r.json() : { contacts: [] }))
+      .then((body) => setContacts(body.contacts ?? []))
       .catch(() => {});
   }, []);
 
