@@ -206,6 +206,13 @@ export interface Verdict {
    *
    * Branch on `valueLow`. Branching on `kind` gets `plateau` wrong — it is the one kind
    * that appears on BOTH sides of this rule.
+   *
+   * DO NOT WIDEN THE CLAIM'S NUMERALS. The two BAND falsifiers have no comparative shape
+   * ("more than" was removed — see the no-direction branch), so the only thing that kills
+   * them when they are not settled is `unanchored-number`: their edges appear in no other
+   * settled sentence. Quote a band edge in the CLAIM too and you hand the gate that
+   * numeral as an anchor, and the falsifier walks through unsettled. The two constructions
+   * are load-bearing against each other; the tests hold both ends.
    */
   falsifier: SettledClaim & { value: number; valueLow: number | null };
 }
@@ -253,22 +260,33 @@ export function trendVerdict(fits: readonly WindowFit[]): Verdict | null {
 
   // The LONG window doesn't establish a direction → we say nothing about direction.
   if (!long.fit.established) {
-    // THE BAND STRADDLES FLAT, AND ITS TWO EDGES ARE THE BASE VALUE. Saying only "no
-    // trend" hands the reader nothing to check. The honest content of an unestablished
-    // fit is the SPREAD the data still allows — quote it, in dollars a month.
+    // ONE CONSTRUCTION FOR BOTH FLAT BANDS — this kind and `plateau`. They are the same
+    // situation at two different windows (a band that straddles flat), and they had two
+    // different sentences, of which ONE WAS FALSE.
+    //
+    // This kind used to threshold its band edges: "a climb of MORE THAN $640 a month, or
+    // a slide of MORE THAN $400 a month." The fixture hid what that construction does on
+    // a lopsided band. Take a real one — [−$2,000, +$15] — and it prints "a climb of more
+    // than $15 A MONTH", which is not a breaking pace and never was: $15 is where the band
+    // ENDS. A pace a hair past an edge does not pull the refit clear of flat, so the
+    // sentence promised a break that would not happen. It is exactly the knife-edge the
+    // plateau branch refuses to print, and it was live here.
+    //
+    // So a band is QUOTED AS A BAND, at both windows. The edges are the base value — the
+    // honest content of an unestablished fit is the spread it still allows — and the break
+    // is the band SETTLING on a direction, which is the thing that is actually true.
+    //
+    // The break stays TWO-SIDED. A one-sided break would have to pick a side, and picking
+    // a side means reading the sign of a slope we have just ruled unreadable — the law
+    // this module opens with.
     const [lo, hi] = long.fit.ci; // lo <= 0 <= hi, or `established` would be true
     const sentence =
-      `${across} this market has no readable direction. The pace could be anything from ` +
-      `a ${usd0(lo)} a month slide to a ${usd0(hi)} a month climb — a spread that still ` +
-      `includes flat, so we do not call one.`;
-    // THE FALSIFIER IS TWO-SIDED, AND IT MUST BE. A one-sided break ("breaks if it
-    // climbs past X") would have to pick a side, and picking a side means reading the
-    // sign of a slope we have just ruled unreadable — the exact law this module opens
-    // with. So BOTH edges ship, and the market breaks the read by clearing EITHER.
+      `${across} this market does not establish a direction either way — across the ` +
+      `whole stretch its pace never separates from flat.`;
     const falsSentence =
-      `This read breaks the first time the market holds one direction for two months ` +
-      `running — a climb of more than ${usd0(hi)} a month, or a slide of more than ` +
-      `${usd0(lo)} a month.`;
+      `This read breaks the first time this history settles on a direction of its own — ` +
+      `today its pace still runs anywhere from a ${usd0(lo)} a month slide to a ` +
+      `${usd0(hi)} a month climb, which is why we do not call one.`;
     return {
       kind: "no-direction",
       tight,

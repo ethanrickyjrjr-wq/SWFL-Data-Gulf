@@ -451,18 +451,48 @@ describe("the verdict is CLIENT COPY — it obeys the rules of engagement", () =
   // The rules require an inference to carry the audited base value. Zero was the number
   // the interval had to clear, which is a fact about our method, not about the market.
   // The honest base value of an unestablished fit is the SPREAD it still allows.
-  it("no-direction: the base value is the BAND, and the falsifier breaks on EITHER edge", () => {
+  it("no-direction: the base value is the BAND, and the break is TWO-SIDED", () => {
     const v = VERDICTS["no-direction"]; // ex-boom ci [-400, 640]
-    // The band is quoted in the copy — that is the base value a reader can check.
-    expect(v.claim.sentence).toContain("$400 a month slide");
-    expect(v.claim.sentence).toContain("$640 a month climb");
+    // The band is quoted in the copy — that is the base value a reader can check, and it
+    // is the ONLY one this kind has (the slope's sign may not be read at all).
+    expect(v.falsifier.sentence).toContain("from a $400 a month slide to a $640 a month climb");
     // TWO-SIDED, and it must be: a one-sided break would have to pick a side, and picking
     // a side means reading the sign of a slope this module just ruled UNREADABLE.
-    expect(v.falsifier.sentence).toContain("climb of more than $640 a month");
-    expect(v.falsifier.sentence).toContain("slide of more than $400 a month");
+    expect(v.falsifier.sentence).toContain("settles on a direction of its own");
     expect(v.falsifier.value).toBe(640); // climb edge
     expect(v.falsifier.valueLow).toBe(-400); // slide edge
     expect(v.falsifier.value).not.toBe(0); // the old sentinel
+  });
+
+  /**
+   * THE KNIFE-EDGE THE FIXTURE WAS HIDING.
+   *
+   * no-direction used to threshold its band edges — "a climb of MORE THAN $640 a month, or
+   * a slide of MORE THAN $400 a month" — and on the tidy [−400, 640] fixture that reads
+   * fine. It is the SAME construction the plateau branch refuses to print, and its
+   * absurdity is data-dependent, not kind-dependent. Give it a lopsided band that still
+   * straddles flat and it shipped, live:
+   *
+   *   "a climb of more than $15 A MONTH, or a slide of more than $2,000 a month"
+   *
+   * $15 is not a breaking pace. It is where the band ENDS — a pace a hair past it does not
+   * pull the refit clear of flat, so the sentence promised a break that would not happen.
+   * A band is quoted as a BAND, at BOTH windows. One construction, no knife-edges.
+   */
+  it("a LOPSIDED flat band never dresses its edge up as a breaking pace", () => {
+    const v = trendVerdict([
+      wf("ex-boom", -900, 0.2, 108, [-2000, 15]), // straddles flat, hard against one side
+      wf("24m", -50, 0.0, 24, [-900, 800]),
+    ])!;
+    expect(v.kind).toBe("no-direction");
+    // The edge is REPORTED (it is the band), never THRESHOLDED.
+    expect(v.falsifier.sentence).toContain("from a $2,000 a month slide to a $15 a month climb");
+    expect(v.falsifier.sentence).not.toMatch(/(more|less) than \$15\b/);
+    expect(v.falsifier.sentence).not.toMatch(/more than/i);
+    // Still dies when it is not itself settled — by `unanchored-number`, since the band
+    // edges appear in no other settled sentence. That is the whole gate for this kind.
+    expect(auditClaims(v.falsifier.sentence, [v.claim]).length).toBeGreaterThan(0);
+    expect(auditClaims(v.falsifier.sentence, [v.claim, v.falsifier])).toEqual([]);
   });
 
   // A PLATEAU DENIES A TURN, so that is what it stakes — one-sided, and keyed to the LONG

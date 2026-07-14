@@ -61,6 +61,22 @@ unify rhythm, not appearance.**
 Verify: 2,630 tests green (`lib/email` + `lib/charts` + `lib/deliverable`) · `bunx tsc --noEmit` clean.
 NOT PUSHED.
 
+## 2026-07-14 (Opus 4.8 · main) — ONE CONSTRUCTION FOR BOTH FLAT BANDS (follow-up to the entry below)
+
+Correcting my own fix. The entry below rejected threshold-framing of a band's edges in `plateau` — *"$7 a month" is where the band ends, not a pace that breaks anything* — and then **left that exact construction live in `no-direction`.** Same situation (a band straddling flat), two different sentences, one of them false.
+
+The tidy `[−400, 640]` fixture hid it. The absurdity is **data-dependent, not kind-dependent** — take a lopsided band that still straddles flat, `[−$2,000, +$15]`, and it printed:
+
+> "a climb of **more than $15 a month**, or a slide of more than $2,000 a month"
+
+$15 is not a breaking pace. It is where the band **ends**; a pace a hair past an edge does not pull the refit clear of flat, so the sentence promised a break that would not happen. Now both flat-band kinds quote the band **as a band** and stake the break on it *settling on a direction* — the thing that is actually true. One construction, no knife-edges. Regression test carries the lopsided band, since the fixture never would.
+
+**Gate note for phase 2 (in the type comment now):** neither band falsifier has a comparative shape any more, so the only thing that kills them when unsettled is `unanchored-number` — their edges appear in no other settled sentence. **Do not quote a band edge in the claim too**, or you hand the gate that numeral as an anchor and the falsifier walks through. The two constructions are load-bearing against each other.
+
+50 tests green in the file, 1079 across `lib/charts` + `lib/deliverable`, typecheck clean.
+
+---
+
 ## 2026-07-14 (Opus 4.8 · main) — THE FALSIFIER THAT WAS ALREADY TRUE WHEN WE PRINTED IT
 
 Prose pass on `trendVerdict` (`lib/charts/series-fit.ts`) before phase 2 wires four renderers to it. Closes `trend_verdict_prose_before_renderer`. Zero production consumers today — which is exactly why now.
