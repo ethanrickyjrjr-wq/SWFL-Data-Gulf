@@ -143,6 +143,7 @@ import { canonStreet } from "@/lib/listings/resolve-subject";
 // ONE AUTHORITY for the community fact + its "these are the COMMUNITY's, not the HOUSE's"
 // warning — this recipe held the only copy until the shared listing narrator needed it too.
 import { communitySourceLine } from "@/lib/listings/listing-detail";
+import { isCoreScope } from "@/refinery/lib/core-scope.mts";
 import type { ListingDetailFacts } from "@/lib/listings/listing-detail";
 import { loadParsedBrain } from "@/lib/fetch-brain";
 import { asOfFromToken } from "@/lib/project/as-of";
@@ -366,7 +367,12 @@ export async function loadAreaTiming(
   deps: { load?: typeof loadParsedBrain } = {},
 ): Promise<MarketTiming | null> {
   const want = String(zip ?? "").match(/\d{5}/)?.[0];
-  if (!want) return null;
+  // THE SCOPE ROOT, ON THE SUBJECT. The peer set below is already held to the subject's own
+  // metro — but the SUBJECT row was looked up by raw ZIP against a table that spans four
+  // Redfin metros, two of them (Punta Gorda / North Port) outside our coverage. Hand this a
+  // Sarasota ZIP and it would return a perfectly-arithmetic timing claim about a county we do
+  // not cover. Scoping the peers was never enough; the subject is the door. Lee + Collier only.
+  if (!want || !isCoreScope(want)) return null;
   const load = deps.load ?? loadParsedBrain;
 
   const brain = await load("housing-swfl").catch(() => null);

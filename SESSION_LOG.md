@@ -39,6 +39,16 @@ SAYS. Every listing email is still 100% `span: 12` — a flat stack of full-widt
 `lib/email/lifecycle-chrome.ts` actually saying `span: 6`. Check: `email_lifecycle_uses_grid_columns`.
 Handoff: `docs/handoff/2026-07-14-layout-root-phase4-handoff.md`.
 
+**A REAL ZIP-SCOPE LEAK, surfaced by Gate 8 because this commit TOUCHED the file.** `loadAreaTiming`
+(`under-contract.ts`, landed 12h ago with the claim gate) scopes its PEER set to the subject's own
+Redfin metro — carefully, with a long comment about why. But it looked the SUBJECT row up by raw ZIP
+against a table spanning four metros, two of them (Punta Gorda / North Port) outside coverage. Hand
+it a Sarasota ZIP and it returns a perfectly-arithmetic "typical days to sell" claim about a county
+we do not cover. **Scoping the peers was never enough — the subject is the door.** Fixed with
+`isCoreScope(want)` at the top of the function. The gate only scans touched files, which is why a
+12-hour-old leak surfaced today; treat a Gate 8 hit on someone else's code as a real finding, not a
+formality.
+
 **Spend disclosure:** `dev-render-listing-emails.mts` is built for zero model calls, but Bun's `.env`
 overrides the shell, so `ANTHROPIC_API_KEY` was picked up anyway and the narrator fired 7 live calls.
 Small, real, unintended. Recorded in the handoff so the next session doesn't repeat it.
