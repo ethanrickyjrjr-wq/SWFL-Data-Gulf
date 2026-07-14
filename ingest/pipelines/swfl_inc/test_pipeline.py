@@ -16,6 +16,10 @@ import re
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+import pytest
+
+pytest.importorskip("crawl4ai")  # .pipeline needs the pinned crawl4ai venv, not system Python
+
 from ingest.pipelines.swfl_inc.pipeline import (
     SWFL_INC_FEEDS,
     dedup_rows,

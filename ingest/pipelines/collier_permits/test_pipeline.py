@@ -13,6 +13,8 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
+pytest.importorskip("crawl4ai")  # .pipeline -> .fetcher needs the pinned crawl4ai venv
+
 from .geocoder import (
     _extract_zip_from_matched_addr,
     _haversine_mi,

@@ -23,6 +23,17 @@ SOURCES = [
         "name": "collier_county_govt",
         "url": "https://www.colliercountyfl.gov/news",
     },
+    {
+        "name": "gulfshore_business",
+        "url": "https://www.gulfshorebusiness.com/news/",
+    },
+    {
+        # NOT /southwest-florida/ -- that path 404s and silently falls back to a
+        # Florida-wide feed (Tampa Bay/Sarasota/Pasco, not Lee/Collier). This is the
+        # actual SWFL-scoped section, verified live 07/14/2026.
+        "name": "business_observer",
+        "url": "https://www.businessobserverfl.com/news/charlotte-lee-collier/",
+    },
 ]
 
 LINK_RE = re.compile(r"\[([^\]]{10,120})\]\((https?://[^\)]+)\)")

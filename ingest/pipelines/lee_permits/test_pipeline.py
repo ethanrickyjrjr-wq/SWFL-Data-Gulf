@@ -11,6 +11,8 @@ from unittest.mock import patch
 import dlt
 import pytest
 
+pytest.importorskip("crawl4ai")  # .pipeline -> .scraper needs the pinned crawl4ai venv
+
 from . import pipeline as pipeline_mod
 from .pipeline import permits_resource
 

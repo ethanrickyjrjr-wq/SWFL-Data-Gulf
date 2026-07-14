@@ -1,6 +1,9 @@
 """Scraper tests — parse a captured Accela result page into typed rows."""
 from pathlib import Path
 import pytest
+
+pytest.importorskip("crawl4ai")  # .scraper needs the pinned crawl4ai venv, not system Python
+
 from . import scraper as _scraper_mod  # for monkeypatching fetch_sequential
 from .scraper import (
     PermitRow,

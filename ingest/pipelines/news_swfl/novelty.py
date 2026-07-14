@@ -20,7 +20,7 @@ from .normalizer import ArticleRow
 log = logging.getLogger(__name__)
 
 # Cadence is 1d, but the registry documents legitimate 0-1 article days and the two govt
-# sources are weekday-only. Zero new URLs across all 4 sources for a full week = broken
+# sources are weekday-only. Zero new URLs across all sources for a full week = broken
 # scrape (LINK_RE regression, markup change, WAF block), not a slow news week.
 NEWS_NOVELTY_MAX_AGE_DAYS = 7
 

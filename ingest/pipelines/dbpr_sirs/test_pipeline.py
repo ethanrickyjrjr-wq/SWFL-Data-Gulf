@@ -3,6 +3,10 @@
 No network / no Qlik — the websocket pull is integration-tested live. These lock the column
 mapping per app schema and the county filter, which is what the brain depends on.
 """
+import pytest
+
+pytest.importorskip("playwright")  # .pipeline -> .qix needs playwright, not always installed
+
 from ingest.pipelines.dbpr_sirs.pipeline import (
     map_rows,
     normalize_county,

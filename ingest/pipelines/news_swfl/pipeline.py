@@ -54,7 +54,7 @@ def run(dry_run: bool = False):
     # NOVELTY guard, not an age guard: news has no real content date (published_date is
     # today-coerced and re-bumped by delete-insert merge). carry_first_seen restores each
     # re-seen URL's stored first-seen date, so MAX(published_date) = the last time a NEW
-    # article_url appeared. 7d gate: a week with zero new URLs across all 4 sources is a
+    # article_url appeared. 7d gate: a week with zero new URLs across all sources is a
     # broken scrape, not a quiet news week. An empty batch (all sources failing, currently
     # a green no-op) raises immediately via newest=None.
     batch = carry_first_seen(fetch_all_sources())

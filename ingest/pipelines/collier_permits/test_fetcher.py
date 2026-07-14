@@ -4,6 +4,10 @@ _parse_listing_html and _build_click_js are fully testable without network.
 """
 from __future__ import annotations
 
+import pytest
+
+pytest.importorskip("crawl4ai")  # this module needs the pinned crawl4ai venv, not system Python
+
 from ingest.pipelines.collier_permits.fetcher import (
     MonthlyReport,
     _build_click_js,

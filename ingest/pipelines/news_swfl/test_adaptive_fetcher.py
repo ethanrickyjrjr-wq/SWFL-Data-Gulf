@@ -7,6 +7,10 @@ filtered out, failed results skipped.
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
+pytest.importorskip("crawl4ai")  # adaptive_fetcher needs the pinned crawl4ai venv, not system Python
+
 from . import adaptive_fetcher as af
 
 
@@ -76,8 +80,9 @@ def test_fetch_all_sources_adaptive_merges_sources_and_swallows_errors():
 
     with patch.object(af, "_crawl_source", side_effect=fake_crawl_source):
         rows = af.fetch_all_sources_adaptive()
-    # 4 sources, naples raises, the other 3 each return the one good row
-    assert len(rows) == 3
+    # 6 sources (07/14/2026: gulfshore_business + business_observer added), naples raises,
+    # the other 5 each return the one good row
+    assert len(rows) == 5
     assert all(r["article_url"] == good.url for r in rows)
 
 
