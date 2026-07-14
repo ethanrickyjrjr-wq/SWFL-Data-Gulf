@@ -167,3 +167,45 @@ test("blank brand gets the editorial palette; a real brand is preserved", () => 
   const branded = buildListingFlyer(FACTS, brandedCurrentDoc());
   expect(branded.globalStyle.accentColor).toBe("#C17B3E");
 });
+
+// ── DAYS ON MARKET — the real one, and only where it is honest ────────────────
+//
+// Operator, 07/14/2026: "I WANT DAYS ON MARKET." We hold it: `today − the vendor's
+// list_date` (/property-tax-history), resolved for the ACTIVE subject. On a home that is
+// still FOR SALE the MLS clock is still running, so that count IS days on market — the
+// "Days Since Listed" hedge exists for under-contract, whose clock stopped at a pending
+// date we do not hold. These tests pin the three things that make it honest.
+
+test("days on market takes the Type cell — 'Residential' loses to a real number", () => {
+  const doc = buildListingFlyer(FACTS, brandedCurrentDoc(), 12);
+  const s = strip(doc);
+  const cells = s?.type === "stats" ? s.props.stats : [];
+
+  expect(cells.map((c) => c.label)).toContain("Days on Market");
+  expect(cells.map((c) => c.label)).not.toContain("Type");
+  expect(cells.find((c) => c.label === "Days on Market")?.value).toBe("12");
+  // Still a SIX-cell strip — the slot is taken, not added. Seven cells would not fit.
+  expect(cells).toHaveLength(6);
+});
+
+test("a fresh listing reads ONE, not zero — and the label goes singular", () => {
+  // The whole reason this cell was missing: it was dismissed as "~0 on a new listing".
+  // It is 1. "1 Day on Market" is the most persuasive number on the email.
+  const s = strip(buildListingFlyer(FACTS, brandedCurrentDoc(), 1));
+  const cells = s?.type === "stats" ? s.props.stats : [];
+  const dom = cells.find((c) => c.label.startsWith("Day"));
+
+  expect(dom?.value).toBe("1");
+  expect(dom?.label).toBe("Day on Market"); // never "1 Days on Market"
+});
+
+test("no list date held (a vendor miss) → Type keeps its slot, never a blank cell", () => {
+  // RULE 0.7: a gap is filled from the next lane or left alone — the build is never blocked,
+  // and a number is never invented to fill it.
+  for (const miss of [null, undefined]) {
+    const s = strip(buildListingFlyer(FACTS, brandedCurrentDoc(), miss));
+    const cells = s?.type === "stats" ? s.props.stats : [];
+    expect(cells.map((c) => c.label)).toContain("Type");
+    expect(cells.map((c) => c.label)).not.toContain("Days on Market");
+  }
+});

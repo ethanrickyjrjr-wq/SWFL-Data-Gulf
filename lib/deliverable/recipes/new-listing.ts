@@ -33,6 +33,7 @@
 // resolve. Never use the hand-written showcase HTML as an acceptance target.
 
 import { buildListingFlyer } from "@/lib/email/listing-flyer";
+import { daysSinceListed, resolveSubjectListDate } from "./under-contract";
 import {
   authorListingNarrative,
   clearNarrativeSlots,
@@ -48,9 +49,19 @@ export async function buildNewListing(ctx: RecipeBuildContext): Promise<EmailDoc
   // than shipping an empty flyer (never refuse, but never fake a house either).
   if (!facts) return null;
 
+  // DAYS ON MARKET — the real one. `today − the vendor's list_date`, resolved off the lat/lon
+  // the dispatcher already has (`/nearby-home-values` → property_id → `/property-tax-history`,
+  // both hour-cached). This home is ACTIVE, so its MLS clock is still running and the count IS
+  // days on market — the "Days Since Listed" hedge belongs to under-contract, whose clock
+  // stopped at a pending date we do not hold.
+  //
+  // Best-effort by contract: a vendor miss → null → the Type cell simply keeps its slot. The
+  // build is NEVER blocked on it (RULE 0.7), and no number is ever invented to fill it.
+  const daysOnMarket = daysSinceListed(await resolveSubjectListDate(facts), new Date());
+
   // The coded flyer grid. Brand (globalStyle, header, footer, agent card) is sticky
   // and lifted from whatever is on the canvas — we never author a brand.
-  let doc = buildListingFlyer(facts, currentDoc);
+  let doc = buildListingFlyer(facts, currentDoc, daysOnMarket);
 
   // NO CHART ON A NEW LISTING. The slot exists in the grid; drop it rather than
   // fill it with filler. An empty chart box is worse than no chart.

@@ -42,6 +42,87 @@ paragraph that STILL carries the street is dropped entirely (`leaksStreet` — w
 subdivision anyway, so naming the community trips nothing).
 
 982 pass, 0 fail. `next build` clean.
+## 2026-07-14 (Opus 4.8 · main) — DAYS ON MARKET: WE HELD IT ALL ALONG, AND "IT WOULD BE ZERO" WAS THE EXCUSE
+
+**Operator: "I WANT DAYS ON MARKET." We have it. It is now on the New Listing email.** Opens
+`email_dom_cell_active_recipes` (extend to the other active recipes).
+
+**I was wrong twice, and both errors are worth writing down.**
+
+1. **I called it "days since WE first saw it."** It never was. `resolveSubjectListDate` reads the
+   VENDOR's `list_date` (`/property-tax-history` → `property_history[].listing.list_date`) — a real
+   listing date, nothing to do with our crawl. My sloppy paraphrase of the codebase's cautious label
+   is what made it sound like a crawl artifact, and the operator was right to reject that.
+2. **I dismissed it as "~0 on a new listing, a dead cell."** It is not zero, it is ONE — and "1 Day
+   on Market" is the most persuasive number on a new-listing email. That dismissal is precisely the
+   reasoning that kept the field unmodelled. Label goes singular at 1.
+
+**The honesty line, and it is the whole reason this was hedged before.** On a home that is still FOR
+SALE the MLS clock is RUNNING, so `today − list_date` **is** days on market — no hedge needed. On an
+under-contract or sold home the clock STOPPED at a pending date we do not hold, so the same
+arithmetic would overstate it. That is the exact fabrication that got `under-contract` refuted once,
+which is why that recipe says "Days Since Listed" and must keep saying it. **DOM ships on ACTIVE
+listings only. Never on under-contract or just-sold.** Pinned in `listing-flyer.test.ts`.
+
+**Every primitive already existed** — `parseActiveListDate`, `fetchActiveListDate`,
+`resolveSubjectListDate`, `daysSinceListed`, all exported and tested in `under-contract.ts`. The
+listing path simply never called them. Wiring: `listingSpecs(facts, daysOnMarket?)` +
+`buildListingFlyer(facts, current, daysOnMarket?)`, resolved in `new-listing.ts`. Two hour-cached
+vendor calls; a miss → null → **Type keeps its slot, never a blank** (RULE 0.7 — never blocked,
+never invented).
+
+**TYPE yields the slot.** The strip holds six and a seventh will not fit. `price-reduced` already
+drops this exact cell, calling it "the one cell a reader will never use" — "Residential" loses to
+"1 Day on Market".
+
+**Found while answering it (check opened, `email_preview_tile_market_stats_in_house_strip`):** the
+New Listing SHOWCASE TILE was showing COUNTY-MARKET stats inside the HOUSE spec strip — `preview-fill`
+carries only 3 house stats for the demo listing, and cells 4–6 fall through to a global market pool
+that overwrites value AND label. That is where the operator's "83 / Median Days on Market" came from:
+a county median sitting where `Lot` and `Type` belong. The LIVE emails were always correct. 2,567
+pass / 0 fail · `bunx next build` exit 0.
+
+---
+
+## 2026-07-14 (Opus 4.8 · main) — THE SPEC STRIP RAN OFF THE PHONE, AND A TABLE CANNOT REFLOW
+
+**Operator caught it in the Phase 4 mobile render: the 6-cell spec strip runs off the page below
+600px** — "Residential" clipped at the edge, the whole email scrolling sideways. Closes
+`email_spec_strip_overflows_mobile`.
+
+**Not a regression — a bug the mobile render finally exposed.** `StatsBlock` HAS a stacking rule
+(`MIN_CELL_PX = 180`), but it keys off `colPx`, and `compile-grid` only passes `colPx` on the
+MULTI-COLUMN path. A full-bleed row passes `undefined`, so `stacked` was ALWAYS false for the strip.
+The strip is a TABLE, and a table does not reflow: 6 cells cannot fit 358px, so it just overflowed.
+
+**Fixed with the Cerberus hybrid the compiler already uses for columns** — each cell an
+`inline-block` capped at its share of the row, so 600px is one row of six and a phone WRAPS to 3+3,
+no media query. Outlook ignores `inline-block`, so a ghost table pins its widths (assembled as a
+STRING: MSO conditionals are HTML comments and React strips them — same reason `compile-grid` and
+`email-head` do it that way). Swept all seven emails at 390px: **zero sideways scroll, no
+overflowing element.** The 3-cell grid rows fit fine, so the strip was the only offender.
+
+**The arithmetic bit me, and the test now pins it.** First pass computed the cell width against the
+600px canvas — but the cells share the Section's CONTENT box (600 − 2×16 = **568**). Six 100px cells
+sum to 600, overflow by 32, and the sixth cell wrapped ON DESKTOP: the exact bug, moved one layer
+down. Caught by rendering at both widths, not by a test — so `render-email-doc.test.ts` now asserts
+the cells fit 568 and are still as wide as they can be.
+
+**The honest cost, stated: equal-width cells are not free.** The old table auto-sized columns,
+quietly stealing width from "BEDS" to give it to "MEDIAN DAYS ON MARKET". Wrapping requires FIXED px
+widths, so every cell is now 568/n. Invisible in the listing campaign (Beds/Baths/Sq Ft/Lot/$/Sq Ft/
+Type are short — they render identically). Visible in the New Listing tile, where the emphasised
+value `83 days` split across two lines. Tightening the cell padding does not buy enough (tried).
+
+**The real fix was CONTENT, not more mechanism.** `preview-fill` carried
+`{ value: "83 days", label: "Median Days on Market" }` — the unit printed TWICE, and every other cell
+already puts the unit in the label (`2,010` / `Sq Ft`). Now `{ value: "83", ... }`: same figure, same
+source, redundancy gone, and it fits. Operator asked why not just label it "DOM" — because DOM is
+realtor jargon and these emails go to the agent's CLIENTS, not to other agents (rules of engagement
+rule 5). Moving the unit fixes the wrap without printing jargon at a homeowner.
+
+---
+
 ## 2026-07-14 (Opus 4.8 · main) — PHASE 4: THE CAMPAIGN SPENDS ITS COLUMNS, AND THE RENDER OVERRULED THE PLAN
 
 **The campaign is no longer a flat stack.** The agent card and the CTA now share ONE row — they

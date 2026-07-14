@@ -3,8 +3,10 @@
 // past width:100% when an unbreakable 32px value can't fit its cell — that
 // expansion pushed every half-width stats seed ~100px past the 600px container
 // (the stair-stepped captures of 07/10/2026).
+import type { CSSProperties } from "react";
 import { Section, Row, Column, Text } from "@react-email/components";
 import type { EmailGlobalStyle, StatItem, StatsProps } from "../doc/types";
+import { GRID_WIDTH } from "../grid-schema";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
 import { EditableText, type EditScope } from "./editable-text";
 import { OPEN_SLOT_INK } from "./OpenSlot";
@@ -25,6 +27,26 @@ import {
  *  Full width (600/3 = 200) keeps the classic row; any grid column tighter
  *  than that per cell stacks. */
 const MIN_CELL_PX = 180;
+
+/** The strip Section's HORIZONTAL padding. ONE constant, because the wrapped-cell arithmetic
+ *  below must subtract exactly what the Section adds: a cell width computed against the full
+ *  600px canvas overflows the real 568px content box, and the sixth cell drops to its own line
+ *  ON DESKTOP — which is the bug the wrap was supposed to fix, moved one layer down. */
+const STRIP_PAD_X = 16;
+
+/** A React style object → an inline CSS string. Every value the scale hands us is ALREADY a
+ *  string ("16px", "1.55" — see `text()` in scale.ts), so this is a pure key transform with no
+ *  unit guessing. It exists so the wrapped email cells below reuse the SAME style objects the
+ *  React path builds — one styling authority, not a second one that drifts. */
+function cssText(style: CSSProperties): string {
+  return Object.entries(style)
+    .filter(([, v]) => v !== undefined && v !== null && v !== "")
+    .map(([k, v]) => `${k.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}:${String(v)}`)
+    .join(";");
+}
+
+const escHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export function StatsBlock({
   props,
@@ -166,16 +188,97 @@ export function StatsBlock({
   // runs under the price. Five cells in a STRIP read as a spec line; five cells in a GRID
   // read as a wall. Same data, entirely different email.
   if (density === "strip") {
+    const stripSection = {
+      ...sectionStyle,
+      borderTop: `1px solid ${globalStyle.accentColor}`,
+      borderBottom: `1px solid ${globalStyle.accentColor}`,
+      padding: pad(12, STRIP_PAD_X),
+    };
+    const labelStyle = {
+      fontFamily: font,
+      ...label(),
+      color: MUTED,
+      margin: space(4, 0, 0),
+    } as CSSProperties;
+
+    // ── THE STRIP MUST WRAP, AND A TABLE CANNOT (07/14/2026) ────────────────────
+    //
+    // A stats row is an HTML table, and a table does not reflow: six cells laid out for a
+    // 600px canvas simply RUN OFF a 390px phone — "Residential" clipped at the edge and the
+    // whole email scrolling sideways (operator, 07/14/2026). `MIN_CELL_PX` never caught this,
+    // because it keys off `colPx`, and compile-grid only passes `colPx` on the MULTI-COLUMN
+    // path — a full-bleed row passes `undefined`, so `stacked` was ALWAYS false here.
+    //
+    // The fix is the same Cerberus hybrid the compiler already uses for columns: each cell is
+    // an `inline-block` capped at its share of the row. At 600px the arithmetic is exact
+    // (6 × 100 = 600) so THE DESKTOP STRIP IS UNCHANGED; on a phone `width:100%` overflows the
+    // room and the cells WRAP (3 + 3) with no media query. Outlook ignores `inline-block`, so
+    // the ghost table pins its widths — which is why this is assembled as a STRING: MSO
+    // conditionals are HTML comments, and React strips those (same reason `compile-grid` and
+    // `email-head` do it this way).
+    //
+    // The CANVAS keeps the React table below — it is editable, and it is never below 600px.
+    if (emailRender && cells.length > 0) {
+      // The cells share the Section's CONTENT box, not the canvas — 600 − (2 × 16) = 568.
+      // Compute against 600 and six 100px cells sum to 600, the row overflows by 32px, and the
+      // sixth cell wraps ON DESKTOP. Measured, not assumed (07/14/2026).
+      const rowPx = (colPx ?? GRID_WIDTH) - STRIP_PAD_X * 2;
+      const cellPx = Math.floor(rowPx / cells.length);
+      const labelCss = cssText(labelStyle);
+      // KNOWN TENSION, stated because the next person WILL hit it. A wrapped cell is a FIXED
+      // 568/n px, where the old table auto-sized each column to its content — stealing width
+      // from "BEDS" to give it to "MEDIAN DAYS ON MARKET". At n=6 that is 94px, and a long
+      // label or a two-word emphasised value ("83 days") wraps where it used to fit. Tightening
+      // this padding does NOT buy enough to change that (tried, 07/14/2026).
+      //
+      // It is harmless for the LISTING campaign (Beds/Baths/Sq Ft/Lot/$/Sq Ft/Type are short)
+      // and visible in templates with 4-word labels. The fix there is the CONTENT — put the
+      // unit in the label, not the value ("83" + "DAYS ON MARKET", the convention every other
+      // cell already follows) — not more mechanism here.
+      const cellPad = pad(4, 8);
+
+      let html =
+        `<!--[if mso]><table role="presentation" cellspacing="0" cellpadding="0" border="0" ` +
+        `width="${rowPx}" style="width:${rowPx}px;"><tr><![endif]-->`;
+      for (const { stat, empty } of cells) {
+        html +=
+          `<!--[if mso]><td width="${cellPx}" valign="top" style="vertical-align:top;text-align:center;"><![endif]-->` +
+          `<div style="display:inline-block;width:100%;max-width:${cellPx}px;vertical-align:top;` +
+          `text-align:center;padding:${cellPad};box-sizing:border-box;">` +
+          `<p style="${cssText(valueStyle(empty, stat.emphasis))}">${escHtml(stat.value ?? "")}</p>` +
+          `<p style="${labelCss}">${escHtml(stat.label ?? "")}</p>` +
+          `</div>` +
+          `<!--[if mso]></td><![endif]-->`;
+      }
+      html += `<!--[if mso]></tr></table><![endif]-->`;
+
+      return (
+        <Section style={stripSection} data-stats-variant="strip">
+          {/* font-size:0 kills the whitespace gap between inline-blocks; each cell sets its
+              own step from the scale. */}
+          <div
+            style={{ fontSize: 0, textAlign: "center" }}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+          {props.footnote ? (
+            <Text
+              style={{
+                fontFamily: font,
+                ...text("mono"),
+                color: MUTED,
+                textAlign: "center",
+                margin: space(8, 0, 0),
+              }}
+            >
+              {props.footnote}
+            </Text>
+          ) : null}
+        </Section>
+      );
+    }
+
     return (
-      <Section
-        style={{
-          ...sectionStyle,
-          borderTop: `1px solid ${globalStyle.accentColor}`,
-          borderBottom: `1px solid ${globalStyle.accentColor}`,
-          padding: pad(12, 16),
-        }}
-        data-stats-variant="strip"
-      >
+      <Section style={stripSection} data-stats-variant="strip">
         <Row>
           {cells.map(({ stat, i, empty }) => (
             <Column key={i} style={{ textAlign: "center", padding: pad(4, 8) }}>
@@ -193,7 +296,7 @@ export function StatsBlock({
                 path={`stats.${i}.label`}
                 scope={scope}
                 placeholder="Label"
-                style={{ fontFamily: font, ...label(), color: MUTED, margin: space(4, 0, 0) }}
+                style={labelStyle}
               />
             </Column>
           ))}

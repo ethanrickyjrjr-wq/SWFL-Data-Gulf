@@ -120,4 +120,57 @@ describe("renderEmailDocHtml — the ONE EmailDoc→HTML root", () => {
     expect(html).not.toContain('data-stats-variant="stacked"');
     expect(html).toContain("$630,000");
   });
+
+  // ── THE SPEC STRIP MUST FIT ITS OWN CONTENT BOX (07/14/2026) ─────────────────
+  //
+  // A 6-cell spec strip is a TABLE, and a table does not reflow: it ran off a 390px phone —
+  // "Residential" clipped, the whole email scrolling sideways (operator-reported). The cells
+  // are now Cerberus inline-blocks that wrap.
+  //
+  // The arithmetic is the whole fix, and it is the part that bit us: the cells share the
+  // Section's CONTENT box (600 − 2×16 = 568), NOT the 600px canvas. Computed against 600, six
+  // 100px cells sum to 600, overflow by 32px, and the sixth cell drops to its own line ON
+  // DESKTOP — the bug reintroduced one layer down. Nothing but this test would catch that,
+  // because both versions render, both are "valid", and only one of them looks right.
+  it("a 6-cell spec strip's cells fit the section's content box, so it stays ONE row at 600px", async () => {
+    const STRIP_DOC: EmailDoc = {
+      globalStyle: STYLE,
+      blocks: [
+        {
+          id: "s1",
+          type: "stats",
+          layout: { x: 0, y: 0, w: 12, h: 3 },
+          props: {
+            variant: "strip",
+            stats: [
+              { label: "Beds", value: "3" },
+              { label: "Baths", value: "3.5" },
+              { label: "Sq Ft", value: "2,847" },
+              { label: "Lot", value: "0.26 ac" },
+              { label: "$/Sq Ft", value: "$209", emphasis: "primary" },
+              { label: "Type", value: "Residential" },
+            ],
+          },
+        },
+      ],
+    } as unknown as EmailDoc;
+
+    const html = await renderEmailDocHtml(STRIP_DOC);
+
+    // Every cell is an inline-block (it wraps) and Outlook gets a ghost <td> (it doesn't).
+    const cellWidths = [...html.matchAll(/display:inline-block;width:100%;max-width:(\d+)px/g)].map(
+      (m) => Number(m[1]),
+    );
+    expect(cellWidths).toHaveLength(6);
+    expect(html).toContain("<!--[if mso]>");
+
+    // THE INVARIANT: the six cells must fit 568px, not 600px.
+    const CONTENT_BOX = 600 - 2 * 16;
+    expect(cellWidths.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(CONTENT_BOX);
+    // ...and they must still be as wide as they can be — a too-timid cell wastes the strip.
+    expect(cellWidths.reduce((a, b) => a + b, 0)).toBeGreaterThan(CONTENT_BOX - 6);
+
+    // The last cell is the one that was being clipped. It survives.
+    expect(html).toContain("Residential");
+  });
 });

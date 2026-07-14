@@ -70,14 +70,35 @@ export function spec(
  * context. Before StatItem carried `emphasis`, a recipe had NO WAY TO SAY THAT, so $209
  * rendered at exactly the same weight as "Residential" and the whole strip read as a wall.
  */
-export function listingSpecs(facts: ListingFacts): StatItem[] {
+export function listingSpecs(facts: ListingFacts, daysOnMarket?: number | null): StatItem[] {
+  // DAYS ON MARKET — and it is the REAL one, on an ACTIVE listing.
+  //
+  // `today − list_date`, where `list_date` is the VENDOR's listing date
+  // (`/property-tax-history` → `property_history[].listing.list_date`, via
+  // `resolveSubjectListDate`). Not a date we invented, and NOT "when we first crawled it".
+  //
+  // On a home that is STILL FOR SALE the MLS clock is still running, so `today − list_date`
+  // IS days on market — the caveat that forces `under-contract` to say "Days Since Listed"
+  // instead (its clock stopped at a pending date we do not hold) simply does not apply here.
+  // So this cell is for ACTIVE listings ONLY. Never pass it on under-contract or just-sold.
+  //
+  // And a fresh listing reads ONE, not zero — "1 Day on Market" is the most persuasive number
+  // on a new-listing email, not a dead cell. Singular label at 1, because "1 Days" is sloppy.
+  const dom =
+    daysOnMarket != null && daysOnMarket >= 0
+      ? spec(String(daysOnMarket), daysOnMarket === 1 ? "Day on Market" : "Days on Market")
+      : undefined;
+
   return [
     spec(facts.beds, "Beds"),
     spec(facts.baths, "Baths"),
     spec(withCommas(facts.sqft), "Sq Ft"),
     spec(facts.lotSize, "Lot"),
     spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft", "primary"),
-    spec(shortType(facts.propertyType) || undefined, "Type", "muted"),
+    // TYPE YIELDS ITS SLOT. The strip holds six, and `price-reduced` already drops this exact
+    // cell — "the one cell a reader will never use." "Residential" loses to "1 Day on Market".
+    // No days held (vendor miss) → Type keeps the slot, so nothing is ever left blank.
+    dom ?? spec(shortType(facts.propertyType) || undefined, "Type", "muted"),
   ];
 }
 
@@ -93,7 +114,13 @@ export function addressLineOf(facts: ListingFacts): string {
   return facts.address ?? [facts.city, facts.state].filter(Boolean).join(", ");
 }
 
-export function buildListingFlyer(facts: ListingFacts, current: EmailDoc): EmailDoc {
+export function buildListingFlyer(
+  facts: ListingFacts,
+  current: EmailDoc,
+  /** ACTIVE listings only — `today − the vendor's list_date`. See `listingSpecs`. Omitted or
+   *  null (a vendor miss) → the Type cell keeps its slot, never a blank. */
+  daysOnMarket?: number | null,
+): EmailDoc {
   return buildLifecycleEmail(current, {
     ribbon: "New Listing",
     photo: facts.photos[0]
@@ -105,7 +132,7 @@ export function buildListingFlyer(facts: ListingFacts, current: EmailDoc): Email
       : null,
     heroValue: facts.price ?? "",
     heroLabel: addressLineOf(facts),
-    specs: listingSpecs(facts),
+    specs: listingSpecs(facts, daysOnMarket),
     specFootnote: specFootnote(facts),
     // The narrator's SOURCE, not the body — build-doc clears this slot then authors into it
     // (fillNarrative SKIPS a text block that already has content, so leaving raw remarks
