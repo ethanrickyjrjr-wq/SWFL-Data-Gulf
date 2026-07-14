@@ -235,3 +235,6 @@ storybook-static
 # chief-of-staff nightly working files (CI workspace + local dispatch testing)
 evidence.json
 chief-of-staff-brief.md
+
+# dev-only email triage renders (scratch, regenerate with scripts/dev-render-listing-emails.mts)
+public/dev-emails/

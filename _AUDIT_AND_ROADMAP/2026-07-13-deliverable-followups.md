@@ -150,25 +150,210 @@ product's own preview.
 
 ---
 
-# 2 — DESIGN
+# 2 — DESIGN + THE SPRAWL
 
-## 2.1 Numbers are still flat everywhere OUTSIDE the listing strip
+## 2.0 ⛔ THE DESIGN SYSTEM ALREADY EXISTS. READ THIS BEFORE YOU CRAWL ANYTHING.
 
-`StatItem.emphasis` now exists and the listing spec strip uses it (`$/Sq Ft` primary, `Type`
-muted). **The other 27 templates and the area recipes have no order of importance** — every
-cell still renders at identical weight.
+**Operator, 07/13: *"the recipes came from the research you aren't even looking at. where is
+the real one?"* He was right. Here it is — the whole chain, newest to oldest.**
 
-**HOW:** give each template and area recipe an emphasis/rank. **One primary figure per
-deliverable; everything else recedes.** Enforce it the way `assertHeroChartCoherence` already
-enforces chart/headline magnitude.
-**WHERE:** `lib/email/doc/default-docs.ts` (27 seeds) · the area recipe builders.
+**① `docs/superpowers/specs/2026-07-03-author-layout-recipes-design.md` — THE DESIGN
+AUTHORITY.** Crawled in-session 07/02/2026. This is where the recipes came from. Sources:
+Mailchimp (single column for any email with a CTA; hook at top; 600–800px), Campaign Monitor
+(≥50% of opens are mobile — hierarchy must survive stacking), Vero (inverted pyramid →
+everything leads to ONE button), Klaviyo (welcome = 51% open; value prop, bite-size story,
+*"not a lengthy biography"*, expectation-setting), Scalero (hero 600–900px, in-body 300–600,
+≤100KB/image, 2x for retina, 60/40 text-to-image), **Chase Dimond's 45-brand layout
+analysis**, Techelix (*"exclusivity comes from what is intentionally left out"*; serif display
++ clean sans body = the luxury formula), Litmus (max two font styles), Shopify/FTC (CAN-SPAM
+is FOUR requirements).
+
+**Its three recipe families are the product:** Prospect (cold-open conversion) · Monthly
+newsletter · **Editorial** (warm-audience premium, where the KPI is *feel*, not opens).
+
+**② `docs/superpowers/specs/2026-07-08-email-grid-fence-system-design.md` — THE ENFORCEMENT.**
+Crawled 07/08/2026. Golden-ratio/Fibonacci span proportions; serif-display + geometric-sans
+pairing (**40–60% more visual distinction** than same-class pairs); MLS photo standard 3:2 /
+4:3, headshots 4:5; MIT Media Lab 2026 (88% of first brand impressions in 90ms are colour
+alone). **And the reason the whole system exists:** arXiv 2605.15124 — *AI design output is
+DOCUMENTED to revert to generic defaults unless mechanically prevented.*
+
+**Fences 1–6 are LIVE IN CODE, not advice:** Fence 1 blessed span pairs + Fence 2 row-order
+zones + Fence 5 accent-colour budget (`lib/email/author-doc.ts`) · Fence 3 photo aspect lock
+(`lib/email/blocks/ImageBlock.tsx`) · Fence 4 `BLESSED_PAIRINGS`
+(`lib/email/brand/apply-brand-style.ts`) · Fence 6 contrast (`lib/brand/palette-contrast.ts`).
+
+**③ `docs/email-marketing/QUALITY-BAR-data-deliverables.md`** — 06/26/2026, the OLDEST. Still
+the only doc with a **numeric type scale** (hero KPI 32–40px / headers 18–22 / body 14–16) and
+the **metric callout** (label small grey caps · value large bold · **delta on its own line,
+coloured, with a triangle glyph**). Use it for §B and §C only. **It is not the recipe
+authority — ① is.**
+
+### ⚠️ AND HERE IS WHY THE BUILD DOESN'T LOOK LIKE THE SAMPLE
+
+**The samples were authored through the design system. The seven lifecycle builders bypass
+it.**
+
+`author-recipes.ts` + the fences live on the **AUTHOR path** (`author-doc.ts` — Fence 5's own
+comment says *"AI path only"*). The recipe builders (`lib/deliverable/recipes/*` →
+`lifecycle-chrome.ts`) **construct the `EmailDoc` block-by-block directly.** They never pass
+through the recipe prose and they are not fence-checked.
+
+**That is the whole answer.** Not "a worker didn't know the design." Not "someone changed it."
+**Two code paths, one design system, and the new builders are on the path that has none of
+it.**
+
+### ✅ VERIFIED 07/13 — TRACED, NOT ASSUMED
+
+- `assembleAuthoredDoc` — the function that applies **Fence 1 (span snap), Fence 2 (zone
+  sort), Fence 5 (accent budget)** — has **exactly ONE caller: `build-doc.ts:1232`, the AI
+  author path.**
+- `lifecycle-chrome.ts:106` — the shared row helper for **every listing email** — is
+  hardcoded: `layout: { x: 0, y, w: 12, h }`.
+- **Every `w:` in every recipe builder is `12`.** `agent-brand-intro.ts:870`,
+  `agent-launch.ts:481`, `coming-soon.ts:504/512/538`, `just-sold.ts:378` — all `w: 12`.
+  **There is not one block in any builder that is not full width.**
+
+**So the fences are not merely skipped — the layout vocabulary they govern is UNREACHABLE.**
+No ⅔/⅓, no ½/½, no blessed multiset, because there are no multi-block rows *at all*. Every
+deliverable is a one-column stack of full-bleed cards.
+
+**And read the PROBLEM STATEMENT that research spec ① was written to solve, verbatim:**
+
+> *"The Email Lab AUTHOR engine produces correct, cited emails that all look the same: **a flat
+> stack of cards.**"*
+
+**The 07/13 builders reproduce, exactly, the defect the design system was built to eliminate.**
+That is not a near-miss. The samples look better than the builds because the samples went
+through the system and **the builds were written underneath it.**
+
+**THE FIX:** run every builder's doc through the same fence pass the AI path gets — snap spans
+onto blessed multisets, sort rows into zones, cap the accent budget — **or** delete the second
+path and have the builders emit a plan the author path assembles. **One path, one design.**
+
+**CHECK:** `builders_bypass_the_fence_system`.
+
+## 2.1 Numbers are flat — and NOTHING in the fences covers it
+
+The fences govern **span, row zone, photo ratio, font pairing, accent budget, contrast.**
+**None of them governs which NUMBER matters.** That is the genuine, un-researched-by-us gap
+behind the operator's *"numbers need different sizes and colors by importance."*
+
+**The structural blocker is a TYPE, not a builder.** `StatItem` is `{value, label, emphasis?}`.
+**There is no `delta` field anywhere.** So the quality bar's central rule — *value large bold,
+delta on its own line, coloured, with a glyph* — **is not expressible.** `$485,000 — up 2.1%
+from last month` cannot be *styled* because it cannot be *stated*. Same failure as the layout
+vocabulary: not wrong, **inexpressible**.
+
+**HOW:**
+1. Add `StatItem.delta?: { value: string; direction: "up" | "down" | "flat"; basis: string }`
+   — `basis` (*"vs last month"*) is **required**: a delta with no basis is a number with no
+   source. Renderer draws the glyph + colour.
+2. Apply the type scale (32–40 / 18–22 / 14–16) in the stats + hero renderers.
+3. **Add it as Fence 7 — ONE primary figure per deliverable**, enforced like
+   `assertHeroChartCoherence`. A red test, not a style note. It belongs with the other fences
+   because it is the same class of rule.
+4. **Then** audit the seeds and area recipes against it.
+
+**WHERE:** `lib/email/doc/types.ts` · `lib/email/blocks/StatsBlock.tsx` ·
+`lib/email/doc/default-docs.ts`.
 **CHECK:** `stat_number_visual_hierarchy`.
 
-## 2.2 The seeds should BE the sample design, not a plainer one
+## 2.2 RETRACTION — "the seeds should BE the sample design" was WRONG
 
-The listing family is now dragged onto the chrome automatically (the collision test forces
-it). **The newsletter and editorial seeds are still plain.** They should get the same
-treatment: the sample's design, not a second, lesser one.
+An earlier draft of this file said *"the newsletter and editorial seeds are still the plain
+design instead of the sample's."* **That is a false defect and it is withdrawn.**
+
+**Editorial Letter is deliberately plain, AND THE RESEARCH SAYS SO.** Its description in
+`default-docs.ts` — *"Plain letters out-open designed emails for warm audiences"* — is not a
+preference. It is **Chase Dimond's 45-brand layout analysis, in spec ① above: a text-only
+personal letter opens at 35–50% versus 20–25% for a designed email, and is the best-performing
+shape for relationship building.** It is a header, one text block, an agent card and a footer
+**on purpose, for a measured reason.**
+
+**Making it look like the sample would make it WORSE.** The seed is right; the defect report
+was wrong.
+
+**And "the sample" was never named**, because two different galleries were mashed together:
+
+- **`SHOWCASES`** (`lib/showcase/registry.ts`) — 4 **finished campaign examples**, with
+  committed live HTML at `public/showcase/<id>/live/*.html`. *These* are the samples.
+- **`SEED_DOCS`** (`lib/email/doc/default-docs.ts`) — 27 **starter templates**, governed by
+  the SLOT RULE (data fields empty, structure/style filled). A canvas you fill.
+
+**Different jobs. Nothing says a seed must look like a showcase.** That "should be" had no
+source — **which is exactly the defect the claim gate exists to catch, committed in this very
+document.** The lesson at the top of this file applies to the file itself.
+
+## 2.3 ONE HOOD — why are there so many of these? (OPERATOR QUESTION, 07/13)
+
+> *"WHY DO WE HAVE SO MANY SHOWCASES? WHY ISN'T EVERYTHING UNDER ONE HOOD AND IT BRANCHES OUT
+> WHEN FIXED TO WHERE IT NEEDS TO GO?"*
+
+**He is right. Here is the honest inventory.**
+
+**The 4 showcases are NOT the sprawl.** They are 4 example *brands/scenarios*
+(listing-to-close, launch-blitz, agent-launch, market-pulse) and **as of 07/13 they all point
+at the one recipe registry** — a slide carries `recipe: RECIPES["…"]`, it does not redefine
+one. That was today's fix: identity used to be the **prompt string**, so the same deliverable
+built two different ways depending on which button you pressed.
+
+**The real sprawl is THREE CATALOGS and SIX SURFACES — and the word "recipe" means three
+different things.**
+
+- **`RECIPE_IDS` — 11** (`lib/email/author-recipes.ts`). **The DESIGN recipes**, straight out
+  of research spec ①. `agent-intro`, `monthly-newsletter`, `editorial-letter`,
+  `editorial-magazine`, `sphere-weekly`, `year-in-review`… They are **advisory prose appended
+  to the system prompt** — the file says so: *"The model MAY deviate — nothing here is
+  enforced."* **This is the design system the samples were built with.**
+- **`RECIPE_KEYS` — 14** (`lib/deliverable/recipes.ts`). **The DELIVERABLE recipes**, built
+  07/13. Identity, subject spine, chart policy, claim gate, parity test. **Do not pass through
+  the design recipes above.**
+- **`SEED_DOCS` — 27** (`lib/email/doc/default-docs.ts`). **The starter templates.** Preview
+  image + slot rule. **No key, no subject, no gate.**
+
+**AND THEY COLLIDE BY NAME ACROSS ALL THREE.** `sphere-weekly` is a design recipe *and* a
+deliverable key. `year-in-review` and `editorial-letter` are design recipes *and* seeds.
+`new-listing`, `just-sold`, `open-house`, `price-reduced` are deliverable keys *and* seeds —
+which is exactly how four seed cards built a *different email* than the button of the same
+name, two of them **emailing coaching notes to real recipients**.
+
+`seed-recipe-parity.test.ts` now blocks that one collision. **But a test that forbids a
+collision is not the same as not having three catalogs.** Three catalogs is why nobody can
+keep track — including the people building it. The operator's complaint is the correct
+diagnosis.
+
+**Six UI surfaces that each show a user "here is an example":**
+`ShowcaseOverlay` · `SeedGallery` · `TemplateGallery` · `CampaignExamples` ·
+`ExamplesAccordion` · `TemplateRail`. Plus `pick-seed.ts` choosing one server-side.
+
+**THE FIX — ONE HOOD, branch at the leaf. This is the operator's own design and it is right.**
+
+1. **`RECIPES` is the hood.** Every buildable thing gets ONE key — the 27 seeds and the 11
+   design recipes fold in. One record:
+   `Recipe { key, design: RecipeId, skeleton, subject, chart, gate, needs }`.
+2. **`design` is the branch that fixes 2.0.** A deliverable recipe now *names its design
+   recipe*, so `new-listing` inherits the researched Prospect/Editorial structure instead of a
+   builder re-inventing a stack of cards. **The design system stops being a separate path and
+   becomes a FIELD.** That is "branches out to where it needs to go."
+3. **A surface may only LIST and DISPATCH.** Filter the registry; hand off `?rkey=`. It never
+   owns a prompt, a layout, or a copy of the catalog. The six components collapse to one list
+   renderer with a filter.
+4. **The rule that stops the next one:** *a surface may not DEFINE a deliverable — it may only
+   REFERENCE a key.* `recipes.parity.test.ts` already enforces exactly this for what was
+   migrated. **It has never been extended to the seeds or the design recipes.** Extend it and
+   the sprawl cannot regrow.
+
+**Half of this is already built.** `authorDoc` dispatches on key today. What is missing is that
+the seeds never got keys and the deliverable recipes never got a `design`.
+
+**WHY IT KEEPS HAPPENING:** every new surface shipped with its own copy of "what can I
+build," because there was no registry to add to. **The registry now exists.** The rule that
+prevents the next one: *a surface may not define a deliverable — it may only reference a
+`RecipeKey`.* `recipes.parity.test.ts` already enforces this for the surfaces that were
+migrated. **Migrate the seeds and the rule covers everything.**
+
+**CHECK:** `one_catalog_seeds_get_recipe_keys`.
 
 ---
 
@@ -226,13 +411,23 @@ Monitor CSS tables**.
 **Encode as:** a lint over `compileGrid` output — every row's widths sum ≤ 12, no ghost
 tables, no `width="1800"`, no unsupported CSS. **A screenshot is not proof for an email.**
 
-## 5.2 Visual hierarchy of numbers
+## 5.2 Email/layout design — ⛔ DO NOT RE-RESEARCH. THREE DOCS ALREADY EXIST.
 
-**Research:** how financial/real-estate newsletters rank figures — size ratios, colour,
-position. **storytellingwithdata.com** (one emphasised thing; everything else recedes),
-**NN/g** on scanning and data tables, **Litmus** typography.
-**Encode as:** the `StatItem.emphasis` rank across all templates + a coherence rule — **one
-primary figure per deliverable**, enforced like `assertHeroChartCoherence`.
+**See 2.0 for the full chain.** ① `2026-07-03-author-layout-recipes-design.md` (the recipe
+authority — Mailchimp/Klaviyo/Vero/Chase Dimond/Techelix/Litmus, 07/02) · ②
+`2026-07-08-email-grid-fence-system-design.md` (Fences 1–6, **live in code**) · ③
+`QUALITY-BAR-data-deliverables.md` (06/26 — the numeric type scale + metric callout).
+
+**An earlier draft of this file told the next session to go crawl number hierarchy. That would
+have re-bought research the operator already paid for — twice. The job is to ENCODE, not to
+buy it again.** Before ANY crawl on email design, read those three.
+
+**The only genuinely open questions (crawl ONLY these):**
+- **Dark mode.** ~1/3 of opens. Nothing in ①②③ says how a coloured **delta** (green up / red
+  down) survives a dark-mode client's colour inversion. Answer it when building
+  `StatItem.delta`.
+- **Which number leads.** No doc we hold ranks *which* figure a reader wants first in a
+  listing vs a market brief. That is the honest gap behind Fence 7.
 
 ## 5.3 A FIELD → VENDOR CAPABILITY MATRIX, and a SPEC-TIME GATE ← the deepest fix
 
