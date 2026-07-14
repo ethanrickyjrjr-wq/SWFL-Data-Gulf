@@ -18,10 +18,15 @@ export const REGION_PASSENGER_SERIES: ChartSeriesDef[] = [
   { key: "passengers", label: "Passengers", color: "#3DC9C0", dash: "" }, // gulf-teal, solid
 ];
 
-/** Two-series feed for the total-passengers + 12-month trend panel. */
+/**
+ * Two-series feed for the total-passengers + 12-month average panel. The second
+ * line is a 12-month trailing mean — a SMOOTHER, not a trend (it has no slope and
+ * no goodness-of-fit; see `movingAverage` in lib/charts/airport-series.ts). It is
+ * labeled "12-month average" so a reader is never told they are looking at a trend.
+ */
 export const REGION_AIR_TRAVEL_SERIES: ChartSeriesDef[] = [
   { key: "passengers", label: "Monthly passengers", color: "#3DC9C0", dash: "" }, // gulf-teal, solid
-  { key: "trend", label: "12-month trend", color: "#d4b370", dash: "8 5" }, // neutral-gold, dashed
+  { key: "smoothed", label: "12-month average", color: "#d4b370", dash: "8 5" }, // neutral-gold, dashed
 ];
 
 /**

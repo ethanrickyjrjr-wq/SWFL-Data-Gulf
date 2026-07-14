@@ -1,7 +1,7 @@
 // KNOWN-DEBT(data_lake: gallery aggregates live in the data_lake schema (typed public only))
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { mapPivotedCityRows, mapPivotedCityYoY } from "@/lib/charts/pivoted-series";
-import { mapAirportTotalWithTrend, type AirportMonthRow } from "@/lib/charts/airport-series";
+import { mapAirportTotalWithSmoothed, type AirportMonthRow } from "@/lib/charts/airport-series";
 import {
   mapTierIndexed,
   mapTierYoY,
@@ -123,7 +123,7 @@ export async function loadPassengers(supabase: Supabase): Promise<LoadedPanel> {
       .eq("metric", "total_passengers")
       .order("report_month", { ascending: true });
     if (error) return { data: [], asOf: undefined, error: error.message };
-    const mapped = mapAirportTotalWithTrend(data as AirportMonthRow[] | null);
+    const mapped = mapAirportTotalWithSmoothed(data as AirportMonthRow[] | null);
     return { data: mapped.entries, asOf: mapped.asOf, error: null };
   } catch (err) {
     return { data: [], asOf: undefined, error: err instanceof Error ? err.message : String(err) };
@@ -260,7 +260,7 @@ const PANEL_CONFIGS: PanelConfig[] = [
     rootId: "air-travel",
     eyebrow: "Southwest Florida",
     title: "RSW Airport Passenger Volume",
-    subtitle: "Monthly Arrivals + Departures — RSW, with 12-Month Trend",
+    subtitle: "Monthly Arrivals + Departures — RSW, with 12-Month Average",
     valueFormat: "count",
     series: REGION_AIR_TRAVEL_SERIES,
     load: (db) => loadPassengers(db),

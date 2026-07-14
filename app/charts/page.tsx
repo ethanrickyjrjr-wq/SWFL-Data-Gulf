@@ -20,7 +20,7 @@ import {
 } from "@/lib/charts/zip-heatmap-series";
 import { AddChartToProject } from "./AddChartToProject";
 import { mapPivotedCityRows, mapPivotedCityYoY } from "@/lib/charts/pivoted-series";
-import { mapAirportTotalWithTrend, type AirportMonthRow } from "@/lib/charts/airport-series";
+import { mapAirportTotalWithSmoothed, type AirportMonthRow } from "@/lib/charts/airport-series";
 import {
   mapTierIndexed,
   mapTierYoY,
@@ -184,7 +184,8 @@ async function loadZipHeatmap(supabase: Supabase): Promise<{ grid: ZipHeatmapDat
   }
 }
 
-// Total-passenger feed with 12-month trend overlay (public.rsw_airport_monthly).
+// Total-passenger feed with a 12-month trailing-average overlay — a smoother, not a
+// trend (public.rsw_airport_monthly).
 async function loadPassengers(supabase: Supabase): Promise<LoadedPanel> {
   try {
     const { data, error } = await supabase
@@ -194,7 +195,7 @@ async function loadPassengers(supabase: Supabase): Promise<LoadedPanel> {
       .eq("metric", "total_passengers")
       .order("report_month", { ascending: true });
     if (error) return { data: [], asOf: undefined, error: error.message };
-    const mapped = mapAirportTotalWithTrend(data as AirportMonthRow[] | null);
+    const mapped = mapAirportTotalWithSmoothed(data as AirportMonthRow[] | null);
     return { data: mapped.entries, asOf: mapped.asOf, error: null };
   } catch (err) {
     return { data: [], asOf: undefined, error: err instanceof Error ? err.message : String(err) };
@@ -257,7 +258,7 @@ export default async function ChartsPage() {
       rootId: "air-travel",
       eyebrow: "Southwest Florida",
       title: "RSW Airport Passenger Volume",
-      subtitle: "Monthly Arrivals + Departures — RSW, with 12-Month Trend",
+      subtitle: "Monthly Arrivals + Departures — RSW, with 12-Month Average",
       valueFormat: "count",
       series: REGION_AIR_TRAVEL_SERIES,
       ...passengers,

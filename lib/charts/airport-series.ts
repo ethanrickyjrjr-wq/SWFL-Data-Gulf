@@ -16,11 +16,20 @@ export interface PassengerSeries {
 }
 
 /**
- * Trailing moving average over an array of values. Returns null for positions
- * that don't yet have a full window, and null when any value in the window is
- * null (a gap breaks the average). Computed over the FULL series before any
- * range-slice so short time-range views (6M/1Y/2Y) still carry the correct
- * trend value on each row.
+ * A 12-month trailing mean. THIS IS A SMOOTHER, NOT A TREND.
+ *
+ * It follows every wiggle, has no slope, no goodness-of-fit, and cannot be extended
+ * forward. It answers "what does this look like with the noise taken out" — NOT
+ * "which way is this heading, and how confident are we." That question is answered
+ * by `fitLine` (lib/charts/fit-line.ts), and only when the fitted slope's 95%
+ * interval clears zero.
+ *
+ * It was called `trend` until 07/13/2026. The name was doing the lying.
+ *
+ * Mechanics: returns null for positions that don't yet have a full window, and null
+ * when any value in the window is null (a gap breaks the average). Computed over the
+ * FULL series before any range-slice so short time-range views (6M/1Y/2Y) still carry
+ * the correct smoothed value on each row.
  */
 export function movingAverage(values: (number | null)[], window: number): (number | null)[] {
   return values.map((_, i) => {
@@ -32,13 +41,14 @@ export function movingAverage(values: (number | null)[], window: number): (numbe
 }
 
 /**
- * Maps total_passengers rows to { month, passengers, trend } where `trend` is
- * the 12-month trailing mean (null until month 12). The trend lives on each row
- * so MetroAreaChart's range-slice (6M/1Y/2Y/ALL) preserves it without a
- * re-compute. Rows with a missing `trend` key plot a gap in recharts, which is
- * the correct behavior for the startup window.
+ * Maps total_passengers rows to { month, passengers, smoothed } where `smoothed` is
+ * the 12-month trailing mean (null until month 12) — a SMOOTHER, not a trend; see
+ * `movingAverage` above. The smoothed value lives on each row so MetroAreaChart's
+ * range-slice (6M/1Y/2Y/ALL) preserves it without a re-compute. Rows with a missing
+ * `smoothed` key plot a gap in recharts, which is the correct behavior for the
+ * startup window.
  */
-export function mapAirportTotalWithTrend(
+export function mapAirportTotalWithSmoothed(
   rows: AirportMonthRow[] | null | undefined,
 ): PassengerSeries {
   if (!rows || rows.length === 0) {
@@ -49,14 +59,14 @@ export function mapAirportTotalWithTrend(
     .filter((r): r is AirportMonthRow & { value: number } => r.value != null && !!r.report_month)
     .sort((a, b) => a.report_month.localeCompare(b.report_month));
 
-  const trends = movingAverage(
+  const smoothedValues = movingAverage(
     valid.map((r) => r.value),
     12,
   );
 
   const entries: ChartRow[] = valid.map((r, i) => {
     const row: ChartRow = { month: r.report_month.slice(0, 7), passengers: r.value };
-    if (trends[i] !== null) row.trend = Math.round(trends[i]!);
+    if (smoothedValues[i] !== null) row.smoothed = Math.round(smoothedValues[i]!);
     return row;
   });
 
