@@ -1,217 +1,80 @@
 {
-  "target": "master",
+  "target": "communities-swfl",
   "timestamps": {
-    "started": "2026-07-14T06:45:51.693Z",
-    "finished": "2026-07-14T06:45:51.713Z"
+    "started": "2026-07-14T21:21:58.618Z",
+    "finished": "2026-07-14T21:21:58.909Z"
   },
   "source": "live",
   "outcomes": [
     {
-      "packId": "franchise-outcomes",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "storm-history-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "permits-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "corridor-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "cre-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "macro-us",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "macro-florida",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "macro-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "sector-credit-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "tourism-tdt",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "env-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "logistics-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "logistics-swfl-nowcast",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "traffic-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "properties-lee-value",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "properties-collier-value",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "rentals-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "housing-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "safety-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "labor-demand-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "econ-dev-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "city-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "rsw-airport",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "news-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "seller-stress-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "market-heat-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "hurricane-tracks-fl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "licenses-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "condo-sirs-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "fgcu-reri",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "permits-commercial-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "price-distribution-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "listing-momentum-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "market-temperature-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "home-values-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "investor-zip-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "active-listings-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "active-rentals-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
       "packId": "communities-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "master",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 2,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "communities-swfl",
+        "version": 2,
+        "refined_at": "2026-07-14T21:21:58Z",
+        "expires": "2027-01-10T21:21:58Z",
+        "ttl_seconds": 15552000,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "30,354 SWFL homes catalogued across 1,000 neighborhoods (Lee + Collier) (as of 2026-07-14). Golf-or-not, fees, amenities, home count and drive-times per community ride in the community catalogue for a specific-community lookup.",
+        "key_metrics": [
+          {
+            "metric": "total_homes_catalogued_swfl",
+            "label": "SWFL homes catalogued to a neighborhood (Lee + Collier)",
+            "value": 30354,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "homes",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/neighborhood_stats?label=SWFL+neighborhood%2Fsubdivision+stats+%28all+homes%2C+Lee+%2B+Collier%29&source=SWFL+Data+Gulf+parcel+name-join+%28Lee+%2B+Collier+tax+rolls%29&brain=communities-swfl&date_col=as_of",
+              "fetched_at": "2026-07-14T21:21:58Z",
+              "tier": 2,
+              "citation": "30,354 residential parcels across 1,000 SWFL neighborhoods, each assigned by parcel name-join as of 2026-07-14"
+            },
+            "suggestions": [
+              "What's driving total homes catalogued swfl?",
+              "How does total homes catalogued swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Neighborhood home counts are authoritative from our parcel name-join (Lee + Collier tax rolls); a built-out single-name community can differ ~7% from a marketed-community source because a marketed community spans several platted subdivisions.",
+          "Golf structure, HOA fee ranges and amenities are cited to named real-estate sources (naplesgolfguy / 55places / realtyofnaples); drive-times and nearby counts are computed by Mapbox. Each carries its own source and as-of.",
+          "Marketed-community coverage is the ~300 branded golf/gated communities, not every neighborhood — a non-branded neighborhood still resolves to its parcel-derived stats."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-07-14T21:21:58Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Per-home HOA dues or golf membership pricing for a specific address — community-level fee ranges only.",
+            "Communities outside Lee + Collier — the other four SWFL counties are not catalogued in v1."
+          ],
+          "finest_grain": "community-annual",
+          "routes": [
+            "Golf structure, fees, amenities, home count and drive-times are tracked per community — want the full profile for a specific community?",
+            "Every home in Lee + Collier rolls up to a neighborhood with real counts and median value — want the stats for a specific neighborhood or address?"
+          ]
+        }
+      }
     }
   ],
-  "exitCode": 0,
-  "masterDecision": "skipped-fresh"
+  "exitCode": 0
 }
