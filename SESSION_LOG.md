@@ -1,3 +1,41 @@
+## 2026-07-14 (Sonnet 5 · main) — PDF/HTML visual-parity regression test built; found a real, previously-undetected agent-hero aspect-ratio bug
+
+Design-inspiration pass over Penpot (github.com/penpot/penpot) surfaced a real gap: the two HTML
+email render engines already share one `BlockRenderer` + a font-parity regression test, but the
+PDF engine (`@react-pdf/renderer`, structurally forced to reimplement every block since it can't
+consume HTML/React-email JSX) had no equivalent — its only test proved every block type produces
+*a* valid PDF, never that it visually matches HTML. Three production bugs (logo squash, logo
+stretch, page-2 header bleed — all already fixed in the working tree, none previously caught by a
+test) had already slipped through exactly that gap. Spec (`docs/superpowers/specs/2026-07-14-pdf-html-visual-parity-design.md`)
++ plan (`docs/superpowers/plans/2026-07-14-pdf-html-visual-parity.md`) written, researched via
+crawl4ai + WebSearch (RULE 0.4): confirmed `pdf-to-img` needs the native `canvas` package,
+confirmed react-pdf's `Image` accepts a `data:` URI empirically (docs didn't say so explicitly),
+and confirmed Playwright's `chromium.launch()` hangs indefinitely under the Bun runtime on this
+Windows machine (known, unresolved upstream bug — oven-sh/bun #27977/#23826/#15679/#10120; browser
+process actually starts but the `--remote-debugging-pipe` handshake with Bun never completes;
+works fine under plain Node) — worked around by spawning Node as a subprocess
+(`rasterize-html-worker.mjs`) for just the HTML-rasterization step; PDF-side rasterization
+(`pdf-to-img` + `canvas`) stays in-process, unaffected.
+
+Built: pixel-buffer primitives (`pixel-utils.ts` — background-relative bounding box, marker-color
+bounding box, nearest-neighbor resize), generated-in-code marker-color test fixtures
+(`visual-parity-fixtures.ts`), the rasterization wrappers, and the acceptance test itself
+(`pdf-html-visual-parity.test.ts`: region-strict + full-page-loose layers per fixture, plus a
+PDF-only page-break-padding floor check). `bun test lib/pdf lib/email/__tests__/font-parity.test.ts`:
+**44 pass, 1 fail** — `bunx next build` clean (exit 0), confirming the 4 new devDependencies don't
+leak into the production bundle.
+
+The 1 failure is real, not flaky: measuring the SAME `EmailDoc` (one `agent-hero` block) through
+both engines found the photo renders at **2.00** aspect ratio in HTML (`AgentHeroBlock.tsx`, fixed
+600×300 box) vs **3.06** in PDF (`email-doc-pdf.tsx`'s `agent-hero` case, full page width × 200pt,
+no horizontal padding) — a 53% mismatch, confirmed by reading both files' style objects, not just
+the pixels. Any non-2:1 agent photo gets cropped differently between the email a recipient sees
+and the PDF they receive. Left the test committed red on purpose (the failure IS the evidence) —
+fixing it means touching `lib/pdf/email-doc-pdf.tsx`, out of scope for this build's own Global
+Constraints. Wrote `docs/handoff/2026-07-14-pdf-html-visual-parity-bugs-handoff.md` (fix options,
+not yet decided) and opened check `agent_hero_pdf_html_aspect_ratio_mismatch`; operator is handing
+that handoff to a separate session. Nothing pushed yet — reviewing the diff first.
+
 ## 2026-07-14 (Sonnet 5 · main) — communities-swfl rebuild dispatched (operator-approved); FULL-SCOPE-FIRST rule added after finding parcel_subdivision pulled 7 of 120 FDOR fields.
 
 Picked up `docs/handoff/2026-07-14-community-data-into-builder-handoff.md`. Before touching the Gap 1
