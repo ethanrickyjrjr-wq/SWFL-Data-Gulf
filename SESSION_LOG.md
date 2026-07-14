@@ -5,6 +5,16 @@ always carried one idea ("here's me, here's the ask") in two stacked full-width 
 listing emails, verified in the rendered HTML: exactly one ghost-table multi-column row each,
 350px + 250px. Closes `email_lifecycle_uses_grid_columns`.
 
+**CORRECTED BEFORE PUSH — I claimed "the button keeps its full-width tap target on mobile" and had
+not rendered a phone.** Every screenshot was 1100px. Advisor caught it; I measured it. At a 392px
+viewport the stacked CTA column is capped at its **250px `max-width` — it does NOT go full-bleed**,
+and the button renders **202×70px, centred**. The conclusion survives (70px is well clear of the 44px
+tap minimum, and it is a BIGGER target than the single-line button it replaced, because the label
+wraps to two lines) but the stated reason was false. The columns *do* stack in source order, so the
+agent still leads and the ask still follows. Logged because "it's fine" arrived at by luck is not the
+same as "it's fine" arrived at by looking — and the next person narrowing that column needs the real
+number, not my assumption.
+
 **The lever was never the span — it was `newRow`.** `lifecycle-chrome`'s `row()` helper hardcoded
 `newRow: true` on every entry, so `groupIntoRows` could never put two blocks together no matter what
 span you asked for. Split it into `cell(block, height, span, newRow)`; `row()` is now the full-bleed

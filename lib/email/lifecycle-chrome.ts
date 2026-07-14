@@ -271,10 +271,16 @@ export function buildLifecycleEmail(current: EmailDoc, chrome: LifecycleChrome):
   //
   // WHY THIS IS SAFE AT EVERY WIDTH — the hybrid columns the compiler emits stack in SOURCE
   // ORDER on a phone (cerberusemail.com/hybrid-responsive, re-verified in-session 07/14/2026).
-  // So the agent card leads and the CTA follows: the exact order a phone shows TODAY, with the
-  // button back at full width and its full tap target. Desktop gains the signature-plus-action
-  // row; mobile loses nothing. The CTA must therefore stay SECOND — reversing these two lines
-  // would put the ask above the agent on every phone.
+  // So the agent card leads and the CTA follows: the exact order a phone shows TODAY. The CTA
+  // must therefore stay SECOND — reversing these two lines would put the ask above the agent on
+  // every phone.
+  //
+  // MEASURED ON A PHONE, not assumed (392px viewport, 07/14/2026): the stacked CTA column is
+  // capped at its 250px `max-width` — it does NOT go full-bleed — and the button inside renders
+  // 202×70px, centred. That is well clear of the 44px minimum tap target, and it is a LARGER
+  // target than the single-line button it replaced, because the label wraps to two lines. Good,
+  // but not free: if you ever narrow this column, you are shrinking the most important click in
+  // the email on the device where most email is opened. Re-measure, don't assume.
   entries.push(cell(keepOrDefault(current, "agent-card"), 4, 7, true));
   entries.push(
     cell(
