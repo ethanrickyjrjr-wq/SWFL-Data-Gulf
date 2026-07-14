@@ -10,7 +10,13 @@
 // for any surviving trace of the old listing. One `CONTENT_KEYS` omission and this
 // goes red.
 import { describe, expect, it } from "bun:test";
-import { applySavedLayout, blocksByRole, stripToLayout, CONTENT_KEYS } from "./saved-layout";
+import {
+  addedBlockIds,
+  applySavedLayout,
+  blocksByRole,
+  stripToLayout,
+  CONTENT_KEYS,
+} from "./saved-layout";
 import type { EmailBlock, EmailDoc, EmailGlobalStyle } from "./types";
 
 const OLD_STYLE: EmailGlobalStyle = {
@@ -300,6 +306,25 @@ describe("stripToLayout — nothing about the old house is even STORED", () => {
     const a = applySavedLayout(FRESH_BUILD, stripToLayout(POISONED_LAYOUT));
     const b = applySavedLayout(FRESH_BUILD, POISONED_LAYOUT);
     expect(a).toEqual(b);
+  });
+});
+
+describe("addedBlockIds — exactly the blocks the author pass must write", () => {
+  // A block the user ADDED comes back as an open slot; the author pass then writes it
+  // for the new subject (build-doc authorAddedSlots). It must name ONLY those blocks:
+  // sweeping up "every empty block" would also grab the slots the BUILDER left open
+  // because it had no source — and handing those to a model is how a figure gets invented.
+  it("names the added block and nothing else", () => {
+    expect(addedBlockIds(FRESH_BUILD, POISONED_LAYOUT)).toEqual(["s6"]); // the 2nd text block
+  });
+
+  it("names nothing when the user only reordered/resized/deleted", () => {
+    const layout = doc([
+      blk("s1", "hero", { value: "$1" }, { x: 0, y: 0, w: 6, h: 4 }), // resized
+      blk("s2", "text", { body: "old" }),
+    ]);
+    const fresh = doc([blk("f1", "text", { body: "new" }), blk("f2", "hero", { value: "$2" })]);
+    expect(addedBlockIds(fresh, layout)).toEqual([]);
   });
 });
 

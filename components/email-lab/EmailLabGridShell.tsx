@@ -142,6 +142,28 @@ const LABELS: Partial<Record<BlockType, string>> = {
 // Only the grid seeds (every block carries a `layout`) belong on the grid shell.
 const GRID_SEEDS = SEED_DOCS.filter((s) => s.build().blocks.every((b) => b.layout != null));
 
+/**
+ * WHEN THEY BUILD ON THEIR OWN LAYOUT, THEIR STYLE IS THE STYLE.
+ *
+ * `applyBrand` stamps the ACCOUNT brand over a doc's `globalStyle` (`primaryColor:
+ * t.PRIMARY || gs.primaryColor` — the token wins). That is right for a fresh build. It
+ * is wrong for a saved layout: the server already returned the doc wearing the palette
+ * and fonts the user set in the inspector ON PURPOSE, and re-stamping the account brand
+ * silently reverts them — "I picked those colors and they didn't stick" (operator,
+ * 07/14/2026: "WHY DOES IT NOT PRODUCE THE SAME THING").
+ *
+ * So: keep the brand overlay on the brand-owned BLOCKS (logo, company name, the CAN-SPAM
+ * footer, the agent card — those must always be current), and give the saved layout's
+ * `globalStyle` back. Their grid, their colors; our brand chrome, still current.
+ */
+function keepSavedStyle(
+  branded: EmailDoc,
+  fromServer: EmailDoc,
+  usedSavedLayout?: boolean,
+): EmailDoc {
+  return usedSavedLayout ? { ...branded, globalStyle: fromServer.globalStyle } : branded;
+}
+
 async function renderDocHtml(doc: EmailDoc): Promise<string> {
   const res = await fetch("/api/email-lab/render", {
     method: "POST",
@@ -495,7 +517,9 @@ export function EmailLabGridShell({
       } else if (data.doc) {
         const parsed = EmailDocSchema.safeParse(data.doc);
         if (parsed.success) {
-          const normalized = normalizeAuthorHeights(applyBrand(parsed.data, brandTokens));
+          const normalized = normalizeAuthorHeights(
+            keepSavedStyle(applyBrand(parsed.data, brandTokens), parsed.data, opts.useSavedLayout),
+          );
           commit(normalized);
           // The grid AS BUILT. Everything they do to it from here is THEIR layout —
           // and until they do something, there is nothing personal to save.
@@ -573,7 +597,9 @@ export function EmailLabGridShell({
           // brandTokens (the prop) is undefined on the standalone grid, so falling
           // back to the live brand is what actually signs the built doc.
           const tokens = brandTokens ?? brandingToTokens(nextBranding);
-          const normalized = normalizeAuthorHeights(applyBrand(parsed.data, tokens));
+          const normalized = normalizeAuthorHeights(
+            keepSavedStyle(applyBrand(parsed.data, tokens), parsed.data, useSavedLayout),
+          );
           commit(normalized);
           // The grid AS BUILT — edits from here are what make it theirs.
           layoutBaselineRef.current = JSON.stringify(normalized);

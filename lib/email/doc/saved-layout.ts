@@ -186,6 +186,21 @@ function matchCounterparts(fresh: EmailDoc, layout: EmailDoc): Map<number, Email
   return matched;
 }
 
+/**
+ * The blocks the user ADDED — in their layout, with no counterpart in the fresh build.
+ * These are the ones `applySavedLayout` hands back as OPEN SLOTS (content cleared), and
+ * therefore the exact set the author pass must write for the new subject. Anything else
+ * the builder already sourced and must not be touched.
+ *
+ * Precise on purpose: "every empty block" would also sweep up the slots the BUILDER
+ * deliberately left open because it had no source for them, and handing those to a
+ * model is how an unsourced figure gets invented.
+ */
+export function addedBlockIds(fresh: EmailDoc, layout: EmailDoc): string[] {
+  const matched = matchCounterparts(fresh, layout);
+  return layout.blocks.filter((_, i) => !matched.has(i)).map((b) => b.id);
+}
+
 /** A block's stable identity across builds: type + ordinal among its own type. */
 export function roleKey(type: string, ordinal: number): string {
   return `${type}#${ordinal}`;

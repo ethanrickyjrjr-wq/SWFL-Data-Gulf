@@ -18,7 +18,7 @@ import {
 } from "@/lib/email/doc/schema";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { AUTHORABLE_TYPES } from "@/lib/email/doc/block-contract";
-import { applySavedLayout } from "@/lib/email/doc/saved-layout";
+import { applySavedLayout, addedBlockIds } from "@/lib/email/doc/saved-layout";
 import { resolveRecipe, recipeSection } from "@/lib/email/author-recipes";
 import { resolveConcoction, datasetsSection } from "@/lib/concoctions/author-section";
 import { seedResolvedDataset } from "@/lib/concoctions/seed-authored";
@@ -436,6 +436,124 @@ Block rules:
 - Tight prose, no jargon, no internal ids in the copy.${chartLine}
 
 SELLING A PROPERTY — when the email's job is a specific home (new listing, open house, price move, featured or just-sold property), you are its agent and every figure you include must work FOR the sale. Quote a market comparison ONLY when it favors the subject (priced under the median, moving faster than typical); NEVER quote a market median, average, or price-per-square-foot that reads cheaper than the subject property — that tells the reader it's overpriced. Use county pace figures (pending share, price-cut share, days on market) to build urgency instead. Leaving a figure out is selection, not invention — sourcing rules above still apply to every number you DO use.`;
+}
+
+/**
+ * The subject house as PROMPT CONTEXT — the same real record the builder wrote its cells
+ * from, so a block the user added talks about the SAME house the grid does, with no
+ * second sourcing lane and nothing to invent. A fact absent from the record is absent
+ * here: it becomes a `[Need: …]`, never a guess.
+ */
+function subjectFactsContext(facts: ListingFacts): string {
+  const lines = [
+    facts.address && `Address: ${facts.address}`,
+    facts.price && `List price: ${facts.price}`,
+    facts.beds && `Beds: ${facts.beds}`,
+    facts.baths && `Baths: ${facts.baths}`,
+    facts.sqft && `Square feet: ${facts.sqft}`,
+    facts.lotSize && `Lot: ${facts.lotSize}`,
+    facts.propertyType && `Type: ${facts.propertyType}`,
+    facts.yearBuilt && `Year built: ${facts.yearBuilt}`,
+    facts.city && `City: ${facts.city}`,
+    facts.zip && `ZIP: ${facts.zip}`,
+    facts.remarks && `The listing's own description: ${facts.remarks.slice(0, 1200)}`,
+  ].filter(Boolean);
+  return lines.length
+    ? `THE SUBJECT PROPERTY — the ONLY facts you may state about this home:\n${lines.join("\n")}`
+    : "";
+}
+
+/**
+ * PROSE-SHAPED blocks a user can ADD to their layout, and the field the author writes.
+ *
+ * Deliberately NOT hero/stats/metric-card/image: those carry FIGURES and PHOTOS, and a
+ * figure with no source is the one thing this product forbids. An added hero stays an
+ * OPEN SLOT — the honest affordance — rather than being handed to a model that would
+ * have to make its headline number up. An added Callout or paragraph is prose, and prose
+ * is exactly what the narrator is allowed to write.
+ */
+const ADDED_SLOT_FIELDS: Record<string, readonly string[]> = {
+  text: ["body"],
+  signal: ["prose", "title"],
+  list: ["items"],
+  "multi-column": ["columns"],
+  button: ["label"],
+};
+
+/**
+ * WRITE THE BLOCKS THE USER ADDED TO THEIR LAYOUT.
+ *
+ * "IT DOESN'T PRODUCE THE SAME THING" (operator, 07/14/2026) — and it didn't: a block a
+ * user added to their saved grid came back EMPTY on the next build, because the coded
+ * builder knows nothing about blocks it never emits. A hole where their Callout was is
+ * not "the same way I built the last one".
+ *
+ * Scope is tight by construction: ONLY the ids handed in (the blocks with no counterpart
+ * in the fresh build — `addedBlockIds`), and only their prose fields. The patch is
+ * filtered to those ids before it is applied, so this pass CANNOT rewrite a figure, a
+ * photo, or the commentary the builder already sourced. Held figures stay read-only
+ * (they are outside `BlockContentPatchSchema` — that fence is untouched).
+ *
+ * Costs one model call, and only when a user actually added a block. Any failure leaves
+ * the slots open — degraded, never blocked, never invented (RULE 0.7).
+ */
+export async function authorAddedSlots(
+  doc: EmailDoc,
+  addedIds: string[],
+  opts: { prompt: string; context: string; mode?: string },
+): Promise<EmailDoc> {
+  const targets = doc.blocks.filter((b) => {
+    if (!addedIds.includes(b.id)) return false;
+    const fields = ADDED_SLOT_FIELDS[b.type];
+    if (!fields) return false;
+    const props = b.props as Record<string, unknown>;
+    // Only if it is actually empty — a block they added AND filled in themselves is
+    // their own writing, and their words are not ours to overwrite.
+    return fields.every((f) => {
+      const v = props[f];
+      if (Array.isArray(v)) return v.length === 0;
+      return v === undefined || String(v).trim() === "";
+    });
+  });
+  if (targets.length === 0) return doc;
+
+  const idList = targets.map((b) => `"${b.id}" (${b.type})`).join(", ");
+  let msg: Anthropic.Message;
+  try {
+    msg = await getAnthropic("email_build").messages.create({
+      model: resolveEmailModel(opts.mode),
+      max_tokens: MAX_TOKENS,
+      system: contentPatchSystem(opts.context, false),
+      messages: [
+        {
+          role: "user",
+          content:
+            `CURRENT DOC (block id → current text):\n${docSkeleton(doc)}\n\n` +
+            `The user added these blocks to their own layout and they are EMPTY: ${idList}.\n` +
+            `WRITE ONLY THOSE BLOCKS. Return a patch containing those ids and nothing else — ` +
+            `every other block is already written and sourced; touching one is an error. ` +
+            `Write about THIS subject using only the facts above and the held figures already ` +
+            `on the page. If you cannot source something, write [Need: …] rather than invent it.\n\n` +
+            `What this email is: ${opts.prompt}`,
+        },
+      ],
+    });
+  } catch {
+    return doc; // the slots stay open — never a blocked build
+  }
+
+  const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
+  const patch = tryParsePatch(text);
+  if (!patch) return doc;
+
+  // THE FENCE: whatever the model returned, only the added blocks are writable here.
+  const allowed = new Set(targets.map((b) => b.id));
+  const scoped: ContentPatch = {};
+  for (const [id, fields] of Object.entries(patch)) if (allowed.has(id)) scoped[id] = fields;
+  if (Object.keys(scoped).length === 0) return doc;
+
+  const parsed = EmailDocSchema.safeParse(applyPatch(doc, scoped));
+  return parsed.success ? parsed.data : doc;
 }
 
 export function applyPatch(doc: EmailDoc, patch: ContentPatch): unknown {
@@ -1048,7 +1166,27 @@ export async function authorDoc({
               `Issues: ${JSON.stringify(shapedParsed.error.issues.slice(0, 5))}`,
           );
         }
-        const finalDoc = shapedParsed.success ? shapedParsed.data : parsed.data;
+        const reshaped = shapedParsed.success ? shapedParsed.data : parsed.data;
+
+        // THE BLOCKS THEY ADDED. A Callout a user put in their own grid came back EMPTY
+        // on the next build — the coded builder emits no such block, so nothing filled
+        // it. A hole where their Callout was is not "the same way I built the last one"
+        // (operator: "WHY DOES IT NOT PRODUCE THE SAME THING"). Write them, from the
+        // SAME sourced facts the builder used, and only them.
+        //
+        // Figure-bearing additions (a second hero, a stats strip) are deliberately NOT
+        // authored — see ADDED_SLOT_FIELDS. A number needs a source; an open slot is
+        // the honest answer, and inventing one is the single thing this product forbids.
+        const finalDoc =
+          savedLayout && shapedParsed.success
+            ? await authorAddedSlots(reshaped, addedBlockIds(parsed.data, savedLayout), {
+                prompt,
+                context: resolvedSubject
+                  ? subjectFactsContext(resolvedSubject.facts)
+                  : await fetchLakeContext(scope).catch(() => ""),
+                mode,
+              }).catch(() => reshaped)
+            : reshaped;
 
         // THE AGENT'S BIO, RESOLVED LATE. The saved bio is a TEMPLATE — the agent's own
         // words plus live {{farm.*}} tokens — because a market figure frozen into saved
