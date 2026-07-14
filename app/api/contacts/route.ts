@@ -1,9 +1,11 @@
-// GET  /api/contacts        — list the signed-in user's contacts
+// GET  /api/contacts        — list the signed-in user's contacts + caller's email-lab tier
 // POST /api/contacts        — upsert one contact
 // RLS (auth.uid()) scopes every row to its owner; no contact is visible cross-user.
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { emailLabTierFor, type EmailLabTier } from "@/lib/email/lab/capabilities";
 
 export const runtime = "nodejs";
 
@@ -17,6 +19,26 @@ async function authed() {
   return { supabase, user };
 }
 
+// Resolve the caller's email-lab tier. Same query shape as
+// lib/email/usage.ts#checkUsageLimit — service-role read of billing_subscriptions,
+// select "tier", eq user_id, maybeSingle. FAILS OPEN to "free" on ANY lookup
+// error: a query error leaves `sub` null (→ "free"), and a thrown client/network
+// error is caught here (→ "free"). A billing/metering hiccup must never 500 the
+// contacts list and block its picker from loading at all.
+async function tierForUser(userId: string): Promise<EmailLabTier> {
+  try {
+    const db = createServiceRoleClient();
+    const { data: sub } = await db
+      .from("billing_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .maybeSingle();
+    return emailLabTierFor(sub?.tier ?? "free");
+  } catch {
+    return "free";
+  }
+}
+
 export async function GET() {
   const { supabase, user } = await authed();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -27,7 +49,9 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: "read failed" }, { status: 500 });
-  return NextResponse.json(data ?? []);
+
+  const tier = await tierForUser(user.id);
+  return NextResponse.json({ contacts: data ?? [], tier });
 }
 
 export async function POST(req: NextRequest) {
