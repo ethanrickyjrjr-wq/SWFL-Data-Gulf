@@ -12,10 +12,17 @@ Two-call strategy (no body-text parsing — avoids layout ambiguity):
 
 No headless browser, no Cloudflare clearance — Brevitas's API responds to plain HTTP with
 the right headers. Playwright is NOT needed here; urllib + the JSON API is sufficient.
+
+WAF / runner-IP note: the JSON API stays plain-HTTP, but GitHub-hosted-runner datacenter IPs
+get categorically 403'd by the edge (the contract is unchanged — it just refuses GH's IPs).
+When CRAWL4AI_PROXY is set (the cron's residential proxy, same repo-wide secret the crawl4ai
+pipelines use), _api_get routes urllib through it; unset, the connection is direct and every
+byte of prior behavior is preserved (local runs, dry-runs, and every other pipeline unaffected).
 """
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 import urllib.request
@@ -52,9 +59,64 @@ _SLUG_ADDR_PAT = re.compile(
 )
 
 
+def _proxy_url_from_env() -> str | None:
+    """Normalize CRAWL4AI_PROXY into a single ``scheme://[user:pass@]host:port`` URL that
+    urllib's ProxyHandler understands, or None when the var is unset/blank.
+
+    Mirrors the accepted string formats of crawl4ai's ``ProxyConfig.from_string``
+    (crawl4ai/async_configs.py) so the SAME repo-wide secret value works here — WITHOUT
+    importing crawl4ai. This pipeline hits a clean JSON API over plain urllib and must stay
+    browser/Playwright-free; pulling in crawl_client just for the proxy parse would drag in
+    the whole crawl4ai/Playwright import graph. Supported inputs (from_string's own list):
+      - ``http://user:pass@host:port`` / ``http://host:port`` / ``socks5://host:port`` — passed
+        through verbatim (urllib embeds the userinfo and forwards Proxy-Authorization into the
+        HTTPS CONNECT tunnel; verified against CPython 3.12 urllib/request.py do_open).
+      - ``host:port:user:pass`` / ``host:port`` — colon forms, defaulted to an http:// proxy.
+
+    Returns None when unset — a strict no-op: every other pipeline, and local/dry-run use with
+    no secret, keeps the exact direct-connection behavior it has today.
+
+    NOTE: urllib natively proxies http(s) CONNECT proxies only (the residential-proxy norm for
+    a WAF bypass). A socks5 value would need PySocks, which we deliberately do not add — the
+    string is passed through so the value is honored identically to the crawl4ai path, not
+    silently rewritten.
+    """
+    raw = os.environ.get("CRAWL4AI_PROXY", "").strip()
+    if not raw:
+        return None
+    if "://" in raw:
+        return raw  # already a full proxy URL (creds embedded if present)
+    parts = raw.split(":")
+    if len(parts) == 4:
+        host, port, user, password = parts
+        return f"http://{user}:{password}@{host}:{port}"
+    if len(parts) == 2:
+        host, port = parts
+        return f"http://{host}:{port}"
+    raise ValueError(f"Invalid CRAWL4AI_PROXY format: {raw!r}")
+
+
+def _proxy_opener() -> urllib.request.OpenerDirector | None:
+    """Return a urllib opener that routes every request through CRAWL4AI_PROXY, or None when
+    the var is unset. None => the caller falls back to the default ``urllib.request.urlopen``,
+    byte-identical to the pre-proxy code path (the residential proxy is opt-in via the env var,
+    which only the GitHub Actions cron sets — see .github/workflows/ingest-brevitas-listings.yml)."""
+    url = _proxy_url_from_env()
+    if url is None:
+        return None
+    # Passing our own ProxyHandler suppresses build_opener's default (system-env) ProxyHandler,
+    # so exactly this proxy is used for both http and https targets.
+    return urllib.request.build_opener(
+        urllib.request.ProxyHandler({"http": url, "https": url})
+    )
+
+
 def _api_get(url: str) -> Any:
     req = urllib.request.Request(url, headers=_HEADERS)
-    with urllib.request.urlopen(req, timeout=20) as r:
+    opener = _proxy_opener()
+    # Unset proxy => the exact prior transport (urllib.request.urlopen); set => route via proxy.
+    open_fn = opener.open if opener is not None else urllib.request.urlopen
+    with open_fn(req, timeout=20) as r:
         return json.loads(r.read())
 
 

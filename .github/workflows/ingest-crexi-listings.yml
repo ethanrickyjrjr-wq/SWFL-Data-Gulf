@@ -18,39 +18,54 @@ on:
 jobs:
   ingest:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
-    runs-on: ubuntu-latest
+    # Self-hosted runner on the operator's machine: its residential IP reaches Crexi's Cloudflare
+    # WAF directly. GitHub datacenter IPs get the "Blocked by anti-bot protection: Cloudflare JS
+    # challenge" block on crexi.com/lease (run 29191537886, 07/12/2026, failed for every city after
+    # green runs 06/28 + 07/05). The 'swfl-local' label scopes this job to that one runner. Mirrors
+    # dbpr-sirs-monthly.yml, which fixed the same datacenter-IP WAF class the same way. NOTE: the
+    # runner is currently OFFLINE (re-provision pending). While it is offline, keep this workflow
+    # `disabled_manually` (gh workflow disable ingest-crexi-listings.yml) so the weekly cron doesn't
+    # create runs that queue against a missing runner and fail after 24h — dbpr-sirs is disabled for
+    # exactly this reason. Re-enable once the runner is registered.
+    runs-on: [self-hosted, swfl-local]
     timeout-minutes: 30
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       DATABASE_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+      # Runs on the self-hosted 'swfl-local' runner (residential IP), so crawl4ai reaches Crexi's
+      # Cloudflare WAF directly and CRAWL4AI_PROXY stays unset -> crawl_client._proxy_from_env()
+      # returns None -> direct fetch. Kept wired as a fallback: if this ever moves back to a cloud
+      # runner, set the secret (already a live repo secret) to escape the datacenter-IP block
+      # without touching code.
       CRAWL4AI_PROXY: ${{ secrets.CRAWL4AI_PROXY }}
+      # Dedicated uv-managed venv (Python 3.12) holding the ingest deps INCLUDING crawl4ai==0.9.0 +
+      # playwright — crexi's extract.py drives Crawl4aiSession + UndetectedAdapter (a real browser),
+      # unlike dbpr_sirs's raw Playwright, so the venv MUST have crawl4ai's browsers provisioned.
+      # Pinned by absolute path because the machine's default `python` drifts to a depless 3.14.
+      # Provisioned ONCE, outside the repo, stable across checkouts/reboots. Refresh after a
+      # requirements.txt change:
+      #   uv venv "C:\Users\ethan\crexi-runner-venv" --python 3.12
+      #   uv pip install --python "C:\Users\ethan\crexi-runner-venv\Scripts\python.exe" -r ingest/requirements.txt
+      #   & "C:\Users\ethan\crexi-runner-venv\Scripts\crawl4ai-setup.exe"   # installs crawl4ai's browsers (chromium)
+      # (fallback if crawl4ai-setup misbehaves: & "...\Scripts\python.exe" -m playwright install chromium)
+      VENV_PY: 'C:\Users\ethan\crexi-runner-venv\Scripts\python.exe'
+    defaults:
+      run:
+        # PowerShell on the Windows runner — bash resolves `python` to a Windows app-execution-alias
+        # / WSL stub (the exact failure dbpr-sirs-monthly.yml documents and fixed the same way).
+        shell: pwsh
 
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Install dependencies
-        run: pip install -r ingest/requirements.txt
-
-      - name: Install crawl4ai browsers
-        run: crawl4ai-setup
-
-      - name: crawl4ai preflight (advisory)
-        continue-on-error: true
-        run: crawl4ai-doctor
-
+      # No actions/setup-python + no pip/crawl4ai-setup steps: the self-hosted runner uses the
+      # pre-provisioned VENV_PY (uv venvs have no pip anyway, and setup-python fails on this runner
+      # with an HKLM registry-permission error — see dbpr-sirs-monthly.yml history).
       - name: Run Crexi listings pipeline
+        env:
+          CORRIDOR: ${{ inputs.corridor }}
         run: |
-          CORRIDOR_FLAG=""
-          if [ -n "${{ inputs.corridor }}" ]; then
-            CORRIDOR_FLAG="--corridor '${{ inputs.corridor }}'"
-          fi
-          DRY_FLAG=""
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            DRY_FLAG="--dry-run"
-          fi
-          python -m ingest.pipelines.crexi_listings.pipeline $CORRIDOR_FLAG $DRY_FLAG
+          $pyArgs = @()
+          if ("$env:CORRIDOR" -ne "") { $pyArgs += "--corridor"; $pyArgs += "$env:CORRIDOR" }
+          if ("${{ inputs.dry_run }}" -eq "true") { $pyArgs += "--dry-run" }
+          & "$env:VENV_PY" -m ingest.pipelines.crexi_listings.pipeline @pyArgs

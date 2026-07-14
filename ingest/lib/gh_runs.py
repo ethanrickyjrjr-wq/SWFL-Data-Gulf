@@ -20,7 +20,8 @@ VERIFIED LIVE (gh 2.95.0, `--help`, 2026-07-11) — do not change these field li
   Runs carry NO workflow path. The join is run.workflowDatabaseId <-> workflow.id.
 
 PURE / IMPURE SPLIT: only fetch_* touch subprocess. index_workflows / summarize_runs /
-apply_backfill / workflows_needing_backfill are pure and fixture-tested with zero gh.
+apply_backfill / workflows_needing_backfill / workflows_needing_streak_recheck are pure and
+fixture-tested with zero gh.
 """
 from __future__ import annotations
 
@@ -191,9 +192,41 @@ def summarize_runs(
 
 
 def workflows_needing_backfill(summaries: dict[str, dict]) -> list[str]:
-    """PURE. Files whose run history fell outside the bulk window — the ONLY ones that
-    justify a targeted per-workflow gh call."""
+    """PURE. Files whose run history fell ENTIRELY outside the bulk window (zero in-window
+    runs) — the ONLY ones this trigger justifies a targeted per-workflow gh call for. A RED
+    workflow with a truncated-but-nonzero in-window streak is a DIFFERENT gap; it is handled
+    by workflows_needing_streak_recheck, which runs alongside this one."""
     return sorted(f for f, s in summaries.items() if s["run_status"] == "NO_RUNS_IN_WINDOW")
+
+
+# The in-window streak at/under which a RED workflow could be MIS-read as TRANSIENT. This MUST
+# stay in lockstep with doctor.prescribe's TRANSIENT gate — ingest/scripts/doctor.py's
+# `run["status"] == "RED" and run.get("consecutive_failures", 0) <= 2`. Change one, change both.
+_TRANSIENT_STREAK_MAX = 2
+
+
+def workflows_needing_streak_recheck(summaries: dict[str, dict]) -> list[str]:
+    """PURE. RED workflows whose in-window streak is small enough (<= _TRANSIENT_STREAK_MAX)
+    that the bulk 500-run window may have TRUNCATED it — the true streak could be longer.
+
+    Closes the brevitas_listings gap: an infrequent (weekly/monthly) workflow's most-recent
+    failure can land inside the 500-run window while its earlier consecutive failures fell
+    outside it. The bulk view then reads streak=1 and doctor (wrongly) calls it TRANSIENT,
+    even though the workflow has 3 real, consecutive, GH-confirmed failures. Any such
+    workflow gets a targeted per-workflow gh call so the TRUE streak — not the window
+    artifact — drives the TRANSIENT/escalate decision.
+
+    Runs ALONGSIDE workflows_needing_backfill (which fires only on ZERO in-window runs): a
+    workflow with exactly one in-window failure never qualified there, which is precisely why
+    the bug slipped through. A daily workflow whose full streak is already in-window recomputes
+    to the SAME streak on backfill, so flagging it here is harmless — the set stays bounded by
+    the (small) count of currently-red workflows."""
+    return sorted(
+        f
+        for f, s in summaries.items()
+        if s["run_status"] == "RED"
+        and s.get("consecutive_failures", 0) <= _TRANSIENT_STREAK_MAX
+    )
 
 
 def apply_backfill(

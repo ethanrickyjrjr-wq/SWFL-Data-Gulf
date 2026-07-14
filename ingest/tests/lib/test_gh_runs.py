@@ -142,3 +142,64 @@ def test_workflows_needing_backfill_lists_only_the_empty_ones():
     need = gh_runs.workflows_needing_backfill(s)
     assert "daily-rebuild.yml" not in need
     assert "faf5-annual.yml" in need
+
+
+# ── streak recheck: the brevitas_listings truncation gap ──────────────────────
+# An infrequent (weekly/monthly) workflow can have ONLY its most-recent failure inside the
+# 500-run bulk window while its earlier consecutive failures fell outside it. The bulk view
+# then reads streak=1 (RED) and — without a targeted recheck — doctor calls it TRANSIENT even
+# though the workflow has 3 real, consecutive, GH-confirmed failures. These tests pin that a
+# RED-with-low-streak workflow is flagged for backfill and that apply_backfill recomputes the
+# TRUE streak. workflows_needing_backfill (zero in-window runs) never covered this class — a
+# single in-window failure disqualified it there — which is exactly how the bug slipped in.
+
+
+def test_streak_recheck_flags_a_red_workflow_with_a_truncated_low_in_window_streak():
+    # Only the MOST RECENT of several real failures is inside the bulk window -> streak=1.
+    runs = [_run(3, "Graphify republish", "failure", "2026-07-11T05:00:00Z", "2026-07-11T05:01:00Z")]
+    s = gh_runs.summarize_runs(runs, gh_runs.index_workflows(WORKFLOWS), now=NOW, manifest_by_file=MANIFEST)
+    assert s["graphify-republish.yml"]["run_status"] == "RED"
+    assert s["graphify-republish.yml"]["consecutive_failures"] == 1
+    recheck = gh_runs.workflows_needing_streak_recheck(s)
+    assert "graphify-republish.yml" in recheck
+    # workflows_needing_backfill must NOT claim it — it has an in-window run, so it is not empty.
+    assert "graphify-republish.yml" not in gh_runs.workflows_needing_backfill(s)
+
+
+def test_streak_recheck_ignores_green_and_never_ran_workflows():
+    runs = [_run(1, "Daily rebuild", "success", "2026-07-11T04:05:00Z", "2026-07-11T04:42:00Z")]
+    s = gh_runs.summarize_runs(runs, gh_runs.index_workflows(WORKFLOWS), now=NOW, manifest_by_file=MANIFEST)
+    recheck = gh_runs.workflows_needing_streak_recheck(s)
+    assert "daily-rebuild.yml" not in recheck   # GREEN
+    assert "faf5-annual.yml" not in recheck     # NO_RUNS_IN_WINDOW is the OTHER trigger's job
+
+
+def test_streak_recheck_skips_a_red_workflow_whose_full_streak_is_already_in_window():
+    # Three failures already visible in the bulk window -> streak=3 already escalates past
+    # TRANSIENT with no recheck needed, so it must NOT be flagged (no wasted gh call).
+    runs = [
+        _run(3, "Graphify republish", "failure", "2026-07-11T05:00:00Z", "2026-07-11T05:01:00Z"),
+        _run(3, "Graphify republish", "failure", "2026-07-10T05:00:00Z", "2026-07-10T05:01:00Z"),
+        _run(3, "Graphify republish", "failure", "2026-07-09T05:00:00Z", "2026-07-09T05:01:00Z"),
+    ]
+    s = gh_runs.summarize_runs(runs, gh_runs.index_workflows(WORKFLOWS), now=NOW, manifest_by_file=MANIFEST)
+    assert s["graphify-republish.yml"]["consecutive_failures"] == 3
+    assert "graphify-republish.yml" not in gh_runs.workflows_needing_streak_recheck(s)
+
+
+def test_recheck_backfill_recomputes_the_full_streak_past_the_transient_threshold():
+    # 1 failure visible in-window; the targeted per-workflow backfill returns all 3 real
+    # consecutive failures. apply_backfill must fold in the FULL streak (3), not the
+    # truncated 1 — so doctor's `<= 2` TRANSIENT gate no longer catches it.
+    runs = [_run(3, "Graphify republish", "failure", "2026-07-11T05:00:00Z", "2026-07-11T05:01:00Z")]
+    s = gh_runs.summarize_runs(runs, gh_runs.index_workflows(WORKFLOWS), now=NOW, manifest_by_file=MANIFEST)
+    targeted = [
+        _run(3, "Graphify republish", "failure", "2026-07-11T05:00:00Z", "2026-07-11T05:01:00Z"),
+        _run(3, "Graphify republish", "failure", "2026-07-04T05:00:00Z", "2026-07-04T05:01:00Z"),
+        _run(3, "Graphify republish", "failure", "2026-06-27T05:00:00Z", "2026-06-27T05:01:00Z"),
+    ]
+    s = gh_runs.apply_backfill(s, {"graphify-republish.yml": targeted}, now=NOW, manifest_by_file=MANIFEST)
+    d = s["graphify-republish.yml"]
+    assert d["run_status"] == "RED"
+    assert d["consecutive_failures"] == 3        # NOT the truncated 1
+    assert d["last_success_at"] is None          # no success in the recomputed history

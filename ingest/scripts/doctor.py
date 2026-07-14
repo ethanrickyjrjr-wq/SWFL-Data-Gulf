@@ -250,7 +250,10 @@ def prescribe(line: dict) -> dict | None:
             f"pg_class kind={line['kind']}",
         )
 
-    # 5 — one or two failures is transient. Three is a class.
+    # 5 — one or two failures is transient. Three is a class. The `<= 2` threshold is
+    # mirrored in gh_runs._TRANSIENT_STREAK_MAX, which decides WHICH red workflows get a
+    # targeted per-workflow backfill so this branch sees the TRUE streak, not a window
+    # artifact (the brevitas_listings truncation bug). Change one, change both.
     if run["status"] == "RED" and run.get("consecutive_failures", 0) <= 2:
         return _rx(
             rx.TRANSIENT,
@@ -519,13 +522,32 @@ def collect_gh(manifest_by_file: dict[str, dict], *, max_backfill: int = 40):
     idx = gh_runs.index_workflows(workflows)
     summaries = gh_runs.summarize_runs(runs, idx, now=now, manifest_by_file=manifest_by_file)
 
-    need = gh_runs.workflows_needing_backfill(summaries)[:max_backfill]
+    # Two targeted-backfill triggers, both real per-workflow gh calls:
+    #   - streak_recheck:  RED with a LOW in-window streak (<=2) whose earlier failures may
+    #     have fallen outside the 500-run window (the brevitas_listings gap) -> recompute the
+    #     TRUE streak so a real 3rd failure is not silently classified TRANSIENT.
+    #   - needing_backfill: ZERO runs in the bulk window (weekly/monthly/annual) -> promote
+    #     NO_RUNS_IN_WINDOW to GREEN/NEVER_RAN.
+    # RED rechecks come FIRST: they are correctness-critical and bounded by the small count of
+    # currently-red workflows, so they must never be sacrificed to the max_backfill cap that a
+    # long tail of zero-in-window infrequent workflows could otherwise exhaust.
+    need = list(
+        dict.fromkeys(
+            gh_runs.workflows_needing_streak_recheck(summaries)
+            + gh_runs.workflows_needing_backfill(summaries)
+        )
+    )[:max_backfill]
     backfilled: dict[str, list[dict]] = {}
     for fname in need:
+        # A truncated RED streak needs enough history to prove a 3rd failure; an empty window
+        # only needs the latest run to decide GREEN/NEVER_RAN. Fetch the deeper page for RED.
+        limit = 10 if summaries[fname]["run_status"] == "RED" else 5
         try:
-            backfilled[fname] = gh_runs.fetch_runs_for_workflow(idx[fname]["path"], limit=5)
+            backfilled[fname] = gh_runs.fetch_runs_for_workflow(idx[fname]["path"], limit=limit)
         except gh_runs.GhUnavailable:
-            continue  # leave it NO_RUNS_IN_WINDOW (yellow) — never promote to a false RED
+            # Leave the summary as-is — a NO_RUNS_IN_WINDOW stays yellow (never a false RED),
+            # a truncated RED stays RED with its in-window streak. Never fabricate a streak.
+            continue
     if backfilled:
         summaries = gh_runs.apply_backfill(
             summaries, backfilled, now=now, manifest_by_file=manifest_by_file

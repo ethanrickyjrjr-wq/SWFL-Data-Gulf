@@ -446,6 +446,99 @@ def test_THE_INVARIANT_every_red_line_carries_a_prescription_or_a_failing_conten
             assert l["prescription"]["code"] in rx.DOCTOR_ASSIGNABLE
 
 
+# ── collect_gh: the brevitas_listings truncation regression (I/O monkeypatched) ──
+
+
+def _gh_run(wf_id, conclusion, created, url):
+    return {
+        "workflowDatabaseId": wf_id, "workflowName": "Brevitas listings",
+        "conclusion": conclusion, "status": "completed", "event": "schedule",
+        "createdAt": created, "startedAt": created,
+        "updatedAt": created.replace("00:00Z", "05:00Z"), "url": url,
+    }
+
+
+def test_collect_gh_backfills_a_red_low_streak_workflow_and_surfaces_the_true_streak(monkeypatch):
+    """brevitas_listings (weekly): the bulk 500-run window saw only the MOST RECENT of 3 real
+    consecutive failures — the two prior ones fell outside the window — so the in-window streak
+    was 1 and doctor classified it TRANSIENT. collect_gh must now fire a targeted per-workflow
+    backfill for ANY red-with-low-streak workflow, recompute the FULL streak (3), and let
+    doctor's `<= 2` TRANSIENT gate no longer catch it. This is the exact live bug, executable."""
+    wfs = [{"id": 7, "name": "Brevitas listings",
+            "path": ".github/workflows/ingest-brevitas-listings.yml", "state": "active"}]
+    # bulk window: ONLY the most-recent failure is visible.
+    bulk = [_gh_run(7, "failure", "2026-07-12T00:00Z", "u12")]
+    # targeted per-workflow backfill: all 3 real, consecutive, GH-confirmed failures.
+    targeted = [
+        _gh_run(7, "failure", "2026-07-12T00:00Z", "u12"),
+        _gh_run(7, "failure", "2026-07-05T00:00Z", "u05"),
+        _gh_run(7, "failure", "2026-06-28T00:00Z", "u28"),
+    ]
+    calls = {"targeted_paths": []}
+
+    def _fake_targeted(path, limit=5):
+        calls["targeted_paths"].append(path)
+        return targeted if "brevitas" in path else []
+
+    monkeypatch.setattr(doctor.gh_runs, "fetch_workflows", lambda limit=200: wfs)
+    monkeypatch.setattr(doctor.gh_runs, "fetch_runs", lambda limit=500: bulk)
+    monkeypatch.setattr(doctor.gh_runs, "fetch_runs_for_workflow", _fake_targeted)
+
+    summaries, gh_error = doctor.collect_gh({})
+    assert gh_error is None
+    # the targeted recheck actually fired for this workflow
+    assert ".github/workflows/ingest-brevitas-listings.yml" in calls["targeted_paths"]
+    s = summaries["ingest-brevitas-listings.yml"]
+    assert s["run_status"] == "RED"
+    assert s["consecutive_failures"] == 3          # the TRUE streak, NOT the truncated 1
+
+    # ...and the corrected streak drives prescribe PAST TRANSIENT (the run signal escalates).
+    line = _line(dataset="brevitas_listings", table="data_lake.active_listings_cre",
+                 workflow="ingest-brevitas-listings.yml",
+                 run={"status": "RED", "severity": "red",
+                      "consecutive_failures": s["consecutive_failures"], "url": "u12"})
+    p = doctor.prescribe(line)
+    assert p["code"] != rx.TRANSIENT
+    assert p["code"] == rx.UNKNOWN
+    assert "3 consecutive" in p["evidence"]
+
+
+def test_collect_gh_prioritizes_red_rechecks_over_empty_backfills_under_the_cap(monkeypatch):
+    """The RED-recheck-FIRST ordering in collect_gh is load-bearing. With ~83 workflows a long
+    tail of zero-in-window infrequent workflows can fill workflows_needing_backfill past
+    max_backfill; if the RED rechecks were appended SECOND they would fall off the `[:cap]`
+    slice and silently revive the brevitas truncation bug in production. This pins that a
+    RED-low-streak workflow wins the scarce backfill slot over a NO_RUNS_IN_WINDOW one — it
+    fails against both the pre-fix code (no recheck at all) and a backfill-first ordering."""
+    wfs = [
+        {"id": 7, "name": "Red weekly", "path": ".github/workflows/red.yml", "state": "active"},
+        {"id": 8, "name": "Empty annual", "path": ".github/workflows/empty.yml", "state": "active"},
+    ]
+    bulk = [_gh_run(7, "failure", "2026-07-12T00:00Z", "u7")]  # id 8 has ZERO in-window runs
+    red_targeted = [
+        _gh_run(7, "failure", "2026-07-12T00:00Z", "u7"),
+        _gh_run(7, "failure", "2026-07-05T00:00Z", "u7b"),
+        _gh_run(7, "failure", "2026-06-28T00:00Z", "u7c"),
+    ]
+    calls = {"targeted_paths": []}
+
+    def _fake_targeted(path, limit=5):
+        calls["targeted_paths"].append(path)
+        return red_targeted if path.endswith("red.yml") else []
+
+    monkeypatch.setattr(doctor.gh_runs, "fetch_workflows", lambda limit=200: wfs)
+    monkeypatch.setattr(doctor.gh_runs, "fetch_runs", lambda limit=500: bulk)
+    monkeypatch.setattr(doctor.gh_runs, "fetch_runs_for_workflow", _fake_targeted)
+
+    summaries, gh_error = doctor.collect_gh({}, max_backfill=1)  # exactly ONE slot
+    assert gh_error is None
+    assert ".github/workflows/red.yml" in calls["targeted_paths"]        # RED won the slot
+    assert ".github/workflows/empty.yml" not in calls["targeted_paths"]  # empty crowded out
+    assert summaries["red.yml"]["consecutive_failures"] == 3             # true streak folded in
+    # the crowded-out empty workflow keeps its unbackfilled status — never a false RED
+    assert summaries["empty.yml"]["run_status"] == "NO_RUNS_IN_WINDOW"
+
+
 # ── --json contract (frozen: /census consumes this) ───────────────────────────
 
 def test_json_top_level_shape_is_frozen():

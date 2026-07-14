@@ -1,3 +1,48 @@
+## 2026-07-14 (Sonnet 5 · main) — 5 doctor-red follow-ups fixed after auditing the baseline handoff doc.
+
+Operator asked me to find issues in `docs/handoff/2026-07-14-doctor-red-baseline-handoff.md` (same-day
+handoff on the last 4 doctor reds). Verified every claim against live code/data instead of trusting the doc
+(RULE 0.5): cadence math and cron/failure evidence held up, but 5 real problems didn't — doctor's TRANSIENT
+classifier had a genuine bug, the "one crawl4ai proxy fixes both" framing was wrong for brevitas (plain
+urllib, never crawl4ai), the dbpr_sirs proxy precedent was backwards (its real fix was a self-hosted
+residential-IP runner, not a purchased proxy), the listing_lifecycle price-floor count didn't reconcile (18
+vs a stale 21), and noaa_ghcn_rainfall's "just wait" framing masked a real per-station gap. Opened checks
+for all 5, fanned 5 Opus agents at them in parallel (disjoint files, no worktrees needed).
+
+**doctor.py (`ingest/lib/gh_runs.py` + `ingest/scripts/doctor.py`):** targeted per-workflow backfill only
+fired on zero-runs-in-window, so an infrequent workflow with 1-2 runs visible in the shared 500-run bulk
+window got its `consecutive_failures` streak truncated and mis-scored TRANSIENT. Proven live on
+`brevitas_listings` (3 real consecutive 403s, doctor saw only the latest — contradicts TRANSIENT's own
+"3rd failure = not transient" policy in `prescriptions.py`). Added a second backfill trigger for
+RED+low-streak workflows, ordered before the existing trigger so it can't be starved by `max_backfill`.
+6 new tests, 262 passing in `ingest/tests/lib` + `ingest/tests/scripts`.
+
+**`brevitas_listings/extract.py`:** wired the already-provisioned `CRAWL4AI_PROXY` secret into its urllib
+call (it never read the env var despite the workflow exposing it — same dead-wiring trap the 06/26
+active-listings handoff already caught elsewhere). No-op when unset. 12 new tests.
+
+**`ingest-crexi-listings.yml`:** staged (not activated) the same self-hosted-runner fix that actually solved
+this WAF class for `dbpr_sirs` — `runs-on: [self-hosted, swfl-local]`, mirroring its venv/shell lessons. The
+runner is genuinely offline right now (0 registered runners, install dir empty) — disabled the crexi cron
+live via `gh workflow disable` so it doesn't queue-and-die against a runner that doesn't exist yet.
+
+**`listing_lifecycle` price floor (`ingest/quality/quality_registry.yaml`):** reconciled the stale "21
+offenders" comment to the true live 18 (transitions ledger showed exactly 3 rows left the active feed
+07/13 — real churn, not a bug). Pulled raw SteadyAPI payloads and REFUTED the rent-leak theory: the $5,000
+cluster is realtor.com MLS placeholder sale prices on new listings, not a rent-value leak. Found a second,
+independent vendor defect on 3 rows (lot sqft duplicated into the living-area sqft field). `min: 20000`
+left untouched — the floor is doing its job.
+
+**`noaa_ghcn_rainfall`:** root-caused the missing-station red instead of assuming it self-resolves.
+USC00086078 (Naples COOP) is alive, not decommissioned — it chronically under-reports (275/365 QC-passing
+days in 2024, 205/365 in 2025, both under `MIN_DAY_COUNT=300`). Added per-station coverage logging so a
+dropped station-year is visible instead of silently vanishing, dropped `expected_rows_min` 8→6 to match 3
+reliably-complete stations. 15 new tests.
+
+**Next:** confirm brevitas clears its 403 on the next dispatch now the proxy is actually wired; get the
+operator's hands-on go-ahead to re-provision the `swfl-local` self-hosted runner before crexi comes back;
+watch noaa_ghcn_rainfall's next scheduled run (08/05) for the new floor + coverage log.
+
 ## 2026-07-14 (Opus 4.8 · main) — SOLD-MEDIAN STALE-BLEND FIX: both sold views were publishing a 2.5-year stock median, ~6.6% high in a falling market.
 
 Operator asked to verify `docs/handoff/2026-07-14-zip-sold-price-third-reference-handoff.md` ("are we

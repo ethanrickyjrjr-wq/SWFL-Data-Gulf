@@ -109,7 +109,20 @@ tables:
       #   source_name        — supplied by BATCH CTX at Locus A: it is NOT a batch-row column
       #                        (distill._STATE_COLS omits it; upsert_state injects it as a
       #                        scalar at distill.py:200).
-      # Live: 21 offenders / 19,116 in-scope = 0.110%. All 21 verified bad, 0 verified-real.
+      # Live 07/14/2026: 18 offenders / 18,996 in-scope = 0.095%. All 18 verified bad, 0 verified-real.
+      # Moved from 21 (a 07/11 snapshot — this line + doctor-first-run-report, commit 7dd4ad29/8d4baa4d).
+      # A `report` contract counts LIVE state='active' rows, so it drifts with the feed: listing_transitions
+      # shows exactly 3 $5,000 single_family rows left the active feed active->holding on the 07/13 sweep
+      # (1932 NE 24th Ave/33909, 3657 Kelly St/33901, 250556 Thst W/33971). 21 - 3 = 18, zero new offenders.
+      # RENT-LEAK THEORY REFUTED for the $5,000 cluster (raw SteadyAPI /search pulled live 07/14, RULE 0.4):
+      # 4 of the 9 pulled (526 Wabasso, 720 Lamar, 606 SW 35th, 703 Wildwood) ALL carry price.amount=5000 on
+      # status='for_sale' source_type='mls' records with is_new_listing=true; the other 5 persist identically.
+      # These are realtor.com MLS PLACEHOLDER list prices on brand-new for-sale listings, NOT rent values —
+      # rentals are a separate /rentals-search endpoint (price.min/max) we never call. We carry the vendor
+      # value faithfully; the corruption is upstream. SECOND, INDEPENDENT defect on the large-sqft subset:
+      # 606 SW 35th (33914) has description.sqft == lot_sqft == 10,019 and 720 Lamar sqft=10,106 (both
+      # lot-scale) — realtor.com is putting LOT area in the living-area field, unrelated to the price bug.
+      # Both defects are vendor-side; the floor stays a report SIGNAL, not a drop (min: 20000 unchanged).
       # Known miss (accepted, stated): a rental-priced row with NULL sqft, and any rent artifact
       # above $20,000 — Arbor Trace annual-rate rentals reach $49,000 while a real sale in the
       # same building starts at $54,900. Price cannot separate that cohort at ANY threshold; the

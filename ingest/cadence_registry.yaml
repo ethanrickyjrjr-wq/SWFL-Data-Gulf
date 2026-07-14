@@ -1428,13 +1428,21 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     dlt_schema_name: noaa_ghcn_rainfall
-    expected_rows_min: 8 # 4 anchor stations × 2 complete years minimum
+    expected_rows_min: 6 # 3 reliably-complete anchor stations × 2 complete years.
     # NOAA GHCN-Daily annual precipitation totals for 4 Lee+Collier anchor stations
     # (USW00012835 FMY, USW00012894 RSW, USW00012897 Naples Muni, USC00086078 Naples COOP).
     # Source: AWS Open Data s3://noaa-ghcn-pds/csv/by_year/ (no auth).
     # Consumer: env-swfl brain (env_rainfall_swfl_annual_in key_metric).
     # Cron: 5th of month 14:00 UTC via noaa-ghcn-rainfall-monthly.yml.
-    # First run: pending first GHA dispatch.
+    # First runs: 06/05/2026 + 07/05/2026, both GREEN.
+    # FLOOR NOTE (verified 07/14/2026 against the live by_year + by_station GHCN files):
+    # USC00086078 is NOT decommissioned — it's a live, QC-passing COOP station that chronically
+    # under-reports (275/365 days in 2024, 205/365 in 2025 — both below MIN_DAY_COUNT=300 in
+    # resources.py). The other 3 anchors clear 300 comfortably except RSW's 314-day 2024, only
+    # 14 above the floor — a real future dip there legitimately re-reds this. USC00086078 stays
+    # in ANCHOR_STATIONS (self-heals if it ever clears 300); resources.py now logs a WARNING per
+    # dropped station-year instead of silently vanishing it. See check
+    # noaa_ghcn_missing_station_masked_by_floor.
     source_scope:
       confirmed_total:
         summary: "Precipitation only, 4 anchor stations"
