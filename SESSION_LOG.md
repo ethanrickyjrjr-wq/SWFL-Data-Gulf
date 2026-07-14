@@ -1,3 +1,24 @@
+## 2026-07-14 (Sonnet 5 · main) — DESK HERO REBASE TAB SHIPPED A VERTICAL SPIKE. FIXED.
+
+Yesterday's `buildHeroFromSold` rewrite (0ce12bfa → f719a128, "hero rides the deep price series")
+replaced `buildHeroFromAsking` as the primary `/desk` hero builder but never set `hero.rebase`.
+`DeskHero.tsx`'s "% since start" tab falls back to raw `hero.cities` when `rebase` is absent — the
+FULL per-city sold series, which run to different depths (Cape Coral/Fort Myers 132 months since
+06/30/2015, Naples 157 since 05/31/2013). Rebasing each city from its own first point and merging by
+date drew a vertical spike where the shorter cities' data starts. Operator caught it live via
+screenshot.
+
+Same function's `windowNote` had a second bug: `n` (`Math.max` across cities → Naples' 157) was
+paired with `first` (`cities[0]`, Cape Coral's 06/30/2015) — a sentence no single city's series
+actually supports. Fixed by deriving both from the same (longest) city.
+
+Fix: `lib/desk/loaders.ts` `buildHeroFromSold` now (1) picks `n`/`first` from the same city, (2) sets
+`rebase: buildRebaseFromSold(sold)` — restoring the consistent trailing-12-month window across all
+three cities that `buildHeroFromAsking` always had. Verified live: `bunx next build` clean, served on
+a throwaway port (3211, killed after), screenshotted the "% over the year" tab — three smooth lines,
+no spike, no gap, caption now reads "12 monthly closed-sale medians per city since 06/30/2025." 44/44
+`lib/desk` tests pass; `bunx tsc --noEmit` clean.
+
 ## 2026-07-14 (Opus 4.8 · main) — THE COMMUNITY NAME SHIPS EVERYWHERE. I OVER-READ THE TEASER RULE.
 
 **Corrected same session, operator caught it.** When community facts first landed on `ListingFacts`,

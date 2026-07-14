@@ -735,8 +735,12 @@ function buildHeroFromSold(
     });
   }
   if (cities.length === 0) return null;
-  const n = Math.max(...cities.map((c) => c.points.length));
-  const first = cities[0].points[0]?.date;
+  // n and first MUST come from the same city — Cape Coral/Fort Myers run 132 months back
+  // to 06/30/2015, Naples runs 157 back to ~2013. Pairing the longest count with cities[0]'s
+  // (Cape Coral's) start date produced a sentence no single city's series actually supports.
+  const longest = cities.reduce((a, b) => (b.points.length > a.points.length ? b : a));
+  const n = longest.points.length;
+  const first = longest.points[0]?.date;
   return {
     cities,
     asOf: cities[0].latest.asOf,
@@ -746,6 +750,11 @@ function buildHeroFromSold(
     // carries its own [INFERENCE] tag, its base value and its falsifier, in the copy block
     // that sits directly under the chart — which is where a reader is actually looking.
     windowNote: `${n} monthly closed-sale medians per city since ${mdY(first) ?? "the window opened"} — true sold prices, redfin.com`,
+    // Without this, DeskHero's "% since start" tab falls back to the raw per-city series
+    // (hero.cities), which run to DIFFERENT depths and start dates. Rebasing each city from
+    // its own first point and merging by date puts a vertical spike wherever the shorter
+    // series starts. buildRebaseFromSold gives all three cities the SAME trailing window.
+    rebase: buildRebaseFromSold(sold),
   };
 }
 
