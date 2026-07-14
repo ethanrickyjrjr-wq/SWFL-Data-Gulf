@@ -1,3 +1,40 @@
+## 2026-07-14 (Sonnet 5 · main) — FOUND WHY "SILENT" REBUILD FAILURES ARE SILENT: exit-code gate never ran for targeted single-pack rebuilds.
+
+Ten-cluster investigate-only fan-out over the 200+ open-checks ledger surfaced
+`env_hurricane_forced_rebuild_silent_degrade`. Traced it to ground truth, not the subagent's word:
+pulled the real GHA logs for runs 29179280303 (env-swfl) and 29179461590 (hurricane-tracks-fl) —
+five minutes of zero output after `[refinery] pack=<id> ...`, then the step reports exit 0.
+
+Root cause: `refinery/cli.mts`'s exit-code derivation + CRON-DIAG print (the block that makes
+`deriveExitCode`/`formatCronDiag` actually fire) only ran `if (resilient && order.includes("master"))`.
+`resolveBuildOrder(leafId)` never includes master (master is a downstream sink, never an upstream), so
+a targeted single-pack rebuild — `pack_id=<brain-id> --force`, this repo's own documented debugging
+path — walks straight past deriveExitCode, the build report, and CRON-DIAG. `main()` falls through,
+process exits 0, no matter what happened inside `buildOne`. Every silent-failure guard built this week
+(assert_landed, doctor, the runner-kill catch) is real and correctly wired — they just all sit
+downstream of a gate that assumes master is always in scope.
+
+Fix: `refinery/cli.mts` — moved exit-code derivation + report + CRON-DIAG out from under
+`order.includes("master")` so it runs on every `--resilient` invocation; master-specific
+build/HOLD logic stays gated as before, `masterDecision` just stays `undefined` for a leaf-only run.
+`bunx tsc --noEmit` clean, 31/31 `resilient-build.test.mts` (pure logic untouched). Live-verified:
+`bun refinery/cli.mts env-swfl --force --resilient --dry-run` completed clean, exit 0, no regression.
+
+Separately root-caused why env-swfl (`brains/env-swfl.md`, refined_at 07/03) and hurricane-tracks-fl
+(refined_at 06/19) still serve pre-scope-fix content despite the 07/07 Lee+Collier re-scope landing in
+code and the nightly chain running green every night: NOT a chain failure — both packs' own TTLs
+(env-swfl 30d, hurricane-tracks-fl 365d) correctly read as still-fresh, so the unforced nightly chain
+never attempts them. The only path that touched either brain since 07/07 was a manual `--force`
+dispatch to push the fix out ahead of natural cadence — exactly the code path that hit the exit-code
+bug above. Left open pending operator go-ahead on re-forcing both with the fix in place.
+
+Also fixed `refinery/packs/storm-history-swfl.mts:207` — hardcoded label `"...all 3 SWFL counties"`
+survived the 07/07 scope fix (which corrected the data/join but not this literal string), live-violating
+the locked Lee+Collier scope rule. Verified it's a cheap fix in practice, not "a whole rebuild": leaf
+brain, `skipSynthesisAgent: true` (no LLM call), ingest reads an already-fetched Tier-1 Parquet (no live
+NOAA fetch) — `bun refinery/cli.mts storm-history-swfl --force` completed in 2.86s, confirmed the
+corrected label landed in `brains/storm-history-swfl.md` (v22→v23). Check `storm_history_stale_3county_label` closed.
+
 ## 2026-07-14 (Sonnet 5 · main) — DOCTOR GATE WAS RIGHT TO BE LOUD: 17 REDS WORKED DOWN TO ~4.
 
 Operator flagged the daily freshness probe (run 29345067777) as broken. Root cause: `05483c41`

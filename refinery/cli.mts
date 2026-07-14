@@ -338,88 +338,109 @@ async function main(): Promise<void> {
     }
   }
 
-  if (resilient && order.includes("master")) {
-    const masterPack = getPack("master");
-    const masterStatus = await brainStatus("master");
+  if (resilient) {
+    // `masterDecision` stays undefined when this invocation never touches master
+    // (a targeted single-pack rebuild, e.g. `pack_id=<leaf-brain>` — see below).
     let masterDecision: BuildReport["masterDecision"];
 
-    // Upstream-aware freshness trigger: master can be within its own 7-day TTL
-    // yet still carry a STALE snapshot of a leaf that rebuilt more recently
-    // (e.g. cre-swfl v47 on 06-05 while master sat at v68/06-03). Gather every
-    // upstream's CURRENT refined_at — post-rebuild for anything rebuilt this run,
-    // existing for anything skipped-fresh — and force a master re-synthesis if
-    // any is newer than master's last synthesis, instead of waiting out master's
-    // own TTL. This is the "data doesn't reach master" gap: without it, a leaf
-    // that updated between master TTL cycles never propagates until 06-10.
-    const upstreamRefinedAts: string[] = [];
-    for (const upstreamId of order) {
-      if (upstreamId === "master") continue;
-      const s = await brainStatus(upstreamId);
-      if (s.kind !== "missing") upstreamRefinedAts.push(s.refined_at);
-    }
-    const masterStaleVsUpstreams =
-      masterStatus.kind !== "missing" &&
-      masterIsStaleVsUpstreams(masterStatus.refined_at, upstreamRefinedAts);
+    if (order.includes("master")) {
+      const masterPack = getPack("master");
+      const masterStatus = await brainStatus("master");
 
-    if (masterStatus.kind === "fresh" && !force && !masterStaleVsUpstreams) {
-      masterDecision = "skipped-fresh";
-      outcomes.push({
-        packId: "master",
-        status: "skipped-fresh",
-        written: false,
-      });
-    } else {
-      if (masterStaleVsUpstreams && masterStatus.kind === "fresh" && !force) {
-        console.log(
-          "[cli] master is TTL-fresh but an upstream rebuilt more recently — re-synthesizing (upstream-aware trigger).",
-        );
+      // Upstream-aware freshness trigger: master can be within its own 7-day TTL
+      // yet still carry a STALE snapshot of a leaf that rebuilt more recently
+      // (e.g. cre-swfl v47 on 06-05 while master sat at v68/06-03). Gather every
+      // upstream's CURRENT refined_at — post-rebuild for anything rebuilt this run,
+      // existing for anything skipped-fresh — and force a master re-synthesis if
+      // any is newer than master's last synthesis, instead of waiting out master's
+      // own TTL. This is the "data doesn't reach master" gap: without it, a leaf
+      // that updated between master TTL cycles never propagates until 06-10.
+      const upstreamRefinedAts: string[] = [];
+      for (const upstreamId of order) {
+        if (upstreamId === "master") continue;
+        const s = await brainStatus(upstreamId);
+        if (s.kind !== "missing") upstreamRefinedAts.push(s.refined_at);
       }
-      const decision = computeMasterDecision(masterPack, outcomes);
-      if (decision === "held") {
-        masterDecision = "held";
-        console.warn(
-          "[cli] HOLD: one or more critical upstreams have an expired last-good. Master not rebuilt.",
-        );
+      const masterStaleVsUpstreams =
+        masterStatus.kind !== "missing" &&
+        masterIsStaleVsUpstreams(masterStatus.refined_at, upstreamRefinedAts);
+
+      if (masterStatus.kind === "fresh" && !force && !masterStaleVsUpstreams) {
+        masterDecision = "skipped-fresh";
         outcomes.push({
           packId: "master",
-          status: "missing",
-          reason: "HOLD: critical upstream eligibility expired",
+          status: "skipped-fresh",
           written: false,
         });
       } else {
-        masterDecision = "published";
-        const masterOutcome = await buildOne(
-          masterPack,
-          { dryRun, degradedUpstreamIds: degradedIds },
-          (p, o) =>
-            runPipeline(p, {
-              dryRun: o.dryRun,
-              strict,
-              degradedUpstreamIds: o.degradedUpstreamIds,
-              // Phase 4 — closed over from the outer scope; no opts/type change
-              // in resilient-build.mts. The gate inside outputStage reads this.
-              criticalHoleIds,
-              // Phase 6 (issue #6) — closed over; subtracted from the gate numerator.
-              neverBuiltIds,
-            }),
-        );
-        outcomes.push(masterOutcome);
-        if (masterOutcome.written) {
-          entries.push({
+        if (masterStaleVsUpstreams && masterStatus.kind === "fresh" && !force) {
+          console.log(
+            "[cli] master is TTL-fresh but an upstream rebuilt more recently — re-synthesizing (upstream-aware trigger).",
+          );
+        }
+        const decision = computeMasterDecision(masterPack, outcomes);
+        if (decision === "held") {
+          masterDecision = "held";
+          console.warn(
+            "[cli] HOLD: one or more critical upstreams have an expired last-good. Master not rebuilt.",
+          );
+          outcomes.push({
             packId: "master",
-            written: masterOutcome.written,
-            brainPath: `brains/master.md`,
-            brainOutput: masterOutcome.brainOutput,
+            status: "missing",
+            reason: "HOLD: critical upstream eligibility expired",
+            written: false,
           });
+        } else {
+          masterDecision = "published";
+          const masterOutcome = await buildOne(
+            masterPack,
+            { dryRun, degradedUpstreamIds: degradedIds },
+            (p, o) =>
+              runPipeline(p, {
+                dryRun: o.dryRun,
+                strict,
+                degradedUpstreamIds: o.degradedUpstreamIds,
+                // Phase 4 — closed over from the outer scope; no opts/type change
+                // in resilient-build.mts. The gate inside outputStage reads this.
+                criticalHoleIds,
+                // Phase 6 (issue #6) — closed over; subtracted from the gate numerator.
+                neverBuiltIds,
+              }),
+          );
+          outcomes.push(masterOutcome);
+          if (masterOutcome.written) {
+            entries.push({
+              packId: "master",
+              written: masterOutcome.written,
+              brainPath: `brains/master.md`,
+              brainOutput: masterOutcome.brainOutput,
+            });
+          }
         }
       }
     }
+
     // Determine exit code (pure, unit-tested in resilient-build.test.mts):
     //   0 — all built/skipped-fresh
     //   2 — degraded-but-complete, ALL failures transient (self-heals; quiet)
     //   1 — LOUD: master HELD, any deterministic failure, or master silently
     //       unpublished (built but not written). The silent-freeze kill lives
     //       here — a deterministic degrade no longer hides as a quiet exit 2.
+    // MUST run for every `--resilient` invocation, not only ones that build
+    // master. This used to live inside `order.includes("master")`, so a
+    // targeted single-pack rebuild (`pack_id=<leaf-brain> --force`, the
+    // documented debugging path in this repo's CLAUDE.md) never reached this
+    // block at all: resolveBuildOrder(leafId) only ever contains that pack's
+    // OWN upstreams, never "master" (master is a downstream consumer, never an
+    // upstream). A leaf's own deterministic ingest failure got classified
+    // correctly by buildOne/classifyFailure, then silently dropped on the
+    // floor — no exit-code derivation, no build report, no CRON-DIAG, no
+    // process.exit — main() just fell through and the process exited 0.
+    // Found 07/14/2026 by directly diffing `gh run view --log` for the
+    // env-swfl and hurricane-tracks-fl forced rebuilds against a working
+    // full-DAG run: the targeted runs produce zero log output after
+    // "[refinery] pack=<id> ..." and report exit 0 regardless of what
+    // actually happened inside buildOne.
     const exitCode = deriveExitCode(outcomes, masterDecision, { dryRun });
 
     const report: BuildReport = {

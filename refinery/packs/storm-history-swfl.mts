@@ -204,7 +204,7 @@ function stormOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     metric: "storm_property_damage_events_10yr",
     value: snapshot.swflPropertyDamageEvents10yr,
     direction: "stable",
-    label: "SWFL property-damage event count (trailing 10-year window, all 3 SWFL counties)",
+    label: "SWFL property-damage event count (trailing 10-year window)",
     variable_type: "extensive",
     units: "events",
     display_format: "count",
