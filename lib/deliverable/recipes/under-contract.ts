@@ -140,6 +140,7 @@ import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { fetchNearbyValues } from "@/lib/listings/steadyapi";
 import { canonStreet } from "@/lib/listings/resolve-subject";
+import type { ListingDetailFacts } from "@/lib/listings/listing-detail";
 import { loadParsedBrain } from "@/lib/fetch-brain";
 import { asOfFromToken } from "@/lib/project/as-of";
 import { createBlock } from "@/lib/email/doc/default-docs";
@@ -886,6 +887,43 @@ export interface NarratorInput {
   settled: SettledClaim[];
   /** LANE 2 — the agent's own listing copy, if they pasted any. Prose, not figures. */
   remarks?: string;
+  /** LANE 1 — the listing's own detail page: does the COMMUNITY have golf, a pool, a gate.
+   *  Absent when we could not read the page — and absent must mean SILENT, not "no golf". */
+  community?: ListingDetailFacts;
+}
+
+/**
+ * The community line — LANE 1, the listing's own detail page.
+ *
+ * WHY THIS UNLOCKS THE WORD-BAN WITHOUT TOUCHING IT. `inventedAttributes` flags an
+ * attribute word only when the paragraph says it and the SOURCES do not. "golf", "pool",
+ * "gated" were never banned outright — they were banned because we held no fact stating
+ * them, so any use was invention. Put the fact in the sources and the word legitimises
+ * itself; leave the fact out (fetch failed) and the guard still hard-blocks it. The gate
+ * is the FACT, not the vocabulary — so a page we could not read degrades to silence, which
+ * is the whole point.
+ *
+ * THE TRAP THIS LINE IS WORDED TO AVOID: these are the COMMUNITY's amenities, not the
+ * house's. "Pool" in this list means the community has a pool — it does NOT mean this home
+ * has a private one. `inventedAttributes` matches words and cannot tell those two apart, so
+ * the distinction has to be carried HERE, in the source text, and restated in the prompt.
+ */
+export function communitySourceLine(f: ListingDetailFacts | undefined): string | null {
+  if (!f || !f.ok) return null;
+  const parts: string[] = [];
+  if (f.communityFeatures.length)
+    parts.push(`Community features: ${f.communityFeatures.join(", ")}`);
+  if (f.amenities.length) parts.push(`Community amenities: ${f.amenities.join(", ")}`);
+  if (f.otherAmenities.length) parts.push(`Also noted: ${f.otherAmenities.join(", ")}`);
+  if (parts.length === 0) return null;
+
+  const where = f.subdivision ? ` (${f.subdivision})` : "";
+  return (
+    `THE COMMUNITY${where}, from the listing's own detail page. THESE DESCRIBE THE ` +
+    `COMMUNITY, NOT THIS HOUSE — a pool here is the COMMUNITY's pool, and golf here means ` +
+    `the COMMUNITY has golf. You may say the community has them. You may NOT say this home ` +
+    `has them.\n${parts.join("\n")}`
+  );
 }
 
 /** PURE: `NarratorInput` → the exact source lines the model is shown. Exported so a
@@ -898,6 +936,7 @@ export function narratorSources(input: NarratorInput): string[] {
       (s) =>
         `SETTLED FACT (computed for you — restate it word for word, never re-derive): ${s.sentence}`,
     ),
+    communitySourceLine(input.community),
     input.remarks ? `THE AGENT'S OWN LISTING DESCRIPTION:\n${input.remarks.slice(0, 1200)}` : null,
   ].filter(Boolean) as string[];
 }
@@ -963,6 +1002,13 @@ export async function authorUnderContractNote(input: NarratorInput): Promise<str
     `canal, a pool, a garage, a lanai, a storey count, a finish, a renovation, a school, ` +
     `a floor plan, or any neighborhood character unless the SOURCES state it. You have ` +
     `never seen this house.\n` +
+    `2a. IF — AND ONLY IF — A COMMUNITY SOURCE LINE IS PRESENT, you may write about the ` +
+    `COMMUNITY: that it has golf, a pool, a clubhouse, tennis, that it is gated. Name only ` +
+    `what that line lists, word for word. These belong to the COMMUNITY, never to this ` +
+    `house — "the community has a pool" is allowed; "the home has a pool" is a fabrication ` +
+    `and the paragraph is thrown away. If there is no community line, say NOTHING about ` +
+    `golf, a pool, a gate or amenities — its absence means we could not read the page, ` +
+    `NOT that the community lacks them. Never write that a community lacks something.\n` +
     `3. Do not claim the home SOLD or CLOSED. It is under contract.\n` +
     `4. YOU DO NOT KNOW THE OFFER. The list price is the SELLER'S ASK — it is NOT what the ` +
     `buyer agreed to pay, and no source here states the accepted price or any term of the ` +
@@ -1037,7 +1083,15 @@ export async function buildUnderContract(ctx: RecipeBuildContext): Promise<Email
   // the home's clock and the ZIP's median — are BOTH still in scope right here, on
   // this line, and NEITHER is passed. The narrator cannot compare two numbers it was
   // never given two of.
-  const input: NarratorInput = { settled: settleAll(facts, timing), remarks: facts.remarks };
+  // `facts.community` rides in from the listing page the scrape already read. Present → the
+  // narrator may name the community's golf/pool/gate (and `inventedAttributes` now finds those
+  // words in the sources, so they stop reading as invention). Absent → the guard still blocks
+  // them, which is exactly right: we could not read the page, so we do not know.
+  const input: NarratorInput = {
+    settled: settleAll(facts, timing),
+    remarks: facts.remarks,
+    community: facts.community,
+  };
 
   // LANDMINE: fillNarrative SKIPS a text block that already has content, so CLEAR
   // first. (This grid leaves the slot empty by design, but the doc on the canvas may

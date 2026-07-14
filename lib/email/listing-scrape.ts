@@ -18,6 +18,8 @@ import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { fetchOgImage } from "./og-image";
 import { safeFetchPublicUrl } from "./safe-fetch";
 import { resolveEmailModel } from "./model-router";
+import { parseListingDetail } from "@/lib/listings/listing-detail";
+import type { ListingDetailFacts } from "@/lib/listings/listing-detail";
 
 export interface ListingFacts {
   address?: string;
@@ -43,6 +45,12 @@ export interface ListingFacts {
   lat?: number; // from GeoCoordinates — used for comps chart
   lon?: number;
   sourceUrl: string; // the citation
+  /** THE COMMUNITY — golf, pool, gated, clubhouse — parsed from the SAME html this function
+   *  already fetched, so it costs no extra request. The index scrape never captured any of
+   *  this, which is why a build could never say whether a community had golf or a pool.
+   *  Absent/`ok:false` when the page didn't state it — and absent must stay SILENT, never
+   *  become "no golf". */
+  community?: ListingDetailFacts;
 }
 
 /** Pull one scalar value from the spec island by its machine id. Returns the
@@ -426,6 +434,10 @@ export async function fetchListingFacts(url: string): Promise<ListingFacts | nul
       const llm = await llmExtractFacts(html, url).catch(() => null);
       if (llm) facts = mergeFacts(facts, llm);
     }
+
+    // THE COMMUNITY — from the html already in hand. No second request, no second egress path.
+    const community = parseListingDetail(html, url);
+    if (community.ok) facts.community = community;
 
     if (facts.photos.length === 0) {
       const og = await fetchOgImage(url).catch(() => null);

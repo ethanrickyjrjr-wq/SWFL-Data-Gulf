@@ -1,3 +1,48 @@
+## 2026-07-14 (Opus 4.8 · main) — THE COMMUNITY DATA: GOLF AND THE POOL WERE ON A PAGE WE ALREADY FETCH
+
+**Operator, furious, was right.** "We brought in all the data on communities and golf and amenities —
+why is it not being used for builds on addresses?" Answer: the community data was half-there, the
+golf/amenity data was NOWHERE, and the one table that WAS populated had zero readers.
+
+**What was actually true (verified from bytes, not docs):**
+- `data_lake.community_profiles` — the table with `golf_structure`/`pool`/`gated`/`hoa_fee_range` —
+  **0 rows.** Schema, source connector, pack, brain, and page all built; the Phase-2 scrape WRITER was
+  never written. The migration comment admits it.
+- `data_lake.neighborhood_stats` — **0 rows.** `agg.py` exists, never ran.
+- `data_lake.parcel_subdivision` — **220,875 rows, and ZERO readers in `lib/` or `app/`.** Collier only,
+  address-level, 98% clean community names. An orphaned table.
+- `active_listings_residential.community` — **39,125 of 39,595 filled (98.8%)**. Also never read.
+- **Lee has zero parcels.** The Collier/Lee asymmetry, not a missing-39k mystery: 220k = parcels that
+  EXIST (tax roll); 39.6k = listings FOR SALE across 5 counties. Different universes.
+
+**SteadyAPI does NOT answer the question.** Live-probed `/neighborhood-amenities` (HTTP 200, no 429):
+it returns 12 plain-English location scores, 12 schools, neighborhood names + boundary polygons — and
+its "amenities" are **20 nearby BUSINESSES in a radius** (fishing charters, a Polish deli). That is not
+"the community has a pool". No golf structure, no HOA fee anywhere in its schema. Also: **the API
+returns no rate-limit headers at all**, so the plan's 200-req/month row can't be resolved from the API.
+
+**The actual lane, and it was free: the listing DETAIL page we already fetch.**
+`lib/email/listing-scrape.ts#fetchListingFacts` already pulls that exact HTML through the SSRF guard.
+The page carries, verbatim (8665 Bay Colony Dr, live 07/14/2026):
+`Community Features: Golf, Gated, Tennis Court(s), Street Lights` ·
+`Amenities: Clubhouse, Fitness Center, Pool, Restaurant, Putting Green(s)` · `Property SubType: Condominium`.
+Golf. Gated. Pool. Clubhouse. **Parsed from the html already in hand — zero extra requests, no bulk job,
+no 39k sweep.** (An earlier draft of mine added its own bare `fetch(listingUrl)` — a duplicate
+round-trip AND an SSRF hole on an attacker-influencable URL. Deleted; parse, don't fetch.)
+
+**The word-bans were never the enemy — and I did not touch them.** `inventedAttributes` flags an
+attribute word only when the PROSE says it and the SOURCES do not. "golf"/"pool" weren't banned
+outright; they were unsourceable, so any use WAS invention. Put the fact in the sources and the word
+legitimises itself. Fetch fails → fact absent → the guard still hard-blocks it. **The gate is the FACT,
+not the vocabulary.** Tested both directions, including that a failed fetch RE-LOCKS the word.
+
+Shipped: `lib/listings/listing-detail.ts` (pure parser, never throws, `null` ≠ `false` — "we couldn't
+read the page" must never render as "this community has no golf") + `ListingFacts.community` +
+`communitySourceLine` wired into the under-contract narrator. 983 tests pass, `next build` clean.
+
+**NOT done — checks opened, not buried here:** only `under-contract` is wired (6 other listing recipes
+still have facts available and unused); HOA fee is NOT on these pages (an internal note claimed it —
+the note is wrong); golf STRUCTURE (bundled/equity/holes) remains nobody's data; Lee parcels still zero.
 ## 2026-07-14 (Opus 4.8 · main) — SOCIAL DESIGN ROOT: PUSHED + HANDOFF, AND EMAIL'S COLOUR IS THE HOLE
 
 Pushed `7fba5b72` / `6226906d` / `ce697d14`. Handoff written:
