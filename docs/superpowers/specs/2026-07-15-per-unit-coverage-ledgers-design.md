@@ -362,3 +362,14 @@ with a passing test — not with another prose read of the code.
   wrong subsystem.
 - **The `community_facts_remaining_recipes` check text vs. code discrepancy (§9) is unresolved.**
   Flagged for whoever implements the community-stats-deliverable-wiring plan, not decided here.
+- **Gate 9's orphan detection has a substring-append blind spot (found live, Task 9 smoke test
+  4d, 07/15/2026).** `findOrphanedClaims` (`.claude/hooks/lib/ledger-parse.mjs`) matches a cited
+  test string via plain `.includes()`. A deleted or in-place-edited test string is correctly caught
+  (`"cut"` → `"cot"` triggers `missing-string`, verified live). A pure suffix-append that preserves
+  the cited phrase as an exact prefix (`"cut"` → `"cutX"`) is NOT caught — the original substring is
+  still literally present. Accepted as-is, not hardened: word-boundary matching would close the
+  append case but only trades it for a real false-block risk (any of the 14 real citations that
+  legitimately sits adjacent to a word character in its source string would flip to a false orphan),
+  and still wouldn't catch a punctuation-separated append. Deletes and in-place edits are the drift
+  modes an honest mistake actually takes; this is a drift detector, not an adversary boundary. Check
+  opened: `gate9_substring_append_blindspot`.
