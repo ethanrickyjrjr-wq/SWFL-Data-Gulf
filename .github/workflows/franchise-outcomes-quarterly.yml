@@ -1,11 +1,18 @@
 name: SBA FOIA Franchise Outcomes Tier 1 quarterly
 
 on:
-  schedule:
-    # SBA FOIA updates quarterly, ~1 month after each quarter end.
-    # 15th of Jan / Apr / Jul / Oct at 08:00 UTC.
-    # FY quarter ends: Sep 30, Dec 31, Mar 31, Jun 30.
-    - cron: "0 8 15 1,4,7,10 *"
+  # SCHEDULE DISABLED 07/14/2026 — the pipeline is `parked: true` under
+  # `not_yet_running:` in ingest/cadence_registry.yaml, but this cron was left
+  # live and would have fired 07/15/2026 08:00 UTC against a parked source.
+  # Parked means parked: a source with no first live run has never had its
+  # write path proven, and a quarterly cron is the worst place to discover that.
+  # Re-enable in the SAME commit that promotes the entry to `pipelines:`.
+  # Tracked as check `sba_franchise_parked_but_live`.
+  #
+  # SBA FOIA updates quarterly, ~1 month after each quarter end.
+  # 15th of Jan / Apr / Jul / Oct at 08:00 UTC.
+  # schedule:
+  #   - cron: "0 8 15 1,4,7,10 *"
   workflow_dispatch:
     inputs:
       dry_run:
