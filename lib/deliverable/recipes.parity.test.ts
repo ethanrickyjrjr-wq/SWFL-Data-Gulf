@@ -17,7 +17,7 @@
 // recipes. Any surface re-typing a prompt could silently fork a deliverable. Now a
 // surface may only POINT at a key, and this file fails the suite if one doesn't.
 
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, test } from "bun:test";
 import { RECIPES, RECIPE_KEYS, isRecipeKey, recipeByKey, recipeFromPrompt } from "./recipes";
 import { SHOWCASES } from "@/lib/showcase/registry";
 import { HERO_CAMPAIGNS, heroDestination } from "@/lib/campaigns";
@@ -201,4 +201,29 @@ describe("the key survives the trip through every door's URL", () => {
     expect(recipeByKey("no-such-recipe")).toBeNull();
     expect(recipeByKey(null)).toBeNull();
   });
+});
+
+test("every recipe declares a positioning lane", () => {
+  for (const key of RECIPE_KEYS) {
+    expect(["sell-side", "story-side"]).toContain(RECIPES[key].positioning);
+  }
+});
+
+test("positioning matches the design doc's recipe table", () => {
+  const sellSide = [
+    "new-listing",
+    "coming-soon",
+    "market-comps",
+    "under-contract",
+    "just-sold",
+    "open-house",
+    "price-reduced",
+    "agent-brand-intro",
+    "agent-launch",
+  ];
+  const storySide = ["sphere-weekly", "market-pulse", "review-reply", "social-pack", "social-cut"];
+  for (const key of sellSide)
+    expect(RECIPES[key as keyof typeof RECIPES].positioning).toBe("sell-side");
+  for (const key of storySide)
+    expect(RECIPES[key as keyof typeof RECIPES].positioning).toBe("story-side");
 });

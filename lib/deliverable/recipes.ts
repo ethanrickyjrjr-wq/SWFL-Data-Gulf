@@ -116,6 +116,16 @@ export type ChartPolicy =
 
 export interface Recipe {
   key: RecipeKey;
+  /** Which posture this recipe's prose defaults to. "sell-side" = pitches a specific
+   *  property or the agent's own brand/track record; "story-side" = recurring
+   *  relationship/informational content with no single sale or brand pitch riding on
+   *  it. A required field so a new recipe cannot compile without declaring its lane —
+   *  see docs/superpowers/specs/2026-07-15-sell-side-favorable-framing-design.md.
+   *  NOTE: sell-side does not imply every sell-side recipe's PROMPT changes — see
+   *  lib/deliverable/CLAUDE.md for which three narrators actually read
+   *  FAVORABLE_FRAMING_POLICY. `social-pack`/`social-cut` ship "story-side" as an
+   *  inert default: neither reads any prompt this field gates. */
+  positioning: "sell-side" | "story-side";
   /** Human label. The button copy may differ per surface; this is the canonical name. */
   label: string;
   /** SEED_DOCS id — the ONE structural authority for this recipe's grid.
@@ -141,6 +151,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   // ── The listing lifecycle ──────────────────────────────────────────────────
   "new-listing": {
     key: "new-listing",
+    positioning: "sell-side",
     label: "New Listing",
     skeleton: "new-listing",
     prose: null,
@@ -155,6 +166,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "coming-soon": {
     key: "coming-soon",
+    positioning: "sell-side",
     label: "Coming Soon",
     skeleton: null,
     prose: null,
@@ -169,6 +181,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "market-comps": {
     key: "market-comps",
+    positioning: "sell-side",
     label: "Market Comps",
     skeleton: null,
     prose: null,
@@ -186,6 +199,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "under-contract": {
     key: "under-contract",
+    positioning: "sell-side",
     label: "Under Contract",
     skeleton: null,
     prose: null,
@@ -211,6 +225,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "just-sold": {
     key: "just-sold",
+    positioning: "sell-side",
     label: "Just Sold",
     skeleton: "just-sold",
     prose: null,
@@ -224,6 +239,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "open-house": {
     key: "open-house",
+    positioning: "sell-side",
     label: "Open House",
     skeleton: "open-house",
     prose: null,
@@ -236,6 +252,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "price-reduced": {
     key: "price-reduced",
+    positioning: "sell-side",
     label: "Price Improved",
     skeleton: "price-reduced",
     prose: null,
@@ -253,6 +270,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   // ── The area / agent recipes ───────────────────────────────────────────────
   "agent-brand-intro": {
     key: "agent-brand-intro",
+    positioning: "sell-side",
     label: "Agent Brand Intro",
     skeleton: null,
     prose: "agent-intro",
@@ -266,6 +284,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "agent-launch": {
     key: "agent-launch",
+    positioning: "sell-side",
     label: "Agent Launch — The Letter",
     skeleton: null,
     prose: "agent-intro",
@@ -279,6 +298,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "sphere-weekly": {
     key: "sphere-weekly",
+    positioning: "story-side",
     label: "Weekly Sphere Update",
     skeleton: null,
     prose: "sphere-weekly",
@@ -299,6 +319,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "review-reply": {
     key: "review-reply",
+    positioning: "story-side",
     label: "The REVIEW Reply",
     skeleton: null,
     prose: null,
@@ -311,6 +332,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "market-pulse": {
     key: "market-pulse",
+    positioning: "story-side",
     label: "Monthly Market Pulse",
     skeleton: null,
     prose: "monthly-newsletter",
@@ -324,6 +346,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   // ── Social ────────────────────────────────────────────────────────────────
   "social-pack": {
     key: "social-pack",
+    positioning: "story-side",
     label: "Social Pack — 4 Formats",
     skeleton: null,
     prose: null,
@@ -336,6 +359,7 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
   },
   "social-cut": {
     key: "social-cut",
+    positioning: "story-side",
     label: "The Social Cut",
     skeleton: null,
     prose: null,
