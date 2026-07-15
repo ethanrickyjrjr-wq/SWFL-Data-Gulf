@@ -3,10 +3,13 @@ import { test, expect, mock, afterAll } from "bun:test";
 
 const realResolveSubject = await import("@/lib/listings/resolve-subject");
 const realCommunityLookup = await import("@/lib/listings/community-lookup");
+const realAnthropic = await import("@/refinery/agents/anthropic.mts");
+const anthropicOrig2 = { ...realAnthropic };
 
 afterAll(() => {
   mock.module("@/lib/listings/resolve-subject", () => realResolveSubject);
   mock.module("@/lib/listings/community-lookup", () => realCommunityLookup);
+  mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrig2);
 });
 
 let communityResult: unknown = { matched: false, reason: "no_parcel_at_address" };
@@ -18,6 +21,21 @@ mock.module("@/lib/listings/resolve-subject", () => ({
 mock.module("@/lib/listings/community-lookup", () => ({
   ...realCommunityLookup,
   resolveCommunityForListing: async () => communityResult,
+}));
+
+// Capture the system prompt handed to the model so the test can assert the framing
+// block is pasted in verbatim. mock.module is process-global — set up BEFORE ./shared
+// is imported (the same ordering the two mocks above rely on), restored in afterAll.
+let capturedSystem = "";
+mock.module("@/refinery/agents/anthropic.mts", () => ({
+  getAnthropic: () => ({
+    messages: {
+      create: async (args: { system: string }) => {
+        capturedSystem = args.system;
+        return { content: [{ type: "text", text: "A well-kept three-bedroom home." }] };
+      },
+    },
+  }),
 }));
 
 const { resolveSubject, FAVORABLE_FRAMING_POLICY } = await import("./shared");
@@ -87,4 +105,10 @@ test("FAVORABLE_FRAMING_POLICY carries the magnitude permission, direction-symme
 
 test("FAVORABLE_FRAMING_POLICY includes a counter-example boundary", () => {
   expect(FAVORABLE_FRAMING_POLICY).toContain("COUNTER-EXAMPLE");
+});
+
+test("authorListingNarrative's system prompt includes FAVORABLE_FRAMING_POLICY verbatim", async () => {
+  const { authorListingNarrative, FAVORABLE_FRAMING_POLICY: policy } = await import("./shared");
+  await authorListingNarrative({ address: "1 Main St", price: "$500,000", beds: 3 } as never);
+  expect(capturedSystem).toContain(policy);
 });

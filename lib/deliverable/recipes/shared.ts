@@ -330,7 +330,7 @@ export async function authorListingNarrative(
       // Prose quality is the whole job here; Haiku wrote the robot sentence.
       model: EMAIL_MODEL_SONNET,
       max_tokens: 500,
-      system: `${system}\n\n${CLAIM_PROHIBITION}`,
+      system: `${system}\n\n${CLAIM_PROHIBITION}\n\n${FAVORABLE_FRAMING_POLICY}`,
       messages: [{ role: "user", content: user }],
     });
     const t = msg.content[0]?.type === "text" ? msg.content[0].text.trim() : "";
