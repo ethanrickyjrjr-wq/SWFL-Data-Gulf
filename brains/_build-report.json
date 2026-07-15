@@ -1,20 +1,19 @@
 {
-  "target": "env-swfl",
+  "target": "hurricane-tracks-fl",
   "timestamps": {
-    "started": "2026-07-15T05:41:08.408Z",
-    "finished": "2026-07-15T05:50:08.421Z"
+    "started": "2026-07-15T06:22:39.875Z",
+    "finished": "2026-07-15T06:22:39.883Z"
   },
   "source": "live",
   "outcomes": [
     {
-      "packId": "env-swfl",
-      "status": "degraded",
-      "failureClass": "transient",
-      "reason": "The operation timed out.",
-      "lastGoodRefinedAt": "2026-07-03T17:30:35Z",
-      "version": 24,
+      "packId": "hurricane-tracks-fl",
+      "status": "missing",
+      "failureClass": "deterministic",
+      "reason": "Refinery: missing required Postgres env var(s): SUPABASE_PG_HOST, SUPABASE_PG_USER, SUPABASE_PG_PASSWORD.\nSet them in .env.local (port defaults to 5432, database defaults to \"postgres\"), or run with REFINERY_SOURCE=fixture for offline mode.",
+      "lastGoodRefinedAt": "2026-06-19T06:05:23Z",
       "written": false
     }
   ],
-  "exitCode": 2
+  "exitCode": 1
 }
