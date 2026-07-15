@@ -39,6 +39,32 @@ _PERMALINK_ZIP = re.compile(r"_(\d{5})_")
 _SA_PAGE = 200   # SteadyAPI page size (meta.returned/limit = 200)
 _MAX_PAGES = 60  # backstop (~30k listings) — real cities exhaust far sooner
 
+# ---- Builder-plan records are NOT listings. VERIFIED LIVE 2026-07-14 (RULE 0.4), two probes:
+#   Estero_FL  /search -> 697 status='for_sale' (flags.is_plan=False) + 46 status='ready_to_build'
+#                         (flags.is_plan=True). The crosstab is 100% clean: the two discriminators
+#                         never disagree, and the vendor sets BOTH.
+# A `ready_to_build` record is a builder FLOOR PLAN offered in a community, not a property on the
+# market: it has no address of its own (the permalink's leading token is the PLAN NAME —
+# "Venice_Verdana-Village-Executive-Homes_18389-Parksville-Dr_...", and one literally reads
+# "CORAL_Lakes-of-Estero_Call-for-more-information-Springlake-Circle_..."), and several plans share
+# one sales-office address + lat/lon. parse_steadyapi's street parse therefore keyed them on the plan
+# name (HIGHGATE:33928, SERENA:33928, FREEPORT II:33935 ...), so they entered the lifecycle state
+# machine as active for-sale listings that can never transition, and 588 of them landed in
+# data_lake.listing_state — 548 of which flowed into data_lake.listing_active_homes (2.65% of it)
+# and moved real user-facing ZIP medians (33917: $184,950 real -> $199,945 published).
+# They are dropped HERE, at the parse boundary, because the vendor hands us the label and identity
+# is the thing they lack — not filtered downstream, where the wrong key has already been minted.
+_PLAN_STATUS = "ready_to_build"
+
+
+def is_builder_plan(raw: dict) -> bool:
+    """True iff the vendor labels this record a builder floor plan (not a listing). Either signal is
+    sufficient — they are 100% correlated live, and OR-ing them means a vendor dropping one field
+    can't silently re-open the leak."""
+    if str(raw.get("status") or "").strip().lower() == _PLAN_STATUS:
+        return True
+    return bool((raw.get("flags") or {}).get("is_plan"))
+
 # Batched baths enrichment (the budget-bomb fix): one /nearby-home-values call covers every new
 # listing within ~2mi of a grid cell, instead of one call per listing.
 _ENRICH_RADIUS = "2mi"
@@ -96,10 +122,14 @@ def parse_steadyapi(raw: dict, city: str, state: str, type_hint: str | None = No
     scan_county_api's id->type lookup; map_property_type resolves it to our internal token. With no
     hint (not matched by any type sweep — e.g. manufactured/farm, which aren't filterable at all),
     falls back to the land heuristic (no beds + a lot_sqft), else "other". Returns None without
-    identity or out of SWFL scope. `property_id` is a REAL persisted column (not stripped) — it's
-    what makes `known_ids` possible."""
+    identity, for a BUILDER PLAN (see is_builder_plan), or out of SWFL scope. `property_id` is a REAL
+    persisted column (not stripped) — it's what makes `known_ids` possible."""
     pid = raw.get("property_id")
     if not pid:
+        return None
+    # A floor plan has no property identity to key on — reject it with the same `None` contract used
+    # for a missing id / an out-of-scope county, BEFORE the street parse mints a plan-name address_key.
+    if is_builder_plan(raw):
         return None
     permalink = raw.get("permalink") or ""
     last = permalink.split("/")[-1]

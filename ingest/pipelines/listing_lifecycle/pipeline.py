@@ -71,6 +71,23 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
     scan = scan_county_api if source == "api" else scan_county
     counties = [only_county] if only_county else (API_COUNTIES if source == "api" else SWFL_COUNTIES)
     prior_all = distill.load_current_state(source_name=src_name)
+    # ── Builder-plan rows are INVISIBLE to the diff. ────────────────────────────────
+    # extract_api.is_builder_plan now rejects `ready_to_build` records at the parse boundary (they
+    # are floor plans, not listings — no address identity). That fix alone would make the 588 plan
+    # rows ALREADY sitting in listing_state look like 588 departures on the very next sweep: absent
+    # from `scanned`, present in `prior` -> diff_states emits active->holding for every one of them.
+    # That is a FABRICATED churn spike — 588 "listings left the market" on a single day, landing in
+    # listing_transitions and the flow metrics brains read. It is the same class of lie the is_seed
+    # baseline guard exists to prevent, so the plan rows are dropped from `prior` too: they are
+    # neither scanned nor diffed, and simply sit inert until the operator-approved purge removes them.
+    # Deliberately keyed on the PERSISTED `status` column (distill._STATE_COLS carries it), so this is
+    # order-independent — the code is safe to deploy before, after, or without the purge.
+    plan_rows = [k for k, v in prior_all.items() if v.get("status") == "ready_to_build"]
+    for k in plan_rows:
+        prior_all.pop(k)
+    if plan_rows and source == "api":
+        print(f"[plans] {len(plan_rows)} stale builder-plan rows held out of the diff "
+              f"(no fabricated departures) — pending the purge", flush=True)
     totals = {"scanned": 0, "upserts": 0, "transitions": 0, "source_total": 0}
     budget_calls = 0
     sold_budget_remaining = SOLD_CHECK_CAP  # paid /property-tax-history calls left this run (shared across counties)

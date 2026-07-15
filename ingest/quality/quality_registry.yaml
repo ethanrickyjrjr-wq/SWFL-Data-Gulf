@@ -109,11 +109,16 @@ tables:
       #   source_name        — supplied by BATCH CTX at Locus A: it is NOT a batch-row column
       #                        (distill._STATE_COLS omits it; upsert_state injects it as a
       #                        scalar at distill.py:200).
-      # Live 07/14/2026: 18 offenders / 18,996 in-scope = 0.095%. All 18 verified bad, 0 verified-real.
-      # Moved from 21 (a 07/11 snapshot — this line + doctor-first-run-report, commit 7dd4ad29/8d4baa4d).
-      # A `report` contract counts LIVE state='active' rows, so it drifts with the feed: listing_transitions
-      # shows exactly 3 $5,000 single_family rows left the active feed active->holding on the 07/13 sweep
-      # (1932 NE 24th Ave/33909, 3657 Kelly St/33901, 250556 Thst W/33971). 21 - 3 = 18, zero new offenders.
+      # Live 07/14/2026 (RE-COUNTED after the not_null removal below): 29 violations = 18 BAD-PRICE
+      # + 11 MISSING-PRICE. The priced class did NOT climb — it FELL 21 -> 18 (listing_transitions
+      # shows exactly 3 $5,000 single_family rows left the active feed active->holding on the 07/13
+      # sweep: 1932 NE 24th Ave/33909, 3657 Kelly St/33901, 250556 Thst W/33971). What "climbed" was
+      # the class this contract was structurally blind to: 11 NULL-price rows, every one of them
+      # status='ready_to_build' — realtor.com BUILDER FLOOR PLANS (FREEPORT II, ARCHER II, HIGHGATE,
+      # SERENA, EASLEY, DRAYTON, ASHBY, CRESTVIEW ...), not properties. 21 -> 18 -> "29" was never a
+      # worsening price leak; it was a blind spot being counted for the first time.
+      # The plans are now rejected at the parse boundary (extract_api.is_builder_plan, 07/14) and the
+      # 588 already in the lake await an operator-approved purge; after it lands this returns to 18.
       # RENT-LEAK THEORY REFUTED for the $5,000 cluster (raw SteadyAPI /search pulled live 07/14, RULE 0.4):
       # 4 of the 9 pulled (526 Wabasso, 720 Lamar, 606 SW 35th, 703 Wildwood) ALL carry price.amount=5000 on
       # status='for_sale' source_type='mls' records with is_new_listing=true; the other 5 persist identically.
@@ -139,12 +144,20 @@ tables:
           - { col: source_name,   op: eq,       value: api_feed }
           - { col: sale_or_rent,  op: eq,       value: sale }
           - { col: state,         op: eq,       value: active }
-          - { col: list_price,    op: not_null }
+          # `list_price not_null` WAS here and was REMOVED 07/14/2026. It CANCELLED this contract's
+          # own `allow_null: false`: the scope threw every NULL-price row out, so the NULL leg
+          # (range_violations line 117 / build_range_sql's "{} IS NULL") was unreachable and the
+          # contract could never count a for-sale home carrying NO price — while declaring that it
+          # did. That self-cancelling pair is why the ledger read 18 when the true violation count
+          # was 29: 18 bad prices + 11 MISSING prices it was structurally blind to. A for-sale home
+          # with sqft and no price is a violation of a PRICE floor, not out of its scope.
           - { col: sqft,          op: not_null }
           - { col: property_type, op: in,       value: [single_family, condo, townhouse, multi_family] }
-        # Unreachable on today's data under ANY batching (only 21 offenders exist region-wide,
-        # scattered across ~10 ZIPs — no batch can assemble 25). It fires on a genuine feed-shape
-        # change: 5% of a 14,110-row Lee sweep = 706 rows. That is what abort is for.
+        # Unreachable on today's data under ANY batching (29 offenders region-wide, scattered across
+        # ~12 ZIPs — no batch can assemble 25 AND clear 5%: 29/18,996 in-scope = 0.153%). Still
+        # unreachable after the not_null removal: the 11 NULL-price rows it newly counts are builder
+        # plans the extractor no longer emits, so no future BATCH can even contain them. It fires on a
+        # genuine feed-shape change: 5% of a 14,110-row Lee sweep = 706 rows. That is what abort is for.
         # violations_gte is load-bearing: real batches are 7 rows (07/07), 364 (07/08), 21,142
         # (07/10). A share-only rule aborts the nightly chain over 1 bad row in a recovery run.
         abort_if: { share_pct_gt: 5.0, violations_gte: 25, if_no_clean_rows: true }

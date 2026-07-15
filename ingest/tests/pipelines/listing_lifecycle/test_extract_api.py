@@ -9,6 +9,7 @@ from __future__ import annotations
 from ingest.pipelines.listing_lifecycle.extract_api import (
     _cluster_by_latlon,
     enrich_baths_batched,
+    is_builder_plan,
     map_property_type,
     parse_steadyapi,
 )
@@ -83,6 +84,56 @@ def test_map_property_type_fallback():
     assert map_property_type("Single Family") == "single_family"
     assert map_property_type("Quadruplex") == "other"
     assert map_property_type(None) == "other"
+
+
+# ---------------------------------------------------------- builder plans are NOT listings
+#
+# VERBATIM live record (RULE 0.4, /search?location=Estero_FL, 2026-07-14). The city sweep returned
+# 697 status='for_sale'/is_plan=False and 46 status='ready_to_build'/is_plan=True — the two vendor
+# discriminators agreed on every one of the 743 records. Note the permalink: its leading token is the
+# PLAN NAME ("Venice"), not a house number, which is precisely how these minted plan-name address_keys.
+_PLAN_ROW = {
+    "property_id": "P417000664438",
+    "permalink": "https://www.realtor.com/realestateandhomes-detail/Venice_Verdana-Village-Executive-Homes_18389-Parksville-Dr_Estero_FL_33928_P417000664438",
+    "price": {"amount": 494999, "reduced_amount": None, "display": "$494,999"},
+    "status": "ready_to_build",
+    "source_type": "mls",
+    "location": {"lat": 26.4457, "lon": -81.6477, "county_fips": "12071"},
+    "description": {"beds": 3, "sqft": 1849, "lot_sqft": None},
+    "flags": {
+        "is_pending": False, "is_contingent": False, "is_coming_soon": False,
+        "is_foreclosure": False, "is_new_construction": True,
+        "is_price_reduced": False, "is_new_listing": False, "is_plan": True,
+    },
+}
+
+
+def test_is_builder_plan_detects_both_vendor_signals():
+    assert is_builder_plan(_PLAN_ROW) is True
+    # Either signal alone is sufficient — OR-ed so the vendor dropping one field can't re-open the leak.
+    assert is_builder_plan({**_PLAN_ROW, "flags": {"is_plan": False}}) is True          # status alone
+    assert is_builder_plan({**_PLAN_ROW, "status": "for_sale"}) is True                 # flag alone
+    assert is_builder_plan({**_PLAN_ROW, "status": "READY_TO_BUILD"}) is True           # case-insensitive
+    # A real listing is never a plan.
+    assert is_builder_plan(_STEADYAPI_ROW) is False
+    assert is_builder_plan({}) is False
+
+
+def test_parse_steadyapi_rejects_builder_plan():
+    """A floor plan has no property identity. It must be rejected at the parse boundary, BEFORE the
+    street parse mints an address_key out of the plan name ('HIGHGATE:33928'), because that key is
+    what carried 588 non-properties into the lifecycle state machine as active for-sale listings."""
+    assert parse_steadyapi(_PLAN_ROW, city="Estero", state="FL") is None
+    assert parse_steadyapi(_PLAN_ROW, city="Estero", state="FL", type_hint="single_family") is None
+    # The plan-name key it WOULD have produced, proving the defect is the identity, not the price:
+    # this row carries a perfectly valid $494,999 — a price floor could never have caught it.
+    assert _PLAN_ROW["price"]["amount"] > 20000
+
+
+def test_parse_steadyapi_still_accepts_the_real_for_sale_row():
+    """Regression guard on the plan filter: the 697-of-743 for_sale majority must be untouched."""
+    r = parse_steadyapi(_STEADYAPI_ROW, city="Cape Coral", state="FL")
+    assert r is not None and r["status"] == "for_sale" and r["list_price"] == 374900
 
 
 # ---------------------------------------------------------- clustering (pure, no network)
