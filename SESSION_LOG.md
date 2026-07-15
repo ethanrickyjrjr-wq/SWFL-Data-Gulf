@@ -1,4 +1,32 @@
-## 2026-07-14 (Sonnet 5 · main) — cleaned up in-flight work orphaned by earlier crashed sessions: 3 more commits + a live production bug fix.
+## 2026-07-15 (Sonnet 5 · main) — desk hero tooltip dot STILL floated off the line on the window pills; today's earlier fix only covered the dense/full series.
+
+Operator screenshotted Naples on the "1 yr" pill: hover dot sitting near the bottom axis, clearly
+off the visible curve. This looked like a repeat of yesterday's `discreteInteraction` fix
+(`b4d9d0b8`), so I re-read it: that fix gated `<TooltipDot animate={!discreteInteraction}>` on
+`dateLabels.length > 60`, true for the 157-point full series but FALSE for every windowed pill (1yr
+= 12 points, 2yr = 24, 5yr = 60, 10yr = 120) — so the dot kept springing (`useSpring(...).set(x)`
+re-targeting every render) on exactly the pills the operator was using. The lag isn't a dense-data
+artifact at all — it's inherent to spring-chasing a fast-moving target on ANY series length. Fix:
+`components/charts/vendor/bklit/tooltip/chart-tooltip.tsx` — dropped the conditional, `<TooltipDot
+animate={false} .../>` unconditionally (crosshair + tooltip box keep their `discreteInteraction`
+gate; only the dot's *position* is a correctness claim, not a smoothness choice). Documented as a
+correction in `components/charts/vendor/bklit/NOTICE.md`.
+
+Verified live: `bunx next build` clean, served on throwaway port 3311, drove `/desk` with
+chrome-devtools MCP across all 3 cities × all 7 window pills. Direct DOM measurement (dot cx/cy vs.
+`getPointAtLength` on the real observed-data `<path>`, picked by longest `d` string to avoid the
+FitGlow trend path) confirmed diff ≈ 0px on Trend/Full/10yr and on the 1yr/2yr pills for the two
+cities I screenshotted (Fort Myers, Naples) — matches `animate={false}`'s structural guarantee
+(plain `<circle cx cy>`, no spring possible). 317 `lib/charts`+`lib/desk` tests green.
+
+**Found a second, separate bug while sweeping the pills — opened `ex_boom_window_spiky_render`
+(desk-hero), not fixed:** the "Without the 2021–22 run-up" pill renders a wildly spiky/wrong-scaled
+data line (Naples confirmed via screenshot — real monthly medians should not swing $300k→$2M→$300k
+month to month) with a straight green fit line cutting across it. Pre-existing, unrelated to the
+tooltip-dot change (verified: my edit only touches `TooltipDot`'s `animate` prop, nothing in the
+fit/y-domain path). Needs its own investigation — likely a y-domain scoped to the fit's narrower
+range while the full un-clipped 157-point history (comment says "the DATA is never hidden") gets
+plotted against it.
 
 Operator: "figure out what is done so it can be committed and pushed... make sure no one is working
 on it." Found the repo was NOT actually abandoned — two other sessions (`946828af`, `bda494b9`) were

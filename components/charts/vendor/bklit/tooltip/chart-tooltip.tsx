@@ -264,7 +264,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
           <g transform={`translate(${margin.left},${margin.top})`}>
             {lines.map((line, index) => (
               <TooltipDot
-                animate={!discreteInteraction}
+                animate={false}
                 color={resolveDotColor(line, index)}
                 cornerRadiusFraction={dotVariant === "ring" ? dotRadiusFraction : undefined}
                 key={line.dataKey}

@@ -133,6 +133,18 @@ while Y was still 44px short of it — the dot visibly floating off the line the
 had already snapped to. Fix: `<TooltipDot animate={!discreteInteraction} .../>`, matching the
 other two. Worth upstreaming.
 
+**Correction (2026-07-15): `discreteInteraction` was the wrong gate — dot now ALWAYS instant.**
+The point-count threshold (`dateLabels.length > 60`) only masked the symptom on the one series that
+happened to trip it. `TooltipDot`'s lag isn't a dense-data artifact — it's `useSpring(...).set(x)`
+re-targeting a spring from the *previous* hovered point every render, so ANY hover jump lags behind
+by the spring's settle time, on ANY series length. Reproduced live on desk hero's 1yr/2yr/5yr/10yr
+window pills (12–120 points, all well under the 60-point gate) — same 40px+-off-the-line dot the
+157-point series had. Fixed by dropping the conditional: `<TooltipDot animate={false} .../>`,
+unconditionally, for every dataset size. The crosshair line and tooltip box keep their
+`discreteInteraction` gate (their springing is a smoothness choice, not an accuracy one — a
+crosshair a few px behind the pointer isn't a wrong number); the dot marks a data value, so it
+snaps every time.
+
 **FitGlow — the backlit fit, added to the underlay slot (2026-07-14)** — new file
 `fit-glow.tsx` (ours, not upstream), plus a ONE-LINE additive patch to `chart-child-passthrough.ts`
 adding `"FitGlow"` to `UNDERLAY_COMPONENT_NAMES`. The shell routes children to render slots BY
