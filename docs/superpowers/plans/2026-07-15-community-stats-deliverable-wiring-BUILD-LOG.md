@@ -9,6 +9,7 @@
 
 
 
+
 Durable record of the subagent-driven execution of `docs/superpowers/plans/2026-07-15-community-stats-deliverable-wiring.md`. Appended after every task's review. See also the design spec (`docs/superpowers/specs/2026-07-15-community-stats-deliverable-wiring-design.md`) and the advisor-caught join-key correction folded into it.
 
 **Execution mode:** subagent-driven-development. Every implementer subagent runs on Opus (operator instruction). Task review is done by the orchestrating session directly (Sonnet), not a dispatched reviewer subagent — operator's "you review." No worktree — working directly on `main` (confirmed no file overlap with concurrent session activity via `git status` at kickoff; this plan's files are all under `ingest/`, `lib/listings/`, `lib/email/listing-scrape.ts`, `lib/deliverable/recipes/`, none of which the concurrent session's dirty files — `components/email-lab/TemplateGallery.tsx` and a per-unit-coverage-ledgers spec — touch).
@@ -127,6 +128,21 @@ Approved (all in-scope test evidence green; the live smoke-test gap is tracked, 
 **Status:** DONE. Commit `2c38b070` "docs: Gap 2 handoff -- name-keyed community lookup surface, not built this round" — done directly per the operator's explicit instruction earlier in this session ("make sure you add a handoff and open a follow up at the end for gap 2").
 
 **What happened:** Wrote `docs/handoff/2026-07-15-community-lookup-by-name-gap2-handoff.md` covering what Gap 2 is (a name-keyed lookup for the ~30,800 non-marketed `neighborhood_stats` rows, serving chat/MCP rather than deliverables), why it wasn't built this round, the two candidate shapes sketched during the original brainstorm, and — folded in as a bonus, since it surfaced during Task 7 — a pointer to the community-name water-word laundering check so whoever picks up Gap 2 doesn't rediscover it independently if their surface touches the same claim-checking machinery. Opened check `gap2_community_lookup_by_name` (project `communities-swfl`).
+
+---
+
+## Final Verification — all 10 tasks complete
+
+Ran every step the plan's Final Verification section specifies, independently, after all 10 tasks:
+
+- `bun test lib/listings/ lib/email/listing-scrape.test.ts lib/deliverable/recipes/` — **583/583 passed**, 1663 assertions, 28 files, 874ms. Zero failures across every file this plan touched or that depends on what it touched.
+- `python -m pytest ingest/lib/test_community_aliases.py ingest/duckdb_pipelines/neighborhood_stats/ -v` — **18/18 passed**, 1.24s.
+- `bunx next build` — full production build compiled clean, no new type errors.
+- `node scripts/check.mjs list` — `community_facts_remaining_recipes` no longer appears (closed, Task 9); `gap2_community_lookup_by_name` appears as open (Task 10).
+
+All ten commits landed on `main`, none pushed. Two new tracking checks opened during the build beyond what the plan specified — both real findings, not scope creep: `neighborhood_stats_full_scan_statement_timeout` (Task 3's live smoke-test hit a pre-existing, unrelated Postgres timeout) and `community_name_water_word_legitimizes_invented_attribute` (Task 7's implementer found a real claim-gate hole). One stale check closed (`fdor_parcel_layer_only_7_of_120_fields`, found and closed before this execution phase began, during the design/planning conversation).
+
+**Ready for the advisor end-to-end review the operator asked for before declaring done.**
 
 ---
 
