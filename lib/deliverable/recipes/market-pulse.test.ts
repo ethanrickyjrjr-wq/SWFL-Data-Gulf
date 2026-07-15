@@ -31,6 +31,7 @@ import {
 } from "./market-pulse";
 import { CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import type { RecipeBuildContext } from "./index";
+import type { ZipMove } from "./market-pulse";
 import type { BrainOutput, BrainOutputDetailTable } from "@/refinery/types/brain-output.mts";
 
 // The six real Cape Coral rows, verbatim from the brain's home_values_by_zip table.
@@ -175,6 +176,26 @@ describe("chart — zip-mom-move, and it must be the MONTH column", () => {
       expect(i.delta).toBe(held.get(i.label)!.m);
     }
     expect(items.length).toBe(6);
+  });
+
+  test("given MORE than 8 real ZIP moves, momChartSpec's own items are capped at 8 — not just the title", () => {
+    // Build 12 synthetic moves reusing the fixture's shape/columns; only the
+    // COUNT matters here, not realism of the values (title-truncation is
+    // already covered by the "top 8 of 12" test above).
+    const twelveMoves: ZipMove[] = Array.from({ length: 12 }, (_, i) => ({
+      zip: `3390${i}`,
+      city: "Naples",
+      value: 300000 + i,
+      mom: -0.1,
+      period: "2026-04-30",
+    }));
+    const projectedTable: BrainOutputDetailTable = {
+      ...TABLE,
+      rows: twelveMoves.map((m) => ({ key: m.zip, cells: TABLE.rows[0]?.cells ?? {} })),
+    };
+    const spec = momChartSpec(OUTPUT, projectedTable, twelveMoves, "Naples");
+    const items = spec?.options?.items as Array<unknown>;
+    expect(items.length).toBe(8);
   });
 
   test("as-of is the DATA's period, not the day we rebuilt the brain", () => {

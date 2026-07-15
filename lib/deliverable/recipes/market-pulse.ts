@@ -149,7 +149,7 @@ const YOY_COL = "value_yoy_pct";
 const CHART_MAX_ROWS = 8;
 
 /** One ZIP's month, exactly as the brain published it. Nothing derived. */
-interface ZipMove {
+export interface ZipMove {
   zip: string;
   city: string | null;
   /** ZHVI home value, USD — verbatim from `home_value_zhvi`. */
