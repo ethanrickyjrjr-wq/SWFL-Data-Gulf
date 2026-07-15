@@ -465,7 +465,7 @@ function sh(c) {
 // `/`, `-`, and `_` (e.g. lib/deliverable/recipes/price-reduced.test.ts) — so
 // reject anything outside that shape BEFORE it reaches a shell command string.
 // This must run ahead of EVERY sh()/run() call built from ledger-parsed content.
-const SAFE_TEST_FILE_RE = /^[A-Za-z0-9._/-]+$/;
+const SAFE_TEST_FILE_RE = /^[A-Za-z0-9._][A-Za-z0-9._/-]*$/;
 function isSafeTestFilePath(f) {
   return typeof f === "string" && SAFE_TEST_FILE_RE.test(f);
 }
