@@ -147,6 +147,61 @@ check("buildAdditionalContext pushes the cold-start nudge when no ledger exists 
   assert.match(ctx, /No coverage ledger yet/);
 });
 
+// ABSOLUTE-PATH FIXTURES (the bug this file exists to catch): PostToolUse's
+// tool_input.file_path is NOT guaranteed repo-relative (Claude Code's own docs
+// example shows an absolute file_path); the original `^`-anchored regexes only
+// ever saw relative-path fixtures in this file and so passed review twice
+// while being silently dead against a real absolute payload. Build fixtures
+// from the ACTUAL process.cwd() of whatever machine runs this test so they're
+// deterministic regardless of platform/drive — see push-touched-unit-coverage.mjs's
+// absForwardSlashed()/afterMarker() for why a genuinely-foreign POSIX-style
+// path (no drive letter) is also safe to hardcode: on Windows, path.resolve()
+// treats a leading "/" as root-of-current-drive and preserves everything
+// after it verbatim; on POSIX it's already absolute and used as-is. Either
+// way the marker segment and everything after it survives intact.
+const cwdFwd = process.cwd().split(path.sep).join("/");
+
+check("matchPipelineDir extracts the dir from a Windows-style absolute path", () => {
+  const winAbs = `${process.cwd()}\\ingest\\pipelines\\fred_g17\\pipeline.py`;
+  assert.equal(matchPipelineDir(winAbs), "fred_g17");
+});
+
+check("matchPipelineDir extracts the dir from a POSIX-style absolute path", () => {
+  const posixAbs = "/Users/someone/elsewhere/ingest/pipelines/fred_g17/pipeline.py";
+  assert.equal(matchPipelineDir(posixAbs), "fred_g17");
+});
+
+check("matchRecipeUnit extracts the recipe key from a Windows-style absolute path", () => {
+  const winAbs = `${process.cwd()}\\lib\\deliverable\\recipes\\price-reduced.ts`;
+  assert.equal(matchRecipeUnit(winAbs), "price-reduced");
+});
+
+check("matchRecipeUnit extracts the recipe key from a POSIX-style absolute path", () => {
+  const posixAbs = "/Users/someone/elsewhere/lib/deliverable/recipes/price-reduced.ts";
+  assert.equal(matchRecipeUnit(posixAbs), "price-reduced");
+});
+
+check(
+  "matchPipelineDir/matchRecipeUnit return null for an absolute path outside either marker",
+  () => {
+    const winAbs = `${process.cwd()}\\lib\\foo.ts`;
+    assert.equal(matchPipelineDir(winAbs), null);
+    assert.equal(matchRecipeUnit(winAbs), null);
+  },
+);
+
+check(
+  "matchPipelineDir still extracts correctly with a forward-slashed absolute path built from cwd",
+  () => {
+    assert.equal(matchPipelineDir(`${cwdFwd}/ingest/pipelines/fred_g17/pipeline.py`), "fred_g17");
+  },
+);
+
+check("matchRecipeUnit returns null for a recipe file nested under a subdir (end-anchored)", () => {
+  const winAbs = `${process.cwd()}\\lib\\deliverable\\recipes\\sub\\price-reduced.ts`;
+  assert.equal(matchRecipeUnit(winAbs), null);
+});
+
 // DRIFT GUARD (Gate-5 mirror pattern — catalog.test.mts mirrors PER_PACK_REGISTRY the same
 // way): RECIPE_KEYS is hardcoded here because this hook runs under plain `node`, which cannot
 // import a .ts module — but that makes it copy #2 of lib/deliverable/recipes.ts's RECIPE_KEYS,

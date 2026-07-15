@@ -21,12 +21,49 @@
 // interfere with a legitimate edit.
 
 import { readFileSync, existsSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractSourceScope } from "./lib/pipeline-scope.mjs";
 import { parseLedger } from "./lib/ledger-parse.mjs";
 
-const PIPELINE_RE = /^ingest\/pipelines\/([^/]+)\//;
+// PostToolUse's tool_input.file_path is NOT guaranteed repo-relative — Claude
+// Code's own docs example shows an absolute file_path, and check-odd-surface.mjs
+// / annotate-plan.mjs already defensively path.resolve() for the same reason.
+// A raw `^`-anchored regex against the unresolved string would go silently
+// dead on an absolute payload. So: resolve to an absolute, forward-slashed
+// path first, then find the marker segment by substring search (mirroring
+// check-odd-surface.mjs's onOddSurface), and slice out whatever comes after
+// it. On Windows the marker SEARCH is done case-insensitively (matching
+// check-odd-surface.mjs's WIN-lowercase convention — Windows paths are
+// case-insensitive) but the slice comes out of the ORIGINAL (non-lowercased)
+// string, because the extracted substring is used downstream as a real lookup
+// key (extractSourceScope's `dir`, RECIPE_KEYS membership, a constructed
+// ledger path) and must keep its real casing.
+const WIN = process.platform === "win32";
+const PIPELINE_MARKER = "/ingest/pipelines/";
+const RECIPE_MARKER = "/lib/deliverable/recipes/";
+const RECIPE_FILENAME_RE = /^([a-z-]+)\.(?:ts|ledger\.md)$/;
+
+/** Resolve `filePath` (relative or absolute, either slash style) to an
+ *  absolute, forward-slashed path. `null` on non-string input or a resolve
+ *  failure — callers treat that as "no match" (fail-open, never throw). */
+function absForwardSlashed(filePath) {
+  if (typeof filePath !== "string" || filePath.length === 0) return null;
+  try {
+    return resolve(process.cwd(), filePath).split(sep).join("/");
+  } catch {
+    return null;
+  }
+}
+
+/** Find `marker` in `norm` (case-insensitively on Windows) and return
+ *  everything after it, sliced from the ORIGINAL (case-preserved) string.
+ *  `null` if the marker isn't present. */
+function afterMarker(norm, marker) {
+  const cmp = WIN ? norm.toLowerCase() : norm;
+  const idx = cmp.indexOf(marker);
+  return idx === -1 ? null : norm.slice(idx + marker.length);
+}
 
 // Hardcoded because this hook runs under plain `node` (can't import a .ts
 // module) — kept honest by the drift-guard test in
@@ -46,12 +83,18 @@ export const RECIPE_KEYS = [
   "review-reply",
   "market-pulse",
 ];
-const RECIPE_FILE_RE = /^lib\/deliverable\/recipes\/([a-z-]+)\.(?:ts|ledger\.md)$/;
-
 /** Recipe key if `filePath` is that recipe's own source or its own ledger —
- *  NOT shared.ts/index.ts/*.test.ts (those aren't a single unit's identity). */
+ *  NOT shared.ts/index.ts/*.test.ts (those aren't a single unit's identity).
+ *  Matched on the resolved ABSOLUTE path — see the note above WIN/afterMarker. */
 export function matchRecipeUnit(filePath) {
-  const m = RECIPE_FILE_RE.exec(String(filePath ?? "").replace(/\\/g, "/"));
+  const norm = absForwardSlashed(filePath);
+  if (norm === null) return null;
+  const rest = afterMarker(norm, RECIPE_MARKER);
+  if (rest === null) return null;
+  // Anchored to the END of `rest`: this must be the recipe's own file
+  // directly under recipes/, not something nested deeper (rest containing a
+  // "/" can never match [a-z-]+, so a nested path is correctly rejected).
+  const m = RECIPE_FILENAME_RE.exec(rest);
   if (!m) return null;
   return RECIPE_KEYS.includes(m[1]) ? m[1] : null;
 }
@@ -72,10 +115,20 @@ export function coldStartNudge(name, ledgerPath) {
   return `No coverage ledger yet for \`${name}\`. If you learn something surprising here, it goes in \`${ledgerPath}\`.`;
 }
 
-/** dir name if `filePath` is under ingest/pipelines/<dir>/, else null. */
+/** dir name if `filePath` is under ingest/pipelines/<dir>/, else null. Matched
+ *  on the resolved ABSOLUTE path — see the note above WIN/afterMarker. */
 export function matchPipelineDir(filePath) {
-  const m = PIPELINE_RE.exec(String(filePath ?? "").replace(/\\/g, "/"));
-  return m ? m[1] : null;
+  const norm = absForwardSlashed(filePath);
+  if (norm === null) return null;
+  const rest = afterMarker(norm, PIPELINE_MARKER);
+  if (rest === null) return null;
+  // Require a file segment after the dir (a real Edit/Write touch always
+  // targets a file, never the bare directory) — matches the old regex's own
+  // trailing `\/` requirement.
+  const slashIdx = rest.indexOf("/");
+  if (slashIdx === -1) return null;
+  const dir = rest.slice(0, slashIdx);
+  return dir.length > 0 ? dir : null;
 }
 
 export function formatPipelineScope(dir, scope) {
