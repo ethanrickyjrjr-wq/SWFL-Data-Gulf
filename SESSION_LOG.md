@@ -1,3 +1,22 @@
+## 2026-07-15 (Sonnet 5 · main) — root cause of "only found one PDF": cpswfl.com (the site downloader.py scrapes) was acquired and is dead; real source has 4 sectors on different cadences. Downloaded all 20 to `~/Downloads/marketbeat-swfl/` for operator review. No code changed.
+
+crawl4ai-verified: `https://www.cpswfl.com/research` (`downloader.py`'s `_CW_RESEARCH_URL`) now
+redirects to `naiburnsscalo.com` — Cushman & Wakefield's local SWFL affiliate was acquired by NAI
+Burns Scalo (their own news post dated 2026-06-09). The scraper has been finding nothing there. The
+real, current source is C&W's own hub page,
+`cushmanwakefield.com/en/united-states/insights/us-marketbeats/fort-myers-naples-marketbeats`, which
+lists 4 distinct sector reports for Fort Myers/Naples — Office, Industrial, Retail, Medical Office
+(confirms both finding 1.1's Office/Retail gap AND the registry's Medical Office gap from this
+morning's audit at once; no Multifamily/Hospitality/Life Sciences edition exists for this metro,
+only national-level). The sectors release on different cadences, confirming the operator's hunch:
+Office/Industrial/Medical Office are all Q1 2026 (current), Retail lags a full quarter at Q4 2025.
+Downloaded all 20 PDFs found on that page (4 current + 16 historical, back to Q1 2024) to
+`~/Downloads/marketbeat-swfl/`, magic-byte verified, for the operator to look at directly. Colliers
+remains genuinely Cloudflare-gated on live crawl4ai fetch (re-confirmed, not resolved). Updated check
+`marketbeat_pdf_pipeline_audit` with the new root cause; not closed — downloader.py/extractor.py/
+pipeline.py still need the actual fix (repoint to the cushmanwakefield.com hub, extend past
+Industrial-only).
+
 ## 2026-07-15 (Sonnet 5 · main) — audited the full MarketBeat PDF ingest pipeline (operator: "how do we fix everything, write a handoff"), wrote `docs/handoff/2026-07-15-marketbeat-pdf-ingest-audit-handoff.md`.
 
 7 findings beyond the template fix, ranked in the handoff. Headline: crawl4ai-confirmed (live,
