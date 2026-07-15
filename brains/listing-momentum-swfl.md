@@ -58,7 +58,7 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-07
       "units": "%",
       "display_format": "percent",
       "source": {
-        "url": "http://localhost:3000/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
+        "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
         "fetched_at": "2026-07-14T21:31:04Z",
         "tier": 2,
         "citation": "15.20% of 29,095 active SWFL for-sale listings carry a price reduction, as of 2026-07-14"
@@ -77,7 +77,7 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-07
       "units": "%",
       "display_format": "percent",
       "source": {
-        "url": "http://localhost:3000/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
+        "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
         "fetched_at": "2026-07-14T21:31:04Z",
         "tier": 2,
         "citation": "8.20% of 29,095 active SWFL for-sale listings are newly listed, as of 2026-07-14"
@@ -143,7 +143,7 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-07
         }
       ],
       "source": {
-        "url": "http://localhost:3000/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
+        "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
         "fetched_at": "2026-07-14T21:31:04Z",
         "tier": 2,
         "citation": "SWFL for-sale listing momentum shares, per grain, as of 2026-07-14"
@@ -662,7 +662,7 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-07
         }
       ],
       "source": {
-        "url": "http://localhost:3000/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
+        "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
         "fetched_at": "2026-07-14T21:31:04Z",
         "tier": 2,
         "citation": "SWFL for-sale listing momentum shares, per grain, as of 2026-07-14"
