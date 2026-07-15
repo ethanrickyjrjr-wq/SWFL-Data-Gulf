@@ -9,6 +9,7 @@
 // Drift is guarded mechanically: seed-previews.test.ts fails when a template
 // edit ships without a re-capture. Pure UI state — nothing is persisted; once
 // a deliverable exists the client never shows this again.
+import type { ReactNode } from "react";
 import { SEED_DOCS, type SeedDoc } from "@/lib/email/doc/default-docs";
 import { SEED_PREVIEW_GROUPS, seedPreviewsFor } from "@/lib/email/doc/seed-previews";
 
@@ -42,9 +43,14 @@ function SeedCard({
 export function TemplateGallery({
   onPick,
   onStartBlank,
+  heroSlot,
 }: {
   onPick: (seed: SeedDoc) => void;
   onStartBlank: () => void;
+  /** Rendered between the page header and the template groups — the Listing Campaign hero
+   *  (spec 2026-07-15-gallery-listing-hero-design.md) uses this; the gallery itself stays
+   *  decoupled from listing specifics. */
+  heroSlot?: ReactNode;
 }) {
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
@@ -64,6 +70,8 @@ export function TemplateGallery({
           Start blank
         </button>
       </div>
+
+      {heroSlot}
 
       {SEED_PREVIEW_GROUPS.map((g) => {
         const previews = seedPreviewsFor(g.key);
