@@ -1,3 +1,29 @@
+## 2026-07-15 (Sonnet 5 · main) — shipped the gallery-first routing + Listing Campaign hero plan (5 tasks, subagent-driven, Opus implementers).
+
+Executed `docs/superpowers/plans/2026-07-15-gallery-listing-hero.md` end to end: Opus implementer
+subagents per task, controller (me) reviewed every diff directly instead of a separate reviewer
+subagent (operator directive). Commits: `lib/lab-entry/create-listing-project.ts` (shared
+address→project helper), `TemplateGallery`'s `heroSlot` prop, `ListingCampaignHero` (the
+address-capturing "From Teaser to Sold" section, real 5-thumbnail filmstrip pulled from the
+`listing-to-close` SHOWCASES entry, honest present-tense click-alert copy referencing this
+session's earlier click-alerts ship), wired into `ProjectEmailLabClient` (pill deleted) and
+`app/email-lab/grid/EmailLabGridClient.tsx` (the actual "New Campaign lands on the gallery, not a
+blank canvas behind a popup" fix — `firstRunGalleryEligible: signedIn`, non-blocking "Building
+into / Change" indicator replacing the old auto-open confirm popup). Task 5's Opus dispatch got
+cut off by a session restart before it reported back; its file edits survived uncommitted — I
+verified the diff line-by-line against the plan, ran tsc/build/tests myself, and committed it
+directly rather than re-dispatching duplicate work.
+
+**Live-verified, not just build-green:** built + served the production bundle on :3211
+(`bunx next start`), fingerprinted, drove it with chrome-devtools — anonymous `/email-lab/grid`
+renders the unchanged blank-canvas taste surface exactly as the spec requires (screenshot
+confirmed, zero console errors beyond an expected anonymous-session 401), killed the server after.
+**Not verified:** the actual new behavior (signed-in "New Campaign" → gallery-first) needs a real
+authenticated click-through — I have no test-user credentials and won't fabricate an auth session
+to get one. `gallery_listing_hero_live_verify` stays OPEN pending that. **What's next:** operator
+(or a session with real login) walks the 5-step live-verify in the plan's Task 6, then closes the
+check.
+
 ## 2026-07-15 (Sonnet 5 · main) — hurricane-tracks-fl rebuild failed on missing Postgres secrets; wired them into daily-rebuild.yml.
 
 Continuing the FEMA scope-leak fix: env-swfl's targeted rebuild (29392067403) succeeded, but
