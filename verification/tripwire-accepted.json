@@ -88,6 +88,12 @@
       "pack": "hurricane-tracks-fl",
       "accepted_on": "07/15/2026",
       "note": "Retry after first dispatch (29392088541) lost a push race with a concurrent commit wave on brains/_build-report.json; rebuild itself likely succeeded, only the publish step failed (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29395303906",
+      "pack": "hurricane-tracks-fl",
+      "accepted_on": "07/15/2026",
+      "note": "Retry #2 after wiring the missing SUPABASE_PG_* secrets into daily-rebuild.yml (commit 23410a45) — prior failure was a genuine CI gap, now fixed (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
