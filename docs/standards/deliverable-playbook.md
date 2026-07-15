@@ -275,3 +275,38 @@ ask what the vendor actually measured — not what arithmetic you can do to its 
 - **`mock.module` replaces the WHOLE module** for every importer in the test process. Spread
   the real module, or you will silently strip exports and break innocent files.
 - **The git index is shared with parallel sessions.** Stage explicit paths; never `git add -A`.
+
+## Part 10 — Positioning: sell-side vs story-side
+
+Every recipe declares `positioning: "sell-side" | "story-side"` on its `Recipe` record
+(`lib/deliverable/recipes.ts`):
+
+- **Sell-side (9):** `new-listing`, `coming-soon`, `market-comps`, `under-contract`, `just-sold`,
+  `open-house`, `price-reduced`, `agent-brand-intro`, `agent-launch`.
+- **Story-side (5):** `sphere-weekly`, `market-pulse`, `review-reply`, `social-pack`, `social-cut`
+  (the last two ship `"story-side"` as an inert default — neither reads any prompt this design touches).
+
+`FAVORABLE_FRAMING_POLICY` (`lib/deliverable/recipes/shared.ts`) is pasted verbatim into exactly THREE
+prompts, not all nine sell-side recipes' prompts: `authorListingNarrative` (shared.ts — covers new-listing,
+coming-soon, price-reduced, just-sold, open-house), `authorUnderContractNote` (under-contract.ts, its own
+bespoke prompt, NOT routed through the shared narrator), and `buildNarratorPrompt` (market-comps.ts). It is
+deliberately absent from `authorAreaRead` (agent-brand-intro.ts) and `LETTER_SYSTEM` (agent-launch.ts) —
+both carry an absolute no-numbers/no-facts constraint the block would contradict.
+
+The block's priority sentence, stated first inside it: cited facts — including unfavorable ones — are
+never dropped, softened, or omitted. This governs emphasis and ordering of true facts, never which facts
+appear.
+
+**The magnitude permission is direction-symmetric.** When settled facts show a large gap, state its size
+plainly rather than hedging it — identically whichever way the number points. `market-comps.ts`'s
+`buildPriceCase` is the reference implementation: its `isExtreme` check fires on the gap's relative size,
+never on which direction is "the favorable one."
+
+**Charts carry the argument too.** `price-reduced` gained a new chart (`priceVsAreaDotSpec`) plotting the
+new price's $/sq ft against a sourced comp median, using the already-registered `dot-plot` frame — no new
+chart-rendering code, reusing `compsForAddress` (the same data root `market-comps.ts` calls).
+
+Research: `_ASSISTANT/research/2026-07-15-sell-side-copywriting-research.md`,
+`_ASSISTANT/research/2026-07-15-ai-steering-anti-drift-research.md`,
+`_ASSISTANT/research/2026-07-15-authority-reasoning-not-hype-research.md`. Design doc:
+`docs/superpowers/specs/2026-07-15-sell-side-favorable-framing-design.md`.
