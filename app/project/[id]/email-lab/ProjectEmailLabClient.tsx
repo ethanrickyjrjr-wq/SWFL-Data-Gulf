@@ -394,7 +394,11 @@ export function ProjectEmailLabClient({
         body: JSON.stringify({ audience_slug: audience, send_hour_et: 9 }),
       });
       const j = await res.json().catch(() => null);
-      if (res.ok && j?.sequence) setSequence(j.sequence);
+      if (res.ok && j?.sequence) {
+        setSequence(j.sequence);
+      } else if (res.status === 409) {
+        setFrozenNote("This listing campaign is already running.");
+      }
     } finally {
       setArming(false);
     }
@@ -467,11 +471,13 @@ export function ProjectEmailLabClient({
             onPick={(seed: SeedDoc) => seedCanvas(seed.build())}
             onStartBlank={() => seedCanvas(defaultDoc())}
             heroSlot={
-              <ListingCampaignHero
-                subjectAddress={subjectAddress ?? null}
-                arming={arming}
-                onArm={() => void armArc()}
-              />
+              sequence ? undefined : (
+                <ListingCampaignHero
+                  subjectAddress={subjectAddress ?? null}
+                  arming={arming}
+                  onArm={() => void armArc()}
+                />
+              )
             }
           />
         </div>
