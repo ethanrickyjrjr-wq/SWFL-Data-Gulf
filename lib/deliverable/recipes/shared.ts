@@ -22,6 +22,10 @@ import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
 import { listingDescriptionFromPrompt } from "@/lib/email/listing-intent";
 import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import { communitySourceLine } from "@/lib/listings/listing-detail";
+import {
+  resolveCommunityForListing,
+  neighborhoodStatsSourceLine,
+} from "@/lib/listings/community-lookup";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc } from "@/lib/email/doc/types";
 
@@ -49,9 +53,46 @@ export interface ResolvedSubject {
  * grid always lands on the canvas with open slots, never a blank page and never an
  * invented number.
  */
+// A 5-digit ZIP, optionally with a +4 suffix, read from the LAST comma-segment of the raw
+// address string (typically "..., FL 34102") -- independent of geocoding, so this can run
+// in PARALLEL with the vendor listing lookup below rather than waiting on its result. Only
+// searches the last segment, not the whole string, so a 5-digit HOUSE NUMBER (e.g.
+// "10500 Main St, Naples, FL 34102") is never mistaken for the ZIP.
+function zip5From(address: string): string {
+  const lastSegment =
+    String(address ?? "")
+      .split(",")
+      .pop() ?? "";
+  const m = /\b(\d{5})(?:-\d{4})?\b/.exec(lastSegment);
+  return m ? m[1] : "";
+}
+
 export async function resolveSubject(address: string, prompt: string): Promise<ResolvedSubject> {
-  const hit = await resolveSubjectListing(address).catch(() => null);
+  const zip = zip5From(address);
+  const [hit, communityForListing] = await Promise.all([
+    resolveSubjectListing(address).catch(() => null),
+    zip ? resolveCommunityForListing(address, zip).catch(() => null) : Promise.resolve(null),
+  ]);
   const facts: ListingFacts = hit ?? { address, photos: [], sourceUrl: BASE_URL };
+  if (communityForListing && (communityForListing as { matched: boolean }).matched) {
+    const c = communityForListing as {
+      matched: true;
+      subdivisionName: string;
+      homeCount: number | null;
+      medianJustValue: number | null;
+      countByType: Record<string, number> | null;
+      sourceUrl: string;
+      asOf: string | null;
+    };
+    facts.communityStats = {
+      subdivisionName: c.subdivisionName,
+      homeCount: c.homeCount,
+      medianJustValue: c.medianJustValue,
+      countByType: c.countByType,
+      sourceUrl: c.sourceUrl,
+      asOf: c.asOf,
+    };
+  }
 
   // LANE 2 — the agent's own words. Never overwrites a description the record
   // already carries; it fills the gap the feed leaves.
@@ -181,6 +222,7 @@ export async function authorListingNarrative(
     // this fact being present, so "no community line" means the model may not mention golf at all,
     // NOT that the community lacks it.
     communitySourceLine(facts.community),
+    neighborhoodStatsSourceLine(facts.communityStats),
     opts.context && `Background context (NOT the subject of this email):\n${opts.context}`,
   ].filter(Boolean);
 
@@ -221,6 +263,13 @@ export async function authorListingNarrative(
     `paragraph is thrown away. If there is NO community line, say NOTHING about golf, a pool, ` +
     `a gate or amenities — its absence means we could not read the page, NOT that the ` +
     `community lacks them. Never write that a community lacks something.\n\n` +
+    `THE NEIGHBORHOOD. If — and ONLY if — a "THE NEIGHBORHOOD" fact line is present above, you ` +
+    `may restate ONLY the home count and median value it states, word for word. This is an ` +
+    `ASSESSED value from the tax roll, not a sale or list price — never call it "median home ` +
+    `price" or say homes in this neighborhood "sell for" this figure. Never invent a trend, a ` +
+    `comparison to another neighborhood, or a characterization of whether the value is high or ` +
+    `low — that is a claim, not a restatement. If there is NO "THE NEIGHBORHOOD" line, say ` +
+    `NOTHING about neighborhood home counts or values.\n\n` +
     `Return ONLY the paragraph.`;
 
   const user = `FACTS:\n${lines.join("\n")}\n\nWrite the description.`;
