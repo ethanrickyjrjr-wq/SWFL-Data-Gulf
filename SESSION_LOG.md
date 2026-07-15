@@ -1,3 +1,13 @@
+## 2026-07-15 (Sonnet 5 · main) — dispatched targeted rebuilds for env-swfl + hurricane-tracks-fl.
+
+Operator-decreed, both via `scripts/dispatch-rebuild.mjs` (`OPERATOR_APPROVED_PAID_RUN=1`):
+env-swfl (run 29392067403) picks up the repopulated FEMA data + the scope-leak fix in one pass;
+hurricane-tracks-fl (run 29392088541) picks up the repopulated data to clear the fabricated-$0
+risk window. Tripwire acceptance entries appended to `verification/tripwire-accepted.json` and
+committed same-session per the wrapper's own requirement. **What's next:** verify both published
+brain files hold real, correctly 3-core-scoped figures once the runs complete, then close
+`fema_nfip_views_six_county_scope_leak`.
+
 ## 2026-07-15 (Sonnet 5 · main) — fixed the FEMA NFIP 6-county scope leak; repopulated fema_nfip_claims after the 07/14 data-loss incident.
 
 Same-day handoff (`docs/handoff/2026-07-14-fema-flood-data-usage-handoff.md`) mapped the FEMA
