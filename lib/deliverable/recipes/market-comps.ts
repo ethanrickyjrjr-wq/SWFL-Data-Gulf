@@ -552,19 +552,28 @@ export function buildPriceCase(facts: ListingFacts, comps: RenderComp[]): PriceC
   const addr = facts.address?.split(",")[0]?.trim();
   const forAddr = addr ? ` for ${addr}` : "";
 
-  // MAGNITUDE TIER — direction-symmetric. An extreme gap (the subject sits at or beyond
-  // the full spread of the set, or the gap is >= 40% of the median) states its size
-  // plainly and directly rather than the same flat "sits $X above/below" wording used for
-  // a marginal gap. Fires IDENTICALLY whichever way the number points — this recipe exists
-  // to defend a price that can legitimately sit on either side of the comps, and a tier
-  // that only sharpens language in the flattering direction is spin, not honesty. See
-  // docs/superpowers/specs/2026-07-15-sell-side-favorable-framing-design.md §4a.
+  // MAGNITUDE TIER — direction-symmetric. An extreme gap (the subject sits strictly beyond
+  // the full spread of the set — genuinely below every comp, or genuinely above every comp)
+  // states its size plainly and directly rather than the same flat "sits $X above/below"
+  // wording used for a marginal gap. Fires IDENTICALLY whichever way the number points —
+  // this recipe exists to defend a price that can legitimately sit on either side of the
+  // comps, and a tier that only sharpens language in the flattering direction is spin, not
+  // honesty. See docs/superpowers/specs/2026-07-15-sell-side-favorable-framing-design.md §4a.
+  //
+  // FIX (task-5 review, Critical finding): an earlier version of this formula ALSO fired on
+  // `diff / medianPpsf >= 0.4` (a percentage-of-median gap), independent of range membership.
+  // That's not a range check — it can be (and was, in a reproduced case) true while the
+  // subject sits strictly INSIDE [min(allPpsf), max(allPpsf)], which made the "entire range"
+  // sentence below assert a falsehood that directly contradicted the very next sentence
+  // (vsSold/compareToSet correctly saying the subject falls WITHIN the range). Removed —
+  // isExtreme must be true ONLY when subjectPpsf is provably outside
+  // [min(allPpsf), max(allPpsf)]; a large percentage gap that's still inside the range falls
+  // through to the plain, always-true "sits $X above/below the median" sentence in the
+  // `else` branch below, which is honest either way.
   const allPpsf = priced.map((x) => x.ppsf);
   const isExtreme =
-    vsMedian.dir !== "level" &&
-    (vsMedian.diff / medianPpsf >= 0.4 ||
-      (vsMedian.dir === "below" && subjectPpsf < Math.min(...allPpsf)) ||
-      (vsMedian.dir === "above" && subjectPpsf > Math.max(...allPpsf)));
+    (vsMedian.dir === "below" && subjectPpsf < Math.min(...allPpsf)) ||
+    (vsMedian.dir === "above" && subjectPpsf > Math.max(...allPpsf));
   const s1 =
     vsMedian.dir === "level"
       ? `At ${usd(subjectPpsf)} per square foot, the asking price${forAddr} is level with the ` +

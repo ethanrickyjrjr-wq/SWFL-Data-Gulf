@@ -484,6 +484,87 @@ test("buildPriceCase states an extreme gap plainly, direction-symmetric", () => 
   expect(expensive!.vsMedian.dir).toBe("above");
 });
 
+test("buildPriceCase does NOT claim 'the entire range' when only the percentage-of-median gap is large and the subject is still inside the set's range", () => {
+  // Regression test for the Critical review finding on task-5-report.md: the ORIGINAL
+  // isExtreme formula also fired on `vsMedian.diff / medianPpsf >= 0.4` alone, with no
+  // range-membership check at all. Reproduction uses the reviewer's exact disclosed shape:
+  // subject $500,000 / 2,000 sqft = $250/sqft; comps (all "sold", same 2,000 sqft) at
+  // $300,000 / $340,000 / $800,000 → ppsf $150 / $170 / $400.
+  //   median = $170, diff = $80, 80/170 ≈ 0.4706 >= 0.4 — the OLD condition 1 fires alone —
+  //   but $250 sits strictly INSIDE [$150, $400], so the subject is provably NOT beyond the
+  //   entire range. Before the fix, s1 said "sits $80 above every comparable home in the
+  //   set — not just the $170 median, the entire range," while the very next sentence (from
+  //   vsSold) correctly said the price "falls within the recorded sales" — a direct,
+  //   code-authored self-contradiction in the same paragraph.
+  const factsInRange: ListingFacts = {
+    ...SUBJECT,
+    address: "1 Inside Ln, Fort Myers, FL 33905",
+    price: "$500,000",
+    sqft: "2000",
+  };
+  const rangeComps: RenderComp[] = [
+    {
+      addressLine: "1 Low St",
+      city: "x",
+      beds: 3,
+      baths: 2,
+      sqft: 2000,
+      status: "sold",
+      price: 300000,
+      priceKind: "sold",
+      priceDate: "2026-01-01",
+      sourceUrl: null,
+    },
+    {
+      addressLine: "2 Mid St",
+      city: "x",
+      beds: 3,
+      baths: 2,
+      sqft: 2000,
+      status: "sold",
+      price: 340000,
+      priceKind: "sold",
+      priceDate: "2026-01-01",
+      sourceUrl: null,
+    },
+    {
+      addressLine: "3 High St",
+      city: "x",
+      beds: 3,
+      baths: 2,
+      sqft: 2000,
+      status: "sold",
+      price: 800000,
+      priceKind: "sold",
+      priceDate: "2026-01-01",
+      sourceUrl: null,
+    },
+  ];
+
+  const pc = buildPriceCase(factsInRange, rangeComps);
+  expect(pc!.subjectPpsf).toBe(250);
+  expect(pc!.medianPpsf).toBe(170);
+  expect(pc!.vsMedian.dir).toBe("above");
+  expect(pc!.vsMedian.diff).toBe(80);
+
+  // The percentage gap alone (80 / 170 ≈ 0.47) would have tripped the OLD isExtreme
+  // formula. It must NOT trip the fixed one — the subject is still inside [150, 400].
+  expect(pc!.verdict).not.toContain("the entire range");
+
+  // The paragraph falls back to the honest, always-true median-gap sentence instead...
+  expect(pc!.verdict).toContain(
+    "sits $80 above the $170 median across the 3 comparable homes nearby.",
+  );
+
+  // ...and stays internally consistent with the within-range language the untouched
+  // vsSold / compareToSet sentences already state correctly.
+  expect(pc!.verdict).toContain("falls within the recorded sales");
+  expect(pc!.verdict).toContain(
+    "The asking price per square foot sits inside the range of the set ($150 to $400), " +
+      "above 2 of 3 and below 1.",
+  );
+});
+
 test("position in the set is COUNTED by compareToSet, never characterized as a 'low end'", () => {
   // The second false claim in the same paragraph: "the subject falls at the low end of
   // that band" when $209 sat BELOW a $210–$266 band entirely. The position sentence is
