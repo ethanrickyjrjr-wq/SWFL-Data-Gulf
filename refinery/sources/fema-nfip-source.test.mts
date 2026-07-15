@@ -8,6 +8,7 @@ const {
   SWFL_STORM_YEARS,
   SWFL_STORM_YEARS_LAST_REVIEWED,
   aggregateZipRollupTop6,
+  aggregateStormTotalsLive,
   AAL_WINDOW_YEARS,
   INSURED_PENETRATION_FACTOR,
   ZIP_POPULATION_2020,
@@ -529,5 +530,108 @@ test("nfip-zip-aggregate fragments have unique, deterministic fragment_ids keyed
       expected,
       `fragment_id for ZIP ${zip} must be derived from natural key "zip-${zip}"`,
     );
+  }
+});
+
+test("aggregateStormTotalsLive: non-2024 storm year total sums the county-year buckets, not raw claims", () => {
+  // Ian 2022 split across two counties in the view — no 2024 raw rows involved.
+  const countyYears = [
+    {
+      kind: "nfip-county-year",
+      county_code: "12071",
+      county_name: "Lee",
+      year: 2022,
+      is_storm_year: true,
+      storm_name: "Ian",
+      paid_total_usd: 500_000,
+      claim_count: 5,
+    },
+    {
+      kind: "nfip-county-year",
+      county_code: "12021",
+      county_name: "Collier",
+      year: 2022,
+      is_storm_year: true,
+      storm_name: "Ian",
+      paid_total_usd: 300_000,
+      claim_count: 3,
+    },
+  ];
+  const out = aggregateStormTotalsLive(countyYears as never, []);
+  const ian = out.find((s: { storm_name: string }) => s.storm_name === "Ian");
+  assert.ok(ian, "expected an Ian 2022 entry");
+  assert.equal(ian!.paid_total_usd, 800_000);
+  assert.equal(ian!.claim_count, 8);
+});
+
+test("aggregateStormTotalsLive: 2024 splits Helene/Milton from raw claims by date_of_loss, ignoring county-year buckets", () => {
+  const countyYears = [
+    {
+      kind: "nfip-county-year",
+      county_code: "12071",
+      county_name: "Lee",
+      year: 2024,
+      is_storm_year: true,
+      storm_name: "Helene+Milton",
+      // Deliberately wrong combined total — if the live-split path fell back
+      // to this bucket instead of the raw 2024 rows, the assertions below fail.
+      paid_total_usd: 999_999,
+      claim_count: 99,
+    },
+  ];
+  const claims2024 = [
+    {
+      id: "helene-1",
+      year_of_loss: 2024,
+      date_of_loss: "2024-09-26",
+      county_code: "12071",
+      amount_paid_on_building_claim: 100_000,
+      amount_paid_on_contents_claim: 0,
+      amount_paid_on_ico_claim: 0,
+    },
+    {
+      id: "milton-1",
+      year_of_loss: 2024,
+      date_of_loss: "2024-10-09",
+      county_code: "12071",
+      amount_paid_on_building_claim: 200_000,
+      amount_paid_on_contents_claim: 0,
+      amount_paid_on_ico_claim: 0,
+    },
+    {
+      id: "null-date-loss",
+      year_of_loss: 2024,
+      date_of_loss: null,
+      county_code: "12071",
+      amount_paid_on_building_claim: 50_000,
+      amount_paid_on_contents_claim: 0,
+      amount_paid_on_ico_claim: 0,
+    },
+    {
+      id: "out-of-scope-county",
+      year_of_loss: 2024,
+      date_of_loss: "2024-09-26",
+      county_code: "12115", // Sarasota — locked out of scope
+      amount_paid_on_building_claim: 400_000,
+      amount_paid_on_contents_claim: 0,
+      amount_paid_on_ico_claim: 0,
+    },
+  ];
+  const out = aggregateStormTotalsLive(countyYears as never, claims2024 as never);
+  const helene = out.find((s: { storm_name: string }) => s.storm_name === "Helene");
+  const milton = out.find((s: { storm_name: string }) => s.storm_name === "Milton");
+  assert.ok(helene && milton, "expected both Helene and Milton entries");
+  assert.equal(helene!.paid_total_usd, 100_000, "Helene = pre-split-date claim only");
+  assert.equal(helene!.claim_count, 1);
+  assert.equal(milton!.paid_total_usd, 200_000, "Milton = on/after-split-date claim only");
+  assert.equal(milton!.claim_count, 1);
+});
+
+test("aggregateStormTotalsLive: returns exactly one entry per SWFL_STORM_YEARS entry, zero-filled when no data", () => {
+  const out = aggregateStormTotalsLive([] as never, [] as never);
+  assert.equal(out.length, SWFL_STORM_YEARS.length);
+  for (const st of out) {
+    assert.equal(st.paid_total_usd, 0);
+    assert.equal(st.claim_count, 0);
   }
 });

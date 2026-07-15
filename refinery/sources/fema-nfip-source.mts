@@ -129,9 +129,6 @@ for (const s of SWFL_STORM_YEARS) {
   STORM_NAME_BY_YEAR.set(s.year, existing ? `${existing}+${s.name}` : s.name);
 }
 
-// Unique storm years for the live-path raw fetch filter.
-const STORM_YEAR_ARRAY = [...new Set(SWFL_STORM_YEARS.map((s) => s.year))];
-
 // Minimal columns needed for per-storm attribution (Helene/Milton date split +
 // paid totals). Replaces the 16-column full-archive select in the live path.
 const STORM_CLAIM_COLUMNS =
@@ -338,7 +335,10 @@ interface ZipWindowViewRow {
 interface LiveFetchResult {
   countyYearRows: NfipCountyYearViewRow[];
   zipWindowRows: ZipWindowViewRow[];
-  stormClaims: ClaimRow[];
+  /** Raw 2024 claims only — needed for the Helene/Milton date_of_loss split.
+   *  Every other storm year's total comes from countyYearRows (see
+   *  aggregateStormTotalsLive). check env_swfl_frozen_stormclaims_timeout. */
+  claims2024: ClaimRow[];
 }
 
 function toNum(v: unknown): number {
@@ -475,6 +475,66 @@ function aggregateStormTotals(rows: ClaimRow[]): NfipStormTotal[] {
       stormRows = yearRows;
     }
 
+    out.push({
+      kind: "nfip-storm-total",
+      storm_name: storm.name,
+      year: storm.year,
+      landfall_date: storm.landfall_date,
+      paid_total_usd: Math.round(stormRows.reduce((s, r) => s + paidTotal(r), 0) * 100) / 100,
+      claim_count: stormRows.length,
+    });
+  }
+
+  return out;
+}
+
+/**
+ * Live-path storm totals — check env_swfl_frozen_stormclaims_timeout.
+ *
+ * Every SWFL_STORM_YEARS entry except 2024 maps to exactly one storm, so its
+ * SWFL-wide paid total is just the county-year view's per-year sum across
+ * counties — already fetched, already aggregated server-side. Only 2024 needs
+ * raw rows, because Helene vs Milton is a same-year date_of_loss split the
+ * view can't express. This keeps the raw claims fetch to ~9k rows (2024 only)
+ * instead of ~56k (all 6 storm years), which is what was blowing the 300s
+ * Supabase REST timeout on the live cron.
+ */
+export function aggregateStormTotalsLive(
+  countyYears: NfipCountyYear[],
+  claims2024: ClaimRow[],
+): NfipStormTotal[] {
+  const yearTotals = new Map<number, { paid: number; count: number }>();
+  for (const b of countyYears) {
+    const acc = yearTotals.get(b.year) ?? { paid: 0, count: 0 };
+    acc.paid += b.paid_total_usd;
+    acc.count += b.claim_count;
+    yearTotals.set(b.year, acc);
+  }
+
+  const claims2024InScope = claims2024.filter(
+    (r) => r.year_of_loss === 2024 && r.county_code != null && SWFL_FIPS.includes(r.county_code),
+  );
+
+  const out: NfipStormTotal[] = [];
+  for (const storm of SWFL_STORM_YEARS) {
+    if (storm.year !== 2024) {
+      const yearTotal = yearTotals.get(storm.year) ?? { paid: 0, count: 0 };
+      out.push({
+        kind: "nfip-storm-total",
+        storm_name: storm.name,
+        year: storm.year,
+        landfall_date: storm.landfall_date,
+        paid_total_usd: Math.round(yearTotal.paid * 100) / 100,
+        claim_count: yearTotal.count,
+      });
+      continue;
+    }
+
+    const stormRows = claims2024InScope.filter((r) =>
+      storm.name === "Helene"
+        ? r.date_of_loss != null && r.date_of_loss < HELENE_MILTON_SPLIT_DATE
+        : r.date_of_loss != null && r.date_of_loss >= HELENE_MILTON_SPLIT_DATE,
+    );
     out.push({
       kind: "nfip-storm-total",
       storm_name: storm.name,
@@ -702,7 +762,7 @@ async function fetchLive(): Promise<LiveFetchResult> {
   // belt-and-suspenders: without it, swfl_storm_year_claims_usd / baseline /
   // post_ian_ratio silently include out-of-scope Charley/Ian dollars from
   // Charlotte/Glades/Sarasota (check fema_nfip_views_six_county_scope_leak).
-  // Mirrors the stormClaims query below, which already does this correctly.
+  // Mirrors the claims2024 query below, which already does this correctly.
   const { data: cyData, error: cyErr } = await sb
     .from(COUNTY_YEAR_VIEW)
     .select("county_code,year,claim_count,paid_total_usd")
@@ -725,25 +785,32 @@ async function fetchLive(): Promise<LiveFetchResult> {
     .in("county_code", SWFL_FIPS);
   if (zipErr) throw new Error(`fema-nfip-source: zip-window view failed — ${zipErr.message}`);
 
-  // Storm-year claims raw fetch — needed for per-storm Helene/Milton date split.
-  // Filtered to SWFL storm years only + minimal columns (~15k-35k rows vs 86.6k).
-  const stormClaims = await selectAllPaged<ClaimRow>(
+  // Raw claims fetch — 2024 ONLY. check env_swfl_frozen_stormclaims_timeout:
+  // the old .in("year_of_loss", STORM_YEAR_ARRAY) pulled all 6 SWFL storm
+  // years (~56.6k rows: 2004:4360, 2005:939, 2017:5365, 2022:36750,
+  // 2024:9176) and started timing out once fema_nfip_claims went from 0 to
+  // 448,425 real rows. Every storm year except 2024 maps to exactly one
+  // storm, so its total is already sitting in the county-year view fetched
+  // above (see aggregateStormTotalsLive) — only Helene vs Milton needs raw
+  // rows, because that's a same-year date_of_loss split the view can't do.
+  // Cuts this fetch from ~56.6k rows to ~9.2k.
+  const claims2024 = await selectAllPaged<ClaimRow>(
     () =>
       sb
         .from(TABLE)
         .select(STORM_CLAIM_COLUMNS)
         .eq("state", "FL")
         .in("county_code", SWFL_FIPS)
-        .in("year_of_loss", STORM_YEAR_ARRAY) as unknown as PagedQuery<ClaimRow>,
+        .eq("year_of_loss", 2024) as unknown as PagedQuery<ClaimRow>,
     "id",
     { minRows: 1 },
   );
-  assertClaimsNonEmpty(stormClaims);
+  assertClaimsNonEmpty(claims2024);
 
   return {
     countyYearRows: cyData as NfipCountyYearViewRow[],
     zipWindowRows: (zipData ?? []) as ZipWindowViewRow[],
-    stormClaims,
+    claims2024,
   };
 }
 
@@ -836,8 +903,9 @@ export const femaNfipSource: SourceConnector = {
         });
       }
     } else {
-      // Live path: county-year + ZIP-window from views; storm totals from raw (storm years only).
-      const { countyYearRows, zipWindowRows, stormClaims } = await fetchLive();
+      // Live path: county-year + ZIP-window from views; storm totals derived
+      // from the county-year view plus raw 2024-only claims (Helene/Milton split).
+      const { countyYearRows, zipWindowRows, claims2024 } = await fetchLive();
 
       // Build NfipCountyYear[] from view rows and compute SWFL rollup.
       const countyYears: NfipCountyYear[] = countyYearRows.map((r) => ({
@@ -911,7 +979,7 @@ export const femaNfipSource: SourceConnector = {
         });
       }
 
-      const stormTotals = aggregateStormTotals(stormClaims);
+      const stormTotals = aggregateStormTotalsLive(countyYears, claims2024);
       for (const st of stormTotals) {
         fragments.push({
           fragment_id: fragmentId(SOURCE_ID, `storm-${st.storm_name.toLowerCase()}-${st.year}`),
