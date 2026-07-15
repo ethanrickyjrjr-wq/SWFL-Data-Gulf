@@ -1,6 +1,7 @@
 # Community Stats → Deliverable Wiring — Build Log
 
-> **Recommended model:** ⚡ Sonnet — 6 tasks, keywords: architecture
+> **Recommended model:** ⚡ Sonnet — 7 tasks, keywords: architecture
+
 
 
 
@@ -84,5 +85,21 @@ Approved (all in-scope test evidence green; the live smoke-test gap is tracked, 
 **What happened:** Opus implementer wrote `zip5From()` (ZIP from the raw address string's last comma-segment, not geocoding, so the new resolver call runs in `Promise.all` alongside the existing vendor lookup rather than serially), wired `resolveCommunityForListing()` into `resolveSubject()`, attached `facts.communityStats` only on a real `matched:true` result, added `neighborhoodStatsSourceLine(facts.communityStats)` to the narrator's `lines` array, and inserted the "THE NEIGHBORHOOD" hard-rule block right after the existing untouched "THE COMMUNITY" block in the system prompt — all exactly per the plan. Created the first-ever `shared.test.ts` for this file (3 tests: attach-on-match, undefined-on-no-match, undefined-on-no-ZIP). Ran the full `lib/deliverable/recipes/` suite as the brief required (not optional) and confirmed zero regression across every recipe.
 
 **My review (independent):** `git diff` confirms an exact match to the plan's specified code. Re-ran `bun test lib/deliverable/recipes/` myself: 443/443 passed across 14 files, 1335 assertions, 745ms — zero regressions. No recipe file (`new-listing.ts`, `coming-soon.ts`, `just-sold.ts`, `open-house.ts`, `price-reduced.ts`, `under-contract.ts`, `market-comps.ts`) was touched, confirming the "ONE resolver, ONE narrator" architecture actually delivers what it promises. Approved, no fixes needed.
+
+---
+
+## Task 7 — `lib/deliverable/recipes/under-contract.ts`: settled-claim wiring
+
+**Status:** DONE_WITH_CONCERNS → resolved. Commit `c49bf311` "feat(deliverable): settle the neighborhood-stats claim in under-contract's narrator" (2 files, +97). Production code (`under-contract.ts`) matches the plan exactly: `settleCommunityStats()` + one line in `settleAll()`, no `NarratorInput`/call-site change, as the plan's divergence note predicted.
+
+**The implementer's three flagged concerns, and how each resolved:**
+
+1. **The plan's own test 4 didn't survive the real gate.** My plan's test paraphrased the settled sentence ("The tax roll counts 1,900 homes...") and asserted `proseViolations(...) === []`. Run for real, it fails: `auditClaims` treats "N homes" as a COUNT-shaped claim and accepts a count ONLY as a verbatim restatement of a settled sentence — a paraphrase is correctly rejected, fail-closed, exactly as this recipe's claim gate is designed to behave (it exists because a paraphrase shipped a real invented comparison once). The implementer consulted advisor mid-task, confirmed this was the gate working as intended rather than a bug, and replaced my one (wrong) test with two precise ones: a positive proving a word-for-word restatement survives, and a negative proving the exact paraphrase from my plan is rejected with `"word-count:900 homes"`. This is a correction to my plan, not a weakening — verified by re-running both tests myself.
+2. **Home-count claims are verbatim-only, project-wide.** Informational: any consumer of `neighborhoodStatsSourceLine`'s output must restate it word-for-word, never paraphrase the count. Already consistent with Task 6's own system-prompt wording ("restate ONLY the home count and median value it states, word for word") — no action needed, just confirms the design holds end to end.
+3. **A real, out-of-scope finding: community names can launder a water-attribute claim.** `inventedAttributes` checks its `ATTRIBUTE_CLAIMS` word list (waterfront, canal, bay, gulf, etc.) against the full `sourceText`, which now includes the settled neighborhood sentence — and that sentence embeds the community's raw NAME (e.g. "Heritage Bay"). Any SWFL community whose marketed name contains a water word — extremely common (Bonita Bay, Miromar Lakes, River Hall, Grande Isle) — would "legitimize" the model claiming that water feature about the HOUSE, not just naming the neighborhood. Same shape as the already-fixed `BRAND_NAME`/"gulf" hole (this file already strips "SWFL Data Gulf" before matching for exactly this reason) but far larger in surface. Opened check `community_name_water_word_legitimizes_invented_attribute` (project `under-contract`) with a concrete fix direction (strip the community-name segment the same way `BRAND_NAME` is stripped) — real finding, correctly not fixed inside this task's scope.
+
+**My review (independent):** `git diff` confirms production code is an exact match to the plan; only the test file diverges, and only in the way described above (a correction, not a weakening — the negative test locks the paraphrase-rejection behavior in place with a precise matcher, not a loose assertion that could rot). Re-ran `bun test lib/deliverable/recipes/under-contract.test.ts` myself: 80/80 passed, 194 assertions, 409ms. Approved. Concern 3 tracked via the check above rather than silently dropped.
+
+---
 
 ---
