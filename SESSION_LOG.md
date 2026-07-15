@@ -1,3 +1,32 @@
+## 2026-07-15 (Sonnet 5 · main) — sell-side favorable-framing spec corrected during planning review + full TDD implementation plan written; no code changed yet.
+
+Reviewed the 07/15 design spec (`docs/superpowers/specs/2026-07-15-sell-side-favorable-framing-design.md`,
+commit `7ac851b7`) against the running code before planning. Found and fixed: (1) `under-contract.ts`
+does NOT route through the shared `authorListingNarrative` — it has its own bespoke prompt
+(`authorUnderContractNote`), confirmed live at the call site, making it a 5th prompt call site, not 4.
+(2) The operator's own objection ("don't handcuff the design because 'do not pitch' looks like it
+conflicts with 'favorable'") sent me back to crawl4ai for a second research pass — new file
+`_ASSISTANT/research/2026-07-15-authority-reasoning-not-hype-research.md` (4 pages: Sharran Srivatsaa's
+$1-vs-$10M pricing-matrix teaching, USPAP narrative-appraisal reasoning, sell-side equity-research "Buy"
+methodology, REIT NAV-discount reasoning) — confirms hype and genuine authority are opposites in every
+field researched; the actual fix is a direction-symmetric magnitude tier ("state a big gap plainly,
+whichever way it points"), not a scope cut. (3) advisor() caught a real bug in my first-pass resolution:
+`FAVORABLE_FRAMING_POLICY`'s content (numbers beat adjectives) directly CONTRADICTS `authorAreaRead`'s
+"assert NO fact of any kind" and `LETTER_SYSTEM`'s "NO NUMBERS, not one digit, anywhere" — the block now
+goes into exactly 3 of 5 prompt call sites (`authorListingNarrative`, `authorUnderContractNote`,
+`buildNarratorPrompt`), never the two agent recipes. Also added, per operator directive: `price-reduced`
+gets a new sourced chart (new price vs. area comps, on the already-registered `dot-plot` frame) — flagged
+explicitly in the spec as a deliberate override of price-reduced's own 07/13 "not a market" design call,
+not smoothed over as purely additive.
+
+Wrote the full plan: `docs/superpowers/plans/2026-07-15-sell-side-favorable-framing-plan.md` (11 TDD
+tasks across 2 phases — framing block + magnitude tier; comp-math extraction + the new chart). Durability
+for the research: spec header cites all 3 research files, new `lib/deliverable/CLAUDE.md` + playbook
+Part 10 planned in Task 7, and two new auto-memory entries
+(`project_sell-side-favorable-framing.md`, `feedback_authority-confidence-scales-with-magnitude.md`)
+so a future session doesn't re-derive any of this. **Not done:** no code implemented yet — next session
+should execute the plan (subagent-driven-development or executing-plans) starting at Task 1.
+
 ## 2026-07-15 (Sonnet 5 · main) — root cause of "only found one PDF": cpswfl.com (the site downloader.py scrapes) was acquired and is dead; real source has 4 sectors on different cadences. Downloaded all 20 to `~/Downloads/marketbeat-swfl/` for operator review. No code changed.
 
 crawl4ai-verified: `https://www.cpswfl.com/research` (`downloader.py`'s `_CW_RESEARCH_URL`) now
