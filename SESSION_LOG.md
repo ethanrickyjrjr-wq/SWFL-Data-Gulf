@@ -1,3 +1,17 @@
+## 2026-07-15 (Sonnet 5 · main) — fixed the MarketBeat PDF ingest issue-body filename template (broken `${}` interpolation, wrong Q/year order).
+
+`.github/workflows/marketbeat-pdf-ingest.yml:110-111` (the ODD manual-drop GitHub issue body) had two
+bugs: the strings were plain `"..."` doubles, not backtick template literals, so `${quarter.replace(...)}`
+printed literally instead of interpolating; and the replace logic (`.replace('-','').replace('Q','')`)
+squished "2025-Q4" into "20254" — not even the right shape. Verified the correct shape against
+`ingest/pipelines/marketbeat_pdf/extractor.py`'s own docstring + `quarter_from_filename` parser:
+`Q{n}{YYYY}` (e.g. `Q42025`). Fixed to real template literals with
+`quarter.replace(/^(\d{4})-Q(\d)$/, "$2$1")`. Verified by extracting the script into a standalone
+`.mjs` and running it with `quarter = "2025-Q4"` — output is `MarketBeat_Industrial_Q42025_FortMyers_Naples.pdf`
+/ `Colliers_Industrial_Q42025_SWFL.pdf`, matching the extractor's expected pattern. YAML re-validated
+with `yaml.safe_load`. This is a docs-string bug only (the fallback issue-body when auto-download
+fails) — no data path or pipeline logic touched.
+
 ## 2026-07-15 (Sonnet 5 · main) — fixed the listing-campaign arm CTA showing on an already-armed project (Task 4 regression from the gallery-listing-hero plan).
 
 A prior session (interrupted mid-work, picked up cold from its last fragment) found that commit
