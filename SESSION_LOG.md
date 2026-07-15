@@ -1,3 +1,44 @@
+## 2026-07-15 (Sonnet 5 · main) — 2 independent reviews found real parser corruption in BOTH Industrial and Medical Office; fixed both bugs; flipped verified=true for 113 reviewed-clean rows.
+
+Operator: "write follow up so we get another set of eyes on it and fixed so it runs correctly and
+then flip it." Dispatched 2 fresh subagents (zero access to extractor.py) to independently read
+the source PDFs and compare against the DB field-by-field. Full writeup:
+`docs/handoff/2026-07-15-marketbeat-verified-review-and-flip.md`.
+
+Both reviews found real, repeatable corruption — this wasn't a Medical-only problem:
+- **Industrial** (pipeline live since 06/09, pre-dates this session): same root cause as the
+  Medical bug found earlier today — `extractor.py`'s "stop at SOUTHWEST FLORIDA TOTAL" check was
+  dead code (the generic `_SKIP_RE` matched and consumed that line first), so the parser wandered
+  into the Key Lease/Sale Transactions tables below the real submarket table. A transaction's city
+  tag re-matched a real submarket name and its garbage values overwrote the correct row via
+  `ON CONFLICT DO UPDATE`. Charlotte County was null 3-of-9 quarters checked; North Naples had a
+  stray transaction SF figure land in `deliveries` 2-of-6 quarters. Fixed with the same reorder,
+  re-extracted, re-verified against the reviewer's exact PDF reads for 2025-Q1/2025-Q4/2026-Q1 —
+  exact match, re-loaded with `--force`.
+- **Medical Office Q3 2024** uses an older 9-column report layout (extra YTD OVERALL ABSORPTION
+  column) the new parser didn't know about — shifted `under_construction`/rent by one slot.
+  Outlying Collier County showed a "$40,000/SF" rent in the DB (actually its under-construction
+  SF). Fixed: layout now auto-detected from header text; also recovers the genuine
+  `ytd_absorption_sqft` figure for 9-col quarters (previously dropped, not just shifted).
+  Re-verified against reviewer's exact figures, re-loaded.
+
+Flipped `verified=true`, scoped exactly to reviewed+re-verified quarters
+(`docs/sql/20260715_marketbeat_swfl_verify_reviewed_quarters.sql`): industrial 2025-Q1/2025-Q4/
+2026-Q1 (49 rows) + medical_office 2024-Q3/2025-Q1/2025-Q3/2026-Q1 (64 rows) = 113 rows. Industrial
+is already in `SURFACED_SECTORS` — once `cre-swfl` rebuilds, these 3 quarters should surface with
+zero further code changes; that's the actual "get the data" step, asked operator for go-ahead
+(touches live `/api/b/*`, RULE 1). Industrial 2024 (60 rows, source PDFs no longer on the live C&W
+hub, one quarter already confirmed still corrupt via a wider check) and Colliers/Lee & Associates
+(152 rows) stay `verified=false` — not reviewed this pass. Medical Office still needs
+`SURFACED_SECTORS` + rent-field pack wiring before it can be flipped-and-rebuilt the same way
+(tracked in check `marketbeat_medical_wiring_followup`) — deliberately not shipped half-wired.
+
+Operator scope note mid-session: Lee + Collier is what matters; Charlotte County/Punta Gorda data
+stays in the lake but the brain doesn't need to focus on it — matches the existing empty-corridor
+treatment of Charlotte County in `marketbeat-submarket-aliases.mts` already. One stale all-null
+"Punta Gorda" ghost row (a pre-fix leftover; upserts never delete rows a corrected parser stops
+producing) left in place, not chased further.
+
 ## 2026-07-15 (Sonnet 5 · main) — built + loaded Medical Office into marketbeat_swfl (64 rows, 4 quarters); fixed the dead cpswfl.com downloader; found the whole quarterly C&W/Colliers/Lee dataset (325 rows) has never reached the brain.
 
 Follow-up to the same-session root-cause finding (cpswfl.com dead, real source is

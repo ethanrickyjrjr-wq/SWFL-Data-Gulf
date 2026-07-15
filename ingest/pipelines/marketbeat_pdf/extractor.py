@@ -164,13 +164,23 @@ def _parse_cw_text(text: str, quarter: str) -> list[dict[str, Any]]:
     while i < len(lines):
         token = lines[i]
 
+        # Must precede the _SKIP_RE check: _SKIP_RE also matches this line
+        # (^SOUTHWEST FLORIDA TOTALS?$), so checking skip first silently
+        # swallows the table-end marker and lets the loop wander into the Key
+        # Lease/Sale Transactions tables below, where a property's city tag
+        # can repeat a real submarket name (e.g. "Charlotte County") with
+        # transaction-table garbage as its "values" -- upserted with the same
+        # (source_name, sector, submarket, quarter) key, that garbage row
+        # silently overwrites the correct one via ON CONFLICT DO UPDATE.
+        # Confirmed live 07/15/2026: Charlotte County / North Naples rows in
+        # the DB had every numeric field null (or a stray transaction SF
+        # figure landed in `deliveries`) for exactly this reason.
+        if "SOUTHWEST FLORIDA TOTAL" in token:
+            break
+
         if _SKIP_RE.match(token):
             i += 1
             continue
-
-        # Stop once we reach the SW Florida totals line (data ends here)
-        if "SOUTHWEST FLORIDA TOTAL" in token:
-            break
 
         # Only process known submarket names — unknown tokens are skipped
         if token.rstrip() not in _CW_SUBMARKETS or _VALUE_LIKE.match(token):
@@ -249,19 +259,33 @@ _CW_MEDICAL_SUBMARKETS: set[str] = {
 
 _CW_MEDICAL_HEADER_SENTINEL = "ALL CLASSES"
 
+# Some report generations (e.g. Q3 2024) insert an extra "YTD OVERALL NET
+# ABSORPTION (SF)" column between current-qtr absorption and YTD leasing
+# activity -- 9 values per row instead of 8. Detected from the header block
+# so the under-construction / rent column offsets shift correctly instead of
+# silently reading the wrong field. Confirmed live 07/15/2026 (independent
+# review): un-detected, this produced a "$40,000/SF" rent for Outlying
+# Collier County Q3 2024 by reading the under-construction SF value as a
+# dollar rent, and dropped the real rent into under_construction.
+_CW_MEDICAL_YTD_OVERALL_MARKER = "YTD OVERALL"
+
 
 def _parse_cw_medical_text(text: str, quarter: str) -> list[dict[str, Any]]:
     """
     Parse C&W MarketBeat Medical Office page text into a list of row dicts.
-    Columns (8 values per submarket, in order):
+    8-column layout (current, e.g. Q1 2026):
       inventory_sf, sublet_vacant_sf, direct_vacant_sf, overall_vacancy_rate,
       current_qtr_net_absorption, ytd_leasing_activity, under_construction,
-      overall_avg_asking_rent (full service, per the PDF's own footnote --
-      NOT triple-net, so it does not go in asking_rent_nnn/mf/os).
+      overall_avg_asking_rent.
+    9-column layout (older, e.g. Q3 2024) inserts ytd_overall_net_absorption
+    between current_qtr_net_absorption and ytd_leasing_activity.
 
+    overall_avg_asking_rent is "full service" per the PDF's own footnote --
+    NOT triple-net, so it does not go in asking_rent_nnn/mf/os.
     ytd_leasing_activity is a different metric than net absorption (leasing
-    activity, not space given back/absorbed) -- left unmapped rather than
-    forced into ytd_absorption_sqft. This report has no deliveries column.
+    activity, not space given back/absorbed) -- never mapped to
+    ytd_absorption_sqft; only the genuine ytd_overall_net_absorption column
+    (9-col layout only) populates that field.
     """
     lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
 
@@ -269,6 +293,9 @@ def _parse_cw_medical_text(text: str, quarter: str) -> list[dict[str, Any]]:
         start = max(i for i, ln in enumerate(lines) if _CW_MEDICAL_HEADER_SENTINEL in ln) + 1
     except ValueError:
         return []
+
+    has_ytd_overall = _CW_MEDICAL_YTD_OVERALL_MARKER in "\n".join(lines[:start])
+    n_vals = 9 if has_ytd_overall else 8
 
     rows: list[dict[str, Any]] = []
     i = start
@@ -294,19 +321,26 @@ def _parse_cw_medical_text(text: str, quarter: str) -> list[dict[str, Any]]:
 
         vals: list[str] = []
         j = i + 1
-        while j < len(lines) and len(vals) < 8:
+        while j < len(lines) and len(vals) < n_vals:
             t = lines[j].strip()
             if t in _CW_MEDICAL_SUBMARKETS or _SKIP_RE.match(t):
                 break
             vals.append(t)
             j += 1
 
-        if len(vals) < 6:
+        if len(vals) < n_vals - 2:
             i += 1
             continue
 
-        while len(vals) < 8:
+        while len(vals) < n_vals:
             vals.append("---")
+
+        if has_ytd_overall:
+            ytd_absorption_sqft = _to_int(vals[5])
+            under_cnstr_idx, rent_idx = 7, 8
+        else:
+            ytd_absorption_sqft = None
+            under_cnstr_idx, rent_idx = 6, 7
 
         submarket = token.rstrip()
         rows.append(
@@ -318,8 +352,9 @@ def _parse_cw_medical_text(text: str, quarter: str) -> list[dict[str, Any]]:
                 "inventory_sf": _to_int(vals[0]),
                 "vacancy_rate": _to_float(vals[3]),
                 "absorption_sqft": _to_int(vals[4]),
-                "under_construction": _to_int(vals[6]),
-                "asking_rent_full_service": _to_float(vals[7]),
+                "ytd_absorption_sqft": ytd_absorption_sqft,
+                "under_construction": _to_int(vals[under_cnstr_idx]),
+                "asking_rent_full_service": _to_float(vals[rent_idx]),
                 "geographic_type": "submarket",
             }
         )
