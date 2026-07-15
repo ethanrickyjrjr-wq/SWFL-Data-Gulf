@@ -7,6 +7,7 @@ import {
   sanitizeProse,
   scrubBrainSlugs,
   scrubCaveatTechnical,
+  scrubVendorSystems,
   isDisplayableCaveat,
 } from "@/refinery/render/speaker.mts";
 
@@ -139,7 +140,15 @@ export function renderBlock(b: GroundingBlock): string {
   // slug is caught too, and an id with no map entry still never reaches the model.
   // Structural fix, not a "please don't say X" instruction: RULE 1 CITE beats a
   // prompt-level ban every time.
-  return scrubBrainSlugs(scrubStatsJargon(parts.join("\n")));
+  //
+  // `scrubVendorSystems` (speaker.mts — the shared root, so this layer and the
+  // deterministic speak()/dossier surfaces can never disagree) runs HERE at block level,
+  // not only inside `sanitizeProse`, because `renderDetailTables` above passes a table's
+  // `title`, each row's `key`/`label`, and every cell through RAW — only the row's source
+  // citation is cleaned. So a vendor name in a table title or a categorical cell reaches
+  // the model untouched by any per-field scrub. The joined-block pass is the only thing
+  // that covers those, which is exactly why the slug + stats scrubs already sit here.
+  return scrubBrainSlugs(scrubVendorSystems(scrubStatsJargon(parts.join("\n"))));
 }
 
 /**

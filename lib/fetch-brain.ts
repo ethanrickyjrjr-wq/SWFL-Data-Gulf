@@ -6,6 +6,7 @@ import {
   speak,
   toDisplayBrain,
   isGroundedConditional,
+  scrubVendorSystems,
   type SpeakerTier,
   type DisplayBrain,
   type ParsedBrain,
@@ -201,7 +202,79 @@ export interface Dossier {
 }
 
 /** Assemble the dossier from a parsed BrainOutput + its freshness token. */
-export function buildDossier(output: BrainOutput, freshnessToken: string): Dossier {
+/**
+ * Vendor-name scrub over the dossier's user-facing strings — the SECOND leak path.
+ *
+ * `speak()` output is scrubbed (sanitizeProse / cleanCitationForDisplay) and the chat
+ * grounding is scrubbed (grounding.ts `renderBlock`), but this dossier was a RAW
+ * passthrough of `BrainOutput` — and it is NOT an internal structure. It ships as
+ * `_meta.dossier` on the MCP tool response (app/api/mcp/server.ts) and as `dossier` on
+ * `/api/b/[slug]?view=speak&format=json`, and the MCP RESPONSE_CONTRACT explicitly tells
+ * the consuming Claude to read `dossier.detail_tables` and "quote its real numbers with
+ * the source". So an un-scrubbed vendor name here reaches an answer verbatim on the one
+ * surface that never touches the speaker — a fix landed only in `grounding.ts` leaves MCP
+ * leaking. Scrubbed at this single chokepoint, every raw-dossier consumer is covered at
+ * once (chat re-scrubs in `renderBlock`; the scrub is idempotent).
+ *
+ * Deliberately ONLY the vendor scrub, not full `sanitizeProse`: this is the machine-facing
+ * payload a downstream Claude reasons over, and the wider prose rewrites (deCorridor,
+ * date reformatting, slug→label swaps) belong to the render layers that already own them.
+ * Non-mutating — `output` is still read raw by `speak()` and the tier-3 audit.
+ */
+function scrubDossierStrings(output: BrainOutput): BrainOutput {
+  // TOTAL-FUNCTION DISCIPLINE. buildDossier was a pure passthrough and therefore could
+  // NEVER throw — `resolveReportGrounding` and the MCP route both lean on that (the "#11 —
+  // never throws" contract: a bad brain degrades to master, it does not 500). A scrub that
+  // crashes on a field a degraded/partial artifact happens to omit would trade a cosmetic
+  // leak for a dead answer engine, so every access here is optional-chained and every
+  // absent field passes through EXACTLY as before (undefined stays undefined).
+  const s = (t: unknown) => (typeof t === "string" ? scrubVendorSystems(t) : t) as string;
+  const scrubSource = <T extends { citation: string }>(src: T): T =>
+    src ? { ...src, citation: s(src.citation) } : src;
+  return {
+    ...output,
+    conclusion: s(output.conclusion),
+    caveats: output.caveats?.map(s),
+    contradicts: output.contradicts?.map(s),
+    key_metrics: output.key_metrics?.map((m) => ({
+      ...m,
+      label: s(m.label),
+      value: typeof m.value === "string" ? s(m.value) : m.value,
+      source: scrubSource(m.source),
+    })),
+    detail_tables: output.detail_tables?.map((t) => ({
+      ...t,
+      title: s(t.title),
+      note: t.note ? s(t.note) : t.note,
+      columns: t.columns?.map((c) => ({ ...c, label: s(c.label) })),
+      rows: t.rows?.map((r) => ({
+        ...r,
+        label: s(r.label),
+        cells: r.cells
+          ? (Object.fromEntries(
+              Object.entries(r.cells).map(([k, v]) => [k, typeof v === "string" ? s(v) : v]),
+            ) as typeof r.cells)
+          : r.cells,
+      })),
+      source: scrubSource(t.source),
+    })),
+    conditional_claims: output.conditional_claims?.map((c) => ({
+      ...c,
+      condition: s(c.condition),
+      falsifier: s(c.falsifier),
+    })),
+    grain_boundary: output.grain_boundary
+      ? {
+          ...output.grain_boundary,
+          not_available: output.grain_boundary.not_available?.map(s),
+          routes: output.grain_boundary.routes?.map(s),
+        }
+      : output.grain_boundary,
+  };
+}
+
+export function buildDossier(rawOutput: BrainOutput, freshnessToken: string): Dossier {
+  const output = scrubDossierStrings(rawOutput);
   return {
     freshness_token: freshnessToken,
     conclusion: output.conclusion,

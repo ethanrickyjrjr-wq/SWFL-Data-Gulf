@@ -151,6 +151,48 @@ export function scrubBrainSlugs(text: string): string {
   });
 }
 
+/**
+ * Vendor/system PRODUCT names — our plumbing, never the reader's concept (CLEAN, rule 5).
+ *
+ * "Accela" is the permit-software vendor whose Citizen Access portal Lee County runs its
+ * building-permit records on. It is minted at SOURCE, in `permits-swfl.mts` citations
+ * ("Lee County Accela Citizen Access — building permit records…") and caveats, so it rides
+ * in `key_metrics[].source.citation` and `caveats[]` on every surface that reads a brain —
+ * i.e. it lands in the exact grounding text the model is told to cite faithfully. A
+ * prompt-only ban ("never say Accela", conversation-path.ts) therefore LOSES: RULE 1 CITE
+ * beats a "don't say this" instruction every time. Scrubbing the word out of the text the
+ * model is handed is the structural fix ("structural guarantee, not AI virtue").
+ *
+ * Why this lives at the SHARED root and `STATS_JARGON_RE` (grounding.ts) does not: a
+ * z-score is real, wanted vocabulary on `/r/*` and in the tier-3 audit, so that scrub is
+ * deliberately chat-only. A vendor product name is unwanted on EVERY customer surface —
+ * report page, tier-1/2/3 speak, ZIP dossier, MCP, chat. One authority, all of them.
+ *
+ * Called from BOTH `sanitizeProse` (conclusion / caveats / grain-boundary / routes, and
+ * citations via `cleanCitationForDisplay`) AND `scrubCaveatTechnical` — because
+ * `shortSourceLabel` calls `scrubCaveatTechnical` WITHOUT `sanitizeProse`, which made the
+ * tier-2 metrics-table source label its own uncovered leak path.
+ *
+ * The phrase rule runs first so the product name collapses whole ("permit portal") instead
+ * of leaving "…permit system Citizen Access". Replacements are noun-adjuncts, NOT "the
+ * county permit system" — the real corpus already prefixes a county, and an article would
+ * break the grammar it lands in:
+ *   "Lee County Accela Citizen Access — building permit records"  → "Lee County permit portal — …"
+ *   "Lee County Accela + Collier County Building"                 → "Lee County permit system + …"
+ *   "daily Accela scrape may be stalled"                          → "daily permit system scrape may be stalled"
+ *   "Lee: Accela; Collier: monthly XLSX"                          → "Lee: permit system; …"
+ */
+const VENDOR_SYSTEM_PROSE: Array<[RegExp, string]> = [
+  [/\bAccela\s+Citizen\s+Access\b/gi, "permit portal"],
+  [/\bAccela\b/gi, "permit system"],
+];
+
+export function scrubVendorSystems(text: string): string {
+  let out = text;
+  for (const [pat, replacement] of VENDOR_SYSTEM_PROSE) out = out.replace(pat, replacement);
+  return out;
+}
+
 const BANNED_PROSE: Array<[RegExp, string]> = [
   [/\bbifurcate(s|d|ing)?\b/gi, "split"],
   [/siblings?\s+haven'?t\s+shipped\.?/gi, ""],
@@ -287,7 +329,7 @@ export function stripCorridorCount(text: string): string {
  * normalization.
  */
 export function sanitizeProse(text: string): string {
-  let out = stripCorridorCount(deCorridor(stripSectionMarker(text)));
+  let out = scrubVendorSystems(stripCorridorCount(deCorridor(stripSectionMarker(text))));
   for (const [pat, replacement] of BANNED_PROSE) {
     out = out.replace(pat, replacement);
   }
@@ -392,7 +434,7 @@ function formatDegradedToken(entry: { label: string; date: string }): string {
  */
 export function scrubCaveatTechnical(text: string): string {
   return (
-    text
+    scrubVendorSystems(text)
       // Internal data-host phrase: "Brains Supabase" names our storage vendor,
       // not a customer-facing source. Map it to the public lake name. Maximally
       // specific (two literal words) so it can never eat domain prose.
