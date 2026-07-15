@@ -40,6 +40,7 @@ import {
   proseViolations,
   settleAll,
   settleAreaTiming,
+  settleCommunityStats,
   settleNewConstruction,
   settlePriceCut,
   settleStatus,
@@ -902,5 +903,82 @@ describe("fallbackNote — deterministic, zero model, and it FABRICATES NOTHING"
 
   it("asserts nothing about the house itself", () => {
     expect(inventedAttributes(fallbackNote(INPUT), "")).toEqual([]);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. THE NEIGHBORHOOD — our own address-resolved, tax-roll-backed community stats,
+//    settled as a claim the narrator may restate. The SIXTH lifecycle recipe runs
+//    this stricter layer ON TOP of the shared narrator; the other five (via
+//    shared.ts) get the same fact through `neighborhoodStatsSourceLine` directly.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("settleCommunityStats — the neighborhood-stats settled claim", () => {
+  const STATS = {
+    subdivisionName: "Heritage Bay",
+    homeCount: 1900,
+    medianJustValue: 612000,
+    countByType: null,
+    sourceUrl: "https://www.swfldatagulf.com/r/source/neighborhood_stats",
+    asOf: "2026-07-14",
+  };
+
+  it("settles the fact and anchors both numerals when present", () => {
+    const claim = settleCommunityStats(STATS);
+    expect(claim).not.toBeNull();
+    expect(claim!.anchors).toContain("1900");
+    expect(claim!.anchors).toContain("612000");
+    expect(claim!.sentence).toContain("Heritage Bay");
+  });
+
+  it("returns null when absent", () => {
+    expect(settleCommunityStats(undefined)).toBeNull();
+  });
+
+  it("settleAll includes it when facts.communityStats is present", () => {
+    const facts = {
+      address: "123 Main St",
+      photos: [],
+      sourceUrl: "x",
+      communityStats: STATS,
+    } as unknown as ListingFacts;
+    const settled = settleAll(facts, null);
+    expect(settled.some((s) => s.sentence.includes("Heritage Bay"))).toBe(true);
+  });
+
+  // ── THE END-TO-END PROOF, IN BOTH DIRECTIONS (deviates from the plan's literal
+  //    test; see task-7 report) ────────────────────────────────────────────────
+  //
+  // The plan's original single test fed a PARAPHRASE ("The tax roll counts 1,900
+  // homes…") and expected `[]`. Run against the real gate it does NOT pass — and it
+  // SHOULD NOT. In this architecture "restate" means WORD FOR WORD: the narrator is
+  // instructed "restate it word for word, never re-derive", and `auditClaims` accepts
+  // a count-shaped sentence ONLY as a verbatim restatement of a settled one
+  // (claims.ts: "Anything else is dropped"). "1,900 homes" is count-shaped — the comma
+  // makes "900 homes" a COUNT match — so a re-count in the narrator's own words is a
+  // claim it drew itself, and the fail-closed gate drops it. That is the gate working,
+  // not a bug, so the two tests below pin BOTH edges rather than weaken either.
+
+  it("a WORD-FOR-WORD restatement of the settled neighborhood numbers survives proseViolations", () => {
+    // This is the real "the numerals are accepted end-to-end" proof. The settled
+    // sentence riding in `sourceText` also legitimizes "Heritage Bay" — its "bay" is an
+    // ATTRIBUTE_CLAIMS word (a water body), self-legitimizing here exactly as the
+    // BRAND_NAME/"gulf" fix intends. See the report's finding #2 for the sharp edge.
+    const settled = [settleStatus(), settleCommunityStats(STATS)!];
+    const sourceText = narratorSources({ settled, community: undefined }).join(" ");
+    const paragraph = `${settleStatus().sentence} ${settleCommunityStats(STATS)!.sentence}`;
+    expect(proseViolations(paragraph, sourceText, settled)).toEqual([]);
+  });
+
+  it("a PARAPHRASED re-count is correctly rejected — COUNT is verbatim-only, by design", () => {
+    // The plan's original paragraph, kept here so it stays traceable — asserted the
+    // OTHER way. A precise matcher (not a loose `.not.toEqual([])`) so it cannot rot
+    // into passing for some unrelated reason.
+    const settled = [settleStatus(), settleCommunityStats(STATS)!];
+    const sourceText = narratorSources({ settled, community: undefined }).join(" ");
+    const paraphrase =
+      "This home is under contract. The tax roll counts 1,900 homes in this neighborhood, " +
+      "with a median assessed value of $612,000.";
+    expect(proseViolations(paraphrase, sourceText, settled)).toContain("word-count:900 homes");
   });
 });

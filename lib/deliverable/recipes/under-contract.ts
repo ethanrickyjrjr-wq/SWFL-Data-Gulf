@@ -145,6 +145,12 @@ import { canonStreet } from "@/lib/listings/resolve-subject";
 import { communitySourceLine } from "@/lib/listings/listing-detail";
 import { isCoreScope } from "@/refinery/lib/core-scope.mts";
 import type { ListingDetailFacts } from "@/lib/listings/listing-detail";
+// ONE AUTHORITY for THE NEIGHBORHOOD fact — our own address-resolved, tax-roll-backed
+// stats. The shared listing narrator reads the same line; this recipe additionally
+// SETTLES it, so its numerals anchor the strict `auditClaims` layer that only this
+// recipe runs on top of the shared narrator.
+import { neighborhoodStatsSourceLine } from "@/lib/listings/community-lookup";
+import type { ResolvedCommunityStats } from "@/lib/listings/community-lookup";
 import { loadParsedBrain } from "@/lib/fetch-brain";
 import { asOfFromToken } from "@/lib/project/as-of";
 import { createBlock } from "@/lib/email/doc/default-docs";
@@ -473,6 +479,18 @@ export function settleNewConstruction(facts: ListingFacts): SettledClaim | null 
   return { sentence: "It is new construction.", anchors: [] };
 }
 
+/** THE NEIGHBORHOOD, as a SETTLED SENTENCE — home count + median ASSESSED value from our
+ *  own tax-roll parcel data, resolved from the listing's street address. Its two numerals
+ *  become ANCHORS the same way `settlePriceCut`'s do, so `auditClaims` accepts the narrator
+ *  restating them and rejects anything else numeric it might add. PURE. */
+export function settleCommunityStats(
+  stats: ResolvedCommunityStats | undefined,
+): SettledClaim | null {
+  const line = neighborhoodStatsSourceLine(stats);
+  if (!line) return null;
+  return { sentence: line, anchors: numeralsIn(line) };
+}
+
 /**
  * The price cut, as a SETTLED SENTENCE.
  *
@@ -530,6 +548,7 @@ export function settleAll(facts: ListingFacts, timing: MarketTiming | null): Set
     settleNewConstruction(facts),
     settlePriceCut(facts),
     settleAreaTiming(timing),
+    settleCommunityStats(facts.communityStats),
   ].filter((s): s is SettledClaim => s !== null);
 }
 
