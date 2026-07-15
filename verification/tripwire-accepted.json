@@ -82,6 +82,12 @@
       "pack": "hurricane-tracks-fl",
       "accepted_on": "07/15/2026",
       "note": "Operator decree: rebuild after FEMA NFIP repopulation (448,425 rows) to replace the fabricated-$0 risk window with real HURDAT2xNFIP figures (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29394854231",
+      "pack": "hurricane-tracks-fl",
+      "accepted_on": "07/15/2026",
+      "note": "Retry after first dispatch (29392088541) lost a push race with a concurrent commit wave on brains/_build-report.json; rebuild itself likely succeeded, only the publish step failed (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
