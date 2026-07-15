@@ -1,6 +1,7 @@
 # Community Stats → Deliverable Wiring — Build Log
 
-> **Recommended model:** ⚡ Sonnet
+> **Recommended model:** ⚡ Sonnet — 6 tasks, keywords: architecture
+
 
 
 
@@ -73,5 +74,15 @@ Approved (all in-scope test evidence green; the live smoke-test gap is tracked, 
 **What happened:** Opus implementer added the one field + its import, verbatim from the brief, kept distinct from the existing `community` field. Ran `bunx next build` per the plan's operator-preferred typecheck command (not `tsc`) — full production build compiled clean, lint-staged clean.
 
 **My review (independent):** `git diff` confirms an exact match to the plan's specified code — nothing more, nothing less. No separate build re-run needed; the implementer's `bunx next build` already exercised the full compile (a type-only change has no test surface of its own — Task 6 exercises it end to end). Approved, no fixes needed.
+
+---
+
+## Task 6 — `lib/deliverable/recipes/shared.ts`: resolve + narrate wiring
+
+**Status:** DONE. Commit `74379a21` "feat(deliverable): wire resolved neighborhood stats into the shared subject resolver + narrator" (2 files, +118/-1). This is the payoff task — the one that makes real neighborhood stats reach all six listing-lifecycle recipes with zero recipe-file edits.
+
+**What happened:** Opus implementer wrote `zip5From()` (ZIP from the raw address string's last comma-segment, not geocoding, so the new resolver call runs in `Promise.all` alongside the existing vendor lookup rather than serially), wired `resolveCommunityForListing()` into `resolveSubject()`, attached `facts.communityStats` only on a real `matched:true` result, added `neighborhoodStatsSourceLine(facts.communityStats)` to the narrator's `lines` array, and inserted the "THE NEIGHBORHOOD" hard-rule block right after the existing untouched "THE COMMUNITY" block in the system prompt — all exactly per the plan. Created the first-ever `shared.test.ts` for this file (3 tests: attach-on-match, undefined-on-no-match, undefined-on-no-ZIP). Ran the full `lib/deliverable/recipes/` suite as the brief required (not optional) and confirmed zero regression across every recipe.
+
+**My review (independent):** `git diff` confirms an exact match to the plan's specified code. Re-ran `bun test lib/deliverable/recipes/` myself: 443/443 passed across 14 files, 1335 assertions, 745ms — zero regressions. No recipe file (`new-listing.ts`, `coming-soon.ts`, `just-sold.ts`, `open-house.ts`, `price-reduced.ts`, `under-contract.ts`, `market-comps.ts`) was touched, confirming the "ONE resolver, ONE narrator" architecture actually delivers what it promises. Approved, no fixes needed.
 
 ---
