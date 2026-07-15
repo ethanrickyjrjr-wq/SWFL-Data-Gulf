@@ -1,6 +1,7 @@
 # Community Stats → Deliverable Wiring — Build Log
 
-> **Recommended model:** ⚡ Sonnet — 8 tasks, keywords: architecture
+> **Recommended model:** ⚡ Sonnet — 10 tasks, keywords: architecture
+
 
 
 
@@ -110,6 +111,24 @@ Approved (all in-scope test evidence green; the live smoke-test gap is tracked, 
 **What happened:** Opus implementer added the one regression test exactly per the brief, using the file's real existing `SUBJECT`/`HOMES` fixtures and `buildPriceCase`/`narratorClaims` functions. Went further than asked, on its own initiative: to prove the test wasn't a tautology, it temporarily injected a fake `communityStats` leak into `narratorClaims`, confirmed the new test actually goes red and catches it ("Heritage Bay" surfaces), then reverted — leaving `market-comps.ts` itself with an empty diff, confirmed twice. Also grepped the whole recipe file to confirm `communityStats` appears nowhere in it, so `buildNarratorPrompt` (which receives the full `facts` object) has no indirect path to it either.
 
 **My review (independent):** `git diff` confirms an exact match to the plan's specified test, plus one faithful adaptation (added `describe`/`it` to the file's `bun:test` import, since it previously only used flat `test`). Re-ran `bun test lib/deliverable/recipes/market-comps.test.ts` myself: 33/33 passed (32 pre-existing + 1 new), 249 assertions, 592ms. Approved, no fixes needed.
+
+---
+
+## Task 9 — correct the `community_facts_remaining_recipes` check
+
+**Status:** DONE. No code — check-ledger only, done directly (no subagent dispatch needed for a one-command tracking correction).
+
+**What happened:** With Tasks 6-8 complete and independently verified (443-test recipe suite green, zero recipe-file changes needed for the shared-narrator extension, market-comps' exclusion locked in with its own test), the check's claim — "only under-contract consumes them" — was directly contradicted by the evidence already gathered during review. Closed with evidence citing the specific commits and test counts that prove it.
+
+---
+
+## Task 10 — Gap 2 handoff doc + follow-up check
+
+**Status:** DONE. Commit `2c38b070` "docs: Gap 2 handoff -- name-keyed community lookup surface, not built this round" — done directly per the operator's explicit instruction earlier in this session ("make sure you add a handoff and open a follow up at the end for gap 2").
+
+**What happened:** Wrote `docs/handoff/2026-07-15-community-lookup-by-name-gap2-handoff.md` covering what Gap 2 is (a name-keyed lookup for the ~30,800 non-marketed `neighborhood_stats` rows, serving chat/MCP rather than deliverables), why it wasn't built this round, the two candidate shapes sketched during the original brainstorm, and — folded in as a bonus, since it surfaced during Task 7 — a pointer to the community-name water-word laundering check so whoever picks up Gap 2 doesn't rediscover it independently if their surface touches the same claim-checking machinery. Opened check `gap2_community_lookup_by_name` (project `communities-swfl`).
+
+---
 
 ---
 
