@@ -166,7 +166,14 @@ def _promote_nfip_to_tier2(rows: list[dict]) -> None:
 
     tier2_pipeline = dlt.pipeline(
         pipeline_name="fema_nfip_tier2",
-        destination="postgres",
+        # dlt's postgres default replace_strategy is "truncate-and-insert" — it empties
+        # data_lake.fema_nfip_claims before/while inserting the new rows, with no atomic
+        # swap. A run killed mid-load (GHA timeout, cancellation) leaves the table empty;
+        # the guards below never run because the process is dead before .run() returns.
+        # "insert-from-staging" loads into a staging table first and only swaps on success,
+        # so a killed run leaves the live table untouched. Root cause of the 07/14 incident
+        # that emptied this table — see check fema_nfip_claims_data_loss_replace_strategy.
+        destination=dlt.destinations.postgres(replace_strategy="insert-from-staging"),
         dataset_name="data_lake",
     )
     load_info = tier2_pipeline.run(fema_nfip_rows())

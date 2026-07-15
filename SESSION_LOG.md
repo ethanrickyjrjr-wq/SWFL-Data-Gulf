@@ -1,3 +1,31 @@
+## 2026-07-14 (Sonnet 5 · main) — replace_strategy data-loss fix landed for all 6 dlt+postgres replace pipelines; two audit handoffs committed.
+
+Committed the in-flight fix for the 07/14 `data_lake.fema_nfip_claims` data-loss incident: dlt's
+postgres default `replace_strategy` ("truncate-and-insert") empties the table before/while
+inserting with no atomic swap, so a run killed mid-load (GHA timeout, cancellation) leaves it
+empty. Swapped `destination="postgres"` for
+`dlt.destinations.postgres(replace_strategy="insert-from-staging")` (stages first, swaps only on
+success) across all 6 pipelines with `write_disposition="replace"`: fema, census_acs, census_cbp,
+fdot, fhfa, fl_dbpr_licenses (applicants table only — its licenses table uses merge, unaffected).
+Corrected an earlier unverified claim that `leepa_parcels` shared this exposure — it uses `merge`,
+not `replace`, and was never at risk. Updated `test_resources.py` regression guards for fdot + fema
+to assert the safe construction (not the old bare string) so a future edit can't silently regress;
+37 tests pass. `census_acs` has no destination-construction test coverage at all — flagged, not
+added (out of scope for this fix). Independently corroborated by the separate 07/14 full-day Opus
+audit (G7): "the in-flight replace_strategy fix hit exactly the 6 replace pipelines... Sound."
+
+`data_lake.fema_nfip_claims` is still at 0 rows — this fix prevents recurrence, doesn't backfill
+the lost data. The root cause of the slow (40+ min) write that got killed is still unconfirmed
+(plausible: DB contention from concurrent session load that day).
+
+Also committed two docs-only handoffs from earlier today: the full-day 61-commit audit + system map
+(10-subsystem read-only review, `docs/handoff/2026-07-14-full-day-audit-and-system-map.md`) and the
+ZIP-grain sold-price investigation (`docs/handoff/2026-07-14-zip-sold-price-third-reference-handoff.md`,
+no code changed, states the scoped next step: wire `leepa_sold_median_by_zip` into
+`loadMarketFigures`). Neither touches files outside `docs/`.
+
+---
+
 ## 2026-07-14 (Sonnet 5 · main) — parcel_subdivision re-ingest confirmed live; found + corrected a wrong LOCKED CLAUDE.md rule about GHA rebuild targeting.
 
 Follow-up to this session's earlier entry (FDOR field-widening + community-lookup join). The

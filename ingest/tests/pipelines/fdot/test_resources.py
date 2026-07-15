@@ -175,7 +175,15 @@ class TestTier2Promotion:
         mock_dlt.pipeline.assert_called_once()
         call_kwargs = mock_dlt.pipeline.call_args.kwargs
         assert call_kwargs["pipeline_name"] == "fdot_aadt_tier2"
-        assert call_kwargs["destination"] == "postgres"
+        # Regression guard: dlt's postgres default replace_strategy ("truncate-and-insert")
+        # empties the table before/while inserting, with no atomic swap — a run killed
+        # mid-load leaves data_lake.fdot_aadt_fl empty. Must build the destination via
+        # dlt.destinations.postgres(replace_strategy="insert-from-staging"), never the
+        # bare "postgres" string, or this silently regresses to the unsafe default.
+        mock_dlt.destinations.postgres.assert_called_once_with(
+            replace_strategy="insert-from-staging"
+        )
+        assert call_kwargs["destination"] == mock_dlt.destinations.postgres.return_value
         assert call_kwargs["dataset_name"] == "data_lake"
         mock_pipeline_instance.run.assert_called_once()
 

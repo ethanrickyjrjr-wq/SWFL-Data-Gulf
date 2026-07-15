@@ -167,7 +167,16 @@ class TestTier2PromotionNfip:
         mock_dlt.pipeline.assert_called_once()
         call_kwargs = mock_dlt.pipeline.call_args.kwargs
         assert call_kwargs["pipeline_name"] == "fema_nfip_tier2"
-        assert call_kwargs["destination"] == "postgres"
+        # Regression guard for the 07/14 data-loss incident: dlt's postgres default
+        # replace_strategy ("truncate-and-insert") empties the table before/while
+        # inserting, with no atomic swap — a run killed mid-load (GHA timeout) leaves
+        # data_lake.fema_nfip_claims empty. Must build the destination via
+        # dlt.destinations.postgres(replace_strategy="insert-from-staging"), never the
+        # bare "postgres" string, or this silently regresses to the unsafe default.
+        mock_dlt.destinations.postgres.assert_called_once_with(
+            replace_strategy="insert-from-staging"
+        )
+        assert call_kwargs["destination"] == mock_dlt.destinations.postgres.return_value
         assert call_kwargs["dataset_name"] == "data_lake"
         mock_pipeline_instance.run.assert_called_once()
 

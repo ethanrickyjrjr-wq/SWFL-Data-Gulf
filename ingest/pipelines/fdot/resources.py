@@ -93,7 +93,12 @@ def _promote_to_tier2(rows: list[dict]) -> None:
 
     tier2_pipeline = dlt.pipeline(
         pipeline_name="fdot_aadt_tier2",
-        destination="postgres",
+        # replace_strategy: dlt's postgres default ("truncate-and-insert") empties this
+        # table before/while inserting — a run killed mid-load leaves it empty with no
+        # atomic swap. "insert-from-staging" loads into staging first, swaps only on
+        # success. See check fema_nfip_claims_data_loss_replace_strategy for the incident
+        # that surfaced this across every dlt+postgres replace pipeline in this codebase.
+        destination=dlt.destinations.postgres(replace_strategy="insert-from-staging"),
         dataset_name="data_lake",
     )
     load_info = tier2_pipeline.run(fdot_aadt_rows())
