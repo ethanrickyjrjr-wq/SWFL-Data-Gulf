@@ -1,3 +1,33 @@
+## 2026-07-15 (Sonnet 5 · main) — built + loaded Medical Office into marketbeat_swfl (64 rows, 4 quarters); fixed the dead cpswfl.com downloader; found the whole quarterly C&W/Colliers/Lee dataset (325 rows) has never reached the brain.
+
+Follow-up to the same-session root-cause finding (cpswfl.com dead, real source is
+cushmanwakefield.com's Fort Myers/Naples hub). Operator: "we already have data from the last
+PDFs, why reextract; just update the new information and make Medical, then send follow up for
+medical wiring." Built `_parse_cw_medical_text` in `extractor.py` (new table layout: 8 columns,
+county-rollup submarkets) — verified against the PDF's own stated total (13,320,306 SF, exact
+match) after fixing a real bug where the "stop at SOUTHWEST FLORIDA TOTALS" check was dead code
+(the generic `_SKIP_RE` matched and consumed that line first), which let the parser wander into
+the Key Lease/Sale Transactions tables and pick up city names as spurious submarket rows. Added
+`asking_rent_full_service` column (migration `20260715_marketbeat_swfl_full_service_rent.sql`) —
+the report's own footnote says "full service asking," not NNN, so it does not belong in
+`asking_rent_nnn`. Loaded 64 rows across Q1 2026/Q3 2025/Q1 2025/Q3 2024 (Q1 2024 uses an older
+report layout, correctly skipped rather than mis-parsed). Fixed `already_loaded()` to be
+sector-aware (it only checked source+quarter, so Medical for an already-Industrial-loaded quarter
+would have silently no-op'd). Fixed `downloader.py`: repointed at the real cushmanwakefield.com
+hub, fixed a second independent bug (`_scrape_html` imported a function that doesn't exist in
+`ingest.lib.crawl_client`, so every scrape call — C&W and Colliers' fallback both — has silently
+returned "" since this pipeline existed), added the %PDF magic-byte check the original audit
+flagged as missing, and fixed `loader.py`'s `.dlt/secrets.toml` fallback (wrong TOML nesting).
+Live-verified downloader end-to-end for both sectors — byte-identical to the manual pull.
+
+BIGGER finding, not Medical-specific: every row this pipeline (and colliers_industrial,
+lee_associates) has ever written has `verified=false`; `marketbeat-swfl-source.mts` and
+`cre-swfl.mts` both gate on `verified=true`. Confirmed live via query_lake — 325 rows across 3
+sources, zero of them ever reached the brain. Only the 48-row annual MHS Databook does. Did NOT
+flip verified=true — that's a manual review gate by design, and this session's extraction wasn't
+reviewed. Tracked as check `marketbeat_medical_wiring_followup` (project `ingest`, due
+08/15/2026), which is the actual "wiring" work the operator deferred.
+
 ## 2026-07-15 (Sonnet 5 · main) — sell-side favorable-framing spec corrected during planning review + full TDD implementation plan written; no code changed yet.
 
 Reviewed the 07/15 design spec (`docs/superpowers/specs/2026-07-15-sell-side-favorable-framing-design.md`,

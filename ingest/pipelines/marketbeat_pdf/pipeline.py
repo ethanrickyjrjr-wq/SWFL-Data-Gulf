@@ -27,14 +27,19 @@ from pathlib import Path
 
 from ingest.lib.api_usage import RunBudget, RunBudgetExceeded
 
-from .extractor import extract_pdf, quarter_from_filename, source_from_filename
+from .extractor import (
+    extract_pdf,
+    quarter_from_filename,
+    sector_from_filename,
+    source_from_filename,
+)
 from .loader import already_loaded, upsert_rows
 
 DROP_DIR = Path("ingest/drops/marketbeat_pdf")
 DOWNLOADS_DIR = Path.home() / "Downloads"
 
 _PDF_RE = re.compile(
-    r"^(MarketBeat|Colliers)_Industrial_Q\d\d{4}_.*\.pdf$", re.IGNORECASE
+    r"^(MarketBeat|Colliers)_(Industrial|MedicalOffice)_Q\d\d{4}_.*\.pdf$", re.IGNORECASE
 )
 
 
@@ -51,12 +56,17 @@ def process_pdf(pdf_path: Path, budget: RunBudget, dry_run: bool = False, force:
     try:
         quarter = quarter_from_filename(pdf_path)
         source = source_from_filename(pdf_path)
+        # colliers_industrial PDFs hold multiple sectors in one file; source+quarter
+        # is the right load unit there. cw_marketbeat is one sector per file, so
+        # narrow the dedup check or a same-quarter Medical/Office PDF silently
+        # no-ops once Industrial for that quarter is already loaded.
+        sector = sector_from_filename(pdf_path) if source == "cw_marketbeat" else None
     except ValueError as e:
         print(f"[skip] {pdf_path.name}: {e}", flush=True)
         return 0
 
-    if not force and not dry_run and already_loaded(source, quarter):
-        print(f"[skip] {source} {quarter} already in DB", flush=True)
+    if not force and not dry_run and already_loaded(source, quarter, sector):
+        print(f"[skip] {source} {sector or ''} {quarter} already in DB", flush=True)
         return 0
 
     print(f"[extract] {pdf_path.name} -> {source} {quarter}", flush=True)

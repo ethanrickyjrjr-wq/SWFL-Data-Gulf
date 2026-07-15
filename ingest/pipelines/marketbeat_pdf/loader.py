@@ -33,6 +33,7 @@ _UPSERT_COLS = [
     "asking_rent_nnn",
     "asking_rent_mf",
     "asking_rent_os",
+    "asking_rent_full_service",
     "geographic_type",
     "_ingested_at",
 ]
@@ -56,10 +57,14 @@ def _get_conn() -> psycopg.Connection:
             if secrets.exists():
                 with secrets.open("rb") as f:
                     data = tomllib.load(f)
-                host = data.get("destination", {}).get("credentials", {}).get("host", "")
-                pw = data.get("destination", {}).get("credentials", {}).get("password", "")
+                creds = data.get("destination", {}).get("postgres", {}).get("credentials", {})
+                host = creds.get("host", "")
+                pw = creds.get("password", "")
+                user = creds.get("username", "postgres")
+                db = creds.get("database", "postgres")
+                port = creds.get("port", 5432)
                 if host and pw:
-                    db_url = f"postgresql://postgres:{pw}@{host}:5432/postgres"
+                    db_url = f"postgresql://{user}:{pw}@{host}:{port}/{db}"
         except Exception:
             pass
 
@@ -91,6 +96,7 @@ def _row_to_params(row: dict[str, Any], now: datetime) -> dict[str, Any]:
         "asking_rent_nnn": row.get("asking_rent_nnn"),
         "asking_rent_mf": row.get("asking_rent_mf"),
         "asking_rent_os": row.get("asking_rent_os"),
+        "asking_rent_full_service": row.get("asking_rent_full_service"),
         "geographic_type": row.get("geographic_type", "submarket"),
         "_ingested_at": now,
     }
@@ -140,13 +146,25 @@ def upsert_rows(rows: list[dict[str, Any]], dry_run: bool = False) -> int:
     return len(rows)
 
 
-def already_loaded(source_name: str, quarter: str) -> bool:
-    """Return True if any rows for this (source_name, quarter) exist."""
-    sql = f"SELECT 1 FROM {_TABLE} WHERE source_name = %s AND quarter = %s LIMIT 1"
+def already_loaded(source_name: str, quarter: str, sector: str | None = None) -> bool:
+    """
+    Return True if any rows for this (source_name, quarter) exist.
+    Pass sector to narrow the check when the source has one sector per file
+    (cw_marketbeat) -- otherwise a quarter with only Industrial loaded would
+    read as "already loaded" and silently skip a same-quarter Medical Office /
+    Office PDF. Omit sector for sources where one file spans multiple sectors
+    (colliers_industrial), where source+quarter is the right load unit.
+    """
+    sql = f"SELECT 1 FROM {_TABLE} WHERE source_name = %s AND quarter = %s"
+    params: list[str] = [source_name, quarter]
+    if sector is not None:
+        sql += " AND sector = %s"
+        params.append(sector)
+    sql += " LIMIT 1"
     try:
         with _get_conn() as conn:
             with conn.cursor() as cur:
-                cur.execute(sql, (source_name, quarter))
+                cur.execute(sql, params)
                 return cur.fetchone() is not None
     except Exception:
         return False

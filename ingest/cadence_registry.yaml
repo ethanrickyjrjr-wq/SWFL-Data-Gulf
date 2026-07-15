@@ -1492,22 +1492,36 @@ pipelines:
     freshness_table: data_lake.marketbeat_swfl
     freshness_column: _ingested_at
     source_name: cw_marketbeat
-    expected_rows_min: 100 # 109 rows loaded 2026-06-09 (7 quarters x ~15 submarkets)
+    expected_rows_min: 100 # 109 industrial + 64 medical_office rows live as of 07/15/2026
     # Pipeline: ingest/pipelines/marketbeat_pdf/pipeline.py
     # GHA cron: .github/workflows/marketbeat-pdf-ingest.yml (quarterly, Jan/Apr/Jul/Oct 15)
+    #   -- cron currently auto-downloads Industrial only (.github/scripts/download-cw.py);
+    #   Medical Office is loaded but not yet wired into the scheduled cron (manual/CLI only).
     # Drop folder: ingest/drops/marketbeat_pdf/ (gitignored *.pdf)
     # Source connector: refinery/sources/marketbeat-swfl-source.mts
-    # First run: 2026-06-09, 109 rows (7 C&W PDFs Q1 2024-Q1 2026, manual ODD drop).
+    # First run: 2026-06-09, 109 rows (7 C&W Industrial PDFs Q1 2024-Q1 2026, manual ODD drop).
+    # CORRECTED 07/15/2026 (operator: "why are we not finding everything"): the prior
+    # confirmed_total/source_ceiling note below was wrong -- crawl4ai-verified live against
+    # cushmanwakefield.com/.../fort-myers-naples-marketbeats that only Industrial ever actually
+    # flowed (extractor.py hardcoded sector="industrial" regardless of input PDF; Office/Retail
+    # were never parsed despite the prior note claiming otherwise). Medical Office built + loaded
+    # this session (64 rows, Q1 2024/Q3 2024/Q1 2025/Q3 2025/Q1 2026; the oldest Q1 2024 PDF uses
+    # a different report layout, not yet parsed). Office and Retail still have no parser.
+    # STANDING GAP (bigger than this table): every cw_marketbeat/colliers_industrial/lee_associates
+    # row in this table has `verified=false` -- refinery/sources/marketbeat-swfl-source.mts and
+    # refinery/packs/cre-swfl.mts both gate on verified=true, so NONE of this data (261 rows across
+    # 3 sources, industrial+medical_office alike) reaches the brain today; only the 48-row annual
+    # MHS Databook does. See check marketbeat_medical_wiring_followup.
     source_scope:
       confirmed_total:
-        value: 109
-        as_of: "2026-06-09"
-        source: "our ingest (retail/industrial/office sectors, 7 quarters)"
+        value: 173
+        as_of: "2026-07-15"
+        source: "our ingest (industrial: 109 rows/7 quarters; medical_office: 64 rows/4 quarters)"
       source_ceiling:
-        summary: "Cushman & Wakefield also publishes a Medical Office sector report for Fort Myers/Naples quarterly, same PDF pipeline — the sector list is hardcoded to retail/industrial/office in the source file and Medical Office was never added. Crexi/Brevitas separately show 300+ active for-sale listings county-wide across Lee/Collier; our CRE listing coverage is 1-4 leases per city."
-        as_of: "07/07/2026"
-        source_url: "https://www.cushmanwakefield.com/en/united-states/insights/us-marketbeat-reports"
-        source_label: "Cushman & Wakefield MarketBeat"
+        summary: "C&W's Fort Myers/Naples MarketBeat hub publishes 4 sector reports for this metro -- Office, Industrial, Retail, Medical Office (no Multifamily/Hospitality/Life Sciences edition exists for this metro). Office and Retail have no extractor.py parser yet. Crexi/Brevitas separately show 300+ active for-sale listings county-wide across Lee/Collier; our CRE listing coverage is 1-4 leases per city."
+        as_of: "07/15/2026"
+        source_url: "https://www.cushmanwakefield.com/en/united-states/insights/us-marketbeats/fort-myers-naples-marketbeats"
+        source_label: "Cushman & Wakefield MarketBeat -- Fort Myers/Naples hub"
 
   - name: colliers_industrial
     workflow: marketbeat-pdf-ingest.yml

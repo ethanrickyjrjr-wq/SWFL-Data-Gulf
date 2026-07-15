@@ -1,14 +1,23 @@
 """
 Auto-download new MarketBeat PDF reports.
 
-C&W MarketBeat (cpswfl.com):
-  Scrapes the CPSWFL research page to find the latest industrial report PDF link.
+C&W MarketBeat (cushmanwakefield.com):
+  cpswfl.com (the local C&W SWFL affiliate this used to scrape) was acquired by
+  NAI Burns Scalo (2026-06-09) and now redirects there -- it no longer serves
+  MarketBeat content. The live source is C&W's own Fort Myers/Naples MarketBeat
+  hub, which lists direct PDF links (current + historical) for each sector
+  report published for this metro -- Office, Industrial, Retail, Medical Office
+  (no Multifamily/Hospitality/Life Sciences edition exists for this metro,
+  only national-level). Confirmed live via crawl4ai 07/15/2026.
 
 Colliers International (colliers.com):
   Tries the known /media/files/ URL pattern (works for most historical quarters).
   Falls back to scraping the research page for a download link.
   Form-gated reports (newer quarters via cloud.usa.colliers.com) cannot be
   auto-downloaded; this function returns None and the caller creates a GH issue.
+  colliers.com sits behind a Cloudflare managed challenge and returns nav-only
+  boilerplate on live crawl4ai fetch (re-confirmed 07/15/2026) -- unresolved,
+  not touched here.
 """
 
 from __future__ import annotations
@@ -34,7 +43,29 @@ _COLLIERS_RESEARCH_URL = (
     "southwest-fl-industrial-market-report-{quarter_lower}"
 )
 
-_CW_RESEARCH_URL = "https://www.cpswfl.com/research"
+_CW_HUB_URL = (
+    "https://www.cushmanwakefield.com/en/united-states/insights/"
+    "us-marketbeats/fort-myers-naples-marketbeats"
+)
+
+# sector (our DB value) -> URL path segment under /us-reports/ on the hub page.
+# Only sectors with a working extractor.py parser belong here (extend as parsers
+# are built for office / retail).
+_CW_SECTOR_PATH = {
+    "industrial": "industrial",
+    "medical_office": "medical",
+}
+
+# PDF asset links on the hub page always follow .../{year}/q{n}/us-reports/{sector}/...pdf
+# -- reliable across both the "Current Marketbeats" cards and "Download Previous
+# X Reports" archive lists, unlike the filename tail which varies in dash/case
+# convention quarter to quarter.
+_CW_PDF_URL_RE = re.compile(
+    r"\((https://assets\.cushmanwakefield\.com/[^)\s]+?/(\d{4})/q([1-4])/"
+    r"us-reports/([a-z]+)/[^)\s]+\.pdf[^)\s]*)"
+    r'(?:\s+"[^"]*")?\)',
+    re.IGNORECASE,
+)
 
 _UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -59,17 +90,17 @@ def _curl_download(url: str, dest: Path, referer: str = "") -> bool:
     if len(parts) != 2:
         return False
     http, size = parts
-    if http == "200" and int(size) > 50_000:
+    if http == "200" and int(size) > 50_000 and dest.read_bytes()[:5] == b"%PDF-":
         return True
     dest.unlink(missing_ok=True)
     return False
 
 
-def _scrape_html(url: str) -> str:
-    """Scrape a URL and return raw HTML for PDF link extraction."""
+def _scrape_markdown(url: str) -> str:
+    """Scrape a URL and return markdown for PDF link extraction."""
     try:
-        from ingest.lib.crawl_client import fetch_page_html
-        return fetch_page_html(url)
+        from ingest.lib.crawl_client import fetch_page_markdown
+        return fetch_page_markdown(url)
     except Exception:
         return ""
 
@@ -143,11 +174,14 @@ def try_download_colliers(quarter: str, dest_dir: Path) -> Path | None:
             print(f"[colliers] downloaded via media URL: {dest.name}", flush=True)
             return dest
 
-    # Strategy 2: scrape the research page to find the actual media URL
+    # Strategy 2: scrape the research page to find the actual media URL.
+    # colliers.com sits behind a Cloudflare managed challenge and returns
+    # nav-only boilerplate on live crawl4ai fetch (confirmed 07/15/2026) --
+    # this strategy is not expected to succeed until that's resolved separately.
     research_url = _COLLIERS_RESEARCH_URL.format(
         quarter_lower=_quarter_to_colliers_slug(quarter)
     )
-    html = _scrape_html(research_url)
+    html = _scrape_markdown(research_url)
     if html:
         pdf_url = _extract_pdf_url(html)
         if pdf_url and "colliers.com" in pdf_url:
@@ -170,10 +204,13 @@ def try_download_colliers(quarter: str, dest_dir: Path) -> Path | None:
     return None
 
 
-def try_download_cw(quarter: str, dest_dir: Path) -> Path | None:
+def try_download_cw(quarter: str, dest_dir: Path, sector: str = "industrial") -> Path | None:
     """
-    Try to download the C&W MarketBeat SWFL Industrial PDF for the given quarter.
-    Scrapes cpswfl.com/research to find the latest PDF link.
+    Try to download a C&W MarketBeat SWFL PDF for the given quarter + sector.
+    Scrapes the Fort Myers/Naples MarketBeat hub (cushmanwakefield.com) for a
+    direct asset link -- the old cpswfl.com/research scrape target was the
+    local C&W affiliate site, acquired by NAI Burns Scalo (2026-06-09) and no
+    longer serving MarketBeat content.
     Returns the downloaded Path on success, None on failure.
     """
     m = re.match(r"(\d{4})-Q(\d)", quarter)
@@ -181,31 +218,45 @@ def try_download_cw(quarter: str, dest_dir: Path) -> Path | None:
         return None
     year, qn = m.group(1), m.group(2)
 
-    dest = dest_dir / f"MarketBeat_Industrial_Q{qn}{year}_FortMyers_Naples.pdf"
+    sector_path = _CW_SECTOR_PATH.get(sector)
+    if sector_path is None:
+        print(f"[cw] no parser wired for sector {sector!r}", flush=True)
+        return None
+
+    dest_names = {
+        "industrial": f"MarketBeat_Industrial_Q{qn}{year}_FortMyersNaples.pdf",
+        "medical_office": f"MarketBeat_MedicalOffice_Q{qn}{year}_FortMyersNaples.pdf",
+    }
+    dest = dest_dir / dest_names[sector]
     if dest.exists():
         print(f"[cw] already exists: {dest.name}", flush=True)
         return dest
 
-    # Scrape the research page for a PDF link matching this quarter
-    html = _scrape_html(_CW_RESEARCH_URL)
-    if not html:
-        print(f"[cw] could not scrape {_CW_RESEARCH_URL}", flush=True)
+    md = _scrape_markdown(_CW_HUB_URL)
+    if not md:
+        print(f"[cw] could not scrape {_CW_HUB_URL}", flush=True)
         return None
 
-    # Look for a PDF link whose URL suggests this quarter
-    q_pattern = re.compile(
-        rf"Q{qn}.*{year}|{year}.*Q{qn}|Q{qn}{year[2:]}|{year[2:]}Q{qn}", re.I
-    )
-    for m_url in re.finditer(r'href=["\']([^"\']*\.pdf[^"\']*)["\']', html, re.I):
-        url = m_url.group(1)
-        if q_pattern.search(url):
-            if not url.startswith("http"):
-                url = "https://www.cpswfl.com" + url
-            if _curl_download(url, dest, referer=_CW_RESEARCH_URL):
-                print(f"[cw] downloaded: {dest.name}", flush=True)
-                return dest
+    match_url = None
+    for m_url in _CW_PDF_URL_RE.finditer(md):
+        url, url_year, url_qn, url_sector = m_url.groups()
+        if url_year == year and url_qn == qn and url_sector.lower() == sector_path:
+            match_url = url
+            break
 
-    print(f"[cw] could not find Q{qn} {year} PDF on cpswfl.com", flush=True)
+    if not match_url:
+        print(
+            f"[cw] could not find {sector} Q{qn} {year} PDF on the hub page "
+            f"(may not be published yet, or older than the archive lists)",
+            flush=True,
+        )
+        return None
+
+    if _curl_download(match_url, dest, referer=_CW_HUB_URL):
+        print(f"[cw] downloaded: {dest.name}", flush=True)
+        return dest
+
+    print(f"[cw] download failed for {dest.name}", flush=True)
     return None
 
 

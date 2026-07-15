@@ -58,6 +58,22 @@ def source_from_filename(path: Path) -> str:
     raise ValueError(f"Unrecognised source prefix in filename: {path.name}")
 
 
+def sector_from_filename(path: Path) -> str:
+    """
+    'MarketBeat_Industrial_Q12026_....pdf' -> 'industrial'
+    'MarketBeat_MedicalOffice_Q12026_....pdf' -> 'medical_office'
+    Used only to tighten the already_loaded() pre-check for cw_marketbeat, where
+    each sector is a separate PDF. Colliers PDFs carry multiple sectors (industrial
+    + flex) in one file, so callers should not use this for colliers_industrial.
+    """
+    name = path.name
+    if "_Industrial_" in name:
+        return "industrial"
+    if "_MedicalOffice_" in name:
+        return "medical_office"
+    raise ValueError(f"Unrecognised sector in filename: {path.name}")
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Numeric helpers
 # ──────────────────────────────────────────────────────────────────────────────
@@ -200,6 +216,114 @@ def _parse_cw_text(text: str, quarter: str) -> list[dict[str, Any]]:
             }
         )
         i = j  # advance past consumed tokens
+
+    return rows
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# C&W MarketBeat Medical Office parser
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Medical Office submarket names as they appear in the PDF. Distinct set from
+# _CW_SUBMARKETS: this report uses "Lehigh" (Industrial uses "Lehigh Acres") and
+# rolls Charlotte/Lee/Collier county subtotals into the same table.
+_CW_MEDICAL_SUBMARKETS: set[str] = {
+    "Charlotte County",
+    "Cape Coral",
+    "City of Fort Myers",
+    "South Fort Myers",
+    "North Fort Myers",
+    "Estero",
+    "Bonita Springs",
+    "Lehigh",
+    "Lehigh Acres",  # older report generations (e.g. Q3 2024) use this instead of "Lehigh"
+    "The Islands",
+    "Naples",
+    "Outlying Collier County",
+    "Golden Gate",
+    "Lely",
+    "Marco Island",
+    "North Naples",
+    "East Naples",
+}
+
+_CW_MEDICAL_HEADER_SENTINEL = "ALL CLASSES"
+
+
+def _parse_cw_medical_text(text: str, quarter: str) -> list[dict[str, Any]]:
+    """
+    Parse C&W MarketBeat Medical Office page text into a list of row dicts.
+    Columns (8 values per submarket, in order):
+      inventory_sf, sublet_vacant_sf, direct_vacant_sf, overall_vacancy_rate,
+      current_qtr_net_absorption, ytd_leasing_activity, under_construction,
+      overall_avg_asking_rent (full service, per the PDF's own footnote --
+      NOT triple-net, so it does not go in asking_rent_nnn/mf/os).
+
+    ytd_leasing_activity is a different metric than net absorption (leasing
+    activity, not space given back/absorbed) -- left unmapped rather than
+    forced into ytd_absorption_sqft. This report has no deliveries column.
+    """
+    lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+
+    try:
+        start = max(i for i, ln in enumerate(lines) if _CW_MEDICAL_HEADER_SENTINEL in ln) + 1
+    except ValueError:
+        return []
+
+    rows: list[dict[str, Any]] = []
+    i = start
+    while i < len(lines):
+        token = lines[i]
+
+        # Must precede the _SKIP_RE check: _SKIP_RE also matches this line
+        # (^SOUTHWEST FLORIDA TOTALS?$), so checking skip first would silently
+        # swallow the table-end marker and let the loop wander into the Key
+        # Lease/Sale Transactions tables below, where city names collide with
+        # real submarket names (e.g. "Cape Coral", "East Naples") and produce
+        # spurious rows keyed off unrelated deal figures.
+        if "SOUTHWEST FLORIDA TOTAL" in token:
+            break
+
+        if _SKIP_RE.match(token):
+            i += 1
+            continue
+
+        if token.rstrip() not in _CW_MEDICAL_SUBMARKETS or _VALUE_LIKE.match(token):
+            i += 1
+            continue
+
+        vals: list[str] = []
+        j = i + 1
+        while j < len(lines) and len(vals) < 8:
+            t = lines[j].strip()
+            if t in _CW_MEDICAL_SUBMARKETS or _SKIP_RE.match(t):
+                break
+            vals.append(t)
+            j += 1
+
+        if len(vals) < 6:
+            i += 1
+            continue
+
+        while len(vals) < 8:
+            vals.append("---")
+
+        submarket = token.rstrip()
+        rows.append(
+            {
+                "source_name": "cw_marketbeat",
+                "sector": "medical_office",
+                "submarket": submarket,
+                "quarter": quarter,
+                "inventory_sf": _to_int(vals[0]),
+                "vacancy_rate": _to_float(vals[3]),
+                "absorption_sqft": _to_int(vals[4]),
+                "under_construction": _to_int(vals[6]),
+                "asking_rent_full_service": _to_float(vals[7]),
+                "geographic_type": "submarket",
+            }
+        )
+        i = j
 
     return rows
 
@@ -398,6 +522,10 @@ def extract_pdf(pdf_path: Path, budget: RunBudget) -> list[dict[str, Any]]:
         text = page.get_text()
         if source == "cw_marketbeat" and _CW_HEADER_SENTINEL in text:
             rows = _parse_cw_text(text, quarter)
+            if rows:
+                break
+        elif source == "cw_marketbeat" and _CW_MEDICAL_HEADER_SENTINEL in text:
+            rows = _parse_cw_medical_text(text, quarter)
             if rows:
                 break
         elif source == "colliers_industrial" and any(h in text for h in _COLLIERS_HEADER_VARIANTS):
