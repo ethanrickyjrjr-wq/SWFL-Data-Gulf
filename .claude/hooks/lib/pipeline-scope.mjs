@@ -2,12 +2,18 @@
 // Text-sliced reader for ingest/cadence_registry.yaml's source_scope block —
 // see the design note in the plan Task 2 for why this isn't a real YAML parse.
 
+/** Escape regex metacharacters in a string for safe interpolation into RegExp.
+ *  Follows the standard pattern used elsewhere in this repo (e.g. annotate-plan.mjs). */
+function escRe(s) {
+  return String(s ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 /** Slice out the `- name: <dir>` entry's raw text block (up to the next
  *  top-level `- name:` line or EOF). Returns null if the dir never appears
  *  as a `- name:` value at all. */
 function sliceEntry(registryYaml, pipelineDir) {
   const lines = String(registryYaml ?? "").split("\n");
-  const nameRe = new RegExp(`^\\s*-\\s*name:\\s*${pipelineDir}\\s*$`);
+  const nameRe = new RegExp(`^\\s*-\\s*name:\\s*${escRe(pipelineDir)}\\s*$`);
   const anyNameRe = /^\s*-\s*name:\s*\S+\s*$/;
   let start = -1;
   for (let i = 0; i < lines.length; i++) {
@@ -31,7 +37,7 @@ function sliceEntry(registryYaml, pipelineDir) {
  *  sub-block. Multi-line/folded YAML scalars are out of scope — every
  *  source_scope field in this registry is a single-line quoted string. */
 function field(block, key) {
-  const re = new RegExp(`^\\s*${key}:\\s*"?([^"\\n]*?)"?\\s*$`, "m");
+  const re = new RegExp(`^\\s*${escRe(key)}:\\s*"?([^"\\n]*?)"?\\s*$`, "m");
   const m = re.exec(block);
   return m ? m[1].trim() : null;
 }
@@ -40,7 +46,7 @@ function field(block, key) {
  *  entry block (each runs until the next same-or-lower-indent `key:` line). */
 function subBlock(entryBlock, key) {
   const lines = entryBlock.split("\n");
-  const hdrRe = new RegExp(`^(\\s*)${key}:\\s*$`);
+  const hdrRe = new RegExp(`^(\\s*)${escRe(key)}:\\s*$`);
   let start = -1;
   let indent = 0;
   for (let i = 0; i < lines.length; i++) {
@@ -67,25 +73,33 @@ function subBlock(entryBlock, key) {
 /** `null` result = pipelineDir does not exist in the registry at all (the
  *  caller's "not a registered pipeline" case). `{confirmedTotal: null,
  *  sourceCeiling: null}` = registered but source_scope not researched yet —
- *  matches /ops/census's own "N/76 confirmed-total researched" honesty gap. */
+ *  matches /ops/census's own "N/76 confirmed-total researched" honesty gap.
+ *  Any internal error is caught and returns null (fail-open per plan Global Constraint). */
 export function extractSourceScope(registryYaml, pipelineDir) {
-  const entry = sliceEntry(registryYaml, pipelineDir);
-  if (entry === null) return null;
+  try {
+    const entry = sliceEntry(registryYaml, pipelineDir);
+    if (entry === null) return null;
 
-  const ctBlock = subBlock(entry, "confirmed_total");
-  const scBlock = subBlock(entry, "source_ceiling");
+    const ctBlock = subBlock(entry, "confirmed_total");
+    const scBlock = subBlock(entry, "source_ceiling");
 
-  const confirmedTotal = ctBlock
-    ? { summary: field(ctBlock, "summary"), source: field(ctBlock, "source") }
-    : null;
-  const sourceCeiling = scBlock
-    ? {
-        summary: field(scBlock, "summary"),
-        asOf: field(scBlock, "as_of"),
-        sourceUrl: field(scBlock, "source_url"),
-        sourceLabel: field(scBlock, "source_label"),
-      }
-    : null;
+    const confirmedTotal = ctBlock
+      ? { summary: field(ctBlock, "summary"), source: field(ctBlock, "source") }
+      : null;
+    const sourceCeiling = scBlock
+      ? {
+          summary: field(scBlock, "summary"),
+          asOf: field(scBlock, "as_of"),
+          sourceUrl: field(scBlock, "source_url"),
+          sourceLabel: field(scBlock, "source_label"),
+        }
+      : null;
 
-  return { confirmedTotal, sourceCeiling };
+    return { confirmedTotal, sourceCeiling };
+  } catch (err) {
+    // Fail open: any internal error returns null (same as "not found").
+    // Caller cannot act differently on "error" vs "not found", so null is
+    // the appropriate signal for both cases.
+    return null;
+  }
 }

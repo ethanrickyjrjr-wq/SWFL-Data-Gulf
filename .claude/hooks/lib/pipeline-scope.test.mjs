@@ -54,5 +54,21 @@ check("returns null (whole result) for a dir not in the registry at all", () => 
   assert.equal(extractSourceScope(REGISTRY, "not_a_real_pipeline"), null);
 });
 
+check("returns null (not throw) when pipelineDir contains regex metacharacters", () => {
+  // Test that a pipelineDir with regex metacharacters like '(' does not throw
+  // but instead fails open and returns null. This exercises the escRe() escaping
+  // fix and the try/catch wrapper.
+  const result = extractSourceScope(REGISTRY, "pipeline(with)parens");
+  assert.equal(result, null);
+});
+
+check("extracts successfully for pipelineDir with non-special characters", () => {
+  // Verify that normal, non-special pipeline dirs still work correctly
+  // (no regression from escRe escaping). The fixture uses underscores which are safe.
+  const scope = extractSourceScope(REGISTRY, "live_search_daily_mortgage");
+  assert.ok(scope.confirmedTotal);
+  assert.ok(scope.sourceCeiling);
+});
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail > 0 ? 1 : 0);
