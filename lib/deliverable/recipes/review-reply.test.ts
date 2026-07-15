@@ -36,6 +36,7 @@ const LAKE_FEED: MarketFigure[] = [
   fig("rent", "Typical asking rent", "$1,980/mo", "Zillow ZORI"),
   fig("active", "Active listings in 33905", "482", "SWFL Data Gulf"),
   fig("county_dom", "Lee County median days on market", "67", "Redfin"),
+  fig("median_list", "Median list price", "$299,900", "SWFL Data Gulf"),
 ];
 
 const FIGURES: ReviewFigures = selectFigures(LAKE_FEED);
@@ -86,11 +87,12 @@ describe("resolveArea — the area comes from the FIELD or the PROMPT", () => {
 
 // ── THE CELLS ────────────────────────────────────────────────────────────────
 
-describe("selectFigures — the four figures, by KEY", () => {
-  test("picks exactly the recipe's four and ignores the rest of the feed", () => {
+describe("selectFigures — the five figures, by KEY", () => {
+  test("picks exactly the recipe's five and ignores the rest of the feed", () => {
     expect(FIGURES.level?.value).toBe("$285,794");
     expect(FIGURES.trend?.value).toBe("−6.8%");
     expect(FIGURES.active?.value).toBe("482");
+    expect(FIGURES.askingNow?.value).toBe("$299,900");
     // Rent is in the feed and is NOT this deliverable. The "Typical asking rent"
     // grab-bag cell is the exact thing this recipe replaces.
     expect(Object.values(FIGURES).some((f) => f?.key === "rent")).toBe(false);
@@ -294,6 +296,8 @@ describe("factLines — every fact names its own PLACE", () => {
   });
 
   test("no figures → no facts (never improvise an area)", () => {
-    expect(factLines({ level: null, trend: null, dom: null, active: null }, [])).toEqual([]);
+    expect(
+      factLines({ level: null, trend: null, dom: null, active: null, askingNow: null }, []),
+    ).toEqual([]);
   });
 });

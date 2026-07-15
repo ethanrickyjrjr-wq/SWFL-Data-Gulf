@@ -127,13 +127,10 @@ import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import type { SettledClaim } from "@/lib/deliverable/claims";
 import { dropEmptyChartSlot } from "./shared";
-import type {
-  BlockLayout,
-  EmailBlock,
-  EmailDoc,
-  SourceCitation,
-  StatItem,
-} from "@/lib/email/doc/types";
+import { finalizeDoc } from "@/lib/email/doc/finalize-doc";
+import type { PlanEntry } from "@/lib/email/doc/finalize-doc";
+import { GRID_COLS } from "@/lib/email/grid-schema";
+import type { EmailBlock, EmailDoc, SourceCitation, StatItem } from "@/lib/email/doc/types";
 import type { RecipeBuildContext } from "./index";
 
 // ── 1. THE SUBJECT: one area, resolved once, from the sourced crosswalk ───────
@@ -1036,11 +1033,31 @@ export function buildGrid(input: GridInput): EmailDoc {
   const globalStyle = { ...current.globalStyle };
   const band = resolveBand("light", globalStyle);
 
-  const blocks: EmailBlock[] = [];
-  let y = 0;
-  const push = (block: EmailBlock, h: number, opts?: Partial<BlockLayout>) => {
-    blocks.push({ ...block, layout: { x: 0, y, w: 12, h, ...opts } });
-    y += h;
+  const entries: PlanEntry[] = [];
+  // Full-bleed row — the seam's zone fence sorts CLOSE-zone blocks (sources, footer)
+  // below everything else regardless of push order, same as the lifecycle chrome.
+  const push = (block: Omit<EmailBlock, "layout">, h: number, isStatic?: true) => {
+    entries.push({
+      id: block.id,
+      type: block.type,
+      props: block.props as Record<string, unknown>,
+      span: GRID_COLS,
+      newRow: true,
+      height: h,
+      ...(isStatic ? { isStatic: true } : {}),
+    });
+  };
+  // THE PAIR's row — two `hero` cards, six columns each. `{6,6}` is a blessed
+  // multiset (BLESSED_ROW_SPANS[2]), so the seam honours it exactly.
+  const pairCell = (block: Omit<EmailBlock, "layout">, h: number, newRow: boolean) => {
+    entries.push({
+      id: block.id,
+      type: block.type,
+      props: block.props as Record<string, unknown>,
+      span: 6,
+      newRow,
+      height: h,
+    });
   };
 
   // Header — the agent's own branded header, lifted off the canvas.
@@ -1069,10 +1086,8 @@ export function buildGrid(input: GridInput): EmailDoc {
       headline.label,
       `${headline.host} · read ${headline.readOn}`,
     );
-    const rowY = y;
-    blocks.push({ ...nationalHero, layout: { x: 0, y: rowY, w: 6, h: 6 } });
-    blocks.push({ ...localHero, layout: { x: 6, y: rowY, w: 6, h: 6 } });
-    y += 6;
+    pairCell(nationalHero, 6, true);
+    pairCell(localHero, 6, false);
   } else if (localHero) {
     // Half the pair. The local number still leads, full width — and the headline slot
     // becomes an open slot the agent can fill from any source they trust.
@@ -1168,9 +1183,9 @@ export function buildGrid(input: GridInput): EmailDoc {
   }
 
   // Footer — the agent's CAN-SPAM footer (postal address, socials, unsubscribe).
-  push(keepOrDefault(current, "footer"), 3, { static: true });
+  push(keepOrDefault(current, "footer"), 3, true);
 
-  return { globalStyle, blocks };
+  return finalizeDoc({ globalStyle, entries });
 }
 
 // ── THE BUILDER ──────────────────────────────────────────────────────────────

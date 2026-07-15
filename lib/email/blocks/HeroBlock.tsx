@@ -147,6 +147,14 @@ export function HeroBlock({
             color: onDark ? ON_DARK_MUTED : MUTED,
             textAlign,
             margin: space(8, 0, 0),
+            // Same fix as the kicker above, same bug: clipping heros sit in side-by-side
+            // PAIRS, and a label carries a ZIP-qualified figure name ("Median home value —
+            // Fort Myers (33905)") that is routinely longer than its sibling's ("Typical
+            // home value — United States"). A 2-line wrap on one card with no reservation
+            // on the other staggers everything below it — the two cards' bottoms, and the
+            // provenance line under each, stop lining up. Caught live 07/14/2026 on
+            // sphere-weekly's national/local pair.
+            ...(clipping ? { minHeight: lines("caption", 2) } : {}),
           }}
         />
       ) : null}

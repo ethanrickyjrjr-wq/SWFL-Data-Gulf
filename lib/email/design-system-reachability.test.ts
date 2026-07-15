@@ -144,10 +144,9 @@ const KNOWN_BYPASS = new Set([
   "lib/concoctions/place-blocks.ts",
   "lib/concoctions/types.ts",
   "lib/concoctions/user-bundle.ts",
-  // The three recipes that still carry a private push() closure. NEXT.
-  "lib/deliverable/recipes/agent-brand-intro.ts",
-  "lib/deliverable/recipes/review-reply.ts",
-  "lib/deliverable/recipes/sphere-weekly.ts",
+  // agent-brand-intro.ts, review-reply.ts and sphere-weekly.ts made the jump 07/14/2026 —
+  // all three now hand `finalizeDoc` a plan, same as the seven listing recipes. Do not put
+  // them back.
   // Post-hoc compaction — reads an EXISTING layout to close a gap; writes no new position.
   "lib/deliverable/recipes/shared.ts",
   // A one-off doc builder, not on the campaign chrome.

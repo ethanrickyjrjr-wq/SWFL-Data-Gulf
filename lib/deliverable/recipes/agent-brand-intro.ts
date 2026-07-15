@@ -78,9 +78,12 @@ import {
 import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
 import { loadMarketFigures, type MarketFigure } from "@/lib/email/market-context";
 import { resolveSubject, dropEmptyChartSlot } from "./shared";
+import { finalizeDoc } from "@/lib/email/doc/finalize-doc";
+import type { PlanEntry } from "@/lib/email/doc/finalize-doc";
+import { GRID_COLS } from "@/lib/email/grid-schema";
 import type { RecipeBuildContext } from "./index";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
-import type { BlockLayout, EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
+import type { EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com";
@@ -866,10 +869,6 @@ function pricePerSqft(price?: string, sqft?: string): string | undefined {
   return "$" + Math.round(p / s).toLocaleString("en-US");
 }
 
-function at<T extends EmailBlock>(block: T, y: number, h: number, opts?: Partial<BlockLayout>): T {
-  return { ...block, layout: { x: 0, y, w: 12, h, ...opts } };
-}
-
 /** A stat cell: sourced → the value; unsourced → an EMPTY cell, which is an editable
  *  open slot on the canvas (its LABEL is the instruction) and does not exist in the
  *  sent email (StatsBlock drops it under `emailRender`, and drops the whole row when
@@ -946,11 +945,19 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
   const agentName = brandAgentName(currentDoc);
   const siteUrl = brandWebsiteUrl(currentDoc) || BASE_URL;
 
-  const blocks: EmailBlock[] = [];
-  let y = 0;
-  const push = (block: EmailBlock, h: number, opts?: Partial<BlockLayout>) => {
-    blocks.push(at(block, y, h, opts));
-    y += h;
+  const entries: PlanEntry[] = [];
+  // Full-bleed row — the seam's zone fence sorts CLOSE-zone blocks (sources, footer)
+  // below everything else regardless of push order, same as the lifecycle chrome.
+  const push = (block: Omit<EmailBlock, "layout">, h: number, isStatic?: true) => {
+    entries.push({
+      id: block.id,
+      type: block.type,
+      props: block.props as Record<string, unknown>,
+      span: GRID_COLS,
+      newRow: true,
+      height: h,
+      ...(isStatic ? { isStatic: true } : {}),
+    });
   };
 
   // 1. Header — the agent's branded header (company, logo, colors). Sticky.
@@ -1159,9 +1166,9 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
   );
 
   // 11. Footer — the agent's CAN-SPAM footer (address, socials, unsubscribe). Sticky.
-  push(keepOrDefault(currentDoc, "footer"), 3, { static: true });
+  push(keepOrDefault(currentDoc, "footer"), 3, true);
 
-  let doc: EmailDoc = { globalStyle: { ...currentDoc.globalStyle }, blocks };
+  let doc: EmailDoc = finalizeDoc({ globalStyle: { ...currentDoc.globalStyle }, entries });
 
   // AN EMPTY CHART BOX IS WORSE THAN NO CHART. Also the house coherence rule
   // (lib/email/CLAUDE.md): a headline that sits an order of magnitude outside the

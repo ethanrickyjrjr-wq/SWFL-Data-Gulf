@@ -59,8 +59,11 @@ import { anchorsExactly, extractNumbers, normalizeNumber } from "@/lib/deliverab
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { clearNarrativeSlots, fillNarrative } from "./shared";
+import { finalizeDoc } from "@/lib/email/doc/finalize-doc";
+import type { PlanEntry } from "@/lib/email/doc/finalize-doc";
+import { GRID_COLS } from "@/lib/email/grid-schema";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
-import type { BlockLayout, EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
+import type { EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { RecipeBuildContext } from "./index";
 
 /** The committed grid this recipe wears (lib/email/doc/default-docs.ts). */
@@ -107,19 +110,28 @@ export function resolveArea(prompt: string, scopeZip?: string): ReviewArea | nul
 
 // ── 2. THE FIGURES: pure lake data, each carrying its own source + as-of ──────
 
-/** The four figures this email is made of. Each is a `MarketFigure` straight from
+/** The five figures this email is made of. Each is a `MarketFigure` straight from
  *  `loadMarketFigures` — the producer `fetchLakeParts` wraps, imported directly
  *  because build-doc dispatches INTO this file and importing it back would cycle.
- *  A figure we do not hold is `null`, and its cell becomes an OPEN SLOT. */
+ *  A figure we do not hold is `null`, and its cell becomes an OPEN SLOT.
+ *
+ *  `level` (ZHVI) and `askingNow` (the live listing feed) are TWO DIFFERENT
+ *  METRICS — a modelled monthly value index vs. what sellers are asking on live
+ *  listings right now — and they are never blended into one number. A number
+ *  derived from two correctly-sourced figures is still an unsourced one (the
+ *  same rule `unanchoredNumbers` enforces on the narrator). What closes the gap
+ *  between "the index's real vintage" and "today" is a SECOND, honestly-dated
+ *  figure sitting beside the first — never a fabricated hybrid. */
 export interface ReviewFigures {
   level: MarketFigure | null; // Zillow ZHVI — the headline
   trend: MarketFigure | null; // Zillow ZHVI — year over year
   dom: MarketFigure | null; // SWFL Data Gulf (ZIP), else Redfin (county median)
   active: MarketFigure | null; // SWFL Data Gulf — active inventory
+  askingNow: MarketFigure | null; // SWFL Data Gulf — live median asking price, scraped daily
 }
 
 /**
- * Select this recipe's four figures out of the ZIP's full feed, by KEY — never by
+ * Select this recipe's five figures out of the ZIP's full feed, by KEY — never by
  * label (a label is display copy and drifts).
  *
  * DAYS ON MARKET, FINER THEN COARSER: per-ZIP when the active-listing feed carries
@@ -135,12 +147,19 @@ export function selectFigures(figures: readonly MarketFigure[]): ReviewFigures {
     trend: byKey("home_value_yoy"),
     dom: byKey("dom") ?? byKey("county_dom"),
     active: byKey("active"),
+    // `median_list` carries `as_of: latestScrapedAt` (market-context.ts) — the actual
+    // scrape timestamp off the daily listing sweep, not a monthly cadence. It is the
+    // freshest real figure this email can show; ZHVI's own vintage stays exactly as
+    // dated as it really is.
+    askingNow: byKey("median_list"),
   };
 }
 
 /** Every figure we actually rendered, in reading order. */
 function rendered(f: ReviewFigures): MarketFigure[] {
-  return [f.level, f.trend, f.dom, f.active].filter((x): x is MarketFigure => x !== null);
+  return [f.level, f.trend, f.dom, f.active, f.askingNow].filter(
+    (x): x is MarketFigure => x !== null,
+  );
 }
 
 /** A stat cell. Sourced → the figure's own label + its value, restated VERBATIM (rule:
@@ -432,19 +451,34 @@ function buildGrid(
   chart: EmailChartImage | null,
 ): EmailDoc {
   const level = figures.level;
-  const blocks: EmailBlock[] = [];
-  let y = 0;
-  const push = (block: EmailBlock, h: number, opts?: Partial<BlockLayout>) => {
-    blocks.push({ ...block, layout: { x: 0, y, w: 12, h, ...opts } });
-    y += h;
+  const entries: PlanEntry[] = [];
+  // Full-bleed row — every block here is one, which is exactly what the seam's zone
+  // fence expects: it sorts the CLOSE-zone `sources` block to sit just above the
+  // footer regardless of push order (the lifecycle chrome does the same thing).
+  const push = (block: Omit<EmailBlock, "layout">, h: number, isStatic?: true) => {
+    entries.push({
+      id: block.id,
+      type: block.type,
+      props: block.props as Record<string, unknown>,
+      span: GRID_COLS,
+      newRow: true,
+      height: h,
+      ...(isStatic ? { isStatic: true } : {}),
+    });
   };
 
   // Header — the agent's branded header, lifted off the canvas.
   push(keepOrDefault(current, "header"), 2);
 
-  // Hero — the LEVEL, and its provenance directly under it. This is the one number the
-  // whole email is about; a reader should not have to open an accordion to learn who says
-  // so and as of when.
+  // Hero — the LEVEL. NO inline citation under it (operator correction, 07/14/2026):
+  // an older draft of this file put the source + as-of directly under the hero on the
+  // theory that "a reader shouldn't have to open an accordion" — that is backwards from
+  // rule 1 (sources ride in the collapsed list, never inline) and it actively worked
+  // against the whole point of adding `askingNow` above: a reader hits "Zillow ZHVI · as
+  // of 05/31/2026" in the first two lines and reads the WHOLE page as six-week-old,
+  // never noticing the live figure sitting in the strip. The citation is already correct
+  // and complete in the closed Sources accordion below (`figureCitations`) — same as
+  // every other recipe. Never both places.
   //
   // `level` is NON-NULL by the time we get here — buildReviewReply refuses to build
   // without it, and that is deliberate. THE HERO CANNOT SELF-SUPPRESS: unlike `stats`,
@@ -461,19 +495,22 @@ function buildGrid(
         kicker: "Your Home-Value Review",
         value: level.value,
         label: level.label,
-        prose: `${level.source}${level.as_of ? ` · as of ${level.as_of}` : ""}`,
       },
     },
     4,
   );
 
-  // KPI strip — the other three the recipe names. Unsourced → open slot.
+  // KPI strip — the other four the recipe names. `askingNow` leads: it is the
+  // freshest real figure on the page (a daily scrape, not a monthly index), and it
+  // sits beside the hero's OWN honest as-of rather than pretending to update it.
+  // Unsourced → open slot.
   push(
     {
       id: createBlock("stats").id,
       type: "stats",
       props: {
         stats: [
+          cell(figures.askingNow, "Current median asking price — type it in"),
           cell(figures.trend, "Home value, year over year — type it in"),
           cell(figures.dom, "Days on market — type it in"),
           cell(figures.active, `Active listings in ${area.zip} — type it in`),
@@ -520,9 +557,9 @@ function buildGrid(
   );
 
   // Footer — the agent's CAN-SPAM footer (address, socials, unsubscribe).
-  push(keepOrDefault(current, "footer"), 3, { static: true });
+  push(keepOrDefault(current, "footer"), 3, true);
 
-  return { globalStyle: { ...current.globalStyle }, blocks };
+  return finalizeDoc({ globalStyle: { ...current.globalStyle }, entries });
 }
 
 // ── THE BUILDER ──────────────────────────────────────────────────────────────
