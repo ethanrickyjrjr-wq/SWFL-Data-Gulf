@@ -1,3 +1,36 @@
+## 2026-07-15 (Sonnet 5 · main) — fixed the FEMA NFIP 6-county scope leak; repopulated fema_nfip_claims after the 07/14 data-loss incident.
+
+Same-day handoff (`docs/handoff/2026-07-14-fema-flood-data-usage-handoff.md`) mapped the FEMA
+pipeline end-to-end and flagged two open items: the claims table sat at 0 rows after a killed
+GHA run, and the two derived SQL views (+ `env-swfl`'s live fetch) leak Charlotte/Glades/Sarasota
+dollars into `swfl_storm_year_claims_usd` / `_nonstorm_claims_baseline` / `_post_ian_claims_ratio`
+(the 07/07/2026 scope lock is Lee+Collier+Hendry only). Operator ran the repopulation manually
+(`python -m ingest.pipelines.fema.pipeline`); first attempt hung mid-load (staging table frozen at
+323,425/448,425 rows, 0 active DB connections, 32s CPU over 82min — confirmed via `pg_stat_activity`
+and process CPU time, not guesswork). Killed and re-run; `insert-from-staging` held the live table
+at 0 throughout the hang exactly as designed, so no data loss. Second run landed clean: 448,425 FL
+rows, `fema_nfip_county_year` = 237 rows, `fema_nfip_zip_window_agg` = 124 rows. Closed check
+`fema_nfip_claims_data_loss_replace_strategy` with the verified evidence.
+
+Fixed the scope leak in `refinery/sources/fema-nfip-source.mts` `fetchLive()`: added
+`.in("county_code", SWFL_FIPS)` to both the county-year and ZIP-window view queries — they were
+reading the (still 6-county) views with no re-filter, while the storm-claims query three lines
+below already did this correctly. Matched the existing pattern rather than touching the SQL views
+themselves (other consumers, e.g. the `nfip-storm-years` Email Lab concoction, deliberately let a
+user pick any county — narrowing the views would have changed that surface's behavior too, which
+is out of scope for this ticket). 25/25 `fema-nfip-source.test.mts` tests pass unchanged (they only
+exercise the fixture path); no new typecheck errors on the edited file.
+
+Also checked `leepa_parcels` for the same replace_strategy exposure per the closed check's own
+follow-up note: it uses `write_disposition="merge"` with `primary_key="folioid"`, not `replace` —
+never carried this risk. Confirmed the other 5 flagged pipelines (`census_acs`, `census_cbp`,
+`fdot`, `fhfa`, `fl_dbpr_licenses` applicants) already got the `insert-from-staging` fix in commit
+`395bb30d` earlier today.
+
+**What's next:** rebuild `env-swfl` and `hurricane-tracks-fl` now that the data + code fix are both
+live, verify the published brain files hold real, correctly 3-core-scoped FEMA figures, then close
+`fema_nfip_views_six_county_scope_leak`.
+
 ## 2026-07-15 (Sonnet 5 · main) — click-triggered listing-campaign agent alerts, v1 (real click → real inbox alert).
 
 Operator was rightly furious that I first claimed "interest tracking isn't a real capability"

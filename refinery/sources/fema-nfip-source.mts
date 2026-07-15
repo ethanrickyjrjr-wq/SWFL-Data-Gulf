@@ -695,23 +695,34 @@ export function assertClaimsNonEmpty(rows: ClaimRow[]): void {
 async function fetchLive(): Promise<LiveFetchResult> {
   const sb = getSupabase().schema(SCHEMA);
 
-  // County-year aggregates from the pre-built SQL view (SWFL core counties × ~decades).
-  // Replaces the county-year TS aggregation on the old 86.6k-row full-archive fetch.
+  // County-year aggregates from the pre-built SQL view. The view itself still
+  // filters to the pre-07/07/2026-lock 6-county footprint (Lee+Collier+Charlotte+
+  // Glades+Hendry+Sarasota — docs/sql/20260623_fema_nfip_county_year_view.sql), so
+  // this re-filter to SWFL_FIPS (Lee+Collier+Hendry) is load-bearing, not
+  // belt-and-suspenders: without it, swfl_storm_year_claims_usd / baseline /
+  // post_ian_ratio silently include out-of-scope Charley/Ian dollars from
+  // Charlotte/Glades/Sarasota (check fema_nfip_views_six_county_scope_leak).
+  // Mirrors the stormClaims query below, which already does this correctly.
   const { data: cyData, error: cyErr } = await sb
     .from(COUNTY_YEAR_VIEW)
-    .select("county_code,year,claim_count,paid_total_usd");
+    .select("county_code,year,claim_count,paid_total_usd")
+    .in("county_code", SWFL_FIPS);
   if (cyErr) throw new Error(`fema-nfip-source: county-year view failed — ${cyErr.message}`);
   if (!cyData || cyData.length === 0)
     throw new Error(
       `fema-nfip-source: ${SCHEMA}.${COUNTY_YEAR_VIEW} returned 0 rows — confirm view was created (docs/sql/20260623_fema_nfip_county_year_view.sql) and GRANT SELECT applied.`,
     );
 
-  // ZIP-window aggregates from the pre-built SQL view (rolling 10-yr window, SWFL ZIPs).
+  // ZIP-window aggregates from the pre-built SQL view (rolling 10-yr window).
+  // Same 6-county view leak as above; downstream scopeZipWindowToCore() in
+  // env-swfl.mts already re-filters by ZIP, but filtering here too keeps the
+  // "nfip-zip-window-full" fragment itself SWFL-core, not just its top-6 slice.
   const { data: zipData, error: zipErr } = await sb
     .from(ZIP_WINDOW_VIEW)
     .select(
       "zip,county_code,paid_total_in_window_usd,claim_count_in_window,median_building_property_value_usd,window_end_year",
-    );
+    )
+    .in("county_code", SWFL_FIPS);
   if (zipErr) throw new Error(`fema-nfip-source: zip-window view failed — ${zipErr.message}`);
 
   // Storm-year claims raw fetch — needed for per-storm Helene/Milton date split.
