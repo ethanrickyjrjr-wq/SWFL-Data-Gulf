@@ -1,3 +1,45 @@
+## 2026-07-15 (Sonnet 5 · wt/ledger-pilot) — Per-unit coverage ledgers: push mechanism (Rollout Step 1) + deliverables pilot (Rollout Step 2), full plan built via subagent-driven-development, final Opus review clean.
+
+Executed `docs/superpowers/plans/2026-07-15-per-unit-coverage-ledgers-push-and-pilot.md` (10 tasks)
+via `superpowers:subagent-driven-development`: fresh implementer + task-reviewer per task, 4 tasks
+needed one fix-and-re-review round (2, 4, 5, 7). New PostToolUse hook
+(`.claude/hooks/push-touched-unit-coverage.mjs`) pushes a touched ingest pipeline's
+`cadence_registry.yaml` PULLED/AVAILABLE scope, or a touched deliverable recipe's Enforced/Unenforced
+`.ledger.md` summary, inline via `additionalContext` — verified live against vendor docs
+(`code.claude.com/docs/en/hooks`) rather than the spec's own original (wrong) mechanism proposal
+(`inject-focus.mjs`, a UserPromptSubmit hook). New Gate 9 in `check-prepush-gate.mjs` blocks a push
+that orphans an Enforced claim (named test file gone, claimed string gone, or the named test fails).
+12 recipe `.ledger.md` files authored for the deliverables pilot (brain packs — Rollout Step 3 — is
+explicitly out of scope for this plan).
+
+Two real defects caught and fixed mid-build, both the exact "claim reads as safety that isn't
+there" failure this system exists to prevent — a claim naming multiple protections but citing only
+ONE test that proves part of it: `coming-soon`/`sphere-weekly` (Task 7's own review), and
+`agent-launch` (missed by Task 7, caught independently by the final whole-branch review dispatched
+on Opus against the full branch diff). Also caught and fixed before any review, by direct code
+inspection: `matchPipelineDir`/`matchRecipeUnit` assumed `tool_input.file_path` is repo-relative,
+but real PostToolUse payloads can be absolute — the entire push mechanism (the plan's actual point)
+would have been silently dead in production despite all tests passing, since every test fixture
+used relative paths. And a real shell-injection-shaped risk in Gate 9's `readFile`/`bun test`
+call sites (ledger-parsed free text reaching `execSync`), closed with a safe-path allowlist.
+
+One finding investigated and deliberately left unfixed after an advisor consult: Gate 9's
+`findOrphanedClaims` (`.includes()` substring match) doesn't flag a suffix-append that preserves a
+cited phrase as an exact prefix (`"cut"`→`"cutX"`); deletes and in-place edits ARE caught. Hardening
+to word-boundary matching would trade this for a real false-block risk against the 14 live citations
+and still wouldn't catch a punctuation-separated append — this is a drift detector against
+forgetfulness, not an adversary boundary. Documented in the design spec's Open Risks; check opened:
+`gate9_substring_append_blindspot`.
+
+Verified: scoped suite clean throughout (450/450 recipes+hooks tests, 3 new hook test files at
+6/6 + 5/5 + 25/25, `bunx next build` exit 0). Full-repo `bun test` has pre-existing flaky failures
+in files this branch never touched (`lib/pdf`, `lib/deliverable/campaign-coherence.test.ts` —
+different files failed across 3 consecutive runs) — not a regression, confirmed via
+`git diff --stat` against each file. Rebased clean onto main via `node scripts/worktree.mjs land
+ledger-pilot` (dropped 1 duplicate-patch commit — the plan doc was already on main). 16 commits,
+`f575bf76..565f6467`. Next: operator pushes (`git push origin HEAD:main`, RULE 1 — not autonomous),
+then `node scripts/worktree.mjs cleanup ledger-pilot`, close `per-unit-coverage-ledgers_live_verify`.
+
 ## 2026-07-15 (Sonnet 5 · main) — Threaded Medical Office rent through cre-swfl (SURFACED_SECTORS + asking_rent_full_service field + per-sector fan-out + vocab), so Industrial + Medical Office can rebuild together in one go.
 
 Operator: "THREAD MEDICAL THROUGH AND THEN WE CAN REBUILD ALL AT ONCE SO WE GET ALL THE INFORMATION
