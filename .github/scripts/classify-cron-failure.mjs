@@ -174,13 +174,31 @@ export function classify(logTail) {
   }
 
   // 10. TRANSIENT — network / timeout / rate-limit; usually self-resolves on retry.
+  //
+  // One addition (07/14, `daily_rebuild_egress_flake_retry`): `Request timed out.` —
+  // APIConnectionTimeoutError's default message (Anthropic SDK v0.106.0,
+  // core/error.mjs:79-83). The old regex matched ETIMEDOUT/ReadTimeout but NOT this
+  // wording, so an SDK connect timeout fell through to UNKNOWN and drew an LLM
+  // narrative instead of an L0 retry. (`Connection error.` — APIConnectionError's
+  // default — already matched here; the reason THAT one still got HELD was purely
+  // upstream: resilient-build stamped it `deterministic`, so rule 7 fired first.
+  // Fixed at the source in refinery/lib/resilient-build.mts `isTransientError`.)
+  //
+  // Deliberately NOT keyed on a `failureClass=transient` token: rule 7 already owns
+  // the `failureClass` stamp as the single authority for the DETERMINISTIC verdict,
+  // and this rule reads WORDING. Two rules keying the same token from two channels
+  // (the CRON-DIAG line and buildOne's per-pack error log) is the coupling we don't
+  // want. Rule 7 still gets first look, so a mixed run — one transient pack plus one
+  // deterministic pack — is correctly HELD. The ordering is load-bearing: do not flip
+  // it. Rule 7 keys an authoritative verdict; rule 10 keys incidental tail text, and
+  // shouldRetry(TRANSIENT) === true, so a flipped order would auto-retry real defects.
   if (
-    /ReadTimeout|TimeoutError|ConnectTimeout|Connection error|socket connection was closed|UNEXPECTED_EOF_WHILE_READING|SSL[: ][^\n]*EOF|HTTP 429|\b429\b|rate.?limit|Temporary failure in name resolution|Connection reset|ECONNRESET|ETIMEDOUT|EAI_AGAIN|Max retries exceeded/i.test(
+    /ReadTimeout|TimeoutError|ConnectTimeout|Connection error|Request timed out|socket connection was closed|UNEXPECTED_EOF_WHILE_READING|SSL[: ][^\n]*EOF|HTTP 429|\b429\b|rate.?limit|Temporary failure in name resolution|Connection reset|ECONNRESET|ETIMEDOUT|EAI_AGAIN|Max retries exceeded/i.test(
       text,
     )
   ) {
     const t = text.match(
-      /ReadTimeout|TimeoutError|Connection error|socket connection was closed|UNEXPECTED_EOF_WHILE_READING|429|Connection reset|ECONNRESET|ETIMEDOUT/i,
+      /ReadTimeout|TimeoutError|Connection error|Request timed out|socket connection was closed|UNEXPECTED_EOF_WHILE_READING|429|Connection reset|ECONNRESET|ETIMEDOUT/i,
     );
     return {
       klass: "TRANSIENT",

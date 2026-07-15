@@ -1,6 +1,7 @@
 // refinery/lib/resilient-build.test.mts
 import { test } from "bun:test";
 import assert from "node:assert/strict";
+import { APIConnectionError, APIConnectionTimeoutError, RateLimitError } from "@anthropic-ai/sdk";
 import type { PackDefinition } from "../types/pack.mts";
 import type { BrainOutputRead } from "./brain-output-reader.mts";
 import type { OutputResult } from "../stages/4-output.mts";
@@ -90,6 +91,54 @@ test("isTransientError: validator/type errors → false", () => {
   ]) {
     assert.ok(!isTransientError(new Error(msg)), `expected non-transient: ${msg}`);
   }
+});
+
+// ── REGRESSION (bug 2): transient misclassified as deterministic ────────────
+// `daily_rebuild_egress_flake_retry`. The Anthropic SDK's APIConnectionError
+// carries the message "Connection error." and APIConnectionTimeoutError carries
+// "Request timed out." — NEITHER matched the old substring list, so a network
+// blip was stamped failureClass=deterministic and HELD by classify-cron-failure's
+// DETERMINISTIC_HOLD (rule 7, which runs before its TRANSIENT rule 10) instead of
+// self-healing. Verified against the installed SDK (v0.106.0).
+
+test("REGRESSION: SDK APIConnectionError (by TYPE, no keyword in message) → transient", () => {
+  // THE TYPE-PATH TEST. The message is deliberately keyword-free, so NO substring
+  // arm can match it — only `instanceof APIConnectionError` can. If the SDK import
+  // ever breaks (wrong export, dual-package resolution), instanceof silently goes
+  // always-false and this test is the ONLY thing that fails; every message-based
+  // test would still pass green over a dead type check.
+  const err = new APIConnectionError({ message: "xyz-no-keywords-whatsoever", cause: undefined });
+  assert.ok(isTransientError(err), "APIConnectionError must be transient by TYPE, not by wording");
+});
+
+test("REGRESSION: SDK APIConnectionError default message 'Connection error.' → transient", () => {
+  const err = new APIConnectionError({ message: undefined, cause: undefined });
+  assert.equal(err.message, "Connection error.", "SDK contract: the default message we missed");
+  assert.ok(isTransientError(err), "a bare 'Connection error.' is a network flake, not a defect");
+});
+
+test("REGRESSION: APIConnectionTimeoutError ('Request timed out.') → transient", () => {
+  // Subclass of APIConnectionError → covered by the same instanceof, for free.
+  const err = new APIConnectionTimeoutError({});
+  assert.equal(err.message, "Request timed out.");
+  assert.ok(isTransientError(err), "connection timeout is transient");
+});
+
+test("REGRESSION: flattened 'Connection error.' (plain Error) → transient", () => {
+  // The fallback arm: the instance is gone (re-thrown plain, or round-tripped
+  // through _build-report.json's `reason` string) but the wording survives.
+  assert.ok(isTransientError(new Error("Connection error.")));
+  assert.ok(isTransientError(new Error("Request timed out.")));
+  assert.ok(isTransientError("Connection error."), "non-Error value must also classify");
+});
+
+test("REGRESSION: a 429 RateLimitError is NOT an APIConnectionError → stays deterministic", () => {
+  // Guard the blast radius of the type check: only CONNECTION errors flip to
+  // transient. A 429 (and the 402 billing_error) are plain APIErrors and must keep
+  // their existing LOUD treatment — this fix must not silently quiet them.
+  const err = new RateLimitError(429, undefined, "rate limited", new Headers());
+  assert.ok(!(err instanceof APIConnectionError), "SDK contract: 429 is not a connection error");
+  assert.ok(!isTransientError(err), "429 must not be silently reclassified by this fix");
 });
 
 // ── isEligibleLastGood ─────────────────────────────────────────────────────
@@ -256,6 +305,74 @@ test("buildOne — success path → built outcome", async () => {
   assert.equal(outcome.status, "built");
   assert.equal(outcome.version, 4);
   assert.ok(outcome.written);
+});
+
+// ── REGRESSION (bug 1): the silent degrade ─────────────────────────────────
+// `env_hurricane_forced_rebuild_silent_degrade`, lane 2. buildOne's catch block
+// called classifyFailure(...) and returned WITHOUT ever logging the caught error.
+// A pack could fail and the operator got five minutes of silence and an exit 0 —
+// the error existed only inside the returned object. A degraded build must SAY SO.
+
+/** Capture console.error for the duration of `fn`. */
+async function captureStderr(fn: () => Promise<void>): Promise<string> {
+  const original = console.error;
+  const lines: string[] = [];
+  console.error = (...args: unknown[]) => {
+    lines.push(args.map(String).join(" "));
+  };
+  try {
+    await fn();
+  } finally {
+    console.error = original;
+  }
+  return lines.join("\n");
+}
+
+test("REGRESSION: a DETERMINISTIC failure is LOGGED (pack id, class, error message)", async () => {
+  const runPipeline = async () => {
+    throw new Error("Orphan Concept: slug `foo-bar` not in brain-vocabulary.json");
+  };
+  const readFn = async () => minOutput(new Date(Date.now() - 86400_000).toISOString());
+  const pack = minPack({ id: "env-hurricane", brain_id: "env-hurricane", ttl_seconds: 604_800 });
+
+  let outcome!: BrainBuildOutcome;
+  const logged = await captureStderr(async () => {
+    outcome = await buildOne(pack, { dryRun: false }, runPipeline, readFn, 0);
+  });
+
+  assert.equal(outcome.status, "degraded");
+  assert.notEqual(logged.trim(), "", "THE BUG: a failed build must not be silent");
+  assert.ok(logged.includes("env-hurricane"), "must name the pack that failed");
+  assert.ok(logged.includes("deterministic"), "must name the failure class");
+  assert.ok(logged.includes("Orphan Concept"), "must surface the actual error message");
+});
+
+test("REGRESSION: a TRANSIENT failure (after retry) is LOGGED too", async () => {
+  const runPipeline = async () => {
+    throw new APIConnectionError({ message: undefined, cause: undefined });
+  };
+  const readFn = async () => minOutput(new Date(Date.now() - 86400_000).toISOString());
+  const pack = minPack({ id: "cre-swfl", brain_id: "cre-swfl", ttl_seconds: 604_800 });
+
+  let outcome!: BrainBuildOutcome;
+  const logged = await captureStderr(async () => {
+    outcome = await buildOne(pack, { dryRun: false }, runPipeline, readFn, 0);
+  });
+
+  // End-to-end proof of BOTH fixes at once: the SDK connection error is now
+  // classified transient (bug 2) AND the degrade announces itself (bug 1).
+  assert.equal(outcome.failureClass, "transient", "bug 2: SDK connection error → transient");
+  assert.ok(logged.includes("cre-swfl"), "bug 1: must name the pack");
+  assert.ok(logged.includes("transient"), "bug 1: must name the class");
+  assert.ok(logged.includes("Connection error."), "bug 1: must surface the error message");
+});
+
+test("REGRESSION: a SUCCESSFUL build logs no failure noise", async () => {
+  const runPipeline = async () => fakeOutputResult;
+  const logged = await captureStderr(async () => {
+    await buildOne(minPack(), { dryRun: false }, runPipeline);
+  });
+  assert.equal(logged.trim(), "", "the happy path must stay quiet");
 });
 
 // ── deriveExitCode (the silent-freeze kill) ─────────────────────────────────

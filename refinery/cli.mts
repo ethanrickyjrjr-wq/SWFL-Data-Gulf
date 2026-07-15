@@ -317,6 +317,15 @@ async function main(): Promise<void> {
 
     if (outcome.status === "degraded" || outcome.status === "missing") {
       degradedIds.add(id);
+      // Say it at the CLI layer too. buildOne logs the raw throw at the catch site;
+      // this is the run-level consequence line — what DOWNSTREAM packs now inherit.
+      // Without it the operator saw only silence, then exit 0 (the silent-degrade bug).
+      console.error(
+        `[refinery] ${id}: ${outcome.status.toUpperCase()} (${outcome.failureClass}) — ` +
+          `downstream packs will build against ${
+            outcome.status === "degraded" ? "its last-good output" : "a HOLE"
+          }`,
+      );
     }
     if (outcome.status === "missing" && outcome.lastGoodRefinedAt !== undefined) {
       // Re-darkened: had a last-good, eligibility expired. The gate's HOLD trigger.

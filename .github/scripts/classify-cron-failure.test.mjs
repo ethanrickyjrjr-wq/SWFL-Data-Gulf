@@ -172,6 +172,81 @@ test("DETERMINISTIC_HOLD — `deterministically` does not match (word boundary)"
   assert.notEqual(classify("failureClass=deterministically computed").klass, "DETERMINISTIC_HOLD");
 });
 
+// ── RULE ORDERING: DETERMINISTIC_HOLD (7) fires before TRANSIENT (10) ───────
+// `daily_rebuild_egress_flake_retry`. The two rules are COUPLED to the upstream
+// `failureClass` stamp that resilient-build's formatCronDiag emits. The ordering
+// is correct BY DESIGN and must not be flipped: rule 7 keys on an AUTHORITATIVE
+// upstream verdict, rule 10 on incidental log-tail text. Reordering would let a
+// genuinely deterministic run whose tail happens to contain stray network noise
+// misclassify as TRANSIENT — and shouldRetry(TRANSIENT) === true, so it would
+// auto-retry a real defect and burn spend.
+//
+// The real bug was UPSTREAM: isTransientError didn't match the Anthropic SDK's
+// APIConnectionError ("Connection error."), so a network flake was STAMPED
+// deterministic and rule 7 correctly honored a wrong verdict. Fixed in
+// refinery/lib/resilient-build.mts. These two tests pin both halves of that
+// contract so neither side can drift back.
+
+test("ORDERING — a deterministic stamp WINS over network noise in the tail (rule 7 before 10)", () => {
+  // This is the pre-fix shape: the flake was mislabeled `deterministic` upstream.
+  // classify() faithfully honors the stamp — which is why the stamp must be right.
+  const c = classify("CRON-DIAG failureClass=deterministic reason=Connection error.");
+  assert.equal(c.klass, "DETERMINISTIC_HOLD");
+  assert.equal(shouldRetry(c.klass), false, "a deterministic verdict must never auto-retry");
+});
+
+test("ORDERING — post-fix, a transient stamp falls through rule 7 to TRANSIENT (rule 10)", () => {
+  // The exact line formatCronDiag now emits for an SDK egress flake. Rule 7's
+  // /failureClass=deterministic\b/ no longer matches → falls through → rule 10's
+  // /Connection error/ matches → TRANSIENT → L0 auto-retry, which self-heals.
+  const c = classify("CRON-DIAG failureClass=transient reason=Connection error.");
+  assert.equal(c.klass, "TRANSIENT", "the egress flake must self-heal, not HOLD");
+  assert.equal(shouldRetry(c.klass), true, "TRANSIENT is the only class L0 retries");
+});
+
+test("ORDERING — a transient stamp on a connection TIMEOUT also reaches TRANSIENT", () => {
+  // "Request timed out." is APIConnectionTimeoutError's default message. Rule 10
+  // matched ETIMEDOUT/ReadTimeout but not this wording — it fell through to UNKNOWN.
+  const c = classify("CRON-DIAG failureClass=transient reason=Request timed out.");
+  assert.equal(c.klass, "TRANSIENT");
+});
+
+// buildOne now logs a per-pack `failureClass=` line for EVERY failure (the bug-1
+// fix), so a real log tail can carry BOTH classes at once — a transient pack and a
+// deterministic pack in the same run. THE INVARIANT: a tail containing a genuine
+// defect must never be classified TRANSIENT and must never auto-retry, no matter how
+// much network noise sits beside it. shouldRetry(TRANSIENT) === true, so a leak here
+// would auto-retry real defects and burn spend.
+
+test("ORDERING — MIXED tail (transient pack + deterministic pack) → HOLD, never retried", () => {
+  const tail = [
+    "[refinery] BUILD FAILED — pack=cre-swfl status=degraded failureClass=transient (self-heals next run)",
+    "[refinery]   error: Connection error.",
+    "[refinery] BUILD FAILED — pack=env-swfl status=missing failureClass=deterministic (will NOT self-heal)",
+    "[refinery]   error: brains/env-swfl.md not found",
+    "CRON-DIAG failureClass=deterministic reason=brains/env-swfl.md not found",
+  ].join("\n");
+  const c = classify(tail);
+  assert.equal(c.klass, "DETERMINISTIC_HOLD", "the defect must not hide behind the network blip");
+  assert.equal(shouldRetry(c.klass), false, "never auto-retry a tail containing a real defect");
+});
+
+test("ORDERING — MIXED tail where the defect is schema drift → SCHEMA_DRIFT, never retried", () => {
+  // Rule 6 (SCHEMA_DRIFT) is MORE SPECIFIC than rule 7 and legitimately claims an
+  // orphan-concept tail first. That's correct — the invariant that matters is not
+  // "which deterministic bucket" but "not TRANSIENT, and not retried".
+  const tail = [
+    "[refinery] BUILD FAILED — pack=cre-swfl status=degraded failureClass=transient",
+    "[refinery]   error: Connection error.",
+    "[refinery] BUILD FAILED — pack=env-swfl status=degraded failureClass=deterministic",
+    "[refinery]   error: Orphan Concept: slug `foo` not in brain-vocabulary.json",
+  ].join("\n");
+  const c = classify(tail);
+  assert.notEqual(c.klass, "TRANSIENT", "a real defect must never be bucketed transient");
+  assert.equal(c.klass, "SCHEMA_DRIFT");
+  assert.equal(shouldRetry(c.klass), false, "never auto-retry a tail containing a real defect");
+});
+
 test("BILLING — Anthropic 402 billing_error is pulled out of the generic HOLD bucket", () => {
   const c = classify(
     'CRON-DIAG failureClass=deterministic reason=402 {"type":"error","error":{"type":"billing_error","message":"Your credit balance is too low to access the Claude API."}}',

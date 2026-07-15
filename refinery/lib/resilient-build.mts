@@ -1,4 +1,7 @@
 // refinery/lib/resilient-build.mts
+// Error CLASS only — no client is constructed here, so this stays off the paid
+// surface (Gate 6 keys on `new Anthropic(` / ANTHROPIC_API_KEY, not on an import).
+import { APIConnectionError } from "@anthropic-ai/sdk";
 import type { PackDefinition } from "../types/pack.mts";
 import type { BrainOutput } from "../types/brain-output.mts";
 import type { OutputResult } from "../stages/4-output.mts";
@@ -57,8 +60,36 @@ export interface BuildReport {
 
 // ── Pure helpers ───────────────────────────────────────────────────────────
 
-/** Classify a build error as transient (retry eligible) or deterministic. */
+/** Classify a build error as transient (retry eligible) or deterministic.
+ *
+ *  TYPE FIRST, then message. The Anthropic SDK's network failures are a real
+ *  class, not a wording — matching only on substrings is what let the 07/13
+ *  egress flake get stamped `deterministic` and HELD as a hard failure:
+ *
+ *    APIConnectionError        → message "Connection error."   (verified: SDK v0.106.0,
+ *    APIConnectionTimeoutError → message "Request timed out."   node_modules/@anthropic-ai/
+ *                                                               sdk/core/error.mjs:70-83)
+ *
+ *  NEITHER matched the old substring list ("socket closed" et al), so a network
+ *  blip → failureClass=deterministic → classify-cron-failure's DETERMINISTIC_HOLD
+ *  (rule 7) fired before its TRANSIENT rule (rule 10) and the run was held instead
+ *  of self-healing. `APIConnectionTimeoutError extends APIConnectionError`, so the
+ *  single `instanceof` below covers both.
+ *
+ *  Deliberately NOT transient: `RateLimitError` (429) and the 402 `billing_error`
+ *  are plain `APIError`s, not `APIConnectionError`s — they stay deterministic/LOUD.
+ *  Verified: `new RateLimitError(...) instanceof APIConnectionError === false`.
+ *
+ *  The substring arm is kept as a FALLBACK, not a replacement: the error can reach
+ *  us flattened (re-thrown as a plain Error, or round-tripped through
+ *  `_build-report.json`'s `reason` string), where the instance is long gone but the
+ *  wording survives. Both arms, so neither hole reopens.
+ */
 export function isTransientError(err: unknown): boolean {
+  // Structural: the real error class survives unwrapped from the SDK call through
+  // runPipeline to buildOne (no re-wrapping layer in between).
+  if (err instanceof APIConnectionError) return true;
+
   const msg = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
   return (
     msg.includes("socket hang up") ||
@@ -67,7 +98,10 @@ export function isTransientError(err: unknown): boolean {
     msg.includes("fetch failed") ||
     // Bun fetch: TCP connection dropped mid-response (external API or Supabase blip)
     msg.includes("socket connection was closed unexpectedly") ||
-    msg.includes("socket closed")
+    msg.includes("socket closed") ||
+    // Anthropic SDK wording, for the flattened/serialized case (see above).
+    msg.includes("connection error") ||
+    msg.includes("request timed out")
   );
 }
 
@@ -233,6 +267,42 @@ type RunPipelineFn = (
   opts: { dryRun: boolean; degradedUpstreamIds?: ReadonlySet<string> },
 ) => Promise<OutputResult>;
 
+/**
+ * The catch-site error log — THE "silent" IN SILENT-DEGRADE.
+ *
+ * `buildOne` used to swallow the caught error entirely: it called
+ * `classifyFailure(...)` and returned, never printing the throw. The CLI in turn
+ * only mutated `degradedIds` and printed nothing. Net effect on a forced rebuild:
+ * a pack fails, the operator watches five minutes of silence, the process exits 0,
+ * and the error that caused it exists NOWHERE in the log (it lived only in the
+ * returned object, and on a transient it never even reached `formatCronDiag`).
+ *
+ * A degraded build must SAY SO. One line, the three facts that make it actionable:
+ * WHICH pack, WHAT class (→ whether it self-heals), and the actual error message.
+ * `console.error` (not a injected logger) to match refinery house style and to land
+ * on the stream the cron log tail captures — which is also what feeds
+ * classify-cron-failure.mjs.
+ *
+ * Stack goes out on `deterministic` only: that's the class that will NOT self-heal
+ * and that a human must debug. A transient blip needs the fact, not the trace.
+ */
+function logFailure(packId: string, outcome: BrainBuildOutcome, err: unknown): void {
+  const reason = String(outcome.reason ?? (err instanceof Error ? err.message : err)).replace(
+    /\s+/g,
+    " ",
+  );
+  const heals = outcome.failureClass === "transient" ? "self-heals next run" : "will NOT self-heal";
+  console.error(
+    `[refinery] BUILD FAILED — pack=${packId} status=${outcome.status} ` +
+      `failureClass=${outcome.failureClass} (${heals}) — serving ` +
+      `${outcome.status === "degraded" ? `last-good v${outcome.version}` : "NOTHING (no eligible last-good)"}` +
+      `\n[refinery]   error: ${reason}`,
+  );
+  if (outcome.failureClass === "deterministic" && err instanceof Error && err.stack) {
+    console.error(err.stack);
+  }
+}
+
 /** Wrap a single pack's runPipeline call with resilience: one retry on
  *  transient errors (5s backoff), then classify as `degraded` or `missing`.
  *  `readBrainOutputFn` and `delaySec` are injectable for unit testing. */
@@ -255,14 +325,18 @@ export async function buildOne(
         // We chose to retry → this is the transient class regardless of the
         // retry error's wording. A transient degrade stays a quiet exit 2.
         const read = await readBrainOutputFn(pack.brain_id);
-        return classifyFailure(pack, retryErr, read, "transient");
+        const outcome = classifyFailure(pack, retryErr, read, "transient");
+        logFailure(pack.id, outcome, retryErr);
+        return outcome;
       }
     } else {
       // Non-transient = a real defect that will NOT self-heal (orphan-concept,
       // spec-validator, type error, harvest throw). Tag deterministic so the
       // exit code goes LOUD (exit 1) instead of silently degrading to exit 2.
       const read = await readBrainOutputFn(pack.brain_id);
-      return classifyFailure(pack, firstErr, read, "deterministic");
+      const outcome = classifyFailure(pack, firstErr, read, "deterministic");
+      logFailure(pack.id, outcome, firstErr);
+      return outcome;
     }
   }
   return {
