@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-07-12",
+  "generated_at": "2026-07-15",
   "spec": "docs/superpowers/plans/2026-06-03-row-tier/sweep-spec.md",
   "note": "Regenerable artifact — never hand-edit. Regenerate: bun refinery/tools/grade-config-sweep.mts. Adjudications live in the `checks` ledger, not here.",
   "summary": {
     "unregistered": 0,
     "invalid-polarity": 0,
     "row-candidate": 45,
-    "gradeable": 195,
+    "gradeable": 198,
     "reviewed-display": 42,
     "moat-fuel": 7,
     "needs-window": 23,
@@ -3752,6 +3752,27 @@
       "backtest_clean": false
     },
     {
+      "slug": "marketbeat_absorption_sqft_medical_office",
+      "concept_id": "marketbeat_absorption_sqft_medical_office",
+      "bucket": "gradeable",
+      "gateVector": {
+        "slug": "marketbeat_absorption_sqft_medical_office",
+        "concept_id": "marketbeat_absorption_sqft_medical_office",
+        "registered": true,
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "higher_is_bullish",
+        "category": "real-estate",
+        "value_type": "integer",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
+    },
+    {
       "slug": "marketbeat_absorption_sqft_office",
       "concept_id": "marketbeat_absorption_sqft_office",
       "bucket": "gradeable",
@@ -3765,6 +3786,27 @@
         "raw_polarity": "higher_is_bullish",
         "category": "real-estate",
         "value_type": "integer",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
+    },
+    {
+      "slug": "marketbeat_asking_rent_full_service_medical_office",
+      "concept_id": "marketbeat_asking_rent_full_service_medical_office",
+      "bucket": "gradeable",
+      "gateVector": {
+        "slug": "marketbeat_asking_rent_full_service_medical_office",
+        "concept_id": "marketbeat_asking_rent_full_service_medical_office",
+        "registered": true,
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "higher_is_bullish",
+        "category": "real-estate",
+        "value_type": "currency",
         "window_days": 180,
         "reviewed_non_directional": false
       },
@@ -3863,6 +3905,27 @@
       "gateVector": {
         "slug": "marketbeat_vacancy_rate_industrial",
         "concept_id": "marketbeat_vacancy_rate_industrial",
+        "registered": true,
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "lower_is_bullish",
+        "category": "real-estate",
+        "value_type": "percentage",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
+    },
+    {
+      "slug": "marketbeat_vacancy_rate_medical_office",
+      "concept_id": "marketbeat_vacancy_rate_medical_office",
+      "bucket": "gradeable",
+      "gateVector": {
+        "slug": "marketbeat_vacancy_rate_medical_office",
+        "concept_id": "marketbeat_vacancy_rate_medical_office",
         "registered": true,
         "polarity_state": "valid_directional",
         "window_ok": true,
