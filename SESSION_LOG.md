@@ -1,3 +1,113 @@
+## 2026-07-14 (Opus 4.8 · main) — LEDGER SWEEP → EXECUTION: 8 agents fixed the live breakage the sweep surfaced. Committed in groups; NOT pushed.
+
+Follow-up to the sweep entry below. Operator: "fan out and fix it all." Fanned 7 fix-agents + used the
+prior sweep's findings. All read-only-on-others'-files, disjoint file sets, I commit centrally (2+ parallel
+sessions live in the tree the whole time). Every claim below is a real test run, not an assertion.
+
+**Chart reshape (`lib/email/reshape-chart-type.ts`).** Two bugs: composition segments read `.value` but the
+writer emits `.valuePct` (dead-end, could never re-reshape); and `frameId:"line-band"` tripped the
+`isTimeSeries` regex meant for DATA shape, freezing re-reshape. Fixed both; the naive `value ?? valuePct`
+fallback would have round-tripped percentages back AS COUNTS (66.9 rendered as a count) — carried the raw
+value alongside instead. 161 tests green across reshape + svg + renderer suites. Side effect: storm-timeline /
+seasonal-radial are no longer frozen against cross-type reshape (their names merely SOUND temporal).
+
+**Desk loaders (`lib/desk/loaders.ts`, +new loaders.test.ts, 59 green).** ZIP median was last-write-wins over
+duplicate rows — 34110 had a real 441-listing row at $659,000 sitting beside a junk 14-listing row at
+$1,599,500, and the junk was corrupting the Pearson CORRELATION input too, not just a displayed median.
+Max-listing_count dedup now applied to ZIPs (was county-only). Added `isCoreCounty` guard (prophylactic — 0
+rows leak today) and server-side null filter + `selectAllPaged` on the sold series (latent truncation, 421
+rows < 1000 cap today). New test file — none existed.
+
+**Answer-path jargon leak (`refinery/render/speaker.mts`, `lib/fetch-brain.ts`, `lib/highlighter/grounding.ts`,
++jargon-leak.test.ts, 520 green + next build clean).** "Accela" was banned only in a PROMPT while 154
+instances rode in permits-swfl.md / master.md as grounding text. The z-score precedent was a MISLEADING
+template (chat-only by design). Scrubbed at the shared root — speaker sanitizeProse + scrubCaveatTechnical
+(the tier-2 metrics source-label path bypasses sanitizeProse), grounding block level, AND `buildDossier` in
+fetch-brain.ts (the MCP `_meta.dossier` + /api/b JSON path a grounding-only fix MISSES). Vendor product name →
+"permit system"/"permit portal"; the aca-prod.accela.com provenance URL is preserved (CITE receipt). Opened
+`welcome_source_chip_vendor_domain` + `citation_vendor_nouns_firecrawl_dlt` (same leak class, Firecrawl+dlt
+still in a citation, factually stale).
+
+**Silent-degrade + transient reclassify (`refinery/lib/resilient-build.mts`, `refinery/cli.mts`,
+`.github/scripts/classify-cron-failure.mjs`, 609 + 43 green).** buildOne's catch logged NOTHING — the literal
+"silent" in the five-minutes-of-silence-then-exit-0. Added a catch-site error log (pack id, failure class,
+real message; stack only on deterministic). And `isTransientError` missed the Anthropic SDK's
+`APIConnectionError` ("Connection error.") — matched by TYPE now (instanceof, verified against SDK v0.106.0),
+so a network flake stops being stamped deterministic-HOLD. Verdict on rule ordering: correct as-is, do NOT
+reorder (rule 7 keys the authoritative verdict, rule 10 keys incidental log-tail). Found a third hole en
+route: connect-timeout "Request timed out." fell through to UNKNOWN — added to rule 10.
+
+**Daily-digest gate (`scripts/email/freshness-preflight.mts`, `build-digest.mts`, `daily-email-digest.yml`,
+56 green).** The digest broke TODAY (run 29347029902) — the annotation blamed "stale master"; it was WRONG.
+The 07/12 preflight asserted master was REBUILT today, but master has a 7-day TTL and correctly SKIPS on a
+quiet day (07/14 chain ran green 06:31 UTC, all 40 upstreams fresh, master skipped-fresh, exit 0). The gate
+was a coin flip that would refuse every quiet day. Rewrote to gate on "did the chain RUN today + master not
+HELD" (from _build-report.json), fails closed on a missing/garbled report. The old test suite ENCODED THE BUG
+as a spec — rewrote it.
+
+**Price floor (`ingest/pipelines/listing_lifecycle/{extract_api,pipeline}.py`, `ingest/quality/
+quality_registry.yaml`, tests 112 green).** The contract was WORSENING (18→21→29 failing rows; 40 active rows
+under $10k, min $600 — monthly rents misfiled into a sale-price column). [Agent died mid-stream on an API
+error; deliverables were durable on disk and I verified the 112 tests pass before trusting them.]
+
+**Scope (`brains/listing-momentum-swfl.md` v4→v5, local free rebuild — skipSynthesisAgent).** Dropped the
+out-of-scope 33935/33440 (both Hendry primary_county); kept 33936 (Lee/Lehigh). Opened
+`listing_momentum_33936_duplicate_zip_row` (a ZCTA straddle emits a duplicate key — pre-existing, verified at
+HEAD, NOT introduced by the rebuild).
+
+**Parked cron (`.github/workflows/franchise-outcomes-quarterly.yml`).** `sba_foia_franchise_outcomes` is
+`parked:true` in the registry but its cron fired 07/15 08:00 UTC against a source whose write path never ran —
+and check_freshness never probes a parked entry, so the first landing would be INVISIBLE. Commented the cron,
+reason written into the file; re-enable in the same commit that promotes it to `pipelines:`.
+
+**FEMA — fix + inventory + handoff.** The empty `fema_nfip_claims` (0 rows, a killed load) is why
+hurricane-tracks-fl LEFT-JOIN-COALESCEs real flood dollars to FABRICATED $0 ($93.6M avg → $0, $3.39B
+worst-on-record → $0) and env-swfl's live fetch throws. The other session's `insert-from-staging` fix (their
+uncommitted resources.py) makes a repop safe (a kill leaves the table untouched, not emptied). Repop is
+BLOCKED at the harness permission gate (data_lake write, ask-first) — handed the operator the `!` command.
+Pulled the live OpenFEMA catalog (crawl4ai): we ingest 1 of ~10 flood datasets (claims), and it's the empty
+one. Available-not-pulled: Policies (73.6M), ResidentialPenetrationRates (3,159, county), CommunityStatusBook
+(25,119, CRS discount), MultipleLossProperties (240,263), IA repeat-flood (1.09M). Wrote
+`docs/handoff/2026-07-14-fema-flood-data-usage-handoff.md` (builder/user-pages/charts usage + ranked
+get-the-rest). Updated `/ops/census` in swfldatagulf-ops (SEPARATE repo, committed there) to show offered-vs-
+pulled-vs-live-rows per source, FEMA fully broken out, honest 0-vs-"—". Opened
+`fema_nfip_views_six_county_scope_leak`: the county-year + zip views still filter to SIX counties (incl.
+Charlotte/Glades/Sarasota), and env-swfl reads them un-re-filtered — so a repop alone does NOT fully de-scope
+env-swfl's dollar metrics. Reframed `source_totals_migration_apply` (migration IS applied; real bug is 0
+rows written). Opened `active_listings_rail_citations_never_render`, `capture_method_second_breadth_recheck`,
+`zip_narration_residual_unbaked` from the sweep.
+
+**NOT done / operator-gated:** the FEMA repop (`! python -m ingest.pipelines.fema.pipeline`), and after it BOTH
+the 6-county view re-scope AND the env-swfl/hurricane-tracks-fl rebuilds. Red crons that are correctly-loud
+alarms, not code bugs: brevitas/crexi (Cloudflare/403), graphify-republish (REBUILD_PAT can't see the private
+ops repo — scope, not expiry), corridor-pulse (Anthropic credit exhaustion + it's the wrong architecture,
+paid search in scheduled ingest — re-architect to crawl4ai before re-enabling). NOT pushed.
+## 2026-07-14 (Sonnet 5 · main) — parcel_subdivision re-ingest confirmed live; found + corrected a wrong LOCKED CLAUDE.md rule about GHA rebuild targeting.
+
+Follow-up to this session's earlier entry (FDOR field-widening + community-lookup join). The
+background re-ingest (both counties, merge-upsert) completed clean: 604,362 rows unchanged
+(collier 220,875 + lee 383,487 — no dupes, no loss), 82,153 with a positive sale_price_1, 603,069
+with living_area_sqft, 603,830 with actual_year_built, all 604,362 with neighborhood_code. Updated
+parcel_subdivision's source_scope in cadence_registry.yaml to confirmed_total (25 of 120 fields).
+
+Dispatched communities-swfl's rebuild (operator-approved) to get master's dossier off "no community
+data yet" — but the freeze-watchdog log showed master itself was skipped as "legitimately fresh."
+Traced why: CLAUDE.md's LOCKED "GHA rebuild targeting" rule (06/29) claimed `pack_id=<brain-id>` = "that
+brain + master only." Verified against refinery/lib/dag.mts's resolveBuildOrder() — it walks the
+target's own input_brains (upstreams), never downstream consumers; master is a consumer of a leaf,
+never in that leaf's build order. The rule was wrong, and had likely been silently under-propagating
+every prior "targeted rebuild" to master since it was written. Corrected CLAUDE.md + the
+feedback_gha-rebuild-targeting memory with the actual cheap fix: dispatch `pack_id=master` with NO
+--force — resilient-build.mts's masterIsStaleVsUpstreams() upstream-aware trigger re-synthesizes ONLY
+master (skips already-fresh leaves) whenever an upstream is newer than master's last refine, even
+inside master's own 7-day TTL. Operator held off firing that dispatch this session — opened check
+master_dossier_stale_communities_swfl_not_propagated so it isn't lost (RULE 2.4).
+
+Also, separately: operator decreed a standing process rule after the FDOR-field-widening finding —
+CLAUDE.md RULE 0.4 now has a FULL-SCOPE-FIRST addendum (enumerate a source's full field list into
+cadence_registry.yaml source_scope, which renders on /ops/census, BEFORE writing any ingest code).
+Saved as feedback_full-scope-first-census-before-ingest memory.
+
 ## 2026-07-14 (Sonnet 5 · main) — PDF/HTML visual-parity regression test built; found a real, previously-undetected agent-hero aspect-ratio bug
 
 Design-inspiration pass over Penpot (github.com/penpot/penpot) surfaced a real gap: the two HTML
