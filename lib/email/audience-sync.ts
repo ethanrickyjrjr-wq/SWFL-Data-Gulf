@@ -22,6 +22,11 @@
  * `resend_audience_id` for historical reasons — it stores a **segment id**; the
  * two are the same opaque string, so no schema change is needed.
  *
+ * NOT the same thing as `contact_segments` / lib/email/segments/ (the saved-filter
+ * engine for the ONE-OFF BLAST lane, ContactPickerModal). This module is the
+ * recurring DIGEST broadcast lane's tag → Resend-segment-id cache — different
+ * table, different send path. See lib/email/CLAUDE.md.
+ *
  * The slug → list mapping: each distinct contact tag value is one audience whose
  * `audience_slug` IS the tag. A contact with tags ["newsletter","vip"] is upserted
  * into both lists. Tag-less contacts belong to no audience (design decision — see
@@ -340,10 +345,7 @@ export async function syncUserAudiences(
  * The phone-import path relies on the service-role variant; the /sync route uses
  * the cookie client.
  */
-export function makeSupabaseAudienceStore(
-  supabase: SupabaseClient,
-  userId: string,
-): AudienceStore {
+export function makeSupabaseAudienceStore(supabase: SupabaseClient, userId: string): AudienceStore {
   return {
     async readContacts(): Promise<ContactRow[]> {
       const { data, error } = await supabase

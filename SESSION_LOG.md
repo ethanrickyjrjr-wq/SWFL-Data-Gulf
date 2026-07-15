@@ -355,6 +355,65 @@ is that it writes 0 rows. Closing it on its old title would have buried a possib
 **NOT done:** zero code edits (parallel sessions live in the tree). No fixes applied. Next: the scope
 violation + silent-degrade chain is the only thing actively lying to users — fix that pair first, then the
 red crons, then rank what's left.
+## 2026-07-14 (Opus 4.8 · wt/contact-segments) — Contact segmentation for the one-off blast lane: 10-task SDD build, docs + safe live-verify.
+
+Shipped contact segmentation end-to-end on the ONE-OFF BLAST lane (ContactPickerModal / POST
+/api/deliverables/[id]/blast) — a saved-filter engine deliberately distinct from `email_audiences` (the
+recurring DIGEST broadcast lane's tag → Resend-segment-id cache, lib/email/audience-sync.ts). Different
+table, different send path. Subagent-driven SDD, 10 tasks, in worktree bp-contact-segments (branch
+wt/contact-segments, lands to main later via `worktree.mjs land` — NOT pushed here). Commits
+27c1028a…98302be0 + this docs commit.
+
+**What shipped:**
+- **Schema (Task 1, 27c1028a):** `contacts.attribs jsonb` + new `contact_segments` table (RLS owner-only,
+  explicit service_role/authenticated grants), migration `20260714_contact_segments.sql`.
+- **Attribs capture (Task 2, 43d953ed):** CSV/vCard import now files unrecognised columns into `attribs`
+  (stored raw — no import-time mangling; CSV escaping stays at the export layer per the pinned policy).
+- **Tier dial (Task 3, 216f192d):** `contactSegments: "paid-only"` in lib/email/lab/capabilities.ts +
+  `emailLabTierFor` helper; the capability set is derived, mutation-tested.
+- **/api/contacts tier (Task 4, 503c80dd + 172f8599):** GET also returns the caller's email-lab tier;
+  fixed a same-shape break on app/contacts/page.tsx, fail-open on any error.
+- **Pure engine (Task 5, 4de26257):** lib/email/segments/filter.ts — a JSON AST `Condition`
+  (and/or/not + tags/attribs/email/name/engagement), pure `evaluateSegment`, and `requiresPaidTier`
+  (attribs|engagement anywhere in the tree = paid).
+- **Resolve wrapper (Task 6, e36178b7):** lib/email/segments/resolve.ts — thin Supabase wrapper: fetches
+  contacts and, only when an engagement leaf is present, the email_events rows scoped to the referenced
+  deliverable ids; fails open to an empty list.
+- **/api/segments CRUD (Task 7, 7ff08ec8):** GET/POST + [id] PATCH/DELETE, server-side paid-tier floor
+  BEFORE any write — the picker UI is not the only gate, a raw fetch can't bypass it.
+- **Preview + sent-deliverables (Task 8, e7c84862):** /api/segments/preview (tier-gated) and
+  /api/deliverables/sent to feed the engagement-condition picker; plain queries + JS join, no embedded
+  relations.
+- **Condition-builder UI (Task 9, 98302be0):** ContactPickerModal rewritten with a flat
+  AND-of-conditions builder; free tier gated by control ABSENCE (not disabled state); dodged a hard
+  react-hooks/set-state-in-effect error.
+- **Findability + safe live-verify (Task 10, this commit):** added the "Contact segmentation has ONE
+  root" bullet to lib/email/CLAUDE.md and a cross-reference in audience-sync.ts so a future session
+  finds this build and never merges the two lanes.
+
+**Live-verify — safe, no email sent.** Service-role probe of the LIVE DB confirmed the schema is applied
+(contacts carries attribs + all read columns, email_events exposes contact_id/did/user_id — the live
+table was altered beyond the tracked 20260628 migration — and contact_segments reads clean) and that
+prod holds essentially no data (1 contact, 0 events, 0 segments). Ran the REAL resolveSegment against
+the live DB using 3 disposable `__sdd_test__` contacts + email_events inserted under the one existing
+user_id: 5/5 assertions passed — tag-only → {A,B,C}, tag AND opened → {A}, tag AND clicked → {B}, tag
+AND never_opened → {B,C}, tag AND attribs.city=Naples → {A,C}. All inserted rows were deleted in a
+finally block; residue re-queried to 0 test contacts / 0 test events; the one pre-existing real contact
+preserved. This proves the data-layer pipeline (wrapper + engine + and/tags/attribs/engagement ops)
+live; it does NOT exercise the UI, the HTTP routes end-to-end, or a real send. Did NOT close
+`contact_segments_live_verify` — a full close needs the picker's match count to agree with an actual
+blast's recipient count (a UI click-through), which the no-send constraint here can't cover; left open
+for the operator's own pass.
+
+**Carry-forward for the final whole-branch review (tracked in progress.md, not silently deferred):** two
+same-named `ContactRow` interfaces coexist (pre-existing collision, not introduced by this build);
+resolve.ts's `.eq("user_id", …)` on email_events can under-match historical rows written with a null
+user_id (recall-only, mirrors an already-accepted dormancy caveat in blast-stagger.ts); the picker has
+no debounce, so a stale matched list can flash mid-request (never a wrong final send).
+
+**Next:** operator picker click-through to evidence-close contact_segments_live_verify; final
+whole-branch review + advisor check; then `worktree.mjs land contact-segments` and push to main.
+
 ## 2026-07-14 (Sonnet 5 · main) — 5 doctor-red follow-ups fixed after auditing the baseline handoff doc.
 
 Operator asked me to find issues in `docs/handoff/2026-07-14-doctor-red-baseline-handoff.md` (same-day

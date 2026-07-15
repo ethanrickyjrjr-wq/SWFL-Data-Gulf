@@ -4,6 +4,13 @@
   social-icons block, the icons, `applyBrand`, the brand form, and the PDF all read it — change it there,
   not in copies. Custom icons = keyless favicon → globe fallback. **No paid logo vendor** (Logo.dev was
   killed — don't re-propose).
+- **Contact segmentation has ONE root:** `lib/email/segments/` (`filter.ts` pure engine +
+  `resolve.ts` DB wrapper), persisted in `contact_segments`. This is the ONE-OFF BLAST
+  lane (`ContactPickerModal` / `POST /api/deliverables/[id]/blast`) — NOT `email_audiences`
+  (the tag → Resend-segment-id cache for the recurring DIGEST broadcast lane,
+  `lib/email/audience-sync.ts`). Different table, different send path; don't merge them.
+  Attribute/engagement conditions are `"paid-only"` in `lib/email/lab/capabilities.ts`,
+  enforced server-side in every `/api/segments*` route, not just in the picker UI.
 - **Outlook reality:** SVG icons render as text in Outlook — use the established fallback, don't ship raw SVG.
 - **Charts in deliverables** go through `buildChartForQuestion` (`lib/email/build-doc.ts`). Every plotted
   number is REAL (held brain / live-web-cited / upload-verified / user-stated) — the model selects points,
