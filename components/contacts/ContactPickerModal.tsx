@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Contact } from "@/lib/contacts/types";
+import type { Condition } from "@/lib/email/segments/filter";
 import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
 import { BlastResultsPanel } from "./BlastResultsPanel";
 
@@ -17,6 +18,32 @@ interface Props {
 }
 
 type SendResult = { sent: number; failed: number } | { error: string; limit?: number };
+type SentDeliverable = { id: string; label: string };
+
+/** One condition row in the builder UI. Compiles to a filter.ts Condition via
+ *  uiConditionToAst — the picker never emits raw SQL or free text. */
+type UiCondition =
+  | { kind: "tag"; mode: "has_any" | "not_any"; values: string[] }
+  | { kind: "attrib"; key: string; op: "eq" | "gt" | "lt" | "contains"; value: string }
+  | { kind: "engagement"; op: "opened" | "clicked" | "never_opened"; deliverableId: string };
+
+function uiConditionToAst(c: UiCondition): Condition {
+  if (c.kind === "tag") {
+    const or: Condition = { or: c.values.map((value) => ({ field: "tags", op: "has", value })) };
+    return c.mode === "has_any" ? or : { not: or };
+  }
+  if (c.kind === "attrib") {
+    return { field: "attribs", key: c.key, op: c.op, value: c.value };
+  }
+  return { field: "engagement", op: c.op, deliverable_id: c.deliverableId };
+}
+
+/** All conditions are ANDed together. Empty → null (no filter — the caller
+ *  falls back to the client-side "all contacts" view, today's behavior). */
+function conditionsToFilter(conditions: UiCondition[]): Condition | null {
+  if (conditions.length === 0) return null;
+  return { and: conditions.map(uiConditionToAst) };
+}
 
 export function ContactPickerModal({
   deliverableId,
@@ -26,8 +53,11 @@ export function ContactPickerModal({
   ctaVariants,
 }: Props) {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [tier, setTier] = useState<"free" | "paid">("free");
   const [search, setSearch] = useState("");
-  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [conditions, setConditions] = useState<UiCondition[]>([]);
+  const [matched, setMatched] = useState<Contact[] | null>(null);
+  const [sentDeliverables, setSentDeliverables] = useState<SentDeliverable[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [subject, setSubject] = useState("");
   const [attachPdf, setAttachPdf] = useState(false);
@@ -35,23 +65,61 @@ export function ContactPickerModal({
   const [result, setResult] = useState<SendResult | null>(null);
   const [splitTest, setSplitTest] = useState(false);
   const [ctaOverride, setCtaOverride] = useState<string | null>(null);
+  const [segmentName, setSegmentName] = useState("");
   const hasVariants = (subjectVariants?.length ?? 0) >= 2 || (ctaVariants?.length ?? 0) >= 2;
 
   useEffect(() => {
     fetch("/api/contacts")
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setContacts)
+      .then((r) => (r.ok ? r.json() : { contacts: [], tier: "free" }))
+      .then((body: { contacts: Contact[]; tier: "free" | "paid" }) => {
+        setContacts(body.contacts ?? []);
+        setTier(body.tier ?? "free");
+        if (body.tier === "paid") {
+          fetch("/api/deliverables/sent")
+            .then((r) => (r.ok ? r.json() : []))
+            .then(setSentDeliverables)
+            .catch(() => {});
+        }
+      })
       .catch(() => {});
   }, []);
 
+  const filter = useMemo(() => conditionsToFilter(conditions), [conditions]);
+
+  // Resolve matches server-side whenever the filter changes (attribs/engagement
+  // conditions can't be evaluated client-side — the picker doesn't hold
+  // email_events). With no filter the effect does nothing and `base` (below)
+  // falls back to the plain client-side contact list — see the `filter ? …`
+  // guard where `base` is computed, which makes any stale `matched` irrelevant
+  // once the filter is cleared (and avoids a synchronous setState in an effect).
+  useEffect(() => {
+    if (!filter) return;
+    let cancelled = false;
+    fetch("/api/segments/preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ filter }),
+    })
+      .then((r) => (r.ok ? r.json() : { contacts: [] }))
+      .then((body: { contacts: Contact[] }) => {
+        if (!cancelled) setMatched(body.contacts ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setMatched([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [filter]);
+
   const allTags = Array.from(new Set(contacts.flatMap((c) => c.tags))).sort();
   const q = search.trim().toLowerCase();
-  const visible = contacts.filter((c) => {
+  const base = filter ? (matched ?? contacts) : contacts;
+  const visible = base.filter((c) => {
     if (c.unsubscribed) return false;
     const matchSearch =
       !q || c.email.toLowerCase().includes(q) || (c.name ?? "").toLowerCase().includes(q);
-    const matchTag = !activeTag || c.tags.includes(activeTag);
-    return matchSearch && matchTag;
+    return matchSearch;
   });
 
   function toggleAll() {
@@ -97,6 +165,36 @@ export function ContactPickerModal({
     } finally {
       setSending(false);
     }
+  }
+
+  function addTagCondition() {
+    setConditions((prev) => [...prev, { kind: "tag", mode: "has_any", values: [] }]);
+  }
+  function addAttribCondition() {
+    setConditions((prev) => [...prev, { kind: "attrib", key: "", op: "eq", value: "" }]);
+  }
+  function addEngagementCondition() {
+    if (sentDeliverables.length === 0) return;
+    setConditions((prev) => [
+      ...prev,
+      { kind: "engagement", op: "opened", deliverableId: sentDeliverables[0].id },
+    ]);
+  }
+  function updateCondition(i: number, next: UiCondition) {
+    setConditions((prev) => prev.map((c, idx) => (idx === i ? next : c)));
+  }
+  function removeCondition(i: number) {
+    setConditions((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  async function saveSegment() {
+    if (!filter || !segmentName.trim()) return;
+    await fetch("/api/segments", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: segmentName.trim(), filter }),
+    }).catch(() => {});
+    setSegmentName("");
   }
 
   const sentOk = result && "sent" in result;
@@ -222,25 +320,171 @@ export function ContactPickerModal({
                 placeholder="Search contacts…"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none"
               />
-              {allTags.length > 0 && (
+              <div className="space-y-2">
+                {conditions.map((c, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 p-2 text-xs"
+                  >
+                    {c.kind === "tag" && (
+                      <>
+                        <select
+                          value={c.mode}
+                          onChange={(e) =>
+                            updateCondition(i, {
+                              ...c,
+                              mode: e.target.value as "has_any" | "not_any",
+                            })
+                          }
+                          className="rounded bg-white/10 px-1.5 py-1 text-white"
+                        >
+                          <option value="has_any">has any of</option>
+                          <option value="not_any">has none of</option>
+                        </select>
+                        <div className="flex flex-1 flex-wrap gap-1">
+                          {allTags.map((tag) => (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={() =>
+                                updateCondition(i, {
+                                  ...c,
+                                  values: c.values.includes(tag)
+                                    ? c.values.filter((v) => v !== tag)
+                                    : [...c.values, tag],
+                                })
+                              }
+                              className={`rounded-full px-2 py-0.5 ${c.values.includes(tag) ? "bg-gulf-teal text-[#0a1419]" : "border border-white/10 text-gray-400"}`}
+                            >
+                              {tag}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    {c.kind === "attrib" && tier === "paid" && (
+                      <>
+                        <input
+                          value={c.key}
+                          onChange={(e) => updateCondition(i, { ...c, key: e.target.value })}
+                          placeholder="attribute (e.g. city)"
+                          className="w-28 rounded bg-white/10 px-1.5 py-1 text-white placeholder-gray-500"
+                        />
+                        <select
+                          value={c.op}
+                          onChange={(e) =>
+                            updateCondition(i, {
+                              ...c,
+                              op: e.target.value as "eq" | "gt" | "lt" | "contains",
+                            })
+                          }
+                          className="rounded bg-white/10 px-1.5 py-1 text-white"
+                        >
+                          <option value="eq">=</option>
+                          <option value="contains">contains</option>
+                          <option value="gt">&gt;</option>
+                          <option value="lt">&lt;</option>
+                        </select>
+                        <input
+                          value={c.value}
+                          onChange={(e) => updateCondition(i, { ...c, value: e.target.value })}
+                          placeholder="value"
+                          className="flex-1 rounded bg-white/10 px-1.5 py-1 text-white placeholder-gray-500"
+                        />
+                      </>
+                    )}
+                    {c.kind === "engagement" && tier === "paid" && (
+                      <>
+                        <select
+                          value={c.op}
+                          onChange={(e) =>
+                            updateCondition(i, {
+                              ...c,
+                              op: e.target.value as "opened" | "clicked" | "never_opened",
+                            })
+                          }
+                          className="rounded bg-white/10 px-1.5 py-1 text-white"
+                        >
+                          <option value="opened">opened</option>
+                          <option value="clicked">clicked</option>
+                          <option value="never_opened">never opened</option>
+                        </select>
+                        <select
+                          value={c.deliverableId}
+                          onChange={(e) =>
+                            updateCondition(i, { ...c, deliverableId: e.target.value })
+                          }
+                          className="flex-1 rounded bg-white/10 px-1.5 py-1 text-white"
+                        >
+                          {sentDeliverables.map((d) => (
+                            <option key={d.id} value={d.id}>
+                              {d.label}
+                            </option>
+                          ))}
+                        </select>
+                      </>
+                    )}
+                    <button
+                      onClick={() => removeCondition(i)}
+                      className="text-gray-500 hover:text-white"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
                 <div className="flex flex-wrap gap-1.5">
                   <button
-                    onClick={() => setActiveTag(null)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${!activeTag ? "bg-gulf-teal text-[#0a1419]" : "border border-white/10 text-gray-400"}`}
+                    type="button"
+                    onClick={addTagCondition}
+                    className="rounded-full border border-white/10 px-2.5 py-1 text-xs text-gray-400 hover:text-white"
                   >
-                    All
+                    + tag condition
                   </button>
-                  {allTags.map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${activeTag === tag ? "bg-gulf-teal text-[#0a1419]" : "border border-white/10 text-gray-400"}`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
+                  {tier === "paid" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={addAttribCondition}
+                        className="rounded-full border border-white/10 px-2.5 py-1 text-xs text-gray-400 hover:text-white"
+                      >
+                        + attribute condition
+                      </button>
+                      {sentDeliverables.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={addEngagementCondition}
+                          className="rounded-full border border-white/10 px-2.5 py-1 text-xs text-gray-400 hover:text-white"
+                        >
+                          + engagement condition
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
-              )}
+                {tier === "free" && (
+                  <p className="text-[11px] text-gray-500">
+                    Attribute and engagement conditions are a paid feature — tag filtering is free.
+                  </p>
+                )}
+                {filter && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      value={segmentName}
+                      onChange={(e) => setSegmentName(e.target.value)}
+                      placeholder="Save as segment…"
+                      className="flex-1 rounded bg-white/10 px-2 py-1 text-xs text-white placeholder-gray-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={saveSegment}
+                      disabled={!segmentName.trim()}
+                      className="rounded-full bg-gulf-teal px-2.5 py-1 text-xs font-medium text-[#0a1419] disabled:opacity-40"
+                    >
+                      Save
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto">
