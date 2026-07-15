@@ -168,49 +168,25 @@ resolve.** Do **not** use the hand-written showcase HTML as an acceptance target
 
 ## Part 6 — The twelve recipes
 
-**All twelve are registered in `lib/deliverable/recipes/index.ts`.** The registry
-(`lib/deliverable/recipes.ts`) is the authority on skeleton · prose · subject spine · chart
-policy. **A surface may only POINT at a key; it may never redefine one.**
+Per-recipe landmines now live at `lib/deliverable/recipes/<name>.ledger.md` — one file per recipe,
+gated (Gate 9, `check-prepush-gate.mjs`) so an "Enforced" claim can never silently orphan from the
+test that backs it. This section used to hold that table directly; see
+`docs/superpowers/specs/2026-07-15-per-unit-coverage-ledgers-design.md` for why it moved.
 
-*(The previous playbook had a **key collision** — it assigned `market-pulse` to both Monthly
-Market Pulse and The Social Cut, and would have sent two workers at one key. It also said
-"these **five** lifecycle recipes" when there are **seven**, and had no entry at all for
-`open-house` or `price-reduced`. Its R-numbers disagreed with the code. All corrected here.)*
+**All twelve are still registered in `lib/deliverable/recipes.ts`** — that registry stays the
+authority on skeleton · prose · subject spine · chart policy; the ledgers document what's PROVEN
+about each, not what each IS.
 
-### The listing lifecycle — ONE resolved house, seven hats
+**Skeletons:** *"it probably already exists, load it"* is **NOT universally true** — and believing
+it is harmful. Every listing seed is **address-forward** (hero label literally "Price and
+address"), so `coming-soon` loading one leaves an open slot **inviting the user to paste back the
+address the recipe exists to suppress.** A coded grid in your own file is legitimate
+(`buildListingFlyer` is one).
 
-| Key | Chart | The thing that will bite you |
-|---|---|---|
-| `new-listing` | **none** | The reference. Its visual IS the photo. |
-| `coming-soon` | scarcity | **The street address must not leak** — not the hero, the alt text, the subject line, the CTA url, **or the narrator's fact sheet.** `authorListingNarrative` builds its facts FROM `facts.address`: hand it raw `ctx.facts` and you have typed the street into the model's context. De-identify, then redact the output. |
-| `market-comps` | comps-bar | **A comp must have beds AND sqft, or it is a vacant lot.** Filter by DATA, never by guessing at the name. The set is **2 recorded sales + 4 valuations** — *not* "six live listings". Say so on the email's face. |
-| `under-contract` | **none** | **Its old prompt REQUESTED A FABRICATION** — "lead with how fast it went pending" — and no lane holds a days-to-contract interval. The builder obeyed and invented one. Now: **time ON market**, which we do hold. |
-| `just-sold` | comps-bar | The vendor's `price` is an **ASK**. A sold price is a different thing. `/property-tax-history` returns the last recorded *transfer*, which may be a 2023 land sale on a new-construction lot — **a real number answering the wrong question.** No close → open slot. |
-| `open-house` | **none** | The **date and time are in no vendor feed.** Lane-2/4 — the agent supplies them. Open slots, never a placeholder date. |
-| `price-reduced` | **none** | **`reduced_amount` is the MOST RECENT cut — NOT the cut from the original ask.** price + cut = the **PREVIOUS** price, not the **ORIGINAL** one. *(This playbook said "old = price + cut" and that was WRONG — see the correction below.)* Operator: show the cut **above** the price, smaller, in the accent color. |
-
-### The area / agent recipes — a different spine. **Do not force the flyer.**
-
-`ctx.facts` is **null**. The subject is a ZIP, a city, or the agent.
-
-| Key | Chart | The thing that will bite you |
-|---|---|---|
-| `agent-brand-intro` | zip-by-zip | Two spines at once (farm area + anchor listing). **The anchor's city must not contaminate the farm area.** |
-| `agent-launch` | **none** | **Exactly ONE hard number in the whole letter, and no chart.** A cross-SWFL ranking chart landed in a personal letter live on 07/05. |
-| `sphere-weekly` | **none** | The headline is a **lane-3 fact** — a named web source, *not in our lake*. Cite it or leave it open. **Never substitute one of our own figures for a "national headline".** |
-| `review-reply` | area-trend | Pure lake data; genuinely about numbers, so it charts. |
-| `market-pulse` | zip-mom-move | ⚠️ **The shared chart producer binds YoY, not MoM** (`findRankedDeltaPair` takes the first delta column sharing a stem). A "month-over-month" email would ship **−8% YoY chips**. And the ranked frame draws **max 8 rows** — a 10-ZIP place cannot show ten bars. |
-
-**Skeletons:** *"it probably already exists, load it"* is **NOT universally true** — and
-believing it is harmful. Every listing seed is **address-forward** (hero label literally
-"Price and address"), so `coming-soon` loading one leaves an open slot **inviting the user to
-paste back the address the recipe exists to suppress.** A coded grid in your own file is
-legitimate (`buildListingFlyer` is one).
-
-**Social** (`social-pack`, `social-cut`) is **NOT `RecipeBuilder`-shaped** and is
-deliberately unregistered. Two live systems; neither touches the dispatch table; and **the
-social path has NO no-invention gate at all** (check
-`social_path_has_no_no_invention_gate`).
+**Social** (`social-pack`, `social-cut`) is **NOT `RecipeBuilder`-shaped** and is deliberately
+unregistered — no ledger for these two; they're out of this pilot's scope (spec §2). Two live
+systems; neither touches the dispatch table; and **the social path has NO no-invention gate at
+all** (check `social_path_has_no_no_invention_gate`).
 
 ---
 
