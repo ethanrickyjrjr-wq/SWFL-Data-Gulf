@@ -70,6 +70,18 @@
       "pack": "communities-swfl",
       "accepted_on": "07/14/2026",
       "note": "Operator-approved 07/14/2026: neighborhood_stats has had real rows (31,110) since today's earlier session; communities-swfl master input still showed 'no community data yet' as of 07/13. Rebuild independent of the parcel_subdivision field-widening re-ingest still running in background. (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29392067403",
+      "pack": "env-swfl",
+      "accepted_on": "07/15/2026",
+      "note": "Operator decree: rebuild after FEMA NFIP repopulation (448,425 rows) + 6-county scope-leak fix (491f4a64) to pick up correctly-scoped, current flood figures (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29392088541",
+      "pack": "hurricane-tracks-fl",
+      "accepted_on": "07/15/2026",
+      "note": "Operator decree: rebuild after FEMA NFIP repopulation (448,425 rows) to replace the fabricated-$0 risk window with real HURDAT2xNFIP figures (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
