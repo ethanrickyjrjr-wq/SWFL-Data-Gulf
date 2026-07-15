@@ -25,7 +25,7 @@
 // PURE — no network, no lake. The live proof (a real build through authorDoc, rendered
 // and looked at) is in the build report.
 
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, mock, afterAll } from "bun:test";
 import {
   auditRead,
   buildGrid,
@@ -116,6 +116,58 @@ function grid(over: Partial<Parameters<typeof buildGrid>[0]> = {}): EmailDoc {
     ...over,
   });
 }
+
+// ── Task 6: authorGapRead's own narrator never carries FAVORABLE_FRAMING_POLICY ──
+//
+// mock.module is process-global (no per-file isolation) — snapshot + restore, the same
+// pattern already used in shared.test.ts / agent-launch.test.ts / under-contract.test.ts.
+// This file otherwise drives PURE functions only (see the file header, "no network, no
+// lake") — this mock exists ONLY for the one test below that reaches the model call
+// inside authorGapRead.
+const realAnthropicSW = await import("@/refinery/agents/anthropic.mts");
+const anthropicOrigSW = { ...realAnthropicSW };
+afterAll(() => {
+  mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrigSW);
+});
+
+let swSystemSeen = "";
+mock.module("@/refinery/agents/anthropic.mts", () => ({
+  ...anthropicOrigSW,
+  getAnthropic: () => ({
+    messages: {
+      create: async (args: { system: string }) => {
+        swSystemSeen = args.system;
+        return {
+          content: [
+            {
+              type: "text",
+              // The exact honest-paragraph shape already proven clean by this file's own
+              // "lets the honest paragraph through" test below.
+              text: "For an owner, that is the number a buyer will start from. Watch next month's reading of the same two numbers.",
+            },
+          ],
+        };
+      },
+    },
+  }),
+}));
+
+describe("Task 6 — authorGapRead's own narrator never carries FAVORABLE_FRAMING_POLICY", () => {
+  // READ_SYSTEM (sphere-weekly.ts) carries an ABSOLUTE no-trend / no-comparison / no-number
+  // constraint over the NATIONAL side ("YOU HAVE NO TREND... WRITE NO NUMBER AND NO YEAR").
+  // FAVORABLE_FRAMING_POLICY presumes real numbers are on the page to order/emphasize —
+  // pasting it in here would contradict the rule this narrator depends on. Dynamic import
+  // AFTER the mock above (same pattern as under-contract.test.ts), so authorGapRead's own
+  // `getAnthropic` binding resolves through it, then called with this file's own top-level
+  // fixtures — the real narrator path, not a stand-in.
+  it("READ_SYSTEM never contains the framing block", async () => {
+    const { FAVORABLE_FRAMING_POLICY } = await import("./shared");
+    const { authorGapRead } = await import("./sphere-weekly");
+    await authorGapRead(AREA, GAP, SETTLED);
+    expect(swSystemSeen.length).toBeGreaterThan(0); // the model call really fired
+    expect(swSystemSeen).not.toContain(FAVORABLE_FRAMING_POLICY);
+  });
+});
 
 describe("THE SUBJECT — an area, from the field OR the prompt", () => {
   it("resolves the place the user typed over the [[blank]] — the Lab door passes NO scope", () => {

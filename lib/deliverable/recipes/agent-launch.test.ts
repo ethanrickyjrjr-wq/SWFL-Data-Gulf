@@ -7,6 +7,7 @@ import { groupRows } from "@/lib/email/doc/row-grouping";
 import { compileGrid } from "@/lib/email/compile-grid";
 import { GRID_COLS } from "@/lib/email/grid-schema";
 import { CLAIM_PROHIBITION, auditClaims } from "@/lib/deliverable/claims";
+import { FAVORABLE_FRAMING_POLICY } from "./shared";
 import type { EmailDoc, EmailBlock } from "@/lib/email/doc/types";
 import type { RecipeBuildContext } from "./index";
 import { RECIPES } from "@/lib/deliverable/recipes";
@@ -238,6 +239,20 @@ test("the narrator is TOLD the exact rule the lint enforces (CLAIM_PROHIBITION i
   await buildAgentLaunch(ctxFor(canvas()));
   expect(systemSeen).toContain(CLAIM_PROHIBITION);
   expect(systemSeen).toContain("NO NUMBERS");
+});
+
+// ── Task 6: the block stays OUT of this agent-spine recipe ──────────────────
+//
+// This recipe's own system prompt (LETTER_SYSTEM in agent-launch.ts) carries an
+// ABSOLUTE no-numbers constraint (asserted above: "NO NUMBERS"). FAVORABLE_FRAMING_POLICY
+// is a magnitude/ordering permission that presumes real numbers are on the page — pasting
+// it in here would directly contradict the "write no numbers at all" rule this recipe
+// depends on. `buildAgentLaunch` is the real narrator path (same call as the test above),
+// so this is a live regression guard, not a hypothetical.
+test("LETTER_SYSTEM NEVER contains FAVORABLE_FRAMING_POLICY (absolute no-numbers constraint)", async () => {
+  await buildAgentLaunch(ctxFor(canvas()));
+  expect(systemSeen.length).toBeGreaterThan(0);
+  expect(systemSeen).not.toContain(FAVORABLE_FRAMING_POLICY);
 });
 
 test("THE STRUCTURAL DONE-CONDITION: the narrator receives no raw set, no pair, no figure", async () => {

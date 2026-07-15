@@ -30,6 +30,7 @@ import {
   tally,
 } from "./market-pulse";
 import { CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
+import { FAVORABLE_FRAMING_POLICY } from "./shared";
 import type { RecipeBuildContext } from "./index";
 import type { ZipMove } from "./market-pulse";
 import type { BrainOutput, BrainOutputDetailTable } from "@/refinery/types/brain-output.mts";
@@ -374,6 +375,20 @@ describe("the claim gate — CODE counts, and the narrator is never given a set 
     const sys = pulseSystemPrompt(6);
     expect(sys).toContain(CLAIM_PROHIBITION);
     expect(sys).toContain("YOU HAVE NOT BEEN GIVEN THE ZIP ROWS");
+  });
+
+  // ── Task 6: the block stays OUT of this story-side recipe ──────────────────
+  //
+  // pulseSystemPrompt(shown) IS the exact `system` string market-pulse's narrator sends
+  // (authorPulseRead builds `const system = pulseSystemPrompt(shown);` and passes it
+  // straight through to messages.create with no further concatenation — market-pulse.ts).
+  // So calling it directly here is not a stand-in for the real narrator's prompt, it IS
+  // the real narrator's prompt. This recipe is one of the three story-side builders this
+  // feature does not touch (sphere-weekly / market-pulse / review-reply).
+  test("pulseSystemPrompt (the real narrator's system prompt) never carries FAVORABLE_FRAMING_POLICY", () => {
+    const sys = pulseSystemPrompt(6);
+    expect(sys.length).toBeGreaterThan(0);
+    expect(sys).not.toContain(FAVORABLE_FRAMING_POLICY);
   });
 
   // ── THE FAIL-CLOSED BACKSTOP ────────────────────────────────────────────────

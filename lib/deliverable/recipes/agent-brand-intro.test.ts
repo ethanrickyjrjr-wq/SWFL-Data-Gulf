@@ -5,7 +5,7 @@
 //
 // Each test below is a defect that was REAL in this build, not a hypothetical.
 
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test, mock, afterAll } from "bun:test";
 import {
   anchorAddressFromPrompt,
   brandAgentCard,
@@ -35,6 +35,56 @@ const SEED =
 const blank = (): EmailDoc => SEED_DOCS.find((s) => s.id === "skeleton-clean-white")!.build();
 
 const AREA = { place: "Cape Coral", zips: ["33904", "33909", "33914", "33990", "33991", "33993"] };
+
+// ── Task 6: authorAreaRead's own narrator never carries FAVORABLE_FRAMING_POLICY ──
+//
+// mock.module is process-global (no per-file isolation) — snapshot + restore, the same
+// pattern already used in shared.test.ts / agent-launch.test.ts / under-contract.test.ts.
+// This file had NO getAnthropic mock before this task: every other test here drives a
+// PURE function with fixture data and makes zero live calls. This mock exists ONLY for
+// the one test below that reaches the model call inside authorAreaRead.
+const realAnthropicABI = await import("@/refinery/agents/anthropic.mts");
+const anthropicOrigABI = { ...realAnthropicABI };
+afterAll(() => {
+  mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrigABI);
+});
+
+let abiSystemSeen = "";
+mock.module("@/refinery/agents/anthropic.mts", () => ({
+  ...anthropicOrigABI,
+  getAnthropic: () => ({
+    messages: {
+      create: async (args: { system: string }) => {
+        abiSystemSeen = args.system;
+        return {
+          content: [{ type: "text", text: "Homes here are worth a look this month." }],
+        };
+      },
+    },
+  }),
+}));
+
+describe("Task 6 — authorAreaRead's own narrator never carries FAVORABLE_FRAMING_POLICY", () => {
+  // This recipe's own system prompt (authorAreaRead's `system` string, agent-brand-intro.ts)
+  // carries an ABSOLUTE "you know NOTHING about the agent... write NOTHING about them"
+  // constraint. FAVORABLE_FRAMING_POLICY governs the emphasis/ordering of a subject's own
+  // facts — pasting it in here would contradict the very rule that keeps this narrator from
+  // inventing anything about the agent. Dynamic import AFTER the mock above, so
+  // authorAreaRead's own `getAnthropic` binding resolves through it.
+  test("the claim-gated system prompt never contains the framing block", async () => {
+    const { FAVORABLE_FRAMING_POLICY } = await import("./shared");
+    const { authorAreaRead } = await import("./agent-brand-intro");
+    const rows: ZipAsk[] = [
+      { zip: "33914", medianList: 525000 },
+      { zip: "33991", medianList: 457500 },
+      { zip: "33990", medianList: 412000 },
+      { zip: "33909", medianList: 344100 },
+    ];
+    await authorAreaRead(AREA, rows);
+    expect(abiSystemSeen.length).toBeGreaterThan(0); // the model call really fired
+    expect(abiSystemSeen).not.toContain(FAVORABLE_FRAMING_POLICY);
+  });
+});
 
 describe("the farm area (spine A)", () => {
   test("a named city resolves to EVERY ZIP it spans, not just one", () => {

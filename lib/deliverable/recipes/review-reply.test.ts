@@ -8,7 +8,7 @@
 // and traced in the build report; what is pinned HERE is every pure decision the
 // builder makes, because those are the ones a future edit can silently break.
 
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test, mock, afterAll } from "bun:test";
 import {
   cell,
   factLines,
@@ -21,6 +21,7 @@ import {
 } from "./review-reply";
 import { chartMagnitudeFromSpec, parseHeroFigure } from "@/lib/deliverable/chart-coherence";
 import type { MarketFigure } from "@/lib/email/market-context";
+import type { RecipeBuildContext } from "./index";
 
 const fig = (key: string, label: string, value: string, source: string): MarketFigure => ({
   key,
@@ -40,6 +41,78 @@ const LAKE_FEED: MarketFigure[] = [
 ];
 
 const FIGURES: ReviewFigures = selectFigures(LAKE_FEED);
+
+// ── Task 6: buildReviewReply's own narrator never carries FAVORABLE_FRAMING_POLICY ──
+//
+// mock.module is process-global (no per-file isolation) — snapshot + restore, the same
+// pattern used in shared.test.ts / agent-launch.test.ts / under-contract.test.ts. This
+// file otherwise drives PURE functions only (see the file header) — READ_SYSTEM is a
+// private, unexported constant, and `authorAreaRead` (the function that sends it) is
+// unexported too, so the ONLY way to reach the real system prompt is through the
+// exported builder, `buildReviewReply`. That builder also reads the lake
+// (`loadMarketFigures`) and a raw Supabase view (`loadZipTrend`) before it ever calls
+// the model, so both are stubbed here purely to reach the narrator offline — neither
+// is asserted on, and stubbing `createServiceRoleClientUntyped` to throw reproduces
+// the exact "no creds" empty-tolerant path `loadZipTrend` is documented to degrade on
+// (review-reply.ts: "no creds, no rows, any query error → [] and no chart"), so the
+// chart — and `chartSpecToEmailImage`, the PNG host — never fires either.
+const realMarketContext = await import("@/lib/email/market-context");
+const realServiceRole = await import("@/utils/supabase/service-role");
+const realAnthropicRR = await import("@/refinery/agents/anthropic.mts");
+const marketContextOrig = { ...realMarketContext };
+const serviceRoleOrig = { ...realServiceRole };
+const anthropicOrigRR = { ...realAnthropicRR };
+afterAll(() => {
+  mock.module("@/lib/email/market-context", () => marketContextOrig);
+  mock.module("@/utils/supabase/service-role", () => serviceRoleOrig);
+  mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrigRR);
+});
+
+let rrSystemSeen = "";
+mock.module("@/lib/email/market-context", () => ({
+  ...marketContextOrig,
+  loadMarketFigures: async () => LAKE_FEED,
+}));
+mock.module("@/utils/supabase/service-role", () => ({
+  ...serviceRoleOrig,
+  createServiceRoleClientUntyped: () => {
+    throw new Error("no creds in test");
+  },
+}));
+mock.module("@/refinery/agents/anthropic.mts", () => ({
+  getAnthropic: () => ({
+    messages: {
+      create: async (args: { system: string }) => {
+        rrSystemSeen = args.system;
+        return {
+          content: [{ type: "text", text: "Values here are holding steady this month." }],
+        };
+      },
+    },
+  }),
+}));
+
+describe("Task 6 — buildReviewReply's own narrator never carries FAVORABLE_FRAMING_POLICY", () => {
+  // READ_SYSTEM (review-reply.ts) forbids arithmetic and forbids naming a cause not given —
+  // it does not carry an absolute no-numbers rule the way agent-launch/sphere-weekly do, but
+  // this recipe is one of the three STORY-SIDE builders this feature explicitly does not
+  // touch (sphere-weekly / market-pulse / review-reply). Dynamic import AFTER the mocks
+  // above, so buildReviewReply's own `getAnthropic` / `loadMarketFigures` /
+  // `createServiceRoleClientUntyped` bindings resolve through them.
+  test("the honest-read system prompt never contains the framing block", async () => {
+    const { FAVORABLE_FRAMING_POLICY } = await import("./shared");
+    const { buildReviewReply } = await import("./review-reply");
+    const ctx = {
+      prompt: "REVIEW — 326 Shore Dr, Fort Myers, FL 33905",
+      currentDoc: { globalStyle: {}, blocks: [] },
+      facts: null,
+      resolved: false,
+    } as RecipeBuildContext;
+    await buildReviewReply(ctx);
+    expect(rrSystemSeen.length).toBeGreaterThan(0); // the model call really fired
+    expect(rrSystemSeen).not.toContain(FAVORABLE_FRAMING_POLICY);
+  });
+});
 
 // ── THE SUBJECT ──────────────────────────────────────────────────────────────
 // The Lab door passes NO scope. If the area only resolves from `scope`, this recipe
