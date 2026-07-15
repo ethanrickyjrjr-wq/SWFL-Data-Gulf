@@ -61,10 +61,17 @@ function extractPoints(spec: ChartSpec): Pt[] {
       .filter((p) => Number.isFinite(p.value));
   }
 
+  // TWO writers use `options.segments` with DIFFERENT value keys: donut-share
+  // carries `{label, value}` (lib/charts/svg/donut-share.ts) while composition
+  // carries `{label, valuePct}` (lib/charts/svg/composition.ts + bindComposition
+  // in lib/deliverable/bind-frame.ts). Reading `value` alone dead-ended every
+  // composition spec (NaN → filtered → zero points → un-reshapeable). Accept
+  // both; our own composition writer below also carries the raw `value` so a
+  // round-trip returns the true magnitude rather than the share.
   const segments = o.segments as Array<Record<string, unknown>> | undefined;
   if (Array.isArray(segments) && segments.length) {
     return segments
-      .map((s) => ({ label: String(s.label ?? ""), value: Number(s.value) }))
+      .map((s) => ({ label: String(s.label ?? ""), value: Number(s.value ?? s.valuePct) }))
       .filter((p) => Number.isFinite(p.value));
   }
 
@@ -126,10 +133,19 @@ export function chartTypeFits(spec: ChartSpec, type: ChartType): boolean {
 /** Is this a trend over time (a period axis)? Such data must NOT be force-fit into a
  *  categorical bar/donut — slicing it grabs arbitrary (often the OLDEST) points, which
  *  is how year-2000 values leaked onto a "current" chart. The trend's own renderer shows
- *  the recent window. Detected by frame, area type, or chronological YYYY/YYYY-MM labels. */
+ *  the recent window.
+ *
+ *  This asks about the DATA, never the frame's NAME. It used to also match
+ *  `/zhvi|area|line-band|seasonal|timeline/` against `frameId`, which was wrong twice
+ *  over: (1) the "line-band" case below deliberately emits chart_type "bar" to stay
+ *  re-reshapeable, but its own frameId then tripped the regex — so once a chart became
+ *  a line-band it could never be changed again; (2) "seasonal-radial" is a per-corridor
+ *  snapshot and "storm-timeline" is a list of named events — categorical data whose
+ *  frame names merely *sound* temporal. A real trend always shows it in the data:
+ *  chart_type "area" (bindLineBand, the zhvi-area producers) or chronological
+ *  YYYY / YYYY-MM labels (the bar-table-framed monthly series). */
 export function isTimeSeries(spec: ChartSpec): boolean {
   if (spec.chart_type === "area") return true;
-  if (/zhvi|area|line-band|seasonal|timeline/i.test(spec.frameId ?? "")) return true;
   const pts = extractPoints(spec);
   return pts.length >= 2 && pts.every((p) => /^\d{4}(-\d{2})?$/.test(String(p.label).trim()));
 }
@@ -264,7 +280,16 @@ export function reshapeChartToType(spec: ChartSpec, type: ChartType): ChartSpec 
         chart_type: "bar",
         frameId: "composition",
         options: {
-          segments: pts.map((p) => ({ label: p.label, valuePct: (p.value / total) * 100 })),
+          // `valuePct` is what compositionSvg draws; the raw `value` rides along
+          // so re-reshaping this spec (extractPoints) recovers the ORIGINAL
+          // magnitudes — without it, a composition → bar round-trip would render
+          // shares (66.9) under the inherited value_format ("count"). The SVG
+          // builder whitelists label/valuePct/color, so the extra key is inert.
+          segments: pts.map((p) => ({
+            label: p.label,
+            value: p.value,
+            valuePct: (p.value / total) * 100,
+          })),
         },
       } as ChartSpec;
     }

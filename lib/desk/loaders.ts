@@ -7,7 +7,8 @@
 // KNOWN-DEBT(data_lake: desk aggregates live in the data_lake schema (typed public only))
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { isCoreScope } from "@/refinery/lib/core-scope.mts";
+import { isCoreCounty, isCoreScope } from "@/refinery/lib/core-scope.mts";
+import { selectAllPaged } from "@/refinery/lib/paginate.mts";
 import {
   mapMarketTemperature,
   type MarketTempGaugeData,
@@ -140,23 +141,48 @@ interface CityMonthlySeries {
   monthsSupply: Map<string, SeriesPoint[]>;
 }
 
-async function loadSoldSeries(supabase: Supabase): Promise<CityMonthlySeries> {
+/**
+ * The sold anchor is the deepest PRICE series on the desk and the hero rides it, so a
+ * silent short-read here is the most expensive kind of bug on this page: a truncated
+ * series doesn't error, it just draws a shorter history and a different trend.
+ *
+ * Two defenses, both server-side:
+ *   1. `.not(median_sale_price, is, null)` — a valueless row was previously fetched, then
+ *      discarded in TS below. It still spent a slot against PostgREST's `db-max-rows` cap,
+ *      so nulls could push real months off the end of the response.
+ *   2. `selectAllPaged` — a bare `.select()` returns AT MOST 1000 rows with NO error. The
+ *      three cities run 421 rows today, so the cap is not biting yet; it starts biting the
+ *      moment a city or a property_type is added, and it bites silently. Ordered by
+ *      (area, period_end), which is unique-together (verified 421/421 distinct against the
+ *      lake, 07/14/2026) — `selectAllPaged` owns ALL ordering, so no `.order()` here: a
+ *      `period_end`-first sort is NOT unique (every month repeats across all three cities)
+ *      and would let PostgREST skip/repeat rows across page seams.
+ *
+ * COUPLING: `months_of_supply` is read from these same rows, so the null filter on PRICE
+ * also gates supply. Verified zero divergence in the lake (07/14/2026 — all 421 rows carry
+ * both), and the two arrive paired in the Redfin feed. If that ever changes, a
+ * price-null/supply-valued row would be dropped from the supply series too.
+ */
+export async function loadSoldSeries(supabase: Supabase): Promise<CityMonthlySeries> {
   const empty: CityMonthlySeries = { sold: new Map(), monthsSupply: new Map() };
   try {
-    const { data, error } = await supabase
-      .schema("data_lake")
-      .from("redfin_city_swfl")
-      .select("area, period_end, median_sale_price, months_of_supply")
-      .eq("property_type", "All Residential")
-      .in(
-        "area",
-        CITY_DEFS.map((c) => c.key),
-      )
-      .order("period_end", { ascending: true });
-    if (error || !data) return empty;
+    const data = await selectAllPaged<SoldRow>(
+      () =>
+        supabase
+          .schema("data_lake")
+          .from("redfin_city_swfl")
+          .select("area, period_end, median_sale_price, months_of_supply")
+          .eq("property_type", "All Residential")
+          .in(
+            "area",
+            CITY_DEFS.map((c) => c.key),
+          )
+          .not("median_sale_price", "is", null) as never,
+      ["area", "period_end"],
+    );
     const sold = new Map<string, SeriesPoint[]>();
     const monthsSupply = new Map<string, SeriesPoint[]>();
-    for (const r of data as SoldRow[]) {
+    for (const r of data) {
       if (typeof r.median_sale_price === "number") {
         const list = sold.get(r.area) ?? [];
         list.push({ period: r.period_end, value: r.median_sale_price });
@@ -178,7 +204,7 @@ async function loadSoldSeries(supabase: Supabase): Promise<CityMonthlySeries> {
 // listing_active_stats — region/county rollups + per-ZIP medians (spine lane)
 // ---------------------------------------------------------------------------
 
-interface ActiveStatsRow {
+export interface ActiveStatsRow {
   county: string | null;
   zip_code: string | null;
   listing_count: number | null;
@@ -186,10 +212,59 @@ interface ActiveStatsRow {
   latest_scraped_at: string | null;
 }
 
-interface ActiveStats {
+export interface ActiveStats {
   region: ActiveStatsRow | null;
   counties: ActiveStatsRow[];
   zips: ActiveStatsRow[];
+}
+
+/**
+ * Pure reducer over the raw view — the ONE place a `listing_active_stats` row is chosen.
+ *
+ * The view carries stray duplicate rollups at BOTH grains, and the same rule settles both:
+ * the row with the most listings is the real one, the thin twin is junk.
+ *
+ * COUNTY: a Lee rollup with listing_count=1 sits beside the real ~13.9k one.
+ *
+ * ZIP: three ZIPs are doubled today (verified in the lake 07/14/2026) — 34110 carries a
+ * 441-listing row at $659,000 AND a 14-listing row at $1,599,500; 33971 and 34119 are the
+ * same shape. Every ZIP row was previously passed through unfiltered, and the downstream
+ * `medianByZip` map is LAST-WRITE-WINS — so whichever twin the view happened to return
+ * second became that ZIP's median, and it fed the watchlist, the movers board, the asking-
+ * price map AND the Pearson correlation matrix. Deduping here (not at each of those four
+ * call sites) is the fix: one authority for "which row IS this ZIP".
+ *
+ * COUNTIES are also scoped to core (Lee + Collier) via `isCoreCounty`. Today the view holds
+ * nothing else, so this drops zero rows — it is a guard, so that a county appearing upstream
+ * cannot walk onto the desk's ticker without anyone deciding it should.
+ */
+export function reduceActiveStats(rows: ActiveStatsRow[]): ActiveStats {
+  const region = rows.find((r) => r.county == null && r.zip_code == null) ?? null;
+
+  /** Keep the max-`listing_count` row per key — the thin twin is the junk one. */
+  const keepFattest = (
+    pick: (r: ActiveStatsRow) => string | null,
+    include: (r: ActiveStatsRow) => boolean,
+  ): ActiveStatsRow[] => {
+    const best = new Map<string, ActiveStatsRow>();
+    for (const r of rows) {
+      const key = pick(r);
+      if (key == null || !include(r)) continue;
+      const prev = best.get(key);
+      if (!prev || (r.listing_count ?? 0) > (prev.listing_count ?? 0)) best.set(key, r);
+    }
+    return [...best.values()];
+  };
+
+  const counties = keepFattest(
+    (r) => r.county,
+    (r) => r.zip_code == null && isCoreCounty(r.county),
+  );
+  const zips = keepFattest(
+    (r) => r.zip_code,
+    () => true,
+  );
+  return { region, counties, zips };
 }
 
 async function loadActiveStats(supabase: Supabase): Promise<ActiveStats> {
@@ -199,18 +274,7 @@ async function loadActiveStats(supabase: Supabase): Promise<ActiveStats> {
       .from("listing_active_stats")
       .select("county, zip_code, listing_count, median_list_price, latest_scraped_at");
     if (error || !data) return { region: null, counties: [], zips: [] };
-    const rows = data as ActiveStatsRow[];
-    const region = rows.find((r) => r.county == null && r.zip_code == null) ?? null;
-    // The view can carry a stray duplicate county rollup (observed: a Lee row
-    // with listing_count=1 beside the real ~20.7k one) — keep the max-count row.
-    const byCounty = new Map<string, ActiveStatsRow>();
-    for (const r of rows) {
-      if (r.county == null || r.zip_code != null) continue;
-      const prev = byCounty.get(r.county);
-      if (!prev || (r.listing_count ?? 0) > (prev.listing_count ?? 0)) byCounty.set(r.county, r);
-    }
-    const zips = rows.filter((r) => r.zip_code != null);
-    return { region, counties: [...byCounty.values()], zips };
+    return reduceActiveStats(data as ActiveStatsRow[]);
   } catch {
     return { region: null, counties: [], zips: [] };
   }

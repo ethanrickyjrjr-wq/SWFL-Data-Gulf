@@ -192,6 +192,35 @@ test("isTimeSeries is false for categorical (ZIP/city) data", () => {
   expect(isTimeSeries(trendSpec)).toBe(true);
 });
 
+// REGRESSION (line_band_frameid_trips_istimeseries_regex): isTimeSeries asks about the
+// DATA (a period axis), never the frame's NAME. It used to regex frameId against
+// /zhvi|area|line-band|seasonal|timeline/ — so the line-band case, which deliberately
+// emits chart_type "bar" to stay re-reshapeable, was frozen by its own frameId: once a
+// chart became a line-band, every later reshape short-circuited and returned it unchanged.
+test("a reshaped line-band is NOT a time series — its labels are ZIPs, not dates", () => {
+  const band = reshapeChartToType(usdSpec, "line-band");
+  expect(band.frameId).toBe("line-band");
+  expect(isTimeSeries(band)).toBe(false);
+});
+
+test("a line-band chart can be reshaped AGAIN (the frame name must not freeze it)", () => {
+  const band = reshapeChartToType(usdSpec, "line-band");
+  expect(reshapeChartToType(band, "bar").frameId).toBe("bar-table");
+  expect(reshapeChartToType(band, "dotplot").frameId).toBe("dot-plot");
+  // and the real values survive the second hop — reshaping only relabels
+  expect(reshapeChartToType(band, "bar").rows).toEqual(usdSpec.rows);
+});
+
+test("frame names that merely SOUND temporal (seasonal/timeline) don't make categorical data a trend", () => {
+  // seasonal-radial is a per-corridor snapshot; storm-timeline is a list of named events.
+  // Neither has a period axis — only chart_type "area" or chronological labels do.
+  expect(isTimeSeries({ ...usdSpec, frameId: "seasonal-radial" })).toBe(false);
+  expect(isTimeSeries({ ...usdSpec, frameId: "storm-timeline" })).toBe(false);
+  // A GENUINE trend is still caught by its data, with no help from the frame name.
+  expect(isTimeSeries({ ...trendSpec, frameId: "bar-table", chart_type: "bar" })).toBe(true);
+  expect(isTimeSeries({ ...trendSpec, frameId: "some-new-frame" })).toBe(true);
+});
+
 test("chartTypeFits: composition needs additive (count) data, same test as donut", () => {
   expect(chartTypeFits(countSpec, "composition")).toBe(true);
   expect(chartTypeFits(usdSpec, "composition")).toBe(false);
@@ -207,6 +236,63 @@ test("count data → composition computes each point's share of the total (never
 
 test("GUARDRAIL: composition on price (usd) data falls back to a bar", () => {
   expect(reshapeChartToType(usdSpec, "composition").frameId).toBe("bar-table");
+});
+
+// REGRESSION (composition_segments_missing_value_key_reshape_deadend): the composition
+// writer emits segments keyed `valuePct`, but extractPoints read `value` only — so every
+// composition spec extracted ZERO points and hit the <2-point dead end: it could never be
+// changed to anything else again. donut-share uses the same `segments` key with `value`,
+// so extractPoints must accept BOTH keys.
+test("a composition spec is re-reshapeable — segments keyed valuePct are not a dead end", () => {
+  const composed = reshapeChartToType(countSpec, "composition");
+  expect(composed.frameId).toBe("composition");
+  const back = reshapeChartToType(composed, "donut");
+  expect(back.frameId).toBe("donut-share");
+  expect((back.options?.segments as unknown[]).length).toBe(3);
+});
+
+test("composition → bar recovers the ORIGINAL counts, never the shares", () => {
+  const composed = reshapeChartToType(countSpec, "composition");
+  // The raw value rides alongside valuePct precisely so the round-trip is honest:
+  // reshaping back must not render 66.9 (a share) under value_format "count".
+  const back = reshapeChartToType(composed, "bar");
+  expect(back.frameId).toBe("bar-table");
+  expect(back.rows).toEqual([
+    ["Lee", 7412],
+    ["Collier", 2749],
+    ["Hendry", 298],
+  ]);
+});
+
+test("a FOREIGN composition spec (bindComposition: valuePct only, percent format) still reshapes", () => {
+  // lib/deliverable/bind-frame.ts bindComposition emits {label, valuePct} with NO raw
+  // value and value_format "percent" — the pct IS the value there, so the fallthrough
+  // must carry it through rather than drop the spec.
+  const fromBinder: ChartSpec = {
+    title: "Flood-zone composition",
+    columns: ["segment", "share_pct"],
+    rows: [
+      ["In a flood zone", 62.4],
+      ["Remaining area", 37.6],
+    ],
+    chart_type: "bar",
+    value_format: "percent",
+    frameId: "composition",
+    asOf: "2026-07-01",
+    source: { citation: "SWFL Data Gulf" },
+    options: {
+      segments: [
+        { label: "In a flood zone", valuePct: 62.4 },
+        { label: "Remaining area", valuePct: 37.6 },
+      ],
+    },
+  };
+  const out = reshapeChartToType(fromBinder, "bar");
+  expect(out.frameId).toBe("bar-table");
+  expect(out.rows).toEqual([
+    ["In a flood zone", 62.4],
+    ["Remaining area", 37.6],
+  ]);
 });
 
 test("PASSTHROUGH: a spec already in the target frameId is returned unchanged", () => {
