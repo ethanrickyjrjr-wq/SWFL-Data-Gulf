@@ -1,3 +1,49 @@
+## 2026-07-14 (Sonnet 5 · main) — cleaned up in-flight work orphaned by earlier crashed sessions: 3 more commits + a live production bug fix.
+
+Operator: "figure out what is done so it can be committed and pushed... make sure no one is working
+on it." Found the repo was NOT actually abandoned — two other sessions (`946828af`, `bda494b9`) were
+still live and finished their own work mid-investigation (visible as a race: my first `git commit`
+attempt for the ingest fix collided with `946828af`/a concurrent session's identical commit
+`395bb30d`, and a `bunx next build` run coincided with a local brain rebuild that briefly reverted my
+`brains/listing-momentum-swfl.md` fix before I recommitted it). Checked the `ws` CLI claim ledger
+before every commit (repolith's own `claim` subcommand is stale/removed — see memory
+`reference_repolith-claim-warnings-false-positives.md`) and re-verified after each one.
+
+Committed 3 more groups of already-complete, already-tested work found sitting in the working tree:
+1. **`734bfe8f`** — migrated `agent-brand-intro.ts`, `review-reply.ts`, `sphere-weekly.ts` off their
+   private `push()`/layout closures onto the `finalizeDoc` grid seam (matches
+   `design-system-reachability.test.ts`'s updated `KNOWN_BYPASS` list); `review-reply.ts` also adds a
+   5th figure (`askingNow` / `median_list`) and moves the hero's citation out of inline prose into the
+   Sources accordion (rule 1). 155 bun tests green.
+2. **`da988769`** — PDF logo `objectFit:"contain"` + `PAGE_TOP_PAD` page-2 header-bleed fix, the exact
+   bugs the new `pdf-html-visual-parity` regression test was built to catch. **Note:** this commit
+   picked up 3 unrelated ingest files (`census_acs`/`census_cbp`/`fl_dbpr_licenses` pipeline.py,
+   comment-only additions documenting existing volume guards) — a plain `git commit` with no trailing
+   pathspec commits the WHOLE index, and another session had staged those in parallel. Content
+   verified accurate and harmless, but a reminder: always `git commit -F <msg> -- <explicit paths>`,
+   never a bare `git commit` in a shared working tree (CLAUDE.md RULE 1.5).
+3. **`3b351d2c`** — a live, already-shipped production bug: `89d5d4f3`'s local rebuild of
+   `listing-momentum-swfl.md` ran with `NEXT_PUBLIC_SITE_URL=http://localhost:3000` set, leaking 4
+   broken `localhost` citation links into main (the exact landmine memory
+   `feedback_refinery-build-overwrites-brain-md` describes). Caught via the separate full-day-audit
+   handoff's finding C4. Corrected the 4 URLs only; left the legitimate Hendry-ZIP-scope content fix
+   from `89d5d4f3` untouched.
+
+**Read, did not act on:** the full-day-audit handoff (`docs/handoff/2026-07-14-full-day-audit-and-
+system-map.md`, committed by the other session in `395bb30d`) flags finding C15 — `5c40fd12`'s
+rewrite of `assertChainRanToday` (already on main) treats a `masterDecision===null` targeted rebuild
+receipt as safe-to-send, which the audit argues can let the digest email yesterday's master numbers
+stamped today. Unclear whether `5c40fd12`'s author saw and deliberately rejected C15's reasoning, or
+wrote it in parallel without seeing the audit. Opened check
+`digest_gate_masterdecision_null_sends_stale_master` rather than resolve this myself — it's a live
+send-gate design call, not a bounded fix.
+
+**Verification:** `bunx next build` clean before the first commit; ingest pytest (57 tests across
+fdot/fema/census_cbp/fhfa/fl_dbpr_licenses) and `bun test lib/deliverable lib/email lib/pdf` (2515
+pass) re-run after every commit. The 1 remaining bun-test failure
+(`agent_hero_pdf_html_aspect_ratio_mismatch`) is a separate, already-tracked, pre-existing bug my
+changes don't touch.
+
 ## 2026-07-14 (Sonnet 5 · main) — replace_strategy data-loss fix landed for all 6 dlt+postgres replace pipelines; two audit handoffs committed.
 
 Committed the in-flight fix for the 07/14 `data_lake.fema_nfip_claims` data-loss incident: dlt's
