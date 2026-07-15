@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write   # needed to commit the email log
+      contents: write # needed to commit the email log
 
     steps:
       - name: Checkout
@@ -93,9 +93,15 @@ jobs:
           fi
 
       # The freshness preflight (scripts/email/freshness-preflight.mts) exits 1
-      # rather than send a digest built on a stale master. That is the ALERT —
-      # surface it. The HC heartbeat below is if: always() and only catches
-      # "the cron never fired", never "it fired and refused".
+      # rather than send a digest when the nightly chain did not run today. That
+      # is the ALERT — surface it. The HC heartbeat below is if: always() and only
+      # catches "the cron never fired", never "it fired and refused".
+      #
+      # The annotation names both arms because they need OPPOSITE responses, and
+      # the old copy ("stale master?") sent 07/14's triage down the wrong one: the
+      # refusal was real but master was NOT stale — the chain had run and correctly
+      # skipped a TTL-fresh master. Read the [DIGEST REFUSED] line in the step log;
+      # it says which arm tripped.
       - name: Notify on failure
         if: failure()
         uses: actions/github-script@v9
@@ -103,7 +109,10 @@ jobs:
           script: |
             const { GITHUB_RUN_ID, GITHUB_REPOSITORY } = process.env;
             const runUrl = `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
-            core.warning(`Daily digest FAILED or REFUSED (stale master?). Check: ${runUrl}`);
+            core.warning(
+              `Daily digest RED — either REFUSED (nightly chain did not run today, or master HELD) ` +
+                `or genuinely FAILED (send error). See the [DIGEST REFUSED] / [DIGEST FATAL] line: ${runUrl}`,
+            );
 
       - name: Healthchecks.io heartbeat
         if: always()

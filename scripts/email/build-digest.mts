@@ -6,7 +6,7 @@ import type { DigestPayload, EmailLog, MetricDelta, ZipMetricSnapshot } from "./
 import { ZIP_FOCUS } from "./types.ts";
 import { fetchDigestData } from "./fetch-digest-data.mts";
 import { readMostRecentLog, writeLog, isTodayAlreadySent, getNextIssueNumber } from "./log-io.mts";
-import { assertMasterFreshToday, StaleMasterError } from "./freshness-preflight.mts";
+import { assertChainRanToday, StaleMasterError } from "./freshness-preflight.mts";
 import { DigestEmail } from "./DigestEmail.tsx";
 
 // Threshold constants — sourced in EMAIL.md SOURCED THRESHOLDS
@@ -185,8 +185,12 @@ async function main() {
   // FRESHNESS PREFLIGHT (spec §8). Runs BEFORE the idempotency guard: a refusal
   // must not consume the day's send slot, burn an issue number, or write a log.
   // The red run IS the alert (see the Notify-on-failure step in the workflow).
+  //
+  // Asserts the CHAIN RAN today (brains/_build-report.json) — NOT that master was
+  // rebuilt today. The refinery correctly skips master on a no-change day, so the
+  // old token===today assertion refused every quiet day. See freshness-preflight.mts.
   try {
-    assertMasterFreshToday(today);
+    assertChainRanToday(today);
   } catch (err) {
     if (!(err instanceof StaleMasterError)) throw err;
     console.error(`[DIGEST REFUSED] ${err.message}`);
