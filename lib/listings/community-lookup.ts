@@ -19,6 +19,21 @@ import { addressKey } from "./address-key";
 // KNOWN-DEBT(data_lake: parcel_subdivision + neighborhood_stats live in the data_lake schema,
 // which the typed Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
+import { communityForSubdivision, COMMUNITY_ALIASES } from "@/refinery/lib/subdivision-aliases.mts";
+
+// SOURCE-SUPPLY NOTE (07/15/2026): data_lake.parcel_subdivision (queried below) carries MORE
+// than county/subdivision_name/zip/phy_addr1 -- the FDOR ingest (ingest/pipelines/
+// parcel_subdivision/) also pulls sale_price_1/2 + sale dates + qualification codes,
+// living_area_sqft, actual_year_built, effective_year_built, land_value, building_count,
+// residential_unit_count, neighborhood_code, market_area, and assessment_year. NONE of that
+// rolls into neighborhood_stats or ResolvedCommunityStats today -- home_count/
+// median_just_value/count_by_type only. Extending the rollup (e.g. "typical year built" or
+// "average living area" per neighborhood) is a one-line SQL change to agg.py's queries, NOT a
+// new ingest decision -- check here before reaching for crawl4ai or a new scrape for anything
+// that turns out to already be a tax-roll concept. True marketing/amenity concepts (golf,
+// gate, pool, HOA fee, clubhouse) are NOT in any government parcel layer and genuinely need
+// the named-web-source lane (see the deferred community_profiles scrape, check
+// community_profiles_zero_coverage).
 
 const SCHEMA = "data_lake";
 const PARCEL_TABLE = "parcel_subdivision";
@@ -136,6 +151,18 @@ interface NeighborhoodStatRow {
   as_of: string | null;
 }
 
+/** Roll a raw stemmed subdivision_name up to its marketed-community CANONICAL LABEL when
+ *  the alias map resolves it (e.g. "HERITAGE BAY" -> "Heritage Bay"), else return the raw
+ *  name unchanged. MUST match the fold `ingest/duckdb_pipelines/neighborhood_stats/agg.py`
+ *  applies before grouping (both read the same fixtures/community-aliases.json) -- this is
+ *  the join-key lockstep the resolver below depends on: neighborhood_stats stores rows keyed
+ *  by this same canonical-or-raw label, so a lookup that skipped this step would silently
+ *  miss every row the ingest side folds. */
+export function canonicalCommunityKey(rawSubdivisionName: string): string {
+  const slug = communityForSubdivision(rawSubdivisionName);
+  return slug && COMMUNITY_ALIASES[slug] ? COMMUNITY_ALIASES[slug].label : rawSubdivisionName;
+}
+
 /** Single-row lookup on the exact (county, subdivision_name) Gap 1 just resolved — a trivial
  *  exact-key join on data the resolver above already produced, not the "queryable by arbitrary
  *  name" surface Gap 2 (docs/handoff/2026-07-14-community-data-into-builder-handoff.md) covers. */
@@ -144,6 +171,7 @@ export async function resolveCommunityStats(
   subdivisionName: string,
 ): Promise<CommunityStats | null> {
   if (!county || !subdivisionName) return null;
+  const key = canonicalCommunityKey(subdivisionName);
   try {
     const db = createServiceRoleClientUntyped();
     const { data } = await db
@@ -151,7 +179,7 @@ export async function resolveCommunityStats(
       .from(NEIGHBORHOOD_TABLE)
       .select("home_count, count_by_type, median_just_value, source_url, as_of")
       .eq("county", county)
-      .eq("subdivision_name", subdivisionName)
+      .eq("subdivision_name", key)
       .limit(1);
     if (!Array.isArray(data) || data.length === 0) return null;
     const row = data[0] as NeighborhoodStatRow;
@@ -197,11 +225,47 @@ export async function resolveCommunityForListing(
   return {
     matched: true,
     county: resolution.county,
-    subdivisionName: resolution.subdivisionName,
+    subdivisionName: canonicalCommunityKey(resolution.subdivisionName),
     homeCount: stats?.homeCount ?? null,
     countByType: stats?.countByType ?? null,
     medianJustValue: stats?.medianJustValue ?? null,
     sourceUrl: stats?.sourceUrl ?? "",
     asOf: stats?.asOf ?? null,
   };
+}
+
+/** The shape `ListingFacts.communityStats` carries -- a listing's resolved-address
+ *  neighborhood stats, ready to cite in a deliverable. */
+export type ResolvedCommunityStats = {
+  subdivisionName: string;
+  homeCount: number | null;
+  medianJustValue: number | null;
+  countByType: Record<string, number> | null;
+  sourceUrl: string;
+  asOf: string | null;
+};
+
+function toMmDdYyyy(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  return m ? `${m[2]}/${m[3]}/${m[1]}` : iso;
+}
+
+/** THE NEIGHBORHOOD, from our own tax-roll parcel data -- universal (every home in Lee +
+ *  Collier), unlike `communitySourceLine`'s opportunistic per-listing vendor scrape. ONE
+ *  AUTHORITY -- every recipe that cites the resolved neighborhood stats reads it from here.
+ *  `median_just_value` is FDOR ASSESSED value, never a sale or list price -- the wording
+ *  below is the only phrasing a narrator may use for that number. Returns null when either
+ *  figure is absent -- absence stays SILENT, never "no data for this neighborhood". */
+export function neighborhoodStatsSourceLine(
+  stats: ResolvedCommunityStats | undefined,
+): string | null {
+  if (!stats || stats.homeCount == null || stats.medianJustValue == null) return null;
+  const homes = stats.homeCount.toLocaleString("en-US");
+  const value = `$${Math.round(stats.medianJustValue).toLocaleString("en-US")}`;
+  const asOf = stats.asOf ? ` as of ${toMmDdYyyy(stats.asOf)}` : "";
+  return (
+    `THE NEIGHBORHOOD (${stats.subdivisionName}), from the tax roll${asOf}: ${homes} homes, ` +
+    `median ASSESSED value ${value}. This is an assessed value, not a sale or list price -- ` +
+    `never call it "median home price" or say homes "sell for" this figure.`
+  );
 }
