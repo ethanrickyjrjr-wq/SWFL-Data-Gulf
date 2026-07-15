@@ -17,6 +17,8 @@ import sys
 
 import duckdb
 
+from ingest.lib.community_aliases import label_by_pattern
+from ingest.lib.guards import assert_min_rows
 from ingest.lib.tier1_inventory import _get_connection
 
 from .agg import aggregate_stats
@@ -26,18 +28,13 @@ _SELECT = (
     "FROM data_lake.parcel_subdivision"
 )
 
-_UPSERT = """
+_DELETE_ALL = "DELETE FROM data_lake.neighborhood_stats"
+
+_INSERT = """
     INSERT INTO data_lake.neighborhood_stats
         (county, subdivision_name, home_count, count_by_type, median_just_value, source_url, as_of, updated_at)
     VALUES
         (%(county)s, %(subdivision_name)s, %(home_count)s, %(count_by_type)s, %(median_just_value)s, %(source_url)s, %(as_of)s, now())
-    ON CONFLICT (county, subdivision_name) DO UPDATE SET
-        home_count = EXCLUDED.home_count,
-        count_by_type = EXCLUDED.count_by_type,
-        median_just_value = EXCLUDED.median_just_value,
-        source_url = EXCLUDED.source_url,
-        as_of = EXCLUDED.as_of,
-        updated_at = now()
 """
 
 
@@ -59,13 +56,22 @@ def _aggregate(rows: list[dict]) -> list[dict]:
             "INSERT INTO parcel_subdivision VALUES (?, ?, ?, ?, ?)",
             [(r["parcel_id"], r["county"], r["property_type"], r["just_value"], r["subdivision_name"]) for r in rows],
         )
-    return aggregate_stats(con)
+    return aggregate_stats(con, label_by_pattern())
 
 
-def _upsert(conn, stats: list[dict]) -> None:
+def _replace_all(conn, stats: list[dict]) -> None:
+    # FULL REPLACE, NOT UPSERT (07/15/2026) -- this pipeline recomputes the COMPLETE set
+    # every run from a full data_lake.parcel_subdivision scan (no incremental read), so a
+    # plain upsert on (county, subdivision_name) would ORPHAN any row whose key changed
+    # since the last run -- e.g. an alias fold that newly collapses two raw names under one
+    # canonical label leaves the OLD raw-keyed row sitting alongside the new one, double-
+    # counting those homes. Guarded by assert_min_rows so a near-empty `stats` (a broken
+    # run) aborts loud before wiping the table -- see ingest/lib/guards.py.
+    assert_min_rows(len(stats), 1, "neighborhood_stats")
     with conn.cursor() as cur:
+        cur.execute(_DELETE_ALL)
         for s in stats:
-            cur.execute(_UPSERT, {**s, "count_by_type": json.dumps(s["count_by_type"])})
+            cur.execute(_INSERT, {**s, "count_by_type": json.dumps(s["count_by_type"])})
     conn.commit()
 
 
@@ -87,8 +93,8 @@ def main(argv: list[str] | None = None) -> int:
             print("sample:", stats[0])
         if args.dry_run:
             return 0
-        _upsert(conn, stats)
-        print(f"neighborhood_stats: upserted {len(stats)} rows")
+        _replace_all(conn, stats)
+        print(f"neighborhood_stats: replaced with {len(stats)} rows")
         return 0
     finally:
         conn.close()
