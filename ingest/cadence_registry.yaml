@@ -935,6 +935,17 @@ pipelines:
     # shape). Annual NAL-derived roll; monthly idempotent retry catches the refresh, same
     # pattern as collier_parcels. Consumed by communities-swfl (address->community resolution,
     # neighborhood_stats aggregation). Docs: docs/superpowers/plans/2026-07-14-lee-parcels-handoff.md
+    source_scope:
+      confirmed_total:
+        value: 604362
+        as_of: "07/14/2026"
+        source: "our ingest (604,362 rows: collier 220,875 + lee 383,487; 25 of 120 fields pulled — widened from 7 same day. Live-verified after re-ingest: 82,153 rows with a positive sale_price_1, 603,069 with living_area_sqft, 603,830 with actual_year_built, all 604,362 with neighborhood_code)"
+      source_ceiling:
+        value: 120
+        as_of: "07/14/2026"
+        source_url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0"
+        source_label: "FDOR Statewide Parcel Centroid (ArcGIS FeatureServer) — same layer collier_parcels reads"
+        summary: "120 fields total. Deliberately NOT pulled: OWN_NAME/OWN_ADDR1-2/OWN_CITY/OWN_STATE/OWN_ZIPCD/FIDU_* (owner/fiduciary PII). Also unpulled: the SOH-specific assessed-value breakdown fields (JV_HMSTD/AV_HMSTD/AV_SD/AV_NSD/TV_NSD) — that's collier_parcels' job (Collier only), not duplicated here. See check collier_parcels_parcel_subdivision_redundant_scrape."
 
   - name: neighborhood_stats
     workflow: neighborhood-stats-annual.yml

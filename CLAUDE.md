@@ -102,7 +102,22 @@ A gap fills from the next lane. The ONLY block is an **invented number** (no rea
 ```
 gh workflow run daily-rebuild.yml --repo ethanrickyjrjr-wq/SWFL-Data-Gulf -f pack_id=env-swfl -f force=true
 ```
-`pack_id=master` (default) = full cascade. `pack_id=<brain-id>` = that brain + master only. Use the targeted form when debugging. The daily cron without `--force` is fine — it skips TTL-fresh brains automatically.
+`pack_id=master` (default) = full cascade. `pack_id=<brain-id>` = **that brain only** — CORRECTED
+07/14/2026, this previously (wrongly) said "+ master too." Verified against `refinery/lib/dag.mts`'s
+`resolveBuildOrder(targetId, PACKS)`: it walks `targetId`'s own `input_brains` (its upstreams), never
+its downstream consumers — master is a CONSUMER of a leaf, not an input to it, so master is never in
+the build order for a leaf-targeted dispatch and cannot be refreshed by one. Use the targeted form
+when debugging a single brain; it will NOT propagate that brain's fresh output into master's dossier.
+
+**To get a freshly-rebuilt leaf's output INTO master's dossier**, dispatch `pack_id=master` with
+**no** `--force`. This is cheap, not the 32-Sonnet-call case above: `resolveBuildOrder("master", ...)`
+walks the full closure, but every already-fresh upstream is skipped (no force = no rebuild of fresh
+brains); master itself still re-synthesizes because of the "upstream-aware freshness trigger"
+already built into `refinery/lib/resilient-build.mts`'s `masterIsStaleVsUpstreams()` — it forces a
+master re-synthesis whenever ANY upstream's `refined_at` is newer than master's own, even though
+master's own 7-day TTL hasn't expired. In practice this run only touches master + whatever upstream
+was genuinely stale anyway. The daily cron without `--force` is fine either way — it skips TTL-fresh
+brains automatically and this same upstream-aware trigger already runs on every cron tick.
 
 **Preferred dispatch form (07/12/2026, closes `tripwire_dispatch_acceptance_ergonomics`):** `OPERATOR_APPROVED_PAID_RUN=1 node scripts/dispatch-rebuild.mjs <brain-id> --reason "<decree>"` — fires the same targeted dispatch AND auto-appends the `accepted_dispatch_runs` entry in `verification/tripwire-accepted.json` (then commit that file same session). A raw `gh workflow run` stays RED on the hourly tripwire until hand-accepted — the wrapper is the recognition channel, the bypass arm is untouched.
 

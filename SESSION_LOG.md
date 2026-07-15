@@ -1,3 +1,34 @@
+## 2026-07-14 (Sonnet 5 · main) — parcel_subdivision re-ingest confirmed live; found + corrected a wrong LOCKED CLAUDE.md rule about GHA rebuild targeting.
+
+Follow-up to this session's earlier entry (FDOR field-widening + community-lookup join). The
+background re-ingest (both counties, merge-upsert) completed clean: 604,362 rows unchanged
+(collier 220,875 + lee 383,487 — no dupes, no loss), 82,153 with a positive sale_price_1, 603,069
+with living_area_sqft, 603,830 with actual_year_built, all 604,362 with neighborhood_code. Updated
+parcel_subdivision's source_scope in cadence_registry.yaml to confirmed_total (25 of 120 fields).
+
+Dispatched communities-swfl's rebuild (operator-approved) to get master's dossier off "no community
+data yet" — but the freeze-watchdog log showed master itself was skipped as "legitimately fresh."
+Traced why: CLAUDE.md's LOCKED "GHA rebuild targeting" rule (06/29) claimed `pack_id=<brain-id>` = "that
+brain + master only." Verified against refinery/lib/dag.mts's resolveBuildOrder() — it walks the
+target's own input_brains (upstreams), never downstream consumers; master is a consumer of a leaf,
+never in that leaf's build order. The rule was wrong, and had likely been silently under-propagating
+every prior "targeted rebuild" to master since it was written. Corrected CLAUDE.md + the
+feedback_gha-rebuild-targeting memory with the actual cheap fix: dispatch `pack_id=master` with NO
+--force — resilient-build.mts's masterIsStaleVsUpstreams() upstream-aware trigger re-synthesizes ONLY
+master (skips already-fresh leaves) whenever an upstream is newer than master's last refine, even
+inside master's own 7-day TTL. Operator held off firing that dispatch this session — opened check
+master_dossier_stale_communities_swfl_not_propagated so it isn't lost (RULE 2.4).
+
+Also, separately: operator decreed a standing process rule after the FDOR-field-widening finding —
+CLAUDE.md RULE 0.4 now has a FULL-SCOPE-FIRST addendum (enumerate a source's full field list into
+cadence_registry.yaml source_scope, which renders on /ops/census, BEFORE writing any ingest code).
+Saved as feedback_full-scope-first-census-before-ingest memory.
+
+**NOTE:** an earlier attempt to add this entry was silently lost — a concurrent session's commit
+raced this one and the stash/restore around it dropped my staged-but-uncommitted SESSION_LOG.md edit
+(known landmine, see feedback_lint-staged-drops-modified-files memory). Re-added and committing
+immediately this time.
+
 ## 2026-07-14 (Opus 4.8 · main) — LEDGER SWEEP → EXECUTION: 8 agents fixed the live breakage the sweep surfaced. Committed in groups; NOT pushed.
 
 Follow-up to the sweep entry below. Operator: "fan out and fix it all." Fanned 7 fix-agents + used the
