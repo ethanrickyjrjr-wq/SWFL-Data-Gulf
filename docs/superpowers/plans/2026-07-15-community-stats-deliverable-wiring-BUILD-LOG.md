@@ -1,6 +1,7 @@
 # Community Stats → Deliverable Wiring — Build Log
 
-> **Recommended model:** ⚡ Sonnet — 7 tasks, keywords: architecture
+> **Recommended model:** ⚡ Sonnet — 8 tasks, keywords: architecture
+
 
 
 
@@ -99,6 +100,18 @@ Approved (all in-scope test evidence green; the live smoke-test gap is tracked, 
 3. **A real, out-of-scope finding: community names can launder a water-attribute claim.** `inventedAttributes` checks its `ATTRIBUTE_CLAIMS` word list (waterfront, canal, bay, gulf, etc.) against the full `sourceText`, which now includes the settled neighborhood sentence — and that sentence embeds the community's raw NAME (e.g. "Heritage Bay"). Any SWFL community whose marketed name contains a water word — extremely common (Bonita Bay, Miromar Lakes, River Hall, Grande Isle) — would "legitimize" the model claiming that water feature about the HOUSE, not just naming the neighborhood. Same shape as the already-fixed `BRAND_NAME`/"gulf" hole (this file already strips "SWFL Data Gulf" before matching for exactly this reason) but far larger in surface. Opened check `community_name_water_word_legitimizes_invented_attribute` (project `under-contract`) with a concrete fix direction (strip the community-name segment the same way `BRAND_NAME` is stripped) — real finding, correctly not fixed inside this task's scope.
 
 **My review (independent):** `git diff` confirms production code is an exact match to the plan; only the test file diverges, and only in the way described above (a correction, not a weakening — the negative test locks the paraphrase-rejection behavior in place with a precise matcher, not a loose assertion that could rot). Re-ran `bun test lib/deliverable/recipes/under-contract.test.ts` myself: 80/80 passed, 194 assertions, 409ms. Approved. Concern 3 tracked via the check above rather than silently dropped.
+
+---
+
+## Task 8 — `lib/deliverable/recipes/market-comps.test.ts`: confirm zero exposure
+
+**Status:** DONE. Commit `9c5989e1` "test(deliverable): lock in market-comps' zero exposure to communityStats" (1 file, +34/-1). No production code touched, as the plan specified — `market-comps.ts` deliberately never reads `facts.communityStats`.
+
+**What happened:** Opus implementer added the one regression test exactly per the brief, using the file's real existing `SUBJECT`/`HOMES` fixtures and `buildPriceCase`/`narratorClaims` functions. Went further than asked, on its own initiative: to prove the test wasn't a tautology, it temporarily injected a fake `communityStats` leak into `narratorClaims`, confirmed the new test actually goes red and catches it ("Heritage Bay" surfaces), then reverted — leaving `market-comps.ts` itself with an empty diff, confirmed twice. Also grepped the whole recipe file to confirm `communityStats` appears nowhere in it, so `buildNarratorPrompt` (which receives the full `facts` object) has no indirect path to it either.
+
+**My review (independent):** `git diff` confirms an exact match to the plan's specified test, plus one faithful adaptation (added `describe`/`it` to the file's `bun:test` import, since it previously only used flat `test`). Re-ran `bun test lib/deliverable/recipes/market-comps.test.ts` myself: 33/33 passed (32 pre-existing + 1 new), 249 assertions, 592ms. Approved, no fixes needed.
+
+---
 
 ---
 
