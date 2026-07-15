@@ -158,7 +158,7 @@ import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, listingSpecs, spec, specFootnote } from "@/lib/email/listing-flyer";
 import { auditClaims, numeralsIn, settledCount, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
-import { clearNarrativeSlots, fillNarrative } from "./shared";
+import { clearNarrativeSlots, fillNarrative, FAVORABLE_FRAMING_POLICY } from "./shared";
 import type { SettledClaim } from "@/lib/deliverable/claims";
 import type { RecipeBuildContext } from "./index";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
@@ -1018,7 +1018,8 @@ export async function authorUnderContractNote(input: NarratorInput): Promise<str
     `sentence is a NEW claim, and it is thrown away.\n\n` +
     `What you MAY say: any SETTLED FACT restated word for word, that backup offers are ` +
     `open, and one true NON-NUMERIC detail from the agent's description.\n\n` +
-    `No hype, no exclamation marks. Plain, confident, specific. Return ONLY the paragraph.`;
+    `No hype, no exclamation marks. Plain, confident, specific. Return ONLY the paragraph.\n\n` +
+    FAVORABLE_FRAMING_POLICY;
 
   const user = `SOURCES:\n${sources.join("\n")}\n\nWrite the paragraph.`;
 

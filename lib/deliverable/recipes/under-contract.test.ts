@@ -26,7 +26,7 @@
 // The fixtures are the live vendor bodies captured 07/13/2026:
 //   • 326 Shore Dr, Fort Myers 33905 — property_id 6951062705
 //   • its ZIP's median days on market (72) from the housing-swfl brain
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, mock, afterAll } from "bun:test";
 import {
   buildUnderContractGrid,
   daysSinceListed,
@@ -54,6 +54,41 @@ import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { DEFAULT_GLOBAL_STYLE } from "@/lib/email/doc/default-docs";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
+
+// ── Task 4: authorUnderContractNote wires in FAVORABLE_FRAMING_POLICY ────────
+//
+// mock.module is process-global (no per-file isolation) — snapshot + restore, the
+// same pattern already used in shared.test.ts / agent-launch.test.ts. This file had
+// NO getAnthropic mock before this task: every other test here drives a PURE
+// function with fixture data and makes zero live calls. This mock exists ONLY for
+// the one test below that reaches the model call inside authorUnderContractNote.
+const realAnthropic = await import("@/refinery/agents/anthropic.mts");
+const anthropicOrig = { ...realAnthropic };
+afterAll(() => {
+  mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrig);
+});
+
+let systemSeen = "";
+mock.module("@/refinery/agents/anthropic.mts", () => ({
+  ...anthropicOrig,
+  getAnthropic: () => ({
+    messages: {
+      create: async (args: { system: string }) => {
+        systemSeen = args.system;
+        return {
+          content: [
+            {
+              type: "text",
+              text:
+                "This home is under contract. It is new construction. The asking price came " +
+                "down by $104,975, to $595,000. Backup offers are still being accepted.",
+            },
+          ],
+        };
+      },
+    },
+  }),
+}));
 
 /** VERBATIM shape of /property-tax-history for 326 Shore Dr (trimmed to the fields
  *  the parser reads). The current for-sale cycle sits alongside two OLD sold
@@ -980,5 +1015,26 @@ describe("settleCommunityStats — the neighborhood-stats settled claim", () => 
       "This home is under contract. The tax roll counts 1,900 homes in this neighborhood, " +
       "with a median assessed value of $612,000.";
     expect(proseViolations(paraphrase, sourceText, settled)).toContain("word-count:900 homes");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. Task 4 — FAVORABLE_FRAMING_POLICY wired into authorUnderContractNote's own
+//    system prompt (the SAME constant Task 3 wired into authorListingNarrative,
+//    a different, unrelated function's prompt).
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("authorUnderContractNote wires in FAVORABLE_FRAMING_POLICY", () => {
+  it("the model's system prompt includes FAVORABLE_FRAMING_POLICY verbatim", async () => {
+    const { FAVORABLE_FRAMING_POLICY: policy } = await import("./shared");
+    // Dynamic import AFTER the mock.module call above, so authorUnderContractNote's
+    // OWN lazy call to getAnthropic() (inside its function body, not at module load)
+    // resolves against the mocked module.
+    const { authorUnderContractNote } = await import("./under-contract");
+    // INPUT (module-level, defined above) has 4 settled facts (status, new
+    // construction, price cut, area timing) -- well past the "settled.length <= 1
+    // && !remarks" short-circuit -- so this reaches the model call, not the fallback.
+    await authorUnderContractNote(INPUT);
+    expect(systemSeen).toContain(policy);
   });
 });
