@@ -1,3 +1,39 @@
+## 2026-07-15 (Sonnet 5 · main) — leepa-parcels-annual: reverted monthly-retry cron back to real annual; root cause is an unfixed HTTP fetch problem, not the schedule.
+
+Operator flagged the `cron_incident_leepa_parcels_annual` TIMEOUT_KILL (90.3min vs 90min ceiling,
+07/15 10:00 UTC scheduled run) and asked why an "annual" workflow fired when it hasn't been a year,
+and whether we even have the data.
+
+Investigated instead of guessing (RULE 0.5): `gh run list` shows leepa-parcels-annual has run 5 times
+on GHA, ever — 3 workflow_dispatch + 1 schedule (06/15) cancelled at ~30.3-30.4min against the
+then-30min ceiling, and today's schedule run cancelled at 90.3min against the ceiling the 07/11
+b9a08bf0 commit raised to 90min. **It has never once completed on GitHub Actions.** Pulled today's
+full run log (`gh run view 29411674653 --log`): zero stdout between the pipeline step starting
+(11:28:18) and GitHub's cancellation (12:57:27) — 89 minutes with not one print, meaning it never
+even cleared the first fetch (L12 parcels+geometry) checkpoint, let alone use_codes/last_sale or the
+~110-chunk Postgres merge write. Confirmed `data_lake.leepa_parcels` DOES hold complete fresh data —
+548,798 rows, 548,323 (99.9%) with zip_code, loaded 2026-07-11 19:28:43-04 — but that load lines up
+with the b9a08bf0 refactor commit same day, i.e. a manual/local run, NOT a successful cron execution.
+This is exactly the failure mode the still-open `leepa_http_fetch_blocked_needs_crawl4ai_path` check
+predicted (LeePA fingerprint-blocks plain scripted HTTP; only a real browser reliably gets through) —
+today's evidence (5/5 GHA cancels + a same-day manual success) is strong confirmation, now verified
+instead of "unverified."
+
+The monthly cadence itself was a deliberate 05/30 change (`3fecea2a`, "monthly retries prevent a
+single GHA failure from orphaning the pipeline for a year") — reasonable in theory, but since the
+underlying fetch has never once succeeded on GHA regardless of ceiling (30min or 90min, always
+cancelled at ~100% of whatever the ceiling was), the monthly retry was pure GHA-minutes cost with
+zero payoff. Operator chose (AskUserQuestion): drop the monthly retry, restore the original real
+annual schedule. Reverted `.github/workflows/leepa-parcels-annual.yml` cron to `0 13 1 3 *` (13:00
+UTC / 9am ET March 1st — LeePA's original Q1-certified-roll reasoning, the value in place before
+3fecea2a). Left `leepa_http_fetch_blocked_needs_crawl4ai_path` open — that's the actual fix needed
+before March, not this schedule change.
+
+Also: the incident's "suggested action" text ("corridor-pulse burned three consecutive 45-minute
+kills...") is hardcoded boilerplate in `.github/scripts/classify-cron-failure.mjs:333-334`, stamped
+on every TIMEOUT_KILL regardless of workflow — not a claim that leepa itself did that. Confusing but
+not a bug; flagged to operator inline, no code change made.
+
 ## 2026-07-15 (Sonnet 5 · wt/ledger-pilot) — Per-unit coverage ledgers: push mechanism (Rollout Step 1) + deliverables pilot (Rollout Step 2), full plan built via subagent-driven-development, final Opus review clean.
 
 Executed `docs/superpowers/plans/2026-07-15-per-unit-coverage-ledgers-push-and-pilot.md` (10 tasks)

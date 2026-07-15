@@ -2,10 +2,16 @@ name: LeePA parcels annual
 
 on:
   schedule:
-    # 10:00 UTC on the 15th of every month.
-    # Data is annual-release but monthly retries prevent a single GHA failure
-    # from orphaning the pipeline for a year. Runs are idempotent (dlt upsert).
-    - cron: "0 10 15 * *"
+    # 13:00 UTC = 9 AM ET on March 1st.
+    # LeePA publishes the prior year's certified roll in early Q1; March 1 is
+    # conservative enough to ensure the data is available.
+    #
+    # Reverted from the 05/30 monthly-retry experiment (0 10 15 * *) on 07/15:
+    # the monthly cadence never once completed on GHA (5/5 scheduled+dispatch
+    # runs cancelled at their timeout ceiling — 30min then 90min, same result
+    # either way). The retry safety net was pure cost with no payoff since the
+    # fetch itself never lands here; see check leepa_http_fetch_blocked_needs_crawl4ai_path.
+    - cron: "0 13 1 3 *"
   workflow_dispatch:
     inputs:
       dry_run:
