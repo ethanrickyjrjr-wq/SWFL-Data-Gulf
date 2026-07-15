@@ -50,6 +50,10 @@ const WAIVERS = {
   "lib/geo/nearest-zips.ts":
     "cross-county BY DESIGN — 'nearby' for a buyer ignores county lines; it is a navigation rail, never a data merge",
   "refinery/lib/core-scope.mts": "is the root",
+  "lib/deliverable/recipes/agent-brand-intro.ts":
+    "the farm-area ZIP driving the listing_active_stats chart resolves through PLACE_ZIP_CROSSWALK (parseReplyIntent/zipFromPromptPlace), whose PlaceZipEntry.county type is lee|collier only — a single .eq(zip_code) lookup against an in-scope-guaranteed ZIP, never a bulk scan",
+  "lib/deliverable/recipes/review-reply.ts":
+    "zip comes from resolveArea's CROSSWALK_ZIPS, built from the same PLACE_ZIP_CROSSWALK (lee|collier only by type) — a single .eq(zip_code) lookup, never a bulk scan",
 };
 
 function changedFiles() {
