@@ -29,6 +29,58 @@ import {
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc } from "@/lib/email/doc/types";
 
+/**
+ * THE ONE SHARED FRAMING BLOCK — pasted VERBATIM (never paraphrased) into the system
+ * prompt of every narrator whose job is stating facts about a property or a price:
+ * `authorListingNarrative` (this file), `authorUnderContractNote`
+ * (recipes/under-contract.ts), `buildNarratorPrompt` (recipes/market-comps.ts).
+ *
+ * NEVER pasted into `authorAreaRead` (agent-brand-intro.ts) or `LETTER_SYSTEM`
+ * (agent-launch.ts) — both carry an absolute no-numbers/no-facts constraint this
+ * block would directly contradict ("numbers beat adjectives" inside a prompt that
+ * says "not one digit, anywhere" is not inert, it's a conflicting instruction). See
+ * docs/superpowers/specs/2026-07-15-sell-side-favorable-framing-design.md §3/§4/§4a.
+ *
+ * Every rule here traces to _ASSISTANT/research/2026-07-15-sell-side-copywriting-research.md
+ * and _ASSISTANT/research/2026-07-15-authority-reasoning-not-hype-research.md — real,
+ * named sources, not invented style guidance.
+ */
+export const FAVORABLE_FRAMING_POLICY =
+  `<favorable_framing_policy>\n` +
+  `PRIORITY, STATED FIRST: cited facts — including unfavorable ones, a real price cut, ` +
+  `a slow-selling comparable — are never dropped, softened, or omitted. This policy ` +
+  `governs the EMPHASIS AND ORDERING of true facts. It never governs which facts appear.\n\n` +
+  `Write for someone deciding whether to act on this property or this agent. Write like ` +
+  `the person with the most data in the room, not like someone selling something:\n` +
+  `- Benefit rides on the fact; it never replaces it. State the sourced number, then ` +
+  `attach the one concrete thing it lets the reader do.\n` +
+  `- Lead with a confirmed strength before any limitation.\n` +
+  `- When you must acknowledge a less-favorable data point, name the specific factual ` +
+  `difference — never drop it silently and never go vague.\n` +
+  `- Numbers beat adjectives, categorically. A specific, sourced figure always outranks ` +
+  `a descriptive word standing in for it.\n` +
+  `- When the facts you were given show a LARGE gap, state its size directly and plainly. ` +
+  `Do not soften a big, sourced number into hedge language ("somewhat," "a bit," "in the ` +
+  `neighborhood of") — the size of the gap is the case on its own. This applies IDENTICALLY ` +
+  `whichever direction the number points: a big gap is not more "sayable" just because it ` +
+  `happens to favor the subject.\n` +
+  `- No steering language, no describing who "should" want this property.\n` +
+  `- Never a superlative or intensifier — "unbeatable," "guaranteed," "won't last," "a rare ` +
+  `opportunity" remain forbidden, exactly as they always were.\n\n` +
+  `WORKED EXAMPLES.\n` +
+  `Weak (hedged, buries a real number): "The price is somewhat below what similar homes ` +
+  `have been asking."\n` +
+  `Strong (favorable, still 100% sourced, same underlying fact): "The asking price sits ` +
+  `$91,000 below every comparable home in the set."\n\n` +
+  `Weak (an adjective standing in for a fact): "This is an unbeatable price."\n` +
+  `Strong: state the sourced figure and stop there — the number is the whole argument, not ` +
+  `an adjective layered on top of it.\n\n` +
+  `COUNTER-EXAMPLE — favorable framing tipping into invention (forbidden): "This home is a ` +
+  `better value than anything else in the neighborhood." That is an unsourced comparison to ` +
+  `homes you were never shown — the same violation this prompt has always forbidden, dressed ` +
+  `up as enthusiasm instead of a market claim.\n` +
+  `</favorable_framing_policy>`;
+
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com";
 
 /** The resolved subject house, plus whether the vendor actually matched it. */
