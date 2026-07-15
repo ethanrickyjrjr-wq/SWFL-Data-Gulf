@@ -1,3 +1,29 @@
+## 2026-07-15 (Sonnet 5 · main) — fixed the listing-campaign arm CTA showing on an already-armed project (Task 4 regression from the gallery-listing-hero plan).
+
+A prior session (interrupted mid-work, picked up cold from its last fragment) found that commit
+`22b4e641` — Task 4 of `docs/superpowers/plans/2026-07-15-gallery-listing-hero.md`, pushed to
+`main` earlier tonight — dropped the `!sequence` check that used to gate the "Start the listing
+campaign" CTA. The plan's own Task 4 Step 2/3 specified the regression: it replaced a three-way
+`sequence ? ArcStrip : subjectAddress ? pill : null` with a two-way `sequence ? ArcStrip : null`,
+then separately wired `ListingCampaignHero` into the gallery's `heroSlot` gated only on
+`showGallery` (driven by `!hasDeliverables`, unrelated to `sequence`). Net effect: a project with
+an armed campaign but zero saved deliverables yet — i.e. right after arming — showed both the live
+ArcStrip and a "Start the listing campaign" button. Clicking it re-prompted for audience/send hour,
+hit the server's duplicate-arm unique-index guard (409), and failed silently (no user-visible
+error).
+
+**Fixed** (`app/project/[id]/email-lab/ProjectEmailLabClient.tsx`, commit `e7a2af74`): gated the
+`heroSlot`'s `ListingCampaignHero` on `!sequence`; surfaced the 409 via the existing `frozenNote`
+banner ("This listing campaign is already running.") instead of a silent no-op. `bunx tsc --noEmit`
+clean, `bunx next build` clean, `ListingCampaignHero.test.tsx` + `TemplateGallery.test.tsx` both
+green (8/8). **Not done:** the plan's Task 6 live-verify (`gallery_listing_hero_live_verify` check,
+still open) requires an actual signed-in click-through per the plan's own evidence standard — a
+clean build is not live proof. This session verified the specific regression logically (build +
+existing tests) but did not click through the live UI as a signed-in user with a real armed
+campaign; that check should stay open until someone does.
+
+---
+
 ## 2026-07-15 (Sonnet 5 · main) — audited "does profile/brand info stick to emails" end-to-end; fixed the propagation gap it found (7 of 11 identity fields silently dropped).
 
 Operator asked whether brand/profile data (bio, website, photos, listing overrides) reliably sticks
