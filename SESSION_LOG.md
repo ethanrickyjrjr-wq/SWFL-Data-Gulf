@@ -1,3 +1,41 @@
+## 2026-07-15 (Sonnet 5 · main) — click-triggered listing-campaign agent alerts, v1 (real click → real inbox alert).
+
+Operator was rightly furious that I first claimed "interest tracking isn't a real capability"
+when asked to reference it in new Email Lab hero copy. Root cause: I checked one subsystem
+(`lib/project/lifecycle-nudge.ts`, MLS-only) and generalized from it instead of searching the
+whole codebase. The real picture, found after a full search: clicks were already logged
+(`email_events`), a proactive agent-alert MECHANISM already ships (Buyer-Intent Reply Sensor —
+`lib/email/agent-alert.ts` → agent's real inbox + `/alerts`), and a fully crawl4ai-researched
+click-triggered-follow-up SYSTEM was already designed on 07/06/2026
+(`docs/superpowers/specs/2026-07-06-email-campaign-playbooks.md` +
+`-flow-graph.yaml`, Follow Up Boss/ActivePipe/RealScout-cited) — its own Open Items flagged the
+wiring as unbuilt. Built that wiring now, v1-scoped per spec
+`docs/superpowers/specs/2026-07-15-campaign-click-alerts-design.md`.
+
+Verified live against Resend docs (crawl4ai, not memory) before touching code: listing-campaign
+milestone sends go out as Resend **Broadcasts** (`app/api/email/broadcast/route.ts`), which take
+no `tags` param (unlike the did/rid-tagged lanes) — but `email.clicked` webhook payloads for a
+broadcast carry `data.broadcast_id` + `data.to` + `data.click.link` regardless
+(resend.com/docs/webhooks/emails/clicked). `public.email_sends` already persists `broadcast_id`
+(built 06/13 for the reply sensor) — so `broadcast_id → email_sends → schedule_id →
+email_schedules.project_id` closes the join with zero changes to the send path itself.
+
+Shipped: `docs/sql/20260715_campaign_click_events.sql` (new table, applied live via
+`bun scripts/run-migration.ts`, verified 11 columns present), `lib/email/campaign-click-alert.ts`
++ `.test.ts` (pure extractor + content builder, 8 tests), a new branch in
+`app/api/webhooks/resend/route.ts` that resolves a broadcast click to project + contact and sends
+a real alert email — reusing `sendAgentAlert`'s exact shape — deduped one-per-contact-per-schedule-
+per-day via `ON CONFLICT` on the new table (insert-then-check, not read-then-write). `bunx tsc`
+clean, `bun test lib/email/` 1637/1637 green, `bunx next build` clean.
+
+Deferred (named, not silently dropped, per spec's Out of Scope): per-button intent tiers
+("Schedule a private showing" as higher-signal than a soft link — `click.link` is captured now,
+pure filtering later); surfacing click alerts on `/alerts` or a project "Watch" tab (email-only
+for v1); the other 7 campaigns in the 07/06 flow-graph. `campaign_click_alerts_live_verify` check
+opened but NOT yet closed — no real click has fired through the live webhook yet, only unit-level
+coverage. **What's next:** live-fire verification (arm a real listing sequence, send a milestone,
+click its own link, confirm the alert email lands) before closing the check.
+
 ## 2026-07-15 (Sonnet 5 · main) — desk hero tooltip dot STILL floated off the line on the window pills; today's earlier fix only covered the dense/full series.
 
 Operator screenshotted Naples on the "1 yr" pill: hover dot sitting near the bottom axis, clearly

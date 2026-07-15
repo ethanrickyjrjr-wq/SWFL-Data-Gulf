@@ -32,7 +32,13 @@ import {
 import { onDemoEvent, type DemoStage } from "@/lib/email/outreach/demo-cadence";
 import { extractWeeklyReadAction } from "@/lib/email/weekly-read/webhook";
 import { extractMarketAlertEngagement } from "@/lib/email/zip-events/webhook";
-// KNOWN-DEBT(market_alert_engagement is a new public table not yet in Database types — regen types, then retype)
+import {
+  extractCampaignClick,
+  buildClickAlertContent,
+  type CampaignClickPayload,
+} from "@/lib/email/campaign-click-alert";
+// KNOWN-DEBT(market_alert_engagement / campaign_click_events are new public tables not yet in
+// Database types — regen types, then retype)
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -90,6 +96,92 @@ export async function POST(request: Request): Promise<Response> {
     } catch (err) {
       console.error(
         `[resend-webhook] ma engagement insert failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
+  // ── Campaign click alerts: listing-campaign milestone emails ───────────────
+  // Spec 2026-07-15-campaign-click-alerts-design.md. Milestone sends go out as Resend
+  // Broadcasts (no did/rid/wid tag), so this keys off data.broadcast_id instead — present on
+  // every email.clicked event for a broadcast send. broadcast_id -> email_sends resolves
+  // user_id/schedule_id; schedule_id -> email_schedules resolves project_id. A broadcast_id
+  // that doesn't match an email_sends row isn't a listing-campaign send (e.g. the digest) —
+  // skip silently, not every broadcast is ours to alert on. NO early return on a miss so a
+  // non-listing-campaign click still falls through to the branches below (harmless — they key
+  // on tags this event doesn't carry, so they no-op too).
+  const campaignClick = extractCampaignClick(event as unknown as CampaignClickPayload);
+  if (campaignClick) {
+    try {
+      const cdb = createServiceRoleClientUntyped();
+      const { data: sendRow } = await cdb
+        .from("email_sends")
+        .select("user_id, schedule_id")
+        .eq("broadcast_id", campaignClick.broadcastId)
+        .maybeSingle();
+      const scheduleId = sendRow?.schedule_id as number | null | undefined;
+      if (sendRow?.user_id && scheduleId != null) {
+        const { data: scheduleRow } = await cdb
+          .from("email_schedules")
+          .select("project_id")
+          .eq("id", scheduleId)
+          .maybeSingle();
+        const projectId = scheduleRow?.project_id as string | null | undefined;
+        if (projectId) {
+          const { data: projectRow } = await cdb
+            .from("projects")
+            .select("title")
+            .eq("id", projectId)
+            .maybeSingle();
+          const { data: contactRow } = await cdb
+            .from("email_contacts")
+            .select("name")
+            .eq("user_id", sendRow.user_id)
+            .eq("email", campaignClick.email)
+            .maybeSingle();
+
+          // Insert-then-check dedup: the unique index on (schedule_id, contact_email,
+          // click_date) rejects a same-day repeat click, so only a genuinely FIRST click
+          // today reaches the alert send below.
+          const { error: insErr } = await cdb.from("campaign_click_events").insert({
+            user_id: sendRow.user_id,
+            project_id: projectId,
+            schedule_id: scheduleId,
+            broadcast_id: campaignClick.broadcastId,
+            contact_email: campaignClick.email,
+            contact_name: (contactRow?.name as string | null) ?? null,
+            link: campaignClick.link,
+          });
+          if (!insErr) {
+            const { data: userRes } = await cdb.auth.admin.getUserById(sendRow.user_id as string);
+            const agentEmail = userRes?.user?.email;
+            if (agentEmail) {
+              const content = buildClickAlertContent({
+                contactEmail: campaignClick.email,
+                contactName: (contactRow?.name as string | null) ?? null,
+                projectTitle: (projectRow?.title as string | null) ?? "your listing",
+                link: campaignClick.link,
+              });
+              const alertResend = getMarketingResend();
+              const res = await alertResend.emails.send({
+                from: `SWFL Data Gulf Alerts <${PLATFORM.fromEmail}>`,
+                to: agentEmail,
+                subject: content.subject,
+                text: content.text,
+              });
+              if (res.error) {
+                console.error(`[resend-webhook] click alert send failed: ${res.error.message}`);
+              }
+            }
+          } else if (insErr.code !== "23505") {
+            // 23505 = unique_violation = already alerted today for this schedule+contact,
+            // the expected/silent dedup path. Anything else is a real failure to log.
+            console.error(`[resend-webhook] click event insert failed: ${insErr.message}`);
+          }
+        }
+      }
+    } catch (err) {
+      console.error(
+        `[resend-webhook] campaign click alert failed: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
   }
