@@ -1,3 +1,32 @@
+## 2026-07-15 (Sonnet 5 · main) — hurricane-tracks-fl rebuild failed on missing Postgres secrets; wired them into daily-rebuild.yml.
+
+Continuing the FEMA scope-leak fix: env-swfl's targeted rebuild (29392067403) succeeded, but
+hurricane-tracks-fl's first attempt (29392088541) lost a push race on `brains/_build-report.json`
+against a concurrent commit wave. Retried (29394854231) — different, real failure this time:
+`missing required Postgres env var(s): SUPABASE_PG_HOST, SUPABASE_PG_USER, SUPABASE_PG_PASSWORD`.
+
+Root cause, confirmed in code + `gh secret list` (not guessed): hurricane-tracks-fl's build does a
+cross-tier DuckDB join (HURDAT2 Parquet × `pg.data_lake.fema_nfip_claims`), which needs direct
+Postgres connection vars — distinct from the `SUPABASE_URL`/`SUPABASE_SERVICE_KEY` REST creds
+env-swfl uses (why that rebuild succeeded) and from `DESTINATION__POSTGRES__CREDENTIALS` (the
+Python ingest side). The 5 `SUPABASE_PG_*` secrets were never set on GitHub at all, and
+`daily-rebuild.yml`'s env block never wired them — meaning every targeted single-pack GHA dispatch
+of a cross-tier brain has always failed this way, not just this run.
+
+Fixed both halves (operator-approved): `gh secret set` the 5 vars, piped directly from the existing
+local `.env.local` values (same DB creds already in use, nothing invented, never retyped/echoed in
+any command) — then added them to `daily-rebuild.yml`'s `env:` block. Only one job/env-block in the
+file, so one spot to fix.
+
+**Aside, flagged not hidden:** an early diagnostic `grep` accidentally echoed the live
+`SUPABASE_PG_PASSWORD` value into this session's own transcript once. Confirmed `.env.local` is
+gitignored with zero git history (`git log --all -- .env.local` empty) — never reached git or
+GitHub. Operator may still want to rotate it as a precaution since it sat in a chat transcript.
+
+**What's next:** push this fix, re-dispatch hurricane-tracks-fl, verify both `brains/env-swfl.md`
+and `brains/hurricane-tracks-fl.md` hold real correctly-3-core-scoped FEMA figures, then close
+`fema_nfip_views_six_county_scope_leak`.
+
 ## 2026-07-15 (Sonnet 5 · main) — corrected a wrong "ops page is broken" claim by actually looking at it; found + specced the real community-data wiring gap; wrote a handoff so this stops getting re-derived.
 
 Operator asked for a per-pipeline/per-brain/per-recipe "playbook" system after being burned

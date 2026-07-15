@@ -122,6 +122,16 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # Direct Postgres connection for cross-tier DuckDB brains (e.g. hurricane-tracks-fl's
+          # HURDAT2 Parquet x pg.data_lake.fema_nfip_claims join) — distinct from the REST-API
+          # creds above and from DESTINATION__POSTGRES__CREDENTIALS (Python ingest side). Never
+          # wired before; every targeted single-pack dispatch of a cross-tier brain failed with
+          # "missing required Postgres env var(s)" until this (2026-07-15).
+          SUPABASE_PG_HOST: ${{ secrets.SUPABASE_PG_HOST }}
+          SUPABASE_PG_PORT: ${{ secrets.SUPABASE_PG_PORT }}
+          SUPABASE_PG_USER: ${{ secrets.SUPABASE_PG_USER }}
+          SUPABASE_PG_PASSWORD: ${{ secrets.SUPABASE_PG_PASSWORD }}
+          SUPABASE_PG_DATABASE: ${{ secrets.SUPABASE_PG_DATABASE }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           SUPABASE_S3_ENDPOINT: ${{ secrets.SUPABASE_S3_ENDPOINT }}
