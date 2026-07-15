@@ -1,12 +1,13 @@
-<!-- FRESHNESS: v1 | Token: SWFL-7421-v1-20260619 -->
+<!-- FRESHNESS: v2 | Token: SWFL-7421-v2-20260715 -->
 ---
 brain_id: hurricane-tracks-fl
-version: 1
-refined_at: 2026-06-19T06:05:23Z
-freshness_token: SWFL-7421-v1-20260619
+version: 2
+refined_at: 2026-07-15T06:52:19Z
+freshness_token: SWFL-7421-v2-20260715
 ttl_seconds: 31536000
+pack_hash: 266c771ecaf2
 context_type: user_saved_reference
-scope: NOAA HURDAT2 best-track joined against OpenFEMA NFIP claims for the SWFL 6-county footprint (LEE+COLLIER+CHARLOTTE+GLADES+HENDRY+SARASOTA). Cross-tier brain: HURDAT2 Parquet in Tier 1 Storage + NFIP claims in Tier 2 Postgres, pre-joined in DuckDB SQL (NOT TypeScript memory). Surfaces landfall counts, Cat-3+ near-passes, per-storm NFIP exposure, most-recent landfall, and closest-pass distance. Pairs with storm-history-swfl (NOAA Storm Events catalog — different upstream, different framing).
+scope: NOAA HURDAT2 best-track joined against OpenFEMA NFIP claims for the SWFL core-county footprint (LEE+COLLIER+HENDRY). Cross-tier brain: HURDAT2 Parquet in Tier 1 Storage + NFIP claims in Tier 2 Postgres, pre-joined in DuckDB SQL (NOT TypeScript memory). Surfaces landfall counts, Cat-3+ near-passes, per-storm NFIP exposure, most-recent landfall, and closest-pass distance. Pairs with storm-history-swfl (NOAA Storm Events catalog — different upstream, different framing).
 ---
 
 # User-Saved Reference Context
@@ -20,7 +21,7 @@ and treat the rest as reference only.
 
 ```reference
 CONTEXT TYPE: user_saved_reference
-SCOPE: NOAA HURDAT2 best-track joined against OpenFEMA NFIP claims for the SWFL 6-county footprint (LEE+COLLIER+CHARLOTTE+GLADES+HENDRY+SARASOTA). Cross-tier brain: HURDAT2 Parquet in Tier 1 Storage + NFIP claims in Tier 2 Postgres, pre-joined in DuckDB SQL (NOT TypeScript memory). Surfaces landfall counts, Cat-3+ near-passes, per-storm NFIP exposure, most-recent landfall, and closest-pass distance. Pairs with storm-history-swfl (NOAA Storm Events catalog — different upstream, different framing).
+SCOPE: NOAA HURDAT2 best-track joined against OpenFEMA NFIP claims for the SWFL core-county footprint (LEE+COLLIER+HENDRY). Cross-tier brain: HURDAT2 Parquet in Tier 1 Storage + NFIP claims in Tier 2 Postgres, pre-joined in DuckDB SQL (NOT TypeScript memory). Surfaces landfall counts, Cat-3+ near-passes, per-storm NFIP exposure, most-recent landfall, and closest-pass distance. Pairs with storm-history-swfl (NOAA Storm Events catalog — different upstream, different framing).
 
 --- HOW THE USER LIKES TO WORK ---
 - The user reads hurricane-tracks-fl as a backward-looking impact-record paired with realized insured losses — landfall counts and per-storm NFIP paid are the load-bearing fields, not narrative speculation about future seasons.
@@ -29,43 +30,43 @@ SCOPE: NOAA HURDAT2 best-track joined against OpenFEMA NFIP claims for the SWFL 
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                                                                                                                | verified   | expires
-s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py. Live read browseable at https://supabase.com/dashboard/project/_/storage/buckets/lake-tier1?path=environmental/hurdat2_fl.parquet. | 2026-06-19 | 2027-06-19
+s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py. Live read browseable at https://supabase.com/dashboard/project/_/storage/buckets/lake-tier1?path=environmental/hurdat2_fl.parquet. | 2026-07-15 | 2027-07-15
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"HURDAT2 × NFIP cross-tier corpus — SWFL 6-county footprint","value":"112 distinct named storms in the SWFL near-pass corpus (within 50mi of any SWFL county centroid), 46 (storm × county) landfall rows. Cross-tier pre-join: HURDAT2 Parquet (Tier 1 Storage) joined to NFIP claims (Tier 2 Postgres) in DuckDB SQL — no TypeScript memory join.","src":"s01","date":"2026-06-19"},
-  {"id":"f002","topic":"metric:hurricane_landfalls_30yr","fact":"SWFL hurricane landfalls in the trailing 30-year window","value":"9 distinct named storms made landfall inside any of the 6 SWFL counties (FIPS 12015/12021/12043/12051/12071/12115) in the trailing 30-year window.","src":"s01","date":"2026-06-19"},
-  {"id":"f003","topic":"metric:hurricane_cat3plus_passes_within_50mi_30yr","fact":"SWFL Cat-3+ hurricane passes within 50mi in the trailing 30-year window","value":"2 distinct Saffir-Simpson Cat 3+ storms passed within 50 statute miles of any SWFL county centroid in the trailing 30-year window.","src":"s01","date":"2026-06-19"},
-  {"id":"f004","topic":"metric:hurricane_nfip_paid_per_landfall_storm_avg_usd","fact":"SWFL average NFIP paid per (landfall storm × county) bucket","value":"$93,663,630 mean NFIP paid (building + contents + ICO) per (county × landfall-storm-year) bucket across the SWFL footprint.","src":"s01","date":"2026-06-19"},
-  {"id":"f005","topic":"metric:hurricane_worst_storm_county_year_nfip_paid_usd","fact":"SWFL worst single (storm × county) NFIP paid on record","value":"$3,389,600,145.37 — the single worst (storm × county) NFIP paid value in the joined corpus.","src":"s01","date":"2026-06-19"},
-  {"id":"f006","topic":"metric:hurricane_most_recent_landfall","fact":"Most recent named-storm landfall in the SWFL footprint","value":"Most recent SWFL landfall: MILTON 2024-10-10.","src":"s01","date":"2026-06-19"},
-  {"id":"f007","topic":"metric:hurricane_closest_pass_5yr_min_mi","fact":"Minimum closest-pass distance to any SWFL county centroid in the trailing 5-year window","value":"9.5 statute miles — the closest any named storm passed to a SWFL county centroid in the trailing 5-year window.","src":"s01","date":"2026-06-19"}
+  {"id":"f001","topic":"corpus_overview","fact":"HURDAT2 × NFIP cross-tier corpus — SWFL core-county footprint","value":"89 distinct named storms in the SWFL near-pass corpus (within 50mi of any SWFL county centroid), 30 (storm × county) landfall rows. Cross-tier pre-join: HURDAT2 Parquet (Tier 1 Storage) joined to NFIP claims (Tier 2 Postgres) in DuckDB SQL — no TypeScript memory join.","src":"s01","date":"2026-07-15"},
+  {"id":"f002","topic":"metric:hurricane_landfalls_30yr","fact":"SWFL hurricane landfalls in the trailing 30-year window","value":"7 distinct named storms made landfall inside any of the 3 SWFL core counties (FIPS 12021/12051/12071) in the trailing 30-year window.","src":"s01","date":"2026-07-15"},
+  {"id":"f003","topic":"metric:hurricane_cat3plus_passes_within_50mi_30yr","fact":"SWFL Cat-3+ hurricane passes within 50mi in the trailing 30-year window","value":"2 distinct Saffir-Simpson Cat 3+ storms passed within 50 statute miles of any SWFL county centroid in the trailing 30-year window.","src":"s01","date":"2026-07-15"},
+  {"id":"f004","topic":"metric:hurricane_nfip_paid_per_landfall_storm_avg_usd","fact":"SWFL average NFIP paid per (landfall storm × county) bucket","value":"$116,788,824 mean NFIP paid (building + contents + ICO) per (county × landfall-storm-year) bucket across the SWFL footprint.","src":"s01","date":"2026-07-15"},
+  {"id":"f005","topic":"metric:hurricane_worst_storm_county_year_nfip_paid_usd","fact":"SWFL worst single (storm × county) NFIP paid on record","value":"$3,389,600,145.37 — the single worst (storm × county) NFIP paid value in the joined corpus.","src":"s01","date":"2026-07-15"},
+  {"id":"f006","topic":"metric:hurricane_most_recent_landfall","fact":"Most recent named-storm landfall in the SWFL footprint","value":"Most recent SWFL landfall: IAN 2022-09-28.","src":"s01","date":"2026-07-15"},
+  {"id":"f007","topic":"metric:hurricane_closest_pass_5yr_min_mi","fact":"Minimum closest-pass distance to any SWFL county centroid in the trailing 5-year window","value":"18 statute miles — the closest any named storm passed to a SWFL county centroid in the trailing 5-year window.","src":"s01","date":"2026-07-15"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "hurricane-tracks-fl",
-  "version": 1,
-  "refined_at": "2026-06-19T06:05:23Z",
-  "expires": "2027-06-19T06:05:23Z",
+  "version": 2,
+  "refined_at": "2026-07-15T06:52:19Z",
+  "expires": "2027-07-15T06:52:19Z",
   "ttl_seconds": 31536000,
   "direction": "neutral",
   "magnitude": 0.2,
   "drivers": [],
   "overrides": [],
-  "conclusion": "Southwest Florida hurricane impact history (HURDAT2 × NFIP cross-tier join, 6 counties: Charlotte + Collier + Glades + Hendry + Lee + Sarasota) — 9 distinct named storms made landfall in a SWFL county over the trailing 30-year window, 2 of those were Cat-3+ on Saffir-Simpson at any point in their lifetime. Realized NFIP exposure per (storm × county) landfall row averages $93,663,630, with the worst single (storm × county) on record at $3,389,600,145.37. Most recent landfall in scope: MILTON 2024-10-10. Closest pass in the trailing 5-year window: 9.5 statute miles from a SWFL county centroid.",
+  "conclusion": "Southwest Florida hurricane impact history (HURDAT2 × NFIP cross-tier join, 3 core counties: Collier + Hendry + Lee) — 7 distinct named storms made landfall in a SWFL county over the trailing 30-year window, 2 of those were Cat-3+ on Saffir-Simpson at any point in their lifetime. Realized NFIP exposure per (storm × county) landfall row averages $116,788,824, with the worst single (storm × county) on record at $3,389,600,145.37. Most recent landfall in scope: IAN 2022-09-28. Closest pass in the trailing 5-year window: 18 statute miles from a SWFL county centroid.",
   "key_metrics": [
     {
       "metric": "hurricane_landfalls_30yr",
-      "value": 9,
+      "value": 7,
       "direction": "stable",
-      "label": "SWFL hurricane landfalls — distinct named storms landfalling in any of the 6 SWFL counties, trailing 30yr window",
+      "label": "SWFL hurricane landfalls — distinct named storms landfalling in any of the SWFL core counties, trailing 30yr window",
       "variable_type": "extensive",
       "units": "storms",
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/hurdat2_fl.parquet",
-        "fetched_at": "2026-06-19T06:05:23Z",
+        "fetched_at": "2026-07-15T06:52:19Z",
         "tier": 1,
         "citation": "NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py."
       },
@@ -84,7 +85,7 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/hurdat2_fl.parquet",
-        "fetched_at": "2026-06-19T06:05:23Z",
+        "fetched_at": "2026-07-15T06:52:19Z",
         "tier": 1,
         "citation": "NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py."
       },
@@ -95,7 +96,7 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
     },
     {
       "metric": "hurricane_nfip_paid_per_landfall_storm_avg_usd",
-      "value": 93663629.88,
+      "value": 116788823.91,
       "direction": "stable",
       "label": "SWFL average NFIP paid per (landfall storm × county) — building + contents + ICO",
       "variable_type": "intensive",
@@ -103,7 +104,7 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
       "display_format": "currency",
       "source": {
         "url": "s3://lake-tier1/environmental/hurdat2_fl.parquet",
-        "fetched_at": "2026-06-19T06:05:23Z",
+        "fetched_at": "2026-07-15T06:52:19Z",
         "tier": 1,
         "citation": "NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py."
       },
@@ -114,7 +115,7 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
     },
     {
       "metric": "hurricane_worst_storm_county_year_nfip_paid_usd",
-      "value": 3389600145.3699956,
+      "value": 3389600145.37,
       "direction": "stable",
       "label": "SWFL worst single (storm × county) NFIP paid value on record (building + contents + ICO)",
       "variable_type": "extensive",
@@ -122,7 +123,7 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
       "display_format": "currency",
       "source": {
         "url": "s3://lake-tier1/environmental/hurdat2_fl.parquet",
-        "fetched_at": "2026-06-19T06:05:23Z",
+        "fetched_at": "2026-07-15T06:52:19Z",
         "tier": 1,
         "citation": "NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py."
       },
@@ -133,13 +134,13 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
     },
     {
       "metric": "hurricane_most_recent_landfall_date",
-      "value": "MILTON 2024-10-10",
+      "value": "IAN 2022-09-28",
       "direction": "stable",
       "label": "Most recent named-storm landfall in the SWFL footprint (storm + ISO date)",
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/hurdat2_fl.parquet",
-        "fetched_at": "2026-06-19T06:05:23Z",
+        "fetched_at": "2026-07-15T06:52:19Z",
         "tier": 1,
         "citation": "NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py."
       },
@@ -150,7 +151,7 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
     },
     {
       "metric": "hurricane_closest_pass_5yr_min_mi",
-      "value": 9.5,
+      "value": 18,
       "direction": "stable",
       "label": "Minimum closest-pass distance (statute miles) to any SWFL county centroid, trailing 5yr window",
       "variable_type": "intensive",
@@ -158,7 +159,7 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
       "display_format": "raw",
       "source": {
         "url": "s3://lake-tier1/environmental/hurdat2_fl.parquet",
-        "fetched_at": "2026-06-19T06:05:23Z",
+        "fetched_at": "2026-07-15T06:52:19Z",
         "tier": 1,
         "citation": "NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py."
       },
@@ -184,7 +185,7 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-06-19T06:05:23Z"
+    "computed_at": "2026-07-15T06:52:19Z"
   },
   "exogenous_signals": []
 }
@@ -193,5 +194,5 @@ s01 | NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_f
 - hurricane-tracks-fl: first cross-tier brain — HURDAT2 (Tier 1 Storage) × NFIP (Tier 2 Postgres) pre-joined via the generic makeDuckDBSource connector, establishing the SQL-pushdown precedent for future cross-tier brains.
 
 --- RECENT NOTES ---
-- 2026-06-19: pack refined by the Refinery — 7 fact(s) from 1 source(s).
+- 2026-07-15: pack refined by the Refinery — 7 fact(s) from 1 source(s).
 ```
