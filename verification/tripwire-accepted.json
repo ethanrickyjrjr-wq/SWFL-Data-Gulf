@@ -94,6 +94,12 @@
       "pack": "hurricane-tracks-fl",
       "accepted_on": "07/15/2026",
       "note": "Retry #2 after wiring the missing SUPABASE_PG_* secrets into daily-rebuild.yml (commit 23410a45) — prior failure was a genuine CI gap, now fixed (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29396341760",
+      "pack": "env-swfl",
+      "accepted_on": "07/15/2026",
+      "note": "Retry: first attempt (29392067403) degraded with a transient timeout (written: false, still serving 07/03 stale content) — re-attempting to actually pick up the repopulated FEMA data + scope fix (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
