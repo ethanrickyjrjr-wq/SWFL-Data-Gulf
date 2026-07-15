@@ -42,6 +42,7 @@
 
 import { execSync } from "node:child_process";
 import { resolvePushCwd } from "./push-context.mjs";
+import { parseLedger, findOrphanedClaims } from "./lib/ledger-parse.mjs";
 
 const BANNER = "=".repeat(72);
 
@@ -318,6 +319,77 @@ process.stdin.on("end", () => {
       "ZIP scope root — a ZIP-grain surface bypasses isCoreScope (Lee + Collier, 57)",
       truncate(scope.out),
     );
+  }
+
+  // ---- Gate 9: ledger enforcement (per-unit coverage ledgers) --------------
+  // An "Enforced" claim in a *.ledger.md names a real test. If that test file
+  // or test string no longer exists, the ledger is reading as safety that
+  // isn't there — worse than no ledger (spec
+  // docs/superpowers/specs/2026-07-15-per-unit-coverage-ledgers-design.md §4).
+  // Fires when a push touches: the ledger file itself, the recipe's SOURCE
+  // (.ts), OR the recipe's TEST file (.test.ts) — the last one is the gate's
+  // own central case (a renamed/deleted test string, which is exactly what
+  // orphans a claim) and is easy to miss because the spec's own §4 wording
+  // ("the unit's own source") reads as source-only. Verified against a direct
+  // trace: a push editing ONLY price-reduced.test.ts (renaming the string an
+  // Enforced claim names) must still trigger this gate.
+  const ledgerTouched = changed.filter((f) =>
+    /^lib\/deliverable\/recipes\/[a-z-]+\.ledger\.md$/.test(f),
+  );
+  const ledgerForTouchedUnit = changed
+    .map((f) => {
+      const m = /^lib\/deliverable\/recipes\/([a-z-]+)\.(?:ts|test\.ts)$/.exec(f);
+      return m ? `lib/deliverable/recipes/${m[1]}.ledger.md` : null;
+    })
+    .filter(Boolean);
+  const allTouchedLedgers = [...new Set([...ledgerTouched, ...ledgerForTouchedUnit])];
+
+  if (allTouchedLedgers.length > 0) {
+    const orphanReport = [];
+    const testFilesToRun = new Set();
+    for (const ledgerFile of allTouchedLedgers) {
+      let ledgerSrc;
+      try {
+        ledgerSrc = sh(`git show HEAD:${ledgerFile}`);
+      } catch {
+        continue; // ledger file doesn't exist at HEAD (not yet authored) — nothing to check
+      }
+      const { enforced } = parseLedger(ledgerSrc);
+      const orphans = findOrphanedClaims(enforced, {
+        readFile: (f) => sh(`git show HEAD:${f}`),
+      });
+      for (const o of orphans) orphanReport.push({ ledgerFile, ...o });
+      for (const e of enforced) testFilesToRun.add(e.testFile);
+    }
+
+    if (orphanReport.length > 0) {
+      block(
+        "LEDGER — an Enforced claim's test no longer exists",
+        orphanReport
+          .map(
+            (o) =>
+              `  ${o.ledgerFile}\n    Claim: ${o.claim}\n    ${o.reason === "missing-file" ? `Test file gone: ${o.testFile}` : `Test string no longer found in ${o.testFile}: "${o.testString}"`}`,
+          )
+          .join("\n\n") +
+          `\n\nFix: either the code/test regressed (restore it) or the ledger is stale (correct or\n` +
+          `remove the claim, and move it to Unenforced if it's no longer test-backed), then retry.`,
+      );
+    }
+
+    const testFailures = [];
+    for (const testFile of testFilesToRun) {
+      const res = run(`bun test ${testFile}`);
+      if (res.ran && res.code !== 0 && !isPackTestEnvFailure(res.out)) {
+        testFailures.push({ file: testFile, out: res.out });
+      }
+    }
+    if (testFailures.length > 0) {
+      block(
+        "LEDGER — a test an Enforced claim depends on is failing",
+        testFailures.map((t) => `  • ${t.file}\n${truncate(t.out, 800)}`).join("\n\n") +
+          `\n\nFix the test or the code it protects, then retry.`,
+      );
+    }
   }
 
   // ---- Gate 3: secret-wiring reminder (advisory, never blocks) --------------
