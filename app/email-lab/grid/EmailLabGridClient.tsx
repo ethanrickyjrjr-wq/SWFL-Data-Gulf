@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { EmailLabGridShell } from "@/components/email-lab/EmailLabGridShell";
 import { SendToSelfModal } from "@/components/email-lab/SendToSelfModal";
+import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
+import { ListingCampaignHero } from "@/components/email-lab/ListingCampaignHero";
 import { seedById, SEED_DOCS } from "@/lib/email/doc/default-docs";
 import { DEFAULT_H } from "@/components/email-lab/GridCanvas";
 import { ensureGridLayouts } from "@/lib/email/doc/grid-layouts";
@@ -14,7 +16,7 @@ import {
   type ShowcaseRecipe,
 } from "@/lib/showcase/recipe";
 import { isRecipeKey } from "@/lib/deliverable/recipes";
-import { projectEmailLabBase } from "@/lib/lab-entry/destination";
+import { openSeed, projectEmailLabBase } from "@/lib/lab-entry/destination";
 import { planArrival } from "@/lib/lab-entry/arrival";
 import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
 import { ProjectConfirmPopup } from "@/components/lab-entry/ProjectConfirmPopup";
@@ -71,9 +73,14 @@ export function EmailLabGridClient({
       subjectAddress: null,
       recipeHasBlank: Boolean(recipeBlank),
       recipeInputKind: recipeBlank ? "address" : null,
-      firstRunGalleryEligible: false,
+      // Signed-in + no recipe/zip/seed/did = a plain "New Campaign" open — show the gallery
+      // instead of a blank canvas (spec 2026-07-15-gallery-listing-hero-design.md). Anonymous
+      // visitors are unchanged — different taste-surface flow (EMAIL_LAB_LANDING).
+      firstRunGalleryEligible: signedIn,
     }),
   );
+
+  const showGallery = plan.doc.kind === "gallery";
 
   // The doc the canvas opens on: blank skeleton for a recipe arrival (never a
   // demo doc), the server ZIP prebuild when present, else the static grid seed.
@@ -98,7 +105,11 @@ export function EmailLabGridClient({
   const currentDocRef = useRef<EmailDoc>(initialDoc);
   const [sendOpen, setSendOpen] = useState(false);
 
-  const [confirmOpen, setConfirmOpen] = useState(plan.projectConfirm);
+  // The gallery case never auto-opens this — the "Building into" line + its own Change link
+  // (Step 5 below) replace the old blocking upfront confirm. Every other arrival (recipe, zip,
+  // seed, did) keeps the original behavior untouched.
+  const [confirmOpen, setConfirmOpen] = useState(showGallery ? false : plan.projectConfirm);
+  const [targetProject, setTargetProject] = useState(offeredProject);
   // ASK FOR THE ADDRESS, ALWAYS. This used to be `plan.addressPopup && !signedIn` on
   // the theory that a signed-in recipe rides into a project, where the in-project
   // client shows the popup. It only rides if there IS a project: `plan.projectConfirm`
@@ -190,53 +201,75 @@ export function EmailLabGridClient({
 
   return (
     <>
-      <EmailLabGridShell
-        key={buildKey}
-        initialDoc={initialDoc}
-        initialAiPrompt={build?.prompt}
-        autoGenerate={build != null}
-        // The filled prompt no longer carries the recipe, so the recipe's brand needs
-        // ride separately — without them the mount build can't tell whether the email
-        // it's about to author would go out signed by a placeholder.
-        autoBuildNeeds={initialRecipe?.needs}
-        initialBranding={Object.keys(arrivalBrand).length > 0 ? arrivalBrand : undefined}
-        // The popup owns the blank now; don't also seed it into the Build box.
-        initialRecipe={build || plan.addressPopup ? null : initialRecipe}
-        onDocChange={(d) => {
-          currentDocRef.current = d;
-          setDirty(true);
-        }}
-        // Address-first scope: a property email's subject is the ADDRESS (comps
-        // ride scope.address, and the feed is NOT narrowed to a ZIP), so ZIP is
-        // just one derived layer among many. The email is ZIP-scoped ONLY when the
-        // arrival is the actual ZIP door (map/report click) — otherwise a listing
-        // never gets hijacked into a ZIP-only feed.
-        scope={
-          plan.doc.kind === "zip" && zip
-            ? { kind: "zip", value: zip, address: addr ?? undefined }
-            : addr
-              ? { address: addr }
-              : undefined
-        }
-        headerSlot={
-          <span className="flex items-center gap-2 text-sm font-semibold">
-            <span className="text-gulf-teal">Email</span>
-            <span className="text-gulf-teal">Lab</span>
-            <span className="rounded bg-gulf-teal px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[#0a1419]">
-              Grid · paid
+      {showGallery && targetProject ? (
+        <div className="min-h-[calc(100dvh-3.5rem)]">
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-2 px-6 pt-4 text-xs text-white/40">
+            Building into: <span className="text-white/70">{targetProject.title}</span>
+            <button
+              type="button"
+              onClick={() => setConfirmOpen(true)}
+              className="text-gulf-teal hover:underline"
+            >
+              Change
+            </button>
+          </div>
+          <TemplateGallery
+            onPick={(seed) => window.location.assign(openSeed(targetProject.id, seed.id))}
+            onStartBlank={() =>
+              window.location.assign(openSeed(targetProject.id, "skeleton-clean-white"))
+            }
+            heroSlot={<ListingCampaignHero subjectAddress={null} />}
+          />
+        </div>
+      ) : (
+        <EmailLabGridShell
+          key={buildKey}
+          initialDoc={initialDoc}
+          initialAiPrompt={build?.prompt}
+          autoGenerate={build != null}
+          // The filled prompt no longer carries the recipe, so the recipe's brand needs
+          // ride separately — without them the mount build can't tell whether the email
+          // it's about to author would go out signed by a placeholder.
+          autoBuildNeeds={initialRecipe?.needs}
+          initialBranding={Object.keys(arrivalBrand).length > 0 ? arrivalBrand : undefined}
+          // The popup owns the blank now; don't also seed it into the Build box.
+          initialRecipe={build || plan.addressPopup ? null : initialRecipe}
+          onDocChange={(d) => {
+            currentDocRef.current = d;
+            setDirty(true);
+          }}
+          // Address-first scope: a property email's subject is the ADDRESS (comps
+          // ride scope.address, and the feed is NOT narrowed to a ZIP), so ZIP is
+          // just one derived layer among many. The email is ZIP-scoped ONLY when the
+          // arrival is the actual ZIP door (map/report click) — otherwise a listing
+          // never gets hijacked into a ZIP-only feed.
+          scope={
+            plan.doc.kind === "zip" && zip
+              ? { kind: "zip", value: zip, address: addr ?? undefined }
+              : addr
+                ? { address: addr }
+                : undefined
+          }
+          headerSlot={
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              <span className="text-gulf-teal">Email</span>
+              <span className="text-gulf-teal">Lab</span>
+              <span className="rounded bg-gulf-teal px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[#0a1419]">
+                Grid · paid
+              </span>
+              {!signedIn && (
+                <button
+                  type="button"
+                  onClick={() => setSendOpen(true)}
+                  className="btn-gradient ml-2 rounded-lg px-3 py-1.5 text-xs font-semibold text-navy-dark"
+                >
+                  Send this to yourself
+                </button>
+              )}
             </span>
-            {!signedIn && (
-              <button
-                type="button"
-                onClick={() => setSendOpen(true)}
-                className="btn-gradient ml-2 rounded-lg px-3 py-1.5 text-xs font-semibold text-navy-dark"
-              >
-                Send this to yourself
-              </button>
-            )}
-          </span>
-        }
-      />
+          }
+        />
+      )}
       {!signedIn && (
         <SendToSelfModal
           open={sendOpen}
@@ -246,15 +279,36 @@ export function EmailLabGridClient({
           refCode={refCode}
         />
       )}
-      {confirmOpen && offeredProject && (
+      {confirmOpen && (targetProject ?? offeredProject) && (
         <ProjectConfirmPopup
-          projectTitle={offeredProject.title}
+          projectTitle={(targetProject ?? offeredProject)!.title}
           creating={creating}
           onConfirm={() => {
             setConfirmOpen(false);
-            intoProject(offeredProject.id);
+            if (showGallery && targetProject) return; // "Change" cancel-to-same — stay on the gallery
+            intoProject(offeredProject!.id);
           }}
-          onNewProject={createAndEnter}
+          onNewProject={async (name) => {
+            if (showGallery) {
+              setCreating(true);
+              try {
+                const res = await fetch("/api/projects", {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({ title: name }),
+                });
+                const data = (await res.json().catch(() => null)) as { id?: string } | null;
+                if (data?.id) {
+                  setTargetProject({ id: data.id, title: name });
+                  setConfirmOpen(false);
+                }
+              } finally {
+                setCreating(false);
+              }
+              return;
+            }
+            await createAndEnter(name);
+          }}
         />
       )}
       {!confirmOpen && addressOpen && recipeBlank && initialRecipe && (
