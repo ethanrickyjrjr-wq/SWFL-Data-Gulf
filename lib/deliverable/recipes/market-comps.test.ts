@@ -5,7 +5,7 @@
 // 07/13/2026 — including `315 Shore Dr`, the vacant lot that has to be filtered out.
 // Pure/offline: the grid builder and the row/label helpers take no network.
 
-import { test, expect } from "bun:test";
+import { test, describe, it, expect } from "bun:test";
 import {
   BANNED_CONTEXT_PHRASES,
   buildCompsGrid,
@@ -686,4 +686,37 @@ test("auditClaims CATCHES THE SHIPPED LIE, and every claim shape that made it po
       (h) => h.kind === "comparative",
     ),
   ).toBe(true);
+});
+
+// ── ZERO EXPOSURE TO communityStats ──────────────────────────────────────────
+//
+// This recipe has an ABSOLUTE ban on locational claims — no "community", no
+// "neighborhood", no "subdivision" — because a prior incident shipped an invented
+// "on the same street" comps claim. `ListingFacts.communityStats` (the address-resolved,
+// tax-roll-backed neighborhood block the other six lifecycle recipes now narrate) must
+// therefore never reach this recipe's model prompt. `narratorClaims(facts, pc)` — the
+// ONLY funnel of `ListingFacts` into the narrator — enumerates the scalar fields it reads
+// (price, beds, baths, sqft, lotSize, yearBuilt, isNewConstruction, priceReduction) and
+// never touches `facts.communityStats`. This locks that in, so a future refactor of
+// `narratorClaims` can't silently start reading it without a test catching it.
+
+describe("market-comps stays excluded from communityStats — same reasoning as its community-word ban", () => {
+  it("narratorClaims never surfaces facts.communityStats, even when present", () => {
+    const subjectWithStats: ListingFacts = {
+      ...SUBJECT,
+      communityStats: {
+        subdivisionName: "Heritage Bay",
+        homeCount: 1900,
+        medianJustValue: 612000,
+        countByType: null,
+        sourceUrl: "x",
+        asOf: "2026-07-14",
+      },
+    };
+    const pc = buildPriceCase(subjectWithStats, HOMES);
+    if (!pc) throw new Error("no case");
+    const claims = narratorClaims(subjectWithStats, pc);
+    expect(claims.some((c) => c.sentence.includes("Heritage Bay"))).toBe(false);
+    expect(claims.some((c) => /\b612,000\b/.test(c.sentence))).toBe(false);
+  });
 });
