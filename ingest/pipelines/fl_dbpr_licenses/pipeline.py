@@ -100,13 +100,17 @@ def run(*, dry_run: bool = False) -> tuple[int, int]:
     print("\nfl_dbpr_licenses: running dlt pipeline (licenses)...")
     pipeline = dlt.pipeline(
         pipeline_name="fl_dbpr_licenses",
-        # replace_strategy: dlt's postgres default ("truncate-and-insert") empties a
-        # replace-disposition table before/while inserting — a run killed mid-load
-        # leaves it empty with no atomic swap. Only applies to dbpr_applicants_resource
-        # (write_disposition="replace" below); dbpr_licenses_resource's merge is
-        # unaffected. "insert-from-staging" loads into staging first, swaps only on
-        # success. See check fema_nfip_claims_data_loss_replace_strategy for the incident
-        # that surfaced this across every dlt+postgres replace pipeline in this codebase.
+        # replace_strategy: dlt's postgres default empties a replace-disposition table
+        # before/while inserting, with no atomic swap — a run killed mid-load leaves it
+        # empty. Only applies to dbpr_applicants_resource (write_disposition="replace"
+        # below); dbpr_licenses_resource's merge is unaffected. "insert-from-staging"
+        # loads into staging first, swaps only on success. See check
+        # fema_nfip_claims_data_loss_replace_strategy for the incident that surfaced
+        # this across every dlt+postgres replace pipeline in this codebase.
+        # The row-count/per-county/city-anchor volume guard for the applicants replace
+        # (BIBLE §0.2 rule 5, ingest.lib.guards) lives in _assert_applicant_volume(),
+        # called inside dbpr_applicants_resource() in resources.py — it runs to
+        # completion before this destructive write starts.
         destination=dlt.destinations.postgres(replace_strategy="insert-from-staging"),
         dataset_name="data_lake",
     )

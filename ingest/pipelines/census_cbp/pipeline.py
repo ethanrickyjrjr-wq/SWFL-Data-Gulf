@@ -9,11 +9,14 @@ from .resources import census_cbp_fl
 def run():
     pipeline = dlt.pipeline(
         pipeline_name="census_cbp",
-        # replace_strategy: dlt's postgres default ("truncate-and-insert") empties this
-        # table before/while inserting — a run killed mid-load leaves it empty with no
-        # atomic swap. "insert-from-staging" loads into staging first, swaps only on
-        # success. See check fema_nfip_claims_data_loss_replace_strategy for the incident
-        # that surfaced this across every dlt+postgres replace pipeline in this codebase.
+        # replace_strategy: dlt's postgres default empties this table before/while
+        # inserting, with no atomic swap — a run killed mid-load leaves it empty.
+        # "insert-from-staging" loads into staging first, swaps only on success. See
+        # check fema_nfip_claims_data_loss_replace_strategy for the incident that
+        # surfaced this across every dlt+postgres replace pipeline in this codebase.
+        # The row-count/non-null volume guard for this replace resource (BIBLE §0.2
+        # rule 5, ingest.lib.guards) lives in census_cbp_fl() in resources.py — it
+        # runs to completion before this destructive write starts.
         destination=dlt.destinations.postgres(replace_strategy="insert-from-staging"),
         dataset_name="data_lake",
     )

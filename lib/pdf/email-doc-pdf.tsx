@@ -38,8 +38,15 @@ const BORDER = "#E5E7EB";
 const MUTED = "#6B7280";
 const CARD_BG = "#ffffff";
 
+// The page carries a real top margin so a block that spills onto page 2+ (react-pdf's
+// automatic `wrap`) never starts flush against the physical edge — that shipped a
+// paragraph's continuation with zero headroom (seen live, 07/14/2026). The header block
+// cancels it back out with an equal negative marginTop (below) so page 1's masthead
+// still bleeds edge-to-edge, exactly as before.
+const PAGE_TOP_PAD = 24;
+
 const s = StyleSheet.create({
-  page: { backgroundColor: CARD_BG, paddingTop: 0, paddingBottom: 36, fontSize: 11 },
+  page: { backgroundColor: CARD_BG, paddingTop: PAGE_TOP_PAD, paddingBottom: 36, fontSize: 11 },
   // Section padding mirrors the email's "20px 24px".
   section: {
     paddingVertical: 16,
@@ -65,14 +72,34 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
         <View
           style={{
             backgroundColor: bg,
+            // Cancels the page's new PAGE_TOP_PAD so the masthead still bleeds to the
+            // physical top edge — the header is the ONLY block this ever applies to; it
+            // renders once, as the first flowed child, never as a page-2+ continuation.
+            marginTop: -PAGE_TOP_PAD,
             paddingVertical: 16,
             paddingHorizontal: 28,
             borderBottomWidth: 3,
             borderBottomColor: gs.accentColor,
+            // Flexbox's default alignItems is "stretch" — with nothing set here every
+            // child's box widened to the header's FULL width. Text still looked fine
+            // (glyphs start at the box's own left edge regardless of box width), but the
+            // logo's new objectFit:"contain" centers the shrunk image WITHIN its box —
+            // so the stretch that was invisible on the text became a dead-centered logo.
+            // flex-start makes every child's box shrink to its own content width instead.
+            alignItems: "flex-start",
           }}
         >
           {p.logoUrl ? (
-            <Image src={p.logoUrl} style={{ maxHeight: 42, maxWidth: 180, marginBottom: 8 }} />
+            // react-pdf's Image defaults objectFit to "fill" — unlike an HTML <img>, giving
+            // it both maxHeight AND maxWidth with no objectFit STRETCHES the source to fill
+            // both axes instead of scaling it down proportionally (verified in the installed
+            // @react-pdf/render source: resolveObjectFit's default is 'fill'). That squashed
+            // the wave logo-mark flat. "contain" is what an HTML max-width/max-height pair
+            // does implicitly.
+            <Image
+              src={p.logoUrl}
+              style={{ maxHeight: 42, maxWidth: 180, marginBottom: 8, objectFit: "contain" }}
+            />
           ) : null}
           {p.companyName ? (
             <Text
