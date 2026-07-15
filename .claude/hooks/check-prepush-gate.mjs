@@ -356,7 +356,20 @@ process.stdin.on("end", () => {
       }
       const { enforced } = parseLedger(ledgerSrc);
       const orphans = findOrphanedClaims(enforced, {
-        readFile: (f) => sh(`git show HEAD:${f}`),
+        // `f` here is `entry.testFile`, parsed straight out of free-text ledger
+        // markdown (the `Test: <file> > "<string>"` line) — not a validated path.
+        // Reject anything outside the safe-path shape BEFORE it reaches `sh()`
+        // (which shells out via execSync with `f` interpolated raw). Throwing is
+        // the correct outcome either way: findOrphanedClaims treats any readFile
+        // throw as reason: "missing-file", and an Enforced claim naming an
+        // unsafe/malformed test-file reference can't be verified as protected —
+        // that's a real defect, same as a genuinely missing file.
+        readFile: (f) => {
+          if (!isSafeTestFilePath(f)) {
+            throw new Error(`unsafe test file path in ledger: ${f}`);
+          }
+          return sh(`git show HEAD:${f}`);
+        },
       });
       for (const o of orphans) orphanReport.push({ ledgerFile, ...o });
       for (const e of enforced) testFilesToRun.add(e.testFile);
@@ -378,6 +391,13 @@ process.stdin.on("end", () => {
 
     const testFailures = [];
     for (const testFile of testFilesToRun) {
+      // Same class of problem as the readFile callback above, different
+      // sh-family call (`run`, which also shells out via execSync). Any
+      // testFile that fails this check already threw inside the readFile
+      // callback above and produced an orphan — which blocks the push before
+      // this loop is ever reached — so this is a defense-in-depth skip, not
+      // the primary catch.
+      if (!isSafeTestFilePath(testFile)) continue;
       const res = run(`bun test ${testFile}`);
       if (res.ran && res.code !== 0 && !isPackTestEnvFailure(res.out)) {
         testFailures.push({ file: testFile, out: res.out });
@@ -436,6 +456,18 @@ function sh(c) {
   return execSync(c, { stdio: ["ignore", "pipe", "ignore"], cwd: REPO_CWD })
     .toString()
     .trim();
+}
+
+// Gate 9 guard: a `.ledger.md`'s `Test: <file> > "<string>"` line is free-text
+// markdown content, not a validated path, but Gate 9 interpolates its testFile
+// value directly into shell commands (`sh()`/`run()`, both execSync-backed).
+// A real test file path in this repo only ever contains letters, digits, `.`,
+// `/`, `-`, and `_` (e.g. lib/deliverable/recipes/price-reduced.test.ts) — so
+// reject anything outside that shape BEFORE it reaches a shell command string.
+// This must run ahead of EVERY sh()/run() call built from ledger-parsed content.
+const SAFE_TEST_FILE_RE = /^[A-Za-z0-9._/-]+$/;
+function isSafeTestFilePath(f) {
+  return typeof f === "string" && SAFE_TEST_FILE_RE.test(f);
 }
 
 // Run a command, capturing combined output and exit code. `ran:false` means the
