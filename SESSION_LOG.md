@@ -1,3 +1,25 @@
+## 2026-07-15 (Sonnet 5 · main) — audited the full MarketBeat PDF ingest pipeline (operator: "how do we fix everything, write a handoff"), wrote `docs/handoff/2026-07-15-marketbeat-pdf-ingest-audit-handoff.md`.
+
+7 findings beyond the template fix, ranked in the handoff. Headline: crawl4ai-confirmed (live,
+cushmanwakefield.com) that C&W publishes separate Office and Retail MarketBeat reports, but
+`extractor.py`/`pipeline.py` are Industrial-only end to end (hardcoded `"sector": "industrial"`,
+filename regex locked to `_Industrial_`) — this directly contradicts the open check
+`vendor_extraction_ceiling_audit_followup` (and `cadence_registry.yaml:1507`), which both claim
+retail/industrial/office already flow through "the same PDF pipeline" with only Medical Office
+missing. That claim doesn't match the code as it stands — flagged for the handoff recipient to
+verify against the live C&W site and correct whichever side is wrong. Also found: zero automated
+tests anywhere for this pipeline (extractor/loader/downloader all untested), silent submarket drops
+with no floor/warn check, `already_loaded()` swallows every exception including real DB failures
+(masks failures behind wasted vision-fallback spend), the `from_downloads` workflow_dispatch input is
+dead/unwired and its description doesn't even match what its CLI flag does, curl download success
+check never verifies `%PDF` magic bytes, and Colliers auto-download may already be failing for every
+current quarter (form-gated) making the manual-drop path the real steady state. Ruled out as
+non-bugs: the loader's 4-column `ON CONFLICT` constraint does exist live (verified against
+`docs/sql/20260605_marketbeat_swfl_mhs_extension.sql`), the Haiku vision-fallback model id is current,
+filename convention is now consistent end-to-end after the template fix. Opened check
+`marketbeat_pdf_pipeline_audit` (project `ingest`, due 08/01/2026) per RULE 2.4 — no code changed,
+docs + check only.
+
 ## 2026-07-15 (Sonnet 5 · main) — fixed the MarketBeat PDF ingest issue-body filename template (broken `${}` interpolation, wrong Q/year order).
 
 `.github/workflows/marketbeat-pdf-ingest.yml:110-111` (the ODD manual-drop GitHub issue body) had two
