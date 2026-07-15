@@ -252,26 +252,31 @@ test("fixture mode returns fragments after verified-filter + latest-per-submarke
   //   industrial Naples       — mhs_databook Q1 (per-field flags all true)
   //   industrial East Naples  — mhs_databook Q1 (per-field flags all true)
   //   office Fort Myers       — mhs_databook Q1 (vacancy+rent verified; absorption dark)
-  // Per-sector surfacing (2026-06-08): retail Naples and industrial Naples are
-  // DISTINCT fragments — keyed on (sector, submarket), never deduped together.
-  assert.equal(fragments.length, 7);
+  //   medical_office Naples       — cw_marketbeat Q1 (whole-row verified=true)
+  //   medical_office East Naples  — cw_marketbeat Q1 (whole-row verified=true)
+  // Per-sector surfacing (2026-06-08; medical_office added 2026-07-15): retail
+  // Naples and industrial Naples are DISTINCT fragments — keyed on (sector,
+  // submarket), never deduped together.
+  assert.equal(fragments.length, 9);
 });
 
-test("fixture mode surfaces retail + industrial + office as distinct sectors", async () => {
+test("fixture mode surfaces retail + industrial + office + medical_office as distinct sectors", async () => {
   const fragments = await marketbeatSwflSource.fetch();
   const sectors = new Set(fragments.map((f) => (f.normalized as { sector?: string }).sector));
   assert.ok(sectors.has("retail"), "retail must surface");
   assert.ok(sectors.has("industrial"), "industrial must surface");
   assert.ok(sectors.has("office"), "office must surface");
+  assert.ok(sectors.has("medical_office"), "medical_office must surface");
 });
 
-test("retail Naples and industrial Naples coexist as separate, un-blended fragments", async () => {
+test("retail, industrial, and medical_office Naples coexist as separate, un-blended fragments", async () => {
   const fragments = await marketbeatSwflSource.fetch();
   const napleses = fragments.filter(
     (f) => (f.normalized as { submarket: string }).submarket === "Naples",
   );
-  // Two Naples rows — one retail, one industrial — never deduped on submarket alone.
-  assert.equal(napleses.length, 2);
+  // Three Naples rows — retail, industrial, medical_office — never deduped
+  // together on submarket alone.
+  assert.equal(napleses.length, 3);
   const bySector = new Map(
     napleses.map((f) => {
       const n = f.normalized as { sector?: string; vacancy_rate: number };
@@ -280,6 +285,31 @@ test("retail Naples and industrial Naples coexist as separate, un-blended fragme
   );
   assert.equal(bySector.get("retail"), 4.8); // retail Q3 winner
   assert.equal(bySector.get("industrial"), 3.1); // industrial Q1 — its own value
+  assert.equal(bySector.get("medical_office"), 6.1); // medical_office Q1 — its own value
+});
+
+test("medical_office Naples carries asking_rent_full_service, not asking_rent_nnn; other sectors stay null on that field", async () => {
+  const fragments = await marketbeatSwflSource.fetch();
+  const medNaples = fragments.find(
+    (f) =>
+      (f.normalized as { submarket: string; sector?: string }).submarket === "Naples" &&
+      (f.normalized as { sector?: string }).sector === "medical_office",
+  );
+  assert.ok(medNaples, "medical_office Naples fragment must be present");
+  const n = medNaples!.normalized as Record<string, unknown>;
+  assert.equal(n["asking_rent_full_service"], 38.46);
+  assert.equal(n["asking_rent_nnn"], null, "medical_office never carries an NNN rent");
+
+  const retailNaples = fragments.find(
+    (f) =>
+      (f.normalized as { submarket: string; sector?: string }).submarket === "Naples" &&
+      (f.normalized as { sector?: string }).sector === "retail",
+  );
+  assert.equal(
+    (retailNaples!.normalized as Record<string, unknown>)["asking_rent_full_service"],
+    null,
+    "retail never carries a full-service rent",
+  );
 });
 
 test("every fragment has kind = marketbeat-swfl with the typed field set", async () => {
@@ -292,7 +322,12 @@ test("every fragment has kind = marketbeat-swfl with the typed field set", async
     assert.match(n["quarter"] as string, /^\d{4}-Q[1-4]$/);
     assert.equal(typeof n["source_name"], "string");
     // Nullable numerics — must be either null or number; never undefined / NaN.
-    for (const field of ["vacancy_rate", "asking_rent_nnn", "absorption_sqft"]) {
+    for (const field of [
+      "vacancy_rate",
+      "asking_rent_nnn",
+      "asking_rent_full_service",
+      "absorption_sqft",
+    ]) {
       const v = n[field];
       assert.ok(
         v === null || (typeof v === "number" && Number.isFinite(v)),

@@ -1,3 +1,45 @@
+## 2026-07-15 (Sonnet 5 · main) — Threaded Medical Office rent through cre-swfl (SURFACED_SECTORS + asking_rent_full_service field + per-sector fan-out + vocab), so Industrial + Medical Office can rebuild together in one go.
+
+Operator: "THREAD MEDICAL THROUGH AND THEN WE CAN REBUILD ALL AT ONCE SO WE GET ALL THE INFORMATION
+IN ONE REBUILD" — instead of doing the previously-asked Industrial-only rebuild now, finished the
+Medical Office wiring gap flagged in `docs/handoff/2026-07-15-marketbeat-verified-review-and-flip.md`
+§4 first, so one rebuild picks up both.
+
+Changes (`refinery/sources/marketbeat-swfl-source.mts`, `refinery/packs/cre-swfl.mts`,
+`refinery/vocab/brain-vocabulary.json`, fixture + 3 test files):
+- Added `medical_office` to `SURFACED_SECTORS`; added `asking_rent_full_service` (full-service/gross
+  basis, not NNN — the C&W Medical Office report's own basis, per the 20260715 migration) to the
+  source connector's row/normalized types, select clause, and passthrough.
+- `cre-swfl.mts`'s per-sector fan-out already iterated sectors dynamically (no hardcoded
+  industrial/office list) — vacancy_rate and absorption_sqft needed zero new code for
+  medical_office. Only the rent slug needed a new emission branch
+  (`asking_rent_full_service_marketbeat_<place>_medical_office`) since medical_office's rent lives
+  in a different column than every other sector's NNN rent. Extracted a `shapeMarketbeatFieldValue`
+  helper (replacing two duplicated 15-line ternaries) rather than hand-editing both to add a 4th
+  branch.
+- Registered 3 new vocab concepts. Caught via `/advisor` before writing the vocab entries: pattern
+  resolution is first-match-wins in file order, and "medical_office" ends in "_office" — so
+  `vacancy_rate_marketbeat_**_office`'s compiled regex (`.+_office$`) would have silently swallowed
+  `vacancy_rate_marketbeat_naples_medical_office` into the wrong (office) concept if the
+  medical_office entries were registered after office's, same for absorption_sqft. Fixed by ordering
+  medical_office entries before their office counterparts (rent family has no such collision — a
+  different field name). Added a discriminating regression test in `2.5-normalize.test.mts` that
+  calls the real resolver against the real vocab file and asserts the correct concept id — a
+  same-slug-different-concept bug would NOT show up as a vocab-coverage orphan, so that gate alone
+  can't catch it.
+- Verified: 1658/1658 `bun test refinery/` pass, `refinery:typecheck` unchanged at 178 pre-existing
+  errors (0 new — confirmed via `git stash` diff), `check-vocab-coverage --all` clean across 41
+  brains, Gate 5 `catalog.test.mts` passes.
+
+Not done, deliberately: Medical Office's data is still NOT live — this is code-only. `cre-swfl` has
+not rebuilt, so nothing customer-facing changed. Check `marketbeat_medical_wiring_followup` stays
+open until the rebuild + master propagation actually ships the numbers (per `feedback_code-fix-is-
+not-live-until-brain-rebuilds` — a code fix isn't done until the served bytes prove it). Asked
+operator for one bundled go-ahead covering: (1) push this commit + the prior Industrial-fix commit,
+(2) `cre-swfl --target-only` rebuild, (3) `master` (no `--force`) to propagate both sectors' fresh
+numbers into the dossier the answer engine actually reads — a `--target-only` leaf rebuild alone does
+NOT propagate to master (memory correction from 07/14).
+
 ## 2026-07-15 (Sonnet 5 · main) — 2 independent reviews found real parser corruption in BOTH Industrial and Medical Office; fixed both bugs; flipped verified=true for 113 reviewed-clean rows.
 
 Operator: "write follow up so we get another set of eyes on it and fixed so it runs correctly and

@@ -21,8 +21,13 @@ import { buildSourceCitationUrl } from "../lib/citation-url.mts";
  *       e.g. 'mhs_databook_retail_bonita-springs_2026-Q1'),
  *   source_name ('cw_marketbeat' | 'mhs_databook' — NOT NULL, no default),
  *   sector, submarket, quarter, geographic_type,
- *   vacancy_rate, asking_rent_nnn, absorption_sqft, source_url, verified,
- *   verified_vacancy, verified_rents, verified_absorption.
+ *   vacancy_rate, asking_rent_nnn, asking_rent_full_service, absorption_sqft,
+ *   source_url, verified, verified_vacancy, verified_rents, verified_absorption.
+ *
+ * asking_rent_full_service (added 2026-07-15, docs/sql/20260715_marketbeat_swfl_full_service_rent.sql):
+ * medical_office's C&W report states rent on a full-service (gross) basis, not
+ * NNN — writing it into asking_rent_nnn would mislabel the rate basis. Always
+ * null for every other sector today.
  *
  * Verification gate differs by source:
  *   cw_marketbeat — legacy `verified = true` gates the whole row.
@@ -68,8 +73,11 @@ const FIXTURE_PATH = path.join(
  *     first, and each sector emits its own slug family (retail stays bare for
  *     backward compat; industrial/office carry a `_industrial` / `_office`
  *     suffix). ZERO cross-sector blending remains the standing rule.
+ *   2026-07-15 (Ricky): add medical_office, same per-sector isolation rule —
+ *     carries a `_medical_office` suffix, its rent surfaces via
+ *     asking_rent_full_service (a full-service/gross basis, not NNN).
  */
-const SURFACED_SECTORS = ["retail", "industrial", "office"] as const;
+const SURFACED_SECTORS = ["retail", "industrial", "office", "medical_office"] as const;
 
 /**
  * Default sector for legacy rows/fixtures that predate the `sector` column
@@ -100,6 +108,13 @@ export interface MarketbeatSwflNormalized {
   vacancy_rate: number | null;
   /** Average asking rent PSF NNN. Nullable. Negative is invalid; n8n's range check rejects out-of-band values upstream. */
   asking_rent_nnn: number | null;
+  /**
+   * Average asking rent PSF, full-service/gross basis (medical_office only —
+   * always null elsewhere). Optional so pre-2026-07-15 fixture/tool literals
+   * still type-check (same carve-out as `sector?` above); an absent value is
+   * treated identically to null downstream (`row.asking_rent_full_service != null`).
+   */
+  asking_rent_full_service?: number | null;
   /** Net absorption sqft — can be negative (give-back). Nullable. */
   absorption_sqft: number | null;
   /** Per-row source URL the broker report came from (Firecrawl scrape origin). */
@@ -123,6 +138,8 @@ export interface MarketbeatRow {
   geographic_type?: string | null;
   vacancy_rate: number | null;
   asking_rent_nnn: number | null;
+  /** Full-service/gross asking rent (medical_office only). Nullable. */
+  asking_rent_full_service?: number | null;
   absorption_sqft: number | null;
   source_url: string | null;
   /** Legacy whole-row gate (cw_marketbeat). Always false for mhs_databook rows. */
@@ -204,11 +221,11 @@ async function fetchLive(): Promise<MarketbeatRow[]> {
     .schema(SCHEMA)
     .from(TABLE)
     .select(
-      "id, source_name, sector, submarket, quarter, geographic_type, vacancy_rate, asking_rent_nnn, absorption_sqft, source_url, verified, verified_vacancy, verified_rents, verified_absorption",
+      "id, source_name, sector, submarket, quarter, geographic_type, vacancy_rate, asking_rent_nnn, asking_rent_full_service, absorption_sqft, source_url, verified, verified_vacancy, verified_rents, verified_absorption",
     )
     // No .eq("verified", true) — mhs_databook rows are always verified=false; per-field
     // gating happens in selectLatestVerifiedPerSubmarket and the normalization step.
-    .in("sector", SURFACED_SECTORS as unknown as string[]) // per-sector (2026-06-08): retail + industrial + office, kept distinct downstream
+    .in("sector", SURFACED_SECTORS as unknown as string[]) // per-sector (2026-06-08): retail + industrial + office + medical_office, kept distinct downstream
     .order("quarter", { ascending: false });
   if (error) {
     throw new Error(`marketbeat-swfl: ${TABLE} fetch failed — ${error.message}`);
@@ -253,6 +270,9 @@ export const marketbeatSwflSource: SourceConnector = {
             ? row.asking_rent_nnn
             : null
           : row.asking_rent_nnn,
+        // No MHS per-field gate: medical_office is cw_marketbeat-only today (the
+        // legacy whole-row `verified` gate already inclusion-filtered this row).
+        asking_rent_full_service: row.asking_rent_full_service ?? null,
         absorption_sqft: isMhs
           ? row.verified_absorption
             ? row.absorption_sqft

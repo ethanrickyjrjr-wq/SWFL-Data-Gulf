@@ -15,11 +15,7 @@ import type { PackDefinition } from "../types/pack.mts";
 // Test fixtures
 // ---------------------------------------------------------------------------
 
-function makeFragment<N>(
-  fragment_id: string,
-  topic: string,
-  normalized: N,
-): TriagedFragment<N> {
+function makeFragment<N>(fragment_id: string, topic: string, normalized: N): TriagedFragment<N> {
   return {
     fragment_id,
     source_id: "test_source",
@@ -65,18 +61,9 @@ test("loadVocabulary: real brain-vocabulary.json parses with expected shape", as
   resetVocabularyCache();
   const vocab = await loadVocabulary();
   assert.equal(vocab.meta.schema_version, "1.0.0");
-  assert.ok(
-    vocab.concepts["cre_cap_rate_median"],
-    "cre_cap_rate_median present",
-  );
-  assert.ok(
-    vocab.concepts["sba_chargeoff_rate_sector_44"],
-    "NAICS 44 concept present",
-  );
-  assert.ok(
-    vocab.concepts["sba_chargeoff_rate_sector_45"],
-    "NAICS 45 concept present",
-  );
+  assert.ok(vocab.concepts["cre_cap_rate_median"], "cre_cap_rate_median present");
+  assert.ok(vocab.concepts["sba_chargeoff_rate_sector_44"], "NAICS 44 concept present");
+  assert.ok(vocab.concepts["sba_chargeoff_rate_sector_45"], "NAICS 45 concept present");
   assert.notEqual(
     vocab.concepts["sba_chargeoff_rate_sector_44"].id,
     vocab.concepts["sba_chargeoff_rate_sector_45"].id,
@@ -111,6 +98,38 @@ test("resolveSlug: NAICS 44 and 45 do not collide", async () => {
   assert.equal(r45?.concept.naics_code, 45);
 });
 
+test("resolveSlug: medical_office marketbeat slugs resolve to their OWN concept, not the office concept", async () => {
+  // Regression guard: "medical_office" ends in "_office", so the office glob
+  // (vacancy_rate_marketbeat_**_office / absorption_sqft_marketbeat_**_office)
+  // would silently swallow a medical_office slug if its concept were registered
+  // AFTER office in brain-vocabulary.json (first-match-wins pattern resolution —
+  // see refinery/vocab/patterns.mts matchSlugPattern). The medical_office
+  // entries must precede office for both fields.
+  const vocab = await loadVocabulary();
+  const vac = resolveSlug(
+    "vacancy_rate_marketbeat_naples_medical_office",
+    "normalized.metric",
+    vocab,
+  );
+  assert.equal(vac?.concept.id, "marketbeat_vacancy_rate_medical_office");
+  assert.notEqual(vac?.concept.id, "marketbeat_vacancy_rate_office");
+
+  const abs = resolveSlug(
+    "absorption_sqft_marketbeat_naples_medical_office",
+    "normalized.metric",
+    vocab,
+  );
+  assert.equal(abs?.concept.id, "marketbeat_absorption_sqft_medical_office");
+  assert.notEqual(abs?.concept.id, "marketbeat_absorption_sqft_office");
+
+  const rent = resolveSlug(
+    "asking_rent_full_service_marketbeat_naples_medical_office",
+    "normalized.metric",
+    vocab,
+  );
+  assert.equal(rent?.concept.id, "marketbeat_asking_rent_full_service_medical_office");
+});
+
 test("resolveSlug: direction at BrainOutput.direction → sentiment", async () => {
   const vocab = await loadVocabulary();
   const r = resolveSlug("direction", "BrainOutput.direction", vocab);
@@ -127,11 +146,7 @@ test("resolveSlug: direction at BrainOutputMetric.direction → trajectory", asy
 
 test("resolveSlug: direction nested in key_metrics[] → trajectory (heuristic)", async () => {
   const vocab = await loadVocabulary();
-  const r = resolveSlug(
-    "direction",
-    "normalized.key_metrics[0].direction",
-    vocab,
-  );
+  const r = resolveSlug("direction", "normalized.key_metrics[0].direction", vocab);
   assert.equal(r?.concept.id, "qual_metric_trajectory");
   assert.equal(r?.disambiguation, "trajectory");
 });
@@ -182,9 +197,7 @@ test("normalizeStage: BrainOutputMetric-shaped normalized → metric slug + dire
   assert.equal(result.orphans.length, 0);
   const tags = result.normalized[0].concept_tags;
   const metricTag = tags.find((t: NormalizedTag) => t.raw_slug === "cap_rate");
-  const directionTag = tags.find(
-    (t: NormalizedTag) => t.raw_slug === "direction",
-  );
+  const directionTag = tags.find((t: NormalizedTag) => t.raw_slug === "direction");
   assert.ok(metricTag, "cap_rate tagged");
   assert.equal(metricTag!.concept_id, "cre_cap_rate");
   assert.ok(directionTag, "direction tagged");
@@ -200,9 +213,7 @@ test("normalizeStage: normalized payload with raw slug as key → tagged", async
   });
   const result = await normalizeStage([frag], pack);
   assert.equal(result.orphans.length, 0);
-  const conceptIds = result.normalized[0].concept_tags
-    .map((t) => t.concept_id)
-    .sort();
+  const conceptIds = result.normalized[0].concept_tags.map((t) => t.concept_id).sort();
   assert.deepEqual(conceptIds, ["macro_fl_unemployment", "macro_sofr_rate"]);
 });
 
@@ -260,10 +271,7 @@ test("normalizeStage: de-duplicates identical (path, slug) claims", async () => 
   // Two distinct claim paths → two tags (classification.topic + normalized.cap_rate_median)
   assert.equal(result.normalized[0].concept_tags.length, 2);
   const paths = result.normalized[0].concept_tags.map((t) => t.path).sort();
-  assert.deepEqual(paths, [
-    "classification.topic",
-    "normalized.cap_rate_median",
-  ]);
+  assert.deepEqual(paths, ["classification.topic", "normalized.cap_rate_median"]);
 });
 
 test("normalizeStage: mixed valid + orphan in non-strict reports both correctly", async () => {
@@ -275,11 +283,7 @@ test("normalizeStage: mixed valid + orphan in non-strict reports both correctly"
   assert.equal(result.orphans[0].fragment_id, "bad");
   assert.equal(result.normalized.length, 2);
   // The good fragment has its tags
-  assert.ok(
-    result.normalized[0].concept_tags.find(
-      (t) => t.concept_id === "macro_sofr_rate",
-    ),
-  );
+  assert.ok(result.normalized[0].concept_tags.find((t) => t.concept_id === "macro_sofr_rate"));
 });
 
 // ---------------------------------------------------------------------------
@@ -366,19 +370,15 @@ test("normalizeStage: env-swfl per-ZIP slugs resolve across all 3 barrier-island
   resetVocabularyCache();
   const pack = makePack("env-swfl");
   const fragments = ["33931", "34134", "34112"].map((zip) =>
-    makeFragment(
-      `zip-${zip}`,
-      `metric:swfl_zip_${zip}_flood_aal_usd_per_insured_property`,
-      {
-        key_metrics: [
-          {
-            metric: `swfl_zip_${zip}_flood_aal_usd_per_insured_property`,
-            value: 1234.5,
-            direction: "stable",
-          },
-        ],
-      },
-    ),
+    makeFragment(`zip-${zip}`, `metric:swfl_zip_${zip}_flood_aal_usd_per_insured_property`, {
+      key_metrics: [
+        {
+          metric: `swfl_zip_${zip}_flood_aal_usd_per_insured_property`,
+          value: 1234.5,
+          direction: "stable",
+        },
+      ],
+    }),
   );
   const result = await normalizeStage(fragments, pack);
   assert.equal(result.orphans.length, 0, "no orphans across the 3 modes");

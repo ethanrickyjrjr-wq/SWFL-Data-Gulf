@@ -893,6 +893,35 @@
       "status": "active",
       "scope_note": "Per-place INDUSTRIAL CRE vacancy from the MarketBeat/MHS feed. A distinct sector from retail — surfaced separately (per-sector reversal 2026-06-08), NEVER blended with retail or office. Slug tail is the canonical place (places-swfl.mts; may carry an `_area` parent-rollup segment) plus an `_industrial` sector suffix. Listed before the bare `marketbeat_vacancy_rate` retail pattern so the sector-specific glob resolves first."
     },
+    "marketbeat_vacancy_rate_medical_office": {
+      "id": "marketbeat_vacancy_rate_medical_office",
+      "grade": { "direction_polarity": "lower_is_bullish" },
+      "prefLabel": "Vacancy Rate — Medical Office (MarketBeat, per place)",
+      "altLabels": [
+        "medical office vacancy",
+        "submarket medical office vacancy rate"
+      ],
+      "raw_slugs": [],
+      "raw_slug_patterns": [
+        "vacancy_rate_marketbeat_**_medical_office"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "cre-swfl"
+      ],
+      "value_type": "percentage",
+      "unit": "%",
+      "value_range": [
+        0,
+        100
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Per-place MEDICAL OFFICE CRE vacancy from the MarketBeat feed (added 2026-07-15). A distinct sector from retail/industrial/office — surfaced separately, NEVER blended. Slug tail is the canonical place (places-swfl.mts; may carry an `_area` parent-rollup segment) plus a `_medical_office` sector suffix. MUST be listed before `marketbeat_vacancy_rate_office` — \"medical_office\" ends in \"_office\", so the office glob (`vacancy_rate_marketbeat_**_office` → `.+_office$`) would otherwise match a medical_office slug first (first-match-wins pattern resolution)."
+    },
     "marketbeat_vacancy_rate_office": {
       "id": "marketbeat_vacancy_rate_office",
       "grade": { "direction_polarity": "lower_is_bullish" },
@@ -997,6 +1026,31 @@
       "status": "active",
       "scope_note": "Per-place INDUSTRIAL net absorption from the MarketBeat/MHS feed. Negative values are valid (give-back). Distinct sector — surfaced separately (2026-06-08), never blended. Slug tail is the canonical place plus an `_industrial` suffix."
     },
+    "marketbeat_absorption_sqft_medical_office": {
+      "id": "marketbeat_absorption_sqft_medical_office",
+      "grade": { "direction_polarity": "higher_is_bullish" },
+      "prefLabel": "Net Absorption — Medical Office (MarketBeat, per place)",
+      "altLabels": [
+        "medical office absorption",
+        "submarket medical office net absorption"
+      ],
+      "raw_slugs": [],
+      "raw_slug_patterns": [
+        "absorption_sqft_marketbeat_**_medical_office"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "cre-swfl"
+      ],
+      "value_type": "integer",
+      "unit": "sqft",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Per-place MEDICAL OFFICE net absorption from the MarketBeat feed (added 2026-07-15). Negative values are valid (give-back). Distinct sector — surfaced separately, never blended. Slug tail is the canonical place plus a `_medical_office` suffix. MUST be listed before `marketbeat_absorption_sqft_office` — \"medical_office\" ends in \"_office\", so the office glob would otherwise match a medical_office slug first (first-match-wins pattern resolution)."
+    },
     "marketbeat_absorption_sqft_office": {
       "id": "marketbeat_absorption_sqft_office",
       "grade": { "direction_polarity": "higher_is_bullish" },
@@ -1021,6 +1075,32 @@
       "direction_concept": "qual_metric_trajectory",
       "status": "active",
       "scope_note": "Per-place OFFICE net absorption from the MarketBeat/MHS feed. Negative values are valid (give-back). Distinct sector — surfaced separately (2026-06-08), never blended. Slug tail is the canonical place plus an `_office` suffix."
+    },
+    "marketbeat_asking_rent_full_service_medical_office": {
+      "id": "marketbeat_asking_rent_full_service_medical_office",
+      "grade": { "direction_polarity": "higher_is_bullish" },
+      "prefLabel": "Asking Rent Full Service — Medical Office (MarketBeat, per place)",
+      "altLabels": [
+        "medical office asking rent",
+        "submarket medical office rent full service",
+        "medical office gross rent"
+      ],
+      "raw_slugs": [],
+      "raw_slug_patterns": [
+        "asking_rent_full_service_marketbeat_**_medical_office"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "cre-swfl"
+      ],
+      "value_type": "currency",
+      "unit": "USD/sqft",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Per-place MEDICAL OFFICE asking rent from the MarketBeat feed (added 2026-07-15), full-service/gross basis — NOT NNN. The C&W Medical Office report states rent this way; distinct field (asking_rent_full_service) from the NNN basis every other sector uses, so it is never comparable to marketbeat_asking_rent_nnn_* without disclosing the basis difference. Slug tail is the canonical place plus a `_medical_office` suffix."
     },
     "marketbeat_vacancy_rate": {
       "id": "marketbeat_vacancy_rate",

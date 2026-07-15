@@ -1,7 +1,7 @@
 {
   "__meta": {
     "_synthetic": true,
-    "_note": "Fixture rows mirror data_lake.marketbeat_swfl (schema after 20260605 extension). All rows carry source_name, sector, and 4-part id (source_name||'_'||sector||'_'||submarket||'_'||quarter).\n\nTest scenarios (retail):\n  Naples Q1+Q3 (cw_marketbeat, verified=true): Q3 wins latest-quarter path.\n  Cape Coral Q1 verified + Q2 unverified (cw_marketbeat): Q1 wins; unverified Q2 is excluded by the legacy verified-gate.\n  Bonita Springs collision: Q1 cw_marketbeat (verified=true) vs Q1 mhs_databook (verified=false, verified_vacancy=true, verified_rents=true, verified_absorption=false); Q3 cw_marketbeat (verified=false, dropped). Inclusion: C&W Q1 passes (verified=true); MHS Q1 passes (verified_vacancy=true). Same-quarter tiebreak: mhs_databook wins. Normalization nulls absorption_sqft on the MHS winner (verified_absorption=false — absorption stays DARK).\n  Fort Myers Q3 cw_marketbeat verified: passes through.\n\nTest scenarios (per-sector surfacing, 2026-06-08): industrial + office mhs_databook rows surface as DISTINCT slugs, NEVER blended with retail.\n  Naples + East Naples industrial (all three per-field flags true): emit vacancy_rate_marketbeat_naples_industrial, …_east_naples_industrial, and the parent-place rollup vacancy_rate_marketbeat_naples_area_industrial (≥2 sub-areas under the naples parent). Retail Naples vacancy (4.8%) and industrial Naples vacancy (3.1%) ship side by side — never averaged.\n  Fort Myers office (verified_absorption=false): vacancy + rent surface (…_fort_myers_office); absorption stays DARK per the per-field gate.",
+    "_note": "Fixture rows mirror data_lake.marketbeat_swfl (schema after 20260605 extension + 20260715 asking_rent_full_service column). All rows carry source_name, sector, and 4-part id (source_name||'_'||sector||'_'||submarket||'_'||quarter).\n\nTest scenarios (retail):\n  Naples Q1+Q3 (cw_marketbeat, verified=true): Q3 wins latest-quarter path.\n  Cape Coral Q1 verified + Q2 unverified (cw_marketbeat): Q1 wins; unverified Q2 is excluded by the legacy verified-gate.\n  Bonita Springs collision: Q1 cw_marketbeat (verified=true) vs Q1 mhs_databook (verified=false, verified_vacancy=true, verified_rents=true, verified_absorption=false); Q3 cw_marketbeat (verified=false, dropped). Inclusion: C&W Q1 passes (verified=true); MHS Q1 passes (verified_vacancy=true). Same-quarter tiebreak: mhs_databook wins. Normalization nulls absorption_sqft on the MHS winner (verified_absorption=false — absorption stays DARK).\n  Fort Myers Q3 cw_marketbeat verified: passes through.\n\nTest scenarios (per-sector surfacing, 2026-06-08): industrial + office mhs_databook rows surface as DISTINCT slugs, NEVER blended with retail.\n  Naples + East Naples industrial (all three per-field flags true): emit vacancy_rate_marketbeat_naples_industrial, …_east_naples_industrial, and the parent-place rollup vacancy_rate_marketbeat_naples_area_industrial (≥2 sub-areas under the naples parent). Retail Naples vacancy (4.8%) and industrial Naples vacancy (3.1%) ship side by side — never averaged.\n  Fort Myers office (verified_absorption=false): vacancy + rent surface (…_fort_myers_office); absorption stays DARK per the per-field gate.\n\nTest scenarios (medical_office, added 2026-07-15): cw_marketbeat rows, whole-row verified=true gate (same as retail — medical_office has no mhs_databook rows today). asking_rent_nnn is always null; rent lives in asking_rent_full_service (full-service/gross basis, not NNN — the C&W Medical Office report's own basis).\n  Naples + East Naples medical_office: emit vacancy_rate_marketbeat_naples_medical_office, …_east_naples_medical_office, asking_rent_full_service_marketbeat_naples_medical_office (38.46), absorption_sqft_marketbeat_naples_medical_office (-12000), and the parent-place rollup vacancy_rate_marketbeat_naples_area_medical_office (≥2 sub-areas). Naples medical_office vacancy (6.1%) ships side by side with Naples retail (4.8%) and Naples industrial (3.1%) — three distinct sector slugs, never blended.",
     "_shape": "One row per (source_name, sector, submarket, quarter). Live 4-part UNIQUE key: (source_name, sector, submarket, quarter)."
   },
   "rows": [
@@ -202,6 +202,44 @@
       "verified_absorption": false,
       "_source_model": "geometry-extract",
       "_ingested_at": "2026-06-05T00:00:00Z"
+    },
+    {
+      "id": "cw_marketbeat_medical_office_Naples_2026-Q1",
+      "source_name": "cw_marketbeat",
+      "sector": "medical_office",
+      "submarket": "Naples",
+      "quarter": "2026-Q1",
+      "geographic_type": "submarket",
+      "vacancy_rate": 6.1,
+      "asking_rent_nnn": null,
+      "asking_rent_full_service": 38.46,
+      "absorption_sqft": -12000,
+      "source_url": "https://www.cushmanwakefield.com/en/united-states/insights/us-marketbeats/fort-myers-naples-marketbeats?sector=medical-office&q=2026-Q1",
+      "verified": true,
+      "verified_vacancy": null,
+      "verified_rents": null,
+      "verified_absorption": null,
+      "_source_model": "spark-1-mini",
+      "_ingested_at": "2026-04-01T13:00:00Z"
+    },
+    {
+      "id": "cw_marketbeat_medical_office_East Naples_2026-Q1",
+      "source_name": "cw_marketbeat",
+      "sector": "medical_office",
+      "submarket": "East Naples",
+      "quarter": "2026-Q1",
+      "geographic_type": "submarket",
+      "vacancy_rate": 7.3,
+      "asking_rent_nnn": null,
+      "asking_rent_full_service": 36.2,
+      "absorption_sqft": 5000,
+      "source_url": "https://www.cushmanwakefield.com/en/united-states/insights/us-marketbeats/fort-myers-naples-marketbeats?sector=medical-office&q=2026-Q1",
+      "verified": true,
+      "verified_vacancy": null,
+      "verified_rents": null,
+      "verified_absorption": null,
+      "_source_model": "spark-1-mini",
+      "_ingested_at": "2026-04-01T13:00:00Z"
     }
   ]
 }

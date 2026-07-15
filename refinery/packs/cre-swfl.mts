@@ -116,13 +116,15 @@ let lastJoinedBySubmarket: ReturnType<typeof groupCorridorsBySubmarket> = {
 /**
  * Non-retail per-sector corridor joins — populated by creCorpusSummary, consumed
  * by outputProducer to emit per-sector-per-submarket key_metrics. One join per
- * surfaced non-retail sector (industrial, office), keyed by sector slug.
+ * surfaced non-retail sector (industrial, office, medical_office), keyed by
+ * sector slug.
  *
- * SECTOR ISOLATION (2026-06-08, the per-sector reversal): each sector is joined
- * SEPARATELY against the corridor corpus, so a Naples industrial vacancy NEVER
- * dedupes against, or blends into, a Naples retail vacancy — they are different
- * markets with different denominators. Retail keeps the bare `lastJoinedBySubmarket`
- * + bare-slug path above (backward compat); industrial/office ride here and emit
+ * SECTOR ISOLATION (2026-06-08, the per-sector reversal; medical_office added
+ * 2026-07-15): each sector is joined SEPARATELY against the corridor corpus, so
+ * a Naples industrial vacancy NEVER dedupes against, or blends into, a Naples
+ * retail vacancy — they are different markets with different denominators.
+ * Retail keeps the bare `lastJoinedBySubmarket` + bare-slug path above
+ * (backward compat); industrial/office/medical_office ride here and emit
  * sector-suffixed slugs. ZERO cross-sector blending — the 2026-06-05 ban stands;
  * we surface the sectors side by side, never averaged together.
  */
@@ -264,7 +266,7 @@ function publisherLabel(sourceName: string): string {
 }
 
 function buildMarketbeatSubmarketSource(
-  field: "vacancy_rate" | "asking_rent_nnn" | "absorption_sqft",
+  field: "vacancy_rate" | "asking_rent_nnn" | "asking_rent_full_service" | "absorption_sqft",
   group: JoinedSubmarketGroup,
   fetched_at: string,
 ): BrainOutputMetricSource {
@@ -306,12 +308,67 @@ function medianOf(xs: number[]): number | null {
   return sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-type MarketbeatField = "vacancy_rate" | "asking_rent_nnn" | "absorption_sqft";
+type MarketbeatField =
+  "vacancy_rate" | "asking_rent_nnn" | "asking_rent_full_service" | "absorption_sqft";
 const ROLLUP_FIELDS: readonly MarketbeatField[] = [
   "vacancy_rate",
   "asking_rent_nnn",
+  "asking_rent_full_service",
   "absorption_sqft",
 ];
+
+/**
+ * Shape a MarketbeatField's raw median value into the display fields a
+ * BrainOutputMetric needs — units/format/kind vary per field. Single source of
+ * truth for both the retail-only parent rollup (line ~1114, full_service is
+ * always null there — no row) and the per-sector rollup (line ~1224, where
+ * medical_office actually populates asking_rent_full_service).
+ */
+function shapeMarketbeatFieldValue(
+  field: MarketbeatField,
+  rawValue: number,
+): {
+  value: number;
+  variable_type: "extensive" | "intensive";
+  units: string;
+  display_format: "count" | "currency" | "percent";
+  kind: string;
+} {
+  switch (field) {
+    case "absorption_sqft":
+      return {
+        value: Math.round(rawValue),
+        variable_type: "extensive",
+        units: "sqft",
+        display_format: "count",
+        kind: "net absorption",
+      };
+    case "asking_rent_nnn":
+      return {
+        value: Math.round(rawValue * 100) / 100,
+        variable_type: "intensive",
+        units: "USD/sqft",
+        display_format: "currency",
+        kind: "asking rent NNN",
+      };
+    case "asking_rent_full_service":
+      return {
+        value: Math.round(rawValue * 100) / 100,
+        variable_type: "intensive",
+        units: "USD/sqft",
+        display_format: "currency",
+        kind: "asking rent full service",
+      };
+    case "vacancy_rate":
+      return {
+        value: Math.round(rawValue * 100) / 100,
+        variable_type: "intensive",
+        units: "percent",
+        display_format: "percent",
+        kind: "vacancy rate",
+      };
+  }
+}
 
 export interface MarketbeatParentRollup {
   /** snake_case parent-place slug (metric-name form), e.g. "naples", "fort_myers". */
@@ -1047,10 +1104,15 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
   // so a Naples 4.8% vacancy doesn't get averaged into a Fort Myers 8.2% read.
   // Today's SWFL-wide blocks stay intact (augment, not replace) — master and any
   // downstream consumers on contract today keep their existing keys.
-  const emittedSubmarketSlugs: Record<
-    "vacancy_rate" | "asking_rent_nnn" | "absorption_sqft",
-    string[]
-  > = { vacancy_rate: [], asking_rent_nnn: [], absorption_sqft: [] };
+  // Keyed on the full MarketbeatField union (shared with computeMarketbeatParentRollups'
+  // ROLLUP_FIELDS) even though this retail-only block never populates
+  // asking_rent_full_service — full_service is always null on a retail row.
+  const emittedSubmarketSlugs: Record<MarketbeatField, string[]> = {
+    vacancy_rate: [],
+    asking_rent_nnn: [],
+    asking_rent_full_service: [],
+    absorption_sqft: [],
+  };
   const zeroMatchedCaveatGroups: JoinedSubmarketGroup[] = [];
 
   for (const group of lastJoinedBySubmarket.matched.values()) {
@@ -1115,30 +1177,7 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
     [...lastJoinedBySubmarket.matched.values()].map((g) => g.row),
   )) {
     const metricName = `${rollup.field}_marketbeat_${rollup.parentSlug}_area`;
-    const shaped =
-      rollup.field === "absorption_sqft"
-        ? {
-            value: Math.round(rollup.value),
-            variable_type: "extensive" as const,
-            units: "sqft",
-            display_format: "count" as const,
-            kind: "net absorption",
-          }
-        : rollup.field === "asking_rent_nnn"
-          ? {
-              value: Math.round(rollup.value * 100) / 100,
-              variable_type: "intensive" as const,
-              units: "USD/sqft",
-              display_format: "currency" as const,
-              kind: "asking rent NNN",
-            }
-          : {
-              value: Math.round(rollup.value * 100) / 100,
-              variable_type: "intensive" as const,
-              units: "percent",
-              display_format: "percent" as const,
-              kind: "vacancy rate",
-            };
+    const shaped = shapeMarketbeatFieldValue(rollup.field, rollup.value);
     key_metrics.push({
       metric: metricName,
       value: shaped.value,
@@ -1152,12 +1191,14 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
     emittedSubmarketSlugs[rollup.field].push(metricName);
   }
 
-  // --- MarketBeat per-SECTOR fan-out (industrial + office) -------------------
+  // --- MarketBeat per-SECTOR fan-out (industrial + office + medical_office) --
   // Per-sector surfacing (2026-06-08, reversing the 2026-06-05 retail-only
-  // decision). Each non-retail sector emits its OWN per-submarket slug family
-  // with a `_<sector>` suffix — `vacancy_rate_marketbeat_naples_industrial`,
-  // `asking_rent_nnn_marketbeat_fort_myers_office`, etc. — so an industrial
-  // vacancy reads side-by-side with retail's, NEVER averaged into it.
+  // decision; medical_office added 2026-07-15). Each non-retail sector emits
+  // its OWN per-submarket slug family with a `_<sector>` suffix —
+  // `vacancy_rate_marketbeat_naples_industrial`,
+  // `asking_rent_nnn_marketbeat_fort_myers_office`,
+  // `asking_rent_full_service_marketbeat_naples_medical_office` — so an
+  // industrial vacancy reads side-by-side with retail's, NEVER averaged into it.
   //
   // ZERO cross-sector blending: each sector was joined on its OWN rows in
   // creCorpusSummary (lastJoinedByNonRetailSector), so the medians/rollups for
@@ -1165,7 +1206,10 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
   // untouched. Parent-place rollups also run per-sector here, carrying the same
   // `_<sector>` suffix on top of the `_area` suffix. Every emitted slug resolves
   // through the per-sector `raw_slug_patterns` registered in the same commit
-  // (…_marketbeat_**_industrial / …_marketbeat_**_office).
+  // (…_marketbeat_**_industrial / …_marketbeat_**_office / …_marketbeat_**_medical_office).
+  // The medical_office vocab entries MUST be registered BEFORE the office ones
+  // in brain-vocabulary.json — "medical_office" ends in "_office", so the
+  // office glob's `.+_office$` would otherwise swallow it (first-match-wins).
   const emittedSectorSlugs: string[] = [];
   // Sort sectors for deterministic emit order across runs.
   for (const sector of [...lastJoinedByNonRetailSector.keys()].sort()) {
@@ -1203,6 +1247,22 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
         });
         emittedSectorSlugs.push(metricName);
       }
+      // full-service/gross rent — medical_office only (asking_rent_nnn stays
+      // null for that sector; the two rent bases never coexist on one row).
+      if (row.asking_rent_full_service != null) {
+        const metricName = `asking_rent_full_service_marketbeat_${slug}_${sector}`;
+        key_metrics.push({
+          metric: metricName,
+          value: Math.round(row.asking_rent_full_service * 100) / 100,
+          direction: "stable",
+          label: `MarketBeat ${display} ${sector} asking rent full service (${row.quarter})`,
+          variable_type: "intensive",
+          units: "USD/sqft",
+          display_format: "currency",
+          source: buildMarketbeatSubmarketSource("asking_rent_full_service", group, mbFetchedAt),
+        });
+        emittedSectorSlugs.push(metricName);
+      }
       if (row.absorption_sqft != null) {
         const metricName = `absorption_sqft_marketbeat_${slug}_${sector}`;
         key_metrics.push({
@@ -1225,30 +1285,7 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
       [...sectorJoin.matched.values()].map((g) => g.row),
     )) {
       const metricName = `${rollup.field}_marketbeat_${rollup.parentSlug}_area_${sector}`;
-      const shaped =
-        rollup.field === "absorption_sqft"
-          ? {
-              value: Math.round(rollup.value),
-              variable_type: "extensive" as const,
-              units: "sqft",
-              display_format: "count" as const,
-              kind: "net absorption",
-            }
-          : rollup.field === "asking_rent_nnn"
-            ? {
-                value: Math.round(rollup.value * 100) / 100,
-                variable_type: "intensive" as const,
-                units: "USD/sqft",
-                display_format: "currency" as const,
-                kind: "asking rent NNN",
-              }
-            : {
-                value: Math.round(rollup.value * 100) / 100,
-                variable_type: "intensive" as const,
-                units: "percent",
-                display_format: "percent" as const,
-                kind: "vacancy rate",
-              };
+      const shaped = shapeMarketbeatFieldValue(rollup.field, rollup.value);
       key_metrics.push({
         metric: metricName,
         value: shaped.value,
@@ -1481,14 +1518,15 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
       `All per-submarket MarketBeat ${FAMILY_LABELS[family]} metrics ship direction=stable as a schema-required fallback; v1 does not compute quarter-over-quarter trends. Affected: ${slugs.join(", ")}.`,
     );
   }
-  // --- Per-sector (industrial/office) MarketBeat caveats ---
-  // Per-sector surfacing (2026-06-08). One disclosure naming the sector slugs
-  // that shipped this run: they are kept FULLY separate from retail (no metric
-  // averages across sectors), and like all MarketBeat metrics they ship
-  // direction=stable (v1 computes no quarter-over-quarter trend).
+  // --- Per-sector (industrial/office/medical_office) MarketBeat caveats ---
+  // Per-sector surfacing (2026-06-08; medical_office added 2026-07-15). One
+  // disclosure naming the sector slugs that shipped this run: they are kept
+  // FULLY separate from retail (no metric averages across sectors), and like
+  // all MarketBeat metrics they ship direction=stable (v1 computes no
+  // quarter-over-quarter trend).
   if (emittedSectorSlugs.length > 0) {
     vote.caveats.push(
-      `Per-sector MarketBeat metrics (industrial/office) are surfaced separately from retail — never blended across sectors — and ship direction=stable as a schema-required fallback (no quarter-over-quarter trend in v1). Affected: ${emittedSectorSlugs.join(", ")}.`,
+      `Per-sector MarketBeat metrics (industrial/office/medical_office) are surfaced separately from retail — never blended across sectors — and ship direction=stable as a schema-required fallback (no quarter-over-quarter trend in v1). Affected: ${emittedSectorSlugs.join(", ")}.`,
     );
   }
   // Zero-matched-corridors guard — a submarket reports a value but none of its

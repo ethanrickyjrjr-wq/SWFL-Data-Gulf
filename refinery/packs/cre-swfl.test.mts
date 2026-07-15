@@ -378,6 +378,61 @@ test("marketbeat per-sector: industrial + office emit sector-suffixed slugs, ret
   );
 });
 
+test("marketbeat per-sector: medical_office emits asking_rent_full_service (not asking_rent_nnn), coexists with retail + industrial Naples", async () => {
+  const corridorFragments = await corridorSource.fetch();
+  const mbFragments = await marketbeatSwflSource.fetch();
+  creSwfl.corpusSummary!([...corridorFragments, ...mbFragments]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const has = (slug: string) => result.key_metrics.find((m) => m.metric === slug);
+
+  const medNaples = has("vacancy_rate_marketbeat_naples_medical_office");
+  assert.ok(medNaples, "expected vacancy_rate_marketbeat_naples_medical_office");
+  assert.equal(medNaples!.value, 6.1);
+
+  // Three sectors, three distinct values — never blended.
+  assert.equal(has("vacancy_rate_marketbeat_naples")?.value, 4.8); // retail
+  assert.equal(has("vacancy_rate_marketbeat_naples_industrial")?.value, 3.1);
+  assert.equal(medNaples!.value, 6.1);
+
+  const rent = has("asking_rent_full_service_marketbeat_naples_medical_office");
+  assert.ok(rent, "expected asking_rent_full_service_marketbeat_naples_medical_office");
+  assert.equal(rent!.value, 38.46);
+  assert.equal(rent!.units, "USD/sqft");
+  assert.equal(rent!.display_format, "currency");
+  assert.ok(
+    !has("asking_rent_nnn_marketbeat_naples_medical_office"),
+    "medical_office never carries an NNN rent slug",
+  );
+
+  assert.equal(has("absorption_sqft_marketbeat_naples_medical_office")?.value, -12000);
+});
+
+test("marketbeat per-sector: medical_office parent-place area rollup stays within its own sector", async () => {
+  const corridorFragments = await corridorSource.fetch();
+  const mbFragments = await marketbeatSwflSource.fetch();
+  creSwfl.corpusSummary!([...corridorFragments, ...mbFragments]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+
+  // Naples + East Naples medical_office roll up to the naples parent. Median
+  // of the two medical_office vacancies (6.1, 7.3) = 6.7 — computed ONLY from
+  // medical_office rows, never mixing in retail (4.8) or industrial (3.1).
+  const areaMed = result.key_metrics.find(
+    (m) => m.metric === "vacancy_rate_marketbeat_naples_area_medical_office",
+  );
+  assert.ok(areaMed, "expected vacancy_rate_marketbeat_naples_area_medical_office rollup");
+  assert.equal(areaMed!.value, 6.7);
+
+  const rentArea = result.key_metrics.find(
+    (m) => m.metric === "asking_rent_full_service_marketbeat_naples_area_medical_office",
+  );
+  assert.ok(
+    rentArea,
+    "expected asking_rent_full_service_marketbeat_naples_area_medical_office rollup",
+  );
+  assert.equal(rentArea!.value, 37.33); // median(38.46, 36.20) rounded to 2dp
+  assert.equal(rentArea!.units, "USD/sqft");
+});
+
 test("marketbeat per-sector: parent-place area rollup stays within one sector", async () => {
   const corridorFragments = await corridorSource.fetch();
   const mbFragments = await marketbeatSwflSource.fetch();
