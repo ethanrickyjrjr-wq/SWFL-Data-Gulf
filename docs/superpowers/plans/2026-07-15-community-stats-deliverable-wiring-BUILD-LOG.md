@@ -4,6 +4,7 @@
 
 
 
+
 Durable record of the subagent-driven execution of `docs/superpowers/plans/2026-07-15-community-stats-deliverable-wiring.md`. Appended after every task's review. See also the design spec (`docs/superpowers/specs/2026-07-15-community-stats-deliverable-wiring-design.md`) and the advisor-caught join-key correction folded into it.
 
 **Execution mode:** subagent-driven-development. Every implementer subagent runs on Opus (operator instruction). Task review is done by the orchestrating session directly (Sonnet), not a dispatched reviewer subagent — operator's "you review." No worktree — working directly on `main` (confirmed no file overlap with concurrent session activity via `git status` at kickoff; this plan's files are all under `ingest/`, `lib/listings/`, `lib/email/listing-scrape.ts`, `lib/deliverable/recipes/`, none of which the concurrent session's dirty files — `components/email-lab/TemplateGallery.tsx` and a per-unit-coverage-ledgers spec — touch).
@@ -62,5 +63,15 @@ Approved (all in-scope test evidence green; the live smoke-test gap is tracked, 
 **What happened:** Opus implementer added `canonicalCommunityKey()`, wired it into `resolveCommunityStats()`'s lookup and `resolveCommunityForListing()`'s returned name, added `neighborhoodStatsSourceLine()` + `ResolvedCommunityStats` + the source-supply tracking comment — all matching the plan exactly. Went beyond the brief in two good ways, on its own initiative: (1) enhanced the test mock to capture the actual `.eq("subdivision_name", …)` argument and assert it equals the canonical label, closing a gap my own plan left untested (I'd noted the existing mock couldn't distinguish query arguments and accepted that as a limitation — the implementer fixed the mock instead); (2) independently verified that Python's `_stem` (`ingest/pipelines/parcel_subdivision/resources.py`) and TS's `normalizeSubdivisionName` (`refinery/lib/subdivision-aliases.mts`) are byte-identical, confirming the two sides of the join-key lockstep actually agree rather than just trusting the existing code comment that says so.
 
 **My review (independent):** `git diff` confirms an exact match to the plan's specified code (plus the two above-and-beyond additions, which are real improvements, not scope creep — they test something the plan should have tested). Re-ran `bun test lib/listings/community-lookup.test.ts` myself: 15/15 passed, 27 assertions, 74ms. Approved, no fixes needed.
+
+---
+
+## Task 5 — `lib/email/listing-scrape.ts`: `ListingFacts.communityStats`
+
+**Status:** DONE. Commit `26f39872` "feat(email): add ListingFacts.communityStats" (1 file, +9).
+
+**What happened:** Opus implementer added the one field + its import, verbatim from the brief, kept distinct from the existing `community` field. Ran `bunx next build` per the plan's operator-preferred typecheck command (not `tsc`) — full production build compiled clean, lint-staged clean.
+
+**My review (independent):** `git diff` confirms an exact match to the plan's specified code — nothing more, nothing less. No separate build re-run needed; the implementer's `bunx next build` already exercised the full compile (a type-only change has no test surface of its own — Task 6 exercises it end to end). Approved, no fixes needed.
 
 ---
