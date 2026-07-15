@@ -9,6 +9,7 @@ import { defaultDoc, seedById, SEED_DOCS, type SeedDoc } from "@/lib/email/doc/d
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
 import { ArcStrip, type ArcSequence } from "@/components/email-lab/ArcStrip";
+import { ListingCampaignHero } from "@/components/email-lab/ListingCampaignHero";
 import { findPlaceholder, inputKindForRecipe, type ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { planArrival } from "@/lib/lab-entry/arrival";
 import { reconcileAddress, addressItem } from "@/lib/lab-entry/address-reconcile";
@@ -447,20 +448,6 @@ export function ProjectEmailLabClient({
     <>
       {sequence ? (
         <ArcStrip projectId={projectId} sequence={sequence} onChanged={setSequence} />
-      ) : subjectAddress ? (
-        <div className="border-b border-white/10 bg-[#081420] px-4 py-2.5">
-          <button
-            type="button"
-            disabled={arming}
-            onClick={() => void armArc()}
-            className="rounded-full bg-gulf-teal px-3 py-1.5 text-xs font-semibold text-[#070f14] hover:bg-[#17a3b3] disabled:opacity-50"
-          >
-            {arming ? "Starting…" : "Start the listing campaign"}
-          </button>
-          <span className="ml-2 text-[10px] text-white/40">
-            Five pieces, teaser to sold — you fire each milestone. Every number sourced.
-          </span>
-        </div>
       ) : null}
       {frozenNote && (
         <div className="border-b border-amber-300/30 bg-amber-300/10 px-4 py-2 text-[11px] text-amber-200">
@@ -479,6 +466,13 @@ export function ProjectEmailLabClient({
           <TemplateGallery
             onPick={(seed: SeedDoc) => seedCanvas(seed.build())}
             onStartBlank={() => seedCanvas(defaultDoc())}
+            heroSlot={
+              <ListingCampaignHero
+                subjectAddress={subjectAddress ?? null}
+                arming={arming}
+                onArm={() => void armArc()}
+              />
+            }
           />
         </div>
       ) : (
