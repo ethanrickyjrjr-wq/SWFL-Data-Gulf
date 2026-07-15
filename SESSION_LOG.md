@@ -1,3 +1,37 @@
+## 2026-07-15 (Sonnet 5 · main) — corrected a wrong "ops page is broken" claim by actually looking at it; found + specced the real community-data wiring gap; wrote a handoff so this stops getting re-derived.
+
+Operator asked for a per-pipeline/per-brain/per-recipe "playbook" system after being burned
+repeatedly by rediscovering data gaps. Full account, corrections included (not scrubbed), in
+`docs/handoff/2026-07-15-source-discovery-and-community-wiring-handoff.md` — read that first.
+
+**Mistake made and corrected in the same session:** claimed `/ops/census` "isn't broken, just
+unread" from a code read alone, then briefly misreported it as a live 404 from a raw `curl` fetch
+(actually a Next.js internal framework payload, not a real error). Only an actual screenshot
+settled it: the page is not thin or stale — 76 pipelines, 71/76 confirmed-total researched, 69/76
+source-ceiling researched, column-level gap detail, already flags its own cross-pipeline
+duplication (`collier_parcels_parcel_subdivision_redundant_scrape`). Struck the spec's original
+plan to generate a parallel per-pipeline file duplicating this; deleted the one already committed
+(`ingest/pipelines/fred_g17/LEDGER.md`, reverted `f672d8ef`). Corrected fix: push the existing
+census data into `inject-focus` at the point of touching a pipeline, don't rebuild it. Full
+corrected design: `docs/superpowers/specs/2026-07-15-per-unit-coverage-ledgers-design.md` (has its
+own in-place correction log).
+
+**Also corrected:** told the operator "only under-contract consumes community facts" — wrong,
+`shared.ts:183` wires `facts.community` into all six shared-narrator recipes already. What's
+actually true and narrower: the NEW resolver built today, `lib/listings/community-lookup.ts`
+(matches an address to `data_lake.parcel_subdivision`'s 604,362 rows, 9/9 tests, closed check
+`parcel_subdivision_orphaned_no_readers`), is called by zero recipes — confirmed by repo-wide grep.
+A same-day, fully-specced, ready-to-execute fix already exists and was NOT built this session:
+`docs/superpowers/specs/2026-07-15-community-stats-deliverable-wiring-design.md` +
+matching 1,168-line plan. Left `community_facts_remaining_recipes`'s check-text-vs-code discrepancy
+open rather than guess-resolve it a third time — flagged for whoever implements that plan, with a
+real test.
+
+**Next:** operator decides priority among: (1) implement the community-stats-deliverable-wiring
+plan (fully specced, untouched), (2) wire `inject-focus` to push `/ops/census` data inline for
+ingest pipelines, (3) build the deliverables Enforced/Unenforced ledger pilot (9 of 12 landmines
+already have a passing test — mostly cross-referencing, not new test-writing). None pushed yet.
+
 ## 2026-07-15 (Sonnet 5 · main) — dispatched targeted rebuilds for env-swfl + hurricane-tracks-fl.
 
 Operator-decreed, both via `scripts/dispatch-rebuild.mjs` (`OPERATOR_APPROVED_PAID_RUN=1`):

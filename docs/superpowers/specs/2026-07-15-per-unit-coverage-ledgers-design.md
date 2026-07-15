@@ -2,6 +2,33 @@
 
 **Date:** 2026-07-15
 
+## CORRECTION LOG (read this first)
+
+This spec was wrong twice in its first draft, both times because I verified the code instead of
+the deployed/actual reality. Corrected in place, not silently — per this codebase's own precedent
+(`docs/standards/deliverable-playbook.md` Part 8.5) a wrong claim that shipped stays visible, not
+rewritten as if it was always right.
+
+1. **I claimed `/ops/census` "isn't broken, just unread" without ever looking at it rendered.**
+   First I misread a Next.js internal framework payload as a live 404 (wrong — that string is
+   boilerplate present on every route). Then, once actually screenshotted (see §7.5), it turned out
+   **not to be a thin, unread page at all** — it's an extremely rich, actively-researched system:
+   76 pipelines, 71 with `confirmed_total` researched, 69 with `source_ceiling` researched,
+   column-level gap detail, live-verified dates, crawl4ai-sourced vendor ceilings, and it already
+   flags cross-pipeline duplication (`collier_parcels_parcel_subdivision_redundant_scrape`). I had
+   proposed **generating a parallel, thinner copy of this per pipeline** (`ingest/pipelines/<name>/LEDGER.md`)
+   and had already committed one for `fred_g17` before catching it. That file is deleted
+   (`f672d8ef`). Ingest Key Details is **struck from this spec entirely** — the system already
+   exists, is good, and the actual gap is that nothing pushes it into the workflow before new
+   research starts (§8, corrected).
+2. **I told the operator "only under-contract consumes community facts, the other six recipes
+   don't" without checking `shared.ts`.** Wrong — the shared narrator (`authorListingNarrative`,
+   `lib/deliverable/recipes/shared.ts:183`) already includes `facts.community` (the vendor
+   listing-scrape kind) for all six recipes that call it; only `market-comps` excludes it by design.
+   What's actually true and narrower: **zero recipes** use the newer `community-lookup.ts` resolver
+   (parcel/tax-roll data, 604,362 rows) — confirmed by grep, it's referenced nowhere outside its own
+   file and test. See the case study in §9.
+
 ## Problem
 
 Nobody can answer "what breaks and why" for any given pipeline, brain, or deliverable recipe
@@ -75,42 +102,18 @@ principle, and the same convention `inject-focus.mjs` already uses for area `CLA
 "nothing documented yet," not an error. This avoids a second self-attestation surface (a registry
 saying `has_ledger: true` could itself drift from reality).
 
-**Operator addendum (07/15/2026, mid-brainstorm):** the ledger's first required section is
-**Key details** — the full scope of what the source/pipeline/unit *could* give us, not just what
-we currently pull, so nobody rediscovers a gap that was already found and then buried. This is not
-a new research task: for ingest, `cadence_registry.yaml`'s `source_scope` block
-(`confirmed_total`/`source_ceiling`, cited `source_url` + `as_of`) already holds this for **74 of
-76** registered pipelines (checked live 07/15/2026) — the FULL-SCOPE-FIRST rule (CLAUDE.md RULE
-0.4 addendum) is already working. The gap isn't missing research, it's that the research is
-sitting in one 900-line YAML file nobody opens per-pipeline. The ledger's Key Details section is a
-**generated rendering** of that existing block — the registry stays the single source of truth
-(rejected-approach #1 still holds), the ledger is what makes it visible at the moment someone
-touches that pipeline. For brains and recipes, the analogous content is "what this unit currently
-draws on vs. what's derivable but unbuilt" — thinner, since neither lane has an equivalent
-scope-ceiling convention today; that's scoped honestly as thin-to-empty at first, not padded.
+**Ingest has NO Key Details section — struck (see CORRECTION LOG #1).** `/ops/census`
+(`swfldatagulf-ops`, `app/census/page.tsx` + `lib/census.ts`, live at
+`https://swfldatagulf-ops.vercel.app/census`) already renders exactly this — offered-upstream vs.
+pulled vs. live-rows, per pipeline, generated from `cadence_registry.yaml`'s `source_scope` block —
+and does it with more depth than this spec proposed (column-level gaps, not summary sentences; see
+§7.5). Building a second, file-per-pipeline copy would be the exact "same information in two
+places, nobody wrote it down once" failure this whole spec exists to prevent. Ingest pipelines get
+**no ledger file** — the registry + census stays the one root, and §8 (corrected) covers how it
+gets pushed into the workflow instead of duplicated.
 
-Each ledger has exactly three sections:
-
-```markdown
-## Key details
-- What we pull: <confirmed_total.summary, source, as_of — generated from cadence_registry.yaml>
-- What the source also offers, unpulled: <source_ceiling.summary, source_url, as_of>
-- (2 of 76 pipelines have no source_scope yet — those ledgers say so explicitly, in the same
-  section, instead of silently omitting it — a visible TODO beats an invisible gap.)
-```
-
-**Honesty framing (advisor round 2 correction):** `source_scope`'s `confirmed_total`/`source_ceiling`
-are researched prose with an `as_of` date — self-attested, same class of claim as the "verified"
-stamp this spec already refused in §6. The drift-gate proves the ledger file matches the registry;
-it does **not** prove the registry's own research is still accurate against the live source. Every
-Key Details section says so explicitly — *"Last researched: `<as_of>` — this is a researched
-snapshot, not a live query"* — never implying a freshness guarantee the mechanism can't back. A real
-worked example is at `ingest/pipelines/fred_g17/LEDGER.md` (generated 07/15/2026 from the live
-registry entry): FRED publishes real Lee/Collier county-level series — house price index, county
-GDP, per-capita income, median household income, poverty rate, building permits, confirmed series
-IDs — **none pulled today**, sitting in the registry since 07/08/2026, now visible instead of buried.
-Deriving the true unpulled-ceiling from the source's live schema/catalog instead of researched prose
-is real, separate future work — flagged in Open Risks, not solved by this spec.
+Deliverable recipes and brain packs still get a ledger — but **two sections, not three**, since
+neither has a census-equivalent scope-ceiling system to point at:
 
 ```markdown
 ## Enforced
@@ -162,11 +165,6 @@ New gate, same file, same fail-closed/fail-open contract as the existing 8:
   is worse than no ledger, because it reads as safety that isn't there).
 - **Block** if the named test file fails when run (mirrors Gate 5's `catalog.test.mts` pattern:
   fast, deterministic, no DB/network — these are all `bun:test` files already).
-- **Block (ingest ledgers only) if a Key Details section drifts from the live `cadence_registry.yaml`
-  `source_scope` block it was generated from** — same mirror-check shape as Gate 5's catalog check,
-  just applied to a generated file instead of hand-written code. This is what stops the Key Details
-  section from becoming exactly the kind of buried-and-stale fact the operator is frustrated by:
-  regenerate-on-drift, don't let the copy silently diverge from the registry.
 - **No block on "Unenforced" entries growing or shrinking** — that list is honest reporting, not a
   violation. A ledger is allowed to say "we don't protect this yet."
 - Fires only on push touching a ledger file or the unit's own source (mirrors how Gate 5/7 scope
@@ -178,12 +176,18 @@ breaking them breaks the push, not because someone reads the file.
 ### 5. `inject-focus.mjs` — push the content inline, not a path to go read
 
 `inject-focus.mjs` already injects "Area conventions load by location" for the 5 area `CLAUDE.md`
-files. Extend it: when a session's touched files match a unit with a ledger, print the ledger's
-**Key Details + Enforced summary + full Unenforced list inline** in the injected context — not a
-pointer to go open the file. A path is still pull; the content itself is push. This is the direct
-fix for "I keep finding out what we could have got after checking and rechecking" — the source
-ceiling shows up automatically the moment anyone touches that pipeline again, not only when someone
-thinks to go look it up.
+files. Extend it with two independent triggers (corrected 07/15/2026 — these are two different
+mechanisms now, not one, since ingest has no ledger file — see CORRECTION LOG #1):
+
+- **Deliverable recipe / pack ledgers:** touched file matches a unit with a ledger → print its
+  **Enforced summary + full Unenforced list inline** — not a pointer to go open the file.
+- **Ingest pipelines:** touched file matches a registered pipeline → print that pipeline's
+  `source_scope` PULLED/AVAILABLE rows (the same data `/ops/census` renders) inline, pulled straight
+  from `cadence_registry.yaml` — no ledger file, no generation step, §8.
+
+A path is still pull; the content itself is push. This is the direct fix for "I keep finding out
+what we could have got after checking and rechecking" — the source ceiling shows up automatically
+the moment anyone touches that pipeline again, not only when someone thinks to go look it up.
 
 **Cold-start case (the gap in the first draft of this plan):** when a session touches a unit with
 **no ledger yet**, print a short nudge anyway — *"No coverage ledger yet for `<unit>`. If you learn
@@ -212,56 +216,81 @@ top of what exists — that worsens the exact pile the operator is frustrated by
   process) — those are cross-cutting practice, not per-unit facts, and don't belong in a ledger.
 - Ingest and packs have no prior monolithic doc to retire — their ledgers start clean.
 
-### 7.5 Why doesn't `/ops/census` already do this? (verified, not assumed)
+### 7.5 Why doesn't `/ops/census` already do this? (verified live, by screenshot — not code-read)
 
-The operator named `/ops/census` directly as "supposed to" solve this. Checked before writing this
-off as a mechanism problem: `swfldatagulf-ops/lib/census.ts` **already parses and renders
-`source_scope`** (`confirmed_total`/`source_ceiling`) exactly as designed
-(`docs/superpowers/plans/2026-07-07-pipeline-data-census.md`) — the mechanism is not broken. The
-open check `source_totals_migration_apply` ("source_totals is APPLIED but writing 0 rows") looked
-like a plausible cause and was checked directly: `data_lake.source_totals` is a **different, dead**
-table — zero rows, zero code references repo-wide, belonging to an unrelated `listing_lifecycle`
-reconciliation attempt, not the census page's row-count path (`rowCounts()` queries tier-2 tables
-directly). Ruled out, not left hanging. The real cause is exactly the push-vs-pull diagnosis this
-spec already made: the data is correct and rendering, at a URL nobody navigates to unprompted. §8
-below is the fix — not a second data pipe, a delivery-mechanism change.
+The operator named `/ops/census` directly as "supposed to" solve this and reported 3 failed
+attempts to build it. First pass (wrong, see CORRECTION LOG #1): read `census.ts`'s source, saw it
+parses `source_scope`, concluded "it works." That's a code-read, not a verification — this
+codebase's own memory (`feedback_code-fix-is-not-live-until-brain-rebuilds`,
+`feedback_verify-built-with-claims-at-artifact-level`) exists specifically to ban that shortcut, and
+it was made anyway.
 
-### 8. The ops page — decided now, not deferred
+**Actually screenshotted the live page 07/15/2026** (`https://swfldatagulf-ops.vercel.app/census`,
+Chrome extension, after an initial permission block and one false "confirmed 404" — that string was
+a Next.js internal framework payload, not a real error, corrected in the same investigation before
+it was reported). What's actually there: *"76 pipelines tracked (73 active, 3 parked) · 71/76
+confirmed-total researched · 69/76 source-ceiling researched · 0/76 vendor-benchmark applicable."*
+Every pipeline has a PULLED row and an AVAILABLE row with real, dated, cited, often
+crawl4ai-verified detail down to the column level — e.g. Lee Permits: *"Lee County's own ArcGIS org
+has 9,386 unincorporated-Lee permits, 719 commercial permits, 2,192 Cape Coral residential permits,
+a 93,976-row code-enforcement layer, two manufactured-home layers, a subdivisions/plats layer, a
+ZoningCases layer — none ingested."* It already self-flags cross-pipeline duplication:
+`Collier Parcels` and `Parcel Subdivision` both cite the open check
+`collier_parcels_parcel_subdivision_redundant_scrape` for hitting the identical FDOR layer.
 
-Per the SRE research and our own evidence (`checks` page was pull-only and its own freshness signal
-was silently broken for weeks): **`/ops/census`'s "browse this to know what's going on" framing is
-retired.** It may still exist as a read-only, auto-generated reflection of the three registries for
-occasional manual audit — but it is explicitly not the enforcement mechanism and not something
-anyone is expected to proactively check as part of normal work. The push mechanisms are (a) the
-gate, at push time, and (b) `inject-focus`, at touch time. If a fact only lives on a page someone
-has to remember to visit, per the SRE line quoted above, it's a candidate for deletion, not upkeep.
+The `data_lake.source_totals` open check ("writing 0 rows") looked like a plausible cause and was
+ruled out directly: it's a different, dead table (zero rows, zero code references, belongs to an
+unrelated `listing_lifecycle` reconciliation attempt) — not the census page's actual data path
+(`rowCounts()` queries tier-2 tables directly).
+
+**So the mechanism is not just "not broken" — it's excellent, and the "3 failed attempts" the
+operator remembers are real (9 commits on the census page, 2 explicitly titled "fix... actually
+render this time") but predate its current state.** The actual, now-confirmed cause of "we keep
+rediscovering what we already have" is exactly the push-vs-pull diagnosis, nothing more exotic: the
+data is correct, thorough, and current, at a URL nothing forces anyone to visit before starting new
+research. §8 (corrected) is the fix — push what exists, don't rebuild it.
+
+### 8. The ops page — push it into the workflow, do not touch it otherwise
+
+**Corrected 07/15/2026 — this section originally recommended retiring `/ops/census`'s browse
+framing. That was backwards, built on the wrong diagnosis in the first draft of §7.5, and is struck.**
+The page is not thin, not stale, and not a candidate for the SRE "delete an unread signal" line —
+it's actively researched (dated citations through 07/15/2026, live crawl4ai probes) and richer than
+anything this spec proposed building. Deleting or de-emphasizing it would destroy real, current work.
+
+The fix is exactly the `inject-focus` mechanism (§5), pointed at the EXISTING page's data instead of
+a new file: when a session touches an ingest pipeline, or before any new source research begins,
+`inject-focus` (or a dedicated pre-research check) pulls that pipeline's PULLED/AVAILABLE rows from
+`/ops/census`'s underlying data (`cadence_registry.yaml` `source_scope`, same source the page
+already reads — no new data path) and prints them inline. That is the entire fix for this lane: a
+push wire into something that already exists and is already good. No new file, no generation
+script, no drift gate — there is nothing to drift against because nothing new is being generated.
 
 ## Rollout order
 
-Two different kinds of work move at two different speeds, and the plan splits them rather than
-forcing one lane order for both:
+**Corrected 07/15/2026** — the original step 1 ("generate ingest Key Details files") is struck; see
+CORRECTION LOG #1. Two things ship instead, in this order:
 
-1. **Ingest Key Details — generate-only, first, fast.** 74 of 76 pipelines already have the source
-   data (`cadence_registry.yaml` `source_scope`); this section is a mechanical render, not new
-   research or new judgment calls. A single generation script can produce all 74 `LEDGER.md` Key
-   Details sections (plus 2 explicit TODO stubs for the missing pair) in one pass. This ships fast
-   and directly answers the operator's live complaint — it does not wait on the deliverables pilot.
+1. **Push `/ops/census` into the workflow — first, fast, no new files.** Wire `inject-focus` (§5) to
+   pull the touched pipeline's existing PULLED/AVAILABLE rows (same `cadence_registry.yaml`
+   `source_scope` data the census page already renders) and print them inline the moment a session
+   touches that pipeline, or before new source research starts. This is the actual fix for the
+   operator's live complaint, and it's smaller than the original plan — no generation script, no new
+   file format, no drift gate, because nothing new is being created.
 2. **Deliverables (Enforced/Unenforced pilot).** 12 recipes, 9 already-enforced landmines to
    cross-reference (mechanical), 1 confirmed gap to close (market-pulse row cap), 2
    irreducible-prose entries, playbook migration, gate + inject-focus wiring. This is where the real
    mechanism design gets proven — the claim-to-test cross-referencing, the orphan-claim gate, the
    inline inject-focus push — because deliverables is the one lane where that triage is already done.
-3. **Ingest Enforced/Unenforced + Brain packs.** Once the deliverables pilot proves the
-   claim-to-test mechanism, apply it to ingest's remaining sections and to the 48 brain packs.
-   Extends Gate 7 (already mirrors `cadence_registry.yaml` against pipeline/workflow code) and
-   Gate 5 (already mirrors packs against `catalog.mts`) respectively, rather than building new
-   trigger logic. Packs is the largest lane — deliberately last, gets its own scoping pass once the
-   pattern is proven twice, not a blind copy-paste.
+   **The community-stats-deliverable-wiring work (§9) is a live candidate first real ledger entry**
+   for `under-contract`/the six shared-narrator recipes once it ships.
+3. **Brain packs.** 48 packs, extends Gate 5 (already mirrors packs against `catalog.mts`).
+   Deliberately last — gets its own scoping pass once the pattern is proven on deliverables, not a
+   blind copy-paste. (Ingest's Enforced/Unenforced tier, if it turns out to be wanted at all beyond
+   step 1's Key Details push, is a separate future scoping question — not assumed here.)
 
-Step 1 is **in scope for this spec's implementation plan** (it's mechanical and low-risk enough to
-ship alongside the pilot). Step 3's ingest/packs Enforced/Unenforced triage is **out of scope** —
-this spec covers the mechanism design, the deliverables pilot, and the ingest Key Details generation
-in full; ingest/packs Enforced/Unenforced get their own short spec once the pilot is live.
+Step 1 and step 2 are **in scope for this spec's implementation plan**. Step 3 (packs) is **out of
+scope** — its own short spec once the deliverables pilot is live.
 
 ## Testing / validation plan
 
@@ -273,10 +302,47 @@ in full; ingest/packs Enforced/Unenforced get their own short spec once the pilo
 - Manual smoke: touch `price-reduced.ts`, confirm `inject-focus` prints its Enforced/Unenforced list
   inline; rename the test string it references, confirm the gate blocks the push with a clear orphan
   message; touch a recipe with no ledger, confirm the cold-start nudge fires.
-- Unit tests for the ingest Key Details generation script — given a `source_scope` block, produces
-  the expected Markdown; given a pipeline with no `source_scope`, produces the explicit TODO stub,
-  never a silent omission. Integration smoke: run it against all 76 live entries, confirm 74 files
-  render and 2 render as TODO stubs, confirm re-running is idempotent (no diff on a second run).
+- Unit tests for the `inject-focus` census-push logic (§8): given a touched ingest pipeline path,
+  pulls the right `source_scope` block and formats it inline; given a pipeline with no `source_scope`
+  (2 of 76 today), prints an explicit "not yet researched" line, never a silent omission.
+
+## 9. Case study — the exact failure this spec exists to prevent, found live, same session
+
+While writing this spec, the operator asked why `parcel_subdivision_orphaned_no_readers` was closed
+07/15/2026. Traced through `SESSION_LOG.md` and the actual code: it closed because
+`lib/listings/community-lookup.ts` was built and unit-tested that day — a real resolver, 9/9 tests,
+matching a street address to `data_lake.parcel_subdivision`'s 604,362 rows and pulling neighborhood
+stats. **But nothing outside its own file and its own test imports it** (confirmed by grep across
+the repo) — the check's own name, "orphaned, no readers," is still literally true in production.
+
+There is already a same-day, thorough, ready-to-execute fix for this:
+`docs/superpowers/specs/2026-07-15-community-stats-deliverable-wiring-design.md` +
+`docs/superpowers/plans/2026-07-15-community-stats-deliverable-wiring.md` (1,168 lines, full
+task-by-task plan, not started as of this writing — verified live by grep, `communityStats`/
+`neighborhoodStatsSourceLine` exist nowhere in `lib/`). It correctly separates two different
+"community" concepts that were getting conflated in conversation — the older vendor-scrape
+`facts.community` (already wired into 6 of 7 recipes via the shared narrator) and the new
+tax-roll-based `communityStats` (wired into none) — and specs the join-key lockstep bug an advisor
+pass already caught (the alias reconciler and the resolver must agree on canonical-vs-raw
+subdivision names or matches silently miss).
+
+**This is the exact "built twice, wired to nothing, and the check ledger doesn't say so precisely
+enough to catch it" pattern this whole spec is about — found live, in this session, independent of
+the spec's own design work.** Once the Enforced/Unenforced pilot (§3) ships, the
+community-stats-deliverable-wiring plan is a strong first real ledger entry for the six
+shared-narrator recipes: "community facts are Enforced via the shared narrator's existing wiring;
+neighborhood tax-roll stats are Unenforced — resolver built, zero recipes call it" is precisely the
+shape §2 describes, and would have made this exact gap visible without an operator having to ask
+"why was this closed?" and a session having to re-derive the answer from git history.
+
+**Open, unresolved as of this writing — do not silently pick one:** the check
+`community_facts_remaining_recipes` currently reads "only under-contract consumes them," which
+contradicts a direct grep of `shared.ts` showing all six non-`market-comps` recipes call the shared
+narrator with `facts.community` already wired in. The community-stats-deliverable-wiring spec's own
+§4 already flags this check as needing "verify against current code... close or correct during
+implementation" — that verification did not happen as part of writing THIS spec, and shouldn't be
+guessed at a third time in one session. Whoever implements that plan resolves it for real, once,
+with a passing test — not with another prose read of the code.
 
 ## Open risks
 
@@ -285,16 +351,14 @@ in full; ingest/packs Enforced/Unenforced get their own short spec once the pilo
 - **Ledger rot at the "Unenforced" tier is still possible** — nothing blocks a stale Unenforced
   claim from sitting untouched. The advisory commit-diff (§6) is the only signal; if it proves too
   weak in practice, revisit after the deliverables pilot has run for a few weeks.
-- **Ingest/pack registry shapes differ enough** (YAML vs. two different TS registries) that the
-  gate's ledger-discovery logic needs per-lane path conventions, not one generic walker — scoped
-  explicitly out of this spec's implementation, called out above.
-- **Key Details is researched-snapshot, not live-verified** (advisor round 2). `source_scope` is
-  self-attested prose with an `as_of` date; the drift-gate only proves file↔registry consistency,
-  never registry↔reality. Real fix — deriving the true unpulled ceiling from the source's live
-  schema/catalog instead of researched prose — is separate future work, not this spec's scope.
-  Every generated Key Details section must say "researched snapshot, not live" explicitly rather
-  than imply a freshness guarantee it can't back.
+- **`cadence_registry.yaml`'s `source_scope` is researched-snapshot, not live-verified.** This was
+  already true of `/ops/census` before this spec existed — `confirmed_total`/`source_ceiling` are
+  researched prose with an `as_of` date, not a live query against the source. Pushing it via
+  `inject-focus` (§8) doesn't change that; it's the existing, accepted honesty limit of the system
+  this spec now points at instead of duplicating.
 - **`data_lake.source_totals`** (0 rows, 0 code references, unrelated `listing_lifecycle` table) is
   confirmed dead and should be dropped — genuinely out of scope for this spec, but worth its own
   cleanup check so the open `source_totals_migration_apply` check doesn't sit stale pointing at the
   wrong subsystem.
+- **The `community_facts_remaining_recipes` check text vs. code discrepancy (§9) is unresolved.**
+  Flagged for whoever implements the community-stats-deliverable-wiring plan, not decided here.
