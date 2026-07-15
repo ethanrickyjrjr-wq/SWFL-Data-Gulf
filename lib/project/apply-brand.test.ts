@@ -108,6 +108,51 @@ describe("applyUserBrandToProject", () => {
     });
   });
 
+  it("propagates bio/website/contact/address — the 7 fields that used to be silently dropped", async () => {
+    const updates: Record<string, unknown>[] = [];
+    const mockSupabase = {
+      from: (_table: string) => ({
+        select: () => ({
+          eq: () => ({
+            eq: () => ({ single: async () => ({ data: null }) }),
+            maybeSingle: async () => ({ data: null }),
+            single: async () => ({ data: null }),
+          }),
+        }),
+        update: (payload: Record<string, unknown>) => {
+          updates.push(payload);
+          return { eq: async () => ({ error: null }) };
+        },
+      }),
+    };
+
+    const resolve = async () => null;
+    const agentProfile = {
+      agent_name: "Jane Smith",
+      nickname: "Janie",
+      agent_title: "Broker Associate",
+      photo_url: "https://example.com/jane.jpg",
+      license: "SL3456789",
+      brokerage: "Gulf Realty",
+      agent_bio: "Fifteen years selling the Gulf coast.",
+      contact_email: "jane@gulfrealty.com",
+      contact_phone: "(239) 555-0100",
+      website_url: "https://janesmithrealty.com",
+      business_address: "123 Main St, Fort Myers, FL 33901",
+    };
+
+    await applyUserBrandToProject(
+      mockSupabase as never,
+      "user-1",
+      "proj-1",
+      resolve,
+      async () => agentProfile,
+    );
+
+    expect(updates).toHaveLength(1);
+    expect(updates[0]).toMatchObject({ branding: agentProfile });
+  });
+
   it("merges agent fields with theme brand when both exist", async () => {
     const updates: Record<string, unknown>[] = [];
     const mockSupabase = {

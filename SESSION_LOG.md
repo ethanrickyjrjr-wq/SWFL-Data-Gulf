@@ -1,3 +1,39 @@
+## 2026-07-15 (Sonnet 5 · main) — audited "does profile/brand info stick to emails" end-to-end; fixed the propagation gap it found (7 of 11 identity fields silently dropped).
+
+Operator asked whether brand/profile data (bio, website, photos, listing overrides) reliably sticks
+to a user's projects/emails rather than drifting or requiring re-entry. Traced the actual token
+pipeline (`app/api/user/brand/route.ts` → `lib/project/apply-brand.ts` → `brandingToTokens` →
+`applyBrand`) instead of trusting the first-pass subagent report, and found the real bug was much
+bigger than the bio example the operator gave: `applyUserBrandToProject` (the function that seeds a
+NEW project's branding at creation) only ever copied 4 of the 11 fields `BrandingBlock.tsx` actually
+lets a user edit — agent_name/photo_url/license/brokerage. Bio, nickname, title, website, contact
+email/phone, and business address were saved durably at the account level
+(`user_brand_profiles`) but never reached a project's actual emails; users would have had to retype
+them per project. business_address got a one-off live-fallback patch earlier only because CAN-SPAM
+forces a send-refusal without it — that pattern was never generalized. Traced this into
+`lib/deliverable/recipes/agent-brand-intro.ts` (the actual "introduce your agent" email builder) to
+confirm it's the exact path that reads bio/name/title onto the agent card, so this was a real,
+user-visible defect, not a theoretical gap.
+
+**Fixed:** `lib/project/apply-brand.ts` (creation-time seed), `components/email-lab/EmailLabGridShell.tsx`
+and `app/project/[id]/ProjectWorkspace.tsx` (client-side fill-empty-slot prefill, which self-heals
+EXISTING projects the next time their brand panel loads) now carry all 11 fields. Added a regression
+test (`apply-brand.test.ts`). Verified: `bun test` (12/12 apply-brand, 1981/1981 across
+lib/email+lib/project+agent-brand-intro), clean `bunx next build` (exit 0).
+
+**Also found and logged as checks (NOT fixed this session — real, separate builds):**
+per-address photo memory doesn't exist (`email_media_assets` is per-user only; every lifecycle
+recipe re-pulls the vendor's current photo on every build); a manual bed/bath/price fix only
+survives inside the ONE doc it was edited in (the `HELD_FIGURE_KEYS` schema lock doesn't cover the
+hero/stats block shape the real New-Listing/Price-Reduced recipes emit); price-drop detection
+(`listing_transitions.price_delta`) has zero consumers beyond an internal nudge notifier with no
+`price_changed` event kind. Operator decreed the price-drop semantics (07/15): PRICE ONLY (never
+beds/baths), nudge first, auto-apply the source price only if the user doesn't respond — logged on
+`price_reduction_not_wired_to_campaigns`. Also noted, not fixed: social media URLs save via the
+account API but have no editor UI anywhere yet, so there's nothing to wire. All 4 checks under
+project `deliverable-persistence`. Not live-verified in a browser this session — build/test proof
+only.
+
 ## 2026-07-15 (Sonnet 5 · main) — shipped the gallery-first routing + Listing Campaign hero plan (5 tasks, subagent-driven, Opus implementers).
 
 Executed `docs/superpowers/plans/2026-07-15-gallery-listing-hero.md` end to end: Opus implementer

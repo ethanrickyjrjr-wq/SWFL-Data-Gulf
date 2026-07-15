@@ -1419,6 +1419,13 @@ export function EmailLabGridShell({
           for (const k of ["business_address", "contact_email", "contact_phone", "website_url"]) {
             if (!next[k] && typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
           }
+          // Same gap for nickname/title/bio — BrandingBlock.tsx edits these too
+          // (bio maps to AGENT_BIO in branding-to-tokens.ts) and they were missing
+          // from every prefill pass above, so a saved bio never reached a project
+          // (found 2026-07-15 auditing "does profile info stick").
+          for (const k of ["nickname", "agent_title", "agent_bio"]) {
+            if (!next[k] && typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
+          }
           const scheme = defaultScheme(data);
           PALETTE_SLOT_KEYS.forEach((k, i) => {
             if (!prev[k] && scheme[i]) next[k] = scheme[i];

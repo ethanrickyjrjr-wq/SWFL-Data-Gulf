@@ -47,10 +47,24 @@ import type {
   ProjectUiState,
 } from "./workspace/types";
 
-// Agent fields that BrandingBlock edits — used for pre-fill detection.
-// business_address rides along (CAN-SPAM postal address, account-level like
-// the rest of these so it seeds every new project once saved globally).
-const AGENT_KEYS = ["agent_name", "photo_url", "license", "brokerage", "business_address"] as const;
+// Agent fields that BrandingBlock edits — used for pre-fill detection. Every field
+// BrandingBlock.tsx has an input for lives here (account-level, seeds every new
+// project once saved globally) — nickname/agent_title/agent_bio/contact_email/
+// contact_phone/website_url were missing until 2026-07-15 (found auditing "does
+// profile info stick"), so a saved bio/website/contact never reached a project.
+const AGENT_KEYS = [
+  "agent_name",
+  "nickname",
+  "agent_title",
+  "photo_url",
+  "license",
+  "brokerage",
+  "agent_bio",
+  "business_address",
+  "contact_email",
+  "contact_phone",
+  "website_url",
+] as const;
 
 interface Seed {
   template: string;
