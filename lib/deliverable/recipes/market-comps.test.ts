@@ -17,6 +17,7 @@ import {
   narratorClaims,
 } from "./market-comps";
 import { auditClaims, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
+import { FAVORABLE_FRAMING_POLICY } from "./shared";
 import { SEED_DOCS } from "@/lib/email/doc/default-docs";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import type { RenderComp } from "@/lib/assistant/comp-helper";
@@ -425,6 +426,64 @@ test("the verdict's direction word always matches the arithmetic — above, belo
   }
 });
 
+test("buildPriceCase states an extreme gap plainly, direction-symmetric", () => {
+  // $40,000 / 2,000 sqft = $20/sqft, roughly 10x below a ~$200-210/sqft comp set — a
+  // genuinely extreme gap that still produces a real (non-zero) $/sq ft, unlike a
+  // literal $1 price (perSqft rounds $1/2,000 sqft to $0, which fails buildPriceCase's
+  // own >0 guard and returns null before the magnitude tier is ever reached).
+  const factsCheap = {
+    address: "1 Cheap Ln, Fort Myers, FL 33905",
+    price: "$40,000",
+    sqft: "2000",
+  } as never;
+  const richComps = [
+    {
+      addressLine: "1 A St",
+      city: "x",
+      beds: 3,
+      baths: 2,
+      sqft: 2000,
+      status: "sold",
+      price: 400000,
+      priceKind: "sold" as const,
+      priceDate: "2026-01-01",
+      sourceUrl: null,
+    },
+    {
+      addressLine: "2 B St",
+      city: "x",
+      beds: 3,
+      baths: 2,
+      sqft: 2000,
+      status: "sold",
+      price: 420000,
+      priceKind: "sold" as const,
+      priceDate: "2026-01-01",
+      sourceUrl: null,
+    },
+  ];
+  const cheap = buildPriceCase(factsCheap, richComps);
+  expect(cheap!.verdict).not.toMatch(/somewhat|a bit|in the neighborhood of/i);
+  // Discriminating assertion: the extreme tier's own distinctive language must appear.
+  // ("somewhat/a bit/in the neighborhood of" never appear in the code-authored verdict at
+  // ANY tier, so the check above alone would still pass with the tier deleted entirely.)
+  expect(cheap!.verdict).toContain("the entire range");
+  expect(cheap!.vsMedian.dir).toBe("below");
+
+  // direction-symmetric: an equally extreme gap ABOVE the set states just as plainly,
+  // using the exact same isExtreme criteria — never a formula that only sharpens language
+  // in the flattering direction.
+  const factsExpensive = {
+    address: "1 Pricey Ln, Fort Myers, FL 33905",
+    price: "$5,000,000",
+    sqft: "2000",
+  } as never;
+  const expensive = buildPriceCase(factsExpensive, richComps);
+  expect(expensive!.verdict).not.toMatch(/somewhat|a bit|in the neighborhood of/i);
+  expect(expensive!.verdict).toContain("the entire range");
+  expect(expensive!.vsMedian.dir).toBe("above");
+});
+
 test("position in the set is COUNTED by compareToSet, never characterized as a 'low end'", () => {
   // The second false claim in the same paragraph: "the subject falls at the low end of
   // that band" when $209 sat BELOW a $210–$266 band entirely. The position sentence is
@@ -604,6 +663,30 @@ test("CLAIM_PROHIBITION is printed into the narrator's system prompt, verbatim",
   // follow an explicit instruction rather than a surprise.
   const { system } = buildNarratorPrompt(SUBJECT, PC);
   expect(system).toContain(CLAIM_PROHIBITION);
+});
+
+test("buildNarratorPrompt's system includes FAVORABLE_FRAMING_POLICY verbatim", () => {
+  const facts = {
+    address: "326 Shore Dr, Fort Myers, FL 33905",
+    price: "$595,000",
+    sqft: "2847",
+  } as never;
+  const pc = buildPriceCase(facts, [
+    {
+      addressLine: "1 A St",
+      city: "x",
+      beds: 3,
+      baths: 2,
+      sqft: 2000,
+      status: "sold",
+      price: 700000,
+      priceKind: "sold",
+      priceDate: "2026-01-01",
+      sourceUrl: null,
+    },
+  ]);
+  const { system } = buildNarratorPrompt(facts, pc!);
+  expect(system).toContain(FAVORABLE_FRAMING_POLICY);
 });
 
 test("every fact the narrator gets is a SETTLED SENTENCE — the mix is a settled COUNT", () => {

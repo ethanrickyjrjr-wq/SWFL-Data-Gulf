@@ -102,7 +102,12 @@ import {
   chartMagnitudeFromSpec,
 } from "@/lib/deliverable/chart-coherence";
 import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
-import { clearNarrativeSlots, dropEmptyChartSlot, fillNarrative } from "./shared";
+import {
+  clearNarrativeSlots,
+  dropEmptyChartSlot,
+  fillNarrative,
+  FAVORABLE_FRAMING_POLICY,
+} from "./shared";
 import type { RecipeBuildContext } from "./index";
 import type { EmailBlock, EmailDoc, ListItem, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
@@ -547,13 +552,30 @@ export function buildPriceCase(facts: ListingFacts, comps: RenderComp[]): PriceC
   const addr = facts.address?.split(",")[0]?.trim();
   const forAddr = addr ? ` for ${addr}` : "";
 
+  // MAGNITUDE TIER — direction-symmetric. An extreme gap (the subject sits at or beyond
+  // the full spread of the set, or the gap is >= 40% of the median) states its size
+  // plainly and directly rather than the same flat "sits $X above/below" wording used for
+  // a marginal gap. Fires IDENTICALLY whichever way the number points — this recipe exists
+  // to defend a price that can legitimately sit on either side of the comps, and a tier
+  // that only sharpens language in the flattering direction is spin, not honesty. See
+  // docs/superpowers/specs/2026-07-15-sell-side-favorable-framing-design.md §4a.
+  const allPpsf = priced.map((x) => x.ppsf);
+  const isExtreme =
+    vsMedian.dir !== "level" &&
+    (vsMedian.diff / medianPpsf >= 0.4 ||
+      (vsMedian.dir === "below" && subjectPpsf < Math.min(...allPpsf)) ||
+      (vsMedian.dir === "above" && subjectPpsf > Math.max(...allPpsf)));
   const s1 =
     vsMedian.dir === "level"
       ? `At ${usd(subjectPpsf)} per square foot, the asking price${forAddr} is level with the ` +
         `${usd(medianPpsf)} median across the ${homes} nearby.`
-      : `At ${usd(subjectPpsf)} per square foot, the asking price${forAddr} sits ` +
-        `${usd(vsMedian.diff)} ${vsMedian.dir} the ${usd(medianPpsf)} median across the ` +
-        `${homes} nearby.`;
+      : isExtreme
+        ? `At ${usd(subjectPpsf)} per square foot, the asking price${forAddr} sits ` +
+          `${usd(vsMedian.diff)} ${vsMedian.dir} every comparable home in the set — not just ` +
+          `the ${usd(medianPpsf)} median, the entire range.`
+        : `At ${usd(subjectPpsf)} per square foot, the asking price${forAddr} sits ` +
+          `${usd(vsMedian.diff)} ${vsMedian.dir} the ${usd(medianPpsf)} median across the ` +
+          `${homes} nearby.`;
 
   const sentences = [s1];
 
@@ -930,7 +952,8 @@ export function buildNarratorPrompt(
     `handed no evidence for, and they are inventions exactly like a made-up number. Never ` +
     `add a selling claim of your own either: "priced to move", "won't last", "a rare ` +
     `opportunity" are YOUR words, not facts. No hype, no exclamation marks.\n\n` +
-    `Return ONLY your two or three sentences.`;
+    `Return ONLY your two or three sentences.\n\n` +
+    FAVORABLE_FRAMING_POLICY;
 
   // THE ENTIRE FACT SHEET. Settled sentences, nothing else — no comp rows, no comp
   // prices, no comp addresses, no set of anything. There is nothing here to compare.
