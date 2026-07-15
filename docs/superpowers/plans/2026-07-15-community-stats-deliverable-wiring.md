@@ -271,7 +271,12 @@ git commit -m "feat(ingest): fold aliased subdivision names in SQL before median
 - Consumes: `label_by_pattern()` (Task 1), `aggregate_stats(con, alias_label_by_pattern)` (Task 2), `assert_min_rows` from `ingest/lib/guards.py` (already exists, unmodified).
 - Produces: `main()`'s behavior — no importable interface change for other modules (no other module imports `pipeline.py`).
 
-There is no existing test file for `pipeline.py` (only `agg.py` is unit tested; `pipeline.py` is a thin psycopg glue layer, consistent with existing practice in this pipeline). Verification is the `--dry-run` smoke step below, not a pytest step.
+**CORRECTION (found live during Task 2's review, not caught when this plan was written):** this plan originally claimed "no existing test file for pipeline.py." That was wrong — `ingest/duckdb_pipelines/neighborhood_stats/test_pipeline.py` and `test_dry_run.py` both already exist and both import/patch `_upsert` directly. Both break under this task's changes unless updated as part of it — Step 2 below now includes those updates. Verification is `pytest` on both files, not just the `--dry-run` smoke step.
+
+**Files (corrected):**
+- Modify: `ingest/duckdb_pipelines/neighborhood_stats/pipeline.py`
+- Modify: `ingest/duckdb_pipelines/neighborhood_stats/test_pipeline.py`
+- Modify: `ingest/duckdb_pipelines/neighborhood_stats/test_dry_run.py`
 
 - [ ] **Step 1: Wire the real alias map into `_aggregate`**
 
@@ -330,6 +335,104 @@ def _replace_all(conn, stats: list[dict]) -> None:
     conn.commit()
 ```
 
+**Update `test_pipeline.py` in the same step** — it imports and directly exercises `_upsert`, so it breaks under the rename/behavior change unless fixed here:
+
+Change the import at the top of `ingest/duckdb_pipelines/neighborhood_stats/test_pipeline.py`:
+
+```python
+from ingest.duckdb_pipelines.neighborhood_stats.pipeline import (
+    _aggregate,
+    _load_parcel_subdivision_rows,
+    _replace_all,
+)
+```
+
+Replace `test_upsert_writes_one_row_per_stat_and_commits` with two tests (rename coverage + the new guard):
+
+```python
+def test_replace_all_deletes_then_writes_one_row_per_stat_and_commits():
+    conn = MagicMock()
+    cur = conn.cursor.return_value.__enter__.return_value
+    stats = [
+        {"county": "lee", "subdivision_name": "CAPE CORAL UNIT 82", "home_count": 1,
+         "count_by_type": {"single-family": 1}, "median_just_value": 400000.0,
+         "source_url": "https://www.swfldatagulf.com/r/source/neighborhood_stats", "as_of": "2026-07-14"},
+    ]
+
+    _replace_all(conn, stats)
+
+    assert cur.execute.call_count == 2  # DELETE FROM ... then one INSERT per stat row
+    delete_args, _ = cur.execute.call_args_list[0]
+    assert "DELETE FROM data_lake.neighborhood_stats" in delete_args[0]
+    insert_args, _ = cur.execute.call_args_list[1]
+    params = insert_args[1]
+    assert params["county"] == "lee"
+    assert params["home_count"] == 1
+    assert params["count_by_type"] == '{"single-family": 1}'  # jsonb param must be a JSON string, not a dict
+    conn.commit.assert_called_once()
+
+
+def test_replace_all_aborts_before_delete_when_stats_is_empty():
+    import pytest
+    from ingest.lib.guards import VolumeGuardError
+
+    conn = MagicMock()
+    cur = conn.cursor.return_value.__enter__.return_value
+    with pytest.raises(VolumeGuardError):
+        _replace_all(conn, [])
+    cur.execute.assert_not_called()  # aborted BEFORE touching the table
+    conn.commit.assert_not_called()
+```
+
+Fix `test_aggregate_feeds_rows_through_the_real_agg_function`'s assertion — after Step 1 above, `_aggregate` calls `aggregate_stats(con, label_by_pattern())` using the REAL shared fixture, so `"HERITAGE BAY"` now folds to its canonical label `"Heritage Bay"` (it's the one entry the fixture already carries — see Task 1). Update the lookup key:
+
+```python
+def test_aggregate_feeds_rows_through_the_real_agg_function():
+    """_aggregate must produce the SAME shape aggregate_stats does directly —
+    proves the psycopg-row -> in-memory-DuckDB-table glue doesn't drop or
+    mangle a column agg.py relies on. Also exercises the real alias fold wired
+    in this task -- HERITAGE BAY resolves to its canonical label "Heritage Bay"
+    via the real fixtures/community-aliases.json, proving the full glue+fold
+    path works end to end, not just agg.py's own unit tests."""
+    rows = [
+        {"parcel_id": "1", "county": "collier", "property_type": "condominium",
+         "just_value": 300000.0, "subdivision_name": "HERITAGE BAY"},
+        {"parcel_id": "2", "county": "collier", "property_type": "single-family",
+         "just_value": 900000.0, "subdivision_name": "HERITAGE BAY"},
+        {"parcel_id": "3", "county": "lee", "property_type": "single-family",
+         "just_value": 400000.0, "subdivision_name": "CAPE CORAL UNIT 82"},
+    ]
+    stats = {(s["county"], s["subdivision_name"]): s for s in _aggregate(rows)}
+    hb = stats[("collier", "Heritage Bay")]  # alias-folded canonical label, not the raw "HERITAGE BAY"
+    assert hb["home_count"] == 2
+    assert hb["median_just_value"] == 600000.0
+    cc = stats[("lee", "CAPE CORAL UNIT 82")]  # not in the alias fixture -- raw name unchanged
+    assert cc["home_count"] == 1
+```
+
+`test_aggregate_handles_zero_rows` is unaffected — leave it as-is.
+
+**Update `test_dry_run.py` in the same step** — it patches `pipeline._upsert` by name:
+
+```python
+"""Verify --dry-run reads + aggregates but never writes to neighborhood_stats."""
+from unittest.mock import MagicMock, patch
+
+
+def test_dry_run_skips_replace_all():
+    fake_conn = MagicMock()
+    with patch("ingest.duckdb_pipelines.neighborhood_stats.pipeline._get_connection", return_value=fake_conn), \
+         patch("ingest.duckdb_pipelines.neighborhood_stats.pipeline._load_parcel_subdivision_rows", return_value=[]), \
+         patch("ingest.duckdb_pipelines.neighborhood_stats.pipeline._replace_all") as mock_replace_all:
+        from ingest.duckdb_pipelines.neighborhood_stats.pipeline import main
+
+        result = main(["--dry-run"])
+
+    assert result == 0
+    mock_replace_all.assert_not_called()
+    fake_conn.close.assert_called_once()  # connection still cleaned up on the dry-run path
+```
+
 - [ ] **Step 3: Update `main()`'s call site**
 
 Change the write step in `main()`:
@@ -360,7 +463,10 @@ def main(argv: list[str] | None = None) -> int:
         conn.close()
 ```
 
-- [ ] **Step 4: Smoke-test with `--dry-run`**
+- [ ] **Step 4: Run the updated test files, then smoke-test with `--dry-run`**
+
+Run: `python -m pytest ingest/duckdb_pipelines/neighborhood_stats/test_pipeline.py ingest/duckdb_pipelines/neighborhood_stats/test_dry_run.py -v`
+Expected: PASS — all tests, including the two new `_replace_all` tests and the corrected alias-fold assertion.
 
 Run: `python -m ingest.duckdb_pipelines.neighborhood_stats.pipeline --dry-run`
 Expected: prints `neighborhood_stats: 604362 parcel rows -> N (county, subdivision) groups` (N should now be at or below the pre-fix 31,110 — the alias fold can only collapse rows, never add new ones) and a sample row whose `subdivision_name` is `"Heritage Bay"` (not `"HERITAGE BAY"`) if any Heritage Bay parcel is in that sample. No write happens on `--dry-run`, so this is safe to run against production Postgres credentials.
@@ -368,7 +474,7 @@ Expected: prints `neighborhood_stats: 604362 parcel rows -> N (county, subdivisi
 - [ ] **Step 5: Commit**
 
 ```bash
-git add ingest/duckdb_pipelines/neighborhood_stats/pipeline.py
+git add ingest/duckdb_pipelines/neighborhood_stats/pipeline.py ingest/duckdb_pipelines/neighborhood_stats/test_pipeline.py ingest/duckdb_pipelines/neighborhood_stats/test_dry_run.py
 git commit -m "feat(ingest): wire the real alias fixture into neighborhood_stats + replace instead of upsert"
 ```
 
