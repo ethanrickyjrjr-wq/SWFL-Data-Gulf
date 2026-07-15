@@ -20,6 +20,7 @@ import { safeFetchPublicUrl } from "./safe-fetch";
 import { resolveEmailModel } from "./model-router";
 import { parseListingDetail } from "@/lib/listings/listing-detail";
 import type { ListingDetailFacts } from "@/lib/listings/listing-detail";
+import type { ResolvedCommunityStats } from "@/lib/listings/community-lookup";
 
 export interface ListingFacts {
   address?: string;
@@ -51,6 +52,14 @@ export interface ListingFacts {
    *  Absent/`ok:false` when the page didn't state it — and absent must stay SILENT, never
    *  become "no golf". */
   community?: ListingDetailFacts;
+  /** THE NEIGHBORHOOD -- home count + median ASSESSED value, resolved from this listing's
+   *  street address against our own tax-roll parcel data (universal: every home in Lee +
+   *  Collier, unlike `community` above which only covers listings we could scrape). Absent
+   *  when the address didn't resolve to exactly one subdivision (no parcel found, or an
+   *  address that spans 2+ distinct subdivisions -- e.g. a condo tower -- never a guess).
+   *  Different provenance from `community`; never merged into it, never let one impersonate
+   *  the other in citation language. */
+  communityStats?: ResolvedCommunityStats;
 }
 
 /** Pull one scalar value from the spec island by its machine id. Returns the
