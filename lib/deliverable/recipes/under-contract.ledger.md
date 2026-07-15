@@ -1,5 +1,5 @@
 ## Enforced
-- Claim: no days-to-contract fabrication (leads with time ON market, not time-to-contract)
+- Claim: no days-to-contract fabrication (labels the running age "Days Since Listed" — never "time on market" [an MLS term whose clock stops at pending] and never "days to contract")
   Test: lib/deliverable/recipes/under-contract.test.ts > "SETS THE TWO CLOCKS SIDE BY SIDE — and LABELS them as different quantities"
 
 ## Unenforced
