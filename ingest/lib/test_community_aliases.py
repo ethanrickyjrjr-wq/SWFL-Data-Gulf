@@ -1,6 +1,7 @@
 from ingest.lib.community_aliases import (
     build_pattern_index,
     community_for_subdivision,
+    label_by_pattern,
     load_community_aliases,
 )
 
@@ -19,3 +20,13 @@ def test_community_for_subdivision_resolves_known_pattern():
 def test_community_for_subdivision_returns_none_for_unknown():
     idx = build_pattern_index(load_community_aliases())
     assert community_for_subdivision("SOME UNKNOWN NAME", idx) is None
+
+
+def test_label_by_pattern_maps_known_pattern_to_its_label():
+    labels = label_by_pattern()
+    assert labels["HERITAGE BAY"] == "Heritage Bay"
+
+
+def test_label_by_pattern_omits_unknown_names():
+    labels = label_by_pattern()
+    assert "SOME UNKNOWN NAME" not in labels

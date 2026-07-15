@@ -33,3 +33,17 @@ def community_for_subdivision(stemmed_name: str, pattern_index: dict[str, str] |
     re-stem, matching the TS `communityForSubdivision` contract."""
     idx = pattern_index if pattern_index is not None else build_pattern_index(load_community_aliases())
     return idx.get(stemmed_name)
+
+
+def label_by_pattern(aliases: dict | None = None) -> dict[str, str]:
+    """Build a direct STEMMED-NAME -> canonical LABEL map (not slug) -- what
+    ingest/duckdb_pipelines/neighborhood_stats/agg.py needs to fold an aliased
+    raw subdivision_name to its marketed-community label before grouping.
+    Mirrors the TS side's `communityForSubdivision` + `COMMUNITY_ALIASES[slug].label`
+    lookup (refinery/lib/subdivision-aliases.mts, via lib/listings/community-lookup.ts's
+    `canonicalCommunityKey`) so both readers resolve a given raw name to the identical
+    label string -- the join-key lockstep the address resolver depends on.
+    """
+    aliases = aliases if aliases is not None else load_community_aliases()
+    index = build_pattern_index(aliases)
+    return {pattern: aliases[slug]["label"] for pattern, slug in index.items()}
