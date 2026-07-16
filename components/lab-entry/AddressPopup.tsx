@@ -38,6 +38,11 @@ export interface AddressPopupProps {
    *  `useSavedLayout` is their answer to the ask (false when there was nothing to ask). */
   onBuild: (value: string, brandPatch: Record<string, string>, useSavedLayout: boolean) => void;
   onCancel: () => void;
+  /** Capture-or-blank (spec 2026-07-16): render a quiet escape that commits the
+   *  raw template instead of building. */
+  onStartBlank?: () => void;
+  /** Subject-less template pick: no input to collect — the ask is fill vs blank. */
+  choiceMode?: boolean;
 }
 
 export function AddressPopup({
@@ -47,6 +52,8 @@ export function AddressPopup({
   savedLayout = null,
   onBuild,
   onCancel,
+  onStartBlank,
+  choiceMode = false,
 }: AddressPopupProps) {
   const [value, setValue] = useState(initialValue);
   const [brandPatch, setBrandPatch] = useState<Record<string, string>>({});
@@ -60,7 +67,7 @@ export function AddressPopup({
   // Brand-only: never block the build on it (RULE 0.7 — a build is never refused).
   // We ASK, because the alternative is what shipped before: an email signed
   // "Company / Tagline" that nobody was ever given the chance to sign.
-  const ready = inputKind ? value.trim().length > 0 : true;
+  const ready = choiceMode ? true : inputKind ? value.trim().length > 0 : true;
   // The arrival door with the address already filled and the brand already known: the
   // ONLY reason this box is on screen is to ask which grid they want.
   const layoutOnly = !inputKind && gaps.length === 0 && Boolean(savedLayout);
@@ -75,16 +82,24 @@ export function AddressPopup({
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
       <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0a1822] p-5 shadow-2xl">
         <h2 className="text-sm font-semibold text-white">
-          {inputKind ? label : layoutOnly ? "Build it your way?" : "Sign this email"}
+          {choiceMode
+            ? "Fill it with your data?"
+            : inputKind
+              ? label
+              : layoutOnly
+                ? "Build it your way?"
+                : "Sign this email"}
         </h2>
         <p className="mt-1 text-xs text-white/50">
-          {inputKind === "address"
-            ? "Which listing is this for?"
-            : inputKind === "area"
-              ? "Which area should the numbers cover?"
-              : layoutOnly
-                ? "You've built this one before — we can use that same grid."
-                : "It goes out under your name — not a placeholder."}
+          {choiceMode
+            ? "We'll fill this template with your brand and your market's real numbers — or start from the clean layout."
+            : inputKind === "address"
+              ? "Which listing is this for?"
+              : inputKind === "area"
+                ? "Which area should the numbers cover?"
+                : layoutOnly
+                  ? "You've built this one before — we can use that same grid."
+                  : "It goes out under your name — not a placeholder."}
         </p>
         {inputKind && (
           <input
@@ -180,8 +195,17 @@ export function AddressPopup({
             onClick={build}
             className="rounded-lg bg-gulf-teal py-2 text-sm font-semibold text-[#070f14] hover:bg-[#17a3b3] disabled:opacity-50"
           >
-            Build
+            {choiceMode ? "Fill with AI" : "Build"}
           </button>
+          {onStartBlank && (
+            <button
+              type="button"
+              onClick={onStartBlank}
+              className="rounded-lg border border-white/15 py-2 text-sm text-white/70 hover:bg-white/5"
+            >
+              Start blank instead
+            </button>
+          )}
           <button
             type="button"
             onClick={onCancel}
