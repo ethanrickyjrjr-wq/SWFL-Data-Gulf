@@ -24,7 +24,7 @@ from ingest.lib.tier1_inventory import _get_connection
 from .agg import aggregate_stats
 
 _SELECT = (
-    "SELECT parcel_id, county, property_type, just_value, subdivision_name "
+    "SELECT parcel_id, county, property_type, just_value, subdivision_name, actual_year_built "
     "FROM data_lake.parcel_subdivision"
 )
 
@@ -32,9 +32,9 @@ _DELETE_ALL = "DELETE FROM data_lake.neighborhood_stats"
 
 _INSERT = """
     INSERT INTO data_lake.neighborhood_stats
-        (county, subdivision_name, home_count, count_by_type, median_just_value, source_url, as_of, updated_at)
+        (county, subdivision_name, home_count, count_by_type, median_just_value, median_year_built, source_url, as_of, updated_at)
     VALUES
-        (%(county)s, %(subdivision_name)s, %(home_count)s, %(count_by_type)s, %(median_just_value)s, %(source_url)s, %(as_of)s, now())
+        (%(county)s, %(subdivision_name)s, %(home_count)s, %(count_by_type)s, %(median_just_value)s, %(median_year_built)s, %(source_url)s, %(as_of)s, now())
 """
 
 
@@ -49,12 +49,13 @@ def _aggregate(rows: list[dict]) -> list[dict]:
     con = duckdb.connect()
     con.execute(
         "CREATE TABLE parcel_subdivision(parcel_id TEXT, county TEXT, property_type TEXT, "
-        "just_value DOUBLE, subdivision_name TEXT)"
+        "just_value DOUBLE, subdivision_name TEXT, actual_year_built BIGINT)"
     )
     if rows:
         con.executemany(
-            "INSERT INTO parcel_subdivision VALUES (?, ?, ?, ?, ?)",
-            [(r["parcel_id"], r["county"], r["property_type"], r["just_value"], r["subdivision_name"]) for r in rows],
+            "INSERT INTO parcel_subdivision VALUES (?, ?, ?, ?, ?, ?)",
+            [(r["parcel_id"], r["county"], r["property_type"], r["just_value"], r["subdivision_name"],
+              r["actual_year_built"]) for r in rows],
         )
     return aggregate_stats(con, label_by_pattern())
 

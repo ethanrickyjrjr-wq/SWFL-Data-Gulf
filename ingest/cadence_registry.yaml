@@ -499,11 +499,11 @@ pipelines:
     # First run: <fill on first successful workflow_dispatch>.
     source_scope:
       confirmed_total:
-        summary: "Core CSV (active_listing_count, median_days_on_market, pending_ratio, new_listing_count, price_reduced_share, median_listing_price, all +YoY) + Hotness CSV (hotness_score, supply_score, demand_score, hotness_rank, median_dom_vs_us), ZIP grain, SWFL-filtered, monthly"
+        summary: "Core CSV (active_listing_count, median_days_on_market, pending_ratio, new_listing_count, price_reduced_share, median_listing_price, all +YoY; ceiling-fill 07/16/2026 added average_listing_price, median_listing_price_per_square_foot, median_square_feet, pending_listing_count, price_increased_count, total_listing_count, each +MoM+YoY) + Hotness CSV (hotness_score, supply_score, demand_score, hotness_rank +MoM+YoY, hh_rank = Nielsen HH Rank, median_dom_vs_us, page_view_count_per_property MoM/YoY/vs-US), ZIP grain, SWFL-filtered, monthly"
         source: "our ingest"
       source_ceiling:
-        summary: "Same ZIP-grain CSVs, same fetch — Avg Listing Price, Median List Price Per Sqft, Median Listing Sqft, Pending Listing Count raw (we only keep the ratio), Price Increase Count, Total Listing Count (active+pending), Nielsen HH Rank (all +M/M+Y/Y), plus from the Hotness file: Hotness Rank Change/Prev/Within-CBSA/Within-County, LDP Unique Viewers Per Property vs US."
-        as_of: "07/08/2026"
+        summary: "Same ZIP-grain CSVs, same fetch — still unpulled: MoM deltas of the original vote-driver families (median_listing_price_mm, active_listing_count_mm, median_days_on_market_mm, new_listing_count_mm, price_reduced_share_mm, pending_ratio_mm), the price_increased_share and price_reduced_count families, and Hotness extras (median_dom_mm_day / median_dom_yy_day day-deltas, median_listing_price + _mm/_yy/_vs_us dupes). DISCREPANCY resolved 07/16/2026: the 07/08 note's 'Hotness Rank Change/Prev/Within-CBSA/Within-County' columns do NOT exist in the ZIP-grain History header (verified live) — the real rank-change columns are hotness_rank_mm/_yy (now pulled), and 'LDP Unique Viewers Per Property vs US' is named page_view_count_per_property_vs_us here (now pulled)."
+        as_of: "07/16/2026"
         source_url: "https://www.realtor.com/research/data/"
         source_label: "Realtor.com Economic Research Data Library"
 
@@ -1903,16 +1903,18 @@ pipelines:
     tolerance_multiplier: 2.0
     freshness_table: data_lake.market_details_swfl
     freshness_column: captured_at
-    # DROPPED FIELDS (see check market_aggregates_details_dropped_fields): parse_market_details()
-    # never reads the market_comparison block or market_temperature extras already present in the
-    # same paid response body — zero extra network cost, pure code gap.
+    # DROPPED FIELDS CLOSED 07/16/2026 (check market_aggregates_details_dropped_fields):
+    # parse_market_details() now reads the market_comparison block + market_temperature extras
+    # from the same paid response body. Migration: docs/sql/20260716_market_details_dropped_fields.sql
+    # (applied 07/16/2026). NOTE: vendor's "ratio_of_days_on_market_*" values are signed day
+    # DELTAS (e.g. -8) despite the key name — stored as written, never reinterpreted.
     source_scope:
       confirmed_total:
-        summary: "Per-ZIP (57 in-scope Lee+Collier ZIPs, monthly): median_sold_price, median_listing_price, median_rent_price, median_days_on_market, median_price_per_sqft, local_hotness_score, list_to_sold_ratio_pct, sold_to_rent_ratio, market_strength, is_competitive"
+        summary: "Per-ZIP (57 in-scope Lee+Collier ZIPs, monthly): median_sold_price, median_listing_price, median_rent_price, median_days_on_market, median_price_per_sqft, local_hotness_score, list_to_sold_ratio_pct, sold_to_rent_ratio, market_strength, is_competitive; plus 07/16/2026 fill: national_hotness_score, local/national_temperature, hot_market_badge, hot_market_rank, and the market_comparison block (ratio_of_days_on_market_vs_typical_property_in_county/_us, ratio_of_ldp_views_vs_typical_property_in_county/_us — vendor-verbatim names)"
         source: "our ingest"
       source_ceiling:
-        summary: "Same paid response body, silently dropped: market_comparison block (ratio_of_days_on_market vs. typical property in county/US, ratio_of_ldp_views vs. typical in county/US) and market_temperature extras (national_hotness_score, local_temperature, national_temperature, hot_market_badge, hot_market_rank). Separately, unused sibling SteadyAPI endpoints not wired into any pipeline: /neighborhood-market-trends, /property-tax-history, /neighborhood-amenities, /environment-risk, /nearby-home-values, /similar-homes, /new-construction, /mortgage-rate, /property-estimates, /property-urgency."
-        as_of: "07/08/2026"
+        summary: "Full extraction of this endpoint's documented response body as of 07/16/2026. Remaining ceiling is endpoint-level, not field-level: unused sibling SteadyAPI endpoints not wired into any pipeline — /neighborhood-market-trends, /property-tax-history (3 listing-date fields unextracted from a response we already fetch for sold-events), /neighborhood-amenities, /environment-risk, /nearby-home-values, /similar-homes, /new-construction, /mortgage-rate, /property-estimates, /property-urgency (views/saves — the realtor.com '2,607 views | 49 saves' block). See docs/steadyapi-research/2026-07-16-realtor-full-scope-audit.md."
+        as_of: "07/16/2026"
         source_url: "https://docs.steadyapi.com"
         source_label: "realtor.com (via SteadyAPI — housing market details)"
     # ~57 calls/run (one per in-scope Lee+Collier ZIP). Consumer: refinery/packs/market-temperature-swfl.mts

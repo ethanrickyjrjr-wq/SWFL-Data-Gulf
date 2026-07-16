@@ -55,7 +55,8 @@ def aggregate_stats(
     """)
     base = con.execute("""
         SELECT county, resolved_name, COUNT(*) AS home_count,
-               median(just_value) AS median_just_value
+               median(just_value) AS median_just_value,
+               median(NULLIF(actual_year_built, 0)) AS median_year_built
         FROM _resolved
         GROUP BY county, resolved_name
     """).fetchall()
@@ -73,13 +74,16 @@ def aggregate_stats(
 
     today = date.today().isoformat()
     out = []
-    for county, name, home_count, median_just_value in base:
+    for county, name, home_count, median_just_value, median_year_built in base:
         out.append({
             "county": county,
             "subdivision_name": name,
             "home_count": int(home_count),
             "count_by_type": types.get((county, name), {}),
             "median_just_value": (float(median_just_value) if median_just_value is not None else None),
+            # FDOR stamps 0/NULL on unbuilt parcels — NULLIF keeps them out of the
+            # median; an all-vacant group therefore reads None, never a fake year.
+            "median_year_built": (int(round(float(median_year_built))) if median_year_built is not None else None),
             "source_url": "https://www.swfldatagulf.com/r/source/neighborhood_stats",
             "as_of": today,
         })

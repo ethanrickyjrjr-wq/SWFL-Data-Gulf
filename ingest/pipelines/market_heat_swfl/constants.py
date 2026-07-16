@@ -24,7 +24,8 @@ BUCKET = "lake-tier1"
 CORE_PARQUET_PATH = "market/market_heat_core_swfl.parquet"
 HOTNESS_PARQUET_PATH = "market/market_heat_hotness_swfl.parquet"
 
-# ── Columns kept from each source (verbatim from the live header 2026-06-25) ──
+# ── Columns kept from each source (verbatim from the live header 2026-06-25;
+#    ceiling-fill families re-verified against the live header 2026-07-16) ──
 # Core: the vote drivers (active_listing_count, median_days_on_market,
 # pending_ratio + their _yy) plus coincident context (new_listing_count,
 # price_reduced_share) and realtor's own confidence flag.
@@ -45,6 +46,26 @@ CORE_COLUMNS = [
     "median_listing_price",
     "median_listing_price_yy",
     "quality_flag",
+    # Ceiling fill (07/16/2026, check ingest_market_heat_swfl_column_gap_fill):
+    # the documented source_ceiling families — same file, zero extra fetch cost.
+    "average_listing_price",
+    "average_listing_price_mm",
+    "average_listing_price_yy",
+    "median_listing_price_per_square_foot",
+    "median_listing_price_per_square_foot_mm",
+    "median_listing_price_per_square_foot_yy",
+    "median_square_feet",
+    "median_square_feet_mm",
+    "median_square_feet_yy",
+    "pending_listing_count",
+    "pending_listing_count_mm",
+    "pending_listing_count_yy",
+    "price_increased_count",
+    "price_increased_count_mm",
+    "price_increased_count_yy",
+    "total_listing_count",
+    "total_listing_count_mm",
+    "total_listing_count_yy",
 ]
 
 # Hotness: RELATIVE descriptors only (cross-sectional rank) — never vote drivers.
@@ -57,6 +78,17 @@ HOTNESS_COLUMNS = [
     "hotness_rank",
     "median_dom_vs_us",
     "quality_flag",
+    # Ceiling fill (07/16/2026): hh_rank = Nielsen HH Rank. The 07/08 ceiling note's
+    # "Hotness Rank Within-CBSA/Within-County" columns do NOT exist in the ZIP-grain
+    # History header (verified live) — the real rank-change columns are the _mm/_yy
+    # deltas; "LDP Unique Viewers Per Property vs US" is named
+    # page_view_count_per_property_vs_us in this file.
+    "hh_rank",
+    "hotness_rank_mm",
+    "hotness_rank_yy",
+    "page_view_count_per_property_mm",
+    "page_view_count_per_property_yy",
+    "page_view_count_per_property_vs_us",
 ]
 
 # ── Gate-4 volume floor (non-null guard before the REPLACE write) ─────────────

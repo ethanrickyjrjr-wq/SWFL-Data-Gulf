@@ -83,6 +83,17 @@ API-integration build track. See the inventory below for where the rest lives.
   `reddit.com/r/<name>` URL, a bare name always 200s false. Feeds
   `docs/superpowers/plans/2026-07-16-marketing-launch-plan.md`.
 
+- `2026-07-16-realtor-full-scope-audit.md` — round 5, realtor.com/SteadyAPI full-scope field
+  audit: all 18 real-estate endpoints' documented response schemas crawled live
+  (docs.steadyapi.com collection) + the operator's screenshot fields live-verified against a
+  real Naples listing in a cookied Chrome session (headless is anti-bot blocked). Settles:
+  year_built / HOA fee / real MLS# / amenity-tags are a genuine permanent vendor gap — no
+  endpoint carries them; year_built is Lane 1 (FDOR `parcel_subdivision.actual_year_built`,
+  already ingested); views/saves + listing-date fields ARE reachable (`/property-urgency`,
+  `/property-tax-history`). Ends in a ranked 6-item punch list — items 1(a)/2/3 (neighborhood
+  median_year_built rollup, market_details dropped fields, market_heat ceiling-column fill)
+  executed same day, 07/16/2026.
+
 ## Existing SteadyAPI material elsewhere (inventory, as of 07/09/2026)
 
 **API mechanics / vendor reference:**

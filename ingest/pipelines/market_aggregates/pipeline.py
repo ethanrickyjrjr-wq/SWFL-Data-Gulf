@@ -32,6 +32,12 @@ _HIST_CONFLICT = ["county", "band_min", "captured_date"]
 _DET_TABLE = "data_lake.market_details_swfl"
 _DET_COLS = ["zip_code", "county", "median_sold_price", "median_listing_price", "median_rent_price",
              "median_days_on_market", "median_price_per_sqft", "local_hotness_score",
+             "national_hotness_score", "local_temperature", "national_temperature",
+             "hot_market_badge", "hot_market_rank",
+             "ratio_of_days_on_market_vs_typical_property_in_county",
+             "ratio_of_days_on_market_vs_typical_property_in_us",
+             "ratio_of_ldp_views_vs_typical_property_in_county",
+             "ratio_of_ldp_views_vs_typical_property_in_us",
              "list_to_sold_ratio_pct", "sold_to_rent_ratio", "market_strength", "is_competitive",
              "captured_date", "source_tag"]
 _DET_CONFLICT = ["zip_code", "captured_date"]

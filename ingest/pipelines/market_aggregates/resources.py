@@ -69,11 +69,18 @@ def fetch_price_histogram(county: str, *, captured: str, dry_run: bool = False, 
 
 def parse_market_details(raw: dict, zip_code: str, county: str, captured: str) -> dict | None:
     """SteadyAPI /housing-market-details body -> one flat per-ZIP row. Returns None if the body carries
-    no metrics (a gap; never fabricate a row). The net-new field is sold_to_rent_ratio."""
+    no metrics (a gap; never fabricate a row). The net-new field is sold_to_rent_ratio.
+
+    market_comparison + the market_temperature extras were silently dropped until 07/16/2026
+    (check market_aggregates_details_dropped_fields) — same paid response, zero extra calls.
+    Comparison column names are the vendor's verbatim keys (docs.steadyapi.com collection);
+    note the "ratio_of_days_on_market_*" values arrive as signed day DELTAS (e.g. -8), not
+    ratios, despite the vendor's key name — stored as written, never reinterpreted."""
     meta = raw.get("meta") or {}
     body = raw.get("body") or {}
     mm = body.get("market_metrics") or {}
     mt = body.get("market_temperature") or {}
+    mc = body.get("market_comparison") or {}
     dv = body.get("derived_metrics") or {}
     if not mm and not dv:
         return None
@@ -86,6 +93,19 @@ def parse_market_details(raw: dict, zip_code: str, county: str, captured: str) -
         "median_days_on_market": _int(mm.get("median_days_on_market")),
         "median_price_per_sqft": _int(mm.get("median_price_per_sqft")),
         "local_hotness_score": _num(mt.get("local_hotness_score")),
+        "national_hotness_score": _num(mt.get("national_hotness_score")),
+        "local_temperature": mt.get("local_temperature"),
+        "national_temperature": mt.get("national_temperature"),
+        "hot_market_badge": mt.get("hot_market_badge"),
+        "hot_market_rank": _int(mt.get("hot_market_rank")),
+        "ratio_of_days_on_market_vs_typical_property_in_county": _num(
+            mc.get("ratio_of_days_on_market_vs_typical_property_in_county")),
+        "ratio_of_days_on_market_vs_typical_property_in_us": _num(
+            mc.get("ratio_of_days_on_market_vs_typical_property_in_us")),
+        "ratio_of_ldp_views_vs_typical_property_in_county": _num(
+            mc.get("ratio_of_ldp_views_vs_typical_property_in_county")),
+        "ratio_of_ldp_views_vs_typical_property_in_us": _num(
+            mc.get("ratio_of_ldp_views_vs_typical_property_in_us")),
         "list_to_sold_ratio_pct": _num(dv.get("list_to_sold_ratio_percentage")),
         "sold_to_rent_ratio": _num(dv.get("sold_to_rent_ratio")),
         "market_strength": dv.get("market_strength") or meta.get("market_strength"),

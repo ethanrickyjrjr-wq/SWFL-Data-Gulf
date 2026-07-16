@@ -47,6 +47,22 @@ def test_parse_market_details_yield_is_net_new_field():
     assert row["source_tag"] == "realtor.com"
 
 
+def test_parse_market_details_formerly_dropped_fields():
+    """market_temperature extras + market_comparison, wired 07/16/2026 (check
+    market_aggregates_details_dropped_fields). Same paid response — zero extra calls."""
+    row = parse_market_details(_load("housing_market_details_33901.json"), "33901", "Lee", "2026-06-30")
+    assert row["national_hotness_score"] == 50.0
+    assert row["local_temperature"] == "warm" and row["national_temperature"] == "warm"
+    assert row["hot_market_badge"] == "Other"
+    assert row["hot_market_rank"] == 5000
+    # the 33901 fixture carries only the in-county DOM comparison; the other three
+    # vendor-documented keys are absent there -> None, never fabricated
+    assert row["ratio_of_days_on_market_vs_typical_property_in_county"] == 0
+    assert row["ratio_of_days_on_market_vs_typical_property_in_us"] is None
+    assert row["ratio_of_ldp_views_vs_typical_property_in_county"] is None
+    assert row["ratio_of_ldp_views_vs_typical_property_in_us"] is None
+
+
 def test_parse_market_details_gap_returns_none():
     assert parse_market_details({"meta": {}, "body": {}}, "33901", "Lee", "2026-06-30") is None
 

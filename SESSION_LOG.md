@@ -1,3 +1,38 @@
+## 2026-07-16 (Fable 5 · main) — realtor-audit punch list 1(a)/2/3 executed: market_heat ceiling fill, market_details dropped fields, neighborhood median_year_built
+
+Operator handed `docs/steadyapi-research/2026-07-16-realtor-full-scope-audit.md` (another session's
+output, staged-but-uncommitted, unclaimed): "see what you can do with this if no one else is working
+on it." Cross-checked the pasted Sonnet round-5 plan (12 items, none overlap) and the failed-calls
+handoff's collision map (fences item 4 property-urgency wiring behind that session's P0s; the
+uncommitted foreign constants.py/cadence_registry edits it warned about were already gone from git
+status at session start — if that session resurfaces, this commit supersedes, vendor-verified +
+tested). Took exactly the audit's three zero-new-cost items:
+
+1. **market_heat_swfl ceiling fill** (closes `ingest_market_heat_swfl_column_gap_fill` on push):
+   +18 Core / +6 Hotness columns in constants.py, verbatim from the LIVE 07/16 CSV headers (RULE
+   0.4). Discrepancy corrected in cadence_registry: the 07/08 note's Hotness Rank vs-CBSA/vs-County
+   columns DO NOT exist at ZIP grain — real rank-change columns are hotness_rank_mm/_yy, and "LDP
+   Unique Viewers" is page_view_count_per_property_* there. Live --dry-run: 11,520 core + 9,671
+   hotness rows with new fields populated; next monthly cron backfills FULL history (REPLACE).
+2. **market_details dropped fields** (closes `market_aggregates_details_dropped_fields` on push):
+   parse_market_details + _DET_COLS now carry the market_temperature extras + full market_comparison
+   block, key names vendor-verbatim from a fresh docs.steadyapi.com collection.json fetch. NOTE the
+   vendor's "ratio_of_days_on_market_*" values are signed day DELTAS (e.g. -8) despite the key name —
+   stored as written. Migration `docs/sql/20260716_market_details_dropped_fields.sql` APPLIED: 9
+   columns + _latest view recreated, 108 rows intact. Fields land from the next monthly details run.
+3. **neighborhood_stats median_year_built** (piece (a) of `ingest_parcel_year_built_join` — check
+   STAYS OPEN for piece (b), the per-listing matchSubdivision join): median(NULLIF(actual_year_built,0))
+   in agg.py, threaded through pipeline SELECT/temp-table/INSERT; new test_agg.py (3 tests) proves the
+   SQL in-memory (sidesteps the known local full-scan statement timeout). Migration
+   `docs/sql/20260716_neighborhood_stats_median_year_built.sql` APPLIED — 31,110 rows intact, column
+   NULL until the next run (annual cron; or dispatch neighborhood-stats-annual.yml post-push to backfill).
+
+Also committed: the audit doc itself + its missing README index line. Touched-scope tests green (27
+passed). PRE-EXISTING, not mine: test_pipeline_drift's 5 test_pipeline_has_workflow failures
+(corridor_grounded, county_planning_swfl, leepa_parcel_zip, report_design_research,
+social_best_practices — pipelines from other sessions' unpushed work, no workflow files yet).
+NOT pushed — foreign commits sit ahead of origin/main; operator to say the word.
+
 ## 2026-07-16 (Fable 5 · main, late) — Issue 001 distribution + beta tease layered onto the launch plan; editor's issue architecture committed
 
 Same session as the desk visit, evening extension. (1) Operator handed the pen on the July issue —
