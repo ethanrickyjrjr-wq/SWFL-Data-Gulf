@@ -130,6 +130,16 @@ export function useAnimatedSeriesPath({
     return () => {
       control.stop();
       animatingRef.current = false;
+      // FORK(swfl): dep churn runs this cleanup mid-morph — the y-domain tween swaps
+      // yScale identity EVERY FRAME, so `control.stop()` fires before `onComplete`
+      // ever can, and the signature guard above blocks a restart. `animatedPoints`
+      // then froze at its first interpolated frame forever, drawing the series with
+      // the PREVIOUS scale's screen coords (measured live 07/16/2026: a city switch
+      // on the zoomed desk hero left the whole line 1–8 chart-heights above the
+      // frame — "line doesn't show up"). Clearing the state lets `activePoints`
+      // fall back to `targetPoints`, which every render recomputes from the live
+      // scales; a genuine data-swap morph still crossfades from displayedPointsRef.
+      setAnimatedPoints(null);
     };
   }, [
     transitionSignature,
