@@ -1859,11 +1859,11 @@ pipelines:
     # Consumer brain: refinery/packs/active-listings-swfl.mts (via data_lake.listing_active_stats).
     source_scope:
       confirmed_total:
-        summary: "Daily SteadyAPI /search sweep, Lee+Collier+Hendry: address/price/beds/sqft/lot/lat-lon/county/photo/status/property_type, all 7 status flags, reduced_amount. State-machine diff (new/active/price-cut/holding/relist). CLOSINGS ARE CAPTURED: budget-sampled departures/holding listings resolve to sold_price + sold_date via /property-tax-history (see check listing_lifecycle_sold_sampling_bias for the sampling caveat)."
+        summary: "Daily SteadyAPI /search sweep, Lee+Collier+Hendry: address/price/beds/sqft/lot/lat-lon/county/photo/status/property_type, all 7 status flags, reduced_amount. State-machine diff (new/active/price-cut/holding/relist). CLOSINGS ARE CAPTURED: budget-sampled departures/holding listings resolve to sold_price + sold_date via /property-tax-history (see check listing_lifecycle_sold_sampling_bias for the sampling caveat). LISTED_DATE CAPTURED 07/16/2026 (zero new calls): property_history[].listing.list_date, off the SAME /property-tax-history probe, persisted for every departure/recheck/backfill call (extract_api.classify_off_market → distill.upsert_state/update_listed_date) — coverage is opportunistic (only probed listings), not the full active sweep, since /search itself never returns list_date."
         source: "our ingest"
       source_ceiling:
-        summary: "listed_date is a confirmed-live vendor field (property_history[].listing.list_date) we read but never persist. brokerage/agent fields and true per-listing days-on-market are genuine vendor ceilings — grepped all 18 SteadyAPI real-estate endpoints, zero agent/broker/office fields exist anywhere; only aggregate median_days_on_market exists (city/county/ZIP grain), not per-listing."
-        as_of: "07/08/2026"
+        summary: "Per-listing days-on-market (today - listed_date) is not yet a computed/served metric — listed_date lands in listing_state but no view or brain derives DOM from it yet. brokerage/agent fields are a genuine vendor ceiling — grepped all 18 SteadyAPI real-estate endpoints, zero agent/broker/office fields exist anywhere; only aggregate median_days_on_market exists (city/county/ZIP grain), not per-listing."
+        as_of: "07/16/2026"
         source_url: "https://docs.steadyapi.com/collection.json"
         source_label: "realtor.com (via SteadyAPI)"
     # Tables: data_lake.listing_state (MERGE) + data_lake.listing_transitions (log). Migration: migrations/20260627_listing_lifecycle.sql.

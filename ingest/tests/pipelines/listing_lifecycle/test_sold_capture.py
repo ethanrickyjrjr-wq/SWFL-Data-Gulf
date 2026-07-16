@@ -10,6 +10,11 @@ threads the paid-call budget.
 Vendor shape verified live 06/30/2026 (RULE 0.4) from docs.steadyapi.com/collection.json:
 /property-tax-history -> {meta:{current_status,...}, body:{status, property_history:[{date, event_name,
 price, source_name, listing:{...}}], statistics:{transactions:{sales_count,...}}}}.
+
+Re-verified live 07/16/2026 (RULE 0.4, docs.steadyapi.com/collection.json): each property_history
+entry's `listing` object carries `list_date` (ISO datetime, e.g. "2026-06-05T23:13:52Z") alongside
+`listing_id`, `list_price`, `status`, `last_status_change_date`, `last_update_date` — the source for
+`listed_date` persistence (docs/steadyapi-capability-census.md §3, check steadyapi_persist_listed_date).
 """
 from __future__ import annotations
 
@@ -38,9 +43,12 @@ def _hist(current_status="for_sale", events=None):
     }
 
 
-def _ev(date, event_name, price):
-    return {"date": date, "event_name": event_name, "price": price,
-            "source_name": "FLGulfCoastMLS", "listing": {"listing_id": "x"}}
+def _ev(date, event_name, price, list_date=None):
+    ev = {"date": date, "event_name": event_name, "price": price,
+          "source_name": "FLGulfCoastMLS", "listing": {"listing_id": "x"}}
+    if list_date is not None:
+        ev["listing"]["list_date"] = list_date
+    return ev
 
 
 # ------------------------------------------------------------------ classify_off_market (pure)
@@ -92,6 +100,51 @@ def test_recheck_window_accepts_a_sale_after_it_left_active():
 
 def test_empty_history_claims_nothing():
     assert classify_off_market(_hist("", []), since=TODAY, at=TODAY)["outcome"] == "holding"
+
+
+# ------------------------------------------------------------------ listed_date (classify_off_market)
+# Zero new calls — off the SAME /property-tax-history response already fetched for the sold-window
+# decision above. docs/steadyapi-capability-census.md §3, check steadyapi_persist_listed_date.
+
+def test_classify_off_market_captures_listed_date_from_current_spell():
+    h = _hist("sold", [
+        _ev("2026-01-10", "Listed", 375000, list_date="2026-01-10T18:00:00Z"),
+        _ev("2026-06-20", "Sold", 355000),
+    ])
+    r = classify_off_market(h, since=TODAY, at=TODAY)
+    assert r["listed_date"] == "2026-01-10"
+
+
+def test_classify_off_market_relisted_picks_current_spell_not_original():
+    # Listed in 2019, presumably withdrawn, relisted in 2026 — we want the CURRENT spell's start,
+    # not the property's first-ever listing years ago.
+    h = _hist("for_sale", [
+        _ev("2019-03-01", "Listed", 300000, list_date="2019-03-01T12:00:00Z"),
+        _ev("2026-06-01", "Listed", 375000, list_date="2026-06-01T09:30:00Z"),
+    ])
+    r = classify_off_market(h, since=TODAY, at=TODAY)
+    assert r["listed_date"] == "2026-06-01"
+
+
+def test_classify_off_market_ignores_a_future_listed_event():
+    h = _hist("for_sale", [
+        _ev("2026-06-01", "Listed", 375000, list_date="2026-06-01T09:30:00Z"),
+        _ev("2026-08-01", "Listed", 400000, list_date="2026-08-01T09:30:00Z"),  # after `at`
+    ])
+    r = classify_off_market(h, since=TODAY, at=TODAY)
+    assert r["listed_date"] == "2026-06-01"
+
+
+def test_classify_off_market_no_listed_event_is_none():
+    h = _hist("sold", [_ev("2026-06-20", "Sold", 355000)])
+    assert classify_off_market(h, since=TODAY, at=TODAY)["listed_date"] is None
+
+
+def test_classify_off_market_bad_window_still_returns_listed_date():
+    h = _hist("for_sale", [_ev("2026-06-01", "Listed", 375000, list_date="2026-06-01T09:30:00Z")])
+    r = classify_off_market(h, since="not-a-date", at=TODAY)
+    assert r["outcome"] == "holding" and r["reason"] == "bad-window"
+    assert r["listed_date"] == "2026-06-01"
 
 
 # ------------------------------------------------------------------ fetch_sold_event (network wrapper)
@@ -268,6 +321,58 @@ def test_recheck_still_holding_touches_nothing_but_is_checked():
     assert ("H", "sale") in stats["checked_keys"] and stats["holding_unresolved"] == 1
 
 
+def test_departure_sold_also_persists_listed_date_on_the_upsert():
+    ups, trans = [_holding_ups("A")], [_holding_trans("A")]
+    checks = [{"kind": "departure", "key": ("A", "sale"), "property_id": "1", "since": TODAY}]
+    res = [{"outcome": "sold", "sold_price": 355000, "sold_date": "2026-06-20", "listed_date": "2026-01-10"}]
+    apply_off_market_resolutions(ups, trans, checks, res, {}, TODAY)
+    assert ups[0]["listed_date"] == "2026-01-10"
+
+
+def test_departure_real_holding_still_persists_listed_date():
+    # A pending departure never resolves to sold/withdrawn, but the probe still learned listed_date.
+    ups, trans = [_holding_ups("A")], [_holding_trans("A")]
+    checks = [{"kind": "departure", "key": ("A", "sale"), "property_id": "1", "since": TODAY}]
+    res = [{"outcome": "holding", "listed_date": "2026-02-14"}]
+    apply_off_market_resolutions(ups, trans, checks, res, {}, TODAY)
+    assert ups[0]["listed_date"] == "2026-02-14"
+
+
+def test_departure_gap_never_sets_listed_date():
+    ups, trans = [_holding_ups("A")], [_holding_trans("A")]
+    checks = [{"kind": "departure", "key": ("A", "sale"), "property_id": "1", "since": TODAY}]
+    apply_off_market_resolutions(ups, trans, checks, [{"outcome": "gap"}], {}, TODAY)
+    assert "listed_date" not in ups[0]
+
+
+def test_recheck_sold_terminal_upsert_carries_listed_date():
+    prior = {("H", "sale"): _prior_holding("H", "9", 420000, holding_age_days=45)}
+    ups, trans = [], []
+    checks = [{"kind": "recheck", "key": ("H", "sale"), "property_id": "9", "since": "2026-05-15"}]
+    res = [{"outcome": "sold", "sold_price": 410000, "sold_date": "2026-06-10", "listed_date": "2026-05-01"}]
+    apply_off_market_resolutions(ups, trans, checks, res, prior, TODAY)
+    assert ups[0]["listed_date"] == "2026-05-01"
+
+
+def test_recheck_still_holding_with_listed_date_returns_targeted_update():
+    # No upsert row is emitted for a still-holding recheck (unchanged from the pre-existing behavior),
+    # so a freshly-learned listed_date can only travel back via the targeted-UPDATE list.
+    prior = {("H", "sale"): _prior_holding("H", "9", 420000, holding_age_days=45)}
+    ups, trans = [], []
+    checks = [{"kind": "recheck", "key": ("H", "sale"), "property_id": "9", "since": "2026-05-15"}]
+    res = [{"outcome": "holding", "listed_date": "2026-05-01"}]
+    stats = apply_off_market_resolutions(ups, trans, checks, res, prior, TODAY)
+    assert ups == [] and trans == []
+    assert stats["listed_date_updates"] == [{"key": ("H", "sale"), "listed_date": "2026-05-01"}]
+
+
+def test_recheck_still_holding_without_listed_date_yields_no_update():
+    prior = {("H", "sale"): _prior_holding("H", "9", 420000, holding_age_days=45)}
+    checks = [{"kind": "recheck", "key": ("H", "sale"), "property_id": "9", "since": "2026-05-15"}]
+    stats = apply_off_market_resolutions([], [], checks, [{"outcome": "holding"}], prior, TODAY)
+    assert stats["listed_date_updates"] == []
+
+
 def test_cap_bounds_call_count_and_known_sold_yields_priced_transition():
     # The plan's explicit verification: sampling cap holds the call count; a known sold -> priced transition.
     trans = [_dep_trans(f"A{i}", price=500000 - i, days=i) for i in range(10)]  # 10 candidates
@@ -336,6 +441,23 @@ def test_apply_price_recheck_upgrades_only_positive_sold():
     assert ("gap", "sale") not in out["checked_keys"] and len(out["checked_keys"]) == 3
 
 
+def test_apply_price_recheck_returns_listed_date_updates_for_every_non_gap_result():
+    # This probe already ran (for the price recheck) — the listed_date it also returned would
+    # otherwise be thrown away since price-recheck never touches listing_state through an upsert row.
+    checks = [{"kind": "price_recheck", "key": (k, "sale"), "property_id": "p", "since": TODAY}
+              for k in ("recovered", "still_zero", "gap")]
+    res = [
+        {"outcome": "sold", "sold_price": 8100000, "sold_date": "2026-06-28", "listed_date": "2026-04-01"},
+        {"outcome": "sold", "sold_price": 0, "sold_date": "2026-06-28", "listed_date": "2026-03-15"},
+        {"outcome": "gap"},
+    ]
+    out = apply_price_recheck_results(checks, res)
+    assert out["listed_date_updates"] == [
+        {"key": ("recovered", "sale"), "listed_date": "2026-04-01"},
+        {"key": ("still_zero", "sale"), "listed_date": "2026-03-15"},
+    ]
+
+
 # ------------------------------------------------------------------ pipeline wiring (gated to LIVE api)
 
 import ingest.pipelines.listing_lifecycle.pipeline as P  # noqa: E402
@@ -364,6 +486,7 @@ def _wire(monkeypatch, calls):
     # Backfill loader: NEVER let a wiring test read the live lake; tests opt in via re-patching.
     monkeypatch.setattr(P.distill, "load_price_pending_solds", lambda *a, **k: [])
     monkeypatch.setattr(P.distill, "update_sold_price", lambda ups, **k: len(ups))
+    monkeypatch.setattr(P.distill, "update_listed_date", lambda ups, **k: len(ups))
 
     def fake_fetch(pid, **k):
         calls.append(pid)
@@ -432,3 +555,21 @@ def test_backfill_never_fires_on_dry_run_or_catchup(monkeypatch):
     P.run(dry_run=True, only_county="Lee", today=TODAY, source="api")
     P.run(dry_run=False, only_county="Lee", today=TODAY, source="api", catchup=True)
     assert calls == []                               # zero paid probes on dry-run AND on the baseline
+
+
+def test_recheck_still_holding_listed_date_reaches_update_listed_date(monkeypatch):
+    # The one eligible recheck in _wire's prior ("Z", holding) resolves to still-holding with a fresh
+    # listed_date — that has no upsert row this run, so it must land via the targeted-UPDATE path.
+    calls: list = []
+    _wire(monkeypatch, calls)
+    persisted: list = []
+    monkeypatch.setattr(P.distill, "update_listed_date",
+                        lambda ups, **k: (persisted.extend(ups), len(ups))[1])
+
+    def fake_fetch(pid, **k):
+        calls.append(pid)
+        return {"outcome": "holding", "listed_date": "2026-05-01"}
+    monkeypatch.setattr(P, "fetch_sold_event", fake_fetch)
+
+    P.run(dry_run=False, only_county="Lee", today=TODAY, source="api")
+    assert persisted == [{"key": ("Z", "sale"), "listed_date": "2026-05-01"}]

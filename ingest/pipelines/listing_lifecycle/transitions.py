@@ -282,17 +282,24 @@ def apply_off_market_resolutions(
         so APPEND a fresh holding->terminal transition + a terminal state upsert. A real `holding`
         outcome touches neither list (nothing new asserted). A `gap` does nothing.
 
+    Every resolution also carries `listed_date` (extract_api.classify_off_market — zero new calls, off
+    the same /property-tax-history response). DEPARTURE and RECHECK+terminal already emit an upsert row
+    this run, so a fresh listed_date is folded straight onto it (through the normal MERGE).
+    RECHECK+still-holding emits no row at all, so its listed_date instead lands in the returned
+    `listed_date_updates` list for a targeted UPDATE (docs/steadyapi-capability-census.md §3).
+
     The `sold_check_at` stamp is NOT applied here — every non-`gap` key is returned in `checked_keys`
     so the pipeline can stamp them via a targeted UPDATE that preserves last_seen (the holding-age
     anchor). A `gap` (transient API failure) is left unstamped so it retries next run.
 
-    Returns {'sold', 'withdrawn', 'holding_unresolved', 'checked_keys'}."""
+    Returns {'sold', 'withdrawn', 'holding_unresolved', 'checked_keys', 'listed_date_updates'}."""
     ups_by_key = {(u.get("address_key"), u.get("sale_or_rent")): u for u in upserts}
     hold_trans_by_key = {
         (t.get("address_key"), t.get("sale_or_rent")): t
         for t in transitions if t.get("to_state") == HOLDING and t.get("at") == today
     }
-    stats: dict[str, Any] = {"sold": 0, "withdrawn": 0, "holding_unresolved": 0, "checked_keys": []}
+    stats: dict[str, Any] = {"sold": 0, "withdrawn": 0, "holding_unresolved": 0, "checked_keys": [],
+                              "listed_date_updates": []}
 
     for chk, res in zip(checks, resolutions):
         key = chk["key"]
@@ -301,6 +308,7 @@ def apply_off_market_resolutions(
             stats["holding_unresolved"] += 1
             continue  # transient failure — not stamped, retry next run.
         stats["checked_keys"].append(key)  # got a real answer -> the pipeline stamps sold_check_at.
+        listed_date = (res or {}).get("listed_date")
 
         terminal = SOLD if outcome == "sold" else WITHDRAWN if outcome == "withdrawn" else None
         sold_price = _to_int(res.get("sold_price")) if outcome == "sold" else None
@@ -309,6 +317,8 @@ def apply_off_market_resolutions(
         if chk["kind"] == "departure":
             t = hold_trans_by_key.get(key)
             u = ups_by_key.get(key)
+            if listed_date and u is not None:
+                u["listed_date"] = listed_date
             if terminal is not None and t is not None:
                 t["to_state"] = terminal
                 t["sold_price"] = sold_price
@@ -323,10 +333,15 @@ def apply_off_market_resolutions(
             if terminal is not None:
                 transitions.append(_terminal_transition(key, prow, terminal, today,
                                                          sold_price=sold_price, sold_date=sold_date))
-                upserts.append(_terminal_upsert(key, prow, terminal, days_in_state=0))
+                term_row = _terminal_upsert(key, prow, terminal, days_in_state=0)
+                if listed_date:
+                    term_row["listed_date"] = listed_date
+                upserts.append(term_row)
                 stats[terminal] += 1
             else:
                 stats["holding_unresolved"] += 1  # stays holding — stamped only (no ups/trans row).
+                if listed_date:
+                    stats["listed_date_updates"].append({"key": key, "listed_date": listed_date})
     return stats
 
 
@@ -402,13 +417,22 @@ def apply_price_recheck_results(
     retraction). Only a sold outcome with a POSITIVE price yields an upgrade; the county record with a
     still-$0 price just re-stamps (still_pending). A gap stays unstamped so it retries next run.
 
-    Returns {'upgrades': [{key, sold_price, sold_date}], 'checked_keys', 'recovered', 'still_pending'}."""
-    out: dict[str, Any] = {"upgrades": [], "checked_keys": [], "recovered": 0, "still_pending": 0}
+    This probe (fetch_sold_event) also returns `listed_date` off the same response — this path never
+    touches listing_state through an upsert row, so every non-gap result's listed_date is collected
+    into `listed_date_updates` for a targeted UPDATE (docs/steadyapi-capability-census.md §3).
+
+    Returns {'upgrades': [{key, sold_price, sold_date}], 'checked_keys', 'recovered', 'still_pending',
+    'listed_date_updates': [{key, listed_date}]}."""
+    out: dict[str, Any] = {"upgrades": [], "checked_keys": [], "recovered": 0, "still_pending": 0,
+                            "listed_date_updates": []}
     for chk, res in zip(checks, resolutions):
         outcome = (res or {}).get("outcome", "gap")
         if outcome == "gap":
             continue
         out["checked_keys"].append(chk["key"])
+        listed_date = (res or {}).get("listed_date")
+        if listed_date:
+            out["listed_date_updates"].append({"key": chk["key"], "listed_date": listed_date})
         price = _to_int((res or {}).get("sold_price"))
         if outcome == "sold" and price is not None and price > 0:
             out["upgrades"].append({

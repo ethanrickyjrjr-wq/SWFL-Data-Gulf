@@ -83,6 +83,7 @@ _MAX_ENRICH_CALLS = 60    # hard backstop: even a worst-case spread can't multip
 # deliberately generous + case-insensitive; the verbatim values are PARKED for confirmation under the
 # gated check `steadyapi_sold_capture_live_verify` (no live paid call burned to guess them).
 _SALE_EVENT_RE = re.compile(r"sold", re.I)          # realtor.com property_history sale event ("Sold")
+_LISTED_EVENT_RE = re.compile(r"listed", re.I)      # realtor.com property_history listing event ("Listed")
 SOLD_STATUSES = frozenset({"sold"})
 PENDING_STATUSES = frozenset({
     "pending", "contingent", "under_contract", "active_under_contract", "in_contract", "coming_soon",
@@ -188,7 +189,8 @@ def parse_steadyapi(raw: dict, city: str, state: str, type_hint: str | None = No
         "mls_number": None,
         "mls_name": raw.get("source_type"),
         "listing_type": None,
-        "listed_date": None,
+        "listed_date": None,  # /search never returns list_date (verified 07/07/2026) — filled in
+                               # later by classify_off_market's /property-tax-history probe, never here.
         "days_on_market": None,
         "property_id": str(pid),
         "status": raw.get("status"),
@@ -487,6 +489,22 @@ def _in_window(date_str: Any, lo: date, hi: date) -> bool:
         return False
 
 
+def _pick_listed_date(hist: list[dict], *, at: str) -> str | None:
+    """Pure: the most recent 'Listed' event's listing.list_date at-or-before `at` — the start of the
+    CURRENT active spell. Vendor shape re-verified live 07/16/2026 (RULE 0.4, docs.steadyapi.com):
+    each property_history entry's `listing` object carries `list_date` (ISO datetime). A relisted
+    property carries older 'Listed' events from prior spells too; taking the latest one at-or-before
+    `at` picks the spell we're actually tracking, never a future or long-stale one. ISO date strings
+    (YYYY-MM-DD, via _iso_date) compare correctly as text — no parse round-trip needed."""
+    dates = [
+        d for e in hist
+        if _LISTED_EVENT_RE.search(str(e.get("event_name") or ""))
+        and (d := _iso_date((e.get("listing") or {}).get("list_date")))
+        and d <= at
+    ]
+    return max(dates) if dates else None
+
+
 def classify_off_market(history: dict, *, since: str, at: str) -> dict[str, Any]:
     """Pure: given a /property-tax-history payload + the window [since .. at], decide WHY a departed
     for-sale listing left the active feed. Returns {'outcome': 'sold'|'withdrawn'|'holding', ...}.
@@ -495,17 +513,22 @@ def classify_off_market(history: dict, *, since: str, at: str) -> dict[str, Any]
     reason a for-sale listing leaves the feed is going pending/under-contract, which closes weeks later —
     at departure there is no sale yet. So `current_status` is the authority (it asserts THAT it sold /
     is pending / is off-market); the property_history event only supplies the sale PRICE + close DATE.
-    Anything ambiguous (still for_sale, unknown status) resolves to 'holding' — we claim nothing."""
+    Anything ambiguous (still for_sale, unknown status) resolves to 'holding' — we claim nothing.
+
+    Every return also carries `listed_date` (see _pick_listed_date) — zero new calls, off the SAME
+    response, independent of the sold/withdrawn/holding outcome (docs/steadyapi-capability-census.md
+    §3, check steadyapi_persist_listed_date)."""
     meta = history.get("meta") or {}
     body = history.get("body") or {}
     hist = body.get("property_history") or []
     cur = str(meta.get("current_status") or body.get("status") or "").strip().lower()
+    listed_date = _pick_listed_date(hist, at=at)
 
     try:
         lo = date.fromisoformat(since) - timedelta(days=RECENT_SALE_BUFFER_DAYS)
         hi = date.fromisoformat(at) + timedelta(days=7)
     except (TypeError, ValueError):
-        return {"outcome": "holding", "reason": "bad-window"}
+        return {"outcome": "holding", "reason": "bad-window", "listed_date": listed_date}
 
     def _pick_sale(require_named: bool) -> dict | None:
         cands = [
@@ -529,12 +552,13 @@ def classify_off_market(history: dict, *, since: str, at: str) -> dict[str, Any]
             "sold_date": _iso_date(sale.get("date")),
             "event_name": sale.get("event_name"),
             "current_status": cur,
+            "listed_date": listed_date,
         }
     if cur in PENDING_STATUSES:
-        return {"outcome": "holding", "reason": f"pending:{cur}"}
+        return {"outcome": "holding", "reason": f"pending:{cur}", "listed_date": listed_date}
     if cur in OFF_MARKET_STATUSES:
-        return {"outcome": "withdrawn", "reason": cur}
-    return {"outcome": "holding", "reason": cur or "unknown"}
+        return {"outcome": "withdrawn", "reason": cur, "listed_date": listed_date}
+    return {"outcome": "holding", "reason": cur or "unknown", "listed_date": listed_date}
 
 
 def fetch_sold_event(property_id: str, *, since: str, at: str, key: str | None = None) -> dict[str, Any]:

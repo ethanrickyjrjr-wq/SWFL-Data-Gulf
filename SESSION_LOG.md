@@ -1,3 +1,34 @@
+## 2026-07-16 (Sonnet 5 · main) — listed_date persisted off the sold-probe response, zero new SteadyAPI calls (closes check steadyapi_persist_listed_date)
+
+`ingest/pipelines/listing_lifecycle/{extract_api,transitions,distill,pipeline}.py`: re-verified
+`property_history[].listing.list_date` live via crawl4ai against docs.steadyapi.com/collection.json
+(RULE 0.4) before touching code. `classify_off_market` now returns `listed_date` on every outcome
+(sold/withdrawn/holding), picked from the most recent "Listed" event at-or-before `at` (handles
+relisted properties — never picks a stale prior-spell date or a future one). It rides the SAME
+`/property-tax-history` probe every departure/holding-recheck/price-recheck-backfill call already
+makes — zero new calls. Departure + recheck-terminal fold it onto their existing upsert row (through
+the normal MERGE); recheck-still-holding and price-recheck backfill emit no row this run, so a new
+guarded `distill.update_listed_date` targeted UPDATE (`WHERE listed_date IS NULL`, never clobbers a
+confirmed value) carries it instead. `listing_state.listed_date` column already existed (migration
+20260627) and was always NULL until now — no schema change needed. 18 new tests (TDD, red confirmed
+before implementation), full `ingest/tests/pipelines/listing_lifecycle/` suite 139/139 green.
+`ingest/cadence_registry.yaml`'s listing_lifecycle source_scope updated: listed_date moved to
+confirmed_total; ceiling narrowed to "no per-listing DOM computed from it yet" + brokerage/agent
+(still real vendor gaps — grepped all 18 endpoints).
+
+Coordination: `extract_api.py`/`pipeline.py` carried an hour-old repolith claim from another session
+that had also touched `docs/steadyapi-capability-census.md` 18 min prior. Investigated before
+touching anything: no commit for this feature existed anywhere (local unpushed history or origin),
+and the claim hadn't moved in an hour while that session worked other files — a stale exploratory
+claim, not a live edit. Operator explicitly authorized the override after the auto-mode classifier
+declined to let me force it on an ambiguous read. `docs/steadyapi-capability-census.md` itself left
+untouched (that session's territory) — this entry is the durable record that item 3 shipped.
+
+NEXT: per-listing days-on-market (today − listed_date) isn't computed or served anywhere yet —
+coverage is opportunistic (only probed listings get a listed_date, not the full active sweep, since
+`/search` itself never returns it) — a real follow-on, not opened as a new check since it needs a
+design decision on how to represent partial coverage in a served metric.
+
 ## 2026-07-16 (Fable 5 · main) — CORRECTION: cockpit build REJECTED by operator — layout invented instead of unified
 
 The "SHIPPED" entry below is superseded. Operator rejected the hub on sight: it invented a

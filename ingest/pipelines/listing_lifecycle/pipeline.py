@@ -200,6 +200,11 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
             res_stats = apply_off_market_resolutions(ups, trans, checks, resolutions, prior, today)
             budget_calls += len(checks)
             sold_budget_remaining -= len(checks)
+            # listed_date: zero new calls — off the SAME probe response above. DEPARTURE and
+            # RECHECK+terminal already landed it on their upsert row (see apply_off_market_resolutions);
+            # RECHECK+still-holding emits no row this run, so it's folded on via a targeted UPDATE.
+            if res_stats["listed_date_updates"]:
+                distill.update_listed_date(res_stats["listed_date_updates"], source_name=src_name, dry_run=dry_run)
             print(f"[sold] {county}: probed={len(checks)} sold={res_stats['sold']} "
                   f"withdrawn={res_stats['withdrawn']} holding={res_stats['holding_unresolved']} "
                   f"(dep={plan_stats['departures_checked']}/{plan_stats['departures_available']} "
@@ -262,6 +267,8 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
             bf_res = [fetch_sold_event(c["property_id"], since=c["since"], at=today) for c in bf_checks]
             applied = apply_price_recheck_results(bf_checks, bf_res)
             distill.update_sold_price(applied["upgrades"], source_name=src_name, dry_run=dry_run)
+            if applied["listed_date_updates"]:  # zero new calls — off this same backfill probe
+                distill.update_listed_date(applied["listed_date_updates"], source_name=src_name, dry_run=dry_run)
             if applied["checked_keys"]:
                 distill.stamp_sold_checked(applied["checked_keys"], source_name=src_name, dry_run=dry_run)
             budget_calls += len(bf_checks)

@@ -319,6 +319,36 @@ def update_sold_price(
     return len(params)
 
 
+def update_listed_date(
+    updates: list[dict[str, Any]], *, source_name: str = SOURCE_NAME, dry_run: bool = False
+) -> int:
+    """Targeted UPDATE: fold a freshly-probed listed_date (extract_api.classify_off_market, off a
+    /property-tax-history response we already paid for) onto an existing state row, for the two probe
+    outcomes that emit no upsert row this run — recheck-still-holding and price-recheck backfill (see
+    transitions.apply_off_market_resolutions / apply_price_recheck_results). Mirrors stamp_sold_checked's
+    shape (targeted, not the MERGE). Guarded on listed_date IS NULL: an earlier confirmed value can
+    never be clobbered by a later probe of the same property."""
+    if not updates:
+        return 0
+    if dry_run:
+        print(f"[dry-run] would backfill listed_date on {len(updates)} state rows")
+        return len(updates)
+    sql = (f"UPDATE {_STATE_TABLE} SET listed_date = %(listed_date)s "
+           f"WHERE source_name = %(src)s AND address_key = %(addr)s AND sale_or_rent = %(sor)s "
+           f"AND listed_date IS NULL")
+    params = [
+        {"listed_date": u["listed_date"], "src": source_name, "addr": u["key"][0], "sor": u["key"][1]}
+        for u in updates if u.get("listed_date")
+    ]
+    if not params:
+        return 0
+    with _get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.executemany(sql, params)
+        conn.commit()
+    return len(params)
+
+
 def stamp_sold_checked(
     keys: list[tuple[str, str]], *, source_name: str = SOURCE_NAME, checked_at: Any = None,
     dry_run: bool = False,
