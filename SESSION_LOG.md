@@ -1,3 +1,22 @@
+## 2026-07-16 (Fable 5 · main) — operator round 2: "good stuff" restored — Ask AI DOCKED in the hub panel, dossier+chips back, welcome layout (unpushed, live on :3299)
+
+Operator flagged the fix round deleted good things. Three asks, three commits (c6c2cfa7,
+4314f6aa, 55d49ef4): (1) the Ask AI pill moves INTO the hub's AI panel — the real assistant
+(BriefcasePanel project-mode, keyed to the selected project; bare BriefcaseChat when zero
+projects) docks under the ✦ header; floating pill suppresses on /project only via NEW
+`ASSISTANT_DOCKED_PATHS` in pill-mount.ts (one authority: pill + DiscoveryTicker tip re-word +
+page-mount-coverage invariant, which now counts a docked assistant as the page's one Ask AI —
+the two AIs are distinct and both live: Ask AI = data chat, aside "Build with AI" = builder,
+in-project pages keep the floating pill). (2) Selected project's dossier (city/ZIP eyebrow,
+title, kind chip) + clickable schedule chips restored as a panel section — info only, no
+buttons back. (3) EmptyLaunchpad → welcome layout per NN/g empty-state guidelines (crawl4ai,
+nngroup.com/articles/empty-state-interface-design: status + in-context cues + direct pathways
++ safe exploration): where-things-live cues, address form, campaign starters, and a
+ShowcaseCard/ShowcaseOverlay click-through of a real finished campaign. 390 briefcase+project
+tests green, `bunx next build` green, live-verified on :3299 (dock renders w/ project prompts,
+panel retargets on selection, email-lab keeps its floating pill). Zero-projects welcome is
+code+test verified only — needs an empty account to see live. Still NOT pushed.
+
 ## 2026-07-16 (Fable 5 · main) — cockpit fix executed: hub is now the SAME room as the in-project pages (unpushed, operator to verify on :3299)
 
 Executed `docs/handoff/2026-07-16-projects-cockpit-rejected-fix-handoff.md` in full, 3 commits
