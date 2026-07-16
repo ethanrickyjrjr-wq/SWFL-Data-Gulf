@@ -80,6 +80,7 @@
 // slot — the code-authored verdict still ships, because it is true by construction.
 
 import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
+import { formatSoldSpell } from "@/lib/listings/dom";
 import {
   auditClaims,
   CLAIM_PROHIBITION,
@@ -154,11 +155,15 @@ function median(values: number[]): number | null {
 }
 
 /** What the price actually IS — never dressed as a sale it was not. The chat lane's
- *  own vocabulary ("sold … on", "estimated value", "last listed"), kept honest. */
+ *  own vocabulary ("sold … on", "estimated value", "last listed"), kept honest.
+ *  A recorded sale with a known spell adds "· sold in N days" (code-computed off the
+ *  same vendor response — spec 2026-07-16-listing-dom-design.md §4). */
 function priceKindPhrase(c: RenderComp): string {
   if (c.priceKind === "sold") {
     const d = mdy(c.priceDate);
-    return d ? `Sold ${d}` : "Sold";
+    const spell = formatSoldSpell(c.soldInDays);
+    const base = d ? `Sold ${d}` : "Sold";
+    return spell ? `${base} · ${spell}` : base;
   }
   if (c.priceKind === "estimate") {
     const d = mdy(c.priceDate);

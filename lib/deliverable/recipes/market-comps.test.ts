@@ -53,6 +53,7 @@ function comp(over: Partial<RenderComp>): RenderComp {
     price: 300000,
     priceKind: "sold",
     priceDate: "2025-08-29",
+    soldInDays: null,
     sourceUrl: "https://www.realtor.com/realestateandhomes-detail/x",
     ...over,
   };
@@ -207,6 +208,25 @@ test("a valuation is never dressed as a sale in a row", () => {
   expect(est?.text).not.toContain("Sold");
   // Every row links out to its own captured page.
   expect(rows.every((r) => Boolean(r.linkUrl))).toBe(true);
+});
+
+test("a sold evidence row carries the spell when known", () => {
+  const homes = HOMES.map((c) =>
+    c.addressLine === "330 Shore Dr Lot 59" ? { ...c, soldInDays: 79 } : c,
+  );
+  const doc = buildCompsGrid(SUBJECT, homes, canvas());
+  const items =
+    listOf(doc)?.type === "list"
+      ? (listOf(doc) as { props: { items: unknown[] } }).props.items
+      : [];
+  const rows = items as { text: string }[];
+  const sold = rows.find((r) => r.text.startsWith("330 Shore Dr Lot 59"));
+  expect(sold?.text).toContain("Sold 08/29/2025 · sold in 79 days");
+});
+
+test("a sold row with unknown spell renders exactly as before", () => {
+  const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
+  expect(JSON.stringify(doc)).not.toContain("sold in");
 });
 
 // ── THE OPEN-SLOT CONTRACT ───────────────────────────────────────────────────
