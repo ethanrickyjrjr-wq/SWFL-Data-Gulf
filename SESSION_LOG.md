@@ -1,4 +1,40 @@
-## 2026-07-16 (Fable 5 · main) — Insiders desk visit + July issue raw-collection started (operator: limited-edition first copy soon)
+## 2026-07-16 (Sonnet 5 · main) — round-5 synthesis spec: cross-read 4 other parallel sessions' SteadyAPI sweeps, dependency-mapped + sequenced, 13 new checks opened.
+
+Operator: "git ignore and spec." The gitignore half was a false alarm — a concurrent session's
+in-progress `.gitignore` edit (wrongly excluding new steadyapi-research docs + the vendor-notes
+file from git) self-resolved before I touched it; confirmed clean, no action needed. "Spec" turned
+out to mean: synthesize today's round-5 SteadyAPI research, not just my own marketing-plan slice.
+Asked the operator to scope it (my plan alone vs. all of today's sweeps) — picked all of them.
+
+Discovered via `git status`/`git log` that at least 4 other parallel sessions ran SteadyAPI round-5
+sweeps today alongside mine: recurring-problems-solutions (validates `campaigns_end_to_end_scheduled`'s
+human-in-the-loop design via live agent sentiment, informs `logistic_regression_listing_outcome`'s
+framing), new-implementations-ux-sweep (3 evidence-backed Tier-1 UX builds: public listing-scoped
+chat, client-preference Brief, audit-trail panel — each verified against real vendor products via
+crawl4ai, not taken from a Reddit comment at face value), data-reliability-and-sourcing-sweep (2
+reliability tactics grounded in our own `leepa-parcels-annual`/`news_swfl` incident history + 3 new
+SWFL data-source candidates), and realtor-full-scope-audit (full 18-endpoint SteadyAPI field audit
+against 3 operator screenshots + a downloaded CSV — confirmed year_built/HOA/amenity-tags are a
+genuine permanent vendor gap, not something we're missing on our side).
+
+Read all four in full and wrote `docs/superpowers/specs/2026-07-16-round5-synthesis-priorities-design.md`
+— NOT a flat re-tiering (each doc already ranked its own items), but the dependency map only a
+cross-read produces: most items are fully independent and can move now; the reliability guardrails
+should land BEFORE the one bot-wall-prone new source (FL OIR insurance); only a narrow slice
+(on-demand SteadyAPI real-estate endpoint wiring) is actually gated on the still-open
+`steadyapi_quota_unknown`/`steadyapi-429-rate-limited` checks — advisor caught me initially
+overstating that gate to cover everything, corrected before writing. Deduped against the live
+~366-row checks ledger first (advisor flagged the real risk: checks write live to Supabase, no
+push-gate, and other sessions may have already opened their own) — 13 genuinely new, unowned
+findings got checks; two close relatives were cross-referenced instead of duplicated. Cross-linked
+one new marketing tactic (live personalized "give me your ZIP" Reddit demos) into the still-unpushed
+marketing plan BY REFERENCE only, to avoid commit churn on that doc.
+
+Still open: **dfa3b088 (self-marketing launch plan) is still sitting unpushed from earlier this
+session** — this spec's commit will stack on top of it. Push needs explicit operator go-ahead
+(hook-enforced) for both.
+
+
 
 Operator brief: more planning + more data, then a limited-edition first Insiders copy; collect
 section-by-section (news, per-brain new, per-brain historical, outside research) in the Fable
