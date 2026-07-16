@@ -1006,6 +1006,23 @@ Note: user timeline endpoints take `user_id` (numeric), not username — resolve
   increasing backoff (not just one immediate retry), and treat a URL that still fails after 3 tries
   as a genuine dead end, not a client bug.
 
+**07/16/2026 (~21 real calls — round-5 recurring-problems sweep,
+`docs/steadyapi-research/2026-07-16-round5-recurring-problems-solutions.md`):**
+- **The `success:false` content-filter false-positive can skip the `{meta, body}` envelope
+  entirely.** On one occurrence (`/v1/reddit/post` against a well-formed URL, retried clean on the
+  very next attempt), the failure response was a BARE `{"success": false, "message": "..."}` at the
+  top level — not nested under `body`. A guard that only checks `json.body.success` misses this
+  variant; check `json.success` too, in addition to `json.body.success`.
+
+**07/16/2026 (~47 real calls — data-reliability/sourcing sweep,
+`docs/steadyapi-research/2026-07-16-data-reliability-and-sourcing-sweep.md`):**
+- **Very old permalinks may be a genuine, non-transient rejection class, not the known transient
+  quirk.** A 2018 r/devops thread (id `9uxyvy`) failed the same `success:false` "valid subReddit
+  URL" validation on EVERY retry attempted this session, not just the first call — unlike the
+  transient version, more retries did not clear it. Old/possibly-archived posts may simply be
+  outside what the endpoint serves; treat repeated failure on a very old permalink as a likely
+  real rejection, not a flake to keep retrying past 3 attempts.
+
 ## 🤖 ScrapeFlow — generic scraper
 
 - `POST /v1/scraper` — SteadyAPI's general-purpose scraping endpoint (their "ScrapeFlow" product). Fallback lane for social surfaces they don't have dedicated endpoints for (e.g. TikTok, Facebook, LinkedIn — none of which have dedicated SteadyAPI sections as of 07/05/2026).
