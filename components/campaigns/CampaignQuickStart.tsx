@@ -147,18 +147,12 @@ export function CampaignQuickStart({
         })}
       </div>
 
+      {/* Coming entries render as PLAIN TEXT, never pill/button shapes — a flat
+          pill reads as a broken button (spec 2026-07-16 decision 6). */}
       {COMING_TILES.length > 0 && (
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {COMING_TILES.map((t) => (
-            <span
-              key={t.label}
-              title={`${t.blurb} (coming soon)`}
-              className="cursor-default rounded-full border border-white/10 bg-white/[0.02] px-2.5 py-1 text-[10px] text-white/30"
-            >
-              {t.label}
-            </span>
-          ))}
-        </div>
+        <p className="mt-2.5 text-[11px] leading-snug text-white/30">
+          Coming soon: {COMING_TILES.map((t) => t.label).join(", ")}
+        </p>
       )}
     </section>
   );
