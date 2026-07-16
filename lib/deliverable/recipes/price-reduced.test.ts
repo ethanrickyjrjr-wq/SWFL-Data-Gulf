@@ -642,6 +642,9 @@ describe("the build-level wiring — the chart fills when sourced, drops cleanly
     };
     const doc = (await buildPriceReduced(ctx(facts)))!;
     const chartBlock = doc.blocks.find((b) => b.type === "image" && b.props.kind === "chart");
-    expect(chartBlock).toBeUndefined(); // dropEmptyChartSlot removed the never-reserved slot
+    // No reduction -> priceCutKicker is "" -> buildLifecycleEmail's `middle` is [] -> the
+    // slot was never reserved at all (dropEmptyChartSlot has nothing to find here; the
+    // reserve-then-drop path is what the "no chart" fixtures above this block exercise).
+    expect(chartBlock).toBeUndefined();
   });
 });
