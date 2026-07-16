@@ -1,3 +1,39 @@
+## 2026-07-16 (Sonnet 5 · main) — SteadyAPI social-listening: 3 parallel research sweeps filed (110 live calls), 2 new vendor quirks folded in.
+
+Operator: unused SteadyAPI monthly quota, "run it over and over on constant problems and find
+solutions on Reddit... new implementations... data collection and not having data go missing."
+Confirmed `PHOTOS_API` live (probe call, 200) before spending anything, then dispatched 3 parallel
+background agents against the established `docs/steadyapi-research/` track:
+
+1. `2026-07-16-round5-recurring-problems-solutions.md` (round 5, 21 Reddit calls) — checks
+   ledger + cron-failure log + SESSION_LOG filtered to what's social-listening-answerable.
+   Settles a scheduled-campaign automation trust boundary (agents trust it for the "boring
+   middle," distrust it the moment a client-facing send has no human review — backs keeping the
+   pre-send edit gate non-negotiable), price-cut/DOM as a motivation signal not a valuation
+   signal, first-person FL insurance-departure testimony.
+2. `2026-07-16-new-implementations-ux-sweep.md` (42 Reddit calls, went wider than the 07/08
+   email/design sweeps into assistant/map/comp/onboarding). Codebase-probed every candidate
+   first — killed 2 false positives (Showing Prep Packet, per-project chat persistence already
+   built). Surviving: public listing-scoped chat with a hard agent hand-off (verified vs
+   AskListing.com $49/mo), a pre-conversation client-preference "Brief" (verified vs Granola.ai),
+   a standalone provenance/audit-trail panel. Found 2 new Reddit vendor quirks (trailing-slash-
+   sensitive subreddit URLs; content-filter can be a persistent per-URL block, not just
+   transient) — folded into `docs/vendor-notes/INSTAGRAM-SOCIAL-STEADY.md`.
+3. `2026-07-16-data-reliability-and-sourcing-sweep.md` (47 calls + 4 crawl4ai fetches) —
+   grounded in our own incidents first (`leepa-parcels-annual` never once completing on GHA,
+   `source_totals` writing 0 rows silently) before researching externally. Fixes: dead-man's-
+   switch heartbeat for fetches that can hang against a bot-wall, 3-bucket failure taxonomy
+   (failed/bad-data/never-ran), per-load schema fingerprint diffing. New sources (each
+   crawl4ai-verified live): FL OIR Residential Market Share (ZIP+county insurance pricing), FL
+   DOE school grades, Redfin Migration Patterns (vendor already ingested, this product line isn't).
+
+`docs/steadyapi-research/README.md` index updated (one edit, after all 3 landed, to avoid the
+agents racing each other on a shared file). Also found and reverted a spurious `.gitignore`
+addition (5 lines that would've excluded these exact files + itself from tracking — not requested,
+root cause not identified, cleaned up before staging). Left an unrelated file from a concurrent
+session (`2026-07-16-realtor-full-scope-audit.md`) and its own round-5 entry untouched — commit
+only what this session owns. Next: operator reviewing the 3 files for a build-priority pass.
+
 ## 2026-07-16 (Sonnet 5 · main) — HuggingFace + launch-tooling deep dive filed: HF is not a usable SWFL data source (verdict, 4 search angles), but surfaces two real anti-hallucination/factuality-scoring adopt-candidates (Vectara HHEM-2.1-Open, promptfoo) plus n8n (ops alerting) + programmatic-SEO methodology. 3 checks opened.
 
 Operator: "huggingface seems to have tons of data and resources," deep dive with crawl4ai for data

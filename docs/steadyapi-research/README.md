@@ -44,6 +44,34 @@ API-integration build track. See the inventory below for where the rest lives.
   per-client-subdomain send-on-behalf, DBPR RE_rgn7.csv as the free weekly agent-name spine
   (no emails), Brandfetch/logo.dev as the brand-at-scale lanes. Q5 cadence: 5th empty search —
   decided from pinned 07/02 evidence. Also the source of the 403-default-UA vendor quirk.
+- `2026-07-16-round5-recurring-problems-solutions.md` — round 5: 21 live Reddit calls against
+  recurring problems surfaced since round 4 (checks ledger + cron-failure log + SESSION_LOG,
+  filtered to what's genuinely social-listening-answerable). Settles a trust boundary for
+  scheduled-campaign automation (r/RealEstateTechnology: agents trust automation for the "boring
+  middle," distrust it the moment a client-facing send has no human in the loop — backs keeping
+  the pre-send edit gate non-negotiable), price-cut/days-on-market as a motivation signal not a
+  valuation signal, and first-person Florida insurance-driven-departure testimony. Two searches
+  (permit-history dealbreaker language, email-gating resentment) came up empty — logged so they
+  aren't re-run blind.
+- `2026-07-16-new-implementations-ux-sweep.md` — net-new territory: ~42 live Reddit calls mining
+  the AI-assistant/chat, map/dashboard, comp-tooling, onboarding, and notification surfaces
+  (deliberately NOT re-covering the 07/08 email/design sweeps). Codebase-probed every candidate
+  before writing it down — two would-be findings turned out already built (Showing Prep Packet,
+  per-project chat persistence) and were dropped. Tier 1: public listing-scoped chat with a hard
+  agent hand-off (verified vs AskListing.com, $49/mo), a pre-conversation client-preference
+  "Brief" (verified vs Granola.ai), a standalone provenance/audit-trail panel distinct from inline
+  citations. Also the source of two new Reddit vendor quirks (trailing-slash-sensitive subreddit
+  URLs, content-filter as persistent per-URL block not just transient) — folded into the vendor
+  note above.
+- `2026-07-16-data-reliability-and-sourcing-sweep.md` — new track: grounded first in our own
+  failure history (`leepa-parcels-annual` never once completing on GHA, cron-rebuild-failures.md,
+  the open checks ledger) before researching externally. Part A (avoiding silent data loss): a
+  dead-man's-switch heartbeat pattern for fetches that can hang against a bot-wall, a 3-bucket
+  failure taxonomy (failed / completed-with-bad-data / never-ran), per-load schema/structural
+  fingerprint diffing. Part B (new SWFL sources, each crawl4ai-verified live): Florida OIR
+  Residential Market Share reports (ZIP+county insurance pricing), Florida DOE school grades, and
+  Redfin's already-ingested-vendor-but-unpulled Migration Patterns product line. 47 live SteadyAPI
+  calls + 4 crawl4ai verification fetches.
 - `2026-07-16-self-marketing-social-listening-round5.md` — round 5: a different question from
   rounds 1-4 — not outreach TO agents, but how SWFL Data Gulf builds its OWN organic presence.
   13 live calls across Reddit/Instagram/Twitter. Settles: Instagram (#swflrealestate 211K/

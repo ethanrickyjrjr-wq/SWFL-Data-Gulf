@@ -987,6 +987,25 @@ Note: user timeline endpoints take `user_id` (numeric), not username — resolve
   error: r/Naples → r/Naples_FL. If a known-active subreddit comes back nearly empty, check for a
   redirect notice and refetch at the canonical name.
 
+**07/16/2026 (~42 real calls — new-implementations/UX sweep,
+`docs/steadyapi-research/2026-07-16-new-implementations-ux-sweep.md`):**
+- **NEW — `/v1/reddit/posts?url=` needs a trailing slash on SOME subreddit URLs.**
+  `https://www.reddit.com/r/CommercialRealEstate` (no trailing slash) 200'd with
+  `{"success": false, "message": "Please enter a valid subReddit URL."}` on two consecutive calls;
+  adding the trailing slash (`.../r/CommercialRealEstate/`) succeeded immediately. Not a blanket
+  requirement — `r/realtors`, `r/RealEstateTechnology`, `r/PropTech`, `r/UXDesign`, `r/webdev`,
+  `r/SaaS` all worked fine without one this same session, so it plausibly trips on camelCase
+  subreddit names specifically. Cheap fix: always append a trailing slash on `/v1/reddit/posts`
+  calls — a no-op for names that don't need it, a fix for the ones that do.
+- **The `success:false` content-filter false-positive is not reliably fixed by a single immediate
+  retry.** Of ~15 individual `/v1/reddit/post` fetches this session, 6 came back `success:false` on
+  the standard immediate retry; 5 of those 6 then succeeded on a SECOND retry after a longer pause
+  (1.5-2s, not the ~400ms normal call spacing). One thread failed on THREE separate attempts spanning
+  several minutes and never returned real data — the first session-documented case of this behaving
+  as a persistent per-URL block rather than a transient flake. Updated guidance: retry with
+  increasing backoff (not just one immediate retry), and treat a URL that still fails after 3 tries
+  as a genuine dead end, not a client bug.
+
 ## 🤖 ScrapeFlow — generic scraper
 
 - `POST /v1/scraper` — SteadyAPI's general-purpose scraping endpoint (their "ScrapeFlow" product). Fallback lane for social surfaces they don't have dedicated endpoints for (e.g. TikTok, Facebook, LinkedIn — none of which have dedicated SteadyAPI sections as of 07/05/2026).
