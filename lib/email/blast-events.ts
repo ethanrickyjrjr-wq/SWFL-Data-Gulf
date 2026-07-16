@@ -32,7 +32,7 @@ export interface BlastWebhookAction {
 /** The slice of a Resend webhook payload we read (outbound email.* events). */
 export interface ResendWebhookPayload {
   type?: string;
-  data?: { email_id?: string; tags?: Record<string, string> };
+  data?: { email_id?: string; broadcast_id?: string; tags?: Record<string, string> };
 }
 
 /**
@@ -41,6 +41,40 @@ export interface ResendWebhookPayload {
  * (i.e. it's an outreach `rid` or weekly-read `wid` send, or untagged/inbound).
  * Pure.
  */
+/** Broadcast events → the email_events vocabulary. Only the CHECK-constraint
+ *  events are recorded (migrations/20260628_email_events.sql); `complained`
+ *  maps to `unsubscribed` (the constraint has no complained value), everything
+ *  else (delivery_delayed, received, …) is dropped. */
+const BROADCAST_EVENT_MAP: Record<string, string> = {
+  "email.sent": "sent",
+  "email.delivered": "delivered",
+  "email.opened": "opened",
+  "email.clicked": "clicked",
+  "email.bounced": "bounced",
+  "email.complained": "unsubscribed",
+};
+
+/**
+ * A SCHEDULED-broadcast engagement event (hub mission-control Task 12): Resend
+ * emits per-recipient email.* events for Broadcast sends carrying
+ * `data.broadcast_id` and NO did/rid/wid tag (those route to their own
+ * branches). The webhook resolves broadcast_id → email_sends.schedule_id →
+ * email_schedules.deliverable_id so scheduled campaigns accrue the same
+ * stored, deduped rows manual blasts already get. Pure.
+ */
+export function extractBroadcastEvent(payload: ResendWebhookPayload): {
+  broadcastId: string;
+  emailId: string;
+  event: string;
+} | null {
+  const event = BROADCAST_EVENT_MAP[payload.type ?? ""];
+  const data = payload.data;
+  if (!event || !data?.email_id || !data?.broadcast_id) return null;
+  const tags = data.tags ?? {};
+  if (tags["did"] || tags["rid"] || tags["wid"]) return null;
+  return { broadcastId: data.broadcast_id, emailId: data.email_id, event };
+}
+
 export function extractBlastAction(payload: ResendWebhookPayload): BlastWebhookAction | null {
   const did = payload.data?.tags?.["did"];
   if (!did) return null;

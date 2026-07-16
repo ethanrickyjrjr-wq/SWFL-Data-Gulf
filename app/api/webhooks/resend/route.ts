@@ -27,6 +27,7 @@ import {
 import { extractOutreachAction, type ResendWebhookPayload } from "@/lib/email/outreach/lifecycle";
 import {
   extractBlastAction,
+  extractBroadcastEvent,
   type ResendWebhookPayload as BlastWebhookPayload,
 } from "@/lib/email/blast-events";
 import { onDemoEvent, type DemoStage } from "@/lib/email/outreach/demo-cadence";
@@ -320,6 +321,48 @@ export async function POST(request: Request): Promise<Response> {
       { ok: true, kind: "blast", event: blastAction.event },
       { status: 200 },
     );
+  }
+
+  // ── Scheduled-broadcast engagement → email_events (hub mission-control) ────
+  // Broadcast sends carry no did tag; resolve broadcast_id → email_sends →
+  // email_schedules.deliverable_id so scheduled campaigns accrue the same
+  // stored, deduped engagement rows manual blasts already get (the campaigns
+  // dashboard reads both identically). NO early return: like the ma-engagement
+  // branch above, a non-matching or unresolvable event falls through unchanged
+  // (e.g. the campaign-click alert already handled clicks; this branch is the
+  // general per-event ledger and they key off the same broadcast_id).
+  const broadcastEvent = extractBroadcastEvent(event as unknown as BlastWebhookPayload);
+  if (broadcastEvent) {
+    try {
+      const sdb = createServiceRoleClient();
+      const { data: sendRow } = await sdb
+        .from("email_sends")
+        .select("user_id, schedule_id")
+        .eq("broadcast_id", broadcastEvent.broadcastId)
+        .maybeSingle();
+      if (sendRow?.user_id && sendRow.schedule_id != null) {
+        const { data: sch } = await sdb
+          .from("email_schedules")
+          .select("deliverable_id")
+          .eq("id", sendRow.schedule_id)
+          .maybeSingle();
+        if (sch?.deliverable_id) {
+          await sdb.from("email_events").upsert(
+            {
+              resend_email_id: broadcastEvent.emailId,
+              did: sch.deliverable_id,
+              user_id: sendRow.user_id,
+              event: broadcastEvent.event,
+            },
+            { onConflict: "resend_email_id,event", ignoreDuplicates: true },
+          );
+        }
+      }
+    } catch (err) {
+      console.error(
+        `[resend-webhook] broadcast engagement failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
   const db = createServiceRoleClient();

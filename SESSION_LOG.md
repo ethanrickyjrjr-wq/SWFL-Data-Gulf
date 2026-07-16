@@ -17,6 +17,17 @@ provider tokens NOT stored by Supabase (capture at callback if needed); NN/g: se
 one legit wizard case, must be brief/skippable/resumable/explain-why. Phases: P1 spine,
 P2 wizard+import, P3 login. NEXT: operator spec review → writing-plans → implementation.
 
+## 2026-07-16 (Fable 5 · main) — Task 12 SHIPPED (operator "Yes"): scheduled-broadcast engagement → email_events
+
+Operator approved the gated task. `extractBroadcastEvent` in lib/email/blast-events.ts (pure:
+broadcast_id + email_id, no did/rid/wid tag; sent/delivered/opened/clicked/bounced pass,
+complained→unsubscribed per the CHECK constraint, delivery_delayed/received dropped; 4 new
+tests, 16/16 file-green) + webhook branch after the blast branch (NO early return, mirrors
+ma-engagement): broadcast_id → email_sends.schedule_id → email_schedules.deliverable_id →
+email_events upsert on the same (resend_email_id,event) dedupe. Scheduled campaigns accrue
+open/click rates from the NEXT send onward; history stays honest dates-only. `bunx next build`
+green. Forward-only, no backfill possible (Resend doesn't replay old events unprompted).
+
 ## 2026-07-16 (Fable 5 · main) — addendum: build-queue synced for hub mission-control (line added, ⬜ operator live-verify + gated Task 12)
 
 ## 2026-07-16 (Fable 5 · main) — /doctor cleanup: skill listing was ~5× over its routing budget; CLAUDE.md rules-of-engagement block now points at its one root

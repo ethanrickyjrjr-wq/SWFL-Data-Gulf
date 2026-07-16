@@ -111,3 +111,48 @@ describe("extractBlastAction", () => {
     ).toEqual({ did: "dlv-abc", emailId: "re_1", event: "opened" });
   });
 });
+
+// ── extractBroadcastEvent (hub mission-control Task 12, 07/16/2026) ─────────
+import { extractBroadcastEvent } from "./blast-events";
+
+describe("extractBroadcastEvent", () => {
+  const base = (over: Record<string, unknown>) => ({
+    type: "email.opened",
+    data: { email_id: "re_1", broadcast_id: "bc_1", tags: {}, ...over },
+  });
+
+  it("maps a broadcast open through; complained maps to unsubscribed", () => {
+    expect(extractBroadcastEvent(base({}))).toEqual({
+      broadcastId: "bc_1",
+      emailId: "re_1",
+      event: "opened",
+    });
+    expect(extractBroadcastEvent({ ...base({}), type: "email.complained" })?.event).toBe(
+      "unsubscribed",
+    );
+  });
+
+  it("maps sent/delivered/clicked/bounced; drops untracked types", () => {
+    for (const [type, event] of [
+      ["email.sent", "sent"],
+      ["email.delivered", "delivered"],
+      ["email.clicked", "clicked"],
+      ["email.bounced", "bounced"],
+    ] as const) {
+      expect(extractBroadcastEvent({ ...base({}), type })?.event).toBe(event);
+    }
+    expect(extractBroadcastEvent({ ...base({}), type: "email.received" })).toBeNull();
+    expect(extractBroadcastEvent({ ...base({}), type: "email.delivery_delayed" })).toBeNull();
+  });
+
+  it("returns null for did/rid/wid-tagged events (they route to their own branches)", () => {
+    expect(extractBroadcastEvent(base({ tags: { did: "d1" } }))).toBeNull();
+    expect(extractBroadcastEvent(base({ tags: { rid: "r1" } }))).toBeNull();
+    expect(extractBroadcastEvent(base({ tags: { wid: "w1" } }))).toBeNull();
+  });
+
+  it("returns null without a broadcast_id or email_id", () => {
+    expect(extractBroadcastEvent(base({ broadcast_id: undefined }))).toBeNull();
+    expect(extractBroadcastEvent(base({ email_id: undefined }))).toBeNull();
+  });
+});
