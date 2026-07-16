@@ -23,17 +23,22 @@
 // chrome tests below pin it back onto the shared spine; campaign-coherence.test.ts is
 // the cross-recipe oracle.
 //
-// Fully offline: the Anthropic client and the photo mirror are stubbed, so this suite
-// makes ZERO network calls and costs nothing to run.
+// Fully offline: the Anthropic client, the photo mirror, and the comp-helper
+// (compsForAddress, Task 10's wiring) are all stubbed, so this suite makes ZERO
+// network calls and costs nothing to run. The comp-helper default returns no comps,
+// so every fixture here reserves-then-drops its chart slot; wiring-specific chart
+// assertions (comps present, coherence, image fill) belong to a later suite.
 
 import { test, expect, mock, afterAll, describe } from "bun:test";
 import * as realAnthropic from "@/refinery/agents/anthropic.mts";
 import * as realMirror from "@/lib/media/hero-photo";
+import * as realCompHelper from "@/lib/assistant/comp-helper";
 import { RECIPES } from "@/lib/deliverable/recipes";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import type { RecipeBuildContext } from "./index";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
+import type { RenderComp } from "@/lib/assistant/comp-helper";
 
 /** The known-good fixture — the LIVE 07/13/2026 resolve of the acceptance subject
  *  (326 Shore Dr, Fort Myers, FL 33905). Every value is the vendor record's own.
@@ -64,6 +69,7 @@ const NARRATIVE = "A three-bedroom home on a quarter-acre lot.";
 const ORIG = {
   "@/refinery/agents/anthropic.mts": { ...realAnthropic },
   "@/lib/media/hero-photo": { ...realMirror },
+  "@/lib/assistant/comp-helper": { ...realCompHelper },
 };
 afterAll(() => {
   for (const [path, orig] of Object.entries(ORIG)) mock.module(path, () => orig);
@@ -87,8 +93,18 @@ mock.module("@/lib/media/hero-photo", () => ({
   ...realMirror,
   mirrorHeroPhoto: async (u: string) => u,
 }));
+// The wiring under test (Task 10) makes buildPriceReduced call compsForAddress. Every
+// test in this file that builds SHORE_DR (isPriceReduced: true) now reserves a chart
+// slot, so this default keeps the WHOLE suite offline: empty comps -> priceVsAreaDotSpec
+// returns null (fewer than 2 comparable homes) -> the slot is dropped, never filled.
+// Wiring-specific chart assertions (comps present, coherence, image fill) are Task 11's.
+mock.module("@/lib/assistant/comp-helper", () => ({
+  ...realCompHelper,
+  compsForAddress: async () => ({ comps: [], asOf: "07/16/2026", needs: [] }),
+}));
 
-const { buildPriceReduced, previousPrice, priceCutKicker } = await import("./price-reduced");
+const { buildPriceReduced, previousPrice, priceCutKicker, priceVsAreaDotSpec } =
+  await import("./price-reduced");
 const { renderEmailDocHtml } = await import("@/lib/email/render-email-doc");
 const { defaultDoc } = await import("@/lib/email/doc/default-docs");
 
@@ -497,4 +513,62 @@ describe("the sendable email (renderEmailDocHtml — what the recipient actually
     expect(html).not.toContain("Previous Price"); // the cell is unsourced → dropped
     expect(html).toContain("$595,000"); // the honest current ask still ships
   });
+});
+
+// ── THE CHART: the new price's $/sq ft vs. real nearby comps ────────────────────
+
+const comp = (price: number, sqft: number): RenderComp => ({
+  addressLine: "1 A St",
+  city: "Fort Myers",
+  beds: 3,
+  baths: 2,
+  sqft,
+  status: "sold",
+  price,
+  priceKind: "sold",
+  priceDate: "2026-01-01",
+  sourceUrl: null,
+});
+
+test("priceVsAreaDotSpec returns null with fewer than 2 comparable homes", () => {
+  const facts = {
+    address: "1 Main St, Fort Myers, FL 33905",
+    price: "$500,000",
+    sqft: "2000",
+  } as never;
+  expect(priceVsAreaDotSpec(facts, [comp(400000, 2000)])).toBeNull();
+});
+
+test("priceVsAreaDotSpec returns null with no subject price or sqft", () => {
+  const facts = { address: "1 Main St, Fort Myers, FL 33905", sqft: "2000" } as never;
+  expect(priceVsAreaDotSpec(facts, [comp(400000, 2000), comp(420000, 2100)])).toBeNull();
+});
+
+test("priceVsAreaDotSpec plots the subject's $/sqft against the comp median, on the dot-plot frame", () => {
+  const facts = {
+    address: "1 Main St, Fort Myers, FL 33905",
+    price: "$400,000",
+    sqft: "2000",
+  } as never;
+  const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000)]); // 220, 230 $/sqft
+  expect(spec).not.toBeNull();
+  expect(spec!.frameId).toBe("dot-plot");
+  expect((spec!.options as { data: { value: number; reference?: number }[] }).data[0].value).toBe(
+    200,
+  ); // 400000/2000
+  expect(
+    (spec!.options as { data: { value: number; reference?: number }[] }).data[0].reference,
+  ).toBe(225); // median(220,230)
+});
+
+test("priceVsAreaDotSpec filters out vacant-lot comps (no beds/sqft) before computing the median", () => {
+  const facts = {
+    address: "1 Main St, Fort Myers, FL 33905",
+    price: "$400,000",
+    sqft: "2000",
+  } as never;
+  const vacantLot: RenderComp = { ...comp(139800, 0), beds: null, sqft: null };
+  const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000), vacantLot]);
+  expect(spec).not.toBeNull();
+  expect((spec!.options as { data: { reference?: number }[] }).data[0].reference).toBe(225); // unaffected by the lot
 });

@@ -75,10 +75,22 @@ import {
   clearNarrativeSlots,
   dropEmptyChartSlot,
   fillNarrative,
+  isComparableHome,
+  median,
+  perSqft,
 } from "./shared";
+import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
+import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
+import {
+  assertHeroChartCoherence,
+  chartMagnitudeFromSpec,
+} from "@/lib/deliverable/chart-coherence";
+import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
+import { createBlock } from "@/lib/email/doc/default-docs";
 import type { RecipeBuildContext } from "./index";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
+import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 
 /** The digits of a money string → a number. "$104,975" → 104975. Anything that isn't
  *  a positive finite number → undefined, and every cell that depended on it becomes
@@ -106,6 +118,61 @@ export function previousPrice(facts: ListingFacts): string | undefined {
   const cut = money(facts.priceReduction);
   if (current === undefined || cut === undefined) return undefined;
   return usd(current + cut);
+}
+
+/** How many real comps to require before charting a reference — one point is not a
+ *  market, it's a coincidence. Matches the honest-evidence floor used elsewhere in
+ *  this recipe set (buildPriceCase requires >=1 priced comp; a reference computed
+ *  from ONE comp is too thin to call a market position, so this recipe asks for 2). */
+const MIN_COMPS_FOR_CHART = 2;
+
+/** How many nearby comps to pull before filtering. Mirrors market-comps.ts's COMP_POOL:
+ *  pull more than we need because the vacant-lot filter (isComparableHome) eats some. */
+const COMP_POOL = 12;
+
+/**
+ * The new price's $/sq ft vs. the median $/sq ft of real nearby comparable homes — one
+ * value, one reference, on the already-registered `dot-plot` frame (no new chart-
+ * rendering code). Pure: no I/O, invents nothing. Comps are used ONLY to compute this
+ * chart — this function's caller must NEVER hand `comps` to the narrator (see
+ * `buildPriceReduced`'s own header: the narrator holds zero market data, by design,
+ * specifically to prevent it inventing a reason the price moved).
+ *
+ * Null when there's no defensible reference: fewer than MIN_COMPS_FOR_CHART real
+ * comparable homes, or the subject itself has no price or sqft. `dropEmptyChartSlot`
+ * (shared.ts) removes the reserved slot when this returns null — never an empty box.
+ */
+export function priceVsAreaDotSpec(facts: ListingFacts, comps: RenderComp[]): ChartSpec | null {
+  const subjectPrice = money(facts.price);
+  const subjectSqft = money(facts.sqft);
+  const subjectPpsf = perSqft(subjectPrice ?? null, subjectSqft ?? null);
+  if (subjectPpsf == null) return null;
+
+  const comparable = comps.filter(isComparableHome);
+  const referencePpsf = median(
+    comparable.map((c) => perSqft(c.price, c.sqft)).filter((v): v is number => v != null),
+  );
+  if (referencePpsf == null || comparable.length < MIN_COMPS_FOR_CHART) return null;
+
+  const street = facts.address?.split(",")[0]?.trim() || "This home";
+  return {
+    frameId: "dot-plot",
+    title: "The new price vs. nearby comparable homes",
+    columns: ["Row", "$/Sq Ft"],
+    rows: [
+      [street, subjectPpsf],
+      ["Comparable homes (median)", referencePpsf],
+    ],
+    value_format: "usd",
+    chart_type: "scatter",
+    asOf: new Date().toISOString().slice(0, 10),
+    source: { citation: "SWFL Data Gulf · realtor.com", url: "https://www.realtor.com" },
+    options: {
+      data: [{ label: street, value: subjectPpsf, reference: referencePpsf }],
+      referenceLabel: "nearby comparable homes (median $/sq ft)",
+      valueLabel: "this home, new price",
+    },
+  };
 }
 
 /**
@@ -204,6 +271,20 @@ function priceStripFootnote(facts: ListingFacts, previous?: string): string | un
   return line.startsWith("*") ? line : `*${line}`;
 }
 
+/** Fill the reserved chart slot IN PLACE (preserving its grid position). Mirrors the
+ *  same private helper in market-comps.ts — a generic block-filler, not extracted, since
+ *  it carries no business rule (unlike isComparableHome/perSqft/median, Task 8). */
+function fillChartSlot(doc: EmailDoc, url: string, alt: string, caption: string): EmailDoc {
+  return {
+    ...doc,
+    blocks: doc.blocks.map((b) =>
+      b.type === "image" && b.props.kind === "chart" && !b.props.url
+        ? { ...b, props: { ...b.props, url, alt, caption } }
+        : b,
+    ),
+  };
+}
+
 export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailDoc | null> {
   const { facts, currentDoc } = ctx;
   // No subject → there is no price to have improved. Fall through to the generic
@@ -237,9 +318,29 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
     specs: priceStrip(facts, previous),
     specFootnote: priceStripFootnote(facts, previous),
 
-    // NO MIDDLE. No chart (declared on the key): was-and-now is TWO BARS, which is a
-    // fact wearing a chart costume — so we wrote the fact instead (the kicker, the hero,
-    // the anchor cell). No comps bar either: this email is about a HOUSE, not a market.
+    // A reduction reserves ONE chart slot — where the NEW price sits against real
+    // nearby comps (priceVsAreaDotSpec, filled below, in place, after the async comp
+    // fetch). The was/now comparison stays a written fact, not a chart (two bars from
+    // the SAME house is still a fact wearing a chart costume) — this is a DIFFERENT,
+    // additional argument: the new price against the market. No reduction → no slot:
+    // there is no price argument to make on a listing with no sourced cut.
+    middle: kicker
+      ? [
+          {
+            block: {
+              id: createBlock("image").id,
+              type: "image",
+              props: {
+                url: "",
+                kind: "chart",
+                alt: "The new price vs. nearby comparable homes",
+                caption: "",
+              },
+            },
+            height: 6,
+          },
+        ]
+      : [],
 
     // The narrative is authored BELOW, and only from a real descriptive source. An empty
     // string here is an OPEN SLOT: an instruction on the canvas, absent from the email.
@@ -255,9 +356,32 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
     ctaUrl: facts.sourceUrl,
   });
 
-  // NO CHART. The chrome emits none, so this is a no-op today; it is the policy stated in
-  // code, and it guards a chart slot ever arriving from anywhere. An empty chart box is
-  // worse than no chart.
+  // ── THE CHART: where the new price sits against real nearby comps. Comps are used
+  // ONLY to compute this chart — NEVER handed to the narrator below, which stays
+  // exactly as constrained as it has always been (zero market data, so it can never
+  // invent a reason the price moved). A chart is a bonus, never a blocker: any miss
+  // here (no comps, incoherent chart, fetch failure) simply drops the reserved slot.
+  if (kicker && facts.address) {
+    const result = await compsForAddress(facts.address, { topN: COMP_POOL }).catch(() => null);
+    const spec = priceVsAreaDotSpec(facts, result?.comps ?? []);
+    if (spec) {
+      const coherence = assertHeroChartCoherence({
+        hero: resolveHeadlineFigure(doc),
+        chart: chartMagnitudeFromSpec(spec),
+      });
+      if (coherence.coherent) {
+        const accent = doc.globalStyle.accentColor || "#B98F45";
+        const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
+        const key = `email-charts/price-reduced-${facts.zip ?? "swfl"}-${spec.asOf}-${tint}.png`;
+        const image = await chartSpecToEmailImage(spec, accent, key).catch(() => null);
+        if (image) doc = fillChartSlot(doc, image.url, image.alt, "");
+      } else {
+        console.log("[price-reduced] dropped incoherent chart:", coherence.reason);
+      }
+    }
+  }
+  // Nothing resolved (no reduction, no comps, incoherent) → drop the slot. An empty
+  // chart box is worse than no chart.
   doc = dropEmptyChartSlot(doc);
 
   // Clear FIRST and UNCONDITIONALLY — `fillNarrative` SKIPS a text block that already has
