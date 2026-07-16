@@ -59,12 +59,15 @@ export function findPlaceholder(
 }
 
 /** The recipe needs the brand blob doesn't fill (empty/whitespace = missing).
- *  Thin delegate over the ledger — kept for its narrower BrandNeed[] shape. */
+ *  Thin delegate over the ledger for WHAT counts as missing — but the result
+ *  keeps the CALLER's needs order (this function's original contract; the
+ *  ledger's own output is registry-ordered). */
 export function brandGaps(
   needs: readonly BrandNeed[],
   branding: Record<string, string>,
 ): BrandNeed[] {
-  return ledgerGaps(branding, needs).map((s) => s.key as BrandNeed);
+  const missing = new Set(ledgerGaps(branding, needs).map((s) => s.key));
+  return needs.filter((k) => missing.has(k));
 }
 
 /** A headshot is an upload the Brand panel owns — it can't be typed into a popup,
@@ -73,7 +76,8 @@ export function typableGaps(
   needs: readonly BrandNeed[],
   branding: Record<string, string>,
 ): BrandNeed[] {
-  return typableProfileGaps(branding, needs).map((s) => s.key as BrandNeed);
+  const missing = new Set(typableProfileGaps(branding, needs).map((s) => s.key));
+  return needs.filter((k) => missing.has(k));
 }
 
 /**
