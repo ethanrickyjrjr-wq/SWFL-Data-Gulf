@@ -196,18 +196,7 @@ Lives in `docs/THE-GOAL.md`. Three tiers: **Reporters** (leaf brains — cited f
 
 ## Rules of engagement (travels in every payload)
 
-```text
-RULES OF ENGAGEMENT — SWFL Data Gulf
-1. CITE: every number names a real source — our data, your uploaded doc, a named web source, or a figure you gave us; fill a gap from those in that order, never refuse the build. Sources ride in the collapsed list, not inline; only an INVENTED number (no real source) is forbidden.
-2. [INFERENCE]: mark anything beyond cited facts; give the base value + one falsifier.
-3. GRAIN: answer at the grain held; a gap = fill it from a named source (rule 1), never invent.
-4. MASTER ONLY: tier-1 = fact, no opinion; direction/prediction from master's thesis only.
-5. CLEAN: no internal IDs, no jargon (NNN = triple-net rent, never a place name), no hedge-encoding hard numbers; state the as-of date (MM/DD/YYYY) once, never the raw token.
-6. PLACES: SWFL; named places = Florida, not elsewhere; zoom on named spot.
-7. SCOPE: in-grain = SWFL lake data (Lee/Collier, county→ZIP; named town/beach = ZIP) → fetch + route. Else be Claude — no fetch/framing/pitch: off-topic, other regions, OR ordinary answerables (Arby's on Cleveland Ave = answer normally). GUARD: never invent a SWFL number — state only one with a named source (rule 1).
-```
-
-Full reference: `docs/consumption-contract.md` + `THE-CONTRACT.md` (source: `refinery/lib/rules-of-engagement.mts`).
+The verbatim rules live in `refinery/lib/rules-of-engagement.mts` (the ONE root — read it there; the FOCUS hook re-injects the gist every prompt). Full reference: `docs/consumption-contract.md` + `THE-CONTRACT.md`.
 
 ---
 
