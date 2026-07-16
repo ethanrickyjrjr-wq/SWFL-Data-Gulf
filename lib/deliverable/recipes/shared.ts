@@ -81,6 +81,31 @@ export const FAVORABLE_FRAMING_POLICY =
   `up as enthusiasm instead of a market claim.\n` +
   `</favorable_framing_policy>`;
 
+import type { RenderComp } from "@/lib/assistant/comp-helper";
+
+/** A comp is a HOME iff the vendor gave us beds AND sqft AND a price. Anything else is
+ *  bare land (or unpriced) and can never sit on a chart beside a house. Extracted here
+ *  (copy #2 — was private in market-comps.ts, price-reduced.ts needs the same rule)
+ *  per "one authority per shared concept". */
+export function isComparableHome(c: RenderComp): boolean {
+  return c.beds != null && c.sqft != null && c.sqft > 0 && c.price != null && c.price > 0;
+}
+
+/** Price ÷ square feet, rounded. Null unless BOTH parts are real (never back-solved). */
+export function perSqft(price: number | null, sqft: number | null): number | null {
+  if (price == null || sqft == null || sqft <= 0) return null;
+  const v = Math.round(price / sqft);
+  return Number.isFinite(v) && v > 0 ? v : null;
+}
+
+/** The median of a numeric set. Even count → the mean of the two middle values. */
+export function median(values: number[]): number | null {
+  if (values.length === 0) return null;
+  const s = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2);
+}
+
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com";
 
 /** The resolved subject house, plus whether the vendor actually matched it. */

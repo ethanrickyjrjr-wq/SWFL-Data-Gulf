@@ -112,3 +112,23 @@ test("authorListingNarrative's system prompt includes FAVORABLE_FRAMING_POLICY v
   await authorListingNarrative({ address: "1 Main St", price: "$500,000", beds: 3 } as never);
   expect(capturedSystem).toContain(policy);
 });
+
+import { isComparableHome, perSqft, median } from "./shared";
+
+test("isComparableHome requires beds, sqft, and price all present and positive", () => {
+  expect(isComparableHome({ beds: 3, sqft: 2000, price: 400000 } as never)).toBe(true);
+  expect(isComparableHome({ beds: null, sqft: 2000, price: 400000 } as never)).toBe(false);
+  expect(isComparableHome({ beds: 3, sqft: 0, price: 400000 } as never)).toBe(false);
+});
+
+test("perSqft divides and rounds; null unless both parts are real", () => {
+  expect(perSqft(400000, 2000)).toBe(200);
+  expect(perSqft(null, 2000)).toBeNull();
+  expect(perSqft(400000, 0)).toBeNull();
+});
+
+test("median: odd count returns the middle, even count averages the two middle", () => {
+  expect(median([1, 3, 2])).toBe(2);
+  expect(median([1, 2, 3, 4])).toBe(3); // (2+3)/2 rounded
+  expect(median([])).toBeNull();
+});

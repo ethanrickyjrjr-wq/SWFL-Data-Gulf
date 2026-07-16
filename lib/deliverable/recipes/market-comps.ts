@@ -107,6 +107,9 @@ import {
   dropEmptyChartSlot,
   fillNarrative,
   FAVORABLE_FRAMING_POLICY,
+  isComparableHome,
+  median,
+  perSqft,
 } from "./shared";
 import type { RecipeBuildContext } from "./index";
 import type { EmailBlock, EmailDoc, ListItem, StatItem } from "@/lib/email/doc/types";
@@ -123,20 +126,6 @@ const MAX_COMPS = 6;
  *  for free. Verified live 07/13/2026: 12 nearby → 11 homes + 1 vacant lot. */
 const COMP_POOL = 12;
 
-/** A comp is a HOME iff the vendor gave us beds AND sqft AND a price. Anything else is
- *  bare land (or unpriced) and can never sit on a chart beside a house. THIS FILTER IS
- *  THE RECIPE'S LOAD-BEARING RULE — see the header. */
-function isComparableHome(c: RenderComp): boolean {
-  return c.beds != null && c.sqft != null && c.sqft > 0 && c.price != null && c.price > 0;
-}
-
-/** Price ÷ square feet, rounded. Null unless BOTH parts are real (never back-solved). */
-function perSqft(price: number | null, sqft: number | null): number | null {
-  if (price == null || sqft == null || sqft <= 0) return null;
-  const v = Math.round(price / sqft);
-  return Number.isFinite(v) && v > 0 ? v : null;
-}
-
 /** Parse a verbatim vendor string ("$595,000", "2847") to a number. 0 → null. */
 function num(s?: string): number | null {
   const n = Number((s ?? "").replace(/[^\d.]/g, ""));
@@ -149,14 +138,6 @@ const usd = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
 function mdy(iso: string | null): string | undefined {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? "");
   return m ? `${m[2]}/${m[3]}/${m[1]}` : undefined;
-}
-
-/** The median of a numeric set. Even count → the mean of the two middle values. */
-function median(values: number[]): number | null {
-  if (values.length === 0) return null;
-  const s = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(s.length / 2);
-  return s.length % 2 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2);
 }
 
 /** What the price actually IS — never dressed as a sale it was not. The chat lane's
