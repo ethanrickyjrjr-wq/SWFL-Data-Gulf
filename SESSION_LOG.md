@@ -1,3 +1,21 @@
+## 2026-07-16 (Fable 5 · main) — cockpit fix executed: hub is now the SAME room as the in-project pages (unpushed, operator to verify on :3299)
+
+Executed `docs/handoff/2026-07-16-projects-cockpit-rejected-fix-handoff.md` in full, 3 commits
+(01cd769f, 35745be6, 241d6af8): `projectEntry()` is the one open-project URL authority; the REAL
+ToolSwitcher renders on the hub aimed at the selected project (accepts id:null, activeTool returns
+null outside the project); the rail renders on the hub too (never disappears), scrollbar-gutter
+fixed, kebab → ConfirmDeleteProject directly; hub body rebuilt as the labs' exact frame — main
+title strip + grouped list center, email-lab aside chrome right (✦ AI assistant header, Start a
+campaign, Contacts, Running now); ProjectPanel.tsx + RowMenu.tsx DELETED (their duplicate
+Email/Social/⋯ buttons with them); PageShell dropped, full-bleed like [id]. Verified live on a
+prod build (:3299, still serving for operator review): signed-out 307 ✓, hub ⇄ Del Prado email-lab
+round trip with rail/pills/aside constant ✓, Email pill reopens the saved doc (?did=…) ✓,
+315 lib/project tests + `bunx next build` green. Also NEW `.claude/skills/one-room/SKILL.md` —
+the in-app chrome law (reuse neighbors' chrome verbatim, one action one home, taste skills are for
+marketing pages only); answer to "do we need design skills installed" is no — crawled
+anthropics/skills (RULE 0.4): nothing there encodes OUR chrome, the local skill does.
+`projects_cockpit_live_verify` stays open pending operator + deploy. NOT pushed.
+
 ## 2026-07-16 (Sonnet 5 · main) — listed_date persisted off the sold-probe response, zero new SteadyAPI calls (closes check steadyapi_persist_listed_date)
 
 `ingest/pipelines/listing_lifecycle/{extract_api,transitions,distill,pipeline}.py`: re-verified
