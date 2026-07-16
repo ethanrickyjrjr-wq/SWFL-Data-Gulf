@@ -101,6 +101,7 @@ describe("pastedLinkComp — gate order (fetch-free by construction)", () => {
       price: 650000,
       priceKind: "last_list",
       priceDate: null,
+      soldInDays: null, // a scraped ask is not a sale — no closed spell
       // The user-pasted page, verbatim (lane-4 link — carried since 07/11/2026).
       sourceUrl: LINK,
     });
