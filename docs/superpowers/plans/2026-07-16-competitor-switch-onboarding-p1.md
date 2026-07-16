@@ -80,11 +80,19 @@ ALTER TABLE public.build_usage ENABLE ROW LEVEL SECURITY;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.build_usage TO service_role;
 
 CREATE OR REPLACE FUNCTION public.increment_build_count(p_user_id uuid, p_day date, p_n integer)
-RETURNS void LANGUAGE sql SECURITY DEFINER AS $$
+RETURNS void LANGUAGE sql SECURITY DEFINER SET search_path = '' AS $$
   INSERT INTO public.build_usage (user_id, day, build_count)
   VALUES (p_user_id, p_day, p_n)
   ON CONFLICT (user_id, day) DO UPDATE SET build_count = public.build_usage.build_count + p_n;
 $$;
+-- PostgREST exposes functions to any role with EXECUTE; default is PUBLIC.
+-- Metering is service-role-only (spec §6) — close the default-open grant.
+REVOKE EXECUTE ON FUNCTION public.increment_build_count(uuid, date, integer) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.increment_build_count(uuid, date, integer) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.increment_build_count(uuid, date, integer) TO service_role;
+
+ALTER TABLE public.build_usage DROP CONSTRAINT IF EXISTS build_count_nonnegative;
+ALTER TABLE public.build_usage ADD CONSTRAINT build_count_nonnegative CHECK (build_count >= 0);
 
 NOTIFY pgrst, 'reload schema';
 COMMIT;
