@@ -1,3 +1,23 @@
+## 2026-07-16 (Fable 5 · main, late) — Issue 001 distribution + beta tease layered onto the launch plan; editor's issue architecture committed
+
+Same session as the desk visit, evening extension. (1) Operator handed the pen on the July issue —
+nine editorial devices added to `_FABLE5/collection/2026-07.md` §6 (Issue 001 numbering, The Tape,
+the papers-vs-ledger fact-check franchise, One Community By Name, The Watch,
+preregistered-falsifier ledger, receipts closer, voice calibration, one-thesis discipline) —
+commit `f73293ed`. (2) Operator: figure out the best socials/Reddit/IG drop for the Insider, tease
+beta (free month or two for feedback), determine how far off full use is; SteadyAPI authorized as
+needed. Probed first (RULE 0.5): tonight's `2026-07-16-marketing-launch-plan.md` + round-5
+listening already answer the channel questions — so NO SteadyAPI calls burned re-asking them;
+instead a dated addendum on the launch plan maps the Insider onto the existing funnel (Tape→IG
+cards in the I2 whitespace, fact-check chart→r/dataisbeautiful reusing the flagship-chart
+obligation, ONE R2-style build-in-public local post carrying the beta ask, issue page ships
+first), sketches the beta offer (capped founding-reader seats, feedback-is-the-pitch), seeds the
+readiness audit (hypothesis: builds usable now, content days away, SEND motion the far edge), and
+queues 3 NEW SteadyAPI targets for tomorrow (agent-professional subs, SWFL agent-influencer graph,
+post-timing). Checks opened: `insiders_issue001_distribution`, `beta_readiness_and_offer` (+
+earlier tonight `insiders_construction_yoy_series`, `news_capture_index_page_junk`). Left
+untouched: concurrent session's uncommitted `ingest/cadence_registry.yaml`.
+
 ## 2026-07-16 (Sonnet 5 · main) — round-5 synthesis spec: cross-read 4 other parallel sessions' SteadyAPI sweeps, dependency-mapped + sequenced, 13 new checks opened.
 
 Operator: "git ignore and spec." The gitignore half was a false alarm — a concurrent session's

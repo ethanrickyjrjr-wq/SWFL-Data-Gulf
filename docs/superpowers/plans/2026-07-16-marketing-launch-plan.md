@@ -170,3 +170,66 @@ punchlist's sake:
 - Does not recommend paid X access.
 - Does not build a new blog CMS before testing whether `/r/` report pages can carry the same
   weight.
+
+---
+
+## Addendum 07/16/2026 (late) — Insiders Issue 001 as the drop + beta tease
+
+Operator directive tonight: figure out the best way to drop the Insiders Edition on
+socials/Reddit/Instagram groups; tease or encourage beta testing with feedback in exchange for a
+free month or two; determine how far off full use is. SteadyAPI authorized as needed. This
+addendum extends the plan above — same funnel, the Insider becomes the flagship content atom.
+
+### Why the Insider changes the content plan
+
+The issue architecture (`_FABLE5/collection/2026-07.md` §6) produces, monthly and as a
+by-product, exactly the assets the channel table above needs — no separate content pipeline:
+
+- **The Tape → Instagram.** 12–15 sourced one-line numbers per issue = a carousel or
+  single-stat card series for #swflrealestate / #fortmyersrealestate / #napleshomes — the
+  211K/60.7K/52.5K-post hashtag pool where finding I2 shows ZERO market-data content today.
+  Branded PNGs via `render-social-image.ts`, hand-posted (Phase 0 reality).
+- **The fact-check franchise → Reddit, split by audience.** r/dataisbeautiful gets the CHART
+  (July: the bifurcation tier-divergence viz — this can BE the flagship `[OC]` chart already
+  tracked as `marketing_flagship_dataviz_chart`; one asset serves both obligations). The local
+  subs get ONE humble build-in-public post per the R2 lesson ("I built a data desk for SWFL and
+  its first issue says the papers have the story half-right — roast it"), never a product
+  announcement.
+- **The issue page is the only link destination.** Every drop points at the canonical issue page
+  (which carries subscribe capture) — never a PDF, never the homepage.
+- **Sequencing rule: the issue ships first.** No teaser goes up before Issue 001's page is live.
+  Every channel drop is a pointer at a real artifact, not a coming-soon.
+
+### The beta tease (design sketch — operator is still mulling; nothing publishes without sign-off)
+
+- Frame: founding-reader/beta seats, capped and numbered like the issue itself — full access
+  free for a month or two in exchange for structured feedback. Scarcity mirrors the
+  limited-edition framing (seat count = operator decision, not set here).
+- Where the ask rides: (a) the /insiders subscribe confirmation, (b) the one local-sub
+  build-in-public post, (c) the issue's receipts closer. Never as a standalone promo post.
+- The R2/R4 evidence says the beta ask WORKS as "tell me what's wrong with it" and dies as
+  "sign up for my product" — the feedback request is the pitch, the free month is the thanks.
+
+### How far off is full use? (audit seeds — verify, don't trust this sketch)
+
+Hypotheses to test in the readiness audit, from today's estate: the BUILD experience is already
+usable by outsiders (builds free, watermark only — locked); the CONTENT lane (Issue 001) is
+days away, gated on compose + operator approvals; the SEND motion is the far edge (payments not
+wired, domain-verify UI missing, several send-path live-verifies open, insiders author never run
+live). If that holds, the honest beta shape TODAY is concierge: beta readers get the issue +
+builds + us running sends for them, feedback calls in return — not self-serve full use. Filed as
+`beta_readiness_and_offer`; punch list lands there, not here.
+
+### Tomorrow's SteadyAPI listening targets (new questions only — don't re-run round 5)
+
+1. **Agent-professional subreddits** — r/realtors, r/RealEstateTechnology, r/CRE and siblings:
+   round 5 covered resident subs + r/dataisbeautiful but never the subs where the CUSTOMER
+   talks shop. Question: does market-data content land there, and how is self-promo policed?
+2. **SWFL agent-influencer graph on Instagram** — `/users/search` + `/similar-accounts` walks
+   from the top #swflrealestate accounts: who holds the audience, whose comment sections are
+   worth being genuinely useful in. Output: a named account list for engagement, not for DM spam.
+3. **Post-timing/engagement patterns** on the three target hashtags (taken_at + like_count over
+   a sample) — when the pool actually engages, to time the Tape drops.
+
+Checks opened tonight (RULE 2.4): `insiders_issue001_distribution` ·
+`beta_readiness_and_offer`.
