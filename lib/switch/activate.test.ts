@@ -4,12 +4,12 @@
  * fields and TTL, duplicate-key handling (23505), and generic error handling.
  */
 import { describe, test, expect } from "bun:test";
-import { activateSwitchPass, SWITCH_PASS_DAYS } from "./activate";
+import { activateSwitchPass, SWITCH_PASS_DAYS, MIN_SWITCH_IMPORT } from "./activate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/database.types";
 
 describe("activateSwitchPass", () => {
-  test("contactsImported < 25 → below_minimum, no insert", async () => {
+  test("contactsImported < MIN_SWITCH_IMPORT → below_minimum, no insert", async () => {
     const insertedRows: unknown[] = [];
     const mockDb = {
       from: (_table: string) => ({
@@ -23,14 +23,14 @@ describe("activateSwitchPass", () => {
     const result = await activateSwitchPass(mockDb, "user123", {
       lane: "oauth_extraction",
       platform: "google",
-      contactsImported: 24,
+      contactsImported: MIN_SWITCH_IMPORT - 1,
     });
 
     expect(result).toEqual({ activated: false, reason: "below_minimum" });
     expect(insertedRows).toHaveLength(0);
   });
 
-  test("contactsImported = 25 → activated true, insert with correct fields and TTL", async () => {
+  test("contactsImported = MIN_SWITCH_IMPORT → activated true, insert with correct fields and TTL", async () => {
     const insertedRows: unknown[] = [];
     const mockDb = {
       from: (_table: string) => ({
@@ -45,7 +45,7 @@ describe("activateSwitchPass", () => {
     const result = await activateSwitchPass(mockDb, "user123", {
       lane: "oauth_extraction",
       platform: "google",
-      contactsImported: 25,
+      contactsImported: MIN_SWITCH_IMPORT,
       detail: { source: "test" },
     });
 
@@ -57,7 +57,7 @@ describe("activateSwitchPass", () => {
     expect(inserted.tier).toBe("starter");
     expect(inserted.source_lane).toBe("oauth_extraction");
     expect(inserted.platform).toBe("google");
-    expect(inserted.contacts_imported).toBe(25);
+    expect(inserted.contacts_imported).toBe(MIN_SWITCH_IMPORT);
     expect(inserted.proof).toEqual({ source: "test" });
 
     // Verify expires_at is ~60 days from now (between 59 and 61 days)
@@ -68,7 +68,7 @@ describe("activateSwitchPass", () => {
     expect(diffDays).toBeLessThan(1); // within 1 day
   });
 
-  test("contactsImported 26 → activated true, insert proceeds", async () => {
+  test("contactsImported > MIN_SWITCH_IMPORT → activated true, insert proceeds", async () => {
     const insertedRows: unknown[] = [];
     const mockDb = {
       from: (_table: string) => ({
@@ -82,7 +82,7 @@ describe("activateSwitchPass", () => {
     const result = await activateSwitchPass(mockDb, "user456", {
       lane: "forwarded_email",
       platform: "apple",
-      contactsImported: 26,
+      contactsImported: MIN_SWITCH_IMPORT + 1,
     });
 
     expect(result).toEqual({ activated: true });

@@ -2,7 +2,7 @@
 // THE ONE place a Switch Pass is granted. Server-side only (service role):
 // proof is a verified migration, never a client claim. Spec §1–2.
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/database.types";
+import type { Database, Json } from "@/database.types";
 
 export const MIN_SWITCH_IMPORT = 25;
 export const SWITCH_PASS_DAYS = 60;
@@ -11,7 +11,7 @@ export interface SwitchProof {
   lane: "oauth_extraction" | "forwarded_email";
   platform: string;
   contactsImported: number;
-  detail?: Record<string, unknown>;
+  detail?: Json;
 }
 
 export async function activateSwitchPass(
