@@ -39,12 +39,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // Public SELECT — verify ownership before mutating.
   const { data: deliverable } = await supabase
     .from("deliverables")
-    .select("user_id")
+    .select("user_id, template")
     .eq("id", id)
     .maybeSingle();
   if (!deliverable) return NextResponse.json({ error: "not found" }, { status: 404 });
   if (deliverable.user_id !== user.id)
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
+
+  // Emails never restyle in place: an "email" renders through the scope-bound
+  // grounded spine and a "block-canvas" (Email Lab) renders from its EmailDoc —
+  // neither rebuilds from (template, narrative, items_snapshot), so swapping the
+  // column would degrade the shared frozen /p/[id] and strand the doc (mirrors
+  // the edit route's email-boundary guard).
+  if (deliverable.template === "email" || deliverable.template === "block-canvas")
+    return NextResponse.json({ error: "cannot restyle an email deliverable" }, { status: 400 });
 
   const svc = createServiceRoleClient();
   const { error } = await svc.from("deliverables").update({ template }).eq("id", id);

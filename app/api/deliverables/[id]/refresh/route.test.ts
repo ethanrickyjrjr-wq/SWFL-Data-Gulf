@@ -106,6 +106,13 @@ test("corrupted template → 422", async () => {
   expect((await POST(makeReq(), { params })).status).toBe(422);
 });
 
+test("block-canvas (Email Lab) source → 422, never forked — a fork here would drop its doc", async () => {
+  scenario.deliverable = { ...baseDeliverable, template: "block-canvas" };
+  const res = await POST(makeReq(), { params });
+  expect(res.status).toBe(422);
+  expect(scenario.lastAssembleOpts).toBeNull();
+});
+
 test("forks a new version with supersedes_id = source id, inheriting template/scope", async () => {
   const res = await POST(makeReq(), { params });
   expect(res.status).toBe(200);

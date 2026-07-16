@@ -69,10 +69,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // COSMETIC — single in-place update, no new row, no LLM.
   if (plan.mode === "cosmetic") {
-    // Frozen-link integrity: an email deliverable renders through a scope-bound path,
-    // so swapping its template in place would silently break a shared /p/[id]. (The
+    // Frozen-link integrity: an email deliverable renders through a scope-bound path
+    // and a block-canvas (Email Lab) email renders from its EmailDoc, so swapping
+    // either's template in place would silently break a shared /p/[id]. (The
     // non-email→email direction is already rejected in planDeliverableEdit.)
-    if (plan.patch.template !== undefined && src.template === "email")
+    if (
+      plan.patch.template !== undefined &&
+      (src.template === "email" || src.template === "block-canvas")
+    )
       return NextResponse.json(
         { error: "cannot change an email deliverable's template" },
         { status: 400 },
@@ -87,6 +91,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   // CONTENT — fork a new gated version. Merge the changed inputs over the source row.
+  // Block-canvas (Email Lab) rows regenerate through the doc lane (update-doc /
+  // materials refresh), never this narrative fork — assembleDeliverable carries no
+  // `doc`, so the forked head would supersede the email with a doc-less report.
+  if (src.template === "block-canvas")
+    return NextResponse.json({ error: "this email is edited in the Email Lab" }, { status: 400 });
   const template: TemplateId = (plan.template ?? src.template) as TemplateId;
   if (!isTemplateId(template))
     return NextResponse.json({ error: "invalid template" }, { status: 422 });

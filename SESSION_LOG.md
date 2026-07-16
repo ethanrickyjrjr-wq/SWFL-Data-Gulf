@@ -1,3 +1,25 @@
+## 2026-07-16 (Fable 5 · main) — block-canvas doc-strand class FIXED at edit/restyle; refresh claim REFUTED (check closed)
+
+Probed check `deliverable_refresh_drops_blockcanvas_doc` — REFUTED as written: `isTemplateId`
+(lib/deliverable/assemble.ts:30) has NEVER admitted block-canvas in any branch (`git log --all -S`
+empty; runtime-verified false), so /api/deliverables/[id]/refresh 422s it before any fork — the
+claimed doc-dropping fork can't happen. Misread was type-vs-runtime: "block-canvas" IS in the
+TemplateId TYPE union (templates.ts:97), NOT in the DELIVERABLE_TEMPLATES runtime set. The
+materials/[did]/refresh doc lane carries `doc` on its fork; all 7 block-canvas insert sites set
+`doc`; build/action/templates-run/MCP lanes all gate or fall back. BUT the sweep found the SAME
+CLASS live in two in-place lanes and one fork lane, all fixed (TDD, 5 RED → GREEN):
+(1) /api/deliverables/[id]/restyle had NO source-template guard — an owner could flip a
+block-canvas (or email) row to a report template IN PLACE, stranding the EmailDoc and degrading
+the shared frozen /p/[id]; now 400s both sources. (2) edit route cosmetic lane guarded only an
+"email" source — block-canvas + {template} flipped in place the same way; guard extended.
+(3) edit route content lane: block-canvas + explicit template override forked a doc-less report
+head OVER the email (this was the check's described failure, one route over); now 400
+"edited in the Email Lab". Tripwire added in edit-plan.test.ts against the REAL runtime set
+(route tests mock isTemplateId) so re-adding block-canvas to DELIVERABLE_TEMPLATES fails loud.
+No UI flow hit the holes (TemplateSwitcher renders only on report pages; workspace edit modal
+retired) — API-reachable only. 940 deliverable-area tests green, `bunx next build` clean.
+Check closed. Next: nothing open on this; competitor-switch P1 plan still queued.
+
 ## 2026-07-16 (Fable 5 · main) — competitor-switch onboarding PLANNED: 13-task P1 plan, code-probed seams
 
 Plan `docs/superpowers/plans/2026-07-16-competitor-switch-onboarding-p1.md` written off the

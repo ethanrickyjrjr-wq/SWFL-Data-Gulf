@@ -215,3 +215,32 @@ test("changing an email deliverable's template in place is rejected → 400", as
   expect(res.status).toBe(400);
   expect(scenario.lastUpdate).toBeNull();
 });
+
+test("cosmetic template swap on a block-canvas source is rejected → 400 (doc would be stranded)", async () => {
+  scenario.deliverable = { ...baseDeliverable, template: "block-canvas" };
+  const res = await POST(makeReq({ template: "one-pager" }), { params });
+  expect(res.status).toBe(400);
+  expect(scenario.lastUpdate).toBeNull();
+});
+
+test("content edit on a block-canvas source is rejected → 400 even with a template override", async () => {
+  scenario.deliverable = { ...baseDeliverable, template: "block-canvas" };
+  const items = [{ id: "i1", added_at: "x", origin: "web", kind: "note", text: "hi" }];
+  const res = await POST(makeReq({ items, template: "one-pager" }), { params });
+  expect(res.status).toBe(400);
+  expect(scenario.lastAssembleOpts).toBeNull(); // never forked — the fork carries no doc
+});
+
+test("content edit on a block-canvas source without an override → 400 (doc-lane message, not 422)", async () => {
+  scenario.deliverable = { ...baseDeliverable, template: "block-canvas" };
+  const res = await POST(makeReq({ instruction: "steer" }), { params });
+  expect(res.status).toBe(400);
+  expect(scenario.lastAssembleOpts).toBeNull();
+});
+
+test("cosmetic branding-only on a block-canvas source stays allowed (inert for the doc render)", async () => {
+  scenario.deliverable = { ...baseDeliverable, template: "block-canvas" };
+  const res = await POST(makeReq({ branding: { primary_color: "#0a0" } }), { params });
+  expect(res.status).toBe(200);
+  expect(scenario.lastUpdate).toEqual({ branding: { primary_color: "#0a0" } });
+});

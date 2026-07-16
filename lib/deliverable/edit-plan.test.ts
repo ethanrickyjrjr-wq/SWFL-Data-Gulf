@@ -1,5 +1,6 @@
 import { test, expect } from "bun:test";
 import { planDeliverableEdit, type EditPlan } from "./edit-plan";
+import { isTemplateId } from "./assemble";
 
 test("empty body → noop", () => {
   expect(planDeliverableEdit({}).mode).toBe("noop");
@@ -43,6 +44,19 @@ test("'email' is rejected as an edit target (scope-bound render path)", () => {
     status: 400,
     error: "invalid template",
   } as EditPlan);
+});
+
+// TRIPWIRE — real runtime set, not the type union. "block-canvas" is in the
+// TemplateId TYPE but must stay OUT of DELIVERABLE_TEMPLATES: the narrative lanes
+// (build/refresh/edit-fork) never carry a `doc`, so admitting it would fork
+// doc-less copies of Email Lab emails. If you're here to add it, wire the doc
+// lane (update-doc / materials refresh) instead.
+test("'block-canvas' is rejected as an edit target — Email Lab docs are doc-lane only", () => {
+  expect(planDeliverableEdit({ template: "block-canvas" }).mode).toBe("invalid");
+});
+
+test("isTemplateId('block-canvas') is false at runtime (type union ≠ runtime set)", () => {
+  expect(isTemplateId("block-canvas")).toBe(false);
 });
 
 test("invalid branding (string / array) → invalid 400", () => {
