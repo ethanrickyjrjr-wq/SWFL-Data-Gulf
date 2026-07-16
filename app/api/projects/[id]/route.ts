@@ -70,6 +70,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
   if ("title" in body) update.title = typeof body.title === "string" ? body.title : null;
   if ("branding" in body) update.branding = body.branding ?? null;
+  // Capture-or-blank (spec 2026-07-16): the subject a template build captured —
+  // banked so it is never asked twice. Trimmed; empty/non-string clears to null.
+  if ("subject_address" in body) {
+    update.subject_address =
+      typeof body.subject_address === "string" && body.subject_address.trim()
+        ? body.subject_address.trim()
+        : null;
+  }
+  if ("subject_area" in body) {
+    update.subject_area =
+      typeof body.subject_area === "string" && body.subject_area.trim()
+        ? body.subject_area.trim()
+        : null;
+  }
   // Piece 1: per-project UI/agent state bag (collapse, mcp dismiss count, …).
   // Object-only; additive keys are merged client-side then PATCHed whole.
   if ("ui_state" in body) {

@@ -327,6 +327,48 @@ export interface Database {
         };
         Relationships: [];
       };
+      campaign_click_events: {
+        Row: {
+          id: number;
+          user_id: string;
+          project_id: string;
+          schedule_id: number | null;
+          broadcast_id: string | null;
+          contact_email: string;
+          contact_name: string | null;
+          link: string | null;
+          clicked_at: string;
+          click_date: string | null;
+          alert_sent: boolean;
+        };
+        Insert: {
+          id: number;
+          user_id: string;
+          project_id: string;
+          schedule_id?: number | null;
+          broadcast_id?: string | null;
+          contact_email: string;
+          contact_name?: string | null;
+          link?: string | null;
+          clicked_at?: string;
+          click_date?: string | null;
+          alert_sent?: boolean;
+        };
+        Update: {
+          id?: number;
+          user_id?: string;
+          project_id?: string;
+          schedule_id?: number | null;
+          broadcast_id?: string | null;
+          contact_email?: string;
+          contact_name?: string | null;
+          link?: string | null;
+          clicked_at?: string;
+          click_date?: string | null;
+          alert_sent?: boolean;
+        };
+        Relationships: [];
+      };
       checks: {
         Row: {
           id: string;
@@ -347,6 +389,7 @@ export interface Database {
           proof: Json | null;
           airtable_record_id: string | null;
           airtable_synced_at: string | null;
+          class: string | null;
         };
         Insert: {
           id?: string;
@@ -367,6 +410,7 @@ export interface Database {
           proof?: Json | null;
           airtable_record_id?: string | null;
           airtable_synced_at?: string | null;
+          class?: string | null;
         };
         Update: {
           id?: string;
@@ -387,6 +431,7 @@ export interface Database {
           proof?: Json | null;
           airtable_record_id?: string | null;
           airtable_synced_at?: string | null;
+          class?: string | null;
         };
         Relationships: [];
       };
@@ -497,6 +542,7 @@ export interface Database {
           unsubscribed: boolean;
           created_at: string;
           attribs: Json;
+          updated_at: string;
         };
         Insert: {
           id?: string;
@@ -508,6 +554,7 @@ export interface Database {
           unsubscribed?: boolean;
           created_at?: string;
           attribs?: Json;
+          updated_at?: string;
         };
         Update: {
           id?: string;
@@ -519,6 +566,7 @@ export interface Database {
           unsubscribed?: boolean;
           created_at?: string;
           attribs?: Json;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -2754,6 +2802,7 @@ export interface Database {
           watch_sqft: number | null;
           watch_price: number | null;
           watch_price_is_estimate: boolean;
+          subject_area: string | null;
         };
         Insert: {
           id: string;
@@ -2781,6 +2830,7 @@ export interface Database {
           watch_sqft?: number | null;
           watch_price?: number | null;
           watch_price_is_estimate?: boolean;
+          subject_area?: string | null;
         };
         Update: {
           id?: string;
@@ -2808,6 +2858,7 @@ export interface Database {
           watch_sqft?: number | null;
           watch_price?: number | null;
           watch_price_is_estimate?: boolean;
+          subject_area?: string | null;
         };
         Relationships: [];
       };

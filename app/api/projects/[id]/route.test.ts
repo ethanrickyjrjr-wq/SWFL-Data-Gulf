@@ -127,3 +127,27 @@ test("PATCH without property_url leaves the column untouched", async () => {
   expect(res.status).toBe(200);
   expect(scenario.captured && "property_url" in scenario.captured).toBe(false);
 });
+
+// ── capture-or-blank (spec 2026-07-16): subject_address / subject_area ───────
+
+test("PATCH subject_address and subject_area save trimmed, empties → null", async () => {
+  const res = await PATCH(req("PATCH", { subject_address: " 123 Palm Ave ", subject_area: "  " }), {
+    params,
+  });
+  expect(res.status).toBe(200);
+  expect(scenario.captured?.subject_address).toBe("123 Palm Ave");
+  expect(scenario.captured?.subject_area).toBeNull();
+});
+
+test("PATCH subject_area saves trimmed", async () => {
+  const res = await PATCH(req("PATCH", { subject_area: " Cape Coral " }), { params });
+  expect(res.status).toBe(200);
+  expect(scenario.captured?.subject_area).toBe("Cape Coral");
+});
+
+test("PATCH without subject fields leaves them untouched", async () => {
+  const res = await PATCH(req("PATCH", { title: "renamed" }), { params });
+  expect(res.status).toBe(200);
+  expect(scenario.captured && "subject_address" in scenario.captured).toBe(false);
+  expect(scenario.captured && "subject_area" in scenario.captured).toBe(false);
+});
