@@ -17,22 +17,19 @@ SOLD_CHECK_CAP = int(os.environ.get("SOLD_CHECK_CAP", "8"))
 # Neutral internal source identity (no vendor name in the table; the brain CITES the real source).
 API_SOURCE_NAME = "api_feed"
 
-# Enumeration seed: query the APIs by city, then self-label every row by its API-returned county FIPS
-# (so a city that bleeds into a neighbor county lands under the right county). v1 = Lee + Collier;
-# widening is just adding cities here — no code change (capture wide).
-# Hendry added 2026-07-02 (operator call, reversing the 07/01 Lee+Collier-only decree): probe proved
-# field parity (LaBelle meta.total=817, Clewiston 349; property_id/price/lat-lon/county_fips/photo/
-# status/flags 100% filled; beds/sqft 42-81% = land-heavy rural mix the land heuristic already maps).
-# ~7 search calls/day for the whole county. LaBelle's page bleeds ~11% Glades (12043) rows — they
-# self-drop at the FIPS gate until Glades is deliberately added here.
-SWFL_CITY_SEED = {
-    "Lee": [
-        "Cape Coral", "Fort Myers", "North Fort Myers", "Lehigh Acres",
-        "Bonita Springs", "Estero", "Fort Myers Beach", "Sanibel",
-    ],
-    "Collier": ["Naples", "Marco Island", "Golden Gate", "Immokalee", "Ave Maria"],
-    "Hendry": ["LaBelle", "Clewiston"],
-}
+# Enumeration seed — COUNTY-LEVEL (migrated 07/16/2026, check
+# steadyapi_migrate_city_seed_to_county_level; design in docs/handoff/
+# 2026-07-07-steadyapi-full-scope-handoff.md Finding 2). "Lee County" slugs to
+# "Lee-County_FL", which /search resolves directly — verified live 07/07/2026
+# (autocomplete slug_id) and re-probed live 07/16/2026: meta.total Lee 22,158 /
+# Collier 7,877 / Hendry 1,077, with every returned row's county_fips matching its
+# county (zero cross-bleed). One location per county replaces the retired 15-city
+# curated list (SWFL_CITY_SEED), which silently dropped unincorporated places —
+# ~4% of Lee's listings (Alva, Boca Grande, St. James City, Pine Island, Captiva…).
+# Rows still self-label by API-returned county FIPS; the IN_SCOPE_FIPS gate stays.
+# Widening scope = adding a county here (rentals/market_aggregates already use
+# county-level location strings — this closes the one pipeline that predated them).
+COUNTY_SEED = {"Lee": "Lee County", "Collier": "Collier County", "Hendry": "Hendry County"}
 
 # County FIPS we keep (the scope gate; everything else self-drops). 5-digit FL state+county.
 IN_SCOPE_FIPS = {"12071": "Lee", "12021": "Collier", "12051": "Hendry"}

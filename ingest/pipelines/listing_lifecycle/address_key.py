@@ -45,6 +45,28 @@ _CANON = {
 _UNIT = re.compile(r"\b(?:UNIT|APT|APARTMENT|STE|SUITE|#)\s*([A-Z0-9-]+)", re.I)
 
 
+def is_streetless(street: str) -> bool:
+    """True when the parsed street carries no digit at all — no house number, no identity.
+    These come from permalinks with no house-number token (bare city 'Fort-Myers_FL_33912_M…'
+    or bare street 'Buckingham-Rd_…'), typically unaddressed land."""
+    return not re.search(r"\d", street or "")
+
+
+def identity_key(property_id: str, zip_code: str) -> str:
+    """Fallback merge key for a street-less listing (07/16/2026, check
+    listing_state_streetless_address_key_collision). A street-less 'address' is not an
+    identity: every such listing in one city+ZIP collapsed onto ONE row and silently
+    overwrote its neighbors (732 street-less keys live in listing_state on 07/16/2026,
+    693 active). property_id is the identity the vendor actually hands us here. The 'L'
+    prefix keeps the key inside the existing grammar ([A-Z0-9]+:ZIP) while guaranteeing
+    no collision with an address-derived key, which always leads with the house number.
+    Trade-off vs the docstring above: an identity-keyed RELIST reads as a new spell
+    (property_id changes on relist) — accepted, because the alternative was losing the
+    listing entirely to a key collision."""
+    z = re.sub(r"[^0-9]", "", zip_code or "")[:5]
+    return f"L{property_id}:{z}"
+
+
 def address_key(street: str, zip_code: str) -> str:
     """Deterministic, collision-resistant-within-a-ZIP, stable-across-relists property key."""
     s = (street or "").upper()

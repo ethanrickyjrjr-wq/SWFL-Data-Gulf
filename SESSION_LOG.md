@@ -1,3 +1,32 @@
+## 2026-07-16 (Fable 5 · main, night) — failed-calls track: retry+degrade everywhere, county-seed migration landed, 3 data-loss checks root-caused
+
+Executed `docs/handoff/2026-07-16-failed-calls-and-readiness-handoff.md` (P0-A..P1-E). RULE 0.4
+crawl: docs.steadyapi.com live — 15 req/s global, 429 beyond, vendor recommends client retry, all
+real-estate endpoints weight 1, NO rate-limit headers (probe-confirmed). SHIPPED (committed, not
+pushed — operator gate): (1) `lib/listings/steadyapi.ts` bounded jittered retry (3×, 10s/attempt
+timeout) on 429/5xx/network + `onDegrade` seam; chat comp lane now says "briefly busy" instead of
+the false "no comps found" (`comp-helper.ts`); 27+2 tests. (2) `extract_api.py` per-page retry
+(4×, attempts counted in budget log) + `pipeline.py` partial-progress (incomplete steady-state
+scan lands scanned rows, absence never a departure; truncated seed still skips; sold budget
+skipped on degraded days; type sweeps skipped for empty cities). (3) COUNTY-SEED MIGRATION:
+`COUNTY_SEED` replaces `SWFL_CITY_SEED` (recovers ~4% dropped Lee listings), city derived from
+permalink slug, `_MAX_PAGES` 60→150; live-verified via Hendry dry-run (1,042 rows, guard green vs
+1,089, 20 calls) + 3-call county-slug probe (fips 100% clean, totals Lee 22,158/Collier
+7,877/Hendry 1,077). (4) `source_totals` 0-rows ROOT CAUSE: write gated on `not only_county`,
+every cron passes --county — moved into the loop, per-county. (5) Street-less key collisions:
+732 keys (693 active) — scans now mint `L<property_id>:<zip>` identity keys; old keys held out of
+diff; re-key migration DRAFTED `docs/sql/20260716_listing_state_streetless_rekey.sql` — RUN ONLY
+AFTER DEPLOY. (6) Stuck-buckets RE-SCOPED w/ lake evidence: 'residential' 2,696 = frozen pid-NULL
+holding legacy (purge candidate, no live harm); 'other' 1,599/1,673 ACTIVE + refreshed daily =
+vendor ceiling (manufactured not filterable), not a bug. 124 pytest + 181 bun tests green.
+HEADLINE for tomorrow's audit: scheduled burn ≈ 8.6–10.3k req/mo vs believed 10k cap — quota
+exhaustion is the prime 07/07-429 suspect; operator must read the steadyapi dashboard (exact ask
+in `docs/handoff/2026-07-16-failed-calls-findings.md`). Biggest tank win available: weekly
+type-sweep cache (~3.2k req/mo, ~35%). KNOWN RED: `bunx next build` broken on main by
+`factuality-grader.ts:17` (0ee9c623, other session holds the claim); my diff is tsc-clean.
+Checks: OPENED `steadyapi_failed_calls_post_deploy` (migration order + first-run watch + parent
+closes). Next: operator dashboard read → push → run re-key migration → watch first county runs.
+
 ## 2026-07-16 (Fable 5 · main) — factuality CI gate BUILT: promptfoo judge through the spend seam, 14/14 first calibration
 
 Resumed the promptfoo mid-brainstorm handoff; operator locked hybrid seam routing (new evidence:

@@ -5,6 +5,7 @@ import {
   normalizeResult,
   parseSoldEvent,
   fetchNearbyValues,
+  fetchPhotoListings,
   fetchSoldEvent,
   type RawNearbyProperty,
 } from "./steadyapi";
@@ -207,7 +208,10 @@ describe("fetchNearbyValues — empty-tolerant, never throws", () => {
     process.env.PHOTOS_API = "test-key";
     const out = await fetchNearbyValues(
       { lat: 26.6, lon: -81.9 },
-      { fetchImpl: (async () => new Response("nope", { status: 429 })) as unknown as typeof fetch },
+      {
+        fetchImpl: (async () => new Response("nope", { status: 429 })) as unknown as typeof fetch,
+        sleep: async () => {},
+      },
     );
     expect(out).toEqual([]);
   });
@@ -219,6 +223,118 @@ describe("fetchNearbyValues — empty-tolerant, never throws", () => {
       { fetchImpl: okFetch({ body: { properties: "not-an-array" } }) },
     );
     expect(out).toEqual([]);
+  });
+});
+
+describe("bounded retry — a single throttle can no longer zero a user-facing call", () => {
+  const seq = (...responses: (Response | Error)[]) => {
+    let i = 0;
+    const calls = { count: 0 };
+    const impl = (async () => {
+      calls.count++;
+      const r = responses[Math.min(i++, responses.length - 1)];
+      if (r instanceof Error) throw r;
+      // Response bodies are single-use — clone so a repeated tail entry stays readable.
+      return r.clone();
+    }) as unknown as typeof fetch;
+    return { impl, calls };
+  };
+  const ok = () => new Response(JSON.stringify(NEARBY_BODY), { status: 200 });
+  const noSleep = async () => {};
+
+  it("retries a 429 and succeeds on a later attempt", async () => {
+    process.env.PHOTOS_API = "test-key";
+    const { impl, calls } = seq(new Response("slow down", { status: 429 }), ok());
+    const delays: number[] = [];
+    const out = await fetchNearbyValues(
+      { lat: 26.6, lon: -81.9 },
+      {
+        fetchImpl: impl,
+        sleep: async (ms) => {
+          delays.push(ms);
+        },
+      },
+    );
+    expect(out).toHaveLength(1);
+    expect(calls.count).toBe(2);
+    expect(delays).toHaveLength(1);
+    expect(delays[0]).toBeGreaterThan(0);
+  });
+
+  it("gives up after 3 attempts on a persistent 429 and reports 'throttled'", async () => {
+    process.env.PHOTOS_API = "test-key";
+    const { impl, calls } = seq(new Response("slow down", { status: 429 }));
+    let degraded: string | null = null;
+    const out = await fetchNearbyValues(
+      { lat: 26.6, lon: -81.9 },
+      { fetchImpl: impl, sleep: noSleep, onDegrade: (r) => (degraded = r) },
+    );
+    expect(out).toEqual([]);
+    expect(calls.count).toBe(3);
+    expect(degraded).toBe("throttled");
+  });
+
+  it("does NOT retry a deterministic 4xx (403 = key/UA problem, not transient)", async () => {
+    process.env.PHOTOS_API = "test-key";
+    const { impl, calls } = seq(new Response("unauthorized", { status: 403 }));
+    let degraded: string | null = null;
+    const out = await fetchNearbyValues(
+      { lat: 26.6, lon: -81.9 },
+      { fetchImpl: impl, sleep: noSleep, onDegrade: (r) => (degraded = r) },
+    );
+    expect(out).toEqual([]);
+    expect(calls.count).toBe(1);
+    expect(degraded).toBeNull();
+  });
+
+  it("retries a thrown network error and succeeds", async () => {
+    process.env.PHOTOS_API = "test-key";
+    const { impl, calls } = seq(new Error("ECONNRESET"), ok());
+    const out = await fetchNearbyValues(
+      { lat: 26.6, lon: -81.9 },
+      { fetchImpl: impl, sleep: noSleep },
+    );
+    expect(out).toHaveLength(1);
+    expect(calls.count).toBe(2);
+  });
+
+  it("fetchSoldEvent gives up on persistent 5xx and reports 'upstream'", async () => {
+    process.env.PHOTOS_API = "test-key";
+    const { impl, calls } = seq(new Response("boom", { status: 503 }));
+    let degraded: string | null = null;
+    const out = await fetchSoldEvent("M5493101642", {
+      fetchImpl: impl,
+      sleep: noSleep,
+      onDegrade: (r) => (degraded = r),
+    });
+    expect(out).toBeNull();
+    expect(calls.count).toBe(3);
+    expect(degraded).toBe("upstream");
+  });
+
+  it("fetchPhotoListings rides the same retry path", async () => {
+    process.env.PHOTOS_API = "test-key";
+    const search = {
+      body: [
+        {
+          property_id: "1234567890",
+          price: { amount: 500000 },
+          photo_url: "https://cdn.example.com/p.jpg",
+          permalink: "1403-NE-19th-Ter_Cape-Coral_FL_33909_M54931-01642",
+        },
+      ],
+    };
+    const { impl, calls } = seq(
+      new Response("slow down", { status: 429 }),
+      new Response(JSON.stringify(search), { status: 200 }),
+    );
+    const out = await fetchPhotoListings(
+      { city: "Cape Coral" },
+      { fetchImpl: impl, sleep: noSleep },
+    );
+    expect(out).toHaveLength(1);
+    expect(out[0].photoUrl).toBe("https://cdn.example.com/p.jpg");
+    expect(calls.count).toBe(2);
   });
 });
 

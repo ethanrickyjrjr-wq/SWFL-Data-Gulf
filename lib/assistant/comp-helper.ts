@@ -19,6 +19,7 @@ import {
   fetchSoldEvent,
   type NearbyComp,
   type SoldEvent,
+  type SteadyDegradeReason,
 } from "@/lib/listings/steadyapi";
 import type { WelcomeSource } from "@/lib/welcome/frames";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
@@ -63,6 +64,19 @@ export interface CompDeps {
     status?: string;
     limit?: number;
   }) => Promise<NearbyComp[]>;
+  /** Like fetchNearby but reports WHY an empty came back, so the needs-ask can be
+   *  honest: a throttled/degraded call says "briefly unavailable", never the false
+   *  "no comps found". Wins over fetchNearby when both are set. The live default
+   *  wires fetchNearbyValues' onDegrade through. */
+  fetchNearbyTracked?: (opts: {
+    lat: number;
+    lon: number;
+    status?: string;
+    limit?: number;
+  }) => Promise<{
+    comps: NearbyComp[];
+    degraded: SteadyDegradeReason | null;
+  }>;
   fetchSold?: (propertyId: string) => Promise<SoldEvent | null>;
   /** Injectable clock so `asOf` is deterministic in tests. */
   now?: Date;
@@ -230,15 +244,37 @@ export async function compsForAddress(address: string, deps: CompDeps = {}): Pro
     );
   }
 
-  const fetchNearby =
-    deps.fetchNearby ?? ((o) => fetchNearbyValues({ ...o, status: o.status ?? "sold" }));
-  const nearby = await fetchNearby({ lat: geo.lat, lon: geo.lon, status: "sold", limit: 25 });
+  const fetchTracked =
+    deps.fetchNearbyTracked ??
+    (deps.fetchNearby
+      ? async (o: { lat: number; lon: number; status?: string; limit?: number }) => ({
+          comps: await deps.fetchNearby!(o),
+          degraded: null as SteadyDegradeReason | null,
+        })
+      : async (o: { lat: number; lon: number; status?: string; limit?: number }) => {
+          let degraded: SteadyDegradeReason | null = null;
+          const comps = await fetchNearbyValues(
+            { ...o, status: o.status ?? "sold" },
+            { onDegrade: (r) => (degraded = r) },
+          );
+          return { comps, degraded };
+        });
+  const { comps: nearby, degraded } = await fetchTracked({
+    lat: geo.lat,
+    lon: geo.lon,
+    status: "sold",
+    limit: 25,
+  });
   const surfaced = nearby.slice(0, deps.topN ?? 6);
   if (surfaced.length === 0) {
+    // A throttled/degraded empty is NOT "no comps exist" — saying so would be an
+    // invented fact about the market. Ask for a retry instead.
     return done(
       [],
       [
-        "I didn't find nearby comps at that point — want me to widen the search, or you can share any comps you already know?",
+        degraded
+          ? "The comp lookup is briefly busy — ask me again in a minute, or share any comps you already know."
+          : "I didn't find nearby comps at that point — want me to widen the search, or you can share any comps you already know?",
       ],
       geo.matchedAddress,
     );

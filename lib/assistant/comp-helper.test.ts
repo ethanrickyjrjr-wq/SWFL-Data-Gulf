@@ -54,6 +54,29 @@ function baseDeps(over: Partial<CompDeps> = {}): CompDeps {
   };
 }
 
+describe("throttle-honest empty (07/16/2026) — a degraded call never claims 'no comps'", () => {
+  it("says briefly-busy when the nearby call degraded (throttle/timeout)", async () => {
+    const out = await compHelper("comps near 1403 NE 19th Ter, Cape Coral", {
+      ...baseDeps(),
+      fetchNearby: undefined,
+      fetchNearbyTracked: async () => ({ comps: [], degraded: "throttled" }),
+    });
+    expect(out.comps).toEqual([]);
+    expect(out.needs.join(" ").toLowerCase()).toContain("briefly busy");
+    expect(out.needs.join(" ").toLowerCase()).not.toContain("didn't find");
+  });
+
+  it("keeps the honest 'didn't find' ask when the call succeeded but was empty", async () => {
+    const out = await compHelper("comps near 1403 NE 19th Ter, Cape Coral", {
+      ...baseDeps(),
+      fetchNearby: undefined,
+      fetchNearbyTracked: async () => ({ comps: [], degraded: null }),
+    });
+    expect(out.comps).toEqual([]);
+    expect(out.needs.join(" ").toLowerCase()).toContain("didn't find");
+  });
+});
+
 describe("RenderComp sourceUrl carry-through (functional link, 07/11/2026 unlock)", () => {
   it("carries each comp's captured sourceUrl; chat prose/citations stay untouched elsewhere", async () => {
     const url =

@@ -14,6 +14,7 @@ Run:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from datetime import date, datetime, timezone
 
@@ -21,7 +22,7 @@ from ingest.lib.guards import ContentContractError
 from ingest.quality.contracts import evaluate_batch
 from ingest.pipelines.listing_lifecycle import distill
 from ingest.pipelines.listing_lifecycle.distill import address_key_to_street
-from ingest.pipelines.listing_lifecycle.address_key import address_key
+from ingest.pipelines.listing_lifecycle.address_key import address_key, identity_key, is_streetless
 from ingest.pipelines.listing_lifecycle.coverage_guard import scan_is_complete
 from ingest.pipelines.listing_lifecycle.constants_api import API_SOURCE_NAME, SOLD_CHECK_CAP
 from ingest.pipelines.listing_lifecycle.extract import SWFL_COUNTIES, scan_county
@@ -39,6 +40,12 @@ from ingest.pipelines.listing_lifecycle.transitions import (
 # as is_seed — no catchup flip needed; the 298 stale lifecycle_seed Hendry rows stay inert history.
 API_COUNTIES = ["Lee", "Collier", "Hendry"]
 
+# An OLD street-less key: no digit before the colon (bare city/street name + ZIP). New identity
+# keys (L<property_id>) contain digits, real address keys lead with the house number — neither
+# matches. 732 such rows live in listing_state on 07/16/2026 (693 active), each one an amalgam
+# of every street-less listing that shared its city/street+ZIP.
+_OLD_STREETLESS_KEY = re.compile(r"^[A-Z]+:\d{5}$")
+
 
 def _keyed_scan(rows: list[dict]) -> dict[tuple[str, str], dict]:
     """Build the diff's `scanned` dict keyed on (address_key, sale_or_rent). Source B is the active
@@ -49,8 +56,17 @@ def _keyed_scan(rows: list[dict]) -> dict[tuple[str, str], dict]:
         # API rows carry their own listing_id (RentCast id / SteadyAPI property_id); the scrape rows
         # don't, so fall back to the composite (region:mls) source identity for those.
         r["listing_id"] = r.get("listing_id") or f"{r.get('mls_region')}:{r.get('mls')}"
-        ak = address_key(r.get("street_address") or "", r.get("zip_code") or "")
-        r["street_address"] = address_key_to_street(ak)
+        street = r.get("street_address") or ""
+        pid = r.get("property_id")
+        if is_streetless(street) and pid:
+            # No house number = no address identity: every street-less listing in one city+ZIP
+            # used to collapse onto ONE key and silently overwrite its neighbors (check
+            # listing_state_streetless_address_key_collision). Key on the vendor's property_id
+            # instead, and keep the parsed street text for display — this key is not an address.
+            ak = identity_key(str(pid), r.get("zip_code") or "")
+        else:
+            ak = address_key(street, r.get("zip_code") or "")
+            r["street_address"] = address_key_to_street(ak)
         out[(ak, r.get("sale_or_rent") or "sale")] = r
     return out
 
@@ -88,6 +104,20 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
     if plan_rows and source == "api":
         print(f"[plans] {len(plan_rows)} stale builder-plan rows held out of the diff "
               f"(no fabricated departures) — pending the purge", flush=True)
+    # ── Old street-less keys are INVISIBLE to the diff (same choreography as the plan rows). ──
+    # _keyed_scan now mints identity keys (L<property_id>) for street-less listings, so a prior
+    # row stored under an old street-less key (city/street name + ZIP, no digit before the colon)
+    # can never match a scanned key again — left in the diff, all ~693 active ones would read as
+    # departures on one day: fabricated churn. Held out until the one-time re-key migration
+    # (docs/sql/20260716_listing_state_streetless_rekey.sql, run AFTER this code deploys) moves
+    # them onto their identity keys; rows it can't re-key (property_id NULL) stay inert here.
+    if source == "api":
+        streetless_priors = [k for k in prior_all if _OLD_STREETLESS_KEY.match(k[0])]
+        for k in streetless_priors:
+            prior_all.pop(k)
+        if streetless_priors:
+            print(f"[streetless] {len(streetless_priors)} old street-less-keyed rows held out of "
+                  f"the diff — pending the re-key migration", flush=True)
     totals = {"scanned": 0, "upserts": 0, "transitions": 0, "source_total": 0}
     budget_calls = 0
     sold_budget_remaining = SOLD_CHECK_CAP  # paid /property-tax-history calls left this run (shared across counties)
@@ -102,6 +132,19 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
             result = scan_county_api(county, known_ids, dry_run=dry_run)
             budget_calls += result.get("search_calls", 0) + result.get("enrich_calls", 0)
             totals["source_total"] += result.get("source_total", 0)
+            # Ledger fix (07/16/2026, check source_totals_migration_apply): every SCHEDULED run
+            # passes --county (one county per cron: Lee 09, Collier 12, Hendry 15 UTC), so the
+            # old end-of-run `not only_county` guard made this write unreachable in production —
+            # the table sat at 0 rows. Log each county's own meta.total claim HERE, trusted scan
+            # or not: the claim is the SOURCE's, and /ops/census exists to compare it against
+            # what actually landed.
+            county_claim = result.get("source_total", 0)
+            if county_claim > 0:
+                distill.log_source_total(
+                    county_claim,
+                    f"SteadyAPI meta.total ({county}, county-level /search)",
+                    dry_run=dry_run,
+                )
         else:
             result = scan(county)
         rows = result["rows"]
@@ -120,9 +163,18 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
             last_trusted_count=(len(prior) or None),
             baseline_total=result.get("county_total"),  # cap-aware: flag a seed far below the printed total
         )
-        if not complete:
+        # Partial-progress (07/16/2026, check steadyapi_429_no_retry): on a STEADY-STATE
+        # incomplete scan, land the rows we did fetch — diff_states(scan_complete=False)
+        # already refuses to infer a departure from absence, so the only thing an
+        # incomplete pull can no longer do is discard pages we paid for. A truncated
+        # SEED stays a full skip: a partial pull must never become the baseline.
+        partial = (not complete) and (not is_seed) and len(rows) > 0
+        if not complete and not partial:
             print(f"[skip] {county}: untrustworthy scan ({why}) — no diff emitted", flush=True)
             continue
+        if partial:
+            print(f"[partial] {county}: incomplete scan ({why}) — landing {len(rows)} scanned rows; "
+                  f"absence NOT diffed (no departures from a truncated pull)", flush=True)
         scanned = _keyed_scan(rows)
         ups, trans = diff_states(prior, scanned, today, scan_complete=complete, is_seed=is_seed)
         for u in ups:
@@ -140,7 +192,9 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
         # network calls, mirrors the enrich dry-run fix) and never on a seed/catch-up baseline sweep.
         res_stats: dict | None = None
         checked_at = datetime.now(timezone.utc)
-        if source == "api" and not dry_run and not is_seed and sold_budget_remaining > 0:
+        # `complete` gate: on a partial (throttled) day the API is already degraded — spending
+        # the sold budget into it mostly buys gaps. The probes run on the next complete scan.
+        if source == "api" and not dry_run and not is_seed and complete and sold_budget_remaining > 0:
             checks, plan_stats = plan_off_market_checks(ups, trans, prior, today, cap=sold_budget_remaining)
             resolutions = [fetch_sold_event(c["property_id"], since=c["since"], at=today) for c in checks]
             res_stats = apply_off_market_resolutions(ups, trans, checks, resolutions, prior, today)
@@ -193,7 +247,8 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
                                        checked_at=checked_at, dry_run=dry_run)
         totals["upserts"] += n_u
         totals["transitions"] += n_t
-        print(f"[ok] {county}: scanned={len(rows)} seed={is_seed} upserts={n_u} transitions={n_t} ({why})", flush=True)
+        print(f"[{'ok' if complete else 'partial'}] {county}: scanned={len(rows)} seed={is_seed} "
+              f"upserts={n_u} transitions={n_t} ({why})", flush=True)
     # Sold-price backfill (approved 07/02/2026): sold rows captured with a 0/absent price (deed not
     # yet recorded, or an undisclosed land-trust sale) get ONLY the budget the county loop left over —
     # departures + holding re-checks always eat first, so backfill can never crowd out fresh sold
@@ -224,11 +279,9 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
     if totals["scanned"] == 0:
         print("[fatal] every county returned 0 rows — failing loud (no silent fake-green)", flush=True)
         sys.exit(1)
-    if source == "api" and not dry_run and not only_county and totals["source_total"] > 0:
-        distill.log_source_total(
-            totals["source_total"],
-            "SteadyAPI meta.total sum (Lee+Collier+Hendry city sweep)",
-        )
+    # source_totals logging moved INTO the county loop (07/16/2026): the old end-of-run write
+    # here was gated on `not only_county`, and every scheduled run passes --county — so it
+    # never fired in production and the ledger sat at 0 rows (check source_totals_migration_apply).
     return totals
 
 

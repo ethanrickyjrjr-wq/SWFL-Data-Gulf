@@ -252,7 +252,8 @@ def test_fetch_steadyapi_clean_empty_first_page_is_complete():
     assert rows == [] and ok is True and pages == 1 and total is None
 
 
-def test_fetch_steadyapi_non_200_is_a_gap():
+def test_fetch_steadyapi_non_200_is_a_gap(monkeypatch):
+    monkeypatch.setattr(extract_api, "_sleep", lambda s: None)  # 429 now retries before giving up
     with patch.object(extract_api.requests, "get", return_value=_resp(429, {})):
         rows, ok, pages, total = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
     assert rows == [] and ok is False and total is None
@@ -265,9 +266,9 @@ def test_fetch_steadyapi_no_key_is_a_gap():
 
 def test_scan_county_api_labels_counts_and_reports_call_budget(monkeypatch):
     monkeypatch.setenv("PHOTOS_API", "p")
-    # Both seams mocked: 1 unfiltered page + 4 type-sweep pages per city. The budget
-    # line must report REAL pages spent — type sweeps included (4114768b), or the
-    # $1-cap accounting undercounts by 4x.
+    # Both seams mocked: 1 unfiltered page + 4 type-sweep pages for the ONE county-level
+    # location (COUNTY_SEED, 07/16/2026 migration). The budget line must report REAL pages
+    # spent — type sweeps included (4114768b), or the $1-cap accounting undercounts by 4x.
     with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], True, 1, None)), \
          patch.object(extract_api, "build_type_lookup", return_value=({}, 4)):
         out = extract_api.scan_county_api("Lee", known_ids={"5493101642"})
@@ -275,8 +276,39 @@ def test_scan_county_api_labels_counts_and_reports_call_budget(monkeypatch):
     assert out["exhausted"] is True
     assert out["last_status"] == 200
     assert all(r["county"] == "Lee" for r in out["rows"])
-    assert out["search_calls"] == len(extract_api.SWFL_CITY_SEED["Lee"]) * (1 + 4)
+    assert out["search_calls"] == 1 + 4              # one county walk + its 4 type sweeps
     assert out["enrich_calls"] == 0                  # the one row is already in known_ids
+
+
+def test_scan_county_api_sweeps_the_county_seed_not_cities(monkeypatch):
+    """County-seed migration (07/16/2026): the unfiltered walk and the type sweeps both hit
+    the county-level location exactly once — no per-city fan-out remains."""
+    monkeypatch.setenv("PHOTOS_API", "p")
+    seen: list[str] = []
+
+    def fake_city(city, state="FL", key=None):
+        seen.append(city)
+        return [_STEADYAPI_ROW], True, 1, 22158
+
+    with patch.object(extract_api, "fetch_steadyapi_city", side_effect=fake_city), \
+         patch.object(extract_api, "build_type_lookup", return_value=({}, 4)) as mock_lookup:
+        out = extract_api.scan_county_api("Lee")
+    assert seen == ["Lee County"]                    # slugs to Lee-County_FL downstream
+    mock_lookup.assert_called_once_with("Lee County")
+    assert out["source_total"] == 22158              # the county's own meta.total, not a city sum
+
+
+def test_parse_steadyapi_derives_city_from_permalink_slug():
+    """County-level sweeps pass no per-row city, so the slug is the city authority:
+    [street, city, state, zip, id]. Falls back to the caller's label when nonstandard."""
+    lehigh = {**_STEADYAPI_ROW,
+              "permalink": "https://www.realtor.com/realestateandhomes-detail/3810-18th-St-SW_Lehigh-Acres_FL_33976_M69363-83501"}
+    r = parse_steadyapi(lehigh, city="Lee County", state="FL")
+    assert r is not None and r["city"] == "Lehigh Acres" and r["zip_code"] == "33976"
+    # nonstandard slug (no zip segment) → caller's label survives as the fallback
+    odd = {**_STEADYAPI_ROW, "permalink": "https://www.realtor.com/realestateandhomes-detail/weird-slug"}
+    r2 = parse_steadyapi(odd, city="Lee County", state="FL")
+    assert r2 is not None and r2["city"] == "Lee County"
 
 
 def test_scan_county_api_clean_empty_city_stays_complete(monkeypatch):
@@ -289,7 +321,10 @@ def test_scan_county_api_clean_empty_city_stays_complete(monkeypatch):
 
 def test_scan_county_api_truncated_city_marks_incomplete(monkeypatch):
     monkeypatch.setenv("PHOTOS_API", "p")
-    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], False, 1, None)):
+    # build_type_lookup patched too — hermetic; otherwise its unfiltered requests.get would
+    # hit the retry path (with real backoff sleeps) on every one of Lee's 8 seed cities.
+    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([_STEADYAPI_ROW], False, 1, None)), \
+         patch.object(extract_api, "build_type_lookup", return_value=({}, 0)):
         out = extract_api.scan_county_api("Lee")
     assert out["exhausted"] is False and out["last_status"] != 200
 
@@ -305,6 +340,67 @@ def test_scan_county_api_dry_run_never_calls_nearby_home_values(monkeypatch):
         extract_api.scan_county_api("Lee", known_ids=set(), dry_run=True)
     enrich_urls = [c.args[0] for c in mock_get.call_args_list if "nearby-home-values" in str(c.args[0])]
     assert enrich_urls == []
+
+
+# ---------------------------------------------------------- bounded retry (07/16/2026)
+# Vendor contract (docs.steadyapi.com crawled live 07/16/2026): 15 req/s global limit,
+# 429 beyond it, vendor recommends client retry with backoff. Before this, a single 429
+# on any page zeroed the county's whole scan (Lee + Collier both, 07/07/2026).
+
+def test_fetch_steadyapi_retries_429_then_succeeds(monkeypatch):
+    sleeps: list[float] = []
+    monkeypatch.setattr(extract_api, "_sleep", sleeps.append)
+    body = {"meta": {"total": 1}, "body": [_STEADYAPI_ROW]}
+    with patch.object(extract_api.requests, "get",
+                      side_effect=[_resp(429, {}), _resp(200, body)]) as mock_get:
+        rows, ok, calls, total = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+    assert ok is True and len(rows) == 1 and total == 1
+    assert mock_get.call_count == 2
+    assert calls == 2                      # honest budget: the burned retry attempt counts
+    assert len(sleeps) == 1 and sleeps[0] > 0
+
+
+def test_fetch_steadyapi_gives_up_after_bounded_attempts(monkeypatch):
+    sleeps: list[float] = []
+    monkeypatch.setattr(extract_api, "_sleep", sleeps.append)
+    with patch.object(extract_api.requests, "get", return_value=_resp(429, {})) as mock_get:
+        rows, ok, calls, total = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+    assert rows == [] and ok is False
+    assert mock_get.call_count == extract_api._MAX_ATTEMPTS   # bounded — never a hot loop
+    assert calls == extract_api._MAX_ATTEMPTS
+    assert len(sleeps) == extract_api._MAX_ATTEMPTS - 1
+
+
+def test_fetch_steadyapi_deterministic_4xx_is_not_retried(monkeypatch):
+    sleeps: list[float] = []
+    monkeypatch.setattr(extract_api, "_sleep", sleeps.append)
+    with patch.object(extract_api.requests, "get", return_value=_resp(403, {})) as mock_get:
+        rows, ok, calls, total = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+    # A 403 is a key/UA problem — retrying it burns quota on the same answer.
+    assert rows == [] and ok is False
+    assert mock_get.call_count == 1 and sleeps == []
+
+
+def test_fetch_steadyapi_network_error_is_retried(monkeypatch):
+    monkeypatch.setattr(extract_api, "_sleep", lambda s: None)
+    body = {"meta": {"total": 1}, "body": [_STEADYAPI_ROW]}
+    with patch.object(extract_api.requests, "get",
+                      side_effect=[ConnectionError("reset"), _resp(200, body)]) as mock_get:
+        rows, ok, calls, total = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+    assert ok is True and len(rows) == 1
+    assert mock_get.call_count == 2
+
+
+def test_scan_county_api_skips_type_sweeps_when_city_pull_is_empty(monkeypatch):
+    """Call economy: an empty unfiltered pull (cleanly-empty city OR dead pull) has no rows
+    to type-stamp — burning 4 type-sweep calls on it is pure waste. On a cap-exhausted day
+    this is the difference between ~15 and ~75 wasted calls across the seed list."""
+    monkeypatch.setenv("PHOTOS_API", "p")
+    with patch.object(extract_api, "fetch_steadyapi_city", return_value=([], True, 1, None)), \
+         patch.object(extract_api, "build_type_lookup") as mock_lookup:
+        out = extract_api.scan_county_api("Lee")
+    mock_lookup.assert_not_called()
+    assert out["exhausted"] is True and out["count"] == 0
 
 
 def test_fetch_steadyapi_city_returns_four_tuple_with_total(monkeypatch):

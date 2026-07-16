@@ -40,7 +40,7 @@ from ingest.pipelines.listing_lifecycle.constants_api import API_SOURCE_NAME
 
 # The catch-up only bridges counties the API sweep actually covers (Lee + Collier = IN_SCOPE_FIPS).
 # Seed rows in other counties (Hendry ~298) have no live feed yet and stay under lifecycle_seed
-# untouched — a documented scope gap, not a break: widening is adding cities to SWFL_CITY_SEED +
+# untouched — a documented scope gap, not a break: widening is adding a county to COUNTY_SEED +
 # FIPS to IN_SCOPE_FIPS, then re-running the flip for that county.
 CATCHUP_COUNTIES = ("Lee", "Collier")
 SEED_SOURCE = distill.SOURCE_NAME  # 'lifecycle_seed'

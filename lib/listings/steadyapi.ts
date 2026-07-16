@@ -10,7 +10,9 @@
 // server works; urllib default UA is blocked.
 //
 // Empty-tolerant (four-lane / ODD): no key, non-200, quota, or bad body → [], never throws.
-// Hour-cached to be frugal on the 10 000 req/month Starter tier.
+// Hour-cached to be frugal on the 10 000 req/month Starter tier. 429/5xx/network errors get
+// a bounded jittered retry (see steadyGet) before degrading — a single throttle no longer
+// silently reads as "no data".
 
 import type { Listing } from "./rentcast";
 
@@ -31,6 +33,67 @@ const BROWSER_HEADERS = {
 // "Cape Coral" → "Cape-Coral_FL", "Fort Myers" → "Fort-Myers_FL"
 function cityToSlug(city: string, state = "FL"): string {
   return `${city.trim().replace(/\s+/g, "-")}_${state}`;
+}
+
+// ── bounded retry (07/16/2026) ────────────────────────────────────────────────
+// Vendor contract (docs.steadyapi.com, crawled live 07/16/2026): 15 req/s global
+// limit, 429 beyond it, no Retry-After header documented; vendor explicitly
+// recommends client-side retry with backoff. Before this, a single 429 in a build
+// session silently became [] — the user read "no comps" for data that exists.
+
+/** Why a call finally gave up. Only TRANSIENT failures report — a deterministic
+ *  4xx (bad key, bad params, no such resource) degrades silently exactly as
+ *  before, because retrying it would burn quota on the same answer. */
+export type SteadyDegradeReason = "throttled" | "upstream" | "network";
+
+export interface SteadyFetchDeps {
+  fetchImpl?: typeof fetch;
+  /** Injectable backoff wait — tests pass a no-op; production sleeps for real. */
+  sleep?: (ms: number) => Promise<void>;
+  /** Fires once, only when every attempt failed on a TRANSIENT error — lets a
+   *  caller say "briefly unavailable" instead of the false "nothing found". */
+  onDegrade?: (reason: SteadyDegradeReason) => void;
+}
+
+const MAX_ATTEMPTS = 3;
+const BACKOFF_BASE_MS = 400;
+const ATTEMPT_TIMEOUT_MS = 10_000;
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
+
+const realSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** One GET against the SteadyAPI base with bounded, jittered exponential backoff
+ *  on 429/5xx/network errors only. Returns the OK Response, or null once it gives
+ *  up — the callers' empty-tolerant contracts ([]/null, never throw) are unchanged. */
+async function steadyGet(
+  pathAndQuery: string,
+  key: string,
+  deps: SteadyFetchDeps,
+): Promise<Response | null> {
+  const doFetch = deps.fetchImpl ?? fetch;
+  const sleep = deps.sleep ?? realSleep;
+  let reason: SteadyDegradeReason = "network";
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (attempt > 0) {
+      // full jitter: base·2^(attempt-1) scaled by 0.5–1.5 — stays well under the
+      // vendor's 15 req/s and never lets concurrent callers re-collide in step.
+      await sleep(BACKOFF_BASE_MS * 2 ** (attempt - 1) * (0.5 + Math.random()));
+    }
+    try {
+      const res = await doFetch(`${BASE}/${pathAndQuery}`, {
+        headers: { ...BROWSER_HEADERS, Authorization: `Bearer ${key}` },
+        signal: AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
+        next: { revalidate: 3600 },
+      });
+      if (res.ok) return res;
+      if (!RETRYABLE_STATUS.has(res.status)) return null; // deterministic — same silent degrade as before
+      reason = res.status === 429 ? "throttled" : "upstream";
+    } catch {
+      reason = "network"; // includes the per-attempt timeout
+    }
+  }
+  deps.onDegrade?.(reason);
+  return null;
 }
 
 /** realtor.com detail-page base, observed VERBATIM in SteadyAPI /search responses
@@ -199,33 +262,30 @@ export function normalizeResult(raw: RawResult, city: string, state: string): Li
  * Never throws — any failure returns [].
  * Results are hour-cached (Next.js fetch cache).
  */
-export async function fetchPhotoListings(opts: {
-  city: string;
-  state?: string;
-  limit?: number;
-  /** Server-side page offset (SteadyAPI honors `offset`) — lets a caller page past
-   *  the first ~200 to find a specific address in a large city. Default 0. */
-  offset?: number;
-  /** Full `location` slug override, e.g. "5370-Holland-St_Naples_FL_34113". When
-   *  present, queries that address directly instead of paging the whole city —
-   *  SteadyAPI centers the result set on the exact address (verified 07/08/2026).
-   *  Far cheaper + more reliable than scanning ~800 city rows for one house. */
-  location?: string;
-}): Promise<Listing[]> {
+export async function fetchPhotoListings(
+  opts: {
+    city: string;
+    state?: string;
+    limit?: number;
+    /** Server-side page offset (SteadyAPI honors `offset`) — lets a caller page past
+     *  the first ~200 to find a specific address in a large city. Default 0. */
+    offset?: number;
+    /** Full `location` slug override, e.g. "5370-Holland-St_Naples_FL_34113". When
+     *  present, queries that address directly instead of paging the whole city —
+     *  SteadyAPI centers the result set on the exact address (verified 07/08/2026).
+     *  Far cheaper + more reliable than scanning ~800 city rows for one house. */
+    location?: string;
+  },
+  deps: SteadyFetchDeps = {},
+): Promise<Listing[]> {
   const key = process.env.PHOTOS_API;
   if (!key || (!opts.city && !opts.location)) return [];
   const state = opts.state ?? "FL";
   const slug = opts.location ?? cityToSlug(opts.city, state);
   const params = new URLSearchParams({ location: slug, offset: String(opts.offset ?? 0) });
   try {
-    const res = await fetch(`${BASE}/search?${params}`, {
-      headers: {
-        ...BROWSER_HEADERS,
-        Authorization: `Bearer ${key}`,
-      },
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return [];
+    const res = await steadyGet(`search?${params}`, key, deps);
+    if (!res) return [];
     const data: unknown = await res.json();
     if (!data || typeof data !== "object") return [];
     const body = (data as Record<string, unknown>).body;
@@ -344,11 +404,10 @@ export function normalizeNearbyComp(raw: RawNearbyProperty): NearbyComp | null {
  */
 export async function fetchNearbyValues(
   opts: { lat: number; lon: number; radius?: string | number; status?: string; limit?: number },
-  deps: { fetchImpl?: typeof fetch } = {},
+  deps: SteadyFetchDeps = {},
 ): Promise<NearbyComp[]> {
   const key = process.env.PHOTOS_API;
   if (!key || !Number.isFinite(opts.lat) || !Number.isFinite(opts.lon)) return [];
-  const doFetch = deps.fetchImpl ?? fetch;
   const params = new URLSearchParams({
     lat: String(opts.lat),
     lon: String(opts.lon),
@@ -357,11 +416,8 @@ export async function fetchNearbyValues(
   if (opts.radius != null) params.set("radius", String(opts.radius));
   if (opts.status) params.set("status", opts.status);
   try {
-    const res = await doFetch(`${BASE}/nearby-home-values?${params}`, {
-      headers: { ...BROWSER_HEADERS, Authorization: `Bearer ${key}` },
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return [];
+    const res = await steadyGet(`nearby-home-values?${params}`, key, deps);
+    if (!res) return [];
     const data: unknown = await res.json();
     const props = (data as { body?: { properties?: unknown } })?.body?.properties;
     if (!Array.isArray(props)) return [];
@@ -403,18 +459,14 @@ export function parseSoldEvent(body: unknown): SoldEvent | null {
  */
 export async function fetchSoldEvent(
   propertyId: string,
-  deps: { fetchImpl?: typeof fetch } = {},
+  deps: SteadyFetchDeps = {},
 ): Promise<SoldEvent | null> {
   const key = process.env.PHOTOS_API;
   if (!key || !propertyId) return null;
-  const doFetch = deps.fetchImpl ?? fetch;
   const params = new URLSearchParams({ propertyId });
   try {
-    const res = await doFetch(`${BASE}/property-tax-history?${params}`, {
-      headers: { ...BROWSER_HEADERS, Authorization: `Bearer ${key}` },
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return null;
+    const res = await steadyGet(`property-tax-history?${params}`, key, deps);
+    if (!res) return null;
     return parseSoldEvent(await res.json());
   } catch {
     return null;

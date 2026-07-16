@@ -18,7 +18,9 @@ property_id + description.baths (string, e.g. "2.5") — a direct batch lookup, 
 from __future__ import annotations
 
 import os
+import random
 import re
+import time
 from datetime import date, timedelta
 from typing import Any
 
@@ -26,18 +28,20 @@ import requests
 
 from ingest.pipelines.listing_lifecycle.address_key import address_key
 from ingest.pipelines.listing_lifecycle.constants_api import (
+    COUNTY_SEED,
     IN_SCOPE_FIPS,
     PROPERTY_TYPE_MAP,
     STEADYAPI_BASE,
     STEADYAPI_HEADERS,
     STEADYAPI_TYPE_FILTERS,
-    SWFL_CITY_SEED,
 )
 
 _PERMALINK_ZIP = re.compile(r"_(\d{5})_")
 
-_SA_PAGE = 200   # SteadyAPI page size (meta.returned/limit = 200)
-_MAX_PAGES = 60  # backstop (~30k listings) — real cities exhaust far sooner
+_SA_PAGE = 200    # SteadyAPI page size (meta.returned/limit = 200)
+_MAX_PAGES = 150  # backstop (~30k listings) — Lee's county-level walk was 22,158 rows =
+                  # ~111 pages live on 07/16/2026; 150 leaves headroom without unbounding
+                  # a runaway walk (raised from 60 with the county-seed migration)
 
 # ---- Builder-plan records are NOT listings. VERIFIED LIVE 2026-07-14 (RULE 0.4), two probes:
 #   Estero_FL  /search -> 697 status='for_sale' (flags.is_plan=False) + 46 status='ready_to_build'
@@ -137,6 +141,17 @@ def parse_steadyapi(raw: dict, city: str, state: str, type_hint: str | None = No
     street = (parts[0].replace("-", " ") if parts else "").strip()
     zm = _PERMALINK_ZIP.search(permalink)
     zip_code = zm.group(1) if zm else next((p for p in parts if p.isdigit() and len(p) == 5), "")
+    # County-level sweeps carry no per-row city label, so recover it from the permalink slug
+    # ("3810-18th-St-SW_Lehigh-Acres_FL_33976_M69363-83501" → "Lehigh Acres"): the segment two
+    # left of the ZIP is the city ([street, city, state, zip, id]). Falls back to the caller's
+    # label when the slug is nonstandard. This also fixes the old per-city mislabel, where a
+    # row bleeding into a neighboring city's page inherited THAT page's seed-city name.
+    slug_city = None
+    if zip_code and zip_code in parts:
+        zi = parts.index(zip_code)
+        if zi >= 2:
+            slug_city = (parts[zi - 2].replace("-", " ").strip() or None)
+    row_city = slug_city or city
     loc = raw.get("location") or {}
     county_fips = loc.get("county_fips")
     if county_fips not in IN_SCOPE_FIPS:
@@ -154,7 +169,7 @@ def parse_steadyapi(raw: dict, city: str, state: str, type_hint: str | None = No
     flags = raw.get("flags") or {}
     return {
         "street_address": street or None,
-        "city": city,
+        "city": row_city,
         "zip_code": zip_code or None,
         "state": state,
         "county": IN_SCOPE_FIPS[county_fips],
@@ -206,40 +221,76 @@ def _cluster_by_latlon(rows: list[dict], grid: float = _ENRICH_GRID) -> list[tup
 # True  = paginated to NATURAL exhaustion (a short/empty page, or reached meta.total) — trustworthy.
 # False = a GAP: no key, non-200, bad body, network error, or _MAX_PAGES backstop — may be truncated.
 
+# ---- Bounded retry (07/16/2026). Vendor contract (docs.steadyapi.com, crawled live
+# 07/16/2026): 15 req/s global limit, 429 beyond it, no Retry-After documented; the vendor
+# recommends client-side retry with backoff. Before this, ONE un-retried 429 on any page
+# zeroed the county's whole scan — hit Lee AND Collier's scheduled runs on 07/07/2026,
+# discarding every page already paid for.
+_RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
+_MAX_ATTEMPTS = 4        # 1 initial + 3 retries per page — bounded, never a hot loop
+_BACKOFF_BASE_S = 2.0    # jittered exponential: ~1-3s, ~2-6s, ~4-12s between attempts
+_sleep = time.sleep      # module seam so tests can no-op the waits
+
+
+def _get_with_retry(url: str, *, params: dict, headers: dict, timeout: int = 30) -> tuple[Any, int]:
+    """requests.get with bounded jittered backoff on 429/5xx/network errors ONLY — a
+    deterministic 4xx (bad key, bad params) returns immediately, because retrying it burns
+    quota on the same answer. Returns (response_or_None, attempts_made); attempts feed the
+    budget log so a burned retry is never invisible. Never raises."""
+    last: Any = None
+    attempts = 0
+    for attempt in range(_MAX_ATTEMPTS):
+        if attempt:
+            _sleep(_BACKOFF_BASE_S * (2 ** (attempt - 1)) * (0.5 + random.random()))
+        attempts += 1
+        try:
+            r = requests.get(url, params=params, headers=headers, timeout=timeout)
+        except Exception:
+            last = None
+            continue
+        if r.status_code in _RETRY_STATUSES:
+            last = r
+            continue
+        return r, attempts
+    return last, attempts
+
+
 def fetch_steadyapi_city(city: str, state: str = "FL", key: str | None = None) -> tuple[list[dict], bool, int, int | None]:
     """Enumerate one city via SteadyAPI (location slug 'City-Name_FL', offset += 200 until meta.total).
-    Returns (rows, ok, pages_fetched, total) — pages_fetched is the real call count for budget
-    logging; total is SteadyAPI's own meta.total claim for this city (None if never seen), captured
-    for the /ops/census source-reconciliation ledger (Task 11)."""
+    Returns (rows, ok, calls, total) — calls is the real request count for budget logging,
+    RETRY ATTEMPTS INCLUDED (they hit the quota just the same); total is SteadyAPI's own
+    meta.total claim for this city (None if never seen), captured for the /ops/census
+    source-reconciliation ledger (Task 11)."""
     key = key or os.environ.get("PHOTOS_API")
     if not key or not city:
         return [], False, 0, None
     slug = f"{city.strip().replace(' ', '-')}_{state}"
     out: list[dict] = []
     total: int | None = None
+    calls = 0
     for page in range(_MAX_PAGES):
         params = {"location": slug, "offset": page * _SA_PAGE}
+        r, attempts = _get_with_retry(f"{STEADYAPI_BASE}/search", params=params,
+                                      headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"})
+        calls += attempts
+        if r is None or r.status_code != 200:
+            return out, False, calls, total
         try:
-            r = requests.get(f"{STEADYAPI_BASE}/search", params=params,
-                             headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"}, timeout=30)
-            pages = page + 1
-            if r.status_code != 200:
-                return out, False, pages, total
             data = r.json()
-            body = data.get("body") if isinstance(data, dict) else None
-            if not isinstance(body, list):
-                return out, False, pages, total
-            if not body:
-                return out, True, pages, total
-            out.extend(body)
-            total = (data.get("meta") or {}).get("total", total)
-            if total is not None and (page + 1) * _SA_PAGE >= total:
-                return out, True, pages, total
-            if len(body) < _SA_PAGE:
-                return out, True, pages, total
         except Exception:
-            return out, False, page + 1, total
-    return out, False, _MAX_PAGES, total
+            return out, False, calls, total
+        body = data.get("body") if isinstance(data, dict) else None
+        if not isinstance(body, list):
+            return out, False, calls, total
+        if not body:
+            return out, True, calls, total
+        out.extend(body)
+        total = (data.get("meta") or {}).get("total", total)
+        if total is not None and (page + 1) * _SA_PAGE >= total:
+            return out, True, calls, total
+        if len(body) < _SA_PAGE:
+            return out, True, calls, total
+    return out, False, calls, total
 
 
 def fetch_steadyapi_type_ids(
@@ -254,29 +305,30 @@ def fetch_steadyapi_type_ids(
     slug = f"{city.strip().replace(' ', '-')}_{state}"
     ids: set[str] = set()
     total: int | None = None
+    calls = 0
     for page in range(_MAX_PAGES):
         params = {"location": slug, "offset": page * _SA_PAGE, "property_type": property_type}
+        r, attempts = _get_with_retry(f"{STEADYAPI_BASE}/search", params=params,
+                                      headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"})
+        calls += attempts
+        if r is None or r.status_code != 200:
+            return ids, False, calls
         try:
-            r = requests.get(f"{STEADYAPI_BASE}/search", params=params,
-                             headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"}, timeout=30)
-            pages = page + 1
-            if r.status_code != 200:
-                return ids, False, pages
             data = r.json()
-            body = data.get("body") if isinstance(data, dict) else None
-            if not isinstance(body, list):
-                return ids, False, pages
-            if not body:
-                return ids, True, pages
-            ids.update(str(x["property_id"]) for x in body if x.get("property_id"))
-            total = (data.get("meta") or {}).get("total", total)
-            if total is not None and (page + 1) * _SA_PAGE >= total:
-                return ids, True, pages
-            if len(body) < _SA_PAGE:
-                return ids, True, pages
         except Exception:
-            return ids, False, page + 1
-    return ids, False, _MAX_PAGES
+            return ids, False, calls
+        body = data.get("body") if isinstance(data, dict) else None
+        if not isinstance(body, list):
+            return ids, False, calls
+        if not body:
+            return ids, True, calls
+        ids.update(str(x["property_id"]) for x in body if x.get("property_id"))
+        total = (data.get("meta") or {}).get("total", total)
+        if total is not None and (page + 1) * _SA_PAGE >= total:
+            return ids, True, calls
+        if len(body) < _SA_PAGE:
+            return ids, True, calls
+    return ids, False, calls
 
 
 def build_type_lookup(city: str, state: str = "FL", key: str | None = None) -> tuple[dict[str, str], int]:
@@ -321,16 +373,17 @@ def enrich_baths_batched(rows: list[dict], known_ids: set[str], *, dry_run: bool
     for lat, lon in clusters:
         if calls >= _MAX_ENRICH_CALLS:
             break
+        # Retry attempts count against the enrich backstop too — a throttled day must
+        # shrink the enrich footprint, never multiply it.
+        r, attempts = _get_with_retry(
+            f"{STEADYAPI_BASE}/nearby-home-values",
+            params={"lat": lat, "lon": lon, "radius": _ENRICH_RADIUS, "limit": _ENRICH_LIMIT},
+            headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"},
+        )
+        calls += attempts
+        if r is None or r.status_code != 200:
+            continue
         try:
-            r = requests.get(
-                f"{STEADYAPI_BASE}/nearby-home-values",
-                params={"lat": lat, "lon": lon, "radius": _ENRICH_RADIUS, "limit": _ENRICH_LIMIT},
-                headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"},
-                timeout=30,
-            )
-            calls += 1
-            if r.status_code != 200:
-                continue
             body = (r.json() or {}).get("body") or {}
             for prop in body.get("properties") or []:
                 pid = str(prop.get("property_id") or "")
@@ -351,17 +404,20 @@ def enrich_baths_batched(rows: list[dict], known_ids: set[str], *, dry_run: bool
 
 
 def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: bool = False) -> dict[str, Any]:
-    """SteadyAPI-only: enumerate every seed city, parse + scope-filter, batch-enrich new listings.
-    Returns the coverage-guard payload pipeline.py consumes: {rows, exhausted, count, last_status,
-    county_total, search_calls, enrich_calls, source_total}. County is COMPLETE only if every city's
-    UNFILTERED pull reached natural exhaustion — that stays the sole completeness gate. Per-city type
-    sweeps (build_type_lookup) run alongside to type-stamp rows; a type-sweep gap just leaves the
+    """SteadyAPI-only: ONE county-level /search walk (COUNTY_SEED, migrated 07/16/2026 — the
+    15-city curated list dropped ~4% of Lee's listings in unincorporated places), parse +
+    scope-filter, batch-enrich new listings. Returns the coverage-guard payload pipeline.py
+    consumes: {rows, exhausted, count, last_status, county_total, search_calls, enrich_calls,
+    source_total}. County is COMPLETE only if the UNFILTERED county pull reached natural
+    exhaustion — that stays the sole completeness gate. County-grain type sweeps
+    (build_type_lookup) run alongside to type-stamp rows; a type-sweep gap just leaves the
     affected rows at the land-heuristic/"other" fallback, it never flips `exhausted`/`last_status`.
-    source_total sums each city's SteadyAPI meta.total — an inexact-but-real completeness signal
-    (per-city search, not a single county query) fed to the /ops/census reconciliation ledger.
-    `dry_run=True` still fires the (cheap) search + type sweeps — that's the real page count the gate
-    needs — but skips the (expensive, multiplying) enrich network calls."""
-    cities = SWFL_CITY_SEED.get(county, [])
+    source_total is the county's own SteadyAPI meta.total — now a DIRECT county-grain claim
+    (no more per-city summing) fed to the /ops/census reconciliation ledger.
+    `dry_run=True` still fires the (cheap) search + type sweeps — that's the real page count the
+    gate needs — but skips the (expensive, multiplying) enrich network calls."""
+    seed = COUNTY_SEED.get(county)
+    cities = [seed] if seed else []
     sa_rows: list[dict] = []
     all_ok = True
     search_calls = 0
@@ -371,6 +427,11 @@ def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: 
         all_ok = all_ok and sa_ok
         search_calls += pages
         source_total += city_total or 0
+        if not sa_raw:
+            # Nothing came back — a cleanly-empty city (ok) or a dead pull (not ok). Either
+            # way there are zero rows to type-stamp, so don't burn 4 type-sweep calls on it.
+            # On a cap-exhausted/dead-key day this is ~15 calls wasted instead of ~75.
+            continue
         type_lookup, type_pages = build_type_lookup(city)
         search_calls += type_pages
         sa_rows.extend(
@@ -461,18 +522,19 @@ def fetch_sold_event(property_id: str, *, since: str, at: str, key: str | None =
     key = key or os.environ.get("PHOTOS_API")
     if not key or not property_id:
         return {"outcome": "gap", "reason": "no-key-or-id"}
-    try:
-        r = requests.get(
-            f"{STEADYAPI_BASE}/property-tax-history",
-            params={"propertyId": property_id},
-            headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"},
-            timeout=30,
-        )
-        if r.status_code != 200:
-            return {"outcome": "gap", "reason": f"http-{r.status_code}"}
-        data = r.json()
-        if not isinstance(data, dict):
-            return {"outcome": "gap", "reason": "bad-body"}
-        return classify_off_market(data, since=since, at=at)
-    except Exception:
+    r, _attempts = _get_with_retry(
+        f"{STEADYAPI_BASE}/property-tax-history",
+        params={"propertyId": property_id},
+        headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"},
+    )
+    if r is None:
         return {"outcome": "gap", "reason": "network"}
+    if r.status_code != 200:
+        return {"outcome": "gap", "reason": f"http-{r.status_code}"}
+    try:
+        data = r.json()
+    except Exception:
+        return {"outcome": "gap", "reason": "bad-body"}
+    if not isinstance(data, dict):
+        return {"outcome": "gap", "reason": "bad-body"}
+    return classify_off_market(data, since=since, at=at)
