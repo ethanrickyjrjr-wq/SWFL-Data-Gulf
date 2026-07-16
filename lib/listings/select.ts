@@ -23,6 +23,9 @@ import type { DeriveListingPhoto } from "@/lib/media/listing-photo";
 // Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import zipCounty from "@/fixtures/swfl-zip-county.json";
+import { daysBetweenIso, todayIso } from "./dom";
+import { fetchListedDate } from "./steadyapi";
+import { persistListedDate, type ListingStateKey } from "./listed-date-write";
 
 // ── Scope → the one city we query (RentCast has no county/ZIP filter) ─────────
 // county → its anchor city; zip → its county (Census-verified fixture) → anchor city;
@@ -284,6 +287,48 @@ const LAKE_LISTING_COLUMNS =
   "sqft, lot_acres, status, list_price, listed_date, last_seen, days_on_market, mls_name, " +
   "mls_number, photo_url, dom_days, dom_is_floor, cdom_days, address_key, property_id";
 
+/** Probe-on-use healing (spec 2026-07-16-listing-dom-design.md §3): a censored floor
+ *  row being SURFACED gets one `/property-tax-history` call for its true list date,
+ *  persisted forever via the guarded single-column write. Capped; failures keep the
+ *  honest floor; never throws. */
+const DOM_HEAL_LIMIT = 3;
+
+export interface DomHealDeps {
+  fetchListedDate?: (propertyId: string) => Promise<string | null>;
+  persistListedDate?: (key: ListingStateKey, isoDate: string) => Promise<boolean>;
+  now?: Date;
+}
+
+export async function healFlooredRows(
+  rows: LakeListingRow[],
+  deps: DomHealDeps = {},
+): Promise<void> {
+  const fetchLd = deps.fetchListedDate ?? fetchListedDate;
+  const persist = deps.persistListedDate ?? persistListedDate;
+  const today = todayIso(deps.now);
+  const targets = rows
+    .filter((r) => r.dom_is_floor === true && r.property_id && r.address_key)
+    .slice(0, DOM_HEAL_LIMIT);
+  await Promise.all(
+    targets.map(async (r) => {
+      try {
+        const ld = await fetchLd(String(r.property_id));
+        const days = daysBetweenIso(ld, today);
+        if (!ld || days == null || days < 0) return; // failure keeps the honest floor
+        r.listed_date = ld;
+        r.dom_days = days;
+        r.dom_is_floor = false;
+        await persist(
+          { sourceName: "api_feed", addressKey: String(r.address_key), saleOrRent: "sale" },
+          ld,
+        );
+      } catch {
+        /* keep the floor */
+      }
+    }),
+  );
+}
+
 /** Fetch active for-sale listings for one city straight from the lake (populated daily by
  *  ingest/pipelines/listing_lifecycle — no live vendor call, no per-request cost). Empty-tolerant:
  *  no creds, no rows, any query error → `[]`, never throws (four-lane/ODD contract). */
@@ -300,9 +345,9 @@ async function fetchLakeListings(city: string): Promise<Listing[]> {
       .eq("sale_or_rent", "sale")
       .limit(500);
     if (!Array.isArray(data)) return [];
-    return (data as unknown as LakeListingRow[])
-      .map(lakeRowToListing)
-      .filter((l): l is Listing => l !== null);
+    const rows = data as unknown as LakeListingRow[];
+    await healFlooredRows(rows);
+    return rows.map(lakeRowToListing).filter((l): l is Listing => l !== null);
   } catch {
     return [];
   }

@@ -102,6 +102,56 @@ test("loadListingContext degrades to empty context on zero rows — never throws
   expect(ctx.figures).toEqual([]);
 });
 
+// ── probe-on-use DOM healing (spec 2026-07-16-listing-dom-design.md §3) ──────
+const { healFlooredRows } = await import("./select");
+
+test("healFlooredRows probes ≤3 floored rows, persists, and recomputes in place", async () => {
+  const rows = [
+    {
+      ...SAMPLE_ROW,
+      address_key: "A:33901",
+      property_id: "P1",
+      dom_is_floor: true,
+      dom_days: 15,
+      listed_date: null,
+    },
+    { ...SAMPLE_ROW, address_key: "B:33901", property_id: "P2", dom_is_floor: false, dom_days: 4 },
+    { ...SAMPLE_ROW, address_key: "C:33901", property_id: null, dom_is_floor: true, dom_days: 15 },
+  ] as Parameters<typeof healFlooredRows>[0];
+  const probed: string[] = [];
+  const persisted: string[] = [];
+  await healFlooredRows(rows, {
+    fetchListedDate: async (pid) => (probed.push(pid), "2026-05-15"),
+    persistListedDate: async (key, iso) => (persisted.push(`${key.addressKey}=${iso}`), true),
+    now: new Date("2026-07-16T12:00:00Z"),
+  });
+  expect(probed).toEqual(["P1"]); // floored+keyed only; no propertyId → skipped
+  expect(persisted).toEqual(["A:33901=2026-05-15"]);
+  expect(rows[0].dom_days).toBe(62);
+  expect(rows[0].dom_is_floor).toBe(false);
+  expect(rows[1].dom_days).toBe(4); // untouched
+});
+
+test("healFlooredRows: probe failure keeps the floor — degraded, never broken", async () => {
+  const rows = [
+    {
+      ...SAMPLE_ROW,
+      address_key: "A:33901",
+      property_id: "P1",
+      dom_is_floor: true,
+      dom_days: 15,
+      listed_date: null,
+    },
+  ] as Parameters<typeof healFlooredRows>[0];
+  await healFlooredRows(rows, {
+    fetchListedDate: async () => null,
+    persistListedDate: async () => true,
+    now: new Date("2026-07-16T12:00:00Z"),
+  });
+  expect(rows[0].dom_is_floor).toBe(true);
+  expect(rows[0].dom_days).toBe(15);
+});
+
 // ── wave 1.5: photo enrichment (derived watermark-crop, one root) ────────────
 // DYNAMIC import, matching this file's existing pattern (line 51): a static
 // `import { enrichListingPhotos }` would hoist ABOVE the mock.module calls at
