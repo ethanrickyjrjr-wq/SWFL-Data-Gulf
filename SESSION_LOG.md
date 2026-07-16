@@ -1,3 +1,21 @@
+## 2026-07-16 (Fable 5 · main) — addendum: build-queue synced for hub mission-control (line added, ⬜ operator live-verify + gated Task 12)
+
+## 2026-07-16 (Fable 5 · main) — /doctor cleanup: skill listing was ~5× over its routing budget; CLAUDE.md rules-of-engagement block now points at its one root
+
+Full /doctor pass (50 sessions/1.7d + 1,030 sessions/30d transcript scans). Repo change: root
+CLAUDE.md's verbatim RULES OF ENGAGEMENT fenced block replaced with a pointer to
+`refinery/lib/rules-of-engagement.mts` (the cited ONE root; the FOCUS hook re-injects the gist
+every prompt) — ~340 tokens/session back, no rule text lost. Machine-local, not in this repo:
+9 pm-skills plugins (0 uses ever) + 22 unused user skills (12 firecrawl-* per the locked
+crawl4ai-only rule, 10 never-used design skills) disabled in ~/.claude/settings.json;
+ezhomesearch + figma MCP servers (0 calls in 30 days) disabled via
+.claude/settings.local.json; global ~/.claude/CLAUDE.md "Firecrawl handles Sunbiz" corrected
+to crawl4ai; 252MB stale updater backup deleted. Skill listing ~10.6k → ~3.2k est tokens/session.
+Also committed `3b00167a`: the competitor-migration handoff doc a parallel Sonnet session left
+untracked (its log entry was already pushed in `ed81d8ac` and referenced the doc — dangling
+until now). Parked with a check (`claude_hooks_slow_and_erroring`): PreToolUse Edit/Write hooks
+avg ~3.2s per call, 49/318 SessionStart hook runs errored in the window. NEXT: operator push.
+
 ## 2026-07-16 (Fable 5 · main) — hub mission-control SHIPPED: calendar + campaigns drawer + See/Edit/Update, live-verified on :3299
 
 Inline execution of plan `2026-07-16-hub-mission-control.md`, Tasks 1–11 + 13. Eleven commits
