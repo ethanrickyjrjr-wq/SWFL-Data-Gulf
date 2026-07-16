@@ -5,6 +5,7 @@ import { PLATFORMS } from "@/lib/email/social/platforms";
 import { BRAND_FONTS } from "@/lib/brand/fonts";
 import { fontsFor } from "@/lib/email/lab/capabilities";
 import { PaletteContrastStrip } from "./PaletteContrastStrip";
+import { BrandCompletenessStrip } from "./BrandCompletenessStrip";
 import {
   type BrandPalette,
   PALETTE_SLOT_KEYS,
@@ -179,6 +180,9 @@ export function BrandingBlock({
           ×
         </button>
       </div>
+
+      {/* Have/need readout — same ledger the build popups ask (fill-once §F). */}
+      <BrandCompletenessStrip branding={branding} />
 
       {/* ── Agent identity ── */}
       <div className="grid grid-cols-2 gap-3">

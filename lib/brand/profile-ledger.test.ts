@@ -82,4 +82,13 @@ describe("profile-ledger", () => {
     expect(s.must.map((g) => g.key).sort()).toEqual(["brokerage", "business_address"].sort());
     expect(s.must.every((g) => g.askCopy && g.askCopy.length > 0)).toBe(true);
   });
+
+  it("completenessSummary: a full profile has zero gaps in every tier", () => {
+    const full = Object.fromEntries(PROFILE_FIELD_KEYS.map((k) => [k, "x"]));
+    const s = completenessSummary(full);
+    expect(s.filled).toBe(s.total);
+    expect(s.must).toEqual([]);
+    expect(s.boost).toEqual([]);
+    expect(s.nice).toEqual([]);
+  });
 });
