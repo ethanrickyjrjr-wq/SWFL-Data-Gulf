@@ -4,10 +4,13 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { Section } from "@/lib/project/group-projects";
+import { kindChipLabel, type Section } from "@/lib/project/group-projects";
 import { chipTime, type ScheduleChip } from "@/lib/project/schedule-chips";
 import { projectEntry } from "@/lib/project/tool-tabs";
+import { promptsForPage } from "@/lib/briefcase/visits";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
+import { BriefcasePanel } from "@/components/briefcase/BriefcasePanel";
+import { BriefcaseChat } from "@/components/briefcase/BriefcaseChat";
 import { ToolSwitcher } from "../[id]/ToolSwitcher";
 import { ConfirmDeleteProject } from "./ConfirmDeleteProject";
 import { EmptyLaunchpad } from "./EmptyLaunchpad";
@@ -172,6 +175,68 @@ export function ProjectsCockpit({
           </div>
 
           <div className="flex-1 overflow-y-auto">
+            {/* The docked Ask AI — the SAME assistant as the floating pill, which is
+                suppressed on this page (pill-mount): one Ask AI per page, and here it
+                lives at the top of the panel, aimed at the selected project. With no
+                projects yet, the bare chat docks instead — the full panel's funnel
+                furniture (pitch + example cards) would duplicate the welcome center. */}
+            <div className="border-b border-white/8 p-4">
+              {selected ? (
+                <BriefcasePanel
+                  key={selected.id}
+                  page={{ kind: "project", projectId: selected.id }}
+                />
+              ) : (
+                <BriefcaseChat starterPrompts={promptsForPage({ kind: "generic" }, 1)} />
+              )}
+            </div>
+
+            {/* Selected project dossier — identity + its live schedules (click a
+                chip to tailor that schedule). Info only; tool nav stays in the pills. */}
+            {selected && (
+              <div className="border-b border-white/8 px-4 pb-4 pt-4">
+                {(selected.city || selected.zip) && (
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gulf-teal/80">
+                    {[selected.city, selected.zip].filter(Boolean).join(" · ")}
+                  </p>
+                )}
+                <div className="mt-0.5 flex items-center gap-2">
+                  <h2 className="min-w-0 text-sm font-semibold leading-snug text-white">
+                    {selected.displayTitle}
+                  </h2>
+                  <span className="shrink-0 rounded-full border border-white/15 px-2 py-0.5 text-[10px] uppercase tracking-wide text-gray-400">
+                    {kindChipLabel(selected)}
+                  </span>
+                </div>
+                {selected.chips.length > 0 && (
+                  <ul className="mt-2.5 flex flex-col gap-1">
+                    {selected.chips.map((c) => (
+                      <li key={c.key}>
+                        <Link
+                          href={c.href}
+                          title="Click to tailor this schedule"
+                          className={`inline-flex flex-wrap items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                            c.status === "active"
+                              ? "border-gulf-teal/40 text-gray-200 hover:border-gulf-teal hover:text-white"
+                              : "border-white/10 text-gray-500 hover:border-white/30"
+                          }`}
+                        >
+                          <span aria-hidden>{c.kind === "email" ? "✉" : "📣"}</span>
+                          <span>{c.line}</span>
+                          {c.audience && <span className="text-gray-500">→ {c.audience}</span>}
+                          {c.status === "paused" ? (
+                            <span className="text-amber-300/70">paused</span>
+                          ) : chipTime(c.nextAt) ? (
+                            <span className="text-gray-500">· next {chipTime(c.nextAt)}</span>
+                          ) : null}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
             {/* Campaign starters — scoped to the selected project. When the hub is
                 empty the launchpad in the center carries them instead (never two
                 copies of the same buttons on one page). */}
