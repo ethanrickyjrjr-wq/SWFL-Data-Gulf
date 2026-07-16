@@ -1,4 +1,45 @@
-## 2026-07-16 (Sonnet 5 · main) — self-marketing launch plan filed: SteadyAPI social-listening round 5 (Reddit/IG/X, our own presence) + funnel-spine GTM plan + 9 punchlist checks.
+## 2026-07-16 (Sonnet 5 · main) — HuggingFace + launch-tooling deep dive filed: HF is not a usable SWFL data source (verdict, 4 search angles), but surfaces two real anti-hallucination/factuality-scoring adopt-candidates (Vectara HHEM-2.1-Open, promptfoo) plus n8n (ops alerting) + programmatic-SEO methodology. 3 checks opened.
+
+Operator: "huggingface seems to have tons of data and resources," deep dive with crawl4ai for data
+problems/solutions; also look into automated help, marketing ideas, and tools that make AI building
+more reliable ("not making up numbers"). ~15 live crawl4ai fetches this session (RULE 0.4), zero
+memory-only claims. Findings written to `docs/research/2026-07-16-huggingface-and-launch-tooling-deep-dive.md`
+(index updated in `docs/research/README.md`).
+
+**Part 1 (HF as data source) — skip, confirmed across real-estate/census/parcel/geospatial
+searches:** every promising hit was either a synthetic/toy dataset (`zillow/real_estate_v1` = GPT-4o
+chatbot dialogue, not market data), a worse-provenance third-party mirror of a source we already
+hold directly (`rwcitek/us_census_tracts_2025` = unattributed TIGER/Line re-host, no README), or a
+homonym-collision (parcel search → LeRobot warehouse pick-and-place robotics data). No further HF
+data searches needed — this is the answer, not a gap.
+
+**Part 2 (the real find) — anti-hallucination scoring, directly serves the no-invention mandate:**
+Vectara's `hallucination_evaluation_model` (HHEM-2.1-Open, Apache-2.0, 0.1B params, beats GPT-4
+zero-shot on RAGTruth/AggreFact benchmarks, CPU-runnable <600MB RAM) scores (premise=facts,
+hypothesis=generated prose) pairs 0-1 for factual consistency — Python/transformers-only
+(`trust_remote_code=True`), same decoupled-job pattern as `dlt`. **promptfoo** (MIT, TS/Node-native,
+23.3k stars, built-in `factuality` assertion, HF TruthfulQA example baked in) is the stronger CI fit
+since it runs directly in the Bun/Node pipeline with no Python decoupling — beats DeepEval
+(same category, Python-only) on stack fit alone. Verified fact worth tracking: promptfoo's own docs
+now banner "Promptfoo is now part of OpenAI" (governance note, license still MIT as fetched today).
+Recommended shape (not yet built): promptfoo factuality assertion as a pre-merge CI gate on pack
+narrative diffs, HHEM as a scheduled post-hoc auditor across live brain output — both only ever
+check *prose*, never replace the deterministic-math rule.
+
+**Part 3 (launch/build tooling):** n8n (Sustainable Use License — fair-code, not OSI open source,
+self-hostable) doesn't unblock `lib/social` auto-posting (that's a Meta Business Verification
+approval gate per today's earlier marketing-launch-plan, not a tooling gap) but is a genuine new
+angle for wiring `public.checks`/cron-failures into Slack/email alerts. Programmatic-SEO research
+(Ahrefs methodology, Nomadlist/Wise examples) gives the already-open `marketing_blog_decision_r_pages`
+check a concrete framework — proprietary + relevant data is what separates it from Google's "spam"
+flag, which we already hold for `/r/` pages — no new check opened, it's supporting evidence for an
+existing one.
+
+**Checks opened (RULE 2.4, none silently deferred):** `research/promptfoo_factuality_ci_gate`,
+`research/hhem_narrative_consistency_scorer`, `research/n8n_ops_alerting_automation`. None piloted
+yet — this session was research only, no code changed.
+
+
 
 Operator: "we have a lot of steady API runs to use this month, run it on reddit, x, instagram" —
 figure out how to bring it together, punchlist for new users, email + social marketing ideas

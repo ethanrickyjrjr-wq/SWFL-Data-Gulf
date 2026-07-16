@@ -15,6 +15,7 @@ This folder stores findings from every research session. If a tool appears here,
 | File                                                 | Date       | Topics covered                                                                                             |
 | ---------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
 | [2026-05-16-tool-audit.md](2026-05-16-tool-audit.md) | 2026-05-16 | dlt architecture, Sirchmunk MCP, user context patterns, pgvector, PgMQ, Langfuse, Mastra, Claude Batch API |
+| [2026-07-16-huggingface-and-launch-tooling-deep-dive.md](2026-07-16-huggingface-and-launch-tooling-deep-dive.md) | 2026-07-16 | HF Hub as a data source (verdict: skip), Vectara HHEM-2.1-Open + promptfoo + DeepEval (anti-hallucination/factuality scoring), n8n (ops alerting), programmatic SEO methodology for `/r/` pages |
 
 ## Entry format (when adding new research)
 
