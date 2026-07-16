@@ -299,8 +299,10 @@ appear.
 
 **The magnitude permission is direction-symmetric.** When settled facts show a large gap, state its size
 plainly rather than hedging it — identically whichever way the number points. `market-comps.ts`'s
-`buildPriceCase` is the reference implementation: its `isExtreme` check fires on the gap's relative size,
-never on which direction is "the favorable one."
+`buildPriceCase` is the reference implementation: its `isExtreme` check fires ONLY when the subject sits
+provably outside the full comp range (`subjectPpsf < min(allPpsf)` or `> max(allPpsf)`, and with at least
+2 priced comps so a one-comp set is never called a "range") — never on the gap's size relative to the
+median alone, and never on which direction is "the favorable one."
 
 **Charts carry the argument too.** `price-reduced` gained a new chart (`priceVsAreaDotSpec`) plotting the
 new price's $/sq ft against a sourced comp median, using the already-registered `dot-plot` frame — no new

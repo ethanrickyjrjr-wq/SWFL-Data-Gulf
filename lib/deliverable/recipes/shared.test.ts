@@ -27,7 +27,13 @@ mock.module("@/lib/listings/community-lookup", () => ({
 // block is pasted in verbatim. mock.module is process-global — set up BEFORE ./shared
 // is imported (the same ordering the two mocks above rely on), restored in afterAll.
 let capturedSystem = "";
+// FIX (final-review, 07/16/2026): this mock.module call replaced the WHOLE module for
+// every importer in the test process without spreading the real one (playbook Part 9) —
+// silently stripping every OTHER named export of @/refinery/agents/anthropic.mts (e.g.
+// model-id constants) for the duration of this file's mock window. Spread anthropicOrig2
+// (captured above, before any mock ran) so only getAnthropic is actually overridden.
 mock.module("@/refinery/agents/anthropic.mts", () => ({
+  ...anthropicOrig2,
   getAnthropic: () => ({
     messages: {
       create: async (args: { system: string }) => {

@@ -16,6 +16,30 @@
 - `_ASSISTANT/research/2026-07-15-ai-steering-anti-drift-research.md`
 - `_ASSISTANT/research/2026-07-15-authority-reasoning-not-hype-research.md`
 
+## Deviations committed during execution
+
+**Dated 07/16/2026, added by the final whole-branch review.** This plan is a permanent "do not
+re-derive" record, and two passages below no longer describe the committed code:
+
+1. **`isExtreme` shipped range-exclusivity-only, not the Task 5 code block below.** Task 5's
+   `isExtreme` code block ORs a range-exclusivity check with a `vsMedian.diff / medianPpsf >= 0.4`
+   percentage-of-median check. That OR condition is superseded — it shipped a reproduced bug
+   (a large percentage gap could claim "the entire range" while the subject sat strictly inside
+   `[min(allPpsf), max(allPpsf)]`, contradicting the very next sentence in the same paragraph).
+   The committed `isExtreme` in `market-comps.ts` is range-exclusivity-only, plus an `n >= 2`
+   floor (a single priced comp can never be "outside the range" as a claim distinct from
+   "outside the median"). Read `market-comps.ts`'s own inline comment above `isExtreme`, not the
+   code block below, as the source of truth.
+2. **The `assertHeroChartCoherence` wiring shown in Task 9/10's `price-reduced.ts` code was not
+   shipped that way.** The committed `buildPriceReduced` does NOT call
+   `assertHeroChartCoherence` on its new chart — the hero is the TOTAL price, the chart plots
+   $/SQFT, and the gate's 4-way `UnitClass` cannot distinguish a currency total from a currency
+   rate, so it would fire on every real listing and drop the chart every time (the exact
+   cross-quantity comparison the coherence module documents as unsafe). The gate stays fully
+   wired on `market-comps`, where both plotted quantities are genuinely the same unit. Read
+   `price-reduced.ts`'s own inline comment above its chart-fill block, not the code block below,
+   as the source of truth.
+
 ## Global Constraints
 
 - **No-invention architecture is untouched.** This plan never modifies `auditClaims`, `gateNarrative`, `CLAIM_PROHIBITION`, or any banned-vocabulary regex in `lib/deliverable/claims.ts`. Every task's tests must confirm existing claim-gate tests still pass unmodified.

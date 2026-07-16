@@ -23,11 +23,12 @@
 // chrome tests below pin it back onto the shared spine; campaign-coherence.test.ts is
 // the cross-recipe oracle.
 //
-// Fully offline: the Anthropic client, the photo mirror, and the comp-helper
-// (compsForAddress, Task 10's wiring) are all stubbed, so this suite makes ZERO
-// network calls and costs nothing to run. The comp-helper default returns no comps,
-// so every fixture here reserves-then-drops its chart slot; wiring-specific chart
-// assertions (comps present, coherence, image fill) belong to a later suite.
+// Fully offline: the Anthropic client, the photo mirror, the comp-helper
+// (compsForAddress, Task 10's wiring), and the chart PNG host (@/lib/email/spec-to-png)
+// are all stubbed, so this suite makes ZERO network calls and costs nothing to run. The
+// comp-helper default returns no comps, so every fixture here reserves-then-drops its
+// chart slot; wiring-specific chart assertions (comps present, coherence, image fill)
+// belong to a later suite.
 
 import { test, expect, mock, afterAll, describe } from "bun:test";
 import * as realAnthropic from "@/refinery/agents/anthropic.mts";
@@ -592,6 +593,44 @@ test("priceVsAreaDotSpec filters out vacant-lot comps (no beds/sqft) before comp
   const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000), vacantLot]);
   expect(spec).not.toBeNull();
   expect((spec!.options as { data: { reference?: number }[] }).data[0].reference).toBe(225); // unaffected by the lot
+});
+
+// ── FINAL-REVIEW FIX 1: the single-row dot-plot must print the median's own number ──
+//
+// A single-item dot-plot scales its track to [value, reference], so the two dots always
+// sit at opposite ends of the track no matter how close the real numbers are — a $1/sqft
+// gap would render identically to a $200/sqft gap, and neither number appeared anywhere
+// in the email. The fix folds both already-sourced numbers into the legend labels.
+test("priceVsAreaDotSpec folds the formatted subject and median $/sqft into the legend labels", () => {
+  const facts = {
+    address: "1 Main St, Fort Myers, FL 33905",
+    price: "$400,000",
+    sqft: "2000",
+  } as never;
+  const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000)]); // 220, 230 $/sqft
+  const options = spec!.options as { referenceLabel?: string; valueLabel?: string };
+  // subject: 400,000 / 2,000 = $200/sqft. Reference: median(220, 230) = $225/sqft.
+  expect(options.valueLabel).toBe("this home, new price ($200/sq ft)");
+  expect(options.referenceLabel).toBe("comparable homes (median $225/sq ft)");
+});
+
+// ── FINAL-REVIEW FIX 5: the floor counts USABLE $/sqft values, not comps with beds/sqft ──
+//
+// isComparableHome only requires beds + sqft + a POSITIVE price — a $100 nominal-price
+// deed (a family transfer, a quitclaim) clears it, but perSqft's own >0 guard rounds
+// $100/2,000 sqft to $0 and discards it. Before this fix, MIN_COMPS_FOR_CHART gated on
+// comps that merely LOOKED like homes, so a 2-"home" set with only ONE usable $/sqft
+// value could still ship a "median" that was really just that one comp's own number.
+test("priceVsAreaDotSpec returns null when fewer than MIN_COMPS_FOR_CHART comps have a USABLE $/sqft (a nominal-price deed doesn't count)", () => {
+  const facts = {
+    address: "1 Main St, Fort Myers, FL 33905",
+    price: "$400,000",
+    sqft: "2000",
+  } as never;
+  const nominalPriceDeed = comp(100, 2000); // beds/sqft/price all present; $/sqft rounds to $0
+  const real = comp(440000, 2000);
+  // 2 comps clear isComparableHome, but only ONE has a real $/sqft — the floor must see 1.
+  expect(priceVsAreaDotSpec(facts, [real, nominalPriceDeed])).toBeNull();
 });
 
 // ── THE BUILD-LEVEL WIRING: the chart fills when sourced, drops cleanly when not ──

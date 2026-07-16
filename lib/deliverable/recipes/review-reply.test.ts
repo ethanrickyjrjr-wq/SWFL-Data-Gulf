@@ -79,7 +79,13 @@ mock.module("@/utils/supabase/service-role", () => ({
     throw new Error("no creds in test");
   },
 }));
+// FIX (final-review, 07/16/2026): this mock.module call replaced the WHOLE module for
+// every importer in the test process without spreading the real one (playbook Part 9) —
+// silently stripping every OTHER named export of @/refinery/agents/anthropic.mts for the
+// duration of this file's mock window. Spread anthropicOrigRR (captured above) so only
+// getAnthropic is actually overridden.
 mock.module("@/refinery/agents/anthropic.mts", () => ({
+  ...anthropicOrigRR,
   getAnthropic: () => ({
     messages: {
       create: async (args: { system: string }) => {

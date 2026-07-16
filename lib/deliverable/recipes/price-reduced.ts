@@ -133,9 +133,11 @@ const COMP_POOL = 12;
  * `buildPriceReduced`'s own header: the narrator holds zero market data, by design,
  * specifically to prevent it inventing a reason the price moved).
  *
- * Null when there's no defensible reference: fewer than MIN_COMPS_FOR_CHART real
- * comparable homes, or the subject itself has no price or sqft. `dropEmptyChartSlot`
- * (shared.ts) removes the reserved slot when this returns null — never an empty box.
+ * Null when there's no defensible reference: fewer than MIN_COMPS_FOR_CHART comps with a
+ * USABLE $/sqft value (never merely MIN_COMPS_FOR_CHART comps that pass isComparableHome —
+ * see the floor computation below), or the subject itself has no price or sqft.
+ * `dropEmptyChartSlot` (shared.ts) removes the reserved slot when this returns null — never
+ * an empty box.
  */
 export function priceVsAreaDotSpec(facts: ListingFacts, comps: RenderComp[]): ChartSpec | null {
   const subjectPrice = money(facts.price);
@@ -143,11 +145,20 @@ export function priceVsAreaDotSpec(facts: ListingFacts, comps: RenderComp[]): Ch
   const subjectPpsf = perSqft(subjectPrice ?? null, subjectSqft ?? null);
   if (subjectPpsf == null) return null;
 
+  // THE FLOOR IS ON USABLE $/SQFT VALUES, NEVER ON COMP COUNT (final-review fix,
+  // 07/16/2026). `isComparableHome` only asks for beds + sqft + a POSITIVE price — a $100
+  // nominal-price deed (a family transfer, a quitclaim) clears it while `perSqft` correctly
+  // discards it (its own >0 guard rounds $100/2,000 sqft to $0 and returns null). Gating on
+  // `comparable.length` let a 2-"home" set with only ONE real $/sqft value still ship a
+  // "median" that was really just that one comp's own number. Compute the FILTERED array
+  // first and gate the floor on ITS length — it now measures what the median is actually
+  // built from, not what merely looks like a house.
   const comparable = comps.filter(isComparableHome);
-  const referencePpsf = median(
-    comparable.map((c) => perSqft(c.price, c.sqft)).filter((v): v is number => v != null),
-  );
-  if (referencePpsf == null || comparable.length < MIN_COMPS_FOR_CHART) return null;
+  const ppsfValues = comparable
+    .map((c) => perSqft(c.price, c.sqft))
+    .filter((v): v is number => v != null);
+  const referencePpsf = median(ppsfValues);
+  if (referencePpsf == null || ppsfValues.length < MIN_COMPS_FOR_CHART) return null;
 
   const street = facts.address?.split(",")[0]?.trim() || "This home";
   return {
@@ -164,8 +175,14 @@ export function priceVsAreaDotSpec(facts: ListingFacts, comps: RenderComp[]): Ch
     source: { citation: "SWFL Data Gulf · realtor.com", url: "https://www.realtor.com" },
     options: {
       data: [{ label: street, value: subjectPpsf, reference: referencePpsf }],
-      referenceLabel: "nearby comparable homes (median $/sq ft)",
-      valueLabel: "this home, new price",
+      // FIX (final-review, 07/16/2026): a SINGLE-ITEM dot-plot scales its track to
+      // [value, reference], so the two dots always sit at opposite ends of the track no
+      // matter how close the real numbers are — a $1/sqft gap renders identical to a
+      // $200/sqft gap, and neither figure appeared anywhere in the email. Folding the
+      // already-computed, already-sourced numbers into the legend labels is the minimal
+      // fix — no new data, no new derivation.
+      referenceLabel: `comparable homes (median ${usd(referencePpsf)}/sq ft)`,
+      valueLabel: `this home, new price (${usd(subjectPpsf)}/sq ft)`,
     },
   };
 }
@@ -264,6 +281,25 @@ function priceStripFootnote(facts: ListingFacts, previous?: string): string | un
   if (kept.length === 0) return undefined;
   const line = kept.join(" ");
   return line.startsWith("*") ? line : `*${line}`;
+}
+
+/** A deterministic, storage-key-safe slug of the subject's street (final-review fix,
+ *  07/16/2026): lowercase, every run of non-alphanumerics collapsed to one hyphen, capped at
+ *  24 chars, no leading/trailing hyphen. NO Date.now()/randomness — the SAME house rebuilt
+ *  the same day must land on the SAME key (the media host upserts on it, which is the
+ *  point), while TWO DIFFERENT houses must never collide on one. Before this, the storage
+ *  key carried zip + date + accent-tint and NOTHING that named the house — two listings in
+ *  the same ZIP, cut on the same day, sharing the agent's accent color, silently shared one
+ *  URL, and the second build overwrote the first house's already-SENT chart image in place. */
+function streetSlug(address?: string): string {
+  const street = (address ?? "").split(",")[0]?.trim() ?? "";
+  const slug = street
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 24)
+    .replace(/-+$/, "");
+  return slug || "home";
 }
 
 /** Fill the reserved chart slot IN PLACE (preserving its grid position). Mirrors the
@@ -375,7 +411,13 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
     if (spec) {
       const accent = doc.globalStyle.accentColor || "#B98F45";
       const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
-      const key = `email-charts/price-reduced-${facts.zip ?? "swfl"}-${spec.asOf}-${tint}.png`;
+      // The subject discriminator (final-review fix, 07/16/2026) — see streetSlug's own
+      // doc comment for the collision this closes.
+      const key =
+        `email-charts/price-reduced-${facts.zip ?? "swfl"}-${streetSlug(facts.address)}-` +
+        `${spec.asOf}-${tint}.png`;
+      // NO block caption — the PNG already bakes in the title, source and as-of date; a
+      // text caption would duplicate it (mirrors market-comps.ts's own chart fill).
       const image = await chartSpecToEmailImage(spec, accent, key).catch(() => null);
       if (image) doc = fillChartSlot(doc, image.url, image.alt, "");
     }

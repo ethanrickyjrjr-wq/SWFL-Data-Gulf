@@ -484,6 +484,56 @@ test("buildPriceCase states an extreme gap plainly, direction-symmetric", () => 
   expect(expensive!.vsMedian.dir).toBe("above");
 });
 
+test("the extreme tier never fires on a SINGLE priced comp — 'the entire range' needs an actual range (final-review Fix 4)", () => {
+  // With n === 1, "outside the full comp range" and "outside the median" are the SAME
+  // one-comp comparison wearing two names — a one-element set is not a range. Before this
+  // fix, isExtreme had no floor on `priced.length`, so a single priced comp with a huge
+  // gap could still ship "not just the median, the entire range" about a "range" that was
+  // really just that one comp.
+  const factsSolo = {
+    address: "1 Solo Ln, Fort Myers, FL 33905",
+    price: "$40,000",
+    sqft: "2000",
+  } as never;
+  const oneComp: RenderComp[] = [
+    {
+      addressLine: "1 A St",
+      city: "x",
+      beds: 3,
+      baths: 2,
+      sqft: 2000,
+      status: "active",
+      price: 400000,
+      priceKind: "estimate",
+      priceDate: "2026-01-01",
+      sourceUrl: null,
+    },
+  ];
+  const pc = buildPriceCase(factsSolo, oneComp);
+  // $40,000 / 2,000 = $20/sqft vs. the single comp's $400,000 / 2,000 = $200/sqft — a
+  // gap just as large (10x) as the direction-symmetric extreme fixtures above, and the
+  // exact shape ("subjectPpsf < the one value in allPpsf") that used to trip isExtreme.
+  expect(pc!.subjectPpsf).toBe(20);
+  expect(pc!.medianPpsf).toBe(200);
+  expect(pc!.n).toBe(1);
+  // The verdict falls through to the plain, always-true median-gap sentence — never the
+  // extreme tier's "not just the median, the entire range" phrasing.
+  expect(pc!.verdict).not.toContain("the entire range");
+  expect(pc!.verdict).toContain(
+    "sits $180 below the $200 median across the 1 comparable home nearby.",
+  );
+
+  // Keep the existing 2-comp direction-symmetric tests' own claim honest: with a REAL
+  // multi-comp range (n >= 2), the exact same gap-and-direction shape still fires.
+  const twoComps: RenderComp[] = [
+    { ...oneComp[0]!, addressLine: "1 A St" },
+    { ...oneComp[0]!, addressLine: "2 B St", price: 420000 },
+  ];
+  const pcTwo = buildPriceCase(factsSolo, twoComps);
+  expect(pcTwo!.n).toBe(2);
+  expect(pcTwo!.verdict).toContain("the entire range");
+});
+
 test("buildPriceCase does NOT claim 'the entire range' when only the percentage-of-median gap is large and the subject is still inside the set's range", () => {
   // Regression test for the Critical review finding on task-5-report.md: the ORIGINAL
   // isExtreme formula also fired on `vsMedian.diff / medianPpsf >= 0.4` alone, with no

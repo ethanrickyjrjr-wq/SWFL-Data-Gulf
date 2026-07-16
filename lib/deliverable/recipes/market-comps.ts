@@ -52,6 +52,10 @@
 // on that misreading. FILTER BY DATA, NEVER BY GUESSING AT THE NAME (the lot's name is
 // "315 Shore Dr" — it looks exactly like its neighbors).
 //
+// This filter (`isComparableHome`) now lives in `recipes/shared.ts` (Task 8's copy-#2
+// extraction) — price-reduced.ts's own chart needs the identical rule and imports it
+// from there rather than redefining it.
+//
 // ── THE OTHER HONESTY PROBLEM: NOT EVERY COMP IS A SALE ───────────────────────
 // `compsForAddress` tags each price: a recorded `sold`, a realtor.com `estimate`
 // (AVM), or a `last_list`. On the live fixture only 2 of 5 real homes are recorded
@@ -552,9 +556,17 @@ export function buildPriceCase(facts: ListingFacts, comps: RenderComp[]): PriceC
   // through to the plain, always-true "sits $X above/below the median" sentence in the
   // `else` branch below, which is honest either way.
   const allPpsf = priced.map((x) => x.ppsf);
+  // FIX (final-review, 07/16/2026): with a SINGLE priced comp, "outside the full range"
+  // and "outside the median" are the same one-comp comparison wearing two names — the
+  // sentence below would still say "not just the median, the entire range" about a
+  // one-element "range", which is not a range at all. Require at least 2 priced comps
+  // before the extreme tier can fire; n === 1 falls through to the plain, always-true
+  // "sits $X above/below the median" sentence in the `else` branch, which is honest at
+  // any n.
   const isExtreme =
-    (vsMedian.dir === "below" && subjectPpsf < Math.min(...allPpsf)) ||
-    (vsMedian.dir === "above" && subjectPpsf > Math.max(...allPpsf));
+    n >= 2 &&
+    ((vsMedian.dir === "below" && subjectPpsf < Math.min(...allPpsf)) ||
+      (vsMedian.dir === "above" && subjectPpsf > Math.max(...allPpsf)));
   const s1 =
     vsMedian.dir === "level"
       ? `At ${usd(subjectPpsf)} per square foot, the asking price${forAddr} is level with the ` +

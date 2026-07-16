@@ -4,6 +4,34 @@
 **Status:** approved design, pre-plan
 **Research:** `_ASSISTANT/research/2026-07-15-sell-side-copywriting-research.md` (10 pages crawl4ai'd — real-estate copywriting / elite-producer technique), `_ASSISTANT/research/2026-07-15-ai-steering-anti-drift-research.md` (13 pages crawl4ai'd — Anthropic/OpenAI/Microsoft/practitioner guidance on encoding one persistent stylistic policy across many LLM call sites without drift), and `_ASSISTANT/research/2026-07-15-authority-reasoning-not-hype-research.md` (4 pages crawl4ai'd — a named $3.4B-production real-estate coach, the USPAP narrative-appraisal standard, sell-side equity-research "Buy" methodology, and REIT NAV-discount reasoning — researched specifically to resolve whether "favorable" and the existing "do not pitch" prompt language are in conflict; they are not). Every rule below traces to one of those three files. **These three files are the permanent record for this design — see "Where this research lives" below; do not re-derive this reasoning from memory in a future session.**
 
+## Deviations committed during execution
+
+**Dated 07/16/2026, added by the final whole-branch review.** This spec is a permanent
+"do not re-derive" record, and two passages below no longer describe the committed code. Both
+deviations are intentional fixes made DURING execution, not drift to correct back toward this
+doc:
+
+1. **`isExtreme` shipped range-exclusivity-only.** §4a.1 below (and the original Task 5 plan
+   code block) describes a threshold that fires on EITHER "subject sits outside the full comp
+   range" OR "the gap exceeds ~40% of the median" — an OR condition. That OR condition shipped a
+   reproduced bug: it could claim "not just the median, the entire range" while the subject sat
+   strictly INSIDE `[min(allPpsf), max(allPpsf)]`, directly contradicting the very next,
+   correctly-computed sentence in the same paragraph. The committed `isExtreme` is
+   range-exclusivity-only (`subjectPpsf < min(allPpsf)` or `> max(allPpsf)`), with an added
+   `n >= 2` floor so a single priced comp — where "outside the range" and "outside the median"
+   are the same comparison wearing two names — can never trigger it either. See
+   `market-comps.ts`'s own inline comment above `isExtreme` for the full incident.
+2. **The `assertHeroChartCoherence` wiring was removed from `price-reduced`'s chart.** §"Charts
+   carry the argument too" below (and the plan's Task 9/10 code) wires the same coherence gate
+   used by `market-comps` onto the new `price-reduced` chart. It was removed: `price-reduced`'s
+   hero is the TOTAL price, its chart plots $/SQFT — two different quantities that the gate's
+   4-way `UnitClass` (currency/percent/count/other) both read as plain "currency", so the gate
+   would fire on every real listing (price runs ~1000x its own $/sqft) and drop the chart every
+   time. That is the exact cross-quantity comparison the coherence module's own header documents
+   as unsafe, not a real coherence check. The gate remains fully wired on `market-comps`, where
+   both plotted quantities genuinely are the same unit. See `price-reduced.ts`'s own inline
+   comment above its chart-fill block for the full reasoning.
+
 ## The problem
 
 The deliverable builder's AI commentary should read as coming from the agent with the most data at their fingertips — an authority, not a hype machine. Today the twelve recipes are honest by construction (the claim gate, the banned-comparative-vocabulary lists, `authorListingNarrative`'s "describe, do not pitch" instruction) but they are *neutral* by default, not favorable. The operator wants a deliberate, code-enforced default: recipes that pitch a specific property or the agent's own brand should lead with strength, favor the property in a true light, and lean on the agent's own description for amenities/lifestyle color — while recipes that are relationship/informational newsletters stay exactly as neutral as they are today.
