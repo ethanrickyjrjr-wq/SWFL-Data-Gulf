@@ -81,11 +81,6 @@ import {
 } from "./shared";
 import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
-import {
-  assertHeroChartCoherence,
-  chartMagnitudeFromSpec,
-} from "@/lib/deliverable/chart-coherence";
-import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
 import { createBlock } from "@/lib/email/doc/default-docs";
 import type { RecipeBuildContext } from "./index";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
@@ -360,27 +355,32 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
   // ONLY to compute this chart — NEVER handed to the narrator below, which stays
   // exactly as constrained as it has always been (zero market data, so it can never
   // invent a reason the price moved). A chart is a bonus, never a blocker: any miss
-  // here (no comps, incoherent chart, fetch failure) simply drops the reserved slot.
+  // here (no comps, fetch failure, render failure) simply drops the reserved slot.
+  //
+  // NO CROSS-QUANTITY COHERENCE CHECK. This recipe's hero is the TOTAL price; this
+  // chart plots $/SQFT — two different quantities, and chart-coherence.ts's own
+  // header states its honest scope: it compares MAGNITUDE within one UnitClass, and
+  // that 4-way class (currency/percent/count/other) has no way to say "this currency
+  // figure is a per-sqft rate, not a total" — both would read as plain "currency" and
+  // the gate would fire on every real listing (price is ~1000x its $/sqft, far past
+  // FACTOR=3), dropping this chart every time it could otherwise ship. Calling it here
+  // would be the exact cross-quantity comparison the module documents as unsafe, not a
+  // real coherence check. This chart needs no such gate anyway: it is magnitude-
+  // self-consistent BY CONSTRUCTION — both plotted values (the subject's $/sqft and
+  // the comps' median $/sqft) come from the same perSqft/median math over the same
+  // sourced comps, so they can never disagree by more than the comps themselves do.
   if (kicker && facts.address) {
     const result = await compsForAddress(facts.address, { topN: COMP_POOL }).catch(() => null);
     const spec = priceVsAreaDotSpec(facts, result?.comps ?? []);
     if (spec) {
-      const coherence = assertHeroChartCoherence({
-        hero: resolveHeadlineFigure(doc),
-        chart: chartMagnitudeFromSpec(spec),
-      });
-      if (coherence.coherent) {
-        const accent = doc.globalStyle.accentColor || "#B98F45";
-        const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
-        const key = `email-charts/price-reduced-${facts.zip ?? "swfl"}-${spec.asOf}-${tint}.png`;
-        const image = await chartSpecToEmailImage(spec, accent, key).catch(() => null);
-        if (image) doc = fillChartSlot(doc, image.url, image.alt, "");
-      } else {
-        console.log("[price-reduced] dropped incoherent chart:", coherence.reason);
-      }
+      const accent = doc.globalStyle.accentColor || "#B98F45";
+      const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
+      const key = `email-charts/price-reduced-${facts.zip ?? "swfl"}-${spec.asOf}-${tint}.png`;
+      const image = await chartSpecToEmailImage(spec, accent, key).catch(() => null);
+      if (image) doc = fillChartSlot(doc, image.url, image.alt, "");
     }
   }
-  // Nothing resolved (no reduction, no comps, incoherent) → drop the slot. An empty
+  // Nothing resolved (no reduction, no comps, no image) → drop the slot. An empty
   // chart box is worse than no chart.
   doc = dropEmptyChartSlot(doc);
 
