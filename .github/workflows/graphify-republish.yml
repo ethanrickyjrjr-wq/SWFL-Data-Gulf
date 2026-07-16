@@ -45,10 +45,11 @@ jobs:
 
       # Cross-repo checkout — the ops repo is separate from brain-platform, so
       # the default GITHUB_TOKEN (scoped to this repo only) can't read or push
-      # it. Reuses REBUILD_PAT (already a fine-grained PAT owned by the
-      # operator, used elsewhere to push brains/ to this repo's protected
-      # main) — unverified whether its scope extends to swfldatagulf-ops until
-      # this step actually runs; a scope gap fails loudly right here.
+      # it. REBUILD_PAT must be a fine-grained PAT granted BOTH repos
+      # (SWFL-Data-Gulf for the rebuild-bot pushes elsewhere, swfldatagulf-ops
+      # for this checkout), Contents read/write. A token missing the ops grant
+      # 404s right here — that was this job's from-birth failure until the
+      # 07/16/2026 re-mint.
       - name: Checkout swfldatagulf-ops
         uses: actions/checkout@v6
         with:
