@@ -181,8 +181,8 @@ export function priceVsAreaDotSpec(facts: ListingFacts, comps: RenderComp[]): Ch
       // $200/sqft gap, and neither figure appeared anywhere in the email. Folding the
       // already-computed, already-sourced numbers into the legend labels is the minimal
       // fix — no new data, no new derivation.
-      referenceLabel: `comparable homes (median ${usd(referencePpsf)}/sq ft)`,
-      valueLabel: `this home, new price (${usd(subjectPpsf)}/sq ft)`,
+      referenceLabel: `area median (${usd(referencePpsf)}/sq ft)`,
+      valueLabel: `new price (${usd(subjectPpsf)}/sq ft)`,
     },
   };
 }

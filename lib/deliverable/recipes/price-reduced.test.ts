@@ -610,8 +610,8 @@ test("priceVsAreaDotSpec folds the formatted subject and median $/sqft into the 
   const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000)]); // 220, 230 $/sqft
   const options = spec!.options as { referenceLabel?: string; valueLabel?: string };
   // subject: 400,000 / 2,000 = $200/sqft. Reference: median(220, 230) = $225/sqft.
-  expect(options.valueLabel).toBe("this home, new price ($200/sq ft)");
-  expect(options.referenceLabel).toBe("comparable homes (median $225/sq ft)");
+  expect(options.valueLabel).toBe("new price ($200/sq ft)");
+  expect(options.referenceLabel).toBe("area median ($225/sq ft)");
 });
 
 // ── FINAL-REVIEW FIX 5: the floor counts USABLE $/sqft values, not comps with beds/sqft ──
