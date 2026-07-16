@@ -83,6 +83,7 @@ import {
   type BrandNeed,
   type ShowcaseRecipe,
 } from "@/lib/showcase/recipe";
+import { PREFILL_KEYS } from "@/lib/brand/profile-ledger";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import {
   type BrandPalette,
@@ -643,8 +644,10 @@ export function EmailLabGridShell({
     autoBuildFired.current = true;
     if (Object.keys(brandPatch).length > 0) {
       applyBranding({ ...brandingRef.current, ...brandPatch });
-      void fetch("/api/user/brand", {
-        method: "PATCH",
+      // Blank-only bank (fill-once §B): an implicit popup fill must never
+      // overwrite an account value the user chose in the account editor.
+      void fetch("/api/user/brand/bank", {
+        method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(brandPatch),
       });
@@ -756,9 +759,10 @@ export function EmailLabGridShell({
       applyBranding({ ...branding, ...brandPatch });
       // "Type it once — we'll remember" has to be true. Signed-out this 401s and is
       // dropped on purpose: the build must NOT be held hostage to a sign-up, and the
-      // Brand panel's Save still offers them the account afterwards.
-      void fetch("/api/user/brand", {
-        method: "PATCH",
+      // Brand panel's Save still offers them the account afterwards. Blank-only
+      // bank (fill-once §B): never overwrites a chosen account value.
+      void fetch("/api/user/brand/bank", {
+        method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(brandPatch),
       });
@@ -1407,9 +1411,11 @@ export function EmailLabGridShell({
         setPalettes(sanitizePalettes(data.color_palettes));
         setBranding((prev) => {
           const next = { ...prev };
-          // preferred_recipe rides along so a saved account default seeds the
-          // recipe picker on NEW projects (only when the project has none yet).
-          for (const k of ["agent_name", "photo_url", "license", "brokerage", "preferred_recipe"]) {
+          // The FULL account profile blank-fills in (fill-once spec 2026-07-16
+          // §F) — it used to be 4 keys + preferred_recipe, so a saved
+          // business_address (CAN-SPAM) never reached an in-project build and
+          // the popup re-asked for what the account already held.
+          for (const k of PREFILL_KEYS) {
             if (!next[k] && typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
           }
           // The old prefill pulled name/photo/license/brokerage and NOTHING else, so
