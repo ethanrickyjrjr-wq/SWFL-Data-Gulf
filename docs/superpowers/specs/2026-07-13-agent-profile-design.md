@@ -66,7 +66,11 @@ do hold, and which we cite.
 ### 1. The two lanes a bio is made of
 
 - **Lane 2 — the agent's own words.** "I got into this after buying my first place on a
-  canal." Never goes stale. **Saved verbatim.**
+  canal." Never goes stale. **Saved verbatim** — the STORED ledger row, so we can always
+  prove what the agent actually said. That is a provenance rule for `agent_profile_facts`,
+  not a style rule for the bio itself: the DRAFTED/rendered bio is free to rewrite,
+  restructure, and dress the same fact in better prose. Storing verbatim and writing
+  verbatim are two different rules — corrected 07/16/2026 after this got conflated.
 - **Lane 1 — our market data.** Cape Coral's typical home value: $339,699. **Goes stale in
   months.** Saved as a **live token**, resolved at build.
 
@@ -136,16 +140,33 @@ Rules, each already paid for:
 
 A "Your story" section in the Brand panel. The AI interviews, drafts, saves.
 
-**May draw on:** saved `agent_profile_facts` (lane 2) + the closed token set (lane 1).
-**Nothing else.**
+**May draw on:** saved `agent_profile_facts` (lane 2, the agent's real words) + the closed
+token set (lane 1) + **web-researched, cited local color** (lane 3 — area history, what a
+neighborhood is known for, the kind of buyer a specialty serves). Corrected 07/16/2026: this
+used to say "nothing else," excluding lane 3 entirely. It shouldn't have — a bio painting a
+real picture of the agent's farm area is exactly what lane-3 research is for, same as any
+other cited web fact in this product.
 
-**May never:** invent a credential, tenure, volume, award or ranking; assert a **comparison**,
-**trajectory**, **count** or **sequence** it was not handed (`lib/deliverable/claims.ts`
-applies to a bio exactly as to a deliverable — `CLAIM_PROHIBITION` goes into its system
-prompt); or write a selling claim of its own ("the agent you can trust").
+**Is expected to, not just permitted to:** rewrite the agent's own words into better prose,
+add adjectives, warmth, personality, structure, and favorable framing. **This is the job, not
+a risk to contain.** The same synthesis license the platform already gives every market
+narrator over a real number (Brain Factory rule 2 — deterministic math, narrative prose)
+applies here: the FACT is locked, the TELLING of it is the AI's. A flat, unadorned restatement
+of raw facts is not a success case — a well-told, flattering, and true bio is. Corrected
+07/16/2026 — this section previously read as banning rewriting; it never should have.
 
-**Fail-closed:** a draft that violates the gate is **not shown**. The AI asks a better question
-instead.
+**May never:** invent a credential, tenure, volume, award, or ranking the agent did not state;
+or assert a **comparison**, **trajectory**, **count**, **sequence**, or **motive** it was not
+handed — `lib/deliverable/claims.ts` applies to a bio exactly as to a deliverable
+(`CLAIM_PROHIBITION` goes into its system prompt, reused as-is). If the agent said they closed
+one sale, the AI may call it "a hard-won first close" — it may never imply a track record, a
+count, or a ranking beyond what was said. The line is invented FACTS, never invented TONE.
+
+**Always editable.** Every draft is shown to the agent to accept, edit, regenerate, or revert
+in full — nothing the AI writes ships without the agent seeing it first.
+
+**Fail-closed:** a draft that violates the claim gate is **not shown**. The AI asks a better
+question instead.
 
 ### 5. How it GROWS
 
