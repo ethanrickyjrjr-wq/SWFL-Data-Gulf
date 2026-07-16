@@ -77,6 +77,30 @@ new headline live. NEXT: operator runs the Group-A blitz sitting (one pass over 
 homepage closes ~35); close checks_class_triage_live_verify when the next session's kickoff renders
 the defect-first headline.
 
+## 2026-07-16 (Fable 5 · main) — desk hero chart: THIRD root cause found+fixed (stale-morph freeze), inherited fixes verified+landed, headline delta now follows the window, fit math independently confirmed
+
+Continued the desk-hero handoff (docs/handoff/2026-07-16-desk-hero-chart-bugs-handoff.md — its
+claims all verified real: diffs, 3 checks, dead-ends). NEW ROOT CAUSE (the handoff's rejected
+theory #1 was right, aimed at the wrong bug): `use-animated-series-path` — y-domain tween churns
+yScale identity per frame → effect cleanup `control.stop()`s the morph before onComplete,
+signature guard blocks restart → `animatedPoints` frozen on the PREVIOUS scale's screen coords
+forever. Measured: Naples 5yr city-switch drew the line at y[-2723,-382] vs a correct [400k,2.4M]
+axis ("line doesn't show up" / "zooms out of view"). Fix: cleanup clears the state; post-fix same
+repro y[40,227] = exact agreement. Ex-boom spiky check killed by same fix (path/scale agreement
+measured). Landed c2b1f3bc (inherited curve+hydration fixes, reviewed, blast-radius audited —
+email-svg/composed/TierProjection inherit safer monotone; MomentumP/L pins curveLinear),
+cca28d90 (freeze fix), bf248ac1 (headline delta follows picked window — operator ask; verified
+"▲ \$38,650 across this window · 06/30/2021 → 05/31/2026"). VERIFIED with real-mouse + fiber
+measurements on prod builds: first-click zoom works; dot-on-line exact at knots (1yr, zoomed
+crops); % over-the-year renders all 3 cities (foreground — background-tab rAF throttling
+mimics a freeze, explains the operator-side "minutes of nothing"); fit math CONFIRMED by
+independent OLS recompute from served data on 2 windows (Cape 5yr −$376/mo CI[−730,−22] ↔ claim
++falsifier verbatim; Naples ex-boom +$7,300/mo CI lower 6,498 ↔ falsifier, 133/157 gapped pts).
+Checks: 4 closed w/ evidence (first-click, dot-line, headline-pill, ex-boom-spiky), opened
+desk_hero_prehydration_click_swallow (pills dead pre-hydration, 20s+ on cold ISR).
+trend_window_menu_live_verify stays open pending production. NEXT: operator push decision
+(foreign commit bbe6b7ae rides along).
+
 ## 2026-07-16 (Fable 5 · main) — /desk: price-cut + closed wire items link to Zillow; ZIP pressure scatter fills the Movers dead space
 
 Operator screenshot review: only NEWS was clickable on The Wire, and the Movers card had a big
