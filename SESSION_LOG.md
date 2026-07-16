@@ -1,3 +1,41 @@
+## 2026-07-16 (Fable 5 · main) — factuality gate: last spend row no longer dropped at exit — flushApiUsageLogs() shipped at the seam
+
+Root-caused `factuality_gate_flush_last_spend_row`: all three usage-log hooks on the spend seam
+(`wrapMessageSurface` create/stream + `wrapBatchesSurface` results in
+`refinery/agents/anthropic.mts`) fire `logApiUsage` fire-and-forget, and `bun test` exits the
+instant the final test settles — the last fixture's Supabase insert dies in flight. Earlier
+fixtures survive only because the next fixture's multi-second grading call gives their inserts
+time to land; it's a race, which is why calibration logged 14/14 rows but a later run dropped
+one. Fix at the seam: hooks register every in-flight log in a pending set; new exported
+`flushApiUsageLogs()` awaits them all (loops to catch logs enqueued mid-wait); the gate test
+awaits it in a LIVE-only `afterAll`. TDD: new unit test stubs global fetch with a gated promise
+and proves flush genuinely blocks while the insert is in flight. BONUS root-cause find: the
+verification `bunx next build` exposed a PRE-EXISTING type error shipped with the gate itself —
+`factuality-grader.ts`'s hand-written `b is { type: "text"; text: string }` predicate isn't
+assignable to the SDK's `ContentBlock` (`TextBlock` requires `citations`); `bun test` never
+typechecks so it slipped; replaced with `flatMap` narrowing (no predicate). Evidence: 923 tests
+green across refinery/agents + lib/deliverable, eslint clean, `bunx next build` green after the
+grader fix. NEXT: push fires the prod GHA gate on this diff (warn-first data point 2) — verify
+14 fresh `factuality_ci` rows land, then close the check with that run as evidence.
+
+## 2026-07-16 (Fable 5 · main) — SteadyAPI real limits off the operator's dashboard: 50k/mo quota (believed 10k) + 1 req/s live rate limit (docs claim 15) — pacing shipped on all four call surfaces
+
+Operator supplied the account dashboard: 10,795/50,000 used this cycle (10,739 ok / 56 failed),
+plus a failed-request log showing the true throttle — `"Rate limit exceeded. Maximum 1 request(s)
+per second."`, `retry_after: 1`. That resolves the 07/07 429 mystery for real: not quota
+exhaustion (~22% utilization), not a vendor transient — sequential page walks trip 1 req/s
+whenever a response returns in <1s. DISCREPANCY logged: docs.steadyapi.com claims 15 req/s;
+live beats docs (the 06/30 "verified 15 req/s" probe predates the current key/plan). Shipped:
+`extract_api.py` `_pace()` (≥1.05s between request starts, `_pace_sleep`/`_now` seams, autouse
+no-op in `ingest/conftest.py`), rentals + market_aggregates `RATE_LIMIT_RPS` 15→0.95 (throttle
+machinery existed, calibrated to the wrong number), TS comps client `THROTTLE_RETRY_FLOOR_MS`
+1.1s (old 0.2–0.6s first backoff re-collided inside the window by design). Stale 10k/"Starter"
+claims corrected (`steadyapi.ts`, `pipeline.py` budget print, `extract_api.py`). Tests: 151
+pytest (lifecycle+rentals+aggregates) + 30 bun (steadyapi clients) green. Checks:
+`steadyapi_quota_unknown` CLOSED (50k evidence), `steadyapi-429-rate-limited` CLOSED (root
+cause + fix). Findings doc §2 answered in place. NEXT: operator picks levers for the ~39k/mo
+headroom (sold-probe cap, amenity pre-cache, weekly rentals — menu given in session).
+
 ## 2026-07-16 (Fable 5 · main + wt/sell-side-framing) — sell-side favorable framing COMPLETE: handoff verified, Tasks 8–11 executed, whole-branch review READY TO MERGE (16 commits in worktree, unpushed)
 
 Verified every claim in `_ASSISTANT/2026-07-16-sell-side-framing-HANDOFF.md` against the tree

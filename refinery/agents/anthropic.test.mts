@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { env } from "../config/env.mts";
 import {
   computeCostUsd,
+  flushApiUsageLogs,
   getAnthropic,
   logApiUsage,
   wrapBatchesSurface,
@@ -166,6 +167,74 @@ describe("logApiUsage()", () => {
       }),
     );
     delete process.env.SKIP_USAGE_LOG;
+  });
+});
+
+describe("flushApiUsageLogs()", () => {
+  test("resolves immediately when nothing is pending", async () => {
+    await flushApiUsageLogs();
+  });
+
+  // Check factuality_gate_flush_last_spend_row: the create hook logs usage
+  // fire-and-forget, so a process that exits right after its last API call
+  // (bun test — the factuality gate) races the final insert and can drop the
+  // row. flush must not resolve while that insert is still in flight.
+  test("blocks until the create hook's in-flight usage insert settles", async () => {
+    const prior = {
+      key: env.anthropicApiKey,
+      url: env.supabaseUrl,
+      sbKey: env.supabaseKey,
+      fetch: globalThis.fetch,
+      capOff: process.env.ANTHROPIC_SPEND_CAP_OFF,
+      skipLog: process.env.SKIP_USAGE_LOG,
+    };
+    env.anthropicApiKey = "test-key-not-real";
+    env.supabaseUrl = "https://fake.supabase.co";
+    env.supabaseKey = "fake-key";
+    process.env.ANTHROPIC_SPEND_CAP_OFF = "1"; // keep the spend gate's own queries off the stub
+    delete process.env.SKIP_USAGE_LOG;
+    let releaseInsert!: () => void;
+    const insertGate = new Promise<void>((resolve) => {
+      releaseInsert = resolve;
+    });
+    let inserts = 0;
+    globalThis.fetch = (async () => {
+      inserts++;
+      await insertGate;
+      return new Response("[]", { status: 201 });
+    }) as typeof fetch;
+    try {
+      const fake = {
+        create: async () => ({
+          model: "claude-haiku-4-5",
+          usage: { input_tokens: 1, output_tokens: 1 },
+        }),
+        stream: () => {
+          throw new Error("unused");
+        },
+      };
+      const wrapped = wrapMessageSurface(fake as never, "factuality_ci") as unknown as typeof fake;
+      await wrapped.create();
+
+      let flushed = false;
+      const flushP = flushApiUsageLogs().then(() => {
+        flushed = true;
+      });
+      await Bun.sleep(20);
+      assert.equal(inserts, 1); // the hook's insert went out and is in flight
+      assert.equal(flushed, false); // flush is genuinely waiting on it
+      releaseInsert();
+      await flushP;
+      assert.equal(flushed, true);
+    } finally {
+      env.anthropicApiKey = prior.key;
+      env.supabaseUrl = prior.url;
+      env.supabaseKey = prior.sbKey;
+      globalThis.fetch = prior.fetch;
+      if (prior.capOff === undefined) delete process.env.ANTHROPIC_SPEND_CAP_OFF;
+      else process.env.ANTHROPIC_SPEND_CAP_OFF = prior.capOff;
+      if (prior.skipLog !== undefined) process.env.SKIP_USAGE_LOG = prior.skipLog;
+    }
   });
 });
 

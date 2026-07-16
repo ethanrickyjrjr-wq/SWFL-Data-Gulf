@@ -151,6 +151,33 @@ export async function logApiUsage(opts: LogApiUsageOpts): Promise<void> {
   }
 }
 
+// ── Usage-log flush (check factuality_gate_flush_last_spend_row) ────────────
+// The create/stream/batch hooks below log fire-and-forget so a slow insert
+// never delays the real API call. On long-lived surfaces that's the end of
+// it, but a process that exits the moment its last call resolves (bun test —
+// the factuality gate) races the final insert and can drop the row. Hooks
+// register every in-flight log here; one-shot surfaces await
+// flushApiUsageLogs() before the process goes away.
+
+const pendingUsageLogs = new Set<Promise<unknown>>();
+
+function trackUsageLog(settling: Promise<unknown>): void {
+  const tracked: Promise<unknown> = settling
+    // Call sites .catch() and log before handing the promise in; this extra
+    // catch just guarantees a tracked promise can never reject unhandled.
+    .catch(() => {})
+    .finally(() => pendingUsageLogs.delete(tracked));
+  pendingUsageLogs.add(tracked);
+}
+
+/** Await every in-flight api_usage_log insert (including any that start while
+ *  waiting). Resolves immediately when nothing is pending. */
+export async function flushApiUsageLogs(): Promise<void> {
+  while (pendingUsageLogs.size > 0) {
+    await Promise.allSettled([...pendingUsageLogs]);
+  }
+}
+
 // ── Spend guard (operator directive 07/05/2026) ─────────────────────────────
 // HARD daily/monthly caps on LOGGED spend, enforced at this ONE seam before
 // every real API call. Caps are env-tunable; breach throws SpendCapError (the
@@ -328,11 +355,13 @@ export function wrapMessageSurface<M extends MessageSurfaceLike>(real: M, callTy
     // stream response does not — skip those (call sites use .stream() for
     // streaming today; this guard just keeps the wrapper honest either way).
     if (response && typeof response === "object" && "usage" in response) {
-      void logApiUsage({
-        model: (response as Anthropic.Message).model,
-        callType,
-        usage: (response as Anthropic.Message).usage,
-      }).catch((e) => console.error("[api-usage-log] create hook failed:", e));
+      trackUsageLog(
+        logApiUsage({
+          model: (response as Anthropic.Message).model,
+          callType,
+          usage: (response as Anthropic.Message).usage,
+        }).catch((e) => console.error("[api-usage-log] create hook failed:", e)),
+      );
     }
     return response;
   };
@@ -344,10 +373,12 @@ export function wrapMessageSurface<M extends MessageSurfaceLike>(real: M, callTy
     };
     // Works for both surfaces: a beta stream's finalMessage() resolves a
     // BetaMessage whose `model`/`usage` carry the same fields logApiUsage reads.
-    stream
-      .finalMessage()
-      .then((msg) => logApiUsage({ model: msg.model, callType, usage: msg.usage }))
-      .catch((e) => console.error("[api-usage-log] stream hook failed:", e));
+    trackUsageLog(
+      stream
+        .finalMessage()
+        .then((msg) => logApiUsage({ model: msg.model, callType, usage: msg.usage }))
+        .catch((e) => console.error("[api-usage-log] stream hook failed:", e)),
+    );
     return stream;
   };
 
@@ -417,12 +448,14 @@ export function wrapBatchesSurface<B extends BatchesSurfaceLike>(real: B, callTy
       for await (const item of iter) {
         const r = item as BatchResultLike;
         if (r.result?.type === "succeeded" && r.result.message) {
-          void logApiUsage({
-            model: r.result.message.model,
-            callType,
-            usage: r.result.message.usage,
-            batch: true,
-          }).catch((e) => console.error("[api-usage-log] batch result hook failed:", e));
+          trackUsageLog(
+            logApiUsage({
+              model: r.result.message.model,
+              callType,
+              usage: r.result.message.usage,
+              batch: true,
+            }).catch((e) => console.error("[api-usage-log] batch result hook failed:", e)),
+          );
         }
         yield item;
       }

@@ -1,8 +1,8 @@
 // LIVE factuality gate (spec 2026-07-16-factuality-ci-gate-design.md D5).
 // Self-skips unless FACTUALITY_GATE=1 — plain `bun test` must stay $0.
 // Each fixture = one real graded call through the spend seam (factuality_ci).
-import { describe, expect, test } from "bun:test";
-import { agentsAreMocked } from "../../refinery/agents/anthropic.mts";
+import { afterAll, describe, expect, test } from "bun:test";
+import { agentsAreMocked, flushApiUsageLogs } from "../../refinery/agents/anthropic.mts";
 import { FACTUALITY_FIXTURES } from "./factuality-fixtures";
 import { seamFactualityGrader } from "./factuality-grader";
 
@@ -18,6 +18,11 @@ describe("factuality gate (live, seam-routed)", () => {
     });
     return;
   }
+
+  // bun test exits the instant the final test settles, racing the last
+  // fixture's fire-and-forget spend insert — without this flush that row is
+  // dropped (check factuality_gate_flush_last_spend_row).
+  afterAll(() => flushApiUsageLogs());
 
   for (const f of FACTUALITY_FIXTURES) {
     test(`${f.id} (class ${f.cls}, expect ${f.expectPass ? "pass" : "fail"})`, async () => {
