@@ -1,3 +1,18 @@
+## 2026-07-16 (Fable 5 · main) — Projects hub cockpit SHIPPED (spec + plan + 7 code commits, unpushed pending operator review)
+
+Full brainstorm→spec→plan→build cycle from operator screenshots. Spec
+`docs/superpowers/specs/2026-07-16-projects-cockpit-design.md` (b94ec02a), plan
+`docs/superpowers/plans/2026-07-16-projects-cockpit.md` (9063dfb8), then: displayProjectTitle
+(005c8720), schedule-chips lift (a66b0634), groupProjects type→city sections (9fed6ac1), rail
+rework — grouped headers, kebab delete replacing trash-mode, 288px, hidden on hub (4866a686),
+ProjectPanel + EmptyLaunchpad (d7333afd), hub page rewrite — list+panel cockpit, quick-links
+row and top campaign starters REMOVED, contacts block added (9f134a4d), coming-soon pills →
+muted text line (338d7350). Research: 11 UX sources via crawl4ai (notes local-only).
+Verified: 312 bun tests green, `bunx next build` green ×4, prod serve on :3311 — auth gate
+307s, anonymous lab grid + AI panel untouched. Signed-in cockpit visuals NOT yet verified
+(needs operator login; check `projects_cockpit_live_verify` stays open until live
+post-deploy). NEXT: operator eyeballs :3311 signed-in, push approval, deploy, close check.
+
 ## 2026-07-16 (Fable 5 · main) — SteadyAPI capability census shipped + headroom levers executed/queued (follow-on to the 50k-quota entry below)
 
 `docs/steadyapi-capability-census.md`: one file — account reality (50k/mo, rate limit
