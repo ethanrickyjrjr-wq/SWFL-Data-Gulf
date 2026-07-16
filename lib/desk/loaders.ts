@@ -40,6 +40,7 @@ import {
   type SeriesPoint,
 } from "./mappers";
 import { correlationMatrix, type CorrelationMetric } from "./correlation";
+import { zillowAddressUrl } from "./portal-link";
 import type {
   CorrelationData,
   DeskData,
@@ -457,6 +458,7 @@ async function loadNotableCuts(supabase: Supabase): Promise<FlashItem[]> {
           detail: `Now ${fmtUsd(r.list_price as number)} · cut ${fmtUsd(r.reduced_amount as number)}`,
           asOf: mdY(r.scraped_at),
           sourceLabel: SPINE_SOURCE,
+          lookupHref: zillowAddressUrl(r.street_address, r.city, r.zip_code),
         };
       });
   } catch {
@@ -476,6 +478,7 @@ interface SoldStateRow {
   listing_id: string;
   street_address: string | null;
   city: string | null;
+  zip_code: string | null;
   list_price: number | null;
 }
 
@@ -497,7 +500,7 @@ async function loadClosings(supabase: Supabase): Promise<FlashItem[]> {
       const { data: states } = await supabase
         .schema("data_lake")
         .from("listing_state")
-        .select("listing_id, street_address, city, list_price")
+        .select("listing_id, street_address, city, zip_code, list_price")
         .in("listing_id", ids);
       for (const s of (states ?? []) as SoldStateRow[]) byId.set(s.listing_id, s);
     }
@@ -523,6 +526,7 @@ async function loadClosings(supabase: Supabase): Promise<FlashItem[]> {
             : `Last listed at ${fmtUsd(display.value)}`,
         asOf: display.asOf ?? mdY(r.at),
         sourceLabel: display.source,
+        lookupHref: zillowAddressUrl(state?.street_address, state?.city, state?.zip_code),
         disclosure: display.disclosure,
       });
       if (items.length >= 4) break;

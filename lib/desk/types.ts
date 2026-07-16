@@ -164,6 +164,10 @@ export interface FlashItem {
   asOf?: string;
   sourceLabel: string;
   href?: string;
+  /** External ADDRESS-LOOKUP convenience (e.g. Zillow) — never provenance.
+   *  Renders as the headline link when `href` is absent; deliberately NOT
+   *  included in filed notes (flashNoteText reads only `href`). */
+  lookupHref?: string;
   /** Code-owned honesty wording (e.g. sold-price disclosure) — rendered verbatim. */
   disclosure?: string;
 }

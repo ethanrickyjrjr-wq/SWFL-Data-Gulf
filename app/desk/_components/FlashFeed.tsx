@@ -20,6 +20,7 @@ export function FlashFeed({ items }: { items: FlashItem[] }) {
     <ul className="flex flex-col divide-y divide-white/5">
       {items.map((it) => {
         const kind = KIND_STYLE[it.kind];
+        const link = it.href ?? it.lookupHref;
         return (
           <li key={it.id} className="flex flex-col gap-0.5 py-2.5 first:pt-0 last:pb-0">
             <div className="flex items-baseline gap-2">
@@ -28,9 +29,9 @@ export function FlashFeed({ items }: { items: FlashItem[] }) {
               >
                 {kind.label}
               </span>
-              {it.href ? (
+              {link ? (
                 <a
-                  href={it.href}
+                  href={link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="min-w-0 truncate text-sm text-gray-200 hover:text-gulf-teal hover:underline"
