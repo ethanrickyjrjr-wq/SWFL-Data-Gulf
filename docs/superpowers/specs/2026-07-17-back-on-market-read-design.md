@@ -5,6 +5,11 @@
 **Build check:** `back_on_market_read_live_verify`
 **Research (evidence base, LOCAL/gitignored):** `docs/steadyapi-research/2026-07-17-back-on-market-surface-research.md`
 (fold into `STEADY-PAINS.md` next session; ties to landscape item 7 + the TIER-2 "motivation signal" block)
+**Scope boundary (separated 07/17/2026):** the market snapshot + sell-now-vs-wait spread ("should I
+sell now or wait?") are a SEPARATE product — `docs/superpowers/specs/2026-07-17-should-i-sell-design.md`
+(`/r/should-i-sell`), finding #1 seller decision-support. They are NOT a phase of this read (finding
+#7). The two share only the reconciled seller-stress reader (`lib/back-on-market/load-zip.ts`). This
+spec stays Phases 1–4 (ZIP read → relist detector → per-home overlay → deliverable).
 
 ---
 

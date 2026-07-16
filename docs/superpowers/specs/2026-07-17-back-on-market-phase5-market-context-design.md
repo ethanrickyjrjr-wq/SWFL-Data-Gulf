@@ -1,3 +1,9 @@
+> **⚠️ SUPERSEDED 07/17/2026 — DO NOT BUILD FROM THIS DOC.** This content was mis-filed as a "Phase 5"
+> of the Back on Market read (finding #7). It is actually seller decision-support (finding #1) and has
+> been consolidated into its own project: `docs/superpowers/specs/2026-07-17-should-i-sell-design.md`
+> (route `/r/should-i-sell`). The market snapshot + sell-now-vs-wait spread belong there, not on
+> `/r/back-on-market`. Kept for history only.
+
 # Back on Market — Phase 5: full market context + sell-now-vs-wait spread
 
 **Date:** 2026-07-17
