@@ -33,6 +33,7 @@ import { test, expect, mock, afterAll, describe } from "bun:test";
 import * as realAnthropic from "@/refinery/agents/anthropic.mts";
 import * as realMirror from "@/lib/media/hero-photo";
 import * as realCompHelper from "@/lib/assistant/comp-helper";
+import * as realSpecToPng from "@/lib/email/spec-to-png";
 import { RECIPES } from "@/lib/deliverable/recipes";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import type { RecipeBuildContext } from "./index";
@@ -70,6 +71,7 @@ const ORIG = {
   "@/refinery/agents/anthropic.mts": { ...realAnthropic },
   "@/lib/media/hero-photo": { ...realMirror },
   "@/lib/assistant/comp-helper": { ...realCompHelper },
+  "@/lib/email/spec-to-png": { ...realSpecToPng },
 };
 afterAll(() => {
   for (const [path, orig] of Object.entries(ORIG)) mock.module(path, () => orig);
@@ -97,10 +99,29 @@ mock.module("@/lib/media/hero-photo", () => ({
 // test in this file that builds SHORE_DR (isPriceReduced: true) now reserves a chart
 // slot, so this default keeps the WHOLE suite offline: empty comps -> priceVsAreaDotSpec
 // returns null (fewer than 2 comparable homes) -> the slot is dropped, never filled.
-// Wiring-specific chart assertions (comps present, coherence, image fill) are Task 11's.
+//
+// Task 11 (below, "THE BUILD-LEVEL WIRING") needs exactly ONE test to see real comps.
+// mock.module is process-global and last-registration-wins, so a SECOND mock.module call
+// for this same specifier with a fixed 2-comp return would flip every pre-existing
+// SHORE_DR fixture above onto the fill path and break their "no chart" assertions. A
+// mutable binding instead lets that one test override the return value in place, while
+// every other test in the file — before and after it — keeps seeing this empty default.
+let mockComps: RenderComp[] = [];
 mock.module("@/lib/assistant/comp-helper", () => ({
   ...realCompHelper,
-  compsForAddress: async () => ({ comps: [], asOf: "07/16/2026", needs: [] }),
+  compsForAddress: async () => ({ comps: mockComps, asOf: "07/16/2026", needs: [] }),
+}));
+// chartSpecToEmailImage is only ever reached once priceVsAreaDotSpec has returned a real
+// spec, which needs >=2 comparable comps (MIN_COMPS_FOR_CHART) — true for exactly the one
+// Task 11 happy-path test below and no other fixture in this file, so this can stay a
+// single static mock with no restore dance of its own.
+mock.module("@/lib/email/spec-to-png", () => ({
+  ...realSpecToPng,
+  chartSpecToEmailImage: async () => ({
+    url: "https://cdn.example/chart.png",
+    alt: "The new price vs. nearby comparable homes",
+    caption: "",
+  }),
 }));
 
 const { buildPriceReduced, previousPrice, priceCutKicker, priceVsAreaDotSpec } =
@@ -571,4 +592,56 @@ test("priceVsAreaDotSpec filters out vacant-lot comps (no beds/sqft) before comp
   const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000), vacantLot]);
   expect(spec).not.toBeNull();
   expect((spec!.options as { data: { reference?: number }[] }).data[0].reference).toBe(225); // unaffected by the lot
+});
+
+// ── THE BUILD-LEVEL WIRING: the chart fills when sourced, drops cleanly when not ──
+//
+// Task 10 wired priceVsAreaDotSpec + compsForAddress + chartSpecToEmailImage into
+// buildPriceReduced itself. Every fixture above this point exercises the NO-COMPS path
+// (the module-level compsForAddress mock defaults to `mockComps = []`, so the "no chart"
+// describe block above and every SHORE_DR-based test reserve-then-drop the slot). These
+// are the only two tests in the file that prove the OTHER side of that wiring end to
+// end: the slot actually fills when real comps exist, and a listing with no reduction
+// never reserves the slot in the first place — through the real built doc, not a mock
+// call count.
+
+describe("the build-level wiring — the chart fills when sourced, drops cleanly when not", () => {
+  test("fills the chart slot when a reduction and real comps both exist", async () => {
+    // The only test in this file that flips the module-level comps mock away from its
+    // empty default — restored in `finally` so every other test keeps seeing no comps
+    // regardless of run order.
+    mockComps = [comp(440000, 2000), comp(460000, 2000)];
+    try {
+      const facts: ListingFacts = {
+        address: "1 Main St, Fort Myers, FL 33905",
+        price: "$400,000",
+        sqft: "2000",
+        isPriceReduced: true,
+        priceReduction: "$50,000",
+        photos: [],
+        sourceUrl: "",
+      };
+      const doc = (await buildPriceReduced(ctx(facts)))!;
+      const chartBlock = doc.blocks.find((b) => b.type === "image" && b.props.kind === "chart");
+      expect((chartBlock?.props as { url?: string } | undefined)?.url).toBe(
+        "https://cdn.example/chart.png",
+      );
+    } finally {
+      mockComps = [];
+    }
+  });
+
+  test("has no chart block at all when there is no reduction", async () => {
+    const facts: ListingFacts = {
+      address: "1 Main St, Fort Myers, FL 33905",
+      price: "$400,000",
+      sqft: "2000",
+      isPriceReduced: false,
+      photos: [],
+      sourceUrl: "",
+    };
+    const doc = (await buildPriceReduced(ctx(facts)))!;
+    const chartBlock = doc.blocks.find((b) => b.type === "image" && b.props.kind === "chart");
+    expect(chartBlock).toBeUndefined(); // dropEmptyChartSlot removed the never-reserved slot
+  });
 });
