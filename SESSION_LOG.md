@@ -1,3 +1,21 @@
+## 2026-07-16 (Fable 5 · main) — per-listing DOM SHIPPED: listing_dom view + one formatter + probe-on-use healing + calibration contract (unpushed)
+
+Operator: "how do we figure out which day it arrived on realtor.com... list it as DOM and track
+a few until we are all caught up." Researched (crawl4ai: realtor.com's counter = current spell,
+resets on new listing ID, counts through pending; MLS DOM/CDOM distinction), spec'd + planned +
+built per `docs/superpowers/specs/2026-07-16-listing-dom-design.md`. Nine commits `453a8cf4`…
+`f6f954e3`: `data_lake.listing_dom` view APPLIED (dom_days/cdom_days/dom_is_floor computed at
+read time off listed_date > relist transition > first_seen; live: 31,969 rows, 26,942 floored,
+0 negative) · `lib/listings/dom.ts` one wording authority · `parseListedEvent` fixture-pinned to
+Python `_pick_listed_date` · sold comps carry "sold in 79 days" for ZERO extra calls (same
+tax-history response) in chat comps + market-comps evidence rows · probe-on-use healing (≤3
+floored rows/request heal via fetchListedDate → persistListedDate single-column guarded write) ·
+quality contract `listing_dom_first_seen_calibration` (median |listed_date−first_seen| ≤ 1d on
+fresh cohort, judges at ≥20 samples, warn→error promotion closes `listing_dom_from_first_seen`).
+Tests: 1,261 TS + 219 Python green, `bunx next build` clean. NEXT: after tonight's nightly run
+lands listed_date rows, `bun scripts/verify-listing-dom.mts` then close `listing_dom_live_verify`;
+follow-ups opened as checks (stats re-point, brain DOM, charts/algos, remaining recipes, desk line).
+
 ## 2026-07-16 (Fable 5 · main) — brand-fill-once SPEC'D: ledger + wizard + auto-populate + social login (research banked, no code yet)
 
 Brainstormed operator ask "branding filled in once and only once, profile talking to every
