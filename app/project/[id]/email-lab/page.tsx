@@ -53,6 +53,9 @@ export default async function ProjectEmailLabPage({
   const sp = await searchParams;
   const did = sp.did ?? null;
   const seedId = sp.seed ?? null;
+  // Capture-or-blank (spec 2026-07-16): ?blank=1 = the user explicitly chose the
+  // raw template (gallery Start-blank door / popup escape re-entry).
+  const seedBlankChosen = sp.blank === "1";
   // Homepage-map click (Lane B fork 1b): ?zip= seeds the deterministic ZIP
   // email prebuild as a new draft in THIS project, brand applied via the
   // normal token bridge below. No LLM call on arrival.
@@ -91,7 +94,7 @@ export default async function ProjectEmailLabPage({
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id, title, items, branding, ui_state, subject_address")
+    .select("id, title, items, branding, ui_state, subject_address, subject_area")
     .eq("id", id)
     .maybeSingle();
 
@@ -215,6 +218,9 @@ export default async function ProjectEmailLabPage({
       }
       arcStep={arcStep}
       subjectAddress={project.subject_address ?? null}
+      subjectArea={project.subject_area ?? null}
+      seedId={seedId}
+      seedBlankChosen={seedBlankChosen}
     />
   );
 }

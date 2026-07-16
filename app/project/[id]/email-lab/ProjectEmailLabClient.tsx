@@ -12,6 +12,8 @@ import { ArcStrip, type ArcSequence } from "@/components/email-lab/ArcStrip";
 import { ListingCampaignHero } from "@/components/email-lab/ListingCampaignHero";
 import { findPlaceholder, inputKindForRecipe, type ShowcaseRecipe } from "@/lib/showcase/recipe";
 import { planArrival } from "@/lib/lab-entry/arrival";
+import { planSeedStart } from "@/lib/lab-entry/seed-start";
+import { seedFillPrompt } from "@/lib/lab-entry/seed-fill-prompt";
 import { reconcileAddress, addressItem } from "@/lib/lab-entry/address-reconcile";
 import { AddressPopup } from "@/components/lab-entry/AddressPopup";
 import { projectEmailLabBase } from "@/lib/lab-entry/destination";
@@ -57,6 +59,13 @@ interface Props {
   arcStep?: string | null;
   /** Listing projects (subject_address set) get the arm CTA when no arc exists. */
   subjectAddress?: string | null;
+  /** The project's remembered market area (projects.subject_area) — area twin of
+   *  subjectAddress for area-subject template picks (spec 2026-07-16). */
+  subjectArea?: string | null;
+  /** ?seed= — the picked template's id; drives the capture-or-blank arrival. */
+  seedId?: string | null;
+  /** ?blank=1 — the user explicitly chose the raw template. */
+  seedBlankChosen?: boolean;
 }
 
 // Project-scoped Email tool (cockpit D2). The GRID canvas is the ONE authoring
@@ -79,6 +88,9 @@ export function ProjectEmailLabClient({
   initialSequence,
   arcStep,
   subjectAddress,
+  subjectArea,
+  seedId,
+  seedBlankChosen,
 }: Props) {
   const [savedId, setSavedId] = useState<string | null>(deliverableId ?? null);
   const [saving, setSaving] = useState(false);
@@ -105,20 +117,30 @@ export function ProjectEmailLabClient({
   // THE arrival plan (spec 2026-07-06 §A2) — the ONE decision for doc + popups +
   // auto-build, shared with the standalone lab. insideProject=true, so it never
   // asks "is this for <this project>?". did/seed/zip already produced initialDoc.
+  // The arc deep link carries seed+recipe together and owns its own machinery —
+  // it must keep hitting the recipe branch, so an ?arcStep= arrival never enters
+  // the seed capture flow (spec 2026-07-16, the one ordering hazard).
+  const arrivalSeedId = arcStep ? null : (seedId ?? null);
+  const arrivalSeed = arrivalSeedId
+    ? (SEED_DOCS.find((s) => s.id === arrivalSeedId) ?? null)
+    : null;
   const [plan] = useState(() =>
     planArrival({
-      params: { did: deliverableId, recipe: initialRecipe?.prompt ?? null },
+      params: {
+        did: deliverableId,
+        seed: arrivalSeedId,
+        recipe: initialRecipe?.prompt ?? null,
+      },
       signedIn: true,
       offeredProject: { id: projectId, title: projectTitle },
       insideProject: true,
       subjectAddress: subjectAddress ?? null,
-      subjectArea: null,
+      subjectArea: subjectArea ?? null,
       recipeHasBlank: Boolean(recipeBlank),
       recipeInputKind: recipeBlank ? "address" : null,
       firstRunGalleryEligible: !initialDoc && !hasDeliverables && !initialRecipe,
-      // Task 7 (spec 2026-07-16) wires the real seed door here.
-      seedSubject: null,
-      seedBlankChosen: false,
+      seedSubject: arrivalSeed?.subject ?? null,
+      seedBlankChosen: Boolean(seedBlankChosen),
     }),
   );
   // A recipe arrival opens the BLANK skeleton (never defaultDoc / a fake-fill demo);
@@ -151,6 +173,19 @@ export function ProjectEmailLabClient({
   // bump buildKey to remount the grid shell with autoGenerate.
   const [buildPrompt, setBuildPrompt] = useState<string | null>(null);
   const [buildKey, setBuildKey] = useState(0);
+  // Capture-or-blank (spec 2026-07-16): what the picked template still needs
+  // before it can build — the subject ask or the fill-or-blank choice. The seed
+  // the canvas came from (URL arrival or gallery pick) feeds the fill prompt.
+  const [seedAsk, setSeedAsk] = useState<
+    { inputKind: "address" | "area" } | { choice: true } | null
+  >(
+    plan.seedStart?.mode === "ask"
+      ? { inputKind: plan.seedStart.inputKind }
+      : plan.seedStart?.mode === "choice"
+        ? { choice: true }
+        : null,
+  );
+  const [activeSeed, setActiveSeed] = useState<SeedDoc | null>(arrivalSeed);
 
   // Silent autosave for a SAVED doc (spec §D): debounced ~5s after edits +
   // keepalive flush on exit. The action ref always calls the latest handleSave
@@ -216,6 +251,32 @@ export function ProjectEmailLabClient({
         },
       }),
     }).catch(() => {});
+  }
+
+  // Template capture Build (spec 2026-07-16): bank the captured subject on the
+  // project when it has none — never asked twice — then fill the picked layout.
+  // Choice mode submits "" → the fill runs on brand + region, nothing to bank.
+  async function onSeedSubjectBuild(value: string) {
+    if (!activeSeed) return;
+    setSeedAsk(null);
+    const v = value.trim();
+    if (activeSeed.subject === "address" && v && !subjectAddress) {
+      void fetch(`/api/projects/${projectId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ subject_address: v }),
+      }).catch(() => {});
+      void recordAddress(v);
+    }
+    if (activeSeed.subject === "area" && v && !subjectArea) {
+      void fetch(`/api/projects/${projectId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ subject_area: v }),
+      }).catch(() => {});
+    }
+    setBuildPrompt(seedFillPrompt(activeSeed, v || null));
+    setBuildKey((k) => k + 1);
   }
 
   // Address popup Build → reconcile against what the project believes. Match /
@@ -429,8 +490,19 @@ export function ProjectEmailLabClient({
   // auto-build is GONE for new-build arrivals — it produced the wrong-listing
   // email (spec §A2). A saved/toggled/gallery-picked doc never auto-builds.
   const readyPrompt =
-    buildPrompt ?? (plan.autoBuildAfterConfirm && initialRecipe ? initialRecipe.prompt : null);
-  const autoBuild = readyPrompt != null && !savedId && !galleryPicked && !zipSeeded;
+    buildPrompt ??
+    // Skip-and-build (spec 2026-07-16): the template's subject is already known —
+    // fill the picked layout for it, no ask.
+    (plan.seedStart?.mode === "build" && arrivalSeed
+      ? seedFillPrompt(arrivalSeed, plan.seedStart.subjectValue)
+      : plan.autoBuildAfterConfirm && initialRecipe
+        ? initialRecipe.prompt
+        : null);
+  // An explicit buildPrompt (popup Build / template fill) overrides the
+  // gallery-pick suppression — that guard only exists to stop the GENERIC
+  // one-shot from clobbering a pick, never a build the user just asked for.
+  const autoBuild =
+    readyPrompt != null && !savedId && !zipSeeded && (buildPrompt != null || !galleryPicked);
   const shared = {
     brandTokens: initialTokens,
     initialBranding,
@@ -472,7 +544,26 @@ export function ProjectEmailLabClient({
       {showGallery ? (
         <div className="min-h-[calc(100dvh-3.5rem)]">
           <TemplateGallery
-            onPick={(seed: SeedDoc) => seedCanvas(seed.build())}
+            onPick={(seed: SeedDoc) => {
+              // Same matrix as the URL door (spec 2026-07-16): the picked layout
+              // lands on the canvas, then capture / skip-and-build / choice.
+              seedCanvas(seed.build());
+              setActiveSeed(seed);
+              const sp = planSeedStart({
+                subject: seed.subject,
+                knownAddress: subjectAddress ?? null,
+                knownArea: subjectArea ?? null,
+                blankChosen: false,
+              });
+              if (sp.mode === "build") {
+                setBuildPrompt(seedFillPrompt(seed, sp.subjectValue));
+                setBuildKey((k) => k + 1);
+              } else if (sp.mode === "ask") {
+                setSeedAsk({ inputKind: sp.inputKind });
+              } else if (sp.mode === "choice") {
+                setSeedAsk({ choice: true });
+              }
+            }}
             onStartBlank={() => seedCanvas(defaultDoc())}
             heroSlot={
               sequence ? undefined : (
@@ -503,6 +594,22 @@ export function ProjectEmailLabClient({
           initialValue={subjectAddress ?? ""}
           onBuild={onAddressBuild}
           onCancel={() => setAddressOpen(false)}
+        />
+      )}
+
+      {/* Template capture (spec 2026-07-16): the subject ask or fill-or-blank
+          choice for a picked template. Start blank / Cancel both land on the
+          already-loaded skeleton — the explicit blank outcome, no navigation. */}
+      {seedAsk && activeSeed && (
+        <AddressPopup
+          inputKind={"inputKind" in seedAsk ? seedAsk.inputKind : null}
+          choiceMode={"choice" in seedAsk}
+          initialValue={
+            "inputKind" in seedAsk && seedAsk.inputKind === "area" ? (subjectArea ?? "") : ""
+          }
+          onBuild={(value) => void onSeedSubjectBuild(value)}
+          onStartBlank={() => setSeedAsk(null)}
+          onCancel={() => setSeedAsk(null)}
         />
       )}
 
