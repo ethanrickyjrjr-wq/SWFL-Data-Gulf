@@ -1,4 +1,31 @@
-## 2026-07-15 (Sonnet 5 · main) — leepa-parcels-annual: reverted monthly-retry cron back to real annual; root cause is an unfixed HTTP fetch problem, not the schedule.
+## 2026-07-16 (Sonnet 5 · main) — self-marketing launch plan filed: SteadyAPI social-listening round 5 (Reddit/IG/X, our own presence) + funnel-spine GTM plan + 9 punchlist checks.
+
+Operator: "we have a lot of steady API runs to use this month, run it on reddit, x, instagram" —
+figure out how to bring it together, punchlist for new users, email + social marketing ideas
+(blogs/reddit/Loom). Distinct from rounds 1-4 in `docs/steadyapi-research/` (those research
+outreach TO agents; this is SWFL Data Gulf's OWN organic presence).
+
+13 live SteadyAPI calls (5 Reddit `/posts`, 6 Instagram hashtag/content search, 2 Twitter
+search), zero errors on the social-listening surface (confirms the operator's premise — separate
+from the still-open `steadyapi_quota_unknown`/`steadyapi-429-rate-limited` comps-API issues,
+different endpoint tier, not conflated). Key findings: Instagram `#swflrealestate` (211K posts) /
+`#fortmyersrealestate` (60.7K) / `#napleshomes` (52.5K) are large, active, and 100% agent
+listing-tour content — zero market-data posts, a real whitespace reaching the actual customer
+(agents). r/dataisbeautiful proven-viable for real-estate data viz (a live 437pt housing post).
+Local SWFL subs (CapeCoral/FortMyers/Naples_FL) reward humble build-in-public framing, punish flat
+self-promo (same-week A/B: 28pts vs 0-3pts on the same "I built a local tool" pitch). X/Twitter
+confirmed a second independent time to have zero organic discovery for this niche (4/4 empty
+searches across two sessions) — deprioritized, paid tier explicitly not recommended. New vendor
+quirk found: `/v1/reddit/posts?url=` needs the full `reddit.com/r/<name>` URL, not a bare name.
+
+Filed: `docs/steadyapi-research/2026-07-16-self-marketing-social-listening-round5.md` (raw
+findings) + `docs/superpowers/plans/2026-07-16-marketing-launch-plan.md` (funnel-spine plan:
+organic content → free build → the already-specced rounds-1-4 cold-outreach engine → SEND
+paywall). Opened 9 `checks` under project `marketing` for the punchlist (flagship chart, IG
+cadence, Loom x2, blog decision, cold-outreach resume, Meta verification). Advisor-reviewed
+before filing — pushed to give the plan a connected spine instead of five disconnected channel
+sections, and to separate the agent audience (Instagram, primary) from the resident/general
+audience (local subs + r/dataisbeautiful, brand-only). Next: work Phase 0 punchlist items.
 
 Operator flagged the `cron_incident_leepa_parcels_annual` TIMEOUT_KILL (90.3min vs 90min ceiling,
 07/15 10:00 UTC scheduled run) and asked why an "annual" workflow fired when it hasn't been a year,

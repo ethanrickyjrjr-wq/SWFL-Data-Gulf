@@ -44,6 +44,16 @@ API-integration build track. See the inventory below for where the rest lives.
   per-client-subdomain send-on-behalf, DBPR RE_rgn7.csv as the free weekly agent-name spine
   (no emails), Brandfetch/logo.dev as the brand-at-scale lanes. Q5 cadence: 5th empty search —
   decided from pinned 07/02 evidence. Also the source of the 403-default-UA vendor quirk.
+- `2026-07-16-self-marketing-social-listening-round5.md` — round 5: a different question from
+  rounds 1-4 — not outreach TO agents, but how SWFL Data Gulf builds its OWN organic presence.
+  13 live calls across Reddit/Instagram/Twitter. Settles: Instagram (#swflrealestate 211K/
+  #fortmyersrealestate 60.7K/#napleshomes 52.5K) is 100% agent listing content with zero
+  market-data posts — a real whitespace; r/dataisbeautiful is a proven channel for real-estate
+  data visualizations specifically; local SWFL subreddits reward humble build-in-public framing
+  over any promotional post; X/Twitter has zero organic discovery for this niche (confirmed a
+  second independent time). New vendor quirk: `/v1/reddit/posts?url=` needs the full
+  `reddit.com/r/<name>` URL, a bare name always 200s false. Feeds
+  `docs/superpowers/plans/2026-07-16-marketing-launch-plan.md`.
 
 ## Existing SteadyAPI material elsewhere (inventory, as of 07/09/2026)
 
