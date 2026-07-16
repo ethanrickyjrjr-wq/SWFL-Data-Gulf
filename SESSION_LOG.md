@@ -1,3 +1,26 @@
+## 2026-07-16 (Fable 5 · main) — seed capture-or-blank SHIPPED: every template click now captures its subject or starts blank by choice (unpushed)
+
+Operator hit New Project → Just Sold landing on the raw slot-rule skeleton ("shows rules for
+builder!!!") — `openSeed` was documented "no popups" and ALL ~27 template chips on all three
+surfaces did it. Built per spec `2026-07-16-seed-capture-or-blank-design.md` + plan (research:
+NN/g wizards/empty-states via crawl4ai — never ask what the system knows, always an escape).
+Nine commits `fe457801`…`17c26616`: SeedDoc.subject required classification (27 templates);
+pure `planSeedStart` matrix (lib/lab-entry/seed-start.ts) shared by planArrival's seed branch
+AND the gallery pick; AddressPopup Start-blank escape + fill-or-blank choice mode;
+`projects.subject_area` column (migration APPLIED, types regenerated) + PATCH allowlist for
+subject_address/subject_area; seedFillPrompt; project lab wired (skip-and-build off known
+subject via readyPrompt, capture banks address→project + area→subject_area, never re-asked;
+arc `?arcStep=` guarded out of the seed flow); standalone grid finally handles `?seed=` (the
+/showcase start-from door was silently IGNORED before — signed-in confirms then hops into the
+project carrying seed+blank, AutoCreateProject carries it for zero-project users); gallery
+Start-blank carries `blank=1` so an explicit blank never re-asks; TemplateRail lifecycle order
+(Just Sold off the lead, RAIL_ORDER exported+tested, missing ids append so nothing vanishes).
+Also this session: ListingCampaignHero copy polish (`787fdfe9`) — nudge overclaim ("the
+moment") removed per daily-cron reality; spec+plan commits `1b374a34`/`177ed921`. 233 tests
+green, `bunx next build` clean. NEXT: operator live-verify `seed_capture_or_blank_live_verify`
+(New Project → Just Sold → popup not skeleton → address → sourced build; 2nd chip
+skip-and-builds; Start blank lands skeleton), then push.
+
 ## 2026-07-16 (Fable 5 · main) — operator round 2: "good stuff" restored — Ask AI DOCKED in the hub panel, dossier+chips back, welcome layout (unpushed, live on :3299)
 
 Operator flagged the fix round deleted good things. Three asks, three commits (c6c2cfa7,
