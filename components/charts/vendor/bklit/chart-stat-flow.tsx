@@ -36,12 +36,21 @@ function formatStatValue(
 }
 
 function useNumberFlowElementReady(): boolean {
-  const [ready, setReady] = useState(
-    () => typeof customElements !== "undefined" && Boolean(customElements.get("number-flow-react")),
-  );
+  // Starts `false` on BOTH server and client, always — matching the server's static-text
+  // render exactly. The custom element can already be registered by the time this hook's
+  // initializer runs on the client (a module-level side effect of importing
+  // `@number-flow/react`, which fires before hydration), so checking `customElements.get(...)`
+  // here produced `true` on the client's first render while the server (no DOM) always
+  // produced `false` — a hydration mismatch on every single page load, which forced React to
+  // discard and remount the whole page segment client-side (losing in-progress chart/tab
+  // state in the process). The `customElements` check now runs only inside the effect, which
+  // fires after hydration commits, so it's a normal post-hydration state update, never a
+  // mismatch.
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (ready) {
+    if (typeof customElements !== "undefined" && customElements.get("number-flow-react")) {
+      setReady(true);
       return;
     }
     let cancelled = false;
@@ -53,7 +62,7 @@ function useNumberFlowElementReady(): boolean {
     return () => {
       cancelled = true;
     };
-  }, [ready]);
+  }, []);
 
   return ready;
 }
