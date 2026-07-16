@@ -53,6 +53,23 @@ Tests: 1,261 TS + 219 Python green, `bunx next build` clean. NEXT: after tonight
 lands listed_date rows, `bun scripts/verify-listing-dom.mts` then close `listing_dom_live_verify`;
 follow-ups opened as checks (stats re-point, brain DOM, charts/algos, remaining recipes, desk line).
 
+## 2026-07-16 (Fable 5 · main) — brand-fill-once P1 BUILT: ledger spine + blank-only banking + both popup lanes + panel strip (local, awaiting operator push)
+
+Executed plan `2026-07-16-brand-fill-once-p1-spine.md` inline, 7 commits `38ad394c..78b7563a`.
+One have/need root `lib/brand/profile-ledger.ts` (31 fields = the brand API's exact allowlists,
+test-pinned; must=name/brokerage/address with ask-copy) · recipe.ts gap helpers now delegate to
+it (caught + fixed in-flight: delegation must keep the CALLER's needs order — existing test
+pinned it) · `bankBrandFields` blank-only upward bank + `POST /api/user/brand/bank`; project
+PATCH banks `branding` upward; the shell's two implicit popup banks switched PATCH→bank (they
+were OVERWRITING the account) · shell mount prefill widened 5→31 keys (a saved business_address
+never reached in-project builds before) · ProjectEmailLabClient: account blank-merge + both
+AddressPopups now carry `gaps` and bank via the project PATCH — closes yesterday's
+sign-with-house-defaults caveat · BrandCompletenessStrip renders in BrandingBlock. 196 tests
+across touched suites + `bunx next build` green. Process note: one commit (`d31bd99a`) landed
+on red because `| tail` swallowed bun's exit code — fixed forward in `206576ac`; check real
+exit codes. NEXT: operator push + live-verify script (spec §H); P2 wizard/imports + P3 social
+login get their own plans.
+
 ## 2026-07-16 (Fable 5 · main) — brand-fill-once spec AMENDED: self.so's LinkedIn-PDF lane + auto-bring-before-typing ordering rule
 
 Operator asked about a GitHub find "with 'self' in it" that "pulls LinkedIn into a website" —
