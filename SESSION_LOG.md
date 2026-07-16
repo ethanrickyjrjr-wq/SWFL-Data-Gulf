@@ -1,3 +1,24 @@
+## 2026-07-16 (Fable 5 · main) — /desk: price-cut + closed wire items link to Zillow; ZIP pressure scatter fills the Movers dead space
+
+Operator screenshot review: only NEWS was clickable on The Wire, and the Movers card had a big
+empty area. Brainstormed → operator picked Zillow address links (over internal ZIP-report) and
+the pressure scatter. Zillow's unofficial address-slug URL verified live via crawl4ai BOTH forms
+(street-city and street-city-zip both resolve to the property page; even the street-number-less
+Hillgrade Rd, Clewiston form lands on a real page). Shipped: `lib/desk/portal-link.ts` single
+owner of the slug contract (7 bun tests, `#`-stripping is load-bearing — a literal # truncates
+the path); new `FlashItem.lookupHref` carries it — PROVENANCE SEAM: `flashNoteText` still reads
+only `href`, so filed notes/deliverables never carry a portal URL and sourceLabel stays SWFL
+Data Gulf; `loadClosings` join now selects zip_code. Scatter: `ZipPressureScatter.tsx`
+server-SVG (cut share × new-listing share per core ZIP, dot area = actives, same ≥50-active
+guard), fed by additive `MoversData.pressure` off already-loaded momentum rows — zero new
+queries. County hues dataviz-validated on #0a1419 (Lee #33a89f / Collier #bd852a, all six
+checks pass). Verified on a real `next build` + `next start -p 3199`: fingerprints + full-page
+and zone screenshots, server killed after. Spec:
+`docs/superpowers/specs/2026-07-16-desk-wire-links-pressure-scatter-design.md`, plan in
+plans/. NEXT: push pending operator OK; `desk_wire_links_pressure_scatter_live_verify` stays
+open until checked on production; offered follow-up (not built): movers/watchlist ZIP rows →
+/r/zip-report/{zip}.
+
 ## 2026-07-16 (Sonnet 5 · main) — market-heat + neighborhood_stats backfills dispatched + verified live; ceiling-fill data landed, not yet wired to a brain
 
 Dispatched the two follow-ups queued by 4b10936f's realtor-audit fix instead of waiting for
