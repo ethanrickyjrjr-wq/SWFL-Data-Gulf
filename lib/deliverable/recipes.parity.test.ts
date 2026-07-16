@@ -227,3 +227,7 @@ test("positioning matches the design doc's recipe table", () => {
   for (const key of storySide)
     expect(RECIPES[key as keyof typeof RECIPES].positioning).toBe("story-side");
 });
+
+test("price-reduced's chart policy reflects its new sourced chart", () => {
+  expect(RECIPES["price-reduced"].chart).toBe("price-vs-area-dot");
+});

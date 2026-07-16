@@ -112,7 +112,13 @@ export type ChartPolicy =
   /** One area's home-value level and trend over time. */
   | "area-value-trend"
   /** How scarce homes like the subject are — live inventory counts. */
-  | "inventory-scarcity";
+  | "inventory-scarcity"
+  /** The subject's NEW $/sq ft (post-reduction) plotted against the median $/sq ft of
+   *  real nearby comparable homes — one value vs. one reference, via the `dot-plot`
+   *  frame. Comps here are used ONLY to compute the chart; never handed to the
+   *  narrator (price-reduced.ts's prose stays exactly as constrained as it always
+   *  was — zero market data, so it can never invent a reason the price moved). */
+  | "price-vs-area-dot";
 
 export interface Recipe {
   key: RecipeKey;
@@ -257,11 +263,17 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     skeleton: "price-reduced",
     prose: null,
     subject: "address",
-    // Two bars (was/now) is a fact wearing a chart costume — write the fact.
     // Operator, 07/13/2026: show the reduced amount ABOVE the price, in a
     // different color, in a smaller font. The vendor's `reduced_amount` is the
-    // size of the CUT, not the old price: old = price + cut.
-    chart: "none",
+    // size of the CUT, not the old price: old = price + cut. That call stands.
+    //
+    // Operator, 07/15/2026: the was/now comparison is still a fact, not a chart
+    // ("two bars is a fact wearing a chart costume" stands) — but the SAME 07/13
+    // comment also said "no comps bar either: this is about a HOUSE, not a
+    // market," and this line is a deliberate, acknowledged override of THAT
+    // clause: the new price vs. real nearby comps is a genuine market argument
+    // this recipe was leaving unshown. See price-reduced.ts's priceVsAreaDotSpec.
+    chart: "price-vs-area-dot",
     prompt:
       "Build a price-improved email for my listing at [[your listing address]] — lead with the price cut, the home's key specs, and one honest line on what the new price means.",
     needs: ["agent_name", "brokerage", "business_address"],
