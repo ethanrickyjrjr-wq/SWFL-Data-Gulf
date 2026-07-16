@@ -15,6 +15,18 @@ factuality_gate_blocking_flip + factuality_gate_brain_markdown_phase2 · factual
 stays open until first prod GHA run post-push. Handoff:
 `docs/handoff/2026-07-16-factuality-ci-gate-shipped.md`. AWAITING OPERATOR PUSH (8 commits local).
 
+## 2026-07-16 (Fable 5 · main) — push carried 9 commits; ALLOW_PAID_SURFACE=1 override recorded for the foreign factuality-gate workflow
+
+Operator said "Push" (informed: bundle = my 4b10936f + 8 foreign factuality-ci-gate commits).
+check-no-new-paid-surface.mjs BLOCKED on the foreign `.github/workflows/factuality-gate.yml`
+adding ANTHROPIC_API_KEY to CI. Verified before overriding (not taken from the commit message):
+8e2dc0b8 adds the `factuality_ci` call type inside the metered root `refinery/agents/anthropic.mts`,
+and `lib/deliverable/factuality-grader.ts:10` calls `getAnthropic("factuality_ci")` — seam-routed,
+spend-logged, warn-first (`continue-on-error: true`), bounded to 14 graded fixtures per run,
+path-filtered trigger. Deliberate + metered → pushed with `ALLOW_PAID_SURFACE=1 node scripts/safe-push.mjs`
+per the hook's own override protocol. Post-push: closed `ingest_market_heat_swfl_column_gap_fill` +
+`market_aggregates_details_dropped_fields` (work in 4b10936f below).
+
 ## 2026-07-16 (Fable 5 · main) — realtor-audit punch list 1(a)/2/3 executed: market_heat ceiling fill, market_details dropped fields, neighborhood median_year_built
 
 Operator handed `docs/steadyapi-research/2026-07-16-realtor-full-scope-audit.md` (another session's
