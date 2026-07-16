@@ -200,6 +200,37 @@ tables:
         # would CUT THROUGH THE MIDDLE of one root-cause event and split it by county.
         abort_if: { share_pct_gt: 50.0, violations_gte: 500, if_no_clean_rows: true }
 
+      # ── DOM CALIBRATION (spec 2026-07-16-listing-dom-design.md §5). ────────────────────
+      # Every probed fresh-cohort row measures our arrival clock: |vendor listed_date −
+      # our first_seen| should be ~0–1 days (nightly full-inventory sweep = first_seen
+      # lands within a day of the listing arriving on realtor.com). Fresh cohort =
+      # first_seen AFTER the CENSOR BOUNDARY 2026-07-03 (sweep full-coverage date —
+      # second of the two occurrences; the other: docs/sql/20260717_listing_dom.sql).
+      # Judges only once ≥ 20 samples exist (listed_date lands opportunistically off the
+      # sold/holding probes — 0 rows at ship, accumulating from the first nightly run
+      # after commit 81e203f6). severity=warn at ship; PROMOTE to error once it has held
+      # green ~2 weeks — that promotion closes check `listing_dom_from_first_seen`.
+      # Cross-row (a median) → sql_expectation, locus MUST be probe. Returns rows ONLY
+      # when failing: enough samples AND the median delta exceeds 1 day.
+      - name: listing_dom_first_seen_calibration
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: warn
+        failing_rows_sql: |
+          WITH deltas AS (
+            SELECT abs(listed_date::date - first_seen::date) AS d
+            FROM data_lake.listing_state
+            WHERE source_name = 'api_feed'
+              AND listed_date IS NOT NULL
+              AND first_seen::date > DATE '2026-07-03'
+          )
+          SELECT count(*) AS samples,
+                 percentile_cont(0.5) WITHIN GROUP (ORDER BY d) AS median_delta_days
+          FROM deltas
+          HAVING count(*) >= 20
+             AND percentile_cont(0.5) WITHIN GROUP (ORDER BY d) > 1
+
   # ── data_lake.listing_active_stats — a VIEW. Locus B is the ONLY locus it has. ───────
   # CREATE OR REPLACE VIEW (docs/sql/20260711_listing_active_stats_homes_only.sql:34); no
   # pipeline writes it (one grep hit in ingest/, and that is a consumer comment). No batch,

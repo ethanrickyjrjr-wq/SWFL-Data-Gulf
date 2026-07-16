@@ -324,6 +324,7 @@ def test_load_contracts_reads_the_real_registry_for_listing_state():
     assert [c["name"] for c in got] == [
         "listing_state_home_price_floor",
         "listing_state_property_type_allowlist",
+        "listing_dom_first_seen_calibration",
     ]
 
 
