@@ -4,27 +4,23 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { projectHome } from "@/lib/project/tool-tabs";
-import { openDoc } from "@/lib/lab-entry/destination";
+import { projectHome, projectEntry } from "@/lib/project/tool-tabs";
 import type { Section } from "@/lib/project/group-projects";
 import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
 import { ConfirmDeleteProject } from "./_cockpit/ConfirmDeleteProject";
-import { RowMenu } from "./_cockpit/RowMenu";
 
 /**
  * The persistent left projects rail (Piece 1 §A), cockpit rework (spec
  * 2026-07-16): grouped section headers, titles shown up to the city, a
- * visible ⋯ menu per row (trash-mode toggle removed), 288px wide. Hidden on
- * the hub itself — `/project`'s body IS the expanded list — and on mobile.
+ * visible ⋯ delete per row (trash-mode toggle removed), 288px wide. Renders
+ * on EVERY project page including the hub — the rail never disappears
+ * between pages (operator, 07/16/2026). Hidden on mobile only.
  */
 export function ProjectsRail({ sections }: { sections: Section[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const [confirm, setConfirm] = useState<{ id: string; name: string } | null>(null);
   const [creating, setCreating] = useState(false);
-
-  // The hub body is the expanded grouped list — a second copy here is noise.
-  if (pathname === "/project") return null;
 
   async function handleCreate() {
     if (creating) return;
@@ -72,7 +68,9 @@ export function ProjectsRail({ sections }: { sections: Section[] }) {
         {sections.length === 0 ? (
           <p className="px-1 text-xs text-gray-500">No projects yet.</p>
         ) : (
-          <div className="flex flex-col gap-3 overflow-y-auto">
+          // scrollbar-gutter keeps the item counts clear of the scrollbar —
+          // without it they sat half-hidden underneath (operator screenshot).
+          <div className="flex flex-col gap-3 overflow-y-auto [scrollbar-gutter:stable]">
             {sections.map((section) => (
               <div key={section.key}>
                 <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-600">
@@ -81,7 +79,7 @@ export function ProjectsRail({ sections }: { sections: Section[] }) {
                 <ul className="flex flex-col gap-0.5">
                   {section.subgroups.flatMap((g) =>
                     g.projects.map((p) => {
-                      const href = p.lastDid ? openDoc(p.id, p.lastDid) : projectHome(p.id);
+                      const href = projectEntry(p.id, p.lastDid);
                       const active = pathname.startsWith(`/project/${p.id}`);
                       return (
                         <li key={p.id} className="flex min-w-0 items-center gap-0.5">
@@ -100,17 +98,18 @@ export function ProjectsRail({ sections }: { sections: Section[] }) {
                               {p.itemCount}
                             </span>
                           </Link>
-                          <RowMenu
-                            label={`Actions for ${p.displayTitle}`}
-                            items={[
-                              { label: "Open", onSelect: () => router.push(href) },
-                              {
-                                label: "Delete",
-                                tone: "danger",
-                                onSelect: () => setConfirm({ id: p.id, name: p.displayTitle }),
-                              },
-                            ]}
-                          />
+                          {/* Straight to the named confirm — the old in-between menu's
+                              only non-duplicate item was Delete, and its popover got
+                              clipped by this list's overflow container. */}
+                          <button
+                            type="button"
+                            aria-label={`Delete ${p.displayTitle}`}
+                            title="Delete project"
+                            onClick={() => setConfirm({ id: p.id, name: p.displayTitle })}
+                            className="rounded-full px-1.5 py-0.5 text-sm leading-none text-gray-500 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gulf-teal/70"
+                          >
+                            ⋯
+                          </button>
                         </li>
                       );
                     }),
