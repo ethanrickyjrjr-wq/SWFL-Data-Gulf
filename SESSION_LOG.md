@@ -1,3 +1,53 @@
+## 2026-07-16 (Fable 5 · main) — hub mission-control SHIPPED: calendar + campaigns drawer + See/Edit/Update, live-verified on :3299
+
+Inline execution of plan `2026-07-16-hub-mission-control.md`, Tasks 1–11 + 13. Eleven commits
+`a6a7eba9`…`25a3cea3`: pure `expandScheduleMonth` (lib/project/schedule-calendar.ts, iterates
+computeNextRunAt — no re-derived cadence math, 6 tests incl. DST + day-31 no-invention) · pure
+`campaignStats` (lib/email/campaign-stats.ts, campaign_key grouping, unique-count rates, 6×4h
+buckets, own-average deltas, ≥2-sends/≥5-delivered strongest floor, 5 tests) ·
+`deriveDocBuildArgs` extracted from emaildoc-occurrence (one scope/prompt authority, cron lane
+unchanged) · `update-doc` route (doc-lane supersedes fork via buildContentDoc, never sends) ·
+`preview-html` route (one render root) · `loadCampaignStats` server loader (blast-results
+escalation grammar) · SelectedProjectContext in the area layout — rail rows select-in-place on
+the hub (desktop), navigate on second click/mobile · CalendarCard (real month grid, day-click
+filters the under-list, no popovers) · CampaignsCard + right slide-over drawer (ChartBlockView
+bars, counts-only degrade) · SelectedProjectCard keyed-remount (react-hooks/set-state-in-effect
+avoided) · cockpit center swap — grouped center list DIED, aside "Running now" RETIRED. 2044
+tests green, `bunx next build` clean. LIVE-VERIFIED on :3299 (fresh server, killed the 13:02
+orphan): rail select retargets all three cards + dossier; drawer opens/Esc-closes; day dots
+match real Monday schedules; UPDATE on Del Prado Test forked `76680c85` (supersedes `44cbf1f2`,
+has_doc, filled with 07/16/2026 cited figures) with the review-before-send banner and
+email_schedules BYTE-IDENTICAL before/after (SQL-checked). Server left up on :3299 for operator
+live-verify (deliberate, not orphaned). NOT done: Task 12 (broadcast events → email_events)
+stays OPERATOR-GATED — without it scheduled sends show dates, no rates. Also opened check
+`deliverable_refresh_drops_blockcanvas_doc` (found during probing). Check
+`hub_mission_control_live_verify` stays open for operator eyes. NOTE: this commit carries the
+parallel Sonnet-5 session's uncommitted log entry below (shared file; its handoff doc commit
+follows from that session).
+
+## 2026-07-16 (Sonnet 5 · main) — competitor campaign migration/onboarding RESEARCH handoff for Fable 5
+
+Operator asked for research (not a build) on bringing in agents who already run email
+campaigns elsewhere — 1-click contact/brand/bio migration. RULE 0.5 probe first: found
+substantial existing infra (unified `public.contacts` store + Google OAuth 1-click import,
+07/05 contact-sourcing roadmap already settled Google-groups/FUB/Outlook/HubSpot-open, the
+07/10 fixture-first brand resolver, and the 07/13-built/07/16-corrected `agent_bio` +
+`agent_profile_facts` AI interview system) — none of that gets rebuilt. Fresh crawl4ai pass
+(07/16) on the actual gap: Wise Agent has real scoped OAuth (best 1-click fit among CRMs
+found), Mailchimp OAuth is all-account/no-scopes with a non-expiring token, Constant Contact
+has real scopes + a bulk CSV-export endpoint, kvCORE is access-gated (gutting its "1-click"
+case) with zero campaign endpoints, BombBomb is manual-API-key like the existing FUB lane.
+Confirmed SteadyAPI (named in the ask) has ZERO agent/brokerage/bio fields across all 18
+endpoints (`docs/steadyapi-capability-census.md:109`) — not a usable lane for this, flagged
+directly. Researched the "forward us an email, we'll extract everything" idea: SigParser
+proves the forwarded-email/signature-extraction pattern is real (build-vs-buy call needed,
+pricing unchecked); our existing Resend Inbound webhook is the natural landing spot. FTC
+CAN-SPAM guide confirms no opt-in/consent requirement blocks importing an agent's own existing
+list — the compliance surface is unchanged from what's already built. Full findings + a
+recommended flow sketch: `docs/handoff/2026-07-16-competitor-campaign-migration-onboarding-handoff.md`.
+NEXT: Fable 5 picks up that handoff to spec the actual connectors (re-verify every vendor fact
+live at build time per RULE 0.4 — this doc is a map, not a locked contract).
+
 ## 2026-07-16 (Fable 5 · main) — hub mission-control PLAN written: spec reviewed against research + code, probes answered, 13 tasks
 
 Spec `2026-07-16-hub-mission-control-design.md` reviewed — its research base (round5
