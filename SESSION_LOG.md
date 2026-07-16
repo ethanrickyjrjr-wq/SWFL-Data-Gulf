@@ -1,3 +1,22 @@
+## 2026-07-16 (Fable 5 · main) — brand-fill-once SPEC'D: ledger + wizard + auto-populate + social login (research banked, no code yet)
+
+Brainstormed operator ask "branding filled in once and only once, profile talking to every
+surface, auto-populate from websites/socials, social login." Spec committed:
+`docs/superpowers/specs/2026-07-16-brand-fill-once-design.md`; build registered
+(`brand_fill_once_live_verify` open). Design: one profile-ledger root (`profileGaps` +
+tiered field registry: must=name/brokerage/address, boost=headshot/title/license/contact/bio,
+nice=colors/fonts/socials) · bank-upward-when-blank server helper (project lane finally
+asks-and-banks — closes the 07/16 seed-ship caveat) · tiny skippable wizard that is a pure
+VIEW over gaps (resume-by-construction) · one FoundFact pipeline (website AI-extract behind a
+verbatim-evidence gate; drops any fact it can't quote) into one review card · social login.
+RESEARCH (crawl4ai 07/16, banked in spec): Supabase AUTO-LINKS same-verified-email OAuth
+identities to one user (no dupes for existing OTP users); LinkedIn provider slug is
+`linkedin_oidc`; LinkedIn OIDC claims = name/picture/email ONLY (no headline — restricted
+API); Apple = name-first-sign-in-only + relay email caveat + $99 dev account (ships parked);
+provider tokens NOT stored by Supabase (capture at callback if needed); NN/g: setup is the
+one legit wizard case, must be brief/skippable/resumable/explain-why. Phases: P1 spine,
+P2 wizard+import, P3 login. NEXT: operator spec review → writing-plans → implementation.
+
 ## 2026-07-16 (Fable 5 · main) — addendum: build-queue synced for hub mission-control (line added, ⬜ operator live-verify + gated Task 12)
 
 ## 2026-07-16 (Fable 5 · main) — /doctor cleanup: skill listing was ~5× over its routing budget; CLAUDE.md rules-of-engagement block now points at its one root
