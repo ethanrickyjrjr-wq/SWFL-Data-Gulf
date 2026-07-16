@@ -1,3 +1,21 @@
+## 2026-07-16 (Fable 5 · main) — competitor-switch onboarding PLANNED: 13-task P1 plan, code-probed seams
+
+Plan `docs/superpowers/plans/2026-07-16-competitor-switch-onboarding-p1.md` written off the
+approved spec, every seam probed at HEAD first (RULE 0.5). Probe corrections carried into the
+plan: canonical contact store is `public.contacts` (07/05 unify spec) — the migration handoff's
+"all writers funnel through upsertContacts/email_contacts" is STALE (Google callback still
+writes legacy email_contacts; pre-existing, tracked by the 07/05 build's own check, not this
+scope); `parse-contacts-csv` recognizes only an `email` header → competitor-export header
+normalization is its own module; brand resolver lives in scripts/outreach/pilot-lib.mts →
+extracted to ONE lib root; api_usage_log has no user column → per-user metering ships as a
+build_usage counter (spec §6 amended to match, same dial). Tasks: switch_passes+build_usage
+migration · effective-tier resolver (paid sub wins, pass lifts free) · send-gate/lab wiring ·
+proof-gated activation (25-contact floor) · canonical upsert extraction (one-way opt-out
+import) · Mailchimp OAuth (one-shot, no token storage) · FUB paste-key · quiet 30/day free
+build guard · forward-lane classifier + webhook branch · Brandfetch root + empty-fields-only
+fill · wow rebuild (draft only, edit-before-send) · live verify. Next: execute (subagent-driven
+or inline, operator's call).
+
 ## 2026-07-16 (Fable 5 · main) — competitor-switch onboarding SPEC'D: Switch Pass (60d Starter on verified migration) + AI concierge migration, pricing verified live
 
 Brainstorm → approved spec `docs/superpowers/specs/2026-07-16-competitor-switch-onboarding-design.md`

@@ -121,9 +121,12 @@ lane meanwhile).
 
 ### 6. Instrumentation (ships with phase 1)
 
-Per-user attribution on `api_usage_log` build rows, so free-tier AI spend per user is queryable
-from day one. This is the pre-wired "AI allowance" dial — never a re-architecture later.
-Plus the quiet free-tier build rate limit (decision 3).
+Per-user build metering via a `build_usage` counter table (user_id × day → build_count),
+mirroring the tested `email_usage` pattern — plan-time refinement: threading a user id through
+the 13 shared `getAnthropic("email_build")` call sites was judged invasive; per-user counts ×
+the avg cost already logged in `api_usage_log` gives the same spend visibility. This is the
+pre-wired "AI allowance" dial — never a re-architecture later. Plus the quiet free-tier build
+rate limit (decision 3).
 
 ## Explicitly parked (open `checks`, RULE 2.4 — not silent deferrals)
 
