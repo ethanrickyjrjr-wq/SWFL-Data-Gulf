@@ -3,6 +3,52 @@ import Link from "next/link";
 import { SEED_DOCS } from "@/lib/email/doc/default-docs";
 import { openSeed } from "@/lib/lab-entry/destination";
 
+/** Rail display order (spec 2026-07-16): the listing lifecycle in the order an
+ *  agent actually fires it, then market/area templates, then relational and
+ *  style skeletons. Just Sold is a lifecycle TAIL — it never leads the rail
+ *  (operator, 07/16/2026). Ids missing from this list still render, appended in
+ *  SEED_DOCS order, so a new template never silently vanishes. */
+export const RAIL_ORDER: string[] = [
+  // Listing lifecycle, in firing order
+  "listing-feature",
+  "new-listing",
+  "open-house",
+  "price-reduced",
+  "skeleton-listing-showcase",
+  "just-sold",
+  "just-sold-grid",
+  // Market / area
+  "market-spotlight",
+  "weekly-pulse",
+  "neighborhood-report",
+  "market-letter",
+  "luxury-market-report",
+  "trend-snapshot",
+  "rate-watch",
+  "investment-brief",
+  "monthly-digest",
+  "year-in-review",
+  "listing-digest",
+  // Relational / brand
+  "welcome",
+  "stay-in-touch",
+  "agent-spotlight",
+  "editorial-letter",
+  "magazine-issue",
+  // Style skeletons
+  "minimal",
+  "skeleton-clean-white",
+  "skeleton-dark-pro",
+  "skeleton-agent-feature",
+];
+
+const RAILED_SEEDS = [
+  ...RAIL_ORDER.map((id) => SEED_DOCS.find((s) => s.id === id)).filter(
+    (s): s is (typeof SEED_DOCS)[number] => Boolean(s),
+  ),
+  ...SEED_DOCS.filter((s) => !RAIL_ORDER.includes(s.id)),
+];
+
 const REPORT_TEMPLATES = [
   { id: "market-overview", label: "Market overview" },
   { id: "bov-lite", label: "Broker opinion" },
@@ -24,7 +70,7 @@ export function TemplateRail({
     <div className="mt-4 space-y-5">
       {/* Email starters */}
       <div className="flex flex-wrap gap-2">
-        {SEED_DOCS.map((s) => (
+        {RAILED_SEEDS.map((s) => (
           <Link
             key={s.id}
             href={openSeed(projectId, s.id)}
