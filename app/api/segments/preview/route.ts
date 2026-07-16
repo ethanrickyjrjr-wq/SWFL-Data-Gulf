@@ -25,7 +25,8 @@ export async function POST(req: Request) {
 
   if (requiresPaidTier(filter)) {
     const db = createServiceRoleClient();
-    if (emailLabTierFor(await resolveEffectiveTier(db, user.id)) !== "paid") {
+    const { tier } = await resolveEffectiveTier(db, user.id);
+    if (emailLabTierFor(tier) !== "paid") {
       return NextResponse.json({ error: "paid_tier_required" }, { status: 403 });
     }
   }

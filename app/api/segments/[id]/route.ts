@@ -21,7 +21,8 @@ async function authed() {
 /** Same effective-tier authority lib/email/usage.ts#checkUsageLimit consults. */
 async function currentTier(userId: string): Promise<"free" | "paid"> {
   const db = createServiceRoleClient();
-  return emailLabTierFor(await resolveEffectiveTier(db, userId));
+  const { tier } = await resolveEffectiveTier(db, userId);
+  return emailLabTierFor(tier);
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {

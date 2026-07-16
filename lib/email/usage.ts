@@ -156,11 +156,17 @@ export async function checkUsageLimit(userId: string): Promise<{
     // Tier resolution consults billing_subscriptions AND switch_passes (a
     // real paid sub always wins; an active Switch Pass lifts free) via the
     // shared effective-tier authority — see lib/billing/effective-tier.ts.
-    // resolveEffectiveTier never throws (it fails open to "free" internally
-    // on either read), so it cannot break this function's own fail-open
-    // guarantee below. email_usage.tier is legacy and no longer read
-    // (KNOWN-DEBT: drop the column later).
-    const tier = await resolveEffectiveTier(db, userId);
+    // resolveEffectiveTier never throws, but it CAN report `degraded: true`
+    // when the billing_subscriptions read itself failed (thrown OR errored)
+    // — that means we could not confirm this caller's real tier, so we fail
+    // OPEN exactly like the old inline `subError` check did (a billing
+    // outage must never block a paying customer's send). email_usage.tier
+    // is legacy and no longer read (KNOWN-DEBT: drop the column later).
+    const { tier, degraded } = await resolveEffectiveTier(db, userId);
+    if (degraded) {
+      // FAIL OPEN: billing_subscriptions read failed → allow
+      return failOpen;
+    }
 
     const { data, error } = await db
       .from("email_usage")

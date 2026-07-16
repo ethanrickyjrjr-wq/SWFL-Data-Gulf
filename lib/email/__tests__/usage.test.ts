@@ -191,4 +191,23 @@ describe("checkUsageLimit (pass-aware via resolveEffectiveTier)", () => {
     expect(result.allowed).toBe(true);
     expect(result.tier).toBe("free");
   });
+
+  // Review Critical (2026-07-16): supabase-js does NOT throw on a normal query
+  // failure (RLS denial, timeout) — it resolves `{data: null, error}`. This is
+  // the discriminating case: NO throw anywhere, just a returned `error` on the
+  // billing_subscriptions read, for a caller who (per email_usage) has ALREADY
+  // sent 200 this period — well past the free-tier limit of 50. The bug this
+  // guards: treating an errored (not thrown) billing read as "no subscription"
+  // → tier "free" → limit 50 → a paying growth customer's send gets BLOCKED
+  // during a transient billing read glitch. Must still fail open.
+  test("billing_subscriptions resolves {data:null, error} (no throw) + sent 200 → fails open, never blocks", async () => {
+    mockDb({
+      billing_subscriptions: async () => ({ data: null, error: { message: "RLS denied" } }),
+      switch_passes: async () => ({ data: null, error: null }),
+      email_usage: async () => ({ data: { sent_count: 200 }, error: null }),
+    });
+
+    const result = await checkUsageLimit("u1");
+    expect(result).toEqual({ allowed: true, tier: "free", sent: 0, limit: 50 });
+  });
 });

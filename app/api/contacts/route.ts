@@ -30,7 +30,8 @@ async function authed() {
 async function tierForUser(userId: string): Promise<EmailLabTier> {
   try {
     const db = createServiceRoleClient();
-    return emailLabTierFor(await resolveEffectiveTier(db, userId));
+    const { tier } = await resolveEffectiveTier(db, userId);
+    return emailLabTierFor(tier);
   } catch {
     return "free";
   }
