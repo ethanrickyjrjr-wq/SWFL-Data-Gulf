@@ -1,3 +1,22 @@
+## 2026-07-16 (Fable 5 · main) — competitor-switch onboarding SPEC'D: Switch Pass (60d Starter on verified migration) + AI concierge migration, pricing verified live
+
+Brainstorm → approved spec `docs/superpowers/specs/2026-07-16-competitor-switch-onboarding-design.md`
+(build registered via new-build.mjs; commits the 07/16 migration handoff alongside). Evidence, all
+live 07/16: competitor pricing crawled (Mailchimp $20@500-stored-contacts 12x send cap · CC ~$12+
+by contacts · Wise Agent $49 · FUB $69/user · Figma/Canva both meter AI, monetize better-not-more);
+switch incentives crawled (ActiveCampaign/Omnisend/Kit/AWeber ALL give free human migration, ~5
+business days, capped — NOBODY discounts); real build costs queried from api_usage_log (email_build
+avg $0.011 n=525, deliverable_build $0.019 n=177, $9.31 lifetime). Operator decisions: pricing
+stays; builds stay unlimited-free (locked decision re-affirmed with numbers), sends stay paywall;
+no visible build quota (quiet anti-abuse limit + per-user cost attribution = future allowance
+dial); no switcher discounts — incentive is AI-instant migration (forward-an-email lane on existing
+Resend Inbound + Mailchimp OAuth + FUB key) + 60-day Starter pass auto-started ONLY by verified
+proof (extraction or platform-origin email; plain CSV never starts the clock). Checks opened:
+competitor_switch_onboarding_live_verify, switch_headtohead_seed_list_research (operator's
+supplied-target-list trial — research-blocked), switch_wiseagent_client_id_request,
+switch_phase2_connectors, switch_bio_scrape_tos_research, ai_allowance_dial_criteria. Next:
+writing-plans → phase-1 implementation.
+
 ## 2026-07-16 (Fable 5 · main) — per-listing DOM SHIPPED: listing_dom view + one formatter + probe-on-use healing + calibration contract (unpushed)
 
 Operator: "how do we figure out which day it arrived on realtor.com... list it as DOM and track
