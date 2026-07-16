@@ -4,11 +4,27 @@
 **State when written:** 388 open checks → classified as 102 defect · 84 verify (after 1 drop) · 19 idea · 182 task.
 This doc covers the **verify** class: work that is BUILT and tested, waiting for one live confirmation.
 
-**The loop per item:** open the surface → confirm the one thing listed → run the close command with what you saw.
+## THE EASY WAY — the guided runner
 
 ```
-node scripts/check.mjs close <check_key> --evidence "<what you actually observed>"
+node scripts/verify-blitz.mjs
 ```
+
+It walks you through every click-now check one at a time: prints the URL to open and the ONE thing
+to confirm, then `y` closes it (Enter accepts a default evidence line, or type what you saw),
+`n` notes it as broken (defect-open commands print at the end), `s` skips, `q` quits. It reads the
+live ledger, so it always shows only what's still open — quit anytime, progress is saved per-close,
+re-run whenever. `--list` prints the queue without doing anything.
+
+## Where "verify" lives (the 20-second orientation)
+
+- The **checks themselves** are rows in the Supabase `public.checks` table — the same list the
+  session kickoff prints. See them anytime: `node scripts/check.mjs list --class verify`
+  (also mirrored read-only to the Airtable board, 2-hourly sync).
+- The **surfaces you verify against** are the live product: `https://www.swfldatagulf.com`
+  (/desk, /email-lab/grid, /project, /welcome) and `https://swfldatagulf-ops.vercel.app` (ops).
+- The **groups below** are the manual version of what the runner automates, plus the groups the
+  runner can't do (after-push, operator-gated sends, awaiting-a-run).
 
 Rules (same as the 07/11 triage handoff): never close without observing it; if it fails, that's a new
 defect-class check (`node scripts/check.mjs open <project> <key> "<label>" --class defect`), not a close.
@@ -131,8 +147,18 @@ verify (commit 6d84855c docs-only, confirmed by the 07/11 sweep); superseded by 
 + pacing in extract_api.py) but isn't deployed; `steadyapi_failed_calls_post_deploy` tracks the
 post-deploy steps and these two close with the first clean cron run as evidence.
 
-**All 7 `cron_incident_*` checks stay open:** every one of those workflows' latest runs is still
-failing as of 07/16 (freshness-probe 2 days, corridor-pulse since 07/05, graphify-republish daily,
-crexi 07/12, brevitas 07/14, chief-of-staff 07/16, daily-rebuild 07/15). They are current defects,
-not stale rows — close on the designed loop (next green run = evidence; the incident logger reopens
-them if the cron re-fails).
+**Cron incidents — diagnosed 07/16 (second pass, same day):**
+- `cron_incident_corridor_pulse_weekly` **CLOSED as moot** — its cron was deliberately paused
+  07/05 (c974db6e, no-paid-web_search decree); the red runs were pre-pause Anthropic
+  credit-balance 400s. Resume path = new task check `corridor_pulse_crawl4ai_retrofit`
+  (corridor "Down the Road" news is frozen at ~07/05 content until that lands).
+- `cron_incident_freshness_probe_daily` — NOT a new failure: the doctor `--fail-on red` gate is
+  correctly holding on the known red baseline. Clears when `doctor_red_baseline_clear_then_reflip`
+  clears. Do not revert the gate.
+- `cron_incident_graphify_republish` — **OPERATOR FIX, ~2 min:** `REBUILD_PAT` gets 404 on
+  `ethanrickyjrjr-wq/swfldatagulf-ops` (token rotated/expired; failing daily since at least 07/10).
+  Mint a fine-grained PAT with contents read/write on swfldatagulf-ops, then
+  `gh secret set REBUILD_PAT --repo ethanrickyjrjr-wq/SWFL-Data-Gulf`. Ops /graph is stale meanwhile.
+- Remaining (crexi 07/12 · brevitas 07/14 · chief-of-staff 07/16 · daily-rebuild 07/15): current
+  defects, still undiagnosed — close on the designed loop (next green run = evidence; the incident
+  logger reopens them on re-failure).

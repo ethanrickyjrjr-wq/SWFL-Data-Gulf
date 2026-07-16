@@ -12,6 +12,22 @@ Both earlier commits (`10078873`, `a23c7b26`) landed on origin via a concurrent 
 carry — verified same-SHA on origin/main. NEXT: brainstorm the two registered levers;
 consider a sustained-rate probe if any bulk job wants >1 req/s.
 
+## 2026-07-16 (Fable 5 · main) — verify-blitz guided runner + 3 red crons diagnosed (1 closed as moot, 1 is the gate working, 1 is a dead PAT)
+
+Operator ("I don't even know where verify lives"): shipped `scripts/verify-blitz.mjs` — interactive
+walk through the 38 click-now verify checks in sitting order (desk → homepage → email lab → projects
+→ ops); y closes via check.mjs (proof gate stays the single close path, Enter = honest default
+evidence line), n collects defect-open commands, reads the live ledger so it self-updates. Handoff
+doc gains the runner + "where verify lives" orientation. Cron triage (gh run logs, not guesses):
+corridor-pulse incident CLOSED moot — cron deliberately paused 07/05 (c974db6e, no-paid-web_search
+decree), red runs were pre-pause Anthropic credit 400s; opened corridor_pulse_crawl4ai_retrofit
+(task) for the resume path. freshness-probe red = doctor --fail-on red gate holding on the known
+red baseline (pointer to doctor_red_baseline_clear_then_reflip written into the incident check;
+NOT a new failure). graphify-republish = REBUILD_PAT 404s on swfldatagulf-ops checkout, red daily
+since ≥07/10 — operator fix is a 2-min PAT re-mint + gh secret set (in the incident check detail +
+handoff). NEXT: operator runs `node scripts/verify-blitz.mjs` (closes up to 38); re-mints
+REBUILD_PAT; push still pending approval (bbe6b7ae + this).
+
 ## 2026-07-16 (Fable 5 · main) — checks ledger gets a class axis: "388 open" was really 102 defects; kickoff headline was capped at 200 and lying
 
 Operator ("we suck at everything... 300 open checks"): the ledger count conflates four things, and
