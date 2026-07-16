@@ -201,9 +201,14 @@ export interface SeedDoc {
   id: string;
   name: string;
   description: string;
+  /** What the right content depends on: a specific listing ("address"), a market
+   *  area ("area"), or nothing beyond brand/region ("none"). Drives the
+   *  capture-or-blank arrival (spec 2026-07-16-seed-capture-or-blank-design.md). */
+  subject: "address" | "area" | "none";
   /** Builds a fresh EmailDoc with newly-minted block ids each call. */
   build: () => EmailDoc;
 }
+export type SeedSubject = SeedDoc["subject"];
 
 const style = (): EmailGlobalStyle => ({ ...DEFAULT_GLOBAL_STYLE });
 
@@ -247,6 +252,7 @@ const style = (): EmailGlobalStyle => ({ ...DEFAULT_GLOBAL_STYLE });
 export const SEED_DOCS: SeedDoc[] = [
   {
     id: "market-spotlight",
+    subject: "area",
     name: "Market Spotlight",
     description: "Big headline number, KPIs, the trend chart behind it, and a signal to watch.",
     build: () => ({
@@ -283,6 +289,7 @@ export const SEED_DOCS: SeedDoc[] = [
   },
   {
     id: "just-sold",
+    subject: "address",
     name: "Just Sold",
     description: "Photo of the win, the numbers behind it, sign off as the agent.",
     // MIRRORS what the Just Sold BUTTON builds (lib/deliverable/recipes/just-sold.ts).
@@ -342,6 +349,7 @@ export const SEED_DOCS: SeedDoc[] = [
   },
   {
     id: "market-letter",
+    subject: "area",
     name: "Market Letter",
     description: "An editorial note: intro, narrative, a signal, and your sign-off.",
     build: () => ({
@@ -369,6 +377,7 @@ export const SEED_DOCS: SeedDoc[] = [
   },
   {
     id: "listing-feature",
+    subject: "address",
     name: "Listing Feature",
     description: "A photo-led feature for a single property or neighborhood.",
     build: () => ({
@@ -394,6 +403,7 @@ export const SEED_DOCS: SeedDoc[] = [
   },
   {
     id: "welcome",
+    subject: "none",
     name: "Welcome",
     description: "Onboard a new subscriber: who you are and what to expect.",
     build: () => ({
@@ -420,6 +430,7 @@ export const SEED_DOCS: SeedDoc[] = [
   },
   {
     id: "minimal",
+    subject: "none",
     name: "Minimal",
     description: "A clean header, one message, and a call to action.",
     build: () => ({
@@ -434,6 +445,7 @@ export const SEED_DOCS: SeedDoc[] = [
   },
   {
     id: "agent-spotlight",
+    subject: "none",
     name: "Agent Spotlight",
     description: "Lead with the agent photo, then track record and a clear call to action.",
     build: () => ({
@@ -481,6 +493,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "luxury-market-report",
+    subject: "area",
     name: "Luxury Market Report",
     description:
       "Serif masthead, wide-banner photo hero, headline + stat side-by-side, market chart, two listing cards.",
@@ -548,6 +561,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "new-listing",
+    subject: "address",
     name: "New Listing",
     description:
       "Hero property photo, price + address headline, the full spec grid, AI paragraph, CTA.",
@@ -626,6 +640,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "weekly-pulse",
+    subject: "area",
     name: "Weekly Market Pulse",
     description: "Header graphic, 3 KPI stats, two charts side-by-side, ZIP comparison signal.",
     build: () => ({
@@ -676,6 +691,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "skeleton-clean-white",
+    subject: "none",
     name: "Clean White",
     description: "Crisp white background, photo placeholder up top, open content area below.",
     build: () => ({
@@ -706,6 +722,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "skeleton-dark-pro",
+    subject: "none",
     name: "Dark Pro",
     description:
       "Deep dark background — bold, high-contrast. Photo placeholder, open content area.",
@@ -742,6 +759,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "skeleton-agent-feature",
+    subject: "none",
     name: "Agent Feature",
     description:
       "Full-width rectangular agent photo banner — not a circle. Name strip, stats, CTA.",
@@ -778,6 +796,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "skeleton-listing-showcase",
+    subject: "address",
     name: "Listing Showcase",
     description:
       "Property photo banner, price + address hero, beds/baths/sqft stats, agent card, CTA.",
@@ -816,6 +835,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "open-house",
+    subject: "address",
     name: "Open House Invite",
     description:
       "Full-width exterior photo, date/time hero, specs, description + RSVP side-by-side, agent card.",
@@ -880,6 +900,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "price-reduced",
+    subject: "address",
     name: "Price Reduced",
     description:
       "Reduced price hero left, before/after stats right, property photo, urgency text, CTA.",
@@ -952,6 +973,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "just-sold-grid",
+    subject: "address",
     name: "Just Sold",
     description:
       "Property photo left + sold hero right, full-width sale stats, story, agent card, home value CTA.",
@@ -1007,6 +1029,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "neighborhood-report",
+    subject: "area",
     name: "Neighborhood Report",
     description:
       "Area headline + KPIs, market chart left + key insight right, agent commentary, search CTA.",
@@ -1071,6 +1094,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "investment-brief",
+    subject: "area",
     name: "Investment Brief",
     description:
       "Property photo + cap rate hero side-by-side, investment KPIs, market chart, analysis CTA.",
@@ -1140,6 +1164,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "rate-watch",
+    subject: "area",
     name: "Rate Watch",
     description:
       "Current rate + affordability stats, market chart, buyer insight, consultation CTA.",
@@ -1211,6 +1236,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "monthly-digest",
+    subject: "area",
     name: "Monthly Digest",
     description:
       "Monthly KPIs, two charts side-by-side, insight + commentary, the month in numbers, agent sign-off.",
@@ -1295,6 +1321,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "year-in-review",
+    subject: "area",
     name: "Year in Review",
     description:
       "Annual headline stats, full-year price chart, 3-column highlights, commentary, CTA.",
@@ -1395,6 +1422,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "listing-digest",
+    subject: "area",
     name: "Listing Digest",
     description:
       "4 property cards in a 2×2 grid — new listings or curated picks for a buyer segment.",
@@ -1462,6 +1490,7 @@ export const SEED_DOCS: SeedDoc[] = [
 
   {
     id: "stay-in-touch",
+    subject: "none",
     name: "Stay in Touch",
     description:
       "Agent hero banner, personal note left + market fact right, social links, referral CTA.",
@@ -1540,6 +1569,7 @@ export const SEED_DOCS: SeedDoc[] = [
   // system only — no source copy, figures, images, or brand identity retained.
   {
     id: "trend-snapshot",
+    subject: "area",
     name: "Trend Snapshot",
     description:
       "Chart leads, no hero — one trend chart up top, supporting stats below, a short read, and your sign-off.",
@@ -1585,6 +1615,7 @@ export const SEED_DOCS: SeedDoc[] = [
   // Brand stays canonical: applyBrand still overlays globalStyle after.
   {
     id: "editorial-letter",
+    subject: "none",
     name: "Editorial Letter",
     description:
       "A text-only personal letter — serif, airy, one link, no buttons. Plain letters out-open designed emails for warm audiences.",
@@ -1614,6 +1645,7 @@ export const SEED_DOCS: SeedDoc[] = [
   },
   {
     id: "magazine-issue",
+    subject: "none",
     name: "Magazine Issue",
     description:
       "Masthead hero with overlay title, feature cards, a dark section band — the designed edition for a warm audience.",
