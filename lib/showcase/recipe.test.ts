@@ -4,9 +4,11 @@ import {
   brandGaps,
   findPlaceholder,
   recipeDestination,
+  typableGaps,
   type BrandNeed,
 } from "./recipe";
 import { SHOWCASES } from "./registry";
+import { profileFieldSpec } from "@/lib/brand/profile-ledger";
 
 describe("findPlaceholder", () => {
   it("returns the exact span of the [[blank]] including brackets", () => {
@@ -104,5 +106,26 @@ describe("NEED_LABELS", () => {
       // Plain words for end users — no snake_case leaking into UI copy.
       expect(label.includes("_")).toBe(false);
     }
+  });
+});
+
+describe("recipe brand needs delegate to the profile ledger", () => {
+  it("NEED_LABELS phrasing comes verbatim from the ledger", () => {
+    for (const [key, label] of Object.entries(NEED_LABELS)) {
+      expect(label).toBe(profileFieldSpec(key)?.label as string);
+    }
+    // The exact strings the popups already show — pinned so the delegation
+    // refactor cannot silently change user-facing copy.
+    expect(NEED_LABELS.agent_name).toBe("your name");
+    expect(NEED_LABELS.photo_url).toBe("your headshot");
+    expect(NEED_LABELS.brokerage).toBe("your brokerage");
+    expect(NEED_LABELS.business_address).toBe("your business address");
+  });
+
+  it("brandGaps/typableGaps behavior is unchanged", () => {
+    const needs = ["agent_name", "photo_url", "brokerage"] as const;
+    const branding = { agent_name: "Marisol Vega" };
+    expect(brandGaps(needs, branding)).toEqual(["photo_url", "brokerage"]);
+    expect(typableGaps(needs, branding)).toEqual(["brokerage"]);
   });
 });

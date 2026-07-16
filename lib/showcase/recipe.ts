@@ -7,9 +7,15 @@
 // fs, no server imports (rides in the browser bundle with the registry).
 
 import { RECIPES, type RecipeKey } from "@/lib/deliverable/recipes";
+import {
+  profileFieldSpec,
+  typableProfileGaps,
+  profileGaps as ledgerGaps,
+} from "@/lib/brand/profile-ledger";
 
-/** Brand-profile keys a recipe leans on — MUST match the Brand panel's field
- *  keys (components/brand/BrandingBlock.tsx). */
+/** Brand-profile keys a recipe leans on. Keys live in the profile ledger (the
+ *  one authority — lib/brand/profile-ledger.ts); this union just narrows which
+ *  of them a RECIPE may declare. */
 export type BrandNeed = "agent_name" | "photo_url" | "brokerage" | "business_address";
 
 export interface ShowcaseRecipe {
@@ -31,13 +37,14 @@ export interface ShowcaseRecipe {
   target?: "email" | "social";
 }
 
-/** Plain-words labels for the gap prompt ("your name, your headshot"). */
-export const NEED_LABELS: Record<BrandNeed, string> = {
-  agent_name: "your name",
-  photo_url: "your headshot",
-  brokerage: "your brokerage",
-  business_address: "your business address",
-};
+/** Plain-words labels for the gap prompt — read from the ledger so popup copy
+ *  and Brand-panel copy can never drift apart. */
+export const NEED_LABELS: Record<BrandNeed, string> = Object.fromEntries(
+  (["agent_name", "photo_url", "brokerage", "business_address"] as const).map((k) => [
+    k,
+    profileFieldSpec(k)?.label ?? k,
+  ]),
+) as Record<BrandNeed, string>;
 
 const PLACEHOLDER_RE = /\[\[([^\]]+)\]\]/;
 
@@ -51,12 +58,13 @@ export function findPlaceholder(
   return { start: m.index, end: m.index + m[0].length, hint: m[1] };
 }
 
-/** The recipe needs the brand blob doesn't fill (empty/whitespace = missing). */
+/** The recipe needs the brand blob doesn't fill (empty/whitespace = missing).
+ *  Thin delegate over the ledger — kept for its narrower BrandNeed[] shape. */
 export function brandGaps(
   needs: readonly BrandNeed[],
   branding: Record<string, string>,
 ): BrandNeed[] {
-  return needs.filter((k) => !(branding[k] ?? "").trim());
+  return ledgerGaps(branding, needs).map((s) => s.key as BrandNeed);
 }
 
 /** A headshot is an upload the Brand panel owns — it can't be typed into a popup,
@@ -65,7 +73,7 @@ export function typableGaps(
   needs: readonly BrandNeed[],
   branding: Record<string, string>,
 ): BrandNeed[] {
-  return brandGaps(needs, branding).filter((k) => k !== "photo_url");
+  return typableProfileGaps(branding, needs).map((s) => s.key as BrandNeed);
 }
 
 /**
