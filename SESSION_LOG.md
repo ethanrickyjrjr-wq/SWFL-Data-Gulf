@@ -1,3 +1,21 @@
+## 2026-07-16 (Sonnet 5 · main) — market-heat + neighborhood_stats backfills dispatched + verified live; ceiling-fill data landed, not yet wired to a brain
+
+Dispatched the two follow-ups queued by 4b10936f's realtor-audit fix instead of waiting for
+cron: `gh workflow run ingest-market-heat-swfl.yml` (run 29505009239) and
+`neighborhood-stats-annual.yml` (run 29505011776), both green. Verified against the actual
+data via the lake MCP (not just green CI): `market_heat_core_swfl` (11,520 rows) +
+`market_heat_hotness_swfl` (9,671 rows) now carry the +18 Core / +6 Hotness ceiling-fill
+columns — average_listing_price, median_listing_price_per_square_foot, median_square_feet,
+pending/price_increased/total_listing_count (each +MoM/+YoY), hh_rank, hotness_rank_mm/_yy,
+page_view_count_per_property_vs_us — all populated (4 nulls in price-per-sqft, ZIPs with no
+sqft data). `data_lake.neighborhood_stats.median_year_built` populated on 31,090/31,110 rows
+(range 1900–2024), up from all-NULL. NOT YET SURFACED: neither
+`refinery/packs/market-heat-swfl.mts` nor any communities-swfl pack reads these new columns
+yet — data is live in the lake/Postgres but not wired into a brain. No new check opened
+(operator call): piece (b) of `ingest_parcel_year_built_join` (per-listing join) still covers
+the year-built work; wiring the market-heat ceiling columns into the pack is unscoped future
+work, not tracked separately yet.
+
 ## 2026-07-16 (Fable 5 · main) — factuality gate: last spend row no longer dropped at exit — flushApiUsageLogs() shipped at the seam
 
 Root-caused `factuality_gate_flush_last_spend_row`: all three usage-log hooks on the spend seam
@@ -18,23 +36,32 @@ green across refinery/agents + lib/deliverable, eslint clean, `bunx next build` 
 grader fix. NEXT: push fires the prod GHA gate on this diff (warn-first data point 2) — verify
 14 fresh `factuality_ci` rows land, then close the check with that run as evidence.
 
-## 2026-07-16 (Fable 5 · main) — SteadyAPI real limits off the operator's dashboard: 50k/mo quota (believed 10k) + 1 req/s live rate limit (docs claim 15) — pacing shipped on all four call surfaces
+## 2026-07-16 (Fable 5 · main) — SteadyAPI real numbers off the operator's dashboard: 50k/mo quota (believed 10k), rate limit UNVERIFIED (evidence spans 1–15 req/s) — ~1 req/s pacing shipped on all four call surfaces
 
 Operator supplied the account dashboard: 10,795/50,000 used this cycle (10,739 ok / 56 failed),
-plus a failed-request log showing the true throttle — `"Rate limit exceeded. Maximum 1 request(s)
-per second."`, `retry_after: 1`. That resolves the 07/07 429 mystery for real: not quota
-exhaustion (~22% utilization), not a vendor transient — sequential page walks trip 1 req/s
-whenever a response returns in <1s. DISCREPANCY logged: docs.steadyapi.com claims 15 req/s;
-live beats docs (the 06/30 "verified 15 req/s" probe predates the current key/plan). Shipped:
+killing the quota-exhaustion theory (~22% utilization). A pasted failed-request log shows a
+1 req/s rejection exists on the account (`"Rate limit exceeded. Maximum 1 request(s) per
+second."`, `retry_after: 1`) — but its params (`"search": "naples florida homes"`) look like
+steadyapi.com's own site demo box, not our clients, and a live 9-call probe (3-concurrent
+bursts × spoofed/plain/bare headers) passed 100% clean — header shape is NOT the bucket key
+and the 06/30 "Cloudflare blocks non-browser UA" note didn't reproduce either. Docs still
+claim 15 req/s. Effective limit: UNVERIFIED; sustained un-paced walks DID 429 on 07/07, so we
+pace ~1 req/s — safe under every hypothesis, ~2 min/county walk. Shipped:
 `extract_api.py` `_pace()` (≥1.05s between request starts, `_pace_sleep`/`_now` seams, autouse
 no-op in `ingest/conftest.py`), rentals + market_aggregates `RATE_LIMIT_RPS` 15→0.95 (throttle
 machinery existed, calibrated to the wrong number), TS comps client `THROTTLE_RETRY_FLOOR_MS`
 1.1s (old 0.2–0.6s first backoff re-collided inside the window by design). Stale 10k/"Starter"
 claims corrected (`steadyapi.ts`, `pipeline.py` budget print, `extract_api.py`). Tests: 151
-pytest (lifecycle+rentals+aggregates) + 30 bun (steadyapi clients) green. Checks:
+pytest (lifecycle+rentals+aggregates) + 35 sold-capture + 30 bun (steadyapi clients) green;
+full-tree pytest is NOT green for PRE-EXISTING reasons (hangs in leepa tests + 13 failures,
+all reproduce on HEAD conftest — new check `ingest_test_tree_not_green`). Checks:
 `steadyapi_quota_unknown` CLOSED (50k evidence), `steadyapi-429-rate-limited` CLOSED (root
-cause + fix). Findings doc §2 answered in place. NEXT: operator picks levers for the ~39k/mo
-headroom (sold-probe cap, amenity pre-cache, weekly rentals — menu given in session).
+cause + fix). Findings doc §2 answered in place. SPEND (operator approved all levers +
+push): SOLD_CHECK_CAP 8→40/county-run, sized from real logs (Lee dep=8/336 dropped 328 in
+one run 29198998185; ~3.6k calls/mo at 40); rentals-weekly lever was ALREADY satisfied (cron
+`0 12 * * 1` since 07/02 — findings doc's "monthly" label was wrong); still queued this
+session: SteadyAPI capability census file (everything grabbable vs pulled vs should-pull),
+listed_date persistence, community amenity pre-cache (latter two need registration+spec).
 
 ## 2026-07-16 (Fable 5 · main + wt/sell-side-framing) — sell-side favorable framing COMPLETE: handoff verified, Tasks 8–11 executed, whole-branch review READY TO MERGE (16 commits in worktree, unpushed)
 
