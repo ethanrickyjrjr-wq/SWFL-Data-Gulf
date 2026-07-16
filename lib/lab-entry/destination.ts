@@ -29,9 +29,16 @@ export function openDoc(projectId: string, did: string, opts: { schedule?: boole
   return `${projectEmailLabBase(projectId)}${q}`;
 }
 
-/** Open a template seed by id (?seed=) — an explicit template pick, no popups. */
-export function openSeed(projectId: string, seedId: string): string {
-  return `${projectEmailLabBase(projectId)}?seed=${encodeURIComponent(seedId)}`;
+/** Open a template seed by id (?seed=). The arrival runs capture-or-blank (spec
+ *  2026-07-16); `blank: true` carries the user's explicit Start-blank choice so
+ *  the arrival skips capture and lands the raw layout. */
+export function openSeed(
+  projectId: string,
+  seedId: string,
+  opts: { blank?: boolean } = {},
+): string {
+  const blank = opts.blank ? "&blank=1" : "";
+  return `${projectEmailLabBase(projectId)}?seed=${encodeURIComponent(seedId)}${blank}`;
 }
 
 /** A template-gallery pick with NO project context (the /showcase "Start-from

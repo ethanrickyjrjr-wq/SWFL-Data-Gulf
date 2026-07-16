@@ -18,6 +18,7 @@ import {
 import { isRecipeKey } from "@/lib/deliverable/recipes";
 import { openSeed, projectEmailLabBase } from "@/lib/lab-entry/destination";
 import { planArrival } from "@/lib/lab-entry/arrival";
+import { seedFillPrompt } from "@/lib/lab-entry/seed-fill-prompt";
 import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
 import { ProjectConfirmPopup } from "@/components/lab-entry/ProjectConfirmPopup";
 import { AddressPopup } from "@/components/lab-entry/AddressPopup";
@@ -34,6 +35,8 @@ export function EmailLabGridClient({
   recipe,
   recipeNeeds,
   rkey,
+  seedId,
+  seedBlankChosen,
   refCode,
   signedIn,
   offeredProject,
@@ -45,6 +48,11 @@ export function EmailLabGridClient({
   recipeNeeds?: string | null;
   /** The recipe KEY (?rkey=) — the deliverable's identity. */
   rkey?: string | null;
+  /** ?seed= — a template pick (the /showcase start-from door); runs
+   *  capture-or-blank (spec 2026-07-16). */
+  seedId?: string | null;
+  /** ?blank=1 — the user explicitly chose the raw layout. */
+  seedBlankChosen?: boolean;
   refCode?: string | null;
   signedIn: boolean;
   offeredProject: { id: string; title: string } | null;
@@ -64,19 +72,22 @@ export function EmailLabGridClient({
     : null;
   const recipeBlank = initialRecipe ? findPlaceholder(initialRecipe.prompt) : null;
 
+  // The picked template (?seed=), resolved once — feeds the arrival plan, the
+  // capture popup, and the fill prompt (spec 2026-07-16).
+  const arrivalSeed = seedId ? (SEED_DOCS.find((s) => s.id === seedId) ?? null) : null;
   const [plan] = useState(() =>
     planArrival({
-      params: { zip, recipe, addr, recipeNeeds },
+      params: { zip, recipe, addr, recipeNeeds, seed: seedId },
       signedIn,
       offeredProject,
       insideProject: false,
+      // The standalone lab holds no project belief — address/area seeds always ask.
       subjectAddress: null,
       subjectArea: null,
       recipeHasBlank: Boolean(recipeBlank),
       recipeInputKind: recipeBlank ? "address" : null,
-      // Task 8 (spec 2026-07-16) wires the real seed door here.
-      seedSubject: null,
-      seedBlankChosen: false,
+      seedSubject: arrivalSeed?.subject ?? null,
+      seedBlankChosen: Boolean(seedBlankChosen),
       // Signed-in + no recipe/zip/seed/did = a plain "New Campaign" open — show the gallery
       // instead of a blank canvas (spec 2026-07-15-gallery-listing-hero-design.md). Anonymous
       // visitors are unchanged — different taste-surface flow (EMAIL_LAB_LANDING).
@@ -86,9 +97,15 @@ export function EmailLabGridClient({
 
   const showGallery = plan.doc.kind === "gallery";
 
-  // The doc the canvas opens on: blank skeleton for a recipe arrival (never a
-  // demo doc), the server ZIP prebuild when present, else the static grid seed.
+  // The doc the canvas opens on: the picked template for a seed arrival, blank
+  // skeleton for a recipe arrival (never a demo doc), the server ZIP prebuild
+  // when present, else the static grid seed.
   const [initialDoc] = useState<EmailDoc>(() => {
+    if (plan.doc.kind === "seed")
+      return ensureGridLayouts(
+        seedDoc ?? (seedById(plan.doc.seedId) ?? SEED_DOCS[0]).build(),
+        DEFAULT_H,
+      );
     if (plan.doc.kind === "zip" && seedDoc) return seedDoc;
     if (plan.doc.kind === "blank")
       return ensureGridLayouts(
@@ -110,9 +127,14 @@ export function EmailLabGridClient({
   const [sendOpen, setSendOpen] = useState(false);
 
   // The gallery case never auto-opens this — the "Building into" line + its own Change link
-  // (Step 5 below) replace the old blocking upfront confirm. Every other arrival (recipe, zip,
-  // seed, did) keeps the original behavior untouched.
-  const [confirmOpen, setConfirmOpen] = useState(showGallery ? false : plan.projectConfirm);
+  // (Step 5 below) replace the old blocking upfront confirm. A signed-in SEED arrival
+  // (the /showcase start-from door) confirms the project first, then rides into it
+  // carrying the seed — the in-project arrival runs capture-or-blank with save/banking
+  // (spec 2026-07-16). Every other arrival keeps the original behavior untouched.
+  const signedInSeedHop = plan.doc.kind === "seed" && signedIn && offeredProject != null;
+  const [confirmOpen, setConfirmOpen] = useState(
+    showGallery ? false : plan.projectConfirm || signedInSeedHop,
+  );
   const [targetProject, setTargetProject] = useState(offeredProject);
   // ASK FOR THE ADDRESS, ALWAYS. This used to be `plan.addressPopup && !signedIn` on
   // the theory that a signed-in recipe rides into a project, where the in-project
@@ -150,6 +172,12 @@ export function EmailLabGridClient({
     }
     if (addr) params.set("addr", addr);
     if (zip) params.set("zip", zip);
+    // A template pick survives the hop — the in-project arrival runs its
+    // capture-or-blank (spec 2026-07-16).
+    if (seedId) {
+      params.set("seed", seedId);
+      if (seedBlankChosen) params.set("blank", "1");
+    }
     const q = params.toString();
     // assign(), not `location.href =` — same hard navigation (the server must re-read
     // the session cookie), but an assignment to a global trips react-hooks/immutability
@@ -182,6 +210,32 @@ export function EmailLabGridClient({
   // shell so the build it fires is SIGNED. Signed-in visitors leave this empty: the
   // shell reads their saved brand from the account on mount.
   const [arrivalBrand, setArrivalBrand] = useState<Record<string, string>>({});
+
+  // Template capture (spec 2026-07-16), local-build path only: anonymous visitors
+  // build right here. Signed-in seed arrivals confirm-then-hop instead (above), so
+  // their ask never renders on this surface.
+  const [seedAsk, setSeedAsk] = useState<
+    { inputKind: "address" | "area" } | { choice: true } | null
+  >(
+    signedInSeedHop
+      ? null
+      : plan.seedStart?.mode === "ask"
+        ? { inputKind: plan.seedStart.inputKind }
+        : plan.seedStart?.mode === "choice"
+          ? { choice: true }
+          : null,
+  );
+
+  // Fill the picked template for the captured subject ("" = choice mode's
+  // Fill-with-AI → brand + region). No project here, so nothing to bank — the
+  // signed-in path hops into a project instead.
+  function onSeedSubjectBuild(value: string) {
+    if (!arrivalSeed) return;
+    setSeedAsk(null);
+    const v = value.trim();
+    setBuild({ prompt: seedFillPrompt(arrivalSeed, v || null) });
+    setBuildKey((k) => k + 1);
+  }
 
   // Fill the recipe's [[blank]] with the popup value, then remount the shell to
   // build it.
@@ -220,7 +274,11 @@ export function EmailLabGridClient({
           <TemplateGallery
             onPick={(seed) => window.location.assign(openSeed(targetProject.id, seed.id))}
             onStartBlank={() =>
-              window.location.assign(openSeed(targetProject.id, "skeleton-clean-white"))
+              // blank:true — an explicit Start-blank must land the raw layout, not
+              // the in-project capture popup (spec 2026-07-16).
+              window.location.assign(
+                openSeed(targetProject.id, "skeleton-clean-white", { blank: true }),
+              )
             }
             heroSlot={<ListingCampaignHero subjectAddress={null} />}
           />
@@ -313,6 +371,19 @@ export function EmailLabGridClient({
             }
             await createAndEnter(name);
           }}
+        />
+      )}
+      {/* Template capture (spec 2026-07-16): the subject ask or fill-or-blank
+          choice for an anonymous template pick. Start blank / Cancel both land
+          on the already-loaded raw layout. */}
+      {!confirmOpen && seedAsk && arrivalSeed && (
+        <AddressPopup
+          inputKind={"inputKind" in seedAsk ? seedAsk.inputKind : null}
+          choiceMode={"choice" in seedAsk}
+          initialValue={addr ?? ""}
+          onBuild={(value) => onSeedSubjectBuild(value)}
+          onStartBlank={() => setSeedAsk(null)}
+          onCancel={() => setSeedAsk(null)}
         />
       )}
       {!confirmOpen && addressOpen && recipeBlank && initialRecipe && (

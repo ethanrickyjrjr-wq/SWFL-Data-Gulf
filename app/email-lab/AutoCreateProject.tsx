@@ -16,6 +16,8 @@ export function AutoCreateProject({
   recipeNeeds = null,
   rkey = null,
   addr = null,
+  seed = null,
+  blank = false,
 }: {
   zip?: string | null;
   recipe?: string | null;
@@ -23,6 +25,9 @@ export function AutoCreateProject({
   /** The recipe KEY — the deliverable's identity, carried into the fresh project. */
   rkey?: string | null;
   addr?: string | null;
+  /** A template pick (?seed=) rides into the fresh project's capture-or-blank arrival. */
+  seed?: string | null;
+  blank?: boolean;
 }) {
   const router = useRouter();
   const firedRef = useRef(false); // strict-mode double-fire would create two projects
@@ -36,6 +41,10 @@ export function AutoCreateProject({
     if (rkey) params.set("rkey", rkey);
     if (recipeNeeds) params.set("recipeNeeds", recipeNeeds);
     if (addr) params.set("addr", addr);
+    if (seed) {
+      params.set("seed", seed);
+      if (blank) params.set("blank", "1");
+    }
     const q = params.size > 0 ? `?${params.toString()}` : "";
     // An address arrival is a listing project — persist the subject on the row
     // (not just in the redirect query) so the address lane survives return visits.
