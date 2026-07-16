@@ -55,8 +55,8 @@ claims corrected (`steadyapi.ts`, `pipeline.py` budget print, `extract_api.py`).
 pytest (lifecycle+rentals+aggregates) + 35 sold-capture + 30 bun (steadyapi clients) green;
 full-tree pytest is NOT green for PRE-EXISTING reasons (hangs in leepa tests + 13 failures,
 all reproduce on HEAD conftest — new check `ingest_test_tree_not_green`). Checks:
-`steadyapi_quota_unknown` CLOSED (50k evidence), `steadyapi-429-rate-limited` CLOSED (root
-cause + fix). Findings doc §2 answered in place. SPEND (operator approved all levers +
+`steadyapi_quota_unknown` CLOSED (50k evidence), `steadyapi-429-rate-limited` CLOSED (evidence
++ defense shipped). Findings doc §2 answered in place. SPEND (operator approved all levers +
 push): SOLD_CHECK_CAP 8→40/county-run, sized from real logs (Lee dep=8/336 dropped 328 in
 one run 29198998185; ~3.6k calls/mo at 40); rentals-weekly lever was ALREADY satisfied (cron
 `0 12 * * 1` since 07/02 — findings doc's "monthly" label was wrong); still queued this

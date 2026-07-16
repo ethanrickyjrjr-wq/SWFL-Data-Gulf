@@ -1,8 +1,9 @@
 """Throttled SteadyAPI GET helper for market_aggregates.
 
-Network lives ONLY here so the pure parsers + `--dry-run` never touch it. Throttles below the verified
-15 req/sec cap. A missing key or any non-200/exception returns a sentinel the caller treats as a gap
-(never fabricates a row)."""
+Network lives ONLY here so the pure parsers + `--dry-run` never touch it. Throttles to ~1 req/s
+(RATE_LIMIT_RPS — see constants.py: the vendor's effective limit is unverified, evidence spans
+1–15 req/s, and ~1 req/s is safe under every hypothesis). A missing key or any non-200/exception
+returns a sentinel the caller treats as a gap (never fabricates a row)."""
 from __future__ import annotations
 
 import os

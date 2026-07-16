@@ -34,6 +34,32 @@ weekly instead of daily — ~107 pages/day ≈ **3.2k requests/mo saved (~35%)**
 
 ## 2. P0-A — quota: exactly what Ricky must fetch (the one open blocker)
 
+> **ANSWERED 07/16/2026 (operator dashboard screenshot): the limit is 50,000 requests/month;
+> 10,795 used this cycle (10,739 successful, 56 failed) → ~39.2k remaining.** 5x the believed
+> 10k ceiling. Usage chart: zero before ~06/27 (key go-live), daily totals since range ~300–1,160.
+> Consequences: (a) cycle-exhaustion is RULED OUT as the 07/07 429 cause — only 56 failed
+> requests in the whole cycle, at ~22% utilization; (b) the 3,349-community amenity pre-cache and
+> other bulk proposals are UNBLOCKED; (c) stale 10k/"Starter" claims in `lib/listings/steadyapi.ts`
+> + `listing_lifecycle/pipeline.py` + `extract_api.py` corrected same day. Operator directive:
+> use the headroom. Still unread: cycle reset date, per-API split (screenshot shows the combined
+> account view).
+>
+> **RATE-LIMIT EVIDENCE, same session (operator pasted a dashboard failed-request log):** the
+> account CAN be answered with
+> `{"message": "Rate limit exceeded. Maximum 1 request(s) per second.", "retry_after": 1}`.
+> BUT the picture is three-way inconsistent and the effective API limit is **UNVERIFIED**:
+> (a) docs claim 15 req/s global; (b) the 1 req/s rejection above — whose params
+> (`"search": "naples florida homes"`, natural language) look like steadyapi.com's own site
+> demo box, not any of our clients (ours send `location` slugs); (c) a live 9-call probe
+> (3-concurrent bursts × spoofed/plain/bare header shapes) passed 100% clean 07/16 — header
+> shape is NOT the bucket key, and the bare-client shape also passed, so the 06/30
+> "Cloudflare blocks non-browser UA" note no longer reproduces either (headers kept anyway).
+> What IS known: sustained un-paced page walks 429'd on 07/07. Defense shipped same day on all
+> four call surfaces, safe under every hypothesis: `extract_api.py` `_pace()` (≥1.05s between
+> request starts), rentals + market_aggregates `RATE_LIMIT_RPS` 15 → 0.95, TS comps client
+> 1.1s throttled-retry floor (honors `retry_after: 1`; the old 0.2–0.6s first backoff could
+> re-collide inside a 1s window). Cost: a full Lee walk takes ~2 min longer on cron.
+
 No API-side signal exists: **no rate-limit/quota headers on any response** (probed live 07/16,
 3 calls — confirms `steadyapi_quota_unknown`), docs publish no per-plan numbers, and the pricing
 page's 200-req/mo row may not be the Real Estate API. The account dashboard is the only authority.

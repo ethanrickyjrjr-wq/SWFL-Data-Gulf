@@ -10,7 +10,8 @@
 // server works; urllib default UA is blocked.
 //
 // Empty-tolerant (four-lane / ODD): no key, non-200, quota, or bad body → [], never throws.
-// Hour-cached to be frugal on the 10 000 req/month Starter tier. 429/5xx/network errors get
+// Hour-cached. Quota: 50,000 req/month (dashboard screenshot 07/16/2026: 10,795 used that
+// cycle — supersedes the old "10k Starter tier" guess this header carried). 429/5xx/network errors get
 // a bounded jittered retry (see steadyGet) before degrading — a single throttle no longer
 // silently reads as "no data".
 
@@ -36,10 +37,16 @@ function cityToSlug(city: string, state = "FL"): string {
 }
 
 // ── bounded retry (07/16/2026) ────────────────────────────────────────────────
-// Vendor contract (docs.steadyapi.com, crawled live 07/16/2026): 15 req/s global
-// limit, 429 beyond it, no Retry-After header documented; vendor explicitly
-// recommends client-side retry with backoff. Before this, a single 429 in a build
-// session silently became [] — the user read "no comps" for data that exists.
+// The vendor's effective rate limit is UNVERIFIED and the evidence disagrees:
+// docs.steadyapi.com claims 15 req/s; the account dashboard's failed-request log
+// shows a 1 req/s rejection exists on the account ("Rate limit exceeded. Maximum
+// 1 request(s) per second.", retry_after: 1 — likely the site demo lane); a live
+// 3-concurrent burst with these exact headers passed clean 07/16/2026. Sustained
+// un-paced walks DID 429 on 07/07/2026. So when a 429 does arrive, the retry
+// waits out a full 1s window (floor below) — correct under every hypothesis; the
+// old 0.2–0.6s first backoff could re-collide inside a 1s window. Before retry
+// existed, a single 429 in a build session silently became [] — the user read
+// "no comps" for data that exists.
 
 /** Why a call finally gave up. Only TRANSIENT failures report — a deterministic
  *  4xx (bad key, bad params, no such resource) degrades silently exactly as
@@ -57,6 +64,9 @@ export interface SteadyFetchDeps {
 
 const MAX_ATTEMPTS = 3;
 const BACKOFF_BASE_MS = 400;
+// Vendor answers a 429 with retry_after: 1 (second) — a throttled retry inside that
+// window is a guaranteed second 429, so it waits out the window plus a small margin.
+const THROTTLE_RETRY_FLOOR_MS = 1_100;
 const ATTEMPT_TIMEOUT_MS = 10_000;
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 
@@ -75,9 +85,12 @@ async function steadyGet(
   let reason: SteadyDegradeReason = "network";
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     if (attempt > 0) {
-      // full jitter: base·2^(attempt-1) scaled by 0.5–1.5 — stays well under the
-      // vendor's 15 req/s and never lets concurrent callers re-collide in step.
-      await sleep(BACKOFF_BASE_MS * 2 ** (attempt - 1) * (0.5 + Math.random()));
+      // full jitter: base·2^(attempt-1) scaled by 0.5–1.5, so concurrent callers
+      // never re-collide in step; a THROTTLED retry is additionally floored at the
+      // vendor's enforced 1 req/s window (see header) or it cannot succeed.
+      let wait = BACKOFF_BASE_MS * 2 ** (attempt - 1) * (0.5 + Math.random());
+      if (reason === "throttled") wait = Math.max(wait, THROTTLE_RETRY_FLOOR_MS);
+      await sleep(wait);
     }
     try {
       const res = await doFetch(`${BASE}/${pathAndQuery}`, {

@@ -33,8 +33,12 @@ STEADYAPI_HEADERS = {
     "Referer": "https://steadyapi.com/",
 }
 
-# Hard rate cap verified 06/30 (429 above 15 req/sec). The client throttles below this.
-RATE_LIMIT_RPS = 15
+# The vendor's effective rate limit is UNVERIFIED and the evidence disagrees (07/16/2026):
+# docs claim 15 req/s; the account dashboard's failed-request log shows a 1 req/s rejection
+# exists on the account ("Maximum 1 request(s) per second.", retry_after: 1 — likely the
+# site demo lane); a 3-concurrent burst probe passed clean; sustained un-paced walks 429'd
+# on 07/07. 0.95 rps (~1.05s spacing) is safe under every hypothesis and costs minutes.
+RATE_LIMIT_RPS = 0.95
 
 # County-scale location slugs for /price-histogram (verified: "Lee County, FL" -> 200, 40 bands).
 COUNTY_LOCATIONS = {"Lee": "Lee County, FL", "Collier": "Collier County, FL"}

@@ -258,7 +258,9 @@ describe("bounded retry — a single throttle can no longer zero a user-facing c
     expect(out).toHaveLength(1);
     expect(calls.count).toBe(2);
     expect(delays).toHaveLength(1);
-    expect(delays[0]).toBeGreaterThan(0);
+    // a throttled retry waits OUT the vendor's 1s retry_after window (429 bodies
+    // answer retry_after: 1 — dashboard evidence 07/16/2026) or it can re-collide
+    expect(delays[0]).toBeGreaterThanOrEqual(1100);
   });
 
   it("gives up after 3 attempts on a persistent 429 and reports 'throttled'", async () => {

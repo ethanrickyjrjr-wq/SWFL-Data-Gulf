@@ -274,7 +274,7 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
 
     if source == "api":
         print(f"[budget] this run = {budget_calls} SteadyAPI calls "
-              f"(10,000/mo Starter cap; ~4,700/mo steady-state target)", flush=True)
+              f"(50,000/mo cap per dashboard 07/16/2026; ~8.6-10.3k/mo scheduled-scan burn)", flush=True)
     print(f"[done] {totals} dry_run={dry_run} source={source}", flush=True)
     if totals["scanned"] == 0:
         print("[fatal] every county returned 0 rows — failing loud (no silent fake-green)", flush=True)

@@ -160,7 +160,10 @@ def test_cluster_by_latlon_skips_rows_without_coords():
 
 
 # ---------------------------------------------------------- batched enrichment (mocked HTTP)
+import itertools  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
+
+import pytest  # noqa: E402
 
 from ingest.pipelines.listing_lifecycle import extract_api  # noqa: E402
 
@@ -342,10 +345,12 @@ def test_scan_county_api_dry_run_never_calls_nearby_home_values(monkeypatch):
     assert enrich_urls == []
 
 
-# ---------------------------------------------------------- bounded retry (07/16/2026)
-# Vendor contract (docs.steadyapi.com crawled live 07/16/2026): 15 req/s global limit,
-# 429 beyond it, vendor recommends client retry with backoff. Before this, a single 429
-# on any page zeroed the county's whole scan (Lee + Collier both, 07/07/2026).
+# ----------------------------------------- bounded retry + ~1 req/s pacing (07/16/2026)
+# The vendor's effective rate limit is UNVERIFIED (evidence spans 1–15 req/s — see the
+# extract_api.py comment block); sustained un-paced walks 429'd on 07/07/2026, zeroing
+# whole county scans, so the pacer holds request starts >=1.05s apart — safe under every
+# hypothesis. ingest/conftest.py autouse-no-ops the pacer for every test — the pacing
+# tests below re-patch the seams to observe it.
 
 def test_fetch_steadyapi_retries_429_then_succeeds(monkeypatch):
     sleeps: list[float] = []
@@ -389,6 +394,30 @@ def test_fetch_steadyapi_network_error_is_retried(monkeypatch):
         rows, ok, calls, total = extract_api.fetch_steadyapi_city("Cape Coral", key="p")
     assert ok is True and len(rows) == 1
     assert mock_get.call_count == 2
+
+
+def test_fetch_steadyapi_paces_consecutive_requests_to_one_per_second(monkeypatch):
+    waits: list[float] = []
+    monkeypatch.setattr(extract_api, "_pace_sleep", waits.append)
+    monkeypatch.setattr(extract_api, "_now", lambda: 100.0)  # frozen clock: zero elapsed
+    body = {"meta": {"total": 1}, "body": [_STEADYAPI_ROW]}
+    with patch.object(extract_api.requests, "get", return_value=_resp(200, body)):
+        extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+        extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+    # First request of the process is unpaced; the second waits the full 1 req/s window.
+    assert waits == [pytest.approx(extract_api._MIN_INTERVAL_S)]
+
+
+def test_fetch_steadyapi_pacing_adds_no_wait_when_window_already_elapsed(monkeypatch):
+    waits: list[float] = []
+    monkeypatch.setattr(extract_api, "_pace_sleep", waits.append)
+    clock = itertools.count(100.0, 2.0)  # every clock read is 2s later — always past 1.05s
+    monkeypatch.setattr(extract_api, "_now", lambda: next(clock))
+    body = {"meta": {"total": 1}, "body": [_STEADYAPI_ROW]}
+    with patch.object(extract_api.requests, "get", return_value=_resp(200, body)):
+        extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+        extract_api.fetch_steadyapi_city("Cape Coral", key="p")
+    assert waits == []  # slow responses already satisfy the window — no added latency
 
 
 def test_scan_county_api_skips_type_sweeps_when_city_pull_is_empty(monkeypatch):

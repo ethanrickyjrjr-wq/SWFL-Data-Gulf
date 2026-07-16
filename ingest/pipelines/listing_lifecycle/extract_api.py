@@ -6,7 +6,7 @@ sqft, lot, lat/lon, county_fips (5-digit), photo_url, status, flags, source_type
 Budget-bomb fix (audited 06/30): baths enrich in BATCHES via /nearby-home-values (clustered by
 lat/lon, ~25-100 properties' baths per call) instead of one /property-tax-history + one
 /similar-homes call PER new listing (the old design — 2 calls/listing, ~42,000 calls/sweep,
-4x the monthly cap). Enrichment only runs for property_ids not already in `known_ids` (threaded
+~84% of the entire 50k/mo quota in one sweep). Enrichment only runs for property_ids not already in `known_ids` (threaded
 from the prior scan's persisted `property_id` column), and `dry_run=True` skips the network
 calls entirely so `--dry-run` is actually safe to run (the old dry-run still fired the full
 enrich storm because it lived inside the unconditional scan, before the dry_run check).
@@ -221,15 +221,36 @@ def _cluster_by_latlon(rows: list[dict], grid: float = _ENRICH_GRID) -> list[tup
 # True  = paginated to NATURAL exhaustion (a short/empty page, or reached meta.total) — trustworthy.
 # False = a GAP: no key, non-200, bad body, network error, or _MAX_PAGES backstop — may be truncated.
 
-# ---- Bounded retry (07/16/2026). Vendor contract (docs.steadyapi.com, crawled live
-# 07/16/2026): 15 req/s global limit, 429 beyond it, no Retry-After documented; the vendor
-# recommends client-side retry with backoff. Before this, ONE un-retried 429 on any page
-# zeroed the county's whole scan — hit Lee AND Collier's scheduled runs on 07/07/2026,
-# discarding every page already paid for.
+# ---- Bounded retry + ~1 req/s pacing (07/16/2026). The vendor's effective rate limit is
+# UNVERIFIED and the evidence disagrees: docs.steadyapi.com claims 15 req/s global (crawled
+# 07/16/2026); the account dashboard's failed-request log shows a 1 req/s rejection exists
+# on this account ({"message": "Rate limit exceeded. Maximum 1 request(s) per second.",
+# "retry_after": 1} — though that entry's params look like steadyapi.com's own site demo
+# box, not our clients); and a live 3-concurrent burst probe with our exact headers passed
+# clean the same day (9 calls, all 200, spoofed/plain/bare header shapes alike). What IS
+# known: sustained un-paced page walks 429'd on 07/07/2026, zeroing Lee's AND Collier's
+# scans. _pace() spaces request STARTS >=1.05s apart — safe under every hypothesis, costs
+# ~2 min per county walk; bounded backoff stays for 5xx/network and any slip-through.
 _RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
 _MAX_ATTEMPTS = 4        # 1 initial + 3 retries per page — bounded, never a hot loop
 _BACKOFF_BASE_S = 2.0    # jittered exponential: ~1-3s, ~2-6s, ~4-12s between attempts
-_sleep = time.sleep      # module seam so tests can no-op the waits
+_MIN_INTERVAL_S = 1.05   # 1 req/s enforced (evidence above) + 5% margin
+_sleep = time.sleep      # module seam so tests can no-op the backoff waits
+_pace_sleep = time.sleep  # separate seam: pacing waits, distinct from backoff in tests
+_now = time.monotonic    # module seam so tests can fake the clock
+_last_request_ts: float | None = None
+
+
+def _pace() -> None:
+    """Block until >=_MIN_INTERVAL_S has passed since the previous request START —
+    module-wide, because every endpoint shares the one key. A paced call never burns
+    quota (or a whole county scan) as a rate-limit failure."""
+    global _last_request_ts
+    if _last_request_ts is not None:
+        wait = _MIN_INTERVAL_S - (_now() - _last_request_ts)
+        if wait > 0:
+            _pace_sleep(wait)
+    _last_request_ts = _now()
 
 
 def _get_with_retry(url: str, *, params: dict, headers: dict, timeout: int = 30) -> tuple[Any, int]:
@@ -243,6 +264,7 @@ def _get_with_retry(url: str, *, params: dict, headers: dict, timeout: int = 30)
         if attempt:
             _sleep(_BACKOFF_BASE_S * (2 ** (attempt - 1)) * (0.5 + random.random()))
         attempts += 1
+        _pace()
         try:
             r = requests.get(url, params=params, headers=headers, timeout=timeout)
         except Exception:
