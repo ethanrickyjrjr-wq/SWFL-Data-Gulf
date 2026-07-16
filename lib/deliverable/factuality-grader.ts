@@ -13,10 +13,7 @@ export const seamFactualityGrader = {
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     });
-    const output = msg.content
-      .filter((b): b is { type: "text"; text: string } => b.type === "text")
-      .map((b) => b.text)
-      .join("\n");
+    const output = msg.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("\n");
     return {
       output,
       tokenUsage: {
