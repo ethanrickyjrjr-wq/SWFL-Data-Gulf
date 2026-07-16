@@ -8,6 +8,7 @@ import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { requiresPaidTier, type Condition } from "@/lib/email/segments/filter";
 import { emailLabTierFor } from "@/lib/email/lab/capabilities";
+import { resolveEffectiveTier } from "@/lib/billing/effective-tier";
 
 async function authed() {
   const supabase = createClient(await cookies());
@@ -17,14 +18,10 @@ async function authed() {
   return { supabase, user };
 }
 
+/** Same effective-tier authority lib/email/usage.ts#checkUsageLimit consults. */
 async function currentTier(userId: string): Promise<"free" | "paid"> {
   const db = createServiceRoleClient();
-  const { data } = await db
-    .from("billing_subscriptions")
-    .select("tier")
-    .eq("user_id", userId)
-    .maybeSingle();
-  return emailLabTierFor(data?.tier ?? "free");
+  return emailLabTierFor(await resolveEffectiveTier(db, userId));
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {

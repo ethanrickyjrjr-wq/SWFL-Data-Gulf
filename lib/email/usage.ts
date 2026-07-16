@@ -37,6 +37,7 @@ import {
   createServiceRoleClient,
   createServiceRoleClientUntyped,
 } from "@/utils/supabase/service-role";
+import { resolveEffectiveTier } from "@/lib/billing/effective-tier";
 
 // ---------------------------------------------------------------------------
 // Pure helpers (exported for unit tests — no DB dependency)
@@ -152,19 +153,14 @@ export async function checkUsageLimit(userId: string): Promise<{
     const db = createServiceRoleClient();
     const period = billingPeriod(new Date());
 
-    // Tier now lives in billing_subscriptions (the Stripe webhook is the
-    // writer); email_usage.tier is legacy and no longer read
+    // Tier resolution consults billing_subscriptions AND switch_passes (a
+    // real paid sub always wins; an active Switch Pass lifts free) via the
+    // shared effective-tier authority — see lib/billing/effective-tier.ts.
+    // resolveEffectiveTier never throws (it fails open to "free" internally
+    // on either read), so it cannot break this function's own fail-open
+    // guarantee below. email_usage.tier is legacy and no longer read
     // (KNOWN-DEBT: drop the column later).
-    const { data: subRow, error: subError } = await db
-      .from("billing_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .maybeSingle();
-    if (subError) {
-      // FAIL OPEN: DB error → allow
-      return failOpen;
-    }
-    const tier = resolveTier(subRow);
+    const tier = await resolveEffectiveTier(db, userId);
 
     const { data, error } = await db
       .from("email_usage")

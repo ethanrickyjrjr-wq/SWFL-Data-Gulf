@@ -3,9 +3,9 @@
  * No DB dependency — these exercise billingPeriod, tierLimit, and the
  * allow/limit math that checkUsageLimit computes.
  */
-import { describe, test } from "bun:test";
+import { describe, test, expect, mock } from "bun:test";
 import assert from "node:assert/strict";
-import { billingPeriod, tierLimit, resolveTier } from "../usage.ts";
+import { billingPeriod, tierLimit, resolveTier, checkUsageLimit } from "../usage.ts";
 
 // ---------------------------------------------------------------------------
 // billingPeriod
@@ -120,5 +120,75 @@ describe("resolveTier (billing_subscriptions → tier)", () => {
   });
   test("paid row → its tier verbatim (incl. past_due rows — keep-through-dunning)", () => {
     assert.equal(resolveTier({ tier: "growth" }), "growth");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// checkUsageLimit — DB-integration cases (effective-tier resolution, Task 3)
+//
+// checkUsageLimit now delegates tier resolution to resolveEffectiveTier(db,
+// userId) (lib/billing/effective-tier.ts) instead of an inline
+// billing_subscriptions read. These cases mock the service-role client's
+// `.from(table)` and branch on the table name, since resolveEffectiveTier
+// reads BOTH billing_subscriptions and switch_passes, and checkUsageLimit
+// itself separately reads email_usage. Mirrors the mock.module pattern used
+// in app/api/contacts/route.test.ts and app/api/segments/route.test.ts —
+// mock.module updates the already-imported `checkUsageLimit`'s live binding
+// to createServiceRoleClient (confirmed via Bun docs: "Overriding Already
+// Imported Modules" — live bindings update even after static import).
+// ---------------------------------------------------------------------------
+
+type MaybeSingleResult = { data: unknown; error: unknown };
+
+function mockDb(byTable: Record<string, () => Promise<MaybeSingleResult>>) {
+  mock.module("@/utils/supabase/service-role", () => ({
+    createServiceRoleClient: () => ({
+      from: (table: string) => {
+        const resolver = byTable[table];
+        if (!resolver) throw new Error(`unexpected table in test mock: ${table}`);
+        return {
+          select: () => ({
+            eq: () => ({
+              eq: () => ({ maybeSingle: resolver }), // email_usage: .eq(user_id).eq(billing_period)
+              maybeSingle: resolver, // billing_subscriptions / switch_passes: .eq(user_id)
+            }),
+          }),
+        };
+      },
+    }),
+    createServiceRoleClientUntyped: () => ({}),
+  }));
+}
+
+describe("checkUsageLimit (pass-aware via resolveEffectiveTier)", () => {
+  test("billing_subscriptions null + active starter switch_passes row → tier lifts to starter", async () => {
+    mockDb({
+      billing_subscriptions: async () => ({ data: null, error: null }),
+      switch_passes: async () => ({
+        data: { tier: "starter", expires_at: "2099-01-01T00:00:00Z" },
+        error: null,
+      }),
+      email_usage: async () => ({ data: { sent_count: 0 }, error: null }),
+    });
+
+    const result = await checkUsageLimit("u1");
+    expect(result.tier).toBe("starter");
+    expect(result.limit).toBe(500);
+  });
+
+  test("billing_subscriptions AND switch_passes both throw → fails open to free, never throws", async () => {
+    mockDb({
+      billing_subscriptions: async () => {
+        throw new Error("db unavailable");
+      },
+      switch_passes: async () => {
+        throw new Error("db unavailable");
+      },
+      email_usage: async () => ({ data: { sent_count: 0 }, error: null }),
+    });
+
+    const result = await checkUsageLimit("u1");
+    expect(result.allowed).toBe(true);
+    expect(result.tier).toBe("free");
   });
 });

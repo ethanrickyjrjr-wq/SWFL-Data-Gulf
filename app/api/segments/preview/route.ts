@@ -10,6 +10,7 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { resolveSegment } from "@/lib/email/segments/resolve";
 import { requiresPaidTier, type Condition } from "@/lib/email/segments/filter";
 import { emailLabTierFor } from "@/lib/email/lab/capabilities";
+import { resolveEffectiveTier } from "@/lib/billing/effective-tier";
 
 export async function POST(req: Request) {
   const supabase = createClient(await cookies());
@@ -24,12 +25,7 @@ export async function POST(req: Request) {
 
   if (requiresPaidTier(filter)) {
     const db = createServiceRoleClient();
-    const { data: sub } = await db
-      .from("billing_subscriptions")
-      .select("tier")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (emailLabTierFor(sub?.tier ?? "free") !== "paid") {
+    if (emailLabTierFor(await resolveEffectiveTier(db, user.id)) !== "paid") {
       return NextResponse.json({ error: "paid_tier_required" }, { status: 403 });
     }
   }

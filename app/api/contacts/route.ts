@@ -6,6 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { emailLabTierFor, type EmailLabTier } from "@/lib/email/lab/capabilities";
+import { resolveEffectiveTier } from "@/lib/billing/effective-tier";
 
 export const runtime = "nodejs";
 
@@ -19,21 +20,17 @@ async function authed() {
   return { supabase, user };
 }
 
-// Resolve the caller's email-lab tier. Same query shape as
-// lib/email/usage.ts#checkUsageLimit — service-role read of billing_subscriptions,
-// select "tier", eq user_id, maybeSingle. FAILS OPEN to "free" on ANY lookup
-// error: a query error leaves `sub` null (→ "free"), and a thrown client/network
-// error is caught here (→ "free"). A billing/metering hiccup must never 500 the
-// contacts list and block its picker from loading at all.
+// Resolve the caller's email-lab tier via the shared effective-tier authority
+// (lib/billing/effective-tier.ts) — same one lib/email/usage.ts#checkUsageLimit
+// consults, so a real paid sub always wins and an active Switch Pass lifts
+// free. resolveEffectiveTier already fails open to "free" internally; the
+// try/catch here is belt-and-suspenders for a thrown client/network error. A
+// billing/metering hiccup must never 500 the contacts list and block its
+// picker from loading at all.
 async function tierForUser(userId: string): Promise<EmailLabTier> {
   try {
     const db = createServiceRoleClient();
-    const { data: sub } = await db
-      .from("billing_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .maybeSingle();
-    return emailLabTierFor(sub?.tier ?? "free");
+    return emailLabTierFor(await resolveEffectiveTier(db, userId));
   } catch {
     return "free";
   }
