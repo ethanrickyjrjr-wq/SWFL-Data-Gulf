@@ -1,5 +1,6 @@
 import type { MoversData, MoverRow } from "@/lib/desk/types";
 import { WatchButton } from "./WatchButton";
+import { ZipPressureScatter } from "./ZipPressureScatter";
 
 function Board({ title, rows, color }: { title: string; rows: MoverRow[]; color: string }) {
   if (rows.length === 0) return null;
@@ -46,6 +47,7 @@ export function MoversBoard({ movers }: { movers: MoversData }) {
           color="#5bc97a"
         />
       </div>
+      {movers.pressure ? <ZipPressureScatter points={movers.pressure} /> : null}
       <p className="mt-3 text-xs text-gray-500">
         Share of that ZIP&apos;s active listings. ZIPs with fewer than {movers.minActive} active
         listings are excluded — a tiny sample would rank on noise.

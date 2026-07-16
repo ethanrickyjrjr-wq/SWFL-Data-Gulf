@@ -146,11 +146,24 @@ export interface MoverRow {
   medianListDisplay?: string;
 }
 
+/** One core ZIP's numeric momentum pair for the pressure scatter. Shares are
+ *  percentages (0–100) as held — the chart never recomputes a rate. */
+export interface PressurePoint {
+  zip: string;
+  county: string | null;
+  cutShare: number;
+  newShare: number;
+  activeCount: number;
+}
+
 export interface MoversData {
   priceCutShare: MoverRow[];
   newListingShare: MoverRow[];
   /** ZIPs below this active-listing count are excluded from ranking (noise guard). */
   minActive: number;
+  /** Cut share vs new-listing share for every qualifying core ZIP (same
+   *  min-active noise guard as the boards) — additive; absent hides the chart. */
+  pressure?: PressurePoint[];
   asOf?: string;
   sourceLabel: string;
 }

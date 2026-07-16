@@ -1051,6 +1051,23 @@ export async function loadDeskData(): Promise<DeskData> {
             rankMovers(momentum.zips, "new_listing_share"),
             "new_listing_share",
           ),
+          pressure: momentum.zips
+            .filter(
+              (r) =>
+                r.zip_code != null &&
+                (r.active_listing_count ?? 0) >= MOVERS_MIN_ACTIVE &&
+                typeof r.price_reduced_share === "number" &&
+                Number.isFinite(r.price_reduced_share) &&
+                typeof r.new_listing_share === "number" &&
+                Number.isFinite(r.new_listing_share),
+            )
+            .map((r) => ({
+              zip: r.zip_code as string,
+              county: r.county,
+              cutShare: r.price_reduced_share as number,
+              newShare: r.new_listing_share as number,
+              activeCount: r.active_listing_count ?? 0,
+            })),
           minActive: MOVERS_MIN_ACTIVE,
           asOf: momentum.asOf ?? spineAsOf,
           sourceLabel: SPINE_SOURCE,
