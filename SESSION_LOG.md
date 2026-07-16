@@ -1,3 +1,21 @@
+## 2026-07-16 (Fable 5 · main) — Insiders desk visit + July issue raw-collection started (operator: limited-edition first copy soon)
+
+Operator brief: more planning + more data, then a limited-edition first Insiders copy; collect
+section-by-section (news, per-brain new, per-brain historical, outside research) in the Fable
+folder, dissect into inferences at compose time; issue closes with SWFL Data Gulf key benefits.
+Today = first collection run. (1) Desk triage 07/16: ~40 rows (first harvest of the 2 NEW news
+sources Gulfshore Business + Business Observer) → 10 picks appended to `_FABLE5/desk/2026-07.md`,
+parser-verified (26 entries). (2) NEW `_FABLE5/collection/2026-07.md` — live-queried lake evidence:
+ZHVI tier divergence (bottom tier falling ~2x faster than top in nearly every Lee+Collier ZIP,
+month ending 05/31/2026), price cuts vs raises ~9:1 Lee / ~7:1 Collier (90d), Naples-city SFR
+median $4.425M +66% YoY on 40 sales (Redfin city grain), CRE cross-currents (retail 3.6% vacancy
+tightest while national brands land; office absorption negative 3 straight quarters; medical-office
+lane new). July thesis upgraded: BIFURCATION, not boom — construction-slowdown story (07/13
+Gannett) + our tier data reconcile the "luxury spreading" narrative. (3) Checks opened (RULE 2.4):
+`insiders_construction_yoy_series` (permit tables can't test the anchor story YoY — FDOR
+year_built lane candidate), `news_capture_index_page_junk` (index pages stored as relevant).
+No weight-5, no mini. Next: per-brain newer-data sweep, historical depth, outside research.
+
 ## 2026-07-16 (Sonnet 5 · main) — SteadyAPI social-listening: 3 parallel research sweeps filed (110 live calls), 2 new vendor quirks folded in.
 
 Operator: unused SteadyAPI monthly quota, "run it over and over on constant problems and find

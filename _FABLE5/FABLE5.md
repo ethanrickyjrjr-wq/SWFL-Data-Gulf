@@ -41,7 +41,9 @@ ledger land in `insiders-runs/<stamp>/`. Sends are operator commands only
 
 ## State of the desk (≤5 lines, update each visit)
 
-- 07/11/2026: first real triage — 48 rows → 16 picks (dual-source Gannett dupes + junk removed).
-  July thesis candidate: luxury diffusing outward from Naples. No weight-5; Marco Hilton decision
-  07/31 is the nearest event-mini candidate. No issues shipped yet; composer being built (Phase B).
-- 07/10/2026: desk opened; no issues shipped yet; composer being built (Phase B).
+- 07/16/2026: ~40 rows (first harvest of 2 NEW sources: Gulfshore Business + Business Observer) →
+  10 picks. July thesis UPGRADED: bifurcation, not boom — construction slowing (news) while ZHVI
+  bottom tier falls ~2x faster than top (lake). Issue raw-collection file started:
+  `collection/2026-07.md` (operator brief: limited-edition first copy soon). No weight-5.
+- 07/11/2026: first real triage — 48 rows → 16 picks. Thesis candidate: luxury diffusing outward.
+- 07/10/2026: desk opened; no issues shipped yet; composer built (Phase A+B, at operator gate).
