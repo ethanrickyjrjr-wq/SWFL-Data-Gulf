@@ -1,3 +1,17 @@
+## 2026-07-16 (Fable 5 · main) — SteadyAPI capability census shipped + headroom levers executed/queued (follow-on to the 50k-quota entry below)
+
+`docs/steadyapi-capability-census.md`: one file — account reality (50k/mo, rate limit
+UNVERIFIED w/ evidence spread), all 18 real-estate endpoints (used/unused/what each holds),
+should-get list ranked by cost (two ZERO-call wins lead: parse `building_permits[]` off
+already-paid `/property-tax-history` responses; persist `listed_date`), vendor ceilings
+(HOA fees/agents/per-listing DOM: genuinely absent), locked don't-re-propose list. Levers:
+SOLD_CHECK_CAP 8→40 SHIPPED (`a23c7b26`, sized from Lee dep=8/336); rentals-weekly was
+ALREADY live (findings doc had it wrong as monthly); checks opened for
+`steadyapi_persist_listed_date` + `steadyapi_community_amenity_precache` (brainstorm-first).
+Both earlier commits (`10078873`, `a23c7b26`) landed on origin via a concurrent session's
+carry — verified same-SHA on origin/main. NEXT: brainstorm the two registered levers;
+consider a sustained-rate probe if any bulk job wants >1 req/s.
+
 ## 2026-07-16 (Fable 5 · main) — checks ledger gets a class axis: "388 open" was really 102 defects; kickoff headline was capped at 200 and lying
 
 Operator ("we suck at everything... 300 open checks"): the ledger count conflates four things, and
