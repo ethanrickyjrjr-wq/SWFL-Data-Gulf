@@ -8,11 +8,7 @@ import type { ProjectItem } from "@/lib/project/items";
 import { inferScopeFromItems } from "@/lib/project/derive-name";
 import { projectHome } from "@/lib/project/tool-tabs";
 import { openDoc } from "@/lib/lab-entry/destination";
-import {
-  describeCadence,
-  formatScheduleSendTime,
-  type Cadence,
-} from "@/lib/email/schedule-cadence";
+import { buildScheduleChips, chipTime } from "@/lib/project/schedule-chips";
 import { ImportDraftOnLogin } from "./_import/ImportDraftOnLogin";
 import { NewProjectButton } from "./NewProjectButton";
 import { NewListingButton } from "./NewListingButton";
@@ -29,23 +25,6 @@ interface ProjectRow {
   title: string | null;
   items: ProjectItem[];
   updated_at: string;
-}
-
-/** One schedule chip — email or social, already phrased for display. */
-interface ScheduleChip {
-  key: string;
-  kind: "email" | "social";
-  status: string; // active | paused
-  line: string; // "Emails every Monday at 8 AM ET"
-  audience: string | null;
-  nextAt: string | null; // ISO, for sorting + display
-  href: string;
-}
-
-function chipTime(nextAt: string | null): string | null {
-  if (!nextAt) return null;
-  const t = formatScheduleSendTime(nextAt);
-  return t || null;
 }
 
 /**
@@ -89,52 +68,13 @@ export default async function ProjectListPage() {
     ]);
   const projects = (data as ProjectRow[] | null) ?? [];
 
-  // Fold schedules + built-email counts by project. Schedules not linked to a
-  // project (project_id null) are counted in the summary but have no card row.
-  const chipsByProject = new Map<string, ScheduleChip[]>();
-  function addChip(pid: string | null, chip: ScheduleChip) {
-    if (!pid) return;
-    const list = chipsByProject.get(pid) ?? [];
-    list.push(chip);
-    chipsByProject.set(pid, list);
-  }
-  for (const s of emailSch ?? []) {
-    addChip(s.project_id, {
-      key: `e${s.id}`,
-      kind: "email",
-      status: s.status,
-      line: `Emails ${describeCadence({
-        cadence: s.cadence as Cadence,
-        day_of_week: s.day_of_week,
-        day_of_month: s.day_of_month,
-        send_hour_et: s.send_hour_et,
-      })}`,
-      audience: s.audience_slug,
-      nextAt: s.next_run_at,
-      href:
-        s.project_id && s.deliverable_id
-          ? `/project/${s.project_id}/email-lab?did=${s.deliverable_id}&schedule=1`
-          : s.project_id
-            ? projectHome(s.project_id)
-            : "/project",
-    });
-  }
-  for (const s of socialSch ?? []) {
-    addChip(s.project_id, {
-      key: `s${s.id}`,
-      kind: "social",
-      status: s.status,
-      line: `Posts to ${s.platform} ${describeCadence({
-        cadence: s.cadence as Cadence,
-        day_of_week: s.day_of_week,
-        day_of_month: s.day_of_month,
-        send_hour_et: s.send_hour_et,
-      })}`,
-      audience: null,
-      nextAt: s.next_run_at,
-      href: s.project_id ? `/project/${s.project_id}/social` : "/project",
-    });
-  }
+  // Fold schedules into display chips (shared helper — the cockpit panel and
+  // rail consume the same shape). Null-project schedules count in the summary
+  // but have no card row.
+  const { chipsByProject, activeCount, upcoming } = buildScheduleChips(
+    emailSch ?? [],
+    socialSch ?? [],
+  );
   const builtByProject = new Map<string, number>();
   // The card link (below) opens this instead of a bare project URL — without it,
   // clicking into a project with a built email dropped you onto a fresh/blank
@@ -146,14 +86,6 @@ export default async function ProjectListPage() {
       lastDidByProject.set(d.project_id, d.id);
     }
   }
-
-  // Upcoming: the next 3 active sends across everything, soonest first.
-  const allChips = [...chipsByProject.values()].flat();
-  const upcoming = allChips
-    .filter((c) => c.status === "active" && c.nextAt)
-    .sort((a, b) => (a.nextAt! < b.nextAt! ? -1 : 1))
-    .slice(0, 3);
-  const activeCount = allChips.filter((c) => c.status === "active").length;
 
   return (
     <PageShell width="narrow">
