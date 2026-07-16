@@ -1,6 +1,13 @@
 # Fill-once brand profile: ledger + wizard + auto-populate + social login
 
-> **Recommended model:** ⚡ Sonnet — 8 tasks, keywords: migration
+> **Recommended model:** ⚡ Sonnet — 8 tasks, keywords: migration, schema
+
+
+
+
+
+
+
 
 
 **Date:** 2026-07-16. State verified against running code that day; vendor facts verified
@@ -72,12 +79,27 @@ what we can, ask just-in-time for what we can't, and always say it's saved.
 - **Provider seed reality:** Google → name + photo + email. Facebook → name + photo.
   LinkedIn → name + photo + email. Apple → name only, FIRST sign-in only, often a private
   relay email. Title, brokerage, license, bio never come from login — only from the
-  website import or the user.
+  website import, the LinkedIn PDF (below), or the user.
+- **`Nutlope/self.so` (github.com/Nutlope/self.so, MIT, ~3k stars, active 07/16/2026) —
+  the operator-flagged "LinkedIn into a website" find.** Verified against the repo: it
+  does **NOT scrape LinkedIn.** The user uploads their **LinkedIn PDF export**
+  (LinkedIn's built-in Profile → Resources → "Save to PDF"), `lib/server/scrapePdfContent.ts`
+  extracts the text (pdfjs), and `lib/server/ai/generateResumeObject.ts` runs an LLM
+  structured-output extraction against a strict schema (name, about, location, contacts,
+  skills, work experience with company/title, education). That is the proven, ToS-clean
+  lane to the rich LinkedIn fields OIDC can't give us: headline/title, brokerage (current
+  employer), license/certifications, bio raw material. We adopt the MECHANISM (PDF upload
+  → text → structured extraction), not the stack (Together.ai/Clerk/Upstash/S3 — not
+  ours); extraction runs on our Anthropic path behind the same evidence gate as the
+  website import. MIT license permits everything including copying their schema/prompt
+  shapes with attribution.
 
 Decisions taken with the operator 07/16: all four sub-builds in one phased spec; consent =
 review card (one click accepts); write-back = bank upward when blank; providers = Google,
 LinkedIn, Facebook, Apple; shape = tiny skippable wizard on the ledger spine; sign-in
 identity basics (name/photo/email) fill blanks silently, everything else via review card.
+Second pass, same day: **auto-bring lanes always come before typing** (§C ordering rule),
+and the LinkedIn PDF upload joins the import lanes (self.so pattern above).
 
 ---
 
@@ -140,14 +162,23 @@ blank. NN/g's save-state requirement is satisfied by construction.
   every step; steps listed up front; header carries the promise verbatim: **"Saved to
   your brand. You'll never type this twice."** Forever reachable from the Brand panel as
   "Import my info."
-- **Step 1 — the easy button.** "Continue with LinkedIn" / "Continue with Google" (when
-  not already the sign-in method) or ONE paste field accepting a website or LinkedIn URL.
-  Escape: "I'll type it" / skip. If sign-in claims already cover step 1, it auto-skips.
+- **THE ORDERING RULE (operator, 07/16): auto-bring before typing, always.** The wizard
+  never shows a typing field for anything an available import lane could fill until the
+  import lanes have been offered and declined/exhausted. Sign-up is itself the first
+  import lane — whoever signs in with Google/LinkedIn has already completed part of
+  step 1, so the wizard opens on what's LEFT, not at the top. Nobody hand-types their
+  name two screens after an easy button could have fetched it.
+- **Step 1 — the easy button.** Import lanes, richest first: **upload your LinkedIn PDF**
+  (Profile → Resources → "Save to PDF" — the self.so pattern, gives title/brokerage/
+  license/bio material) · paste your website URL · "Continue with LinkedIn/Google" (when
+  not already the sign-in method — gives name/photo/email). Escape: "I'll type it" /
+  skip. If sign-in claims + imports already cover everything step 1 could bring, it
+  auto-skips.
 - **Step 2 — confirm what we found.** The review card (§D). Blank fields pre-ticked;
   filled fields default "keep yours." One click accepts all. Nothing saves unseen.
 - **Step 3 — the three that sign your emails.** Whatever must-fields survived import,
   plus optional headshot upload. Ask copy: "this is the signature and legal footer on
-  every email you send."
+  every email you send." Per the ordering rule, this typing step is always LAST.
 
 ### D. Auto-populate — one FoundFact shape, many sources
 
@@ -155,9 +186,9 @@ blank. NN/g's save-state requirement is satisfied by construction.
 type FoundFact = {
   field: ProfileFieldKey;
   value: string;
-  source: "website" | "linkedin" | "google" | "facebook" | "upload";
-  sourceDetail: string; // URL
-  evidence: string;     // verbatim snippet from the fetched page (website source)
+  source: "website" | "linkedin_pdf" | "linkedin" | "google" | "facebook" | "upload";
+  sourceDetail: string; // URL, or the uploaded file's name for linkedin_pdf
+  evidence: string; // verbatim snippet from the fetched page / PDF text
 };
 ```
 
@@ -169,6 +200,16 @@ type FoundFact = {
   DISCARDED server-side before anyone sees it. Not on the page → not offered. Spend note:
   this is a new paid-API surface (one Claude extraction call per import) — heads-up to the
   operator before its first live run, per standing spend policy.
+- **LinkedIn PDF upload (the self.so mechanism, §Research)** — the user uploads
+  LinkedIn's own "Save to PDF" export; server extracts the text and runs the SAME
+  structured AI extraction as the website import, behind the SAME evidence gate (a fact
+  must quote the PDF's text verbatim or it is discarded). This is the richest lane —
+  headline/title, brokerage, license/certifications, bio raw material — and the ToS-clean
+  one: the member exports their own profile; we never touch LinkedIn's servers. Bio
+  material from this lane lands in `agent_profile_facts` as `source: agent_upload` (the
+  existing legal value), `source_detail` = the file name. Reference implementation:
+  `Nutlope/self.so` `lib/server/scrapePdfContent.ts` + `lib/server/ai/generateResumeObject.ts`
+  (MIT).
 - **Sign-in claims** — name, photo, email from the chosen provider (§E). The three
   identity basics fill blank fields silently (the OAuth consent screen was the consent);
   they also appear in the wizard's review so the user sees where they came from.
@@ -229,7 +270,9 @@ type FoundFact = {
   account), empty-vs-filled edge cases.
 - `bankBrandFields`: blank-only semantics — never overwrites, fills nulls/empties only.
 - Evidence gate: poisoned fixture (extraction returns a fact whose snippet is NOT in the
-  page) → fact dropped server-side.
+  page) → fact dropped server-side. Same test against a LinkedIn-PDF text fixture.
+- Wizard ordering: with any import lane available and undeclined, no typing field renders
+  for an importable blank field.
 - Review card: never writes an unticked field; keep-yours default on filled fields.
 - Wizard: derives purely from gaps (a full profile renders no wizard; a half profile
   renders only the blank steps) — resume-by-construction.
@@ -242,7 +285,8 @@ type FoundFact = {
 
 1. **P1 — the spine.** Ledger + `bankBrandFields` + both popup lanes on `profileGaps` +
    Brand-panel completeness strip.
-2. **P2 — the fast lane.** Wizard + website import route (evidence gate) + review card.
+2. **P2 — the fast lane.** Wizard (auto-bring-before-typing ordering) + website import
+   route + LinkedIn PDF upload lane (both behind the one evidence gate) + review card.
 3. **P3 — the front door.** Social login (Google → LinkedIn/Facebook → Apple parked) +
    claim seeding. Social-connect-as-fill-source rides here or later.
 
@@ -256,8 +300,10 @@ type FoundFact = {
   variants).
 - **The AI skips brand blocks by design** (07/13 spec). Nothing in this build may default
   an instruction or placeholder into a brand block.
-- **LinkedIn gives NO headline/title via OIDC.** Don't promise it in UI copy; title comes
-  from the website import or the user.
+- **LinkedIn gives NO headline/title via OIDC, and scraping LinkedIn is off the table.**
+  Don't promise "connect LinkedIn and we'll pull your profile" in UI copy. The rich lane
+  is the member's OWN PDF export (self.so mechanism, §D) — title/brokerage/license come
+  from there, the website import, or the user.
 - **Provider tokens aren't stored by Supabase.** If a future phase wants provider-API
   data post-login, capture the token at the callback (posting-connect already models
   this).

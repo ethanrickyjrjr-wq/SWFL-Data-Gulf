@@ -16,6 +16,18 @@ Tests: 1,261 TS + 219 Python green, `bunx next build` clean. NEXT: after tonight
 lands listed_date rows, `bun scripts/verify-listing-dom.mts` then close `listing_dom_live_verify`;
 follow-ups opened as checks (stats re-point, brain DOM, charts/algos, remaining recipes, desk line).
 
+## 2026-07-16 (Fable 5 · main) — brand-fill-once spec AMENDED: self.so's LinkedIn-PDF lane + auto-bring-before-typing ordering rule
+
+Operator asked about a GitHub find "with 'self' in it" that "pulls LinkedIn into a website" —
+not on disk/stars/forks/gists/vault; it's `Nutlope/self.so` (MIT, ~3k stars). Verified against
+the repo: it does NOT scrape LinkedIn — the user uploads LinkedIn's own "Save to PDF" export,
+`scrapePdfContent.ts` pulls the text, `generateResumeObject.ts` runs LLM structured extraction.
+Folded into the spec as the richest import lane (title/brokerage/license/bio — exactly what
+LinkedIn OIDC can't give), behind the same verbatim-evidence gate; bio material →
+`agent_profile_facts` `source: agent_upload`. Also locked the operator's ordering rule into §C:
+auto-bring lanes ALWAYS offered before any typing field; sign-up method counts as the first
+import lane, so the wizard opens on what's LEFT. NEXT: operator spec review → writing-plans.
+
 ## 2026-07-16 (Fable 5 · main) — brand-fill-once SPEC'D: ledger + wizard + auto-populate + social login (research banked, no code yet)
 
 Brainstormed operator ask "branding filled in once and only once, profile talking to every
