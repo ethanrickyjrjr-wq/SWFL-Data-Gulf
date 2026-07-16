@@ -276,6 +276,24 @@ export interface Database {
         };
         Relationships: [];
       };
+      build_usage: {
+        Row: {
+          user_id: string;
+          day: string;
+          build_count: number;
+        };
+        Insert: {
+          user_id: string;
+          day: string;
+          build_count?: number;
+        };
+        Update: {
+          user_id?: string;
+          day?: string;
+          build_count?: number;
+        };
+        Relationships: [];
+      };
       buyer_intent_events: {
         Row: {
           id: number;
@@ -3687,6 +3705,45 @@ export interface Database {
           is_bucketed?: boolean;
           fetched_at?: string;
           inserted_at?: string;
+        };
+        Relationships: [];
+      };
+      switch_passes: {
+        Row: {
+          id: string;
+          user_id: string;
+          tier: string;
+          source_lane: string;
+          platform: string;
+          contacts_imported: number;
+          proof: Json;
+          starts_at: string;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          tier?: string;
+          source_lane: string;
+          platform: string;
+          contacts_imported: number;
+          proof?: Json;
+          starts_at?: string;
+          expires_at: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          tier?: string;
+          source_lane?: string;
+          platform?: string;
+          contacts_imported?: number;
+          proof?: Json;
+          starts_at?: string;
+          expires_at?: string;
+          created_at?: string;
         };
         Relationships: [];
       };
