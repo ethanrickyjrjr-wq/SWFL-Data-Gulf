@@ -1,3 +1,15 @@
+## 2026-07-16 (Fable 5 · main) — CORRECTION: cockpit build REJECTED by operator — layout invented instead of unified
+
+The "SHIPPED" entry below is superseded. Operator rejected the hub on sight: it invented a
+NEW layout (rail hidden, lookalike pills, custom two-column body, floating panel card) and
+tripled the same buttons, when the whole point was ONE cockpit — the hub must be the SAME
+frame as the in-project pages (rail + real ToolSwitcher pills + email-lab-chrome right
+aside), center-only difference. Full fix brief for the next session:
+`docs/handoff/2026-07-16-projects-cockpit-rejected-fix-handoff.md` (keeps the lib helpers/
+tests/delete-confirm/coming-soon fixes; rebuilds the hub shell; kills duplicate buttons;
+fixes rail scrollbar-overlap + clipped-popover bugs). Still nothing pushed. :3311 verify
+server killed at handoff.
+
 ## 2026-07-16 (Fable 5 · main) — Projects hub cockpit SHIPPED (spec + plan + 7 code commits, unpushed pending operator review)
 
 Full brainstorm→spec→plan→build cycle from operator screenshots. Spec
