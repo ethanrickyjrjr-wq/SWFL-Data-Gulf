@@ -6,17 +6,27 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { projectHome } from "@/lib/project/tool-tabs";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
+import { SHOWCASES } from "@/lib/showcase/registry";
+import { recipeDestination, type ShowcaseRecipe } from "@/lib/lab-entry/destination";
+import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
+import { ShowcaseOverlay } from "@/components/showcase/ShowcaseOverlay";
 
 /**
- * Zero-projects hub (spec 2026-07-16 §6): one centered launchpad — the
- * address input is the hero, campaign starters second, contacts + examples
- * as "while you're here". The split cockpit takes over from project #1.
+ * Zero-projects hub — the welcome (operator, 07/16/2026: show where things
+ * live, how they work, and what finished looks like — quickly and simply).
+ * Structure follows NN/g's empty-state guidelines (nngroup.com, "Designing
+ * Empty States in Complex Applications"): say what will live here, teach in
+ * context, give direct pathways to the key task, and offer safe exploration —
+ * here a click-through of a real finished campaign (ShowcaseOverlay, the same
+ * cards the AI panel and /showcase use). The split cockpit takes over from
+ * project #1.
  */
 export function EmptyLaunchpad({ contactsCount }: { contactsCount: number }) {
   const router = useRouter();
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openShowcase, setOpenShowcase] = useState<string | null>(null);
 
   async function createListing(e: React.FormEvent) {
     e.preventDefault();
@@ -42,13 +52,35 @@ export function EmptyLaunchpad({ contactsCount }: { contactsCount: number }) {
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6 py-8">
-      <h2 className="text-center text-lg font-semibold text-white">Start your first project</h2>
+      <div className="text-center">
+        <h2 className="text-lg font-semibold text-white">Welcome — your projects live here</h2>
+        <p className="mt-1 text-sm text-gray-400">
+          Every listing or campaign you start gets a home: its emails, social posts, and schedules,
+          all in one place.
+        </p>
+      </div>
+
+      {/* Where things live — cues tied to the chrome that's already on screen. */}
+      <ul className="flex flex-col gap-1.5 rounded-xl border border-white/10 px-4 py-3 text-xs text-gray-400">
+        <li>
+          <span className="font-semibold text-white/80">Left rail</span> — every project, one click
+          away. It stays put on every page.
+        </li>
+        <li>
+          <span className="font-semibold text-white/80">Pills on top</span> — a project&apos;s
+          tools: Email, Social, Watch, Overview.
+        </li>
+        <li>
+          <span className="font-semibold text-white/80">Right panel</span> — the AI and your
+          campaign starters, always top right.
+        </li>
+      </ul>
 
       <form
         onSubmit={(e) => void createListing(e)}
         className="rounded-xl border border-white/10 bg-[#0d1e2b]/80 p-4"
       >
-        <p className="text-sm font-semibold text-white">New listing</p>
+        <p className="text-sm font-semibold text-white">Start with a listing</p>
         <p className="mt-0.5 text-xs text-gray-400">
           Type the address — we set everything up around it.
         </p>
@@ -77,22 +109,40 @@ export function EmptyLaunchpad({ contactsCount }: { contactsCount: number }) {
         <CampaignQuickStart surface="all" variant="bare" />
       </div>
 
-      <div className="rounded-xl border border-white/10 px-4 py-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-          While you&apos;re here
+      {/* Safe exploration — click through a real finished campaign before
+          committing to anything (same cards the AI panel and /showcase use). */}
+      <div>
+        <p className="mb-2 text-center text-xs text-gray-500">
+          see what a finished campaign looks like
         </p>
-        <div className="mt-2 flex flex-col gap-1.5 text-sm">
-          <Link href="/contacts" className="text-gray-200 hover:text-gulf-teal">
-            👥{" "}
-            {contactsCount === 0
-              ? "Bring your contacts in first — Import →"
-              : `Contacts — ${contactsCount} people · Manage →`}
-          </Link>
-          <Link href="/showcase" className="text-gray-200 hover:text-gulf-teal">
-            ▤ See finished examples →
-          </Link>
-        </div>
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {SHOWCASES.slice(0, 2).map((s) => (
+            <li key={s.id}>
+              <ShowcaseCard showcase={s} onOpen={setOpenShowcase} />
+            </li>
+          ))}
+        </ul>
       </div>
+
+      <p className="text-center text-xs">
+        <Link href="/contacts" className="text-gray-300 hover:text-gulf-teal">
+          👥{" "}
+          {contactsCount === 0
+            ? "Bring your contacts in first — Import →"
+            : `Contacts — ${contactsCount} people · Manage →`}
+        </Link>
+      </p>
+
+      {openShowcase && (
+        <ShowcaseOverlay
+          showcase={SHOWCASES.find((s) => s.id === openShowcase)!}
+          onClose={() => setOpenShowcase(null)}
+          onUseRecipe={(recipe: ShowcaseRecipe) => {
+            setOpenShowcase(null);
+            router.push(recipeDestination(recipe));
+          }}
+        />
+      )}
     </div>
   );
 }
