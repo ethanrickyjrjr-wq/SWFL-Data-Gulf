@@ -71,8 +71,12 @@ export function EmailLabGridClient({
       offeredProject,
       insideProject: false,
       subjectAddress: null,
+      subjectArea: null,
       recipeHasBlank: Boolean(recipeBlank),
       recipeInputKind: recipeBlank ? "address" : null,
+      // Task 8 (spec 2026-07-16) wires the real seed door here.
+      seedSubject: null,
+      seedBlankChosen: false,
       // Signed-in + no recipe/zip/seed/did = a plain "New Campaign" open — show the gallery
       // instead of a blank canvas (spec 2026-07-15-gallery-listing-hero-design.md). Anonymous
       // visitors are unchanged — different taste-surface flow (EMAIL_LAB_LANDING).

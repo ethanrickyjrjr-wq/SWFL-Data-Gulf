@@ -8,9 +8,12 @@ const base: ArrivalInput = {
   offeredProject: { id: "p1", title: "Rainbow Meadows" },
   insideProject: false,
   subjectAddress: null,
+  subjectArea: null,
   recipeHasBlank: false,
   recipeInputKind: null,
   firstRunGalleryEligible: false,
+  seedSubject: null,
+  seedBlankChosen: false,
 };
 
 describe("planArrival", () => {
@@ -129,5 +132,78 @@ describe("planArrival", () => {
   test("plain open, not gallery-eligible → blank", () => {
     const p = planArrival({ ...base, insideProject: true });
     expect(p.doc).toEqual({ kind: "blank" });
+  });
+});
+
+describe("seed arrivals — capture or blank (spec 2026-07-16)", () => {
+  const seedBase: ArrivalInput = {
+    params: { seed: "just-sold" },
+    signedIn: true,
+    offeredProject: null,
+    insideProject: true,
+    subjectAddress: null,
+    subjectArea: null,
+    recipeHasBlank: false,
+    recipeInputKind: null,
+    firstRunGalleryEligible: false,
+    seedSubject: "address",
+    seedBlankChosen: false,
+  };
+
+  test("address seed, no known address → seed doc + address popup, no auto-build", () => {
+    const p = planArrival(seedBase);
+    expect(p.doc).toEqual({ kind: "seed", seedId: "just-sold" });
+    expect(p.seedStart).toEqual({ mode: "ask", inputKind: "address" });
+    expect(p.addressPopup).toBe(true);
+    expect(p.autoBuildAfterConfirm).toBe(false);
+  });
+
+  test("address seed, project knows the address → skip-and-build", () => {
+    const p = planArrival({ ...seedBase, subjectAddress: "123 Palm Ave" });
+    expect(p.seedStart).toEqual({ mode: "build", subjectValue: "123 Palm Ave" });
+    expect(p.addressPopup).toBe(false);
+    expect(p.autoBuildAfterConfirm).toBe(true);
+  });
+
+  test("area seed uses subjectArea, not subjectAddress", () => {
+    const p = planArrival({ ...seedBase, seedSubject: "area", subjectAddress: "123 Palm Ave" });
+    expect(p.seedStart).toEqual({ mode: "ask", inputKind: "area" });
+  });
+
+  test("area seed + known area → skip-and-build", () => {
+    const p = planArrival({ ...seedBase, seedSubject: "area", subjectArea: "Cape Coral" });
+    expect(p.seedStart).toEqual({ mode: "build", subjectValue: "Cape Coral" });
+    expect(p.autoBuildAfterConfirm).toBe(true);
+  });
+
+  test("no-subject seed → fill-or-blank choice, no address popup (choice popup is the client's)", () => {
+    const p = planArrival({ ...seedBase, seedSubject: "none" });
+    expect(p.seedStart).toEqual({ mode: "choice" });
+    expect(p.addressPopup).toBe(false);
+    expect(p.autoBuildAfterConfirm).toBe(false);
+  });
+
+  test("blank chosen → exactly today's behavior", () => {
+    const p = planArrival({ ...seedBase, seedBlankChosen: true });
+    expect(p).toEqual({
+      doc: { kind: "seed", seedId: "just-sold" },
+      projectConfirm: false,
+      addressPopup: false,
+      autoBuildAfterConfirm: false,
+      legacyAutoGenerate: false,
+      seedStart: { mode: "blank" },
+    });
+  });
+
+  test("unclassifiable seed (seedSubject null) → today's behavior, no popups", () => {
+    const p = planArrival({ ...seedBase, seedSubject: null });
+    expect(p.addressPopup).toBe(false);
+    expect(p.autoBuildAfterConfirm).toBe(false);
+    expect(p.seedStart).toBeNull();
+  });
+
+  test("non-seed arrivals carry seedStart: null", () => {
+    const p = planArrival({ ...seedBase, params: {}, insideProject: false });
+    expect(p.seedStart).toBeNull();
   });
 });

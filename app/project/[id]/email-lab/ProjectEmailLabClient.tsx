@@ -112,9 +112,13 @@ export function ProjectEmailLabClient({
       offeredProject: { id: projectId, title: projectTitle },
       insideProject: true,
       subjectAddress: subjectAddress ?? null,
+      subjectArea: null,
       recipeHasBlank: Boolean(recipeBlank),
       recipeInputKind: recipeBlank ? "address" : null,
       firstRunGalleryEligible: !initialDoc && !hasDeliverables && !initialRecipe,
+      // Task 7 (spec 2026-07-16) wires the real seed door here.
+      seedSubject: null,
+      seedBlankChosen: false,
     }),
   );
   // A recipe arrival opens the BLANK skeleton (never defaultDoc / a fake-fill demo);

@@ -6,6 +6,8 @@
 // signed-in redirect auto-picked projects[0], and a generic on-mount auto-build
 // produced wrong-listing emails. New-build arrivals now get a BLANK skeleton and
 // the generic auto-build (legacyAutoGenerate) is dead.
+import type { SeedSubject } from "@/lib/email/doc/default-docs";
+import { planSeedStart, type SeedStartPlan } from "@/lib/lab-entry/seed-start";
 
 export interface ArrivalInput {
   params: {
@@ -20,9 +22,17 @@ export interface ArrivalInput {
   offeredProject: { id: string; title: string } | null;
   insideProject: boolean;
   subjectAddress: string | null;
+  /** The project's remembered market area (projects.subject_area) — the area
+   *  twin of subjectAddress for area-subject template picks. */
+  subjectArea: string | null;
   recipeHasBlank: boolean;
   recipeInputKind: "address" | "area" | null;
   firstRunGalleryEligible: boolean;
+  /** The picked template's declared subject (SeedDoc.subject), null when the
+   *  arrival carries no seed or the seed id is unknown. */
+  seedSubject: SeedSubject | null;
+  /** The user explicitly chose blank (?blank=1 / the popup's escape). */
+  seedBlankChosen: boolean;
 }
 
 export type DocChoice =
@@ -38,6 +48,9 @@ export interface ArrivalPlan {
   addressPopup: boolean;
   autoBuildAfterConfirm: boolean;
   legacyAutoGenerate: false;
+  /** Capture-or-blank verdict for a seed arrival (spec 2026-07-16); null on
+   *  every non-seed arrival. "choice" renders the client's fill-or-blank popup. */
+  seedStart: SeedStartPlan | null;
 }
 
 const trimmed = (s?: string | null) => (s ?? "").trim();
@@ -53,16 +66,29 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
       projectConfirm: false,
       addressPopup: false,
       ...dead,
+      seedStart: null,
     };
   }
 
-  // Explicit template pick — the user chose this seed; no popups.
+  // Template pick (spec 2026-07-16-seed-capture-or-blank-design.md): the pure
+  // matrix decides capture / skip-and-build / explicit blank. A seed with no
+  // classification resolvable (unknown id) keeps the legacy no-popups landing.
   if (trimmed(params.seed)) {
+    const seedStart = input.seedSubject
+      ? planSeedStart({
+          subject: input.seedSubject,
+          knownAddress: input.subjectAddress,
+          knownArea: input.subjectArea,
+          blankChosen: input.seedBlankChosen,
+        })
+      : null;
     return {
       doc: { kind: "seed", seedId: params.seed! },
       projectConfirm: false,
-      addressPopup: false,
-      ...dead,
+      addressPopup: seedStart?.mode === "ask",
+      autoBuildAfterConfirm: seedStart?.mode === "build",
+      legacyAutoGenerate: false,
+      seedStart,
     };
   }
 
@@ -78,7 +104,13 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
   // so a listing can never be hijacked onto the generic ZIP card. The `!recipe`
   // guard stays as belt-and-suspenders: a ZIP subject never has a recipe.
   if (/^\d{5}$/.test(trimmed(params.zip)) && !trimmed(params.recipe)) {
-    return { doc: { kind: "zip", zip: params.zip! }, projectConfirm, addressPopup: false, ...dead };
+    return {
+      doc: { kind: "zip", zip: params.zip! },
+      projectConfirm,
+      addressPopup: false,
+      ...dead,
+      seedStart: null,
+    };
   }
 
   // Recipe (Make-this / campaign / hero) — BLANK skeleton, never a demo doc.
@@ -97,6 +129,7 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
       // still holding a blank waits for the popup's Build instead.
       autoBuildAfterConfirm: !input.recipeHasBlank,
       legacyAutoGenerate: false,
+      seedStart: null,
     };
   }
 
@@ -106,5 +139,6 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
     projectConfirm: false,
     addressPopup: false,
     ...dead,
+    seedStart: null,
   };
 }
