@@ -63,6 +63,29 @@ export function refreshPrompt(scope?: BuildScope): string {
   return `Refresh this email with the latest Southwest Florida market data${scope?.value ? ` for ${scope.value}` : ""}.`;
 }
 
+/** Scope + prompt off the DELIVERABLE row — the ONE derivation the cron lane
+ *  and the hub Update route share. A whole-region design has undefined scope;
+ *  a stored instruction is the build prompt, else a neutral refresh. */
+export function deriveDocBuildArgs(
+  deliv: Pick<
+    EmailDocDeliverable,
+    "instruction" | "scope_kind" | "scope_value" | "subject_address"
+  >,
+): { prompt: string; scope?: BuildScope } {
+  const address =
+    typeof deliv.subject_address === "string" && deliv.subject_address.trim()
+      ? deliv.subject_address.trim()
+      : undefined;
+  const scope: BuildScope | undefined =
+    typeof deliv.scope_kind === "string" &&
+    typeof deliv.scope_value === "string" &&
+    deliv.scope_value
+      ? { kind: deliv.scope_kind, value: deliv.scope_value, ...(address ? { address } : {}) }
+      : undefined;
+  const stored = typeof deliv.instruction === "string" ? deliv.instruction.trim() : "";
+  return { prompt: stored || refreshPrompt(scope), scope };
+}
+
 export async function buildEmailDocOccurrence(
   deliverableId: string,
   deps: EmailDocOccurrenceDeps,
@@ -81,20 +104,9 @@ export async function buildEmailDocOccurrence(
     return null;
   }
 
-  // Scope + prompt ride off the DELIVERABLE row (single source of truth). A whole-region
-  // design has null scope; a stored instruction is the build prompt, else a neutral refresh.
-  const address =
-    typeof deliv.subject_address === "string" && deliv.subject_address.trim()
-      ? deliv.subject_address.trim()
-      : undefined;
-  const scope: BuildScope | undefined =
-    typeof deliv.scope_kind === "string" &&
-    typeof deliv.scope_value === "string" &&
-    deliv.scope_value
-      ? { kind: deliv.scope_kind, value: deliv.scope_value, ...(address ? { address } : {}) }
-      : undefined;
-  const stored = typeof deliv.instruction === "string" ? deliv.instruction.trim() : "";
-  const prompt = stored || refreshPrompt(scope);
+  // Scope + prompt ride off the DELIVERABLE row (single source of truth) —
+  // the shared derivation (also the hub Update route's).
+  const { prompt, scope } = deriveDocBuildArgs(deliv);
 
   const freshDoc = await deps.buildDoc({ prompt, rawDoc: parsed.data, scope });
 

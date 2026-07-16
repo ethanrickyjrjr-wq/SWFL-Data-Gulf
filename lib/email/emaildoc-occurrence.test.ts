@@ -171,3 +171,31 @@ describe("buildEmailDocOccurrence", () => {
     expect(built?.emailDocHtml?.includes("{{{RESEND_UNSUBSCRIBE_URL}}}")).toBe(true);
   });
 });
+
+// ── deriveDocBuildArgs (mission-control build 07/16/2026) ────────────────────
+// The ONE scope/prompt derivation the cron lane and the hub Update route share.
+import { deriveDocBuildArgs } from "./emaildoc-occurrence";
+
+describe("deriveDocBuildArgs", () => {
+  test("stored instruction + scope + address ride through", () => {
+    const args = deriveDocBuildArgs({
+      instruction: "  Weekly Naples update  ",
+      scope_kind: "zip",
+      scope_value: "34102",
+      subject_address: " 123 Gulf Shore Blvd ",
+    });
+    expect(args.prompt).toBe("Weekly Naples update");
+    expect(args.scope).toEqual({ kind: "zip", value: "34102", address: "123 Gulf Shore Blvd" });
+  });
+
+  test("no instruction → neutral refresh prompt; no scope_value → undefined scope", () => {
+    const args = deriveDocBuildArgs({
+      instruction: null,
+      scope_kind: null,
+      scope_value: null,
+      subject_address: null,
+    });
+    expect(args.scope).toBeUndefined();
+    expect(args.prompt).toBe("Refresh this email with the latest Southwest Florida market data.");
+  });
+});
