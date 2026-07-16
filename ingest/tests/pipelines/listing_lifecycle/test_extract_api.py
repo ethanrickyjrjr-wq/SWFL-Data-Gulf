@@ -450,3 +450,17 @@ def test_fetch_steadyapi_city_returns_four_tuple_with_total(monkeypatch):
     assert ok is True
     assert pages == 1
     assert total == 1
+
+
+def test_pick_listed_date_parity_with_ts_fixture():
+    """Shared fixture parity: lib/listings/steadyapi.listed-date.test.ts asserts these
+    exact values off the same JSON — the two implementations cannot drift silently."""
+    import json
+    from pathlib import Path
+
+    fx = json.loads(
+        (Path(__file__).parent / "fixtures" / "property_history_two_spells.json").read_text()
+    )
+    hist = fx["body"]["property_history"]
+    assert extract_api._pick_listed_date(hist, at="2026-07-16") == "2026-04-02"
+    assert extract_api._pick_listed_date(hist, at="2025-12-31") == "2025-06-15"

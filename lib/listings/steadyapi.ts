@@ -446,6 +446,9 @@ export async function fetchNearbyValues(
 export interface SoldEvent {
   soldPrice: number;
   soldDate: string;
+  /** Vendor list date of the SOLD spell (most recent "Listed" event ≤ soldDate);
+   *  null/absent when the history carries none. Rides the SAME response — free. */
+  listedDate?: string | null;
 }
 
 /** Read the most-recent `event_name == "Sold"` row out of a tax-history body.
@@ -461,6 +464,26 @@ export function parseSoldEvent(body: unknown): SoldEvent | null {
     const date = typeof r.date === "string" ? r.date : null;
     if (price == null || !date) continue;
     if (!best || date > best.soldDate) best = { soldPrice: price, soldDate: date };
+  }
+  return best ? { ...best, listedDate: parseListedEvent(body, best.soldDate) } : null;
+}
+
+/** Most recent "Listed" event's `listing.list_date` at-or-before `at` (default today) —
+ *  the start of the spell being tracked. MIRRORS Python `_pick_listed_date`
+ *  (ingest/pipelines/listing_lifecycle/extract_api.py) — the shared fixture
+ *  property_history_two_spells.json pins both to identical outputs. Pure. */
+export function parseListedEvent(body: unknown, at?: string): string | null {
+  const history = (body as { body?: { property_history?: unknown } })?.body?.property_history;
+  if (!Array.isArray(history)) return null;
+  const cutoff = at ?? new Date().toISOString().slice(0, 10);
+  let best: string | null = null;
+  for (const row of history) {
+    const r = row as { event_name?: unknown; listing?: { list_date?: unknown } };
+    if (typeof r.event_name !== "string" || !/listed/i.test(r.event_name)) continue;
+    const raw = r.listing?.list_date;
+    const d = typeof raw === "string" ? raw.slice(0, 10) : "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > cutoff) continue;
+    if (!best || d > best) best = d;
   }
   return best;
 }
@@ -481,6 +504,28 @@ export async function fetchSoldEvent(
     const res = await steadyGet(`property-tax-history?${params}`, key, deps);
     if (!res) return null;
     return parseSoldEvent(await res.json());
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * One `/property-tax-history` call — the current spell's vendor list date for a
+ * property (probe-on-use healing of censored DOM floors, spec
+ * 2026-07-16-listing-dom-design.md §3). Empty-tolerant: no key, non-200, no Listed
+ * event, or bad body → null, never throws.
+ */
+export async function fetchListedDate(
+  propertyId: string,
+  deps: SteadyFetchDeps = {},
+): Promise<string | null> {
+  const key = process.env.PHOTOS_API;
+  if (!key || !propertyId) return null;
+  const params = new URLSearchParams({ propertyId });
+  try {
+    const res = await steadyGet(`property-tax-history?${params}`, key, deps);
+    if (!res) return null;
+    return parseListedEvent(await res.json());
   } catch {
     return null;
   }

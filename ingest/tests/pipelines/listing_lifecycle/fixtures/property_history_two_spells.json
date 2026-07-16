@@ -1,0 +1,31 @@
+{
+  "meta": { "current_status": "sold" },
+  "body": {
+    "property_history": [
+      {
+        "date": "2026-06-20",
+        "event_name": "Sold",
+        "price": 372000,
+        "listing": { "list_date": "2026-04-02T14:00:00Z" }
+      },
+      {
+        "date": "2026-04-02",
+        "event_name": "Listed",
+        "price": 379000,
+        "listing": { "list_date": "2026-04-02T14:00:00Z" }
+      },
+      {
+        "date": "2025-09-10",
+        "event_name": "Listing removed",
+        "price": 385000,
+        "listing": { "list_date": "2025-06-15T09:30:00Z" }
+      },
+      {
+        "date": "2025-06-15",
+        "event_name": "Listed",
+        "price": 385000,
+        "listing": { "list_date": "2025-06-15T09:30:00Z" }
+      }
+    ]
+  }
+}

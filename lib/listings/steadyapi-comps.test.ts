@@ -151,7 +151,12 @@ describe("parseSoldEvent — latest Sold event from property_history", () => {
         ],
       },
     };
-    expect(parseSoldEvent(body)).toEqual({ soldPrice: 415000, soldDate: "2026-05-12" });
+    // listedDate: the 2020 Listed event carries no listing.list_date → null.
+    expect(parseSoldEvent(body)).toEqual({
+      soldPrice: 415000,
+      soldDate: "2026-05-12",
+      listedDate: null,
+    });
   });
 
   it("returns null when there is no Sold event", () => {
@@ -363,6 +368,6 @@ describe("fetchSoldEvent — empty-tolerant, never throws", () => {
       fetchImpl: (async () =>
         new Response(JSON.stringify(body), { status: 200 })) as unknown as typeof fetch,
     });
-    expect(out).toEqual({ soldPrice: 415000, soldDate: "2026-05-12" });
+    expect(out).toEqual({ soldPrice: 415000, soldDate: "2026-05-12", listedDate: null });
   });
 });
