@@ -39,21 +39,33 @@ export function ListingCampaignHero({
         Listing campaigns
       </p>
       <h2 className="mt-1 text-2xl font-semibold text-white">From Teaser to Sold.</h2>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/60">
-        One address in, five pieces out — Coming Soon, New Listing, Comps, Under Contract, Sold. You
-        fire each one when you&rsquo;re ready, and every number is sourced. Real status changes on
-        the listing — a price cut, back on the market — nudge you the moment it&rsquo;s time to send
-        the next piece. And a real click on any piece alerts you directly, the moment a contact
-        shows interest.
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
+        One address in, five pieces out. You fire each one when you&rsquo;re ready, and every number
+        is sourced — never invented.
       </p>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/60">
+      <ul className="mt-3 max-w-2xl space-y-1.5 text-sm leading-relaxed text-white/60">
+        <li className="flex gap-2.5">
+          <span className="mt-[7px] h-1 w-1 flex-none rounded-full bg-gulf-teal/70" aria-hidden />
+          <span>
+            Real status changes on the listing — a price cut, back on the market — nudge you when
+            it&rsquo;s time to send the next piece.
+          </span>
+        </li>
+        <li className="flex gap-2.5">
+          <span className="mt-[7px] h-1 w-1 flex-none rounded-full bg-gulf-teal/70" aria-hidden />
+          <span>
+            A real click on any piece alerts you directly — the moment a contact shows interest.
+          </span>
+        </li>
+      </ul>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/60">
         Need an open house invite or a private showing email? Just ask in the builder — it&rsquo;s
         one prompt away.
       </p>
 
       {FILMSTRIP.length > 0 && (
-        <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-          {FILMSTRIP.map((f) => (
+        <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
+          {FILMSTRIP.map((f, i) => (
             <div key={f.title} className="min-w-[92px] flex-1">
               {/* eslint-disable-next-line @next/next/no-img-element -- committed static capture */}
               <img
@@ -62,7 +74,11 @@ export function ListingCampaignHero({
                 className="h-20 w-full rounded-lg border border-white/10 object-cover object-top"
                 loading="lazy"
               />
-              <p className="mt-1 text-center text-[10px] text-white/50">{f.title}</p>
+              <p className="mt-1.5 text-center text-[11px] text-white/60">
+                <span className="font-semibold text-gulf-teal/80">{i + 1}</span>
+                <span className="mx-1 text-white/25">·</span>
+                {f.title}
+              </p>
             </div>
           ))}
         </div>
@@ -91,8 +107,8 @@ export function ListingCampaignHero({
       </div>
 
       <p className="mt-3 text-[11px] text-white/35">
-        Social scheduling is coming soon. Until then, we can already build the same campaign as
-        ready-to-post social creative for you to share today.
+        Social scheduling is coming soon — until then, we can build the same campaign as
+        ready-to-post social creative you can share today.
       </p>
 
       {addressOpen && (

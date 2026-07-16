@@ -45,7 +45,7 @@ describe("ListingCampaignHero", () => {
 
   it("names the real click-alert capability", () => {
     const html = renderToStaticMarkup(createElement(ListingCampaignHero, { subjectAddress: null }));
-    expect(html).toContain("a real click on any piece alerts you directly");
+    expect(html).toContain("real click on any piece alerts you directly");
   });
 
   it("names socials as coming soon, with no dead link", () => {
