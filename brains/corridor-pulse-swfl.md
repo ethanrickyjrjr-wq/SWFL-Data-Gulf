@@ -1,10 +1,11 @@
-<!-- FRESHNESS: v15 | Token: SWFL-7421-v15-20260707 -->
+<!-- FRESHNESS: v16 | Token: SWFL-7421-v16-20260716 -->
 ---
 brain_id: corridor-pulse-swfl
-version: 15
-refined_at: 2026-07-07T09:33:33Z
-freshness_token: SWFL-7421-v15-20260707
+version: 16
+refined_at: 2026-07-16T04:36:37Z
+freshness_token: SWFL-7421-v16-20260716
 ttl_seconds: 604800
+pack_hash: 9b745295cada
 context_type: user_saved_reference
 scope: SWFL (Lee + Collier) weekly corridor current-events pulse — dated commercial-real-estate transactions, construction, leasing, and openings/closings on the CRE corridors, each cited to a primary source.
 ---
@@ -29,173 +30,173 @@ SCOPE: SWFL (Lee + Collier) weekly corridor current-events pulse — dated comme
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                | verified   | expires
-s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-07-07 | 2026-07-14
+s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-07-16 | 2026-07-23
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corridor-pulse:summary","fact":"Live SWFL corridor current-events signals","value":"149 non-expired signals across 26 corridors (Coral Pointe (Cape Coral): 13, Pine Island Rd: 5, Ben Hill Griffin: 8, Midpoint Bridge: 5, Bonita Beach: 5, Estero / Bonita line: 6, Daniels: 6, Fort Myers Beach: 8, Lee Blvd: 3, Vanderbilt: 5, Bonita Trail: 6, Cape Coral Pkwy: 9, Six Mile Cypress: 8, Summerlin: 4, Collier Blvd: 6, Downtown Naples: 12, Airport-Pulling: 11, Pine Ridge: 1, East Trail (Naples): 4, Cleveland Ave: 5, Colonial East: 4, Joel Blvd: 5, East Naples: 3, Gulf Coast Town Center: 3, North Naples (Immokalee Rd): 3, Coconut Point: 1).","src":"s01","date":"2026-07-07"},
-  {"id":"f002","topic":"corridor-pulse:transactions","fact":"Coral Pointe (Cape Coral) — transactions","value":"The Shops at Surfside at 2354 Surfside Blvd. sold to a Pinellas County real estate developer for $12 million (source: https://www.businessobserverfl.com/news/2026/jun/22/cape-coral-shopping-center-sells-for-12m-to-pinellas-investor/)","src":"s01","date":"2026-07-07"},
-  {"id":"f003","topic":"corridor-pulse:transactions","fact":"Coral Pointe (Cape Coral) — transactions","value":"A multitenant retail plaza on Del Prado Boulevard sold in Cape Coral for $3.19 million (source: https://www.gulfshorebusiness.com/gb-daily/cape-coral-retail-plaza-sells-for-3-19m/article_514db224-0a39-42a0-ac5c-712c77340fd0.html)","src":"s01","date":"2026-07-07"},
-  {"id":"f004","topic":"corridor-pulse:transactions","fact":"Pine Island Rd — transactions","value":"EKS Investments LLC bought a retail store at 1499 S.W. Pine Island Road, Cape Coral from Piedmont GFIM Ft Myers Tamiami GW LLC in May 2026 (source: https://www.businessobserverfl.com/news/2026/may/11/commercial-real-estate-transactions/)","src":"s01","date":"2026-07-07"},
-  {"id":"f005","topic":"corridor-pulse:transactions","fact":"Ben Hill Griffin — transactions","value":"14-acre parcel at Three Oaks Parkway and Alico Road sold for $11.6 million (source: https://www.businessobserverfl.com/news/2026/feb/22/multifamily-developer-buys-fort-myers-land/)","src":"s01","date":"2026-07-07"},
-  {"id":"f006","topic":"corridor-pulse:transactions","fact":"Midpoint Bridge — transactions","value":"A less than 1-acre corner lot at 2675 Del Prado Blvd. S. in Cape Coral primed for redevelopment has sold. (source: https://www.businessobserverfl.com/news/2025/sep/28/clearwater-tech-company-expands/)","src":"s01","date":"2026-07-07"},
-  {"id":"f007","topic":"corridor-pulse:transactions","fact":"Bonita Beach — transactions","value":"Collier County Public Utilities is conducting work to replace the transmission water main on Bonita Beach Road from February 2025. (source: https://www.colliercountyfl.gov/Home/Components/News/News/49481/1536)","src":"s01","date":"2026-07-07"},
-  {"id":"f008","topic":"corridor-pulse:transactions","fact":"Coral Pointe (Cape Coral) — transactions","value":"A 0.84-acre parcel at 2675 Del Prado Blvd. S. in Cape Coral sold to Alegian Growth Partners for $550,000. (source: https://www.businessobserverfl.com/news/2025/sep/28/clearwater-tech-company-expands/)","src":"s01","date":"2026-07-07"},
-  {"id":"f009","topic":"corridor-pulse:transactions","fact":"Pine Island Rd — transactions","value":"1.04 acre vacant outparcel located on Pine Island Road (SR 78) in Cape Coral is available for sale and lease. (source: https://www.colliers.com/en/properties/prime-location-at-1133-sw-pine-island-road-cape-coral-fl/usa-1133-sw-pine-island-rd-cape-coral-fl-33991-usa/usa1157658)","src":"s01","date":"2026-07-07"}
+  {"id":"f001","topic":"corridor-pulse:summary","fact":"Live SWFL corridor current-events signals","value":"89 non-expired signals across 25 corridors (Bonita Trail: 5, Cape Coral Pkwy: 8, Ben Hill Griffin: 7, Bonita Beach: 3, Coral Pointe (Cape Coral): 4, Estero / Bonita line: 3, Daniels: 3, Six Mile Cypress: 5, Summerlin: 3, Fort Myers Beach: 4, Collier Blvd: 3, Downtown Naples: 7, Airport-Pulling: 5, Pine Ridge: 1, East Trail (Naples): 4, Vanderbilt: 4, Midpoint Bridge: 1, Cleveland Ave: 4, Gulf Coast Town Center: 2, East Naples: 2, North Naples (Immokalee Rd): 3, Colonial East: 2, Joel Blvd: 2, Pine Island Rd: 2, Lee Blvd: 2).","src":"s01","date":"2026-07-16"},
+  {"id":"f002","topic":"corridor-pulse:development","fact":"Bonita Trail — development","value":"Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city's portion of a regional rail-to-trail project. (source: https://www.gulfshorebusiness.com/lee/bonita-springs-voters-to-decide-on-rail-trail-bonds-soon/article_55b63b61-9f9f-4c67-8d2e-6663c254584b.html)","src":"s01","date":"2026-07-16"},
+  {"id":"f003","topic":"corridor-pulse:development","fact":"Cape Coral Pkwy — development","value":"Cape Coral Parkway is set to undergo expansion from four lanes to six lanes (source: https://www.gulfshorebusiness.com/gb_daily/cape-coral-businesses-concerned-with-parking-loss-in-road-expansion/)","src":"s01","date":"2026-07-16"},
+  {"id":"f004","topic":"corridor-pulse:development","fact":"Ben Hill Griffin — development","value":"My Shower Door broke ground April 2 on a 14,000-square-foot national headquarters, a $4 million construction project at 17000 Cam Court, off Alico Road (source: https://www.gulfshorebusiness.com/retail/my-shower-door-invests-4m-in-new-fort-myers-headquarters/article_4eef396d-d496-42a1-9c41-866d2a130c6b.html)","src":"s01","date":"2026-07-16"},
+  {"id":"f005","topic":"corridor-pulse:development","fact":"Ben Hill Griffin — development","value":"Village of Estero Corkscrew Road Shared Use Path Project constructs a 10-foot-wide asphalt pathway on the north side from Ben Hill Griffin Parkway to Bella Terra Boulevard with estimated completion Fall 2026 and project cost approximately $23 million (source: https://www.leegov.com/dot/News%20Documents/Roadwatch%20January%208,%202026%20to%20January%2014,%202026.pdf)","src":"s01","date":"2026-07-16"},
+  {"id":"f006","topic":"corridor-pulse:development","fact":"Ben Hill Griffin — development","value":"Ben Hill Griffin Parkway traffic signal upgrades, asphalt mill & overlay and striping with estimated completion mid-2028 and project cost approximately $39.7 million (source: https://www.leegov.com/dot/News%20Documents/Roadwatch%20August%2021,%202025%20to%20August%2027,%202025.pdf)","src":"s01","date":"2026-07-16"},
+  {"id":"f007","topic":"corridor-pulse:development","fact":"Bonita Beach — development","value":"The Florida Department of Transportation is looking for ways to address congestion issues and the projected increase in traffic at the intersection of Bonita Beach Road and U.S. 41. (source: https://www.gulfshorebusiness.com/fdot-studies-improvements-to-bonita-beach-road-and-u-s-41-intersection/)","src":"s01","date":"2026-07-16"},
+  {"id":"f008","topic":"corridor-pulse:development","fact":"Bonita Trail — development","value":"Imperial 41 broke ground Dec. 11 as a mixed-use development that will add 120 apartments and other uses in downtown Bonita. (source: https://www.gulfshorebusiness.com/gb-daily/imperial-41-breaks-ground-on-downtown-bonita-project/article_318503a6-85a2-4540-8de0-e3a82c1d0bdc.html)","src":"s01","date":"2026-07-16"},
+  {"id":"f009","topic":"corridor-pulse:development","fact":"Bonita Trail — development","value":"A 4.05-acre parcel in Bonita Springs has been sold for construction of the Bonita Auto Vault, a luxury car garage storage facility. (source: https://www.businessobserverfl.com/news/2025/aug/31/developer-car-condos-bonita-springs/)","src":"s01","date":"2026-07-16"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "corridor-pulse-swfl",
-  "version": 15,
-  "refined_at": "2026-07-07T09:33:33Z",
-  "expires": "2026-07-14T09:33:33Z",
+  "version": 16,
+  "refined_at": "2026-07-16T04:36:37Z",
+  "expires": "2026-07-23T04:36:37Z",
   "ttl_seconds": 604800,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL corridor pulse as of 2026-07-07: 149 live current-events signals across 26 corridors — Coral Pointe (Cape Coral) (13), Pine Island Rd (5), Ben Hill Griffin (8), Midpoint Bridge (5), Bonita Beach (5), Estero / Bonita line (6), Daniels (6), Fort Myers Beach (8), Lee Blvd (3), Vanderbilt (5), Bonita Trail (6), Cape Coral Pkwy (9), Six Mile Cypress (8), Summerlin (4), Collier Blvd (6), Downtown Naples (12), Airport-Pulling (11), Pine Ridge (1), East Trail (Naples) (4), Cleveland Ave (5), Colonial East (4), Joel Blvd (5), East Naples (3), Gulf Coast Town Center (3), North Naples (Immokalee Rd) (3), Coconut Point (1). Most current: Coral Pointe (Cape Coral) — The Shops at Surfside at 2354 Surfside Blvd. sold to a Pinellas County real estate developer for $12 million These are current cited facts only; the corridor read and any direction call live downstream in cre-swfl and master.",
+  "conclusion": "SWFL corridor pulse as of 2026-07-16: 89 live current-events signals across 25 corridors — Bonita Trail (5), Cape Coral Pkwy (8), Ben Hill Griffin (7), Bonita Beach (3), Coral Pointe (Cape Coral) (4), Estero / Bonita line (3), Daniels (3), Six Mile Cypress (5), Summerlin (3), Fort Myers Beach (4), Collier Blvd (3), Downtown Naples (7), Airport-Pulling (5), Pine Ridge (1), East Trail (Naples) (4), Vanderbilt (4), Midpoint Bridge (1), Cleveland Ave (4), Gulf Coast Town Center (2), East Naples (2), North Naples (Immokalee Rd) (3), Colonial East (2), Joel Blvd (2), Pine Island Rd (2), Lee Blvd (2). Most current: Bonita Trail — Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city's portion of a regional rail-to-trail project. These are current cited facts only; the corridor read and any direction call live downstream in cre-swfl and master.",
   "key_metrics": [
     {
-      "metric": "signal_transactions_1",
-      "value": "Coral Pointe (Cape Coral): The Shops at Surfside at 2354 Surfside Blvd. sold to a Pinellas County real estate developer for $12 million",
+      "metric": "signal_development_1",
+      "value": "Bonita Trail: Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city's portion of a regional rail-to-trail project.",
       "direction": "stable",
-      "label": "Coral Pointe (Cape Coral) — transactions",
+      "label": "Bonita Trail — development",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2026/jun/22/cape-coral-shopping-center-sells-for-12m-to-pinellas-investor/",
-        "fetched_at": "2026-07-07T09:33:33Z",
+        "url": "https://www.gulfshorebusiness.com/lee/bonita-springs-voters-to-decide-on-rail-trail-bonds-soon/article_55b63b61-9f9f-4c67-8d2e-6663c254584b.html",
+        "fetched_at": "2026-07-16T04:36:37Z",
         "tier": 2,
-        "citation": "Pinellas investor buys Cape Coral shopping center for $12M | Business Observer: \"The Shops at Surfside, according to a listing on LoopNet, is 117,556 square feet and sits on 8.26 acres just off the Veterans Memorial Parkway. The li...\""
+        "citation": "Bonita Springs bond vote could fund $35M rail trail | Lee County | gulfshorebusiness.com: \"Evan Williams ... Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city’s portion of a regional rail-to-t...\""
       },
       "suggestions": [
-        "What's driving signal transactions 1?",
-        "How does signal transactions 1 here compare to other SWFL areas?"
+        "What's driving signal development 1?",
+        "How does signal development 1 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_transactions_2",
-      "value": "Coral Pointe (Cape Coral): A multitenant retail plaza on Del Prado Boulevard sold in Cape Coral for $3.19 million",
+      "metric": "signal_development_2",
+      "value": "Cape Coral Pkwy: Cape Coral Parkway is set to undergo expansion from four lanes to six lanes",
       "direction": "stable",
-      "label": "Coral Pointe (Cape Coral) — transactions",
+      "label": "Cape Coral Pkwy — development",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/gb-daily/cape-coral-retail-plaza-sells-for-3-19m/article_514db224-0a39-42a0-ac5c-712c77340fd0.html",
-        "fetched_at": "2026-07-07T09:33:33Z",
+        "url": "https://www.gulfshorebusiness.com/gb_daily/cape-coral-businesses-concerned-with-parking-loss-in-road-expansion/",
+        "fetched_at": "2026-07-16T04:36:37Z",
         "tier": 2,
-        "citation": "Cape Coral retail plaza sells for $3.19M | GB Daily | gulfshorebusiness.com: \"Multitenant retail plaza on Del Prado Boulevard sells in Cape Coral.\""
+        "citation": "Cape Coral businesses concerned with parking loss in road expansion - Gulfshore Business: \"Cape Coral is set to undergo a significant change with a road expansion project on Cape Coral Parkway, increasing it from four lanes to six.\n\nCape Cor...\""
       },
       "suggestions": [
-        "What's driving signal transactions 2?",
-        "How does signal transactions 2 here compare to other SWFL areas?"
+        "What's driving signal development 2?",
+        "How does signal development 2 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_transactions_3",
-      "value": "Pine Island Rd: EKS Investments LLC bought a retail store at 1499 S.W. Pine Island Road, Cape Coral from Piedmont GFIM Ft Myers Tamiami GW LLC in May 2026",
+      "metric": "signal_development_3",
+      "value": "Ben Hill Griffin: My Shower Door broke ground April 2 on a 14,000-square-foot national headquarters, a $4 million construction project at 17000 Cam Court, off Alico Road",
       "direction": "stable",
-      "label": "Pine Island Rd — transactions",
+      "label": "Ben Hill Griffin — development",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2026/may/11/commercial-real-estate-transactions/",
-        "fetched_at": "2026-07-07T09:33:33Z",
+        "url": "https://www.gulfshorebusiness.com/retail/my-shower-door-invests-4m-in-new-fort-myers-headquarters/article_4eef396d-d496-42a1-9c41-866d2a130c6b.html",
+        "fetched_at": "2026-07-16T04:36:37Z",
         "tier": 2,
-        "citation": "The week's top commercial real estate transactions in Charlotte, Collier, Hillsborough, Lee, Manatee, Pasco, Pinellas, Polk, Sarasota | Business Observer: \"Buyer: EKS Investments LLC Seller: Piedmont GFIM Ft Myers Tamiami GW LLC Address: 1499 S.W. Pine Island Road, Cape Coral Property Type: Retail store P...\""
+        "citation": "Expanding My Shower Door takes on a new headquarters | Retail | gulfshorebusiness.com: \"My Shower Door ... My Shower Door broke ground April 2 on a 14,000-square-foot national headquarters, a $4 million construction project designed to re...\""
       },
       "suggestions": [
-        "What's driving signal transactions 3?",
-        "How does signal transactions 3 here compare to other SWFL areas?"
+        "What's driving signal development 3?",
+        "How does signal development 3 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_transactions_4",
-      "value": "Ben Hill Griffin: 14-acre parcel at Three Oaks Parkway and Alico Road sold for $11.6 million",
+      "metric": "signal_development_4",
+      "value": "Ben Hill Griffin: Village of Estero Corkscrew Road Shared Use Path Project constructs a 10-foot-wide asphalt pathway on the north side from Ben Hill Griffin Parkway to Bella Terra Boulevard with estimated completion Fall 2026 and project cost approximately $23 million",
       "direction": "stable",
-      "label": "Ben Hill Griffin — transactions",
+      "label": "Ben Hill Griffin — development",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2026/feb/22/multifamily-developer-buys-fort-myers-land/",
-        "fetched_at": "2026-07-07T09:33:33Z",
+        "url": "https://www.leegov.com/dot/News%20Documents/Roadwatch%20January%208,%202026%20to%20January%2014,%202026.pdf",
+        "fetched_at": "2026-07-16T04:36:37Z",
         "tier": 2,
-        "citation": "Prolific Atlanta multifamily developer buys Fort Myers land | Business Observer: \"A 14-acre parcel in Fort Myers has sold for $11.6 million. The property is at Three Oaks Parkway and Alico Road, just off of Interstate 75. The buyer ...\""
+        "citation": "Roadwatch January 8, 2026 to January 14, ...: \"Estimated completion is Fall 2026. Project cost is approximately $23 million, including $4.6 million for · landscaping and irrigation and $4 million f...\""
       },
       "suggestions": [
-        "What's driving signal transactions 4?",
-        "How does signal transactions 4 here compare to other SWFL areas?"
+        "What's driving signal development 4?",
+        "How does signal development 4 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_transactions_5",
-      "value": "Midpoint Bridge: A less than 1-acre corner lot at 2675 Del Prado Blvd. S. in Cape Coral primed for redevelopment has sold.",
+      "metric": "signal_development_5",
+      "value": "Ben Hill Griffin: Ben Hill Griffin Parkway traffic signal upgrades, asphalt mill & overlay and striping with estimated completion mid-2028 and project cost approximately $39.7 million",
       "direction": "stable",
-      "label": "Midpoint Bridge — transactions",
+      "label": "Ben Hill Griffin — development",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2025/sep/28/clearwater-tech-company-expands/",
-        "fetched_at": "2026-07-07T09:33:33Z",
+        "url": "https://www.leegov.com/dot/News%20Documents/Roadwatch%20August%2021,%202025%20to%20August%2027,%202025.pdf",
+        "fetched_at": "2026-07-16T04:36:37Z",
         "tier": 2,
-        "citation": "Clearwater insurtech company expands with new facility | Business Observer: \"... A less than 1-acre parcel primed for redevelopment has sold. The corner lot is at 2675 Del Prado Blvd. S. in Cape Coral between S.E.\""
+        "citation": "Roadwatch August 21, 2025 to August 27, ...: \"Estimated completion is mid-2028. Project cost is approximately $39.7 M. The contractor is ECH · Construction. For further questions, please visit www...\""
       },
       "suggestions": [
-        "What's driving signal transactions 5?",
-        "How does signal transactions 5 here compare to other SWFL areas?"
+        "What's driving signal development 5?",
+        "How does signal development 5 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_transactions_6",
-      "value": "Bonita Beach: Collier County Public Utilities is conducting work to replace the transmission water main on Bonita Beach Road from February 2025.",
+      "metric": "signal_development_6",
+      "value": "Bonita Beach: The Florida Department of Transportation is looking for ways to address congestion issues and the projected increase in traffic at the intersection of Bonita Beach Road and U.S. 41.",
       "direction": "stable",
-      "label": "Bonita Beach — transactions",
+      "label": "Bonita Beach — development",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.colliercountyfl.gov/Home/Components/News/News/49481/1536",
-        "fetched_at": "2026-07-07T09:33:33Z",
+        "url": "https://www.gulfshorebusiness.com/fdot-studies-improvements-to-bonita-beach-road-and-u-s-41-intersection/",
+        "fetched_at": "2026-07-16T04:36:37Z",
         "tier": 2,
-        "citation": "News Releases | Collier County, FL: \"Post Date:02/21/2025 2:16 PM · Collier County Public Utilities is conducting work to replace the transmission water main on Bonita Beach Road from Feb...\""
+        "citation": "FDOT studies improvements to Bonita Beach Road and U.S. 41 intersection - Gulfshore Business: \"The Florida Department of Transportation is looking for ways to address congestion issues and the projected increase in traffic at the intersection of...\""
       },
       "suggestions": [
-        "What's driving signal transactions 6?",
-        "How does signal transactions 6 here compare to other SWFL areas?"
+        "What's driving signal development 6?",
+        "How does signal development 6 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_transactions_7",
-      "value": "Coral Pointe (Cape Coral): A 0.84-acre parcel at 2675 Del Prado Blvd. S. in Cape Coral sold to Alegian Growth Partners for $550,000.",
+      "metric": "signal_development_7",
+      "value": "Bonita Trail: Imperial 41 broke ground Dec. 11 as a mixed-use development that will add 120 apartments and other uses in downtown Bonita.",
       "direction": "stable",
-      "label": "Coral Pointe (Cape Coral) — transactions",
+      "label": "Bonita Trail — development",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2025/sep/28/clearwater-tech-company-expands/",
-        "fetched_at": "2026-07-07T09:33:33Z",
+        "url": "https://www.gulfshorebusiness.com/gb-daily/imperial-41-breaks-ground-on-downtown-bonita-project/article_318503a6-85a2-4540-8de0-e3a82c1d0bdc.html",
+        "fetched_at": "2026-07-16T04:36:37Z",
         "tier": 2,
-        "citation": "Clearwater insurtech company expands with new facility | Business Observer: \"The buyer, according to Lee property records, is local financial management firm Alegian Growth Partners. It paid $550,000.\""
+        "citation": "Imperial 41 breaks ground on downtown Bonita project | GB Daily | gulfshorebusiness.com: \"Barron Collier Cos. ... Barron Collier Cos. and CAPREIT broke ground Dec. 11 on Imperial 41, a mixed-use development that will add 120 apartments and ...\""
       },
       "suggestions": [
-        "What's driving signal transactions 7?",
-        "How does signal transactions 7 here compare to other SWFL areas?"
+        "What's driving signal development 7?",
+        "How does signal development 7 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_transactions_8",
-      "value": "Pine Island Rd: 1.04 acre vacant outparcel located on Pine Island Road (SR 78) in Cape Coral is available for sale and lease.",
+      "metric": "signal_development_8",
+      "value": "Bonita Trail: A 4.05-acre parcel in Bonita Springs has been sold for construction of the Bonita Auto Vault, a luxury car garage storage facility.",
       "direction": "stable",
-      "label": "Pine Island Rd — transactions",
+      "label": "Bonita Trail — development",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.colliers.com/en/properties/prime-location-at-1133-sw-pine-island-road-cape-coral-fl/usa-1133-sw-pine-island-rd-cape-coral-fl-33991-usa/usa1157658",
-        "fetched_at": "2026-07-07T09:33:33Z",
+        "url": "https://www.businessobserverfl.com/news/2025/aug/31/developer-car-condos-bonita-springs/",
+        "fetched_at": "2026-07-16T04:36:37Z",
         "tier": 2,
-        "citation": "Commercial-Specialty For Sale and Lease — 1133 SW Pine Island Rd, Cape Coral, FL 33991, USA | United States | Colliers: \"1.04 acre vacant outparcel located on Pine Island Road (SR 78), a major east-west thoroughfare and thriving commercial corridor in Cape Coral. The out...\""
+        "citation": "Developer to build car condos in Bonita Springs | Business Observer: \"Image via LoopNet.com ... A 4.05-acre parcel in Bonita Springs has been sold to an investor who plans to build a luxury car garage storage facility on...\""
       },
       "suggestions": [
-        "What's driving signal transactions 8?",
-        "How does signal transactions 8 here compare to other SWFL areas?"
+        "What's driving signal development 8?",
+        "How does signal development 8 here compare to other SWFL areas?"
       ]
     }
   ],
   "caveats": [
-    "141 additional live signals are tracked but not surfaced here (cap 8).",
+    "81 additional live signals are tracked but not surfaced here (cap 8).",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
   ],
   "contradicts": [],
@@ -208,7 +209,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-07T09:33:33Z"
+    "computed_at": "2026-07-16T04:36:37Z"
   },
   "exogenous_signals": []
 }
@@ -217,5 +218,5 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
 - corridor-pulse-swfl: weekly SWFL corridor-grain current-events reporter over data_lake.city_pulse_corridors (TTL'd, citation-backed); brain-input edge into cre-swfl.
 
 --- RECENT NOTES ---
-- 2026-07-07: pack refined by the Refinery — 9 fact(s) from 1 source(s).
+- 2026-07-16: pack refined by the Refinery — 9 fact(s) from 1 source(s).
 ```
