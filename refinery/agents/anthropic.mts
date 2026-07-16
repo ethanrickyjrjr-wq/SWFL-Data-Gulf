@@ -35,6 +35,10 @@ export type CallType =
   // draft+editor passes; a per-issue IssueBudget ledger rides on top of these
   // global caps (spec 2026-07-10-insiders-edition-design.md).
   | "insiders_author"
+  // Factuality CI gate (lib/deliverable/factuality-grader.ts) — promptfoo
+  // model-graded fixtures, CI/deliberate-local only (FACTUALITY_GATE=1); spec
+  // 2026-07-16-factuality-ci-gate-design.md. Added 07/16/2026.
+  | "factuality_ci"
   | "other";
 
 export interface UsageLike {
