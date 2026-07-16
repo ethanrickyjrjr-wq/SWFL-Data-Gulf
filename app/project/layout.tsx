@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { BRAIN_CATALOG } from "@/refinery/packs/catalog.mts";
 import { ProjectsRail } from "./ProjectsRail";
+import { SelectedProjectProvider } from "./SelectedProjectContext";
 import {
   groupProjects,
   toCockpitProjects,
@@ -96,13 +97,19 @@ export default async function ProjectAreaLayout({ children }: { children: React.
   });
   const searchIndex = [...reportEntries, ...chartEntries];
 
+  // Rows arrive updated_at desc, so rows[0] is the most-recent project — the
+  // hub dashboard's default selection (same default the old center list used).
+  const initialSelectedId = ((data as ProjectRowInput[] | null) ?? [])[0]?.id ?? null;
+
   return (
-    <div className="flex w-full">
-      <ProjectsRail sections={sections} />
-      <div className="flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-1 flex-col">
-        <div className="flex-1">{children}</div>
-        <ProjectSearch entries={searchIndex} />
+    <SelectedProjectProvider initialId={initialSelectedId}>
+      <div className="flex w-full">
+        <ProjectsRail sections={sections} />
+        <div className="flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-1 flex-col">
+          <div className="flex-1">{children}</div>
+          <ProjectSearch entries={searchIndex} />
+        </div>
       </div>
-    </div>
+    </SelectedProjectProvider>
   );
 }

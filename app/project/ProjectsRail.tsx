@@ -8,6 +8,7 @@ import { projectHome, projectEntry } from "@/lib/project/tool-tabs";
 import type { Section } from "@/lib/project/group-projects";
 import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
 import { ConfirmDeleteProject } from "./_cockpit/ConfirmDeleteProject";
+import { useSelectedProject } from "./SelectedProjectContext";
 
 /**
  * The persistent left projects rail (Piece 1 §A), cockpit rework (spec
@@ -19,6 +20,8 @@ import { ConfirmDeleteProject } from "./_cockpit/ConfirmDeleteProject";
 export function ProjectsRail({ sections }: { sections: Section[] }) {
   const pathname = usePathname();
   const router = useRouter();
+  const sel = useSelectedProject();
+  const onHub = pathname === "/project";
   const [confirm, setConfirm] = useState<{ id: string; name: string } | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -80,12 +83,30 @@ export function ProjectsRail({ sections }: { sections: Section[] }) {
                   {section.subgroups.flatMap((g) =>
                     g.projects.map((p) => {
                       const href = projectEntry(p.id, p.lastDid);
-                      const active = pathname.startsWith(`/project/${p.id}`);
+                      const active =
+                        onHub && sel
+                          ? p.id === sel.selectedId
+                          : pathname.startsWith(`/project/${p.id}`);
                       return (
                         <li key={p.id} className="flex min-w-0 items-center gap-0.5">
                           <Link
                             href={href}
                             prefetch
+                            onClick={(e) => {
+                              // Hub + desktop: first click selects (the dashboard's
+                              // widgets retarget); clicking the already-selected row
+                              // falls through to navigation. Mobile (no split view)
+                              // always navigates — the old center-row contract.
+                              if (
+                                onHub &&
+                                sel &&
+                                p.id !== sel.selectedId &&
+                                window.matchMedia("(min-width: 1024px)").matches
+                              ) {
+                                e.preventDefault();
+                                sel.setSelectedId(p.id);
+                              }
+                            }}
                             aria-current={active ? "page" : undefined}
                             className={`flex min-w-0 flex-1 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                               active
