@@ -1,3 +1,20 @@
+## 2026-07-16 (Fable 5 · main) — factuality CI gate BUILT: promptfoo judge through the spend seam, 14/14 first calibration
+
+Resumed the promptfoo mid-brainstorm handoff; operator locked hybrid seam routing (new evidence:
+promptfoo's grading provider accepts a custom ApiProvider object + public assertions.runAssertion —
+crawl4ai-verified) and deliverable-narrative-only scope. Spec `9f62dcca` + plan `dd6a52ba`, then 6
+build commits (`8e2dc0b8` seam CallType factuality_ci · `14def3f1` promptfoo 0.121.19 pinned,
+OpenAI-owned, re-verify on bumps · `0ee9c623` seam-routed grader · `9365ff86` 14-fixture golden set,
+5 classes · `55d4c35c` env-gated live gate test, plain bun test stays $0 · `fa69620e` warn-first
+path-filtered workflow). FIRST CALIBRATION 07/16: 14/14 verdicts correct (6/6 catches on
+reversed-direction + contradiction, 0 false positives), spend visible: 14 api_usage_log rows,
+factuality_ci, claude-sonnet-4-6, $0.0418 total. Seeded-red proof: exactly 1 fail, reverted.
+Learned live: bun test skips .env.local by design → local live runs inline creds (documented in
+skip message). Checks: promptfoo_factuality_ci_gate CLOSED w/ evidence · OPENED
+factuality_gate_blocking_flip + factuality_gate_brain_markdown_phase2 · factuality_ci_gate_live_verify
+stays open until first prod GHA run post-push. Handoff:
+`docs/handoff/2026-07-16-factuality-ci-gate-shipped.md`. AWAITING OPERATOR PUSH (8 commits local).
+
 ## 2026-07-16 (Fable 5 · main) — realtor-audit punch list 1(a)/2/3 executed: market_heat ceiling fill, market_details dropped fields, neighborhood median_year_built
 
 Operator handed `docs/steadyapi-research/2026-07-16-realtor-full-scope-audit.md` (another session's
