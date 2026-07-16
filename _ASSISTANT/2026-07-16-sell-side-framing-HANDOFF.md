@@ -2,6 +2,53 @@
 
 **Written:** 07/16/2026 (session paused mid-Phase-2, blocked on account-wide weekly usage limit — resets 07/18/2026, 7pm America/New_York)
 
+---
+
+## ⚡ STATUS UPDATE — 07/16/2026, later session: EXECUTED TO COMPLETION, READY TO LAND
+
+Everything below this block stands as accurate history, but its "what's next" is done. A later
+07/16 session verified every claim in this handoff against the tree (all commit hashes, paths, and
+code spot-checks held — the only stale fact was main's unpushed-commit count) and then executed
+Tasks 8–11 to completion in the same worktree via subagent-driven-development:
+
+- **Task 8** `5e0ee9fd` (extract helpers) · **Task 9** `033e77bb` (chart policy) · **Task 10**
+  `92d4812e` + fix `3c306ab5` · **Task 11** `bfef0642` + `fce85be3` · **final-review fix wave**
+  `3ce9e5e1` · **legend-clip fix** `623f69d9`. Branch HEAD `623f69d9`, 16 commits over base
+  `ec59ae22`, clean tree, 907/907 `lib/deliverable/` tests, tsc baseline unchanged (the 4 pngjs/Bun
+  errors in `lib/pdf/__tests__` are pre-existing, stash-verified).
+- **Final whole-branch review + re-review: READY TO MERGE.** Per-task review results live in the
+  ledger (`.superpowers/sdd/progress.md`, worktree-local).
+- **A SECOND plan bug was confirmed and fixed** (same class as Task 5's `isExtreme` fix): the
+  plan's Task 10 wired `assertHeroChartCoherence` around the chart fill, but that gate is a
+  cross-quantity category error here — the hero (total price) and this chart ($/sq ft) both
+  classify as "currency" in the gate's 4-way unit system, so FACTOR=3 fires on every real listing
+  and the chart could never render (and Task 11's mandated fill test could never pass). The call
+  was removed with an in-code justification; `market-comps.ts` keeps the same gate where hero and
+  chart genuinely plot the same quantity. The final reviewer independently confirmed both
+  deviations correct. **Deviation notes are now written into the top of the spec and the plan** —
+  the warning below about the plan's stale Task 5 formula is handled durably.
+- **Deferred, tracked in `checks` (RULE 2.4):** `market-comps-chart-key-collision` (pre-existing
+  twin of the storage-key fix — two houses, same ZIP/day/accent, one upserted PNG URL) and
+  `sell-side-framing_live_verify` (the spec's done-condition: one live price-reduced build reviewed
+  by eye — confirm dot-plot labels uncut at 4-digit $/sq ft, prose reads right, chart drops cleanly
+  on thin comps).
+- **The usage-limit note below is overtaken:** this later session ran fully on 07/16, before the
+  claimed 07/18 reset. Treat "account-wide, only time fixes it" as unverified — the limit either
+  lifted early, was pool-specific, or the account changed.
+- **§ "Git/commit status" below is overtaken too:** a parallel session pushed on 07/16 — the four
+  foreign commits, this handoff's own commit, and more are now on origin. As of this update, local
+  `main` is exactly ONE foreign unpushed commit ahead (`b0a3ce2f`, failed-calls/retry track). Note
+  that `b0a3ce2f` touches `lib/assistant/comp-helper.ts`, which the new chart wiring calls — so
+  **after `worktree.mjs land` rebases this branch onto current main, re-run
+  `bun test lib/deliverable/` before pushing.**
+
+**What's left is one operator decision:** eyeball a live price-reduced render (the open
+`sell-side-framing_live_verify` check), then `node scripts/worktree.mjs land sell-side-framing`
+from the main repo, re-run the deliverable suite, and push — asking-before-bundling still applies
+to whatever foreign unpushed commits sit on main at that moment.
+
+---
+
 **Read these two first, in order:**
 1. `docs/superpowers/specs/2026-07-15-sell-side-favorable-framing-design.md` — the design (why, what, the three-narrator scope correction, the chart addition).
 2. `docs/superpowers/plans/2026-07-15-sell-side-favorable-framing-plan.md` — the 11-task TDD plan being executed.

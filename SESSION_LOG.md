@@ -1,3 +1,22 @@
+## 2026-07-16 (Fable 5 · main + wt/sell-side-framing) — sell-side favorable framing COMPLETE: handoff verified, Tasks 8–11 executed, whole-branch review READY TO MERGE (16 commits in worktree, unpushed)
+
+Verified every claim in `_ASSISTANT/2026-07-16-sell-side-framing-HANDOFF.md` against the tree
+(hashes/paths/code all held; only main's unpushed-count was stale). Resumed subagent-driven
+development at Task 8 in `bp-sell-side-framing`: Task 8 `5e0ee9fd`, Task 9 `033e77bb`, Task 10
+`92d4812e`+`3c306ab5`, Task 11 `bfef0642`+`fce85be3`, final-review fix wave `3ce9e5e1`, legend
+fix `623f69d9` — branch HEAD `623f69d9`, 907/907 lib/deliverable tests. SECOND confirmed plan bug
+(class of Task 5's isExtreme): Task 10's `assertHeroChartCoherence` wiring was a cross-quantity
+category error (total-$ hero vs $/sqft chart both classify "currency"; FACTOR=3 → chart could
+never render); removed with in-code justification, reviewer independently confirmed, deviation
+notes committed into spec+plan. Final review found 3 Important (dot-plot never printed the median
+figure; 2 mock.module calls missing real-module spread; chart PNG key had no subject
+discriminator) — all fixed + re-review READY TO MERGE. Checks: opened
+`market-comps-chart-key-collision` (pre-existing twin, out of branch scope) and
+`sell-side-framing_live_verify` (spec done-condition: live render by eye). Handoff doc updated
+in place with completion status. NEXT: operator eyeballs a live price-reduced render, then
+`node scripts/worktree.mjs land sell-side-framing`, re-run `bun test lib/deliverable/` (main's
+`b0a3ce2f` changed comp-helper under us), then operator-approved push.
+
 ## 2026-07-16 (Fable 5 · main, night) — failed-calls track: retry+degrade everywhere, county-seed migration landed, 3 data-loss checks root-caused
 
 Executed `docs/handoff/2026-07-16-failed-calls-and-readiness-handoff.md` (P0-A..P1-E). RULE 0.4
