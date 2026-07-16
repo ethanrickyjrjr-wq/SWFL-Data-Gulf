@@ -10,7 +10,13 @@ import type { EmailDoc } from "@/lib/email/doc/types";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
 import { ArcStrip, type ArcSequence } from "@/components/email-lab/ArcStrip";
 import { ListingCampaignHero } from "@/components/email-lab/ListingCampaignHero";
-import { findPlaceholder, inputKindForRecipe, type ShowcaseRecipe } from "@/lib/showcase/recipe";
+import {
+  findPlaceholder,
+  inputKindForRecipe,
+  type BrandNeed,
+  type ShowcaseRecipe,
+} from "@/lib/showcase/recipe";
+import { MUST_KEYS, PREFILL_KEYS, typableProfileGaps } from "@/lib/brand/profile-ledger";
 import { planArrival } from "@/lib/lab-entry/arrival";
 import { planSeedStart } from "@/lib/lab-entry/seed-start";
 import { seedFillPrompt } from "@/lib/lab-entry/seed-fill-prompt";
@@ -186,6 +192,52 @@ export function ProjectEmailLabClient({
         : null,
   );
   const [activeSeed, setActiveSeed] = useState<SeedDoc | null>(arrivalSeed);
+
+  // Live branding for THIS lane's popups (fill-once spec 2026-07-16 §F). Starts
+  // from the project blob, then the account profile blank-fills in (same merge
+  // the grid shell does on mount) — so a popup never asks for a field the
+  // ACCOUNT already holds, even when the project blob predates full copying.
+  const [branding, setBranding] = useState<Record<string, string>>(initialBranding ?? {});
+  const brandMergeAttempted = useRef(false);
+  useEffect(() => {
+    if (brandMergeAttempted.current) return;
+    brandMergeAttempted.current = true;
+    fetch("/api/user/brand")
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((data: Record<string, unknown>) => {
+        setBranding((prev) => {
+          const next = { ...prev };
+          for (const k of PREFILL_KEYS) {
+            if (!next[k] && typeof data[k] === "string" && data[k]) next[k] = data[k] as string;
+          }
+          return next;
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  // Every email prints the signature block, so template (seed) builds ask for
+  // the must tier; recipe arrivals ask for what the recipe declares. photo_url
+  // never appears (upload — the Brand panel owns it).
+  const seedGaps = typableProfileGaps(branding, MUST_KEYS).map((s) => s.key as BrandNeed);
+  const recipeGapsForPopup = initialRecipe
+    ? typableProfileGaps(branding, initialRecipe.needs).map((s) => s.key as BrandNeed)
+    : [];
+
+  // Bank what a popup collected: local state (the next shell remount signs with
+  // it) + the project blob (the build's persisted brand). The project PATCH
+  // banks blank ACCOUNT fields server-side — one write path per fact, no second
+  // POST to /api/user/brand/bank from here.
+  function bankPopupBrand(brandPatch: Record<string, string>) {
+    if (Object.keys(brandPatch).length === 0) return;
+    const next = { ...branding, ...brandPatch };
+    setBranding(next);
+    void fetch(`/api/projects/${projectId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ branding: next }),
+    }).catch(() => {});
+  }
 
   // Silent autosave for a SAVED doc (spec §D): debounced ~5s after edits +
   // keepalive flush on exit. The action ref always calls the latest handleSave
@@ -505,7 +557,9 @@ export function ProjectEmailLabClient({
     readyPrompt != null && !savedId && !zipSeeded && (buildPrompt != null || !galleryPicked);
   const shared = {
     brandTokens: initialTokens,
-    initialBranding,
+    // The live merged blob (project ⊕ account blanks ⊕ popup fills) — the shell
+    // copies it into its own state on mount, and buildKey remounts pick up fills.
+    initialBranding: branding,
     scope: effectiveScope,
     // A truly blank project (no ready recipe) gets an EMPTY box, not a fake
     // pre-written sentence — the aiPlaceholder below already shows a grey example.
@@ -592,7 +646,13 @@ export function ProjectEmailLabClient({
           // three doors into this popup can't drift apart again.
           inputKind={inputKindForRecipe(initialRecipe) ?? "address"}
           initialValue={subjectAddress ?? ""}
-          onBuild={onAddressBuild}
+          // Fill-once §F: the recipe's missing brand fields ride the same box —
+          // this lane used to build silently off house defaults (07/16 caveat).
+          gaps={recipeGapsForPopup}
+          onBuild={(value, brandPatch) => {
+            bankPopupBrand(brandPatch);
+            onAddressBuild(value);
+          }}
           onCancel={() => setAddressOpen(false)}
         />
       )}
@@ -607,7 +667,13 @@ export function ProjectEmailLabClient({
           initialValue={
             "inputKind" in seedAsk && seedAsk.inputKind === "area" ? (subjectArea ?? "") : ""
           }
-          onBuild={(value) => void onSeedSubjectBuild(value)}
+          // Fill-once §F: every email prints the signature block, so a template
+          // build asks for missing must fields (name/brokerage/address) here too.
+          gaps={seedGaps}
+          onBuild={(value, brandPatch) => {
+            bankPopupBrand(brandPatch);
+            void onSeedSubjectBuild(value);
+          }}
           onStartBlank={() => setSeedAsk(null)}
           onCancel={() => setSeedAsk(null)}
         />
