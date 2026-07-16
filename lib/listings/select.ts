@@ -237,6 +237,12 @@ interface LakeListingRow {
   mls_name: string | null;
   mls_number: string | null;
   photo_url: string | null;
+  dom_days: number | null;
+  dom_is_floor: boolean | null;
+  cdom_days: number | null;
+  /** Internal heal keys (probe-on-use) — read by healFlooredRows, NEVER mapped onto Listing. */
+  address_key: string | null;
+  property_id: string | null;
 }
 
 /** Pure: coerce one data_lake.listing_state row into the shared `Listing` shape.
@@ -264,7 +270,9 @@ export function lakeRowToListing(row: LakeListingRow): Listing | null {
     listedDate: row.listed_date,
     removedDate: null,
     lastSeenDate: row.last_seen,
-    daysOnMarket: row.days_on_market,
+    daysOnMarket: row.dom_days ?? row.days_on_market,
+    domIsFloor: row.dom_is_floor === true,
+    cdomDays: row.cdom_days,
     mlsName: row.mls_name,
     mlsNumber: row.mls_number,
     ...(row.photo_url ? { photoUrl: row.photo_url } : {}),
@@ -274,7 +282,7 @@ export function lakeRowToListing(row: LakeListingRow): Listing | null {
 const LAKE_LISTING_COLUMNS =
   "listing_id, street_address, city, county, zip_code, lat, lon, property_type, beds, baths, " +
   "sqft, lot_acres, status, list_price, listed_date, last_seen, days_on_market, mls_name, " +
-  "mls_number, photo_url";
+  "mls_number, photo_url, dom_days, dom_is_floor, cdom_days, address_key, property_id";
 
 /** Fetch active for-sale listings for one city straight from the lake (populated daily by
  *  ingest/pipelines/listing_lifecycle — no live vendor call, no per-request cost). Empty-tolerant:
@@ -285,12 +293,11 @@ async function fetchLakeListings(city: string): Promise<Listing[]> {
     const db = createServiceRoleClientUntyped();
     const { data } = await db
       .schema("data_lake")
-      .from("listing_state")
+      .from("listing_dom") // the DOM authority view — already api_feed-scoped
       .select(LAKE_LISTING_COLUMNS)
       .eq("city", city)
       .eq("state", "active")
       .eq("sale_or_rent", "sale")
-      .eq("source_name", "api_feed")
       .limit(500);
     if (!Array.isArray(data)) return [];
     return (data as unknown as LakeListingRow[])

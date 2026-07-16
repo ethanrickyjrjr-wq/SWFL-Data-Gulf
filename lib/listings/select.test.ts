@@ -21,6 +21,11 @@ interface FakeRow {
   mls_name: string | null;
   mls_number: string | null;
   photo_url: string | null;
+  dom_days: number | null;
+  dom_is_floor: boolean | null;
+  cdom_days: number | null;
+  address_key: string | null;
+  property_id: string | null;
 }
 
 function makeChain(rows: FakeRow[]) {
@@ -71,14 +76,22 @@ const SAMPLE_ROW: FakeRow = {
   mls_name: "Florida Gulf Coast MLS",
   mls_number: "226012345",
   photo_url: "https://rdcpix.example/photo.jpg",
+  dom_days: 45,
+  dom_is_floor: false,
+  cdom_days: 45,
+  address_key: "4100LAKEWOODBLVDF30:33914",
+  property_id: "P123",
 };
 
-test("loadListingContext reads data_lake.listing_state, never calls a live vendor API", async () => {
+test("loadListingContext reads data_lake.listing_dom, never calls a live vendor API", async () => {
   rowsForNextCall = [SAMPLE_ROW];
   const ctx = await loadListingContext({ kind: "county", value: "Lee" }, new Date("2026-07-01"));
   expect(ctx.ranked).toHaveLength(1);
   expect(ctx.ranked[0].photoUrl).toBe("https://rdcpix.example/photo.jpg");
   expect(ctx.ranked[0].price).toBe(340000);
+  expect(ctx.ranked[0].daysOnMarket).toBe(45); // from the view's dom_days, NOT the dead column
+  expect(ctx.ranked[0].domIsFloor).toBe(false);
+  expect(ctx.ranked[0].cdomDays).toBe(45);
   expect(ctx.figures.length).toBeGreaterThan(0);
 });
 

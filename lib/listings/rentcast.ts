@@ -33,6 +33,10 @@ export interface Listing {
   removedDate: string | null;
   lastSeenDate: string | null;
   daysOnMarket: number | null;
+  /** True when daysOnMarket is a censored-first-seen FLOOR — render "N+ days". */
+  domIsFloor?: boolean;
+  /** Cumulative days across relists (≥ daysOnMarket); undefined when unknown. */
+  cdomDays?: number | null;
   mlsName: string | null;
   mlsNumber: string | null;
   /** MLS listing photo from SteadyAPI (realtor.com CDN). Undefined when not enriched. */
