@@ -503,3 +503,49 @@ describe("buildCompsChartSpec — the comps bar chart (comps-only, no subject ba
     expect(spec.title).toBe("Nearby comparable prices");
   });
 });
+
+describe("sold-spell DOM (spec 2026-07-16-listing-dom-design.md) — zero extra calls", () => {
+  it("an enriched sold comp carries soldInDays and the rendered line says 'sold in N days'", async () => {
+    const out = await compHelper(
+      "comps near 1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        fetchNearby: async () => [comp({ propertyId: "M-1" })],
+        fetchSold: async () => ({
+          soldPrice: 372000,
+          soldDate: "2026-06-20",
+          listedDate: "2026-04-02",
+        }),
+      }),
+    );
+    expect(out.comps[0].soldInDays).toBe(79);
+    const block = renderCompBlock(out);
+    expect(block).toContain("sold in 79 days");
+  });
+
+  it("a sold event without listedDate leaves soldInDays null and the line unchanged", async () => {
+    const out = await compHelper(
+      "comps near 1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        fetchNearby: async () => [comp({ propertyId: "M-1" })],
+        fetchSold: async () => ({ soldPrice: 372000, soldDate: "2026-06-20" }),
+      }),
+    );
+    expect(out.comps[0].soldInDays).toBeNull();
+    expect(renderCompBlock(out)).not.toContain("sold in");
+  });
+
+  it("a negative vendor spell (list date after sale) is discarded, never surfaced", async () => {
+    const out = await compHelper(
+      "comps near 1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        fetchNearby: async () => [comp({ propertyId: "M-1" })],
+        fetchSold: async () => ({
+          soldPrice: 372000,
+          soldDate: "2026-06-20",
+          listedDate: "2026-07-01",
+        }),
+      }),
+    );
+    expect(out.comps[0].soldInDays).toBeNull();
+  });
+});

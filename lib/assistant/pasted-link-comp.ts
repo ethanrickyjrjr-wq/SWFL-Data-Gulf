@@ -64,6 +64,8 @@ function toRenderComp(facts: ListingFacts): RenderComp {
     price: numOrNull(facts.price),
     priceKind,
     priceDate: null,
+    soldInDays: null, // a scraped ask is not a sale — no closed spell exists
+
     // The page the USER pasted — verbatim (their own lane-4 link, never minted).
     sourceUrl: facts.sourceUrl ?? null,
   };

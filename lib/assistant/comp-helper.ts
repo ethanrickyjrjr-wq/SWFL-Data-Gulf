@@ -21,6 +21,7 @@ import {
   type SoldEvent,
   type SteadyDegradeReason,
 } from "@/lib/listings/steadyapi";
+import { daysBetweenIso, formatSoldSpell } from "@/lib/listings/dom";
 import type { WelcomeSource } from "@/lib/welcome/frames";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
@@ -41,6 +42,9 @@ export interface RenderComp {
   priceKind: PriceKind;
   /** ISO date behind the price (sold date / AVM date); null for a last-list. */
   priceDate: string | null;
+  /** Closed-spell length for a RECORDED sale (sold date − vendor list date, same
+   *  response, zero extra calls); null for estimates/last-list or missing history. */
+  soldInDays: number | null;
   /** Captured realtor.com detail URL for FUNCTIONAL links (email comp rows).
    *  Chat prose + compSources ignore it — citations stay domain-level. */
   sourceUrl: string | null;
@@ -298,10 +302,13 @@ export async function compsForAddress(address: string, deps: CompDeps = {}): Pro
     let price: number | null;
     let priceKind: PriceKind;
     let priceDate: string | null;
+    let soldInDays: number | null = null;
     if (sold) {
       price = sold.soldPrice;
       priceKind = "sold";
       priceDate = sold.soldDate;
+      soldInDays = daysBetweenIso(sold.listedDate ?? null, sold.soldDate);
+      if (soldInDays != null && soldInDays < 0) soldInDays = null;
     } else if (c.estimateValue != null) {
       price = c.estimateValue;
       priceKind = "estimate";
@@ -321,6 +328,7 @@ export async function compsForAddress(address: string, deps: CompDeps = {}): Pro
       price,
       priceKind,
       priceDate,
+      soldInDays,
       sourceUrl: c.sourceUrl ?? null,
     };
   });
@@ -389,7 +397,8 @@ function pricePhrase(c: RenderComp): string {
   if (c.price == null) return "price not available";
   if (c.priceKind === "sold") {
     const d = isoToMDY(c.priceDate);
-    return `sold ${usd(c.price)}${d ? ` on ${d}` : ""}`;
+    const spell = formatSoldSpell(c.soldInDays);
+    return `sold ${usd(c.price)}${d ? ` on ${d}` : ""}${spell ? ` · ${spell}` : ""}`;
   }
   if (c.priceKind === "estimate") return `estimated value ${usd(c.price)}`;
   return `last listed ${usd(c.price)}`;
