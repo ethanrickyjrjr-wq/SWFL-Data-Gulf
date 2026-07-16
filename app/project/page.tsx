@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { PageShell } from "@/components/PageShell";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient } from "@/utils/supabase/server";
@@ -14,7 +13,6 @@ import { NewProjectButton } from "./NewProjectButton";
 import { NewListingButton } from "./NewListingButton";
 import { ShowingPrepButton } from "./ShowingPrepButton";
 import { ProjectsCockpit } from "./_cockpit/ProjectsCockpit";
-import { EmptyLaunchpad } from "./_cockpit/EmptyLaunchpad";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,11 +20,10 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your projects — SWFL Data Gulf" };
 
 /**
- * The cockpit hub (spec 2026-07-16, supersedes the 07/03 control-center list):
- * grouped project list + selected-project panel in the shared cockpit chrome.
- * The quick-links row and page-topping campaign starters are gone — starters
- * live in the panel/empty state, Charts/Alerts/Search in the top nav, and
- * Contacts is a first-class panel block.
+ * The cockpit hub (fix brief 2026-07-16, supersedes the 07/03 control-center
+ * list): the SAME frame as every in-project page — rail (from the area
+ * layout), real tool pills, email-lab aside chrome — with the grouped project
+ * list in the center. Full-bleed like the [id] pages; no PageShell.
  */
 export default async function ProjectListPage() {
   const supabase = createClient(await cookies());
@@ -89,30 +86,23 @@ export default async function ProjectListPage() {
   const defaultSelectedId = rows[0]?.id ?? null;
 
   return (
-    <PageShell width="wide">
+    <>
       {/* Migrates an anonymous localStorage draft into a saved project on arrival. */}
       <ImportDraftOnLogin />
-
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-white">Your projects</h1>
-        <div className="flex items-center gap-2">
-          <NewListingButton />
-          <ShowingPrepButton />
-          <NewProjectButton />
-        </div>
-      </div>
-
-      {projects.length === 0 ? (
-        <EmptyLaunchpad contactsCount={contactsCount} />
-      ) : (
-        <ProjectsCockpit
-          sections={sections}
-          defaultSelectedId={defaultSelectedId}
-          activeCount={activeCount}
-          upcoming={upcoming}
-          contactsCount={contactsCount}
-        />
-      )}
-    </PageShell>
+      <ProjectsCockpit
+        sections={sections}
+        defaultSelectedId={defaultSelectedId}
+        activeCount={activeCount}
+        upcoming={upcoming}
+        contactsCount={contactsCount}
+        actions={
+          <>
+            <NewListingButton />
+            <ShowingPrepButton />
+            <NewProjectButton />
+          </>
+        }
+      />
+    </>
   );
 }
