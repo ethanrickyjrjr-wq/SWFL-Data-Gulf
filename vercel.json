@@ -3,6 +3,10 @@
     {
       "path": "/api/mls/sync",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/nightly-chain-dispatch",
+      "schedule": "23 4 * * *"
     }
   ]
 }
