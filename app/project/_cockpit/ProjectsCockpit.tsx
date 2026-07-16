@@ -1,64 +1,66 @@
 // app/project/_cockpit/ProjectsCockpit.tsx
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { kindChipLabel, type Section } from "@/lib/project/group-projects";
-import { chipTime, type ScheduleChip } from "@/lib/project/schedule-chips";
+import { kindChipLabel, type CockpitProject } from "@/lib/project/group-projects";
+import {
+  chipTime,
+  type ScheduleChip,
+  type EmailScheduleRow,
+  type SocialScheduleRow,
+} from "@/lib/project/schedule-chips";
 import { projectEntry } from "@/lib/project/tool-tabs";
 import { promptsForPage } from "@/lib/briefcase/visits";
+import type { CampaignStats } from "@/lib/email/campaign-stats";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 import { BriefcasePanel } from "@/components/briefcase/BriefcasePanel";
 import { BriefcaseChat } from "@/components/briefcase/BriefcaseChat";
 import { ToolSwitcher } from "../[id]/ToolSwitcher";
-import { ConfirmDeleteProject } from "./ConfirmDeleteProject";
+import { useSelectedProject } from "../SelectedProjectContext";
 import { EmptyLaunchpad } from "./EmptyLaunchpad";
+import { CalendarCard } from "./CalendarCard";
+import { CampaignsCard } from "./CampaignsCard";
+import { SelectedProjectCard } from "./SelectedProjectCard";
 
 /**
- * The hub cockpit (fix brief 2026-07-16): the SAME room as every in-project
- * page — real ToolSwitcher pills on top (aimed at the selected project),
- * grouped project list in the center, and the email-lab aside chrome on the
- * right. Only the center differs from a project page; rail, pills, and aside
- * never jump. One action = one home: Email/Social/Watch/Overview live ONLY
- * in the pills, campaign starters ONLY in the aside, delete ONLY on the row ⋯.
- *
- * Selection: clicking a center row SELECTS it on desktop (pills + aside
- * retarget); on mobile (no split view) the tap navigates into the project.
+ * The hub center: MISSION CONTROL (spec 2026-07-16-hub-mission-control-design).
+ * The rail is the ONE project list now — the center is a dashboard: compact
+ * calendar (top-left, not the center of attention), the selected project's
+ * frozen preview with See/Edit/Update (top-right), campaigns full-width below
+ * carrying the visual weight. Same room as every in-project page — real
+ * ToolSwitcher pills on top (aimed at the selected project) and the email-lab
+ * aside chrome on the right; rail, pills, and aside never jump. One fact, one
+ * home: next-send facts live in the calendar card (the aside's old "Running
+ * now" section retired with this build); the center project list DIED here —
+ * selection comes from the rail via SelectedProjectContext.
  */
 export function ProjectsCockpit({
-  sections,
-  defaultSelectedId,
+  projects,
   activeCount,
-  upcoming,
+  chips,
+  emailSch,
+  socialSch,
   contactsCount,
+  stats,
+  initialPreview,
   actions,
 }: {
-  sections: Section[];
-  defaultSelectedId: string | null;
+  projects: CockpitProject[];
   activeCount: number;
-  upcoming: ScheduleChip[];
+  chips: ScheduleChip[];
+  emailSch: EmailScheduleRow[];
+  socialSch: SocialScheduleRow[];
   contactsCount: number;
+  stats: CampaignStats;
+  initialPreview: { did: string; html: string } | null;
   /** Top-strip actions (New listing / Showing prep / New project) — passed in
    *  from the server page so the buttons keep their one existing home. */
   actions?: ReactNode;
 }) {
-  const router = useRouter();
-  const [selectedId, setSelectedId] = useState<string | null>(defaultSelectedId);
-  const [confirm, setConfirm] = useState<{ id: string; name: string } | null>(null);
-
-  const all = sections.flatMap((s) => s.subgroups.flatMap((g) => g.projects));
-  // After a delete the stale id falls back to the most recent project.
-  const selected = all.find((p) => p.id === selectedId) ?? all[0] ?? null;
-  const empty = all.length === 0;
-
-  function rowClick(e: React.MouseEvent, id: string) {
-    // Desktop split view: select in place. Below lg (aside stacked away): navigate.
-    if (window.matchMedia("(min-width: 1024px)").matches) {
-      e.preventDefault();
-      setSelectedId(id);
-    }
-  }
+  const sel = useSelectedProject();
+  const selected = projects.find((p) => p.id === sel?.selectedId) ?? projects[0] ?? null;
+  const empty = projects.length === 0;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -67,29 +69,17 @@ export function ProjectsCockpit({
       <ToolSwitcher id={selected?.id ?? null} lastDid={selected?.lastDid ?? null} />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[1fr_380px]">
-        {/* ══════════ CENTER: the project list — the only part that changes ══════════ */}
+        {/* ══════════ CENTER: mission control — the only part that changes ══════════ */}
         <main className="flex min-h-0 min-w-0 flex-col overflow-hidden">
           <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/8 px-4 py-2.5">
-            <h1 className="text-sm font-semibold text-white/80">Your projects</h1>
+            <h1 className="text-sm font-semibold text-white/80">Mission control</h1>
             <p className="text-[11px] text-white/45">
               {activeCount === 0 ? (
                 <>Nothing scheduled yet.</>
               ) : (
-                <>
-                  <span className="text-white/80">
-                    {activeCount} active {activeCount === 1 ? "send" : "sends"}
-                  </span>
-                  {upcoming[0] && (
-                    <>
-                      {" "}
-                      · next {upcoming[0].kind === "email" ? "✉" : "📣"}{" "}
-                      <Link href={upcoming[0].href} className="hover:text-gulf-teal">
-                        {upcoming[0].line}
-                        {chipTime(upcoming[0].nextAt) ? ` · ${chipTime(upcoming[0].nextAt)}` : ""}
-                      </Link>
-                    </>
-                  )}
-                </>
+                <span className="text-white/80">
+                  {activeCount} active {activeCount === 1 ? "send" : "sends"}
+                </span>
               )}
             </p>
             <div className="ml-auto flex items-center gap-2">{actions}</div>
@@ -99,69 +89,33 @@ export function ProjectsCockpit({
             {empty ? (
               <EmptyLaunchpad contactsCount={contactsCount} />
             ) : (
-              <div className="mx-auto w-full max-w-2xl">
-                {sections.map((section) => (
-                  <div key={section.key} className="mb-5">
-                    <p className="border-b border-white/10 pb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
-                      {section.label} <span className="text-gray-600">({section.count})</span>
-                    </p>
-                    {section.subgroups.map((g) => (
-                      <div key={g.city ?? "~none"}>
-                        {g.city && (
-                          <p className="mt-2 px-1 text-[10px] font-medium uppercase tracking-wide text-gray-600">
-                            {g.city}
-                          </p>
-                        )}
-                        <ul className="mt-1 flex flex-col gap-0.5">
-                          {g.projects.map((p) => {
-                            const active = p.id === selected?.id;
-                            return (
-                              <li key={p.id} className="flex min-w-0 items-center gap-0.5">
-                                <Link
-                                  href={projectEntry(p.id, p.lastDid)}
-                                  onClick={(e) => rowClick(e, p.id)}
-                                  aria-current={active ? "true" : undefined}
-                                  className={`min-w-0 flex-1 rounded-lg px-3 py-2 transition-colors ${
-                                    active
-                                      ? "bg-gulf-teal/15 text-white"
-                                      : "text-gray-300 hover:bg-white/5 hover:text-white"
-                                  }`}
-                                >
-                                  <span className="block text-sm font-medium">
-                                    {p.displayTitle}
-                                  </span>
-                                  <span className="mt-0.5 block text-[11px] text-gray-500">
-                                    {[
-                                      p.chips[0]
-                                        ? `${p.chips[0].kind === "email" ? "✉" : "📣"} ${
-                                            chipTime(p.chips[0].nextAt) ?? p.chips[0].status
-                                          }`
-                                        : null,
-                                      p.built > 0
-                                        ? `${p.built} ${p.built === 1 ? "email" : "emails"} built`
-                                        : `${p.itemCount} ${p.itemCount === 1 ? "item" : "items"}`,
-                                    ]
-                                      .filter(Boolean)
-                                      .join(" · ")}
-                                  </span>
-                                </Link>
-                                <button
-                                  type="button"
-                                  aria-label={`Delete ${p.displayTitle}`}
-                                  title="Delete project"
-                                  onClick={() => setConfirm({ id: p.id, name: p.displayTitle })}
-                                  className="rounded-full px-1.5 py-0.5 text-sm leading-none text-gray-500 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gulf-teal/70"
-                                >
-                                  ⋯
-                                </button>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                ))}
+              <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_1fr]">
+                  <CalendarCard
+                    emailSch={emailSch}
+                    socialSch={socialSch}
+                    chips={chips}
+                    scheduleHref={
+                      selected ? projectEntry(selected.id, selected.lastDid) : "/project"
+                    }
+                  />
+                  {/* Keyed by selection: a change REMOUNTS the card so its
+                      preview/update state resets without setState-in-effect. */}
+                  <SelectedProjectCard
+                    key={selected ? `${selected.id}:${selected.lastDid ?? ""}` : "none"}
+                    project={
+                      selected
+                        ? {
+                            id: selected.id,
+                            title: selected.displayTitle,
+                            lastDid: selected.lastDid,
+                          }
+                        : null
+                    }
+                    initialPreview={initialPreview}
+                  />
+                </div>
+                <CampaignsCard stats={stats} />
               </div>
             )}
           </div>
@@ -265,43 +219,9 @@ export function ProjectsCockpit({
                 </Link>
               </div>
             </div>
-
-            {upcoming.length > 0 && (
-              <div className="border-b border-white/8 px-4 pb-4 pt-4">
-                <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
-                  Running now
-                </p>
-                <ul className="flex flex-col gap-1">
-                  {upcoming.map((c) => (
-                    <li key={c.key}>
-                      <Link
-                        href={c.href}
-                        className="text-xs text-white/60 transition-colors hover:text-gulf-teal"
-                      >
-                        {c.kind === "email" ? "✉" : "📣"} {c.line}
-                        {chipTime(c.nextAt) ? ` · next ${chipTime(c.nextAt)}` : ""}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         </aside>
       </div>
-
-      {confirm && (
-        <ConfirmDeleteProject
-          projectId={confirm.id}
-          name={confirm.name}
-          onClose={() => setConfirm(null)}
-          onDeleted={() => {
-            if (selectedId === confirm.id) setSelectedId(null);
-            setConfirm(null);
-            router.refresh();
-          }}
-        />
-      )}
     </div>
   );
 }

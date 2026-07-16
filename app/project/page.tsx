@@ -2,12 +2,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient } from "@/utils/supabase/server";
-import { buildScheduleChips } from "@/lib/project/schedule-chips";
 import {
-  groupProjects,
-  toCockpitProjects,
-  type ProjectRowInput,
-} from "@/lib/project/group-projects";
+  buildScheduleChips,
+  type EmailScheduleRow,
+  type SocialScheduleRow,
+} from "@/lib/project/schedule-chips";
+import { toCockpitProjects, type ProjectRowInput } from "@/lib/project/group-projects";
+import { loadCampaignStats } from "@/lib/email/load-campaign-stats";
+import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
+import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { ImportDraftOnLogin } from "./_import/ImportDraftOnLogin";
 import { NewProjectButton } from "./NewProjectButton";
 import { NewListingButton } from "./NewListingButton";
@@ -20,10 +23,12 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your projects — SWFL Data Gulf" };
 
 /**
- * The cockpit hub (fix brief 2026-07-16, supersedes the 07/03 control-center
- * list): the SAME frame as every in-project page — rail (from the area
- * layout), real tool pills, email-lab aside chrome — with the grouped project
- * list in the center. Full-bleed like the [id] pages; no PageShell.
+ * The hub: MISSION CONTROL (spec 2026-07-16-hub-mission-control-design,
+ * supersedes the same-day cockpit's grouped center list). The rail (area
+ * layout) is the ONE project list; this page assembles the dashboard's data —
+ * schedules for the calendar, stored campaign stats, and the default
+ * selection's frozen preview — and hands it to the cockpit shell. Full-bleed
+ * like the [id] pages; no PageShell.
  */
 export default async function ProjectListPage() {
   const supabase = createClient(await cookies());
@@ -63,7 +68,7 @@ export default async function ProjectListPage() {
   const rows = (data as ProjectRowInput[] | null) ?? [];
   const contactsCount = contactsRes.count ?? 0;
 
-  const { chipsByProject, activeCount, upcoming } = buildScheduleChips(
+  const { chipsByProject, activeCount, allChips } = buildScheduleChips(
     emailSch ?? [],
     socialSch ?? [],
   );
@@ -81,20 +86,39 @@ export default async function ProjectListPage() {
     builtByProject,
     lastDidByProject,
   });
-  const sections = groupProjects(projects);
-  // Rows arrive updated_at desc, so rows[0] is the most recent project.
-  const defaultSelectedId = rows[0]?.id ?? null;
+
+  const stats = await loadCampaignStats(supabase, user.id);
+
+  // Default selection = most recent project (rows[0], same as the layout's
+  // provider initialId). Server-render its latest doc so the card paints
+  // without a fetch; selection changes re-fetch via preview-html.
+  let initialPreview: { did: string; html: string } | null = null;
+  const defaultDid = rows[0] ? (lastDidByProject.get(rows[0].id) ?? null) : null;
+  if (defaultDid) {
+    const { data: doc } = await supabase
+      .from("deliverables")
+      .select("doc")
+      .eq("id", defaultDid)
+      .maybeSingle();
+    const parsed = EmailDocSchema.safeParse(doc?.doc);
+    if (parsed.success) {
+      initialPreview = { did: defaultDid, html: await renderEmailDocHtml(parsed.data) };
+    }
+  }
 
   return (
     <>
       {/* Migrates an anonymous localStorage draft into a saved project on arrival. */}
       <ImportDraftOnLogin />
       <ProjectsCockpit
-        sections={sections}
-        defaultSelectedId={defaultSelectedId}
+        projects={projects}
         activeCount={activeCount}
-        upcoming={upcoming}
+        chips={allChips}
+        emailSch={(emailSch ?? []) as EmailScheduleRow[]}
+        socialSch={(socialSch ?? []) as SocialScheduleRow[]}
         contactsCount={contactsCount}
+        stats={stats}
+        initialPreview={initialPreview}
         actions={
           <>
             <NewListingButton />
