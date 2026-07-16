@@ -9,10 +9,15 @@ import os
 
 STEADYAPI_BASE = "https://api.steadyapi.com/v1/real-estate"
 
-# Sold-capture (Phase-2 Part A) paid-call budget, per pipeline invocation. Target ~500/mo: Lee + Collier
-# run on separate daily crons, so ~8/county-run (8 * 2 counties * 30d ~= 480/mo). Env-overridable for
-# tuning once the real departure-vs-recheck yield is observed. 0 disables the hook entirely.
-SOLD_CHECK_CAP = int(os.environ.get("SOLD_CHECK_CAP", "8"))
+# Sold-capture (Phase-2 Part A) paid-call budget, per pipeline invocation (one county per
+# nightly-chain leg, so this is per county-run). RAISED 8 → 40 on 07/16/2026, operator-approved,
+# sized from real run logs exactly as the Phase-2 handoff required ("size the cap from that real
+# number, not a guess"): at cap 8 the [sold] line showed dep=8/336 for Lee (run 29198998185,
+# 07/12 — 328 departures dropped in ONE run) and 8/121 Collier (07/11). The old ~500/mo target
+# was sized against a believed 10k/mo quota; the real quota is 50k/mo with ~22% used (dashboard
+# read 07/16/2026). 40 × 3 county-runs × 30d ≈ 3.6k calls/mo — drains Lee's backlog in ~2 weeks,
+# then keeps pace. Env-overridable for tuning. 0 disables the hook entirely.
+SOLD_CHECK_CAP = int(os.environ.get("SOLD_CHECK_CAP", "40"))
 
 # Neutral internal source identity (no vendor name in the table; the brain CITES the real source).
 API_SOURCE_NAME = "api_feed"
