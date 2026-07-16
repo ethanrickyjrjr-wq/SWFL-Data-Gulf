@@ -1,3 +1,24 @@
+## 2026-07-16 (Fable 5 · main) — hub mission-control PLAN written: spec reviewed against research + code, probes answered, 13 tasks
+
+Spec `2026-07-16-hub-mission-control-design.md` reviewed — its research base (round5
+automation-trust boundary, UX-sweep Granola-Brief/audit-trail) verified real and load-bearing;
+fresh crawl4ai pass on mission-control homes of successful companies (Stripe Dashboard Home:
+performance charts + surfaced notifications + customizable widgets; Shopify admin Home:
+real-time metrics + task reminders, every action click-through — both: overview +
+what-needs-attention, every card a door; Resend webhook event types re-verified live).
+RULE 0.5 probes answered the spec's mandated question: scheduled sends are Resend BROADCASTS
+(email_sends.broadcast_id, same deliverable re-rendered each occurrence) and write NO
+did-tagged email_events — only manual blasts do; campaign identity root =
+deliverables.campaign_key (lib/campaigns.ts) else solo did; Update seam = the cron doc lane
+(buildContentDoc + renderEmailDocHtml), forked with supersedes_id. Defect found + check
+opened: `deliverable_refresh_drops_blockcanvas_doc` (/refresh accepts block-canvas but
+assembleDeliverable drops `doc`). Plan committed `c0d2dd81`
+(docs/superpowers/plans/2026-07-16-hub-mission-control.md): 2 pure tested utils
+(schedule-calendar on computeNextRunAt; campaign-stats), update-doc + preview-html routes,
+selection context (rail drives the hub once the center list dies), 3 cards + drawer on
+ChartBlockView, Task 12 OPERATOR-GATED (broadcast engagement → email_events). NEXT: inline
+execution of the plan, Task 1.
+
 ## 2026-07-16 (Fable 5 · main) — seed capture-or-blank SHIPPED: every template click now captures its subject or starts blank by choice (unpushed)
 
 Operator hit New Project → Just Sold landing on the raw slot-rule skeleton ("shows rules for
