@@ -147,7 +147,10 @@ if (droppedTypeIds.size) {
         }
       }
     }
-    graph.edges.push(...newEdges);
+    // No spread here: newEdges can be tens of thousands of bridge edges and
+    // push(...arr) passes each as a call argument — RangeError on CI (first
+    // seen run 29515671837, 68k-edge graph).
+    for (const e of newEdges) graph.edges.push(e);
   }
 }
 
