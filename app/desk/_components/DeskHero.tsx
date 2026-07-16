@@ -190,6 +190,27 @@ export function DeskHero({ hero }: { hero: HeroData }) {
     return [lo - pad, hi + pad];
   }, [picked, areaRows]);
 
+  /** THE HEADLINE FOLLOWS THE WINDOW. Every FIT OVER window ends at the latest
+   *  reading, so the big number already IS the picked window's end value — what
+   *  never moved was the delta beside it, stuck on the one-month change no
+   *  matter the window (operator call 07/16/2026: the numbers up top must
+   *  change with the zoom). When a window is picked, the delta becomes that
+   *  window's ACTUAL change — last held reading minus the first held reading
+   *  inside the window, never a fitted value. */
+  const windowDelta = useMemo(() => {
+    if (!picked || areaRows.length < 2) return null;
+    const first = areaRows[0];
+    const last = areaRows[areaRows.length - 1];
+    const delta = last.value - first.value;
+    const mdy = (d: Date) =>
+      `${String(d.getUTCMonth() + 1).padStart(2, "0")}/${String(d.getUTCDate()).padStart(2, "0")}/${d.getUTCFullYear()}`;
+    return {
+      delta,
+      display: `$${Math.abs(Math.round(delta)).toLocaleString("en-US")}`,
+      range: `${mdy(first.date)} → ${mdy(last.date)}`,
+    };
+  }, [picked, areaRows]);
+
   /** The two sentences on screen ALWAYS describe the fit on screen. Never one window's
    *  line under another window's claim. */
   const read = picked
@@ -272,7 +293,15 @@ export function DeskHero({ hero }: { hero: HeroData }) {
                 labelClassName="text-[11px] text-gray-500 font-mono"
               />
             </span>
-            {active.latest.direction && active.latest.direction !== "flat" ? (
+            {windowDelta ? (
+              <span
+                className="font-mono text-sm tabular-nums"
+                style={{ color: windowDelta.delta >= 0 ? UP : DOWN }}
+              >
+                {windowDelta.delta >= 0 ? "▲" : "▼"} {windowDelta.display}
+                <span className="ml-1 text-gray-500">across this window · {windowDelta.range}</span>
+              </span>
+            ) : active.latest.direction && active.latest.direction !== "flat" ? (
               <span
                 className="font-mono text-sm tabular-nums"
                 style={{ color: active.latest.direction === "up" ? UP : DOWN }}
