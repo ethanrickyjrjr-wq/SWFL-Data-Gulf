@@ -4,6 +4,7 @@
 // paid subscription ALWAYS wins; the pass only lifts "free". Consumers keep
 // receiving the same tier strings tierLimit/emailLabTierFor already handle.
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/database.types";
 
 const PAID = new Set(["starter", "growth", "pro"]);
 
@@ -18,7 +19,10 @@ export function pickEffectiveTier(
 }
 
 /** Service-role read. FAIL OPEN to the subscription tier (mirrors usage.ts). */
-export async function resolveEffectiveTier(db: SupabaseClient, userId: string): Promise<string> {
+export async function resolveEffectiveTier(
+  db: SupabaseClient<Database>,
+  userId: string,
+): Promise<string> {
   let subTier: string | null = null;
   try {
     const { data } = await db
@@ -26,7 +30,7 @@ export async function resolveEffectiveTier(db: SupabaseClient, userId: string): 
       .select("tier")
       .eq("user_id", userId)
       .maybeSingle();
-    subTier = (data?.tier as string | null) ?? null;
+    subTier = data?.tier ?? null;
   } catch {
     /* fail open to free below */
   }
@@ -37,7 +41,7 @@ export async function resolveEffectiveTier(db: SupabaseClient, userId: string): 
       .select("tier, expires_at")
       .eq("user_id", userId)
       .maybeSingle();
-    pass = (data as { tier: string; expires_at: string } | null) ?? null;
+    pass = data ? { tier: data.tier, expires_at: data.expires_at } : null;
   } catch {
     /* pass lookup failure must never block */
   }
