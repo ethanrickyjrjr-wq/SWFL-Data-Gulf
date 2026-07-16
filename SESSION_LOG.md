@@ -18,6 +18,16 @@ post-timing). Checks opened: `insiders_issue001_distribution`, `beta_readiness_a
 earlier tonight `insiders_construction_yoy_series`, `news_capture_index_page_junk`). Left
 untouched: concurrent session's uncommitted `ingest/cadence_registry.yaml`.
 
+(3) Operator: "write a handoff for a new Fable 5" on the known how-far-off issues, priority =
+API-call resilience ("don't lose people to failed calls"), full audit tomorrow. Written:
+`docs/handoff/2026-07-16-failed-calls-and-readiness-handoff.md` — work list from the LIVE checks
+ledger (quota settle + throttled key, comps-client retry/degrade [grep-verified: zero retry in
+lib/listings/steadyapi.ts], scheduled-scan 429 retry, county-seed call economy, 3 data-loss
+fixes, domain-verify UI last), with an explicit COLLISION MAP fencing off the round-5 synthesis
+build sequence (d8931b10), the marketing/Insiders lane, and the live uncommitted
+market_heat_swfl/cadence_registry edits. Full audit stays under `beta_readiness_and_offer`
+(tomorrow, operator present); the handoff session feeds it a quota+burn findings file.
+
 ## 2026-07-16 (Sonnet 5 · main) — round-5 synthesis spec: cross-read 4 other parallel sessions' SteadyAPI sweeps, dependency-mapped + sequenced, 13 new checks opened.
 
 Operator: "git ignore and spec." The gitignore half was a false alarm — a concurrent session's
