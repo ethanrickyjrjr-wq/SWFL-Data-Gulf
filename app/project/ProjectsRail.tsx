@@ -1,3 +1,4 @@
+// app/project/ProjectsRail.tsx
 "use client";
 
 import { useState } from "react";
@@ -5,34 +6,25 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { projectHome } from "@/lib/project/tool-tabs";
 import { openDoc } from "@/lib/lab-entry/destination";
+import type { Section } from "@/lib/project/group-projects";
 import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
-
-export interface RailProject {
-  id: string;
-  title: string | null;
-  itemCount: number;
-  /** Most-recent block-canvas deliverable, if any — reopens the SAME saved doc
-   *  instead of a fresh/blank one (see app/project/layout.tsx). */
-  lastDid: string | null;
-}
+import { ConfirmDeleteProject } from "./_cockpit/ConfirmDeleteProject";
+import { RowMenu } from "./_cockpit/RowMenu";
 
 /**
- * The persistent left projects rail (Piece 1 §A). Each row is a real `/project/[id]`
- * link. Desktop-only; mobile navigates via the `/project` list page.
- *
- * Delete mode: the trash icon in the header puts every row into delete mode. Each row
- * shows an × button; clicking it opens a confirm modal. On confirm, the project is
- * deleted via `DELETE /api/projects/[id]` and the page refreshes (or redirects if the
- * deleted project was the currently-viewed one).
+ * The persistent left projects rail (Piece 1 §A), cockpit rework (spec
+ * 2026-07-16): grouped section headers, titles shown up to the city, a
+ * visible ⋯ menu per row (trash-mode toggle removed), 288px wide. Hidden on
+ * the hub itself — `/project`'s body IS the expanded list — and on mobile.
  */
-export function ProjectsRail({ projects }: { projects: RailProject[] }) {
+export function ProjectsRail({ sections }: { sections: Section[] }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [deleteMode, setDeleteMode] = useState(false);
-  const [confirmId, setConfirmId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<{ id: string; name: string } | null>(null);
   const [creating, setCreating] = useState(false);
+
+  // The hub body is the expanded grouped list — a second copy here is noise.
+  if (pathname === "/project") return null;
 
   async function handleCreate() {
     if (creating) return;
@@ -50,79 +42,17 @@ export function ProjectsRail({ projects }: { projects: RailProject[] }) {
     }
   }
 
-  const confirmProject = projects.find((p) => p.id === confirmId);
-  const confirmName = confirmProject?.title || "Untitled project";
-
-  async function handleDelete() {
-    if (!confirmId) return;
-    setDeleting(true);
-    setDeleteError(null);
-    try {
-      const res = await fetch(`/api/projects/${confirmId}`, { method: "DELETE" });
-      if (res.ok) {
-        const wasViewing = pathname.includes(confirmId);
-        setConfirmId(null);
-        setDeleteMode(false);
-        if (wasViewing) {
-          router.push("/project");
-        } else {
-          router.refresh();
-        }
-      } else {
-        setDeleteError("Delete failed — please try again.");
-      }
-    } catch {
-      setDeleteError("Network error — please try again.");
-    } finally {
-      setDeleting(false);
-    }
-  }
-
   return (
     <>
       <nav
         aria-label="Your projects"
-        className="hidden w-64 shrink-0 flex-col gap-1 border-r border-white/10 px-3 py-6 md:flex"
+        className="hidden w-72 shrink-0 flex-col gap-1 border-r border-white/10 px-3 py-6 md:flex"
       >
         <div className="mb-2 flex items-center justify-between px-1">
           <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
             Projects
           </span>
           <div className="flex items-center gap-2">
-            {deleteMode ? (
-              <button
-                type="button"
-                onClick={() => setDeleteMode(false)}
-                className="text-xs text-gray-400 hover:text-gray-200"
-              >
-                Done
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setDeleteMode(true)}
-                aria-label="Delete a project"
-                title="Delete a project"
-                className="text-gray-500 transition-colors hover:text-red-400"
-              >
-                {/* Trash icon */}
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
-                  <path
-                    d="M1.5 3.5h10M4.5 3.5V2.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M9.5 3.5v7a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-7"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M5.5 6v3M7.5 6v3"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            )}
             <Link href="/project" className="text-xs text-gray-400 hover:text-gulf-teal">
               All
             </Link>
@@ -139,93 +69,73 @@ export function ProjectsRail({ projects }: { projects: RailProject[] }) {
           </div>
         </div>
 
-        {projects.length === 0 ? (
+        {sections.length === 0 ? (
           <p className="px-1 text-xs text-gray-500">No projects yet.</p>
         ) : (
-          <ul className="flex flex-col gap-0.5 overflow-y-auto">
-            {projects.map((p) => {
-              // Open into the Email tool (projectHome); highlight on ANY of the
-              // project's tool pages, not just the landing one. A remembered
-              // did reopens the SAME saved doc instead of a fresh/blank one.
-              const href = p.lastDid ? openDoc(p.id, p.lastDid) : projectHome(p.id);
-              const active = pathname.startsWith(`/project/${p.id}`);
-              return (
-                <li key={p.id} className="flex items-center gap-1">
-                  <Link
-                    href={href}
-                    prefetch
-                    aria-current={active ? "page" : undefined}
-                    className={`flex flex-1 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-                      active
-                        ? "bg-gulf-teal/15 text-white"
-                        : "text-gray-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <span className="truncate">{p.title || "Untitled project"}</span>
-                    {!deleteMode && (
-                      <span className="shrink-0 text-[10px] text-gray-500">{p.itemCount}</span>
-                    )}
-                  </Link>
-                  {deleteMode && (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmId(p.id)}
-                      aria-label={`Delete ${p.title || "untitled project"}`}
-                      className="shrink-0 rounded-full p-1 text-sm text-red-400 transition-colors hover:bg-red-400/10"
-                    >
-                      ×
-                    </button>
+          <div className="flex flex-col gap-3 overflow-y-auto">
+            {sections.map((section) => (
+              <div key={section.key}>
+                <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-600">
+                  {section.label}
+                </p>
+                <ul className="flex flex-col gap-0.5">
+                  {section.subgroups.flatMap((g) =>
+                    g.projects.map((p) => {
+                      const href = p.lastDid ? openDoc(p.id, p.lastDid) : projectHome(p.id);
+                      const active = pathname.startsWith(`/project/${p.id}`);
+                      return (
+                        <li key={p.id} className="flex min-w-0 items-center gap-0.5">
+                          <Link
+                            href={href}
+                            prefetch
+                            aria-current={active ? "page" : undefined}
+                            className={`flex min-w-0 flex-1 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+                              active
+                                ? "bg-gulf-teal/15 text-white"
+                                : "text-gray-300 hover:bg-white/5 hover:text-white"
+                            }`}
+                          >
+                            <span className="truncate">{p.displayTitle}</span>
+                            <span className="shrink-0 text-[10px] text-gray-500">
+                              {p.itemCount}
+                            </span>
+                          </Link>
+                          <RowMenu
+                            label={`Actions for ${p.displayTitle}`}
+                            items={[
+                              { label: "Open", onSelect: () => router.push(href) },
+                              {
+                                label: "Delete",
+                                tone: "danger",
+                                onSelect: () => setConfirm({ id: p.id, name: p.displayTitle }),
+                              },
+                            ]}
+                          />
+                        </li>
+                      );
+                    }),
                   )}
-                </li>
-              );
-            })}
-          </ul>
+                </ul>
+              </div>
+            ))}
+          </div>
         )}
 
         <SendCeilingMeter variant="rail" />
       </nav>
 
-      {/* Confirm delete modal — fixed overlay, outside the nav so z-index stacks cleanly */}
-      {confirmId && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/60"
-            onClick={() => {
-              if (!deleting) {
-                setConfirmId(null);
-                setDeleteError(null);
-              }
-            }}
-          />
-          <div className="fixed left-1/2 top-1/2 z-50 w-72 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/15 bg-[#0d1e2b] p-5 shadow-2xl">
-            <p className="text-sm font-semibold text-white">Delete &ldquo;{confirmName}&rdquo;?</p>
-            <p className="mt-1 text-xs text-gray-400">
-              All items and deliverables will be permanently removed.
-            </p>
-            {deleteError && <p className="mt-2 text-xs text-red-400">{deleteError}</p>}
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={handleDelete}
-                className="rounded-full bg-red-500 px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
-              >
-                {deleting ? "Deleting…" : "Yes, delete"}
-              </button>
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={() => {
-                  setConfirmId(null);
-                  setDeleteError(null);
-                }}
-                className="rounded-full border border-white/10 px-4 py-1.5 text-xs text-gray-300 disabled:opacity-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </>
+      {confirm && (
+        <ConfirmDeleteProject
+          projectId={confirm.id}
+          name={confirm.name}
+          onClose={() => setConfirm(null)}
+          onDeleted={() => {
+            const wasViewing = pathname.includes(confirm.id);
+            setConfirm(null);
+            if (wasViewing) router.push("/project");
+            else router.refresh();
+          }}
+        />
       )}
     </>
   );

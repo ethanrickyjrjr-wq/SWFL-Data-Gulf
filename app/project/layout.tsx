@@ -1,8 +1,12 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
-import type { ProjectItem } from "@/lib/project/items";
 import { BRAIN_CATALOG } from "@/refinery/packs/catalog.mts";
-import { ProjectsRail, type RailProject } from "./ProjectsRail";
+import { ProjectsRail } from "./ProjectsRail";
+import {
+  groupProjects,
+  toCockpitProjects,
+  type ProjectRowInput,
+} from "@/lib/project/group-projects";
 import { ProjectSearch } from "@/components/project/ProjectSearch";
 import type { SearchEntry } from "./[id]/workspace/types";
 
@@ -32,7 +36,7 @@ export default async function ProjectAreaLayout({ children }: { children: React.
   const [{ data }, { data: delivRows }] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, title, items, updated_at")
+      .select("id, title, kind, items, updated_at")
       .order("updated_at", { ascending: false }),
     // Newest-first so the fold below keeps the first (= most recent) block-canvas
     // row per project — same rule the tool-switcher fix (layout.tsx under [id])
@@ -50,14 +54,24 @@ export default async function ProjectAreaLayout({ children }: { children: React.
     }
   }
 
-  const projects: RailProject[] = (
-    (data as { id: string; title: string | null; items: ProjectItem[] | null }[] | null) ?? []
-  ).map((p) => ({
-    id: p.id,
-    title: p.title,
-    itemCount: p.items?.length ?? 0,
-    lastDid: lastDidByProject.get(p.id) ?? null,
-  }));
+  // Rail sections: same type→city grouping as the hub (spec 2026-07-16 §3).
+  // Only project_id is read from the schedules — the rail needs "has a
+  // schedule" for the Campaigns section, not the chip text.
+  const [{ data: emailIds }, { data: socialIds }] = await Promise.all([
+    supabase.from("email_schedules").select("project_id").in("status", ["active", "paused"]),
+    supabase.from("social_schedules").select("project_id").in("status", ["active", "paused"]),
+  ]);
+  const scheduledIds = new Set<string>(
+    [...(emailIds ?? []), ...(socialIds ?? [])]
+      .map((r) => r.project_id as string | null)
+      .filter((x): x is string => !!x),
+  );
+  const sections = groupProjects(
+    toCockpitProjects((data as ProjectRowInput[] | null) ?? [], {
+      scheduledIds,
+      lastDidByProject,
+    }),
+  );
 
   // Bottom-bar search index (§F): reports from BRAIN_CATALOG + recent titled saved
   // charts. Built server-side so the client filters a plain array (no catalog bundle).
@@ -84,7 +98,7 @@ export default async function ProjectAreaLayout({ children }: { children: React.
 
   return (
     <div className="flex w-full">
-      <ProjectsRail projects={projects} />
+      <ProjectsRail sections={sections} />
       <div className="flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-1 flex-col">
         <div className="flex-1">{children}</div>
         <ProjectSearch entries={searchIndex} />
