@@ -76,6 +76,16 @@ describe("shouldRenderStandalone (exactly one visible pill)", () => {
     expect(shouldRenderStandalone("/embed/waitlist", false)).toBe(false);
     expect(shouldRenderStandalone("/embed/cards/asking-rent", true)).toBe(false);
   });
+
+  it("SUPPRESSES on the projects hub — its cockpit aside docks the same assistant", () => {
+    expect(shouldRenderStandalone("/project", true)).toBe(false);
+    expect(shouldRenderStandalone("/project", false)).toBe(false);
+  });
+
+  it("keeps the floating pill on in-project pages (their aside is the builder AI)", () => {
+    expect(shouldRenderStandalone("/project/abc123/email-lab", true)).toBe(true);
+    expect(shouldRenderStandalone("/project/abc123", false)).toBe(true);
+  });
 });
 
 describe("shouldMountHighlighter (the selection-triggered twin — broader suppression)", () => {

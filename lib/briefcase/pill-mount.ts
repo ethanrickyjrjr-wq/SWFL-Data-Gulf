@@ -54,6 +54,21 @@ export function isHighlighterFree(pathname: string | null): boolean {
 }
 
 /**
+ * Pages that DOCK the assistant inline in their own body — the projects hub renders
+ * BriefcasePanel/BriefcaseChat at the top of its cockpit aside (operator, 07/16/2026:
+ * the AI pill moves INTO the AI panel there). The floating pill suppresses on these
+ * so the page still carries exactly ONE Ask AI, and the discovery ticker re-words its
+ * "bottom-right" tip. EXACT paths, not prefixes: /project/[id]/* keeps the floating
+ * pill (its aside is the builder AI). Docking a new page = add it here only — the
+ * pill suppression, the ticker, and the coverage test all read this one list.
+ */
+export const ASSISTANT_DOCKED_PATHS = ["/project"] as const;
+
+export function isAssistantDocked(pathname: string | null): boolean {
+  return pathname !== null && (ASSISTANT_DOCKED_PATHS as readonly string[]).includes(pathname);
+}
+
+/**
  * The root standalone pill renders everywhere EXCEPT on /r/* while the highlighter
  * is enabled — there the BRIDGED pill (AppShell renders it when the /r/* page's
  * ReportHighlightBridge has published a report context, bridging the report thread)
@@ -71,6 +86,9 @@ export function shouldRenderStandalone(pathname: string, highlighterEnabled: boo
   if (pathname.startsWith("/p/") || pathname.startsWith("/embed/")) return false;
   // Clean reviewer/marketing pages keep nav + footer but no AI pill (no funnel pop).
   if (isAiChromeFree(pathname)) return false;
+  // Docked pages carry the assistant in their own body — the floating pill would
+  // be a second Ask AI on the one page (see ASSISTANT_DOCKED_PATHS above).
+  if (isAssistantDocked(pathname)) return false;
   const onReport = pathname.startsWith("/r/");
   return !(onReport && highlighterEnabled);
 }

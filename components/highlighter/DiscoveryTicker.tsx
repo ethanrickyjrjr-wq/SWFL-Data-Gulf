@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { isAssistantDocked } from "@/lib/briefcase/pill-mount";
 
 // Ambient, top-right "what you can do here" ticker. Deliberately subtle (low
 // opacity, small, dark glass) so it never bothers the reader — the operator's
@@ -31,7 +33,15 @@ const VISIBLE_MS = 4600;
 const FADE_MS = 350;
 
 export function DiscoveryTicker({ onReport }: { onReport: boolean }) {
-  const TIPS = onReport ? REPORT_TIPS : GENERIC_TIPS;
+  const pathname = usePathname();
+  // On assistant-docked pages (the projects hub) the pill isn't bottom-right —
+  // the same assistant lives in the cockpit's right panel, so the tip points there.
+  const docked = isAssistantDocked(pathname);
+  const TIPS = onReport
+    ? REPORT_TIPS
+    : docked
+      ? GENERIC_TIPS.map((t) => (t.startsWith("Open Ask AI") ? "Ask AI is in the right panel" : t))
+      : GENERIC_TIPS;
   const tipCount = TIPS.length;
   const [i, setI] = useState(0);
   const [visible, setVisible] = useState(true);

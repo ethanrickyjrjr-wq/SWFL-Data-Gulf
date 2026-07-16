@@ -7,6 +7,7 @@ import {
   shouldRenderStandalone,
   isAiChromeFree,
   isHighlighterFree,
+  ASSISTANT_DOCKED_PATHS,
 } from "./pill-mount";
 
 const REPO_ROOT = path.join(import.meta.dir, "..", "..");
@@ -34,6 +35,10 @@ const REPO_ROOT = path.join(import.meta.dir, "..", "..");
 const HIGHLIGHTER_CLEAN = ["/p/", "/embed/", "/login", "/auth"];
 // The pill is suppressed on only the white-label deliverable/iframe prefixes.
 const PILL_CLEAN = ["/p/", "/embed/"];
+// Pages that DOCK the assistant inline in their own body carry their one Ask AI in
+// the page instead of the floating pill — the shared list in pill-mount.ts is the
+// single authority (pill suppression + discovery ticker + this test all read it).
+const PILL_DOCKED: readonly string[] = ASSISTANT_DOCKED_PATHS;
 
 function matchesAny(p: string, prefixes: string[]): boolean {
   return prefixes.some((pre) => p.startsWith(pre));
@@ -94,15 +99,24 @@ test("EVERY page mounts exactly one pill, or zero on the white-label set — nev
   const wrong: string[] = [];
   for (const pg of PAGES) {
     // AppShell: bridged (report context) takes precedence; else standalone unless white-label.
+    // Docked pages carry the assistant in their own body instead of the floating pill.
     const bridged = pg.hasReportContext ? 1 : 0;
     const standalone = !pg.hasReportContext && shouldRenderStandalone(pg.path, false) ? 1 : 0;
-    const pillCount = bridged + standalone;
+    const docked = PILL_DOCKED.includes(pg.path) ? 1 : 0;
+    const pillCount = bridged + standalone + docked;
     const expected = matchesAny(pg.path, PILL_CLEAN) || isAiChromeFree(pg.path) ? 0 : 1;
     if (pillCount !== expected) {
       wrong.push(`${pg.rel} (${pg.path}): pillCount=${pillCount}, expected=${expected}`);
     }
   }
   expect(wrong).toEqual([]);
+});
+
+test("docked pages suppress the floating pill (declaration and mount logic agree)", () => {
+  for (const p of PILL_DOCKED) {
+    expect(shouldRenderStandalone(p, true)).toBe(false);
+    expect(shouldRenderStandalone(p, false)).toBe(false);
+  }
 });
 
 test("only /r/* pages publish a report context (bridge encoding is report-scoped)", () => {
