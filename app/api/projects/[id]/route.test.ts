@@ -38,6 +38,16 @@ mock.module("@/utils/supabase/server", () => ({
 }));
 mock.module("next/headers", () => ({ cookies: async () => ({}) }));
 
+// Fill-once §B: a branding PATCH also banks blank account fields upward. The
+// helper is unit-tested on its own (lib/brand/bank-brand-fields.test.ts); here
+// we only assert the route CALLS it with the branding payload + the authed user.
+const banked: { userId: string; patch: Record<string, unknown> }[] = [];
+mock.module("@/lib/brand/bank-brand-fields", () => ({
+  bankBrandFields: async (_s: unknown, userId: string, patch: Record<string, unknown>) => {
+    banked.push({ userId, patch });
+  },
+}));
+
 const { GET, PATCH, DELETE } = await import("./route");
 
 const params = Promise.resolve({ id: "proj-1" });
@@ -53,6 +63,7 @@ beforeEach(() => {
   scenario.user = { id: "user-a" };
   scenario.row = { id: "proj-1" };
   scenario.captured = null;
+  banked.length = 0;
 });
 
 test("GET unauthenticated → 401", async () => {
@@ -150,4 +161,23 @@ test("PATCH without subject fields leaves them untouched", async () => {
   expect(res.status).toBe(200);
   expect(scenario.captured && "subject_address" in scenario.captured).toBe(false);
   expect(scenario.captured && "subject_area" in scenario.captured).toBe(false);
+});
+
+// ── fill-once (spec 2026-07-16 §B): branding banks upward to the account ─────
+
+test("PATCH with branding banks the payload upward for the authed user", async () => {
+  const res = await PATCH(
+    req("PATCH", { branding: { agent_name: "Marisol Vega", brokerage: "Vega Realty" } }),
+    { params },
+  );
+  expect(res.status).toBe(200);
+  expect(banked).toHaveLength(1);
+  expect(banked[0].userId).toBe("user-a");
+  expect(banked[0].patch).toMatchObject({ agent_name: "Marisol Vega", brokerage: "Vega Realty" });
+});
+
+test("PATCH without branding never touches the bank", async () => {
+  const res = await PATCH(req("PATCH", { title: "renamed" }), { params });
+  expect(res.status).toBe(200);
+  expect(banked).toHaveLength(0);
 });

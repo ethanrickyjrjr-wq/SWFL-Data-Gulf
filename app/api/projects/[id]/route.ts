@@ -6,6 +6,7 @@ import { projectItemsSchema } from "@/lib/project/items";
 import { isValidPropertyUrl } from "@/lib/listings/artifact-link";
 import { markFeedSeen } from "@/lib/project/feed";
 import { logActivity } from "@/lib/project/activity";
+import { bankBrandFields } from "@/lib/brand/bank-brand-fields";
 
 export const runtime = "nodejs";
 
@@ -137,6 +138,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       summary: `Project renamed to "${body.title}"`,
       detail: { from: prevTitle, to: body.title },
     });
+  }
+  if ("branding" in body && body.branding && typeof body.branding === "object") {
+    // Fill-once (spec 2026-07-16 §B): a field typed in a project's Brand panel
+    // also fills the ACCOUNT profile's blanks, so no other surface asks again.
+    // Blank-only — a deliberate per-project difference never clobbers the account.
+    await bankBrandFields(supabase, user.id, body.branding as Record<string, unknown>);
   }
   if ("branding" in body && body.branding) {
     const b = body.branding as Record<string, unknown>;
