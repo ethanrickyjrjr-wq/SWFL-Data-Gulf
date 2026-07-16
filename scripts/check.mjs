@@ -101,6 +101,38 @@ export function sortByStaleness(rows) {
   });
 }
 
+// --- class axis: what a check IS, so counts stop mixing bugs with finished
+// work, banked ideas, and to-dos. NULL = untriaged (pre-class rows).
+export const CHECK_CLASSES = ["defect", "verify", "idea", "task"];
+
+/** Default class from the key's shape: `*_live_verify` is by construction a
+ *  built-and-awaiting-operator-verify check. Everything else is untriaged. */
+export function inferClass(checkKey) {
+  return typeof checkKey === "string" && checkKey.endsWith("_live_verify") ? "verify" : null;
+}
+
+/** Count open rows per class (null → untriaged). Pure; used by list + kickoff. */
+export function classBreakdown(rows) {
+  const counts = { defect: 0, verify: 0, idea: 0, task: 0, untriaged: 0 };
+  for (const r of rows ?? []) counts[r.class ?? "untriaged"] += 1;
+  return counts;
+}
+
+/** "384 open — 61 defect · 79 verify · …" (zero-count classes omitted). */
+export function formatClassBreakdown(rows) {
+  const counts = classBreakdown(rows);
+  const parts = Object.entries(counts)
+    .filter(([, n]) => n > 0)
+    .map(([k, n]) => `${n} ${k}`);
+  return `${(rows ?? []).length} open${parts.length ? ` — ${parts.join(" · ")}` : ""}`;
+}
+
+function parseClassFlag(raw) {
+  if (typeof raw !== "string" || !CHECK_CLASSES.includes(raw))
+    fail(`--class must be one of: ${CHECK_CLASSES.join(", ")}`);
+  return raw;
+}
+
 /** Split argv into positionals + a flag map (flags take the next token as value). */
 function parseArgs(args) {
   const positionals = [];
@@ -168,10 +200,15 @@ async function list(args = []) {
   }
   const nowIso = new Date().toISOString();
   const staleDays = flags.stale != null ? Number(flags.stale) : null;
+  console.log(`  ${formatClassBreakdown(rows)}`);
 
   let out = rows;
+  if (flags.class != null) {
+    const want = flags.class === "untriaged" ? null : parseClassFlag(flags.class);
+    out = out.filter((r) => (r.class ?? null) === want);
+  }
   if (staleDays != null) {
-    out = sortByStaleness(rows).filter(
+    out = sortByStaleness(out).filter(
       (r) => (ageDays(nowIso, r.updated_at ?? r.created_at) ?? 0) >= staleDays,
     );
   }
@@ -180,9 +217,11 @@ async function list(args = []) {
     const due = r.due_at ? ` (due ${fmtDate(r.due_at)})` : "";
     const age = ageDays(nowIso, r.updated_at ?? r.created_at);
     const ageLabel = age != null ? ` [${age}d untouched]` : "";
-    console.log(`  ${r.check_key}  ·  ${r.label}${due}${ageLabel}  [${r.project}]`);
+    const tag = r.class ? `${r.class}·${r.project}` : r.project;
+    console.log(`  ${r.check_key}  ·  ${r.label}${due}${ageLabel}  [${tag}]`);
   }
   if (staleDays != null && !out.length) console.log(`none untouched ≥${staleDays}d ✓`);
+  if (flags.class != null && !out.length) console.log(`none in class ${flags.class} ✓`);
 }
 
 async function open(args) {
@@ -212,6 +251,7 @@ async function open(args) {
     state: "open",
     resolution: flags.resolution ?? "manual",
     priority: flags.priority ? Number(flags.priority) : 0,
+    class: flags.class != null ? parseClassFlag(flags.class) : inferClass(checkKey),
   };
   if (flags.detail) row.detail = flags.detail;
   if (flags.due) row.due_at = flags.due;
@@ -223,7 +263,9 @@ async function open(args) {
     headers: { Prefer: "return=minimal" },
     body: JSON.stringify(row),
   });
-  console.log(`opened: ${checkKey} — ${label}${row.signal ? ` [signal: ${row.signal.type}]` : ""}`);
+  console.log(
+    `opened: ${checkKey} — ${label}${row.class ? ` [${row.class}]` : ""}${row.signal ? ` [signal: ${row.signal.type}]` : ""}`,
+  );
 }
 
 // Upsert-to-open. Unlike `open` (create-only — fails if the key exists in ANY
@@ -241,6 +283,7 @@ async function reopen(args) {
   if (existing.length) {
     // Clear the old proof too — a re-opened check's prior proof is stale.
     const patch = { state: "open", resolved_at: null, resolved_by: null, proof: null };
+    if (flags.class != null) patch.class = parseClassFlag(flags.class);
     if (flags.detail) patch.detail = flags.detail;
     await rest(`checks?check_key=eq.${encodeURIComponent(checkKey)}`, {
       method: "PATCH",
@@ -257,6 +300,7 @@ async function reopen(args) {
     state: "open",
     resolution: flags.resolution ?? "manual",
     priority: flags.priority ? Number(flags.priority) : 0,
+    class: flags.class != null ? parseClassFlag(flags.class) : inferClass(checkKey),
   };
   if (flags.detail) row.detail = flags.detail;
   if (flags.due) row.due_at = flags.due;
@@ -349,6 +393,7 @@ async function update(args) {
   if (flags.due != null) patch.due_at = flags.due;
   if (flags.priority != null) patch.priority = Number(flags.priority);
   if (flags.label != null) patch.label = flags.label;
+  if (flags.class != null) patch.class = parseClassFlag(flags.class);
   if (flags.signal != null) {
     // Attach a signal ONLY to a signal-less check. A set signal is immutable via
     // the CLI (the trigger enforces it); pre-check so we fail friendly, not 500.
@@ -362,7 +407,9 @@ async function update(args) {
   }
   const { updated_at: _unused, ...meaningful } = patch;
   if (!Object.keys(meaningful).length)
-    fail("update: nothing to change — pass --detail / --due / --priority / --label / --signal");
+    fail(
+      "update: nothing to change — pass --detail / --due / --priority / --label / --class / --signal",
+    );
   const updated = await rest(`checks?${col}=eq.${encodeURIComponent(handle)}`, {
     method: "PATCH",
     headers: { Prefer: "return=representation" },
@@ -394,7 +441,7 @@ async function mainCli() {
         break;
       default:
         console.log(
-          'usage:\n  check.mjs list [--stale N]  (N = min days untouched; omit to list everything)\n  check.mjs open <project> <check_key> "<label>" [--detail "..."] [--due YYYY-MM-DD] [--resolution manual] [--priority N] [--signal \'<json>\']\n  check.mjs reopen <project> <check_key> "<label>" [--detail "..."]  (idempotent: re-open a closed check or create it)\n  check.mjs update <check_key|id> [--detail "..."] [--due YYYY-MM-DD] [--priority N] [--label "..."] [--signal \'<json>\']\n  check.mjs close <check_key|id> [note] [--evidence "..."] [--drop]\n\n  --signal types: http_ok {url}, http_body {url,contains}, db_row_exists {table,filter}, db_fresh {table,column,max_age_days}\n  A check WITH a signal closes only when the CLI re-runs it live and it passes; a check WITHOUT one needs --evidence.',
+          'usage:\n  check.mjs list [--stale N] [--class defect|verify|idea|task|untriaged]  (N = min days untouched)\n  check.mjs open <project> <check_key> "<label>" [--class defect|verify|idea|task] [--detail "..."] [--due YYYY-MM-DD] [--resolution manual] [--priority N] [--signal \'<json>\']\n  check.mjs reopen <project> <check_key> "<label>" [--class ...] [--detail "..."]  (idempotent: re-open a closed check or create it)\n  check.mjs update <check_key|id> [--detail "..."] [--due YYYY-MM-DD] [--priority N] [--label "..."] [--class ...] [--signal \'<json>\']\n  check.mjs close <check_key|id> [note] [--evidence "..."] [--drop]\n\n  --class: defect = live problem · verify = built, awaiting operator live-verify · idea = banked candidate · task = to-do that isn\'t a defect\n  (`*_live_verify` keys default to verify automatically; everything else defaults to untriaged.)\n  --signal types: http_ok {url}, http_body {url,contains}, db_row_exists {table,filter}, db_fresh {table,column,max_age_days}\n  A check WITH a signal closes only when the CLI re-runs it live and it passes; a check WITHOUT one needs --evidence.',
         );
         process.exitCode = cmd ? 1 : 0;
     }

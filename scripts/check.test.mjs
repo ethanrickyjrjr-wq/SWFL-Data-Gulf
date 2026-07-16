@@ -11,6 +11,10 @@ import {
   parseSignalFlag,
   ageDays,
   sortByStaleness,
+  CHECK_CLASSES,
+  inferClass,
+  classBreakdown,
+  formatClassBreakdown,
 } from "./check.mjs";
 
 const NOW = "2026-07-05T12:00:00Z";
@@ -103,6 +107,41 @@ test("sortByStaleness — falls back to created_at when updated_at is null", () 
     sorted.map((r) => r.check_key),
     ["old", "recent"],
   );
+});
+
+// --- class axis: inference + breakdown (pure) ---
+test("inferClass — *_live_verify keys default to verify", () => {
+  assert.equal(inferClass("email_hero_mirror_live_verify"), "verify");
+});
+
+test("inferClass — everything else is untriaged (null)", () => {
+  assert.equal(inferClass("corridor_grain_bug_is_live_on_embed_and_brain"), null);
+  assert.equal(inferClass("live_verify_prefix_does_not_count"), null);
+  assert.equal(inferClass(undefined), null);
+});
+
+test("classBreakdown — counts per class, null → untriaged", () => {
+  const rows = [{ class: "defect" }, { class: "defect" }, { class: "verify" }, { class: null }, {}];
+  assert.deepEqual(classBreakdown(rows), {
+    defect: 2,
+    verify: 1,
+    idea: 0,
+    task: 0,
+    untriaged: 2,
+  });
+});
+
+test("formatClassBreakdown — total + only non-zero classes", () => {
+  const rows = [{ class: "defect" }, { class: "verify" }, { class: "verify" }, {}];
+  assert.equal(formatClassBreakdown(rows), "4 open — 1 defect · 2 verify · 1 untriaged");
+});
+
+test("formatClassBreakdown — empty ledger is just the count", () => {
+  assert.equal(formatClassBreakdown([]), "0 open");
+});
+
+test("CHECK_CLASSES — the four classes the DB constraint also enforces", () => {
+  assert.deepEqual(CHECK_CLASSES, ["defect", "verify", "idea", "task"]);
 });
 
 test("sortByStaleness — does not mutate the input array", () => {

@@ -1,3 +1,25 @@
+## 2026-07-16 (Fable 5 · main) — checks ledger gets a class axis: "388 open" was really 102 defects; kickoff headline was capped at 200 and lying
+
+Operator ("we suck at everything... 300 open checks"): the ledger count conflates four things, and
+the kickoff's `limit=200` fetch reported "200 open" forever once the ledger passed 200. Shipped:
+`class` column on public.checks (defect/verify/idea/task, migration applied + constraint), check.mjs
+`--class` on open/reopen/update + breakdown headline + filter (`*_live_verify` auto-defaults to
+verify — new-build.mjs needs no change), kickoff exact-count via `Prefer: count=exact` + class
+headline + defect-first ordering. All 388 open rows triaged (87 mechanical + 300 manual + 1 auto):
+**102 defect · 84 verify · 19 idea · 182 task**. Bulk PATCH guarded class=is.null (concurrent-session
+safe); verified no updated_at auto-bump so ages survive. Honest-close pass: 0 closed — all 7
+cron_incident_* workflows verified STILL RED at latest run (gh run list, 07/16); SteadyAPI retry
+fixes are at HEAD (b0a3ce2f) but undeployed, carried by steadyapi_failed_calls_post_deploy. 1 drop:
+sold_resolution_latlon_crosswalk_live_verify (never built, 6d84855c docs-only, superseded by
+sold_resolution_crosswalk_recheck). Found + flagged a real duplicate pair
+(per_unit_coverage_ledgers vs per-unit-coverage-ledgers, both 07/15) — merge candidate, not dropped
+blind. NEW: `docs/handoff/2026-07-16-verify-blitz.md` — all verify-class checks grouped into
+sittings (click-now-on-prod / after-next-push / operator-gated / awaiting-a-run / blocked-by-defect)
+with per-item close commands. 19 tests green (check.test.mjs), eslint clean, kickoff smoke shows the
+new headline live. NEXT: operator runs the Group-A blitz sitting (one pass over /desk, /email-lab/grid,
+homepage closes ~35); close checks_class_triage_live_verify when the next session's kickoff renders
+the defect-first headline.
+
 ## 2026-07-16 (Fable 5 · main) — /desk: price-cut + closed wire items link to Zillow; ZIP pressure scatter fills the Movers dead space
 
 Operator screenshot review: only NEWS was clickable on The Wire, and the Movers card had a big

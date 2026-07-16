@@ -73,13 +73,21 @@ function fmtDate(iso) {
 async function getOpenChecks(sbUrl, sbKey) {
   const headers = { apikey: sbKey };
   headers["Authorization"] = "Bearer " + sbKey;
+  // count=exact: the headline must be the TRUE total — the old limit=200 fetch
+  // reported "200 open" forever once the ledger passed 200. Order puts class
+  // first (alphabetically defect < idea < task < verify, nulls last) so the
+  // top-of-list lines are the bleeding, not whatever was due soonest.
+  headers["Prefer"] = "count=exact";
   try {
     const res = await fetch(
-      `${sbUrl}/rest/v1/checks?state=eq.open&select=check_key,label,resolution,due_at&order=due_at.asc.nullslast&limit=200`,
+      `${sbUrl}/rest/v1/checks?state=eq.open&select=check_key,label,resolution,due_at,class&order=class.asc.nullslast,due_at.asc.nullslast&limit=1000`,
       { headers },
     );
     if (!res.ok) return null;
-    return await res.json();
+    const rows = await res.json();
+    const range = res.headers.get("content-range") ?? "";
+    const total = Number(range.split("/")[1]);
+    return { rows, total: Number.isFinite(total) ? total : rows.length };
   } catch {
     return null;
   }
@@ -155,10 +163,40 @@ function summariseChecks(rows) {
   if (!rows || rows.length === 0) return "none open ✓";
   return rows
     .map((r) => {
+      const cls = r.class ? `${r.class}: ` : "";
       const due = r.due_at ? ` [${r.resolution}, due ${fmtDate(r.due_at)}]` : ` [${r.resolution}]`;
-      return r.label + due;
+      return cls + r.label + due;
     })
     .join("\n    · ");
+}
+
+// Class counts come from their own class-only fetch (tiny payload), NOT the
+// display page — the display page is capped at 200 and would undercount once
+// most rows are classified.
+async function getClassCounts(sbUrl, sbKey) {
+  const headers = { apikey: sbKey, Authorization: "Bearer " + sbKey };
+  try {
+    const res = await fetch(`${sbUrl}/rest/v1/checks?state=eq.open&select=class&limit=2000`, {
+      headers,
+    });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    const counts = {};
+    for (const r of rows)
+      counts[r.class ?? "untriaged"] = (counts[r.class ?? "untriaged"] ?? 0) + 1;
+    return counts;
+  } catch {
+    return null;
+  }
+}
+
+// "384 open — 61 defect · 79 verify · …" — the true total plus per-class split.
+function classHeadline(counts, total) {
+  if (!counts) return `${total} open`;
+  const parts = ["defect", "verify", "idea", "task", "untriaged"]
+    .filter((k) => counts[k])
+    .map((k) => `${counts[k]} ${k}`);
+  return `${total} open${parts.length ? ` — ${parts.join(" · ")}` : ""}`;
 }
 
 async function main() {
@@ -184,11 +222,15 @@ async function main() {
       parseTomlStr(secrets, "SUPABASE_SERVICE_KEY") ??
       parseTomlStr(secrets, "BRAINS_SUPABASE_SERVICE_KEY");
     if (sbUrl && sbKey) {
-      allCheckRows = await getOpenChecks(sbUrl, sbKey);
+      const [fetched, classCounts] = await Promise.all([
+        getOpenChecks(sbUrl, sbKey),
+        getClassCounts(sbUrl, sbKey),
+      ]);
+      allCheckRows = fetched?.rows ?? null;
       checksLine =
-        allCheckRows === null
+        fetched === null
           ? "(could not reach Supabase)"
-          : `${allCheckRows.length} open\n    · ${summariseChecks(allCheckRows.slice(0, 8))}`;
+          : `${classHeadline(classCounts, fetched.total)}\n    · ${summariseChecks(allCheckRows.slice(0, 8))}`;
     }
   } catch {
     checksLine = "(secrets read error)";
