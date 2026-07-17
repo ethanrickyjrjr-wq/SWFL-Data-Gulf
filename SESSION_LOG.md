@@ -1,3 +1,21 @@
+## 2026-07-16 (Fable 5 · main) — listing hero: FULL email thumbnails + copy rewritten to verified claims only
+
+Operator screenshot: ListingCampaignHero filmstrip cropped every capture to its top 80px
+(`h-20 object-cover object-top`) — "why show half of it??" — and the copy led with defensive
+"never invented" framing on a surface where the listing is the user's own. Rewrote both, claims
+verified against code BEFORE writing: (1) filmstrip now renders all five committed captures
+(1400×3108–4046) at natural aspect, uncropped, labels on top; (2) copy now sells what's real —
+fresh-at-build numbers (frozen-once semantics forbid "fresh at send"), the four REAL nudge
+triggers from lib/project/lifecycle-nudge.ts (goes live / leaves active market / sale recorded /
+comps due 14 days after launch), click→inbox alert (resend webhook), nothing-sends-unseen +
+on-time scheduled delivery (once-lane, at-most-once claim key), paste-your-description close.
+KILLED an overclaim the old copy shipped: "a price cut, back on the market — nudge you" — NO
+price-cut/relist nudge exists; test now tripwires `not.toContain("price cut")` plus build-time-
+freshness and uncropped-filmstrip guards (10 pass). Verified live on prod build :3100 via Chrome:
+full thumbnails render, Get started opens the Listing-address capture, Cancel clean. (First :3100
+serve hit a stale-chunk 404 — .next inconsistency, gone after clean rebuild; not a code issue.)
+NOT pushed — awaiting operator.
+
 ## 2026-07-16 (Fable 5 · main) — hub aside now REAL lab chrome + Project AI actually knows the selection
 
 Operator screenshots: hub aside led with a custom "Project AI / knows this project" header +

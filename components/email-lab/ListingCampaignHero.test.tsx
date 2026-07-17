@@ -45,7 +45,33 @@ describe("ListingCampaignHero", () => {
 
   it("names the real click-alert capability", () => {
     const html = renderToStaticMarkup(createElement(ListingCampaignHero, { subjectAddress: null }));
-    expect(html).toContain("real click on any piece alerts you directly");
+    expect(html).toContain("an alert lands in your inbox");
+  });
+
+  it("claims only the nudge triggers the decision core actually emits", () => {
+    const html = renderToStaticMarkup(createElement(ListingCampaignHero, { subjectAddress: null }));
+    // lib/project/lifecycle-nudge.ts: appeared / departed_holding / resolved_sold / time_elapsed.
+    expect(html).toContain("It goes live, it leaves the active market, the sale is recorded");
+    expect(html).toContain("two weeks after launch");
+    expect(html).not.toContain("price cut"); // no price-cut nudge exists — never claim one
+    expect(html).toContain("nothing fires on its own");
+  });
+
+  it("states build-time freshness, never send-time (scheduled sends are frozen)", () => {
+    const html = renderToStaticMarkup(createElement(ListingCampaignHero, { subjectAddress: null }));
+    expect(html).toContain("fresh at build");
+    expect(html).toContain("Nothing sends unseen");
+  });
+
+  it("asks for the one input we genuinely lack — the property description", () => {
+    const html = renderToStaticMarkup(createElement(ListingCampaignHero, { subjectAddress: null }));
+    expect(html).toContain("Paste your description into the builder");
+  });
+
+  it("renders the filmstrip captures uncropped — full email, natural aspect", () => {
+    const html = renderToStaticMarkup(createElement(ListingCampaignHero, { subjectAddress: null }));
+    expect(html).not.toContain("object-cover");
+    expect(html).not.toContain("object-top");
   });
 
   it("names socials as coming soon, with no dead link", () => {
