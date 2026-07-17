@@ -27,6 +27,13 @@ jobs:
       - name: Lint
         run: bunx eslint .
 
+      # Several bun:test suites launch a real browser (lib/pdf rasterize + the
+      # PDF/HTML visual-parity tests). `bun test` has no browser without this, so
+      # they failed with "Executable doesn't exist" and red-ed main. `chromium`
+      # pulls both the full browser and the headless shell the tests use.
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+
       - name: Test
         run: bun test
 

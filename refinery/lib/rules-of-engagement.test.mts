@@ -28,11 +28,12 @@ test("RULES_OF_ENGAGEMENT carries all seven numbered rules", () => {
   expect(RULES_OF_ENGAGEMENT).toContain("Arby's");
 });
 
-// Drift guard: the constant is a verbatim mirror in THREE human-facing files.
+// Drift guard: the constant is a verbatim mirror in the TWO full-reference docs.
 // If anyone edits one without updating the constant (or vice versa), this fails
-// — the four copies must never diverge. (CLAUDE.md was added here after it
-// silently drifted to a stale 5-rule copy that nothing tested.)
-const MIRRORS = [["docs", "consumption-contract.md"], ["THE-CONTRACT.md"], ["CLAUDE.md"]];
+// — the copies must never diverge. (CLAUDE.md was REMOVED here 07/17/2026: commit
+// 1def7125 replaced its verbatim block with a POINTER to the one root —
+// refinery/lib/rules-of-engagement.mts — so there is no longer a copy to drift.)
+const MIRRORS = [["docs", "consumption-contract.md"], ["THE-CONTRACT.md"]];
 for (const rel of MIRRORS) {
   test(`RULES_OF_ENGAGEMENT matches the lean block in ${rel.at(-1)}`, () => {
     const doc = readFileSync(join(import.meta.dir, "..", "..", ...rel), "utf-8").replace(

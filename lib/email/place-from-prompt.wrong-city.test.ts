@@ -14,15 +14,16 @@
 //
 // THE RULE THIS PINS: an unknown place must cost an OPEN SLOT, never a neighbouring city.
 // The gazetteer must be able to say "I do not know this place."
+//
+// UPDATE 07/17/2026: North Fort Myers was itself ADDED to the crosswalk on 07/16 (its own
+// USPS/GeoNames-sourced ZIPs 33903/33917/33918), so it now resolves to ITSELF — the better
+// fix than refusing it. The unknown-place rule is now pinned by the still-unheld examples
+// (East/North Naples, Bonita Beach, qualified Cape Coral); NFM moved to the DO-hold block.
 
 import { describe, expect, it } from "bun:test";
 import { zipFromPromptPlace } from "./place-from-prompt";
 
 describe("a place we do not hold resolves to NOTHING — never to its neighbour", () => {
-  it("North Fort Myers is NOT Fort Myers (a real, distinct Lee County community)", () => {
-    expect(zipFromPromptPlace("I farm North Fort Myers.")).toBeUndefined();
-  });
-
   it("East / North Naples are NOT Naples", () => {
     expect(zipFromPromptPlace("I farm East Naples.")).toBeUndefined();
     expect(zipFromPromptPlace("my farm area North Naples")).toBeUndefined();
@@ -48,6 +49,16 @@ describe("the places we DO hold still resolve — the guard must not eat the pro
 
     expect(zipFromPromptPlace("a weekly update for Fort Myers")?.place).toBe("Fort Myers");
     expect(zipFromPromptPlace("my farm area Naples")?.place).toBe("Naples");
+  });
+
+  it("North Fort Myers resolves to ITSELF, never to Fort Myers (added to the crosswalk 07/16/2026)", () => {
+    // The 07/13 wrong-city bug ("North Fort Myers" -> Fort Myers) was fixed by HOLDING the
+    // place, not by refusing it: it now carries its own USPS/GeoNames-sourced ZIPs. "Never
+    // its neighbour" is now the POSITIVE outcome here — its own 33903, never Fort Myers's 33901.
+    const nfm = zipFromPromptPlace("I farm North Fort Myers.");
+    expect(nfm?.place).toBe("North Fort Myers");
+    expect(nfm?.zips).toEqual(["33903", "33917", "33918"]);
+    expect(nfm?.zips).not.toContain("33901"); // Fort Myers's core ZIP — must never leak in
   });
 
   it("a MULTI-WORD known place still beats its own prefix", () => {

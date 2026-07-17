@@ -9,6 +9,25 @@ deliverable-playbook Part 10; full test coverage) had already reached main via a
 so a rebase from this tree patch-matched and skipped them. Pushed from the isolated worktree, not the
 shared main checkout. Also cleaned up two stale worktrees this session: `dcd` (already landed) and
 `desk-fix-isolate-2` (its months-of-supply desk chart is already live on main via a later commit).
+## 2026-07-17 (Opus 4.8 · main) — cleared stale + infra CI reds; Chromium install surfaces the real agent-hero parity bug
+
+Main's CI `build` job had been red 7+ runs straight (every push bypassing the required check). Triaged
+the actual failures on run 29615372323 — none caused by that run's diff:
+- `place-from-prompt.wrong-city.test` asserted "North Fort Myers" → undefined, but NFM was ADDED to the
+  gazetteer 07/16 with its own USPS/GeoNames-sourced ZIPs (33903/33917/33918). Moved the test to the
+  DO-hold block: it now resolves to itself, never Fort Myers's 33901. Code was right, test was stale.
+- `rules-of-engagement.test` still listed CLAUDE.md as a verbatim mirror, but commit 1def7125 replaced
+  CLAUDE.md's block with a POINTER to the one root. Dropped CLAUDE.md from MIRRORS (kept
+  consumption-contract.md + THE-CONTRACT.md, which still carry the verbatim block).
+- `ci.yml` ran `bun test` with no browser, so every lib/pdf rasterize + visual-parity test died on
+  "Executable doesn't exist". Added `bunx playwright install --with-deps chromium` (syntax verified live
+  vs playwright.dev) before the Test step.
+NFM + rules tests verified green locally. The Chromium install also SURFACES the one remaining red:
+pdf-html-visual-parity agent-hero Layer 1 (htmlRatio 2 vs pdfRatio 3.06, relDiff 0.53) — ambiguous
+between a real rendering bug (handoff 11df7ec8) and an env/font artifact (check
+pdf_visual_parity_test_red_local, LiberationSans missing locally). This is the FIRST CI run where those
+tests execute on Linux with a browser, so the run this push triggers resolves which. Left honest and
+visible, not skipped.
 
 ## 2026-07-17 (Opus 4.8 · main) — armed the nightly row gate (dropped --dry-run from assert_landed)
 
