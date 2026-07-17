@@ -21,7 +21,7 @@
 // interfere with a legitimate edit.
 
 import { readFileSync, existsSync } from "node:fs";
-import { resolve, sep } from "node:path";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractSourceScope } from "./lib/pipeline-scope.mjs";
 import { parseLedger } from "./lib/ledger-parse.mjs";
@@ -50,7 +50,14 @@ const RECIPE_FILENAME_RE = /^([a-z-]+)\.(?:ts|ledger\.md)$/;
 function absForwardSlashed(filePath) {
   if (typeof filePath !== "string" || filePath.length === 0) return null;
   try {
-    return resolve(process.cwd(), filePath).split(sep).join("/");
+    // Normalize backslashes to "/" UNCONDITIONALLY — never via the OS-specific
+    // `sep`. A git hook can receive a Windows-style path on a Linux runner (and
+    // vice versa); splitting on `sep` only touches the runtime OS's separator, so
+    // the other style's backslashes survive and the forward-slashed markers below
+    // never match. That passed on Windows dev boxes but failed on Linux CI —
+    // matchPipelineDir/matchRecipeUnit returned null for Windows-style inputs
+    // (07/17/2026).
+    return resolve(process.cwd(), filePath).replace(/\\/g, "/");
   } catch {
     return null;
   }

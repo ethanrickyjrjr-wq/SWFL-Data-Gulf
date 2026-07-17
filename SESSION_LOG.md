@@ -9,6 +9,18 @@ deliverable-playbook Part 10; full test coverage) had already reached main via a
 so a rebase from this tree patch-matched and skipped them. Pushed from the isolated worktree, not the
 shared main checkout. Also cleaned up two stale worktrees this session: `dcd` (already landed) and
 `desk-fix-isolate-2` (its months-of-supply desk chart is already live on main via a later commit).
+## 2026-07-17 (Opus 4.8 · main) — CI layer 2b: fixed a real cross-platform path bug in the push-coverage hook
+
+After the manifest regen, node:test was down to one failure that passed locally but failed on Linux CI
+(run 29617999161: 23 pass / 2 fail) — the two "Windows-style absolute path" cases of
+`.claude/hooks/push-touched-unit-coverage.mjs`. Root cause: `absForwardSlashed` normalized with
+`.split(sep).join("/")`, and `sep` is the runtime OS's separator — so on a Linux runner the backslashes
+in a Windows-style input survived and the forward-slashed markers (`/ingest/pipelines/`,
+`/lib/deliverable/recipes/`) never matched, returning null. A git hook can receive either slash style on
+either OS, so the normalization must be OS-agnostic: replaced with `.replace(/\\/g, "/")` and dropped the
+now-unused `sep` import. Verified with a Linux-input simulation (→ fred_g17 / price-reduced); Windows
+local test still 25/0. Real bug the cross-platform test correctly caught, not a flake.
+
 ## 2026-07-17 (Opus 4.8 · main) — CI layer 2: regenerated stale watch-manifest + watcher workflows
 
 Fixing the bun-test reds let the CI `build` job advance to the next step (`node --test` over
