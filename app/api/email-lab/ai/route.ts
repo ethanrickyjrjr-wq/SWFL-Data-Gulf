@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { createClient } from "@/utils/supabase/server";
 import { buildContentDoc, authorDoc, fetchLakeContext } from "@/lib/email/build-doc";
+import { checkBuildAllowance, recordBuild } from "@/lib/email/build-usage";
 import { toPanelItem, type MediaAssetRow } from "@/lib/email/media-assets";
 import type { LibraryAsset } from "@/lib/email/author-doc";
 import { resolveEmailModel } from "@/lib/email/model-router";
@@ -42,6 +43,23 @@ async function loadCaller(): Promise<{ assets: LibraryAsset[]; email?: string }>
 // The content-build pipeline lives in lib/email/build-doc.ts (the ONE root a script
 // or test can run identically). This route is a thin HTTP wrapper: block-canvas
 // docs go through buildContentDoc; the legacy token path stays here.
+
+/** Best-effort caller id for build metering ONLY (Task 8) — never blocks, never
+ *  throws. /email-lab/grid ships "Anonymous visitors build right here" (builds
+ *  are free), so this route is a deliberately mixed lane: a session cookie is
+ *  read the same optional way `loadCaller` already does above, and the quiet
+ *  free-tier daily guard only applies when a signed-in user is found. */
+async function meterUserId(): Promise<string | null> {
+  try {
+    const db = createClient(await cookies());
+    const {
+      data: { user },
+    } = await db.auth.getUser();
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
 
 // ── Legacy token mode (kept for the transition / structural templates) ───────
 function legacyTokenSystem(lakeContext?: string): string {
@@ -124,6 +142,26 @@ export async function POST(req: NextRequest) {
         isAuthor && body.useSavedLayout && body.recipeKey
           ? await loadUserLayout(body.recipeKey).catch(() => null)
           : null;
+
+      // Quiet free-tier daily guard (Task 8) — only the buildContentDoc
+      // (non-author, "fill the skeleton") lane is metered here per the brief's
+      // scope; authorDoc (paid-only "Build with AI") and the showing-prep
+      // branch above are untouched. Anonymous callers (no session cookie)
+      // stay unmetered — see meterUserId's doc comment.
+      let meteredUid: string | null = null;
+      if (!isAuthor) {
+        meteredUid = await meterUserId();
+        if (meteredUid) {
+          const allowance = await checkBuildAllowance(meteredUid);
+          if (!allowance.allowed) {
+            return NextResponse.json(
+              { error: "You've hit today's free build limit — it resets tomorrow." },
+              { status: 429 },
+            );
+          }
+        }
+      }
+
       const { httpStatus, payload } = isAuthor
         ? await authorDoc({
             prompt,
@@ -144,6 +182,8 @@ export async function POST(req: NextRequest) {
             mode: body.mode,
             chartType: body.chartType as ChartType | undefined,
           });
+      // Metering never blocks a build — fire-and-forget, swallow any DB error.
+      if (meteredUid) recordBuild(meteredUid).catch(() => {});
       return httpStatus
         ? NextResponse.json(payload, { status: httpStatus })
         : NextResponse.json(payload);

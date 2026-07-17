@@ -13,6 +13,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { buildContentDoc } from "@/lib/email/build-doc";
+import { checkBuildAllowance, recordBuild } from "@/lib/email/build-usage";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { deriveDocBuildArgs } from "@/lib/email/emaildoc-occurrence";
 import type { EmailDoc } from "@/lib/email/doc/types";
@@ -57,10 +58,23 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     scope_value: src.scope_value,
     subject_address: (proj?.subject_address as string | null) ?? null,
   });
+  // Quiet free-tier daily guard (Task 8) — builds are free, but the free tier
+  // caps daily volume; paid/pass tiers and a degraded tier-read are always
+  // allowed (lib/email/build-usage.ts).
+  const allowance = await checkBuildAllowance(user.id);
+  if (!allowance.allowed) {
+    return NextResponse.json(
+      { error: "You've hit today's free build limit — it resets tomorrow." },
+      { status: 429 },
+    );
+  }
+
   // Same mode the scheduler uses: content fill only, never a restyle; a fill
   // that doesn't apply ships the saved doc unchanged, never a blank.
   const result = await buildContentDoc({ prompt, rawDoc: parsed.data, scope, mode: "quality" });
   const freshDoc = (result.payload?.doc as EmailDoc | undefined) ?? parsed.data;
+  // Metering never blocks a build — fire-and-forget, swallow any DB error.
+  recordBuild(user.id).catch(() => {});
 
   const db = createServiceRoleClient();
   const newId = crypto.randomUUID();

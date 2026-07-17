@@ -14,6 +14,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { buildContentDoc, type BuildScope } from "@/lib/email/build-doc";
+import { checkBuildAllowance, recordBuild } from "@/lib/email/build-usage";
 import { buildWeek } from "@/lib/email/social-calendar/build-week";
 import { mondayOf } from "@/lib/email/social-calendar/week";
 import { defaultDoc } from "@/lib/email/doc/default-docs";
@@ -112,17 +113,34 @@ export async function POST(
 
   // ── Email side (the lab's auto-fill prompt, verbatim) ──────────────────────
   if (missing.email) {
-    const prompt = `Market spotlight email for ${scopeLabel} — fill in realistic market context and agent copy`;
-    try {
-      const { payload } = await buildContentDoc({ prompt, rawDoc: defaultDoc(), scope });
-      const did =
-        payload.applied === false || !payload.doc
-          ? null
-          : await insertMaterial(admin, id, user.id, payload.doc, prompt);
-      if (did) week.email = { did, state: "pending" };
-      else errors.email = true;
-    } catch {
+    // Quiet free-tier daily guard (Task 8) — this route already treats a
+    // build failure on the email side as a soft, partial-degrade (errors.email
+    // = true, socials still generate, response stays 200): a metering denial
+    // is handled the SAME way rather than the 429-the-whole-request shape used
+    // by the single-purpose build routes, since this endpoint bundles email +
+    // social into one response and a free-tier cap on the email side must not
+    // also block the unrelated social side.
+    const allowance = await checkBuildAllowance(user.id);
+    if (!allowance.allowed) {
       errors.email = true;
+    } else {
+      const prompt = `Market spotlight email for ${scopeLabel} — fill in realistic market context and agent copy`;
+      try {
+        const { payload } = await buildContentDoc({ prompt, rawDoc: defaultDoc(), scope });
+        const did =
+          payload.applied === false || !payload.doc
+            ? null
+            : await insertMaterial(admin, id, user.id, payload.doc, prompt);
+        if (did) {
+          week.email = { did, state: "pending" };
+          // Metering never blocks a build — fire-and-forget, swallow any DB error.
+          recordBuild(user.id).catch(() => {});
+        } else {
+          errors.email = true;
+        }
+      } catch {
+        errors.email = true;
+      }
     }
   }
 

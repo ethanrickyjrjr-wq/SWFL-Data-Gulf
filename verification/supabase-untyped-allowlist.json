@@ -18,6 +18,7 @@
   "lib/deliverable/recipes/coming-soon.ts",
   "lib/deliverable/recipes/review-reply.ts",
   "lib/desk/loaders.ts",
+  "lib/email/build-usage.ts",
   "lib/email/market-context.ts",
   "lib/email/usage.ts",
   "lib/landing/load-home-map-data.ts",
