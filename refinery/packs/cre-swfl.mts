@@ -39,6 +39,7 @@ import { submarketSlug } from "../lib/marketbeat-submarket-aliases.mts";
 import { resolvePlace, parentOf, metricSlug, type PlaceRecord } from "../lib/places-swfl.mts";
 import { displayNameFor } from "../lib/corridor-display.mts";
 import { makeBrainInputSource, type BrainInputNormalized } from "../sources/brain-input-source.mts";
+import { blsPpiSource, type BlsPpiNormalized } from "../sources/bls-ppi-source.mts";
 import { env } from "../config/env.mts";
 import {
   computeCorridorFactor,
@@ -70,6 +71,15 @@ let lastActiveListingFetchedAt: string | null = null;
 
 /** Local CRE context rows (Estero EDC + FMB planning; Wave 3). */
 let lastLocalCreContextRows: LocalCreContextNormalized[] = [];
+
+/**
+ * Stashed BLS PPI construction-cost indicators — populated by creCorpusSummary,
+ * consumed by outputProducer. National series (no per-corridor/per-submarket
+ * join needed, unlike MarketBeat) — each maps 1:1 onto an existing cre-swfl
+ * sector or trade-cost category via BLS_PPI_METRIC_MAP in outputProducer.
+ */
+let lastBlsPpiIndicators: BlsPpiNormalized[] = [];
+let lastBlsPpiFetchedAt: string | null = null;
 
 /** Stashed permits-swfl OUTPUT — populated by creCorpusSummary, consumed by outputProducer. */
 
@@ -704,6 +714,8 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   lastActiveListingRows = [];
   lastActiveListingFetchedAt = null;
   lastLocalCreContextRows = [];
+  lastBlsPpiIndicators = [];
+  lastBlsPpiFetchedAt = null;
 
   // Stash permits-swfl upstream OUTPUT for outputProducer (thin-pipe: read only
   // the distilled OUTPUT block, never the raw permit rows).
@@ -736,6 +748,14 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   lastLocalCreContextRows = localContextFragments.map(
     (f) => f.normalized as unknown as LocalCreContextNormalized,
   );
+
+  // Stash BLS PPI construction-cost fragments (Nonresidential Building
+  // Construction sector). National series, no per-corridor join needed.
+  const blsPpiFragments = allFragments.filter(
+    (f) => (f.normalized as { kind?: string } | null)?.kind === "bls-ppi-index",
+  );
+  lastBlsPpiIndicators = blsPpiFragments.map((f) => f.normalized as unknown as BlsPpiNormalized);
+  lastBlsPpiFetchedAt = blsPpiFragments[0]?.fetched_at ?? null;
 
   const corridors = allFragments
     .map((f) => f.normalized as unknown as CorridorNormalized)
@@ -1469,7 +1489,82 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
     });
   }
 
+  // --- BLS PPI construction-cost metrics (Nonresidential Building
+  // Construction sector, NAICS 236) ---------------------------------------
+  // Populated by creCorpusSummary from blsPpiSource into lastBlsPpiIndicators.
+  // Each series maps 1:1 onto an existing cre-swfl sector (industrial/
+  // warehouse -> industrial audience, office -> office, health care ->
+  // medical_office) or stands alone as a nonresidential trade-cost input
+  // (concrete/roofing/electrical/plumbing-HVAC) — never blended into a
+  // composite (this pack's zero-cross-sector-blending rule, 2026-06-05/
+  // 2026-06-08). 236222 (school) is ingested but deliberately NOT surfaced —
+  // no cre-swfl sector maps to institutional/public construction; tracked via
+  // check bls_ppi_school_series_no_consumer. 236400/236500/2381MR are
+  // aggregate rollups of series already shown individually above and are also
+  // not separately surfaced (would double-count).
+  const BLS_PPI_METRIC_MAP: Record<string, { metric: string; label: string }> = {
+    PCU236211236211: {
+      metric: "construction_cost_ppi_industrial",
+      label: "Construction cost — new industrial building (PPI)",
+    },
+    PCU236221236221: {
+      metric: "construction_cost_ppi_warehouse",
+      label: "Construction cost — new warehouse building (PPI)",
+    },
+    PCU236223236223: {
+      metric: "construction_cost_ppi_office",
+      label: "Construction cost — new office building (PPI)",
+    },
+    PCU236224236224: {
+      metric: "construction_cost_ppi_medical_office",
+      label: "Construction cost — new health care building (PPI)",
+    },
+    PCU23811X23811X: {
+      metric: "construction_cost_ppi_trade_concrete",
+      label: "Construction cost — concrete contractors, nonres. building work (PPI)",
+    },
+    PCU23816X23816X: {
+      metric: "construction_cost_ppi_trade_roofing",
+      label: "Construction cost — roofing contractors, nonres. building work (PPI)",
+    },
+    PCU23821X23821X: {
+      metric: "construction_cost_ppi_trade_electrical",
+      label: "Construction cost — electrical contractors, nonres. building work (PPI)",
+    },
+    PCU23822X23822X: {
+      metric: "construction_cost_ppi_trade_plumbing_hvac",
+      label: "Construction cost — plumbing/HVAC contractors, nonres. building work (PPI)",
+    },
+  };
+  const emittedBlsPpiSlugs: string[] = [];
+  for (const indicator of lastBlsPpiIndicators) {
+    const m = BLS_PPI_METRIC_MAP[indicator.series_id];
+    if (!m) continue; // 236222/236400/236500/2381MR intentionally excluded
+    key_metrics.push({
+      metric: m.metric,
+      value: indicator.value,
+      direction: indicator.direction,
+      label: m.label,
+      variable_type: "intensive",
+      units: "PPI index (not seasonally adjusted; base period varies by series)",
+      display_format: "raw",
+      source: {
+        url: `https://data.bls.gov/timeseries/${indicator.series_id}`,
+        fetched_at: lastBlsPpiFetchedAt ?? fetched_at,
+        tier: 1,
+        citation: `BLS PPI industry data for ${indicator.label} (series ${indicator.series_id}) — latest observation ${indicator.value} for period ${indicator.period}, ${indicator.direction} vs. ~6 periods prior.`,
+      },
+    });
+    emittedBlsPpiSlugs.push(m.metric);
+  }
+
   const vote = voteCreDirection(corridors);
+
+  if (emittedBlsPpiSlugs.length > 0) {
+    vote.caveats.push(
+      `Construction-cost PPI metrics (${emittedBlsPpiSlugs.join(", ")}) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required "stable" fallback) but BLS can revise recent observations within ~30 days of first publication.`,
+    );
+  }
 
   // Per-metric direction-confidence caveats. Only emitted for metrics that
   // ship a value (n > 0); a metric with no value also has no row in
@@ -1977,6 +2072,7 @@ export const creSwfl: PackDefinition = {
     localCreContextSource,
     makeBrainInputSource("permits-swfl"),
     makeBrainInputSource("corridor-pulse-swfl"),
+    blsPpiSource,
   ],
   input_brains: [
     { id: "permits-swfl", edge_type: "input" },

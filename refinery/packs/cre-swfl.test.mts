@@ -5,6 +5,7 @@ import type { BrainOutput, BrainOutputMetric } from "../types/brain-output.mts";
 import type { BrainInputNormalized } from "../sources/brain-input-source.mts";
 import type { MarketbeatSwflNormalized } from "../sources/marketbeat-swfl-source.mts";
 import type { CorridorNormalized } from "../sources/cre-source.mts";
+import type { BlsPpiNormalized } from "../sources/bls-ppi-source.mts";
 
 process.env["REFINERY_SOURCE"] = "fixture";
 
@@ -1033,4 +1034,182 @@ test("grain: fixture-driven SWFL + county medians are submarket-grain; null-subm
   const abs = has("absorption_sqft_median");
   assert.ok(abs, "expected absorption_sqft_median");
   assert.match(String(abs!.label), /corridors\)/);
+});
+
+// --- BLS PPI construction-cost metrics ------------------------------------
+
+function makeBlsPpiFragment(
+  series_id: string,
+  label: string,
+  value: number,
+  period: string,
+  direction: "rising" | "falling" | "stable",
+): RawFragment {
+  const norm: BlsPpiNormalized = {
+    kind: "bls-ppi-index",
+    series_id,
+    label,
+    value,
+    period,
+    direction,
+  };
+  return {
+    fragment_id: `bls-ppi:${series_id}`,
+    source_id: "bls_ppi_construction",
+    source_trust_tier: 1,
+    fetched_at: NOW,
+    raw: { series_id },
+    normalized: norm as unknown as Record<string, unknown>,
+  };
+}
+
+const BLS_PPI_TEST_FRAGMENTS: RawFragment[] = [
+  makeBlsPpiFragment(
+    "PCU236211236211",
+    "New industrial building construction",
+    205,
+    "2026-06",
+    "rising",
+  ),
+  makeBlsPpiFragment(
+    "PCU236221236221",
+    "New warehouse building construction",
+    205,
+    "2026-06",
+    "falling",
+  ),
+  makeBlsPpiFragment(
+    "PCU236223236223",
+    "New office building construction",
+    191,
+    "2026-06",
+    "stable",
+  ),
+  makeBlsPpiFragment(
+    "PCU236224236224",
+    "New health care building construction",
+    232,
+    "2026-06",
+    "rising",
+  ),
+  makeBlsPpiFragment(
+    "PCU23811X23811X",
+    "Concrete contractors, nonresidential building work",
+    186,
+    "2026-06",
+    "rising",
+  ),
+  makeBlsPpiFragment(
+    "PCU23816X23816X",
+    "Roofing contractors, nonresidential building work",
+    169,
+    "2026-06",
+    "falling",
+  ),
+  makeBlsPpiFragment(
+    "PCU23821X23821X",
+    "Electrical contractors, nonresidential building work",
+    161,
+    "2026-06",
+    "stable",
+  ),
+  makeBlsPpiFragment(
+    "PCU23822X23822X",
+    "Plumbing/HVAC contractors, nonresidential building work",
+    171,
+    "2026-06",
+    "rising",
+  ),
+  makeBlsPpiFragment(
+    "PCU236222236222",
+    "New school building construction",
+    198,
+    "2026-06",
+    "stable",
+  ),
+  makeBlsPpiFragment(
+    "PCU236400236400",
+    "New nonresidential building construction by contractor type/region",
+    200,
+    "2026-06",
+    "stable",
+  ),
+  makeBlsPpiFragment(
+    "PCU236500236500",
+    "New nonresidential building construction by region",
+    199,
+    "2026-06",
+    "stable",
+  ),
+  makeBlsPpiFragment(
+    "PCU2381MR2381MR",
+    "Nonresidential building maintenance & repair",
+    205,
+    "2026-06",
+    "stable",
+  ),
+];
+
+test("bls-ppi: all 8 mapped series emit their construction_cost_ppi_* metric with the right value + direction", () => {
+  creSwfl.corpusSummary!(BLS_PPI_TEST_FRAGMENTS);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const byMetric = new Map(result.key_metrics.map((m) => [m.metric, m]));
+
+  assert.equal(byMetric.get("construction_cost_ppi_industrial")?.value, 205);
+  assert.equal(byMetric.get("construction_cost_ppi_industrial")?.direction, "rising");
+  assert.equal(byMetric.get("construction_cost_ppi_warehouse")?.value, 205);
+  assert.equal(byMetric.get("construction_cost_ppi_warehouse")?.direction, "falling");
+  assert.equal(byMetric.get("construction_cost_ppi_office")?.value, 191);
+  assert.equal(byMetric.get("construction_cost_ppi_office")?.direction, "stable");
+  assert.equal(byMetric.get("construction_cost_ppi_medical_office")?.value, 232);
+  assert.equal(byMetric.get("construction_cost_ppi_medical_office")?.direction, "rising");
+  assert.equal(byMetric.get("construction_cost_ppi_trade_concrete")?.value, 186);
+  assert.equal(byMetric.get("construction_cost_ppi_trade_roofing")?.value, 169);
+  assert.equal(byMetric.get("construction_cost_ppi_trade_electrical")?.value, 161);
+  assert.equal(byMetric.get("construction_cost_ppi_trade_plumbing_hvac")?.value, 171);
+});
+
+test("bls-ppi: 236222 (school) and the 236400/236500/2381MR aggregates never surface as construction_cost_ppi_* metrics", () => {
+  creSwfl.corpusSummary!(BLS_PPI_TEST_FRAGMENTS);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const slugs = result.key_metrics.map((m) => m.metric);
+  assert.ok(!slugs.some((s) => s.includes("school")));
+  assert.equal(slugs.filter((s) => s.startsWith("construction_cost_ppi_")).length, 8);
+});
+
+test("bls-ppi: each emitted metric carries a source citation naming its own BLS series id", () => {
+  creSwfl.corpusSummary!(BLS_PPI_TEST_FRAGMENTS);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const industrial = result.key_metrics.find(
+    (m) => m.metric === "construction_cost_ppi_industrial",
+  );
+  assert.ok(industrial);
+  assert.ok(industrial!.source.citation.includes("PCU236211236211"));
+  assert.equal(industrial!.source.tier, 1);
+});
+
+test("bls-ppi: emitting any construction_cost_ppi_* metric fires a national-series disclosure caveat", () => {
+  creSwfl.corpusSummary!(BLS_PPI_TEST_FRAGMENTS);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  assert.ok(result.caveats.some((c) => /national BLS series/i.test(c)));
+});
+
+test("bls-ppi: no BLS PPI fragments → no construction_cost_ppi_* metrics, no disclosure caveat", () => {
+  creSwfl.corpusSummary!([]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  assert.equal(
+    result.key_metrics.filter((m) => m.metric.startsWith("construction_cost_ppi_")).length,
+    0,
+  );
+  assert.ok(!result.caveats.some((c) => /national BLS series/i.test(c)));
+});
+
+test("bls-ppi: singleton reset — a second run without BLS PPI fragments clears the prior run's metrics", () => {
+  creSwfl.corpusSummary!(BLS_PPI_TEST_FRAGMENTS);
+  const first = creSwfl.outputProducer!(minimalPackOutput());
+  assert.ok(first.key_metrics.some((m) => m.metric === "construction_cost_ppi_industrial"));
+
+  creSwfl.corpusSummary!([]);
+  const second = creSwfl.outputProducer!(minimalPackOutput());
+  assert.ok(!second.key_metrics.some((m) => m.metric.startsWith("construction_cost_ppi_")));
 });
