@@ -1,3 +1,31 @@
+## 2026-07-17 (Sonnet 5 · main) — CORRECTION to the entry below: real root cause was transcription drift, not fabrication; shipped the actual fix (ref-based citation)
+
+The entry directly below this one is wrong about WHY the SHAs didn't exist. I checked the exact
+strings the lint rejected (`cafc1aca`, `63c4b001`) via `git cat-file -e` + `gh api commits/<sha>` and
+found no match anywhere — true — but concluded "genuine fabrication" from that alone, without
+checking for near-misses. Mid-session, a parallel verification (surfaced as an operator message, then
+independently confirmed by me against full git history) found both are 1-2 hex chars off REAL
+commits: cited `63c4b001` vs actual `63c4b00d182387...`; cited `cafc1aca` vs actual
+`cafc1aacacdffb...`. Confirmed both exist via `git log --all | grep`. Also confirmed
+(`public.checks` REST query) that `cron_incident_chief_of_staff_nightly` had already been updated
+with this same corrected diagnosis at 2026-07-17T18:46:59Z, before I acted on the claim — verified
+independently, not trusted blind. So: the lint gate was never wrong (RULE 0.7 still worked — no bad
+citation ever posted), but my "genuine fabrication" framing and my first fix (a prompt instruction
+telling the model to "copy SHAs verbatim") were both insufficient — an LLM reliably retyping a 7-char
+hex string correctly after 23 tool-call turns is not a solved problem, prompt instructions don't fix
+transcription error rates.
+
+Shipped the real fix instead: `buildEvidencePack` (`scripts/chief-of-staff-lib.mjs`) now tags every
+commit with a short deterministic `ref` (c1, c2, ...); the reconciler agent cites `<ref>` instead of a
+SHA (workflow prompt updated); `lintBrief` validates refs against the pack (can't drift — it's a
+small integer, not 7 hex chars); a new `expandBriefRefs()` swaps refs back to real sha7 AFTER lint
+passes, and `chief-of-staff-lint.mjs` now overwrites the brief file with the expanded version before
+the "Post brief" step runs — so the posted GitHub issue still shows real, human-readable SHAs.
+`briefKickoffLines` (reads the POSTED/expanded issue body) untouched in behavior, still matches hex.
+21 tests green (`bun test scripts/chief-of-staff.test.mjs`), plus a manual CLI smoke test of
+lint.mjs's expand-and-overwrite. Next nightly run (~08:47 UTC 07/18) is the live test — first one in
+3 nights that should actually post.
+
 ## 2026-07-17 (Sonnet 5 · main) — chief-of-staff-nightly: 2-night-running brief rejection, real root cause found + fixed
 
 Operator asked "where is the morning brief" — none had posted since 07/15; the last two nightly

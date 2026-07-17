@@ -52,7 +52,12 @@ export function buildEvidencePack({ commits, checks, fullLogText, now = new Date
   return {
     generated_at: now.toISOString(),
     window_hours: 48,
-    commits,
+    // `ref` is a short deterministic handle (c1, c2, ...) the reconciler agent
+    // cites INSTEAD OF a SHA — hand-typed hex drifts after enough tool calls
+    // (confirmed 07/16 + 07/17: real commits, 1-2 transposed hex chars). A ref
+    // is expanded back to the real SHA by expandBriefRefs() after the lint
+    // gate passes, so the posted brief still shows real SHAs to a human.
+    commits: commits.map((c, i) => ({ ...c, ref: `c${i + 1}` })),
     checks: checks.map((r) => ({
       check_key: r.check_key,
       label: r.label,
@@ -72,7 +77,10 @@ const REQUIRED_SECTIONS = [
   "## Stale top 3",
   "## No evidence",
 ];
-const CANDIDATE_RE = /^- (\S+) — ([0-9a-f]{7,40}(?:, ?[0-9a-f]{7,40})*) — .+ — (HIGH|MEDIUM)$/;
+// Raw brief (pre-expansion): candidates cite `ref` tokens (c1, c2, ...) — never hex.
+const CANDIDATE_REF_RE = /^- (\S+) — (c\d+(?:, ?c\d+)*) — (.+) — (HIGH|MEDIUM)$/;
+// Posted brief (post-expansion): candidates carry real SHAs — what briefKickoffLines reads back.
+const CANDIDATE_SHA_RE = /^- (\S+) — ([0-9a-f]{7,40}(?:, ?[0-9a-f]{7,40})*) — .+ — (HIGH|MEDIUM)$/;
 const MAX_CANDIDATES = 15;
 
 function candidateSection(briefText) {
@@ -80,7 +88,7 @@ function candidateSection(briefText) {
   return m ? m[1].trim() : null;
 }
 
-/** Validate a drafted brief against the evidence pack. Deterministic, $0. */
+/** Validate a drafted (ref-based) brief against the evidence pack. Deterministic, $0. */
 export function lintBrief(briefText, pack) {
   const errors = [];
   for (const s of REQUIRED_SECTIONS) {
@@ -91,29 +99,46 @@ export function lintBrief(briefText, pack) {
     const lines = section.split("\n").filter((l) => l.startsWith("- "));
     if (lines.length > MAX_CANDIDATES)
       errors.push(`too many candidates: ${lines.length} > ${MAX_CANDIDATES}`);
+    const validRefs = new Set(pack.commits.map((c) => c.ref));
     for (const line of lines) {
-      const m = line.match(CANDIDATE_RE);
+      const m = line.match(CANDIDATE_REF_RE);
       if (!m) {
         errors.push(`malformed candidate line: ${line}`);
         continue;
       }
-      for (const sha of m[2].split(",").map((s) => s.trim())) {
-        if (!pack.commits.some((c) => c.sha.startsWith(sha))) {
-          errors.push(`cited SHA not in evidence pack: ${sha}`);
-        }
+      for (const ref of m[2].split(",").map((s) => s.trim())) {
+        if (!validRefs.has(ref)) errors.push(`cited ref not in evidence pack: ${ref}`);
       }
     }
   }
   return { ok: errors.length === 0, errors };
 }
 
-/** Top candidate lines for the session kickoff block. */
+/** Replace ref tokens (c1, c2, ...) with the real sha7 they point to. Runs only after lintBrief passes. */
+export function expandBriefRefs(briefText, pack) {
+  const sha7ByRef = new Map(pack.commits.map((c) => [c.ref, c.sha.slice(0, 7)]));
+  return String(briefText)
+    .split("\n")
+    .map((line) => {
+      const m = line.match(CANDIDATE_REF_RE);
+      if (!m) return line;
+      const [, key, refs, why, tier] = m;
+      const shas = refs
+        .split(",")
+        .map((r) => sha7ByRef.get(r.trim()) ?? r.trim())
+        .join(", ");
+      return `- ${key} — ${shas} — ${why} — ${tier}`;
+    })
+    .join("\n");
+}
+
+/** Top candidate lines for the session kickoff block (reads the POSTED, SHA-expanded issue body). */
 export function briefKickoffLines(briefText, { max = 5 } = {}) {
   const section = candidateSection(briefText);
   if (!section) return [];
   return section
     .split("\n")
-    .filter((l) => CANDIDATE_RE.test(l))
+    .filter((l) => CANDIDATE_SHA_RE.test(l))
     .slice(0, max);
 }
 

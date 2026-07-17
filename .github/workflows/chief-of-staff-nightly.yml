@@ -59,19 +59,10 @@ jobs:
             git log / git show / git diff or read files to confirm a match. You must
             NOT close checks, edit any other file, or push anything.
 
-            SHA DISCIPLINE: every SHA you write in the brief must be COPIED, character
-            for character, from the "sha" field of a commit object in evidence.json's
-            `commits` array — never typed from memory of a git log/show/diff you ran,
-            never abbreviated or reconstructed by hand. If a commit that matches a check
-            lives outside the 48h evidence pack (found via your own git log), you may
-            still describe the match in prose, but do NOT put its SHA on a candidate
-            line — a candidate's SHA is a hard proof token, not a citation. If the only
-            evidence for a check is outside the pack, put it in "No evidence" instead.
-
             Write ./chief-of-staff-brief.md with EXACTLY these four sections:
 
             ## Close candidates
-            - <check_key> — <sha7>[, <sha7>…] — <one-line why> — HIGH|MEDIUM
+            - <check_key> — <ref>[, <ref>…] — <one-line why> — HIGH|MEDIUM
 
             ## Never started
             - <check_key> — <one line>   (from live_verify_never_started; verify before listing)
@@ -83,8 +74,17 @@ jobs:
             <N> open checks had no matching work in the window.
 
             Hard rules:
-            - Every candidate cites at least one SHA that appears in evidence.json.
-              A deterministic lint rejects the brief otherwise — nothing posts.
+            - Each commit object in evidence.json's `commits` array carries a short
+              `ref` field (e.g. "c3"). A candidate cites that ref — NEVER a SHA typed
+              or reconstructed by hand. A deterministic step expands refs to real SHAs
+              after you're done, so hand-typed hex is both unnecessary and unverifiable
+              (it drifts after enough tool calls — confirmed two nights running).
+            - If a commit that matches a check was found via your own git log/show/diff
+              and is NOT one of the ref'd commits in evidence.json (i.e. outside the 48h
+              window), describe the match in prose but do not cite a ref for it — that
+              check belongs in "No evidence", not on a candidate line.
+            - A deterministic lint rejects the brief if any cited ref isn't in
+              evidence.json — nothing posts.
             - Max 15 candidates, ranked most-confident first.
             - HIGH = commit message names the check's work AND touched files match.
               MEDIUM = files match but the message is ambiguous. Anything weaker is

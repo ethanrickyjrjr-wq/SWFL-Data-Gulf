@@ -6,7 +6,12 @@ import {
   neverStartedLiveVerifies,
   buildEvidencePack,
 } from "./chief-of-staff-lib.mjs";
-import { lintBrief, briefKickoffLines, repoSlugFromRemoteUrl } from "./chief-of-staff-lib.mjs";
+import {
+  lintBrief,
+  expandBriefRefs,
+  briefKickoffLines,
+  repoSlugFromRemoteUrl,
+} from "./chief-of-staff-lib.mjs";
 
 const LOG = [
   "aaaa111\tfeat(zip-events): market-area alert event",
@@ -97,6 +102,7 @@ describe("buildEvidencePack", () => {
     });
     expect(pack.window_hours).toBe(48);
     expect(pack.commits).toHaveLength(2);
+    expect(pack.commits.map((c) => c.ref)).toEqual(["c1", "c2"]);
     expect(pack.checks).toHaveLength(3);
     expect(pack.checks[0].days_untouched).toBe(1);
     expect(pack.live_verify_never_started.length).toBeGreaterThan(0);
@@ -106,15 +112,15 @@ describe("buildEvidencePack", () => {
 
 const PACK = {
   commits: [
-    { sha: "aaaa111aaaa111aaaa111aaaa111aaaa111aaaa1", subject: "s", files: [] },
-    { sha: "bbbb222bbbb222bbbb222bbbb222bbbb222bbbb2", subject: "t", files: [] },
+    { sha: "aaaa111aaaa111aaaa111aaaa111aaaa111aaaa1", subject: "s", files: [], ref: "c1" },
+    { sha: "bbbb222bbbb222bbbb222bbbb222bbbb222bbbb2", subject: "t", files: [], ref: "c2" },
   ],
 };
 
 const GOOD = [
   "## Close candidates",
-  "- market_area_alerts_live_verify — aaaa111 — types+fixture committed — HIGH",
-  "- old_manual_check — bbbb222 — docs landed — MEDIUM",
+  "- market_area_alerts_live_verify — c1 — types+fixture committed — HIGH",
+  "- old_manual_check — c2 — docs landed — MEDIUM",
   "",
   "## Never started",
   "- phantom_build_live_verify",
@@ -130,18 +136,24 @@ describe("lintBrief", () => {
   test("accepts a well-formed brief", () => {
     expect(lintBrief(GOOD, PACK)).toEqual({ ok: true, errors: [] });
   });
-  test("rejects SHA not in the evidence pack", () => {
-    const bad = GOOD.replace("aaaa111", "deadbee");
+  test("rejects ref not in the evidence pack", () => {
+    const bad = GOOD.replace("— c1 —", "— c99 —");
     const r = lintBrief(bad, PACK);
     expect(r.ok).toBe(false);
-    expect(r.errors.join(" ")).toContain("deadbee");
+    expect(r.errors.join(" ")).toContain("c99");
+  });
+  test("rejects a hand-typed SHA instead of a ref (the 07/16+07/17 failure mode)", () => {
+    const bad = GOOD.replace("— c1 —", "— aaaa111 —");
+    const r = lintBrief(bad, PACK);
+    expect(r.ok).toBe(false);
+    expect(r.errors.join(" ")).toContain("malformed candidate line");
   });
   test("rejects a candidate line without HIGH/MEDIUM tier", () => {
     const bad = GOOD.replace(" — HIGH", "");
     expect(lintBrief(bad, PACK).ok).toBe(false);
   });
   test("rejects >15 candidates", () => {
-    const many = Array.from({ length: 16 }, (_, i) => `- k${i} — aaaa111 — why — HIGH`).join("\n");
+    const many = Array.from({ length: 16 }, (_, i) => `- k${i} — c1 — why — HIGH`).join("\n");
     const bad = GOOD.replace(/- market.*MEDIUM/s, many);
     const r = lintBrief(bad, PACK);
     expect(r.ok).toBe(false);
@@ -157,9 +169,30 @@ describe("lintBrief", () => {
   });
 });
 
+describe("expandBriefRefs", () => {
+  test("replaces refs with the real sha7 they point to", () => {
+    const expanded = expandBriefRefs(GOOD, PACK);
+    expect(expanded).toContain(
+      "- market_area_alerts_live_verify — aaaa111 — types+fixture committed — HIGH",
+    );
+    expect(expanded).toContain("- old_manual_check — bbbb222 — docs landed — MEDIUM");
+  });
+  test("leaves non-candidate lines untouched", () => {
+    const expanded = expandBriefRefs(GOOD, PACK);
+    expect(expanded).toContain("## Never started");
+    expect(expanded).toContain("- phantom_build_live_verify (39d)");
+  });
+  test("an unresolvable ref passes through unchanged (lint should already have caught it)", () => {
+    const withBadRef = GOOD.replace("— c1 —", "— c99 —");
+    expect(expandBriefRefs(withBadRef, PACK)).toContain("— c99 —");
+  });
+});
+
 describe("briefKickoffLines", () => {
+  // reads the POSTED issue body, i.e. after expandBriefRefs has run
+  const POSTED = expandBriefRefs(GOOD, PACK);
   test("returns up to max candidate lines", () => {
-    expect(briefKickoffLines(GOOD, { max: 1 })).toEqual([
+    expect(briefKickoffLines(POSTED, { max: 1 })).toEqual([
       "- market_area_alerts_live_verify — aaaa111 — types+fixture committed — HIGH",
     ]);
   });
