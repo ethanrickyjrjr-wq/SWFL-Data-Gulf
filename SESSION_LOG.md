@@ -1,3 +1,29 @@
+## 2026-07-17 (Opus 4.8 · main) — Back on Market read: Phase 1 shipped, Phases 1–2 specced + planned (landscape finding #7)
+
+Built the address-first "Back on the Market" read (landscape item 7 — buyers calling
+relisted-after-fallthrough homes "tainted," both sides). Brainstormed → spec → plan → executed
+Phase 1 (Lane 1, the ZIP read), all against verified code + live research (crawl4ai), not memory.
+
+Phase 1 shipped (d66521a0, 7eb93311, d161397e, 00f0efbe): `lib/back-on-market/{load-zip,national-frame}.ts`
+— reads the live Lee/Collier cancellation/relist/delist rates off `seller-stress-swfl`'s
+`seller_stress_by_zip` table (52 of ~55 core ZIPs scored, as-of 03/01/2026; national frame = Redfin
+13.6% May 2026, VERIFIED via crawl4ai of the /news/ page, not a search summary);
+`components/back-on-market/BackOnMarketRead.tsx` (buyer/seller toggle + provenance panel);
+`app/r/back-on-market/page.tsx` (address/ZIP-first route, empty-tolerant); + a no-invention guard
+(never the word "stigmatized" — legal term of art, FL 689.25; never a per-home reason). 12/12 tests
+green; `bunx next build` clean; `/r/back-on-market` compiles. Check `back_on_market_read_live_verify`
+stays open (operator-run screenshot).
+
+Boundary probed + honored: the state machine's `holding` = reason-unknown, so we never claim WHY a
+specific deal died. Lake probe (research §6) proved the per-home relist signal (`holding→active`) is
+real + fresh (5,579 events, latest ~07/15) but scan-flicker-contaminated and unmeasurable via the
+transition's frozen `days_in_prev_state` — so Phase 2 (planned, not built) is a bounded detector:
+stamp true off-market duration from `last_seen`, `days_off_market` column, ≥7-day floor. Phases 3–4
+(per-home overlay, "send it" deliverable) not yet planned.
+
+Docs: spec `2026-07-17-back-on-market-read-design.md`, plans `…-phase1.md` + `…-phase2.md`; research
+(gitignored) `docs/steadyapi-research/2026-07-17-back-on-market-surface-research.md`.
+
 ## 2026-07-17 (Sonnet 5 · main) — chief-of-staff ref-citation fix: live manual-dispatch run exposed a SECOND lint-gate bug, fixed
 
 Operator manually fired `workflow_dispatch` (run 29608096116) to live-test the ref-citation fix
