@@ -29,7 +29,7 @@ deliberately withholds the score from the seller it describes; it lives on the a
 is a live, deterministic 0–100 composite per ZIP (delistings rate leading, price-drop breadth,
 cancellation rate, drop depth, relisting), each figure cited to Redfin Data Center, scored vs a
 2019–2021 baseline. Latest served read: SWFL median 60.9/100 ("elevated"), 52 of 55 core ZIPs scored,
-data period 03/01/2026.
+data period March 2026 (labeled 2026-03-01, a Redfin rolling-3-month figure).
 
 But (a) that score only faces the seller in analyst voice at region grain (on `/r/housing-swfl`,
 "elevated at 61/100"), not their own area truth-first; (b) the market-timing signals a seller needs —
@@ -131,12 +131,14 @@ asset. Every input is sourced, live-fetched-and-cited, or required from the user
 
 ### Entry + chrome
 
-- **4th mode on the homepage bar** (`HeroBar`, operator-locked one-bar surface). Routes via the pure
-  `heroBarAction`: bare ZIP → `/r/should-i-sell/<zip>`; any place → `/r/should-i-sell?q=<place>`. The
-  thin landing resolves `?q=` via `resolveLocation` + `searchRoute` and redirects to the `[zip]`
-  permalink (out-of-scope → `OutOfScopePanel`, never a 404). Tab label / button / "gets" copy + the
-  hero `<h1>` (which currently promises three things and must grow to four) are the **operator's to
-  approve before ship**. Touches locked files: `HeroBar.tsx`, `lib/landing/hero-bar-action.ts`.
+- **Standalone route this build — NO new homepage-bar mode** (corrected 07/17 per the seller-stress
+  handoff + the operator-locked "one grammar, never a collage" homepage rule). Ship `/r/should-i-sell`
+  as a link-reachable route (like `/r/back-on-market` Phase 1), with its own thin `?q=` landing that
+  resolves via `resolveLocation` + `searchRoute` → the `[zip]` permalink (out-of-scope →
+  `OutOfScopePanel`, never a 404). Do NOT add a bespoke 4th `HeroBar` mode — two adjacent seller reads
+  with two front doors crowd the locked one-bar. The homepage entry-grammar (route via the EXISTING
+  "Market Report" mode, or ONE deliberate new seller-decision mode covering the whole product) is an
+  **operator decision, flagged not built** — `HeroBar.tsx` / `hero-bar-action.ts` stay untouched here.
 - **Report-family chrome, reused not reinvented:** `ReportShell`/`Header`/`Footer`/`SectionTitle`,
   `resolveZip`, `CitationList`, `asOfFromToken`, `ReportAi`. Public, indexable.
 - **Crawler-honest number:** the score + dollar figures render as real server-side numbers (the
@@ -148,8 +150,9 @@ asset. Every input is sourced, live-fetched-and-cited, or required from the user
 - Never "ZIP-level" — "your area" / "your market", name the place (`primaryPlace`); ZIP is the key.
 - Plain text; the only tables are the report stat cards, never markdown tables in prose.
 - Every figure cited; "SWFL Data Gulf" label, underlying source named (Redfin / county / comp helper).
-- The reading's currency is the **data period** (e.g. "Data through 03/01/2026"), refresh date shown as a
-  distinct secondary "last checked 07/12/2026" line — MM/DD/YYYY, stated once each, never the raw token.
+- The reading's currency is the **data period** shown as a month label ("Data through March 2026" — a
+  rolling-3-month figure, so a bare day like 03/01/2026 over-states precision), with the refresh date as
+  a distinct secondary "last checked 07/12/2026" line (MM/DD/YYYY). Never the raw freshness token.
 - No invented number anywhere; suppressed area + missing inputs = explicit copy, never a silent guess.
 - Truth-first: we do not sand off "elevated pressure" — the honesty is the differentiator.
 

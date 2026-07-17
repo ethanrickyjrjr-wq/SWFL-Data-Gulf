@@ -14,6 +14,7 @@
 // (lib/seller-stress/read.ts, never wired to a live page) — one place, not two, knows how
 // to turn this brain's output into a ZIP's stress read.
 import { loadParsedBrain } from "../fetch-brain";
+import { asOfFromToken } from "../project/as-of";
 import type { BrainOutputDirection } from "../../refinery/types/brain-output.mts";
 
 const REGION_STATE_LABEL: Record<BrainOutputDirection, string> = {
@@ -34,8 +35,23 @@ export interface BackOnMarketZip {
   stressScore: number | null;
   region: { direction: BrainOutputDirection; stateLabel: string; median: number } | null;
   area: { rank: { position: number; total: number }; vsMedian: "above" | "near" | "below" } | null;
+  /** The reading's CURRENCY — the Redfin data period, MM/DD/YYYY (e.g. "03/01/2026").
+   *  A rolling-monthly figure; surfaces should display it as a month label ("March
+   *  2026"), not a bare day (which over-states precision). */
   asOf: string;
   source: { label: string; url: string };
+  // ── Seller-facing additions (07/17/2026) — consumed by /r/should-i-sell's Section 1.
+  //    ADDITIVE ONLY: the region/area/rate fields above are unchanged. One read seam —
+  //    these ride the SAME parsed brain, no second parseBrainMarkdown of seller-stress-swfl.
+  /** Plain-English seller-pressure signals, leading signal (delistings) FIRST. */
+  drivers: { label: string; valuePct: number }[];
+  /** Seller-material caveats, substance-verbatim from the brain, internal brain
+   *  cross-references stripped (no system-noun leak): the ~50%-all-cash calibration note
+   *  (always) + the SB 4-D / condo-assessment note. */
+  sellerCaveats: string[];
+  /** When the read was last refreshed — the freshness token's date, MM/DD/YYYY (or null).
+   *  A SECONDARY line, distinct from `asOf` (the data period). */
+  refreshedAt: string | null;
 }
 
 function num(v: unknown): number | null {
@@ -46,6 +62,21 @@ function num(v: unknown): number | null {
 function asOfFrom(title: string, fetchedAt: string): string {
   const iso = title.match(/(\d{4})-(\d{2})-(\d{2})/) ?? fetchedAt.match(/(\d{4})-(\d{2})-(\d{2})/);
   return iso ? `${iso[2]}/${iso[3]}/${iso[1]}` : "";
+}
+
+/**
+ * A seller-material caveat, substance-only. The brain's caveats are analyst-authored and
+ * can carry an internal cross-reference (e.g. "…See `condo-sirs-swfl` for the condo read.")
+ * — a brain slug that would be a display-leak / system-noun violation in seller copy. This
+ * direct `output.caveats` read does NOT pass through the speaker's scrubBrainSlugs, so the
+ * internal cross-reference is stripped here and any stray backtick slug unwrapped.
+ */
+function scrubSellerCaveat(text: string): string {
+  return text
+    .replace(/\s*See\s+`[a-z0-9-]+`[^.]*\.?/gi, "") // drop "See `slug` …" cross-refs
+    .replace(/`([a-z0-9-]+)`/g, "$1") // safety: unwrap any remaining backtick slug
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 export async function loadBackOnMarketZip(
@@ -85,16 +116,48 @@ export async function loadBackOnMarketZip(
     area = { rank: { position, total: scored.length }, vsMedian };
   }
 
+  const cancellationRatePct = num(row.cells["cancellation_rate_pct"]);
+  const relistRatePct = num(row.cells["share_relisted_pct"]);
+  const delistRatePct = num(row.cells["share_delisted_pct"]);
+  const priceDropSharePct = num(row.cells["pct_active_with_drops"]);
+
+  // Plain-English seller-pressure signals — the composite's TOP 3, in its own weighting
+  // order: delistings (leading) → price-drop breadth → cancellations. (Drop depth and
+  // relistings are the lower-weight #4/#5 signals; relistRatePct stays a top-level field
+  // for the back-on-market surface but is not a headline seller driver here.)
+  const drivers = [
+    { label: "Delistings — homes pulled off the market", value: delistRatePct },
+    { label: "Price drops — share of active listings cutting price", value: priceDropSharePct },
+    { label: "Contract cancellations", value: cancellationRatePct },
+  ]
+    .filter((d): d is { label: string; value: number } => d.value != null)
+    .map((d) => ({ label: d.label, valuePct: d.value }));
+
+  // Seller-material caveats: the ~50%-all-cash calibration note (always) + the condo /
+  // SB 4-D assessment note. There is NO per-ZIP condo flag anywhere (seller-stress rows
+  // carry none, condo-sirs-swfl has no per-ZIP table), so gating the condo note on a
+  // fabricated classifier would invent data — and the note's own "in condo-heavy ZIPs"
+  // wording already conditions it. Relayed substance-verbatim, slugs stripped. The
+  // Hurricane-Ian event note and the suppression-count note are not seller-decision
+  // material here (suppression is surfaced as honest no-score copy by the consumer).
+  const sellerCaveats = (output?.caveats ?? [])
+    .filter((c) => /all-cash|SB 4-D|condo/i.test(c))
+    .map(scrubSellerCaveat)
+    .filter(Boolean);
+
   return {
     zip,
     place: deps.place ?? zip,
-    cancellationRatePct: num(row.cells["cancellation_rate_pct"]),
-    relistRatePct: num(row.cells["share_relisted_pct"]),
-    delistRatePct: num(row.cells["share_delisted_pct"]),
+    cancellationRatePct,
+    relistRatePct,
+    delistRatePct,
     stressScore,
     region,
     area,
     asOf: asOfFrom(table.title ?? "", table.source?.fetched_at ?? ""),
     source: { label: table.source?.citation ?? "Redfin Data Center", url: table.source?.url ?? "" },
+    drivers,
+    sellerCaveats,
+    refreshedAt: asOfFromToken(brain?.freshness_token),
   };
 }
