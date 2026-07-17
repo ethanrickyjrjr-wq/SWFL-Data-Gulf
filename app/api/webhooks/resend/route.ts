@@ -112,7 +112,16 @@ export async function POST(request: Request): Promise<Response> {
   // write happens later, from an authenticated session, via
   // POST /api/switch/apply-forward (see lib/switch/forward-handler.ts's
   // `applyForward`).
-  if (isSwitchInbound(event)) {
+  //
+  // FIX (final whole-branch review, must-fix #1): gate on event.type too, not
+  // just the recipient. `isSwitchInbound` only checks `data.to` -- an
+  // imported/legacy contact whose OWN address happens to be
+  // `switch@<domain>` (e.g. a real person's Gmail alias) generates
+  // email.bounced/complained/clicked events with that same `to`, which would
+  // otherwise early-return 200 HERE and skip the ma-engagement/suppression/
+  // click branches below that a bounce/complaint/click needs to reach. Only
+  // an actual inbound email (`email.received`) is a switch forward.
+  if (event.type === "email.received" && isSwitchInbound(event)) {
     try {
       const sdb = createServiceRoleClient();
       const switchResend = getMarketingResend();
