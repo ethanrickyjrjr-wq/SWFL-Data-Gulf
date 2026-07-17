@@ -1,3 +1,25 @@
+## 2026-07-17 (Sonnet 5 · main) — chief-of-staff ref-citation fix: live manual-dispatch run exposed a SECOND lint-gate bug, fixed
+
+Operator manually fired `workflow_dispatch` (run 29608096116) to live-test the ref-citation fix
+(previous entry, `4f2d5c83`) same-day instead of waiting for tomorrow's cron. Run succeeded and
+posted `Morning brief — 07/17/2026` (issue #129) — the original bug (invented/transposed SHAs) did
+NOT recur. But the posted issue showed raw internal ref tokens (`c3, c4`, `c9, c17...`) instead of
+real SHAs across every one of its ~12 candidate lines — `expandBriefRefs` never ran on them. Root
+cause: `lintBrief` (`scripts/chief-of-staff-lib.mjs`) filtered the candidate section to only lines
+starting with the literal `"- "` bullet marker BEFORE validating anything; tonight the model wrote
+every candidate line without that leading dash, so the filter reduced `lines` to zero, the
+ref-validation loop never ran, and lint reported "OK" having checked nothing — a fail-OPEN hole in a
+gate whose entire job is fail-closed (RULE 0.7). `expandBriefRefs` shares the same anchored regex, so
+it silently passed the same lines through unexpanded. Fixed: the candidate-line filter is now "any
+non-blank line, unless the whole section is exactly `(none)`" — a line that doesn't match the
+candidate format is now a hard `malformed candidate line` lint error instead of being silently
+dropped from validation. Added a regression test reproducing tonight's exact no-dash shape
+(`bun test scripts/chief-of-staff.test.mjs` = 22/0), plus a CLI smoke test confirming the fixed
+lint.mjs now rejects that shape (exit 1) and still correctly expands a well-formed brief. Issue #129
+stays live with the unexpanded refs — it self-supersedes on the next successful run (existing
+"Post brief" step logic), operator can also close it manually. Not yet pushed — flagging for operator
+go-ahead given this is the second live-discovered bug in the same automation today.
+
 ## 2026-07-17 (Sonnet 5 · main) — bls-ppi implementation plan written (4 tasks, ready to execute)
 
 `superpowers:writing-plans` against the approved design doc. Re-probed every touch point directly

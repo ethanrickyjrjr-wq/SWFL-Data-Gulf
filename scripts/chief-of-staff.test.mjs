@@ -167,6 +167,15 @@ describe("lintBrief", () => {
     const empty = GOOD.replace(/- market.*MEDIUM/s, "(none)");
     expect(lintBrief(empty, PACK).ok).toBe(true);
   });
+  test("rejects candidate lines missing the leading dash marker (07/17 manual-dispatch failure: lint silently skipped every line and reported OK)", () => {
+    const noDash = GOOD.replace(
+      "- market_area_alerts_live_verify — c1 — types+fixture committed — HIGH",
+      "market_area_alerts_live_verify — c1 — types+fixture committed — HIGH",
+    );
+    const r = lintBrief(noDash, PACK);
+    expect(r.ok).toBe(false);
+    expect(r.errors.join(" ")).toContain("malformed candidate line");
+  });
 });
 
 describe("expandBriefRefs", () => {

@@ -95,8 +95,14 @@ export function lintBrief(briefText, pack) {
     if (!String(briefText).includes(s)) errors.push(`missing section: ${s}`);
   }
   const section = candidateSection(briefText);
-  if (section != null) {
-    const lines = section.split("\n").filter((l) => l.startsWith("- "));
+  if (section != null && section !== "(none)") {
+    // Every non-blank line must match the candidate format — filtering to only
+    // "- "-prefixed lines here would silently DROP malformed lines from
+    // validation instead of rejecting them (07/17 manual-dispatch: the model
+    // wrote candidates without the leading dash; the old filter reduced them
+    // to zero lines, so the loop below never ran and lint reported OK on an
+    // unvalidated, unexpanded brief).
+    const lines = section.split("\n").filter((l) => l.trim().length > 0);
     if (lines.length > MAX_CANDIDATES)
       errors.push(`too many candidates: ${lines.length} > ${MAX_CANDIDATES}`);
     const validRefs = new Set(pack.commits.map((c) => c.ref));
