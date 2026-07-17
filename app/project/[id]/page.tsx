@@ -13,6 +13,7 @@ import { readRecentActivity } from "@/lib/project/activity";
 import { projectScopeSet } from "@/lib/project/project-scope";
 import { inferScopeFromItems } from "@/lib/project/derive-name";
 import { computeSignificantChanges, loadSignificanceRegistry } from "@/lib/signals/brain-snapshot";
+import { weekDids } from "@/lib/project/this-week";
 import { recordUseForClient } from "@/lib/highlighter/meter";
 import type { ScoredEventSummary } from "@/lib/signals/types";
 import { ProjectWorkspace } from "./ProjectWorkspace";
@@ -181,6 +182,12 @@ export default async function ProjectPage({
   // A content edit/refresh forks a new row that supersedes the old.
   const { heads: deliverables } = splitDeliverableVersions(allDeliverables);
 
+  // This Week's queue ids — the workspace excludes these from the materials
+  // library (queue inventory ≠ user-made materials). Computed here, not client-
+  // side: after a fresh generation the route persists ui_state BEFORE responding,
+  // so the router.refresh() re-run of this component always sees current ids.
+  const weekQueueDids = weekDids(project.ui_state?.this_week ?? null);
+
   // Active email schedules for the project (§D Emailing lane is schedule-driven).
   const { data: scheduleRows } = await supabase
     .from("email_schedules")
@@ -276,6 +283,7 @@ export default async function ProjectPage({
       significantChanges={significantChanges}
       activeEvents={activeEvents}
       recentActivity={recentActivityLines}
+      weekQueueDids={weekQueueDids}
     />
   );
 }

@@ -24,6 +24,7 @@ import type { ProjectItem } from "@/lib/project/items";
 import { recordUse } from "@/lib/highlighter/meter";
 import {
   missingSides,
+  staleQueueDids,
   weekIsCurrent,
   type ThisWeekSocial,
   type ThisWeekState,
@@ -74,7 +75,7 @@ export async function POST(
   // Ownership via owner-RLS'd projects select (materials-route pattern).
   const { data: project } = await db
     .from("projects")
-    .select("id, items, ui_state")
+    .select("id, items, ui_state, subject_address, subject_area")
     .eq("id", id)
     .maybeSingle();
   if (!project) return NextResponse.json({ error: "not found" }, { status: 404 });
@@ -92,6 +93,35 @@ export async function POST(
   }
 
   const items: ProjectItem[] = Array.isArray(project.items) ? project.items : [];
+  const admin = createServiceRoleClient();
+
+  // Rollover / force-regen housekeeping: the replaced queue's UNTOUCHED rows
+  // (pending/skipped) soft-trash so they never resurface as "materials".
+  // Approved/scheduled rows are kept — acting on a queue item graduates it
+  // into the library (and a schedule may reference the row).
+  const prior = uiState.this_week ?? null;
+  if (prior && (prior.week_of !== monday || body.force)) {
+    const stale = staleQueueDids(prior);
+    if (stale.length > 0) {
+      await admin
+        .from("deliverables")
+        .update({ deleted_at: new Date().toISOString() })
+        .in("id", stale)
+        .eq("project_id", id)
+        .is("deleted_at", null);
+    }
+  }
+
+  // Scope gate: an empty project (no filed items, no subject address/area) has
+  // nothing to build a week FROM — opening an untitled shell must never fire
+  // LLM spend or insert queue rows (operator, 07/16/2026). `skipped` tells the
+  // client this is benign (no retry chip); any current partial week still returns.
+  const hasScope =
+    items.length > 0 || !!project.subject_address?.trim() || !!project.subject_area?.trim();
+  if (!hasScope) {
+    return NextResponse.json({ week: existing, skipped: "no_scope" });
+  }
+
   const inferred = inferScopeFromItems(items);
   const scope: BuildScope = inferred.zip
     ? { kind: "zip", value: inferred.zip }
@@ -102,7 +132,6 @@ export async function POST(
     ? `${inferred.place}${inferred.zip ? ` ${inferred.zip}` : ""}`
     : (inferred.zip ?? "Southwest Florida");
 
-  const admin = createServiceRoleClient();
   const week: ThisWeekState = existing ?? {
     week_of: monday,
     generated_at: new Date().toISOString(),
@@ -146,26 +175,39 @@ export async function POST(
 
   // ── Social side (Generate-Week root) ───────────────────────────────────────
   if (missing.social) {
-    try {
-      const calendar = await buildWeek(scope, monday);
-      const social: ThisWeekSocial[] = [];
-      for (const post of calendar.posts) {
-        const did = await insertMaterial(admin, id, user.id, post.card, null);
-        if (did) {
-          social.push({
-            day: post.day,
-            did,
-            theme: post.theme,
-            caption: post.caption,
-            hashtags: post.hashtags,
-            state: "pending",
-          });
-        }
-      }
-      if (social.length > 0) week.social = social;
-      else errors.social = true;
-    } catch {
+    // Same quiet free-tier daily guard as the email side — buildWeek fires five
+    // model fills + a web refresh, so it must not run unmetered on every open.
+    // A denial degrades soft (errors.social), same shape as the email side.
+    const allowance = await checkBuildAllowance(user.id);
+    if (!allowance.allowed) {
       errors.social = true;
+    } else {
+      try {
+        const calendar = await buildWeek(scope, monday);
+        const social: ThisWeekSocial[] = [];
+        for (const post of calendar.posts) {
+          const did = await insertMaterial(admin, id, user.id, post.card, null);
+          if (did) {
+            social.push({
+              day: post.day,
+              did,
+              theme: post.theme,
+              caption: post.caption,
+              hashtags: post.hashtags,
+              state: "pending",
+            });
+          }
+        }
+        if (social.length > 0) {
+          week.social = social;
+          // One recorded build per week-generation side, mirroring the email side.
+          recordBuild(user.id).catch(() => {});
+        } else {
+          errors.social = true;
+        }
+      } catch {
+        errors.social = true;
+      }
     }
   }
 

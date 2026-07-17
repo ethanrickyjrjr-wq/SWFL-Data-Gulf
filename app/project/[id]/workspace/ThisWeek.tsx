@@ -30,6 +30,11 @@ interface Props {
   deliverables: DeliverableRow[];
   scopeKind: string | null;
   scopeValue: string | null;
+  /** False when the project has nothing to scope a week from (no items, no
+   *  subject address/area). Blocks the mount auto-POST — the server's scope
+   *  gate is the authority; this just skips a pointless request + spinner
+   *  blink on empty projects. Default true for older call sites. */
+  eligible?: boolean;
   /** Persists the whole bag key (ProjectWorkspace.patchUiState). */
   onWeekChange: (next: ThisWeekState) => Promise<boolean>;
 }
@@ -45,11 +50,19 @@ export function ThisWeek({
   deliverables,
   scopeKind,
   scopeValue,
+  eligible = true,
   onWeekChange,
 }: Props) {
   const router = useRouter();
   const [week, setWeek] = useState<ThisWeekState | null>(initialWeek);
-  const [generating, setGenerating] = useState(false);
+  // Mount-time truths, precomputed so the auto-fire effect never calls setState
+  // synchronously (react-hooks/set-state-in-effect is a hard error here): the
+  // spinner STARTS true when the mount request will run over an empty queue,
+  // instead of being flipped on inside the effect body.
+  const initialHasContent =
+    !!initialWeek && (initialWeek.email != null || initialWeek.social.length > 0);
+  const willAutoFire = eligible || initialWeek != null;
+  const [generating, setGenerating] = useState(willAutoFire && !initialHasContent);
   const [genError, setGenError] = useState(false);
   const [emailScheduleFor, setEmailScheduleFor] = useState<string | null>(null);
   const [socialScheduleFor, setSocialScheduleFor] = useState<ThisWeekSocial | null>(null);
@@ -57,27 +70,29 @@ export function ThisWeek({
   const [scheduleMsg, setScheduleMsg] = useState<string | null>(null);
   const firedRef = useRef(false); // strict-mode / remount double-fire guard
 
-  // ONE generation entry point, used by mount and retry. The SERVER owns
-  // week_of currency (once-per-week guard + partial-side retry live in the
-  // route), so the client always POSTs; a current, complete week comes back
-  // {cached:true} instantly and nothing changes visually.
-  function generate() {
-    const hadContent = !!week && (week.email != null || week.social.length > 0);
-    setGenError(false);
-    if (!hadContent) setGenerating(true); // never a blocking spinner over an existing queue
+  // The bare request — every setState here lives in async callbacks, so the
+  // mount effect may call this directly (set-state-in-effect stays clean). The
+  // SERVER owns week_of currency (once-per-week guard + partial-side retry live
+  // in the route), so the client always POSTs; a current, complete week comes
+  // back {cached:true} instantly and nothing changes visually.
+  function fireWeekRequest() {
     fetch(`/api/projects/${projectId}/week`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({}),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("week failed"))))
-      .then((data: { week?: ThisWeekState; cached?: boolean }) => {
+      .then((data: { week?: ThisWeekState | null; cached?: boolean; skipped?: string }) => {
         if (data.week) {
           setWeek(data.week);
           setGenError(Boolean(data.week.errors?.email || data.week.errors?.social));
           // Materials were inserted server-side — refresh the RSC payload so
           // MaterialsHub + our did→doc lookups see them.
           if (!data.cached) router.refresh();
+        } else if (data.skipped) {
+          // Server scope gate: nothing to build a week from. Clear any stale
+          // queue (a pre-gate week may linger in ui_state) — never an error chip.
+          setWeek(null);
         } else {
           setGenError(true);
         }
@@ -86,10 +101,21 @@ export function ThisWeek({
       .finally(() => setGenerating(false));
   }
 
+  // Retry chip entry point (event handler — sync setState is fine here).
+  function generate() {
+    const hadContent = !!week && (week.email != null || week.social.length > 0);
+    setGenError(false);
+    if (!hadContent) setGenerating(true); // never a blocking spinner over an existing queue
+    fireWeekRequest();
+  }
+
   useEffect(() => {
     if (firedRef.current) return;
     firedRef.current = true;
-    generate();
+    // Empty project with no existing queue: don't even ask. (With a stale
+    // pre-gate queue we still POST — the server skips and we drop the cards.)
+    if (!eligible && !week) return;
+    fireWeekRequest();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -199,6 +225,11 @@ export function ThisWeek({
 
   const anyApproved =
     !!week && (week.email?.state === "approved" || week.social.some((s) => s.state === "approved"));
+
+  // Nothing queued, nothing generating, nothing to retry → no section at all.
+  // An empty project must not open on an empty "This Week" box (operator, 07/16/2026).
+  const hasContent = !!week && (week.email != null || week.social.length > 0);
+  if (!generating && !genError && !hasContent) return null;
 
   return (
     <section className="mb-6 rounded-xl border border-white/10 bg-white/[0.02] p-4">

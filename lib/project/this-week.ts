@@ -48,6 +48,28 @@ export function missingSides(week: ThisWeekState | null | undefined): {
   return { email: week.email == null, social: week.social.length === 0 };
 }
 
+/** Every deliverable id the week's queue references (email + socials, any state).
+ *  The materials library excludes these — queue inventory is not something the
+ *  user made, so it never renders as "Your materials" (operator, 07/16/2026). */
+export function weekDids(week: ThisWeekState | null | undefined): string[] {
+  if (!week) return [];
+  const dids = week.social.map((s) => s.did);
+  if (week.email) dids.unshift(week.email.did);
+  return dids;
+}
+
+/** Queue rows safe to soft-trash when a week is replaced (rollover or force
+ *  regen): the user never acted on them. Approved/scheduled rows are kept —
+ *  acting on a queue item is what graduates it into the materials library. */
+export function staleQueueDids(week: ThisWeekState | null | undefined): string[] {
+  if (!week) return [];
+  const entries = [
+    ...(week.email ? [week.email] : []),
+    ...week.social.map((s) => ({ did: s.did, state: s.state })),
+  ];
+  return entries.filter((e) => e.state === "pending" || e.state === "skipped").map((e) => e.did);
+}
+
 /** Calendar day → social_schedules day_of_week (Sun=0 convention, matches
  *  ScheduleSocialModal's DAYS array). */
 export const DAY_OF_WEEK: Record<CalendarDay, number> = {

@@ -1,3 +1,24 @@
+## 2026-07-17 (Fable 5 · main) — Overview de-mash #1+#2: week queue out of materials, empty projects stop auto-building
+
+Operator screenshots (07/16 ~22:00): untitled EMPTY project shows 5 "email · Jul 2026" materials +
+dead This Week cards. Root cause verified in code: /api/projects/[id]/week auto-fires on EVERY
+project open, builds 1 email + 5 socials (5 Haiku fills + web refresh, social side UNMETERED) and
+inserts all 6 as deliverables rows — MaterialsHub then lists the queue's own inventory as "Your
+materials" (socials render as emails: block-canvas + unbranded). Fixes (operator-approved "1 and
+2"): (1) weekDids() exclusion — page.tsx computes the queue's ids from ui_state.this_week,
+workspace filters them from MaterialsHub (ThisWeek/digest keep full list); rollover/force-regen now
+soft-trashes UNTOUCHED (pending/skipped) queue rows — approved/scheduled graduate into the library.
+(2) Scope gate in the week route: no items + no subject address/area → {week, skipped:"no_scope"},
+zero LLM spend, zero rows; client (ThisWeek) skips the mount POST on empty projects, treats skipped
+as benign (no retry chip), hides the section entirely when there's nothing queued. Social side now
+metered like the email side (checkBuildAllowance + recordBuild). 13 unit tests pass; bunx next
+build green. NOTE: released db32ffa0's 1h+ claim on the week route (file bit-identical the whole
+hold, holder had committed unrelated switch work — judged leftover, not in-flight). Follow-up #3
+open in checks: this_week_social_lane_dead_ends (dead click targets, approve-modal no-op race,
+stubbed send path + operator says queue belongs on the Projects HUB, not Overview — placement
+decision pending). Lab Generate-Week route still unmetered (user-initiated; same guard is a
+candidate). Push pending operator OK.
+
 ## 2026-07-17 (Fable 5 · main) — desk 07/17: airports day + brain sweep lands bifurcation's third leg (ZORI rent map)
 
 Daily Insiders triage (operator: "look around, pull some things in; press run ~Sunday"). 6 lake

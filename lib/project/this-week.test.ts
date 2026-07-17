@@ -1,6 +1,13 @@
 // lib/project/this-week.test.ts
 import { describe, expect, test } from "bun:test";
-import { DAY_OF_WEEK, missingSides, weekIsCurrent, type ThisWeekState } from "./this-week";
+import {
+  DAY_OF_WEEK,
+  missingSides,
+  staleQueueDids,
+  weekDids,
+  weekIsCurrent,
+  type ThisWeekState,
+} from "./this-week";
 
 const week: ThisWeekState = {
   week_of: "2026-06-29",
@@ -34,6 +41,40 @@ describe("missingSides (partial-failure retry)", () => {
   });
   test("social failed (empty) → only social missing", () => {
     expect(missingSides({ ...week, social: [] })).toEqual({ email: false, social: true });
+  });
+});
+
+describe("weekDids (materials-library exclusion set)", () => {
+  test("collects the email did and every social did", () => {
+    expect(weekDids(week)).toEqual(["d1", "d2"]);
+  });
+  test("email null → socials only", () => {
+    expect(weekDids({ ...week, email: null })).toEqual(["d2"]);
+  });
+  test("null/undefined week → empty", () => {
+    expect(weekDids(null)).toEqual([]);
+    expect(weekDids(undefined)).toEqual([]);
+  });
+});
+
+describe("staleQueueDids (rollover trash set)", () => {
+  test("pending and skipped are trashable; approved and scheduled graduate", () => {
+    const mixed: ThisWeekState = {
+      ...week,
+      email: { did: "d1", state: "approved" },
+      social: [
+        { ...week.social[0]!, did: "d2", state: "pending" },
+        { ...week.social[0]!, did: "d3", state: "skipped" },
+        { ...week.social[0]!, did: "d4", state: "scheduled" },
+      ],
+    };
+    expect(staleQueueDids(mixed)).toEqual(["d2", "d3"]);
+  });
+  test("pending email is trashable too", () => {
+    expect(staleQueueDids(week)).toEqual(["d1", "d2"]);
+  });
+  test("null week → empty", () => {
+    expect(staleQueueDids(null)).toEqual([]);
   });
 });
 

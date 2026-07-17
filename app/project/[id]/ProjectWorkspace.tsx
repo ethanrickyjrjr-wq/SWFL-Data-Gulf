@@ -98,6 +98,10 @@ interface Props {
   activeEvents: ScoredEventSummary[];
   /** Pre-formatted recent activity (last 30d, sig ≥ 5) from readRecentActivity(). */
   recentActivity?: string[];
+  /** Deliverable ids owned by the This Week queue (ui_state.this_week, computed
+   *  server-side in page.tsx). Excluded from the materials library — queue
+   *  inventory is not something the user made (operator, 07/16/2026). */
+  weekQueueDids?: string[];
 }
 
 interface BuildOpts {
@@ -132,6 +136,7 @@ export function ProjectWorkspace({
   significantChanges,
   activeEvents,
   recentActivity = [],
+  weekQueueDids = [],
 }: Props) {
   const router = useRouter();
   const [items, setItems] = useState<ProjectItem[]>(initialItems);
@@ -514,6 +519,20 @@ export function ProjectWorkspace({
 
   const emailScope = emailDeliverableScope(items);
 
+  // The materials library never shows This Week's queue inventory. Acting on a
+  // queue item (approve/schedule) is what graduates it: at week rollover its id
+  // leaves the queue set and the row surfaces here; untouched rows get trashed
+  // server-side instead. ThisWeek + the digest keep the FULL list (did lookups).
+  const materialRows = useMemo(() => {
+    if (weekQueueDids.length === 0) return deliverables;
+    const queue = new Set(weekQueueDids);
+    return deliverables.filter((d) => !queue.has(d.id));
+  }, [deliverables, weekQueueDids]);
+
+  // A week can only build from something — filed items or a subject. Empty
+  // projects skip the auto-generate POST entirely (server gate is authority).
+  const weekEligible = items.length > 0 || !!subjectAddress || !!subjectArea;
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <ProjectAiContextBridge digest={digest} />
@@ -526,6 +545,7 @@ export function ProjectWorkspace({
         deliverables={deliverables}
         scopeKind={emailScope?.scope_kind ?? null}
         scopeValue={emailScope?.scope_value ?? null}
+        eligible={weekEligible}
         onWeekChange={(next) => patchUiState({ this_week: next })}
       />
 
@@ -692,7 +712,7 @@ export function ProjectWorkspace({
       <div className="mt-6">
         <MaterialsHub
           projectId={id}
-          materials={deliverables}
+          materials={materialRows}
           onRefresh={handleRefreshMaterial}
           onAiMaterial={handleAiMaterial}
         />
