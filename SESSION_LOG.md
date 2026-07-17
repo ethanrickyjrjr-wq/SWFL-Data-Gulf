@@ -1,3 +1,25 @@
+## 2026-07-16 (Fable 5 · main) — hub aside now REAL lab chrome + Project AI actually knows the selection
+
+Operator screenshots: hub aside led with a custom "Project AI / knows this project" header +
+three big canned prompt buttons ("What's the bottom line for this project?") ABOVE the ask box —
+nonsense for an empty project, and none of it in the labs' section idiom. Root cause of the
+blindness: the context bus (ai-context-store) is only seeded by /project/[id]'s
+ProjectAiContextBridge — the hub NEVER seeded it, so BriefcasePanel fell back to the static
+PROJECT_PROMPTS floor forever; the empty-project branch in prompt-engine was unreachable there.
+Fixes (one-room law, lifted verbatim from ProjectSocialClient/EmailLabGridShell):
+(1) hub page.tsx builds a per-project ProjectDigest from rows already in hand (items + email
+schedule scope cols + branding + ui_state.last_freshness_token_seen + deliverable created_at —
+pure fold, no new queries) and the cockpit mounts the SAME ProjectAiContextBridge keyed by
+selection; (2) aside AI section is now canonical lab chrome — 10px uppercase teal "Project AI"
+label, ask box FIRST (lab textarea/button styles), prompts demoted to small chips below
+(BriefcaseChat variant="docked", BriefcasePanel docked prop; floating pill unchanged);
+"knows this project" tag deleted in the dock; (3) page-context now describes the hub's SELECTED
+project to the analyst (describePage "/project" + projectPageContextForPath hub branch, tests
+added — 25 pass). Verified on prod build :3199 via Chrome: empty project shows start-here
+prompts, selection retargets dossier/prompts/campaigns, chrome constant hub↔social. Opened
+`listing_scope_not_in_digest` (defect): listing ZIP scope (social shows 33991) never reaches the
+digest — prompts stay SWFL-generic; pre-existing, affects [id] too. NOT pushed — awaiting operator.
+
 ## 2026-07-16 (Fable 5 · main) — block-canvas doc-strand class FIXED at edit/restyle; refresh claim REFUTED (check closed)
 
 Probed check `deliverable_refresh_drops_blockcanvas_doc` — REFUTED as written: `isTemplateId`

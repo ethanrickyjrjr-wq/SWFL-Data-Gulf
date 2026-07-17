@@ -47,7 +47,19 @@ function ladderCopy(intensity: "soft" | "medium" | "hard"): string {
  * any filed item → the draft list + the (gated) build path. Copy is
  * "context-aware" (page + anon revisit count), NEVER "learns how you work".
  */
-export function BriefcasePanel({ page }: { page: PillPage }) {
+export function BriefcasePanel({
+  page,
+  docked = false,
+}: {
+  page: PillPage;
+  /**
+   * True when the panel is docked inside an in-app aside (the projects hub) instead of
+   * the floating pill popover. Docked drops the panel's own header — the aside section
+   * carries the canonical 10px-uppercase-teal label like every lab section — and the
+   * chat renders input-first in the labs' chrome (BriefcaseChat variant="docked").
+   */
+  docked?: boolean;
+}) {
   const session = useSession();
   const briefcase = useBriefcase();
   // Count the visit once per PAGE LOAD (not per panel mount — the panel unmounts on
@@ -139,12 +151,14 @@ export function BriefcasePanel({ page }: { page: PillPage }) {
   if (projectMode) {
     return (
       <div className="flex flex-col gap-3 text-sm text-[#f0ede6]">
-        <div className="flex items-center justify-between">
-          <span className="font-semibold text-gulf-teal">Project AI</span>
-          <span className="text-[10px] text-gray-500">knows this project</span>
-        </div>
+        {!docked && (
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-gulf-teal">Project AI</span>
+            <span className="text-[10px] text-gray-500">knows this project</span>
+          </div>
+        )}
 
-        <BriefcaseChat starterPrompts={prompts} />
+        <BriefcaseChat starterPrompts={prompts} variant={docked ? "docked" : "floating"} />
 
         {draftItems.length > 0 && (
           <div>

@@ -173,9 +173,14 @@ export function describePage(pathname: string, project?: ProjectPageContext): st
   if (p.startsWith("/p/")) return "a built deliverable they're viewing";
   if (p.startsWith("/c/")) return "a saved card / chart they're viewing";
 
-  // Projects — list vs. a single project workspace. On a single project, name it +
+  // Projects — hub vs. a single project workspace. On a single project, name it +
   // its scope + what's filed (Piece 2 §D) so the analyst answers at the project's grain.
-  if (p === "/project") return "their projects list";
+  // The HUB gets the same treatment when the cockpit has seeded a selection — the rail
+  // click selects without navigating, so the path alone can't name the project.
+  if (p === "/project")
+    return project
+      ? `their projects hub, with ${describeProject(project)} selected`
+      : "their projects list";
   if (p.startsWith("/project/"))
     return project ? describeProject(project) : "one of their projects";
 
@@ -189,13 +194,19 @@ export function describePage(pathname: string, project?: ProjectPageContext): st
  * stale-leak defense: the module store persists across route changes, so during an A→B
  * switch `getAiContext()` can still hold A's digest while the path is already B; returning
  * undefined then keeps A's context out of B's chat. Pure → directly unit-testable.
+ *
+ * The HUB (`/project`) has no project in its path — there the cockpit itself seeds the
+ * store on every selection change (ProjectAiContextBridge keyed by selection), so the
+ * digest IS the selected project and passes through un-guarded.
  */
 export function projectPageContextForPath(
   path: string,
   digest: ProjectDigest | null,
 ): ProjectPageContext | undefined {
+  if (!digest) return undefined;
   const pid = projectIdFromPath(path);
-  if (!pid || !digest || digest.projectId !== pid) return undefined;
+  if (!pid && norm(path) !== "/project") return undefined;
+  if (pid && digest.projectId !== pid) return undefined;
   return {
     title: digest.title,
     scope: digest.scope,

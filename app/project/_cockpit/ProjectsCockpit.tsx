@@ -13,6 +13,8 @@ import {
 import { projectEntry } from "@/lib/project/tool-tabs";
 import { promptsForPage } from "@/lib/briefcase/visits";
 import type { CampaignStats } from "@/lib/email/campaign-stats";
+import type { ProjectDigest } from "@/lib/project/digest";
+import { ProjectAiContextBridge } from "../[id]/workspace/ProjectAiContextBridge";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 import { BriefcasePanel } from "@/components/briefcase/BriefcasePanel";
 import { BriefcaseChat } from "@/components/briefcase/BriefcaseChat";
@@ -44,6 +46,7 @@ export function ProjectsCockpit({
   contactsCount,
   stats,
   initialPreview,
+  digests,
   actions,
 }: {
   projects: CockpitProject[];
@@ -54,6 +57,10 @@ export function ProjectsCockpit({
   contactsCount: number;
   stats: CampaignStats;
   initialPreview: { did: string; html: string } | null;
+  /** Per-project digests (server-built from the already-loaded rows) — seeded into
+   *  the context bus on selection change so Project AI actually knows the selected
+   *  project on the hub, exactly like an open /project/[id] page. */
+  digests: Record<string, ProjectDigest>;
   /** Top-strip actions (New listing / Showing prep / New project) — passed in
    *  from the server page so the buttons keep their one existing home. */
   actions?: ReactNode;
@@ -61,6 +68,7 @@ export function ProjectsCockpit({
   const sel = useSelectedProject();
   const selected = projects.find((p) => p.id === sel?.selectedId) ?? projects[0] ?? null;
   const empty = projects.length === 0;
+  const selectedDigest = selected ? (digests[selected.id] ?? null) : null;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -129,19 +137,34 @@ export function ProjectsCockpit({
           </div>
 
           <div className="flex-1 overflow-y-auto">
+            {/* Seed the context bus with the SELECTED project's digest — the same bridge
+                the /project/[id] pages mount, keyed by selection so a rail click reseeds.
+                This is what makes Project AI's prompts + answers project-aware here. */}
+            {selectedDigest && (
+              <ProjectAiContextBridge key={selectedDigest.projectId} digest={selectedDigest} />
+            )}
+
             {/* The docked Ask AI — the SAME assistant as the floating pill, which is
                 suppressed on this page (pill-mount): one Ask AI per page, and here it
-                lives at the top of the panel, aimed at the selected project. With no
-                projects yet, the bare chat docks instead — the full panel's funnel
-                furniture (pitch + example cards) would duplicate the welcome center. */}
-            <div className="border-b border-white/8 p-4">
+                lives at the top of the panel, aimed at the selected project. Docked =
+                the labs' section chrome (label + input first). With no projects yet,
+                the bare chat docks instead — the full panel's funnel furniture (pitch +
+                example cards) would duplicate the welcome center. */}
+            <div className="border-b border-white/8 px-4 pb-4 pt-4">
+              <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
+                {selected ? "Project AI" : "Ask AI"}
+              </p>
               {selected ? (
                 <BriefcasePanel
                   key={selected.id}
                   page={{ kind: "project", projectId: selected.id }}
+                  docked
                 />
               ) : (
-                <BriefcaseChat starterPrompts={promptsForPage({ kind: "generic" }, 1)} />
+                <BriefcaseChat
+                  starterPrompts={promptsForPage({ kind: "generic" }, 1)}
+                  variant="docked"
+                />
               )}
             </div>
 

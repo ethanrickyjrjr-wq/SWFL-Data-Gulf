@@ -8,6 +8,8 @@ import {
   type SocialScheduleRow,
 } from "@/lib/project/schedule-chips";
 import { toCockpitProjects, type ProjectRowInput } from "@/lib/project/group-projects";
+import { buildProjectDigest, brandingForDigest, type ProjectDigest } from "@/lib/project/digest";
+import { deriveProjectName } from "@/lib/project/derive-name";
 import { loadCampaignStats } from "@/lib/email/load-campaign-stats";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
@@ -42,12 +44,12 @@ export default async function ProjectListPage() {
     await Promise.all([
       supabase
         .from("projects")
-        .select("id, title, kind, items, updated_at")
+        .select("id, title, kind, items, updated_at, ui_state, branding")
         .order("updated_at", { ascending: false }),
       supabase
         .from("email_schedules")
         .select(
-          "id, project_id, status, cadence, day_of_week, day_of_month, send_hour_et, audience_slug, next_run_at, deliverable_id",
+          "id, project_id, status, cadence, day_of_week, day_of_month, send_hour_et, audience_slug, next_run_at, deliverable_id, scope_kind, scope_value, topic, last_run_at",
         )
         .in("status", ["active", "paused"]),
       supabase
@@ -60,12 +62,16 @@ export default async function ProjectListPage() {
       // project (same tie-break the tool switcher uses).
       supabase
         .from("deliverables")
-        .select("id, project_id, template")
+        .select("id, project_id, template, created_at")
         .order("data_as_of", { ascending: false }),
       supabase.from("contacts").select("id", { count: "exact", head: true }),
     ]);
 
-  const rows = (data as ProjectRowInput[] | null) ?? [];
+  type HubProjectRow = ProjectRowInput & {
+    ui_state: Record<string, unknown> | null;
+    branding: Record<string, string> | null;
+  };
+  const rows = (data as HubProjectRow[] | null) ?? [];
   const contactsCount = contactsRes.count ?? 0;
 
   const { chipsByProject, activeCount, allChips } = buildScheduleChips(
@@ -86,6 +92,39 @@ export default async function ProjectListPage() {
     builtByProject,
     lastDidByProject,
   });
+
+  // Per-project digests from the rows already in hand (pure fold — no extra queries).
+  // The cockpit seeds the context bus with the SELECTED one, so Project AI on the hub
+  // is as project-aware as an open /project/[id] page: empty projects get start-here
+  // prompts, populated ones get situational prompts, and answers know the project.
+  // (Feed rows / activity / events are [id]-page depth — deliberately not loaded per
+  // project here.)
+  const digests: Record<string, ProjectDigest> = {};
+  for (const r of rows) {
+    const items = r.items ?? [];
+    digests[r.id] = buildProjectDigest({
+      projectId: r.id,
+      title: r.title || deriveProjectName(items),
+      items,
+      deliverables: (delivRows ?? [])
+        .filter((d) => d.project_id === r.id)
+        .map((d) => ({ id: d.id, template: d.template, created_at: d.created_at })),
+      schedules: (emailSch ?? [])
+        .filter((s) => s.project_id === r.id)
+        .map((s) => ({
+          cadence: s.cadence,
+          scope_kind: s.scope_kind,
+          scope_value: s.scope_value,
+          topic: s.topic,
+          last_run_at: s.last_run_at,
+        })),
+      lastFreshnessTokenSeen:
+        typeof r.ui_state?.last_freshness_token_seen === "string"
+          ? r.ui_state.last_freshness_token_seen
+          : undefined,
+      branding: brandingForDigest(r.branding),
+    });
+  }
 
   const stats = await loadCampaignStats(supabase, user.id);
 
@@ -119,6 +158,7 @@ export default async function ProjectListPage() {
         contactsCount={contactsCount}
         stats={stats}
         initialPreview={initialPreview}
+        digests={digests}
         actions={
           <>
             <NewListingButton />

@@ -48,7 +48,19 @@ async function drainSseText(res: Response): Promise<string> {
     .join("");
 }
 
-export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string[] }) {
+export function BriefcaseChat({
+  starterPrompts = [],
+  variant = "floating",
+}: {
+  starterPrompts?: string[];
+  /**
+   * "floating" = the pill popover (prompts stacked above the input — the funnel order).
+   * "docked" = the labs' aside chrome (input FIRST like "Build with AI", lab textarea +
+   * button styling, starter prompts demoted to small chips below the input).
+   */
+  variant?: "floating" | "docked";
+}) {
+  const docked = variant === "docked";
   const briefcase = useBriefcase();
   const pathname = usePathname();
   // Touch devices have no reliable Shift modifier (see AskPage.tsx) — Enter must
@@ -273,9 +285,25 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
       ? suggestFollowUps(lastUserQuestion, lastMsg.content)
       : [];
 
-  return (
-    <div className="flex flex-col">
-      {messages.length === 0 && starterPrompts.length > 0 && (
+  // The starter prompts, in the variant's own idiom: floating keeps the stacked funnel
+  // buttons; docked uses the same small chip idiom as the follow-up suggestions so the
+  // input stays the section's lead element (the labs' "Build with AI" order).
+  const promptBlock =
+    messages.length === 0 && starterPrompts.length > 0 ? (
+      docked ? (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {starterPrompts.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => submit(p)}
+              className="rounded-full border border-gulf-teal/40 px-2.5 py-1 text-left text-[10px] text-gray-300 transition-colors hover:border-gulf-teal hover:text-gulf-teal"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      ) : (
         <ul className="mb-3 flex flex-col gap-1.5">
           {/* PHONE ONLY: show just the first prompt so the panel stays short over the
               homepage map; every prompt after the first is hidden < sm and restored at sm:
@@ -292,6 +320,60 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
             </li>
           ))}
         </ul>
+      )
+    ) : null;
+
+  const chatForm = (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit(input);
+        setInput("");
+      }}
+      className="flex items-end gap-2"
+    >
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (isTouchDevice) return;
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            submit(input);
+            setInput("");
+          }
+        }}
+        rows={2}
+        disabled={busy}
+        placeholder="Ask about SWFL real estate, permits, flood risk…"
+        className={
+          docked
+            ? "min-w-0 flex-1 resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:border-gulf-teal/50 focus:outline-none focus:ring-1 focus:ring-gulf-teal disabled:opacity-50"
+            : "min-w-0 flex-1 resize-none rounded-lg border border-gulf-teal bg-[#152832] px-3 py-2 text-xs text-[#f0ede6] placeholder:text-gray-500 focus:border-gulf-teal focus:outline-none focus:ring-1 focus:ring-gulf-teal/40 disabled:opacity-50"
+        }
+      />
+      <button
+        type="submit"
+        disabled={busy || !input.trim()}
+        className={
+          docked
+            ? "shrink-0 rounded-lg bg-gulf-teal px-4 py-2 text-sm font-semibold text-[#070f14] transition-colors hover:bg-[#17a3b3] disabled:opacity-40"
+            : "btn-gradient shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-navy-dark disabled:opacity-40"
+        }
+      >
+        Ask
+      </button>
+    </form>
+  );
+
+  return (
+    <div className="flex flex-col">
+      {docked ? chatForm : promptBlock}
+      {docked && promptBlock}
+      {/* Docked puts the form first, so the conversation area below needs its own
+          top gap (the floating order gets this from the blocks' mb-* margins). */}
+      {docked && (messages.length > 0 || (!nudgeDismissed && (nudgeItems?.length ?? 0) > 0)) && (
+        <div className="mt-3" aria-hidden />
       )}
 
       {!nudgeDismissed && nudgeItems && nudgeItems.length > 0 && (
@@ -429,38 +511,7 @@ export function BriefcaseChat({ starterPrompts = [] }: { starterPrompts?: string
         </button>
       )}
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit(input);
-          setInput("");
-        }}
-        className="flex items-end gap-2"
-      >
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (isTouchDevice) return;
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              submit(input);
-              setInput("");
-            }
-          }}
-          rows={2}
-          disabled={busy}
-          placeholder="Ask about SWFL real estate, permits, flood risk…"
-          className="min-w-0 flex-1 resize-none rounded-lg border border-gulf-teal bg-[#152832] px-3 py-2 text-xs text-[#f0ede6] placeholder:text-gray-500 focus:border-gulf-teal focus:outline-none focus:ring-1 focus:ring-gulf-teal/40 disabled:opacity-50"
-        />
-        <button
-          type="submit"
-          disabled={busy || !input.trim()}
-          className="btn-gradient shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-navy-dark disabled:opacity-40"
-        >
-          Ask
-        </button>
-      </form>
+      {!docked && chatForm}
     </div>
   );
 }

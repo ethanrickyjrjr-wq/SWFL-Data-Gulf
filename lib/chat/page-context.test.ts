@@ -74,6 +74,20 @@ describe("describePage", () => {
     expect(describePage("/project/abc")).toBe("one of their projects");
   });
 
+  it("names the SELECTED project on the hub when given project context", () => {
+    const d = describePage("/project", {
+      title: "Del Prado Test",
+      itemCount: 0,
+    });
+    expect(d).toContain("Del Prado Test");
+    expect(d).toMatch(/nothing filed/i);
+    expect(d).toMatch(/hub|projects/i);
+  });
+
+  it("still says 'projects list' on the hub with no selection context", () => {
+    expect(describePage("/project")).toBe("their projects list");
+  });
+
   it("handles an empty project gracefully", () => {
     const d = describePage("/project/abc", { title: "New Project", itemCount: 0 });
     expect(d).toContain("New Project");
@@ -138,5 +152,18 @@ describe("projectPageContextForPath (the §D stale-leak guard)", () => {
   });
   it("hasEmailSchedule is false with no schedules", () => {
     expect(projectPageContextForPath("/project/p1", digest())?.hasEmailSchedule).toBe(false);
+  });
+
+  it("maps the digest on the HUB (/project) — the cockpit seeds the store with the selection", () => {
+    const ctx = projectPageContextForPath("/project", digest());
+    expect(ctx).toMatchObject({ title: "Fort Myers Beach 33931", itemCount: 2 });
+  });
+
+  it("hub with an empty store still returns undefined", () => {
+    expect(projectPageContextForPath("/project", null)).toBeUndefined();
+  });
+
+  it("hub tolerates a trailing slash", () => {
+    expect(projectPageContextForPath("/project/", digest())?.title).toBe("Fort Myers Beach 33931");
   });
 });
