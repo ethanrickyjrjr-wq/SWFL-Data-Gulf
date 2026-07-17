@@ -33,8 +33,14 @@ export interface ParseResult {
   skippedCount: number;
 }
 
-// Defensive caps so a single malicious cell can't carry an unbounded tag list
-// (the row count itself is bounded downstream in upsert-contacts).
+// Defensive caps so a single malicious cell can't carry an unbounded tag list.
+// This parser does NOT itself bound total row count -- that's each caller's
+// own job (STALE until 07/17/2026 security review: this comment used to
+// point at a module named "upsert-contacts" that doesn't cap rows and, after
+// the 07/05 unification, doesn't exist under that name either). Real caps
+// live at the call sites: app/api/contacts/import/route.ts's MAX_ROWS=5000
+// (rejects over the cap) and lib/switch/forward-handler.ts's own 5000-row
+// stash cap (truncates, counts the rest as skipped).
 const MAX_TAGS_PER_ROW = 50;
 const MAX_TAG_LEN = 64;
 

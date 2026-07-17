@@ -41,11 +41,10 @@ import {
 import { isSwitchInbound } from "@/lib/switch/forward-inbound";
 import {
   processForwardEmail,
+  MAX_ATTACHMENT_BYTES,
   type ForwardDeps,
   type ForwardEvent,
 } from "@/lib/switch/forward-handler";
-import { upsertCanonicalContacts } from "@/lib/contacts/upsert";
-import { activateSwitchPass } from "@/lib/switch/activate";
 // KNOWN-DEBT(market_alert_engagement / campaign_click_events are new public tables not yet in
 // Database types — regen types, then retype)
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
@@ -59,6 +58,16 @@ const PLATFORM = {
 
 function siteOrigin(req: Request): string {
   return process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? new URL(req.url).origin;
+}
+
+/** OUR own sending/reply domains -- an inbound `From` on either is a loop
+ *  with ourselves or a spoof, never a real switch/reply target (security
+ *  review, Minor f: reply-loop / backscatter guard). */
+function ourDomains(): string[] {
+  const platformDomain = PLATFORM.fromEmail.includes("@")
+    ? PLATFORM.fromEmail.slice(PLATFORM.fromEmail.indexOf("@") + 1)
+    : PLATFORM.fromEmail;
+  return [replyDomain(), platformDomain];
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -96,6 +105,13 @@ export async function POST(request: Request): Promise<Response> {
   // the Resend dashboard (same signing secret as this endpoint) — no live
   // event carries that recipient until then, so this is safe to ship ahead of
   // that operator step.
+  //
+  // SECURITY (07/17/2026 review): the inbound `From` is attacker-claimable,
+  // so this branch ONLY STASHES what it parsed (status 'pending') -- it never
+  // writes contacts/agent_profile_facts/switch_passes directly. The actual
+  // write happens later, from an authenticated session, via
+  // POST /api/switch/apply-forward (see lib/switch/forward-handler.ts's
+  // `applyForward`).
   if (isSwitchInbound(event)) {
     try {
       const sdb = createServiceRoleClient();
@@ -103,6 +119,8 @@ export async function POST(request: Request): Promise<Response> {
 
       const forwardDeps: ForwardDeps = {
         log: (line) => console.log(line),
+        ourDomains: ourDomains(),
+        siteUrl: siteOrigin(request),
 
         async findUserIdByEmail(email) {
           // No email->user lookup helper exists anywhere in the repo (grepped
@@ -140,6 +158,7 @@ export async function POST(request: Request): Promise<Response> {
               id: a.id,
               filename: a.filename ?? "",
               contentType: a.content_type,
+              size: a.size,
             })),
           };
         },
@@ -156,11 +175,21 @@ export async function POST(request: Request): Promise<Response> {
               );
               return null;
             }
-            // download_url is signed + expires in 1hr (no documented inbound
-            // size cap — degrade gracefully on any failure, never throw).
+            // download_url is signed + expires in 1hr. The pure core already
+            // declined anything over MAX_ATTACHMENT_BYTES by Resend's own
+            // metadata `size` before this ever runs; Content-Length is a
+            // second, defense-in-depth check against the ACTUAL download in
+            // case that metadata was missing or understated.
             const res = await fetch(data.download_url);
             if (!res.ok) {
               console.error(`[resend-webhook] switch attachment download failed: ${res.status}`);
+              return null;
+            }
+            const contentLength = res.headers.get("content-length");
+            if (contentLength && Number(contentLength) > MAX_ATTACHMENT_BYTES) {
+              console.error(
+                `[resend-webhook] switch attachment download Content-Length ${contentLength} over cap -- refusing.`,
+              );
               return null;
             }
             return await res.text();
@@ -172,41 +201,24 @@ export async function POST(request: Request): Promise<Response> {
           }
         },
 
-        async upsertContacts(userId, rows) {
-          return upsertCanonicalContacts(sdb, userId, rows);
-        },
-
-        async activatePass(userId, proof) {
-          return activateSwitchPass(sdb, userId, proof);
-        },
-
-        async insertProfileFact(userId, value, messageId) {
-          const { error } = await sdb.from("agent_profile_facts").insert({
-            user_id: userId,
-            key: "forwarded_campaign_about",
-            value,
-            source: "agent_upload",
-            source_detail: messageId,
-          });
-          if (!error) return "inserted";
-          // 23505 = a LIVE fact already exists for (user_id, key) — first
-          // forward wins; superseding is a later extension, not this task's.
-          if (error.code === "23505") return "duplicate";
-          console.error(`[resend-webhook] switch profile fact insert failed: ${error.message}`);
-          return "error";
-        },
-
         async stashForward(userId, row) {
           const { error } = await sdb.from("switch_forwards").insert({
             user_id: userId,
             message_id: row.messageId,
+            kind: row.kind,
+            status: "pending",
             platform: row.platform,
             sender_domain: row.senderDomain,
             html: row.html,
+            payload: row.payload,
           });
-          if (error) {
-            console.error(`[resend-webhook] switch_forwards stash failed: ${error.message}`);
-          }
+          if (!error) return "inserted";
+          // 23505 = message_id already stashed -- Svix (Resend's webhook
+          // signer) is at-least-once, so a redelivery of the same event is
+          // expected, not an error. Skip, don't re-reply.
+          if (error.code === "23505") return "duplicate";
+          console.error(`[resend-webhook] switch_forwards stash failed: ${error.message}`);
+          return "error";
         },
 
         async sendReply(to, subject, text) {

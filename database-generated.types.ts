@@ -3717,6 +3717,9 @@ export interface Database {
           sender_domain: string | null;
           html: string | null;
           created_at: string;
+          kind: string;
+          status: string;
+          payload: Json;
         };
         Insert: {
           id?: string;
@@ -3726,6 +3729,9 @@ export interface Database {
           sender_domain?: string | null;
           html?: string | null;
           created_at?: string;
+          kind?: string;
+          status?: string;
+          payload?: Json;
         };
         Update: {
           id?: string;
@@ -3735,6 +3741,9 @@ export interface Database {
           sender_domain?: string | null;
           html?: string | null;
           created_at?: string;
+          kind?: string;
+          status?: string;
+          payload?: Json;
         };
         Relationships: [];
       };
