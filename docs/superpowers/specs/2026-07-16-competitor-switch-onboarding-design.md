@@ -73,6 +73,15 @@ Only two, both verifiable server-side; a plain CSV upload does NOT start the clo
 
 Minimum ~25 imported contacts either way (anti-gaming floor; exact number plan-time).
 
+**Security amendment (07/17/2026, from build-time review):** an SMTP From address is
+attacker-claimable, so the forward lane never writes anything directly. Inbound forwards are
+STASHED (`switch_forwards`, pending) and applied only when the account owner clicks Apply from a
+signed-in session (`POST /api/switch/apply-forward`) — that click is the proof moment and starts
+the 60-day clock. Forged-From mail therefore lands as an inert pending row the real owner sees
+and dismisses; it can never inject contacts, seed bio facts, or burn the once-ever pass.
+Attachments are size-capped before download, forwarded HTML is tail-capped in storage,
+redelivery is deduped on message id, and auto-responder/self-domain senders never get replies.
+
 ### 3. Forward lane (flagship, new)
 
 One inbound address (e.g. `switch@`) on the **existing Resend Inbound webhook**

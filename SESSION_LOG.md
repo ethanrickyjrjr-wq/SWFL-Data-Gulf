@@ -311,6 +311,37 @@ No UI flow hit the holes (TemplateSwitcher renders only on report pages; workspa
 retired) — API-reachable only. 940 deliverable-area tests green, `bunx next build` clean.
 Check closed. Next: nothing open on this; competitor-switch P1 plan still queued.
 
+## 2026-07-17 (Fable 5 · main) — competitor-switch onboarding P1 BUILT: Switch Pass live in code, both connectors, hardened forward lane, wow rebuild — smoke-verified, operator steps remain
+
+Subagent-driven execution of all 13 plan tasks + final whole-branch review (READY FOR LIVE
+VERIFY). ~20 commits (mine, interleaved with parallel-session rebases): switch_passes +
+build_usage + switch_forwards migrations RUN LIVE (RPC EXECUTE-locked service-role after review
+caught PostgREST /rpc exposure) · effective-tier resolver ({tier,degraded} — review caught a
+REAL fail-open regression: supabase-js resolves {data:null,error} without throwing; a paying
+sender at 200 sends would have been BLOCKED by a transient billing read; fixed + pinned by a
+discriminating test) · pass-aware send gate + lab tiers · activateSwitchPass (25-contact floor,
+60d, once-ever) · canonical upsert extraction w/ one-way opt-outs + in-batch dedup (PostgREST
+union-of-keys wire gap found by implementer, verified against installed client source) ·
+Mailchimp OAuth (one-shot, token never persisted; live-crawled: metadata returns {dc} only) ·
+FUB paste-key (live-crawled: Person has NO unsubscribe field -> check
+switch_fub_emevents_unsubscribe_gap) · quiet 30/day free build guard (fail-open, no visible
+quota) · forward classifier (review BENCHMARKED and killed a quadratic-regex hang on hostile
+HTML -> linear walker, flat <10ms to 2.1MB) · forward lane HARDENED to stash-then-confirm after
+opus review confirmed forged-From injection (spec-inherited): webhook writes NOTHING, applies
+only via authed /api/switch/apply-forward click, spec amended · Brandfetch ONE root (delegates
+to bankBrandFields; fonts deliberately unwritten) · wow rebuild (trend-snapshot seed, draft-only
+edit-before-send, claim-and-send persistence) + switch section on /contacts/upload (one-room;
+pending-forwards Apply/Dismiss; pass banner) · final review fixes: email.received gate on the
+webhook branch (live regression risk for contacts named switch@...), honest whole-account
+consent copy. Smoke-verified on :3388 (auth gates 401/307, section fingerprinted in served
+chunks, server killed). Checks: closed contacts_upsert_no_same_batch_email_dedup; opened
+switch_forward_golive_residuals (due 07/24, BEFORE wiring switch@), effective_tier_hardening,
+switch_p1_test_debt, google_oauth_state_cookie_cleanup, fub_pagination_cursor_semantics,
+build_metering_polish, switch_wow_side_by_side_gap (operator call), brandfetch_key_missing_
+from_vercel, email_author_flag_client_supplied_no_tier_check (pre-existing, surfaced).
+competitor_switch_onboarding_live_verify stays OPEN with the 4-step operator walk. Operator
+flags: cross-audience opt-out-wins policy; stash-then-confirm spec amendment (security-forced).
+
 ## 2026-07-16 (Fable 5 · main) — competitor-switch onboarding PLANNED: 13-task P1 plan, code-probed seams
 
 Plan `docs/superpowers/plans/2026-07-16-competitor-switch-onboarding-p1.md` written off the

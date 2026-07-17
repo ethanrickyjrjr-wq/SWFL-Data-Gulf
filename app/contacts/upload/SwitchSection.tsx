@@ -252,8 +252,8 @@ export function SwitchSection({
           Sign in to Mailchimp once and we’ll pull your audience straight in.
         </p>
         <p className="mt-1 text-xs text-gray-500">
-          Heads up: Mailchimp’s sign-in grants read access to your whole account for this one import
-          — we pull your contacts once and never keep the connection.
+          Heads up: Mailchimp’s sign-in grants access to your whole account — we only read your
+          contacts, once, and never keep the connection.
         </p>
         <a
           href="/api/email/contacts/mailchimp/start"
