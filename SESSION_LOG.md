@@ -1,3 +1,20 @@
+## 2026-07-16 (Fable 5 · main) — housing staleness is UPSTREAM: Redfin file frozen since 06/02; rebuild landed, master left to cron
+
+Follow-up to the entry below, post-rebuild verification. The decreed housing-swfl rebuild (run
+29549622565) SUCCEEDED but the served window stayed at 03/01/2026 — and that is correct behavior:
+Redfin's S3 file (zip_code_market_tracker.tsv000.gz) has Last-Modified 06/02/2026; our 06/15 and
+07/15 pulls both loaded identical 67,536 rows / 124 ZIPs (run logs compared line-for-line), newest
+window Mar–May. Redfin's data center page still advertises monthly — their July drop is overdue or
+moved. Our pipeline is downstream-correct; no amount of rebuilding advances the window until Redfin
+publishes. The 124→54 ZIP-count change in the rebuilt output is the 07/07 Lee+Collier scope
+(97c9af60) landing in housing for the first time — intentional, not a regression; metric shifts
+(median $441,525, DOM 75) follow from dropping Charlotte/Sarasota metro ZIPs. Master propagation
+NOT dispatched (window didn't advance — masterIsStaleVsUpstreams folds the rescoped leaf in on the
+next daily cron tick, free). Root cause written into digest_housing_window_one_cycle_stale; added
+source-object staleness (ETag/Last-Modified unchanged across N pulls → alert) as variant (d) of
+data_vintage_tripwire_missing. Push of b14f8cb6 (acceptance entry) still pending operator word —
+it would bundle unpushed foreign commit 512cbcdc (parallel switch session).
+
 ## 2026-07-16 (Fable 5 · main) — housing staleness root-caused: process-green/data-stale blind spot + decreed rebuild
 
 Operator: "period beginning 03/01/2026 in a July email — HOW DO WE NOT KNOW THIS IS GOING ON?"
