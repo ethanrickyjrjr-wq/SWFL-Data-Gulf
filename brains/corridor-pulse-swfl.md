@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v17 | Token: SWFL-7421-v17-20260717 -->
+<!-- FRESHNESS: v18 | Token: SWFL-7421-v18-20260717 -->
 ---
 brain_id: corridor-pulse-swfl
-version: 17
-refined_at: 2026-07-17T21:35:34Z
-freshness_token: SWFL-7421-v17-20260717
+version: 18
+refined_at: 2026-07-17T21:47:15Z
+freshness_token: SWFL-7421-v18-20260717
 ttl_seconds: 604800
 pack_hash: 9b745295cada
 context_type: user_saved_reference
@@ -48,9 +48,9 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
 --- OUTPUT ---
 {
   "brain_id": "corridor-pulse-swfl",
-  "version": 17,
-  "refined_at": "2026-07-17T21:35:34Z",
-  "expires": "2026-07-24T21:35:34Z",
+  "version": 18,
+  "refined_at": "2026-07-17T21:47:15Z",
+  "expires": "2026-07-24T21:47:15Z",
   "ttl_seconds": 604800,
   "direction": "neutral",
   "magnitude": 0,
@@ -66,7 +66,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/lee/bonita-springs-voters-to-decide-on-rail-trail-bonds-soon/article_55b63b61-9f9f-4c67-8d2e-6663c254584b.html",
-        "fetched_at": "2026-07-17T21:35:34Z",
+        "fetched_at": "2026-07-17T21:47:15Z",
         "tier": 2,
         "citation": "Bonita Springs bond vote could fund $35M rail trail | Lee County | gulfshorebusiness.com: \"Evan Williams ... Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city’s portion of a regional rail-to-t...\""
       },
@@ -83,7 +83,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/gb_daily/cape-coral-businesses-concerned-with-parking-loss-in-road-expansion/",
-        "fetched_at": "2026-07-17T21:35:34Z",
+        "fetched_at": "2026-07-17T21:47:15Z",
         "tier": 2,
         "citation": "Cape Coral businesses concerned with parking loss in road expansion - Gulfshore Business: \"Cape Coral is set to undergo a significant change with a road expansion project on Cape Coral Parkway, increasing it from four lanes to six.\n\nCape Cor...\""
       },
@@ -100,7 +100,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/retail/my-shower-door-invests-4m-in-new-fort-myers-headquarters/article_4eef396d-d496-42a1-9c41-866d2a130c6b.html",
-        "fetched_at": "2026-07-17T21:35:34Z",
+        "fetched_at": "2026-07-17T21:47:15Z",
         "tier": 2,
         "citation": "Expanding My Shower Door takes on a new headquarters | Retail | gulfshorebusiness.com: \"My Shower Door ... My Shower Door broke ground April 2 on a 14,000-square-foot national headquarters, a $4 million construction project designed to re...\""
       },
@@ -117,7 +117,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.leegov.com/dot/News%20Documents/Roadwatch%20January%208,%202026%20to%20January%2014,%202026.pdf",
-        "fetched_at": "2026-07-17T21:35:34Z",
+        "fetched_at": "2026-07-17T21:47:15Z",
         "tier": 2,
         "citation": "Roadwatch January 8, 2026 to January 14, ...: \"Estimated completion is Fall 2026. Project cost is approximately $23 million, including $4.6 million for · landscaping and irrigation and $4 million f...\""
       },
@@ -134,7 +134,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.leegov.com/dot/News%20Documents/Roadwatch%20August%2021,%202025%20to%20August%2027,%202025.pdf",
-        "fetched_at": "2026-07-17T21:35:34Z",
+        "fetched_at": "2026-07-17T21:47:15Z",
         "tier": 2,
         "citation": "Roadwatch August 21, 2025 to August 27, ...: \"Estimated completion is mid-2028. Project cost is approximately $39.7 M. The contractor is ECH · Construction. For further questions, please visit www...\""
       },
@@ -151,7 +151,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/fdot-studies-improvements-to-bonita-beach-road-and-u-s-41-intersection/",
-        "fetched_at": "2026-07-17T21:35:34Z",
+        "fetched_at": "2026-07-17T21:47:15Z",
         "tier": 2,
         "citation": "FDOT studies improvements to Bonita Beach Road and U.S. 41 intersection - Gulfshore Business: \"The Florida Department of Transportation is looking for ways to address congestion issues and the projected increase in traffic at the intersection of...\""
       },
@@ -168,7 +168,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/gb-daily/imperial-41-breaks-ground-on-downtown-bonita-project/article_318503a6-85a2-4540-8de0-e3a82c1d0bdc.html",
-        "fetched_at": "2026-07-17T21:35:34Z",
+        "fetched_at": "2026-07-17T21:47:15Z",
         "tier": 2,
         "citation": "Imperial 41 breaks ground on downtown Bonita project | GB Daily | gulfshorebusiness.com: \"Barron Collier Cos. ... Barron Collier Cos. and CAPREIT broke ground Dec. 11 on Imperial 41, a mixed-use development that will add 120 apartments and ...\""
       },
@@ -185,7 +185,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.businessobserverfl.com/news/2025/aug/31/developer-car-condos-bonita-springs/",
-        "fetched_at": "2026-07-17T21:35:34Z",
+        "fetched_at": "2026-07-17T21:47:15Z",
         "tier": 2,
         "citation": "Developer to build car condos in Bonita Springs | Business Observer: \"Image via LoopNet.com ... A 4.05-acre parcel in Bonita Springs has been sold to an investor who plans to build a luxury car garage storage facility on...\""
       },
@@ -209,7 +209,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-17T21:35:34Z"
+    "computed_at": "2026-07-17T21:47:15Z"
   },
   "exogenous_signals": []
 }

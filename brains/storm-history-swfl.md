@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v24 | Token: SWFL-7421-v24-20260717 -->
+<!-- FRESHNESS: v25 | Token: SWFL-7421-v25-20260717 -->
 ---
 brain_id: storm-history-swfl
-version: 24
-refined_at: 2026-07-17T21:35:32Z
-freshness_token: SWFL-7421-v24-20260717
+version: 25
+refined_at: 2026-07-17T21:47:12Z
+freshness_token: SWFL-7421-v25-20260717
 ttl_seconds: 31536000
 pack_hash: 09f592fc768c
 context_type: user_saved_reference
@@ -45,9 +45,9 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
 --- OUTPUT ---
 {
   "brain_id": "storm-history-swfl",
-  "version": 24,
-  "refined_at": "2026-07-17T21:35:32Z",
-  "expires": "2027-07-17T21:35:32Z",
+  "version": 25,
+  "refined_at": "2026-07-17T21:47:12Z",
+  "expires": "2027-07-17T21:47:12Z",
   "ttl_seconds": 31536000,
   "direction": "bearish",
   "magnitude": 0.5,
@@ -65,7 +65,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-07-17T21:35:32Z",
+        "fetched_at": "2026-07-17T21:47:12Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -84,7 +84,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-07-17T21:35:32Z",
+        "fetched_at": "2026-07-17T21:47:12Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -103,7 +103,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-07-17T21:35:32Z",
+        "fetched_at": "2026-07-17T21:47:12Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -122,7 +122,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-07-17T21:35:32Z",
+        "fetched_at": "2026-07-17T21:47:12Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -139,7 +139,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-07-17T21:35:32Z",
+        "fetched_at": "2026-07-17T21:47:12Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -156,7 +156,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-07-17T21:35:32Z",
+        "fetched_at": "2026-07-17T21:47:12Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -173,7 +173,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-07-17T21:35:32Z",
+        "fetched_at": "2026-07-17T21:47:12Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -190,7 +190,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-07-17T21:35:32Z",
+        "fetched_at": "2026-07-17T21:47:12Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -207,7 +207,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
       "variable_type": "categorical",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-07-17T21:35:32Z",
+        "fetched_at": "2026-07-17T21:47:12Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -233,7 +233,7 @@ s01 | NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/envir
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-17T21:35:32Z"
+    "computed_at": "2026-07-17T21:47:12Z"
   },
   "exogenous_signals": []
 }
