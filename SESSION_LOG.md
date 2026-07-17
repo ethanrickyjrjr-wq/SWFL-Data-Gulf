@@ -1,3 +1,18 @@
+## 2026-07-17 (Sonnet 5 · main) — bls-ppi implementation plan written (4 tasks, ready to execute)
+
+`superpowers:writing-plans` against the approved design doc. Re-probed every touch point directly
+(types/pack.mts, types/brain-output.mts, macro-us-source.mts, faf5-source.mts, duckdb-source.mts,
+cre-swfl.mts's full closure-state/corpusSummary/outputProducer wiring, cre-swfl.test.mts conventions,
+brain-vocabulary.json's concepts+slug_index schema, catalog.mts/catalog.test.mts mirror scope) so
+every step names exact anchors instead of guessing. Landed on 8 emitted metrics, not the spec's
+"1 blended cross-sector metric" — averaging 4 different trade-contractor indices would violate this
+exact pack's own zero-cross-sector-blending rule, so each of the 4 trades ships as its own named
+metric instead (a plan-time spec fix, per writing-plans' license to correct issues found while
+planning). 4 tasks: (1) ingest broaden Python + cadence_registry, (2) new bls-ppi-source.mts DuckDB
+Tier-1 connector + fixture + test, (3) cre-swfl wiring + tests + vocab in ONE commit (Gate 2/5 force
+this — an intermediate commit missing the vocab entries can't push clean), (4) full verification
+pass. Plan: `docs/superpowers/plans/2026-07-17-bls-ppi-cre-swfl-consumer.md`. Not yet executed.
+
 ## 2026-07-17 (Sonnet 5 · main) — bls-ppi consumer design: full BLS PPI construction scope researched live, cre-swfl picked as consumer
 
 `bls_ppi` ingest (landed since 05/27, `consuming_pack: none`) got a proper brainstorm per RULE 3.5.
