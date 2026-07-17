@@ -11,6 +11,7 @@ const files = [
   "components/back-on-market/BackOnMarketRead.tsx",
   "lib/back-on-market/national-frame.ts",
   "lib/back-on-market/load-zip.ts",
+  "lib/back-on-market/relist-fact.ts",
 ];
 
 /** File text with block + full-line comments removed, lowercased. */
@@ -36,5 +37,24 @@ test("Lane 1 copy never claims a specific home's reason or seller state", () => 
     "this contract fell through because",
   ]) {
     expect(src).not.toContain(banned);
+  }
+});
+
+test("the Lane 2 per-home overlay states WHEN it returned, never WHY it left", () => {
+  // The overlay says "back on the market <date> after N days off-market — the record
+  // doesn't state why." It must carry that disclaimer, and never a per-home cause.
+  const src = code("components/back-on-market/BackOnMarketRead.tsx");
+  expect(src).toContain("back on the market");
+  expect(src).toContain("state why"); // the "the record doesn't state why" disclaimer
+  for (const bannedReason of [
+    "fell through because",
+    "because the deal",
+    "foreclos", // never assert a distressed cause
+    "short sale",
+    "the buyer backed out",
+    "financing fell",
+    "distressed",
+  ]) {
+    expect(src).not.toContain(bannedReason);
   }
 });

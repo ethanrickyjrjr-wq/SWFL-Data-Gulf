@@ -73,10 +73,15 @@ def diff_states(
             else:
                 # STATE CHANGE — the headline signal.
                 delta = price - prev_price if (price is not None and prev_price is not None) else None
+                # RELIST: a holding listing reappearing into a live state carries its TRUE
+                # off-market duration (today - frozen holding-entry last_seen), so a real
+                # relist-after-departure can be told apart from same-week scan flicker.
+                dom = _days_off_market(prev, today) if (prev_state == HOLDING and state in _RELIST_TO) else None
                 upserts.append(_upsert(addr, sor, cur, state, days_in_state=0))
                 transitions.append(
                     _transition(addr, sor, prev_state, state, today, cur,
-                                price, delta, _to_int(prev.get("days_in_state")), is_seed)
+                                price, delta, _to_int(prev.get("days_in_state")), is_seed,
+                                days_off_market=dom)
                 )
         else:
             # ABSENT today. Move to HOLDING ONLY on a complete pull AND only from a live for-sale
@@ -103,7 +108,8 @@ def _upsert(addr: str, sor: str, row: dict[str, Any], state: str, *, days_in_sta
     return out
 
 
-def _transition(addr, sor, from_state, to_state, at, row, price, price_delta, days_in_prev_state, seed):
+def _transition(addr, sor, from_state, to_state, at, row, price, price_delta, days_in_prev_state, seed,
+                days_off_market=None):
     return {
         "address_key": addr,
         "sale_or_rent": sor,
@@ -115,6 +121,7 @@ def _transition(addr, sor, from_state, to_state, at, row, price, price_delta, da
         "price_delta": price_delta,
         "days_in_prev_state": days_in_prev_state,
         "seed": seed,
+        "days_off_market": days_off_market,
     }
 
 
@@ -143,6 +150,24 @@ def _as_date(v: Any) -> date | None:
         except ValueError:
             return None
     return None
+
+
+# LIVE states a holding listing can reappear into — a relist. Mirrors _LIVE_STATES, minus the
+# fact that the SteadyAPI feed labels a returned listing "active" (not "back_on_market").
+_RELIST_TO = _LIVE_STATES
+
+
+def _days_off_market(prev: dict[str, Any], today: str) -> int | None:
+    """True off-market duration of a reappearing holding: today - the FROZEN holding-entry
+    last_seen (days_in_state is frozen at 0 on a holding, so it can't measure this). None unless
+    the prior state was 'holding' and both dates parse."""
+    if prev.get("state") != HOLDING:
+        return None
+    entered = _as_date(prev.get("last_seen"))
+    td = _as_date(today)
+    if entered is None or td is None:
+        return None
+    return (td - entered).days
 
 
 def plan_off_market_checks(

@@ -7,6 +7,7 @@
 import { geocodeAddress, type GeocodeFn } from "@/lib/geo/geocode-address";
 import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
 import { loadBackOnMarketZip } from "@/lib/back-on-market/load-zip";
+import { resolveRelistFact } from "@/lib/back-on-market/relist-fact";
 import BackOnMarketRead from "@/components/back-on-market/BackOnMarketRead";
 
 const BARE_ZIP = /^\d{5}$/;
@@ -28,7 +29,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ q
   const { q = "" } = await searchParams;
   const resolved = await resolveQToZip(q);
   const inScope = resolved ? resolveZip(resolved.zip).in_scope : false;
-  const data = resolved && inScope ? await loadBackOnMarketZip(resolved.zip) : null;
+  // Lane 2 is only meaningful for a specific ADDRESS (a bare ZIP has no per-home key), so
+  // skip the geocode for a bare-ZIP query. resolveRelistFact is empty-tolerant on its own,
+  // but a returned fact overlays only when Lane-1 ZIP context exists.
+  const isAddress = q.trim() !== "" && !BARE_ZIP.test(q.trim());
+  const [data, relist] = await Promise.all([
+    resolved && inScope ? loadBackOnMarketZip(resolved.zip) : Promise.resolve(null),
+    isAddress ? resolveRelistFact(q) : Promise.resolve(null),
+  ]);
 
   if (!data) {
     return (
@@ -43,7 +51,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ q
   }
   return (
     <main>
-      <BackOnMarketRead data={data} />
+      <BackOnMarketRead data={data} relist={relist} />
     </main>
   );
 }

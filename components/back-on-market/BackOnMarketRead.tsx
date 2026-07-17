@@ -8,10 +8,20 @@
 import { useState } from "react";
 import { NATIONAL_FALLTHROUGH } from "@/lib/back-on-market/national-frame";
 import type { BackOnMarketZip } from "@/lib/back-on-market/load-zip";
+import type { RelistFact } from "@/lib/back-on-market/relist-fact";
 
 const pct = (n: number | null) => (n == null ? "—" : `${n}%`);
 
-export default function BackOnMarketRead({ data }: { data: BackOnMarketZip }) {
+export default function BackOnMarketRead({
+  data,
+  relist,
+}: {
+  data: BackOnMarketZip;
+  /** Lane 2 — the specific home's clean relist event, when an address resolved one.
+   *  null/absent → Lane 1 only. It states WHEN the home returned and HOW LONG it was
+   *  gone; it NEVER states WHY (the record doesn't say, and neither do we). */
+  relist?: RelistFact | null;
+}) {
   const [side, setSide] = useState<"buyer" | "seller">("buyer");
   const hasLocal = data.cancellationRatePct != null;
 
@@ -50,6 +60,13 @@ export default function BackOnMarketRead({ data }: { data: BackOnMarketZip }) {
         <p className="bom-sub">
           Relists {pct(data.relistRatePct)} · delistings {pct(data.delistRatePct)} — as of{" "}
           {data.asOf}.
+        </p>
+      )}
+
+      {relist && (
+        <p className="bom-relist">
+          This home came <strong>back on the market {relist.date}</strong> after{" "}
+          {relist.daysOffMarket} days off-market — the record doesn&rsquo;t state why.
         </p>
       )}
 

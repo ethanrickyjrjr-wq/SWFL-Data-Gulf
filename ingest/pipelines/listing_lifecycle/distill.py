@@ -99,6 +99,9 @@ _TRANS_COLS = [
     "price", "price_delta", "days_in_prev_state", "seed",
     # Sold-capture: the confirmed sale price + real close date (both NULL unless to_state='sold').
     "sold_price", "sold_date",
+    # Relist detector (back-on-market Phase 2): true off-market duration on a holding->live
+    # transition (at - holding-entry last_seen). NULL for every non-relist transition.
+    "days_off_market",
 ]
 
 

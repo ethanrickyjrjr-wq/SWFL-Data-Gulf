@@ -10,6 +10,7 @@
   "app/charts/page.tsx",
   "app/insiders/_lib/desk-stats.ts",
   "app/r/communities-swfl/communities.ts",
+  "lib/back-on-market/relist-fact.ts",
   "lib/charts/gallery-loaders.ts",
   "lib/charts/load-metro-trend.ts",
   "lib/claim/claim-store.test.ts",

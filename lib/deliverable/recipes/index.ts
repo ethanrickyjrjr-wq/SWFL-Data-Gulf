@@ -106,3 +106,11 @@ export const RECIPE_BUILDERS: Partial<Record<RecipeKey, RecipeBuilder>> = {
 export function builderFor(key: RecipeKey): RecipeBuilder | null {
   return RECIPE_BUILDERS[key] ?? null;
 }
+
+// ── Back on the Market — the "send it" deliverable for /r/back-on-market ────────────
+// Registered as a direct export, NOT in RECIPE_BUILDERS above: `back-on-market` is not a
+// `RecipeKey` (the closed key set lives in lib/deliverable/recipes.ts), and the "send it"
+// flow originates from the read page, not the email-lab `authorDoc(key)` dispatch. To wire
+// it into the lab dispatch, an operator must first add "back-on-market" to RECIPE_KEYS +
+// RECIPES in recipes.ts (out of this build's scope) — then it can join the table above.
+export { buildBackOnMarket } from "./back-on-market";
