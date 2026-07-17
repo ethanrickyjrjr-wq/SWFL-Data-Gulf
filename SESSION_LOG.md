@@ -9,6 +9,19 @@ deliverable-playbook Part 10; full test coverage) had already reached main via a
 so a rebase from this tree patch-matched and skipped them. Pushed from the isolated worktree, not the
 shared main checkout. Also cleaned up two stale worktrees this session: `dcd` (already landed) and
 `desk-fix-isolate-2` (its months-of-supply desk chart is already live on main via a later commit).
+## 2026-07-17 (Opus 4.8 · main) — CI layer 2: regenerated stale watch-manifest + watcher workflows
+
+Fixing the bun-test reds let the CI `build` job advance to the next step (`node --test` over
+.github/scripts + scripts/lib + .claude/hooks), which had its OWN pre-existing failure, hidden all this
+time behind the earlier-failing bun-test step. `.github/_watch-manifest.json` and both watcher workflows
+(log-cron-incident.yml, heal-cron-failure.yml) had drifted from the workflows dir (factuality-gate.yml
+absent, among others). Ran the sanctioned regen `node scripts/build-watch-lists.mjs --write
+--write-watchers` — 107 workflows, 77 scheduled; watchers now watch 76/74. Full node:test suite 143/0
+local (push-touched-unit-coverage.test.mjs, flagged in CI, passes locally in isolation AND aggregate —
+next CI run confirms). NOT blocking, logged for handoff: regen surfaced 4 ZOMBIE_CRON workflows
+(dbpr-sirs-monthly, fgcu-reri-monthly, marketbeat-pdf-ingest, rsw-airport-monthly) disabled at the
+GitHub API but with live crons in source.
+
 ## 2026-07-17 (Opus 4.8 · main) — fixed the agent-hero PDF/HTML aspect-ratio bug (the last CI red)
 
 The one remaining CI red — pdf-html-visual-parity agent-hero Layer 1 — was a REAL, cross-platform

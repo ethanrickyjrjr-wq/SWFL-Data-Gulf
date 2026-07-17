@@ -280,6 +280,16 @@
     "disabled": false
   },
   {
+    "name": "factuality-gate",
+    "file": "factuality-gate.yml",
+    "scheduled": false,
+    "timeout_minutes": null,
+    "cancel_in_progress": false,
+    "paid": true,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "FAF5 freight annual (S3 parquet cold lane)",
     "file": "faf5-annual.yml",
     "scheduled": true,
@@ -313,7 +323,7 @@
     "name": "FEMA NFIP quarterly",
     "file": "fema-nfip-quarterly.yml",
     "scheduled": true,
-    "timeout_minutes": 30,
+    "timeout_minutes": 45,
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
@@ -362,7 +372,7 @@
   {
     "name": "SBA FOIA Franchise Outcomes Tier 1 quarterly",
     "file": "franchise-outcomes-quarterly.yml",
-    "scheduled": true,
+    "scheduled": false,
     "timeout_minutes": 45,
     "cancel_in_progress": false,
     "paid": false,
@@ -680,6 +690,16 @@
     "disabled": false
   },
   {
+    "name": "Neighborhood stats annual (aggregate parcel_subdivision)",
+    "file": "neighborhood-stats-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "SWFL business news ingest daily",
     "file": "news-swfl-ingest.yml",
     "scheduled": true,
@@ -738,6 +758,16 @@
     "paid": false,
     "should_be_dark": false,
     "disabled": false
+  },
+  {
+    "name": "Parcel subdivision annual (FDOR centroid, Collier + Lee)",
+    "file": "parcel-subdivision-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 180,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
   },
   {
     "name": "Project-feed change detection (daily)",
