@@ -232,6 +232,7 @@ function makeCorridorFragment(name: string, city: string): RawFragment {
     name,
     city,
     county: "Lee",
+    submarket: null,
     corridor_type: "highway-strip-mall",
     seasonal_index: 0.3,
     character: null,
@@ -614,12 +615,18 @@ function makeCorridorFragmentWithMetrics(
   abs: number,
   rent: number,
   vacancySourceUrl: string | null = null,
+  submarket: string | null = name,
 ): RawFragment {
   const norm: CorridorNormalized = {
     kind: "corridor",
     name,
     city,
     county: "Lee",
+    // Default: each hand-built metrics corridor is its own one-corridor
+    // submarket so metric-median tests keep exercising the value math (a null
+    // submarket drops the row from every stamped-metric aggregate). Pass an
+    // explicit shared submarket to model the stamped-duplicate shape.
+    submarket,
     corridor_type: "highway-strip-mall",
     seasonal_index: 0.3,
     character: null,
@@ -917,4 +924,113 @@ test("cre-swfl emits a deterministic corridor_vacancy detail_table", () => {
     undefined,
     "unsourced corridor must NOT carry a coverage_note (no fabricated provenance)",
   );
+});
+
+// --- Corridor-median grain: the 07/13 stamped-figure incident as law ----------
+// corridor_profiles rent/vacancy/cap figures are C&W MarketBeat SUBMARKET
+// values stamped onto every corridor in the submarket. The published medians
+// must therefore be medians ACROSS SUBMARKETS — a median across corridor rows
+// is corridor-count-weighted and lets one submarket's stamped copies outvote
+// the rest (check corridor_grain_bug_is_live_on_embed_and_brain).
+
+test("grain: stamped duplicate corridors collapse to ONE submarket vote in the SWFL medians", () => {
+  creSwfl.corpusSummary!([
+    // Naples: three corridors, identical stamped figures — the crowning shape.
+    makeCorridorFragmentWithMetrics(
+      "Waterside Shops",
+      "Naples",
+      6.7,
+      1.8,
+      1500,
+      60.84,
+      null,
+      "Naples",
+    ),
+    makeCorridorFragmentWithMetrics(
+      "5th Ave South",
+      "Naples",
+      6.7,
+      1.8,
+      6200,
+      60.84,
+      null,
+      "Naples",
+    ),
+    makeCorridorFragmentWithMetrics(
+      "Tamiami Naples",
+      "Naples",
+      6.7,
+      1.8,
+      800,
+      60.84,
+      null,
+      "Naples",
+    ),
+    makeCorridorFragmentWithMetrics(
+      "Cape Coral Pkwy E",
+      "Cape Coral",
+      6.7,
+      2.5,
+      3500,
+      23.09,
+      null,
+      "Cape Coral",
+    ),
+  ]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const rent = result.key_metrics.find((m) => m.metric === "asking_rent_psf_median");
+  assert.ok(rent, "expected asking_rent_psf_median");
+  // Corridor-weighted median of [60.84, 60.84, 60.84, 23.09] is 60.84 — the bug.
+  // Submarket-grain median of [60.84, 23.09] is ~41.97.
+  assert.notEqual(rent!.value, 60.84, "median must not be the stamped-majority value");
+  assert.ok(
+    (rent!.value as number) > 41.9 && (rent!.value as number) < 42.0,
+    `expected the 2-submarket median (~41.97), got ${rent!.value}`,
+  );
+  assert.match(String(rent!.label), /2 of 2 submarkets/);
+  assert.match(
+    String(rent!.source.citation),
+    /2 submarkets reporting asking_rent_psf \(4 corridors mapped\)/,
+  );
+});
+
+test("grain: fixture-driven SWFL + county medians are submarket-grain; null-submarket corridors drop out", async () => {
+  const corridorFragments = await corridorSource.fetch();
+  creSwfl.corpusSummary!(corridorFragments);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const has = (slug: string) => result.key_metrics.find((m) => m.metric === slug);
+
+  // Fixture submarket reps with a rent: North Naples 42.5 · Lehigh Acres 35.08 ·
+  // Cape Coral 32.5 · Bonita Springs 26.5 (City of Fort Myers holds no values;
+  // Pine Ridge 38.0 / Estero Blvd 45.0 / Gulf Coast 28.0 / Alico Flex 16.5 have
+  // NO submarket and must not contribute). Median = (32.5 + 35.08) / 2 = 33.79.
+  // The old corridor-weighted median over all 9 rent rows was 35.08.
+  const rent = has("asking_rent_psf_median");
+  assert.ok(rent, "expected asking_rent_psf_median");
+  assert.equal(rent!.value, 33.79);
+  assert.match(String(rent!.label), /4 of 5 submarkets/);
+
+  const vac = has("vacancy_rate_median");
+  assert.ok(vac, "expected vacancy_rate_median");
+  assert.equal(vac!.value, 4.6); // median(0.2, 4.2, 5, 8) across submarkets
+
+  const cap = has("cap_rate_median");
+  assert.ok(cap, "expected cap_rate_median");
+  assert.equal(cap!.value, 6.2); // median(5.8, 6.2, 7) across submarkets
+
+  // County split rides the reps: Collier = North Naples alone; Lee = Lehigh /
+  // Cape Coral / Bonita (City of Fort Myers has no values).
+  const rentCollier = has("asking_rent_psf_median_collier");
+  assert.ok(rentCollier, "expected asking_rent_psf_median_collier");
+  assert.equal(rentCollier!.value, 42.5);
+  assert.match(String(rentCollier!.label), /1 of 1 Collier submarkets/);
+  const rentLee = has("asking_rent_psf_median_lee");
+  assert.ok(rentLee, "expected asking_rent_psf_median_lee");
+  assert.equal(rentLee!.value, 32.5);
+  assert.match(String(rentLee!.label), /3 of 4 Lee submarkets/);
+
+  // Absorption stays corridor-grain — it genuinely varies inside a submarket.
+  const abs = has("absorption_sqft_median");
+  assert.ok(abs, "expected absorption_sqft_median");
+  assert.match(String(abs!.label), /corridors\)/);
 });

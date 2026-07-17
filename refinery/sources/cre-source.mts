@@ -6,10 +6,7 @@ import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
-import {
-  corridorsForSubmarket,
-  submarketFor,
-} from "../lib/marketbeat-submarket-aliases.mts";
+import { corridorsForSubmarket, submarketFor } from "../lib/marketbeat-submarket-aliases.mts";
 import { displayNameFor } from "../lib/corridor-display.mts";
 import type { MarketbeatSwflNormalized } from "./marketbeat-swfl-source.mts";
 
@@ -95,6 +92,14 @@ export interface CorridorNormalized {
   display_name?: string;
   city: string;
   county: "Lee" | "Collier" | "Unknown";
+  /**
+   * C&W MarketBeat submarket the stamped rent/vacancy figures belong to —
+   * the DB `submarket` column (07/13 exact-value-join backfill, migration
+   * 20260713_corridor_submarket_grain.sql). Null = this corridor's figures
+   * matched no published submarket row (no named source) and must stay out
+   * of every submarket-grain aggregate.
+   */
+  submarket: string | null;
   corridor_type: string;
   /** 0-1 — pass-through, do NOT scale */
   seasonal_index: number | null;
@@ -207,9 +212,7 @@ function metricDirection(v: unknown): CorridorMetricDirection | null {
 function normalizeFlags(raw: unknown): CorridorFlag[] {
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter(
-      (f): f is Record<string, unknown> => f != null && typeof f === "object",
-    )
+    .filter((f): f is Record<string, unknown> => f != null && typeof f === "object")
     .map((f) => ({
       flag: str(f.flag) ?? "",
       type: str(f.type) ?? "unknown",
@@ -224,19 +227,13 @@ function normalizeFlags(raw: unknown): CorridorFlag[] {
  * Supabase returning either an already-parsed object or a JSON string (some
  * PostgREST configurations).
  */
-export function normalizeBrokerNarrative(
-  raw: unknown,
-): CorridorBrokerNarrative | null {
+export function normalizeBrokerNarrative(raw: unknown): CorridorBrokerNarrative | null {
   let obj: Record<string, unknown> | null = null;
   if (raw == null) return null;
   if (typeof raw === "string") {
     try {
       const parsed = JSON.parse(raw) as unknown;
-      if (
-        parsed != null &&
-        typeof parsed === "object" &&
-        !Array.isArray(parsed)
-      ) {
+      if (parsed != null && typeof parsed === "object" && !Array.isArray(parsed)) {
         obj = parsed as Record<string, unknown>;
       }
     } catch {
@@ -404,20 +401,17 @@ export function groupCorridorsBySubmarket(
 }
 
 /** Map a raw `corridor_profiles` row -> CorridorNormalized. Single point of schema knowledge. */
-export function normalizeCorridor(
-  row: Record<string, unknown>,
-): CorridorNormalized {
+export function normalizeCorridor(row: Record<string, unknown>): CorridorNormalized {
   const city = str(row.city) ?? "";
   const character = str(row.character);
-  const character_broker_narrative = normalizeBrokerNarrative(
-    row.character_broker_narrative,
-  );
+  const character_broker_narrative = normalizeBrokerNarrative(row.character_broker_narrative);
   return {
     kind: "corridor",
     name: str(row.corridor_name) ?? "",
     display_name: displayNameFor(str(row.corridor_name) ?? ""),
     city,
     county: cityToCounty(city),
+    submarket: str(row.submarket),
     corridor_type: str(row.corridor_type) ?? "unknown",
     seasonal_index: num(row.seasonal_index),
     character,
@@ -456,15 +450,10 @@ export function normalizeCorridor(
 }
 
 /** Load a fixture file, unwrapping the `{ __meta, rows }` wrapper to a plain array. */
-async function loadFixtureRows(
-  fixturePath: string,
-): Promise<Record<string, unknown>[]> {
+async function loadFixtureRows(fixturePath: string): Promise<Record<string, unknown>[]> {
   const data = JSON.parse(await readFile(fixturePath, "utf-8")) as
-    | { rows?: unknown[]; data?: unknown[] }
-    | unknown[];
-  const rows: unknown[] = Array.isArray(data)
-    ? data
-    : (data.rows ?? data.data ?? []);
+    { rows?: unknown[]; data?: unknown[] } | unknown[];
+  const rows: unknown[] = Array.isArray(data) ? data : (data.rows ?? data.data ?? []);
   return rows as Record<string, unknown>[];
 }
 
@@ -478,9 +467,7 @@ async function fetchCorridorRows(): Promise<Record<string, unknown>[]> {
     .is("deleted_at", null)
     .eq("verification_status", "verified");
   if (error) {
-    throw new Error(
-      `cre-source: corridor_profiles fetch failed — ${error.message}`,
-    );
+    throw new Error(`cre-source: corridor_profiles fetch failed — ${error.message}`);
   }
   const rows = (data ?? []) as Record<string, unknown>[];
   if (rows.length === 0) {
@@ -498,10 +485,7 @@ export const corridorSource: SourceConnector = {
     return rows.map((row): RawFragment<CorridorNormalized> => {
       const normalized = normalizeCorridor(row);
       return {
-        fragment_id: fragmentId(
-          CORRIDOR_SOURCE_ID,
-          normalized.name || JSON.stringify(row),
-        ),
+        fragment_id: fragmentId(CORRIDOR_SOURCE_ID, normalized.name || JSON.stringify(row)),
         source_id: CORRIDOR_SOURCE_ID,
         source_trust_tier: 2, // verified editorial intelligence
         fetched_at,
@@ -512,8 +496,7 @@ export const corridorSource: SourceConnector = {
   },
   citationMeta(verifiedDate, ttlSeconds): Omit<CitationRow, "id"> {
     return {
-      source:
-        "SWFL CRE corridor profiles — Supabase corridor_profiles (verified, non-deleted)",
+      source: "SWFL CRE corridor profiles — Supabase corridor_profiles (verified, non-deleted)",
       verified: verifiedDate,
       expires: expiresDate(verifiedDate, ttlSeconds),
     };

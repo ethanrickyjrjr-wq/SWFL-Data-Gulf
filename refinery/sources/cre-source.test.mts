@@ -12,10 +12,7 @@ const {
   normalizeCorridor,
   groupCorridorsBySubmarket,
 } = await import("./cre-source.mts");
-import type {
-  CorridorNormalized,
-  JoinedSubmarketGroup,
-} from "./cre-source.mts";
+import type { CorridorNormalized, JoinedSubmarketGroup } from "./cre-source.mts";
 import type { MarketbeatSwflNormalized } from "./marketbeat-swfl-source.mts";
 
 // Minimal CorridorNormalized factory — only the fields the join touches.
@@ -25,6 +22,7 @@ function mkCorridor(name: string): CorridorNormalized {
     name,
     city: "",
     county: "Unknown",
+    submarket: null,
     corridor_type: "unknown",
     seasonal_index: null,
     character: null,
@@ -274,10 +272,7 @@ test("fixture row A (both): normalizeCorridor populates broker + character_rende
   const rowA = rows.find((r) => r.corridor_name === "Test Corridor A — Both");
   assert.ok(rowA);
   const c = normalizeCorridor(rowA!);
-  assert.equal(
-    c.character,
-    "Hand-authored character text — the verbatim editorial intel.",
-  );
+  assert.equal(c.character, "Hand-authored character text — the verbatim editorial intel.");
   assert.ok(c.character_broker_narrative);
   assert.equal(c.character_broker_narrative!.quarter, "2026-Q3");
   assert.ok(c.character_render);
@@ -287,9 +282,7 @@ test("fixture row A (both): normalizeCorridor populates broker + character_rende
 
 test("fixture row B (broker only): normalizeCorridor uses broker as character fallback", async () => {
   const rows = await loadBrokerFixtureRows();
-  const rowB = rows.find(
-    (r) => r.corridor_name === "Test Corridor B — Broker Only",
-  );
+  const rowB = rows.find((r) => r.corridor_name === "Test Corridor B — Broker Only");
   assert.ok(rowB);
   const c = normalizeCorridor(rowB!);
   assert.equal(c.character, null);
@@ -302,9 +295,7 @@ test("fixture row B (broker only): normalizeCorridor uses broker as character fa
 
 test("fixture row C (neither): normalizeCorridor leaves broker + character_render null", async () => {
   const rows = await loadBrokerFixtureRows();
-  const rowC = rows.find(
-    (r) => r.corridor_name === "Test Corridor C — Neither",
-  );
+  const rowC = rows.find((r) => r.corridor_name === "Test Corridor C — Neither");
   assert.ok(rowC);
   const c = normalizeCorridor(rowC!);
   assert.equal(c.character, null);
@@ -323,10 +314,7 @@ test("normalizeCorridor: hand-authored character is NEVER mutated when broker na
 // --- groupCorridorsBySubmarket -----------------------------------------
 
 test("groupCorridorsBySubmarket: empty mbRows → empty matched + all corridors unmatched", () => {
-  const corridors = [
-    mkCorridor("Pine Ridge Rd Naples"),
-    mkCorridor("Cape Coral Pkwy E"),
-  ];
+  const corridors = [mkCorridor("Pine Ridge Rd Naples"), mkCorridor("Cape Coral Pkwy E")];
   const { matched, unmatched } = groupCorridorsBySubmarket(corridors, []);
   assert.equal(matched.size, 0);
   assert.equal(unmatched.length, 2);
@@ -365,27 +353,17 @@ test("groupCorridorsBySubmarket: happy path — intersects mapped corridors with
 });
 
 test("groupCorridorsBySubmarket: corridor with no alias entry → unmatched", () => {
-  const corridors = [
-    mkCorridor("Pine Ridge Rd Naples"),
-    mkCorridor("Nonexistent Corridor"),
-  ];
-  const { matched, unmatched } = groupCorridorsBySubmarket(corridors, [
-    mkMbRow("Naples"),
-  ]);
+  const corridors = [mkCorridor("Pine Ridge Rd Naples"), mkCorridor("Nonexistent Corridor")];
+  const { matched, unmatched } = groupCorridorsBySubmarket(corridors, [mkMbRow("Naples")]);
   assert.equal(matched.size, 1);
   assert.equal(unmatched.length, 1);
   assert.equal(unmatched[0]!.name, "Nonexistent Corridor");
 });
 
 test("groupCorridorsBySubmarket: corridor resolves to submarket with no mbRow → unmatched", () => {
-  const corridors = [
-    mkCorridor("Pine Ridge Rd Naples"),
-    mkCorridor("Cape Coral Pkwy E"),
-  ];
+  const corridors = [mkCorridor("Pine Ridge Rd Naples"), mkCorridor("Cape Coral Pkwy E")];
   // Only Naples has an mbRow this run.
-  const { matched, unmatched } = groupCorridorsBySubmarket(corridors, [
-    mkMbRow("Naples"),
-  ]);
+  const { matched, unmatched } = groupCorridorsBySubmarket(corridors, [mkMbRow("Naples")]);
   assert.equal(matched.size, 1);
   assert.ok(matched.has("Naples"));
   assert.equal(unmatched.length, 1);

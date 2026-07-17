@@ -1,13 +1,14 @@
 {
   "__meta": {
     "_synthetic": false,
-    "_note": "Fixture rows reflect real SWFL corridor data. source_url values point to C&W MarketBeat reports (Industrial Q1 2026, Office Q2 2025) and C&W hub. Per-metric source columns are null in fixture \u2014 fallback chain tests are covered by source_url.",
+    "_note": "Fixture rows reflect real SWFL corridor data. source_url values point to C&W MarketBeat reports (Industrial Q1 2026, Office Q2 2025) and C&W hub. Per-metric source columns are null in fixture \u2014 fallback chain tests are covered by source_url. submarket = the 07/13 exact-value-join backfill (migration 20260713_corridor_submarket_grain.sql), mirrored from the live DB 07/17/2026; null = figures matched no published submarket row (no named source).",
     "_shape": "One row per SWFL CRE corridor. The live fetch filters deleted_at IS NULL AND verification_status = 'verified' \u2014 fixture rows all reflect that state. There is NO county column; county is derived from city in normalize(). active_flags is the de-facto 'hidden truths' layer. cap_rate_pct / vacancy_rate_pct / absorption_sqft / asking_rent_psf are nullable \u2014 corridors without metrics are excluded from the cre-swfl direction vote and surfaced as caveats. Negative absorption (give-back) is valid; Estero Blvd row exercises that path."
   },
   "rows": [
     {
       "corridor_name": "Immokalee Rd North Naples",
       "city": "Naples",
+      "submarket": "North Naples",
       "corridor_type": "highway-strip-mall",
       "seasonal_index": 0.3,
       "character": "The 'Suburban 5th Avenue' \u2014 true commercial gravity center of north Collier, anchored by daytime medical-tech employment rather than seasonal tourism.",
@@ -48,6 +49,7 @@
     {
       "corridor_name": "Cleveland Ave Fort Myers",
       "city": "Fort Myers",
+      "submarket": "City of Fort Myers",
       "corridor_type": "mixed-use-downtown",
       "seasonal_index": 0.15,
       "character": "Legacy commercial spine in structural decline. Auto-row dealerships thinning, retail vacancy climbing north of Colonial.",
@@ -82,9 +84,10 @@
     {
       "corridor_name": "Lee Blvd Lehigh Acres",
       "city": "Lehigh Acres",
+      "submarket": "Lehigh Acres",
       "corridor_type": "highway-strip-mall",
       "seasonal_index": 0.1,
-      "character": "One of Lehigh Acres' primary commercial thoroughfares — land along Lee Boulevard was set aside for commerce in the community's original plat — anchored by a Walmart Supercenter (2523 Lee Blvd) and strip retail serving the ~114,000-resident CDP.",
+      "character": "One of Lehigh Acres' primary commercial thoroughfares \u2014 land along Lee Boulevard was set aside for commerce in the community's original plat \u2014 anchored by a Walmart Supercenter (2523 Lee Blvd) and strip retail serving the ~114,000-resident CDP.",
       "evolution_direction": "stable",
       "tenant_mix": "Walmart Supercenter anchor, strip retail, QSR pads",
       "active_flags": [],
@@ -109,6 +112,7 @@
     {
       "corridor_name": "Joel Blvd Lehigh Acres",
       "city": "Lehigh Acres",
+      "submarket": "Lehigh Acres",
       "corridor_type": "highway-strip-mall",
       "seasonal_index": 0.1,
       "character": "A secondary north-south commercial spine on the east side of Lehigh Acres, anchored by neighborhood grocery and strip retail (Jack's Market, 510 Joel Blvd) serving the surrounding residential blocks of the ~114,000-resident CDP.",
@@ -136,6 +140,7 @@
     {
       "corridor_name": "Gulf Coast Town Center / Alico Rd",
       "city": "Estero",
+      "submarket": null,
       "corridor_type": "anchor-dependent",
       "seasonal_index": 0.45,
       "character": "Big-box power center whose health tracks a handful of anchor leases. Anchor turnover is the dominant risk variable.",
@@ -176,6 +181,7 @@
     {
       "corridor_name": "Cape Coral Pkwy E",
       "city": "Cape Coral",
+      "submarket": "Cape Coral",
       "corridor_type": "suburban-residential",
       "seasonal_index": 0.25,
       "character": "Neighborhood-serving retail spine for a fast-growing residential base. Demand is rooftop-driven, not destination-driven.",
@@ -210,6 +216,7 @@
     {
       "corridor_name": "Estero Blvd / Fort Myers Beach",
       "city": "Fort Myers Beach",
+      "submarket": null,
       "corridor_type": "beachfront-tourism",
       "seasonal_index": 0.88,
       "character": "Barrier-island tourism corridor mid-rebuild after Hurricane Ian. Extreme seasonality \u2014 winter-quarter revenue carries the year.",
@@ -250,6 +257,7 @@
     {
       "corridor_name": "Bonita Trail",
       "city": "Bonita Springs",
+      "submarket": "Bonita Springs",
       "corridor_type": "highway-strip-mall",
       "seasonal_index": 0.4,
       "character": null,
@@ -284,6 +292,7 @@
     {
       "corridor_name": "Pine Ridge Rd Naples",
       "city": "Naples",
+      "submarket": null,
       "corridor_type": "medical-anchored",
       "seasonal_index": 0.35,
       "character": "Medical-office and health-services corridor with a stable, age-driven demand base less exposed to tourist seasonality.",
@@ -318,6 +327,7 @@
     {
       "corridor_name": "Alico Rd Industrial Flex",
       "city": "Fort Myers",
+      "submarket": null,
       "corridor_type": "industrial-flex",
       "seasonal_index": 0.1,
       "character": "Logistics and light-industrial flex corridor riding regional distribution growth. Effectively zero seasonality.",

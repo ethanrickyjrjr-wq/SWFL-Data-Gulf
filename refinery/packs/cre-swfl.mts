@@ -548,6 +548,108 @@ function summarizeDirection(values: (CorridorMetricDirection | null)[]): Directi
   return { direction: "stable", status: "tied", counts };
 }
 
+/**
+ * One representative per C&W submarket for the STAMPED corridor metrics
+ * (cap rate / vacancy / asking rent).
+ *
+ * corridor_profiles carries those three figures as MarketBeat SUBMARKET values
+ * stamped onto every corridor inside the submarket (07/13 finding: 23 of 27
+ * corridors' (rent, vacancy) pairs exactly match a row of the C&W submarket
+ * table) — so a median across corridor ROWS is a corridor-count-weighted
+ * submarket median: Naples' stamped copies outvote every other submarket
+ * (check corridor_grain_bug_is_live_on_embed_and_brain). Aggregates collapse
+ * to ONE representative per submarket first. Corridors with a null
+ * `submarket` (the DB exact-join backfill found no published row — a figure
+ * with no named source) stay out of every submarket-grain aggregate.
+ *
+ * Absorption is deliberately NOT collapsed — it genuinely varies inside a
+ * submarket (the 07/13 over-claim revert), so stamping it to submarket grain
+ * would manufacture a figure the report does not contain. It stays at
+ * corridor grain, labeled as such.
+ */
+interface SubmarketRep {
+  submarket: string;
+  county: CorridorNormalized["county"];
+  /** Member corridors, for citations + mapped-count disclosure. */
+  corridors: CorridorNormalized[];
+  cap_rate_pct: number | null;
+  /** Modal member direction, null when tied or unreported. */
+  cap_rate_direction: CorridorMetricDirection | null;
+  vacancy_rate_pct: number | null;
+  vacancy_rate_direction: CorridorMetricDirection | null;
+  asking_rent_psf: number | null;
+  asking_rent_psf_direction: CorridorMetricDirection | null;
+}
+
+/** Modal member direction for a rep, or null when tied/unreported. */
+function repDirection(values: (CorridorMetricDirection | null)[]): CorridorMetricDirection | null {
+  const sum = summarizeDirection(values);
+  return sum.status === "modal" ? sum.direction : null;
+}
+
+export function collapseCorridorsToSubmarkets(corridors: CorridorNormalized[]): SubmarketRep[] {
+  const bySubmarket = new Map<string, CorridorNormalized[]>();
+  for (const c of corridors) {
+    if (c.submarket == null) continue;
+    const list = bySubmarket.get(c.submarket) ?? [];
+    list.push(c);
+    bySubmarket.set(c.submarket, list);
+  }
+  const reps: SubmarketRep[] = [];
+  for (const [submarket, members] of bySubmarket) {
+    const counties = new Set(members.map((m) => m.county));
+    reps.push({
+      submarket,
+      county: counties.size === 1 ? members[0].county : "Unknown",
+      corridors: members,
+      // Median-within-group: identical by construction for stamped figures;
+      // guards drifted/degraded inputs without ever crowning one copy.
+      cap_rate_pct: medianOf(
+        members.map((m) => m.cap_rate_pct).filter((v): v is number => v != null),
+      ),
+      cap_rate_direction: repDirection(members.map((m) => m.cap_rate_direction)),
+      vacancy_rate_pct: medianOf(
+        members.map((m) => m.vacancy_rate_pct).filter((v): v is number => v != null),
+      ),
+      vacancy_rate_direction: repDirection(members.map((m) => m.vacancy_rate_direction)),
+      asking_rent_psf: medianOf(
+        members.map((m) => m.asking_rent_psf).filter((v): v is number => v != null),
+      ),
+      asking_rent_psf_direction: repDirection(members.map((m) => m.asking_rent_psf_direction)),
+    });
+  }
+  // Deterministic order — Map insertion order follows fetch order otherwise.
+  return reps.sort((a, b) => a.submarket.localeCompare(b.submarket));
+}
+
+/**
+ * Source receipt for a submarket-grain corridor aggregate. Same PostgREST
+ * reproduction URL shape as buildCreAggregateSource plus the
+ * `submarket=not.is.null` filter that defines the grain; the citation names
+ * submarkets (the real denominator) and discloses the corridor mapping count.
+ */
+function buildCreSubmarketAggregateSource(
+  field: "cap_rate_pct" | "vacancy_rate_pct" | "asking_rent_psf",
+  contributing: SubmarketRep[],
+  fetched_at: string,
+): BrainOutputMetricSource {
+  const url =
+    env.source === "live" && env.supabaseUrl
+      ? `${env.supabaseUrl}/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&${field}=not.is.null`
+      : "fixture://refinery/__fixtures__/corridor-profiles.sample.json";
+  const MAX_NAMED = 3;
+  const namedParts = contributing.slice(0, MAX_NAMED).map((r) => r.submarket);
+  const rest = contributing.length - MAX_NAMED;
+  const named = namedParts.join("; ") + (rest > 0 ? `; and ${rest} more` : "");
+  const mapped = contributing.reduce((s, r) => s + r.corridors.length, 0);
+  return {
+    url,
+    fetched_at,
+    tier: 2,
+    citation: `Brains Supabase corridor_profiles (verified, non-deleted) — median across ${contributing.length} submarket${contributing.length === 1 ? "" : "s"} reporting ${field} (${mapped} corridor${mapped === 1 ? "" : "s"} mapped): ${named}. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator.`,
+  };
+}
+
 /** Sorted "label (count)" breakdown of a string-keyed tally, count-descending. */
 function breakdown(counts: Record<string, number>): string {
   return Object.entries(counts)
@@ -744,28 +846,31 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   }
 
   // Four CRE corpus medians — tagged with `metric:` prefix so they surface in
-  // SAVED FACTS alongside the producer's BrainOutput.key_metrics.
-  const withCap = corridors.filter((c) => c.cap_rate_pct != null);
-  const withVac = corridors.filter((c) => c.vacancy_rate_pct != null);
+  // SAVED FACTS alongside the producer's BrainOutput.key_metrics. Cap/vacancy/
+  // rent are submarket-grain (stamped figures — see collapseCorridorsToSubmarkets);
+  // absorption genuinely varies per corridor and stays corridor-grain.
+  const factReps = collapseCorridorsToSubmarkets(corridors);
+  const withCap = factReps.filter((r) => r.cap_rate_pct != null);
+  const withVac = factReps.filter((r) => r.vacancy_rate_pct != null);
   const withAbs = corridors.filter((c) => c.absorption_sqft != null);
-  const withRent = corridors.filter((c) => c.asking_rent_psf != null);
-  const capMedian = medianOf(withCap.map((c) => c.cap_rate_pct as number));
-  const vacMedian = medianOf(withVac.map((c) => c.vacancy_rate_pct as number));
+  const withRent = factReps.filter((r) => r.asking_rent_psf != null);
+  const capMedian = medianOf(withCap.map((r) => r.cap_rate_pct as number));
+  const vacMedian = medianOf(withVac.map((r) => r.vacancy_rate_pct as number));
   const absMedian = medianOf(withAbs.map((c) => c.absorption_sqft as number));
-  const rentMedian = medianOf(withRent.map((c) => c.asking_rent_psf as number));
+  const rentMedian = medianOf(withRent.map((r) => r.asking_rent_psf as number));
   if (capMedian != null) {
     facts.push({
       topic: "metric:cap_rate_median",
-      fact: "Median cap rate across SWFL CRE corridors with reported metrics",
-      value: `Median cap rate is ${round2(capMedian)}% across ${withCap.length} of ${corridors.length} corridors that have reported metrics this period.`,
+      fact: "Median cap rate across SWFL CRE submarkets with reported metrics",
+      value: `Median cap rate is ${round2(capMedian)}% across ${withCap.length} of ${factReps.length} submarkets that have reported metrics this period.`,
       source_fragment_ids: [],
     });
   }
   if (vacMedian != null) {
     facts.push({
       topic: "metric:vacancy_rate_median",
-      fact: "Median vacancy rate across SWFL CRE corridors with reported metrics",
-      value: `Median vacancy rate is ${round2(vacMedian)}% across ${withVac.length} of ${corridors.length} corridors that have reported metrics this period.`,
+      fact: "Median vacancy rate across SWFL CRE submarkets with reported metrics",
+      value: `Median vacancy rate is ${round2(vacMedian)}% across ${withVac.length} of ${factReps.length} submarkets that have reported metrics this period.`,
       source_fragment_ids: [],
     });
   }
@@ -780,8 +885,8 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   if (rentMedian != null) {
     facts.push({
       topic: "metric:asking_rent_psf_median",
-      fact: "Median asking rent (PSF, NNN) across SWFL CRE corridors with reported metrics",
-      value: `Median asking rent is $${round2(rentMedian)}/sqft across ${withRent.length} of ${corridors.length} corridors that have reported metrics this period.`,
+      fact: "Median asking rent (PSF, NNN) across SWFL CRE submarkets with reported metrics",
+      value: `Median asking rent is $${round2(rentMedian)}/sqft across ${withRent.length} of ${factReps.length} submarkets that have reported metrics this period.`,
       source_fragment_ids: [],
     });
   }
@@ -972,22 +1077,26 @@ function voteCreDirection(corridors: CorridorNormalized[]): {
 // avoids the no-unused-vars lint the lint-staged hook enforces (--max-warnings=0).
 function creSwflOutputProducer(): BrainOutputProducerResult {
   const corridors = lastCorridors;
-  const withCap = corridors.filter((c) => c.cap_rate_pct != null);
-  const withVac = corridors.filter((c) => c.vacancy_rate_pct != null);
+  // Submarket grain for the stamped metrics (cap/vacancy/rent) — see
+  // collapseCorridorsToSubmarkets. Absorption stays corridor grain.
+  const reps = collapseCorridorsToSubmarkets(corridors);
+  const withCap = reps.filter((r) => r.cap_rate_pct != null);
+  const withVac = reps.filter((r) => r.vacancy_rate_pct != null);
   const withAbs = corridors.filter((c) => c.absorption_sqft != null);
-  const withRent = corridors.filter((c) => c.asking_rent_psf != null);
-  const capMedian = medianOf(withCap.map((c) => c.cap_rate_pct as number));
-  const vacMedian = medianOf(withVac.map((c) => c.vacancy_rate_pct as number));
+  const withRent = reps.filter((r) => r.asking_rent_psf != null);
+  const capMedian = medianOf(withCap.map((r) => r.cap_rate_pct as number));
+  const vacMedian = medianOf(withVac.map((r) => r.vacancy_rate_pct as number));
   const absMedian = medianOf(withAbs.map((c) => c.absorption_sqft as number));
-  const rentMedian = medianOf(withRent.map((c) => c.asking_rent_psf as number));
+  const rentMedian = medianOf(withRent.map((r) => r.asking_rent_psf as number));
 
   // Direction summaries computed once per metric — the `status` field drives
   // per-metric caveats below so a "stable" fallback label can't masquerade as
-  // a measured trend.
-  const capDir = summarizeDirection(withCap.map((c) => c.cap_rate_direction));
-  const vacDir = summarizeDirection(withVac.map((c) => c.vacancy_rate_direction));
+  // a measured trend. Stamped metrics summarize across submarket reps (one
+  // modal vote per submarket — nine stamped Naples copies are ONE vote).
+  const capDir = summarizeDirection(withCap.map((r) => r.cap_rate_direction));
+  const vacDir = summarizeDirection(withVac.map((r) => r.vacancy_rate_direction));
   const absDir = summarizeDirection(withAbs.map((c) => c.absorption_sqft_direction));
-  const rentDir = summarizeDirection(withRent.map((c) => c.asking_rent_psf_direction));
+  const rentDir = summarizeDirection(withRent.map((r) => r.asking_rent_psf_direction));
 
   // P2 provenance — single-query fetched_at shared across all corridors in
   // this run. If the closure capture missed (zero fragments), fall back to a
@@ -1000,11 +1109,11 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
       metric: "cap_rate_median",
       value: Math.round(capMedian * 100) / 100,
       direction: capDir.direction,
-      label: `Median SWFL CRE cap rate (${withCap.length} of ${corridors.length} corridors)`,
+      label: `Median SWFL CRE cap rate (${withCap.length} of ${reps.length} submarkets)`,
       variable_type: "intensive",
       units: "percent",
       display_format: "percent",
-      source: buildCreAggregateSource("cap_rate_pct", withCap, fetched_at),
+      source: buildCreSubmarketAggregateSource("cap_rate_pct", withCap, fetched_at),
     });
   }
   if (vacMedian != null) {
@@ -1012,11 +1121,11 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
       metric: "vacancy_rate_median",
       value: Math.round(vacMedian * 100) / 100,
       direction: vacDir.direction,
-      label: `Median SWFL CRE vacancy rate (${withVac.length} of ${corridors.length} corridors)`,
+      label: `Median SWFL CRE vacancy rate (${withVac.length} of ${reps.length} submarkets)`,
       variable_type: "intensive",
       units: "percent",
       display_format: "percent",
-      source: buildCreAggregateSource("vacancy_rate_pct", withVac, fetched_at),
+      source: buildCreSubmarketAggregateSource("vacancy_rate_pct", withVac, fetched_at),
     });
   }
   if (absMedian != null) {
@@ -1036,11 +1145,11 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
       metric: "asking_rent_psf_median",
       value: Math.round(rentMedian * 100) / 100,
       direction: rentDir.direction,
-      label: `Median SWFL CRE asking rent PSF NNN (${withRent.length} of ${corridors.length} corridors)`,
+      label: `Median SWFL CRE asking rent PSF NNN (${withRent.length} of ${reps.length} submarkets)`,
       variable_type: "intensive",
       units: "USD/sqft",
       display_format: "currency",
-      source: buildCreAggregateSource("asking_rent_psf", withRent, fetched_at),
+      source: buildCreSubmarketAggregateSource("asking_rent_psf", withRent, fetched_at),
     });
   }
 
@@ -1366,16 +1475,16 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
   // ship a value (n > 0); a metric with no value also has no row in
   // key_metrics, so its direction can't mislead anyone.
   const directionGuards = [
-    ["cap_rate_median", capDir, withCap.length] as const,
-    ["vacancy_rate_median", vacDir, withVac.length] as const,
-    ["absorption_sqft_median", absDir, withAbs.length] as const,
-    ["asking_rent_psf_median", rentDir, withRent.length] as const,
+    ["cap_rate_median", capDir, withCap.length, "submarket"] as const,
+    ["vacancy_rate_median", vacDir, withVac.length, "submarket"] as const,
+    ["absorption_sqft_median", absDir, withAbs.length, "corridor"] as const,
+    ["asking_rent_psf_median", rentDir, withRent.length, "submarket"] as const,
   ];
-  for (const [name, sum, n] of directionGuards) {
+  for (const [name, sum, n, unit] of directionGuards) {
     if (n === 0) continue;
     if (sum.status === "no-data") {
       vote.caveats.push(
-        `${name}: ${n} corridor${n === 1 ? "" : "s"} report a value but none reports a direction — the "stable" label on this metric is a schema-required fallback, not a measured trend.`,
+        `${name}: ${n} ${unit}${n === 1 ? "" : "s"} report a value but none reports a direction — the "stable" label on this metric is a schema-required fallback, not a measured trend.`,
       );
     } else if (sum.status === "tied") {
       vote.caveats.push(
@@ -1384,49 +1493,47 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
     }
   }
 
-  // --- Per-county corridor medians (Lee vs Collier) ---
+  // --- Per-county medians (Lee vs Collier) ---
   // county is a code-derived partition (cre-source.mts CITY_TO_COUNTY — Naples →
   // Collier, all other corpus cities → Lee); there is no county column in
   // corridor_profiles, so the PostgREST URL stays corpus-level (no server-side
-  // county filter). The citation enumerates only that county's contributing
-  // corridors so a reader can still trace any median back to the exact rows.
+  // county filter). Stamped metrics (cap/vacancy/rent) partition the submarket
+  // REPS (a rep's county = its member corridors' shared county); absorption
+  // partitions corridors. The citation enumerates only that county's
+  // contributors so a reader can still trace any median back to the exact rows.
   // Additive: the existing combined slugs (cap_rate_median etc.) are unchanged.
-  const leeCorridors = corridors.filter((c) => c.county === "Lee");
-  const collierCorridors = corridors.filter((c) => c.county === "Collier");
-
-  for (const [countyLabel, countyAll] of [
-    ["Lee", leeCorridors],
-    ["Collier", collierCorridors],
-  ] as [string, CorridorNormalized[]][]) {
+  for (const countyLabel of ["Lee", "Collier"] as const) {
     const countySuffix = countyLabel.toLowerCase();
-    const withCapC = countyAll.filter((c) => c.cap_rate_pct != null);
-    const withVacC = countyAll.filter((c) => c.vacancy_rate_pct != null);
-    const withAbsC = countyAll.filter((c) => c.absorption_sqft != null);
-    const withRentC = countyAll.filter((c) => c.asking_rent_psf != null);
-    const capMedC = medianOf(withCapC.map((c) => c.cap_rate_pct as number));
-    const vacMedC = medianOf(withVacC.map((c) => c.vacancy_rate_pct as number));
+    const countyReps = reps.filter((r) => r.county === countyLabel);
+    const countyCorridors = corridors.filter((c) => c.county === countyLabel);
+    const withCapC = countyReps.filter((r) => r.cap_rate_pct != null);
+    const withVacC = countyReps.filter((r) => r.vacancy_rate_pct != null);
+    const withAbsC = countyCorridors.filter((c) => c.absorption_sqft != null);
+    const withRentC = countyReps.filter((r) => r.asking_rent_psf != null);
+    const capMedC = medianOf(withCapC.map((r) => r.cap_rate_pct as number));
+    const vacMedC = medianOf(withVacC.map((r) => r.vacancy_rate_pct as number));
     const absMedC = medianOf(withAbsC.map((c) => c.absorption_sqft as number));
-    const rentMedC = medianOf(withRentC.map((c) => c.asking_rent_psf as number));
+    const rentMedC = medianOf(withRentC.map((r) => r.asking_rent_psf as number));
     // Direction per county — do NOT reuse the combined capDir/vacDir/absDir/rentDir
     // (directional-polarity trap: the combined direction pools Lee + Collier reads
     // and must never leak onto a county-only subset).
-    const capDirC = summarizeDirection(withCapC.map((c) => c.cap_rate_direction));
-    const vacDirC = summarizeDirection(withVacC.map((c) => c.vacancy_rate_direction));
+    const capDirC = summarizeDirection(withCapC.map((r) => r.cap_rate_direction));
+    const vacDirC = summarizeDirection(withVacC.map((r) => r.vacancy_rate_direction));
     const absDirC = summarizeDirection(withAbsC.map((c) => c.absorption_sqft_direction));
-    const rentDirC = summarizeDirection(withRentC.map((c) => c.asking_rent_psf_direction));
+    const rentDirC = summarizeDirection(withRentC.map((r) => r.asking_rent_psf_direction));
 
-    // M is that county's total corridors — NOT all corridors — so the label
-    // "2 of 9 Collier corridors" can't be misread as "2 of 27 total corridors."
+    // M is that county's total submarkets/corridors — NOT the whole corpus —
+    // so "2 of 3 Collier submarkets" can't be misread as "2 of 10 total."
     if (capMedC != null) {
       key_metrics.push({
         metric: `cap_rate_median_${countySuffix}`,
         value: Math.round(capMedC * 100) / 100,
         direction: capDirC.direction,
-        label: `Median ${countyLabel} County CRE cap rate (${withCapC.length} of ${countyAll.length} ${countyLabel} corridors)`,
+        label: `Median ${countyLabel} County CRE cap rate (${withCapC.length} of ${countyReps.length} ${countyLabel} submarkets)`,
         variable_type: "intensive",
         units: "percent",
         display_format: "percent",
-        source: buildCreAggregateSource("cap_rate_pct", withCapC, fetched_at),
+        source: buildCreSubmarketAggregateSource("cap_rate_pct", withCapC, fetched_at),
       });
     }
     if (vacMedC != null) {
@@ -1434,11 +1541,11 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
         metric: `vacancy_rate_median_${countySuffix}`,
         value: Math.round(vacMedC * 100) / 100,
         direction: vacDirC.direction,
-        label: `Median ${countyLabel} County CRE vacancy rate (${withVacC.length} of ${countyAll.length} ${countyLabel} corridors)`,
+        label: `Median ${countyLabel} County CRE vacancy rate (${withVacC.length} of ${countyReps.length} ${countyLabel} submarkets)`,
         variable_type: "intensive",
         units: "percent",
         display_format: "percent",
-        source: buildCreAggregateSource("vacancy_rate_pct", withVacC, fetched_at),
+        source: buildCreSubmarketAggregateSource("vacancy_rate_pct", withVacC, fetched_at),
       });
     }
     if (absMedC != null) {
@@ -1446,7 +1553,7 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
         metric: `absorption_sqft_median_${countySuffix}`,
         value: Math.round(absMedC),
         direction: absDirC.direction,
-        label: `Median ${countyLabel} County CRE net absorption (${withAbsC.length} of ${countyAll.length} ${countyLabel} corridors)`,
+        label: `Median ${countyLabel} County CRE net absorption (${withAbsC.length} of ${countyCorridors.length} ${countyLabel} corridors)`,
         variable_type: "extensive",
         units: "sqft",
         display_format: "count",
@@ -1458,26 +1565,26 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
         metric: `asking_rent_psf_median_${countySuffix}`,
         value: Math.round(rentMedC * 100) / 100,
         direction: rentDirC.direction,
-        label: `Median ${countyLabel} County CRE asking rent PSF NNN (${withRentC.length} of ${countyAll.length} ${countyLabel} corridors)`,
+        label: `Median ${countyLabel} County CRE asking rent PSF NNN (${withRentC.length} of ${countyReps.length} ${countyLabel} submarkets)`,
         variable_type: "intensive",
         units: "USD/sqft",
         display_format: "currency",
-        source: buildCreAggregateSource("asking_rent_psf", withRentC, fetched_at),
+        source: buildCreSubmarketAggregateSource("asking_rent_psf", withRentC, fetched_at),
       });
     }
     // Per-county direction caveats — same disclosure contract as the combined
     // directionGuards block above. Only fires for metrics that shipped a value.
-    const countyDirGuards: [string, DirectionSummary, number][] = [
-      [`cap_rate_median_${countySuffix}`, capDirC, withCapC.length],
-      [`vacancy_rate_median_${countySuffix}`, vacDirC, withVacC.length],
-      [`absorption_sqft_median_${countySuffix}`, absDirC, withAbsC.length],
-      [`asking_rent_psf_median_${countySuffix}`, rentDirC, withRentC.length],
+    const countyDirGuards: [string, DirectionSummary, number, string][] = [
+      [`cap_rate_median_${countySuffix}`, capDirC, withCapC.length, "submarket"],
+      [`vacancy_rate_median_${countySuffix}`, vacDirC, withVacC.length, "submarket"],
+      [`absorption_sqft_median_${countySuffix}`, absDirC, withAbsC.length, "corridor"],
+      [`asking_rent_psf_median_${countySuffix}`, rentDirC, withRentC.length, "submarket"],
     ];
-    for (const [mName, sum, n] of countyDirGuards) {
+    for (const [mName, sum, n, unit] of countyDirGuards) {
       if (n === 0) continue;
       if (sum.status === "no-data") {
         vote.caveats.push(
-          `${mName}: ${n} corridor${n === 1 ? "" : "s"} report a value but none reports a direction — the "stable" label on this metric is a schema-required fallback, not a measured trend.`,
+          `${mName}: ${n} ${unit}${n === 1 ? "" : "s"} report a value but none reports a direction — the "stable" label on this metric is a schema-required fallback, not a measured trend.`,
         );
       } else if (sum.status === "tied") {
         vote.caveats.push(

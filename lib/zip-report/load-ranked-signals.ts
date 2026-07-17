@@ -33,21 +33,11 @@ import { buildZipCandidates, loadCensusSignals, type FloodZipRow } from "./candi
 import { filterCensusValues } from "./census-values";
 import { loadZipQuickSummary } from "../zip-summary/load";
 
-/** The registry packs whose zip-grain tables feed the candidate pool — mirrors
- *  app/r/zip-report/[zip]/page.tsx's REGISTRY_PACK_IDS. */
-const REGISTRY_PACK_IDS = [
-  "housing-swfl",
-  "home-values-swfl",
-  "rentals-swfl",
-  "active-rentals-swfl",
-  "market-heat-swfl",
-  "market-temperature-swfl",
-  "listing-momentum-swfl",
-  "seller-stress-swfl",
-  "tier-divergence-swfl",
-  "permits-commercial-swfl",
-  "properties-collier-value",
-] as const;
+// The registry packs whose zip-grain tables feed the candidate pool — imported
+// from the assembly root so email and webpage load the SAME list structurally
+// (was a hand-mirrored copy; the active-listings-swfl rail-citation hole showed
+// why a by-convention mirror rots).
+import { REGISTRY_PACK_IDS } from "./assemble";
 
 export interface RankedZipSignals {
   /** Deterministically ranked signals — same order the webpage renders. */

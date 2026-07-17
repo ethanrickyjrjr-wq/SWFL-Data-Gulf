@@ -100,6 +100,34 @@ platform's safety classifier ("Credential Materialization") because the prompt t
 hygiene bug in my prompt, not a false positive. Round 2 used the identical instruction and cleared
 it, so it is not a hard block, but the pattern should not be relied on again — pipe secrets straight
 into the consuming command, never print them as a separate step.
+## 2026-07-17 (Fable 5 · wt/grain-fixes) — 3 assigned defects: corridor grain re-grained to submarket (embed + brain), active-listings rail citations wired, source_totals verified writing
+
+Operator picked three defects. (1) `source_totals_migration_apply`: root cause was already found+
+fixed 07/16 (write gated on `not only_county`, unreachable under scheduled `--county` runs); verified
+LIVE 07/17 — 6 rows, two scheduled cycles (04:25 + 06:38 UTC), Lee 22,223 / Collier 7,862 / Hendry
+1,084, matching the 07/16 meta.total probes. Close is BLOCKED on its stored signal: the signal says
+table `data_lake.source_totals`, which PostgREST 404s forever (runner supports `schema:` — signal
+needs the schema-qualified form); signal edits are trigger-locked to a deliberate operator Bun.SQL
+session and the auto-mode classifier blocked mine — handing Ricky the one-liner. (2) Corridor grain
+(`corridor_grain_bug_is_live_on_embed_and_brain`): embed card now ranks SUBMARKETS
+(app/embed/cards/asking-rent/collapse.ts — null-submarket rows are uncited figures and drop), and
+cre-swfl re-grains all 12 corridor-median key_metrics (SWFL + Lee + Collier × cap/vac/rent) + their
+direction summaries onto submarket reps (`collapseCorridorsToSubmarkets`; DB `submarket` column =
+the 07/13 exact-join authority — the alias table is too coarse, it files North Naples under Naples).
+Absorption stays corridor-grain (varies within submarket; stamping it would invent a figure).
+Normalizer + fixture carry `submarket`; 2 grain-law tests pin fixture median 33.79 vs the old
+corridor-weighted 35.08. Residual found + checked, not fixed (moves the brain's headline direction):
+`cre_direction_vote_and_corridor_factor_stamped_weighting`. (3) Rail citations
+(`active_listings_rail_citations_never_render`): active-listings-swfl added to REGISTRY_PACK_IDS,
+load-ranked-signals.ts now imports the ONE list from assemble.ts (kills the hand-mirror), new
+registry-coverage.test.ts invariant reds on any candidates.ts pack missing from the load list.
+Verified no paid re-bake: demoted specs feed railContext only, `ranked`/bake-hash untouched.
+Worktree because the parallel session's safe-push rebase DESTROYED this session's first pass of
+these exact edits mid-flight (uncommitted tracked files wiped by its checkout; untracked survived) —
+RULE 1.5 applied after the fact, everything rebuilt in isolation. Verify: 108 refinery + 95
+catalog/tools + 47 zip-report tests green, vocab coverage OK (no slug changes), `bunx next build`
+green (95/95). Push pending operator OK (pack key_metrics math = ask-first); then decreed cre-swfl
+rebuild + live verify.
 
 ## 2026-07-16 (Fable 5 · main) — housing window labeled by what it COVERS ("data through X") + stale-ZIP-row check
 

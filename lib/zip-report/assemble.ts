@@ -37,6 +37,9 @@ export const REGISTRY_PACK_IDS = [
   "tier-divergence-swfl",
   "permits-commercial-swfl",
   "properties-collier-value",
+  // Demoted-only today (3 rail citations in candidates.ts) — registry-coverage.test.ts
+  // fails if a pack the registry references is missing from this list.
+  "active-listings-swfl",
 ] as const;
 
 type ParsedBrain = Awaited<ReturnType<typeof loadParsedBrain>>;

@@ -11,10 +11,7 @@
  * scaffolding.
  */
 
-import type {
-  BuildFactPackInput,
-  PriorQuarterContext,
-} from "./build-corridor-fact-pack.mts";
+import type { BuildFactPackInput, PriorQuarterContext } from "./build-corridor-fact-pack.mts";
 import type { CorridorNormalized } from "../sources/cre-source.mts";
 import type { MarketbeatSwflNormalized } from "../sources/marketbeat-swfl-source.mts";
 import type { LausSwflSummary } from "../sources/bls-laus-source.mts";
@@ -22,14 +19,13 @@ import type { LausSwflSummary } from "../sources/bls-laus-source.mts";
 const GENERATED_AT = "2026-05-26T12:00:00.000Z";
 
 /** Spread defaults onto a partial CorridorNormalized override. */
-function makeCorridor(
-  patch: Partial<CorridorNormalized> = {},
-): CorridorNormalized {
+function makeCorridor(patch: Partial<CorridorNormalized> = {}): CorridorNormalized {
   return {
     kind: "corridor",
     name: "Pine Ridge Rd Naples",
     city: "Naples",
     county: "Collier",
+    submarket: null,
     corridor_type: "primary commercial",
     seasonal_index: 0.5,
     character: null,
