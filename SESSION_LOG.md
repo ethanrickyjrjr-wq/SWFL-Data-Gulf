@@ -1,3 +1,24 @@
+## 2026-07-17 (Sonnet 5 · main) — Lead-gen research: SteadyAPI Reddit + crawl4ai, picks up launch-plan listening target #1
+
+Operator: "run steadapi on reddit and crawl4ai until you understand lead generation and how we
+create it ourselves in house." 27 live SteadyAPI Reddit calls (r/realtors, r/RealEstateTechnology,
+r/CommercialRealEstate, r/sales, r/smallbusiness, r/LeadGeneration, r/weddingvideography,
+r/sweatystartup — 3 full-thread comment pulls) + 1 crawl4ai fetch of Google's own Ads blog
+(verified live: Google now runs nationwide data-rich Home Listing LSAs via a HouseCanary
+partnership, published 06/11/2026; agents pay ~$60-75/lead LSA or $150-400/click on seller-keyword
+Google Ads). Reddit's own consensus on "what still works" matches our existing cold-outreach
+design (clean/targeted beats purchased/generic — validates the DBPR spine approach, rounds 1-4).
+Three findings extend `2026-07-16-marketing-launch-plan.md`: (1) Google Business Profile +
+immediate post-job reviews is repeatedly cited as the single highest-leverage free channel,
+independent of niche — we have none today, filed `marketing_gbp_setup_swfl_datagulf` (idea).
+(2) Building-permit filings are a proven timing signal (2-6wk window pre-hire/pre-listing) and we
+already ingest Lee/Collier permits for a different purpose — worth testing as a lead-timing angle
+against our own historical data, filed `marketing_permit_timing_signal_leadgen` (idea), not a
+commitment yet. (3) A detailed local-SEO location-page structure (r/weddingvideography, $700K
+case study) independently confirms the launch plan's "reuse `/r/` pages, skip the blog" call.
+Full write-up: `docs/steadyapi-research/2026-07-17-leadgen-landscape-and-inhouse-organic.md`.
+Docs-only, no code touched. Push pending operator OK.
+
 ## 2026-07-17 (Fable 5 · main) — Overview de-mash #1+#2: week queue out of materials, empty projects stop auto-building
 
 Operator screenshots (07/16 ~22:00): untitled EMPTY project shows 5 "email · Jul 2026" materials +

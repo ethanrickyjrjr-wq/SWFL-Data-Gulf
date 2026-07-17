@@ -83,6 +83,17 @@ API-integration build track. See the inventory below for where the rest lives.
   `reddit.com/r/<name>` URL, a bare name always 200s false. Feeds
   `docs/superpowers/plans/2026-07-16-marketing-launch-plan.md`.
 
+- `2026-07-17-leadgen-landscape-and-inhouse-organic.md` — picks up the launch plan's "tomorrow's
+  listening targets" item 1: 27 live Reddit calls (r/realtors, r/RealEstateTechnology,
+  r/CommercialRealEstate, r/sales, r/smallbusiness, r/LeadGeneration, r/weddingvideography,
+  r/sweatystartup) + 1 crawl4ai fetch of Google's own Ads blog. Settles the paid-lead landscape
+  (Google now runs nationwide data-rich Home Listing LSAs via a HouseCanary partnership,
+  $60-75/lead; seller-keyword Google Ads clicks run $150-400) and three organic/in-house findings:
+  Google Business Profile + immediate post-job reviews as the single highest-leverage free
+  channel (no GBP exists for us today — `marketing_gbp_setup_swfl_datagulf`), building-permit
+  filings as an untested timing signal against data we already ingest
+  (`marketing_permit_timing_signal_leadgen`), and a detailed local-SEO location-page structure
+  that independently validates the launch plan's "reuse `/r/` pages, skip the blog" call.
 - `2026-07-16-realtor-full-scope-audit.md` — round 5, realtor.com/SteadyAPI full-scope field
   audit: all 18 real-estate endpoints' documented response schemas crawled live
   (docs.steadyapi.com collection) + the operator's screenshot fields live-verified against a
