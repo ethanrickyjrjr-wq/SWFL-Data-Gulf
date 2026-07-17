@@ -524,6 +524,18 @@ export interface ApplyForwardDeps {
    *  throw, but the call site below still wraps it in a try/catch as
    *  defense in depth, matching this module's other best-effort guards. */
   fillBrandFromDomain?: (userId: string, domain: string) => Promise<void>;
+
+  /** Best-effort forwarded-campaign REBUILD (Task 12, lib/switch/rebuild-campaign.ts).
+   *  Optional -- only the campaign branch exercises it, AFTER the facts write,
+   *  brand fill, and markApplied. It rebuilds the forwarded campaign as a NEW
+   *  DRAFT deliverable (never sends) and emails the agent one edit link. A
+   *  missing dep or any failure must NEVER block or fail the apply: the call
+   *  site guards it in try/catch and it never throws by contract. Returns the
+   *  new draft id (null on skip/failure). */
+  rebuildCampaign?: (
+    userId: string,
+    forwardId: string,
+  ) => Promise<{ deliverableId: string | null }>;
 }
 
 export type ApplyForwardOutcome =
@@ -538,7 +550,7 @@ export type ApplyForwardOutcome =
       passReason?: string;
       partial: boolean;
     }
-  | { kind: "applied_campaign"; factWritten: boolean };
+  | { kind: "applied_campaign"; factWritten: boolean; rebuildQueued?: boolean };
 
 interface ContactExportPayload {
   rows: ContactRow[];
@@ -646,5 +658,29 @@ export async function applyForward(
   }
 
   await deps.markApplied(row.id);
-  return { kind: "applied_campaign", factWritten };
+
+  // The wow moment (Task 12): rebuild the forwarded campaign as a DRAFT with
+  // today's live data and email the agent one edit link. Runs LAST, on the
+  // now-applied row, and is strictly best-effort -- a missing dep or any
+  // failure is logged and never fails the apply (the facts/brand writes above
+  // already succeeded). `rebuildQueued` is OMITTED when nothing was queued so
+  // the applied_campaign outcome stays byte-identical for callers that don't
+  // wire a rebuild.
+  let rebuildQueued = false;
+  if (deps.rebuildCampaign) {
+    try {
+      const rebuilt = await deps.rebuildCampaign(authUserId, row.id);
+      rebuildQueued = rebuilt.deliverableId !== null;
+    } catch (err) {
+      deps.log(
+        `[switch] apply-forward ${forwardId}: campaign rebuild failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
+  return {
+    kind: "applied_campaign",
+    factWritten,
+    ...(rebuildQueued ? { rebuildQueued: true } : {}),
+  };
 }
