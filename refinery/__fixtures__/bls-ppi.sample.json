@@ -1,0 +1,206 @@
+[
+  {
+    "series_id": "PCU236211236211",
+    "year": 2026,
+    "period": "M04",
+    "period_name": "April",
+    "value": 195.0
+  },
+  {
+    "series_id": "PCU236211236211",
+    "year": 2026,
+    "period": "M05",
+    "period_name": "May",
+    "value": 200.0
+  },
+  {
+    "series_id": "PCU236211236211",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 205.0
+  },
+
+  {
+    "series_id": "PCU236221236221",
+    "year": 2026,
+    "period": "M04",
+    "period_name": "April",
+    "value": 215.0
+  },
+  {
+    "series_id": "PCU236221236221",
+    "year": 2026,
+    "period": "M05",
+    "period_name": "May",
+    "value": 210.0
+  },
+  {
+    "series_id": "PCU236221236221",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 205.0
+  },
+
+  {
+    "series_id": "PCU236223236223",
+    "year": 2026,
+    "period": "M04",
+    "period_name": "April",
+    "value": 190.0
+  },
+  {
+    "series_id": "PCU236223236223",
+    "year": 2026,
+    "period": "M05",
+    "period_name": "May",
+    "value": 190.5
+  },
+  {
+    "series_id": "PCU236223236223",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 191.0
+  },
+
+  {
+    "series_id": "PCU236224236224",
+    "year": 2026,
+    "period": "M04",
+    "period_name": "April",
+    "value": 220.0
+  },
+  {
+    "series_id": "PCU236224236224",
+    "year": 2026,
+    "period": "M05",
+    "period_name": "May",
+    "value": 226.0
+  },
+  {
+    "series_id": "PCU236224236224",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 232.0
+  },
+
+  {
+    "series_id": "PCU23811X23811X",
+    "year": 2026,
+    "period": "M04",
+    "period_name": "April",
+    "value": 180.0
+  },
+  {
+    "series_id": "PCU23811X23811X",
+    "year": 2026,
+    "period": "M05",
+    "period_name": "May",
+    "value": 183.0
+  },
+  {
+    "series_id": "PCU23811X23811X",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 186.0
+  },
+
+  {
+    "series_id": "PCU23816X23816X",
+    "year": 2026,
+    "period": "M04",
+    "period_name": "April",
+    "value": 175.0
+  },
+  {
+    "series_id": "PCU23816X23816X",
+    "year": 2026,
+    "period": "M05",
+    "period_name": "May",
+    "value": 172.0
+  },
+  {
+    "series_id": "PCU23816X23816X",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 169.0
+  },
+
+  {
+    "series_id": "PCU23821X23821X",
+    "year": 2026,
+    "period": "M04",
+    "period_name": "April",
+    "value": 160.0
+  },
+  {
+    "series_id": "PCU23821X23821X",
+    "year": 2026,
+    "period": "M05",
+    "period_name": "May",
+    "value": 160.5
+  },
+  {
+    "series_id": "PCU23821X23821X",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 161.0
+  },
+
+  {
+    "series_id": "PCU23822X23822X",
+    "year": 2026,
+    "period": "M04",
+    "period_name": "April",
+    "value": 165.0
+  },
+  {
+    "series_id": "PCU23822X23822X",
+    "year": 2026,
+    "period": "M05",
+    "period_name": "May",
+    "value": 168.0
+  },
+  {
+    "series_id": "PCU23822X23822X",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 171.0
+  },
+
+  {
+    "series_id": "PCU236222236222",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 198.0
+  },
+  {
+    "series_id": "PCU236400236400",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 200.0
+  },
+  {
+    "series_id": "PCU236500236500",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 199.0
+  },
+  {
+    "series_id": "PCU2381MR2381MR",
+    "year": 2026,
+    "period": "M06",
+    "period_name": "June",
+    "value": 205.0
+  }
+]
