@@ -1,7 +1,6 @@
 // app/project/_cockpit/ProjectsCockpit.tsx
 "use client";
 
-import { type ReactNode } from "react";
 import Link from "next/link";
 import { kindChipLabel, type CockpitProject } from "@/lib/project/group-projects";
 import {
@@ -11,6 +10,7 @@ import {
   type SocialScheduleRow,
 } from "@/lib/project/schedule-chips";
 import { projectEntry } from "@/lib/project/tool-tabs";
+import { openDoc } from "@/lib/lab-entry/destination";
 import { promptsForPage } from "@/lib/briefcase/visits";
 import type { CampaignStats } from "@/lib/email/campaign-stats";
 import type { ProjectDigest } from "@/lib/project/digest";
@@ -24,6 +24,7 @@ import { EmptyLaunchpad } from "./EmptyLaunchpad";
 import { CalendarCard } from "./CalendarCard";
 import { CampaignsCard } from "./CampaignsCard";
 import { SelectedProjectCard } from "./SelectedProjectCard";
+import { ShowingPrepCard } from "./ShowingPrepCard";
 
 /**
  * The hub center: MISSION CONTROL (spec 2026-07-16-hub-mission-control-design).
@@ -47,7 +48,6 @@ export function ProjectsCockpit({
   stats,
   initialPreview,
   digests,
-  actions,
 }: {
   projects: CockpitProject[];
   activeCount: number;
@@ -61,9 +61,6 @@ export function ProjectsCockpit({
    *  the context bus on selection change so Project AI actually knows the selected
    *  project on the hub, exactly like an open /project/[id] page. */
   digests: Record<string, ProjectDigest>;
-  /** Top-strip actions (New listing / Showing prep / New project) — passed in
-   *  from the server page so the buttons keep their one existing home. */
-  actions?: ReactNode;
 }) {
   const sel = useSelectedProject();
   const selected = projects.find((p) => p.id === sel?.selectedId) ?? projects[0] ?? null;
@@ -90,7 +87,6 @@ export function ProjectsCockpit({
                 </span>
               )}
             </p>
-            <div className="ml-auto flex items-center gap-2">{actions}</div>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 [scrollbar-gutter:stable]">
@@ -103,8 +99,17 @@ export function ProjectsCockpit({
                     emailSch={emailSch}
                     socialSch={socialSch}
                     chips={chips}
+                    // "Schedule →" must land IN the scheduler, not on a bare lab
+                    // canvas (operator, 07/16/2026): with a saved doc the link
+                    // auto-opens the ScheduleSendModal on it (?schedule=1); with
+                    // no doc yet there's nothing to schedule, so it opens the lab
+                    // to build one.
                     scheduleHref={
-                      selected ? projectEntry(selected.id, selected.lastDid) : "/project"
+                      selected
+                        ? selected.lastDid
+                          ? openDoc(selected.id, selected.lastDid, { schedule: true })
+                          : projectEntry(selected.id, null)
+                        : "/project"
                     }
                   />
                   {/* Keyed by selection: a change REMOUNTS the card so its
@@ -221,27 +226,10 @@ export function ProjectsCockpit({
               <CampaignQuickStart surface="all" projectId={selected?.id} variant="panel" />
             )}
 
-            <div className="border-b border-white/8 px-4 pb-4 pt-4">
-              <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-gulf-teal">
-                Contacts
-              </p>
-              <p className="text-sm text-white/85">
-                {contactsCount} {contactsCount === 1 ? "person" : "people"}
-              </p>
-              <div className="mt-2 flex gap-3 text-xs">
-                {selected && (
-                  <Link
-                    href={projectEntry(selected.id, selected.lastDid)}
-                    className="text-gulf-teal hover:underline"
-                  >
-                    Send to contacts →
-                  </Link>
-                )}
-                <Link href="/contacts" className="text-white/45 hover:text-gulf-teal">
-                  Manage →
-                </Link>
-              </div>
-            </div>
+            {/* Showing Prep — its own card, same chrome as the campaign starters
+                (operator, 07/16/2026). The hub top-strip button row died with this;
+                Contacts moved to the rail's sticky footer the same day. */}
+            {!empty && <ShowingPrepCard />}
           </div>
         </aside>
       </div>

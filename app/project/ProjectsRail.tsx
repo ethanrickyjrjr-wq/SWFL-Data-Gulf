@@ -17,7 +17,13 @@ import { useSelectedProject } from "./SelectedProjectContext";
  * on EVERY project page including the hub — the rail never disappears
  * between pages (operator, 07/16/2026). Hidden on mobile only.
  */
-export function ProjectsRail({ sections }: { sections: Section[] }) {
+export function ProjectsRail({
+  sections,
+  contactsCount,
+}: {
+  sections: Section[];
+  contactsCount: number;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const sel = useSelectedProject();
@@ -45,7 +51,7 @@ export function ProjectsRail({ sections }: { sections: Section[] }) {
     <>
       <nav
         aria-label="Your projects"
-        className="hidden w-72 shrink-0 flex-col gap-1 border-r border-white/10 px-3 py-6 md:flex"
+        className="hidden w-72 shrink-0 flex-col gap-1 border-r border-white/10 px-3 pt-6 md:flex"
       >
         <div className="mb-2 flex items-center justify-between px-1">
           <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
@@ -141,7 +147,24 @@ export function ProjectsRail({ sections }: { sections: Section[] }) {
           </div>
         )}
 
-        <SendCeilingMeter variant="rail" />
+        {/* Sticky rail footer (operator, 07/16/2026): Contacts lives HERE — its
+            one home on every project page — pinned visible however long the
+            list gets. bg matches the body (--gulf-midnight) so scrolled rows
+            don't ghost through. */}
+        <div className="sticky bottom-0 z-10 mt-auto -mx-3 bg-[#0a1419]">
+          <div className="px-4">
+            <SendCeilingMeter variant="rail" />
+          </div>
+          <Link
+            href="/contacts"
+            className="mt-2 flex items-center justify-between border-t border-white/10 px-4 py-3 text-sm text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <span>👥 Contacts</span>
+            <span className="text-[10px] text-gray-500">
+              {contactsCount} {contactsCount === 1 ? "person" : "people"}
+            </span>
+          </Link>
+        </div>
       </nav>
 
       {confirm && (

@@ -25,10 +25,13 @@ const TABS: {
  *
  *  This is THE one pill chrome — the hub (`/project`) renders it too, aimed at
  *  the selected project, so the bar never jumps between the hub and a project.
- *  `id: null` (hub with zero projects) keeps the same geometry with inert pills. */
+ *  `id: null` (hub with zero projects) keeps the same geometry with inert pills.
+ *  The leading Projects pill is the way BACK — inside a tool there was no route
+ *  to the hub without the browser button (operator, 07/16/2026). */
 export function ToolSwitcher({ id, lastDid }: { id: string | null; lastDid: string | null }) {
   const pathname = usePathname();
   const active = id ? activeTool(pathname, id) : null;
+  const onHub = pathname === "/project";
   return (
     // top-14 = the app bar's height (the layout's own 3.5rem constant). BOTH bars
     // are sticky in the body scroll; at top-0 this one slid UNDERNEATH the opaque
@@ -38,6 +41,17 @@ export function ToolSwitcher({ id, lastDid }: { id: string | null; lastDid: stri
       {/* Segmented control — sized to be unmissable (operator: the subtle pills read
           as page chrome and got scrolled past entirely). */}
       <div className="mx-auto flex max-w-2xl gap-1.5 rounded-full py-2.5">
+        <Link
+          href="/project"
+          aria-current={onHub ? "page" : undefined}
+          className={`flex-1 rounded-full px-4 py-2 text-center text-sm font-semibold transition-colors ${
+            onHub
+              ? "bg-gulf-teal text-[#04121b] shadow-lg shadow-gulf-teal/25"
+              : "border border-white/15 text-white/75 hover:border-gulf-teal/50 hover:bg-white/5 hover:text-white"
+          }`}
+        >
+          Projects
+        </Link>
         {TABS.map((t) =>
           id ? (
             <Link

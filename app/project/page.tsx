@@ -14,9 +14,6 @@ import { loadCampaignStats } from "@/lib/email/load-campaign-stats";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { ImportDraftOnLogin } from "./_import/ImportDraftOnLogin";
-import { NewProjectButton } from "./NewProjectButton";
-import { NewListingButton } from "./NewListingButton";
-import { ShowingPrepButton } from "./ShowingPrepButton";
 import { ProjectsCockpit } from "./_cockpit/ProjectsCockpit";
 
 export const runtime = "nodejs";
@@ -165,13 +162,6 @@ export default async function ProjectListPage() {
         stats={stats}
         initialPreview={initialPreview}
         digests={digests}
-        actions={
-          <>
-            <NewListingButton />
-            <ShowingPrepButton />
-            <NewProjectButton />
-          </>
-        }
       />
     </>
   );

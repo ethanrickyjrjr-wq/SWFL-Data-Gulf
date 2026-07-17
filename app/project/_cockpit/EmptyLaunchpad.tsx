@@ -67,8 +67,8 @@ export function EmptyLaunchpad({ contactsCount }: { contactsCount: number }) {
           away. It stays put on every page.
         </li>
         <li>
-          <span className="font-semibold text-white/80">Pills on top</span> — a project&apos;s
-          tools: Email, Social, Watch, Overview.
+          <span className="font-semibold text-white/80">Pills on top</span> — Projects brings you
+          back here; the rest are a project&apos;s tools: Email, Social, Watch, Overview.
         </li>
         <li>
           <span className="font-semibold text-white/80">Right panel</span> — the AI and your

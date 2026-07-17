@@ -34,7 +34,7 @@ export default async function ProjectAreaLayout({ children }: { children: React.
   // Unauthenticated: render children plain — the child page redirects to /login.
   if (!user) return <>{children}</>;
 
-  const [{ data }, { data: delivRows }] = await Promise.all([
+  const [{ data }, { data: delivRows }, contactsRes] = await Promise.all([
     supabase
       .from("projects")
       // subject_address/subject_area ride so a fresh listing project still gets
@@ -49,7 +49,10 @@ export default async function ProjectAreaLayout({ children }: { children: React.
       .from("deliverables")
       .select("id, project_id, template")
       .order("data_as_of", { ascending: false }),
+    // Head-only count for the rail's sticky Contacts footer (RLS-scoped).
+    supabase.from("contacts").select("id", { count: "exact", head: true }),
   ]);
+  const contactsCount = contactsRes.count ?? 0;
   const lastDidByProject = new Map<string, string>();
   for (const d of delivRows ?? []) {
     if (d.template === "block-canvas" && !lastDidByProject.has(d.project_id)) {
@@ -106,7 +109,7 @@ export default async function ProjectAreaLayout({ children }: { children: React.
   return (
     <SelectedProjectProvider initialId={initialSelectedId}>
       <div className="flex w-full">
-        <ProjectsRail sections={sections} />
+        <ProjectsRail sections={sections} contactsCount={contactsCount} />
         <div className="flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-1 flex-col">
           <div className="flex-1">{children}</div>
           <ProjectSearch entries={searchIndex} />

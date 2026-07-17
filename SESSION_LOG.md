@@ -1,3 +1,24 @@
+## 2026-07-16 (Fable 5 · main) — hub de-clutter: 3-button row dead, Showing Prep aside card, Contacts on the rail, Projects pill, calendar Schedule opens the scheduler
+
+Operator (3 screenshots): the hub's New listing / Showing prep / New project strip duplicated
+actions that already have homes; no route back to Projects from inside a tool; the calendar's
+"Schedule →" dumped you on a bare email-lab canvas ("what the fuck").
+- 3-button row REMOVED — page.tsx `actions` prop dead; NewProjectButton / NewListingButton /
+  ShowingPrepButton.tsx deleted. New project = rail "+ New"; listing = launchpad + campaign starters.
+- Showing Prep = its own aside card (`_cockpit/ShowingPrepCard.tsx`), exact Start-a-campaign
+  section chrome + teal accent; create → build packet logic moved verbatim from the dead button.
+- Contacts = sticky footer on the rail (ProjectsRail + head-count query in the area layout);
+  the cockpit aside's Contacts section retired — one home, every project page.
+- ToolSwitcher grew a leading Projects pill (active on the hub) — the way back from Email/Social/
+  Watch/Overview.
+- Calendar "Schedule →" now `openDoc(id, lastDid, {schedule:true})` → ScheduleSendModal auto-opens
+  via the existing ?schedule=1 seam; falls back to the lab base only when no doc exists yet.
+Verified: `bunx next build` clean; lab-entry door-pin + schedule-chips tests pass (door-pin's first
+run hit its 5s cold-scan timeout, 218ms green on rerun — flake, not the diff). Parallel session
+365ee436 was live on overlapping files: its stale post-commit claims released after journal check
+showed the work committed (a6b0fcd5/cec3349d); its in-flight files (digest.*, social/page.tsx,
+lib/switch/*) left untouched and unstaged. Push pending operator approval.
+
 ## 2026-07-16 (Fable 5 · main) — housing staleness is UPSTREAM: Redfin file frozen since 06/02; rebuild landed, master left to cron
 
 Follow-up to the entry below, post-rebuild verification. The decreed housing-swfl rebuild (run
