@@ -1,3 +1,20 @@
+## 2026-07-17 (Sonnet 5 · main) — bls-ppi consumer design: full BLS PPI construction scope researched live, cre-swfl picked as consumer
+
+`bls_ppi` ingest (landed since 05/27, `consuming_pack: none`) got a proper brainstorm per RULE 3.5.
+crawl4ai against `download.bls.gov/pub/time.series/pc/pc.industry` + BLS PPI Industry Factsheets
+confirmed the 2 series we pull (industrial/warehouse construction, both nonresidential — the old
+"residential" label was simply wrong, no matching BLS series exists for residential) belong to a
+bounded 12-series sector ("Nonresidential Building Construction," NAICS 236). Operator directive:
+pull all 12. `cre-swfl` picked as consumer — it already isolates retail/industrial/office/
+medical_office as distinct per-sector slugs, so 236223 (office) and 236224 (health care) pair 1:1
+onto existing sectors; the 4 trade-contractor indexes (concrete/roofing/electrical/plumbing) surface
+as one cross-sector cost-pressure metric; 236222 (school) gets pulled but stays consumer-less — no
+existing pack owns institutional/public construction, so it's parked with a tracked check instead of
+force-fit. Design doc: `docs/superpowers/specs/2026-07-17-bls-ppi-cre-swfl-consumer-design.md`.
+Opened `bls_ppi_cre_swfl_live_verify` (verify) + `bls_ppi_school_series_no_consumer` (task, RULE
+2.4). Next: `superpowers:writing-plans` for the implementation plan (ingest SERIES_IDS broaden +
+`refinery/sources/bls-ppi-source.mts` + cre-swfl wiring + vocab + tests) — not yet built.
+
 ## 2026-07-17 (Sonnet 5 · main) — CORRECTION to the entry below: real root cause was transcription drift, not fabrication; shipped the actual fix (ref-based citation)
 
 The entry directly below this one is wrong about WHY the SHAs didn't exist. I checked the exact
