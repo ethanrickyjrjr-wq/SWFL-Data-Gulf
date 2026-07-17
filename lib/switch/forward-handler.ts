@@ -514,6 +514,16 @@ export interface ApplyForwardDeps {
     value: string,
     messageId: string,
   ) => Promise<"inserted" | "duplicate" | "error">;
+
+  /** Best-effort brand-kit fill off the forwarded campaign's sender domain
+   *  (Task 11, ONE Brandfetch root lib/brand/brandfetch.ts). Optional --
+   *  only the campaign branch below exercises it, and a missing/failing fill
+   *  must never block or fail the apply (fire-safe): the adapter composes
+   *  fetchBrandKit (null on any failure) + fillEmptyBrandFields (itself
+   *  best-effort via bankBrandFields) so this dep should already never
+   *  throw, but the call site below still wraps it in a try/catch as
+   *  defense in depth, matching this module's other best-effort guards. */
+  fillBrandFromDomain?: (userId: string, domain: string) => Promise<void>;
 }
 
 export type ApplyForwardOutcome =
@@ -618,6 +628,20 @@ export async function applyForward(
       );
     } else if (result === "error") {
       deps.log(`[switch] apply-forward ${forwardId}: agent_profile_facts insert failed.`);
+    }
+  }
+
+  // Best-effort brand-kit fill off the sender domain (Task 11) -- runs
+  // regardless of whether the profile-fact write happened above (the domain
+  // is a legitimate signal on its own), and NEVER blocks or fails the apply:
+  // any failure here is caught and logged, never rethrown.
+  if (payload.senderDomain && deps.fillBrandFromDomain) {
+    try {
+      await deps.fillBrandFromDomain(authUserId, payload.senderDomain);
+    } catch (err) {
+      deps.log(
+        `[switch] apply-forward ${forwardId}: brand fill failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 

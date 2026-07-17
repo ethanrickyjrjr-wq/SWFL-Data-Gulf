@@ -776,4 +776,98 @@ describe("applyForward — campaign", () => {
     expect(outcome).toEqual({ kind: "applied_campaign", factWritten: false });
     expect(markApplied).toHaveBeenCalledTimes(1);
   });
+
+  test("senderDomain present + dep wired: brand fill called with authUserId + domain", async () => {
+    const fillBrandFromDomain = mock(async () => {});
+    const markApplied = mock(async () => {});
+
+    const outcome = await applyForward(
+      "fwd_1",
+      "user_1",
+      false,
+      makeApplyDeps({
+        loadForward: async () =>
+          makeForwardRow({
+            kind: "campaign",
+            payload: { about: "About Jane.", platform: null, senderDomain: "rival.com" },
+          }),
+        fillBrandFromDomain,
+        markApplied,
+      }),
+    );
+
+    expect(outcome).toEqual({ kind: "applied_campaign", factWritten: true });
+    expect(fillBrandFromDomain).toHaveBeenCalledTimes(1);
+    expect(fillBrandFromDomain.mock.calls[0]).toEqual(["user_1", "rival.com"]);
+    expect(markApplied).toHaveBeenCalledTimes(1);
+  });
+
+  test("no senderDomain: brand fill dep is never called", async () => {
+    const fillBrandFromDomain = mock(async () => {});
+
+    await applyForward(
+      "fwd_1",
+      "user_1",
+      false,
+      makeApplyDeps({
+        loadForward: async () =>
+          makeForwardRow({
+            kind: "campaign",
+            payload: { about: null, platform: null, senderDomain: null },
+          }),
+        fillBrandFromDomain,
+      }),
+    );
+
+    expect(fillBrandFromDomain).not.toHaveBeenCalled();
+  });
+
+  test("brand fill dep omitted entirely: apply still succeeds (dep is optional)", async () => {
+    const markApplied = mock(async () => {});
+    const outcome = await applyForward(
+      "fwd_1",
+      "user_1",
+      false,
+      makeApplyDeps({
+        loadForward: async () =>
+          makeForwardRow({
+            kind: "campaign",
+            payload: { about: "About Jane.", platform: null, senderDomain: "rival.com" },
+          }),
+        fillBrandFromDomain: undefined,
+        markApplied,
+      }),
+    );
+    expect(outcome).toEqual({ kind: "applied_campaign", factWritten: true });
+    expect(markApplied).toHaveBeenCalledTimes(1);
+  });
+
+  test("brand fill dep throws: swallowed, logged, apply still succeeds (fire-safe)", async () => {
+    const fillBrandFromDomain = mock(async () => {
+      throw new Error("brandfetch down");
+    });
+    const markApplied = mock(async () => {});
+    const logged: string[] = [];
+
+    const outcome = await applyForward(
+      "fwd_1",
+      "user_1",
+      false,
+      makeApplyDeps({
+        loadForward: async () =>
+          makeForwardRow({
+            kind: "campaign",
+            payload: { about: "About Jane.", platform: null, senderDomain: "rival.com" },
+          }),
+        fillBrandFromDomain,
+        markApplied,
+        log: (line) => logged.push(line),
+      }),
+    );
+
+    expect(outcome).toEqual({ kind: "applied_campaign", factWritten: true });
+    expect(fillBrandFromDomain).toHaveBeenCalledTimes(1);
+    expect(markApplied).toHaveBeenCalledTimes(1);
+    expect(logged.some((l) => l.includes("brand fill failed"))).toBe(true);
+  });
 });

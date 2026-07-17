@@ -25,6 +25,7 @@ import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { upsertCanonicalContacts } from "@/lib/contacts/upsert";
 import { activateSwitchPass } from "@/lib/switch/activate";
+import { fetchBrandKit, fillEmptyBrandFields } from "@/lib/brand/brandfetch";
 import {
   applyForward,
   type ApplyForwardDeps,
@@ -109,6 +110,12 @@ export async function POST(req: Request): Promise<Response> {
       if (error.code === "23505") return "duplicate";
       console.error(`[apply-forward] profile fact insert failed: ${error.message}`);
       return "error";
+    },
+
+    async fillBrandFromDomain(userId, domain) {
+      const kit = await fetchBrandKit(domain);
+      if (!kit) return;
+      await fillEmptyBrandFields(sdb, userId, kit);
     },
   };
 
