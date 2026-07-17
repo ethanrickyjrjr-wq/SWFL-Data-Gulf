@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { inferScopeFromItems } from "@/lib/project/derive-name";
+import { inferScopeFromItems, inferScopeFromSubject } from "@/lib/project/derive-name";
 import type { ProjectItem } from "@/lib/project/items";
 import { signedUploadUrls } from "@/lib/project/signed-upload-url";
 import { ProjectSocialClient } from "./ProjectSocialClient";
@@ -46,7 +46,7 @@ export default async function ProjectSocialPage({
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id, title, items, branding, subject_address")
+    .select("id, title, items, branding, subject_address, subject_area")
     .eq("id", id)
     .maybeSingle();
   if (!project) notFound();
@@ -55,14 +55,11 @@ export default async function ProjectSocialPage({
   const items: ProjectItem[] = Array.isArray(project.items) ? project.items : [];
   let scope = inferScopeFromItems(items);
   // A fresh listing project has no filed items yet, so scope from items is empty.
-  // Fall back to the saved subject address (a New Listing Socials launch week
-  // must be about THE user's listing area, not region-wide) — routed through the
-  // ONE scope root as a synthetic note, never re-parsed here.
-  const subjectAddress = typeof project.subject_address === "string" ? project.subject_address : "";
-  if (!scope.zip && !scope.place && subjectAddress.trim()) {
-    scope = inferScopeFromItems([
-      { id: "subject", added_at: "", origin: "web", kind: "note", text: subjectAddress },
-    ]);
+  // Fall back to the saved subject (a New Listing Socials launch week must be
+  // about THE user's listing area, not region-wide) — via the ONE shared helper
+  // (inferScopeFromSubject), the same fallback the project digest now applies.
+  if (!scope.zip && !scope.place) {
+    scope = inferScopeFromSubject(project.subject_address, project.subject_area);
   }
 
   // Filed image items + 1h signed URLs (same as the email tool's Photos feed).

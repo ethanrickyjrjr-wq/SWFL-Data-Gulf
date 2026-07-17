@@ -87,6 +87,10 @@ interface Props {
   mcpKey: string | null;
   /** Wave 1.5: the user's own listing-page URL (head of the artifact link chain). */
   propertyUrl: string | null;
+  /** projects.subject_address / subject_area — digest scope fallback for projects
+   *  (listings especially) whose filed items don't name a place yet. */
+  subjectAddress: string | null;
+  subjectArea: string | null;
   seed: Seed | null;
   /** Pre-computed from computeSignificantChanges() server-side. */
   significantChanges: SignificantChange[];
@@ -122,6 +126,8 @@ export function ProjectWorkspace({
   fileUrls,
   mcpKey,
   propertyUrl: initialPropertyUrl,
+  subjectAddress,
+  subjectArea,
   seed,
   significantChanges,
   activeEvents,
@@ -486,6 +492,8 @@ export function ProjectWorkspace({
         activeEvents,
         recentActivity,
         branding: brandingForDigest(branding),
+        subjectAddress,
+        subjectArea,
       }),
     [
       id,
@@ -499,6 +507,8 @@ export function ProjectWorkspace({
       activeEvents,
       recentActivity,
       branding,
+      subjectAddress,
+      subjectArea,
     ],
   );
 

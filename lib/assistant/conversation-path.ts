@@ -489,7 +489,7 @@ async function otherProjectsBlockFor(currentProjectId: string): Promise<string> 
     // current project so findOverlap can resolve "self"; ui_state carries dismissed keys.
     const { data: rows } = await supabase
       .from("projects")
-      .select("id, title, items, updated_at, ui_state")
+      .select("id, title, items, updated_at, ui_state, subject_address, subject_area")
       .order("updated_at", { ascending: false })
       .limit(50); // newest-first at the DB; the in-memory cap (8) trims from here. Bounds
     // the read for a power user so newest rows survive PostgREST's 1000-row default.
@@ -508,12 +508,16 @@ async function otherProjectsBlockFor(currentProjectId: string): Promise<string> 
         title: string | null;
         items: ProjectItem[] | null;
         updated_at: string | null;
+        subject_address: string | null;
+        subject_area: string | null;
       }[]
     ).map((r) => ({
       projectId: r.id,
       title: r.title ?? "",
       items: r.items ?? [],
       updatedAt: r.updated_at ?? undefined,
+      subjectAddress: r.subject_address,
+      subjectArea: r.subject_area,
     }));
 
     return buildOtherProjectsContext(mapped, currentProjectId, { dismissed });

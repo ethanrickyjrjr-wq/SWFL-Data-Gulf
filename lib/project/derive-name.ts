@@ -178,6 +178,34 @@ export function inferScopeFromItems(items: ProjectItem[]): InferredScope {
   return { place: namePlace, topic };
 }
 
+/**
+ * Scope from the project's remembered SUBJECT — the saved listing address
+ * (`projects.subject_address`) and/or market area (`projects.subject_area`) — for
+ * projects whose filed items don't name a place yet (a fresh listing project has
+ * zero items but knows exactly where it is). Routed through the ONE scope root as
+ * synthetic notes so there is never a second address parser: a crosswalk-resolving
+ * ZIP in either text wins (and brings its place), else the whole-word place-name
+ * scan. Works for every covered city the crosswalk/needles know — nothing is
+ * special-cased to one town. An out-of-coverage address yields {} so callers fall
+ * back to region-wide instead of claiming a city we don't cover.
+ */
+export function inferScopeFromSubject(
+  subjectAddress?: string | null,
+  subjectArea?: string | null,
+): InferredScope {
+  const notes: ProjectItem[] = [subjectAddress, subjectArea]
+    .filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+    .map((text, i) => ({
+      id: `subject-${i}`,
+      added_at: "",
+      origin: "web" as const,
+      kind: "note" as const,
+      text,
+    }));
+  if (notes.length === 0) return {};
+  return inferScopeFromItems(notes);
+}
+
 export function deriveProjectName(items: ProjectItem[]): string {
   if (items.length === 0) return "Untitled project";
 

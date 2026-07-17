@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { deriveProjectName, inferScopeFromItems } from "./derive-name";
+import { deriveProjectName, inferScopeFromItems, inferScopeFromSubject } from "./derive-name";
 import type { ProjectItem } from "./items";
 
 const base = { id: "x", added_at: "2026-06-17T08:00:00Z", origin: "web" as const };
@@ -187,5 +187,50 @@ describe("inferScopeFromItems (the shared scope root)", () => {
       { ...base, kind: "file", storage_path: "u/p/2b9f.png", mime: "image/png", size: 500 },
     ];
     expect(inferScopeFromItems(items)).toEqual({ place: undefined, topic: undefined });
+  });
+});
+describe("inferScopeFromSubject (saved listing address / market area -> scope)", () => {
+  it("resolves a listing address through its ZIP for ANY covered city", () => {
+    expect(inferScopeFromSubject("2006 SW 15th Ave, Cape Coral, FL 33991")).toEqual({
+      zip: "33991",
+      place: "Cape Coral",
+      topic: undefined,
+    });
+    expect(inferScopeFromSubject("480 5th Ave S, Naples, FL 34102")).toEqual({
+      zip: "34102",
+      place: "Naples",
+      topic: undefined,
+    });
+    expect(inferScopeFromSubject("27200 Old 41 Rd, Bonita Springs, FL 34135")).toEqual({
+      zip: "34135",
+      place: "Bonita Springs",
+      topic: undefined,
+    });
+  });
+
+  it("falls back to the whole-word place scan when the address carries no ZIP", () => {
+    const s = inferScopeFromSubject("123 Main St, Fort Myers Beach");
+    expect(s.place).toBe("Fort Myers Beach");
+    expect(s.zip).toBeUndefined();
+  });
+
+  it("uses the market area when there is no address", () => {
+    expect(inferScopeFromSubject(null, "Cape Coral").place).toBe("Cape Coral");
+    expect(inferScopeFromSubject(undefined, "Naples").place).toBe("Naples");
+  });
+
+  it("an address outside the crosswalk yields NO scope (never an invented place)", () => {
+    // Miami — not in any SWFL crosswalk. (Sarasota/Charlotte/Manatee DO resolve —
+    // the geographic crosswalk is deliberately wider than the data scope, and this
+    // helper inherits the ONE root's policy rather than inventing its own.)
+    const s = inferScopeFromSubject("100 Biscayne Blvd, Miami, FL 33101");
+    expect(s.zip).toBeUndefined();
+    expect(s.place).toBeUndefined();
+  });
+
+  it("blank / missing subject yields an empty scope", () => {
+    expect(inferScopeFromSubject()).toEqual({});
+    expect(inferScopeFromSubject("  ", "")).toEqual({});
+    expect(inferScopeFromSubject(null, null)).toEqual({});
   });
 });

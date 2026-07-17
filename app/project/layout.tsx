@@ -37,7 +37,9 @@ export default async function ProjectAreaLayout({ children }: { children: React.
   const [{ data }, { data: delivRows }] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, title, kind, items, updated_at")
+      // subject_address/subject_area ride so a fresh listing project still gets
+      // its city subgroup (toCockpitProjects' scope fallback — same fix as the hub).
+      .select("id, title, kind, items, updated_at, subject_address, subject_area")
       .order("updated_at", { ascending: false }),
     // Newest-first so the fold below keeps the first (= most recent) block-canvas
     // row per project — same rule the tool-switcher fix (layout.tsx under [id])

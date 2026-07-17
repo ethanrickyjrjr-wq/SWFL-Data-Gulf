@@ -326,3 +326,67 @@ describe("brandingForDigest", () => {
     });
   });
 });
+describe("subject-address / subject-area scope fallback (listing_scope_not_in_digest)", () => {
+  it("a zero-item listing project takes scope from its saved subject_address", () => {
+    const d = buildProjectDigest(
+      input({ items: [], subjectAddress: "2006 SW 15th Ave, Cape Coral, FL 33991" }),
+    );
+    expect(d.scope.zip).toBe("33991");
+    expect(d.scope.place).toBe("Cape Coral");
+  });
+
+  it("works for any covered city, not one special case", () => {
+    const naples = buildProjectDigest(
+      input({ items: [], subjectAddress: "480 5th Ave S, Naples, FL 34102" }),
+    );
+    expect(naples.scope.place).toBe("Naples");
+    const bonita = buildProjectDigest(
+      input({ items: [], subjectAddress: "27200 Old 41 Rd, Bonita Springs, FL 34135" }),
+    );
+    expect(bonita.scope.place).toBe("Bonita Springs");
+  });
+
+  it("subject_area fills scope when there is no address", () => {
+    const d = buildProjectDigest(input({ items: [], subjectArea: "Cape Coral" }));
+    expect(d.scope.place).toBe("Cape Coral");
+  });
+
+  it("filed items OUTRANK the subject (items are what the project holds)", () => {
+    // items say Fort Myers Beach 33931; subject says Cape Coral
+    const d = buildProjectDigest(
+      input({ subjectAddress: "2006 SW 15th Ave, Cape Coral, FL 33991" }),
+    );
+    expect(d.scope.zip).toBe("33931");
+    expect(d.scope.place).toBe("Fort Myers Beach");
+  });
+
+  it("subject OUTRANKS the schedule fallback (the subject is what the project IS)", () => {
+    const d = buildProjectDigest(
+      input({
+        items: [],
+        subjectAddress: "2006 SW 15th Ave, Cape Coral, FL 33991",
+        schedules: [{ cadence: "weekly", scope_kind: "place", scope_value: "Fort Myers" }],
+      }),
+    );
+    expect(d.scope.place).toBe("Cape Coral");
+  });
+
+  it("schedule still fills scope when neither items nor subject name a place", () => {
+    const d = buildProjectDigest(
+      input({
+        items: [],
+        subjectAddress: "somewhere unrecognized",
+        schedules: [{ cadence: "weekly", scope_kind: "place", scope_value: "Fort Myers" }],
+      }),
+    );
+    expect(d.scope.place).toBe("Fort Myers");
+  });
+
+  it("subject-derived scope bumps the rev (the store's keyed no-op must not eat it)", () => {
+    const a = buildProjectDigest(input({ items: [] }));
+    const b = buildProjectDigest(
+      input({ items: [], subjectAddress: "2006 SW 15th Ave, Cape Coral, FL 33991" }),
+    );
+    expect(a.rev).not.toBe(b.rev);
+  });
+});

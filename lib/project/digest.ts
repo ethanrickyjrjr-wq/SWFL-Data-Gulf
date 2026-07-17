@@ -1,4 +1,4 @@
-import { inferScopeFromItems, type InferredScope } from "./derive-name";
+import { inferScopeFromItems, inferScopeFromSubject, type InferredScope } from "./derive-name";
 import { identityKeyForItem } from "./identity-key";
 import { tokenDayKey, tokenVersion } from "./as-of";
 import type { ProjectItem } from "./items";
@@ -108,6 +108,17 @@ export interface ProjectDigestInput {
     last_run_at?: string | null;
   }[];
   recentSends?: { sent_at: string }[];
+  /**
+   * `projects.subject_address` / `projects.subject_area` — the project's remembered
+   * subject (a listing's street address, a campaign's market area). Scope fallback
+   * when the filed items don't name a place: a fresh listing project has ZERO items
+   * but knows exactly where it is, and without this every AI surface reading the
+   * digest called it region-wide (check `listing_scope_not_in_digest`). Resolved
+   * through the ONE scope root (`inferScopeFromSubject`) — any covered city, no
+   * special cases. Precedence: items → subject → schedules.
+   */
+  subjectAddress?: string | null;
+  subjectArea?: string | null;
   /** `ui_state.last_freshness_token_seen` — undefined means never seen. */
   lastFreshnessTokenSeen?: string;
   /** Reconcile stale-metric verdicts; omit / `[]` when the TTL gate is off. */
@@ -282,7 +293,17 @@ export function buildProjectDigest(input: ProjectDigestInput): ProjectDigest {
   const branding = input.branding ?? {};
   const recentActivity = input.recentActivity ?? [];
 
-  const scope = withScheduleFallback(inferScopeFromItems(items), schedules);
+  // Scope precedence: filed items → the saved subject (listing address / market
+  // area — what the project IS) → schedule scope (what it sends). The subject slot
+  // fills only when items name no place, so populated projects are unchanged.
+  let itemScope: InferredScope = inferScopeFromItems(items);
+  if (!itemScope.zip && !itemScope.place) {
+    const subject = inferScopeFromSubject(input.subjectAddress, input.subjectArea);
+    if (subject.zip || subject.place) {
+      itemScope = { ...subject, topic: itemScope.topic ?? subject.topic };
+    }
+  }
+  const scope = withScheduleFallback(itemScope, schedules);
   const feedSignals = foldFeedSignals(input.feedRows ?? []);
 
   const kindCounts: Record<string, number> = {};

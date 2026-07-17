@@ -28,6 +28,10 @@ export interface OtherProjectRow {
   items: ProjectItem[];
   /** projects.updated_at — used only to order newest-first (NOT as the data vintage). */
   updatedAt?: string;
+  /** projects.subject_address / subject_area — digest scope fallback so a fresh
+   *  listing project still shows its [place] tag in the TIER B block. */
+  subjectAddress?: string | null;
+  subjectArea?: string | null;
 }
 
 export interface OtherProjectEntry {
@@ -93,7 +97,13 @@ export function otherProjectEntries(
   return rows
     .filter((r) => r.projectId !== currentProjectId)
     .map((r) => {
-      const d = buildProjectDigest({ projectId: r.projectId, title: r.title, items: r.items });
+      const d = buildProjectDigest({
+        projectId: r.projectId,
+        title: r.title,
+        items: r.items,
+        subjectAddress: r.subjectAddress,
+        subjectArea: r.subjectArea,
+      });
       return {
         projectId: r.projectId,
         title: r.title,

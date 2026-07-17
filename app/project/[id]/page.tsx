@@ -34,6 +34,8 @@ interface ProjectRow {
   mcp_key: string | null;
   ui_state: ProjectUiState | null;
   property_url: string | null;
+  subject_address: string | null;
+  subject_area: string | null;
 }
 
 /** A deliverable row as loaded for the workspace (render fields kept server-side). */
@@ -109,7 +111,9 @@ export default async function ProjectPage({
   // RLS scopes this SELECT to the owner — another user's id returns no row → 404.
   const { data } = await supabase
     .from("projects")
-    .select("id, title, items, branding, mcp_key, ui_state, property_url")
+    .select(
+      "id, title, items, branding, mcp_key, ui_state, property_url, subject_address, subject_area",
+    )
     .eq("id", id)
     .maybeSingle();
   if (!data) notFound();
@@ -266,6 +270,8 @@ export default async function ProjectPage({
       fileUrls={fileUrls}
       mcpKey={project.mcp_key}
       propertyUrl={project.property_url ?? null}
+      subjectAddress={project.subject_address ?? null}
+      subjectArea={project.subject_area ?? null}
       seed={seed}
       significantChanges={significantChanges}
       activeEvents={activeEvents}

@@ -44,7 +44,9 @@ export default async function ProjectListPage() {
     await Promise.all([
       supabase
         .from("projects")
-        .select("id, title, kind, items, updated_at, ui_state, branding")
+        .select(
+          "id, title, kind, items, updated_at, ui_state, branding, subject_address, subject_area",
+        )
         .order("updated_at", { ascending: false }),
       supabase
         .from("email_schedules")
@@ -70,6 +72,8 @@ export default async function ProjectListPage() {
   type HubProjectRow = ProjectRowInput & {
     ui_state: Record<string, unknown> | null;
     branding: Record<string, string> | null;
+    subject_address: string | null;
+    subject_area: string | null;
   };
   const rows = (data as HubProjectRow[] | null) ?? [];
   const contactsCount = contactsRes.count ?? 0;
@@ -123,6 +127,8 @@ export default async function ProjectListPage() {
           ? r.ui_state.last_freshness_token_seen
           : undefined,
       branding: brandingForDigest(r.branding),
+      subjectAddress: r.subject_address,
+      subjectArea: r.subject_area,
     });
   }
 

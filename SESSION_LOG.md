@@ -68,6 +68,23 @@ full thumbnails render, Get started opens the Listing-address capture, Cancel cl
 serve hit a stale-chunk 404 — .next inconsistency, gone after clean rebuild; not a code issue.)
 NOT pushed — awaiting operator.
 
+## 2026-07-16 (Fable 5 · main) — listing scope now reaches the digest everywhere (check listing_scope_not_in_digest CLOSED)
+
+Root cause: digest scope = inferScopeFromItems + schedule fallback ONLY, so a fresh listing
+project (0 items) read as region-wide on every AI surface even though projects.subject_address
+knew the exact address — the social page had its own inline copy of the address fallback (the
+copy #2 smell). Fix: ONE shared helper `inferScopeFromSubject(address, area)` in derive-name.ts
+(synthetic notes through the ONE scope root — no second parser, works for every crosswalk city;
+tests prove Cape Coral 33991, Naples 34102, Bonita Springs 34135, place-only, area-only, and
+unknown→{}). buildProjectDigest takes subjectAddress/subjectArea; precedence items → subject →
+schedules (the subject is what the project IS; schedules are what it sends — NOTE this flips
+scope for a project whose schedule points elsewhere than its subject, deliberate). Wired at
+every digest builder: hub /project page, [id] ProjectWorkspace (new props), TIER B
+other-projects via conversation-path select, PLUS toCockpitProjects (rail grouping + dossier
+CITY·ZIP line, hub + layout selects) and social/page.tsx refactored onto the helper. Live on
+prod build :3199: listing's hub prompts now say "Pull the latest Cape Coral market data into
+this project", dossier shows CAPE CORAL · 33991. bun tests 379+218 pass, next build green.
+
 ## 2026-07-16 (Fable 5 · main) — hub aside now REAL lab chrome + Project AI actually knows the selection
 
 Operator screenshots: hub aside led with a custom "Project AI / knows this project" header +

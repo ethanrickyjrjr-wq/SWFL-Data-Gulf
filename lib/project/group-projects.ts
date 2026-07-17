@@ -5,7 +5,7 @@
  * facets ride as badges/chips on its row, never duplicate rows.
  */
 import type { ProjectItem } from "@/lib/project/items";
-import { inferScopeFromItems } from "@/lib/project/derive-name";
+import { inferScopeFromItems, inferScopeFromSubject } from "@/lib/project/derive-name";
 import { cityForZip } from "@/lib/swfl-zip-city";
 import { displayProjectTitle } from "@/lib/project/display-title";
 import type { ScheduleChip } from "@/lib/project/schedule-chips";
@@ -33,6 +33,10 @@ export interface ProjectRowInput {
   kind: string | null;
   items: ProjectItem[] | null;
   updated_at: string;
+  /** projects.subject_address / subject_area — scope fallback so a fresh listing
+   *  project still gets its city subgroup in the rail + the dossier's city·ZIP line. */
+  subject_address?: string | null;
+  subject_area?: string | null;
 }
 
 export function toCockpitProjects(
@@ -47,7 +51,10 @@ export function toCockpitProjects(
   return rows.map((r) => {
     const kind: ProjectKind =
       r.kind === "listing" || r.kind === "showing-prep" ? r.kind : "general";
-    const scope = inferScopeFromItems(r.items ?? []);
+    let scope = inferScopeFromItems(r.items ?? []);
+    if (!scope.zip && !scope.place) {
+      scope = inferScopeFromSubject(r.subject_address, r.subject_area);
+    }
     const zip = scope.zip ?? null;
     const city = scope.place ?? (zip ? (cityForZip(zip) ?? null) : null);
     const chips = opts.chipsByProject?.get(r.id) ?? [];
