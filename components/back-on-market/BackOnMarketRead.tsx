@@ -63,7 +63,7 @@ export default function BackOnMarketRead({ data }: { data: BackOnMarketZip }) {
 
       <p className="bom-side">
         {side === "buyer"
-          ? "For a buyer: a returned listing is often leverage, not damaged goods — the seller is motivated and the deal history is public. What it does not tell you is why this specific contract ended; the record does not say, and neither will we."
+          ? "For a buyer: a returned listing is often leverage, not damaged goods, and the deal history is public. What it does not tell you is why this specific contract ended; the record does not say, and neither will we."
           : "For a seller: a relist is common here — the numbers above are the context to hand a buyer up front. Leverage cuts both ways; the story is the market, not your home."}
       </p>
 
