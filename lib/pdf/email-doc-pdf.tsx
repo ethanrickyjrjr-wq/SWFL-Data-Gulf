@@ -25,6 +25,7 @@ import { cleanCitations } from "@/lib/citations/clean-url";
 import { groupRows } from "@/lib/email/doc/row-grouping";
 import type { EmailBlock, EmailDoc, EmailGlobalStyle, FontFamily } from "@/lib/email/doc/types";
 import { PLATFORMS, platformMeta, domainFromUrl } from "@/lib/email/social/platforms";
+import { AGENT_HERO_PHOTO_ASPECT_RATIO } from "@/lib/email/blocks/agent-hero-dimensions";
 import { BRAND_FONTS } from "@/lib/brand/fonts";
 
 /** Map the doc's font family onto a @react-pdf built-in — resolved from the one
@@ -449,9 +450,22 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
       return (
         <View style={[s.section, { backgroundColor: CARD_BG, padding: 0 }]}>
           {p.photoUrl ? (
-            <Image src={p.photoUrl} style={{ width: "100%", height: 200, objectFit: "cover" }} />
+            <Image
+              src={p.photoUrl}
+              style={{
+                width: "100%",
+                aspectRatio: AGENT_HERO_PHOTO_ASPECT_RATIO,
+                objectFit: "cover",
+              }}
+            />
           ) : (
-            <View style={{ width: "100%", height: 200, backgroundColor: "#1a2e35" }} />
+            <View
+              style={{
+                width: "100%",
+                aspectRatio: AGENT_HERO_PHOTO_ASPECT_RATIO,
+                backgroundColor: "#1a2e35",
+              }}
+            />
           )}
           <View
             style={{

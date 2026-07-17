@@ -7,8 +7,10 @@ import { fontStack, CARD_BG, BORDER, MUTED } from "./styles";
 import { text, label, pad, space, WEIGHT, CARD_PAD } from "./scale";
 import { legibleInk } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
+import { AGENT_HERO_PHOTO_HEIGHT, AGENT_HERO_PHOTO_MAX_WIDTH } from "./agent-hero-dimensions";
 
-const PHOTO_HEIGHT = 300;
+// Photo box shared with the PDF renderer via the one ratio root (agent-hero-dimensions.ts).
+const PHOTO_HEIGHT = AGENT_HERO_PHOTO_HEIGHT;
 const PLACEHOLDER_BG = "#1a2e35";
 
 export function AgentHeroBlock({
@@ -30,7 +32,7 @@ export function AgentHeroBlock({
           alt={props.alt ?? props.name ?? ""}
           style={{
             width: "100%",
-            maxWidth: "600px",
+            maxWidth: `${AGENT_HERO_PHOTO_MAX_WIDTH}px`,
             height: `${PHOTO_HEIGHT}px`,
             display: "block",
             margin: 0,

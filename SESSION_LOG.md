@@ -9,6 +9,20 @@ deliverable-playbook Part 10; full test coverage) had already reached main via a
 so a rebase from this tree patch-matched and skipped them. Pushed from the isolated worktree, not the
 shared main checkout. Also cleaned up two stale worktrees this session: `dcd` (already landed) and
 `desk-fix-isolate-2` (its months-of-supply desk chart is already live on main via a later commit).
+## 2026-07-17 (Opus 4.8 · main) — fixed the agent-hero PDF/HTML aspect-ratio bug (the last CI red)
+
+The one remaining CI red — pdf-html-visual-parity agent-hero Layer 1 — was a REAL, cross-platform
+rendering bug (Linux CI produced htmlRatio 2 vs pdfRatio 3.06, identical to local), not the env/font
+artifact the `pdf_visual_parity_test_red_local` check guessed. Root cause (handoff 2026-07-14-pdf-html-
+visual-parity-bugs §1): HTML AgentHeroBlock rendered the photo 600×300 (2:1); the PDF agent-hero case
+rendered it full-page-width 612×200 (3.06:1) — the same photo cropped differently in the email vs the
+downloadable PDF. Fixed at the ROOT (handoff option 3): new `lib/email/blocks/agent-hero-dimensions.ts`
+holds ONE ratio (AGENT_HERO_PHOTO_ASPECT_RATIO = 2); AgentHeroBlock keeps an explicit px height derived
+from it (email clients ignore CSS aspect-ratio), and the PDF now uses react-pdf's Yoga-backed
+`aspectRatio` (supported in 4.5.1, verified against the installed package) so it's 2:1 at any page width
+— no more hardcoded 200. Verified: agent-hero pdfRatio 2 == htmlRatio 2 (relDiff 0); visual-parity 5/5,
+lib/pdf + lib/email/blocks 151/0, `tsc --noEmit` clean. Closes `pdf_visual_parity_test_red_local`.
+
 ## 2026-07-17 (Opus 4.8 · main) — cleared stale + infra CI reds; Chromium install surfaces the real agent-hero parity bug
 
 Main's CI `build` job had been red 7+ runs straight (every push bypassing the required check). Triaged
