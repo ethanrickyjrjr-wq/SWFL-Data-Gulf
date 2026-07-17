@@ -117,13 +117,17 @@ export function aggregateMonthsOfSupply(rows: readonly HousingZipRow[]): number 
   return (inv * 3) / sold;
 }
 
-// MEDIAN_DOM_YOY is an ABSOLUTE day difference (see housing-source.mts), so it
-// renders as a signed day change — NEVER ×100 as a percent (that bug shipped a
-// "650.0% YoY" to users). e.g. -11 → "-11 days", +6.5 → "+6.5 days".
-export function formatDayDelta(days: number): string {
-  const r = Math.round(days * 10) / 10;
+// MEDIAN_DOM_YOY is a DECIMAL FRACTION since the redfin_data_center retarget
+// (see housing-source.mts) — render ×100 exactly ONCE. Successor to the
+// formatDayDelta guard: the legacy feed published absolute days and a percent
+// render shipped "650.0% YoY"; the new feed publishes a percent that the
+// source converts to a fraction. Never render this as days again.
+export function formatDomYoyPct(fraction: number): string {
+  // Round half away from zero (JS Math.round biases toward +∞ on negatives).
+  const r = (Math.sign(fraction) * Math.round(Math.abs(fraction) * 1000)) / 10;
   const sign = r > 0 ? "+" : "";
-  return `${sign}${r} day${Math.abs(r) === 1 ? "" : "s"}`;
+  const txt = Number.isInteger(r) ? String(r) : r.toFixed(1);
+  return `${sign}${txt}%`;
 }
 
 function rowsFromFragments(fragments: RawFragment[]): HousingZipRow[] {
@@ -329,7 +333,7 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     fetched_at,
     tier: 3,
     citation:
-      "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month.",
+      "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month.",
   };
 
   const verdict = classifyDirection(snap);
@@ -344,7 +348,7 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     metric: "housing_median_sale_price_swfl",
     value: Number(snap.median_sale_price.toFixed(0)),
     direction: metricDirection(snap.median_sale_price_yoy),
-    label: `SWFL regional median sale price (All Residential) at ${snap.period_begin}${priceYoyLabel}`,
+    label: `SWFL regional median sale price (all property types) at ${snap.period_begin}${priceYoyLabel}`,
     variable_type: "extensive",
     units: "USD",
     display_format: "currency",
@@ -357,7 +361,7 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       metric: "housing_median_dom_swfl",
       value: Number(snap.median_dom.toFixed(0)),
       direction: domTrendDirection(snap.median_dom_yoy),
-      label: `SWFL regional median days on market — falling = faster sales${snap.median_dom_yoy !== null ? ` (YoY: ${formatDayDelta(snap.median_dom_yoy)})` : ""}`,
+      label: `SWFL regional median days on market — falling = faster sales${snap.median_dom_yoy !== null ? ` (YoY: ${formatDomYoyPct(snap.median_dom_yoy)})` : ""}`,
       variable_type: "extensive",
       units: "days",
       display_format: "count",
@@ -474,8 +478,8 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
               ? null
               : Number((r.median_sale_price_yoy * 100).toFixed(1)),
           median_dom: r.median_dom,
-          median_dom_yoy_days:
-            r.median_dom_yoy === null ? null : Number(r.median_dom_yoy.toFixed(1)),
+          median_dom_yoy_pct:
+            r.median_dom_yoy === null ? null : Number((r.median_dom_yoy * 100).toFixed(1)),
           avg_sale_to_list_pct:
             r.avg_sale_to_list === null ? null : Number((r.avg_sale_to_list * 100).toFixed(1)),
           months_of_supply: mos === null ? null : Number(mos.toFixed(1)),
@@ -513,10 +517,10 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
               units: "days",
             },
             {
-              id: "median_dom_yoy_days",
+              id: "median_dom_yoy_pct",
               label: "Median days-on-market YoY change",
-              display_format: "raw",
-              units: "days",
+              display_format: "percent",
+              units: "percent",
             },
             {
               id: "avg_sale_to_list_pct",

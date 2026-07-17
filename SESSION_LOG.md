@@ -77,6 +77,36 @@ run hit its 5s cold-scan timeout, 218ms green on rerun — flake, not the diff).
 showed the work committed (a6b0fcd5/cec3349d); its in-flight files (digest.*, social/page.tsx,
 lib/switch/*) left untouched and unstaged. Push pending operator approval.
 
+## 2026-07-16 (Fable 5 · main) — REDFIN RETARGET BUILT: new data_center feed + source-staleness tripwire, TDD, reconciled
+
+Operator "go" on the brainstormed design (spec: docs/superpowers/specs/
+2026-07-17-redfin-datacenter-retarget-design.md, deviations recorded in-file).
+Shipped TDD (21 tests green: 11 pytest + 12 bun test incl. pre-existing):
+(1) redfin_swfl pipeline retargeted to redfin_data_center/housing_market/monthly/all_zips.csv
+(662 MB CSV, stamped 07/14) — ALL 50 columns pulled as-written (snake_case + _pct/_ppts
+suffixes, TRY_CAST NA→NULL), SWFL filter via METRO (new feed has no STATE_CODE), matching the
+sibling redfin_price_drops pattern. (2) Tripwire: pre-download HEAD vs inventory-recorded
+ETag/Last-Modified ("SOURCE UNCHANGED" loud note) + newest-PERIOD-END content gate
+(MAX_CONTENT_AGE_DAYS=40 via existing assert_content_fresh seam — trips RED on the FIRST
+frozen cycle) + MIN_ROWS=6000 floor; data_lake._tier1_inventory gained source_etag/
+source_last_modified/max_period_end (idempotent migration applied, 616 rows intact).
+(3) housing-source.mts = the ONE unit-conversion seam (mapHousingRow exported+tested,
+percent→fraction ÷100 once); median_list_price/price_drops permanent nulls (no successor
+column — never mapped from lookalikes). (4) DOM YoY contract change: days→decimal fraction
+(new feed publishes percent; back-solving days = recomputation, banned); formatDayDelta→
+formatDomYoyPct, detail column median_dom_yoy_days→median_dom_yoy_pct; "(All Residential)"
+→"(all property types)". Vocab coverage + corridor aliases + catalog mirror all green.
+(5) Side find: 14 pipelines copy-paste _load_env reading .env.local as cp1252 (crashed the
+first local run) — extracted ingest/lib/env_local.py (utf-8, tested), migrated redfin_swfl,
+check env_local_loader_migrate_pipelines opened for the other 13. Local verify vs live file:
+10,072 rows / 126 ZIPs, window advanced to 04/01–06/30; reconciled vs operator's independent
+weekly metro CSV — sale-to-list within 0.5ppts all 4 metros, MoS within 0.7, price ±10%
+(Naples +1.3%, Punta Gorda +0.6%), directions all agree; DOM gap explained by window offset.
+YoY distribution sanity-checked (113/126 non-null, -23%..+54%). cadence_registry source_scope
+recensused (confirmed 10,072; ceiling: property_types 1.42GB no-rollup file, cancellations/
+delistings ZIP files; weekly feeds are metro-grain only). Next: S3 run (in flight) →
+decreed housing-swfl rebuild → live verify window 04/01 + Lee+Collier scope.
+
 ## 2026-07-16 (Fable 5 · main) — housing staleness is UPSTREAM: Redfin file frozen since 06/02; rebuild landed, master left to cron
 
 Follow-up to the entry below, post-rebuild verification. The decreed housing-swfl rebuild (run

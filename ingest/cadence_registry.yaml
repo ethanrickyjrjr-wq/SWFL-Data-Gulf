@@ -281,17 +281,25 @@ pipelines:
     tolerance_multiplier: 2.0
     inventory_id: lake-tier1/market/redfin_swfl.parquet
     inventory_key_type: exact
-    # First run: 2026-05-27 (workflow_dispatch) — 66,672 rows / 125 ZIP codes ✓
+    # RETARGETED 07/16/2026: the legacy dump (redfin_market_tracker/
+    # zip_code_market_tracker.tsv000.gz) FROZE at Last-Modified 06/02/2026 while
+    # serving stale 200s — two green crons re-landed identical bytes and the
+    # housing brain served a March window into mid-July. Now pulls
+    # redfin_data_center/housing_market/monthly/all_zips.csv (~660 MB CSV) with
+    # in-pipeline guards: MIN_ROWS floor + newest-PERIOD-END content gate (40d)
+    # + source ETag/Last-Modified recorded on the inventory row (a byte-identical
+    # re-pull logs SOURCE UNCHANGED loud). Spec:
+    # docs/superpowers/specs/2026-07-17-redfin-datacenter-retarget-design.md
     source_scope:
       confirmed_total:
-        value: 66672
-        as_of: "2026-05-27"
-        source: "our ingest (125 ZIPs)"
+        value: 10072
+        as_of: "07/16/2026"
+        source: "our ingest (126 ZIPs × ~80 rolling-3-month windows since 2019; ALL 50 source columns pulled, values as-written)"
       source_ceiling:
-        summary: "Redfin publishes the same county/ZIP tracker weekly (we pull monthly). Also separate metro-grain-only products: quarterly migration flows, investor home purchases, Redfin Home Price Index."
-        as_of: "07/07/2026"
-        source_url: "https://www.redfin.com/news/data-center/"
-        source_label: "Redfin Data Center"
+        summary: "Same bucket/prefix, unpulled: property_types/monthly/all_zips.csv (1.42 GB, per-property-type ONLY — no all-residential rollup rows); contract_cancellations + delistings_relistings monthly ZIP files; price_drops ZIP file (own pipeline: redfin_price_drops). Weekly feeds are metro-grain and coarser only — no weekly ZIP file exists, monthly is the finest ZIP cadence."
+        as_of: "07/16/2026"
+        source_url: "https://www.redfin.com/news/data-center/downloads/"
+        source_label: "Redfin Data Center — Downloads"
 
   - name: redfin_price_drops
     workflow: redfin-price-drops-monthly.yml

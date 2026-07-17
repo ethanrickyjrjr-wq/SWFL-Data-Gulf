@@ -35,37 +35,38 @@ metro CSV before being declared live.
 
 ## What we're building
 
-### 1. Source swap — pipeline is the compatibility layer; consumer untouched
+### 1. Source swap — parquet stores the vendor AS-WRITTEN; the source seam converts
+
+**Implemented deviation from the presented design (better, matching the in-repo
+pattern):** instead of the pipeline emitting the legacy ALL_CAPS contract with
+synthesized constants, the Tier-1 parquet stores the new feed AS-WRITTEN —
+snake_case names with unit suffixes (`_pct`, `_ppts`), exactly like the sibling
+`redfin_price_drops` pipeline that already consumed this feed family. The
+parquet stays row-comparable to the vendor file (which made the reconciliation
+an exact-units diff), and unit conversion happens ONCE at the consumer seam.
 
 `ingest/duckdb_pipelines/redfin_swfl/` retargets to
 `https://redfin-public-data.s3.us-west-2.amazonaws.com/redfin_data_center/housing_market/monthly/all_zips.csv`.
 
-The pipeline maps new headers → the EXISTING parquet contract so
-`refinery/sources/housing-source.mts` needs zero changes:
-
-- `REGION NAME` (bare 5-digit) → `zip_code` (old "Zip Code: " strip becomes a no-op)
-- `METRO` → `PARENT_METRO_REGION`; SWFL filter moves to `METRO LIKE` over the same
-  `SWFL_METRO_SUBSTRINGS` (the new file has NO `STATE_CODE`/`CITY`/`STATE` columns)
-- Synthesized constants for the consumer's WHERE clause: `REGION_TYPE = 'zip code'`,
-  `PROPERTY_TYPE = 'All Residential'`, `PERIOD_DURATION = 90`
-- `PERIOD BEGIN`/`PERIOD END` → `PERIOD_BEGIN`/`PERIOD_END`
+- `REGION NAME` (bare 5-digit) → `zip_code`; `METRO` → `metro`; SWFL filter is
+  `"REGION TYPE" = 'Zip' AND METRO LIKE` over the same `SWFL_METRO_SUBSTRINGS`
+  (the new file has NO `STATE_CODE`/`CITY`/`STATE` columns)
+- ALL 50 source columns pulled (FULL-SCOPE-FIRST); `TRY_CAST` turns Redfin's
+  literal `"NA"` into SQL NULL
 
 ### 2. Unit normalization (rescaling only — never recomputation)
 
-New feed publishes percents where the contract has ratios/fractions. Pipeline divides
-by 100 — the same quantity in different units, read as written:
+`refinery/sources/housing-source.mts` is the ONE place vendor units become
+contract units — `mapHousingRow` (exported, unit-tested) divides by 100 once:
 
-- `AVERAGE SALE TO LIST RATIO (%)` 96.12 → `AVG_SALE_TO_LIST` 0.9612 (ratio ~1.0)
-- `SHARE SOLD ABOVE ORIGINAL LIST (%)` → `SOLD_ABOVE_LIST` fraction 0–1
-- `PERCENT OFF MARKET IN TWO WEEKS (%)` → `OFF_MARKET_IN_TWO_WEEKS` fraction 0–1
-- All `YOY (%)` / `MOM (%)` percent columns → decimal fractions
-- `MEDIAN SALE PRICE NSA ($)` → `MEDIAN_SALE_PRICE`; `MEDIAN SALE PRICE PER SQ.FT.`
-  → `MEDIAN_PPSF`; `MONTHS OF SUPPLY` → `MONTHS_OF_SUPPLY`; counts map 1:1
+- `avg_sale_to_list_pct` 96.12 → `avg_sale_to_list` 0.9612 (ratio ~1.0)
+- `sold_above_list_pct` / `off_market_in_two_weeks_pct` → fractions 0–1
+- `*_yoy_pct` / `*_mom_pct` → decimal fractions
+- `avg_sale_to_list_yoy_ppts` → absolute ratio delta (ppts ÷ 100)
 
-Columns whose source vanished AND that the pack never reads go NULL with a comment:
-`MEDIAN_LIST_PRICE`, `MEDIAN_LIST_PPSF`, `PRICE_DROPS`, plus any `*_MOM/_YOY` legs
-without a successor. (`MEDIAN NEW LISTING PRICE` is a DIFFERENT concept than the old
-`MEDIAN_LIST_PRICE` — never mapped across.)
+Contract fields whose source vanished stay as permanent nulls, never mapped from
+a lookalike: `median_list_price` (`MEDIAN NEW LISTING PRICE` is a DIFFERENT
+concept), `price_drops` (own dataset/pipeline). The pack reads neither.
 
 ### 3. The one contract change — DOM YoY becomes a fraction (user-visible)
 
@@ -85,8 +86,12 @@ percent is recomputation — banned. So:
 - **Pre-download:** HEAD the source; compare `ETag`/`Last-Modified` to the values the
   inventory row recorded last run. Unchanged → LOUD log "SOURCE UNCHANGED since
   MM/DD/YYYY" (not a failure — mid-cycle reruns are legitimate).
-- **Post-load:** newest `PERIOD_END` must be within `cadence_days × tolerance`
-  (30 × 2 = 60 days, matching cadence_registry's pinned values) of today (UTC).
+- **Post-load:** newest `PERIOD_END` must be within `MAX_CONTENT_AGE_DAYS = 40`
+  of today — healthy pulls run ≤ ~25 days behind, ONE frozen cycle ≥ ~46, so 40
+  trips RED on the first missed cycle (deliberately TIGHTER than the registry's
+  30 × 2.0 probe threshold, per guards.py doctrine). Wired via the EXISTING
+  `assert_content_fresh` / `ContentStaleError` seam. Volume floor
+  `MIN_ROWS = 6_000` (healthy pull = 10,072 rows / 126 ZIPs, measured 07/16).
   Breach → exit 1 LOUD → GHA red. This is the "did we actually get anything" signal.
 - Inventory row (`data_lake._tier1_inventory`) gains `source_etag`,
   `source_last_modified`, `max_period_end` (idempotent SQL migration, run directly).

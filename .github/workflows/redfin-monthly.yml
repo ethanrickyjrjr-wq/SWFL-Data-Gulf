@@ -3,8 +3,10 @@ name: Redfin SWFL Tier 1 monthly
 on:
   schedule:
     # 0 13 15 * * — 13:00 UTC = 9:00 AM ET on the 15th of each month.
-    # Redfin publishes monthly (~3rd week; S3 last-mod observed ~15th). 1.5 GB download —
-    # weekly cadence would waste bandwidth and risk rate limits.
+    # Redfin Data Center ships the monthly tracker ~the 13th-15th (June data
+    # released Jul 13; S3 object stamped Jul 14) — the 15th lands after their
+    # drop. ~660 MB download (redfin_data_center/housing_market/monthly/
+    # all_zips.csv; retargeted 07/16/2026 off the FROZEN legacy dump).
     # (Avoids clash with existing slots — see docs/standards/pipeline-freshness.md §3.)
     - cron: "0 13 15 * *"
   workflow_dispatch:

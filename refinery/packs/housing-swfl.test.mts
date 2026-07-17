@@ -1,8 +1,12 @@
 /**
  * housing-swfl helper unit tests. Lock the two side-bug fixes and the
  * thin-sample guard that shipped with the per-ZIP detail-table fix:
- *  - formatDayDelta: MEDIAN_DOM_YOY is ABSOLUTE DAYS, never ×100 a percent
- *    (the "650.0% YoY" regression).
+ *  - formatDomYoyPct: MEDIAN_DOM_YOY is a DECIMAL FRACTION since the
+ *    redfin_data_center retarget (07/16/2026) — ×100 exactly once at display.
+ *    (Successor to the formatDayDelta guard: the legacy feed published DOM YoY
+ *    as ABSOLUTE DAYS and rendering it as a percent shipped "650.0% YoY" to
+ *    users. The new feed publishes a percent; the source converts to a
+ *    fraction; anything rendering raw days again is the same bug reborn.)
  *  - monthsOfSupply: derived inventory ÷ 90-day sales pace, SUPPRESSED on
  *    thin-sample ZIPs (a 1–4 sale denominator produces nonsense).
  *  - aggregateMonthsOfSupply: a TRUE regional absorption rate, robust to the
@@ -14,7 +18,7 @@ import assert from "node:assert/strict";
 import {
   monthsOfSupply,
   aggregateMonthsOfSupply,
-  formatDayDelta,
+  formatDomYoyPct,
   isLowSample,
 } from "./housing-swfl.mts";
 import type { HousingZipRow } from "../sources/housing-source.mts";
@@ -47,14 +51,12 @@ function row(p: Partial<HousingZipRow>): HousingZipRow {
 }
 
 describe("housing-swfl helpers", () => {
-  describe("formatDayDelta — guards the 650%-YoY units bug", () => {
-    test("renders signed days, never a percent", () => {
-      assert.equal(formatDayDelta(-11), "-11 days");
-      assert.equal(formatDayDelta(6.5), "+6.5 days");
-      assert.equal(formatDayDelta(148.5), "+148.5 days");
-      assert.equal(formatDayDelta(0), "0 days");
-      assert.equal(formatDayDelta(1), "+1 day");
-      assert.equal(formatDayDelta(-1), "-1 day");
+  describe("formatDomYoyPct — successor to the 650%-YoY units guard", () => {
+    test("renders a signed percent from a decimal fraction, ×100 exactly once", () => {
+      assert.equal(formatDomYoyPct(-0.1375), "-13.8%");
+      assert.equal(formatDomYoyPct(0.0398), "+4%");
+      assert.equal(formatDomYoyPct(7.5225), "+752.3%");
+      assert.equal(formatDomYoyPct(0), "0%");
     });
   });
 
