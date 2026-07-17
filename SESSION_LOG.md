@@ -1,3 +1,15 @@
+## 2026-07-17 (Opus 4.8 · main) — Landed final sell-side favorable-framing commit; framing work now fully on main
+
+Landed the final `wt/sell-side-framing` commit — `67916ce8` (shorten dot-plot legend
+labels to clear the 600px SVG edge at 4-digit ppsf). The other 15 framing commits (`FAVORABLE_FRAMING_POLICY`
+shared constant wired into listing-narrative / under-contract / market-comps with a direction-symmetric
+magnitude tier; the sourced price-vs-area dot chart for price-reduced; `shared.ts` extraction of
+isComparableHome/perSqft/median; the required `positioning` field on Recipe; `lib/deliverable/CLAUDE.md` +
+deliverable-playbook Part 10; full test coverage) had already reached main via a concurrent session's push,
+so a rebase from this tree patch-matched and skipped them. Pushed from the isolated worktree, not the
+shared main checkout. Also cleaned up two stale worktrees this session: `dcd` (already landed) and
+`desk-fix-isolate-2` (its months-of-supply desk chart is already live on main via a later commit).
+
 ## 2026-07-17 (Opus 4.8 · main) — armed the nightly row gate (dropped --dry-run from assert_landed)
 
 The nightly chain's row gate (`ingest/scripts/assert_landed`) had run `--dry-run` since the 07/12 cron
