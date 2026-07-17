@@ -41,9 +41,10 @@ ledger land in `insiders-runs/<stamp>/`. Sends are operator commands only
 
 ## State of the desk (≤5 lines, update each visit)
 
-- 07/16/2026: ~40 rows (first harvest of 2 NEW sources: Gulfshore Business + Business Observer) →
-  10 picks. July thesis UPGRADED: bifurcation, not boom — construction slowing (news) while ZHVI
-  bottom tier falls ~2x faster than top (lake). Issue raw-collection file started:
-  `collection/2026-07.md` (operator brief: limited-edition first copy soon). No weight-5.
-- 07/11/2026: first real triage — 48 rows → 16 picks. Thesis candidate: luxury diffusing outward.
-- 07/10/2026: desk opened; no issues shipped yet; composer built (Phase A+B, at operator gate).
+- 07/17/2026: 6 rows → 2 picks, both airports (RSW $1.1B/14-gate/Dec-2027 Suffolk build; APF lease
+  appraised $8–10.8M/yr). Brain sweep landed the thesis's THIRD leg: ZORI rents split on the same
+  map (Marco +11.9% vs Lehigh −8.2%); Naples luxury print = statewide coastal pattern (cross-coast
+  Redfin). 2 defect checks opened (news body truncation; TDT combined label). Press run → Sun 07/19.
+- 07/16/2026: ~40 rows → 10 picks; thesis UPGRADED to bifurcation (construction slowing + ZHVI
+  bottom tier falling ~2x faster); `collection/2026-07.md` started. 07/11: 48 rows → 16 picks,
+  luxury-diffusion candidate. 07/10: desk opened; composer at operator gate. No issue shipped yet.

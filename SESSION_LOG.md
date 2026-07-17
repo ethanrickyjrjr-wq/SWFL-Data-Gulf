@@ -1,3 +1,21 @@
+## 2026-07-17 (Fable 5 · main) — desk 07/17: airports day + brain sweep lands bifurcation's third leg (ZORI rent map)
+
+Daily Insiders triage (operator: "look around, pull some things in; press run ~Sunday"). 6 lake
+rows → 2 picks, both airports: Suffolk is building RSW's $1.1B 14-gate Concourse E + 16-lane TSA
+(completion Dec 2027, Business Observer) and an appraisal says Naples could ask $8M–$10.8M/yr for
+the APF lease — access-repricing thread hardens from watch to committed capital. Hunt-list item 1
+cleared (per-brain newer-data sweep: tourism-tdt, rsw-airport, env-swfl, macro-swfl, rentals-swfl,
+traffic-swfl → collection/2026-07.md §07/17): THE FIND is ZORI rents bifurcating on the same map
+as ZHVI tiers (Marco 34145 +11.9% vs Lehigh 33973 −8.2%, month ending 05/31/2026) — thesis now
+stands on three independent legs. Cross-coast Redfin city grain shows Naples's +66.2% luxury print
+is the statewide coastal-core pattern (Palm Beach +54.9%, Miami Beach +94.0%), backing the
+mix-effect read. Two defects hit + checks opened same session (RULE 2.4):
+news_capture_body_truncation (body_text hard-capped at 3,000 nav-junk chars, 142/145 rows at cap —
+desk re-crawls by hand) and tourism_tdt_combined_masks_collier_lag ("SWFL combined April" = Lee
+alone to the penny; Collier lake rows stop at 2026-02). Next: 07/18–07/19 historical depth +
+outside research (rate/insurance backdrop, cash-buyer share), remaining brains for The Tape, One
+Community pair, receipts closer; first dry-run press pass targeted Sunday 07/19.
+
 ## 2026-07-16 (Fable 5 · main) — address WINS scope precedence + North Fort Myers crosswalk entry + exhaustive every-ZIP test
 
 Operator rulings off the scope-fix review: (1) WHY WOULD THE CITY WIN OVER THE ADDRESS → it
