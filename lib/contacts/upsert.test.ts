@@ -164,4 +164,83 @@ describe("upsertCanonicalContacts", () => {
     // Third batch (rows 200-249) must never be attempted once batch 2 errors.
     expect(calls).toHaveLength(2);
   });
+
+  // --- in-batch dedup (contacts_upsert_no_same_batch_email_dedup) ---
+  // Two rows sharing (user_id, email) in one .upsert() call make Postgres
+  // throw "ON CONFLICT DO UPDATE command cannot affect row a second time".
+  // These assert the dedup happens BEFORE the opt-out partition/chunking so
+  // the payload sent to Postgres never contains a repeated email.
+
+  test("duplicate email in one batch collapses to ONE row (in-batch dedup)", async () => {
+    const { db, calls } = fakeDb(okHandler);
+
+    const result = await upsertCanonicalContacts(db, "user-1", [row("a@x.com"), row("a@x.com")]);
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].batch).toHaveLength(1);
+    expect(calls[0].batch[0].email).toBe("a@x.com");
+    expect(result).toEqual({ added: 1, error: null });
+  });
+
+  test("name/phone: later non-null wins; a later null never nulls out an earlier value", async () => {
+    const { db, calls } = fakeDb(okHandler);
+
+    await upsertCanonicalContacts(db, "user-1", [
+      row("a@x.com", { name: "First", phone: "111" }),
+      row("a@x.com", { name: "Second", phone: null }),
+      row("a@x.com", { name: null, phone: null }),
+    ]);
+
+    expect(calls[0].batch).toHaveLength(1);
+    expect(calls[0].batch[0].name).toBe("Second");
+    expect(calls[0].batch[0].phone).toBe("111");
+  });
+
+  test("tags union, order-preserving first-seen", async () => {
+    const { db, calls } = fakeDb(okHandler);
+
+    await upsertCanonicalContacts(db, "user-1", [
+      row("a@x.com", { tags: ["vip", "buyer"] }),
+      row("a@x.com", { tags: ["buyer", "referral"] }),
+    ]);
+
+    expect(calls[0].batch[0].tags).toEqual(["vip", "buyer", "referral"]);
+  });
+
+  test("attribs shallow merge, later keys win", async () => {
+    const { db, calls } = fakeDb(okHandler);
+
+    await upsertCanonicalContacts(db, "user-1", [
+      row("a@x.com", { attribs: { source: "csv", city: "Naples" } }),
+      row("a@x.com", { attribs: { source: "csv2" } }),
+    ]);
+
+    expect(calls[0].batch[0].attribs).toEqual({ source: "csv2", city: "Naples" });
+  });
+
+  test("unsubscribed: true wins across duplicates and the merged row lands in the opted-out partition", async () => {
+    const { db, calls } = fakeDb(okHandler);
+
+    await upsertCanonicalContacts(db, "user-1", [
+      row("a@x.com"),
+      row("a@x.com", { unsubscribed: true }),
+      row("b@x.com"),
+    ]);
+
+    expect(calls).toHaveLength(2);
+    const optOutCall = calls.find((c) => c.batch.some((r) => r.email === "a@x.com"))!;
+    const restCall = calls.find((c) => c.batch.some((r) => r.email === "b@x.com"))!;
+    expect(optOutCall.batch).toHaveLength(1);
+    expect(optOutCall.batch[0].unsubscribed).toBe(true);
+    expect(Object.prototype.hasOwnProperty.call(restCall.batch[0], "unsubscribed")).toBe(false);
+  });
+
+  test("case-different emails are NOT merged (case-sensitive match)", async () => {
+    const { db, calls } = fakeDb(okHandler);
+
+    await upsertCanonicalContacts(db, "user-1", [row("A@x.com"), row("a@x.com")]);
+
+    expect(calls[0].batch).toHaveLength(2);
+    expect(calls[0].batch.map((r) => r.email).sort()).toEqual(["A@x.com", "a@x.com"]);
+  });
 });

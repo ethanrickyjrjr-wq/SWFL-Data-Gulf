@@ -16,12 +16,58 @@ import type { ContactRow } from "@/lib/contacts/types";
 
 const BATCH_SIZE = 100;
 
+/**
+ * In-batch dedup — collapses rows sharing the exact same `email` string
+ * (case-SENSITIVE: public.contacts' UNIQUE(user_id,email) is case-sensitive,
+ * so "A@x.com" and "a@x.com" are different keys and are NOT merged) before
+ * they ever reach a single `.upsert()` call. Two rows with the same
+ * (user_id, email) landing in one upsert call make Postgres throw "ON
+ * CONFLICT DO UPDATE command cannot affect row a second time" — this closes
+ * `contacts_upsert_no_same_batch_email_dedup` (a repeated CSV/vCard address,
+ * or an upcoming connector that doesn't pre-dedupe like Mailchimp's mapper
+ * does, would hit it today).
+ *
+ * Merge folds left-to-right over duplicates (later row wins ties):
+ *   - name/phone: later non-null value wins; a later null never nulls out
+ *     an earlier value
+ *   - tags: union, order-preserving first-seen
+ *   - attribs: shallow merge, later keys win
+ *   - unsubscribed: one-way — true wins if ANY duplicate says true;
+ *     otherwise the key stays ABSENT (mirrors the opt-out rule below)
+ */
+function dedupeSameBatchEmails(rows: ContactRow[]): ContactRow[] {
+  const order: string[] = [];
+  const byEmail = new Map<string, ContactRow>();
+
+  for (const r of rows) {
+    const prev = byEmail.get(r.email);
+    if (!prev) {
+      order.push(r.email);
+      byEmail.set(r.email, { ...r, tags: [...r.tags], attribs: { ...r.attribs } });
+      continue;
+    }
+    byEmail.set(r.email, {
+      name: r.name ?? prev.name,
+      email: r.email,
+      phone: r.phone ?? prev.phone,
+      tags: Array.from(new Set([...prev.tags, ...r.tags])),
+      attribs: { ...prev.attribs, ...r.attribs },
+      ...(prev.unsubscribed === true || r.unsubscribed === true
+        ? { unsubscribed: true as const }
+        : {}),
+    });
+  }
+
+  return order.map((email) => byEmail.get(email)!);
+}
+
 export async function upsertCanonicalContacts(
   supabase: SupabaseClient<Database>,
   userId: string,
   rows: ContactRow[],
 ): Promise<{ added: number; error: string | null }> {
   let added = 0;
+  const deduped = dedupeSameBatchEmails(rows);
 
   // PostgREST derives a request's column set as the UNION of keys across
   // every object in the payload (postgrest-js PostgrestQueryBuilder.upsert:
@@ -34,8 +80,8 @@ export async function upsertCanonicalContacts(
   // Partition opt-outs from everything else BEFORE chunking so every call's
   // batch has a homogeneous key set (either every row specifies
   // `unsubscribed` or none do).
-  const optedOut = rows.filter((r) => r.unsubscribed === true);
-  const rest = rows.filter((r) => r.unsubscribed !== true);
+  const optedOut = deduped.filter((r) => r.unsubscribed === true);
+  const rest = deduped.filter((r) => r.unsubscribed !== true);
 
   for (const group of [optedOut, rest]) {
     for (let i = 0; i < group.length; i += BATCH_SIZE) {
