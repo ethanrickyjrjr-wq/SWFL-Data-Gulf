@@ -106,6 +106,12 @@
       "pack": "housing-swfl",
       "accepted_on": "07/16/2026",
       "note": "operator-approved 07/16: pick up 07/15 Redfin ingest — live brain serving 03/01/2026 window, TTL not due until 08/03 (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29554222969",
+      "pack": "housing-swfl",
+      "accepted_on": "07/17/2026",
+      "note": "operator-approved retarget verify: redfin_data_center feed landed (Apr-Jun window, 10072 rows), rebuild to serve it (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
