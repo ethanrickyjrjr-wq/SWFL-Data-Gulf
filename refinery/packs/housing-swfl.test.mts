@@ -20,6 +20,7 @@ import {
   aggregateMonthsOfSupply,
   formatDomYoyPct,
   isLowSample,
+  buildSnapshot,
 } from "./housing-swfl.mts";
 import type { HousingZipRow } from "../sources/housing-source.mts";
 
@@ -100,6 +101,30 @@ describe("housing-swfl helpers", () => {
     });
     test("null when no row has a real sales count", () => {
       assert.equal(aggregateMonthsOfSupply([row({ inventory: 100, homes_sold: 0 })]), null);
+    });
+  });
+
+  describe("buildSnapshot — window labeled by what it COVERS, not when it opens", () => {
+    test("period_end is the LATEST window's end, laggard ZIPs don't drag it", () => {
+      const snap = buildSnapshot([
+        row({
+          zip_code: "33904",
+          period_begin: "2026-04-01",
+          period_end: "2026-06-30",
+          median_sale_price: 365000,
+        }),
+        // Thin rural ZIP whose latest Redfin window is years old — must not
+        // define the regional window label in either direction.
+        row({
+          zip_code: "34266",
+          period_begin: "2020-01-01",
+          period_end: "2020-03-31",
+          median_sale_price: 100000,
+        }),
+      ]);
+      assert.ok(snap !== null);
+      assert.equal(snap!.period_begin, "2026-04-01");
+      assert.equal(snap!.period_end, "2026-06-30");
     });
   });
 

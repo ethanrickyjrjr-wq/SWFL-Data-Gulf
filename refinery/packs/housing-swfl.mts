@@ -25,6 +25,10 @@ const LOW_SAMPLE_FLOOR = 5;
 
 interface HousingSnapshot {
   period_begin: string;
+  /** End of the LATEST window — the date user-facing copy quotes ("through
+   *  X"), because a window labeled by its start reads ~3 months staler than
+   *  the data it covers (operator caught this live on 07/16/2026). */
+  period_end: string;
   zip_count: number;
   median_sale_price: number;
   median_dom: number | null;
@@ -136,14 +140,18 @@ function rowsFromFragments(fragments: RawFragment[]): HousingZipRow[] {
     .filter((r): r is HousingZipRow => !!r && typeof r === "object");
 }
 
-function buildSnapshot(rows: HousingZipRow[]): HousingSnapshot | null {
+export function buildSnapshot(rows: HousingZipRow[]): HousingSnapshot | null {
   if (rows.length === 0) return null;
 
   let latestPeriod = "";
+  let latestPeriodEnd = "";
   const byMetro = new Map<string, HousingZipRow[]>();
 
   for (const row of rows) {
-    if (row.period_begin > latestPeriod) latestPeriod = row.period_begin;
+    if (row.period_begin > latestPeriod) {
+      latestPeriod = row.period_begin;
+      latestPeriodEnd = row.period_end;
+    }
     const metro = row.parent_metro_region || "Unknown";
     if (!byMetro.has(metro)) byMetro.set(metro, []);
     byMetro.get(metro)!.push(row);
@@ -185,6 +193,7 @@ function buildSnapshot(rows: HousingZipRow[]): HousingSnapshot | null {
 
   return {
     period_begin: latestPeriod,
+    period_end: latestPeriodEnd,
     zip_count: rows.length,
     median_sale_price: medianSalePrice,
     median_dom: median(rows.map((r) => r.median_dom)),
@@ -300,7 +309,7 @@ function housingCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
     {
       topic: "corpus_overview",
       fact: "Redfin SWFL housing market corpus",
-      value: `${rows.length.toLocaleString()} ZIP snapshots at ${snap.period_begin}. Regional median sale price = ${priceStr}, YoY = ${yoyStr}. Median DOM = ${snap.median_dom?.toFixed(0) ?? "n/a"} days. Months of supply = ${snap.months_of_supply?.toFixed(1) ?? "n/a"}.`,
+      value: `${rows.length.toLocaleString()} ZIP snapshots, data through ${snap.period_end}. Regional median sale price = ${priceStr}, YoY = ${yoyStr}. Median DOM = ${snap.median_dom?.toFixed(0) ?? "n/a"} days. Months of supply = ${snap.months_of_supply?.toFixed(1) ?? "n/a"}.`,
       source_fragment_ids: [],
     },
   ];
@@ -348,7 +357,7 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     metric: "housing_median_sale_price_swfl",
     value: Number(snap.median_sale_price.toFixed(0)),
     direction: metricDirection(snap.median_sale_price_yoy),
-    label: `SWFL regional median sale price (all property types) at ${snap.period_begin}${priceYoyLabel}`,
+    label: `SWFL regional median sale price (all property types), data through ${snap.period_end}${priceYoyLabel}`,
     variable_type: "extensive",
     units: "USD",
     display_format: "currency",
@@ -451,7 +460,7 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       .join(", ") || "none";
 
   const conclusion = [
-    `SWFL housing reads ${verdict.direction} at ${snap.period_begin} across ${snap.zip_count} ZIPs — regional median sale price ${priceDisplay}${yoyDisplay}, DOM ${domDisplay}, ${mosDisplay} of supply, ${stlDisplay} sale-to-list.`,
+    `SWFL housing reads ${verdict.direction} (data through ${snap.period_end}) across ${snap.zip_count} ZIPs — regional median sale price ${priceDisplay}${yoyDisplay}, DOM ${domDisplay}, ${mosDisplay} of supply, ${stlDisplay} sale-to-list.`,
     `Fastest-moving ZIPs: ${hottestList}. Priciest ZIPs: ${priciestList}.`,
   ].join(" ");
 
@@ -494,7 +503,7 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     ? [
         {
           id: "housing_by_zip",
-          title: `SWFL housing by ZIP — latest 90-day window (${snap.period_begin})`,
+          title: `SWFL housing by ZIP — latest rolling 3-month window, data through ${snap.period_end}`,
           grain: "zip",
           columns: [
             { id: "metro", label: "Metro area" },

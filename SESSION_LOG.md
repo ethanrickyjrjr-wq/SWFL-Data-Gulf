@@ -1,3 +1,22 @@
+## 2026-07-16 (Fable 5 · main) — housing window labeled by what it COVERS ("data through X") + stale-ZIP-row check
+
+Operator caught the label live ("what do you mean serves at 4/1/2026?"): housing copy printed the
+rolling window's START date, reading ~3 months staler than the data even when fresh. Fixed TDD:
+snapshot gains period_end (latest window's end; laggard ZIPs can't drag it — tested), all four
+user-facing spots (stage-1 value, price key-metric label, conclusion, by-ZIP table title) now say
+"data through <period_end>" (speaker renders MM/DD/YYYY downstream). 17 tests green, vocab +
+catalog green. Also answered "what about all the other ZIP codes" in PRODUCT terms (operator: "WE HAVE 57 ZIP
+CODES!"): of the 57 core Lee+Collier ZIPs, 54 are current through 06/30/2026; 34101 (downtown
+Naples) is six years stale at Redfin (its latest published window is Jan–Mar 2020); 33965 (FGCU)
+and 34137 (Copeland) have no Redfin rows at all — vendor coverage reality, identical holes in the
+old feed. Lake-wide: 117/126 advanced. By-ZIP table has NO age marker for laggard rows, opened
+check housing_zip_rows_no_window_age_marker.
+Also verified isCoreScope (Lee+Collier 57) untouched by the retarget — scope lives in the pack
+(line 283), the rewritten source file never carried it. NOTE: first post-retarget dispatch
+(29554222969) failed as expected — origin didn't have the new consumer yet (Binder REGION_TYPE);
+degraded to last-good, no synthesis spend. Origin has the retarget now (rebased ed0b2efd by the
+parallel session's push); this push adds the label fix, then ONE rebuild dispatch verifies live.
+
 ## 2026-07-17 (Sonnet 5 · main) — Lead-gen research: SteadyAPI Reddit + crawl4ai, picks up launch-plan listening target #1
 
 Operator: "run steadapi on reddit and crawl4ai until you understand lead generation and how we
