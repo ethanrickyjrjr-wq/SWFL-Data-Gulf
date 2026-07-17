@@ -1,3 +1,4 @@
+import json
 from unittest.mock import MagicMock, patch
 
 
@@ -40,3 +41,23 @@ def test_dry_run_skips_upload():
     assert result == 0
     mock_upload.assert_not_called()
     mock_inv.assert_not_called()
+
+
+def test_fetch_sends_all_scoped_series():
+    from ingest.pipelines.bls_ppi.constants import SERIES_IDS
+
+    captured = {}
+
+    def _capture_post(url, data=None, headers=None, timeout=None):
+        captured["payload"] = json.loads(data)
+        return _fake_bls_response()
+
+    with patch("requests.post", side_effect=_capture_post):
+        from ingest.pipelines.bls_ppi.resources import fetch_bls_ppi
+
+        fetch_bls_ppi()
+
+    assert captured["payload"]["seriesid"] == SERIES_IDS
+    assert len(SERIES_IDS) == 12
+    assert captured["payload"]["seriesid"][0] == "PCU236211236211"
+    assert captured["payload"]["seriesid"][1] == "PCU236221236221"

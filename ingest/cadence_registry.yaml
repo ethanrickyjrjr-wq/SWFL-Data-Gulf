@@ -517,27 +517,30 @@ pipelines:
 
   - name: bls_ppi
     workflow: ingest-bls-ppi.yml
-    consuming_pack: none
+    consuming_pack: cre-swfl
     lane: tier-1
     cadence_days: 30
     tolerance_multiplier: 2.0
     inventory_id: lake-tier1/macro/bls_ppi/
     inventory_key_type: prefix
     # First run: 2026-05-27 (workflow_dispatch) ✓
-    # LABELING DISCREPANCY confirmed 07/08/2026 (see check bls_ppi_mislabeled_series): our own
-    # constants.py labels PCU236221236221/PCU236211236211 "single-family/multi-family home
-    # construction PPI." BLS's live Industry Factsheets page states 236221 = "New Warehouse
-    # Building Construction" and 236211 = "New Industrial Building Construction" — both
-    # NONRESIDENTIAL. Series still fetch/load fine; the LABEL is what's wrong. Genuine
-    # residential-construction PPI series (NAICS 236115/236116) were not confirmed live this
-    # session — needs a follow-up probe before trusting downstream consumption of this signal.
+    # Broadened 2 -> 12 series 07/17/2026 (full "Nonresidential Building
+    # Construction" sector, NAICS 236 subset) — see docs/superpowers/specs/
+    # 2026-07-17-bls-ppi-cre-swfl-consumer-design.md. cre-swfl consumes 8 of the
+    # 12: industrial/warehouse/office/health-care building-type indexes plus the
+    # 4 nonresidential trade-contractor indexes (concrete/roofing/electrical/
+    # plumbing-HVAC). 236222 (school) is ingested but deliberately NOT consumed —
+    # no existing pack owns institutional/public construction; tracked via check
+    # bls_ppi_school_series_no_consumer. 236400/236500/2381MR are aggregate
+    # rollups of series already shown individually and are not separately
+    # surfaced (would double-count against their own components).
     source_scope:
       confirmed_total:
-        summary: "2 PPI industry series, 10-year rolling monthly index — currently labeled residential construction, likely mislabeled (see comment above)"
+        summary: "12 PPI industry series, 10-year rolling monthly index — full 'Nonresidential Building Construction' sector (NAICS 236 subset). 8 consumed by cre-swfl; 236222 (school) ingested but unconsumed; 236400/236500/2381MR are aggregate rollups, not separately surfaced."
         source: "our ingest"
       source_ceiling:
-        summary: "BLS PPI publishes a much broader set for the same 'Nonresidential Building Construction' sector we're actually measuring — New School (236222), New Office (236223), New Health Care (236224), Construction Trade Contractors (238), plus 'Final Demand Construction' and 'Inputs to Construction Industries' composite indexes — none pulled. If genuine residential PPI series (236115/236116) exist as intended, those are a separate unconfirmed gap."
-        as_of: "07/08/2026"
+        summary: "Adjacent BLS systems verified live but not pulled: Final Demand Construction composite (WPUFD43/WPUFD431/WPUFD432, FD-ID commodity aggregation system) and Materials & Components for Construction input-cost index (WPUID612/WPUID6121/WPUID6122, intermediate-demand commodity system). Different survey/series-id scheme from the NAICS-236 industry data above — flagged as a future extension, not pulled this build. Confirmed: no BLS PPI series exists for residential building construction (no NAICS 2361xx entries anywhere in the industry list) — a real gap in BLS's own coverage, not a gap in our ingest."
+        as_of: "07/17/2026"
         source_url: "https://www.bls.gov/ppi/factsheets/"
         source_label: "BLS Producer Price Index — Industry Factsheets"
 
