@@ -9,6 +9,19 @@ deliverable-playbook Part 10; full test coverage) had already reached main via a
 so a rebase from this tree patch-matched and skipped them. Pushed from the isolated worktree, not the
 shared main checkout. Also cleaned up two stale worktrees this session: `dcd` (already landed) and
 `desk-fix-isolate-2` (its months-of-supply desk chart is already live on main via a later commit).
+## 2026-07-17 (Opus 4.8 · main) — main CI GREEN (first in 7+ runs) + handoff for leftover non-blocking issues
+
+Commit bdfd9f18 is the first green `ci.yml build` run (29618424950 = success) after 7+ consecutive reds.
+The whole cascade is cleared: bun-test (NFM test, rules mirror, Chromium install, agent-hero PDF ratio),
+node:test (watch-manifest regen, cross-platform path bug in push-coverage hook), and the registry steps
+all pass. Wrote `docs/handoff/2026-07-17-ci-green-cascade.md` covering every layer fixed plus the
+non-blocking issues surfaced along the way. Opened check `zombie_crons_disabled_but_registry_expects_rows`
+(4 workflows disabled at the GitHub API but cron-live in source — dbpr-sirs-monthly, fgcu-reri-monthly,
+marketbeat-pdf-ingest, rsw-airport-monthly; decide intentional-or-not, do NOT blindly enable). Closed
+`pdf_visual_parity_test_red_local` (was mis-diagnosed as env/font; it was the real agent-hero bug, now
+fixed + CI-confirmed). Flagged for the operator: the required `CI / build` check is still admin-bypassed
+on every push — now that it's green, that's the moment to stop bypassing or it rots again.
+
 ## 2026-07-17 (Opus 4.8 · main) — CI layer 2b: fixed a real cross-platform path bug in the push-coverage hook
 
 After the manifest regen, node:test was down to one failure that passed locally but failed on Linux CI
