@@ -3708,6 +3708,36 @@ export interface Database {
         };
         Relationships: [];
       };
+      switch_forwards: {
+        Row: {
+          id: string;
+          user_id: string;
+          message_id: string;
+          platform: string | null;
+          sender_domain: string | null;
+          html: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          message_id: string;
+          platform?: string | null;
+          sender_domain?: string | null;
+          html?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          message_id?: string;
+          platform?: string | null;
+          sender_domain?: string | null;
+          html?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       switch_passes: {
         Row: {
           id: string;

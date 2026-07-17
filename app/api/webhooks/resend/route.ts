@@ -38,6 +38,14 @@ import {
   buildClickAlertContent,
   type CampaignClickPayload,
 } from "@/lib/email/campaign-click-alert";
+import { isSwitchInbound } from "@/lib/switch/forward-inbound";
+import {
+  processForwardEmail,
+  type ForwardDeps,
+  type ForwardEvent,
+} from "@/lib/switch/forward-handler";
+import { upsertCanonicalContacts } from "@/lib/contacts/upsert";
+import { activateSwitchPass } from "@/lib/switch/activate";
 // KNOWN-DEBT(market_alert_engagement / campaign_click_events are new public tables not yet in
 // Database types — regen types, then retype)
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
@@ -76,6 +84,153 @@ export async function POST(request: Request): Promise<Response> {
     event = JSON.parse(raw) as InboundEvent;
   } catch {
     return NextResponse.json({ error: "bad_json" }, { status: 400 });
+  }
+
+  // ── Switch forward lane: "bring your own list" competitor migration ────────
+  // An operator forwards a competitor contact-export or campaign email to
+  // switch@<reply-domain> (spec 2026-07-16-competitor-switch-onboarding-design.md).
+  // ALL decision logic lives in lib/switch/forward-handler.ts (unit-tested with
+  // mocked deps); this branch only builds the real seams. EARLY RETURN: a
+  // switch-addressed event is never also a buyer-intent reply/outreach/blast
+  // event. Dead code until the operator wires the switch@ inbound address in
+  // the Resend dashboard (same signing secret as this endpoint) — no live
+  // event carries that recipient until then, so this is safe to ship ahead of
+  // that operator step.
+  if (isSwitchInbound(event)) {
+    try {
+      const sdb = createServiceRoleClient();
+      const switchResend = getMarketingResend();
+
+      const forwardDeps: ForwardDeps = {
+        log: (line) => console.log(line),
+
+        async findUserIdByEmail(email) {
+          // No email->user lookup helper exists anywhere in the repo (grepped
+          // listUsers/getUserByEmail/a profiles table — none found), so
+          // auth.admin.listUsers is the only surface. Hard page cap (25 pages
+          // x 200 = 5,000 users) so a large user base can't hang the webhook;
+          // a match past the cap is a known, loud limitation, not a silent one.
+          const PAGE_SIZE = 200;
+          const MAX_PAGES = 25;
+          const target = email.toLowerCase();
+          for (let page = 1; page <= MAX_PAGES; page++) {
+            const { data, error } = await sdb.auth.admin.listUsers({ page, perPage: PAGE_SIZE });
+            if (error) {
+              console.error(`[resend-webhook] switch listUsers failed: ${error.message}`);
+              return null;
+            }
+            const hit = data.users.find((u) => u.email?.toLowerCase() === target);
+            if (hit) return hit.id;
+            if (data.users.length < PAGE_SIZE) break;
+          }
+          return null;
+        },
+
+        async fetchBody(emailId) {
+          const { data, error } = await switchResend.emails.receiving.get(emailId);
+          if (error || !data) {
+            throw new Error(`receiving.get ${emailId}: ${error?.message ?? "no data"}`);
+          }
+          return {
+            from: data.from ?? "",
+            html: data.html ?? null,
+            text: data.text ?? "",
+            headers: (data.headers as Record<string, string | undefined>) ?? {},
+            attachments: (data.attachments ?? []).map((a) => ({
+              id: a.id,
+              filename: a.filename ?? "",
+              contentType: a.content_type,
+            })),
+          };
+        },
+
+        async fetchAttachmentText(emailId, attachmentId) {
+          try {
+            const { data, error } = await switchResend.emails.receiving.attachments.get({
+              emailId,
+              id: attachmentId,
+            });
+            if (error || !data) {
+              console.error(
+                `[resend-webhook] switch attachment fetch failed: ${error?.message ?? "no data"}`,
+              );
+              return null;
+            }
+            // download_url is signed + expires in 1hr (no documented inbound
+            // size cap — degrade gracefully on any failure, never throw).
+            const res = await fetch(data.download_url);
+            if (!res.ok) {
+              console.error(`[resend-webhook] switch attachment download failed: ${res.status}`);
+              return null;
+            }
+            return await res.text();
+          } catch (err) {
+            console.error(
+              `[resend-webhook] switch attachment fetch error: ${err instanceof Error ? err.message : String(err)}`,
+            );
+            return null;
+          }
+        },
+
+        async upsertContacts(userId, rows) {
+          return upsertCanonicalContacts(sdb, userId, rows);
+        },
+
+        async activatePass(userId, proof) {
+          return activateSwitchPass(sdb, userId, proof);
+        },
+
+        async insertProfileFact(userId, value, messageId) {
+          const { error } = await sdb.from("agent_profile_facts").insert({
+            user_id: userId,
+            key: "forwarded_campaign_about",
+            value,
+            source: "agent_upload",
+            source_detail: messageId,
+          });
+          if (!error) return "inserted";
+          // 23505 = a LIVE fact already exists for (user_id, key) — first
+          // forward wins; superseding is a later extension, not this task's.
+          if (error.code === "23505") return "duplicate";
+          console.error(`[resend-webhook] switch profile fact insert failed: ${error.message}`);
+          return "error";
+        },
+
+        async stashForward(userId, row) {
+          const { error } = await sdb.from("switch_forwards").insert({
+            user_id: userId,
+            message_id: row.messageId,
+            platform: row.platform,
+            sender_domain: row.senderDomain,
+            html: row.html,
+          });
+          if (error) {
+            console.error(`[resend-webhook] switch_forwards stash failed: ${error.message}`);
+          }
+        },
+
+        async sendReply(to, subject, text) {
+          const res = await switchResend.emails.send({
+            from: `${PLATFORM.fromName} <${PLATFORM.fromEmail}>`,
+            to,
+            subject,
+            text,
+          });
+          if (res.error) {
+            console.error(`[resend-webhook] switch reply send failed: ${res.error.message}`);
+          }
+        },
+      };
+
+      const outcome = await processForwardEmail(event as ForwardEvent, forwardDeps);
+      return NextResponse.json({ ok: true, kind: "switch", outcome }, { status: 200 });
+    } catch (err) {
+      // Never 500 a webhook (house rule, this route) — log + ack.
+      console.error(
+        `[resend-webhook] switch forward-lane failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      return NextResponse.json({ ok: false, error: "switch_processing_error" }, { status: 200 });
+    }
   }
 
   // ── Market-area alerts: per-recipient × per-trigger engagement ─────────────
