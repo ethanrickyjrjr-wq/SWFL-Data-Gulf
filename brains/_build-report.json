@@ -1,217 +1,1103 @@
 {
-  "target": "master",
+  "target": "housing-swfl",
   "timestamps": {
-    "started": "2026-07-16T06:52:02.676Z",
-    "finished": "2026-07-16T06:52:02.701Z"
+    "started": "2026-07-17T02:19:22.146Z",
+    "finished": "2026-07-17T02:19:24.374Z"
   },
   "source": "live",
   "outcomes": [
     {
-      "packId": "franchise-outcomes",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "storm-history-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "permits-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "corridor-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "cre-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "macro-us",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "macro-florida",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "macro-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "sector-credit-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "tourism-tdt",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "env-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "logistics-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "logistics-swfl-nowcast",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "traffic-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "properties-lee-value",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "properties-collier-value",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "rentals-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
       "packId": "housing-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "safety-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "labor-demand-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "econ-dev-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "city-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "rsw-airport",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "news-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "seller-stress-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "market-heat-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "hurricane-tracks-fl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "licenses-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "condo-sirs-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "fgcu-reri",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "permits-commercial-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "price-distribution-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "listing-momentum-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "market-temperature-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "home-values-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "investor-zip-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "active-listings-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "active-rentals-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "communities-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "master",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 11,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "housing-swfl",
+        "version": 11,
+        "refined_at": "2026-07-17T02:19:24Z",
+        "expires": "2026-08-21T02:19:24Z",
+        "ttl_seconds": 3024000,
+        "direction": "mixed",
+        "magnitude": 0.25,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL housing reads mixed at 2026-03-01 across 54 ZIPs — regional median sale price $441,525 (-3.7% YoY), DOM 75 days, 4.5 months of supply, 94.9% sale-to-list. Fastest-moving ZIPs: 34139 (20 days), 34116 (43 days), 33990 (46 days). Priciest ZIPs: 33921 ($2,840,000), 34102 ($1,800,000), 34103 ($1,600,000).",
+        "key_metrics": [
+          {
+            "metric": "housing_median_sale_price_swfl",
+            "value": 441525,
+            "direction": "falling",
+            "label": "SWFL regional median sale price (All Residential) at 2026-03-01 (-3.7% YoY)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-17T02:19:24Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
+            },
+            "suggestions": [
+              "What's driving housing median sale price swfl?",
+              "How does housing median sale price swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing median sale price swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_median_dom_swfl",
+            "value": 75,
+            "direction": "rising",
+            "label": "SWFL regional median days on market — falling = faster sales (YoY: +5 days)",
+            "variable_type": "extensive",
+            "units": "days",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-17T02:19:24Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
+            },
+            "suggestions": [
+              "What's driving housing median dom swfl?",
+              "How does housing median dom swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing median dom swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_months_of_supply_swfl",
+            "value": 4.5,
+            "direction": "stable",
+            "label": "SWFL regional median months of supply — derived from inventory over the 90-day sales pace (< 3 = seller's market, > 6 = buyer's market)",
+            "variable_type": "intensive",
+            "units": "months",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-17T02:19:24Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
+            },
+            "suggestions": [
+              "What's driving housing months of supply swfl?",
+              "How does housing months of supply swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing months of supply swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_avg_sale_to_list_swfl",
+            "value": 94.9,
+            "direction": "falling",
+            "label": "SWFL regional median sale-to-list ratio (> 100% = homes selling above ask)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-17T02:19:24Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
+            },
+            "suggestions": [
+              "What's driving housing avg sale to list swfl?",
+              "How does housing avg sale to list swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing avg sale to list swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_sold_above_list_pct_swfl",
+            "value": 5.6,
+            "direction": "stable",
+            "label": "SWFL regional median % of homes sold above list price",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-17T02:19:24Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
+            },
+            "suggestions": [
+              "What's driving housing sold above list pct swfl?",
+              "How does housing sold above list pct swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing sold above list pct swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_off_market_in_two_weeks_pct_swfl",
+            "value": 16.3,
+            "direction": "stable",
+            "label": "SWFL regional median % of homes going off-market within 2 weeks",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-17T02:19:24Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
+            },
+            "suggestions": [
+              "What's driving housing off market in two weeks pct swfl?",
+              "How does housing off market in two weeks pct swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing off market in two weeks pct swfl in this ZIP?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "housing_by_zip",
+            "title": "SWFL housing by ZIP — latest 90-day window (2026-03-01)",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "metro",
+                "label": "Metro area"
+              },
+              {
+                "id": "median_sale_price",
+                "label": "Median sale price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "median_sale_price_yoy_pct",
+                "label": "Median sale price YoY",
+                "display_format": "percent",
+                "units": "percent"
+              },
+              {
+                "id": "median_dom",
+                "label": "Median days on market",
+                "display_format": "count",
+                "units": "days"
+              },
+              {
+                "id": "median_dom_yoy_days",
+                "label": "Median days-on-market YoY change",
+                "display_format": "raw",
+                "units": "days"
+              },
+              {
+                "id": "avg_sale_to_list_pct",
+                "label": "Sale-to-list ratio",
+                "display_format": "percent",
+                "units": "percent"
+              },
+              {
+                "id": "months_of_supply",
+                "label": "Months of supply",
+                "display_format": "raw",
+                "units": "months"
+              },
+              {
+                "id": "homes_sold",
+                "label": "Homes sold (90-day)",
+                "display_format": "count",
+                "units": "count"
+              },
+              {
+                "id": "inventory",
+                "label": "Active inventory",
+                "display_format": "count",
+                "units": "count"
+              },
+              {
+                "id": "low_sample",
+                "label": "Thin sample (under 5 sales this window)"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33901",
+                "label": "33901",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 313000,
+                  "median_sale_price_yoy_pct": 13.2,
+                  "median_dom": 94.5,
+                  "median_dom_yoy_days": 12,
+                  "avg_sale_to_list_pct": 94.7,
+                  "months_of_supply": 6.7,
+                  "homes_sold": 72,
+                  "inventory": 160,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 297000,
+                  "median_sale_price_yoy_pct": 3.5,
+                  "median_dom": 65,
+                  "median_dom_yoy_days": 7,
+                  "avg_sale_to_list_pct": 94.4,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 106,
+                  "inventory": 190,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 336000,
+                  "median_sale_price_yoy_pct": -10.4,
+                  "median_dom": 61,
+                  "median_dom_yoy_days": -22,
+                  "avg_sale_to_list_pct": 95.3,
+                  "months_of_supply": 4.9,
+                  "homes_sold": 282,
+                  "inventory": 459,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 340000,
+                  "median_sale_price_yoy_pct": -5.6,
+                  "median_dom": 72,
+                  "median_dom_yoy_days": 10.5,
+                  "avg_sale_to_list_pct": 96.7,
+                  "months_of_supply": 4.2,
+                  "homes_sold": 221,
+                  "inventory": 311,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 199900,
+                  "median_sale_price_yoy_pct": -26.3,
+                  "median_dom": 59,
+                  "median_dom_yoy_days": -11,
+                  "avg_sale_to_list_pct": 94.1,
+                  "months_of_supply": 6.6,
+                  "homes_sold": 92,
+                  "inventory": 202,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 302500,
+                  "median_sale_price_yoy_pct": -20.4,
+                  "median_dom": 86,
+                  "median_dom_yoy_days": 6.5,
+                  "avg_sale_to_list_pct": 94.6,
+                  "months_of_supply": 5,
+                  "homes_sold": 401,
+                  "inventory": 665,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 329900,
+                  "median_sale_price_yoy_pct": 1.5,
+                  "median_dom": 55,
+                  "median_dom_yoy_days": -12,
+                  "avg_sale_to_list_pct": 97.6,
+                  "months_of_supply": 4.6,
+                  "homes_sold": 305,
+                  "inventory": 467,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 392500,
+                  "median_sale_price_yoy_pct": 6.8,
+                  "median_dom": 71,
+                  "median_dom_yoy_days": 14,
+                  "avg_sale_to_list_pct": 95.1,
+                  "months_of_supply": 3.3,
+                  "homes_sold": 165,
+                  "inventory": 182,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 490000,
+                  "median_sale_price_yoy_pct": -2,
+                  "median_dom": 60,
+                  "median_dom_yoy_days": -6.5,
+                  "avg_sale_to_list_pct": 95.9,
+                  "months_of_supply": 3.4,
+                  "homes_sold": 372,
+                  "inventory": 422,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 485000,
+                  "median_sale_price_yoy_pct": -3,
+                  "median_dom": 65,
+                  "median_dom_yoy_days": -17.5,
+                  "avg_sale_to_list_pct": 95.7,
+                  "months_of_supply": 4,
+                  "homes_sold": 425,
+                  "inventory": 560,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 275000,
+                  "median_sale_price_yoy_pct": 7.8,
+                  "median_dom": 128.5,
+                  "median_dom_yoy_days": 58.5,
+                  "avg_sale_to_list_pct": 93.1,
+                  "months_of_supply": 6.8,
+                  "homes_sold": 69,
+                  "inventory": 156,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 323000,
+                  "median_sale_price_yoy_pct": 1.3,
+                  "median_dom": 65.5,
+                  "median_dom_yoy_days": 0.5,
+                  "avg_sale_to_list_pct": 95.6,
+                  "months_of_supply": 3.9,
+                  "homes_sold": 212,
+                  "inventory": 275,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 259000,
+                  "median_sale_price_yoy_pct": -9.1,
+                  "median_dom": 59.5,
+                  "median_dom_yoy_days": -17.5,
+                  "avg_sale_to_list_pct": 94.5,
+                  "months_of_supply": 4.6,
+                  "homes_sold": 238,
+                  "inventory": 367,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 437000,
+                  "median_sale_price_yoy_pct": -4,
+                  "median_dom": 85,
+                  "median_dom_yoy_days": -56.5,
+                  "avg_sale_to_list_pct": 96.1,
+                  "months_of_supply": 5.6,
+                  "homes_sold": 52,
+                  "inventory": 97,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 2840000,
+                  "median_sale_price_yoy_pct": -26.2,
+                  "median_dom": 115,
+                  "median_dom_yoy_days": 49.5,
+                  "avg_sale_to_list_pct": 94.1,
+                  "months_of_supply": 8.3,
+                  "homes_sold": 16,
+                  "inventory": 44,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 439300,
+                  "median_sale_price_yoy_pct": 16.4,
+                  "median_dom": 109,
+                  "median_dom_yoy_days": -24,
+                  "avg_sale_to_list_pct": 92.4,
+                  "months_of_supply": 7.4,
+                  "homes_sold": 35,
+                  "inventory": 86,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 1012500,
+                  "median_sale_price_yoy_pct": 8,
+                  "median_dom": 83.5,
+                  "median_dom_yoy_days": -76,
+                  "avg_sale_to_list_pct": 91.5,
+                  "months_of_supply": 10.2,
+                  "homes_sold": 18,
+                  "inventory": 61,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 520000,
+                  "median_sale_price_yoy_pct": 6.1,
+                  "median_dom": 77,
+                  "median_dom_yoy_days": 8.5,
+                  "avg_sale_to_list_pct": 95.8,
+                  "months_of_supply": 2.6,
+                  "homes_sold": 402,
+                  "inventory": 351,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 545000,
+                  "median_sale_price_yoy_pct": -13.8,
+                  "median_dom": 107.5,
+                  "median_dom_yoy_days": 3.5,
+                  "avg_sale_to_list_pct": 92.9,
+                  "months_of_supply": 9.8,
+                  "homes_sold": 119,
+                  "inventory": 387,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 235000,
+                  "median_sale_price_yoy_pct": -5.6,
+                  "median_dom": 95,
+                  "median_dom_yoy_days": 32,
+                  "avg_sale_to_list_pct": 96.4,
+                  "months_of_supply": 5,
+                  "homes_sold": 136,
+                  "inventory": 225,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 536250,
+                  "median_sale_price_yoy_pct": -7.5,
+                  "median_dom": 102,
+                  "median_dom_yoy_days": 40,
+                  "avg_sale_to_list_pct": 94.7,
+                  "months_of_supply": 6.1,
+                  "homes_sold": 34,
+                  "inventory": 69,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 1032500,
+                  "median_sale_price_yoy_pct": 17.3,
+                  "median_dom": 116,
+                  "median_dom_yoy_days": 29,
+                  "avg_sale_to_list_pct": 91.8,
+                  "months_of_supply": 6.1,
+                  "homes_sold": 140,
+                  "inventory": 284,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 339500,
+                  "median_sale_price_yoy_pct": -10.4,
+                  "median_dom": 68,
+                  "median_dom_yoy_days": 16,
+                  "avg_sale_to_list_pct": 95.8,
+                  "months_of_supply": 3.8,
+                  "homes_sold": 96,
+                  "inventory": 121,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 370000,
+                  "median_sale_price_yoy_pct": -5.1,
+                  "median_dom": 50,
+                  "median_dom_yoy_days": 2.5,
+                  "avg_sale_to_list_pct": 96.3,
+                  "months_of_supply": 3.9,
+                  "homes_sold": 105,
+                  "inventory": 138,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 309899,
+                  "median_sale_price_yoy_pct": -6.1,
+                  "median_dom": 76,
+                  "median_dom_yoy_days": 13,
+                  "avg_sale_to_list_pct": 98.3,
+                  "months_of_supply": 4.7,
+                  "homes_sold": 241,
+                  "inventory": 377,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 339890,
+                  "median_sale_price_yoy_pct": -5.6,
+                  "median_dom": 54,
+                  "median_dom_yoy_days": -16.5,
+                  "avg_sale_to_list_pct": 98.5,
+                  "months_of_supply": 6.5,
+                  "homes_sold": 133,
+                  "inventory": 286,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 459950,
+                  "median_sale_price_yoy_pct": 0.8,
+                  "median_dom": 105.5,
+                  "median_dom_yoy_days": 53.5,
+                  "avg_sale_to_list_pct": 97.9,
+                  "months_of_supply": 8.2,
+                  "homes_sold": 44,
+                  "inventory": 120,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 303000,
+                  "median_sale_price_yoy_pct": -5.3,
+                  "median_dom": 92,
+                  "median_dom_yoy_days": 12,
+                  "avg_sale_to_list_pct": 98.7,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 282,
+                  "inventory": 506,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 315000,
+                  "median_sale_price_yoy_pct": -5.7,
+                  "median_dom": 70,
+                  "median_dom_yoy_days": 12,
+                  "avg_sale_to_list_pct": 98.5,
+                  "months_of_supply": 4,
+                  "homes_sold": 183,
+                  "inventory": 242,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 350000,
+                  "median_sale_price_yoy_pct": -4.1,
+                  "median_dom": 46,
+                  "median_dom_yoy_days": -11,
+                  "avg_sale_to_list_pct": 97.1,
+                  "months_of_supply": 3.4,
+                  "homes_sold": 175,
+                  "inventory": 196,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 399000,
+                  "median_sale_price_yoy_pct": 2.3,
+                  "median_dom": 67,
+                  "median_dom_yoy_days": -3,
+                  "avg_sale_to_list_pct": 96.8,
+                  "months_of_supply": 3.8,
+                  "homes_sold": 227,
+                  "inventory": 287,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33993",
+                "label": "33993",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 354250,
+                  "median_sale_price_yoy_pct": 1.2,
+                  "median_dom": 73,
+                  "median_dom_yoy_days": -10,
+                  "avg_sale_to_list_pct": 97.6,
+                  "months_of_supply": 4.7,
+                  "homes_sold": 416,
+                  "inventory": 645,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 1800000,
+                  "median_sale_price_yoy_pct": -15.3,
+                  "median_dom": 82,
+                  "median_dom_yoy_days": -18,
+                  "avg_sale_to_list_pct": 93.3,
+                  "months_of_supply": 7.2,
+                  "homes_sold": 159,
+                  "inventory": 379,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 1600000,
+                  "median_sale_price_yoy_pct": 0,
+                  "median_dom": 98.5,
+                  "median_dom_yoy_days": 8.5,
+                  "avg_sale_to_list_pct": 92.2,
+                  "months_of_supply": 4.3,
+                  "homes_sold": 212,
+                  "inventory": 303,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 402000,
+                  "median_sale_price_yoy_pct": 1.8,
+                  "median_dom": 50,
+                  "median_dom_yoy_days": -7,
+                  "avg_sale_to_list_pct": 95.5,
+                  "months_of_supply": 4.4,
+                  "homes_sold": 163,
+                  "inventory": 238,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 698000,
+                  "median_sale_price_yoy_pct": 16.3,
+                  "median_dom": 60,
+                  "median_dom_yoy_days": 5,
+                  "avg_sale_to_list_pct": 94,
+                  "months_of_supply": 3.7,
+                  "homes_sold": 139,
+                  "inventory": 173,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 1250000,
+                  "median_sale_price_yoy_pct": 1.2,
+                  "median_dom": 85.5,
+                  "median_dom_yoy_days": 21,
+                  "avg_sale_to_list_pct": 93.6,
+                  "months_of_supply": 5.8,
+                  "homes_sold": 213,
+                  "inventory": 409,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 647500,
+                  "median_sale_price_yoy_pct": 4.4,
+                  "median_dom": 64.5,
+                  "median_dom_yoy_days": 4.5,
+                  "avg_sale_to_list_pct": 94.2,
+                  "months_of_supply": 4.4,
+                  "homes_sold": 180,
+                  "inventory": 264,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 650000,
+                  "median_sale_price_yoy_pct": 0.4,
+                  "median_dom": 88.5,
+                  "median_dom_yoy_days": 7,
+                  "avg_sale_to_list_pct": 93.6,
+                  "months_of_supply": 4.6,
+                  "homes_sold": 232,
+                  "inventory": 356,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 330000,
+                  "median_sale_price_yoy_pct": -23.1,
+                  "median_dom": 74,
+                  "median_dom_yoy_days": 15,
+                  "avg_sale_to_list_pct": 94.5,
+                  "months_of_supply": 4.2,
+                  "homes_sold": 263,
+                  "inventory": 372,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 627500,
+                  "median_sale_price_yoy_pct": -1.6,
+                  "median_dom": 68,
+                  "median_dom_yoy_days": -19,
+                  "avg_sale_to_list_pct": 94.1,
+                  "months_of_supply": 4.6,
+                  "homes_sold": 244,
+                  "inventory": 376,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 605000,
+                  "median_sale_price_yoy_pct": -4.3,
+                  "median_dom": 85,
+                  "median_dom_yoy_days": -3.5,
+                  "avg_sale_to_list_pct": 95.1,
+                  "months_of_supply": 4,
+                  "homes_sold": 295,
+                  "inventory": 392,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 450000,
+                  "median_sale_price_yoy_pct": -3.7,
+                  "median_dom": 43,
+                  "median_dom_yoy_days": -15,
+                  "avg_sale_to_list_pct": 95.9,
+                  "months_of_supply": 3.5,
+                  "homes_sold": 61,
+                  "inventory": 72,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 550000,
+                  "median_sale_price_yoy_pct": -4.3,
+                  "median_dom": 75.5,
+                  "median_dom_yoy_days": 29.5,
+                  "avg_sale_to_list_pct": 96.2,
+                  "months_of_supply": 4.9,
+                  "homes_sold": 80,
+                  "inventory": 131,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 675000,
+                  "median_sale_price_yoy_pct": -11.5,
+                  "median_dom": 58.5,
+                  "median_dom_yoy_days": -3.5,
+                  "avg_sale_to_list_pct": 94.8,
+                  "months_of_supply": 3.8,
+                  "homes_sold": 292,
+                  "inventory": 368,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 580000,
+                  "median_sale_price_yoy_pct": 1.6,
+                  "median_dom": 75,
+                  "median_dom_yoy_days": -13.5,
+                  "avg_sale_to_list_pct": 95.8,
+                  "months_of_supply": 4.8,
+                  "homes_sold": 328,
+                  "inventory": 522,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 745000,
+                  "median_sale_price_yoy_pct": -4.2,
+                  "median_dom": 88,
+                  "median_dom_yoy_days": 13,
+                  "avg_sale_to_list_pct": 94.2,
+                  "months_of_supply": 4,
+                  "homes_sold": 301,
+                  "inventory": 398,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135",
+                "cells": {
+                  "metro": "Cape Coral, FL",
+                  "median_sale_price": 495000,
+                  "median_sale_price_yoy_pct": -7.9,
+                  "median_dom": 65,
+                  "median_dom_yoy_days": 3,
+                  "avg_sale_to_list_pct": 95.6,
+                  "months_of_supply": 3.2,
+                  "homes_sold": 443,
+                  "inventory": 478,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 443750,
+                  "median_sale_price_yoy_pct": null,
+                  "median_dom": 441.5,
+                  "median_dom_yoy_days": null,
+                  "avg_sale_to_list_pct": 77.5,
+                  "months_of_supply": null,
+                  "homes_sold": 2,
+                  "inventory": 1,
+                  "low_sample": true
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 562500,
+                  "median_sale_price_yoy_pct": null,
+                  "median_dom": 20,
+                  "median_dom_yoy_days": null,
+                  "avg_sale_to_list_pct": 83.3,
+                  "months_of_supply": null,
+                  "homes_sold": 1,
+                  "inventory": 4,
+                  "low_sample": true
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 865000,
+                  "median_sale_price_yoy_pct": 39.5,
+                  "median_dom": 267,
+                  "median_dom_yoy_days": 167,
+                  "avg_sale_to_list_pct": 86.6,
+                  "months_of_supply": 4.3,
+                  "homes_sold": 7,
+                  "inventory": 10,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 230000,
+                  "median_sale_price_yoy_pct": null,
+                  "median_dom": 525,
+                  "median_dom_yoy_days": null,
+                  "avg_sale_to_list_pct": 83.6,
+                  "months_of_supply": null,
+                  "homes_sold": 1,
+                  "inventory": 1,
+                  "low_sample": true
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 359154,
+                  "median_sale_price_yoy_pct": -9.1,
+                  "median_dom": 105,
+                  "median_dom_yoy_days": 14.5,
+                  "avg_sale_to_list_pct": 95.7,
+                  "months_of_supply": 7.3,
+                  "homes_sold": 102,
+                  "inventory": 249,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145",
+                "cells": {
+                  "metro": "Naples, FL",
+                  "median_sale_price": 1026562.5,
+                  "median_sale_price_yoy_pct": 3.7,
+                  "median_dom": 100.5,
+                  "median_dom_yoy_days": 12.5,
+                  "avg_sale_to_list_pct": 94,
+                  "months_of_supply": 4.1,
+                  "homes_sold": 304,
+                  "inventory": 418,
+                  "low_sample": false
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-17T02:19:24Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (All Residential), SWFL MSAs. Updated ~3rd Friday each month."
+            },
+            "note": "One row per SWFL ZIP, each its latest Redfin 90-day window. Months of supply is derived (inventory over the 90-day sales pace); Redfin does not publish it at ZIP grain. When low_sample is true the row rests on fewer than 5 sales — quote its median as a thin, indicative read rather than a stable one, and its months of supply is omitted."
+          }
+        ],
+        "caveats": [],
+        "contradicts": [],
+        "confidence": 0.6,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 3,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-07-17T02:19:24Z"
+        },
+        "exogenous_signals": []
+      }
     }
   ],
-  "exitCode": 0,
-  "masterDecision": "skipped-fresh"
+  "exitCode": 0
 }
