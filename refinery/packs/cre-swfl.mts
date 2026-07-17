@@ -997,23 +997,17 @@ function metricVote(metric: CreMetric, dir: CorridorMetricDirection | null): Vot
 }
 
 /**
- * Per-corridor direction read from the polarity-normalized signal suite:
- *   - any "bullish" AND any "bearish"  → "mixed" corridor (split read)
+ * Reduce a set of polarity-normalized metric votes (bullish/bearish/neutral) to
+ * a single market read:
+ *   - any "bullish" AND any "bearish"  → "mixed" (split read)
  *   - any "bullish", no "bearish"      → "bullish" (landlord market)
  *   - any "bearish", no "bullish"      → "bearish" (distress)
  *   - all neutral (stable values only) → "neutral"
- *   - all signals null                 → "no-data"
+ *   - no votes at all                  → "no-data"
  */
 type CorridorVote = "bullish" | "bearish" | "mixed" | "neutral" | "no-data";
 
-function voteCorridor(c: CorridorNormalized): CorridorVote {
-  const sides = [
-    metricVote("cap_rate", c.cap_rate_direction),
-    metricVote("vacancy_rate", c.vacancy_rate_direction),
-    metricVote("absorption_sqft", c.absorption_sqft_direction),
-    metricVote("asking_rent_psf", c.asking_rent_psf_direction),
-  ].filter((s): s is VoteSide => s != null);
-
+function reduceSides(sides: VoteSide[]): CorridorVote {
   if (sides.length === 0) return "no-data";
   const hasBullish = sides.includes("bullish");
   const hasBearish = sides.includes("bearish");
@@ -1024,23 +1018,48 @@ function voteCorridor(c: CorridorNormalized): CorridorVote {
 }
 
 /**
- * Brain-level CRE direction. Counts per-corridor votes among corridors that
- * have metrics, and applies the spec's 0.60 agreement floor — a single side
- * must hit ≥60% to claim the direction, else the brain reads "mixed".
+ * Per-SUBMARKET direction read. Votes over the three STAMPED metrics a submarket
+ * rep carries — cap rate, vacancy, asking rent — and NEVER absorption.
+ * Absorption stays corridor-grain (it genuinely varies within a submarket) and
+ * is 22 of 23 unsourced (check corridor_absorption_provenance), so it must not
+ * enter the brain's published direction call. ONE submarket = ONE vote: the many
+ * stamped Naples corridor copies collapse to a single rep here and can no longer
+ * outvote a real submarket (check
+ * cre_direction_vote_and_corridor_factor_stamped_weighting).
  */
-function voteCreDirection(corridors: CorridorNormalized[]): {
+function voteSubmarketRep(r: SubmarketRep): CorridorVote {
+  const sides = [
+    metricVote("cap_rate", r.cap_rate_direction),
+    metricVote("vacancy_rate", r.vacancy_rate_direction),
+    metricVote("asking_rent_psf", r.asking_rent_psf_direction),
+  ].filter((s): s is VoteSide => s != null);
+  return reduceSides(sides);
+}
+
+/**
+ * Brain-level CRE direction. Counts ONE vote per SUBMARKET rep (not per raw
+ * corridor) among submarkets that have metrics, and applies the spec's 0.60
+ * agreement floor — a single side must hit ≥60% to claim the direction, else the
+ * brain reads "mixed". Voting over reps rather than raw corridors is the fix for
+ * cre_direction_vote_and_corridor_factor_stamped_weighting: cap/vacancy/rent are
+ * MarketBeat submarket figures stamped onto every member corridor, so a
+ * per-corridor vote let Naples' many stamped copies outvote every other
+ * submarket. collapseCorridorsToSubmarkets already deduped the medians to one rep
+ * per submarket; the headline direction call now rides that same grain.
+ */
+function voteCreDirection(reps: SubmarketRep[]): {
   direction: "bullish" | "bearish" | "mixed" | "neutral";
   magnitude: number;
   caveats: string[];
 } {
-  const votes = corridors.map(voteCorridor);
+  const votes = reps.map(voteSubmarketRep);
   const withData = votes.filter((v) => v !== "no-data");
   const noData = votes.length - withData.length;
 
   const caveats: string[] = [];
   if (noData > 0) {
     caveats.push(
-      `${noData} of ${corridors.length} corridors have no reported metrics — direction is read from the ${withData.length} corridors with data.`,
+      `${noData} of ${reps.length} submarkets have no reported metrics — direction is read from the ${withData.length} submarkets with data.`,
     );
   }
   if (withData.length === 0) {
@@ -1457,12 +1476,21 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
   // Inputs come from lastCorridors (pack-internal closure state populated by
   // corridorSource — Tier 2 corridor_profiles). No reads from master,
   // housing-swfl, or any brain that cre-swfl feeds downstream. DAG safe.
-  const cfInputs: CorridorFactorInput[] = corridors.map((c) => ({
-    name: c.name,
-    cap_rate_pct: c.cap_rate_pct,
-    vacancy_rate_pct: c.vacancy_rate_pct,
-    absorption_sqft: c.absorption_sqft,
-    asking_rent_psf: c.asking_rent_psf,
+  // Composite scored at SUBMARKET-rep grain (fix for
+  // cre_direction_vote_and_corridor_factor_stamped_weighting): cap/vacancy/rent
+  // are stamped submarket figures, so scoring raw corridors let Naples' many
+  // stamped copies dominate both the percentile cohort and the median. One rep
+  // per submarket = one cohort member + one score. absorption is deliberately
+  // dropped (null): it is corridor-grain and 22/23 unsourced
+  // (corridor_absorption_provenance), so it must not enter a rendered composite —
+  // computeCorridorFactor renormalizes the equal weights across the 3 present
+  // stamped metrics.
+  const cfInputs: CorridorFactorInput[] = reps.map((r) => ({
+    name: r.submarket,
+    cap_rate_pct: r.cap_rate_pct,
+    vacancy_rate_pct: r.vacancy_rate_pct,
+    absorption_sqft: null,
+    asking_rent_psf: r.asking_rent_psf,
   }));
   const cfResults = computeCorridorFactor(cfInputs);
   const cfScores = cfResults.map((r) => r.score).filter((s): s is number => s !== null);
@@ -1476,7 +1504,7 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
       metric: "corridor_factor",
       value: Math.round(cfMedian),
       direction: "stable",
-      label: `Corridor Factor — SWFL CRE composite index (${cfScores.length} of ${corridors.length} corridors scored)`,
+      label: `Corridor Factor — SWFL CRE composite index (${cfScores.length} of ${reps.length} submarkets scored)`,
       variable_type: "intensive",
       units: "index 0-100",
       display_format: "raw",
@@ -1484,7 +1512,7 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
         url: cfUrl,
         fetched_at,
         tier: 2,
-        citation: `Brains Supabase corridor_profiles (verified, non-deleted) — Corridor Factor composite: percentile-rank of cap_rate_pct (lower_is_better), vacancy_rate_pct (lower_is_better), absorption_sqft (higher_is_better), asking_rent_psf (higher_is_better); equal weights; corridor-health/landlord lens. Scored ${cfScores.length} of ${corridors.length} corridors.`,
+        citation: `Brains Supabase corridor_profiles (verified, non-deleted) — Corridor Factor composite: percentile-rank of cap_rate_pct (lower_is_better), vacancy_rate_pct (lower_is_better), asking_rent_psf (higher_is_better); equal weights; corridor-health/landlord lens, scored per submarket. Net absorption is excluded from the composite — it is corridor-grain and unsourced. Scored ${cfScores.length} of ${reps.length} submarkets.`,
       },
     });
   }
@@ -1558,7 +1586,7 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
     emittedBlsPpiSlugs.push(m.metric);
   }
 
-  const vote = voteCreDirection(corridors);
+  const vote = voteCreDirection(reps);
 
   if (emittedBlsPpiSlugs.length > 0) {
     vote.caveats.push(
@@ -1810,15 +1838,15 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
   }
   if (vote.direction === "bullish") {
     conclusionParts.push(
-      "Polarity-normalized corridor signals lean predominantly landlord-market — rates compressing, space tightening, leasing velocity up, or pricing power present.",
+      "Polarity-normalized submarket signals lean predominantly landlord-market — cap rates compressing, space tightening, or pricing power present.",
     );
   } else if (vote.direction === "bearish") {
     conclusionParts.push(
-      "Polarity-normalized corridor signals lean predominantly distressed — yields widening, space emptying, absorption falling, or rents giving back.",
+      "Polarity-normalized submarket signals lean predominantly distressed — yields widening, space emptying, or rents giving back.",
     );
   } else if (vote.direction === "mixed") {
     conclusionParts.push(
-      "Corridor signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power).",
+      "Submarket signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power).",
     );
   }
 
@@ -1827,7 +1855,7 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
   if (cfMedian != null) {
     const cfBand = bandFor(Math.round(cfMedian), DEFAULT_CORRIDOR_FACTOR_CONFIG.bands);
     conclusionParts.push(
-      `Corridor Factor: ${Math.round(cfMedian)}/100 (${cfBand}) — composite of cap rate, vacancy, absorption, and asking rent across ${cfScores.length} of ${corridors.length} corridors.`,
+      `Corridor Factor: ${Math.round(cfMedian)}/100 (${cfBand}) — composite of cap rate, vacancy, and asking rent across ${cfScores.length} of ${reps.length} submarkets.`,
     );
   }
 

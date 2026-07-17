@@ -1,3 +1,28 @@
+## 2026-07-17 (Opus 4.8 · main) — CRE grain fix pt.2: re-grained the direction vote + corridor_factor to submarket reps
+
+Closed the code half of `cre_direction_vote_and_corridor_factor_stamped_weighting` (twin of the
+already-landed median grain fix `3084c99d`). Both remaining stamped-weighting sites in `cre-swfl.mts`
+now compute at submarket-rep grain, not raw-corridor grain:
+- `voteCreDirection` votes ONE rep per submarket over cap/vacancy/rent (was per-corridor over 4
+  metrics). Naples' many stamped corridor copies no longer outvote real submarkets. Extracted the
+  shared `reduceSides`; `voteCorridor` (per-corridor, 4-metric) deleted, replaced by `voteSubmarketRep`.
+- `corridor_factor` composite scores per submarket-rep with absorption dropped (absorption is
+  corridor-grain + 22/23 unsourced → must not enter a rendered figure, per
+  `corridor_absorption_provenance`); `computeCorridorFactor` renormalizes the equal weights over the 3
+  present stamped metrics. Corrected the now-false citation/label/conclusion (named absorption + a
+  "corridors" denominator that is now submarkets).
+- Added a discriminating regression test: 5 stamped-bearish Naples corridors + 1 bullish Fort Myers +
+  1 bullish Cape Coral → old per-corridor vote = bearish (5/7), fixed per-submarket vote = bullish
+  (2/3). Same fragments, opposite headline.
+
+Live before→after (deterministic, no LLM): headline direction stays `mixed` (no silent flip);
+denominator corrects 27 corridors → 10 submarkets (magnitude 0.22 → 0.30); corridor_factor 45 → 44.
+Verified: 57 pack tests + corridor-factor + catalog green, vocab coverage OK, eslint clean.
+`absorption_sqft_median` deliberately left as-is (rides the planned figures-layer re-grain, not a
+saved re-rebuild). Next: ONE bundled serve — targeted cre-swfl dispatch + no-force master propagate —
+to serve this WITH the landed median fix and close the due-07/19 grain checks (operator-approved paid
+run). Figures-layer implementation plan (decoupled, docs-only) to follow.
+
 ## 2026-07-17 (Opus 4.8 · main) — Landed final sell-side favorable-framing commit; framing work now fully on main
 
 Landed the final `wt/sell-side-framing` commit — `67916ce8` (shorten dot-plot legend

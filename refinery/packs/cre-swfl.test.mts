@@ -4,7 +4,7 @@ import type { RawFragment } from "../types/fragment.mts";
 import type { BrainOutput, BrainOutputMetric } from "../types/brain-output.mts";
 import type { BrainInputNormalized } from "../sources/brain-input-source.mts";
 import type { MarketbeatSwflNormalized } from "../sources/marketbeat-swfl-source.mts";
-import type { CorridorNormalized } from "../sources/cre-source.mts";
+import type { CorridorNormalized, CorridorMetricDirection } from "../sources/cre-source.mts";
 import type { BlsPpiNormalized } from "../sources/bls-ppi-source.mts";
 
 process.env["REFINERY_SOURCE"] = "fixture";
@@ -698,6 +698,104 @@ test("corridor_factor: absent when all corridors have null CRE metrics", () => {
   assert.ok(
     !result.key_metrics.some((m) => m.metric === "corridor_factor"),
     "expected no corridor_factor when all corridors have null metrics",
+  );
+});
+
+// --- grain-weighting regression -------------------------------------------
+// Regression for cre_direction_vote_and_corridor_factor_stamped_weighting.
+// cap/vacancy/rent are MarketBeat SUBMARKET figures stamped onto every member
+// corridor, so a per-corridor vote let a submarket with many corridors (Naples)
+// outvote every other. The fix votes one rep per submarket, so N stamped copies
+// of one submarket cast ONE direction vote and contribute ONE corridor_factor
+// score.
+
+/** Corridor with a shared submarket and a bullish/bearish stamped direction. */
+function makeDirectedCorridor(
+  name: string,
+  submarket: string,
+  side: "bullish" | "bearish",
+): RawFragment {
+  // bullish → cap + vacancy FALLING (yields compressing, space tightening).
+  // bearish → cap + vacancy RISING. Both metrics agree, so the corridor votes
+  // cleanly on that side. Rent direction left null (cap+vacancy suffice).
+  const d: CorridorMetricDirection = side === "bullish" ? "falling" : "rising";
+  const cw = "https://assets.cushmanwakefield.com/x";
+  // Distinct per-submarket values so corridor_factor has a real cohort to rank;
+  // identical WITHIN a submarket is the stamped shape we are collapsing.
+  const v = submarket === "Naples" ? 7 : submarket === "Fort Myers" ? 5 : 5.5;
+  const norm: CorridorNormalized = {
+    kind: "corridor",
+    name,
+    city: submarket,
+    county: "Lee",
+    submarket,
+    corridor_type: "highway-strip-mall",
+    seasonal_index: 0.3,
+    character: null,
+    evolution_direction: null,
+    tenant_mix: null,
+    flags: [],
+    source_url: null,
+    cap_rate_source_url: cw,
+    vacancy_rate_source_url: cw,
+    absorption_sqft_source_url: null,
+    asking_rent_psf_source_url: cw,
+    cap_rate_pct: v,
+    cap_rate_direction: d,
+    vacancy_rate_pct: v,
+    vacancy_rate_direction: d,
+    absorption_sqft: null,
+    absorption_sqft_direction: null,
+    asking_rent_psf: 30 - v,
+    asking_rent_psf_direction: null,
+    metrics_period: null,
+    metrics_verified_date: null,
+    character_broker_narrative: null,
+    character_render: null,
+    character_facts: null,
+    character_speculative: null,
+    character_chart: null,
+    character_citations: null,
+    character_generated_at: null,
+    character_fact_pack_vintage: null,
+  };
+  return {
+    fragment_id: `corridor_profiles:${name}`,
+    source_id: "corridor_profiles",
+    source_trust_tier: 2,
+    fetched_at: NOW,
+    raw: {},
+    normalized: norm as unknown as Record<string, unknown>,
+  };
+}
+
+test("direction + corridor_factor: N stamped copies of one submarket vote ONCE", () => {
+  // Naples: 5 stamped-bearish corridors. Fort Myers + Cape Coral: 1 bullish each.
+  // Per-CORRIDOR (old bug): 5 bearish vs 2 bullish → 5/7 ≥ 0.60 → bearish.
+  // Per-SUBMARKET (fix): Naples=1 bearish, FM=1 + CC=1 bullish → 2/3 → bullish.
+  // Same fragments, opposite headline — the stamped copies no longer over-vote.
+  creSwfl.corpusSummary!([
+    makeDirectedCorridor("N1 Naples", "Naples", "bearish"),
+    makeDirectedCorridor("N2 Naples", "Naples", "bearish"),
+    makeDirectedCorridor("N3 Naples", "Naples", "bearish"),
+    makeDirectedCorridor("N4 Naples", "Naples", "bearish"),
+    makeDirectedCorridor("N5 Naples", "Naples", "bearish"),
+    makeDirectedCorridor("FM1 Fort Myers", "Fort Myers", "bullish"),
+    makeDirectedCorridor("CC1 Cape Coral", "Cape Coral", "bullish"),
+  ]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  assert.equal(
+    result.direction,
+    "bullish",
+    `expected the 2 bullish submarkets to outvote Naples' single (deduped) bearish vote; got ${result.direction} — stamped corridor copies are still over-voting`,
+  );
+  // corridor_factor scored per SUBMARKET (3), never per raw corridor (7).
+  const cf = result.key_metrics.find((m) => m.metric === "corridor_factor");
+  assert.ok(cf, "expected corridor_factor in key_metrics");
+  assert.match(
+    String(cf!.label),
+    /of 3 submarkets scored/,
+    `corridor_factor must be scored over 3 submarkets, not 7 corridors; got label: ${cf!.label}`,
   );
 });
 
