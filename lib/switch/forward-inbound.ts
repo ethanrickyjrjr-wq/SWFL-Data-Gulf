@@ -185,41 +185,58 @@ function matchMarker(haystack: string): string | null {
 }
 
 /**
- * Marker-table platform detection. Two signals, checked in order, either one
- * resolves it:
- *   1. Headers — e.g. a `list-unsubscribe` value is often a URL on the ESP's
- *      own domain (`<https://x.list-manage.com/unsubscribe?...>`).
- *   2. Body links (FIRST-CLASS, not a mere fallback) — a forwarded email
- *      commonly loses or rewrites its original headers entirely (Gmail's
- *      "Forwarded message" rewrites From/Reply-To and drops List-Unsubscribe),
- *      but the ORIGINAL campaign HTML is quoted verbatim in the new message
- *      body, so ESP tracking/unsubscribe/branding links inside it survive
- *      forwarding even when every header does not.
- * Returns the platform slug, or null when nothing in the marker table matches
- * — never guessed.
+ * Marker-table platform detection. Two signals, BODY LINKS CHECKED FIRST
+ * (first-class, not a fallback — review-pinned 07/16/2026):
+ *   1. Body links — in a FORWARDED email, the headers belong to the
+ *      FORWARDER, not the original platform (Gmail's "Forwarded message"
+ *      rewrites From/Reply-To and typically drops List-Unsubscribe
+ *      entirely), while the ORIGINAL campaign HTML is quoted verbatim in the
+ *      new message body, so the platform's own tracking/unsubscribe/branding
+ *      links survive even when every header does not. Body links are the
+ *      DURABLE signal for forwarded mail, so they're checked first, not
+ *      second.
+ *   2. Headers — fallback only, for the less common case where a header
+ *      happens to carry a platform's domain (e.g. a non-forwarded direct
+ *      send) and the body has no matching link.
+ * Returns the platform slug, or null when nothing in the marker table
+ * matches — never guessed. When both signals point to DIFFERENT platforms
+ * (a stale/reused header vs. the actual quoted body), the body link wins.
  */
 export function detectPlatform(
   headers: Record<string, string | undefined>,
   html: string | null,
 ): string | null {
-  const headerHaystack = Object.values(headers)
-    .filter((v): v is string => Boolean(v))
-    .join(" ");
-  const fromHeaders = matchMarker(headerHaystack);
-  if (fromHeaders) return fromHeaders;
-
   if (html) {
     const fromBody = matchMarker(html);
     if (fromBody) return fromBody;
   }
 
-  return null;
+  const headerHaystack = Object.values(headers)
+    .filter((v): v is string => Boolean(v))
+    .join(" ");
+  return matchMarker(headerHaystack);
 }
 
 // ── extractFooterAbout ──────────────────────────────────────────────────────
 
 const ABOUT_PATTERN = /about\s+(me|[A-Z][a-z]+)/i;
 const LONG_BLOCK_MIN_CHARS = 120;
+
+/**
+ * Hard cap on how much HTML `extractFooterAbout` will scan (review-pinned
+ * 07/16/2026 — CRITICAL: the original backtracking regex
+ * `/<(p|td)[^>]*>([\s\S]*?)<\/\1>/gi` is O(n^2) on adversarial input, e.g.
+ * thousands of unclosed `<p>` openers, benchmarked at 143ms per 80KB by the
+ * reviewer; inbound mail has NO documented size cap (see the file-header
+ * RULE 0.4 note) and this runs on the live webhook thread once Task 10 wires
+ * it in). A genuine bio/footer lives at the END of a forwarded message — a
+ * campaign's marketing content leads, the sender's signature/bio trails — so
+ * when the HTML exceeds this cap, only the TAIL is scanned. That preserves
+ * this function's purpose (real footers are still found) while bounding
+ * worst-case work; only a hostile or badly-broken payload ever hits it (a
+ * normal newsletter's full HTML is tens of KB, nowhere near 250,000 chars).
+ */
+export const MAX_FORWARD_HTML = 250_000;
 
 function stripTags(fragment: string): string {
   return fragment
@@ -228,18 +245,102 @@ function stripTags(fragment: string): string {
     .trim();
 }
 
-/** Plain-text of every top-level `<p>`/`<td>` block, in document order. Simple
- *  by design (per the brief): does not handle a `<td>` nested inside another
- *  `<td>` (the inner one would double-count) — acceptable for the footer/
- *  campaign-block shapes this targets. */
+/** All start indices of a fixed literal substring (case-insensitive, caller
+ *  passes an already-lowercased haystack + lowercased needle), in increasing
+ *  order. A single forward pass: each `indexOf` call's scan window is only
+ *  the gap since the previous hit, so total work across every call is O(n)
+ *  in the haystack length — NOT O(n) per call, which is what made the old
+ *  backtracking regex quadratic on a run of near-adjacent matches (e.g.
+ *  thousands of unclosed `<p>` openers each triggering a fresh scan to the
+ *  end of the string). */
+function findAllCI(lowerHaystack: string, lowerNeedle: string): number[] {
+  const indices: number[] = [];
+  let idx = lowerHaystack.indexOf(lowerNeedle, 0);
+  while (idx !== -1) {
+    indices.push(idx);
+    idx = lowerHaystack.indexOf(lowerNeedle, idx + lowerNeedle.length);
+  }
+  return indices;
+}
+
+/** True when the character code sits right after a tag NAME and legitimately
+ *  ends it (whitespace, `>`, `/`, or end-of-string) rather than continuing it
+ *  — so matching `<p` doesn't false-hit `<pre>`/`<param>`, and `<td` doesn't
+ *  false-hit some future `<tdfoo>`-shaped tag. */
+function isTagNameBoundary(code: number): boolean {
+  return (
+    Number.isNaN(code) ||
+    code === 32 /* space */ ||
+    code === 9 /* tab */ ||
+    code === 10 /* \n */ ||
+    code === 13 /* \r */ ||
+    code === 62 /* > */ ||
+    code === 47 /* / */
+  );
+}
+
+/** All start indices of valid `<p`/`<td` open tags (boundary-checked, see
+ *  above), in increasing order — same linear find-all-occurrences shape as
+ *  `findAllCI`. */
+function findAllOpenTags(lowerHtml: string, tagName: "p" | "td"): number[] {
+  const needle = `<${tagName}`;
+  const opens: number[] = [];
+  let idx = lowerHtml.indexOf(needle, 0);
+  while (idx !== -1) {
+    if (isTagNameBoundary(lowerHtml.charCodeAt(idx + needle.length))) opens.push(idx);
+    idx = lowerHtml.indexOf(needle, idx + needle.length);
+  }
+  return opens;
+}
+
+/**
+ * Plain-text of every top-level `<p>`/`<td>` block, in document order — a
+ * LINEAR scan (review-pinned 07/16/2026, replacing a backtracking regex that
+ * was O(n^2) on hostile input; see `MAX_FORWARD_HTML` above). Every open tag
+ * of each type is found once (`findAllOpenTags`), every close tag of each
+ * type is found once (`findAllCI`), then a monotonic two-pointer merge pairs
+ * each open with the nearest FOLLOWING close of the same type — the pointer
+ * only ever moves forward, so the whole pairing pass is also O(n), never
+ * O(n) per open tag.
+ *
+ * Simple by design (per the brief): does not track real nesting depth, so a
+ * `<td>` nested inside another `<td>` pairs the OUTER open with the INNER
+ * close (same "nearest following close" semantics the original non-greedy
+ * regex had) — acceptable for the flat, non-nested footer/campaign-block
+ * shapes this targets; not a regression introduced by the linear rewrite.
+ */
 function blockTexts(html: string): string[] {
+  const lower = html.toLowerCase();
+
+  type Open = { pos: number; tag: "p" | "td" };
+  const opens: Open[] = [
+    ...findAllOpenTags(lower, "p").map((pos): Open => ({ pos, tag: "p" })),
+    ...findAllOpenTags(lower, "td").map((pos): Open => ({ pos, tag: "td" })),
+  ].sort((a, b) => a.pos - b.pos);
+  if (opens.length === 0) return [];
+
+  const closes: Record<"p" | "td", number[]> = {
+    p: findAllCI(lower, "</p"),
+    td: findAllCI(lower, "</td"),
+  };
+  const closePtr: Record<"p" | "td", number> = { p: 0, td: 0 };
+
   const blocks: string[] = [];
-  const re = /<(p|td)[^>]*>([\s\S]*?)<\/\1>/gi;
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(html)) !== null) {
-    const text = stripTags(match[2]);
+  for (const open of opens) {
+    const gt = lower.indexOf(">", open.pos);
+    if (gt === -1) continue; // truncated open tag (e.g. right at a tail-slice boundary)
+    const contentStart = gt + 1;
+
+    const list = closes[open.tag];
+    let ptr = closePtr[open.tag];
+    while (ptr < list.length && list[ptr] < contentStart) ptr++;
+    closePtr[open.tag] = ptr;
+    if (ptr >= list.length) continue; // no matching close ahead — unclosed tag, skip
+
+    const text = stripTags(html.slice(contentStart, list[ptr]));
     if (text) blocks.push(text);
   }
+
   return blocks;
 }
 
@@ -249,10 +350,15 @@ function blockTexts(html: string): string[] {
  * block over 120 plain-text characters when no about-pattern block exists.
  * Absent means absent: returns null rather than inventing a bio when nothing
  * qualifies (e.g. a forward with only short pleasantries).
+ *
+ * HTML over `MAX_FORWARD_HTML` chars is capped to its TAIL before scanning
+ * (see that constant's doc) — bounds worst-case work on hostile/oversized
+ * input while a real footer, which lives at the end, still gets found.
  */
 export function extractFooterAbout(html: string | null): string | null {
   if (!html) return null;
-  const blocks = blockTexts(html);
+  const bounded = html.length > MAX_FORWARD_HTML ? html.slice(-MAX_FORWARD_HTML) : html;
+  const blocks = blockTexts(bounded);
   if (blocks.length === 0) return null;
 
   const aboutBlocks = blocks.filter((b) => ABOUT_PATTERN.test(b));

@@ -11,6 +11,7 @@ import {
   detectPlatform,
   extractFooterAbout,
   senderDomain,
+  MAX_FORWARD_HTML,
 } from "./forward-inbound";
 
 describe("SWITCH_ADDRESS_LOCAL", () => {
@@ -221,6 +222,18 @@ describe("detectPlatform", () => {
     expect(detectPlatform({}, html)).toBe("followupboss");
   });
 
+  test("CONFLICT: header carries a Constant Contact marker but body links carry Mailchimp — links win", () => {
+    // Review-pinned 07/16/2026: body links are checked FIRST because in a
+    // forwarded email the headers belong to the forwarder, not the platform —
+    // a stale/reused header pointing elsewhere must not out-rank the actual
+    // quoted body.
+    const platform = detectPlatform(
+      { "list-unsubscribe": "<https://visitor.constantcontact.com/do?p=un&m=abc>" },
+      '<p>Check out this week\'s listings.</p><a href="https://mailchimp.com/">Powered by Mailchimp</a>',
+    );
+    expect(platform).toBe("mailchimp");
+  });
+
   test("null when no headers and no html carry any known marker", () => {
     expect(detectPlatform({}, null)).toBeNull();
   });
@@ -264,6 +277,43 @@ describe("extractFooterAbout", () => {
 
   test("returns null for html with no p/td blocks at all", () => {
     expect(extractFooterAbout("<div>no paragraph or table cells here</div>")).toBeNull();
+  });
+
+  test("MAX_FORWARD_HTML matches the documented cap", () => {
+    expect(MAX_FORWARD_HTML).toBe(250_000);
+  });
+
+  test("still finds the real bio when preceded by more than MAX_FORWARD_HTML of padding (tail slice)", () => {
+    // The bio sits at the very end, as a real forwarded-campaign footer would
+    // — slicing to the TAIL (rather than e.g. the head) must still surface it.
+    const filler =
+      "<p>filler content that is not a bio and is not long enough to qualify on its own</p>";
+    const padding = filler.repeat(4000);
+    expect(padding.length).toBeGreaterThan(MAX_FORWARD_HTML);
+    const bio =
+      "<p>About Jane Smith — Jane has helped 200+ families buy and sell homes in Bonita Springs since 2015.</p>";
+    expect(extractFooterAbout(padding + bio)).toBe(
+      "About Jane Smith — Jane has helped 200+ families buy and sell homes in Bonita Springs since 2015.",
+    );
+  });
+
+  test("a pathological 200k+ string of unclosed <p> openers returns quickly (no quadratic blowup)", () => {
+    // Regression for the reviewer's CRITICAL finding: the old backtracking
+    // regex was O(n^2) here (benchmarked 143ms at just 80KB of unclosed <p>
+    // openers). This fixture is 210,000 chars — over 200k, and still under
+    // MAX_FORWARD_HTML, so it exercises the LINEAR SCAN itself, not just the
+    // tail-slice safety net.
+    const hostile = "<p>".repeat(70_000);
+    expect(hostile.length).toBeGreaterThan(200_000);
+
+    const start = performance.now();
+    const result = extractFooterAbout(hostile);
+    const elapsedMs = performance.now() - start;
+
+    // Generous bound so this isn't flaky on a loaded CI box — the point is
+    // "not quadratic", not "as fast as physically possible".
+    expect(elapsedMs).toBeLessThan(500);
+    expect(result === null || typeof result === "string").toBe(true);
   });
 });
 
