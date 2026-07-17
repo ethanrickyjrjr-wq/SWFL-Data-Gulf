@@ -94,6 +94,19 @@ API-integration build track. See the inventory below for where the rest lives.
   filings as an untested timing signal against data we already ingest
   (`marketing_permit_timing_signal_leadgen`), and a detailed local-SEO location-page structure
   that independently validates the launch plan's "reuse `/r/` pages, skip the blog" call.
+- `2026-07-17-buyer-seller-agent-augmentation-landscape.md` — fan-out competitive-landscape pass
+  (Workflow-orchestrated: parallel SteadyAPI/Reddit-social + crawl4ai/web lanes, note-taker
+  normalize stage per lane, a cross-pollination round generating 20 more angles per path off round
+  1's findings, final rank pass). 15 seed buyer + 15 seed seller angles, +40 round-2 angles, 168
+  deduped ranked findings (round 1: 70, crawl lane only — round-1 SteadyAPI lane got blocked by a
+  safety classifier over a credential-materialization prompt bug, see the file's quirk note; round
+  2: 108, both lanes clean). Headline: an entire propensity-to-list/seller-stress scoring industry
+  (Homebot, CoreLogic Sell Score, Datazapp) exists and is commercially proven, but every instance is
+  sold to agents/lenders/investors and deliberately withheld from the seller it describes — nobody
+  sells this to the person living the decision. Best next move per the synthesis: face our own
+  already-built seller-stress signals (delisting/price-drop/cancellation rate by ZIP) + listing-
+  lifecycle state machine directly to the seller, no new data acquisition needed. Filed
+  `marketing_seller_stress_signals_face_the_seller` (idea).
 - `2026-07-16-realtor-full-scope-audit.md` — round 5, realtor.com/SteadyAPI full-scope field
   audit: all 18 real-estate endpoints' documented response schemas crawled live
   (docs.steadyapi.com collection) + the operator's screenshot fields live-verified against a
