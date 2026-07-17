@@ -208,6 +208,12 @@ _ASSISTANT/TODAY.md
 *crawl4ai*
 .crawl4ai/
 
+# steadyapi-research — competitor/strategy research findings, local-only per operator
+# decree 07/17/2026 (same spirit as crawl4ai: real company names + strategic analysis
+# stay off GitHub). Existing already-pushed rounds are untracked going forward but remain
+# in git history untouched — a history rewrite is a separate, much bigger ask.
+docs/steadyapi-research/
+
 # designlang MCP tool — local design-audit scratch output (grade cards, tokens)
 design-extract-output/
 
