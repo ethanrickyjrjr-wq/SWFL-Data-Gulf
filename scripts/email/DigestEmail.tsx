@@ -36,6 +36,18 @@ const fmtPrice = (v: number | null) => (v === null ? "—" : `$${Math.round(v / 
 const fmtDom = (v: number | null) => (v === null ? "—" : `${Math.round(v)}d`);
 const fmtMos = (v: number | null) => (v === null ? "—" : `${v.toFixed(1)} mo`);
 
+// ZIP Focus table columns — ONE spec shared by the header row and every body
+// row. react-email renders each <Row> as its OWN <table>, so without identical
+// explicit widths every row auto-sizes to its content and the columns drift
+// out of line row-to-row (the "grid is shit on the numbers" 07/16 issue).
+// Numbers right-align; the ZIP key stays left.
+const ZIP_TABLE_COLS = [
+  { label: "ZIP", width: "22%", align: "left" },
+  { label: "Med Price", width: "26%", align: "right" },
+  { label: "DOM", width: "22%", align: "right" },
+  { label: "Mo Supply", width: "30%", align: "right" },
+] as const;
+
 const TOPIC_BADGE: Record<string, string> = {
   breaking: "🔴 BREAKING",
   transactions: "📋 DEAL",
@@ -170,10 +182,12 @@ export function DigestEmail({
             </Text>
             {/* Header row */}
             <Row style={{ backgroundColor: primary }}>
-              {["ZIP", "Med Price", "DOM", "Mo Supply"].map((h) => (
+              {ZIP_TABLE_COLS.map((c) => (
                 <Column
-                  key={h}
+                  key={c.label}
                   style={{
+                    width: c.width,
+                    textAlign: c.align,
                     padding: "5px 8px",
                     fontFamily: F,
                     fontSize: "11px",
@@ -181,7 +195,7 @@ export function DigestEmail({
                     color: "#fff",
                   }}
                 >
-                  {h}
+                  {c.label}
                 </Column>
               ))}
             </Row>
@@ -200,6 +214,8 @@ export function DigestEmail({
                 >
                   <Column
                     style={{
+                      width: ZIP_TABLE_COLS[0].width,
+                      textAlign: ZIP_TABLE_COLS[0].align,
                       padding: "6px 8px",
                       fontFamily: F,
                       fontSize: "13px",
@@ -208,13 +224,38 @@ export function DigestEmail({
                   >
                     {zip}
                   </Column>
-                  <Column style={{ padding: "6px 8px", fontFamily: F, fontSize: "13px", ...bold }}>
+                  <Column
+                    style={{
+                      width: ZIP_TABLE_COLS[1].width,
+                      textAlign: ZIP_TABLE_COLS[1].align,
+                      padding: "6px 8px",
+                      fontFamily: F,
+                      fontSize: "13px",
+                      ...bold,
+                    }}
+                  >
                     {fmtPrice(m.median_sale_price)}
                   </Column>
-                  <Column style={{ padding: "6px 8px", fontFamily: F, fontSize: "13px" }}>
+                  <Column
+                    style={{
+                      width: ZIP_TABLE_COLS[2].width,
+                      textAlign: ZIP_TABLE_COLS[2].align,
+                      padding: "6px 8px",
+                      fontFamily: F,
+                      fontSize: "13px",
+                    }}
+                  >
                     {fmtDom(m.dom)}
                   </Column>
-                  <Column style={{ padding: "6px 8px", fontFamily: F, fontSize: "13px" }}>
+                  <Column
+                    style={{
+                      width: ZIP_TABLE_COLS[3].width,
+                      textAlign: ZIP_TABLE_COLS[3].align,
+                      padding: "6px 8px",
+                      fontFamily: F,
+                      fontSize: "13px",
+                    }}
+                  >
                     {fmtMos(m.months_of_supply)}
                   </Column>
                 </Row>

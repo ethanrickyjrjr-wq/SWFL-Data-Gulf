@@ -196,8 +196,11 @@ async function fetchCityVoices(): Promise<CityVoiceSignal[]> {
 // ── City-voice relevance filter (email-side curation) ───────────────────────
 // city-pulse faithfully reports every current event — including human-interest
 // "breaking" items (earthquakes, crime, weather) that are real but must never
-// lead a real-estate digest. We curate here, in the email, rather than mutate
-// the upstream reporter.
+// appear in a real-estate digest AT ALL. We curate here, in the email, rather
+// than mutate the upstream reporter. Curation is DROP, not rank-to-tail: the
+// 07/16/2026 Issue #21 postmortem shipped a hit-and-run sentencing, a court
+// judgment, a swindler sentencing, and tornado coverage because tail-ranked
+// junk still filled the section up to the cap on a thin-market-news day.
 
 const MARKET_TOPICS = new Set<CityVoiceSignal["topic"]>([
   "transactions",
@@ -205,24 +208,34 @@ const MARKET_TOPICS = new Set<CityVoiceSignal["topic"]>([
   "business",
 ]);
 
+// Hard exclusion — crime / courts / casualty / disaster vocabulary. An item
+// hitting this is NEVER market-relevant, regardless of topic label or any $
+// figure it carries ("court ordered $1.17 million against…" is a crime story,
+// not a market signal). Aggressive on purpose: wrongly dropping a borderline
+// story costs one line of filler; shipping a drunk-driving sentencing costs
+// the brand.
+const NEWS_EXCLUDE =
+  /\b(sentenc\w*|prison|jail\w*|arrest\w*|charged|convict\w*|indict\w*|swindl\w*|fraud\w*|scam\w*|embezzl\w*|theft|stolen?|robber\w*|burglar\w*|murder\w*|homicide|shooting|stabb\w*|assault\w*|kidnapp?\w*|hit[- ]and[- ]run|dui|drunk\w*|crash\w*|fatal\w*|killed|died|death\w*|drown\w*|overdose\w*|lawsuit\w*|sued|litigat\w*|judgments?|court[- ]?order\w*|guilty|felony|misdemeanor|tornado\w*|landspout|waterspout|earthquake|quake|wildfire|evacuat\w*)\b/i;
+
 // A breaking/structural item earns market relevance only if its text hits a
 // real-estate / development / commerce term.
 const MARKET_KEYWORDS =
   /\b(zon|rezone|permit|develop|construction|ground[- ]?break|project|sold|sells?|sale|listed|listing|leas|sq ?ft|acres?|commission|council|board|approv|housing|apartment|condo|townhom|residence|retail|commercial|industrial|warehouse|mixed[- ]use|hotel|resort|plaza|subdivision|tenant|vacancy|rent)\b|\$\s?\d/i;
 
 /**
- * Market-relevant = a transaction/development/business topic, or a
- * breaking/structural item whose text hits a real-estate keyword. Human-
- * interest "breaking" (crime, weather, earthquakes) is NOT market-relevant and
- * must never drive the subject line or lead the City Voices body.
+ * Market-relevant = NOT excluded (crime/courts/disaster kills first, before
+ * topic or keywords — a market topic label cannot launder a crime story), AND
+ * a transaction/development/business topic or a breaking/structural item whose
+ * text hits a real-estate keyword. Non-market items are DROPPED by
+ * selectCityVoices — they never reach the body, the subject, or hero tokens.
  */
 export function isMarketRelevant(s: CityVoiceSignal): boolean {
+  if (NEWS_EXCLUDE.test(s.title)) return false;
   return MARKET_TOPICS.has(s.topic) || MARKET_KEYWORDS.test(s.title);
 }
 
-// Subject/lead priority. Market-relevant items first (breaking-market still
-// wins, honoring EMAIL.md Rule 2's "breaking first" intent); everything
-// human-interest sorts to the tail (+100).
+// Body order among the (all market-relevant) survivors. breaking-market still
+// leads, honoring EMAIL.md Rule 2's "breaking first" intent.
 const TOPIC_RANK: Record<CityVoiceSignal["topic"], number> = {
   breaking: 0,
   transactions: 1,
@@ -231,7 +244,7 @@ const TOPIC_RANK: Record<CityVoiceSignal["topic"], number> = {
   structural: 4,
 };
 function voiceRank(s: CityVoiceSignal): number {
-  return (isMarketRelevant(s) ? 0 : 100) + TOPIC_RANK[s.topic];
+  return TOPIC_RANK[s.topic];
 }
 
 const normTitle = (t: string): string =>
@@ -280,18 +293,19 @@ export const SUBJECT_TOPICS: ReadonlySet<CityVoiceSignal["topic"]> = new Set([
 
 /**
  * Curate city voices for the email. Two distinct gates, on purpose:
- *  - BODY order (`cityVoices`) uses `isMarketRelevant` (topic OR keyword), so a
- *    breaking real-estate item can still rank high in the body — after dedup.
- *  - SUBJECT (`topStory`) uses the strict `SUBJECT_TOPICS` allowlist — breaking
- *    NEVER promotes to the subject. Null → the subject falls back to the data
- *    lede (build-digest `buildSubjectLine`).
+ *  - BODY (`cityVoices`): dedup, then DROP every non-market-relevant signal —
+ *    human-interest news never ships, not even as tail filler on a thin day.
+ *    An all-junk day yields an EMPTY list (the template omits the section).
+ *  - SUBJECT (`topStory`) additionally uses the strict `SUBJECT_TOPICS`
+ *    allowlist — breaking NEVER promotes to the subject. Null → the subject
+ *    falls back to the data lede (build-digest `buildSubjectLine`).
  */
 export function selectCityVoices(
   signals: CityVoiceSignal[],
   cap = 4,
 ): { cityVoices: CityVoiceSignal[]; topStory: CityVoiceSignal | null } {
-  const deduped = dedupeSignals(signals);
-  const ranked = [...deduped].sort((a, b) => voiceRank(a) - voiceRank(b));
+  const market = dedupeSignals(signals).filter(isMarketRelevant);
+  const ranked = [...market].sort((a, b) => voiceRank(a) - voiceRank(b));
   return {
     cityVoices: ranked.slice(0, cap),
     topStory: ranked.find((s) => SUBJECT_TOPICS.has(s.topic)) ?? null,

@@ -169,6 +169,62 @@ describe("city voice relevance filter", () => {
     assert.equal(topStory, null);
   });
 
+  // ── The 07/16/2026 Issue #21 postmortem set — the four "BREAKING" items that
+  // actually shipped: a hit-and-run sentencing, a court judgment, a swindler
+  // sentencing, and storm/tornado coverage. None may ever be market-relevant,
+  // and an all-junk day must produce an EMPTY section, not a crime blotter.
+  const ISSUE_21_JUNK: CityVoiceSignal[] = [
+    sig(
+      "breaking",
+      "LaBelle woman sentenced to prison for fatal hit-and-run in Lehigh Acres (July 14, 2026).",
+      "Lehigh Acres",
+    ),
+    sig(
+      "breaking",
+      "A court ordered $1.17 million in judgments against a Naples flight broker sued for unpaid charters and refunds.",
+      "Naples",
+    ),
+    sig(
+      "breaking",
+      "A Naples man who swindled an elderly couple was sentenced to 4 years, as reported July 7, 2026.",
+      "Naples",
+    ),
+    sig(
+      "breaking",
+      "Big storms on or around July 11, 2026 left SWFL residents wondering if tornadoes touched down, with a possible Naples tornado and a landspout reported in Cape Coral.",
+      "Fort Myers",
+    ),
+  ];
+
+  test("crime/courts/disaster stories are never market-relevant — a $ figure cannot launder them in", () => {
+    for (const s of ISSUE_21_JUNK) {
+      assert.equal(isMarketRelevant(s), false, `should be excluded: ${s.title}`);
+    }
+    // Even a market TOPIC can't launder a crime story into the digest.
+    assert.equal(
+      isMarketRelevant(
+        sig("transactions", "Man sentenced for stealing $200,000 in home-sale deposits."),
+      ),
+      false,
+    );
+  });
+
+  test("human-interest items are DROPPED from the body — never tail-filled to cap", () => {
+    const signals = [
+      ...ISSUE_21_JUNK,
+      sig("transactions", "5100 Seagrass Way listed at $7,675,000.", "Bonita Springs"),
+    ];
+    const { cityVoices } = selectCityVoices(signals, 4);
+    assert.equal(cityVoices.length, 1, `junk tail-filled the body: ${JSON.stringify(cityVoices)}`);
+    assert.ok(/Seagrass/.test(cityVoices[0].title));
+  });
+
+  test("all-junk day → EMPTY city voices (section omitted downstream), not a crime blotter", () => {
+    const { cityVoices, topStory } = selectCityVoices(ISSUE_21_JUNK, 4);
+    assert.deepEqual(cityVoices, []);
+    assert.equal(topStory, null);
+  });
+
   test("Cuba-style: a breaking item never becomes the subject — even with market keywords (allowlist gate)", () => {
     const signals: CityVoiceSignal[] = [
       sig("breaking", "A 6.1 magnitude earthquake near Cuba was felt across SWFL.", "Cape Coral"),

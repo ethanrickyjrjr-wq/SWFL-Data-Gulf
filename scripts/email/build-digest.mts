@@ -8,6 +8,7 @@ import { fetchDigestData } from "./fetch-digest-data.mts";
 import { readMostRecentLog, writeLog, isTodayAlreadySent, getNextIssueNumber } from "./log-io.mts";
 import { assertChainRanToday, StaleMasterError } from "./freshness-preflight.mts";
 import { DigestEmail } from "./DigestEmail.tsx";
+import { asOfFromIso } from "../../lib/project/as-of.ts";
 
 // Threshold constants — sourced in EMAIL.md SOURCED THRESHOLDS
 const ZIP_PRICE_THRESHOLD = 0.05;
@@ -143,12 +144,15 @@ export function buildSubjectLine(payload: DigestPayload, escalations: MetricDelt
 
 // ── Delta narrative ────────────────────────────────────────────────────────
 
-function buildDeltaText(current: DigestPayload, prevLog: EmailLog | null): string {
+export function buildDeltaText(current: DigestPayload, prevLog: EmailLog | null): string {
   if (!prevLog) return "First issue — no prior data to compare.";
   const gap = Math.round(
     (new Date(current.date).getTime() - new Date(prevLog.last_send_date).getTime()) / 86400000,
   );
-  const lines = [`Since ${prevLog.last_send_date} (${gap} day${gap !== 1 ? "s" : ""} ago):`];
+  // MM/DD/YYYY — the log stores ISO, but user-facing display never shows it
+  // raw (asOfFromIso is the ONE root; a raw ISO here shipped in Issue #21).
+  const since = asOfFromIso(prevLog.last_send_date) ?? prevLog.last_send_date;
+  const lines = [`Since ${since} (${gap} day${gap !== 1 ? "s" : ""} ago):`];
   for (const zip of ZIP_FOCUS) {
     const curr = current.zip_metrics[zip],
       prev = prevLog.zip_metrics[zip];

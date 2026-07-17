@@ -1,3 +1,31 @@
+## 2026-07-16 (Fable 5 · main) — daily digest sends KILLED + City Voices news junk dropped at the gate
+
+Operator screenshot: Issue #21 of the old Phase-1 daily digest (self-sent to hello@, weekday GHA
+cron) shipped a "City Voices" section of pure crime/weather news (hit-and-run sentencing, $1.17M
+court judgment, swindler sentencing, tornado coverage), a raw ISO "Since 2026-07-15" in What
+Changed, and a ZIP table whose columns didn't line up. Root causes + actions:
+(1) SENDS STOPPED — daily-email-digest.yml disabled on GitHub (disabled_manually) AND both active
+email_schedules rows (ids 5+6, weekly, operator's own account — verified owner via auth lookup)
+flipped to status='paused' (the app's own pause patch shape; UI reactivation still works). Nothing
+else in email_schedules exists.
+(2) City Voices curation was rank-to-tail, not drop: selectCityVoices sliced ranked signals to
+cap=4, so human-interest junk FILLED the section on thin-market-news days; and the bare `$digit`
+keyword made "$1.17M judgments" count as market-relevant. Now: NEWS_EXCLUDE (crime/courts/casualty/
+disaster vocab) runs BEFORE topic/keywords — a $ figure or market topic label can't launder a crime
+story — and non-market signals are dropped entirely; an all-junk day yields an EMPTY section (the
+template omits it; hero SIGNAL_TITLE falls back neutral). Issue #21's four real titles are now the
+regression fixture. This also protects the LIVE multi-tenant scheduler lane (buildBody + hero
+tokens read the same curated list).
+(3) buildDeltaText emitted raw ISO "Since 2026-07-15" — the one spot the 07/09 date sweep missed;
+now via asOfFromIso (exported + tested).
+(4) ZIP Focus grid: react-email renders each Row as its OWN table, so unfixed column widths
+auto-sized per row and drifted; ONE ZIP_TABLE_COLS spec (fixed widths, right-aligned numerics)
+now shared by header + body rows.
+Verified: 60/60 scripts/email tests pass; re-rendered the real Issue #21 payload through the fixed
+template and screenshot-checked (junk gone, date correct, columns aligned). Check opened:
+digest_housing_window_one_cycle_stale (period beginning 03/01/2026 in a July email — housing-swfl
+vintage question, NOT fixed here). Digest stays dead until operator says otherwise.
+
 ## 2026-07-16 (Fable 5 · main) — listing hero: FULL email thumbnails + copy rewritten to verified claims only
 
 Operator screenshot: ListingCampaignHero filmstrip cropped every capture to its top 80px

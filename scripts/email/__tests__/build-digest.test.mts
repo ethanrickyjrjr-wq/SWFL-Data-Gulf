@@ -1,7 +1,7 @@
 // scripts/email/__tests__/build-digest.test.mts
 import { describe, test } from "bun:test";
 import assert from "node:assert/strict";
-import { computeDelta, buildSubjectLine } from "../build-digest.mts";
+import { computeDelta, buildSubjectLine, buildDeltaText } from "../build-digest.mts";
 import { selectCityVoices } from "../fetch-digest-data.mts";
 import type { ZipMetricSnapshot, DigestPayload, CityVoiceSignal } from "../types.ts";
 
@@ -109,5 +109,23 @@ describe("buildSubjectLine", () => {
   test("no unexpected ALL-CAPS shouting (brand acronym SWFL allowed)", () => {
     const s = buildSubjectLine(fakePayload(), []).replace(/\bSWFL\b/g, "");
     assert.ok(!/\b[A-Z]{4,}\b/.test(s), `ALL-CAPS found: "${s}"`);
+  });
+});
+
+describe("buildDeltaText", () => {
+  test("date renders MM/DD/YYYY — never raw ISO (the 07/16/2026 'Since 2026-07-15' regression)", () => {
+    const payload = {
+      date: "2026-07-16",
+      zip_metrics: {},
+      city_voices: [],
+    } as unknown as DigestPayload;
+    const prevLog = {
+      last_send_date: "2026-07-15",
+      zip_metrics: {},
+      signals_surfaced: [],
+    } as unknown as import("../types.ts").EmailLog;
+    const text = buildDeltaText(payload, prevLog);
+    assert.ok(text.startsWith("Since 07/15/2026 (1 day ago):"), `got: "${text}"`);
+    assert.ok(!/\d{4}-\d{2}-\d{2}/.test(text), `raw ISO leaked: "${text}"`);
   });
 });
