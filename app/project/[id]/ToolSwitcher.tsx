@@ -30,7 +30,11 @@ export function ToolSwitcher({ id, lastDid }: { id: string | null; lastDid: stri
   const pathname = usePathname();
   const active = id ? activeTool(pathname, id) : null;
   return (
-    <nav className="sticky top-0 z-30 border-b border-white/10 bg-[#070f14]/95 px-4 backdrop-blur">
+    // top-14 = the app bar's height (the layout's own 3.5rem constant). BOTH bars
+    // are sticky in the body scroll; at top-0 this one slid UNDERNEATH the opaque
+    // z-40 app bar the moment the page scrolled — pills ghosted through the blur
+    // and every tap landed on the header ("buttons don't work", mobile 07/16/2026).
+    <nav className="sticky top-14 z-30 border-b border-white/10 bg-[#070f14]/95 px-4 backdrop-blur">
       {/* Segmented control — sized to be unmissable (operator: the subtle pills read
           as page chrome and got scrolled past entirely). */}
       <div className="mx-auto flex max-w-2xl gap-1.5 rounded-full py-2.5">

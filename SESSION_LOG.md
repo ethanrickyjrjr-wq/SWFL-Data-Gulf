@@ -1,3 +1,27 @@
+## 2026-07-16 (Fable 5 · main) — FOOTER LAST EVERYWHERE (operator decree) + $0 hero pipeline fixed + dead-tabs root cause
+
+Operator screenshot (21:02): a built lots email rendered the agent card AND the ZIP chart BELOW the
+CAN-SPAM footer. Stored doc 76680c85 was the evidence: chart block layout=null (upsertChartBlock's
+replace rebuilt {id,type,props} and DROPPED the reserved slot's layout — the landmine the 07/13
+audit documented and nobody fixed), and agent-card/button saved at y=28 under the footer's y=24
+(EmailLabGridShell's nextBottomY stacked new blocks below the static footer — same bug
+insertDatasetBlocks fixed on 07/13 for datasets only; copy #2). Render order is layout.y via
+groupRows; nothing forced the footer last. Fixed as a CLASS, TDD (17 new tests, all suites green,
+next build clean): (1) groupRows (ONE root, HTML+PDF engines) partitions footers out of banding and
+appends them as trailing rows — footer closes the email no matter what the doc carries;
+(2) upsertChartBlock preserves layout on replace, inserts before the footer on fallback;
+(3) place-blocks.ts gains contentBottomY + pushFooterBelowContent — the shell's commit() chokepoint
+normalizes every write, initialDoc normalizes on open (existing broken docs straighten themselves),
+and all three add paths (add-block/duplicate/photo) place above the footer. Also: $0 hero fixed per
+banked check — docSkeleton now SHOWS open slots ('' = deliberate slot, SLOT RULE), buildContentDoc
+AND authorDoc return unfilled[]+honest heads-up message (never blocks, four-lane), HeroBlock editor
+placeholder '$0'→'$—'. Dead project tabs: root cause by inspection — ToolSwitcher sticky top-0 z-30
+slid UNDER the opaque top-0 z-40 app bar once the body scrolled (phone), taps hit the header; now
+pins at top-14. Desktop tabs confirmed working from operator's own 21:04 screenshot. Checks:
+email_stat_zero + projects_top_tabs updated with root causes; footer_last_everywhere_live_verify +
+pdf_visual_parity_test_red_local (pre-existing, clean-tree-verified) opened;
+email_builder_mobile_layout still needs a phone repro. NOT pushed — awaiting operator go.
+
 ## 2026-07-16 (Fable 5 · main) — daily digest sends KILLED + City Voices news junk dropped at the gate
 
 Operator screenshot: Issue #21 of the old Phase-1 daily digest (self-sent to hello@, weekday GHA

@@ -6,6 +6,7 @@ import {
   cityZipsFor,
   docSkeleton,
   applyPatch,
+  unfilledFigureSlots,
 } from "./build-doc";
 import { BlockContentPatchSchema } from "./doc/schema";
 import type { EmailDoc } from "./doc/types";
@@ -286,6 +287,76 @@ test("a block with no held figures gets no READ ONLY annotation (no noise)", () 
   );
   expect(skeleton).toContain("just prose");
   expect(skeleton).not.toContain("READ ONLY");
+});
+
+// ── Open slots: the $0 regression (deliverable ae316e1f, 07/16/2026) ─────────
+// A hero shipped with value:"" — the AI quoted the real $299,650 median in its
+// prose but never filled the headline slot, because docSkeleton OMITTED empty
+// fields: an open slot was invisible to the model, and nothing checked it got
+// filled. The editor then rendered the empty value as a "$0" placeholder.
+
+test("docSkeleton marks an EMPTY (open-slot) field explicitly instead of hiding it", () => {
+  const skeleton = docSkeleton(
+    docWith([
+      {
+        id: "h1",
+        type: "hero",
+        props: { kicker: "Cape Coral Market Snapshot", value: "", label: "500 active listings" },
+      },
+    ] as unknown as EmailDoc["blocks"]),
+  );
+  expect(skeleton).toContain("OPEN SLOTS");
+  expect(skeleton).toContain("value");
+  expect(skeleton).toContain("Cape Coral Market Snapshot"); // filled fields still shown
+});
+
+test("docSkeleton stays quiet for a block with no empty fields (no noise)", () => {
+  const skeleton = docSkeleton(
+    docWith([
+      { id: "h1", type: "hero", props: { kicker: "K", value: "$299,650", label: "L" } },
+    ] as unknown as EmailDoc["blocks"]),
+  );
+  expect(skeleton).not.toContain("OPEN SLOTS");
+});
+
+test("an undefined field is NOT an open slot — only an authored empty string is", () => {
+  // The SLOT RULE (lib/email/CLAUDE.md): "" is a deliberate open slot; a key the
+  // block never carried is simply not part of its design.
+  const skeleton = docSkeleton(
+    docWith([
+      { id: "t1", type: "text", props: { body: "prose" } },
+    ] as unknown as EmailDoc["blocks"]),
+  );
+  expect(skeleton).not.toContain("OPEN SLOTS");
+});
+
+test("unfilledFigureSlots reports a hero value that was empty before the patch and still is", () => {
+  const before = docWith([
+    { id: "h1", type: "hero", props: { kicker: "K", value: "", label: "L" } },
+    { id: "s1", type: "stats", props: { stats: [{ value: "", label: "Median price" }] } },
+  ] as unknown as EmailDoc["blocks"]);
+  const after = before; // nothing filled
+  const missing = unfilledFigureSlots(before, after);
+  expect(missing.length).toBe(2);
+  expect(missing.join(" ")).toContain("headline");
+  expect(missing.join(" ")).toContain("Median price");
+});
+
+test("unfilledFigureSlots is empty when the patch filled the figures", () => {
+  const before = docWith([
+    { id: "h1", type: "hero", props: { kicker: "K", value: "", label: "L" } },
+  ] as unknown as EmailDoc["blocks"]);
+  const after = docWith([
+    { id: "h1", type: "hero", props: { kicker: "K", value: "$299,650", label: "L" } },
+  ] as unknown as EmailDoc["blocks"]);
+  expect(unfilledFigureSlots(before, after)).toEqual([]);
+});
+
+test("unfilledFigureSlots ignores slots that were already filled before the build", () => {
+  const before = docWith([
+    { id: "h1", type: "hero", props: { value: "$500,000" } },
+  ] as unknown as EmailDoc["blocks"]);
+  expect(unfilledFigureSlots(before, before)).toEqual([]);
 });
 
 test("docSkeleton SHOWS a list's rows and a multi-column's cards (stats was the only array it saw)", () => {

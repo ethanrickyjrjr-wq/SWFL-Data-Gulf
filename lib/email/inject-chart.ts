@@ -40,9 +40,12 @@ export function chartImageBlock(opts: {
 /**
  * Place a chart `image` block into the doc, returning a NEW doc (no mutation):
  *   • If an `image` block already exists, replace its props with `block.props`
- *     (id and position preserved — a re-render updates in place, never stacks).
+ *     (id, LAYOUT, and position preserved — a re-render updates in place, never
+ *     stacks, and the reserved slot keeps its grid cell so the chart can't sink
+ *     to the render fallback tail).
  *   • Otherwise insert `block` immediately AFTER the first `hero` block; if there
- *     is no hero, after the first `header`; if neither, append to the end.
+ *     is no hero, after the first `header`; if neither, before the footer (the
+ *     footer closes the email); with no footer either, append.
  */
 export function upsertChartBlock(doc: EmailDoc, block: BlockOf<"image">): EmailDoc {
   // Target ONLY the chart's own slot: a kind:"chart" image, or a legacy untagged
@@ -59,7 +62,12 @@ export function upsertChartBlock(doc: EmailDoc, block: BlockOf<"image">): EmailD
   if (existingIdx !== -1) {
     const blocks = doc.blocks.map((b, i) =>
       i === existingIdx
-        ? ({ id: b.id, type: "image", props: { ...block.props } } satisfies BlockOf<"image">)
+        ? ({
+            id: b.id,
+            type: "image",
+            props: { ...block.props },
+            ...(b.layout ? { layout: b.layout } : {}),
+          } satisfies BlockOf<"image">)
         : b,
     );
     return { ...doc, blocks };
@@ -70,10 +78,12 @@ export function upsertChartBlock(doc: EmailDoc, block: BlockOf<"image">): EmailD
   const anchorIdx = heroIdx !== -1 ? heroIdx : headerIdx;
 
   const blocks = [...doc.blocks];
-  if (anchorIdx === -1) {
-    blocks.push(block);
-  } else {
+  if (anchorIdx !== -1) {
     blocks.splice(anchorIdx + 1, 0, block);
+  } else {
+    const footerIdx = blocks.findIndex((b) => b.type === "footer");
+    if (footerIdx !== -1) blocks.splice(footerIdx, 0, block);
+    else blocks.push(block);
   }
   return { ...doc, blocks };
 }

@@ -64,6 +64,61 @@ describe("groupRows", () => {
     expect(rows[0].map((d) => d.block.id)).toEqual(["short", "tall"]);
   });
 
+  // ── Footer-last invariant (operator decree 07/16/2026): the CAN-SPAM footer
+  // closes the email, in every engine, no matter what positions the doc carries.
+  // The live failure: canvas add-paths stacked blocks BELOW the static footer and
+  // upsertChartBlock dropped a chart's layout — both rendered under the footer. ──
+
+  it("footer renders last even when other blocks were positioned below it", () => {
+    // Mirrors deliverable 76680c85: footer y=24 h=4, agent-card/button parked at y=28.
+    const footer = {
+      id: "f",
+      type: "footer",
+      props: {},
+      layout: { x: 0, y: 24, w: 12, h: 4, static: true },
+    } as unknown as EmailBlock;
+    const rows = groupRows([
+      blk("text", { x: 0, y: 20, w: 12, h: 2 }),
+      footer,
+      blk("agent", { x: 0, y: 28, w: 7, h: 4 }),
+      blk("btn", { x: 7, y: 28, w: 5, h: 3 }),
+    ]);
+    expect(rows.map((r) => r.map((d) => d.block.id))).toEqual([["text"], ["agent", "btn"], ["f"]]);
+  });
+
+  it("footer stays its own row — it never band-merges with the row it now follows", () => {
+    // After the re-order the footer's stored y (24) overlaps the agent row's band
+    // (28..32); banding must not swallow it into that row.
+    const footer = {
+      id: "f",
+      type: "footer",
+      props: {},
+      layout: { x: 0, y: 24, w: 12, h: 4 },
+    } as unknown as EmailBlock;
+    const rows = groupRows([footer, blk("agent", { x: 0, y: 28, w: 12, h: 8 })]);
+    expect(rows).toHaveLength(2);
+    expect(rows[1].map((d) => d.block.id)).toEqual(["f"]);
+  });
+
+  it("a no-layout block sinks to the bottom of CONTENT — above the footer, never below", () => {
+    // The upsertChartBlock failure shape: chart replaced its slot but lost layout.
+    const footer = {
+      id: "f",
+      type: "footer",
+      props: {},
+      layout: { x: 0, y: 6, w: 12, h: 4 },
+    } as unknown as EmailBlock;
+    const rows = groupRows([blk("hero", { x: 0, y: 0, w: 12, h: 6 }), footer, blk("chart")]);
+    expect(rows.map((r) => r[0].block.id)).toEqual(["hero", "chart", "f"]);
+    expect(rows[1][0].eff.w).toBe(12);
+  });
+
+  it("a footer with NO layout still lands last, not banded into the fallback tail", () => {
+    const footer = { id: "f", type: "footer", props: {} } as unknown as EmailBlock;
+    const rows = groupRows([blk("hero", { x: 0, y: 0, w: 12, h: 6 }), footer, blk("late")]);
+    expect(rows.map((r) => r[0].block.id)).toEqual(["hero", "late", "f"]);
+  });
+
   it("KNOWN LIMITATION (locked): 2×2 masonry with a tall right column swallows the below-left block", () => {
     // Two stacked half-width blocks on the left, one tall half-width on the right.
     // A linear email/PDF cannot represent true 2D masonry; the band rule projects

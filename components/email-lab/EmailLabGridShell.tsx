@@ -57,7 +57,12 @@ import { PhotosPanel } from "./PhotosPanel";
 import { MediaPanel } from "./MediaPanel";
 import { DatasetBrowser } from "./DatasetBrowser";
 import { DatasetChip } from "./DatasetChip";
-import { insertDatasetBlocks, shouldAutoRefresh } from "./dataset-browser-core";
+import {
+  contentBottomY,
+  insertDatasetBlocks,
+  pushFooterBelowContent,
+  shouldAutoRefresh,
+} from "./dataset-browser-core";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
 import type { SocialElement } from "@/lib/social/design/types";
 import { formatForClipboard } from "@/lib/email/social-calendar/week";
@@ -174,19 +179,13 @@ async function renderDocHtml(doc: EmailDoc): Promise<string> {
   return (await res.json()).html ?? "";
 }
 
-/** y of the first free row under everything (incl. a static footer). */
-function nextBottomY(blocks: EmailBlock[]): number {
-  let max = 0;
-  for (const b of blocks) {
-    if (b.layout) max = Math.max(max, b.layout.y + b.layout.h);
-  }
-  return max;
-}
-
-/** A block's layout, or a synthesized full-width one stacked at the bottom. */
+/** A block's layout, or a synthesized full-width one at the bottom of the
+ *  CONTENT — above the footer, never below it. (The old fallback stacked under
+ *  the static footer, which is how blocks ended up rendering past the
+ *  unsubscribe line — deliverable 76680c85, 07/16/2026.) */
 function ensureLayout(block: EmailBlock, blocks: EmailBlock[]): BlockLayout {
   return (
-    block.layout ?? { x: 0, y: nextBottomY(blocks), w: GRID_COLS, h: DEFAULT_H[block.type] ?? 4 }
+    block.layout ?? { x: 0, y: contentBottomY(blocks), w: GRID_COLS, h: DEFAULT_H[block.type] ?? 4 }
   );
 }
 
@@ -289,7 +288,12 @@ export function EmailLabGridShell({
   // Top-level mode: Email grid ↔ Social composer. The tab itself is gated on the dial.
   const [mode, setMode] = useState<"email" | "social">("email");
   const [history, setHistory] = useState<DocHistory>(() =>
-    initHistory(applyBrand(initialDoc, brandTokens)),
+    // pushFooterBelowContent: docs saved before the footer-last fix (07/16/2026)
+    // may carry blocks parked beneath the footer — straighten them on open so
+    // the canvas matches what the render engines will send.
+    initHistory(
+      applyBrand({ ...initialDoc, blocks: pushFooterBelowContent(initialDoc.blocks) }, brandTokens),
+    ),
   );
   const doc = history.present;
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -443,9 +447,14 @@ export function EmailLabGridShell({
   function commit(next: EmailDoc) {
     editingRef.current = false;
     if (idleRef.current) clearTimeout(idleRef.current);
-    setHistory((h) => pushDoc(h, next));
-    onDocChange?.(next);
-    armDatasetAutoRefresh(next);
+    // Footer-last invariant at the ONE write chokepoint: whatever an add, drag,
+    // AI build, or dataset load produced, nothing is ever saved sitting under
+    // the footer. No violation → same doc reference, zero cost.
+    const blocks = pushFooterBelowContent(next.blocks);
+    const normalized = blocks === next.blocks ? next : { ...next, blocks };
+    setHistory((h) => pushDoc(h, normalized));
+    onDocChange?.(normalized);
+    armDatasetAutoRefresh(normalized);
   }
 
   /** Content auto-height correction from the grid canvas — replace present in place,
@@ -535,6 +544,9 @@ export function EmailLabGridShell({
             data.note ??
               `Built the whole email from one line — ${normalized.blocks.length} blocks laid out on the grid.`,
           );
+          // A successful build can still carry an honest warning — a figure slot
+          // the author left blank rather than invent ("$—"). Never silent.
+          if (data.message) setAiMessage(data.message);
           // Phone: show them what got built (the tab bar is right there to come
           // back). No-op on lg+ where both panes are visible. Failure paths stay
           // on Build so the message is seen.
@@ -685,7 +697,9 @@ export function EmailLabGridShell({
           setLinkAsks(auditDocLinks(parsed.data));
         }
       }
-      if (data.applied === false && data.message) setAiMessage(data.message);
+      // `message` also rides on a SUCCESSFUL build when figure slots stayed
+      // empty (the honest "$—" heads-up) — show it either way.
+      if (data.message) setAiMessage(data.message);
       else if (data.chartNote) setAiMessage(data.chartNote);
     } catch {
       setAiMessage("Something went wrong — try again.");
@@ -862,12 +876,13 @@ export function EmailLabGridShell({
     });
   }
 
-  /** Add a block straight onto the grid (full-width, stacked at the bottom). */
+  /** Add a block straight onto the grid (full-width, at the bottom of the
+   *  content — commit() pushes the footer down past it). */
   function addBlockToGrid(type: BlockType) {
     const block = createBlock(type);
     const layout: BlockLayout = {
       x: 0,
-      y: nextBottomY(doc.blocks),
+      y: contentBottomY(doc.blocks),
       w: GRID_COLS,
       h: DEFAULT_H[type] ?? 4,
     };
@@ -1040,13 +1055,14 @@ export function EmailLabGridShell({
     void updateAllDatasets(next);
   }
 
-  /** Duplicate a block — fresh id, content cloned, placed below; movable. */
+  /** Duplicate a block — fresh id, content cloned, placed at the bottom of the
+   *  content (above the footer); movable. */
   function duplicateBlock(id: string) {
     const src = doc.blocks.find((b) => b.id === id);
     if (!src) return;
     const layout: BlockLayout = {
       ...ensureLayout(src, doc.blocks),
-      y: nextBottomY(doc.blocks),
+      y: contentBottomY(doc.blocks),
       static: undefined,
     };
     const copy = {
@@ -1250,7 +1266,7 @@ export function EmailLabGridShell({
     } else {
       const layout: BlockLayout = {
         x: 0,
-        y: nextBottomY(doc.blocks),
+        y: contentBottomY(doc.blocks),
         w: GRID_COLS,
         h: DEFAULT_H.image,
       };

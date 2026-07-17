@@ -13,6 +13,14 @@
 // height get different y values. We only read positions; compaction happened
 // upstream. Blocks without a `layout` sort AFTER positioned ones, in original
 // array order, each as its own full-bleed row.
+//
+// FOOTER LAST — ALWAYS (operator decree 07/16/2026). The CAN-SPAM footer closes
+// the email in every engine, no matter what positions the doc carries: canvas
+// add-paths used to stack new blocks BELOW the static footer, and a chart that
+// lost its layout sank to the fallback tail — both rendered under the footer in
+// the sent email. Footers are partitioned out before banding (so a stored y can
+// never band-merge them into a content row) and appended as their own trailing
+// full-bleed rows. A doc whose footer is already last renders byte-identically.
 
 import { GRID_COLS } from "../grid-schema";
 import type { EmailBlock } from "./types";
@@ -49,12 +57,17 @@ export function groupRows(blocks: EmailBlock[]): RowEntry[][] {
     i,
     eff: effectiveLayout(block, FALLBACK_BASE + i),
   }));
-  decorated.sort((a, b) => a.eff.y - b.eff.y || a.eff.x - b.eff.x || a.i - b.i);
+
+  // Footer-last invariant: footers never enter the banding pass (a stored y
+  // could merge them into a content row) — they close the doc as their own rows.
+  const footers = decorated.filter((d) => d.block.type === "footer");
+  const rest = decorated.filter((d) => d.block.type !== "footer");
+  rest.sort((a, b) => a.eff.y - b.eff.y || a.eff.x - b.eff.x || a.i - b.i);
 
   const rows: (typeof decorated)[] = [];
   let cur: typeof decorated = [];
   let curBottom = Number.NEGATIVE_INFINITY;
-  for (const d of decorated) {
+  for (const d of rest) {
     if (cur.length === 0 || d.eff.y < curBottom) {
       cur.push(d);
       curBottom = Math.max(curBottom, d.eff.y + d.eff.h);
@@ -65,6 +78,7 @@ export function groupRows(blocks: EmailBlock[]): RowEntry[][] {
     }
   }
   if (cur.length) rows.push(cur);
+  for (const f of footers) rows.push([f]);
 
   return rows.map((r) =>
     [...r].sort((a, b) => a.eff.x - b.eff.x || a.i - b.i).map(({ block, eff }) => ({ block, eff })),

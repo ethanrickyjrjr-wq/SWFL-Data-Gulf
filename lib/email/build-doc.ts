@@ -383,8 +383,14 @@ export function docSkeleton(doc: EmailDoc): string {
   const lines = doc.blocks.map((b) => {
     const props = b.props as Record<string, unknown>;
     const text: Record<string, unknown> = {};
+    // An authored EMPTY STRING is an OPEN SLOT (the SLOT RULE, lib/email/CLAUDE.md)
+    // — it must be VISIBLE to the model as a slot to fill. Omitting it is how the
+    // $0 hero shipped (deliverable ae316e1f, 07/16/2026): the writer quoted the
+    // real median in its prose but never saw that the headline slot existed.
+    const open: string[] = [];
     for (const k of TEXT_KEYS) {
-      if (props[k] !== undefined && props[k] !== "") text[k] = props[k];
+      if (props[k] === "") open.push(k);
+      else if (props[k] !== undefined) text[k] = props[k];
     }
     // Array-shaped content. `stats` was the ONLY one the AI could see; a `list`'s
     // rows and a `multi-column`'s cards serialized as nothing, so the writer was
@@ -402,9 +408,61 @@ export function docSkeleton(doc: EmailDoc): string {
     const heldPart = Object.keys(held).length
       ? ` [held figures on this block — READ ONLY, reference them in your prose, never rewrite them: ${JSON.stringify(held)}]`
       : "";
-    return `  "${b.id}" (${b.type}): ${JSON.stringify(text)}${heldPart}`;
+    const openPart = open.length
+      ? ` [OPEN SLOTS on this block — REQUIRED, fill each per the sourcing lanes (a real figure, or "[Need: …]" — never leave one empty): ${open.join(", ")}]`
+      : "";
+    return `  "${b.id}" (${b.type}): ${JSON.stringify(text)}${heldPart}${openPart}`;
   });
   return lines.join("\n");
+}
+
+/** The honest tail of a build result: name the figure slots that stayed empty,
+ *  or add nothing. Rides BOTH build lanes (skeleton fill + full author). */
+function unfilledHeadsUp(
+  unfilled: string[],
+): { unfilled: string[]; message: string } | Record<string, never> {
+  if (unfilled.length === 0) return {};
+  const one = unfilled.length === 1;
+  return {
+    unfilled,
+    message: `Heads up — ${unfilled.join(" and ")} still ${one ? "needs" : "need"} a figure. I left ${
+      one ? "it" : "them"
+    } blank rather than invent a number — click the block to type yours, or rebuild with the figure in your prompt.`,
+  };
+}
+
+/**
+ * The post-fill completeness gate for FIGURE slots — the check that was missing
+ * when the $0 hero shipped: a hero `value` or a stats cell that was an OPEN SLOT
+ * ("" ) before the patch and is STILL empty after it. Returns plain-English slot
+ * names for the honest "heads up" message; empty array = build filled everything
+ * it was shown. Never blocks the build (four-lane rule: a gap is surfaced, the
+ * user fills it — only invention is forbidden).
+ *
+ * Author-path usage passes the SAME doc twice: with no "before", every empty
+ * figure slot in the authored doc is by definition unfilled.
+ */
+export function unfilledFigureSlots(before: EmailDoc, after: EmailDoc): string[] {
+  const afterById = new Map(after.blocks.map((b) => [b.id, b]));
+  const out: string[] = [];
+  for (const b of before.blocks) {
+    const now = afterById.get(b.id);
+    if (!now) continue;
+    const wasProps = b.props as Record<string, unknown>;
+    const nowProps = now.props as Record<string, unknown>;
+    if (b.type === "hero" && wasProps.value === "" && nowProps.value === "") {
+      out.push("the headline value on the lead block");
+    }
+    if (b.type === "stats" && Array.isArray(wasProps.stats) && Array.isArray(nowProps.stats)) {
+      (wasProps.stats as Array<{ value?: string; label?: string }>).forEach((cell, i) => {
+        const nowCell = (nowProps.stats as Array<{ value?: string; label?: string }>)[i];
+        if (cell.value === "" && nowCell && nowCell.value === "") {
+          out.push(`the "${cell.label || `stat ${i + 1}`}" stat`);
+        }
+      });
+    }
+  }
+  return out;
 }
 
 function contentPatchSystem(lakeContext: string, hasChart: boolean): string {
@@ -865,6 +923,11 @@ export async function buildContentDoc({
       chart: Boolean(chartRes),
       chartNote: chartRes?.note,
       photo: Boolean(photoRes),
+      // Completeness gate: figure slots that were open before the patch and are
+      // still empty. The build is never blocked (four-lane rule) — but it must not
+      // read as clean when a headline slot stayed blank; that silence is exactly how
+      // the "$0" hero shipped and got called good (07/16/2026).
+      ...unfilledHeadsUp(unfilledFigureSlots(doc, sourcedDoc)),
       // Freshness: which stale held figures the AI replaced with a current web-cited value,
       // and the sources it cited — so the UI can show "found fresher data" + the citations.
       webRefreshed: refreshedLabels,
@@ -1528,6 +1591,10 @@ export async function authorDoc({
       stripped,
       voiceStripped,
       scheduleSuggestion: authored.schedule_suggestion ?? null,
+      // Same completeness gate as the fill path: an authored doc carrying an
+      // empty hero value / stats cell must not read as a clean "built it" —
+      // that silence is how the "$0" hero got called good (07/16/2026).
+      ...unfilledHeadsUp(unfilledFigureSlots(finalDoc, finalDoc)),
     },
   };
 }

@@ -120,7 +120,7 @@ export function HeroBlock({
           value={props.value ?? ""}
           path="value"
           scope={scope}
-          placeholder="$0"
+          placeholder="$—"
           style={{
             fontFamily: displayFont,
             ...text("h1", { numeric: true }),

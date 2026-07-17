@@ -18,7 +18,8 @@
 // its to write. `finalizeDoc` is the only function that mints them.
 //
 // Bypass is not forbidden — it is USELESS. A hand-written block with no `layout`
-// sinks to `y = 1_000_000` in `row-grouping.ts` (below the footer, in both the HTML
+// sinks to `y = 1_000_000` in `row-grouping.ts` (the bottom of the content, just
+// above the footer — the footer itself is forced absolute-last in both the HTML
 // and PDF engines), so a builder that skips this seam ships a visibly broken email.
 // And `finalizeDoc` stamps every doc it returns with the SEAM marker, so
 // `design-system-reachability.test.ts` can tell a doc that went through the fences

@@ -10,6 +10,41 @@ function bottomY(blocks: EmailBlock[]): number {
   }, 0);
 }
 
+/** The bottom of the CONTENT — footers excluded. This is where a NEW block goes
+ *  (the footer closes the email; nothing is ever placed under it). The lab shell
+ *  had its own bottom-of-everything copy that INCLUDED the static footer, which
+ *  is exactly how add-block/duplicate/photo-add parked blocks beneath the
+ *  unsubscribe line (deliverable 76680c85, 07/16/2026). */
+export function contentBottomY(blocks: EmailBlock[]): number {
+  return bottomY(blocks.filter((b) => b.type !== "footer"));
+}
+
+/**
+ * FOOTER LAST, on the canvas too. If any content block's band reaches past a
+ * footer's top edge, that footer is moved to the bottom of the content and to
+ * the END of the array. A doc already in shape is returned UNTOUCHED (same
+ * reference), so callers can run this on every commit for free. A deliberate
+ * gap above the footer is respected — only violations move it.
+ *
+ * The render engines enforce the same invariant independently
+ * (lib/email/doc/row-grouping.ts); this keeps the editing canvas honest so the
+ * preview and the sent email tell one story.
+ */
+export function pushFooterBelowContent(blocks: EmailBlock[]): EmailBlock[] {
+  const footers = blocks.filter((b) => b.type === "footer" && b.layout);
+  if (footers.length === 0) return blocks;
+  const body = blocks.filter((b) => !footers.includes(b));
+  const bottom = bottomY(body);
+  if (footers.every((f) => f.layout!.y >= bottom)) return blocks;
+  let y = bottom;
+  const pushed = footers.map((f) => {
+    const moved = { ...f, layout: { ...f.layout!, y } } as EmailBlock;
+    y += f.layout!.h;
+    return moved;
+  });
+  return [...body, ...pushed];
+}
+
 /**
  * Insert dataset blocks into a doc ABOVE ITS FOOTER, and return the whole block
  * list. This is the one place that answers "where does loaded data go" — the lab
