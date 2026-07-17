@@ -84,11 +84,12 @@ describe("zip-resolver §A spine", () => {
     expect(r.barrier.name).toBe("Captiva");
   });
 
-  it("33903 N. Fort Myers → in scope Lee, absent from the place crosswalk", () => {
+  it("33903 North Fort Myers → in scope Lee, resolves via the crosswalk (entry added 07/16/2026), carries the needs_verification caveat until the USPS re-check", () => {
     const r = resolveZip("33903");
     expect(r.in_scope).toBe(true);
     expect(r.primary_county).toBe("12071");
-    expect(r.places).toEqual([]);
+    expect(r.places.map((p) => p.place)).toContain("North Fort Myers");
+    expect(r.resolution_notes.some((n) => n.includes("needs_verification"))).toBe(true);
   });
 
   // ---- G6: an in-scope ZIP absent from the barrier table NEVER yields "inland" ----

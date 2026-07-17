@@ -1,3 +1,22 @@
+## 2026-07-16 (Fable 5 · main) — address WINS scope precedence + North Fort Myers crosswalk entry + exhaustive every-ZIP test
+
+Operator rulings off the scope-fix review: (1) WHY WOULD THE CITY WIN OVER THE ADDRESS → it
+shouldn't; precedence flipped to saved listing ADDRESS → filed items → market area → schedules
+(digest.ts + social/page.tsx, zip+place always a coherent pair from ONE source, topic still
+prefers items). (2) WHERE IS NORTH FORT MYERS → real catch: NFM was absent from the sourced
+place-zip crosswalk (fixtures/swfl-place-zip-crosswalk.json), so name-only "North Fort Myers"
+text MISLABELED as Fort Myers via the shorter needle. Entry added (33903 + 33917/33918, lee,
+aliases n/north ft variants) — mail city per lib/swfl-zip-city.ts USPS map + live GeoNames
+cross-check (zippopotam.us, all 3 ZIPs → North Fort Myers); needs_verification:true until a
+direct tools.usps.com re-check (resolver auto-emits the "confirm before citing" caveat; USPS
+endpoint itself blocked the probe). zip-resolver test that asserted NFM's ABSENCE updated to
+assert presence + caveat. (3) WHAT TESTS → exhaustive sweep added: ALL 137 ZIPs in the USPS map
+resolve through inferScopeFromSubject (no lucky samples), + name-only Fort Myers / North Fort
+Myers / Lehigh Acres / Estero, + NFM≠Fort Myers regression. Fort Myers/Lehigh/Estero were
+always in the crosswalk; Charlotte/Sarasota/Manatee exist in lib/swfl-zip-city.ts as USPS
+NAME labels for brain detail-table ZIPs (naming, not data coverage). 664 tests pass across
+gazetteer consumers + project/chat/assistant; next build green.
+
 ## 2026-07-16 (Fable 5 · main) — hub de-clutter: 3-button row dead, Showing Prep aside card, Contacts on the rail, Projects pill, calendar Schedule opens the scheduler
 
 Operator (3 screenshots): the hub's New listing / Showing prep / New project strip duplicated

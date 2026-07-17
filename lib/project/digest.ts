@@ -293,17 +293,26 @@ export function buildProjectDigest(input: ProjectDigestInput): ProjectDigest {
   const branding = input.branding ?? {};
   const recentActivity = input.recentActivity ?? [];
 
-  // Scope precedence: filed items → the saved subject (listing address / market
-  // area — what the project IS) → schedule scope (what it sends). The subject slot
-  // fills only when items name no place, so populated projects are unchanged.
-  let itemScope: InferredScope = inferScopeFromItems(items);
-  if (!itemScope.zip && !itemScope.place) {
-    const subject = inferScopeFromSubject(input.subjectAddress, input.subjectArea);
-    if (subject.zip || subject.place) {
-      itemScope = { ...subject, topic: itemScope.topic ?? subject.topic };
-    }
-  }
-  const scope = withScheduleFallback(itemScope, schedules);
+  // Scope precedence (operator ruling 07/16/2026: the ADDRESS always wins — it is
+  // the project's identity, typed in by the user; everything else is inference):
+  //   saved listing address → filed items → saved market area → schedule scope.
+  // zip+place are taken TOGETHER from the first source that names a place, never
+  // mixed across sources (an address's place must not pair with another city's
+  // item-derived ZIP). Topic still prefers the filed items — topics live in data.
+  const addressScope = inferScopeFromSubject(input.subjectAddress);
+  const itemScope = inferScopeFromItems(items);
+  const placeSource =
+    addressScope.zip || addressScope.place
+      ? addressScope
+      : itemScope.zip || itemScope.place
+        ? itemScope
+        : inferScopeFromSubject(undefined, input.subjectArea);
+  const merged: InferredScope = {
+    zip: placeSource.zip,
+    place: placeSource.place,
+    topic: itemScope.topic ?? placeSource.topic,
+  };
+  const scope = withScheduleFallback(merged, schedules);
   const feedSignals = foldFeedSignals(input.feedRows ?? []);
 
   const kindCounts: Record<string, number> = {};

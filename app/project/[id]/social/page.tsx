@@ -53,13 +53,14 @@ export default async function ProjectSocialPage({
 
   const branding = (project.branding ?? {}) as Record<string, string>;
   const items: ProjectItem[] = Array.isArray(project.items) ? project.items : [];
-  let scope = inferScopeFromItems(items);
-  // A fresh listing project has no filed items yet, so scope from items is empty.
-  // Fall back to the saved subject (a New Listing Socials launch week must be
-  // about THE user's listing area, not region-wide) — via the ONE shared helper
-  // (inferScopeFromSubject), the same fallback the project digest now applies.
+  // Scope precedence — same rule as the project digest (operator ruling
+  // 07/16/2026): the saved listing ADDRESS wins (it is what the project IS),
+  // then filed items, then the remembered market area. One shared helper
+  // (inferScopeFromSubject), never a second parser.
+  let scope = inferScopeFromSubject(project.subject_address);
+  if (!scope.zip && !scope.place) scope = inferScopeFromItems(items);
   if (!scope.zip && !scope.place) {
-    scope = inferScopeFromSubject(project.subject_address, project.subject_area);
+    scope = inferScopeFromSubject(undefined, project.subject_area);
   }
 
   // Filed image items + 1h signed URLs (same as the email tool's Photos feed).

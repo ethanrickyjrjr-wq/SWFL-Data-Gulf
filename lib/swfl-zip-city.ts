@@ -141,6 +141,12 @@ export function cityForZip(zip: string): string | undefined {
   return ZIP_CITY[zip];
 }
 
+/** Every [zip, USPS city] pair in the map — for exhaustive coverage tests, so no
+ *  city is ever a lucky sample. Read-only snapshot; the map stays private. */
+export function allZipCityEntries(): ReadonlyArray<readonly [string, string]> {
+  return Object.entries(ZIP_CITY);
+}
+
 /** Returns true when the string looks like a 5-digit US ZIP code. */
 export function looksLikeZip(s: string): boolean {
   return /^\d{5}$/.test(s);

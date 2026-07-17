@@ -1,5 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { deriveProjectName, inferScopeFromItems, inferScopeFromSubject } from "./derive-name";
+import { allZipCityEntries } from "@/lib/swfl-zip-city";
 import type { ProjectItem } from "./items";
 
 const base = { id: "x", added_at: "2026-06-17T08:00:00Z", origin: "web" as const };
@@ -232,5 +233,33 @@ describe("inferScopeFromSubject (saved listing address / market area -> scope)",
     expect(inferScopeFromSubject()).toEqual({});
     expect(inferScopeFromSubject("  ", "")).toEqual({});
     expect(inferScopeFromSubject(null, null)).toEqual({});
+  });
+});
+describe("inferScopeFromSubject — EXHAUSTIVE: every ZIP in the USPS map resolves (no lucky samples)", () => {
+  it("an address carrying any covered ZIP resolves to that ZIP + a named place", () => {
+    const failures: string[] = [];
+    for (const [zip, city] of allZipCityEntries()) {
+      const s = inferScopeFromSubject(`123 Main St, ${city}, FL ${zip}`);
+      if (s.zip !== zip || !s.place) failures.push(`${zip} (${city}) -> ${JSON.stringify(s)}`);
+    }
+    expect(failures).toEqual([]);
+  });
+});
+
+describe("inferScopeFromSubject — name-only addresses (no ZIP written)", () => {
+  it("resolves the Lee communities by name: Fort Myers, North Fort Myers, Lehigh Acres, Estero", () => {
+    expect(inferScopeFromSubject("123 Main St, Fort Myers").place).toBe("Fort Myers");
+    expect(inferScopeFromSubject("123 Main St, North Fort Myers").place).toBe("North Fort Myers");
+    expect(inferScopeFromSubject("123 Oak Ln, Lehigh Acres").place).toBe("Lehigh Acres");
+    expect(inferScopeFromSubject("456 Corkscrew Rd, Estero").place).toBe("Estero");
+  });
+
+  it("REGRESSION: North Fort Myers must never be mislabeled as Fort Myers", () => {
+    // Before the North Fort Myers crosswalk entry, the whole-word scan matched the
+    // shorter "fort myers" needle inside "north fort myers".
+    expect(inferScopeFromSubject("77 Pine Island Rd, North Fort Myers").place).toBe(
+      "North Fort Myers",
+    );
+    expect(inferScopeFromSubject("77 Pine Island Rd, N Fort Myers").place).toBe("North Fort Myers");
   });
 });

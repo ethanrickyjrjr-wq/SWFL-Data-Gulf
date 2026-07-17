@@ -39,6 +39,17 @@
       "note": "City of Fort Myers spans many ZIPs; 33901 is the central/downtown core and the primary reference."
     },
     {
+      "place": "North Fort Myers",
+      "aliases": ["n fort myers", "north ft myers", "n ft myers"],
+      "zip": "33903",
+      "alt_zips": ["33917", "33918"],
+      "county": "lee",
+      "usps_preferred_city": "North Fort Myers",
+      "source": "USPS ZIP Code Lookup (tools.usps.com)",
+      "needs_verification": true,
+      "note": "Added 07/16/2026. Mail-city assignment mirrors lib/swfl-zip-city.ts (USPS preferred names, same source of record) and was cross-checked live against GeoNames (zippopotam.us: 33903/33917/33918 all -> North Fort Myers, FL); flagged needs_verification until the next direct tools.usps.com re-check. Without this entry the whole-word place scan mislabeled name-only North Fort Myers text as Fort Myers."
+    },
+    {
       "place": "Cape Coral",
       "aliases": ["cape"],
       "zip": "33904",

@@ -351,13 +351,28 @@ describe("subject-address / subject-area scope fallback (listing_scope_not_in_di
     expect(d.scope.place).toBe("Cape Coral");
   });
 
-  it("filed items OUTRANK the subject (items are what the project holds)", () => {
-    // items say Fort Myers Beach 33931; subject says Cape Coral
+  it("the saved ADDRESS outranks filed items (operator ruling 07/16/2026 — the address is the project's identity)", () => {
+    // items say Fort Myers Beach 33931; the listing address says Cape Coral 33991
     const d = buildProjectDigest(
       input({ subjectAddress: "2006 SW 15th Ave, Cape Coral, FL 33991" }),
     );
+    expect(d.scope.zip).toBe("33991");
+    expect(d.scope.place).toBe("Cape Coral");
+    // topic still comes from the filed items (topics live in data, not addresses)
+    expect(d.scope.topic).toBe("Flood");
+  });
+
+  it("the market AREA does NOT outrank filed items (area is the weakest explicit signal)", () => {
+    // items say Fort Myers Beach 33931; the remembered area says Cape Coral
+    const d = buildProjectDigest(input({ subjectArea: "Cape Coral" }));
     expect(d.scope.zip).toBe("33931");
     expect(d.scope.place).toBe("Fort Myers Beach");
+  });
+
+  it("zip and place always travel as a pair from ONE source — an address without a ZIP never borrows another city's item ZIP", () => {
+    const d = buildProjectDigest(input({ subjectAddress: "123 Main St, Cape Coral" }));
+    expect(d.scope.place).toBe("Cape Coral");
+    expect(d.scope.zip).toBeUndefined(); // NOT 33931 from the FMB item
   });
 
   it("subject OUTRANKS the schedule fallback (the subject is what the project IS)", () => {
