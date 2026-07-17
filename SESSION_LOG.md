@@ -1,3 +1,19 @@
+## 2026-07-16 (Fable 5 · main) — housing staleness root-caused: process-green/data-stale blind spot + decreed rebuild
+
+Operator: "period beginning 03/01/2026 in a July email — HOW DO WE NOT KNOW THIS IS GOING ON?"
+Root cause is structural, verified live: every freshness monitor measures PROCESS recency, none
+measures served DATA vintage. (1) redfin-monthly ran green 06/15 + 07/15 — tripwire checks the job
+ran, not whether the newest period in the rows advanced; (2) housing-swfl ttl_seconds = 35 DAYS on
+a 30-day source — rebuilt 06/29, daily cron skips it until ~08/03, so the 07/15 Redfin data sits
+unused in the lake; no lake→leaf staleness trigger exists (masterIsStaleVsUpstreams covers only
+master-vs-brains); (3) no vintage lint at serve/send — live api/b/housing-swfl confirmed serving
+"at 03/01/2026" (freshness 06/29). Bonus display bug: window label shows period_begin (START of the
+90-day window) — reads 90 days staler than the data even when fresh. Actions: operator-approved
+decreed dispatch housing-swfl (run 29549622565, acceptance entry in tripwire-accepted.json this
+commit); master no-force propagation next after leaf lands. Check opened:
+data_vintage_tripwire_missing (the class fix — vintage tripwire vs cadence_registry, TTL≤cadence
+or lake→leaf trigger, label range/end). Next: verify served window advances to ~04/01 post-rebuild.
+
 ## 2026-07-16 (Fable 5 · main) — FOOTER LAST EVERYWHERE (operator decree) + $0 hero pipeline fixed + dead-tabs root cause
 
 Operator screenshot (21:02): a built lots email rendered the agent card AND the ZIP chart BELOW the

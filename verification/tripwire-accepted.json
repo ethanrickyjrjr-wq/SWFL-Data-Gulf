@@ -100,6 +100,12 @@
       "pack": "env-swfl",
       "accepted_on": "07/15/2026",
       "note": "Retry: first attempt (29392067403) degraded with a transient timeout (written: false, still serving 07/03 stale content) — re-attempting to actually pick up the repopulated FEMA data + scope fix (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29549622565",
+      "pack": "housing-swfl",
+      "accepted_on": "07/16/2026",
+      "note": "operator-approved 07/16: pick up 07/15 Redfin ingest — live brain serving 03/01/2026 window, TTL not due until 08/03 (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
