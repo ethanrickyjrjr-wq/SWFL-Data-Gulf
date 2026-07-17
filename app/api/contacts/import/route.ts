@@ -6,6 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { parseContactsCsv } from "@/lib/email/parse-contacts-csv";
 import { parseVcards } from "@/lib/contacts/parse-vcard";
+import { upsertCanonicalContacts } from "@/lib/contacts/upsert";
 import type { ContactRow, ImportResult } from "@/lib/contacts/types";
 
 export const runtime = "nodejs";
@@ -64,18 +65,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
   }
 
-  for (let i = 0; i < rows.length; i += 100) {
-    const batch = rows.slice(i, i + 100).map((r) => ({ ...r, user_id: user.id }));
-    const { data, error } = await supabase
-      .from("contacts")
-      .upsert(batch, { onConflict: "user_id,email" })
-      .select("id");
-    if (error) {
-      return NextResponse.json({ error: "import failed", detail: error.message }, { status: 500 });
-    }
-    // Supabase upsert doesn't distinguish insert vs update — count all as added.
-    result.added += data?.length ?? 0;
+  const { added, error } = await upsertCanonicalContacts(supabase, user.id, rows);
+  if (error) {
+    return NextResponse.json({ error: "import failed", detail: error }, { status: 500 });
   }
+  result.added = added;
 
   return NextResponse.json(result);
 }

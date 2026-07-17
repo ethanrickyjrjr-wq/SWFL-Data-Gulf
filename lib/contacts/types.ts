@@ -20,6 +20,12 @@ export interface ContactRow {
   phone: string | null;
   tags: string[];
   attribs: Record<string, string>;
+  /**
+   * Optional opt-out signal from the source (e.g. a competitor platform's
+   * unsubscribe list). ONE-WAY: `true` may be written; `false`/undefined
+   * must never overwrite an existing opt-out — see lib/contacts/upsert.ts.
+   */
+  unsubscribed?: boolean;
 }
 
 export interface ImportResult {
