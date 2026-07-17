@@ -112,6 +112,12 @@
       "pack": "housing-swfl",
       "accepted_on": "07/17/2026",
       "note": "operator-approved retarget verify: redfin_data_center feed landed (Apr-Jun window, 10072 rows), rebuild to serve it (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29555048801",
+      "pack": "housing-swfl",
+      "accepted_on": "07/17/2026",
+      "note": "operator-approved final: retarget + data-through label on origin, rebuild to serve Apr-Jun window live (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
