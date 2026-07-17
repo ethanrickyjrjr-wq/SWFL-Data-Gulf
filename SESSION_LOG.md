@@ -1,3 +1,24 @@
+## 2026-07-17 (Sonnet 5 · main) — chief-of-staff-nightly: 2-night-running brief rejection, real root cause found + fixed
+
+Operator asked "where is the morning brief" — none had posted since 07/15; the last two nightly
+runs (07/16, 07/17) both failed lint with "cited SHA not in evidence pack" (`cafc1aca`, `63c4b001`).
+A prior `@claude`-mention run on the 07/16 issue had already "diagnosed + fixed" this — but I
+verified its diagnosis was itself wrong: it claimed `cafc1aca` was a real commit the model correctly
+cited from outside the 48h evidence window (lint too strict), without actually checking. I checked —
+via `git cat-file -e` after a full fetch AND `gh api repos/.../commits/<sha>` — and neither `cafc1aca`
+nor tonight's `63c4b001` exists anywhere in the repo, on any branch, or in GitHub's index. Both nights
+the Sonnet-4.6 reconciler agent is genuinely fabricating hex strings that look like SHAs instead of
+copying real ones from evidence.json — the lint (`chief-of-staff-lib.mjs` candidate regex + pack
+membership check) is correctly doing its job both times, RULE 0.7 working as designed. Separately,
+that prior bot's (wrong) fix never shipped anyway — it committed locally to
+`claude/issue-126-20260716-1408` inside the GHA runner's checkout but never pushed (blocked by a
+required "CI / build" ruleset on `claude/**` branches), so the branch never reached GitHub and was
+destroyed with the runner. Real fix: tightened the reconciler prompt in
+`.github/workflows/chief-of-staff-nightly.yml` — explicit SHA-discipline instruction requiring every
+candidate SHA be copied verbatim from evidence.json's `commits[].sha`, never reconstructed from
+memory of a `git log`/`show`/`diff` the agent ran itself; matches found outside the 48h pack go to
+prose or "No evidence," never onto a candidate line. Next nightly run (~08:47 UTC) is the live test.
+
 ## 2026-07-17 (Sonnet 5 · main) — buyer/seller agent-augmentation landscape research (168 ranked findings, Workflow fan-out)
 
 Operator asked for a 2-lane fan-out (SteadyAPI/Reddit social listening + crawl4ai/web) researching
