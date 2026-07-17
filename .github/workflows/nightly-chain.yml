@@ -123,10 +123,13 @@ jobs:
       - name: Assert every nightly source landed today (UTC)
         env:
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
-        # SHIP REPORT-ONLY FIRST (spec §15 step 6): --dry-run always exits 0, so
-        # the gate NAMES what would have blocked without blocking. Remove the flag
-        # only after a week of clean nightly reports — that is Task 7's precondition.
-        run: python -m ingest.scripts.assert_landed --dry-run
+        # ARMED 07/17/2026: --dry-run dropped. The gate now RED-s the chain (exit 1
+        # -> rebuild is SKIPPED) whenever any nightly source is STALE / LOW_ROWS /
+        # UNRESOLVED — a zero-row night can no longer feed a green rebuild.
+        # Precondition met: 5 consecutive clean nightly reports 07/13..07/17, all 4
+        # sources LANDED every night — INCLUDING 07/13 & 07/15 when the chain red-ed
+        # downstream (rebuild/parity), which proves the gate itself never false-fired.
+        run: python -m ingest.scripts.assert_landed
 
   # ── T3: rebuild ───────────────────────────────────────────────────────────
   rebuild:

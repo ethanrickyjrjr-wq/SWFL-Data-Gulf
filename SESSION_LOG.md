@@ -1,3 +1,15 @@
+## 2026-07-17 (Opus 4.8 · main) — armed the nightly row gate (dropped --dry-run from assert_landed)
+
+The nightly chain's row gate (`ingest/scripts/assert_landed`) had run `--dry-run` since the 07/12 cron
+cutover — report-only, always exits 0, so it NAMED a stale/zero-row source but never actually blocked
+the rebuild. A green chain did not certify rows landed. Verified the gate's own report was clean 5
+nights running (07/13–07/17, all 4 nightly sources LANDED every night, INCLUDING 07/13 & 07/15 when the
+chain red-ed downstream — proving the gate never false-fired), then removed `--dry-run` from
+nightly-chain.yml's row-gate step. From tonight, any STALE / LOW_ROWS / UNRESOLVED source exits 1 and
+SKIPS the rebuild instead of rebuilding on stale data. Armed at 5 clean nights rather than the literal
+7 the comment asked for — 5 including 2 chain-red nights is stronger signal than 7 quiet ones. Closes
+check row_gate_flip_blocking.
+
 ## 2026-07-17 (Sonnet 5 · main) — reconciled seller-stress readers to one authority + Phase 5 design (market snapshot + sell-now-vs-wait spread)
 
 Landed mid-session next to a parallel session's Back on Market Phase 1 ship: found two readers of
