@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.redirect(new URL("/login?next=/contacts/upload", req.url));
+    return finish(NextResponse.redirect(new URL("/login?next=/contacts/upload", req.url)));
   }
 
   const fail = (reason: string) =>
@@ -65,13 +65,20 @@ export async function GET(req: NextRequest) {
   }
 
   const { added, error } = await upsertCanonicalContacts(supabase, user.id, rows);
-  if (error) {
+  // upsertCanonicalContacts commits its 100-row batches sequentially and
+  // stops on the FIRST error (lib/contacts/upsert.ts) — so a later-batch
+  // failure still leaves `added` real, already-committed rows in the DB.
+  // Only a total, nothing-landed failure is the pure "import failed" path;
+  // any partial success must still be reflected (and still eligible for
+  // pass activation) rather than silently discarded.
+  if (error && added === 0) {
     return finish(fail("import"));
   }
 
-  // The import already committed — a pass-activation problem (including
-  // createServiceRoleClient() throwing on missing env) must degrade to
-  // pass=0, never turn a successful import into a 500.
+  // The import already committed `added` rows — a pass-activation problem
+  // (including createServiceRoleClient() throwing on missing env) must
+  // degrade to pass=0, never turn a successful or partially-successful
+  // import into a 500.
   let passActivated = false;
   try {
     const passResult = await activateSwitchPass(createServiceRoleClient(), user.id, {
@@ -88,6 +95,7 @@ export async function GET(req: NextRequest) {
   url.searchParams.set("source", "mailchimp");
   url.searchParams.set("imported", String(added));
   url.searchParams.set("pass", passActivated ? "1" : "0");
+  if (error) url.searchParams.set("partial", "1");
   return finish(NextResponse.redirect(url));
 }
 

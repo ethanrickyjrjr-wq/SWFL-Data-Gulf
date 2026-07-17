@@ -44,6 +44,7 @@
  * the Fundamentals guide, not a field Mailchimp hands back. Built accordingly.
  */
 import type { ContactRow } from "@/lib/contacts/types";
+import { isValidEmail } from "@/lib/email/validation";
 
 const MAILCHIMP_AUTH_ENDPOINT = "https://login.mailchimp.com/oauth2/authorize";
 const MAILCHIMP_TOKEN_ENDPOINT = "https://login.mailchimp.com/oauth2/token";
@@ -231,8 +232,13 @@ export async function fetchAllMembers(accessToken: string, dc: string): Promise<
  * Pure Mailchimp member → ContactRow mapper. Network-free so it unit-tests in
  * isolation (the OAuth dance and the actual list/member fetches live above).
  *
- * A member missing/blank `email_address` is skipped — there's nothing to
- * write. `status !== "subscribed"` sets `unsubscribed: true`; a genuinely
+ * A member missing/blank `email_address`, or one that fails `isValidEmail`
+ * (lib/email/validation.ts — the same RFC-lite shape check + 254-char cap the
+ * subscribe/waitlist routes use), is skipped — there's nothing valid to
+ * write. `upsertCanonicalContacts` itself does NOT validate email shape (only
+ * the legacy Google path validates, via `upsert-contacts.ts`), so this
+ * connector must — a canonical write path must never trust an unvalidated
+ * upstream shape. `status !== "subscribed"` sets `unsubscribed: true`; a genuinely
  * subscribed member OMITS the key entirely (upsertCanonicalContacts's
  * one-way rule requires this — see lib/contacts/upsert.ts).
  *
@@ -259,7 +265,7 @@ export function mailchimpMembersToContactRows(members: MailchimpMember[]): Conta
   const byEmail = new Map<string, ContactRow>();
   for (const m of members ?? []) {
     const email = (m.email_address ?? "").trim();
-    if (!email) continue;
+    if (!email || !isValidEmail(email)) continue;
     const key = email;
 
     const fname =

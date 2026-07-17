@@ -72,6 +72,11 @@ describe("mailchimpMembersToContactRows", () => {
     expect(rows).toHaveLength(0);
   });
 
+  test("malformed email_address (fails isValidEmail) is skipped", () => {
+    const rows = mailchimpMembersToContactRows([member({ email_address: "not-an-email" })]);
+    expect(rows).toHaveLength(0);
+  });
+
   test("empty input returns empty output", () => {
     expect(mailchimpMembersToContactRows([])).toEqual([]);
   });
