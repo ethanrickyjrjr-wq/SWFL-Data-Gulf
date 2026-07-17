@@ -70,6 +70,24 @@ lint.mjs now rejects that shape (exit 1) and still correctly expands a well-form
 stays live with the unexpanded refs — it self-supersedes on the next successful run (existing
 "Post brief" step logic), operator can also close it manually. Not yet pushed — flagging for operator
 go-ahead given this is the second live-discovered bug in the same automation today.
+## 2026-07-17 (Sonnet 5 · main · wt/bls-ppi-consumer) — bls-ppi consumer BUILT: all 4 tasks complete, verified, ready to land
+
+Executed the 4-task plan via `superpowers:subagent-driven-development` — opus implementer per task,
+isolated in worktree `bp-bls-ppi-consumer` (EnterWorktree for real Edit-tool access, per
+`feedback_subagent-dev-in-worktree-edit-friction`), controller (not a separate reviewer subagent)
+independently re-ran every gate after each task, advisor() consulted after each. 3 commits:
+`02f2cc57` (ingest broadened 2→12 series + cadence_registry), `cf4eda1c` (new
+`refinery/sources/bls-ppi-source.mts` Tier-1 DuckDB connector, 8/8 tests), `b13a7b1a` (cre-swfl
+wiring: 8 new construction-cost key_metrics + tests + vocab, one commit per Gate 2/5 constraint).
+Full verification: `bun test` 7685/7688 pass — the 3 failures (rules-of-engagement.test.mts vs
+CLAUDE.md drift, place-from-prompt North-Fort-Myers zip match, pdf-html-visual-parity ratio) touch
+none of the 9 files this build changed, confirmed pre-existing and unrelated. `check-vocab-coverage
+--all` OK, all 8 new slugs cross-verified 2× each (raw_slugs + slug_index) against
+`BLS_PPI_METRIC_MAP`. `python -m pytest ingest/tests/pipelines/bls_ppi/` 2 passed 1 skipped.
+Whole-branch diff read fresh-eyes: exactly the planned 9 files, no scope creep. 236222 (school)
+stays ingested-but-unconsumed on purpose (check `bls_ppi_school_series_no_consumer` open). Not yet
+landed to main or pushed — awaiting operator approval. Plan:
+`docs/superpowers/plans/2026-07-17-bls-ppi-cre-swfl-consumer.md`.
 
 ## 2026-07-17 (Sonnet 5 · main) — bls-ppi implementation plan written (4 tasks, ready to execute)
 
