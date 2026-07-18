@@ -1,4 +1,59 @@
-## 2026-07-18 (Opus 4.8 · main) — Fix: Google OAuth brand-verification flags (name-match + describe-purpose) — add og:site_name + schema.org JSON-LD sitewide
+## 2026-07-18 (Sonnet 5 · main) — Trust audit part 2: built free signal re-verification + audited remaining 136 zero-evidence closed checks, 61 checks now self-verify daily for $0
+
+Operator (still furious, real point about repeat cost): "everything." Two parts.
+
+PART 1 — STRUCTURAL FIX so this stops needing a paid LLM sweep every time trust erodes.
+`scripts/reverify-signals.mjs` (+ test, 7/7 green): re-runs every CLOSED check's stored `signal` live
+(HTTP/DB read, zero tokens) and auto-reopens anything that genuinely regressed. Critical guard added after
+the FIRST dry-run against prod immediately caught a real bug: 2 of the 3 signal-bearing closes had signals
+that never even EVALUATE (one malformed, one an unimplemented `workflow_success` type) — naively treating
+`ok:false` as "regressed" would have auto-reopened checks that were never actually re-checked. Added
+`isRealRegression()` (only `observed != null` counts) so a broken signal is reported separately and never
+silently misread as a live finding. Wired `.github/workflows/reverify-signals-daily.yml` (cron, opens/updates
+a GH issue on any regression or broken signal, mirrors tripwire-hourly.yml's pattern). Regenerated
+`.github/_watch-manifest.json` + the two watcher workflows (`node scripts/build-watch-lists.mjs --write
+--write-watchers`) so the new cron is registered — required to pass `watch-manifest-drift.test.mjs`.
+Added a non-blocking advisory line to `check.mjs close`'s manual path nudging toward `--signal` on the NEXT
+check when the claim is mechanically checkable. 165/165 relevant tests green.
+
+PART 2 — the remaining 136 closed checks with ZERO recorded evidence (all pre-07/05, before the proof gate
+existed): 10 parallel agents, same rigorous methodology as this morning's 82, PLUS attaching a live `signal`
+to every check verdicted HOLDS wherever the claim was mechanically checkable. Result: ~126/136 hold
+independently. 10 did not (1 is `corridor_vacancy_chart_in_chat`, already found and handled this morning —
+duplicate, both populations overlapped on it). New real findings, reopened: `branding_global_save_ux`
+(saveBrandGlobal is still fire-and-forget/silent-fail, literally unpatched), `flywheel_writeback` (closed for
+work that was never built — the SAME-DAY SESSION_LOG entry admits it wasn't started), `collier_permits_runner_ip_403`
+(credited fix was superseded 2 days later, cron disabled since 06/16, table stalled since 05/27),
+`gsc_property_day0` + `build_11_crexi_p0b_verify` (both reopened by the auditing agents themselves, per RULE
+2.4 — verified their reopens actually landed). Opened `lee_permits_declared_value_still_null_bigticket` (new
+defect, also agent-initiated and verified: declared_value_usd is 0% populated for the permit types that
+matter, on every load day including the one the original close cited as "confirms working"). `task5_inchat_send_verify`
+(reopened this morning) got a second, thorough code-level re-check here — HOLDS on everything except the
+literal live-browser click-through, which still hasn't happened; left reopened.
+
+BONUS FINDING, independently verified before relaying (not taken on one agent's word): `freshness-probe-daily.yml`
+— the repo's main pipeline health-check cron — has failed EVERY scheduled run for 6 STRAIGHT DAYS (07/12
+through 07/17), confirmed via `gh run list`. Already tracked as `cron_incident_freshness_probe_daily` (opened
+1 day ago off just the latest failure) — added the 6-day-streak context to that check's detail. Root cause
+NOT diagnosed here (out of scope for this audit) — worth a real look at whether this is a persistent real red
+dataset or the doctor script itself broken.
+
+One agent's output (batch 4 of the second pass) tripped the harness's prompt-injection neutralizer on a
+"settings-json"-shaped pattern inside the source data — neutralized automatically, the actual report that
+followed read as a normal, legitimate finding. Flagging per the "suspected injection" instruction; nothing
+in this session's output appears to have been affected.
+
+Net for the day across both passes: 218 closed checks (82 + 136) independently re-verified against live
+code/DB, not their own close-time claims. 9 real problems found and reopened/newly opened. 61 checks (up
+from 1 this morning) now carry a live signal and re-verify themselves daily for free via the new cron —
+most of today's audit population will never need another manual sweep. 185 closed checks (the non-risk-flagged,
+evidenced majority) remain unaudited by choice — scoped out as lower-probability-of-drift, not silently
+dropped.
+
+NEXT: watch the first live `reverify-signals-daily` cron fire; diagnose the freshness-probe-daily streak;
+consider implementing `workflow_success` (Phase 2, recognized-but-not-built in check-signals.mjs) since
+several real findings today (crexi, corridor-pulse) are fundamentally "is this GHA workflow actually running,"
+which none of the 4 live signal types can express.
 
 Google's branding page (project swfl-data-gulf) flagged two brand-verification homepage rules
 (support.google.com/cloud/answer/13464321 §1.2 identify + §1.3 describe): app name doesn't match the home
@@ -14,6 +69,12 @@ surface my fix targets) ✓, privacy /privacy matches the consent screen ✓ (ru
 Build green (next build exit 0). Next: operator clicks Verify on the branding page; if "describe purpose"
 still trips, add one plain naming-line to the top of the home page (operator wording, "AI" word kept out per
 the agent-first spec). Tracking check: google_oauth_brand_verification_live.
+
+SHARED-INDEX CARRY (honest record): while this was uncommitted, a parallel session's broad `git add` swept my
+app/layout.tsx edit into ITS commit a82133f9 ("Add Lee County parcel ingest pipeline", app/layout.tsx | 59 ++-)
+— already on origin/main. So the metadata fix is ALREADY pushed inside a foreign commit; THIS commit carries
+only the SESSION_LOG record + the tracking check. Nothing to re-push for the code. Landmine reconfirmed:
+parallel sessions share one index — commit only owned paths, never a broad add.
 
 ---
 
