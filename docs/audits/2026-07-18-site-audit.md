@@ -2,7 +2,7 @@
 
 Fan-out audit of the whole site + emails + answer engine. Static fan-out — 2 rounds, 30 slices total, Sonnet find → adversarial verify — plus a live-probe track (per-ZIP answers vs lake ground truth + AI-honesty red-team).
 
-**89 verified problems** after dedup. Track A (static): 84 confirmed / 1 rejected by the adversarial verifier (53 round 1, 31 round 2). Track B (live-probe): 8.
+**89 findings** after dedup — read this as a *machine-found backlog*, not a hand-verified list. Track A (static): 84 confirmed / **only 1 rejected** by the adversarial verifier (53 round 1, 31 round 2). That low reject rate means the verify pass rubber-stamped more than it refuted, so treat every static finding as a **candidate pending human triage**, not a proven defect. Track B (live-probe, 8) is different: each was checked by hand against the live serve + lake ground truth. The **5 criticals were additionally human-read at the source and all hold** (with severity nuances noted). Net: live-probe + criticals are the most defensible; the dead-code / design tail is the softest.
 
 By severity: 5 critical · 35 high · 33 medium · 16 low
 
