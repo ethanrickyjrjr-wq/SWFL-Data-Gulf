@@ -141,7 +141,16 @@ export async function logApiUsage(opts: LogApiUsageOpts): Promise<void> {
       cache_creation_tokens: opts.usage.cache_creation_input_tokens ?? 0,
       cost_usd: computeCostUsd(opts.model, opts.usage, { batch: opts.batch ?? false }),
       env:
-        process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production"
+        process.env.VERCEL_ENV === "production" ||
+        process.env.NODE_ENV === "production" ||
+        // GitHub Actions runs (crons: daily-rebuild, build-example-deliverables,
+        // narrative-bake, factuality-gate, …) are automated PRODUCT infra, not a
+        // dev laptop — GHA always sets GITHUB_ACTIONS=true. Without this they fall
+        // through to "development" and get mis-filed as dev-session noise on
+        // /spend (e.g. the example-deliverables cron logged ~$0.21/day as "dev").
+        // Safe re: spend caps — sum_api_spend() sums cost_usd by created_at with
+        // no env filter, so the label never changes what counts against the cap.
+        process.env.GITHUB_ACTIONS === "true"
           ? "production"
           : "development",
     });

@@ -1,3 +1,21 @@
+## 2026-07-18 (Opus 4.8 · main) — Spend hygiene: relabel GHA API calls as production + kill the daily example-deliverables cron
+
+Audited `api_usage_log` (trailing 7d: $21.08 / 1,222 calls) after the API console cache page read ~0%. Two
+real findings: (1) prompt-cache reads are ~1.2% and come ENTIRELY from `email_build` — every other call
+site is either below Anthropic's per-model token floor (Haiku 4,096 / Sonnet) or writes a cache that expires
+before reuse, so 0% is the correct steady state, not a regression ([[prompt-caching-model-floors]]).
+Caching is a near-zero lever for this workload — the expensive input is per-run data, which is uncacheable.
+(2) 61% of spend logged as `env="development"` was actually GHA product crons: no workflow sets NODE_ENV, so
+every scheduled TypeScript refinery call fell through to "development" and got mis-filed as dev-session noise
+on /spend. Fix: `refinery/agents/anthropic.mts` now tags `env="production"` when `GITHUB_ACTIONS=true` (chose
+the CI flag over flipping NODE_ENV to avoid any app-behavior change). Safe re: spend caps — `sum_api_spend()`
+sums `cost_usd` by `created_at` with no env filter, so the label never changes what counts against the cap;
+verified 34/34 (`anthropic.test.mts` + `spend-guard.test.mts`). Also disabled the daily 08:23-UTC
+`build-example-deliverables` cron (~$0.21/day drip on the showcase examples; kept `workflow_dispatch` for
+manual rebuilds, one-uncomment-away revert) per operator. Staged only these two files — a parallel session
+holds the cre-figures-corroboration spec/plan. NEXT: local pack iteration now runs mocked per the new "real
+spend only on final serve" rule.
+
 ## 2026-07-18 (Opus 4.8 · main) — cre-swfl v62 rebuilt (grain fix live in repo) + master propagation dispatched
 
 Run 29622523421 succeeded: `[stage 4] wrote brains/cre-swfl.md (version 62)` (source=live), committed to the

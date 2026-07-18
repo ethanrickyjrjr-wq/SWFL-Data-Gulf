@@ -1,12 +1,16 @@
 name: Rebuild Example Deliverables
 
 on:
-  schedule:
-    # 08:23 UTC daily — after the 04:23 Daily Brain Rebuild refreshes brains/*.md
-    # (even with observed multi-hour schedule drift), so the examples carry the
-    # current freshness_token (matching live /r/*). :23 = off the top-of-hour
-    # congestion (GitHub schedule delays peak at :00).
-    - cron: "23 8 * * *"
+  # CRON DISABLED 07/18/2026 (operator: "don't need daily rebuilds on something
+  # that doesn't even work"). The daily rebuild spent ~$0.21/day keeping the
+  # showcase examples' freshness_token current; examples now rebuild on manual
+  # dispatch only. Reverting the daily clock is one uncomment away.
+  # schedule:
+  #   # 08:23 UTC daily — after the 04:23 Daily Brain Rebuild refreshes brains/*.md
+  #   # (even with observed multi-hour schedule drift), so the examples carry the
+  #   # current freshness_token (matching live /r/*). :23 = off the top-of-hour
+  #   # congestion (GitHub schedule delays peak at :00).
+  #   - cron: "23 8 * * *"
   workflow_dispatch:
 
 # Serialize so a manual dispatch can't race a scheduled run's upserts.
