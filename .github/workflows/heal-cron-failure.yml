@@ -56,7 +56,6 @@ on:
       - "Pipeline freshness probe (daily)"
       - "Project-feed change detection (daily)"
       - "RSW Airport monthly"
-      - "Rebuild Example Deliverables"
       - "Redfin Collier market monthly"
       - "Redfin Contract Cancellations Tier 1 monthly"
       - "Redfin Delistings & Relistings Tier 1 monthly"

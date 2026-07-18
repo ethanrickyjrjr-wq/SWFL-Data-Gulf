@@ -1,3 +1,30 @@
+## 2026-07-18 (Opus 4.8 · main) — Zombie-cron reconciliation: 3 re-enabled (confirmed safe), 3 declared SHOULD_BE_DARK; manifest zombie-clean
+
+Resolved the CI-green handoff's zombie-cron item (check `zombie_crons_disabled_but_registry_expects_rows`).
+The four workflows it named split cleanly once I pulled LIVE gh state: **fgcu-reri, marketbeat-pdf, rsw-airport**
+are `active` again — re-enabled since the 07/17 handoff by an unattributed actor (state changed outside this
+session). Confirmed safe before accepting: grepped each pipeline + workflow for `web_search` → none; they're
+crawl4ai (fgcu/rsw) or quarterly Anthropic-PDF (marketbeat), so the check's "paid-search/cost pause" rationale
+never applied to them (it applies to the pulse crons). No revert. **dbpr-sirs + ingest-crexi** are both dark
+because their shared self-hosted `swfl-local` runner is OFFLINE (0 runners registered) — crexi's own header
+directs keeping it disabled while the runner is unregistered. Declared both in `SHOULD_BE_DARK`
+(`scripts/lib/watch-manifest.mjs`); also folded **daily-email-digest** (07/16 kill) in so its "never re-enable
+without Ricky" rule is now machine-enforced by `darkDrift`.
+
+Root of the stale picture: the 07/17 regen ran without `--with-state`, so it preserved prior (disabled) state
+and both hid the live re-enables and mis-flagged them as zombies. Re-ran `build-watch-lists.mjs --write
+--write-watchers --with-state`. Result: `zombieCrons`=0, `darkDrift`=0, node:test 143/0. Watcher lists dropped
+the now-unscheduled "Rebuild Example Deliverables" (a parallel 07/18 session commented its cron but staged only
+its own files). Opened `swfl_local_runner_offline_dark_sources` (re-provision the runner vs retire the two
+sources — operator decision); rescoped/closed the interim dbpr-sirs-only check.
+
+Bypass finding — NOT changed, surfaced for decision: `main`'s required `CI / build` check is bypassed by
+Ricky's own account (`ethanrickyjrjr-wq`, `mode=always`, via a ruleset — classic protection is off). That's
+load-bearing for direct-push-to-main: a fresh commit has no CI run yet, so the required check would REJECT the
+push without the bypass — it's the mechanism safe-push depends on, not a bug. The handoff's "stop bypassing"
+would force a PR flow. Left as-is; documented. NEXT: operator veto on the dbpr-sirs/crexi dark call + bypass
+posture, then close the zombie check post-push.
+
 ## 2026-07-18 (Opus 4.8 · main) — Spend hygiene: relabel GHA API calls as production + kill the daily example-deliverables cron
 
 Audited `api_usage_log` (trailing 7d: $21.08 / 1,222 calls) after the API console cache page read ~0%. Two

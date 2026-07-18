@@ -20,6 +20,15 @@ export const MANIFEST_PATH = ".github/_watch-manifest.json";
 export const SHOULD_BE_DARK = {
   "corridor-pulse-weekly.yml":
     "PAUSED 07/05/2026 (operator decree, ingest/CLAUDE.md): no paid model web_search on a schedule. crawl4ai retrofit first, re-enable second.",
+  // dbpr-sirs + crexi both run on the self-hosted `swfl-local` runner, which is OFFLINE
+  // (0 runners registered). Their schedules would queue against the missing runner and fail
+  // after 24h, so both are `disabled_manually` — a shared root, tracked in one check.
+  "dbpr-sirs-monthly.yml":
+    "TEMPORARILY DARK 07/18/2026: needs the offline self-hosted `swfl-local` runner (0 registered) — scheduled monthly SIRS pulls just queue and fail. Shared runner root: check `swfl_local_runner_offline_dark_sources`. darkDrift flags any re-enable (bring the runner up, then drop this entry).",
+  "ingest-crexi-listings.yml":
+    "TEMPORARILY DARK 07/18/2026: same offline `swfl-local` runner as dbpr-sirs — the workflow header itself directs keeping it disabled while the runner is unregistered (weekly cron would queue against a missing runner and fail after 24h). Shared runner root: check `swfl_local_runner_offline_dark_sources`. darkDrift flags any re-enable.",
+  "daily-email-digest.yml":
+    "KILLED 07/16/2026 (operator): disabled after crime news shipped in a send; the City Voices gate now drops crime/courts/disaster items. NEVER re-enable without Ricky — darkDrift makes any re-enable loud.",
 };
 
 // Scheduled workflows the two watchers deliberately do NOT watch.
