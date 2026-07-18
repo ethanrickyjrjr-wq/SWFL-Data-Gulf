@@ -935,6 +935,8 @@ pipelines:
     consuming_pack: properties-lee-value
     lane: tier-2
     cadence_days: null # dispatch-only by design — see workflow comment; not a standing cron
+    dispatch_only: true # lee-parcels-annual.yml has no cron on purpose (556k-parcel annual pull) —
+      # states the fact structurally so registry-identity's workflow_dark check doesn't RED it
     tolerance_multiplier: 1.5
     dlt_schema_name: lee_parcels
     expected_rows_min: null # first run in flight 07/18/2026 — set after live row count confirmed
