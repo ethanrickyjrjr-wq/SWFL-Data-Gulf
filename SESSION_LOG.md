@@ -1,3 +1,22 @@
+## 2026-07-18 (Opus 4.8 · main) — Fix: Google OAuth brand-verification flags (name-match + describe-purpose) — add og:site_name + schema.org JSON-LD sitewide
+
+Google's branding page (project swfl-data-gulf) flagged two brand-verification homepage rules
+(support.google.com/cloud/answer/13464321 §1.2 identify + §1.3 describe): app name doesn't match the home
+page, home page doesn't explain purpose. Root cause — probed the LIVE served HTML, not memory: the site
+emits ZERO og:site_name and ZERO structured data. "SWFL Data Gulf" is in the body 14× (header/footer/title)
+but NOT in the machine-readable slot Google's brand crawler reads first; the <h1> is "Type a place…" (no
+brand name), so the crawler can't confirm the page's app name = the consent-screen name. Fix (app/layout.tsx
+ONLY): added applicationName + openGraph (siteName "SWFL Data Gulf") + twitter + a WebApplication/Organization
+JSON-LD block carrying the already-committed approved title/description — NO hero rewrite, NO new copy, NO
+design change. Layout-level so it covers whichever route the console points at. Console fields confirmed via
+operator screenshots: app name "SWFL Data Gulf" ✓, home page https://www.swfldatagulf.com (root — matches the
+surface my fix targets) ✓, privacy /privacy matches the consent screen ✓ (rule #4 clear, no next-round trap).
+Build green (next build exit 0). Next: operator clicks Verify on the branding page; if "describe purpose"
+still trips, add one plain naming-line to the top of the home page (operator wording, "AI" word kept out per
+the agent-first spec). Tracking check: google_oauth_brand_verification_live.
+
+---
+
 ## 2026-07-18 (Opus 4.8 · main) — Fix: revert places-swfl "South Fort Myers" alias (unintended cre-swfl regression); scope stays local to the crosswalk
 
 Follow-up to 03e6373f. The `south fort myers → fort-myers` alias I added to the shared place resolver
