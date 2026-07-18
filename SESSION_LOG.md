@@ -1,3 +1,9 @@
+## 2026-07-18 (Opus 4.8 · main) — Dispatched cre-swfl rebuild to serve the Charlotte scope fix
+
+Operator-approved paid dispatch (run 29625071833) to serve the Lee/Collier core-scope gate on the CRE
+broker-survey emission (commit 68d3e987). After it completes: no-force `pack_id=master` propagate, then
+verify the served brain is Charlotte/Punta-Gorda-free and close `cre_charlotte_county_out_of_scope_live`.
+
 ## 2026-07-18 (Opus 4.8 · main) — Zombie-cron reconciliation: 3 re-enabled (confirmed safe), 3 declared SHOULD_BE_DARK; manifest zombie-clean
 
 Resolved the CI-green handoff's zombie-cron item (check `zombie_crons_disabled_but_registry_expects_rows`).
