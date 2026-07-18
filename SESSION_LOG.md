@@ -1,3 +1,32 @@
+## 2026-07-18 (Opus 4.8 · main) — DOM de-flooring: backfill vendor listed_date so "typical days on market" is REAL, not a thin recent-skewed cohort. Desk-safe by construction, proven with a canary.
+
+Operator asked to fix the DOM benchmark for market-heat + listing-momentum (resolves the
+`buyer_leverage_zip_dom_authority_audit`): benchmark a subject home's `dom_days` against a same-ruler
+own-data ZIP median, not realtor.com's monthly aggregate. Probing the lake surfaced the real blocker —
+of 29,538 active for-sale listings, only **5** carried a vendor `listed_date` and **5,892** had a
+non-floored (exact) DOM. `/search` never returns `list_date` (verified 07/07, `extract_api` line ~192);
+it lives only on per-property `/property-tax-history`, which we call only on departure. So ~80% of the
+active book anchored on `first_seen` = a censored FLOOR. "Typical DOM" over the non-floored cohort read
+~60d vs ~170 over the full book — biased low, overstating a buyer's leverage gap. De-flooring is the
+real fix.
+
+Built `ingest/pipelines/listing_lifecycle/backfill_listed_date.py` — one-time, resumable, ~1 req/s
+probe of `/property-tax-history` for every active list_date-less listing, oldest-first, writing ONLY
+`listed_date` via `distill.update_listed_date`. **Desk-safe by construction:** that primitive is a
+one-column `UPDATE … WHERE listed_date IS NULL` — zero `listing_transitions`, no `last_seen`/`scraped_at`
+bump, no insert (nothing reads as new), never through `diff_states`. Operator's hard constraint was "no
+24,000 changes on the /desk." **Canary (15 live probes) proved it:** transitions-today 416→416, new-
+listing-today 158→158 (both unchanged = invisible to the desk); non-floored active DOM 5,892→5,907;
+real DOMs surfaced on the oldest cohort (661, 302, 243, 186 days, `dom_is_floor=false`) that were hidden
+as ~21-day floors; 15/15 had a real vendor date (100% — quota, not dollars: weight-1 calls on the flat
+50k/mo sub). Full run (~29.5k, ~9h) launched in background after operator "go". Idempotent/self-
+liquidating (post-07/03 arrivals are fresh-observed, so no new floors accumulate) — no cron wrapper.
+
+Test: `test_backfill_listed_date.py` (pure `fold_updates` — takes only `listed_date`, ignores the sold
+classification, skips gaps/no-date so they stay floored + retry). Check `dom_backfill_listed_date_live_verify`.
+NEXT: land the benchmark itself — median DOM into `listing_momentum_stats` + the listing-momentum brain
+— once the book is de-floored so "typical here" renders true.
+
 ## 2026-07-18 (Sonnet 5 · main) — Fixed freshness-probe-daily's 6-day crash: one malformed registry entry was killing the ENTIRE daily health report, not just itself
 
 Operator: "fix why it's broke for 6 days." Diagnosed live, not from old GHA logs (those came back
