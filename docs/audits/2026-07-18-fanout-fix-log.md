@@ -20,18 +20,38 @@ after every lane finished.
   **30 flagged** — reproduced, but the correct fix was a genuine judgment call, so nothing was
   changed.
 
-## Verification performed on the aggregate diff (40 files)
+## Verification performed on the aggregate diff (42 files across two commits)
 
 - `bunx next build` — clean, no type/compile errors.
-- `bun test` on every existing test file covering a touched module (18 files, 126 tests) — 2
-  failures found on first run, both pre-existing tests pinned to the *old, buggy* output that the
-  fixes correctly changed (one expected the raw `env-swfl` brain slug to leak into a stream instead
-  of being scrubbed to its human label; one expected the year-less `"Jun 10"` as-of date instead of
-  `06/10/2026`). Updated both assertions to lock in the corrected behavior, re-ran — 126/126 pass.
+- First pass: `bun test` on every existing test file covering a touched module (18 files, 126
+  tests) — 2 failures, both pre-existing tests pinned to the *old, buggy* output that the fixes
+  correctly changed (raw `env-swfl` brain slug leaking into a stream instead of being scrubbed;
+  year-less `"Jun 10"` as-of date instead of `06/10/2026`). Updated both assertions, re-ran —
+  126/126 pass.
+- **Second pass — the full suite, not just the touched-module selection** (7877 tests / 768
+  files): surfaced 3 more failures the filename-matched selection couldn't catch, because they're
+  in shared/golden-fixture test files not named after any file the fan-out touched:
+  - `lib/email/render-golden.test.ts` (9 of 10 frozen golden `.html` fixtures) — the MM/DD/YYYY
+    date fix (#44) and the `$` prefix on currency deltas (#89) are real, correct output changes in
+    `grounded-report.ts`'s shared render path. Regenerated the goldens against current output;
+    diffed old vs. new to confirm **only** those two changes landed anywhere, nothing else drifted.
+  - `components/back-on-market/back-on-market-read.test.tsx` — was pinned to the raw
+    `03/01/2026` date that finding #64 replaced with a month label; updated to expect
+    `"March 2026"`.
+  - `lib/email/__tests__/recurring-report.test.ts` — same #44 date-format fix; updated
+    `"Jun 16"` → `"06/16/2026"`.
+  - `lib/deliverable/campaign-coherence.test.ts` intermittently failed (2 of its 10 tests) in the
+    full-suite run but passed clean in isolation both **before and after** this fix pass (verified
+    in an isolated git worktree at the pre-fix commit) — pre-existing flake under load, unrelated.
+  Full suite after these 3 fixes: **7877 tests, 0 fail** (the one known flake aside).
 - `bun refinery/tools/check-vocab-coverage.mts --all` — clean (two packs were touched:
   `housing-swfl.mts`, `catalog.mts`).
-- This is a compile + existing-test gate, not a claim that all 43 fixes are behaviorally perfect —
-  see the Opus pass for that.
+- This is a compile + test-suite gate, not a claim that all 43 fixes are behaviorally perfect in
+  every untested path — the API-route/security-sensitive ones (#38, #41, #49, #57, #62, #72, #75)
+  were additionally spot-checked by reading the actual diffs (not lane self-reports): #38's
+  per-platform `freezePost` call was confirmed pure (no id/side-effect risk from calling it N
+  times); #72's new 422 was confirmed to render a handled (if generically-worded) error in
+  `ContactPickerModal`, not an unhandled crash. See the Opus pass for the rest.
 
 ---
 
