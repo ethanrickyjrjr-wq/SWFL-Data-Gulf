@@ -106,6 +106,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/check-answer-fix-proof.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-no-env-exfil.mjs"
           }
         ]
       },
