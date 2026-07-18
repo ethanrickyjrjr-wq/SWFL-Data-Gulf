@@ -1,3 +1,24 @@
+## 2026-07-18 (Opus 4.8 · main) — Supabase advisor DB-hygiene pass: 31 RLS InitPlan rewrites + revoked anon EXECUTE on rls_auto_enable (applied to prod, mirrored to docs/sql, NOT pushed)
+
+Operator: "use the supabase mcp, you have read and write, fix what we need fixed." Ran the security +
+performance advisors and fixed the two genuinely-actionable, DB-native clusters (the 187 tracked
+`defect` checks are overwhelmingly code/pipeline, not SQL — surfaced, not touched here). (1) The 31
+`auth_rls_initplan` WARN findings: every owner RLS policy on the hot app tables (`projects`,
+`contacts`, `email_*`, `social_*`, `user_*`, etc.) re-evaluated `auth.uid()` once per row — wrapped
+each as `(select auth.uid())` so it evaluates once per query. Access semantics byte-identical (anon/
+NULL case unchanged); purely a planner win, fully reversible. (2) `public.rls_auto_enable()` — a
+SECURITY DEFINER *event-trigger* function — was anon/authenticated-callable over `/rest/v1/rpc`
+(advisor 0028/0029). Revoked EXECUTE from PUBLIC/anon/authenticated; event triggers fire system-side
+so auto-RLS still works, service_role keeps EXECUTE. Both applied via `apply_migration` and mirrored
+to `docs/sql/20260718_rls_initplan_and_revoke_anon_rls_auto_enable.sql`. Verified in-DB: 0 policies
+with an unwrapped `auth.*()` call remain; `has_function_privilege` = anon:false / authenticated:false
+/ service_role:true. Left alone deliberately (would change behavior or needs code): ~70
+`rls_enabled_no_policy` INFO (deny-all default, app reads via service_role), 11
+`function_search_path_mutable` WARN (per-function care — some reference `data_lake.*` unqualified),
+107 unused-index / 49 no-PK / 10 unindexed-FK INFO (mostly lake/staging), leaked-password toggle
+(auth dashboard, not SQL). Next-most-urgent tracked item is code, not SQL:
+`seller_stress_swfl_serving_stale_period` (priority 0, due today).
+
 ## 2026-07-18 (Opus 4.8 · main) — Site audit: fanned-out find→adversarial-verify sweep of the whole site + emails + answer engine; 89 verified problems → doc + 84 checks + 5 safe-win fixes (build+tests green, NOT pushed)
 
 Operator asked for a big, live-verified list of ways to make the built site better (find problems,
