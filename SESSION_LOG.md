@@ -84,6 +84,15 @@ Operator-approved paid dispatch (run 29625071833) to serve the Lee/Collier core-
 broker-survey emission (commit 68d3e987). After it completes: no-force `pack_id=master` propagate, then
 verify the served brain is Charlotte/Punta-Gorda-free and close `cre_charlotte_county_out_of_scope_live`.
 
+## 2026-07-18 (Opus 4.8 · main) — Scope-guard the market figure feed (pre-push Gate 8 debt surfaced by the sold-median wire)
+
+Touching `lib/email/market-context.ts` for the sold-median wire tripped the ZIP-scope pre-push gate — the
+file read ZIP-grain lake tables (ZHVI/ZORI/listings/census + the new market_details) without the scope
+root, a pre-existing debt the gate only checks on a touched file. Fixed properly, not waived: `loadMarketFigures`
+now guards the lake reads with `isCoreScope`/`isCoreCounty` — an out-of-scope ZIP (Sarasota/Charlotte/mailing)
+draws NO lake figures instead of leaking a county we don't cover, while the lane-3 web cache still fills any
+ZIP (four-lane intact). Verified: market-context 9/9, tsc clean, Gate 8 OK.
+
 ## 2026-07-18 (Opus 4.8 · main) — Wired the ZIP-grain SOLD figure (value → sold → list third point) from realtor.com
 
 Closed the wiring gap the `zip_sold_price_third_reference` check has tracked: `loadMarketFigures`

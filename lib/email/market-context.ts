@@ -14,6 +14,7 @@
 // KNOWN-DEBT(data_lake: market views (zhvi/zori/active listings/acs/redfin) live in the data_lake schema)
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { getSourcedFigures, type SourcedFigure } from "@/lib/figures/sourced";
+import { isCoreScope, isCoreCounty } from "@/refinery/lib/core-scope.mts";
 
 export interface MarketFigure {
   key: string;
@@ -358,10 +359,18 @@ export async function loadMarketFigures(scope?: {
   const figs: MarketFigure[] = [];
   try {
     if (scope.kind === "zip") {
-      const county = await zipFigures(db, scope.value, figs);
-      if (county) await countyFigures(db, county, figs);
+      // Scope root (isCoreScope) — the lake holds ZIP-grain data for out-of-scope
+      // counties (Sarasota/Charlotte/mailing ZIPs), so an ungated read WOULD surface a
+      // county we don't cover. Only the 57 Lee/Collier core ZIPs draw lake figures; any
+      // other ZIP draws none here (the lane-3 web cache below still applies — a found
+      // figure fills any ZIP, four-lane).
+      if (isCoreScope(scope.value)) {
+        const county = await zipFigures(db, scope.value, figs);
+        if (county) await countyFigures(db, county, figs);
+      }
     } else if (scope.kind === "county") {
-      await countyFigures(db, scope.value.replace(/\s*County$/i, "").trim(), figs);
+      const county = scope.value.replace(/\s*County$/i, "").trim();
+      if (isCoreCounty(county)) await countyFigures(db, county, figs);
     }
   } catch {
     /* degrade — return whatever we gathered */
