@@ -142,6 +142,12 @@
       "pack": "master",
       "accepted_on": "07/17/2026",
       "note": "Propagate cre-swfl v63 (Charlotte/Punta Gorda gated out of the broker-survey emission) into master's dossier. No-force TTL-respecting cascade. Operator-approved ('clean it up'). (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29628194082",
+      "pack": "seller-stress-swfl",
+      "accepted_on": "07/17/2026",
+      "note": "pick up 07-15 Redfin ingest, currently serving stale 03/01/2026 period (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }

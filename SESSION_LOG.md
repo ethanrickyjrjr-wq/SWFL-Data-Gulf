@@ -1,3 +1,21 @@
+## 2026-07-18 (Sonnet 5 · main) — Dispatched seller-stress-swfl rebuild: brain was serving a 03/01/2026 period while fresher Redfin data sat unused in the lake since 07-15
+
+Ricky flagged the Back on Market read showing "as of 03/01/2026" and asked why. Traced it: `seller-stress-swfl`
+(brains/seller-stress-swfl.md, refined_at 2026-07-12) computed `latestPeriod=2026-03-01` for its
+`seller_stress_by_zip` table (33908: cancellation_rate_pct=12.76). The three Redfin Tier-1 ingest crons
+(contract_cancellations/price_drops/delistings_relistings) ran clean on 2026-07-15 — three days AFTER that
+brain build — and landed period_begin=2026-04-01 (period_end 06/30/2026, Redfin's own last_updated 07/03/2026;
+33908 cancellation_rate_pct=13.57 there). So this wasn't inherent Redfin lag (real vendor lag is ~2-3 weeks
+period-end→publish, confirmed directly off the freshly-ingested parquet via `mcp__lake__query_lake`) — it was
+the brain not having rebuilt since before the fresher ingest landed. `lib/back-on-market/load-zip.ts`'s comment
+("~4 months lagged... not today") is now stale/misleading and needs correcting once the rebuild lands and the
+real current lag is confirmed.
+
+Opened `seller_stress_swfl_serving_stale_period` (defect). Dispatched targeted rebuild (run 29628194082):
+`OPERATOR_APPROVED_PAID_RUN=1 node scripts/dispatch-rebuild.mjs seller-stress-swfl --reason "pick up 07-15
+Redfin ingest, currently serving stale 03/01/2026 period"`. Next: verify the served brain flips to the newer
+period, confirm /r/back-on-market and /r/should-i-sell render it, fix the stale lag comment, close the check.
+
 ## 2026-07-18 (Opus 4.8 · main) — FL DOR "Assessment Roll Data Request" form fully reverse-engineered (crawl4ai)
 
 Research for `fldor_collier_nal_confirm_source` (records-request project — "pin the filing channel").
