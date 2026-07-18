@@ -9,10 +9,12 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 from ingest.scripts.check_freshness import (
+    _safe_cadence_days,
     check_odd_window_entry,
     check_tier1_entry,
     check_tier2_entry,
     load_registry,
+    run_probe,
 )
 
 _REGISTRY_PATH = os.path.join(
@@ -145,6 +147,103 @@ def test_tier1_missing_when_no_db_row():
     assert result["status"] == "MISSING"
     assert result["last_run"] is None
     assert result["age_days"] is None
+
+
+# ── cadence_days guard (07/18/2026 incident) ───────────────────────────────────
+# A mid-scaffold registry entry (lee_parcels) shipped with cadence_days: null.
+# int(None) crashed check_tier2_entry, which crashed run_probe's plain for-loop,
+# which crashed the ENTIRE daily probe — every other dataset's freshness went
+# unreported for 6 straight days, not just the one bad entry. Two layers now:
+# _safe_cadence_days makes the specific case graceful; run_probe's try/except is
+# the backstop for whatever the next unguarded field turns out to be.
+
+
+def test_safe_cadence_days_returns_int_for_a_valid_entry():
+    assert _safe_cadence_days({"cadence_days": 30}) == 30
+
+
+def test_safe_cadence_days_returns_None_for_missing_key():
+    assert _safe_cadence_days({}) is None
+
+
+def test_safe_cadence_days_returns_None_for_null_value():
+    """The literal shape of the incident: cadence_days present but None (YAML `null`)."""
+    assert _safe_cadence_days({"cadence_days": None}) is None
+
+
+def test_safe_cadence_days_returns_None_for_unparseable_value():
+    assert _safe_cadence_days({"cadence_days": "not-a-number"}) is None
+
+
+def test_tier1_entry_with_null_cadence_is_MISCONFIGURED_not_a_crash():
+    conn = _tier1_conn(date.today())
+    entry = {
+        "name": "wip_pipeline",
+        "lane": "tier-1",
+        "cadence_days": None,
+        "tolerance_multiplier": 2.0,
+        "inventory_id": "lake-tier1/wip/",
+        "inventory_key_type": "prefix",
+    }
+    result = check_tier1_entry(conn, entry)
+    assert result["status"] == "MISCONFIGURED"
+    assert result["name"] == "wip_pipeline"
+
+
+def test_tier2_entry_with_null_cadence_is_MISCONFIGURED_not_a_crash():
+    """The exact live crash: lee_parcels, lane=tier-2, cadence_days=None."""
+    conn = _tier2_conn(datetime.now(tz=timezone.utc))
+    entry = {
+        "name": "lee_parcels",
+        "lane": "tier-2",
+        "cadence_days": None,
+        "tolerance_multiplier": 1.5,
+        "dlt_schema_name": "lee_parcels",
+    }
+    result = check_tier2_entry(conn, entry)
+    assert result["status"] == "MISCONFIGURED"
+    assert result["name"] == "lee_parcels"
+
+
+def test_odd_window_entry_with_null_cadence_is_MISCONFIGURED_not_a_crash():
+    conn = _odd_conn(None)
+    entry = {**_ODD_BASE, "cadence_days": None}
+    result = check_odd_window_entry(conn, entry)
+    assert result["status"] == "MISCONFIGURED"
+
+
+def test_run_probe_survives_one_entry_crashing_and_still_reports_the_rest():
+    """The loop-level backstop: even a crash _safe_cadence_days doesn't catch (here,
+    a missing tolerance_multiplier — a KeyError, not a cadence problem at all) must
+    not cost every OTHER dataset its freshness result."""
+    conn = _tier1_conn(date.today())
+    registry = {
+        "pipelines": [
+            {
+                "name": "fine_pipeline",
+                "lane": "tier-1",
+                "cadence_days": 30,
+                "tolerance_multiplier": 2.0,
+                "inventory_id": "lake-tier1/fine/",
+                "inventory_key_type": "prefix",
+            },
+            {
+                "name": "broken_pipeline",
+                "lane": "tier-1",
+                "cadence_days": 30,
+                # tolerance_multiplier deliberately missing -> KeyError inside
+                # check_tier1_entry, AFTER the cadence guard succeeds — proves the
+                # backstop, not just the specific cadence_days fix.
+                "inventory_id": "lake-tier1/broken/",
+                "inventory_key_type": "prefix",
+            },
+        ]
+    }
+    pipeline_results, _view_results = run_probe(conn, registry)
+    by_name = {r["name"]: r for r in pipeline_results}
+    assert len(pipeline_results) == 2, "one crashing entry must not drop the other"
+    assert by_name["fine_pipeline"]["status"] == "FRESH"
+    assert by_name["broken_pipeline"]["status"] == "MISCONFIGURED"
 
 
 # ── test 5: registry smoke test ───────────────────────────────────────────────

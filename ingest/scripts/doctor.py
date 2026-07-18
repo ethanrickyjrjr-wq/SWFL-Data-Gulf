@@ -80,6 +80,11 @@ _FRESHNESS_SEVERITY = {
     "UNINITIALIZED": "yellow",
     "OVERDUE": "red",
     "MISSING": "red",
+    # A registry entry the probe itself couldn't evaluate (e.g. cadence_days not
+    # set yet on a mid-scaffold pipeline) — red, not silently dropped, so the
+    # freshness-probe cron gate (--fail-on red) still catches it same as any
+    # other real problem. See _safe_cadence_days / _misconfigured in check_freshness.py.
+    "MISCONFIGURED": "red",
 }
 
 

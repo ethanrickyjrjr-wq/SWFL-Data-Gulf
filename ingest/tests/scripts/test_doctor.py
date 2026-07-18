@@ -57,6 +57,14 @@ def test_freshness_missing_is_red():
     assert doctor.freshness_severity({"name": "x", "status": "MISSING"}, set()) == "red"
 
 
+def test_freshness_misconfigured_is_red_not_dropped():
+    """07/18/2026 incident: a registry entry the probe couldn't even evaluate (bare
+    int(None) on cadence_days) crashed run_probe entirely and hid 6 days of real
+    reds. MISCONFIGURED is the graceful result for that case now — must stay red,
+    never silently fall through to the "unknown status" yellow default."""
+    assert doctor.freshness_severity({"name": "x", "status": "MISCONFIGURED"}, set()) == "red"
+
+
 def test_freshness_stale_is_yellow_unless_it_breached_its_own_SLA():
     assert doctor.freshness_severity({"name": "x", "status": "STALE"}, set()) == "yellow"
     assert doctor.freshness_severity({"name": "x", "status": "STALE"}, {"x"}) == "red"

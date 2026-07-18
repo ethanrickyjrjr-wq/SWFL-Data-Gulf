@@ -292,13 +292,47 @@ def _fetch_max_freshness(conn, entry: dict) -> date | None:
     return _to_date(row[0])
 
 
+def _safe_cadence_days(entry: dict) -> int | None:
+    """int(entry["cadence_days"]), or None if the entry is mid-scaffold and hasn't set
+    it yet — a WIP pipeline is legitimately registered with cadence_days: null until its
+    first live run informs the choice (07/18/2026: found live on `lee_parcels`, which
+    crashed the entire daily probe — every OTHER dataset's freshness went unreported for
+    days because one unrelated entry had a bare int(None). Never again: this is checked,
+    not trusted, at every call site below."""
+    raw = entry.get("cadence_days")
+    if raw is None:
+        return None
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return None
+
+
+def _misconfigured(name: str, lane: str) -> dict:
+    """Shared early-return shape for an entry whose cadence_days isn't set yet.
+    RED, not silently skipped: MISCONFIGURED needs a human to fill in the registry
+    (or is expected and self-resolves once the WIP pipeline's first run lands)."""
+    return {
+        "name": name,
+        "lane": lane,
+        "last_run": None,
+        "last_run_ts": None,
+        "age_days": None,
+        "cadence_days": None,
+        "threshold_days": None,
+        "status": "MISCONFIGURED",
+    }
+
+
 def check_tier1_entry(conn, entry: dict) -> dict:
     """Query _tier1_inventory by id (exact or prefix) and return a status dict."""
     name = entry["name"]
     lane = entry["lane"]
     inv_id = entry["inventory_id"]
     key_type = entry.get("inventory_key_type", "exact")
-    cadence = int(entry["cadence_days"])
+    cadence = _safe_cadence_days(entry)
+    if cadence is None:
+        return _misconfigured(name, lane)
     tolerance = float(entry["tolerance_multiplier"])
     threshold = int(cadence * tolerance)
 
@@ -432,7 +466,9 @@ def check_volume_entry(conn, entry: dict) -> dict | None:
 def check_tier2_entry(conn, entry: dict) -> dict:
     """Query tier-2 freshness via _fetch_max_freshness and compare to threshold."""
     name = entry["name"]
-    cadence = int(entry["cadence_days"])
+    cadence = _safe_cadence_days(entry)
+    if cadence is None:
+        return _misconfigured(name, "tier-2")
     tolerance = float(entry["tolerance_multiplier"])
     threshold = int(cadence * tolerance)
 
@@ -492,7 +528,9 @@ def check_odd_window_entry(conn, entry: dict, _today: date | None = None) -> dic
     """
     name = entry["name"]
     lane = entry.get("lane", "tier-2")
-    cadence = int(entry["cadence_days"])
+    cadence = _safe_cadence_days(entry)
+    if cadence is None:
+        return _misconfigured(name, lane)
     today = _today or date.today()
     window_half = _odd_window_half(cadence)
 
@@ -659,14 +697,27 @@ def run_probe(conn, registry: dict) -> tuple[list[dict], list[dict]]:
     for entry in registry.get("pipelines", []):
         lane = entry.get("lane", "")
         probe_mode = entry.get("probe_mode", "standard")
-        if probe_mode == "odd_window":
-            r = check_odd_window_entry(conn, entry)
-        elif lane in ("tier-1", "tier-1-duckdb"):
-            r = check_tier1_entry(conn, entry)
-        elif lane == "tier-2":
-            r = check_tier2_entry(conn, entry)
-        else:
-            continue
+        try:
+            if probe_mode == "odd_window":
+                r = check_odd_window_entry(conn, entry)
+            elif lane in ("tier-1", "tier-1-duckdb"):
+                r = check_tier1_entry(conn, entry)
+            elif lane == "tier-2":
+                r = check_tier2_entry(conn, entry)
+            else:
+                continue
+        except Exception as exc:  # noqa: BLE001 — one bad entry must never blind the
+            # whole report. Proven live 07/18/2026: an unguarded int(None) on a single
+            # mid-scaffold entry (lee_parcels' cadence_days) crashed run_probe entirely,
+            # so EVERY other dataset's freshness went unreported for 6 straight days.
+            # _safe_cadence_days already catches that specific case gracefully; this is
+            # the backstop for whatever the next unguarded field turns out to be.
+            print(
+                f"[freshness] {entry.get('name', '?')} probe crashed, reporting"
+                f" MISCONFIGURED rather than losing every other dataset: {exc}",
+                file=sys.stderr,
+            )
+            r = _misconfigured(entry.get("name", "?"), lane)
         vol = check_volume_entry(conn, entry)
         r["volume_status"] = vol["status"] if vol else None
         r["volume_landed"] = vol["landed"] if vol else None
