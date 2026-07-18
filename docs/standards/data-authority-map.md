@@ -9,6 +9,26 @@ recommendation; declaring a source "the authority" is an architecture decision (
 operator sign-off before it becomes normative. Until then this file is a *descriptive* map of where each
 concept lives and which source the audit recommends — read it before wiring a new consumer.
 
+**OPERATOR DECISIONS (2026-07-18) — these are now RATIFIED (everything else stays a recommendation):**
+- **Value / parcels — KEEP BOTH.** `leepa_parcels` (Lee appraiser) stays as a cross-check of the incoming
+  FDOR `lee_parcels`; leepa is not retired. The only parcel dedup is `parcel_subdivision` → a homes-only
+  view once `lee_parcels` lands (`docs/handoff/2026-07-18-parcel-consolidation.md`).
+- **Market-state / "temperature" — `market-heat-swfl` is the authority** for "how hot is the market" (YoY
+  verdict). `market-temperature-swfl` is MISNAMED — it emits a rent-yield ratio, not heat; read it only
+  for rent-yield, never for market temperature. (The rename is deferred; the do-not-read guidance stands.)
+- **Heat vs seller-stress — KEEP BOTH, never merge.** Different questions (YoY heat vs a 2019–21 z-score),
+  incompatible baselines; they can legitimately point opposite for one region — a real `contradicts[]`
+  receipt, not a bug.
+- **ZHVI labeling — FIXED in code 2026-07-18:** "typical (ZHVI) home value," never "median," in the email
+  figure feed, the `/charts` panel, and the home-values brain metric label (checks `zhvi_median_mislabel_email`
+  + `zhvi_median_mislabel_chart_and_brain`). Goes fully live on the next email/chart/brain render.
+- **fgcu-reri shadow vote — DROPPED from master 2026-07-18** (it re-voted 8 already-sourced concepts);
+  the brain survives as a standalone reporter (check `fgcu_reri_shadow_vote_dedup`). Live on next master rebuild.
+
+**STILL OPEN (a decision, not ratified):** which realtor feed is the market-state root
+(`market_heat_core_swfl` Tier-1 vs `market_details_swfl_latest` Tier-2); the `market-temperature-swfl`
+rename; and the two NO-CANONICAL concepts (sold/recorded-sale price; all-property-types active count).
+
 **Why this exists:** the platform holds **87 lake tables** feeding **~50 brains**, and the same concept
 (days-on-market, "value", price-cut share, active count, rent, market-heat) is computed in several places
 with different definitions. Consumers grab whichever they find first, so the same claim renders 2–14×

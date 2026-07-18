@@ -259,7 +259,7 @@ function homeValuesOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     metric: "home_value_zhvi_regional_median",
     value: Number(snap.regional_median_home_value.toFixed(0)),
     direction: "stable",
-    label: `SWFL regional median ZHVI home value (USD) at ${snap.regional_latest_period}`,
+    label: `SWFL regional typical (ZHVI) home value (USD) at ${snap.regional_latest_period}`,
     variable_type: "extensive",
     units: "USD",
     display_format: "currency",

@@ -10,7 +10,7 @@ export async function GET() {
         value: "5th Ave South / Waterside",
         subtext: "$60.84/sqft NNN",
         source: "SWFL CRE Corridor Profiles",
-        freshness: "Updated today",
+        freshness: "As of 06/05/2026",
       },
       {
         question: "How many building permits are active in Lee + Collier?",
@@ -19,7 +19,7 @@ export async function GET() {
         value: "5,003 Permits",
         subtext: "Trailing 63 days",
         source: "Lee County Accela + Collier County Building",
-        freshness: "Updated 3 days ago",
+        freshness: "As of 06/05/2026",
       },
       {
         question: "What's the median CRE vacancy rate across SWFL corridors?",
@@ -28,17 +28,16 @@ export async function GET() {
         value: "3.2% Median Vacancy",
         subtext: "Across 25 tracked corridors",
         source: "SWFL CRE Corridor Profiles",
-        freshness: "Updated today",
+        freshness: "As of 06/05/2026",
       },
       {
-        question:
-          "How concentrated is SWFL's construction workforce vs. national?",
+        question: "How concentrated is SWFL's construction workforce vs. national?",
         genericResponse:
           "Construction employment in SWFL follows Sun Belt trends, though exact figures require current BLS data to confirm.",
         value: "2.17× National Avg",
         subtext: "Lee County construction LOC quotient",
         source: "BLS OEWS May 2025",
-        freshness: "Updated 6 days ago",
+        freshness: "As of 06/05/2026",
       },
     ],
     charts: {

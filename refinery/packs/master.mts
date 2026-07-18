@@ -254,7 +254,12 @@ export const master: PackDefinition = {
     makeBrainInputSource("hurricane-tracks-fl"),
     makeBrainInputSource("licenses-swfl"),
     makeBrainInputSource("condo-sirs-swfl"),
-    makeBrainInputSource("fgcu-reri"),
+    // fgcu-reri DROPPED from master 2026-07-18 (operator decree): it was a shadow-vote
+    // engine re-deriving 8 concepts already carried by dedicated brains (airport, tourist
+    // tax, taxable sales, unemployment, SF permits, home sales/prices, active listings) —
+    // a second full-weight vote on all of them (check fgcu_reri_shadow_vote_dedup). Removed
+    // from BOTH sources[] and input_brains[] to keep them mirrored; the brain survives as a
+    // standalone reporter at /api/b/fgcu-reri.
     makeBrainInputSource("permits-commercial-swfl"),
     makeBrainInputSource("price-distribution-swfl"),
     makeBrainInputSource("listing-momentum-swfl"),
@@ -326,7 +331,10 @@ export const master: PackDefinition = {
     { id: "hurricane-tracks-fl", edge_type: "input" },
     { id: "licenses-swfl", edge_type: "input" },
     { id: "condo-sirs-swfl", edge_type: "input" },
-    { id: "fgcu-reri", edge_type: "input" },
+    // fgcu-reri edge DROPPED 2026-07-18 — shadow-vote on 8 already-sourced concepts
+    // (see sources[] note above + check fgcu_reri_shadow_vote_dedup). A demote to
+    // `modifier` would be cosmetic (edge_type never enters the direction/magnitude math);
+    // only removing the edge actually stops the vote.
     { id: "permits-commercial-swfl", edge_type: "input" },
     // 2026-07-01: the three-tier market-cadence brains (live-verified,
     // market_cadence_three_tier_live_verify closed) — wired as plain `input`,

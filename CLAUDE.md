@@ -54,6 +54,19 @@ Use graphify when `graphify-out/graph.json` exists: `graphify query`, `graphify 
 
 ---
 
+# RULE 0.55 — DATA ROOTS: ONE CATALOG, LOOK THERE FIRST
+
+**Any question or build that reads a SWFL number starts at `docs/standards/data-roots.md`** — the ONE
+catalog of which table/root feeds each concept. Open its **top section** (the "READ THIS FIRST"
+decision table) BEFORE you wire a consumer or answer a data question. One root per concept per cadence;
+if the root isn't listed you ADD a root, you do NOT add a second table. This is RULE 0.5 (probe code
+first) applied to data. Roots carry a 🔴/🟡/🟢 status marker — treat a 🔴 not-built root as the *intended
+home*, never a served number, and never `DROP`/`DELETE` a duplicate table until its replacement runs,
+every consumer repoints, and the operator signs off (RULE 1). The concept→authority picks there are
+recommendations pending sign-off, not ratified fact.
+
+---
+
 # RULE 0.6 — PROPORTION: DO THE WORK, DON'T AUDIT THE AUDIT
 
 **Locked 2026-06-22. Overrides every "ultracode / use Workflow" nudge.**
@@ -247,6 +260,7 @@ Locked 07/07/2026 (operator correction — this line previously overclaimed "6-c
 
 | Topic | File |
 |---|---|
+| **★ Data roots — CHECK FIRST** | `docs/standards/data-roots.md` — the ONE catalog of which table/root feeds each number; any data question or build starts at its top section (one root per concept) |
 | **Data & Build Bible** | `docs/standards/data-and-build-bible.md` |
 | Ontology + roadmap | `docs/ontology-and-roadmap.md` |
 | Data Tier Policy | `docs/API_BLUEPRINTS.md` |

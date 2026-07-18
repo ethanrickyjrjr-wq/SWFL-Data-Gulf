@@ -62,7 +62,7 @@ async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<st
       if (hv != null && hv > 0)
         figs.push({
           key: "home_value",
-          label: `Median home value — ${data.city ?? zip} (${zip})`,
+          label: `Typical home value — ${data.city ?? zip} (${zip})`,
           value: usd(hv),
           source: "Zillow ZHVI",
           as_of: asOf,

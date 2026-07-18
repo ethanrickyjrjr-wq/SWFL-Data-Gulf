@@ -32,10 +32,19 @@ CREATE TABLE IF NOT EXISTS data_lake.rental_listings_swfl (
   PRIMARY KEY (property_id, captured_date)
 );
 
+-- 2026-07-18 completeness fix (check rentals_latest_view_completeness_guard): use the latest capture
+-- PER COUNTY, not the single global max — a Collier-only capture day was hiding Lee entirely (the view
+-- returned Collier 3,082 / Lee 0 while the brain claimed both). Per-county-latest restores Lee (3,927 @
+-- 2026-07-06) alongside Collier (3,082 @ 2026-07-13); each county exposes its own captured_date so any
+-- staleness is visible rather than silently dropped. Applied to prod + verified live 2026-07-18.
 CREATE OR REPLACE VIEW data_lake.rental_listings_swfl_latest AS
-SELECT *
-FROM data_lake.rental_listings_swfl
-WHERE captured_date = (SELECT max(captured_date) FROM data_lake.rental_listings_swfl);
+SELECT r.*
+FROM data_lake.rental_listings_swfl r
+WHERE r.captured_date = (
+  SELECT max(r2.captured_date)
+  FROM data_lake.rental_listings_swfl r2
+  WHERE r2.county = r.county
+);
 
 -- Aggregate-at-source stats (region / county / ZIP via GROUPING SETS, mirrors
 -- data_lake.listing_momentum_stats). count + observed price range only — MIN/MAX of the vendor's own

@@ -1,3 +1,66 @@
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- READ THIS FIRST. The 1,500-line catalog below is the searchable backing. -->
+<!-- This top section is the 30-second map. Filed 2026-07-18 (lineage fan-out). -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+
+# READ THIS FIRST — "where's the authority for X?" in 30 seconds
+
+You're about to answer a data question or wire a consumer. **Do NOT grep for a table and read the
+first one you find** — that is exactly how the same claim renders 2–14× apart across our surfaces.
+Find the concept in the table below, read its **recommended root**, route through its **brain**.
+(Full answer-flow: the "SWFL Intelligence Lake — data protocol v3" block in `CLAUDE.md` — fetch
+master `…/api/b/master?view=speak&tier=2&v=5`, quote its `freshness_token`, route to the named leaf,
+then read the ROOT, never a raw base table.)
+
+**These picks are RECOMMENDATIONS from the 2026-07-18 lineage audit — NOT ratified architecture.**
+Declaring a source "the authority" is a C1/C2 decision needing operator sign-off; everything tagged
+**[NEEDS-SIGN-OFF]** is ratification-ready, not settled. Where the catalog below still says "IS a
+root," treat that as the audit's recommendation too until signed off. Roots carry a status marker:
+🔴 not built · 🟡 chosen, consumers not repointed / duplicates not deleted · 🟢 live, duplicates deleted.
+A 🔴 root is the *intended home*, never a served value. **Never `DROP`/`DELETE` a duplicate** until its
+replacement runs, every consumer repoints, and the operator signs off (RULE 1).
+
+## Decision table — CONCEPT → recommended ROOT → BRAIN → DO-NOT-READ  **[NEEDS-SIGN-OFF]**
+
+"no single brain" = a view/spine read directly by many surfaces, not owned by one pack (don't invent an owner).
+
+| Concept | Recommended root | Brain | DO-NOT-READ (dead / dup / wrong) |
+|---|---|---|---|
+| **DOM — per-listing, list-side** | `listing_dom` view (`lib/listings/dom.ts formatDom`) | no single brain | `listing_state.days_on_market` (0%) · `listing_active_stats.avg_days_on_market` (NULL) · `listing_active_homes.days_on_market` (NULL) · `active_listings_residential*` (corpse) · `market_details_swfl.median_days_on_market` (realtor dup) — **T1** |
+| **DOM — typical list-side (history)** | `listing_dom_historical` 🔴 → external `market_heat_swfl` (view `market_heat_core_swfl`, ZIP×month+YoY) | market-heat-swfl | never interchange w/ sold-side |
+| **DOM — sold-side** | `redfin_swfl.median_dom` | housing-swfl | never interchange w/ list-side |
+| **Value — assessed / just** | `leepa_parcels` (Lee) · `collier_parcels` (Collier) | properties-lee-value · properties-collier-value | per-ZIP assessed answerable for Collier, NOT Lee (real asymmetry) |
+| **Value — list / asking** | `listing_state.list_price` (median-by-zip) | no single brain | `active_listings_residential` asking median (stale seed) |
+| **Value — sold / recorded-sale** | **no single canonical** — grain+vendor dependent (`redfin_lee`/`redfin_collier`, `redfin_city_swfl`, LeePA/FDOR deeds) | properties-value / housing-swfl | pick per surface + **LABEL it** |
+| **Value — home-value INDEX** | `zhvi_*` (Zillow ZHVI) | home-values-swfl | label **"typical home value," NEVER "median"** (live bugs: `market-context.ts:65`, `/charts`, brain label) — **T2** |
+| **Price cut — EVENT (per-listing)** | `listing_transitions.price_delta` (forward-only) | no single brain (rollups `listing_pulse_daily`, `listing_transitions_recent_zip_stats`) | — |
+| **Price cut — SHARE (area)** | `listing_momentum_stats.price_reduced_share` (**0–100**) | listing-momentum-swfl | `market_details_swfl` (no cut field) — **T3** |
+| **Active inventory — for-sale HOMES** | `listing_active_stats.listing_count` (homes-only, Lee/Collier; add `zip_code IS NOT NULL` to skip region rollup) | active-listings-swfl | `listing_momentum_stats.active_listing_count` (all-types, +~7,300 land, ~3.2×) · `active_listings_residential*` (dead) |
+| **Rent — INDEX (monthly)** | `zori_*` (Zillow ZORI) | consumers: investor-zip-swfl (yield calc) + email `zori_zip_latest` (bypass) | don't conflate w/ the weekly own-sweep |
+| **Rent — own inventory (weekly)** | `rentals_swfl` | active-rentals-swfl | live bug: `_latest` view Collier-only, drops Lee (`rentals_latest_view_completeness_guard`) |
+| **Rent — yield** | generic → realtor sold-to-rent · investor → `investor-zip-swfl.gross_rent_yield_pct` (ZORI×12 ÷ ZHVI) | market-temperature-swfl (generic) · investor-zip-swfl (investor) | 3 rent numbers/ZIP disagree up to ~7× — LABEL which |
+| **Market-state / "temperature"** | `market-heat-swfl` (YoY verdict) | market-heat-swfl | **`market-temperature-swfl` is MISNAMED — emits rent-yield, NOT heat** · momentum + 2 others = neutral `0` reporters — **T4** |
+| **Seller-stress verdict** | seller-stress-swfl (2019–21 z-score) | seller-stress-swfl | incompatible baseline vs market-heat — can point opposite for one region |
+
+**Traps (nuance the cells can't hold):**
+- **T1 — aggregate DOM is not trustworthy today.** Row-level `listing_dom` is fine; the *aggregate* is censored — ~63% of the active book is a `first_seen` floor (07/18 backfill de-flooring it). A 30-sec "typical DOM" off the aggregate is confidently wrong right now.
+- **T2 — ZHVI is a typical-value INDEX, not a median.** Mislabeled "median" in ≥3 places. Same ZIP (33901): assessed $244,810 / ZHVI $261,247 / deed-sold $269,900 / list $309k–$340k — never blend.
+- **T3 — 0–1 vs 0–100 unit trap.** `price_reduced_share` is **0–100** in our `listing_momentum_stats` (20.1) but a **0–1 fraction** in realtor's `market_heat_core_swfl` (0.232). Both convert correctly today; a future swap is a silent 100×.
+- **T4 — the most dangerous name in the system.** `market-temperature-swfl` does NOT carry market temperature (it's a rent-yield ratio). For "how hot is the market," use `market-heat-swfl`. Grabbing by name gets the wrong brain.
+
+## PARCELS — four tables, easy to confuse (live-probed 2026-07-18)  **[NEEDS-SIGN-OFF]**
+
+| Table | Rows / cols | What it is | Read for | Note |
+|---|---|---|---|---|
+| `collier_parcels` | 290,973 / **104** | FDOR cadastral, Collier (CO_NO=21) — comprehensive, **DONE** | properties-collier-value | don't re-widen |
+| `leepa_parcels` | 548,798 / **19** | Lee **Property Appraiser** — a **DIFFERENT source** (valuation+sale only) | properties-lee-value | distinctive: `folioid`, `building_value` (`soh_cap`/`cap_difference` derivable from FDOR `jv_hmstd−av_hmstd`). A **cross-check of FDOR, NOT slated for deletion** |
+| `lee_parcels` | **DOES NOT EXIST YET** | FDOR cadastral, Lee (CO_NO=46) — ingest **in flight** | properties-lee-value (planned) | **DO-NOT-WIRE until it lands.** `OUT_FIELDS` byte-identical to `collier_parcels` → lands as the full 104-col shape |
+| `parcel_subdivision` | 604,362 / **28** | FDOR **homes-only** subset, both counties | communities-swfl | ONE distinctive col: `subdivision_name` (parse of `legal_description`) |
+
+- **ONE-ROOT TARGET (recommended, [NEEDS-SIGN-OFF]):** one canonical FDOR parcel table (Lee+Collier, shared schema) read by properties-lee-value + properties-collier-value + communities. **Pending** `lee_parcels` landing, then the LeePA keep-vs-retire decision. Deletion is operator-gated and blocked. Checks: `lee_parcels_leepa_redundant_into_properties_lee`, `collier_parcels_parcel_subdivision_redundant_scrape`, `data_authority_single_source_registry`.
+
+---
+
 # Data Roots — THE one place
 
 **This is the catalog.** Before you build anything that reads a number, look here for its root and wire

@@ -6,3 +6,4 @@ FOCUS — the rules that get repeated. Honor them before answering.
 5. Answers carry no system nouns, internal IDs, or jargon (no master/brain-id/§/pack ids; NNN = triple-net rent, never a place name).
 6. Answers are plain text — no blockquotes, no tables (they break copy-paste). Code fences are for commands only.
 7. Probe our code first (RULE 0.5), research the outside answer with crawl4ai not memory (RULE 0.4). If unsure, use /advisor — never guess.
+8. For any SWFL number, which table/root feeds it is catalogued in one place — docs/standards/data-roots.md; open its top section before wiring a consumer or answering a data question. One root per concept; an unbuilt root is the intended home, not a served value.
