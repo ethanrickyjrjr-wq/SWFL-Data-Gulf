@@ -18,7 +18,10 @@ const data: BackOnMarketZip = {
 test("renders the local rate, the as-of date, and never the word stigmatized", () => {
   const html = renderToStaticMarkup(<BackOnMarketRead data={data} />);
   expect(html).toContain("14.2");
-  expect(html).toContain("03/01/2026");
+  // Rolling-monthly Redfin figure — rendered as a month label (matching the 07/17/2026
+  // operator ruling already applied to the sibling should-i-sell surface), not the raw day.
+  expect(html).toContain("March 2026");
+  expect(html).not.toContain("03/01/2026");
   expect(html).toContain("Cape Coral");
   expect(html.toLowerCase()).not.toContain("stigmatiz");
 });

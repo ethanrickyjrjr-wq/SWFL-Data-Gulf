@@ -385,11 +385,11 @@ describe("renderRecurringHtml — real-render byte-identity + slot-break regress
     // slot deletion. (Note: the hero shell has no [ BODY TEXT ] slot — the global digest's
     // text body is conveyed via the subject, not the hero body; a pre-existing digest
     // concern tracked separately, NOT introduced by Task 3.)
-    const model = assembledReportToModel(makeReport()); // token SWFL-7421-v5-20260616 → "Jun 16"
+    const model = assembledReportToModel(makeReport()); // token SWFL-7421-v5-20260616 → "06/16/2026"
     const grounded = await renderRecurringHtml({ slug: "report", body: "", model }, realDeps);
-    // freshness now rendered as human-readable date, not raw token
+    // freshness now rendered as MM/DD/YYYY (never a year-less date), not raw token
     assert.ok(
-      grounded.includes("Jun 16") && grounded.includes("Data as of"),
+      grounded.includes("06/16/2026") && grounded.includes("Data as of"),
       "the grounded report quotes the fresh freshness date",
     );
 
