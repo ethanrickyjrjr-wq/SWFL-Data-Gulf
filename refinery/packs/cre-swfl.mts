@@ -259,6 +259,24 @@ function cleanSubmarket(submarket: string): { display: string; slug: string } {
 }
 
 /**
+ * Core-scope gate for a broker-survey (MarketBeat) submarket. The CRE brain
+ * covers Lee + Collier only — a submarket that positively resolves to a non-core
+ * county (Charlotte, FIPS 12015) is dropped from EVERY downstream emission:
+ * standalone per-submarket metrics, the SWFL-wide broker-survey median, the
+ * per-sector fan-out, and the parent-place rollups all read the filtered
+ * `lastMarketbeatRows`. Closes check `cre_charlotte_county_out_of_scope_live`.
+ *
+ * The row STAYS in the lake (data is untouched) — we only stop the brain from
+ * surfacing it. We drop ONLY on a confirmed out-of-core resolution: an
+ * unresolved SWFL label (e.g. "South Fort Myers", a Lee area not in the place
+ * resolver) is kept, so a failed resolve never silently drops real coverage.
+ */
+function submarketInCoreScope(submarket: string): boolean {
+  const place = resolvePlace(submarket);
+  return place == null || place.county === "Lee" || place.county === "Collier";
+}
+
+/**
  * Customer-facing publisher label for a marketbeat_swfl row, keyed on its
  * `source_name`. The marketbeat_swfl table UNIONS two publishers
  * ('cw_marketbeat' | 'mhs_databook' — NOT NULL, see
@@ -727,9 +745,13 @@ function creCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const marketbeatFragments = allFragments.filter(
     (f) => (f.normalized as { kind?: string } | null)?.kind === "marketbeat-swfl",
   );
-  lastMarketbeatRows = marketbeatFragments.map(
-    (f) => f.normalized as unknown as MarketbeatSwflNormalized,
-  );
+  lastMarketbeatRows = marketbeatFragments
+    .map((f) => f.normalized as unknown as MarketbeatSwflNormalized)
+    // CORE-SCOPE GATE (cre_charlotte_county_out_of_scope_live): Lee + Collier
+    // only. Filtering here — the single chokepoint — keeps Charlotte out of every
+    // downstream aggregate (per-submarket, the SWFL-wide median, per-sector, and
+    // rollups all read lastMarketbeatRows). The lake row is untouched.
+    .filter((r) => submarketInCoreScope(r.submarket));
   lastMarketbeatFetchedAt = marketbeatFragments[0]?.fetched_at ?? null;
 
   // Stash active-listing fragments (Crexi; Estero + FMB gap-fill).

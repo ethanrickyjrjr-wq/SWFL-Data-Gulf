@@ -559,6 +559,53 @@ test("marketbeat: zero-matched-corridors caveat fires when submarket reports a v
   assert.ok(caveatHit, `expected zero-matched caveat, got caveats:\n${result.caveats.join("\n")}`);
 });
 
+test("SCOPE: a Charlotte County broker-survey row emits NO metric and stays out of the SWFL-wide median", () => {
+  // Charlotte (FIPS 12015) is out of core scope (Lee + Collier only). The row
+  // stays in the lake; the brain must not surface it — standalone OR pooled.
+  const charlotte: MarketbeatSwflNormalized = {
+    kind: "marketbeat-swfl",
+    source_name: "cw_marketbeat",
+    submarket: "Charlotte County",
+    quarter: "2026-Q1",
+    vacancy_rate: 2.4,
+    asking_rent_nnn: 13,
+    absorption_sqft: 1000,
+    source_url: "https://example.invalid/charlotte",
+  };
+  const fm: MarketbeatSwflNormalized = {
+    kind: "marketbeat-swfl",
+    source_name: "cw_marketbeat",
+    submarket: "Fort Myers",
+    quarter: "2026-Q1",
+    vacancy_rate: 8.2,
+    asking_rent_nnn: 26,
+    absorption_sqft: -5000,
+    source_url: "https://example.invalid/fm",
+  };
+  creSwfl.corpusSummary!([
+    makeCorridorFragment("Pine Ridge Rd Naples", "Naples"),
+    makeMbFragment(charlotte),
+    makeMbFragment(fm),
+  ]);
+  const result = creSwfl.outputProducer!(minimalPackOutput());
+  const charlotteKeys = result.key_metrics.filter((m) => m.metric.includes("charlotte"));
+  assert.equal(
+    charlotteKeys.length,
+    0,
+    `expected zero Charlotte metrics, got: ${charlotteKeys.map((m) => m.metric).join(", ")}`,
+  );
+  // Fort Myers (Lee) still ships — core coverage is untouched.
+  assert.ok(
+    result.key_metrics.find((m) => m.metric === "vacancy_rate_marketbeat_fort_myers"),
+    "expected Fort Myers vacancy metric to still ship",
+  );
+  // The SWFL-wide retail median excludes Charlotte → Fort Myers alone (8.2), NOT
+  // median(2.4, 8.2)=5.3. Proves Charlotte is out of the regional pool.
+  const swfl = result.key_metrics.find((m) => m.metric === "vacancy_rate_marketbeat_swfl");
+  assert.ok(swfl, "expected SWFL-wide retail vacancy median");
+  assert.equal(swfl!.value, 8.2, "Charlotte must not be pooled into the SWFL-wide median");
+});
+
 test("marketbeat: singleton reset — running corpusSummary twice does not let a prior-run join bleed through", () => {
   // Run 1: full SWFL fixture-equivalent — Naples + Fort Myers + Cape Coral
   // mbRows with corridors that match each.

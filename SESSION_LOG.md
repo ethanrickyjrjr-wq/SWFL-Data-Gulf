@@ -43,6 +43,20 @@ manual rebuilds, one-uncomment-away revert) per operator. Staged only these two 
 holds the cre-figures-corroboration spec/plan. NEXT: local pack iteration now runs mocked per the new "real
 spend only on final serve" rule.
 
+## 2026-07-18 (Opus 4.8 · main) — Charlotte scope leak fixed: CRE broker-survey now Lee/Collier only
+
+Gated the cre-swfl per-submarket MarketBeat emission to core scope (Lee + Collier) at the single
+chokepoint — a `submarketInCoreScope` filter on `lastMarketbeatRows` in `creCorpusSummary`, so every
+downstream aggregate (per-submarket, the SWFL-wide broker-survey median, per-sector, rollups) inherits
+it. Closes `cre_charlotte_county_out_of_scope_live` on served verify. The gate drops ONLY on a confirmed
+out-of-core `resolvePlace` county; an unresolved SWFL label ("South Fort Myers", a Lee area absent from
+the resolver) is kept — a failed resolve never drops real coverage. Live before/after: 20 broker-survey
+submarkets → 18, dropping Charlotte County AND Punta Gorda (both Charlotte, FIPS 12015), keeping all 18
+Lee/Collier. Lake data untouched (operator: "don't delete the data — just make it Lee/Collier only").
+Regression test: a Charlotte row emits zero metrics AND stays out of the SWFL-wide retail median (Fort
+Myers alone 8.2, not median(2.4, 8.2)=5.3). 65 pack tests + catalog + vocab green, lint clean.
+NEXT: rebuild to serve → verify Charlotte-free → then hand off the figures-layer plan.
+
 ## 2026-07-18 (Opus 4.8 · main) — cre-swfl v62 rebuilt (grain fix live in repo) + master propagation dispatched
 
 Run 29622523421 succeeded: `[stage 4] wrote brains/cre-swfl.md (version 62)` (source=live), committed to the
