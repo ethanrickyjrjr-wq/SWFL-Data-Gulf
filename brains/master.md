@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v107 | Token: SWFL-7421-v107-20260718 -->
+<!-- FRESHNESS: v108 | Token: SWFL-7421-v108-20260718 -->
 ---
 brain_id: master
-version: 107
-refined_at: 2026-07-18T01:31:53Z
-freshness_token: SWFL-7421-v107-20260718
+version: 108
+refined_at: 2026-07-18T04:29:06Z
+freshness_token: SWFL-7421-v108-20260718
 ttl_seconds: 604800
 pack_hash: 33eb56cb4c6a
 context_type: user_saved_reference
@@ -53,7 +53,7 @@ s20 | city-pulse-swfl brain — https://www.swfldatagulf.com/api/b/city-pulse-sw
 s21 | rsw-airport brain — https://www.swfldatagulf.com/api/b/rsw-airport                           | 2026-06-29 | 2026-07-06
 s22 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl                               | 2026-07-12 | 2026-07-19
 s23 | freshness-pulse brain — https://www.swfldatagulf.com/api/b/freshness-pulse                   | 2026-07-17 | 2026-07-24
-s24 | seller-stress-swfl brain — https://www.swfldatagulf.com/api/b/seller-stress-swfl             | 2026-07-12 | 2026-07-19
+s24 | seller-stress-swfl brain — https://www.swfldatagulf.com/api/b/seller-stress-swfl             | 2026-07-18 | 2026-07-25
 s25 | market-heat-swfl brain — https://www.swfldatagulf.com/api/b/market-heat-swfl                 | 2026-07-01 | 2026-07-08
 s26 | storm-history-swfl brain — https://www.swfldatagulf.com/api/b/storm-history-swfl             | 2026-07-18 | 2026-07-25
 s27 | hurricane-tracks-fl brain — https://www.swfldatagulf.com/api/b/hurricane-tracks-fl           | 2026-07-15 | 2026-07-22
@@ -94,7 +94,7 @@ s38 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
   {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-06-29: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-07-18"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (bearish, magnitude 0.70, confidence 0.80)","value":"news-swfl as of 2026-07-12: direction bearish, magnitude 0.70, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 0 SWFL-relevant press releases in the last 90 days. 4 individual enforcement notices active in Lee and Collier counties (2 construction unlicensed, 0 ABT/hospitality). Enforcement activity momentum: -1 vs prior 90-day window. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-07-18"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-07-17: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — Cape Coral median asking price (as of 2026-07-17) $400,000; Fort Myers median asking price (as of 2026-07-17) $324,250; Naples median asking price (as of 2026-07-17) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-07-16) 6.55%. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-07-18"},
-  {"id":"f024","topic":"upstream :: seller-stress-swfl","fact":"Upstream snapshot — seller-stress-swfl (bearish, magnitude 0.52, confidence 0.60)","value":"seller-stress-swfl as of 2026-07-12: direction bearish, magnitude 0.52, confidence 0.60, trust tier T3, 5 key metric(s). SWFL seller stress is elevated at 61/100 (bearish threshold: ≥65). 52 of 55 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 34145 (84), 33903 (78), 33973 (72). Leading signal: 15.5% median delistings rate.","src":"s01","date":"2026-07-18"},
+  {"id":"f024","topic":"upstream :: seller-stress-swfl","fact":"Upstream snapshot — seller-stress-swfl (bearish, magnitude 0.56, confidence 0.60)","value":"seller-stress-swfl as of 2026-07-18: direction bearish, magnitude 0.56, confidence 0.60, trust tier T3, 5 key metric(s). SWFL seller stress is elevated at 63/100 (bearish threshold: ≥65). 52 of 55 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 33903 (86), 33924 (80), 34145 (78). Leading signal: 18.7% median delistings rate.","src":"s01","date":"2026-07-18"},
   {"id":"f025","topic":"upstream :: market-heat-swfl","fact":"Upstream snapshot — market-heat-swfl (bullish, magnitude 0.31, confidence 0.60)","value":"market-heat-swfl as of 2026-07-01: direction bullish, magnitude 0.31, confidence 0.60, trust tier T3, 5 key metric(s). SWFL market heat is tightening (bullish) at 66/100. Inventory down 21.0% Y/Y, DOM down 5.4% Y/Y across 77 ZIPs. Tightest: 34240 (97), 34275 (89), 34293 (89). [INFERENCE] Forward read anchors on the pending ratio (median 0.27), the leading demand edge: a sustained rise points to firming prices. Falsified if the pending ratio falls for 2+ consecutive months while active inventory rises.","src":"s01","date":"2026-07-18"},
   {"id":"f026","topic":"upstream :: storm-history-swfl","fact":"Upstream snapshot — storm-history-swfl (bearish, magnitude 0.50, confidence 1.00)","value":"storm-history-swfl as of 2026-07-18: direction bearish, magnitude 0.50, confidence 1.00, trust tier T1, 9 key metric(s). Southwest Florida storm history (LEE + COLLIER) — 887 total NOAA Storm Events across the 1996-2025 modern-schema vintage, 17 qualifying as major storms (damage >= $1M AND event_type in {Hurricane, Tropical Storm, Tornado, Flash Flood, Storm Surge/Tide}). Most recent billion-dollar event in scope: Hurricane Ian on 2022-09-28. Trailing 10-year window: 71 property-damage events, 12 distinct tropical cyclones — bearish read on near-term physical risk.","src":"s01","date":"2026-07-18"},
   {"id":"f027","topic":"upstream :: hurricane-tracks-fl","fact":"Upstream snapshot — hurricane-tracks-fl (neutral, magnitude 0.20, confidence 1.00)","value":"hurricane-tracks-fl as of 2026-07-15: direction neutral, magnitude 0.20, confidence 1.00, trust tier T1, 6 key metric(s). Southwest Florida hurricane impact history (HURDAT2 × NFIP cross-tier join, 3 core counties: Collier + Hendry + Lee) — 7 distinct named storms made landfall in a SWFL county over the trailing 30-year window, 2 of those were Cat-3+ on Saffir-Simpson at any point in their lifetime. Realized NFIP exposure per (storm × county) landfall row averages $116,788,824, with the worst single (storm × county) on record at $3,389,600,145.37. Most recent landfall in scope: IAN 2022-09-28. Closest pass in the trailing 5-year window: 18 statute miles from a SWFL county centroid.","src":"s01","date":"2026-07-18"},
@@ -114,12 +114,12 @@ s38 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 107,
-  "refined_at": "2026-07-18T01:31:53Z",
-  "expires": "2026-07-25T01:31:53Z",
+  "version": 108,
+  "refined_at": "2026-07-18T04:29:06Z",
+  "expires": "2026-07-25T04:29:06Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.47965615188007565,
+  "magnitude": 0.48359310958955365,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -893,7 +893,7 @@ s38 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-18T01:31:53.000Z"
+    "computed_at": "2026-07-18T04:29:06.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
