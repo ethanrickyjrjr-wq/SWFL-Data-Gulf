@@ -118,6 +118,12 @@
       "pack": "housing-swfl",
       "accepted_on": "07/17/2026",
       "note": "operator-approved final: retarget + data-through label on origin, rebuild to serve Apr-Jun window live (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29622523421",
+      "pack": "cre-swfl",
+      "accepted_on": "07/17/2026",
+      "note": "Serve the re-grained CRE direction vote + corridor_factor (submarket reps) alongside the landed median grain fix 3084c99d; closes cre_direction_vote_and_corridor_factor_stamped_weighting + the due-07/19 corridor_grain checks. Operator-approved paid run (this conversation). (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }

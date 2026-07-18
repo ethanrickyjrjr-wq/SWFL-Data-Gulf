@@ -1,3 +1,15 @@
+## 2026-07-17 (Opus 4.8 · main) — Served the CRE grain fix: pushed + dispatched cre-swfl rebuild (operator-approved paid run)
+
+Pushed 5 commits to main (`48030dcc..2881abb2`): my CRE re-grain fix (`da0df618`) + grade-coverage regen
+(`03e6b7ac`, 8 stale `cre_construction_cost_ppi_*` slugs) + a scope-root guard on the carried
+should-i-sell `load-market-snapshot.ts` (`2881abb2`, needed to clear the ZIP-scope pre-push gate — the
+foreign commit's own test used out-of-scope ZIP 34999; moved fixtures to in-scope 33966/34101, added
+scope-rejection coverage), carrying the two foreign commits (`156e0625` should-i-sell, `aac44079`
+back-on-market) at operator's "carry all commits" instruction. Then dispatched the operator-approved
+targeted `cre-swfl` rebuild (force) — run 29622523421 — to serve the re-grain WITH the landed median fix.
+NEXT: after cre-swfl completes, a no-force `pack_id=master` propagate carries the corrected medians into
+master's dossier; then live-verify served bytes + close the grain checks.
+
 ## 2026-07-17 (Opus 4.8 · main) — CRE grain fix pt.2: re-grained the direction vote + corridor_factor to submarket reps
 
 Closed the code half of `cre_direction_vote_and_corridor_factor_stamped_weighting` (twin of the
