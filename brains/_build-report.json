@@ -1,1029 +1,978 @@
 {
-  "target": "master",
+  "target": "seller-stress-swfl",
   "timestamps": {
-    "started": "2026-07-18T01:31:53.346Z",
-    "finished": "2026-07-18T01:31:53.749Z"
+    "started": "2026-07-18T03:05:50.611Z",
+    "finished": "2026-07-18T03:05:54.903Z"
   },
   "source": "live",
   "outcomes": [
     {
-      "packId": "franchise-outcomes",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "storm-history-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "permits-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "corridor-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "cre-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "macro-us",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "macro-florida",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "macro-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "sector-credit-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "tourism-tdt",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "env-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "logistics-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "logistics-swfl-nowcast",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "traffic-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "properties-lee-value",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "properties-collier-value",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "rentals-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "housing-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "safety-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "labor-demand-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "econ-dev-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "city-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "rsw-airport",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "news-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
       "packId": "seller-stress-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "market-heat-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "hurricane-tracks-fl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "licenses-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "condo-sirs-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "fgcu-reri",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "permits-commercial-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "price-distribution-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "listing-momentum-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "market-temperature-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "home-values-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "investor-zip-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "active-listings-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "active-rentals-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "communities-swfl",
-      "status": "skipped-fresh",
-      "written": false
-    },
-    {
-      "packId": "master",
       "status": "built",
-      "version": 107,
+      "version": 9,
       "written": true,
       "brainOutput": {
-        "brain_id": "master",
-        "version": 107,
-        "refined_at": "2026-07-18T01:31:53Z",
-        "expires": "2026-07-25T01:31:53Z",
-        "ttl_seconds": 604800,
-        "direction": "mixed",
-        "magnitude": 0.47965615188007565,
-        "drivers": [
-          {
-            "brain_id": "franchise-outcomes",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "cre-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "macro-us",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "macro-florida",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "macro-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "sector-credit-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "tourism-tdt",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "env-swfl",
-            "edge_type": "modifier"
-          },
-          {
-            "brain_id": "logistics-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "logistics-swfl-nowcast",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "traffic-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "properties-lee-value",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "properties-collier-value",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "permits-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "rentals-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "housing-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "safety-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "labor-demand-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "econ-dev-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "city-pulse-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "rsw-airport",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "news-swfl",
-            "edge_type": "modifier"
-          },
-          {
-            "brain_id": "freshness-pulse",
-            "edge_type": "modifier"
-          },
-          {
-            "brain_id": "seller-stress-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "market-heat-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "storm-history-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "hurricane-tracks-fl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "licenses-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "condo-sirs-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "fgcu-reri",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "permits-commercial-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "price-distribution-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "listing-momentum-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "market-temperature-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "investor-zip-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "active-listings-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "active-rentals-swfl",
-            "edge_type": "input"
-          },
-          {
-            "brain_id": "communities-swfl",
-            "edge_type": "input"
-          }
-        ],
-        "overrides": [
-          "flood-barrier-mode-1",
-          "storm-history-modifier"
-        ],
-        "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, fgcu-reri, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, active-rentals-swfl, communities-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs safety-swfl (bullish). Combined confidence 0.88, trust tier T4, based on 38 upstream brains.",
+        "brain_id": "seller-stress-swfl",
+        "version": 9,
+        "refined_at": "2026-07-18T03:05:54Z",
+        "expires": "2026-08-17T03:05:54Z",
+        "ttl_seconds": 2592000,
+        "direction": "bearish",
+        "magnitude": 0.56,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL seller stress is elevated at 63/100 (bearish threshold: ≥65). 52 of 55 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 33903 (86), 33924 (80), 34145 (78). Leading signal: 18.7% median delistings rate.",
         "key_metrics": [
           {
-            "metric": "permits_swfl_county_weighted_avg_corridor_z",
-            "value": 0.682,
+            "metric": "seller_stress_score_swfl",
+            "value": 62.5,
             "direction": "rising",
-            "label": "SWFL permits - corridor-weighted z-score across Lee + Collier, current 90d vs trailing-365d (rate-normalized)",
+            "label": "SWFL median seller stress score (0-100) at 2026-04-01 — 52 ZIPs scored vs 2019–2021 baseline",
             "variable_type": "intensive",
-            "units": "z-score",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-              "fetched_at": "2026-07-18T01:23:03Z",
-              "tier": 1,
-              "citation": "Lee + Collier County Building Permits (SWFL rollup) — Lee: Accela; Collier: colliercountyfl.gov monthly XLSX."
-            },
-            "suggestions": [
-              "What's driving permits swfl county weighted avg corridor z?",
-              "How does permits swfl county weighted avg corridor z here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "storm_property_damage_events_10yr",
-            "value": 71,
-            "direction": "stable",
-            "label": "SWFL property-damage event count (trailing 10-year window)",
-            "variable_type": "extensive",
-            "units": "events",
-            "display_format": "count",
-            "source": {
-              "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-              "fetched_at": "2026-07-18T01:23:03Z",
-              "tier": 1,
-              "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
-            },
-            "suggestions": [
-              "What's driving storm property damage events 10yr?",
-              "How does storm property damage events 10yr here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "best_naics_survival",
-            "value": 100,
-            "direction": "stable",
-            "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate [thin sample: only 7 resolved loans, directional not confident]",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-              "fetched_at": "2026-07-16T04:43:21Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving best naics survival?",
-              "How does best naics survival here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "latest_monthly_collections_usd",
-            "value": 9028029.34,
-            "direction": "stable",
-            "label": "Latest monthly TDT collections (SWFL combined, 2026-04, shoulder season)",
-            "variable_type": "extensive",
-            "units": "USD/month",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-07-16T04:43:22Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) via Brains Supabase fl_dor_tdt_collections (666 rows: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined 2026-04 = $9.03M (FY 2026, post_ian=true)."
-            },
-            "suggestions": [
-              "What's driving latest monthly collections usd?",
-              "How does latest monthly collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "hurricane_landfalls_30yr",
-            "value": 7,
-            "direction": "stable",
-            "label": "SWFL hurricane landfalls — distinct named storms landfalling in any of the SWFL core counties, trailing 30yr window",
-            "variable_type": "extensive",
-            "units": "storms",
-            "display_format": "count",
-            "source": {
-              "url": "s3://lake-tier1/environmental/hurdat2_fl.parquet",
-              "fetched_at": "2026-07-15T06:52:19Z",
-              "tier": 1,
-              "citation": "NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py."
-            },
-            "suggestions": [
-              "What's driving hurricane landfalls 30yr?",
-              "How does hurricane landfalls 30yr here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "fgcu_reri_airport_activity_pct_change",
-            "label": "RERI Airport Activity YoY",
-            "value": 1.8,
-            "direction": "rising",
-            "variable_type": "intensive",
-            "units": "%",
+            "units": "score (0-100)",
             "display_format": "raw",
-            "source": {
-              "url": "https://www.fgcu.edu/cob/reri/",
-              "fetched_at": "2026-07-12T04:18:08Z",
-              "tier": 1,
-              "citation": "FGCU RERI Monthly Economic Outlook — Lutgert College of Business (airport_activity 2026-05 +1.8% YoY)"
-            },
-            "suggestions": [
-              "What's driving fgcu reri airport activity pct change?",
-              "How does fgcu reri airport activity pct change here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "inbound_freight_tons_swfl",
-            "value": 1226969.1,
-            "direction": "stable",
-            "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
-            "variable_type": "extensive",
-            "units": "thousand tons/year",
-            "display_format": "count",
-            "source": {
-              "url": "https://faf.ornl.gov/faf5/",
-              "fetched_at": "2026-07-03T21:54:04Z",
-              "tier": 1,
-              "citation": "FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year 2024). Aggregate: 3430 origin × commodity flow rows summing to 1226969.1K tons ($614894.8M) across 12 origin zones and 40 commodity classes."
-            },
-            "suggestions": [
-              "What's driving inbound freight tons swfl?",
-              "How does inbound freight tons swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "swfl_sfha_pct_area_weighted",
-            "value": 0.4325,
-            "direction": "stable",
-            "label": "SWFL area-weighted Special Flood Hazard Area coverage",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-              "fetched_at": "2026-07-03T17:29:49Z",
-              "tier": 1,
-              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 6 SWFL counties: Charlotte (12015), Collier (12021), Glades (12043), Hendry (12051), Lee (12071), Sarasota (12115)."
-            },
-            "suggestions": [
-              "What's driving swfl sfha pct area weighted?",
-              "How does swfl sfha pct area weighted here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "licenses_active_lee",
-            "label": "Active Licensed Contractors — Lee County",
-            "value": 6361,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "licenses",
-            "display_format": "count",
-            "source": {
-              "url": "https://www2.myfloridalicense.com/instant-public-records/",
-              "fetched_at": "2026-06-29T18:40:31Z",
-              "tier": 1,
-              "citation": "FL DBPR boards 06+08 — Lee County (county_code=46) active licenses (primary_status=C, secondary_status=A): 6,361"
-            },
-            "suggestions": [
-              "What's driving licenses active lee?",
-              "How does licenses active lee here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sirs_confirmed_swfl",
-            "label": "SIRS-Confirmed Associations — SWFL (Lee + Collier)",
-            "value": 1358,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "associations",
-            "display_format": "count",
-            "source": {
-              "url": "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/",
-              "fetched_at": "2026-06-29T18:40:31Z",
-              "tier": 1,
-              "citation": "DBPR SIRS Reporting Database — pre-July 2025 app (14f1ed21) + July 2025+ app (d217126f); Lee + Collier county_normalized; confirmed SIRS filings: 1,358"
-            },
-            "suggestions": [
-              "What's driving sirs confirmed swfl?",
-              "How does sirs confirmed swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "commercial_permits_count",
-            "value": 281,
-            "direction": "stable",
-            "label": "SWFL commercial permits issued (2025)",
-            "variable_type": "extensive",
-            "units": "permits",
-            "display_format": "count",
-            "source": {
-              "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-              "fetched_at": "2026-06-29T18:40:31Z",
-              "tier": 1,
-              "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (281 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — count of all rows."
-            },
-            "suggestions": [
-              "What's driving commercial permits count?",
-              "How does commercial permits count here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "safety_property_crime_per_1k_lee",
-            "value": 9.06,
-            "direction": "falling",
-            "label": "Lee County property crime rate — 2024 UCR, Part I offenses per 1,000 residents",
-            "variable_type": "intensive",
-            "units": "per 1,000 population",
-            "display_format": "raw",
-            "source": {
-              "url": "https://cde.ucr.cjis.gov/",
-              "fetched_at": "2026-06-29T18:40:26.458Z",
-              "tier": 1,
-              "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2024 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-            },
-            "suggestions": [
-              "What's driving safety property crime per 1k lee?",
-              "How does safety property crime per 1k lee here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_top_occupation_employment",
-            "label": "Lee (Cape Coral-Fort Myers) Largest Workforce Sector",
-            "value": 37050,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "workers",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.bls.gov/oes/tables.htm",
-              "fetched_at": "2026-06-29T18:40:26Z",
-              "tier": 1,
-              "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) — Office and Administrative Support Occupations: 37,050 workers"
-            },
-            "suggestions": [
-              "What's driving lee top occupation employment?",
-              "How does lee top occupation employment here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "rsw_trailing_12mo_total_passengers_yoy",
-            "label": "RSW Total Passengers — Trailing-12-Mo YoY (direction driver)",
-            "value": 2.3837188145672608,
-            "direction": "rising",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "raw",
-            "source": {
-              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-              "fetched_at": "2026-06-29T18:40:26Z",
-              "tier": 1,
-              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12-mo total passengers ending 2026-04 vs prior 12 mo: +2.4%"
-            },
-            "suggestions": [
-              "What's driving rsw trailing 12mo total passengers yoy?",
-              "How does rsw trailing 12mo total passengers yoy here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "laus_lee_unemployment_rate",
-            "label": "Lee County Unemployment Rate",
-            "value": 5,
-            "direction": "rising",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "percent",
-            "source": {
-              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-              "fetched_at": "2026-06-29T18:35:33Z",
-              "tier": 1,
-              "citation": "BLS LAUS series LAUCN120710000000003, 2026-M04 = 5%"
-            },
-            "suggestions": [
-              "What's driving laus lee unemployment rate?",
-              "How does laus lee unemployment rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "fl_unemployment",
-            "value": 4.8,
-            "direction": "rising",
-            "label": "Florida unemployment rate",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-              "fetched_at": "2026-06-29T16:30:14Z",
-              "tier": 1,
-              "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.8 percent for period 2026-05-01, rising vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
-            },
-            "suggestions": [
-              "What's driving fl unemployment?",
-              "How does fl unemployment here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sofr_rate",
-            "value": 3.62,
-            "direction": "stable",
-            "label": "SOFR (Secured Overnight Financing Rate)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
-              "fetched_at": "2026-06-29T16:30:08Z",
-              "tier": 1,
-              "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 3.62 percent_annualized for period 2026-06-26, stable vs prior 6 periods. SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios."
-            },
-            "suggestions": [
-              "What's driving sofr rate?",
-              "How does sofr rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "cap_rate_median",
-            "value": 6.7,
-            "direction": "rising",
-            "label": "Median SWFL CRE cap rate (9 of 10 submarkets)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&cap_rate_pct=not.is.null",
-              "fetched_at": "2026-07-18T01:23:05Z",
-              "tier": 2,
-              "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 9 submarkets reporting cap_rate_pct (21 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 6 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
-            },
-            "suggestions": [
-              "What's driving cap rate median?",
-              "How does cap rate median here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "entry_level_listing_share_swfl",
-            "label": "SWFL for-sale listings priced under $300k (share of active inventory)",
-            "value": 43.7,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "percent",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-              "fetched_at": "2026-07-17T21:56:13Z",
-              "tier": 2,
-              "citation": "Entry-tier (<$300k) share of listings across 29,558 active SWFL for-sale listings, as of 2026-07-13"
-            },
-            "suggestions": [
-              "What's driving entry level listing share swfl?",
-              "How does entry level listing share swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "housing_median_sale_price_swfl",
-            "value": 443650,
-            "direction": "falling",
-            "label": "SWFL regional median sale price (all property types), data through 2026-06-30 (-3.3% YoY)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
             "source": {
               "url": "https://www.redfin.com/news/data-center/",
-              "fetched_at": "2026-07-17T04:31:33Z",
+              "fetched_at": "2026-07-18T03:05:51Z",
               "tier": 3,
-              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
             },
             "suggestions": [
-              "What's driving housing median sale price swfl?",
-              "How does housing median sale price swfl here compare to other SWFL areas?",
-              "How does flood risk affect housing median sale price swfl in this ZIP?"
+              "What's driving seller stress score swfl?",
+              "How does seller stress score swfl here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "rental_rent_index_zori_regional_median",
-            "value": 2114,
-            "direction": "stable",
-            "label": "SWFL regional median ZORI rent index (USD/month) at 2026-05-31",
-            "variable_type": "extensive",
-            "units": "USD/month",
-            "display_format": "currency",
+            "metric": "seller_stress_delistings_rate_swfl",
+            "value": 18.689999999999998,
+            "direction": "rising",
+            "label": "SWFL median delistings rate (share of listings pulled off market without selling) — leading indicator",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
             "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-              "fetched_at": "2026-06-29T18:40:23Z",
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-18T03:05:51Z",
               "tier": 3,
-              "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
             },
             "suggestions": [
-              "What's driving rental rent index zori regional median?",
-              "How does rental rent index zori regional median here compare to other SWFL areas?"
+              "What's driving seller stress delistings rate swfl?",
+              "How does seller stress delistings rate swfl here compare to other SWFL areas?"
             ]
+          },
+          {
+            "metric": "seller_stress_price_drops_rate_swfl",
+            "value": 40.845,
+            "direction": "rising",
+            "label": "SWFL median share of active listings with a price reduction — coincident indicator",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-18T03:05:51Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress price drops rate swfl?",
+              "How does seller stress price drops rate swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_cancellation_rate_swfl",
+            "value": 13.785,
+            "direction": "stable",
+            "label": "SWFL median contract cancellation rate (% of pending sales cancelled) — lagging ~30-60 days",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-18T03:05:51Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress cancellation rate swfl?",
+              "How does seller stress cancellation rate swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_avg_drop_depth_swfl",
+            "value": 4.5,
+            "direction": "rising",
+            "label": "SWFL median average price reduction size among listings that received a cut — lagging indicator",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-18T03:05:51Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress avg drop depth swfl?",
+              "How does seller stress avg drop depth swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "seller_stress_by_zip",
+            "title": "SWFL seller stress by ZIP — 2026-04-01 (vs 2019–2021 baseline)",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "seller_stress_score",
+                "label": "Stress Score (0-100)",
+                "display_format": "raw",
+                "units": "score"
+              },
+              {
+                "id": "share_delisted_pct",
+                "label": "Delistings Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "pct_active_with_drops",
+                "label": "Price Drop Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "cancellation_rate_pct",
+                "label": "Cancellation Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "avg_price_drop_pct",
+                "label": "Avg Drop Depth",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "share_relisted_pct",
+                "label": "Relisting Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "periods_scored",
+                "label": "Periods Scored",
+                "display_format": "count",
+                "units": "months"
+              },
+              {
+                "id": "baseline_suppressed",
+                "label": "Baseline Suppressed"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33903",
+                "label": "33903",
+                "cells": {
+                  "seller_stress_score": 85.7,
+                  "share_delisted_pct": 19.82,
+                  "pct_active_with_drops": 48.08,
+                  "cancellation_rate_pct": 27.97,
+                  "avg_price_drop_pct": 5.05,
+                  "share_relisted_pct": 6.87,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924",
+                "cells": {
+                  "seller_stress_score": 79.5,
+                  "share_delisted_pct": 20.34,
+                  "pct_active_with_drops": 39.72,
+                  "cancellation_rate_pct": 27.56,
+                  "avg_price_drop_pct": 6.16,
+                  "share_relisted_pct": 6.41,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145",
+                "cells": {
+                  "seller_stress_score": 78.3,
+                  "share_delisted_pct": 18.01,
+                  "pct_active_with_drops": 39.96,
+                  "cancellation_rate_pct": 11.97,
+                  "avg_price_drop_pct": 4.55,
+                  "share_relisted_pct": 5.79,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114",
+                "cells": {
+                  "seller_stress_score": 78.1,
+                  "share_delisted_pct": 19.14,
+                  "pct_active_with_drops": 39.31,
+                  "cancellation_rate_pct": 8.59,
+                  "avg_price_drop_pct": 4.52,
+                  "share_relisted_pct": 4.59,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973",
+                "cells": {
+                  "seller_stress_score": 75.3,
+                  "share_delisted_pct": 14.28,
+                  "pct_active_with_drops": 39.95,
+                  "cancellation_rate_pct": 25.72,
+                  "avg_price_drop_pct": 3.93,
+                  "share_relisted_pct": 5.43,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110",
+                "cells": {
+                  "seller_stress_score": 74.1,
+                  "share_delisted_pct": 23.27,
+                  "pct_active_with_drops": 41.08,
+                  "cancellation_rate_pct": 16.16,
+                  "avg_price_drop_pct": 5.81,
+                  "share_relisted_pct": 3.54,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120",
+                "cells": {
+                  "seller_stress_score": 73.5,
+                  "share_delisted_pct": 16.01,
+                  "pct_active_with_drops": 38,
+                  "cancellation_rate_pct": 12.44,
+                  "avg_price_drop_pct": 3.68,
+                  "share_relisted_pct": 5.29,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901",
+                "cells": {
+                  "seller_stress_score": 73,
+                  "share_delisted_pct": 22.05,
+                  "pct_active_with_drops": 43.04,
+                  "cancellation_rate_pct": 14.39,
+                  "avg_price_drop_pct": 6.11,
+                  "share_relisted_pct": 8,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957",
+                "cells": {
+                  "seller_stress_score": 72.3,
+                  "share_delisted_pct": 23.3,
+                  "pct_active_with_drops": 33.65,
+                  "cancellation_rate_pct": 15.66,
+                  "avg_price_drop_pct": 5.84,
+                  "share_relisted_pct": 6.18,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907",
+                "cells": {
+                  "seller_stress_score": 72.2,
+                  "share_delisted_pct": 19.87,
+                  "pct_active_with_drops": 40.9,
+                  "cancellation_rate_pct": 15.66,
+                  "avg_price_drop_pct": 5.69,
+                  "share_relisted_pct": 5.53,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990",
+                "cells": {
+                  "seller_stress_score": 72.2,
+                  "share_delisted_pct": 16.83,
+                  "pct_active_with_drops": 46.32,
+                  "cancellation_rate_pct": 20.16,
+                  "avg_price_drop_pct": 3.82,
+                  "share_relisted_pct": 8.51,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "seller_stress_score": 71.6,
+                  "share_delisted_pct": 20.66,
+                  "pct_active_with_drops": 41.92,
+                  "cancellation_rate_pct": 12.56,
+                  "avg_price_drop_pct": 4.79,
+                  "share_relisted_pct": 3.58,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919",
+                "cells": {
+                  "seller_stress_score": 70.5,
+                  "share_delisted_pct": 21.78,
+                  "pct_active_with_drops": 43.57,
+                  "cancellation_rate_pct": 12.8,
+                  "avg_price_drop_pct": 4.96,
+                  "share_relisted_pct": 6.44,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904",
+                "cells": {
+                  "seller_stress_score": 69.9,
+                  "share_delisted_pct": 18.66,
+                  "pct_active_with_drops": 44.55,
+                  "cancellation_rate_pct": 20.47,
+                  "avg_price_drop_pct": 4.37,
+                  "share_relisted_pct": 8.15,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976",
+                "cells": {
+                  "seller_stress_score": 67.5,
+                  "share_delisted_pct": 13.95,
+                  "pct_active_with_drops": 45.48,
+                  "cancellation_rate_pct": 19.99,
+                  "avg_price_drop_pct": 2.92,
+                  "share_relisted_pct": 3.08,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956",
+                "cells": {
+                  "seller_stress_score": 66.6,
+                  "share_delisted_pct": 22.83,
+                  "pct_active_with_drops": 36.26,
+                  "cancellation_rate_pct": 25.97,
+                  "avg_price_drop_pct": 5.25,
+                  "share_relisted_pct": 5.06,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905",
+                "cells": {
+                  "seller_stress_score": 66.1,
+                  "share_delisted_pct": 18.23,
+                  "pct_active_with_drops": 41.77,
+                  "cancellation_rate_pct": 16.77,
+                  "avg_price_drop_pct": 4.03,
+                  "share_relisted_pct": 6.62,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922",
+                "cells": {
+                  "seller_stress_score": 65.8,
+                  "share_delisted_pct": 18.72,
+                  "pct_active_with_drops": 44.91,
+                  "cancellation_rate_pct": 26.07,
+                  "avg_price_drop_pct": 4.77,
+                  "share_relisted_pct": 4.81,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931",
+                "cells": {
+                  "seller_stress_score": 65.5,
+                  "share_delisted_pct": 23.75,
+                  "pct_active_with_drops": 38.23,
+                  "cancellation_rate_pct": 16.38,
+                  "avg_price_drop_pct": 5.3,
+                  "share_relisted_pct": 4.69,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912",
+                "cells": {
+                  "seller_stress_score": 64.8,
+                  "share_delisted_pct": 20.38,
+                  "pct_active_with_drops": 43.66,
+                  "cancellation_rate_pct": 10.72,
+                  "avg_price_drop_pct": 4.88,
+                  "share_relisted_pct": 4.97,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134",
+                "cells": {
+                  "seller_stress_score": 64.8,
+                  "share_delisted_pct": 21.93,
+                  "pct_active_with_drops": 35.59,
+                  "cancellation_rate_pct": 13.02,
+                  "avg_price_drop_pct": 5.26,
+                  "share_relisted_pct": 3.54,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916",
+                "cells": {
+                  "seller_stress_score": 63.8,
+                  "share_delisted_pct": 16.78,
+                  "pct_active_with_drops": 49.12,
+                  "cancellation_rate_pct": 12.76,
+                  "avg_price_drop_pct": 4.64,
+                  "share_relisted_pct": 9.59,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116",
+                "cells": {
+                  "seller_stress_score": 63.8,
+                  "share_delisted_pct": 15.57,
+                  "pct_active_with_drops": 30.57,
+                  "cancellation_rate_pct": 17.11,
+                  "avg_price_drop_pct": 4.48,
+                  "share_relisted_pct": 4.17,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142",
+                "cells": {
+                  "seller_stress_score": 63.6,
+                  "share_delisted_pct": 15.83,
+                  "pct_active_with_drops": 43,
+                  "cancellation_rate_pct": 12.39,
+                  "avg_price_drop_pct": 4.02,
+                  "share_relisted_pct": 5.31,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117",
+                "cells": {
+                  "seller_stress_score": 63.5,
+                  "share_delisted_pct": 12.05,
+                  "pct_active_with_drops": 40.79,
+                  "cancellation_rate_pct": 18.47,
+                  "avg_price_drop_pct": 5,
+                  "share_relisted_pct": 8.32,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914",
+                "cells": {
+                  "seller_stress_score": 62.5,
+                  "share_delisted_pct": 15.97,
+                  "pct_active_with_drops": 47.72,
+                  "cancellation_rate_pct": 14.82,
+                  "avg_price_drop_pct": 4.01,
+                  "share_relisted_pct": 8.26,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135",
+                "cells": {
+                  "seller_stress_score": 62.5,
+                  "share_delisted_pct": 22.8,
+                  "pct_active_with_drops": 40.47,
+                  "cancellation_rate_pct": 9.59,
+                  "avg_price_drop_pct": 4.27,
+                  "share_relisted_pct": 6.05,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104",
+                "cells": {
+                  "seller_stress_score": 61.6,
+                  "share_delisted_pct": 18.79,
+                  "pct_active_with_drops": 40.74,
+                  "cancellation_rate_pct": 7.82,
+                  "avg_price_drop_pct": 4.22,
+                  "share_relisted_pct": 4.42,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109",
+                "cells": {
+                  "seller_stress_score": 61.5,
+                  "share_delisted_pct": 18.46,
+                  "pct_active_with_drops": 41.23,
+                  "cancellation_rate_pct": 11.99,
+                  "avg_price_drop_pct": 4.54,
+                  "share_relisted_pct": 3.16,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108",
+                "cells": {
+                  "seller_stress_score": 60.7,
+                  "share_delisted_pct": 23.14,
+                  "pct_active_with_drops": 37.33,
+                  "cancellation_rate_pct": 10.15,
+                  "avg_price_drop_pct": 5.29,
+                  "share_relisted_pct": 5.49,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909",
+                "cells": {
+                  "seller_stress_score": 60.4,
+                  "share_delisted_pct": 15.48,
+                  "pct_active_with_drops": 39.94,
+                  "cancellation_rate_pct": 18.57,
+                  "avg_price_drop_pct": 3.58,
+                  "share_relisted_pct": 4.14,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991",
+                "cells": {
+                  "seller_stress_score": 60.3,
+                  "share_delisted_pct": 14.87,
+                  "pct_active_with_drops": 45.98,
+                  "cancellation_rate_pct": 14.3,
+                  "avg_price_drop_pct": 3.5,
+                  "share_relisted_pct": 8.87,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908",
+                "cells": {
+                  "seller_stress_score": 60,
+                  "share_delisted_pct": 19.41,
+                  "pct_active_with_drops": 45.45,
+                  "cancellation_rate_pct": 13.57,
+                  "avg_price_drop_pct": 4.57,
+                  "share_relisted_pct": 5.58,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105",
+                "cells": {
+                  "seller_stress_score": 59.8,
+                  "share_delisted_pct": 19.78,
+                  "pct_active_with_drops": 34.19,
+                  "cancellation_rate_pct": 14,
+                  "avg_price_drop_pct": 5.08,
+                  "share_relisted_pct": 2.72,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33993",
+                "label": "33993",
+                "cells": {
+                  "seller_stress_score": 59.1,
+                  "share_delisted_pct": 14.61,
+                  "pct_active_with_drops": 46.87,
+                  "cancellation_rate_pct": 16.15,
+                  "avg_price_drop_pct": 3.55,
+                  "share_relisted_pct": 6.49,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971",
+                "cells": {
+                  "seller_stress_score": 57.9,
+                  "share_delisted_pct": 15.74,
+                  "pct_active_with_drops": 44.02,
+                  "cancellation_rate_pct": 14.78,
+                  "avg_price_drop_pct": 3.11,
+                  "share_relisted_pct": 5.52,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913",
+                "cells": {
+                  "seller_stress_score": 57.5,
+                  "share_delisted_pct": 15.31,
+                  "pct_active_with_drops": 44.23,
+                  "cancellation_rate_pct": 11.2,
+                  "avg_price_drop_pct": 3.61,
+                  "share_relisted_pct": 4.6,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103",
+                "cells": {
+                  "seller_stress_score": 57.4,
+                  "share_delisted_pct": 24.84,
+                  "pct_active_with_drops": 33.01,
+                  "cancellation_rate_pct": 6.76,
+                  "avg_price_drop_pct": 5.07,
+                  "share_relisted_pct": 4.27,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920",
+                "cells": {
+                  "seller_stress_score": 57.1,
+                  "share_delisted_pct": 12.75,
+                  "pct_active_with_drops": 44.67,
+                  "cancellation_rate_pct": 20.3,
+                  "avg_price_drop_pct": 4.32,
+                  "share_relisted_pct": 3.1,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921",
+                "cells": {
+                  "seller_stress_score": 55.3,
+                  "share_delisted_pct": 24.09,
+                  "pct_active_with_drops": 33.39,
+                  "cancellation_rate_pct": 0,
+                  "avg_price_drop_pct": 6.66,
+                  "share_relisted_pct": 4.55,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967",
+                "cells": {
+                  "seller_stress_score": 53.5,
+                  "share_delisted_pct": 16.44,
+                  "pct_active_with_drops": 39.61,
+                  "cancellation_rate_pct": 11.61,
+                  "avg_price_drop_pct": 3.94,
+                  "share_relisted_pct": 4.77,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917",
+                "cells": {
+                  "seller_stress_score": 53.4,
+                  "share_delisted_pct": 18.78,
+                  "pct_active_with_drops": 37.75,
+                  "cancellation_rate_pct": 12.26,
+                  "avg_price_drop_pct": 4.02,
+                  "share_relisted_pct": 5.12,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119",
+                "cells": {
+                  "seller_stress_score": 53.1,
+                  "share_delisted_pct": 17.28,
+                  "pct_active_with_drops": 41.97,
+                  "cancellation_rate_pct": 9.75,
+                  "avg_price_drop_pct": 3.86,
+                  "share_relisted_pct": 4.08,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112",
+                "cells": {
+                  "seller_stress_score": 52.1,
+                  "share_delisted_pct": 20.55,
+                  "pct_active_with_drops": 38.18,
+                  "cancellation_rate_pct": 8.53,
+                  "avg_price_drop_pct": 5.01,
+                  "share_relisted_pct": 5.1,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936",
+                "cells": {
+                  "seller_stress_score": 50.6,
+                  "share_delisted_pct": 16.36,
+                  "pct_active_with_drops": 42.24,
+                  "cancellation_rate_pct": 15.51,
+                  "avg_price_drop_pct": 4.09,
+                  "share_relisted_pct": 5.04,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972",
+                "cells": {
+                  "seller_stress_score": 49.7,
+                  "share_delisted_pct": 14.87,
+                  "pct_active_with_drops": 40.33,
+                  "cancellation_rate_pct": 15.84,
+                  "avg_price_drop_pct": 3.74,
+                  "share_relisted_pct": 3.93,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974",
+                "cells": {
+                  "seller_stress_score": 49,
+                  "share_delisted_pct": 16.41,
+                  "pct_active_with_drops": 45.46,
+                  "cancellation_rate_pct": 16.07,
+                  "avg_price_drop_pct": 3.64,
+                  "share_relisted_pct": 6.33,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140",
+                "cells": {
+                  "seller_stress_score": 48.1,
+                  "share_delisted_pct": 33.5,
+                  "pct_active_with_drops": 35.87,
+                  "cancellation_rate_pct": 0,
+                  "avg_price_drop_pct": 7.75,
+                  "share_relisted_pct": null,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966",
+                "cells": {
+                  "seller_stress_score": 47.6,
+                  "share_delisted_pct": 14.93,
+                  "pct_active_with_drops": 46.13,
+                  "cancellation_rate_pct": 6.16,
+                  "avg_price_drop_pct": 4.05,
+                  "share_relisted_pct": 2.74,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "seller_stress_score": 46,
+                  "share_delisted_pct": 22.05,
+                  "pct_active_with_drops": 34.91,
+                  "cancellation_rate_pct": 5.43,
+                  "avg_price_drop_pct": 5.65,
+                  "share_relisted_pct": 4.22,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928",
+                "cells": {
+                  "seller_stress_score": 45.5,
+                  "share_delisted_pct": 16.83,
+                  "pct_active_with_drops": 39.62,
+                  "cancellation_rate_pct": 8.66,
+                  "avg_price_drop_pct": 3.45,
+                  "share_relisted_pct": 4.54,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139",
+                "cells": {
+                  "seller_stress_score": 30.9,
+                  "share_delisted_pct": 38.38,
+                  "pct_active_with_drops": 24.66,
+                  "cancellation_rate_pct": 0,
+                  "avg_price_drop_pct": 3.18,
+                  "share_relisted_pct": null,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34101",
+                "label": "34101",
+                "cells": {
+                  "seller_stress_score": null,
+                  "share_delisted_pct": null,
+                  "pct_active_with_drops": null,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": null,
+                  "share_relisted_pct": null,
+                  "periods_scored": 0,
+                  "baseline_suppressed": true
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138",
+                "cells": {
+                  "seller_stress_score": null,
+                  "share_delisted_pct": null,
+                  "pct_active_with_drops": null,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": null,
+                  "share_relisted_pct": null,
+                  "periods_scored": 12,
+                  "baseline_suppressed": true
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141",
+                "cells": {
+                  "seller_stress_score": null,
+                  "share_delisted_pct": null,
+                  "pct_active_with_drops": null,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": null,
+                  "share_relisted_pct": null,
+                  "periods_scored": 8,
+                  "baseline_suppressed": true
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-07-18T03:05:51Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            }
           }
         ],
         "caveats": [
-          "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $32,610/insured property",
-          "Override \"storm-history-modifier\" fired (priority 70)",
-          "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
-          "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
-          "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
-          "asking_rent_nnn_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
-          "All per-submarket MarketBeat vacancy_rate metrics ship direction=stable as a schema-required fallback; v1 does not compute quarter-over-quarter trends. Affected: vacancy_rate_marketbeat_bonita_springs, vacancy_rate_marketbeat_cape_coral, vacancy_rate_marketbeat_east_naples, vacancy_rate_marketbeat_estero, vacancy_rate_marketbeat_fort_myers, vacancy_rate_marketbeat_golden_gate, vacancy_rate_marketbeat_lehigh_acres, vacancy_rate_marketbeat_lely, vacancy_rate_marketbeat_marco_island, vacancy_rate_marketbeat_naples, vacancy_rate_marketbeat_north_fort_myers, vacancy_rate_marketbeat_north_naples, vacancy_rate_marketbeat_collier_county, vacancy_rate_marketbeat_san_carlos_park, vacancy_rate_marketbeat_the_islands, vacancy_rate_marketbeat_naples_area, vacancy_rate_marketbeat_fort_myers_area.",
-          "All per-submarket MarketBeat asking_rent_nnn metrics ship direction=stable as a schema-required fallback; v1 does not compute quarter-over-quarter trends. Affected: asking_rent_nnn_marketbeat_bonita_springs, asking_rent_nnn_marketbeat_cape_coral, asking_rent_nnn_marketbeat_east_naples, asking_rent_nnn_marketbeat_estero, asking_rent_nnn_marketbeat_fort_myers, asking_rent_nnn_marketbeat_golden_gate, asking_rent_nnn_marketbeat_lehigh_acres, asking_rent_nnn_marketbeat_lely, asking_rent_nnn_marketbeat_marco_island, asking_rent_nnn_marketbeat_naples, asking_rent_nnn_marketbeat_north_fort_myers, asking_rent_nnn_marketbeat_north_naples, asking_rent_nnn_marketbeat_collier_county, asking_rent_nnn_marketbeat_san_carlos_park, asking_rent_nnn_marketbeat_the_islands, asking_rent_nnn_marketbeat_naples_area, asking_rent_nnn_marketbeat_fort_myers_area.",
-          "All per-submarket MarketBeat absorption_sqft metrics ship direction=stable as a schema-required fallback; v1 does not compute quarter-over-quarter trends. Affected: absorption_sqft_marketbeat_bonita_springs, absorption_sqft_marketbeat_cape_coral, absorption_sqft_marketbeat_east_naples, absorption_sqft_marketbeat_estero, absorption_sqft_marketbeat_fort_myers, absorption_sqft_marketbeat_golden_gate, absorption_sqft_marketbeat_lehigh_acres, absorption_sqft_marketbeat_lely, absorption_sqft_marketbeat_marco_island, absorption_sqft_marketbeat_naples, absorption_sqft_marketbeat_north_fort_myers, absorption_sqft_marketbeat_north_naples, absorption_sqft_marketbeat_collier_county, absorption_sqft_marketbeat_san_carlos_park, absorption_sqft_marketbeat_the_islands, absorption_sqft_marketbeat_naples_area, absorption_sqft_marketbeat_fort_myers_area.",
-          "Per-sector MarketBeat metrics (industrial/office/medical_office) are surfaced separately from retail — never blended across sectors — and ship direction=stable as a schema-required fallback (no quarter-over-quarter trend in v1). Affected: vacancy_rate_marketbeat_bonita_springs_industrial, asking_rent_nnn_marketbeat_bonita_springs_industrial, absorption_sqft_marketbeat_bonita_springs_industrial, vacancy_rate_marketbeat_cape_coral_industrial, asking_rent_nnn_marketbeat_cape_coral_industrial, absorption_sqft_marketbeat_cape_coral_industrial, vacancy_rate_marketbeat_fort_myers_industrial, asking_rent_nnn_marketbeat_fort_myers_industrial, absorption_sqft_marketbeat_fort_myers_industrial, vacancy_rate_marketbeat_east_naples_industrial, asking_rent_nnn_marketbeat_east_naples_industrial, absorption_sqft_marketbeat_east_naples_industrial, vacancy_rate_marketbeat_estero_industrial, asking_rent_nnn_marketbeat_estero_industrial, absorption_sqft_marketbeat_estero_industrial, vacancy_rate_marketbeat_fort_myers_industrial, asking_rent_nnn_marketbeat_fort_myers_industrial, absorption_sqft_marketbeat_fort_myers_industrial, vacancy_rate_marketbeat_golden_gate_industrial, asking_rent_nnn_marketbeat_golden_gate_industrial, absorption_sqft_marketbeat_golden_gate_industrial, vacancy_rate_marketbeat_lehigh_acres_industrial, asking_rent_nnn_marketbeat_lehigh_acres_industrial, absorption_sqft_marketbeat_lehigh_acres_industrial, vacancy_rate_marketbeat_lehigh_acres_industrial, asking_rent_nnn_marketbeat_lehigh_acres_industrial, absorption_sqft_marketbeat_lehigh_acres_industrial, vacancy_rate_marketbeat_lely_industrial, asking_rent_nnn_marketbeat_lely_industrial, absorption_sqft_marketbeat_lely_industrial, vacancy_rate_marketbeat_marco_island_industrial, asking_rent_nnn_marketbeat_marco_island_industrial, absorption_sqft_marketbeat_marco_island_industrial, vacancy_rate_marketbeat_naples_industrial, asking_rent_nnn_marketbeat_naples_industrial, absorption_sqft_marketbeat_naples_industrial, vacancy_rate_marketbeat_north_fort_myers_industrial, asking_rent_nnn_marketbeat_north_fort_myers_industrial, absorption_sqft_marketbeat_north_fort_myers_industrial, vacancy_rate_marketbeat_north_naples_industrial, asking_rent_nnn_marketbeat_north_naples_industrial, absorption_sqft_marketbeat_north_naples_industrial, vacancy_rate_marketbeat_collier_county_industrial, asking_rent_nnn_marketbeat_collier_county_industrial, absorption_sqft_marketbeat_collier_county_industrial, vacancy_rate_marketbeat_san_carlos_park_industrial, asking_rent_nnn_marketbeat_san_carlos_park_industrial, absorption_sqft_marketbeat_san_carlos_park_industrial, vacancy_rate_marketbeat_south_fort_myers_industrial, asking_rent_nnn_marketbeat_south_fort_myers_industrial, absorption_sqft_marketbeat_south_fort_myers_industrial, vacancy_rate_marketbeat_the_islands_industrial, asking_rent_nnn_marketbeat_the_islands_industrial, absorption_sqft_marketbeat_the_islands_industrial, vacancy_rate_marketbeat_fort_myers_area_industrial, asking_rent_nnn_marketbeat_fort_myers_area_industrial, absorption_sqft_marketbeat_fort_myers_area_industrial, vacancy_rate_marketbeat_naples_area_industrial, asking_rent_nnn_marketbeat_naples_area_industrial, absorption_sqft_marketbeat_naples_area_industrial, vacancy_rate_marketbeat_lehigh_acres_area_industrial, asking_rent_nnn_marketbeat_lehigh_acres_area_industrial, absorption_sqft_marketbeat_lehigh_acres_area_industrial, vacancy_rate_marketbeat_bonita_springs_medical_office, asking_rent_full_service_marketbeat_bonita_springs_medical_office, absorption_sqft_marketbeat_bonita_springs_medical_office, vacancy_rate_marketbeat_cape_coral_medical_office, asking_rent_full_service_marketbeat_cape_coral_medical_office, absorption_sqft_marketbeat_cape_coral_medical_office, vacancy_rate_marketbeat_fort_myers_medical_office, asking_rent_full_service_marketbeat_fort_myers_medical_office, absorption_sqft_marketbeat_fort_myers_medical_office, vacancy_rate_marketbeat_east_naples_medical_office, asking_rent_full_service_marketbeat_east_naples_medical_office, absorption_sqft_marketbeat_east_naples_medical_office, vacancy_rate_marketbeat_estero_medical_office, asking_rent_full_service_marketbeat_estero_medical_office, absorption_sqft_marketbeat_estero_medical_office, vacancy_rate_marketbeat_golden_gate_medical_office, asking_rent_full_service_marketbeat_golden_gate_medical_office, asking_rent_full_service_marketbeat_lehigh_acres_medical_office, absorption_sqft_marketbeat_lehigh_acres_medical_office, vacancy_rate_marketbeat_lehigh_acres_medical_office, absorption_sqft_marketbeat_lehigh_acres_medical_office, vacancy_rate_marketbeat_lely_medical_office, asking_rent_full_service_marketbeat_lely_medical_office, absorption_sqft_marketbeat_lely_medical_office, vacancy_rate_marketbeat_marco_island_medical_office, asking_rent_full_service_marketbeat_marco_island_medical_office, absorption_sqft_marketbeat_marco_island_medical_office, vacancy_rate_marketbeat_naples_medical_office, asking_rent_full_service_marketbeat_naples_medical_office, absorption_sqft_marketbeat_naples_medical_office, asking_rent_full_service_marketbeat_north_fort_myers_medical_office, vacancy_rate_marketbeat_north_naples_medical_office, asking_rent_full_service_marketbeat_north_naples_medical_office, absorption_sqft_marketbeat_north_naples_medical_office, vacancy_rate_marketbeat_south_fort_myers_medical_office, asking_rent_full_service_marketbeat_south_fort_myers_medical_office, absorption_sqft_marketbeat_south_fort_myers_medical_office, vacancy_rate_marketbeat_the_islands_medical_office, asking_rent_full_service_marketbeat_the_islands_medical_office, absorption_sqft_marketbeat_the_islands_medical_office, vacancy_rate_marketbeat_fort_myers_area_medical_office, asking_rent_full_service_marketbeat_fort_myers_area_medical_office, absorption_sqft_marketbeat_fort_myers_area_medical_office, vacancy_rate_marketbeat_naples_area_medical_office, asking_rent_full_service_marketbeat_naples_area_medical_office, absorption_sqft_marketbeat_naples_area_medical_office, absorption_sqft_marketbeat_lehigh_acres_area_medical_office, vacancy_rate_marketbeat_bonita_springs_office, asking_rent_nnn_marketbeat_bonita_springs_office, absorption_sqft_marketbeat_bonita_springs_office, vacancy_rate_marketbeat_cape_coral_office, asking_rent_nnn_marketbeat_cape_coral_office, absorption_sqft_marketbeat_cape_coral_office, vacancy_rate_marketbeat_east_naples_office, asking_rent_nnn_marketbeat_east_naples_office, absorption_sqft_marketbeat_east_naples_office, vacancy_rate_marketbeat_estero_office, asking_rent_nnn_marketbeat_estero_office, absorption_sqft_marketbeat_estero_office, vacancy_rate_marketbeat_fort_myers_office, asking_rent_nnn_marketbeat_fort_myers_office, absorption_sqft_marketbeat_fort_myers_office, vacancy_rate_marketbeat_golden_gate_office, asking_rent_nnn_marketbeat_golden_gate_office, absorption_sqft_marketbeat_golden_gate_office, vacancy_rate_marketbeat_lehigh_acres_office, asking_rent_nnn_marketbeat_lehigh_acres_office, absorption_sqft_marketbeat_lehigh_acres_office, vacancy_rate_marketbeat_lely_office, asking_rent_nnn_marketbeat_lely_office, absorption_sqft_marketbeat_lely_office, vacancy_rate_marketbeat_marco_island_office, asking_rent_nnn_marketbeat_marco_island_office, absorption_sqft_marketbeat_marco_island_office, vacancy_rate_marketbeat_naples_office, asking_rent_nnn_marketbeat_naples_office, absorption_sqft_marketbeat_naples_office, vacancy_rate_marketbeat_north_fort_myers_office, asking_rent_nnn_marketbeat_north_fort_myers_office, absorption_sqft_marketbeat_north_fort_myers_office, vacancy_rate_marketbeat_north_naples_office, asking_rent_nnn_marketbeat_north_naples_office, absorption_sqft_marketbeat_north_naples_office, vacancy_rate_marketbeat_collier_county_office, asking_rent_nnn_marketbeat_collier_county_office, absorption_sqft_marketbeat_collier_county_office, vacancy_rate_marketbeat_san_carlos_park_office, asking_rent_nnn_marketbeat_san_carlos_park_office, absorption_sqft_marketbeat_san_carlos_park_office, vacancy_rate_marketbeat_the_islands_office, asking_rent_nnn_marketbeat_the_islands_office, absorption_sqft_marketbeat_the_islands_office, vacancy_rate_marketbeat_naples_area_office, asking_rent_nnn_marketbeat_naples_area_office, absorption_sqft_marketbeat_naples_area_office, vacancy_rate_marketbeat_fort_myers_area_office, asking_rent_nnn_marketbeat_fort_myers_area_office, absorption_sqft_marketbeat_fort_myers_area_office.",
-          "MHS Databook East Naples submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "MHS Databook Golden Gate submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "MHS Databook Lehigh Acres submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "MHS Databook Lely submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "MHS Databook Marco Island submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "MHS Databook North Fort Myers submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "MHS Databook North Naples submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "MHS Databook Collier County submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "MHS Databook San Carlos Park submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "MHS Databook The Islands submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
-          "Broker-survey (MarketBeat) coverage is incomplete for some areas this build — those areas are not reflected in the survey-backed rent and vacancy metrics.",
-          "corridor_factor: direction ships as \"stable\" — v1 does not compute period-over-period index change; the label is a schema-required fallback, not a measured trend.",
-          "Estero CRE metrics derived from active Crexi listings (16 listings as of 2026-07-05); no broker aggregate survey covers this submarket. Available sqft reflects listed inventory only — not total corridor inventory. Direction=stable is a schema-required fallback, not a measured trend.",
-          "Fort Myers Beach CRE metrics derived from active Crexi listings (9 listings as of 2026-07-05); no broker aggregate survey covers this submarket. Available sqft reflects listed inventory only — not total corridor inventory. Direction=stable is a schema-required fallback, not a measured trend.",
-          "Fort Myers Beach local context [fmb_planning (2026-05-01)]: Beach Renourishment -- 41,655 CY placed, started mid-May 2026 — Fort Myers Beach coastal renourishment project: 41,655 cubic yards of sand placed beginning mid-May 2026. Restores beach width destroyed by Hurricane Ian, directly supporting tourism recovery and beac",
-          "Fort Myers Beach local context [fmb_planning (2026-04-08)]: Times Square Pier -- $11.7M contract awarded Apr 8, 2026 — Town of Fort Myers Beach awarded $11.7M contract for Times Square Pier reconstruction on April 8, 2026. Pier was destroyed by Hurricane Ian. Reconstruction is the primary catalyst for Times Square com",
-          "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Big Carlos Pass Bridge -- replacement underway 2026 — Big Carlos Pass Bridge (south end of Fort Myers Beach island) replacement underway 2026. Provides critical connectivity for the southern commercial corridor and residential areas.",
-          "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Newton Beach Park -- design phase 2026 — Newton Beach Park redesign in design phase as of 2026. Part of broader FMB public-space recovery program following Hurricane Ian.",
-          "Fort Myers Beach local context [fmb_planning (2026-01-01)]: CDBG-DR allocation -- $1.107B total for FMB recovery — Fort Myers Beach has received $1.107 billion in CDBG-DR (Community Development Block Grant - Disaster Recovery) funding from HUD via the State of Florida for Hurricane Ian recovery. Covers infrastruct",
-          "Estero local context [estero_edc (2026-01-01)]: Corkscrew Rd Widening Phase 2 -- ~$27M, est. completion end-2026 — Corkscrew Road Widening Phase 2, approximately $27M project, estimated completion end of 2026. Expands capacity on the primary east-west commercial spine through Estero.",
-          "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Matanzas Pass Bridge -- improvements underway 2026 — Matanzas Pass Bridge improvements underway in 2026. Improves the primary northern gateway to Fort Myers Beach island, critical for construction-phase traffic management and eventual tourist return.",
-          "Fort Myers Beach local context [fmb_planning (2025-12-01)]: Times Square District -- plans to permits phase 2025-2026 — Times Square commercial district moving from planning to permitting phase. Multiple commercial rebuilds in queue. Pier contract ($11.7M, Apr 2026) is the anchor catalyst; full district recovery projec",
-          "Estero local context [estero_edc (2025-12-01)]: Aldi grocery -- 11906 Newbridge Court — New Aldi grocery store at 11906 Newbridge Court, Estero. Part of continued Estero retail infill along US-41 / Corkscrew Rd corridors.",
-          "Estero local context [estero_edc (2025-12-01)]: Corkscrew Village mini-warehouse -- 75,910 SF — Corkscrew Village self-storage / mini-warehouse, 75,910 SF, along Corkscrew Rd corridor. Reflects growing demand for last-mile industrial in the Estero-Bonita Springs submarket.",
-          "Estero local context [estero_edc (2025-12-01)]: Home2 Suites by Hilton -- approved 2025 — New Home2 Suites extended-stay hotel approved in Estero. Adds extended-stay inventory to the US-41 / Miromar/Coconut Point hospitality cluster.",
-          "Estero local context [estero_edc (2025-12-01)]: Walmart Supercenter expansion -- Estero — Walmart Supercenter expansion permit issued in Estero. Continues US-41 corridor big-box retail densification in the Coconut Point area.",
-          "Estero local context [estero_edc (2025-12-01)]: High 5 Entertainment -- 9000 Williams Rd — New 40,000 SF entertainment venue at 9000 Williams Rd, Estero. Permit value ~$1.1M. Approved 2025. Anchors Williams Rd commercial corridor.",
-          "Fort Myers Beach local context [fmb_planning (2025-08-01)]: Bay Oaks Park -- reconstruction completed ~Aug 2025 — Bay Oaks Recreation Center and Park reconstruction completed approximately August 2025. Restores key community and tourism amenity destroyed by Hurricane Ian.",
-          "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.",
-          "Census CBP data is an annual snapshot; establishment and employment counts may lag up to 18 months behind current conditions.",
-          "BLS LAUS data for 2026-M04 is preliminary — subject to revision at next monthly release.",
-          "Charge-off rates use the resolved-loan denominator (n_chargeoffs / (n_chargeoffs + n_paid_in_full)); the materialized view's `chargeoff_pct` is intentionally ignored because it understates risk on still-active loans.",
-          "Sectors with fewer than 5 resolved loans are not ranked — small-sample charge-off rates are directional, not actionable.",
-          "Worst-sector charge-off 57.1% (Transportation & Warehousing, NAICS 48) above 30% bearish threshold — sector-level credit risk is elevated.",
-          "Florida DOR Form 3 may revise recent months for ~60 days after first publication — treat the latest month as directional, not final.",
-          "Latest month 2026-04 reflects only 1 of 2 expected counties (Collier data lags Lee by ~2 months). YoY comparison is suppressed to avoid apples-to-oranges inflation. Use per-county metrics or trailing_12mo_collections_usd for the cross-county read.",
-          "Area aggregates are in square decimal degrees (WGS84 / EPSG:4326), not projected meters. Ratios across zones within the same county are accurate; absolute areas are NOT physical units and are never propagated.",
-          "Bbox-intersect queries include polygons that touch the county envelope, so edge polygons may belong to neighboring counties. The DFIRM_ID on each polygon is the authoritative county affiliation; v1 surfaces the bbox-aggregate without re-attributing edge polygons.",
-          "FEMA NFHL is queried live on every refinery run (v1). LOMR-based cache invalidation (Layer 1, EFF_DATE) is documented in docs/env-swfl-spike-findings.md and reserved for v2 once a hot-path issue is observed.",
-          "NFIP claims are policyholder-only. Uninsured properties and parcels outside NFIP participation are NOT in the archive — true SWFL flood loss is materially larger than what these numbers show.",
-          "Storm-year list (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024) was last reviewed 2026-05-17. Requires update in refinery/sources/fema-nfip-source.mts when a new named storm hits SWFL.",
-          "Per-ZIP AAL denominator uses 2020 ACS population × 0.3 NSI-coverage proxy for insured-property count (v1). Replace with the live OpenFEMA NFIP Policies insured count in v2 before treating per-ZIP magnitudes as policy-grade — current numbers compress toward each other when actual NFIP penetration in a ZIP diverges from the 30% proxy.",
-          "USGS surface stage metric includes both Approved (A) and Provisional (P) qualifiers — magnitudes may revise as USGS approves provisional readings over the 6-12 month review window. For approval-only reads, brain-level consumers should filter on the qualifiers column directly.",
-          "GHCN-Daily rainfall is gauge precipitation at the station point — not areal interpolation. The 4-station Lee+Collier average smooths station-level micro-climate but may diverge from PRISM or radar QPE in high-gradient convective events.",
-          "Scope is inbound domestic only (dms_dest=129 AND trade_type=1). Imports (trade_type=2), exports (trade_type=3), and outbound flows (dms_orig=129) are intentionally excluded — separate brains would own those scopes if built.",
-          "Year scope is 2024 (latest historical FAF5 year). FAF5 forecast years are deliberately not consumed here; bump LATEST_HISTORICAL_FAF_YEAR in refinery/sources/faf5-source.mts when ORNL publishes the next vintage.",
-          "v1 emits no direction/magnitude vote — the brain reports a point-in-time snapshot, not a time series. Direction reads require a multi-year retro (planned for v2 once a second FAF5 vintage is ingested).",
-          "Path B (post-commit 297ad23): deviation math compares CURRENT FDOT segment-count activity (Σ AADT × tfctr × payload × 365) against the rolling mean/stddev of the same quantity in the last 24 days of shock-log history. The FAF5 number above is preserved as audited CONTEXT but is no longer the math anchor — the prior v1 design comparing FDOT activity to FAF5 flow had dimensional + population mismatches.",
-          "Daily-cadence shock detection uses a synthetic per-day denominator (annual tons_per_year ÷ 365) because Tier 2 carries only annual FDOT AADT. 30d / 90d escalation thresholds will rarely fire from current Tier 2 data alone — true daily AADT-equivalent (FDOT continuous-count stations) is reserved for v2 ingest.",
-          "Conversion math: activity_tons_per_year_per_segment = AADT × tfctr × 16 × 365. The 16.0 tons/truck payload is FHWA HS 2023 Table VM-1 (combination trucks); commodity-mix shifts (heavy gravel vs light electronics) are not modeled in v1.",
-          "Path B over-counts pass-through traffic (one truck traversing five segments contributes to five segment counts) — the over-count is constant across days and cancels in the z-score, but the headline tons/year number should NOT be compared directly to FAF5 flow.",
-          "Scheduled FDOT construction closures look mathematically identical to genuine slowdowns; v1 has no calendar-aware filter to separate the two.",
-          "Length-weighting uses shape_length (auto-generated geometry length in the layer projection). The shape_leng attribute is not consulted — it may be stale after route realignments.",
-          "Cohort-matched YoY identifies segments by (roadway, desc_frm, desc_to). If FDOT changes any of those three fields between years for the same physical segment, that segment drops from the cohort silently — small cohort sizes (< 100) should be read with skepticism.",
-          "Truck factor metric reports a length-weighted MEAN of per-county MEDIANS rather than a true cross-county median (true median would require raw segment access, defeating the source aggregation). Treat the value as a county-mix-aware estimate, not an exact statistic.",
-          "Year scope is 2021-2025. Bump LATEST_FDOT_YEAR in refinery/sources/fdot-source.mts when FDOT publishes the next vintage.",
-          "Post-Ian recovery index DELIBERATELY uses a wider 3-county set (Lee + Collier + Charlotte) than the brain's standard 2-county scope — Charlotte sat in Ian's eye-wall path and must be included for the storm signal to be honest. The other 4 metrics stay 2-county.",
-          "Direction thresholds: bullish ≥ +3% YoY; bearish ≤ -3% YoY; neutral otherwise.",
-          "Sales-velocity baseline is derived from each parcel's LATEST qualified sale, so re-sales attributed to recent years are subtracted from earlier-year buckets. Current-year z-score is therefore biased UPWARD; treat marginal bullish reads as suggestive rather than confirmatory.",
-          "Qualified-sale-only sample: inheritance, divorce, and non-arms-length transfers do not appear in the velocity counts. The signal measures market-mediated parcel turnover, not total ownership change.",
-          "Lee County only — Collier and Charlotte are NOT included. SWFL-wide reads must be assembled from sibling brains (not yet built).",
-          "FHFA HPI metrics (Cape Coral MSA + FL state) use a repeat-sale methodology and are published quarterly with a ~2-month lag. They measure price-level change, not transaction volume — the LeePA z-score and the FHFA YoY are complementary, not interchangeable.",
-          "Save-Our-Homes gap median is restricted to parcels with cap_difference > 0 (actively benefiting from the SOH cap). Non-homestead and newly-homesteaded parcels are excluded from the median; total_parcels is the full snapshot row count for context.",
-          "Direction thresholds: bullish if z ≥ +1.0σ; bearish if z ≤ -1.0σ; neutral otherwise. Standard deviation is population std over 3 baseline years; if variance is zero (all baseline years identical) z is undefined and direction is neutral.",
-          "Collier County only — Lee (see properties-lee-value) and Charlotte are NOT included.",
-          "Two sources, two grains: market velocity + price come from Redfin (county aggregates); the Save-Our-Homes gap + parcel count come from the FDOR Statewide Cadastral (parcel-grain, CO_NO=21). Redfin carries no assessed value; the cadastral carries no monthly sales pace — each fills the other's gap.",
-          "Save-Our-Homes gap = median (jv_hmstd - av_hmstd)/jv_hmstd across homesteaded parcels (the homestead-portion SOH cap differential). This is the textbook SOH measure; Lee's number is the whole-parcel just-vs-taxable proxy, so the two are directionally comparable, not numerically identical.",
-          "Velocity is monthly Redfin HOMES_SOLD summed to calendar years; the current-year count is final only after the year closes and Redfin's revisions settle (recent months are revised upward as late-recorded sales land — treat the most recent year as a soft floor).",
-          "Not directly comparable to properties-lee-value's velocity: Lee counts LeePA qualified parcel sales; Collier counts Redfin closed sales. Compare direction (z-score sign/magnitude), not raw counts.",
-          "Direction thresholds: bullish if z ≥ +1.0σ; bearish if z ≤ -1.0σ; neutral otherwise. Standard deviation is population std over 3 baseline years; if variance is zero z is undefined and direction is neutral.",
-          "Lee permit history only reaches back 143d (< 365d) - the historical baseline is incomplete; the rate-of-change reads above are indicative, not robust.",
-          "35 of 42 (corridor x bucket) cells have n < 10 in the current 90d window — z-scores on those cells are computed against small samples.",
-          "Most recent Naples permit issued 2026-04-30; monthly XLSX has not refreshed for 79 days (cadence 30d). Collier signal in this build is stale.",
-          "Collier z-scores are based on 1 month of data; signal stabilizes after 6+ months. Treat Collier values as directional only.",
-          "8 of 94 ZIPs lack a 12-month look-back; YoY excludes them.",
-          "Property crime data is annual (2024) with ~6–9 month publication lag; quarterly incident granularity is not available at county level.",
-          "Rate is per 1,000 residents covered by the agencies reporting NIBRS to the FBI that year (the denominator is the sum of those agencies' participated populations). Lee coverage is near-complete from 2022; in Collier, Naples PD does not report, so the Collier rate reflects the Sheriff + Marco Island footprint.",
-          "BLS OEWS data is annual (May survey); released ~April of the following year. Counts are employment estimates, not job openings.",
-          "Some wage and employment cells are suppressed by BLS to protect employer confidentiality when sample size is insufficient (marked * in source). Suppressed values are stored as null and excluded from all aggregates — never zeroed.",
-          "1 of 5 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
-          "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
-          "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "140 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
-          "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
-          "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
-          "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
-          "Relevance in press releases is determined by Lee/Collier geographic mentions (county or place names) — releases without an explicit place name may be undercounted.",
-          "Scope is the Lee + Collier core: enforcement records attributed to other counties in the scrape (Charlotte, Sarasota, Manatee, Hendry, Monroe) are excluded from every count.",
-          "0 of 0 recent releases were statewide with no Lee/Collier geographic mention.",
-          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design.",
           "~50% of SWFL transactions are all-cash (Lee County, Attom 2024) — rate-sensitive national thresholds do not apply; this score is calibrated to SWFL's own 2019–2021 baseline.",
           "Hurricane Ian (Sept 2022) produced a natural spike; scores from Oct 2022–Mar 2023 reflect forced delistings, not organic seller stress — treat as a labeled distress event, not a trend.",
           "Condo segment is not separated in this score; SB 4-D special assessment delistings inflate stress in condo-heavy ZIPs (e.g., Marco Island corridor). See `condo-sirs-swfl` for the condo-specific read.",
-          "3 ZIPs suppressed (insufficient baseline data in 2019–2021 or no recent observations).",
-          "List-side only — these are active-listing metrics; there are no closed/sold prices in this source. Sold-price reads come from the ATTOM lane.",
-          "Hotness is a cross-sectional national rank, not an absolute cycle gauge — a SWFL ZIP can rank hot nationally while cooling locally. The directional call is driven by inventory/DOM/pending year-over-year, not by Hotness.",
-          "~50% of SWFL transactions are all-cash (Lee County, ATTOM 2024) — national rate-sensitive thresholds are muted; read the YoY tightening, not absolute DOM cutoffs.",
-          "Hurricane Ian (Sept 2022) is a labeled event — inventory/DOM dislocations Oct 2022–Mar 2023 are forced, not organic demand.",
-          "Data provided by Realtor.com.",
-          "22 ZIPs suppressed (insufficient signals or realtor quality_flag).",
-          "NOAA modernized the Storm Events schema in 1996; this brain reads the modern-schema vintage only (1996+). Pre-1996 records use an incompatible column layout and are excluded by construction.",
-          "damage_property strings are parsed best-effort (regex matches \"1.5M\" / \"10K\" / \"2B\" / plain numbers). 6 events in this corpus had unparseable damage strings and are excluded from damage-based metrics (counted but not summed).",
-          "Vintage end year is 2025 — bump YEAR_RANGE_END in ingest/duckdb_pipelines/storm_history_swfl/constants.py and re-run the ingest when NCEI publishes the next yearly file.",
-          "Direction is bearish when >= 3 distinct named tropical cyclones (hurricane / tropical storm / depression) affected the SWFL footprint in the trailing 10-year window; neutral otherwise. This brain never emits bullish — it is a backward-looking hazard record. For SWFL this threshold is effectively always met (Irma 2017, Ian 2022, Helene + Milton 2024), so the brain reads structurally bearish on physical risk by design.",
-          "NFIP coverage is policyholder-only — uninsured and non-NFIP losses (private flood policies, structural damage outside flood coverage) are NOT in this archive. True SWFL hurricane loss is larger than the joined nfip_paid_usd values show.",
-          "\"Landfall in county\" uses HURDAT2 record_id='L' obs within 30mi of the county centroid as a proxy — actual county-level landfall attribution would require obs ∩ county polygon (deferred until a downstream brain needs sub-county precision).",
-          "Storm-county join is on (county_fips, storm_year) — NFIP claims dated in the same calendar year as a HURDAT2 landfall are attributed to that storm. Multiple storms in one year share the same NFIP year (e.g. Helene + Milton both 2024 SWFL).",
-          "Saffir-Simpson category is derived from MAX(max_wind_kt) over the storm's lifetime, not the wind speed at SWFL passage. A storm can be \"Cat 5 at peak\" but Cat 1 by the time it reached SWFL.",
-          "Qlik data coverage: complete (hypercube limit did not fire).",
-          "Compliance rate cannot be derived — no baseline registry of all SWFL 3-story+ condominium associations exists in this dataset. Presence = confirmed SIRS filing; absence has no meaning.",
-          "Pre-July 2025 and July 2025+ are two separate DBPR databases — the pre-July set holds older filings and the July 2025+ set holds post-HB 913 mandate filings; they are distinct registers, not one continuous time series.",
-          "Data lag: FGCU RERI publishes indicators ~4th of each month; data reflects ~2 months prior (report_month 2026-05 → reference period ends ~2026-05).",
-          "Charlotte County figures are FGCU RERI's own published tri-county series and are always labeled by county — regional coverage here is deliberately wider than the Lee + Collier core; the Charlotte series comes from the named source, not from this platform's own county data.",
-          "Concentration: one permit (Project Rainforest, $486.8M industrial, Fort Myers) is 21% of the $2.31B SWFL total; the remaining 280 permits sum to $1.83B. Read the headline value as one megaproject plus a broader base, not a uniform surge.",
-          "Rows are extracted from the MHS Data Book PDF and are not yet spot-checked (verified flag). Treat values as directional pending manual review.",
-          "Site ZIP resolved for 184 of 281 permits — the remainder had no geocodable street address and carry no ZIP (still counted in submarket and SWFL totals). ZIP-grain reads cover only the resolved subset.",
-          "Only one calendar year is on file; no year-over-year comparison is possible yet. Do not infer a trend from a single annual snapshot.",
-          "List-side only: this is the price distribution of ACTIVE for-sale listings (asking prices), not closed sales.",
-          "Includes ALL for-sale property types — the under-$300k band is dominated by vacant land/lots in lot-heavy areas, so the entry-tier share overstates entry-level HOMES. Use the per-county detail to read the shape.",
-          "Weekly snapshot — the distribution's drift over time reads the affordability trend; a single week is neutral.",
-          "Source is realtor.com for-sale listings, binned per county at source.",
-          "Point-in-time shares of ACTIVE for-sale listings (list-side leading signals), not closed sales.",
-          "A single week is neutral by construction — the week-over-week drift is the read: a rising price-cut share signals softening, a rising new-listing share signals supply building.",
-          "Shares come from the listing's own new / price-reduced flags on the realtor.com for-sale feed.",
-          "The headline is a gross yield (sold price ÷ annual rent) — before taxes, insurance, HOA, vacancy, and maintenance; a net yield is materially lower, especially given SWFL insurance costs.",
-          "The median sold/DOM/hotness/list-to-sold figures in the table are CONTEXT — the same signals are tracked at monthly cadence elsewhere; this brain's own read is the sold-to-rent yield.",
-          "Monthly cadence: realtor.com's ZIP-grain aggregates refresh monthly, so these numbers move month to month, not week to week.",
-          "Source is realtor.com per-ZIP market aggregates.",
-          "Excluded 2 ZIP(s) from the \"Highest-yield\" ranking (33920, 33972) — their median sold price implies under 500 sqft at the ZIP's own price/sqft, meaning the sale mix is dominated by land/mobile-home lots rather than homes, which would inflate the implied yield past any realistic reading. Still in the full table below.",
-          "2 ZIP card(s) had a gross yield outside the 2-12% plausibility band — yield and flood-adjusted cap rate suppressed (value/rent indices not comparable in vacation/seasonal markets); raw value, rent, and flood facts retained. Standard residential gross yield thresholds for SWFL (2-12%); values outside indicate high-variance index inputs (ZORI/ZHVI disparity), not a real return.",
-          "51 of 53 ZIP cards carry value + rent but no flood overlay — env-swfl surfaces the flood cap-rate adjustment only for its top-AAL ZIPs, so the flood-adjusted cap rate is null for the rest.",
-          "Short-term-rental revenue (str_revenue_est_monthly) is null pending an AirDNA feed — available on request.",
-          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
-          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
-          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
-          "Inventory COUNT and observed asking-price RANGE only — not a median rent. The observed min/max is the plain MIN/MAX of each listing's own posted price range, not a computed average; for the source-faithful median rent per ZIP, see market-temperature-swfl (realtor.com monthly ZIP aggregates).",
-          "Each row can be a multi-unit community (one property_id spans a range of unit types/prices), not one apartment — counts are LISTINGS, not units.",
-          "This is live FOR-RENT inventory, distinct from rentals-swfl (the Zillow ZORI rent INDEX — a monthly trend/direction read, not a listing count).",
-          "Weekly snapshot — direction is neutral on any one week; a second sweep is what would read inventory rising/falling.",
-          "Source is realtor.com rental listings.",
-          "Neighborhood home counts are authoritative from our parcel name-join (Lee + Collier tax rolls); a built-out single-name community can differ ~7% from a marketed-community source because a marketed community spans several platted subdivisions.",
-          "Golf structure, HOA fee ranges and amenities are cited to named real-estate sources (naplesgolfguy / 55places / realtyofnaples); drive-times and nearby counts are computed by Mapbox. Each carries its own source and as-of.",
-          "Marketed-community coverage is the ~300 branded golf/gated communities, not every neighborhood — a non-branded neighborhood still resolves to its parcel-derived stats."
+          "3 ZIPs suppressed (insufficient baseline data in 2019–2021 or no recent observations)."
         ],
-        "contradicts": [
-          "macro-us (bearish) vs safety-swfl (bullish)",
-          "macro-us (bearish) vs labor-demand-swfl (bullish)",
-          "macro-us (bearish) vs rsw-airport (bullish)",
-          "macro-us (bearish) vs market-heat-swfl (bullish)",
-          "macro-us (bearish) vs licenses-swfl (bullish)",
-          "macro-florida (bearish) vs safety-swfl (bullish)",
-          "macro-florida (bearish) vs labor-demand-swfl (bullish)",
-          "macro-florida (bearish) vs rsw-airport (bullish)",
-          "macro-florida (bearish) vs market-heat-swfl (bullish)",
-          "macro-florida (bearish) vs licenses-swfl (bullish)",
-          "macro-swfl (bearish) vs safety-swfl (bullish)",
-          "macro-swfl (bearish) vs labor-demand-swfl (bullish)",
-          "macro-swfl (bearish) vs rsw-airport (bullish)",
-          "macro-swfl (bearish) vs market-heat-swfl (bullish)",
-          "macro-swfl (bearish) vs licenses-swfl (bullish)",
-          "sector-credit-swfl (bearish) vs safety-swfl (bullish)",
-          "sector-credit-swfl (bearish) vs labor-demand-swfl (bullish)",
-          "sector-credit-swfl (bearish) vs rsw-airport (bullish)",
-          "sector-credit-swfl (bearish) vs market-heat-swfl (bullish)",
-          "sector-credit-swfl (bearish) vs licenses-swfl (bullish)",
-          "env-swfl (bearish) vs safety-swfl (bullish)",
-          "env-swfl (bearish) vs labor-demand-swfl (bullish)",
-          "env-swfl (bearish) vs rsw-airport (bullish)",
-          "env-swfl (bearish) vs market-heat-swfl (bullish)",
-          "env-swfl (bearish) vs licenses-swfl (bullish)",
-          "rentals-swfl (bearish) vs safety-swfl (bullish)",
-          "rentals-swfl (bearish) vs labor-demand-swfl (bullish)",
-          "rentals-swfl (bearish) vs rsw-airport (bullish)",
-          "rentals-swfl (bearish) vs market-heat-swfl (bullish)",
-          "rentals-swfl (bearish) vs licenses-swfl (bullish)",
-          "safety-swfl (bullish) vs news-swfl (bearish)",
-          "safety-swfl (bullish) vs seller-stress-swfl (bearish)",
-          "safety-swfl (bullish) vs storm-history-swfl (bearish)",
-          "labor-demand-swfl (bullish) vs news-swfl (bearish)",
-          "labor-demand-swfl (bullish) vs seller-stress-swfl (bearish)",
-          "labor-demand-swfl (bullish) vs storm-history-swfl (bearish)",
-          "rsw-airport (bullish) vs news-swfl (bearish)",
-          "rsw-airport (bullish) vs seller-stress-swfl (bearish)",
-          "rsw-airport (bullish) vs storm-history-swfl (bearish)",
-          "news-swfl (bearish) vs market-heat-swfl (bullish)",
-          "news-swfl (bearish) vs licenses-swfl (bullish)",
-          "seller-stress-swfl (bearish) vs market-heat-swfl (bullish)",
-          "seller-stress-swfl (bearish) vs licenses-swfl (bullish)",
-          "market-heat-swfl (bullish) vs storm-history-swfl (bearish)",
-          "storm-history-swfl (bearish) vs licenses-swfl (bullish)"
-        ],
-        "confidence": 0.9,
-        "joint_integrity": 0.01,
-        "confidence_dispersion": 0.13,
-        "chain_depth": 3,
-        "trust_tier": 4,
-        "upstream_count": 38,
+        "contradicts": [],
+        "confidence": 0.6,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 3,
+        "upstream_count": 0,
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-07-18T01:31:53.000Z"
+          "computed_at": "2026-07-18T03:05:54Z"
         },
-        "exogenous_signals": [],
-        "conditional_claims": [
-          {
-            "condition": "the upstream split resolves — the strongest bullish and bearish reads do not currently agree",
-            "then_direction": "mixed",
-            "basis": "upstream brains are pulling in opposite directions; no single direction clears the agreement threshold",
-            "basis_refs": [
-              "labor-demand-swfl",
-              "macro-swfl"
-            ],
-            "falsifier": "one side's weight clears 60% of the total on the next refine, breaking the tie"
-          }
-        ],
-        "grain_boundary": {
-          "not_available": [
-            "Outcomes for a specific named business or street address — the lake holds sector- and corridor-level aggregates, not individual firms.",
-            "Geography finer than what an upstream explicitly publishes (most reads are Lee/Collier county level).",
-            "Sub-monthly timing on most series — the synthesized read moves at a monthly grain."
-          ],
-          "finest_grain": "county-month",
-          "routes": [
-            "Flood risk is tracked per ZIP — want it for a specific ZIP or address?",
-            "Recent commercial real-estate current events — leasing, sales, openings and closings — are tracked per area; want the latest for a specific area?",
-            "Housing prices, days on market and supply are tracked per ZIP — want it for a specific ZIP or town?"
-          ]
-        },
-        "prediction_window": "next freight-shock print (days), then re-confirm at the next monthly macro release"
+        "exogenous_signals": []
       }
     }
   ],
-  "exitCode": 0,
-  "masterDecision": "published"
+  "exitCode": 0
 }
