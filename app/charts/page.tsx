@@ -238,7 +238,7 @@ export default async function ChartsPage() {
     {
       rootId: "home-values",
       eyebrow: "Southwest Florida",
-      title: "Median Home Value",
+      title: "Typical Home Value",
       subtitle: "Cape Coral · Fort Myers · Naples",
       valueFormat: "usd",
       series: SWFL_METRO_SERIES,

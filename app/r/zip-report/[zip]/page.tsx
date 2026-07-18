@@ -444,7 +444,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                   variant="area"
                   asOf={metroTrend.asOf}
                   eyebrow="Southwest Florida"
-                  title="Median Home Value Trend"
+                  title="Typical Home Value Trend"
                   subtitle="Cape Coral · Fort Myers · Naples"
                   valueFormat="usd"
                   rootId="zip-report-zhvi"

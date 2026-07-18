@@ -1,3 +1,19 @@
+## 2026-07-18 (Fable 5 · main) — Consolidation verify pass: 3 residual ZHVI "median" labels fixed, data-roots catalog de-staled (lee_parcels LANDED, leepa KEEP ratified, rentals fix noted)
+
+Ran a full verification of the 07/18 consolidation work against the live DB: lee_parcels 556,083 rows /
+104 cols / all parcel_ids distinct, lee_parcels_summary categories sum exactly, rentals `_latest` now
+per-county (Lee 3,927 @ 07/06 + Collier 3,082 @ 07/13), fgcu-reri cleanly out of BOTH master arrays.
+Two gaps found + fixed: (1) the ZHVI "median" fix had missed 3 live surfaces — `app/charts/page.tsx`
+metro panel, `app/r/zip-report/[zip]/page.tsx` trend chart (rootId zip-report-zhvi), homepage-map
+sublabel (`lib/landing/home-map-data.ts`) — all now "Typical"; band-guard family classification verified
+safe (matches on "home value", which survives). A 4th grep hit (DeliverableShowcase) is rendered nowhere
+— left as-is. (2) `data-roots.md` still said lee_parcels DOES-NOT-EXIST/IN-FLIGHT after it landed, plus
+stale rentals-bug + ZHVI-live-bugs + leepa-undecided notes — all updated to the ratified state (KEEP
+BOTH; only greenlit dedup = parcel_subdivision homes-only view). `bunx next build` green. Checks
+`zhvi_median_mislabel_residual_surfaces` + `data_roots_stale_lee_parcels_landed` opened this session,
+closed with this push. Label changes go live on next deploy; brain-label fix from e8f38964 still needs
+the home-values rebuild to serve.
+
 ## 2026-07-18 (Opus 4.8 · main) — Lee parcels: live write LANDED (556,083), grant SQL applied to prod, registry confirmed_total set — the 4-task lee_parcels arc is closed
 
 Fired the live `lee-parcels-annual.yml` write (dry_run=false) after confirming the earlier dry run had

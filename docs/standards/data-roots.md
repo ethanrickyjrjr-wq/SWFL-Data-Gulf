@@ -32,19 +32,19 @@ replacement runs, every consumer repoints, and the operator signs off (RULE 1).
 | **Value — assessed / just** | `leepa_parcels` (Lee) · `collier_parcels` (Collier) | properties-lee-value · properties-collier-value | per-ZIP assessed answerable for Collier, NOT Lee (real asymmetry) |
 | **Value — list / asking** | `listing_state.list_price` (median-by-zip) | no single brain | `active_listings_residential` asking median (stale seed) |
 | **Value — sold / recorded-sale** | **no single canonical** — grain+vendor dependent (`redfin_lee`/`redfin_collier`, `redfin_city_swfl`, LeePA/FDOR deeds) | properties-value / housing-swfl | pick per surface + **LABEL it** |
-| **Value — home-value INDEX** | `zhvi_*` (Zillow ZHVI) | home-values-swfl | label **"typical home value," NEVER "median"** (live bugs: `market-context.ts:65`, `/charts`, brain label) — **T2** |
+| **Value — home-value INDEX** | `zhvi_*` (Zillow ZHVI) | home-values-swfl | label **"typical home value," NEVER "median"** (6 label sites fixed 07/18) — **T2** |
 | **Price cut — EVENT (per-listing)** | `listing_transitions.price_delta` (forward-only) | no single brain (rollups `listing_pulse_daily`, `listing_transitions_recent_zip_stats`) | — |
 | **Price cut — SHARE (area)** | `listing_momentum_stats.price_reduced_share` (**0–100**) | listing-momentum-swfl | `market_details_swfl` (no cut field) — **T3** |
 | **Active inventory — for-sale HOMES** | `listing_active_stats.listing_count` (homes-only, Lee/Collier; add `zip_code IS NOT NULL` to skip region rollup) | active-listings-swfl | `listing_momentum_stats.active_listing_count` (all-types, +~7,300 land, ~3.2×) · `active_listings_residential*` (dead) |
 | **Rent — INDEX (monthly)** | `zori_*` (Zillow ZORI) | consumers: investor-zip-swfl (yield calc) + email `zori_zip_latest` (bypass) | don't conflate w/ the weekly own-sweep |
-| **Rent — own inventory (weekly)** | `rentals_swfl` | active-rentals-swfl | live bug: `_latest` view Collier-only, drops Lee (`rentals_latest_view_completeness_guard`) |
+| **Rent — own inventory (weekly)** | `rentals_swfl` | active-rentals-swfl | FIXED 07/18: `_latest` now per-county-latest (Lee restored; per-county `captured_date` makes staleness visible) |
 | **Rent — yield** | generic → realtor sold-to-rent · investor → `investor-zip-swfl.gross_rent_yield_pct` (ZORI×12 ÷ ZHVI) | market-temperature-swfl (generic) · investor-zip-swfl (investor) | 3 rent numbers/ZIP disagree up to ~7× — LABEL which |
 | **Market-state / "temperature"** | `market-heat-swfl` (YoY verdict) | market-heat-swfl | **`market-temperature-swfl` is MISNAMED — emits rent-yield, NOT heat** · momentum + 2 others = neutral `0` reporters — **T4** |
 | **Seller-stress verdict** | seller-stress-swfl (2019–21 z-score) | seller-stress-swfl | incompatible baseline vs market-heat — can point opposite for one region |
 
 **Traps (nuance the cells can't hold):**
 - **T1 — aggregate DOM is not trustworthy today.** Row-level `listing_dom` is fine; the *aggregate* is censored — ~63% of the active book is a `first_seen` floor (07/18 backfill de-flooring it). A 30-sec "typical DOM" off the aggregate is confidently wrong right now.
-- **T2 — ZHVI is a typical-value INDEX, not a median.** Mislabeled "median" in ≥3 places. Same ZIP (33901): assessed $244,810 / ZHVI $261,247 / deed-sold $269,900 / list $309k–$340k — never blend.
+- **T2 — ZHVI is a typical-value INDEX, not a median.** All 6 known "median" mislabel sites fixed 07/18 (email figure, chart gallery, brain label, `/charts` metro panel, zip-report trend, homepage-map sublabel) — grep before adding any new ZHVI surface. Same ZIP (33901): assessed $244,810 / ZHVI $261,247 / deed-sold $269,900 / list $309k–$340k — never blend.
 - **T3 — 0–1 vs 0–100 unit trap.** `price_reduced_share` is **0–100** in our `listing_momentum_stats` (20.1) but a **0–1 fraction** in realtor's `market_heat_core_swfl` (0.232). Both convert correctly today; a future swap is a silent 100×.
 - **T4 — the most dangerous name in the system.** `market-temperature-swfl` does NOT carry market temperature (it's a rent-yield ratio). For "how hot is the market," use `market-heat-swfl`. Grabbing by name gets the wrong brain.
 
@@ -54,10 +54,10 @@ replacement runs, every consumer repoints, and the operator signs off (RULE 1).
 |---|---|---|---|---|
 | `collier_parcels` | 290,973 / **104** | FDOR cadastral, Collier (CO_NO=21) — comprehensive, **DONE** | properties-collier-value | don't re-widen |
 | `leepa_parcels` | 548,798 / **19** | Lee **Property Appraiser** — a **DIFFERENT source** (valuation+sale only) | properties-lee-value | distinctive: `folioid`, `building_value` (`soh_cap`/`cap_difference` derivable from FDOR `jv_hmstd−av_hmstd`). A **cross-check of FDOR, NOT slated for deletion** |
-| `lee_parcels` | **DOES NOT EXIST YET** | FDOR cadastral, Lee (CO_NO=46) — ingest **in flight** | properties-lee-value (planned) | **DO-NOT-WIRE until it lands.** `OUT_FIELDS` byte-identical to `collier_parcels` → lands as the full 104-col shape |
+| `lee_parcels` | 556,083 / **104** | FDOR cadastral, Lee (CO_NO=46) — **LANDED 07/18/2026**, all parcel types | properties-lee-value | `lee_parcels_summary` view live (522,205 res / 14,052 com / 211,838 homesteaded / SOH gap median 31.6%); shape = `collier_parcels` (byte-identical `OUT_FIELDS`) |
 | `parcel_subdivision` | 604,362 / **28** | FDOR **homes-only** subset, both counties | communities-swfl | ONE distinctive col: `subdivision_name` (parse of `legal_description`) |
 
-- **ONE-ROOT TARGET (recommended, [NEEDS-SIGN-OFF]):** one canonical FDOR parcel table (Lee+Collier, shared schema) read by properties-lee-value + properties-collier-value + communities. **Pending** `lee_parcels` landing, then the LeePA keep-vs-retire decision. Deletion is operator-gated and blocked. Checks: `lee_parcels_leepa_redundant_into_properties_lee`, `collier_parcels_parcel_subdivision_redundant_scrape`, `data_authority_single_source_registry`.
+- **ONE-ROOT TARGET (recommended, [NEEDS-SIGN-OFF]):** one canonical FDOR parcel table (Lee+Collier, shared schema) read by properties-lee-value + properties-collier-value + communities. `lee_parcels` **LANDED 07/18/2026**; the LeePA keep-vs-retire question is **RESOLVED — operator ratified KEEP BOTH** (leepa stays as the appraiser cross-check, never dropped; `docs/handoff/2026-07-18-parcel-consolidation.md`). Only greenlit dedup: `parcel_subdivision` → homes-only view, after its 3 readers repoint. Deletion is operator-gated and blocked. Checks: `lee_parcels_leepa_redundant_into_properties_lee`, `collier_parcels_parcel_subdivision_redundant_scrape`, `data_authority_single_source_registry`.
 
 ---
 
@@ -205,7 +205,7 @@ the lake roots below. Everything "how the market looks right now" descends from 
 ## WEEKLY (cadence_days = 7)
 
 - **`market_aggregates_histogram`** 🟡 — root: **price distribution / bands** (list-side, weekly). → price-distribution-swfl. *(Was missing from v1 of this catalog.)*
-- **`rentals_swfl`** 🟡 — root: **our own rental listing inventory + rent** (weekly sweep). → active-rentals-swfl. NOTE the live bug: latest view is Collier-only (tracked `rentals_latest_view_completeness_guard`). Distinct from the monthly ZORI index.
+- **`rentals_swfl`** 🟡 — root: **our own rental listing inventory + rent** (weekly sweep). → active-rentals-swfl. Completeness bug FIXED 07/18: `_latest` is now per-county-latest (at verify: Lee 3,927 @ 07/06 + Collier 3,082 @ 07/13). Distinct from the monthly ZORI index.
 - **`lee_permits`** 🟡 — root: **Lee building permits** (weekly). *(Collier permits are MONTHLY — cadence mismatch between the two; the permits brain must not treat them as same-cadence.)*
 - Also weekly: `swfl_inc` (econ-dev), `dbpr_press_releases`/`dbpr_public_notices` (news), `city_pulse_corridors` (corridor/cre), `crexi_listings`/`brevitas_listings` (cre).
 
@@ -217,7 +217,7 @@ the lake roots below. Everything "how the market looks right now" descends from 
 - **`redfin_price_drops` / `redfin_contract_cancellations` / `redfin_delistings_relistings`** 🟡 — roots: seller-stress inputs (external monthly). One each, one purpose.
 - **`redfin_lee` / `redfin_collier` (31d)** 🟡 — root: **sold price / market by county** → properties-value brains. SECOND route: `lib/email/market-context.ts` reads the raw `redfin_*_market` tables directly for email county figures (bypasses the brains).
 - **`redfin_city_swfl` (31d)** 🟡 — root: **monthly city-grain SOLD price** → LIVE via the desk hero (`lib/desk/loaders.ts:174`) + price-trend fallback (`lib/charts/gallery-loaders.ts:203`). NOT dead (its `consuming_pack: none` = no brain, a page reads it).
-- **`zhvi_*` (Zillow)** 🟡 — root: **home-value INDEX** ("typical home value," never "median" — fix `lib/email/market-context.ts:65`, tracked `zhvi_median_mislabel_email`).
+- **`zhvi_*` (Zillow)** 🟡 — root: **home-value INDEX** ("typical home value," never "median" — all 6 known label sites fixed 07/18).
 - **`zori_*` (Zillow)** 🟡 — root: **rent INDEX** (monthly). Distinct purpose from the weekly own-sweep above.
 - **`airdna_str_swfl`** 🟡 — root: short-term-rental → investor-zip. **`collier_permits`** (monthly) → permits. Plus tdt/sales-tax/sirs/licenses/rainfall/rsw/fgcu/bls-monthly (each its own root, walked later).
 
@@ -231,11 +231,11 @@ the lake roots below. Everything "how the market looks right now" descends from 
 
 **PARCELS — the redundancy poster child. FOUR overlapping ingests; target = ONE FDOR parcel root.**
 - **`leepa`** (Lee) — LeePA appraiser feed (gissvr.leepa.org, layers 0/9/10/12), 548,798 parcels → **properties-lee-value**. 24 vendor layers exist; 4 pulled.
-- **`lee_parcels`** (Lee) — NEW 07/18/2026, FDOR ArcGIS Statewide Parcel (CO_NO=46), 556k features, 102 fields, dispatch-only, **first run IN FLIGHT** → **properties-lee-value** (the SAME brain as `leepa`). "Lee never had a comprehensive FDOR parcel table before this."
+- **`lee_parcels`** (Lee) — NEW 07/18/2026, FDOR ArcGIS Statewide Parcel (CO_NO=46), **LANDED same day: 556,083 unique parcels** (556,100 raw features; 17 unservable OBJECTIDs logged + skipped), 104 cols, dispatch-only → **properties-lee-value** (the SAME brain as `leepa` — operator ratified KEEP BOTH). "Lee never had a comprehensive FDOR parcel table before this."
 - **`collier_parcels`** (Collier) — FDOR ArcGIS (CO_NO=21), 290,973 parcels, 102 fields → **properties-collier-value**.
 - **`parcel_subdivision`** — the SAME FDOR ArcGIS Statewide Parcel layer `lee_parcels`+`collier_parcels` read → **communities-swfl**.
 - **THE PROBLEM:** Lee is ingested twice into one brain (`leepa` appraiser + `lee_parcels` FDOR); and `lee_parcels`/`collier_parcels`/`parcel_subdivision` all hit the identical FDOR layer. Collier overlap tracked (`collier_parcels_parcel_subdivision_redundant_scrape`); Lee overlap NEW (`lee_parcels_leepa_redundant_into_properties_lee`).
-- **ONE-ROOT TARGET:** a single canonical FDOR parcel table (Lee CO_NO=46 + Collier CO_NO=21, shared 102-field schema) that properties-lee-value + properties-collier-value + communities all read. Decide whether the `leepa` appraiser feed is still needed (does FDOR replace it, or does LeePA carry fields FDOR lacks?) before `lee_parcels` doubles the Lee coverage.
+- **ONE-ROOT TARGET:** a single canonical FDOR parcel table (Lee CO_NO=46 + Collier CO_NO=21, shared schema) that properties-lee-value + properties-collier-value + communities all read. The `leepa` question is **RESOLVED (operator, 07/18): KEEP BOTH** — LeePA carries fields FDOR lacks (`building_value`, deed instrument, full sale date, `folioid` key) and stays as the appraiser cross-check.
 - Also annual, walked later: `neighborhood_stats`, `fdot` (traffic), `census_acs`/`census_cbp`, `bls_oews`, `hurdat2`, `faf5`, `mhs_databook`/`mhs_permits`.
 
 ---
