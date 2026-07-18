@@ -19,7 +19,10 @@ import { ColorLegend } from "../_components/color-legend";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { reportTrail } from "@/lib/nav/breadcrumbs";
 import { ReportChart } from "../../../components/charts/ReportChart";
-import DigestSubscribe from "../../../components/email/DigestSubscribe";
+import { MetroAreaChart } from "../../../components/charts";
+import { SWFL_METRO_SERIES } from "../../../lib/charts/series";
+import { loadMetroTrend } from "../../../lib/charts/load-metro-trend";
+import { CitationList, type SourceEntry } from "../../../components/CitationList";
 import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
 import { PrintButton } from "../../../components/PrintButton";
 import { ReportAi } from "../_components/report-ai";
@@ -134,8 +137,16 @@ export default async function HousingPage() {
   }
 
   const narrative = await loadNarrative("brain", "housing-swfl");
+  const metroTrend = await loadMetroTrend("zhvi_pivoted");
   const housingBoxes = toBoxes(housingParsed.output.key_metrics ?? [], HOUSING_SHORT);
   const stressBoxes = toBoxes(stressParsed?.output.key_metrics ?? [], STRESS_SHORT);
+
+  // Real, cited sources for the closed accordion — housing + seller-stress metrics
+  // that carry a source URL, deduped/cleaned by CitationList's shared root.
+  const sources: SourceEntry[] = [];
+  for (const m of [...housing.metrics, ...(stressDisplay?.metrics ?? [])]) {
+    if (m.sourceUrl) sources.push({ label: m.sourceLabel ?? "SWFL Data Gulf", url: m.sourceUrl });
+  }
 
   return (
     <ReportShell>
@@ -175,6 +186,23 @@ export default async function HousingPage() {
 
       {housing.chart && <ReportChart block={housing.chart} />}
 
+      {/* ── Regional home-value trend — the same live /charts panel, reused ── */}
+      {metroTrend.data.length > 0 && (
+        <section className="mt-10">
+          <MetroAreaChart
+            data={metroTrend.data}
+            series={SWFL_METRO_SERIES}
+            variant="area"
+            asOf={metroTrend.asOf}
+            eyebrow="Southwest Florida"
+            title="Median Home Value Trend"
+            subtitle="Cape Coral · Fort Myers · Naples"
+            valueFormat="usd"
+            rootId="housing-zhvi"
+          />
+        </section>
+      )}
+
       {/* ── Market conditions (housing key metrics) ── */}
       {housingBoxes.length > 0 && (
         <section className="mt-10">
@@ -192,11 +220,9 @@ export default async function HousingPage() {
         </section>
       )}
 
-      <ColorLegend />
+      {sources.length > 0 && <CitationList sources={sources} />}
 
-      <div className="mt-12">
-        <DigestSubscribe source="r-page" />
-      </div>
+      <ColorLegend />
 
       <ReportFooter freshnessToken={housing.freshnessToken} />
 

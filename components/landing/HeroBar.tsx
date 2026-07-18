@@ -146,6 +146,10 @@ export default function HeroBar() {
 
   return (
     <div className="hero">
+      <p className="hero-brandline">
+        <strong>SWFL Data Gulf</strong> builds ready-to-send listing campaigns, market reports, and
+        cited answers from live Southwest Florida data — every number named to its source.
+      </p>
       <h1>
         Type a place.
         <br />

@@ -1,7 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import type { Metadata } from "next";
 import {
   parseBrainMarkdown,
@@ -23,13 +22,13 @@ import {
 } from "../_components/report-shell";
 import { MetricsTable } from "../_components/metrics-table";
 import { ColorLegend } from "../_components/color-legend";
+import { CitationList, type SourceEntry } from "../../../components/CitationList";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { reportTrail } from "@/lib/nav/breadcrumbs";
 import { ReportChart } from "../../../components/charts/ReportChart";
 import { ReportAi } from "../_components/report-ai";
 import { AnswerText } from "../../../components/answer/AnswerText";
 import { PrintButton } from "../../../components/PrintButton";
-import DigestSubscribe from "../../../components/email/DigestSubscribe";
 import { CRESummaryBoxes, CRECorridorBreakdown } from "../cre-swfl/CREMetricsExplorer";
 import { CREMarketBeatChart } from "../cre-swfl/CREMarketBeatChart";
 import {
@@ -117,7 +116,13 @@ export default async function ReportPage({ params }: PageProps) {
   }
 
   const narrative = await loadNarrative("brain", slug);
-  const hasDetail = display.detailCaveats.length > 0 || display.metrics.length > 0;
+  // Real, cited sources for the closed accordion (replaces the old members-only
+  // blur gate): every metric that carries a source URL, deduped/cleaned by
+  // CitationList's shared clean-url root.
+  const sources: SourceEntry[] = [];
+  for (const m of display.metrics) {
+    if (m.sourceUrl) sources.push({ label: m.sourceLabel ?? "SWFL Data Gulf", url: m.sourceUrl });
+  }
   const ld = brainJsonLd(display, slug);
 
   // ── CRE Key-metrics split (server-safe: plain strings + audited numbers) ──
@@ -267,13 +272,9 @@ export default async function ReportPage({ params }: PageProps) {
         )
       )}
 
-      {hasDetail && <SourcesGate sourceCount={display.metrics.length} />}
+      {sources.length > 0 && <CitationList sources={sources} />}
 
       <ColorLegend />
-
-      <div className="mt-12">
-        <DigestSubscribe source="r-page" />
-      </div>
 
       <ReportFooter freshnessToken={display.freshnessToken} />
 
@@ -416,50 +417,5 @@ function RawFallback({ slug, content }: { slug: string; content: string }) {
         {content}
       </pre>
     </ReportShell>
-  );
-}
-
-function SourcesGate({ sourceCount }: { sourceCount: number }) {
-  return (
-    <div className="mt-10 rounded-xl glass-card-modern border border-white/10 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-        <span className="text-sm font-medium text-gray-300">
-          Full detail — every source and note
-        </span>
-        <span className="flex items-center gap-1.5 rounded-full bg-gulf-teal/10 px-2.5 py-0.5 text-xs font-medium text-gulf-teal">
-          <svg className="h-3 w-3" viewBox="0 0 12 12" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M4 4.5V3a2 2 0 114 0v1.5h.5A1.5 1.5 0 0110 6v4a1.5 1.5 0 01-1.5 1.5h-5A1.5 1.5 0 012 10V6a1.5 1.5 0 011.5-1.5H4zm2-3a.5.5 0 00-.5.5V4.5h1V2a.5.5 0 00-.5-.5z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Members only
-        </span>
-      </div>
-      <div className="px-4 pt-3 pb-1 select-none pointer-events-none">
-        <p className="text-xs uppercase tracking-wider text-gray-600 mb-2">Sources</p>
-        {Array.from({ length: Math.min(sourceCount, 3) }).map((_, i) => (
-          <div
-            key={i}
-            className="mb-2 h-3 rounded bg-white/[0.04]"
-            style={{ width: `${65 + (i % 3) * 12}%` }}
-          />
-        ))}
-      </div>
-      <div className="px-4 pb-4 pt-2">
-        {/* A "Members only" gate is a login story — the old /#waitlist anchor pointed
-            at a section nothing renders (check get_access_dead_anchor). */}
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-2 btn-gradient text-navy-dark px-5 py-2 rounded-lg text-sm font-semibold"
-        >
-          Get access to unlock sources
-        </Link>
-        <p className="mt-2 text-xs text-gray-600">
-          {sourceCount} source{sourceCount !== 1 ? "s" : ""} + full provenance behind this read.
-        </p>
-      </div>
-    </div>
   );
 }
