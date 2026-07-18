@@ -55,7 +55,7 @@ function Method({ metric, entry }: { metric: string; entry: MethodologyEntry }) 
           {entry.denominator && (
             <div>
               <dt className="text-xs uppercase tracking-wider text-gray-500">
-                Grain / denominator
+                Coverage / denominator
               </dt>
               <dd className="mt-1 text-sm leading-7 text-gray-200">{entry.denominator}</dd>
             </div>

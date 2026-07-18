@@ -27,6 +27,7 @@ import {
 import type { BrainOutputMetric } from "../refinery/types/brain-output.mts";
 import { formatMetricValue } from "./format-metric";
 import { loadParsedBrain, renderDetailRowText } from "./fetch-brain.ts";
+import { asOfFromToken } from "./project/as-of";
 
 // ---------------------------------------------------------------------------
 // BRAIN_GEO (G2) — the sourced grain + county-coverage registry
@@ -374,7 +375,7 @@ function renderMetricText(m: BrainOutputMetric, freshnessToken: string): string 
   return [
     `**${sanitizeProse(m.label)}** — ${formatMetricValue(m)}.`,
     `Source: ${cleanCitationForDisplay(m.source.citation)}`,
-    `_Freshness:_ \`${freshnessToken}\``,
+    `_Freshness:_ ${asOfFromToken(freshnessToken) ?? freshnessToken}`,
   ].join("\n\n");
 }
 

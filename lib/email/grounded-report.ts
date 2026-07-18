@@ -211,7 +211,7 @@ export async function renderGroundedReport(
   // footprint descriptor instead of repeating it.
   const county =
     model.scope.kind === "region"
-      ? "6-county region"
+      ? "Lee and Collier counties"
       : model.countyName
         ? `${model.countyName} County`
         : "Southwest Florida";

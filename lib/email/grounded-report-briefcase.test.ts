@@ -106,7 +106,7 @@ describe("briefcase grounded render — non-ZIP grains build honestly (no handcu
     const model = buildEmailDeliverableModel({ ...row, scope_kind: null, scope_value: null })!;
     const html = await renderGroundedReport(model, { skin: "email" });
     expect(html).toContain("Southwest Florida market read");
-    expect(html).toContain("6-county region"); // subtitle does NOT repeat "Southwest Florida"
+    expect(html).toContain("Lee and Collier counties"); // subtitle does NOT repeat "Southwest Florida"
     expect(html).not.toContain("&middot; ZIP");
     expect(html).toContain("$412,000");
     expect(html).not.toMatch(/\{\{[A-Z_]+\}\}/);

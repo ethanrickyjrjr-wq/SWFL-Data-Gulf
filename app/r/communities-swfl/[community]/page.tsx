@@ -99,7 +99,7 @@ export default async function CommunityPage({ params }: PageProps) {
       home_count: c.home_count,
       source_url: c.source_url,
     },
-    token || (c.as_of ?? ""),
+    asOfFromToken(token) ?? c.as_of ?? "",
   );
 
   const amenities = amenityList(c);

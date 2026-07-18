@@ -322,11 +322,15 @@ describe("renderScopedBody", () => {
     }
   });
 
-  test("freshness_token is quoted exactly once at end of body", () => {
+  test("as-of date (from freshness_token) is quoted exactly once at end of body", () => {
     const { body } = renderScopedBody(content);
-    assert.ok(body.includes("SWFL-7421-v5-20260614"), "freshness_token missing from body");
-    const count = body.split("SWFL-7421-v5-20260614").length - 1;
-    assert.strictEqual(count, 1, "freshness_token must appear exactly once");
+    assert.ok(
+      !body.includes("SWFL-7421-v5-20260614"),
+      "raw freshness token must NOT leak into body",
+    );
+    assert.ok(body.includes("06/14/2026"), "as-of date missing from body");
+    const count = body.split("06/14/2026").length - 1;
+    assert.strictEqual(count, 1, "as-of date must appear exactly once");
   });
 
   test("no freshness_token → no Data: line in body", () => {

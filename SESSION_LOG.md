@@ -1,3 +1,28 @@
+## 2026-07-18 (Opus 4.8 · main) — Site audit: fanned-out find→adversarial-verify sweep of the whole site + emails + answer engine; 89 verified problems → doc + 84 checks + 5 safe-win fixes (build+tests green, NOT pushed)
+
+Operator asked for a big, live-verified list of ways to make the built site better (find problems,
+data-matches-the-question, email loaded with real info, AI not inventing). Ran two static fan-out
+rounds via Workflow — 30 slices, Sonnet finder → default-refute adversarial verifier per slice — plus
+a live-probe track I ran myself (per-ZIP `swfl_fetch` payloads compared to `mcp lake` ground truth +
+AI-honesty red-team). 89 verified problems after dedup (static: 84 confirmed / 1 rejected; live-probe:
+8): 5 critical, 35 high, 33 medium, 16 low. Full list → `docs/audits/2026-07-18-site-audit.md`.
+Promoted 84 to the checks ledger under project `site-audit-0718` (all keys `sa0718_*`) so they filter
+and bulk-manage as one batch.
+
+Fixed 5 mechanical safe-wins (re-verified each against the real file; `bun test` on the 4 affected
+files + `bunx next build` both green; committed, NOT pushed): raw freshness-token → `asOfFromToken`
+(MM/DD/YYYY) in the scoped digest email body (`scoped-content.ts`), the `/api/z` per-ZIP block
+(`zip-dossier.ts`), and community JSON-LD (`communities-swfl/[community]/page.tsx`); the "6-county
+region" coverage overclaim → "Lee and Collier counties" in the whole-region briefcase email
+(`grounded-report.ts` + its locked briefcase test); and banned word "Grain / denominator" →
+"Coverage / denominator" on the method page. Post-deploy verify tracked at
+`sa0718_safe_wins_live_verify`. Biggest still-open (as checks): `/demo` renders fabricated fixture
+stats with real "cited fact" styling + no noindex; `/r/[slug]` RawFallback dumps the entire raw brain
+file (internal sections) to a public URL on any parse error; DOM-YoY ships "-2796.2%" in answers (73%
+of `redfin_swfl` rows carry garbage YoY); `token-defaults.ts` ships a fabricated Naples address +
+$850k price as a fallback; Stripe checkout can silently downgrade a paying subscriber on an unchecked
+read error.
+
 ## 2026-07-18 (Sonnet 5 · main) — Lee parcels: bumped GHA timeout for the real fetch time, fixed a real registry-identity RED, discovered we already had Lee commercial/residential data
 
 Continuing the lee_parcels FDOR pipeline another session built earlier today (a82133f9):

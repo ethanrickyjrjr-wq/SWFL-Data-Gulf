@@ -15,6 +15,7 @@
  */
 import type { WelcomeMetric, PlaceEcho } from "@/lib/welcome/frames";
 import { formatMetric } from "@/lib/welcome/frames";
+import { asOfFromToken } from "@/lib/project/as-of";
 import type { ScheduleRow } from "@/lib/email/scheduler";
 import { resolveLocation, type LocationInput } from "@/refinery/lib/location-resolver.mts";
 import { assembleLocationDossier, type LocationDossier } from "@/lib/zip-dossier";
@@ -238,7 +239,7 @@ export function renderScopedBody(content: ScopedContent): { subject: string; bod
   }
   if (content.freshness_token) {
     if (lines.length) lines.push("");
-    lines.push(`Data: ${content.freshness_token}`);
+    lines.push(`Data: ${asOfFromToken(content.freshness_token) ?? content.freshness_token}`);
   }
 
   return { subject, body: lines.join("\n") };
