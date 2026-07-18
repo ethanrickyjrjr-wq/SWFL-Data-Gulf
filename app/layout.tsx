@@ -23,14 +23,59 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Brand identity constants — the single source for the app name/description that
+// Google's OAuth brand-verification crawler reads. Values are the already-committed,
+// operator-approved title + description (no new copy invented). og:site_name +
+// applicationName + the JSON-LD block below give the crawler an unambiguous app
+// name that MATCHES the OAuth consent screen ("SWFL Data Gulf"), and a plain
+// functionality description — the two brand-verification homepage requirements
+// (support.google.com/cloud/answer/13464321 §1.2 identify + §1.3 describe).
+const SITE_NAME = "SWFL Data Gulf";
+const SITE_URL = "https://www.swfldatagulf.com";
+const SITE_TITLE = "SWFL Data Gulf — Southwest Florida Intelligence";
+const SITE_DESCRIPTION =
+  "Public intelligence for Lee and Collier County operators — flood, freight, permits, rents, demographics, and macro signal, in one read.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.swfldatagulf.com"),
+  metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
   title: {
-    default: "SWFL Data Gulf — Southwest Florida Intelligence",
+    default: SITE_TITLE,
     template: "%s — SWFL Data Gulf",
   },
-  description:
-    "Public intelligence for Lee and Collier County operators — flood, freight, permits, rents, demographics, and macro signal, in one read.",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    images: [{ url: "/logo.png", alt: SITE_NAME }],
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/logo.png"],
+  },
+};
+
+// schema.org WebApplication + publisher Organization — the structured signal
+// Google's brand crawler reads first to extract the app name and purpose.
+const ORG_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: SITE_NAME,
+  url: SITE_URL,
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  description: SITE_DESCRIPTION,
+  publisher: {
+    "@type": "Organization",
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+  },
 };
 
 // Explicit base viewport — pinch-zoom stays enabled; ResetZoomOnRouteChange
@@ -56,6 +101,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
+        {/* Brand-verification structured data — read by Google's OAuth brand crawler
+            to confirm the homepage app name matches the consent screen. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSON_LD) }}
+        />
         {/* NavigationGuardProvider (nextjs-nav-guard) intercepts App Router nav so
             useLeaveGuard can raise a Save/Leave/Cancel dialog for unsaved lab work
             (spec 2026-07-06 §D). Fork of the unmaintained LayerX package; Next 16.2+. */}

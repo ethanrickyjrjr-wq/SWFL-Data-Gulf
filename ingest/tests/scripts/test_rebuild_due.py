@@ -80,3 +80,44 @@ def test_missing_frontmatter_keys_forces_rebuild(monkeypatch, tmp_path):
         rebuild_due, "MASTER_MD", _write_master(tmp_path, "no frontmatter here\n")
     )
     assert rebuild_due.master_is_stale() is True
+
+
+# ── collapse_landings: the pure map-collapse feeding the ingest-aware trigger ──
+# build_ingest_freshness_map does the DB reads; collapse_landings is the pure part —
+# consuming_pack keying + max-across-sources. ISO-8601 'Z' strings are fixed-width so
+# lexical max == chronological latest, which is what these lock in.
+
+
+def test_collapse_landings_takes_max_per_pack():
+    """A pack fed by several sources keeps the LATEST landing (any source moving
+    after the last build makes the brain behind)."""
+    pairs = [
+        (["seller-stress-swfl"], "2026-07-14T00:00:00Z"),
+        (["seller-stress-swfl"], "2026-07-15T04:22:07Z"),  # newest — must win
+        (["seller-stress-swfl"], "2026-06-14T00:00:00Z"),
+    ]
+    assert rebuild_due.collapse_landings(pairs) == {
+        "seller-stress-swfl": "2026-07-15T04:22:07Z"
+    }
+
+
+def test_collapse_landings_skips_none_timestamps():
+    """A source with no landing timestamp never writes a null into the map."""
+    pairs = [(["licenses-swfl"], None), (["licenses-swfl"], "2026-07-08T02:10:44Z")]
+    assert rebuild_due.collapse_landings(pairs) == {
+        "licenses-swfl": "2026-07-08T02:10:44Z"
+    }
+
+
+def test_collapse_landings_all_none_yields_empty_map():
+    """No timestamps at all → empty map → every leaf falls back to TTL-only."""
+    assert rebuild_due.collapse_landings([(["x-swfl"], None)]) == {}
+
+
+def test_collapse_landings_one_source_feeds_multiple_packs():
+    """A source declared with a list consuming_pack lands on each named pack."""
+    pairs = [(["a-swfl", "b-swfl"], "2026-07-15T00:00:00Z")]
+    assert rebuild_due.collapse_landings(pairs) == {
+        "a-swfl": "2026-07-15T00:00:00Z",
+        "b-swfl": "2026-07-15T00:00:00Z",
+    }

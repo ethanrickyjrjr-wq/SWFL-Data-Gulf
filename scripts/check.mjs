@@ -375,6 +375,16 @@ async function close(args) {
   const arr = Array.isArray(updated) ? updated : [updated];
   if (!arr.length) fail(`no check matched ${col}=${handle}`);
   console.log(`closed: ${handle} — ${arr[0]?.label ?? ""} [${proof.kind}]`.trim());
+  // A manual close is a claim nobody re-checks (07/18/2026 audit: 266/267 evidenced
+  // closes were manual; scripts/reverify-signals.mjs can only re-run the 1 that
+  // wasn't). Not a gate — a signal can only be attached before this point via
+  // `open --signal`, and forcing one here would block legitimate one-off human
+  // judgment calls. Just a nudge toward the cheaper, self-checking alternative.
+  if (proof.kind === "manual")
+    console.log(
+      `  (manual close — if this claim is mechanically checkable (a URL, a row count, a file's freshness), ` +
+        `consider opening the NEXT check like it with --signal so it re-verifies itself for free instead of by hand.)`,
+    );
 }
 
 async function update(args) {

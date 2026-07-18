@@ -3714,6 +3714,34 @@
       "status": "active",
       "scope_note": "Row count of data_lake.leepa_parcels (Lee County Property Appraiser parcel snapshot, layers 9+10+12 joined on FOLIOID). Single source of truth for the velocity denominator."
     },
+    "properties_lee_fdor_commercial_parcel_count": {
+      "id": "properties_lee_fdor_commercial_parcel_count",
+      "grade": { "reviewed_non_directional": true },
+      "prefLabel": "Lee County Commercial Parcel Count (FDOR Use-Code Category)",
+      "altLabels": [
+        "Lee commercial parcels"
+      ],
+      "raw_slugs": [
+        "fdor_commercial_parcel_count"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "properties-lee-value",
+        "master"
+      ],
+      "value_type": "count",
+      "unit": "parcels",
+      "value_range": [
+        0,
+        1000000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of Lee County parcels classed 'commercial' by FDOR's own DOR_UC use-code table (use-code 003 or 010-039) in data_lake.lee_parcels (FDOR statewide cadastral, ArcGIS FeatureServer, CO_NO=46). A separate source and methodology from the LeePA-sourced total_parcels above — a cross-check on scale, not reconciled to the parcel. Built 07/18/2026 alongside collier_parcels' widen, closing the gap where Lee had no FDOR-sourced parcel-category breakdown."
+    },
     "properties_collier_homes_sold_zscore": {
       "id": "properties_collier_homes_sold_zscore",
       "grade": {
@@ -9072,6 +9100,7 @@
     "soh_gap_median_pct": "properties_lee_soh_gap_median_pct",
     "lee_sold_median_homes_only": "properties_lee_sold_median_homes_only",
     "total_parcels": "properties_lee_total_parcels",
+    "fdor_commercial_parcel_count": "properties_lee_fdor_commercial_parcel_count",
     "collier_homes_sold_zscore": "properties_collier_homes_sold_zscore",
     "collier_homes_sold_per_year": "properties_collier_homes_sold_per_year",
     "collier_median_sale_price_yoy": "properties_collier_median_sale_price_yoy",

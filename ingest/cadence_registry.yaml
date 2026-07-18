@@ -917,18 +917,45 @@ pipelines:
     dlt_schema_name: collier_parcels # VERIFY after first run: SELECT DISTINCT schema_name FROM data_lake._dlt_loads WHERE schema_name LIKE '%collier_parcel%'
     expected_rows_min: 261000 # 90% of 290,973 UNIQUE parcel_ids (table merges 364,827 cadastral features to unique PARCEL_ID — multi-part rows carry identical values) confirmed 2026-06-06
     count_table: data_lake.collier_parcels
-    # Source: FDOR Statewide Cadastral ArcGIS FeatureServer (CO_NO=21). Annual roll (~Aug); monthly idempotent retry catches the refresh. Consumed by properties-collier-value (SOH gap + parcel count). 290,973 unique parcels live 2026-06-06; SOH gap median 36.47%.
+    # Source: FDOR Statewide Cadastral ArcGIS FeatureServer (CO_NO=21). Annual roll (~Aug); monthly idempotent retry catches the refresh. Consumed by properties-collier-value (SOH gap + parcel count). 290,973 unique parcels live 07/18/2026; SOH gap median 36.47%.
     source_scope:
       confirmed_total:
         value: 290973
-        as_of: "07/14/2026"
-        source: "our ingest (unique PARCEL_ID; 15 of 120 fields pulled: jv/jv_hmstd/av_hmstd/av_sd/av_nsd/tv_nsd, sale_prc1/yr1/mo1+qual_cd1/vi_cd1, phy_zipcd, dor_uc, pa_uc — SALE_PRC1 etc. added 07/11/2026 when the layer was repointed off the broken 14-field cadastral URL to the centroid twin; confirmed live 07/14/2026: 290,973 rows, 34,747 with a positive sale_prc1)"
+        as_of: "07/18/2026"
+        source: "our ingest (unique PARCEL_ID; WIDENED 07/18/2026 to 102 of 120 fields — every field the layer carries except 14 owner/fiduciary PII fields and 4 ArcGIS-internal row-tracking artifacts, verified field-by-field against FDOR's live 2025 NAL Data File User's Guide. No DOR_UC filter — all parcel types (residential/commercial/vacant/agricultural/institutional). Confirmed live 07/18/2026: 364,000 of 364,827 raw features fetched, merging to 290,973 unique parcels, 104 columns landed; 7,858 with new-construction value, 96,935 with special-features value, 290,391 with census block group, 78 distinct DOR use codes present.)"
       source_ceiling:
         value: 120
-        as_of: "07/14/2026"
+        as_of: "07/18/2026"
         source_url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0"
         source_label: "FDOR Statewide Parcel Centroid (ArcGIS FeatureServer) — same layer parcel_subdivision reads"
-        summary: "120 fields total (re-verified 07/14/2026 — the old '135 fields' note was against the since-abandoned broken cadastral URL). Deliberately NOT duplicated here: S_LEGAL/PHY_ADDR1 (subdivision identity — that's parcel_subdivision's job), TOT_LVG_AR/ACT_YR_BLT/EFF_YR_BLT/LND_VAL/NBRHD_CD/MKT_AR (physical/geography — going into parcel_subdivision's widened pull instead, not duplicated per-pipeline). See check collier_parcels_parcel_subdivision_redundant_scrape — both pipelines already hit this identical layer for overlapping Collier parcels; real consolidation is a separate design task, not done here."
+        summary: "120 fields total, 102 now pulled (up from 15). Remaining 18-field gap is deliberate: 14 owner/fiduciary PII fields (OWN_*/FIDU_*) and 4 ArcGIS-internal row artifacts (OBJECTID/OID_/ORIG_FID/PARCELNO) with no NAL spec match. See check collier_parcels_parcel_subdivision_redundant_scrape — this pipeline and parcel_subdivision still both hit this identical layer for overlapping Collier parcels (now with more overlap after the widen); real consolidation into one canonical table is a separate, deferred design task, not done here."
+
+  - name: lee_parcels
+    workflow: lee-parcels-annual.yml
+    consuming_pack: properties-lee-value
+    lane: tier-2
+    cadence_days: null # dispatch-only by design — see workflow comment; not a standing cron
+    tolerance_multiplier: 1.5
+    dlt_schema_name: lee_parcels
+    expected_rows_min: null # first run in flight 07/18/2026 — set after live row count confirmed
+    count_table: data_lake.lee_parcels
+    # Source: FDOR Statewide Cadastral ArcGIS FeatureServer (CO_NO=46). Sibling to
+    # collier_parcels, built 07/18/2026 — Lee never had a comprehensive FDOR-sourced
+    # parcel table before this (properties-lee-value's existing SOH gap/velocity
+    # signal sources from the separate LeePA appraiser feed instead). Dispatch-only,
+    # not scheduled: a 556k-parcel full pull is a deliberate annual action, re-run
+    # manually when FDOR republishes the roll, not a standing cron.
+    source_scope:
+      confirmed_total:
+        value: null # set after the live run in flight 07/18/2026 completes
+        as_of: "07/18/2026"
+        source: "our ingest (unique PARCEL_ID; same 102-of-120-field scope as collier_parcels, verified against FDOR's live 2025 NAL Data File User's Guide. No DOR_UC filter — all parcel types. Server-reported count 556,100 raw features (07/18/2026); unique-parcel count TBD pending live run completion.)"
+      source_ceiling:
+        value: 120
+        as_of: "07/18/2026"
+        source_url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0"
+        source_label: "FDOR Statewide Parcel Centroid (ArcGIS FeatureServer) — same layer collier_parcels and parcel_subdivision read"
+        summary: "120 fields total, 102 pulled (same scope as collier_parcels). Excluded: 14 owner/fiduciary PII fields (OWN_*/FIDU_*) and 4 ArcGIS-internal row artifacts (OBJECTID/OID_/ORIG_FID/PARCELNO)."
 
   - name: parcel_subdivision
     workflow: parcel-subdivision-annual.yml

@@ -11,6 +11,7 @@ import {
   classifyFailure,
   computeMasterDecision,
   masterIsStaleVsUpstreams,
+  leafIsStaleVsIngest,
   buildOne,
   deriveExitCode,
   formatCronDiag,
@@ -579,4 +580,40 @@ test("masterIsStaleVsUpstreams: an upstream refined at the SAME instant → not 
 
 test("masterIsStaleVsUpstreams: no upstreams → fresh (false)", () => {
   assert.equal(masterIsStaleVsUpstreams("2026-06-05T12:00:00Z", []), false);
+});
+
+// ── leafIsStaleVsIngest ──────────────────────────────────────────────────────
+// The leaf↔ingest twin of the trigger above. A leaf can be TTL-fresh by its own
+// clock yet already behind its Tier-1 ingest (e.g. seller-stress-swfl serving the
+// Mar 2026 period after its Redfin sources landed 07/15). Compare against the
+// leaf's BUILD time (refined_at), never the served period — a successful rebuild
+// advances refined_at past the landing so the trigger fires once per landing.
+
+test("leafIsStaleVsIngest: a source landed AFTER the last build → stale (true)", () => {
+  // Real scenario: seller-stress-swfl built 2026-07-03; Redfin price_drops landed 2026-07-15.
+  const leafRefinedAt = "2026-07-03T04:11:02Z";
+  const landed = [
+    "2026-06-14T00:00:00Z", // an earlier month's landing
+    "2026-07-15T04:22:07Z", // the fresh Redfin roll — newer than the build
+  ];
+  assert.equal(leafIsStaleVsIngest(leafRefinedAt, landed), true);
+});
+
+test("leafIsStaleVsIngest: all sources landed before the last build → fresh (false)", () => {
+  const leafRefinedAt = "2026-07-16T09:00:00Z";
+  const landed = ["2026-07-15T04:22:07Z", "2026-06-14T00:00:00Z"];
+  assert.equal(leafIsStaleVsIngest(leafRefinedAt, landed), false);
+});
+
+test("leafIsStaleVsIngest: a source landed at the SAME instant → not stale (false; strictly-newer only)", () => {
+  const ts = "2026-07-15T04:22:07Z";
+  assert.equal(leafIsStaleVsIngest(ts, [ts]), false);
+});
+
+test("leafIsStaleVsIngest: no sources → fresh (false)", () => {
+  assert.equal(leafIsStaleVsIngest("2026-07-15T04:22:07Z", []), false);
+});
+
+test("leafIsStaleVsIngest: an unparseable landing time is ignored (false), never a spurious rebuild", () => {
+  assert.equal(leafIsStaleVsIngest("2026-07-15T04:22:07Z", ["not-a-date"]), false);
 });

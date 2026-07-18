@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "source": "synthetic fixture — refinery/sources/lee-parcels-source.mts",
+    "note": "Shape mirrors data_lake.lee_parcels_summary; values are illustrative, not live."
+  },
+  "summary": {
+    "kind": "lee-parcels-summary",
+    "total_parcels": 500000,
+    "soh_homesteaded_parcels": 180000,
+    "soh_gap_median_pct": 42.5,
+    "residential_parcels": 380000,
+    "commercial_parcels": 45000,
+    "industrial_parcels": 8000,
+    "agricultural_parcels": 15000,
+    "institutional_parcels": 6000,
+    "governmental_parcels": 12000,
+    "misc_parcels": 34000
+  }
+}

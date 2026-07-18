@@ -23,6 +23,10 @@ import {
   type LeeSalesYearNormalized,
   type LeeSummaryNormalized,
 } from "../sources/lee-market-source.mts";
+import {
+  leeParcelsSource,
+  type LeeParcelsSummaryNormalized,
+} from "../sources/lee-parcels-source.mts";
 import { env } from "../config/env.mts";
 import { fmtInt, fmtPct, fmtRatio } from "./lib/number-format.mts";
 
@@ -93,6 +97,11 @@ let lastFetchedAt: string | null = null;
 
 let lastFhfaSummary: HpiSwflSummary | null = null;
 let lastLeeMarket: LeeMarketAggregates | null = null;
+
+// FDOR-sourced parcel-category cross-check (separate source/methodology from
+// LeePA) — the answer to "how much of Lee is commercial", which LeePA's
+// snapshot doesn't classify by use-code category the way FDOR's own NAL does.
+let lastLeeParcelsSummary: LeeParcelsSummaryNormalized | null = null;
 
 // Homes-only SOLD median per ZIP (LeePA recorded deeds) — the sold answer to the
 // active-listing land-blend. Distinct grain/source from the Redfin market median.
@@ -172,6 +181,16 @@ function leeMarketSummaryFrom(fragments: RawFragment[]): LeeSummaryNormalized | 
   for (const f of fragments) {
     const n = f.normalized as unknown as LeeSummaryNormalized;
     if (n?.kind === "lee-summary") return n;
+  }
+  return null;
+}
+
+// Strict === kind matching — "lee-parcels-summary" (FDOR) must never cross-match
+// "leepa-summary" (Lee County Property Appraiser) — same county, different source.
+function leeParcelsSummaryFrom(fragments: RawFragment[]): LeeParcelsSummaryNormalized | null {
+  for (const f of fragments) {
+    const n = f.normalized as unknown as LeeParcelsSummaryNormalized;
+    if (n?.kind === "lee-parcels-summary") return n;
   }
   return null;
 }
@@ -318,6 +337,7 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
     leeMarketSales.size > 0 || leeMarketSummary != null
       ? aggregateLeeMarket(leeMarketSales, leeMarketSummary)
       : null;
+  lastLeeParcelsSummary = leeParcelsSummaryFrom(allFragments);
 
   const agg = lastAggregate;
   if (agg.totalParcels === 0) return [];
@@ -376,6 +396,22 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
         : `${fmtInt(agg.totalParcels)} parcels in fixture refinery/__fixtures__/properties-lee-value.sample.json.`,
     source_fragment_ids: [],
   });
+
+  const fdorParcels = lastLeeParcelsSummary;
+  if (fdorParcels) {
+    facts.push({
+      topic: "metric:fdor_commercial_parcel_count",
+      fact: "Lee parcel count by FDOR use-code category (FDOR cadastral, cross-check vs LeePA)",
+      value:
+        `${fmtInt(fdorParcels.total_parcels)} Lee parcels in the FDOR statewide cadastral snapshot ` +
+        `(a separate source/methodology from LeePA, used here as a cross-check, not a replacement). ` +
+        `By FDOR use-code category: ${fmtInt(fdorParcels.residential_parcels)} residential, ` +
+        `${fmtInt(fdorParcels.commercial_parcels)} commercial, ${fmtInt(fdorParcels.industrial_parcels)} industrial, ` +
+        `${fmtInt(fdorParcels.agricultural_parcels)} agricultural, ${fmtInt(fdorParcels.institutional_parcels)} institutional, ` +
+        `${fmtInt(fdorParcels.governmental_parcels)} governmental, ${fmtInt(fdorParcels.misc_parcels)} miscellaneous.`,
+      source_fragment_ids: [],
+    });
+  }
 
   const fhfa = lastFhfaSummary;
   if (fhfa?.cape_coral_msa) {
@@ -546,6 +582,35 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
     display_format: "count",
     source: sourceMeta,
   });
+
+  const fdorParcels = lastLeeParcelsSummary;
+  if (fdorParcels) {
+    const fdorSourceMeta: BrainOutputMetricSource = {
+      url:
+        env.source === "live" && env.supabaseUrl
+          ? `${env.supabaseUrl}/rest/v1/lee_parcels_summary?select=total_parcels,commercial_parcels,residential_parcels`
+          : "fixture://refinery/__fixtures__/properties-lee-parcels.sample.json",
+      fetched_at,
+      tier: 2,
+      citation:
+        env.source === "live"
+          ? `FDOR Statewide Cadastral via data_lake.lee_parcels (ArcGIS FeatureServer, CO_NO=46) — ` +
+            `use-code category counted per FDOR's 2025 NAL Data File User's Guide (residential 000-002/004-009, ` +
+            `commercial 003+010-039, industrial 040-049, agricultural 050-069, institutional 070-079, ` +
+            `governmental 080-089, misc 090-099). Cross-check source, separate from LeePA.`
+          : "FDOR Statewide Cadastral — Lee parcels (fixture; refinery/__fixtures__/properties-lee-parcels.sample.json).",
+    };
+    key_metrics.push({
+      metric: "fdor_commercial_parcel_count",
+      value: fdorParcels.commercial_parcels,
+      direction: "stable",
+      label: "Lee commercial parcel count (FDOR use-code category, cross-check vs LeePA total)",
+      variable_type: "extensive",
+      units: "parcels",
+      display_format: "count",
+      source: fdorSourceMeta,
+    });
+  }
 
   const fhfa = lastFhfaSummary;
   const fhfaCitationBase =
@@ -790,6 +855,7 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
     `Lee County only — Collier and Charlotte are NOT included. SWFL-wide reads must be assembled from sibling brains (not yet built).`,
     `FHFA HPI metrics (Cape Coral MSA + FL state) use a repeat-sale methodology and are published quarterly with a ~2-month lag. They measure price-level change, not transaction volume — the LeePA z-score and the FHFA YoY are complementary, not interchangeable.`,
     `Save-Our-Homes gap median is restricted to parcels with cap_difference > 0 (actively benefiting from the SOH cap). Non-homestead and newly-homesteaded parcels are excluded from the median; total_parcels is the full snapshot row count for context.`,
+    `fdor_commercial_parcel_count comes from a separate source (FDOR statewide cadastral, data_lake.lee_parcels) than the LeePA-sourced total_parcels above — the two total counts will not match exactly (different snapshot dates, different inclusion rules) and should be read as a cross-check on scale, not reconciled to the parcel.`,
     `Direction thresholds: bullish if z ≥ +${Z_BULL_THRESHOLD.toFixed(1)}σ; bearish if z ≤ ${Z_BEAR_THRESHOLD.toFixed(1)}σ; neutral otherwise. Standard deviation is population std over ${BASELINE_YEAR_COUNT} baseline years; if variance is zero (all baseline years identical) z is undefined and direction is neutral.`,
   ];
   if (env.source === "fixture") {
@@ -820,7 +886,13 @@ export const propertiesLeeValue: PackDefinition = {
   scope:
     "Lee County (FL) real-estate direction read — LeePA parcel-grain: sales-velocity z-score (current year vs trailing 3yr) + Save-Our-Homes gap median. Redfin county tracker (market-grain): homes-sold z-score + median sale price YoY + months of supply from data_lake.redfin_lee_market. Two sources, two grains; county-grain peer to properties-collier-value.",
   ttl_seconds: 2592000, // 30 days — both LeePA and Redfin refresh monthly
-  sources: [leepaValueSource, leeMarketSource, fhfaHpiSource, leepaSoldMedianSource],
+  sources: [
+    leepaValueSource,
+    leeMarketSource,
+    fhfaHpiSource,
+    leepaSoldMedianSource,
+    leeParcelsSource,
+  ],
   input_brains: [],
   fitScore: (): number => 8,
   compositeCutoff: 0,

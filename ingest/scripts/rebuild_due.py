@@ -48,6 +48,7 @@ Usage:
     python ingest/scripts/rebuild_due.py --explain  # always exit 0; print decision only
 """
 import argparse
+import json
 import os
 import re
 import sys
@@ -69,6 +70,10 @@ EXIT_SKIP = 10     # nothing ingested since the last build — skip the rebuild
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 BRAINS_DIR = REPO_ROOT / "brains"
 REGISTRY_PATH = Path(__file__).resolve().parent.parent / "cadence_registry.yaml"
+# Transient run artifact (gitignored): the rebuild step's CLI reads this to fire the
+# per-leaf ingest-aware trigger. Written every gate run, even when the gate rebuilds
+# for another reason, so a TTL-fresh leaf whose ingest just moved is never skipped.
+FRESHNESS_MAP_PATH = BRAINS_DIR / "_ingest-freshness.json"
 
 _REFINED_AT_RE = re.compile(r"^refined_at:\s*(\S+)\s*$", re.MULTILINE)
 _TTL_RE = re.compile(r"^ttl_seconds:\s*(\d+)\s*$", re.MULTILINE)
@@ -169,23 +174,92 @@ def newest_source_ingest(conn, registry: dict) -> tuple[date | None, list[tuple[
     return newest, per_source
 
 
+def collapse_landings(pairs: list[tuple[list[str], str | None]]) -> dict[str, str]:
+    """(consuming_packs, last_run_ts) rows → {pack_id: latest landing ISO ts}.
+
+    A pack fed by several source pipelines (seller-stress-swfl reads price_drops +
+    contract_cancellations + delistings_relistings) takes the MAX across them: any
+    one source landing after the brain's last build makes the brain behind. ISO-8601
+    UTC 'Z' timestamps are fixed-width and zero-padded, so lexical max == latest.
+    A row with no timestamp is skipped (never writes a null into the map)."""
+    out: dict[str, str] = {}
+    for packs, ts in pairs:
+        if not ts:
+            continue
+        for pack in packs:
+            prev = out.get(pack)
+            if prev is None or ts > prev:
+                out[pack] = ts
+    return out
+
+
+def build_ingest_freshness_map(conn, registry: dict) -> dict[str, str]:
+    """pack_id → latest source-landing timestamp, keyed off each cadence entry's
+    ``consuming_pack``. This is the signal the rebuild step's CLI reads to fire the
+    per-leaf ingest-aware trigger (``refinery/cli.mts`` leafIsStaleVsIngest). Reuses
+    the probe's per-source freshness queries (one SQL root); entries with no
+    ``consuming_pack`` are skipped, so that pack keeps TTL-only freshness."""
+    pairs: list[tuple[list[str], str | None]] = []
+    for entry in registry.get("pipelines", []):
+        packs = entry.get("consuming_pack")
+        if not packs:
+            continue
+        packs = [packs] if isinstance(packs, str) else list(packs)
+        lane = entry.get("lane", "")
+        try:
+            if lane in ("tier-1", "tier-1-duckdb"):
+                r = check_tier1_entry(conn, entry)
+            elif lane == "tier-2":
+                r = check_tier2_entry(conn, entry)
+            else:
+                continue
+        except Exception as exc:  # one bad pipeline must not blind the whole map
+            print(f"  ! {entry.get('name', '?')}: freshness query failed ({exc})", file=sys.stderr)
+            continue
+        pairs.append((packs, r.get("last_run_ts")))
+    return collapse_landings(pairs)
+
+
+def write_freshness_map(fmap: dict[str, str]) -> None:
+    """Atomic write of the ingest-freshness map (tmpfile + replace). Gitignored;
+    the rebuild step reads it in-workspace and never commits it."""
+    tmp = FRESHNESS_MAP_PATH.with_name(FRESHNESS_MAP_PATH.name + ".tmp")
+    tmp.write_text(json.dumps(fmap, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    tmp.replace(FRESHNESS_MAP_PATH)
+
+
 def decide() -> int:
     built = last_build_date()
     if built is None:
         print("Could not read any brains/*.md refined_at — FAIL OPEN, rebuild.", file=sys.stderr)
         return EXIT_REBUILD
 
-    # master's OWN freshness contract is independent of source-ingest recency.
-    # If master is past its TTL, rebuild regardless of whether any source moved —
-    # otherwise a due master can sit silently frozen (the source gate never trips
-    # and the rebuild step that arms the freeze watchdog never runs).
-    if master_is_stale():
-        print("REBUILD - brains/master.md is past its own ttl_seconds OR has unverifiable frontmatter; forcing a rebuild (re-renders master and arms the freeze watchdog) regardless of source ingest.")
-        return EXIT_REBUILD
-
     registry = load_registry(REGISTRY_PATH)
     conn = _get_connection()
     try:
+        # Always emit the ingest-freshness map first — the rebuild step's CLI reads
+        # it to fire the per-leaf ingest-aware trigger, and it must exist even when
+        # the gate rebuilds for a DIFFERENT reason (master past its own TTL, below),
+        # else a TTL-fresh leaf whose ingest just moved is still skipped. Never
+        # gates: a write failure is logged and the gate decision proceeds unaffected.
+        try:
+            fmap = build_ingest_freshness_map(conn, registry)
+            write_freshness_map(fmap)
+            print(f"Wrote {FRESHNESS_MAP_PATH.name}: {len(fmap)} pack(s) mapped to a source landing.")
+        except Exception as exc:  # noqa: BLE001 — artifact write, never gate the rebuild
+            print(
+                f"  ! ingest-freshness map not written ({exc}); leaves fall back to TTL-only.",
+                file=sys.stderr,
+            )
+
+        # master's OWN freshness contract is independent of source-ingest recency.
+        # If master is past its TTL, rebuild regardless of whether any source moved —
+        # otherwise a due master can sit silently frozen (the source gate never trips
+        # and the rebuild step that arms the freeze watchdog never runs).
+        if master_is_stale():
+            print("REBUILD - brains/master.md is past its own ttl_seconds OR has unverifiable frontmatter; forcing a rebuild (re-renders master and arms the freeze watchdog) regardless of source ingest.")
+            return EXIT_REBUILD
+
         newest, per_source = newest_source_ingest(conn, registry)
     finally:
         conn.close()

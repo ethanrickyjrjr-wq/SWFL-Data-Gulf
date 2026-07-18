@@ -610,6 +610,16 @@
     "disabled": false
   },
   {
+    "name": "Lee parcels annual (FDOR cadastral)",
+    "file": "lee-parcels-annual.yml",
+    "scheduled": false,
+    "timeout_minutes": 90,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "Lee County permits weekly",
     "file": "lee-permits-weekly.yml",
     "scheduled": true,
@@ -858,6 +868,16 @@
     "paid": false,
     "should_be_dark": false,
     "disabled": false
+  },
+  {
+    "name": "Reverify closed-check signals (daily)",
+    "file": "reverify-signals-daily.yml",
+    "scheduled": true,
+    "timeout_minutes": 10,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
   },
   {
     "name": "Rollback on red — Prod",

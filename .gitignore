@@ -244,3 +244,8 @@ chief-of-staff-brief.md
 
 # dev-only email triage renders (scratch, regenerate with scripts/dev-render-listing-emails.mts)
 public/dev-emails/
+
+# ingest-freshness map: per-run artifact written by ingest/scripts/rebuild_due.py at
+# rebuild preflight and read in-workspace by refinery/cli.mts's per-leaf ingest-aware
+# trigger. Transient run state (not repo content) — never commit; regenerated every gate run.
+brains/_ingest-freshness.json*

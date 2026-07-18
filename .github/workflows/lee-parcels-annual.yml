@@ -1,0 +1,42 @@
+name: Lee parcels annual (FDOR cadastral)
+
+on:
+  # Dispatch-only, not scheduled — a full 556k-parcel snapshot is meant to be a
+  # deliberate, occasional pull (annual roll, ~August), not a standing cron.
+  # Re-run manually next year when FDOR republishes the roll.
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch + normalize only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run Lee parcels pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run"
+          fi
+          python -m ingest.pipelines.lee_parcels.pipeline $ARGS

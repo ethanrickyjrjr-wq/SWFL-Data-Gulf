@@ -189,6 +189,31 @@ export function masterIsStaleVsUpstreams(
   return upstreamRefinedAts.some((ts) => Date.parse(ts) > masterMs);
 }
 
+/** Pure: is a LEAF brain behind its own ingest? True iff any of the leaf's ingest
+ *  sources landed data STRICTLY AFTER the leaf's last synthesis. The leaf↔ingest
+ *  twin of `masterIsStaleVsUpstreams` (which is brain↔brain): a leaf can sit
+ *  within its own TTL yet already serve a stale snapshot because its Tier-1
+ *  source ingested a fresher period — e.g. seller-stress-swfl's Redfin sources
+ *  land ~monthly while the leaf's TTL is shorter, so the nightly skipped it as
+ *  "fresh" and it served the Mar 2026 period for weeks after the 07/15 ingest.
+ *  The CLI uses this to override a "skipped-fresh" leaf so the nightly rebuilds
+ *  it the moment its data moves, instead of waiting out the TTL.
+ *
+ *  Compare against `leafRefinedAt` (the BUILD time), NEVER the served data
+ *  period — a leaf whose period lags its build would otherwise re-fire this
+ *  trigger every single night. A successful rebuild advances `refined_at` past
+ *  the landing time, so the trigger clears and fires exactly once per landing.
+ *  Equal timestamps are NOT stale (a same-run rebuild already yields a current
+ *  leaf). An unparseable landing time is ignored (NaN comparison is false) so
+ *  junk never forces a spurious rebuild. Exported for direct unit testing. */
+export function leafIsStaleVsIngest(
+  leafRefinedAt: string,
+  sourceLandedAts: readonly string[],
+): boolean {
+  const refinedMs = Date.parse(leafRefinedAt);
+  return sourceLandedAts.some((ts) => Date.parse(ts) > refinedMs);
+}
+
 /**
  * Pure: derive the process exit code from the full outcome set + master decision.
  *

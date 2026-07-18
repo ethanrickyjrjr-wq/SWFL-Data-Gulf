@@ -63,6 +63,7 @@ on:
       - "Redfin Price Drops Tier 1 monthly"
       - "Redfin SWFL Tier 1 monthly"
       - "Redfin SWFL city market monthly"
+      - "Reverify closed-check signals (daily)"
       - "SWFL Inc. economic dev weekly"
       - "SWFL business news ingest daily"
       - "SWFL search demand monthly"

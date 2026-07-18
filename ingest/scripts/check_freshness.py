@@ -221,6 +221,23 @@ def _to_date(val) -> date:
     raise ValueError(f"Cannot convert {type(val)} to date")
 
 
+def _to_iso(val) -> str | None:
+    """Full-precision UTC ISO-8601 (…Z) for a datetime/date. The date-truncated
+    `last_run` the probe reports is right for a cadence-tolerance check, but the
+    rebuild trigger (rebuild_due.build_ingest_freshness_map) compares a source
+    landing against a brain's full `refined_at` timestamp — truncating the landing
+    to midnight would silently MISS data that lands after a same-day rebuild. So
+    the check functions surface this raw timestamp ADDITIVELY, alongside `last_run`,
+    without changing the probe's own date-based behavior."""
+    if isinstance(val, datetime):
+        return val.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if isinstance(val, date):
+        return datetime(val.year, val.month, val.day, tzinfo=timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
+    return None
+
+
 def _fetch_max_freshness(conn, entry: dict) -> date | None:
     """Return MAX(freshness_column) for this entry, or None if no rows / table missing.
 
@@ -316,6 +333,7 @@ def check_tier1_entry(conn, entry: dict) -> dict:
             "name": name,
             "lane": lane,
             "last_run": None,
+            "last_run_ts": None,
             "age_days": None,
             "cadence_days": cadence,
             "threshold_days": threshold,
@@ -327,6 +345,7 @@ def check_tier1_entry(conn, entry: dict) -> dict:
             "name": name,
             "lane": lane,
             "last_run": None,
+            "last_run_ts": None,
             "age_days": None,
             "cadence_days": cadence,
             "threshold_days": threshold,
@@ -334,12 +353,14 @@ def check_tier1_entry(conn, entry: dict) -> dict:
         }
 
     last_run = _to_date(row[0])
+    last_run_ts = _to_iso(row[0])  # full-precision landing for the rebuild trigger
     age_days = (date.today() - last_run).days
     status = "STALE" if age_days > threshold else "FRESH"
     return {
         "name": name,
         "lane": lane,
         "last_run": last_run,
+        "last_run_ts": last_run_ts,
         "age_days": age_days,
         "cadence_days": cadence,
         "threshold_days": threshold,
@@ -422,6 +443,7 @@ def check_tier2_entry(conn, entry: dict) -> dict:
             "name": name,
             "lane": "tier-2",
             "last_run": None,
+            "last_run_ts": None,
             "age_days": None,
             "cadence_days": cadence,
             "threshold_days": threshold,
@@ -434,6 +456,7 @@ def check_tier2_entry(conn, entry: dict) -> dict:
         "name": name,
         "lane": "tier-2",
         "last_run": last_run,
+        "last_run_ts": _to_iso(last_run),  # date-precision (tier-2 lands monthly+)
         "age_days": age_days,
         "cadence_days": cadence,
         "threshold_days": threshold,

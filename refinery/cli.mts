@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { getPack, PACKS } from "./config/packs.mts";
 import type { PackDefinition } from "./types/pack.mts";
@@ -14,11 +14,29 @@ import {
   buildOne,
   computeMasterDecision,
   masterIsStaleVsUpstreams,
+  leafIsStaleVsIngest,
   deriveExitCode,
   formatCronDiag,
   type BrainBuildOutcome,
   type BuildReport,
 } from "./lib/resilient-build.mts";
+
+/** Ingest-freshness map: pack_id → latest source-landing ISO timestamp, written by
+ *  ingest/scripts/rebuild_due.py at nightly preflight (the same query the rebuild
+ *  gate already runs — zero added egress). Absent/unreadable → {} so the leaf
+ *  ingest-aware trigger is a pure no-op and every leaf keeps its TTL-only behavior. */
+async function loadIngestFreshness(): Promise<Record<string, string>> {
+  const p = path.join(process.cwd(), "brains", "_ingest-freshness.json");
+  try {
+    const parsed = JSON.parse(await readFile(p, "utf-8"));
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, string>;
+    }
+  } catch {
+    /* missing/unreadable/malformed → no signal; fall back to TTL-only */
+  }
+  return {};
+}
 
 interface CliArgs {
   packId: string;
@@ -205,6 +223,12 @@ async function main(): Promise<void> {
   const neverBuiltIds = new Set<string>();
   const startedAt = new Date().toISOString();
 
+  // Ingest-aware leaf trigger: pack_id → latest source-landing timestamp. Lets a
+  // TTL-fresh leaf rebuild when its own Tier-1 ingest landed AFTER its last build
+  // (the leaf↔ingest twin of master's upstream-aware trigger). {} when the map is
+  // absent → the trigger is a no-op and leaves fall back to TTL-only freshness.
+  const ingestFreshness = resilient ? await loadIngestFreshness() : {};
+
   // In resilient mode, master is handled separately after all upstreams so
   // computeMasterDecision can inspect the full outcome set before master runs.
   for (const id of resilient ? order.filter((id) => id !== "master") : order) {
@@ -284,9 +308,17 @@ async function main(): Promise<void> {
         continue;
       }
       if (status.kind === "fresh" && !force) {
-        console.log(`[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — skip`);
-        outcomes.push({ packId: id, status: "skipped-fresh", written: false });
-        continue;
+        const landed = ingestFreshness[id];
+        if (landed && leafIsStaleVsIngest(status.refined_at, [landed])) {
+          console.log(
+            `[refinery] upstream ${id}: TTL-fresh but ingest landed ${landed} after last build (${status.refined_at}) — rebuilding (ingest-aware trigger).`,
+          );
+          // fall through to buildOne below
+        } else {
+          console.log(`[refinery] upstream ${id}: fresh (expires ${status.expires_at}) — skip`);
+          outcomes.push({ packId: id, status: "skipped-fresh", written: false });
+          continue;
+        }
       }
       if (status.kind === "missing") {
         console.log(`[refinery] upstream ${id}: missing — building (resilient)`);
@@ -302,8 +334,15 @@ async function main(): Promise<void> {
       // run it through buildOne as well
       const status = await brainStatus(id);
       if (status.kind === "fresh" && !force) {
-        outcomes.push({ packId: id, status: "skipped-fresh", written: false });
-        continue;
+        const landed = ingestFreshness[id];
+        if (landed && leafIsStaleVsIngest(status.refined_at, [landed])) {
+          console.log(
+            `[refinery] ${id}: TTL-fresh but ingest landed ${landed} after last build (${status.refined_at}) — rebuilding (ingest-aware trigger).`,
+          );
+        } else {
+          outcomes.push({ packId: id, status: "skipped-fresh", written: false });
+          continue;
+        }
       }
     }
 

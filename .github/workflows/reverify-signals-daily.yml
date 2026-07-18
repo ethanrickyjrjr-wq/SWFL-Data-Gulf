@@ -1,0 +1,77 @@
+name: Reverify closed-check signals (daily)
+
+# 07/18/2026 — the free half of check-drift defense. A trust audit that day
+# found 82 risk-flagged closed checks and had to re-verify them by hand (9
+# agents, ~1.5M tokens) because only 1 of 267 evidenced closes carried a
+# `signal` — a live, mechanically re-runnable assertion. This job re-runs
+# every CLOSED check's stored signal on a clock, for the cost of an HTTP/DB
+# read: no agent, no tokens. A signal that used to pass and now fails means
+# the thing it verified has regressed, and gets auto-reopened — the next
+# session's CHECK surfaces it instead of a human needing to notice, or an
+# operator needing to pay for another manual sweep to find it.
+#
+# Distinct from a REGRESSION: a signal that never evaluates at all (bad
+# params, an unimplemented type) is reported separately and never reopens
+# anything — see scripts/reverify-signals.mjs's isRealRegression().
+
+on:
+  schedule:
+    # 15:41 UTC — off the top-of-hour congestion band, well clear of the
+    # nightly chain (04:23 UTC) and the freshness probe (14:00 UTC).
+    - cron: "41 15 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run — report only, reopen nothing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: reverify-signals-daily
+  cancel-in-progress: false
+
+jobs:
+  reverify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+
+      - name: Reverify every closed check's stored signal
+        id: run
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          set -o pipefail
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            node scripts/reverify-signals.mjs --dry-run | tee scan.txt
+          else
+            node scripts/reverify-signals.mjs | tee scan.txt
+          fi
+
+      - name: Open or update the regression issue
+        if: steps.run.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          body="$(printf '```\n%s\n```\nRun: %s/%s/actions/runs/%s' "$(cat scan.txt)" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")"
+          existing=$(gh issue list --state open --search "SIGNAL REGRESSION in:title" --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "SIGNAL REGRESSION — a closed check's stored signal now fails (or never evaluates)" --body "$body"
+          fi
+
+      - name: Fail the run on any regression or broken signal (visible red X)
+        if: steps.run.outcome == 'failure'
+        run: exit 1

@@ -41,13 +41,15 @@ test("propertiesLeeValue pack: deterministic (skipTriageAgent + skipSynthesisAge
   assert.equal(propertiesLeeValue.skipSynthesisAgent, true);
 });
 
-test("propertiesLeeValue pack: source connectors wired (leepa + redfin-lee-market + fhfa-hpi + leepa-sold-median)", () => {
+test("propertiesLeeValue pack: source connectors wired (leepa + redfin-lee-market + fhfa-hpi + leepa-sold-median + lee-parcels-fdor)", () => {
   // Drift fix (2026-06-13): the redfin-lee build added leeMarketSource as a 3rd
   // connector but this assertion still expected 2 — it was red on main. Pinned
   // to 3 and the redfin_lee_market connector added below.
   // 2026-07-11: leepa_sold_median added as the 4th connector (homes-only sold
   // median per ZIP from recorded deeds).
-  assert.equal(propertiesLeeValue.sources.length, 4);
+  // 2026-07-18: lee_parcels_fdor added as the 5th connector (FDOR cadastral
+  // use-code category cross-check, sibling to collier_parcels' widen).
+  assert.equal(propertiesLeeValue.sources.length, 5);
   const leepa = propertiesLeeValue.sources.find((s) => s.source_id === "leepa_value_lee");
   assert.ok(leepa, "leepa_value_lee source must be wired");
   assert.equal(leepa!.trust_tier, 2);
@@ -60,6 +62,63 @@ test("propertiesLeeValue pack: source connectors wired (leepa + redfin-lee-marke
   const soldMedian = propertiesLeeValue.sources.find((s) => s.source_id === "leepa_sold_median");
   assert.ok(soldMedian, "leepa_sold_median source must be wired");
   assert.equal(soldMedian!.trust_tier, 2);
+  const fdorParcels = propertiesLeeValue.sources.find((s) => s.source_id === "lee_parcels_fdor");
+  assert.ok(fdorParcels, "lee_parcels_fdor source must be wired");
+  assert.equal(fdorParcels!.trust_tier, 2);
+});
+
+test("propertiesLeeValue pack: FDOR commercial parcel count surfaces (cross-check vs LeePA total_parcels)", async () => {
+  const { leepaValueSource } = await import("../sources/leepa-value-source.mts");
+  const { leeParcelsSource } = await import("../sources/lee-parcels-source.mts");
+  const fragments = [...(await leepaValueSource.fetch()), ...(await leeParcelsSource.fetch())];
+
+  propertiesLeeValue.corpusSummary!(
+    fragments as unknown as Parameters<NonNullable<typeof propertiesLeeValue.corpusSummary>>[0],
+  );
+  const result = propertiesLeeValue.outputProducer!({
+    pack: propertiesLeeValue,
+    version: 1,
+    refined_at: new Date().toISOString(),
+    citations: [],
+    facts: [],
+    recentNote: "",
+  } as unknown as Parameters<NonNullable<typeof propertiesLeeValue.outputProducer>>[0]);
+
+  const m = result.key_metrics.find((k) => k.metric === "fdor_commercial_parcel_count");
+  assert.ok(m, "fdor_commercial_parcel_count metric must surface");
+  assert.equal(m!.variable_type, "extensive");
+  assert.equal(m!.display_format, "count");
+  assert.equal(m!.value, 45000, "must match the fixture's commercial_parcels value");
+  assert.ok(/FDOR/.test(m!.source.citation));
+
+  // Cross-check caveat must be present — the two total counts (LeePA vs FDOR)
+  // come from different sources and must never be silently reconciled.
+  assert.ok(
+    result.caveats.some((c) => /separate source/i.test(c) && /cross-check/i.test(c)),
+    "cross-check caveat must surface distinguishing FDOR from LeePA sourcing",
+  );
+});
+
+test("propertiesLeeValue pack: without the lee-parcels fragment, fdor_commercial_parcel_count does not surface", async () => {
+  const { leepaValueSource } = await import("../sources/leepa-value-source.mts");
+  const fragments = await leepaValueSource.fetch();
+
+  propertiesLeeValue.corpusSummary!(
+    fragments as unknown as Parameters<NonNullable<typeof propertiesLeeValue.corpusSummary>>[0],
+  );
+  const result = propertiesLeeValue.outputProducer!({
+    pack: propertiesLeeValue,
+    version: 1,
+    refined_at: new Date().toISOString(),
+    citations: [],
+    facts: [],
+    recentNote: "",
+  } as unknown as Parameters<NonNullable<typeof propertiesLeeValue.outputProducer>>[0]);
+
+  assert.ok(
+    !result.key_metrics.some((k) => k.metric === "fdor_commercial_parcel_count"),
+    "metric must not surface without a lee-parcels-summary fragment (no invented value)",
+  );
 });
 
 test("propertiesLeeValue pack: fixture round-trip produces expected metrics", async () => {
