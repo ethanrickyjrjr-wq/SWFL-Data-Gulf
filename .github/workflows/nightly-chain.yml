@@ -22,6 +22,20 @@ name: Nightly Chain
 # off the top of the hour did not fix it. `workflow_dispatch` starts in ~4
 # SECONDS (run 28353096175: created 06:29:37, job started 06:29:41).
 #
+# ─── DOUBLE-FIRE FIX (07/18/2026) ─────────────────────────────────────────────
+# Both heads target the same 04:23 UTC slot, so on any night the dispatch
+# route (app/api/cron/nightly-chain-dispatch) succeeds, `schedule:` still fires
+# 2-5h later and — because it's not "in progress" anymore by then — runs the
+# WHOLE chain a second time instead of queuing behind a finished run. Proven on
+# 07/16: repository_dispatch run 29471261483 (04:23:39, success) AND schedule
+# run 29477346132 (06:39:07, success) both completed for the same night — a
+# full duplicate ingest+rebuild+bake+parity pass, real paid duplicate work.
+# The `guard` job below closes this: on a `schedule` event only, it checks
+# whether a repository_dispatch/workflow_dispatch run already succeeded today
+# (UTC) and short-circuits the rest of the chain if so. `schedule` still runs
+# for real — and rebuilds — on any night the dispatch route or Vercel Cron
+# itself failed (07/17: dispatch run 29554716033 failed, schedule caught it).
+#
 # Operator constraint (07/11/2026): the chain starts after 11 PM-12 AM Eastern and
 # NOTHING is still running at 6:00 AM Eastern. EXECUTION fits easily (~26 min
 # typical, ~2h36m at every measured worst, ~3h25m if every job runs to its YAML
@@ -55,6 +69,46 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # ── T0: duplicate-fire guard ───────────────────────────────────────────────
+  # Only a `schedule` event asks the question. repository_dispatch and
+  # workflow_dispatch always proceed — they're the certified head, never gated.
+  guard:
+    name: guard · duplicate-fire check
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read   # `gh run list` 403s without it — repo default is no scopes.
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Skip this schedule fire if a dispatch already ran the chain today
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          today=$(date -u +%Y-%m-%d)
+          set +e
+          count=$(gh run list --repo "${{ github.repository }}" --workflow=nightly-chain.yml \
+            --json event,status,conclusion,createdAt --limit 20 \
+            --jq "[.[] | select((.event==\"repository_dispatch\" or .event==\"workflow_dispatch\") and .status==\"completed\" and .conclusion==\"success\" and (.createdAt | startswith(\"$today\")))] | length" 2>&1)
+          rc=$?
+          set -e
+          # API hiccup: fail OPEN (still run) — a missed dedup beats a silently
+          # skipped backstop night.
+          if [ $rc -ne 0 ] || [ -z "$count" ]; then
+            echo "::warning::guard could not query run history (rc=$rc): $count — running to be safe"
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$count" -gt 0 ]; then
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
   # ── T1: the 4 ingests, in parallel ────────────────────────────────────────
   # The standalone crons stagger the listing counties 3h apart to dodge the
   # source's sustained-burst 403 throttle. A matrix does NOT re-create that risk:
@@ -63,6 +117,8 @@ jobs:
   # into one all-county call.
   listings:
     name: ingest · active listings
+    needs: [guard]
+    if: needs.guard.outputs.should_run == 'true'
     strategy:
       fail-fast: false          # a Collier 403 must never discard Lee's landed rows
       matrix:
@@ -75,6 +131,8 @@ jobs:
 
   lifecycle:
     name: ingest · listing lifecycle
+    needs: [guard]
+    if: needs.guard.outputs.should_run == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -90,11 +148,15 @@ jobs:
 
   pulse:
     name: ingest · city pulse
+    needs: [guard]
+    if: needs.guard.outputs.should_run == 'true'
     uses: ./.github/workflows/city-pulse-daily.yml
     secrets: inherit
 
   live-search:
     name: ingest · live search
+    needs: [guard]
+    if: needs.guard.outputs.should_run == 'true'
     uses: ./.github/workflows/live-search-daily.yml
     secrets: inherit
 
@@ -105,8 +167,11 @@ jobs:
   # This is a normal job (not a `uses:`), so timeout-minutes IS supported here.
   row-gate:
     name: gate · assert_landed
-    needs: [listings, lifecycle, pulse, live-search]
-    if: always()   # a partial ingest must still be JUDGED, not silently skipped
+    needs: [guard, listings, lifecycle, pulse, live-search]
+    # always() so a partial ingest is still JUDGED, not silently skipped — but
+    # AND the guard output back in, or a skipped-by-guard night falls through
+    # `always()` into a row-gate run against rows a DIFFERENT run already landed.
+    if: always() && needs.guard.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

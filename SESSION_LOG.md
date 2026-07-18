@@ -1,3 +1,26 @@
+## 2026-07-18 (Sonnet 5 · main) — Fixed nightly-chain double-fire: schedule backstop was re-running the whole chain after a successful dispatch
+
+Ricky flagged real duplicate paid runs. Verified via `gh run list --workflow=nightly-chain.yml`: on 07/16,
+`repository_dispatch` run 29471261483 (04:23:39, success) AND `schedule` run 29477346132 (06:39:07, success)
+both completed for the same night — a full duplicate ingest+rebuild+bake+parity pass. Root cause: both
+triggers target the same 04:23 UTC slot; `concurrency: group: nightly-chain / cancel-in-progress: false`
+queues a second head only while the first is still running, but GitHub's `schedule:` fires 2-5h late
+(measured, see file header), by which point the dispatch-triggered run has already finished — so the late
+schedule fire is no longer "in progress," queues clean, and runs the entire chain again instead of no-op'ing.
+07/17 showed the backstop is still needed (dispatch run 29554716033 failed; schedule caught it 2h10m later)
+so removing `schedule:` outright was rejected — the fix keeps it as a real backstop, not a second head.
+
+Added a `guard` job (`.github/workflows/nightly-chain.yml`) that runs first: on `repository_dispatch` /
+`workflow_dispatch` it always proceeds; on `schedule` it queries `gh run list` for a `repository_dispatch`/
+`workflow_dispatch` run that already succeeded today (UTC) and sets `should_run=false` if one is found,
+which skips `listings`/`lifecycle`/`pulse`/`live-search`/`row-gate` (the rest of the chain skips naturally
+via `needs:` propagation). Fails OPEN (should_run=true) on any API-query error, so a guard hiccup can never
+silently kill a real backstop night. Verified the guard's jq filter against real run history: 1 for 07/16
+(the duplicate day), 0 for 07/17 (the day it was needed). Closed `nightly_chain_external_clock` (the
+external-dispatch check) — the dispatch route shipped 07/16 but was never closed, and this fix is what makes
+that design actually correct end-to-end. YAML validated (`python -c "import yaml; yaml.safe_load(...)"`).
+NEXT: watch tonight's fire — confirm exactly one full run lands, not zero, not two.
+
 ## 2026-07-18 (Opus 4.8 · main) — Seller reads: sourced condo-share number on Should I Sell + Back-on-Market layout fix (live) + Seller Tools nav
 
 This push, three parts. (1) CONDO NUMBER — Should I Sell now shows a sourced per-ZIP condo share under the
