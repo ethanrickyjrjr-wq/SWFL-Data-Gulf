@@ -1,3 +1,40 @@
+## 2026-07-18 (Sonnet 5 · main) — Lee parcels: bumped GHA timeout for the real fetch time, fixed a real registry-identity RED, discovered we already had Lee commercial/residential data
+
+Continuing the lee_parcels FDOR pipeline another session built earlier today (a82133f9):
+dispatched its GHA workflow (`lee-parcels-annual.yml`) in dry-run to prove the returnIdsOnly+objectIds
+pagination fix actually completes end-to-end — it did: all 556,100 Lee parcels fetched, matching the
+server's canonical count exactly. But the fetch alone took ~81 of the workflow's 90-minute budget;
+a real run also has to write ~112 chunked merges on top of that, so bumped `timeout-minutes` to 150
+before attempting a live write (fetch-only, no data landed yet — `data_lake.lee_parcels` still does
+not exist, confirmed via live query, not assumed).
+
+Pushing that one-line timeout bump hit a real, unrelated blocker: Gate 7 (registry-identity,
+`ingest/tools/check-registry-identity.mts`) hard-blocks any push touching a workflow file /
+`cadence_registry.yaml` / an ingest pipeline `.py` file. It printed 98 findings, which read like a huge
+backlog — but 97 of those are pre-approved/known advisory (action-version pins, unread secrets) that the
+tool itself suppresses from the exit code. Exactly ONE was real and blocking: the `lee_parcels` registry
+entry didn't state `dispatch_only: true`, so the checker read its null `cadence_days` + cron-less
+workflow as a source silently aging out (RED, `workflow_dark`). Fixed with the one field (same
+convention as `corridor_pulse`/`mhs_databook` entries) — `registry-identity: OK` on re-run. Opened
+`registry_identity_gate_98_findings` so the other 97 don't get lost, but they are NOT what was blocking
+anyone; that was worth clearing up before spending real time on a false-alarm-sized backlog.
+
+While that dry-run ran, operator asked the load-bearing question directly: do we already have this
+data? Live query, not memory: `data_lake.leepa_parcels` (Lee Property Appraiser, NOT FDOR) already has
+548,798 rows, zero nulls on `use_code`, and already breaks Lee parcels out by the same use-code taxonomy
+FDOR uses down to VACANT COMMERCIAL / WAREHOUSING / OFFICE ONE STORY / COMMUNITY SHOPPING CENTER, plus
+`just_value`/`assessed_value`/`soh_cap`/`cap_difference`. The "why don't we have commercial data" alarm
+from earlier today was not a real gap — should have checked this table before agreeing to build a new
+pipeline (RULE 0.5). Operator's call once shown this: keep the FDOR pipeline for the deeper NAL fields
+it adds that leepa_parcels doesn't have (two-sale history, homestead/portability chain, disaster/historic
+codes, census block group), migrate every leepa_parcels consumer onto it, then drop leepa_parcels.
+
+NEXT: dispatch the live lee_parcels write (150-min budget now live), verify the row count for real,
+apply `docs/sql/lee_parcels_grant.sql`, then audit every leepa_parcels/leepa_parcels_summary/
+leepa_parcels_sales_yearly/leepa_sold_median_by_zip consumer, repoint them at lee_parcels-backed
+equivalents, verify no regression, and only then drop leepa_parcels (with a final confirmation before
+the actual DROP — that's a 548k-row production table). None of that is done yet.
+
 ## 2026-07-18 (Opus 4.8 · main) — DOM de-flooring: backfill vendor listed_date so "typical days on market" is REAL, not a thin recent-skewed cohort. Desk-safe by construction, proven with a canary.
 
 Operator asked to fix the DOM benchmark for market-heat + listing-momentum (resolves the
