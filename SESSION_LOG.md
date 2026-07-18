@@ -1,3 +1,27 @@
+## 2026-07-18 (Sonnet 5 · main) — collier_parcels widened 15 -> 102 fields, all parcel types, verified live
+
+Closed the open half of `fldor_collier_nal_confirm_source`: the FL DOR Collier NAL roll IS already
+reachable via the FDOR ArcGIS FeatureServer we already ingest — confirmed by pulling FDOR's live 2025
+NAL Data File User's Guide (crawl4ai + direct PDF fetch) and mapping every field verbatim, not guessing
+from the truncated ArcGIS aliases. `collier_parcels` (`ingest/pipelines/collier_parcels/`) now pulls all
+102 non-PII, non-internal fields the layer carries (up from 15) — every parcel type, no DOR_UC filter
+(commercial/vacant/agricultural/institutional included, not just homes). Ran live, not just committed:
+364,000 of 364,827 raw features fetched, merged to 290,973 unique parcels, 104 columns landed in
+`data_lake.collier_parcels`. Verified post-write, not just trusted the log: 7,858 parcels with a
+new-construction value, 96,935 with a special-features value, 290,391 with census block group, 78
+distinct DOR use codes. Committed locally (707e7dff), not pushed.
+
+Real Supabase cost check ran mid-session (operator alarm re: ~600GB/mo): total database is 4GB, not
+600GB — `collier_parcels` was 77MB before this widen. Storage was never the driver; egress was, and
+that traces to the nightly-chain double-fire another session (this same repo, same time window) found
+and fixed (`8d557d26`) — not to anything in this entry.
+
+Not done, explicitly held pending operator direction: a `lee_parcels` sibling table (Lee has no
+equivalent comprehensive table today — its only current path, `parcel_subdivision`, is home-filtered
+and shared with communities-swfl, not touched here), disabling any cron, and closing out the
+`fldor_collier_nal` records-request seed / `fldor_collier_nal_confirm_source` check. NEXT: operator
+call on `lee_parcels` scope before building it.
+
 ## 2026-07-18 (Sonnet 5 · main) — Fixed nightly-chain double-fire: schedule backstop was re-running the whole chain after a successful dispatch
 
 Ricky flagged real duplicate paid runs. Verified via `gh run list --workflow=nightly-chain.yml`: on 07/16,
