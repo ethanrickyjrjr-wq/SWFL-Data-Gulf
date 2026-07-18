@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { isSafeReturnPath } from "@/lib/safe-return";
+import { oauthIdentityToBrandPatch } from "@/lib/auth/oauth-identity";
+import { bankBrandFields } from "@/lib/brand/bank-brand-fields";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -35,6 +37,16 @@ export async function GET(request: NextRequest) {
             },
             { onConflict: "user_id" },
           );
+        }
+      }
+      // §E seeding: a first social sign-in carries name/email in user_metadata —
+      // blank-fill the account brand from it (bankBrandFields is blank-only +
+      // never-overwrite + never-throws). No-op for email-code sign-ins, whose
+      // metadata carries none of these keys, so this is safe on every path.
+      if (newUser) {
+        const patch = oauthIdentityToBrandPatch(newUser.user_metadata);
+        if (Object.keys(patch).length > 0) {
+          await bankBrandFields(supabase, newUser.id, patch);
         }
       }
       return NextResponse.redirect(new URL(next, url.origin));
