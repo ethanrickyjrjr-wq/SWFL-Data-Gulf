@@ -97,6 +97,20 @@ outreach radar exists at the DB layer, rendered nowhere) · `storm-timeline` del
 mislabel live in THREE places (email + `/charts` + brain label) · `rsw_airport` note references Firecrawl
 (crawl4ai-only violation — confirm stale) · corridor-pulse pair paused since 07/05.
 
+**MOCK/FAKE DATA SERVED AS REAL (a surface not wired to a real root — tracked):** `/map` renders
+hardcoded mock flood-loss dollars as if they were real per-ZIP data (`sa0718_map_page_always_renders_hardcoded_mock_flo`),
+and its "live" flood-gradient bounds are numerically identical to the mock fixture — the calibration was
+copied from fake data (`sa0718_live_flood_gradient_bounds_are_numerically`). Same class as the hardcoded
+landing/hurricane snapshots. The fix is wiring `/map` to the real env-swfl flood root.
+
+**FRESHNESS-WIRING — sale-page surfaces serve STALE brain periods while all lights are green (the wiring
+that isn't done until it SERVES fresh):** `/r/should-i-sell` + `/r/back-on-market` serve Mar 2026 while
+Jun-30 data has sat in the lake since 07/15 (`seller_stress_swfl_serving_stale_period`, P0 due today —
+needs a brain rebuild, not SQL). ROOT CAUSE, architectural: every freshness monitor measures PROCESS
+recency; none measures served DATA vintage (`data_vintage_tripwire_missing`). A root's job is not done
+when it's *registered* — it's done when it SERVES the freshest lake data. **The gate must include a
+data-vintage tripwire** (served output period vs lake-newest vs cadence).
+
 **FIELD UNDERUSE (FULL-SCOPE-FIRST):** `parcel_subdivision` pulls 25/120 fields (95 unused) off the same
 layer others pull 102 from · parcels pull ~102, only ~10 used today (rest sit for planned builds/unused)
 · `faf5` mode-blind (transport-mode column never read).
