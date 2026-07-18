@@ -215,3 +215,75 @@ build, not a pre-rebuild change.
 - Single-source figures → used, tagged. Unsourced → rejected. (operator, 07/17)
 - Crosswalk → built as part of this layer; exact-match works day one, crosswalk
   expands coverage. (default, confirm on review)
+
+## Resolutions — 07/18/2026 (evidence-backed, operator-steered)
+
+The two decisions the handoff flagged as unsettled — the trust bar for the
+0-verified Colliers (132) + Lee (20) rows, and where `cre_figures` lives — were
+resolved against the live rows + crawl4ai research this session.
+
+### Firm-data reality (pulled live from `data_lake.marketbeat_swfl`, 07/18)
+
+Both firms are **real**. The split is **sourced vs unsourced**, not real vs fake:
+
+- **`lee_associates`** — 20 rows, Fort Myers, 4 sectors (industrial/retail/office/
+  multifamily), 5 quarters (2025-Q1 → 2026-Q1). Holds the **only `cap_rate` and
+  `sale_price_psf` in the whole corpus**. Every quarter carries a **live source
+  URL** — 4 Lee & Associates PDF reports (`lee-associates.com/wp-content/uploads/
+  2026/04/2026-Q1-Fort-Myers-FL-{Industrial,Retail,Office,Multifamily}.pdf`), all
+  verified resolving (HTTP 200, `application/pdf`, ~2.7 MB each). `verified=false`
+  is an un-done editorial spot-check, **not** a missing source.
+- **`colliers_industrial`** — 132 rows, 6 submarkets, 2 sectors (industrial/flex),
+  11 quarters (2022-Q4 → 2025-Q4). No cap/psf. **Zero `source_url` captured on any
+  row** — the actual defect. Colliers *does* publish this: the SWFL Industrial
+  Market Report ships every quarter at `colliers.com/en/research/ft-myers/
+  southwest-florida-industrial-market-report-<yyyy>-q<n>` (confirmed live; regional
+  figures align — their Q4 2025 vacancy 9.9%, Q1 2026 9.7% / 115,777 sf absorbed).
+  The URL is a predictable per-quarter pattern, so provenance is **backfillable**.
+
+### Decision 1 — trust bar = "has a `source_url`", NOT `verified===true`
+
+The gate is the moat rule (an unsourced number is the only hard reject), applied
+at the `cre_figures` boundary. Consequences:
+
+- **Lee enters `cre_figures` now** — single-source, tagged `lee_associates`, cited
+  to its PDF. This un-strands every cap rate we own.
+- **Colliers enters after a source-URL backfill** — a real, bounded work item
+  (map each `(quarter)` → its Colliers report URL; the pattern is known). Until
+  backfilled, Colliers rows are correctly rejected (no-invention). **This backfill
+  is called out as its own plan task requiring operator sign-off** — it is worth
+  it (132 rows = the entire SWFL industrial picture across 6 submarkets).
+- `verified` is NOT the gate — it is an editorial spot-check that, unrun for these
+  two firms, would darken 152 rows of real professional data including all cap
+  rates. The pack's existing `verified===true` inclusion rule
+  (`selectLatestVerifiedPerSubmarket`) is the wrong gate for the figures layer.
+
+### Decision 2 — `cre_figures` is a queryable table + a viewable ops page
+
+Operator wants to *see* the built layer, not have it buried inside brain output.
+So: deterministic logic **in code** (testable), result **materialized to a
+queryable `data_lake.cre_figures` table**, and a **read-only ops monitoring page**
+(coverage grid: submarket × sector × metric, colored by source status — citable /
+needs-source / no-figure; corroboration-tier counts; current `flagged`
+disagreements). The ops page reads the table directly; the CRE brain re-grain
+(separate follow-up spec) reads the same table. One source of truth, independently
+inspectable — the "keep tabs on it" surface.
+
+### Five review findings folded in (from the v2 handoff design review)
+
+1. Firm identity is **`source_name`**, never `_source_model` (the LLM extractor,
+   which collapses 3 firms into 1 and under-counts corroboration 18 → 3).
+2. **Extend `MARKETBEAT_SUBMARKET_MAP`**, don't rebuild — it already documents
+   Colliers' broad aliases (e.g. "Bonita/Estero" = Bonita Springs + Estero).
+3. **Sector scope**: Colliers = industrial + flex; Lee = 4 sectors; C&W/MHS cover
+   the rest. Every sector surfaces on its own line, **never blended**.
+4. **`active_listings_cre` needs a corridor → submarket hop** before its 62
+   listings aggregate to a submarket median (distinct `metric = asking_price_psf`).
+5. **Corroboration keys on `source_name`** and compares only same canonical cells;
+   two firms agreeing within tolerance is a confidence upgrade, never a requirement.
+
+### Still out of scope here (unchanged)
+
+The CRE brain re-grain onto `cre_figures` remains its own follow-up spec. This
+layer + crosswalk + corroboration engine + ops page is the deliverable; the brain
+consuming it comes after.

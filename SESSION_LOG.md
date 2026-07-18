@@ -1,3 +1,21 @@
+## 2026-07-18 (Opus 4.8 · main) — Charlotte scope fix VERIFIED LIVE + CRE figures-layer plan handed off
+
+Charlotte cleanup done end-to-end: served cre-swfl v63 has ZERO Charlotte; master v107 has zero
+charlotte_county metric slugs (remaining 'Charlotte' mentions are a 'NOT included' caveat + other brains'
+sourced context — FGCU RERI, Ian storm history). Check `cre_charlotte_county_out_of_scope_live` CLOSED
+with served evidence. Lake data untouched.
+
+Figures-layer plan handed off (docs, decoupled, no spend): `docs/superpowers/plans/2026-07-18-cre-figures-corroboration.md`
++ resolutions appended to the design spec. Key decisions settled on EVIDENCE (crawl4ai + live rows):
+both firms are real — Lee (sourced, 4 live PDFs, holds the only cap rates) enters now; Colliers (real
+but 0 source_url captured; reports live at colliers.com) enters after a URL backfill (its own plan task,
+operator sign-off gated). Trust bar = has source_url, NOT verified===true. `cre_figures` = queryable
+table + ops coverage page (operator wants to SEE it). Core scope enforced at the crosswalk (Charlotte →
+null); the flagged-tier corroboration test moved off Charlotte onto an in-scope Fort Myers cell.
+PUSH HELD: shared main carries the parallel session's unpushed `57028f3b` (social login) — not publishing
+their commit without operator OK. Master serve reached origin via the rebuild bot regardless.
+Unpushed local: master-propagation acceptance (36df76e5) + this plan handoff.
+
 ## 2026-07-18 (Opus 4.8 · main) — cre-swfl v63 (Charlotte-free) rebuilt; master propagation dispatched
 
 cre-swfl rebuild (run 29625071833) succeeded → wrote brains/cre-swfl.md v63 with Charlotte/Punta Gorda
