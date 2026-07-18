@@ -153,6 +153,34 @@ async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<st
     /* degrade */
   }
 
+  // ZIP-grain SOLD median — the "third point" (value → sold → list) that no email
+  // carried before. Realtor.com per-ZIP median sold from data_lake.market_details_swfl_latest
+  // (the same latest snapshot the market-temperature source reads). A recorded-sale
+  // reference between the modelled value (ZHVI) and the active asking median, so the
+  // list-vs-value gap has a measured middle. Empty-tolerant like every block here.
+  try {
+    const { data } = await db
+      .schema("data_lake")
+      .from("market_details_swfl_latest")
+      .select("median_sold_price, captured_date")
+      .eq("zip_code", zip)
+      .maybeSingle();
+    if (data) {
+      const sold = num(data.median_sold_price);
+      const asOf = mdY(data.captured_date);
+      if (sold != null && sold > 0)
+        figs.push({
+          key: "sold_median",
+          label: "Median sold price",
+          value: usd(sold),
+          source: "Realtor.com",
+          as_of: asOf,
+        });
+    }
+  } catch {
+    /* degrade */
+  }
+
   try {
     const { data } = await db
       .schema("data_lake")

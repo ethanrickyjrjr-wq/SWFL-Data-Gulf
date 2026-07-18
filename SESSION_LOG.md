@@ -66,6 +66,28 @@ Operator-approved paid dispatch (run 29625071833) to serve the Lee/Collier core-
 broker-survey emission (commit 68d3e987). After it completes: no-force `pack_id=master` propagate, then
 verify the served brain is Charlotte/Punta-Gorda-free and close `cre_charlotte_county_out_of_scope_live`.
 
+## 2026-07-18 (Opus 4.8 · main) — Wired the ZIP-grain SOLD figure (value → sold → list third point) from realtor.com
+
+Closed the wiring gap the `zip_sold_price_third_reference` check has tracked: `loadMarketFigures`
+(`lib/email/market-context.ts`) — the one figure feed every deliverable recipe reads — carried a
+modelled value (ZHVI) and an active asking median but NO ZIP-grain sold price. Added a `sold_median`
+figure sourced from `data_lake.market_details_swfl_latest.median_sold_price` (realtor.com per-ZIP,
+captured early 07/2026), empty-tolerant like every sibling block. Gives recipes the measured middle
+point between value and list.
+
+Chose this over the FL DOR SDF ingest the session set out to build. RULE 0.5 chain: the FDOR NAL
+(incl. sale price/date) is ALREADY in the lake via ArcGIS (parcel_subdivision, 82k parcels w/ a sale);
+a rolling-12-month sold-median view for BOTH counties already shipped 07/14 (`20260714_sold_median_
+recency_window.sql` — the "6.6% high stock blend" defect I first cited was already fixed); and that
+same migration flagged `market_details_swfl` as the CURRENT, unwired sold source. The SDF (2025 Final
+roll, no 2026 preliminary posted) is qualified/arms-length cleaner but ~a year LESS recent than
+market_details, so it's a marginal annual cross-check, not the win — parked as a confirmed-downloadable
+option (SharePoint REST path proven live: 54,695 Collier sale rows, 23 fields). Reality check that
+market_details passes and my unverified SDF median never did: 33904 = $340,000, an exact match to the
+07/14 verdict's four-source-verified truth. Verified: market-context 9/9, tsc clean. Live on next
+deploy (request-time lake read, no rebuild). Check `zip_sold_price_third_reference` stays open pending
+served-bytes verify post-deploy.
+
 ## 2026-07-18 (Opus 4.8 · main) — Zombie-cron reconciliation: 3 re-enabled (confirmed safe), 3 declared SHOULD_BE_DARK; manifest zombie-clean
 
 Resolved the CI-green handoff's zombie-cron item (check `zombie_crons_disabled_but_registry_expects_rows`).
