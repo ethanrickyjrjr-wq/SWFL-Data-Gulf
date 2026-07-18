@@ -34,3 +34,19 @@ test("no cuts → zeros, empty events, never throws", () => {
   const h = deriveCutHistory([], false);
   expect(h).toEqual({ count: 0, totalCutUsd: 0, events: [], complete: true });
 });
+
+import { fetchCutRows } from "./cut-history";
+
+test("fetchCutRows returns [] on injected empty read (empty-tolerant)", async () => {
+  const rows = await fetchCutRows("123MAINST:33904", { fetchRows: async () => [] });
+  expect(rows).toEqual([]);
+});
+
+test("fetchCutRows swallows a throwing read → []", async () => {
+  const rows = await fetchCutRows("123MAINST:33904", {
+    fetchRows: async () => {
+      throw new Error("no creds");
+    },
+  });
+  expect(rows).toEqual([]);
+});

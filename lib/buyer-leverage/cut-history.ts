@@ -45,3 +45,44 @@ export function deriveCutHistory(rows: TransitionRow[], subjectFloored: boolean)
   const totalCutUsd = events.reduce((s, e) => s + e.sizeUsd, 0);
   return { count: events.length, totalCutUsd, events, complete: !subjectFloored };
 }
+
+// KNOWN-DEBT(data_lake): listing_transitions lives in the data_lake schema, which the
+// typed Supabase client intentionally does not cover — see utils/supabase/service-role.ts.
+// Same untyped service-role read as lib/back-on-market/relist-fact.ts.
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
+
+export interface CutDeps {
+  /** Injectable lake read — tests never touch Supabase. */
+  fetchRows?: (addressKey: string) => Promise<TransitionRow[]>;
+}
+
+/** Default read: this home's sale transitions, freshest first. Empty-tolerant — any error → []. */
+async function defaultFetchRows(key: string): Promise<TransitionRow[]> {
+  try {
+    const db = createServiceRoleClientUntyped();
+    const { data } = await db
+      .schema("data_lake")
+      .from("listing_transitions")
+      .select("at, from_state, to_state, price, price_delta")
+      .eq("address_key", key)
+      .eq("sale_or_rent", "sale")
+      .order("at", { ascending: false })
+      .limit(25);
+    return Array.isArray(data) ? (data as TransitionRow[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Fetch a home's transition rows for a derived address_key. Never throws. */
+export async function fetchCutRows(
+  addressKey: string,
+  deps: CutDeps = {},
+): Promise<TransitionRow[]> {
+  const fetchRows = deps.fetchRows ?? defaultFetchRows;
+  try {
+    return await fetchRows(addressKey);
+  } catch {
+    return [];
+  }
+}
