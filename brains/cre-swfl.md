@@ -1,11 +1,11 @@
-<!-- FRESHNESS: v61 | Token: SWFL-7421-v61-20260717 -->
+<!-- FRESHNESS: v62 | Token: SWFL-7421-v62-20260718 -->
 ---
 brain_id: cre-swfl
-version: 61
-refined_at: 2026-07-17T21:54:40Z
-freshness_token: SWFL-7421-v61-20260717
+version: 62
+refined_at: 2026-07-18T00:19:12Z
+freshness_token: SWFL-7421-v62-20260718
 ttl_seconds: 604800
-pack_hash: 912467a97de7
+pack_hash: 01d9693feeac
 context_type: user_saved_reference
 scope: SWFL commercial real estate corridors — verified corridor intelligence (profiles, character, active flags)
 ---
@@ -30,45 +30,45 @@ SCOPE: SWFL commercial real estate corridors — verified corridor intelligence 
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                        | verified   | expires
-s01 | SWFL CRE corridor profiles — Supabase corridor_profiles (verified, non-deleted)                                                                               | 2026-07-17 | 2026-07-24
-s02 | MarketBeat SWFL CRE quarterly via data_lake.marketbeat_swfl (n8n + Firecrawl quarterly extract; manual spot-check gate on verified=true)                      | 2026-07-17 | 2026-07-24
-s03 | Active CRE listings via data_lake.active_listings_cre (Crexi crawl4ai weekly scrape; available-only filter)                                                   | 2026-07-17 | 2026-07-24
-s04 | Local CRE context via data_lake.local_cre_context (Village of Estero EDC + Town of FMB planning; Firecrawl monthly scrape)                                    | 2026-07-17 | 2026-07-24
-s05 | permits-swfl brain — https://www.swfldatagulf.com/api/b/permits-swfl                                                                                          | 2026-07-17 | 2026-07-24
-s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-pulse-swfl                                                                            | 2026-07-17 | 2026-07-24
-s07 | BLS Producer Price Index — Nonresidential Building Construction sector (NAICS 236 industry data; monthly, not seasonally adjusted) — https://www.bls.gov/ppi/ | 2026-07-17 | 2026-07-24
+s01 | SWFL CRE corridor profiles — Supabase corridor_profiles (verified, non-deleted)                                                                               | 2026-07-18 | 2026-07-25
+s02 | MarketBeat SWFL CRE quarterly via data_lake.marketbeat_swfl (n8n + Firecrawl quarterly extract; manual spot-check gate on verified=true)                      | 2026-07-18 | 2026-07-25
+s03 | Active CRE listings via data_lake.active_listings_cre (Crexi crawl4ai weekly scrape; available-only filter)                                                   | 2026-07-18 | 2026-07-25
+s04 | Local CRE context via data_lake.local_cre_context (Village of Estero EDC + Town of FMB planning; Firecrawl monthly scrape)                                    | 2026-07-18 | 2026-07-25
+s05 | permits-swfl brain — https://www.swfldatagulf.com/api/b/permits-swfl                                                                                          | 2026-07-18 | 2026-07-25
+s06 | corridor-pulse-swfl brain — https://www.swfldatagulf.com/api/b/corridor-pulse-swfl                                                                            | 2026-07-18 | 2026-07-25
+s07 | BLS Producer Price Index — Nonresidential Building Construction sector (NAICS 236 industry data; monthly, not seasonally adjusted) — https://www.bls.gov/ppi/ | 2026-07-18 | 2026-07-25
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Dataset scope — verified SWFL commercial real estate corridors","value":"27 verified SWFL CRE corridors: 18 in Lee County, 9 in Collier County, across 8 corridor types.","src":"s01","date":"2026-07-17"},
-  {"id":"f002","topic":"corridors_by_type","fact":"Verified corridor count by corridor type","value":"Corridor count by type: highway-strip-mall (11), anchor-dependent (4), beachfront-tourism (4), mixed-use-downtown (2), suburban-residential (2), medical-anchored (2), unknown (1), industrial-flex (1).","src":"s01","date":"2026-07-17"},
-  {"id":"f003","topic":"corridors_by_county","fact":"Verified corridor count by county (derived from city)","value":"Corridor count by county, derived from city: Lee (18), Collier (9). County is not a column in the source — Naples maps to Collier, all other corpus cities to Lee.","src":"s01","date":"2026-07-17"},
-  {"id":"f004","topic":"seasonal_index_stats","fact":"Seasonal-index distribution across the verified corridors","value":"Seasonal index across 27 corridors: min 0.1, max 1, median 0.35, average 0.44. The scale runs 0 (no seasonality) to 1 (extreme seasonality).","src":"s01","date":"2026-07-17"},
-  {"id":"f005","topic":"active_flags_summary","fact":"Active corridor flags — the ground-truth intelligence layer","value":"32 active corridor flags across 17 of 27 corridors. By type: status_update (11), new_project (7), infrastructure (6), construction (5), regulatory (3). These flags capture infrastructure, new-project, regulatory, construction, and status changes that are not visible in public listings.","src":"s01","date":"2026-07-17"},
-  {"id":"f006","topic":"metric:cap_rate_median","fact":"Median cap rate across SWFL CRE submarkets with reported metrics","value":"Median cap rate is 6.7% across 9 of 10 submarkets that have reported metrics this period.","src":"s01","date":"2026-07-17"},
-  {"id":"f007","topic":"metric:vacancy_rate_median","fact":"Median vacancy rate across SWFL CRE submarkets with reported metrics","value":"Median vacancy rate is 2.9% across 10 of 10 submarkets that have reported metrics this period.","src":"s01","date":"2026-07-17"},
-  {"id":"f008","topic":"metric:absorption_sqft_median","fact":"Median net absorption across SWFL CRE corridors with reported metrics","value":"Median net absorption is 6,397 sqft across 23 of 27 corridors that have reported metrics this period.","src":"s01","date":"2026-07-17"},
-  {"id":"f009","topic":"metric:asking_rent_psf_median","fact":"Median asking rent (PSF, NNN) across SWFL CRE submarkets with reported metrics","value":"Median asking rent is $27.15/sqft across 10 of 10 submarkets that have reported metrics this period.","src":"s01","date":"2026-07-17"},
-  {"id":"f010","topic":"corridor-pulse:recent","fact":"Bonita Trail — development","value":"Bonita Trail: Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city's portion of a regional rail-to-trail project. (source: https://www.gulfshorebusiness.com/lee/bonita-springs-voters-to-decide-on-rail-trail-bonds-soon/article_55b63b61-9f9f-4c67-8d2e-6663c254584b.html)","src":"s01","date":"2026-07-17"},
-  {"id":"f011","topic":"corridor-pulse:recent","fact":"Cape Coral Pkwy — development","value":"Cape Coral Pkwy: Cape Coral Parkway is set to undergo expansion from four lanes to six lanes (source: https://www.gulfshorebusiness.com/gb_daily/cape-coral-businesses-concerned-with-parking-loss-in-road-expansion/)","src":"s01","date":"2026-07-17"},
-  {"id":"f012","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — development","value":"Ben Hill Griffin: My Shower Door broke ground April 2 on a 14,000-square-foot national headquarters, a $4 million construction project at 17000 Cam Court, off Alico Road (source: https://www.gulfshorebusiness.com/retail/my-shower-door-invests-4m-in-new-fort-myers-headquarters/article_4eef396d-d496-42a1-9c41-866d2a130c6b.html)","src":"s01","date":"2026-07-17"},
-  {"id":"f013","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — development","value":"Ben Hill Griffin: Village of Estero Corkscrew Road Shared Use Path Project constructs a 10-foot-wide asphalt pathway on the north side from Ben Hill Griffin Parkway to Bella Terra Boulevard with estimated completion Fall 2026 and project cost approximately $23 million (source: https://www.leegov.com/dot/News%20Documents/Roadwatch%20January%208,%202026%20to%20January%2014,%202026.pdf)","src":"s01","date":"2026-07-17"},
-  {"id":"f014","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — development","value":"Ben Hill Griffin: Ben Hill Griffin Parkway traffic signal upgrades, asphalt mill & overlay and striping with estimated completion mid-2028 and project cost approximately $39.7 million (source: https://www.leegov.com/dot/News%20Documents/Roadwatch%20August%2021,%202025%20to%20August%2027,%202025.pdf)","src":"s01","date":"2026-07-17"},
-  {"id":"f015","topic":"corridor-pulse:recent","fact":"Bonita Beach — development","value":"Bonita Beach: The Florida Department of Transportation is looking for ways to address congestion issues and the projected increase in traffic at the intersection of Bonita Beach Road and U.S. 41. (source: https://www.gulfshorebusiness.com/fdot-studies-improvements-to-bonita-beach-road-and-u-s-41-intersection/)","src":"s01","date":"2026-07-17"}
+  {"id":"f001","topic":"corpus_overview","fact":"Dataset scope — verified SWFL commercial real estate corridors","value":"27 verified SWFL CRE corridors: 18 in Lee County, 9 in Collier County, across 8 corridor types.","src":"s01","date":"2026-07-18"},
+  {"id":"f002","topic":"corridors_by_type","fact":"Verified corridor count by corridor type","value":"Corridor count by type: highway-strip-mall (11), anchor-dependent (4), beachfront-tourism (4), mixed-use-downtown (2), suburban-residential (2), medical-anchored (2), unknown (1), industrial-flex (1).","src":"s01","date":"2026-07-18"},
+  {"id":"f003","topic":"corridors_by_county","fact":"Verified corridor count by county (derived from city)","value":"Corridor count by county, derived from city: Lee (18), Collier (9). County is not a column in the source — Naples maps to Collier, all other corpus cities to Lee.","src":"s01","date":"2026-07-18"},
+  {"id":"f004","topic":"seasonal_index_stats","fact":"Seasonal-index distribution across the verified corridors","value":"Seasonal index across 27 corridors: min 0.1, max 1, median 0.35, average 0.44. The scale runs 0 (no seasonality) to 1 (extreme seasonality).","src":"s01","date":"2026-07-18"},
+  {"id":"f005","topic":"active_flags_summary","fact":"Active corridor flags — the ground-truth intelligence layer","value":"32 active corridor flags across 17 of 27 corridors. By type: status_update (11), new_project (7), infrastructure (6), construction (5), regulatory (3). These flags capture infrastructure, new-project, regulatory, construction, and status changes that are not visible in public listings.","src":"s01","date":"2026-07-18"},
+  {"id":"f006","topic":"metric:cap_rate_median","fact":"Median cap rate across SWFL CRE submarkets with reported metrics","value":"Median cap rate is 6.7% across 9 of 10 submarkets that have reported metrics this period.","src":"s01","date":"2026-07-18"},
+  {"id":"f007","topic":"metric:vacancy_rate_median","fact":"Median vacancy rate across SWFL CRE submarkets with reported metrics","value":"Median vacancy rate is 2.9% across 10 of 10 submarkets that have reported metrics this period.","src":"s01","date":"2026-07-18"},
+  {"id":"f008","topic":"metric:absorption_sqft_median","fact":"Median net absorption across SWFL CRE corridors with reported metrics","value":"Median net absorption is 6,397 sqft across 23 of 27 corridors that have reported metrics this period.","src":"s01","date":"2026-07-18"},
+  {"id":"f009","topic":"metric:asking_rent_psf_median","fact":"Median asking rent (PSF, NNN) across SWFL CRE submarkets with reported metrics","value":"Median asking rent is $27.15/sqft across 10 of 10 submarkets that have reported metrics this period.","src":"s01","date":"2026-07-18"},
+  {"id":"f010","topic":"corridor-pulse:recent","fact":"Bonita Trail — development","value":"Bonita Trail: Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city's portion of a regional rail-to-trail project. (source: https://www.gulfshorebusiness.com/lee/bonita-springs-voters-to-decide-on-rail-trail-bonds-soon/article_55b63b61-9f9f-4c67-8d2e-6663c254584b.html)","src":"s01","date":"2026-07-18"},
+  {"id":"f011","topic":"corridor-pulse:recent","fact":"Cape Coral Pkwy — development","value":"Cape Coral Pkwy: Cape Coral Parkway is set to undergo expansion from four lanes to six lanes (source: https://www.gulfshorebusiness.com/gb_daily/cape-coral-businesses-concerned-with-parking-loss-in-road-expansion/)","src":"s01","date":"2026-07-18"},
+  {"id":"f012","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — development","value":"Ben Hill Griffin: My Shower Door broke ground April 2 on a 14,000-square-foot national headquarters, a $4 million construction project at 17000 Cam Court, off Alico Road (source: https://www.gulfshorebusiness.com/retail/my-shower-door-invests-4m-in-new-fort-myers-headquarters/article_4eef396d-d496-42a1-9c41-866d2a130c6b.html)","src":"s01","date":"2026-07-18"},
+  {"id":"f013","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — development","value":"Ben Hill Griffin: Village of Estero Corkscrew Road Shared Use Path Project constructs a 10-foot-wide asphalt pathway on the north side from Ben Hill Griffin Parkway to Bella Terra Boulevard with estimated completion Fall 2026 and project cost approximately $23 million (source: https://www.leegov.com/dot/News%20Documents/Roadwatch%20January%208,%202026%20to%20January%2014,%202026.pdf)","src":"s01","date":"2026-07-18"},
+  {"id":"f014","topic":"corridor-pulse:recent","fact":"Ben Hill Griffin — development","value":"Ben Hill Griffin: Ben Hill Griffin Parkway traffic signal upgrades, asphalt mill & overlay and striping with estimated completion mid-2028 and project cost approximately $39.7 million (source: https://www.leegov.com/dot/News%20Documents/Roadwatch%20August%2021,%202025%20to%20August%2027,%202025.pdf)","src":"s01","date":"2026-07-18"},
+  {"id":"f015","topic":"corridor-pulse:recent","fact":"Bonita Beach — development","value":"Bonita Beach: The Florida Department of Transportation is looking for ways to address congestion issues and the projected increase in traffic at the intersection of Bonita Beach Road and U.S. 41. (source: https://www.gulfshorebusiness.com/fdot-studies-improvements-to-bonita-beach-road-and-u-s-41-intersection/)","src":"s01","date":"2026-07-18"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "cre-swfl",
-  "version": 61,
-  "refined_at": "2026-07-17T21:54:40Z",
-  "expires": "2026-07-24T21:54:40Z",
+  "version": 62,
+  "refined_at": "2026-07-18T00:19:12Z",
+  "expires": "2026-07-25T00:19:12Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.2222222222222222,
+  "magnitude": 0.3,
   "drivers": [],
   "overrides": [],
-  "conclusion": "The SWFL CRE pack covers 27 verified corridors across Lee and Collier counties. Quantified reads: median cap rate 6.7% (rising); median vacancy 2.9% (falling); median net absorption 6,397 sqft (rising); median asking rent $27.15/sqft NNN (rising). Corridor signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power). Corridor Factor: 45/100 (neutral) — composite of cap rate, vacancy, absorption, and asking rent across 27 of 27 corridors. Permit capital flow: Lee County corridor-weighted z = 0.41 (above baseline).",
+  "conclusion": "The SWFL CRE pack covers 27 verified corridors across Lee and Collier counties. Quantified reads: median cap rate 6.7% (rising); median vacancy 2.9% (falling); median net absorption 6,397 sqft (rising); median asking rent $27.15/sqft NNN (rising). Submarket signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power). Corridor Factor: 44/100 (neutral) — composite of cap rate, vacancy, and asking rent across 10 of 10 submarkets. Permit capital flow: Lee County corridor-weighted z = 0.41 (above baseline).",
   "key_metrics": [
     {
       "metric": "cap_rate_median",
@@ -80,7 +80,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&cap_rate_pct=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 9 submarkets reporting cap_rate_pct (21 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 6 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
@@ -99,7 +99,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&vacancy_rate_pct=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 10 submarkets reporting vacancy_rate_pct (23 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 7 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
@@ -119,7 +119,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 23 corridors reporting absorption_sqft: Daniels (Fort Myers, Lee); Collier Blvd (Naples, Collier); Vanderbilt (Naples, Collier); and 20 more."
       },
@@ -138,7 +138,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&asking_rent_psf=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 10 submarkets reporting asking_rent_psf (23 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 7 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
@@ -158,7 +158,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat SWFL CRE quarterly — median across 16 submarkets reporting vacancy_rate: Bonita Springs 2026-Q1; Cape Coral 2026-Q1; Charlotte County 2026-Q1; and 13 more."
       },
@@ -178,7 +178,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat SWFL CRE quarterly — median across 16 submarkets reporting asking_rent_nnn: Bonita Springs 2026-Q1; Cape Coral 2026-Q1; Charlotte County 2026-Q1; and 13 more."
       },
@@ -198,7 +198,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Bonita%20Springs&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs 2026-Q1 — vacancy_rate across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -218,7 +218,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Bonita%20Springs&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs 2026-Q1 — asking_rent_nnn across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -238,7 +238,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Bonita%20Springs&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs 2026-Q1 — absorption_sqft across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -257,7 +257,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Cape%20Coral&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral 2026-Q1 — vacancy_rate across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -277,7 +277,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Cape%20Coral&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral 2026-Q1 — asking_rent_nnn across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -297,7 +297,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Cape%20Coral&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral 2026-Q1 — absorption_sqft across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -316,7 +316,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Charlotte%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County 2026-Q1 — vacancy_rate across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -336,7 +336,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Charlotte%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County 2026-Q1 — asking_rent_nnn across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -356,7 +356,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Charlotte%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County 2026-Q1 — absorption_sqft across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -375,7 +375,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.East%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook East Naples 2026-Q1 — vacancy_rate across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -395,7 +395,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.East%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook East Naples 2026-Q1 — asking_rent_nnn across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -415,7 +415,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.East%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook East Naples 2026-Q1 — absorption_sqft across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -434,7 +434,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Estero&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Estero 2026-Q1 — vacancy_rate across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -454,7 +454,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Estero&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Estero 2026-Q1 — asking_rent_nnn across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -474,7 +474,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Estero&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Estero 2026-Q1 — absorption_sqft across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -493,7 +493,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers 2026-Q1 — vacancy_rate across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Gulf Coast Town Center, Six Mile Cypress, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -513,7 +513,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers 2026-Q1 — asking_rent_nnn across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Gulf Coast Town Center, Six Mile Cypress, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -533,7 +533,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers 2026-Q1 — absorption_sqft across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Gulf Coast Town Center, Six Mile Cypress, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -552,7 +552,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Golden%20Gate&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate 2026-Q1 — vacancy_rate across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -572,7 +572,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Golden%20Gate&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate 2026-Q1 — asking_rent_nnn across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -592,7 +592,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Golden%20Gate&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate 2026-Q1 — absorption_sqft across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -611,7 +611,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lehigh&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres 2026-Q1 — vacancy_rate across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -631,7 +631,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lehigh&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres 2026-Q1 — asking_rent_nnn across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -651,7 +651,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lehigh&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres 2026-Q1 — absorption_sqft across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -670,7 +670,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lely&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lely 2026-Q1 — vacancy_rate across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -690,7 +690,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lely&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lely 2026-Q1 — asking_rent_nnn across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -710,7 +710,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Lely&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lely 2026-Q1 — absorption_sqft across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -729,7 +729,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Marco%20Island&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island 2026-Q1 — vacancy_rate across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -749,7 +749,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Marco%20Island&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island 2026-Q1 — asking_rent_nnn across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -769,7 +769,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Marco%20Island&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island 2026-Q1 — absorption_sqft across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -788,7 +788,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Naples 2026-Q1 — vacancy_rate across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -808,7 +808,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Naples 2026-Q1 — asking_rent_nnn across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -828,7 +828,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Naples 2026-Q1 — absorption_sqft across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -847,7 +847,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers 2026-Q1 — vacancy_rate across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -867,7 +867,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers 2026-Q1 — asking_rent_nnn across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -887,7 +887,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers 2026-Q1 — absorption_sqft across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -906,7 +906,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Naples 2026-Q1 — vacancy_rate across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -926,7 +926,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Naples 2026-Q1 — asking_rent_nnn across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -946,7 +946,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.North%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Naples 2026-Q1 — absorption_sqft across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -965,7 +965,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Outlying%20Collier%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Collier County 2026-Q1 — vacancy_rate across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -985,7 +985,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Outlying%20Collier%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Collier County 2026-Q1 — asking_rent_nnn across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1005,7 +1005,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.Outlying%20Collier%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Collier County 2026-Q1 — absorption_sqft across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1024,7 +1024,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.sfm-san-carlos&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park 2026-Q1 — vacancy_rate across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1044,7 +1044,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.sfm-san-carlos&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park 2026-Q1 — asking_rent_nnn across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1064,7 +1064,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.sfm-san-carlos&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park 2026-Q1 — absorption_sqft across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1083,7 +1083,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.The%20Islands&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook The Islands 2026-Q1 — vacancy_rate across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1103,7 +1103,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.The%20Islands&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook The Islands 2026-Q1 — asking_rent_nnn across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1123,7 +1123,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&submarket=eq.The%20Islands&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook The Islands 2026-Q1 — absorption_sqft across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1142,7 +1142,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area vacancy_rate — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1162,7 +1162,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area asking_rent_nnn — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1182,7 +1182,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area absorption_sqft — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1201,7 +1201,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area vacancy_rate — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1221,7 +1221,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area asking_rent_nnn — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1241,7 +1241,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.retail&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area absorption_sqft — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1260,7 +1260,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Bonita%20Springs&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (industrial) 2026-Q1 — vacancy_rate across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1280,7 +1280,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Bonita%20Springs&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (industrial) 2026-Q1 — asking_rent_nnn across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1300,7 +1300,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Bonita%20Springs&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (industrial) 2026-Q1 — absorption_sqft across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1319,7 +1319,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Cape%20Coral&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (industrial) 2026-Q1 — vacancy_rate across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1339,7 +1339,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Cape%20Coral&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (industrial) 2026-Q1 — asking_rent_nnn across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1359,7 +1359,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Cape%20Coral&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (industrial) 2026-Q1 — absorption_sqft across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1378,7 +1378,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Charlotte%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (industrial) 2026-Q1 — vacancy_rate across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1398,7 +1398,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Charlotte%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (industrial) 2026-Q1 — asking_rent_nnn across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1418,7 +1418,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Charlotte%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (industrial) 2026-Q1 — absorption_sqft across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1437,7 +1437,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.City%20of%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers (industrial) 2026-Q1 — vacancy_rate across the Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -1457,7 +1457,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.City%20of%20Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers (industrial) 2026-Q1 — asking_rent_nnn across the Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -1477,7 +1477,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.City%20of%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers (industrial) 2026-Q1 — absorption_sqft across the Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -1496,7 +1496,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.East%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (industrial) 2026-Q1 — vacancy_rate across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1516,7 +1516,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.East%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (industrial) 2026-Q1 — asking_rent_nnn across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1536,7 +1536,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.East%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (industrial) 2026-Q1 — absorption_sqft across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1555,7 +1555,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Estero&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Estero (industrial) 2026-Q1 — vacancy_rate across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1575,7 +1575,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Estero&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Estero (industrial) 2026-Q1 — asking_rent_nnn across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1595,7 +1595,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Estero&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Estero (industrial) 2026-Q1 — absorption_sqft across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1614,7 +1614,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (industrial) 2026-Q1 — vacancy_rate across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Gulf Coast Town Center, Six Mile Cypress, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1634,7 +1634,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (industrial) 2026-Q1 — asking_rent_nnn across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Gulf Coast Town Center, Six Mile Cypress, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1654,7 +1654,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (industrial) 2026-Q1 — absorption_sqft across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Gulf Coast Town Center, Six Mile Cypress, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1673,7 +1673,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Golden%20Gate&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (industrial) 2026-Q1 — vacancy_rate across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1693,7 +1693,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Golden%20Gate&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (industrial) 2026-Q1 — asking_rent_nnn across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1713,7 +1713,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Golden%20Gate&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (industrial) 2026-Q1 — absorption_sqft across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1732,7 +1732,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lehigh&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (industrial) 2026-Q1 — vacancy_rate across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1752,7 +1752,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lehigh&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (industrial) 2026-Q1 — asking_rent_nnn across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1772,7 +1772,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lehigh&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (industrial) 2026-Q1 — absorption_sqft across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1791,7 +1791,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lehigh%20Acres&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres (industrial) 2026-Q1 — vacancy_rate across the Lehigh Acres submarket; covers Lee Blvd, Joel Blvd (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -1811,7 +1811,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lehigh%20Acres&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres (industrial) 2026-Q1 — asking_rent_nnn across the Lehigh Acres submarket; covers Lee Blvd, Joel Blvd (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -1831,7 +1831,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lehigh%20Acres&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres (industrial) 2026-Q1 — absorption_sqft across the Lehigh Acres submarket; covers Lee Blvd, Joel Blvd (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -1850,7 +1850,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lely&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lely (industrial) 2026-Q1 — vacancy_rate across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1870,7 +1870,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lely&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lely (industrial) 2026-Q1 — asking_rent_nnn across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1890,7 +1890,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Lely&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lely (industrial) 2026-Q1 — absorption_sqft across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1909,7 +1909,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Marco%20Island&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (industrial) 2026-Q1 — vacancy_rate across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1929,7 +1929,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Marco%20Island&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (industrial) 2026-Q1 — asking_rent_nnn across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1949,7 +1949,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Marco%20Island&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (industrial) 2026-Q1 — absorption_sqft across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1968,7 +1968,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Naples (industrial) 2026-Q1 — vacancy_rate across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -1988,7 +1988,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Naples (industrial) 2026-Q1 — asking_rent_nnn across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2008,7 +2008,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Naples (industrial) 2026-Q1 — absorption_sqft across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2027,7 +2027,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (industrial) 2026-Q1 — vacancy_rate across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2047,7 +2047,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (industrial) 2026-Q1 — asking_rent_nnn across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2067,7 +2067,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (industrial) 2026-Q1 — absorption_sqft across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2086,7 +2086,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (industrial) 2026-Q1 — vacancy_rate across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2106,7 +2106,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (industrial) 2026-Q1 — asking_rent_nnn across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2126,7 +2126,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.North%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (industrial) 2026-Q1 — absorption_sqft across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2145,7 +2145,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Outlying%20Collier%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (industrial) 2026-Q1 — vacancy_rate across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2165,7 +2165,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Outlying%20Collier%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (industrial) 2026-Q1 — asking_rent_nnn across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2185,7 +2185,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.Outlying%20Collier%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (industrial) 2026-Q1 — absorption_sqft across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2204,7 +2204,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.sfm-san-carlos&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (industrial) 2026-Q1 — vacancy_rate across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2224,7 +2224,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.sfm-san-carlos&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (industrial) 2026-Q1 — asking_rent_nnn across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2244,7 +2244,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.sfm-san-carlos&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (industrial) 2026-Q1 — absorption_sqft across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2263,7 +2263,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.South%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat South Fort Myers (industrial) 2026-Q1 — vacancy_rate across the South Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2283,7 +2283,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.South%20Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat South Fort Myers (industrial) 2026-Q1 — asking_rent_nnn across the South Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2303,7 +2303,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.South%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat South Fort Myers (industrial) 2026-Q1 — absorption_sqft across the South Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2322,7 +2322,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.The%20Islands&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (industrial) 2026-Q1 — vacancy_rate across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2342,7 +2342,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.The%20Islands&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (industrial) 2026-Q1 — asking_rent_nnn across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2362,7 +2362,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&submarket=eq.The%20Islands&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (industrial) 2026-Q1 — absorption_sqft across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2381,7 +2381,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area industrial vacancy_rate — median across 5 sub-areas: City of Fort Myers 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2401,7 +2401,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area industrial asking_rent_nnn — median across 5 sub-areas: City of Fort Myers 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2421,7 +2421,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area industrial absorption_sqft — median across 5 sub-areas: City of Fort Myers 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2440,7 +2440,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area industrial vacancy_rate — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2460,7 +2460,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area industrial asking_rent_nnn — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2480,7 +2480,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area industrial absorption_sqft — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -2499,7 +2499,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres area industrial vacancy_rate — median across 2 sub-areas: Lehigh 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lehigh Acres 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2519,7 +2519,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres area industrial asking_rent_nnn — median across 2 sub-areas: Lehigh 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lehigh Acres 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2539,7 +2539,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.industrial&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres area industrial absorption_sqft — median across 2 sub-areas: Lehigh 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lehigh Acres 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2558,7 +2558,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Bonita%20Springs&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Bonita Springs (medical_office) 2026-Q1 — vacancy_rate across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2578,7 +2578,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Bonita%20Springs&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Bonita Springs (medical_office) 2026-Q1 — asking_rent_full_service across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2598,7 +2598,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Bonita%20Springs&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Bonita Springs (medical_office) 2026-Q1 — absorption_sqft across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2617,7 +2617,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Cape%20Coral&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Cape Coral (medical_office) 2026-Q1 — vacancy_rate across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2637,7 +2637,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Cape%20Coral&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Cape Coral (medical_office) 2026-Q1 — asking_rent_full_service across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2657,7 +2657,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Cape%20Coral&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Cape Coral (medical_office) 2026-Q1 — absorption_sqft across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2676,7 +2676,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Charlotte%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Charlotte County (medical_office) 2026-Q1 — vacancy_rate across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2696,7 +2696,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Charlotte%20County&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Charlotte County (medical_office) 2026-Q1 — asking_rent_full_service across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2716,7 +2716,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Charlotte%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Charlotte County (medical_office) 2026-Q1 — absorption_sqft across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2735,7 +2735,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.City%20of%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers (medical_office) 2026-Q1 — vacancy_rate across the Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2755,7 +2755,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.City%20of%20Fort%20Myers&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers (medical_office) 2026-Q1 — asking_rent_full_service across the Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2775,7 +2775,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.City%20of%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers (medical_office) 2026-Q1 — absorption_sqft across the Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2794,7 +2794,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.East%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat East Naples (medical_office) 2026-Q1 — vacancy_rate across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2814,7 +2814,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.East%20Naples&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat East Naples (medical_office) 2026-Q1 — asking_rent_full_service across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2834,7 +2834,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.East%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat East Naples (medical_office) 2026-Q1 — absorption_sqft across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2853,7 +2853,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Estero&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Estero (medical_office) 2026-Q1 — vacancy_rate across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2873,7 +2873,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Estero&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Estero (medical_office) 2026-Q1 — asking_rent_full_service across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2893,7 +2893,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Estero&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Estero (medical_office) 2026-Q1 — absorption_sqft across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2912,7 +2912,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Golden%20Gate&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Golden Gate (medical_office) 2026-Q1 — vacancy_rate across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2932,7 +2932,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Golden%20Gate&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Golden Gate (medical_office) 2026-Q1 — asking_rent_full_service across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2952,7 +2952,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Lehigh&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres (medical_office) 2026-Q1 — asking_rent_full_service across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2972,7 +2972,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Lehigh&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres (medical_office) 2026-Q1 — absorption_sqft across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -2991,7 +2991,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Lehigh%20Acres&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres (medical_office) 2024-Q3 — vacancy_rate across the Lehigh Acres submarket; covers Lee Blvd, Joel Blvd (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3011,7 +3011,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Lehigh%20Acres&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres (medical_office) 2024-Q3 — absorption_sqft across the Lehigh Acres submarket; covers Lee Blvd, Joel Blvd (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3030,7 +3030,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Lely&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lely (medical_office) 2026-Q1 — vacancy_rate across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3050,7 +3050,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Lely&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lely (medical_office) 2026-Q1 — asking_rent_full_service across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3070,7 +3070,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Lely&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lely (medical_office) 2026-Q1 — absorption_sqft across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3089,7 +3089,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Marco%20Island&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Marco Island (medical_office) 2026-Q1 — vacancy_rate across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3109,7 +3109,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Marco%20Island&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Marco Island (medical_office) 2026-Q1 — asking_rent_full_service across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3129,7 +3129,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Marco%20Island&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Marco Island (medical_office) 2026-Q1 — absorption_sqft across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3148,7 +3148,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples (medical_office) 2026-Q1 — vacancy_rate across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3168,7 +3168,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Naples&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples (medical_office) 2026-Q1 — asking_rent_full_service across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3188,7 +3188,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples (medical_office) 2026-Q1 — absorption_sqft across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3207,7 +3207,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.North%20Fort%20Myers&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat North Fort Myers (medical_office) 2026-Q1 — asking_rent_full_service across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3227,7 +3227,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.North%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat North Naples (medical_office) 2026-Q1 — vacancy_rate across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3247,7 +3247,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.North%20Naples&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat North Naples (medical_office) 2026-Q1 — asking_rent_full_service across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3267,7 +3267,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.North%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat North Naples (medical_office) 2026-Q1 — absorption_sqft across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3286,7 +3286,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.South%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat South Fort Myers (medical_office) 2026-Q1 — vacancy_rate across the South Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3306,7 +3306,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.South%20Fort%20Myers&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat South Fort Myers (medical_office) 2026-Q1 — asking_rent_full_service across the South Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3326,7 +3326,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.South%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat South Fort Myers (medical_office) 2026-Q1 — absorption_sqft across the South Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3345,7 +3345,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.The%20Islands&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat The Islands (medical_office) 2026-Q1 — vacancy_rate across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3365,7 +3365,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.The%20Islands&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat The Islands (medical_office) 2026-Q1 — asking_rent_full_service across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3385,7 +3385,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&submarket=eq.The%20Islands&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat The Islands (medical_office) 2026-Q1 — absorption_sqft across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3404,7 +3404,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area medical_office vacancy_rate — median across 2 sub-areas: City of Fort Myers 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; The Islands 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3424,7 +3424,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area medical_office asking_rent_full_service — median across 3 sub-areas: City of Fort Myers 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; North Fort Myers 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; The Islands 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3444,7 +3444,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area medical_office absorption_sqft — median across 2 sub-areas: City of Fort Myers 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; The Islands 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3463,7 +3463,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area medical_office vacancy_rate — median across 5 sub-areas: East Naples 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Golden Gate 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Lely 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Naples 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; North Naples 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3483,7 +3483,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&asking_rent_full_service=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area medical_office asking_rent_full_service — median across 5 sub-areas: East Naples 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Golden Gate 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Lely 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Naples 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; North Naples 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3503,7 +3503,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area medical_office absorption_sqft — median across 4 sub-areas: East Naples 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Lely 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Naples 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; North Naples 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3522,7 +3522,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.medical_office&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Lehigh Acres area medical_office absorption_sqft — median across 2 sub-areas: Lehigh 2026-Q1 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]; Lehigh Acres 2024-Q3 [https://www.swfldatagulf.com/r/source/marketbeat_swfl?label=MarketBeat+%E2%80%94+SWFL+CRE+quarterly&source=Cushman+%26+Wakefield+%2F+LSI+%2F+CPSWFL+%28n8n+%2B+Firecrawl%29&brain=cre-swfl&date_col=quarter]."
       },
@@ -3541,7 +3541,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Bonita%20Springs&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (office) 2026-Q1 — vacancy_rate across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3561,7 +3561,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Bonita%20Springs&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (office) 2026-Q1 — asking_rent_nnn across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3581,7 +3581,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Bonita%20Springs&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Bonita Springs (office) 2026-Q1 — absorption_sqft across the Bonita Springs submarket; covers Bonita Beach, Bonita Trail (matched 2 of 2 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3600,7 +3600,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Cape%20Coral&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (office) 2026-Q1 — vacancy_rate across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3620,7 +3620,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Cape%20Coral&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (office) 2026-Q1 — asking_rent_nnn across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3640,7 +3640,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Cape%20Coral&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Cape Coral (office) 2026-Q1 — absorption_sqft across the Cape Coral submarket; covers Cape Coral Pkwy, Coral Pointe (Cape Coral), Pine Island Rd (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3659,7 +3659,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Charlotte%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (office) 2026-Q1 — vacancy_rate across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3679,7 +3679,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Charlotte%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (office) 2026-Q1 — asking_rent_nnn across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3699,7 +3699,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Charlotte%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Charlotte County (office) 2026-Q1 — absorption_sqft across the Charlotte County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3718,7 +3718,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.East%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (office) 2026-Q1 — vacancy_rate across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3738,7 +3738,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.East%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (office) 2026-Q1 — asking_rent_nnn across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3758,7 +3758,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.East%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook East Naples (office) 2026-Q1 — absorption_sqft across the East Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3777,7 +3777,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Estero&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Estero (office) 2026-Q1 — vacancy_rate across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3797,7 +3797,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Estero&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Estero (office) 2026-Q1 — asking_rent_nnn across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3817,7 +3817,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Estero&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Estero (office) 2026-Q1 — absorption_sqft across the Estero submarket; covers Ben Hill Griffin, Estero / Bonita line, Coconut Point (matched 3 of 3 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3836,7 +3836,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (office) 2026-Q1 — vacancy_rate across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Gulf Coast Town Center, Six Mile Cypress, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3856,7 +3856,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (office) 2026-Q1 — asking_rent_nnn across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Gulf Coast Town Center, Six Mile Cypress, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3876,7 +3876,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Fort Myers (office) 2026-Q1 — absorption_sqft across the Fort Myers submarket; covers Daniels, Colonial East, Midpoint Bridge, Cleveland Ave, Gulf Coast Town Center, Six Mile Cypress, Summerlin (matched 7 of 7 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3895,7 +3895,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Golden%20Gate&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (office) 2026-Q1 — vacancy_rate across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3915,7 +3915,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Golden%20Gate&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (office) 2026-Q1 — asking_rent_nnn across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3935,7 +3935,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Golden%20Gate&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Golden Gate (office) 2026-Q1 — absorption_sqft across the Golden Gate submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3954,7 +3954,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lehigh&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (office) 2026-Q1 — vacancy_rate across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3974,7 +3974,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lehigh&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (office) 2026-Q1 — asking_rent_nnn across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -3994,7 +3994,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lehigh&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lehigh Acres (office) 2026-Q1 — absorption_sqft across the Lehigh Acres submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4013,7 +4013,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lely&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lely (office) 2026-Q1 — vacancy_rate across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4033,7 +4033,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lely&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lely (office) 2026-Q1 — asking_rent_nnn across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4053,7 +4053,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Lely&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Lely (office) 2026-Q1 — absorption_sqft across the Lely submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4072,7 +4072,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Marco%20Island&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (office) 2026-Q1 — vacancy_rate across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4092,7 +4092,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Marco%20Island&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (office) 2026-Q1 — asking_rent_nnn across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4112,7 +4112,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Marco%20Island&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Marco Island (office) 2026-Q1 — absorption_sqft across the Marco Island submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4131,7 +4131,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Naples (office) 2026-Q1 — vacancy_rate across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4151,7 +4151,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Naples (office) 2026-Q1 — asking_rent_nnn across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4171,7 +4171,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Naples (office) 2026-Q1 — absorption_sqft across the Naples submarket; covers Collier Blvd, Vanderbilt, North Naples (Immokalee Rd), Downtown Naples, East Trail (Naples), Waterside, Pine Ridge, East Naples, Airport-Pulling (matched 9 of 9 mapped in MARKETBEAT_SUBMARKET_MAP) [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4190,7 +4190,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Fort%20Myers&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (office) 2026-Q1 — vacancy_rate across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4210,7 +4210,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Fort%20Myers&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (office) 2026-Q1 — asking_rent_nnn across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4230,7 +4230,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Fort%20Myers&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Fort Myers (office) 2026-Q1 — absorption_sqft across the North Fort Myers submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4249,7 +4249,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Naples&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (office) 2026-Q1 — vacancy_rate across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4269,7 +4269,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Naples&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (office) 2026-Q1 — asking_rent_nnn across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4289,7 +4289,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.North%20Naples&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook North Naples (office) 2026-Q1 — absorption_sqft across the North Naples submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4308,7 +4308,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Outlying%20Collier%20County&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (office) 2026-Q1 — vacancy_rate across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4328,7 +4328,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Outlying%20Collier%20County&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (office) 2026-Q1 — asking_rent_nnn across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4348,7 +4348,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.Outlying%20Collier%20County&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook Collier County (office) 2026-Q1 — absorption_sqft across the Collier County submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4367,7 +4367,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.sfm-san-carlos&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (office) 2026-Q1 — vacancy_rate across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4387,7 +4387,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.sfm-san-carlos&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (office) 2026-Q1 — asking_rent_nnn across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4407,7 +4407,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.sfm-san-carlos&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook San Carlos Park (office) 2026-Q1 — absorption_sqft across the San Carlos Park submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4426,7 +4426,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.The%20Islands&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (office) 2026-Q1 — vacancy_rate across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4446,7 +4446,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.The%20Islands&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (office) 2026-Q1 — asking_rent_nnn across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4466,7 +4466,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&submarket=eq.The%20Islands&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MHS Databook The Islands (office) 2026-Q1 — absorption_sqft across the The Islands submarket; covers 0 of 0 mapped corridors in the verified corpus this run [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4485,7 +4485,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area office vacancy_rate — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4505,7 +4505,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area office asking_rent_nnn — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4525,7 +4525,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Naples area office absorption_sqft — median across 5 sub-areas: East Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Golden Gate 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Lely 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Naples 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4544,7 +4544,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&vacancy_rate=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area office vacancy_rate — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4564,7 +4564,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&asking_rent_nnn=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area office asking_rent_nnn — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4584,7 +4584,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/marketbeat_swfl?select=*&verified=eq.true&sector=eq.office&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "MarketBeat Fort Myers area office absorption_sqft — median across 4 sub-areas: Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; North Fort Myers 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; sfm-san-carlos 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]; The Islands 2026-Q1 [https://mhsappraisal.com/southwest-florida-commercial-real-estate-in-2026-what-the-data-actually-shows/]."
       },
@@ -4603,7 +4603,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://www.gulfshorebusiness.com/lee/bonita-springs-voters-to-decide-on-rail-trail-bonds-soon/article_55b63b61-9f9f-4c67-8d2e-6663c254584b.html",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Bonita Springs bond vote could fund $35M rail trail | Lee County | gulfshorebusiness.com: \"Evan Williams ... Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city’s portion of…"
       },
@@ -4614,17 +4614,17 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
     },
     {
       "metric": "corridor_factor",
-      "value": 45,
+      "value": 44,
       "direction": "stable",
-      "label": "Corridor Factor — SWFL CRE composite index (27 of 27 corridors scored)",
+      "label": "Corridor Factor — SWFL CRE composite index (10 of 10 submarkets scored)",
       "variable_type": "intensive",
       "units": "index 0-100",
       "display_format": "raw",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
-        "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — Corridor Factor composite: percentile-rank of cap_rate_pct (lower_is_better), vacancy_rate_pct (lower_is_better), absorption_sqft (higher_is_better), asking_rent_psf (higher_is_better); equal weights; corridor-health/landlord lens. Scored 27 of 27 corridors."
+        "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — Corridor Factor composite: percentile-rank of cap_rate_pct (lower_is_better), vacancy_rate_pct (lower_is_better), asking_rent_psf (higher_is_better); equal weights; corridor-health/landlord lens, scored per submarket. Net absorption is excluded from the composite — it is corridor-grain and unsourced. Scored 10 of 10 submarkets."
       },
       "suggestions": [
         "What's driving corridor factor?",
@@ -4641,7 +4641,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "raw",
       "source": {
         "url": "https://data.bls.gov/timeseries/PCU236211236211",
-        "fetched_at": "2026-07-17T21:47:16Z",
+        "fetched_at": "2026-07-18T00:11:56Z",
         "tier": 1,
         "citation": "BLS PPI industry data for New industrial building construction (series PCU236211236211) — latest observation 200.869 for period 2026-06, stable vs. ~6 periods prior."
       },
@@ -4660,7 +4660,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "raw",
       "source": {
         "url": "https://data.bls.gov/timeseries/PCU236221236221",
-        "fetched_at": "2026-07-17T21:47:16Z",
+        "fetched_at": "2026-07-18T00:11:56Z",
         "tier": 1,
         "citation": "BLS PPI industry data for New warehouse building construction (series PCU236221236221) — latest observation 239.654 for period 2026-06, stable vs. ~6 periods prior."
       },
@@ -4679,7 +4679,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "raw",
       "source": {
         "url": "https://data.bls.gov/timeseries/PCU236223236223",
-        "fetched_at": "2026-07-17T21:47:16Z",
+        "fetched_at": "2026-07-18T00:11:56Z",
         "tier": 1,
         "citation": "BLS PPI industry data for New office building construction (series PCU236223236223) — latest observation 218.983 for period 2026-06, stable vs. ~6 periods prior."
       },
@@ -4698,7 +4698,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "raw",
       "source": {
         "url": "https://data.bls.gov/timeseries/PCU236224236224",
-        "fetched_at": "2026-07-17T21:47:16Z",
+        "fetched_at": "2026-07-18T00:11:56Z",
         "tier": 1,
         "citation": "BLS PPI industry data for New health care building construction (series PCU236224236224) — latest observation 164.553 for period 2026-06, rising vs. ~6 periods prior."
       },
@@ -4717,7 +4717,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "raw",
       "source": {
         "url": "https://data.bls.gov/timeseries/PCU23811X23811X",
-        "fetched_at": "2026-07-17T21:47:16Z",
+        "fetched_at": "2026-07-18T00:11:56Z",
         "tier": 1,
         "citation": "BLS PPI industry data for Concrete contractors, nonresidential building work (series PCU23811X23811X) — latest observation 193.934 for period 2026-06, rising vs. ~6 periods prior."
       },
@@ -4736,7 +4736,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "raw",
       "source": {
         "url": "https://data.bls.gov/timeseries/PCU23816X23816X",
-        "fetched_at": "2026-07-17T21:47:16Z",
+        "fetched_at": "2026-07-18T00:11:56Z",
         "tier": 1,
         "citation": "BLS PPI industry data for Roofing contractors, nonresidential building work (series PCU23816X23816X) — latest observation 228.649 for period 2026-06, stable vs. ~6 periods prior."
       },
@@ -4755,7 +4755,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "raw",
       "source": {
         "url": "https://data.bls.gov/timeseries/PCU23821X23821X",
-        "fetched_at": "2026-07-17T21:47:16Z",
+        "fetched_at": "2026-07-18T00:11:56Z",
         "tier": 1,
         "citation": "BLS PPI industry data for Electrical contractors, nonresidential building work (series PCU23821X23821X) — latest observation 178.437 for period 2026-06, stable vs. ~6 periods prior."
       },
@@ -4774,7 +4774,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "raw",
       "source": {
         "url": "https://data.bls.gov/timeseries/PCU23822X23822X",
-        "fetched_at": "2026-07-17T21:47:16Z",
+        "fetched_at": "2026-07-18T00:11:56Z",
         "tier": 1,
         "citation": "BLS PPI industry data for Plumbing/HVAC contractors, nonresidential building work (series PCU23822X23822X) — latest observation 182.385 for period 2026-06, stable vs. ~6 periods prior."
       },
@@ -4793,7 +4793,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&cap_rate_pct=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 6 submarkets reporting cap_rate_pct (13 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 3 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
@@ -4812,7 +4812,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&vacancy_rate_pct=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 7 submarkets reporting vacancy_rate_pct (15 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 4 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
@@ -4832,7 +4832,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 16 corridors reporting absorption_sqft: Daniels (Fort Myers, Lee); Cape Coral Pkwy (Cape Coral, Lee); Bonita Beach (Bonita Springs, Lee); and 13 more."
       },
@@ -4851,7 +4851,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&asking_rent_psf=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 7 submarkets reporting asking_rent_psf (15 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 4 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
@@ -4871,7 +4871,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&cap_rate_pct=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 3 submarkets reporting cap_rate_pct (8 corridors mapped): East Naples; Naples; North Naples. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
@@ -4890,7 +4890,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&vacancy_rate_pct=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 3 submarkets reporting vacancy_rate_pct (8 corridors mapped): East Naples; Naples; North Naples. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
@@ -4910,7 +4910,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&absorption_sqft=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 7 corridors reporting absorption_sqft: Collier Blvd (Naples, Collier); Vanderbilt (Naples, Collier); North Naples (Immokalee Rd) (Naples, Collier); and 4 more."
       },
@@ -4929,7 +4929,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&asking_rent_psf=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — median across 3 submarkets reporting asking_rent_psf (8 corridors mapped): East Naples; Naples; North Naples. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
@@ -4949,7 +4949,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "ratio",
       "source": {
         "url": "brain://permits-swfl",
-        "fetched_at": "2026-07-17T21:47:14Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "permits-swfl distilled OUTPUT — Lee County building permit saturation index and corridor-weighted z (thin-pipe read)."
       },
@@ -4968,7 +4968,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://www.crexi.com/lease/properties/1153991/florida-23400-23498-lyden-dr",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Crexi active CRE listings — Estero, FL (available-only; 16 listings as of 2026-07-05)"
       },
@@ -4988,7 +4988,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://www.crexi.com/lease/properties/1153991/florida-23400-23498-lyden-dr",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Crexi active CRE listings — Estero, FL (available-only; 16 listings as of 2026-07-05)"
       },
@@ -5007,7 +5007,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "currency",
       "source": {
         "url": "https://www.crexi.com/lease/properties/774462/florida-santini-marina-plaza",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Crexi active CRE listings — Fort Myers Beach, FL (available-only; 9 listings as of 2026-07-05)"
       },
@@ -5027,7 +5027,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       "display_format": "count",
       "source": {
         "url": "https://www.crexi.com/lease/properties/774462/florida-santini-marina-plaza",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Crexi active CRE listings — Fort Myers Beach, FL (available-only; 9 listings as of 2026-07-05)"
       },
@@ -5243,7 +5243,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       ],
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=name,seasonal_index&verification_status=eq.verified&deleted_at=is.null&seasonal_index=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — seasonal_index per corridor (0 = no seasonality, 1 = extreme). 27 of 27 corridors reporting."
       }
@@ -5476,7 +5476,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
       ],
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=corridor_name,vacancy_rate_pct,vacancy_rate_source_url&verification_status=eq.verified&deleted_at=is.null&vacancy_rate_pct=not.is.null",
-        "fetched_at": "2026-07-17T21:47:15Z",
+        "fetched_at": "2026-07-18T00:11:55Z",
         "tier": 2,
         "citation": "Brains Supabase corridor_profiles (verified, non-deleted) — vacancy_rate_pct per corridor. 27 of 27 corridors reporting. 23 flagged coverage_note draw on the incomplete MarketBeat submarket survey."
       }
@@ -5530,7 +5530,7 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-17T21:54:40Z"
+    "computed_at": "2026-07-18T00:19:12Z"
   },
   "exogenous_signals": []
 }
@@ -5539,5 +5539,5 @@ s07 | BLS Producer Price Index — Nonresidential Building Construction sector (
 - cre-swfl: standing reference on verified SWFL commercial real estate corridors.
 
 --- RECENT NOTES ---
-- 2026-07-17: pack refined by the Refinery — 15 fact(s) from 7 source(s).
+- 2026-07-18: pack refined by the Refinery — 15 fact(s) from 7 source(s).
 ```
