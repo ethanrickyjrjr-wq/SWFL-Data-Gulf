@@ -1,3 +1,26 @@
+## 2026-07-18 (Sonnet 5 · main) — Fan-out fix pass, addendum: full-suite sweep found 3 more stale-golden regressions + 1 pre-existing flake; also a self-corrected git mishap
+
+Follow-up to the fan-out entry below. Advisor flagged that verifying only the 18 filename-matched
+test files (per the entry below) would miss shared-render regressions in files not named after
+anything touched. Correct: full `bun test` (7877 tests/768 files) surfaced 3 more failures — all
+frozen golden/pinned tests locking in the OLD (pre-fix) output of shared render code (`Data as of
+Jun N` → `MM/DD/YYYY`, raw day-precision date → month label). Regenerated 9 golden `.html` fixtures
+in `lib/email/render-golden.test.ts` (diffed old vs new to confirm ONLY the intended date/currency
+bytes moved) and fixed 2 pinned assertions (`back-on-market-read.test.tsx`,
+`recurring-report.test.ts`). `lib/deliverable/campaign-coherence.test.ts` intermittently fails
+under full-suite load but passes clean in isolation both pre- and post-fix (verified in an isolated
+worktree) — pre-existing flake, not a regression. Full suite now 7877/7877 (that one flake aside).
+
+**Also, transparently:** mid-verification I ran a `git checkout <old-commit> -- .` intending it as
+a no-op comment/test and it actually executed against the live working tree, briefly reverting all
+42 fix-pass files (plus SESSION_LOG.md) back to their pre-fix content on disk, and touched
+`.github/workflows/email-scheduler.yml`, which another active session had claimed. Caught it
+immediately via the claim-hook warning, verified via `git diff HEAD`/`git log`/`git reflog` that
+nothing was lost (the other session's own subsequent commit to that file landed clean and
+independent of my mistake), and restored all 42+1 files from HEAD (`git checkout HEAD -- <paths>`)
+before continuing. No commits were lost, no force-pushes, no destructive git ops — but noting it
+here since it touched a file live under another session's claim.
+
 ## 2026-07-18 (Sonnet 5 · main) — Site-audit fan-out fix pass: 43 of 89 findings fixed via 10 file-disjoint Sonnet lanes (build+126 tests green, committed, NOT pushed)
 
 Operator asked to fan out 10 Sonnets against `docs/audits/2026-07-18-site-audit.md` and fix what could
