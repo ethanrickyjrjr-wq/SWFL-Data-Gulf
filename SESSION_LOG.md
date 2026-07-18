@@ -1,3 +1,41 @@
+## 2026-07-18 (Opus 4.8 · main) — FL DOR "Assessment Roll Data Request" form fully reverse-engineered (crawl4ai)
+
+Research for `fldor_collier_nal_confirm_source` (records-request project — "pin the filing channel").
+Live crawl4ai fetch of `https://floridarevenue.com/property/Pages/Public_Record_Request.aspx`
+("PROPERTY TAX OVERSIGHT PROGRAM — Assessment Roll Data Request") found FL DOR runs a dedicated,
+purpose-built online form for exactly the NAL/SDF/NAP/GIS county-roll data we want — a better fit
+than a generic §119 letter for `fldor_collier_nal`. It's a SharePoint out-of-box list form
+(ASP.NET WebForms postback, NOT a plain HTML POST target): `<form method="post" action="./Public_Record_Request.aspx"
+enctype="multipart/form-data">`, control-id prefix `ctl00$ctl38$g_57405410_389b_45e5_a747_720eca61a735$`.
+
+Full field map (verified against live HTML, not guessed):
+- `ff11` Name* (text, required) · `ff21` Company (text) · `ff31` Phone (text) · `ff41` Email* (text,
+  required) · `ff51` Year(s)* (free text, required — not a dropdown)
+- `ff61` "All Counties" master checkbox, then 67 per-county checkboxes `ff71`…`ff731` (step 10,
+  alphabetical, labeled "NN-CountyName" using FL's standard 11–77 county numbering). Confirmed by
+  direct HTML lookup, not arithmetic: **Collier = `ff171`**, **Lee = `ff421`**, **Hendry = `ff321`**.
+- 9 "Submission Type(s)" checkboxes `ff741`…`ff821` in order: NAL Finals, NAL Preliminaries, NAL
+  Sales, SDF Finals, SDF Preliminaries, SDF Sales, NAP Finals, NAP Preliminaries, GIS Finals.
+- `ff831` Comments (textarea, 6 rows) · attachment upload is a separate SharePoint JS flow
+  (`javascript:UploadAttachment()`), not a plain `<input type=file>`.
+- Submit: `<input type="button" name="btnSave" value="Submit" onclick="if (!PreSaveItem()) return
+  false; __doPostBack('ctl00$ctl38$g_...','__commit;__redirect={/property/Pages/ThankYou.aspx}')">`
+  — success signal is the redirect to `/property/Pages/ThankYou.aspx`.
+
+**Build implication:** every postback carries single-use, session-bound `__VIEWSTATE` /
+`__EVENTVALIDATION` / `__REQUESTDIGEST` tokens scraped fresh off the loaded page — a raw HTTP POST
+replay is fragile/wrong. The right shape for the auto-fill is Playwright-style render→fill-by-id→
+click (crawl4ai's own engine), not a hand-built POST. NOT built — RULE 3.5 requires a brainstorm
+before writing it, and the operator should own the auto-submit-vs-review-first call (mirror the
+existing `send [--confirm]` gate in `scripts/records-request.mts`).
+
+**Still open, gates the build:** the check's OTHER half — confirm Collier NAL isn't already reachable
+via the FDOR ArcGIS FeatureServer already ingested for `collier_parcels` ("if reachable via ArcGIS,
+this is a Tier-2 miss, not a records request — withdraw the seed") — is UNCONFIRMED. If it resolves
+reachable, the whole auto-fill build is moot. Check `fldor_collier_nal_confirm_source` left OPEN
+pending that half. NEXT: confirm/refute the ArcGIS overlap, then brainstorm the auto-fill if the
+records-request path survives.
+
 ## 2026-07-18 (Opus 4.8 · main) — Charlotte scope fix VERIFIED LIVE + CRE figures-layer plan handed off
 
 Charlotte cleanup done end-to-end: served cre-swfl v63 has ZERO Charlotte; master v107 has zero
