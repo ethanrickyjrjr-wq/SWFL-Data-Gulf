@@ -90,7 +90,7 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
     // Named-source, cited, re-fetched county tax (stubbed until a confirmed live
     // per-parcel endpoint lands — returns null, never an invented number).
     const tax = await fetchPropertyTaxAnnual({ address: addr, zip, countyFips: "" });
-    if (v0Estimate || comps.needs.length > 0) {
+    if (v0Estimate || comps.needs.length > 0 || comps.comps.length > 0) {
       spread = (
         <SellNowVsWait
           place={place}

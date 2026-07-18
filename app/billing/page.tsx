@@ -54,7 +54,14 @@ export default async function BillingPage() {
                 {usage.sent.toLocaleString()} / {usage.limit.toLocaleString()} sends
               </p>
             </div>
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded bg-white/10">
+            <div
+              className="mt-3 h-1.5 w-full overflow-hidden rounded bg-white/10"
+              role="progressbar"
+              aria-label="Send usage"
+              aria-valuenow={Math.min(usage.sent, usage.limit)}
+              aria-valuemin={0}
+              aria-valuemax={usage.limit}
+            >
               <div
                 className="h-full bg-gulf-teal"
                 style={{ width: `${Math.min(100, (usage.sent / usage.limit) * 100)}%` }}

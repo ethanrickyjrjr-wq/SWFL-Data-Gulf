@@ -49,7 +49,7 @@ describe("briefcase grounded render — both skins", () => {
     expect(html).toContain("View the full 33901 report online");
     expect(html).toContain("$412,000"); // hero + metrics table (display)
     expect(html).toContain("Data as of");
-    expect(html).toContain("Jun 10"); // freshness token rendered as human-readable date
+    expect(html).toContain("06/10/2026"); // freshness token rendered as MM/DD/YYYY (RULE: as-of dates always carry the year)
     expect(html).toContain("seller-leaning"); // exec_summary prose in the reads
     expect(html).not.toMatch(/\{\{[A-Z_]+\}\}/); // no unfilled tokens
   });

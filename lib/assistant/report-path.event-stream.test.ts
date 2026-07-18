@@ -90,8 +90,10 @@ test("streams via the event-iteration branch (real SDK shape, no textStream)", a
     .map((p) => p.text as string)
     .join("");
 
-  // Both chunks arrive and reconstruct the full sentence.
-  expect(reconstructed).toBe("Flood AAL is $30,074 [env-swfl].");
+  // Both chunks arrive and reconstruct the full sentence, with the brain slug scrubbed
+  // to its human-readable label (report-path now wraps the stream in scrubSlugStream,
+  // matching stream.ts's layer-2 leak guard — see PACK_ID_LABELS in speaker.mts).
+  expect(reconstructed).toBe("Flood AAL is $30,074 [the SWFL flood + environmental read].");
 
   // Non-text event types must NOT appear anywhere in the SSE body.
   expect(body).not.toContain("content_block_start");

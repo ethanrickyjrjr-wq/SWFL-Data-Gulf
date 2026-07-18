@@ -13,6 +13,7 @@ import { useState } from "react";
 import { NATIONAL_FALLTHROUGH } from "@/lib/back-on-market/national-frame";
 import type { BackOnMarketZip } from "@/lib/back-on-market/load-zip";
 import type { RelistFact } from "@/lib/back-on-market/relist-fact";
+import { monthYearLabel } from "@/lib/should-i-sell/format-period";
 
 const pct = (n: number | null) => (n == null ? "—" : `${n}%`);
 
@@ -28,6 +29,9 @@ export default function BackOnMarketRead({
 }) {
   const [side, setSide] = useState<"buyer" | "seller">("buyer");
   const hasLocal = data.cancellationRatePct != null;
+  // seller-stress-swfl's asOf is a rolling-monthly Redfin figure — a bare day
+  // over-states its precision (operator ruling 07/17/2026, format-period.ts).
+  const asOfLabel = monthYearLabel(data.asOf) || data.asOf;
 
   return (
     <section className="mt-8 space-y-5">
@@ -46,7 +50,7 @@ export default function BackOnMarketRead({
           </p>
           <p className="text-sm leading-6 text-gray-400">
             Relists <span className="text-gray-200">{pct(data.relistRatePct)}</span> · delistings{" "}
-            <span className="text-gray-200">{pct(data.delistRatePct)}</span> — as of {data.asOf}.
+            <span className="text-gray-200">{pct(data.delistRatePct)}</span> — as of {asOfLabel}.
           </p>
         </>
       ) : (
@@ -106,7 +110,7 @@ export default function BackOnMarketRead({
         </summary>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
-            Local rates: SWFL Data Gulf, from {data.source.label} — as of {data.asOf}.
+            Local rates: SWFL Data Gulf, from {data.source.label} — as of {asOfLabel}.
           </li>
           <li>
             National: {NATIONAL_FALLTHROUGH.source.label}, as of {NATIONAL_FALLTHROUGH.asOf} —{" "}

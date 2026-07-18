@@ -227,7 +227,7 @@ export function HBarChart({
                     }}
                     className="hbarchart-value"
                   >
-                    $0.00
+                    {fmt(0)}
                   </div>
                 </div>
                 {showSeparator && (

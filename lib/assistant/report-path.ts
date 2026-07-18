@@ -23,7 +23,12 @@ import { resolveMethod } from "@/refinery/lib/methodology-registry.mts";
 import { buildGroundedSystemPrompt } from "@/lib/grounded-answer";
 import { webFallbackForAnswer } from "@/lib/assistant/web-fallback";
 import type { AssistantRequest } from "@/lib/assistant/contract";
-import { extractText, sseMessage, SSE_STREAM_HEADERS } from "@/lib/assistant/stream";
+import {
+  extractText,
+  scrubSlugStream,
+  sseMessage,
+  SSE_STREAM_HEADERS,
+} from "@/lib/assistant/stream";
 
 const MAX_TOKENS = 760; // +60 over the answer budget for the short follow-ups tail.
 
@@ -104,9 +109,6 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
   const neededComponents = (method?.components ?? [])
     .filter((c) => c.role === "need")
     .map((c) => c.name);
-  // answered=false means "we offered to find a named gap" (a tracked data request), NOT
-  // "we failed to answer". A metric with `need` components is, by definition, a gap.
-  const answered = neededComponents.length === 0;
 
   // Build the chart BEFORE the system prompt so the model can be TOLD a chart is on screen
   // and describe it — instead of refusing ("I can't chart that" / "outside this report's
@@ -147,8 +149,14 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
   // the user — instead of deflecting. Gated on a figure-ask (zero added latency for a
   // normal question), never throws (degrades to ""). This is the Phase-3 unification the
   // engine always intended: both paths, one internet lookup.
-  const { block: webBlock } = await webFallbackForAnswer(question, grounded);
+  const { block: webBlock, sources: webSources } = await webFallbackForAnswer(question, grounded);
   const system = grounded + webBlock;
+
+  // answered=false means "we offered to find a named gap" (a tracked data request), NOT
+  // "we failed to answer". A metric with `need` components is a gap UNLESS the web
+  // fallback above just verified and injected the missing figure live — recompute AFTER
+  // it runs so the done frame / gap-log never contradict an answer the user just got.
+  const answered = neededComponents.length === 0 || webSources.length > 0;
 
   // Tell the model the SHAPE of what was grabbed so the answer (not just the follow-ups)
   // is tailored — e.g. a date/token reads differently than a metric.
@@ -174,7 +182,7 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
           system,
           messages: [{ role: "user", content: userMsg }],
         });
-        for await (const text of extractText(ai)) {
+        for await (const text of scrubSlugStream(extractText(ai))) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
         }
         // Log the ask alongside the existing meter — both fire-and-forget. `answered` +

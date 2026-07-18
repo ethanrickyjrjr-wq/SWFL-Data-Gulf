@@ -32,6 +32,15 @@ export default function ContactsPage() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!showAdd) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setShowAdd(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [showAdd]);
+
   const allTags = Array.from(new Set(contacts.flatMap((c) => c.tags))).sort();
   const q = search.trim().toLowerCase();
   const visible = contacts.filter((c) => {
@@ -125,7 +134,11 @@ export default function ContactsPage() {
       {importMsg && (
         <div className="mb-4 flex items-center justify-between rounded-lg border border-gulf-teal/30 bg-gulf-teal/10 px-4 py-2 text-sm text-gulf-teal">
           <span>{importMsg}</span>
-          <button className="opacity-60 hover:opacity-100" onClick={() => setImportMsg(null)}>
+          <button
+            className="opacity-60 hover:opacity-100"
+            onClick={() => setImportMsg(null)}
+            aria-label="Dismiss"
+          >
             ×
           </button>
         </div>
@@ -165,7 +178,7 @@ export default function ContactsPage() {
             : "No contacts match your search."}
         </p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 bg-white/5 text-left text-xs font-medium uppercase tracking-wide text-gray-400">
@@ -218,8 +231,15 @@ export default function ContactsPage() {
 
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0d1e2b] p-6">
-            <h2 className="mb-4 text-lg font-semibold text-white">Add contact</h2>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-contact-title"
+            className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0d1e2b] p-6"
+          >
+            <h2 id="add-contact-title" className="mb-4 text-lg font-semibold text-white">
+              Add contact
+            </h2>
             <form onSubmit={handleAdd} className="space-y-3">
               <input
                 placeholder="Name (optional)"

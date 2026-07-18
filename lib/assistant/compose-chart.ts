@@ -406,17 +406,24 @@ export function attachExternalPoints(
   block: ChartBlock,
   externals: ExternalPoint[],
   heldNumbers: ReadonlySet<number>,
-): { block: ChartBlock; numbers: Set<number> } {
+): { block: ChartBlock; numbers: Set<number>; kept: ExternalPoint[] } {
   const numbers = new Set(heldNumbers);
-  if (externals.length === 0) return { block, numbers };
+  if (externals.length === 0) return { block, numbers, kept: [] };
 
   const extraRows = externals.map((e): [string, number] => [e.label, e.value]);
   for (const e of externals) numbers.add(e.value);
   const rows = [...block.rows, ...extraRows].slice(0, MAX_BARS);
+  // Only the externals that actually SURVIVED the MAX_BARS slice — an item that got
+  // truncated out must never be cited/attributed as if it were on the rendered chart.
+  const kept = externals.slice(0, Math.max(0, rows.length - block.rows.length));
 
-  const peerNote = externals.map((e) => `${e.label} — ${hostOf(e.url)}`).join("; ");
+  const peerNote = kept.map((e) => `${e.label} — ${hostOf(e.url)}`).join("; ");
   const base = block.source?.citation ?? "";
-  const citation = base ? `${base} · Peer data (web): ${peerNote}` : `Peer data (web): ${peerNote}`;
+  const citation = !peerNote
+    ? base
+    : base
+      ? `${base} · Peer data (web): ${peerNote}`
+      : `Peer data (web): ${peerNote}`;
 
   return {
     block: {
@@ -425,6 +432,7 @@ export function attachExternalPoints(
       source: { ...(block.source ?? { citation: "" }), citation },
     },
     numbers,
+    kept,
   };
 }
 
@@ -438,25 +446,31 @@ export function attachUploadPoints(
   uploadPoints: UploadPoint[],
   uploadsText: string,
   baseNumbers: ReadonlySet<number>,
-): { block: ChartBlock; numbers: Set<number> } {
+): { block: ChartBlock; numbers: Set<number>; kept: UploadPoint[] } {
   const numbers = new Set(baseNumbers);
   const verified = uploadPoints.filter(
     (u) => u && typeof u.value === "number" && u.label && valueAppearsInText(u.value, uploadsText),
   );
-  if (verified.length === 0) return { block, numbers };
+  if (verified.length === 0) return { block, numbers, kept: [] };
 
   const extraRows = verified.map((u): [string, number] => [u.label, u.value]);
   for (const u of verified) numbers.add(u.value);
   const rows = [...block.rows, ...extraRows].slice(0, MAX_BARS);
+  // Only the uploads that actually SURVIVED the MAX_BARS slice — an item truncated
+  // out must never be cited/attributed as if it were on the rendered chart.
+  const kept = verified.slice(0, Math.max(0, rows.length - block.rows.length));
 
-  const docs = [...new Set(verified.map((u) => u.source_doc).filter(Boolean))].join(", ");
-  const note = `From your upload${docs ? ` (${docs})` : ""}: ${verified.map((u) => u.label).join("; ")}`;
+  const docs = [...new Set(kept.map((u) => u.source_doc).filter(Boolean))].join(", ");
+  const note = kept.length
+    ? `From your upload${docs ? ` (${docs})` : ""}: ${kept.map((u) => u.label).join("; ")}`
+    : "";
   const base = block.source?.citation ?? "";
-  const citation = base ? `${base} · ${note}` : note;
+  const citation = !note ? base : base ? `${base} · ${note}` : note;
 
   return {
     block: { ...block, rows, source: { ...(block.source ?? { citation: "" }), citation } },
     numbers,
+    kept,
   };
 }
 
@@ -469,22 +483,30 @@ export function attachUserPoints(
   block: ChartBlock,
   userPoints: UserPoint[],
   baseNumbers: ReadonlySet<number>,
-): { block: ChartBlock; numbers: Set<number> } {
+): { block: ChartBlock; numbers: Set<number>; kept: UserPoint[] } {
   const numbers = new Set(baseNumbers);
   const clean = userPoints.filter((u) => u && typeof u.value === "number" && u.label);
-  if (clean.length === 0) return { block, numbers };
+  if (clean.length === 0) return { block, numbers, kept: [] };
 
   const extraRows = clean.map((u): [string, number] => [u.label, u.value]);
   for (const u of clean) numbers.add(u.value);
   const rows = [...block.rows, ...extraRows].slice(0, MAX_BARS);
+  // Only the user points that actually SURVIVED the MAX_BARS slice — an item
+  // truncated out must never be cited/attributed as if it were on the rendered chart.
+  const kept = clean.slice(0, Math.max(0, rows.length - block.rows.length));
 
-  const userNote = clean.map((u) => u.label).join("; ");
+  const userNote = kept.map((u) => u.label).join("; ");
   const base = block.source?.citation ?? "";
-  const citation = base ? `${base} · Provided by you: ${userNote}` : `Provided by you: ${userNote}`;
+  const citation = !userNote
+    ? base
+    : base
+      ? `${base} · Provided by you: ${userNote}`
+      : `Provided by you: ${userNote}`;
 
   return {
     block: { ...block, rows, source: { ...(block.source ?? { citation: "" }), citation } },
     numbers,
+    kept,
   };
 }
 
@@ -591,9 +613,6 @@ export async function composeChartFromRequest(
   // Increment D — upload-fill (PRIORITY before the web). Keep only the figures the
   // model read from the uploaded docs that verify verbatim against the upload text.
   const withUpload = attachUploadPoints(block, input.upload_points, uploadsText, menu.numbers);
-  const verifiedUploads = input.upload_points.filter((u) =>
-    valueAppearsInText(u.value, uploadsText),
-  );
 
   // Increment B — live cited gap-fill. Fetch each requested peer/context figure and
   // keep ONLY those verified verbatim against a real cited source (gap-fill.ts is the
@@ -618,17 +637,23 @@ export async function composeChartFromRequest(
   // upload-verified value, a citation-verified web value, or a user-supplied value.
   if (!lintChartBlock(block, withUser.numbers).ok) return null;
 
-  const hasExtras =
-    externals.length > 0 || verifiedUploads.length > 0 || input.user_points.length > 0;
+  // Use only the extras that actually SURVIVED the MAX_BARS slice inside each attach*
+  // call above — an item verified/fetched but dropped by truncation must never be
+  // cited or attributed in the answer as if it were on the rendered chart.
+  const keptUploads = withUpload.kept;
+  const keptExternals = withExternal.kept;
+  const keptUser = withUser.kept;
+
+  const hasExtras = keptExternals.length > 0 || keptUploads.length > 0 || keptUser.length > 0;
   const chart: ChartSpec = {
     ...block,
     frameId: "bar-table",
     ...(hasExtras
       ? {
           options: {
-            externalSources: externals,
-            uploadSources: verifiedUploads,
-            userSources: input.user_points,
+            externalSources: keptExternals,
+            uploadSources: keptUploads,
+            userSources: keptUser,
           },
         }
       : {}),
@@ -637,22 +662,22 @@ export async function composeChartFromRequest(
   // the upload figures (attribute to the user's doc), the web sources (to cite), and
   // the user-provided figures (to attribute).
   let groundingNote = summarizeChartForGrounding(chart);
-  if (verifiedUploads.length > 0) {
+  if (keptUploads.length > 0) {
     groundingNote +=
       "\nFigures from the user's uploaded document(s) (attribute to their upload, not our data): " +
-      verifiedUploads.map((u) => `${u.label} = ${u.value}`).join("; ") +
+      keptUploads.map((u) => `${u.label} = ${u.value}`).join("; ") +
       ".";
   }
-  if (externals.length > 0) {
+  if (keptExternals.length > 0) {
     groundingNote +=
       "\nPeer/context figures fetched live and cited (state the source if you mention them): " +
-      externals.map((e) => `${e.label} = ${e.value} (${hostOf(e.url)})`).join("; ") +
+      keptExternals.map((e) => `${e.label} = ${e.value} (${hostOf(e.url)})`).join("; ") +
       ".";
   }
-  if (input.user_points.length > 0) {
+  if (keptUser.length > 0) {
     groundingNote +=
       "\nUser-provided figures (attribute to the user — 'you provided', not our data): " +
-      input.user_points.map((u) => `${u.label} = ${u.value}`).join("; ") +
+      keptUser.map((u) => `${u.label} = ${u.value}`).join("; ") +
       ".";
   }
   return { chart, groundingNote };

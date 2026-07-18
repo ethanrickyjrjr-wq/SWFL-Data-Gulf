@@ -8,32 +8,7 @@ import {
   type MetricBox,
   METRIC_TYPES,
 } from "./cre-metrics";
-
-// ---------------------------------------------------------------------------
-// Direction color system (mirrors metrics-table.tsx DIRECTION_CONFIG)
-// ---------------------------------------------------------------------------
-
-const DIRECTION_CONFIG: Record<string, { label: string; className: string }> = {
-  rising: { label: "↑ Rising", className: "text-[#5bc97a]" },
-  bullish: { label: "↑ Bullish", className: "text-[#5bc97a]" },
-  falling: { label: "↓ Falling", className: "text-[#e08158]" },
-  bearish: { label: "↓ Bearish", className: "text-[#e08158]" },
-  mixed: { label: "→ Mixed", className: "text-[#d4b370]" },
-  stable: { label: "→ Stable", className: "text-[#b8b4a8]" },
-  neutral: { label: "→ Neutral", className: "text-[#b8b4a8]" },
-};
-
-function directionClass(direction: string | null): string {
-  if (!direction) return "text-gulf-teal";
-  return DIRECTION_CONFIG[direction]?.className ?? "text-gulf-teal";
-}
-
-function DirectionBadge({ direction }: { direction: string | null }) {
-  if (!direction) return null;
-  const cfg = DIRECTION_CONFIG[direction];
-  if (!cfg) return <span className="text-[#b8b4a8] text-xs">{direction}</span>;
-  return <span className={`text-xs font-medium ${cfg.className}`}>{cfg.label}</span>;
-}
+import { directionClassName, DirectionBadge } from "../_components/metrics-table";
 
 // ---------------------------------------------------------------------------
 // Stat box
@@ -44,7 +19,7 @@ function StatBox({ box }: { box: MetricBox }) {
     <div className="flex flex-col gap-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
       <dt className="text-xs uppercase leading-tight tracking-wider text-gray-400">{box.label}</dt>
       <dd
-        className={`font-mono text-lg font-semibold tabular-nums ${directionClass(box.direction)}`}
+        className={`font-mono text-lg font-semibold tabular-nums ${directionClassName(box.direction)}`}
       >
         {box.value}
       </dd>
@@ -108,17 +83,16 @@ function CorridorRow({
         ].join(" ")}
       >
         <span className="flex flex-col">
-          {/* Corridor name — bigger; the SEO anchor below keeps the real URL
-              crawlable while the visible affordance is the inline drill-down. */}
+          {/* Corridor name — bigger; the SEO anchor (sibling of this button, below)
+              keeps the real URL crawlable while the visible affordance is the
+              inline drill-down. It lives outside the button so an <a> is never
+              nested inside interactive <button> content (invalid HTML). */}
           <span className="text-sm font-semibold text-gray-100">{corridor.name}</span>
           {corridor.subtitle && (
             <span className="text-[11px] uppercase tracking-wide text-gray-500">
               {corridor.subtitle}
             </span>
           )}
-          <a href={`/r/cre-swfl/${corridor.slug}`} className="sr-only">
-            {corridor.name} commercial real estate report
-          </a>
         </span>
         <svg
           className={`h-3.5 w-3.5 shrink-0 text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -132,6 +106,9 @@ function CorridorRow({
           <path d="M4 6l4 4 4-4" />
         </svg>
       </button>
+      <a href={`/r/cre-swfl/${corridor.slug}`} className="sr-only">
+        {corridor.name} commercial real estate report
+      </a>
 
       {isOpen && (
         <div className="relative mt-2 rounded-xl border border-gulf-teal/25 bg-gulf-teal/[0.03] p-4">

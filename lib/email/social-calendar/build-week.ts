@@ -209,7 +209,11 @@ export function assembleDraft(
   platforms?: readonly Platform[],
 ): SocialDraft | null {
   const patch = ContentPatchSchema.safeParse(parsed.patch);
-  const filledRaw = patch.success ? applyPatch(card, patch.data) : card;
+  // A patch that fails to parse must reject the draft, not fall back to the unfilled
+  // seed card — the seed's hero/signal/text fields are literal authoring-instruction
+  // placeholder text (default-docs.ts), not reader-safe copy (see its 07/13 postmortem).
+  if (!patch.success) return null;
+  const filledRaw = applyPatch(card, patch.data);
   const filled = EmailDocSchema.safeParse(filledRaw);
   if (!filled.success) return null;
   const draft: SocialDraft = {

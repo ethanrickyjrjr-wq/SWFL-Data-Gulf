@@ -40,6 +40,8 @@ export interface PulseDigest {
     commentCount: number;
     format: string;
     captionPreview: string | null;
+    /** True when the original caption was longer than the 140-code-point preview. */
+    captionTruncated: boolean;
   }[];
   hashtags: { name: string; mediaCount: number | null; deltaFromPrev: number | null }[];
   topics: { topic: string; label: string; postCount: number; medianLikes: number }[];
@@ -76,6 +78,13 @@ export function previewOf(caption: string | null): string | null {
   return Array.from(caption.replace(/\u0000/g, ""))
     .slice(0, 140)
     .join("");
+}
+
+/** True when previewOf() actually cut the caption short — the sibling flag
+ *  callers need so they only render a truncation ellipsis when one is real. */
+export function previewTruncated(caption: string | null): boolean {
+  if (!caption) return false;
+  return Array.from(caption.replace(/\u0000/g, "")).length > 140;
 }
 
 function formatOf(mediaType: number | null): "image" | "video" | "carousel" | "unknown" {
@@ -143,6 +152,7 @@ export function computeDigest(input: {
         commentCount: p.comment_count ?? 0,
         format: formatOf(p.media_type),
         captionPreview: previewOf(p.caption),
+        captionTruncated: previewTruncated(p.caption),
       })),
   );
 

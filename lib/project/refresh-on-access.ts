@@ -8,6 +8,7 @@
 
 import type { ProjectItem } from "./items";
 import { isConfirmed, type ConfirmedValues } from "@/lib/signals/confirmed-values";
+import { inferScopeFromItems } from "./derive-name";
 
 export interface BrainValueMap {
   /** keyed by `${report_id}|${slug}|${scope_value ?? ""}` */
@@ -45,6 +46,10 @@ export function applyRefresh(
   confirmedValues?: ConfirmedValues,
 ): RefreshResult {
   let refreshed = 0;
+  // Same fallback the route uses to populate `brainValues` (inferScopeFromItems'
+  // dominant ZIP) — must match exactly or an item with no scope_value of its own
+  // keys to a different cache entry on read than the route wrote on the write side.
+  const fallbackZip = inferScopeFromItems(items).zip;
   const next = items.map((item): ProjectItem => {
     if (item.kind !== "metric" && item.kind !== "qa") return item;
 
@@ -52,7 +57,7 @@ export function applyRefresh(
     if (item.kind === "metric" && isConfirmed(confirmedValues, item.id, item.value)) return item;
 
     const slug = item.kind === "metric" ? (item.metric_slug ?? item.label) : item.question;
-    const scopeValue = item.scope_value;
+    const scopeValue = item.scope_value ?? fallbackZip;
     const key = refreshKey(item.report_id, slug, scopeValue);
     const brain = brainValues[key];
 

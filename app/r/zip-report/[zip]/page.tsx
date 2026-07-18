@@ -329,7 +329,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
             ))}
             {gaps.map((g) => (
               <FindItButton
-                key={g.metric_key}
+                key={`${zip}-${g.metric_key}`}
                 zip={zip}
                 metricKey={g.metric_key}
                 label={g.label}

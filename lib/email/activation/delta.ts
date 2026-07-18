@@ -78,10 +78,7 @@ function favorability(
   return moved === "down"; // lower_is_better
 }
 
-function diffMetrics(
-  prev: SnapshotMetric[],
-  current: SnapshotMetric[],
-): MetricChange[] {
+function diffMetrics(prev: SnapshotMetric[], current: SnapshotMetric[]): MetricChange[] {
   const currentByKey = new Map(current.map((m) => [m.key, m]));
   const changes: MetricChange[] = [];
 
@@ -126,6 +123,7 @@ function diffMetrics(
 
 function diffSignals(prev: ActivationSnapshot, current: ActivationSnapshot): SignalChange[] {
   const currentByBrain = new Map(current.lines.map((l) => [l.brain_id, l]));
+  const prevByBrain = new Map(prev.lines.map((l) => [l.brain_id, l]));
   const out: SignalChange[] = [];
   for (const p of prev.lines) {
     if (!DELTABLE_SIGNAL_BRAINS.has(p.brain_id)) continue;
@@ -135,6 +133,18 @@ function diffSignals(prev: ActivationSnapshot, current: ActivationSnapshot): Sig
     out.push({
       brain_id: p.brain_id,
       label: SIGNAL_LABEL[p.brain_id] ?? p.label,
+    });
+  }
+  // A DELTABLE brain that holds no prior line but has one now — the signal's
+  // FIRST appearance (e.g. a ZIP going from zero permit/news/city-pulse
+  // activity to a first real read this cycle). Without this, the loop above
+  // (which only walks prev.lines) can never surface it as "new activity."
+  for (const c of current.lines) {
+    if (!DELTABLE_SIGNAL_BRAINS.has(c.brain_id)) continue;
+    if (prevByBrain.has(c.brain_id)) continue; // already handled above
+    out.push({
+      brain_id: c.brain_id,
+      label: SIGNAL_LABEL[c.brain_id] ?? c.label,
     });
   }
   return out;

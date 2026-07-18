@@ -300,17 +300,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const model = buildEmailDeliverableModel(deliverable as unknown as EmailDeliverableRow, {
       siteOrigin: BASE_URL,
     });
-    let legacyHtml: string;
-    if (model) {
-      legacyHtml = await renderGroundedReport(model, { skin: "email" });
-    } else {
-      legacyHtml =
-        `<!doctype html><html><body style="font-family:Arial,sans-serif;padding:24px">` +
-        `<p style="font-size:16px;color:#111">Your market report is ready.</p>` +
-        `<p><a href="${escAttr(webUrl)}" style="display:inline-block;background:#3DC9C0;color:#fff;` +
-        `padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">View Report</a></p>` +
-        `</body></html>`;
+    // model is null only when the deliverable is genuinely empty (zero metrics,
+    // zero narrative lines) — refuse the send rather than shipping a contentless
+    // "Your market report is ready" placeholder to real contacts.
+    if (!model) {
+      return NextResponse.json({ error: "empty_deliverable" }, { status: 422 });
     }
+    const legacyHtml = await renderGroundedReport(model, { skin: "email" });
     // Split-send is block-canvas only (plan's own scope note) — legacy template
     // always renders exactly one HTML, regardless of variant_test.
     htmlByVariant = [legacyHtml];

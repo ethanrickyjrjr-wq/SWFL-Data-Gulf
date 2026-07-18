@@ -105,12 +105,32 @@ export async function fetchOgImage(rawUrl: string): Promise<OgImageResult | null
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(u.toString(), {
-      method: "GET",
-      redirect: "follow",
-      signal: ctrl.signal,
-      headers: { "user-agent": BROWSER_UA, accept: "text/html,*/*" },
-    });
+    // redirect: "manual" so each hop's destination is re-validated against
+    // isSafePublicUrl BEFORE it's fetched — "follow" would let a remote server
+    // 3xx us to an internal/link-local address (e.g. 169.254.169.254) without
+    // ever re-checking it. Node's fetch (unlike browser fetch) exposes the
+    // status/Location header on a manual-redirect response, so this is safe.
+    let res: Response;
+    let hops = 0;
+    for (;;) {
+      res = await fetch(u.toString(), {
+        method: "GET",
+        redirect: "manual",
+        signal: ctrl.signal,
+        headers: { "user-agent": BROWSER_UA, accept: "text/html,*/*" },
+      });
+      if (res.status < 300 || res.status >= 400) break;
+      const location = res.headers.get("location");
+      if (!location || ++hops > 5) return null;
+      let next: URL;
+      try {
+        next = new URL(location, u);
+      } catch {
+        return null;
+      }
+      if (!isSafePublicUrl(next)) return null;
+      u = next;
+    }
     if (!res.ok) return null;
     if (!(res.headers.get("content-type") ?? "").includes("html")) return null;
     const html = (await res.text()).slice(0, MAX_HTML_BYTES);

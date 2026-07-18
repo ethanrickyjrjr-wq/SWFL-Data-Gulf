@@ -191,6 +191,9 @@ export async function processInboundReply(
   // 5. PASS → grounded auto-reply. The reply keeps the SAME monitored reply-to so
   //    a follow-up keeps sensing (until the thread cap hands off to the human).
   let answerText: string | null = null;
+  // Distinguishes a genuine send/model failure from "nothing needed blocking" so
+  // blockedReason below doesn't collapse both into the same null value.
+  let answerFailedReason: string | null = null;
   if (decision.allow && rawReply) {
     try {
       const answer = await deps.generateAnswer(rawReply);
@@ -211,13 +214,14 @@ export async function processInboundReply(
         `[inbound] auto-reply FAILED for ${fromEmail}: ${err instanceof Error ? err.message : String(err)}`,
       );
       answerText = null;
+      answerFailedReason = "send_failed";
     }
   } else if (!decision.allow) {
     deps.log(`[inbound] no auto-reply to ${fromEmail} — ${decision.reason}.`);
   }
 
   const answerSent = answerText !== null;
-  const blockedReason = decision.allow ? null : decision.reason;
+  const blockedReason = decision.allow ? answerFailedReason : decision.reason;
 
   // 6. ALWAYS log the event + alert the agent (a forwarded/unknown lead still counts).
   const eventId = await deps.recordEvent({

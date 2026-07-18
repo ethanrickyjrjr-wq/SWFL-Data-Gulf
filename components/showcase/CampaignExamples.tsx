@@ -17,6 +17,8 @@ const SECTION_INTRO: Record<string, string> = {
     "Every stage a listing goes through, end to end — five emails, one property, real data at every step.",
   "launch-blitz":
     "One listing launch, cut for email and every social format at once — same real numbers everywhere.",
+  "agent-launch":
+    "A brand-new agent's first email to her sphere — one real number, then a weekly update that sends itself.",
   "market-pulse":
     "Set it up once — the monthly brief and its socials rebuild themselves from fresh data every month.",
 };

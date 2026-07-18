@@ -127,7 +127,7 @@ export default async function CommunityPage({ params }: PageProps) {
               value={<code className="text-xs text-gulf-teal">{asOfFromToken(token)}</code>}
             />
           )}
-          {c.as_of && <Meta label="As of" value={asOfFromIso(c.as_of) ?? c.as_of} />}
+          {c.as_of && asOfFromIso(c.as_of) && <Meta label="As of" value={asOfFromIso(c.as_of)} />}
         </dl>
       </ReportHeader>
 

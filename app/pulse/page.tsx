@@ -19,7 +19,7 @@ export default async function PulsePage() {
     return (
       <main className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="text-3xl font-semibold">SWFL Social Pulse</h1>
-        <p className="text-muted-foreground mt-4">
+        <p className="text-text-secondary mt-4">
           The first weekly scan hasn&apos;t landed yet. Check back shortly.
         </p>
       </main>
@@ -30,7 +30,7 @@ export default async function PulsePage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-semibold">SWFL Social Pulse</h1>
-      <p className="text-muted-foreground mt-1 text-sm">
+      <p className="text-text-secondary mt-1 text-sm">
         Live Instagram scan ({digest.asOf}) · SWFL Data Gulf
       </p>
 
@@ -51,10 +51,10 @@ export default async function PulsePage() {
             {digest.formats.map((f) => (
               <li
                 key={f.format}
-                className="border-border/40 flex items-baseline justify-between border-b pb-2"
+                className="border-gulf-haze/40 flex items-baseline justify-between border-b pb-2"
               >
                 <span className="capitalize">{f.format}</span>
-                <span className="text-muted-foreground text-sm">
+                <span className="text-text-secondary text-sm">
                   {Math.round(f.share * 100)}% of posts · median {f.medianLikes.toLocaleString()}{" "}
                   likes
                 </span>
@@ -78,13 +78,16 @@ export default async function PulsePage() {
                 >
                   @{p.username}
                 </a>
-                <span className="text-muted-foreground ml-2 text-sm">
+                <span className="text-text-secondary ml-2 text-sm">
                   {AREA_LABELS[p.area as keyof typeof AREA_LABELS] ?? p.area} ·{" "}
                   {p.likeCount.toLocaleString()} likes · {p.commentCount.toLocaleString()} comments
                   · {p.format}
                 </span>
                 {p.captionPreview ? (
-                  <p className="text-muted-foreground mt-1 text-sm">{p.captionPreview}…</p>
+                  <p className="text-text-secondary mt-1 text-sm">
+                    {p.captionPreview}
+                    {p.captionTruncated ? "…" : ""}
+                  </p>
                 ) : null}
               </li>
             ))}
@@ -99,10 +102,10 @@ export default async function PulsePage() {
             {digest.hashtags.map((h) => (
               <li
                 key={h.name}
-                className="border-border/40 flex items-baseline justify-between border-b pb-2"
+                className="border-gulf-haze/40 flex items-baseline justify-between border-b pb-2"
               >
                 <span>#{h.name}</span>
-                <span className="text-muted-foreground text-sm">
+                <span className="text-text-secondary text-sm">
                   {h.mediaCount != null ? `${h.mediaCount.toLocaleString()} posts` : "—"}
                   {h.deltaFromPrev != null
                     ? ` · ${h.deltaFromPrev >= 0 ? "+" : ""}${h.deltaFromPrev.toLocaleString()} vs prior scan`
@@ -114,7 +117,7 @@ export default async function PulsePage() {
         </section>
       ) : null}
 
-      <p className="text-muted-foreground mt-12 text-xs">
+      <p className="text-text-secondary mt-12 text-xs">
         Engagement figures are read from public Instagram posts as written — never estimated. Posts
         link to their creators on Instagram.{" "}
         <Link href="/" className="underline underline-offset-2">
@@ -128,9 +131,9 @@ export default async function PulsePage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-border/60 rounded-lg border p-4">
+    <div className="border-gulf-haze/60 rounded-lg border p-4">
       <div className="text-2xl font-semibold">{value}</div>
-      <div className="text-muted-foreground mt-1 text-xs">{label}</div>
+      <div className="text-text-secondary mt-1 text-xs">{label}</div>
     </div>
   );
 }

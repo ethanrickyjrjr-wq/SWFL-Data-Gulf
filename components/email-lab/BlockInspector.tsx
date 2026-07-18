@@ -14,6 +14,7 @@ import type {
   PaddingSize,
   SocialIconsProps,
   SocialPlatformEntry,
+  SourcesProps,
   StatItem,
   TextAlign,
 } from "@/lib/email/doc/types";
@@ -584,6 +585,30 @@ export function BlockInspector({
               props={block.props as FooterProps}
               onChange={(order) => set("socialOrder", order)}
             />
+          </>
+        )}
+
+        {block.type === "sources" && (
+          <>
+            <FieldShell label="Cited sources">
+              {((block.props as SourcesProps).sources ?? []).length > 0 ? (
+                <ul className="space-y-2">
+                  {((block.props as SourcesProps).sources ?? []).map((s, i) => (
+                    <li key={i} className="text-sm text-gray-700">
+                      {s.label ?? s.url ?? "Untitled source"}
+                      {s.url && (
+                        <span className="block truncate text-xs text-gray-400">{s.url}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-gray-400">No sources held for this report yet.</p>
+              )}
+            </FieldShell>
+            <p className="text-[10px] text-gray-400">
+              Builder-seeded from real cited data — read-only here.
+            </p>
           </>
         )}
       </div>

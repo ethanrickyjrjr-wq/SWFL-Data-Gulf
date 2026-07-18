@@ -355,7 +355,10 @@ export function renderDetailRowText(
   if (ctx.origin) {
     blocks.push(`Full report → ${ctx.origin.replace(/\/$/, "")}/r/${ctx.slug}`);
   }
-  blocks.push(`_Freshness:_ ${asOfFromToken(ctx.freshnessToken) ?? ctx.freshnessToken}`);
+  // Omit the line entirely when the token has no parseable date — we never fall back
+  // to printing the raw token (matches speaker.mts's freshnessLine convention).
+  const detailAsOf = asOfFromToken(ctx.freshnessToken);
+  if (detailAsOf) blocks.push(`_Freshness:_ ${detailAsOf}`);
   return blocks.join("\n\n");
 }
 
@@ -407,10 +410,14 @@ export async function fetchDetailRow(
   }
 
   const link = `${origin.replace(/\/$/, "")}/r/${slug}`;
+  // Omit the freshness line entirely when the token has no parseable date — we never
+  // fall back to printing the raw token (matches speaker.mts's freshnessLine convention).
+  const notFoundAsOf = asOfFromToken(brain.freshness_token);
   return {
     text:
       `No specific row for "${wantRaw}" in this report — it may be outside the covered set. ` +
-      `See the full report for what is covered → ${link}\n\n_Freshness:_ ${asOfFromToken(brain.freshness_token) ?? brain.freshness_token}`,
+      `See the full report for what is covered → ${link}` +
+      (notFoundAsOf ? `\n\n_Freshness:_ ${notFoundAsOf}` : ""),
     freshness_token: brain.freshness_token,
     found: false,
   };

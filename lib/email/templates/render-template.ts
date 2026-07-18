@@ -32,9 +32,10 @@ export async function renderEmailTemplate(
 
   let html = await renderHtmlTemplate(resolvedSlug, merged, data?.repeats);
 
-  if (data?.chart) html = html.replace(/\[\s*CHART\s*\]/g, data.chart);
-  if (data?.body) html = html.replace(/\[\s*BODY TEXT\s*\]/g, data.body);
-  // DELTA is always replaced — an absent delta must not leave a literal `[ DELTA ]`.
+  // CHART/BODY/DELTA are always replaced — an absent value must not leave a
+  // literal `[ CHART ]` / `[ BODY TEXT ]` / `[ DELTA ]` bracket slot.
+  html = html.replace(/\[\s*CHART\s*\]/g, data?.chart ?? "");
+  html = html.replace(/\[\s*BODY TEXT\s*\]/g, data?.body ?? "");
   html = html.replace(/\[\s*DELTA\s*\]/g, data?.delta ?? "");
 
   // Assert no uppercase tokens remain — any still-unfilled {{KEY}} is a bug.

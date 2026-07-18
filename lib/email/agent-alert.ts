@@ -42,6 +42,8 @@ function blockedNote(reason: string): string {
       return "You've had a few exchanges already — time to take this one personally. We stopped auto-replying.";
     case "agent_breaker":
       return "Daily auto-reply limit reached; we logged this but did not auto-reply.";
+    case "send_failed":
+      return "We tried to send an automated answer but it failed (a system error on our end) — reply to this person yourself.";
     default:
       return "We did not auto-reply to this one.";
   }

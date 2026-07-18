@@ -67,7 +67,7 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
     id: "housing-swfl",
     domain: "real-estate",
     scope:
-      "SWFL ZIP-level residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.",
+      "SWFL residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.",
     ttl_seconds: 86400 * 35,
   },
   {

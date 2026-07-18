@@ -94,21 +94,31 @@ function lineToHtml(text: string, primary: string): string {
   return paras.join("");
 }
 
-/** YYYYMMDD inside a freshness token → "Jun 10" (null when unparseable). */
+/** YYYYMMDD inside a freshness token → "06/10/2026" (null when unparseable).
+ *  Locked house format (MM/DD/YYYY) — mirrors asOfFromToken (lib/project/as-of.ts). */
 function tokenDate(token: string | null): string | null {
   if (!token) return null;
   const m = token.match(/(\d{4})(\d{2})(\d{2})$/);
   if (!m) return null;
-  const d = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00Z`);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  const [, y, mo, d] = m;
+  const month = Number(mo);
+  const day = Number(d);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return `${mo}/${d}/${y}`;
 }
 
-function formatChangeValue(v: number | null, unit: string | undefined): string {
+// Metric keys that are dollar-denominated (SnapshotMetric.unit stays "" for these —
+// the "$" is a prefix, "handled by render"). Mirrors HOUSING_CELLS' format:"currency"
+// cell (lib/email/activation/snapshot.ts) — the only place that classification exists
+// today, since MetricChange itself carries no format field.
+const CURRENCY_METRIC_KEYS = new Set(["housing.median_sale_price"]);
+
+function formatChangeValue(v: number | null, unit: string | undefined, key?: string): string {
   if (v === null) return "—";
   // Heuristic: the metric's own display string is the source of truth, but the delta
   // works on raw numbers, so format minimally here.
-  return `${v.toLocaleString("en-US")}${unit ?? ""}`;
+  const prefix = key && CURRENCY_METRIC_KEYS.has(key) ? "$" : "";
+  return `${prefix}${v.toLocaleString("en-US")}${unit ?? ""}`;
 }
 
 function metricChangeRow(c: MetricChange): string {
@@ -117,11 +127,12 @@ function metricChangeRow(c: MetricChange): string {
   else if (c.favorable === false) color = BAD;
 
   let detail: string;
-  if (c.direction === "appeared") detail = `now reported: ${formatChangeValue(c.to, c.unit)}`;
+  if (c.direction === "appeared")
+    detail = `now reported: ${formatChangeValue(c.to, c.unit, c.key)}`;
   else if (c.direction === "disappeared") detail = `no longer reported`;
   else {
     const arrow = c.direction === "up" ? "▲" : "▼";
-    detail = `${formatChangeValue(c.from, c.unit)} → ${formatChangeValue(c.to, c.unit)} <span style="color:${color};">${arrow}</span>`;
+    detail = `${formatChangeValue(c.from, c.unit, c.key)} → ${formatChangeValue(c.to, c.unit, c.key)} <span style="color:${color};">${arrow}</span>`;
   }
   return `<tr><td style="padding:4px 0;font-size:13px;color:#f0ede6;"><strong>${esc(c.label)}</strong></td><td align="right" style="padding:4px 0;font-size:13px;color:#f0ede6;">${detail}</td></tr>`;
 }
@@ -229,6 +240,13 @@ export async function renderGroundedReport(
   const reads = model.lines.slice(0, MAX_LINES).map((l) => ({
     READ_HTML: lineToHtml(l.text, accent),
   }));
+  // Coverage caveats (non-core-county gaps, e.g. Hendry) render through the SAME
+  // existing "reads" repeat, appended AFTER the MAX_LINES slice above so they can
+  // never be truncated out — mirrors the `_Coverage:_ ${c}` convention already
+  // used for this exact field elsewhere (lib/zip-dossier.ts).
+  for (const caveat of model.coverage_caveats ?? []) {
+    reads.push({ READ_HTML: lineToHtml(`_Coverage:_ ${caveat}`, accent) });
+  }
 
   // Single-value tokens (content + brand). brandThemeToTokens omits absent keys, so
   // Object.assign keeps every token value a string (no undefined leaks into the map).

@@ -65,7 +65,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
           <Chip>Neighborhood</Chip>
         </div>
         <dl className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-          {n.as_of && <Meta label="As of" value={asOfFromIso(n.as_of) ?? n.as_of} />}
+          {n.as_of && asOfFromIso(n.as_of) && <Meta label="As of" value={asOfFromIso(n.as_of)} />}
         </dl>
       </ReportHeader>
 

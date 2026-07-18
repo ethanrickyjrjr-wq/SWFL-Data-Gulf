@@ -44,6 +44,7 @@ export function MediaPanel({ onApply }: { onApply: (url: string, caption?: strin
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PexelsResult[] | null>(null);
   const [searching, setSearching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(async () => {
@@ -79,22 +80,32 @@ export function MediaPanel({ onApply }: { onApply: (url: string, caption?: strin
     const label = renameText.trim();
     setRenamingId(null);
     if (!label) return;
+    const prev = items;
     setItems((cur) => cur?.map((i) => (i.id === id ? { ...i, label } : i)) ?? cur);
-    await fetch("/api/email-lab/media", {
+    const res = await fetch("/api/email-lab/media", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, label }),
     });
+    if (!res.ok) {
+      setItems(prev);
+      setError("Couldn't rename that item — try again.");
+    }
   }
 
   async function remove(id: string) {
     setConfirmingId(null);
+    const prev = items;
     setItems((cur) => cur?.filter((i) => i.id !== id) ?? cur);
-    await fetch("/api/email-lab/media", {
+    const res = await fetch("/api/email-lab/media", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
+    if (!res.ok) {
+      setItems(prev);
+      setError("Couldn't remove that item — try again.");
+    }
   }
 
   async function search() {
@@ -138,6 +149,8 @@ export function MediaPanel({ onApply }: { onApply: (url: string, caption?: strin
         <span>Media</span>
         <span className={`transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
       </button>
+
+      {open && error && <p className="mt-1 text-[10px] text-red-400">{error}</p>}
 
       {open && (
         <div className="mt-2 mb-2 flex gap-1">

@@ -133,14 +133,23 @@ export async function POST(req: NextRequest) {
   }
 
   const nowIso = new Date().toISOString();
-  const frozen = freezePost(post, nowIso, {
+  const freezeOpts = {
     mediaUrl: typeof body?.mediaUrl === "string" ? body.mediaUrl : null,
     freshnessToken: typeof body?.freshnessToken === "string" ? body.freshnessToken : null,
     design: body?.design ?? null,
-  });
+  };
 
-  const rows = scheduled.map((platform) =>
-    buildSocialScheduleInsert({
+  const rows = scheduled.map((platform) => {
+    // Use the per-network caption variant when compose-time produced one for this
+    // platform; otherwise fall back to the generic caption. Freezing per platform
+    // (rather than once, reused) is what lets each platform's row carry its own text.
+    const variantCaption = post.variants?.[platform];
+    const frozen = freezePost(
+      variantCaption ? { ...post, caption: variantCaption } : post,
+      nowIso,
+      freezeOpts,
+    );
+    return buildSocialScheduleInsert({
       userId: user.id,
       projectId,
       socialAccountId: accountByPlatform.get(platform)!,
@@ -153,8 +162,8 @@ export async function POST(req: NextRequest) {
       frozenPost: frozen,
       signature: null,
       nextRunAtIso: nextIso,
-    }),
-  );
+    });
+  });
 
   const { data: inserted, error } = await supabase
     .from("social_schedules")

@@ -589,7 +589,7 @@ export const housingSwfl: PackDefinition = {
   public_label: "Housing Market",
   domain: "real-estate",
   scope:
-    "SWFL ZIP-level residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.",
+    "SWFL residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.",
   ttl_seconds: 86400 * 35,
   sources: [housingSource],
   input_brains: [],

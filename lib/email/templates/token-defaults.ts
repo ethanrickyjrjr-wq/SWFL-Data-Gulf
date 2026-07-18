@@ -107,13 +107,14 @@ export const SWFL_TOKEN_DEFAULTS: Record<TokenKey, string> = {
   SIGNAL_KICKER: "Signal to Watch",
   SIGNAL_TITLE: "This week in Southwest Florida",
   SIGNAL_BODY: "From this week's Southwest Florida city pulse.",
-  // real-estate / agent defaults
+  // real-estate / agent defaults — "—" = not held this run (never an invented
+  // fact), matching the email-hero content fallbacks above.
   PROPERTY_PHOTO_URL: "",
-  PROPERTY_ADDRESS: "123 Gulf Shore Blvd, Naples, FL 34102",
-  PROPERTY_PRICE: "$850,000",
-  PROPERTY_BEDS: "4",
-  PROPERTY_BATHS: "3",
-  PROPERTY_SQFT: "2,850",
+  PROPERTY_ADDRESS: "—",
+  PROPERTY_PRICE: "—",
+  PROPERTY_BEDS: "—",
+  PROPERTY_BATHS: "—",
+  PROPERTY_SQFT: "—",
   PROPERTY_TYPE: "Single Family",
   AGENT_PHOTO_URL: "",
   AGENT_NAME: "SWFL Data Gulf",
@@ -121,14 +122,14 @@ export const SWFL_TOKEN_DEFAULTS: Record<TokenKey, string> = {
   AGENT_BIO:
     "Helping buyers and sellers navigate Southwest Florida real estate with local expertise and market intelligence.",
   NEIGHBORHOOD_PHOTO_URL: "",
-  NEIGHBORHOOD_NAME: "Naples Park",
-  EVENT_DATE: "Saturday, July 12",
-  EVENT_TIME: "12:00 PM – 3:00 PM",
+  NEIGHBORHOOD_NAME: "—",
+  EVENT_DATE: "—",
+  EVENT_TIME: "—",
   CTA_URL: "https://www.swfldatagulf.com",
   CTA_LABEL: "View Listing",
-  PRICE_FROM: "$925,000",
-  PRICE_TO: "$850,000",
-  REDUCE_PCT: "8.1%",
+  PRICE_FROM: "—",
+  PRICE_TO: "—",
+  REDUCE_PCT: "—",
 };
 
 export type TemplateTokens = Partial<Record<TokenKey, string>>;

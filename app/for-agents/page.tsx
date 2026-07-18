@@ -66,13 +66,13 @@ export default function ForAgentsPage() {
     <PageShell width="content" className="py-16 leading-relaxed">
       {/* Hero */}
       <header className="max-w-2xl">
-        <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
+        <p className="text-sm font-medium uppercase tracking-wide text-neutral-400">
           For licensed real estate agents
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight">
           Southwest Florida market intelligence you can stand behind.
         </h1>
-        <p className="mt-4 text-lg text-neutral-600 dark:text-neutral-300">
+        <p className="mt-4 text-lg text-neutral-300">
           A member-only workspace for licensed agents across Southwest Florida. Every number is
           computed in code and tied to its source — nothing is estimated or invented by an AI.
         </p>
@@ -94,15 +94,12 @@ export default function ForAgentsPage() {
         <h2 className="text-2xl font-semibold tracking-tight">How it works</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {STEPS.map((s) => (
-            <div
-              key={s.n}
-              className="rounded-lg border border-black/[.08] p-5 dark:border-white/[.145]"
-            >
+            <div key={s.n} className="rounded-lg border border-white/[.145] p-5">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-sm font-semibold text-white dark:bg-white dark:text-black">
                 {s.n}
               </div>
               <h3 className="mt-4 font-semibold">{s.title}</h3>
-              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">{s.body}</p>
+              <p className="mt-2 text-sm text-neutral-400">{s.body}</p>
             </div>
           ))}
         </div>
@@ -113,12 +110,9 @@ export default function ForAgentsPage() {
         <h2 className="text-2xl font-semibold tracking-tight">Why agents trust the numbers</h2>
         <div className="mt-6 space-y-4">
           {DIFFERENTIATORS.map((d) => (
-            <div
-              key={d.title}
-              className="rounded-lg border border-black/[.08] p-5 dark:border-white/[.145]"
-            >
+            <div key={d.title} className="rounded-lg border border-white/[.145] p-5">
               <h3 className="font-semibold">{d.title}</h3>
-              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">{d.body}</p>
+              <p className="mt-2 text-sm text-neutral-400">{d.body}</p>
             </div>
           ))}
         </div>
@@ -127,25 +121,25 @@ export default function ForAgentsPage() {
       {/* Data responsibility */}
       <section className="mt-20">
         <h2 className="text-2xl font-semibold tracking-tight">How we handle MLS data</h2>
-        <p className="mt-3 max-w-2xl text-neutral-600 dark:text-neutral-300">
+        <p className="mt-3 max-w-2xl text-neutral-300">
           Access to MLS-sourced data is gated to verified members and governed by each board&rsquo;s
           license. We built the platform to keep that data inside the wall, not pipe it to the
           public.
         </p>
-        <dl className="mt-6 divide-y divide-black/[.08] dark:divide-white/[.145]">
+        <dl className="mt-6 divide-y divide-white/[.145]">
           {RESPONSIBILITY.map(([term, def]) => (
             <div key={term} className="grid gap-1 py-4 sm:grid-cols-[12rem_1fr] sm:gap-6">
               <dt className="font-semibold">{term}</dt>
-              <dd className="text-sm text-neutral-600 dark:text-neutral-400">{def}</dd>
+              <dd className="text-sm text-neutral-400">{def}</dd>
             </div>
           ))}
         </dl>
       </section>
 
       {/* Closing CTA */}
-      <section className="mt-20 rounded-xl border border-black/[.08] bg-neutral-50 p-8 dark:border-white/[.145] dark:bg-neutral-950">
+      <section className="mt-20 rounded-xl border border-white/[.145] bg-neutral-950 p-8">
         <h2 className="text-2xl font-semibold tracking-tight">Ready to connect?</h2>
-        <p className="mt-2 max-w-xl text-neutral-600 dark:text-neutral-300">
+        <p className="mt-2 max-w-xl text-neutral-300">
           Sign in, connect your MLS, and start working from data you can cite.
         </p>
         <div className="mt-6">
@@ -156,7 +150,7 @@ export default function ForAgentsPage() {
             Sign in
           </Link>
         </div>
-        <p className="mt-6 text-sm text-neutral-500">
+        <p className="mt-6 text-sm text-neutral-400">
           We cover Lee and Collier County in depth — and fill wider Southwest Florida asks from
           named sources.
         </p>

@@ -64,7 +64,9 @@ export async function POST(
     doc: parsed.data,
     instruction: aiPrompt,
     campaign_key: campaignKey,
-    data_as_of: body?.data_as_of ?? new Date().toISOString(),
+    // Always server-stamped — never trust a client-supplied value here (matches
+    // the PATCH handler below), so the freshness/staleness signal can't be spoofed.
+    data_as_of: new Date().toISOString(),
     narrative: EMPTY_NARRATIVE,
     items_snapshot: [],
     status: "ready",

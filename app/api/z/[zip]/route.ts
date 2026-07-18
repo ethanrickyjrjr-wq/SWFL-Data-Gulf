@@ -63,8 +63,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ zip:
       headers: { ...COMMON_HEADERS, "Content-Type": "text/plain; charset=utf-8" },
     });
   } catch (err) {
+    // Log the real error server-side; never pass internal messages (brain_ids, doc
+    // paths) straight through to the response — this is a public-facing API.
+    console.error("[api/z] dossier assembly failed:", err);
     return Response.json(
-      { error: (err as Error).message },
+      { error: "failed to assemble location dossier" },
       { status: 500, headers: COMMON_HEADERS },
     );
   }

@@ -130,14 +130,22 @@ function digitsOf(s: string | number): string {
 }
 
 /** THE MOAT CHECK (shared): does `value` appear VERBATIM (digit-for-digit) in `text`?
- *  At least 2 significant digits are required so a trivially-short number (a "5")
- *  can't match incidentally. Used to verify both web citations (gap-fill) and the
- *  user's uploaded-document text (upload-fill) — a number must literally be IN the
- *  bytes we read, never from the model's memory. */
+ *  Used to verify both web citations (gap-fill) and the user's uploaded-document
+ *  text (upload-fill) — a number must literally be IN the bytes we read, never from
+ *  the model's memory.
+ *
+ *  A 2+ digit target is checked as a substring of the text's stripped digits — cheap
+ *  and safe since a longer run is unlikely to appear incidentally. A single digit
+ *  (e.g. a whole-number "5%" cap rate or "$5") can't use that substring check — it
+ *  would incidentally match inside ANY longer number — so it's instead required to
+ *  appear as its OWN number token (not embedded inside a longer integer or decimal),
+ *  so "5" matches "$5" or "5%" but not the "5" inside "13.5%" or "155". */
 export function valueAppearsInText(value: number, text: string): boolean {
   const target = digitsOf(value);
-  if (target.length < 2) return false;
-  return digitsOf(text).includes(target);
+  if (target.length >= 2) return digitsOf(text).includes(target);
+  if (!target) return false;
+  const tokens = text.match(/\d+(?:[.,]\d+)*/g) ?? [];
+  return tokens.some((t) => digitsOf(t) === target);
 }
 
 /** Like valueAppearsInText, but returns the matching citation span (for the URL). */

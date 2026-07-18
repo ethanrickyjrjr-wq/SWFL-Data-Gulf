@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChartError } from "@/components/charts/ChartError";
 
 export interface ZipValue {
   value: number;
@@ -90,13 +91,18 @@ export function ZipChoropleth({
     x: number;
     y: number;
   } | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     const container = ref.current;
     if (!container) return;
+    setLoadError(false);
 
     fetch("/maps/lee-collier.svg")
-      .then((r) => r.text())
+      .then((r) => {
+        if (!r.ok) throw new Error(`map fetch failed: ${r.status}`);
+        return r.text();
+      })
       .then((svgText) => {
         container.innerHTML = svgText;
         const svg = container.querySelector("svg");
@@ -179,13 +185,14 @@ export function ZipChoropleth({
             group.addEventListener("click", () => onZipClick(zip));
           }
         });
-      });
+      })
+      .catch(() => setLoadError(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(data), colorLow, colorHigh, county]);
 
   return (
     <div className={`relative ${className}`} style={{ minHeight: 200, background: "#152832" }}>
-      <div ref={ref} className="w-full h-full" />
+      {loadError ? <ChartError /> : <div ref={ref} className="w-full h-full" />}
       {tooltip && (
         <div
           className="pointer-events-none absolute z-10 rounded bg-gray-900 px-2 py-1 text-xs text-white shadow"

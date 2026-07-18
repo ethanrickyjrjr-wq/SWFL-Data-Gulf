@@ -11,11 +11,14 @@ import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint
 //   • { template, tokens }     → legacy token path, kept for the 5 structural
 //                                templates (shell-two-col, compare, hbar, …).
 export async function POST(req: NextRequest) {
-  const body = (await req.json()) as
-    { doc?: unknown } | { template?: string; tokens?: Record<string, string> };
+  const body = (await req.json().catch(() => null)) as
+    { doc?: unknown } | { template?: string; tokens?: Record<string, string> } | null;
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
 
   // ── Block-canvas path ─────────────────────────────────────────────────────
-  if (body && typeof body === "object" && "doc" in body && body.doc !== undefined) {
+  if ("doc" in body && body.doc !== undefined) {
     const parsed = EmailDocSchema.safeParse(body.doc);
     if (!parsed.success) {
       return NextResponse.json(

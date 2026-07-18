@@ -176,61 +176,6 @@
   letter-spacing: -0.02em;
   margin-bottom: 4px;
 }
-.zp-metric-block {
-  padding: 22px 0;
-  border-bottom: 1px solid var(--gulf-slate);
-}
-.zp-metric-block:last-of-type { border-bottom: none; }
-.zp-metric-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 8px;
-}
-.zp-metric-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
-}
-.zp-metric-rank {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 11px;
-  color: var(--text-tertiary);
-}
-.zp-metric-value {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 36px;
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.zp-metric-sublabel {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  margin-bottom: 14px;
-}
-.zp-bar-track {
-  height: 6px;
-  background: var(--gulf-slate-hi);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-.zp-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-}
-.zp-bar-fill--flood  { background: linear-gradient(to right, #1c3a2e, #d4b370, #e08158); }
-.zp-bar-fill--value  { background: linear-gradient(to right, #1c3a2e, #3DC9C0, #5bc97a); }
-.zp-bar-fill--permits{ background: linear-gradient(to right, #1c3a2e, #4a6fa8, #a0c4ff); }
-.zp-percentile {
-  font-size: 11px;
-  color: var(--text-tertiary);
-}
-
 /* ─── SIDE RAIL (right) ─── */
 .zp-rail {
   background: var(--gulf-deep);
@@ -279,46 +224,6 @@
   color: var(--text-tertiary);
   margin-top: 2px;
 }
-.zp-rail-metric-row {
-  padding: 13px 18px;
-  border-bottom: 1px solid var(--gulf-slate);
-}
-.zp-rail-metric-row--active {
-  background: rgba(10,128,120,.08);
-  border-left: 2px solid var(--gulf-teal);
-  padding-left: 16px;
-}
-.zp-rail-row-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
-  margin-bottom: 4px;
-}
-.zp-rail-row-value {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-.zp-rail-row-rank {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-  color: var(--text-tertiary);
-  margin-top: 2px;
-}
-.zp-mini-bar {
-  height: 3px;
-  background: var(--gulf-slate-hi);
-  border-radius: 2px;
-  margin-top: 7px;
-  overflow: hidden;
-}
-.zp-mini-bar-fill { height: 100%; border-radius: 2px; }
-.zp-mini-bar-fill--flood   { background: var(--sunset-coral); }
-.zp-mini-bar-fill--value   { background: var(--gulf-teal); }
-.zp-mini-bar-fill--permits { background: #4a6fa8; }
 .zp-rail-footer {
   padding: 14px 18px;
   font-size: 10px;

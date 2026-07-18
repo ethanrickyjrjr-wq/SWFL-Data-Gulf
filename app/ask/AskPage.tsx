@@ -30,7 +30,7 @@ const STARTERS = [
 
 export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: string }) {
   const [question, setQuestion] = useState(initialQ);
-  const { ask, answer, streaming, error, reset } = useConverse();
+  const { ask, answer, answered, streaming, error, reset } = useConverse();
   const answerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasSubmittedInitial = useRef(false);
@@ -163,7 +163,13 @@ export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: st
                   </p>
                   {!streaming && answer && (
                     <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-                      <span className="text-[11px] text-gray-500">Grounded in SWFL lake data</span>
+                      {answered === true ? (
+                        <span className="text-[11px] text-gray-500">
+                          Grounded in SWFL lake data
+                        </span>
+                      ) : (
+                        <span />
+                      )}
                       <button
                         onClick={() => {
                           reset();
