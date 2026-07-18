@@ -13,6 +13,7 @@
   "lib/back-on-market/relist-fact.ts",
   "lib/buyer-leverage/cut-history.ts",
   "lib/buyer-leverage/dom-read.ts",
+  "lib/buyer-leverage/zip-benchmark.ts",
   "lib/charts/gallery-loaders.ts",
   "lib/charts/load-metro-trend.ts",
   "lib/claim/claim-store.test.ts",
