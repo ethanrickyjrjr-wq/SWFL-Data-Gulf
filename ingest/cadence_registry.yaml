@@ -939,7 +939,7 @@ pipelines:
       # states the fact structurally so registry-identity's workflow_dark check doesn't RED it
     tolerance_multiplier: 1.5
     dlt_schema_name: lee_parcels
-    expected_rows_min: null # first run in flight 07/18/2026 — set after live row count confirmed
+    expected_rows_min: 500475 # 90% of 556,083 unique parcels confirmed live 07/18/2026
     count_table: data_lake.lee_parcels
     # Source: FDOR Statewide Cadastral ArcGIS FeatureServer (CO_NO=46). Sibling to
     # collier_parcels, built 07/18/2026 — Lee never had a comprehensive FDOR-sourced
@@ -949,9 +949,9 @@ pipelines:
     # manually when FDOR republishes the roll, not a standing cron.
     source_scope:
       confirmed_total:
-        value: null # set after the live run in flight 07/18/2026 completes
+        value: 556083 # live run landed 07/18/2026 into data_lake.lee_parcels
         as_of: "07/18/2026"
-        source: "our ingest (unique PARCEL_ID; same 102-of-120-field scope as collier_parcels, verified against FDOR's live 2025 NAL Data File User's Guide. No DOR_UC filter — all parcel types. Server-reported count 556,100 raw features (07/18/2026); unique-parcel count TBD pending live run completion.)"
+        source: "our ingest (556,083 unique PARCEL_ID landed in data_lake.lee_parcels; same 102-of-120-field scope as collier_parcels, verified against FDOR's live 2025 NAL Data File User's Guide. No DOR_UC filter — all parcel types: 522,205 residential / 14,052 commercial / 4,305 industrial / 2,938 agricultural / 1,817 institutional / 7,259 governmental / 3,507 misc. Server-reported 556,100 raw features; 17 OBJECTIDs unservable on the source layer, logged + skipped.)"
       source_ceiling:
         value: 120
         as_of: "07/18/2026"

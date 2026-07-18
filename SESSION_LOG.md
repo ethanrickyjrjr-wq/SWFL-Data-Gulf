@@ -1,3 +1,20 @@
+## 2026-07-18 (Opus 4.8 · main) — Lee parcels: live write LANDED (556,083), grant SQL applied to prod, registry confirmed_total set — the 4-task lee_parcels arc is closed
+
+Fired the live `lee-parcels-annual.yml` write (dry_run=false) after confirming the earlier dry run had
+already proven the full config: the `--dry-run` path calls the exact `fetch_lee_parcels()` used live —
+full 102-of-120-field FDOR scope, no DOR_UC filter (all parcel types), CO_NO=46 — so only the DB write
+was unproven. `data_lake.lee_parcels` now holds 556,083 unique PARCEL_ID (server reported 556,100 raw
+features; 17 OBJECTIDs unservable on the source layer, logged + skipped; `assert_vs_canonical` guard
+passed). Applied `docs/sql/lee_parcels_grant.sql` verbatim to prod (read grant + `lee_parcels_summary`
+view + pgrst reload) — view returns real numbers: 522,205 residential / 14,052 commercial / 4,305
+industrial / 2,938 agricultural / 1,817 institutional / 7,259 governmental / 3,507 misc = 556,083 (every
+parcel categorized), 211,838 homesteaded, median SOH gap 31.6%. This is the FDOR-sourced all-parcel-type
+Lee table Lee never had — parcel_subdivision was homes-only, leepa_parcels is the separate LeePA
+valuation feed (verified live: collier_parcels is ALREADY the comprehensive 104-col/all-type table, so
+NO Collier widen was needed — that plan step was stale). This commit sets registry `confirmed_total`
+=556,083 and `expected_rows_min`=500,475 (90% floor). Next on this arc: nothing — properties-lee-value
+can now cross-check its LeePA SOH gap against this FDOR view.
+
 ## 2026-07-18 (Sonnet 5 · main) — Fan-out fix pass, addendum: full-suite sweep found 3 more stale-golden regressions + 1 pre-existing flake; also a self-corrected git mishap
 
 Follow-up to the fan-out entry below. Advisor flagged that verifying only the 18 filename-matched
