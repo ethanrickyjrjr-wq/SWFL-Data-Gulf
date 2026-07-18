@@ -35,6 +35,11 @@ after every lane finished.
     date fix (#44) and the `$` prefix on currency deltas (#89) are real, correct output changes in
     `grounded-report.ts`'s shared render path. Regenerated the goldens against current output;
     diffed old vs. new to confirm **only** those two changes landed anywhere, nothing else drifted.
+    Note for whoever reads that test file next: its docstring says it proves post-spine output
+    matches "pre-spine bytes, captured @91b6aec" — that's no longer literally true, since these 9
+    goldens were just regenerated from current (post-fix) output, not from the 91b6aec capture.
+    The test is now self-referential going forward (proves stability from today, not from
+    91b6aec) until someone re-captures from a truly independent reference.
   - `components/back-on-market/back-on-market-read.test.tsx` — was pinned to the raw
     `03/01/2026` date that finding #64 replaced with a month label; updated to expect
     `"March 2026"`.
@@ -47,11 +52,29 @@ after every lane finished.
 - `bun refinery/tools/check-vocab-coverage.mts --all` — clean (two packs were touched:
   `housing-swfl.mts`, `catalog.mts`).
 - This is a compile + test-suite gate, not a claim that all 43 fixes are behaviorally perfect in
-  every untested path — the API-route/security-sensitive ones (#38, #41, #49, #57, #62, #72, #75)
-  were additionally spot-checked by reading the actual diffs (not lane self-reports): #38's
-  per-platform `freezePost` call was confirmed pure (no id/side-effect risk from calling it N
-  times); #72's new 422 was confirmed to render a handled (if generically-worded) error in
-  `ContactPickerModal`, not an unhandled crash. See the Opus pass for the rest.
+  every untested path. The 7 API-route/security-sensitive ones with no covering test (#38, #41,
+  #49, #57, #62, #72, #75) were additionally read as actual diffs, not taken on lane self-report:
+  - **#38** — moved `freezePost` inside the per-platform loop (called N times instead of once).
+    Confirmed `freezePost` (`lib/social/persist-schedule.ts`) is a pure function — no id
+    generation, no side effects — so calling it per-platform is safe.
+  - **#41** — swapped a leaked `(err as Error).message` for a generic response + server-side
+    `console.error`. Three-line diff, unambiguous.
+  - **#49** — widened `should-i-sell/[zip]/page.tsx`'s render condition to
+    `v0Estimate || comps.needs.length > 0 || comps.comps.length > 0`. Read `SellNowVsWait.tsx`
+    directly: it already renders a "we couldn't estimate a value — enter your own number" manual
+    prompt whenever `v0Estimate` is null, which is exactly the state this fix now also routes into.
+    Confirmed, not just claimed.
+  - **#57** — the SSRF fix (re-read incidentally during the git-mishap recovery below): confirmed
+    `redirect: "manual"` + per-hop `isSafePublicUrl` re-validation loop is really in the file.
+  - **#62** — removed the client-controllable `data_as_of` fallback; always server-stamped now,
+    matching the sibling PATCH handler. One-line diff, unambiguous.
+  - **#72** — new `422 empty_deliverable` response confirmed to render a handled (if
+    generically-worded, `Couldn't send: empty_deliverable`) message in `ContactPickerModal.tsx`,
+    not an unhandled crash or silent failure. Minor UX polish opportunity: that's a raw enum
+    string, not a clean sentence — worth a follow-up, not a blocker.
+  See the Opus pass for the remaining 36 fixes, which were verified by build + test-suite green
+  and this session's own reading, but not individually diff-audited line-by-line the way these 7
+  were.
 
 ---
 
