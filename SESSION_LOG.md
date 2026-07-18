@@ -1,3 +1,27 @@
+## 2026-07-18 (Sonnet 5 · main) — Site-audit fan-out fix pass: 43 of 89 findings fixed via 10 file-disjoint Sonnet lanes (build+126 tests green, committed, NOT pushed)
+
+Operator asked to fan out 10 Sonnets against `docs/audits/2026-07-18-site-audit.md` and fix what could
+be fixed, with anything needing operator input surfaced instead of guessed at. Carved out 11 findings
+BEFORE the fan-out — billing (#3, #33: silent tier-clobber / silent upgrade-drop in the Stripe
+checkout/webhook routes), MCP surface (#48: CORS only on OPTIONS, not the real POST/DELETE — RULE 1
+explicit ask-first), and 8 cross-brain data-reconciliation/ingest-scope findings (DOM-YoY nonsense,
+two unreconciled "temperature" reads, redfin_swfl scope contamination, etc.) — pinpointed exact source
+files for all 8 (previously "pinpoint pending" in the audit) without touching them. Ran a 10-lane
+Workflow (file-disjoint groups, no lane shares a file) where each lane re-verified its assigned
+findings against CURRENT code (not the audit's stale line numbers) before fixing, and flagged rather
+than guessed at genuine judgment calls (dead-code delete-vs-keep, architecture choices, anything
+security-sensitive). Result: 43 fixed (42 clean + `lib/email/og-image.ts` SSRF redirect-revalidation,
+fixed but flagged for an explicit security read), 30 flagged with recommended direction, left untouched.
+Ran one verification pass myself after all lanes finished (lanes never build/test/commit): `bunx next
+build` clean, `bun test` across all 18 test files covering touched modules (126/126 pass — 2 pre-existing
+assertions were pinned to the OLD buggy output and needed updating to lock in the corrected behavior:
+`grounded-report-briefcase.test.ts`'s year-less "Jun 10" and `report-path.event-stream.test.ts`'s
+unscrubbed `[env-swfl]` slug), `check-vocab-coverage.mts --all` clean. Full per-finding log + the 11
+carve-outs' investigation notes → `docs/audits/2026-07-18-fanout-fix-log.md`. Checks ledger
+(`site-audit-0718`) left open on all 84 — not closing "fixed" until it's actually reviewed and live,
+per the "checks is prod evidence, not dev attestation" rule. Committed (`daeb1f6e`), NOT pushed —
+waiting on the operator's Opus review pass.
+
 ## 2026-07-18 (Opus 4.8 · main) — Supabase advisor DB-hygiene pass: 31 RLS InitPlan rewrites + revoked anon EXECUTE on rls_auto_enable (applied to prod, mirrored to docs/sql, NOT pushed)
 
 Operator: "use the supabase mcp, you have read and write, fix what we need fixed." Ran the security +
