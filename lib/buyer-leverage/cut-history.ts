@@ -35,8 +35,13 @@ export function deriveCutHistory(rows: TransitionRow[], subjectFloored: boolean)
         typeof r.at === "string" &&
         r.at.length > 0,
     )
-    .map((r) => ({ date: toMdY(r.at as string), sizeUsd: Math.abs(r.price_delta as number) }))
-    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    // Sort on the ISO `at` field (chronologically correct, freshest-first) BEFORE mapping
+    // to the formatted MM/DD/YYYY string — that formatted form sorts wrong across a year
+    // boundary (01/05/2027 lexically below 12/20/2026). `at` is a non-empty string here (filter).
+    .sort((a, b) =>
+      (a.at as string) < (b.at as string) ? 1 : (a.at as string) > (b.at as string) ? -1 : 0,
+    )
+    .map((r) => ({ date: toMdY(r.at as string), sizeUsd: Math.abs(r.price_delta as number) }));
   const totalCutUsd = events.reduce((s, e) => s + e.sizeUsd, 0);
   return { count: events.length, totalCutUsd, events, complete: !subjectFloored };
 }
