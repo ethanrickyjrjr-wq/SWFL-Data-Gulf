@@ -27,13 +27,26 @@ import { resolvePlace } from "./places-swfl.mts";
 export type CanonicalSubmarket = string;
 
 /**
- * County NAME for a submarket, for the core-scope gate. County-grain entries carry
- * their FIPS/type in SUBMARKET_METADATA and pass their own name through (so
- * "Charlotte County" reaches isCoreCounty and is rejected). City/area entries resolve
- * their county via places-swfl `.county` ("Lee" | "Collier" | "Charlotte"). Returns ""
- * if unresolved → treated as non-core.
+ * Broker labels that are genuinely Lee/Collier but that the shared place resolver
+ * deliberately does NOT carry. We do NOT add them to places-swfl: resolving e.g.
+ * "South Fort Myers" there would collapse it onto the Fort Myers record, and cre-swfl's
+ * cleanSubmarket would then relabel + slug-collide it with the real "Fort Myers"
+ * submarket. Scope-only, local to this crosswalk. (C&W's largest FM submarket, 22.1M SF.)
+ */
+const COUNTY_OVERRIDE: Record<string, string> = {
+  "South Fort Myers": "Lee",
+};
+
+/**
+ * County NAME for a submarket, for the core-scope gate. Local override first (broker
+ * labels places-swfl can't carry). County-grain entries carry their FIPS/type in
+ * SUBMARKET_METADATA and pass their own name through (so "Charlotte County" reaches
+ * isCoreCounty and is rejected). City/area entries resolve their county via places-swfl
+ * `.county` ("Lee" | "Collier" | "Charlotte"). Returns "" if unresolved → treated non-core.
  */
 export function countyForSubmarket(submarket: string): string {
+  const override = COUNTY_OVERRIDE[submarket];
+  if (override) return override;
   const meta = SUBMARKET_METADATA[submarket];
   if (meta?.geographic_type === "county") return submarket; // "Charlotte County" | "Lee County" | "Collier County"
   return resolvePlace(submarket)?.county ?? "";

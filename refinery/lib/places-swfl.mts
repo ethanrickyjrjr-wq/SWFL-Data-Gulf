@@ -297,10 +297,6 @@ const RAW_ALIASES: Record<string, string | null> = {
 
   // Fort Myers sub-areas
   "north fort myers": "north-fort-myers",
-  // South Fort Myers = C&W's largest Fort Myers submarket (Daniels/Six Mile/Gulf Coast,
-  // 22.1M SF). Not a distinct Census place — rolls up to Fort Myers/Lee for scope, exactly
-  // like North Fort Myers. Added 2026-07-18 so the CRE figures crosswalk can scope it.
-  "south fort myers": "fort-myers",
   "san carlos park": "san-carlos-park",
   "san carlos": "san-carlos-park",
   "sfm san carlos": "san-carlos-park", // raw MHS slug "sfm-san-carlos"

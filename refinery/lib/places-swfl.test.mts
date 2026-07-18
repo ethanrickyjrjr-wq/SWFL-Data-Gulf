@@ -59,7 +59,7 @@ describe("places-swfl resolver — roll-up (granularity decision)", () => {
   });
 
   it("Fort Myers sub-areas roll up to Fort Myers", () => {
-    for (const sub of ["North Fort Myers", "South Fort Myers", "sfm-san-carlos", "The Islands"]) {
+    for (const sub of ["North Fort Myers", "sfm-san-carlos", "The Islands"]) {
       expect(parentOf(sub)?.slug).toBe("fort-myers");
       expect(resolvePlace(sub)?.county).toBe("Lee");
     }

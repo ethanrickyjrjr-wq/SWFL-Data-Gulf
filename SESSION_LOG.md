@@ -1,3 +1,17 @@
+## 2026-07-18 (Opus 4.8 · main) — Fix: revert places-swfl "South Fort Myers" alias (unintended cre-swfl regression); scope stays local to the crosswalk
+
+Follow-up to 03e6373f. The `south fort myers → fort-myers` alias I added to the shared place resolver
+had a side effect: cre-swfl's `cleanSubmarket`/`parentOf` (refinery/packs/cre-swfl.mts:256,275,460) would
+then relabel "South Fort Myers" as "Fort Myers" and slug-collide it with the real Fort Myers submarket
+(the pack's own line-271 comment relies on it being UNRESOLVED). Reverted the alias + its test line;
+moved the scope knowledge into a local `COUNTY_OVERRIDE` in cre-submarket-crosswalk.mts (`South Fort
+Myers → Lee`) — the production path never calls it (South Fort Myers is in the closed canonical set), it
+only satisfied the guard test. Materialization byte-identical (dry-run 1078/985). cre-swfl restored to
+pre-change behavior. NO brain rebuild needed: nothing in refinery/ consumes cre_figures yet (the brain
+re-grain is the separate follow-up spec), so a rebuild would not surface the figures layer.
+
+---
+
 ## 2026-07-18 (Opus 4.8 · main) — CRE figures layer BUILT + materialized live: all 4 firms in, cross-source corroboration, cited to SWFL Data Gulf
 
 Executed `docs/superpowers/plans/2026-07-18-cre-figures-corroboration.md` — but reviewed the plan against
