@@ -13,6 +13,10 @@
       "url": "https://www.swfldatagulf.com/api/mcp",
       "headersHelper": "node -e \"process.stdout.write(JSON.stringify({'X-Account-Key':process.env.SWFL_MCP_KEY||''}))\""
     },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=jtkdowmrjaxfvwmemxso"
+    },
     "ezhomesearch": {
       "type": "http",
       "url": "https://www.ezhomesearch.com/mcp",
