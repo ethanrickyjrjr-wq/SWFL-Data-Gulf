@@ -1,3 +1,42 @@
+## 2026-07-18 (Sonnet 5 · main) — Fixed freshness-probe-daily's 6-day crash: one malformed registry entry was killing the ENTIRE daily health report, not just itself
+
+Operator: "fix why it's broke for 6 days." Diagnosed live, not from old GHA logs (those came back
+truncated/unhelpful via `gh run view --log` — only 292 lines, cut off right after the doctor step
+starts). Instead re-ran `python -m ingest.scripts.doctor` locally against the live prod DB and got an
+immediate, reproducible traceback: `check_freshness.py:435` does bare `int(entry["cadence_days"])`, and
+the `lee_parcels` registry entry (a WIP pipeline scaffolded THIS SESSION by a parallel session, dated
+07/18/2026) has `cadence_days: null` — legitimate mid-build state, other fields on that same entry are
+also null pending its first live run. That single unguarded int(None) propagates up through
+`run_probe`'s plain for-loop with no try/except, killing the entire probe before it prints a single
+dataset. `gh run list` confirms every scheduled run 07/12-07/17 failed — 6 straight days with ZERO
+visibility into real pipeline health, not "one dataset is stale."
+
+lee_parcels itself only explains today's instance — the historical streak means this exact unguarded-int
+shape has been live and waiting to be triggered by any WIP entry for a while; this fixes the class of bug,
+not just today's trigger.
+
+Fix (`ingest/scripts/check_freshness.py` + `ingest/scripts/doctor.py`): `_safe_cadence_days()` returns
+None instead of raising; all 3 per-entry probes (`check_tier1_entry`/`check_tier2_entry`/
+`check_odd_window_entry`) return a graceful `MISCONFIGURED` status instead of crashing. `run_probe`'s
+loop also gained a try/except backstop — a DIFFERENT unguarded field can never again take the whole
+report down with it, only its own entry. `MISCONFIGURED` added to `doctor.py`'s severity map as red
+(gates same as MISSING/OVERDUE via `--fail-on red`), not silently dropped to the unknown-status yellow
+default. Verified locally against live prod: doctor now runs to completion and correctly reports
+**8 red · 37 yellow · 30 green of 75 datasets** (was: bare traceback, zero lines). The 8 reds were
+invisible for 6 days, not absent — `fema` (TIMEOUT_KILL), `lee_parcels` + `neighborhood_stats`
+(NEVER_LANDED — registry claims a table with no successful load), `fgcu_reri_indicators` (GAP_SENTINEL,
+likely a dead vendor key), 3 disabled-but-cron-carrying workflows (`dbpr_sirs_submissions`,
+`crexi_listings` — same root cause already reopened today as `crexi_cron_cf_yield_verify` /
+`build_11_crexi_p0b_verify` — `brevitas_listings`), and one content-contract failure on
+`listing_state.list_price` (already has its own open check). `--fail-on red` still exits 1 correctly —
+this restores visibility, it doesn't loosen the gate. 9 new tests added (targeted suite 78/78 green,
+full `ingest/` suite kicked off in background — some tests run long, e.g. hit live network — result
+not yet in hand at push time, will confirm next session if not already clean).
+
+NEXT: none of the 8 now-visible reds are triaged/fixed in this push except the ones already independently
+found and reopened earlier today — this was specifically "why is the health check itself broken," not a
+sweep of the 8 things it just started correctly reporting again.
+
 ## 2026-07-18 (Sonnet 5 · main) — 36-agent non-RE monetization sweep (10 ranked+verified plans) + a real credential-exposure incident found and cleaned
 
 Operator asked for a large SteadyAPI+crawl4ai fan-out (25 agents, 500+ calls, "not sure real estate")
