@@ -4,13 +4,13 @@ name: Airtable checks sync
 # Spec: docs/superpowers/specs/2026-07-11-checks-airtable-mirror-design.md
 # Check: checks_airtable_mirror_live_verify
 #
-# Every 2 hours, not hourly — the spec's cost math keeps this comfortably
-# under Airtable's free-tier 1,000-calls/month cap at this repo's observed
-# checks-ledger velocity (~33 opens+updates/day, ~15-20 closes/day).
+# THROTTLED 2026-07-18 (operator call, zero users yet): was every 2 hours,
+# cut to once daily. The free-tier call-cap math in the spec has even more
+# headroom at this cadence; bump back up if the mirror needs to feel live.
 
 on:
   schedule:
-    - cron: "23 */2 * * *" # off the top-of-hour congestion, same convention as tripwire-hourly.yml
+    - cron: "23 12 * * *" # once daily, off the top-of-hour congestion
   workflow_dispatch: {}
 
 permissions:

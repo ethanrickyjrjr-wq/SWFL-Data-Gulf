@@ -1,4 +1,4 @@
-name: Data-readiness verification (hourly)
+name: Data-readiness verification (daily)
 
 # Fires the pre-send data-verification ladder. The handler at
 # app/api/cron/data-readiness was written for an external hourly trigger
@@ -9,10 +9,11 @@ name: Data-readiness verification (hourly)
 
 on:
   schedule:
-    # Hourly at :23 — off the top-of-hour congestion (GitHub schedule delays
-    # peak at :00 and jobs can be dropped). The handler's 75-min look-ahead
-    # window still covers every send regardless of the minute offset.
-    - cron: "23 * * * *"
+    # THROTTLED 2026-07-18 (operator call, zero users yet): was hourly, cut to
+    # once daily. Positioned 14:40 UTC — inside the 75-min look-ahead window of
+    # email-scheduler's 15:45 UTC daily run, so it still verifies same-day sends
+    # before they fire. Revert to hourly once real send volume needs closer cover.
+    - cron: "40 14 * * *"
   workflow_dispatch:
 
 permissions:

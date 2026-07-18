@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/mls/sync",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 11 * * *"
     },
     {
       "path": "/api/cron/nightly-chain-dispatch",

@@ -1,16 +1,16 @@
 name: Tripwire hourly
 
 # The watchman on a clock — spec: docs/superpowers/specs/2026-07-05-spend-tripwire-design.md
-# The 07/05/2026 drain ran in ~2 hours; a daily check would sleep through it.
-# This runs the $0 deterministic scan EVERY HOUR (free on a public repo) and
-# opens/updates a GitHub issue on any RED — GitHub notifies the operator's
-# phone/email; nobody has to remember to look.
+# The 07/05/2026 drain ran in ~2 hours; hourly was sized to catch a repeat of that
+# fast. THROTTLED 2026-07-18 (operator call, zero users yet — nothing live enough
+# to drain that fast right now): once daily instead. Revert to hourly before
+# opening this up to real traffic.
 #
 # No ANTHROPIC_API_KEY here — the scan spends nothing, by design.
 
 on:
   schedule:
-    - cron: "17 * * * *" # hourly, off the top-of-hour congestion
+    - cron: "17 13 * * *" # once daily, off the top-of-hour congestion
   workflow_dispatch: {}
 
 permissions:
