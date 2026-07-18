@@ -41,18 +41,24 @@ export const NAV_GROUPS: NavItem[] = [
     label: "Explore",
     children: [
       { label: "Search", href: "/r" },
-      // Seller-side reads (the validated whitespace: the scoring industry hides the
-      // seller's own stress score — these face it to them). Live /r/ routes, wired
-      // 07/18/2026 so they're reachable, not orphaned-by-URL. `/r/should-i-sell` sits
-      // under `/r`, so activeChildHref's longest-match tiebreak lights it over Search.
-      { label: "Should I Sell?", href: "/r/should-i-sell" },
-      { label: "Back on Market", href: "/r/back-on-market" },
       { label: "Guides", href: "/guides" },
     ],
   },
   // The campaign centerpiece rides top-level, right after Explore (spec
   // 2026-07-10-insiders-page-design.md) — not buried as a dropdown child.
   { label: "Insiders", href: "/insiders" },
+  // Seller-side reads, promoted to their OWN top-level group (operator ruling 07/18/2026:
+  // "seller tools can be louder under Seller Tools"). The validated whitespace — the
+  // scoring industry hides the seller's own stress score; these face it to them. Both are
+  // live /r/ routes. `/r/should-i-sell` sits under `/r`, but Seller Tools is a distinct
+  // group so it never collides with Explore's Search (`/r`) in activeChildHref.
+  {
+    label: "Seller Tools",
+    children: [
+      { label: "Should I Sell?", href: "/r/should-i-sell" },
+      { label: "Back on Market", href: "/r/back-on-market" },
+    ],
+  },
   { label: "Desk", href: "/desk" },
   { label: "Showcase", href: "/showcase" },
   { label: "Projects", href: "/project" },

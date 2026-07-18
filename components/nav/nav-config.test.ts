@@ -76,10 +76,11 @@ describe("homeHref (B4 — signed-in home base)", () => {
 });
 
 describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
-  it("carries the top-level marquees + Explore group in order", () => {
+  it("carries the top-level marquees + Explore + Seller Tools groups in order", () => {
     expect(NAV_GROUPS.map((n) => n.label)).toEqual([
       "Explore",
       "Insiders",
+      "Seller Tools",
       "Desk",
       "Showcase",
       "Projects",
@@ -94,14 +95,14 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
     expect(insiders?.href).toBe("/insiders");
     expect(insiders?.children).toBeUndefined();
   });
-  it("holds Search, the seller reads, and Guides under Explore (Maps promoted top-level, ZIP Reports retired)", () => {
+  it("keeps Search + Guides under Explore (Maps promoted top-level, ZIP Reports retired)", () => {
     const explore = NAV_GROUPS.find((n) => n.label === "Explore");
-    expect(explore?.children?.map((c) => c.href)).toEqual([
-      "/r",
-      "/r/should-i-sell",
-      "/r/back-on-market",
-      "/guides",
-    ]);
+    expect(explore?.children?.map((c) => c.href)).toEqual(["/r", "/guides"]);
+  });
+  it("promotes the seller reads to a top-level Seller Tools group (operator ruling 07/18)", () => {
+    const seller = NAV_GROUPS.find((n) => n.label === "Seller Tools");
+    expect(seller?.href).toBeUndefined();
+    expect(seller?.children?.map((c) => c.href)).toEqual(["/r/should-i-sell", "/r/back-on-market"]);
   });
   it("exposes Maps as a top-level leaf at /map", () => {
     const maps = NAV_GROUPS.find((n) => n.label === "Maps");

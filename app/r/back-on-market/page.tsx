@@ -78,7 +78,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ q
   }
 
   const zip = resolved!.zip;
-  const place = data.place ?? cityForZip(zip) ?? `ZIP ${zip}`;
+  // Prefer the city name over the bare ZIP (resolveQToZip carries no place, so data.place
+  // falls back to the ZIP — "Cape Coral · 33904" reads better than "33904 · 33904").
+  const place = cityForZip(zip) ?? data.place ?? `ZIP ${zip}`;
   const county = resolveZip(zip).county_names?.[0];
 
   return (

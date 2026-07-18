@@ -1,3 +1,21 @@
+## 2026-07-18 (Opus 4.8 · main) — Seller reads: sourced condo-share number on Should I Sell + Back-on-Market layout fix (live) + Seller Tools nav
+
+This push, three parts. (1) CONDO NUMBER — Should I Sell now shows a sourced per-ZIP condo share under the
+always-on SB 4-D caveat: `fixtures/condo-share-by-zip.json` (Lee LeePA use_code 04 + Collier FDOR dor_uc 004,
+as-of 07/11/2026 off the `_dlt_load_id`; straddle ZIPs 34110/34134 combined), read by
+`lib/should-i-sell/condo-share.ts` (empty-tolerant → null outside the Lee/Collier footprint, never invents),
+rendered in `SellerStressRead`'s "Reading this honestly" block. Turns "in condo-heavy ZIPs" into "About 66.5%
+of homes in Naples 34103 are condominiums" (Cape Coral 20.6%, Marco 55.1%, Lehigh 0%). Precomputed fixture,
+NOT a per-request 500k-row scan. (2) BACK-ON-MARKET layout fix VERIFIED LIVE (287bbbaf already deployed) — bare
+`<main>` + undefined `bom-*` classes → `ReportShell`, now contained/styled like should-i-sell; this commit adds
+a place polish (`cityForZip` → "Cape Coral · 33904"). (3) NAV — promoted the seller reads out of Explore into a
+top-level "Seller Tools" group (operator ruling 07/18). Also this session (already landed / no code here): ran
+Collier+Lee+Hendry listing sweeps (operator-approved paid) — proved `days_off_market` now lands (7 relists,
+1-17d; earlier NULLs were deployment lag, not a bug). Closed should_i_sell_live_verify,
+back_on_market_read_live_verify, relist_days_off_market_null_on_live_sweep. 75 tests green, `next build` clean.
+NEXT: regenerate the condo fixture on a parcel-roll refresh (consider graduating it to a pipeline). The 14-day
+listing-capture spike is coverage-cadence, not corruption (94% distinct-new property_ids, verified).
+
 ## 2026-07-18 (Sonnet 5 · main) — Dispatched seller-stress-swfl rebuild: brain was serving a 03/01/2026 period while fresher Redfin data sat unused in the lake since 07-15
 
 Ricky flagged the Back on Market read showing "as of 03/01/2026" and asked why. Traced it: `seller-stress-swfl`

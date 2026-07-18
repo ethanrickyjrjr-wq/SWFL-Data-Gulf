@@ -7,6 +7,7 @@
 import Link from "next/link";
 import type { SellerStressRead } from "@/lib/should-i-sell/load-stress-read";
 import { monthYearLabel } from "@/lib/should-i-sell/format-period";
+import { type CondoShare, condoShareSentence } from "@/lib/should-i-sell/condo-share";
 import { SectionTitle } from "@/app/r/_components/report-shell";
 
 const pct = (n: number) => `${n.toFixed(1)}%`;
@@ -25,9 +26,13 @@ function vsMedianPhrase(v: "above" | "near" | "below"): string {
 export default function SellerStressRead({
   data,
   nearby = [],
+  condoShare = null,
 }: {
   data: SellerStressRead;
   nearby?: NearbyArea[];
+  /** Per-ZIP condo share — the concrete number under the SB 4-D / condo caveat. null
+   *  outside the Lee/Collier parcel footprint (the line then omits, never invents). */
+  condoShare?: CondoShare | null;
 }) {
   const { place, region, area, scored, drivers, caveats } = data;
   const dataThroughLabel = monthYearLabel(data.dataThrough);
@@ -101,18 +106,28 @@ export default function SellerStressRead({
         </div>
       )}
 
-      {caveats.length > 0 && (
+      {(caveats.length > 0 || condoShare) && (
         <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-wider text-gulf-teal">
             Reading this honestly
           </p>
-          <ul className="mt-2 space-y-2">
-            {caveats.map((c) => (
-              <li key={c} className="text-sm leading-6 text-gray-300">
-                {c}
-              </li>
-            ))}
-          </ul>
+          {caveats.length > 0 && (
+            <ul className="mt-2 space-y-2">
+              {caveats.map((c) => (
+                <li key={c} className="text-sm leading-6 text-gray-300">
+                  {c}
+                </li>
+              ))}
+            </ul>
+          )}
+          {condoShare && (
+            <p className="mt-2 border-t border-white/5 pt-2 text-sm leading-6 text-gray-300">
+              {condoShareSentence(condoShare, place)}{" "}
+              <span className="text-xs text-gray-500">
+                ({condoShare.source.label}, county parcel records — as of {condoShare.asOf})
+              </span>
+            </p>
+          )}
         </div>
       )}
 

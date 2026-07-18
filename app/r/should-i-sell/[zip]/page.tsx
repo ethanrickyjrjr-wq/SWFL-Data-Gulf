@@ -14,6 +14,7 @@ import { resolveZip } from "../../../../refinery/lib/zip-resolver.mts";
 import { cityForZip } from "@/lib/swfl-zip-city";
 import { nearestZips } from "@/lib/geo/nearest-zips";
 import { loadSellerStressRead } from "@/lib/should-i-sell/load-stress-read";
+import { condoShareForZip } from "@/lib/should-i-sell/condo-share";
 import { loadMarketSnapshot, loadZipYoyFraction } from "@/lib/should-i-sell/load-market-snapshot";
 import { compsForAddress } from "@/lib/assistant/comp-helper";
 import { deriveV0FromComps } from "@/lib/should-i-sell/derive-v0";
@@ -67,6 +68,9 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
   }
 
   const place = cityForZip(zip) ?? `ZIP ${zip}`;
+  // Concrete number under the always-shown condo caveat — sourced parcel share, or null
+  // outside the Lee/Collier footprint (line omits, never invents). Synchronous fixture read.
+  const condoShare = condoShareForZip(zip);
 
   const [stress, snapshot] = await Promise.all([
     loadSellerStressRead(zip, { place }),
@@ -138,6 +142,7 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
           {stress && (
             <SellerStressRead
               data={stress}
+              condoShare={condoShare}
               nearby={
                 stress.scored
                   ? []
