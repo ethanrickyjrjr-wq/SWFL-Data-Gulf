@@ -132,4 +132,10 @@ These unblock multiple plays at once. Track as `checks` when we commit to one.
 - `02-horizontal-engine-spec.md` — the vertical-agnostic engine design + full data-sourcing map.
 - `03-research-and-signals.md` — live research (reachability, channel legality, pain points, net-new
   ideas) **weighted by closeness to cash**. The ranking there is the "what do we do next" answer.
+- `04-data-acquisition-engine.md` — the hard-data acquisition landscape + a system design for
+  systematizing source discovery and records requests.
+- `05-non-re-monetization-sweep-2026-07-18.md` — 36-agent sweep (Twitter/Instagram/Amazon +
+  crawl4ai) across 14 domains outside the already-covered RE/insurance/mortgage/contractor ground,
+  ranked into 10 fully-planned, adversarially-verified product candidates. Top pick: a SIRS/milestone
+  condo-compliance gap finder off data already in the lake.
 - _add one `NN-<vertical>.md` per play as we go deep. Insurance is the next deep dive._

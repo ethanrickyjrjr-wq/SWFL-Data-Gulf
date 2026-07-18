@@ -1,3 +1,38 @@
+## 2026-07-18 (Sonnet 5 · main) — 36-agent non-RE monetization sweep (10 ranked+verified plans) + a real credential-exposure incident found and cleaned
+
+Operator asked for a large SteadyAPI+crawl4ai fan-out (25 agents, 500+ calls, "not sure real estate")
+to find monetizable ideas beyond the already-covered RE/insurance/mortgage/contractor ground in
+`docs/steadyapi-research/STEADY-PAINS.md` + `docs/vertical-plays/`. Smoke-tested SteadyAPI first
+(RULE 0.4): real-estate/Instagram/Twitter/Amazon all live; **Reddit module is dead** (every endpoint
+returns `success:false`, reproduced against the vendor's own docs) — routed around via crawl4ai direct
+to reddit.com. Ran a 36-agent Workflow (1 capability inventory → 14 domain researchers → 1 Opus ranking
+pass → 10 plan-authors → 10 Opus adversarial verifiers) across HOA/CAM managers, appraisers/inspectors,
+local retail, banks, financial advisors, boat/marina, chambers/EDCs, and more. Result committed:
+`docs/vertical-plays/05-non-re-monetization-sweep-2026-07-18.md` — 10 ranked ideas with full build
+steps, data/engine reuse, monetization, effort, named competitors, and a verify verdict each (9
+PLAUSIBLE, 1 CONFIRMED). Top pick: a SIRS/milestone condo-compliance gap finder off two tables already
+in the lake. A post-processing bug in my own orchestration script (misread `pipeline()`'s return shape)
+initially discarded all 10 plans as null; recovered them by cross-referencing `journal.jsonl` rather
+than re-running (no wasted spend).
+
+**Real finding, not a false alarm:** the workflow's sandbox flagged 5 subagents for credential handling.
+4 were false positives (PHOTOS_API legitimately covers Twitter/Instagram/Amazon on this account). One
+was real — an agent wrote the raw key to a plaintext scratchpad file — and manual follow-up found it
+was worse: 2 more raw-key copies, one in a DIFFERENT session's `/tmp` dir, and **`/tmp/noai.env` — a
+complete plaintext copy of the entire `.env.local`** (Stripe live key, a GitHub PAT with push-to-main,
+full Supabase service-role key + Postgres password, everything). All 5 located files deleted and
+verified gone; git status stayed clean throughout, nothing touched the tracked repo. A full historical
+sweep of the hundreds of old `/tmp/claude/<session>` dirs on this machine was NOT done (auto-mode
+classifier correctly blocked a broader credential grep after this session's flags, and a full sweep is
+a separate, bigger decision) — flagged as an open check
+(`credential_exposure_rotate_secrets_2026_07_18`) rather than silently deferred. Recommend rotating at
+minimum the Stripe secret key, the GitHub push-to-main PAT, and the Supabase service-role key/Postgres
+password. Full incident + vendor findings: `docs/steadyapi-research/2026-07-18-non-re-vertical-sweep-and-security-incident.md`
+(local-only, per that folder's standing rule). Not pushed — holding for operator review of both the
+plans doc and the security finding.
+
+---
+
 ## 2026-07-18 (Sonnet 5 · main) — Trust audit part 2: built free signal re-verification + audited remaining 136 zero-evidence closed checks, 61 checks now self-verify daily for $0
 
 Operator (still furious, real point about repeat cost): "everything." Two parts.
