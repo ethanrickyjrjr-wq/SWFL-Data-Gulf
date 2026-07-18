@@ -94,9 +94,14 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
     expect(insiders?.href).toBe("/insiders");
     expect(insiders?.children).toBeUndefined();
   });
-  it("keeps Search + Guides under Explore (Maps promoted top-level, ZIP Reports retired)", () => {
+  it("holds Search, the seller reads, and Guides under Explore (Maps promoted top-level, ZIP Reports retired)", () => {
     const explore = NAV_GROUPS.find((n) => n.label === "Explore");
-    expect(explore?.children?.map((c) => c.href)).toEqual(["/r", "/guides"]);
+    expect(explore?.children?.map((c) => c.href)).toEqual([
+      "/r",
+      "/r/should-i-sell",
+      "/r/back-on-market",
+      "/guides",
+    ]);
   });
   it("exposes Maps as a top-level leaf at /map", () => {
     const maps = NAV_GROUPS.find((n) => n.label === "Maps");
