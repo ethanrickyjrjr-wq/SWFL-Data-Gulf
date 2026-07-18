@@ -30,9 +30,11 @@ const housingBrain = {
             },
           },
           {
-            // present, but its snapshot cells are null (thin-sample style)
-            key: "34999",
-            label: "34999",
+            // present, but its snapshot cells are null (thin-sample style).
+            // In-scope (Fort Myers, Lee) so it clears the scope root; the null
+            // cells are what this fixture exercises.
+            key: "33966",
+            label: "33966",
             cells: {
               median_sale_price: 300_000,
               median_sale_price_yoy_pct: null,
@@ -99,7 +101,7 @@ test("a ZIP in both tables → both halves, each with its own asOf + source", as
 });
 
 test("a ZIP present in housing but ABSENT from momentum → momentum half null", async () => {
-  const s = await loadMarketSnapshot("34999", { loadBrain });
+  const s = await loadMarketSnapshot("33966", { loadBrain });
   expect(s).not.toBeNull();
   expect(s!.housing).not.toBeNull();
   // present row with null cells stays a (null-valued) half, not a dropped half
@@ -107,9 +109,18 @@ test("a ZIP present in housing but ABSENT from momentum → momentum half null",
   expect(s!.momentum).toBeNull(); // absent from the momentum table
 });
 
-test("a ZIP absent from BOTH tables → null object (section omitted)", async () => {
-  const s = await loadMarketSnapshot("00000", { loadBrain });
+test("an in-scope ZIP absent from BOTH tables → null object (section omitted)", async () => {
+  // 34101 is in-scope (Naples, Collier) but not in either fixture table — this
+  // exercises the both-halves-null path, not the scope guard.
+  const s = await loadMarketSnapshot("34101", { loadBrain });
   expect(s).toBeNull();
+});
+
+test("an out-of-scope ZIP (not Lee/Collier) is rejected at the scope root", async () => {
+  // 34999 is outside our coverage — rejected before any table read, so no stray
+  // out-of-scope lake row can surface via the snapshot or the YoY projection.
+  expect(await loadMarketSnapshot("34999", { loadBrain })).toBeNull();
+  expect(await loadZipYoyFraction("34999", { loadBrain })).toBeNull();
 });
 
 test("a missing brain degrades that half to null, never throws", async () => {
@@ -127,6 +138,6 @@ test("YoY fraction reads the percent cell and divides by 100 (the /100 contract)
 });
 
 test("YoY fraction is null when the ZIP/cell is absent (projection then omitted)", async () => {
-  expect(await loadZipYoyFraction("34999", { loadBrain })).toBeNull(); // cell null
-  expect(await loadZipYoyFraction("00000", { loadBrain })).toBeNull(); // ZIP absent
+  expect(await loadZipYoyFraction("33966", { loadBrain })).toBeNull(); // in-scope, cell null
+  expect(await loadZipYoyFraction("34101", { loadBrain })).toBeNull(); // in-scope, ZIP absent
 });

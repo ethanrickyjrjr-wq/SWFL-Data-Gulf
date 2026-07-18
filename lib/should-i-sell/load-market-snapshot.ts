@@ -14,6 +14,7 @@
 import { loadParsedBrain } from "../fetch-brain";
 import type { ParsedBrain } from "../../refinery/render/speaker.mts";
 import type { BrainOutputDetailTable } from "../../refinery/types/brain-output.mts";
+import { isCoreScope } from "../../refinery/lib/core-scope.mts";
 
 type LoadBrain = (slug: string) => Promise<ParsedBrain | null>;
 
@@ -111,6 +112,11 @@ export async function loadMarketSnapshot(
   zip: string,
   deps: MarketSnapshotDeps = {},
 ): Promise<MarketSnapshot | null> {
+  // Scope root (Lee + Collier only, 57 ZIPs — refinery/lib/core-scope.mts). An
+  // out-of-scope ZIP is not a market we cover, so return null before any read —
+  // this keeps a Sarasota/Charlotte ZIP from surfacing a stray out-of-scope row
+  // from the ZIP-grain housing/momentum tables.
+  if (!isCoreScope(zip)) return null;
   const loadBrain: LoadBrain = deps.loadBrain ?? loadParsedBrain;
   const [housingBrain, momentumBrain] = await Promise.all([
     loadBrain("housing-swfl"),
@@ -132,6 +138,7 @@ export async function loadZipYoyFraction(
   zip: string,
   deps: { loadBrain?: LoadBrain } = {},
 ): Promise<number | null> {
+  if (!isCoreScope(zip)) return null; // scope root — see loadMarketSnapshot
   const loadBrain: LoadBrain = deps.loadBrain ?? loadParsedBrain;
   const brain = await loadBrain("housing-swfl");
   const table = tableOf(brain, "housing_by_zip");
