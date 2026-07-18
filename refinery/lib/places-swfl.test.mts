@@ -1,13 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import {
-  PLACES,
-  resolvePlace,
-  parentOf,
-  metricSlug,
-  normalizePlace,
-} from "./places-swfl.mts";
+import { PLACES, resolvePlace, parentOf, metricSlug, normalizePlace } from "./places-swfl.mts";
 import { SWFL_COUNTY_FIPS } from "./swfl-geo.mts";
 
 const FIXTURES_DIR = path.resolve(import.meta.dirname, "..", "..", "fixtures");
@@ -17,10 +11,7 @@ interface CrosswalkEntry {
   county: string;
 }
 const crosswalk: { entries: CrosswalkEntry[] } = JSON.parse(
-  readFileSync(
-    path.join(FIXTURES_DIR, "swfl-place-zip-crosswalk.json"),
-    "utf-8",
-  ),
+  readFileSync(path.join(FIXTURES_DIR, "swfl-place-zip-crosswalk.json"), "utf-8"),
 );
 
 describe("places-swfl resolver — the two live leaks", () => {
@@ -42,23 +33,11 @@ describe("places-swfl resolver — the two live leaks", () => {
 
 describe("places-swfl resolver — bureaucratic + plain + abbreviated forms", () => {
   const cases: Array<[string[], string]> = [
-    [
-      ["City of Cape Coral", "CITY OF CAPE CORAL", "Cape Coral", "cape coral"],
-      "cape-coral",
-    ],
-    [
-      ["Unincorporated Lee County", "UNINC LEE", "Lee County", "Lee"],
-      "lee-county",
-    ],
-    [
-      ["Unincorporated Collier", "UNINC COLLIER", "Collier County", "Collier"],
-      "collier-county",
-    ],
+    [["City of Cape Coral", "CITY OF CAPE CORAL", "Cape Coral", "cape coral"], "cape-coral"],
+    [["Unincorporated Lee County", "UNINC LEE", "Lee County", "Lee"], "lee-county"],
+    [["Unincorporated Collier", "UNINC COLLIER", "Collier County", "Collier"], "collier-county"],
     [["City of Naples", "Naples"], "naples"],
-    [
-      ["Town of Fort Myers Beach", "Fort Myers Beach", "FMB"],
-      "fort-myers-beach",
-    ],
+    [["Town of Fort Myers Beach", "Fort Myers Beach", "FMB"], "fort-myers-beach"],
     [["Village of Estero", "Estero"], "estero"],
     [["City of Marco Island", "Marco Island", "Marco"], "marco-island"],
   ];
@@ -80,7 +59,7 @@ describe("places-swfl resolver — roll-up (granularity decision)", () => {
   });
 
   it("Fort Myers sub-areas roll up to Fort Myers", () => {
-    for (const sub of ["North Fort Myers", "sfm-san-carlos", "The Islands"]) {
+    for (const sub of ["North Fort Myers", "South Fort Myers", "sfm-san-carlos", "The Islands"]) {
       expect(parentOf(sub)?.slug).toBe("fort-myers");
       expect(resolvePlace(sub)?.county).toBe("Lee");
     }
