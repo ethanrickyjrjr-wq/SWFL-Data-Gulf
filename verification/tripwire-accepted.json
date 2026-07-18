@@ -124,6 +124,12 @@
       "pack": "cre-swfl",
       "accepted_on": "07/17/2026",
       "note": "Serve the re-grained CRE direction vote + corridor_factor (submarket reps) alongside the landed median grain fix 3084c99d; closes cre_direction_vote_and_corridor_factor_stamped_weighting + the due-07/19 corridor_grain checks. Operator-approved paid run (this conversation). (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29622934675",
+      "pack": "master",
+      "accepted_on": "07/17/2026",
+      "note": "Propagate re-grained cre-swfl v62 (submarket-grain medians + direction + corridor_factor) into master's dossier; no-force TTL-respecting cascade, skips fresh upstreams. Operator-approved paid serve (this conversation). (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }

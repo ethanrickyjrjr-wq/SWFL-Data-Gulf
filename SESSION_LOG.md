@@ -1,3 +1,12 @@
+## 2026-07-18 (Opus 4.8 · main) — cre-swfl v62 rebuilt (grain fix live in repo) + master propagation dispatched
+
+Run 29622523421 succeeded: `[stage 4] wrote brains/cre-swfl.md (version 62)` (source=live), committed to the
+brains repo as `d5a2556f`. The re-grain is in repo HEAD; the live site was still serving v61 (21:54 cron
+build) at check time — normal redeploy lag, verifying after it catches up. Dispatched the no-force
+`pack_id=master` propagation (run 29622934675) so master's dossier picks up v62's submarket-grain medians
+(cre-swfl v62 @ 00:19 is newer than master's 21:56 baseline → upstream-aware re-synth; fresh upstreams
+skipped). NEXT: verify served bytes on both, then close the grain checks.
+
 ## 2026-07-17 (Opus 4.8 · main) — Served the CRE grain fix: pushed + dispatched cre-swfl rebuild (operator-approved paid run)
 
 Pushed 5 commits to main (`48030dcc..2881abb2`): my CRE re-grain fix (`da0df618`) + grade-coverage regen
