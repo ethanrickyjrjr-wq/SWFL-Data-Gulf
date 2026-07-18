@@ -136,6 +136,12 @@
       "pack": "cre-swfl",
       "accepted_on": "07/17/2026",
       "note": "Serve the Lee/Collier core-scope gate on the CRE broker-survey emission — drops out-of-core Charlotte County + Punta Gorda from standalone metrics and the SWFL-wide median. Closes cre_charlotte_county_out_of_scope_live. Operator-approved paid run (this conversation: 'clean it up'). (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29625350335",
+      "pack": "master",
+      "accepted_on": "07/17/2026",
+      "note": "Propagate cre-swfl v63 (Charlotte/Punta Gorda gated out of the broker-survey emission) into master's dossier. No-force TTL-respecting cascade. Operator-approved ('clean it up'). (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }

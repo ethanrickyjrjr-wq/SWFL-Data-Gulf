@@ -1,3 +1,9 @@
+## 2026-07-18 (Opus 4.8 · main) — cre-swfl v63 (Charlotte-free) rebuilt; master propagation dispatched
+
+cre-swfl rebuild (run 29625071833) succeeded → wrote brains/cre-swfl.md v63 with Charlotte/Punta Gorda
+gated out. Dispatched no-force `pack_id=master` propagation (run 29625350335). NEXT: verify served brain +
+master are Charlotte-free, then close `cre_charlotte_county_out_of_scope_live` + hand off the figures plan.
+
 ## 2026-07-18 (Opus 4.8 · main) — Dispatched cre-swfl rebuild to serve the Charlotte scope fix
 
 Operator-approved paid dispatch (run 29625071833) to serve the Lee/Collier core-scope gate on the CRE
