@@ -247,3 +247,6 @@ public/dev-emails/
 # rebuild preflight and read in-workspace by refinery/cli.mts's per-leaf ingest-aware
 # trigger. Transient run state (not repo content) — never commit; regenerated every gate run.
 brains/_ingest-freshness.json*
+
+# qmd hybrid-search index — machine-local, never tracked (92MB sqlite)
+.qmd/*.sqlite

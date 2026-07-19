@@ -111,28 +111,13 @@ A gap fills from the next lane. The ONLY block is an **invented number** (no rea
 
 **Always:** SESSION_LOG entry on every push · sync `_AUDIT_AND_ROADMAP/build-queue.md` · use `node scripts/safe-push.mjs` · stage explicit paths only · never `--no-verify` or force-push `main`.
 
-**GHA rebuild targeting — LOCKED 2026-06-29. `pack_id=master --force` rebuilds all 32 brains (32 Sonnet calls). Never do this to debug one brain. Target the specific brain:**
-```
-gh workflow run daily-rebuild.yml --repo ethanrickyjrjr-wq/SWFL-Data-Gulf -f pack_id=env-swfl -f force=true
-```
-`pack_id=master` (default) = full cascade. `pack_id=<brain-id>` = **that brain only** — CORRECTED
-07/14/2026, this previously (wrongly) said "+ master too." Verified against `refinery/lib/dag.mts`'s
-`resolveBuildOrder(targetId, PACKS)`: it walks `targetId`'s own `input_brains` (its upstreams), never
-its downstream consumers — master is a CONSUMER of a leaf, not an input to it, so master is never in
-the build order for a leaf-targeted dispatch and cannot be refreshed by one. Use the targeted form
-when debugging a single brain; it will NOT propagate that brain's fresh output into master's dossier.
-
-**To get a freshly-rebuilt leaf's output INTO master's dossier**, dispatch `pack_id=master` with
-**no** `--force`. This is cheap, not the 32-Sonnet-call case above: `resolveBuildOrder("master", ...)`
-walks the full closure, but every already-fresh upstream is skipped (no force = no rebuild of fresh
-brains); master itself still re-synthesizes because of the "upstream-aware freshness trigger"
-already built into `refinery/lib/resilient-build.mts`'s `masterIsStaleVsUpstreams()` — it forces a
-master re-synthesis whenever ANY upstream's `refined_at` is newer than master's own, even though
-master's own 7-day TTL hasn't expired. In practice this run only touches master + whatever upstream
-was genuinely stale anyway. The daily cron without `--force` is fine either way — it skips TTL-fresh
-brains automatically and this same upstream-aware trigger already runs on every cron tick.
-
-**Preferred dispatch form (07/12/2026, closes `tripwire_dispatch_acceptance_ergonomics`):** `OPERATOR_APPROVED_PAID_RUN=1 node scripts/dispatch-rebuild.mjs <brain-id> --reason "<decree>"` — fires the same targeted dispatch AND auto-appends the `accepted_dispatch_runs` entry in `verification/tripwire-accepted.json` (then commit that file same session). A raw `gh workflow run` stays RED on the hourly tripwire until hand-accepted — the wrapper is the recognition channel, the bypass arm is untouched.
+**GHA rebuild targeting — LOCKED 2026-06-29.** `pack_id=master --force` rebuilds all 32 brains (32
+Sonnet calls) — never do this to debug one brain. `pack_id=<brain-id>` = **that brain only**; a leaf
+dispatch can NEVER refresh master's dossier (CORRECTED 07/14/2026, verified vs `refinery/lib/dag.mts`).
+To fold a fresh leaf into master, dispatch `pack_id=master` with **no** `--force` — cheap: fresh
+upstreams skip, master re-synthesizes via the upstream-aware trigger. Preferred form:
+`OPERATOR_APPROVED_PAID_RUN=1 node scripts/dispatch-rebuild.mjs <brain-id> --reason "<decree>"` +
+commit the auto-appended acceptance entry same session. Full mechanics + raw `gh` form: `scripts/CLAUDE.md`.
 
 ---
 
@@ -140,12 +125,9 @@ brains automatically and this same upstream-aware trigger already runs on every 
 
 **Never `git add -A`.** Always `git add <explicit paths>`.
 
-When two sessions touch overlapping files, isolate in a local worktree:
-- `node scripts/worktree.mjs new <label>` → `../bp-<label>`, branch `wt/<label>`
-- `node scripts/worktree.mjs land <label>` → rebases, prints finish commands (does not auto-push)
-- Finish: `git push origin HEAD:main` then `node scripts/worktree.mjs cleanup <label>`
-
-Worktree branches are local and self-deleting. Never `git push origin wt/*`, never a PR.
+When two sessions touch overlapping files, isolate in a local worktree via `scripts/worktree.mjs`
+(`new` / `land` / `cleanup` — usage in `scripts/CLAUDE.md`). Worktree branches are local and
+self-deleting. Never `git push origin wt/*`, never a PR.
 
 Single session / no file overlap → just work on `main`.
 
@@ -182,10 +164,7 @@ Invoke `superpowers:brainstorming` before any new feature, component, or non-tri
 ```
 node scripts/new-build.mjs <slug> "<label>"
 ```
-- **slug** = short kebab-case id, e.g. `zip-report-rebuild` (lowercase letters, numbers, hyphens only)
-- **label** = human-readable name, e.g. `"Rich /r/zip-report page"`
-
-This creates the spec stub in `docs/superpowers/specs/` and opens the `<slug>_live_verify` check in one step. Without it, there is no check to close and no spec to archive — the build is invisible to the session loop.
+This creates the spec stub in `docs/superpowers/specs/` and opens the `<slug>_live_verify` check in one step (arg conventions: `scripts/CLAUDE.md`). Without it, there is no check to close and no spec to archive — the build is invisible to the session loop.
 
 ---
 
@@ -295,6 +274,4 @@ Graph at `graphify-out/` — gitignored, regenerate with `bun run graphify:updat
 - `graphify path "<A>" "<B>"` — relationship
 - `graphify explain "<concept>"` — focused breakdown
 
-Update: `node scripts/graphify-app-nodes.mjs` (app plane, ~1s) · `bun run graphify:update` (full) · `bun run graphify:publish` (ops /graph page).
-
-**Worktree cold-start:** `graphify-out/` is gitignored, so a fresh worktree (RULE 1.5) has no graph until one is built — `graphify:update`/`graphify:publish` now auto-save a shared compressed snapshot (`bun scripts/graphify-snapshot.mjs save`, ~16:1 via `Bun.zstdCompressSync`, lives outside git in `~/.cache/graphify-brain-platform/`) and `scripts/worktree.mjs new` auto-restores from it — new worktrees start warm instead of doing a full cold re-extraction. Manual: `bun run graphify:snapshot-save` / `graphify:snapshot-restore`.
+Update / publish / snapshot commands (incl. worktree warm-start): `scripts/CLAUDE.md`.

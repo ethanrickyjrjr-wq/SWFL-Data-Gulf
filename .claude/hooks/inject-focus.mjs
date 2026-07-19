@@ -39,6 +39,9 @@ export const AREA_DIRS = [
   "lib/email/",
   "lib/assistant/",
   "lib/social/",
+  "lib/deliverable/",
+  "app/api/",
+  "scripts/",
 ];
 
 /** The Class-A canon — the cross-cutting beliefs the operator repeats. Factual

@@ -1,3 +1,19 @@
+## 2026-07-19 (Fable 5 · main) — context-bloat pass: 92MB .qmd sqlite untracked; app/api + scripts CLAUDE.mds; root CLAUDE.md −324 words
+
+Repo diagnosis first (repomix: 5,045 files / 16.9M compressed tokens; docs = 26% of tracked files;
+~80KB of session-start hook output), then the mechanical fixes: (1) `.qmd/index.sqlite` (92MB — 65%
+of the repo's tracked bytes) untracked + `.qmd/*.sqlite` gitignored; `index.yml` stays tracked
+(it's the qmd config). History still carries the old blob — no force-push, per rules. (2) NEW
+`app/api/CLAUDE.md` (two Supabase clients, guarded Claude call path via refinery/agents/anthropic.mts,
+runtime/error conventions, hard lines) + NEW `scripts/CLAUDE.md` (session-loop tools, full GHA
+dispatch mechanics, worktree + graphify commands). (3) Root CLAUDE.md: GHA/worktree/graphify/new-build
+MECHANICS moved into scripts/CLAUDE.md — every locked decision kept verbatim in root (2840→2516
+words). (4) `inject-focus.mjs` AREA_DIRS += `lib/deliverable/`, `app/api/`, `scripts/`
+(lib/deliverable's CLAUDE.md existed but was never surfaced by FOCUS); hook tests 10/10 green.
+(5) NEW check `context_bloat_session_start` (RULE 2.4) for the deferred remainder: kickoff-hook
+output cap, SESSION_LOG archive, ECC skill-surface trim. Check bankruptcy (593 open) + domain freeze
+stay operator strategy calls. NEXT: operator push.
+
 ## 2026-07-19 (Fable 5 · main) — digest generator island DELETED (07/16 kill decree executed)
 
 Operator gave the word ("take care of this" on the standing-items handoff). 12 files cut: build-digest /
