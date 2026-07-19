@@ -1,7 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { parseBrainMarkdown, toDisplayBrain } from "../../refinery/render/speaker.mts";
-import { asOfFromToken } from "../project/as-of";
 import type { BakeFact, BakeInputs, SourceRef } from "./types";
 
 /**
@@ -65,7 +64,9 @@ export async function assembleBrainBakeInputs(slug: string): Promise<BakeInputs 
     key: slug,
     place: display.title,
     county: null,
-    asOf: asOfFromToken(display.freshnessToken) ?? null,
+    // display.freshnessToken is ALREADY the MM/DD/YYYY form (speaker.mts runs
+    // asOfFromToken at display time) — parsing it again always returned null.
+    asOf: display.freshnessToken || null,
     facts,
     context: [display.scope, display.conclusion].filter(Boolean),
     sources: [...sources.values()],

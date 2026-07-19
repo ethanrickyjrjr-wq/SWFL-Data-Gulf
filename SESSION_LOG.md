@@ -1,3 +1,24 @@
+## 2026-07-19 (Fable 5 · main) — narrative-bake red loop ROOT-CAUSED + FIXED: cross-run customId collision discarded a 72-key batch
+
+Operator asked "think i messed up github" — they didn't. GitHub/repo state clean; the red was
+narrative-bake failing every run since 02:11. Root cause (evidence in run logs 29669806581 →
+29671235735): (1) batch customIds are req-0..req-N in EVERY run, and Phase 2 decided "is this my
+batch?" by customId overlap — so when the 02:11 run's 72-key batch (msgbatch_01CK) outlived its
+45-min deadline and handed off, THREE overlapping later runs each "collected" it against their own
+unrelated inputs → all 72 results discarded as invented-number lint failures ("33904 invented" on
+zip/33904's own page), hashes never stored, keys re-queued, spend re-spent. (2) Real lint gap:
+prompt shows `(source: FL DBPR boards 06+08)` but whitelist never fed f.source/place/county → model
+citing "board 06" flagged. (3) brain-inputs double-converted asOf (speaker already returns
+MM/DD/YYYY; asOfFromToken on that → always null) — brain narratives baked dateless. Fixes: batchId
+equality decides the inputs map + inputsHash-match invariant before landing any result (fail-safe
+skip, never foreign-input validation); whitelist now feeds source/place/county (invariant test:
+every numeric token in the built prompt is whitelisted); asOf passthrough fixed (moves ~30 brain
+hashes → one-time ~$0.36 rebake); job-level concurrency group serializes collectors (verified
+placement against live GH docs — job-level binds under workflow_call too). 26/26 narratives tests
+green (3 new, all red before fix) + dry-run verified. 02:11 red itself = run-cap 72/81 keys working
+as designed. Opened `brain_metric_display_formats_bait_bake_lint` (lapse rate renders "0", CBC share
+"0.18" → model's "18%" trips lint; pack/display ask-first). NOT pushed yet — operator to confirm.
+
 ## 2026-07-19 (Fable 5 · main) — DISPATCHED (decree 'fire'): Lee per-ZIP assessed value + SOH gap → serve
 
 Operator decreed 'fire' on the 07/19 Lee mirror build (082c06e4). Forced properties-lee-value rebuild

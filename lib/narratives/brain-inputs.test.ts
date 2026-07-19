@@ -24,6 +24,10 @@ describe("assembleBrainBakeInputs", () => {
     }
     expect(inputs!.context.length).toBeGreaterThan(0);
   });
+  it("carries the display layer's MM/DD/YYYY as-of date (07/19 postmortem: double asOfFromToken → always null)", async () => {
+    const inputs = await assembleBrainBakeInputs("housing-swfl");
+    expect(inputs!.asOf).toMatch(/^\d{2}\/\d{2}\/\d{4}$/);
+  });
   it("returns null for a missing brain", async () => {
     expect(await assembleBrainBakeInputs("no-such-brain")).toBeNull();
   });

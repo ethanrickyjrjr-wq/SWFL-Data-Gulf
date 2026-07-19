@@ -23,10 +23,13 @@ export function buildNumberWhitelist(inputs: BakeInputs): Set<string> {
     feed(f.display);
     feed(f.sub);
     feed(f.why);
+    feed(f.source);
   }
   for (const line of inputs.context) feed(line);
   feed(inputs.asOf);
   feed(inputs.key);
+  feed(inputs.place);
+  feed(inputs.county);
   return allow;
 }
 

@@ -166,6 +166,16 @@ async function collectBatch(
       t.skipped++; // Phase-0 hash drift — key re-bakes fresh this run
       continue;
     }
+    if (inputsHash(inputs) !== entry.inputsHash) {
+      // Invariant: a result only ever lands against the exact inputs it was
+      // prompted from. A mismatch means wrong-map or drift — skip (key
+      // re-bakes on a later run), never validate against foreign inputs.
+      t.skipped++;
+      console.error(
+        `[bake] ${entry.surface}/${entry.key} inputs hash mismatch at collection — skipped (re-bakes later)`,
+      );
+      continue;
+    }
     if (row.result.type !== "succeeded" || !row.result.message) {
       t.failed++;
       t.failures.push(`${entry.surface}/${entry.key}: batch result ${row.result.type}`);
@@ -340,6 +350,7 @@ async function main(): Promise<number> {
 
   const toPoll = [...inFlight];
   const inputsByCustomId = new Map<string, BakeInputs>();
+  let submittedBatchId: string | null = null;
   if (fit.length > 0) {
     const client = getAnthropic("narrative_bake");
     const batch = (await client.messages.batches.create({
@@ -358,6 +369,7 @@ async function main(): Promise<number> {
       batch.id,
       fit.map((w) => w.entry),
     );
+    submittedBatchId = batch.id;
     for (const w of fit) inputsByCustomId.set(w.entry.customId, w.inputs);
     toPoll.push({ batchId: batch.id, entries: fit.map((w) => w.entry) });
     console.log(
@@ -379,9 +391,14 @@ async function main(): Promise<number> {
         still.push(b);
         continue;
       }
-      // Phase-0 leftovers have no same-run inputs — re-assemble with the hash guard.
-      const hasSameRunInputs = b.entries.some((e) => inputsByCustomId.has(e.customId));
-      const inputsMap = hasSameRunInputs ? inputsByCustomId : await reassembleGuarded(b.entries);
+      // Same-run inputs apply ONLY to the batch this run submitted. Deciding by
+      // customId overlap was the 07/19 outage: customIds are req-0, req-1, …
+      // in EVERY run, so a prior run's batch always "matched" and its results
+      // were validated against this run's unrelated inputs — 72 keys' results
+      // discarded as invented-number failures. Prior-run batches re-assemble
+      // with the hash guard instead.
+      const inputsMap =
+        b.batchId === submittedBatchId ? inputsByCustomId : await reassembleGuarded(b.entries);
       const c = await collectBatch(b.batchId, b.entries, inputsMap);
       t.baked += c.baked;
       t.failed += c.failed;

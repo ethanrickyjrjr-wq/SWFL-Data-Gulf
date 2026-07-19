@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { inputsHash, stableStringify } from "./hash";
 import { shouldRunToday } from "./cadence";
 import { buildNumberWhitelist, numericTokens, validateNarrative } from "./validate";
+import { buildNarrativePrompt } from "./prompt";
 import type { BakeInputs, NarrativeSectionsData } from "./types";
 
 const INPUTS: BakeInputs = {
@@ -46,6 +47,37 @@ function good(): NarrativeSectionsData {
     ],
   };
 }
+
+describe("whitelist ⊇ prompt", () => {
+  // The lint's contract: every numeric token the model was SHOWN is legal to
+  // restate. 07/19 postmortem: source strings ("FL DBPR boards 06+08") rode in
+  // the prompt's fact lines but never fed the whitelist — the model citing
+  // "board 06" was flagged as invention.
+  const digitsEverywhere: BakeInputs = {
+    ...INPUTS,
+    place: "Page Field 33907",
+    facts: [
+      {
+        label: "Active Licensed Contractors",
+        display: "6,455",
+        sub: null,
+        why: null,
+        source: "FL DBPR boards 06+08",
+      },
+    ],
+  };
+  test("fact source strings feed the whitelist", () => {
+    const allow = buildNumberWhitelist(digitsEverywhere);
+    expect(allow.has("06")).toBe(true);
+    expect(allow.has("08")).toBe(true);
+  });
+  test("every numeric token in the built user prompt is whitelisted", () => {
+    const { user } = buildNarrativePrompt(digitsEverywhere);
+    const allow = buildNumberWhitelist(digitsEverywhere);
+    const orphans = [...new Set(numericTokens(user))].filter((t) => !allow.has(t));
+    expect(orphans).toEqual([]);
+  });
+});
 
 describe("hash", () => {
   test("stable across key order", () => {

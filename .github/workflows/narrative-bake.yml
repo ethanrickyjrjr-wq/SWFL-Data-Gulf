@@ -61,6 +61,14 @@ jobs:
   bake:
     # workflow_run fires on failure/cancel too — only bake on a green rebuild.
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # ONE collector at a time (07/19 outage): three overlapping runs all
+    # collected the same pending batch and discarded its 72 results. Job-level
+    # (not workflow-level) so it also binds when nightly-chain.yml calls this
+    # via workflow_call. Newer queued runs replace the pending one — the newest
+    # run does the same work (collect all pending, bake all changed keys).
+    concurrency:
+      group: narrative-bake
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     # 90: the job now polls the Message Batch to completion (~1h typical worst
     # case) instead of making per-key synchronous calls. In-script deadline is
