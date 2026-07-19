@@ -184,6 +184,12 @@
       "pack": "master",
       "accepted_on": "07/18/2026",
       "note": "Operator decree 07/19/2026 'take care of these': propagate fresh home-values/active-rentals/env leaves + fgcu-reri removal into the dossier (plain cascade, no force) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29670378775",
+      "pack": "master",
+      "accepted_on": "07/18/2026",
+      "note": "Operator decree 07/19/2026 'take care of these': master propagation retry after the 33945 zip-scope fix landed (3ce9c915) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }

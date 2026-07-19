@@ -9099,6 +9099,7 @@
     "sales_velocity_zscore": "properties_lee_sales_velocity_zscore",
     "soh_gap_median_pct": "properties_lee_soh_gap_median_pct",
     "lee_sold_median_homes_only": "properties_lee_sold_median_homes_only",
+    "collier_sold_median_homes_only": "properties_collier_sold_median_homes_only",
     "total_parcels": "properties_lee_total_parcels",
     "fdor_commercial_parcel_count": "properties_lee_fdor_commercial_parcel_count",
     "collier_homes_sold_zscore": "properties_collier_homes_sold_zscore",

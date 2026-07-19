@@ -1,3 +1,13 @@
+## 2026-07-19 (Fable 5 · main) — Master hold #2: slug_index missing the Collier sold-median twin — one-line vocab fix
+
+Master retry after the 33945 fix held AGAIN, new cause: orphan-concept on
+`collier_sold_median_homes_only` in master's rollup. The vocabulary CONCEPT exists (raw_slugs
+correct — which is why check-vocab-coverage passes) but the `slug_index` block never got the Collier
+row its Lee twin has (the known slug-index-staleness landmine; runtime normalize consults slug_index
+only). Added `collier_sold_median_homes_only → properties_collier_sold_median_homes_only` at line
+9102, mirroring lee. vocab tests 49/49 + coverage green. (Same run: active-rentals blip = transient,
+served its fresh last-good — no action.) Re-dispatching master.
+
 ## 2026-07-19 (Fable 5 · main) — Dispatch round-trip: leaves served (env 3.36@07/09 CONFIRMED in brain bytes); master held on a LeePA zip-scope drift — fixed here
 
 home-values ✓ · active-rentals ✓ (first run cancelled by the daily-rebuild concurrency group when two
