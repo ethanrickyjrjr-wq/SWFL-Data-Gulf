@@ -66,9 +66,12 @@ Executed same day:
   re-build). A legacy row now throws a loud per-row error until re-linked to a saved Email Lab
   design. `lib/email/scoped-content.ts` + `lib/email/recurring-report.ts` DELETED
   (`resolveReportZip` relocated into `lib/deliverable/schedule-recipe.ts`, its one consumer).
-  The digest GENERATOR island (`build-digest` / `fetch-digest-data` / `hero-tokens` + the
-  disabled `daily-email-digest.yml`) still exists — dead by the 07/16 decree; permanent
-  deletion is the operator's call, and it's a one-commit job when given.
+- 🟢 The digest GENERATOR island is **DELETED** (07/19, on the operator's word): `build-digest` /
+  `fetch-digest-data` / `hero-tokens` / `freshness-preflight` / `DigestEmail.tsx` / `log-io`
+  (+ all their tests) + the disabled `daily-email-digest.yml`. Deliberately KEPT:
+  `scripts/email/types.ts` (theme root — `SWFL_THEME`/`BrandTheme` feed live templates, outreach,
+  and the social rasterizer) and `setup-digest-segment.mts` (provisions the Resend segment the
+  broadcast route still uses as its default audience).
 
 Staged (open checks — the map is wrong the day these close if it isn't updated):
 - 🟡 `email_prospect_seed_block_canvas` — `lib/prospects/open-project.ts:29` still SEEDS new
@@ -284,7 +287,7 @@ silently fall back on the others. **Any typography or block-style change touches
 - **Schedulers** — `email-scheduler.yml` (multi-tenant, */15 cron) is LIVE but all
   `email_schedules` rows are paused as of 07/16. The worker (`run-schedules.mts`) is
   **EmailDoc-only** since the 07/19 rip — frozen sequence one-shots + block-canvas
-  occurrences; legacy rows error loudly. `daily-email-digest.yml` is DISABLED — §9.
+  occurrences; legacy rows error loudly. `daily-email-digest.yml` is DELETED (07/19) — §9.
 - **Sender** — verified `hello@swfldatagulf.com` via Resend (`RESEND_API_KEY` in `.env.local`
   + gh secrets). Resend has NO native A/B; DMARC gap noted 06/27.
 - **CAN-SPAM = 4 real requirements** (corrected 07/02 — it was wrongly "3" in older docs):
@@ -313,9 +316,10 @@ Every entry is a class of bug, not just an incident. Check your change against e
   blanks only; prefer lake-carried fields over vendor re-fetch; editor affordances must never
   render on output paths.*
 - **07/16 — digest shipped crime/courts news ("WE AREN'T A NEWS EMAILER ABOUT SWINDLERS").**
-  Fix: `NEWS_EXCLUDE` drop-gate BEFORE topic checks in `scripts/email/fetch-digest-data.mts`;
-  digest itself killed (§9). CLASS: *curation must DROP, not rank-to-tail; a $ figure can't
-  launder a crime story.*
+  Fix (historical): `NEWS_EXCLUDE` drop-gate BEFORE topic checks in `fetch-digest-data.mts`;
+  digest itself killed (§9). The generator — and with it the gate — was deleted 07/19, so any
+  future City Voices email consumer must REBUILD the drop-gate before its first send.
+  CLASS: *curation must DROP, not rank-to-tail; a $ figure can't launder a crime story.*
 - **07/13 — invention is CLAIM-shaped.** Seven workers built seven deliverables; four shipped
   falsehoods with ZERO invented digits (inverted comparison, phantom DOM interval, fabricated
   ordering, "widening" from one level, wrong count, wrong city as subject). Fix: the claim gate
@@ -362,8 +366,10 @@ provider.
 
 ## 9. KILL LIST — dead by operator decree; never re-propose, never re-enable
 
-- **Daily digest** — `daily-email-digest.yml` disabled 07/16 + schedules paused. Re-enable
-  ONLY on explicit operator say-so with content quality signed off.
+- **Daily digest** — killed 07/16 (workflow disabled + schedules paused); generator island
+  permanently DELETED 07/19 on the operator's word. Nothing is left to re-enable — a revival
+  is a from-scratch build, ONLY on explicit operator say-so, and must rebuild the
+  `NEWS_EXCLUDE` crime/courts drop-gate (§7, 07/16 entry) before any send.
 - **Logo.dev / any paid logo vendor** — custom icons = keyless favicon → globe fallback.
 - **`labDestination` / `projects[0]` auto-pick** — deleted; `signedInLabArrival` replaced it.
 - **Prompt-regex recipe gating** (`isNewListingRecipePrompt`) — deleted; keys are identity.

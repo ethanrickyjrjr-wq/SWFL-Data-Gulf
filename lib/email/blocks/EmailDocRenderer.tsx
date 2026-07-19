@@ -1,6 +1,6 @@
 // lib/email/blocks/EmailDocRenderer.tsx — PURE (no "use client"). Wraps the
 // block list in Html+Body+Container. Used by the render API route via
-// render(EmailDocEmail({ doc })) — same proven pattern as DigestEmail.tsx.
+// render(EmailDocEmail({ doc })).
 import { Html, Head, Body, Container, Preview } from "@react-email/components";
 import { BlockRenderer } from "./BlockRenderer";
 import type { EmailDoc } from "../doc/types";

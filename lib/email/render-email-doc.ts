@@ -11,7 +11,7 @@
 // (Cerberus hybrid columns + Outlook ghost tables). Free tier (no `layout`)
 // stays on the exact `render(EmailDocEmail(...))` call — byte-identical to
 // the pre-extraction route line. Component called as a function (no JSX in
-// server modules) — same proven pattern as scripts/email/build-digest.mts.
+// server modules).
 
 import { render } from "@react-email/render";
 import { EmailDocEmail } from "./blocks/EmailDocRenderer";

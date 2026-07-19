@@ -1,3 +1,19 @@
+## 2026-07-19 (Fable 5 · main) — digest generator island DELETED (07/16 kill decree executed)
+
+Operator gave the word ("take care of this" on the standing-items handoff). 12 files cut: build-digest /
+fetch-digest-data / hero-tokens / freshness-preflight / DigestEmail.tsx / log-io (+ all their tests) +
+disabled daily-email-digest.yml. Island verified import-isolated before the cut (only in-island imports).
+Deliberately KEPT: scripts/email/types.ts (SWFL_THEME/BrandTheme feed live templates, outreach, social
+rasterizer) and setup-digest-segment.mts (provisions the Resend segment the broadcast route defaults to).
+Two dangling "same pattern as" comment pointers fixed (render-email-doc.ts, EmailDocRenderer.tsx); email
+map (docs/standards/emails.md) stamped same session per lib/email/CLAUDE.md — incl. §9 kill-list note
+that the NEWS_EXCLUDE crime-drop gate went down with the island, so any revival must rebuild it first.
+Verify: bun test scripts/email lib/email — 1671 pass / 0 fail. Checks CLOSED (moot): digest_no_quality_gate,
+cta_report_link_mismatch, digest_gate_masterdecision_null_sends_stale_master, email_digest_phase2_golive.
+Still open, untouched by design: footer_dead_digest_cta (site footer still runs the killed signup —
+r-brain-page-lift's defect), grounded_report_out_of_email (relocation, the other standing item — not
+touched this pass). NEXT: operator push.
+
 ## 2026-07-19 (Fable 5 · main) — cre-swfl citations de-jargoned (the third bait-class fix)
 
 Operator go ("take care of it" on `pack_citation_jargon_cre_corridor`). All 5 cre-swfl.mts citation
