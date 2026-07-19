@@ -153,12 +153,12 @@ async function fetchMode(domainsPath: string): Promise<void> {
 
   await writeFile(indexPath, JSON.stringify(index, null, 2) + "\n");
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  await mkdir("outreach-runs", { recursive: true });
+  await mkdir(join("runs", "outreach-runs"), { recursive: true });
   await writeFile(
-    join("outreach-runs", `brand-pilot-${stamp}.json`),
+    join("runs", "outreach-runs", `brand-pilot-${stamp}.json`),
     JSON.stringify(report, null, 2),
   );
-  console.log(`\nReport: outreach-runs/brand-pilot-${stamp}.json`);
+  console.log(`\nReport: runs/outreach-runs/brand-pilot-${stamp}.json`);
   console.log(
     'NEXT: crawl4ai-verify the top-20 send targets before any email uses an "api" fixture at trust.',
   );

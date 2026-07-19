@@ -217,11 +217,9 @@ docs/steadyapi-research/
 # designlang MCP tool — local design-audit scratch output (grade cards, tokens)
 design-extract-output/
 
-# Outreach campaign dry-run artifacts (rendered previews + run reports)
-outreach-runs/
-
-# Weekly-read run artifacts (per-ZIP issue previews + run reports)
-weekly-read-runs/
+# ALL run outputs (campaign renders, outreach previews, insiders ledgers,
+# weekly-read issues) live under runs/ — local evidence, never committed.
+runs/
 
 # cloud-secrets: ONLY the encrypted vault.enc is committed. The passphrase and any
 # decrypted/plaintext key material must NEVER be committed.

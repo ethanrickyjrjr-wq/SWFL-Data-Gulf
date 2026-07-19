@@ -152,7 +152,7 @@ async function main(): Promise<void> {
 
   // ── Preview + report FIRST — unconditionally, before any live branch ──────
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const outDir = join("insiders-runs", stamp);
+  const outDir = join("runs", "insiders-runs", stamp);
   await mkdir(outDir, { recursive: true });
   const ledger = ledgerReport(authored.ledger, capUsd);
   const report = {

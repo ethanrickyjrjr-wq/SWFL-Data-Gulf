@@ -170,9 +170,9 @@ async function main(): Promise<void> {
     });
   }
 
-  // Enroll report — ALWAYS written (outreach-runs/ is gitignored).
+  // Enroll report — ALWAYS written (runs/ is gitignored).
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const outDir = join("outreach-runs", stamp);
+  const outDir = join("runs", "outreach-runs", stamp);
   await mkdir(outDir, { recursive: true });
   const summary = {
     total: resolved.length,

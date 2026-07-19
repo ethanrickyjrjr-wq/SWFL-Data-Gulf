@@ -50,6 +50,32 @@ session ships the same bug again.
    outreach ≠ cold email. Don't merge them. §6.
 8. **Builds are free; SEND is the paywall** (watermark only, no Stripe on creation).
 
+### THE CUT — 07/19/2026, operator decree: ONE email system (EmailDoc/authorDoc)
+
+Executed same day:
+- 🟢 `/api/email-lab/render` is **EmailDoc-only** — the legacy `{template, tokens}` branch is
+  DELETED (its last poster, `components/email-lab/parked/classic-templates.ts`, deleted with it).
+- 🟢 Blast route sends **block-canvas only** — the grounded token-template fallback is gone;
+  a docless deliverable gets 422 `legacy_deliverable_rebuild_in_lab`. Email SENDING now has
+  exactly one render root: `renderEmailDocHtml`.
+- 🟢 All run outputs live under gitignored `runs/` (campaign-out, insiders-runs, outreach-runs,
+  weekly-read-runs — writers + weekly-read.yml repointed).
+
+Staged (open checks — the map is wrong the day these close if it isn't updated):
+- 🟡 `email_scheduler_legacy_lanes_rip` — digest/grounded/recurring lanes still woven through
+  `scripts/email/run-schedules.mts` (all schedule rows paused; the EmailDoc occurrence +
+  sequence lanes are the keepers).
+- 🟡 `email_prospect_seed_block_canvas` — `lib/prospects/open-project.ts:29` still SEEDS new
+  legacy `template:"email"` rows from the prospect-claim funnel.
+- 🟡 `grounded_report_out_of_email` — `grounded-report` survives ONLY as the report/print
+  renderer behind `/p/[id]` + the print route (narrative templates); it belongs on the report
+  side, not in `lib/email`.
+- 🟡 `web_chart_lib_consolidation` — recharts (6 files) + echarts (2 files) are WEB chart
+  surfaces (zero imports inside lib/email); port to the bklit/visx kit, then drop both deps.
+- Note: `/api/templates/render` + `lib/templates/render-html-template.ts` are the **viz-template
+  showcase** (a WEBSITE surface, `/showcase` previews) — not part of the email system, not in
+  this cut. `lib/email/templates/charts` stays: it feeds the LIVE social/og rasterizer.
+
 ---
 
 ## 2. THE PIPELINE — how an email actually gets built
@@ -225,10 +251,10 @@ silently fall back on the others. **Any typography or block-style change touches
 
 1. **Free-tier email** — `lib/email/blocks/EmailDocRenderer.tsx` (`@react-email`). The only
    path that injects the web-font `<link>` in `<Head>`.
-2. **Grid-tier email** — `lib/email/blocks/compile-grid.ts` (`compileGrid`; used whenever ANY
-   block has a `layout`). As of the 06/29 audit it emitted an EMPTY `<Head>` — web fonts
-   silently fall back. Verify current state before typography work. Inline block CSS carries
-   (reuses `BlockRenderer`).
+2. **Grid-tier email** — `lib/email/compile-grid.ts` (`compileGrid`; used whenever ANY block
+   has a `layout`). The 06/29 empty-`<Head>` font gap is FIXED (verified 07/19): both email
+   engines build their head from the SHARED `lib/email/blocks/email-head.ts`
+   (`emailHeadChildren` + `msoFontPin`) — keep it that way; never hand-build a `<Head>`.
 3. **PDF** — `lib/pdf/email-doc-pdf.tsx` (`@react-pdf/renderer`, separate `PdfBlock` switch,
    built-in fonts only unless `Font.register` from a pinned CDN URL — `public/` is not in the
    Vercel lambda fs; unresolved variants THROW).
@@ -241,7 +267,8 @@ silently fall back on the others. **Any typography or block-style change touches
 
 - **One-off blast** — `ContactPickerModal` → `POST /api/deliverables/[id]/blast`, recipients
   from `contact_segments` (`lib/email/segments/`). Attribute/engagement conditions are
-  paid-only, enforced server-side in every `/api/segments*` route.
+  paid-only, enforced server-side in every `/api/segments*` route. **Block-canvas only**
+  (07/19 cut): a deliverable without an EmailDoc gets 422 — rebuild it in the lab.
 - **Recurring digest broadcast** — `email_audiences` (tag → Resend segment id cache,
   `lib/email/audience-sync.ts`). Different table, different send path from blast.
 - **Outreach** — `lib/email/outreach/` (campaign/send/recipients).

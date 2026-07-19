@@ -170,7 +170,7 @@ async function main(): Promise<void> {
   );
 
   const stamp = now.toISOString().replace(/[:.]/g, "-");
-  const outDir = join("outreach-runs", stamp);
+  const outDir = join("runs", "outreach-runs", stamp);
   await mkdir(outDir, { recursive: true });
 
   const rows: RunRow[] = [];

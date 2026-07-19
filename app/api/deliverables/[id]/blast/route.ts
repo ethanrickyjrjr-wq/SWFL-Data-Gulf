@@ -1,10 +1,10 @@
-import type { EmailDeliverableRow } from "@/lib/deliverable/email-deliverable";
 // POST /api/deliverables/[id]/blast — send a frozen email deliverable to selected
 // contacts via Resend.
 //
 // SEND is the paywall (build is free): this route enforces the per-user email
 // quota (checkUsageLimit) and records usage (recordEmailSent). It renders the
-// REAL deliverable HTML (renderGroundedReport — the same render /p/[id] shows),
+// REAL deliverable HTML (renderEmailDocHtml — the ONE EmailDoc→HTML root; only
+// block-canvas deliverables send, legacy rows 422),
 // not a bare link, and sends from the platform's VERIFIED domain with the agent's
 // name + reply-to (sending From: an unverified agent address would fail DKIM and
 // land in spam). Each recipient gets a one-click unsubscribe (List-Unsubscribe
@@ -36,8 +36,6 @@ import { getSuppressedContacts } from "@/lib/email/suppression";
 import { resolvePostalAddress } from "@/lib/email/postal-address";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import { bindUnsubscribeHref } from "@/lib/email/bind-unsubscribe";
-import { buildEmailDeliverableModel } from "@/lib/deliverable/email-deliverable";
-import { renderGroundedReport } from "@/lib/email/grounded-report";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { renderEmailDocToBuffer, pdfFilename } from "@/lib/pdf";
@@ -295,21 +293,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       pdfBuffer = await renderEmailDocToBuffer(sendDoc);
     }
   } else {
-    // jsonb read: the typed row carries items_snapshot/narrative as Json; the builder
-    // reads the concrete EmailDeliverableRow shape (same columns, concrete jsonb).
-    const model = buildEmailDeliverableModel(deliverable as unknown as EmailDeliverableRow, {
-      siteOrigin: BASE_URL,
-    });
-    // model is null only when the deliverable is genuinely empty (zero metrics,
-    // zero narrative lines) — refuse the send rather than shipping a contentless
-    // "Your market report is ready" placeholder to real contacts.
-    if (!model) {
-      return NextResponse.json({ error: "empty_deliverable" }, { status: 422 });
-    }
-    const legacyHtml = await renderGroundedReport(model, { skin: "email" });
-    // Split-send is block-canvas only (plan's own scope note) — legacy template
-    // always renders exactly one HTML, regardless of variant_test.
-    htmlByVariant = [legacyHtml];
+    // EmailDoc is the ONE email system (operator decree 07/19/2026). A deliverable
+    // without a block-canvas doc has no send path — rebuild it in the Email Lab.
+    // The grounded token-template renderer stays a REPORT/print concern only
+    // (/p/[id] + print route); it never renders a send again.
+    return NextResponse.json({ error: "legacy_deliverable_rebuild_in_lab" }, { status: 422 });
   }
   const baseHtml = htmlByVariant[0]; // keep existing single-HTML call sites (url-lint) working
 

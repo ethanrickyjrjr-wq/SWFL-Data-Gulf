@@ -282,7 +282,7 @@ async function main(): Promise<void> {
   const subscribers = (data ?? []) as DueRow[];
 
   const stamp = now.toISOString().replace(/[:.]/g, "-");
-  const outDir = join("weekly-read-runs", stamp);
+  const outDir = join("runs", "weekly-read-runs", stamp);
   await mkdir(outDir, { recursive: true });
 
   const rows: RunRow[] = [];

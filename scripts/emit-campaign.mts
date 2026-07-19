@@ -5,7 +5,7 @@
 // (inside the test files), and NOBODY EVER KEPT THE OUTPUT. This script keeps the output.
 //
 // Offline. No API call, no AI, no key. Same builders, same data, same bytes.
-//   bun scripts/emit-campaign.mts            -> campaign-out/*.html + index.html
+//   bun scripts/emit-campaign.mts            -> runs/campaign-out/*.html + index.html
 //   bun scripts/emit-campaign.mts --out DIR
 
 import { mkdir, writeFile } from "node:fs/promises";
@@ -59,7 +59,7 @@ async function build(key: RecipeKey): Promise<EmailDoc | null> {
 }
 
 const outIdx = process.argv.indexOf("--out");
-const OUT = outIdx > -1 ? process.argv[outIdx + 1]! : "campaign-out";
+const OUT = outIdx > -1 ? process.argv[outIdx + 1]! : "runs/campaign-out";
 
 await mkdir(OUT, { recursive: true });
 

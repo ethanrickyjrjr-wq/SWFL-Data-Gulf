@@ -214,7 +214,7 @@ async function main(): Promise<void> {
 
   // Write the tracking run-report + per-recipient previews.
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const outDir = join("outreach-runs", stamp);
+  const outDir = join("runs", "outreach-runs", stamp);
   await mkdir(outDir, { recursive: true });
   const reportRows = messages.map(({ html, ...rest }: ComposedMessage) => ({
     ...rest,

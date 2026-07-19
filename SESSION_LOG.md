@@ -1,3 +1,23 @@
+## 2026-07-19 (Fable 5 · main) — THE CUT: one email system (EmailDoc/authorDoc) — legacy render paths deleted from lab + blast; runs/ sweep; 4 staged-retirement checks
+
+Operator decree ("do it all — get us to the one email system… there are no consumers"). Audit
+first (importer trace, not memory), then cut: (1) /api/email-lab/render is EmailDoc-ONLY — the
+legacy {template,tokens} branch deleted; its last poster components/email-lab/parked/
+classic-templates.ts (zero importers) deleted. (2) Blast route sends block-canvas only —
+grounded token-template fallback removed (docless → 422 legacy_deliverable_rebuild_in_lab);
+email sending now has exactly ONE render root (renderEmailDocHtml). (3) Run-output sprawl swept:
+campaign-out/insiders-runs (untracked from repo)/outreach-runs/weekly-read-runs all →
+gitignored runs/, 8 writers + weekly-read.yml + FABLE5.md repointed. NOT killable today, each
+with an open check: run-schedules.mts legacy digest/grounded/recurring lanes
+(email_scheduler_legacy_lanes_rip), prospect-claim funnel still SEEDING template:"email" rows
+(email_prospect_seed_block_canvas — lib/prospects/open-project.ts:29), grounded-report as the
+/p+print report renderer (grounded_report_out_of_email), and the web chart-lib triple —
+recharts 6 files + echarts 2, zero email imports (web_chart_lib_consolidation). Also verified
+FIXED: the 06/29 grid-tier <Head> font gap (both engines share blocks/email-head.ts). Map
+(docs/standards/emails.md) updated with THE CUT status block. Gates: bun test lib/email +
+lib/deliverable + app/api/deliverables + app/api/email-lab 2,701/0 · bunx next build ✓.
+NEXT: operator push; then the scheduler rip closes email_scheduler_legacy_lanes_rip.
+
 ## 2026-07-19 (Fable 5 · main) — DOCS: docs/standards/emails.md — the ONE email map, wired so email workers load it every time
 
 Operator order: one orientation .md per major area, emails first (after 07/19's "all emails

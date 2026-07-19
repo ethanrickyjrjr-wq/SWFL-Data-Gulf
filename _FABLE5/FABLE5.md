@@ -30,7 +30,7 @@ Plan: `docs/superpowers/plans/2026-07-10-insiders-edition-plan.md`.
 
 Draft: `bun scripts/email/insiders-run.mts --month YYYY-MM` (DRY_RUN default; paid
 authoring only with `INSIDERS_LIVE_AUTHOR=1`, ≤ $20/issue ledger). Preview + spend
-ledger land in `insiders-runs/<stamp>/`. Sends are operator commands only
+ledger land in `runs/insiders-runs/<stamp>/`. Sends are operator commands only
 (`INSIDERS_APPROVED=1` + postal + From). After every send: retro from
 `retro/TEMPLATE.md`, promotions → checks SAME session.
 
