@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v20 | Token: SWFL-7421-v20-20260718 -->
+<!-- FRESHNESS: v21 | Token: SWFL-7421-v21-20260719 -->
 ---
 brain_id: corridor-pulse-swfl
-version: 20
-refined_at: 2026-07-18T01:23:04Z
-freshness_token: SWFL-7421-v20-20260718
+version: 21
+refined_at: 2026-07-19T22:23:42Z
+freshness_token: SWFL-7421-v21-20260719
 ttl_seconds: 604800
 pack_hash: 9b745295cada
 context_type: user_saved_reference
@@ -30,173 +30,173 @@ SCOPE: SWFL (Lee + Collier) weekly corridor current-events pulse — dated comme
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                | verified   | expires
-s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-07-18 | 2026-07-25
+s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-07-19 | 2026-07-26
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corridor-pulse:summary","fact":"Live SWFL corridor current-events signals","value":"89 non-expired signals across 25 corridors (Bonita Trail: 5, Cape Coral Pkwy: 8, Ben Hill Griffin: 7, Bonita Beach: 3, Coral Pointe (Cape Coral): 4, Estero / Bonita line: 3, Daniels: 3, Six Mile Cypress: 5, Summerlin: 3, Fort Myers Beach: 4, Collier Blvd: 3, Downtown Naples: 7, Airport-Pulling: 5, Pine Ridge: 1, East Trail (Naples): 4, Vanderbilt: 4, Midpoint Bridge: 1, Cleveland Ave: 4, Gulf Coast Town Center: 2, East Naples: 2, North Naples (Immokalee Rd): 3, Colonial East: 2, Joel Blvd: 2, Pine Island Rd: 2, Lee Blvd: 2).","src":"s01","date":"2026-07-18"},
-  {"id":"f002","topic":"corridor-pulse:development","fact":"Bonita Trail — development","value":"Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city's portion of a regional rail-to-trail project. (source: https://www.gulfshorebusiness.com/lee/bonita-springs-voters-to-decide-on-rail-trail-bonds-soon/article_55b63b61-9f9f-4c67-8d2e-6663c254584b.html)","src":"s01","date":"2026-07-18"},
-  {"id":"f003","topic":"corridor-pulse:development","fact":"Cape Coral Pkwy — development","value":"Cape Coral Parkway is set to undergo expansion from four lanes to six lanes (source: https://www.gulfshorebusiness.com/gb_daily/cape-coral-businesses-concerned-with-parking-loss-in-road-expansion/)","src":"s01","date":"2026-07-18"},
-  {"id":"f004","topic":"corridor-pulse:development","fact":"Ben Hill Griffin — development","value":"My Shower Door broke ground April 2 on a 14,000-square-foot national headquarters, a $4 million construction project at 17000 Cam Court, off Alico Road (source: https://www.gulfshorebusiness.com/retail/my-shower-door-invests-4m-in-new-fort-myers-headquarters/article_4eef396d-d496-42a1-9c41-866d2a130c6b.html)","src":"s01","date":"2026-07-18"},
-  {"id":"f005","topic":"corridor-pulse:development","fact":"Ben Hill Griffin — development","value":"Village of Estero Corkscrew Road Shared Use Path Project constructs a 10-foot-wide asphalt pathway on the north side from Ben Hill Griffin Parkway to Bella Terra Boulevard with estimated completion Fall 2026 and project cost approximately $23 million (source: https://www.leegov.com/dot/News%20Documents/Roadwatch%20January%208,%202026%20to%20January%2014,%202026.pdf)","src":"s01","date":"2026-07-18"},
-  {"id":"f006","topic":"corridor-pulse:development","fact":"Ben Hill Griffin — development","value":"Ben Hill Griffin Parkway traffic signal upgrades, asphalt mill & overlay and striping with estimated completion mid-2028 and project cost approximately $39.7 million (source: https://www.leegov.com/dot/News%20Documents/Roadwatch%20August%2021,%202025%20to%20August%2027,%202025.pdf)","src":"s01","date":"2026-07-18"},
-  {"id":"f007","topic":"corridor-pulse:development","fact":"Bonita Beach — development","value":"The Florida Department of Transportation is looking for ways to address congestion issues and the projected increase in traffic at the intersection of Bonita Beach Road and U.S. 41. (source: https://www.gulfshorebusiness.com/fdot-studies-improvements-to-bonita-beach-road-and-u-s-41-intersection/)","src":"s01","date":"2026-07-18"},
-  {"id":"f008","topic":"corridor-pulse:development","fact":"Bonita Trail — development","value":"Imperial 41 broke ground Dec. 11 as a mixed-use development that will add 120 apartments and other uses in downtown Bonita. (source: https://www.gulfshorebusiness.com/gb-daily/imperial-41-breaks-ground-on-downtown-bonita-project/article_318503a6-85a2-4540-8de0-e3a82c1d0bdc.html)","src":"s01","date":"2026-07-18"},
-  {"id":"f009","topic":"corridor-pulse:development","fact":"Bonita Trail — development","value":"A 4.05-acre parcel in Bonita Springs has been sold for construction of the Bonita Auto Vault, a luxury car garage storage facility. (source: https://www.businessobserverfl.com/news/2025/aug/31/developer-car-condos-bonita-springs/)","src":"s01","date":"2026-07-18"}
+  {"id":"f001","topic":"corridor-pulse:summary","fact":"Live SWFL corridor current-events signals","value":"35 non-expired signals across 21 corridors (Coral Pointe (Cape Coral): 2, Cape Coral Pkwy: 3, Colonial East: 2, Joel Blvd: 2, Ben Hill Griffin: 2, Estero / Bonita line: 1, Six Mile Cypress: 2, Airport-Pulling: 1, Collier Blvd: 1, Fort Myers Beach: 1, Pine Island Rd: 2, Cleveland Ave: 3, North Naples (Immokalee Rd): 2, Daniels: 1, Gulf Coast Town Center: 1, Summerlin: 2, Lee Blvd: 2, Bonita Beach: 1, East Naples: 1, Bonita Trail: 1, East Trail (Naples): 2).","src":"s01","date":"2026-07-19"},
+  {"id":"f002","topic":"corridor-pulse:structural","fact":"Coral Pointe (Cape Coral) — structural","value":"There were 5,593 listings in Cape Coral as of the end of February, with median list price of $358,500. (source: https://www.businessobserverfl.com/news/2025/mar/27/cape-coral-buyers-market/)","src":"s01","date":"2026-07-19"},
+  {"id":"f003","topic":"corridor-pulse:structural","fact":"Coral Pointe (Cape Coral) — structural","value":"Cape Coral's business incentive grants are no longer available to gas stations, car washes, storage locker facilities, home-based businesses. (source: https://www.gulfshorebusiness.com/lee/cape-coral-changes-business-incentive-grants-eligibility/article_7f22f4bd-1f56-4df0-835d-27ec73aaef57.html)","src":"s01","date":"2026-07-19"},
+  {"id":"f004","topic":"corridor-pulse:structural","fact":"Cape Coral Pkwy — structural","value":"Cape Coral's Community Redevelopment Agency increased its total net position by 19% during fiscal year 25 (source: https://www.gulfshorebusiness.com/gb-daily/cape-coral-cra-net-position-jumps-19-in-fy25/article_ed6b8612-1ac0-4eb7-9523-4f42491f9c1b.html)","src":"s01","date":"2026-07-19"},
+  {"id":"f005","topic":"corridor-pulse:structural","fact":"Colonial East — structural","value":"Lee Health system will close Lee Memorial Hospital when they open the planned acute care hospital on Challenger (source: https://www.gulfshorebusiness.com/lee-health-posts-conversion-mission-agreement-for-public-review-comment/)","src":"s01","date":"2026-07-19"},
+  {"id":"f006","topic":"corridor-pulse:structural","fact":"Joel Blvd — structural","value":"Lee Board of County Commissioners voted to adopt alignment study to expand Sunshine Boulevard to four lanes from State Road 82 to 23rd Street SW in Lehigh Acres (source: https://www.gulfshorebusiness.com/gb_daily/lee-commissioners-approve-transportation-projects-for-lehigh-acres/)","src":"s01","date":"2026-07-19"},
+  {"id":"f007","topic":"corridor-pulse:structural","fact":"Ben Hill Griffin — structural","value":"The ITEC Business Park east of Ben Hill Griffin Parkway has 2.4 million square feet of space; Gulf Landings Logistic Center is just north of Alico Road. (source: https://www.gulfshorebusiness.com/construction-development/different-avenues-the-changing-face-of-alico-road/article_0d777eb5-c261-5da2-a342-4c98903ebacd.html)","src":"s01","date":"2026-07-19"},
+  {"id":"f008","topic":"corridor-pulse:structural","fact":"Estero / Bonita line — structural","value":"Estero's village manager Gibbs expects to start seeing redevelopment of some older developments including Coconut Point mall. (source: https://www.gulfshorebusiness.com/inside-the-magazine/estero-builds-its-future-with-boca-inspired-design-rules/article_2df0eb15-5509-51a1-a2df-7a9c7d078a1b.html)","src":"s01","date":"2026-07-19"},
+  {"id":"f009","topic":"corridor-pulse:structural","fact":"Six Mile Cypress — structural","value":"Manhattan Construction, founded in 1896 by L.H. Rooney and still family-operated, is moving its local headquarters from Naples to a 3.4-acre property just off Daniels Parkway near Six Mile Cypress in Fort Myers. (source: https://www.businessobserverfl.com/news/2026/apr/10/construction-giant-moving-hq-fort-myers/)","src":"s01","date":"2026-07-19"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "corridor-pulse-swfl",
-  "version": 20,
-  "refined_at": "2026-07-18T01:23:04Z",
-  "expires": "2026-07-25T01:23:04Z",
+  "version": 21,
+  "refined_at": "2026-07-19T22:23:42Z",
+  "expires": "2026-07-26T22:23:42Z",
   "ttl_seconds": 604800,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL corridor pulse as of 2026-07-18: 89 live current-events signals across 25 corridors — Bonita Trail (5), Cape Coral Pkwy (8), Ben Hill Griffin (7), Bonita Beach (3), Coral Pointe (Cape Coral) (4), Estero / Bonita line (3), Daniels (3), Six Mile Cypress (5), Summerlin (3), Fort Myers Beach (4), Collier Blvd (3), Downtown Naples (7), Airport-Pulling (5), Pine Ridge (1), East Trail (Naples) (4), Vanderbilt (4), Midpoint Bridge (1), Cleveland Ave (4), Gulf Coast Town Center (2), East Naples (2), North Naples (Immokalee Rd) (3), Colonial East (2), Joel Blvd (2), Pine Island Rd (2), Lee Blvd (2). Most current: Bonita Trail — Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city's portion of a regional rail-to-trail project. These are current cited facts only; the corridor read and any direction call live downstream in cre-swfl and master.",
+  "conclusion": "SWFL corridor pulse as of 2026-07-19: 35 live current-events signals across 21 corridors — Coral Pointe (Cape Coral) (2), Cape Coral Pkwy (3), Colonial East (2), Joel Blvd (2), Ben Hill Griffin (2), Estero / Bonita line (1), Six Mile Cypress (2), Airport-Pulling (1), Collier Blvd (1), Fort Myers Beach (1), Pine Island Rd (2), Cleveland Ave (3), North Naples (Immokalee Rd) (2), Daniels (1), Gulf Coast Town Center (1), Summerlin (2), Lee Blvd (2), Bonita Beach (1), East Naples (1), Bonita Trail (1), East Trail (Naples) (2). Most current: Coral Pointe (Cape Coral) — There were 5,593 listings in Cape Coral as of the end of February, with median list price of $358,500. These are current cited facts only; the corridor read and any direction call live downstream in cre-swfl and master.",
   "key_metrics": [
     {
-      "metric": "signal_development_1",
-      "value": "Bonita Trail: Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city's portion of a regional rail-to-trail project.",
+      "metric": "signal_structural_1",
+      "value": "Coral Pointe (Cape Coral): There were 5,593 listings in Cape Coral as of the end of February, with median list price of $358,500.",
       "direction": "stable",
-      "label": "Bonita Trail — development",
+      "label": "Coral Pointe (Cape Coral) — structural",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/lee/bonita-springs-voters-to-decide-on-rail-trail-bonds-soon/article_55b63b61-9f9f-4c67-8d2e-6663c254584b.html",
-        "fetched_at": "2026-07-18T01:23:04Z",
+        "url": "https://www.businessobserverfl.com/news/2025/mar/27/cape-coral-buyers-market/",
+        "fetched_at": "2026-07-19T22:23:42Z",
         "tier": 2,
-        "citation": "Bonita Springs bond vote could fund $35M rail trail | Lee County | gulfshorebusiness.com: \"Evan Williams ... Bonita Springs residents are set to vote on a plan to borrow up to $35 million to pay for the city’s portion of a regional rail-to-t...\""
+        "citation": "Report: Cape Coral tops list of buyer's markets in nation | Business Observer: \"There were 5,593 listings in Cape Coral as of the end of February, according to Zillow, which reports the median list price was $358,500, while the me...\""
       },
       "suggestions": [
-        "What's driving signal development 1?",
-        "How does signal development 1 here compare to other SWFL areas?"
+        "What's driving signal structural 1?",
+        "How does signal structural 1 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_2",
-      "value": "Cape Coral Pkwy: Cape Coral Parkway is set to undergo expansion from four lanes to six lanes",
+      "metric": "signal_structural_2",
+      "value": "Coral Pointe (Cape Coral): Cape Coral's business incentive grants are no longer available to gas stations, car washes, storage locker facilities, home-based businesses.",
       "direction": "stable",
-      "label": "Cape Coral Pkwy — development",
+      "label": "Coral Pointe (Cape Coral) — structural",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/gb_daily/cape-coral-businesses-concerned-with-parking-loss-in-road-expansion/",
-        "fetched_at": "2026-07-18T01:23:04Z",
+        "url": "https://www.gulfshorebusiness.com/lee/cape-coral-changes-business-incentive-grants-eligibility/article_7f22f4bd-1f56-4df0-835d-27ec73aaef57.html",
+        "fetched_at": "2026-07-19T22:23:42Z",
         "tier": 2,
-        "citation": "Cape Coral businesses concerned with parking loss in road expansion - Gulfshore Business: \"Cape Coral is set to undergo a significant change with a road expansion project on Cape Coral Parkway, increasing it from four lanes to six.\n\nCape Cor...\""
+        "citation": "Cape Coral modifies business incentive grant rules | Lee County | gulfshorebusiness.com: \"Evan Williams ... Cape Coral’s business incentive grants are no longer available to gas stations, car washes, storage locker facilities, home-based bu...\""
       },
       "suggestions": [
-        "What's driving signal development 2?",
-        "How does signal development 2 here compare to other SWFL areas?"
+        "What's driving signal structural 2?",
+        "How does signal structural 2 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_3",
-      "value": "Ben Hill Griffin: My Shower Door broke ground April 2 on a 14,000-square-foot national headquarters, a $4 million construction project at 17000 Cam Court, off Alico Road",
+      "metric": "signal_structural_3",
+      "value": "Cape Coral Pkwy: Cape Coral's Community Redevelopment Agency increased its total net position by 19% during fiscal year 25",
       "direction": "stable",
-      "label": "Ben Hill Griffin — development",
+      "label": "Cape Coral Pkwy — structural",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/retail/my-shower-door-invests-4m-in-new-fort-myers-headquarters/article_4eef396d-d496-42a1-9c41-866d2a130c6b.html",
-        "fetched_at": "2026-07-18T01:23:04Z",
+        "url": "https://www.gulfshorebusiness.com/gb-daily/cape-coral-cra-net-position-jumps-19-in-fy25/article_ed6b8612-1ac0-4eb7-9523-4f42491f9c1b.html",
+        "fetched_at": "2026-07-19T22:23:42Z",
         "tier": 2,
-        "citation": "Expanding My Shower Door takes on a new headquarters | Retail | gulfshorebusiness.com: \"My Shower Door ... My Shower Door broke ground April 2 on a 14,000-square-foot national headquarters, a $4 million construction project designed to re...\""
+        "citation": "Cape Coral CRA net position jumps 19% in FY25 | GB Daily | gulfshorebusiness.com: \"Evan Williams · Cape Coral’s Community Redevelopment Agency increased its total net position, a measure of assets minus liabilities, by 19% during fis...\""
       },
       "suggestions": [
-        "What's driving signal development 3?",
-        "How does signal development 3 here compare to other SWFL areas?"
+        "What's driving signal structural 3?",
+        "How does signal structural 3 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_4",
-      "value": "Ben Hill Griffin: Village of Estero Corkscrew Road Shared Use Path Project constructs a 10-foot-wide asphalt pathway on the north side from Ben Hill Griffin Parkway to Bella Terra Boulevard with estimated completion Fall 2026 and project cost approximately $23 million",
+      "metric": "signal_structural_4",
+      "value": "Colonial East: Lee Health system will close Lee Memorial Hospital when they open the planned acute care hospital on Challenger",
       "direction": "stable",
-      "label": "Ben Hill Griffin — development",
+      "label": "Colonial East — structural",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.leegov.com/dot/News%20Documents/Roadwatch%20January%208,%202026%20to%20January%2014,%202026.pdf",
-        "fetched_at": "2026-07-18T01:23:04Z",
+        "url": "https://www.gulfshorebusiness.com/lee-health-posts-conversion-mission-agreement-for-public-review-comment/",
+        "fetched_at": "2026-07-19T22:23:42Z",
         "tier": 2,
-        "citation": "Roadwatch January 8, 2026 to January 14, ...: \"Estimated completion is Fall 2026. Project cost is approximately $23 million, including $4.6 million for · landscaping and irrigation and $4 million f...\""
+        "citation": "Lee Health posts conversion mission agreement for public review: \"The system will be allowed to continue with current plans to close Lee Memorial Hospital when they open the planned acute care hospital on Challenger ...\""
       },
       "suggestions": [
-        "What's driving signal development 4?",
-        "How does signal development 4 here compare to other SWFL areas?"
+        "What's driving signal structural 4?",
+        "How does signal structural 4 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_5",
-      "value": "Ben Hill Griffin: Ben Hill Griffin Parkway traffic signal upgrades, asphalt mill & overlay and striping with estimated completion mid-2028 and project cost approximately $39.7 million",
+      "metric": "signal_structural_5",
+      "value": "Joel Blvd: Lee Board of County Commissioners voted to adopt alignment study to expand Sunshine Boulevard to four lanes from State Road 82 to 23rd Street SW in Lehigh Acres",
       "direction": "stable",
-      "label": "Ben Hill Griffin — development",
+      "label": "Joel Blvd — structural",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.leegov.com/dot/News%20Documents/Roadwatch%20August%2021,%202025%20to%20August%2027,%202025.pdf",
-        "fetched_at": "2026-07-18T01:23:04Z",
+        "url": "https://www.gulfshorebusiness.com/gb_daily/lee-commissioners-approve-transportation-projects-for-lehigh-acres/",
+        "fetched_at": "2026-07-19T22:23:42Z",
         "tier": 2,
-        "citation": "Roadwatch August 21, 2025 to August 27, ...: \"Estimated completion is mid-2028. Project cost is approximately $39.7 M. The contractor is ECH · Construction. For further questions, please visit www...\""
+        "citation": "Lee Commissioners approve transportation projects for Lehigh Acres - Gulfshore Business: \"The board also voted to adopt an alignment study to expand Sunshine Boulevard to four lanes from State Road 82 to 23rd Street SW in Lehigh Acres to co...\""
       },
       "suggestions": [
-        "What's driving signal development 5?",
-        "How does signal development 5 here compare to other SWFL areas?"
+        "What's driving signal structural 5?",
+        "How does signal structural 5 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_6",
-      "value": "Bonita Beach: The Florida Department of Transportation is looking for ways to address congestion issues and the projected increase in traffic at the intersection of Bonita Beach Road and U.S. 41.",
+      "metric": "signal_structural_6",
+      "value": "Ben Hill Griffin: The ITEC Business Park east of Ben Hill Griffin Parkway has 2.4 million square feet of space; Gulf Landings Logistic Center is just north of Alico Road.",
       "direction": "stable",
-      "label": "Bonita Beach — development",
+      "label": "Ben Hill Griffin — structural",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/fdot-studies-improvements-to-bonita-beach-road-and-u-s-41-intersection/",
-        "fetched_at": "2026-07-18T01:23:04Z",
+        "url": "https://www.gulfshorebusiness.com/construction-development/different-avenues-the-changing-face-of-alico-road/article_0d777eb5-c261-5da2-a342-4c98903ebacd.html",
+        "fetched_at": "2026-07-19T22:23:42Z",
         "tier": 2,
-        "citation": "FDOT studies improvements to Bonita Beach Road and U.S. 41 intersection - Gulfshore Business: \"The Florida Department of Transportation is looking for ways to address congestion issues and the projected increase in traffic at the intersection of...\""
+        "citation": "Different avenues: The changing face of Alico Road | Construction-development | gulfshorebusiness.com: \"The ITEC Business Park east of Ben Hill Griffin Parkway has 2.4 million square feet of space. Gulf Landings Logistic Center, just north of Alico, hudd...\""
       },
       "suggestions": [
-        "What's driving signal development 6?",
-        "How does signal development 6 here compare to other SWFL areas?"
+        "What's driving signal structural 6?",
+        "How does signal structural 6 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_7",
-      "value": "Bonita Trail: Imperial 41 broke ground Dec. 11 as a mixed-use development that will add 120 apartments and other uses in downtown Bonita.",
+      "metric": "signal_structural_7",
+      "value": "Estero / Bonita line: Estero's village manager Gibbs expects to start seeing redevelopment of some older developments including Coconut Point mall.",
       "direction": "stable",
-      "label": "Bonita Trail — development",
+      "label": "Estero / Bonita line — structural",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.gulfshorebusiness.com/gb-daily/imperial-41-breaks-ground-on-downtown-bonita-project/article_318503a6-85a2-4540-8de0-e3a82c1d0bdc.html",
-        "fetched_at": "2026-07-18T01:23:04Z",
+        "url": "https://www.gulfshorebusiness.com/inside-the-magazine/estero-builds-its-future-with-boca-inspired-design-rules/article_2df0eb15-5509-51a1-a2df-7a9c7d078a1b.html",
+        "fetched_at": "2026-07-19T22:23:42Z",
         "tier": 2,
-        "citation": "Imperial 41 breaks ground on downtown Bonita project | GB Daily | gulfshorebusiness.com: \"Barron Collier Cos. ... Barron Collier Cos. and CAPREIT broke ground Dec. 11 on Imperial 41, a mixed-use development that will add 120 apartments and ...\""
+        "citation": "Estero builds its future with Boca-inspired design rules | Inside the Magazine | gulfshorebusiness.com: \"Gibbs expects to start seeing redevelopment of some of the older developments including Coconut Point mall.\""
       },
       "suggestions": [
-        "What's driving signal development 7?",
-        "How does signal development 7 here compare to other SWFL areas?"
+        "What's driving signal structural 7?",
+        "How does signal structural 7 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_development_8",
-      "value": "Bonita Trail: A 4.05-acre parcel in Bonita Springs has been sold for construction of the Bonita Auto Vault, a luxury car garage storage facility.",
+      "metric": "signal_structural_8",
+      "value": "Six Mile Cypress: Manhattan Construction, founded in 1896 by L.H. Rooney and still family-operated, is moving its local headquarters from Naples to a 3.4-acre property just off Daniels Parkway near Six Mile Cypress in Fort Myers.",
       "direction": "stable",
-      "label": "Bonita Trail — development",
+      "label": "Six Mile Cypress — structural",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2025/aug/31/developer-car-condos-bonita-springs/",
-        "fetched_at": "2026-07-18T01:23:04Z",
+        "url": "https://www.businessobserverfl.com/news/2026/apr/10/construction-giant-moving-hq-fort-myers/",
+        "fetched_at": "2026-07-19T22:23:42Z",
         "tier": 2,
-        "citation": "Developer to build car condos in Bonita Springs | Business Observer: \"Image via LoopNet.com ... A 4.05-acre parcel in Bonita Springs has been sold to an investor who plans to build a luxury car garage storage facility on...\""
+        "citation": "Construction giant moving local HQ, jobs from Naples to Fort Myers | Business Observer: \"According to the commercial real estate website Loopnet, the property where the new headquarters is being built is 3.4 acres and just off of Daniels P...\""
       },
       "suggestions": [
-        "What's driving signal development 8?",
-        "How does signal development 8 here compare to other SWFL areas?"
+        "What's driving signal structural 8?",
+        "How does signal structural 8 here compare to other SWFL areas?"
       ]
     }
   ],
   "caveats": [
-    "81 additional live signals are tracked but not surfaced here (cap 8).",
+    "27 additional live signals are tracked but not surfaced here (cap 8).",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
   ],
   "contradicts": [],
@@ -209,7 +209,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-18T01:23:04Z"
+    "computed_at": "2026-07-19T22:23:42Z"
   },
   "exogenous_signals": []
 }
@@ -218,5 +218,5 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
 - corridor-pulse-swfl: weekly SWFL corridor-grain current-events reporter over data_lake.city_pulse_corridors (TTL'd, citation-backed); brain-input edge into cre-swfl.
 
 --- RECENT NOTES ---
-- 2026-07-18: pack refined by the Refinery — 9 fact(s) from 1 source(s).
+- 2026-07-19: pack refined by the Refinery — 9 fact(s) from 1 source(s).
 ```
