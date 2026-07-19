@@ -657,7 +657,7 @@ git commit -m "feat(wins): watch store + API routes (sender dark by design)" -- 
 - [ ] **Step 2: Open the spec's follow-up checks** (spec §Follow-up):
 
 ```bash
-node scripts/check.mjs open brain-platform stale_listing_radar_build "Agent Stale-Listing Radar ($19.99/mo intro) — own brainstorm+spec; fence = feed/volume features (spec 2026-07-19-why-isnt-it-selling-design.md)"
+node scripts/check.mjs open brain-platform stale_listing_radar_build "Agent Stale-Listing Radar ($19.99/mo intro) — own brainstorm+spec; fence = feed/volume features; distress overlay candidate: LeePA delinquent-tax layer 21 (10,964 parcels, face_value) joins lee_parcels via current_strap — see leepa_delinquent_tax_layer_unused (spec 2026-07-19-why-isnt-it-selling-design.md)"
 node scripts/check.mjs open brain-platform parcel_owner_fields_probe "FDOR layer: census owner-name/mailing-address field availability (full-scope-first), update cadence_registry source_scope before any pull"
 node scripts/check.mjs open brain-platform wins_print_mail_addon "Radar print-and-mail add-on — verify PostGrid/Lob per-piece pricing live before speccing"
 node scripts/check.mjs open brain-platform wins_direct_mail_loop "Our direct-mail loop to the 180+day cohort with personalized report links"
