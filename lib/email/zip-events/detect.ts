@@ -23,9 +23,12 @@ export const BURST_PRICE_CUTS_N = 3; // [PROVISIONAL] cuts per window = a burst
 export const SURGE_RATIO = 1.5; // [PROVISIONAL] new listings vs trailing weekly baseline
 export const NOTABLE_SALE_AREA_RATIO = 2; // [PROVISIONAL] sold ≥ 2x area median
 
-const SOURCE_LAKE = "SWFL Data Gulf listing lifecycle";
-const SOURCE_RANK = "SWFL Data Gulf ranked signals";
-const SOURCE_PULSE = "SWFL Data Gulf local pulse";
+// Citation labels are CUSTOMER language — never internal pipeline names
+// ("listing lifecycle", "local pulse" leaked into a real send, operator 07/19;
+// same bait class as the brain citation fixes of the same day).
+const SOURCE_LAKE = "SWFL Data Gulf listings data";
+const SOURCE_RANK = "SWFL Data Gulf market rankings";
+const SOURCE_PULSE = "SWFL Data Gulf local news";
 
 /** Alert-class metrics: a cross here fires standalone; the rest ride the weekly. */
 const ALERT_METRICS: ReadonlySet<MetricKey> = new Set(["median_sale_price", "median_dom"]);
@@ -171,6 +174,8 @@ export interface AreaNewsItem {
   zip: string;
   distance_band: string;
   published_at: string; // YYYY-MM-DD
+  /** Source article link — rides into the fact so the story is clickable. */
+  url?: string;
 }
 
 export function detectNearbyNews(items: AreaNewsItem[], area: MarketArea): MarketEvent[] {
@@ -181,7 +186,13 @@ export function detectNearbyNews(items: AreaNewsItem[], area: MarketArea): Marke
       grain: "area",
       area_id: area.area_id,
       class: "weekly",
-      facts: items.map((i) => ({ label: i.title, value: null, unit: "", source: SOURCE_PULSE })),
+      facts: items.map((i) => ({
+        label: i.title,
+        value: null,
+        unit: "",
+        source: SOURCE_PULSE,
+        url: i.url,
+      })),
     },
   ];
 }

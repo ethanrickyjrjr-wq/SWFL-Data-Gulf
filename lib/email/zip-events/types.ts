@@ -16,7 +16,7 @@ export type MarketEventClass = "alert" | "weekly" | "baseline";
 export type MarketEventGrain = "zip" | "area" | "city" | "county";
 
 /** One held, citable figure. `source` names where the number lives (e.g.
- *  "SWFL Data Gulf listing lifecycle" / "SWFL Data Gulf ranked signals") —
+ *  "SWFL Data Gulf listings data" / "SWFL Data Gulf market rankings") —
  *  it rides the collapsed source list, never inline copy. */
 export interface MarketFact {
   label: string;
@@ -25,6 +25,9 @@ export interface MarketFact {
   value: number | null;
   unit: string; // "$", " days", "%", "" — display suffix/prefix hint
   source: string;
+  /** Click-through for the fact (a news story's source article). Optional —
+   *  numeric facts have no destination; stories always should (operator 07/19). */
+  url?: string;
 }
 
 export interface MarketEvent {

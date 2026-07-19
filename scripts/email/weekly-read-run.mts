@@ -92,6 +92,11 @@ const APPROVED = process.env.WEEKLY_READ_APPROVED === "1";
 const SEED_SNAPSHOTS = process.env.MARKET_ALERTS_SEED === "1";
 const PREVIEW_ZIP = process.env.WEEKLY_READ_PREVIEW_ZIP;
 const SITE_ORIGIN = (process.env.SITE_ORIGIN ?? "https://www.swfldatagulf.com").replace(/\/$/, "");
+// Emails must NEVER carry a localhost asset/link URL: zip-seed's siteBase() reads
+// NEXT_PUBLIC_SITE_URL at call time, and .env.local pins it to localhost in dev —
+// the 07/19 preview send shipped a broken localhost map cutout. Runtime assignment
+// beats env-file loading, so every in-process consumer now sees SITE_ORIGIN.
+process.env.NEXT_PUBLIC_SITE_URL = SITE_ORIGIN;
 const BATCH_LIMIT = Number(process.env.WEEKLY_READ_BATCH_LIMIT ?? "200");
 const POSTAL_ADDRESS =
   process.env.WEEKLY_READ_POSTAL_ADDRESS ?? process.env.OUTREACH_POSTAL_ADDRESS;
@@ -225,7 +230,7 @@ function insiderFor(
   return {
     title: `Market internals for ${place ?? zip}: how fast inventory is actually moving`,
     rows,
-    source: "SWFL Data Gulf listing lifecycle",
+    source: "SWFL Data Gulf listings data",
   };
 }
 
@@ -291,6 +296,7 @@ async function main(): Promise<void> {
         zip: i.zip_code ?? area.zips[0],
         distance_band: i.geo_grain ?? "",
         published_at: i.captured_at.slice(0, 10),
+        url: i.source_url ?? undefined,
       }));
       events.push(...detectNearbyNews(items, area));
     } catch {

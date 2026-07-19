@@ -1,3 +1,52 @@
+## 2026-07-19 (Fable 5 · main) — weekly-read v5: sources accordion de-jargoned at the citation root; inventory card names its vendor
+
+Operator rounds 4-5 (opened the accordion: internal ops strings — "Firecrawl + dlt", SQL table
+names, "Attribution-only license", "vote driver"; then the realtor.com 33908 screenshot: our card
+~600 actives vs their 1,153). (1) cleanCitations (the ONE citation display root — email accordion
+AND website CitationList) gained displayLabel: known ops strings → customer language, bare-host
+labels → publisher names ("files.zillowstatic.com" → "Zillow Research"), dates → MM/DD/YYYY.
+Raw stored strings still need root fixes + rebuilds — check citation_ops_strings_at_roots.
+(2) Inventory gap DIAGNOSED, not guessed: our card serves Redfin's end-of-month ZIP inventory
+(housing_by_zip ← redfin_swfl), realtor counts live MLS actives — ~2x methodology gap, NOT condo
+exclusion (condos swept but mislabeled per the known property_type defect). Card sub now says
+"Redfin end-of-month count" (candidates.ts — labels the webpage too). Which vendor LEADS the
+concept = operator sign-off — check active_inventory_vendor_gap. Verify: 110/110 tests
+(zip-report + citations + zip-events); offender sweep clean (remaining hits are href URLs, not
+visible text). v5 sent to hello@. NEXT: operator verdict + push (several commits stacked).
+
+## 2026-07-19 (Fable 5 · main) — weekly-read v4: jargon citations killed, cutout un-broken, stories clickable
+
+Operator round 3 ("better email though… Good job" + three hits). (1) JARGON: detector citation
+labels were internal pipeline names — "SWFL Data Gulf listing lifecycle/local pulse/ranked signals"
+→ "listings data / local news / market rankings"; sources note "held, cited value" → plain English.
+Same bait class as today's brain citation fixes. (2) BROKEN CUTOUT (screenshot): zip-shape route
+already serves email-safe PNG — the bug was my LOCAL render baking .env.local's
+NEXT_PUBLIC_SITE_URL=localhost into the image URL; runner now pins NEXT_PUBLIC_SITE_URL=SITE_ORIGIN
+at startup (an email must never carry a localhost URL). (3) CLICKABLE STORIES: MarketFact grew
+optional url; pulse source_url rides detectNearbyNews → news renders as a linked list block
+(ListItem.linkUrl already existed) — verified 10 real external article links per sample. Sources
+accordion confirmed CLOSED by construction (<details>, no open attr; Outlook/some apps degrade to
+expanded — vendor limit, documented in SourcesBlock). Verified: 45/45 tests, zero localhost URLs,
+prod PNG cutout, jargon sweep CLEAN. v4 sent to hello@ (ids afe5b1f1, 646b19fc). NEW check:
+weekly_read_trend_chart_block (the missing chart — next lever, chart-image pipeline + metro root).
+NEXT: operator verdict + push.
+
+## 2026-07-19 (Fable 5 · main) — weekly-read v3: the FULL rundown brief (zip-seed anatomy + events + regional read)
+
+Operator rejected v2 as still-thin ("full rundown brief… DO NOT STOP"). Root realization: buildZipSeedDoc
+(lib/email/zip-seed.ts) already held EVERYTHING demanded — map cutout header, ranked metric cards
+(same pool as the webpage), the BAKED narrator commentary, "What just moved", "Down the road"
+[INFERENCE]+falsifier outlook — and the weekly-read composer never used any of it. 8dd31f05:
+composeRichWeeklyDoc/composeRichBaselineDoc splice the week's events (lead card, per-ZIP rollup,
+heat when live, news, insider) INTO the seed brief ahead of its sources/CTA tail, plus a new
+"regional read" block carrying housing-swfl's cited conclusion (repo file read, zero tokens; the
+commentary the nightly rebuild already pays for). Grain-coherence fix: CTA now "See the full ZIP
+33908 report" — never a city label over a ZIP-grain link (operator caught it). Fallback = plain v2
+shape when the seed is unavailable. Verify: 45/45 zip-events tests; v3 previews rendered (41KB
+each, all sections confirmed present incl. entity-decoded check) and sent to hello@ (ids a2387223,
+758e2821). Still absent by data-reality, tracked: heat leaderboard (weekly_read_heat_block_data_starved),
+insider card (correctly fails closed under the sold-count gate). NEXT: operator verdict on v3 + push.
+
 ## 2026-07-19 (Fable 5 · main) — weekly-read emails: defect fixes + composition rebuilt to the spec anatomy
 
 Operator saw the first live previews (sent to hello@) and rejected them hard — correctly. Two passes:

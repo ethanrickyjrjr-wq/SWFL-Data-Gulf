@@ -171,6 +171,25 @@ function ctaBlock(url: string, zip: string, y: number): BlockOf<"button"> {
   return gblk("button", { x: 0, y, w: 12, h: 2 }, { label: `See the full ZIP ${zip} report`, url });
 }
 
+const NEWS_H = 4;
+
+/** Nearby-news event → a linked story list — every story leads to its article
+ *  ("make stories clickable so they lead to the story" — operator 07/19). */
+function newsListBlock(e: MarketEvent, y: number): BlockOf<"list"> {
+  const items: ListItem[] = e.facts.map((f) => ({ text: f.label, linkUrl: f.url }));
+  return gblk("list", { x: 0, y, w: 12, h: NEWS_H }, { title: "Local news nearby", items });
+}
+
+/** News renders as a linked list; every other non-ZIP event stays a card. */
+function otherEventBlock(
+  e: MarketEvent,
+  y: number,
+): { block: EmailDoc["blocks"][number]; h: number } {
+  return e.type === "nearby_news"
+    ? { block: newsListBlock(e, y), h: NEWS_H }
+    : { block: eventCard(e, y), h: 3 };
+}
+
 /** Dedupe every fact source into ONE collapsed sources block. */
 function sourcesBlock(events: MarketEvent[], extra: string[], y: number): BlockOf<"sources"> {
   const labels = [...new Set([...events.flatMap((e) => e.facts.map((f) => f.source)), ...extra])];
@@ -179,7 +198,7 @@ function sourcesBlock(events: MarketEvent[], extra: string[], y: number): BlockO
     { x: 0, y, w: 12, h: 2 },
     {
       sources: labels.map((label) => ({ label, url: undefined })),
-      note: "Every figure above is a held, cited value — nothing is estimated.",
+      note: "Every figure above comes straight from the source cited — nothing is estimated.",
     },
   );
 }
@@ -245,8 +264,9 @@ export function composeAlertDoc(input: ComposeInput): EmailDoc {
     y += 4;
   }
   for (const e of other) {
-    blocks.push(eventCard(e, y));
-    y += 3;
+    const { block, h } = otherEventBlock(e, y);
+    blocks.push(block);
+    y += h;
   }
   if (input.reportUrl) {
     blocks.push(ctaBlock(input.reportUrl, input.subscriberZip, y));
@@ -315,8 +335,9 @@ export function composeWeeklyDoc(input: ComposeWeeklyInput): EmailDoc {
   }
 
   for (const e of other) {
-    blocks.push(eventCard(e, y));
-    y += 3;
+    const { block, h } = otherEventBlock(e, y);
+    blocks.push(block);
+    y += h;
   }
 
   if (input.insider) {
@@ -426,8 +447,9 @@ export function composeBaselineDoc(input: ComposeBaselineInput): EmailDoc {
     y += 4;
   }
   for (const e of other.slice(0, 1)) {
-    blocks.push(eventCard(e, y));
-    y += 3;
+    const { block, h } = otherEventBlock(e, y);
+    blocks.push(block);
+    y += h;
   }
 
   if (input.reportUrl) {
@@ -447,7 +469,7 @@ export function composeBaselineDoc(input: ComposeBaselineInput): EmailDoc {
   );
   y += 1;
 
-  blocks.push(sourcesBlock(input.recentEvents, ["SWFL Data Gulf listing lifecycle"], y));
+  blocks.push(sourcesBlock(input.recentEvents, ["SWFL Data Gulf listings data"], y));
   y += 2;
   blocks.push(gblk("footer", { x: 0, y, w: 12, h: 3, static: true }));
   return { globalStyle: { ...NEUTRAL_SKELETON_STYLE }, blocks };
@@ -533,8 +555,9 @@ function eventSectionBlocks(
   }
   const newsCap = kind === "weekly" ? other.length : Math.min(other.length, 1);
   for (const e of other.slice(0, newsCap)) {
-    blocks.push(eventCard(e, y));
-    y += 3;
+    const { block, h } = otherEventBlock(e, y);
+    blocks.push(block);
+    y += h;
   }
   if (input.regionalRead) {
     blocks.push(regionalReadBlock(input.regionalRead, y));

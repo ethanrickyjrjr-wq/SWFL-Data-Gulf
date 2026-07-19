@@ -210,7 +210,11 @@ export const ZIP_METRIC_SOURCES: ZipMetricSource[] = [
     role: "primary",
     key: "inventory",
     label: "Active Inventory",
-    sub: "Homes for sale now",
+    // Vendor + basis NAMED on the card (operator 07/19): this is Redfin's
+    // end-of-month ZIP inventory metric — realtor.com's live active count for
+    // the same ZIP can run ~2x higher (methodology, not a data error). An
+    // unlabeled count next to realtor's public page reads as wrong.
+    sub: "Redfin end-of-month count",
     display: fmtCount,
   },
 

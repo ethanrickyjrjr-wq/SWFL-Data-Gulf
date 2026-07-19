@@ -34,7 +34,7 @@ const CUT_BURST: MarketEvent = {
       label: "Price cuts this week",
       value: 3,
       unit: "",
-      source: "SWFL Data Gulf listing lifecycle",
+      source: "SWFL Data Gulf listings data",
     },
   ],
 };
@@ -52,7 +52,7 @@ const PRICE_CROSS: MarketEvent = {
       to: 451_000,
       value: 451_000,
       unit: "$",
-      source: "SWFL Data Gulf listing lifecycle",
+      source: "SWFL Data Gulf listings data",
     },
   ],
 };

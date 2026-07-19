@@ -97,9 +97,66 @@ function labelParam(url: string): string {
   }
 }
 
+/** Bare-host labels a reader shouldn't see → the publisher's real name. */
+const HOST_LABELS: Record<string, string> = {
+  "files.zillowstatic.com": "Zillow Research",
+  "zillowstatic.com": "Zillow Research",
+};
+
+/** Internal-ops citation strings → customer language (operator 07/19: scrape
+ *  tooling, SQL table names, license notes, and ranking mechanics leaked into a
+ *  real send's sources list). This is the DISPLAY cleanup at the ONE citation
+ *  root — the stored strings still deserve fixing at their pipeline roots
+ *  (check `citation_ops_strings_at_roots`), but every surface renders clean
+ *  from tonight. Dates found in the original ride along as MM/DD/YYYY. */
+const OPS_REWRITES: { match: RegExp; label: string; keepAsOf?: boolean }[] = [
+  {
+    match: /^Lee County Accela Citizen Access/,
+    label: "Lee County Accela Citizen Access — official building permit records, updated daily",
+  },
+  {
+    match: /^Collier County Building Permits — monthly XLSX/,
+    label: "Collier County Building Permits — official monthly permit records",
+  },
+  {
+    match: /^Data provided by Realtor\.com/,
+    label:
+      "Data provided by Realtor.com — Economic Research Data Library (ZIP-level inventory & market hotness, monthly)",
+  },
+  {
+    match: /^Active SWFL rental listings/,
+    label: "Active SWFL rental listings, tracked by SWFL Data Gulf",
+    keepAsOf: true,
+  },
+  {
+    match: /^SWFL for-sale listing momentum/,
+    label: "SWFL for-sale listing momentum",
+    keepAsOf: true,
+  },
+  {
+    match: /^SWFL per-ZIP market snapshot/,
+    label: "SWFL ZIP market snapshot (Realtor.com monthly data)",
+    keepAsOf: true,
+  },
+];
+
+function displayLabel(label: string): string {
+  const host = HOST_LABELS[label.toLowerCase()];
+  if (host) return host;
+  for (const r of OPS_REWRITES) {
+    if (r.match.test(label)) {
+      const iso = label.match(/(\d{4})-(\d{2})-(\d{2})/);
+      const asOf = r.keepAsOf && iso ? `, as of ${iso[2]}/${iso[3]}/${iso[1]}` : "";
+      return `${r.label}${asOf}`;
+    }
+  }
+  // Trailing ranking-mechanics clause (MHS Data Book) — trim, keep the source.
+  return label.replace(/ — site ZIP from each permit's project address.*$/, "");
+}
+
 export function cleanCitation(raw: RawCitation): CleanCitation {
   const url = (raw.url ?? "").trim();
-  const human = humanLabel((raw.label ?? "").trim());
+  const human = displayLabel(humanLabel((raw.label ?? "").trim()));
   const origin_kind = raw.origin_kind;
   const noLink = (label: string, is_internal: boolean): CleanCitation => ({
     linkable: false,
@@ -132,7 +189,7 @@ export function cleanCitation(raw: RawCitation): CleanCitation {
   if (isInternalApiPath(url)) return noLink(human || BRAND_LABEL, true);
 
   // 5/6. linkable external/our-own page; label = human → ?label= param → clean host → "Source".
-  const label = human || labelParam(url) || hostDomain(url) || "Source";
+  const label = human || displayLabel(labelParam(url) || hostDomain(url)) || "Source";
   return { linkable: true, href: url, label, is_internal: false, origin_kind };
 }
 
