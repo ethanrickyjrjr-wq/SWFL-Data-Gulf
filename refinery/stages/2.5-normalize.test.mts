@@ -157,10 +157,11 @@ test("resolveSlug: unknown slug returns null", async () => {
   assert.equal(r, null);
 });
 
-test("resolveSlug: _direction_ambiguous marker is not a concept", async () => {
+test("resolveSlug: 'direction' has no literal index row — the derived index excludes the path-ambiguous family", async () => {
   const vocab = await loadVocabulary();
-  // Sanity — the marker exists in slug_index but is not a string entry
-  assert.equal(typeof vocab.slug_index["_direction_ambiguous"], "object");
+  // deriveSlugIndex skips PATH_AMBIGUOUS_SLUGS: a literal row could never be
+  // correct for both owners; resolveSlug step 1 dispatches by field path first.
+  assert.equal(vocab.slug_index["direction"], undefined);
 });
 
 // ---------------------------------------------------------------------------

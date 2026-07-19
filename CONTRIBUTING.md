@@ -13,7 +13,7 @@ is adding or hardening a brain. These are the house rules.
 
 ## Ship contract
 
-- A brain's vocabulary and `slug_index` land in the same commit as the brain.
+- A brain's vocabulary (concept + `raw_slugs`) lands in the same commit as the brain. `slug_index` is derived from `raw_slugs` at load — never author it.
 - A Tier-2 ingest never ships without the brain that consumes it in the same PR.
 - Tests and lints (`facts-only-lint`, `spec-validator`) pass before a change is shippable.
 

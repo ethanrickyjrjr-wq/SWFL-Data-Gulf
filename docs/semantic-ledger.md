@@ -2,16 +2,16 @@
 
 _The data on the data — auto-generated read-only view of the SKOS vocabulary, DAG, and constitution overrides that drive the SWFL Intelligence Lake._
 
-**Generated:** 2026-06-15T22:13:43.286Z (commit `ca5acc0`)
+**Generated:** 2026-07-19T04:25:30.209Z (commit `fc375393`)
 **Vocab schema:** 1.0.0 · created 2026-05-16 · next review 2026-08-15
 **Audit doc:** `docs/vocab-audit.md`
 
 ## TL;DR
 
-- **277** SKOS concepts across **13** categories (275 active, 2 stub).
-- **303** raw slugs registered in `slug_index`.
-- **34** distinct source brains referenced (live + planned).
-- **35** packs in the runtime registry.
+- **324** SKOS concepts across **14** categories (319 active, 2 stub).
+- **343** raw slugs registered in `slug_index`.
+- **41** distinct source brains referenced (live + planned).
+- **42** packs in the runtime registry.
 
 ## Regenerate
 
@@ -23,7 +23,7 @@ bun refinery/tools/semantic-ledger.mts
 
 | Category | Concepts | Active | Stub |
 | --- | ---: | ---: | ---: |
-| `cre` | 3 | 3 | 0 |
+| `cre` | 7 | 7 | 0 |
 | `credit-risk` | 17 | 16 | 1 |
 | `demand-signal` | 15 | 15 | 0 |
 | `economic-activity` | 11 | 11 | 0 |
@@ -32,26 +32,35 @@ bun refinery/tools/semantic-ledger.mts
 | `labor` | 7 | 7 | 0 |
 | `logistics` | 19 | 19 | 0 |
 | `macro` | 35 | 35 | 0 |
-| `market-signal` | 5 | 5 | 0 |
+| `market-signal` | 23 | 23 | 0 |
 | `qualitative` | 5 | 5 | 0 |
-| `real-estate` | 103 | 103 | 0 |
+| `real-estate` | 127 | 125 | 0 |
 | `regulatory` | 14 | 14 | 0 |
+| `undefined` | 1 | 0 | 0 |
 
 ## Concepts by Category
 
-### `cre` (3)
+### `cre` (7)
 
 | Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `commercial_permits_count` | SWFL Commercial Permits Issued | `commercial_permits_count` | count | permits | _unbounded_ | `permits-commercial-swfl` | `real-estate` | ✅ active |
 | `commercial_permits_sf` | SWFL Commercial Permit Building Area | `commercial_permits_sf` | count | sqft | _unbounded_ | `permits-commercial-swfl` | `real-estate` | ✅ active |
 | `commercial_permits_value_usd` | SWFL Commercial Permit Value | `commercial_permits_value_usd` | currency | USD | _unbounded_ | `permits-commercial-swfl` | `real-estate` | ✅ active |
+| `cre_active_listings_estero_asking_rent_psf` | Estero Active Listing Median Asking Rent PSF (Crexi) | `cre_active_listings_estero_asking_rent_psf` | rate | USD/sqft | 0 – 500 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_active_listings_estero_available_sqft` | Estero Total Available Sqft on Crexi | `cre_active_listings_estero_available_sqft` | count | sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_active_listings_fort_myers_beach_asking_rent_psf` | Fort Myers Beach Active Listing Median Asking Rent PSF (Crexi) | `cre_active_listings_fort_myers_beach_asking_rent_psf` | rate | USD/sqft | 0 – 500 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_active_listings_fort_myers_beach_available_sqft` | Fort Myers Beach Total Available Sqft on Crexi | `cre_active_listings_fort_myers_beach_available_sqft` | count | sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
 
 <details><summary>Scope notes</summary>
 
 - **`commercial_permits_count`** — Count of issued commercial building permits across SWFL for the reporting calendar year, from the Maxwell, Hendry & Simmons annual Data Book (data_lake.mhs_permits_swfl, source_name='mhs_databook'). SWFL-wide total across all mapped submarkets. Distinct from residential Accela permits (permits-swfl) — never blend the two. Single-year snapshot; not a trend until a second annual book lands.
 - **`commercial_permits_sf`** — Sum of building square footage across SWFL issued commercial building permits for the reporting calendar year, from the MHS Data Book (data_lake.mhs_permits_swfl). SWFL-wide total across all mapped submarkets; rows with a missing building_sf contribute 0. Distinct from residential Accela permits.
 - **`commercial_permits_value_usd`** — Sum of declared permit value (USD) across SWFL issued commercial building permits for the reporting calendar year, from the MHS Data Book (data_lake.mhs_permits_swfl). Declared value is the applicant-stated construction value, not appraised or assessed value. SWFL-wide total across all mapped submarkets; distinct from residential Accela permits.
+- **`cre_active_listings_estero_asking_rent_psf`** — Median asking rent per sqft from Crexi available commercial listings in Estero, FL. No broker aggregate survey covers this submarket. Available-listings only; does not represent total submarket inventory.
+- **`cre_active_listings_estero_available_sqft`** — Total sqft of available commercial listings on Crexi in Estero, FL. Sum of sqft across active listings only — not a vacancy rate (no total inventory denominator).
+- **`cre_active_listings_fort_myers_beach_asking_rent_psf`** — Median asking rent per sqft from Crexi available commercial listings in Fort Myers Beach, FL. No broker aggregate survey covers this submarket. Available-listings only.
+- **`cre_active_listings_fort_myers_beach_available_sqft`** — Total sqft of available commercial listings on Crexi in Fort Myers Beach, FL. Sum of sqft across active listings only — not a vacancy rate.
 
 </details>
 
@@ -206,7 +215,7 @@ bun refinery/tools/semantic-ledger.mts
 - **`env_flood_losses_swfl_baseline_annual_usd`** — Median annual total of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115), restricted to non-storm years only (the full 1978-onward archive MINUS the SWFL_STORM_YEARS list in refinery/sources/fema-nfip-source.mts). The 'boring-times floor' for SWFL flood losses â€” the denominator for env_flood_losses_swfl_post_ian_ratio.
 - **`env_flood_losses_swfl_post_ian_ratio`** — Most recent complete year's sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115) Ã· env_flood_losses_swfl_baseline_annual_usd. >2 = elevated activity (still in storm recovery); ~1 = back to baseline. Tracks the Ian/Helene/Milton recovery curve.
 - **`env_flood_losses_swfl_storm_year_count_since_2000`** — Count of named SWFL-impacting hurricane years since 2000 with paid-claim totals > 10Ã— baseline. Operationally = the SWFL_STORM_YEARS hardcoded list in refinery/sources/fema-nfip-source.mts filtered to year >= 2000, deduplicated by year â€” currently Charley 2004, Wilma 2005, Irma 2017, Ian 2022, and 2024 (Helene + Milton, same year) (n=5 distinct years). Reads as 'how often does SWFL get hammered by flood claims'; the 6 SWFL counties (FIPS 12071, 12021, 12015, 12043, 12051, 12115) are the union scope.
-- **`env_flood_losses_swfl_storm_year_total_usd`** — Sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across all 6 SWFL counties (FIPS 12071 Lee, 12021 Collier, 12015 Charlotte, 12043 Glades, 12051 Hendry, 12115 Sarasota) in the named SWFL-impacting storm years (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024). Storm list hardcoded in refinery/sources/fema-nfip-source.mts with a LAST_REVIEWED date; update when a new named storm hits SWFL.
+- **`env_flood_losses_swfl_storm_year_total_usd`** — Sum of (amount_paid_on_building_claim + amount_paid_on_contents_claim + amount_paid_on_ico_claim) from data_lake.fema_nfip_claims across the SWFL core counties (FIPS 12071 Lee, 12021 Collier, 12051 Hendry; Charlotte/Glades/Sarasota removed 07/07/2026 scope lock) in the named SWFL-impacting storm years (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024). Storm list hardcoded in refinery/sources/fema-nfip-source.mts with a LAST_REVIEWED date; update when a new named storm hits SWFL.
 - **`env_flood_risk_pct`** — Generic flood-risk percentage at unspecified spatial granularity. Currently a stub â€” no source brain emits it, and the SWFL flood-coverage signal is carried instead by the scope-specific concepts env_swfl_sfha_coverage_pct, env_lee_sfha_coverage_pct, env_collier_sfha_coverage_pct (and their V/VE-zone siblings).
 - **`env_hurricane_cat3plus_passes_within_50mi_30yr_swfl`** — Distinct named storms in NOAA HURDAT2 whose lifetime max windspeed reached Saffir-Simpson Cat 3+ (>= 111 kt) AND that passed within 50 statute miles of any SWFL county centroid during the trailing 30-year window. Distance computed haversine from HURDAT2 obs lat/lon to hardcoded county centroids; threshold of 50mi captures eye-wall + significant tropical-storm-force wind impact band.
 - **`env_hurricane_closest_pass_5yr_min_mi_swfl`** — Minimum haversine distance (statute miles) from any HURDAT2 observation point to any SWFL county centroid, across all named storms in the trailing 5-year window. Lower = closer = bigger near-term impact. A 'direct hit' is ~0-10mi; eye-wall passes are 10-30mi; significant outer-band impact is 30-100mi.
@@ -418,23 +427,59 @@ bun refinery/tools/semantic-ledger.mts
 
 </details>
 
-### `market-signal` (5)
+### `market-signal` (23)
 
 | Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `active_rental_listings_count_swfl` | SWFL Active Rental Listings (Count) | `active_rental_listings_count_swfl` | extensive | listings | _unbounded_ | `active-rentals-swfl` | `real-estate`, `housing` | ✅ active |
+| `entry_level_listing_share_swfl` | SWFL Entry-Tier Listing Share | `entry_level_listing_share_swfl` | intensive | % | _unbounded_ | `price-distribution-swfl` | `real-estate`, `housing` | ✅ active |
+| `golf_bundled_community_share_swfl` | SWFL Communities Where Golf Is Bundled (Share of Golf Communities) | `golf_bundled_community_share_swfl` | intensive | percent | _unbounded_ | `communities-swfl` | `real-estate` | ✅ active |
+| `homes_in_gated_communities_swfl` | SWFL Homes Inside Gated Communities | `homes_in_gated_communities_swfl` | extensive | homes | _unbounded_ | `communities-swfl` | `real-estate` | ✅ active |
+| `luxury_listing_share_swfl` | SWFL Luxury Listing Share | `luxury_listing_share_swfl` | intensive | % | _unbounded_ | `price-distribution-swfl` | `real-estate`, `housing` | ✅ active |
+| `market_heat_dom_yy_swfl` | SWFL Days-on-Market Y/Y | `market_heat_dom_yy_swfl` | intensive | % | _unbounded_ | `market-heat-swfl` | `real-estate`, `housing` | ✅ active |
+| `market_heat_inventory_yy_swfl` | SWFL Active Inventory Y/Y | `market_heat_inventory_yy_swfl` | intensive | % | _unbounded_ | `market-heat-swfl` | `real-estate`, `housing` | ✅ active |
+| `market_heat_pending_ratio_swfl` | SWFL Pending Ratio | `market_heat_pending_ratio_swfl` | intensive | ratio | _unbounded_ | `market-heat-swfl` | `real-estate`, `housing` | ✅ active |
+| `market_heat_price_cut_share_swfl` | SWFL Price-Cut Share | `market_heat_price_cut_share_swfl` | intensive | % | _unbounded_ | `market-heat-swfl` | `real-estate`, `housing` | ✅ active |
+| `market_heat_tilt_swfl` | SWFL Market Heat Tilt | `market_heat_tilt_swfl` | intensive | score (0-100) | _unbounded_ | `market-heat-swfl` | `real-estate`, `housing` | ✅ active |
+| `marketed_communities_count_swfl` | SWFL Marketed Golf/Gated Communities Catalogued | `marketed_communities_count_swfl` | extensive | communities | _unbounded_ | `communities-swfl` | `real-estate` | ✅ active |
+| `median_hoa_fee_midpoint_swfl` | SWFL Marketed-Community Median HOA Fee (Range Midpoint) | `median_hoa_fee_midpoint_swfl` | intensive | USD | _unbounded_ | `communities-swfl` | `real-estate` | ✅ active |
+| `midmarket_listing_share_swfl` | SWFL Mid-Market Listing Share | `midmarket_listing_share_swfl` | intensive | % | _unbounded_ | `price-distribution-swfl` | `real-estate`, `housing` | ✅ active |
+| `new_listing_share_swfl` | SWFL New-Listing Share | `new_listing_share_swfl` | intensive | % | _unbounded_ | `listing-momentum-swfl` | `real-estate`, `housing` | ✅ active |
+| `price_reduced_share_swfl` | SWFL Price-Cut Share | `price_reduced_share_swfl` | intensive | % | _unbounded_ | `listing-momentum-swfl` | `real-estate`, `housing` | ✅ active |
 | `seller_stress_avg_drop_depth_swfl` | SWFL Median Avg Price Drop Depth | `seller_stress_avg_drop_depth_swfl` | intensive | % | _unbounded_ | `seller-stress-swfl` | `real-estate`, `housing` | ✅ active |
 | `seller_stress_cancellation_rate_swfl` | SWFL Median Cancellation Rate | `seller_stress_cancellation_rate_swfl` | intensive | % | _unbounded_ | `seller-stress-swfl` | `real-estate`, `housing` | ✅ active |
 | `seller_stress_delistings_rate_swfl` | SWFL Median Delistings Rate | `seller_stress_delistings_rate_swfl` | intensive | % | _unbounded_ | `seller-stress-swfl` | `real-estate`, `housing` | ✅ active |
 | `seller_stress_price_drops_rate_swfl` | SWFL Median Price Drop Rate | `seller_stress_price_drops_rate_swfl` | intensive | % | _unbounded_ | `seller-stress-swfl` | `real-estate`, `housing` | ✅ active |
 | `seller_stress_score_swfl` | SWFL Seller Stress Score | `seller_stress_score_swfl` | intensive | score (0-100) | _unbounded_ | `seller-stress-swfl` | `real-estate`, `housing` | ✅ active |
+| `sold_to_rent_ratio_swfl` | SWFL Sold-to-Rent Multiple | `sold_to_rent_ratio_swfl` | intensive | price ÷ annual rent | _unbounded_ | `market-temperature-swfl` | `real-estate`, `housing` | ✅ active |
+| `total_homes_catalogued_swfl` | SWFL Homes Catalogued to a Neighborhood (Lee + Collier) | `total_homes_catalogued_swfl` | extensive | homes | _unbounded_ | `communities-swfl` | `real-estate` | ✅ active |
+| `upper_tier_listing_share_swfl` | SWFL Upper-Tier Listing Share | `upper_tier_listing_share_swfl` | intensive | % | _unbounded_ | `price-distribution-swfl` | `real-estate`, `housing` | ✅ active |
 
 <details><summary>Scope notes</summary>
 
+- **`active_rental_listings_count_swfl`** — Count of active rental listings across SWFL (Lee + Collier), from SteadyAPI's weekly rentals-search sweep. List-side rental inventory only — not a median rent (see market-temperature-swfl for the source-faithful median) and not the ZORI rent index/trend (see rentals-swfl).
+- **`entry_level_listing_share_swfl`** — Share of active SWFL for-sale listings priced under $300,000 (Lee + Collier), from the realtor.com price-histogram aggregate. Includes vacant land/lots — not all entry-level homes. List-side snapshot.
+- **`golf_bundled_community_share_swfl`** — Share of SWFL marketed golf communities whose golf is bundled into membership (vs equity/optional/none), over communities with a known golf structure. Cited to named real-estate sources.
+- **`homes_in_gated_communities_swfl`** — Count of SWFL homes whose marketed community carries the gated flag — an OUTPUT of the Tier-1 join (never a stored/invented number). Emitted only when a community's gated flag and home count are both known.
+- **`luxury_listing_share_swfl`** — Share of active SWFL for-sale listings priced $1,000,000 and above (Lee + Collier), from the realtor.com price-histogram aggregate. List-side snapshot.
+- **`market_heat_dom_yy_swfl`** — SWFL median days-on-market, year-over-year change (realtor.com, ZIP grain). Falling = homes selling faster = bullish.
+- **`market_heat_inventory_yy_swfl`** — SWFL median active-listing count, year-over-year change (realtor.com, ZIP grain). The lead tightening signal — falling inventory = bullish.
+- **`market_heat_pending_ratio_swfl`** — SWFL median pending ratio (pending ÷ active listings; realtor.com, ZIP grain). The leading demand edge — rising = demand tightening = bullish.
+- **`market_heat_price_cut_share_swfl`** — SWFL median share of active listings with a price reduction (realtor.com, ZIP grain). Coincident context — rising = softening. Realtor's list-side cut share is distinct from the Redfin price-drop breadth that feeds seller-stress-swfl.
+- **`market_heat_tilt_swfl`** — SWFL market-heat tilt (0-100, 50 = balanced; >50 = tightening/seller-favoring) — median per-ZIP composite of the inventory, DOM, and pending-ratio year-over-year signals from realtor.com. Higher = more tightening = more bullish. Distinct from Hotness, which is a relative cross-sectional rank, not this directional tilt.
+- **`marketed_communities_count_swfl`** — Count of marketed golf/gated communities in Lee + Collier profiled with golf/fee/amenity facts (Tier-2 catalog).
+- **`median_hoa_fee_midpoint_swfl`** — Median of the HOA fee-range midpoints across SWFL marketed communities with both fee bounds known. Cited to named real-estate sources; community-level range, not a per-home due.
+- **`midmarket_listing_share_swfl`** — Share of active SWFL for-sale listings priced $300,000 to $600,000 (Lee + Collier), from the realtor.com price-histogram aggregate. List-side snapshot.
+- **`new_listing_share_swfl`** — Share of active SWFL for-sale listings flagged newly listed (Lee + Collier), a point-in-time flag share off our own realtor.com for-sale sweep. A leading supply signal; a rising share week-over-week reads as fresh inventory building.
+- **`price_reduced_share_swfl`** — Share of active SWFL for-sale listings currently carrying a price reduction (Lee + Collier), a point-in-time flag share off our own realtor.com for-sale sweep. A leading softening signal; a rising share week-over-week reads as market cooling. Distinct from market-heat's monthly YoY price-cut metric.
 - **`seller_stress_avg_drop_depth_swfl`** — SWFL median average size of price reductions among listings that received a cut in the rolling 3-month period. Lagging indicator per Dallas Fed nowcast (2023): depth amplifies breadth signal but lags it. Higher = more bearish.
 - **`seller_stress_cancellation_rate_swfl`** — SWFL median contract cancellation rate (cancellations as % of pending sales) in the rolling 3-month period. Lagging indicator (~30-60 days). Not included in any public composite seller stress score at ZIP grain. Higher = more bearish.
 - **`seller_stress_delistings_rate_swfl`** — SWFL median share of active listings that were delisted (taken off market without selling) in the rolling 3-month period. Leading indicator — delistings lead price unlock per Redfin Nov 2025 research. Higher = more bearish.
 - **`seller_stress_price_drops_rate_swfl`** — SWFL median share of active listings that received at least one price reduction in the rolling 3-month period. Coincident seller-side signal per Zillow Market Heat Index methodology (2024). Higher = more bearish.
 - **`seller_stress_score_swfl`** — Composite seller stress score (0-100) per SWFL region, computed as a z-score-weighted combination of delistings rate, price drop breadth, cancellation rate, avg drop depth, and relisting rate vs the 2019-2021 baseline. Higher = more stress = more bearish.
+- **`sold_to_rent_ratio_swfl`** — SWFL median price-to-annual-rent multiple (median home sold price ÷ annual rent), from realtor.com's monthly ZIP aggregates (Lee + Collier). Its inverse is the implied GROSS rental yield (before taxes/insurance/HOA/vacancy). The one field no free source publishes — this brain's net-new read, distinct from the sold price and rent index tracked elsewhere.
+- **`total_homes_catalogued_swfl`** — Count of residential parcels in Lee + Collier assigned to a subdivision/neighborhood by the parcel name-join (Tier-1 universal backbone). Authoritative from our parcel data; each condo unit counts as one home.
+- **`upper_tier_listing_share_swfl`** — Share of active SWFL for-sale listings priced $600,000 to $1,000,000 (Lee + Collier), from the realtor.com price-histogram aggregate. List-side snapshot.
 
 </details>
 
@@ -458,10 +503,12 @@ bun refinery/tools/semantic-ledger.mts
 
 </details>
 
-### `real-estate` (103)
+### `real-estate` (127)
 
 | Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `active_listings_count_swfl` | SWFL Active Residential Listings (Count) | `active_listings_count_swfl` | count | — | _unbounded_ | _none_ | _none_ | ⚠️ undefined |
+| `avg_days_on_market_swfl` | SWFL Average Days on Market (Active Residential) | `avg_days_on_market_swfl` | days | — | _unbounded_ | _none_ | _none_ | ⚠️ undefined |
 | `cre_absorption_sqft` | Net Absorption (per corridor) | `absorption_sqft` | integer | sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
 | `cre_absorption_sqft_median` | Median Net Absorption (corpus) | `absorption_sqft_median` | integer | sqft | _unbounded_ | `cre-swfl`, `master` | `real-estate` | ✅ active |
 | `cre_absorption_sqft_median_county` | Median Net Absorption — per county (Lee / Collier) | _none_ | integer | sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
@@ -471,6 +518,14 @@ bun refinery/tools/semantic-ledger.mts
 | `cre_cap_rate` | Cap Rate (per corridor) | `cap_rate` | percentage | % | 0 – 20 | `cre-swfl` | `real-estate` | ✅ active |
 | `cre_cap_rate_median` | Median Cap Rate (corpus) | `cap_rate_median` | percentage | % | 0 – 20 | `cre-swfl`, `master` | `real-estate` | ✅ active |
 | `cre_cap_rate_median_county` | Median Cap Rate — per county (Lee / Collier) | _none_ | percentage | % | 0 – 20 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_construction_cost_ppi_industrial` | Construction Cost — New Industrial Building (PPI) | `construction_cost_ppi_industrial` | index | PPI index (NSA, base period varies by series) | 0 – 1000 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_construction_cost_ppi_medical_office` | Construction Cost — New Health Care Building (PPI) | `construction_cost_ppi_medical_office` | index | PPI index (NSA, base period varies by series) | 0 – 1000 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_construction_cost_ppi_office` | Construction Cost — New Office Building (PPI) | `construction_cost_ppi_office` | index | PPI index (NSA, base period varies by series) | 0 – 1000 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_construction_cost_ppi_trade_concrete` | Construction Cost — Concrete Contractors, Nonres. (PPI) | `construction_cost_ppi_trade_concrete` | index | PPI index (NSA, base period varies by series) | 0 – 1000 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_construction_cost_ppi_trade_electrical` | Construction Cost — Electrical Contractors, Nonres. (PPI) | `construction_cost_ppi_trade_electrical` | index | PPI index (NSA, base period varies by series) | 0 – 1000 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_construction_cost_ppi_trade_plumbing_hvac` | Construction Cost — Plumbing/HVAC Contractors, Nonres. (PPI) | `construction_cost_ppi_trade_plumbing_hvac` | index | PPI index (NSA, base period varies by series) | 0 – 1000 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_construction_cost_ppi_trade_roofing` | Construction Cost — Roofing Contractors, Nonres. (PPI) | `construction_cost_ppi_trade_roofing` | index | PPI index (NSA, base period varies by series) | 0 – 1000 | `cre-swfl` | `real-estate` | ✅ active |
+| `cre_construction_cost_ppi_warehouse` | Construction Cost — New Warehouse Building (PPI) | `construction_cost_ppi_warehouse` | index | PPI index (NSA, base period varies by series) | 0 – 1000 | `cre-swfl` | `real-estate` | ✅ active |
 | `cre_corridor_evolution` | Corridor Evolution Stage | `evolution` | enum | — | `growing` / `stable` / `repositioning` / `declining` | `cre-swfl` | `real-estate` | ✅ active |
 | `cre_corridor_factor` | Corridor Factor Index | `corridor_factor` | score | index 0-100 | 0 – 100 | `cre-swfl` | `real-estate` | ✅ active |
 | `cre_corridor_pulse_signals` | Live Corridor-Pulse Signals | `corridor_pulse_signals_live` | count | signals | 0 – 1000 | `cre-swfl` | `real-estate` | ✅ active |
@@ -487,6 +542,14 @@ bun refinery/tools/semantic-ledger.mts
 | `fhfa_cape_coral_msa_yoy_pct` | Cape Coral-Fort Myers MSA HPI Year-over-Year Change (FHFA) | `fhfa_cape_coral_msa_yoy_pct` | percent_change | percent | -30 – 30 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
 | `fhfa_fl_state_yoy_pct` | Florida Statewide HPI Year-over-Year Change (FHFA) | `fhfa_fl_state_yoy_pct` | percent_change | percent | -30 – 30 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
 | `fhfa_naples_msa_yoy_pct` | Naples-Marco Island MSA HPI Year-over-Year Change (FHFA) | `fhfa_naples_msa_yoy_pct` | percent_change | percent | -30 – 30 | `properties-collier-value`, `master` | `real-estate` | ✅ active |
+| `freshness_median_asking_price_cape_coral_usd` | Cape Coral — Today's Median Asking Price | `freshness_median_asking_price_cape_coral_usd` | currency | USD | _unbounded_ | `freshness-pulse`, `master` | `real-estate` | ✅ active |
+| `freshness_median_asking_price_fort_myers_usd` | Fort Myers — Today's Median Asking Price | `freshness_median_asking_price_fort_myers_usd` | currency | USD | _unbounded_ | `freshness-pulse`, `master` | `real-estate` | ✅ active |
+| `freshness_median_asking_price_naples_usd` | Naples — Today's Median Asking Price | `freshness_median_asking_price_naples_usd` | currency | USD | _unbounded_ | `freshness-pulse`, `master` | `real-estate` | ✅ active |
+| `freshness_median_sale_price_cape_coral_usd` | Cape Coral — Today's Sourced Median Sale Price | `freshness_median_sale_price_cape_coral_usd` | currency | USD | _unbounded_ | `freshness-pulse`, `master` | `real-estate` | ✅ active |
+| `freshness_median_sale_price_fort_myers_usd` | Fort Myers — Today's Sourced Median Sale Price | `freshness_median_sale_price_fort_myers_usd` | currency | USD | _unbounded_ | `freshness-pulse`, `master` | `real-estate` | ✅ active |
+| `freshness_median_sale_price_naples_usd` | Naples — Today's Sourced Median Sale Price | `freshness_median_sale_price_naples_usd` | currency | USD | _unbounded_ | `freshness-pulse`, `master` | `real-estate` | ✅ active |
+| `freshness_mortgage_30yr_fixed_pct` | 30-Year Fixed Mortgage Rate — Today's Sourced Value | `freshness_mortgage_30yr_fixed_pct` | ratio | % | _unbounded_ | `freshness-pulse`, `master` | `real-estate` | ✅ active |
+| `freshness_zip_pulse_median_price_approx` | Per-ZIP Pulse Median Price (approx, [INFERENCE]) | _none_ | currency | USD | _unbounded_ | `freshness-pulse` | `real-estate` | ✅ active |
 | `home_value_yoy_pct` | ZHVI Home Value YoY % - ZIP Level | `home_value_yoy_pct` | percent_change | % | -50 – 50 | `home-values-swfl`, `investor-zip-swfl`, `master` | `real-estate` | ✅ active |
 | `home_value_yoy_pct_regional_median` | ZHVI Home Value YoY % - SWFL Regional Median | `home_value_yoy_pct_regional_median` | percent_change | % | -50 – 50 | `home-values-swfl`, `master` | `real-estate` | ✅ active |
 | `home_value_yoy_pct_top_appreciating_zips` | Top-Appreciating SWFL ZIPs by ZHVI Home Value YoY % | `home_value_yoy_pct_top_appreciating_zips` | string | — | _unbounded_ | `home-values-swfl` | `real-estate` | ✅ active |
@@ -507,12 +570,15 @@ bun refinery/tools/semantic-ledger.mts
 | `investor_zip_cards_with_flood_overlay` | Count of Investor Cards with Flood Overlay | `investor_zip_cards_with_flood_overlay` | count | count | 0 – 1000 | `investor-zip-swfl` | `real-estate`, `environmental` | ✅ active |
 | `marketbeat_absorption_sqft` | Net Absorption (MarketBeat/MHS, per place) | _none_ | integer | sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
 | `marketbeat_absorption_sqft_industrial` | Net Absorption — Industrial (MarketBeat/MHS, per place) | _none_ | integer | sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
+| `marketbeat_absorption_sqft_medical_office` | Net Absorption — Medical Office (MarketBeat, per place) | _none_ | integer | sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
 | `marketbeat_absorption_sqft_office` | Net Absorption — Office (MarketBeat/MHS, per place) | _none_ | integer | sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
-| `marketbeat_asking_rent_nnn` | Asking Rent NNN (MarketBeat/MHS, per place) | _none_ | currency | USD/sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
+| `marketbeat_asking_rent_full_service_medical_office` | Asking Rent Full Service — Medical Office (MarketBeat, per place) | _none_ | currency | USD/sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
+| `marketbeat_asking_rent_nnn` | Asking Rent NNN (MarketBeat/MHS, per place) | `asking_rent_nnn_marketbeat_swfl` | currency | USD/sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
 | `marketbeat_asking_rent_nnn_industrial` | Asking Rent NNN — Industrial (MarketBeat/MHS, per place) | _none_ | currency | USD/sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
 | `marketbeat_asking_rent_nnn_office` | Asking Rent NNN — Office (MarketBeat/MHS, per place) | _none_ | currency | USD/sqft | _unbounded_ | `cre-swfl` | `real-estate` | ✅ active |
 | `marketbeat_vacancy_rate` | Vacancy Rate (MarketBeat/MHS, per place) | `vacancy_rate_marketbeat_swfl` | percentage | % | 0 – 100 | `cre-swfl` | `real-estate` | ✅ active |
 | `marketbeat_vacancy_rate_industrial` | Vacancy Rate — Industrial (MarketBeat/MHS, per place) | _none_ | percentage | % | 0 – 100 | `cre-swfl` | `real-estate` | ✅ active |
+| `marketbeat_vacancy_rate_medical_office` | Vacancy Rate — Medical Office (MarketBeat, per place) | _none_ | percentage | % | 0 – 100 | `cre-swfl` | `real-estate` | ✅ active |
 | `marketbeat_vacancy_rate_office` | Vacancy Rate — Office (MarketBeat/MHS, per place) | _none_ | percentage | % | 0 – 100 | `cre-swfl` | `real-estate` | ✅ active |
 | `median_dom_yoy_days` | Median Days on Market YoY Change | `median_dom_yoy_days` | days | days | _unbounded_ | `housing-swfl` | `real_estate` | ✅ active |
 | `median_sale_price_yoy_pct` | Median Sale Price YoY Change | `median_sale_price_yoy_pct` | percent_change | % | _unbounded_ | `housing-swfl` | `real_estate` | ✅ active |
@@ -535,7 +601,9 @@ bun refinery/tools/semantic-ledger.mts
 | `properties_collier_median_sale_price_yoy` | Collier County Median Sale Price Year-over-Year (Redfin) | `collier_median_sale_price_yoy` | percent_change | percent | -30 – 30 | `properties-collier-value`, `master` | `real-estate` | ✅ active |
 | `properties_collier_months_of_supply` | Collier County Months of Supply (Redfin) | `collier_months_of_supply` | rate | months | 0 – 36 | `properties-collier-value`, `master` | `real-estate` | ✅ active |
 | `properties_collier_soh_gap_median_pct` | Collier County Save-Our-Homes Gap Median (% Homestead Just Value Suppressed) | `collier_soh_gap_median_pct` | percentage | % | 0 – 80 | `properties-collier-value`, `master` | `real-estate` | ✅ active |
+| `properties_collier_sold_median_homes_only` | Collier County Homes-Only Sold Median (Recorded Deeds) | `collier_sold_median_homes_only` | currency | USD | 0 – 100000000 | `properties-collier-value`, `master` | `real-estate` | ✅ active |
 | `properties_collier_total_parcels` | Collier County Total Parcels (FDOR Cadastral Snapshot) | `collier_total_parcels` | count | parcels | 0 – 1000000 | `properties-collier-value`, `master` | `real-estate` | ✅ active |
+| `properties_lee_fdor_commercial_parcel_count` | Lee County Commercial Parcel Count (FDOR Use-Code Category) | `fdor_commercial_parcel_count` | count | parcels | 0 – 1000000 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
 | `properties_lee_homes_sold_per_year` | Lee County Residential Homes Sold (Current Year, Redfin) | `lee_homes_sold_per_year` | count | home sales | 0 – 100000 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
 | `properties_lee_homes_sold_zscore` | Lee County Homes-Sold Z-Score (Current Year vs Trailing 3yr Baseline, Redfin) | `lee_homes_sold_zscore` | zscore | z-score | -5 – 5 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
 | `properties_lee_median_sale_price_yoy` | Lee County Median Sale Price Year-over-Year (Redfin) | `lee_median_sale_price_yoy` | percent_change | percent | -50 – 100 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
@@ -543,6 +611,7 @@ bun refinery/tools/semantic-ledger.mts
 | `properties_lee_sales_velocity_per_1k` | Lee County Qualified Sales Velocity (Per 1,000 Parcels, Current Year) | `sales_velocity_per_1k` | rate | qualified sales per 1,000 parcels | 0 – 200 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
 | `properties_lee_sales_velocity_zscore` | Lee County Sales-Velocity Z-Score (Current Year vs Trailing 3yr Baseline) | `sales_velocity_zscore` | zscore | standard deviations | -10 – 10 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
 | `properties_lee_soh_gap_median_pct` | Lee County Save-Our-Homes Gap Median (% Just Value Suppressed) | `soh_gap_median_pct` | percentage | % | 0 – 80 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
+| `properties_lee_sold_median_homes_only` | Lee County Homes-Only Sold Median (Recorded Deeds) | `lee_sold_median_homes_only` | currency | USD | 0 – 100000000 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
 | `properties_lee_total_parcels` | Lee County Total Parcels (Snapshot Row Count) | `total_parcels` | count | parcels | 0 – 1000000 | `properties-lee-value`, `master` | `real-estate` | ✅ active |
 | `rental_rent_index_zori` | Zillow Observed Rent Index (ZORI) â€” ZIP-Level Monthly Rent | `rental_rent_index_zori` | index | USD/month | 500 – 15000 | `rentals-swfl`, `master` | `real-estate` | ✅ active |
 | `rental_rent_index_zori_regional_median` | ZORI Rent Index â€” SWFL Regional Median | `rental_rent_index_zori_regional_median` | index | USD/month | 500 – 10000 | `rentals-swfl`, `master` | `real-estate` | ✅ active |
@@ -568,6 +637,8 @@ bun refinery/tools/semantic-ledger.mts
 
 <details><summary>Scope notes</summary>
 
+- **`active_listings_count_swfl`** — Count of active residential listings across SWFL . List-side inventory; rising inventory signals a softening, buyer-favorable market.
+- **`avg_days_on_market_swfl`** — Average days on market across active SWFL residential listings . Higher = slower market.
 - **`cre_absorption_sqft`** — Net absorption in square feet over the metrics_period. Negative values are valid (give-back). Bullish polarity: rising = stronger leasing velocity.
 - **`cre_absorption_sqft_median_county`** — Median net absorption in sqft computed independently per county. Slug form: absorption_sqft_median_{lee|collier}.
 - **`cre_asking_rent_psf`** — Average asking rent, NNN, per square foot. Bullish polarity: rising = pricing power â€” BUT rising rent + rising vacancy = distress (asking-price stickiness, not real pricing power). Polarity is enforced per metric in the cre-swfl voteCorridor.
@@ -575,13 +646,21 @@ bun refinery/tools/semantic-ledger.mts
 - **`cre_cap_rate`** — Point-in-time corridor-level cap rate. Trajectory (falling/stable/rising) signals landlord vs tenant market direction.
 - **`cre_cap_rate_median`** — Median across all corridors with reported metrics in the current period. A falling median is the primary bullish signal in the cre-swfl pack.
 - **`cre_cap_rate_median_county`** — Median cap rate computed independently for Lee County corridors and Collier County corridors. County is a code-derived partition (cre-source.mts CITY_TO_COUNTY) — not a DB column. Slug form: cap_rate_median_{lee|collier}. Denominator is that county's corridor count, not the SWFL total.
+- **`cre_construction_cost_ppi_industrial`** — BLS PPI industry data for New Industrial Building Construction (NAICS 236211), national series, monthly, not seasonally adjusted. Pairs with cre-swfl's existing industrial MarketBeat sector. Rising cost is bearish for development feasibility — lower_is_bullish.
+- **`cre_construction_cost_ppi_medical_office`** — BLS PPI industry data for New Health Care Building Construction (NAICS 236224), national series, monthly, not seasonally adjusted. Pairs with cre-swfl's existing medical_office MarketBeat sector. Rising cost is bearish for development feasibility — lower_is_bullish.
+- **`cre_construction_cost_ppi_office`** — BLS PPI industry data for New Office Building Construction (NAICS 236223), national series, monthly, not seasonally adjusted. Pairs with cre-swfl's existing office MarketBeat sector. Rising cost is bearish for development feasibility — lower_is_bullish.
+- **`cre_construction_cost_ppi_trade_concrete`** — BLS PPI industry data for concrete contractors performing nonresidential building work (NAICS 23811X), national series. Cross-sector trade-cost input, not tied to one cre-swfl sector — never blended with the building-type indexes above. Rising cost is bearish — lower_is_bullish.
+- **`cre_construction_cost_ppi_trade_electrical`** — BLS PPI industry data for electrical contractors performing nonresidential building work (NAICS 23821X), national series. Cross-sector trade-cost input, not tied to one cre-swfl sector — never blended with the building-type indexes above. Rising cost is bearish — lower_is_bullish.
+- **`cre_construction_cost_ppi_trade_plumbing_hvac`** — BLS PPI industry data for plumbing/HVAC contractors performing nonresidential building work (NAICS 23822X), national series. Cross-sector trade-cost input, not tied to one cre-swfl sector — never blended with the building-type indexes above. Rising cost is bearish — lower_is_bullish.
+- **`cre_construction_cost_ppi_trade_roofing`** — BLS PPI industry data for roofing contractors performing nonresidential building work (NAICS 23816X), national series. Cross-sector trade-cost input, not tied to one cre-swfl sector — never blended with the building-type indexes above. Rising cost is bearish — lower_is_bullish.
+- **`cre_construction_cost_ppi_warehouse`** — BLS PPI industry data for New Warehouse Building Construction (NAICS 236221), national series, monthly, not seasonally adjusted. Pairs with cre-swfl's existing industrial MarketBeat sector alongside construction_cost_ppi_industrial. Rising cost is bearish for development feasibility — lower_is_bullish.
 - **`cre_corridor_evolution`** — Qualitative lifecycle stage of a corridor. Ordered by operator-friendliness descending; see cre_corridor_evolution_stages in ordered_collections.
 - **`cre_corridor_factor`** — Composite 0–100 index ranking SWFL CRE corridors on four metrics (cap rate, vacancy, absorption, asking rent) via within-cohort percentile-rank with equal weights. 67–100 = strong, 34–66 = neutral, 0–33 = soft. Corridor-health/landlord lens by default; buyer/yield lens available via config. Higher is bullish. Weights and band thresholds are empirical placeholders pending §8.2 backtest (2022–2024 corridor outcomes).
 - **`cre_corridor_pulse_signals`** — Count of live corridor-pulse current-events signals (TTL-bounded news/lease/closure items) informing the cre-swfl read this period. Emitted only when count > 0; master gates its 'ask about a specific area' grain-boundary route on this contribution count, not on cre merely being wired. No inherent direction polarity — a signal can be bullish (new lease/opening) or bearish (closure/termination), so the concept is intentionally ungradeable.
 - **`cre_seasonal_index`** — 0 = no seasonality, 1 = extreme seasonality. Corridor-level only; not aggregated to corpus median.
 - **`cre_vacancy_rate_median_county`** — Median vacancy rate computed independently per county. Slug form: vacancy_rate_median_{lee|collier}. Collier is small-N (Naples-area corridors only) — the denominator label discloses corridor count so it cannot masquerade as a deep-sample read.
 - **`fgcu_reri_active_listings_pct_change`** — Year-over-year percentage change in SWFL residential active listings per FGCU RERI monthly report. ~2-month data lag.
-- **`fgcu_reri_home_prices_charlotte_pct_change`** — Year-over-year percentage change in Charlotte County single-family median home prices per FGCU RERI monthly report. ~2-month data lag.
+- **`fgcu_reri_home_prices_charlotte_pct_change`** — Year-over-year percentage change in Charlotte County single-family median home prices per FGCU RERI monthly report. ~2-month data lag. Deliberate named-source exception to the Lee + Collier core scope (operator ruling 07/11/2026): the series is RERI's own published tri-county data, always county-labeled.
 - **`fgcu_reri_home_prices_collier_pct_change`** — Year-over-year percentage change in Collier County single-family median home prices per FGCU RERI monthly report. ~2-month data lag.
 - **`fgcu_reri_home_prices_lee_pct_change`** — Year-over-year percentage change in Lee County single-family median home prices per FGCU RERI monthly report. ~2-month data lag.
 - **`fgcu_reri_home_sales_sf_pct_change`** — Year-over-year percentage change in SWFL single-family home sales per FGCU RERI monthly report. ~2-month data lag.
@@ -589,6 +668,14 @@ bun refinery/tools/semantic-ledger.mts
 - **`fhfa_cape_coral_msa_yoy_pct`** — Year-over-year percent change in FHFA House Price Index (traditional, purchase-only, quarterly, NSA) for the Cape Coral-Fort Myers FL MSA â€” the Lee County price-level proxy. Computed from data_lake.fhfa_hpi: (latest_quarter_index - same_quarter_prior_year_index) / same_quarter_prior_year_index Ã— 100. Negative = falling prices; positive = rising. Exogenous signal in properties-lee-value; contrasted against LeePA sales-velocity z-score.
 - **`fhfa_fl_state_yoy_pct`** — Year-over-year percent change in FHFA House Price Index (traditional, purchase-only, quarterly, NSA) for the state of Florida (place_id='FL'). Computed from data_lake.fhfa_hpi. State baseline for comparison against Cape Coral MSA divergence. Negative = statewide prices falling; positive = rising.
 - **`fhfa_naples_msa_yoy_pct`** — Year-over-year percent change in FHFA House Price Index (traditional, purchase-only, quarterly, NSA) for the Naples-Marco Island FL MSA — the Collier County price-level proxy. Computed from data_lake.fhfa_hpi: (latest_quarter_index - same_quarter_prior_year_index) / same_quarter_prior_year_index × 100. Negative = falling prices; positive = rising. Exogenous signal in properties-collier-value; contrasted against Redfin homes-sold velocity z-score.
+- **`freshness_median_asking_price_cape_coral_usd`** — Today's median ASKING (list) price for active home listings in Cape Coral, FL, from the daily freshness layer (data_lake.daily_truth, fetch_mode=lake): a deterministic median over our own cleaned inventory view (data_lake.listing_active_homes — homes only, no land, no rental mislabels). Asking, never sold — the sold companion is the monthly city-grain median in data_lake.redfin_city_swfl. Replaced the retired median_sale_price web-search 07/12/2026. Anomaly-screened against our own prior value; range gate catches a land-blend regression.
+- **`freshness_median_asking_price_fort_myers_usd`** — Today's median ASKING (list) price for active home listings in Fort Myers, FL, from the daily freshness layer (data_lake.daily_truth, fetch_mode=lake): a deterministic median over our own cleaned inventory view (data_lake.listing_active_homes). Asking, never sold — the sold companion is the monthly city-grain median in data_lake.redfin_city_swfl. Replaced the retired median_sale_price web-search 07/12/2026.
+- **`freshness_median_asking_price_naples_usd`** — Today's median ASKING (list) price for active home listings in Naples, FL (Collier), from the daily freshness layer (data_lake.daily_truth, fetch_mode=lake): a deterministic median over our own cleaned inventory view (data_lake.listing_active_homes). Asking, never sold — the sold companion is the monthly city-grain median in data_lake.redfin_city_swfl. Replaced the retired median_sale_price web-search 07/12/2026.
+- **`freshness_median_sale_price_cape_coral_usd`** — RETIRED FEED 07/12/2026 — the median_sale_price web-search wrote 19 days of NULL-only rows (no daily sold source exists) and was removed from the registry; no new values can ever emit under this slug. Registered for historic brains only. Successor: freshness_median_asking_price_cape_coral_usd (daily asking, own inventory) + the monthly sold anchor in data_lake.redfin_city_swfl.
+- **`freshness_median_sale_price_fort_myers_usd`** — RETIRED FEED 07/12/2026 — the median_sale_price web-search wrote 19 days of NULL-only rows (no daily sold source exists) and was removed from the registry; no new values can ever emit under this slug. Registered for historic brains only. Successor: freshness_median_asking_price_fort_myers_usd (daily asking, own inventory) + the monthly sold anchor in data_lake.redfin_city_swfl.
+- **`freshness_median_sale_price_naples_usd`** — RETIRED FEED 07/12/2026 — the median_sale_price web-search wrote 19 days of NULL-only rows (no daily sold source exists) and was removed from the registry; no new values can ever emit under this slug. Registered for historic brains only. Successor: freshness_median_asking_price_naples_usd (daily asking, own inventory) + the monthly sold anchor in data_lake.redfin_city_swfl.
+- **`freshness_mortgage_30yr_fixed_pct`** — Today's 30-year fixed mortgage rate (US average) from the daily freshness layer in api mode — a deterministic pull from FRED MORTGAGE30US (Freddie Mac PMMS, weekly Thursday release, units Percent). Area 'swfl' carries the single national rate; FRED is its own authority (no separate vendor anchor).
+- **`freshness_zip_pulse_median_price_approx`** — Per-ZIP pulse median price PROJECTION from the freshness-pulse Baseline-Delta machine — today's county-grain fresh delta applied to that ZIP's vendor baseline (ZHVI/Redfin). source_tag='approx', an [INFERENCE] (never a cited ZIP fact), superseded by the next ZIP-grain vendor file; a same-period vendor value wins. Today these ride in the freshness_by_zip detail_table (cells, not key_metrics — check-vocab-coverage does not scan detail_table ids); the pattern is registered now so a future key_metrics emission never orphans. Mirrors env-swfl's swfl_zip_*_flood_aal_usd_per_insured_property per-ZIP…
 - **`home_value_yoy_pct`** — Year-over-year percent change in home_value_zhvi for a given ZIP, computed deterministically in TypeScript by home-values-swfl as (value_t / value_t_minus_12 - 1) * 100. The slug template home_value_yoy_pct_zip_{ZIP} is matched via refinery/vocab/patterns.mts.
 - **`home_value_yoy_pct_regional_median`** — Median YoY % across SWFL ZIPs - the headline signal that drives home-values-swfl direction polarity per the locked band table (bearish < 0; neutral [0,3); bullish [3,10]; bullish with caveat (10,15]; neutral with caveat > 15).
 - **`home_value_yoy_pct_top_appreciating_zips`** — Comma-joined list of the top-N (default 3) SWFL ZIPs by home_value_yoy_pct at the latest period_end. Categorical metric - value is a label string, not a number.
@@ -609,12 +696,15 @@ bun refinery/tools/semantic-ledger.mts
 - **`investor_zip_cards_with_flood_overlay`** — Count of investor cards that also carry the flood-adjusted cap rate - i.e. ZIPs env-swfl surfaces. Sentinel exposing the moat-metric coverage gap (flood overlay reaches only env's top-AAL ZIPs, not all value+rent ZIPs).
 - **`marketbeat_absorption_sqft`** — Per-place net absorption from the MarketBeat/MHS submarket feed. Negative values are valid (give-back). Slug tail is the canonical place (places-swfl.mts).
 - **`marketbeat_absorption_sqft_industrial`** — Per-place INDUSTRIAL net absorption from the MarketBeat/MHS feed. Negative values are valid (give-back). Distinct sector — surfaced separately (2026-06-08), never blended. Slug tail is the canonical place plus an `_industrial` suffix.
+- **`marketbeat_absorption_sqft_medical_office`** — Per-place MEDICAL OFFICE net absorption from the MarketBeat feed (added 2026-07-15). Negative values are valid (give-back). Distinct sector — surfaced separately, never blended. Slug tail is the canonical place plus a `_medical_office` suffix. MUST be listed before `marketbeat_absorption_sqft_office` — "medical_office" ends in "_office", so the office glob would otherwise match a medical_office slug first (first-match-wins pattern resolution).
 - **`marketbeat_absorption_sqft_office`** — Per-place OFFICE net absorption from the MarketBeat/MHS feed. Negative values are valid (give-back). Distinct sector — surfaced separately (2026-06-08), never blended. Slug tail is the canonical place plus an `_office` suffix.
+- **`marketbeat_asking_rent_full_service_medical_office`** — Per-place MEDICAL OFFICE asking rent from the MarketBeat feed (added 2026-07-15), full-service/gross basis — NOT NNN. The C&W Medical Office report states rent this way; distinct field (asking_rent_full_service) from the NNN basis every other sector uses, so it is never comparable to marketbeat_asking_rent_nnn_* without disclosing the basis difference. Slug tail is the canonical place plus a `_medical_office` suffix.
 - **`marketbeat_asking_rent_nnn`** — Per-place NNN asking rent from the MarketBeat/MHS submarket feed. Slug tail is the canonical place (places-swfl.mts).
 - **`marketbeat_asking_rent_nnn_industrial`** — Per-place INDUSTRIAL NNN asking rent from the MarketBeat/MHS feed. Distinct sector — surfaced separately (2026-06-08), never blended across sectors. Slug tail is the canonical place plus an `_industrial` suffix.
 - **`marketbeat_asking_rent_nnn_office`** — Per-place OFFICE NNN asking rent from the MarketBeat/MHS feed. Distinct sector — surfaced separately (2026-06-08), never blended across sectors. Slug tail is the canonical place plus an `_office` suffix.
 - **`marketbeat_vacancy_rate`** — Per-place RETAIL CRE vacancy from the MarketBeat/MHS submarket feed (retail is the bare, default sector — industrial/office carry an explicit `_industrial`/`_office` suffix and resolve to their own concepts, which are listed BEFORE this one so the sector-specific globs win first-match). Slug tail is the canonical place (places-swfl.mts) — a rollup place (…_naples) or a sub-area (…_east_naples). The `**` pattern covers both single- and multi-word place tails.
 - **`marketbeat_vacancy_rate_industrial`** — Per-place INDUSTRIAL CRE vacancy from the MarketBeat/MHS feed. A distinct sector from retail — surfaced separately (per-sector reversal 2026-06-08), NEVER blended with retail or office. Slug tail is the canonical place (places-swfl.mts; may carry an `_area` parent-rollup segment) plus an `_industrial` sector suffix. Listed before the bare `marketbeat_vacancy_rate` retail pattern so the sector-specific glob resolves first.
+- **`marketbeat_vacancy_rate_medical_office`** — Per-place MEDICAL OFFICE CRE vacancy from the MarketBeat feed (added 2026-07-15). A distinct sector from retail/industrial/office — surfaced separately, NEVER blended. Slug tail is the canonical place (places-swfl.mts; may carry an `_area` parent-rollup segment) plus a `_medical_office` sector suffix. MUST be listed before `marketbeat_vacancy_rate_office` — "medical_office" ends in "_office", so the office glob (`vacancy_rate_marketbeat_**_office` → `.+_office$`) would otherwise match a medical_office slug first (first-match-wins pattern resolution).
 - **`marketbeat_vacancy_rate_office`** — Per-place OFFICE CRE vacancy from the MarketBeat/MHS feed. A distinct sector from retail/industrial — surfaced separately (per-sector reversal 2026-06-08), NEVER blended. Slug tail is the canonical place (places-swfl.mts; may carry an `_area` parent-rollup segment) plus an `_office` sector suffix.
 - **`permits_collier_corridor_z`** — Per-(Naples corridor x bucket) rate-normalized z-score. Child slugs match permits_collier_corridor_{corridor_id}_{bucket}_z.
 - **`permits_collier_county_weighted_avg_corridor_z`** — Corridor-weighted mean z-score of rate-normalized permit issuance across Collier-county (Naples) corridors only. Current 90d vs trailing 13 x 28d windows. Carries a load-bearing short-baseline caveat through ~Q4 2026.
@@ -635,14 +725,17 @@ bun refinery/tools/semantic-ledger.mts
 - **`properties_collier_median_sale_price_yoy`** — Year-over-year percent change in Redfin median sale price ('All Residential') for Collier County at the latest published period. Positive = rising prices; negative = falling. Level/price metric, complementary to the homes-sold velocity direction signal.
 - **`properties_collier_months_of_supply`** — Redfin months-of-supply for Collier County ('All Residential') at the latest published period: inventory divided by the monthly sales pace. Lower = tighter, seller-favorable (lower_is_bullish); higher = more buyer leverage. Does NOT drive the leaf brain's direction (that is the homes-sold z-score; the pack emits MOS with direction 'stable'), but is independently gradeable with the same polarity as properties_lee_months_of_supply — identical Redfin All-Residential metric/units, so the polarity is verified on Collier's own semantics, not mirrored. Grade block added 2026-06-13 for Lee/Collier pa…
 - **`properties_collier_soh_gap_median_pct`** — Median (jv_hmstd - av_hmstd)/jv_hmstd * 100 across homesteaded Collier parcels (jv_hmstd>0) from the FDOR Statewide Cadastral (CO_NO=21). The homestead-portion Save-Our-Homes cap differential. High = long-tenured ownership; low = recent turnover. Textbook SOH measure; Lee's properties_lee_soh_gap_median_pct uses whole-parcel just-vs-taxable, so the two are directionally comparable, not numerically identical.
+- **`properties_collier_sold_median_homes_only`** — Homes-only (single-family + condo, FDOR use code 001/004) SOLD median per Collier County ZIP from FDOR recorded deeds — each parcel's latest recorded sale 2024+ over $20,000 (a stock of most-recent prices, not a transaction-flow median). Vacant land excluded — this is the sold, homes-only answer to the active-listing land-blend. Situs ZIP is native to the FDOR roll, so unlike Lee there is no centroid-to-ZCTA derivation. County rollup is the headline; per-ZIP detail rides in the collier_sold_median_by_zip detail table, ZIPs under 20 qualifying sales reporting the county median (county_fallback…
 - **`properties_collier_total_parcels`** — Row count of data_lake.collier_parcels (FDOR Statewide Cadastral, Collier CO_NO=21). The parcel-grain base enabling the Save-Our-Homes gap + future per-ZIP drill — the parity with the Lee parcel brain that Redfin's county aggregates can't provide.
-- **`properties_lee_homes_sold_per_year`** — Count of Redfin-recorded 'All Residential' closed sales in Lee County for the most recent complete calendar year (year-1 relative to today), summed from monthly HOMES_SOLD. Recent years are revised upward as late-recorded sales land; treat the latest year as a soft floor. Level metric — no grade block.
+- **`properties_lee_fdor_commercial_parcel_count`** — Count of Lee County parcels classed 'commercial' by FDOR's own DOR_UC use-code table (use-code 003 or 010-039) in data_lake.lee_parcels (FDOR statewide cadastral, ArcGIS FeatureServer, CO_NO=46). A separate source and methodology from the LeePA-sourced total_parcels above — a cross-check on scale, not reconciled to the parcel. Built 07/18/2026 alongside collier_parcels' widen, closing the gap where Lee had no FDOR-sourced parcel-category breakdown.
+- **`properties_lee_homes_sold_per_year`** — Count of Redfin-recorded 'All Residential' closed sales in Lee County for the most recent complete calendar year (year-1 relative to today), summed from monthly HOMES_SOLD. Recent years are revised upward as late-recorded sales land; treat the latest year as a soft floor. Higher = more closings = a stronger market.
 - **`properties_lee_homes_sold_zscore`** — Direction signal for properties-lee-value (market-grain). Bullish if z >= +1.0, bearish if z <= -1.0. Derived from Redfin Data Center 'All Residential' monthly HOMES_SOLD summed to calendar years, current complete year (year-1) vs trailing 3yr mean. Market-grain Redfin closed sales — NOT parcel-grain LeePA qualified-sale velocity (sales_velocity_zscore); compare direction, not raw counts.
 - **`properties_lee_median_sale_price_yoy`** — Year-over-year percent change in Redfin median sale price ('All Residential') for Lee County at the latest published period. Source is Redfin market tracker — NOT LeePA (LeePA last_sale_amount is 100% null). Positive = rising prices; negative = falling. Level/price metric, complementary to the homes-sold velocity direction signal.
 - **`properties_lee_months_of_supply`** — Redfin months-of-supply for Lee County ('All Residential') at the latest published period: inventory divided by the monthly sales pace. Lower = tighter, seller-favorable (lower_is_bullish); higher = more buyer leverage. Level metric.
 - **`properties_lee_sales_velocity_per_1k`** — Count of LeePA-recorded qualified sales for the most recent COMPLETE calendar year (year-1 relative to today), divided by total parcels Ã— 1000. Qualified sales exclude inheritance, divorce, and non-arms-length transfers.
 - **`properties_lee_sales_velocity_zscore`** — Direction signal for properties-lee-value. Bullish if z â‰¥ +1.0, bearish if z â‰¤ âˆ’1.0. Baseline derived from each parcel's LATEST qualified sale, so re-sales overwrite earlier-year buckets â€” current-year z is biased UPWARD; treat marginal bullish reads as suggestive, not confirmatory.
 - **`properties_lee_soh_gap_median_pct`** — Median (just_value âˆ’ taxable_value) / just_value Ã— 100 across parcels where cap_difference > 0 (actively benefiting from the Save-Our-Homes cap). Reads as a level metric describing how much of the tax base is locked behind the homestead cap. High = long-tenured ownership; low = recent turnover or non-homestead.
+- **`properties_lee_sold_median_homes_only`** — Homes-only (single-family + condo, use_code 01/04) SOLD median per Lee County ZIP from LeePA recorded deeds — each parcel's latest qualified sale 2024+ over $20,000 (a stock of most-recent prices, not a transaction-flow median). Vacant land excluded — this is the sold, homes-only answer to the active-listing land-blend that reported ~$35k at 33972. County rollup is the headline; per-ZIP detail rides in the lee_sold_median_by_zip detail table, ZIPs under 20 qualifying sales reporting the county median (county_fallback). Level metric, emitted direction 'stable' — reviewed non-directional (a ris…
 - **`properties_lee_total_parcels`** — Row count of data_lake.leepa_parcels (Lee County Property Appraiser parcel snapshot, layers 9+10+12 joined on FOLIOID). Single source of truth for the velocity denominator.
 - **`rental_rent_index_zori`** — Zillow Observed Rent Index â€” seasonally-adjusted monthly composite methodology approximating typical monthly rent (SFR + Condo + Multifamily) for a given ZIP and month. Emitted by rentals-swfl as one metric per top-N ZIP using the slug template rental_rent_index_zori_zip_{ZIP}; the templated slugs resolve through refinery/vocab/patterns.mts.
 - **`rental_rent_index_zori_regional_median`** — Median of rental_rent_index_zori across all SWFL ZIPs for the latest period_end. Deterministic; computed in TS by rentals-swfl.
@@ -689,20 +782,32 @@ bun refinery/tools/semantic-ledger.mts
 
 <details><summary>Scope notes</summary>
 
-- **`dbpr_notices_abt_90d`** — Hard-parsed DBPR public notices with ABT or hospitality industry in SWFL. Rising = bearish (compliance stress signal).
+- **`dbpr_notices_abt_90d`** — Hard-parsed DBPR public notices with ABT or hospitality industry in Lee + Collier (core scope; non-core counties in the scrape are excluded). Rising = bearish (compliance stress signal).
 - **`dbpr_notices_collier_90d`** — Active DBPR public notices for Collier County in last 90 days. Hard-parsed county field. Data-only; no direction contribution.
-- **`dbpr_notices_construction_90d`** — Hard-parsed DBPR public notices with violation_type=unlicensed_activity and construction industry in SWFL. Rising = bullish (recovery signal — enforcement follows demand).
+- **`dbpr_notices_construction_90d`** — Hard-parsed DBPR public notices with violation_type=unlicensed_activity and construction industry in Lee + Collier (core scope; Charlotte/Sarasota/Manatee/Hendry/Monroe notices in the scrape are excluded). Rising = bullish (recovery signal — enforcement follows demand).
 - **`dbpr_notices_lee_90d`** — Active DBPR public notices for Lee County in last 90 days. Hard-parsed county field. Data-only; no direction contribution.
 - **`dbpr_releases_abt_90d`** — SWFL-relevant DBPR press releases with ABT/hospitality in affected_industries or topics, Sonnet-inferred. Softer signal than dbpr_notices_abt_90d.
 - **`dbpr_releases_construction_90d`** — SWFL-relevant DBPR press releases with construction in affected_industries or topics, Sonnet-inferred. Softer signal than dbpr_notices_construction_90d.
-- **`dbpr_swfl_releases_90d`** — Count of DBPR press releases in the last 90 days where is_swfl_relevant=true (geographic mention Sonnet-inferred). Direction vote anchor for news-swfl.
-- **`dbpr_swfl_releases_prior_90d`** — Count of SWFL-relevant DBPR press releases in the 90-180 day window. Paired with dbpr_swfl_releases_90d to compute momentum direction.
+- **`dbpr_swfl_releases_90d`** — Count of DBPR press releases in the last 90 days whose geographic mentions name Lee or Collier County or a Lee/Collier place (Lee + Collier core scope; recomputed in-pack from geographic_mentions, superseding the ingest-era 5-county is_swfl_relevant flag). Direction vote anchor for news-swfl.
+- **`dbpr_swfl_releases_prior_90d`** — Count of Lee/Collier-relevant DBPR press releases in the 90-180 day window (same core-scope mention rule as dbpr_swfl_releases_90d). Paired with dbpr_swfl_releases_90d to compute momentum direction.
 - **`dbpr_total_releases_90d`** — Total DBPR press releases in last 90 days regardless of SWFL relevance. Statewide context for the SWFL-relevant subset.
 - **`sirs_collier_count`** — Collier County subset of SIRS-confirmed association count. county_normalized=COLLIER rows in data_lake.dbpr_sirs_submissions.
 - **`sirs_confirmed_swfl`** — Count of SWFL (Lee + Collier) condo/co-op associations confirmed to have submitted their Structural Integrity Reserve Study to DBPR. Positive signal only — floor estimate when Qlik hypercube limit fires (expected on every run).
 - **`sirs_july2025_plus_count`** — SIRS filings from the July 2025+ Qlik app (d217126f), representing post-HB 913 compliance push. database_period=july_2025_plus, Lee + Collier combined.
 - **`sirs_lee_count`** — Lee County subset of SIRS-confirmed association count. county_normalized=LEE rows in data_lake.dbpr_sirs_submissions.
 - **`sirs_result_truncated`** — Whether the Qlik hypercube limit fired during SIRS scrape. 'floor estimate (Qlik limit fired)' means the SIRS count understates the true filing universe. Expected on every run — statewide set exceeds Qlik render threshold.
+
+</details>
+
+### `undefined` (1)
+
+| Concept ID | prefLabel | Raw slugs | Type | Unit | Range / Allowed | Source brains | Domains | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `median_list_price_swfl` | SWFL Median Asking Price (Active Residential) | `median_list_price_swfl` | — | — | _unbounded_ | _none_ | _none_ | ⚠️ undefined |
+
+<details><summary>Scope notes</summary>
+
+- **`median_list_price_swfl`** — Median asking (list) price across active SWFL residential listings . List-side, not closed sale price.
 
 </details>
 
@@ -722,34 +827,6 @@ bun refinery/tools/semantic-ledger.mts
 | `repositioning` | Tenant mix or use changing. Cap rate / vacancy may diverge. Watch flags closely. |
 | `declining` | Rising cap rate and/or vacancy, outmigration signals. Tenant-market territory. |
 
-### `cre_active_listings_estero_asking_rent_psf`
-
-- **prefLabel:** Estero Active Listing Median Asking Rent PSF (Crexi)
-- **type:** `—`
-- **ordering criterion:** —
-- **ordered members:** 
-
-### `cre_active_listings_estero_available_sqft`
-
-- **prefLabel:** Estero Total Available Sqft on Crexi
-- **type:** `—`
-- **ordering criterion:** —
-- **ordered members:** 
-
-### `cre_active_listings_fort_myers_beach_asking_rent_psf`
-
-- **prefLabel:** Fort Myers Beach Active Listing Median Asking Rent PSF (Crexi)
-- **type:** `—`
-- **ordering criterion:** —
-- **ordered members:** 
-
-### `cre_active_listings_fort_myers_beach_available_sqft`
-
-- **prefLabel:** Fort Myers Beach Total Available Sqft on Crexi
-- **type:** `—`
-- **ordering criterion:** —
-- **ordered members:** 
-
 ### `sba_franchise_survival_table`
 
 - **prefLabel:** SBA Franchise Survival Detail Table
@@ -764,55 +841,23 @@ bun refinery/tools/semantic-ledger.mts
 - **ordering criterion:** —
 - **ordered members:** 
 
-### `freshness_median_sale_price_cape_coral_usd`
-
-- **prefLabel:** Cape Coral — Today's Sourced Median Sale Price
-- **type:** `—`
-- **ordering criterion:** —
-- **ordered members:** 
-
-### `freshness_median_sale_price_fort_myers_usd`
-
-- **prefLabel:** Fort Myers — Today's Sourced Median Sale Price
-- **type:** `—`
-- **ordering criterion:** —
-- **ordered members:** 
-
-### `freshness_median_sale_price_naples_usd`
-
-- **prefLabel:** Naples — Today's Sourced Median Sale Price
-- **type:** `—`
-- **ordering criterion:** —
-- **ordered members:** 
-
-### `freshness_mortgage_30yr_fixed_pct`
-
-- **prefLabel:** 30-Year Fixed Mortgage Rate — Today's Sourced Value
-- **type:** `—`
-- **ordering criterion:** —
-- **ordered members:** 
-
-### `freshness_zip_pulse_median_price_approx`
-
-- **prefLabel:** Per-ZIP Pulse Median Price (approx, [INFERENCE])
-- **type:** `—`
-- **ordering criterion:** —
-- **ordered members:** 
-
 ## Brain DAG (typed edges)
 
 Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | modifier` — see `refinery/types/pack.mts` → `BrainEdgeType`. A disputant reading `OUTPUT.drivers` on any brain can see edge semantics inline; this table is the authoring view of the same DAG.
 
 | Brain | Domain | Upstream edges | Edge weight legend |
 | --- | --- | --- | --- |
+| `active-listings-swfl` | `real-estate` | _leaf_ | — |
+| `active-rentals-swfl` | `real-estate` | _leaf_ | — |
 | `city-pulse-swfl` | `macro` | _leaf_ | — |
+| `communities-swfl` | `real-estate` | _leaf_ | — |
 | `condo-sirs-swfl` | `regulatory` | _leaf_ | — |
 | `corridor-pulse-swfl` | `real-estate` | _leaf_ | — |
 | `cre-swfl` | `real-estate` | `permits-swfl` (**input**), `corridor-pulse-swfl` (**input**) | all input |
 | `econ-dev-swfl` | `macro` | _leaf_ | — |
 | `env-swfl` | `environmental` | _leaf_ | — |
 | `fgcu-reri` | `macro` | _leaf_ | — |
-| `franchise-outcomes` | `real-estate` | _leaf_ | — |
+| `franchise-outcomes` | `finance` | _leaf_ | — |
 | `freshness-pulse` | `real-estate` | _leaf_ | — |
 | `home-values-swfl` | `real-estate` | _leaf_ | — |
 | `housing-swfl` | `real-estate` | _leaf_ | — |
@@ -820,15 +865,19 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `investor-zip-swfl` | `real-estate` | `home-values-swfl` (**input**), `rentals-swfl` (**input**), `env-swfl` (**input**) | all input |
 | `labor-demand-swfl` | `macro` | _leaf_ | — |
 | `licenses-swfl` | `real-estate` | _leaf_ | — |
+| `listing-momentum-swfl` | `real-estate` | _leaf_ | — |
 | `logistics-swfl` | `logistics` | _leaf_ | — |
 | `logistics-swfl-nowcast` | `logistics` | `logistics-swfl` (**input**) | all input |
 | `macro-florida` | `macro` | `macro-us` (**input**) | all input |
 | `macro-swfl` | `macro` | `macro-florida` (**input**) | all input |
 | `macro-us` | `macro` | _leaf_ | — |
-| `master` | `real-estate` | `franchise-outcomes` (**input**), `cre-swfl` (**input**), `macro-us` (**input**), `macro-florida` (**input**), `macro-swfl` (**input**), `sector-credit-swfl` (**input**), `tourism-tdt` (**input**), `env-swfl` (**modifier**), `logistics-swfl` (**input**), `logistics-swfl-nowcast` (**input**), `traffic-swfl` (**input**), `properties-lee-value` (**input**), `properties-collier-value` (**input**), `permits-swfl` (**input**), `rentals-swfl` (**input**), `housing-swfl` (**input**), `safety-swfl` (**input**), `labor-demand-swfl` (**input**), `econ-dev-swfl` (**input**), `city-pulse-swfl` (**input**), `rsw-airport` (**input**), `news-swfl` (**modifier**), `freshness-pulse` (**modifier**) | 3× modifier |
+| `market-heat-swfl` | `real-estate` | _leaf_ | — |
+| `market-temperature-swfl` | `real-estate` | _leaf_ | — |
+| `master` | `real-estate` | `franchise-outcomes` (**input**), `cre-swfl` (**input**), `macro-us` (**input**), `macro-florida` (**input**), `macro-swfl` (**input**), `sector-credit-swfl` (**input**), `tourism-tdt` (**input**), `env-swfl` (**modifier**), `logistics-swfl` (**input**), `logistics-swfl-nowcast` (**input**), `traffic-swfl` (**input**), `properties-lee-value` (**input**), `properties-collier-value` (**input**), `permits-swfl` (**input**), `rentals-swfl` (**input**), `housing-swfl` (**input**), `safety-swfl` (**input**), `labor-demand-swfl` (**input**), `econ-dev-swfl` (**input**), `city-pulse-swfl` (**input**), `rsw-airport` (**input**), `news-swfl` (**modifier**), `freshness-pulse` (**modifier**), `seller-stress-swfl` (**input**), `market-heat-swfl` (**input**), `storm-history-swfl` (**input**), `hurricane-tracks-fl` (**input**), `licenses-swfl` (**input**), `condo-sirs-swfl` (**input**), `permits-commercial-swfl` (**input**), `price-distribution-swfl` (**input**), `listing-momentum-swfl` (**input**), `market-temperature-swfl` (**input**), `investor-zip-swfl` (**input**), `active-listings-swfl` (**input**), `active-rentals-swfl` (**input**), `communities-swfl` (**input**) | 3× modifier |
 | `news-swfl` | `macro` | _leaf_ | — |
 | `permits-commercial-swfl` | `real-estate` | _leaf_ | — |
 | `permits-swfl` | `real-estate` | `storm-history-swfl` (**modifier**) | 1× modifier |
+| `price-distribution-swfl` | `real-estate` | _leaf_ | — |
 | `properties-collier-value` | `real-estate` | _leaf_ | — |
 | `properties-lee-value` | `real-estate` | _leaf_ | — |
 | `rentals-swfl` | `real-estate` | _leaf_ | — |
@@ -843,11 +892,27 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 
 ## What each brain emits (SKOS concepts)
 
+### `active-rentals-swfl` (1 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `active_rental_listings_count_swfl` | SWFL Active Rental Listings (Count) | `active_rental_listings_count_swfl` | active |
+
 ### `city-pulse-swfl` (1 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
 | `city_pulse_signal` | City Pulse Signal | _none_ | active |
+
+### `communities-swfl` (5 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `golf_bundled_community_share_swfl` | SWFL Communities Where Golf Is Bundled (Share of Golf Communities) | `golf_bundled_community_share_swfl` | active |
+| `homes_in_gated_communities_swfl` | SWFL Homes Inside Gated Communities | `homes_in_gated_communities_swfl` | active |
+| `marketed_communities_count_swfl` | SWFL Marketed Golf/Gated Communities Catalogued | `marketed_communities_count_swfl` | active |
+| `median_hoa_fee_midpoint_swfl` | SWFL Marketed-Community Median HOA Fee (Range Midpoint) | `median_hoa_fee_midpoint_swfl` | active |
+| `total_homes_catalogued_swfl` | SWFL Homes Catalogued to a Neighborhood (Lee + Collier) | `total_homes_catalogued_swfl` | active |
 
 ### `condo-sirs-swfl` (5 concepts)
 
@@ -859,19 +924,31 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `sirs_lee_count` | SIRS-Confirmed Associations — Lee County | `sirs_lee_count` | active |
 | `sirs_result_truncated` | Qlik Data Coverage — SIRS Registry | `sirs_result_truncated` | active |
 
-### `cre-swfl` (27 concepts)
+### `cre-swfl` (42 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
 | `cre_absorption_sqft` | Net Absorption (per corridor) | `absorption_sqft` | active |
 | `cre_absorption_sqft_median` | Median Net Absorption (corpus) | `absorption_sqft_median` | active |
 | `cre_absorption_sqft_median_county` | Median Net Absorption — per county (Lee / Collier) | _none_ | active |
+| `cre_active_listings_estero_asking_rent_psf` | Estero Active Listing Median Asking Rent PSF (Crexi) | `cre_active_listings_estero_asking_rent_psf` | active |
+| `cre_active_listings_estero_available_sqft` | Estero Total Available Sqft on Crexi | `cre_active_listings_estero_available_sqft` | active |
+| `cre_active_listings_fort_myers_beach_asking_rent_psf` | Fort Myers Beach Active Listing Median Asking Rent PSF (Crexi) | `cre_active_listings_fort_myers_beach_asking_rent_psf` | active |
+| `cre_active_listings_fort_myers_beach_available_sqft` | Fort Myers Beach Total Available Sqft on Crexi | `cre_active_listings_fort_myers_beach_available_sqft` | active |
 | `cre_asking_rent_psf` | Asking Rent PSF NNN (per corridor) | `asking_rent_psf` | active |
 | `cre_asking_rent_psf_median` | Median Asking Rent PSF NNN (corpus) | `asking_rent_psf_median` | active |
 | `cre_asking_rent_psf_median_county` | Median Asking Rent PSF NNN — per county (Lee / Collier) | _none_ | active |
 | `cre_cap_rate` | Cap Rate (per corridor) | `cap_rate` | active |
 | `cre_cap_rate_median` | Median Cap Rate (corpus) | `cap_rate_median` | active |
 | `cre_cap_rate_median_county` | Median Cap Rate — per county (Lee / Collier) | _none_ | active |
+| `cre_construction_cost_ppi_industrial` | Construction Cost — New Industrial Building (PPI) | `construction_cost_ppi_industrial` | active |
+| `cre_construction_cost_ppi_medical_office` | Construction Cost — New Health Care Building (PPI) | `construction_cost_ppi_medical_office` | active |
+| `cre_construction_cost_ppi_office` | Construction Cost — New Office Building (PPI) | `construction_cost_ppi_office` | active |
+| `cre_construction_cost_ppi_trade_concrete` | Construction Cost — Concrete Contractors, Nonres. (PPI) | `construction_cost_ppi_trade_concrete` | active |
+| `cre_construction_cost_ppi_trade_electrical` | Construction Cost — Electrical Contractors, Nonres. (PPI) | `construction_cost_ppi_trade_electrical` | active |
+| `cre_construction_cost_ppi_trade_plumbing_hvac` | Construction Cost — Plumbing/HVAC Contractors, Nonres. (PPI) | `construction_cost_ppi_trade_plumbing_hvac` | active |
+| `cre_construction_cost_ppi_trade_roofing` | Construction Cost — Roofing Contractors, Nonres. (PPI) | `construction_cost_ppi_trade_roofing` | active |
+| `cre_construction_cost_ppi_warehouse` | Construction Cost — New Warehouse Building (PPI) | `construction_cost_ppi_warehouse` | active |
 | `cre_corridor_evolution` | Corridor Evolution Stage | `evolution` | active |
 | `cre_corridor_factor` | Corridor Factor Index | `corridor_factor` | active |
 | `cre_corridor_pulse_signals` | Live Corridor-Pulse Signals | `corridor_pulse_signals_live` | active |
@@ -881,12 +958,15 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `cre_vacancy_rate_median_county` | Median Vacancy Rate — per county (Lee / Collier) | _none_ | active |
 | `marketbeat_absorption_sqft` | Net Absorption (MarketBeat/MHS, per place) | _none_ | active |
 | `marketbeat_absorption_sqft_industrial` | Net Absorption — Industrial (MarketBeat/MHS, per place) | _none_ | active |
+| `marketbeat_absorption_sqft_medical_office` | Net Absorption — Medical Office (MarketBeat, per place) | _none_ | active |
 | `marketbeat_absorption_sqft_office` | Net Absorption — Office (MarketBeat/MHS, per place) | _none_ | active |
-| `marketbeat_asking_rent_nnn` | Asking Rent NNN (MarketBeat/MHS, per place) | _none_ | active |
+| `marketbeat_asking_rent_full_service_medical_office` | Asking Rent Full Service — Medical Office (MarketBeat, per place) | _none_ | active |
+| `marketbeat_asking_rent_nnn` | Asking Rent NNN (MarketBeat/MHS, per place) | `asking_rent_nnn_marketbeat_swfl` | active |
 | `marketbeat_asking_rent_nnn_industrial` | Asking Rent NNN — Industrial (MarketBeat/MHS, per place) | _none_ | active |
 | `marketbeat_asking_rent_nnn_office` | Asking Rent NNN — Office (MarketBeat/MHS, per place) | _none_ | active |
 | `marketbeat_vacancy_rate` | Vacancy Rate (MarketBeat/MHS, per place) | `vacancy_rate_marketbeat_swfl` | active |
 | `marketbeat_vacancy_rate_industrial` | Vacancy Rate — Industrial (MarketBeat/MHS, per place) | _none_ | active |
+| `marketbeat_vacancy_rate_medical_office` | Vacancy Rate — Medical Office (MarketBeat, per place) | _none_ | active |
 | `marketbeat_vacancy_rate_office` | Vacancy Rate — Office (MarketBeat/MHS, per place) | _none_ | active |
 | `permits_lee_capital_flow_z` | Lee permits capital-flow z (cre-swfl thin-pipe read) | `permits_lee_capital_flow_z` | active |
 | `permits_lee_saturation_signal` | Lee permits saturation signal (cre-swfl thin-pipe read) | `permits_lee_saturation_signal` | active |
@@ -943,6 +1023,19 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
 | `sba_overall_survival_rate` | SBA Franchise Survival Rate (Corpus) | `overall_survival_rate` | active |
+
+### `freshness-pulse` (8 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `freshness_median_asking_price_cape_coral_usd` | Cape Coral — Today's Median Asking Price | `freshness_median_asking_price_cape_coral_usd` | active |
+| `freshness_median_asking_price_fort_myers_usd` | Fort Myers — Today's Median Asking Price | `freshness_median_asking_price_fort_myers_usd` | active |
+| `freshness_median_asking_price_naples_usd` | Naples — Today's Median Asking Price | `freshness_median_asking_price_naples_usd` | active |
+| `freshness_median_sale_price_cape_coral_usd` | Cape Coral — Today's Sourced Median Sale Price | `freshness_median_sale_price_cape_coral_usd` | active |
+| `freshness_median_sale_price_fort_myers_usd` | Fort Myers — Today's Sourced Median Sale Price | `freshness_median_sale_price_fort_myers_usd` | active |
+| `freshness_median_sale_price_naples_usd` | Naples — Today's Sourced Median Sale Price | `freshness_median_sale_price_naples_usd` | active |
+| `freshness_mortgage_30yr_fixed_pct` | 30-Year Fixed Mortgage Rate — Today's Sourced Value | `freshness_mortgage_30yr_fixed_pct` | active |
+| `freshness_zip_pulse_median_price_approx` | Per-ZIP Pulse Median Price (approx, [INFERENCE]) | _none_ | active |
 
 ### `home-values-swfl` (6 concepts)
 
@@ -1018,6 +1111,13 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `licenses_lapse_rate_swfl` | FL DBPR Contractor License Lapse Rate — SWFL | `licenses_lapse_rate_swfl` | active |
 | `licenses_new_12m_swfl` | FL DBPR New Contractor Licenses — SWFL (Trailing 12 Months) | `licenses_new_12m_swfl` | active |
 
+### `listing-momentum-swfl` (2 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `new_listing_share_swfl` | SWFL New-Listing Share | `new_listing_share_swfl` | active |
+| `price_reduced_share_swfl` | SWFL Price-Cut Share | `price_reduced_share_swfl` | active |
+
 ### `logistics-swfl` (2 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
@@ -1082,7 +1182,23 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `macro_cpi_yoy` | US CPI Year-over-Year | `cpi_yoy` | active |
 | `macro_sofr_rate` | SOFR (Secured Overnight Financing Rate) | `sofr_rate` | active |
 
-### `master` (114 concepts)
+### `market-heat-swfl` (5 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `market_heat_dom_yy_swfl` | SWFL Days-on-Market Y/Y | `market_heat_dom_yy_swfl` | active |
+| `market_heat_inventory_yy_swfl` | SWFL Active Inventory Y/Y | `market_heat_inventory_yy_swfl` | active |
+| `market_heat_pending_ratio_swfl` | SWFL Pending Ratio | `market_heat_pending_ratio_swfl` | active |
+| `market_heat_price_cut_share_swfl` | SWFL Price-Cut Share | `market_heat_price_cut_share_swfl` | active |
+| `market_heat_tilt_swfl` | SWFL Market Heat Tilt | `market_heat_tilt_swfl` | active |
+
+### `market-temperature-swfl` (1 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `sold_to_rent_ratio_swfl` | SWFL Sold-to-Rent Multiple | `sold_to_rent_ratio_swfl` | active |
+
+### `master` (124 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
@@ -1106,6 +1222,13 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `fhfa_cape_coral_msa_yoy_pct` | Cape Coral-Fort Myers MSA HPI Year-over-Year Change (FHFA) | `fhfa_cape_coral_msa_yoy_pct` | active |
 | `fhfa_fl_state_yoy_pct` | Florida Statewide HPI Year-over-Year Change (FHFA) | `fhfa_fl_state_yoy_pct` | active |
 | `fhfa_naples_msa_yoy_pct` | Naples-Marco Island MSA HPI Year-over-Year Change (FHFA) | `fhfa_naples_msa_yoy_pct` | active |
+| `freshness_median_asking_price_cape_coral_usd` | Cape Coral — Today's Median Asking Price | `freshness_median_asking_price_cape_coral_usd` | active |
+| `freshness_median_asking_price_fort_myers_usd` | Fort Myers — Today's Median Asking Price | `freshness_median_asking_price_fort_myers_usd` | active |
+| `freshness_median_asking_price_naples_usd` | Naples — Today's Median Asking Price | `freshness_median_asking_price_naples_usd` | active |
+| `freshness_median_sale_price_cape_coral_usd` | Cape Coral — Today's Sourced Median Sale Price | `freshness_median_sale_price_cape_coral_usd` | active |
+| `freshness_median_sale_price_fort_myers_usd` | Fort Myers — Today's Sourced Median Sale Price | `freshness_median_sale_price_fort_myers_usd` | active |
+| `freshness_median_sale_price_naples_usd` | Naples — Today's Sourced Median Sale Price | `freshness_median_sale_price_naples_usd` | active |
+| `freshness_mortgage_30yr_fixed_pct` | 30-Year Fixed Mortgage Rate — Today's Sourced Value | `freshness_mortgage_30yr_fixed_pct` | active |
 | `home_value_yoy_pct` | ZHVI Home Value YoY % - ZIP Level | `home_value_yoy_pct` | active |
 | `home_value_yoy_pct_regional_median` | ZHVI Home Value YoY % - SWFL Regional Median | `home_value_yoy_pct_regional_median` | active |
 | `home_value_zhvi` | Zillow Home Value Index (ZHVI) - ZIP-Level Home Value | `home_value_zhvi` | active |
@@ -1165,7 +1288,9 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `properties_collier_median_sale_price_yoy` | Collier County Median Sale Price Year-over-Year (Redfin) | `collier_median_sale_price_yoy` | active |
 | `properties_collier_months_of_supply` | Collier County Months of Supply (Redfin) | `collier_months_of_supply` | active |
 | `properties_collier_soh_gap_median_pct` | Collier County Save-Our-Homes Gap Median (% Homestead Just Value Suppressed) | `collier_soh_gap_median_pct` | active |
+| `properties_collier_sold_median_homes_only` | Collier County Homes-Only Sold Median (Recorded Deeds) | `collier_sold_median_homes_only` | active |
 | `properties_collier_total_parcels` | Collier County Total Parcels (FDOR Cadastral Snapshot) | `collier_total_parcels` | active |
+| `properties_lee_fdor_commercial_parcel_count` | Lee County Commercial Parcel Count (FDOR Use-Code Category) | `fdor_commercial_parcel_count` | active |
 | `properties_lee_homes_sold_per_year` | Lee County Residential Homes Sold (Current Year, Redfin) | `lee_homes_sold_per_year` | active |
 | `properties_lee_homes_sold_zscore` | Lee County Homes-Sold Z-Score (Current Year vs Trailing 3yr Baseline, Redfin) | `lee_homes_sold_zscore` | active |
 | `properties_lee_median_sale_price_yoy` | Lee County Median Sale Price Year-over-Year (Redfin) | `lee_median_sale_price_yoy` | active |
@@ -1173,6 +1298,7 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `properties_lee_sales_velocity_per_1k` | Lee County Qualified Sales Velocity (Per 1,000 Parcels, Current Year) | `sales_velocity_per_1k` | active |
 | `properties_lee_sales_velocity_zscore` | Lee County Sales-Velocity Z-Score (Current Year vs Trailing 3yr Baseline) | `sales_velocity_zscore` | active |
 | `properties_lee_soh_gap_median_pct` | Lee County Save-Our-Homes Gap Median (% Just Value Suppressed) | `soh_gap_median_pct` | active |
+| `properties_lee_sold_median_homes_only` | Lee County Homes-Only Sold Median (Recorded Deeds) | `lee_sold_median_homes_only` | active |
 | `properties_lee_total_parcels` | Lee County Total Parcels (Snapshot Row Count) | `total_parcels` | active |
 | `qcew_collier_private_avg_wkly_wage` | Collier County Private-Sector Average Weekly Wage | `qcew_collier_private_avg_wkly_wage`, `collier_private_avg_wkly_wage` | active |
 | `qcew_collier_private_avg_wkly_wage_yoy_pct` | Collier County Private-Sector Average Weekly Wage YoY % | `qcew_collier_private_avg_wkly_wage_yoy_pct`, `collier_private_wage_yoy_pct` | active |
@@ -1240,7 +1366,16 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `permits_swfl_saturation_index` | SWFL permits saturation index (Lee + Collier rollup) | `permits_swfl_saturation_index` | active |
 | `permits_swfl_top_heating_cooling` | SWFL permits top heating/cooling corridors (Lee + Collier rank-ordered categorical) | `permits_swfl_top_heating_commercial_alteration`, `permits_swfl_top_heating_commercial_new`, `permits_swfl_top_cooling_commercial_alteration`, `permits_swfl_top_cooling_commercial_new` | active |
 
-### `properties-collier-value` (7 concepts)
+### `price-distribution-swfl` (4 concepts)
+
+| Concept | prefLabel | Raw slugs | Status |
+| --- | --- | --- | --- |
+| `entry_level_listing_share_swfl` | SWFL Entry-Tier Listing Share | `entry_level_listing_share_swfl` | active |
+| `luxury_listing_share_swfl` | SWFL Luxury Listing Share | `luxury_listing_share_swfl` | active |
+| `midmarket_listing_share_swfl` | SWFL Mid-Market Listing Share | `midmarket_listing_share_swfl` | active |
+| `upper_tier_listing_share_swfl` | SWFL Upper-Tier Listing Share | `upper_tier_listing_share_swfl` | active |
+
+### `properties-collier-value` (8 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
@@ -1250,14 +1385,16 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `properties_collier_median_sale_price_yoy` | Collier County Median Sale Price Year-over-Year (Redfin) | `collier_median_sale_price_yoy` | active |
 | `properties_collier_months_of_supply` | Collier County Months of Supply (Redfin) | `collier_months_of_supply` | active |
 | `properties_collier_soh_gap_median_pct` | Collier County Save-Our-Homes Gap Median (% Homestead Just Value Suppressed) | `collier_soh_gap_median_pct` | active |
+| `properties_collier_sold_median_homes_only` | Collier County Homes-Only Sold Median (Recorded Deeds) | `collier_sold_median_homes_only` | active |
 | `properties_collier_total_parcels` | Collier County Total Parcels (FDOR Cadastral Snapshot) | `collier_total_parcels` | active |
 
-### `properties-lee-value` (10 concepts)
+### `properties-lee-value` (12 concepts)
 
 | Concept | prefLabel | Raw slugs | Status |
 | --- | --- | --- | --- |
 | `fhfa_cape_coral_msa_yoy_pct` | Cape Coral-Fort Myers MSA HPI Year-over-Year Change (FHFA) | `fhfa_cape_coral_msa_yoy_pct` | active |
 | `fhfa_fl_state_yoy_pct` | Florida Statewide HPI Year-over-Year Change (FHFA) | `fhfa_fl_state_yoy_pct` | active |
+| `properties_lee_fdor_commercial_parcel_count` | Lee County Commercial Parcel Count (FDOR Use-Code Category) | `fdor_commercial_parcel_count` | active |
 | `properties_lee_homes_sold_per_year` | Lee County Residential Homes Sold (Current Year, Redfin) | `lee_homes_sold_per_year` | active |
 | `properties_lee_homes_sold_zscore` | Lee County Homes-Sold Z-Score (Current Year vs Trailing 3yr Baseline, Redfin) | `lee_homes_sold_zscore` | active |
 | `properties_lee_median_sale_price_yoy` | Lee County Median Sale Price Year-over-Year (Redfin) | `lee_median_sale_price_yoy` | active |
@@ -1265,6 +1402,7 @@ Every edge is `{ id, edge_type }`. `edge_type` ∈ `input | constraint | veto | 
 | `properties_lee_sales_velocity_per_1k` | Lee County Qualified Sales Velocity (Per 1,000 Parcels, Current Year) | `sales_velocity_per_1k` | active |
 | `properties_lee_sales_velocity_zscore` | Lee County Sales-Velocity Z-Score (Current Year vs Trailing 3yr Baseline) | `sales_velocity_zscore` | active |
 | `properties_lee_soh_gap_median_pct` | Lee County Save-Our-Homes Gap Median (% Just Value Suppressed) | `soh_gap_median_pct` | active |
+| `properties_lee_sold_median_homes_only` | Lee County Homes-Only Sold Median (Recorded Deeds) | `lee_sold_median_homes_only` | active |
 | `properties_lee_total_parcels` | Lee County Total Parcels (Snapshot Row Count) | `total_parcels` | active |
 
 ### `rentals-swfl` (7 concepts)
@@ -1427,27 +1565,21 @@ _Formula: `refinery/lib/confidence.mts` — `confidence = avg(trust_tier_score) 
 
 ## Data-quality checks
 
-### Concepts with no source brain (2)
+### Concepts with no source brain (5)
 
 These concepts are registered in the vocab but no brain currently emits them. Usually intentional (stubs pre-registered for upcoming brains).
 
 | Concept | Status | Scope hint |
 | --- | --- | --- |
+| `active_listings_count_swfl` | undefined | Count of active residential listings across SWFL . List-side inventory; rising inventory signals a softening, buyer-favorable market. |
+| `avg_days_on_market_swfl` | undefined | Average days on market across active SWFL residential listings . Higher = slower market. |
 | `env_flood_risk_pct` | stub | Generic flood-risk percentage at unspecified spatial granularity. Currently a stub â€” no source brain emits it, and the SWFL flood-coverage signal is carried instead by the scope-specific concepts e… |
+| `median_list_price_swfl` | undefined | Median asking (list) price across active SWFL residential listings . List-side, not closed sale price. |
 | `sba_naics_distress_baseline` | stub | Pre-registered for the naics-distress-veto override rule in refinery/constitution/real-estate.mts. Fires false until sector-credit-swfl exposes a baseline metric. Pair with sba_chargeoff_rate_sector_… |
 
-### Unresolved `slug_index` entries (8)
+### Unresolved `slug_index` entries (0)
 
-These slugs map to concept IDs that don't exist in `concepts{}` — likely a typo or a deletion that missed a back-pointer.
-
-- `freshness_median_sale_price_cape_coral_usd`
-- `freshness_median_sale_price_fort_myers_usd`
-- `freshness_median_sale_price_naples_usd`
-- `freshness_mortgage_30yr_fixed_pct`
-- `cre_active_listings_estero_asking_rent_psf`
-- `cre_active_listings_estero_available_sqft`
-- `cre_active_listings_fort_myers_beach_asking_rent_psf`
-- `cre_active_listings_fort_myers_beach_available_sqft`
+_None — every `slug_index` entry points to a concept that exists._
 
 ### Concepts referencing a brain not in PACKS (0)
 
@@ -1458,6 +1590,6 @@ _None — every `source_brains` entry resolves to a registered pack._
 **Notes**
 
 - This file is generated; do not edit by hand. Edit `refinery/vocab/brain-vocabulary.json` or the per-pack `input_brains` arrays, then rerun the generator.
-- SKOS pattern: each concept's stable ID (e.g. `env_lee_ve_zone_coverage_pct`) is the lookup key; `raw_slugs` are the legacy strings the engine still writes into brain `.md` files. `slug_index` inverts to make raw → concept resolution sync.
+- SKOS pattern: each concept's stable ID (e.g. `env_lee_ve_zone_coverage_pct`) is the lookup key; `raw_slugs` are the legacy strings the engine still writes into brain `.md` files. The loaders derive `slug_index` from `raw_slugs` at load (raw → concept resolution, sync) — it is never authored in the JSON.
 - DAG edge semantics live in `refinery/types/pack.mts` (`BrainEdgeType`). Edge weights in this ledger summarize the strongest edge type the brain carries on any of its inbound connections.
 - Override priority ordering is enforced by `refinery/constitution/index.mts` after merging per-domain rule sets.

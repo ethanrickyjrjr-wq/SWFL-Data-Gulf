@@ -75,9 +75,7 @@ function truncate(s: string, max: number): string {
 
 function buildHeader(vocab: ReturnType<typeof loadVocabularySync>): string {
   const conceptCount = Object.keys(vocab.concepts).length;
-  const slugCount = Object.keys(vocab.slug_index).filter(
-    (k) => !k.startsWith("_"),
-  ).length;
+  const slugCount = Object.keys(vocab.slug_index).filter((k) => !k.startsWith("_")).length;
   const categories = new Set<string>();
   const brains = new Set<string>();
   let activeCount = 0;
@@ -113,13 +111,8 @@ function buildHeader(vocab: ReturnType<typeof loadVocabularySync>): string {
   ].join("\n");
 }
 
-function buildCategoriesTable(
-  vocab: ReturnType<typeof loadVocabularySync>,
-): string {
-  const counts = new Map<
-    string,
-    { total: number; active: number; stub: number }
-  >();
+function buildCategoriesTable(vocab: ReturnType<typeof loadVocabularySync>): string {
+  const counts = new Map<string, { total: number; active: number; stub: number }>();
   for (const c of Object.values(vocab.concepts)) {
     const row = counts.get(c.category) ?? { total: 0, active: 0, stub: 0 };
     row.total += 1;
@@ -127,11 +120,7 @@ function buildCategoriesTable(
     else if (c.status === "stub") row.stub += 1;
     counts.set(c.category, row);
   }
-  const lines = [
-    "## Categories",
-    "",
-    "| Category | Concepts | Active | Stub |",
-  ];
+  const lines = ["## Categories", "", "| Category | Concepts | Active | Stub |"];
   lines.push("| --- | ---: | ---: | ---: |");
   for (const cat of [...counts.keys()].sort()) {
     const row = counts.get(cat)!;
@@ -141,9 +130,7 @@ function buildCategoriesTable(
   return lines.join("\n");
 }
 
-function buildConceptsByCategory(
-  vocab: ReturnType<typeof loadVocabularySync>,
-): string {
+function buildConceptsByCategory(vocab: ReturnType<typeof loadVocabularySync>): string {
   const byCategory = new Map<string, VocabConcept[]>();
   for (const c of Object.values(vocab.concepts)) {
     const arr = byCategory.get(c.category) ?? [];
@@ -194,9 +181,7 @@ function buildConceptsByCategory(
   return out.join("\n");
 }
 
-function buildOrderedCollections(
-  vocab: ReturnType<typeof loadVocabularySync>,
-): string {
+function buildOrderedCollections(vocab: ReturnType<typeof loadVocabularySync>): string {
   const ocs = vocab.ordered_collections ?? {};
   const keys = Object.keys(ocs);
   if (keys.length === 0) {
@@ -211,9 +196,7 @@ function buildOrderedCollections(
     out.push(`- **type:** \`${oc.type ?? "—"}\``);
     out.push(`- **ordering criterion:** ${oc.ordering_criterion ?? "—"}`);
     const members = (oc.ordered_members as string[]) ?? [];
-    out.push(
-      `- **ordered members:** ${members.map((m) => `\`${m}\``).join(" → ")}`,
-    );
+    out.push(`- **ordered members:** ${members.map((m) => `\`${m}\``).join(" → ")}`);
     const memberNotes = (oc.member_notes as Record<string, string>) ?? {};
     if (Object.keys(memberNotes).length > 0) {
       out.push("");
@@ -248,9 +231,7 @@ function buildDagAndEdges(): string {
         : edges.map((e) => `\`${e.id}\` (**${e.edge_type}**)`).join(", ");
     const vetoes = edges.filter((e) => e.edge_type === "veto").length;
     const modifiers = edges.filter((e) => e.edge_type === "modifier").length;
-    const constraints = edges.filter(
-      (e) => e.edge_type === "constraint",
-    ).length;
+    const constraints = edges.filter((e) => e.edge_type === "constraint").length;
     const weight =
       vetoes > 0
         ? `${vetoes}× veto`
@@ -267,9 +248,7 @@ function buildDagAndEdges(): string {
   return out.join("\n");
 }
 
-function buildBrainEmissions(
-  vocab: ReturnType<typeof loadVocabularySync>,
-): string {
+function buildBrainEmissions(vocab: ReturnType<typeof loadVocabularySync>): string {
   // Invert source_brains → concepts so the operator can see which concepts
   // each brain produces. Helpful for "what does env-swfl actually emit?"
   const byBrain = new Map<string, VocabConcept[]>();
@@ -349,9 +328,7 @@ function buildTrustTierLegend(): string {
   ].join("\n");
 }
 
-function buildDataQuality(
-  vocab: ReturnType<typeof loadVocabularySync>,
-): string {
+function buildDataQuality(vocab: ReturnType<typeof loadVocabularySync>): string {
   const out: string[] = ["## Data-quality checks", ""];
 
   // 1. Concepts with empty source_brains
@@ -387,9 +364,7 @@ function buildDataQuality(
   out.push(`### Unresolved \`slug_index\` entries (${unresolvedSlugs.length})`);
   out.push("");
   if (unresolvedSlugs.length === 0) {
-    out.push(
-      "_None — every `slug_index` entry points to a concept that exists._",
-    );
+    out.push("_None — every `slug_index` entry points to a concept that exists._");
   } else {
     out.push(
       "These slugs map to concept IDs that don't exist in `concepts{}` — likely a typo or a deletion that missed a back-pointer.",
@@ -410,18 +385,12 @@ function buildDataQuality(
       }
     }
   }
-  out.push(
-    `### Concepts referencing a brain not in PACKS (${danglingBrainRefs.length})`,
-  );
+  out.push(`### Concepts referencing a brain not in PACKS (${danglingBrainRefs.length})`);
   out.push("");
   if (danglingBrainRefs.length === 0) {
-    out.push(
-      "_None — every `source_brains` entry resolves to a registered pack._",
-    );
+    out.push("_None — every `source_brains` entry resolves to a registered pack._");
   } else {
-    out.push(
-      "Either the brain is planned but not yet scaffolded, or the reference is stale.",
-    );
+    out.push("Either the brain is planned but not yet scaffolded, or the reference is stale.");
     out.push("");
     out.push("| Concept | Missing brain |");
     out.push("| --- | --- |");
@@ -441,7 +410,7 @@ function buildFooter(): string {
     "**Notes**",
     "",
     "- This file is generated; do not edit by hand. Edit `refinery/vocab/brain-vocabulary.json` or the per-pack `input_brains` arrays, then rerun the generator.",
-    "- SKOS pattern: each concept's stable ID (e.g. `env_lee_ve_zone_coverage_pct`) is the lookup key; `raw_slugs` are the legacy strings the engine still writes into brain `.md` files. `slug_index` inverts to make raw → concept resolution sync.",
+    "- SKOS pattern: each concept's stable ID (e.g. `env_lee_ve_zone_coverage_pct`) is the lookup key; `raw_slugs` are the legacy strings the engine still writes into brain `.md` files. The loaders derive `slug_index` from `raw_slugs` at load (raw → concept resolution, sync) — it is never authored in the JSON.",
     "- DAG edge semantics live in `refinery/types/pack.mts` (`BrainEdgeType`). Edge weights in this ledger summarize the strongest edge type the brain carries on any of its inbound connections.",
     "- Override priority ordering is enforced by `refinery/constitution/index.mts` after merging per-domain rule sets.",
     "",

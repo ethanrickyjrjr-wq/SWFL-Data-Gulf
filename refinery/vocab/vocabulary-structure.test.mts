@@ -36,16 +36,43 @@ test("ordered_collections holds only true collections — a concept-shaped entry
   );
 });
 
-test("every slug_index target resolves to a real concept — a dangling target is a latent Orphan Concept abort", async () => {
+// slug_index is DERIVED at load since 2026-07-19 (refinery/vocab/derive-slug-index.mts).
+// The on-disk block is retired: ≥10 "fix(vocab): register X — unblocks master" commits
+// in one month were hand-mirror staleness. These three tests lock the new contract.
+
+test("brain-vocabulary.json carries NO slug_index block — it is derived from raw_slugs at load, a hand-added block is dead weight that WILL drift", async () => {
   const vocab = await loadRealVocab();
-  const dangling = Object.entries(vocab.slug_index).filter(
-    ([, target]) => typeof target === "string" && !(target in vocab.concepts),
+  assert.ok(
+    !("slug_index" in vocab),
+    "slug_index block found in brain-vocabulary.json — delete it; register slugs via concepts[].raw_slugs only (the loaders derive the index)",
   );
-  assert.deepEqual(
-    dangling.map(([slug, target]) => `${slug} -> ${target}`),
-    [],
-    "slug_index target(s) missing from concepts",
-  );
+});
+
+test("deriveSlugIndex over the real concepts throws no collision — every raw_slug has exactly one owner (or is registered path-ambiguous)", async () => {
+  const { deriveSlugIndex, PATH_AMBIGUOUS_SLUGS } = await import("./derive-slug-index.mts");
+  const vocab = await loadRealVocab();
+  deriveSlugIndex(vocab.concepts, PATH_AMBIGUOUS_SLUGS); // throws on collision
+});
+
+test("closing invariant: every concept's every raw_slug resolves through the REAL resolver back to its owner — this is the exact property the hand-maintained index violated 10+ times", async () => {
+  const { loadVocabulary, resolveSlug, resetVocabularyCache } =
+    await import("../stages/2.5-normalize.mts");
+  resetVocabularyCache();
+  const vocab = await loadVocabulary(); // derived slug_index
+  const failures: string[] = [];
+  for (const [conceptId, concept] of Object.entries(vocab.concepts)) {
+    for (const slug of concept.raw_slugs ?? []) {
+      const r = resolveSlug(slug, "normalized.metric", vocab);
+      if (!r) {
+        failures.push(`${slug} (owner ${conceptId}) -> UNRESOLVED`);
+      } else if (r.concept.id !== conceptId && r.disambiguation === null) {
+        failures.push(`${slug} (owner ${conceptId}) -> resolved to ${r.concept.id}`);
+      }
+      // disambiguation !== null is the path-ambiguous family ("direction"):
+      // both owners register the slug, path decides — either owner is correct.
+    }
+  }
+  assert.deepEqual(failures, [], "raw_slug(s) that do not resolve to their owning concept");
 });
 
 test("every concept's id field matches its key", async () => {

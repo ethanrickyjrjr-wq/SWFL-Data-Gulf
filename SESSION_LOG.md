@@ -1,3 +1,25 @@
+## 2026-07-19 (Fable 5 · main) — ROOT FIX: slug_index is now DERIVED from raw_slugs — the hand-mirror staleness class is dead
+
+Operator: "take care of this / make it right so we don't have to worry about it anymore" on the
+recurring slug_index staleness (their re-check found ≥10 "fix(vocab): register X — unblocks master"
+commits in a month; the 07/19 Collier sold-median hold was the same class). Root cause was structural:
+pack tests validate concepts[].raw_slugs (vocab-coverage.mts) while the Stage-2.5 resolver reads only
+the hand-materialized slug_index block — two sources of truth, one authored twice by hand. Fix:
+new refinery/vocab/derive-slug-index.mts (pure, collision-throwing, PATH_AMBIGUOUS_SLUGS excluded);
+BOTH loaders (loadVocabulary + loadVocabularySync) now overwrite vocab.slug_index with the derived
+map at load; the ~343-line block is DELETED from brain-vocabulary.json (parity proven pre-delete:
+338/338 rows identical targets, 5 latent env_zip_* orphans-in-waiting healed, 1 alias-only row
+backfilled into raw_slugs). Guards: structure test fails if the block ever reappears + closing
+invariant (every raw_slug resolves through the REAL resolver to its owner); pre-push
+conditional-orphan guard now reads raw_slugs (∪ legacy block, transition-safe); remediation texts +
+CONTRIBUTING no longer instruct mirroring. Verified: 118 tests green (vocab/stages/constitution),
+check-vocab-coverage --all 41/41 brains, corridor-aliases 7/7, grade-config-sweep --check green,
+semantic-ledger regenerated (was 06/15-stale). Registered build slug-index-autoderive; check
+`slug_index_autoderive_live_verify` stays OPEN until the next master cascade proves it on CI (no
+paid dispatch without decree — the nightly cron will exercise it). Spec:
+docs/superpowers/specs/2026-07-19-slug-index-autoderive-design.md. PUSH HELD: foreign unpushed
+commits on local main (ask-before-bundling) — commit is local; operator to green-light.
+
 ## 2026-07-19 (Fable 5 · main) — SPEC: SOH portability + cost-of-waiting on /r/should-i-sell (brainstormed, registered, evidence in-spec)
 
 Operator: "take care of the should i sell page." Brainstormed + registered `soh-portability-should-i-sell`

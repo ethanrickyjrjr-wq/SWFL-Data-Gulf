@@ -81,10 +81,7 @@ async function main(): Promise<void> {
       // fieldPath "normalized.metric" mirrors how packs emit a metric slug;
       // it only matters for the path-ambiguous family (e.g. "direction") —
       // literal/pattern resolution is path-independent.
-      if (
-        metric?.metric &&
-        !resolveSlug(metric.metric, "normalized.metric", vocab)
-      ) {
+      if (metric?.metric && !resolveSlug(metric.metric, "normalized.metric", vocab)) {
         orphans.push({ brain, metric: metric.metric });
       }
     }
@@ -107,9 +104,9 @@ async function main(): Promise<void> {
   }
   console.error(
     `\nFix: register each slug in refinery/vocab/brain-vocabulary.json — add it ` +
-      `to a concept's "raw_slugs" AND the materialized "slug_index" (the resolver ` +
-      `reads slug_index, not raw_slugs), or add a "raw_slug_patterns" glob. Ship ` +
-      `it in the SAME commit as the pack that emits it (CLAUDE.md "Ship contract together").`,
+      `to a concept's "raw_slugs" (slug_index is DERIVED from raw_slugs at load; ` +
+      `never author it), or add a "raw_slug_patterns" glob. Ship it in the SAME ` +
+      `commit as the pack that emits it (CLAUDE.md "Ship contract together").`,
   );
   process.exit(1);
 }

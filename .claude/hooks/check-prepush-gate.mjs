@@ -149,8 +149,9 @@ process.stdin.on("end", () => {
         `A brain claims a metric slug that does not resolve in\n` +
           `refinery/vocab/brain-vocabulary.json — the orphan-concept error that\n` +
           `aborts the nightly rebuild the moment master re-synthesizes.\n\n` +
-          `Fix: add a documented concept (prefLabel + scope_note) AND a slug_index\n` +
-          `identity entry for each slug below, in THIS commit, then retry.\n\n` +
+          `Fix: add a documented concept (prefLabel + scope_note) with the slug in\n` +
+          `its raw_slugs, in THIS commit, then retry. (slug_index is DERIVED from\n` +
+          `raw_slugs at load since 2026-07-19 — there is no block to mirror.)\n\n` +
           truncate(vocab.out),
       );
     }
@@ -165,14 +166,16 @@ process.stdin.on("end", () => {
     if (unregistered.length > 0) {
       block(
         "VOCAB/ALIAS — a pack emits a metric slug literal not registered (conditional-orphan guard)",
-        `These metric slugs are written as literals in pack source but are NOT in\n` +
-          `refinery/vocab/brain-vocabulary.json slug_index. Even if a slug is emitted\n` +
-          `only conditionally (behind an \`if\`), it MUST be registered now — otherwise\n` +
-          `it orphans master the first day its data makes it computable.\n\n` +
+        `These metric slugs are written as literals in pack source but are NOT\n` +
+          `registered in refinery/vocab/brain-vocabulary.json (no concept carries\n` +
+          `them in raw_slugs). Even if a slug is emitted only conditionally (behind\n` +
+          `an \`if\`), it MUST be registered now — otherwise it orphans master the\n` +
+          `first day its data makes it computable.\n\n` +
           unregistered.map((u) => `  - ${u.slug}   (${u.file})`).join("\n") +
-          `\n\nFix: add a documented concept + slug_index identity entry for each, in\n` +
-          `THIS commit, then retry. (If a slug is genuinely templated, emit it via a\n` +
-          `backtick template and register a raw_slug_patterns glob instead.)`,
+          `\n\nFix: add a documented concept with each slug in its raw_slugs, in THIS\n` +
+          `commit, then retry — slug_index is derived from raw_slugs at load. (If a\n` +
+          `slug is genuinely templated, emit it via a backtick template and register\n` +
+          `a raw_slug_patterns glob instead.)`,
       );
     }
     // grade-coverage artifact drift: the committed _AUDIT_AND_ROADMAP/grade-coverage.json
@@ -550,8 +553,14 @@ function unregisteredLiteralSlugs(changed) {
     } catch {
       return []; // can't read vocab at HEAD — fail open
     }
-    const slugIndex = JSON.parse(vocabRaw)?.slug_index ?? {};
-    const registered = new Set(Object.keys(slugIndex));
+    // slug_index is DERIVED from concepts[].raw_slugs at load (2026-07-19) — the
+    // JSON no longer carries a block. Union both sources so the guard is correct
+    // on either side of that transition (old HEADs still have the block).
+    const vocabJson = JSON.parse(vocabRaw) ?? {};
+    const registered = new Set(Object.keys(vocabJson.slug_index ?? {}));
+    for (const concept of Object.values(vocabJson.concepts ?? {})) {
+      for (const slug of concept?.raw_slugs ?? []) registered.add(slug);
+    }
     const found = [];
     const seen = new Set();
     for (const file of packs) {

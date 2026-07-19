@@ -19,6 +19,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Vocabulary, VocabConcept } from "../stages/2.5-normalize.mts";
+import { deriveSlugIndex, PATH_AMBIGUOUS_SLUGS } from "./derive-slug-index.mts";
 
 const VOCAB_PATH = path.join(process.cwd(), "refinery", "vocab", "brain-vocabulary.json");
 
@@ -27,7 +28,10 @@ let cached: Vocabulary | null = null;
 export function loadVocabularySync(): Vocabulary {
   if (cached) return cached;
   const raw = readFileSync(VOCAB_PATH, "utf-8");
-  cached = JSON.parse(raw) as Vocabulary;
+  const vocab = JSON.parse(raw) as Vocabulary;
+  // slug_index is DERIVED, never authored — mirrors async loadVocabulary().
+  vocab.slug_index = deriveSlugIndex(vocab.concepts, PATH_AMBIGUOUS_SLUGS);
+  cached = vocab;
   return cached;
 }
 

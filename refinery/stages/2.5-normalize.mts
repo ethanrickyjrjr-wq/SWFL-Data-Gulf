@@ -4,6 +4,7 @@ import type { TriagedFragment } from "../types/fragment.mts";
 import type { PackDefinition } from "../types/pack.mts";
 import { writeStage } from "../lib/raw-store.mts";
 import { compilePatterns, matchSlugPattern } from "../vocab/patterns.mts";
+import { deriveSlugIndex, PATH_AMBIGUOUS_SLUGS } from "../vocab/derive-slug-index.mts";
 
 /**
  * Stage 2.5 — Vocab Bridge.
@@ -101,6 +102,15 @@ export interface Vocabulary {
   };
   concepts: Record<string, VocabConcept>;
   ordered_collections: Record<string, unknown>;
+  /**
+   * DERIVED at load — never authored. Both loaders (`loadVocabulary` here,
+   * `loadVocabularySync` in refinery/vocab/loader.mts) overwrite this with
+   * `deriveSlugIndex(concepts, PATH_AMBIGUOUS_SLUGS)` after JSON.parse, so
+   * registering a concept's `raw_slugs` is full wiring by construction.
+   * brain-vocabulary.json carries NO slug_index block (structure-test enforced).
+   * Test fixtures that build a Vocabulary literal may still set it directly —
+   * `resolveSlug` reads whatever map it is handed.
+   */
   slug_index: Record<string, string | { _note: string }>;
 }
 
@@ -171,7 +181,13 @@ let vocabPromise: Promise<Vocabulary> | null = null;
 
 export async function loadVocabulary(): Promise<Vocabulary> {
   if (!vocabPromise) {
-    vocabPromise = readFile(VOCAB_PATH, "utf-8").then((raw) => JSON.parse(raw) as Vocabulary);
+    vocabPromise = readFile(VOCAB_PATH, "utf-8").then((raw) => {
+      const vocab = JSON.parse(raw) as Vocabulary;
+      // slug_index is DERIVED, never authored: raw_slugs is the one surface.
+      // Any hand-added block in the JSON is ignored, so it cannot go stale.
+      vocab.slug_index = deriveSlugIndex(vocab.concepts, PATH_AMBIGUOUS_SLUGS);
+      return vocab;
+    });
   }
   return vocabPromise;
 }
@@ -185,8 +201,7 @@ export function resetVocabularyCache(): void {
 // Slug resolution
 // ---------------------------------------------------------------------------
 
-/** Slug strings whose canonical resolution depends on field path, not value. */
-const PATH_AMBIGUOUS_SLUGS = new Set<string>(["direction"]);
+export { PATH_AMBIGUOUS_SLUGS };
 
 /** A slug index entry is either a concept id (string) or a `_note` marker (ambiguous family). */
 function looksLikeConceptId(entry: unknown): entry is string {
