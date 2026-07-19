@@ -1948,6 +1948,37 @@ pipelines:
     # ~57 calls/run (one per in-scope Lee+Collier ZIP). Consumer: refinery/packs/market-temperature-swfl.mts
     # (via data_lake.market_details_swfl_latest). Workflow: ingest-market-aggregates-details.yml.
 
+  # ── Realtor geo trends — the Redfin-retirement PARALLEL RUN ─────────────────
+  # Operator-commissioned 07/18/2026: city/county/neighborhood median sold/list/DOM/ppsqft
+  # off 3 anchor properties (/neighborhood-market-trends, ~3 calls/run, monthly). NOT dead
+  # despite consuming_pack: none — its consumer is the cutover decision itself: the
+  # data_lake.realtor_redfin_median_overlap view compares each month against Redfin, and
+  # after 2-3 overlap months within tolerance the Redfin pull retires and this table
+  # continues the served sold-median series (check realtor_redfin_overlap_cutover).
+  # First live run 07/18/2026: 9 rows (3 city + 2 county + 4 neighborhood); overlap deltas
+  # Lee 0.0% / Collier 1.2% / Cape Coral 1.4% / Fort Myers -1.8% / Naples -49.9%
+  # (definitional: realtor "Naples" = broad mailing-address sweep, Redfin = city-proper —
+  # operator chose the broad definition go-forward). Pipeline: geo-trends resource in
+  # ingest/pipelines/market_aggregates/ (shared throttled client + upsert).
+  - name: realtor_geo_trends
+    workflow: realtor-geo-trends-monthly.yml
+    consuming_pack: none
+    lane: tier-2
+    cadence_days: 30 # monthly — same vendor refresh as market_aggregates_details
+    tolerance_multiplier: 2.0
+    freshness_table: data_lake.realtor_geo_medians
+    freshness_column: captured_date
+    source_scope:
+      confirmed_total:
+        summary: "Per anchor call, ALL geo blocks stored (full response body): city + county + each named neighborhood, each with the vendor's median_listing_price, median_sold_price, median_days_on_market, median_price_per_sqft, plus name/slug_id/state_code/county/level. 9 rows on first run (3 anchors)."
+        as_of: "07/18/2026"
+        source: "our ingest"
+      source_ceiling:
+        summary: "Field-level: none — every documented block of this endpoint is stored. Endpoint-level ceiling: more anchors = more cities/neighborhoods (any listing_state property_id works); /geo-details could enumerate every city/ZIP/neighborhood under the metro in one sweep if the parallel run graduates to a full geo census."
+        as_of: "07/18/2026"
+        source_url: "https://docs.steadyapi.com"
+        source_label: "realtor.com (via SteadyAPI — neighborhood market trends)"
+
   # ── Rentals (SteadyAPI /rentals-search, realtor.com origin) ─────────────────
   # GRADUATED 2026-07-02: moved up from not_yet_running: — schedule uncommented in ingest-rentals.yml.
   # First green live dispatch (dry_run=false, run 28559510045, 10m48s): 466 rentals-search calls
