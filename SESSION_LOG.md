@@ -1,3 +1,16 @@
+## 2026-07-19 (Fable 5 · main) — SPEC: SOH portability + cost-of-waiting on /r/should-i-sell (brainstormed, registered, evidence in-spec)
+
+Operator: "take care of the should i sell page." Brainstormed + registered `soh-portability-should-i-sell`
+(two-tier shape operator-ratified: always-on ZIP SOH line off the served value-brain tables + address-gated
+per-parcel portability calc off lee/collier_parcels jv_hmstd−av_hmstd). RULE 0.4 evidence fetched live:
+DOR PT-112 (3%/CPI cap, 3-yr window from Jan 1 of abandonment yr, DR-501T by Mar 1) + s.193.155(8) F.S.
+verbatim upsize/downsize formulas ($500k cap); county tax-bill live fetch RULED OUT (TaxSys: Cloudflare
+gate on Collier, JS-only on Lee) → spread tax field stays user-entry + cited link-out; opened
+`taxsys_bulk_reports_probe` (idea), spec closes `should_i_sell_property_tax_source` at ship. Spec:
+docs/superpowers/specs/2026-07-19-soh-portability-should-i-sell-design.md. Next: operator spec review →
+writing-plans → build (checks to close at live-verify: soh_portability_should_i_sell_live_verify,
+steady20_soh_cost_of_waiting_calc).
+
 ## 2026-07-19 (Fable 5 · main) — DESK VISIT: 15→4 picks + full numbers audit after the consolidation + Tape sweep cleared
 
 Operator: "a lot has changed — make sure your numbers are updated and correct in Fables." Re-verified
