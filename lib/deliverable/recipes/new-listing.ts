@@ -57,7 +57,11 @@ export async function buildNewListing(ctx: RecipeBuildContext): Promise<EmailDoc
   //
   // Best-effort by contract: a vendor miss → null → the Type cell simply keeps its slot. The
   // build is NEVER blocked on it (RULE 0.7), and no number is ever invented to fill it.
-  const daysOnMarket = daysSinceListed(await resolveSubjectListDate(facts), new Date());
+  //
+  // LAKE-FIRST (07/19/2026): a lake-resolved subject already carries the healed count
+  // from our own per-listing DOM root (listing_dom) — use it and skip both vendor calls.
+  const daysOnMarket =
+    facts.daysOnMarket ?? daysSinceListed(await resolveSubjectListDate(facts), new Date());
 
   // The coded flyer grid. Brand (globalStyle, header, footer, agent card) is sticky
   // and lifted from whatever is on the canvas — we never author a brand.

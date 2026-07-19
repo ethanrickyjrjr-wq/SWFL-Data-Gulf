@@ -45,6 +45,11 @@ export interface ListingFacts {
   photos: string[]; // absolute listing photo URLs
   lat?: number; // from GeoCoordinates — used for comps chart
   lon?: number;
+  /** REAL days on market from our own per-listing DOM root (listing_dom view),
+   *  attached only by the lake resolve lane and only when the count is NOT a
+   *  first-seen floor. Present → recipes use it directly and skip the two-call
+   *  vendor list-date chain. Never a floored count, never invented. */
+  daysOnMarket?: number;
   sourceUrl: string; // the citation
   /** THE COMMUNITY — golf, pool, gated, clubhouse — parsed from the SAME html this function
    *  already fetched, so it costs no extra request. The index scrape never captured any of

@@ -86,8 +86,12 @@ export function HeroBlock({
         ...(clipping ? { borderLeft: `4px solid ${clipAccent}` } : {}),
       }}
     >
-      {/* The kicker is a CAPTION only when it isn't a ribbon — a ribbon already carries it. */}
-      {!props.ribbon && (props.kicker || scope) ? (
+      {/* The kicker is a CAPTION only when it isn't a ribbon — a ribbon already carries it.
+          On a label-first (flyer) hero the campaign RIBBON above the photo already IS the
+          kicker, so the editor does not offer an empty kicker slot here — a bare "KICKER"
+          placeholder over the address read as broken chrome (operator, 07/19/2026). A
+          filled kicker still renders and stays editable. */}
+      {!props.ribbon && (props.kicker || (scope && !labelFirst)) ? (
         <EditableText
           as={Text}
           value={props.kicker ?? ""}

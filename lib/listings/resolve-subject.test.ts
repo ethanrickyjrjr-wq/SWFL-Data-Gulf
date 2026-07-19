@@ -126,6 +126,32 @@ describe("resolveSubjectListing — lake-first (vendor slug drift 07/19/2026)", 
     expect(facts?.price).toBe("$1,159,150");
   });
 
+  test("a lake hit carries the sweep's real DOM onto facts (never a floored count)", async () => {
+    const real = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
+      fetchNearby: noNearby,
+      geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: async () => [
+        { ...SUBJECT, daysOnMarket: 83, domIsFloor: false } as typeof SUBJECT,
+      ],
+      fetchListings: noLake,
+    });
+    expect(real!.daysOnMarket).toBe(83);
+
+    const floored = await resolveSubjectListing(
+      "16447 Rainbow Meadows Court, Fort Myers, FL 33908",
+      {
+        fetchNearby: noNearby,
+        geocode: geocodeReturning("33908"),
+        fetchLakeCandidates: async () => [
+          { ...SUBJECT, daysOnMarket: 12, domIsFloor: true } as typeof SUBJECT,
+        ],
+        fetchListings: noLake,
+      },
+    );
+    expect(floored).not.toBeNull(); // the resolve itself still lands
+    expect(floored!.daysOnMarket).toBeUndefined(); // a floor is never printed as exact
+  });
+
   test("a lake hit prints the FULL address line, not the bare street", async () => {
     const facts = await resolveSubjectListing(
       "16447 Rainbow Meadows Court, Fort Myers, Florida 33908",

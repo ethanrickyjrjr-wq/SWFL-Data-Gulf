@@ -12,6 +12,11 @@ import { PLATFORMS, platformMeta } from "@/lib/email/social/platforms";
 import { brandGlobalStyle } from "@/lib/email/brand/apply-brand-style";
 import type { EmailBlock, EmailDoc, SocialPlatformEntry } from "@/lib/email/doc/types";
 
+/** The one generic hero label a scope token may still replace (token-defaults.ts
+ *  HERO_LABEL) — kept as a local constant so this pure module doesn't grow a
+ *  dependency on the legacy template-token file. */
+const HOUSE_DEFAULT_HERO_LABEL = "Southwest Florida";
+
 export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc {
   if (!t) return doc;
   const globalStyle = brandGlobalStyle(doc.globalStyle, t);
@@ -66,7 +71,13 @@ export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc 
       // (mailto:, agent-launch L2) survives the overlay.
       if (cta && !String(props.url ?? "").startsWith("mailto:")) props.url = cta;
     } else if (b.type === "hero") {
-      if (t.HERO_LABEL) props.label = t.HERO_LABEL;
+      // Scope dressing (HERO_LABEL = the project's place/ZIP, added by the project
+      // page) fills a hero label ONLY when it is blank or still the house default.
+      // An authored label is CONTENT — on every lifecycle flyer it is the listing
+      // ADDRESS — and the overlay must never clobber it (07/19/2026: every project
+      // build printed "Cape Coral" where the address belonged).
+      const cur = String((props.label as string | undefined) ?? "").trim();
+      if (t.HERO_LABEL && (!cur || cur === HOUSE_DEFAULT_HERO_LABEL)) props.label = t.HERO_LABEL;
     }
     return { ...b, props } as EmailBlock;
   });

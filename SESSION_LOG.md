@@ -14,6 +14,24 @@ Spec: docs/superpowers/specs/2026-07-19-offer-check-design.md. Check open:
 offer_check_live_verify (close after live post-deploy verify). NEXT: operator pushes (agent
 push classifier-blocked), then live-verify checkout round-trip + unlocked comp render on prod.
 
+## 2026-07-19 (Fable 5 · main) — flyer follow-ups: brand overlay was CLOBBERING the authored address; DOM cell restored from our own listing_dom root; stray KICKER placeholder off flyer heroes
+
+Live-verify of 8d15e842 surfaced three presentation defects (operator escalation). (1) ADDRESS
+MISSING: the project page stamps HERO_LABEL = the project's place ("Cape Coral") into brand tokens,
+and apply-brand.ts:69 wrote it over EVERY hero label — including the authored listing address the
+server correctly built (proven: local authorDoc returned the full address; the client overlay
+clobbered it). Fix: HERO_LABEL fills only a blank or house-default ("Southwest Florida") label —
+authored content is never overwritten; pinned in new apply-brand.test.ts. (2) DOM CELL GONE: the
+lake resolve lane didn't carry listing_dom's healed dom_days, so buildNewListing fell back to the
+2-call vendor list-date chain (which missed) and the cell showed Type instead. Fix: lake lane runs
+healFlooredRows + attaches daysOnMarket to ListingFacts (floors never printed as exact); new-listing
+prefers it and skips both vendor calls. (3) "KICKER" TEXT: editor-only inline-edit placeholder
+(never in sent HTML) — now suppressed on label-first flyer heroes whose ribbon already carries the
+kicker. Explained-not-changed: $/SqFt emphasis = the 07/13 operator ruling (scale.ts ladder);
+header/colors/no-logo = the test account's near-empty brand profile (brand-fill-once P1 pending
+live-verify). Gates: 2,803 tests lib/listings+email+deliverable · 35/0 new pins · `bunx next build`
+✓. NEXT: operator rebuild on prod → address + DOM cell verified in-canvas.
+
 ## 2026-07-19 (Fable 5 · main) — "ALL EMAILS BROKEN" root-caused: SteadyAPI /search address-slug centering DIED → every address-spine build shipped an empty skeleton; fix = lake-first subject resolver
 
 Operator rage-report, reproduced live in Chrome (New Listing seed, 2006 SW 15th Ave Cape Coral):

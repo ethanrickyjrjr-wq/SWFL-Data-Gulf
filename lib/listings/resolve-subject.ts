@@ -27,7 +27,12 @@
 // ("16447 Rainbow Meadows Court" ≡ the record's "16447 Rainbow Meadows Ct").
 import { geocodeAddress, type GeocodeFn } from "@/lib/geo/geocode-address";
 import { fetchPhotoListings, fetchNearbyValues } from "./steadyapi";
-import { lakeRowToListing, LAKE_LISTING_COLUMNS, type LakeListingRow } from "./select";
+import {
+  lakeRowToListing,
+  healFlooredRows,
+  LAKE_LISTING_COLUMNS,
+  type LakeListingRow,
+} from "./select";
 // KNOWN-DEBT(data_lake: listing_state/listing_dom live in the data_lake schema, which
 // the typed Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
@@ -93,9 +98,12 @@ async function fetchLakeSubjectCandidates(q: {
     sel = q.zip ? sel.eq("zip_code", q.zip) : sel.ilike("city", q.city);
     const { data } = await sel;
     if (!Array.isArray(data)) return [];
-    return (data as unknown as LakeListingRow[])
-      .map(lakeRowToListing)
-      .filter((l): l is Listing => l !== null);
+    const rows = data as unknown as LakeListingRow[];
+    // Probe-on-use DOM healing, same as the city feed (select.ts): a floored row
+    // being SURFACED gets its true list date resolved + persisted, so the flyer's
+    // DOM cell is real. Capped inside healFlooredRows; failures keep the floor.
+    await healFlooredRows(rows);
+    return rows.map(lakeRowToListing).filter((l): l is Listing => l !== null);
   } catch {
     return [];
   }
@@ -309,6 +317,16 @@ export async function resolveSubjectListing(
         .filter(Boolean)
         .join(", ");
       if (full && !(facts.address ?? "").includes(",")) facts.address = full;
+      // THE DOM CELL — from our own per-listing DOM root (listing_dom, healed above).
+      // A first-seen floor ("at least N") is never printed as an exact count; recipes
+      // holding this skip the two-call vendor list-date chain entirely.
+      if (
+        lakeHit.domIsFloor !== true &&
+        lakeHit.daysOnMarket != null &&
+        lakeHit.daysOnMarket >= 0
+      ) {
+        facts.daysOnMarket = lakeHit.daysOnMarket;
+      }
       return withBaths(facts, target, fetchNearby);
     }
   }
