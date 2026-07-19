@@ -219,7 +219,7 @@ export interface ListingContext {
   city: string;
 }
 
-interface LakeListingRow {
+export interface LakeListingRow {
   listing_id: string | null;
   street_address: string | null;
   city: string | null;
@@ -243,6 +243,11 @@ interface LakeListingRow {
   dom_days: number | null;
   dom_is_floor: boolean | null;
   cdom_days: number | null;
+  /** Vendor-stated listing characteristics carried by the sweep — the descriptive
+   *  facts a listing flyer is about. Absent/null = not stated; never inferred. */
+  flag_new_construction: boolean | null;
+  flag_price_reduced: boolean | null;
+  reduced_amount: number | null;
   /** Internal heal keys (probe-on-use) — read by healFlooredRows, NEVER mapped onto Listing. */
   address_key: string | null;
   property_id: string | null;
@@ -279,13 +284,22 @@ export function lakeRowToListing(row: LakeListingRow): Listing | null {
     mlsName: row.mls_name,
     mlsNumber: row.mls_number,
     ...(row.photo_url ? { photoUrl: row.photo_url } : {}),
+    ...(row.flag_new_construction != null ? { isNewConstruction: row.flag_new_construction } : {}),
+    ...(row.flag_price_reduced != null ? { isPriceReduced: row.flag_price_reduced } : {}),
+    // The sweep can hold a HISTORICAL reduced_amount on a row whose flag has since
+    // cleared — carry the cut only while the vendor still flags it, or a stale cut
+    // renders on a listing that is no longer reduced.
+    ...(row.flag_price_reduced === true && row.reduced_amount != null
+      ? { priceReduction: row.reduced_amount }
+      : {}),
   };
 }
 
-const LAKE_LISTING_COLUMNS =
+export const LAKE_LISTING_COLUMNS =
   "listing_id, street_address, city, county, zip_code, lat, lon, property_type, beds, baths, " +
   "sqft, lot_acres, status, list_price, listed_date, last_seen, days_on_market, mls_name, " +
-  "mls_number, photo_url, dom_days, dom_is_floor, cdom_days, address_key, property_id";
+  "mls_number, photo_url, dom_days, dom_is_floor, cdom_days, flag_new_construction, " +
+  "flag_price_reduced, reduced_amount, address_key, property_id";
 
 /** Probe-on-use healing (spec 2026-07-16-listing-dom-design.md §3): a censored floor
  *  row being SURFACED gets one `/property-tax-history` call for its true list date,

@@ -65,6 +65,88 @@ const listFrom =
 // come from /nearby-home-values — but this suite is offline by contract, so every call
 // injects this. A resolve must still make ZERO live vendor calls.
 const noNearby = async () => [];
+// The lake lane, stubbed empty — vendor-lane tests below exercise the FALLBACK path.
+const noLake = async () => [];
+
+describe("resolveSubjectListing — lake-first (vendor slug drift 07/19/2026)", () => {
+  test("a subject in our own lake resolves with ZERO vendor listing calls", async () => {
+    let vendorCalls = 0;
+    const facts = await resolveSubjectListing(
+      "16447 Rainbow Meadows Court, Fort Myers, Florida 33908",
+      {
+        fetchNearby: noNearby,
+        geocode: geocodeReturning("33908"),
+        fetchLakeCandidates: async () => [SUBJECT],
+        fetchListings: async () => {
+          vendorCalls++;
+          return [];
+        },
+      },
+    );
+    expect(facts).not.toBeNull();
+    expect(facts!.price).toBe("$1,159,150");
+    expect(facts!.beds).toBe("4");
+    expect(facts!.photos[0]).toBe("https://ap.rdcpix.com/abc/16447.jpg");
+    expect(vendorCalls).toBe(0);
+  });
+
+  test("the lake fetcher receives the parsed house number + geocoded ZIP", async () => {
+    let got: { houseNumber: string; zip: string | null; city: string } | null = null;
+    await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, Florida 33908", {
+      fetchNearby: noNearby,
+      geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: async (q) => {
+        got = q;
+        return [];
+      },
+      fetchListings: noLake,
+    });
+    expect(got).toEqual({ houseNumber: "16447", zip: "33908", city: "Fort Myers" });
+  });
+
+  test("lake candidates that don't match fall through to the vendor lane", async () => {
+    const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
+      fetchNearby: noNearby,
+      geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: async () => [mkListing({ addressLine1: "9 Elsewhere Blvd" })],
+      fetchListings: listFrom({ 0: [SUBJECT] }),
+    });
+    expect(facts?.price).toBe("$1,159,150");
+  });
+
+  test("a lake fetcher failure never blocks — the vendor lane still resolves", async () => {
+    const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
+      fetchNearby: noNearby,
+      geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: async () => {
+        throw new Error("lake down");
+      },
+      fetchListings: listFrom({ 0: [SUBJECT] }),
+    });
+    expect(facts?.price).toBe("$1,159,150");
+  });
+
+  test("a lake hit prints the FULL address line, not the bare street", async () => {
+    const facts = await resolveSubjectListing(
+      "16447 Rainbow Meadows Court, Fort Myers, Florida 33908",
+      {
+        fetchNearby: noNearby,
+        geocode: geocodeReturning("33908"),
+        // lakeRowToListing sets formattedAddress to the bare street line.
+        fetchLakeCandidates: async () => [
+          mkListing({
+            addressLine1: "16447 Rainbow Meadows Ct",
+            formattedAddress: "16447 Rainbow Meadows Ct",
+            price: 1159150,
+            photoUrl: "https://ap.rdcpix.com/abc/16447.jpg",
+          }),
+        ],
+        fetchListings: noLake,
+      },
+    );
+    expect(facts!.address).toBe("16447 Rainbow Meadows Ct, Fort Myers, FL, 33908");
+  });
+});
 
 describe("resolveSubjectListing", () => {
   test("resolves a Lee address to its record — Court≡Ct, photo + real numbers", async () => {
@@ -73,6 +155,7 @@ describe("resolveSubjectListing", () => {
       {
         fetchNearby: noNearby,
         geocode: geocodeReturning("33908"),
+        fetchLakeCandidates: noLake,
         fetchListings: listFrom({ 0: [SUBJECT] }),
       },
     );
@@ -91,6 +174,7 @@ describe("resolveSubjectListing", () => {
     const facts = await resolveSubjectListing("100 Main St, Miami, FL 33101", {
       fetchNearby: noNearby,
       geocode: geocodeReturning("99999"), // resolves to no SWFL county
+      fetchLakeCandidates: noLake,
       fetchListings: async () => {
         called++;
         return [SUBJECT];
@@ -104,6 +188,7 @@ describe("resolveSubjectListing", () => {
     const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
       fetchNearby: noNearby,
       geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: noLake,
       fetchListings: listFrom({ 0: [mkListing({ addressLine1: "9 Elsewhere Blvd" })] }),
     });
     expect(facts).toBeNull();
@@ -116,6 +201,7 @@ describe("resolveSubjectListing", () => {
     const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
       fetchNearby: noNearby,
       geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: noLake,
       fetchListings: listFrom({ 0: fullPage, 200: [SUBJECT] }),
     });
     expect(facts?.photos[0]).toBe("https://ap.rdcpix.com/abc/16447.jpg");
@@ -125,6 +211,7 @@ describe("resolveSubjectListing", () => {
     const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
       fetchNearby: noNearby,
       geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: noLake,
       fetchListings: async () => [],
     });
     expect(facts).toBeNull();
@@ -153,6 +240,7 @@ describe("resolveSubjectListing", () => {
     });
     const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
       geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: noLake,
       fetchListings: listFrom({ 0: [noBaths] }),
       fetchNearby: async () => [
         { addressLine: "9 Somewhere Else Dr", baths: 9 },
@@ -173,6 +261,7 @@ describe("resolveSubjectListing", () => {
     });
     const facts = await resolveSubjectListing("16447 Rainbow Meadows Court, Fort Myers, FL 33908", {
       geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: noLake,
       fetchListings: listFrom({ 0: [noBaths] }),
       fetchNearby: async () => [{ addressLine: "9 Somewhere Else Dr", baths: 9 }],
     });

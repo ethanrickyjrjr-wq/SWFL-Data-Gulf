@@ -28,6 +28,7 @@
   "lib/landing/load-home-map-data.ts",
   "lib/listings/community-lookup.ts",
   "lib/listings/listed-date-write.ts",
+  "lib/listings/resolve-subject.ts",
   "lib/listings/select.ts",
   "lib/narratives/batch-store.ts",
   "lib/narratives/store.ts",

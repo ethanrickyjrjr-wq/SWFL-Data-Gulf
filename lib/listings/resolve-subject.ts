@@ -9,13 +9,28 @@
 // Empty-tolerant by contract (four-lane / ODD): no geocode, out of the SteadyAPI
 // footprint (Lee 12071 / Collier 12021), no address match, or no key → null, and
 // the caller falls back to the "paste your listing link or add a photo" ask. Never
-// throws, never invents a number: every field is the vendor record's own value.
+// throws, never invents a number: every field is the record's own value.
+//
+// LAKE-FIRST (07/19/2026). The vendor /search address-slug lane BROKE: a
+// `location=<street>_<city>_FL_<zip>` slug now returns rows byte-identical to the
+// bare city slug (probed live 07/19/2026 — the "centers on the exact address"
+// behavior verified 07/08/2026 is gone), and the city-scan fallback reads at most
+// ~800 rows of cities that hold thousands of actives. Net effect: nearly every
+// subject address missed, and every address-spine recipe shipped an empty
+// skeleton. The nightly sweep already lands these same listings in
+// data_lake.listing_state (surfaced through the listing_dom authority view), so
+// OUR OWN LAKE is now the primary resolver — four-lane lane 1 — with the vendor
+// slug + city scan kept as fallbacks for listings the sweep hasn't landed yet.
 //
 // The photo-search feed (fetchPhotoListings) returns for-sale listings WITH photos
 // keyed by CITY; we page it and match the subject by its canonicalized street line
 // ("16447 Rainbow Meadows Court" ≡ the record's "16447 Rainbow Meadows Ct").
 import { geocodeAddress, type GeocodeFn } from "@/lib/geo/geocode-address";
 import { fetchPhotoListings, fetchNearbyValues } from "./steadyapi";
+import { lakeRowToListing, LAKE_LISTING_COLUMNS, type LakeListingRow } from "./select";
+// KNOWN-DEBT(data_lake: listing_state/listing_dom live in the data_lake schema, which
+// the typed Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import type { Listing } from "./rentcast";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
@@ -35,15 +50,55 @@ export type FetchNearbyFn = (opts: {
   limit?: number;
 }) => Promise<{ addressLine: string; baths: number | null }[]>;
 
+/** Lane-1 candidate fetcher — our own lake, keyed by house number + ZIP (or city).
+ *  Returns CANDIDATES; the resolver applies the one canonical street match. */
+export type FetchLakeSubjectFn = (q: {
+  houseNumber: string;
+  zip: string | null;
+  city: string;
+}) => Promise<Listing[]>;
+
 export interface ResolveSubjectDeps {
   /** Nearby-values fetcher (the ONLY source of a bath count — /search carries none). */
   fetchNearby?: FetchNearbyFn;
   /** Injectable geocoder — tests never touch Mapbox/Census. */
   geocode?: GeocodeFn;
+  /** Injectable lake candidates feed — tests never touch Supabase. */
+  fetchLakeCandidates?: FetchLakeSubjectFn;
   /** Injectable city listings feed — tests never touch SteadyAPI. */
   fetchListings?: FetchListingsFn;
   /** Pages of ~200 to scan for the subject before giving up (1 Steady call each). */
   maxPages?: number;
+}
+
+/** Default lane-1 impl: active for-sale rows from the listing_dom authority view
+ *  (nightly sweep — no live vendor call, no per-request cost), narrowed to the
+ *  subject's house number + ZIP so the fetch stays tiny. Empty-tolerant: no creds,
+ *  no rows, any query error → `[]`, never throws (four-lane/ODD contract). */
+async function fetchLakeSubjectCandidates(q: {
+  houseNumber: string;
+  zip: string | null;
+  city: string;
+}): Promise<Listing[]> {
+  try {
+    const db = createServiceRoleClientUntyped();
+    let sel = db
+      .schema("data_lake")
+      .from("listing_dom")
+      .select(LAKE_LISTING_COLUMNS)
+      .eq("sale_or_rent", "sale")
+      .eq("state", "active")
+      .ilike("street_address", `${q.houseNumber} %`)
+      .limit(25);
+    sel = q.zip ? sel.eq("zip_code", q.zip) : sel.ilike("city", q.city);
+    const { data } = await sel;
+    if (!Array.isArray(data)) return [];
+    return (data as unknown as LakeListingRow[])
+      .map(lakeRowToListing)
+      .filter((l): l is Listing => l !== null);
+  } catch {
+    return [];
+  }
 }
 
 /** Standard USPS-ish street-suffix folding so "Court" and "Ct" canonicalize equal. */
@@ -179,8 +234,9 @@ function toFacts(l: Listing, geoZip: string | null, subject: string): ListingFac
     // The vendor row DOES carry these two and we were dropping them on the floor —
     // the flyer has always read facts.lotSize / facts.propertyType (the scrape lane
     // fills them), so the address lane rendered "Lot" and "Type" as bare labels over
-    // data we already held. lotSize is ACRES by convention (see steadyapi.ts).
-    lotSize: l.lotSize != null ? `${l.lotSize} ac` : undefined,
+    // data we already held. lotSize is ACRES by convention (see steadyapi.ts);
+    // lake rows carry raw floats, so round to 2dp for display (never re-derive).
+    lotSize: l.lotSize != null ? `${Math.round(l.lotSize * 100) / 100} ac` : undefined,
     propertyType: l.propertyType || undefined,
     yearBuilt: l.yearBuilt != null ? String(l.yearBuilt) : undefined,
     lat: typeof l.latitude === "number" ? l.latitude : undefined,
@@ -234,9 +290,35 @@ export async function resolveSubjectListing(
     return rc === target || rc.startsWith(target + " ") || target.startsWith(rc + " ");
   };
 
-  // 1) DIRECT address query — SteadyAPI centers its result set on the exact address
-  //    slug ("850-10th-St-N_Naples_FL_34102"), so the subject (if listed) is right at
-  //    the top. One call, no scanning ~800 city rows hoping to trip over it.
+  // 0) OUR OWN LAKE — lane 1 of the four-lane order, and since 07/19/2026 the
+  //    primary lane outright: the vendor slug lane below stopped centering on the
+  //    address (see header), so the sweep we already run nightly is what actually
+  //    finds the subject. Tiny fetch (house number + ZIP), canonical street match,
+  //    zero vendor quota.
+  const houseNumber = /^\d+$/.test(target.split(" ")[0] ?? "") ? target.split(" ")[0]! : "";
+  if (houseNumber) {
+    const fetchLake = deps.fetchLakeCandidates ?? fetchLakeSubjectCandidates;
+    const lakeRows = await fetchLake({ houseNumber, zip: geo.zip ?? null, city }).catch(
+      () => [] as Listing[],
+    );
+    const lakeHit = lakeRows.find(matches);
+    if (lakeHit) {
+      const facts = toFacts(lakeHit, geo.zip, subject);
+      // The lake row's formattedAddress is the bare street line — print the full one.
+      const full = [lakeHit.addressLine1, lakeHit.city, lakeHit.state, lakeHit.zipCode]
+        .filter(Boolean)
+        .join(", ");
+      if (full && !(facts.address ?? "").includes(",")) facts.address = full;
+      return withBaths(facts, target, fetchNearby);
+    }
+  }
+
+  // 1) DIRECT address query — SteadyAPI used to center its result set on the exact
+  //    address slug ("850-10th-St-N_Naples_FL_34102") so the subject sat right at
+  //    the top (verified 07/08/2026). That behavior BROKE by 07/19/2026 (the slug
+  //    now returns the plain city feed — see header), but the call is kept: it
+  //    costs the same as one city page, and if the vendor restores centering this
+  //    lane silently starts hitting again for listings the sweep hasn't landed.
   if (geo.zip) {
     const slug =
       `${streetLineOf(subject).trim().replace(/\s+/g, "-")}` +

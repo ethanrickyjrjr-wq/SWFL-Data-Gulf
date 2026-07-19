@@ -552,6 +552,11 @@ export function EmailLabGridShell({
           // on Build so the message is seen.
           setPhoneTab("preview");
           if (campaignFollowUp) setFollowUpArmed(true);
+        } else {
+          // A doc that fails the schema parse used to vanish in silence — the user
+          // saw "nothing happened" with no signal. A failed build must say so.
+          setAiStatus(null);
+          setAiMessage("The build came back malformed — nothing was applied. Try again.");
         }
       }
     } catch {
@@ -618,6 +623,10 @@ export function EmailLabGridShell({
           layoutBaselineRef.current = JSON.stringify(normalized);
           layoutSubjectRef.current = data.listing?.subject ?? layoutSubjectRef.current;
           setSelectedId(null);
+        } else {
+          // Same honesty rule as runAuthor: a malformed build must never read as
+          // "nothing happened".
+          setAiMessage("The build came back malformed — nothing was applied. Try again.");
         }
       }
     } catch {

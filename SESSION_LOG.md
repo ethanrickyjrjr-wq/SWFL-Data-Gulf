@@ -1,3 +1,22 @@
+## 2026-07-19 (Fable 5 · main) — "ALL EMAILS BROKEN" root-caused: SteadyAPI /search address-slug centering DIED → every address-spine build shipped an empty skeleton; fix = lake-first subject resolver
+
+Operator rage-report, reproduced live in Chrome (New Listing seed, 2006 SW 15th Ave Cape Coral):
+build returned 200 + "applied" with EVERY figure slot empty. Trace: popup Build → authorDoc recipe
+lane → resolveSubject → resolveSubjectListing → NULL, so the coded builder correctly shipped the
+honest empty grid. Layer probe: geocode ✓ (33991/Lee), SteadyAPI key ✓ — but the vendor's
+`location=<street>_<city>_FL_<zip>` slug now returns rows BYTE-IDENTICAL to the bare city slug
+(probed live; the "centers on the exact address" behavior verified 07/08 is gone), and the city-scan
+fallback reads ≤800 rows of cities holding thousands — so nearly every subject missed, and 15+
+address-spine recipes built empty. The listing was in data_lake.listing_state the whole time.
+Fix: lane-0 LAKE-FIRST in resolveSubjectListing (listing_dom authority view, house-number+ZIP
+narrow fetch, canonical street match, zero vendor quota; vendor slug + city scan kept as fallbacks)
++ lakeRowToListing carries the sweep's new-construction/price-cut flags (cut gated on the live flag)
++ toFacts rounds lake lot floats + EmailLabGridShell surfaces the previously-SILENT schema-parse
+failure in both build paths. Live probe now returns full facts ($379,500 · 4/2 · 1,828 sqft · photo).
+Gates: resolve-subject 18/0 · lib/listings 161/0 · lib/deliverable+lib/email 2,641/0 · `bunx next
+build` ✓. Checks opened: subject_resolver_lake_first_live_verify · steady_search_slug_drift_reprobe.
+NEXT: operator push → prod rebuild of the same email → close live-verify.
+
 ## 2026-07-19 (Fable 5 · wt/ci-quiet) — CI red since 07/18 05:03Z KILLED (stale watch-manifest regen) + CI path-filtered off bot brains/ pushes; bake red root-caused to already-fixed c98dc100
 
 Operator: "what is all this running on GitHub" → 2+3 (trim meta-layer, fix the reds). Findings, all
