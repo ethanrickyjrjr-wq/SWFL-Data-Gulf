@@ -1,7 +1,7 @@
 """Pure tests over the SQL strings + row->params packing. No live DB."""
 from datetime import date
 
-from ingest.pipelines.listing_week.db import LABEL_SQL, MERGE_SQL, _merge_params
+from ingest.pipelines.listing_week.db import LABEL_SQL, MERGE_SQL, STATE_SQL, _merge_params
 
 ROW = {"address_key": "123 MAIN ST:33904", "sale_or_rent": "sale",
        "week_start": date(2026, 6, 29), "listing_id": "L1", "zip_code": "33904",
@@ -27,6 +27,12 @@ def test_label_sql_updates_only_labels():
     s = LABEL_SQL.lower()
     assert s.strip().startswith("update data_lake.listing_week")
     assert "list_price" not in s
+
+def test_state_load_dedupes_deterministically():
+    # 274 addresses live under two source rows — freshest must win, not scan order.
+    s = STATE_SQL.lower()
+    assert "distinct on (address_key, sale_or_rent)" in s
+    assert "order by address_key, sale_or_rent, scraped_at desc" in s
 
 def test_merge_params_order_matches_placeholders():
     params = _merge_params(ROW)

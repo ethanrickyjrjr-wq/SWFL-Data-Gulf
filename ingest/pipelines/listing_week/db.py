@@ -44,20 +44,40 @@ def get_conn():
 
     db_url = os.environ.get("DATABASE_URL")
     if not db_url:
+        # .dlt/secrets.toml credentials are a TOML TABLE (host/port/...), not a URL —
+        # assemble exactly like listing_lifecycle/distill._get_conn.
         import tomllib
-        secrets = Path(__file__).resolve().parents[2] / ".dlt" / "secrets.toml"
-        with open(secrets, "rb") as f:
-            db_url = tomllib.load(f)["destination"]["postgres"]["credentials"]
+        s = Path(".dlt/secrets.toml")
+        if s.exists():
+            with s.open("rb") as f:
+                data = tomllib.load(f)
+            pg = data.get("destination", {}).get("postgres", {}).get("credentials", {})
+            host, pw = pg.get("host", ""), pg.get("password", "")
+            db, user = pg.get("database", "postgres"), pg.get("username", "postgres")
+            port = pg.get("port", 5432)
+            if host and pw:
+                db_url = f"postgresql://{user}:{pw}@{host}:{port}/{db}?sslmode=require"
+    if not db_url:
+        raise RuntimeError("No DB URL. Set DATABASE_URL or ensure .dlt/secrets.toml is present.")
     return psycopg.connect(db_url)
 
 
+# 274 addresses (07/19/2026) exist under TWO listing_state source rows (seed + api_feed).
+# DISTINCT ON + scraped_at DESC makes the survivor deterministic: freshest row wins,
+# instead of whichever the merge happened to write last.
+STATE_SQL = (
+    "SELECT DISTINCT ON (address_key, sale_or_rent) "
+    "address_key, sale_or_rent, state, list_price, listed_date, zip_code, "
+    "county, property_type, beds, baths, sqft, lot_acres, flag_foreclosure, "
+    "flag_new_construction, listing_id "
+    "FROM data_lake.listing_state WHERE sale_or_rent = 'sale' "
+    "ORDER BY address_key, sale_or_rent, scraped_at DESC NULLS LAST"
+)
+
+
 def load_sale_state(conn) -> list[dict[str, Any]]:
-    cols = ("address_key, sale_or_rent, state, list_price, listed_date, zip_code, "
-            "county, property_type, beds, baths, sqft, lot_acres, flag_foreclosure, "
-            "flag_new_construction, listing_id")
     with conn.cursor() as cur:
-        cur.execute(f"SELECT {cols} FROM data_lake.listing_state "
-                    "WHERE sale_or_rent = 'sale'")
+        cur.execute(STATE_SQL)
         names = [d.name for d in cur.description]
         return [dict(zip(names, r)) for r in cur.fetchall()]
 
