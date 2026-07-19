@@ -6,6 +6,7 @@ import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 /**
  * leepa-sold-median source connector — Lee County homes-only SOLD median per ZIP,
@@ -103,7 +104,13 @@ export const leepaSoldMedianSource: SourceConnector = {
   trust_tier: 2,
   async fetch(): Promise<RawFragment[]> {
     const fetched_at = isoTimestamp();
-    const rows = env.source === "fixture" ? await loadFixtureRows() : await fetchLiveRows();
+    // Core-scope filter at the single ZIP-entry point (zip-scope gate contract): the view
+    // GROUPs raw leepa_parcels site ZIPs, so edge ZIPs outside the 57-ZIP core (first seen
+    // live: 33945, 07/19/2026) can drift in as LeePA data changes and would inflate the
+    // "of N SWFL ZIPs" denominator downstream.
+    const rows = (
+      env.source === "fixture" ? await loadFixtureRows() : await fetchLiveRows()
+    ).filter((r) => isCoreScope(r.zip_code));
     if (rows.length === 0) return [];
 
     // county_median/county_n are constant across rows (CROSS JOIN); read from row 0.

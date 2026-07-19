@@ -1,3 +1,17 @@
+## 2026-07-19 (Fable 5 · main) — Dispatch round-trip: leaves served (env 3.36@07/09 CONFIRMED in brain bytes); master held on a LeePA zip-scope drift — fixed here
+
+home-values ✓ · active-rentals ✓ (first run cancelled by the daily-rebuild concurrency group when two
+dispatches queued 7s apart — only ONE pending slot; re-dispatched sequentially) · env-swfl ✓ on retry:
+first run failed "The operation timed out." (300s Bun-fetch hang) which resilient-build misclassified
+DETERMINISTIC — connector verified 5s locally, retry green; opened
+`resilient_build_timeout_misclassified_deterministic`. brains/env-swfl.md on origin now serves 3.36 ft
+@ 07/09 with the Parquet citation (frozen read dead). master --no-force then HELD: the cascade rebuilt
+stale properties-lee-value and the zip-scope gate caught ZIP 33945 (non-core) newly drifting into
+data_lake.leepa_sold_median_by_zip — LeePA data drift, not a regression from this session. Fixed per
+the gate's own prescription: isCoreScope(zip_code) filter at the single entry point in
+leepa-sold-median-source.mts (fixture fallback row 33902→33924 Captiva, a real core thin-sales ZIP;
+26/26 tests green). Re-dispatching master after this push.
+
 ## 2026-07-19 (Fable 5 · main) — Decreed serve dispatches fired: home-values-swfl, active-rentals-swfl, env-swfl (targeted, via dispatch-rebuild.mjs)
 
 Three leaf rebuilds dispatched under the operator's "take care of these" decree (ZHVI label fix,

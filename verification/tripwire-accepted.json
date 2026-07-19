@@ -166,6 +166,24 @@
       "pack": "env-swfl",
       "accepted_on": "07/18/2026",
       "note": "Operator decree 07/19/2026 'take care of these': serve the USGS parquet dual-read repoint (frozen 3.17@05/17 -> live 3.36@07/09) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29670043408",
+      "pack": "active-rentals-swfl",
+      "accepted_on": "07/18/2026",
+      "note": "Operator decree 07/19/2026 'take care of these': re-dispatch — first run cancelled by concurrency group when env-swfl was dispatched 7s later (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29670074098",
+      "pack": "env-swfl",
+      "accepted_on": "07/18/2026",
+      "note": "Operator decree 07/19/2026 'take care of these': retry — first run hit a 300s fetch timeout misclassified deterministic; USGS connector verified 5s locally (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29670229041",
+      "pack": "master",
+      "accepted_on": "07/18/2026",
+      "note": "Operator decree 07/19/2026 'take care of these': propagate fresh home-values/active-rentals/env leaves + fgcu-reri removal into the dossier (plain cascade, no force) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }

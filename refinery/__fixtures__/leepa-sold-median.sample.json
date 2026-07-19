@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "note": "Sample of data_lake.leepa_sold_median_by_zip — Lee homes-only (use_code 01/04) sold median per ZIP from LeePA recorded deeds. county_median/county_n are constant across rows (CROSS JOIN). Values illustrative but in-band: county median ~$371k (validated live 07/11/2026: 55,457 eligible homes).",
+    "note": "Sample of data_lake.leepa_sold_median_by_zip \u00e2\u20ac\u201d Lee homes-only (use_code 01/04) sold median per ZIP from LeePA recorded deeds. county_median/county_n are constant across rows (CROSS JOIN). Values illustrative but in-band: county median ~$371k (validated live 07/11/2026: 55,457 eligible homes). county_fallback row uses 33924 (Captiva, core-scope; thin sales) \u2014 33902 was a PO-box ZIP outside the 57-ZIP core and the source now filters isCoreScope at fetch (07/19/2026).",
     "source": "Lee County Property Appraiser (recorded deeds)"
   },
   "rows": [
@@ -21,7 +21,7 @@
       "county_n": 55457
     },
     {
-      "zip_code": "33902",
+      "zip_code": "33924",
       "home_sales_n": 8,
       "median_sale": 371298,
       "county_fallback": true,
