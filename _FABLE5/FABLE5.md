@@ -41,10 +41,10 @@ ledger land in `insiders-runs/<stamp>/`. Sends are operator commands only
 
 ## State of the desk (≤5 lines, update each visit)
 
-- 07/17/2026: 6 rows → 2 picks, both airports (RSW $1.1B/14-gate/Dec-2027 Suffolk build; APF lease
-  appraised $8–10.8M/yr). Brain sweep landed the thesis's THIRD leg: ZORI rents split on the same
-  map (Marco +11.9% vs Lehigh −8.2%); Naples luxury print = statewide coastal pattern (cross-coast
-  Redfin). 2 defect checks opened (news body truncation; TDT combined label). Press run → Sun 07/19.
-- 07/16/2026: ~40 rows → 10 picks; thesis UPGRADED to bifurcation (construction slowing + ZHVI
-  bottom tier falling ~2x faster); `collection/2026-07.md` started. 07/11: 48 rows → 16 picks,
-  luxury-diffusion candidate. 07/10: desk opened; composer at operator gate. No issue shipped yet.
+- 07/19/2026: 15 rows → 4 picks (Naples Bay Resort $41.25M print; APF lease adds purchase option).
+  ALL banked numbers re-verified after the 07/18–19 consolidation (ZHVI tiers/ZORI stand — now
+  INDEX-labeled; Collier subdivisions 18,426→18,400). NEW fourth leg: Lee SOH lock-in served
+  (36.71% median gap). Tape sweep done; One Community pair picked (Lehigh $244K vs Aqualane $7.4M,
+  30.3x). Collection compose-ready; historical depth + receipts closer remain. Press run → 07/19.
+- 07/17: 6 rows → 2 picks, airports; ZORI third leg. 07/16: thesis → bifurcation; collection
+  started. 07/11: first triage, luxury-diffusion candidate. 07/10: desk opened. No issue shipped.

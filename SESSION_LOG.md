@@ -1,3 +1,22 @@
+## 2026-07-19 (Fable 5 · main) — DESK VISIT: 15→4 picks + full numbers audit after the consolidation + Tape sweep cleared
+
+Operator: "a lot has changed — make sure your numbers are updated and correct in Fables." Re-verified
+every banked number in _FABLE5/collection against live lake/brains: ZHVI tiers + ZORI stand to the
+decimal (both still month-ending 05/31/2026) but now carry INDEX labels per the 07/18 demotion;
+Collier subdivisions re-based 18,426→18,400 (parcel_subdivision→view rebuild; home counts conserved
+Lee 383,487 / Collier 220,875); Caloosahatchee 3.36@07/09 noted. NEW fourth thesis leg banked: Lee
+SOH lock-in served 07/19 — 36.71% median gap / 192,973 homesteaded parcels; zip-report 33904
+verified on served bytes ($322K assessed / 37.9% gap; the two lee-assessed verify checks were
+already closed by the parallel session). Tape sweep finished (price-distribution 29,558 book,
+seller-stress 63/100 vs market-heat 64/100 two-clocks trap documented, condo-sirs 1,358, storm 887
+events, Marco 34145 rent-hot/seller-stressed paradox) + One Community pair picked: Lehigh Acres
+($244,194 × 29,225 homes) vs Aqualane Shores ($7,404,579 × 328) = 30.3x. Desk 07/19: 4 picks —
+Naples Bay Resort $41.25M to Pyramid, APF lease purchase option, beachfront-club groundbreaking, FL
+$1.8T GDP. Opened `lee_soh_homestead_scope_discrepancy` (brain 192,973/36.71% vs summary view
+211,838/31.6%). PUSH HELD: two unpushed foreign commits on local main (c98dc100 bake fix, 7831d8e8
+wins normalizer) would ride any push — ask-before-bundling rule; desk work committed locally,
+operator to green-light the bundle or let the owning session land first.
+
 ## 2026-07-19 (Fable 5 · main) — narrative-bake red loop ROOT-CAUSED + FIXED: cross-run customId collision discarded a 72-key batch
 
 Operator asked "think i messed up github" — they didn't. GitHub/repo state clean; the red was
