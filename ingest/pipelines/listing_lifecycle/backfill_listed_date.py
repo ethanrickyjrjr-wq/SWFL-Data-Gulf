@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from datetime import date
 from typing import Any
 
@@ -116,6 +117,36 @@ def fold_updates(
     return updates, stats
 
 
+def _write_with_retry(
+    updates: list[dict[str, Any]], *, source_name: str, attempts: int = 4, base_delay: float = 3.0,
+) -> int:
+    """Write one chunk, surviving a transient DB drop. `update_listed_date` opens its OWN short-lived
+    connection per call and commits, so over a multi-hour run one chunk will occasionally meet a pooler
+    blip mid-executemany (`psycopg.OperationalError: server closed the connection`) — uncaught, that
+    kills the whole run (it did, at chunk 92 / row ~18k, 07/18/2026). Retry on a fresh connection; the
+    guarded UPDATE (`listed_date IS NULL`) makes a retry idempotent — any row committed on a prior
+    attempt is simply skipped. If every attempt fails, leave the chunk unwritten (rows stay
+    `listed_date IS NULL`) so the next resume re-probes them, rather than aborting the run."""
+    import psycopg
+
+    if not updates:
+        return 0
+    for attempt in range(1, attempts + 1):
+        try:
+            return distill.update_listed_date(updates, source_name=source_name, dry_run=False)
+        except (psycopg.OperationalError, psycopg.InterfaceError) as e:
+            if attempt == attempts:
+                print(f"[backfill-dom] write failed after {attempts} attempts ({e}); leaving "
+                      f"{len(updates)} rows for the next resume (they stay listed_date IS NULL)",
+                      flush=True)
+                return 0
+            delay = base_delay * attempt
+            print(f"[backfill-dom] write attempt {attempt} hit a DB drop ({e}); reconnecting in "
+                  f"{delay:.0f}s", flush=True)
+            time.sleep(delay)
+    return 0
+
+
 def run(
     *, dry_run: bool = False, limit: int | None = None, county: str | None = None,
     today: str | None = None, batch: int = 200,
@@ -157,7 +188,7 @@ def run(
             fetch_sold_event(str(t["property_id"]), since=today, at=today) for t in chunk
         ]
         updates, stats = fold_updates(chunk, resolutions)
-        distill.update_listed_date(updates, source_name=src, dry_run=False)
+        _write_with_retry(updates, source_name=src)
         for k in totals:
             totals[k] += stats[k]
         print(

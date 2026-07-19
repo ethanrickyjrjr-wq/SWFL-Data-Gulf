@@ -24,10 +24,16 @@ concept lives and which source the audit recommends — read it before wiring a 
   + `zhvi_median_mislabel_chart_and_brain`). Goes fully live on the next email/chart/brain render.
 - **fgcu-reri shadow vote — DROPPED from master 2026-07-18** (it re-voted 8 already-sourced concepts);
   the brain survives as a standalone reporter (check `fgcu_reri_shadow_vote_dedup`). Live on next master rebuild.
+- **Market-state realtor feed — `market_heat_core_swfl` (→ market-heat-swfl) is the root** for the
+  market-state/heat verdict (it carries YoY + ZIP×month history). `market_details_swfl_latest`
+  (→ market-temperature-swfl) is a per-ZIP monthly DETAIL source (median sold/list/rent/DOM/ppsqft),
+  NOT a market-state verdict — read it for those fields, never for "how hot is the market." Follows
+  directly from the market-heat authority decision above.
 
-**STILL OPEN (a decision, not ratified):** which realtor feed is the market-state root
-(`market_heat_core_swfl` Tier-1 vs `market_details_swfl_latest` Tier-2); the `market-temperature-swfl`
-rename; and the two NO-CANONICAL concepts (sold/recorded-sale price; all-property-types active count).
+**STILL OPEN (a decision, not ratified):** the `market-temperature-swfl` **pack rename** (its output is
+honestly labeled + its docstring now warns; the rename is an atomic change deferred, not blocking); and
+the two NO-CANONICAL concepts that need operator DEFINITION, not just a pick — sold/recorded-sale price
+(grain+vendor dependent) and all-property-types active count (momentum includes land).
 
 **Why this exists:** the platform holds **87 lake tables** feeding **~50 brains**, and the same concept
 (days-on-market, "value", price-cut share, active count, rent, market-heat) is computed in several places

@@ -16,6 +16,12 @@ const SOURCE_ID = "market_temperature_swfl";
 /**
  * market-temperature-swfl — per-ZIP market snapshot from realtor.com's monthly ZIP aggregates.
  *
+ * ⚠ THE NAME IS MISLEADING (do NOT route "market temperature" here). This brain does NOT carry a
+ * market-heat/temperature verdict — its only headline is a rent-yield (sold-to-rent) ratio. The
+ * AUTHORITY for "how hot is the market" is market-heat-swfl (YoY verdict). Read this brain ONLY for
+ * rent-yield / per-ZIP realtor detail. Ratified 2026-07-18 (docs/standards/data-authority-map.md);
+ * a full pack rename is deferred — it is an atomic change across catalog/master/vocab/consumers/tests.
+ *
  * HEADLINE = sold_to_rent_ratio (sold price ÷ annual rent), the one genuinely net-new field no free source
  * publishes — a gross-yield read for the investor audience. Everything else in the snapshot (median
  * sold/list/rent/DOM/ppsqft/hotness/list-to-sold, market_strength) DUPLICATES data we already hold free

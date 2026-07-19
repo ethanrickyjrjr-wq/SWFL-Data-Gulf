@@ -5,9 +5,21 @@
 DROP/DELETE run. Every claim is backed by a live query (Postgres lake) or a `file:line` citation.
 System-shape changes are tagged **[NEEDS-SIGN-OFF]** (operator C1/C2; never asserted here as "the authority").
 
-**Nothing here executes this session.** `lee_parcels` is not landed; deletion is operator-gated (RULE 1)
-and blocked until it lands + passes §5 + consumers repoint + operator signs off. Open checks that own
-the decision: `lee_parcels_leepa_redundant_into_properties_lee`, `collier_parcels_parcel_subdivision_redundant_scrape`.
+**UPDATE 2026-07-18 — `lee_parcels` HAS LANDED and PASSED the §5 gate.** Live-verified: 556,083 rows =
+556,083 distinct `parcel_id` (zero dupes; 1:1 with the feature count — Lee did NOT have Collier's
+multi-centroid collapse, so the feature-vs-distinct concern is resolved), CO_NO=46 only, 104 columns,
+`legal_description`/`jv`/`phy_zipcd` all 100% populated, all 7 use-code categories present (522,523
+residential + 13,734 commercial + 4,305 industrial + 2,938 ag + 1,817 institutional + 7,259 gov + 3,507
+misc). **Consolidation soundness PROVEN:** the `subdivision_name` derivation reproduces
+`parcel_subdivision` at **100.00%** for both counties — Collier 220,399/220,399 (P1) and now Lee
+**383,487/383,487** (joined live on matching STRAP `parcel_id`). So `parcel_subdivision` is provably a
+reproducible subset of the two wide tables.
+
+**Still gated (the DROP is irreversible).** Deletion of `parcel_subdivision` remains blocked until the
+execution steps run and verify: build the two-county replacement VIEW (§4c) → repoint the 3 readers (§4d)
+→ rebuild `neighborhood_stats` and confirm it MATCHES the pre-retirement rollup → then DROP (§6a). That is
+a focused, verified pass, not a tail-of-session action. Open checks: `lee_parcels_leepa_redundant_into_properties_lee`,
+`collier_parcels_parcel_subdivision_redundant_scrape`.
 
 **OPERATOR DECISION (2026-07-18): KEEP `leepa_parcels`.** The FDOR pull is a cross-check; the appraiser
 feed stays and is NEVER dropped. §2 is resolved **KEEP BOTH**; §6b (leepa deletion) is therefore
