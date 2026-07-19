@@ -56,11 +56,11 @@ user-entered.
 - **Per-ZIP (always-on line):** published brain output via `loadParsedBrain` — the same seam as
   the market snapshot. Lee: properties-lee-value per-ZIP assessed/SOH detail table (served
   07/19/2026). Collier: properties-collier-value `collier_value_by_zip` table
-  (`soh_gap_median_pct` column). **Definitional nuance carried in copy:** Lee's ZIP median is
-  the whole-parcel (just−taxable)/just proxy; Collier's is the homestead-portion
-  (jv_hmstd−av_hmstd)/jv_hmstd measure. Directionally comparable, not numerically identical —
-  each line cites its own county's definition. The per-parcel tier is NOT affected (uniform
-  jv_hmstd/av_hmstd in both counties).
+  (`soh_gap_median_pct` column). **Definitional nuance CORRECTED at plan time (07/19/2026):**
+  both per-ZIP tables share the homestead-portion definition — median
+  (jv_hmstd − av_hmstd)/jv_hmstd, per each table's own note — so one loader reads both
+  identically. The just-vs-taxable proxy applies only to Lee's county-level key metric,
+  which this build does not read.
 
 ## What we're building
 

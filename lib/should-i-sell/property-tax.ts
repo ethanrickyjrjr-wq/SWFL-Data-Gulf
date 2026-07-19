@@ -4,23 +4,16 @@
 // tax figure must be a NAMED, CITED, live-fetched county number, or the user's real
 // bill — NEVER an invented or back-solved number.
 //
-// STATUS (2026-07-17): no confirmed live PER-PARCEL annual-tax-bill endpoint is wired
-// in-session. What we hold today:
-//   • data_lake.leepa_parcels carries `taxable_value` / `assessed_value` per parcel
-//     (LeePA, keyed by folioid) — a VALUE, not the annual tax BILL.
-//   • properties-collier-value carries just-value per ZIP + the Save-Our-Homes gap —
-//     county/ZIP grain, not a per-parcel bill.
-// The annual tax BILL = taxable_value × the parcel's millage rate, and we do NOT hold
-// a per-parcel millage / tax-collector bill feed. Back-solving tax from taxable_value ×
-// an assumed millage is derivable-but-invented (a locked no-invention rule), so this
-// returns null until a real per-parcel county tax endpoint is confirmed. The spread
-// section then requires the user's real bill and NEVER shows a guessed tax number.
-//
-// TODO(should-i-sell B3 — open decision in the design spec): wire a confirmed live
-// per-parcel county tax-bill endpoint, verified via crawl4ai (RULE 0.4) at plan time —
-// Lee County Tax Collector (leetc.com) parcel bill lookup by folio, and Collier County
-// Tax Collector (colliertax.com). Inject it through `deps.fetchAnnualTax`; until then
-// this is a null-returning contract, not a number source.
+// STATUS (2026-07-19): PROBED — no fetchable per-parcel bill exists. Both counties run
+// Grant Street TaxSys (Lee: county-taxes.net/fl-lee/property-tax; Collier:
+// collier.county-taxes.com/public); Collier sits behind Cloudflare bot verification and
+// Lee is a client-rendered app — neither is a dependable server-fetch at request time.
+// Back-solving a bill from taxable_value × an assumed millage stays banned as
+// derivable-but-invented (a locked no-invention rule). Resolution shipped with the SOH
+// build: the spread's tax field stays user-entry and renders a cited per-county
+// link-out (TAX_LOOKUP in app/r/should-i-sell/[zip]/page.tsx). Future upgrade lane:
+// TaxSys /public/reports bulk files (check taxsys_bulk_reports_probe). This module
+// stays a null-returning contract wired through `deps.fetchAnnualTax`.
 
 export interface PropertyTaxResult {
   /** The starting annual property-tax figure — a named, cited county number. */

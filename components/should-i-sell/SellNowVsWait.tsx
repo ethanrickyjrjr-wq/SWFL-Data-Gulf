@@ -29,6 +29,8 @@ export interface SellNowVsWaitProps {
   yoyAsOf: string;
   defaultTaxAnnual: number | null;
   taxSource: { label: string; url: string } | null;
+  /** County Tax Collector bill-lookup portal — a cited link-out, never a fetched number. */
+  taxLookup: { label: string; url: string } | null;
 }
 
 const usd = (n: number) => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString("en-US");
@@ -70,7 +72,7 @@ function Field({
 }
 
 export default function SellNowVsWait(props: SellNowVsWaitProps) {
-  const { place, v0Estimate, yoyFraction, yoyAsOf, defaultTaxAnnual, taxSource } = props;
+  const { place, v0Estimate, yoyFraction, yoyAsOf, defaultTaxAnnual, taxSource, taxLookup } = props;
 
   const [months, setMonths] = useState<Horizon>(12);
   const [v0Override, setV0Override] = useState("");
@@ -159,17 +161,31 @@ export default function SellNowVsWait(props: SellNowVsWaitProps) {
           placeholder="e.g. 12,000"
           hint="Leave blank if none — counted as $0."
         />
-        <Field
-          label="Property tax / year"
-          value={taxOverride}
-          onChange={setTaxOverride}
-          placeholder={defaultTaxAnnual != null ? usd(defaultTaxAnnual) : "add your real bill"}
-          hint={
-            defaultTaxAnnual != null && taxSource
-              ? `Starts from ${taxSource.label}; override with your real bill.`
-              : "We don't have a live county figure yet — enter your real tax bill."
-          }
-        />
+        <div>
+          <Field
+            label="Property tax / year"
+            value={taxOverride}
+            onChange={setTaxOverride}
+            placeholder={defaultTaxAnnual != null ? usd(defaultTaxAnnual) : "add your real bill"}
+            hint={
+              defaultTaxAnnual != null && taxSource
+                ? `Starts from ${taxSource.label}; override with your real bill.`
+                : "We don't have a live county figure yet — enter your real tax bill."
+            }
+          />
+          {taxLookup && (
+            <p className="mt-1 text-xs text-gray-500">
+              <a
+                href={taxLookup.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-gray-300"
+              >
+                Look up your exact bill — {taxLookup.label} ↗
+              </a>
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Projection basis + result */}

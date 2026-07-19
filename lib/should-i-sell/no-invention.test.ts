@@ -15,11 +15,18 @@ import {
   PROJECTION_BASIS,
   computeSpread,
 } from "./spread-calc";
+import {
+  SOH_PORT_CAP,
+  SOH_SOURCES,
+  SOH_PROJECTION_TAG,
+  SOH_PROJECTION_BASIS,
+} from "./soh-portability";
 
 const COMPONENTS = [
   "components/should-i-sell/SellerStressRead.tsx",
   "components/should-i-sell/MarketSnapshot.tsx",
   "components/should-i-sell/SellNowVsWait.tsx",
+  "components/should-i-sell/SohPortability.tsx",
 ];
 
 /** File text with block + full-line comments removed. */
@@ -34,6 +41,8 @@ const BRAIN_SLUGS = [
   "housing-swfl",
   "listing-momentum-swfl",
   "condo-sirs-swfl",
+  "properties-lee-value",
+  "properties-collier-value",
 ];
 
 test("no rendered component string leaks a brain id / § / 'ZIP-level'", () => {
@@ -72,6 +81,20 @@ test("the spread UI never defaults insurance or tax to a number (no invented def
   // the required-insurance / no-default contract is stated to the user
   expect(src).toContain("No default");
   expect(src).toMatch(/insurance not included|Add your real premium|add your.*premium/i);
+});
+
+test("SOH constants match their cited primary sources", () => {
+  expect(SOH_PORT_CAP).toBe(500_000);
+  expect(SOH_SOURCES.statute.url).toContain("leg.state.fl.us");
+  expect(SOH_SOURCES.dorGuide.url).toContain("floridarevenue.com");
+  expect(SOH_PROJECTION_TAG).toBe("[INFERENCE]");
+  expect(SOH_PROJECTION_BASIS).toContain("3%");
+});
+
+test("the SOH UI never defaults the next-home price (no invented input)", () => {
+  const src = code("components/should-i-sell/SohPortability.tsx");
+  expect(src).toContain('useState("")'); // nextPrice starts empty
+  expect(src.toLowerCase()).toContain("optional");
 });
 
 test("computeSpread with no insurance is explicitly incomplete, never a $0 insurance stand-in", () => {

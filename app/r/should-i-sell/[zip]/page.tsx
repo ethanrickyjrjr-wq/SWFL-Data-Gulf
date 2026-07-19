@@ -19,9 +19,13 @@ import { loadMarketSnapshot, loadZipYoyFraction } from "@/lib/should-i-sell/load
 import { compsForAddress } from "@/lib/assistant/comp-helper";
 import { deriveV0FromComps } from "@/lib/should-i-sell/derive-v0";
 import { fetchPropertyTaxAnnual } from "@/lib/should-i-sell/property-tax";
+import { loadZipSoh } from "@/lib/should-i-sell/load-zip-soh";
+import { loadParcelSoh, type ParcelSohRow } from "@/lib/should-i-sell/load-parcel-soh";
+import { SOH_SOURCES } from "@/lib/should-i-sell/soh-portability";
 import SellerStressRead from "@/components/should-i-sell/SellerStressRead";
 import MarketSnapshot from "@/components/should-i-sell/MarketSnapshot";
 import SellNowVsWait from "@/components/should-i-sell/SellNowVsWait";
+import SohPortability from "@/components/should-i-sell/SohPortability";
 import {
   ReportShell,
   ReportHeader,
@@ -36,6 +40,17 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const VALID_ZIP = /^\d{5}$/;
+
+// County Tax Collector bill-lookup portals (URLs verified in-session 07/19/2026).
+// No fetchable per-parcel bill exists (see lib/should-i-sell/property-tax.ts STATUS) —
+// the user looks up their real bill and types it in; we never estimate one.
+const TAX_LOOKUP: Record<string, { label: string; url: string }> = {
+  Lee: { label: "Lee County Tax Collector", url: "https://county-taxes.net/fl-lee/property-tax" },
+  Collier: {
+    label: "Collier County Tax Collector",
+    url: "https://collier.county-taxes.com/public",
+  },
+};
 
 interface PageProps {
   params: Promise<{ zip: string }>;
@@ -72,20 +87,26 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
   // outside the Lee/Collier footprint (line omits, never invents). Synchronous fixture read.
   const condoShare = condoShareForZip(zip);
 
-  const [stress, snapshot] = await Promise.all([
+  const [stress, snapshot, zipSoh] = await Promise.all([
     loadSellerStressRead(zip, { place }),
     loadMarketSnapshot(zip, { place }),
+    loadZipSoh(zip, res.county_names),
   ]);
 
   // ── Section 3 (address-gated) ─────────────────────────────────────────────
   const addr = (address ?? "").trim();
   let spread: ReactNode = null;
+  let parcelSoh: ParcelSohRow | null = null;
+  let yoyFraction: number | null = null;
   const compSources: SourceEntry[] = [];
   if (addr) {
-    const [comps, yoyFraction] = await Promise.all([
+    const [comps, yoy, parcel] = await Promise.all([
       compsForAddress(addr),
       loadZipYoyFraction(zip),
+      loadParcelSoh(zip, addr, res.county_names),
     ]);
+    yoyFraction = yoy;
+    parcelSoh = parcel;
     const v0Estimate = deriveV0FromComps(comps);
     // Named-source, cited, re-fetched county tax (stubbed until a confirmed live
     // per-parcel endpoint lands — returns null, never an invented number).
@@ -99,6 +120,7 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
           yoyAsOf={snapshot?.housing?.source.asOf ?? stress?.dataThrough ?? ""}
           defaultTaxAnnual={tax?.annual ?? null}
           taxSource={tax?.source ?? null}
+          taxLookup={TAX_LOOKUP[res.county_names[0] ?? ""] ?? null}
         />
       );
       if (v0Estimate) {
@@ -115,6 +137,11 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
     sources.push({ label: snapshot.housing.source.label, url: snapshot.housing.source.url });
   if (snapshot?.momentum?.source.url)
     sources.push({ label: snapshot.momentum.source.label, url: snapshot.momentum.source.url });
+  if (zipSoh) sources.push({ label: zipSoh.source.label, url: zipSoh.source.url });
+  if (parcelSoh?.homesteaded) {
+    sources.push({ label: SOH_SOURCES.dorGuide.label, url: SOH_SOURCES.dorGuide.url });
+    sources.push({ label: SOH_SOURCES.statute.label, url: SOH_SOURCES.statute.url });
+  }
   sources.push(...compSources);
 
   const nothing = !stress && !snapshot;
@@ -151,6 +178,15 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
             />
           )}
           {snapshot && <MarketSnapshot data={snapshot} />}
+
+          {/* ── Save Our Homes: ZIP line always; per-parcel calc address-gated ── */}
+          <SohPortability
+            place={place}
+            zipLine={zipSoh}
+            parcel={parcelSoh}
+            yoyFraction={yoyFraction}
+            yoyAsOf={snapshot?.housing?.source.asOf ?? stress?.dataThrough ?? ""}
+          />
 
           {/* ── Section 3: address-gated spread ── */}
           {spread ?? (
