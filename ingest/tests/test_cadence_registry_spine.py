@@ -53,10 +53,13 @@ def _entries() -> list[dict]:
     return _pipelines() + _parked()
 
 
-def test_registry_shape_is_73_plus_3():
+def test_registry_shape_is_75_plus_3():
     """Guards the two helpers above: if the file shape changes, fail here, loudly,
-    rather than letting every other test in this file vacuously pass on an empty list."""
-    assert len(_pipelines()) == 73, f"expected 73 pipelines: entries, got {len(_pipelines())}"
+    rather than letting every other test in this file vacuously pass on an empty list.
+    73->75 on 07/19/2026: a parallel session's registry addition landed without this
+    bump (pre-existing red at HEAD, found during listing_week's edit), plus
+    listing_week (sell-odds Phase 0 panel)."""
+    assert len(_pipelines()) == 75, f"expected 75 pipelines: entries, got {len(_pipelines())}"
     assert len(_parked()) == 3, f"expected 3 not_yet_running: entries, got {len(_parked())}"
 
 

@@ -1269,6 +1269,28 @@ pipelines:
         source_url: "https://www.swflinc.com/blog/"
         source_label: "SWFL Inc. blog"
 
+  - name: listing_week
+    workflow: listing-week-weekly.yml
+    consuming_pack: none # CONSCIOUS brain-first deviation: consumers are the Phase 1 cohort
+    # loader + Phase 2 training job (operator-approved spec 2026-07-19-sell-odds-model-design.md),
+    # not a brain — check sell_odds_model_live_verify.
+    lane: tier-2
+    cadence_days: 7
+    tolerance_multiplier: 2.0
+    freshness_table: data_lake.listing_week
+    freshness_column: built_at
+    expected_rows_min: 20000 # ~31k sale-side rows/week live 07/19/2026; conservative floor
+    note: "Weekly person-period panel for the sell-odds hazard model: one row per (address_key, sale_or_rent, week_start), features replayed from listing_state + listing_transitions as-of week-end, next-week outcome labels filled one week in arrears (last completed week always NULL-labeled = censored). Derivation over our own lake — no external fetch, no LLM. Monday 08:00 UTC. Pipeline: ingest/pipelines/listing_week/. Backfilled from 06/29/2026 live on 07/19/2026 (30,849 + 31,844 rows, labels verified surviving re-merge)."
+    source_scope:
+      confirmed_total:
+        summary: "address_key, sale_or_rent, week_start, listing_id, zip_code, county, property_type, beds, baths, sqft, lot_acres, listed_date, dom_days, state_at_week_end, list_price, cuts_to_date, cut_depth_pct_to_date, weeks_since_last_cut, relists_to_date, flag_foreclosure, flag_new_construction, sold_next_week, holding_next_week, price_cut_next_week — replayed from our own listing_state + listing_transitions"
+        source: "our ingest (derivation)"
+      source_ceiling:
+        summary: "listing_state columns held but not snapshotted: city, subdivision, brokerage, street_address, photo_url, lat/lon, county_fips, mls_number/mls_name, listing_type, status, reduced_amount, flag_pending/contingent/coming_soon/new_listing, sold_check_at, list_suffix, first_seen/last_seen/scraped_at. Candidate later features (spec cross-link): homestead/SOH gap via parcel address-key join."
+        as_of: "07/19/2026"
+        source_url: "docs/superpowers/specs/2026-07-19-sell-odds-model-design.md"
+        source_label: "sell-odds Phase 0 spec"
+
   - name: dbpr_press_releases
     workflow: dbpr-press-releases-weekly.yml
     consuming_pack: news-swfl

@@ -1,3 +1,23 @@
+## 2026-07-19 (Fable 5 · main) — SELL-ODDS PHASE 0 BUILT + BACKFILLED: listing_week person-period panel live in the lake
+
+From "do we use cross entropy anywhere?" (no — first learned model in the platform) through
+brainstorm → spec (2026-07-19-sell-odds-model-design.md; operator locked BOTH displays + BOTH
+builds, merge-key corrected to address_key+sale_or_rent+week_start) → plan → inline execution.
+New pipeline ingest/pipelines/listing_week/: pure replay engine rebuilds any listing's state at
+any week-end from listing_transitions (19 tests green); append-only data_lake.listing_week with
+labels one week in arrears (last completed week censored — discrete-time hazard training shape,
+BMC Med Res Methodol 2022). Migration applied; backfill live: 30,849 rows (06/29) + 31,844 (07/06);
+verified on real bytes — 4,777 labels survived a feature re-merge, sample trajectory shows pre-cut
+price with price_cut_next_week=TRUE the week before the cut, 54 labeled solds vs 55 window
+transitions (1 same-week appear+sell, explained). Found + fixed live: 274 addresses under two
+listing_state source rows → freshest-wins DISTINCT ON dedupe. Weekly cron listing-week-weekly.yml
+(Mon 08:00 UTC) — post-push dry-run dispatch still owed. Registry entry w/ full source_scope;
+spine count 73→75 (found a PRE-EXISTING red: a parallel session's registry entry landed without
+the count bump — fixed forward with attribution). data-roots training-panel row added. Checks:
+sell_odds_model_live_verify open (closes at Phase 2 serve); direction_call_calibration_ledger
+idea banked (3b1b sweep). PUSH HELD — ~20 commits on local main incl. the SOH session's stack
+(their "bundled push" never landed) + behind 1 (rebuild bot brains commit); operator to green-light.
+
 ## 2026-07-19 (Fable 5 · main) — BUILT: SOH portability + cost-of-waiting live on /r/should-i-sell (5 commits, bundled push)
 
 Executed the approved spec end-to-end: pure statute math (s.193.155(8) both branches, $500k cap,

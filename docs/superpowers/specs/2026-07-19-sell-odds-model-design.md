@@ -75,7 +75,8 @@ scope for v1; revisit only if calibration error on the holdout demands it.
   listed_date is known), so no observed week is wasted. Reconstruction is possible ONLY for
   transition-covered history — hence the snapshot job going forward.
 - **Weekly GHA cron wrapper + `--dry-run`** in the same PR (pipeline-freshness standard).
-  Idempotent merge on (listing_id, week_start). Non-null guard per ingest Gate 4.
+  Idempotent merge on (address_key, sale_or_rent, week_start) — the tracker's identity key;
+  listing_id is a carried column, not the key (corrected from the draft during planning). Non-null guard per ingest Gate 4.
 - **data-roots entry** for the new root (concept: per-listing weekly panel) — one root, added
   to `docs/standards/data-roots.md` top table in the same PR (RULE 0.55).
 - Registered in `ingest/cadence_registry.yaml` with full `source_scope` (FULL-SCOPE-FIRST:
