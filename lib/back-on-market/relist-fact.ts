@@ -31,6 +31,7 @@
 // docstring already defers.
 import { geocodeAddress, type GeocodeFn } from "@/lib/geo/geocode-address";
 import { addressKey } from "@/lib/listings/address-key";
+import { normalizeTypedUnits } from "@/lib/listings/typed-address";
 // KNOWN-DEBT(data_lake): listing_transitions lives in the data_lake schema, which the
 // typed Supabase client intentionally does not cover — see utils/supabase/service-role.ts.
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
@@ -137,8 +138,10 @@ export async function resolveRelistFact(
   const street = streetOf(raw);
   if (!street) return null;
   // Normalize the display "#<unit>" form to the permalink word form the ingest keyed on
-  // (see the file header). Single-family addresses are unaffected.
-  const key = addressKey(street.replace(/#\s*/g, "Unit "), geo.zip);
+  // (see the file header). Single-family addresses are unaffected. The normalizer now
+  // lives in lib/listings/typed-address.ts (copy #2 extraction — the Why Isn't It
+  // Selling loader needs the identical round-trip).
+  const key = addressKey(normalizeTypedUnits(street), geo.zip);
 
   const fetchRows = deps.fetchRelistRows ?? defaultFetchRelistRows;
   let rows: RelistRow[];
