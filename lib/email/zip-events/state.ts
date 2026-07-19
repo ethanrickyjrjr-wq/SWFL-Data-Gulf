@@ -184,7 +184,10 @@ export async function assembleFreshSnapshots(
       median_sale_price: curMedian,
       median_dom: null, // not held at source (see actives note); lights up if ingest adds it
       actives: activesByZip.get(zip) ?? null,
-      sold_count_30d: w.cur.length > 0 ? w.cur.length : null,
+      // Same MIN_SOLD_SAMPLE fail-closed policy as the medians above: a
+      // trace-level count is pipeline coverage, not the market ("1 homes
+      // sold" for Fort Myers, 07/19) — below sample, omit rather than mislead.
+      sold_count_30d: w.cur.length >= MIN_SOLD_SAMPLE ? w.cur.length : null,
       sale_to_list_ratio:
         ratios.length >= MIN_SOLD_SAMPLE ? Math.round((median(ratios) as number) * 10) / 10 : null,
     };

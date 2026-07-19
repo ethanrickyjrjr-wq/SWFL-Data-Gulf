@@ -1,3 +1,18 @@
+## 2026-07-19 (Fable 5 · main) — weekly-read emails: defect fixes + composition rebuilt to the spec anatomy
+
+Operator saw the first live previews (sent to hello@) and rejected them hard — correctly. Two passes:
+(1) DEFECTS: same-label cards from different ZIPs read as one contradictory number → ZIP qualifier in
+card titles; "Moved from 2.6 to 7" → surge baseline named as a trailing average; "1 homes sold (30d)"
+→ sold_count_30d now MIN_SOLD_SAMPLE-gated (state.ts's own fail-closed policy; trace counts are
+pipeline coverage, not the market). (2) COMPOSITION rebuilt per spec 2026-07-10-market-area-alerts
+anatomy: ONE lead story card (place-named kicker) → per-ZIP rollup list (kills the N-identical-boxes
+wall) → heat leaderboard (still data-starved, see check) → news → insider → NEW report CTA button
+(/r/zip-report/[zip]) wired through all 3 send classes + previews. bun test lib/email/zip-events
+45/45; v2 samples re-sent to hello@ (ids 3eb32c22, 5e19521b). NEW checks (RULE 2.4):
+weekly_read_heat_block_data_starved (signature block renders never — median_dom not held),
+weekly_read_county_trend_fill_missing, weekly_read_sold_count_root. NOTE: sibling session already
+swept the CI watcher red my 268c78e2 digest deletion caused (see entry below). NEXT: operator push.
+
 ## 2026-07-19 (Fable 5 · main) — CI red diagnosed + digest-kill watcher sweep finished; bake-rejects check opened
 
 CI on main red since 268c78e2 deleted daily-email-digest.yml without sweeping the watcher layer —

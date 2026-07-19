@@ -104,7 +104,7 @@ function gblk<K extends BlockType>(
 }
 
 /** One event → a signal card. Copy is slotted micro-copy around held numbers. */
-function eventCard(e: MarketEvent, y: number): BlockOf<"signal"> {
+function eventCard(e: MarketEvent, y: number, kickerOverride?: string): BlockOf<"signal"> {
   const f = e.facts[0];
   const kickerByType: Record<MarketEvent["type"], string> = {
     threshold_cross: "Market move",
@@ -113,17 +113,64 @@ function eventCard(e: MarketEvent, y: number): BlockOf<"signal"> {
     nearby_news: "Local news",
     heat_shift: "Market heat",
   };
+  // ZIP-grain events carry their ZIP in the title: an area email can hold the
+  // same fact label for several ZIPs (e.g. two price-cut bursts), and without
+  // the qualifier the cards read as one contradictory number (07/19 screenshot).
+  const scope = e.zip != null ? ` (${e.zip})` : "";
   const title =
     e.type === "nearby_news"
       ? `${e.facts.length} local update${e.facts.length === 1 ? "" : "s"} nearby`
-      : `${f.label}: ${formatValue(f.value, f.unit)}`;
+      : `${f.label}${scope}: ${formatValue(f.value, f.unit)}`;
   const body =
     e.type === "nearby_news"
       ? e.facts.map((x) => x.label).join(" · ")
       : f.from != null && f.to != null
-        ? `Moved from ${formatValue(f.from, f.unit)} to ${formatValue(f.to, f.unit)}.`
+        ? e.type === "lifecycle_burst"
+          ? // Surge baseline is a trailing weekly AVERAGE (can be fractional) —
+            // name it as one; "Moved from 2.6" read as a broken count.
+            `Up from a typical week of ${formatValue(f.from, f.unit)} (trailing average).`
+          : `Moved from ${formatValue(f.from, f.unit)} to ${formatValue(f.to, f.unit)}.`
         : "";
-  return gblk("signal", { x: 0, y, w: 12, h: 3 }, { kicker: kickerByType[e.type], title, body });
+  return gblk(
+    "signal",
+    { x: 0, y, w: 12, h: 3 },
+    { kicker: kickerOverride ?? kickerByType[e.type], title, body },
+  );
+}
+
+const ROLLUP_MAX = 8;
+
+/** ONE lead story + a compact per-ZIP rollup. The 07/19 operator review killed
+ *  the previous layout — every event as its own full-size card produced a wall
+ *  of identical boxes with no hierarchy and nothing to scan. Now: the subject
+ *  ZIP's event (or the first event) leads as a card; every other ZIP-grain fact
+ *  collapses into one scannable rollup line per ZIP; non-ZIP events (news etc.)
+ *  keep their own cards. */
+function splitLeadAndRollup(events: MarketEvent[], subjectZip: string) {
+  const zipEvents = events.filter((e) => e.zip != null && e.type !== "nearby_news");
+  const other = events.filter((e) => e.zip == null || e.type === "nearby_news");
+  const lead = zipEvents.find((e) => e.zip === subjectZip) ?? zipEvents[0] ?? null;
+  const byZip = new Map<string, string[]>();
+  for (const e of zipEvents) {
+    if (e === lead) continue;
+    const f = e.facts[0];
+    const line = `${f.label}: ${formatValue(f.value, f.unit)}`;
+    byZip.set(e.zip as string, [...(byZip.get(e.zip as string) ?? []), line]);
+  }
+  const rollup: ListItem[] = [...byZip.entries()].map(([zip, lines]) => ({
+    lead: zip,
+    text: lines.join(" · "),
+  }));
+  return { lead, rollup, other };
+}
+
+/** Every issue leads somewhere: one button to the subscriber's live ZIP report. */
+function ctaBlock(url: string, placeOrZip: string, y: number): BlockOf<"button"> {
+  return gblk(
+    "button",
+    { x: 0, y, w: 12, h: 2 },
+    { label: `See the full ${placeOrZip} report`, url },
+  );
 }
 
 /** Dedupe every fact source into ONE collapsed sources block. */
@@ -146,6 +193,8 @@ export interface ComposeInput {
   area: MarketArea;
   /** MM/DD/YYYY — stated exactly once in the doc. */
   asOf: string;
+  /** Absolute URL of the subscriber's live ZIP report — renders the CTA button. */
+  reportUrl?: string | null;
 }
 
 function headerAndHero(
@@ -176,13 +225,34 @@ function headerAndHero(
   return { blocks, y };
 }
 
-/** Alert email: the firing event's cards + minimal context, same skeleton. */
+/** Alert email: ONE firing event leads, siblings roll up, CTA out. */
 export function composeAlertDoc(input: ComposeInput): EmailDoc {
   const { blocks, y: y0 } = headerAndHero(input, "Market alert");
   let y = y0;
-  for (const e of input.events) {
+  const placeOrZip = input.subscriberPlace ?? `ZIP ${input.subscriberZip}`;
+  const { lead, rollup, other } = splitLeadAndRollup(input.events, input.subscriberZip);
+  if (lead) {
+    const leadScope = lead.zip === input.subscriberZip ? placeOrZip : `ZIP ${lead.zip}`;
+    blocks.push(eventCard(lead, y, `Market alert — ${leadScope}`));
+    y += 3;
+  }
+  if (rollup.length > 0) {
+    blocks.push(
+      gblk(
+        "list",
+        { x: 0, y, w: 12, h: 4 },
+        { title: `Also moving in ${input.area.label}`, items: rollup.slice(0, ROLLUP_MAX) },
+      ),
+    );
+    y += 4;
+  }
+  for (const e of other) {
     blocks.push(eventCard(e, y));
     y += 3;
+  }
+  if (input.reportUrl) {
+    blocks.push(ctaBlock(input.reportUrl, placeOrZip, y));
+    y += 2;
   }
   blocks.push(sourcesBlock(input.events, [], y));
   y += 2;
@@ -203,13 +273,27 @@ export interface ComposeWeeklyInput extends ComposeInput {
   insider: InsiderCard | null;
 }
 
-/** Weekly roundup: event cards → heat leaderboard → insider extra (flagged). */
+/** Weekly roundup: ONE lead story → per-ZIP rollup → heat leaderboard → news →
+ *  insider extra (flagged) → report CTA. Hierarchy over card-wall (07/19). */
 export function composeWeeklyDoc(input: ComposeWeeklyInput): EmailDoc {
   const { blocks, y: y0 } = headerAndHero(input, "Your weekly market read");
   let y = y0;
-  for (const e of input.events) {
-    blocks.push(eventCard(e, y));
+  const placeOrZip = input.subscriberPlace ?? `ZIP ${input.subscriberZip}`;
+  const { lead, rollup, other } = splitLeadAndRollup(input.events, input.subscriberZip);
+  if (lead) {
+    const leadScope = lead.zip === input.subscriberZip ? placeOrZip : `ZIP ${lead.zip}`;
+    blocks.push(eventCard(lead, y, `This week's lead — ${leadScope}`));
     y += 3;
+  }
+  if (rollup.length > 0) {
+    blocks.push(
+      gblk(
+        "list",
+        { x: 0, y, w: 12, h: 4 },
+        { title: `Around ${input.area.label}`, items: rollup.slice(0, ROLLUP_MAX) },
+      ),
+    );
+    y += 4;
   }
 
   if (input.heatRanks.length > 0) {
@@ -232,6 +316,11 @@ export function composeWeeklyDoc(input: ComposeWeeklyInput): EmailDoc {
     }
   }
 
+  for (const e of other) {
+    blocks.push(eventCard(e, y));
+    y += 3;
+  }
+
   if (input.insider) {
     blocks.push(
       gblk(
@@ -245,6 +334,11 @@ export function composeWeeklyDoc(input: ComposeWeeklyInput): EmailDoc {
       ),
     );
     y += 3;
+  }
+
+  if (input.reportUrl) {
+    blocks.push(ctaBlock(input.reportUrl, placeOrZip, y));
+    y += 2;
   }
 
   blocks.push(sourcesBlock(input.events, input.insider ? [input.insider.source] : [], y));
@@ -261,6 +355,8 @@ export interface ComposeBaselineInput {
   snapshot: ZipMetricsSnapshot;
   heatPosition: number | null;
   recentEvents: MarketEvent[];
+  /** Absolute URL of the subscriber's live ZIP report — renders the CTA button. */
+  reportUrl?: string | null;
 }
 
 /** Baseline welcome: "here's your market area right now" — held metrics only
@@ -314,9 +410,31 @@ export function composeBaselineDoc(input: ComposeBaselineInput): EmailDoc {
     y += 3;
   }
 
-  for (const e of input.recentEvents.slice(0, 3)) {
+  const placeOrZip = input.subscriberPlace ?? `ZIP ${input.subscriberZip}`;
+  const { lead, rollup, other } = splitLeadAndRollup(input.recentEvents, input.subscriberZip);
+  if (lead) {
+    const leadScope = lead.zip === input.subscriberZip ? placeOrZip : `ZIP ${lead.zip}`;
+    blocks.push(eventCard(lead, y, `Happening now — ${leadScope}`));
+    y += 3;
+  }
+  if (rollup.length > 0) {
+    blocks.push(
+      gblk(
+        "list",
+        { x: 0, y, w: 12, h: 4 },
+        { title: `Around ${input.area.label}`, items: rollup.slice(0, ROLLUP_MAX) },
+      ),
+    );
+    y += 4;
+  }
+  for (const e of other.slice(0, 1)) {
     blocks.push(eventCard(e, y));
     y += 3;
+  }
+
+  if (input.reportUrl) {
+    blocks.push(ctaBlock(input.reportUrl, placeOrZip, y));
+    y += 2;
   }
 
   blocks.push(
