@@ -148,6 +148,24 @@
       "pack": "seller-stress-swfl",
       "accepted_on": "07/17/2026",
       "note": "pick up 07-15 Redfin ingest, currently serving stale 03/01/2026 period (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29669788721",
+      "pack": "home-values-swfl",
+      "accepted_on": "07/18/2026",
+      "note": "Operator decree 07/19/2026 'take care of these': serve the ZHVI median->Typical brain-label fix (e8f38964) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29669799342",
+      "pack": "active-rentals-swfl",
+      "accepted_on": "07/18/2026",
+      "note": "Operator decree 07/19/2026 'take care of these': serve the rentals _latest per-county fix (Lee restored) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29669802303",
+      "pack": "env-swfl",
+      "accepted_on": "07/18/2026",
+      "note": "Operator decree 07/19/2026 'take care of these': serve the USGS parquet dual-read repoint (frozen 3.17@05/17 -> live 3.36@07/09) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
