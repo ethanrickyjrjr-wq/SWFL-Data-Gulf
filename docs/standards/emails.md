@@ -311,6 +311,15 @@ silently fall back on the others. **Any typography or block-style change touches
 
 Every entry is a class of bug, not just an incident. Check your change against each class.
 
+- **07/19 — the inventory card served a MONTH-OLD vendor snapshot as "homes for sale now"** (Redfin
+  end-of-month 639 for 33908 while realtor.com's public page showed 1,153 — and our own daily sweep
+  held 918 the whole time). Labeling the vendor on the card was tried first; operator killed that:
+  fix the ROOT, not the caption. `active_inventory` primary now reads `active-listings-swfl`
+  (`listing_active_stats`, our daily realtor.com sweep — the data-roots authority) across the ZIP
+  page, weekly-read/zip-seed cards, and activation emails; Redfin demoted to a labeled monthly
+  cross-check in the rail. CLASS: *when a fresher root we already hold covers the concept, serving
+  the staler vendor is a defect — repoint, don't relabel. data-roots names the authority; consumers
+  must actually read it.*
 - **07/19 — "ALL EMAILS BROKEN" (empty skeleton, `applied: true`).** The vendor's exact-address
   search slug silently degraded to the bare city feed → every address-spine recipe resolved no
   subject → honest empty grid shipped with a 200. Root fix: lake-first resolver (§2.4).

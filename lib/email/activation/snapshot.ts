@@ -115,14 +115,8 @@ const HOUSING_CELLS: Array<{
     direction: "neutral",
     format: "int",
   },
-  {
-    cell: "inventory",
-    key: "housing.inventory",
-    label: "Active inventory",
-    unit: "",
-    direction: "neutral",
-    format: "int",
-  },
+  // "Active inventory" is NOT here: it left the Redfin housing_by_zip cells on
+  // 07/19 (operator decree) for the live daily count — see activeInventoryMetric.
 ];
 
 /**
@@ -176,6 +170,30 @@ function housingMetrics(brain: ParsedBrain | null, zip: string): ReportMetric[] 
     });
   }
   return out;
+}
+
+/** Live active-inventory count from the active-listings-swfl brain — our own daily
+ * sweep of realtor.com for-sale listings (`listing_active_stats`, the data-roots
+ * authority for "homes for sale now"). Deliberately a NEW snapshot key: pairing the
+ * old Redfin end-of-month `housing.inventory` against this live count would
+ * fabricate a delta across a vendor/basis change. Old snapshots simply don't pair;
+ * the metric re-baselines from the first live capture. */
+function activeInventoryMetric(brain: ParsedBrain | null, zip: string): ReportMetric[] {
+  const table = brain?.output.detail_tables?.find((t) => t.id === "active_listings_by_zip");
+  const row = table?.rows.find((r) => r.key === zip);
+  if (!row) return [];
+  const value = asNumber(row.cells["listing_count"]);
+  if (value === null) return [];
+  return [
+    {
+      key: "listings.active_count",
+      label: "Active inventory",
+      value,
+      unit: "",
+      direction: "neutral",
+      display: value.toLocaleString("en-US"),
+    },
+  ];
 }
 
 /** Pull the per-ZIP flood AAL + percentile rank from the env-swfl brain (if held). */
@@ -282,13 +300,18 @@ export async function assembleActivationReport(
   }
 
   const loc = resolvedAsZip(resolution);
-  const [dossier, housing, env] = await Promise.all([
+  const [dossier, housing, env, activeListings] = await Promise.all([
     assembleLocationDossier(loc, { loadBrain }),
     loadBrain("housing-swfl"),
     loadBrain("env-swfl"),
+    loadBrain("active-listings-swfl"),
   ]);
 
-  const metrics = [...housingMetrics(housing, zip), ...floodMetrics(env, zip)];
+  const metrics = [
+    ...housingMetrics(housing, zip),
+    ...activeInventoryMetric(activeListings, zip),
+    ...floodMetrics(env, zip),
+  ];
   const lines = dossierToLines(dossier);
 
   // Freshness token — prefer the housing/env brains (the per-ZIP source), else any dossier line.

@@ -204,17 +204,19 @@ export const ZIP_METRIC_SOURCES: ZipMetricSource[] = [
   },
   {
     concept: "active_inventory",
-    packId: "housing-swfl",
-    tableId: "housing_by_zip",
-    cell: "inventory",
+    packId: "active-listings-swfl",
+    tableId: "active_listings_by_zip",
+    cell: "listing_count",
     role: "primary",
-    key: "inventory",
+    key: "active_listings_count",
     label: "Active Inventory",
-    // Vendor + basis NAMED on the card (operator 07/19): this is Redfin's
-    // end-of-month ZIP inventory metric — realtor.com's live active count for
-    // the same ZIP can run ~2x higher (methodology, not a data error). An
-    // unlabeled count next to realtor's public page reads as wrong.
-    sub: "Redfin end-of-month count",
+    // ROOT REPOINT (operator decree 07/19): "homes for sale NOW" serves the LIVE
+    // count — our own daily sweep of realtor.com for-sale listings
+    // (listing_active_stats, the data-roots authority for this concept). Redfin's
+    // end-of-month metric ran ~40% low next to realtor's public page and is
+    // DEMOTED to the rail below as the monthly cross-check; never re-promote a
+    // monthly vendor snapshot to a "now" card.
+    sub: "Live realtor.com count, updated daily",
     display: fmtCount,
   },
 
@@ -464,12 +466,12 @@ export const ZIP_METRIC_SOURCES: ZipMetricSource[] = [
   },
   {
     concept: "active_inventory",
-    packId: "active-listings-swfl",
-    tableId: "active_listings_by_zip",
-    cell: "listing_count",
+    packId: "housing-swfl",
+    tableId: "housing_by_zip",
+    cell: "inventory",
     role: "demoted",
-    key: "active_listings_count",
-    label: "realtor.com active listing count",
+    key: "inventory",
+    label: "Redfin end-of-month inventory",
     sub: "",
     display: fmtCount,
   },

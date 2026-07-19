@@ -70,7 +70,7 @@ export const SIGNAL_PRIORITY: readonly string[] = [
   "permits_90d",
   "months_of_supply",
   "homes_sold",
-  "inventory",
+  "active_listings_count",
   "avg_sale_to_list_pct",
   "median_household_income",
   "population",

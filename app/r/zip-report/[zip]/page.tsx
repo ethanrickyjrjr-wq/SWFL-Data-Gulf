@@ -137,7 +137,15 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   const saleToList = housingRow?.cells["avg_sale_to_list_pct"] as number | null | undefined;
   const mos = housingRow?.cells["months_of_supply"] as number | null | undefined;
   const homesSold = housingRow?.cells["homes_sold"] as number | null | undefined;
-  const inventory = housingRow?.cells["inventory"] as number | null | undefined;
+
+  // ROOT REPOINT (operator decree 07/19): "active inventory" is the LIVE daily
+  // realtor.com sweep (active-listings-swfl ← listing_active_stats, the data-roots
+  // authority for this concept) — never Redfin's end-of-month `inventory` cell.
+  const activeListingsRow = a.registryBrains
+    .get("active-listings-swfl")
+    ?.output.detail_tables?.find((t) => t.id === "active_listings_by_zip")
+    ?.rows.find((r) => r.key === zip);
+  const inventory = activeListingsRow?.cells["listing_count"] as number | null | undefined;
 
   const hasHousing = housingRow !== undefined && price !== undefined && dom !== undefined;
 
@@ -217,8 +225,13 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
     if (saleToList != null) aiMetrics.push(hm("Sale-to-list ratio", `${saleToList}%`));
     if (mos != null) aiMetrics.push(hm("Months of supply", String(mos)));
     if (homesSold != null) aiMetrics.push(hm("Homes sold (90 days)", String(homesSold)));
-    if (inventory != null) aiMetrics.push(hm("Active inventory", String(inventory)));
   }
+  if (inventory != null)
+    aiMetrics.push({
+      label: "Active inventory",
+      value: String(inventory),
+      packId: "active-listings-swfl",
+    });
   if (hasFlood && floodForZip) {
     const aalVal = floodForZip.aal;
     const floodPctVal = floodForZip.pctRank != null ? Math.round(floodForZip.pctRank) : null;

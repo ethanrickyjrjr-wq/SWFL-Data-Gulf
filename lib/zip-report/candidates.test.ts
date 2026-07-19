@@ -3,9 +3,31 @@ import { describe, expect, test } from "bun:test";
 import {
   buildZipCandidates,
   buildRegistryCandidates,
+  ZIP_METRIC_SOURCES,
   type CandidateInput,
   type RegistryTableData,
 } from "./candidates";
+
+// ── Operator decree 07/19 — LOCKED: "homes for sale now" serves the LIVE daily
+// realtor.com sweep (the data-roots authority), never a monthly vendor snapshot.
+// Redfin's end-of-month cell stays demoted in the rail as the labeled cross-check.
+describe("active_inventory root (locked by operator decree 07/19)", () => {
+  const entries = ZIP_METRIC_SOURCES.filter((s) => s.concept === "active_inventory");
+
+  test("the primary is the live daily sweep (active-listings-swfl.listing_count)", () => {
+    const primary = entries.find((s) => s.role === "primary");
+    expect(primary?.packId).toBe("active-listings-swfl");
+    expect(primary?.tableId).toBe("active_listings_by_zip");
+    expect(primary?.cell).toBe("listing_count");
+  });
+
+  test("Redfin end-of-month inventory is demoted and vendor-labeled, never the primary", () => {
+    const redfin = entries.find((s) => s.packId === "housing-swfl" && s.cell === "inventory");
+    expect(redfin?.role).toBe("demoted");
+    expect(redfin?.label).toMatch(/Redfin/);
+    expect(redfin?.label).toMatch(/end-of-month/i);
+  });
+});
 
 function tableMap(entries: Record<string, RegistryTableData>): Map<string, RegistryTableData> {
   return new Map(Object.entries(entries));

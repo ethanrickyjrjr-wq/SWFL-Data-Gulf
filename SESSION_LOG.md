@@ -1,3 +1,21 @@
+## 2026-07-19 (Fable 5 · main) — active inventory REPOINTED to the live root: daily realtor.com sweep leads, Redfin demoted to monthly cross-check
+
+Operator verdict on active_inventory_vendor_gap, delivered at volume: never serve month-old data
+where we hold daily data — fix the ROOT, not the label. The data-roots catalog already named the
+authority (`listing_active_stats.listing_count`, our daily realtor.com sweep via active-listings-swfl:
+61 ZIPs; 33908 = 918 live vs Redfin EOM 639 vs realtor public 1,153) — consumers were just wired to
+the wrong table. Repointed: (1) candidates.ts — active_inventory PRIMARY is now
+active-listings-swfl/active_listings_by_zip.listing_count, sub "Live realtor.com count, updated
+daily"; Redfin housing_by_zip.inventory DEMOTED to the rail as "Redfin end-of-month inventory" (one
+flip fixes ZIP page + weekly-read/zip-seed email cards). (2) signal-rank SIGNAL_PRIORITY key swap.
+(3) zip-report page.tsx direct read + AI-grounding metric → live brain row. (4) activation email
+snapshot.ts: housing.inventory (Redfin) cut; NEW key listings.active_count from the live brain —
+new key on purpose, a delta paired across the vendor swap would fabricate a move. data-roots row
+RATIFIED 🟢 (operator decree) + emails.md failure-catalog entry (CLASS: repoint, don't relabel) +
+decree-lock tests in candidates.test.ts. Tests: zip-report+activation 85 pass, downstream 186 pass,
+Gate 8 zip-scope OK. Check closed: active_inventory_vendor_gap. NEXT: next-build verify, operator
+push call (commits stacked).
+
 ## 2026-07-19 (Fable 5 · main) — weekly-read v5: sources accordion de-jargoned at the citation root; inventory card names its vendor
 
 Operator rounds 4-5 (opened the accordion: internal ops strings — "Firecrawl + dlt", SQL table
