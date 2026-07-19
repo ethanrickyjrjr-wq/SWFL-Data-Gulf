@@ -64,9 +64,27 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { zip } = await params;
   const place = cityForZip(zip) ?? `ZIP ${zip}`;
+  const title = `Should I sell in ${place}? — SWFL Data Gulf`;
+  const description = `A seller's honest read for ${place}: your area's stress level, the market snapshot, and what waiting 6–12 months could cost or gain you.`;
+  // Absolute URLs on purpose (same ORIGIN convention as app/sitemap.ts) — share
+  // scrapers reject relative og:image, and metadataBase isn't set repo-wide.
+  const ogImage = `https://www.swfldatagulf.com/api/og/should-i-sell/${zip}`;
   return {
-    title: `Should I sell in ${place}? — SWFL Data Gulf`,
-    description: `A seller's honest read for ${place}: your area's stress level, the market snapshot, and what waiting 6–12 months could cost or gain you.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `https://www.swfldatagulf.com/r/should-i-sell/${zip}`,
+      siteName: "SWFL Data Gulf",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: `Should I sell in ${place}?` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
   };
 }
 

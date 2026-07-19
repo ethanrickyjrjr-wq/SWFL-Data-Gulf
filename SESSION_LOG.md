@@ -54,6 +54,22 @@ sweep killed 59 procs incl. 6 parallel sessions (all resumable via claude --resu
 session's uncommitted edits below survived on disk). NEXT: operator pushes to deploy, records
 Loom, posts; verify live checkout with a $19 self-purchase then refund via Stripe dashboard.
 
+## 2026-07-19 (Fable 5 · main) — BUILD: per-ZIP share cards for the seller read (og:image route + metadata)
+
+Every posted /r/should-i-sell/<zip> link unfurled as a bare grey link — the page had
+title/description metadata but NO og:image, and the campaign channel is link-sharing. Built:
+`/api/og/should-i-sell/[zip]` (1200×630 PNG) as a THIN route over the existing social rasterizer
+(lib/social/render-social-image.ts — resvg, brand tokens, burned-in provenance watermark, no-invention
+moat; C2: no second renderer) reading the ONE per-ZIP stress authority (lib/back-on-market/load-zip.ts);
+pure model builder lib/should-i-sell/og-card.ts (6 bun tests green). generateMetadata now emits
+openGraph + twitter summary_large_image (absolute URLs, sitemap.ts ORIGIN convention). Live-render
+verify on 33904 caught two real defects pre-ship: loader place fallback rendered "Should I sell in
+33904?" (route now passes cityForZip like the page) and the citation label leaked internal column
+names onto the public watermark (builder strips the em-dash tail → "Redfin Data Center"). Card
+verified by eye: 69.9/100, #14 of 52, watermarked. `bunx next build` green. NEXT: push on operator
+word (rides with the search-box action fix); OG parity for back-on-market + zip-report is the obvious
+follow-on.
+
 ## 2026-07-19 (Fable 5 · main) — funnel bug: Should I Sell search box routed sellers AWAY from the seller read; action prop fix
 
 Live rehearsal for the demo GIF exposed it: LocationSearchBox hardcodes `action="/r/search"`, so
