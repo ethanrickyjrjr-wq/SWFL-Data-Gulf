@@ -11,6 +11,9 @@
 // from the agent's RESO Media feed (next layer), not from here. So this lane is
 // "their website / a fetchable listing page", and it degrades silently otherwise.
 
+import { lookup } from "node:dns/promises";
+import { isPrivateOrReservedIp } from "./safe-fetch";
+
 const BROWSER_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 const FETCH_TIMEOUT_MS = 8000;
@@ -86,6 +89,26 @@ function isSafePublicUrl(u: URL): boolean {
   return true;
 }
 
+/** Resolve-then-check: `isSafePublicUrl` only pattern-matches the hostname STRING,
+ *  so a domain whose A-record points at a private/metadata IP passes it. Resolve
+ *  the name and reject if ANY answer is private/reserved (safe-fetch.ts's check —
+ *  same residual TOCTOU as the rest of the house SSRF guard: fetch re-resolves).
+ *  Literal-IP hostnames were already caught by the pattern check. */
+async function resolvesPublic(u: URL): Promise<boolean> {
+  try {
+    const addrs = await lookup(u.hostname, { all: true });
+    return addrs.length > 0 && addrs.every((a) => !isPrivateOrReservedIp(a.address));
+  } catch {
+    return false; // unresolvable → treat as unsafe, this is a best-effort bonus fetch
+  }
+}
+
+/** An unread Response body pins its socket/buffer until GC (undici) — cancel on
+ *  every path that abandons a response without consuming it. */
+function discardBody(res: Response): void {
+  void res.body?.cancel().catch(() => {});
+}
+
 export interface OgImageResult {
   image: string;
   title?: string;
@@ -100,16 +123,17 @@ export async function fetchOgImage(rawUrl: string): Promise<OgImageResult | null
   } catch {
     return null;
   }
-  if (!isSafePublicUrl(u)) return null;
+  if (!isSafePublicUrl(u) || !(await resolvesPublic(u))) return null;
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
   try {
-    // redirect: "manual" so each hop's destination is re-validated against
-    // isSafePublicUrl BEFORE it's fetched — "follow" would let a remote server
-    // 3xx us to an internal/link-local address (e.g. 169.254.169.254) without
-    // ever re-checking it. Node's fetch (unlike browser fetch) exposes the
-    // status/Location header on a manual-redirect response, so this is safe.
+    // redirect: "manual" so each hop's destination is re-validated BEFORE it's
+    // fetched — "follow" would let a remote server 3xx us to an internal/link-local
+    // address (e.g. 169.254.169.254) without ever re-checking it. Each hop gets the
+    // SAME two-layer check as the entry URL: hostname pattern + DNS resolve-then-check
+    // (a redirect to a public-looking name with a private A-record must not pass).
+    // Node's fetch exposes status/Location on a manual-redirect response.
     let res: Response;
     let hops = 0;
     for (;;) {
@@ -120,6 +144,7 @@ export async function fetchOgImage(rawUrl: string): Promise<OgImageResult | null
         headers: { "user-agent": BROWSER_UA, accept: "text/html,*/*" },
       });
       if (res.status < 300 || res.status >= 400) break;
+      discardBody(res); // 3xx body is never read
       const location = res.headers.get("location");
       if (!location || ++hops > 5) return null;
       let next: URL;
@@ -128,11 +153,13 @@ export async function fetchOgImage(rawUrl: string): Promise<OgImageResult | null
       } catch {
         return null;
       }
-      if (!isSafePublicUrl(next)) return null;
+      if (!isSafePublicUrl(next) || !(await resolvesPublic(next))) return null;
       u = next;
     }
-    if (!res.ok) return null;
-    if (!(res.headers.get("content-type") ?? "").includes("html")) return null;
+    if (!res.ok || !(res.headers.get("content-type") ?? "").includes("html")) {
+      discardBody(res);
+      return null;
+    }
     const html = (await res.text()).slice(0, MAX_HTML_BYTES);
     const image = parseOgImage(html, u.toString());
     return image ? { image, title: parseTitle(html) } : null;

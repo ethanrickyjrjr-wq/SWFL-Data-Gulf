@@ -75,19 +75,78 @@ const HOUSING_CELLS: Array<{
   direction: SnapshotMetric["direction"];
   format: "currency" | "int" | "percent";
 }> = [
-  { cell: "median_sale_price", key: "housing.median_sale_price", label: "Median sale price", unit: "", direction: "neutral", format: "currency" },
-  { cell: "median_dom", key: "housing.median_dom", label: "Days on market", unit: " days", direction: "lower_is_better", format: "int" },
-  { cell: "avg_sale_to_list_pct", key: "housing.sale_to_list", label: "Sale-to-list ratio", unit: "%", direction: "neutral", format: "percent" },
-  { cell: "months_of_supply", key: "housing.months_of_supply", label: "Months of supply", unit: "", direction: "neutral", format: "int" },
-  { cell: "homes_sold", key: "housing.homes_sold", label: "Homes sold (90d)", unit: "", direction: "neutral", format: "int" },
-  { cell: "inventory", key: "housing.inventory", label: "Active inventory", unit: "", direction: "neutral", format: "int" },
+  {
+    cell: "median_sale_price",
+    key: "housing.median_sale_price",
+    label: "Median sale price",
+    unit: "",
+    direction: "neutral",
+    format: "currency",
+  },
+  {
+    cell: "median_dom",
+    key: "housing.median_dom",
+    label: "Days on market",
+    unit: " days",
+    direction: "lower_is_better",
+    format: "int",
+  },
+  {
+    cell: "avg_sale_to_list_pct",
+    key: "housing.sale_to_list",
+    label: "Sale-to-list ratio",
+    unit: "%",
+    direction: "neutral",
+    format: "percent",
+  },
+  {
+    cell: "months_of_supply",
+    key: "housing.months_of_supply",
+    label: "Months of supply",
+    unit: "",
+    direction: "neutral",
+    format: "int",
+  },
+  {
+    cell: "homes_sold",
+    key: "housing.homes_sold",
+    label: "Homes sold (90d)",
+    unit: "",
+    direction: "neutral",
+    format: "int",
+  },
+  {
+    cell: "inventory",
+    key: "housing.inventory",
+    label: "Active inventory",
+    unit: "",
+    direction: "neutral",
+    format: "int",
+  },
 ];
+
+/**
+ * THE currency classification for raw-value rendering downstream. Delta rows work on
+ * raw numbers (SnapshotMetric carries no format field), so the "$" prefix must be
+ * re-applied by key — derived here from HOUSING_CELLS' `format:"currency"` plus the
+ * flood AAL metric (whose $-display lives in `floodMetrics` below), so currency-ness
+ * has ONE authority file: add a currency cell above and it is automatically a
+ * currency delta everywhere.
+ */
+export const CURRENCY_METRIC_KEYS: ReadonlySet<string> = new Set([
+  ...HOUSING_CELLS.filter((c) => c.format === "currency").map((c) => c.key),
+  "env.flood_aal_usd",
+]);
 
 function asNumber(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
 
-function formatMetric(value: number | null, fmt: "currency" | "int" | "percent", unit: string): string {
+function formatMetric(
+  value: number | null,
+  fmt: "currency" | "int" | "percent",
+  unit: string,
+): string {
   if (value === null) return "—";
   if (fmt === "currency") return `$${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
   if (fmt === "percent") return `${value}%`;
@@ -184,7 +243,13 @@ function toSnapshot(
     label: l.label,
     fingerprint: fingerprintText(l.text),
   }));
-  return { zip, freshness_token: freshnessToken, captured_at: capturedAt, metrics: snapMetrics, lines: snapLines };
+  return {
+    zip,
+    freshness_token: freshnessToken,
+    captured_at: capturedAt,
+    metrics: snapMetrics,
+    lines: snapLines,
+  };
 }
 
 /**

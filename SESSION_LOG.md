@@ -1,3 +1,25 @@
+## 2026-07-19 (Fable 5 · main) — Opus pass on the 07/18 fan-out fix commits: 10 confirmed findings, all applied
+
+Reviewed daeb1f6e + eb071f90 (8 finder angles, every candidate verified against the files). FOUND:
+the "waiting on Opus pass before push" gate had already been bypassed — both commits rode to origin/main
+under the later 07/18 pushes (safe-push foreign-commit carry). 10 findings confirmed, full detail in
+`docs/audits/2026-07-18-opus-pass.md`; worst three were regressions introduced BY fixes: (1) #15's
+`answered` widening put the "Grounded in SWFL lake data" badge on web-sourced answers (#7's exact false
+claim) — fixed with a `grounding` provenance field on the done frame (lake/web/gap; badge keys off
+"lake"); (2) #43's single-digit relax made THE moat check near-vacuous (incidental "Page 5" verified an
+invented 5) while still failing "5.0%" — now figure-context only ($-prefix / %-suffix, numeric compare);
+(3) #73's delta "appeared" branch fabricated "new activity" emails on top-8 ranking churn — now gated
+is_true_zip (never capped). Also: footer raw-token fallback (live via should-i-sell's ISO lastChecked)
+→ token-or-ISO parse, omit otherwise; CURRENCY_METRIC_KEYS missed env.flood_aal_usd (golden had locked
+the bare output — regenerated, one-line diff) → derived in snapshot.ts (one authority); og-image SSRF
+read: hostname-only hop checks → DNS resolve-then-check via safe-fetch's isPrivateOrReservedIp + body
+cancels; ZipChoropleth unrecoverable error state → overlay, ref stays mounted; MediaPanel thrown-fetch
+bypassed rollback → try/catch; PROPERTY_TYPE "Single Family" invented default → "—"; render-golden
+header now states real provenance. Bonus one-root wins: tokenDate delegates to asOfFromToken;
+parseTokenDate/asOfFromIso reject impossible calendar days. Verified: 1,928 tests 0 fail (lib/email +
+lib/assistant + back-on-market), `bunx next build` green. Checks opened: web_fallback_component_linkage,
+opus_pass_0718_cleanup_batch. NOT closed yet: the site-audit-0718 checks (operator call per the doc).
+
 ## 2026-07-18 (Fable 5 · main) — Consolidation verify pass: 3 residual ZHVI "median" labels fixed, data-roots catalog de-staled (lee_parcels LANDED, leepa KEEP ratified, rentals fix noted)
 
 Ran a full verification of the 07/18 consolidation work against the live DB: lee_parcels 556,083 rows /

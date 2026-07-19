@@ -135,17 +135,27 @@ function digitsOf(s: string | number): string {
  *  the model's memory.
  *
  *  A 2+ digit target is checked as a substring of the text's stripped digits — cheap
- *  and safe since a longer run is unlikely to appear incidentally. A single digit
- *  (e.g. a whole-number "5%" cap rate or "$5") can't use that substring check — it
- *  would incidentally match inside ANY longer number — so it's instead required to
- *  appear as its OWN number token (not embedded inside a longer integer or decimal),
- *  so "5" matches "$5" or "5%" but not the "5" inside "13.5%" or "155". */
+ *  and safe since a longer run is unlikely to appear incidentally. A single digit is
+ *  different in BOTH directions: nearly every document contains an incidental
+ *  standalone digit ("Page 5", "July 5", "5 of 12"), so a bare-token match would
+ *  verify almost any invented single-digit figure — while sources routinely write a
+ *  whole number as a decimal ("5.0%"), which digit-equality misses. So a single
+ *  digit verifies ONLY when it appears as a FIGURE — currency-prefixed ("$5",
+ *  "$5.0") or percent-suffixed ("5%", "5.0%", "5 percent") — compared numerically,
+ *  so "5.0%" verifies 5 but "5.5%", "13.5%", and a bare "5" never do. A bare
+ *  single-digit count stays unverifiable by design: the moat errs strict (the gap
+ *  fills from the next lane), never loose (an invention ships). */
 export function valueAppearsInText(value: number, text: string): boolean {
   const target = digitsOf(value);
   if (target.length >= 2) return digitsOf(text).includes(target);
   if (!target) return false;
-  const tokens = text.match(/\d+(?:[.,]\d+)*/g) ?? [];
-  return tokens.some((t) => digitsOf(t) === target);
+  const figures =
+    text.match(/[$€£]\s?\d(?:[.,]\d+)?(?!\d)|(?<![\d.,$€£])\d(?:[.,]\d+)?\s?(?:%|percent\b)/gi) ??
+    [];
+  return figures.some((t) => {
+    const n = parseFloat(t.replace(/[^\d.,]/g, "").replace(",", "."));
+    return Number.isFinite(n) && n === value;
+  });
 }
 
 /** Like valueAppearsInText, but returns the matching citation span (for the URL). */

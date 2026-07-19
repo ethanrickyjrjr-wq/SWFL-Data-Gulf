@@ -22,7 +22,8 @@
 
 import { renderEmailTemplate, brandThemeToTokens } from "@/lib/email/templates/render-template";
 import { SWFL_TOKEN_DEFAULTS } from "@/lib/email/templates/token-defaults";
-import type { AssembledReport } from "./activation/snapshot";
+import { asOfFromToken } from "@/lib/project/as-of";
+import { CURRENCY_METRIC_KEYS, type AssembledReport } from "./activation/snapshot";
 import type { ActivationBrand, ReportDelta, MetricChange } from "./activation/types";
 
 /**
@@ -95,23 +96,11 @@ function lineToHtml(text: string, primary: string): string {
 }
 
 /** YYYYMMDD inside a freshness token → "06/10/2026" (null when unparseable).
- *  Locked house format (MM/DD/YYYY) — mirrors asOfFromToken (lib/project/as-of.ts). */
+ *  Delegates to THE ONE token-date parser (lib/project/as-of.ts) — a local mirror
+ *  drifted from it once (end-anchor vs word-boundary); never fork it again. */
 function tokenDate(token: string | null): string | null {
-  if (!token) return null;
-  const m = token.match(/(\d{4})(\d{2})(\d{2})$/);
-  if (!m) return null;
-  const [, y, mo, d] = m;
-  const month = Number(mo);
-  const day = Number(d);
-  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-  return `${mo}/${d}/${y}`;
+  return asOfFromToken(token);
 }
-
-// Metric keys that are dollar-denominated (SnapshotMetric.unit stays "" for these —
-// the "$" is a prefix, "handled by render"). Mirrors HOUSING_CELLS' format:"currency"
-// cell (lib/email/activation/snapshot.ts) — the only place that classification exists
-// today, since MetricChange itself carries no format field.
-const CURRENCY_METRIC_KEYS = new Set(["housing.median_sale_price"]);
 
 function formatChangeValue(v: number | null, unit: string | undefined, key?: string): string {
   if (v === null) return "—";

@@ -16,6 +16,11 @@ export interface UseConverse {
    * null = stream still in progress (no done frame yet).
    */
   answered: boolean | null;
+  /** Figure provenance from the done frame: "lake" (all components lake-held), "web"
+   *  (gap filled by the cited live-web fallback), "gap" (still open). null until the
+   *  done frame arrives, or when the server didn't compute one — only "lake" may
+   *  render a lake-grounding claim. */
+  grounding: "lake" | "web" | "gap" | null;
   /** Best-effort chart payload emitted before the text stream. null until received. */
   chart: unknown;
   /** Grounded SWFL location from the OFF-report prelude `place` frame (null until one
@@ -41,6 +46,7 @@ export function useConverse(): UseConverse {
   const [reach, setReach] = useState<string[]>([]);
   const [followups, setFollowups] = useState<string[]>([]);
   const [answered, setAnswered] = useState<boolean | null>(null);
+  const [grounding, setGrounding] = useState<"lake" | "web" | "gap" | null>(null);
   const [chart, setChart] = useState<unknown>(null);
   const [groundedPlace, setGroundedPlace] = useState<{ zip?: string; name?: string } | null>(null);
   const [groundedToken, setGroundedToken] = useState<string | undefined>(undefined);
@@ -52,6 +58,7 @@ export function useConverse(): UseConverse {
     setReach([]);
     setFollowups([]);
     setAnswered(null);
+    setGrounding(null);
     setChart(null);
     setGroundedPlace(null);
     setGroundedToken(undefined);
@@ -65,6 +72,7 @@ export function useConverse(): UseConverse {
     setReach([]);
     setFollowups([]);
     setAnswered(null);
+    setGrounding(null);
     setChart(null);
     setGroundedPlace(null);
     setGroundedToken(undefined);
@@ -75,6 +83,7 @@ export function useConverse(): UseConverse {
       onReach: setReach,
       onFollowups: setFollowups,
       onAnswered: setAnswered,
+      onGrounding: setGrounding,
       onChart: setChart,
       onPlace: (place, token) => {
         setGroundedPlace(place);
@@ -91,6 +100,7 @@ export function useConverse(): UseConverse {
     reach,
     followups,
     answered,
+    grounding,
     chart,
     groundedPlace,
     groundedToken,

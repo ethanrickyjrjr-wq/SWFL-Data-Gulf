@@ -152,11 +152,16 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
   const { block: webBlock, sources: webSources } = await webFallbackForAnswer(question, grounded);
   const system = grounded + webBlock;
 
-  // answered=false means "we offered to find a named gap" (a tracked data request), NOT
-  // "we failed to answer". A metric with `need` components is a gap UNLESS the web
-  // fallback above just verified and injected the missing figure live — recompute AFTER
-  // it runs so the done frame / gap-log never contradict an answer the user just got.
-  const answered = neededComponents.length === 0 || webSources.length > 0;
+  // Figure provenance — what the UI may CLAIM about this answer: "lake" = every
+  // needed component held in the lake; "web" = a named gap was filled live by the
+  // cited web fallback (real, cited — but NOT lake data); "gap" = still open.
+  // `answered` stays the gap-log flag ("did the user get an answer" — a web-filled
+  // gap IS answered), but any lake-grounding badge must key off the done frame's
+  // grounding==="lake": a web-sourced figure wearing a lake badge is a fabricated
+  // provenance claim. (Local name `provenance` — `grounding` above is the prompt text.)
+  const provenance: "lake" | "web" | "gap" =
+    neededComponents.length === 0 ? "lake" : webSources.length > 0 ? "web" : "gap";
+  const answered = provenance !== "gap";
 
   // Tell the model the SHAPE of what was grabbed so the answer (not just the follow-ups)
   // is tailored — e.g. a date/token reads differently than a metric.
@@ -202,7 +207,7 @@ export async function runReportPath(request: Request, req: AssistantRequest): Pr
         });
         controller.enqueue(
           encoder.encode(
-            `data: ${JSON.stringify({ done: true, reach: reachSlugs, answered })}\n\n`,
+            `data: ${JSON.stringify({ done: true, reach: reachSlugs, answered, grounding: provenance })}\n\n`,
           ),
         );
       } catch (e) {

@@ -7,6 +7,15 @@
  * badge, and we never silently re-fetch. The token stays pinned (the moat).
  * Returns null when there's no parseable trailing date.
  */
+/** True only for a real calendar day. A string range check (day ≤ 31) would let an
+ *  impossible date in a corrupted token — 02/31, 06/31 — render as a freshness
+ *  guarantee; round-trip through Date so it can't. */
+function isRealCalendarDay(y: number, mo: number, d: number): boolean {
+  if (mo < 1 || mo > 12 || d < 1) return false;
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  return dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d;
+}
+
 /** The validated {y,mo,d} of a token's trailing date, or null. ONE parser for
  *  both the display form (`asOfFromToken`) and the compare key (`tokenDayKey`). */
 function parseTokenDate(
@@ -16,9 +25,7 @@ function parseTokenDate(
   const m = /(\d{4})(\d{2})(\d{2})\b/.exec(token);
   if (!m) return null;
   const [, y, mo, d] = m;
-  const month = Number(mo);
-  const day = Number(d);
-  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  if (!isRealCalendarDay(Number(y), Number(mo), Number(d))) return null;
   return { y, mo, d };
 }
 
@@ -41,9 +48,7 @@ export function asOfFromIso(iso: string | null | undefined): string | null {
   const m = /(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   if (!m) return null;
   const [, y, mo, d] = m;
-  const month = Number(mo);
-  const day = Number(d);
-  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  if (!isRealCalendarDay(Number(y), Number(mo), Number(d))) return null;
   return `${mo}/${d}/${y}`;
 }
 

@@ -82,12 +82,17 @@ export function MediaPanel({ onApply }: { onApply: (url: string, caption?: strin
     if (!label) return;
     const prev = items;
     setItems((cur) => cur?.map((i) => (i.id === id ? { ...i, label } : i)) ?? cur);
-    const res = await fetch("/api/email-lab/media", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, label }),
-    });
-    if (!res.ok) {
+    let res: Response | null = null;
+    try {
+      res = await fetch("/api/email-lab/media", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, label }),
+      });
+    } catch {
+      // network-level failure — same rollback as a non-2xx below
+    }
+    if (!res?.ok) {
       setItems(prev);
       setError("Couldn't rename that item — try again.");
     }
@@ -97,12 +102,17 @@ export function MediaPanel({ onApply }: { onApply: (url: string, caption?: strin
     setConfirmingId(null);
     const prev = items;
     setItems((cur) => cur?.filter((i) => i.id !== id) ?? cur);
-    const res = await fetch("/api/email-lab/media", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    if (!res.ok) {
+    let res: Response | null = null;
+    try {
+      res = await fetch("/api/email-lab/media", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+    } catch {
+      // network-level failure — same rollback as a non-2xx below
+    }
+    if (!res?.ok) {
       setItems(prev);
       setError("Couldn't remove that item — try again.");
     }

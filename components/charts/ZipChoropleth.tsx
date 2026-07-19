@@ -186,13 +186,24 @@ export function ZipChoropleth({
           }
         });
       })
-      .catch(() => setLoadError(true));
+      .catch(() => {
+        container.innerHTML = ""; // drop a stale previous map so the error isn't misread
+        setLoadError(true);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(data), colorLow, colorHigh, county]);
 
   return (
     <div className={`relative ${className}`} style={{ minHeight: 200, background: "#152832" }}>
-      {loadError ? <ChartError /> : <div ref={ref} className="w-full h-full" />}
+      {/* The ref div stays MOUNTED through an error (ChartError overlays it): if it
+          unmounted, the effect's `if (!container) return` would fire before the
+          setLoadError(false) reset and no deps change could ever retry the fetch. */}
+      <div ref={ref} className="w-full h-full" />
+      {loadError && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ChartError />
+        </div>
+      )}
       {tooltip && (
         <div
           className="pointer-events-none absolute z-10 rounded bg-gray-900 px-2 py-1 text-xs text-white shadow"

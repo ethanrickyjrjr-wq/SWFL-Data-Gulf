@@ -1,14 +1,19 @@
 /**
- * lib/email/render-golden.test.ts — NON-CIRCULAR behavior-preservation guard.
+ * lib/email/render-golden.test.ts — golden-baseline stability guard.
  *
- * The golden `__fixtures__/golden/<case>.html` files were captured from the PRE-spine
- * `reportToEmailHtml` (commit 91b6aec, the parent of the convergence-spine refactor).
- * This asserts the POST-spine `reportToEmailHtml` reproduces those exact bytes — so it
- * compares against a frozen external reference, NOT against the new code path itself
- * (which would be tautological now that the wrapper delegates into renderGroundedReport).
+ * PROVENANCE — read before regenerating:
+ * - ORIGINAL capture: the pre-spine `reportToEmailHtml` (commit 91b6aec, parent of the
+ *   convergence-spine refactor) — an independent, non-circular reference at the time.
+ * - REGENERATED 07/18/2026 (site-audit fix pass) from post-fix output, because the pass
+ *   intentionally changed the shared render path: as-of dates → MM/DD/YYYY, and a "$"
+ *   prefix on currency delta values (housing.median_sale_price + env.flood_aal_usd).
  *
- * If a future change to the spine alters email output, these break with a byte diff.
- * Regenerate ONLY with explicit intent (the capture script is documented in git history).
+ * So these goldens now guard stability against that 07/18 baseline, NOT the original
+ * 91b6aec bytes — the suite proves "output hasn't drifted since the last INTENDED
+ * change", not pre-spine equivalence. A byte diff here means the spine's output moved:
+ * regenerate ONLY with explicit intent, and record the intended change in this header
+ * when you do (regen: render each GOLDEN_CASES entry via `reportToEmailHtml` and write
+ * the result over `__fixtures__/golden/<case>.html`).
  */
 
 import { describe, expect, it } from "bun:test";

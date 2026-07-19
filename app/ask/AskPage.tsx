@@ -30,7 +30,7 @@ const STARTERS = [
 
 export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: string }) {
   const [question, setQuestion] = useState(initialQ);
-  const { ask, answer, answered, streaming, error, reset } = useConverse();
+  const { ask, answer, answered, grounding, streaming, error, reset } = useConverse();
   const answerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasSubmittedInitial = useRef(false);
@@ -163,7 +163,12 @@ export function AskPage({ initialQ, reportId }: { initialQ: string; reportId: st
                   </p>
                   {!streaming && answer && (
                     <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-                      {answered === true ? (
+                      {/* The badge is a PROVENANCE claim, so it keys off `grounding`,
+                          not `answered`: a web-filled gap is answered but NOT lake
+                          data (its citations are in the answer itself). `grounding`
+                          null = server didn't compute one — fall back to the answered
+                          gate rather than badging blind. */}
+                      {grounding === "lake" || (grounding === null && answered === true) ? (
                         <span className="text-[11px] text-gray-500">
                           Grounded in SWFL lake data
                         </span>

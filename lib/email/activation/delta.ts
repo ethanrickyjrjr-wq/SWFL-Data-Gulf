@@ -139,8 +139,15 @@ function diffSignals(prev: ActivationSnapshot, current: ActivationSnapshot): Sig
   // FIRST appearance (e.g. a ZIP going from zero permit/news/city-pulse
   // activity to a first real read this cycle). Without this, the loop above
   // (which only walks prev.lines) can never surface it as "new activity."
+  // ONLY a true-ZIP line may make this claim: selectDossierLines keeps every
+  // true-ZIP line but ranks + caps the non-true-zip headline lines, so a
+  // headline line's snapshot membership churns with ranking — its appearance
+  // is selection noise, not new activity (the same reason absence above is
+  // "not a claimable change"). A true-ZIP line absent from the prior snapshot
+  // genuinely wasn't held for this ZIP then.
   for (const c of current.lines) {
     if (!DELTABLE_SIGNAL_BRAINS.has(c.brain_id)) continue;
+    if (!c.is_true_zip) continue;
     if (prevByBrain.has(c.brain_id)) continue; // already handled above
     out.push({
       brain_id: c.brain_id,

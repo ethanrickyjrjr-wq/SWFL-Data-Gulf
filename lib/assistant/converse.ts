@@ -96,6 +96,11 @@ export interface ConverseHandlers {
    * false = the AI signalled it couldn't answer from the payload (data gap).
    */
   onAnswered?: (answered: boolean) => void;
+  /** Called once with the done frame's figure provenance ("lake" | "web" | "gap"),
+   *  or null when the frame carries none (older server / paths that don't compute
+   *  it). Only "lake" may render a lake-grounding claim — never infer lake from
+   *  `answered` alone when a provenance value is present. */
+  onGrounding?: (grounding: "lake" | "web" | "gap" | null) => void;
   /** Called with the chart frame payload when the server emits one. */
   onChart?: (chart: unknown) => void;
   /** Called with the prelude `place` frame the OFF-report conversation path emits — the
@@ -188,6 +193,11 @@ export async function streamConverse(
           if (Array.isArray(ev.reach)) handlers.onReach?.(ev.reach);
           // answered defaults to true when absent (older server / test stub).
           handlers.onAnswered?.(ev.answered !== false);
+          handlers.onGrounding?.(
+            ev.grounding === "lake" || ev.grounding === "web" || ev.grounding === "gap"
+              ? ev.grounding
+              : null,
+          );
           handlers.onFollowups?.(splitFollowupTail(acc).followups);
           handlers.onDone?.();
         }

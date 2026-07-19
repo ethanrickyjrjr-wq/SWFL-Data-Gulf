@@ -16,7 +16,19 @@ describe("valueAppearsInText — shared verbatim-digit moat check", () => {
   });
   it("rejects a value not in the text and trivially-short numbers", () => {
     expect(valueAppearsInText(99, doc)).toBe(false);
-    expect(valueAppearsInText(5, doc)).toBe(false); // <2 digits → never matches
+    expect(valueAppearsInText(5, doc)).toBe(false); // "13.5%" is not a 5
+  });
+  it("single digit: verifies only as a figure ($-prefixed / %-suffixed), numerically", () => {
+    expect(valueAppearsInText(5, "cap rates held at 5.0% this quarter")).toBe(true);
+    expect(valueAppearsInText(5, "listed at $5 per sqft NNN")).toBe(true);
+    expect(valueAppearsInText(5, "rents rose 5 percent year over year")).toBe(true);
+    // Incidental standalone digits are NOT verification evidence.
+    expect(valueAppearsInText(5, "see Page 5 of the appendix")).toBe(false);
+    expect(valueAppearsInText(5, "updated July 5, 2026")).toBe(false);
+    expect(valueAppearsInText(5, "unit 5 of 12 sold")).toBe(false);
+    // Numeric comparison, not digit comparison.
+    expect(valueAppearsInText(5, "grew 5.5% yoy")).toBe(false);
+    expect(valueAppearsInText(5, "a $50 fee")).toBe(false);
   });
 });
 

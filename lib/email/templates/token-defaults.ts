@@ -115,7 +115,7 @@ export const SWFL_TOKEN_DEFAULTS: Record<TokenKey, string> = {
   PROPERTY_BEDS: "—",
   PROPERTY_BATHS: "—",
   PROPERTY_SQFT: "—",
-  PROPERTY_TYPE: "Single Family",
+  PROPERTY_TYPE: "—",
   AGENT_PHOTO_URL: "",
   AGENT_NAME: "SWFL Data Gulf",
   AGENT_TITLE: "Market Intelligence",

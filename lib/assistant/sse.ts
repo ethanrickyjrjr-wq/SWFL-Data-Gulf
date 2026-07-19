@@ -19,6 +19,11 @@ export interface SSEEvent {
   reach?: string[];
   /** Server sets false when the answer signals a data gap (answered=false in data_requests). */
   answered?: boolean;
+  /** Figure provenance on the done frame: "lake" (all components held in the lake),
+   *  "web" (a named gap filled by the cited live-web fallback), "gap" (still open).
+   *  Absent on older servers / paths that don't compute it — treat as unknown,
+   *  never as lake. Only "lake" may render a lake-grounding claim. */
+  grounding?: "lake" | "web" | "gap";
   error?: string;
   /** Best-effort chart emitted before the text stream. See buildChartForIntent. */
   chart?: unknown;

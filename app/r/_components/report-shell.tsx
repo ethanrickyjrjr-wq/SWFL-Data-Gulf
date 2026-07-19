@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { asOfFromToken } from "@/lib/project/as-of";
+import { asOfFromToken, asOfFromIso } from "@/lib/project/as-of";
 
 /**
  * Shared chrome for every /r/ report read, so all pages render identical
@@ -65,6 +65,10 @@ export function ReportFooter({
   note?: ReactNode;
   children?: ReactNode;
 }) {
+  // MM/DD/YYYY or nothing — NEVER the raw internal string (locked as-of rule; matches
+  // speaker.mts's freshnessLine convention). Callers pass a freshness token, but
+  // should-i-sell passes an ISO timestamp, so try both parsers; unparseable → omit.
+  const asOf = asOfFromToken(freshnessToken) ?? asOfFromIso(freshnessToken);
   return (
     <footer className="mt-12 border-t border-white/10 pt-6 text-sm text-gray-500">
       <div className="flex items-center gap-2">
@@ -72,9 +76,7 @@ export function ReportFooter({
         <span>SWFL Data Gulf</span>
       </div>
       {children && <div className="mt-2">{children}</div>}
-      {freshnessToken && (
-        <p className="mt-2 text-xs">As of {asOfFromToken(freshnessToken) ?? freshnessToken}</p>
-      )}
+      {asOf && <p className="mt-2 text-xs">As of {asOf}</p>}
       {note && <p className="mt-2 text-xs">{note}</p>}
     </footer>
   );
