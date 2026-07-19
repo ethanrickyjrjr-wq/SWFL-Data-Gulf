@@ -32,6 +32,7 @@
   "lib/narratives/batch-store.ts",
   "lib/narratives/store.ts",
   "lib/pulse/corridor-nearby.ts",
+  "lib/should-i-sell/load-parcel-soh.ts",
   "lib/pulse/nearby.ts",
   "lib/why-not-selling/cut-history.ts",
   "lib/zip-report/candidates.ts",
