@@ -1,3 +1,18 @@
+## 2026-07-19 (Fable 5 · main) — cre-swfl citations de-jargoned (the third bait-class fix)
+
+Operator go ("take care of it" on `pack_citation_jargon_cre_corridor`). All 5 cre-swfl.mts citation
+sites drop "Brains Supabase corridor_profiles (verified, non-deleted)" → "SWFL CRE corridor profiles
+(editorially verified)", and column tokens go plain via new FIELD_LABELS map (cap_rate_pct → "cap
+rate", seasonal_index → "seasonal index", coverage_note → "flagged rows", lower_is_better → "lower is
+better"). Same product-language rewrite as MHS (0b42eb5a) + tourism/sector (ff11e356); interpolated
+figures, provenance semantics, and PostgREST reproduction URLs byte-identical; doc comments naming
+the URL host stay (never served). One pack-test regex updated to the new string (contract ships with
+its test, same commit). Gates: 113/113 pack/catalog/alias/speaker/display-leak tests, vocab coverage
+OK (41 brains). Check STAYS OPEN until a rebuild serves the new strings — do NOT dispatch before
+this commit is on origin (the GHA builds from origin/main; precedent: MHS dispatch fired only after
+0b42eb5a was pushed). NEXT: operator push, then a targeted `dispatch-rebuild.mjs cre-swfl` decree
+closes the loop; master folds it in on the nightly upstream-aware tick.
+
 ## 2026-07-19 (Fable 5 · main) — sibling citations de-jargoned (tourism-tdt + sector-credit); MHS rebuild dispatched; NEW cre-swfl bait check
 
 Operator go ("take care of it" on the defect-pass handoff). (1) `pack_citation_jargon_tourism_sector`

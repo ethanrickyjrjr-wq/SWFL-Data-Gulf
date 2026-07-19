@@ -1136,7 +1136,7 @@ test("grain: stamped duplicate corridors collapse to ONE submarket vote in the S
   assert.match(String(rent!.label), /2 of 2 submarkets/);
   assert.match(
     String(rent!.source.citation),
-    /2 submarkets reporting asking_rent_psf \(4 corridors mapped\)/,
+    /2 submarkets reporting asking rent \(4 corridors mapped\)/,
   );
 });
 

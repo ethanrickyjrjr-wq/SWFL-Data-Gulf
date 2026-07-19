@@ -172,6 +172,21 @@ function brainInputFrom(fragments: RawFragment[], upstreamId: string): BrainOutp
  * `source_url`s (when present), so a reader can trace value → corridor → its
  * own source without leaving the OUTPUT block.
  */
+// Product language only — citation strings are fed to the bake model as
+// citation text, and "Brains"/table-path/column-name jargon in them trips the
+// narration JARGON lint when echoed (check pack_citation_jargon_cre_corridor).
+// Table provenance lives in docs/standards/data-roots.md, not in a served
+// citation; the reproduction URL keeps the exact column filters.
+const FIELD_LABELS: Record<
+  "cap_rate_pct" | "vacancy_rate_pct" | "absorption_sqft" | "asking_rent_psf",
+  string
+> = {
+  cap_rate_pct: "cap rate",
+  vacancy_rate_pct: "vacancy rate",
+  absorption_sqft: "net absorption",
+  asking_rent_psf: "asking rent",
+};
+
 function buildCreAggregateSource(
   field: "cap_rate_pct" | "vacancy_rate_pct" | "absorption_sqft" | "asking_rent_psf",
   contributing: CorridorNormalized[],
@@ -191,7 +206,7 @@ function buildCreAggregateSource(
     url,
     fetched_at,
     tier: 2,
-    citation: `Brains Supabase corridor_profiles (verified, non-deleted) — median across ${contributing.length} corridors reporting ${field}: ${named}.`,
+    citation: `SWFL CRE corridor profiles (editorially verified) — median across ${contributing.length} corridors reporting ${FIELD_LABELS[field]}: ${named}.`,
   };
 }
 
@@ -674,7 +689,8 @@ function buildCreSubmarketAggregateSource(
     url,
     fetched_at,
     tier: 2,
-    citation: `Brains Supabase corridor_profiles (verified, non-deleted) — median across ${contributing.length} submarket${contributing.length === 1 ? "" : "s"} reporting ${field} (${mapped} corridor${mapped === 1 ? "" : "s"} mapped): ${named}. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator.`,
+    // Product language only — see the FIELD_LABELS note (check pack_citation_jargon_cre_corridor).
+    citation: `SWFL CRE corridor profiles (editorially verified) — median across ${contributing.length} submarket${contributing.length === 1 ? "" : "s"} reporting ${FIELD_LABELS[field]} (${mapped} corridor${mapped === 1 ? "" : "s"} mapped): ${named}. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator.`,
   };
 }
 
@@ -1534,7 +1550,8 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
         url: cfUrl,
         fetched_at,
         tier: 2,
-        citation: `Brains Supabase corridor_profiles (verified, non-deleted) — Corridor Factor composite: percentile-rank of cap_rate_pct (lower_is_better), vacancy_rate_pct (lower_is_better), asking_rent_psf (higher_is_better); equal weights; corridor-health/landlord lens, scored per submarket. Net absorption is excluded from the composite — it is corridor-grain and unsourced. Scored ${cfScores.length} of ${reps.length} submarkets.`,
+        // Product language only — see the FIELD_LABELS note (check pack_citation_jargon_cre_corridor).
+        citation: `SWFL CRE corridor profiles (editorially verified) — Corridor Factor composite: percentile rank of cap rate (lower is better), vacancy rate (lower is better), and asking rent (higher is better); equal weights; corridor-health/landlord lens, scored per submarket. Net absorption is excluded from the composite — it is corridor-level data without a named source. Scored ${cfScores.length} of ${reps.length} submarkets.`,
       },
     });
   }
@@ -2034,7 +2051,8 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
         url: seasonalityUrl,
         fetched_at,
         tier: 2,
-        citation: `Brains Supabase corridor_profiles (verified, non-deleted) — seasonal_index per corridor (0 = no seasonality, 1 = extreme). ${seasonalityRows.length} of ${corridors.length} corridors reporting.`,
+        // Product language only — see the FIELD_LABELS note (check pack_citation_jargon_cre_corridor).
+        citation: `SWFL CRE corridor profiles (editorially verified) — seasonal index per corridor (0 = no seasonality, 1 = extreme). ${seasonalityRows.length} of ${corridors.length} corridors reporting.`,
       },
     });
   }
@@ -2083,11 +2101,12 @@ function creSwflOutputProducer(): BrainOutputProducerResult {
         url: vacancyUrl,
         fetched_at,
         tier: 2,
+        // Product language only — see the FIELD_LABELS note (check pack_citation_jargon_cre_corridor).
         citation:
-          `Brains Supabase corridor_profiles (verified, non-deleted) — vacancy_rate_pct per corridor. ` +
+          `SWFL CRE corridor profiles (editorially verified) — vacancy rate per corridor. ` +
           `${vacancyRows.length} of ${corridors.length} corridors reporting.` +
           (flaggedCount > 0
-            ? ` ${flaggedCount} flagged coverage_note draw on the incomplete MarketBeat submarket survey.`
+            ? ` ${flaggedCount} flagged rows draw on the incomplete MarketBeat submarket survey.`
             : ``),
       },
     });
