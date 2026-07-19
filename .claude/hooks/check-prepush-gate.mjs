@@ -75,6 +75,22 @@ process.stdin.on("end", () => {
   if (!isGitPush(cmd)) process.exit(0);
   REPO_CWD = resolvePushCwd(payload);
 
+  // ---- SCOPE GUARD (added 07/19/2026) --------------------------------------
+  // Every gate below is brain-platform-specific (lockfile / vocab / ingest / pack /
+  // registry), and several shell into scripts/ that exist ONLY in this repo. When
+  // the SAME Claude session pushes a DIFFERENT repo (e.g. the ops repo
+  // swfldatagulf-ops), this hook ran those gates against it and CRASHED fail-CLOSED
+  // on a missing brain-platform script (`scripts/check-zip-scope-gate.mjs` →
+  // MODULE_NOT_FOUND) — wedging every foreign-repo push, the exact "a broken hook
+  // must never wedge every push" failure the header forbids. `git cat-file -e` is a
+  // pure tree lookup (no fs path translation across msys); it succeeds for main AND
+  // RULE-1.5 worktrees (they share HEAD's tree) and throws for any other repo.
+  try {
+    sh("git cat-file -e HEAD:refinery/packs/catalog.mts");
+  } catch {
+    process.exit(0); // push targets a non-brain-platform repo — these gates do not apply
+  }
+
   // Comparison base: upstream if set, else origin/main. Mirrors the session-log hook.
   let base = "";
   try {
