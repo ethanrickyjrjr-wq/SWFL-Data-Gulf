@@ -7,8 +7,8 @@ false alarm checked). With zero readers left, dropped data_lake.usgs_daily + usg
 usgs_caloosahatchee_stage_latest (to_regclass null x3; migrations/20260719_drop_usgs_tier2_corpses.sql,
 applied via supabase MCP); lake-probe rows removed; data-roots usgs_tier2 section marked DROPPED;
 closed `usgs_tier2_orphan`. One deferral: the registry `usgs_tier2` entry retirement hit the other
-session's live claim on cadence_registry.yaml (deadlock elected me to yield) — retried after their
-release; if it lands with this push the deferral note is moot. Push note (transparency): the earlier
+session's live claim on cadence_registry.yaml (deadlock elected me to yield; retry still held) —
+opened check `usgs_tier2_registry_entry_retirement` with the ready-to-paste retirement text. Push note (transparency): the earlier
 safe-push rebase carried the other session's just-committed docs-only spec commit ("Why Isn't It
 Selling" v1 design) — docs-only, RULE 1 just-push class, disclosed.
 
