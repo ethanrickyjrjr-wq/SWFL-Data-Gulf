@@ -35,6 +35,19 @@ sweep killed 59 procs incl. 6 parallel sessions (all resumable via claude --resu
 session's uncommitted edits below survived on disk). NEXT: operator pushes to deploy, records
 Loom, posts; verify live checkout with a $19 self-purchase then refund via Stripe dashboard.
 
+## 2026-07-19 (Fable 5 · main) — funnel bug: Should I Sell search box routed sellers AWAY from the seller read; action prop fix
+
+Live rehearsal for the demo GIF exposed it: LocationSearchBox hardcodes `action="/r/search"`, so
+typing 33904 into /r/should-i-sell landed on /r/zip-report/33904 — the seller read
+(/r/should-i-sell/[zip]) was unreachable from its own landing page (the landing's ?q= redirect
+logic never fired; nothing submitted to it). Fix: `action` prop on LocationSearchBox (default
+unchanged /r/search); all three boxes on the should-i-sell landing submit to /r/should-i-sell.
+`bunx next build` green. Also this session (prior entry's push went live ~120s): Stripe live-mode
+verified via API — all 6 lookup-key prices correct ($19/$190/$79/$790/$149/$1,490, livemode,
+active), webhook enabled at prod URL, 0 active subscriptions. Demo GIF recorded off live prod
+(hub → seller read 33904 → pricing) → Downloads/swfl-data-gulf-demo.gif. NEXT: push this fix on
+operator word; X/IG accounts are operator-side (signup flow staged in his Chrome).
+
 ## 2026-07-19 (Fable 5 · main) — funnel fixes: Seller Tools out of the pinned marquee run; /r finally reachable (footer + sitemap + /r hub directory)
 
 Operator correction: the 07/18 parallel session wedged the Seller Tools group BETWEEN Insiders and

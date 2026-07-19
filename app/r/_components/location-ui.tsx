@@ -14,18 +14,24 @@ import { cleanCitation } from "../../../lib/citations/clean-url";
  */
 
 /** One search box, any input. Plain GET form → /r/search → resolveLocation.
- *  Works with JS off; a human's first move is typing, not crafting a URL. */
+ *  Works with JS off; a human's first move is typing, not crafting a URL.
+ *  `action` lets a themed landing keep the visitor in ITS flow — the Should I
+ *  Sell page submits to itself so a ZIP lands on the seller read, not the
+ *  generic report (funnel bug found 07/19: the hardcoded /r/search action made
+ *  the seller read unreachable from its own landing page). */
 export function LocationSearchBox({
   defaultValue = "",
   placeholder = "ZIP, city, address, or county — e.g. 33931, Naples, Lee County",
   autoFocus = false,
+  action = "/r/search",
 }: {
   defaultValue?: string;
   placeholder?: string;
   autoFocus?: boolean;
+  action?: string;
 }) {
   return (
-    <form action="/r/search" method="get" role="search" className="flex w-full gap-2">
+    <form action={action} method="get" role="search" className="flex w-full gap-2">
       <input
         type="text"
         name="q"

@@ -41,6 +41,7 @@ export default async function ShouldISellLanding({ searchParams }: PageProps) {
             <LocationSearchBox
               defaultValue=""
               placeholder="Your ZIP or address — e.g. 33904, or 123 Main St, Cape Coral"
+              action="/r/should-i-sell"
             />
           </div>
         </ReportHeader>
@@ -66,6 +67,7 @@ export default async function ShouldISellLanding({ searchParams }: PageProps) {
             <LocationSearchBox
               defaultValue={q}
               placeholder="Narrow to a ZIP or a full street address"
+              action="/r/should-i-sell"
             />
           </div>
         </ReportHeader>
@@ -86,7 +88,7 @@ export default async function ShouldISellLanding({ searchParams }: PageProps) {
     <ReportShell width="2xl">
       <ReportHeader title="Should I Sell?">
         <div className="mt-5">
-          <LocationSearchBox defaultValue={q} />
+          <LocationSearchBox defaultValue={q} action="/r/should-i-sell" />
         </div>
       </ReportHeader>
       <OutOfScopePanel query={q} />
