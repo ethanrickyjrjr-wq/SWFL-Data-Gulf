@@ -24,9 +24,9 @@ import { GOLDEN_CASES } from "./__fixtures__/golden/cases";
 
 const GOLDEN_DIR = join(import.meta.dir, "__fixtures__", "golden");
 
-describe("reportToEmailHtml — frozen golden (pre-spine bytes, captured @91b6aec)", () => {
+describe("reportToEmailHtml — frozen golden baseline (see header for provenance)", () => {
   for (const c of GOLDEN_CASES) {
-    it(`${c.name}: post-spine output is byte-identical to the pre-spine golden`, async () => {
+    it(`${c.name}: output is byte-identical to the golden baseline`, async () => {
       const golden = readFileSync(join(GOLDEN_DIR, `${c.name}.html`), "utf8");
       const actual = await reportToEmailHtml(c.report, c.opts);
       expect(actual).toBe(golden);
