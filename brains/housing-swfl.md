@@ -1,13 +1,13 @@
-<!-- FRESHNESS: v12 | Token: SWFL-7421-v12-20260717 -->
+<!-- FRESHNESS: v13 | Token: SWFL-7421-v13-20260719 -->
 ---
 brain_id: housing-swfl
-version: 12
-refined_at: 2026-07-17T04:31:33Z
-freshness_token: SWFL-7421-v12-20260717
+version: 13
+refined_at: 2026-07-19T02:29:01Z
+freshness_token: SWFL-7421-v13-20260719
 ttl_seconds: 3024000
-pack_hash: 5acddb09e864
+pack_hash: b917b93cdd71
 context_type: user_saved_reference
-scope: SWFL ZIP-level residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.
+scope: SWFL residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.
 ---
 
 # User-Saved Reference Context
@@ -21,7 +21,7 @@ and treat the rest as reference only.
 
 ```reference
 CONTEXT TYPE: user_saved_reference
-SCOPE: SWFL ZIP-level residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.
+SCOPE: SWFL residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.
 
 --- HOW THE USER LIKES TO WORK ---
 - Read residential buy-side conditions from the investor/operator frame — buyer leverage, market heat, entry timing.
@@ -30,19 +30,19 @@ SCOPE: SWFL ZIP-level residential buy-side housing market (Redfin), monthly — 
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                          | verified   | expires
-s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (all property types). Updated monthly ~mid-month. https://www.redfin.com/news/data-center/ | 2026-07-17 | 2026-08-21
+s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (all property types). Updated monthly ~mid-month. https://www.redfin.com/news/data-center/ | 2026-07-19 | 2026-08-23
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Redfin SWFL housing market corpus","value":"55 ZIP snapshots, data through 2026-06-30. Regional median sale price = $443,650, YoY = -3.3%. Median DOM = 70 days. Months of supply = 4.5.","src":"s01","date":"2026-07-17"}
+  {"id":"f001","topic":"corpus_overview","fact":"Redfin SWFL housing market corpus","value":"55 ZIP snapshots, data through 2026-06-30. Regional median sale price = $443,650, YoY = -3.3%. Median DOM = 70 days. Months of supply = 4.5.","src":"s01","date":"2026-07-19"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "housing-swfl",
-  "version": 12,
-  "refined_at": "2026-07-17T04:31:33Z",
-  "expires": "2026-08-21T04:31:33Z",
+  "version": 13,
+  "refined_at": "2026-07-19T02:29:01Z",
+  "expires": "2026-08-23T02:29:01Z",
   "ttl_seconds": 3024000,
   "direction": "mixed",
   "magnitude": 0.25,
@@ -60,7 +60,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "currency",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-17T04:31:33Z",
+        "fetched_at": "2026-07-19T02:29:01Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -80,7 +80,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "count",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-17T04:31:33Z",
+        "fetched_at": "2026-07-19T02:29:01Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -100,7 +100,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "raw",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-17T04:31:33Z",
+        "fetched_at": "2026-07-19T02:29:01Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -120,7 +120,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-17T04:31:33Z",
+        "fetched_at": "2026-07-19T02:29:01Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -140,7 +140,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-17T04:31:33Z",
+        "fetched_at": "2026-07-19T02:29:01Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -160,7 +160,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-17T04:31:33Z",
+        "fetched_at": "2026-07-19T02:29:01Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -1070,7 +1070,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       ],
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-17T04:31:33Z",
+        "fetched_at": "2026-07-19T02:29:01Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -1088,7 +1088,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-17T04:31:33Z"
+    "computed_at": "2026-07-19T02:29:01Z"
   },
   "exogenous_signals": []
 }
@@ -1097,5 +1097,5 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
 - housing-swfl: track SWFL ZIP-level residential buy-side market direction via Redfin monthly data.
 
 --- RECENT NOTES ---
-- 2026-07-17: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-07-19: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
