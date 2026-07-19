@@ -18,6 +18,23 @@ mhs_source_string_jargon_bait opened. Actions-tab noise: last night's flood = op
 decreed rebuild dispatches × ~7 downstream runs each (CI/deptry/smoke/rollback/bake/grade/loggers);
 sub-daily crons were already throttled 07/18 (65359971, b3fd7af7). Next: operator fires the push;
 bake verify closes on tonight's chain run.
+## 2026-07-19 (Fable 5 · main) — MONETIZED: Should I Sell spread behind $19 one-time Stripe unlock (guest checkout, live price created)
+
+The address-level spread (comp-derived value + 6/12-mo hold math + per-parcel SOH) is now
+address- AND payment-gated: unpaid address → lock panel, zero comp/vendor spend pre-payment;
+paid → 30-day signed httpOnly cookie unlock (HMAC off STRIPE_SECRET_KEY, no new env). New:
+lib/billing/report-unlock.ts, /api/stripe/report-checkout (mode=payment, guest, metadata-carried
+zip+address), /api/stripe/report-unlock (verifies payment_status=paid → cookie → back to
+spread), UnlockSpread lock panel, SELLER_REPORT SKU in the tiers.ts price root ($19,
+swfl_seller_report_once), setup-report-product.mts. LIVE Stripe price created:
+price_1TupKf6Nq6usB9gGRSxYLuha. Webhook confirmed safe for payment-mode sessions (no
+client_reference_id → mutation null → ignored; billing tests 26/26 pass). Free ZIP-level read
+unchanged (crawler-honest). Launch kit (Loom script + socials + 10-buyer play):
+_ASSISTANT/seller-report-launch.md (local). Session also: OOM triage — operator-ordered process
+sweep killed 59 procs incl. 6 parallel sessions (all resumable via claude --resume; the nav/funnel
+session's uncommitted edits below survived on disk). NEXT: operator pushes to deploy, records
+Loom, posts; verify live checkout with a $19 self-purchase then refund via Stripe dashboard.
+
 ## 2026-07-19 (Fable 5 · main) — funnel fixes: Seller Tools out of the pinned marquee run; /r finally reachable (footer + sitemap + /r hub directory)
 
 Operator correction: the 07/18 parallel session wedged the Seller Tools group BETWEEN Insiders and

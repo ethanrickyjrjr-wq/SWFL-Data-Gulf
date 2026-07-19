@@ -10,6 +10,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { resolveZip } from "../../../../refinery/lib/zip-resolver.mts";
 import { cityForZip } from "@/lib/swfl-zip-city";
 import { nearestZips } from "@/lib/geo/nearest-zips";
@@ -22,6 +23,9 @@ import { fetchPropertyTaxAnnual } from "@/lib/should-i-sell/property-tax";
 import { loadZipSoh } from "@/lib/should-i-sell/load-zip-soh";
 import { loadParcelSoh, type ParcelSohRow } from "@/lib/should-i-sell/load-parcel-soh";
 import { SOH_SOURCES } from "@/lib/should-i-sell/soh-portability";
+import { verifyUnlock, UNLOCK_COOKIE } from "@/lib/billing/report-unlock";
+import { SELLER_REPORT } from "@/lib/billing/tiers";
+import UnlockSpread from "@/components/should-i-sell/UnlockSpread";
 import SellerStressRead from "@/components/should-i-sell/SellerStressRead";
 import MarketSnapshot from "@/components/should-i-sell/MarketSnapshot";
 import SellNowVsWait from "@/components/should-i-sell/SellNowVsWait";
@@ -93,13 +97,15 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
     loadZipSoh(zip, res.county_names),
   ]);
 
-  // ── Section 3 (address-gated) ─────────────────────────────────────────────
+  // ── Section 3 (address- AND payment-gated) ────────────────────────────────
+  // Unpaid + address → lock panel only: no comp lookup, no vendor spend.
   const addr = (address ?? "").trim();
+  const unlocked = verifyUnlock((await cookies()).get(UNLOCK_COOKIE)?.value);
   let spread: ReactNode = null;
   let parcelSoh: ParcelSohRow | null = null;
   let yoyFraction: number | null = null;
   const compSources: SourceEntry[] = [];
-  if (addr) {
+  if (addr && unlocked) {
     const [comps, yoy, parcel] = await Promise.all([
       compsForAddress(addr),
       loadZipYoyFraction(zip),
@@ -188,39 +194,44 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
             yoyAsOf={snapshot?.housing?.source.asOf ?? stress?.dataThrough ?? ""}
           />
 
-          {/* ── Section 3: address-gated spread ── */}
-          {spread ?? (
-            <section className="mt-10">
-              <SectionTitle>What waiting 6–12 months could cost or gain you</SectionTitle>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-400">
-                Add your address and we&rsquo;ll estimate your home&rsquo;s value from nearby sales,
-                then lay out — line by line — what holding it 6 or 12 months could cost or gain,
-                using {place}&rsquo;s own price trend. Your insurance is the one figure we never
-                guess.
-              </p>
-              <form method="get" className="mt-4 flex max-w-xl flex-wrap gap-2">
-                <input
-                  type="text"
-                  name="address"
-                  defaultValue={addr}
-                  placeholder="Your full street address, Lee or Collier County"
-                  aria-label="Your property address"
-                  className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:border-gulf-teal/60 focus:outline-none focus:ring-1 focus:ring-gulf-teal/40"
-                />
-                <button
-                  type="submit"
-                  className="btn-gradient inline-flex shrink-0 items-center rounded-lg px-5 py-3 text-sm font-semibold text-navy-dark transition-all hover:opacity-90"
-                >
-                  Run my spread
-                </button>
-              </form>
-              {addr && (
-                <p className="mt-3 text-sm text-[#e08158]">
-                  We couldn&rsquo;t pull nearby sales for that address yet — check it&rsquo;s a full
-                  Lee or Collier County street address, or enter your own value once it resolves.
+          {/* ── Section 3: address-gated spread; unpaid address → unlock panel ── */}
+          {addr && !unlocked ? (
+            <UnlockSpread zip={zip} address={addr} priceUsd={SELLER_REPORT.priceUsd} />
+          ) : (
+            (spread ?? (
+              <section className="mt-10">
+                <SectionTitle>What waiting 6–12 months could cost or gain you</SectionTitle>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-400">
+                  Add your address and we&rsquo;ll estimate your home&rsquo;s value from nearby
+                  sales, then lay out — line by line — what holding it 6 or 12 months could cost or
+                  gain, using {place}&rsquo;s own price trend. Your insurance is the one figure we
+                  never guess.
                 </p>
-              )}
-            </section>
+                <form method="get" className="mt-4 flex max-w-xl flex-wrap gap-2">
+                  <input
+                    type="text"
+                    name="address"
+                    defaultValue={addr}
+                    placeholder="Your full street address, Lee or Collier County"
+                    aria-label="Your property address"
+                    className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:border-gulf-teal/60 focus:outline-none focus:ring-1 focus:ring-gulf-teal/40"
+                  />
+                  <button
+                    type="submit"
+                    className="btn-gradient inline-flex shrink-0 items-center rounded-lg px-5 py-3 text-sm font-semibold text-navy-dark transition-all hover:opacity-90"
+                  >
+                    Run my spread
+                  </button>
+                </form>
+                {addr && (
+                  <p className="mt-3 text-sm text-[#e08158]">
+                    We couldn&rsquo;t pull nearby sales for that address yet — check it&rsquo;s a
+                    full Lee or Collier County street address, or enter your own value once it
+                    resolves.
+                  </p>
+                )}
+              </section>
+            ))
           )}
         </>
       )}

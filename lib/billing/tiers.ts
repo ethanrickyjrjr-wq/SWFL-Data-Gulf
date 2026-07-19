@@ -60,3 +60,14 @@ export const ALL_LOOKUP_KEYS: readonly string[] = BILLING_TIERS.flatMap((t) => [
   t.lookupKeyMonthly,
   t.lookupKeyAnnual,
 ]);
+
+/**
+ * One-time purchase: the Should I Sell full spread unlock (guest checkout,
+ * no account, no subscription). Lives here because this file is the one
+ * price root — no price literal may appear anywhere else.
+ */
+export const SELLER_REPORT = {
+  name: "Should I Sell — full seller spread",
+  priceUsd: 19,
+  lookupKey: "swfl_seller_report_once",
+} as const;
