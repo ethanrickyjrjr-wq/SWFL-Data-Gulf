@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v109 | Token: SWFL-7421-v109-20260719 -->
+<!-- FRESHNESS: v110 | Token: SWFL-7421-v110-20260719 -->
 ---
 brain_id: master
-version: 109
-refined_at: 2026-07-19T02:39:52Z
-freshness_token: SWFL-7421-v109-20260719
+version: 110
+refined_at: 2026-07-19T03:09:34Z
+freshness_token: SWFL-7421-v110-20260719
 ttl_seconds: 604800
 pack_hash: 70e0f9ee1d30
 context_type: user_saved_reference
@@ -112,12 +112,12 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 109,
-  "refined_at": "2026-07-19T02:39:52Z",
-  "expires": "2026-07-26T02:39:52Z",
+  "version": 110,
+  "refined_at": "2026-07-19T03:09:34Z",
+  "expires": "2026-07-26T03:09:34Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.5299261309231593,
+  "magnitude": 0.5299346168852076,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -863,8 +863,8 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000002,
-    "computed_at": "2026-07-19T02:39:52.000Z"
+    "half_life_hours": 720.0000000000001,
+    "computed_at": "2026-07-19T03:09:34.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
