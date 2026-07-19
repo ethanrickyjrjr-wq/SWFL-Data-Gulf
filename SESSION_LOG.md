@@ -11,8 +11,16 @@ paths + roles only, strategy content stays local). Wired READ-FIRST pointers int
 lib/email/CLAUDE.md + lib/deliverable/CLAUDE.md (auto-load on edit) and
 .claude/agents/deliverable-builder.md (FIRST ACTION: read the map); fixed that agent's stale
 "CAN-SPAM = 3" → corrected 4 (07/02 ruling). Update rule written into the map: postmortems
-land there same session. NEXT: operator push; then same treatment for assistant/ingest/website
-on operator word.
+land there same session. SECOND PASS (operator: "what about what we use to build — fonts,
+sizes, spacing"): added §4 THE DESIGN SYSTEM — the full provenance chain (app/_design/
+05-color-and-type.md → lib/email/blocks/scale.ts with the 7-role type scale / weights /
+leading / 8px-grid Space union; lib/brand/fonts.ts 6-family root + 07/02 locked email font
+policy; grid-schema.ts 12-col/600px canvas — RGL v2.2.3 confirmed current, the 07/06 gridstack
+plan never landed in package.json; on-dark.ts WCAG floors), the 07/14 "markdown is read by
+zero code" postmortem into the failure catalog, and §10 THE RESEARCH SHELF indexing every
+committed research artifact (06/28 render-stack spec incl. rejected-tools list, 07/01
+design-quality set, app/_design series) beside the local-only steadyapi-research trail.
+NEXT: operator push; then same treatment for assistant/ingest/website on operator word.
 
 ## 2026-07-19 (Fable 5 · main) — NEW PRODUCT: /r/offer-check — a live offer checked against recorded sales, on the existing $19 pass
 

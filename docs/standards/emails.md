@@ -41,10 +41,14 @@ session ships the same bug again.
    `console.error` in the dispatcher), a resolver miss must ask for the link/photo — never
    render the placeholder grid, never invent, never refuse the build (RULE 0.7).
 5. **Three render engines** disagree with each other (free-tier email / grid-tier email / PDF).
-   Any font or block-style change must touch ALL THREE. §4.
-6. **Send lanes are separate systems.** Blast (segments) ≠ digest broadcast (audiences) ≠
-   outreach ≠ cold email. Don't merge them. §5.
-7. **Builds are free; SEND is the paywall** (watermark only, no Stripe on creation).
+   Any font or block-style change must touch ALL THREE. §5.
+6. **The design system is CODE, not taste.** Every font size, weight, line-height, and spacing
+   value comes from `lib/email/blocks/scale.ts` (`text()`, `label()`, `statRole()`) — the
+   executable form of the researched `app/_design/05-color-and-type.md`. Hand-typing a px value
+   in an email block is the bug, not a style choice. §4.
+7. **Send lanes are separate systems.** Blast (segments) ≠ digest broadcast (audiences) ≠
+   outreach ≠ cold email. Don't merge them. §6.
+8. **Builds are free; SEND is the paywall** (watermark only, no Stripe on creation).
 
 ---
 
@@ -79,7 +83,7 @@ seed card ──→ same skeleton, unfilled       resolveSubject                
 4. **Subject resolution** — `resolveSubjectListing()` in `lib/listings/resolve-subject.ts`.
    Lane 0 = LAKE-FIRST (`listing_dom` authority view: house-number + ZIP narrow fetch, canonical
    street match, zero vendor quota). Vendor address-slug + ≤800-row city scan are FALLBACKS only
-   (the slug lane is functionally dead — §7). There is ONE resolver; never write a second.
+   (the slug lane is functionally dead — §8). There is ONE resolver; never write a second.
    A miss returns the "paste your link or add a photo" ask — an honest gap, never a placeholder.
 5. **Recipe builders** — `lib/deliverable/recipes/*.ts` (per-key builders; prose prompts like
    `authorListingNarrative` live in `recipes/shared.ts`; `FAVORABLE_FRAMING_POLICY` is pasted
@@ -142,7 +146,79 @@ is `SocialModel` vs `EmailDoc`. Confirm which system you're in before building.
 
 ---
 
-## 4. RENDER — three engines that disagree
+## 4. THE DESIGN SYSTEM — fonts, sizes, spacing, and where every number came from
+
+The visual rules were **researched for days, written into `app/_design/`, committed — and then
+read by ZERO CODE**, because they lived in markdown and markdown cannot be imported. Measured
+07/14/2026, before the executable form existed: 17 distinct font sizes in use where the scale
+defines 7 · 30 fontWeight declarations, ZERO compliant · `tabular-nums` (required on every
+numeric cell) used ZERO times · ~30 text nodes with no lineHeight, silently inheriting
+@react-email's injected ABSOLUTE `lineHeight: 24px` — a 36px stat clipped into a 24px box was
+the mechanical cause of "the emails look uneven." The lesson is structural: **research that
+lives only in a doc does not govern anything; it must become a typed code root that makes
+violations uncompilable.**
+
+**The provenance chain — doc → code root → enforced API:**
+
+| Layer | Source doc (the research) | Executable root (what code reads) |
+|---|---|---|
+| Type scale, weights, leading, tracking, spacing tokens | `app/_design/05-color-and-type.md` | `lib/email/blocks/scale.ts` — every constant cites its doc line |
+| Shared weights (email + social) | social-design-root handoff 07/14 | `lib/brand/weight.ts` |
+| Fonts (6 families, all engines) | brand-tokens-one-root spec 07/02 | `lib/brand/fonts.ts` — stack + webfontUrl + pdf built-in + canvas face per family; `font-parity.test.ts` |
+| Canvas geometry | render-stack research 06/28 | `lib/email/grid-schema.ts` |
+| Style atoms / section padding | scale.ts | `lib/email/blocks/styles.ts` (`PAD_Y`, `MUTED`, `BORDER`) |
+| Contrast / legible ink | ink-fence spec+plan 07/09 (WCAG floors) | `lib/email/blocks/on-dark.ts` (`legibleInk`); math from `lib/charts/palette.ts` (ONE root) |
+| Unbranded seed palette | — | `lib/email/doc/skeleton-style.ts` (`NEUTRAL_SKELETON_STYLE`, grayscale — never ship SWFL navy/teal on an unbranded seed) |
+| Brand → tokens | brand-tokens-one-root spec 07/02 | `lib/email/brand/branding-to-tokens.ts` + `apply-brand-style.ts` |
+| Charts | `app/_design/07-charts-and-dataviz.md` + taskC chart-type verification 07/01 | `lib/email/templates/charts/chart-defaults.ts` |
+
+**The numbers themselves (from `scale.ts`, which cites `05-color-and-type.md` per line):**
+- **Type scale (px):** hero 64 · h1 44 · metric 36 · h2 28 · body 16 · caption 14 · mono 12.
+  Seven roles. There is no eighth. A "compact" variant is `compact(role)` — ONE STEP DOWN the
+  ladder (operator ruling 07/14: density is a variant, never a second scale, no new numbers).
+- **Weights:** 600 display · 500 section-headers/emphasis/mono · 400 body. Never 700/800.
+- **Leading:** display (28px+) 1.1 · body 1.55 · caption 1.4 — always unitless, never absolute.
+- **Tracking:** −0.015em at display sizes · +0.06em on uppercase labels.
+- **Spacing:** 8px base grid, tokens `0/4/8/12/16/24/32/48/64/96` — typed as a union, so an
+  off-grid literal is a COMPILE error. Card padding 24 · metric row 12 · table row 8.
+- **Numerics:** `tabular-nums` on every figure (`text(role, {numeric: true})`).
+- **The API rule:** `text(role)` returns size+leading+weight TOGETHER — you cannot pick a size
+  and forget the line-height; the injected-24px bug is unreachable. `statRole()` is the
+  importance dial (primary > default > muted, monotonic at every density). `lines(role, n)`
+  derives reserved heights — never hand-type a `minHeight`.
+- **Scope:** scale.ts unifies RHYTHM, not appearance — color, block order, and what a template
+  looks like remain per-template choices (operator ruling 07/14).
+
+**Fonts (policy operator-locked 07/02):** progressive enhancement, auto-safe, no toggles. The
+email-safe `stack` is ALWAYS inline; `webfontUrl` is an additive `<Head>` link (~24% of clients
+honor @font-face, per caniemail); Outlook is pinned to the stack via `[if mso]` (its @font-face
+bug otherwise lands on Times New Roman). Six families; `Record<FontFamily, …>` + `FONT_ROUTING`
+(`lib/email/lab/capabilities.ts`) mean a new font cannot ship without a complete entry AND a
+tier route.
+
+**Canvas (from the 06/28 render-stack research, values re-verified against vendor docs
+in-session that day):** react-grid-layout v2.2.3 · 12 columns · 600px email canvas · rowHeight
+30 (advisory — email height is content-driven) · margin [8,8]. Users pick width PRESETS
+(Full/⅔/½/⅓ = 12/8/6/4 cols) — the 12-col grid is internal plumbing. `isGridDoc()` (any block
+with a `layout`) is what routes a doc to the grid renderer vs the free-tier stack. NOTE: a
+07/06 gridstack-migration plan exists in `docs/superpowers/plans/` but gridstack is NOT in
+`package.json` — the canvas is still react-grid-layout; treat that plan as not-current.
+
+**Contrast:** WCAG floors 4.5:1 functional text · 3:1 large text (18pt+/14pt+bold) and icons;
+decoration exempt. `legibleInk(preferred, bg, floor)` guards every raw brand-ink site at
+render; a low-contrast saved palette warns (non-blocking) — saves never blocked, colors never
+rewritten.
+
+**Render-stack decisions from the 06/28 research — settled, do not re-evaluate:** react-email
+compiles blocks to table HTML (MJML REJECTED — same model, extra binary); Photopea is the
+in-browser photo editor (free, iframe, no key); Craft.js for editor state; Graphite is a
+design-side SVG tool only (no data injection for 12–18mo); Inkscape is GHA-only (no desktop
+binaries on Vercel); GIMP, SendGrid/Twilio, Beefree, Easy Email, Litmus all rejected —
+reasons in `docs/superpowers/specs/2026-06-28-email-lab-ai-design-research.md` §8.
+
+---
+
+## 5. RENDER — three engines that disagree
 
 An `EmailDoc` renders through THREE independent engines. A font/style that works on one can
 silently fall back on the others. **Any typography or block-style change touches all three.**
@@ -161,7 +237,7 @@ silently fall back on the others. **Any typography or block-style change touches
 
 ---
 
-## 5. SEND — the lanes (separate systems, don't merge)
+## 6. SEND — the lanes (separate systems, don't merge)
 
 - **One-off blast** — `ContactPickerModal` → `POST /api/deliverables/[id]/blast`, recipients
   from `contact_segments` (`lib/email/segments/`). Attribute/engagement conditions are
@@ -173,7 +249,7 @@ silently fall back on the others. **Any typography or block-style change touches
   compliance already built. The 21k DBPR prospect list is PARKED outside the repo until the
   operator lifts it. Do not re-raise the legality objection; only provider wiring remains.
 - **Schedulers** — `email-scheduler.yml` (multi-tenant, */15 cron) is LIVE but all
-  `email_schedules` rows are paused as of 07/16. `daily-email-digest.yml` is DISABLED — §8.
+  `email_schedules` rows are paused as of 07/16. `daily-email-digest.yml` is DISABLED — §9.
 - **Sender** — verified `hello@swfldatagulf.com` via Resend (`RESEND_API_KEY` in `.env.local`
   + gh secrets). Resend has NO native A/B; DMARC gap noted 06/27.
 - **CAN-SPAM = 4 real requirements** (corrected 07/02 — it was wrongly "3" in older docs):
@@ -188,7 +264,7 @@ silently fall back on the others. **Any typography or block-style change touches
 
 ---
 
-## 6. THE FAILURE CATALOG — why emails have actually broken
+## 7. THE FAILURE CATALOG — why emails have actually broken
 
 Every entry is a class of bug, not just an incident. Check your change against each class.
 
@@ -203,7 +279,7 @@ Every entry is a class of bug, not just an incident. Check your change against e
   render on output paths.*
 - **07/16 — digest shipped crime/courts news ("WE AREN'T A NEWS EMAILER ABOUT SWINDLERS").**
   Fix: `NEWS_EXCLUDE` drop-gate BEFORE topic checks in `scripts/email/fetch-digest-data.mts`;
-  digest itself killed (§8). CLASS: *curation must DROP, not rank-to-tail; a $ figure can't
+  digest itself killed (§9). CLASS: *curation must DROP, not rank-to-tail; a $ figure can't
   launder a crime story.*
 - **07/13 — invention is CLAIM-shaped.** Seven workers built seven deliverables; four shipped
   falsehoods with ZERO invented digits (inverted comparison, phantom DOM interval, fabricated
@@ -217,6 +293,11 @@ Every entry is a class of bug, not just an incident. Check your change against e
 - **07/13 — silent recipe-validation fallback** seated a Lee County figure in a NATIONAL
   headline slot, rendered fine, looked fine. Fix: LOUD error on invalid recipe output. CLASS:
   *a fallback that looks like success is the disease wearing a lab coat.*
+- **07/14 — the design system existed only as markdown, so nothing obeyed it.** 17 rogue font
+  sizes, zero compliant weights, zero `tabular-nums`, ~30 nodes clipped by an invisible
+  injected 24px line-height — "the emails look uneven" for weeks. Fix: `scale.ts` (§4), typed
+  so violations don't compile. CLASS: *research that lives only in a doc is read by zero code;
+  encode it as a typed root or it never happened.*
 - **06/29 — grid-tier renderer had an empty `<Head>`** — web fonts silently fell back on the
   paid tier only. CLASS: *three render engines; test the one you didn't change.*
 - **06/28 — hand-editing an AI fill** (about to overwrite web-fresh "60 days" with held "72"
@@ -225,7 +306,7 @@ Every entry is a class of bug, not just an incident. Check your change against e
 
 ---
 
-## 7. VENDOR REALITY (as of 07/19/2026)
+## 8. VENDOR REALITY (as of 07/19/2026)
 
 **SteadyAPI** (the listing vendor — NEVER surface this name to end users; it's plumbing):
 - Quota 50k/mo, 1 req/s live limit — use the headroom, but **real spend only on the final
@@ -239,45 +320,66 @@ Every entry is a class of bug, not just an incident. Check your change against e
 - General lesson: probe vendor behavior LIVE (crawl4ai / direct probe) before building on it;
   a behavior verified once (slug centering, 07/08) can be gone eleven days later.
 
-**Resend:** broadcast/segment lane only (§5). No native A/B. DMARC gap. Never the cold-email
+**Resend:** broadcast/segment lane only (§6). No native A/B. DMARC gap. Never the cold-email
 provider.
 
 ---
 
-## 8. KILL LIST — dead by operator decree; never re-propose, never re-enable
+## 9. KILL LIST — dead by operator decree; never re-propose, never re-enable
 
 - **Daily digest** — `daily-email-digest.yml` disabled 07/16 + schedules paused. Re-enable
   ONLY on explicit operator say-so with content quality signed off.
 - **Logo.dev / any paid logo vendor** — custom icons = keyless favicon → globe fallback.
 - **`labDestination` / `projects[0]` auto-pick** — deleted; `signedInLabArrival` replaced it.
 - **Prompt-regex recipe gating** (`isNewListingRecipePrompt`) — deleted; keys are identity.
-- **Hand-editing AI fills** — see §6, 06/28.
+- **Hand-editing AI fills** — see §7, 06/28.
 - **A second subject resolver / second segments table / second social-platform list / second
   render root** — extend the existing root (RULE C2).
 - **The email grid builder is the crown jewel** — never kill or bypass it; drive it.
 
 ---
 
-## 9. LOCAL-ONLY RESEARCH (gitignored — on this machine, never committed)
+## 10. THE RESEARCH SHELF — everything we researched before writing this code
 
-The research behind email/product decisions is deliberately kept out of GitHub
-(`.gitignore`: `docs/steadyapi-research/`, `*crawl4ai*`). It exists — go read it locally
-instead of re-deriving:
+The email system was NOT designed from vibes; each layer has a research artifact behind it.
+Before re-deriving, re-crawling, or re-evaluating ANYTHING email, check this shelf — most
+"open questions" were answered, verified via crawl4ai, and written down already.
 
+**Committed (in the repo — read these first):**
+- `app/_design/` — THE design-doc series (00-START-HERE → 07-charts-and-dataviz +
+  QUICK-REFERENCE): product brief, motion rules, surface recipes, color & type (the §4
+  numbers' source), voice & microcopy, charts/dataviz, anime.js docs mirror.
+- `docs/superpowers/specs/2026-06-28-email-lab-ai-design-research.md` — the render-stack
+  research (grid canvas, Photopea, react-email, Graphite, Inkscape + the full rejected list).
+  Header says it: "Do NOT re-crawl these topics. Build from here."
+- `_ASSISTANT/research/2026-07-01-ai-deliverable-design-quality-research.md` (+
+  `design-quality-BCD-handoff`, `taskB-wcag-contrast-verification`,
+  `taskC-charttype-verification`, `social-safezone-meta-firstparty-verification`,
+  `email-social-ai-pipeline-report`) — the design-QUALITY research: 8pt grid +
+  internal≤external spacing, M3 grouping/rhythm, type-scale ratios, WCAG contrast math,
+  chart-type selection — all crawl4ai-verified with sources.
+- `_ASSISTANT/research/2026-07-01-listing-lifecycle-marketing-research.md` — the lifecycle
+  recipes' marketing research.
+- `_ASSISTANT/research/2026-07-15-*` — sell-side copywriting / anti-drift / authority trio
+  behind `FAVORABLE_FRAMING_POLICY`.
+- `docs/superpowers/plans/2026-07-08-ai-design-and-email-marketing-hacks-sweep.md`,
+  `2026-07-09-email-ink-fence-and-palette-gate.md`, `2026-06-29-email-lab-text-styling.md`,
+  `2026-07-06-email-grid-gridstack-*` (NOT executed — §4) — the design/build plan trail.
+- `docs/standards/deliverable-playbook.md` + `docs/standards/email-images.md`.
+
+**Local-only (gitignored — on this machine, never committed):**
 - `docs/steadyapi-research/STEADY-PAINS.md` — THE distilled buyer/seller/agent pain reference
   (weighted, quoted, mapped to what we already hold). Load it whenever writing to customer
   pains. Standing rule: fold every new research round into it or it's stale.
 - `docs/steadyapi-research/2026-07-17-*.md`, `2026-07-18-*.md`, `2026-07-19-20-users-launch-kit.md`
   — the dated evidence trail (landscape scans, execution briefs, launch kit).
-- `_ASSISTANT/research/2026-07-15-*` — the sell-side copywriting / anti-drift / authority
-  research trio behind `FAVORABLE_FRAMING_POLICY`.
 
-Distilled PROCESS facts (vendor behavior, pipeline shape) belong in this committed map;
-strategy content stays local. Nothing matching `*crawl4ai*` is ever committed.
+Distilled PROCESS facts (vendor behavior, pipeline shape, design constants) belong in this
+committed map; strategy content stays local. Nothing matching `*crawl4ai*` is ever committed.
 
 ---
 
-## 10. VERIFY BEFORE YOU CLAIM ANYTHING WORKS
+## 11. VERIFY BEFORE YOU CLAIM ANYTHING WORKS
 
 1. `bun test` the touched surfaces — `lib/email` + `lib/deliverable` + `lib/listings` is
    ~2,800 tests as of 07/19 and runs in seconds. Recipe touched → `recipes.parity.test.ts`.
