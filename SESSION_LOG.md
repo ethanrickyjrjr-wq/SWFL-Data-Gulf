@@ -1,3 +1,19 @@
+## 2026-07-19 (Fable 5 · main) — footer digest signup CUT + grounded-report relocated to lib/deliverable
+
+Operator decree ("get it all taken care of") on the two standing items. (1) `footer_dead_digest_cta`
+CLOSED: SiteFooter's dead daily-digest block + import removed; component renamed
+DigestSubscribe → SubscribeCapture with ALL digest defaults stripped (endpoint/heading/blurb/
+doneMessage now required — sole live instance is zip-report's weekly-read capture, which already
+passes everything). `/api/email/subscribe` KEPT (broadcast-list enrollment) but now has no UI
+poster — NEW check `general_email_list_no_signup_surface` for the product call (RULE 2.4).
+(2) `grounded_report_out_of_email` CLOSED: grounded-report.ts + both tests → lib/deliverable/
+(the check's own specced home), 6 importers repointed (/p page, print route, activation/render,
+scheduler + test, email-deliverable); lib/email keeps only the activation wrapper. Email map
+updated (staged section 🟡→🟢 ×2). Verify: bun test components/email lib/deliverable lib/email =
+2633 pass / 0 fail; bunx next build green. NOTE: parallel session's 4658af13 (context-bloat pass)
+swept my 5 staged git-mv renames while I worked — pure renames, zero content, net tree correct;
+content edits land in THIS commit. NEXT: operator push (carries 268c78e2 + 4658af13 + this).
+
 ## 2026-07-19 (Sonnet 5 · main) — cre-swfl rebuild dispatched (serves the de-jargoned strings)
 
 Operator go ("take care of this and run the rebuild") after confirming `ae293f56` (cre-swfl

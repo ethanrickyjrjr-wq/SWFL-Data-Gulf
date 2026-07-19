@@ -17,7 +17,7 @@
 
 import { resolvePlaceZip } from "@/refinery/lib/geography-gazetteer.mts";
 import type { ActivationSnapshot } from "../email/activation/types";
-import type { GroundedReportModel, GroundedReportScope } from "../email/grounded-report";
+import type { GroundedReportModel, GroundedReportScope } from "./grounded-report";
 import type { ReportMetric, ReportLine } from "../email/activation/snapshot";
 import type { SnapshotItem, Narrative } from "./templates";
 

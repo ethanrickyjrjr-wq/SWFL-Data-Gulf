@@ -76,9 +76,14 @@ Executed same day:
 Staged (open checks — the map is wrong the day these close if it isn't updated):
 - 🟡 `email_prospect_seed_block_canvas` — `lib/prospects/open-project.ts:29` still SEEDS new
   legacy `template:"email"` rows from the prospect-claim funnel.
-- 🟡 `grounded_report_out_of_email` — `grounded-report` survives ONLY as the report/print
-  renderer behind `/p/[id]` + the print route (narrative templates); it belongs on the report
-  side, not in `lib/email`.
+- 🟢 `grounded_report_out_of_email` — DONE 07/19: `grounded-report` relocated to
+  `lib/deliverable/grounded-report.ts` (+ both tests), all importers repointed; `lib/email`
+  keeps only the activation wrapper (`activation/render.ts`) over the spine.
+- 🟢 The site-footer daily-digest signup is CUT (07/19, closes `footer_dead_digest_cta`) —
+  the capture component is renamed `SubscribeCapture` with NO product defaults (its one live
+  instance is the zip-report weekly-read capture). `/api/email/subscribe` stays (broadcast
+  list enrollment) but now has NO UI poster — product call tracked in
+  `general_email_list_no_signup_surface`.
 - 🟡 `web_chart_lib_consolidation` — recharts (6 files) + echarts (2 files) are WEB chart
   surfaces (zero imports inside lib/email); port to the bklit/visx kit, then drop both deps.
 - Note: `/api/templates/render` + `lib/templates/render-html-template.ts` are the **viz-template

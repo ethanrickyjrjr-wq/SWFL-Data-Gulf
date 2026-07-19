@@ -21,7 +21,7 @@ import {
   buildEmailDeliverableModel,
   type EmailDeliverableRow,
 } from "@/lib/deliverable/email-deliverable";
-import { renderGroundedReport } from "@/lib/email/grounded-report";
+import { renderGroundedReport } from "@/lib/deliverable/grounded-report";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

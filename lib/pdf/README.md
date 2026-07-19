@@ -46,7 +46,7 @@ redirects block-canvas to the Email Lab):
 These predate the root and render HTML, not `EmailDoc` PDF. Left as-is:
 
 - `app/p/[id]/print/route.ts` + `components/PrintButton.tsx` — report deliverables.
-- `lib/email/grounded-report.ts` (`skin: "pdf"`) — the "email" template print skin.
+- `lib/deliverable/grounded-report.ts` (`skin: "pdf"`) — the "email" template print skin.
 
 ---
 

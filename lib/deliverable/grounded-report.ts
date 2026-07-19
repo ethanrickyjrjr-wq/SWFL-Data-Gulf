@@ -1,5 +1,5 @@
 /**
- * lib/email/grounded-report.ts — the convergence spine.
+ * lib/deliverable/grounded-report.ts — the convergence spine.
  *
  * `GroundedReportModel` is the ONE grounded data shape every deliverable lane
  * (activation email, recurring digest, briefcase email/PDF) produces and consumes.
@@ -23,8 +23,8 @@
 import { renderEmailTemplate, brandThemeToTokens } from "@/lib/email/templates/render-template";
 import { SWFL_TOKEN_DEFAULTS } from "@/lib/email/templates/token-defaults";
 import { asOfFromToken } from "@/lib/project/as-of";
-import { CURRENCY_METRIC_KEYS, type AssembledReport } from "./activation/snapshot";
-import type { ActivationBrand, ReportDelta, MetricChange } from "./activation/types";
+import { CURRENCY_METRIC_KEYS, type AssembledReport } from "@/lib/email/activation/snapshot";
+import type { ActivationBrand, ReportDelta, MetricChange } from "@/lib/email/activation/types";
 
 /**
  * General report scope — replaces the ZIP-hardcoded `primaryPlace/countyName/zip` triple

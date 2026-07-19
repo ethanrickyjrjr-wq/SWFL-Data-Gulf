@@ -1,7 +1,7 @@
 // This repo has no DOM test environment by design — tests are bun:test + pure.
-// DigestSubscribe exports its body builder + activation-visibility logic for that.
+// SubscribeCapture exports its body builder + activation-visibility logic for that.
 import { describe, test, expect } from "bun:test";
-import { activationFieldsVisible, buildSubscribeBody } from "./DigestSubscribe";
+import { activationFieldsVisible, buildSubscribeBody } from "./SubscribeCapture";
 
 const base = { email: "a@b.com", source: "zip-report", zip: "", consent: false };
 

@@ -235,7 +235,7 @@ Secrets needed: `RESEND_API_KEY` (already in GH secrets per feedback memory), `N
 - `lib/email/marketing-client.ts` — lazy full_access Resend client (`RESEND_AUDIENCES_KEY` ?? `full_access`) + `getDigestSegmentId()` from `RESEND_DIGEST_SEGMENT_ID`.
 - `scripts/email/setup-digest-segment.mts` — one-time idempotent segment creator (ran live; segment id captured).
 - `app/api/email/subscribe/route.ts` — validates → adds contact to the segment (idempotent on dupes, verified live) → mirrors to `email_subscribers`. Resilient: a Resend OR Supabase hiccup never loses the signup.
-- `components/email/DigestSubscribe.tsx` — subscribe CTA, wired into the landing `Footer` (`source="landing"`) and every `/r/[slug]` report (`source="r-page"`).
+- `components/email/SubscribeCapture.tsx` (ex-`DigestSubscribe`) — generic capture CTA with NO product defaults since 07/19; the site-footer daily-digest instance was cut with the digest kill, and the sole live instance is the zip-report weekly-read capture (`/api/weekly-read/subscribe`).
 - `app/api/email/broadcast/route.ts` — server-side broadcast trigger (bearer `DIGEST_BROADCAST_SECRET`). **Safe by default: creates a Resend DRAFT** unless `send:true`; **rejects HTML missing `{{{RESEND_UNSUBSCRIBE_URL}}}`** (CAN-SPAM guard).
 
 **Go-live checklist (the deliberate flip — none of this emails strangers until done):**

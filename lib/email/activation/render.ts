@@ -2,7 +2,7 @@
  * lib/email/activation/render.ts — assemble a branded report email (deterministic).
  *
  * `reportToEmailHtml` is now a thin wrapper over the convergence spine
- * (`lib/email/grounded-report.ts`): it maps the activation `AssembledReport` into the
+ * (`lib/deliverable/grounded-report.ts`): it maps the activation `AssembledReport` into the
  * general `GroundedReportModel`, renders the email skin, then injects the unsubscribe
  * token AFTER the render (the render-template assert would otherwise reject the inner
  * `{{RESEND_UNSUBSCRIBE_URL}}`), reusing the scheduler's idempotent injector. All
@@ -10,11 +10,11 @@
  * tokens — lives in the spine so every lane shares one grounded render path. NO LLM
  * here: every number comes from the `AssembledReport` (whose facts came from the
  * grounded dossier engine). The email output is byte-identical to the pre-spine render
- * (golden-equivalence test in `lib/email/grounded-report.test.ts`).
+ * (golden-equivalence test in `lib/deliverable/grounded-report.test.ts`).
  */
 
 import { ensureUnsubscribeToken } from "@/lib/email/scheduler";
-import { renderGroundedReport, assembledReportToModel } from "@/lib/email/grounded-report";
+import { renderGroundedReport, assembledReportToModel } from "@/lib/deliverable/grounded-report";
 import type { AssembledReport } from "./snapshot";
 import type { ActivationBrand, ReportDelta } from "./types";
 

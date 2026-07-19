@@ -24,7 +24,7 @@ import { ChartBlockView } from "@/components/charts/ChartBlockView";
 import { FrameRenderer } from "@/components/charts/registry/FrameRenderer";
 import { signedUploadUrls } from "@/lib/project/signed-upload-url";
 import { buildEmailDeliverableModel } from "@/lib/deliverable/email-deliverable";
-import { renderGroundedReport } from "@/lib/email/grounded-report";
+import { renderGroundedReport } from "@/lib/deliverable/grounded-report";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { GlobalDigestFallback } from "@/components/GlobalDigestFallback";

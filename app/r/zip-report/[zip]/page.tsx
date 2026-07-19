@@ -26,7 +26,7 @@ import type { SourceEntry } from "../../../../components/CitationList";
 import { AnswerText } from "../../../../components/answer/AnswerText";
 import { asOfFromToken } from "../../../../lib/project/as-of";
 import { computeZipGradient, FLOOD_GRADIENT } from "../../../../lib/map/zip-color";
-import DigestSubscribe from "../../../../components/email/DigestSubscribe";
+import SubscribeCapture from "../../../../components/email/SubscribeCapture";
 import { MetroAreaChart } from "../../../../components/charts";
 import { REDFIN_METRO_SOLD_SERIES } from "../../../../lib/charts/series";
 import { loadMetroTrend } from "../../../../lib/charts/load-metro-trend";
@@ -507,7 +507,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
         </section>
 
         <div>
-          <DigestSubscribe
+          <SubscribeCapture
             source="zip-report"
             presetZip={zip}
             endpoint="/api/weekly-read/subscribe"

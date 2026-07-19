@@ -1,10 +1,7 @@
 import { describe, it, expect } from "bun:test";
-import {
-  buildEmailDeliverableModel,
-  type EmailDeliverableRow,
-} from "../deliverable/email-deliverable";
+import { buildEmailDeliverableModel, type EmailDeliverableRow } from "./email-deliverable";
 import { renderGroundedReport } from "./grounded-report";
-import type { SnapshotItem, Narrative } from "../deliverable/templates";
+import type { SnapshotItem, Narrative } from "./templates";
 
 // End-to-end render lock for the briefcase email/PDF lane: a frozen deliverable row →
 // buildEmailDeliverableModel → renderGroundedReport, for BOTH skins. Reads the real

@@ -15,9 +15,9 @@ There are TWO ways a deliverable gets rendered. Knowing which one you're in save
 - Chart for it: `lib/email/chart-image.ts` (`trendChartSvg` → `svgToPng` → `hostEmailPng`).
 
 **System 2 — Grounded-report templates** (the scheduler / blast path; the legacy)
-- Render (email + pdf skins): `lib/email/grounded-report.ts` (`renderGroundedReport`).
+- Render (email + pdf skins): `lib/deliverable/grounded-report.ts` (`renderGroundedReport`) — relocated out of `lib/email` 07/19.
 - Templates: `lib/email/templates/template-registry.ts` (8 slugs) + `render-template.ts`.
-- Used by: `app/api/deliverables/[id]/blast/route.ts`, `app/p/[id]/print/route.ts`, `app/p/[id]/page.tsx`, `scripts/email/run-schedules.mts`.
+- Used by: `app/p/[id]/page.tsx`, `app/p/[id]/print/route.ts`, and the activation wrapper `lib/email/activation/render.ts` (the blast route and scheduler are EmailDoc-only since the 07/19 rip).
 
 **The disconnect (the heartbreak):** the scheduler (`run-schedules.mts`) only knows System 2 templates. It has ZERO reference to an `EmailDoc`. So an email built in the Lab (System 1) **cannot be scheduled or sent.** Connecting them is blueprint node N6.
 

@@ -32,29 +32,30 @@ export function buildSubscribeBody(input: {
 }
 
 /**
- * Daily-digest subscribe CTA (Email Marketing Phase 2). SEPARATE from the
- * landing Waitlist (launch-notify) — this opts the reader into the free daily
- * SWFL data email. Posts to /api/email/subscribe with a `source` tag.
+ * Generic email-capture CTA. Every product decision arrives via props — the
+ * caller names the POST target, heading, blurb, and success copy. (The daily
+ * digest this component was born for was killed 07/16 and its generator
+ * deleted 07/19, so there are deliberately NO product defaults left here.)
  *
  * Plain Tailwind (no motion dep) so it drops onto both the landing and the
  * dark /r/ report pages unchanged.
  */
-export default function DigestSubscribe({
-  source = "landing",
-  heading = "Get the free daily SWFL data digest",
-  blurb = "Your ZIP's prices, permits, and the day's market read — one short email each weekday. Cited, no spam.",
+export default function SubscribeCapture({
+  source,
+  heading,
+  blurb,
   activation = false,
   presetZip,
-  endpoint = "/api/email/subscribe",
-  doneMessage = "You're subscribed. Watch for the next weekday digest.",
+  endpoint,
+  doneMessage,
 }: {
-  source?: string;
-  heading?: string;
-  blurb?: string;
-  /** POST target — the daily digest by default; pass /api/weekly-read/subscribe for the weekly read. */
-  endpoint?: string;
-  /** Success copy — override when the product isn't the weekday digest. */
-  doneMessage?: string;
+  source: string;
+  heading: string;
+  blurb: string;
+  /** POST target (e.g. /api/weekly-read/subscribe). */
+  endpoint: string;
+  /** Success copy shown after a 2xx. */
+  doneMessage: string;
   /**
    * Activation mode (the "It's Alive" surface): also collect the prospect's ZIP and
    * an explicit, unchecked opt-in. Off everywhere else — the landing/report forms keep

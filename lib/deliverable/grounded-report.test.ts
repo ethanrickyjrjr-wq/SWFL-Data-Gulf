@@ -4,8 +4,8 @@ import {
   assembledReportToModel,
   type GroundedReportModel,
 } from "./grounded-report";
-import type { AssembledReport } from "./activation/snapshot";
-import type { ReportDelta } from "./activation/types";
+import type { AssembledReport } from "@/lib/email/activation/snapshot";
+import type { ReportDelta } from "@/lib/email/activation/types";
 
 function report(over: Partial<AssembledReport> = {}): AssembledReport {
   return {

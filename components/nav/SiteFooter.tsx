@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import DigestSubscribe from "@/components/email/DigestSubscribe";
 import { isHiddenPath, isChromeFree } from "./nav-config";
 
 /**
@@ -97,11 +96,6 @@ export function SiteFooter() {
               </div>
             ))}
           </nav>
-        </div>
-
-        {/* Customer-engagement block (NN/g validated footer element). */}
-        <div className="mb-12 max-w-2xl">
-          <DigestSubscribe source="footer" />
         </div>
 
         <div className="flex flex-col items-center justify-between gap-6 border-t border-white/5 pt-8 md:flex-row">

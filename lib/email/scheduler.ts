@@ -35,7 +35,7 @@
 import type { CadenceSpec } from "./schedule-cadence";
 import type { ResolvedSender, SenderConfigRow, PlatformSenderDefaults } from "./sender-config";
 import { resolveSender } from "./sender-config";
-import type { GroundedReportModel } from "./grounded-report";
+import type { GroundedReportModel } from "@/lib/deliverable/grounded-report";
 
 /** The literal Resend managed-unsubscribe token the broadcast route requires. */
 export const UNSUBSCRIBE_TOKEN = "{{{RESEND_UNSUBSCRIBE_URL}}}";

@@ -19,7 +19,7 @@ import {
   type BroadcastResult,
   type AudienceLookup,
 } from "../scheduler.ts";
-import type { GroundedReportModel } from "../grounded-report.ts";
+import type { GroundedReportModel } from "@/lib/deliverable/grounded-report.ts";
 import { buildEmailDocOccurrence } from "../emaildoc-occurrence.ts";
 import { defaultDoc } from "../doc/default-docs.ts";
 import type { EmailDoc } from "../doc/types.ts";
