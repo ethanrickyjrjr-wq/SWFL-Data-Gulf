@@ -1,3 +1,9 @@
+## 2026-07-19 (Fable 5 · main) — Decreed serve dispatches fired: home-values-swfl, active-rentals-swfl, env-swfl (targeted, via dispatch-rebuild.mjs)
+
+Three leaf rebuilds dispatched under the operator's "take care of these" decree (ZHVI label fix,
+rentals per-county `_latest` fix, USGS parquet repoint); acceptance entries committed with this push.
+master `--no-force` propagation + served-bytes verification follow once the leaves land.
+
 ## 2026-07-19 (Fable 5 · main) — Consolidation finishing pass: USGS zombie read FIXED (parquet dual-read) + parcel_subdivision RETIRED for the verified view (drop executed)
 
 Operator decree: "take care of these" — the 4 genuinely-remaining consolidation items. Two are done
