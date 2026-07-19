@@ -562,7 +562,7 @@ function collierOutputProducer(_out: PackOutput): BrainOutputProducerResult {
             },
           })),
           source: parcelSourceMeta,
-          note: "One row per in-scope SWFL ZIP (6-county footprint). Values from FDOR Statewide Cadastral (CO_NO=21). Median just value is the parcel-level median market value; SOH gap is median (jv_hmstd − av_hmstd)/jv_hmstd across homesteaded parcels in that ZIP — NULLs for ZIPs with no homesteaded parcels.",
+          note: "One row per Collier-primary SWFL ZIP. Values from FDOR Statewide Cadastral (CO_NO=21). Median just value is the parcel-level median market value; SOH gap is median (jv_hmstd − av_hmstd)/jv_hmstd across homesteaded parcels in that ZIP — NULLs for ZIPs with no homesteaded parcels. ZIPs straddling the Lee/Collier line appear in exactly one county's table by crosswalk primary county: 34110/34119 are counted here; 34134 is counted in the Lee table.",
         },
       ]
     : [];

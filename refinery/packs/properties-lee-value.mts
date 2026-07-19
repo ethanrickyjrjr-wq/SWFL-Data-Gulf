@@ -26,6 +26,7 @@ import {
 import {
   leeParcelsSource,
   type LeeParcelsSummaryNormalized,
+  type LeeParcelsZipRowNormalized,
 } from "../sources/lee-parcels-source.mts";
 import { env } from "../config/env.mts";
 import { fmtInt, fmtPct, fmtRatio } from "./lib/number-format.mts";
@@ -102,6 +103,7 @@ let lastLeeMarket: LeeMarketAggregates | null = null;
 // LeePA) — the answer to "how much of Lee is commercial", which LeePA's
 // snapshot doesn't classify by use-code category the way FDOR's own NAL does.
 let lastLeeParcelsSummary: LeeParcelsSummaryNormalized | null = null;
+let lastLeeParcelsZipRows: LeeParcelsZipRowNormalized[] = [];
 
 // Homes-only SOLD median per ZIP (LeePA recorded deeds) — the sold answer to the
 // active-listing land-blend. Distinct grain/source from the Redfin market median.
@@ -193,6 +195,12 @@ function leeParcelsSummaryFrom(fragments: RawFragment[]): LeeParcelsSummaryNorma
     if (n?.kind === "lee-parcels-summary") return n;
   }
   return null;
+}
+
+function leeParcelsZipRowsFrom(fragments: RawFragment[]): LeeParcelsZipRowNormalized[] {
+  return fragments
+    .map((f) => f.normalized as unknown as LeeParcelsZipRowNormalized)
+    .filter((n) => n?.kind === "lee-parcels-zip-row");
 }
 
 /**
@@ -338,6 +346,7 @@ function propertyValueCorpusSummary(allFragments: RawFragment[]): SynthesisFact[
       ? aggregateLeeMarket(leeMarketSales, leeMarketSummary)
       : null;
   lastLeeParcelsSummary = leeParcelsSummaryFrom(allFragments);
+  lastLeeParcelsZipRows = leeParcelsZipRowsFrom(allFragments);
 
   const agg = lastAggregate;
   if (agg.totalParcels === 0) return [];
@@ -583,23 +592,26 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
     source: sourceMeta,
   });
 
+  // FDOR-cadastral source meta — shared by the commercial-count metric and the
+  // per-ZIP detail table below (hoisted like Collier's parcelSourceMeta).
+  const fdorSourceMeta: BrainOutputMetricSource = {
+    url:
+      env.source === "live" && env.supabaseUrl
+        ? `${env.supabaseUrl}/rest/v1/lee_parcels_summary?select=total_parcels,commercial_parcels,residential_parcels`
+        : "fixture://refinery/__fixtures__/properties-lee-parcels.sample.json",
+    fetched_at,
+    tier: 2,
+    citation:
+      env.source === "live"
+        ? `FDOR Statewide Cadastral via data_lake.lee_parcels (ArcGIS FeatureServer, CO_NO=46) — ` +
+          `use-code category counted per FDOR's 2025 NAL Data File User's Guide (residential 000-002/004-009, ` +
+          `commercial 003+010-039, industrial 040-049, agricultural 050-069, institutional 070-079, ` +
+          `governmental 080-089, misc 090-099). Per-ZIP assessed value + SOH gap pre-aggregated through ` +
+          `lee_parcels_zip_summary. Cross-check source, separate from LeePA.`
+        : "FDOR Statewide Cadastral — Lee parcels (fixture; refinery/__fixtures__/properties-lee-parcels.sample.json).",
+  };
   const fdorParcels = lastLeeParcelsSummary;
   if (fdorParcels) {
-    const fdorSourceMeta: BrainOutputMetricSource = {
-      url:
-        env.source === "live" && env.supabaseUrl
-          ? `${env.supabaseUrl}/rest/v1/lee_parcels_summary?select=total_parcels,commercial_parcels,residential_parcels`
-          : "fixture://refinery/__fixtures__/properties-lee-parcels.sample.json",
-      fetched_at,
-      tier: 2,
-      citation:
-        env.source === "live"
-          ? `FDOR Statewide Cadastral via data_lake.lee_parcels (ArcGIS FeatureServer, CO_NO=46) — ` +
-            `use-code category counted per FDOR's 2025 NAL Data File User's Guide (residential 000-002/004-009, ` +
-            `commercial 003+010-039, industrial 040-049, agricultural 050-069, institutional 070-079, ` +
-            `governmental 080-089, misc 090-099). Cross-check source, separate from LeePA.`
-          : "FDOR Statewide Cadastral — Lee parcels (fixture; refinery/__fixtures__/properties-lee-parcels.sample.json).",
-    };
     key_metrics.push({
       metric: "fdor_commercial_parcel_count",
       value: fdorParcels.commercial_parcels,
@@ -732,10 +744,56 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
     }
   }
 
+  const detail_tables: BrainOutputDetailTable[] = [];
+
+  // Per-ZIP assessed value + SOH gap (FDOR cadastral) — the Lee mirror of
+  // collier_parcels_by_zip, closing the "per-ZIP assessed answerable for
+  // Collier, NOT Lee" asymmetry. Lee-primary ZIPs only (straddle rule in
+  // refinery/lib/parcel-zip-scope.mts).
+  if (lastLeeParcelsZipRows.length) {
+    detail_tables.push({
+      id: "lee_parcels_by_zip",
+      title: "Lee County parcels by ZIP (FDOR cadastral snapshot)",
+      grain: "zip",
+      columns: [
+        { id: "parcel_count", label: "Parcels", display_format: "count", units: "count" },
+        {
+          id: "homesteaded_count",
+          label: "Homesteaded parcels",
+          display_format: "count",
+          units: "count",
+        },
+        {
+          id: "median_jv",
+          label: "Median just value",
+          display_format: "currency",
+          units: "USD",
+        },
+        {
+          id: "soh_gap_median_pct",
+          label: "Median SOH gap",
+          display_format: "percent",
+          units: "percent",
+        },
+      ],
+      rows: lastLeeParcelsZipRows.map((r) => ({
+        key: r.zip,
+        label: r.zip,
+        cells: {
+          parcel_count: r.parcel_count,
+          homesteaded_count: r.homesteaded_count,
+          median_jv: r.median_jv,
+          soh_gap_median_pct: r.soh_gap_median_pct,
+        },
+      })),
+      source: fdorSourceMeta,
+      note: "One row per Lee-primary SWFL ZIP. Values from FDOR Statewide Cadastral (CO_NO=46). Median just value is the parcel-level median market value; SOH gap is median (jv_hmstd − av_hmstd)/jv_hmstd across homesteaded parcels in that ZIP — NULLs for ZIPs with no homesteaded parcels. ZIPs straddling the Lee/Collier line appear in exactly one county's table by crosswalk primary county: 34134 is counted here; 34110/34119 are counted in the Collier table.",
+    });
+  }
+
   // Homes-only SOLD median per ZIP (LeePA recorded deeds) — county rollup metric
   // + per-ZIP detail table. Homes-only (SF + condo) excludes the vacant-land tail
   // that produced the $35k-at-33972 active-listing land-blend.
-  const detail_tables: BrainOutputDetailTable[] = [];
   const sm = lastSoldMedianSummary;
   if (sm) {
     const soldMedianSource: BrainOutputMetricSource = {

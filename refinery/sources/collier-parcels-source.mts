@@ -6,7 +6,7 @@ import { env } from "../config/env.mts";
 import { getSupabase } from "./supabase.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
-import { resolveZip } from "../lib/zip-resolver.mts";
+import { zipInPrimaryCounty, COLLIER_FIPS } from "../lib/parcel-zip-scope.mts";
 
 /**
  * collier-parcels source connector — Collier County parcel snapshot from the
@@ -155,8 +155,11 @@ async function fetchLiveZipRows(): Promise<CollierParcelsZipRowNormalized[]> {
     median_jv: number | string | null;
     soh_gap_median_pct: number | string | null;
   }[];
+  // Primary-county gate (not just in_scope): a Lee/Collier straddle ZIP must appear
+  // in exactly one county's table or zip-report renders two competing candidates —
+  // see refinery/lib/parcel-zip-scope.mts. Drops 34134 (Lee-primary); keeps 34110/34119.
   return rows
-    .filter((r) => r.phy_zipcd && resolveZip(r.phy_zipcd).in_scope)
+    .filter((r) => r.phy_zipcd && zipInPrimaryCounty(r.phy_zipcd, COLLIER_FIPS))
     .map((r) => ({
       kind: "collier-parcels-zip-row" as const,
       zip: r.phy_zipcd,

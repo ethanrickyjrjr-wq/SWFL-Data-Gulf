@@ -1,3 +1,26 @@
+## 2026-07-19 (Fable 5 · main) — Lee per-ZIP assessed value + SOH gap: mirror built, straddle-ZIP disjointness added to BOTH counties (committed, NOT pushed — awaiting operator)
+
+Picked up item 1 of the 07/18 "104-column unlock" list after verifying no parallel session claims the
+lane. Built the Lee mirror of the Collier per-ZIP parcel chain: `data_lake.lee_parcels_zip_summary`
+(applied live via run-migration.ts; 41 ZIP rows, parcel total 556,083 exactly matches the table, 0
+mismatches vs direct aggregation) → `lee-parcels-source.mts` zip-row fragments → `lee_parcels_by_zip`
+detail table in properties-lee-value → zip-report `assessed_value`/`soh_gap` concepts now county-pair
+(was Collier-only; properties-lee-value added to REGISTRY_PACK_IDS). NEW FINDING that shaped the
+design: 3 ZIPs straddle the Lee/Collier line (34110: 379 Lee/16,174 Collier · 34119: 234/19,103 ·
+34134: 13,611/1,859) — naive dual wiring would render duplicate zip-report candidates (the 33936
+defect class), and Collier's table was ALREADY serving 34134 (Bonita Springs) off its 1,859-parcel
+sliver. Fix: ONE shared predicate `refinery/lib/parcel-zip-scope.mts` (crosswalk primary_county via
+resolveZip; crosswalk agrees with parcel-count majorities on all 3) filters BOTH county sources —
+Collier keeps 21/22 rows (34134 moves to Lee), Lee keeps 35/41 (drops junk "0" 5,912 parcels,
+Charlotte-primary 33955 1,989, PO-box 33902/33929, Collier-primary 34110/34119). Tests: 72 pass
+across 6 suites (new: predicate straddle trio, lee_parcels_by_zip pack test, county-pair disjointness
+in candidates.test); vocab coverage OK (no new slugs — detail table only); `bunx next build` green;
+refinery typecheck deltas all pre-existing baseline. Spec: `docs/superpowers/specs/2026-07-19-lee-zip-assessed-soh-design.md`;
+check `lee_zip_assessed_soh_live_verify` open until brains rebuild + live verify. NOT pushed: pack
+OUTPUT-shape change (RULE 1 ask-first). data-roots.md update pending — file claimed by a parallel
+session at write time; retry or check before push. Next up from the unlock list (not started):
+homestead portability → should-i-sell, LeePA layer-21 delinquency → seller-stress-swfl.
+
 ## 2026-07-19 (Fable 5 · main) — Opus pass on the 07/18 fan-out fix commits: 10 confirmed findings, all applied
 
 Reviewed daeb1f6e + eb071f90 (8 finder angles, every candidate verified against the files). FOUND:

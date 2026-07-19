@@ -217,6 +217,64 @@ test("propertiesLeeValue pack: homes-only sold median surfaces (metric + per-ZIP
   assert.ok(!/\[config\]|\[internal\]|§/.test(m!.source.citation));
 });
 
+test("propertiesLeeValue pack: lee_parcels_by_zip detail table surfaces from zip-row fragments", async () => {
+  const { leepaValueSource } = await import("../sources/leepa-value-source.mts");
+  // Parcel fragments keep the pack out of the empty path; hand-built zip-row
+  // fragments stand in for the live-only lee_parcels_zip_summary fetch (the
+  // fixture source emits none, mirroring the Collier connector).
+  const zipRow = (zip: string, median_jv: number, soh_gap_median_pct: number) => ({
+    fragment_id: `test:lee_parcels_fdor:zip-${zip}`,
+    source_id: "lee_parcels_fdor",
+    source_trust_tier: 2,
+    fetched_at: new Date().toISOString(),
+    raw: { zip },
+    normalized: {
+      kind: "lee-parcels-zip-row",
+      zip,
+      parcel_count: 10_000,
+      homesteaded_count: 4_000,
+      median_jv,
+      soh_gap_median_pct,
+    },
+  });
+  const fragments = [
+    ...(await leepaValueSource.fetch()),
+    zipRow("33901", 241_151, 42.3),
+    zipRow("34134", 600_000, 35.0),
+  ];
+
+  propertiesLeeValue.corpusSummary!(
+    fragments as unknown as Parameters<NonNullable<typeof propertiesLeeValue.corpusSummary>>[0],
+  );
+  const result = propertiesLeeValue.outputProducer!({
+    pack: propertiesLeeValue,
+    version: 1,
+    refined_at: new Date().toISOString(),
+    citations: [],
+    facts: [],
+    recentNote: "",
+  } as unknown as Parameters<NonNullable<typeof propertiesLeeValue.outputProducer>>[0]);
+
+  const dt = (result.detail_tables ?? []).find((t) => t.id === "lee_parcels_by_zip");
+  assert.ok(dt, "lee_parcels_by_zip detail table must surface when zip rows are present");
+  assert.equal(dt!.grain, "zip");
+  assert.deepEqual(
+    dt!.columns.map((c) => c.id),
+    ["parcel_count", "homesteaded_count", "median_jv", "soh_gap_median_pct"],
+    "column set must mirror collier_parcels_by_zip",
+  );
+  const row = dt!.rows.find((r) => r.key === "33901");
+  assert.ok(row, "33901 row must be present");
+  assert.equal(row!.cells.median_jv, 241_151);
+  assert.equal(row!.cells.soh_gap_median_pct, 42.3);
+  // The straddle rule must be stated where a reader of the table will see it.
+  assert.ok(
+    /34134/.test(dt!.note ?? "") && /34110/.test(dt!.note ?? ""),
+    "note must document the Lee/Collier straddle-ZIP assignment",
+  );
+  assert.ok(/FDOR/.test(dt!.source.citation), "detail table cites the FDOR cadastral");
+});
+
 test("propertiesLeeValue pack: no stale 'last_sale_amount is null' claim anywhere in facts or OUTPUT", async () => {
   // Fetch ALL real sources so the lee-market path (where the stale claim lived)
   // is exercised — the stale string sat in a corpus fact, not the result object.

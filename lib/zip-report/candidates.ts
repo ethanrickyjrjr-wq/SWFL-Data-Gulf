@@ -283,7 +283,13 @@ export const ZIP_METRIC_SOURCES: ZipMetricSource[] = [
     thinBelow: THIN_COUNT_FLOOR,
   },
 
-  // ── Collier-only: assessed value + Save-Our-Homes gap ──
+  // ── Assessed value + Save-Our-Homes gap (county pair: Collier + Lee) ──
+  // Both counties are `primary` for the SAME concepts/keys. Safe — never two
+  // candidates for one ZIP — because the two tables are disjoint by construction:
+  // each parcel source filters its rows to crosswalk-primary ZIPs
+  // (refinery/lib/parcel-zip-scope.mts), so a Lee/Collier straddle ZIP
+  // (34110/34119/34134) holds a row in exactly one table. Percentile ranks are
+  // per-county-table; the sub label names the county to keep that honest.
   {
     concept: "assessed_value",
     packId: "properties-collier-value",
@@ -304,6 +310,28 @@ export const ZIP_METRIC_SOURCES: ZipMetricSource[] = [
     key: "soh_gap",
     label: "Save-Our-Homes Gap",
     sub: "Collier County — % of value shielded from tax by the cap",
+    display: fmtPct,
+  },
+  {
+    concept: "assessed_value",
+    packId: "properties-lee-value",
+    tableId: "lee_parcels_by_zip",
+    cell: "median_jv",
+    role: "primary",
+    key: "assessed_value",
+    label: "Tax-Assessed Value",
+    sub: "Lee County median just value",
+    display: fmtUsdShort,
+  },
+  {
+    concept: "soh_gap",
+    packId: "properties-lee-value",
+    tableId: "lee_parcels_by_zip",
+    cell: "soh_gap_median_pct",
+    role: "primary",
+    key: "soh_gap",
+    label: "Save-Our-Homes Gap",
+    sub: "Lee County — % of value shielded from tax by the cap",
     display: fmtPct,
   },
 

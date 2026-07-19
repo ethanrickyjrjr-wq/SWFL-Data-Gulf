@@ -335,9 +335,9 @@ describe("buildRegistryCandidates — concept dedup", () => {
     expect(demoted![0].sourceLabel).toBe("realtor.com");
   });
 
-  test("a Collier-only concept (assessed_value) is absent for a Lee ZIP with no row — not a fake zero", () => {
+  test("assessed_value is absent for a ZIP with no row in either county's parcel table — not a fake zero", () => {
     const { candidates } = buildRegistryCandidates(
-      "33914", // Lee ZIP
+      "33914", // Lee ZIP, but no Lee table held in this map
       tableMap({
         "properties-collier-value:collier_parcels_by_zip": {
           rows: [{ key: "34102", cells: { median_jv: 900_000 } }], // Naples, Collier
@@ -360,6 +360,43 @@ describe("buildRegistryCandidates — concept dedup", () => {
     const av = candidates.find((c) => c.key === "assessed_value")!;
     expect(av.display).toBe("$900K");
     expect(av.covered).toBe(true);
+  });
+
+  test("a Lee ZIP with a held row in lee_parcels_by_zip gets assessed_value with the Lee sub-label", () => {
+    const { candidates } = buildRegistryCandidates(
+      "33901",
+      tableMap({
+        "properties-lee-value:lee_parcels_by_zip": {
+          rows: [{ key: "33901", cells: { median_jv: 241_151, soh_gap_median_pct: 42.3 } }],
+          source: { label: "FDOR cadastral", url: "https://floridarevenue.com" },
+        },
+      }),
+    );
+    const av = candidates.find((c) => c.key === "assessed_value")!;
+    expect(av.display).toBe("$241K");
+    expect(av.sub).toBe("Lee County median just value");
+    const soh = candidates.find((c) => c.key === "soh_gap")!;
+    expect(soh).toBeDefined();
+  });
+
+  test("county-pair disjointness: with BOTH parcel tables held, a ZIP gets exactly one assessed_value candidate", () => {
+    // The sources guarantee a straddle ZIP appears in only one county's table
+    // (refinery/lib/parcel-zip-scope.mts); this asserts the registry side —
+    // same key from two tables never doubles up when the tables are disjoint.
+    const both = tableMap({
+      "properties-lee-value:lee_parcels_by_zip": {
+        rows: [{ key: "34134", cells: { median_jv: 600_000 } }], // Bonita Springs — Lee-primary
+      },
+      "properties-collier-value:collier_parcels_by_zip": {
+        rows: [{ key: "34110", cells: { median_jv: 800_000 } }], // Collier-primary
+      },
+    });
+    for (const zip of ["34134", "34110"]) {
+      const { candidates } = buildRegistryCandidates(zip, both);
+      expect(candidates.filter((c) => c.key === "assessed_value")).toHaveLength(1);
+    }
+    const lee = buildRegistryCandidates("34134", both).candidates;
+    expect(lee.find((c) => c.key === "assessed_value")!.sub).toBe("Lee County median just value");
   });
 
   test("the home-value pair: ZHVI and MLS both compete independently AND both carry a matching footnote when both held", () => {
