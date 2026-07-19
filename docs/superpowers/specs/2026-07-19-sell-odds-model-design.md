@@ -100,6 +100,10 @@ and is not blocked by this spec).
 - **Training:** offline Python job in `ingest/` (scikit-learn logistic regression; no new
   paid surface, no GPU, no vendor). Time-based train/validation split (train on weeks ≤ T,
   validate on weeks > T — never random split; leakage guard).
+- **Candidate feature (cross-link, no dependency):** homestead status + SOH gap size via
+  address-key join to `lee_parcels`/`collier_parcels` — SOH lock-in plausibly depresses
+  sell-through. Reads published parcel tables only; the separate SOH-portability build
+  (07/19, other session) neither blocks nor is blocked by this.
 - **Gate to ship:** calibration on the time-forward holdout (Brier score + reliability curve
   documented in the training report artifact) — the model ships only when its predicted
   probabilities match realized frequencies within a documented tolerance, and beats the
