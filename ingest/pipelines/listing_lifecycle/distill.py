@@ -185,8 +185,14 @@ def upsert_state(
         return len(upserts)
 
     placeholders = ", ".join(f"%({c})s" for c in _STATE_COLS)
+    # listed_date must survive the MERGE: /search sweep rows never carry a list date (verified
+    # 07/07/2026), so a blanket EXCLUDED overwrite would NULL the one-time ~29.5k-row
+    # /property-tax-history backfill (07/18/2026) on the first sweep after it. COALESCE keeps the
+    # stored date unless the incoming row actually has one.
     set_clause = ",\n          ".join(
-        f"{c} = EXCLUDED.{c}" for c in _STATE_COLS if c not in ("address_key", "sale_or_rent")
+        f"{c} = COALESCE(EXCLUDED.{c}, listing_state.{c})" if c == "listed_date"
+        else f"{c} = EXCLUDED.{c}"
+        for c in _STATE_COLS if c not in ("address_key", "sale_or_rent")
     )
     sql = f"""
         INSERT INTO {_STATE_TABLE}

@@ -1,3 +1,21 @@
+## 2026-07-19 (Fable 5 · main) — INCIDENT: nightly chain wiped 17,127 backfilled listed_dates; MERGE guard landed; PITR restore to 04:20Z in flight
+
+Nightly Chain run 29673245885 (04:23Z, repository_dispatch — fired despite the workflow being
+disabled at the API) re-upserted 17,540 active rows; upsert_state's blanket
+`SET listed_date = EXCLUDED.listed_date` nulled 17,127 of the ~29.1k vendor list dates the 07/18
+15-hour /property-tax-history backfill wrote (sweep /search rows never carry list_date). 12,416
+active-sale dated rows survived (not rescanned by that run). listing_week panel (built 04:39/05:51Z)
+snapshotted the post-wipe state — unusable as a restore source. Dead tuples autovacuumed 04:29Z.
+Fix (this commit): distill.upsert_state COALESCEs listed_date on conflict — a stored date survives
+unless the incoming row actually carries one. Recovery: operator-approved in-place PITR restore to
+04:20:00Z (epoch 1784434800; CLI invocation classifier-blocked for the agent — operator fires it);
+pre-restore snapshot of all 12,545 dated rows + 257 today-transitions saved to session-scratchpad
+CSVs for post-restore union re-apply (backfill tail kept writing past 04:20). This push bundles 22
+pending parallel-session commits (listing-week panel + should-i-sell SOH). NEXT: verify ~29k dates
+post-restore, re-apply snapshot tail, rebuild listing_week backfill (06/29 + 07/06), open checks
+(restore live-verify; zombie repository_dispatch bypasses workflow-disable), never re-dispatch the
+chain before this guard is deployed.
+
 ## 2026-07-19 (Fable 5 · main) — SELL-ODDS PHASE 0 BUILT + BACKFILLED: listing_week person-period panel live in the lake
 
 From "do we use cross entropy anywhere?" (no — first learned model in the platform) through
