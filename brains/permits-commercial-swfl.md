@@ -1,11 +1,11 @@
-<!-- FRESHNESS: v12 | Token: SWFL-7421-v12-20260719 -->
+<!-- FRESHNESS: v13 | Token: SWFL-7421-v13-20260719 -->
 ---
 brain_id: permits-commercial-swfl
-version: 12
-refined_at: 2026-07-19T02:29:04Z
-freshness_token: SWFL-7421-v12-20260719
+version: 13
+refined_at: 2026-07-19T19:41:23Z
+freshness_token: SWFL-7421-v13-20260719
 ttl_seconds: 31536000
-pack_hash: 8cfda4d1b44e
+pack_hash: e93e9f9adb26
 context_type: user_saved_reference
 scope: SWFL commercial building permits — annual issued-permit dataset from the Maxwell, Hendry & Simmons Data Book (calendar year 2025), aggregated by submarket and site ZIP into permit count, declared value, and building square footage for commercial-real-estate operators.
 ---
@@ -43,9 +43,9 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
 --- OUTPUT ---
 {
   "brain_id": "permits-commercial-swfl",
-  "version": 12,
-  "refined_at": "2026-07-19T02:29:04Z",
-  "expires": "2027-07-19T02:29:04Z",
+  "version": 13,
+  "refined_at": "2026-07-19T19:41:23Z",
+  "expires": "2027-07-19T19:41:23Z",
   "ttl_seconds": 31536000,
   "direction": "neutral",
   "magnitude": 0.3,
@@ -63,9 +63,9 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       "display_format": "count",
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-07-19T02:29:04Z",
+        "fetched_at": "2026-07-19T19:41:23Z",
         "tier": 1,
-        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — count of all rows."
+        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 permits, calendar year 2025) — count of all recorded permits."
       },
       "suggestions": [
         "What's driving commercial permits count?",
@@ -82,9 +82,9 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       "display_format": "currency",
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-07-19T02:29:04Z",
+        "fetched_at": "2026-07-19T19:41:23Z",
         "tier": 1,
-        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — sum(permit_value_usd)."
+        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 permits, calendar year 2025) — total stated permit value."
       },
       "suggestions": [
         "What's driving commercial permits value usd?",
@@ -101,9 +101,9 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       "display_format": "count",
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-07-19T02:29:04Z",
+        "fetched_at": "2026-07-19T19:41:23Z",
         "tier": 1,
-        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — sum(building_sf)."
+        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 permits, calendar year 2025) — total building square footage."
       },
       "suggestions": [
         "What's driving commercial permits sf?",
@@ -248,11 +248,11 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       ],
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-07-19T02:29:04Z",
+        "fetched_at": "2026-07-19T19:41:23Z",
         "tier": 1,
-        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — grouped by submarket_slug."
+        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 permits, calendar year 2025) — grouped by submarket."
       },
-      "note": "Submarket = jurisdiction mapped via data_lake.mhs_jurisdiction_xwalk."
+      "note": "Submarket = the permit's issuing jurisdiction mapped to a Data Book submarket."
     },
     {
       "id": "commercial_permits_by_zip",
@@ -624,9 +624,9 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
       ],
       "source": {
         "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-        "fetched_at": "2026-07-19T02:29:04Z",
+        "fetched_at": "2026-07-19T19:41:23Z",
         "tier": 1,
-        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 rows, calendar year 2025, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook') — site ZIP from project_address, ranked against the Lee + Collier core ZIP universe."
+        "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 permits, calendar year 2025) — site ZIP from each permit's project address, ranked against the Lee + Collier core ZIP universe."
       },
       "note": "Ranked against the Lee + Collier core ZIP universe. 215 of 412 permits resolved a site ZIP; permits in non-core counties or without a geocodable address are absent here (still counted in the submarket totals)."
     }
@@ -647,7 +647,7 @@ s01 | Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits, ca
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-19T02:29:04Z"
+    "computed_at": "2026-07-19T19:41:23Z"
   },
   "exogenous_signals": []
 }
