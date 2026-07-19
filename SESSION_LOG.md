@@ -49,6 +49,18 @@ Full `bunx next build` green. back-on-market flush-left defect confirmed already
 reuses report-shell) — safe to promote. NEXT: per-ZIP should-i-sell/zip-report sitemap enumeration
 (check opened); 20-paying-users launch kit written to docs/steadyapi-research/ (local-only).
 
+## 2026-07-19 (Fable 5 · main) — SHIP: $19 seller-spread checkout live — pushed the stranded should-i-sell unlock to prod
+
+Operator decree: make the site sellable NOW. Found the $19 one-time should-i-sell unlock
+(a82e2b67, parallel session) committed but never pushed — prod 404'd the checkout API. Verified
+before ship: root tsc clean; live Stripe price `swfl_seller_report_once` already exists
+(price_1TupKf…, confirmed via idempotent setup script --dry-run, LIVE mode); listing_state restore
+intact (33,671 rows / 12,545 dated, queried live). This push carries the two parallel-session
+commits (a82e2b67 $19 unlock, 4d27b1c9 nav/discoverability) — they ARE the deliverable the
+operator ordered live; bundling explicitly intended. Launch kit for first buyers:
+`_ASSISTANT/seller-report-launch.md` (untracked, operator-facing). NEXT: verify live checkout
+URL returns JSON post-deploy, verify /r/should-i-sell/[zip] renders the unlock panel on prod.
+
 ## 2026-07-19 (Fable 5 · main) — lint: gitignored scratch out of ESLint scope; Problems panel cleared to zero
 
 Operator asked to clear all editor problems. Repo audit: root `tsc --noEmit` clean; all 11 ESLint
