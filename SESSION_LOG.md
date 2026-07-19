@@ -1,3 +1,21 @@
+## 2026-07-19 (Fable 5 · main) — sibling citations de-jargoned (tourism-tdt + sector-credit); MHS rebuild dispatched; NEW cre-swfl bait check
+
+Operator go ("take care of it" on the defect-pass handoff). (1) `pack_citation_jargon_tourism_sector`
+fix landed: tourism-tdt.mts + sector-credit-swfl.mts citation strings drop "via Brains Supabase
+<table>/MV" — same product-language rewrite as the MHS fix (0b42eb5a), interpolated figures
+untouched; scrub-host/speaker test fixtures deliberately keep the old form (they test the
+scrubber). Gates: 30/30 pack/catalog/alias/scrub tests, vocab coverage OK (41 brains). Check stays
+open until a rebuild serves the new strings. (2) Decreed dispatch fired for permits-commercial-swfl
+(acceptance entry appended by the wrapper, in this commit):
+https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29701079688 —
+`mhs_source_string_jargon_bait` closes on served-bytes verify; master folds the fresh leaf in on
+the nightly upstream-aware tick, no second dispatch. (3) NEW check `pack_citation_jargon_cre_corridor`:
+cre-swfl.mts emits "Brains Supabase corridor_profiles (verified, non-deleted)" at 5 citation sites
+(~194/677/1537/2037/2087) — same bait class, NOT silently expanded into this fix (RULE 2.4).
+NEXT: operator push — it will carry a7db2e54 (scheduler rip, already awaiting your push) + this
+commit; the hourly tripwire reads ORIGIN, so the accepted dispatch stays RED to the scan until
+pushed.
+
 ## 2026-07-19 (Fable 5 · main) — push addendum: check keys for the two entries below, gate-visible
 
 The defect-pass and THE CUT entries below name their open checks in parentheses; the

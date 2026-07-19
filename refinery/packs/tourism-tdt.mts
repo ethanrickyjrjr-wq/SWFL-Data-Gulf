@@ -491,9 +491,13 @@ function buildTdtSource(
         (p) => monthOf(p.period_yyyymm) === monthOf(latest.period_yyyymm) && p.combined_usd > 0,
       ).length
     : 0;
+  // Product language only — this string is fed to the bake model as citation
+  // text, and "Brains"/table-path jargon in it trips the narration JARGON lint
+  // when echoed (check pack_citation_jargon_tourism_sector). Table provenance
+  // lives in docs/standards/data-roots.md, not in a served citation.
   const base =
-    `Florida DOR Tourist Development Tax — SWFL (Lee + Collier) via Brains Supabase fl_dor_tdt_collections ` +
-    `(${snapshot.rows.length} rows: ${snapshot.swflPeriods[0]?.period_yyyymm ?? "?"} → ${snapshot.swflPeriods[snapshot.swflPeriods.length - 1]?.period_yyyymm ?? "?"}); ` +
+    `Florida DOR Tourist Development Tax — SWFL (Lee + Collier) ` +
+    `(${snapshot.rows.length} monthly collection records: ${snapshot.swflPeriods[0]?.period_yyyymm ?? "?"} → ${snapshot.swflPeriods[snapshot.swflPeriods.length - 1]?.period_yyyymm ?? "?"}); ` +
     `source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag)`;
 
   let detail = "";

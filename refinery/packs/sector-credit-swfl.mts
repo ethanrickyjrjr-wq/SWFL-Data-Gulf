@@ -117,8 +117,12 @@ function buildSectorSource(
     sector !== null
       ? ` — ${sector.label} (NAICS ${sector.naics_2digit}): ${fmtInt(sector.n_chargeoffs)} charged off of ${fmtInt(sector.resolved)} resolved loans (${fmtInt(sector.n_loans_total)} total approved across ${sector.sample_brands} sub-industries; $${(sector.total_approved / 1_000_000).toFixed(1)}M gross approved capital)`
       : "";
+  // Product language only — this string is fed to the bake model as citation
+  // text, and "Brains"/table-path jargon in it trips the narration JARGON lint
+  // when echoed (check pack_citation_jargon_tourism_sector). Table provenance
+  // lives in docs/standards/data-roots.md, not in a served citation.
   const citation =
-    `SBA 7(a)/504 loan outcomes via Brains Supabase sba_loans_by_naics_county MV ` +
+    `SBA 7(a)/504 loan outcomes ` +
     `(Lee + Collier counties, ${fySpan}); federal source: Small Business Administration loan-status reporting${sectorDetail}.`;
   return {
     url,

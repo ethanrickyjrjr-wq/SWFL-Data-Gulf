@@ -208,6 +208,12 @@
       "pack": "master",
       "accepted_on": "07/18/2026",
       "note": "Operator decree 07/19/2026 'fire': propagate fresh properties-lee-value (Lee assessed value + SOH gap) into the dossier (plain cascade, no force) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29701079688",
+      "pack": "permits-commercial-swfl",
+      "accepted_on": "07/19/2026",
+      "note": "Operator go 07/19 ('take care of it' on the defect-pass handoff): serve the de-jargoned MHS citation strings from 0b42eb5a — mhs_source_string_jargon_bait (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
