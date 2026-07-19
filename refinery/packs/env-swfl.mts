@@ -527,8 +527,8 @@ function hydroSource(
   const sites = siteNos.length > 0 ? siteNos.join(",") : "no sites";
   const provenance =
     env.source === "live"
-      ? "USGS Water Services daily values via data_lake.usgs_daily"
-      : "USGS Water Services (fixture; refinery/__fixtures__/usgs-water.sample.json)";
+      ? "USGS Water Services daily values via Tier-1 Parquet usgs_water_swfl.parquet (dual-read with usgs_water_swfl_sites.parquet, refreshed monthly)"
+      : "USGS Water Services (fixture; refinery/__fixtures__/usgs-water-joined.sample.json)";
   return {
     url: `${USGS_WATER_BASE_URL}/dv/?stateCd=FL&parameterCd=${parameterCd}&siteStatus=active&format=json`,
     fetched_at: snapshot.hydro_fetched_at ?? snapshot.earliest_fetched_at,

@@ -1,5 +1,10 @@
-"""Runs aggregate_stats over data_lake.parcel_subdivision and upserts the result
+"""Runs aggregate_stats over data_lake.parcel_subdivision_v and upserts the result
 into data_lake.neighborhood_stats (communities-swfl Phase 1 T4).
+
+parcel_subdivision_v is the two-county homes-only VIEW over lee_parcels +
+collier_parcels (migrations/20260719_parcel_subdivision_v.sql) that replaced the
+retired data_lake.parcel_subdivision table — same column names, so only this
+read target changed (docs/handoff/2026-07-18-parcel-consolidation.md §4).
 
 No DuckDB<->Postgres round-trip precedent in this repo (per SESSION_LOG
 2026-07-06's T4 note) — reads and writes go straight through psycopg (the same
@@ -25,7 +30,7 @@ from .agg import aggregate_stats
 
 _SELECT = (
     "SELECT parcel_id, county, property_type, just_value, subdivision_name, actual_year_built "
-    "FROM data_lake.parcel_subdivision"
+    "FROM data_lake.parcel_subdivision_v"
 )
 
 _DELETE_ALL = "DELETE FROM data_lake.neighborhood_stats"

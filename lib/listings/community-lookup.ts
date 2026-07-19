@@ -16,14 +16,14 @@
 // handoff.md Gap 3 for that follow-up.
 
 import { addressKey } from "./address-key";
-// KNOWN-DEBT(data_lake: parcel_subdivision + neighborhood_stats live in the data_lake schema,
+// KNOWN-DEBT(data_lake: parcel_subdivision_v + neighborhood_stats live in the data_lake schema,
 // which the typed Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { communityForSubdivision, COMMUNITY_ALIASES } from "@/refinery/lib/subdivision-aliases.mts";
 
-// SOURCE-SUPPLY NOTE (07/15/2026): data_lake.parcel_subdivision (queried below) carries MORE
-// than county/subdivision_name/zip/phy_addr1 -- the FDOR ingest (ingest/pipelines/
-// parcel_subdivision/) also pulls sale_price_1/2 + sale dates + qualification codes,
+// SOURCE-SUPPLY NOTE (07/15/2026, view repoint 07/19/2026): data_lake.parcel_subdivision_v
+// (queried below) carries MORE than county/subdivision_name/zip/phy_addr1 -- the view over the
+// FDOR wide tables also exposes sale_price_1/2 + sale dates + qualification codes,
 // living_area_sqft, actual_year_built, effective_year_built, land_value, building_count,
 // residential_unit_count, neighborhood_code, market_area, and assessment_year. NONE of that
 // rolls into neighborhood_stats or ResolvedCommunityStats today -- home_count/
@@ -36,7 +36,9 @@ import { communityForSubdivision, COMMUNITY_ALIASES } from "@/refinery/lib/subdi
 // community_profiles_zero_coverage).
 
 const SCHEMA = "data_lake";
-const PARCEL_TABLE = "parcel_subdivision";
+// The homes-only two-county VIEW over lee_parcels + collier_parcels — replaced the retired
+// parcel_subdivision table 07/19/2026 (same column names; migrations/20260719_parcel_subdivision_v.sql).
+const PARCEL_TABLE = "parcel_subdivision_v";
 const NEIGHBORHOOD_TABLE = "neighborhood_stats";
 
 export interface ParcelCandidateRow {

@@ -1,0 +1,57 @@
+[
+  {
+    "site_no": "02292900",
+    "parameter_cd": "00065",
+    "stat_cd": "00003",
+    "obs_date": "2026-01-15",
+    "value": 4.82,
+    "unit": "ft",
+    "datum": "LOCAL",
+    "huc_cd": "03090205",
+    "county_cd": "12071"
+  },
+  {
+    "site_no": "02292900",
+    "parameter_cd": "00065",
+    "stat_cd": "00003",
+    "obs_date": "2026-02-15",
+    "value": 5.13,
+    "unit": "ft",
+    "datum": "LOCAL",
+    "huc_cd": "03090205",
+    "county_cd": "12071"
+  },
+  {
+    "site_no": "02292900",
+    "parameter_cd": "00065",
+    "stat_cd": "00003",
+    "obs_date": "2026-03-15",
+    "value": 5.91,
+    "unit": "ft",
+    "datum": "LOCAL",
+    "huc_cd": "03090205",
+    "county_cd": "12071"
+  },
+  {
+    "site_no": "02292900",
+    "parameter_cd": "00065",
+    "stat_cd": "00003",
+    "obs_date": "2026-04-15",
+    "value": 6.42,
+    "unit": "ft",
+    "datum": "LOCAL",
+    "huc_cd": "03090205",
+    "county_cd": "12071"
+  },
+  {
+    "site_no": "02292900",
+    "parameter_cd": "00065",
+    "stat_cd": "00003",
+    "obs_date": "2026-05-15",
+    "value": 6.78,
+    "unit": "ft",
+    "datum": "LOCAL",
+    "huc_cd": "03090205",
+    "county_cd": "12071"
+  }
+]

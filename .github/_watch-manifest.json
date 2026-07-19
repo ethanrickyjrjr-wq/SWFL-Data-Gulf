@@ -190,7 +190,7 @@
     "disabled": false
   },
   {
-    "name": "Data-readiness verification (hourly)",
+    "name": "Data-readiness verification (daily)",
     "file": "data-readiness-cron.yml",
     "scheduled": true,
     "timeout_minutes": 10,
@@ -613,7 +613,7 @@
     "name": "Lee parcels annual (FDOR cadastral)",
     "file": "lee-parcels-annual.yml",
     "scheduled": false,
-    "timeout_minutes": 90,
+    "timeout_minutes": 150,
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
@@ -700,7 +700,7 @@
     "disabled": false
   },
   {
-    "name": "Neighborhood stats annual (aggregate parcel_subdivision)",
+    "name": "Neighborhood stats annual (aggregate parcel_subdivision_v)",
     "file": "neighborhood-stats-annual.yml",
     "scheduled": true,
     "timeout_minutes": 20,
@@ -764,16 +764,6 @@
     "file": "outreach-drip.yml",
     "scheduled": false,
     "timeout_minutes": 10,
-    "cancel_in_progress": false,
-    "paid": false,
-    "should_be_dark": false,
-    "disabled": false
-  },
-  {
-    "name": "Parcel subdivision annual (FDOR centroid, Collier + Lee)",
-    "file": "parcel-subdivision-annual.yml",
-    "scheduled": true,
-    "timeout_minutes": 180,
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,

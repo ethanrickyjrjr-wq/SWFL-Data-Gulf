@@ -776,9 +776,12 @@ pipelines:
   - name: usgs_tier2
     workflow: none
     consuming_pack: env-swfl
-    known_drift: # RULE 2.4 — the zombie verdict is real; the DECISION (delete vs repoint) is the
-      # operator's. env-swfl reads data_lake.usgs_daily LIVE and it has been frozen since
-      # 2026-05-19. Suppressed to WARN only while the named check stays open.
+    known_drift: # ZOMBIE READ FIXED 07/19/2026: usgs-water-source.mts repointed to the fresh
+      # tier-1 Parquets (usgs_water_swfl + _sites, refreshed by usgs-monthly.yml) — nothing
+      # reads data_lake.usgs_daily/usgs_sites anymore. The frozen tables + this entry are
+      # dropped/removed once the env-swfl rebuild is verified serving the Parquet number
+      # (check usgs_tier2_orphan closes then). Until that drop lands this entry stays so the
+      # still-present tables don't false-RED zero_coverage.
       - { rule: zombie_target, check: usgs_tier2_orphan }
       - { rule: no_producer_workflow, check: usgs_tier2_orphan } # same condition, Rule-A facet
     lane: tier-2
@@ -927,8 +930,8 @@ pipelines:
         value: 120
         as_of: "07/18/2026"
         source_url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0"
-        source_label: "FDOR Statewide Parcel Centroid (ArcGIS FeatureServer) — same layer parcel_subdivision reads"
-        summary: "120 fields total, 102 now pulled (up from 15). Remaining 18-field gap is deliberate: 14 owner/fiduciary PII fields (OWN_*/FIDU_*) and 4 ArcGIS-internal row artifacts (OBJECTID/OID_/ORIG_FID/PARCELNO) with no NAL spec match. See check collier_parcels_parcel_subdivision_redundant_scrape — this pipeline and parcel_subdivision still both hit this identical layer for overlapping Collier parcels (now with more overlap after the widen); real consolidation into one canonical table is a separate, deferred design task, not done here."
+        source_label: "FDOR Statewide Parcel Centroid (ArcGIS FeatureServer)"
+        summary: "120 fields total, 102 now pulled (up from 15). Remaining 18-field gap is deliberate: 14 owner/fiduciary PII fields (OWN_*/FIDU_*) and 4 ArcGIS-internal row artifacts (OBJECTID/OID_/ORIG_FID/PARCELNO) with no NAL spec match. Consolidation DONE 07/19/2026: the overlapping parcel_subdivision pull retired; its homes-only slice is now the VIEW parcel_subdivision_v over this table + lee_parcels (check collier_parcels_parcel_subdivision_redundant_scrape)."
 
   - name: lee_parcels
     workflow: lee-parcels-annual.yml
@@ -956,36 +959,20 @@ pipelines:
         value: 120
         as_of: "07/18/2026"
         source_url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0"
-        source_label: "FDOR Statewide Parcel Centroid (ArcGIS FeatureServer) — same layer collier_parcels and parcel_subdivision read"
+        source_label: "FDOR Statewide Parcel Centroid (ArcGIS FeatureServer) — same layer collier_parcels reads"
         summary: "120 fields total, 102 pulled (same scope as collier_parcels). Excluded: 14 owner/fiduciary PII fields (OWN_*/FIDU_*) and 4 ArcGIS-internal row artifacts (OBJECTID/OID_/ORIG_FID/PARCELNO)."
 
-  - name: parcel_subdivision
-    workflow: parcel-subdivision-annual.yml
-    consuming_pack: communities-swfl
-    lane: tier-2
-    cadence_days: 365
-    tolerance_multiplier: 1.5
-    dlt_schema_name: parcel_subdivision
-    expected_rows_min: 543926 # 90% of 604,362 (collier 220,875 + lee 383,487) confirmed live 07/14/2026
-    count_table: data_lake.parcel_subdivision
-    # Source: FDOR Statewide Parcel Centroid ArcGIS FeatureServer (CO_NO=21 Collier, CO_NO=46 Lee)
-    # — same layer, same retrieval code for both counties (returnIdsOnly+objectIds; see
-    # ingest/pipelines/parcel_subdivision/constants.py's 07/14/2026 correction — the prior
-    # "Lee is a broken partition" note was stale, diagnosed against the old keyset-pagination
-    # shape). Annual NAL-derived roll; monthly idempotent retry catches the refresh, same
-    # pattern as collier_parcels. Consumed by communities-swfl (address->community resolution,
-    # neighborhood_stats aggregation). Docs: docs/superpowers/plans/2026-07-14-lee-parcels-handoff.md
-    source_scope:
-      confirmed_total:
-        value: 604362
-        as_of: "07/14/2026"
-        source: "our ingest (604,362 rows: collier 220,875 + lee 383,487; 25 of 120 fields pulled — widened from 7 same day. Live-verified after re-ingest: 82,153 rows with a positive sale_price_1, 603,069 with living_area_sqft, 603,830 with actual_year_built, all 604,362 with neighborhood_code)"
-      source_ceiling:
-        value: 120
-        as_of: "07/14/2026"
-        source_url: "https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0"
-        source_label: "FDOR Statewide Parcel Centroid (ArcGIS FeatureServer) — same layer collier_parcels reads"
-        summary: "120 fields total. Deliberately NOT pulled: OWN_NAME/OWN_ADDR1-2/OWN_CITY/OWN_STATE/OWN_ZIPCD/FIDU_* (owner/fiduciary PII). Also unpulled: the SOH-specific assessed-value breakdown fields (JV_HMSTD/AV_HMSTD/AV_SD/AV_NSD/TV_NSD) — that's collier_parcels' job (Collier only), not duplicated here. See check collier_parcels_parcel_subdivision_redundant_scrape."
+  # RETIRED 07/19/2026: parcel_subdivision (workflow parcel-subdivision-annual.yml, pipeline
+  # ingest/pipelines/parcel_subdivision/). It was a homes-only 25-field pull of the SAME FDOR
+  # centroid layer lee_parcels + collier_parcels now pull comprehensively (102 fields, all
+  # parcel types). Replaced by the VIEW data_lake.parcel_subdivision_v
+  # (migrations/20260719_parcel_subdivision_v.sql) — identical column names, subdivision_name
+  # re-derived from legal_description via the validated \y stem (100.00% match both counties;
+  # 476 Collier parcels whose legal_description is NULL in the fresher FDOR vintage fold to
+  # the '' unknown-name group). Readers repointed: neighborhood_stats pipeline, lib/listings/community-lookup.ts,
+  # app/r/source/_tables.ts. Table dropped after the verified neighborhood_stats rebuild.
+  # History: docs/handoff/2026-07-18-parcel-consolidation.md §4/§6a; check
+  # collier_parcels_parcel_subdivision_redundant_scrape.
 
   - name: neighborhood_stats
     workflow: neighborhood-stats-annual.yml
@@ -993,15 +980,16 @@ pipelines:
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
-    expected_rows_min: 1 # nascent — first real run 07/14/2026, no stable baseline yet (per pipeline-freshness.md rule (e))
+    expected_rows_min: 27975 # 90% of 31,084 — first stable baseline set 07/19/2026 (view-repointed rebuild)
     count_table: data_lake.neighborhood_stats
-    # Not a dlt pipeline — no dlt_schema_name. Reads data_lake.parcel_subdivision straight
-    # through psycopg (no DuckDB<->Postgres precedent existed before this — see
+    # Not a dlt pipeline — no dlt_schema_name. Reads data_lake.parcel_subdivision_v (the
+    # two-county homes-only VIEW over lee_parcels + collier_parcels; repointed 07/19/2026 when
+    # the parcel_subdivision table retired) straight through psycopg (see
     # ingest/duckdb_pipelines/neighborhood_stats/pipeline.py), aggregates in an in-memory
-    # DuckDB table via agg.py's tested GROUP BY, upserts data_lake.neighborhood_stats with a
-    # plain ON CONFLICT. Scheduled 2hr after parcel-subdivision-annual.yml so a same-day
-    # refresh is picked up; idempotent either way. Consumed by communities-swfl (home count +
-    # median just-value per community).
+    # DuckDB table via agg.py's tested GROUP BY, full-replaces data_lake.neighborhood_stats.
+    # Scheduled day 24 — after collier-parcels-annual (day 20); lee_parcels is dispatch-only,
+    # so re-dispatch this after any manual lee_parcels refresh. Consumed by communities-swfl
+    # (home count + median just-value per community).
 
   - name: fhfa
     workflow: fhfa-hpi-quarterly.yml
@@ -2184,9 +2172,9 @@ not_yet_running:
 # above; the `note:` here is the one-line why.
 #
 # SCOPE — what coverage_exempt does NOT do: it suppresses the ZERO-COVERAGE assertion only.
-# It does NOT bless a pack reading one of these tables. env-swfl live-queries
-# data_lake.usgs_sites (usgs-water-source.mts:33 SITES_TABLE='usgs_sites') even though that
-# table is exempt and frozen since 2026-05-19 — that is a SEPARATE Phase-2 RED ("pack reads a
+# It does NOT bless a pack reading one of these tables. (Historical example: env-swfl
+# live-queried the exempt, frozen data_lake.usgs_sites until the 07/19/2026 Parquet repoint
+# of usgs-water-source.mts) — that class is a SEPARATE Phase-2 RED ("pack reads a
 # legacy/excluded table", spec section 6). Two assertions, two answers. Do not collapse them.
 coverage_exempt:
   - table: data_lake.dbhydro_stations
@@ -2214,9 +2202,10 @@ coverage_exempt:
     note: "Phase 3C T-60 email preflight (app/api/cron/data-readiness/route.ts, a Vercel cron). No lake write; appends alerts only in the T-75min window before an actual send. ZERO rows on a quiet day is CORRECT."
 
   # Added 07/12/2026 — Phase 2 --live zero-coverage sweep. Each row names its real writer
-  # (verified in-tree). The three REAL gaps deliberately NOT exempted: parcel_subdivision
-  # (check parcel_subdivision_zero_coverage), community_profiles + neighborhood_stats
-  # (check communities_tables_zero_coverage) — a RED that produces a decision.
+  # (verified in-tree). REAL gaps deliberately NOT exempted: community_profiles +
+  # neighborhood_stats (check communities_tables_zero_coverage) — a RED that produces a
+  # decision. (parcel_subdivision, the third, RESOLVED 07/19/2026: table retired for the
+  # parcel_subdivision_v view over lee/collier_parcels.)
   - table: data_lake.view_vintages
     reason: derived_snapshot
     note: "PIT capture of our own zhvi/zori views — capture_view_vintages.py via view-vintages-monthly.yml (day 26). Not a vendor source; promote-to-pipelines decision rides check coverage_exempt_confirm_three."

@@ -55,7 +55,7 @@ export const SOURCE_PROVENANCE_TABLES: Record<string, SourceTableEntry> = {
     brain: "communities-swfl",
     date_col: "as_of",
   },
-  parcel_subdivision: {
+  parcel_subdivision_v: {
     label: "SWFL parcels → subdivision name-join (Lee + Collier)",
     brain: "communities-swfl",
     date_col: "as_of",

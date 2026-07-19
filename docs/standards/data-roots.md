@@ -55,9 +55,9 @@ replacement runs, every consumer repoints, and the operator signs off (RULE 1).
 | `collier_parcels` | 290,973 / **104** | FDOR cadastral, Collier (CO_NO=21) — comprehensive, **DONE** | properties-collier-value | don't re-widen |
 | `leepa_parcels` | 548,798 / **19** | Lee **Property Appraiser** — a **DIFFERENT source** (valuation+sale only) | properties-lee-value | distinctive: `folioid`, `building_value` (`soh_cap`/`cap_difference` derivable from FDOR `jv_hmstd−av_hmstd`). A **cross-check of FDOR, NOT slated for deletion** |
 | `lee_parcels` | 556,083 / **104** | FDOR cadastral, Lee (CO_NO=46) — **LANDED 07/18/2026**, all parcel types | properties-lee-value | `lee_parcels_summary` view live (522,205 res / 14,052 com / 211,838 homesteaded / SOH gap median 31.6%); shape = `collier_parcels` (byte-identical `OUT_FIELDS`) |
-| `parcel_subdivision` | 604,362 / **28** | FDOR **homes-only** subset, both counties | communities-swfl | ONE distinctive col: `subdivision_name` (parse of `legal_description`) |
+| `parcel_subdivision_v` (VIEW) | 604,362 / 28 | FDOR homes-only slice of `lee_parcels`+`collier_parcels` — **replaced the `parcel_subdivision` table 07/19/2026** | communities-swfl | `subdivision_name` re-derived in-view from `legal_description` (validated `\y` stem, 100% match; 476 Collier parcels NULL where the fresher vintage lost their legal) |
 
-- **ONE-ROOT TARGET (recommended, [NEEDS-SIGN-OFF]):** one canonical FDOR parcel table (Lee+Collier, shared schema) read by properties-lee-value + properties-collier-value + communities. `lee_parcels` **LANDED 07/18/2026**; the LeePA keep-vs-retire question is **RESOLVED — operator ratified KEEP BOTH** (leepa stays as the appraiser cross-check, never dropped; `docs/handoff/2026-07-18-parcel-consolidation.md`). Only greenlit dedup: `parcel_subdivision` → homes-only view, after its 3 readers repoint. Deletion is operator-gated and blocked. Checks: `lee_parcels_leepa_redundant_into_properties_lee`, `collier_parcels_parcel_subdivision_redundant_scrape`, `data_authority_single_source_registry`.
+- **ONE-ROOT TARGET — EXECUTED 07/19/2026:** one canonical FDOR parcel pair (Lee+Collier, shared 104-col schema). The LeePA keep-vs-retire question is **RESOLVED — operator ratified KEEP BOTH** (leepa stays as the appraiser cross-check, never dropped; `docs/handoff/2026-07-18-parcel-consolidation.md`). The greenlit dedup is DONE: `parcel_subdivision` (table + pipeline + cron) retired for the `parcel_subdivision_v` VIEW after full-join verification (604,362 = 604,362, zip/type/just_value 0 diffs) + all 3 readers repointed + `neighborhood_stats` rebuilt. Checks: `lee_parcels_leepa_redundant_into_properties_lee`, `collier_parcels_parcel_subdivision_redundant_scrape`, `data_authority_single_source_registry`.
 
 ---
 
@@ -126,15 +126,19 @@ The full "what we get vs what's available" per source is its `source_scope` bloc
 
 **TRUE CORPSES (feed nothing live — delete):** `active_listings` + `active_listings_residential`(+`_zip_stats`)
 (daily cron, zero readers) · `census_vip`, `fred_g17` (no consumer at all) · `bls_oews_swfl_tier1` (cold
-NDJSON dup of the live tier-2) · `usgs` tier-1 parquet (fresh but unread).
+NDJSON dup of the live tier-2). (The `usgs` tier-1 parquet came OFF this list 07/19/2026 — it is now
+env-swfl's live read.)
 
-**ZOMBIE READ — a brain reads a DEAD table (serious):** `usgs_tier2` / `data_lake.usgs_daily` is frozen
-since 05/19/2026, its producing module was DELETED, YET it is the LIVE read path for env-swfl's
-Caloosahatchee stage metric — env-swfl serves frozen water data. Check `usgs_tier2_orphan`.
+**ZOMBIE READ — FIXED 07/19/2026:** `usgs_tier2` / `data_lake.usgs_daily` (frozen 05/19/2026, producer
+deleted) WAS env-swfl's live read path for the Caloosahatchee stage metric. `usgs-water-source.mts` now
+dual-reads the fresh tier-1 Parquets (`usgs_water_swfl` + `_sites`, monthly via `usgs-monthly.yml`);
+the frozen `usgs_daily`/`usgs_sites` tables drop once the env-swfl rebuild is verified serving the
+Parquet number. Check `usgs_tier2_orphan`.
 
-**REDUNDANT DOUBLE-INGEST:** parcels (`leepa` + `lee_parcels` + `collier_parcels` + `parcel_subdivision`,
-same FDOR layer — the poster child). CORRECTION: duckdb→tier2 pairs (`zhvi`, `tier_divergence`) are NOT
-redundant — a promotion chain (parquet raw → Postgres → view), by design.
+**REDUNDANT DOUBLE-INGEST:** parcels — the poster child — RESOLVED 07/19/2026: `parcel_subdivision`
+retired for the view; `leepa` is the ratified-KEEP appraiser cross-check; `lee_parcels` +
+`collier_parcels` are the one canonical FDOR pair. CORRECTION: duckdb→tier2 pairs (`zhvi`,
+`tier_divergence`) are NOT redundant — a promotion chain (parquet raw → Postgres → view), by design.
 
 **BYPASS WIRES — a surface reads the raw table, skipping the brain that already carries it** (your exact
 "don't run a second wire to the chart" rule; each is either a wire to delete OR a brain to route through):
@@ -174,9 +178,10 @@ recency; none measures served DATA vintage (`data_vintage_tripwire_missing`). A 
 when it's *registered* — it's done when it SERVES the freshest lake data. **The gate must include a
 data-vintage tripwire** (served output period vs lake-newest vs cadence).
 
-**FIELD UNDERUSE (FULL-SCOPE-FIRST):** `parcel_subdivision` pulls 25/120 fields (95 unused) off the same
-layer others pull 102 from · parcels pull ~102, only ~10 used today (rest sit for planned builds/unused)
-· `faf5` mode-blind (transport-mode column never read).
+**FIELD UNDERUSE (FULL-SCOPE-FIRST):** parcels pull ~102 fields, only ~10 used today (rest sit for
+planned builds/unused) · `faf5` mode-blind (transport-mode column never read). (The
+`parcel_subdivision` 25/120 underuse case closed 07/19/2026 with the table's retirement — the view
+exposes the wide tables' fields.)
 
 **NAMING LANDMINE:** the `active-listings-swfl` brain's `SOURCE_ID` + source file name point at the
 `active_listings_residential` corpse by string, but actually read the live `listing_active_stats` — wire
@@ -233,8 +238,8 @@ the lake roots below. Everything "how the market looks right now" descends from 
 - **`leepa`** (Lee) — LeePA appraiser feed (gissvr.leepa.org, layers 0/9/10/12), 548,798 parcels → **properties-lee-value**. 24 vendor layers exist; 4 pulled.
 - **`lee_parcels`** (Lee) — NEW 07/18/2026, FDOR ArcGIS Statewide Parcel (CO_NO=46), **LANDED same day: 556,083 unique parcels** (556,100 raw features; 17 unservable OBJECTIDs logged + skipped), 104 cols, dispatch-only → **properties-lee-value** (the SAME brain as `leepa` — operator ratified KEEP BOTH). "Lee never had a comprehensive FDOR parcel table before this."
 - **`collier_parcels`** (Collier) — FDOR ArcGIS (CO_NO=21), 290,973 parcels, 102 fields → **properties-collier-value**.
-- **`parcel_subdivision`** — the SAME FDOR ArcGIS Statewide Parcel layer `lee_parcels`+`collier_parcels` read → **communities-swfl**.
-- **THE PROBLEM:** Lee is ingested twice into one brain (`leepa` appraiser + `lee_parcels` FDOR); and `lee_parcels`/`collier_parcels`/`parcel_subdivision` all hit the identical FDOR layer. Collier overlap tracked (`collier_parcels_parcel_subdivision_redundant_scrape`); Lee overlap NEW (`lee_parcels_leepa_redundant_into_properties_lee`).
+- **`parcel_subdivision`** — RETIRED 07/19/2026: was a homes-only pull of the SAME FDOR layer; now the VIEW `parcel_subdivision_v` over `lee_parcels`+`collier_parcels` → **communities-swfl**.
+- **THE PROBLEM (largely resolved):** Lee is ingested twice into one brain (`leepa` appraiser + `lee_parcels` FDOR) — ratified KEEP BOTH as a cross-check; the triple-scrape of the identical FDOR layer ended 07/19/2026 with `parcel_subdivision`'s retirement (`collier_parcels_parcel_subdivision_redundant_scrape`); Lee overlap tracked (`lee_parcels_leepa_redundant_into_properties_lee`).
 - **ONE-ROOT TARGET:** a single canonical FDOR parcel table (Lee CO_NO=46 + Collier CO_NO=21, shared schema) that properties-lee-value + properties-collier-value + communities all read. The `leepa` question is **RESOLVED (operator, 07/18): KEEP BOTH** — LeePA carries fields FDOR lacks (`building_value`, deed instrument, full sale date, `folioid` key) and stays as the appraiser cross-check.
 - Also annual, walked later: `neighborhood_stats`, `fdot` (traffic), `census_acs`/`census_cbp`, `bls_oews`, `hurdat2`, `faf5`, `mhs_databook`/`mhs_permits`.
 
@@ -651,14 +656,16 @@ Scope: `leepa`, `collier_parcels`, `lee_parcels`, `parcel_subdivision`, `neighbo
   (`properties-lee-value.mts:858`) warns LeePA `total_parcels` ≠ FDOR `lee_parcels` total — "cross-check on
   scale, not reconciled to the parcel."
 
-### The collier_parcels ⇄ parcel_subdivision redundant scrape (documented, still open)
+### The collier_parcels ⇄ parcel_subdivision redundant scrape — RESOLVED 07/19/2026
 Both pipelines hit the SAME FDOR layer —
 `services9.arcgis.com/.../Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0` — for overlapping
-Collier parcels, landing overlapping fields into TWO tables (`data_lake.collier_parcels` +
-`data_lake.parcel_subdivision`). Tracked in-registry as check
-`collier_parcels_parcel_subdivision_redundant_scrape` (registry lines 931, 988). The 07/18 collier widen
-(15→102 fields) INCREASED the field overlap. Real consolidation into one canonical parcel table is a
-deferred design task, not done.
+Collier parcels, landing overlapping fields into TWO tables. Resolved by retiring the
+`parcel_subdivision` pipeline + table: its homes-only slice is now the VIEW
+`data_lake.parcel_subdivision_v` over `lee_parcels` + `collier_parcels`
+(migrations/20260719_parcel_subdivision_v.sql), verified row-for-row (604,362 = 604,362; the
+`subdivision_name` stem matched 100%, with 476 Collier parcels folding to NULL where the fresher FDOR
+vintage carries no `legal_description`). Check `collier_parcels_parcel_subdivision_redundant_scrape`
+closes with this.
 
 ### The duckdb ↔ tier2 relationship = PROMOTION CHAIN (not a redundant double-pull) — VERIFIED
 For both ZHVI and tier-divergence, the `_duckdb` (tier-1) entry writes a Parquet to
@@ -846,37 +853,38 @@ So: **duckdb parquet = raw base → tier2 Postgres = promotion → views = brain
   FDOR-sourced parcel table before). Its `just value` is a 3rd "assessed value" definition for Lee alongside
   LeePA and neighborhood_stats.
 
-### parcel_subdivision · cadence 365d · lane tier-2
-- **STATUS:** live
-- **ROOT:** IS a root — `data_lake.parcel_subdivision` (count_table). FDOR Statewide Parcel Centroid
-  FeatureServer, CO_NO=21 (Collier) + CO_NO=46 (Lee), same layer/retrieval for both. `dlt_schema_name: parcel_subdivision`.
-- **DATA WE GET:** 604,362 rows (as_of 07/14/2026; Collier 220,875 + Lee 383,487), **25 of 120 fields**
-  (widened from 7 same day). Live-verified: 82,153 rows with positive `sale_price_1`, 603,069 with
-  `living_area_sqft`, 603,830 with `actual_year_built`, all 604,362 with `neighborhood_code`.
-- **DATA AVAILABLE, unpulled:** 120 fields total. Deliberately NOT pulled: `OWN_*`/`FIDU_*` PII; and the
-  SOH-specific assessed-value breakdown (`JV_HMSTD`/`AV_HMSTD`/`AV_SD`/`AV_NSD`/`TV_NSD`) — that is
-  collier_parcels' job (Collier only), not duplicated here. **Big unpulled: 95 of 120 fields** — this is the
-  most under-pulled parcel table in the batch (the RULE-0.4 full-scope postmortem source).
-- **ROUTES:** ingest `ingest/pipelines/parcel_subdivision/pipeline.py` → `data_lake.parcel_subdivision`.
-  parcel_subdivision is NOT read by any brain directly; its consumer is the neighborhood_stats aggregation →
-  `ingest/duckdb_pipelines/neighborhood_stats/pipeline.py` reads `data_lake.parcel_subdivision` (via psycopg),
-  aggregates, upserts `data_lake.neighborhood_stats` → brain `communities-swfl` (see neighborhood_stats).
-  Chain to product: parcel_subdivision → neighborhood_stats → communities-swfl brain → master
-  (`master.mts:265/:361`) + chat catalog (`catalog.mts:132`) + community drill pages.
-- **NOTES:** neighborhood/address resolution backbone. Its `just_value_1` (Tier-1 assessed) is a 4th
-  "assessed value" definition. Redundant-scrape twin of collier_parcels (same FeatureServer/0, overlapping
-  Collier parcels) — the widen widened the overlap.
+### parcel_subdivision_v · VIEW (retired the parcel_subdivision table 07/19/2026)
+- **STATUS:** live (view; no pipeline, no cron — refreshes with `lee_parcels`/`collier_parcels`)
+- **ROOT:** IS a root — `data_lake.parcel_subdivision_v`
+  (migrations/20260719_parcel_subdivision_v.sql): the homes-only (`dor_uc IN
+  ('001','002','004','005','007','008')`) two-county slice of `lee_parcels` + `collier_parcels`,
+  exposing the retired table's exact 26 data columns; `subdivision_name` derived in-view from
+  `legal_description` via the validated `\y` stem.
+- **RETIREMENT EVIDENCE (07/19/2026):** full join old-vs-view on (parcel_id, county): 604,362 = 604,362,
+  zero unmatched either side; `zip`/`property_type`/`just_value` 0 diffs; `subdivision_name` identical
+  except 476 Collier parcels (0.08%) that fold to NULL because the fresher FDOR vintage carries no
+  `legal_description` for them. Old table + `ingest/pipelines/parcel_subdivision/` +
+  `parcel-subdivision-annual.yml` all retired.
+- **ROUTES:** NOT read by any brain directly; consumers = the neighborhood_stats aggregation
+  (`ingest/duckdb_pipelines/neighborhood_stats/pipeline.py` via psycopg), the address→community
+  resolver (`lib/listings/community-lookup.ts`), and the `/r/source/parcel_subdivision_v` provenance
+  page (`app/r/source/_tables.ts`). Chain to product: parcel_subdivision_v → neighborhood_stats →
+  communities-swfl brain → master (`master.mts:265/:361`) + chat catalog + community drill pages.
+- **NOTES:** neighborhood/address resolution backbone. Field-underuse case CLOSED — the view sits on
+  the 104-col wide tables, so every FDOR field is one SELECT away.
 
 ### neighborhood_stats · cadence 365d · lane tier-2 (non-dlt)
 - **STATUS:** live (nascent — first real run 07/14/2026, `expected_rows_min: 1`, no stable baseline yet)
 - **ROOT:** IS a derived root — `data_lake.neighborhood_stats` (count_table). NOT a dlt pipeline (no
-  `dlt_schema_name`). First DuckDB↔Postgres bridge in the repo: reads `data_lake.parcel_subdivision` via
-  psycopg, aggregates in an in-memory DuckDB `GROUP BY`, upserts via `ON CONFLICT`.
-  Scheduled 2h after `parcel-subdivision-annual.yml` (`neighborhood-stats-annual.yml`).
+  `dlt_schema_name`). First DuckDB↔Postgres bridge in the repo: reads `data_lake.parcel_subdivision_v`
+  (repointed 07/19/2026) via psycopg, aggregates in an in-memory DuckDB `GROUP BY`, full-replaces the
+  table. Scheduled day 24, after `collier-parcels-annual` day 20 (`neighborhood-stats-annual.yml`);
+  re-dispatch after any manual `lee_parcels` refresh.
 - **DATA WE GET:** one row per (county, subdivision_name): `home_count`, count-by-type, `median_just_value`
   (per `ingest/duckdb_pipelines/neighborhood_stats/agg.py`).
-- **DATA AVAILABLE, unpulled:** ceiling = whatever more of parcel_subdivision's 95 unpulled fields could be
-  rolled up (living area, year built, sale price already land in the source but aren't aggregated here yet).
+- **DATA AVAILABLE, unpulled:** ceiling = whatever more of the wide tables' fields could be rolled up
+  through the view (living area, sale price already exposed by `parcel_subdivision_v` but not
+  aggregated here yet; `median_year_built` added 07/1x).
 - **ROUTES (TWO consumers — brain AND direct page reads):**
   - Brain: `refinery/sources/communities-swfl-source.mts:43` (`NEIGHBORHOOD_TABLE = neighborhood_stats`,
     read at `:145`) → brain `refinery/packs/communities-swfl.mts` (metric `total_homes_catalogued_swfl` `:111`)
@@ -1413,22 +1421,25 @@ Universal surfaces for ALL brains below (stated once; per-source ROUTES add only
 ---
 
 ### usgs · cadence 30d · lane tier-1-duckdb
-- **STATUS:** unwired (live-producing, zero consumers). The Parquet is refreshed monthly (`usgs-monthly.yml` → `python -m ingest.duckdb_pipelines.usgs.pipeline`, writes `lake-tier1/environmental/usgs_water_swfl.parquet`). Registry lists `consuming_pack: env-swfl`, but env-swfl does NOT read this Parquet — it reads the tier-2 Postgres tables (see usgs_tier2 below). So the fresh monthly data reaches no brain.
-- **ROOT:** IS a root (Tier-1 Parquet). Nominally the raw base of env-swfl's hydro metric — but that wire is not connected.
-- **DATA WE GET:** 4 parameters extracted per `ingest/duckdb_pipelines/usgs/constants.py` (registry L405), same 60 USGS SWFL sites, vintage 2000-2026.
-- **DATA AVAILABLE, unpulled:** same 60 sites in the same fetch also carry streamflow/discharge, water temperature, salinity, dissolved oxygen/pH — free, not extracted (registry L408).
-- **ROUTES:** `ingest/duckdb_pipelines/usgs/{fetch,pipeline}.py` → `lake-tier1/environmental/usgs_water_swfl.parquet` (+ a sites Parquet). **No downstream reader.** env-swfl's `usgs-water-source.mts` points at Postgres `data_lake.usgs_daily`/`usgs_sites`, not this Parquet.
-- **NOTES:** This is the fresh half of the USGS split — produced, current, unconsumed. The consumed half (usgs_tier2) is frozen. Workflow header confirms it "supersedes the deprecated `ingest/pipelines/usgs` (deleted in PR 3)."
+- **STATUS:** LIVE — env-swfl's hydro read since 07/19/2026. The Parquet is refreshed monthly (`usgs-monthly.yml` → `python -m ingest.duckdb_pipelines.usgs.pipeline`, writes `lake-tier1/environmental/usgs_water_swfl.parquet` + `_sites`).
+- **ROOT:** IS a root (Tier-1 Parquet). The raw base of env-swfl's hydro metric.
+- **DATA WE GET:** 4 parameters extracted per `ingest/duckdb_pipelines/usgs/constants.py`, ~580 USGS SWFL sites, vintage 2000-2026, ~4.7M daily rows.
+- **DATA AVAILABLE, unpulled:** same sites in the same fetch also carry streamflow/discharge, water temperature, salinity, dissolved oxygen/pH — free, not extracted.
+- **ROUTES:** `ingest/duckdb_pipelines/usgs/{fetch,pipeline}.py` → the two Parquets → `refinery/sources/usgs-water-source.mts` (makeDuckDBSource dual-read: daily × sites join for the Caloosahatchee HUC filter, latest-date median) → hydro-swfl-aggregate fragment → `refinery/packs/env-swfl.mts` `swfl_sw_stage_caloosahatchee_ft` key_metric → `/api/b/env-swfl` + master dossier.
+- **NOTES:** Was "fresh but unread" until the 07/19/2026 repoint closed the USGS split (P8 zombie fix). Workflow header confirms it "supersedes the deprecated `ingest/pipelines/usgs` (deleted in PR 3)."
 
 ---
 
-### usgs_tier2 · cadence 30d · lane tier-2
-- **STATUS:** dead-corpse / zombie — but STILL the LIVE READ PATH for env-swfl. `workflow: none`; `known_drift: zombie_target + no_producer_workflow` (registry L776-783). `MAX(inserted_at)=2026-05-19` — frozen.
-- **ROOT:** raw (frozen) base of **env-swfl** hydro metric — the wire env-swfl actually uses.
-- **DATA WE GET:** 605 rows as_of 2026-05-31 (4 parameters), table `data_lake.usgs_daily` (+ `data_lake.usgs_sites`, 900 rows, also legacy/DROP-scheduled). dlt_schema_name `usgs`.
-- **DATA AVAILABLE, unpulled:** same as usgs above (streamflow, water temp, salinity, DO/pH).
-- **ROUTES:** `data_lake.usgs_daily` + `data_lake.usgs_sites` → `refinery/sources/usgs-water-source.mts:196-236` (`fetchLive`, PostgREST paged reads, SWFL filter county_cd IN 12071/12021 OR Caloosahatchee/Big-Cypress HUC) → hydro-swfl-aggregate fragment → `refinery/packs/env-swfl.mts:881-898` `swfl_sw_stage_caloosahatchee_ft` key_metric → `/api/b/env-swfl` + master dossier.
-- **NOTES — task's zombie claim VERIFIED:** "zombie whose producing module was deleted" is TRUE. The Postgres writer was `ingest/pipelines/usgs` (dlt), **deleted in PR 3** (per `usgs-monthly.yml` L6 comment); no such directory exists today (glob: only `ingest/duckdb_pipelines/usgs` remains, and that writes Parquet, not Postgres). Pre-push gate states it verbatim: `.claude/hooks/check-prepush-gate.mjs:276` — "usgs_tier2 names a writer that does not exist and env-swfl reads the frozen table live." Net: **the USGS split is broken both ways** — env-swfl reads a frozen orphan table; the fresh monthly Parquet has no reader. Migration to close this: `docs/superpowers/plans/2026-05-19-usgs-postgres-to-parquet-migration.md` (referenced but file NOT present in repo). Open check `usgs_tier2_orphan`. Also: `docs/sql/20260718_vacuum_usgs_daily_bloat.sql` exists (bloat cleanup on the frozen table).
+### usgs_tier2 · corpse pending drop (zombie read FIXED 07/19/2026)
+- **STATUS:** frozen corpse with ZERO readers since the 07/19/2026 repoint of `usgs-water-source.mts`
+  to the tier-1 Parquets. `MAX(inserted_at)=2026-05-19`; producer deleted in PR 3.
+- **DROP PLAN:** `data_lake.usgs_daily` (605-row stub) + `data_lake.usgs_sites` (900 rows) drop once
+  the env-swfl rebuild is verified serving the Parquet number (3.36 ft @ 07/09 at repoint time, vs the
+  frozen 3.17 @ 05/17); the registry `usgs_tier2` entry retires in the same pass. Check
+  `usgs_tier2_orphan` closes then.
+- **NOTES:** the frozen stub was not merely stale — it was a degenerate one-shot load (~1 row/site,
+  2 of 4 params) while the Parquet holds the full series. History: P8 zombie postmortem
+  (`docs/audits/2026-07-18-data-consolidation/P8-bypass-and-zombie.md`).
 
 ---
 

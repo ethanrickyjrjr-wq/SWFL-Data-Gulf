@@ -1,9 +1,10 @@
-name: Neighborhood stats annual (aggregate parcel_subdivision)
+name: Neighborhood stats annual (aggregate parcel_subdivision_v)
 
 on:
   schedule:
-    # 2hr after parcel-subdivision-annual.yml (13:00 UTC) so same-day refreshes are
-    # picked up; idempotent either way against a stale run.
+    # Day 24, after collier-parcels-annual (day 20) refreshes the wide table under the
+    # parcel_subdivision_v view; lee_parcels is dispatch-only — re-dispatch this after any
+    # manual Lee refresh. Idempotent either way against a stale run.
     - cron: "0 15 24 * *"
   workflow_dispatch:
     inputs:

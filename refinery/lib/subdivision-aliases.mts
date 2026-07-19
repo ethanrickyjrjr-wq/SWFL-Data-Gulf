@@ -16,7 +16,8 @@
  * fill from a real source, never an invented community.
  *
  * Data lives in `fixtures/community-aliases.json` (single source of truth — Python's
- * `parcel_subdivision` ingest reads the same file, so TS and the ingest never drift apart).
+ * `neighborhood_stats` rollup reads the same file via ingest/lib/community_aliases.py, so TS
+ * and the ingest never drift apart).
  */
 import communityAliasesJson from "../../fixtures/community-aliases.json";
 

@@ -1,3 +1,35 @@
+## 2026-07-19 (Fable 5 · main) — Consolidation finishing pass: USGS zombie read FIXED (parquet dual-read) + parcel_subdivision RETIRED for the verified view (drop executed)
+
+Operator decree: "take care of these" — the 4 genuinely-remaining consolidation items. Two are done
+end-to-end this push. (1) **Frozen-water read:** rewrote `refinery/sources/usgs-water-source.mts` from
+PostgREST-on-frozen `data_lake.usgs_daily`/`usgs_sites` (dead since 05/19, producer deleted) to a
+`makeDuckDBSource` dual-read of the live tier-1 Parquets (`usgs_water_swfl` × `_sites` join for the
+Caloosahatchee HUC filter — the daily Parquet carries no site metadata). Query semantics verified
+against the real Parquet via the lake: 3.36 ft @ 07/09 across 7 gages (vs frozen-served 3.17 @ 05/17),
+matching P8's independent reproduction exactly. New joined fixture (old one deleted), env-swfl
+provenance strings updated, 50 tests + `bunx next build` green. Served number still needs the env-swfl
+dispatch to flip; frozen tables drop AFTER that verify (registry `usgs_tier2` entry annotated,
+`usgs_tier2_orphan` stays open until then). (2) **parcel_subdivision drop — executed under the full
+§6a gate:** created `data_lake.parcel_subdivision_v` (homes-only view over lee+collier_parcels,
+exact legacy column names, validated `\y` stem); full-join proof old-vs-view 604,362=604,362, zero
+unmatched, zip/type/just_value 0 diffs; only drift = 476 Collier parcels whose `legal_description`
+the fresher FDOR vintage dropped — first live rebuild attempt caught them as a NOT NULL violation
+(clean rollback), fixed by COALESCE '' matching the retired table's 0-true-NULL convention. Repointed
+all 3 readers (neighborhood_stats pipeline, community-lookup PARCEL_TABLE, /r/source registry),
+rebuilt neighborhood_stats (31,110→31,084; Lee byte-identical, home_count conserved 604,362, the 476
+fully accounted: 450 out of surviving groups + 26 vanished single-home groups → '' group 126→602),
+then DROPped the table (verified to_regclass null, view still serving). Pipeline dir + workflow +
+registry entry retired; watch manifests regenerated; data-roots.md de-staled on both arcs;
+neighborhood_stats `expected_rows_min` 1→27,975 (first stable baseline). Checks: closed
+`collier_parcels_parcel_subdivision_redundant_scrape`, `lee_parcels_leepa_redundant_into_properties_lee`
+(KEEP-BOTH ratified + executed), `neighborhood_stats_alias_reconciler_not_wired` (stale — wired 07/15);
+opened `neighborhood_stats_stale_local_test_copies` (8 pre-existing in-folder test reds) +
+`community_aliases_fixture_coverage_thin` (re-scope of the real residual). NEXT this session: decreed
+paid dispatches (home-values-swfl, active-rentals-swfl, env-swfl, then master --no-force), served-bytes
+verify, frozen usgs table drop, and the 2 operator decisions (canonical sold-price source, all-types
+active count). NOT touched: `lib/landing/home-map-data.ts` + `load-home-map-data.ts` (another live
+session's in-flight ZHVI→realtor-sold map swap).
+
 ## 2026-07-19 (Fable 5 · main) — Lee per-ZIP assessed value + SOH gap: mirror built, straddle-ZIP disjointness added to BOTH counties (committed, NOT pushed — awaiting operator)
 
 Picked up item 1 of the 07/18 "104-column unlock" list after verifying no parallel session claims the

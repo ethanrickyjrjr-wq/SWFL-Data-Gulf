@@ -29,7 +29,7 @@ def build_pattern_index(aliases: dict) -> dict[str, str]:
 def community_for_subdivision(stemmed_name: str, pattern_index: dict[str, str] | None = None) -> str | None:
     """Roll a STEMMED subdivision name up to its marketed community, or None if
     unknown. Caller stems the raw name first (see `_stem` in
-    ingest/pipelines/parcel_subdivision/resources.py) — this function does not
+    the parcel_subdivision_v view's legal-description stem) — this function does not
     re-stem, matching the TS `communityForSubdivision` contract."""
     idx = pattern_index if pattern_index is not None else build_pattern_index(load_community_aliases())
     return idx.get(stemmed_name)

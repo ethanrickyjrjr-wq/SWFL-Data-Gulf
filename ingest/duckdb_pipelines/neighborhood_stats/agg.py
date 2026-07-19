@@ -2,7 +2,7 @@
 — aggregate-at-source in DuckDB (communities-swfl Phase 1 T4, name-join variant).
 
 Reads a `parcel_subdivision` table already loaded into the connection (the
-pipeline glue loads it from `data_lake.parcel_subdivision` via the Postgres
+pipeline glue loads it from `data_lake.parcel_subdivision_v` via the Postgres
 attach; kept out of this pure function so it's testable with an in-memory
 DuckDB table, no network/DB). Grouped on (county, subdivision_name) — the
 name-join has no spatial subdivision_id, so that pair is the aggregation key.
@@ -22,7 +22,7 @@ def aggregate_stats(
     -- aggregate-at-source in DuckDB (communities-swfl Phase 1 T4, name-join variant).
 
     Reads a `parcel_subdivision` table already loaded into the connection (the
-    pipeline glue loads it from `data_lake.parcel_subdivision` via the Postgres
+    pipeline glue loads it from `data_lake.parcel_subdivision_v` via the Postgres
     attach; kept out of this pure function so it's testable with an in-memory
     DuckDB table, no network/DB). Grouped on (county, subdivision_name) -- the
     name-join has no spatial subdivision_id, so that pair is the aggregation key.
