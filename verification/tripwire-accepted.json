@@ -202,6 +202,12 @@
       "pack": "properties-lee-value",
       "accepted_on": "07/18/2026",
       "note": "Operator decree 07/19/2026 'fire': serve Lee per-ZIP assessed value + SOH gap into zip-report (082c06e4) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29671293906",
+      "pack": "master",
+      "accepted_on": "07/18/2026",
+      "note": "Operator decree 07/19/2026 'fire': propagate fresh properties-lee-value (Lee assessed value + SOH gap) into the dossier (plain cascade, no force) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }

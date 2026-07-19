@@ -1,3 +1,12 @@
+## 2026-07-19 (Fable 5 · main) — DISPATCHED (decree 'fire'): Lee per-ZIP assessed value + SOH gap → serve
+
+Operator decreed 'fire' on the 07/19 Lee mirror build (082c06e4). Forced properties-lee-value rebuild
+via the wrapper — run 29671210012 SUCCEEDED — then plain master cascade (no force) run 29671293906,
+in flight at commit time. Both acceptance entries appended to tripwire-accepted.json (the leaf entry
+rode a parallel session's commit ea437e67 — they hold the file claim; the master entry lands in this
+commit). Next: once master lands, live-verify zip-report Lee assessed_value/soh_gap on served bytes →
+close `lee_zip_assessed_soh_live_verify` + `lee_parcels_zip_summary_missing` with proof.
+
 ## 2026-07-19 (Fable 5 · main) — Operator ratified: ALL-TYPES ACTIVE COUNT becomes its own labeled root
 
 Put directly to the operator (the last of the two definitions this session carried; sold-price was
