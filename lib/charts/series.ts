@@ -13,6 +13,18 @@ export const SWFL_METRO_SERIES: ChartSeriesDef[] = [
   { key: "naples", label: "Naples", color: "#d4b370", dash: "2 5" }, // neutral-gold, dotted
 ];
 
+/**
+ * Same three metros for the Redfin MEDIAN SALE PRICE view
+ * (data_lake.redfin_metro_sold_pivoted). Naples is labeled "(city)" because
+ * Redfin's "Naples, FL" is the incorporated city (~2× the broad mailing-address
+ * Naples that the per-ZIP tables cover) — cross-vendor check 07/18/2026.
+ */
+export const REDFIN_METRO_SOLD_SERIES: ChartSeriesDef[] = [
+  { key: "cape_coral", label: "Cape Coral", color: "#3DC9C0", dash: "" }, // gulf-teal, solid
+  { key: "fort_myers", label: "Fort Myers", color: "#5bc97a", dash: "8 5" }, // mangrove, dashed
+  { key: "naples", label: "Naples (city)", color: "#d4b370", dash: "2 5" }, // neutral-gold, dotted
+];
+
 /** Single-series feed for the regional airport passenger panel. */
 export const REGION_PASSENGER_SERIES: ChartSeriesDef[] = [
   { key: "passengers", label: "Passengers", color: "#3DC9C0", dash: "" }, // gulf-teal, solid

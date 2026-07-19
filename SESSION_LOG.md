@@ -43,6 +43,32 @@ parseTokenDate/asOfFromIso reject impossible calendar days. Verified: 1,928 test
 lib/assistant + back-on-market), `bunx next build` green. Checks opened: web_fallback_component_linkage,
 opus_pass_0718_cleanup_batch. NOT closed yet: the site-audit-0718 checks (operator call per the doc).
 
+## 2026-07-18 (Fable 5 · main) — Real medians replace the Zillow index on every value surface; realtor parallel-run ingest live (the Redfin-retirement path)
+
+Operator decree executed ("build it and commit push it all"): (1) The three metro chart surfaces
+(/charts panel, chart gallery, zip-report trend) now serve Redfin's REAL median sale price via the new
+`data_lake.redfin_metro_sold_pivoted` view (exact `zhvi_pivoted` column shape — swap was by view name;
+May: CC $369,900 / FM $339,000 / Naples-city $1,235,000; Naples line labeled "Naples (city)" via new
+`REDFIN_METRO_SOLD_SERIES`). (2) Homepage map value layer → `market_details_swfl_latest.median_sold_price`
+(realtor.com) — the map already read that view for DOM, so the zhvi_zip_latest read is DROPPED (this was
+also a 7th live "Median home value (Zillow ZHVI)" label the earlier 6-site count missed). (3) Email's
+ZHVI home-value figure deleted — the realtor per-ZIP sold median was already in the same email
+(duplicate concept); county fallback moved onto the sold-median query. (4) NEW `geo-trends` resource in
+ingest/pipelines/market_aggregates (extend-don't-erect): /neighborhood-market-trends off 3 verified
+anchor properties → `data_lake.realtor_geo_medians` (city+county+neighborhood medians, vendor-verbatim,
+monthly cron `realtor-geo-trends-monthly.yml`, ~3 calls/run). First live run landed 9 rows; the
+`realtor_redfin_median_overlap` view baselines the cutover: Lee 0.0% / Collier 1.2% / CC 1.4% /
+FM -1.8% / Naples -49.9% (definitional — realtor "Naples"=broad sweep $619k vs Redfin city-proper
+$1.235M; operator chose broad go-forward; NEVER splice the two). ZHVI survives ONLY as an index doing
+index work: YoY growth panels + investor yield calc — no surface calls it a median. Checks opened:
+`realtor_redfin_overlap_cutover` (decision, operator-gated), `zori_median_monthly_rent_label` (same
+violation class, found in flight), `realtor_geo_cutover_live_verify` (spec
+docs/superpowers/specs/2026-07-19-realtor-geo-cutover-design.md). Verified: bunx next build green,
+342 chart/landing/zip/email tests + 9 map tests green; pipeline drift suite: only the 6 pre-existing
+workflow-less pipelines red (none mine). Registry entry (`realtor_geo_trends`) + data-roots catalog
+updates land in the follow-up commit of this same push — both files were claim-held by the parallel
+parcel-consolidation session when this entry was written.
+
 ## 2026-07-18 (Fable 5 · main) — Consolidation verify pass: 3 residual ZHVI "median" labels fixed, data-roots catalog de-staled (lee_parcels LANDED, leepa KEEP ratified, rentals fix noted)
 
 Ran a full verification of the 07/18 consolidation work against the live DB: lee_parcels 556,083 rows /

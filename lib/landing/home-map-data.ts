@@ -99,8 +99,8 @@ export const HOME_MAP_DATA: HomeMapFixture = {
       c2: "#e08158",
     },
     value: {
-      label: "Home Value",
-      sublabel: "Typical home value (Zillow ZHVI)",
+      label: "Median Sold Price",
+      sublabel: "Median sold price (realtor.com)",
       format: "currency",
       sample: true,
       data: {

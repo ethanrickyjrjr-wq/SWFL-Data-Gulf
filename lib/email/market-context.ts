@@ -47,38 +47,10 @@ type Db = ReturnType<typeof createServiceRoleClientUntyped>;
 async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<string | null> {
   let county: string | null = null;
 
-  try {
-    const { data } = await db
-      .schema("data_lake")
-      .from("zhvi_zip_latest")
-      .select("home_value_latest, value_yoy_pct, latest_period, city, county_name")
-      .eq("zip_code", zip)
-      .maybeSingle();
-    if (data) {
-      county = (data.county_name ?? "").replace(/\s*County$/i, "").trim() || null;
-      const hv = num(data.home_value_latest);
-      const yoy = num(data.value_yoy_pct);
-      const asOf = mdY(data.latest_period);
-      if (hv != null && hv > 0)
-        figs.push({
-          key: "home_value",
-          label: `Typical home value — ${data.city ?? zip} (${zip})`,
-          value: usd(hv),
-          source: "Zillow ZHVI",
-          as_of: asOf,
-        });
-      if (yoy != null)
-        figs.push({
-          key: "home_value_yoy",
-          label: "Home value, year over year",
-          value: pct(yoy),
-          source: "Zillow ZHVI",
-          as_of: asOf,
-        });
-    }
-  } catch {
-    /* degrade */
-  }
+  // (The Zillow ZHVI "home value" figure was REMOVED 07/18/2026 — the email already
+  // carries the realtor.com per-ZIP median sold below, and two home-price figures in
+  // one email was the exact duplicate-concept problem the root catalog exists to kill.
+  // ZHVI remains an internal index only — investor yield calc.)
 
   try {
     const { data } = await db
@@ -154,19 +126,21 @@ async function zipFigures(db: Db, zip: string, figs: MarketFigure[]): Promise<st
     /* degrade */
   }
 
-  // ZIP-grain SOLD median — the "third point" (value → sold → list) that no email
-  // carried before. Realtor.com per-ZIP median sold from data_lake.market_details_swfl_latest
-  // (the same latest snapshot the market-temperature source reads). A recorded-sale
-  // reference between the modelled value (ZHVI) and the active asking median, so the
-  // list-vs-value gap has a measured middle. Empty-tolerant like every block here.
+  // ZIP-grain SOLD median — realtor.com per-ZIP median sold from
+  // data_lake.market_details_swfl_latest (the same latest snapshot the
+  // market-temperature source reads). Since 07/18/2026 this is the email's ONE
+  // home-price reference (the ZHVI figure above was removed as a duplicate).
+  // Also the county fallback for ZIPs with no active-listings row.
+  // Empty-tolerant like every block here.
   try {
     const { data } = await db
       .schema("data_lake")
       .from("market_details_swfl_latest")
-      .select("median_sold_price, captured_date")
+      .select("median_sold_price, captured_date, county")
       .eq("zip_code", zip)
       .maybeSingle();
     if (data) {
+      county = county ?? ((data.county ?? "").replace(/\s*County$/i, "").trim() || null);
       const sold = num(data.median_sold_price);
       const asOf = mdY(data.captured_date);
       if (sold != null && sold > 0)

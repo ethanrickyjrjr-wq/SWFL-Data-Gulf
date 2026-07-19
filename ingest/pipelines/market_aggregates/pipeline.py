@@ -1,15 +1,19 @@
 """market_aggregates orchestrator — SteadyAPI Layer-B market aggregates (realtor.com origin).
 
-Two resources at two cadences (see docs/superpowers/specs/2026-06-30-market-cadence-three-tier-design.md):
-  histogram  weekly  (~2 calls)   -> data_lake.listing_price_histogram_swfl  (price-distribution-swfl)
-  details    monthly (~57 calls)  -> data_lake.market_details_swfl           (market-temperature-swfl)
+Three resources (see docs/superpowers/specs/2026-06-30-market-cadence-three-tier-design.md):
+  histogram   weekly  (~2 calls)  -> data_lake.listing_price_histogram_swfl  (price-distribution-swfl)
+  details     monthly (~57 calls) -> data_lake.market_details_swfl           (market-temperature-swfl)
+  geo-trends  monthly (~3 calls)  -> data_lake.realtor_geo_medians           (Redfin-retirement
+              parallel run, 07/18/2026 — city/county/neighborhood medians off anchor properties;
+              cutover decision check realtor_redfin_overlap_cutover)
 
 `--dry-run` makes ZERO network calls and prints the intended call count. Provenance surfaced by the
 brains is realtor.com; SteadyAPI (the access layer) is never surfaced.
 
 Run:
-  python -m ingest.pipelines.market_aggregates.pipeline --resource histogram [--dry-run]
-  python -m ingest.pipelines.market_aggregates.pipeline --resource details   [--dry-run]
+  python -m ingest.pipelines.market_aggregates.pipeline --resource histogram  [--dry-run]
+  python -m ingest.pipelines.market_aggregates.pipeline --resource details    [--dry-run]
+  python -m ingest.pipelines.market_aggregates.pipeline --resource geo-trends [--dry-run]
 """
 from __future__ import annotations
 
@@ -21,8 +25,13 @@ from ingest.lib.guards import ContentContractError
 from ingest.quality.contracts import evaluate_batch
 
 from . import db
-from .constants import COUNTY_LOCATIONS, swfl_zip_counties
-from .resources import fetch_market_details, fetch_price_histogram, intended_call_counts
+from .constants import COUNTY_LOCATIONS, GEO_TREND_ANCHORS, swfl_zip_counties
+from .resources import (
+    fetch_geo_trends,
+    fetch_market_details,
+    fetch_price_histogram,
+    intended_call_counts,
+)
 
 _HIST_TABLE = "data_lake.listing_price_histogram_swfl"
 _HIST_COLS = ["county", "band_min", "band_max", "band_range", "listing_count",
@@ -41,6 +50,13 @@ _DET_COLS = ["zip_code", "county", "median_sold_price", "median_listing_price", 
              "list_to_sold_ratio_pct", "sold_to_rent_ratio", "market_strength", "is_competitive",
              "captured_date", "source_tag"]
 _DET_CONFLICT = ["zip_code", "captured_date"]
+
+_GEO_TABLE = "data_lake.realtor_geo_medians"
+_GEO_COLS = ["geo_type", "name", "slug_id", "state_code", "county", "level",
+             "median_listing_price", "median_sold_price", "median_days_on_market",
+             "median_price_per_sqft", "anchor_label", "anchor_property_id",
+             "captured_date", "source_tag"]
+_GEO_CONFLICT = ["slug_id", "captured_date"]
 
 
 def run_histogram(*, dry_run: bool = False, today: str | None = None) -> dict:
@@ -103,18 +119,53 @@ def run_details(*, dry_run: bool = False, today: str | None = None) -> dict:
     return {"rows": n, "calls": calls}
 
 
+def run_geo_trends(*, dry_run: bool = False, today: str | None = None) -> dict:
+    """Monthly city/county/neighborhood median pull off the anchor properties — the
+    Redfin-retirement parallel run (operator-commissioned 07/18/2026). Rows land in
+    data_lake.realtor_geo_medians; the overlap-vs-Redfin read is the
+    data_lake.realtor_redfin_median_overlap view, decision check
+    realtor_redfin_overlap_cutover. Dedupes shared geo blocks (both Lee anchors
+    return the same Lee county block) by slug_id before the upsert."""
+    captured = today or str(date.today())
+    rows: list[dict] = []
+    seen: set[str] = set()
+    calls = 0
+    for label, pid in GEO_TREND_ANCHORS:
+        res = fetch_geo_trends(label, pid, captured=captured, dry_run=dry_run)
+        calls += res["calls"]
+        if not dry_run and not res["rows"]:
+            # A stale/unresolvable anchor must be LOUD (see GEO_TREND_ANCHORS note),
+            # but one dead anchor must not sink the other cities' rows.
+            print(f"[warn] geo_trends anchor '{label}' (pid {pid}) returned no rows — "
+                  f"replace the anchor from listing_state", flush=True)
+        for r in res["rows"]:
+            if r["slug_id"] in seen:
+                continue
+            seen.add(r["slug_id"])
+            rows.append(r)
+    n = db.upsert(_GEO_TABLE, _GEO_COLS, _GEO_CONFLICT, rows, dry_run=dry_run)
+    intended = intended_call_counts()["geo_trends"]
+    print(f"[budget] geo_trends = {calls if not dry_run else intended} "
+          f"neighborhood-market-trends calls (monthly; ~{intended}/run)", flush=True)
+    print(f"[done] geo_trends rows={n} dry_run={dry_run}", flush=True)
+    return {"rows": n, "calls": calls}
+
+
 def main(argv: list[str] | None = None) -> int:
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
         pass
-    ap = argparse.ArgumentParser(description="SteadyAPI market aggregates (histogram | details).")
-    ap.add_argument("--resource", choices=["histogram", "details"], required=True)
+    ap = argparse.ArgumentParser(
+        description="SteadyAPI market aggregates (histogram | details | geo-trends).")
+    ap.add_argument("--resource", choices=["histogram", "details", "geo-trends"], required=True)
     ap.add_argument("--dry-run", action="store_true",
                     help="fetch nothing (zero network calls), print the intended call count")
     args = ap.parse_args(argv)
     if args.resource == "histogram":
         run_histogram(dry_run=args.dry_run)
+    elif args.resource == "geo-trends":
+        run_geo_trends(dry_run=args.dry_run)
     else:
         run_details(dry_run=args.dry_run)
     return 0

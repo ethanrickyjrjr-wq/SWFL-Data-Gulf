@@ -26,12 +26,6 @@ mock.module("@/utils/supabase/service-role", () => ({
 
 const { loadHomeMapData } = await import("./load-home-map-data");
 
-const ZHVI = [
-  { zip_code: "33901", home_value_latest: 285000, latest_period: "2026-04-30", city: null },
-  { zip_code: "34102", home_value_latest: 985000, latest_period: "2026-04-30", city: null },
-  { zip_code: "34108", home_value_latest: 1250000, latest_period: "2026-04-30", city: null },
-  { zip_code: "99999", home_value_latest: 111111, latest_period: "2026-04-30", city: null }, // off-map: dropped
-];
 // Market Activity ← listing_active_stats (active inventory, full Lee+Collier).
 // The null-zip county-rollup row must be DROPPED by the loader's zip_code gate —
 // its 7,673 must never leak into the "Active Listings" total (stays 30+120=150).
@@ -58,15 +52,36 @@ const ACTIVITY = [
     latest_scraped_at: "2026-07-02T00:00:00Z",
   },
 ];
-// Days on Market ← market_details_swfl_latest (realtor.com median DOM).
+// Median Sold Price AND Days on Market both ← market_details_swfl_latest
+// (realtor.com per-ZIP monthly) — ONE shared root since 07/18/2026 (the ZHVI
+// index left user surfaces), so one table failure takes both layers down.
+// Sold medians are the live-verified 07/18/2026 values for these ZIPs.
 const MARKET_DETAILS = [
-  { zip_code: "33901", county: "Lee", median_days_on_market: 157, captured_date: "2026-07-02" },
-  { zip_code: "34102", county: "Collier", median_days_on_market: 90, captured_date: "2026-07-02" },
+  {
+    zip_code: "33901",
+    county: "Lee",
+    median_sold_price: 320000,
+    median_days_on_market: 157,
+    captured_date: "2026-07-02",
+  },
+  {
+    zip_code: "34102",
+    county: "Collier",
+    median_sold_price: 1650000,
+    median_days_on_market: 90,
+    captured_date: "2026-07-02",
+  },
+  {
+    zip_code: "99999",
+    county: "Lee",
+    median_sold_price: 111111,
+    median_days_on_market: 10,
+    captured_date: "2026-07-02",
+  }, // off-map: dropped
 ];
 
 beforeEach(() => {
   for (const k of Object.keys(tables)) delete tables[k];
-  tables["zhvi_zip_latest"] = { data: ZHVI, error: null };
   tables["listing_active_stats"] = { data: ACTIVITY, error: null };
   tables["market_details_swfl_latest"] = { data: MARKET_DETAILS, error: null };
 });
@@ -80,11 +95,12 @@ describe("loadHomeMapData", () => {
 
     const value = p.data.metrics.value!;
     expect(value.sample).toBeUndefined();
-    expect(value.low).toBe(285000);
-    expect(value.high).toBe(1250000);
+    expect(value.label).toBe("Median Sold Price");
+    expect(value.low).toBe(320000);
+    expect(value.high).toBe(1650000);
     expect(value.data["99999"]).toBeUndefined(); // off-map row dropped
-    expect(value.asOf).toBe("04/30/2026");
-    // Operator ruling 07/03/2026: Home Value is the first map and wears the
+    expect(value.asOf).toBe("07/02/2026");
+    // Operator ruling 07/03/2026: the value layer is the first map and wears the
     // orange brand ramp — dark slate base, gold→coral top.
     expect([value.c0, value.c1, value.c2]).toEqual(["#33525e", "#d4b370", "#e08158"]);
 
@@ -99,33 +115,32 @@ describe("loadHomeMapData", () => {
 
     const labels = p.stats.map((s) => s.label);
     expect(labels).toContain("Active Listings");
-    expect(labels).toContain("Highest Home Value");
+    expect(labels).toContain("Highest Median Sold");
     const total = p.stats.find((s) => s.label === "Active Listings")!;
     expect(total.value).toBe("150");
   });
 
-  test("value query fails → fixture fallback with sample:true + sample badge", async () => {
-    tables["zhvi_zip_latest"] = { data: null, error: { message: "boom" } };
+  test("shared-root query fails → value fixture fallback + dom absent (one table, one failure)", async () => {
+    tables["market_details_swfl_latest"] = { data: null, error: { message: "boom" } };
     const p = await loadHomeMapData();
     expect(p.data.metrics.value!.sample).toBe(true);
+    expect(p.data.metrics.dom).toBeUndefined();
     expect(p.anySample).toBe(true);
     expect(p.badge).toContain("Sample data");
     // No live value rows → no value-derived stat cells (never mock stats).
-    expect(p.stats.map((s) => s.label)).not.toContain("Highest Home Value");
+    expect(p.stats.map((s) => s.label)).not.toContain("Highest Median Sold");
   });
 
-  test("listing queries fail → activity AND dom pills absent, page stays live", async () => {
+  test("activity query fails → activity pill absent, page stays live", async () => {
     tables["listing_active_stats"] = { data: null, error: { message: "boom" } };
-    tables["market_details_swfl_latest"] = { data: null, error: { message: "boom" } };
     const p = await loadHomeMapData();
     expect(p.data.metrics.activity).toBeUndefined();
-    expect(p.data.metrics.dom).toBeUndefined();
     expect(p.stats.map((s) => s.label)).not.toContain("Active Listings");
     expect(p.data.metrics.value!.sample).toBeUndefined();
   });
 
   test("empty result sets → fixture fallback, never empty metrics", async () => {
-    tables["zhvi_zip_latest"] = { data: [], error: null };
+    tables["market_details_swfl_latest"] = { data: [], error: null };
     const p = await loadHomeMapData();
     expect(p.data.metrics.value!.sample).toBe(true);
     expect(Object.keys(p.data.metrics.value!.data).length).toBeGreaterThan(40);

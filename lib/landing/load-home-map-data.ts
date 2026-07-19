@@ -63,11 +63,10 @@ const num = (v: unknown): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
-interface ZhviRow {
+interface SoldRow {
   zip_code: string;
-  home_value_latest: number | string | null;
-  latest_period: string | null;
-  city: string | null;
+  median_sold_price: number | string | null;
+  captured_date: string | null;
 }
 interface ActivityRow {
   zip_code: string;
@@ -112,38 +111,39 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
   let activity: MetricDef | null = null;
   let dom: MetricDef | null = null;
 
-  let zhviRows: ZhviRow[] = [];
+  let soldRows: SoldRow[] = [];
   let activityRows: ActivityRow[] = [];
 
-  // ── Home Value — data_lake.zhvi_zip_latest (Zillow ZHVI) ──
+  // ── Median Sold Price — data_lake.market_details_swfl_latest (realtor.com,
+  //    per-ZIP monthly). Replaced the ZHVI index on user surfaces 07/18/2026 —
+  //    the map already reads this view for its DOM layer, so this DROPS a
+  //    source (zhvi_zip_latest) rather than adding one. ──
   if (db) {
     try {
       const { data, error } = await db
         .schema("data_lake")
-        .from("zhvi_zip_latest")
-        .select("zip_code, home_value_latest, latest_period, city");
+        .from("market_details_swfl_latest")
+        .select("zip_code, median_sold_price, captured_date");
       if (!error && data) {
-        zhviRows = (data as ZhviRow[]).filter((r) => MAP_ZIPS.has(r.zip_code));
-        const rows = zhviRows
-          .map((r) => ({ zip: r.zip_code, val: num(r.home_value_latest) }))
+        soldRows = (data as SoldRow[]).filter((r) => MAP_ZIPS.has(r.zip_code));
+        const rows = soldRows
+          .map((r) => ({ zip: r.zip_code, val: num(r.median_sold_price) }))
           .filter((r): r is { zip: string; val: number } => r.val != null);
-        const latest = zhviRows
-          .map((r) => r.latest_period)
+        const latest = soldRows
+          .map((r) => r.captured_date)
           .sort()
           .at(-1);
         value = metricFromRows(rows, {
-          label: "Home Value",
-          sublabel: "Median home value (Zillow ZHVI)",
+          label: "Median Sold Price",
+          sublabel: "Median sold price (realtor.com)",
           format: "currency",
           // The orange brand ramp (operator ruling 07/03/2026): dark slate
-          // base, gold→coral coast — Home Value is the first map and wears it.
+          // base, gold→coral coast — the value layer is the first map and wears it.
           c0: "#33525e",
           c1: "#d4b370",
           c2: "#e08158",
           asOf: mdY(latest),
         });
-        for (const r of zhviRows)
-          if (r.city && !placeNames[r.zip_code]) placeNames[r.zip_code] = r.city;
       }
     } catch {
       /* fall through to fixture */
@@ -269,19 +269,19 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
     }
   }
 
-  if (zhviRows.length > 0 && value && !value.sample) {
-    const ranked = zhviRows
-      .map((r) => ({ zip: r.zip_code, val: num(r.home_value_latest) }))
+  if (soldRows.length > 0 && value && !value.sample) {
+    const ranked = soldRows
+      .map((r) => ({ zip: r.zip_code, val: num(r.median_sold_price) }))
       .filter((r): r is { zip: string; val: number } => r.val != null)
       .sort((a, b) => b.val - a.val);
     const top = ranked[0];
     const bottom = ranked[ranked.length - 1];
     if (top) {
       stats.push({
-        label: "Highest Home Value",
+        label: "Highest Median Sold",
         value: usdShort(top.val),
         sub: `${placeNames[top.zip] ?? top.zip} (${top.zip})`,
-        tag: `Zillow ZHVI${value.asOf ? ` · ${value.asOf}` : ""}`,
+        tag: `realtor.com${value.asOf ? ` · ${value.asOf}` : ""}`,
       });
     }
     if (top && bottom && ranked.length > 1) {
@@ -289,7 +289,7 @@ export async function loadHomeMapData(): Promise<HomeMapPayload> {
         label: "Market Range",
         value: `${ranked.length} ZIPs`,
         sub: `${usdShort(bottom.val)} ${placeNames[bottom.zip] ?? bottom.zip} → ${usdShort(top.val)} ${placeNames[top.zip] ?? top.zip}`,
-        tag: "Zillow ZHVI",
+        tag: "realtor.com",
       });
     }
   }

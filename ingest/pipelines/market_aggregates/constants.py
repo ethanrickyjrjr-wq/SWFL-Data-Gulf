@@ -46,6 +46,23 @@ COUNTY_LOCATIONS = {"Lee": "Lee County, FL", "Collier": "Collier County, FL"}
 # For-sale only (excludes ready_to_build new-construction) — matches our listing_state for-sale scope.
 HISTOGRAM_STATUS = "for_sale"
 
+# ── /neighborhood-market-trends anchors (geo_trends resource, added 07/18/2026) ──
+# The endpoint resolves ONE propertyId to its city + county + neighborhood median
+# blocks, so a monthly city/county median pull needs one stable anchor property per
+# city. These three were live-verified 07/18/2026 to resolve to the intended geo
+# (city block name + county both correct). ANCHOR WART, verified same day: a 34119
+# "Naples" property resolved to Lee county / a Bonita Springs neighborhood — anchors
+# must sit well INSIDE their boundary. If an anchor goes stale (non-200), replace it
+# from data_lake.listing_state (state='active', the anchor's zip_code) and note it here.
+# Naples anchor = 34102 (city-proper); note the CITY block realtor returns for "Naples"
+# is the BROAD mailing-address Naples (~$619k on 07/18/2026), not Redfin's city-proper
+# (~$1.235M) — the operator-chosen go-forward definition (07/18/2026).
+GEO_TREND_ANCHORS: list[tuple[str, str]] = [
+    ("Cape Coral", "6748540406"),   # 1437 Vendome Ct, 33904
+    ("Fort Myers", "6867135156"),   # 4350 Orangewood Ave, 33901
+    ("Naples", "6566982567"),       # 401 Bayfront Pl #3502, 34102
+]
+
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _ZIP_FIXTURE = _REPO_ROOT / "fixtures" / "swfl-zip-county.json"
 _IN_SCOPE_COUNTY_FIPS = {"12071": "Lee", "12021": "Collier"}

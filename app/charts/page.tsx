@@ -26,7 +26,11 @@ import {
   mapTierYoY,
   type TierPivotedRow,
 } from "@/lib/charts/tier-divergence-series";
-import { SWFL_METRO_SERIES, REGION_AIR_TRAVEL_SERIES } from "@/lib/charts/series";
+import {
+  SWFL_METRO_SERIES,
+  REDFIN_METRO_SOLD_SERIES,
+  REGION_AIR_TRAVEL_SERIES,
+} from "@/lib/charts/series";
 import type { ChartRow, ChartSeriesDef, PivotedCityMonth } from "@/types/viz";
 import type { ValueFormat } from "@/lib/charts/format";
 // KNOWN-DEBT(data_lake: reads chart aggregates from the data_lake schema (typed public only))
@@ -224,7 +228,7 @@ export default async function ChartsPage() {
     marketTemp,
     zipHeat,
   ] = await Promise.all([
-    loadMetros(supabase, "zhvi_pivoted"),
+    loadMetros(supabase, "redfin_metro_sold_pivoted"),
     loadMetros(supabase, "zori_pivoted"),
     loadPassengers(supabase),
     loadHomeValueMomentum(supabase),
@@ -238,10 +242,10 @@ export default async function ChartsPage() {
     {
       rootId: "home-values",
       eyebrow: "Southwest Florida",
-      title: "Typical Home Value",
-      subtitle: "Cape Coral · Fort Myers · Naples",
+      title: "Median Sale Price",
+      subtitle: "Cape Coral · Fort Myers · Naples (city)",
       valueFormat: "usd",
-      series: SWFL_METRO_SERIES,
+      series: REDFIN_METRO_SOLD_SERIES,
       variant: "area",
       ...homeValues,
     },

@@ -1,0 +1,51 @@
+name: realtor-geo-trends-monthly
+
+# SteadyAPI /neighborhood-market-trends -> data_lake.realtor_geo_medians — the
+# Redfin-retirement PARALLEL RUN (operator-commissioned 07/18/2026). ~3 calls/run
+# (one per anchor property: Cape Coral, Fort Myers, Naples). MONTHLY. City +
+# county + neighborhood median sold/list/DOM/ppsqft, vendor-verbatim. Provenance
+# surfaced = realtor.com.
+#
+# Cutover: after 2-3 overlap months the data_lake.realtor_redfin_median_overlap
+# view answers whether realtor continues the Redfin series (city/county deltas
+# held within ~2% on 07/18/2026; Naples differs BY DEFINITION — broad vs
+# city-proper). Decision check: realtor_redfin_overlap_cutover. Until it closes,
+# BOTH pulls run. Respects the engine on/off switch (vars.ENGINE_ENABLED).
+
+on:
+  schedule:
+    - cron: "0 14 4 * *"   # 4th of the month 14:00 UTC — 1h after market-aggregates-details
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run (zero network, zero DB write)"
+        type: boolean
+        default: true
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+      PHOTOS_API: ${{ secrets.PHOTOS_API }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run neighborhood-market-trends geo pull
+        env:
+          DRY_INPUT: ${{ inputs.dry_run }}
+        run: |
+          ARGS=(--resource geo-trends)
+          if [ "$DRY_INPUT" = "true" ]; then ARGS+=(--dry-run); fi
+          python -m ingest.pipelines.market_aggregates.pipeline "${ARGS[@]}"

@@ -7,7 +7,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from .constants import COUNTY_LOCATIONS, HISTOGRAM_STATUS, SOURCE_TAG, swfl_zip_counties
+from .constants import (
+    COUNTY_LOCATIONS,
+    GEO_TREND_ANCHORS,
+    HISTOGRAM_STATUS,
+    SOURCE_TAG,
+    swfl_zip_counties,
+)
 from .steady_client import get_json
 
 
@@ -125,6 +131,68 @@ def fetch_market_details(zip_code: str, county: str, *, captured: str, dry_run: 
     return {"row": parse_market_details(data, zip_code, county, captured), "calls": 1}
 
 
+# ── neighborhood market trends (city/county/neighborhood medians per anchor) ────
+
+def parse_geo_trends(raw: dict, anchor_label: str, anchor_pid: str, captured: str) -> list[dict]:
+    """SteadyAPI /neighborhood-market-trends body -> one row per geo block (city + county +
+    each neighborhood). Verbatim vendor medians (median is REAL here — never recomputed).
+    A block with no metrics is skipped (a gap; never fabricate a row). Neighborhood rows carry
+    the vendor's `level`; city/county rows leave it NULL."""
+    body = raw.get("body") or {}
+    out: list[dict] = []
+
+    def _row(block: dict, geo_type: str) -> dict | None:
+        if not isinstance(block, dict):
+            return None
+        mm = block.get("market_metrics") or {}
+        if not mm:
+            return None
+        slug = block.get("slug_id")
+        name = block.get("name")
+        if not slug or not name:
+            return None
+        return {
+            "geo_type": geo_type,
+            "name": name,
+            "slug_id": slug,
+            "state_code": block.get("state_code"),
+            "county": block.get("county"),
+            "level": block.get("level"),
+            "median_listing_price": _int(mm.get("median_listing_price")),
+            "median_sold_price": _int(mm.get("median_sold_price")),
+            "median_days_on_market": _int(mm.get("median_days_on_market")),
+            "median_price_per_sqft": _int(mm.get("median_price_per_sqft")),
+            "anchor_label": anchor_label,
+            "anchor_property_id": anchor_pid,
+            "captured_date": captured,
+            "source_tag": SOURCE_TAG,
+        }
+
+    for block, geo_type in ((body.get("city"), "city"), (body.get("county"), "county")):
+        r = _row(block, geo_type)
+        if r:
+            out.append(r)
+    for nb in body.get("neighborhoods") or []:
+        r = _row(nb, "neighborhood")
+        if r:
+            out.append(r)
+    return out
+
+
+def fetch_geo_trends(anchor_label: str, anchor_pid: str, *, captured: str,
+                     dry_run: bool = False, key: str | None = None) -> dict:
+    """One /neighborhood-market-trends call for an anchor property. Returns {rows, calls}.
+    dry_run -> zero network."""
+    if dry_run:
+        return {"rows": [], "calls": 0}
+    st, data = get_json("neighborhood-market-trends", {"propertyId": anchor_pid}, key=key)
+    if st != 200 or not isinstance(data, dict):
+        return {"rows": [], "calls": 1}
+    return {"rows": parse_geo_trends(data, anchor_label, anchor_pid, captured), "calls": 1}
+
+
 def intended_call_counts() -> dict:
-    """What a live run WOULD cost (printed by --dry-run). histogram = counties; details = in-scope ZIPs."""
-    return {"histogram": len(COUNTY_LOCATIONS), "details": len(swfl_zip_counties())}
+    """What a live run WOULD cost (printed by --dry-run). histogram = counties; details = in-scope
+    ZIPs; geo_trends = anchor properties."""
+    return {"histogram": len(COUNTY_LOCATIONS), "details": len(swfl_zip_counties()),
+            "geo_trends": len(GEO_TREND_ANCHORS)}

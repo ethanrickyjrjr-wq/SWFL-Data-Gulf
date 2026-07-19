@@ -28,7 +28,7 @@ import { asOfFromToken } from "../../../../lib/project/as-of";
 import { computeZipGradient, FLOOD_GRADIENT } from "../../../../lib/map/zip-color";
 import DigestSubscribe from "../../../../components/email/DigestSubscribe";
 import { MetroAreaChart } from "../../../../components/charts";
-import { SWFL_METRO_SERIES } from "../../../../lib/charts/series";
+import { REDFIN_METRO_SOLD_SERIES } from "../../../../lib/charts/series";
 import { loadMetroTrend } from "../../../../lib/charts/load-metro-trend";
 import { loadNarrative } from "../../../../lib/narratives/store";
 import { NarrativeSections } from "../../../../components/narratives/NarrativeSections";
@@ -95,7 +95,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   // the same Promise.all.
   const [a, metroTrend, sourcedFigures, narrative, pulseNearby, seedEmailHtml] = await Promise.all([
     assembleZipReport(zip),
-    loadMetroTrend("zhvi_pivoted"),
+    loadMetroTrend("redfin_metro_sold_pivoted"),
     getSourcedFigures({ kind: "zip", key: zip }),
     loadNarrative("zip", zip),
     loadPulseNearby(zip),
@@ -440,14 +440,14 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
               <div className="mt-5">
                 <MetroAreaChart
                   data={metroTrend.data}
-                  series={SWFL_METRO_SERIES}
+                  series={REDFIN_METRO_SOLD_SERIES}
                   variant="area"
                   asOf={metroTrend.asOf}
                   eyebrow="Southwest Florida"
-                  title="Typical Home Value Trend"
-                  subtitle="Cape Coral · Fort Myers · Naples"
+                  title="Median Sale Price Trend"
+                  subtitle="Cape Coral · Fort Myers · Naples (city)"
                   valueFormat="usd"
-                  rootId="zip-report-zhvi"
+                  rootId="zip-report-sold-median"
                 />
               </div>
             )}

@@ -9,6 +9,7 @@ import {
 } from "@/lib/charts/tier-divergence-series";
 import {
   SWFL_METRO_SERIES,
+  REDFIN_METRO_SOLD_SERIES,
   REGION_AIR_TRAVEL_SERIES,
   TIER_INDEXED_SERIES,
 } from "@/lib/charts/series";
@@ -240,12 +241,12 @@ const PANEL_CONFIGS: PanelConfig[] = [
   {
     rootId: "home-values",
     eyebrow: "Southwest Florida",
-    title: "Typical Home Value",
-    subtitle: "Cape Coral · Fort Myers · Naples",
+    title: "Median Sale Price",
+    subtitle: "Cape Coral · Fort Myers · Naples (city)",
     valueFormat: "usd",
-    series: SWFL_METRO_SERIES,
+    series: REDFIN_METRO_SOLD_SERIES,
     variant: "area",
-    load: (db) => loadMetros(db, "zhvi_pivoted"),
+    load: (db) => loadMetros(db, "redfin_metro_sold_pivoted"),
   },
   {
     rootId: "rents",
