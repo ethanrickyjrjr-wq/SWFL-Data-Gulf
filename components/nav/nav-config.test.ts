@@ -77,16 +77,18 @@ describe("homeHref (B4 — signed-in home base)", () => {
 
 describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
   it("carries the top-level marquees + Explore + Seller Tools groups in order", () => {
+    // The 07/11 pinned marquee run (Insiders…Alerts) stays CONTIGUOUS — Seller Tools
+    // rides after it, never wedged inside it (operator correction 07/19).
     expect(NAV_GROUPS.map((n) => n.label)).toEqual([
       "Explore",
       "Insiders",
-      "Seller Tools",
       "Desk",
       "Showcase",
       "Projects",
       "Charts",
       "Maps",
       "Alerts",
+      "Seller Tools",
     ]);
   });
 

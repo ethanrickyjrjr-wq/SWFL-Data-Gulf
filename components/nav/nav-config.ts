@@ -47,11 +47,18 @@ export const NAV_GROUPS: NavItem[] = [
   // The campaign centerpiece rides top-level, right after Explore (spec
   // 2026-07-10-insiders-page-design.md) — not buried as a dropdown child.
   { label: "Insiders", href: "/insiders" },
-  // Seller-side reads, promoted to their OWN top-level group (operator ruling 07/18/2026:
-  // "seller tools can be louder under Seller Tools"). The validated whitespace — the
-  // scoring industry hides the seller's own stress score; these face it to them. Both are
-  // live /r/ routes. `/r/should-i-sell` sits under `/r`, but Seller Tools is a distinct
-  // group so it never collides with Explore's Search (`/r`) in activeChildHref.
+  { label: "Desk", href: "/desk" },
+  { label: "Showcase", href: "/showcase" },
+  { label: "Projects", href: "/project" },
+  { label: "Charts", href: "/charts" },
+  { label: "Maps", href: "/map" },
+  { label: "Alerts", href: "/alerts" },
+  // Seller-side reads, their OWN top-level group (operator ruling 07/18/2026: "seller
+  // tools can be louder under Seller Tools"). Placed AFTER the pinned marquee run —
+  // the 07/18 parallel session wedged this between Insiders and Desk, breaking the
+  // 07/11 pinned order (operator correction 07/19: the marquee run stays contiguous).
+  // Both are live /r/ routes. `/r/should-i-sell` sits under `/r`, but Seller Tools is
+  // a distinct group so it never collides with Explore's Search (`/r`) in activeChildHref.
   {
     label: "Seller Tools",
     children: [
@@ -59,12 +66,6 @@ export const NAV_GROUPS: NavItem[] = [
       { label: "Back on Market", href: "/r/back-on-market" },
     ],
   },
-  { label: "Desk", href: "/desk" },
-  { label: "Showcase", href: "/showcase" },
-  { label: "Projects", href: "/project" },
-  { label: "Charts", href: "/charts" },
-  { label: "Maps", href: "/map" },
-  { label: "Alerts", href: "/alerts" },
 ];
 
 /**

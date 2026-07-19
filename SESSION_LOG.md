@@ -18,6 +18,20 @@ mhs_source_string_jargon_bait opened. Actions-tab noise: last night's flood = op
 decreed rebuild dispatches × ~7 downstream runs each (CI/deptry/smoke/rollback/bake/grade/loggers);
 sub-daily crons were already throttled 07/18 (65359971, b3fd7af7). Next: operator fires the push;
 bake verify closes on tonight's chain run.
+## 2026-07-19 (Fable 5 · main) — funnel fixes: Seller Tools out of the pinned marquee run; /r finally reachable (footer + sitemap + /r hub directory)
+
+Operator correction: the 07/18 parallel session wedged the Seller Tools group BETWEEN Insiders and
+Desk, breaking the 07/11 pinned marquee order — moved to after Alerts (marquee run contiguous
+again; nav-config.test.ts order guard updated same commit, 31/31 pass). Discoverability audit for
+"/r pages are unreachable": only path in was Explore▾→Search; footer had no seller-read links;
+sitemap enumerated ONLY /r/[slug] brains — /r itself, /r/should-i-sell, /r/back-on-market had zero
+crawler path. Fixed: footer Explore column carries Should I Sell?/Back on Market/Housing Report;
+sitemap adds /r (0.8) + /r/should-i-sell (0.9, daily) + /r/back-on-market (0.8, daily); /r hub
+gets an "Or start from a report" 3-card directory (should-i-sell / back-on-market / housing-swfl).
+Full `bunx next build` green. back-on-market flush-left defect confirmed already fixed 07/18 (page
+reuses report-shell) — safe to promote. NEXT: per-ZIP should-i-sell/zip-report sitemap enumeration
+(check opened); 20-paying-users launch kit written to docs/steadyapi-research/ (local-only).
+
 ## 2026-07-19 (Fable 5 · main) — lint: gitignored scratch out of ESLint scope; Problems panel cleared to zero
 
 Operator asked to clear all editor problems. Repo audit: root `tsc --noEmit` clean; all 11 ESLint

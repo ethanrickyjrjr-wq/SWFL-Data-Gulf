@@ -22,6 +22,9 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Explore",
     links: [
       { label: "Search", href: "/r" },
+      { label: "Should I Sell?", href: "/r/should-i-sell" },
+      { label: "Back on Market", href: "/r/back-on-market" },
+      { label: "Housing Report", href: "/r/housing-swfl" },
       { label: "Guides", href: "/guides" },
       { label: "Insiders Edition", href: "/insiders" },
       { label: "Data Desk", href: "/desk" },

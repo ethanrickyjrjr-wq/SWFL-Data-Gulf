@@ -50,6 +50,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   });
 
+  // ── Report entry points (/r hub + the seller-facing marquee reads) ────────
+  // These were invisible to crawlers until 07/19 — only /r/[slug] brain pages
+  // were enumerated, so the seller-side landing surfaces had zero SEO path in.
+  entries.push({
+    url: `${ORIGIN}/r`,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  });
+  entries.push({
+    url: `${ORIGIN}/r/should-i-sell`,
+    changeFrequency: "daily",
+    priority: 0.9,
+  });
+  entries.push({
+    url: `${ORIGIN}/r/back-on-market`,
+    changeFrequency: "daily",
+    priority: 0.8,
+  });
+
   // ── Guides hub (/guides + /guides/[slug]) ─────────────────────────────────
   entries.push({
     url: `${ORIGIN}/guides`,
