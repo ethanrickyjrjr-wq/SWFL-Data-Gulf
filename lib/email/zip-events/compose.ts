@@ -164,13 +164,11 @@ function splitLeadAndRollup(events: MarketEvent[], subjectZip: string) {
   return { lead, rollup, other };
 }
 
-/** Every issue leads somewhere: one button to the subscriber's live ZIP report. */
-function ctaBlock(url: string, placeOrZip: string, y: number): BlockOf<"button"> {
-  return gblk(
-    "button",
-    { x: 0, y, w: 12, h: 2 },
-    { label: `See the full ${placeOrZip} report`, url },
-  );
+/** Every issue leads somewhere: one button to the subscriber's live ZIP report.
+ *  Label names the ZIP, not the city — the destination is ZIP-grain (a "Fort
+ *  Myers report" label over a 33908 link mislabels the grain — operator 07/19). */
+function ctaBlock(url: string, zip: string, y: number): BlockOf<"button"> {
+  return gblk("button", { x: 0, y, w: 12, h: 2 }, { label: `See the full ZIP ${zip} report`, url });
 }
 
 /** Dedupe every fact source into ONE collapsed sources block. */
@@ -251,7 +249,7 @@ export function composeAlertDoc(input: ComposeInput): EmailDoc {
     y += 3;
   }
   if (input.reportUrl) {
-    blocks.push(ctaBlock(input.reportUrl, placeOrZip, y));
+    blocks.push(ctaBlock(input.reportUrl, input.subscriberZip, y));
     y += 2;
   }
   blocks.push(sourcesBlock(input.events, [], y));
@@ -337,7 +335,7 @@ export function composeWeeklyDoc(input: ComposeWeeklyInput): EmailDoc {
   }
 
   if (input.reportUrl) {
-    blocks.push(ctaBlock(input.reportUrl, placeOrZip, y));
+    blocks.push(ctaBlock(input.reportUrl, input.subscriberZip, y));
     y += 2;
   }
 
@@ -433,7 +431,7 @@ export function composeBaselineDoc(input: ComposeBaselineInput): EmailDoc {
   }
 
   if (input.reportUrl) {
-    blocks.push(ctaBlock(input.reportUrl, placeOrZip, y));
+    blocks.push(ctaBlock(input.reportUrl, input.subscriberZip, y));
     y += 2;
   }
 
@@ -453,4 +451,189 @@ export function composeBaselineDoc(input: ComposeBaselineInput): EmailDoc {
   y += 2;
   blocks.push(gblk("footer", { x: 0, y, w: 12, h: 3, static: true }));
   return { globalStyle: { ...NEUTRAL_SKELETON_STYLE }, blocks };
+}
+
+// ── Rich composition — the researched zip-seed anatomy + the week's events ──
+//
+// Operator ruling 07/19 (verbatim: "how does builder not put together a full
+// rundown brief of what is going, what has happened and what the future looks
+// like?"): the recurring email is NOT a bare event list. It is the full
+// zip-seed brief — map cutout, ranked metric cards from the same pool the
+// webpage renders, the baked narrator commentary, the [INFERENCE]+falsifier
+// outlook — with the week's events and the regional housing read spliced in
+// ahead of its sources/CTA tail. buildZipSeedDoc is empty-tolerant; when it
+// returns null the composer falls back to the plain event shape.
+
+export interface RegionalRead {
+  /** Held, brain-baked conclusion text — served verbatim (read rates as written). */
+  text: string;
+  sourceLabel: string;
+}
+
+function regionalReadBlock(r: RegionalRead, y: number): BlockOf<"signal"> {
+  return gblk(
+    "signal",
+    { x: 0, y, w: 12, h: 5 },
+    { kicker: "The regional read", title: "Southwest Florida housing right now", body: r.text },
+  );
+}
+
+interface EventSectionInput {
+  events: MarketEvent[];
+  subscriberZip: string;
+  subscriberPlace: string | null;
+  area: MarketArea;
+  heatRanks?: AreaHeatRank[];
+  areaLabelsById?: Record<string, string>;
+  insider?: InsiderCard | null;
+  regionalRead?: RegionalRead | null;
+}
+
+function eventSectionBlocks(
+  kind: "weekly" | "baseline",
+  input: EventSectionInput,
+  startY: number,
+): { blocks: EmailDoc["blocks"]; y: number } {
+  const blocks: EmailDoc["blocks"] = [];
+  let y = startY;
+  const placeOrZip = input.subscriberPlace ?? `ZIP ${input.subscriberZip}`;
+  const { lead, rollup, other } = splitLeadAndRollup(input.events, input.subscriberZip);
+  if (lead) {
+    const leadScope = lead.zip === input.subscriberZip ? placeOrZip : `ZIP ${lead.zip}`;
+    const kicker = kind === "weekly" ? "This week's lead" : "Happening now";
+    blocks.push(eventCard(lead, y, `${kicker} — ${leadScope}`));
+    y += 3;
+  }
+  if (rollup.length > 0) {
+    blocks.push(
+      gblk(
+        "list",
+        { x: 0, y, w: 12, h: 4 },
+        { title: `Around ${input.area.label}`, items: rollup.slice(0, ROLLUP_MAX) },
+      ),
+    );
+    y += 4;
+  }
+  if (kind === "weekly" && input.heatRanks && input.heatRanks.length > 0 && input.areaLabelsById) {
+    const labels = input.areaLabelsById;
+    const items: ListItem[] = input.heatRanks
+      .filter((r) => labels[r.area_id])
+      .slice(0, 6)
+      .map((r) => ({ lead: `#${r.position}`, text: capFirst(labels[r.area_id]) }));
+    if (items.length > 0) {
+      blocks.push(
+        gblk(
+          "list",
+          { x: 0, y, w: 12, h: 4 },
+          { title: "Hottest market areas in Lee & Collier this week", items },
+        ),
+      );
+      y += 4;
+    }
+  }
+  const newsCap = kind === "weekly" ? other.length : Math.min(other.length, 1);
+  for (const e of other.slice(0, newsCap)) {
+    blocks.push(eventCard(e, y));
+    y += 3;
+  }
+  if (input.regionalRead) {
+    blocks.push(regionalReadBlock(input.regionalRead, y));
+    y += 5;
+  }
+  if (kind === "weekly" && input.insider) {
+    blocks.push(
+      gblk(
+        "signal",
+        { x: 0, y, w: 12, h: 3 },
+        {
+          kicker: "Insider extra — usually part of the paid tier",
+          title: input.insider.title,
+          body: input.insider.rows.map((r) => `${r.label}: ${r.value}`).join(" · "),
+        },
+      ),
+    );
+    y += 3;
+  }
+  if (kind === "baseline") {
+    blocks.push(
+      gblk(
+        "text",
+        { x: 0, y, w: 12, h: 1 },
+        {
+          body: "From here on you'll only hear from us when this market actually moves — quiet weeks stay quiet.",
+          align: "left",
+        },
+      ),
+    );
+    y += 1;
+  }
+  return { blocks, y };
+}
+
+/** Where the seed doc's tail (sources → button → footer) begins. */
+function tailStart(seed: EmailDoc): { index: number; y: number } {
+  const index = seed.blocks.findIndex(
+    (b) => b.type === "sources" || b.type === "button" || b.type === "footer",
+  );
+  if (index === -1) return { index: seed.blocks.length, y: 0 };
+  const layout = (seed.blocks[index] as { layout?: BlockLayout }).layout;
+  return { index, y: layout?.y ?? 0 };
+}
+
+function spliceIntoSeed(
+  seed: EmailDoc,
+  kind: "weekly" | "baseline",
+  input: EventSectionInput,
+): EmailDoc {
+  const { index, y } = tailStart(seed);
+  const section = eventSectionBlocks(kind, input, y);
+  const delta = section.y - y;
+  const blocks = [...seed.blocks];
+  for (let i = index; i < blocks.length; i++) {
+    const b = blocks[i] as { layout?: BlockLayout };
+    if (b.layout) b.layout = { ...b.layout, y: b.layout.y + delta };
+  }
+  blocks.splice(index, 0, ...section.blocks);
+  const src = blocks.find((b) => b.type === "sources") as BlockOf<"sources"> | undefined;
+  if (src) {
+    const extra = [
+      ...input.events.flatMap((e) => e.facts.map((f) => f.source)),
+      ...(input.insider ? [input.insider.source] : []),
+      ...(input.regionalRead ? [input.regionalRead.sourceLabel] : []),
+    ];
+    const have = new Set((src.props.sources ?? []).map((s) => s.label));
+    for (const label of extra) {
+      if (label && !have.has(label)) {
+        src.props.sources.push({ label, url: undefined });
+        have.add(label);
+      }
+    }
+  }
+  return { ...seed, blocks };
+}
+
+export type RichWeeklyInput = ComposeWeeklyInput & {
+  seedDoc?: EmailDoc | null;
+  regionalRead?: RegionalRead | null;
+};
+
+export function composeRichWeeklyDoc(input: RichWeeklyInput): EmailDoc {
+  if (!input.seedDoc) return composeWeeklyDoc(input);
+  return spliceIntoSeed(input.seedDoc, "weekly", input);
+}
+
+export type RichBaselineInput = ComposeBaselineInput & {
+  seedDoc?: EmailDoc | null;
+  regionalRead?: RegionalRead | null;
+};
+
+export function composeRichBaselineDoc(input: RichBaselineInput): EmailDoc {
+  if (!input.seedDoc) return composeBaselineDoc(input);
+  return spliceIntoSeed(input.seedDoc, "baseline", {
+    events: input.recentEvents,
+    subscriberZip: input.subscriberZip,
+    subscriberPlace: input.subscriberPlace,
+    area: input.area,
+    regionalRead: input.regionalRead,
+  });
 }

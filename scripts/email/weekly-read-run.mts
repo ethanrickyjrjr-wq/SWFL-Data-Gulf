@@ -33,7 +33,9 @@
 //        ZIP even with zero subscribers — operator eyeball without a list)
 
 import { mkdir, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { buildZipSeedDoc } from "@/lib/email/zip-seed";
 import { afterSend, shouldSend } from "@/lib/email/weekly-read/cadence";
 import {
   buildWeeklyReadBatches,
@@ -69,11 +71,12 @@ import { pickDailyAlert, selectWeeklyContent } from "@/lib/email/zip-events/gate
 import {
   baselineSubject,
   composeAlertDoc,
-  composeBaselineDoc,
-  composeWeeklyDoc,
+  composeRichBaselineDoc,
+  composeRichWeeklyDoc,
   shouldIncludeInsider,
   subjectFor,
   type InsiderCard,
+  type RegionalRead,
 } from "@/lib/email/zip-events/compose";
 import {
   advanceSnapshots,
@@ -144,6 +147,48 @@ function asOfMMDDYYYY(now: Date): string {
   const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
   const dd = String(now.getUTCDate()).padStart(2, "0");
   return `${mm}/${dd}/${now.getUTCFullYear()}`;
+}
+
+/** The regional housing read — the brain-baked, cited conclusion (a repo read,
+ *  zero tokens; the commentary the nightly rebuild already paid for). */
+function regionalReadFromBrains(): RegionalRead | null {
+  try {
+    const raw = readFileSync("brains/housing-swfl.md", "utf-8");
+    const seg = raw.split("--- OUTPUT ---")[1];
+    if (!seg) return null;
+    // The OUTPUT JSON is followed by more sections (--- RECENT NOTES --- etc.)
+    // and a closing code fence — cut to the JSON object itself before parsing.
+    const cutAt = seg.indexOf("\n--- ");
+    const jsonRaw = (cutAt === -1 ? seg : seg.slice(0, cutAt)).trim();
+    const lastBrace = jsonRaw.lastIndexOf("}");
+    if (lastBrace === -1) return null;
+    const out = JSON.parse(jsonRaw.slice(0, lastBrace + 1)) as {
+      conclusion?: string;
+      key_metrics?: { source?: { citation?: string } }[];
+    };
+    if (!out.conclusion) return null;
+    const citation = out.key_metrics?.[0]?.source?.citation?.split("—")[0]?.trim();
+    return { text: out.conclusion, sourceLabel: citation || "SWFL Data Gulf housing read" };
+  } catch {
+    return null;
+  }
+}
+const REGIONAL_READ = regionalReadFromBrains();
+
+/** Per-ZIP zip-seed brief (map cutout + ranked cards + baked commentary +
+ *  outlook) — the rich composition splices events into it. Empty-tolerant:
+ *  null (out of scope / no signals / no creds) falls back to the plain shape. */
+const seedCache = new Map<string, EmailDoc | null>();
+async function seedFor(zip: string): Promise<EmailDoc | null> {
+  if (!seedCache.has(zip)) {
+    try {
+      seedCache.set(zip, await buildZipSeedDoc(zip));
+    } catch (err) {
+      console.warn(`[market-alerts] zip-seed build failed for ${zip}: ${String(err)}`);
+      seedCache.set(zip, null);
+    }
+  }
+  return seedCache.get(zip) ?? null;
 }
 
 function placeFor(zip: string): string | null {
@@ -303,12 +348,14 @@ async function main(): Promise<void> {
       const heatPos = freshRanks.find((r) => r.area_id === area.area_id)?.position ?? null;
       return {
         cls: "baseline",
-        doc: composeBaselineDoc({
+        doc: composeRichBaselineDoc({
           subscriberZip: rec.zip,
           subscriberPlace: place,
           area,
           asOf,
           reportUrl: `${SITE_ORIGIN}/r/zip-report/${rec.zip}`,
+          seedDoc: await seedFor(rec.zip),
+          regionalRead: REGIONAL_READ,
           snapshot: f,
           heatPosition: heatPos,
           recentEvents: areaEvents,
@@ -340,13 +387,15 @@ async function main(): Promise<void> {
     if (!sel.send) return { skip: "flat_week" }; // cursor NOT advanced — first mover next run
     return {
       cls: "weekly",
-      doc: composeWeeklyDoc({
+      doc: composeRichWeeklyDoc({
         events: sel.used,
         subscriberZip: rec.zip,
         subscriberPlace: place,
         area,
         asOf,
         reportUrl: `${SITE_ORIGIN}/r/zip-report/${rec.zip}`,
+        seedDoc: await seedFor(rec.zip),
+        regionalRead: REGIONAL_READ,
         heatRanks: freshRanks,
         areaLabelsById,
         insider: shouldIncludeInsider(rec.issues_sent) ? insiderFor(place, rec.zip, f) : null,
@@ -438,12 +487,14 @@ async function main(): Promise<void> {
     if (area && f) {
       const place = placeFor(PREVIEW_ZIP);
       const heatPos = freshRanks.find((r) => r.area_id === area.area_id)?.position ?? null;
-      const baseDoc = composeBaselineDoc({
+      const baseDoc = composeRichBaselineDoc({
         subscriberZip: PREVIEW_ZIP,
         subscriberPlace: place,
         area,
         asOf,
         reportUrl: `${SITE_ORIGIN}/r/zip-report/${PREVIEW_ZIP}`,
+        seedDoc: await seedFor(PREVIEW_ZIP),
+        regionalRead: REGIONAL_READ,
         snapshot: f,
         heatPosition: heatPos,
         recentEvents: events.filter((e) => e.area_id === area.area_id && e.class !== "baseline"),
@@ -454,13 +505,15 @@ async function main(): Promise<void> {
       );
       const sel = selectWeeklyContent(PREVIEW_ZIP, area, events);
       if (sel.send) {
-        const weeklyDoc = composeWeeklyDoc({
+        const weeklyDoc = composeRichWeeklyDoc({
           events: sel.used,
           subscriberZip: PREVIEW_ZIP,
           subscriberPlace: place,
           area,
           asOf,
           reportUrl: `${SITE_ORIGIN}/r/zip-report/${PREVIEW_ZIP}`,
+          seedDoc: await seedFor(PREVIEW_ZIP),
+          regionalRead: REGIONAL_READ,
           heatRanks: freshRanks,
           areaLabelsById,
           insider: insiderFor(place, PREVIEW_ZIP, f),
