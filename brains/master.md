@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v110 | Token: SWFL-7421-v110-20260719 -->
+<!-- FRESHNESS: v111 | Token: SWFL-7421-v111-20260719 -->
 ---
 brain_id: master
-version: 110
-refined_at: 2026-07-19T03:09:34Z
-freshness_token: SWFL-7421-v110-20260719
+version: 111
+refined_at: 2026-07-19T04:36:13Z
+freshness_token: SWFL-7421-v111-20260719
 ttl_seconds: 604800
 pack_hash: 70e0f9ee1d30
 context_type: user_saved_reference
@@ -89,7 +89,7 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
   {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-07-19: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-07-19"},
   {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-07-19: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-07-19"},
   {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"econ-dev-swfl as of 2026-07-19: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-07-19"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-07-19: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-07-19: 156 live current-events signals across 13 cities — Cape Coral (13), Fort Myers (43), Naples (40), North Naples (11), Fort Myers Beach (8), Marco Island (7), Bonita Springs (10), East Naples (5), Lehigh Acres (2), Estero (7), Sanibel (5), Golden Gate (4), North Fort Myers (1). Most current: Cape Coral — A possible landspout touched down in Cape Coral during big storms reported on July 11, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-07-19"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-07-19: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-07-19: 152 live current-events signals across 13 cities — Fort Myers (43), Naples (36), Cape Coral (13), North Naples (11), Fort Myers Beach (8), Marco Island (7), Bonita Springs (10), East Naples (5), Lehigh Acres (2), Estero (7), Sanibel (5), Golden Gate (4), North Fort Myers (1). Most current: Fort Myers — Big storms on or around July 11, 2026 left SWFL residents wondering if tornadoes touched down, with reports of a possible tornado in Naples and a landspout in Cape Coral. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-07-19"},
   {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-06-29: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-07-19"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (bearish, magnitude 0.70, confidence 0.80)","value":"news-swfl as of 2026-07-19: direction bearish, magnitude 0.70, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 0 SWFL-relevant press releases in the last 90 days. 4 individual enforcement notices active in Lee and Collier counties (2 construction unlicensed, 0 ABT/hospitality). Enforcement activity momentum: -1 vs prior 90-day window. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-07-19"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-07-19: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — Cape Coral median asking price (as of 2026-07-18) $399,999; Fort Myers median asking price (as of 2026-07-18) $324,900; Naples median asking price (as of 2026-07-18) $655,783; SWFL 30-year fixed mortgage rate (as of 2026-07-16) 6.55%. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-07-19"},
@@ -112,9 +112,9 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 110,
-  "refined_at": "2026-07-19T03:09:34Z",
-  "expires": "2026-07-26T03:09:34Z",
+  "version": 111,
+  "refined_at": "2026-07-19T04:36:13Z",
+  "expires": "2026-07-26T04:36:13Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
   "magnitude": 0.5299346168852076,
@@ -751,7 +751,7 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
     "1 of 5 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
     "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
     "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-    "148 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "144 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
     "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
     "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -863,8 +863,8 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000001,
-    "computed_at": "2026-07-19T03:09:34.000Z"
+    "half_life_hours": 720,
+    "computed_at": "2026-07-19T04:36:13.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
