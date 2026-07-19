@@ -23,8 +23,6 @@
 
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { computeNextRunAt } from "@/lib/email/schedule-cadence";
-import { renderEmailTemplate } from "@/lib/email/templates/render-template";
-import { EMAIL_TEMPLATES, type TemplateSlug } from "@/lib/email/templates/template-registry";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import { claimOnce, releaseClaim } from "@/lib/email/idempotency";
 import type { SenderConfigRow } from "@/lib/email/sender-config";
@@ -40,20 +38,6 @@ import {
   type ProcessDeps,
   type ScheduleOutcome,
 } from "@/lib/email/scheduler";
-import {
-  assembleScopedContent,
-  renderScopedBody,
-  defaultScopedDeps,
-  type ScopedContent,
-} from "@/lib/email/scoped-content";
-import { buildReportModel, reportSubject, renderRecurringHtml } from "@/lib/email/recurring-report";
-import { renderGroundedReport, type GroundedReportModel } from "@/lib/email/grounded-report";
-import { assembleActivationReport } from "@/lib/email/activation/snapshot";
-import { resolveUserBrand } from "@/lib/email/templates/resolve-brand";
-import type { BrandTheme } from "@/lib/deliverable/brand-theme";
-import { fetchDigestData } from "./fetch-digest-data.mts";
-import { buildSubjectLine } from "./build-digest.mts";
-import { buildHeroTokens } from "./hero-tokens.mts";
 // ── Block-canvas EmailDoc lane (N6) ──
 // A schedule linked to a saved Email Lab design re-RENDERS that exact doc with fresh
 // lake data + fresh AI commentary + a fresh chart each occurrence. buildContentDoc is
@@ -70,7 +54,6 @@ import { buildFrozenOccurrence } from "@/lib/email/sequence/frozen-occurrence";
 const DRY_RUN = process.env.DRY_RUN === "true";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
 const CLAIM_LIMIT = 50;
-const DEFAULT_TEMPLATE: TemplateSlug = "hero";
 
 // Model tier for a scheduled EmailDoc re-render. "quality" → Sonnet (the tier the
 // end-to-end build was proven on): a recurring customer-facing email warrants the better
@@ -96,56 +79,12 @@ const PLATFORM = {
   fromEmail: process.env.DIGEST_SENDER_ADDRESS ?? "hello@swfldatagulf.com",
 };
 
-// ── content seam ─────────────────────────────────────────────────────────────
-// v1: reuse the existing brain-fetch (`fetchDigestData`) as the brain-data seam
-// and build a SIMPLE faithful summary body. Rich templating is the template
-// lane's job — the orchestration + guards are this unit's deliverable, not
-// template polish. We fetch once per run (the lake snapshot is the same for every
-// tenant this cycle) and reuse it across schedules.
-let digestCache: Awaited<ReturnType<typeof fetchDigestData>> | null = null;
-async function getDigest() {
-  if (!digestCache) digestCache = await fetchDigestData();
-  return digestCache;
-}
-
-/** A minimal, faithful plain-text body from the master pulse + top city voices. */
-function buildBody(digest: Awaited<ReturnType<typeof fetchDigestData>>): string {
-  const lines: string[] = [];
-  if (digest.top_line) lines.push(digest.top_line);
-  const voices = digest.city_voices.slice(0, 3);
-  if (voices.length) {
-    lines.push("");
-    for (const v of voices) lines.push(`• ${v.city}: ${v.title}`);
-  }
-  return lines.join("\n");
-}
-
-/**
- * The whole-region digest content: subject + plain body + the DATA-DRIVEN hero
- * tokens (`buildHeroTokens`) that fill `email-hero.html` from the lake — never the
- * old hardcoded mockup. The single source for every "fall back to the global
- * digest" path (global, unassemblable report, out-of-footprint scope).
- */
-async function digestContent(): Promise<{
-  subject: string;
-  body: string;
-  tokens: Record<string, string>;
-}> {
-  const digest = await getDigest();
-  return {
-    subject: buildSubjectLine(digest, []),
-    body: buildBody(digest),
-    tokens: buildHeroTokens(digest),
-  };
-}
-
-/** Validate the row's template_id against the registry; fall back for v1. */
-function resolveTemplateSlug(templateId: string | null): TemplateSlug {
-  if (templateId && templateId in EMAIL_TEMPLATES) return templateId as TemplateSlug;
-  return DEFAULT_TEMPLATE;
-}
-
 // ── runner ───────────────────────────────────────────────────────────────────
+// ONE EMAIL SYSTEM (operator decree 07/19/2026): the worker sends EmailDoc
+// deliverables ONLY — the sequence one-shot (frozen doc) and the block-canvas
+// occurrence (fresh re-build of a saved Email Lab design). The digest, grounded
+// "report", scoped, and token-template lanes were ripped out; a legacy row throws
+// a loud per-row error until it is re-linked to a saved design or deactivated.
 
 function requireEnv(): void {
   // The service-role client throws on missing SUPABASE_*; surface the broadcast
@@ -272,52 +211,6 @@ async function main(): Promise<void> {
     return;
   }
 
-  // ── scoped-content seams (Task 02) ──
-  // Real bindings (dossier assembler + identity + buildWelcomeAnswer) built ONCE
-  // per run. `origin` = the deployed site (the worker's stand-in for a request
-  // origin; the welcome route uses `new URL(request.url).origin`) so the cited
-  // links in a scoped body point at prod. The in-run `scopeCache` keys on the
-  // canonical scope so multiple tenants on the same scope reuse one assembly —
-  // mirroring getDigest()'s once-per-run snapshot. A cached `null` = a known
-  // unresolvable scope (we don't re-assemble it for every tenant).
-  const scopedDeps = defaultScopedDeps({ origin: SITE_URL, log: (line) => console.log(line) });
-  const scopeCache = new Map<string, ScopedContent | null>();
-
-  // ── grounded "report" lane (Task 3) ──
-  // A `template_id:"report"` schedule renders the grounded report (the Task-2 spine)
-  // with FRESH per-ZIP data this run via `assembleActivationReport`. Cached per ZIP
-  // for the run (mirrors getDigest()/scopeCache): multiple tenants on the same ZIP
-  // reuse one assembly; a cached `null` = a known-unassemblable scope (→ digest).
-  const reportModelCache = new Map<string, GroundedReportModel | null>();
-  async function getReportModel(row: ScheduleRow): Promise<GroundedReportModel | null> {
-    const key = `${(row.scope_kind ?? "").trim().toLowerCase()}|${(row.scope_value ?? "").trim()}`;
-    let model = reportModelCache.get(key);
-    if (model === undefined) {
-      model = await buildReportModel(row, {
-        assembleReport: (scope) => assembleActivationReport(scope),
-        log: (line) => console.log(line),
-      });
-      reportModelCache.set(key, model);
-    }
-    return model;
-  }
-
-  // ── white-label brand (the schedule OWNER's colors + logo) ──
-  // A recurring send renders in the owner's brand when one is on file (project →
-  // user-account default), else null → the SWFL house brand. Cached per
-  // user+project for the run (a brand lookup is two SELECTs; tenants repeat).
-  // `null` (no brand on file) is cached too, so we don't re-query every fire.
-  const brandCache = new Map<string, BrandTheme | null>();
-  async function getBrand(row: ScheduleRow): Promise<BrandTheme | null> {
-    const key = `${row.user_id}|${row.project_id ?? ""}`;
-    let brand = brandCache.get(key);
-    if (brand === undefined) {
-      brand = await resolveUserBrand(db, row.user_id, row.project_id ?? undefined);
-      brandCache.set(key, brand);
-    }
-    return brand;
-  }
-
   // ── Block-canvas EmailDoc occurrence (N6) ──
   // The decision core lives in `lib/email/emaildoc-occurrence.ts` (load → re-build with
   // fresh data → render → subject; injected + unit-tested). Here we build the REAL seams:
@@ -435,67 +328,36 @@ async function main(): Promise<void> {
           `sequence one-shot schedule=${row.id}: deliverable ${row.deliverable_id} missing/invalid — refusing digest fallback`,
         );
       }
-      // Block-canvas EmailDoc lane (N6) — checked FIRST: a row carrying a deliverable_id
-      // + template_id="block-canvas" re-renders the user's saved Email Lab design with
-      // fresh data this occurrence. Returns finished HTML (emailDocHtml) the core sends
-      // verbatim. A null fall-through (deliverable gone / invalid) drops to the digest.
+      // Block-canvas EmailDoc lane (N6): a row carrying a deliverable_id +
+      // template_id="block-canvas" re-renders the user's saved Email Lab design with
+      // fresh data this occurrence. Returns finished HTML (emailDocHtml) the core
+      // sends verbatim. A null (deliverable gone / invalid doc) THROWS: the digest
+      // fallback is deleted, there is nothing honest to send instead, and a silent
+      // skip would look green.
       if (row.template_id === "block-canvas" && row.deliverable_id) {
         const built = await emailDocOccurrence(row.deliverable_id);
         if (built) return built;
-        return digestContent();
+        throw new Error(
+          `schedule=${row.id}: deliverable ${row.deliverable_id} missing/invalid — no send path (EmailDoc only)`,
+        );
       }
-      // Grounded "report" lane (Task 3) — checked FIRST: a report row IS scoped
-      // (scope_kind="zip"), so this must precede the scoped path below. Fresh ZIP
-      // report via the spine; the model rides to renderHtml. Unassemblable (non-ZIP /
-      // out-of-footprint / empty) → global digest, rendered through the default
-      // template (renderHtml maps the bodyless "report" slug away).
-      if (resolveTemplateSlug(row.template_id) === "report") {
-        const model = await getReportModel(row);
-        if (model) return { subject: reportSubject(model), body: "", model };
-        return digestContent();
-      }
-      // Global path — UNCHANGED (regression contract). scope_kind==NULL &&
-      // topic==NULL is today's whole-region digest, byte-for-byte as before.
-      if (row.scope_kind == null && row.topic == null) {
-        return digestContent();
-      }
-      // Scoped path — in-run cache keyed by the canonical scope (multiple tenants
-      // on the same scope reuse one assembly, mirroring getDigest()).
-      const key = `${row.scope_kind ?? ""}|${row.scope_value ?? ""}|${row.topic ?? ""}`;
-      let content = scopeCache.get(key);
-      if (content === undefined) {
-        content = await assembleScopedContent(row, scopedDeps); // null = unresolvable
-        scopeCache.set(key, content);
-      }
-      if (!content) {
-        // Unresolvable / out-of-footprint scope → fall back to the global digest,
-        // never invent below grain (the no-invention floor; logged in assembly).
-        return digestContent();
-      }
-      return renderScopedBody(content);
+      // Legacy digest/report/scoped/template rows have NO send path since the
+      // 07/19/2026 rip (one email system). Loud per-row error, never batch-fatal:
+      // the row errors every cycle until re-linked to a saved Email Lab design
+      // (template_id="block-canvas" + deliverable_id) or deactivated.
+      throw new Error(
+        `schedule=${row.id}: legacy template_id=${row.template_id ?? "null"} has no send path — ` +
+          "the digest/report/template lanes were removed; link the schedule to a saved Email Lab design.",
+      );
     },
 
-    async renderHtml(
-      row: ScheduleRow,
-      body: string,
-      chart?: string,
-      model?: GroundedReportModel,
-      tokens?: Record<string, string | number>,
-    ): Promise<string> {
-      // Route via the tested router: a grounded model → the spine; a "report" row
-      // that fell back (no model) → the default template, never the bodyless report
-      // shell; every other template → the unchanged plain render. `tokens` (the
-      // data-driven digest-hero values) flow into the plain render. `brand` = the
-      // schedule owner's white-label theme (colors + logo), or null → SWFL house brand.
-      const brand = await getBrand(row);
-      return renderRecurringHtml(
-        { slug: resolveTemplateSlug(row.template_id), body, chart, model, tokens, brand },
-        {
-          renderGrounded: (m, b) => renderGroundedReport(m, { skin: "email", brand: b }),
-          renderTemplate: (slug, b, c, tok) =>
-            renderEmailTemplate(slug, tok, { body: b, ...(c ? { chart: c } : {}) }),
-          defaultSlug: DEFAULT_TEMPLATE,
-        },
+    async renderHtml(): Promise<string> {
+      // Unreachable: both EmailDoc lanes return finished emailDocHtml (the core
+      // skips renderHtml) and every other row throws in buildContent. Kept only
+      // because ProcessDeps requires the seam — a call landing here means a new
+      // body-only lane appeared without a render plan. Fail loud.
+      throw new Error(
+        "renderHtml is unreachable — the EmailDoc lanes return finished HTML (one email system, 07/19/2026).",
       );
     },
 

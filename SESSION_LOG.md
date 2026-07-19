@@ -27,6 +27,23 @@ pack_citation_jargon_tourism_sector (not silently expanded into this fix).
 20 pack/catalog/alias tests green, vocab OK, bunx next build ✓. Both fix checks stay open until
 the deploy/rebuild serves the new strings.
 
+## 2026-07-19 (Fable 5 · main) — SCHEDULER RIPPED: run-schedules.mts is EmailDoc-only; scoped-content + recurring-report DELETED
+
+Operator: "Rip the scheduler." Closes email_scheduler_legacy_lanes_rip. The digest/grounded/
+scoped/token-template lanes are gone from scripts/email/run-schedules.mts (~180 lines out):
+kept the worker skeleton (claim RPC, crash-orphan reaper, at-most-once idempotency, reply
+sensor, loud-failure gate) + the two EmailDoc lanes (sequence one-shot frozen doc,
+block-canvas occurrence). Legacy rows now THROW a loud per-row error (never batch-fatal;
+digest fallback deleted — nothing honest to send); the adapter's renderHtml seam throws
+unreachable (both lanes return finished emailDocHtml; core untouched, zero scheduler.test
+churn). Orphan deletions: lib/email/scoped-content.ts + recurring-report.ts (+ both tests);
+resolveReportZip relocated into lib/deliverable/schedule-recipe.ts (its one consumer). Kept:
+grounded-report (still /p+print — check grounded_report_out_of_email), the digest GENERATOR
+island (build-digest/fetch-digest-data/hero-tokens + disabled daily-email-digest.yml —
+07/16 decree artifact, permanent deletion is an operator call). Gates: bun test lib/email +
+lib/deliverable + scripts/email 2,662/0 · root tsc clean · DRY_RUN worker run against prod
+rows clean (0 due) · bunx next build ✓. Map THE CUT block flipped 🟢. NEXT: operator push.
+
 ## 2026-07-19 (Fable 5 · main) — THE CUT: one email system (EmailDoc/authorDoc) — legacy render paths deleted from lab + blast; runs/ sweep; 4 staged-retirement checks
 
 Operator decree ("do it all — get us to the one email system… there are no consumers"). Audit

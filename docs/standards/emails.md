@@ -60,11 +60,17 @@ Executed same day:
   exactly one render root: `renderEmailDocHtml`.
 - 🟢 All run outputs live under gitignored `runs/` (campaign-out, insiders-runs, outreach-runs,
   weekly-read-runs — writers + weekly-read.yml repointed).
+- 🟢 **The scheduler worker is EmailDoc-only** (same-day rip): the digest / grounded-report /
+  scoped / token-template lanes are DELETED from `scripts/email/run-schedules.mts` — the two
+  keepers are the sequence one-shot (frozen doc) and the block-canvas occurrence (fresh
+  re-build). A legacy row now throws a loud per-row error until re-linked to a saved Email Lab
+  design. `lib/email/scoped-content.ts` + `lib/email/recurring-report.ts` DELETED
+  (`resolveReportZip` relocated into `lib/deliverable/schedule-recipe.ts`, its one consumer).
+  The digest GENERATOR island (`build-digest` / `fetch-digest-data` / `hero-tokens` + the
+  disabled `daily-email-digest.yml`) still exists — dead by the 07/16 decree; permanent
+  deletion is the operator's call, and it's a one-commit job when given.
 
 Staged (open checks — the map is wrong the day these close if it isn't updated):
-- 🟡 `email_scheduler_legacy_lanes_rip` — digest/grounded/recurring lanes still woven through
-  `scripts/email/run-schedules.mts` (all schedule rows paused; the EmailDoc occurrence +
-  sequence lanes are the keepers).
 - 🟡 `email_prospect_seed_block_canvas` — `lib/prospects/open-project.ts:29` still SEEDS new
   legacy `template:"email"` rows from the prospect-claim funnel.
 - 🟡 `grounded_report_out_of_email` — `grounded-report` survives ONLY as the report/print
@@ -276,7 +282,9 @@ silently fall back on the others. **Any typography or block-style change touches
   compliance already built. The 21k DBPR prospect list is PARKED outside the repo until the
   operator lifts it. Do not re-raise the legality objection; only provider wiring remains.
 - **Schedulers** — `email-scheduler.yml` (multi-tenant, */15 cron) is LIVE but all
-  `email_schedules` rows are paused as of 07/16. `daily-email-digest.yml` is DISABLED — §9.
+  `email_schedules` rows are paused as of 07/16. The worker (`run-schedules.mts`) is
+  **EmailDoc-only** since the 07/19 rip — frozen sequence one-shots + block-canvas
+  occurrences; legacy rows error loudly. `daily-email-digest.yml` is DISABLED — §9.
 - **Sender** — verified `hello@swfldatagulf.com` via Resend (`RESEND_API_KEY` in `.env.local`
   + gh secrets). Resend has NO native A/B; DMARC gap noted 06/27.
 - **CAN-SPAM = 4 real requirements** (corrected 07/02 — it was wrongly "3" in older docs):

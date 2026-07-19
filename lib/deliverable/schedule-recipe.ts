@@ -16,9 +16,25 @@
  * than inventing sub-grain precision.
  */
 
-import { resolveReportZip } from "../email/recurring-report";
 import { validateToolInput, type ParsedCommand } from "../email/schedule-command";
 import type { Cadence } from "../email/schedule-cadence";
+
+/**
+ * The ZIP-only scope guard for a scheduled report recipe. Normalizes trim +
+ * lowercase the kind, trim the value; returns the trimmed ZIP, or null for any
+ * non-ZIP / blank scope. Lived in lib/email/recurring-report.ts until the
+ * 07/19/2026 scheduler rip deleted that module (one email system) — this bridge
+ * is its ONE remaining consumer, so the rule lives here now.
+ */
+export function resolveReportZip(
+  kind: string | null | undefined,
+  value: string | null | undefined,
+): string | null {
+  const k = (kind ?? "").trim().toLowerCase();
+  const z = (value ?? "").trim();
+  if (k !== "zip" || !z) return null;
+  return z;
+}
 
 /** The frozen deliverable fields the bridge reads. A `deliverables` row is a superset. */
 export interface DeliverableRecipeRow {
