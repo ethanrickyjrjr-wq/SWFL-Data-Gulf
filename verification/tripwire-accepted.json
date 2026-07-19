@@ -196,6 +196,12 @@
       "pack": "master",
       "accepted_on": "07/18/2026",
       "note": "Operator decree 07/19/2026 'take care of these': master propagation attempt 3 after slug_index fix (f3e767bb) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29671210012",
+      "pack": "properties-lee-value",
+      "accepted_on": "07/18/2026",
+      "note": "Operator decree 07/19/2026 'fire': serve Lee per-ZIP assessed value + SOH gap into zip-report (082c06e4) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
