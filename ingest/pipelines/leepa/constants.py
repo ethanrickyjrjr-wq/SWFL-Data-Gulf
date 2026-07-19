@@ -14,4 +14,15 @@ LEEPA_LAST_SALE_URL = f"{LEEPA_MAPSERVER_BASE}/10/query"
 # ingest layer 12 once and skip the duplicates.
 LEEPA_JUST_VALUE_URL = f"{LEEPA_MAPSERVER_BASE}/12/query"
 
+# ParcelsWFS — a SIBLING SERVICE to ParcelInfo on the same host (not one of its 24 layers).
+# Layer 0 "FabricParcels" (probed live 07/19/2026): 564,339 rows, `Name` + `FolioID` both
+# zero-NULL, zero Historical rows, maxRecordCount 1000. `Name` IS the Lee STRAP in FDOR form —
+# byte-identical to data_lake.lee_parcels.parcel_id (5/5 live-join verified). We pull ONLY
+# Name+FolioID as the folio->strap crosswalk. NEVER pull its Address*/City/State/ZIP — those
+# are OWNER-MAILING fields (a CA ZIP appears on a Lee parcel), a G1 violation if ever used as
+# situs; FDOR phy_zipcd stays the situs-ZIP authority.
+LEEPA_FABRIC_PARCELS_URL = (
+    "https://gissvr.leepa.org/gissvr/rest/services/ParcelsWFS/MapServer/0/query"
+)
+
 TABULAR_BUCKET = "raw-tabular-cold"

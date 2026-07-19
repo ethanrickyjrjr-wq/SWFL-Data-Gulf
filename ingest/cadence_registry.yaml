@@ -849,10 +849,10 @@ pipelines:
         source: "our ingest (layer 12, Just Value bundle)"
       source_ceiling:
         value: 24
-        as_of: "07/08/2026"
+        as_of: "07/19/2026"
         source_url: "https://gissvr.leepa.org/gissvr/rest/services/ParcelInfo/MapServer"
-        source_label: "LeePA ParcelInfo MapServer"
-        summary: "24 layers total (not the ~4 assumed). We pull layers 0, 9, 10, 12; layers 1-8 confirmed as cartographic label duplicates of value layers 13-18 (not a gap). Layers 19-23 (Non CT Sales, Land Type, Delinquent Tax Advertising, Cert of Title Sales, Comparable Sales) are genuinely unexamined — field schemas UNCONFIRMED as of 07/08/2026 (repeated live-query timeouts against gissvr.leepa.org for those specific layer IDs; retry from a clean session)."
+        source_label: "LeePA ParcelInfo MapServer (+ sibling ParcelsWFS service)"
+        summary: "ParcelInfo: 24 layers; we pull 0, 9, 10, 12 (layers 1-8 are cartographic label duplicates of 13-18, not a gap). Layers 11/19-23 field schemas CONFIRMED live 07/19/2026 (the 07/08 timeouts did not recur): 11 Qualified Sales Ratios (ORBookPage, Instrument, DoS, Ratio) · 19 Non CT Sales (SaleYear/Month, DeedType, SalePrice) · 21 Delinquent Tax Advertising (10,964 rows: FOLIOID, current_strap, face_value — a seller-stress distress signal, unpulled; check leepa_delinquent_tax_layer_unused) · 22 Cert of Title Sales (foreclosure deeds, same shape as 19) · 23 Comparable Sales (adds dorcode, BedRooms, Bathrooms, Pool, YearBuilt, GrossArea, NbhdLand) — all still unpulled. SIBLING SERVICE ParcelsWFS/MapServer/0 'FabricParcels' (564,339 rows, ~110 fields): PULLED 07/19/2026 = Name (the Lee STRAP, = lee_parcels.parcel_id form) + FolioID, joined onto leepa_parcels.strap as the parcel-grain FDOR crosswalk. Available-unpulled there: Longitude/Latitude/Point_X/Point_Y (parcel coords), DORCode, CondoName, Legal, LandUseCode/Desc, Zoning, TaxingDistrict, AVMMarketArea, AVMNBHD, unit/condo block (BldgNumber/UnitNumber/MaxFloor/PhaseNum), plat Book/Page; owner fields PII-excluded. WARNING: FabricParcels Address*/City/State/ZIP are OWNER-MAILING, never situs (G1) — FDOR phy_zipcd stays the situs-ZIP authority."
 
   - name: redfin_collier
     workflow: redfin-collier-monthly.yml

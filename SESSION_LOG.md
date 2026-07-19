@@ -154,6 +154,26 @@ docs/superpowers/specs/2026-07-19-realtor-geo-cutover-design.md). Verified: bunx
 workflow-less pipelines red (none mine). Registry entry (`realtor_geo_trends`) + data-roots catalog
 updates land in the follow-up commit of this same push — both files were claim-held by the parallel
 parcel-consolidation session when this entry was written.
+## 2026-07-19 (Fable 5 · wt/leepa-strap) — leepa_parcels.strap LANDED: parcel-grain Lee↔LeePA stitch live (99.85% coverage, 98.99% FDOR join)
+
+Discovered live that LeePA's sibling service `ParcelsWFS/MapServer/0` (FabricParcels, 564,339 rows)
+publishes `Name` = the Lee STRAP in exactly `lee_parcels.parcel_id` form alongside `FolioID` — the
+crosswalk `leepa_parcels` was missing (its `alternate_key` twin on the FDOR side is 0% populated).
+Landed `strap` on `data_lake.leepa_parcels` (backfill script, exit 0): fabric pull 564,339/564,339
+canonical, 564,298 distinct folios, 547,972/548,798 parcels strapped (99.85%), 542,445 straps
+(98.99%) join `lee_parcels.parcel_id` — the appraiser↔state-roll cross-check is now parcel-grain;
+5,527 non-joins = snapshot drift (sample logged). Pipeline carries strap on future annual runs
+(keyset fetch + degrade-to-NULL + Tier-1 `leepa/fabric_strap/` archive). FabricParcels
+Address*/ZIP are OWNER-MAILING (CA ZIP seen) — never situs (G1), documented in constants + registry.
+Fixed in passing: leepa "unit" tests were hitting the LIVE server through the unpatched keyset value
+pull (and asserting a stale 15-column count) — all externals now patched, 33/33 in 0.9s; schema
+baseline gained `strap` + the baseline-missing `zip_code`. Registry leepa `source_ceiling` census
+updated: layers 11/19–23 field schemas CONFIRMED (07/08 timeouts didn't recur) — layer 21
+Delinquent Tax Advertising (10,964 rows w/ face_value + current_strap) flagged as an unpulled
+seller-stress signal (check `leepa_delinquent_tax_layer_unused`). Checks closed with live proof:
+`leepa_fdor_strap_crosswalk_unwired`, `leepa_strap_crosswalk_live_verify`; also opened this session:
+`lee_parcels_zip_summary_missing`. Known: `test_registry_shape_is_73_plus_3` red PRE-EXISTS at HEAD
+(74 vs 73) — the parallel session's parcel_subdivision retirement resolves it; hunks don't overlap.
 
 ## 2026-07-18 (Fable 5 · main) — Consolidation verify pass: 3 residual ZHVI "median" labels fixed, data-roots catalog de-staled (lee_parcels LANDED, leepa KEEP ratified, rentals fix noted)
 

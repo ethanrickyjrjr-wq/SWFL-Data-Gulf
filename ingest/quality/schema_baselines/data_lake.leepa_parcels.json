@@ -14,7 +14,9 @@
   "last_sale_instrument": "character varying",
   "market_value": "double precision",
   "soh_cap": "double precision",
+  "strap": "character varying",
   "taxable_value": "double precision",
   "use_code": "character varying",
-  "use_description": "character varying"
+  "use_description": "character varying",
+  "zip_code": "character varying"
 }

@@ -53,7 +53,7 @@ replacement runs, every consumer repoints, and the operator signs off (RULE 1).
 | Table | Rows / cols | What it is | Read for | Note |
 |---|---|---|---|---|
 | `collier_parcels` | 290,973 / **104** | FDOR cadastral, Collier (CO_NO=21) — comprehensive, **DONE** | properties-collier-value | don't re-widen |
-| `leepa_parcels` | 548,798 / **19** | Lee **Property Appraiser** — a **DIFFERENT source** (valuation+sale only) | properties-lee-value | distinctive: `folioid`, `building_value` (`soh_cap`/`cap_difference` derivable from FDOR `jv_hmstd−av_hmstd`). A **cross-check of FDOR, NOT slated for deletion** |
+| `leepa_parcels` | 548,798 / **20** | Lee **Property Appraiser** — a **DIFFERENT source** (valuation+sale only) | properties-lee-value | distinctive: `folioid`, `building_value` (`soh_cap`/`cap_difference` derivable from FDOR `jv_hmstd−av_hmstd`). A **cross-check of FDOR, NOT slated for deletion**. `strap` LANDED 07/19/2026 (FabricParcels crosswalk) — joins `lee_parcels.parcel_id` at parcel grain |
 | `lee_parcels` | 556,083 / **104** | FDOR cadastral, Lee (CO_NO=46) — **LANDED 07/18/2026**, all parcel types | properties-lee-value | `lee_parcels_summary` view live (522,205 res / 14,052 com / 211,838 homesteaded / SOH gap median 31.6%); shape = `collier_parcels` (byte-identical `OUT_FIELDS`) |
 | `parcel_subdivision_v` (VIEW) | 604,362 / 28 | FDOR homes-only slice of `lee_parcels`+`collier_parcels` — **replaced the `parcel_subdivision` table 07/19/2026** | communities-swfl | `subdivision_name` re-derived in-view from `legal_description` (validated `\y` stem, 100% match; 476 Collier parcels NULL where the fresher vintage lost their legal) |
 

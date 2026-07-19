@@ -28,6 +28,14 @@ SALE_ROW_1 = {
     "Instrument": "WD", "ORBookPage": "5012/3456",
 }
 
+# A Lee STRAP in FDOR form — the shape data_lake.lee_parcels.parcel_id carries.
+STRAP_1 = "01432201010080050"
+
+
+def _feat(props):
+    """Wrap a value row the way paginate_arcgis_keyset yields L12 features (geojson)."""
+    return {"type": "Feature", "geometry": None, "properties": props}
+
 
 class TestIngestLeepaParcels:
     """The original Layer 0 ingest — unchanged. Tests retained as regression guards."""
@@ -141,91 +149,165 @@ class TestJoinLeepa:
         assert len(joined) == 1
         assert joined[0]["folioid"] == "F2"
 
+    def test_strap_attached_from_crosswalk(self):
+        from ingest.pipelines.leepa.resources import _join_leepa
+        joined = _join_leepa([USE_ROW_1], [VALUE_ROW_1, VALUE_ROW_2], [SALE_ROW_1],
+                             None, {"F1": STRAP_1})
+        by_folio = {r["folioid"]: r for r in joined}
+        assert by_folio["F1"]["strap"] == STRAP_1
+        assert by_folio["F2"]["strap"] is None
+
+    def test_strap_null_when_no_crosswalk(self):
+        from ingest.pipelines.leepa.resources import _join_leepa
+        joined = _join_leepa([USE_ROW_1], [VALUE_ROW_1], [SALE_ROW_1])
+        assert joined[0]["strap"] is None
+
 
 class TestIngestLeepaParcelsValue:
-    def _stub_paginator(self, monkeypatch_target="ingest.pipelines.leepa.resources.paginate_arcgis_tabular"):
-        # Returned in the same layer order the function pulls: just_value, use_codes, last_sale.
-        return [iter([VALUE_ROW_1, VALUE_ROW_2]), iter([USE_ROW_1, USE_ROW_2]), iter([SALE_ROW_1])]
+    """ingest_leepa_parcels_value pulls the L12 value spine via paginate_arcgis_keyset
+    (geometry-bearing), use/sale via paginate_arcgis_tabular, the site ZIP via
+    _zip_by_folio, and the strap crosswalk via _fetch_strap_by_folio. Everything
+    external is patched — these are unit tests, zero network.
+
+    (Pre-07/19 these tests patched only paginate_arcgis_tabular and silently hit the
+    LIVE LeePA server through the keyset value pull — never regress that.)
+    """
+
+    def _run(self, value_features=None, tabular=None, strap_map=None,
+             strap_raises=False, canonical=2, zip_map=None):
+        from ingest.pipelines.leepa.resources import ingest_leepa_parcels_value
+
+        if value_features is None:
+            value_features = [_feat(VALUE_ROW_1), _feat(VALUE_ROW_2)]
+        if tabular is None:
+            tabular = [iter([USE_ROW_1, USE_ROW_2]), iter([SALE_ROW_1])]
+        strap_kwargs = ({"side_effect": RuntimeError("fabric boom")} if strap_raises
+                        else {"return_value": strap_map or {}})
+        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_keyset",
+                   return_value=iter(value_features)) as keyset, \
+             patch("ingest.pipelines.leepa.resources.paginate_arcgis_tabular",
+                   side_effect=tabular) as tab, \
+             patch("ingest.pipelines.leepa.resources._zip_by_folio",
+                   return_value=zip_map or {}) as zips, \
+             patch("ingest.pipelines.leepa.resources._fetch_strap_by_folio",
+                   **strap_kwargs) as strap, \
+             patch("ingest.pipelines.leepa.resources.upload_csv_gz") as upload, \
+             patch("ingest.pipelines.leepa.resources.upsert_inventory_row") as pointer, \
+             patch("ingest.pipelines.leepa.resources.arcgis_count",
+                   return_value=canonical) as count, \
+             patch("ingest.pipelines.leepa.resources._promote_leepa_to_tier2") as promote:
+            ingest_leepa_parcels_value(MagicMock())
+        return {"keyset": keyset, "tabular": tab, "zips": zips, "strap": strap,
+                "upload": upload, "pointer": pointer, "count": count, "promote": promote}
 
     def test_three_tier1_uploads_one_per_layer(self):
-        from ingest.pipelines.leepa.resources import ingest_leepa_parcels_value
-        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_tabular",
-                   side_effect=self._stub_paginator()), \
-             patch("ingest.pipelines.leepa.resources.upload_csv_gz") as mock_upload, \
-             patch("ingest.pipelines.leepa.resources.upsert_inventory_row"), \
-             patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=2), \
-             patch("ingest.pipelines.leepa.resources._promote_leepa_to_tier2"):
-            ingest_leepa_parcels_value(MagicMock())
-        assert mock_upload.call_count == 3
-        paths = [call.args[1] for call in mock_upload.call_args_list]
+        m = self._run()
+        assert m["upload"].call_count == 3
+        paths = [call.args[1] for call in m["upload"].call_args_list]
         assert any("leepa/just_value/" in p for p in paths)
         assert any("leepa/use_codes/" in p for p in paths)
         assert any("leepa/last_sale/" in p for p in paths)
         assert all(p.endswith(".csv.gz") for p in paths)
 
     def test_three_pointer_rows(self):
-        from ingest.pipelines.leepa.resources import ingest_leepa_parcels_value
-        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_tabular",
-                   side_effect=self._stub_paginator()), \
-             patch("ingest.pipelines.leepa.resources.upload_csv_gz"), \
-             patch("ingest.pipelines.leepa.resources.upsert_inventory_row") as mock_ptr, \
-             patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=2), \
-             patch("ingest.pipelines.leepa.resources._promote_leepa_to_tier2"):
-            ingest_leepa_parcels_value(MagicMock())
-        paths = {call.kwargs["path"] for call in mock_ptr.call_args_list}
+        m = self._run()
+        paths = {call.kwargs["path"] for call in m["pointer"].call_args_list}
         assert any("just_value" in p for p in paths)
         assert any("use_codes" in p for p in paths)
         assert any("last_sale" in p for p in paths)
 
     def test_tier2_called_with_joined_rows(self):
-        from ingest.pipelines.leepa.resources import ingest_leepa_parcels_value
-        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_tabular",
-                   side_effect=self._stub_paginator()), \
-             patch("ingest.pipelines.leepa.resources.upload_csv_gz"), \
-             patch("ingest.pipelines.leepa.resources.upsert_inventory_row"), \
-             patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=2), \
-             patch("ingest.pipelines.leepa.resources._promote_leepa_to_tier2") as mock_promote:
-            ingest_leepa_parcels_value(MagicMock())
-        assert mock_promote.called
-        joined = mock_promote.call_args[0][0]
+        m = self._run()
+        assert m["promote"].called
+        joined = m["promote"].call_args[0][0]
         assert len(joined) == 2
         folios = {r["folioid"] for r in joined}
         assert folios == {"F1", "F2"}
 
-    def test_skips_promotion_when_layer_returns_zero_rows(self):
-        from ingest.pipelines.leepa.resources import ingest_leepa_parcels_value
-        # just_value returns 0 — entire function returns early
-        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_tabular",
-                   side_effect=[iter([]), iter([]), iter([])]), \
-             patch("ingest.pipelines.leepa.resources.upload_csv_gz") as mock_upload, \
-             patch("ingest.pipelines.leepa.resources.upsert_inventory_row"), \
-             patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=100), \
-             patch("ingest.pipelines.leepa.resources._promote_leepa_to_tier2") as mock_promote:
-            ingest_leepa_parcels_value(MagicMock())
-        assert not mock_upload.called
-        assert not mock_promote.called
+    def test_zip_attached_from_spatial_assign(self):
+        m = self._run(zip_map={"F1": "33901"})
+        joined = m["promote"].call_args[0][0]
+        by_folio = {r["folioid"]: r for r in joined}
+        assert by_folio["F1"]["zip_code"] == "33901"
+        assert by_folio["F2"]["zip_code"] is None
+
+    def test_skips_promotion_when_value_layer_returns_zero_features(self):
+        m = self._run(value_features=[])
+        assert not m["upload"].called
+        assert not m["promote"].called
 
     def test_aborts_when_pagination_under_90_pct_canonical(self):
-        from ingest.pipelines.leepa.resources import ingest_leepa_parcels_value
         # Pulled 2 just_value rows; canonical reports 1000 → 0.2% coverage → must raise
-        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_tabular",
-                   side_effect=self._stub_paginator()), \
-             patch("ingest.pipelines.leepa.resources.upload_csv_gz"), \
-             patch("ingest.pipelines.leepa.resources.upsert_inventory_row"), \
-             patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=1000), \
-             patch("ingest.pipelines.leepa.resources._promote_leepa_to_tier2") as mock_promote:
+        try:
+            self._run(canonical=1000)
+        except RuntimeError as e:
+            assert "aborting" in str(e).lower()
+        else:
+            raise AssertionError("expected RuntimeError when pagination < 90% canonical")
+
+    def test_strap_attached_and_archived(self):
+        m = self._run(strap_map={"F1": STRAP_1}, zip_map={"F1": "33901"})
+        joined = m["promote"].call_args[0][0]
+        by_folio = {r["folioid"]: r for r in joined}
+        assert by_folio["F1"]["strap"] == STRAP_1
+        assert by_folio["F2"]["strap"] is None
+        # fabric crosswalk archived as the 4th Tier-1 object with its own pointer row
+        assert m["upload"].call_count == 4
+        paths = [call.args[1] for call in m["upload"].call_args_list]
+        assert any("leepa/fabric_strap/" in p for p in paths)
+        pointer_paths = {call.kwargs["path"] for call in m["pointer"].call_args_list}
+        assert any("fabric_strap" in p for p in pointer_paths)
+
+    def test_strap_fetch_failure_degrades_to_null_never_aborts(self):
+        m = self._run(strap_raises=True)
+        assert m["promote"].called  # the parcel ingest itself must survive
+        joined = m["promote"].call_args[0][0]
+        assert all(r["strap"] is None for r in joined)
+        assert m["upload"].call_count == 3  # no fabric archive on a failed fetch
+
+
+class TestFetchStrapByFolio:
+    def _fabric(self, attrs_list):
+        return iter([{"attributes": a} for a in attrs_list])
+
+    def test_dedupes_to_min_name_per_folio(self):
+        from ingest.pipelines.leepa.resources import _fetch_strap_by_folio
+        rows = [{"FolioID": 10, "Name": "B"}, {"FolioID": 10, "Name": "A"},
+                {"FolioID": 11, "Name": "C"}]
+        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_keyset",
+                   return_value=self._fabric(rows)), \
+             patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=3):
+            straps = _fetch_strap_by_folio()
+        assert straps == {"10": "A", "11": "C"}
+
+    def test_skips_null_folio_or_name(self):
+        from ingest.pipelines.leepa.resources import _fetch_strap_by_folio
+        rows = [{"FolioID": None, "Name": "A"}, {"FolioID": 12, "Name": ""},
+                {"FolioID": 13, "Name": "S13"}]
+        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_keyset",
+                   return_value=self._fabric(rows)), \
+             patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=3):
+            straps = _fetch_strap_by_folio()
+        assert straps == {"13": "S13"}
+
+    def test_raises_on_truncated_pull(self):
+        from ingest.pipelines.leepa.resources import _fetch_strap_by_folio
+        rows = [{"FolioID": 10, "Name": "A"}]
+        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_keyset",
+                   return_value=self._fabric(rows)), \
+             patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=1000):
             try:
-                ingest_leepa_parcels_value(MagicMock())
+                _fetch_strap_by_folio()
             except RuntimeError as e:
                 assert "aborting" in str(e).lower()
             else:
-                raise AssertionError("expected RuntimeError when pagination < 90% canonical")
-        assert not mock_promote.called
+                raise AssertionError("expected RuntimeError on truncated fabric pull")
 
 
 class TestPromoteLeepaToTier2:
     JOINED = [{
-        "folioid": "F1", "just_value": 425000.0, "market_value": 430000.0,
+        "folioid": "F1", "strap": STRAP_1, "zip_code": "33901",
+        "just_value": 425000.0, "market_value": 430000.0,
         "assessed_value": 380000.0, "taxable_value": 330000.0, "soh_cap": 50000.0,
         "building_value": 280000.0, "land_value": 145000.0, "cap_difference": 45000.0,
         "use_code": "0100", "use_description": "Single Family",
@@ -258,8 +340,11 @@ class TestPromoteLeepaToTier2:
         assert captured["table_name"] == "leepa_parcels"
         assert captured["write_disposition"] == "merge"
         assert "columns" in captured
-        assert len(captured["columns"]) == 15
+        # 17 = folioid + strap + zip_code + the 14 value/use/sale fields.
+        # (This assert sat stale at 15 while zip_code made it 16 — keep it honest.)
+        assert len(captured["columns"]) == 17
         assert captured["columns"]["folioid"].get("primary_key") is True
+        assert captured["columns"]["strap"] == {"data_type": "text", "nullable": True}
 
     def test_raises_on_failed_jobs(self):
         from ingest.pipelines.leepa.resources import _promote_leepa_to_tier2

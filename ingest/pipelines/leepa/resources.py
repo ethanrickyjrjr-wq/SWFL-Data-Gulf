@@ -14,6 +14,7 @@ from ingest.lib.storage_uploader import upload_csv_gz, upload_geojson_gz
 from ingest.lib.tier1_inventory import upsert_inventory_row
 from ingest.lib.zcta_assign import zip_by_folio as _zip_by_folio
 from .constants import (
+    LEEPA_FABRIC_PARCELS_URL,
     LEEPA_JUST_VALUE_URL,
     LEEPA_LAST_SALE_URL,
     LEEPA_PARCELS_URL,
@@ -33,10 +34,13 @@ def ingest_leepa_parcels(pipeline) -> None:
     )
 
 
-# Tier 2 column hints — pin the 15-column joined parcel row to explicit dlt types so the
+# Tier 2 column hints — pin the 17-column joined parcel row to explicit dlt types so the
 # Postgres table schema is stable across re-ingests. FOLIOID is the parcel key (PK).
 _TIER2_LEEPA_COLUMNS: dict = {
     "folioid":              {"data_type": "text",   "nullable": False, "primary_key": True},
+    # Lee STRAP (= FDOR lee_parcels.parcel_id form) via the ParcelsWFS FabricParcels
+    # Name<->FolioID crosswalk — the parcel-grain join key to the FDOR state roll.
+    "strap":                {"data_type": "text",   "nullable": True},
     # Site ZIP (G1: derived from the parcel's own centroid, never a mailing ZIP).
     # An attribute OF the parcel, so it lives on the parcel row — not in a
     # separate 1:1 crosswalk table. Comes free from the L12 pass we already make.
@@ -64,15 +68,19 @@ def _join_leepa(
     value_rows: list[dict],
     sale_rows: list[dict],
     zip_by_folio: dict[str, str | None] | None = None,
+    strap_by_folio: dict[str, str] | None = None,
 ) -> list[dict]:
     """Left-join three layers on FOLIOID with the value layer as the spine (canonical parcel set).
 
     `zip_by_folio` (folioid -> site ZIP, derived from the L12 geometry in the same
     pass) is attached as a column. Absent/None => zip_code stays NULL; never invented.
+    `strap_by_folio` (folioid -> Lee STRAP from the FabricParcels crosswalk) is attached
+    the same way — absent/None => strap stays NULL, never invented.
     """
     use_by_folio = {r.get("FOLIOID"): r for r in use_rows if r.get("FOLIOID")}
     sale_by_folio = {r.get("FOLIOID"): r for r in sale_rows if r.get("FOLIOID")}
     zips = zip_by_folio or {}
+    straps = strap_by_folio or {}
     joined: list[dict] = []
     for v in value_rows:
         folio = v.get("FOLIOID")
@@ -82,6 +90,7 @@ def _join_leepa(
         s = sale_by_folio.get(folio) or {}
         joined.append({
             "folioid":              folio,
+            "strap":                straps.get(str(folio)),
             "zip_code":             zips.get(str(folio)),
             "just_value":           _coerce_float(v.get("Just")),
             "market_value":         _coerce_float(v.get("Market")),
@@ -99,6 +108,36 @@ def _join_leepa(
             "last_sale_book_page":  s.get("ORBookPage"),
         })
     return joined
+
+
+def _fetch_strap_by_folio() -> dict[str, str]:
+    """FabricParcels Name (the Lee STRAP, FDOR parcel_id form) keyed by str(FolioID).
+
+    Keyset-paginated — the offset walk silently truncates on this host (the L12
+    40,000-row lesson). The fabric carries ~15.5k artifact rows beyond the parcel
+    set, so dedupe to one strap per folio (deterministic min(Name)). A short pull
+    raises via assert_vs_canonical so the caller's degrade path (strap stays NULL)
+    takes over instead of half-attaching a truncated map.
+    """
+    straps: dict[str, str] = {}
+    fetched = 0
+    for feature in paginate_arcgis_keyset(
+        LEEPA_FABRIC_PARCELS_URL,
+        out_fields="Name,FolioID",
+        page_size=1000,
+        geometry=False,
+    ):
+        fetched += 1
+        attrs = feature.get("attributes") or {}
+        folio, name = attrs.get("FolioID"), attrs.get("Name")
+        if folio is None or not name:
+            continue
+        key = str(folio)
+        if key not in straps or name < straps[key]:
+            straps[key] = name
+    canonical = arcgis_count(LEEPA_FABRIC_PARCELS_URL)
+    assert_vs_canonical(fetched, canonical, label="leepa fabric strap")
+    return straps
 
 
 def _make_leepa_resource(chunk: list[dict]):
@@ -142,10 +181,11 @@ def _promote_leepa_to_tier2(rows: list[dict], chunk_size: int = 5_000) -> None:
 
 
 def ingest_leepa_parcels_value(tier1_pipeline) -> None:
-    """Pull layers 9/10/12 (use codes, last qualified sale, just value), archive each as
-    Tier 1 CSV.gz with pointer rows, then join on FOLIOID and promote to
-    data_lake.leepa_parcels. Layers 13/14/15 are intentionally skipped — their fields
-    are identical to layer 12, only their choropleth styling differs.
+    """Pull layers 9/10/12 (use codes, last qualified sale, just value) plus the
+    ParcelsWFS FabricParcels strap crosswalk, archive each as Tier 1 CSV.gz with
+    pointer rows, then join on FOLIOID and promote to data_lake.leepa_parcels.
+    Layers 13/14/15 are intentionally skipped — their fields are identical to
+    layer 12, only their choropleth styling differs.
 
     Layer 12 (the parcel spine) is pulled WITH geometry: one geojson request returns
     the value attributes AND the polygon, so the site ZIP is derived from the parcel's
@@ -198,7 +238,32 @@ def ingest_leepa_parcels_value(tier1_pipeline) -> None:
     canonical = arcgis_count(LEEPA_JUST_VALUE_URL)
     assert_vs_canonical(len(pulled["just_value"]), canonical, label="leepa just_value")
 
-    joined = _join_leepa(pulled["use_codes"], pulled["just_value"], pulled["last_sale"], zip_map)
+    # STRAP crosswalk (ParcelsWFS FabricParcels Name<->FolioID) — the parcel-grain key
+    # into the FDOR state roll (data_lake.lee_parcels.parcel_id). Failure must not sink
+    # the parcel ingest — strap stays NULL this run; scripts/backfill_leepa_strap.py
+    # can re-attach out-of-band.
+    try:
+        strap_map = _fetch_strap_by_folio()
+        print(f"leepa strap: {len(strap_map)} folio->strap pairs fetched")
+    except Exception as exc:  # noqa: BLE001 — degrade, never abort the parcel ingest
+        print(f"leepa strap: fabric crosswalk failed ({exc}) — strap will be NULL this run")
+        strap_map = {}
+    if strap_map:
+        try:
+            strap_rows = [{"folioid": k, "strap": v} for k, v in sorted(strap_map.items())]
+            object_path = f"leepa/fabric_strap/{today}.csv.gz"
+            upload_csv_gz(TABULAR_BUCKET, object_path, strap_rows, ["folioid", "strap"])
+            upsert_inventory_row(
+                bucket=TABULAR_BUCKET, path=object_path, vintage=today,
+                byte_size=None, pack_id="properties-lee-value",
+                source_url=LEEPA_FABRIC_PARCELS_URL,
+            )
+        except Exception as exc:  # noqa: BLE001 — archive is best-effort; attach proceeds
+            print(f"leepa strap: Tier-1 archive failed ({exc}) — continuing with attach")
+
+    joined = _join_leepa(
+        pulled["use_codes"], pulled["just_value"], pulled["last_sale"], zip_map, strap_map
+    )
     if not joined:
         return
     _promote_leepa_to_tier2(joined)
