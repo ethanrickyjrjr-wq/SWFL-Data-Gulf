@@ -20,18 +20,34 @@ export async function GET(req: NextRequest): Promise<Response> {
   let paid = false;
   let zip = "";
   let address = "";
+  let kind = "seller_report";
+  let offer = "";
+  let sqft = "";
   try {
     const session = await getStripe().checkout.sessions.retrieve(sessionId);
     paid = session.payment_status === "paid";
     zip = session.metadata?.zip ?? "";
     address = session.metadata?.address ?? "";
+    kind = session.metadata?.kind ?? "seller_report";
+    offer = session.metadata?.offer ?? "";
+    sqft = session.metadata?.sqft ?? "";
   } catch {
     // unknown session → treated as unpaid below
   }
 
-  const back = /^\d{5}$/.test(zip)
-    ? `${origin}/r/should-i-sell/${zip}${address ? `?address=${encodeURIComponent(address)}` : ""}`
-    : `${origin}/r/should-i-sell`;
+  let back: string;
+  if (kind === "offer_check") {
+    const qs = new URLSearchParams();
+    if (address) qs.set("address", address);
+    if (offer) qs.set("offer", offer);
+    if (sqft) qs.set("sqft", sqft);
+    if (/^\d{5}$/.test(zip)) qs.set("zip", zip);
+    back = `${origin}/r/offer-check${qs.size ? `?${qs.toString()}` : ""}`;
+  } else {
+    back = /^\d{5}$/.test(zip)
+      ? `${origin}/r/should-i-sell/${zip}${address ? `?address=${encodeURIComponent(address)}` : ""}`
+      : `${origin}/r/should-i-sell`;
+  }
   if (!paid) return NextResponse.redirect(back);
 
   (await cookies()).set(UNLOCK_COOKIE, mintUnlock(Date.now()), {

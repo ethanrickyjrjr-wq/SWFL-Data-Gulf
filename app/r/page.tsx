@@ -20,6 +20,11 @@ const REPORTS: { label: string; blurb: string; href: string }[] = [
     href: "/r/should-i-sell",
   },
   {
+    label: "Offer Check",
+    blurb: "Got an offer in hand? See where it lands against recent recorded sales near you.",
+    href: "/r/offer-check",
+  },
+  {
     label: "Back on Market",
     blurb: "Deals that fell through and relisted — where they are and what happened.",
     href: "/r/back-on-market",

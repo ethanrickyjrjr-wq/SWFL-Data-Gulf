@@ -1,3 +1,19 @@
+## 2026-07-19 (Fable 5 · main) — NEW PRODUCT: /r/offer-check — a live offer checked against recorded sales, on the existing $19 pass
+
+Operator decree: build the NEW thing the research says is needed. Shipped the Offer Check —
+the 07/17 landscape's confirmed empty lane (zero consumer products check "is this offer fair").
+Free: ZIP area read off published brains (loadMarketSnapshot, zero metered calls). Paid (behind
+the existing sis_unlock cookie): compsForAddress live comp lookup (≤4 metered calls, fired ONLY
+after payment) → buildOfferPosition (lib/offer-check/verdict.ts, pure, 8 tests): strict
+below/above counts vs recorded sales, sold min/median/max band, $/sqft bands, owner-supplied
+sqft as the only subject figure (lane 4, labeled). Sold NEVER blended with estimates; no sold
+comps → no verdict (estimates = labeled context). Same SELLER_REPORT price + cookie — checkout/
+unlock routes carry kind=offer_check for the return surface only; no new Stripe object. Hub row
++ sitemap added. Gates: verdict tests 8/0 · root tsc 0 · eslint 0 · bunx next build clean.
+Spec: docs/superpowers/specs/2026-07-19-offer-check-design.md. Check open:
+offer_check_live_verify (close after live post-deploy verify). NEXT: operator pushes (agent
+push classifier-blocked), then live-verify checkout round-trip + unlocked comp render on prod.
+
 ## 2026-07-19 (Fable 5 · main) — "ALL EMAILS BROKEN" root-caused: SteadyAPI /search address-slug centering DIED → every address-spine build shipped an empty skeleton; fix = lake-first subject resolver
 
 Operator rage-report, reproduced live in Chrome (New Listing seed, 2006 SW 15th Ave Cape Coral):

@@ -64,6 +64,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   });
   entries.push({
+    url: `${ORIGIN}/r/offer-check`,
+    changeFrequency: "daily",
+    priority: 0.9,
+  });
+  entries.push({
     url: `${ORIGIN}/r/back-on-market`,
     changeFrequency: "daily",
     priority: 0.8,

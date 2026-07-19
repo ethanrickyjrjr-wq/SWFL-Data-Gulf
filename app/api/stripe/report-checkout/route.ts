@@ -22,10 +22,23 @@ export async function POST(req: NextRequest): Promise<Response> {
   const body = (await req.json().catch(() => null)) as {
     zip?: string;
     address?: string;
+    product?: string;
+    offer?: string;
+    sqft?: string;
   } | null;
   const zip = body?.zip ?? "";
   const address = (body?.address ?? "").trim().slice(0, 200);
-  if (!VALID_ZIP.test(zip)) return NextResponse.json({ error: "bad_request" }, { status: 400 });
+  // Same $19 pass, two front doors: the spread and the offer check share the
+  // one price + unlock cookie; `kind` only picks the landing surface.
+  const kind = body?.product === "offer_check" ? "offer_check" : "seller_report";
+  const offer = (body?.offer ?? "").replace(/[^0-9]/g, "").slice(0, 12);
+  const sqft = (body?.sqft ?? "").replace(/[^0-9]/g, "").slice(0, 6);
+  // The offer check can run with an address whose ZIP we couldn't parse — the
+  // spread still requires its ZIP-anchored page.
+  if (kind === "seller_report" && !VALID_ZIP.test(zip))
+    return NextResponse.json({ error: "bad_request" }, { status: 400 });
+  if (kind === "offer_check" && !address)
+    return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
   let stripe;
   try {
@@ -44,13 +57,21 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   const origin = siteOrigin(req);
-  const cancel = `${origin}/r/should-i-sell/${zip}${
-    address ? `?address=${encodeURIComponent(address)}` : ""
-  }`;
+  const offerQs = new URLSearchParams();
+  offerQs.set("address", address);
+  if (offer) offerQs.set("offer", offer);
+  if (sqft) offerQs.set("sqft", sqft);
+  if (VALID_ZIP.test(zip)) offerQs.set("zip", zip);
+  const cancel =
+    kind === "offer_check"
+      ? `${origin}/r/offer-check?${offerQs.toString()}`
+      : `${origin}/r/should-i-sell/${zip}${
+          address ? `?address=${encodeURIComponent(address)}` : ""
+        }`;
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: [{ price: price.id, quantity: 1 }],
-    metadata: { kind: "seller_report", zip, address },
+    metadata: { kind, zip, address, offer, sqft },
     success_url: `${origin}/api/stripe/report-unlock?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: cancel,
   });
