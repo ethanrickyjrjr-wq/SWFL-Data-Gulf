@@ -1,3 +1,13 @@
+## 2026-07-19 (Fable 5 · main) — Final acceptance entry (master attempt-3 dispatch) committed; sold-price canonical noted as RATIFIED by the parallel session
+
+The master run-29670518717 acceptance entry lands with this push (the wrapper appended it after the
+prior acceptance commit). Also noting for the record: the parallel session ratified the Value-sold
+canonical in data-roots (99d96ea3 — redfin_metro_sold_pivoted metro / realtor per-ZIP / county
+redfin history, ZHVI demoted to index-only, realtor_geo_medians cutover parallel-run), so of the two
+operator decisions this session carried, only the ALL-TYPES ACTIVE COUNT definition remains open —
+put to the operator directly. `usgs_tier2` registry entry retirement still parked on their live
+claim (check `usgs_tier2_registry_entry_retirement`).
+
 ## 2026-07-19 (Fable 5 · main) — SERVED + CLOSED: master propagated (attempt 3), env 3.36@07/09 live-verified, frozen USGS corpses dropped
 
 Master --no-force succeeded after the slug_index fix: dossier refined_at 02:39:52Z, fgcu-reri fully
