@@ -53,7 +53,7 @@ function num(v: unknown): number | null {
 /** First ISO date found across the candidate strings → MM/DD/YYYY, else "". The
  *  housing table dates itself in its title ("data through YYYY-MM-DD"); the momentum
  *  table dates itself in its source citation ("as of YYYY-MM-DD"). */
-function asOfMdy(...candidates: (string | undefined | null)[]): string {
+export function asOfMdy(...candidates: (string | undefined | null)[]): string {
   for (const c of candidates) {
     if (!c) continue;
     const m = c.match(/(\d{4})-(\d{2})-(\d{2})/);
