@@ -1,3 +1,12 @@
+## 2026-07-19 (Fable 5 · main) — Operator ratified: ALL-TYPES ACTIVE COUNT becomes its own labeled root
+
+Put directly to the operator (the last of the two definitions this session carried; sold-price was
+already ratified by the parallel session): the all-types active count (~29.5k incl. ~7,300 land)
+is a REAL concept — register it as its own root with a mandatory label, extend the
+`listing_active_stats` rollup, repoint `listing_momentum_stats.active_listing_count`, kill momentum's
+own computation. Recorded in data-roots.md; build tracked at check `all_types_active_count_own_root`
+(brainstorm + new-build registration before code). "Active listings" unqualified stays homes-only.
+
 ## 2026-07-19 (Fable 5 · main) — Final acceptance entry (master attempt-3 dispatch) committed; sold-price canonical noted as RATIFIED by the parallel session
 
 The master run-29670518717 acceptance entry lands with this push (the wrapper appended it after the
