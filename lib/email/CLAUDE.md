@@ -1,5 +1,10 @@
 # lib/email/ — email & deliverable conventions (loads when you edit here)
 
+> **READ FIRST → `docs/standards/emails.md` — the ONE email map.** The build pipeline end-to-end,
+> the three render engines, the send lanes, the failure catalog (every way emails have actually
+> broken), vendor reality, and the kill list. This file is the in-context digest; the map is the
+> full picture. Any email postmortem or decree updates the map in the SAME session.
+
 - **Social platforms have ONE root:** `lib/email/social/platforms.ts` (8 platforms). The footer, the
   social-icons block, the icons, `applyBrand`, the brand form, and the PDF all read it — change it there,
   not in copies. Custom icons = keyless favicon → globe fallback. **No paid logo vendor** (Logo.dev was

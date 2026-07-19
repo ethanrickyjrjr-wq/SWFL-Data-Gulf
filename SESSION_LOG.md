@@ -1,3 +1,19 @@
+## 2026-07-19 (Fable 5 · main) — DOCS: docs/standards/emails.md — the ONE email map, wired so email workers load it every time
+
+Operator order: one orientation .md per major area, emails first (after 07/19's "all emails
+broken" empty-skeleton failure proved sessions keep starting blind). Built
+docs/standards/emails.md from code + SESSION_LOG, not memory: the build pipeline (lab-entry
+doors → recipe-key dispatch → lake-first subject resolver → truth gates → brand overlay), the
+three divergent render engines, the four send lanes, an 8-entry failure catalog (06/28–07/19,
+each as a bug CLASS), vendor reality (SteadyAPI slug death + 08/19 reprobe), the kill list,
+and an index of the gitignored research (docs/steadyapi-research/, _ASSISTANT/research/ —
+paths + roles only, strategy content stays local). Wired READ-FIRST pointers into
+lib/email/CLAUDE.md + lib/deliverable/CLAUDE.md (auto-load on edit) and
+.claude/agents/deliverable-builder.md (FIRST ACTION: read the map); fixed that agent's stale
+"CAN-SPAM = 3" → corrected 4 (07/02 ruling). Update rule written into the map: postmortems
+land there same session. NEXT: operator push; then same treatment for assistant/ingest/website
+on operator word.
+
 ## 2026-07-19 (Fable 5 · main) — NEW PRODUCT: /r/offer-check — a live offer checked against recorded sales, on the existing $19 pass
 
 Operator decree: build the NEW thing the research says is needed. Shipped the Offer Check —

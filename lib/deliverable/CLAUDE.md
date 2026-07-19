@@ -1,5 +1,9 @@
 # lib/deliverable/ — sell-side vs story-side conventions (loads when you edit here)
 
+> **READ FIRST → `docs/standards/emails.md` — the ONE email map** (pipeline, recipe dispatch,
+> truth gates, render engines, send lanes, failure catalog). Doctrine detail stays in
+> `docs/standards/deliverable-playbook.md`; this file is the in-context digest.
+
 - **Every `Recipe` declares `positioning: "sell-side" | "story-side"`** (`recipes.ts`). Sell-side = pitches
   a specific property or the agent's own brand; story-side = recurring relationship/informational content.
   Adding a recipe? It will not compile without this field.
