@@ -35,6 +35,8 @@
   "lib/should-i-sell/load-parcel-soh.ts",
   "lib/pulse/nearby.ts",
   "lib/why-not-selling/cut-history.ts",
+  "lib/why-not-selling/parcel-read.ts",
+  "lib/why-not-selling/zhvi-change.ts",
   "lib/zip-report/candidates.ts",
   "lib/zip-summary/load.ts"
 ]
