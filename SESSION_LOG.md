@@ -1,3 +1,24 @@
+## 2026-07-19 (Fable 5 · wt/ci-quiet) — CI red since 07/18 05:03Z KILLED (stale watch-manifest regen) + CI path-filtered off bot brains/ pushes; bake red root-caused to already-fixed c98dc100
+
+Operator: "what is all this running on GitHub" → 2+3 (trim meta-layer, fix the reds). Findings, all
+verified on real runs/logs: (1) CI red on EVERY push since a82133f9 (07/18 01:03 ET) — that commit
+HAND-EDITED .github/_watch-manifest.json instead of regenerating; 3 drift tests failing since.
+Fix: `node scripts/build-watch-lists.mjs --write --write-watchers` (manifest +20, logger 77 watched,
+healer 75) — full CI node:test layer now 143/143 locally. (2) ci.yml push trigger gets
+paths-ignore brains/** — rebuild bot commits ONLY brains/ (daily-rebuild.yml `git add brains/`),
+so bot data pushes stop burning ~10 min CI + red noise; mixed pushes still run. (3) narrative-bake
+7× red overnight = cross-run customId collision (req-N identical every run → prior batch's results
+validated against wrong surface's whitelist — why zip/33917 was rejected for "inventing" its own
+zip code). ALREADY FIXED by overnight session in c98dc100 (23:28 ET) — landed AFTER all failing
+runs; zero bakes since, so tonight's chain is the live verify. Retrieved rejected narrations from
+the paid batch (free GET) to confirm: prose normal, wrong whitelist. Found while probing: MHS
+permits fact source string says "via Brains Supabase data_lake…" — jargon-bait fed to the bake
+model (echo → JARGON lint rejection); check opened. Checks: bake_green_post_collision_fix +
+mhs_source_string_jargon_bait opened. Actions-tab noise: last night's flood = operator's own 10
+decreed rebuild dispatches × ~7 downstream runs each (CI/deptry/smoke/rollback/bake/grade/loggers);
+sub-daily crons were already throttled 07/18 (65359971, b3fd7af7). Next: operator fires the push;
+bake verify closes on tonight's chain run.
+
 ## 2026-07-19 (Fable 5 · main) — INCIDENT: nightly chain wiped 17,127 backfilled listed_dates; MERGE guard landed; PITR restore to 04:20Z in flight
 
 Nightly Chain run 29673245885 (04:23Z, repository_dispatch — fired despite the workflow being

@@ -86,9 +86,11 @@ on:
       - "ingest-market-aggregates-histogram"
       - "ingest-mhs-permits-swfl"
       - "ingest-rentals"
+      - "listing-week-weekly"
       - "market-heat-swfl monthly"
       - "marketbeat-pdf-ingest"
       - "notion-sync-weekly"
+      - "realtor-geo-trends-monthly"
       - "social-pulse-scan"
       - "view_vintages monthly capture"
     types: [completed]

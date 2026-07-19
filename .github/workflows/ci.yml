@@ -3,6 +3,13 @@ name: CI
 on:
   push:
     branches: [main]
+    # The rebuild bot commits ONLY brains/ (daily-rebuild.yml `git add brains/`).
+    # Brain markdown is data output — nothing CI checks (tsc/eslint/bun test)
+    # reads it, so a brains-only push burns ~10 min of CI for zero signal.
+    # paths-ignore skips the run only when EVERY changed file matches; any push
+    # mixing code with brains/ still runs full CI.
+    paths-ignore:
+      - "brains/**"
   pull_request:
     branches: [main]
 

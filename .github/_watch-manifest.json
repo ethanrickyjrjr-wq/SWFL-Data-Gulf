@@ -660,6 +660,16 @@
     "disabled": false
   },
   {
+    "name": "listing-week-weekly",
+    "file": "listing-week-weekly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "Live Search Daily (sourced freshness)",
     "file": "live-search-daily.yml",
     "scheduled": false,
@@ -788,6 +798,16 @@
     "paid": false,
     "should_be_dark": false,
     "disabled": false
+  },
+  {
+    "name": "realtor-geo-trends-monthly",
+    "file": "realtor-geo-trends-monthly.yml",
+    "scheduled": true,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
   },
   {
     "name": "Redfin SWFL city market monthly",
