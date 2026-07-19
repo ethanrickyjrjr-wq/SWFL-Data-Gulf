@@ -1,3 +1,18 @@
+## 2026-07-19 (Fable 5 · main) — BUILT: SOH portability + cost-of-waiting live on /r/should-i-sell (5 commits, bundled push)
+
+Executed the approved spec end-to-end: pure statute math (s.193.155(8) both branches, $500k cap,
+3%/CPI ceiling — 13 tests incl. exact upsize/downsize/cap-clip cases) · address→parcel loader off
+data_lake.lee/collier_parcels (single-match honesty, straddle-county fallback, untyped-allowlisted;
+composite (phy_zipcd,phy_addr1) indexes applied + verified live) · ZIP-line loader off the published
+lee/collier_parcels_by_zip tables (defs confirmed IDENTICAL both counties — spec's Lee-proxy nuance
+corrected in-spec) · SohPortability client section (gap, port math w/ optional next-home price, 3-yr
+clock, [INFERENCE] projection) · page wiring + Tax Collector link-outs (TaxSys probe: Cloudflare/JS,
+no fetchable bill — user-entry stands, property-tax.ts STATUS updated). 69 surface tests + next build
+green. Bundle: cd891c21(spec) 91f712b6 10ce9032 0d8e28ab 0e72acb4 ab0fb199 + this log. Next: Vercel
+deploy → live-verify 33904 (3514 SE 16TH PL homesteaded / 3315 SE 17TH AVE non-hmstd) + 34112
+(3411 POLLY AVE) → close soh_portability_should_i_sell_live_verify, steady20_soh_cost_of_waiting_calc,
+should_i_sell_property_tax_source.
+
 ## 2026-07-19 (Fable 5 · main) — ROOT FIX: slug_index is now DERIVED from raw_slugs — the hand-mirror staleness class is dead
 
 Operator: "take care of this / make it right so we don't have to worry about it anymore" on the
