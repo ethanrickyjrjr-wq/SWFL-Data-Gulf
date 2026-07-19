@@ -6,8 +6,7 @@ for (const l of lines) {
   if (m) process.env[m[1]] = m[2].replace(/^['"]|['"]$/g, "");
 }
 const url = (process.env.SUPABASE_URL ?? process.env.BRAINS_SUPABASE_URL)!;
-const key = (process.env.SUPABASE_SERVICE_KEY ??
-  process.env.BRAINS_SUPABASE_SERVICE_KEY)!;
+const key = (process.env.SUPABASE_SERVICE_KEY ?? process.env.BRAINS_SUPABASE_SERVICE_KEY)!;
 if (!url || !key) {
   console.error("missing creds");
   process.exit(1);
@@ -15,8 +14,6 @@ if (!url || !key) {
 
 const probes: Array<{ schema: string; table: string }> = [
   { schema: "data_lake", table: "fhfa_hpi" },
-  { schema: "data_lake", table: "usgs_daily" },
-  { schema: "data_lake", table: "usgs_sites" },
   { schema: "data_lake", table: "bls_qcew" },
   { schema: "data_lake", table: "fdot_aadt_fl" },
   { schema: "data_lake", table: "fdot_aadt_swfl_yearly" },
@@ -59,9 +56,7 @@ for (const p of probes) {
       try {
         body = (await r.text()).slice(0, 120).replace(/\s+/g, " ");
       } catch {}
-      console.log(
-        `${status.padEnd(4)} ${p.schema}.${p.table.padEnd(34)} ${body}`,
-      );
+      console.log(`${status.padEnd(4)} ${p.schema}.${p.table.padEnd(34)} ${body}`);
     }
   } catch (e) {
     console.log(`ERR  ${p.schema}.${p.table} ${(e as Error).message}`);

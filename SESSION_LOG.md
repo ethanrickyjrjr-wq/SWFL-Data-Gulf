@@ -1,3 +1,17 @@
+## 2026-07-19 (Fable 5 · main) — SERVED + CLOSED: master propagated (attempt 3), env 3.36@07/09 live-verified, frozen USGS corpses dropped
+
+Master --no-force succeeded after the slug_index fix: dossier refined_at 02:39:52Z, fgcu-reri fully
+absent from master.md. Live serve verified on real bytes: /api/b/env-swfl serves 3.36 ft @ 07/09 with
+the Parquet citation (the 7 remaining "2026-05-17" hits are FEMA's unrelated storm-list-review date —
+false alarm checked). With zero readers left, dropped data_lake.usgs_daily + usgs_sites + orphan view
+usgs_caloosahatchee_stage_latest (to_regclass null x3; migrations/20260719_drop_usgs_tier2_corpses.sql,
+applied via supabase MCP); lake-probe rows removed; data-roots usgs_tier2 section marked DROPPED;
+closed `usgs_tier2_orphan`. One deferral: the registry `usgs_tier2` entry retirement hit the other
+session's live claim on cadence_registry.yaml (deadlock elected me to yield) — retried after their
+release; if it lands with this push the deferral note is moot. Push note (transparency): the earlier
+safe-push rebase carried the other session's just-committed docs-only spec commit ("Why Isn't It
+Selling" v1 design) — docs-only, RULE 1 just-push class, disclosed.
+
 ## 2026-07-19 (Fable 5 · main) — Master hold #2: slug_index missing the Collier sold-median twin — one-line vocab fix
 
 Master retry after the 33945 fix held AGAIN, new cause: orphan-concept on

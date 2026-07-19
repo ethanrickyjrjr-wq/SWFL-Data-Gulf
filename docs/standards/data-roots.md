@@ -1430,15 +1430,14 @@ Universal surfaces for ALL brains below (stated once; per-source ROUTES add only
 
 ---
 
-### usgs_tier2 · corpse pending drop (zombie read FIXED 07/19/2026)
-- **STATUS:** frozen corpse with ZERO readers since the 07/19/2026 repoint of `usgs-water-source.mts`
-  to the tier-1 Parquets. `MAX(inserted_at)=2026-05-19`; producer deleted in PR 3.
-- **DROP PLAN:** `data_lake.usgs_daily` (605-row stub) + `data_lake.usgs_sites` (900 rows) drop once
-  the env-swfl rebuild is verified serving the Parquet number (3.36 ft @ 07/09 at repoint time, vs the
-  frozen 3.17 @ 05/17); the registry `usgs_tier2` entry retires in the same pass. Check
-  `usgs_tier2_orphan` closes then.
+### usgs_tier2 · DROPPED 07/19/2026 (zombie read fixed, corpse deleted)
+- **STATUS:** gone. `data_lake.usgs_daily` (605-row stub) + `data_lake.usgs_sites` + the orphan view
+  `usgs_caloosahatchee_stage_latest` dropped (migrations/20260719_drop_usgs_tier2_corpses.sql) after
+  the env-swfl rebuild was verified on SERVED bytes: `/api/b/env-swfl` serves 3.36 ft @ 07/09 from
+  the tier-1 Parquet dual-read (the frozen stub's last value was 3.17 @ 05/17). Registry entry
+  retired; check `usgs_tier2_orphan` closed.
 - **NOTES:** the frozen stub was not merely stale — it was a degenerate one-shot load (~1 row/site,
-  2 of 4 params) while the Parquet holds the full series. History: P8 zombie postmortem
+  2 of 4 params) while the Parquet holds the full 4.7M-row series. History: P8 zombie postmortem
   (`docs/audits/2026-07-18-data-consolidation/P8-bypass-and-zombie.md`).
 
 ---
