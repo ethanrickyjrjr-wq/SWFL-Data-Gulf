@@ -46,6 +46,11 @@ const eslintConfig = defineConfig([
     // Archived plan docs — historical code snippets, not shipped.
     "docs/**/_FINISHED/**",
     "docs/_FINISHED/**",
+    // Gitignored local scratch — one-off session debug harnesses (.gitignore
+    // covers both patterns); never committed, never shipped, keep them out of
+    // lint and the editor Problems panel.
+    "tmp/**",
+    "scripts/email/tmp-*.mts",
   ]),
   // Fiverr-delivered viz components use Recharts tooltip prop typing
   // (`any` is the library default) and a setState-in-effect default-select

@@ -18,6 +18,15 @@ mhs_source_string_jargon_bait opened. Actions-tab noise: last night's flood = op
 decreed rebuild dispatches × ~7 downstream runs each (CI/deptry/smoke/rollback/bake/grade/loggers);
 sub-daily crons were already throttled 07/18 (65359971, b3fd7af7). Next: operator fires the push;
 bake verify closes on tonight's chain run.
+## 2026-07-19 (Fable 5 · main) — lint: gitignored scratch out of ESLint scope; Problems panel cleared to zero
+
+Operator asked to clear all editor problems. Repo audit: root `tsc --noEmit` clean; all 11 ESLint
+errors/warnings lived in four gitignored one-off scratch harnesses (`tmp/*.mts`,
+`scripts/email/tmp-*.mts` — .gitignore already covers both). Added those two patterns to the
+existing `globalIgnores` block in `eslint.config.mjs` (scratch is never shipped, so lint shouldn't
+police it); `bunx eslint . --max-warnings=0` now exits 0 with zero findings. Refinery typecheck
+baseline (~131 accepted-debt errors, bun:test resolution) intentionally untouched — judged by
+delta per standing rule, not raw count. NEXT: nothing pending from this change.
 
 ## 2026-07-19 (Fable 5 · main) — INCIDENT: nightly chain wiped 17,127 backfilled listed_dates; MERGE guard landed; PITR restore to 04:20Z in flight
 
