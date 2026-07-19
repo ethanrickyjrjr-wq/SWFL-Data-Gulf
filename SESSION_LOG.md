@@ -1,3 +1,13 @@
+## 2026-07-19 (Fable 5 · main) — push addendum: check keys for the two entries below, gate-visible
+
+The defect-pass and THE CUT entries below name their open checks in parentheses; the
+no-silent-deferral gate reads backticked keys, so restating them here (append-only, no
+rewrite): defect pass → `corridor_asof_vs_report_period` + `mhs_source_string_jargon_bait`
+(both open until deploy/rebuild serves the new strings) + new `pack_citation_jargon_tourism_sector`;
+THE CUT staged retirements → `email_scheduler_legacy_lanes_rip` +
+`email_prospect_seed_block_canvas` + `grounded_report_out_of_email` +
+`web_chart_lib_consolidation`. All verified open in the ledger this session.
+
 ## 2026-07-19 (Fable 5 · main) — defect pass: corridor as-of labeled as verify date; MHS citation de-jargoned; back-on-market container closed on live evidence
 
 Operator go on the morning-brief backlog. The 5 HIGH close candidates (cre_figures/bls_ppi/
