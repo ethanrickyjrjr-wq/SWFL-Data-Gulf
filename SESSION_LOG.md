@@ -1,3 +1,15 @@
+## 2026-07-19 (Sonnet 5 · main) — cre-swfl rebuild dispatched (serves the de-jargoned strings)
+
+Operator go ("take care of this and run the rebuild") after confirming `ae293f56` (cre-swfl
+citations de-jargoned, third bait-class fix — `pack_citation_jargon_cre_corridor`) was already on
+origin. Fired `OPERATOR_APPROVED_PAID_RUN=1 node scripts/dispatch-rebuild.mjs cre-swfl --reason
+"..."` — targeted `daily-rebuild.yml` dispatch (pack_id=cre-swfl force=true), run:
+https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29706050489. Acceptance entry
+auto-appended to `verification/tripwire-accepted.json` per the wrapper's own covenant. Left the
+other uncommitted working-tree changes (context-bloat pass entry below, digest/grounded-report
+renames, CLAUDE.md/inject-focus.mjs edits) untouched — not part of this push. NEXT: check
+`pack_citation_jargon_cre_corridor` closes once the run lands and the site serves the new strings.
+
 ## 2026-07-19 (Fable 5 · main) — context-bloat pass: 92MB .qmd sqlite untracked; app/api + scripts CLAUDE.mds; root CLAUDE.md −324 words
 
 Repo diagnosis first (repomix: 5,045 files / 16.9M compressed tokens; docs = 26% of tracked files;

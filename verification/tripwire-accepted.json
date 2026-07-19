@@ -214,6 +214,12 @@
       "pack": "permits-commercial-swfl",
       "accepted_on": "07/19/2026",
       "note": "Operator go 07/19 ('take care of it' on the defect-pass handoff): serve the de-jargoned MHS citation strings from 0b42eb5a — mhs_source_string_jargon_bait (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29706050489",
+      "pack": "cre-swfl",
+      "accepted_on": "07/19/2026",
+      "note": "pack_citation_jargon_cre_corridor: cre-swfl citations de-jargoned (third bait-class fix, ae293f56) — serve new strings (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
