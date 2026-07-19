@@ -47,6 +47,8 @@ const SCOPE_TOKENS = ["isCoreScope", "CORE_SCOPE_ZIPS", "coreScopeZips"];
  * Each needs a reason. This is the only escape hatch, and it is deliberately loud.
  */
 const WAIVERS = {
+  "app/r/zip-report/[zip]/page.tsx":
+    "reads housing_by_zip off the BRAIN payload (a.registryBrains housing-swfl detail_tables), never the lake — brain output is already scope-filtered; the page's lake-grain reads all route through assembleZipReport/candidates.ts, which is isCoreScope-gated",
   "lib/geo/nearest-zips.ts":
     "cross-county BY DESIGN — 'nearby' for a buyer ignores county lines; it is a navigation rail, never a data merge",
   "refinery/lib/core-scope.mts": "is the root",
