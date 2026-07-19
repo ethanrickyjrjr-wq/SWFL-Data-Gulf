@@ -308,9 +308,13 @@ function buildSource(
   snapshot: MhsSnapshot,
   fetched_at: string,
 ): BrainOutputMetricSource {
+  // Product language only — this string is fed to the bake model as citation
+  // text, and "Brains"/table-path jargon in it trips the narration JARGON lint
+  // when echoed (check mhs_source_string_jargon_bait). Table provenance lives
+  // in docs/standards/data-roots.md, not in a served citation.
   const base =
     `Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits ` +
-    `(${snapshot.totalCount} rows, calendar year ${snapshot.year ?? "?"}, via Brains Supabase data_lake.mhs_permits_swfl, source_name='mhs_databook')`;
+    `(${snapshot.totalCount} permits, calendar year ${snapshot.year ?? "?"})`;
   return {
     url: snapshot.source_url,
     fetched_at,
@@ -341,8 +345,8 @@ function buildDetailTables(snapshot: MhsSnapshot, fetched_at: string): BrainOutp
           building_sf: s.building_sf,
         },
       })),
-      source: buildSource(" — grouped by submarket_slug", snapshot, fetched_at),
-      note: "Submarket = jurisdiction mapped via data_lake.mhs_jurisdiction_xwalk.",
+      source: buildSource(" — grouped by submarket", snapshot, fetched_at),
+      note: "Submarket = the permit's issuing jurisdiction mapped to a Data Book submarket.",
     });
   }
 
@@ -366,7 +370,7 @@ function buildDetailTables(snapshot: MhsSnapshot, fetched_at: string): BrainOutp
         },
       })),
       source: buildSource(
-        " — site ZIP from project_address, ranked against the Lee + Collier core ZIP universe",
+        " — site ZIP from each permit's project address, ranked against the Lee + Collier core ZIP universe",
         snapshot,
         fetched_at,
       ),
@@ -408,7 +412,7 @@ function outputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "extensive",
       units: "permits",
       display_format: "count",
-      source: buildSource(" — count of all rows", snapshot, fetched_at),
+      source: buildSource(" — count of all recorded permits", snapshot, fetched_at),
     },
     {
       metric: METRIC_VALUE,
@@ -418,7 +422,7 @@ function outputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "extensive",
       units: "USD",
       display_format: "currency",
-      source: buildSource(" — sum(permit_value_usd)", snapshot, fetched_at),
+      source: buildSource(" — total stated permit value", snapshot, fetched_at),
     },
     {
       metric: METRIC_SF,
@@ -428,7 +432,7 @@ function outputProducer(_out: PackOutput): BrainOutputProducerResult {
       variable_type: "extensive",
       units: "sf",
       display_format: "count",
-      source: buildSource(" — sum(building_sf)", snapshot, fetched_at),
+      source: buildSource(" — total building square footage", snapshot, fetched_at),
     },
   ];
 

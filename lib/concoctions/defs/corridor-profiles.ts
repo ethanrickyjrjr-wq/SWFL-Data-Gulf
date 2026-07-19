@@ -144,6 +144,11 @@ export const corridorProfiles: ConcoctionDef<Params> = {
   // and comp citations still read "SWFL Data Gulf"; this is a third-party report
   // we are quoting, and the report is what a broker will check us against.)
   sourceLine: "Cushman & Wakefield MarketBeat — Southwest Florida Retail, Q4 2025",
+  // asOf here is metrics_verified_date — the day WE last checked the figures,
+  // not the report's period (that's the "Q4 2025" in sourceLine). "As of
+  // 06/09/2026" next to a Q4 2025 report reads as data currency, so the label
+  // says what the date actually is (check corridor_asof_vs_report_period).
+  asOfLabel: "Verified",
   defaultLayout: [
     // Every measure below is submarket-grain, so the grain seam collapses these
     // to one row per submarket and the dimension resolves to `submarket`. The

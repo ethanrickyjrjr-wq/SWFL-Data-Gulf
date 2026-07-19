@@ -1,3 +1,22 @@
+## 2026-07-19 (Fable 5 · main) — defect pass: corridor as-of labeled as verify date; MHS citation de-jargoned; back-on-market container closed on live evidence
+
+Operator go on the morning-brief backlog. The 5 HIGH close candidates (cre_figures/bls_ppi/
+rail-citations/seller-stress-period/condo-caveat) were ALREADY closed 07/19 03:19 UTC by a prior
+session — verified in public.checks, no action. Defects: (1) corridor_asof_vs_report_period —
+new optional ConcoctionDef.asOfLabel threads def → chart caption + SVG caption + sources note +
+BlockBinding (+schema, additive) + lab DatasetChip; corridor-profiles labels its
+metrics_verified_date "Verified" so captions read "… Q4 2025 · Verified 06/09/2026" (option b:
+both dates, distinctly labeled); pinned in chart-block/materialize/corridor-profiles tests.
+(2) mhs_source_string_jargon_bait — permits-commercial-swfl citations rewritten to product
+language: "via Brains Supabase data_lake…" (the \bbrains?\b JARGON-lint bait) + column fragments
+(sum(permit_value_usd), submarket_slug) + the xwalk note all replaced; lands on next brain
+rebuild. Sibling bait found in tourism-tdt.mts:495 + sector-credit-swfl.mts:121 → NEW check
+pack_citation_jargon_tourism_sector (not silently expanded into this fix).
+(3) back_on_market_page_no_layout_container CLOSED — already fixed on main (ReportShell since
+287bbbaf/23b30140), live probe 07/19 serves centered containers. Gates: 276 concoction/email +
+20 pack/catalog/alias tests green, vocab OK, bunx next build ✓. Both fix checks stay open until
+the deploy/rebuild serves the new strings.
+
 ## 2026-07-19 (Fable 5 · main) — THE CUT: one email system (EmailDoc/authorDoc) — legacy render paths deleted from lab + blast; runs/ sweep; 4 staged-retirement checks
 
 Operator decree ("do it all — get us to the one email system… there are no consumers"). Audit

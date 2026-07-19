@@ -156,7 +156,7 @@ export function mapSliceToBlock(
         type: "sources",
         props: {
           sources: [{ label: def.sourceLine }],
-          note: asOf ? `As of ${asOf}` : undefined,
+          note: asOf ? `${def.asOfLabel ?? "As of"} ${asOf}` : undefined,
         },
         layout: { ...spec.layout },
       };
@@ -288,6 +288,7 @@ export async function materializeLoad(
         params: parsed as Record<string, string | number>,
         slice: spec.slice,
         asOf,
+        ...(def.asOfLabel ? { asOfLabel: def.asOfLabel } : {}),
         sourceLine: def.sourceLine,
       },
     });
@@ -362,7 +363,13 @@ async function rematerialize(
     ...rebuilt,
     id: block.id,
     layout: block.layout ? { ...block.layout } : rebuilt.layout,
-    binding: { ...binding, params: parsed, slice: binding.slice, asOf },
+    binding: {
+      ...binding,
+      params: parsed,
+      slice: binding.slice,
+      asOf,
+      ...(def.asOfLabel ? { asOfLabel: def.asOfLabel } : {}),
+    },
   } as EmailBlock;
 }
 

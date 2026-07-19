@@ -412,6 +412,9 @@ export interface BlockBinding {
   slice: BindingSlice;
   /** MM/DD/YYYY at materialization — the chip + staleness compare read this. */
   asOf: string;
+  /** Chip label for `asOf` (default "As of") — set when the date is a
+   *  verification date, not the data period (which lives in sourceLine). */
+  asOfLabel?: string;
   sourceLine: string;
 }
 

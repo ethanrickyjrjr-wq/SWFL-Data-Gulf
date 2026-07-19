@@ -40,6 +40,10 @@ export interface TrendChartOpts {
   /** Caption under the chart: "{source} · as of MM/DD/YYYY". */
   source?: string;
   asOf?: string;
+  /** Caption label for `asOf` (default "as of"). Pass e.g. "verified" when the
+   *  date is OUR verification date, not the data period — "as of" on a verify
+   *  date reads as data currency. */
+  asOfLabel?: string;
   /** Optional grey context line on the same x-domain (e.g. prior year). */
   compare?: TrendPoint[];
   /** Points at/after this index are a projection: dashed line + shaded band. */
@@ -202,7 +206,8 @@ export function trendChartSvg(points: TrendPoint[], opts: TrendChartOpts): strin
   } else {
     const captionParts: string[] = [];
     if (opts.source) captionParts.push(opts.source);
-    if (opts.asOf) captionParts.push(`as of ${formatDisplayDate(opts.asOf)}`);
+    if (opts.asOf)
+      captionParts.push(`${opts.asOfLabel ?? "as of"} ${formatDisplayDate(opts.asOf)}`);
     captionText = captionParts.join(" · ");
   }
   const caption = captionText
@@ -242,6 +247,8 @@ export function barChartSvg(
     valueFormat?: ValueFormat;
     source?: string;
     asOf?: string;
+    /** Caption label for `asOf` (default "as of") — see TrendChartOpts.asOfLabel. */
+    asOfLabel?: string;
     width?: number;
   },
 ): string {
@@ -279,7 +286,7 @@ export function barChartSvg(
   });
   const captionParts: string[] = [];
   if (opts.source) captionParts.push(opts.source);
-  if (opts.asOf) captionParts.push(`as of ${formatDisplayDate(opts.asOf)}`);
+  if (opts.asOf) captionParts.push(`${opts.asOfLabel ?? "as of"} ${formatDisplayDate(opts.asOf)}`);
   if (captionParts.length)
     parts.push(
       `<text x="${padL}" y="${H - 12}" font-family="Arial" font-size="10" fill="${axisColor}">${esc(captionParts.join(" · "))}</text>`,

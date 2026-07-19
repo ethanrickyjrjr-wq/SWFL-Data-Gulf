@@ -102,6 +102,9 @@ describe("corridorProfiles def", () => {
       expect(evaluateGuards(FIXTURE as never, col).ok).toBe(true);
     }
   });
+  it("asOfLabel says the date is a verify date, not the report period", () => {
+    expect(corridorProfiles.asOfLabel).toBe("Verified");
+  });
   it("asOf = max metrics_verified_date as MM/DD/YYYY; null-safe", () => {
     expect(corridorProfiles.asOf(FIXTURE as never)).toBe("06/01/2026");
   });

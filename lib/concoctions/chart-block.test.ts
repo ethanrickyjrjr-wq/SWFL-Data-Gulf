@@ -77,7 +77,11 @@ describe("buildChartBlock", () => {
     expect(props.caption).toContain(
       "Cushman & Wakefield MarketBeat — Southwest Florida Retail, Q4 2025",
     );
-    expect(props.caption).toContain("As of 05/22/2026");
+    // corridor-profiles asOf is metrics_verified_date, not the report period —
+    // the caption must label it as a verify date, never as data currency
+    // (check corridor_asof_vs_report_period).
+    expect(props.caption).toContain("Verified 05/22/2026");
+    expect(props.caption).not.toContain("As of");
   });
   it("date dimension → trend chart; key is stable across identical calls", async () => {
     const keys: string[] = [];

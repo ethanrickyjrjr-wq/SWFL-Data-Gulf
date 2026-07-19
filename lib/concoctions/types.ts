@@ -81,5 +81,10 @@ export interface ConcoctionDef<P = Record<string, string | number>> {
   /** Cheap staleness probe (metadata-scale query) — MM/DD/YYYY. */
   probeAsOf(sb: unknown, params: P): Promise<string>;
   sourceLine: string;
+  /** Presentation label for the asOf date (default "As of"). Set when asOf is
+   *  OUR verification date rather than the source's data period — the period
+   *  belongs in sourceLine, and "As of" on a verify date reads as data
+   *  currency (check corridor_asof_vs_report_period). */
+  asOfLabel?: string;
   defaultLayout: DefaultBlockSpec[];
 }

@@ -201,6 +201,8 @@ describe("materializeLoad", () => {
     expect(props.sources[0].label).toBe(
       "Cushman & Wakefield MarketBeat — Southwest Florida Retail, Q4 2025",
     );
-    expect(props.note).toBe("As of 06/01/2026");
+    // Labeled "Verified", not "As of" — the def's asOf is our verify date, the
+    // report period lives in the source line (check corridor_asof_vs_report_period).
+    expect(props.note).toBe("Verified 06/01/2026");
   });
 });

@@ -87,6 +87,7 @@ export async function buildChartBlock(
       valueFormat,
       source: def.sourceLine,
       asOf: opts.asOf,
+      asOfLabel: def.asOfLabel,
     });
   } else {
     const bars = rows
@@ -104,6 +105,7 @@ export async function buildChartBlock(
       valueFormat,
       source: def.sourceLine,
       asOf: opts.asOf,
+      asOfLabel: def.asOfLabel,
     });
   }
 
@@ -117,7 +119,7 @@ export async function buildChartBlock(
     props: {
       url,
       alt: title,
-      caption: `${mCol.label} · ${def.sourceLine} · As of ${opts.asOf}`,
+      caption: `${mCol.label} · ${def.sourceLine} · ${def.asOfLabel ?? "As of"} ${opts.asOf}`,
       kind: "chart",
     },
     layout: { ...spec.layout },

@@ -44,7 +44,7 @@ export function DatasetChip({
   return (
     <div className="mt-2 rounded-md border border-gulf-teal/25 bg-gulf-teal/5 px-2.5 py-2">
       <p className="text-[10px] leading-snug text-white/55">
-        {binding.sourceLine} · As of {binding.asOf}
+        {binding.sourceLine} · {binding.asOfLabel ?? "As of"} {binding.asOf}
       </p>
       {unrefreshable && (
         <p className="mt-1 text-[10px] text-white/35">
