@@ -29,7 +29,6 @@ on:
       - "DBPR Public Notices — Weekly SWFL"
       - "DBPR RE Licensees (New-Agent Radar) — Weekly"
       - "DBPR SIRS Submissions — Monthly SWFL"
-      - "Daily Email Digest"
       - "Data Targets (daily)"
       - "Data-readiness verification (daily)"
       - "Deliverables retention sweep (daily)"

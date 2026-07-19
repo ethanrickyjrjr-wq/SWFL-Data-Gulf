@@ -1,3 +1,17 @@
+## 2026-07-19 (Fable 5 · main) — CI red diagnosed + digest-kill watcher sweep finished; bake-rejects check opened
+
+CI on main red since 268c78e2 deleted daily-email-digest.yml without sweeping the watcher layer —
+4 .github meta-tests still expected the file. Swept in one commit: manifest entry removed
+(_watch-manifest.json), "Daily Email Digest" dropped from both watch lists (log-cron-incident.yml,
+heal-cron-failure.yml), orphaned "keeps its own clock" test deleted (nightly-chain-sole-clock.test.mjs).
+Verify: CI's full node:test file set run locally = 142 pass / 0 fail (was 139/4, minus the 1 deleted
+test). Separately diagnosed narrative-bake red: NOT plumbing — 5 surfaces fail the no-invention
+validator every bake (model states derived counts absent from its inputs; fallback rows kept, nothing
+invented ever shipped) → NEW check `narrative_bake_invented_number_rejects` (RULE 2.4). Also verified
+the "firing every minute" scare: every rebuild run in 48h was our own workflow_dispatch fanning out
+into chained runs; ZERO schedule-triggered runs — the cron consolidation is holding. NEXT: per-surface
+bake-input fix for the 5 reject keys (check above). Push: pending operator go.
+
 ## 2026-07-19 (Fable 5 · main) — footer digest signup CUT + grounded-report relocated to lib/deliverable
 
 Operator decree ("get it all taken care of") on the two standing items. (1) `footer_dead_digest_cta`

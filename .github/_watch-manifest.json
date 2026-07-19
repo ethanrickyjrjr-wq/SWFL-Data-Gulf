@@ -170,16 +170,6 @@
     "disabled": true
   },
   {
-    "name": "Daily Email Digest",
-    "file": "daily-email-digest.yml",
-    "scheduled": true,
-    "timeout_minutes": 10,
-    "cancel_in_progress": false,
-    "paid": false,
-    "should_be_dark": true,
-    "disabled": true
-  },
-  {
     "name": "Daily Brain Rebuild",
     "file": "daily-rebuild.yml",
     "scheduled": false,

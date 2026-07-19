@@ -50,12 +50,3 @@ test("nightly-chain.yml itself DOES carry the backstop cron", () => {
   const src = fs.readFileSync(resolve(WF, "nightly-chain.yml"), "utf8");
   assert.ok(LIVE_CRON.test(src), "nightly-chain.yml lost its backstop cron.");
 });
-
-test("daily-email-digest keeps its own clock — it is NOT a chain member", () => {
-  const src = fs.readFileSync(resolve(WF, "daily-email-digest.yml"), "utf8");
-  assert.ok(
-    LIVE_CRON.test(src),
-    "daily-email-digest.yml lost its cron. The 10:23 AM EDT send is the INTENTIONAL " +
-      "customer-facing send at the researched engagement peak — never chain it.",
-  );
-});
