@@ -1,0 +1,56 @@
+name: listing-week-weekly
+
+# Person-period panel for the sell-odds model (Phase 0) ->
+# data_lake.listing_week. Builds the just-completed week's rows + fills the
+# prior week's labels. Monday 08:00 UTC: the nightly chain finishes ~06:00, so
+# Sunday's listing_state/transitions are landed. Derivation over our own lake —
+# no external fetch, no LLM, no paid surface ($1-budget rule not applicable).
+# Spec: docs/superpowers/specs/2026-07-19-sell-odds-model-design.md
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run (build + print, no DB write)"
+        type: boolean
+        default: false
+      backfill_from:
+        description: "Rebuild all weeks from this Monday (YYYY-MM-DD, blank = last week only)"
+        required: false
+        default: ""
+
+jobs:
+  build:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Build listing_week panel
+        env:
+          DRY_INPUT: ${{ inputs.dry_run }}
+          BACKFILL_INPUT: ${{ inputs.backfill_from }}
+        run: |
+          ARGS=()
+          if [ "$DRY_INPUT" = "true" ]; then ARGS+=(--dry-run); fi
+          if [ -n "$BACKFILL_INPUT" ]; then ARGS+=(--backfill-from "$BACKFILL_INPUT"); fi
+          python -m ingest.pipelines.listing_week.pipeline "${ARGS[@]}"
+
+      - name: Healthchecks.io heartbeat
+        if: always()
+        run: |
+          curl -fsS -m 10 --retry 3 \
+            "https://hc-ping.com/${{ secrets.HEALTHCHECKS_PING_KEY }}/listing-week-weekly?create=1" || true
