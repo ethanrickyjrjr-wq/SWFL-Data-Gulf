@@ -25,11 +25,24 @@ export type CommunitySlug = string;
 
 /** Normalize a raw platted-subdivision name to its marketed-community stem:
  *  uppercase, drop plat qualifiers (UNIT/PHASE/TRACT/REPLAT/…) and everything after,
- *  strip punctuation, collapse whitespace. "HERITAGE BAY UNIT 12, PHASE 1" -> "HERITAGE BAY". */
+ *  drop a trailing LOT n, strip punctuation, collapse whitespace.
+ *  "HERITAGE BAY UNIT 12, PHASE 1" -> "HERITAGE BAY" · "MAGNOLIA AT VERANDAH LOT 88" -> "MAGNOLIA AT VERANDAH".
+ *
+ *  LOCKSTEP WITH SQL — this is the JS twin of the stem in
+ *  migrations/20260720_parcel_subdivision_v_lot_stem.sql (`\b` here for that file's `\y`).
+ *  The alias fold matches on the STEMMED name, so if these two drift the ingest side folds rows
+ *  the address resolver misses. Change both or neither.
+ *
+ *  The LOT rule is DELIBERATELY guarded — `^(.+?)\s*\bLOT\b` requires real content before LOT,
+ *  so a name that STARTS with its lot number keeps its words instead of being erased to "".
+ *  A naive /\bLOT\b.*$/ would have destroyed 56 live names, e.g. "LOT 8 SOUTHWIND EST" and
+ *  "LOT 30 SPYGLASS ISLAND" — the community name sits AFTER the lot number there. Those stay
+ *  fragments (tracked as neighborhood_stats_leading_lot_fragments), which beats losing the name. */
 export function normalizeSubdivisionName(raw: string): string {
   return raw
     .toUpperCase()
     .replace(/\b(UNIT|PHASE|TRACT|BLOCK|BLK|REPLAT|AMENDED|ADDITION|ADD|SECTION|SEC)\b.*$/u, "")
+    .replace(/^(.+?)\s*\bLOT\b.*$/u, "$1")
     .replace(/[^A-Z0-9 ]/gu, " ")
     .replace(/\s+/gu, " ")
     .trim();

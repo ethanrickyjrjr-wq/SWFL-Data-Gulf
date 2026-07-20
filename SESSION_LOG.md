@@ -1,3 +1,46 @@
+## 2026-07-20 (Opus 4.8 · main) — Lot fragments: the community rollup's `LOT` gap, fixed at the stem root
+
+Check `neighborhood_stats_per_lot_subdivision_fragments`. The legal-description stem in
+`parcel_subdivision_v` dropped `UNIT|PHASE|TRACT|BLOCK|BLK|REPLAT|AMENDED|ADDITION|ADD|SECTION|SEC`
+but **not `LOT`** — so the lot number rode along in the name and every lot became its own one-home
+"community" ("MAGNOLIA AT VERANDAH LOT 88", "LOT 76"). Matters because amenity/HOA work is
+community-grain.
+
+**The near-miss, recorded because it nearly shipped.** The obvious fix — add `LOT` to the existing
+alternation, which strips the token *and everything after* — would have **destroyed 56 real names**.
+56 rows have `LOT` at the *start*, with the community name AFTER the number: `LOT 8 SOUTHWIND EST`,
+`LOT 30 SPYGLASS ISLAND`, `LOT 88 IMPERIAL GATES UNRC`. Strip-to-end empties those. Shipped instead
+a **guarded** rule, `'^(.+?)\s*\yLOT\y.*$' -> '\1'`, where `(.+?)` requires real content before `LOT`,
+so a leading-lot name is left intact rather than erased. Safety query
+(`old_stem <> '' AND new_stem = ''`) returns **0 destroyed**, run before apply.
+
+Measured on `lee_parcels` + `collier_parcels` (homes-only), old vs new, 07/20/2026:
+distinct names **31,062 → 20,370 (−10,692 fake communities)** · 12,127 parcels re-stemmed ·
+11,198 fragment names folded into **646** real communities.
+
+**Applied + verified live** (`migrations/20260720_parcel_subdivision_v_lot_stem.sql`, CREATE OR
+REPLACE, reversible by re-running the 07/19 file): view holds **604,362 rows — unchanged**, 20,370
+distinct names, and the only 64 `LOT` rows remaining are the 64 deliberately-preserved leading-lot
+names (zero unintended residue). `MAGNOLIA AT VERANDAH` is now **one row of 51 parcels**.
+
+TS twin `refinery/lib/subdivision-aliases.mts` moved in lockstep (`\b` for `\y`); 8 tests pass,
+including the guard cases and `CAMELOT`/`PILOT`/`LOTUS` word-boundary safety.
+
+**NOT DONE — `data_lake.neighborhood_stats` still holds the OLD names.** The pipeline re-run is a
+`data_lake.*` write (RULE 1: ask first) and is **not** run. Until it is, `resolveCommunityStats`
+(`lib/listings/community-lookup.ts:184`, exact `.eq` on `subdivision_name`) returns null for those
+~12k parcels instead of the old fake "1-home community" — a real behavior change on the live
+resolver, stated so it is not discovered later.
+
+Three checks opened rather than deferred silently (RULE 2.4):
+`neighborhood_stats_leading_lot_fragments` (the 64), `neighborhood_stats_nonlot_legal_fragments`
+(LOT was the biggest class, not the only one — ~1,888 rows carry PARCEL/PB/PG/BLDG, and `PH` is not
+in the qualifier list though `PHASE` is), and `subdivision_stem_sql_ts_parity_untested` — the stem
+lives in SQL *and* TS with nothing executing both, which is exactly why this gap survived in both
+copies.
+
+---
+
 ## 2026-07-20 (Opus 4.8 · main) — CORRECTION: schedule-catalog test file was silently truncating the bun test suite
 
 The entry below ("Schedule catalog SHIPPED") stands, but its verification claim was incomplete. The
