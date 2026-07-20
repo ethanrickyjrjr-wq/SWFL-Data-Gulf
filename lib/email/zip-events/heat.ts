@@ -58,16 +58,34 @@ export function areaHeatInputs(
   return anyHeld ? out : null;
 }
 
-/** Normalized-rank score. An area missing ANY component is EXCLUDED (spec:
- *  missing-input areas excluded, not zero-filled) — a partial score would
- *  silently reweight the formula. */
+/** Normalized-rank score. TWO missing-data rules, different scopes:
+ *  • An area missing a component OTHER areas hold is EXCLUDED (spec:
+ *    missing-input areas excluded, not zero-filled) — a partial score would
+ *    silently reweight the formula BETWEEN areas.
+ *  • A component NO area holds is DROPPED from the formula for everyone and the
+ *    remaining weights renormalize — a uniform formula is not a reweighting
+ *    between areas. Why: momentum needs the PREVIOUS 30-day sold window, and the
+ *    lake's transition history starts 07/02/2026 (probed live 07/20/2026: 3
+ *    prev-window sales region-wide) — demanding it ranked ZERO of 19 areas and
+ *    silently blanked the weekly's heat leaderboard. Momentum re-enters the
+ *    formula automatically once ~60 days of history exist. */
 export function rankAreaHeat(inputs: AreaHeatInput[]): AreaHeatRank[] {
+  const momentumOf = (i: AreaHeatInput): number | null =>
+    i.price_momentum_pct != null && i.sold_momentum_pct != null
+      ? i.price_momentum_pct + i.sold_momentum_pct
+      : null;
+  const held = {
+    pace: inputs.some((i) => i.absorption_rate_pct != null),
+    tightness: inputs.some((i) => i.sale_to_list_ratio != null),
+    momentum: inputs.some((i) => momentumOf(i) != null),
+  };
+  if (!held.pace && !held.tightness && !held.momentum) return [];
+
   const complete = inputs.filter(
     (i) =>
-      i.absorption_rate_pct != null &&
-      i.sale_to_list_ratio != null &&
-      i.price_momentum_pct != null &&
-      i.sold_momentum_pct != null,
+      (!held.pace || i.absorption_rate_pct != null) &&
+      (!held.tightness || i.sale_to_list_ratio != null) &&
+      (!held.momentum || momentumOf(i) != null),
   );
   if (complete.length === 0) return [];
 
@@ -77,20 +95,28 @@ export function rankAreaHeat(inputs: AreaHeatInput[]): AreaHeatRank[] {
     const pos = sorted.indexOf(v);
     return sorted.length === 1 ? 1 : 1 - pos / (sorted.length - 1);
   };
-  const paces = complete.map((i) => i.absorption_rate_pct as number);
-  const ratios = complete.map((i) => i.sale_to_list_ratio as number);
-  const momenta = complete.map(
-    (i) => (i.price_momentum_pct as number) + (i.sold_momentum_pct as number),
-  );
+  const paces = complete.map((i) => i.absorption_rate_pct).filter((v): v is number => v != null);
+  const ratios = complete.map((i) => i.sale_to_list_ratio).filter((v): v is number => v != null);
+  const momenta = complete.map(momentumOf).filter((v): v is number => v != null);
 
-  const scored = complete.map((i) => ({
-    area_id: i.area_id,
-    score:
-      HEAT_WEIGHTS.pace * rank01(paces, i.absorption_rate_pct as number, true) + // faster absorption = hot
-      HEAT_WEIGHTS.tightness * rank01(ratios, i.sale_to_list_ratio as number, true) +
-      HEAT_WEIGHTS.momentum *
-        rank01(momenta, (i.price_momentum_pct as number) + (i.sold_momentum_pct as number), true),
-  }));
+  const totalWeight =
+    (held.pace ? HEAT_WEIGHTS.pace : 0) +
+    (held.tightness ? HEAT_WEIGHTS.tightness : 0) +
+    (held.momentum ? HEAT_WEIGHTS.momentum : 0);
+
+  const scored = complete.map((i) => {
+    let score = 0;
+    if (held.pace) {
+      score += HEAT_WEIGHTS.pace * rank01(paces, i.absorption_rate_pct as number, true); // faster absorption = hot
+    }
+    if (held.tightness) {
+      score += HEAT_WEIGHTS.tightness * rank01(ratios, i.sale_to_list_ratio as number, true);
+    }
+    if (held.momentum) {
+      score += HEAT_WEIGHTS.momentum * rank01(momenta, momentumOf(i) as number, true);
+    }
+    return { area_id: i.area_id, score: score / totalWeight };
+  });
   scored.sort((a, b) => b.score - a.score || a.area_id.localeCompare(b.area_id));
   return scored.map((s, idx) => ({ ...s, position: idx + 1 }));
 }

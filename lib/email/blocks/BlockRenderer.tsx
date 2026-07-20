@@ -107,7 +107,9 @@ export function BlockRenderer({
     case "footer":
       return <FooterBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "sources":
-      return <SourcesBlock props={block.props} globalStyle={globalStyle} />;
+      return (
+        <SourcesBlock props={block.props} globalStyle={globalStyle} emailRender={emailRender} />
+      );
     default:
       return null;
   }

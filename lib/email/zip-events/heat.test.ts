@@ -33,6 +33,46 @@ describe("rankAreaHeat", () => {
     const ranks = rankAreaHeat([input("a", 5), partial]);
     expect(ranks.map((r) => r.area_id)).toEqual(["a"]);
   });
+
+  test("a component NO area holds drops from the formula for everyone (young-lake momentum)", () => {
+    // The 07/20/2026 live state: pace + tightness held, momentum null everywhere
+    // (prev-30d sold window predates the lake's transition history). The field
+    // still ranks on the held components instead of blanking the leaderboard.
+    const noMomentum = (id: string, v: number): AreaHeatInput => ({
+      area_id: id,
+      absorption_rate_pct: v,
+      sale_to_list_ratio: 90 + v,
+      price_momentum_pct: null,
+      sold_momentum_pct: null,
+    });
+    const ranks = rankAreaHeat([noMomentum("a", 2), noMomentum("b", 9)]);
+    expect(ranks.map((r) => r.area_id)).toEqual(["b", "a"]);
+    // renormalized: the best area still scores 1, not 0.7
+    expect(ranks[0].score).toBe(1);
+  });
+
+  test("a component held by SOME areas keeps the strict rule — the missing area is excluded", () => {
+    const noMomentum: AreaHeatInput = {
+      area_id: "x",
+      absorption_rate_pct: 5,
+      sale_to_list_ratio: 95,
+      price_momentum_pct: null,
+      sold_momentum_pct: null,
+    };
+    const ranks = rankAreaHeat([input("a", 5), noMomentum]);
+    expect(ranks.map((r) => r.area_id)).toEqual(["a"]);
+  });
+
+  test("all components null everywhere → empty rank, never an invented order", () => {
+    const empty: AreaHeatInput = {
+      area_id: "x",
+      absorption_rate_pct: null,
+      sale_to_list_ratio: null,
+      price_momentum_pct: null,
+      sold_momentum_pct: null,
+    };
+    expect(rankAreaHeat([empty])).toEqual([]);
+  });
 });
 
 describe("areaHeatInputs", () => {

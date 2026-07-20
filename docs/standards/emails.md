@@ -311,6 +311,24 @@ silently fall back on the others. **Any typography or block-style change touches
 
 Every entry is a class of bug, not just an incident. Check your change against each class.
 
+- **07/19 (fixed 07/20) — sources "accordion" shipped as a wall of text in Gmail; baseline +
+  next email were ~99% identical.** Three defects, one inbox review: (1) SourcesBlock's
+  `<details>` accordion — Gmail REPLACES `<details>/<summary>` with `<u></u>` (caniemail,
+  verified in-session), so the closed accordion rendered permanently expanded; a code comment
+  claiming "Gmail honors <details>" was wrong. Fix: email render is compact BY CONSTRUCTION —
+  one "Sources (N) — view all" line linking to the report's `#section-sources` (`viewAllUrl`
+  prop); the accordion stays canvas-only. (2) The baseline welcome shows ALL current area
+  events, alerts bypass cadence, and lifecycle bursts re-fire from the same weekly counts —
+  so the next day's "alert" restated the welcome. Fix: every confirmed send stores each shown
+  event's `eventKey()` on the subscriber row (`last_event_keys`, migration 20260720); the next
+  alert/weekly EXCLUDES them ("nothing_new" reported skip). (3) The heat leaderboard ranked 0
+  of 19 areas — momentum needs the PREVIOUS 30-day sold window and the lake's transition
+  history starts 07/02, so demanding all four components blanked the block. Fix: a component
+  NO area holds drops from the formula for everyone (weights renormalize); a component SOME
+  areas hold keeps the strict exclusion. CLASSES: *an email client is not a browser — verify
+  interactive HTML per client, not per spec; content-identity dedupe must survive cadence
+  bypasses; an all-or-nothing input rule on a young lake silently blanks features.*
+
 - **07/19 — the inventory card served a MONTH-OLD vendor snapshot as "homes for sale now"** (Redfin
   end-of-month 639 for 33908 while realtor.com's public page showed 1,153 — and our own daily sweep
   held 918 the whole time). Labeling the vendor on the card was tried first; operator killed that:
@@ -375,6 +393,11 @@ Every entry is a class of bug, not just an incident. Check your change against e
 
 **Resend:** broadcast/segment lane only (§6). No native A/B. DMARC gap. Never the cold-email
 provider.
+
+**Gmail (all platforms):** does NOT support `<details>/<summary>` — the tags are replaced
+with `<u></u>`, so nothing interactive-collapsible survives (caniemail HTML5-semantics,
+verified 07/19/2026). Email-side "collapsed" content must be compact by construction
+(count + link out), never a client-side accordion.
 
 ---
 

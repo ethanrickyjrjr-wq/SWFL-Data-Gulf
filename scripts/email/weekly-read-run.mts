@@ -22,6 +22,13 @@
 // events, so nothing is ever swallowed. Cost scales with the 58-ZIP geography,
 // never subscriber count.
 //
+// NEVER-REPEAT (07/19, operator: two near-identical emails in one inbox): every
+// confirmed send stores the eventKey() of each event it showed on the subscriber
+// row (last_event_keys, migration 20260720). The next alert/weekly EXCLUDES
+// those keys — an email that would only restate the previous one is a reported
+// skip ("nothing_new"), not a send. A re-detected event with a NEW value keys
+// differently and still goes out.
+//
 // Usage:
 //   bun scripts/email/weekly-read-run.mts
 //   env: DRY_RUN (default true), WEEKLY_READ_APPROVED (must be "1" for live),
@@ -49,10 +56,7 @@ import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
 import { getMarketingResend } from "@/lib/email/marketing-client";
-import {
-  createServiceRoleClient,
-  createServiceRoleClientUntyped,
-} from "@/utils/supabase/service-role";
+import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { areaForZip, loadMarketAreas, type MarketArea } from "@/lib/email/zip-events/market-areas";
 import {
   detectLifecycleBurst,
@@ -67,7 +71,7 @@ import {
   rankAreaHeat,
   type AreaHeatRank,
 } from "@/lib/email/zip-events/heat";
-import { pickDailyAlert, selectWeeklyContent } from "@/lib/email/zip-events/gate";
+import { eventKey, pickDailyAlert, selectWeeklyContent } from "@/lib/email/zip-events/gate";
 import {
   baselineSubject,
   composeAlertDoc,
@@ -110,6 +114,10 @@ interface DueRow {
   status: string;
   next_send_at: string | null;
   issues_sent: number;
+  /** eventKey()s the subscriber's LAST email showed (jsonb, default []) —
+   *  the next alert/weekly excludes them so it never repeats the previous
+   *  email (07/19: baseline + next-day "alert" were ~99% identical). */
+  last_event_keys: string[] | null;
 }
 
 interface RunRow {
@@ -235,7 +243,6 @@ function insiderFor(
 }
 
 async function main(): Promise<void> {
-  const db = createServiceRoleClient();
   const lake = createServiceRoleClientUntyped();
   const now = new Date();
   const asOf = asOfMMDDYYYY(now);
@@ -323,9 +330,12 @@ async function main(): Promise<void> {
   );
 
   // ── SUBSCRIBER PASS ─────────────────────────────────────────────────────────
-  const { data, error } = await db
+  // Untyped client: last_event_keys (migration 20260720) is not in the generated
+  // Database types; the row shape is pinned by DueRow + the cast, same pattern as
+  // the market_event_snapshots reads above.
+  const { data, error } = await lake
     .from("weekly_read_subscribers")
-    .select("id, email, zip, status, next_send_at, issues_sent")
+    .select("id, email, zip, status, next_send_at, issues_sent, last_event_keys")
     .eq("status", "active")
     .order("next_send_at", { ascending: true, nullsFirst: true })
     .limit(BATCH_LIMIT);
@@ -337,17 +347,28 @@ async function main(): Promise<void> {
   await mkdir(outDir, { recursive: true });
 
   const rows: RunRow[] = [];
-  const sendable: Array<{ rec: DueRow; cls: SendClass; out: WeeklyReadOutgoing; zip: string }> = [];
+  const sendable: Array<{
+    rec: DueRow;
+    cls: SendClass;
+    out: WeeklyReadOutgoing;
+    zip: string;
+    /** eventKey()s of the events THIS email shows — stored on confirmed send. */
+    eventKeys: string[];
+  }> = [];
   const previewWritten = new Set<string>();
 
   async function buildFor(
     rec: DueRow,
     area: MarketArea,
   ): Promise<
-    { cls: SendClass; doc: EmailDoc; subject: string; trigger: string } | { skip: string }
+    | { cls: SendClass; doc: EmailDoc; subject: string; trigger: string; usedEvents: MarketEvent[] }
+    | { skip: string }
   > {
     const place = placeFor(rec.zip);
     const f = fresh.get(rec.zip);
+    // What the subscriber's LAST email showed — an alert/weekly that would only
+    // repeat it is skipped, not sent (the 07/19 near-duplicate inbox).
+    const seen: ReadonlySet<string> = new Set(rec.last_event_keys ?? []);
     if (rec.issues_sent === 0) {
       if (!f) return { skip: "no_fresh_snapshot" };
       const areaEvents = events.filter((e) => e.area_id === area.area_id && e.class !== "baseline");
@@ -368,9 +389,10 @@ async function main(): Promise<void> {
         }),
         subject: baselineSubject(place, area.label),
         trigger: "baseline",
+        usedEvents: areaEvents,
       };
     }
-    const alerts = pickDailyAlert(events, rec.zip, area);
+    const alerts = pickDailyAlert(events, rec.zip, area, seen);
     if (alerts.length > 0) {
       return {
         cls: "alert",
@@ -384,13 +406,16 @@ async function main(): Promise<void> {
         }),
         subject: subjectFor(alerts, place, area.label),
         trigger: alerts[0].type,
+        usedEvents: alerts,
       };
     }
     if (!shouldSend({ status: "active", next_send_at: rec.next_send_at }, now)) {
       return { skip: "not_due" };
     }
-    const sel = selectWeeklyContent(rec.zip, area, events);
-    if (!sel.send) return { skip: "flat_week" }; // cursor NOT advanced — first mover next run
+    const sel = selectWeeklyContent(rec.zip, area, events, seen);
+    // cursor NOT advanced on skip — first mover next run. "nothing_new" = the
+    // market moved but the subscriber was already told every one of those facts.
+    if (!sel.send) return { skip: sel.skip_reason ?? "flat_week" };
     return {
       cls: "weekly",
       doc: composeRichWeeklyDoc({
@@ -408,6 +433,7 @@ async function main(): Promise<void> {
       }),
       subject: subjectFor(sel.used, place, area.label),
       trigger: sel.used[0].type,
+      usedEvents: sel.used,
     };
   }
 
@@ -471,6 +497,7 @@ async function main(): Promise<void> {
       rec,
       cls: built.cls,
       zip: rec.zip,
+      eventKeys: built.usedEvents.map(eventKey),
       out: {
         subscriberId: rec.id,
         email: rec.email,
@@ -628,11 +655,15 @@ async function main(): Promise<void> {
   );
   for (const s of sendable) {
     const cursor = afterSend(s.rec.id, now);
-    await db
+    // Untyped client: last_event_keys is not in the generated Database types
+    // (migration 20260720). REPLACED, never appended — "what the last email
+    // showed" is exactly the previous send.
+    await lake
       .from("weekly_read_subscribers")
       .update({
         next_send_at: cursor.next_send_at,
         issues_sent: s.rec.issues_sent + 1,
+        last_event_keys: s.eventKeys,
         updated_at: now.toISOString(),
       })
       .eq("id", s.rec.id);

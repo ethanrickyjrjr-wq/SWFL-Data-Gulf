@@ -271,6 +271,7 @@ const SourceCitationSchema = z.object({
 const SourcesPropsSchema = z.object({
   sources: z.array(SourceCitationSchema).max(30),
   note: z.string().max(200).optional(),
+  viewAllUrl: z.string().optional(),
   paddingY: paddingY(),
   sectionBg: sectionBg(),
 }) satisfies z.ZodType<SourcesProps>;

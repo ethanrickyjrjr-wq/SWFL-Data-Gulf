@@ -1,3 +1,21 @@
+## 2026-07-20 (Fable 5 · main) — weekly-read inbox review: Gmail-safe sources line, never-repeat dedupe, heat leaderboard un-blanked
+
+Operator inbox review (two near-identical emails at hello@, sources expanded): (1) Gmail strips
+<details>/<summary> — replaced with <u></u> (caniemail HTML5-semantics, crawled in-session) — so
+the "closed" sources accordion shipped as a wall; SourcesBlock now renders email-side as ONE
+compact "Sources (N) — view all →" line to the report's #section-sources (new viewAllUrl prop
+through types/schema/zip-seed/zip-events compose; accordion stays canvas-only; prior "Gmail
+honors <details>" comment was false). (2) Baseline showed all area events + alerts bypass
+cadence + lifecycle bursts re-fire ⇒ next email restated the welcome; confirmed sends now store
+each shown event's eventKey() on the subscriber (last_event_keys, migration 20260720 — run,
+column verified live) and the next alert/weekly excludes them ("nothing_new" reported skip).
+(3) heat_ranked_areas was 0/19: momentum needs the prev-30d sold window but transition history
+starts 07/02 (probed live: 3 prev-window sales region-wide); rankAreaHeat now drops a component
+NO area holds (weights renormalize; per-area strict exclusion unchanged) → 6 areas rank, the
+weekly's "Hottest market areas" leaderboard renders (baseline: none — real class differentiator
+restored). Verified: bun test zip-events 51/51 + sources-block/schema 36/36, DRY runs green,
+bunx next build exit 0. emails.md §7/§8 updated same session.
+
 ## 2026-07-19 (Fable 5 · main) — zip-report JSON-LD SPECCED (Dataset+FAQPage) + freshness precondition dispatched
 
 Brainstormed + operator-approved: /r/zip-report/[zip] gets the proven Dataset+FAQPage markup —

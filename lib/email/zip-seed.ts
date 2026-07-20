@@ -200,10 +200,11 @@ export async function buildZipSeedDoc(zip: string): Promise<EmailDoc | null> {
   }
 
   // ── Sources + CTA + footer ────────────────────────────────────────────────
-  // Collapsed accordion, not an inline wall of text — SourcesBlock (native
-  // <details>, opens on click only) is the ONE place a citation renders in the
-  // Email Lab canvas, same rule every other citation surface follows
-  // (components/CitationList.tsx).
+  // Closed-accordion rule, per surface: on the Email Lab canvas SourcesBlock is a
+  // native <details> accordion; in the SENT email (Gmail strips <details> —
+  // caniemail, 07/19/2026) it renders ONE compact "Sources (N) — view all" line
+  // pointing at the live report's #section-sources accordion (viewAllUrl). Same
+  // collapsed-by-default rule as components/CitationList.tsx, never a wall of text.
   const citationList = [
     ...sources.map((s) => ({ label: s.label, url: s.url })),
     ...(lifecycle ? [{ label: lifecycle.source, url: undefined }] : []),
@@ -216,6 +217,7 @@ export async function buildZipSeedDoc(zip: string): Promise<EmailDoc | null> {
         {
           sources: citationList,
           note: "Figures refresh from live data when this email rebuilds.",
+          viewAllUrl: `${SITE}/r/zip-report/${zip}#section-sources`,
         },
       ),
     );

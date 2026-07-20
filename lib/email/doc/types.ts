@@ -330,17 +330,23 @@ export interface SourceCitation {
   label?: string;
 }
 
-/** The collapsed "Sources" accordion — DATA-SEEDED (the builder that assembles the
+/** The collapsed "Sources" block — DATA-SEEDED (the builder that assembles the
  *  doc lists real held/cited sources), never AI-authored: there is no content-patch
- *  or author field for it, so a send can never show an invented citation. Renders
- *  default-CLOSED with a click-to-open list (native <details>, no JS needed), the
- *  same collapsed-by-default rule every other citation surface follows
- *  (components/CitationList.tsx). `sources[]` is the structural exception (ordered
- *  by array position, like `stats`/`items`/`columns`). */
+ *  or author field for it, so a send can never show an invented citation. On the
+ *  CANVAS it renders default-CLOSED with a click-to-open list (native <details>),
+ *  the same collapsed-by-default rule every other citation surface follows
+ *  (components/CitationList.tsx). In the SENT email it renders one compact
+ *  "Sources (N) — view all" line instead — Gmail strips <details>/<summary>
+ *  (caniemail, verified 07/19/2026), so an in-email accordion cannot stay closed.
+ *  `sources[]` is the structural exception (ordered by array position, like
+ *  `stats`/`items`/`columns`). */
 export interface SourcesProps extends BlockBase {
   sources: SourceCitation[];
   /** Small print line under the accordion (e.g. a refresh/freshness note). */
   note?: string;
+  /** Web home of the full source list (e.g. the ZIP report's #section-sources
+   *  accordion) — the sent email's "view all" line links here. */
+  viewAllUrl?: string;
 }
 
 export interface FooterProps {

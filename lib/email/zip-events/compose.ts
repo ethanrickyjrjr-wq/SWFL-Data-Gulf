@@ -190,8 +190,19 @@ function otherEventBlock(
     : { block: eventCard(e, y), h: 3 };
 }
 
-/** Dedupe every fact source into ONE collapsed sources block. */
-function sourcesBlock(events: MarketEvent[], extra: string[], y: number): BlockOf<"sources"> {
+/** Dedupe every fact source into ONE collapsed sources block. In the sent email
+ *  it renders as a compact "Sources (N) — view all" line (Gmail strips <details>),
+ *  so the full list needs a web home: the report's #section-sources accordion. */
+function sourcesAnchor(reportUrl?: string | null): string | undefined {
+  return reportUrl ? `${reportUrl}#section-sources` : undefined;
+}
+
+function sourcesBlock(
+  events: MarketEvent[],
+  extra: string[],
+  y: number,
+  viewAllUrl?: string,
+): BlockOf<"sources"> {
   const labels = [...new Set([...events.flatMap((e) => e.facts.map((f) => f.source)), ...extra])];
   return gblk(
     "sources",
@@ -199,6 +210,7 @@ function sourcesBlock(events: MarketEvent[], extra: string[], y: number): BlockO
     {
       sources: labels.map((label) => ({ label, url: undefined })),
       note: "Every figure above comes straight from the source cited — nothing is estimated.",
+      ...(viewAllUrl ? { viewAllUrl } : {}),
     },
   );
 }
@@ -272,7 +284,7 @@ export function composeAlertDoc(input: ComposeInput): EmailDoc {
     blocks.push(ctaBlock(input.reportUrl, input.subscriberZip, y));
     y += 2;
   }
-  blocks.push(sourcesBlock(input.events, [], y));
+  blocks.push(sourcesBlock(input.events, [], y, sourcesAnchor(input.reportUrl)));
   y += 2;
   blocks.push(gblk("footer", { x: 0, y, w: 12, h: 3, static: true }));
   return { globalStyle: { ...NEUTRAL_SKELETON_STYLE }, blocks };
@@ -360,7 +372,14 @@ export function composeWeeklyDoc(input: ComposeWeeklyInput): EmailDoc {
     y += 2;
   }
 
-  blocks.push(sourcesBlock(input.events, input.insider ? [input.insider.source] : [], y));
+  blocks.push(
+    sourcesBlock(
+      input.events,
+      input.insider ? [input.insider.source] : [],
+      y,
+      sourcesAnchor(input.reportUrl),
+    ),
+  );
   y += 2;
   blocks.push(gblk("footer", { x: 0, y, w: 12, h: 3, static: true }));
   return { globalStyle: { ...NEUTRAL_SKELETON_STYLE }, blocks };
@@ -469,7 +488,14 @@ export function composeBaselineDoc(input: ComposeBaselineInput): EmailDoc {
   );
   y += 1;
 
-  blocks.push(sourcesBlock(input.recentEvents, ["SWFL Data Gulf listings data"], y));
+  blocks.push(
+    sourcesBlock(
+      input.recentEvents,
+      ["SWFL Data Gulf listings data"],
+      y,
+      sourcesAnchor(input.reportUrl),
+    ),
+  );
   y += 2;
   blocks.push(gblk("footer", { x: 0, y, w: 12, h: 3, static: true }));
   return { globalStyle: { ...NEUTRAL_SKELETON_STYLE }, blocks };

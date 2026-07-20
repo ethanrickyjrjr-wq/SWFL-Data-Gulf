@@ -171,6 +171,7 @@ const fullDoc: EmailDoc = {
           { url: "https://x/y" },
         ],
         note: "Figures refresh from live data.",
+        viewAllUrl: "https://www.swfldatagulf.com/r/zip-report/33908#section-sources",
         paddingY: "sm",
         sectionBg: "#fff",
       },

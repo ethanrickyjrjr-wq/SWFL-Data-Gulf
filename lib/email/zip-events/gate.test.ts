@@ -2,7 +2,7 @@
 import { describe, expect, test } from "bun:test";
 import type { MarketArea } from "./market-areas";
 import type { MarketEvent } from "./types";
-import { alertAbsorbsRoundup, pickDailyAlert, selectWeeklyContent } from "./gate";
+import { alertAbsorbsRoundup, eventKey, pickDailyAlert, selectWeeklyContent } from "./gate";
 
 const AREA: MarketArea = {
   area_id: "cape-coral",
@@ -70,6 +70,42 @@ describe("pickDailyAlert", () => {
   });
   test("baseline class never rides an alert", () => {
     expect(pickDailyAlert([ev({ class: "baseline" })], "33904", AREA)).toEqual([]);
+  });
+});
+
+describe("never-repeat exclusion (last_event_keys)", () => {
+  test("eventKey is stable for the same fact and differs when the value moves", () => {
+    const a = ev({ type: "lifecycle_burst" });
+    expect(eventKey(a)).toBe(eventKey(ev({ type: "lifecycle_burst" })));
+    const moved = ev({
+      type: "lifecycle_burst",
+      facts: [{ label: "x", value: 2, unit: "", source: "s" }],
+    });
+    expect(eventKey(moved)).not.toBe(eventKey(a));
+  });
+
+  test("an alert the last email already showed does not re-fire", () => {
+    const a = ev({ class: "alert" });
+    expect(pickDailyAlert([a], "33904", AREA, new Set([eventKey(a)]))).toEqual([]);
+    // a NEW value on the same detector still alerts
+    const moved = ev({ class: "alert", facts: [{ label: "x", value: 9, unit: "", source: "s" }] });
+    expect(pickDailyAlert([moved], "33904", AREA, new Set([eventKey(a)]))).toEqual([moved]);
+  });
+
+  test("a weekly that would only restate the last email skips as nothing_new", () => {
+    const a = ev({});
+    const sel = selectWeeklyContent("33904", AREA, [a], new Set([eventKey(a)]));
+    expect(sel.send).toBe(false);
+    expect(sel.skip_reason).toBe("nothing_new");
+    // flat market (no events at all) still reports flat_week, not nothing_new
+    expect(selectWeeklyContent("33904", AREA, [], new Set([eventKey(a)])).skip_reason).toBe(
+      "flat_week",
+    );
+    // one fresh event among seen ones → sends with only the fresh event
+    const freshEv = ev({ facts: [{ label: "y", value: 5, unit: "", source: "s" }] });
+    const sel2 = selectWeeklyContent("33904", AREA, [a, freshEv], new Set([eventKey(a)]));
+    expect(sel2.send).toBe(true);
+    expect(sel2.used).toEqual([freshEv]);
   });
 });
 
