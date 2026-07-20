@@ -69,7 +69,7 @@ Rules:
 - `workflow:` is the join key: a GHA filename, or `vercel.json#<path>` for Vercel crons, or
   `claude#<routine-name>` for Claude-side scheduled routines (checked via CronList 07/20 — none
   exist; the paused pulse schedules are GHA workflows already covered).
-- Backfill in the same commit: all 24 unregistered GHA cron workflows + 2 Vercel crons. (The 3
+- Backfill in the same commit: 30 entries landed — 28 GHA cron workflows + 2 Vercel crons. (The 3
   API-disabled workflows — corridor-pulse-weekly, dbpr-sirs-monthly, ingest-crexi-listings —
   already have pipelines:/not_yet_running: entries, verified 07/20; membership is satisfied and
   they get NO duplicate jobs: entries. Tripwire remains the live-state authority.) Purposes
@@ -114,8 +114,12 @@ Read-only merge, no authored duplication (slug_index lesson: derive what's deriv
   parsed from `.github/workflows/*.yml`, `vercel.json` crons.
 - Output: one JSON to stdout (or `--out <path>`) — name, purpose, scheduler, cron expression,
   status, source entry type (ingest | job). Nothing committed; consumers run the script.
-- Also serves as the gate's shared parser (Gate 10 imports the same workflow-scan function) and as
-  the local lookup: `node scripts/schedule-catalog.mjs` answers "what runs when" in one command.
+- Gate 10 cannot import this script — hooks stay self-contained (`git show HEAD:` reads committed
+  state, this script reads the working tree) — so `.claude/hooks/check-prepush-gate.mjs` inlines its
+  own twin of the cron-detection + membership-predicate logic instead. A parity test in
+  `scripts/schedule-catalog.test.mjs` reads both files as text and pins the two membership-predicate
+  regexes against drift. This script also serves as the local lookup:
+  `node scripts/schedule-catalog.mjs` answers "what runs when" in one command.
 
 ### 4. Ops rendering — deferred, explicitly
 
