@@ -84,3 +84,64 @@ def test_merge_with_nothing_supplied_returns_all_none_but_identity_fields():
     assert row["county"] == "Lee"
     assert row["golf_structure"] is None
     assert row["home_count"] is None
+
+
+def test_merge_golf_falls_back_to_hoa_comparison_when_no_naplesgolfguy():
+    row = merge_community_row(
+        "golf-only-hoa",
+        "Golf Only HOA",
+        "Collier",
+        naplesgolfguy=None,
+        fiftyfive_places=None,
+        hoa_comparison={"golf_structure": "bundled"},
+    )
+    assert row["golf_structure"] == "bundled"
+    assert row["golf_source_url"] == "https://realtyofnaplesfl.com/hoa-fee-comparison-by-community/"
+
+
+def test_merge_gated_alone_still_sets_home_count_source_provenance():
+    row = merge_community_row(
+        "gated-only",
+        "Gated Only",
+        "Lee",
+        naplesgolfguy=None,
+        fiftyfive_places={"gated": True},
+        hoa_comparison=None,
+    )
+    assert row["gated"] is True
+    assert row["home_count"] is None
+    assert row["home_count_source_url"] is not None
+
+
+def test_merge_fees_group_appends_est_marker_when_is_estimate_true():
+    row = merge_community_row(
+        "est-range",
+        "Estimate Range",
+        "Collier",
+        naplesgolfguy=None,
+        fiftyfive_places=None,
+        hoa_comparison={
+            "hoa_fee_range": "$2,500–$3,500+/mo",
+            "is_estimate": True,
+            "cdd_flag": None,
+            "golf_structure": None,
+        },
+    )
+    assert row["hoa_fee_range"] == "$2,500–$3,500+/mo (est.)"
+
+
+def test_merge_fees_group_leaves_range_unmodified_when_not_estimate():
+    row = merge_community_row(
+        "precise-range",
+        "Precise Range",
+        "Collier",
+        naplesgolfguy=None,
+        fiftyfive_places=None,
+        hoa_comparison={
+            "hoa_fee_range": "$400–$600/mo",
+            "is_estimate": False,
+            "cdd_flag": None,
+            "golf_structure": None,
+        },
+    )
+    assert row["hoa_fee_range"] == "$400–$600/mo"

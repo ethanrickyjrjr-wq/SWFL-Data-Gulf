@@ -81,11 +81,13 @@ def merge_community_row(
         row["golf_as_of"] = as_of
 
     # --- home_count / gated group (55places only) ---
-    if fiftyfive_places:
+    if fiftyfive_places and (
+        fiftyfive_places.get("home_count") is not None or fiftyfive_places.get("gated") is not None
+    ):
+        row["home_count_source_url"] = _fiftyfive_places_url(slug)
+        row["home_count_as_of"] = as_of
         if fiftyfive_places.get("home_count") is not None:
             row["home_count"] = fiftyfive_places["home_count"]
-            row["home_count_source_url"] = _fiftyfive_places_url(slug)
-            row["home_count_as_of"] = as_of
         if fiftyfive_places.get("gated") is not None:
             row["gated"] = fiftyfive_places["gated"]
 
@@ -104,7 +106,13 @@ def merge_community_row(
 
     # --- fees group (curated comparison table only, v1) ---
     if hoa_comparison and hoa_comparison.get("hoa_fee_range") is not None:
-        row["hoa_fee_range"] = hoa_comparison["hoa_fee_range"]
+        hoa_fee_range = hoa_comparison["hoa_fee_range"]
+        if hoa_comparison.get("is_estimate"):
+            # Re-embed the "(est.)" marker distill_realtyofnaplesfl.py stripped for its
+            # own field-separation purposes -- the honesty signal must survive into the
+            # stored value since there's no separate is_estimate column (schema v1).
+            hoa_fee_range = f"{hoa_fee_range} (est.)"
+        row["hoa_fee_range"] = hoa_fee_range
         row["cdd_flag"] = hoa_comparison.get("cdd_flag")
         row["fees_source_url"] = _HOA_COMPARISON_URL
         row["fees_as_of"] = as_of
