@@ -1,3 +1,45 @@
+## 2026-07-20 (Opus 4.8 · main) — FIX THE SITE, not the simulation: 3 real product defects closed
+
+Operator, verbatim: "FIX EVERYTHING YOU HAVE FOUND!!! WHY DO WE JUST TALK ABOOUT IT AND FIX IT IN
+YOUR WORTHLESS SIMULATION ... FIX OUR FUCKING SITE." He is right. Three defects the campaign
+simulator surfaced had been logged as checks and worked around INSIDE the simulator while the
+product kept shipping them. Fixed in the product now.
+
+1. **Blast route 422'd on any webfont doc — users could not send.** `email-head.ts` injects a
+   `<link href="<webfontUrl>">` for any doc using Playfair Display, Lato or Montserrat (3 of 6
+   BRAND_FONTS). That URL is a CONSTANT in lib/brand/fonts.ts, absent from the doc, so
+   `collectAllowedUrls` never saw it and `lintCompiledHtml` rejected it → `url_violation` 422.
+   Fix: `ENGINE_URLS` in `lib/deliverable/url-lint.ts`, read FROM BRAND_FONTS so a new family
+   cannot silently re-break sending. Exact-URL match, not a host allowance — the gate exists to
+   make minted URLs impossible, not merely improbable. Closes `blast_url_lint_rejects_webfont_link`.
+
+2. **The brand was applied in the BROWSER only, so every non-canvas send shipped house defaults.**
+   `applyBrand` had exactly two callers repo-wide, both React client components. Any doc reaching
+   the blast route without passing through a live canvas — scheduled send, API-driven send, a doc
+   built by a script, a row saved before the user set their brand — shipped the seed's house logo,
+   house colours, no agent identity, and an EMPTY FOOTER ADDRESS while the account profile held a
+   valid one. The route already read `business_address` to GATE the send and then never printed it.
+   Fix: the overlay now runs server-side in the blast route between schema-parse and the link
+   ladder. It fills blanks only (pinned by apply-brand's own tests), so a canvas-branded doc passes
+   through unchanged and a doc that never saw a canvas finally gets branded. Empty-tolerant —
+   branding never blocks a send. Closes `applybrand_no_server_side_caller`.
+   NOTE: this also resolves the "our logo on a client's email" exposure. HOUSE_BRAND in the seed is
+   a deliberate operator ruling (07/05/2026 — house brand until the user's own overrides); the
+   ruling assumed an override that was never running on the send path. Now it runs. Seed untouched.
+
+3. **The Type cell shipped the raw lake enum.** A real listing email read "single_family".
+   `shortType` was written for vendor prose ("Residential - Single Family") and had no mapping for
+   `data_lake.listing_dom.property_type`'s snake_case vocabulary. Fix: a render-edge label map plus
+   a generic snake_case → Title Case fallback, so an enum we have not seen yet degrades to
+   something readable instead of leaking an identifier. The lake value stays the authority and is
+   never rewritten. Closes `raw_property_type_enum_in_email`.
+
+Verified: 2,635 lib/email + lib/deliverable tests green; `bunx next build` compiles.
+
+STILL OPEN and NOT worked around: `comps_no_size_band_guard` — 460 and 684 sq ft rows compared
+against a 1,978 sq ft subject. That one changes what a comp IS and needs a real decision, not a
+patch.
+
 ## 2026-07-20 (Opus 4.8 · main) — Why the postal address "never reached the email": applyBrand has no server-side caller
 
 Operator asked why his CAN-SPAM address never reached the sent emails. It was not missing — his

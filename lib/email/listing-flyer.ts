@@ -38,14 +38,55 @@ export function pricePerSqft(price?: string, sqft?: string): string | undefined 
 
 /** A short, cell-sized property-type label. The scrape lane hands long strings
  *  ("Residential - Single Family"); the stat cell caps at 24 chars. */
+/** The lake's own `property_type` vocabulary (data_lake.listing_dom), which is
+ *  snake_case machine values — NOT display text. Shipped verbatim to a reader once:
+ *  the Type cell of a real listing email read "single_family" (operator, 07/20/2026,
+ *  reading it in his inbox). Mapped at the RENDER EDGE only; the lake value is the
+ *  authority and is never rewritten. An unmapped value falls through to the generic
+ *  snake-case → Title Case pass below, so a new vendor enum degrades to something
+ *  readable instead of leaking an identifier. */
+const PROPERTY_TYPE_LABEL: Record<string, string> = {
+  single_family: "Single Family",
+  multi_family: "Multi-Family",
+  condo: "Condo",
+  condos: "Condo",
+  townhouse: "Townhouse",
+  townhomes: "Townhouse",
+  duplex: "Duplex",
+  triplex: "Triplex",
+  fourplex: "Fourplex",
+  apartment: "Apartment",
+  mobile: "Mobile Home",
+  manufactured: "Manufactured",
+  farm: "Farm",
+  land: "Land",
+  lot: "Lot",
+  other: "",
+};
+
 export function shortType(t?: string): string {
   if (!t) return "";
+  const raw = t.trim();
+  // Machine enum first — an exact lake/vendor value never reaches a reader as-is.
+  const mapped = PROPERTY_TYPE_LABEL[raw.toLowerCase()];
+  if (mapped !== undefined) return mapped;
+  // Vendor prose ("Residential - Single Family") keeps its existing tail-segment rule.
   const seg =
-    t
+    raw
       .split(/\s[-–—]\s/)
       .pop()
-      ?.trim() || t.trim();
-  return seg.slice(0, 24);
+      ?.trim() || raw;
+  // Anything still carrying underscores is an identifier, not a phrase — title-case it
+  // rather than print it raw. "single_family" would already be mapped; this catches the
+  // enum we have not seen yet.
+  const humane = seg.includes("_")
+    ? seg
+        .split("_")
+        .filter(Boolean)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(" ")
+    : seg;
+  return humane.slice(0, 24);
 }
 
 /** A spec cell. An unsourced value is "" — an OPEN SLOT on the canvas (the LABEL is the

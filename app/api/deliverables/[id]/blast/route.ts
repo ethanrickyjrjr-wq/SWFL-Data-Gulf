@@ -37,6 +37,8 @@ import { resolvePostalAddress } from "@/lib/email/postal-address";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import { bindUnsubscribeHref } from "@/lib/email/bind-unsubscribe";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
+import { applyBrand } from "@/lib/email/brand/apply-brand";
+import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { renderEmailDocToBuffer, pdfFilename } from "@/lib/pdf";
 import { logActivity } from "@/lib/project/activity";
@@ -269,11 +271,49 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!parsedDoc.success) {
       return NextResponse.json({ error: "invalid email document" }, { status: 422 });
     }
+
+    // ── THE ACCOUNT BRAND, APPLIED SERVER-SIDE ───────────────────────────────
+    //
+    // Until 07/20/2026 `applyBrand` had exactly TWO callers repo-wide and both were
+    // React CLIENT components (EmailLabGridShell, ProjectSocialClient). The brand was
+    // stamped onto the doc IN THE BROWSER, which meant a doc reaching this route
+    // without passing through a live canvas — a scheduled send, an API-driven send, a
+    // doc built by a script, a row saved before the user set their brand — shipped the
+    // SEED's house defaults instead: our own logo (hardcoded at default-docs.ts:42),
+    // house colours, no agent identity, and an EMPTY FOOTER ADDRESS while the account
+    // profile held a perfectly valid one. Found when the operator asked why his
+    // CAN-SPAM address never reached an email whose send THIS ROUTE had already gated
+    // on that address existing — we checked for it and then never printed it.
+    //
+    // The overlay is pure and it FILLS BLANKS ONLY (apply-brand.ts — never overwriting
+    // authored content is pinned by its own tests), so running it here cannot change
+    // what an email KNOWS, only whose identity it wears. A doc already branded in the
+    // canvas passes through unchanged; a doc that never saw a canvas finally gets
+    // branded at all.
+    //
+    // Empty-tolerant by contract: no profile row, no tokens, or a parse failure leaves
+    // the doc exactly as it arrived. Branding must never block a send.
+    let brandedDoc = parsedDoc.data;
+    try {
+      const { data: fullBrand } = await supabase
+        .from("user_brand_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (fullBrand) {
+        const tokens = brandingToTokens(fullBrand as unknown as Record<string, string>);
+        const reparsed = EmailDocSchema.safeParse(applyBrand(brandedDoc, tokens));
+        if (reparsed.success) brandedDoc = reparsed.data;
+        else console.error("[blast] brand overlay produced an invalid doc — sending unbranded");
+      }
+    } catch (err) {
+      console.error("[blast] brand overlay failed — sending as-authored:", err);
+    }
     // Dead-link floor: any click-promising slot still empty at send time gets the
     // fallback ladder (listing page → brand site → hosted /p page). Every rung is
     // doc-held or the platform's own webUrl, so the url-lint below still admits
     // the laddered HTML. A blast never ships a dead button.
-    const ladder = applyLinkFallbacks(parsedDoc.data, {
+    const ladder = applyLinkFallbacks(brandedDoc, {
       listingUrl: subjectListingUrl(parsedDoc.data),
       brandWebsiteUrl: brandWebsiteUrl(parsedDoc.data),
       replyMailto: null, // blast replies ride the reply-to header, not a body CTA

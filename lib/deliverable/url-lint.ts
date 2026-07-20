@@ -9,6 +9,8 @@
 // PURE — no I/O. Callers assemble the allowed set from what they hold:
 //   interactive render → strip + warn;  unattended send → fail the build.
 
+import { BRAND_FONTS } from "@/lib/brand/fonts";
+
 export interface UrlViolation {
   attr: "href" | "src";
   url: string;
@@ -28,6 +30,31 @@ export interface TextUrlLintResult {
 
 /** Hosts we own — compiled-in links (view-online, unsubscribe) are allowed by host. */
 const PLATFORM_HOSTS = new Set(["swfldatagulf.com", "www.swfldatagulf.com"]);
+
+/**
+ * ENGINE-OWNED URLS — emitted by our own renderer, never by a model, and never
+ * present in the doc the caller hands us.
+ *
+ * THE BUG THIS CLOSES (found 07/20/2026 by the campaign simulator, first live run):
+ * `lib/email/blocks/email-head.ts` injects `<link href="<webfontUrl>">` for any doc
+ * using a family that declares one — 3 of 6 BRAND_FONTS do (Playfair Display, Lato,
+ * Montserrat). That URL is a CONSTANT in lib/brand/fonts.ts. It is not in the doc, so
+ * `collectAllowedUrls` never saw it, so `isAllowedUrl` rejected it, so
+ * `app/api/deliverables/[id]/blast` returned 422 `url_violation` — meaning A USER WHO
+ * PICKED ONE OF THOSE THREE FONTS COULD NOT SEND AT ALL. Same class as the
+ * view-online and unsubscribe links this file already allows by host: engine-owned
+ * plumbing, not mintable content.
+ *
+ * Read from BRAND_FONTS rather than hardcoded, so a new family cannot silently fall
+ * outside the allowlist and re-break sending. Exact-URL match, NOT a host allowance:
+ * a font CDN host is still a host, and this gate exists to make minted URLs
+ * impossible, not merely improbable.
+ */
+const ENGINE_URLS: ReadonlySet<string> = new Set(
+  Object.values(BRAND_FONTS)
+    .map((f) => f.webfontUrl)
+    .filter((u): u is string => Boolean(u)),
+);
 
 /** Schemes that carry no fetchable claim to mint. */
 const SAFE_SCHEME_RE = /^(?:mailto:|tel:|data:)/i;
@@ -74,6 +101,7 @@ function isAllowedUrl(url: string, allowed: ReadonlySet<string>): boolean {
   if (u === "" || u.startsWith("/") || u.startsWith("#")) return true; // ours by construction
   if (SAFE_SCHEME_RE.test(u)) return true;
   if (allowed.has(u)) return true;
+  if (ENGINE_URLS.has(u)) return true; // our own renderer's webfont <link>; see ENGINE_URLS
   try {
     const host = new URL(u).hostname.toLowerCase();
     if (PLATFORM_HOSTS.has(host)) return true;
