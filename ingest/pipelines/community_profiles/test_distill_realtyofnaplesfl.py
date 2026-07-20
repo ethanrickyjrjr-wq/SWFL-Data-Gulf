@@ -13,6 +13,7 @@ def test_parses_both_county_tables():
 
     pelican = by_name["Pelican Bay"]
     assert pelican["hoa_fee_range"] == "$175–$220/mo"
+    assert pelican["fees_included"] == "Beach tram, beach clubs, landscape, security"
     assert pelican["cdd_flag"] is False
     assert pelican["golf_structure"] == "none"
     assert pelican["is_estimate"] is False

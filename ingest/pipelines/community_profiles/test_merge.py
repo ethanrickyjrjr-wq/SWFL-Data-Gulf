@@ -165,3 +165,138 @@ def test_merge_fees_group_leaves_range_unmodified_when_not_estimate():
         },
     )
     assert row["hoa_fee_range"] == "$400–$600/mo"
+
+
+def test_merge_carries_club_type_and_fee_fields_from_naplesgolfguy():
+    row = merge_community_row(
+        "fiddlers-creek",
+        "Fiddler's Creek",
+        "Collier",
+        naplesgolfguy={
+            "golf_structure": "equity",
+            "golf_holes": 18,
+            "golf_courses": 1,
+            "club_type": "Private Country Club",
+            "golf_initiation_fee": "$450,000 (equity)",
+            "golf_annual_dues": "$24,923",
+            "social_initiation_fee": "$18,000",
+            "social_annual_dues": "$3,884",
+            "fnb_minimum_disclosed": True,
+        },
+        fiftyfive_places=None,
+        hoa_comparison=None,
+    )
+    assert row["club_type"] == "Private Country Club"
+    assert row["golf_initiation_fee"] == "$450,000 (equity)"
+    assert row["golf_annual_dues"] == "$24,923"
+    assert row["social_initiation_fee"] == "$18,000"
+    assert row["social_annual_dues"] == "$3,884"
+    assert row["fnb_minimum_disclosed"] is True
+
+
+def test_merge_talis_park_real_scenario_naplesgolfguy_detail_plus_hoa_structure_fallback():
+    # The actual Talis Park case, confirmed live 2026-07-20: naplesgolfguy's
+    # own page has real holes/club_type/fee data but its membership-type text
+    # ("One Time Initiation Fee") doesn't map to a known golf_structure enum
+    # (distill_naplesgolfguy.py's _STRUCTURE_MAP miss -- a real, undressed
+    # gap). realtyofnaplesfl's curated table independently lists Talis Park's
+    # golf as "Optional". The merged row must keep BOTH: naplesgolfguy's
+    # detail fields (never silently dropped just because golf_structure
+    # itself came back None) AND the HOA table's golf_structure filling the
+    # enum gap -- neither source gets to erase the other's real data.
+    row = merge_community_row(
+        "talis-park",
+        "Talis Park",
+        "Collier",
+        naplesgolfguy={
+            "golf_structure": None,  # "One Time Initiation Fee" -- unmapped
+            "golf_holes": 18,
+            "golf_courses": 1,
+            "club_type": "Private Country Club",
+            "golf_initiation_fee": "$225,000",
+            "golf_annual_dues": "$24,724",
+            "social_initiation_fee": None,
+            "social_annual_dues": "$10,000",
+            "fnb_minimum_disclosed": True,
+        },
+        fiftyfive_places=None,
+        hoa_comparison={
+            "hoa_fee_range": "$700–$1,100/mo",
+            "cdd_flag": True,
+            "golf_structure": "optional",
+            "is_estimate": False,
+        },
+    )
+    assert row["golf_structure"] == "optional"  # filled from hoa_comparison
+    assert row["golf_holes"] == 18  # naplesgolfguy's own detail, kept
+    assert row["golf_courses"] == 1
+    assert row["club_type"] == "Private Country Club"
+    assert row["golf_initiation_fee"] == "$225,000"
+    assert row["golf_annual_dues"] == "$24,724"
+    assert row["social_initiation_fee"] is None
+    assert row["social_annual_dues"] == "$10,000"
+    assert row["fnb_minimum_disclosed"] is True
+    # golf_source_url still points at naplesgolfguy -- it supplied the bulk
+    # of the group (holes/club_type/fees); v1 has one url per group, not per
+    # field (see merge.py's module docstring).
+    assert row["golf_source_url"] == "https://naplesgolfguy.com/golf-communities/talis-park/"
+
+
+def test_merge_carries_55places_listing_profile_fields():
+    row = merge_community_row(
+        "heritage-bay",
+        "Heritage Bay",
+        "Collier",
+        naplesgolfguy=None,
+        fiftyfive_places={
+            "home_count": 1400,
+            "gated": True,
+            "price_range": "Low $200ks - Low $1Ms",
+            "home_types": "Attached, Condos, Single-Family",
+            "new_or_resale": "Resale Homes Only",
+            "builder": "Lennar Homes",
+            "years_built": "2005 - 2014",
+            "age_restrictions": "No Age Restrictions",
+            "activity_director": True,
+        },
+        hoa_comparison=None,
+    )
+    assert row["price_range"] == "Low $200ks - Low $1Ms"
+    assert row["home_types"] == "Attached, Condos, Single-Family"
+    assert row["new_or_resale"] == "Resale Homes Only"
+    assert row["builder"] == "Lennar Homes"
+    assert row["years_built"] == "2005 - 2014"
+    assert row["age_restrictions"] == "No Age Restrictions"
+    assert row["activity_director"] is True
+    assert row["home_count_source_url"] == "https://www.55places.com/florida/communities/heritage-bay"
+
+
+def test_merge_carries_fees_included_from_hoa_comparison():
+    row = merge_community_row(
+        "pelican-bay",
+        "Pelican Bay",
+        "Collier",
+        naplesgolfguy=None,
+        fiftyfive_places=None,
+        hoa_comparison={
+            "hoa_fee_range": "$175–$220/mo",
+            "fees_included": "Beach tram, beach clubs, landscape, security",
+            "cdd_flag": False,
+            "golf_structure": "none",
+            "is_estimate": False,
+        },
+    )
+    assert row["fees_included"] == "Beach tram, beach clubs, landscape, security"
+
+
+def test_merge_new_fields_stay_none_when_source_absent():
+    row = merge_community_row(
+        "some-slug", "Some Community", "Lee", naplesgolfguy=None, fiftyfive_places=None, hoa_comparison=None
+    )
+    assert row["club_type"] is None
+    assert row["golf_initiation_fee"] is None
+    assert row["social_initiation_fee"] is None
+    assert row["fnb_minimum_disclosed"] is None
+    assert row["price_range"] is None
+    assert row["activity_director"] is None
+    assert row["fees_included"] is None

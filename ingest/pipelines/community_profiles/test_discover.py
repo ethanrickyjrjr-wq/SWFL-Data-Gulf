@@ -45,7 +45,7 @@ def test_build_discovery_maps_fetches_every_directory_url():
             return NGG_FIXTURE.read_text(encoding="utf-8")
         return FP_FIXTURE.read_text(encoding="utf-8")
 
-    ngg_map, fp_map = build_discovery_maps(fake_fetch)
+    ngg_map, fp_map = build_discovery_maps(fake_fetch, delay_seconds=0)
     assert ngg_map["GREY OAKS"] == "grey-oaks-country-club"
     assert fp_map["LELY RESORT"] == "lely-resort"
     # 3 regional + 3 membership-type naplesgolfguy pages (not fully redundant —
@@ -54,6 +54,20 @@ def test_build_discovery_maps_fetches_every_directory_url():
 
 
 def test_build_discovery_maps_skips_empty_fetch_without_raising():
-    ngg_map, fp_map = build_discovery_maps(lambda url: "")
+    ngg_map, fp_map = build_discovery_maps(lambda url: "", delay_seconds=0)
     assert ngg_map == {}
     assert fp_map == {}
+
+
+def test_build_discovery_maps_paces_fetches_with_a_delay_between_calls(monkeypatch):
+    import ingest.pipelines.community_profiles.discover as mod
+
+    slept = []
+    monkeypatch.setattr(mod.time, "sleep", lambda s: slept.append(s))
+
+    def fake_fetch(url: str) -> str:
+        return ""
+
+    build_discovery_maps(fake_fetch, delay_seconds=1.5)
+    # 8 total fetches -> 7 inter-request delays (none before the first).
+    assert slept == [1.5] * 7

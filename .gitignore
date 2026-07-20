@@ -205,6 +205,10 @@ public/maps/fl_zips.geojson
 # graphify generated output
 graphify-out/
 
+# community_profiles raw-markdown fetch cache — scratch, never committed
+# (ingest/pipelines/community_profiles/pipeline.py --full-discovery + raw_cache.py)
+ingest/pipelines/community_profiles/.raw_cache/
+
 # _ASSISTANT/ local brief — generated per-session, not committed
 _ASSISTANT/TODAY.md
 

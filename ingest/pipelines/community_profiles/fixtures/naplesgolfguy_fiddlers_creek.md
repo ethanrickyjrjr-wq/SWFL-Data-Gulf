@@ -6,6 +6,15 @@ Club Type:
 ## Private Country Club
 Membership Type:
 ## Equity
+###  Membership Fees
+| Golf Membership Initiation Fee:   | $450,000 (equity)  |
+| --- | --- |
+| Annual Golf Dues:   | $24,923  |
+| Social Membership Initiation Fee:   | $18,000  |
+| Annual Social Dues:   | $3,884  |
+Please be aware, that other membership options may be available.
+Additional fees such as capital assessments, a food and beverage minimum, or taxes may apply.
+Please feel free to contact us for additional information.
 ###  Golf Course Information
 |  Opened   | 2002  |
 | --- | --- |

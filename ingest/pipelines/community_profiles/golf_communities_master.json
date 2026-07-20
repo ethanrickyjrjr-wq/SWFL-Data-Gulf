@@ -1,0 +1,1108 @@
+[
+  {
+    "slug": "arrowhead-golf-course",
+    "label": "Arrowhead Golf Course",
+    "naplesgolfguy_slug": "arrowhead-golf-course",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "audubon-country-club",
+    "label": "Audubon Country Club",
+    "naplesgolfguy_slug": "audubon-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "babcock-national",
+    "label": "Babcock National",
+    "naplesgolfguy_slug": "babcock-national",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "bay-colony-golf-club",
+    "label": "Bay Colony Golf Club",
+    "naplesgolfguy_slug": "bay-colony-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "bears-paw-country-club",
+    "label": "Bears Paw Country Club",
+    "naplesgolfguy_slug": "bears-paw-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "bentley-village-golf-club",
+    "label": "Bentley Village Golf Club",
+    "naplesgolfguy_slug": "bentley-village-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "boca-royale-golf-country-club",
+    "label": "Boca Royale Golf Country Club",
+    "naplesgolfguy_slug": "boca-royale-golf-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "bonita-bay-club-east",
+    "label": "Bonita Bay Club East",
+    "naplesgolfguy_slug": "bonita-bay-club-east",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "bonita-bay-club-west",
+    "label": "Bonita Bay Club West",
+    "naplesgolfguy_slug": "bonita-bay-club-west",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "bonita-fairways-golf-club",
+    "label": "Bonita Fairways Golf Club",
+    "naplesgolfguy_slug": "bonita-fairways-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "bonita-national-golf-country-club",
+    "label": "Bonita National Golf Country Club",
+    "naplesgolfguy_slug": "bonita-national-golf-country-club",
+    "fiftyfive_places_slug": "bonita-national-golf-country-club",
+    "county": "Lee"
+  },
+  {
+    "slug": "calusa-country-club",
+    "label": "Calusa Country Club",
+    "naplesgolfguy_slug": "calusa-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "calusa-pines-golf-club",
+    "label": "Calusa Pines Golf Club",
+    "naplesgolfguy_slug": "calusa-pines-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "capri-isles-golf-club",
+    "label": "Capri Isles Golf Club",
+    "naplesgolfguy_slug": "capri-isles-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "cavu-golf-club",
+    "label": "Cavu Golf Club",
+    "naplesgolfguy_slug": "cavu-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "cedar-hammock-golf-and-country-club",
+    "label": "Cedar Hammock Golf And Country Club",
+    "naplesgolfguy_slug": "cedar-hammock-golf-and-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "colliers-reserve-country-club",
+    "label": "Colliers Reserve Country Club",
+    "naplesgolfguy_slug": "colliers-reserve-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "colonial-country-club",
+    "label": "Colonial Country Club",
+    "naplesgolfguy_slug": "colonial-country-club",
+    "fiftyfive_places_slug": "colonial-country-club",
+    "county": null
+  },
+  {
+    "slug": "colony-golf-country-club",
+    "label": "Colony Golf Country Club",
+    "naplesgolfguy_slug": "colony-golf-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "concession-golf-club",
+    "label": "Concession Golf Club",
+    "naplesgolfguy_slug": "concession-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "copperleaf-at-the-brooks",
+    "label": "Copperleaf At The Brooks",
+    "naplesgolfguy_slug": "copperleaf-at-the-brooks",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "country-club-of-naples",
+    "label": "Country Club Of Naples",
+    "naplesgolfguy_slug": "country-club-of-naples",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "country-creek",
+    "label": "Country Creek",
+    "naplesgolfguy_slug": "country-creek",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "countryside-golf-club",
+    "label": "Countryside Golf Club",
+    "naplesgolfguy_slug": "countryside-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "cross-creek-country-club",
+    "label": "Cross Creek Country Club",
+    "naplesgolfguy_slug": "cross-creek-country-club",
+    "fiftyfive_places_slug": "cross-creek-country-club",
+    "county": "Lee"
+  },
+  {
+    "slug": "crown-colony-golf-and-country-club",
+    "label": "Crown Colony Golf And Country Club",
+    "naplesgolfguy_slug": "crown-colony-golf-and-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "cypress-lake-golf-club",
+    "label": "Cypress Lake Golf Club",
+    "naplesgolfguy_slug": "cypress-lake-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "cypress-woods",
+    "label": "Cypress Woods",
+    "naplesgolfguy_slug": "cypress-woods",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "eagle-creek",
+    "label": "Eagle Creek",
+    "naplesgolfguy_slug": "eagle-creek",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "eagle-lakes-golf-club",
+    "label": "Eagle Lakes Golf Club",
+    "naplesgolfguy_slug": "eagle-lakes-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "eagle-ridge-golf-club",
+    "label": "Eagle Ridge Golf Club",
+    "naplesgolfguy_slug": "eagle-ridge-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "eastwood-golf-course",
+    "label": "Eastwood Golf Course",
+    "naplesgolfguy_slug": "eastwood-golf-course",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "esplanade-at-azario",
+    "label": "Esplanade At Azario",
+    "naplesgolfguy_slug": "esplanade-at-azario",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "esplanade-at-lakewood-ranch",
+    "label": "Esplanade At Lakewood Ranch",
+    "naplesgolfguy_slug": "esplanade-at-lakewood-ranch",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "esplanade-at-rivergrass",
+    "label": "Esplanade At Rivergrass",
+    "naplesgolfguy_slug": "esplanade-at-rivergrass",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "esplanade-golf-and-country-club",
+    "label": "Esplanade Golf And Country Club",
+    "naplesgolfguy_slug": "esplanade-golf-and-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "estero-country-club",
+    "label": "Estero Country Club",
+    "naplesgolfguy_slug": "estero-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "fiddlers-creek",
+    "label": "Fiddlers Creek",
+    "naplesgolfguy_slug": "fiddlers-creek",
+    "fiftyfive_places_slug": "fiddlers-creek",
+    "county": "Collier"
+  },
+  {
+    "slug": "fiddlesticks-country-club",
+    "label": "Fiddlesticks Country Club",
+    "naplesgolfguy_slug": "fiddlesticks-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "forest-country-club",
+    "label": "Forest Country Club",
+    "naplesgolfguy_slug": "forest-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "forest-glen-golf-country-club",
+    "label": "Forest Glen Golf Country Club",
+    "naplesgolfguy_slug": "forest-glen-golf-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "fort-myers-country-club",
+    "label": "Fort Myers Country Club",
+    "naplesgolfguy_slug": "fort-myers-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "founders-golf-club",
+    "label": "Founders Golf Club",
+    "naplesgolfguy_slug": "founders-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "foxfire-country-club",
+    "label": "Foxfire Country Club",
+    "naplesgolfguy_slug": "foxfire-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "glades-country-club",
+    "label": "Glades Country Club",
+    "naplesgolfguy_slug": "glades-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "glen-eagle-golf-and-country-club",
+    "label": "Glen Eagle Golf And Country Club",
+    "naplesgolfguy_slug": "glen-eagle-golf-and-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "golf-club-of-the-everglades",
+    "label": "Golf Club Of The Everglades",
+    "naplesgolfguy_slug": "golf-club-of-the-everglades",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "grandezza-country-club",
+    "label": "Grandezza Country Club",
+    "naplesgolfguy_slug": "grandezza-country-club",
+    "fiftyfive_places_slug": "grandezza",
+    "county": "Lee"
+  },
+  {
+    "slug": "grey-oaks-country-club",
+    "label": "Grey Oaks Country Club",
+    "naplesgolfguy_slug": "grey-oaks-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "gulf-harbour-yacht-and-country-club",
+    "label": "Gulf Harbour Yacht And Country Club",
+    "naplesgolfguy_slug": "gulf-harbour-yacht-and-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "hammock-bay",
+    "label": "Hammock Bay",
+    "naplesgolfguy_slug": "hammock-bay",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "heritage-bay",
+    "label": "Heritage Bay",
+    "naplesgolfguy_slug": "heritage-bay",
+    "fiftyfive_places_slug": "heritage-bay",
+    "county": "Collier"
+  },
+  {
+    "slug": "heritage-landing",
+    "label": "Heritage Landing",
+    "naplesgolfguy_slug": "heritage-landing",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "heritage-oaks",
+    "label": "Heritage Oaks",
+    "naplesgolfguy_slug": "heritage-oaks",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "heritage-palms-golf-club",
+    "label": "Heritage Palms Golf Club",
+    "naplesgolfguy_slug": "heritage-palms-golf-club",
+    "fiftyfive_places_slug": "heritage-palms",
+    "county": "Lee"
+  },
+  {
+    "slug": "hibiscus-golf-club",
+    "label": "Hibiscus Golf Club",
+    "naplesgolfguy_slug": "hibiscus-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "hideaway-country-club",
+    "label": "Hideaway Country Club",
+    "naplesgolfguy_slug": "hideaway-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "hideout-golf-club",
+    "label": "Hideout Golf Club",
+    "naplesgolfguy_slug": "hideout-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "high-point-country-club",
+    "label": "High Point Country Club",
+    "naplesgolfguy_slug": "high-point-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "highland-woods",
+    "label": "Highland Woods",
+    "naplesgolfguy_slug": "highland-woods",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "hole-in-the-wall-golf-club",
+    "label": "Hole In The Wall Golf Club",
+    "naplesgolfguy_slug": "hole-in-the-wall-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "hunters-ridge-country-club",
+    "label": "Hunters Ridge Country Club",
+    "naplesgolfguy_slug": "hunters-ridge-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "imperial-golf-estates",
+    "label": "Imperial Golf Estates",
+    "naplesgolfguy_slug": "imperial-golf-estates",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "island-country-club",
+    "label": "Island Country Club",
+    "naplesgolfguy_slug": "island-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "jacaranda-west-country-club",
+    "label": "Jacaranda West Country Club",
+    "naplesgolfguy_slug": "jacaranda-west-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "kelly-greens-golf-and-country-club",
+    "label": "Kelly Greens Golf And Country Club",
+    "naplesgolfguy_slug": "kelly-greens-golf-and-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "kensington-golf-country-club",
+    "label": "Kensington Golf Country Club",
+    "naplesgolfguy_slug": "kensington-golf-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "kinsale-golf-club",
+    "label": "Kinsale Golf Club",
+    "naplesgolfguy_slug": "kinsale-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "lakewood-country-club",
+    "label": "Lakewood Country Club",
+    "naplesgolfguy_slug": "lakewood-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "lakewood-national",
+    "label": "Lakewood National",
+    "naplesgolfguy_slug": "lakewood-national",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "lakewood-ranch",
+    "label": "Lakewood Ranch",
+    "naplesgolfguy_slug": "lakewood-ranch",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "landings-golf",
+    "label": "Landings Golf",
+    "naplesgolfguy_slug": "landings-golf",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "laplaya-golf-club",
+    "label": "Laplaya Golf Club",
+    "naplesgolfguy_slug": "laplaya-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "laurel-oak-country-club",
+    "label": "Laurel Oak Country Club",
+    "naplesgolfguy_slug": "laurel-oak-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "legends-golf",
+    "label": "Legends Golf",
+    "naplesgolfguy_slug": "legends-golf",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "lely-resort",
+    "label": "Lely Resort",
+    "naplesgolfguy_slug": "lely-resort",
+    "fiftyfive_places_slug": "lely-resort",
+    "county": "Collier"
+  },
+  {
+    "slug": "lexington-country-club",
+    "label": "Lexington Country Club",
+    "naplesgolfguy_slug": "lexington-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "longboat-key-club",
+    "label": "Longboat Key Club",
+    "naplesgolfguy_slug": "longboat-key-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "meadows-country-club",
+    "label": "Meadows Country Club",
+    "naplesgolfguy_slug": "meadows-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "mediterra-golf-club",
+    "label": "Mediterra Golf Club",
+    "naplesgolfguy_slug": "mediterra-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "miakka-golf-club",
+    "label": "Miakka Golf Club",
+    "naplesgolfguy_slug": "miakka-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "miromar-lakes-golf-club",
+    "label": "Miromar Lakes Golf Club",
+    "naplesgolfguy_slug": "miromar-lakes-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "misty-creek-country-club",
+    "label": "Misty Creek Country Club",
+    "naplesgolfguy_slug": "misty-creek-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "moorings-golf-and-country-club",
+    "label": "Moorings Golf And Country Club",
+    "naplesgolfguy_slug": "moorings-golf-and-country-club",
+    "fiftyfive_places_slug": "moorings",
+    "county": null
+  },
+  {
+    "slug": "myakka-pines-golf-club",
+    "label": "Myakka Pines Golf Club",
+    "naplesgolfguy_slug": "myakka-pines-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "myerlee-country-club",
+    "label": "Myerlee Country Club",
+    "naplesgolfguy_slug": "myerlee-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "naples-beach-hotel-and-golf-club",
+    "label": "Naples Beach Hotel And Golf Club",
+    "naplesgolfguy_slug": "naples-beach-hotel-and-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "naples-grande-golf-club",
+    "label": "Naples Grande Golf Club",
+    "naplesgolfguy_slug": "naples-grande-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "naples-heritage-golf-club",
+    "label": "Naples Heritage Golf Club",
+    "naplesgolfguy_slug": "naples-heritage-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "naples-lakes-country-club",
+    "label": "Naples Lakes Country Club",
+    "naplesgolfguy_slug": "naples-lakes-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "naples-national-golf-club",
+    "label": "Naples National Golf Club",
+    "naplesgolfguy_slug": "naples-national-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "old-collier-golf-club",
+    "label": "Old Collier Golf Club",
+    "naplesgolfguy_slug": "old-collier-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "old-corkscrew",
+    "label": "Old Corkscrew",
+    "naplesgolfguy_slug": "old-corkscrew",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "olde-cypress",
+    "label": "Olde Cypress",
+    "naplesgolfguy_slug": "olde-cypress",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "olde-florida-golf-club",
+    "label": "Olde Florida Golf Club",
+    "naplesgolfguy_slug": "olde-florida-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "olde-hickory",
+    "label": "Olde Hickory",
+    "naplesgolfguy_slug": "olde-hickory",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "palm-aire-country-club",
+    "label": "Palm Aire Country Club",
+    "naplesgolfguy_slug": "palm-aire-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "palmira-golf-club",
+    "label": "Palmira Golf Club",
+    "naplesgolfguy_slug": "palmira-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "pandion-golf-club",
+    "label": "Pandion Golf Club",
+    "naplesgolfguy_slug": "pandion-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "panther-run-golf-club",
+    "label": "Panther Run Golf Club",
+    "naplesgolfguy_slug": "panther-run-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "pelican-bay",
+    "label": "Pelican Bay",
+    "naplesgolfguy_slug": "pelican-bay",
+    "fiftyfive_places_slug": "pelican-bay",
+    "county": null
+  },
+  {
+    "slug": "pelican-marsh-golf-club",
+    "label": "Pelican Marsh Golf Club",
+    "naplesgolfguy_slug": "pelican-marsh-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "pelican-preserve",
+    "label": "Pelican Preserve",
+    "naplesgolfguy_slug": "pelican-preserve",
+    "fiftyfive_places_slug": "pelican-preserve",
+    "county": "Lee"
+  },
+  {
+    "slug": "pelican-sound",
+    "label": "Pelican Sound",
+    "naplesgolfguy_slug": "pelican-sound",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "plantation-golf",
+    "label": "Plantation Golf",
+    "naplesgolfguy_slug": "plantation-golf",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "plantation-golf-club",
+    "label": "Plantation Golf Club",
+    "naplesgolfguy_slug": "plantation-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "quail-creek-country-club",
+    "label": "Quail Creek Country Club",
+    "naplesgolfguy_slug": "quail-creek-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "quail-run-golf-club",
+    "label": "Quail Run Golf Club",
+    "naplesgolfguy_slug": "quail-run-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "quail-village-golf-club",
+    "label": "Quail Village Golf Club",
+    "naplesgolfguy_slug": "quail-village-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "quail-west",
+    "label": "Quail West",
+    "naplesgolfguy_slug": "quail-west",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "river-hall-country-club",
+    "label": "River Hall Country Club",
+    "naplesgolfguy_slug": "river-hall-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "river-strand-golf-club",
+    "label": "River Strand Golf Club",
+    "naplesgolfguy_slug": "river-strand-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "rookery-golf-club",
+    "label": "Rookery Golf Club",
+    "naplesgolfguy_slug": "rookery-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "royal-palm-golf-club",
+    "label": "Royal Palm Golf Club",
+    "naplesgolfguy_slug": "royal-palm-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "royal-poinciana-golf-club",
+    "label": "Royal Poinciana Golf Club",
+    "naplesgolfguy_slug": "royal-poinciana-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "royal-wood-golf-country-club",
+    "label": "Royal Wood Golf Country Club",
+    "naplesgolfguy_slug": "royal-wood-golf-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "saltleaf-golf-preserve",
+    "label": "Saltleaf Golf Preserve",
+    "naplesgolfguy_slug": "saltleaf-golf-preserve",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "san-carlos-golf-club",
+    "label": "San Carlos Golf Club",
+    "naplesgolfguy_slug": "san-carlos-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "sanctuary-golf-club",
+    "label": "Sanctuary Golf Club",
+    "naplesgolfguy_slug": "sanctuary-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "sarasota-national-golf-club",
+    "label": "Sarasota National Golf Club",
+    "naplesgolfguy_slug": "sarasota-national-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "shadow-wood-country-club",
+    "label": "Shadow Wood Country Club",
+    "naplesgolfguy_slug": "shadow-wood-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "shadow-wood-preserve",
+    "label": "Shadow Wood Preserve",
+    "naplesgolfguy_slug": "shadow-wood-preserve",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "soleta-golf-club",
+    "label": "Soleta Golf Club",
+    "naplesgolfguy_slug": "soleta-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "spanish-wells-country-club",
+    "label": "Spanish Wells Country Club",
+    "naplesgolfguy_slug": "spanish-wells-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "spring-run",
+    "label": "Spring Run",
+    "naplesgolfguy_slug": "spring-run",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "stonebridge-country-club",
+    "label": "Stonebridge Country Club",
+    "naplesgolfguy_slug": "stonebridge-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "stoneybrook-golf-country-club",
+    "label": "Stoneybrook Golf Country Club",
+    "naplesgolfguy_slug": "stoneybrook-golf-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "talis-park",
+    "label": "Talis Park",
+    "naplesgolfguy_slug": "talis-park",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "tara-golf-and-country-club",
+    "label": "Tara Golf And Country Club",
+    "naplesgolfguy_slug": "tara-golf-and-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "the-club-at-gateway",
+    "label": "The Club At Gateway",
+    "naplesgolfguy_slug": "the-club-at-gateway",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "the-club-at-renaissance",
+    "label": "The Club At Renaissance",
+    "naplesgolfguy_slug": "the-club-at-renaissance",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "the-club-at-the-strand",
+    "label": "The Club At The Strand",
+    "naplesgolfguy_slug": "the-club-at-the-strand",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "the-lantern-club",
+    "label": "The Lantern Club",
+    "naplesgolfguy_slug": "the-lantern-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "the-national-golf-country-club",
+    "label": "The National Golf Country Club",
+    "naplesgolfguy_slug": "the-national-golf-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "the-nest-at-pelican-landing",
+    "label": "The Nest At Pelican Landing",
+    "naplesgolfguy_slug": "the-nest-at-pelican-landing",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "the-oaks-club",
+    "label": "The Oaks Club",
+    "naplesgolfguy_slug": "the-oaks-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "the-quarry",
+    "label": "The Quarry",
+    "naplesgolfguy_slug": "the-quarry",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "tiburon-golf-club",
+    "label": "Tiburon Golf Club",
+    "naplesgolfguy_slug": "tiburon-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "tpc-prestancia",
+    "label": "Tpc Prestancia",
+    "naplesgolfguy_slug": "tpc-prestancia",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "treviso-bay",
+    "label": "Treviso Bay",
+    "naplesgolfguy_slug": "treviso-bay",
+    "fiftyfive_places_slug": "treviso-bay",
+    "county": "Collier"
+  },
+  {
+    "slug": "twin-eagles",
+    "label": "Twin Eagles",
+    "naplesgolfguy_slug": "twin-eagles",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "valencia-golf-and-country-club",
+    "label": "Valencia Golf And Country Club",
+    "naplesgolfguy_slug": "valencia-golf-and-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "vanderbilt-country-club",
+    "label": "Vanderbilt Country Club",
+    "naplesgolfguy_slug": "vanderbilt-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "vasari-country-club",
+    "label": "Vasari Country Club",
+    "naplesgolfguy_slug": "vasari-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "venetian-golf-and-river-club",
+    "label": "Venetian Golf And River Club",
+    "naplesgolfguy_slug": "venetian-golf-and-river-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "venice-golf-and-country-club",
+    "label": "Venice Golf And Country Club",
+    "naplesgolfguy_slug": "venice-golf-and-country-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "verandah-golf-club",
+    "label": "Verandah Golf Club",
+    "naplesgolfguy_slug": "verandah-golf-club",
+    "fiftyfive_places_slug": "verandah",
+    "county": "Lee"
+  },
+  {
+    "slug": "vineyards-country-club",
+    "label": "Vineyards Country Club",
+    "naplesgolfguy_slug": "vineyards-country-club",
+    "fiftyfive_places_slug": "vineyards",
+    "county": "Collier"
+  },
+  {
+    "slug": "waterford-golf-club",
+    "label": "Waterford Golf Club",
+    "naplesgolfguy_slug": "waterford-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "webbs-reserve",
+    "label": "Webbs Reserve",
+    "naplesgolfguy_slug": "webbs-reserve",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "wellen-park-golf-club",
+    "label": "Wellen Park Golf Club",
+    "naplesgolfguy_slug": "wellen-park-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": null
+  },
+  {
+    "slug": "west-bay-club",
+    "label": "West Bay Club",
+    "naplesgolfguy_slug": "west-bay-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "whiskey-creek-country-club",
+    "label": "Whiskey Creek Country Club",
+    "naplesgolfguy_slug": "whiskey-creek-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "wildcat-run",
+    "label": "Wildcat Run",
+    "naplesgolfguy_slug": "wildcat-run",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "wilderness-country-club",
+    "label": "Wilderness Country Club",
+    "naplesgolfguy_slug": "wilderness-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "windstar-golf-club",
+    "label": "Windstar Golf Club",
+    "naplesgolfguy_slug": "windstar-golf-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  },
+  {
+    "slug": "worthington-country-club",
+    "label": "Worthington Country Club",
+    "naplesgolfguy_slug": "worthington-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Lee"
+  },
+  {
+    "slug": "wyndemere-country-club",
+    "label": "Wyndemere Country Club",
+    "naplesgolfguy_slug": "wyndemere-country-club",
+    "fiftyfive_places_slug": null,
+    "county": "Collier"
+  }
+]

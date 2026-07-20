@@ -3,15 +3,27 @@
 Precedence per field GROUP (never per individual field within a group - a
 group's facts come from one page, so they carry one source_url + as_of pair,
 matching migrations/20260706_community_profiles.sql's comment):
-  - golf group: naplesgolfguy first (dedicated golf detail), else the
-    hoa_comparison row's golf_structure (curated, no holes/courses count).
+  - golf group: naplesgolfguy's detail fields (holes/courses/club_type/the
+    four Membership Fees fields/fnb_minimum_disclosed) whenever naplesgolfguy
+    returned ANY of them -- golf_structure itself keeps its own precedence
+    within that same branch: naplesgolfguy's own value when present, else the
+    hoa_comparison row's golf_structure (curated). This split exists because
+    naplesgolfguy's own membership-type text doesn't always map to a known
+    enum (e.g. "One Time Initiation Fee" -- distill_naplesgolfguy.py's
+    _STRUCTURE_MAP miss, a known gap, not fixed here) even though the SAME
+    page carries real holes/club_type/fee data worth keeping. When
+    naplesgolfguy has nothing at all, falls back fully to hoa_comparison
+    (structure + its own source_url), same as before this file's July 2026
+    fee/club_type extension.
   - amenities group (pool/tennis/pickleball/fitness/clubhouse/on_site_dining/
     boating_marina): 55places first (broader, non-golf-restricted coverage),
     else naplesgolfguy.
-  - home_count/gated group: 55places only (naplesgolfguy doesn't carry these).
-  - fees group (hoa_fee_range/cdd_flag): realtyofnaplesfl's curated table only
-    for v1 (the realtyofnaples.com per-listing aggregate lane is a follow-up,
-    per the design spec's "Out of scope" section).
+  - 55places listing-profile group (home_count/gated/price_range/home_types/
+    new_or_resale/builder/years_built/age_restrictions/activity_director):
+    55places only (naplesgolfguy doesn't carry these).
+  - fees group (hoa_fee_range/fees_included/cdd_flag): realtyofnaplesfl's
+    curated table only for v1 (the realtyofnaples.com per-listing aggregate
+    lane is a follow-up, per the design spec's "Out of scope" section).
 """
 from __future__ import annotations
 
@@ -21,6 +33,23 @@ from .constants import HOA_COMPARISON_URL, fiftyfive_places_url, naplesgolfguy_u
 
 _AMENITY_KEYS = (
     "pool", "tennis", "pickleball", "fitness", "clubhouse", "on_site_dining", "boating_marina",
+)
+
+# naplesgolfguy-only golf-detail fields (excludes golf_structure/golf_holes/
+# golf_courses, which get their own explicit handling below).
+_GOLF_DETAIL_KEYS = (
+    "club_type",
+    "golf_initiation_fee",
+    "golf_annual_dues",
+    "social_initiation_fee",
+    "social_annual_dues",
+    "fnb_minimum_disclosed",
+)
+
+# 55places-only listing-profile fields, beyond home_count/gated (which keep
+# their own names for backward compat with existing callers/tests).
+_FIFTYFIVE_TEXT_KEYS = (
+    "price_range", "home_types", "new_or_resale", "builder", "years_built", "age_restrictions",
 )
 
 
@@ -60,6 +89,7 @@ def merge_community_row(
         "golf_source_url": None,
         "golf_as_of": None,
         "hoa_fee_range": None,
+        "fees_included": None,
         "cdd_flag": None,
         "fees_source_url": None,
         "fees_as_of": None,
@@ -68,12 +98,40 @@ def merge_community_row(
     }
     for key in _AMENITY_KEYS:
         row[key] = None
+    for key in _GOLF_DETAIL_KEYS:
+        row[key] = None
+    for key in _FIFTYFIVE_TEXT_KEYS:
+        row[key] = None
+    row["activity_director"] = None
 
     # --- golf group ---
-    if naplesgolfguy and naplesgolfguy.get("golf_structure") is not None:
-        row["golf_structure"] = naplesgolfguy["golf_structure"]
+    # Fires whenever naplesgolfguy returned golf_structure OR holes/courses OR
+    # any of the club_type/fee/fnb detail fields -- not gated strictly behind
+    # golf_structure any more, so a page whose membership-type text didn't
+    # resolve to a known enum (see module docstring) still contributes its
+    # real holes/club_type/fee data instead of the whole group being dropped.
+    naplesgolfguy_has_golf_data = naplesgolfguy and (
+        naplesgolfguy.get("golf_structure") is not None
+        or naplesgolfguy.get("golf_holes") is not None
+        or naplesgolfguy.get("golf_courses") is not None
+        or any(naplesgolfguy.get(k) is not None for k in _GOLF_DETAIL_KEYS)
+    )
+    if naplesgolfguy_has_golf_data:
         row["golf_holes"] = naplesgolfguy.get("golf_holes")
         row["golf_courses"] = naplesgolfguy.get("golf_courses")
+        for key in _GOLF_DETAIL_KEYS:
+            row[key] = naplesgolfguy.get(key)
+        if naplesgolfguy.get("golf_structure") is not None:
+            row["golf_structure"] = naplesgolfguy["golf_structure"]
+        elif hoa_comparison and hoa_comparison.get("golf_structure") is not None:
+            # naplesgolfguy fetched real detail (holes/club_type/fees) but its
+            # own membership-type text didn't map to a known enum -- the
+            # curated HOA-comparison table's golf_structure is a real,
+            # independently-sourced value for the SAME community, so it still
+            # fills the enum. golf_source_url below points at naplesgolfguy
+            # regardless (it supplied the bulk of this group) -- v1 has one
+            # url per group, not per field; a future schema could split this.
+            row["golf_structure"] = hoa_comparison["golf_structure"]
         row["golf_source_url"] = naplesgolfguy_url(naplesgolfguy_slug)
         row["golf_as_of"] = as_of
     elif hoa_comparison and hoa_comparison.get("golf_structure") is not None:
@@ -81,16 +139,14 @@ def merge_community_row(
         row["golf_source_url"] = HOA_COMPARISON_URL
         row["golf_as_of"] = as_of
 
-    # --- home_count / gated group (55places only) ---
-    if fiftyfive_places and (
-        fiftyfive_places.get("home_count") is not None or fiftyfive_places.get("gated") is not None
-    ):
+    # --- 55places listing-profile group (home_count/gated + the rest) ---
+    _fiftyfive_all_keys = ("home_count", "gated", "activity_director") + _FIFTYFIVE_TEXT_KEYS
+    if fiftyfive_places and any(fiftyfive_places.get(k) is not None for k in _fiftyfive_all_keys):
         row["home_count_source_url"] = fiftyfive_places_url(fiftyfive_places_slug)
         row["home_count_as_of"] = as_of
-        if fiftyfive_places.get("home_count") is not None:
-            row["home_count"] = fiftyfive_places["home_count"]
-        if fiftyfive_places.get("gated") is not None:
-            row["gated"] = fiftyfive_places["gated"]
+        for key in _fiftyfive_all_keys:
+            if fiftyfive_places.get(key) is not None:
+                row[key] = fiftyfive_places[key]
 
     # --- amenities group: 55places preferred, naplesgolfguy fallback ---
     amenities_source = None
@@ -114,6 +170,7 @@ def merge_community_row(
             # stored value since there's no separate is_estimate column (schema v1).
             hoa_fee_range = f"{hoa_fee_range} (est.)"
         row["hoa_fee_range"] = hoa_fee_range
+        row["fees_included"] = hoa_comparison.get("fees_included")
         row["cdd_flag"] = hoa_comparison.get("cdd_flag")
         row["fees_source_url"] = HOA_COMPARISON_URL
         row["fees_as_of"] = as_of

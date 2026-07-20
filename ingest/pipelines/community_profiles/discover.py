@@ -19,6 +19,7 @@ pipeline means a truncated display string never breaks a match.
 from __future__ import annotations
 
 import re
+import time
 from typing import Callable
 
 from .normalize import normalize_community_name
@@ -77,21 +78,32 @@ def parse_55places_directory(markdown: str) -> dict[str, str]:
     return _parse_directory(markdown, _FIFTYFIVE_PLACES_LINK_RE)
 
 
-def build_discovery_maps(fetch: FetchFn) -> tuple[dict[str, str], dict[str, str]]:
+def build_discovery_maps(
+    fetch: FetchFn, *, delay_seconds: float = 1.5
+) -> tuple[dict[str, str], dict[str, str]]:
     """Fetch every directory/nav page for both sources (8 fetches total — a
     one-time discovery cost, not a per-community sweep) and merge into two
     normalized-name -> slug maps. A page that fails to fetch (empty markdown)
-    is skipped, never raises — partial discovery still beats none."""
-    ngg_map: dict[str, str] = {}
-    for url in NAPLESGOLFGUY_REGIONAL_URLS:
-        md = fetch(url)
-        if md:
-            ngg_map.update(parse_naplesgolfguy_directory(md))
+    is skipped, never raises — partial discovery still beats none.
 
+    delay_seconds: a fixed pause BEFORE each fetch after the first — low
+    volume (8 fetches) so low risk either way, but kept consistent with the
+    pacing standard the rest of this effort holds detail-page fetches to (see
+    ingest.lib.crawl_client.fetch_sequential's jitter). Tests pass
+    delay_seconds=0 to stay fast."""
+    ngg_map: dict[str, str] = {}
     fp_map: dict[str, str] = {}
-    for url in FIFTYFIVE_PLACES_AREA_URLS:
+    all_urls = list(NAPLESGOLFGUY_REGIONAL_URLS) + list(FIFTYFIVE_PLACES_AREA_URLS)
+
+    for i, url in enumerate(all_urls):
+        if i > 0 and delay_seconds:
+            time.sleep(delay_seconds)
         md = fetch(url)
-        if md:
+        if not md:
+            continue
+        if url in NAPLESGOLFGUY_REGIONAL_URLS:
+            ngg_map.update(parse_naplesgolfguy_directory(md))
+        else:
             fp_map.update(parse_55places_directory(md))
 
     return ngg_map, fp_map

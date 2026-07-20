@@ -2,7 +2,11 @@
 comparison page. This is an EDITORIAL comparison (the page's own text: "typical
 ranges based on available data as of early 2026") — every row is a curated
 range, not a live per-listing aggregate. is_estimate=True carries the page's
-own "(est.)" flag through verbatim; callers must never drop it."""
+own "(est.)" flag through verbatim; callers must never drop it.
+
+fees_included is the table's 5th column ("What's Included") verbatim (e.g.
+"Beach tram, beach clubs, landscape, security") — None when that cell is
+blank, never fabricated from the fee range or community name."""
 from __future__ import annotations
 
 import re
@@ -54,6 +58,7 @@ def parse_hoa_comparison_page(markdown: str) -> list[dict]:
             {
                 "name": name,
                 "hoa_fee_range": fee_clean,
+                "fees_included": _included or None,
                 "cdd_flag": _parse_cdd(cdd_cell),
                 "golf_structure": _parse_golf(golf_cell),
                 "is_estimate": is_estimate,

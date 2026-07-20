@@ -1,3 +1,31 @@
+## 2026-07-20 (Sonnet 5 · main) — community_profiles: merged all 158 golf communities (naplesgolfguy + 55places + HOA table), real completeness numbers
+
+Built `ingest/pipelines/community_profiles/finalize.py` (+ `test_finalize.py`, 8 new tests, TDD)
+to merge the prior two stages' live-scrape partials (`.raw_cache/naplesgolfguy_partials.json`,
+`.raw_cache/55places_full_run_partials.json`) plus a fresh crawl4ai fetch of
+realtyofnaplesfl's HOA-comparison page (20/20 rows parsed clean — no fetch failure) into final
+rows via the already-tested `merge_community_row`, for all 158 `golf_communities_master.json`
+entries. Read-only/report-only: no dlt write, no write to `fixtures/community-aliases.json` —
+both still gated on a fresh explicit operator go-ahead per the 07/20 full-discovery handoff.
+
+**Real completeness (of 158):** golf_structure 86, golf_holes 132, club_type 158,
+membership-fees (any of 4) 127, fnb_minimum_disclosed=True 142, home_count 16, gated 16,
+price_range 15, amenities (any of 7 true) 152, hoa_fee_range 16, fees_included 16, all-groups-null
+0/158 (every row gets at least club_type from naplesgolfguy). 55places' 16/158 is a real
+source-coverage ceiling (55places only lists 51 communities total across both counties, and only
+14 normalize-matched the naplesgolfguy-derived master list per the prior scrape stage) — not a
+bug.
+
+**Identity-match vs `fixtures/community-aliases.json`:** 1/158 already a known alias
+(`heritage-bay`), 157/158 would mint a fresh entry via the existing `maybe_register_alias` — 0
+duplicate slugs. Expected given the alias fixture's near-empty (1-entry) starting state; the
+158-entry newly-minted list was reported to the operator, not written to the fixture.
+
+67/67 tests pass (`ingest/pipelines/community_profiles/`, up from 59). Merged rows written to
+gitignored `.raw_cache/final_rows.json` only — still no live write to
+`data_lake.community_profiles`. Committed locally, NOT pushed (operator reviews + pushes
+separately).
+
 ## 2026-07-20 (Opus 4.8 · main) — Campaign simulator: 7/7 delivered; resume-path flaw found by a real mid-run kill
 
 Addendum to the entry below. The send run was KILLED mid-campaign after 3 of 7 emails (during the
