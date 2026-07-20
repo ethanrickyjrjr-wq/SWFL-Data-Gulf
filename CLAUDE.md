@@ -184,6 +184,8 @@ node scripts/new-build.mjs <slug> "<label>"
 ```
 This creates the spec stub in `docs/superpowers/specs/` and opens the `<slug>_live_verify` check in one step (arg conventions: `scripts/CLAUDE.md`). Without it, there is no check to close and no spec to archive — the build is invisible to the session loop.
 
+**NAME THE BREAK BEFORE YOU BUILD (locked 07/20/2026).** No design gets presented for approval without a failure-modes section: every way the build can break, each paired with the guard that stops it (validation, gate, test, lint) — same adversarial standard already required of code review (santa-method / orch-review), moved to design time instead of applied only after code ships and breaks. A design with an empty or hand-waved failure-modes section does not get approved. **Why this rule exists:** every guardrail on this platform to date has shipped reactively, one incident at a time — build breaks, a guard gets bolted on, it breaks a different way, another guard gets bolted on. Root cause, confirmed 07/20/2026: the one process required before every build (`superpowers:brainstorming`) listed "error handling" as a single word in a narrative checklist, with no forcing function to actually enumerate failure modes up front. This closes that gap at the source instead of adding another incident-specific patch.
+
 ---
 
 # RULE 3 — ARCHITECTURE DISCIPLINE

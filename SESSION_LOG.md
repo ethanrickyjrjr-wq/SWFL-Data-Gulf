@@ -1,3 +1,75 @@
+## 2026-07-20 (Sonnet 5 · main) — RULE 3.5 addendum: design must name failure modes + guard before approval
+
+Operator called out the pattern directly: every guardrail on this platform has shipped reactively
+— build breaks, guard gets bolted on, breaks a different way, another guard gets bolted on. Read
+`superpowers:brainstorming` (the skill RULE 3.5 requires before every build, no exceptions) and
+confirmed the root cause: its design checklist lists "error handling" as one word in a narrative
+list — no forcing function to enumerate failure modes before code exists. Everything downstream
+(adversarial code review, 5 pre-push gates, no-invention lint) is rigorous about catching problems
+after the fact; nothing upstream was rigorous about naming them before. Added "NAME THE BREAK
+BEFORE YOU BUILD (locked 07/20/2026)" to RULE 3.5 in `CLAUDE.md`: no design gets approved without
+a failure-modes section (each break paired with its guard), same adversarial standard already used
+in review, moved to design time. Next: watch whether the next brainstorm actually produces that
+section, or whether the rule itself needs a hook to enforce it instead of relying on the skill
+being followed.
+
+## 2026-07-20 (Sonnet 5 · main) — Email Lab could not build a real listing: root-caused live via 30-agent fan-out (20 Opus + 10 Sonnet), 10 real fixes landed
+
+Operator, furious: proved live (twice, with a real current `data_lake.listing_state` row —
+14189 Mindello Dr, real photo/price/specs on file) that typing a natural request into the Email
+Lab AI-build panel ("New listing announcement for <address>...") produced a generic ZIP-stats
+email — no photo, no price, wrong ZIP mixed in, cut-off sentences, an unrelated area-wide chart.
+Separately, testing this on a local dev server pointed at production Supabase, in the operator's
+own already-logged-in Chrome, silently PATCHed a real 4-week-old project ("26000 Hickory Blvd") —
+no in-app undo exists (project_activity/events/feed all empty for it). Confirmed the operator
+never touched that browser himself.
+
+Operator ordered a 30-agent fan-out (20 Opus + 10 Sonnet, `Workflow` tool) to root-cause every
+email-build path, each agent required to work read-only (no browser, no DB writes, no git) and
+write its own notes to `_ASSISTANT/investigations/email-build-fix/`. 30/30 returned clean, 24/30
+confirmed a real root cause, converging on one core defect plus several independent side-bugs.
+
+**Core fix:** `lib/email/listing-intent.ts` `subjectAddressFromPrompt` only ever matched the
+machine's own seed phrasing ("...at <addr> —"); any naturally typed prompt ("for <addr>")
+returned null, so the address never reached `resolveSubjectListing` and every build fell through
+to the generic author. Added a general street-address-shape fallback extractor. Regression tests
+added and passing; 2,777+ existing tests green throughout, zero regressions.
+
+**9 more real, independently-confirmed bugs fixed in the same pass:**
+- ZIP mismatch (`place-from-prompt.ts`): always returned a city's primary ZIP even when the prompt
+  named a different, valid alt ZIP — fixed to prefer an explicit ZIP present in the text.
+- Generic-author lane injected an unrelated area-wide chart on every listing ask with no guard
+  (the existing "no chart on a new listing" rule only lived in one of two code paths) —
+  `build-doc.ts` now skips chart injection when listing intent is detected.
+- Model responses were never checked for `stop_reason === "max_tokens"` — explains the mid-word
+  cutoffs; now degrades to an honest "ran long, try again" message instead of shipping a fragment.
+- **Safety-critical, this is what caused tonight's incident:** `EmailLabGridClient.tsx` suppressed
+  the blocking project-confirm popup on the default gallery arrival, silently offering the
+  single most-recently-updated project as the write target with only an easy-to-miss "Building
+  into: X [Change]" line. Confirm is now required there too, same as every other arrival.
+- `LinkAskModal.tsx`: real React duplicate-key bug (two link suggestions resolving to the same
+  URL) — deduped.
+- Footer address defaulted to SWFL Data Gulf's OWN placeholder instead of empty — any agent who
+  never set a business address shipped a non-compliant CAN-SPAM footer, silently. Now empty (THE
+  SLOT RULE) with a visible required-warning fallback, mirroring the existing unsubscribe pattern.
+- `/dev-emails`'s copy falsely claimed the hero photo was "real, re-resolved and mirrored" — it's
+  a deliberate fixture placeholder unless captured with `--live`. Copy now says so.
+- `listing` block was `authorable:true` with zero author-schema support — a latent trap (hollow
+  card, every field `""`) if ever offered. Set `authorable:false`, same precedent as `metric-card`.
+- `market-context.ts`: a magnitude-guessing heuristic silently shipped county YoY sale-price swings
+  ~100x too small whenever a real move was >=100% — the source column is unconditionally a fraction,
+  fixed to an unconditional x100.
+
+**Verified:** `bunx tsc --noEmit` clean, full `bun test` run — 7,932 pass, 3 fail. All 3 failures
+confirmed pre-existing and unrelated (none touch any file changed this session): 2 pre-existing
+(campaign-chrome full-suite-only flake, TOPIC_TO_SLUG brain-routing) filed as checks, not caused
+here. Deferred as checks (real, confirmed, out of scope for this pass): `project_activity` has
+zero INSERT policy so all activity logging has silently failed since 06/19; PDF engine drops
+several fields vs the HTML engines; showcase captures are 14-18 days stale; `recipeFromPrompt`'s
+seed-prefix match is still narrow (secondary to the address fix, not required for it).
+
+**Not pushed** — awaiting operator review/confirmation per standing push-approval rule.
+
 ## 2026-07-20 (Sonnet 5 · main) — Email Lab: auto-build race that ate keystrokes and deselected the block, fixed
 
 Operator screenshotted the Hero block's "Prose" field (pre-filled seed placeholder text) and said
