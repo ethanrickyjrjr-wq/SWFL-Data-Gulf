@@ -1,3 +1,19 @@
+## 2026-07-20 (Sonnet 5 · main) — CI red on main for 4 straight pushes: lee-deed-records-swfl had no routing rule
+
+Operator: "what the fuck is going on with github?? how did the build fail?" `gh run list` showed
+"CI" failing on every push to `main` since commit `85811f64` ("Add tests and source connector for
+Lee County Clerk of Courts recorded deeds"). That commit added `lee-deed-records-swfl` to
+`BRAIN_CATALOG` but never gave it a rule in `lib/highlighter/reach.ts` — `reach-coverage.test.ts`
+gates exactly this (every catalogued brain must be routed in `TOPIC_TO_SLUG` or listed in
+`INTENTIONALLY_UNROUTED` with a reason), so `bun test` failed the `build` job's `Test` step on
+every subsequent run. Not flaky infra — a real, deterministic gate doing its job.
+
+Fix: added a `TOPIC_TO_SLUG` entry for `lee-deed-records-swfl` (deed/recorded deed/quitclaim/
+grantor/grantee keywords) in `lib/highlighter/reach.ts`. Verified locally: `bun test
+lib/highlighter/reach-coverage.test.ts` → 4 pass; `bun test lib/highlighter/` → 128 pass; ran the
+consuming assistant tests (`conversation-path.test.ts`, `chart-for-question.test.ts`) → 46 pass,
+no regressions. Next: push once approved, confirm the next CI run on `main` goes green.
+
 ## 2026-07-20 (Opus 4.8 · main) — Drove the ACTUAL site: the flagship campaign was blocked by a window.prompt
 
 Operator, after hours of me testing a parallel command-line script: "ARE YOU SAYING YOU CAN'T TYPE

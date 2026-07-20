@@ -110,6 +110,12 @@ export const TOPIC_TO_SLUG: Array<{ keywords: RegExp; slug: string }> = [
     slug: "investor-zip-swfl",
   },
   {
+    // Recorded-deed velocity / arm's-length vs nominal-transfer mix — distinct from
+    // housing-swfl's sale-price read; deed counts never imply a market direction.
+    keywords: /\b(deeds?|recorded deeds?|quitclaim deeds?|deed records?|grantor|grantee)\b/i,
+    slug: "lee-deed-records-swfl",
+  },
+  {
     // The bare verb `build` used to live in this alternation. It matched "build me a
     // chart of rents by ZIP" and, because this table is first-match-wins and permits
     // sits above rentals, the VERB beat the NOUN and every chart request became a
