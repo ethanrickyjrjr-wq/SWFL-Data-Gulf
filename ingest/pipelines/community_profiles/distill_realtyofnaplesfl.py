@@ -15,12 +15,17 @@ _GOLF_MAP = {
     "bundled": "bundled",
     "optional": "optional",
     "optional membership": "optional",
+    "no golf": "none",
 }
 
 
 def _parse_golf(cell: str) -> str | None:
-    """None means no golf mentioned/applicable for this row (e.g. "No golf") —
-    str|None per the interface, so "no golf" is NOT itself a string value."""
+    """"none" (string) means the row explicitly states no golf — a known value,
+    per migrations/20260706_community_profiles.sql's golf_structure CHECK
+    ('bundled'|'equity'|'optional'|'none') and refinery/packs/communities-swfl.mts's
+    GOLF_STRUCTURES set, both of which treat "none" as a confirmed enum member.
+    Python None means the Golf column has no recognizable value at all (not
+    mentioned/unknown for this row) — a different, unknown state."""
     normalized = cell.strip().lower()
     for key, value in _GOLF_MAP.items():
         if key in normalized:
