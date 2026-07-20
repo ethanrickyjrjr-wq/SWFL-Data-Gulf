@@ -75,6 +75,16 @@ there is exactly one place to fix it.
 3. When a real root runs correctly and every consumer is on it, **DELETE the roots it replaced** (dead
    tables, duplicate views, their crons). No corpses left to be grepped and re-wired.
 4. Roots are VIEWS (or one loader function for cross-table math) — one definition, fix once.
+5. **FRESHNESS PRECEDENCE — operator decree 07/19/2026, applies to EVERY concept in this catalog.**
+   When we hold roots for the same concept at different cadences, the FRESHEST root we hold serves
+   every "current"/"now" claim on every customer surface (webpage, email, chat, deliverable). A
+   slower-cadence vendor root survives ONLY as labeled trend/history or a labeled cross-check
+   ("Redfin end-of-month inventory") — never as the unlabeled current number. Serving a staler root
+   where a fresher one exists is a DEFECT: **repoint the consumer, don't relabel the card.** Every
+   repoint ships with a regression-test lock on the consumer's registry (pattern:
+   `lib/zip-report/candidates.test.ts` "active_inventory root" block). Postmortem that forced this:
+   active-inventory cards served Redfin's end-of-month 639 (33908) as "homes for sale now" while our
+   own daily realtor.com sweep held 918 in the same lake the whole time.
 
 ## Field-level scope — the census, per column (the format every source follows)
 

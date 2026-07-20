@@ -1,3 +1,13 @@
+## 2026-07-19 (Fable 5 · main) — FRESHNESS PRECEDENCE promoted to data-roots RULE 5 (catalog-wide)
+
+Operator: "DO WE HAVE THIS AS A RULE IN DATA ROOT GOING FORWARD???" — the inventory fix was
+instance-level only, so the general rule is now Rule 5 in the data-roots rules block: freshest
+held root serves every "now" claim on every customer surface; slower-cadence vendors survive only
+as LABELED trend/cross-check; staler-where-fresher-exists = defect, fix by REPOINTING (never
+relabeling), every repoint ships a regression-test lock. 639-vs-918 postmortem cited in the rule.
+File was mid-edit in a parallel session; operator told them to wait and authorized the claim
+release. NEXT: push call still pending (bcbf1662 + this).
+
 ## 2026-07-19 (Fable 5 · main) — active inventory REPOINTED to the live root: daily realtor.com sweep leads, Redfin demoted to monthly cross-check
 
 Operator verdict on active_inventory_vendor_gap, delivered at volume: never serve month-old data
