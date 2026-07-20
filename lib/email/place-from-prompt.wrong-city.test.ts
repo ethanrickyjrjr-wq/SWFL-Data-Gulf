@@ -89,3 +89,32 @@ describe("the places we DO hold still resolve — the guard must not eat the pro
     expect(zipFromPromptPlace("a landscape photo")).toBeUndefined();
   });
 });
+
+describe("an explicit ZIP in the text wins over the place's primary ZIP — postmortem 07/20/2026", () => {
+  // A live build produced a headline for ZIP 33905 (the address's real ZIP) while every
+  // stat block underneath was scoped to 33901 (Fort Myers's primary ZIP) — two disagreeing
+  // ZIPs in one email. Root cause: this function always returned zips[0], discarding an
+  // explicit ZIP already present in the prompt even when it's a valid alt_zip of the place.
+  it("an explicit alt ZIP for the place is honored, not silently swapped for the primary", () => {
+    const r = zipFromPromptPlace(
+      "New listing announcement for 14189 Mindello Dr, Fort Myers, FL 33905.",
+    );
+    expect(r?.place).toBe("Fort Myers");
+    expect(r?.zip).toBe("33905");
+    expect(r?.zips).toEqual(["33905"]);
+  });
+
+  it("with no explicit ZIP present, the primary ZIP behavior is unchanged", () => {
+    const r = zipFromPromptPlace("a weekly update for Fort Myers");
+    expect(r?.zip).toBe("33901");
+    expect(r?.zips.length).toBeGreaterThan(1);
+  });
+
+  it("an explicit ZIP that does NOT belong to the matched place is ignored, not adopted", () => {
+    // 90210 is not a Fort Myers ZIP — this must not silently narrow to a foreign ZIP.
+    const r = zipFromPromptPlace("a weekly update for Fort Myers 90210");
+    expect(r?.place).toBe("Fort Myers");
+    expect(r?.zip).toBe("33901");
+    expect(r?.zips.length).toBeGreaterThan(1);
+  });
+});

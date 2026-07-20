@@ -33,6 +33,15 @@ export function LinkAskModal({
   const [values, setValues] = useState<Record<string, string>>({});
   const keyOf = (a: LinkAsk) => `${a.blockId}:${a.columnIndex ?? ""}`;
 
+  // Two independently-sourced suggestions (the listing card, the brand website) can
+  // legitimately resolve to the SAME url — e.g. an agent's website IS the listing
+  // link. Rendered as-is that produced two chips with the same React key (a real
+  // console error) plus a redundant duplicate-destination chip. Keep the first
+  // occurrence (the more specific label wins over the generic "Your website" one).
+  const dedupedSuggestions = suggestions.filter(
+    (s, i) => suggestions.findIndex((t) => t.url === s.url) === i,
+  );
+
   const applyAll = () => {
     const answers = asks.flatMap((a) => {
       const v = (values[keyOf(a)] ?? "").trim();
@@ -61,9 +70,9 @@ export function LinkAskModal({
                 onChange={(e) => setValues((v) => ({ ...v, [keyOf(a)]: e.target.value }))}
                 className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
               />
-              {suggestions.length > 0 ? (
+              {dedupedSuggestions.length > 0 ? (
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {suggestions.map((s) => (
+                  {dedupedSuggestions.map((s) => (
                     <button
                       key={s.url}
                       type="button"

@@ -130,9 +130,10 @@ export default async function DevEmailsPage() {
         <p style={S.sub}>
           The 7 listing emails as actually built, then {recipes.length} recipes (the designed
           versions), then {seeds.length} templates (the canvases). Rendered live from the code,
-          never from screenshots. No AI call anywhere. One address lookup, to recover the hero photo
-          that was lost. Nothing in the product changed. Mark each one: <b>keep</b> / <b>change</b>{" "}
-          / <b>kill</b>.
+          never from screenshots. No AI call anywhere. The hero photo below is a placeholder fixture
+          unless this capture was run with <code>--live</code> — see
+          scripts/dev-render-listing-emails.mts. Nothing in the product changed. Mark each one:{" "}
+          <b>keep</b> / <b>change</b> / <b>kill</b>.
         </p>
         <div style={S.navRow}>
           <span style={S.navLabel}>AS BUILT · real data</span>
@@ -175,9 +176,10 @@ export default async function DevEmailsPage() {
       </h2>
       <p style={S.bandNote}>
         The real builders, run against the real listing — $595,000 / 3 bed / 3.5 bath / 2,847 sq ft
-        / $104,975-cut, and the real hero photo, re-resolved and now mirrored into our own storage.
-        No AI wrote a word of this: every narrator here falls through to a deterministic note, which
-        is exactly what your 07/13 build produced. Nothing on this row is a mockup.
+        / $104,975-cut. The hero photo is a placeholder fixture in this default capture (the real,
+        mirrored photo only appears when re-captured with --live). No AI wrote a word of this: every
+        narrator here falls through to a deterministic note, which is exactly what your 07/13 build
+        produced. Nothing on this row is a mockup.
       </p>
       {LIFECYCLE.map((r) => (
         <section key={r.key} id={`b-${r.key}`} style={{ ...S.card, borderColor: "#5a4520" }}>

@@ -93,6 +93,19 @@ export function zipFromPromptPlace(
     const suffix = SUFFIX_AFTER.exec(after)?.[1];
     if (suffix && !known.has(`${n.needle} ${suffix}`)) return undefined;
 
+    // If the text also names an EXPLICIT ZIP that belongs to this place (e.g. "...Fort
+    // Myers, FL 33905" — 33905 is one of Fort Myers's own alt_zips, not its primary
+    // 33901), that explicit ZIP wins over the place's primary ZIP. Check EVERY 5-digit
+    // span, not just the first — an address's house number (e.g. "14189") is also
+    // 5 digits and would otherwise be mistaken for the ZIP; only a number that is
+    // actually one of this place's known ZIPs qualifies. Otherwise every downstream
+    // figure/chart scopes to the primary ZIP even though the user named a different,
+    // equally valid one — two disagreeing ZIPs in one email (postmortem 07/20/2026).
+    const explicitZip = (norm.match(/\b\d{5}\b/g) ?? []).find((z) => n.zips.includes(z));
+    if (explicitZip) {
+      return { place: n.place, zip: explicitZip, zips: [explicitZip] };
+    }
+
     return { place: n.place, zip: n.zips[0], zips: n.zips };
   }
   return undefined;

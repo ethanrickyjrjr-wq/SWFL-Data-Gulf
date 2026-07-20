@@ -21,8 +21,11 @@ import {
 // author-doc.ts:356 — KNOWN_TYPES = new Set(Object.keys(DEFAULT_BLOCK_PROPS))
 const EXPECTED_KNOWN = Object.keys(DEFAULT_BLOCK_PROPS) as BlockType[];
 
-// build-doc.ts:922 — vocabulary = Object.keys(DEFAULT_BLOCK_PROPS) minus metric-card
-const EXPECTED_AUTHORABLE = EXPECTED_KNOWN.filter((t) => t !== "metric-card");
+// vocabulary = Object.keys(DEFAULT_BLOCK_PROPS) minus metric-card and listing —
+// listing's fields are data-seeded (loadListingContext/resolveSubject), never
+// AI-written; authorable:true would let the generic author offer it and ship a
+// hollow card with every field defaulting to "" (postmortem 07/20/2026).
+const EXPECTED_AUTHORABLE = EXPECTED_KNOWN.filter((t) => t !== "metric-card" && t !== "listing");
 
 // author-doc.ts:448 — BANDABLE set (blocks whose props extend BlockBase)
 const EXPECTED_BANDABLE: BlockType[] = [

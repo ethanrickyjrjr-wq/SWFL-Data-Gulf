@@ -145,7 +145,13 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
   sources: { sources: [] },
   footer: {
     companyName: HOUSE_BRAND.companyName,
-    address: HOUSE_BRAND.address,
+    // NOT HOUSE_BRAND.address — a CAN-SPAM postal address must be the SENDING
+    // agent's own address; defaulting it to SWFL Data Gulf's own placeholder let
+    // an agent who never set a business address ship real commercial email with
+    // an address that is (a) not theirs and (b) not even complete — silently,
+    // with no warning anywhere. Empty follows THE SLOT RULE like every other
+    // data-dependent field (postmortem 07/20/2026).
+    address: "",
     phone: "",
     email: HOUSE_BRAND.email,
     websiteUrl: HOUSE_BRAND.websiteUrl,

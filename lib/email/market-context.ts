@@ -233,7 +233,12 @@ async function countyFigures(db: Db, county: string, figs: MarketFigure[]): Prom
         figs.push({
           key: "county_sale_yoy",
           label: `${county} County sale price, year over year`,
-          value: pct(yoy * (Math.abs(yoy) < 1 ? 100 : 1)),
+          // The source column is UNCONDITIONALLY a fraction (ingest/pipelines/
+          // redfin_lee/resources.py:52, "fraction, e.g. 0.0378") — never
+          // pre-converted to a percent. The old magnitude-guessing branch
+          // (`Math.abs(yoy) < 1 ? 100 : 1`) silently shipped a number ~100x too
+          // small whenever a real swing was >= 100% in magnitude.
+          value: pct(yoy * 100),
           source: "Redfin",
           as_of: asOf,
         });

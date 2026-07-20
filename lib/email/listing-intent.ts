@@ -41,12 +41,42 @@ export function isNewListingRecipePrompt(prompt: string): boolean {
 // is not an address; return null and let the caller fall through to the old behavior.
 const SUBJECT_AT = /\b(?:listing|property|home|house)\s+at\s+(.+?)(?:\s*[—–]|\s+-\s+|$)/i;
 
+// FALLBACK — a bare US street-address SHAPE (house number + up to 6 street words + a
+// common suffix), independent of the connective word before it. SUBJECT_AT above only
+// matches the machine seed's rigid "...at <addr> —" template; a naturally typed prompt
+// ("for", "of", "regarding", or no connective at all — e.g. "New listing announcement
+// for 14189 Mindello Dr, Fort Myers, FL 33905") matches none of it and used to fall
+// through to null, silently dropping the address and sending the build to the generic
+// ZIP-stats author instead of the real listing (postmortem 07/20/2026).
+const STREET_SUFFIX =
+  "(?:St|Street|Dr|Drive|Ave|Avenue|Rd|Road|Blvd|Boulevard|Ln|Lane|Ct|Court|Way|Cir|Circle|Pl|Place|Ter|Terrace|Pkwy|Parkway|Trl|Trail|Loop|Run|Path)";
+const STREET_CORE = new RegExp(
+  String.raw`\b\d{1,6}[A-Za-z]?\s+(?:[A-Za-z0-9'.]+\s+){0,5}${STREET_SUFFIX}\b\.?`,
+  "i",
+);
+// After the street core, optionally keep reading through ", City[, FL][ ZIP]" — but
+// stop at the first sentence end, dash, or a comma that opens an instruction clause,
+// so a trailing ask ("...use the real photo") never gets folded into "the address".
+const TAIL_STOP =
+  /[.!?]|(?:\s+[—–]\s+|\s+-\s+)|,?\s*(?:use|please|with|and|showing|note|thanks)\b/i;
+
 export function subjectAddressFromPrompt(prompt: string): string | null {
-  const span = SUBJECT_AT.exec(prompt || "")?.[1]
+  const p = prompt || "";
+
+  const atSpan = SUBJECT_AT.exec(p)?.[1]
     ?.trim()
     .replace(/[,\s]+$/, "");
-  if (!span || !/\d/.test(span) || span.length < 6) return null;
-  return span;
+  if (atSpan && /\d/.test(atSpan) && atSpan.length >= 6) return atSpan;
+
+  const core = STREET_CORE.exec(p);
+  if (!core) return null;
+  const rest = p.slice(core.index + core[0].length);
+  const stop = TAIL_STOP.exec(rest);
+  const tail = stop ? rest.slice(0, stop.index) : rest.slice(0, 60);
+  const full = (core[0] + tail).trim().replace(/[,\s]+$/, "");
+
+  if (!/\d/.test(full) || full.length < 6) return null;
+  return full;
 }
 
 // The LISTING DESCRIPTION — lane 2, the agent's own words.

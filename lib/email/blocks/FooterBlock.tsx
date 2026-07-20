@@ -67,7 +67,17 @@ export function FooterBlock({
                 placeholder="Postal address (CAN-SPAM)"
               />
             </>
-          ) : null}
+          ) : (
+            // Same visibility rule as the unsubscribe fallback below: a missing
+            // CAN-SPAM-required physical address must be self-evident in the
+            // actual sent output, not silently absent (postmortem 07/20/2026).
+            <>
+              <br />
+              <span style={{ opacity: 0.5 }}>
+                Physical mailing address required (CAN-SPAM) — add one in Branding
+              </span>
+            </>
+          )}
         </Text>
       ) : null}
 

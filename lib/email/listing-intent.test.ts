@@ -62,3 +62,34 @@ test("null when there is no house number — a span with no digit is not an addr
   expect(subjectAddressFromPrompt("Build my monthly market update for Cape Coral")).toBe(null);
   expect(subjectAddressFromPrompt("")).toBe(null);
 });
+
+// ── the naturally-typed prompt — postmortem 07/20/2026 ──────────────────────
+// SUBJECT_AT only ever matched the machine seed's rigid "...at <addr> —" shape. A
+// person typing their own words ("for" instead of "at", a period instead of an
+// em-dash) got null every time, silently losing the address and falling through to
+// the generic ZIP-stats author. This is the exact reproduction, twice-confirmed live.
+test("pulls the address out of an organically typed 'for <addr>' prompt", () => {
+  expect(
+    subjectAddressFromPrompt(
+      "New listing announcement for 14189 Mindello Dr, Fort Myers, FL 33905. Use the real listing photo and real price/specs.",
+    ),
+  ).toBe("14189 Mindello Dr, Fort Myers, FL 33905");
+});
+
+test("organic prompt: stops at the sentence period, never swallows the trailing ask", () => {
+  const addr = subjectAddressFromPrompt(
+    "New listing announcement for 326 Shore Dr, Fort Myers, FL 33905. Use the real listing photo and real price/specs.",
+  )!;
+  expect(addr).toBe("326 Shore Dr, Fort Myers, FL 33905");
+  expect(addr).not.toContain("Use the real");
+});
+
+test("organic prompt with no city/zip suffix still yields the bare street address", () => {
+  expect(subjectAddressFromPrompt("Can you build a flyer for 14189 Mindello Dr please")).toBe(
+    "14189 Mindello Dr",
+  );
+});
+
+test("a bare ZIP with no street suffix is still not an address (no false positive)", () => {
+  expect(subjectAddressFromPrompt("Weekly market update for ZIP 33905")).toBe(null);
+});

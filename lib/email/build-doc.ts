@@ -865,6 +865,20 @@ export async function buildContentDoc({
     };
   }
 
+  // A truncated response was never checked before this line — the raw text (a
+  // sentence cut off mid-word) got parsed and shipped as if it were complete.
+  // Never patch in a partial answer; degrade the same way an API error does.
+  if (msg.stop_reason === "max_tokens") {
+    return {
+      payload: {
+        doc,
+        applied: false,
+        message:
+          "The AI's response ran long and got cut off — try a shorter prompt or fewer blocks.",
+      },
+    };
+  }
+
   const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
   if (process.env.EMAIL_LAB_DEBUG === "1") {
     console.log("[email-lab/ai] raw model response:", text.slice(0, 500));
@@ -1383,9 +1397,18 @@ export async function authorDoc({
   // ZIP-by-ZIP chart) instead of the SWFL-wide top-12; every other place is undefined
   // here and takes the existing single-scope chart.
   const chartZips = cityZipsFor(promptPlace);
+  // A single-listing ask ("New listing announcement for <address>...") must never get
+  // an areawide market chart glued on — that rule already existed in the legacy
+  // subject-listing lane above (dropEmptyChartSlot) but was missing here, in the
+  // generic-author fallback this lane runs whenever subject resolution misses.
+  // Confirmed live 07/20/2026: a "new listing" ask that fell through to this lane still
+  // got a cross-ZIP price-ranking bar chart bolted on, unrelated to the named property.
+  const isListingAsk = isNewListingRecipePrompt(prompt) || isListingIntent(prompt);
   const [lakeParts, chartRes, photoRes] = await Promise.all([
     fetchLakeParts(effectiveScope),
-    buildPromptChart(prompt, currentDoc, effectiveScope, chartType, chartZips),
+    isListingAsk
+      ? Promise.resolve(null)
+      : buildPromptChart(prompt, currentDoc, effectiveScope, chartType, chartZips),
     resolveHeroPhoto(prompt, currentDoc),
   ]);
 
@@ -1429,7 +1452,7 @@ export async function authorDoc({
   // — without this, assembleAuthoredDoc force-reserves any offered chart above the
   // footer and a cross-SWFL ranking lands in a personal letter (seen live 07/05/2026).
   const chartSlot =
-    chartRes && resolvedRecipe !== "agent-intro"
+    chartRes && resolvedRecipe !== "agent-intro" && !isListingAsk
       ? { url: chartRes.image.url, alt: chartRes.image.alt, linkUrl: brandWebsiteUrl(currentDoc) }
       : null;
   const photoSlot = photoRes

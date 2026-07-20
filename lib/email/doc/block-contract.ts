@@ -49,7 +49,13 @@ export const BLOCK_CONTRACT: Record<BlockType, BlockContractEntry> = {
   text: { authorable: true, bandable: true, zone: "body", menu: { label: "Text", icon: "¶" } },
   image: { authorable: true, bandable: true, zone: "body", menu: { label: "Image", icon: "▢" } },
   listing: {
-    authorable: true,
+    // NOT authorable — listing data (photoUrl/price/beds/baths/sqft/address) is
+    // DATA-SEEDED (loadListingContext / resolveSubject), never AI-written: those
+    // fields are deliberately outside AuthoredBlockSchema (build-doc.ts
+    // HELD_FIGURE_KEYS). Left authorable:true, the generic author could still
+    // offer this block, get no writable fields for it, and ship a hollow card
+    // (every field defaulting to "") — same precedent as metric-card below.
+    authorable: false,
     bandable: true,
     zone: "body",
     menu: { label: "Listing", icon: "⌂" },

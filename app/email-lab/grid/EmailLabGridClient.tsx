@@ -126,14 +126,20 @@ export function EmailLabGridClient({
   const currentDocRef = useRef<EmailDoc>(initialDoc);
   const [sendOpen, setSendOpen] = useState(false);
 
-  // The gallery case never auto-opens this — the "Building into" line + its own Change link
-  // (Step 5 below) replace the old blocking upfront confirm. A signed-in SEED arrival
-  // (the /showcase start-from door) confirms the project first, then rides into it
-  // carrying the seed — the in-project arrival runs capture-or-blank with save/banking
-  // (spec 2026-07-16). Every other arrival keeps the original behavior untouched.
+  // A signed-in SEED arrival (the /showcase start-from door) confirms the project
+  // first, then rides into it carrying the seed — the in-project arrival runs
+  // capture-or-blank with save/banking (spec 2026-07-16).
   const signedInSeedHop = plan.doc.kind === "seed" && signedIn && offeredProject != null;
+  // The gallery case used to skip this entirely — a passive "Building into: <project>
+  // [Change]" line (Step 5 below) was the ONLY signal that a plain "New Campaign" open
+  // was about to write into an existing, possibly unrelated project (whichever one the
+  // account last touched). That line is easy to miss, and a build DOES silently PATCH/
+  // autosave over that project's real content the moment one lands (postmortem
+  // 07/20/2026 — a real, unrelated project got overwritten this way). The gallery still
+  // shows underneath, but now requires the same explicit confirm/change/new-project
+  // choice as every other arrival before any write can happen.
   const [confirmOpen, setConfirmOpen] = useState(
-    showGallery ? false : plan.projectConfirm || signedInSeedHop,
+    showGallery ? offeredProject != null : plan.projectConfirm || signedInSeedHop,
   );
   const [targetProject, setTargetProject] = useState(offeredProject);
   // ASK FOR THE ADDRESS, ALWAYS. This used to be `plan.addressPopup && !signedIn` on
