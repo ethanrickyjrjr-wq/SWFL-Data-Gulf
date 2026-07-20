@@ -13,6 +13,28 @@ Read at session start alongside TODAY.md.
 
 ## OPEN — raised 07/20/2026, not yet resolved
 
+### 0. Same surface "fixed" five times in a row without ever being driven live
+Operator, 07/20 evening: "how can we get it fucking wrong every time!!!" — about the
+`/graph` physics in **swfldatagulf-ops** (`app/graph/page.tsx`). Five commits in ~1h
+(b4064b40, 8bc5c0d2, 5851453a, e205ade4, 0f5410a4) each declared the physics fixed. It
+still shipped broken: dragging a node re-framed the camera to all 658 nodes (read as a
+page refresh) and the settle was computed offscreen (read as no flow).
+
+**The pattern, not the bug:** every one of those passes was judged on static screenshots.
+A screenshot structurally cannot catch "the camera jumped when I let go" or "it shakes
+forever" — both are *time-domain* symptoms. `0f5410a4`'s own commit message admits the
+prior pass's "2-screenshot test was the wrong test and missed it" — and then shipped on
+the same class of evidence again.
+
+**Rule going forward:** a fix to anything interactive (drag, hover, animation, transition)
+is not verifiable by screenshot. Drive the real interaction on a real server, or hand the
+operator the URL and ask him to be the eyes. Never declare an interaction fixed from a
+static capture.
+
+Note for whoever picks this up: `damping: 0.4` is CORRECT and vendor-verified — it is
+vis-network's own documented default for `forceAtlas2Based`, and the docs do define
+damping as velocity carried over between iterations. Do not "fix" it back to 0.92.
+
 ### 1. THE META FAILURE: every idea gets replaced by a new idea
 Operator's words: "every fucking idea leads to another idea that says the last idea sucks."
 Confirmed live this session — operator said "do all three," and the reply was a new
