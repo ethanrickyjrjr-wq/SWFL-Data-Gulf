@@ -13,9 +13,9 @@ Design notes (see the plan's Task 0 — do not "fix" these back):
     (:238, :382); `source_tag` is read by nothing.
 """
 
+import json
 import pathlib
 import re
-from pathlib import Path
 
 import yaml
 
@@ -320,11 +320,18 @@ def test_coverage_exempt_does_not_shadow_a_live_pipeline():
 # Non-ingest scheduled jobs: membership only (name/workflow/purpose), no cron
 # strings (derived by scripts/schedule-catalog.mjs), no freshness fields.
 # ---------------------------------------------------------------------------
-_JOBS_WF_DIR = Path(__file__).resolve().parents[2] / ".github" / "workflows"
+_JOBS_WF_DIR = pathlib.Path(__file__).resolve().parents[2] / ".github" / "workflows"
+_VERCEL_JSON_PATH = pathlib.Path(__file__).resolve().parents[2] / "vercel.json"
 
 
 def _jobs():
     return [e for e in (REG.get("jobs") or []) if isinstance(e, dict)]
+
+
+def _vercel_cron_paths() -> set[str]:
+    """The `path` values GitHub-committed vercel.json actually schedules under `crons:`."""
+    data = json.loads(_VERCEL_JSON_PATH.read_text(encoding="utf-8"))
+    return {c["path"] for c in data.get("crons", []) if isinstance(c, dict) and c.get("path")}
 
 
 def test_jobs_section_exists_and_is_well_formed():
@@ -334,8 +341,16 @@ def test_jobs_section_exists_and_is_well_formed():
     assert len(names) == len(set(names)), f"duplicate jobs names: {names}"
     for j in jobs:
         assert j.get("name"), f"jobs entry needs name: {j!r}"
+        assert isinstance(j.get("name"), str), (
+            f"jobs entry name must be a string (a bare `key: value` YAML accident parses as a "
+            f"dict and is still truthy) — got {type(j.get('name')).__name__}: {j!r}"
+        )
         assert j.get("workflow"), f"{j.get('name')}: jobs entry needs workflow:"
         assert j.get("purpose"), f"{j.get('name')}: jobs entry needs purpose:"
+        assert isinstance(j.get("purpose"), str), (
+            f"{j.get('name')}: purpose must be a string (a bare `key: value` YAML accident "
+            f"parses as a dict and is still truthy) — got {type(j.get('purpose')).__name__}"
+        )
         wf = str(j["workflow"])
         assert wf.endswith(".yml") or wf.startswith("vercel.json#"), (
             f"{j['name']}: workflow must be a .yml basename or vercel.json#<path>: {wf}"
@@ -344,6 +359,13 @@ def test_jobs_section_exists_and_is_well_formed():
             assert j["status"] in ("disabled", "parked"), f"{j['name']}: bad status"
         if j.get("scheduler") is not None:
             assert j["scheduler"] in ("gha", "vercel"), f"{j['name']}: bad scheduler"
+        is_vercel_workflow = wf.startswith("vercel.json#")
+        is_vercel_scheduler = j.get("scheduler") == "vercel"
+        assert is_vercel_workflow == is_vercel_scheduler, (
+            f"{j['name']}: scheduler/workflow mismatch — workflow={wf!r} declares "
+            f"scheduler={j.get('scheduler')!r}. `scheduler: vercel` must hold IFF `workflow` "
+            "starts with 'vercel.json#' (the derivation script picks its reader off this field)."
+        )
         forbidden = {"cron", "cadence_days", "lane", "freshness_sla"} & set(j)
         assert not forbidden, f"{j['name']}: derived/ingest fields forbidden in jobs: {forbidden}"
 
@@ -354,9 +376,15 @@ def test_jobs_workflows_exist_and_are_not_double_registered():
         for e in REG.get(section) or []:
             if isinstance(e, dict) and e.get("workflow"):
                 already.add(e["workflow"])
+    vercel_paths = _vercel_cron_paths()
     for j in _jobs():
         wf = str(j["workflow"])
         if wf.startswith("vercel.json#"):
+            cron_path = wf[len("vercel.json#") :]
+            assert cron_path in vercel_paths, (
+                f"{j['name']}: {wf} — {cron_path!r} is not a `path` under vercel.json's "
+                f"`crons:` list (known paths: {sorted(vercel_paths)})"
+            )
             continue
         assert (_JOBS_WF_DIR / wf).exists(), f"{j['name']}: .github/workflows/{wf} missing"
         assert wf not in already, (

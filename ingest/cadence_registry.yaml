@@ -2311,10 +2311,10 @@ coverage_exempt:
 jobs:
   - name: daily-rebuild
     workflow: daily-rebuild.yml
-    purpose: Daily Brain Rebuild — refinery DAG rebuild of stale brains. Runs via nightly-chain.yml's needs order; own schedule retired 07/12.
+    purpose: Brain Rebuild — refinery DAG rebuild of stale brains. Runs via nightly-chain.yml's needs order; own schedule retired 07/12.
   - name: chief-of-staff-nightly
     workflow: chief-of-staff-nightly.yml
-    purpose: Nightly chief-of-staff triage run.
+    purpose: Chief-of-staff triage run.
   - name: email-scheduler
     workflow: email-scheduler.yml
     purpose: Sends due scheduled emails.
@@ -2327,17 +2327,17 @@ jobs:
     purpose: Tripwire scan — spend, dispatches, guard-file state.
   - name: narrative-bake
     workflow: narrative-bake.yml
-    purpose: Bakes narrative surfaces behind a no-invention numeric-token validator. Chained off Daily Brain Rebuild's completion; own schedule retired 07/12.
+    purpose: Bakes narrative surfaces behind a no-invention numeric-token validator. Chained off daily-rebuild's completion; own schedule retired 07/12.
   - name: freshness-probe-daily
     workflow: freshness-probe-daily.yml
-    purpose: Daily freshness probe over this registry's pipelines entries.
+    purpose: Freshness probe over this registry's pipelines entries.
   - name: watch-scan-daily
     workflow: watch-scan-daily.yml
-    purpose: Property Watch scan (daily) — writes public.project_events.
+    purpose: Property Watch scan — writes public.project_events.
     status: parked
   - name: watch-digest-daily
     workflow: watch-digest-daily.yml
-    purpose: Property Watch digest send (daily).
+    purpose: Property Watch digest — emails a per-project digest of un-notified Property Watch events.
     status: parked
   - name: outreach-drip
     workflow: outreach-drip.yml
@@ -2356,10 +2356,10 @@ jobs:
     status: disabled
   - name: data-readiness-cron
     workflow: data-readiness-cron.yml
-    purpose: Daily data-readiness verification.
+    purpose: Data-readiness verification.
   - name: data-targets-daily
     workflow: data-targets-daily.yml
-    purpose: Daily data-targets refresh.
+    purpose: Data-targets refresh.
   - name: gate-a-parity
     workflow: gate-a-parity.yml
     purpose: GATE A DB parity — zhvi/zori view vs pack (scheduled CI check). Chained via nightly-chain.yml's needs order; own schedule retired 07/12.
@@ -2368,16 +2368,16 @@ jobs:
     purpose: Republishes the graphify code graph.
   - name: home-values-investor-monthly
     workflow: home-values-investor-monthly.yml
-    purpose: Home-Values + Investor Composite monthly build (ingest-flavored; promotion to pipelines with freshness fields tracked in checks).
+    purpose: Home-Values + Investor Composite build (ingest-flavored; promotion to pipelines with freshness fields tracked in checks).
   - name: lifecycle-nudges-daily
     workflow: lifecycle-nudges-daily.yml
-    purpose: Daily lifecycle-arc nudges.
+    purpose: Lifecycle-arc nudges.
   - name: notion-sync-weekly
     workflow: notion-sync-weekly.yml
-    purpose: Weekly Notion sync.
+    purpose: Pushes Big Bird's Brain content to the Notion Latest Sync hub and detail pages (tear-down + rebuild).
   - name: reverify-signals-daily
     workflow: reverify-signals-daily.yml
-    purpose: Re-verifies closed-check signals (daily).
+    purpose: Re-verifies closed-check signals.
   - name: social-engagement-poll
     workflow: social-engagement-poll.yml
     purpose: Polls social engagement metrics.
@@ -2391,21 +2391,21 @@ jobs:
     status: parked
   - name: mls-sync
     workflow: vercel.json#/api/mls/sync
-    purpose: Daily MLS listing sync endpoint.
+    purpose: MLS listing sync endpoint.
     scheduler: vercel
   - name: nightly-chain-dispatch
     workflow: vercel.json#/api/cron/nightly-chain-dispatch
-    purpose: Vercel cron that dispatches the GHA nightly chain.
+    purpose: Vercel cron that dispatches nightly-chain.yml.
     scheduler: vercel
   - name: nightly-chain
     workflow: nightly-chain.yml
     purpose: Single clocked head that runs ingest, row-gate, rebuild, bake, warm, and parity in needs order (backstop cron; primary trigger is the Vercel dispatch above).
   - name: deliverables-retention-sweep-daily
     workflow: deliverables-retention-sweep-daily.yml
-    purpose: Hard-deletes deliverables soft-trashed more than 7 days ago (daily).
+    purpose: Hard-deletes deliverables soft-trashed more than 7 days ago.
   - name: project-feed-change-detection-daily
     workflow: project-feed-change-detection-daily.yml
-    purpose: Appends a project_feed row when a tracked per-ZIP brain metric moves (daily).
+    purpose: Appends a project_feed row when a tracked per-ZIP brain metric moves.
   - name: view-vintages-monthly
     workflow: view-vintages-monthly.yml
-    purpose: Point-in-time capture of the ZHVI/ZORI pivoted views into data_lake.view_vintages (monthly, day 26; ingest-flavored, same promotion-pending pattern as home-values-investor-monthly).
+    purpose: Point-in-time capture of the ZHVI/ZORI pivoted views into data_lake.view_vintages (ingest-flavored; same promotion-pending pattern as home-values-investor-monthly).
