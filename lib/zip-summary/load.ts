@@ -1,6 +1,5 @@
 import type { ZipQuickSummary, ZipSummaryFigure } from "./types";
-// KNOWN-DEBT(data_lake: ZIP ACS summary lives in the data_lake schema (typed public only))
-import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
+import { loadCensusAcsZctaRows } from "../zip-report/census-acs-rows";
 
 /**
  * Per-ZIP Quick Summary loader — the seam the ZIP report page renders from.
@@ -34,28 +33,9 @@ interface AcsRow {
 }
 
 export async function loadZipQuickSummary(zip: string): Promise<ZipQuickSummary> {
-  let supabase: ReturnType<typeof createServiceRoleClientUntyped>;
-  try {
-    supabase = createServiceRoleClientUntyped();
-  } catch {
-    return { zip, figures: [] }; // no lake creds in this env — degrade, never throw
-  }
-
-  let row: AcsRow | null = null;
-  try {
-    const { data, error } = await supabase
-      .schema("data_lake")
-      .from("census_acs_zcta")
-      .select(
-        "acs_year, total_population, median_household_income, median_age, owner_occupied_pct, moved_in_past_year_pct, poverty_rate, employment_rate, avg_household_size",
-      )
-      .eq("geo_id", zip)
-      .maybeSingle();
-    if (error || !data) return { zip, figures: [] };
-    row = data as AcsRow;
-  } catch {
-    return { zip, figures: [] };
-  }
+  const rows = await loadCensusAcsZctaRows();
+  const row: AcsRow | null = rows.find((r) => r.geo_id === zip) ?? null;
+  if (!row) return { zip, figures: [] };
 
   // ACS 5-year vintage YYYY = the 5-year window (YYYY-4 .. YYYY). As-of = period end.
   const year = row.acs_year ?? 0;

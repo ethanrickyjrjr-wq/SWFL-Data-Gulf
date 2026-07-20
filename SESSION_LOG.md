@@ -1,3 +1,15 @@
+## 2026-07-19 (Fable 5 · main) — census_acs_zcta: ONE cached read shared by zip-report candidates + zip quick summary
+
+Follow-through on the caching pass (operator "FIX NOW"): loadCensusSignals (candidates.ts) and
+loadZipQuickSummary (zip-summary/load.ts) each ran their own query against data_lake.census_acs_zcta
+on every /r/zip-report/[zip] view (force-dynamic) — one of them an unfiltered full-table scan. NEW
+lib/zip-report/census-acs-rows.ts: one 10-min-TTL in-memory read (ACS is annual-vintage, staleness
+harmless), empty-tolerant, serves last-good rows on transient errors. Summary path switched
+.eq().maybeSingle() → find() over cached rows — equivalence PROVEN live (100 rows, 100 distinct
+geo_ids, 1 vintage). Verified: bun test zip-report+zip-summary 51/51, bunx next build exit 0.
+Same root, no repoint — census_acs_zcta stays the ZIP quick-summary authority per data-roots.
+(Separate known issue, untouched: data_lake_anon_rest_leak check covers anon RLS on this table.)
+
 ## 2026-07-19 (Fable 5 · main) — FRESHNESS PRECEDENCE promoted to data-roots RULE 5 (catalog-wide)
 
 Operator: "DO WE HAVE THIS AS A RULE IN DATA ROOT GOING FORWARD???" — the inventory fix was

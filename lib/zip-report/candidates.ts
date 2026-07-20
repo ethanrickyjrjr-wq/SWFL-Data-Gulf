@@ -8,9 +8,8 @@
 // deltas. No invented numbers; an absent metric simply doesn't compete.
 import { percentileOf, THIN_COUNT_FLOOR, type SignalCandidate } from "./signal-rank";
 import { findGap, type MetricGapCoverage } from "@/lib/figures/metric-gaps";
-// KNOWN-DEBT(data_lake: census_acs_zcta lives in the data_lake schema (typed public only))
-import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { isCoreScope, TOTAL_CORE_ZIPS } from "@/refinery/lib/core-scope.mts";
+import { loadCensusAcsZctaRows } from "./census-acs-rows";
 
 /**
  * Denominator for the flood key_metrics fallback. Derived from the single core-scope authority
@@ -855,42 +854,22 @@ export async function loadCensusSignals(zip: string): Promise<{
   numericByKey: Map<string, number>;
   distribution: Map<string, number[]>;
 }> {
-  const empty = {
-    numericByKey: new Map<string, number>(),
-    distribution: new Map<string, number[]>(),
-  };
-  let db: ReturnType<typeof createServiceRoleClientUntyped>;
-  try {
-    db = createServiceRoleClientUntyped();
-  } catch {
-    return empty;
-  }
-  try {
-    const { data, error } = await db
-      .schema("data_lake")
-      .from("census_acs_zcta")
-      .select(
-        "geo_id, total_population, median_household_income, median_age, owner_occupied_pct, avg_household_size, poverty_rate, employment_rate, moved_in_past_year_pct",
-      );
-    if (error || !data) return empty;
-    const numericByKey = new Map<string, number>();
-    const distribution = new Map<string, number[]>();
-    for (const raw of data as unknown as Record<string, unknown>[]) {
-      const geoId = typeof raw.geo_id === "string" ? raw.geo_id : "";
-      // Core scope (57), not in_scope (100). in_scope pooled Sarasota/Charlotte/Hendry into the
-      // income/poverty/employment distributions — measuring Naples partly against sugarcane towns.
-      if (!/^\d{5}$/.test(geoId) || !isCoreScope(geoId)) continue;
-      for (const [col, key] of Object.entries(CENSUS_KEY_BY_COLUMN)) {
-        const n = Number(raw[col]);
-        if (!Number.isFinite(n) || raw[col] == null) continue;
-        const arr = distribution.get(key) ?? [];
-        arr.push(n);
-        distribution.set(key, arr);
-        if (geoId === zip) numericByKey.set(key, n);
-      }
+  const rows = await loadCensusAcsZctaRows();
+  const numericByKey = new Map<string, number>();
+  const distribution = new Map<string, number[]>();
+  for (const raw of rows as unknown as Record<string, unknown>[]) {
+    const geoId = typeof raw.geo_id === "string" ? raw.geo_id : "";
+    // Core scope (57), not in_scope (100). in_scope pooled Sarasota/Charlotte/Hendry into the
+    // income/poverty/employment distributions — measuring Naples partly against sugarcane towns.
+    if (!/^\d{5}$/.test(geoId) || !isCoreScope(geoId)) continue;
+    for (const [col, key] of Object.entries(CENSUS_KEY_BY_COLUMN)) {
+      const n = Number(raw[col]);
+      if (!Number.isFinite(n) || raw[col] == null) continue;
+      const arr = distribution.get(key) ?? [];
+      arr.push(n);
+      distribution.set(key, arr);
+      if (geoId === zip) numericByKey.set(key, n);
     }
-    return { numericByKey, distribution };
-  } catch {
-    return empty;
   }
+  return { numericByKey, distribution };
 }

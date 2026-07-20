@@ -38,6 +38,5 @@
   "lib/why-not-selling/cut-history.ts",
   "lib/why-not-selling/parcel-read.ts",
   "lib/why-not-selling/zhvi-change.ts",
-  "lib/zip-report/candidates.ts",
-  "lib/zip-summary/load.ts"
+  "lib/zip-report/census-acs-rows.ts"
 ]
