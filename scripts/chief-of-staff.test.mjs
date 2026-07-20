@@ -9,6 +9,7 @@ import {
 import {
   lintBrief,
   expandBriefRefs,
+  humanizeBrief,
   briefKickoffLines,
   repoSlugFromRemoteUrl,
 } from "./chief-of-staff-lib.mjs";
@@ -115,6 +116,7 @@ const PACK = {
     { sha: "aaaa111aaaa111aaaa111aaaa111aaaa111aaaa1", subject: "s", files: [], ref: "c1" },
     { sha: "bbbb222bbbb222bbbb222bbbb222bbbb222bbbb2", subject: "t", files: [], ref: "c2" },
   ],
+  checks: rows,
 };
 
 const GOOD = [
@@ -197,12 +199,48 @@ describe("expandBriefRefs", () => {
   });
 });
 
+describe("humanizeBrief", () => {
+  const POSTED = humanizeBrief(expandBriefRefs(GOOD, PACK), PACK);
+
+  test("swaps check_key for the check's label, moves sha+key to a trailing parenthetical", () => {
+    expect(POSTED).toContain(
+      "- **Market area alerts live-verify** — types+fixture committed _(confident; commit aaaa111; ledger key: market_area_alerts_live_verify)_",
+    );
+    expect(POSTED).toContain(
+      "- **Old manual** — docs landed _(likely; commit bbbb222; ledger key: old_manual_check)_",
+    );
+  });
+  test("humanizes the never-started and stale lines with their labels", () => {
+    expect(POSTED).toContain(
+      "- **Phantom build live-verify** _(ledger key: phantom_build_live_verify)_",
+    );
+    expect(POSTED).toContain(
+      "- **Phantom build live-verify** — untouched 39 days _(ledger key: phantom_build_live_verify)_",
+    );
+  });
+  test("rewrites the no-evidence count into a plain sentence", () => {
+    expect(POSTED).toContain(
+      "197 items on the to-do list had no matching work in the last 48 hours",
+    );
+  });
+  test("prepends a plain-terms summary line computed from section counts", () => {
+    expect(POSTED.split("\n")[0]).toBe(
+      "**In plain terms:** 2 items look finished and ready to check off, 1 flagged as untouched since they were opened, 1 of the oldest items on the list shown below.",
+    );
+  });
+  test("empty candidates section summarizes as nothing finished", () => {
+    const empty = GOOD.replace(/- market.*MEDIUM/s, "(none)");
+    const out = humanizeBrief(expandBriefRefs(empty, PACK), PACK);
+    expect(out.split("\n")[0]).toContain("nothing looked finished enough to check off");
+  });
+});
+
 describe("briefKickoffLines", () => {
-  // reads the POSTED issue body, i.e. after expandBriefRefs has run
-  const POSTED = expandBriefRefs(GOOD, PACK);
-  test("returns up to max candidate lines", () => {
+  // reads the POSTED issue body, i.e. after expandBriefRefs + humanizeBrief have run
+  const POSTED = humanizeBrief(expandBriefRefs(GOOD, PACK), PACK);
+  test("returns up to max candidate lines, reconstructed key/sha/why for the next session", () => {
     expect(briefKickoffLines(POSTED, { max: 1 })).toEqual([
-      "- market_area_alerts_live_verify — aaaa111 — types+fixture committed — HIGH",
+      "- market_area_alerts_live_verify — aaaa111 — types+fixture committed",
     ]);
   });
   test("no section -> empty array", () => {

@@ -1,4 +1,44 @@
-## 2026-07-20 (Sonnet 5 · main) — community_profiles Task 8/9 finished; caught a prior session's runaway loop + a real apostrophe bug
+## 2026-07-20 (Sonnet 5 · main) — Morning brief: 6 of 10 close-candidates verified live (4 false positives caught), brief rewritten to plain English
+
+Operator read issue #140 raw in GitHub and had no idea what any of it meant — confirms
+`morning_brief_no_consumer` (already open, due 07/21) was right. Two-part fix.
+
+**Part 1 — verified before closing, not just re-cited the brief's own claims.** All 30 cited
+commits are real and on main, but live/prod-checking each of the 10 "close candidates" (per
+[[feedback_checks-prod-evidence-not-dev-attestation]]: code existing ≠ prod evidence) found only 6
+actually hold up:
+CLOSED — `pack_citation_jargon_cre_corridor` (live `api/b/cre-swfl` tier=3: 15x new citation string,
+0x old jargon), `schedule_catalog_live_verify` (ran `schedule-catalog.mjs` live: `unregistered: []`),
+`soh_portability_should_i_sell_live_verify` (live `/r/should-i-sell/33904` renders the SOH section),
+`zip_report_jsonld_live_verify` (live `/r/zip-report/33904` HTML has both Dataset+FAQPage JSON-LD),
+`r_brain_page_lift_live_verify` (live `/r/housing-swfl` renders sources accordion + chart +
+commentary + freshness date), `corridor_asof_vs_report_period` (0b42eb5 confirmed ancestor of prod
+HEAD e3a5215, wired into live Email Lab chart consumers, 113/113 tests — no standalone page to
+spot-check the caption directly).
+NOT CLOSED, ledger detail corrected instead of left stale — `buyer_leverage_report_live_verify`:
+`lib/buyer-leverage/*` is real but there is ZERO consumer anywhere in `app/` — no page, no route;
+data-layer only, brief mistook code-existence for a live report. `community_profiles_zero_coverage`:
+prod `data_lake.community_profiles` is still 0 rows — pipeline exists (dc4b0545 has `--dry-run` CLI)
+but has apparently only ever been dry-run. `dom_backfill_listed_date_live_verify`: backfill (c4ffca1)
+targeted ~29.5k rows, prod currently shows only 12,545 of 33,671 — real shortfall, plausibly eaten by
+the same sweep-wipe bug fixed hours later. `listing_dom_from_first_seen`: the fix (b9e9c65, landed
+07/19 06:27 UTC) has never run through a real sweep — `nightly-chain.yml` was manually disabled
+07/19 05:54 UTC, before the fix could land in a live run; ties to the existing zombie-cron tripwire.
+
+**Part 2 — brief rewritten to plain English going forward.** Added `humanizeBrief()` to
+`scripts/chief-of-staff-lib.mjs`: a deterministic post-process (no model involved) that runs after
+`expandBriefRefs()` in `scripts/chief-of-staff-lint.mjs` — swaps each `check_key` for the check's own
+`label`, moves commit SHAs + HIGH/MEDIUM tier + the ledger key into a trailing italic parenthetical,
+rewrites the never-started/stale/no-evidence lines the same way, and prepends a one-line "In plain
+terms" summary computed from section counts. Zero risk to the fragile part (lint regex, ref->SHA
+expansion, the two-nights-running hex-drift protection) — purely a cosmetic final pass on an
+already-validated brief. `briefKickoffLines()` rewritten to parse the new humanized format and
+reconstruct the terse key/sha form the session-kickoff script and `check.mjs close <key>` still need
+— the GitHub issue stays plain English for a human, the kickoff read-back stays technical for the
+next session. `bun test scripts/chief-of-staff.test.mjs` — 27/27 green. Next nightly run (tomorrow,
+08:47 UTC) is the first live proof; no way to test the real GHA+claude-code-action step locally.
+
+
 
 Operator flagged a SEPARATE window that had been "Worked for 2h 11m 58s" with nothing to show —
 its own text explained why: it had run Task 8 (the plan's 5-community sanity check,

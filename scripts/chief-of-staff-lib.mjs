@@ -79,8 +79,6 @@ const REQUIRED_SECTIONS = [
 ];
 // Raw brief (pre-expansion): candidates cite `ref` tokens (c1, c2, ...) — never hex.
 const CANDIDATE_REF_RE = /^- (\S+) — (c\d+(?:, ?c\d+)*) — (.+) — (HIGH|MEDIUM)$/;
-// Posted brief (post-expansion): candidates carry real SHAs — what briefKickoffLines reads back.
-const CANDIDATE_SHA_RE = /^- (\S+) — ([0-9a-f]{7,40}(?:, ?[0-9a-f]{7,40})*) — .+ — (HIGH|MEDIUM)$/;
 const MAX_CANDIDATES = 15;
 
 function candidateSection(briefText) {
@@ -138,14 +136,109 @@ export function expandBriefRefs(briefText, pack) {
     .join("\n");
 }
 
-/** Top candidate lines for the session kickoff block (reads the POSTED, SHA-expanded issue body). */
+const TIER_WORD = { HIGH: "confident", MEDIUM: "likely" };
+
+function labelFor(key, checks) {
+  return checks?.find((c) => c.check_key === key)?.label ?? key;
+}
+
+// Matches a humanizeBrief-rewritten candidate line, to pull the ledger key
+// back out for operators/future sessions (see briefKickoffLines below).
+const HUMANIZED_CANDIDATE_RE =
+  /^- \*\*(.+?)\*\* — (.+) _\((confident|likely); commits? ([0-9a-f]{7,40}(?:, ?[0-9a-f]{7,40})*); ledger key: (\S+)\)_$/;
+
+/**
+ * Rewrite a linted, SHA-expanded brief into plain English for a human reader —
+ * swaps snake_case check_key for the check's own label, moves commit SHAs and
+ * the ledger key into a trailing parenthetical, and prepends a one-line
+ * plain-terms summary computed from the section contents (deterministic, no
+ * model involved). Runs last, after expandBriefRefs — never touches lint or
+ * the ref->SHA expansion, purely a cosmetic final pass on an already-validated
+ * brief. Addresses check morning_brief_no_consumer.
+ */
+export function humanizeBrief(briefText, pack) {
+  const candidateLineRe =
+    /^- (\S+) — ([0-9a-f]{7,40}(?:, ?[0-9a-f]{7,40})*) — (.+) — (HIGH|MEDIUM)$/;
+  const neverStartedLineRe = /^- (\S+)(?: — (.+))?$/;
+  const staleLineRe = /^- (\S+) \((\d+)d\)(?: — (.+))?$/;
+  const noEvidenceLineRe = /^(\d+) open checks had no matching work in the window\.$/;
+
+  let section = null;
+  let candidateCount = 0;
+  let neverStartedCount = 0;
+  let staleCount = 0;
+
+  const body = String(briefText)
+    .split("\n")
+    .map((line) => {
+      if (line.startsWith("## ")) {
+        section = line.trim();
+        return line;
+      }
+      if (section === "## Close candidates") {
+        const m = line.match(candidateLineRe);
+        if (!m) return line;
+        candidateCount++;
+        const [, key, shas, why, tier] = m;
+        const shaWord = shas.includes(",") ? "commits" : "commit";
+        return `- **${labelFor(key, pack.checks)}** — ${why} _(${TIER_WORD[tier]}; ${shaWord} ${shas}; ledger key: ${key})_`;
+      }
+      if (section === "## Never started") {
+        const m = line.match(neverStartedLineRe);
+        if (!m || !m[1].endsWith("_live_verify")) return line;
+        neverStartedCount++;
+        const [, key, why] = m;
+        return why
+          ? `- **${labelFor(key, pack.checks)}** — ${why} _(ledger key: ${key})_`
+          : `- **${labelFor(key, pack.checks)}** _(ledger key: ${key})_`;
+      }
+      if (section === "## Stale top 3") {
+        const m = line.match(staleLineRe);
+        if (!m) return line;
+        staleCount++;
+        const [, key, days, labelOverride] = m;
+        const label = labelOverride ?? labelFor(key, pack.checks);
+        return `- **${label}** — untouched ${days} days _(ledger key: ${key})_`;
+      }
+      if (section === "## No evidence") {
+        const m = line.match(noEvidenceLineRe);
+        if (!m) return line;
+        return `${m[1]} items on the to-do list had no matching work in the last 48 hours — normal for a backlog this size on its own, not a red flag by itself.`;
+      }
+      return line;
+    })
+    .join("\n");
+
+  const tldr =
+    candidateCount > 0
+      ? `${candidateCount} item${candidateCount === 1 ? "" : "s"} look${candidateCount === 1 ? "s" : ""} finished and ready to check off`
+      : "nothing looked finished enough to check off";
+  const extras = [];
+  if (neverStartedCount > 0)
+    extras.push(`${neverStartedCount} flagged as untouched since they were opened`);
+  if (staleCount > 0) extras.push(`${staleCount} of the oldest items on the list shown below`);
+
+  const summary = `**In plain terms:** ${[tldr, ...extras].join(", ")}.`;
+
+  return `${summary}\n\n${body}`;
+}
+
+/** Top candidate lines for the session kickoff block. Reads the POSTED issue
+ * body (post-humanizeBrief) and reconstructs the terse key/sha form the
+ * kickoff script and `check.mjs close` need — the issue itself stays plain
+ * English for a human, this is the technical read-back for the next session. */
 export function briefKickoffLines(briefText, { max = 5 } = {}) {
   const section = candidateSection(briefText);
   if (!section) return [];
-  return section
-    .split("\n")
-    .filter((l) => CANDIDATE_SHA_RE.test(l))
-    .slice(0, max);
+  const lines = [];
+  for (const line of section.split("\n")) {
+    const m = line.match(HUMANIZED_CANDIDATE_RE);
+    if (!m) continue;
+    const [, , why, , shas, key] = m;
+    lines.push(`- ${key} — ${shas} — ${why}`);
+    if (lines.length >= max) break;
+  }
+  return lines;
 }
 
 /** "owner/repo" from a git remote URL (https or ssh), else null. */
