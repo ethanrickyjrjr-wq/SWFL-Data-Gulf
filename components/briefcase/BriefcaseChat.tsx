@@ -285,9 +285,10 @@ export function BriefcaseChat({
       ? suggestFollowUps(lastUserQuestion, lastMsg.content)
       : [];
 
-  // The starter prompts, in the variant's own idiom: floating keeps the stacked funnel
-  // buttons; docked uses the same small chip idiom as the follow-up suggestions so the
-  // input stays the section's lead element (the labs' "Build with AI" order).
+  // The starter prompts render BELOW the input in both variants (the input is always
+  // the section's lead element — the labs' "Build with AI" order). Only the buttons'
+  // own idiom differs: floating keeps the stacked full-width buttons; docked uses the
+  // same small chip idiom as the follow-up suggestions.
   const promptBlock =
     messages.length === 0 && starterPrompts.length > 0 ? (
       docked ? (
@@ -304,7 +305,7 @@ export function BriefcaseChat({
           ))}
         </div>
       ) : (
-        <ul className="mb-3 flex flex-col gap-1.5">
+        <ul className="mb-3 mt-3 flex flex-col gap-1.5">
           {/* PHONE ONLY: show just the first prompt so the panel stays short over the
               homepage map; every prompt after the first is hidden < sm and restored at sm:
               (desktop is unchanged). */}
@@ -368,11 +369,13 @@ export function BriefcaseChat({
 
   return (
     <div className="flex flex-col">
-      {docked ? chatForm : promptBlock}
-      {docked && promptBlock}
-      {/* Docked puts the form first, so the conversation area below needs its own
-          top gap (the floating order gets this from the blocks' mb-* margins). */}
-      {docked && (messages.length > 0 || (!nudgeDismissed && (nudgeItems?.length ?? 0) > 0)) && (
+      {/* Input leads for both variants — the lab/socials "Build with AI" order
+          (operator, 07/20/2026: Ask AI must open the same way everywhere). The
+          conversation area below needs its own top gap since the mb-* margins
+          live on the blocks above, not on the form. */}
+      {chatForm}
+      {promptBlock}
+      {(messages.length > 0 || (!nudgeDismissed && (nudgeItems?.length ?? 0) > 0)) && (
         <div className="mt-3" aria-hidden />
       )}
 
@@ -510,8 +513,6 @@ export function BriefcaseChat({
           {summarizeLabel}
         </button>
       )}
-
-      {!docked && chatForm}
     </div>
   );
 }

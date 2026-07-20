@@ -1,3 +1,19 @@
+## 2026-07-20 (Sonnet 5 · main) — Ask AI floating pill: input now leads, matching the lab/socials order
+
+Operator screenshot of the floating "Ask AI" panel (pitch state) showed three suggested-prompt
+buttons stacked ABOVE the input — asked why it's different from the lab/socials, where the
+"Build with AI" box always leads with input first. It was intentional divergence: the 07/16/2026
+hub-mission-control work added a `docked` variant to `BriefcaseChat` that puts the form first (to
+match the labs' idiom) but explicitly left the `floating` variant (used by the pill everywhere
+else, including the homepage) with prompts-above-input, unchanged, on purpose, at the time.
+
+Operator instruction overrides that prior call: `components/briefcase/BriefcaseChat.tsx` now
+renders `chatForm` before `promptBlock` for BOTH variants — one order, everywhere Ask AI appears.
+Header/pitch-copy/showcase-cards structure in `BriefcasePanel.tsx` untouched (only the input-vs-
+prompts order inside `BriefcaseChat` changed). Verified: `bun test lib/briefcase` (75 pass) +
+`bunx next build` (green on retry — first attempt hit an unrelated `/insiders` + `/charts` SSG
+60s-timeout flake, confirmed pre-existing/load-related, not from this diff).
+
 ## 2026-07-20 (Sonnet 5 · main) — CI red on main for 4 straight pushes: lee-deed-records-swfl had no routing rule
 
 Operator: "what the fuck is going on with github?? how did the build fail?" `gh run list` showed
