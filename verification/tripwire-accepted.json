@@ -220,6 +220,12 @@
       "pack": "cre-swfl",
       "accepted_on": "07/19/2026",
       "note": "pack_citation_jargon_cre_corridor: cre-swfl citations de-jargoned (third bait-class fix, ae293f56) — serve new strings (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29710922404",
+      "pack": "active-listings-swfl",
+      "accepted_on": "07/19/2026",
+      "note": "operator decree 07/19: fold today's 04:30 UTC realtor.com sweep into the served brain before zip-report JSON-LD build — serve was one sweep behind (refined 02:29 UTC) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
