@@ -25,13 +25,23 @@ export interface NavItem {
  * is auth-gated, and its page handles the redirect). Labels are plain verbs/nouns
  * (NN/g: unfamiliar nomenclature is a top cause of navigation cognitive strain).
  *
- * B2 grouped the flat tail under `Explore ▾` so the bar stays compact, not a flat
- * row of every surface. Explore holds Search (`/r`) and Guides (`/guides`); the
- * marquees Insiders, Desk, Showcase, Projects, Charts, Maps, Alerts stay top-level
- * in that pinned order (operator ruling 07/11/2026). Maps was PROMOTED out of the
- * Explore dropdown to a static top-level tab, and the old ZIP Reports entry
- * (`/r/search`) was retired. `/data-intel` is deliberately NOT here (internal-only
- * — B6).
+ * REVISED 07/20/2026 (operator correction — supersedes the 07/11 Maps promotion below).
+ * The 07/11→07/19 history promoted Charts and Maps to static top-level tabs; by 07/20 that
+ * left the bar cramped enough to wrap the logo and squeeze the New Campaign pill onto two
+ * lines, and it still didn't make every page reachable — `/r/housing-swfl` and
+ * `/r/offer-check` had NO header entry at all (offer-check wasn't even in the footer).
+ * Charts + Maps moved back under Explore to free bar width; Explore now also carries every
+ * `/r/*` and marketing surface that isn't a pinned marquee tab, so "how do I get to X" is
+ * always answerable by opening Explore. `/data-intel` stays deliberately excluded
+ * (internal-only — B6); `/r/search` stays excluded too (it's a query-result redirect, not a
+ * destination — empty query bounces to `/r`).
+ *
+ * The pinned marquee run (Insiders, Desk, Showcase, Projects, Alerts) stays contiguous and in
+ * that order (operator ruling 07/11, reaffirmed 07/19). Seller Tools rides after it as its own
+ * top-level group (operator ruling 07/18) — Offer Check joined it 07/20 since it's the same
+ * seller-decision shape as Should I Sell? / Back on Market. `/r/should-i-sell` sits under `/r`,
+ * but Seller Tools is a distinct group so it never collides with Explore's Search (`/r`) in
+ * activeChildHref.
  *
  * The deterministic guards in `nav-config.test.ts` encode this exact shape — change
  * NAV_GROUPS and update that test in the SAME commit, or CI goes red.
@@ -41,7 +51,12 @@ export const NAV_GROUPS: NavItem[] = [
     label: "Explore",
     children: [
       { label: "Search", href: "/r" },
+      { label: "Charts", href: "/charts" },
+      { label: "Maps", href: "/map" },
+      { label: "Housing Report", href: "/r/housing-swfl" },
       { label: "Guides", href: "/guides" },
+      { label: "Ask AI", href: "/ask" },
+      { label: "Demo", href: "/demo" },
     ],
   },
   // The campaign centerpiece rides top-level, right after Explore (spec
@@ -50,20 +65,19 @@ export const NAV_GROUPS: NavItem[] = [
   { label: "Desk", href: "/desk" },
   { label: "Showcase", href: "/showcase" },
   { label: "Projects", href: "/project" },
-  { label: "Charts", href: "/charts" },
-  { label: "Maps", href: "/map" },
   { label: "Alerts", href: "/alerts" },
   // Seller-side reads, their OWN top-level group (operator ruling 07/18/2026: "seller
   // tools can be louder under Seller Tools"). Placed AFTER the pinned marquee run —
   // the 07/18 parallel session wedged this between Insiders and Desk, breaking the
   // 07/11 pinned order (operator correction 07/19: the marquee run stays contiguous).
-  // Both are live /r/ routes. `/r/should-i-sell` sits under `/r`, but Seller Tools is
+  // All three are live /r/ routes. `/r/should-i-sell` sits under `/r`, but Seller Tools is
   // a distinct group so it never collides with Explore's Search (`/r`) in activeChildHref.
   {
     label: "Seller Tools",
     children: [
       { label: "Should I Sell?", href: "/r/should-i-sell" },
       { label: "Back on Market", href: "/r/back-on-market" },
+      { label: "Offer Check", href: "/r/offer-check" },
     ],
   },
 ];

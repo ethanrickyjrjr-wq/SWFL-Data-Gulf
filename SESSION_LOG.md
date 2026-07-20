@@ -1,3 +1,37 @@
+## 2026-07-20 (Sonnet 5 · main) — Header nav fix set: dropdown swap bug, orphaned /r/ pages, logo/pill/tagline cleanup
+
+Operator handed a screenshot of the live header with 7 verbatim gripes. Fixed all in
+`components/nav/{SiteShell,nav-config,nav-config.test}.ts(x)`, `components/landing/HeroBar.tsx`,
+`components/landing/home-explorer.css`:
+
+1. Logo/wordmark two-line wrap → `whitespace-nowrap` + `shrink-0`.
+2. Seller Tools opened Explore's dropdown and vice versa — root cause: `SiteShell.tsx` gated
+   BOTH group dropdowns off one shared `exploreOpen` boolean (and a duplicate `id="explore-menu"`,
+   an a11y bug besides). Fixed to per-group `openGroup: string | null` state; verified live in
+   Chrome (localhost:3411, a parallel session's dev server) that each group now opens only its
+   own menu.
+3. Removed the redundant `.hero-brandline` sentence in `HeroBar.tsx` that just repeated the H1 +
+   hero-sub below it. It wasn't purely decorative — its CSS comment cited it as required for
+   Google OAuth brand-verification (support.google.com/cloud/answer/13807376). Fetched that page
+   live via crawl4ai before touching it: the requirement is about the homepage as a whole naming
+   the app + describing functionality, which the sitewide header wordmark + H1/hero-sub + footer
+   brand blurb already satisfy — safe to remove the duplicate line.
+4. New Campaign / Build-one-free pills were wrapping to two lines and used `rounded-xl` (mismatched
+   against the fully-round Log In/Account buttons in the same cluster) → `rounded-full` +
+   `whitespace-nowrap`.
+5. Charts + Maps moved from static top-level tabs into the Explore dropdown to free bar width
+   (operator: "put Charts and Maps in Explore if you need room") — supersedes the 07/11→07/19
+   promotion-to-top-level history in `nav-config.ts`'s comments, updated accordingly.
+6. `/r/housing-swfl` and `/r/offer-check` had NO header entry at all (offer-check wasn't even in
+   the footer) — operator: "I have no idea how to get to /r/ pages." Added Housing Report + Ask AI
+   + Demo to Explore, Offer Check to Seller Tools.
+
+`nav-config.test.ts` pinned assertions updated in the same commit (33 tests green; 44 total
+across nav/HeroBar/home-spine suites). `_ASSISTANT/SCRATCHPAD.md` append attempted twice,
+blocked both times by a repolith claim held by another active session — deferred, not lost
+(operator separately raised whether a single-scratchpad file is the right shape given the
+write contention; open question, not resolved this session).
+
 ## 2026-07-20 (Opus 4.8 · main) — Campaign simulator: all 7 lifecycle recipes driven as ONE campaign, teaser → sold, into a real inbox
 
 Operator ask: drive the email builder through a full campaign on a REAL new listing — teaser to

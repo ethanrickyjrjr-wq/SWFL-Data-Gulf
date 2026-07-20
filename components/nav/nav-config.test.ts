@@ -75,18 +75,18 @@ describe("homeHref (B4 — signed-in home base)", () => {
   });
 });
 
-describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
+describe("NAV_GROUPS (primary nav — grouped in B2, Charts/Maps folded back in 07/20)", () => {
   it("carries the top-level marquees + Explore + Seller Tools groups in order", () => {
     // The 07/11 pinned marquee run (Insiders…Alerts) stays CONTIGUOUS — Seller Tools
-    // rides after it, never wedged inside it (operator correction 07/19).
+    // rides after it, never wedged inside it (operator correction 07/19). Charts + Maps
+    // moved OUT of the marquee run and into Explore on 07/20 (bar was cramped: wrapped
+    // logo, squeezed New Campaign pill).
     expect(NAV_GROUPS.map((n) => n.label)).toEqual([
       "Explore",
       "Insiders",
       "Desk",
       "Showcase",
       "Projects",
-      "Charts",
-      "Maps",
       "Alerts",
       "Seller Tools",
     ]);
@@ -97,19 +97,30 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
     expect(insiders?.href).toBe("/insiders");
     expect(insiders?.children).toBeUndefined();
   });
-  it("keeps Search + Guides under Explore (Maps promoted top-level, ZIP Reports retired)", () => {
+  it("carries every non-marquee surface under Explore (07/20: Charts/Maps folded back in, orphaned /r/ + marketing pages added)", () => {
     const explore = NAV_GROUPS.find((n) => n.label === "Explore");
-    expect(explore?.children?.map((c) => c.href)).toEqual(["/r", "/guides"]);
+    expect(explore?.children?.map((c) => c.href)).toEqual([
+      "/r",
+      "/charts",
+      "/map",
+      "/r/housing-swfl",
+      "/guides",
+      "/ask",
+      "/demo",
+    ]);
   });
-  it("promotes the seller reads to a top-level Seller Tools group (operator ruling 07/18)", () => {
+  it("promotes the seller reads to a top-level Seller Tools group (operator ruling 07/18, Offer Check added 07/20)", () => {
     const seller = NAV_GROUPS.find((n) => n.label === "Seller Tools");
     expect(seller?.href).toBeUndefined();
-    expect(seller?.children?.map((c) => c.href)).toEqual(["/r/should-i-sell", "/r/back-on-market"]);
+    expect(seller?.children?.map((c) => c.href)).toEqual([
+      "/r/should-i-sell",
+      "/r/back-on-market",
+      "/r/offer-check",
+    ]);
   });
-  it("exposes Maps as a top-level leaf at /map", () => {
-    const maps = NAV_GROUPS.find((n) => n.label === "Maps");
-    expect(maps?.href).toBe("/map");
-    expect(maps?.children).toBeUndefined();
+  it("no longer exposes Charts or Maps as top-level leaves (folded into Explore 07/20)", () => {
+    expect(NAV_GROUPS.find((n) => n.label === "Charts")).toBeUndefined();
+    expect(NAV_GROUPS.find((n) => n.label === "Maps")).toBeUndefined();
   });
   it("exposes Desk as a top-level leaf at /desk (live market terminal)", () => {
     const desk = NAV_GROUPS.find((n) => n.label === "Desk");
@@ -139,7 +150,7 @@ describe("NAV_GROUPS (primary nav — grouped in B2)", () => {
 
 describe("isItemActive (group lights when any child is active)", () => {
   const explore = NAV_GROUPS.find((n) => n.label === "Explore")!;
-  const charts = NAV_GROUPS.find((n) => n.label === "Charts")!;
+  const desk = NAV_GROUPS.find((n) => n.label === "Desk")!;
   it("lights Explore on any of its children", () => {
     expect(isItemActive("/r", explore)).toBe(true);
     expect(isItemActive("/r/env-swfl", explore)).toBe(true);
@@ -148,14 +159,17 @@ describe("isItemActive (group lights when any child is active)", () => {
     expect(isItemActive("/guides", explore)).toBe(true);
     expect(isItemActive("/guides/sourced-numbers", explore)).toBe(true);
   });
-  it("does NOT light Explore on a marquee route (incl. Maps, now top-level)", () => {
-    expect(isItemActive("/charts", explore)).toBe(false);
+  it("lights Explore on Charts/Maps (folded back in 07/20, no longer top-level)", () => {
+    expect(isItemActive("/charts", explore)).toBe(true);
+    expect(isItemActive("/map", explore)).toBe(true);
+  });
+  it("does NOT light Explore on a marquee route or an unrelated path", () => {
     expect(isItemActive("/project/abc", explore)).toBe(false);
-    expect(isItemActive("/map", explore)).toBe(false);
+    expect(isItemActive("/desk", explore)).toBe(false);
   });
   it("lights a leaf marquee on its own path", () => {
-    expect(isItemActive("/charts", charts)).toBe(true);
-    expect(isItemActive("/r", charts)).toBe(false);
+    expect(isItemActive("/desk", desk)).toBe(true);
+    expect(isItemActive("/r", desk)).toBe(false);
   });
   it("is false for a null path", () => {
     expect(isItemActive(null, explore)).toBe(false);
@@ -172,9 +186,12 @@ describe("activeChildHref (longest match wins in the dropdown)", () => {
     expect(activeChildHref("/guides", children)).toBe("/guides");
     expect(activeChildHref("/guides/email-design", children)).toBe("/guides");
   });
-  it("returns null when nothing under Explore matches (incl. top-level Maps)", () => {
-    expect(activeChildHref("/charts", children)).toBe(null);
-    expect(activeChildHref("/map", children)).toBe(null);
+  it("lights Charts/Maps now that they're Explore children (folded back in 07/20)", () => {
+    expect(activeChildHref("/charts", children)).toBe("/charts");
+    expect(activeChildHref("/map", children)).toBe("/map");
+  });
+  it("returns null when nothing under Explore matches", () => {
+    expect(activeChildHref("/desk", children)).toBe(null);
     expect(activeChildHref(null, children)).toBe(null);
   });
   // The longest-match tiebreak is the whole reason this helper exists. Explore

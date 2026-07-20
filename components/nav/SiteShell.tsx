@@ -118,12 +118,16 @@ function AppBar({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [exploreOpen, setExploreOpen] = useState(false);
+  // Which GROUP's dropdown is open, by label — not a shared boolean. A single
+  // `exploreOpen` boolean used to gate every group's dropdown at once, so clicking
+  // "Seller Tools" opened Explore's menu too (and vice versa) — operator bug report
+  // 07/20/2026 ("seller opens explore and vise versa").
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const barRef = useRef<HTMLElement>(null);
 
   const closeAccount = useCallback(() => setAccountOpen(false), []);
-  const closeExplore = useCallback(() => setExploreOpen(false), []);
+  const closeExplore = useCallback(() => setOpenGroup(null), []);
 
   // Home-only scroll solidify (listener sets state, not the effect body — the
   // set-state-in-effect ban doesn't apply to event handlers).
@@ -143,13 +147,13 @@ function AppBar({
     setMobileOpen(false);
   }, []);
 
-  // One outside-click / Escape listener for BOTH bar disclosures (account + Explore).
-  const anyOpen = accountOpen || exploreOpen;
+  // One outside-click / Escape listener for BOTH bar disclosures (account + any group).
+  const anyOpen = accountOpen || openGroup !== null;
   useEffect(() => {
     if (!anyOpen) return;
     function closeAll() {
       setAccountOpen(false);
-      setExploreOpen(false);
+      setOpenGroup(null);
     }
     function onPointerDown(e: PointerEvent) {
       if (barRef.current && !barRef.current.contains(e.target as Node)) closeAll();
@@ -183,11 +187,17 @@ function AppBar({
         <div className="flex items-center gap-6">
           <Link
             href={homeHref(user)}
-            className="flex items-center gap-2"
+            className="flex shrink-0 items-center gap-2"
             aria-label="SWFL Data Gulf — home"
           >
-            <Image src="/logo.png" alt="" width={32} height={32} className="h-8 w-8 rounded-lg" />
-            <span className="hidden text-base font-semibold tracking-tight text-white sm:inline">
+            <Image
+              src="/logo.png"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8 shrink-0 rounded-lg"
+            />
+            <span className="hidden whitespace-nowrap text-base font-semibold tracking-tight text-white sm:inline">
               SWFL Data Gulf
             </span>
           </Link>
@@ -199,27 +209,29 @@ function AppBar({
                 // A GROUP (Explore ▾) → disclosure button + dropdown of its children.
                 if (item.children?.length) {
                   const childActive = activeChildHref(pathname, item.children);
+                  const groupOpen = openGroup === item.label;
+                  const menuId = `nav-menu-${item.label.toLowerCase().replace(/\s+/g, "-")}`;
                   return (
                     <li key={item.label} className="relative">
                       <button
                         type="button"
                         onClick={() => {
                           setAccountOpen(false);
-                          setExploreOpen((o) => !o);
+                          setOpenGroup((g) => (g === item.label ? null : item.label));
                         }}
-                        aria-expanded={exploreOpen}
-                        aria-controls="explore-menu"
+                        aria-expanded={groupOpen}
+                        aria-controls={menuId}
                         className={`relative flex items-center gap-1 rounded-lg px-3 py-2 text-sm transition-colors ${
                           active ? "font-medium text-white" : "text-gray-300 hover:text-white"
                         }`}
                       >
                         {item.label}
-                        <Caret open={exploreOpen} />
+                        <Caret open={groupOpen} />
                         {active && <ActiveMarker />}
                       </button>
-                      {exploreOpen && (
+                      {groupOpen && (
                         <div
-                          id="explore-menu"
+                          id={menuId}
                           className="absolute left-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-white/10 bg-navy-dark p-1 shadow-2xl"
                         >
                           {item.children.map((c) => (
@@ -270,7 +282,7 @@ function AppBar({
               {/* Straight-to-cockpit door: a blank grid canvas, no project pick. */}
               <Link
                 href={signedInLabArrival()}
-                className="btn-gradient rounded-xl px-5 py-2 text-sm font-medium text-navy-dark transition-all"
+                className="btn-gradient whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium text-navy-dark transition-all"
               >
                 New Campaign
               </Link>
@@ -278,7 +290,7 @@ function AppBar({
                 <button
                   type="button"
                   onClick={() => {
-                    setExploreOpen(false);
+                    setOpenGroup(null);
                     setAccountOpen((o) => !o);
                   }}
                   aria-expanded={accountOpen}
@@ -338,7 +350,7 @@ function AppBar({
               {/* Call-to-value, not "Get Access" (NN/g 4.1) — and a real destination. */}
               <Link
                 href={EMAIL_LAB_LANDING}
-                className="btn-gradient rounded-xl px-5 py-2 text-sm font-medium text-navy-dark"
+                className="btn-gradient whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium text-navy-dark"
               >
                 Build one free
               </Link>
