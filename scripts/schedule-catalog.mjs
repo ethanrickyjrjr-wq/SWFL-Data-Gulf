@@ -27,6 +27,22 @@ export function cronLines(workflowYaml) {
   return out;
 }
 
+/** Escape a string for use inside a RegExp source (literal match). */
+function escapeRegExp(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Is `ref` registered as an actual `workflow:` field value in the registry
+ * text — not merely name-dropped in a comment or another entry's `purpose:`
+ * prose? Matches a line like `    workflow: <ref>` (optionally followed by a
+ * trailing `# comment`), any leading whitespace, multiline mode.
+ */
+function isRegisteredRef(registryText, ref) {
+  const re = new RegExp(`^\\s*workflow:\\s*${escapeRegExp(ref)}\\s*(#.*)?$`, "m");
+  return re.test(String(registryText));
+}
+
 /** vercel.json crons as registry refs: { ref: "vercel.json#<path>", cron }. */
 export function vercelCronRefs(vercelJsonText) {
   try {
@@ -34,7 +50,13 @@ export function vercelCronRefs(vercelJsonText) {
     return crons
       .filter((c) => c?.path && c?.schedule)
       .map((c) => ({ ref: `vercel.json#${c.path}`, cron: c.schedule }));
-  } catch {
+  } catch (e) {
+    // Fail OPEN on the return value (empty catalog contribution) but never
+    // SILENT — a malformed vercel.json must not make --check report OK while
+    // its crons have quietly vanished from the catalog.
+    console.warn(
+      `schedule-catalog: vercel.json failed to parse, treating as zero Vercel crons — ${e.message}`,
+    );
     return [];
   }
 }
@@ -65,9 +87,11 @@ export function jobsEntries(registryText) {
 }
 
 /**
- * Merge authored membership with live schedules. Membership is text-presence
- * of the ref anywhere in the registry (same contract as the hook's
- * unregisteredPipelineDirs), so pipelines:/not_yet_running: entries count.
+ * Merge authored membership with live schedules. Membership requires the ref
+ * to appear as an actual `workflow:` field value in the registry (see
+ * isRegisteredRef) — a bare mention in a comment or another entry's
+ * `purpose:` prose does NOT count. pipelines:/not_yet_running:/jobs: entries
+ * all use the same `workflow:` field, so all three sections count.
  */
 export function buildCatalog({ registryText, workflows, vercelJsonText }) {
   const rows = [];
@@ -75,12 +99,12 @@ export function buildCatalog({ registryText, workflows, vercelJsonText }) {
   for (const wf of workflows) {
     const crons = cronLines(wf.text);
     if (crons.length === 0) continue; // dispatch-/CI-only — not a scheduled surface
-    const registered = String(registryText).includes(wf.file);
+    const registered = isRegisteredRef(registryText, wf.file);
     if (!registered) unregistered.push(wf.file);
     rows.push({ ref: wf.file, scheduler: "gha", cron: crons, registered });
   }
   for (const v of vercelCronRefs(vercelJsonText)) {
-    const registered = String(registryText).includes(v.ref);
+    const registered = isRegisteredRef(registryText, v.ref);
     if (!registered) unregistered.push(v.ref);
     rows.push({ ref: v.ref, scheduler: "vercel", cron: [v.cron], registered });
   }

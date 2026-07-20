@@ -39,16 +39,47 @@ check("cronLines: quoted + unquoted extracted, commented-out excluded", () => {
   assert.deepStrictEqual(cronLines(yml), ["23 4 * * *", "0 11 * * 1"]);
 });
 
+check("cronLines: trailing inline comment on the cron line is stripped", () => {
+  // Real shape used by 11 of the 77 live workflows, e.g. airtable-checks-sync.yml,
+  // tripwire-hourly.yml, lee-permits-weekly.yml — the expression must come back
+  // clean, not with the comment text still attached.
+  const yml = [
+    "on:",
+    "  schedule:",
+    '    - cron: "23 12 * * *" # once daily, off the top-of-hour congestion',
+    "name: x",
+  ].join("\n");
+  assert.deepStrictEqual(cronLines(yml), ["23 12 * * *"]);
+});
+
 check("cronLines: no schedule → []", () => {
   assert.deepStrictEqual(cronLines("on:\n  workflow_dispatch:\n"), []);
 });
 
-check("vercelCronRefs: parses crons array; bad JSON → []", () => {
+check("vercelCronRefs: parses crons array", () => {
   const good = JSON.stringify({ crons: [{ path: "/api/mls/sync", schedule: "0 11 * * *" }] });
   assert.deepStrictEqual(vercelCronRefs(good), [
     { ref: "vercel.json#/api/mls/sync", cron: "0 11 * * *" },
   ]);
-  assert.deepStrictEqual(vercelCronRefs("{nope"), []);
+});
+
+check("vercelCronRefs: bad JSON → [], warns on stderr instead of failing silently", () => {
+  // Malformed vercel.json must not vanish quietly — stub console.warn so the
+  // assertion proves the warning fires without polluting this runner's stdout.
+  const calls = [];
+  const original = console.warn;
+  console.warn = (...args) => calls.push(args.join(" "));
+  try {
+    const result = vercelCronRefs("{nope");
+    assert.deepStrictEqual(result, []);
+  } finally {
+    console.warn = original;
+  }
+  assert.strictEqual(calls.length, 1, "expected exactly one console.warn call");
+  assert.ok(
+    /vercel\.json/i.test(calls[0]),
+    `expected warning to name vercel.json, got: ${calls[0]}`,
+  );
 });
 
 check("jobsEntries: fixed-shape parse, stops at next top-level key", () => {
@@ -116,7 +147,19 @@ check("REPO SWEEP: zero unregistered scheduled surfaces (acceptance 1)", () => {
     .filter((f) => f.endsWith(".yml"))
     .map((file) => ({ file, text: readFileSync(path.join(wfDir, file), "utf8") }));
   const vercelJsonText = readFileSync(path.join(root, "vercel.json"), "utf8");
-  const { unregistered } = buildCatalog({ registryText, workflows, vercelJsonText });
+  const { rows, unregistered } = buildCatalog({ registryText, workflows, vercelJsonText });
+  // Floor/anchor: an empty `unregistered` array is produced identically by
+  // "everything detected is registered" and by "cron detection broke and
+  // found nothing." redfin-monthly.yml is a verified active-cron workflow
+  // (`- cron: "0 13 15 * *"`, no dispatch-only trigger) registered under
+  // `ingest/cadence_registry.yaml`'s pipelines: section — if detection ever
+  // silently stops finding scheduled surfaces, this assertion catches it
+  // even though `unregistered` would still read as empty.
+  assert.ok(
+    rows.some((r) => r.ref === "redfin-monthly.yml" && r.registered === true),
+    "expected redfin-monthly.yml to be detected as an active-cron, registered row — " +
+      "if this fails, cron/workflow detection silently broke",
+  );
   assert.deepStrictEqual(unregistered, []);
 });
 
