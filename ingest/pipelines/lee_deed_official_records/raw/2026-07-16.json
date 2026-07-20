@@ -1,0 +1,5227 @@
+[
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "MADDEN KEITH ALLEN",
+      "MADDEN TERESA P"
+    ],
+    "grantees": [
+      "MADDEN KEITH ALLEN TRUSTEE",
+      "MADDEN TERESA P TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187515",
+    "legalFull": "L 170 RESERVE AT ESTERO | Parcel 22-46-25-E4-10000.1700",
+    "lot": "170",
+    "block": null,
+    "unit": null,
+    "subdivision": "RESERVE AT ESTERO",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19764956"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "SMITH GREGORY L",
+      "SMITH GREGORY LYNN"
+    ],
+    "grantees": [
+      "HAWKEYES INVESTMENT LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187518",
+    "legalFull": "Parcel 03-47-24-W1-0280A.6010 U A601 THE SANDARAC",
+    "lot": null,
+    "block": null,
+    "unit": "A601",
+    "subdivision": "THE SANDARAC",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19764959"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "SMITH GREGORY L"
+    ],
+    "grantees": [
+      "HAWKEYES INVESTMENT LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187522",
+    "legalFull": "Parcel 35-44-25-P1-01400.0890 L 89 COLONIAL COUNTRY CLUB PARCEL 119",
+    "lot": "89",
+    "block": null,
+    "unit": null,
+    "subdivision": "COLONIAL COUNTRY CLUB PARCEL 119",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19764964"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "SMITH GREGORY L"
+    ],
+    "grantees": [
+      "HAWKEYES INVESTMENT LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187528",
+    "legalFull": "L 12 WHISPERING PALMS | Parcel 35-44-25-P1-03800.0120",
+    "lot": "12",
+    "block": null,
+    "unit": null,
+    "subdivision": "WHISPERING PALMS",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19764966"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "SHALTON JEFFREY PER REP",
+      "BEER MICHAEL ANTHONY ESTATE",
+      "..."
+    ],
+    "grantees": [
+      "SHALTON JEFFREY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187529",
+    "legalFull": "Parcel 12-45-24-28-00000.7120 | U 712 OAKMONT VILLAGE AT THE HIDEAWAY COUNTRY CLUB CONDOMINIUM NO. 7",
+    "lot": null,
+    "block": null,
+    "unit": "712",
+    "subdivision": "OAKMONT VILLAGE AT THE HIDEAWAY COUNTRY CLUB CONDOMINIUM NO. 7",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19764969"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "CONTREIRAS SARA LOURENCO VAZ"
+    ],
+    "grantees": [
+      "SARA LOURENCO VAZ CONTREIRAS LIVING TRUST",
+      "CONTREIRAS SARA LOURENCO VAZ TRUSTEE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187539",
+    "legalFull": "L 59, 60 BLK 3938 U 54 CAPE CORAL | Parcel 17-44-23-C1-03938.0590",
+    "lot": "59, 60",
+    "block": "3938",
+    "unit": "54",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19764989"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$500,000.00",
+    "grantors": [
+      "CONNARD PROPERTIES LLC",
+      "CONNARD PROPERTIES L L C",
+      "..."
+    ],
+    "grantees": [
+      "VTE HOLDINGS LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187541",
+    "legalFull": "Parcel 20-43-25-03-00002.0008 | U 8 MERCANTILE COMMERCIAL PARK CONDOMINIUM BLDG 2",
+    "lot": null,
+    "block": null,
+    "unit": "8",
+    "subdivision": "MERCANTILE COMMERCIAL PARK CONDOMINIUM",
+    "phase": "2",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19764981"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "NICHOLSON WESLEY E"
+    ],
+    "grantees": [
+      "NICHOLSON WESLEY E"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187547",
+    "legalFull": "Parcel 28-43-24-01-00029.0100 L 10 BLK 29 U 1 TAMIAMI VILLAGE",
+    "lot": "10",
+    "block": "29",
+    "unit": "1",
+    "subdivision": "TAMIAMI VILLAGE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765011"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$208,250.00",
+    "grantors": [
+      "THOMAS BRIAN",
+      "THOMAS KEVIN"
+    ],
+    "grantees": [
+      "THOMAS SCOTT"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187548",
+    "legalFull": "L 21, 22 BLK 368 U 7 CAPE CORAL | Parcel 08-45-24-C4-00368.0210",
+    "lot": "21, 22",
+    "block": "368",
+    "unit": "7",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765012"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "SALUGA LAWRENCE SCOTT"
+    ],
+    "grantees": [
+      "ALBANESE JO ELLEN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187555",
+    "legalFull": "Parcel 11-45-24-27-00000.6090 | U 609 WHISKEY CREEK VILLAGE GREEN CONDOMINIUM",
+    "lot": null,
+    "block": null,
+    "unit": "609",
+    "subdivision": "WHISKEY CREEK VILLAGE GREEN CONDOMINIUM",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19764993"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$250,000.00",
+    "grantors": [
+      "ELLIOTT JESSICA D"
+    ],
+    "grantees": [
+      "FEICHTER THOMAS J",
+      "SCHUELKE ALICE M"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187580",
+    "legalFull": "Parcel 29-46-25-E3-22000.F440 L F-44 MARINERS COVE MOBILE HOME PARK 2018 JACO MOBILE HOME",
+    "lot": "F-44",
+    "block": null,
+    "unit": null,
+    "subdivision": "MARINERS COVE MOBILE HOME PARK",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765072"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$480,000.00",
+    "grantors": [
+      "JAJ DONG HOMES INC"
+    ],
+    "grantees": [
+      "CAPOTE DAYANA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187590",
+    "legalFull": "Parcel 20-44-27-L1-07025.0180 L 18,19 BLK 25 U 7 LEHIGH ACRES",
+    "lot": "18,19",
+    "block": "25",
+    "unit": "7",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765068"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$167,500.00",
+    "grantors": [
+      "BERKENSTOCK KATHLEEN M"
+    ],
+    "grantees": [
+      "GRANT STUART",
+      "GRANT MARGARET"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187595",
+    "legalFull": "Parcel 06-46-24-20-000K0.0040 | U K-4 AMBERWOOD LAKE",
+    "lot": null,
+    "block": null,
+    "unit": "K-4",
+    "subdivision": "AMBERWOOD LAKE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765093"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "QUIROZ FERNANDO"
+    ],
+    "grantees": [
+      "FERNANDO QUIROZ ROMERO REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187597",
+    "legalFull": "Parcel 25-43-23-C3-02312.0030 L 3, 4 BLK 2312 U 36 CAPE CORAL",
+    "lot": "3, 4",
+    "block": "2312",
+    "unit": "36",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765095"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "QUIROZ FERNANDO"
+    ],
+    "grantees": [
+      "FERNANDO QUIROZ ROMERO REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187598",
+    "legalFull": "Parcel 05-44-24-C4-03545.0190 L 19, 20 BLK 3545 U 47 PT 2 CAPE CORAL",
+    "lot": "19, 20",
+    "block": "3545",
+    "unit": "47 PT 2",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765096"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "QUIROZ FERNANDO"
+    ],
+    "grantees": [
+      "FERNANDO QUIROZ ROMERO REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187599",
+    "legalFull": "Parcel 33-43-23-C4-03905.0070 L 7,8 BLK 3905 U 53 CAPE CORAL",
+    "lot": "7,8",
+    "block": "3905",
+    "unit": "53",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765097"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "QUIROZ FERNANDO"
+    ],
+    "grantees": [
+      "FERNANDO QUIROZ ROMERO REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187600",
+    "legalFull": "Parcel 26-43-23-C2-02762.0210 L 21, 22 BLK 2762 U 40 CAPE CORAL",
+    "lot": "21, 22",
+    "block": "2762",
+    "unit": "40",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765098"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "QUIROZ FERNANDO"
+    ],
+    "grantees": [
+      "FERNANDO QUIROZ ROMERO REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187601",
+    "legalFull": "Parcel 05-44-24-C4-03545.0010 L 1, 2 BLK 3545 U 47 PT 2 CAPE CORAL",
+    "lot": "1, 2",
+    "block": "3545",
+    "unit": "47 PT 2",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765099"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "QUIROZ FERNANDO"
+    ],
+    "grantees": [
+      "FERNANDO QUIROZ ROMERO REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187602",
+    "legalFull": "Parcel 35-43-23-C3-02705.0230 L 23, 24 BLK 2705 U 39 CAPE CORAL",
+    "lot": "23, 24",
+    "block": "2705",
+    "unit": "39",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765100"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "QUIROZ FERNANDO"
+    ],
+    "grantees": [
+      "FERNANDO QUIROZ ROMERO REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187603",
+    "legalFull": "Parcel 01-44-23-C1-02439.0150 L 15, 16 BLK 2439 U 34 CAPE CORAL",
+    "lot": "15, 16",
+    "block": "2439",
+    "unit": "34",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765101"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "QUIROZ FERNANDO"
+    ],
+    "grantees": [
+      "FERNANDO QUIROZ ROMERO REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187604",
+    "legalFull": "Parcel 05-44-23-C3-04036.0150 L 15, 16 BLK 4036 U 56 CAPE CORAL",
+    "lot": "15, 16",
+    "block": "4036",
+    "unit": "56",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765102"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "NICHOLAS RUTH VIRGINIA LILLY PER REP",
+      "NICHOLAS PETER M ESTATE"
+    ],
+    "grantees": [
+      "NICHOLAS RUTH VIRGINIA LILLY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187606",
+    "legalFull": "Parcel 02-43-20-06-00019.0040 L 5 BLK 18 GASPARILLA ISLAND",
+    "lot": "5",
+    "block": "18",
+    "unit": null,
+    "subdivision": "GASPARILLA ISLAND",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19756347"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "NICHOLAS RUTH L"
+    ],
+    "grantees": [
+      "NICHOLAS RUTH VIRGINIA LILLY TRUSTEE",
+      "QIU JEAN TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187607",
+    "legalFull": "Parcel 02-43-20-06-00018.0040 SEC 2 TWN 43S RNG 20E",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "2",
+    "township": "43S",
+    "range": "20E",
+    "internalDocId": "19756348"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "NICHOLAS RUTH L"
+    ],
+    "grantees": [
+      "NICHOLAS RUTH VIRGINIA LILLY TRUSTEE",
+      "QIU JEAN TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187608",
+    "legalFull": "Parcel 02-43-20-06-00019.0070 L 7 BLK 19 GASPARILLA ISLAND",
+    "lot": "7",
+    "block": "19",
+    "unit": null,
+    "subdivision": "GASPARILLA ISLAND",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19756349"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "PETERSON TADLY KAVIN"
+    ],
+    "grantees": [
+      "PETERSON TADLY KAVIN",
+      "PETERSON EMEL"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187610",
+    "legalFull": "Parcel 10-44-23-C2-01000.3070 | Parcel 10-44-23-C2-01000.3070 L 307 STONEWATER",
+    "lot": "307",
+    "block": null,
+    "unit": null,
+    "subdivision": "STONEWATER",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765116"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$455,000.00",
+    "grantors": [
+      "ROBERTS BARBARA",
+      "ROBERTS BARBARA TRUSTEE",
+      "..."
+    ],
+    "grantees": [
+      "VALEG LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187616",
+    "legalFull": "Parcel __-__-__-__-_____.__NA L 2 SEC 32 TWN 47S RNG 25E | Parcel 32-47-25-B3-00048.011B",
+    "lot": "2",
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "32",
+    "township": "47S",
+    "range": "25E",
+    "internalDocId": "19765129"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "KEREKES THOMAS J",
+      "KEREKES SUSAN M"
+    ],
+    "grantees": [
+      "KEREKES THOMAS J TRUSTEE",
+      "KEREKES SUSAN M TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187620",
+    "legalFull": "Parcel 28-46-25-E2-12000.1100 L 110 CASCADES AT ESTERO - PARCEL A",
+    "lot": "110",
+    "block": null,
+    "unit": null,
+    "subdivision": "CASCADES AT ESTERO - PARCEL A",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765141"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$240,000.00",
+    "grantors": [
+      "PORCH KAREN S",
+      "CHEVALIER BRIAN C"
+    ],
+    "grantees": [
+      "GORDON GAEL"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187624",
+    "legalFull": "Parcel 23-45-24-57-00028.2813 U 2813 REFLECTION LAKES TWO",
+    "lot": null,
+    "block": null,
+    "unit": "2813",
+    "subdivision": "REFLECTION LAKES TWO",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765148"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$295,000.00",
+    "grantors": [
+      "TILKA TERRENCE G",
+      "TILKA TERRENCE G TRUSTEE",
+      "..."
+    ],
+    "grantees": [
+      "WAGENER DEBONIE L",
+      "WAGENER JOEL L"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187628",
+    "legalFull": "Parcel 32-44-25-P4-03000.1830 L 183 CASTALINA",
+    "lot": "183",
+    "block": null,
+    "unit": null,
+    "subdivision": "CASTALINA",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765156"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$359,000.00",
+    "grantors": [
+      "CHURAMAN JASON",
+      "CHURAMAN BRITTANY"
+    ],
+    "grantees": [
+      "SUAREZ LAZARO"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187630",
+    "legalFull": "Parcel 30-44-26-L2-04027.0030 L 3 BLK 27 U 4 LEHIGH ACRES",
+    "lot": "3",
+    "block": "27",
+    "unit": "4",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765162"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "FINKEL BENJAMIN PER REP",
+      "FINKEL GERTRUDE ESTATE"
+    ],
+    "grantees": [
+      "FINKEL BENJAMIN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187633",
+    "legalFull": "Parcel __-__-__-__-_____.__NA PLANTATION BEACH CLUB I PH B 1 WK 15 PAR B4",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": "PLANTATION BEACH CLUB I",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765171"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "FINKEL BENJAMIN PER REP",
+      "FINKEL JERRY B ESTATE"
+    ],
+    "grantees": [
+      "FINKEL BENJAMIN TRUSTEE",
+      "FINKEL PAUL TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187634",
+    "legalFull": "Parcel __-__-__-__-_____.__NA PLANTATION BEACH CLUB I PH B-1 WK 15 PARCEL B4",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": "PLANTATION BEACH CLUB I",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765172"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "HUSTAD CAROL WHITE",
+      "HUSTAD JOHN GREGORY"
+    ],
+    "grantees": [
+      "HUSTAD CAROL WHITE TRUSTEE",
+      "CAROL WHITE HUSTAD REVOCABLE LIVING TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187635",
+    "legalFull": "L 249 SOMERSET AT THE PLANTATION | Parcel 14-45-25-P2-00600.2490",
+    "lot": "249",
+    "block": null,
+    "unit": null,
+    "subdivision": "SOMERSET AT THE PLANTATION",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765174"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$728,000.00",
+    "grantors": [
+      "NELSON STEVEN",
+      "NELSON BETH A"
+    ],
+    "grantees": [
+      "BIGFORD JAMES RICHARD",
+      "BIGFORD MOLLY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187639",
+    "legalFull": "Parcel 09-45-23-C4-04659.0110 L 11,12,132 BLK 4659 U 70 CAPE CORAL",
+    "lot": "11,12,132",
+    "block": "4659",
+    "unit": "70",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765201"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "EAGLES STEVEN ROBERT",
+      "EAGELS STEVEN ROBERT"
+    ],
+    "grantees": [
+      "EAGLES STEVEN ROBERT TRUSTEE",
+      "EAGLES SILVIA ALEJANDRA TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187665",
+    "legalFull": "Parcel 14-45-25-P1-35000.4180 L 418 MARINA BAY PLAT TWO",
+    "lot": "418",
+    "block": null,
+    "unit": null,
+    "subdivision": "MARINA BAY",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765232"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$690,000.00",
+    "grantors": [
+      "GORKA DAWN"
+    ],
+    "grantees": [
+      "ZIMMERMAN TIMOTHY M"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187666",
+    "legalFull": "Parcel 36-45-23-06-0000C.0100 L 10 BLK C U 2 TAHITIAN SHORES",
+    "lot": "10",
+    "block": "C",
+    "unit": "2",
+    "subdivision": "TAHITIAN SHORES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765256"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "COX ARCHIE V",
+      "COX KATHRYN ANN"
+    ],
+    "grantees": [
+      "COX ARCHIE V TRUSTEE",
+      "COX KATHRYN ANN TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187670",
+    "legalFull": "Parcel 08-45-25-15-00000.1020 L 102 CYPRESS WALK",
+    "lot": "102",
+    "block": null,
+    "unit": null,
+    "subdivision": "CYPRESS WALK",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765272"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$480,000.00",
+    "grantors": [
+      "FERRANTI KAREN ANN"
+    ],
+    "grantees": [
+      "WINN JEFFREY",
+      "WINN ROBYN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187671",
+    "legalFull": "Parcel 32-44-23-C3-05943.0090 L 9,10 BLK 5943 U 93 CAPE CORAL",
+    "lot": "9,10",
+    "block": "5943",
+    "unit": "93",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765285"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$35,000.00",
+    "grantors": [
+      "KALEY C DAVID"
+    ],
+    "grantees": [
+      "SGV LOTS LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187679",
+    "legalFull": "Parcel 19-43-24-C4-05562.0090 L 9,10 BLK 5562 U 84 CAPE CORAL",
+    "lot": "9,10",
+    "block": "5562",
+    "unit": "84",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765316"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "AHMEDIC ADNAN"
+    ],
+    "grantees": [
+      "AHMEDIC ADNAN TRUSTEE",
+      "ADNAN AHMEDIC REVOCABLE TRUST 2026"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187684",
+    "legalFull": "Parcel 16-45-24-41-00000.2220 U DD222 SUNSET COVE",
+    "lot": null,
+    "block": null,
+    "unit": "DD222",
+    "subdivision": "SUNSET COVE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765298"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "DUSCHENE ANN VICTORIA"
+    ],
+    "grantees": [
+      "ANN VICTORIA DUSCHENE TRUST",
+      "DUSCHENE ANN VICTORIA TRUSTEE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187708",
+    "legalFull": "Parcel 01-45-25-P4-04103.3404 U 3-404 PALAZZO II AT PELICAN PRESERVE BLDG 3",
+    "lot": null,
+    "block": null,
+    "unit": "3-404",
+    "subdivision": "PALAZZO II AT PELICAN PRESERVE",
+    "phase": "3",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765262"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "MURNANE JAMES FRANCIS",
+      "MURNANE JANICE E"
+    ],
+    "grantees": [
+      "MURNANE JAMES F TRUSTEE",
+      "JAMES F MURNANE REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187711",
+    "legalFull": "Parcel 14-45-24-02-01722.0040 U 6 PINE MANOR",
+    "lot": null,
+    "block": null,
+    "unit": "6",
+    "subdivision": "PINE MANOR",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765377"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1,600,000.00",
+    "grantors": [
+      "VOSS MICHAEL P",
+      "VOSS DONNA P",
+      "..."
+    ],
+    "grantees": [
+      "LINGAFELTER WENDY C TRUSTEE",
+      "WENDY LINGAFELTER DECLARATION OF TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187715",
+    "legalFull": "Parcel 20-46-23-T4-00002.0370 | SEC 20 TWN 46 SOUTH RNG 23 EAST",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "20",
+    "township": "46 SOUTH",
+    "range": "23 EAST",
+    "internalDocId": "19765380"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$207,000.00",
+    "grantors": [
+      "BARNHART PROPERTIES LLC",
+      "JAMES M MCCABE PA"
+    ],
+    "grantees": [
+      "PENTON PROPERTY GROUP LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187719",
+    "legalFull": "L 21, 22 BLK 5180 U 83 CAPE CORAL SUBDIVISION | Parcel 25-43-22-C3-05180.0210",
+    "lot": "21, 22",
+    "block": "5180",
+    "unit": "83",
+    "subdivision": "CAPE CORAL SUBDIVISION",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765269"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "COLLINS ANDREW B",
+      "COLLINS ANDREW BENTLEY",
+      "..."
+    ],
+    "grantees": [
+      "COLLINS ANDREW B TRUSTEE",
+      "COLLINS BRENDA K TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187723",
+    "legalFull": "Parcel 21-45-24-13-00WP0.0080 U WP-8 WINJAMMER VILLAGE PAR 1 OF THE LANDINGS",
+    "lot": null,
+    "block": null,
+    "unit": "WP-8",
+    "subdivision": "WINJAMMER VILLAGE PAR 1 OF THE LANDINGS",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765283"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$100.00",
+    "grantors": [
+      "ODONNELL KENNETH A",
+      "ODONNELL NADINE M"
+    ],
+    "grantees": [
+      "ODONNELL KENNETH A TRUSTEE",
+      "ODONNELL NADINE M TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187737",
+    "legalFull": "Parcel 13-46-25-L2-11000.7240 | Parcel 13-46-25-L2-11000.7240 L 724 ESPLANADE LAKE CLUB PLAT FIVE B",
+    "lot": "724",
+    "block": null,
+    "unit": null,
+    "subdivision": "ESPLANADE LAKE CLUB PLAT FIVE B",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765404"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$100.00",
+    "grantors": [
+      "ODONNELL KENNETH A",
+      "ODONNELL NADINE M"
+    ],
+    "grantees": [
+      "ODONNELL KENNETH A TRUSTEE",
+      "ODONNELL NADINE M TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187738",
+    "legalFull": "Parcel 21-46-25-E4-12006.0633 | Parcel 21-46-25-E4-12006.0633 U 633 TERRACE III AT OSPREY COVE BLDG 6",
+    "lot": null,
+    "block": null,
+    "unit": "633",
+    "subdivision": "TERRACE III AT OSPREY COVE",
+    "phase": "6",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765405"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$9,000.00",
+    "grantors": [
+      "GROW ADAM",
+      "GROW ASHLYNN"
+    ],
+    "grantees": [
+      "E and E2 COLLECTIVE LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187748",
+    "legalFull": "Parcel 03-44-27-L1-09045.0170 L 17 BLK 45 U PT 9 GREENBRIAR",
+    "lot": "17",
+    "block": "45",
+    "unit": "PT 9",
+    "subdivision": "GREENBRIAR",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765278"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "FERNANDO JUDITH H",
+      "FERNANDO JUDITH HELEN"
+    ],
+    "grantees": [
+      "FERNANDO JUDITH HELEN TRSUTEE",
+      "R AND J FERNANDO FAMILY TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187753",
+    "legalFull": "L 29 WOODBRIAR | Parcel 09-46-25-08-00000.0290",
+    "lot": "29",
+    "block": null,
+    "unit": null,
+    "subdivision": "WOODBRIAR",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19729736"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$3,500.00",
+    "grantors": [
+      "HEDGER KAY L",
+      "HEDGER ROBERT WILLIS ESTATE",
+      "..."
+    ],
+    "grantees": [
+      "VILARDO MARK A",
+      "VILARDO SHARON A"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187786",
+    "legalFull": "Parcel 30-46-23-T2-01201.00A0 SANIBEL BEACH CLUB BLDG 8 WK 16 CONDO PARCEL B",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": "SANIBEL BEACH CLUB",
+    "phase": "8",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765364"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$160,000.00",
+    "grantors": [
+      "LEPREE MARION",
+      "ORTENGREN SUZAN",
+      "..."
+    ],
+    "grantees": [
+      "INMAN ANDREA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187787",
+    "legalFull": "Parcel 34-47-25-B4-02200.1340 | U 134 POLYNESIAN VILLAS V",
+    "lot": null,
+    "block": null,
+    "unit": "134",
+    "subdivision": "POLYNESIAN VILLAS V",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765430"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$221,500.00",
+    "grantors": [
+      "ISTVAN CAROL ANN"
+    ],
+    "grantees": [
+      "MURPHY CYNTHIA",
+      "LIVENS MICHAEL D"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187802",
+    "legalFull": "Parcel 15-45-24-44-00002.0212 U 212 TERRACE I AT RIVERWALK BLDG 2",
+    "lot": null,
+    "block": null,
+    "unit": "212",
+    "subdivision": "TERRACE I AT RIVERWALK",
+    "phase": "2",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765453"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$613,000.00",
+    "grantors": [
+      "BRAKAJ XHEVAIR",
+      "BRAKAJ MARSELA SALIAJ"
+    ],
+    "grantees": [
+      "MEADOWS STACEY ILENE",
+      "MEADOWS BRIAN LEE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187810",
+    "legalFull": "Parcel 02-48-26-B2-08000.0200 L 20 SEASONS AT BONITA",
+    "lot": "20",
+    "block": null,
+    "unit": null,
+    "subdivision": "SEASONS AT BONITA",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765464"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "KOPLEWSKY ALEXANDRE",
+      "BIELIKOVA LUBICA"
+    ],
+    "grantees": [
+      "KREMNIC PROPERTIES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187814",
+    "legalFull": "Parcel 43-23-C3-04087.0120 L 12,13 BLK 4087 U 57 CAPE CORAL",
+    "lot": "12,13",
+    "block": "4087",
+    "unit": "57",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765396"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$5,000.00",
+    "grantors": [
+      "HEDGER KAY L",
+      "HEDGER ROBERT WILLIS ESTATE",
+      "..."
+    ],
+    "grantees": [
+      "SCHETROMPF LISHA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187822",
+    "legalFull": "Parcel 30-46-23-T2-01201.00A0 SANIBEL BEACH CLUB BLDG 8 WK 14 PARCEL B",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": "SANIBEL BEACH CLUB",
+    "phase": "8",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765399"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "MAYLOR FAY CONSTANCE"
+    ],
+    "grantees": [
+      "BURKE EMMA MORRIS"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187831",
+    "legalFull": "Parcel 25-44-27-L1-12046.0100 L 10 BLK 46 U 12 LEHIGH ACRES",
+    "lot": "10",
+    "block": "46",
+    "unit": "12",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765426"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "MAYLOR FAY",
+      "MAYLOR LOUIS"
+    ],
+    "grantees": [
+      "MAYLOR FAY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187832",
+    "legalFull": "Parcel 25-44-27-L4-06021.0090 L 9 BLK 21 U 6 LEHIGH ACRES",
+    "lot": "9",
+    "block": "21",
+    "unit": "6",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765425"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1,225,000.00",
+    "grantors": [
+      "KOENES MICHAEL E",
+      "KOENES MAXINE D",
+      "..."
+    ],
+    "grantees": [
+      "BEATY CHRISTINE L TRUSTEE",
+      "BEATY DANIEL S TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187834",
+    "legalFull": "Parcel 35-46-22-T1-00205.2050 | U 205 KING'S CROWN BLDG 5",
+    "lot": null,
+    "block": null,
+    "unit": "205",
+    "subdivision": "KING'S CROWN",
+    "phase": "5",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765485"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "TUELL MICHAEL WALKER",
+      "TUELL NANCY ELIZABETH",
+      "..."
+    ],
+    "grantees": [
+      "TUELL LIVING TRUST",
+      "TUELL NANCY ELIZABETH TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187838",
+    "legalFull": "L 42, 43 BLK 425 U 15 CAPE CORAL | Parcel 06-45-24-C1-00425.0420",
+    "lot": "42, 43",
+    "block": "425",
+    "unit": "15",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765424"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1,075,000.00",
+    "grantors": [
+      "DEPOMBO APRIL M",
+      "DEPOMBO CAROLINA"
+    ],
+    "grantees": [
+      "KORONKA DONALD J",
+      "KORONKA ELENORA L"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187847",
+    "legalFull": "Parcel 27-46-22-T4-00500.0880 L 88-88A LAKE MUREX",
+    "lot": "88-88A",
+    "block": null,
+    "unit": null,
+    "subdivision": "LAKE MUREX",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765494"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "HRONCICH THERESA E"
+    ],
+    "grantees": [
+      "HRONCICH THERESA E",
+      "HRONCICH ANTHONY L"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187857",
+    "legalFull": "Parcel 18-44-24-C4-00732.1300 U 130-A COURTYARDS OF CAPE CORAL PH II BLDG 1032",
+    "lot": null,
+    "block": null,
+    "unit": "130-A",
+    "subdivision": "COURTYARDS OF CAPE CORAL",
+    "phase": "1032",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765509"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$115,500.00",
+    "grantors": [
+      "RAMIREZ ROBERTO",
+      "RAMIREZ EVARISTA"
+    ],
+    "grantees": [
+      "HUDSON JAMES",
+      "HUDSON MARIA TERESA NAVEA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187861",
+    "legalFull": "Parcel 30-44-24-C3-00100.1100 U 110 BAHIA CONDOMINIUM",
+    "lot": null,
+    "block": null,
+    "unit": "110",
+    "subdivision": "BAHIA CONDOMINIUM",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765510"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1,300,000.00",
+    "grantors": [
+      "HARDY DORIS DAVEY",
+      "HARDY DORIS DAVEY TRUSTEE",
+      "..."
+    ],
+    "grantees": [
+      "WHITMORE BRADLEY RANDAL",
+      "WHITMORE BONNIE LYN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187875",
+    "legalFull": "L 12 SEC 12 TWN 46 SOUTH RNG 21 EAST | Parcel 12-46-21-T4-00010.0170",
+    "lot": "12",
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "12",
+    "township": "46 SOUTH",
+    "range": "21 EAST",
+    "internalDocId": "19765516"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$159,000.00",
+    "grantors": [
+      "JUNCKER LAURA ANN",
+      "JUNCKER LAURA ANN TRUSTEE",
+      "..."
+    ],
+    "grantees": [
+      "FL VACATION TYME LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187893",
+    "legalFull": "Parcel 02-46-26-31-20000.0072 U 724 DAVIS LAKE CONDOMINIUM",
+    "lot": null,
+    "block": null,
+    "unit": "724",
+    "subdivision": "DAVIS LAKE CONDOMINIUM",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765535"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$294,500.00",
+    "grantors": [
+      "MEDINA EUDDY"
+    ],
+    "grantees": [
+      "MERCY ADELINE MARCELIN",
+      "MARCELIN BILLY W"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187901",
+    "legalFull": "Parcel 24-44-26-L2-07055.0030 L 3 BLK 55 U 7 LEHIGH ACRES",
+    "lot": "3",
+    "block": "55",
+    "unit": "7",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765493"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1,470,000.00",
+    "grantors": [
+      "GOULAIT DAVID J K",
+      "GOULAIT PATRICIA M",
+      "..."
+    ],
+    "grantees": [
+      "LYSKOWSKI ROMAN",
+      "VANAVER ELISSA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187927",
+    "legalFull": "L 33 BUTTERKNIFE | Parcel 36-46-22-T1-00600.0330",
+    "lot": "33",
+    "block": null,
+    "unit": null,
+    "subdivision": "BUTTERKNIFE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765548"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "LATHAM JUDITH A"
+    ],
+    "grantees": [
+      "LATHAM JUDITH A"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187936",
+    "legalFull": "L 37 U 1 COUNTRY LAKES | Parcel 10-44-25-04-00000.0370",
+    "lot": "37",
+    "block": null,
+    "unit": "1",
+    "subdivision": "COUNTRY LAKES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765565"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$440,000.00",
+    "grantors": [
+      "QUINN ELLEN C"
+    ],
+    "grantees": [
+      "HANLEY STEPHANIE",
+      "SHARFNAKER TYLER",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187950",
+    "legalFull": "Parcel 16-44-24-15-00000.0660 L 66 U 1 LOCHMOOR",
+    "lot": "66",
+    "block": null,
+    "unit": "1",
+    "subdivision": "LOCHMOOR",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766026"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$0.00",
+    "grantors": [
+      "HAMAN MICHAEL D TRUSTEE",
+      "MICHAEL C HAMAN TRUST"
+    ],
+    "grantees": [
+      "HAMAN MICHAEL D",
+      "HAMAN STACY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187957",
+    "legalFull": "Parcel 18-44-23-C3-05340.0230 L 23, 24 BLK 5340 U 58 CAPE CORAL",
+    "lot": "23, 24",
+    "block": "5340",
+    "unit": "58",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765306"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$96,500.00",
+    "grantors": [
+      "JFK  and  ASSOCIATES INC",
+      "JFK ASSOCIATES INC"
+    ],
+    "grantees": [
+      "CHESTERFIELD KYRAN MAHER",
+      "CHESTERFIELD PATRICIA ANN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187961",
+    "legalFull": "L 16, 17 BLK 1532 U 17 CAPE CORAL | Parcel 08-44-24-C4-01532.0160",
+    "lot": "16, 17",
+    "block": "1532",
+    "unit": "17",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765584"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "ODORIZZI JOAN"
+    ],
+    "grantees": [
+      "CHESTERFIELD KYRAN MAHER",
+      "CHESTERFIELD PATRICIA ANN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187962",
+    "legalFull": "Parcel 08-44-24-C4-01532.0160 L 16,17 BLK 1532 U 17 CAPE CORAL",
+    "lot": "16,17",
+    "block": "1532",
+    "unit": "17",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765585"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$455,000.00",
+    "grantors": [
+      "MOHL JANINE VITRAY",
+      "MOHL FAMILY LIVING TRUST",
+      "..."
+    ],
+    "grantees": [
+      "BRADFORD MORGAN N",
+      "BRADFORD LYN DARLENE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187965",
+    "legalFull": "L 43, 44 BLK 482 U 15 CAPE CORAL SUBDIVISION | Parcel 01-45-23-C3-00482.0430",
+    "lot": "43, 44",
+    "block": "482",
+    "unit": "15",
+    "subdivision": "CAPE CORAL SUBDIVISION",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765580"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$42,000.00",
+    "grantors": [
+      "SGV LOTS LLC"
+    ],
+    "grantees": [
+      "CAH SWFL LAND HOLDINGS LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187969",
+    "legalFull": "L 31, 32 BLK 2767 U 40 CAPE CORAL | Parcel 23-43-23-C3-02767.0310",
+    "lot": "31, 32",
+    "block": "2767",
+    "unit": "40",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765595"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "PINA JOANNE"
+    ],
+    "grantees": [
+      "PINA JOANNE",
+      "TORRES CARLOS LUIS"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187971",
+    "legalFull": "L 55, 56 BLK 3843 U 53 CAPE CORAL",
+    "lot": "55, 56",
+    "block": "3843",
+    "unit": "53",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766665"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1,050,000.00",
+    "grantors": [
+      "BOND ROBERT DENNIS"
+    ],
+    "grantees": [
+      "HEINS ERIC C",
+      "OWENS KATHERINE P"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187973",
+    "legalFull": "Parcel 22-47-25-B2-00200.7330 SAN CARLOS ESTATES TRACT 733",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": "SAN CARLOS ESTATES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19753251"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1,325,000.00",
+    "grantors": [
+      "COMMERCIAL ASSET HOLDINGS INC"
+    ],
+    "grantees": [
+      "INTEGRITY PARK LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187975",
+    "legalFull": "Parcel 14-45-24-00-00003.0050 | SEC 14 TWN 45 SOUTH RNG 24 EAST",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "14",
+    "township": "45 SOUTH",
+    "range": "24 EAST",
+    "internalDocId": "19765589"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$225,000.00",
+    "grantors": [
+      "DAHL CYNTHIA Z",
+      "DAHL CYNTHIA ZOE",
+      "..."
+    ],
+    "grantees": [
+      "BAUER LINDA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187983",
+    "legalFull": "Parcel 06-46-24-28-00000.3240 U 3240 CINNAMON COVE VILLAS IV",
+    "lot": null,
+    "block": null,
+    "unit": "3240",
+    "subdivision": "CINNAMON COVE VILLAS IV",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765604"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$0.00",
+    "grantors": [
+      "BONNER STEPHANIE"
+    ],
+    "grantees": [
+      "BONNER NATHANIEL"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187985",
+    "legalFull": "Parcel 24-44-24-P2-02719.025A L PT25-27 BLK 19 EVANS APP NO 2",
+    "lot": "PT25-27",
+    "block": "19",
+    "unit": null,
+    "subdivision": "EVANS APP NO 2",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766678"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$455,000.00",
+    "grantors": [
+      "MCMONIGLE RANDY K",
+      "MCMONIGLE STEPHANIE D"
+    ],
+    "grantees": [
+      "HALL CHARLES L",
+      "HALL LAURA A"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187989",
+    "legalFull": "Parcel 13-45-23-C4-00150.0530 L 53, 54 BLK 150 U 4 PT 2 CAPE CORAL",
+    "lot": "53, 54",
+    "block": "150",
+    "unit": "4 PT 2",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766683"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$27,000.00",
+    "grantors": [
+      "H and R DEVELOPMENT CONTACING CORP INC"
+    ],
+    "grantees": [
+      "SAVVY 5 INVESTMENTS LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187990",
+    "legalFull": "Parcel 02-45-26-L1-01003.0090 L 9 BLK 3 U 1 LEHIGH ACRES",
+    "lot": "9",
+    "block": "3",
+    "unit": "1",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765611"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$625,000.00",
+    "grantors": [
+      "PRZLOMSKI T LYNN",
+      "PRZLOMSKI REVOCABLE TRUST",
+      "..."
+    ],
+    "grantees": [
+      "LEANNAH RANDY",
+      "LEANNAH DANIELLE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187993",
+    "legalFull": "L 11, 12 BLK 1173 U 19 CAPE CORAL | Parcel 32-44-24-C3-01173.0110",
+    "lot": "11, 12",
+    "block": "1173",
+    "unit": "19",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765599"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$0.00",
+    "grantors": [
+      "PRZLOMSKI T LYNN TRUSTEE",
+      "PRZLOMSKI LYNN",
+      "..."
+    ],
+    "grantees": [
+      "LEANNAH RANDY",
+      "LEANNAH DANIELLE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187995",
+    "legalFull": "L 11, 12 BLK 1173 U 19 CAPE CORAL | Parcel 32-44-24-C3-01173.0110",
+    "lot": "11, 12",
+    "block": "1173",
+    "unit": "19",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765601"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$0.00",
+    "grantors": [
+      "PRZLOMSKI T LYNN",
+      "KNEBEL TIMOTHY",
+      "..."
+    ],
+    "grantees": [
+      "LEANNAH RANDY",
+      "LEANNAH DANIELLE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000187997",
+    "legalFull": "L 11, 12 BLK 1173 U 19 CAPE CORAL | Parcel 32-44-24-C3-01173.0110",
+    "lot": "11, 12",
+    "block": "1173",
+    "unit": "19",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765603"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$330,000.00",
+    "grantors": [
+      "CAH - SWFL LAND HOLDINGS LLC"
+    ],
+    "grantees": [
+      "DUNFORD ALEXIS",
+      "VITITOE JACOB"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188000",
+    "legalFull": "Parcel 20-43-24-C1-05647.0530 L 53,54 BLK 5647 U 85 CAPE CORAL",
+    "lot": "53,54",
+    "block": "5647",
+    "unit": "85",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765608"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$5,000.00",
+    "grantors": [
+      "HINDS EVERTON A"
+    ],
+    "grantees": [
+      "LANDIN GRAZIANO"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188005",
+    "legalFull": "Parcel 11-45-27-L1-01001.0020 L 2 BLK 1 U 1 LEHIGH ACRES",
+    "lot": "2",
+    "block": "1",
+    "unit": "1",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765618"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$355,000.00",
+    "grantors": [
+      "ROSALES KATHERI SOSA",
+      "LOPEZ MIGUEL A ROSADA"
+    ],
+    "grantees": [
+      "GOMEZ JUAN LUIS RONDON",
+      "LOPEZ CARLOS FERNANDEZ",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188006",
+    "legalFull": "Parcel 14-45-27-L2-07036.0030 L 3 BLK 36 U 7 LEHIGH ACRES",
+    "lot": "3",
+    "block": "36",
+    "unit": "7",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765612"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$475,000.00",
+    "grantors": [
+      "GROSS GORDON P",
+      "TONON JANICE"
+    ],
+    "grantees": [
+      "WORDEN TERRY L TRUSTEE",
+      "TERRY L WORDEN REVOCABLE LIVING TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188008",
+    "legalFull": "Parcel 25-44-23-C3-00933.0120 L 12,13 BLK 933 U 26 CAPE CORAL",
+    "lot": "12,13",
+    "block": "933",
+    "unit": "26",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765615"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1,060,000.00",
+    "grantors": [
+      "WALLACE TODD A",
+      "WALLACE MARGARET"
+    ],
+    "grantees": [
+      "HLAVACHEK TY",
+      "HLAVACHEK BECKY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188011",
+    "legalFull": "Parcel 10-45-23-C1-03350.0100 L 10,11 BLK 3350 U 65 CAPE CORAL",
+    "lot": "10,11",
+    "block": "3350",
+    "unit": "65",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765620"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$285,000.00",
+    "grantors": [
+      "EVANS DAVID A JR",
+      "WHITE JASMINE D"
+    ],
+    "grantees": [
+      "MACHADO SAMANTHA",
+      "AMORES LUDWIG"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188016",
+    "legalFull": "Parcel 08-44-23-C1-04024.0120 L 12,13,14 BLK 4024 U 55 CAPE CORAL",
+    "lot": "12,13,14",
+    "block": "4024",
+    "unit": "55",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765628"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$416,000.00",
+    "grantors": [
+      "DAX ENTERPRISES LLC"
+    ],
+    "grantees": [
+      "PADRON LUIS ENRIQUE DORTA",
+      "GONZALEZ ODALYS GONZALEZ"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188019",
+    "legalFull": "Parcel 16-44-23-C2-03692.0400 L 40, 41 BLK 3692 U 50 CAPE CORAL",
+    "lot": "40, 41",
+    "block": "3692",
+    "unit": "50",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766746"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$180,000.00",
+    "grantors": [
+      "MILLER TORI K",
+      "BROOKS TORI",
+      "..."
+    ],
+    "grantees": [
+      "SERRANO ARELIZ",
+      "SERRANO JENNIFER"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188022",
+    "legalFull": "Parcel 33-44-26-L2-02014.0100 L 10 BLK 14 U 2 LEHIGH ACRES",
+    "lot": "10",
+    "block": "14",
+    "unit": "2",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765630"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$420,000.00",
+    "grantors": [
+      "THEBO DIANE E",
+      "THEBO DIANE E TRUSTEE",
+      "..."
+    ],
+    "grantees": [
+      "FLAXENBURG SETH JACOB"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188025",
+    "legalFull": "Parcel 07-44-22-04-00000.0080 L 8 ISLE PINES",
+    "lot": "8",
+    "block": null,
+    "unit": null,
+    "subdivision": "ISLE PINES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765624"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$297,500.00",
+    "grantors": [
+      "ROSCITI CARL G",
+      "ROSCITI INES I",
+      "..."
+    ],
+    "grantees": [
+      "REIS LUCAS N",
+      "REIS BRUNA C"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188036",
+    "legalFull": "L 41, 42 BLK 3732 U 51 CAPE CORAL | Parcel 09-44-23-C3-03732.0410",
+    "lot": "41, 42",
+    "block": "3732",
+    "unit": "51",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765641"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$257,000.00",
+    "grantors": [
+      "OLSON BRADLEY E",
+      "OLSON BRADLEY E TRUSTEE",
+      "..."
+    ],
+    "grantees": [
+      "CONRAD JOHN",
+      "WEILER-CONRAD SHARON"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188042",
+    "legalFull": "Parcel 20-46-25-W3-14000.0206 U 206 THE PRESERVE CONDOMINIUM I AT BRECKENRIDGE",
+    "lot": null,
+    "block": null,
+    "unit": "206",
+    "subdivision": "THE PRESERVE CONDOMINIUM I AT BRECKENRIDGE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765650"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$260,000.00",
+    "grantors": [
+      "WICKERS DENISE PER REP",
+      "ALBU DENISE PER REP",
+      "..."
+    ],
+    "grantees": [
+      "WICKERS LISA ANN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188048",
+    "legalFull": "Parcel 30-43-26-02-00029.0040 L 4 BLK 29 U 2 FORT MYERS SHORES",
+    "lot": "4",
+    "block": "29",
+    "unit": "2",
+    "subdivision": "FORT MYERS SHORES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765645"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "BEVER NED ALLAN"
+    ],
+    "grantees": [
+      "BEVER NED ALLAN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188053",
+    "legalFull": "Parcel 35-46-25-E3-0100F.0150 L 15 BLK F CORKSCREW WOODLANDS PH ONE",
+    "lot": "15",
+    "block": "F",
+    "unit": null,
+    "subdivision": "CORKSCREW WOODLANDS",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765658"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$337,500.00",
+    "grantors": [
+      "SUNLIFE LAND HOLDINGS LLC"
+    ],
+    "grantees": [
+      "BELLANTONI MICHAEL JOSEPH JR",
+      "BELLANTONI BRENDA NOEMI"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188059",
+    "legalFull": "Parcel __-__-__-__-_____.__NA L 7,8 BLK 2818 U 40 CAPE CORAL",
+    "lot": "7,8",
+    "block": "2818",
+    "unit": "40",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765661"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$660,000.00",
+    "grantors": [
+      "BOSTIC TONY M",
+      "BOSTIC ANITA P"
+    ],
+    "grantees": [
+      "CEA RICHARD",
+      "SCHELL SABRINA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188076",
+    "legalFull": "Parcel 34-47-25-B1-02300.0180 L 18 EDENBRIDGE GARDENS",
+    "lot": "18",
+    "block": null,
+    "unit": null,
+    "subdivision": "EDENBRIDGE GARDENS",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765672"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$245,000.00",
+    "grantors": [
+      "GN1 INVESTING LLC"
+    ],
+    "grantees": [
+      "WACHS JUDITH GALE",
+      "WACHS RAFAEL"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188080",
+    "legalFull": "Parcel 14-44-26-L2-06047.0010 L 1 BLK 47 U 6 LEHIGH ACRES",
+    "lot": "1",
+    "block": "47",
+    "unit": "6",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765553"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$265,000.00",
+    "grantors": [
+      "TOLEVICH ALEXANDER G",
+      "TOLEVICH JEAN M"
+    ],
+    "grantees": [
+      "JOVANOVIC ZIVORAD"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188091",
+    "legalFull": "Parcel 05-45-25-P3-01633.3343 | U 3343 TERRACE II AT ROYAL GREENS BLDG 33",
+    "lot": null,
+    "block": null,
+    "unit": "3343",
+    "subdivision": "TERRACE II AT ROYAL GREENS",
+    "phase": "33",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766827"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$20,000.00",
+    "grantors": [
+      "VELAZQUEZ GUILLERMO CESAR DOMINGUEZ",
+      "GARCIA OSCAR ALEJANDRO PEREZ"
+    ],
+    "grantees": [
+      "GARCIA OSCAR ALEJANDRO PEREZ"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188099",
+    "legalFull": "Parcel 25-45-27-L1-05025.0140 L 15 BLK 25 U 5 LEHIGH ACRES",
+    "lot": "15",
+    "block": "25",
+    "unit": "5",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766840"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "GARCIA OSCAR ALEJANDRO PEREZ"
+    ],
+    "grantees": [
+      "O - T HOMES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188100",
+    "legalFull": "Parcel 12-44-27-L2-11042.012B L 12 BLK 42 U 11 LEHIGH ACRES",
+    "lot": "12",
+    "block": "42",
+    "unit": "11",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766841"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$20,000.00",
+    "grantors": [
+      "GARCIA OSCAR ALEJANDRO PEREZ",
+      "VELAZQUEZ GUILLERMO CESAR DOMINGUEZ"
+    ],
+    "grantees": [
+      "GARCIA OSCAR ALEJANDRO PEREZ"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188101",
+    "legalFull": "Parcel 25-45-27-L1-05025.0140 L 14 BLK 25 U 5 LEHIGH ACRES",
+    "lot": "14",
+    "block": "25",
+    "unit": "5",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766842"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$100,000.00",
+    "grantors": [
+      "DUGUID CONNIE",
+      "DUGUID CONSTANTINA"
+    ],
+    "grantees": [
+      "HOGAN FREDERICK J",
+      "HOGAN MARLENE F"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188104",
+    "legalFull": "Parcel __-__-__-__-_____.__NA L 1,2 BLK 1641 U 30 CAPE CORAL",
+    "lot": "1,2",
+    "block": "1641",
+    "unit": "30",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766871"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$220,000.00",
+    "grantors": [
+      "GONZALEZ ROGELIO",
+      "BRONCO RENTAL LLC",
+      "..."
+    ],
+    "grantees": [
+      "GOLDEN HARBOR PROPERTIES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188116",
+    "legalFull": "Parcel 15-45-23-C4-04525.0610 L 61, 62 BLK 4525 U 64 CAPE CORAL",
+    "lot": "61, 62",
+    "block": "4525",
+    "unit": "64",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19766991"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$390,000.00",
+    "grantors": [
+      "FIEDONCZUK ROBERT",
+      "KOWALSKI PATRICIA"
+    ],
+    "grantees": [
+      "KNODE JARED",
+      "KNODE KRISTINA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188117",
+    "legalFull": "Parcel 22-45-24-09-00016.0140 L 14 BLK 16 U 4 CYPRESS LAKE COUNTRY CLUB ESTATES",
+    "lot": "14",
+    "block": "16",
+    "unit": "4",
+    "subdivision": "CYPRESS LAKE COUNTRY CLUB ESTATES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765691"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$214,999.00",
+    "grantors": [
+      "AQUABELLA DEVELOPMENT GROUP LLC"
+    ],
+    "grantees": [
+      "WOODCOCK JEFFREY TODD",
+      "WOODCOCK THERESA A"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188128",
+    "legalFull": "Parcel 06-45-27-L4-16017.1724 | U 1724 CARRIAGE HOMES II AT IBIS LANDING PH 2 BLDG 17",
+    "lot": null,
+    "block": null,
+    "unit": "1724",
+    "subdivision": "CARRIAGE HOMES II AT IBIS LANDING",
+    "phase": "17",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765700"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "SHORT CHERI L",
+      "SHORT RICHARD A",
+      "..."
+    ],
+    "grantees": [
+      "SHORT CHERI L",
+      "SHORT RICHARD A"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188139",
+    "legalFull": "Parcel 29-43-26-05-00077.0110 L 11,12 BLK 77 U 5 FORT MYERS SHORES",
+    "lot": "11,12",
+    "block": "77",
+    "unit": "5",
+    "subdivision": "FORT MYERS SHORES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765705"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "FALLEN KEMAR PETER"
+    ],
+    "grantees": [
+      "ANDREW JEANINE SOLANGE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188142",
+    "legalFull": "Parcel 14-45-27-L3-10052.0040 L 4 BLK 52 U 10 LEHIGH ACRES",
+    "lot": "4",
+    "block": "52",
+    "unit": "10",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767055"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$0.00",
+    "grantors": [
+      "MURPHY CONNIE J"
+    ],
+    "grantees": [
+      "MURPHY CONNIE J"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188150",
+    "legalFull": "L 32 AND 33 BLK 32 U 8 SAN CARLOS PARK",
+    "lot": "32 AND 33",
+    "block": "32",
+    "unit": "8",
+    "subdivision": "SAN CARLOS PARK",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767059"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$627,880.00",
+    "grantors": [
+      "LENNAR HOMES LLC"
+    ],
+    "grantees": [
+      "CROSBY JEREMY WILLIAM",
+      "WOODRING TARA ANN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188151",
+    "legalFull": "L 51 BAYSHORE RANCH | Parcel 23-43-25-L2-04000.0510",
+    "lot": "51",
+    "block": null,
+    "unit": null,
+    "subdivision": "BAYSHORE RANCH",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765714"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1.00",
+    "grantors": [
+      "LAKHANY HOLDINGS LLC",
+      "ALESSIO MICHAEL",
+      "..."
+    ],
+    "grantees": [
+      "STATE OF FLORIDA DEPARTMENT OF TRANSPORTATION"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188153",
+    "legalFull": "Parcel __-__-__-__-_____.__NA SEC 21 TWN 44S RNG 25E",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "21",
+    "township": "44S",
+    "range": "25E",
+    "internalDocId": "19766984"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$0.00",
+    "grantors": [
+      "BENSON LARRY R",
+      "BENSON REBECCA A"
+    ],
+    "grantees": [
+      "BENSON LAWRENCE R TRUSTEE",
+      "BENSON REBECCA A TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188168",
+    "legalFull": "Parcel 04-44-23-C1-03834.0310 L 31,32,33 BLK 3834 U 52 CAPE CORAL",
+    "lot": "31,32,33",
+    "block": "3834",
+    "unit": "52",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765717"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$115,000.00",
+    "grantors": [
+      "WISCHHUSEN JAMES",
+      "WISCHHUSEN SUSAN"
+    ],
+    "grantees": [
+      "SUTTON HOWARD C",
+      "SUTTON PATRICIA A"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188170",
+    "legalFull": "Parcel 23-45-24-21-00003.2150 | U 215 SEVEN LAKES BLDG 3",
+    "lot": null,
+    "block": null,
+    "unit": "215",
+    "subdivision": "SEVEN LAKES",
+    "phase": "3",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765730"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$750,000.00",
+    "grantors": [
+      "SMITH DAVID",
+      "SMITH RITA"
+    ],
+    "grantees": [
+      "PERRI WILLIAM B"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188184",
+    "legalFull": "Parcel 21-43-26-01-00004.0010 BLK 4 LANE'S SUBDIVISION OF ENGLESIDE",
+    "lot": null,
+    "block": "4",
+    "unit": null,
+    "subdivision": "LANE'S SUBDIVISION OF ENGLESIDE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765724"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$750,000.00",
+    "grantors": [
+      "PRUITT AMY",
+      "PRUITT TOMMY A SR"
+    ],
+    "grantees": [
+      "JOHN F BURKE SELF DECLARATION OF TRUST",
+      "BURKE JOHN F TRUSTEE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188186",
+    "legalFull": "L 543 BLK 17 U SIX BONITA NATIONAL | Parcel 01-48-26-B1-14017.5430",
+    "lot": "543",
+    "block": "17",
+    "unit": "SIX",
+    "subdivision": "BONITA NATIONAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765740"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "LEON LUAR CUELLAR"
+    ],
+    "grantees": [
+      "CUELLAR LEON PROPERTIES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188195",
+    "legalFull": "Parcel 02-44-27-L1-07026.0030 L 3 BLK 26 U 7 LEHIGH ACRES",
+    "lot": "3",
+    "block": "26",
+    "unit": "7",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767131"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "LEON LUAR CUELLAR"
+    ],
+    "grantees": [
+      "CUELLAR LEON PROPERTIES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188196",
+    "legalFull": "Parcel 02-44-27-L1-07026.001A L PT 1 BLK 26 U 7 LEHIGH ACRES",
+    "lot": "PT 1",
+    "block": "26",
+    "unit": "7",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767132"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "LEON LUAR CUELLAR"
+    ],
+    "grantees": [
+      "CUELLAR LEON PROPERTIES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188197",
+    "legalFull": "Parcel 12-45-27-L3-10049.0060 L 6,15 BLK 49 U 10 LEHIGH ACRES",
+    "lot": "6,15",
+    "block": "49",
+    "unit": "10",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767133"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "CUELLAR LEON PROPERTIES LLC",
+      "CUELLA LEON PROPERTIES LLC"
+    ],
+    "grantees": [
+      "CUELLAR LEON PROPERTIES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188198",
+    "legalFull": "Parcel 23-45-27-L1-06010.0270 L 27 BLK 10 U 6 LEHIGH ACRES",
+    "lot": "27",
+    "block": "10",
+    "unit": "6",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767134"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$330,000.00",
+    "grantors": [
+      "ROQUE JOSE F",
+      "ROQUE GABRIELLE E",
+      "..."
+    ],
+    "grantees": [
+      "SILVA MACEDONIO QUIROZ",
+      "MOREIRA YANEISY VALDES"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188201",
+    "legalFull": "Parcel 33-43-23-C4-03902.0340 L 34, 35 BLK 3902 U 53 CAPE CORAL",
+    "lot": "34, 35",
+    "block": "3902",
+    "unit": "53",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767128"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$1,225,000.00",
+    "grantors": [
+      "CENTRAL LINE PROPERTIES L L C"
+    ],
+    "grantees": [
+      "CURBELO PEDRO"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188205",
+    "legalFull": "Parcel 06-46-24-00-00003.0090 SEC 6 TWN 46S RNG 24E",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "6",
+    "township": "46S",
+    "range": "24E",
+    "internalDocId": "19765741"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "GLAAB STEFAN",
+      "GLAAB PETRA"
+    ],
+    "grantees": [
+      "CHARMING CAPE CORAL LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188207",
+    "legalFull": "Parcel 26-44-23-V4-03063.0120 L 12,13 BLK 3063 U 62 CAPE CORAL",
+    "lot": "12,13",
+    "block": "3063",
+    "unit": "62",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765760"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "CHRIST JEFFREY MARSHALL",
+      "CHRIST JEFF M",
+      "..."
+    ],
+    "grantees": [
+      "CHRIST JEFFREY MARSHALL TRUSTEE",
+      "MCANDLESS MEGAN MARY TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188210",
+    "legalFull": "Parcel 18-44-21-00-00004.0000 L 8 SEC 18 TWN 44 RNG 21",
+    "lot": "8",
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "18",
+    "township": "44",
+    "range": "21",
+    "internalDocId": "19765761"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$110,000.00",
+    "grantors": [
+      "TIHEN LAWRENCE D",
+      "TIHEN LAWRENCE D TRUSTEE",
+      "..."
+    ],
+    "grantees": [
+      "TRUPO JOHN ALAN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188213",
+    "legalFull": "Parcel 31-44-24-C4-00631.0200 L 20,21 BLK 631 U 21 CAPE CORAL",
+    "lot": "20,21",
+    "block": "631",
+    "unit": "21",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765756"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "CNOSSEN DONNA MARIE"
+    ],
+    "grantees": [
+      "CNOSSEN DONNA MARIE",
+      "OLINGER BARBARA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188217",
+    "legalFull": "Parcel 27-46-25-E4-04000.0080 L 8 GROVES",
+    "lot": "8",
+    "block": null,
+    "unit": null,
+    "subdivision": "GROVES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765764"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$27,000.00",
+    "grantors": [
+      "MORRISON VIRGIE BETTY"
+    ],
+    "grantees": [
+      "MARRERO HOMES BUILDERS CORP INC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188220",
+    "legalFull": "Parcel 31-43-24-C2-02153.0150 L 15,16 BLK 2153 U 32 CAPE CORAL",
+    "lot": "15,16",
+    "block": "2153",
+    "unit": "32",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765770"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$81,500.00",
+    "grantors": [
+      "BIGGS SAUNDRA"
+    ],
+    "grantees": [
+      "FRITZ RUEDIGER"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188225",
+    "legalFull": "Parcel 09-44-24-23-01421.0000 | U 1421 TROPIC TERRACE CONDOMINIUM",
+    "lot": null,
+    "block": null,
+    "unit": "1421",
+    "subdivision": "TROPIC TERRACE CONDOMINIUM",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765768"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "IWANOW BONNIE M",
+      "STEINFIELD ROY",
+      "..."
+    ],
+    "grantees": [
+      "IWANOW BONNIE M"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188231",
+    "legalFull": "Parcel 28-43-24-03-00000.2840 U 284 HORIZON VILLAGE",
+    "lot": null,
+    "block": null,
+    "unit": "284",
+    "subdivision": "HORIZON VILLAGE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765775"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$300,000.00",
+    "grantors": [
+      "KOLTON HELEN",
+      "RUIZ RENE"
+    ],
+    "grantees": [
+      "RODRIGUEZ YILIANNIS",
+      "RODRIGUEZ ALFREDO",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188232",
+    "legalFull": "L 36, 37 BLK 2526 U 36 CAPE CORAL | Parcel 36-43-23-C2-02526.0360",
+    "lot": "36, 37",
+    "block": "2526",
+    "unit": "36",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765782"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$0.00",
+    "grantors": [
+      "HILE MMICHAEL B TRUSTEE",
+      "BEVERLY JANE KITCH REVOCABLE TRUST AGREEMENT"
+    ],
+    "grantees": [
+      "HILE MICHAEL B"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188234",
+    "legalFull": "Parcel 03-46-24-13-0000H.2700 L 270 BLK H U III CROWN COLONY",
+    "lot": "270",
+    "block": "H",
+    "unit": "III",
+    "subdivision": "CROWN COLONY",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765779"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$299,000.00",
+    "grantors": [
+      "AKMAKJIAN PHILIP"
+    ],
+    "grantees": [
+      "COFFEY COLLIN WILSON",
+      "COFFEY PATRICIA LILLY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188235",
+    "legalFull": "Parcel 25-44-26-L3-11092.0010 L 1 BLK 92 U 11,12 LEHIGH ACRES",
+    "lot": "1",
+    "block": "92",
+    "unit": "11,12",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765780"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$790,000.00",
+    "grantors": [
+      "TAYLOR MORRISON OF FLORIDA INC"
+    ],
+    "grantees": [
+      "SORENSEN CHARLES M JR",
+      "SORENSEN SARAH E"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188240",
+    "legalFull": "L 779 ESPLANADE LAKE CLUB PLAT SIX | Parcel 13-46-25-L2-12000.7790",
+    "lot": "779",
+    "block": null,
+    "unit": null,
+    "subdivision": "ESPLANADE LAKE CLUB PLAT SIX",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765785"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$0.00",
+    "grantors": [
+      "SACIA ANITA M TRUSTEE",
+      "JAN R AND ANITA M SACIA REVOCABLE TRUST"
+    ],
+    "grantees": [
+      "ANITA M SACIA REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188242",
+    "legalFull": "Parcel __-__-__-__-_____.____ L 30 BLK 4672 U 70 CAPE CORAL | Parcel 09-45-23-C1-04672.0290",
+    "lot": "30",
+    "block": "4672",
+    "unit": "70",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765778"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$390,000.00",
+    "grantors": [
+      "PULTE HOME COMPANY LLC"
+    ],
+    "grantees": [
+      "SPIRES WAYNE W JR TRUSTEE",
+      "SPIRES FAMILY REVOCABLE TRUST",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188250",
+    "legalFull": "Parcel 29-46-27-L1-0600D.1687 L 1687 BLK D VERDANA VILLAGE PH 3A,3B",
+    "lot": "1687",
+    "block": "D",
+    "unit": null,
+    "subdivision": "VERDANA VILLAGE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765791"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$630,000.00",
+    "grantors": [
+      "JRAK ENTERPRISE LLC"
+    ],
+    "grantees": [
+      "DEMAAR JOHN",
+      "DEMAAR JAMIE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188256",
+    "legalFull": "Parcel 33-47-25-B4-03802.2202 | U 2202 THE RESIDENCES AT BONITA VILLAGE I",
+    "lot": null,
+    "block": null,
+    "unit": "2202",
+    "subdivision": "THE RESIDENCES AT BONITA VILLAGE I",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767222"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "ESTEVEZ GLADYS A"
+    ],
+    "grantees": [
+      "ESTEVEZ JEFFREY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188259",
+    "legalFull": "L 19 BLK 78 U 10 LEHIGH ACRES SEC 29 TWN 44 SOUTH RNG 26 EAST | Parcel 29-44-26-L1-10078.0190",
+    "lot": "19",
+    "block": "78",
+    "unit": "10",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": "29",
+    "township": "44 SOUTH",
+    "range": "26 EAST",
+    "internalDocId": "19765795"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$0.00",
+    "grantors": [
+      "LEB ROBERT B TRUSTEE",
+      "LOIS LEB FIRST RESTATEMENT OF TRUST"
+    ],
+    "grantees": [
+      "PELICAN CREEK CONDO LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188261",
+    "legalFull": "Parcel 21-47-25-B1-0220A.1020 CREEKSIDE CROSSING CONDOMINIUM PH A BLDG A PARCEL 102",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": "CREEKSIDE CROSSING CONDOMINIUM",
+    "phase": "A",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765799"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$319,500.00",
+    "grantors": [
+      "J R CONSTRUCTION AND MAINTENANCE INC"
+    ],
+    "grantees": [
+      "NEAL JOANNA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188263",
+    "legalFull": "L 8 BLK 8 U 1 LEHIGH ACRES SEC 21 TWN 44 SOUTH RNG 26 EAST | Parcel 21-44-26-L4-01008.0080",
+    "lot": "8",
+    "block": "8",
+    "unit": "1",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": "21",
+    "township": "44 SOUTH",
+    "range": "26 EAST",
+    "internalDocId": "19765803"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$430,000.00",
+    "grantors": [
+      "KLB HOLDINGS LLC"
+    ],
+    "grantees": [
+      "S  and  G HOMELAND PROPERTIES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188272",
+    "legalFull": "L 8, 9 BLK 4346 U 63 CAPE CORAL | Parcel 27-44-23-C4-04346.0080",
+    "lot": "8, 9",
+    "block": "4346",
+    "unit": "63",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765812"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "BOWERS JUNE F"
+    ],
+    "grantees": [
+      "BOWERS JUNE F"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188277",
+    "legalFull": "Parcel __-__-__-__-_____.____ L 2 BLK 193 U 29 GREENBRIAR SEC 8 TWN 44 SOUTH RNG 27 EAST | Parcel 08-44-27-L1-29193.0020",
+    "lot": "2",
+    "block": "193",
+    "unit": "29",
+    "subdivision": "GREENBRIAR",
+    "phase": null,
+    "section": "8",
+    "township": "44 SOUTH",
+    "range": "27 EAST",
+    "internalDocId": "19765816"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "BOWERS JUNE F"
+    ],
+    "grantees": [
+      "BOWERS JUNE F"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188281",
+    "legalFull": "L 3 BLK 193 U 29 GREENBRIAR SEC 8 TWN 44 SOUTH RNG 27 EAST | Parcel 08-44-27-L1-29193.0030",
+    "lot": "3",
+    "block": "193",
+    "unit": "29",
+    "subdivision": "GREENBRIAR",
+    "phase": null,
+    "section": "8",
+    "township": "44 SOUTH",
+    "range": "27 EAST",
+    "internalDocId": "19765831"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$470,000.00",
+    "grantors": [
+      "MOORE ROBERT",
+      "MOORE DIANNA"
+    ],
+    "grantees": [
+      "WOODWARD DANIEL C",
+      "WOODWARD MONICA C"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188283",
+    "legalFull": "Parcel 08-44-27-L4-05020.0050 L 5 BLK 20 U 5 LEHIGH ACRES",
+    "lot": "5",
+    "block": "20",
+    "unit": "5",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765828"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$354,000.00",
+    "grantors": [
+      "H  and  R BUILDING  and  AIR CONDITIONING INC"
+    ],
+    "grantees": [
+      "AZUA ALEJANDRO ULYSSES JR"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188289",
+    "legalFull": "L 3 BLK 60 U 10 LEHIGH ACRES SEC 21 TWN 45 SOUTH RNG 27 EAST | Parcel 21-45-27-L4-10060.0030",
+    "lot": "3",
+    "block": "60",
+    "unit": "10",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": "21",
+    "township": "45 SOUTH",
+    "range": "27 EAST",
+    "internalDocId": "19765832"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$126,050.00",
+    "grantors": [
+      "MCLP ASSET COMPANY INC"
+    ],
+    "grantees": [
+      "MARTIN MATTHEW"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188292",
+    "legalFull": "L 12 BLK 80 U 8 LEHIGH ACRES SEC 1 TWN 45 SOUTH RNG 26 EAST | Parcel 01-45-26-L4-08080.0120",
+    "lot": "12",
+    "block": "80",
+    "unit": "8",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": "1",
+    "township": "45 SOUTH",
+    "range": "26 EAST",
+    "internalDocId": "19767317"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "KINZIE KATHRYN",
+      "KINZIE WALDEMAR B ESTATE"
+    ],
+    "grantees": [
+      "FOWLER CHRISTOPHER J TRUSTEE",
+      "WBK FLORIDA LAND TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188297",
+    "legalFull": "Parcel __-__-__-__-_____.____ L 3 SEC 18 TWN 44 RNG 25 | Parcel 18-44-25-P4-01001.0010",
+    "lot": "3",
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "18",
+    "township": "44",
+    "range": "25",
+    "internalDocId": "19765821"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "KINZIE KATHRYN F",
+      "KINZIE WALDEMAR B ESTATE"
+    ],
+    "grantees": [
+      "FOWLER CHRISTOPHER J TRUSTEE",
+      "WBK FLORIDA LAND TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188298",
+    "legalFull": "L 3 SEC 18 TWN 44 SOUTH RNG 25 EAST | Parcel 18-44-25-P4-00014.0000",
+    "lot": "3",
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "18",
+    "township": "44 SOUTH",
+    "range": "25 EAST",
+    "internalDocId": "19765822"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "KINZIE KATHRYN",
+      "KINZIE WALDEMAR B ESTATE"
+    ],
+    "grantees": [
+      "FOWLER CHRISTOPHER J TRUSTEE",
+      "WBK FLORIDA LAND TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188299",
+    "legalFull": "L 41, 43, 45, 47 BLK 3 EVANS ADDITION TO FORT MYERS | Parcel 13-44-24-P3-00603.0410",
+    "lot": "41, 43, 45, 47",
+    "block": "3",
+    "unit": null,
+    "subdivision": "EVANS ADDITION TO FORT MYERS",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765823"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "KINZIE KATHRYN"
+    ],
+    "grantees": [
+      "FOWLER CHRISTOPHER J TRUSTEE",
+      "WBK FLORIDA LAND TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188300",
+    "legalFull": "Parcel 18-44-25-P4-00010.0000 L GL3 SEC 18 TWN 44 RNG 25",
+    "lot": "GL3",
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "18",
+    "township": "44",
+    "range": "25",
+    "internalDocId": "19765824"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "KINZIE KATHRYN F",
+      "KINZIE WALDEMAR B ESTATE"
+    ],
+    "grantees": [
+      "FOWLER CHRISTOPHER J TRUSTEE",
+      "WBK FLORIDA LAND TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188301",
+    "legalFull": "L 3 SEC 18 TWN 44 RNG 25 EAST | Parcel 18-44-25-P4-00013.0000",
+    "lot": "3",
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "18",
+    "township": "44",
+    "range": "25 EAST",
+    "internalDocId": "19765825"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "KINZIE KATHRYN",
+      "KINZIE WALDEMAR B ESTATE",
+      "..."
+    ],
+    "grantees": [
+      "FOWLER CHRISTOPHER J TRUSTEE",
+      "WBK FLORIDA LAND TRUST",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188302",
+    "legalFull": "L 3 SEC 18 TWN 44 SOUTH RNG 25 EAST | Parcel 18-44-25-P4-01001.0020",
+    "lot": "3",
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": "18",
+    "township": "44 SOUTH",
+    "range": "25 EAST",
+    "internalDocId": "19765826"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$630,000.00",
+    "grantors": [
+      "GETZY KAREN M",
+      "GETZY DAVID M"
+    ],
+    "grantees": [
+      "MILLER BILLIE LOU"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188306",
+    "legalFull": "Parcel 25-46-22-T1-00500.0040 L 4 MITZI",
+    "lot": "4",
+    "block": null,
+    "unit": null,
+    "subdivision": "MITZI",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767334"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "PRICE MATTHEW GREGORY"
+    ],
+    "grantees": [
+      "PRICE MATTHEW GREGORY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188307",
+    "legalFull": "Parcel 36-45-24-10-00007.0302 | U 302 JONATHAN'S BAY CONDOMINIUM PH 7",
+    "lot": null,
+    "block": null,
+    "unit": "302",
+    "subdivision": "JONATHAN'S BAY CONDOMINIUM",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765848"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$449,500.00",
+    "grantors": [
+      "CHIARADIO DEANNA M"
+    ],
+    "grantees": [
+      "TOSCANO FRANK"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188308",
+    "legalFull": "Parcel 32-44-24-C2-01211.0020 L 2,3,4 BLK 1211 U 19 CAPE CORAL",
+    "lot": "2,3,4",
+    "block": "1211",
+    "unit": "19",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765849"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "MACILLON HENNCY",
+      "MACILLON JULENNE"
+    ],
+    "grantees": [
+      "HENNCY  and  JULENNE MACILLON JOINT REVOCABLE TRUST"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188309",
+    "legalFull": "L 32, 33 BLK 2430 U 34 CAPE CORAL | Parcel 01-44-23-C2-02430.0320",
+    "lot": "32, 33",
+    "block": "2430",
+    "unit": "34",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765845"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$120,000.00",
+    "grantors": [
+      "DAHAN NATHALIE PER REP",
+      "ROMANO ABRAHAM ESTATE"
+    ],
+    "grantees": [
+      "REVITALIZE HOMES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188317",
+    "legalFull": "L 3, 4 BLK 1899 U 45 PART 1 CAPE CORAL | Parcel 35-44-23-C4-01899.0030",
+    "lot": "3, 4",
+    "block": "1899",
+    "unit": "45 PART 1",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765844"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$520,000.00",
+    "grantors": [
+      "JEC PROPERTIES LLC"
+    ],
+    "grantees": [
+      "HABERMAN MICHAEL REUBEN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188319",
+    "legalFull": "L 7 DEVONWOOD PRESERVE | Parcel 36-45-24-L4-12000.0070",
+    "lot": "7",
+    "block": null,
+    "unit": null,
+    "subdivision": "DEVONWOOD PRESERVE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767355"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$18,000.00",
+    "grantors": [
+      "WEDDING DENNIS",
+      "WEDDING PATRICIA VASCONES"
+    ],
+    "grantees": [
+      "VASCONES PATRICIA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188321",
+    "legalFull": "Parcel 35-43-23-C3-02702-0270 L 27,28 BLK 2702 U 39 CAPE CORAL",
+    "lot": "27,28",
+    "block": "2702",
+    "unit": "39",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767358"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$395,000.00",
+    "grantors": [
+      "SUTTER SCOTT",
+      "SUTTER ADELE"
+    ],
+    "grantees": [
+      "CRUZ DON LOUIS",
+      "CRUZ TREVA ETHELEEN",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188323",
+    "legalFull": "L 42 BLK A U THREE BELLA TERRA | Parcel 29-46-26-E2-0500A.0420",
+    "lot": "42",
+    "block": "A",
+    "unit": "THREE",
+    "subdivision": "BELLA TERRA",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765853"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$589,900.00",
+    "grantors": [
+      "SANDERS ERNEST JR",
+      "SANDERS MARY"
+    ],
+    "grantees": [
+      "CARR CHRISTOPHER REINHOLD",
+      "CARR MARY KATHERINE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188328",
+    "legalFull": "L 978 BLK E PLACE AT CORKSCREW PH 2-A | Parcel 24-46-26-L3-0600E.9780",
+    "lot": "978",
+    "block": "E",
+    "unit": null,
+    "subdivision": "PLACE AT CORKSCREW",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765858"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "WISE TRAVIS D"
+    ],
+    "grantees": [
+      "WISE INVESTMENT CAPITAL LLC - PROTECTED SERIES 1"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188333",
+    "legalFull": "Parcel 16-45-24-34-0000E.1060 U 203 CENTRAL PARK SOUTH FOUR BLDG Q",
+    "lot": null,
+    "block": null,
+    "unit": "203",
+    "subdivision": "CENTRAL PARK SOUTH FOUR",
+    "phase": "Q",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765861"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "PIERONI BRYAN",
+      "PIERONI JOLEEN D",
+      "..."
+    ],
+    "grantees": [
+      "PIERONI BRYAN D TRUSTEE",
+      "PIERONI JOLEEN J TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188336",
+    "legalFull": "Parcel 10-47-25-E4-16023-2301 | U 2301 WINDING STREAM SECTION I PH 3 BLDG 23",
+    "lot": null,
+    "block": null,
+    "unit": "2301",
+    "subdivision": "WINDING STREAM SECTION I",
+    "phase": "23",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765854"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$19,000.00",
+    "grantors": [
+      "APORTELA MEILAN"
+    ],
+    "grantees": [
+      "LUCEN CHAVEZ JOSE RICARDO",
+      "LUCEN CHAVEZ JESUS RODOLFO"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188346",
+    "legalFull": "Parcel 36-44-26-L4-05036.0030 L 3 BLK 36 U 5 LEHIGH ACRES",
+    "lot": "3",
+    "block": "36",
+    "unit": "5",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767287"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$2,250,000.00",
+    "grantors": [
+      "HUSAK CHARLES A",
+      "HUSAK CHARLES",
+      "..."
+    ],
+    "grantees": [
+      "CUNNOUDA LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188359",
+    "legalFull": "L 69, 70 BLK 1137 U 23 CAPE CORAL | Parcel 13-44-23-C3-01137.0690",
+    "lot": "69, 70",
+    "block": "1137",
+    "unit": "23",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765882"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$345,000.00",
+    "grantors": [
+      "FREGLETTE MICHAEL"
+    ],
+    "grantees": [
+      "PANTOJO IVAN PARRAZALES",
+      "DUBUC ELIZABETH VILLALOBOS"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188360",
+    "legalFull": "Parcel 22-46-25-E4-11000.4080 L 408 RESERVE AT ESTERO PH 2",
+    "lot": "408",
+    "block": null,
+    "unit": null,
+    "subdivision": "RESERVE AT ESTERO",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765878"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$26,000.00",
+    "grantors": [
+      "MARTINEZ VICTOR M",
+      "PIORNO DIANA SUAREZ"
+    ],
+    "grantees": [
+      "MARTINEZ VICTOR M"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188364",
+    "legalFull": "Parcel 25-43-23-C1-02301.0220",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19767427"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$49,000.00",
+    "grantors": [
+      "BAILEY DONNA LEE",
+      "MARTIN LESTER L"
+    ],
+    "grantees": [
+      "COASTON HOMES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188366",
+    "legalFull": "Parcel __-__-__-__-_____.____ L 13, 14 BLK 102 U 11 LEHIGH ACRES | Parcel 35-44-26-L3-11102.0130",
+    "lot": "13, 14",
+    "block": "102",
+    "unit": "11",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765890"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$41,000.00",
+    "grantors": [
+      "DREES NANCY",
+      "DREES DAVID"
+    ],
+    "grantees": [
+      "COASTON HOMES LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188369",
+    "legalFull": "L 5 BLK 5657 U 85 CAPE CORAL | Parcel 20-43-24-C205657.0050",
+    "lot": "5",
+    "block": "5657",
+    "unit": "85",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765893"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$289,999.00",
+    "grantors": [
+      "D R HORTON INC"
+    ],
+    "grantees": [
+      "TARIRA DANIEL"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188370",
+    "legalFull": "Parcel 01-44-26-L4-08078.0180",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765883"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "BH HOMES USA LLC"
+    ],
+    "grantees": [
+      "GUILLEN DENISSE IBARRA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188374",
+    "legalFull": "L 8 BLK 27 U 5 LEHIGH ACRES SEC 12 TWN 45 SOUTH RNG 27 EAST | Parcel 12-45-27-L1-05027.0080",
+    "lot": "8",
+    "block": "27",
+    "unit": "5",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": "12",
+    "township": "45 SOUTH",
+    "range": "27 EAST",
+    "internalDocId": "19765896"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$326,999.00",
+    "grantors": [
+      "D R HORTON INC"
+    ],
+    "grantees": [
+      "BATEMAN VICTORIA LEE",
+      "STEVENS LISA MICHELLE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188375",
+    "legalFull": "Parcel 03-45-23-C1-03262.0350 L 35,36 BLK 3262 U 66 CAPE CORAL",
+    "lot": "35,36",
+    "block": "3262",
+    "unit": "66",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765892"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$265,000.00",
+    "grantors": [
+      "MCH SFR PROPERTY OWNER 1B LLC"
+    ],
+    "grantees": [
+      "ARELLANO JAMIE MARTINEZ",
+      "MARTINEZ IRMA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188377",
+    "legalFull": "L 58 BLK 17 U 2 LEHIGH ACRES SEC 24 TWN 45 SOUTH RNG 27 EAST | Parcel 24-45-27-L1-02017.0580",
+    "lot": "58",
+    "block": "17",
+    "unit": "2",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": "24",
+    "township": "45 SOUTH",
+    "range": "27 EAST",
+    "internalDocId": "19765885"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "DEROY LANDA"
+    ],
+    "grantees": [
+      "ALEXIS VIERGENIE GERARD"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188381",
+    "legalFull": "Parcel 34-44-26-05-00040.0030 | Parcel 34-44-26-05-00040.0030 L 3 BLK 40 U 5 LEHIGH ACRES SEC 34 TWN 44 SOUTH RNG 26 EAST",
+    "lot": "3",
+    "block": "40",
+    "unit": "5",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": "34",
+    "township": "44 SOUTH",
+    "range": "26 EAST",
+    "internalDocId": "19767460"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$440,000.00",
+    "grantors": [
+      "LENNAR HOMES LLC"
+    ],
+    "grantees": [
+      "RIGNEY ROBERT ERWIN JR",
+      "RIGNEY SARAH ANN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188383",
+    "legalFull": "L 48 BAYSHORE RANCH | Parcel 23-43-25-L2-04000.0480",
+    "lot": "48",
+    "block": null,
+    "unit": null,
+    "subdivision": "BAYSHORE RANCH",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765903"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$100,000.00",
+    "grantors": [
+      "ROTONDI DAN"
+    ],
+    "grantees": [
+      "SAMARTINE GIORGIO",
+      "SAMARTINE VINCENZA",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188389",
+    "legalFull": "Parcel 05-48-26-B2-00719.1902 | U 1902 WATERFORD V",
+    "lot": null,
+    "block": null,
+    "unit": "1902",
+    "subdivision": "WATERFORD V",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765905"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$295,000.00",
+    "grantors": [
+      "FLORIDA SL LLC"
+    ],
+    "grantees": [
+      "ALONSO PEREZ JONATHAN JESUS"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188413",
+    "legalFull": "L 10 BLK 14 U 3 PLAT OF SOUTHWOOD SEC 7 TWN 45 SOUTH RNG 27 EAST | Parcel 07-45-27-L2-03014.0100",
+    "lot": "10",
+    "block": "14",
+    "unit": "3",
+    "subdivision": "PLAT OF SOUTHWOOD",
+    "phase": null,
+    "section": "7",
+    "township": "45 SOUTH",
+    "range": "27 EAST",
+    "internalDocId": "19765935"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "KAYE ROBERT LAWRENCE"
+    ],
+    "grantees": [
+      "KAYE REVOCABLE TRUST",
+      "KAYE ROBERT LAWRENCE TRUSTEE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188416",
+    "legalFull": "L 39 BLK E PALOMA PH THREE | Parcel 25-47-25-B1-0260E.0390",
+    "lot": "39",
+    "block": "E",
+    "unit": null,
+    "subdivision": "PALOMA",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765937"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$360,000.00",
+    "grantors": [
+      "VERGARA HUMBERTO CARLOS RAMOS",
+      "MENDOZA NATALIA GONZALEZ",
+      "..."
+    ],
+    "grantees": [
+      "JONES KRISTIN GITTLEMAN"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188418",
+    "legalFull": "L 13, 14 BLK 2706 U 39 CAPE CORAL | Parcel 35-43-23-C4-02706.0130",
+    "lot": "13, 14",
+    "block": "2706",
+    "unit": "39",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765928"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "LISS DONALD J",
+      "LISS VIRGINIA M"
+    ],
+    "grantees": [
+      "LISS DONALD J TRUSTEE",
+      "LISS VIRGINIA M TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188426",
+    "legalFull": "Parcel __-__-__-__-_____.__NA BRIARCLIFF FARMS TRACT W",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": "BRIARCLIFF FARMS",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765908"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$365,000.00",
+    "grantors": [
+      "IRWIN KENNETH MARK JR",
+      "RISTEVSKI RISTE",
+      "..."
+    ],
+    "grantees": [
+      "TAFT BRADLEY M",
+      "ORTIZ VERONICA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188429",
+    "legalFull": "Parcel 11-45-23-C1-01726.0570 L 57,58 BLK 1726 U 44 CAPE CORAL",
+    "lot": "57,58",
+    "block": "1726",
+    "unit": "44",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765947"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$467,400.00",
+    "grantors": [
+      "CLICKDIRECT STR 1 LLC"
+    ],
+    "grantees": [
+      "CAPOTE CLAUDIO",
+      "CAPOTE DANIELA CARDENAS"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188433",
+    "legalFull": "L 3, 4 BLK 5142 U 80 CAPE CORAL | Parcel __-__-__-__-_____.__NA",
+    "lot": "3, 4",
+    "block": "5142",
+    "unit": "80",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765944"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$100.00",
+    "grantors": [
+      "CM.SK SERVICE LLC"
+    ],
+    "grantees": [
+      "CAH - SWFL LAND HOLDINGS LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188435",
+    "legalFull": "L 33, 34 BLK 2854 U 41 CAPE CORAL | Parcel 03-44-23-C3-02854.0330",
+    "lot": "33, 34",
+    "block": "2854",
+    "unit": "41",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765951"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$210,000.00",
+    "grantors": [
+      "KOVALL JOANN",
+      "CLARK CATHERINE J"
+    ],
+    "grantees": [
+      "CICCONE KIMBERLY"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188437",
+    "legalFull": "L 28 BLK 8014 BELLA VIDA | Parcel 21-43-24-C4-00114.0280",
+    "lot": "28",
+    "block": "8014",
+    "unit": null,
+    "subdivision": "BELLA VIDA",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765956"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$495,000.00",
+    "grantors": [
+      "LAND TRUST COMPANY OF FLORIDA",
+      "LAND TRUST COMPANY"
+    ],
+    "grantees": [
+      "DUMMITT JOSEPH F"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188439",
+    "legalFull": "Parcel 01-48-26-B2-23073.7304 | U 7304 COACH HOMES V AT BONITA NATIONAL PH 16 BLDG 73",
+    "lot": null,
+    "block": null,
+    "unit": "7304",
+    "subdivision": "COACH HOMES V AT BONITA NATIONAL",
+    "phase": "73",
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765952"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$10.00",
+    "grantors": [
+      "HARRIS JAMES E JR",
+      "HARRIS DIANE"
+    ],
+    "grantees": [
+      "HARRIS JAMES E JR"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188440",
+    "legalFull": "Parcel 06-46-24-30-00002.2025",
+    "lot": null,
+    "block": null,
+    "unit": null,
+    "subdivision": null,
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765955"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$3,600,000.00",
+    "grantors": [
+      "WILLIAMS SQUARED INC"
+    ],
+    "grantees": [
+      "LEIDHOLDT STEPHEN C TRUSTEE",
+      "LEIDHOLDT SANDRA M TRUSTEE",
+      "..."
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188443",
+    "legalFull": "Parcel 29-45-24-16-00000.1350 L 135 U 2 PALMETTO POINT",
+    "lot": "135",
+    "block": null,
+    "unit": "2",
+    "subdivision": "PALMETTO POINT",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765959"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$55,000.00",
+    "grantors": [
+      "CAMPOS-LOPEZ YUSAIMA"
+    ],
+    "grantees": [
+      "CARLS GENERAL SERVICE LLC"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188448",
+    "legalFull": "L 14, 15, 16 BLK 2086 U 31 CAPE CORAL | Parcel 06-44-24-C2-02086.0140",
+    "lot": "14, 15, 16",
+    "block": "2086",
+    "unit": "31",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765970"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$369,999.00",
+    "grantors": [
+      "M I HOMES OF FT MYERS NAPLES LLC"
+    ],
+    "grantees": [
+      "PEREZ DENISSE",
+      "MEDINA DARWIN OBED PAZ"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188450",
+    "legalFull": "L 16 WHISPERING LAKES PH 2 | Parcel 04-45-27-L3-15000.0160",
+    "lot": "16",
+    "block": null,
+    "unit": null,
+    "subdivision": "WHISPERING LAKES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765968"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$25,000.00",
+    "grantors": [
+      "LOPEZ DAVID"
+    ],
+    "grantees": [
+      "CHANCHAVAC DOMINGO AJANEL"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188458",
+    "legalFull": "Parcel 24-44-26-L1-07058.0200 L 20 BLK 58 U 2,6,7 LEHIGH ACRES TRACT PTF",
+    "lot": "20",
+    "block": "58",
+    "unit": "2,6,7",
+    "subdivision": "LEHIGH ACRES",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765983"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$760,000.00",
+    "grantors": [
+      "POYNTER RICK E",
+      "POYNTER MARCIA A"
+    ],
+    "grantees": [
+      "PAUL J LINSTROTH REVECABLE TRUST AGREEMENT",
+      "LINSTROTH PAUL J TRUSTEE"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188459",
+    "legalFull": "L 150 VISTABLUE PH 2 | Parcel 20-46-26-L4-08000.1500",
+    "lot": "150",
+    "block": null,
+    "unit": null,
+    "subdivision": "VISTABLUE",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765984"
+  },
+  {
+    "status": "V",
+    "considerationRaw": "$135,000.00",
+    "grantors": [
+      "NODAL ALICIA"
+    ],
+    "grantees": [
+      "DOBROWOLSKI ANDREW",
+      "JANKIEWICZ URSULA"
+    ],
+    "recordDate": "07/16/2026",
+    "docType": "DEED",
+    "bookType": "O",
+    "book": null,
+    "page": "0000",
+    "clerkFileNumber": "2026000188460",
+    "legalFull": "Parcel 31-43-23-C104324.0350 L 35,36 BLK 4324 U 61 CAPE CORAL",
+    "lot": "35,36",
+    "block": "4324",
+    "unit": "61",
+    "subdivision": "CAPE CORAL",
+    "phase": null,
+    "section": null,
+    "township": null,
+    "range": null,
+    "internalDocId": "19765957"
+  }
+]

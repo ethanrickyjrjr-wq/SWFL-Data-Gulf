@@ -12,12 +12,23 @@
 
 ---
 
-# RULE 0.4 — RESEARCH FIRST (crawl4ai), THEN FIX
+# RULE 0.4 — RESEARCH FIRST (ours, THEN crawl4ai), THEN FIX
 
-**Locked 2026-06-22. No fix, no answer, no plan until you've researched the real answer.**
+**Locked 2026-06-22. Amended 07/20/2026 — our own research comes first.**
+**No fix, no answer, no plan until you've researched the real answer.**
 
-1. **Research with crawl4ai FIRST** — vendor docs, real API behavior, real best practice. Not memory.
-2. **Write findings to `SESSION_LOG.md`** so the next session inherits evidence, not guesses.
+0. **READ OUR OWN RESEARCH FIRST — `_RESEARCH/INDEX.md`.** ALL research lives in `_RESEARCH/`,
+   **GITIGNORED — it never ships, so write freely.** Consolidated there 07/20/2026 by operator
+   decree: agent-behavior, audits (was `docs/audits/`), competitor-and-strategy (was
+   `docs/steadyapi-research/`), data-and-ingest, deliverable-and-design, email-and-social,
+   private (was `_private/`), real-estate-market, voice-and-positioning. `_FABLE5/` stays put
+   and is still worth checking. We have already paid for this research and it goes unread —
+   that is the documented failure this step exists to stop. Scan the index, open anything
+   plausibly relevant, and say what you found before proposing.
+1. **Only if it isn't there, crawl4ai** — vendor docs, real API behavior, real best practice. Not memory.
+2. **Write findings to `SESSION_LOG.md`** so the next session inherits evidence, not guesses, AND
+   file the research itself under the right `_RESEARCH/` category with its line added to
+   `INDEX.md` in the same pass. Unindexed research does not exist.
 3. **Plan from evidence, then touch code.**
 
 Twin of RULE 0.5: **0.5 = read OUR files; 0.4 = research the outside answer.** Do both. crawl4ai is the ONLY web-crawl tool — never Firecrawl.
@@ -133,8 +144,15 @@ Single session / no file overlap → just work on `main`.
 
 ---
 
-# RULE 2 — THE SESSION LOOP (Check → Submit → Update)
+# RULE 2 — THE SESSION LOOP (Scratchpad → Check → Submit → Update)
 
+0. **SCRATCHPAD — `_ASSISTANT/SCRATCHPAD.md`. ALWAYS. (locked 07/20/2026.)** The moment the
+   operator raises an issue, gripe, correction, or "we already covered this," it goes in the
+   scratchpad — BEFORE you answer, before you build, before you probe. He must never have to
+   type the same thing twice because a session ended or context compacted. Read it at session
+   start next to `TODAY.md`; move items to RESOLVED with a date when they actually close.
+   This is not a substitute for a `checks` entry (see 4) — the scratchpad catches it in the
+   moment; `checks` is where a real obligation lives.
 1. **CHECK** — SessionStart prints it: `SESSION_LOG.md`, open `checks` (Supabase `public.checks`), build queue (`_AUDIT_AND_ROADMAP/build-queue.md`). Trust it; verify surprises against `git`.
 2. **SUBMIT** — commit + SESSION_LOG entry + `node scripts/safe-push.mjs`.
 3. **UPDATE** — same push: `node scripts/check.mjs close <key>` / `open <project> <key> "<label>"` / `list`. Open obligations live in `checks` — never as `⬜/✅` in plan docs.

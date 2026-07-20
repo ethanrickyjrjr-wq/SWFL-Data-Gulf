@@ -150,10 +150,17 @@ data/
 # Never push to GitHub. Stays in-house.
 docs/design-reference/
 
-# docs/audits/ holds dated snapshot files (e.g. *-corridor-character-snapshot.md)
-# that are committed as diff/restore baselines. If a future audit-style file
-# carries interactive checkboxes or per-row notes, gitignore that specific
-# pattern case-by-case rather than the whole directory.
+# ── _RESEARCH/ — ALL local research, ONE folder, NEVER committed ──────────────
+# Locked 07/20/2026 by operator decree. Consolidated here in one move:
+#   docs/steadyapi-research/  -> _RESEARCH/competitor-and-strategy/  (was already ignored)
+#   docs/audits/              -> _RESEARCH/audits/                   (was TRACKED — now untracked)
+#   _private/                 -> _RESEARCH/private/                  (was already ignored)
+#   _ASSISTANT/research/      -> _RESEARCH/<category>/               (was TRACKED — now untracked)
+# _FABLE5/ deliberately NOT moved — the desk stays where it is.
+# The front door is _RESEARCH/INDEX.md; RULE 0.4 requires reading it before crawl4ai.
+# Nothing under _RESEARCH/ ships. The rules that POINT at it (CLAUDE.md, _ASSISTANT/RULES.md)
+# stay tracked — that is the one exception.
+_RESEARCH/
 
 # In-progress / uncertain plan docs — ignored until promoted or deleted
 docs/superpowers/plans/2026-05-26-corridor-broker-narrative-promotion/
@@ -212,7 +219,7 @@ _ASSISTANT/TODAY.md
 # decree 07/17/2026 (same spirit as crawl4ai: real company names + strategic analysis
 # stay off GitHub). Existing already-pushed rounds are untracked going forward but remain
 # in git history untouched — a history rewrite is a separate, much bigger ask.
-docs/steadyapi-research/
+# (moved 07/20/2026 -> _RESEARCH/competitor-and-strategy/, covered by _RESEARCH/)
 
 # designlang MCP tool — local design-audit scratch output (grade cards, tokens)
 design-extract-output/
