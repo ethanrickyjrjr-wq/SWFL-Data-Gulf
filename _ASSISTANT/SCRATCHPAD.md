@@ -212,3 +212,17 @@ one sitting; that is not the point. The point is proving the builder builds AND 
 Default spacing raised accordingly. Do not compress it back for convenience.
 Also noted, operator on the triple-sent Under Contract: "didn't look bad, to be honest, so that is
 a plus!" — the EMAIL itself is landing; the defect was delivery mechanics, not the build.
+
+### 15. applyBrand has NO server-side caller — every non-browser send is unbranded
+07/20/2026. Operator: "why would it never reach the email????" His account profile HAD a valid
+business_address the whole time; the campaign-sim emails still rendered the CAN-SPAM nudge.
+Root cause, verified by grep: `applyBrand` is called from exactly TWO places repo-wide and both are
+React CLIENT components — `components/email-lab/EmailLabGridShell.tsx` and
+`app/project/[id]/social/ProjectSocialClient.tsx`. There is NO server-side caller. The brand is
+stamped onto the doc IN THE BROWSER, after authoring, before sending. Any send path that does not
+go through the Lab canvas therefore ships house defaults: no logo, no brand colors, no agent
+identity, empty footer address. The blast route reads business_address but only to GATE the send
+(resolvePostalAddress), never to stamp the footer.
+Fixed IN THE SIM (loads user_brand_profiles + applies the same pure overlay server-side).
+⚠️ NOT fixed in the product: any future non-browser sender (scheduler worker, cron, API-driven
+send) has the same hole. Worth an operator call on whether the overlay belongs server-side.

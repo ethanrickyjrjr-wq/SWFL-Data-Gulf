@@ -479,9 +479,29 @@ const { collectAllowedUrls, lintCompiledHtml } = await import("@/lib/deliverable
 const { recordEmailSent } = await import("@/lib/email/usage");
 const { RECIPES } = await import("@/lib/deliverable/recipes");
 const { BRAND_FONTS } = await import("@/lib/brand/fonts");
+const { applyBrand } = await import("@/lib/email/brand/apply-brand");
+const { brandingToTokens } = await import("@/lib/email/brand/branding-to-tokens");
 const { createServiceRoleClient } = await import("@/utils/supabase/service-role");
 
 const db = createServiceRoleClient();
+
+/** THE ACCOUNT BRAND, loaded once. See the overlay note in runStage for why this
+ *  program had to grow a server-side brand step the product does in the browser. */
+const { data: brandRow } = await db
+  .from("user_brand_profiles")
+  .select("*")
+  .eq("user_id", UID)
+  .maybeSingle();
+const brandTokens = brandRow
+  ? brandingToTokens(brandRow as unknown as Record<string, string>)
+  : null;
+console.log(
+  brandTokens
+    ? `[sim] brand loaded — ${Object.keys(brandTokens).length} tokens ` +
+        `(address=${brandTokens.ADDRESS ? "yes" : "MISSING"} · logo=${brandTokens.LOGO_URL ? "yes" : "no"} ` +
+        `· accent=${brandTokens.ACCENT ?? brandTokens.ACCENT_COLOR ?? "—"})`
+    : `[sim] NO brand profile for this user — emails will render house defaults`,
+);
 
 /** ENGINE-OWNED URLS the compiled email legitimately links to but the DOC never names.
  *
@@ -628,7 +648,31 @@ async function runStage(index: number): Promise<StageOutcome> {
   if (!parsed.success) {
     throw new Error(`[${n}] built doc failed schema re-parse`);
   }
-  const doc = parsed.data;
+  // ── THE BRAND OVERLAY — the step this program was silently skipping ───────────
+  //
+  // Found 07/20/2026 when the operator asked why his postal address "never reached
+  // the email". It never reached it because `applyBrand` is called from exactly TWO
+  // places in the entire codebase, and both are React CLIENT components:
+  // EmailLabGridShell.tsx (the Lab canvas) and ProjectSocialClient.tsx. There is no
+  // server-side caller. In real use the brand is stamped onto the doc IN THE BROWSER,
+  // after authoring and before sending.
+  //
+  // This program never opens a browser — it calls authorDoc and sends from the command
+  // line — so every email it sent was UNBRANDED: house-default colors, no logo, no agent
+  // card identity, and an empty footer `address`, which is why the CAN-SPAM nudge
+  // rendered on all seven while the account profile HAD a valid address the whole time.
+  // The blast route reads `business_address` too, but only to GATE the send
+  // (resolvePostalAddress must find one) — it never stamps it into the footer.
+  //
+  // A simulator that skips the brand is not simulating what a user sends. Load the
+  // account brand and apply the SAME pure overlay the canvas applies, server-side.
+  // Empty-tolerant: no profile row → no tokens → applyBrand returns the doc untouched.
+  const branded = brandTokens ? applyBrand(parsed.data, brandTokens) : parsed.data;
+  const rebranded = EmailDocSchema.safeParse(branded);
+  if (!rebranded.success) {
+    throw new Error(`[${n}] brand overlay produced an INVALID doc — refusing to send`);
+  }
+  const doc = rebranded.data;
   const listing = payload.listing as { subject?: string; resolved?: boolean } | undefined;
   console.log(
     `[${n}] built · blocks=${doc.blocks.length} · subject-resolved=${listing?.resolved} ` +

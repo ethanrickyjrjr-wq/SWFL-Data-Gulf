@@ -1,3 +1,37 @@
+## 2026-07-20 (Opus 4.8 · main) — Why the postal address "never reached the email": applyBrand has no server-side caller
+
+Operator asked why his CAN-SPAM address never reached the sent emails. It was not missing — his
+`user_brand_profiles` row carried `7191 Cypress Lake Drive STE 3, Fort Myers, FL 33907` the whole
+time, and I had wrongly told him the profile was empty. Corrected same session.
+
+ROOT CAUSE, grep-verified: `applyBrand` has exactly TWO callers repo-wide and both are React CLIENT
+components — `components/email-lab/EmailLabGridShell.tsx` and
+`app/project/[id]/social/ProjectSocialClient.tsx`. There is no server-side caller. The brand is
+stamped onto the doc IN THE BROWSER, after authoring and before sending. campaign-sim calls
+`authorDoc` and sends from the command line, never opening a browser — so every email it sent was
+UNBRANDED: house-default colors, no logo, no agent identity, empty footer `address`, hence the
+CAN-SPAM nudge on all seven. The blast route reads `business_address` (route.ts:173) but only to
+GATE the send via `resolvePostalAddress`; it never stamps the footer.
+
+Fixed IN THE SIM: it now loads `user_brand_profiles` and applies the SAME pure overlay
+(`brandingToTokens` → `applyBrand`) server-side, then re-parses the schema and refuses to send an
+invalid doc. Verified: 19 brand tokens, address present, logo present, accent #3DC9C0; the rendered
+New Listing now carries the masthead, the gulf-deep/teal palette, the agent card with title + bio,
+and the real postal address — CAN-SPAM nudge count 0, footnote count 0.
+
+NOT fixed in the PRODUCT — `applybrand_no_server_side_caller` (defect, due 07/27). Any non-browser
+sender has the same hole today: the scheduler worker, any cron, any API-driven send. Needs an
+operator call on whether the overlay belongs server-side (in build-doc or the send routes) so every
+lane is branded by construction rather than by whoever happens to be holding a canvas.
+
+PROFILE BUILT OUT (operator ask). Ricky Cooper · Founder · SWFL Data Gulf · the REAL address above
+(cleaned of stray whitespace from his own row, never invented) · hello@swfldatagulf.com ·
+www.swfldatagulf.com · brand palette from the design docs as the ONE root (`--gulf-deep` #0F1D24,
+`--gulf-teal` #3DC9C0, text #1A2B33, surface-dark #152832) · Playfair/Lato · the real
+swfldatagulf.com logo mark · generated avatar · an authored bio (operator: "just use the made up
+personal info or bio, i don't care"). Phone deliberately left NULL rather than invent a number that
+would ring a real person — the only field where "make one up" is unsafe.
+
 ## 2026-07-20 (Opus 4.8 · main) — Triple-send postmortem: three concurrent senders; formula footnote killed; sim cleared
 
 Operator received "Under Contract" THREE TIMES and called out the spec-strip footnote
