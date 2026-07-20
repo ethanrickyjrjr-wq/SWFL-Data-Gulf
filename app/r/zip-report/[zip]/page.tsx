@@ -24,7 +24,8 @@ import {
 import { CitationList } from "../../../../components/CitationList";
 import type { SourceEntry } from "../../../../components/CitationList";
 import { AnswerText } from "../../../../components/answer/AnswerText";
-import { asOfFromToken } from "../../../../lib/project/as-of";
+import { asOfFromToken, asOfIsoFromToken } from "../../../../lib/project/as-of";
+import { zipReportJsonLd } from "../../../../lib/jsonld";
 import { computeZipGradient, FLOOD_GRADIENT } from "../../../../lib/map/zip-color";
 import SubscribeCapture from "../../../../components/email/SubscribeCapture";
 import { MetroAreaChart } from "../../../../components/charts";
@@ -209,6 +210,23 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
 
   // ── Freshness ─────────────────────────────────────────────────────────────
   const asOf = asOfFromToken(freshnessToken);
+
+  // ── Structured data — Dataset+FAQPage from the SAME ranked signals the page
+  // serves (verbatim displays, per-signal sources). Formatted dates only; the
+  // raw freshness token never enters markup (check jsonld_raw_freshness_token_leak).
+  const ld = zipReportJsonLd({
+    zip,
+    place: primaryPlace,
+    county: res.county_names[0] ?? null,
+    signals: ranked.map((s) => ({
+      label: s.label,
+      display: s.display,
+      sub: s.sub,
+      source: s.source,
+    })),
+    asOf,
+    asOfIso: asOfIsoFromToken(freshnessToken),
+  });
 
   // ── Metric suggestions (normalized by the ReportAi one-root at mount) ─────
   const aiMetrics: ReportAiMetric[] = [];
@@ -531,6 +549,10 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
         </div>
         <ColorLegend />
         <ReportFooter freshnessToken={freshnessToken} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+        />
       </div>
 
       <ReportAi
