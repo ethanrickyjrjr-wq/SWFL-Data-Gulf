@@ -9,6 +9,14 @@ Read at session start alongside TODAY.md.
 ⚠️ This file IS tracked by git — only `_ASSISTANT/TODAY.md` is gitignored, not the folder
 (verified 07/20/2026). Keep that in mind before writing anything here that shouldn't ship.
 
+⚠️ **Edit-append only — never Write this file whole.** As of 07/20/2026 this file is
+exempt from the edit-gate claim lock (`[coord] append_only` in the workspace
+`repolith.toml`), the same exemption SESSION_LOG.md has always had. Parallel sessions are
+never blocked from writing it — and equally, nothing stops two from writing at once. An
+Edit-append is safe: it requires an exact anchor match, so a stale read fails loudly and
+retries. A whole-file Write from a stale read is the one way to clobber another session's
+entry. Don't do it.
+
 ---
 
 ## OPEN — raised 07/20/2026, not yet resolved
@@ -159,6 +167,29 @@ deliberately.
 ---
 
 ## RESOLVED
+
+**07/20/2026 — scratchpad write contention: the exemption already existed, unused.** Operator:
+"we have session notes, so why does scratchpad ever have to have a problem with similar files
+being changed and claudes using it at the same time?" Answer: it never had to. The edit-gate
+(ws `coord/appendOnly.ts`) has always supported exempting a file from the claim lock, and its
+header comment describes this exact situation verbatim — a shared high-frequency append target
+is the worst possible fit for a whole-file exclusive claim, because independent appends don't
+conflict. SESSION_LOG.md was on that exempt list from the start, which is why it has never had
+this problem despite every session writing it. SCRATCHPAD.md was never added. That was the
+entire bug.
+
+Fix: `[coord] append_only = ["SCRATCHPAD.md"]` in the workspace `repolith.toml`. One line, no
+new mechanism, no ws source change. Verified live 07/20/2026 — the same edit that was denied at
+21:45 ("being edited by another active session") applied cleanly at 21:56, and the journal shows
+`SCRATCHPAD.md ... editing (append-only, exempt from claim gate)`.
+
+Two things worth keeping. First, the earlier proposal in this same session — per-session fragment
+files merged back into one canonical file by a hook — was wrong, and wrong in the documented way:
+it designed a new mechanism without first probing whether one existed (RULE 0.5). The operator's
+question, not the proposal, is what found the real answer. Second, the exemption genuinely does
+allow two sessions to write at once; the anchor-match on an Edit-append is what makes that safe,
+and it was observed working on a real concurrent write during this very fix. A whole-file Write
+from a stale read is the one remaining clobber path — see the header warning.
 
 **07/20/2026 — ONE gitignored research folder: `_RESEARCH/`.** Operator decree. Consolidated
 `_ASSISTANT/research/` (12 files, was tracked), `docs/audits/` (14, was tracked),

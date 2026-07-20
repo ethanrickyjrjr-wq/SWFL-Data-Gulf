@@ -1,3 +1,39 @@
+## 2026-07-20 (Opus 4.8 · main) — Scratchpad lock contention: the exemption existed all along, unused
+
+Operator: "we have session notes, so why does scratchpad ever have to have a problem with similar
+files being changed and claudes using it at the same time?" It never had to.
+
+The edit-gate already ships an append-only exemption (`ws/src/coord/appendOnly.ts`) whose header
+comment describes this situation verbatim: a shared high-frequency append target is the worst fit
+for a whole-file exclusive claim, because independent appends don't conflict. `SESSION_LOG.md` has
+been on that exempt list from the start — which is exactly why it is written by every session and
+has never once had this problem. `SCRATCHPAD.md` was never added to it. That was the whole bug.
+
+Fix: `[coord] append_only = ["SCRATCHPAD.md"]` in the workspace `repolith.toml` (operator applied
+it — the file is outside this repo and `check-project-path.mjs` correctly blocked the agent write).
+One config line. No new mechanism, no ws source change.
+
+Verified against the running code, not the diff: hooks invoke `bun run ws/src/cli.ts edit-hook`
+(TypeScript source, no stale dist in the path); `parseManifest` reads `coord.append_only`;
+`isAppendOnlyFile` gates both `commands/claim.ts:64` and `commands/bash.ts:97`. End to end — the
+identical SCRATCHPAD.md edit was DENIED at 21:45 ("being edited by another active session") and
+applied cleanly at 21:56 after the config landed, with the journal recording
+`_ASSISTANT/SCRATCHPAD.md ... editing (append-only, exempt from claim gate)`.
+
+Owned: the first proposal this session was a per-session fragment file merged back by a hook. It
+was wrong in the documented way — designing a new mechanism without probing whether one already
+existed (RULE 0.5). The operator's question found the answer; the proposal would have built a
+merge step that could silently fail, to solve a problem one config line already solved.
+
+Named the failure mode rather than discovering it later: the exemption really does permit two
+concurrent writers. An Edit-append is self-protecting (exact anchor match — a stale read fails
+loudly and retries), and that was observed working on a real concurrent write mid-fix. A whole-file
+Write from a stale read is the one clobber path; guarded by a convention line in the file header,
+which is the same exposure SESSION_LOG.md has always lived with.
+
+Unrelated but noticed: session `a43acb04` (this session's pre-compaction lineage) still holds 16
+claims and keeps heartbeating. Inert for the scratchpad now, but flagged to the operator.
+
 ## 2026-07-20 (Opus 4.8 · main) — FIX THE SITE, not the simulation: 3 real product defects closed
 
 Operator, verbatim: "FIX EVERYTHING YOU HAVE FOUND!!! WHY DO WE JUST TALK ABOOUT IT AND FIX IT IN
