@@ -1,3 +1,47 @@
+## 2026-07-20 (Opus 4.8 · main) — Drove the ACTUAL site: the flagship campaign was blocked by a window.prompt
+
+Operator, after hours of me testing a parallel command-line script: "ARE YOU SAYING YOU CAN'T TYPE
+OR SEE WHERE THAT CODE GOES TO WHEN SOMEONE TYPES IN AN ADDRESS?" He was right to force this.
+Opened www.swfldatagulf.com in a real browser for the first time this session.
+
+WHAT IS ALREADY BUILT (and what I should have found in the first ten minutes): the Email Lab's
+"From Teaser to Sold" listing campaign — one address in, five pieces out (Coming Soon · New Listing
+· Market Comps · Under Contract · Sold), each step carrying a recipe prompt + seed layout, states
+pending → built → scheduled → sent, arc defined in `PLATFORM_ARC` (lib/email/sequence/types.ts),
+armed through `POST /api/projects/[id]/sequence`. The feature the operator has been asking me to
+prove EXISTS. I built a parallel simulator instead of opening the page.
+
+TRACE (typed address → where it goes): `ListingCampaignHero.handleAddressSubmit` →
+`createListingProjectAndEnter` → `POST /api/projects {title, kind:"listing", subject_address}` →
+hard-navigate to `/project/<id>/email-lab`. That works — project 207ed528-b36 was created with the
+address. Then "Start the listing campaign" → `armArc()` → **`window.prompt(...)`** → the sequence
+POST that never fired.
+
+THE BLOCKER, FIXED: `armArc()` opened `window.prompt("Which contact list should this campaign send
+to? (audience slug)")` as the flagship feature's FIRST interaction. Browser chrome over a designed
+surface; "audience slug" is a system noun in user-facing copy; and a native modal BLOCKS THE PAGE —
+which is exactly why the renderer appeared frozen and every browser tool call timed out (screenshots
+do not capture native dialogs). Zero deliverables were created because the fetch never ran. Removed:
+arming now uses the all-contacts default. SAFE because arming SENDS NOTHING — the hero's own copy is
+"You approve every send; nothing fires on its own"; steps land pending and recipients are chosen at
+send time by the contact picker that already owns that decision. Follow-up for a real in-app
+selector: `campaign_arm_audience_picker`.
+
+ALSO FIXED: `PLATFORM_ARC`'s new-listing prompt still promised "a chart of the ZIP's home-value
+trend". That chart was killed 07/13/2026 — `recipes.ts` declares `chart: "none"` and states a prompt
+must never promise what the build won't ship. The registry copy was corrected then; the ARC copy
+drifted and kept the promise, so an armed campaign asked for a chart the recipe drops. Now
+byte-identical to `RECIPES["new-listing"].prompt`.
+
+2,658 tests green · `bunx next build` compiles.
+
+THE METHOD FAILURE, recorded because it cost a full day: asked to prove how emails SEND, I wrote a
+program that imported the builder's functions and REIMPLEMENTED the send path, then reported it
+green for hours. It was testing my copy, not the site. Each divergence I found (brand overlay is
+browser-only, address missing, house logo) I patched INSIDE the simulator, making it less faithful
+every time. Three times I reported a state I had not verified against the artifact. OPEN THE SITE
+FIRST; a parallel harness is evidence about the harness.
+
 ## 2026-07-20 (Opus 4.8 · main) — Scratchpad lock contention: the exemption existed all along, unused
 
 Operator: "we have session notes, so why does scratchpad ever have to have a problem with similar

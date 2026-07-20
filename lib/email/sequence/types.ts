@@ -52,8 +52,17 @@ export const PLATFORM_ARC: SetupStep[] = [
   {
     key: "new-listing",
     title: "New Listing",
+    // ⚠️ THIS PROMPT PROMISED A CHART THAT NO LONGER SHIPS (fixed 07/20/2026).
+    // It read "...a chart of the ZIP's home-value trend, and one honest line about
+    // where that market sits." That chart was KILLED by operator ruling 07/13/2026 —
+    // `recipes.ts` declares `chart: "none"` for new-listing ("NO CHART on a new
+    // listing. The visual IS the property.") and says outright that a prompt must
+    // never promise what the build won't ship. The registry's own copy was corrected
+    // then; THIS one drifted and kept the promise, so an armed campaign asked the
+    // builder for a chart the recipe drops. Now byte-identical to
+    // RECIPES["new-listing"].prompt — if you change one, change both.
     recipe_prompt:
-      "Build a new-listing announcement email for my listing at [[your listing address]] — key specs, price per square foot, a chart of the ZIP's home-value trend, and one honest line about where that market sits.",
+      "Build a new-listing announcement email for my listing at [[your listing address]] — key specs, price per square foot, and one honest line about the home.",
     seed_doc_id: "new-listing",
   },
   {

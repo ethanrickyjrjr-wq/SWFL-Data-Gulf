@@ -257,3 +257,25 @@ identity, empty footer address. The blast route reads business_address but only 
 Fixed IN THE SIM (loads user_brand_profiles + applies the same pure overlay server-side).
 ⚠️ NOT fixed in the product: any future non-browser sender (scheduler worker, cron, API-driven
 send) has the same hole. Worth an operator call on whether the overlay belongs server-side.
+
+### 16. The flagship campaign was blocked by a window.prompt asking for an "audience slug"
+07/20/2026. Operator drove me to the actual site after hours of me testing a parallel script.
+`armArc()` (app/project/[id]/email-lab/ProjectEmailLabClient.tsx:501) opened
+`window.prompt("Which contact list should this campaign send to? (audience slug)")` as the FIRST
+interaction of "From Teaser to Sold". Native browser dialog over our own designed surface; "audience
+slug" is a system noun in user-facing copy; and a native modal BLOCKS THE PAGE, so the campaign
+could not be armed from any scripted session and a user who hit Cancel got silence. Removed —
+arming now uses the all-contacts default, which is safe because arming SENDS NOTHING (every step
+lands pending → built → scheduled → approved, and recipients are chosen at send time by the contact
+picker). Follow-up for a real picker: `campaign_arm_audience_picker`.
+ALSO FIXED same pass: PLATFORM_ARC's new-listing prompt still promised "a chart of the ZIP's
+home-value trend" — killed by operator ruling 07/13/2026 (recipes.ts declares chart:"none" and says
+a prompt must never promise what the build won't ship). The registry copy was corrected then; the
+ARC copy drifted and kept the promise. Now byte-identical to RECIPES["new-listing"].prompt.
+
+**THE LESSON THE OPERATOR HAD TO DRAG OUT OF ME (log it, do not repeat it):** he asked to see how
+the emails actually SEND. I built a command-line program that imported the builder's functions and
+reimplemented the send path, then reported it green for hours. It was testing MY COPY, not the site.
+Every divergence I found (browser-only brand overlay, missing address, house logo) I "fixed" INSIDE
+the simulator, which made it less like the site each time. The site already had the whole feature —
+"From Teaser to Sold", five steps, real scheduling. OPEN THE SITE FIRST.

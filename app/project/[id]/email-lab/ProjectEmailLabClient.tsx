@@ -115,6 +115,9 @@ export function ProjectEmailLabClient({
   // Lifecycle arc state — the strip mutates via its own API calls and bubbles back.
   const [sequence, setSequence] = useState<ArcSequence | null>(initialSequence ?? null);
   const [arming, setArming] = useState(false);
+  /** The audience a freshly-armed campaign points at. Arming only creates the arc —
+   *  WHO each piece goes to is a per-send decision the contact picker owns. */
+  const DEFAULT_AUDIENCE_SLUG = "all-contacts";
   // Set when a save is refused because the piece is frozen (armed one-shot).
   const [frozenNote, setFrozenNote] = useState<string | null>(null);
   // The recipe's remaining [[blank]], if any (a hero arrival has none — it slices
@@ -498,11 +501,27 @@ export function ProjectEmailLabClient({
   // Arm the listing campaign (v1-minimal audience/hour pickers; the real
   // audience picker upgrade is a welcome follow-up, not a requirement).
   async function armArc() {
-    const audience = window.prompt(
-      "Which contact list should this campaign send to? (audience slug)",
-      "all-contacts",
-    );
-    if (!audience) return;
+    // NO window.prompt HERE (removed 07/20/2026, operator found it live on prod).
+    //
+    // This is the FLAGSHIP "From Teaser to Sold" campaign, and its very first
+    // interaction was `window.prompt("Which contact list should this campaign send
+    // to? (audience slug)")` — a raw browser-chrome dialog, on a designed product
+    // surface, asking the user to type a TECHNICAL IDENTIFIER blind. Three defects in
+    // one line: browser chrome over our own UI, "audience slug" is a system noun
+    // banned from user-facing copy, and a native modal BLOCKS THE PAGE — the campaign
+    // could not be started at all from a scripted or automated session, and a user who
+    // hit Cancel got silence and no campaign.
+    //
+    // Arming is SAFE without asking, because arming SENDS NOTHING: it only creates the
+    // arc. The hero's own copy is "You approve every send; nothing fires on its own,"
+    // and every step lands `pending`, then must be built, then scheduled, then sent.
+    // WHO it goes to is chosen at SEND time, by the contact picker that already owns
+    // that decision. Asking for a recipient list before a single email exists was the
+    // wrong question at the wrong moment.
+    //
+    // A real in-app audience selector on the arc is worth building
+    // (`campaign_arm_audience_picker`) — it is not worth blocking the feature on.
+    const audience = DEFAULT_AUDIENCE_SLUG;
     setArming(true);
     try {
       const res = await fetch(`/api/projects/${projectId}/sequence`, {
