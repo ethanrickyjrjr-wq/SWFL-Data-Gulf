@@ -1,3 +1,29 @@
+## 2026-07-20 (Sonnet 5 · main) — Email Lab fix set: closed the "does it actually build" gap advisor caught
+
+Follow-up to the 30-agent Email Lab fix session below. Before reporting the 10 fixes as done,
+called `advisor` (had skipped it during the fan-out itself, despite the operator's explicit
+"USE ADVISOR" instruction — owned that gap when asked). Advisor's finding: green `tsc` + green
+unit tests prove each fix correct in isolation, but nothing proved a NATURALLY TYPED prompt
+travels the whole `authorDoc` path end-to-end (extract → resolve → photo → render) and comes out
+clean — exactly the operator's original complaint, which is empirical, not structural.
+
+Checked whether that path can be proven without the browser: `new-listing.ts` (the "reference
+implementation") resolves its subject via `resolveSubjectListing` — DB-backed, no LLM — before any
+Anthropic call, and `authorListingNarrative` fails closed (`catch { return null }`) rather than
+throwing, so the structural facts (photo/price/beds/baths/sqft/zip) are fully testable offline.
+Found the recipe had ZERO test coverage despite the "reference implementation" label. Wrote
+`lib/deliverable/recipes/new-listing.test.ts` (6 tests, same offline-mock pattern as
+`open-house.test.ts`) driving `authorDoc` with a prompt phrased the way the operator actually
+typed it ("New listing announcement for <addr> — 3 bed...", not the seed template's "at <addr> —"
+which every existing sibling-recipe test used and which was never actually broken). Confirmed
+logically that the old `SUBJECT_AT` regex would NOT have matched this prompt (no "at", no reliance
+on the seed's own em-dash), so the test exercises the real regression, not a vacuous pass.
+
+Result: 6/6 pass — address resolves from natural phrasing, real photo/price/specs render, no
+chart, no wrong-ZIP leak, no truncated paragraph, and the old seed-template phrasing still works
+(no regression). Full suite: 7,939 pass / 2 fail — same two pre-existing, unrelated failures
+already logged below, no new regressions. **Still not pushed** — awaiting operator go-ahead.
+
 ## 2026-07-20 (Sonnet 5 · main) — RULE 3.5 addendum: design must name failure modes + guard before approval
 
 Operator called out the pattern directly: every guardrail on this platform has shipped reactively
