@@ -15,6 +15,7 @@ Design notes (see the plan's Task 0 — do not "fix" these back):
 
 import pathlib
 import re
+from pathlib import Path
 
 import yaml
 
@@ -312,3 +313,52 @@ def test_coverage_exempt_does_not_shadow_a_live_pipeline():
                 monitored.add(e[key])
     overlap = exempt & monitored
     assert not overlap, f"table is both monitored and coverage_exempt: {sorted(overlap)}"
+
+
+# ---------------------------------------------------------------------------
+# jobs: — the schedule catalog (spec 2026-07-20-schedule-catalog-design.md).
+# Non-ingest scheduled jobs: membership only (name/workflow/purpose), no cron
+# strings (derived by scripts/schedule-catalog.mjs), no freshness fields.
+# ---------------------------------------------------------------------------
+_JOBS_WF_DIR = Path(__file__).resolve().parents[2] / ".github" / "workflows"
+
+
+def _jobs():
+    return [e for e in (REG.get("jobs") or []) if isinstance(e, dict)]
+
+
+def test_jobs_section_exists_and_is_well_formed():
+    jobs = _jobs()
+    assert jobs, "top-level `jobs:` list is missing (schedule catalog)"
+    names = [j.get("name") for j in jobs]
+    assert len(names) == len(set(names)), f"duplicate jobs names: {names}"
+    for j in jobs:
+        assert j.get("name"), f"jobs entry needs name: {j!r}"
+        assert j.get("workflow"), f"{j.get('name')}: jobs entry needs workflow:"
+        assert j.get("purpose"), f"{j.get('name')}: jobs entry needs purpose:"
+        wf = str(j["workflow"])
+        assert wf.endswith(".yml") or wf.startswith("vercel.json#"), (
+            f"{j['name']}: workflow must be a .yml basename or vercel.json#<path>: {wf}"
+        )
+        if j.get("status") is not None:
+            assert j["status"] in ("disabled", "parked"), f"{j['name']}: bad status"
+        if j.get("scheduler") is not None:
+            assert j["scheduler"] in ("gha", "vercel"), f"{j['name']}: bad scheduler"
+        forbidden = {"cron", "cadence_days", "lane", "freshness_sla"} & set(j)
+        assert not forbidden, f"{j['name']}: derived/ingest fields forbidden in jobs: {forbidden}"
+
+
+def test_jobs_workflows_exist_and_are_not_double_registered():
+    already = set()
+    for section in ("pipelines", "not_yet_running"):
+        for e in REG.get(section) or []:
+            if isinstance(e, dict) and e.get("workflow"):
+                already.add(e["workflow"])
+    for j in _jobs():
+        wf = str(j["workflow"])
+        if wf.startswith("vercel.json#"):
+            continue
+        assert (_JOBS_WF_DIR / wf).exists(), f"{j['name']}: .github/workflows/{wf} missing"
+        assert wf not in already, (
+            f"{j['name']}: {wf} already under pipelines:/not_yet_running: — one entry per thing"
+        )
