@@ -41,3 +41,8 @@ This is the Python ingest island (dlt + DuckDB), zero TS coupling. Rules for wor
 - **Creds** in `.dlt/secrets.toml`. **Migrations** via `new Bun.SQL` (psql is NOT installed), `sslmode=require`.
 - **Deno imports** only in `supabase/functions` (not here, but don't cross them).
 - New pipeline? Start from `ingest/scaffold.py` — fix it to default incremental-aware (it's the root of the replace spread).
+- **Python version is pinned 3.12 here and at repo root (`.python-version`, both places, 07/20/2026).**
+  `crawl4ai`'s dep chain (`lxml`) has no prebuilt wheel for 3.14 — a bare `uv venv` run without the pin
+  grabs the newest installed toolchain and silently builds a broken environment. The real, working venv
+  is `ingest/.venv` (`uv venv && uv pip install -r ingest/requirements.txt`). If you ever see a `.venv`
+  at the repo root again, it's not this one — check it's pinned 3.12 before trusting it, or delete it.

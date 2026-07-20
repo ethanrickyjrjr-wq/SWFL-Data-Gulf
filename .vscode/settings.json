@@ -25,6 +25,7 @@
   "typescript.disableAutomaticTypeAcquisition": true,
   "editor.formatOnSave": false,
   "python.terminal.activateEnvironment": false,
+  "python.defaultInterpreterPath": "${workspaceFolder}/ingest/.venv/Scripts/python.exe",
   "[json]": {
     "editor.formatOnSave": false,
     "editor.defaultFormatter": null,

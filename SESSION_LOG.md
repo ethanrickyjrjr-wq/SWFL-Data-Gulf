@@ -1,3 +1,24 @@
+## 2026-07-20 (Sonnet 5 · main) — Killed the stray root `.venv` that broke ingest crawl4ai; pinned Python 3.12 both places
+
+Operator hit a broken PowerShell venv-activation prompt, traced it to a decoy: repo-root `.venv`
+(created 01:33am today, empty, pinned Python 3.14) had been silently outranking the real one
+(`ingest/.venv`, Python 3.12, `crawl4ai==0.9.0` + `lxml` correctly installed — Task 8 earlier this
+session). 3.14 has no prebuilt `lxml` wheel; the root venv was never referenced by any script,
+workflow, or doc — pure landmine, first surfaced today because nothing in the repo pinned a Python
+version, so a bare `uv venv` could silently drift to whatever's newest.
+
+Fix: deleted the empty root `.venv` (gitignored, zero packages, safe). Added `.python-version`
+(`3.12`) at repo root AND `ingest/` so this can't recur. Added a breadcrumb to `ingest/CLAUDE.md`
+pointing at `ingest/.venv` as the real one. `.vscode/settings.json` now hard-points
+`python.defaultInterpreterPath` at `ingest/.venv/Scripts/python.exe` instead of auto-detecting.
+
+Landmine hit mid-fix: a parallel session's tracked-file revert (before this entry) ate two
+uncommitted edits (`.vscode/settings.json`'s new line, the `ingest/CLAUDE.md` breadcrumb) — disk
+was reset to HEAD. Re-applied both after `advisor()` diagnosed it; the `.python-version` files and
+the `.venv` deletion survived untouched (untracked / gitignored, outside git's revert scope).
+Reminder for next time this repo has concurrent sessions: commit sooner, don't let doc-only edits
+sit uncommitted for multiple turns.
+
 ## 2026-07-20 (Sonnet 5 · main) — Morning brief: 6 of 10 close-candidates verified live (4 false positives caught), brief rewritten to plain English
 
 Operator read issue #140 raw in GitHub and had no idea what any of it meant — confirms
