@@ -226,6 +226,12 @@
       "pack": "active-listings-swfl",
       "accepted_on": "07/19/2026",
       "note": "operator decree 07/19: fold today's 04:30 UTC realtor.com sweep into the served brain before zip-report JSON-LD build — serve was one sweep behind (refined 02:29 UTC) (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29711021400",
+      "pack": "master",
+      "accepted_on": "07/19/2026",
+      "note": "operator decree 07/19: fold fresh active-listings-swfl v11 (today's sweep) into master dossier — standard no-force propagation (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
