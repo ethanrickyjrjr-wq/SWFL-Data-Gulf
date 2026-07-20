@@ -34,6 +34,14 @@ export function asOfFromToken(token: string | null | undefined): string | null {
   return p ? `${p.mo}/${p.d}/${p.y}` : null;
 }
 
+/** ISO `YYYY-MM-DD` of a freshness token's trailing date, or null — the machine-field
+ *  twin of `asOfFromToken` (Dataset.dateModified wants ISO; prose wants MM/DD/YYYY).
+ *  Same ONE parser; never hand-slice the token elsewhere. */
+export function asOfIsoFromToken(token: string | null | undefined): string | null {
+  const p = parseTokenDate(token);
+  return p ? `${p.y}-${p.mo}-${p.d}` : null;
+}
+
 /**
  * Format a raw ISO date/timestamp (`refined_at`, `metrics_verified_date`, …) as
  * MM/DD/YYYY — rule 5. The twin of `asOfFromToken` for dates that are NOT freshness

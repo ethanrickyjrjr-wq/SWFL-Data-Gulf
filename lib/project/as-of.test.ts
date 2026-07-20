@@ -1,5 +1,15 @@
 import { test, expect } from "bun:test";
-import { asOfFromToken, asOfFromIso, tokenDayKey, tokenVersion } from "./as-of";
+import { asOfFromToken, asOfFromIso, asOfIsoFromToken, tokenDayKey, tokenVersion } from "./as-of";
+
+test("asOfIsoFromToken: token trailing date → ISO YYYY-MM-DD", () => {
+  expect(asOfIsoFromToken("SWFL-7421-v10-20260719")).toBe("2026-07-19");
+});
+
+test("asOfIsoFromToken: null on missing/unparseable/impossible date", () => {
+  expect(asOfIsoFromToken(null)).toBeNull();
+  expect(asOfIsoFromToken("no-date-here")).toBeNull();
+  expect(asOfIsoFromToken("SWFL-7421-v2-20260231")).toBeNull(); // Feb 31
+});
 
 test("tokenVersion extracts the numeric refinery version (for same-day tie-breaks)", () => {
   expect(tokenVersion("SWFL-7421-v5-20260610")).toBe(5);
