@@ -1,3 +1,21 @@
+## 2026-07-20 (Sonnet 5 · main) — new reference folder: LeePA/FDOR property code lists (condo, improvement, neighborhood, RPTQC)
+
+Docs-only push (RULE 1). New `docs/reference/leepa-fdor-codes/` at operator request ("save codes
+and rules in one folder") — 4 source docs fetched (curl download + `pdftotext -layout`, crawl4ai's
+browser crawler doesn't render PDF binaries) plus a README cross-referencing them against fields
+we already pull raw and don't decode: `leepa-condominium-codes.md` (Condominium_Code_List.pdf,
+12/17/2012), `leepa-improvement-codes.md` (Improvement_Code_List.pdf, 06/01/2015 — codes 6/10/11/
+12/31/33/34/48/51/67/76/77 are the condo-improvement set), `leepa-property-neighborhood-codes.md`
+(Property_Neighborhood_Code_List.pdf, 12/13/2012 — decodes `NBRHD_CD`, already an `OUT_FIELDS`
+column in `lee_parcels`/`collier_parcels`), `fdor-rptqc-manual.md` (floridarevenue.com
+RPTQC_Manual.pdf, Oct 2025 — full rule set behind `QUAL_CD1`/`QUAL_CD2`, versus the one-line
+comment currently backing `lee_parcels/constants.py`'s `QUALIFIED_SALE_CODE = "01"`). README also
+catalogs the full LeePA Codes.aspx index (18 more lists, link-only per operator instruction) and
+flags DOR_Code_List.pdf (decodes `DOR_UC` — a statewide field already in every parcel row) as the
+highest-value next pull. Nothing wired into ingest code — reference only. NEXT: none opened; this
+is inert until someone picks up the condo/property-type classification gap on lee_parcels/
+collier_parcels.
+
 ## 2026-07-20 (Fable 5 · main) — data-roots: community-grain row added (needs-sign-off); FABLE5 desk carries Realtor.com alignment pass + One Community regrain
 
 Docs-only push (RULE 1). `docs/standards/data-roots.md`: added the missing "Community / subdivision
