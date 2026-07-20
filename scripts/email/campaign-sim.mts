@@ -488,7 +488,11 @@ async function contactIdFor(email: string): Promise<string> {
 // ONE STAGE
 // ════════════════════════════════════════════════════════════════════════════════
 
-async function runStage(index: number): Promise<void> {
+/** "sent" | "built" (dry run) | "skipped" (already sent on an earlier run).
+ *  The caller waits only after real work — see the loop's own note. */
+type StageOutcome = "sent" | "built" | "skipped";
+
+async function runStage(index: number): Promise<StageOutcome> {
   const stage = STAGES[index]!;
   const st = state.stages[index]!;
   currentStage = index; // ← the ONLY thing that drives the mocks
@@ -500,7 +504,7 @@ async function runStage(index: number): Promise<void> {
 
   if (st.sentAt && !RESEND_SENT) {
     console.log(`[${n}] already sent ${st.sentAt} — skipping (pass --resend to force)`);
-    return;
+    return "skipped";
   }
 
   // ── BUILD — the real product call. Same one the Lab's Build box fires. ──────────
@@ -599,7 +603,7 @@ async function runStage(index: number): Promise<void> {
 
   if (!SEND) {
     console.log(`[${n}] DRY RUN — not sending`);
-    return;
+    return "built";
   }
 
   // ── SEND — blast-route parity ─────────────────────────────────────────────────
@@ -652,6 +656,7 @@ async function runStage(index: number): Promise<void> {
   st.resendId = res.data?.id ?? null;
   saveState();
   console.log(`[${n}] SENT → ${TO}  ·  subject: "${stage.subject}"  ·  resend id ${st.resendId}`);
+  return "sent";
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -684,8 +689,9 @@ if (ONLY && indices.length === 0) {
 let failed = false;
 for (let n = 0; n < indices.length; n++) {
   const i = indices[n]!;
+  let outcome: StageOutcome;
   try {
-    await runStage(i);
+    outcome = await runStage(i);
   } catch (err) {
     failed = true;
     state.stages[i]!.error = err instanceof Error ? err.message : String(err);
@@ -697,9 +703,15 @@ for (let n = 0; n < indices.length; n++) {
     );
     break;
   }
-  // Wait before the NEXT stage (never after the last one).
+  // Wait before the NEXT stage — but ONLY after a real send, never after a stage
+  // we skipped because an earlier run already sent it.
+  //
+  // Caught live on the first resume (07/20/2026): the killed run had sent 3 of 7, and
+  // resuming slept the full spacing after EACH skipped stage — 12 idle minutes before
+  // the campaign reached the first email it actually had to send. A resume is a
+  // recovery path; it must catch up at once and only then fall back into cadence.
   const isLast = n === indices.length - 1;
-  if (!isLast && !NO_WAIT && SPACING_MIN > 0) {
+  if (outcome === "sent" && !isLast && !NO_WAIT && SPACING_MIN > 0) {
     console.log(`\n[sim] waiting ${SPACING_MIN} min before the next email …`);
     await Bun.sleep(SPACING_MIN * 60_000);
   }

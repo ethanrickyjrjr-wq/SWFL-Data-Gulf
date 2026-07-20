@@ -1,3 +1,25 @@
+## 2026-07-20 (Opus 4.8 · main) — Campaign simulator: 7/7 delivered; resume-path flaw found by a real mid-run kill
+
+Addendum to the entry below. The send run was KILLED mid-campaign after 3 of 7 emails (during the
+wait before stage 4), which exercised the recovery path for real on its first outing. The state
+file held exactly which stages had sent, so `--send --resume <runId>` re-entered cleanly: nothing
+double-sent, nothing lost.
+
+It also exposed a flaw a clean run would never have shown: the loop slept the full spacing after
+EVERY stage including SKIPPED ones, so resuming a half-finished campaign idled 12 minutes before
+sending the first email it actually owed. A resume is a recovery path — it must catch up at once
+and only then fall back into cadence. `runStage` now returns "sent" | "built" | "skipped" and the
+loop waits only after a real send. Fix carries the incident in its comment.
+
+FINAL: 7/7 built, 7/7 sent to hello@swfldatagulf.com, every per-stage assertion passed, every URL
+lint clean. Resend ids in runs/campaign-sim/2026-07-20-mrtmtmby/state.json. The no-invention gates
+fired unprompted on the teaser, the comps email and the sold email — the sold narrator twice tried
+to write the close figure and the sold date as prose and was dropped both times.
+
+`campaign_sim_live_verify` stays OPEN: delivery is proven (Resend accepted, ids recorded), but the
+operator has not yet eyeballed the seven in the inbox, and that reading — not a green run — is what
+this check exists for.
+
 ## 2026-07-20 (Sonnet 5 · main) — Header nav fix set: dropdown swap bug, orphaned /r/ pages, logo/pill/tagline cleanup
 
 Operator handed a screenshot of the live header with 7 verbatim gripes. Fixed all in
