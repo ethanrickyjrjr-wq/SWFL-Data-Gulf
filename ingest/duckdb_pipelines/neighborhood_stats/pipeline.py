@@ -90,15 +90,29 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    # ONE CONNECTION PER PHASE, NOT ONE FOR THE WHOLE RUN (07/20/2026).
+    # The read hauls ~604k rows, then _aggregate spends MINUTES in in-memory DuckDB while the
+    # Postgres connection sits idle. Holding it across that gap is what killed run 29719097092:
+    # the aggregation printed its result fine, then the very next statement -- the DELETE that
+    # opens the write -- died with `SSL error: unexpected eof while reading`. The transaction
+    # rolled back, so the table survived intact; the run was still a total loss.
+    # So: release the read connection BEFORE the aggregation, and open a fresh one for the
+    # write. _get_connection() already returns a new connection per call.
     conn = _get_connection()
     try:
         rows = _load_parcel_subdivision_rows(conn)
-        stats = _aggregate(rows)
-        print(f"neighborhood_stats: {len(rows)} parcel rows -> {len(stats)} (county, subdivision) groups")
-        if stats:
-            print("sample:", stats[0])
-        if args.dry_run:
-            return 0
+    finally:
+        conn.close()
+
+    stats = _aggregate(rows)
+    print(f"neighborhood_stats: {len(rows)} parcel rows -> {len(stats)} (county, subdivision) groups")
+    if stats:
+        print("sample:", stats[0])
+    if args.dry_run:
+        return 0
+
+    conn = _get_connection()
+    try:
         _replace_all(conn, stats)
         print(f"neighborhood_stats: replaced with {len(stats)} rows")
         return 0
