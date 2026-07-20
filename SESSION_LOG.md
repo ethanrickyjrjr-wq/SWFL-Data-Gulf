@@ -1,3 +1,31 @@
+## 2026-07-20 (Opus 4.8 · main) — CORRECTION: schedule-catalog test file was silently truncating the bun test suite
+
+The entry below ("Schedule catalog SHIPPED") stands, but its verification claim was incomplete. The
+final whole-build review caught what five per-task reviews could not: `scripts/schedule-catalog.test.mjs`
+shipped as a hand-rolled runner ending in a top-level `process.exit()`. `bun test` runs every
+discovered test file in ONE process, so that line terminated the whole run — and CI's Test step
+(`bun test`, ~793 files) kept reporting green while an unknown slice never executed. Proven:
+`bun test scripts/schedule-catalog.test.mjs scripts/tripwire-scan.test.mjs` ran only the first
+file's 12 checks, exit 0; tripwire-scan's 7 tests never ran. This was live on origin/main.
+
+Root cause: the plan specified modelling the file on `.claude/hooks/push-context.test.mjs`, which
+uses that same self-runner shape. That file is harmless only because `bun test` does not discover
+the `.claude/` dotdir (verified). `scripts/` IS in bun's discovery path, and schedule-catalog was
+the lone self-runner among its 7 test files — the other six all use `node:test`.
+
+Fixed in e9e8e064: converted to `node:test`, all 12 checks preserved 1:1. Verified — `bun test
+scripts/schedule-catalog.test.mjs scripts/tripwire-scan.test.mjs` now reports 19 pass / Ran 19
+tests across 2 files; `bun test scripts/*.test.mjs` 91 pass across 7 files; `node
+scripts/schedule-catalog.mjs --check` still OK at 79 surfaces, zero unregistered; broken-assertion
+sanity check fails non-zero under both runners. Same commit corrected two now-false spec claims:
+"Gate 10 imports the same workflow-scan function" (it inlines twins, pinned by a parity test) and
+the stale "24 GHA" backfill count (30 landed).
+
+Side effect worth having: because bun test now discovers the file, the REPO SWEEP runs in CI —
+which is what actually activates the backstop for registry-side deletions Gate 10 cannot see.
+Closing check `schedule_catalog_sweep_not_in_ci`. Opened `schedule_catalog_yaml_flowstyle_gap` for
+the one remaining silent-miss class: a `.yaml` (not `.yml`) workflow, or an inline flow-style
+`schedule: [{cron: ...}]`, is invisible to both the sweep and Gate 10. Zero occurrences today.
 ## 2026-07-20 (Sonnet 5 · main) — Schedule catalog SHIPPED: ONE catalog of everything scheduled (79 surfaces, zero unregistered)
 
 Operator: "one catalog would be nice." Three artifacts landed across 8 commits (2 spec-correction +
