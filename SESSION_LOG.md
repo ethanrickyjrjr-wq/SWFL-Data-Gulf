@@ -1,3 +1,20 @@
+## 2026-07-20 (Fable 5 · main) — data-roots: community-grain row added (needs-sign-off); FABLE5 desk carries Realtor.com alignment pass + One Community regrain
+
+Docs-only push (RULE 1). `docs/standards/data-roots.md`: added the missing "Community / subdivision
+grain" row to the top decision table — `neighborhood_stats` 🟢 (via `parcel_subdivision_v` ←
+`lee_parcels`+`collier_parcels`) is the ONE sanctioned root for community names/home
+counts/values, feeding communities-swfl; `community_profiles` flagged as NOT a root (empty,
+uncatalogued) with the grain trap called out (Lehigh Acres' 29,225-home row is a CITY plat
+rollup, not a community — sanity-check `home_count`). Tagged needs-sign-off like its peer rows.
+`_FABLE5/`: Realtor.com June-2026 alignment banked (operator screenshots + crawl4ai, 3 geographies
++ 4 city rows — Lehigh is the only SWFL city with rising inventory, +3.74% YoY); PMMS rate
+backdrop cleared; One Community pair REGRANDED after an operator catch (Lehigh is a city, not a
+community) to Olympia Pointe ($203,251) vs Aqualane Shores ($7,404,579, 36.4x, matched size/
+vintage); Issue 001 architecture decided as a per-city top/entry community atlas. Amenity color
+(golf/pool/HOA) has no root — flagged in both the collection note and the data-roots row; open
+check `community_profiles_empty_via_lake_mcp` covers it. NEXT: investigate whether SteadyAPI (or
+another lane) can fill amenity color — see following session entry.
+
 ## 2026-07-20 (Fable 5 · main) — weekly-read inbox review: Gmail-safe sources line, never-repeat dedupe, heat leaderboard un-blanked
 
 Operator inbox review (two near-identical emails at hello@, sources expanded): (1) Gmail strips

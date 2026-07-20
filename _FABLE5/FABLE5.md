@@ -41,10 +41,11 @@ ledger land in `runs/insiders-runs/<stamp>/`. Sends are operator commands only
 
 ## State of the desk (≤5 lines, update each visit)
 
-- 07/19/2026: 15 rows → 4 picks (Naples Bay Resort $41.25M print; APF lease adds purchase option).
-  ALL banked numbers re-verified after the 07/18–19 consolidation (ZHVI tiers/ZORI stand — now
-  INDEX-labeled; Collier subdivisions 18,426→18,400). NEW fourth leg: Lee SOH lock-in served
-  (36.71% median gap). Tape sweep done; One Community pair picked (Lehigh $244K vs Aqualane $7.4M,
-  30.3x). Collection compose-ready; historical depth + receipts closer remain. Press run → 07/19.
+- 07/19/2026 eve: Realtor.com June-2026 alignment BANKED (operator screenshots + crawl4ai) — lake
+  corroborated; Lehigh sole inventory riser +3.74% = 5th bifurcation leg; PMMS 6.55% backdrop
+  cleared; sources→closed accordion decree; charts mapped to bklit email frames. **One Community
+  pair REGRAINED (operator catch — Lehigh is a CITY, city grain only): now Olympia Pointe $203,251
+  vs Aqualane Shores $7,404,579, 36.4x, size/vintage twins — collection §8.** Historical series +
+  receipts closer remain; 3 evening news rows all skips. Press run → tonight.
 - 07/17: 6 rows → 2 picks, airports; ZORI third leg. 07/16: thesis → bifurcation; collection
   started. 07/11: first triage, luxury-diffusion candidate. 07/10: desk opened. No issue shipped.
