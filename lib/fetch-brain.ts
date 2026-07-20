@@ -99,10 +99,27 @@ export function parseTier(raw: unknown): SpeakerTier {
   throw new BrainBadTierError(raw);
 }
 
+/**
+ * Memoizes the parse-and-render pipeline (readFile → parseBrainMarkdown → speak →
+ * toDisplayBrain), which every one of ~30 call sites redoes from scratch per call.
+ * Safe with no TTL/eviction: `brains/*.md` only changes via a full redeploy (the
+ * rebuild pipeline commits + pushes to main, which bundles a fresh copy into the
+ * next deployment — see refinery/stages/4-output.mts), so a running instance's
+ * on-disk content is immutable for its whole lifetime, and the key space is closed
+ * (~42 slugs × 3 tiers × a handful of origins). A redeploy starts a fresh process
+ * with an empty Map, which is exactly when the content actually changes.
+ */
+const brainCache = new Map<string, FetchBrainResult>();
+
 export async function fetchBrain(slug: string, opts: FetchBrainOptions): Promise<FetchBrainResult> {
   if (!VALID_SLUG.test(slug)) {
     throw new BrainNotFoundError(slug);
   }
+
+  const origin = resolveOrigin(opts.origin);
+  const cacheKey = `${slug}:${opts.tier}:${origin}`;
+  const cached = brainCache.get(cacheKey);
+  if (cached) return cached;
 
   let content: string;
   try {
@@ -114,15 +131,17 @@ export async function fetchBrain(slug: string, opts: FetchBrainOptions): Promise
   const brain = parseBrainMarkdown(content);
   const text = speak(brain, {
     tier: opts.tier,
-    origin: resolveOrigin(opts.origin),
+    origin,
   });
 
-  return {
+  const result: FetchBrainResult = {
     text,
     freshness_token: brain.freshness_token,
     output: brain.output,
     display: toDisplayBrain(brain),
   };
+  brainCache.set(cacheKey, result);
+  return result;
 }
 
 /**
