@@ -15,6 +15,7 @@
 // width presets. Tier differences come from capabilitiesFor(tier), never hardcoded.
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 import { CHART_TYPE_OPTIONS, type ChartType } from "@/lib/email/reshape-chart-type";
 import { RECIPE_IDS, RECIPE_LABELS } from "@/lib/email/author-recipes";
 import type {
@@ -1322,10 +1323,15 @@ export function EmailLabGridShell({
           ? `/api/projects/${projectId}/email-media`
           : "/api/email-lab/media";
         const res = await fetch(endpoint, { method: "PUT", body: fd });
-        if (!res.ok) return null;
+        if (!res.ok) {
+          const body = (await res.json().catch(() => null)) as { error?: string } | null;
+          toast.error(body?.error ?? "Photo upload failed — try a different file.");
+          return null;
+        }
         const { url } = (await res.json()) as { url: string };
         return url;
       } catch {
+        toast.error("Photo upload failed — check your connection and try again.");
         return null;
       } finally {
         setPromotingPath(null);
