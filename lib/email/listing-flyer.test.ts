@@ -79,8 +79,12 @@ test("flyer builds THE SAMPLE'S LAYOUT — ribbon, centred address over price, o
   expect(cells.find((c) => c.label === "$/Sq Ft")?.emphasis).toBe("primary");
   expect(cells.find((c) => c.label === "Type")?.emphasis).toBe("muted");
 
-  // A DERIVED cell states its provenance where the reader can see it.
-  expect(s?.type === "stats" && s.props.footnote).toContain("Computed from list price");
+  // NO FOOTNOTE ON $/SQ FT (operator, 07/20/2026, on reading it in a real inbox). Price
+  // over square footage is the most self-evident derivation in residential real estate,
+  // and both operands sit in this very strip — spelling out the division read like a
+  // spreadsheet export, not like an agent. See specFootnote's own header for the rule
+  // that survives: a note is earned when the derivation is non-obvious or misreadable.
+  expect(s?.type === "stats" && s.props.footnote).toBeFalsy();
 
   const photo = doc.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
   expect(photo?.type === "image" && (photo.props.url ?? "")).toContain("225076926");

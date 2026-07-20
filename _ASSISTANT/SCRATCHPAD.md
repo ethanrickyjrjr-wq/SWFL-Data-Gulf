@@ -175,3 +175,32 @@ in `CLAUDE.md` RULE 0.4 as step 0 (read ours → then crawl4ai → then answer) 
 `_ASSISTANT/RULES.md` #7, which the inject-focus hook puts in front of every single prompt.
 Scratchpad landed as `CLAUDE.md` RULE 2 step 0 + RULES.md #9. Closes OPEN items 2 and 6-adjacent
 tooling; items 1, 3, 4, 5, 6, 7, 8 remain open.
+
+### 12. Campaign sim: operator received "Under Contract" THREE TIMES, not 7 distinct emails
+07/20/2026. Operator: "i only recieved under contract 3 fucking times!!!" The 7 rendered HTML files
+in runs/campaign-sim/2026-07-20-mrtmtmby/ are each distinct and each carries its OWN ribbon exactly
+once (verified by grep across all 7 files). So the defect is BETWEEN render and inbox, not in the
+build. Under investigation. Candidates: Resend delivery/dedup, the send loop sending the wrong
+stage's html, or inbox threading collapsing near-identical chrome. DO NOT close until the operator
+confirms 7 distinct emails in the inbox.
+
+### 13. "*Computed from list price ÷ listed square footage." is engineer-speak in a customer email
+07/20/2026. Operator: "what the fuck is this shit". This is `specFootnote` (lib/email/listing-flyer.ts),
+rendered under the spec strip on lifecycle emails. It reads like a unit test assertion, not like
+something an agent would ever say to a buyer. Provenance for a derived cell is right in PRINCIPLE
+(a reader should be able to check $/sq ft) but the WORDING is a developer explaining a formula.
+Needs product voice, or removal — a reader who can see price and sq ft does not need the division
+spelled out. Applies to every lifecycle recipe that renders a footnote, not just one.
+
+**RESOLVED 07/20/2026 — item 12 root cause: THREE concurrent sender processes, my bug.**
+Deliverable rows proved it: market-comps built 19:55:48 AND 19:55:49, price-reduced twice at
+20:00:01, under-contract 20:04:12 AND 20:04:13, just-sold 20:08:53 AND 20:08:54 — two processes in
+lockstep one second apart — plus a third resume run 20:06-20:19. Stages 4-7 each sent 3x; stages
+1-3 once. The harness reported two background runs as killed/stopped and the bun processes SURVIVED,
+still sending on their original 4-min cadence; a resume was then started on top of two live senders.
+The state file did not help because the duplicate-send guard was read ONCE at startup and never
+again — that defends re-running a FINISHED campaign, not concurrency. Fixed two ways: a PID+
+heartbeat LOCK.json that refuses to start while a live process holds the run, and a re-read of
+state.json from disk immediately before every send (the real net — survives a stale or forced lock).
+Item 13 (the $/sq ft footnote) also fixed: specFootnote now returns undefined; 3 tests repointed;
+2,635 email+deliverable tests green.

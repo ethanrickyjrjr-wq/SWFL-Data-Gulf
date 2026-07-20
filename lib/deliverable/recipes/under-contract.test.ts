@@ -659,9 +659,14 @@ describe("buildUnderContractGrid — it wears the CAMPAIGN CHROME, not a grid of
     expect(cellFor(fullDoc(), "List Price")).toBeUndefined();
   });
 
-  it("the derived cell states its provenance — the strip carries the footnote", () => {
+  it("carries NO footnote — $/sq ft explains itself, and both operands are in the strip", () => {
+    // Operator, 07/20/2026, on reading it in a real inbox: "*Computed from list price ÷
+    // listed square footage." is a developer narrating a formula, not an agent talking to
+    // a buyer. A derived cell earns a note when the derivation is non-obvious or could be
+    // misread (price-reduced's previous price, just-sold's sale-price $/sq ft) — never for
+    // restating grade-school division. See specFootnote's header in lib/email/listing-flyer.ts.
     const strip = fullDoc().blocks.find((b) => b.type === "stats" && b.props.variant === "strip");
-    expect(strip?.type === "stats" && strip.props.footnote).toContain("Computed from list price");
+    expect(strip?.type === "stats" && strip.props.footnote).toBeFalsy();
   });
 
   it("asks for the backup offer — that is the whole point of this email", () => {

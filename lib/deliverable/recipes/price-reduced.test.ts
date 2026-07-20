@@ -357,11 +357,17 @@ describe("every cell is sourced or open", () => {
     expect(cellNamed(doc, "Previous Price")!.emphasis).toBe("muted");
   });
 
-  test("both DERIVED cells state their provenance under the strip", async () => {
+  test("the UNCHECKABLE derived cell states its provenance — and only that one", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
     const strip = doc.blocks.find((b) => b.type === "stats")!.props as { footnote?: string };
-    expect(strip.footnote).toContain("list price ÷ listed square footage");
+    // THE PREVIOUS PRICE EARNS ITS NOTE: it is the one number here a reader cannot derive
+    // from what is on the page (ask + the reduction on record), and the note is what makes
+    // the cut checkable.
     expect(strip.footnote).toContain("Previous price = this asking price plus the reduction");
+    // $/SQ FT DOES NOT. Operator, 07/20/2026, reading it in a real inbox: spelling out
+    // "list price ÷ listed square footage" is a developer narrating a formula when both
+    // operands sit in the same strip. See specFootnote's header in lib/email/listing-flyer.ts.
+    expect(strip.footnote).not.toContain("listed square footage");
   });
 
   test("NOT ONE cell is a zero", async () => {

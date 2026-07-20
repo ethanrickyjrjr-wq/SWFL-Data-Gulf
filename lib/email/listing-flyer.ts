@@ -105,11 +105,29 @@ export function listingSpecs(facts: ListingFacts, daysOnMarket?: number | null):
   ];
 }
 
-/** The footnote for the one DERIVED cell — provenance, stated where the reader can see it. */
-export function specFootnote(facts: ListingFacts): string | undefined {
-  return pricePerSqft(facts.price, facts.sqft)
-    ? "*Computed from list price ÷ listed square footage."
-    : undefined;
+/**
+ * NO FOOTNOTE ON $/SQ FT (operator, 07/20/2026, on reading it in a real inbox).
+ *
+ * This used to emit "*Computed from list price ÷ listed square footage." under the spec
+ * strip of every lifecycle email. Provenance on a derived cell is right in principle —
+ * a reader must be able to check our arithmetic — but this particular derivation is the
+ * most self-evident number in residential real estate. Every agent and every buyer
+ * already knows $/sq ft is price over square footage, and BOTH OPERANDS ARE IN THE SAME
+ * STRIP, two cells away. Explaining it is a developer narrating a formula, not an agent
+ * talking to a buyer, and it made the email read like a spreadsheet export.
+ *
+ * The rule this leaves behind: a derived cell earns a note when the derivation is NOT
+ * obvious or could be MISREAD. price-reduced's "previous price = this asking price plus
+ * the reduction on record" earns one (the reader cannot otherwise check that number).
+ * just-sold's "$/Sq Ft is the SALE price ÷ sq ft" earns one (it distinguishes the figure
+ * from the list-price version a reader would otherwise assume). Restating grade-school
+ * division does not.
+ *
+ * Kept as a function rather than deleted at its call sites: the strip may yet carry a
+ * derived cell that genuinely needs a note, and this is where that belongs.
+ */
+export function specFootnote(_facts: ListingFacts): string | undefined {
+  return undefined;
 }
 
 /** The address line a listing hero leads with. */

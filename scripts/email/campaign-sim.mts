@@ -284,6 +284,90 @@ fs.mkdirSync(runDir, { recursive: true });
 const saveState = () => fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 
 // ════════════════════════════════════════════════════════════════════════════════
+// THE CONCURRENCY LOCK — failure mode #4, second edition.
+//
+// ── THE INCIDENT THAT FORCED THIS (07/20/2026) ──────────────────────────────────
+//
+// The operator received "Under Contract" THREE TIMES. The deliverable rows proved it:
+// market-comps built at 19:55:48 AND 19:55:49, price-reduced twice at 20:00:01,
+// under-contract at 20:04:12 AND 20:04:13 — two processes in lockstep one second
+// apart, plus a third "resume" started at 20:06. Stages 4-7 each sent 3x.
+//
+// Root cause: the agent harness reported two background runs as "killed"/"stopped",
+// but the bun processes SURVIVED and kept sending on their original 4-minute cadence.
+// A resume was then started on top of two live senders.
+//
+// The state file could not save us, because the original guard only defended the
+// SEQUENTIAL case: each process loaded state into memory ONCE at startup and never
+// looked at the disk again, so all three believed stages 4-7 were unsent. A
+// duplicate-send guard that is only read at startup is not a guard against
+// concurrency — it is a guard against re-running a FINISHED campaign.
+//
+// TWO defenses now, because the first can be defeated by a stale lock and the second
+// cannot:
+//   1. THIS LOCK — refuse to start while another LIVE process holds the run.
+//   2. RE-READ BEFORE EVERY SEND (see runStage) — the real net. Even if a lock is
+//      bypassed, forced or stale, a stage another process already sent is skipped.
+// ════════════════════════════════════════════════════════════════════════════════
+
+const lockPath = path.join(runDir, "LOCK.json");
+
+/** Is `pid` a live process? `kill(pid, 0)` signals nothing and throws when it is not.
+ *  An indeterminate answer counts as ALIVE — refusing to start is recoverable in
+ *  seconds (delete the lock); double-sending a campaign to a real inbox is not. */
+function pidAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return (err as NodeJS.ErrnoException)?.code === "EPERM";
+  }
+}
+
+if (fs.existsSync(lockPath)) {
+  try {
+    const held = JSON.parse(fs.readFileSync(lockPath, "utf-8")) as {
+      pid: number;
+      startedAt: string;
+      heartbeat: string;
+    };
+    if (held.pid !== process.pid && pidAlive(held.pid)) {
+      console.error(
+        `[sim] REFUSED — run "${runId}" is already being sent by a LIVE process.\n` +
+          `      pid ${held.pid} · started ${held.startedAt} · last heartbeat ${held.heartbeat}\n` +
+          `      Two senders on one run is how the operator got "Under Contract" three\n` +
+          `      times on 07/20/2026. If you are certain that process is dead, delete:\n` +
+          `        ${path.relative(process.cwd(), lockPath)}`,
+      );
+      process.exit(1);
+    }
+    console.log(`[sim] took over a STALE lock from dead pid ${held.pid}`);
+  } catch {
+    /* unreadable lock → treat as stale and overwrite */
+  }
+}
+
+const writeLock = () =>
+  fs.writeFileSync(
+    lockPath,
+    JSON.stringify(
+      { pid: process.pid, startedAt: state.startedAt, heartbeat: new Date().toISOString() },
+      null,
+      2,
+    ),
+  );
+writeLock();
+// Release on ANY exit path so a finished run never blocks the next one.
+process.on("exit", () => {
+  try {
+    const held = JSON.parse(fs.readFileSync(lockPath, "utf-8")) as { pid: number };
+    if (held.pid === process.pid) fs.unlinkSync(lockPath);
+  } catch {
+    /* nothing to release */
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════
 // THE MOCKS — installed ONCE, before any product module is imported.
 //
 // Behavior is a pure function of `currentStage`; the mocks are never toggled or
@@ -496,6 +580,7 @@ async function runStage(index: number): Promise<StageOutcome> {
   const stage = STAGES[index]!;
   const st = state.stages[index]!;
   currentStage = index; // ← the ONLY thing that drives the mocks
+  writeLock(); // heartbeat — proves to any other process that this run is live
 
   const n = `${index + 1}/${STAGES.length}`;
   console.log(`\n${"─".repeat(72)}`);
@@ -604,6 +689,35 @@ async function runStage(index: number): Promise<StageOutcome> {
   if (!SEND) {
     console.log(`[${n}] DRY RUN — not sending`);
     return "built";
+  }
+
+  // ── THE LAST GATE BEFORE A REAL EMAIL LEAVES ──────────────────────────────────
+  //
+  // Re-read state FROM DISK, not from the copy this process loaded at startup. This
+  // is the guard that would have prevented the 07/20/2026 triple-send: three
+  // processes each held a stale in-memory state saying "stage 6 unsent" and each
+  // sent it. Whatever else fails — a stale lock, a forced lock, a harness that
+  // reports a kill it did not perform — a stage another process has already sent
+  // must not go out twice.
+  //
+  // Deliberately NOT a full state swap: this process owns its own stage results.
+  // We read exactly one fact — has THIS stage been sent by anyone? — and obey it.
+  try {
+    const onDisk = JSON.parse(fs.readFileSync(statePath, "utf-8")) as RunState;
+    const theirs = onDisk.stages[index];
+    if (theirs?.sentAt && !st.sentAt && !RESEND_SENT) {
+      console.error(
+        `[${n}] ABORTING SEND — another process already sent this stage at ${theirs.sentAt}\n` +
+          `      (resend id ${theirs.resendId}). This process had a stale view of the run.\n` +
+          `      Nothing was sent twice. Check for a second campaign-sim process.`,
+      );
+      st.sentAt = theirs.sentAt;
+      st.resendId = theirs.resendId;
+      saveState();
+      return "skipped";
+    }
+  } catch {
+    /* unreadable state → fall through; the lock is still holding */
   }
 
   // ── SEND — blast-route parity ─────────────────────────────────────────────────
