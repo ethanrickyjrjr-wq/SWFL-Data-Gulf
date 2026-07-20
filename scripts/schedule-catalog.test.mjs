@@ -130,6 +130,86 @@ check("buildCatalog: unregistered detection + jobs metadata attach", () => {
   assert.strictEqual(rebuild.status, "live");
 });
 
+check(
+  "buildCatalog: prose-only mention (purpose text + comment) does NOT count as registered",
+  () => {
+    // Regression for the tightening from bare .includes() to a field-match
+    // regex: prose-mention.yml and the vercel ref below are both present as
+    // literal SUBSTRINGS of registryText (inside a `purpose:` line and a `#`
+    // comment) but never as an actual `workflow: <ref>` field value. A
+    // .includes()-style membership check would have cleared both for free —
+    // 29 of 77 real active-cron workflows were riding exactly this loophole
+    // before the tightening (nightly-chain.yml alone had 5 such mentions).
+    const registryText = [
+      "pipelines:",
+      "  - name: real-one",
+      "    workflow: real-one.yml",
+      "    purpose: Mentions prose-mention.yml and vercel.json#/api/ghost-report only in passing.",
+      "  # prose-mention.yml is also referenced here, again just a comment",
+    ].join("\n");
+    const workflows = [
+      { file: "real-one.yml", text: '    - cron: "0 3 * * *"' },
+      { file: "prose-mention.yml", text: '    - cron: "0 4 * * *"' },
+    ];
+    const vercelJsonText = JSON.stringify({
+      crons: [{ path: "/api/ghost-report", schedule: "0 5 * * *" }],
+    });
+    const { unregistered } = buildCatalog({ registryText, workflows, vercelJsonText });
+    assert.ok(
+      unregistered.includes("prose-mention.yml"),
+      "prose-only mention of prose-mention.yml must still be reported unregistered",
+    );
+    assert.ok(
+      unregistered.includes("vercel.json#/api/ghost-report"),
+      "prose-only mention of the vercel ref must still be reported unregistered",
+    );
+    assert.ok(
+      !unregistered.includes("real-one.yml"),
+      "sanity: real-one.yml has a genuine workflow: field and must not be flagged",
+    );
+  },
+);
+
+check(
+  "buildCatalog: positive control — a real `workflow:` field line DOES count as registered",
+  () => {
+    // Same fixture as the prose-only case above, but prose-mention.yml and the
+    // vercel ref now ALSO get a genuine `workflow:` field entry. Without this
+    // half, the prose-only test above could pass on an unrelated bug (e.g.
+    // buildCatalog reporting everything as unregistered) and nobody would
+    // notice — the positive control proves field-match still recognizes the
+    // real thing.
+    const registryText = [
+      "pipelines:",
+      "  - name: real-one",
+      "    workflow: real-one.yml",
+      "    purpose: Mentions prose-mention.yml and vercel.json#/api/ghost-report only in passing.",
+      "  # prose-mention.yml is also referenced here, again just a comment",
+      "jobs:",
+      "  - name: prose-mention",
+      "    workflow: prose-mention.yml",
+      "    purpose: Now genuinely registered.",
+      "  - name: ghost-report",
+      "    workflow: vercel.json#/api/ghost-report",
+      "    purpose: Now genuinely registered.",
+      "    scheduler: vercel",
+    ].join("\n");
+    const workflows = [
+      { file: "real-one.yml", text: '    - cron: "0 3 * * *"' },
+      { file: "prose-mention.yml", text: '    - cron: "0 4 * * *"' },
+    ];
+    const vercelJsonText = JSON.stringify({
+      crons: [{ path: "/api/ghost-report", schedule: "0 5 * * *" }],
+    });
+    const { unregistered } = buildCatalog({ registryText, workflows, vercelJsonText });
+    assert.deepStrictEqual(
+      unregistered,
+      [],
+      "with real `workflow:` field lines added, nothing should remain unregistered",
+    );
+  },
+);
+
 check("gate10Snippet: gha + vercel shapes", () => {
   assert.strictEqual(
     gate10Snippet("foo-bar.yml"),
@@ -137,6 +217,51 @@ check("gate10Snippet: gha + vercel shapes", () => {
   );
   assert.ok(gate10Snippet("vercel.json#/api/x/y").includes("scheduler: vercel"));
   assert.ok(gate10Snippet("vercel.json#/api/x/y").includes("name: api-x-y"));
+});
+
+check("Gate 10 parity: hook's inline predicate regex mirrors scripts/schedule-catalog.mjs", () => {
+  // The hook (.claude/hooks/check-prepush-gate.mjs) can't import this script
+  // — hooks stay self-contained — so it duplicates isRegisteredRef inline as
+  // isRegisteredRefInline. If the two regexes ever drift, the pre-push gate
+  // silently disagrees with this script's sweep, which defeats the point of
+  // having a gate at all (the hook's own Gate 10 comment says as much:
+  // "if the two ever disagree about 'registered', the gate is worthless").
+  // Extract the `new RegExp(...)` line that builds the membership predicate
+  // out of each file's source text and compare them. The escape-helper name
+  // is the ONE documented, intentional divergence (script: escapeRegExp,
+  // hook: escapeRegExpInline — the "Inline" suffix is the hook's
+  // self-contained-duplicate convention), so normalize just that call before
+  // comparing; anything else that differs between the two lines is real drift.
+  const scriptPath = path.join(process.cwd(), "scripts", "schedule-catalog.mjs");
+  const hookPath = path.join(process.cwd(), ".claude", "hooks", "check-prepush-gate.mjs");
+  const scriptText = readFileSync(scriptPath, "utf8");
+  const hookText = readFileSync(hookPath, "utf8");
+
+  function extractPredicateLine(text, label) {
+    const lines = text
+      .split(/\r?\n/)
+      .filter((l) => l.includes("new RegExp(") && l.includes("workflow:"));
+    assert.strictEqual(
+      lines.length,
+      1,
+      `expected exactly one workflow-membership RegExp construction line in ${label}, found ${lines.length} — ` +
+        `the extraction itself is drift-sensitive: a renamed/restructured predicate must fail this test loudly, ` +
+        `not silently skip the comparison`,
+    );
+    return lines[0].trim();
+  }
+
+  function normalize(line) {
+    return line.replace(/escapeRegExp(?:Inline)?\(ref\)/, "ESCAPE_REF(ref)");
+  }
+
+  const scriptLine = extractPredicateLine(scriptText, "scripts/schedule-catalog.mjs");
+  const hookLine = extractPredicateLine(hookText, ".claude/hooks/check-prepush-gate.mjs");
+  assert.strictEqual(
+    normalize(hookLine),
+    normalize(scriptLine),
+    "the hook's inline predicate must mirror scripts/schedule-catalog.mjs — update both or neither",
+  );
 });
 
 check("REPO SWEEP: zero unregistered scheduled surfaces (acceptance 1)", () => {
