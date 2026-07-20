@@ -1,3 +1,19 @@
+## 2026-07-19 (Fable 5 · main) — data_lake anon REST leak CLOSED at the schema door (check data_lake_anon_rest_leak)
+
+Operator "fix this" = the OK the 07/18 check was waiting on. Twist found on re-audit: the two
+explicit anon grants (fl_dbpr_licenses + census_acs_zcta, verified present 07/18) were ALREADY GONE
+— 0 of 91 data_lake relations anon-readable, no revoke ever ran. Cause: dlt `replace` re-ingests
+drop+recreate tables, and per-table grants die with the table. Accidental closure = churny grant
+state, so the durable fix is schema-level: NEW docs/sql/20260720_data_lake_anon_revoke.sql (applied
+live via Bun.SQL, twin of the 06/08 public-schema posture file) — REVOKE USAGE ON SCHEMA data_lake
+FROM anon, authenticated (the statement that survives table recreation), full grant sweep, default-
+privilege flip for postgres-created objects, RLS-on (0 policies) for the two named tables.
+Verified live: anon REST → 42501 "permission denied for schema data_lake" on both (hint text gone);
+service_role REST → 200 + rows on both (bypassrls=true confirmed in pg_roles); lake MCP + dlt
+connect as postgres (owner, RLS-exempt); zero app consumers use anon/browser clients on
+data_lake (rg sweep over all 84 .schema("data_lake") files); bun test zip-report+zip-summary 51/51.
+Check data_lake_anon_rest_leak closed with this evidence.
+
 ## 2026-07-19 (Fable 5 · main) — census_acs_zcta: ONE cached read shared by zip-report candidates + zip quick summary
 
 Follow-through on the caching pass (operator "FIX NOW"): loadCensusSignals (candidates.ts) and
