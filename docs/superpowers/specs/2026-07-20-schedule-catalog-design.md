@@ -55,9 +55,10 @@ jobs:
     workflow: vercel.json#/api/mls/sync
     purpose: Daily MLS listing sync endpoint.
     scheduler: vercel          # optional; default gha
-  - name: corridor-pulse-weekly
-    workflow: corridor-pulse-weekly.yml
-    purpose: Weekly corridor pulse scan.
+  - name: example-parked-job
+    workflow: example-parked-job.yml
+    purpose: Illustrative only — shows the optional `status:` field's shape (not a real entry;
+      the 3 API-disabled workflows are excluded from `jobs:` per the backfill rule below).
     status: disabled           # optional; default live. disabled | parked
 ```
 
