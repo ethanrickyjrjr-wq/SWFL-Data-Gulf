@@ -25,6 +25,10 @@
 //                  `check-registry-identity.mts --static` — files only, no DB, no
 //                  network (tags come from the maintained ingest/tools/action-tags.json
 //                  allowlist and fail OPEN). Same block/exit contract as Gate 2/5.
+//  10. SCHEDULE CATALOG — an ACTIVE-cron workflow (or vercel.json cron) with no
+//                  cadence_registry.yaml entry. ONE catalog of everything
+//                  scheduled (spec 2026-07-20); the error prints a paste-ready
+//                  jobs: snippet so the fix never requires reading the registry.
 //
 // NOTE — what this hook can and cannot catch: it stops DETERMINISTIC failures
 // (drift, orphans, lockfile). It does NOT and cannot reliably stop a FLAKY test
@@ -323,6 +327,21 @@ process.stdin.on("end", () => {
       );
     }
   }
+
+  // ---- Gate 10: schedule-catalog membership (spec 2026-07-20) ---------------
+  // ONE catalog: every scheduled surface (active-cron GHA workflow, vercel.json
+  // cron) is registered in ingest/cadence_registry.yaml — pipelines:/
+  // not_yet_running:/jobs: all count, because all three use the same `workflow:`
+  // field. Membership is a FIELD match, NOT bare text-presence: the ref must
+  // appear as an actual `workflow: <ref>` value, so a workflow merely name-dropped
+  // in a comment or in another entry's `purpose:` prose does NOT count as
+  // registered (29 of the 77 active-cron workflows are mentioned that way — a
+  // text-presence check would hand them a free pass). This mirrors
+  // scripts/schedule-catalog.mjs's isRegisteredRef EXACTLY; if the two ever
+  // disagree about "registered", the gate is worthless. Both sides read HEAD, so
+  // registering in the SAME commit passes. That script is the working-tree twin
+  // (full-repo sweep + JSON view); its test file pins both shapes.
+  scheduleCatalogGate(changed);
 
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
@@ -803,4 +822,112 @@ function unregisteredPipelineDirs(files) {
   } catch {
     return [];
   }
+}
+
+// Gate 10 body. Only touched files are checked (the full-repo sweep lives in
+// scripts/schedule-catalog.test.mjs "REPO SWEEP"). Commented-out crons do not
+// count — a parked workflow with its cron commented is dispatch-only. Fails
+// OPEN on any internal error; block() exits, so the catch never swallows it.
+function scheduleCatalogGate(changed) {
+  try {
+    if (process.env.ALLOW_UNREGISTERED_CRON === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] OVERRIDE: ALLOW_UNREGISTERED_CRON=1 — pushing an\n` +
+          `unregistered scheduled workflow anyway (logged).\n`,
+      );
+      return;
+    }
+    let registry;
+    try {
+      registry = sh("git show HEAD:ingest/cadence_registry.yaml");
+    } catch {
+      return; // no registry at HEAD — fail open
+    }
+    const missing = [];
+    for (const f of changed) {
+      const wf = /^\.github\/workflows\/([^/]+\.yml)$/.exec(f);
+      if (wf) {
+        let src;
+        try {
+          src = sh(`git show HEAD:${f}`);
+        } catch {
+          continue; // deleted at HEAD — nothing scheduled to register
+        }
+        if (!/^\s*-\s*cron:/m.test(src)) continue; // no ACTIVE cron
+        if (!isRegisteredRefInline(registry, wf[1])) missing.push(wf[1]);
+      }
+      if (f === "vercel.json") {
+        let vercel;
+        try {
+          vercel = JSON.parse(sh("git show HEAD:vercel.json"));
+        } catch {
+          continue; // gone/unparseable at HEAD — fail open for this file
+        }
+        for (const c of vercel?.crons ?? []) {
+          // Same filter as schedule-catalog.mjs vercelCronRefs: an entry with no
+          // schedule is not a scheduled surface.
+          if (!c?.path || !c?.schedule) continue;
+          const ref = `vercel.json#${c.path}`;
+          if (!isRegisteredRefInline(registry, ref)) missing.push(ref);
+        }
+      }
+    }
+    if (missing.length === 0) return;
+    block(
+      "SCHEDULE CATALOG — a scheduled workflow has no cadence_registry entry (Gate 10)",
+      `ONE catalog: everything that runs on a schedule is registered in\n` +
+        `ingest/cadence_registry.yaml (spec 2026-07-20-schedule-catalog-design.md).\n` +
+        `These scheduled surfaces are about to ship unregistered:\n\n` +
+        missing.map((ref) => `  - ${ref}`).join("\n") +
+        `\n\nFix: paste this under \`jobs:\` at the BOTTOM of ingest/cadence_registry.yaml,\n` +
+        `fill the purpose line from the workflow's own \`name:\` field, commit it in\n` +
+        `THIS push, then retry:\n\n` +
+        missing.map((ref) => gate10SnippetInline(ref)).join("\n") +
+        `\n\n(A mention in a comment or another entry's \`purpose:\` prose does NOT\n` +
+        `register a workflow — the ref must be an actual \`workflow:\` field value.)\n` +
+        `(An ingest SOURCE belongs under pipelines:/not_yet_running: instead — register\n` +
+        `it there with lane/cadence so the freshness probe covers it.)\n` +
+        `Operator escape for a legitimate one-off: ALLOW_UNREGISTERED_CRON=1.`,
+    );
+  } catch {
+    // never wedge a push on a guard bug — fail open
+  }
+}
+
+// Inline twin of scripts/schedule-catalog.mjs escapeRegExp. Escape a string for
+// use inside a RegExp source (literal match).
+function escapeRegExpInline(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Inline twin of scripts/schedule-catalog.mjs isRegisteredRef — MUST stay
+// character-for-character identical to it. Is `ref` registered as an actual
+// `workflow:` field value in the registry text — not merely name-dropped in a
+// comment or another entry's `purpose:` prose? Matches a line like
+// `    workflow: <ref>` (optionally followed by a trailing `# comment`), any
+// leading whitespace, multiline mode. Bare text-presence (`registry.includes`)
+// is NOT sufficient: 29 of the 77 active-cron workflows appear somewhere in the
+// registry's prose, and nightly-chain.yml alone has 5 such mentions — every one
+// of them would have satisfied a text-presence gate for free.
+function isRegisteredRefInline(registryText, ref) {
+  const re = new RegExp(`^\\s*workflow:\\s*${escapeRegExpInline(ref)}\\s*(#.*)?$`, "m");
+  return re.test(String(registryText));
+}
+
+// Inline twin of scripts/schedule-catalog.mjs gate10Snippet (hooks stay
+// self-contained; the script's test file pins this exact shape).
+function gate10SnippetInline(ref) {
+  const isVercel = ref.startsWith("vercel.json#");
+  const name = isVercel
+    ? ref
+        .slice("vercel.json#".length)
+        .replace(/[^A-Za-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+    : ref.replace(/\.yml$/, "");
+  return (
+    `  - name: ${name}\n` +
+    `    workflow: ${ref}\n` +
+    `    purpose: <one line — what this job does>` +
+    (isVercel ? `\n    scheduler: vercel` : ``)
+  );
 }
