@@ -17,20 +17,11 @@ from __future__ import annotations
 
 from datetime import date
 
+from .constants import HOA_COMPARISON_URL, fiftyfive_places_url, naplesgolfguy_url
+
 _AMENITY_KEYS = (
     "pool", "tennis", "pickleball", "fitness", "clubhouse", "on_site_dining", "boating_marina",
 )
-
-
-def _naplesgolfguy_url(slug: str) -> str:
-    return f"https://naplesgolfguy.com/golf-communities/{slug}/"
-
-
-def _fiftyfive_places_url(slug: str) -> str:
-    return f"https://www.55places.com/florida/communities/{slug}"
-
-
-_HOA_COMPARISON_URL = "https://realtyofnaplesfl.com/hoa-fee-comparison-by-community/"
 
 
 def merge_community_row(
@@ -73,18 +64,18 @@ def merge_community_row(
         row["golf_structure"] = naplesgolfguy["golf_structure"]
         row["golf_holes"] = naplesgolfguy.get("golf_holes")
         row["golf_courses"] = naplesgolfguy.get("golf_courses")
-        row["golf_source_url"] = _naplesgolfguy_url(slug)
+        row["golf_source_url"] = naplesgolfguy_url(slug)
         row["golf_as_of"] = as_of
     elif hoa_comparison and hoa_comparison.get("golf_structure") is not None:
         row["golf_structure"] = hoa_comparison["golf_structure"]
-        row["golf_source_url"] = _HOA_COMPARISON_URL
+        row["golf_source_url"] = HOA_COMPARISON_URL
         row["golf_as_of"] = as_of
 
     # --- home_count / gated group (55places only) ---
     if fiftyfive_places and (
         fiftyfive_places.get("home_count") is not None or fiftyfive_places.get("gated") is not None
     ):
-        row["home_count_source_url"] = _fiftyfive_places_url(slug)
+        row["home_count_source_url"] = fiftyfive_places_url(slug)
         row["home_count_as_of"] = as_of
         if fiftyfive_places.get("home_count") is not None:
             row["home_count"] = fiftyfive_places["home_count"]
@@ -95,10 +86,10 @@ def merge_community_row(
     amenities_source = None
     if fiftyfive_places and any(fiftyfive_places.get(k) is not None for k in _AMENITY_KEYS):
         amenities_source = fiftyfive_places
-        row["amenities_source_url"] = _fiftyfive_places_url(slug)
+        row["amenities_source_url"] = fiftyfive_places_url(slug)
     elif naplesgolfguy and any(naplesgolfguy.get(k) is not None for k in _AMENITY_KEYS):
         amenities_source = naplesgolfguy
-        row["amenities_source_url"] = _naplesgolfguy_url(slug)
+        row["amenities_source_url"] = naplesgolfguy_url(slug)
     if amenities_source is not None:
         for key in _AMENITY_KEYS:
             row[key] = amenities_source.get(key)
@@ -114,7 +105,7 @@ def merge_community_row(
             hoa_fee_range = f"{hoa_fee_range} (est.)"
         row["hoa_fee_range"] = hoa_fee_range
         row["cdd_flag"] = hoa_comparison.get("cdd_flag")
-        row["fees_source_url"] = _HOA_COMPARISON_URL
+        row["fees_source_url"] = HOA_COMPARISON_URL
         row["fees_as_of"] = as_of
 
     return row
