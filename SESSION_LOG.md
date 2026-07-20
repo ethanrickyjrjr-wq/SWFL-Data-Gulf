@@ -28,9 +28,10 @@ Operator handed a screenshot of the live header with 7 verbatim gripes. Fixed al
 
 `nav-config.test.ts` pinned assertions updated in the same commit (33 tests green; 44 total
 across nav/HeroBar/home-spine suites). `_ASSISTANT/SCRATCHPAD.md` append attempted twice,
-blocked both times by a repolith claim held by another active session — deferred, not lost
-(operator separately raised whether a single-scratchpad file is the right shape given the
-write contention; open question, not resolved this session).
+blocked both times by a repolith claim held by another active session — opened check
+`scratchpad_single_file_write_contention` (operator separately asked whether a single-scratchpad
+file is still the right shape given the write contention; open design question, not resolved
+this session).
 
 ## 2026-07-20 (Opus 4.8 · main) — Campaign simulator: all 7 lifecycle recipes driven as ONE campaign, teaser → sold, into a real inbox
 
