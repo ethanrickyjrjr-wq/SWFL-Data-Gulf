@@ -1,3 +1,44 @@
+## 2026-07-20 (Opus 4.8 · main) — Triple-send postmortem: three concurrent senders; formula footnote killed; sim cleared
+
+Operator received "Under Contract" THREE TIMES and called out the spec-strip footnote
+"*Computed from list price ÷ listed square footage." in a real inbox. Both were mine.
+
+TRIPLE-SEND — ROOT CAUSE. Deliverable rows proved it: market-comps built 19:55:48 AND 19:55:49,
+price-reduced twice at 20:00:01, under-contract 20:04:12 AND 20:04:13 — two processes in lockstep
+one second apart — plus a third resume run 20:06–20:19. Stages 4–7 each sent 3×, stages 1–3 once.
+The agent harness reported two background runs as killed/stopped; the bun processes SURVIVED and
+kept sending on their original 4-min cadence, and a resume was started on top of two live senders.
+The run-state file did not help because the duplicate-send guard was read ONCE at startup — that
+defends re-running a FINISHED campaign, not concurrency; all three processes held a snapshot taken
+before the others acted. Fixed twice over: a PID+heartbeat `LOCK.json` that refuses a second LIVE
+sender on a run, and a re-read of state.json from disk in the moment before every send (the real
+net — survives a stale or forced lock). Verified lock acquires, heartbeats and releases cleanly.
+
+Owned separately: the earlier claim that the mid-run kill was "a useful accident that proved the
+recovery path" was wrong. It concealed a triple-send, because the sends were verified against the
+program's OWN state file and never against the inbox. That meta-lesson is now the closing line of
+the new failure-catalog entry: verify a send against the RECIPIENT, never against your own record
+of having sent it.
+
+FOOTNOTE KILLED (operator decree). `specFootnote` returns undefined. $/sq ft is the most
+self-evident derivation in residential real estate and both operands sit in the same strip. The
+surviving rule is written into the map, the area digest, and the function's own header: a derived
+cell earns a note when the derivation is NON-OBVIOUS or MISREADABLE — price-reduced's previous
+price and just-sold's sale-price $/sq ft keep theirs; restating division does not. 3 tests
+repointed; 2,635 email+deliverable tests green.
+
+RULES UPDATED (the map's own same-session rule): `docs/standards/emails.md` §7 gains the incident
+with both defect classes plus the meta-class; `lib/email/CLAUDE.md` gains the footnote convention
+and a pointer to the simulator as the way to prove a lifecycle change end-to-end.
+
+CADENCE. Default spacing 4 min → 20 min (operator: "don't have to rush the sends... just make sure
+the builder is building and sending on a schedule"). `--now` is documented as a BUILD check, not a
+schedule test.
+
+SIM CLEARED. 15 email_blasts rows + 25 deliverables removed from the campaign-sim project (25
+because the dry runs had left rows too). The seven originally-sent emails were handed to the
+operator as rendered HTML first.
+
 ## 2026-07-20 (Sonnet 5 · main) — community_profiles: merged all 158 golf communities (naplesgolfguy + 55places + HOA table), real completeness numbers
 
 Built `ingest/pipelines/community_profiles/finalize.py` (+ `test_finalize.py`, 8 new tests, TDD)

@@ -16,6 +16,22 @@
   `lib/email/audience-sync.ts`). Different table, different send path; don't merge them.
   Attribute/engagement conditions are `"paid-only"` in `lib/email/lab/capabilities.ts`,
   enforced server-side in every `/api/segments*` route, not just in the picker UI.
+- **A derived cell earns a footnote ONLY when the reader can't check it** (operator decree
+  07/20/2026, on reading one in a real inbox). `specFootnote` used to print "*Computed from list
+  price ÷ listed square footage." under every lifecycle spec strip — a developer narrating a
+  formula when BOTH OPERANDS sit two cells away in that same strip. It now returns `undefined`.
+  KEEP a note where the derivation is non-obvious or misreadable: price-reduced's "previous price =
+  ask + the reduction on record" (uncheckable from the page) and just-sold's "$/Sq Ft is the SALE
+  price ÷ sq ft" (distinguishes it from the list-price version). Never restate arithmetic the
+  reader can do in their head — it reads as a spreadsheet export, not as an agent.
+- **The campaign simulator is how you prove a lifecycle change end-to-end:**
+  `bun scripts/email/campaign-sim.mts` (dry run, no send) drives ALL 7 listing recipes through the
+  real `authorDoc` on one real listing, with simulated price-cut/sold events injected BELOW
+  authorDoc at the data boundary (process-local `mock.module`, zero prod files changed). `--send`
+  sends on a schedule — 20 min default, don't compress it. ONE SENDER PER RUN: it holds a PID lock
+  and re-reads state before every send, because three concurrent processes once sent the operator
+  "Under Contract" three times (map §7). **Verify a send against the INBOX, never against the
+  program's own record of having sent it.**
 - **Outlook reality:** SVG icons render as text in Outlook — use the established fallback, don't ship raw SVG.
 - **Charts in deliverables** go through `buildChartForQuestion` (`lib/email/build-doc.ts`). Every plotted
   number is REAL (held brain / live-web-cited / upload-verified / user-stated) — the model selects points,

@@ -311,6 +311,32 @@ silently fall back on the others. **Any typography or block-style change touches
 
 Every entry is a class of bug, not just an incident. Check your change against each class.
 
+- **07/20 — the operator received "Under Contract" THREE TIMES, and a formula footnote shipped
+  to a real inbox.** Both found by the campaign simulator (§6, `scripts/email/campaign-sim.mts`)
+  on its first live run. (1) THREE concurrent sender processes ran the same campaign: the agent
+  harness reported two background runs as killed/stopped, the `bun` processes SURVIVED and kept
+  sending on their original cadence, and a "resume" was started on top of two live senders.
+  Deliverable rows are the proof — `under-contract` built at 20:04:12 AND 20:04:13, one second
+  apart, plus a third at 20:15; stages 4–7 each sent 3×. The run-state file did NOT prevent it
+  because the duplicate-send guard was read ONCE at startup: that defends re-running a FINISHED
+  campaign, not two live processes, and all three held a snapshot taken before the others acted.
+  Fix: a PID+heartbeat lock that refuses a second live sender, AND a re-read of run state from
+  disk in the moment before each send (the real net — it survives a stale or forced lock).
+  (2) `specFootnote` emitted "*Computed from list price ÷ listed square footage." under every
+  lifecycle spec strip. Killed by operator decree: $/sq ft is the most self-evident derivation in
+  residential real estate and BOTH OPERANDS SIT IN THE SAME STRIP, so the sentence was a developer
+  narrating a formula. The surviving rule: **a derived cell earns a note when the derivation is
+  NON-OBVIOUS or could be MISREAD** — price-reduced's "previous price = ask + reduction on record"
+  (uncheckable from the page) and just-sold's "$/Sq Ft is the SALE price ÷ sq ft" (distinguishes it
+  from the list-price version) both keep theirs. CLASSES: *a concurrency guard read once at startup
+  is not a concurrency guard — re-read the authority immediately before the irreversible act; a
+  reported process kill is a claim, not a fact; provenance is for numbers the reader CANNOT check,
+  and explaining arithmetic they can do in their head reads as a spreadsheet export, not an agent.*
+  META-CLASS, and the reason this entry exists at all: *the sends were verified against the
+  program's OWN state file and declared correct. The inbox — the only authority on what a
+  subscriber received — was never checked. Verify a send against the recipient, never against
+  your own record of having sent it.*
+
 - **07/19 (fixed 07/20) — sources "accordion" shipped as a wall of text in Gmail; baseline +
   next email were ~99% identical.** Three defects, one inbox review: (1) SourcesBlock's
   `<details>` accordion — Gmail REPLACES `<details>/<summary>` with `<u></u>` (caniemail,

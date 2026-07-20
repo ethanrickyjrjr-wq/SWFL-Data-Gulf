@@ -204,3 +204,11 @@ heartbeat LOCK.json that refuses to start while a live process holds the run, an
 state.json from disk immediately before every send (the real net — survives a stale or forced lock).
 Item 13 (the $/sq ft footnote) also fixed: specFootnote now returns undefined; 3 tests repointed;
 2,635 email+deliverable tests green.
+
+### 14. Campaign sends must NOT be rushed — give real time between them
+07/20/2026. Operator: "don't have to rush the sends. give it time in between sends. Just make sure
+the builder is building and sending on a schedule." The 4-min spacing was chosen so a demo fit in
+one sitting; that is not the point. The point is proving the builder builds AND sends on a SCHEDULE.
+Default spacing raised accordingly. Do not compress it back for convenience.
+Also noted, operator on the triple-sent Under Contract: "didn't look bad, to be honest, so that is
+a plus!" — the EMAIL itself is landing; the defect was delivery mechanics, not the build.

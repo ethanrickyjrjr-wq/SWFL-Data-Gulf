@@ -54,9 +54,13 @@
 // ── USAGE ────────────────────────────────────────────────────────────────────────
 //
 //   bun scripts/email/campaign-sim.mts                      # DRY RUN — build all 7, write HTML, send nothing
-//   bun scripts/email/campaign-sim.mts --send               # build + SEND, 4 min apart, in order
-//   bun scripts/email/campaign-sim.mts --send --spacing 2   # 2 min apart
-//   bun scripts/email/campaign-sim.mts --send --now         # send all 7 back to back, no waiting
+//   bun scripts/email/campaign-sim.mts --send               # build + SEND, 20 min apart, in order (~2 hr)
+//   bun scripts/email/campaign-sim.mts --send --spacing 45  # slower cadence
+//   bun scripts/email/campaign-sim.mts --send --now         # back to back — build check only, NOT a schedule test
+//
+// ONE SENDER AT A TIME. The run holds a PID lock and re-reads its state before every
+// send; a second process on the same run is refused. See THE CONCURRENCY LOCK below —
+// three concurrent senders is how the operator received "Under Contract" three times.
 //   bun scripts/email/campaign-sim.mts --only price-reduced # one stage (debugging)
 //   bun scripts/email/campaign-sim.mts --send --resume <runId>   # pick up where a dead run stopped
 //
@@ -202,7 +206,17 @@ const valueOf = (flag: string): string | undefined => {
 
 const SEND = has("--send");
 const NO_WAIT = has("--now");
-const SPACING_MIN = Number(valueOf("--spacing") ?? 4);
+/** DEFAULT SPACING — 20 minutes (operator, 07/20/2026: "don't have to rush the sends.
+ *  give it time in between sends. Just make sure the builder is building and sending on
+ *  a schedule.").
+ *
+ *  The old 4-minute default existed so a demo fit in one sitting, and that was the wrong
+ *  thing to optimize: the point of this program is proving the builder BUILDS AND SENDS
+ *  ON A SCHEDULE, not that it can empty a queue quickly. A rushed cadence also makes the
+ *  campaign read as a burst rather than a sequence, which is exactly what a subscriber
+ *  would never receive. Do not compress this back for convenience — pass --spacing
+ *  deliberately, or --now when you are only checking that the builds are sound. */
+const SPACING_MIN = Number(valueOf("--spacing") ?? 20);
 const ONLY = valueOf("--only");
 const RESUME_ID = valueOf("--resume");
 const RESEND_SENT = has("--resend");
