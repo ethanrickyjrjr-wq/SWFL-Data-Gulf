@@ -22,6 +22,34 @@ shared main checkout; confirmed via `git diff` that their uncommitted work was u
 **Not done:** did not reproduce the native OS file-picker itself opening/not-opening — browser
 automation can't drive that dialog either way, so that half of the original complaint is unverified
 by me; the silent-failure bug is the one concretely found, fixed, and type-checked.
+## 2026-07-20 (Sonnet 5 · main) — community_profiles: fixed seed name + 2 more real bugs the audit surfaced, 96-name gap now honestly quantified
+
+Completes the Stage 1 discovery entry below. Operator: "fix it anyone there is an issue."
+
+**Seed name fixed:** `seed_communities.json` had "Lely Country Club" — both naplesgolfguy and
+55places call it "Lely Resort." Confirmed live before changing it (no invented rename).
+
+**Full 96-name seed audit against the real discovery maps** (not a per-community fetch — just
+cross-checking already-discovered names, zero extra network cost per name) surfaced 33 seed names
+matching neither source. Investigating found 2 more real, fixable bugs, not just gaps:
+
+1. `normalize.py`'s suffix regex only stripped "GOLF & COUNTRY CLUB" / "GOLF AND COUNTRY CLUB" —
+   not the connector-less "GOLF COUNTRY CLUB" that a slug-word-split produces
+   (`forest-glen-golf-country-club` -> "forest glen golf country club"). "Forest Glen" and
+   "Royal Wood" were silently un-matchable because of this alone. Fixed, tested.
+2. `discover.py`'s 3 regional naplesgolfguy pages are NOT fully redundant with its 3
+   membership-type pages (bundled/equity/luxury) — "Bonita National Golf & Country Club" and
+   "Kensington Golf & Country Club" are listed on the equity/bundled pages but absent from their
+   own region's regional page. Now fetching all 6 (+2 55places = 8 total, still a one-time
+   discovery cost, not a sweep).
+
+**Result: 33 -> 29 unmatched, verified by re-running the same audit live.** The remaining 29
+(The National at Ave Maria, TwinEagles, Six Lakes Country Club, Shell Point Golf Club, Town and
+River, and 24 others) found NO match under any heuristic tried — most likely genuine non-coverage
+by these two sites for smaller/local communities, not a further bug. Stopped chasing these
+individually rather than over-invest per-name; the honest remainder is reported, not hidden.
+30/30 tests pass. Committed locally, not pushed — two commits now awaiting go-ahead
+(`866e9803`, this one).
 
 ---
 

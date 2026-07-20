@@ -48,8 +48,9 @@ def test_build_discovery_maps_fetches_every_directory_url():
     ngg_map, fp_map = build_discovery_maps(fake_fetch)
     assert ngg_map["GREY OAKS"] == "grey-oaks-country-club"
     assert fp_map["LELY RESORT"] == "lely-resort"
-    # 3 naplesgolfguy regional pages + 2 55places area pages, per the design spec's Stage 1.
-    assert len(fetched_urls) == 5
+    # 3 regional + 3 membership-type naplesgolfguy pages (not fully redundant —
+    # see NAPLESGOLFGUY_REGIONAL_URLS' comment) + 2 55places area pages.
+    assert len(fetched_urls) == 8
 
 
 def test_build_discovery_maps_skips_empty_fetch_without_raising():

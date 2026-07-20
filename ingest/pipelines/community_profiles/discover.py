@@ -27,10 +27,21 @@ FetchFn = Callable[[str], str]
 
 # Greater Sarasota is a 4th naplesgolfguy regional page but deliberately
 # excluded — out of SCOPE (CLAUDE.md: Lee + Collier only).
+#
+# The 3 regional pages and the 3 cross-cutting membership-type pages
+# (bundled/equity/luxury) are NOT fully redundant — found live 07/20/2026:
+# "Bonita National Golf & Country Club" is listed on the Bundled page's
+# Bonita Springs/Estero section but absent from the Bonita Springs/Estero
+# regional page itself. Fetching both sets is the only way to get real
+# coverage; a duplicate slug across pages is harmless (parse_directory
+# keeps the first one seen).
 NAPLESGOLFGUY_REGIONAL_URLS = [
     "https://naplesgolfguy.com/golf-community/naples-golf-communities/",
     "https://naplesgolfguy.com/golf-community/bonita-springs-estero-golf-communities/",
     "https://naplesgolfguy.com/golf-community/fort-myers-golf-communities/",
+    "https://naplesgolfguy.com/golf-community/bundled-golf-communities/",
+    "https://naplesgolfguy.com/golf-community/equity-golf-communities/",
+    "https://naplesgolfguy.com/golf-community/luxury-golf-communities/",
 ]
 
 FIFTYFIVE_PLACES_AREA_URLS = [
@@ -67,7 +78,7 @@ def parse_55places_directory(markdown: str) -> dict[str, str]:
 
 
 def build_discovery_maps(fetch: FetchFn) -> tuple[dict[str, str], dict[str, str]]:
-    """Fetch every directory/nav page for both sources (5 fetches total — a
+    """Fetch every directory/nav page for both sources (8 fetches total — a
     one-time discovery cost, not a per-community sweep) and merge into two
     normalized-name -> slug maps. A page that fails to fetch (empty markdown)
     is skipped, never raises — partial discovery still beats none."""

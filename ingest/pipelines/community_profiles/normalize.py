@@ -11,7 +11,7 @@ import re
 
 _SUFFIX_RE = re.compile(
     r"\b("
-    r"GOLF\s*&\s*COUNTRY\s*CLUB|GOLF\s+AND\s+COUNTRY\s+CLUB|"
+    r"GOLF\s*&\s*COUNTRY\s*CLUB|GOLF\s+AND\s+COUNTRY\s+CLUB|GOLF\s+COUNTRY\s+CLUB|"
     r"COUNTRY\s+CLUB|GOLF\s*&\s*CC|GOLF\s+CLUB|"
     r"COMMUNITY\s+ASSOCIATION,?\s*INC\.?|HOMEOWNERS\s*'?\s*ASSOCIATION,?\s*INC\.?|"
     r"ASSOCIATION,?\s*INC\.?|CC|INC\.?"
