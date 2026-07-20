@@ -1,3 +1,66 @@
+## 2026-07-20 (Opus 4.8 · main) — Campaign simulator: all 7 lifecycle recipes driven as ONE campaign, teaser → sold, into a real inbox
+
+Operator ask: drive the email builder through a full campaign on a REAL new listing — teaser to
+sold — feeding it a property description plus fake price-cut and sold events on a schedule, letting
+it find its own comps, sending in order to hello@swfldatagulf.com. Build the program, author nothing
+in the emails by hand, and SAVE the program for the next time emails break.
+
+Built `scripts/email/campaign-sim.mts` + `lib/deliverable/campaign-sim/events.ts` (TDD, 11 tests).
+Spec with a full failure-modes table: `docs/superpowers/specs/2026-07-20-campaign-sim-design.md`.
+Check: `campaign_sim_live_verify`.
+
+ARCHITECTURE (advisor-checked before writing any code). The sim enters through `authorDoc` — the
+same call the Lab's Build box fires — and NEVER calls a recipe builder directly. That was the
+deciding constraint: the two layers that actually broke live inside authorDoc (07/13 prompt-regex
+dispatch killed 15 of 17 recipes; 07/19 subject resolution shipped empty skeletons with a 200), so
+a program that bypassed it would prove nothing about the thing just fixed. Fake data therefore
+enters BELOW authorDoc at the data-fetch boundary, via `mock.module` in the sim process only, both
+mocks call-through-then-patch: `resolve-subject` runs for real then takes the stage's cut layered
+on; `comp-helper` runs for real (it finds its own comps, per the ask) and only the subject's own
+row is patched to a recorded sale on the sold stage — which just-sold.ts documents as the ONLY
+honest source of a close. ZERO production files changed; no prod file gained an injection port.
+Verified `mock.module` intercepts transitively from a plain Bun script with a 10-line probe first.
+
+Subject: 8348 Southwindbay Cir, Fort Myers FL 33908 — real active Lee listing (3/2, 1,978 sq ft,
+$659,000), real photo, real specs, real comps. Three invented inputs only, all named in the spec:
+the MLS remarks (no vendor sells them — lane 2 is the agent's own paste), a $24,000 cut at stage 5,
+a $628,500 close at stage 7.
+
+RESULT: 7/7 built, all per-stage assertions passed, all URL lints clean. Campaign continuity holds
+across stages — the sold email's List Price cell carries the REDUCED $635,000 forward, list-to-sale
+99%, $/sq ft $318 = 628,500 ÷ 1,978, sold date 07/20/2026. Price-improved shows cut $24,000 / new
+$635,000 / previous $659,000, and previous − cut = current. The truth gates fired three times and
+DROPPED invented claims unprompted (a "before it hits the market" sequence, a comparative "above",
+and on just-sold a "below its original ask" plus unanchored numbers) — the gates working, not
+failing.
+
+FOUR DEFECTS FOUND ON THE FIRST RUN — all logged as checks, none fixed autonomously:
+- `blast_url_lint_rejects_webfont_link` (defect) — `email-head.ts:41` injects a Google Fonts
+  `<link>` for any doc using Playfair Display / Lato / Montserrat (3 of 6 BRAND_FONTS), and
+  `url-lint.ts` PLATFORM_HOSTS holds only the swfldatagulf.com pair, so the blast route hard-422s
+  `url_violation` on any real user's webfont doc. The link is ENGINE-owned, same class as the
+  view-online/unsubscribe links the lint already allows by host. Not patched: it is a security gate
+  on a live send route (RULE 1 ask-first). The sim passes the engine URLs explicitly, read from
+  BRAND_FONTS so a new family cannot silently fall outside the list.
+- `comps_no_size_band_guard` (defect) — the live comp set returned 460 sq ft and 684 sq ft rows
+  against a 1,978 sq ft subject; all clear `isComparableHome` (beds + sqft + positive price). The
+  email then correctly reports the ask sits $85/sq ft above the ENTIRE range — arithmetically true,
+  directionally misleading, because half the set is not comparable by size. Same CLASS as the
+  documented vacant-lot trap, one level up. The framing is right; the INPUT SET is wrong.
+- `raw_property_type_enum_in_email` (defect) — the Type cell renders `single_family` verbatim.
+- Brand profile has no `business_address`, so every footer renders today's deliberate CAN-SPAM
+  visibility nudge in the SENT output. Working as designed (this morning's commit); it is telling
+  us to populate the brand.
+
+Also caught pre-send: reading `NEXT_PUBLIC_SITE_URL` put a `http://localhost:3000` "View this
+report online" link in an email bound for a real inbox — the sim now pins the production base URL
+and takes `--base` to override. `tmp-rainbow-recipe-send.mts` carries the same trap.
+
+RE-RUN: `bun scripts/email/campaign-sim.mts` (dry run, writes HTML to gitignored runs/) ·
+`--send` · `--now` (no waiting) · `--only <recipe>` · `--send --resume <runId>` after a mid-run
+death. State file per run; a sent stage is never re-sent without `--resend`; recipients are
+hard-allowlisted.
+
 ## 2026-07-20 (Sonnet 5 · main) — Email Lab fix set: closed the "does it actually build" gap advisor caught
 
 Follow-up to the 30-agent Email Lab fix session below. Before reporting the 10 fixes as done,
