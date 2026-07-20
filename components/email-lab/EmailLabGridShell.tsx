@@ -394,6 +394,14 @@ export function EmailLabGridShell({
   const [brandLoaded, setBrandLoaded] = useState(false);
   const [autoBuildGaps, setAutoBuildGaps] = useState<BrandNeed[] | null>(null);
   const autoBuildFired = useRef(false);
+  // Set the instant the visitor touches the canvas (selects a block, edits a field,
+  // drags/resizes) — BEFORE brandLoaded/layoutOfferResolved land. Without this, a fast
+  // visitor who starts typing into the seed's placeholder text the moment the page
+  // paints loses every keystroke: the mount auto-build fires a beat later, `commit()`
+  // replaces the whole doc (new block ids) out from under their cursor, and
+  // `setSelectedId(null)` closes the side panel they'd have fallen back to. Once this
+  // is true the silent auto-build never fires and never applies — their own edit wins.
+  const userInteractedRef = useRef(false);
   // Async callbacks (mount effects) capture a stale `branding` — the ref is what they
   // read so the build signs with the brand that actually landed, not the empty blob
   // the component mounted with.
@@ -446,6 +454,7 @@ export function EmailLabGridShell({
   const idleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function commit(next: EmailDoc) {
+    userInteractedRef.current = true;
     editingRef.current = false;
     if (idleRef.current) clearTimeout(idleRef.current);
     // Footer-last invariant at the ONE write chokepoint: whatever an add, drag,
@@ -611,6 +620,11 @@ export function EmailLabGridShell({
         return;
       }
       if (data.doc) {
+        // The fetch above can take a couple seconds; a visitor who clicked into a
+        // block or typed a character while it was in flight has already started
+        // hand-authoring. Applying this response now would silently replace their
+        // doc (new block ids) and deselect whatever they had open — drop it instead.
+        if (userInteractedRef.current) return;
         const parsed = EmailDocSchema.safeParse(data.doc);
         if (parsed.success) {
           // brandTokens (the prop) is undefined on the standalone grid, so falling
@@ -643,7 +657,14 @@ export function EmailLabGridShell({
     // people come through would silently rebuild the standard grid and never ask
     // whether they wanted the one they made. "They aren't forced to start over every
     // build" has to be true on EVERY door, not just the ones that happen to stop.
-    if (!autoGenerate || !brandLoaded || !layoutOfferResolved || autoBuildFired.current) return;
+    if (
+      !autoGenerate ||
+      !brandLoaded ||
+      !layoutOfferResolved ||
+      autoBuildFired.current ||
+      userInteractedRef.current
+    )
+      return;
     const gaps = typableGaps(autoBuildNeeds ?? [], brandingRef.current);
     if (gaps.length > 0 || savedLayoutOffer) {
       setAutoBuildGaps(gaps); // may be [] — the popup then carries ONLY the layout ask
@@ -1780,7 +1801,13 @@ export function EmailLabGridShell({
             <GridCanvas
               doc={doc}
               selectedId={selectedId}
-              onSelectBlock={setSelectedId}
+              onSelectBlock={(id) => {
+                // A click into any block (before they've typed a single character) is
+                // already engagement — it must be enough to cancel the pending silent
+                // auto-build, same as commit() does for an actual edit.
+                if (id !== null) userInteractedRef.current = true;
+                setSelectedId(id);
+              }}
               onChangeDoc={(next, opts) =>
                 opts?.autoHeightOnly ? patchPresentDoc(next) : commit(next)
               }

@@ -1,3 +1,32 @@
+## 2026-07-20 (Sonnet 5 · main) — Email Lab: auto-build race that ate keystrokes and deselected the block, fixed
+
+Operator screenshotted the Hero block's "Prose" field (pre-filled seed placeholder text) and said
+typing did nothing, then "why doesn't it fall back to the side panel." Traced the arrival flow
+(`ProjectEmailLabClient.tsx` → `EmailLabGridShell.tsx`): picking a template and typing an
+address/ZIP arms a mount-time auto-build (`runAutoBuild`) that fires once brand + saved-layout
+lookups resolve — no gate checks whether the visitor has already started clicking/typing. If the
+AI response lands while they're mid-edit, `commit()` silently replaces the ENTIRE doc (new block
+ids — the old contentEditable DOM node is gone) and `setSelectedId(null)` closes whatever side
+panel they had open. Operator's own description confirmed the mechanism exactly: "picked template,
+put in address, didn't build the template I picked and changed it up entirely... click and
+couldn't write, but could write in side panel."
+
+**Fix:** `userInteractedRef` in `EmailLabGridShell.tsx` — set the instant a block is selected or
+any edit is committed. Gates the mount-effect auto-build (skips firing if already set) AND is
+re-checked right before applying the AI response in `runAutoBuild` (drops the response instead of
+overwriting if the visitor engaged while the fetch was in flight). 4-site diff, `bunx next build`
+clean.
+
+**Not independently reproduced live** — local dev-server testing was confounded by a second live
+session's parallel edits (Fast Refresh reloads mid-test, a real AI build call that hung ~40s under
+the churn) and I have no login for the operator's real account/session. Shipping on the strength of
+the operator's own description matching the traced mechanism line-for-line, not a captured
+before/after. If it recurs, the next lead is contrast: an AI-authored `sectionBg` in a non-hex
+format (rgba/named color) would silently skip the dark-band text-color flip in `on-dark.ts`,
+putting invisible dark-on-dark prose text on a dark band — sidebar inputs are always dark-on-white
+regardless of doc colors, which would explain "couldn't write on canvas, could write in sidebar" as
+a SECOND, separate bug even after this race is closed.
+
 ## 2026-07-20 (Sonnet 5 · wt/email-lab-upload-error-toast) — Email Lab "Choose a file" traced to a silent upload-error swallow, fixed
 
 Operator reported the Email Lab photo-upload button "doesn't work" (screenshot of the Featured
