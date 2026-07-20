@@ -1,0 +1,66 @@
+[
+  {
+    "internal_doc_id": "19764956",
+    "doc_type": "DEED",
+    "consideration_usd": 10.0,
+    "record_date": "2026-07-16",
+    "subdivision": "RESERVE AT ESTERO",
+    "parcel_strap": "22-46-25-E4-10000.1700"
+  },
+  {
+    "internal_doc_id": "19764959",
+    "doc_type": "DEED",
+    "consideration_usd": 10.0,
+    "record_date": "2026-07-16",
+    "subdivision": "THE SANDARAC",
+    "parcel_strap": "03-47-24-W1-0280A.6010"
+  },
+  {
+    "internal_doc_id": "19764961",
+    "doc_type": "DEED",
+    "consideration_usd": 500000.0,
+    "record_date": "2026-07-16",
+    "subdivision": "RESERVE AT ESTERO",
+    "parcel_strap": "22-46-25-E4-10000.1800"
+  },
+  {
+    "internal_doc_id": "19764970",
+    "doc_type": "DEED",
+    "consideration_usd": 304900.0,
+    "record_date": "2026-07-16",
+    "subdivision": "COLONIAL COUNTRY CLUB",
+    "parcel_strap": "35-44-25-P1-01400.0890"
+  },
+  {
+    "internal_doc_id": "19764980",
+    "doc_type": "DEED",
+    "consideration_usd": 3600000.0,
+    "record_date": "2026-07-15",
+    "subdivision": "GULF HARBOUR",
+    "parcel_strap": "30-45-24-01-00001.0010"
+  },
+  {
+    "internal_doc_id": "19764990",
+    "doc_type": "DEED",
+    "consideration_usd": 10.0,
+    "record_date": "2026-07-15",
+    "subdivision": "LEHIGH ACRES",
+    "parcel_strap": "12-45-26-05-00100.0010"
+  },
+  {
+    "internal_doc_id": "19765001",
+    "doc_type": "DEED",
+    "consideration_usd": 425000.0,
+    "record_date": "2026-07-14",
+    "subdivision": "PELICAN PRESERVE",
+    "parcel_strap": "01-45-25-P2-00200.0020"
+  },
+  {
+    "internal_doc_id": "19765010",
+    "doc_type": "DEED",
+    "consideration_usd": 1.0,
+    "record_date": "2026-07-14",
+    "subdivision": "CAPE CORAL",
+    "parcel_strap": "18-44-23-C1-00300.0030"
+  }
+]

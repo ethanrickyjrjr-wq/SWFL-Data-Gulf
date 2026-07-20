@@ -2146,6 +2146,49 @@ not_yet_running:
         as_of: "07/07/2026"
         source_label: "realtor.com (via SteadyAPI)"
 
+  # ── Lee Clerk official records (DEED docs) — Operation Dumbo Drop, parked ─────
+  # SPLIT PIPELINE: the LOAD half is automated (ingest-lee-deed-official-records.yml
+  # merges committed raw/*.json into data_lake.lee_deed_official_records daily,
+  # idempotent on internal_doc_id). The FETCH half is MANUAL and cannot be automated:
+  # Akamai Bot Manager blocks ALL tested unattended access to or.leeclerk.org —
+  # crawl4ai, a CDP-driven Chromium, plain curl, and curl_cffi with full Chrome124 TLS
+  # impersonation all failed; only a genuine human-launched browser session got through
+  # (verified live 07/19-07/20/2026 — see the pipeline README "Delivery mechanism").
+  # A human captures each day's DEED pull into raw/<YYYY-MM-DD>.json; the load cron
+  # folds it in on the next tick.
+  #
+  # PARKED / probe-excluded because CONTENT only advances on a manual drop — a freshness
+  # probe under pipelines: would false-RED on every quiet day. The workflow's cron is
+  # COMMENTED until the first green load (migration must be applied first — see the
+  # workflow header); the known_drift below is FORWARD-READY: the moment the cron is
+  # uncommented, check_freshness still won't probe not_yet_running:, and that
+  # parked_but_scheduled state is already tracked (RULE 2.4).
+  # Graduation is when a backfill cadence is decided: promote to pipelines: with
+  # freshness_table: data_lake.lee_deed_official_records + freshness_column: record_date
+  # (the CONTENT date — NOT _ingested_at, which a delete-insert merge bumps every run).
+  - name: lee_deed_official_records
+    workflow: ingest-lee-deed-official-records.yml
+    consuming_pack: lee-deed-records-swfl
+    known_drift: # forward-ready for when the (currently commented) load cron is enabled
+      - { rule: parked_but_scheduled, check: lee_deed_load_parked_but_scheduled }
+    lane: tier-2
+    cadence_days: 1 # the LOAD is automatable daily; the FETCH (manual) sets true content cadence
+    tolerance_multiplier: 2.0
+    parked: true # shows yellow on ops, not red — manual-fetch ODD source, by design
+    note: "Parked ODD source: LOAD automatable (daily merge of committed raw/*.json — cron COMMENTED until migration applied + first green manual load), FETCH manual — Akamai blocks unattended access to or.leeclerk.org (crawl4ai + CDP Chromium + curl + curl_cffi-Chrome-TLS all failed 07/20/2026). Consumer lee-deed-records-swfl ships empty-tolerant. Backfill a little at a time per operator 07/20/2026; promote to pipelines: (freshness_column: record_date) once a backfill cadence is set."
+    # Idempotent merge key: internal_doc_id (stable numeric doc id, README idx 25).
+    source_scope:
+      confirmed_total:
+        value: 20
+        summary: "20 meaningful positional columns decoded per deed row into data_lake.lee_deed_official_records: status, consideration (raw + derived USD), grantors[], grantees[], record_date, doc_type, book_type, book, page, clerk_file_number, legal_full, lot, block, unit, subdivision, phase, section, township, range, internal_doc_id — plus a derived parcel_strap (lee_parcels join key) and ODD provenance columns."
+        source: "our ingest (LOAD half of ingest/pipelines/lee_deed_official_records)"
+      source_ceiling:
+        value: 27
+        summary: "The GetSearchResults DataTables response exposes 27 positional columns (idx 0-26; see the README column-mapping table — there is no public vendor API doc). We discard 3 UI-only columns (0 row-counter, 1 viewed-icon HTML, 2 add-to-cart HTML), leave idx 14 (doc-image links) and the blank/unconfirmed idx 5/24/26 unparsed. TWO real SOURCE-side completeness gaps, not our omission: grantor/grantee lists truncate past ~3 parties with a literal '...' marker, and doc types beyond DEED (MORTGAGE, LIEN, CERTIFICATE OF TITLE, PLAT, ...) are available but not currently pulled."
+        as_of: "07/16/2026"
+        source_url: "https://or.leeclerk.org/LandMarkWeb/search/index?theme=.blue&section=searchCriteriaDocuments&quickSearchSelection="
+        source_label: "Lee County Clerk of Courts — Official Records Search (LandMarkWeb)"
+
 # ── Tables intentionally excluded from the probe — DO NOT ADD ────────────────
 # NARRATIVE ONLY. The machine-readable authority is the `coverage_exempt:` block at the
 # END OF THIS FILE — Phase 2's zero-coverage check reads that, not these comments. Keep the

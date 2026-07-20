@@ -60,6 +60,26 @@ ad-hoc greps.
 
 ---
 
+### 9. Quoting a SPEC's number as if it were a live fact — the "AI sucks" moment
+07/20/2026. Operator asked "how many are floored?" I had already told him — in a plan doc and in
+chat — that the active book was **9.9% floored**. That number came from reading
+`docs/superpowers/specs/2026-07-19-sell-odds-model-design.md`, written one day earlier. I never
+queried. Live truth on 07/20: **54.2% floored** (18,098 of 33,373). Off by 5.5×.
+The spec was not wrong when written — the 07/18 backfill genuinely landed ~90%. It was then
+**wiped** (17,127 `listed_date`s; parked check `dom_backfill_repull_17k`). A day-old document
+described a state that no longer existed.
+**Rule:** a number in a spec/plan/README is a HYPOTHESIS with a timestamp, never a served fact.
+Any count, share, or percentage the operator asks for gets queried live before it is spoken —
+even if a document "just" said it, even if I wrote that document this session.
+**Second-order damage:** the wrong number propagated into
+`docs/superpowers/plans/2026-07-20-listing-signal-assembly.md` and shaped its sequencing (a
+Collier-inclusive step 1 planned against a book that is 14.0% covered in Collier). Corrected
+same session.
+**No free fix exists:** probed whether `listing_week` retained the wiped dates — **0 of 18,098
+floored addresses are recoverable** from our own panel (its dates are a subset of the intact
+ones). De-flooring REQUIRES the parked ~17.2k vendor re-probe. Everything downstream must
+suppress rather than pretend until the operator authorizes it.
+
 ### 10. Session cost / usage credits — DO NOT SPECULATE ABOUT THIS AGAIN
 07/20/2026. The cost hook printed $9 → $12 → $30 → $59 across one session. I first raised it
 to the operator as a concern, then — when he said he's on Max — reversed and told him it "means
@@ -80,6 +100,24 @@ to compact or start fresh, not to guess at billing.
 ### 9. Is `_ASSISTANT/SCRATCHPAD.md` (this file) supposed to be tracked?
 It currently IS tracked — it holds the operator's verbatim quotes and internal gripes, which
 ship to GitHub. `_RESEARCH/` got gitignored 07/20; this file did not. Operator's call.
+
+### 11. Quoting a SPEC's number as if it were live — the "AI sucks" moment
+07/20/2026. Operator asked "how many are floored?" I had already told him — in chat and in a
+plan doc — that the active book was **9.9% floored**. That came from reading
+`docs/superpowers/specs/2026-07-19-sell-odds-model-design.md`, written ONE DAY earlier. I never
+queried. Live truth: **54.2% floored** (18,098 of 33,373 active). Off by 5.5×.
+The spec wasn't wrong when written — the 07/18 backfill genuinely landed ~90%, then got **wiped**
+(17,127 `listed_date`s; parked check `dom_backfill_repull_17k`). A day-old doc described a state
+that no longer existed.
+**Rule:** a number in a spec/plan/README is a HYPOTHESIS with a timestamp, never a served fact.
+Any count/share/percentage the operator asks for gets queried live before it is spoken — even if
+a doc "just" said it, even if I wrote that doc this session.
+**Second-order damage:** the wrong number propagated into
+`docs/superpowers/plans/2026-07-20-listing-signal-assembly.md` and shaped its sequencing (a
+Collier-inclusive step 1 planned against a book that is 14.0% covered in Collier).
+**No free fix exists:** probed whether `listing_week` retained the wiped dates — **0 of 18,098
+floored addresses recoverable** from our own panel. De-flooring REQUIRES the parked ~17.2k vendor
+re-probe (operator declined 07/20). Everything downstream must suppress, not pretend.
 
 ### 7. `_ASSISTANT/research/` tracked and on GitHub — RESOLVED 07/20/2026
 Found 07/20/2026 while building the index. `.gitignore` line 201 ignores only

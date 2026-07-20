@@ -1,0 +1,72 @@
+name: lee-deed-official-records load
+
+# LOAD HALF ONLY. This workflow NEVER fetches from the Lee Clerk — the fetch is
+# manual because Akamai Bot Manager blocks all unattended access (crawl4ai, CDP
+# Chromium, curl, curl_cffi w/ full Chrome TLS impersonation all failed; only a
+# human-launched browser session gets through). See
+# ingest/pipelines/lee_deed_official_records/README.md "Delivery mechanism — the
+# actual blocker" and the Operation Dumbo Drop standard
+# (docs/superpowers/plans/2026-06-05-operation-dumbo-drop.md).
+#
+# A human drops raw/<YYYY-MM-DD>.json into the pipeline dir (README "How to pull
+# the next day"); this job reads every committed raw file and MERGES it into
+# data_lake.lee_deed_official_records on internal_doc_id. It is idempotent — safe
+# to run on this daily schedule even when no new raw file has landed since the last
+# run (it just re-merges what's there). The cadence_registry entry is parked /
+# probe-excluded because CONTENT only advances on a manual drop (a freshness probe
+# would false-RED); tracked by check `lee_deed_load_parked_but_scheduled`.
+
+on:
+  # CRON COMMENTED until the first green load (franchise-outcomes precedent — a
+  # parked source's write path is unproven on a schedule). The migration
+  # (migrations/20260720_lee_deed_official_records.sql) MUST be applied BEFORE the
+  # first scheduled run: ENGINE_ENABLED='true' in this repo, so an uncommented cron
+  # would fire and the dlt role would AUTO-CREATE the table with dlt's own types, no
+  # service_role GRANT (brain can't read it), and no _ingested_at column — and then
+  # CREATE TABLE IF NOT EXISTS is a permanent no-op. Sequence: (1) apply migration,
+  # (2) one green manual load via workflow_dispatch confirms 191 rows, (3) THEN
+  # uncomment the cron below. Uncommenting activates the parked_but_scheduled state
+  # already tracked by known_drift in cadence_registry (check
+  # lee_deed_load_parked_but_scheduled).
+  #
+  # Daily 11:17 UTC — the LOAD is automatable even though the FETCH is not.
+  # schedule:
+  #   - cron: "17 11 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — read + normalize the raw/*.json files and report; skip the dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  load:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Load Lee deed official records (merge committed raw/*.json)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.lee_deed_official_records.pipeline --dry-run
+          else
+            python -m ingest.pipelines.lee_deed_official_records.pipeline
+          fi

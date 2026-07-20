@@ -46,6 +46,17 @@ replacement runs, every consumer repoints, and the operator signs off (RULE 1).
 
 **Traps (nuance the cells can't hold):**
 - **T1 — aggregate DOM is not trustworthy today.** Row-level `listing_dom` is fine; the *aggregate* is censored — ~63% of the active book is a `first_seen` floor (07/18 backfill de-flooring it). A 30-sec "typical DOM" off the aggregate is confidently wrong right now.
+  **UPDATE 07/20/2026 (live probe — the 07/18 backfill was WIPED, not merely incomplete):**
+  33,373 active rows, **18,098 floored (54.2%)**, 15,275 real (45.8%). The censoring is now
+  **wildly uneven by county**, which is the load-bearing fact: **Lee 58.9% real** (13,893 of
+  23,579) vs **Collier 14.0%** (1,214 of 8,667) and **Hendry 14.9%** (168 of 1,127). A regionwide
+  or Collier aggregate is an artifact of whichever listings survived the wipe; a Lee aggregate is
+  merely thin. **Suppress aggregates on COVERAGE, not just sample size** — a 60-row Collier ZIP
+  median can clear a sample floor while representing 14% of that ZIP's book.
+  Not recoverable from `listing_week` (0 of 18,098 — probed 07/20). Only fix is the parked
+  `dom_backfill_repull_17k` (~17.2k vendor calls), declined by the operator 07/20.
+  Dirty tail on the real rows: 34 over 5 years, 2 over 10, max 7,550 days — apply a sanity
+  ceiling before serving any percentile.
 - **T2 — ZHVI is a typical-value INDEX, not a median.** Resolved harder later on 07/18: ZHVI left the value-serving user surfaces entirely (metro charts → `redfin_metro_sold_pivoted`, homepage map + email → realtor per-ZIP median sold); it survives only doing index work — YoY growth panels + investor yield calc, no "median" claim anywhere. The label lesson generalizes to ANY index (ZORI's "Median Monthly Rent" panel is the same violation, tracked `zori_median_monthly_rent_label`). Same ZIP (33901): assessed $244,810 / ZHVI $261,247 / deed-sold $269,900 / list $309k–$340k — never blend.
 - **T3 — 0–1 vs 0–100 unit trap.** `price_reduced_share` is **0–100** in our `listing_momentum_stats` (20.1) but a **0–1 fraction** in realtor's `market_heat_core_swfl` (0.232). Both convert correctly today; a future swap is a silent 100×.
 - **T4 — the most dangerous name in the system.** `market-temperature-swfl` does NOT carry market temperature (it's a rent-yield ratio). For "how hot is the market," use `market-heat-swfl`. Grabbing by name gets the wrong brain.

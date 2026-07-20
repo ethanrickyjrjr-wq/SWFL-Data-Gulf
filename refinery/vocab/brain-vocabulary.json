@@ -6990,6 +6990,118 @@
       "status": "active",
       "scope_note": "Lapsed (primary_status != C) / all rows for FL DBPR boards 06+08 in Lee+Collier. Bearish threshold >0.10 (>10%); bullish threshold <0.05 (<5%). No historical baseline on first run — direction defaults to neutral until second snapshot enables trend comparison. DBPR annual report baseline ~8-9% statewide. [CITATION_NEEDED — verify figure against live DBPR annual report]"
     },
+    "deed_records_total_lee": {
+      "id": "deed_records_total_lee",
+      "prefLabel": "Recorded Deeds Loaded — Lee County",
+      "altLabels": [
+        "Lee recorded deeds total",
+        "Lee deed records loaded"
+      ],
+      "raw_slugs": [
+        "deed_records_total_lee"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "lee-deed-records-swfl"
+      ],
+      "value_type": "count",
+      "unit": "deeds",
+      "value_range": [
+        0,
+        5000000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of all recorded DEED rows loaded into data_lake.lee_deed_official_records from the Lee County Clerk of Courts LandMarkWeb official-records feed. Backfill accumulates from a manual daily capture (FETCH is blocked to automation by Akamai); this is a corpus-size figure, not a market rate."
+    },
+    "deed_records_30d_lee": {
+      "id": "deed_records_30d_lee",
+      "prefLabel": "Deeds Recorded — Lee County (Trailing 30 Days)",
+      "altLabels": [
+        "Lee deed recording velocity 30d",
+        "Lee recorded deeds last 30 days"
+      ],
+      "raw_slugs": [
+        "deed_records_30d_lee"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "lee-deed-records-swfl"
+      ],
+      "value_type": "count",
+      "unit": "deeds",
+      "value_range": [
+        0,
+        100000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of Lee County recorded DEED documents with record_date in the trailing 30 days. Coincident recording-activity signal (volume context), not a leading price signal; on a thin early backfill it is dominated by a few days and is indicative only."
+    },
+    "deed_arms_length_30d_lee": {
+      "id": "deed_arms_length_30d_lee",
+      "prefLabel": "Arm's-Length Deeds — Lee County (Trailing 30 Days)",
+      "altLabels": [
+        "Lee arm's-length deeds 30d",
+        "Lee real sales deeds last 30 days"
+      ],
+      "raw_slugs": [
+        "deed_arms_length_30d_lee"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "lee-deed-records-swfl"
+      ],
+      "value_type": "count",
+      "unit": "deeds",
+      "value_range": [
+        0,
+        100000
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of Lee County recorded DEEDs (trailing 30 days) with consideration > $100 — arm's-length sales, separated from nominal transfers. Consideration <= $100 (e.g. $10 deeds) is a quitclaim/family/trust transfer, not a market sale (README)."
+    },
+    "deed_nominal_transfer_share_lee": {
+      "id": "deed_nominal_transfer_share_lee",
+      "prefLabel": "Nominal-Transfer Share of Recorded Deeds — Lee County (Trailing 30 Days)",
+      "altLabels": [
+        "Lee nominal deed share",
+        "Lee non-arm's-length deed share 30d"
+      ],
+      "raw_slugs": [
+        "deed_nominal_transfer_share_lee"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "lee-deed-records-swfl"
+      ],
+      "value_type": "ratio",
+      "unit": "ratio",
+      "value_range": [
+        0,
+        1
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Share of trailing-30d Lee County recorded deeds with consideration <= $100 (nominal / non-arm's-length transfers) out of all classifiable trailing-30d deeds. A high share means headline deed counts overstate genuine market sales; reported as fact, no directional polarity assigned."
+    },
     "licenses_cbc_share_swfl": {
       "id": "licenses_cbc_share_swfl",
       "grade": {

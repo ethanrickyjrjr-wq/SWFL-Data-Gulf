@@ -366,4 +366,14 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
       "SWFL daily sourced freshness snapshot — today's cited median asking price (Cape Coral / Fort Myers / Naples, from live active-listing inventory) and 30-year fixed mortgage rate, each provenance-gated to a real source URL, with ZIP-grain Baseline-Delta projections ([INFERENCE]).",
     ttl_seconds: 86400,
   },
+  {
+    // Scope DUPLICATED VERBATIM from leeDeedRecordsSwfl.scope in lee-deed-records-swfl.mts.
+    // Gate 5 (catalog.test.mts) checks catalog ⇆ PER_PACK_REGISTRY parity on
+    // id/domain/scope/ttl — edit both strings together.
+    id: "lee-deed-records-swfl",
+    domain: "real-estate",
+    scope:
+      "Lee County recorded-deed activity from the Clerk of Courts official records (LandMarkWeb) — deed recording velocity and the arm's-length vs nominal-transfer mix. Reports counts as fact; does not infer market direction or a sale-price median from deed counts.",
+    ttl_seconds: 86400,
+  },
 ];

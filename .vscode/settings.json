@@ -24,6 +24,7 @@
   "typescript.preferences.includePackageJsonAutoImports": "off",
   "typescript.disableAutomaticTypeAcquisition": true,
   "editor.formatOnSave": false,
+  "python.terminal.activateEnvironment": false,
   "[json]": {
     "editor.formatOnSave": false,
     "editor.defaultFormatter": null,

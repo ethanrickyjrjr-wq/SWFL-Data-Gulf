@@ -1,9 +1,13 @@
 # lee_deed_official_records — Lee County Clerk recorded-document feed
 
-**Status: raw capture only. No dlt pipeline, no PackDefinition, no `data_lake.*` table yet.**
-Per `ingest/CLAUDE.md` brain-first rule, this stays out of Tier 2 until a consuming brain's
-PackDefinition ships in the same PR. Until then this directory just accumulates dated raw pulls
-so backfill can proceed incrementally without re-deriving the API each session.
+**Status (07/20/2026): LOAD pipeline + consuming brain shipped.** The split-pipeline is live per
+Operation Dumbo Drop: `pipeline.py` (LOAD) merges every committed `raw/*.json` into
+`data_lake.lee_deed_official_records` on `internal_doc_id`; the consuming brain
+`refinery/packs/lee-deed-records-swfl.mts` reads it (empty-tolerant). The FETCH stays MANUAL — see
+"Delivery mechanism — the actual blocker" below (Akamai). Migration:
+`migrations/20260720_lee_deed_official_records.sql`. Cadence: `ingest/cadence_registry.yaml`
+(`lee_deed_official_records`, parked / probe-excluded, `known_drift: parked_but_scheduled`).
+This directory still accumulates dated raw pulls so backfill proceeds incrementally.
 
 ## What this is
 

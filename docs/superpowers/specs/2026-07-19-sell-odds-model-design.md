@@ -36,6 +36,17 @@ One trained model, two deliverables:
   status flags (pending/contingent/foreclosure/new_construction/price_reduced), address_key.
   `data_lake.listing_dom` view: 33,267 active rows, 9.9% still date-floored (07/18 backfill
   ~90% landed; probe-on-use heals the rest). DOM is NOT a blocker.
+  **⚠️ SUPERSEDED 07/20/2026 — live probe of the same view.** The 07/18 backfill was WIPED after
+  this spec was written. Live: **33,373 active rows, 18,098 floored (54.2%), 15,275 real (45.8%)**
+  — Lee 13,893/23,579 (58.9%), **Collier 1,214/8,667 (14.0%)**, Hendry 168/1,127 (14.9%).
+  Restoration from `listing_week` is IMPOSSIBLE (0 of 18,098 recoverable — probed 07/20; the
+  panel's dates are a subset of the intact ones). Parked check `dom_backfill_repull_17k`
+  (~17.2k vendor calls) is the only path back, and the operator declined it on 07/20.
+  **DOM IS a blocker for Collier/Hendry cohorts** until that runs; Lee-only work is viable.
+  Real-DOM distribution over the 15,275: median 52 days, p25 10, p75 159, p90 322; 6,133 at 90+
+  days, 3,257 at 180+. Dirty tail — 34 rows over 5 years, 2 over 10, max 7,550 days — needs a
+  sanity ceiling before any percentile is served or used as a feature.
+  The 9.9% line above is retained only to show what the spec assumed; it is not current.
 - **Labels are young.** `data_lake.listing_transitions` (the outcome record) starts
   06/27/2026: 195 sold, 43 withdrawn, 9,101 holding transitions as of 07/19/2026. Full
   90-day-labeled cohorts don't mature until late Sept 2026. **This is the binding clock.**

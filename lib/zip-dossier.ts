@@ -203,6 +203,11 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   // entry, so validateBrainGeo() throws on EVERY /r/zip-report/[zip] load (same
   // failure mode as the active-listings-swfl/market-heat-swfl incidents above).
   "communities-swfl": { grains: ["county"], covers: LEE_COLLIER },
+  // Lee County recorded-deed velocity + arm's-length/nominal mix, Clerk of Courts
+  // official records. LEE ONLY (Collier's clerk feed is a separate, unbuilt problem) —
+  // county grain (the table carries no zip/city field yet; parcel_strap is a lee_parcels
+  // join key, not a ZIP).
+  "lee-deed-records-swfl": { grains: ["county"], covers: [LEE] },
 };
 
 /**

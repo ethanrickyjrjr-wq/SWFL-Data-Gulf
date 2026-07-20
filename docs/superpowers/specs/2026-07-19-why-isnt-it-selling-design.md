@@ -21,7 +21,10 @@ window.
 We now hold the data both sides lack: de-floored per-listing days on market (07/18 backfill),
 cumulative DOM across relists, full price-cut event history, daily ZIP-grain typical DOM from our
 own book, and the FDOR parcel spine (prior sale price/date, year built, living area — verified
-live 07/18). ~4,700 Lee/Collier active listings sit 180+ days: an addressable, identifiable
+live 07/18). ~4,700 Lee/Collier active listings sit 180+ days **[⚠️ REVISED 07/20/2026 — live
+probe: 3,257 countable at 180+ and 6,133 at 90+, but only over the 15,275 rows with real DOM.
+The true 180+ population is HIGHER and currently unknowable — 18,098 floored rows can't be
+counted either way. Treat 3,257 as a FLOOR on the cohort, never its size.]**: an addressable, identifiable
 population.
 
 ## Positioning (locked)
@@ -64,6 +67,15 @@ agent-network badge.
 - `data_lake.listing_dom` view — the DOM authority: `dom_days`, `dom_is_floor`, `cdom_days`,
   pass-through listing columns. De-floored by the 07/18 `backfill_listed_date` run (in flight at
   spec time; ~98% vendor-date hit rate past the miss-head).
+  **⚠️ SUPERSEDED 07/20/2026 — live probe.** That backfill was WIPED. Live: 33,373 active rows,
+  **18,098 floored (54.2%)**, 15,275 real (45.8%). **Collier is only 14.0% covered** (1,214 of
+  8,667); Lee is 58.9% (13,893 of 23,579); Hendry 14.9% (168 of 1,127). Not recoverable from
+  `listing_week` (0 of 18,098 — probed 07/20). Only fix is the parked `dom_backfill_repull_17k`
+  vendor re-probe, declined by the operator 07/20.
+  **Consequence for v1:** the subject-home read stays honest anywhere (`dom_is_floor` is truthful
+  row by row), but every ZIP/cohort aggregate must suppress on COVERAGE, not just sample size — a
+  Collier ZIP median computed off 14% of its book is an artifact. Ship Lee-first; Collier/Hendry
+  get the area read only once coverage clears the floor.
 - `data_lake.zip_active_dom_median(zip)` — per-ZIP median over exact (non-floored) active rows,
   with `sample_size` (07/18 migration).
 - `data_lake.listing_transitions` — price cuts as discrete events (`from_state = to_state`,
