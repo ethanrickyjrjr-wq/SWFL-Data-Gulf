@@ -9,6 +9,9 @@ harmless), empty-tolerant, serves last-good rows on transient errors. Summary pa
 geo_ids, 1 vintage). Verified: bun test zip-report+zip-summary 51/51, bunx next build exit 0.
 Same root, no repoint — census_acs_zcta stays the ZIP quick-summary authority per data-roots.
 (Separate known issue, untouched: data_lake_anon_rest_leak check covers anon RLS on this table.)
+Gate 8 caught the follow-on: the shared loader read the table without isCoreScope, letting the
+quick-summary path serve any of the ~100 held ZIPs (43 out-of-scope). Loader now filters to core
+scope at the root — it IS the scope root; summary for an out-of-scope ZIP degrades to empty.
 
 ## 2026-07-19 (Fable 5 · main) — FRESHNESS PRECEDENCE promoted to data-roots RULE 5 (catalog-wide)
 

@@ -52,6 +52,8 @@ const WAIVERS = {
   "lib/geo/nearest-zips.ts":
     "cross-county BY DESIGN — 'nearby' for a buyer ignores county lines; it is a navigation rail, never a data merge",
   "refinery/lib/core-scope.mts": "is the root",
+  "lib/zip-summary/load.ts":
+    "names census_acs_zcta only in its provenance doc-comment — the actual read routes through lib/zip-report/census-acs-rows.ts (loadCensusAcsZctaRows), which filters via isCoreScope at the shared root",
   "lib/deliverable/recipes/agent-brand-intro.ts":
     "the farm-area ZIP driving the listing_active_stats chart resolves through PLACE_ZIP_CROSSWALK (parseReplyIntent/zipFromPromptPlace), whose PlaceZipEntry.county type is lee|collier only — a single .eq(zip_code) lookup against an in-scope-guaranteed ZIP, never a bulk scan",
   "lib/deliverable/recipes/review-reply.ts":

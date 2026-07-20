@@ -12,6 +12,7 @@
 
 // KNOWN-DEBT(data_lake: census_acs_zcta lives in the data_lake schema (typed public only))
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
+import { isCoreScope } from "@/refinery/lib/core-scope.mts";
 
 export interface CensusAcsZctaRow {
   geo_id: string;
@@ -50,7 +51,11 @@ export async function loadCensusAcsZctaRows(now = Date.now()): Promise<CensusAcs
       .from("census_acs_zcta")
       .select(CENSUS_ACS_COLUMNS);
     if (error || !data) return cached?.rows ?? [];
-    const rows = data as unknown as CensusAcsZctaRow[];
+    // Scope root: the table holds ~100 ZIPs but coverage is Lee + Collier (57).
+    // Filter HERE so no consumer can surface an out-of-scope county.
+    const rows = (data as unknown as CensusAcsZctaRow[]).filter(
+      (r) => typeof r.geo_id === "string" && isCoreScope(r.geo_id),
+    );
     cached = { rows, at: now };
     return rows;
   } catch {
