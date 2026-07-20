@@ -1,4 +1,4 @@
-from ingest.pipelines.community_profiles.pipeline import build_rows
+from ingest.pipelines.community_profiles.pipeline import build_rows, maybe_register_alias
 
 
 def _fake_fetch(url: str) -> str:
@@ -39,3 +39,16 @@ def test_build_rows_applies_hoa_comparison_by_normalized_name():
     ]
     rows = build_rows(seed, hoa_table=hoa_table, fetch=lambda url: "")
     assert rows[0]["hoa_fee_range"] == "$350–$550/mo"
+
+
+def test_maybe_register_alias_adds_new_entry():
+    aliases = {"heritage-bay": {"label": "Heritage Bay", "patterns": ["HERITAGE BAY"]}}
+    updated = maybe_register_alias("fiddlers-creek", "Fiddler's Creek", aliases)
+    assert updated["fiddlers-creek"] == {"label": "Fiddler's Creek", "patterns": ["FIDDLERS CREEK"]}
+    assert updated["heritage-bay"] == aliases["heritage-bay"]  # untouched
+
+
+def test_maybe_register_alias_is_a_noop_for_existing_slug():
+    aliases = {"heritage-bay": {"label": "Heritage Bay", "patterns": ["HERITAGE BAY"]}}
+    updated = maybe_register_alias("heritage-bay", "Heritage Bay Golf & Country Club", aliases)
+    assert updated["heritage-bay"]["label"] == "Heritage Bay"  # original label wins, not overwritten

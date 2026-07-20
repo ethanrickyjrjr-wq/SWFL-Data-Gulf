@@ -22,7 +22,7 @@ _SUFFIX_RE = re.compile(
 def normalize_community_name(name: str) -> str:
     """Uppercase, strip trailing marketed-name/entity suffixes, strip punctuation,
     collapse whitespace. "Heritage Bay Golf & Country Club" -> "HERITAGE BAY"."""
-    upper = name.upper().strip()
+    upper = name.upper().strip().replace("'", "")
     prev = None
     while prev != upper:
         prev = upper

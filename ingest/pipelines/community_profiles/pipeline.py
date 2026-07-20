@@ -67,8 +67,22 @@ def community_profiles_resource(rows: list[dict]):
     yield from rows
 
 
+def maybe_register_alias(slug: str, label: str, aliases: dict) -> dict:
+    """Add a new slug -> {label, patterns} entry when `slug` isn't already in
+    the shared fixture (fixtures/community-aliases.json, read by both this
+    pipeline's normalize.normalize_community_name callers and
+    refinery/lib/subdivision-aliases.mts). Existing entries are never
+    overwritten — a human already curated that label/pattern set."""
+    if slug in aliases:
+        return aliases
+    updated = dict(aliases)
+    updated[slug] = {"label": label, "patterns": [normalize_community_name(label)]}
+    return updated
+
+
 def run_pipeline(*, fetch: FetchFn) -> None:
     from ingest.lib.crawl_client import fetch_page_markdown  # live import, keeps build_rows pure
+    from ingest.lib.community_aliases import _FIXTURE_PATH, load_community_aliases
 
     seed = _load_seed()
     hoa_md = fetch_page_markdown(HOA_COMPARISON_URL)
@@ -84,6 +98,11 @@ def run_pipeline(*, fetch: FetchFn) -> None:
     )
     load_info = pipeline.run(community_profiles_resource(rows))
     load_info.raise_on_failed_jobs()
+
+    aliases = load_community_aliases()
+    for row in rows:
+        aliases = maybe_register_alias(row["community_slug"], row["label"], aliases)
+    _FIXTURE_PATH.write_text(json.dumps(aliases, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> int:

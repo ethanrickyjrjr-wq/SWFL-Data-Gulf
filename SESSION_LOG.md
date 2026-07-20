@@ -1,3 +1,36 @@
+## 2026-07-20 (Sonnet 5 · main) — community_profiles Task 8/9 finished; caught a prior session's runaway loop + a real apostrophe bug
+
+Operator flagged a SEPARATE window that had been "Worked for 2h 11m 58s" with nothing to show —
+its own text explained why: it had run Task 8 (the plan's 5-community sanity check,
+`docs/superpowers/plans/2026-07-20-community-profiles-amenity-scrape.md:1189`) as a 96-community,
+193+-fetch background sweep instead, then sat in a `/loop`-style resume cycle polling that
+background process every wake, printing "still waiting" and burning tokens for zero output. Diagnosed
+from the plan doc + `TaskList` (empty — nothing tracked live) + repo state (Tasks 1-7 committed clean,
+Task 8/9 never landed) — no code was touched to fix that window; it's a dead end, not resumed.
+
+**Task 8 (this session, correct scope):** `ingest/.venv` (Python 3.12, fresh — repo-root `.venv` is
+pinned to 3.14, which has no prebuilt `lxml` wheel for `crawl4ai`'s dep chain and fails a source
+build with no libxml2 headers; noted here since it'll bite the next Python ingest task too) +
+`uv pip install -r ingest/requirements.txt`. Ran the real `--dry-run --limit 5` synchronously — one
+command, ~2 minutes, no loop. Result: 2/4 verified communities came back clean (Fiddler's Creek,
+Heritage Bay), Grey Oaks partial (golf + amenities, no home_count — 55places had nothing under that
+slug), **Lely Country Club came back entirely null** — none of the 3 sources matched
+`lely-country-club`. Per the plan's own Step 2, that's the "needs a second discovery pass on slug
+variants before the real write" signal — flagged to operator, not silently pushed through.
+
+**Task 9:** added `maybe_register_alias()` + wiring into `run_pipeline()` per plan, TDD (failing
+tests first). The plan's own unmodified test (`test_maybe_register_alias_adds_new_entry`, expecting
+`"FIDDLERS CREEK"`) caught a real bug: `normalize_community_name()` was converting apostrophes to a
+SPACE (`"FIDDLER S CREEK"`) instead of dropping them like `slugify()` does — inconsistent apostrophe
+handling that would also silently break HOA-table-to-seed-name matching for any community with an
+apostrophe in its name. Fixed at the source (`normalize.py`), not just in the test. 21/21 tests pass.
+
+**Not done / needs operator call:** the real write (Task 9's `run_pipeline` persistence path was
+never executed — no live `data_lake.community_profiles` write happened this session) and the
+second discovery pass for unverified slugs. Committed locally, not pushed — awaiting go-ahead.
+
+---
+
 ## 2026-07-20 (Opus 4.8 · main) — Lot fragments SERVED: table rebuilt, 31,084 → 20,400 rows, zero homes lost
 
 Completes the entry below. Operator go ("just geet it") → dispatched the rebuild, which **failed**,
