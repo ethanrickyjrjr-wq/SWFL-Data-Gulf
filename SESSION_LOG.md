@@ -1,3 +1,22 @@
+## 2026-07-19 (Fable 5 · main) — zip-report JSON-LD SPECCED (Dataset+FAQPage) + freshness precondition dispatched
+
+Brainstormed + operator-approved: /r/zip-report/[zip] gets the proven Dataset+FAQPage markup —
+new pure zipReportJsonLd() in lib/jsonld.ts (decoupled input like communityJsonLd), one ld+json
+script next to ReportFooter, ranked signals verbatim with per-signal sources, FAQ only for cited
+signals, cap 8, empty→Dataset-only. RESEARCH (crawl4ai, Google Search Central, 07/19): FAQ rich
+results FULLY deprecated May 7 2026 (no Google Search feature for anyone); Dataset markup feeds
+Dataset Search only. AEO rationale (LLM crawlers citing us) unchanged — operator picked
+Dataset+FAQPage with that on the table. Deviation from existing helpers: NO raw freshness token in
+markup (formatted asOf + ISO dateModified) → existing helpers' token leak filed as check
+jsonld_raw_freshness_token_leak. Registered: spec docs/superpowers/specs/2026-07-20-zip-report-
+jsonld-design.md + check zip_report_jsonld_live_verify. FRESHNESS PRECONDITION (operator decree):
+served active-listings-swfl refined 02:29 UTC 07/19 but daily sweep landed ~04:30 UTC — one sweep
+behind; targeted leaf rebuild dispatch blocked by GitHub Actions minor incident (4x HTTP 503
+~00:50 UTC 07/20), background retry loop running (10x, 5-min spacing); on success: commit tripwire
+acceptance entry + master --no-force fold + verify served refined_at. Out of scope on purpose:
+/z/[zip], should-i-sell, speakable, RealEstateListing (no such page — verified). NEXT: operator
+spec review → writing-plans → implement.
+
 ## 2026-07-19 (Fable 5 · main) — data_lake anon REST leak CLOSED at the schema door (check data_lake_anon_rest_leak)
 
 Operator "fix this" = the OK the 07/18 check was waiting on. Twist found on re-audit: the two
