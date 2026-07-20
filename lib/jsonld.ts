@@ -301,3 +301,90 @@ export function communityJsonLd(community: CommunityJsonLdInput, freshnessToken:
   };
   return [place, faq];
 }
+
+/** Minimal decoupled shapes for the ZIP report page (same pattern as
+ *  `CommunityJsonLdInput` — the page imports CSS so only this helper is
+ *  bun-testable). `display` restates a served number VERBATIM. */
+export interface ZipReportJsonLdSignal {
+  label: string;
+  display: string;
+  sub?: string;
+  source?: { label: string; url: string };
+}
+
+export interface ZipReportJsonLdInput {
+  zip: string;
+  place: string | null;
+  county: string | null;
+  signals: ZipReportJsonLdSignal[];
+  /** MM/DD/YYYY prose date — NEVER the raw freshness token. */
+  asOf: string | null;
+  /** ISO YYYY-MM-DD for Dataset.dateModified (machine field). */
+  asOfIso: string | null;
+}
+
+/**
+ * Dataset + FAQPage for /r/zip-report/[zip]. FAQ entries exist ONLY for signals
+ * carrying a real source (no uncited answers); zero eligible → Dataset alone
+ * (a 0-question FAQPage is invalid schema.org — same guard as corridor/community).
+ */
+export function zipReportJsonLd(input: ZipReportJsonLdInput): object[] {
+  const { zip, place, county, signals, asOf, asOfIso } = input;
+  const where = place ? `${place}, ${zip}` : `ZIP ${zip}`;
+  const countyArea = county
+    ? {
+        "@type": "AdministrativeArea",
+        name: `${county} County, Florida`,
+        containedInPlace: SPATIAL,
+      }
+    : SPATIAL;
+
+  const dataset = {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    name: place
+      ? `${place} ${zip} Market Report — SWFL Data Gulf`
+      : `ZIP ${zip} Market Report — SWFL Data Gulf`,
+    description: `Home values, flood risk, and building permits for ${where}${
+      county ? ` in ${county} County, FL` : ""
+    } — cited to the source.`,
+    url: `${SITE}/r/zip-report/${zip}`,
+    ...(asOfIso ? { dateModified: asOfIso } : {}),
+    isAccessibleForFree: true,
+    publisher: PUBLISHER,
+    creator: CREATOR,
+    ...(LICENSE_URL ? { license: LICENSE_URL } : {}),
+    spatialCoverage: {
+      "@type": "Place",
+      name: place ? `${place}, FL ${zip}` : `ZIP ${zip}, Florida`,
+      containedInPlace: countyArea,
+    },
+    variableMeasured: signals.map((s) => ({
+      "@type": "PropertyValue",
+      name: s.label,
+      value: s.display,
+      ...(s.source?.url ? { url: s.source.url } : {}),
+    })),
+  };
+
+  const faqEntries = signals
+    .filter((s) => s.source && s.source.url)
+    .slice(0, 8)
+    .map((s) =>
+      question(
+        `What is ${s.label} in ${place ?? `ZIP ${zip}`} (${zip})?`,
+        `${s.display}${s.sub ? ` — ${s.sub}` : ""}. Source: ${s.source!.label} (${s.source!.url}).${
+          asOf ? ` As of ${asOf}.` : ""
+        }`,
+      ),
+    );
+
+  if (faqEntries.length === 0) return [dataset];
+
+  const faq = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqEntries,
+  };
+  return [dataset, faq];
+}

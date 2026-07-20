@@ -1,6 +1,12 @@
 import { test } from "bun:test";
 import assert from "node:assert/strict";
-import { brainJsonLd, corridorJsonLd, deskJsonLd } from "./jsonld.ts";
+import {
+  brainJsonLd,
+  corridorJsonLd,
+  deskJsonLd,
+  zipReportJsonLd,
+  type ZipReportJsonLdSignal,
+} from "./jsonld.ts";
 import type { DisplayBrain } from "../refinery/render/speaker.mts";
 import type { CorridorNormalized } from "../refinery/sources/cre-source.mts";
 
@@ -297,4 +303,84 @@ test("brainJsonLd: Dataset carries creator + isAccessibleForFree + temporalCover
   assert.equal(ds.isAccessibleForFree, true);
   assert.equal((ds.creator as Record<string, unknown>).name, "SWFL Data Gulf");
   assert.equal(ds.temporalCoverage, "2026-06-01"); // from minBrain.refinedAt
+});
+
+// ── zipReportJsonLd ────────────────────────────────────────────────────────
+
+function zipSig(i: number, withSource = true): ZipReportJsonLdSignal {
+  return {
+    label: `Signal ${i}`,
+    display: `$${i}K`,
+    sub: `sub ${i}`,
+    ...(withSource ? { source: { label: `Src ${i}`, url: `https://example.com/${i}` } } : {}),
+  };
+}
+
+const zipBase = {
+  zip: "33914",
+  place: "Cape Coral",
+  county: "Lee",
+  signals: [zipSig(1), zipSig(2)],
+  asOf: "07/19/2026",
+  asOfIso: "2026-07-19",
+};
+
+test("zipReportJsonLd: Dataset first — name, url, dateModified", () => {
+  const [dataset] = zipReportJsonLd(zipBase);
+  const d = dataset as Record<string, unknown>;
+  assert.equal(d["@type"], "Dataset");
+  assert.equal(d.name, "Cape Coral 33914 Market Report — SWFL Data Gulf");
+  assert.ok((d.url as string).endsWith("/r/zip-report/33914"));
+  assert.equal(d.dateModified, "2026-07-19");
+});
+
+test("zipReportJsonLd: ZIP-scoped spatialCoverage chain", () => {
+  const [dataset] = zipReportJsonLd(zipBase);
+  const sc = (dataset as Record<string, unknown>).spatialCoverage as Record<string, unknown>;
+  assert.equal(sc.name, "Cape Coral, FL 33914");
+  const county = sc.containedInPlace as Record<string, unknown>;
+  assert.equal(county.name, "Lee County, Florida");
+});
+
+test("zipReportJsonLd: place-less fallback naming", () => {
+  const [dataset] = zipReportJsonLd({ ...zipBase, place: null });
+  const d = dataset as Record<string, unknown>;
+  assert.equal(d.name, "ZIP 33914 Market Report — SWFL Data Gulf");
+  assert.equal((d.spatialCoverage as Record<string, unknown>).name, "ZIP 33914, Florida");
+});
+
+test("zipReportJsonLd: variableMeasured restates display verbatim; url only with source", () => {
+  const [dataset] = zipReportJsonLd({ ...zipBase, signals: [zipSig(1), zipSig(2, false)] });
+  const vm = (dataset as Record<string, unknown>).variableMeasured as Record<string, unknown>[];
+  assert.equal(vm.length, 2);
+  assert.equal(vm[0].value, "$1K");
+  assert.equal(vm[0].url, "https://example.com/1");
+  assert.equal(vm[1].value, "$2K");
+  assert.ok(!("url" in vm[1]));
+});
+
+test("zipReportJsonLd: FAQ excludes uncited signals and caps at 8", () => {
+  const signals = Array.from({ length: 10 }, (_, i) => zipSig(i + 1)).concat([zipSig(99, false)]);
+  const [, faq] = zipReportJsonLd({ ...zipBase, signals });
+  const entries = (faq as Record<string, unknown>).mainEntity as unknown[];
+  assert.equal(entries.length, 8);
+});
+
+test("zipReportJsonLd: FAQ answer carries value, sub, source, as-of", () => {
+  const [, faq] = zipReportJsonLd(zipBase);
+  const first = ((faq as Record<string, unknown>).mainEntity as Record<string, unknown>[])[0];
+  const answer = (first.acceptedAnswer as Record<string, unknown>).text as string;
+  assert.ok(answer.includes("$1K — sub 1"));
+  assert.ok(answer.includes("Source: Src 1 (https://example.com/1)"));
+  assert.ok(answer.includes("As of 07/19/2026"));
+});
+
+test("zipReportJsonLd: zero cited signals → Dataset only", () => {
+  const ld = zipReportJsonLd({ ...zipBase, signals: [zipSig(1, false)] });
+  assert.equal(ld.length, 1);
+});
+
+test("zipReportJsonLd: no raw freshness token pattern in output", () => {
+  const serialized = JSON.stringify(zipReportJsonLd(zipBase));
+  assert.ok(!/SWFL-\d+-v\d+-\d{8}/.test(serialized));
 });
