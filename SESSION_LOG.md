@@ -1,3 +1,30 @@
+## 2026-07-20 (Sonnet 5 · wt/email-lab-upload-error-toast) — Email Lab "Choose a file" traced to a silent upload-error swallow, fixed
+
+Operator reported the Email Lab photo-upload button "doesn't work" (screenshot of the Featured
+Listing image dropzone). Read `OpenSlot.tsx`/`ImageBlock.tsx`/`GridCanvas.tsx` — the label+hidden-
+input pattern and react-grid-layout's drag-handle scoping (`react-draggable`'s `handleDragStart`
+bails early on non-handle targets, verified in `node_modules/react-draggable`) are both correct;
+reproduced live on the dev server (port 3411) and confirmed the click reaches the block-select
+handler fine. Real bug is in `uploadPhotoFile` (`components/email-lab/EmailLabGridShell.tsx`):
+every failure mode — expired session (401 from `/api/email-lab/media` and
+`/api/projects/[id]/email-media`, both verified), the 8MB cap (413), an unreadable image (400), a
+storage/DB error (500), or a thrown network exception — hit `return null` with zero user feedback.
+A failed upload was visually indistinguishable from the button doing nothing.
+
+**Fix:** `uploadPhotoFile` now `toast.error`s the API's real `{error}` message (or a generic
+network-failure message) before returning null, using the `sonner` toast already mounted globally
+(`app/layout.tsx`) and already used the same way in `GridCanvas.tsx`. 7-line diff, `bunx next build`
+TypeScript pass clean in an isolated worktree (`bp-email-lab-upload-error-toast`) — a second live
+Claude session held an active, unrelated claim on this exact file (a real in-progress
+auto-build-vs-user-edit race fix), so RULE 1.5 worktree isolation was used rather than editing the
+shared main checkout; confirmed via `git diff` that their uncommitted work was untouched.
+
+**Not done:** did not reproduce the native OS file-picker itself opening/not-opening — browser
+automation can't drive that dialog either way, so that half of the original complaint is unverified
+by me; the silent-failure bug is the one concretely found, fixed, and type-checked.
+
+---
+
 ## 2026-07-20 (Sonnet 5 · main) — community_profiles Stage 1 discovery: naive slug-guessing was mis-attributing pages, now fixed
 
 Completes the Task 8/9 entry below. Operator asked to try slug variants for the misses
