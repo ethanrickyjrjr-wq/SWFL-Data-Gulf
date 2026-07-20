@@ -33,8 +33,18 @@ def merge_community_row(
     fiftyfive_places: dict | None,
     hoa_comparison: dict | None,
     as_of: str | None = None,
+    naplesgolfguy_slug: str | None = None,
+    fiftyfive_places_slug: str | None = None,
 ) -> dict:
+    """naplesgolfguy_slug / fiftyfive_places_slug: the slug ACTUALLY fetched on
+    that source when discover.py resolved a real URL different from `slug`
+    (our own community identity/output key) — defaults to `slug` so a caller
+    that never discovered anything keeps the old identity-slug-as-URL
+    behavior. Never reconstruct a source_url from `slug` directly: that would
+    silently record a URL that was never fetched."""
     as_of = as_of or date.today().isoformat()
+    naplesgolfguy_slug = naplesgolfguy_slug or slug
+    fiftyfive_places_slug = fiftyfive_places_slug or slug
 
     row: dict = {
         "community_slug": slug,
@@ -64,7 +74,7 @@ def merge_community_row(
         row["golf_structure"] = naplesgolfguy["golf_structure"]
         row["golf_holes"] = naplesgolfguy.get("golf_holes")
         row["golf_courses"] = naplesgolfguy.get("golf_courses")
-        row["golf_source_url"] = naplesgolfguy_url(slug)
+        row["golf_source_url"] = naplesgolfguy_url(naplesgolfguy_slug)
         row["golf_as_of"] = as_of
     elif hoa_comparison and hoa_comparison.get("golf_structure") is not None:
         row["golf_structure"] = hoa_comparison["golf_structure"]
@@ -75,7 +85,7 @@ def merge_community_row(
     if fiftyfive_places and (
         fiftyfive_places.get("home_count") is not None or fiftyfive_places.get("gated") is not None
     ):
-        row["home_count_source_url"] = fiftyfive_places_url(slug)
+        row["home_count_source_url"] = fiftyfive_places_url(fiftyfive_places_slug)
         row["home_count_as_of"] = as_of
         if fiftyfive_places.get("home_count") is not None:
             row["home_count"] = fiftyfive_places["home_count"]
@@ -86,10 +96,10 @@ def merge_community_row(
     amenities_source = None
     if fiftyfive_places and any(fiftyfive_places.get(k) is not None for k in _AMENITY_KEYS):
         amenities_source = fiftyfive_places
-        row["amenities_source_url"] = fiftyfive_places_url(slug)
+        row["amenities_source_url"] = fiftyfive_places_url(fiftyfive_places_slug)
     elif naplesgolfguy and any(naplesgolfguy.get(k) is not None for k in _AMENITY_KEYS):
         amenities_source = naplesgolfguy
-        row["amenities_source_url"] = naplesgolfguy_url(slug)
+        row["amenities_source_url"] = naplesgolfguy_url(naplesgolfguy_slug)
     if amenities_source is not None:
         for key in _AMENITY_KEYS:
             row[key] = amenities_source.get(key)

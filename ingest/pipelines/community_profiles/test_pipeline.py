@@ -41,6 +41,35 @@ def test_build_rows_applies_hoa_comparison_by_normalized_name():
     assert rows[0]["hoa_fee_range"] == "$350–$550/mo"
 
 
+def test_build_rows_uses_discovered_slug_when_naive_guess_is_wrong():
+    # naplesgolfguy's real URL for "Grey Oaks" is grey-oaks-country-club, not
+    # the naive slugify("Grey Oaks") == "grey-oaks" — discover.py's map must
+    # win, and the wrong naive guess must never even be fetched.
+    seed = [{"name": "Grey Oaks", "county": "Collier", "verified": True}]
+    ngg_map = {"GREY OAKS": "grey-oaks-country-club"}
+    fetched_urls = []
+
+    def fake_fetch(url: str) -> str:
+        fetched_urls.append(url)
+        if "grey-oaks-country-club" in url:
+            return "Membership Type:\n## Optional\n"
+        return ""
+
+    rows = build_rows(seed, hoa_table=[], fetch=fake_fetch, ngg_map=ngg_map, fp_map={})
+    row = rows[0]
+    assert row["community_slug"] == "grey-oaks"  # our own identity key is unaffected
+    assert row["golf_structure"] == "optional"
+    assert row["golf_source_url"] == "https://naplesgolfguy.com/golf-communities/grey-oaks-country-club/"
+    assert any("grey-oaks-country-club" in u for u in fetched_urls)
+    assert not any(u.endswith("/golf-communities/grey-oaks/") for u in fetched_urls)
+
+
+def test_build_rows_falls_back_to_naive_slug_when_not_in_discovery_map():
+    seed = [{"name": "Some New Place", "county": "Lee", "verified": False}]
+    rows = build_rows(seed, hoa_table=[], fetch=lambda url: "", ngg_map={}, fp_map={})
+    assert rows[0]["community_slug"] == "some-new-place"
+
+
 def test_maybe_register_alias_adds_new_entry():
     aliases = {"heritage-bay": {"label": "Heritage Bay", "patterns": ["HERITAGE BAY"]}}
     updated = maybe_register_alias("fiddlers-creek", "Fiddler's Creek", aliases)

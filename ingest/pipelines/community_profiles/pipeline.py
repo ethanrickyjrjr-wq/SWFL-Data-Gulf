@@ -11,6 +11,7 @@ import dlt
 
 from ingest.lib.guards import assert_min_rows
 from .constants import HOA_COMPARISON_URL, SCHEMA, TABLE_NAME, fiftyfive_places_url, naplesgolfguy_url
+from .discover import build_discovery_maps
 from .distill_55places import parse_55places_detail
 from .distill_naplesgolfguy import parse_naplesgolfguy_detail
 from .distill_realtyofnaplesfl import parse_hoa_comparison_page
@@ -26,13 +27,30 @@ def _load_seed() -> list[dict]:
     return json.loads(_SEED_PATH.read_text(encoding="utf-8"))
 
 
-def build_rows(seed: list[dict], *, hoa_table: list[dict], fetch: FetchFn) -> list[dict]:
+def build_rows(
+    seed: list[dict],
+    *,
+    hoa_table: list[dict],
+    fetch: FetchFn,
+    ngg_map: dict[str, str] | None = None,
+    fp_map: dict[str, str] | None = None,
+) -> list[dict]:
     """Pure orchestration (network isolated behind `fetch`). For each seed name:
-    fetch naplesgolfguy + 55places detail pages by slug guess, distill whatever
-    came back (empty markdown -> that source's parser returns all-None, which
-    merge.py already treats as absent), match the hoa_comparison table by
-    normalized name, and merge. A source with no page for this community
-    contributes nothing — never raises, never invents."""
+    resolve the REAL per-source URL slug via discover.py's directory maps
+    (ngg_map/fp_map, normalized-name -> slug) when available, falling back to
+    slugify(name) only when the community isn't in that source's directory —
+    naive guessing alone is wrong often enough (naplesgolfguy's real URL for
+    "Grey Oaks" is grey-oaks-country-club, not grey-oaks) to risk silently
+    attributing a wrong page's content to the wrong community. Distill
+    whatever came back (empty markdown -> that source's parser returns
+    all-None, which merge.py already treats as absent), match the
+    hoa_comparison table by normalized name, and merge. community_slug (our
+    own identity/output key) always stays slugify(name) regardless of which
+    per-source slug was actually fetched — merge_community_row tracks that
+    separately via naplesgolfguy_slug/fiftyfive_places_slug so a discovered
+    URL never gets silently re-derived from the wrong slug."""
+    ngg_map = ngg_map or {}
+    fp_map = fp_map or {}
     hoa_by_normalized = {normalize_community_name(r["name"]): r for r in hoa_table}
 
     rows: list[dict] = []
@@ -40,14 +58,17 @@ def build_rows(seed: list[dict], *, hoa_table: list[dict], fetch: FetchFn) -> li
         name = entry["name"]
         slug = slugify(name)
         county = entry["county"]
+        normalized = normalize_community_name(name)
 
-        ngg_md = fetch(naplesgolfguy_url(slug))
+        ngg_fetch_slug = ngg_map.get(normalized, slug)
+        ngg_md = fetch(naplesgolfguy_url(ngg_fetch_slug))
         ngg = parse_naplesgolfguy_detail(ngg_md) if ngg_md else None
 
-        fp_md = fetch(fiftyfive_places_url(slug))
+        fp_fetch_slug = fp_map.get(normalized, slug)
+        fp_md = fetch(fiftyfive_places_url(fp_fetch_slug))
         fp = parse_55places_detail(fp_md) if fp_md else None
 
-        hoa = hoa_by_normalized.get(normalize_community_name(name))
+        hoa = hoa_by_normalized.get(normalized)
 
         rows.append(
             merge_community_row(
@@ -57,6 +78,8 @@ def build_rows(seed: list[dict], *, hoa_table: list[dict], fetch: FetchFn) -> li
                 naplesgolfguy=ngg,
                 fiftyfive_places=fp,
                 hoa_comparison=hoa,
+                naplesgolfguy_slug=ngg_fetch_slug,
+                fiftyfive_places_slug=fp_fetch_slug,
             )
         )
     return rows
@@ -87,8 +110,9 @@ def run_pipeline(*, fetch: FetchFn) -> None:
     seed = _load_seed()
     hoa_md = fetch_page_markdown(HOA_COMPARISON_URL)
     hoa_table = parse_hoa_comparison_page(hoa_md) if hoa_md else []
+    ngg_map, fp_map = build_discovery_maps(fetch)
 
-    rows = build_rows(seed, hoa_table=hoa_table, fetch=fetch)
+    rows = build_rows(seed, hoa_table=hoa_table, fetch=fetch, ngg_map=ngg_map, fp_map=fp_map)
     assert_min_rows(len(rows), minimum=1, label="community_profiles")
 
     pipeline = dlt.pipeline(
@@ -120,7 +144,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.dry_run:
         hoa_md = fetch_page_markdown(HOA_COMPARISON_URL)
         hoa_table = parse_hoa_comparison_page(hoa_md) if hoa_md else []
-        rows = build_rows(seed, hoa_table=hoa_table, fetch=fetch_page_markdown)
+        ngg_map, fp_map = build_discovery_maps(fetch_page_markdown)
+        rows = build_rows(
+            seed, hoa_table=hoa_table, fetch=fetch_page_markdown, ngg_map=ngg_map, fp_map=fp_map
+        )
         print(f"community_profiles dry-run: {len(rows)} rows (dlt write skipped)")
         for row in rows:
             print(row)

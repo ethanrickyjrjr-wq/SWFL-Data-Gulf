@@ -1,3 +1,44 @@
+## 2026-07-20 (Sonnet 5 · main) — community_profiles Stage 1 discovery: naive slug-guessing was mis-attributing pages, now fixed
+
+Completes the Task 8/9 entry below. Operator asked to try slug variants for the misses
+(Lely Country Club, Grey Oaks, Bay Colony); checking the design spec first
+(`docs/superpowers/specs/2026-07-20-community-profiles-amenity-scrape-design.md`, Stage 1) showed
+this was already speced as "crawl each source's own directory/nav pages" — the 9-task
+implementation plan skipped that stage and went straight to `slugify(seed_name)` guessing.
+
+**Real finding, not a naming quirk:** cross-checking naive guesses against naplesgolfguy's real
+directory pages (3 regional pages, live-fetched and verified) showed the guess was flat wrong for
+2 of 5 tested communities — Grey Oaks' real URL is `grey-oaks-country-club`, not `grey-oaks`; Bay
+Colony's is `bay-colony-golf-club`, not `bay-colony` — and the pipeline was STILL returning partial
+data from the wrong guessed URL in both cases (redirect or generic-page match, unconfirmed which).
+That's a live data-integrity risk: content silently attributed to the wrong community's row.
+Lely Country Club is a separate, unfixable-by-slug-matching case — both sources call it
+"Lely Resort," a genuinely different name, not a URL-formatting problem.
+
+**Fix:** new `discover.py` builds a normalized-name -> real-slug map from naplesgolfguy's 3
+regional directory pages + 55places' 2 area pages (5 fetches total, matching the design spec's
+Stage 1 exactly — not a per-community sweep). Matches by the URL SLUG's own words, not the link
+text, since 55places truncates long names with "..." on its listing pages. `merge.py` gained
+`naplesgolfguy_slug`/`fiftyfive_places_slug` params so a discovered per-source slug records its
+OWN real source_url instead of one silently re-derived from the community's identity slug — closes
+the mis-attribution risk directly. `build_rows` now resolves the real per-source slug when
+discovered, falling back to the naive guess only when a community isn't in either directory.
+37/37 tests pass (29 in this pipeline + re-ran the other 8 affected). Live re-run against the same
+5 communities confirms it: Grey Oaks and Bay Colony's `amenities_source_url` now cite the CORRECT
+discovered pages; Lely Country Club still returns null everywhere, correctly, since no amount of
+slug-matching fixes a wrong seed name — that needs a deliberate seed-list correction, not code.
+
+**Also caught and fixed mid-session:** committed 26 files that were never mine (the whole
+`lee_deed_official_records` pipeline + several docs/vocab files sitting staged from other
+concurrent work) into what should have been a 4-file Task 9 commit — caught before push, soft-reset,
+cleanly re-isolated, recommitted (`1b33e1b9`). Root cause: checked `git status` scoped to my own
+directory instead of the full repo before committing. Full `git status` every time from here.
+
+**Not done:** the real write to `data_lake.community_profiles` (still 0 rows), and correcting
+"Lely Country Club" to "Lely Resort" in `seed_communities.json`. Committed locally, not pushed.
+
+---
+
 ## 2026-07-20 (Sonnet 5 · main) — Killed the stray root `.venv` that broke ingest crawl4ai; pinned Python 3.12 both places
 
 Operator hit a broken PowerShell venv-activation prompt, traced it to a decoy: repo-root `.venv`

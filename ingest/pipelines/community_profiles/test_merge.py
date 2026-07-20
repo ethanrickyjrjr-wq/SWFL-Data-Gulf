@@ -130,6 +130,26 @@ def test_merge_fees_group_appends_est_marker_when_is_estimate_true():
     assert row["hoa_fee_range"] == "$2,500–$3,500+/mo (est.)"
 
 
+def test_merge_uses_discovered_per_source_slug_for_provenance_url_not_identity_slug():
+    # community_slug (our own identity/output key) can legitimately differ from
+    # the slug actually fetched on each source (discover.py resolves the real
+    # per-source URL) — the recorded source_url must reflect what was really
+    # fetched, never be silently re-derived from the identity slug.
+    row = merge_community_row(
+        "lely-country-club",
+        "Lely Country Club",
+        "Collier",
+        naplesgolfguy={"golf_structure": "optional"},
+        fiftyfive_places={"home_count": 4506, "gated": True},
+        hoa_comparison=None,
+        naplesgolfguy_slug="lely-resort",
+        fiftyfive_places_slug="lely-resort",
+    )
+    assert row["community_slug"] == "lely-country-club"
+    assert row["golf_source_url"] == "https://naplesgolfguy.com/golf-communities/lely-resort/"
+    assert row["home_count_source_url"] == "https://www.55places.com/florida/communities/lely-resort"
+
+
 def test_merge_fees_group_leaves_range_unmodified_when_not_estimate():
     row = merge_community_row(
         "precise-range",
