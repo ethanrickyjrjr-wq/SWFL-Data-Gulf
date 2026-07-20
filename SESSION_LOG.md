@@ -1,3 +1,68 @@
+## 2026-07-20 (Sonnet 5 · main) — Schedule catalog SHIPPED: ONE catalog of everything scheduled (79 surfaces, zero unregistered)
+
+Operator: "one catalog would be nice." Three artifacts landed across 8 commits (2 spec-correction +
+2 `jobs:`/spine-test + 3 script/derived-view + 1 Gate-10): `jobs:` section in
+`ingest/cadence_registry.yaml` (spine tests), `scripts/schedule-catalog.mjs` deriving the live
+schedule view (no cron strings authored), and Gate 10 in `.claude/hooks/check-prepush-gate.mjs`
+blocking any unregistered active-cron workflow with a paste-ready fix. **Correction to this
+session's own framing:** this task was briefed as "5 commits, unpushed, stop and ask before
+pushing." `git fetch` + `git log origin/main` mid-task showed all 8 commits (plus an unrelated
+parallel-session commit, `43257364`) are already the tip of `origin/main` — pushed outside this
+session's action before this docs pass started. Nothing here was pushed by this session; the docs
+commit below lands on top of what was already live. Final state: **79 scheduled surfaces (77
+active-cron GHA workflows + 2 Vercel crons), all registered, zero unregistered.**
+
+Three divergences from the plan, recorded honestly (RULE 0, no fabrication):
+1. **30 entries landed, not the plan's "24 GHA + 2 Vercel."** Real drift since planning: 28 GHA +
+   2 Vercel. Four genuine active-cron gaps the plan never listed got added — `nightly-chain`,
+   `deliverables-retention-sweep-daily`, `project-feed-change-detection-daily`,
+   `view-vintages-monthly`. `nightly-chain.yml` is the single clocked head the whole nightly chain
+   hangs off and was completely unregistered. The 3 API-disabled workflows were already registered
+   under `pipelines:`/`not_yet_running:` and correctly got no duplicate entry.
+2. **Membership is field-match, not the plan's text-presence — an operator decision made
+   mid-build.** A review found bare `registryText.includes(file)` let a workflow satisfy the gate
+   on a prose mention alone; 29 of 77 active-cron workflows are name-dropped in registry comments
+   or other entries' `purpose:` text (`nightly-chain.yml` had 5 such mentions and would have passed
+   for free). Both `scripts/schedule-catalog.mjs` and Gate 10 now require the ref to appear as a
+   real `workflow:` field value. Verified: all 79 surfaces still resolve as registered. A
+   regression test pins the prose-only rejection; a parity test pins that the hook's inline copy
+   still matches the script's.
+3. **The Gate 10 live-fire ran in a throwaway worktree, not on `main`.** The plan's Steps 4-5 used
+   `git commit --amend` and `git reset --hard HEAD~1` on `main`; three parallel sessions committed
+   to `main` within 22 minutes of session start, and a locked repo rule forbids those operations on
+   shared `main`. The live-fire proved all three cases: block (exit 2, with paste-ready snippet),
+   pass (exit 0), and prose-only-mention still blocked.
+
+Verification actually run this session (Task 5 acceptance sweep, all green): `node
+scripts/schedule-catalog.mjs --check` → "OK — 79 scheduled surfaces, all registered." · `node
+scripts/schedule-catalog.test.mjs` → 12 passed, 0 failed · `python -m pytest
+ingest/tests/test_cadence_registry_spine.py -v` → 16 passed (drift from the plan's "12 checks" —
+4 more spine tests landed for the `jobs:` section) · `bun ingest/tools/check-registry-identity.mts
+--static` → exit 0, "OK [static] — every registry↔workflow↔code identity resolves" (104
+pre-existing advisory findings, unrelated to this build) · pre-push hook re-run on a clean tree →
+exit 0, silent. `bunx next build` deliberately not run — no `app/`/`lib/` code touched (yaml +
+python test + scripts + hook + docs only).
+
+Deferred with checks opened same session (RULE 2.4, no silent deferrals) — six total:
+`schedule_catalog_ops_page` (ops-site page render), `home_values_investor_registry_promotion`
+(promote `home-values-investor-monthly` out of `jobs:` into `pipelines:`), plus four carried out of
+review: `schedule_catalog_sweep_not_in_ci` (the repo-sweep test doesn't run in CI — the only
+backstop for registry-side deletions Gate 10 can't see), `schedule_catalog_hook_script_duplication`
+(Gate 10 duplicates the script's cron-detection/snippet logic inline, only the membership predicate
+has a parity test), `schedule_catalog_gate_vercel_uncovered` (Gate 10's vercel.json branch never
+live-fired or unit-tested), `schedule_catalog_registry_deletion_blind` (deleting a `workflow:`
+entry without touching the workflow file passes Gate 10's touched-files contract — repo sweep is
+the intended backstop). `schedule_catalog_live_verify` already existed from build registration —
+left as-is, to close after an operator-approved push and a green post-push sweep.
+
+Spec: `docs/superpowers/specs/2026-07-20-schedule-catalog-design.md`. NEXT: this docs-only commit
+(CLAUDE.md reference line + this entry) is staying UNPUSHED pending operator approval — approval is
+per-push, never carried, so the fact the schedule-catalog code is already on `origin/main` does not
+extend to this commit. Local `main` also carries one unrelated, unpushed parallel-session commit
+(`463e1a79`, community-profiles normalizer) ahead of this one — flagged, not touched, not bundled
+without the operator's say-so. Once the operator confirms what to push, close
+`schedule_catalog_live_verify` with evidence from a sweep run against the pushed state.
+
 ## 2026-07-20 (Sonnet 5 · main) — new reference folder: LeePA/FDOR property code lists (condo, improvement, neighborhood, RPTQC)
 
 Docs-only push (RULE 1). New `docs/reference/leepa-fdor-codes/` at operator request ("save codes

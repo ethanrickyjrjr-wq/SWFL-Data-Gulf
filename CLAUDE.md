@@ -266,6 +266,7 @@ Locked 07/07/2026 (operator correction — this line previously overclaimed "6-c
 | Semantic ledger | `docs/semantic-ledger.md` |
 | Cron incident ledger | `docs/cron-rebuild-failures.md` |
 | Cadence registry | `ingest/cadence_registry.yaml` |
+| Schedule catalog (what runs when) | `ingest/cadence_registry.yaml` `jobs:` section + `node scripts/schedule-catalog.mjs` (Gate 10 enforces membership) |
 | Active plans | `docs/superpowers/plans/` |
 | Refinery pipeline / packs | `refinery/stages/{1-4}-*.mts` / `refinery/packs/index.mts` |
 | Output type + spec / speaker | `refinery/types/brain-output.mts` + `refinery/validate/spec-validator.mts` |
