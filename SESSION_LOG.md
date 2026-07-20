@@ -24,6 +24,18 @@ chart, no wrong-ZIP leak, no truncated paragraph, and the old seed-template phra
 (no regression). Full suite: 7,939 pass / 2 fail — same two pre-existing, unrelated failures
 already logged below, no new regressions. **Still not pushed** — awaiting operator go-ahead.
 
+## 2026-07-20 (Sonnet 5 · main) — RULE 3.5 addendum #2: TDD mandatory for implementation, scoped
+
+Operator pushed further: "why wouldn't we want TDD? we can't build anything right." Agreed with a
+caveat, not a competing plan — TDD would not have caught the actual worst incidents (dev pointed
+at prod, fabricated address, LLM-invented number); those are environment/existence/provenance
+failures, not logic failures. Added "TDD IS MANDATORY FOR IMPLEMENTATION (locked 07/20/2026)" to
+RULE 3.5 in `CLAUDE.md`, directly under the failure-modes addendum: `superpowers:test-driven-development`
+is now a hard gate (like brainstorming) for deterministic logic, explicitly scoped as one guard
+type among the validation/gate/lint options the failure-modes section already requires — not a
+replacement for them. Both addenda committed together; push still pending operator's explicit
+per-push approval (hook-enforced, doesn't carry from "do it").
+
 ## 2026-07-20 (Sonnet 5 · main) — RULE 3.5 addendum: design must name failure modes + guard before approval
 
 Operator called out the pattern directly: every guardrail on this platform has shipped reactively
