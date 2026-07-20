@@ -16,6 +16,16 @@ weekly's "Hottest market areas" leaderboard renders (baseline: none — real cla
 restored). Verified: bun test zip-events 51/51 + sources-block/schema 36/36, DRY runs green,
 bunx next build exit 0. emails.md §7/§8 updated same session.
 
+## 2026-07-20 (Fable 5 · main) — zip-report JSON-LD BUILT: Dataset+FAQPage live-ready on /r/zip-report/[zip]
+
+Plan executed inline, 3 TDD commits: b3fd5cd7 asOfIsoFromToken (ISO twin in the ONE token parser,
+lib/project/as-of.ts + tests) · d715515c zipReportJsonLd in lib/jsonld.ts (ZIP-scoped
+spatialCoverage chain, verbatim signal displays, FAQ only for cited signals cap 8, empty→Dataset-
+only, NO raw token — 8 new tests, 33 file total green) · bad7026c page injection (imports + ld
+block + script tag next to ReportFooter). bun tests 43 pass across both files; bunx next build
+clean. Plan doc committed 883b3e6f. NEXT: operator push → Vercel deploy → live-verify markup on
+/r/zip-report/33914 vs served page values → close zip_report_jsonld_live_verify with evidence.
+
 ## 2026-07-20 (Fable 5 · main) — freshness precondition DONE: leaf v11 live, master v112 folded; root cause = TTL-blind rebuild skip
 
 Operator asked why the brain built before the sweep — it didn't: 02:29 UTC build was out-of-band
