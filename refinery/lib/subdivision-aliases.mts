@@ -35,7 +35,8 @@ export type CommunitySlug = string;
  *
  *  The LOT rule is DELIBERATELY guarded — `^(.+?)\s*\bLOT\b` requires real content before LOT,
  *  so a name that STARTS with its lot number keeps its words instead of being erased to "".
- *  A naive /\bLOT\b.*$/ would have destroyed 56 live names, e.g. "LOT 8 SOUTHWIND EST" and
+ *  A naive /\bLOT\b.*$/ would have destroyed 56 distinct live names (64 parcels — same defect,
+ *  different grain), e.g. "LOT 8 SOUTHWIND EST" and
  *  "LOT 30 SPYGLASS ISLAND" — the community name sits AFTER the lot number there. Those stay
  *  fragments (tracked as neighborhood_stats_leading_lot_fragments), which beats losing the name. */
 export function normalizeSubdivisionName(raw: string): string {

@@ -7,8 +7,9 @@ but **not `LOT`** — so the lot number rode along in the name and every lot bec
 community-grain.
 
 **The near-miss, recorded because it nearly shipped.** The obvious fix — add `LOT` to the existing
-alternation, which strips the token *and everything after* — would have **destroyed 56 real names**.
-56 rows have `LOT` at the *start*, with the community name AFTER the number: `LOT 8 SOUTHWIND EST`,
+alternation, which strips the token *and everything after* — would have **destroyed 56 real names**
+(= 64 parcels in the live view; same defect counted at name-grain vs parcel-grain, both figures
+appear below). Those rows have `LOT` at the *start*, community name AFTER it: `LOT 8 SOUTHWIND EST`,
 `LOT 30 SPYGLASS ISLAND`, `LOT 88 IMPERIAL GATES UNRC`. Strip-to-end empties those. Shipped instead
 a **guarded** rule, `'^(.+?)\s*\yLOT\y.*$' -> '\1'`, where `(.+?)` requires real content before `LOT`,
 so a leading-lot name is left intact rather than erased. Safety query
@@ -31,6 +32,15 @@ including the guard cases and `CAMELOT`/`PILOT`/`LOTUS` word-boundary safety.
 (`lib/listings/community-lookup.ts:184`, exact `.eq` on `subdivision_name`) returns null for those
 ~12k parcels instead of the old fake "1-home community" — a real behavior change on the live
 resolver, stated so it is not discovered later.
+
+**Propagation is FREE and automatic — verified, not assumed.** `Neighborhood stats annual` is
+`active` (`gh workflow list`, id 313205882) on cron `0 15 24 * *`, so it re-reads the fixed view and
+rebuilds the table on **07/24/2026** at no marginal cost; `Daily Brain Rebuild` (active, id
+282728589) then folds the fresh table into communities-swfl → master on its next tick. Fully live
+by ~07/25 without spending anything. Two surfaces, two steps, so "live" is honest: the **table**
+rebuild fixes the direct drill-page reads (`app/r/communities-swfl/communities.ts:145`); the
+**brain** rebuild fixes the brain-metric → master → chat path. Off-cycle dispatch is only worth it
+to have it today — offered to the operator, not taken unilaterally.
 
 Three checks opened rather than deferred silently (RULE 2.4):
 `neighborhood_stats_leading_lot_fragments` (the 64), `neighborhood_stats_nonlot_legal_fragments`

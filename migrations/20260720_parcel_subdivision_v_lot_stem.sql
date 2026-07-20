@@ -10,9 +10,11 @@
 -- THE GUARD IS THE POINT — '^(.+?)\s*\yLOT\y.*$' -> '\1', NOT a naive '\yLOT\y.*$' -> ''.
 -- The `(.+?)` REQUIRES real content before LOT, so a name that STARTS with the lot number is
 -- left untouched instead of being erased. Measured on the live two-county source 07/20/2026:
---   * naive strip-to-end would have destroyed 56 names, incl. "LOT 8 SOUTHWIND EST",
+--   * naive strip-to-end would have destroyed 56 DISTINCT NAMES (= 64 parcels in the live view;
+--     the two counts are the same defect at different grain), incl. "LOT 8 SOUTHWIND EST",
 --     "LOT 30 SPYGLASS ISLAND", "LOT 88 IMPERIAL GATES UNRC" — real communities whose name
---     sits AFTER the lot number. Those 56 are STILL fragments; tracked separately, not erased.
+--     sits AFTER the lot number. Those are STILL fragments; tracked separately, not erased
+--     (check `neighborhood_stats_leading_lot_fragments`).
 --   * with the guard: 0 names destroyed (`old_stem <> '' AND new_stem = ''` returns zero rows).
 -- Verified deltas on data_lake.lee_parcels + collier_parcels (homes-only), 07/20/2026:
 --   groups 31,062 -> 20,370 (-10,692 fake communities) · 12,127 parcels re-stemmed ·
