@@ -1,4 +1,4 @@
-# One catalog of everything scheduled (jobs section + Gate 6 + derived schedule view)
+# One catalog of everything scheduled (jobs section + Gate 10 + derived schedule view)
 
 **Date:** 2026-07-20
 **Operator ask (07/20):** "one catalog would be nice" — one place listing everything that runs on a
@@ -66,17 +66,19 @@ Rules:
   ingest entries. The freshness probe ignores `jobs:` entirely (verify its parser tolerates the new
   key before landing).
 - `workflow:` is the join key: a GHA filename, or `vercel.json#<path>` for Vercel crons, or
-  `claude#<routine-name>` for Claude-side scheduled routines (checked via CronList during the
-  build; registered only if any exist).
-- Backfill in the same commit: all 24 unregistered GHA cron workflows + 2 Vercel crons +
-  3 disabled workflows (`status: disabled`). Purposes written from each workflow's own `name:`
-  and run steps — read the file, never guess.
+  `claude#<routine-name>` for Claude-side scheduled routines (checked via CronList 07/20 — none
+  exist; the paused pulse schedules are GHA workflows already covered).
+- Backfill in the same commit: all 24 unregistered GHA cron workflows + 2 Vercel crons. (The 3
+  API-disabled workflows — corridor-pulse-weekly, dbpr-sirs-monthly, ingest-crexi-listings —
+  already have pipelines:/not_yet_running: entries, verified 07/20; membership is satisfied and
+  they get NO duplicate jobs: entries. Tripwire remains the live-state authority.) Purposes
+  written from each workflow's own `name:` and run steps — read the file, never guess.
 - Tripwire remains the authority on live/disabled state; `status:` records intent
   (deliberately parked vs. live), not observed health.
 
-### 2. Gate 6 — schedule-catalog membership (pre-push)
+### 2. Gate 10 — schedule-catalog membership (pre-push)
 
-Extend `.claude/hooks/check-prepush-gate.mjs` with Gate 6 (RULE 3 C2: extend the existing gate
+Extend `.claude/hooks/check-prepush-gate.mjs` with Gate 10 (RULE 3 C2: extend the existing gate
 family, no new hook file):
 
 - Trigger: any commit ahead of upstream touches a `.github/workflows/*.yml` containing a `cron:`
@@ -87,7 +89,7 @@ family, no new hook file):
 - Fail: block the push and print the exact paste-ready snippet —
 
 ```
-GATE 6 — unregistered scheduled workflow: foo-bar.yml
+GATE 10 — unregistered scheduled workflow: foo-bar.yml
 Add to ingest/cadence_registry.yaml under `jobs:` (bottom of file):
 
   - name: foo-bar
@@ -111,7 +113,7 @@ Read-only merge, no authored duplication (slug_index lesson: derive what's deriv
   parsed from `.github/workflows/*.yml`, `vercel.json` crons.
 - Output: one JSON to stdout (or `--out <path>`) — name, purpose, scheduler, cron expression,
   status, source entry type (ingest | job). Nothing committed; consumers run the script.
-- Also serves as the gate's shared parser (Gate 6 imports the same workflow-scan function) and as
+- Also serves as the gate's shared parser (Gate 10 imports the same workflow-scan function) and as
   the local lookup: `node scripts/schedule-catalog.mjs` answers "what runs when" in one command.
 
 ### 4. Ops rendering — deferred, explicitly
@@ -129,9 +131,9 @@ separate session). This build ends at the JSON. A `checks` entry records the def
 
 ## Acceptance (schedule_catalog_live_verify)
 
-1. `node scripts/schedule-catalog.mjs` emits every scheduled thing: 95 GHA crons + 2 Vercel crons
-   accounted for, zero unregistered.
-2. A test push touching a cron workflow absent from the registry is blocked by Gate 6 with the
+1. `node scripts/schedule-catalog.mjs --check` exits 0: every workflow with an ACTIVE `- cron:`
+   line and every vercel.json cron is registered; zero unregistered.
+2. A test push touching a cron workflow absent from the registry is blocked by Gate 10 with the
    paste-ready snippet in the error; the same push passes after adding the printed snippet.
 3. Freshness probe and existing gates run green with the `jobs:` section present.
 4. Clean tree pushes are unaffected (gate is silent when nothing scheduled was touched).
