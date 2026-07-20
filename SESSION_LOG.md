@@ -16,6 +16,19 @@ weekly's "Hottest market areas" leaderboard renders (baseline: none — real cla
 restored). Verified: bun test zip-events 51/51 + sources-block/schema 36/36, DRY runs green,
 bunx next build exit 0. emails.md §7/§8 updated same session.
 
+## 2026-07-20 (Fable 5 · main) — freshness precondition DONE: leaf v11 live, master v112 folded; root cause = TTL-blind rebuild skip
+
+Operator asked why the brain built before the sweep — it didn't: 02:29 UTC build was out-of-band
+(repoint session), then the chain's ordered rebuild SKIPPED the leaf as TTL-fresh (48h TTL vs daily
+sweep) — TTL age ≠ source freshness; leaves have no source-aware trigger (master does). Filed
+leaf_ttl_blind_to_source_freshness + active_listings_dup_county_rows (phantom 'Collier 1/Lee 1'
+rows in conclusion, v10+v11). Forced leaf rebuild landed through GitHub incident (retry 7, run
+29710922404): v11 = today's sweep (21,130 listings, Lee 14,450, Collier 6,680, as of 07/19/2026),
+VERIFIED on served bytes. Master fold (run 29711021400, no-force) → v112 refined 01:31 UTC on
+origin; serve propagating via deploy. Both tripwire acceptance entries committed. Push carries two
+foreign commits (11550df0 weekly-read, 9cf024bd schedule-catalog spec) — operator-approved bundling
+("Push"). Spec APPROVED → writing-plans next.
+
 ## 2026-07-19 (Fable 5 · main) — zip-report JSON-LD SPECCED (Dataset+FAQPage) + freshness precondition dispatched
 
 Brainstormed + operator-approved: /r/zip-report/[zip] gets the proven Dataset+FAQPage markup —
