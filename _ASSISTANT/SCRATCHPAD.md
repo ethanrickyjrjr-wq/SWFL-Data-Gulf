@@ -758,10 +758,64 @@ and then dies in `requirePgEnv()`. **It crashes on startup; it does not download
 **Still remove it** — loaded gun without ammunition. Copy a secrets file in to make the worktree
 runnable (the normal reason worktrees exist) and the burn is live and unguarded.
 
-**Why this correction is written down instead of quietly fixed:** an unverified egress number is
-the exact thing that cost trust on this issue. Item 19 named five suspects and picked none; item 26
+**RESOLVED 07/21/2026 — items 26 + 27 both closed.** Operator: *"is it ever going to happen again??
+SO FUCKING FIX IT."* He was right that I answered a fix request with three questions. Fixed:
+both unguarded copies removed (worktree gone — `git worktree list` shows only main; burner file
+deleted from the `bp-ci-quiet` orphan), and `scripts/egress-burner-scan.mjs` now runs inside the
+session-start tripwire. Presence-based, four signals: live burner process · unguarded copy on the
+box · `.mcp.json` that would spawn it (matched on args, NEVER the key — the key rename was the
+failed 07/21 fix) · opt-in variable set. 18 TDD tests, each named for the failure mode it prevents.
+FM4 is the important one: a scan that can't confirm its own guard token reports RED SCAN BROKEN,
+never green. Verified on a REAL POSITIVE — RED naming all three hazards before cleanup, green
+after. Commit `60f3ce45`. Checks `egress_stale_checkout_rearm` + `egress_burn_detector` closed.
+
+**The lesson that generalizes, logged because it bit twice in one session:** the detector's FIRST
+live run flagged two "LIVE BURNER" processes that were its own PowerShell probe — whose command
+line contained `lake-mcp-server` because that is the string it searches for. And my own earlier
+manual sweep reported ZERO live processes because I filtered on process NAME instead of command
+line. Both directions of error in one hour. **A probe that measures the wrong thing is worse than
+no probe: one cries wolf until it's ignored, the other says all-clear while blind.** Both are now
+tested (FM6 and FM4).
+
+**Why the correction above is written down instead of quietly fixed:** an unverified egress number
+is the exact thing that cost trust on this issue. Item 19 named five suspects and picked none; item 26
 recorded a "fix" that did nothing. Making the same shape of unchecked claim while auditing those
 two would have been the third repeat. The lesson generalizes past egress: *absence of a guard is
 not presence of a capability* — check that the dangerous path can actually reach its resources
 before pricing the risk.
+
+### 29. "NOTHING IN SUPABASE HAS A RLS POLICY" — raised 07/21/2026, premise checked and it's FALSE
+Operator, 07/21: *"NOTHING IN SUPABASE HAS A RLS POLICY ESTABLISHED TO IT."* Probed live before
+answering. **38 policies exist** (34 `public`, 4 `storage`). Every multi-tenant user table —
+`contacts`, `projects`, `email_*` (12 of them), `social_*`, `user_brand_profiles`,
+`user_mcp_tokens`, `user_mls_connections`, `agent_profile_facts`, `buyer_intent_events` — carries
+an `auth.uid() = user_id` owner policy. The tenant boundary is real and enforced.
+
+**What the advisor lint actually says** (and why it reads as "nothing"): 57 `public` tables show
+`rls_enabled_no_policy` at **INFO**, not ERROR. RLS on + zero policies = **deny-all** to
+anon/authenticated. Those tables are LOCKED, not open. `service_role` bypasses RLS, which is how
+every server path reads them. There is **zero** `rls_disabled_in_public` — all 91 `public` tables
+have RLS enabled.
+
+**Three tables ARE world-readable, by design:** `deliverables`, `narratives`, `saved_charts` each
+have `SELECT USING (true)` for anon — the public share-link surface. Anon holds SELECT only on
+those three. Confirm intent; don't assume it's a bug.
+
+**`data_lake` (48 of 56 tables RLS OFF) is NOT reachable** — `anon`/`authenticated` have no schema
+`USAGE` on `data_lake`, `data_lake_staging`, or `personal_vault`; only `postgres` + `service_role`.
+Anon inherits no roles. Verified via `nspacl` + `pg_auth_members`, not assumed from the lint.
+
+**The one real finding, and it is a latent one:** `anon` holds `INSERT/UPDATE/DELETE/TRUNCATE` —
+full DML — on **27 `public` tables** that have no policy (`waitlist`, `checks`, `ops_notes`,
+`goals`, `predictions`, `brain_registry`, `source_connectors`, `corridor_profiles`, …). Today RLS
+is the only thing standing between anon and TRUNCATE. Those grants are leftover `GRANT ALL`, not
+intent. Single point of failure: one permissive policy added by a future migration, or one
+`DISABLE ROW LEVEL SECURITY`, and a table goes world-writable with no second line of defense.
+Defense-in-depth fix is to REVOKE the write grants, not to add policies.
+
+**Pattern this repeats (same shape as item 27, one day later):** *absence of a guard is not
+presence of a capability.* The lint says "no policy" and reads as "wide open"; reachability needed
+GRANT + schema USAGE + exposure checked separately, and three of those were closed. Check the
+whole path before pricing the risk. Corollary learned here: it cuts both ways — the same probe that
+downgraded the panic surfaced a real latent hole (27 anon-writable tables) the panic wasn't about.
 
