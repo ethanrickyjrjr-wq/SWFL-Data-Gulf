@@ -426,3 +426,285 @@ retry storms (the outage itself feeds egress — timeouts retry, retries re-down
 `revalidate = 300` on /desk + /charts (288 renders/day each). Needs the dashboard's egress BREAKDOWN
 (database vs storage vs realtime vs auth) to narrow before touching code.
 
+**MECHANISM CONFIRMED (vendor docs, crawl4ai 07/21/2026):** 250 GB egress is the **Pro plan** quota;
+Pro normally BILLS overage at **$0.09/GB**. The screenshot says "not billed for overages" -> the
+**SPEND CAP is ON**, which converts billing into RESTRICTION. That is the throttle. To restore
+service: disable the spend cap (bills ~528.592 GB over x $0.09 = **~$47.57**), or wait for cycle
+reset. Nothing else lifts it — a fix to the leak cannot, because the counter is cumulative.
+
+**EGRESS HUNT — what it is NOT (agent sweep + live storage query, 07/21/2026):**
+- `db-max-rows = 1000` is set project-wide (`refinery/lib/paginate.mts:2-5`, verbatim). **No bare
+  `.select()` in this repo can pull a full table** — a "cron doing full-table pulls" is structurally
+  impossible. Only `selectAllPaged`, raw SQL/`.rpc()`, and Storage bypass it.
+- **email-media is NOT the burner** (was the agent's #1 by elimination; killed by live query):
+  135 objects, **9,961 kB total**. Would need ~78,000 full-bucket downloads to reach 778 GB.
+- Ingest crons are INGRESS (scrape external -> INSERT), not egress. No polling loops, no Realtime
+  subs, no `.rpc()` over large tables, no raw pg client on any request path.
+- DB read paths total **tens of GB/month**, not 778.
+**LIVE STORAGE SIZES (queried 07/21/2026):** lake-tier1 652 objs / **732 MB** · raw-tabular-cold 32
+objs / **349 MB** (avg 11 MB each) · raw-geometry 9 / 63 MB · email-media 135 / 9.9 MB ·
+project-uploads 7 / 4.3 MB · social-media 2 / 962 kB.
+**LEAD (unconfirmed):** `lake-tier1` at 732 MB — 778 GB is ~1,060 full reads of it. The lake MCP
+queries Tier-1 datasets; if each query re-downloads objects, that is DEV TOOLING egress, not product
+egress. **Operator's question, and it is the right one: "why is anyone using the lake when we have
+brains?" Nothing in the PRODUCT reads the lake — the brains serve the site. The lake MCP is a
+session/dev convenience.** If it is the burner, we have been paying overage for our own debugging.
+NEXT SESSION: confirm or kill this before anything else — check whether the lake MCP downloads from
+`lake-tier1` per query, and whether `raw-tabular-cold` (11 MB/object) is re-read by any job.
+
+**TWO SEPARATE PROBLEMS, do not conflate them:** (a) egress overage -> spend cap -> throttle = why
+the site is DOWN. (b) `/r/source/[table]` = why the DB was already on its knees. Fix (a) restores
+service; fix (b) stops it recurring.
+**THE DB STRANGLER (found 07/21/2026, fix authorized + dispatched):**
+`app/r/source/[table]/page.tsx:14` is `force-dynamic` (uncached, every request hits Postgres) and
+`:76` runs `.select("*", { count: "exact", head: true })`. For `parcel_subdivision_v` that is
+lee_parcels 383,487 + collier_parcels 220,875 = **604,362 rows scanned per request**. And
+`app/sitemap.ts:137` PUBLISHES that URL in the public sitemap with `robots.ts:110` allowing crawlers
+on `/r/` — so search-engine crawls trigger full scans continuously. **This matches the
+statement-timeout firing every 20-60s around the clock in the Postgres logs.** Burns CPU/IO, NOT
+egress — it is not the bill, it is the starvation.
+**ALSO FOUND — ~97% of neighborhood pages silently 404:** `fetchNeighborhoodBySlug`
+(`app/r/communities-swfl/communities.ts:145-156`) selects then `.find()`s in JS, so `db-max-rows`
+caps it at 1000 of **31,110** rows. Plus a double-fetch (generateMetadata + body, no `cache()`).
+Operator: "fix it all" -> all three dispatched to a subagent 07/21/2026, TDD, UNCOMMITTED, not pushed.
+
+---
+
+## OPEN — raised 07/21/2026 (email surface + /demo), five screenshots
+
+### 20. `/demo` — "what the fuck is it?????????"
+Operator hit it and had no idea what it is or why it exists. What it IS, verified by reading
+`app/demo/page.tsx`: a standalone scroll page — hero "Real data makes AI real. / 26 corridors.
+68 ZIP codes. 89,492 flood records. One verified answer.", then a brain conclusion, then two charts.
+
+**Every number on it is a STATIC FIXTURE, not live data.** It imports `fixtures/corridor-rents.json`,
+`fixtures/zhvi-trend.json`, `fixtures/brain-output.json`, `fixtures/stats.json`. Its own comment
+(line 16) says so: *"Static fixture data — swap these imports for live fetch() calls when the Fiverr
+components are wired to the real API."* That swap never happened. The "Confidence: 84% · 05/22/2026"
+line is a frozen token from a two-month-old brain build, presented as current.
+
+Provenance: it's the delivered artifact from `docs/fiverr-briefs/brief-A-intelligence-scroll.md` —
+that brief specifies the headline and the 89,492 figure verbatim. A prior operator ruling
+(`docs/_archive/parked/site-flow-build/B6-cleanup-and-retire.md`, 06/20/2026) was: keep it
+STANDALONE, not in top nav, footer-listed only, add a forward CTA, revisit later. It's the "revisit
+later" that came due.
+
+**Decision owed (operator's, not mine):** kill it, wire it to live data, or leave it parked. What it
+must NOT keep doing is what it does now — show a stale date and a hardcoded confidence score on a
+public page, which is the exact thing every rule here exists to prevent.
+
+### 21. CAN-SPAM: instructions meant for the SENDER are being printed to the RECIPIENT
+Operator: *"why are we writing shit we shouldn't have in emails, if it's for AI, why don't we put in
+the background? and why are we not putting in my can-spam address for an email?"*
+
+Two different strings, both in `lib/email/blocks/FooterBlock.tsx`, both landing in a real inbox:
+- line 67 — `placeholder="Postal address (CAN-SPAM)"` (screenshot 020500, rendered as body text)
+- line 77 — `Physical mailing address required (CAN-SPAM) — add one in Branding` (screenshot 015458)
+
+Line 77's own comment says it was made deliberately visible on 07/20 so a missing address would be
+"visible in the actual sent output, not silently absent." That reasoning is right about the FAILURE
+and wrong about the AUDIENCE: it makes the sender's TODO visible to the customer. "add one in
+Branding" is an instruction to Ricky, printed in an email to a buyer. Same class as item 13 — our
+internals speaking directly to a client. The nag belongs in the Lab UI (where it already exists —
+`EmailLabGridShell.tsx:1715` has the identical nudge in-product) and/or as a send-time gate. It does
+not belong in rendered HTML.
+
+**And the second half of his question is the real bug:** his account HAS a business address. This is
+item 15 (`applyBrand` has no server-side caller) surfacing in the product exactly as predicted —
+item 15 was fixed IN THE SIM ONLY and explicitly flagged "NOT fixed in the product." Any send path
+that doesn't run through the Lab canvas in a browser ships house defaults and an empty footer
+address, which is what then triggers the nag copy above. Fix the stamping and the nag never renders.
+
+### 22. Equation footnotes STILL SHIPPING — item 13 was declared resolved, only 1 of 4 producers died
+Operator, on screenshots 015737 and 015458: *"why the fuck are we writing equations???"*
+
+Still live in real emails:
+- `*Computed from list price ÷ listed square footage. Previous price = this asking price plus the
+  reduction on record.`
+- `*$/Sq Ft is the sale price ÷ listed square footage; List-to-Sale is the sale price ÷ the list price.`
+
+Item 13 (07/20) was closed with "specFootnote now returns undefined." Verified — `listing-flyer.ts:170`
+does return undefined. **But `specFootnote` was never the only producer.** Four separate ones exist and
+three still emit:
+- `priceStripFootnote` — `price-reduced.ts:350` ← screenshot 015737
+- `just-sold.ts:280-282` (`parts.push`) ← screenshot 015458
+- `compsFootnote` — `market-comps.ts:380`
+- `provenanceFootnote` — `back-on-market.ts:172`
+
+**This is not purely a miss — part of it was a deliberate carve-out that the operator has now
+overruled.** `lib/email/CLAUDE.md` was written yesterday saying to KEEP price-reduced's and
+just-sold's notes because "the derivation is non-obvious or misreadable." That was our judgment call.
+He just read both in an inbox and rejected them. The carve-out is dead; kill all four, and update
+`lib/email/CLAUDE.md` + `docs/standards/emails.md` in the same pass so it doesn't grow back.
+
+**The pattern worth naming (same shape as item 0):** a fix was verified against the ONE function
+named in the complaint, not against the OUTPUT the operator actually sees. Grep the rendered string,
+not the helper.
+
+### 23. Only ONE comp on the comps chart
+Operator: *"only one comp??????????? has to be other sales near by in last 6 months"*
+Screenshot 015737 — "The new price vs. nearby comparable homes" plots exactly two things: the subject
+property (8348 Southwindbay Cir, $321/sq ft) and an "area median" reference line ($221/sq ft). Zero
+actual comparable sales. A comps email with no comps.
+
+Not yet root-caused. Needs a probe of what feeds the comps set — whether the query returned nothing
+(radius/date window too tight, or condo-vs-SF grain, cf. the `listing_state.property_type` collapse),
+whether it returned rows that got filtered at render, or whether the chart only ever plots subject +
+median by design. Requirement per operator: nearby sales, last 6 months. Also note this email built
+during the PostgREST outage window (item 19) — rule out an empty result caused by the outage before
+blaming the query.
+
+### 24. Button block ships labeled "Button" — and the label can't be changed
+Operator: *"what the fuck is Button??????? can't even change it. how fucking dumb are we??????"*
+Screenshot 020452 — a dark pill reading "Button" in a real email.
+
+`lib/email/blocks/ButtonBlock.tsx` uses `placeholder="Button"` twice (lines 42, 50) on `EditableText`.
+Two things to establish: (a) whether a placeholder is leaking into SENT html rather than staying an
+edit-mode affordance — line 19 (`if (!props.label && !scope) return null`) says an unlabeled button
+should vanish outside edit scope, so a rendered "Button" means either scope is set where it shouldn't
+be, or something is writing the literal string into `props.label`; (b) why the inline edit doesn't
+take — the operator clicked it and could not change it, which is a separate defect from the label
+itself. Reproduce on the live surface, not from the source (item 0's rule — this is an interaction).
+
+### 25. Every email's CTA goes to the same place
+Operator: *"Every email button goes to the same place."*
+Confirmed by construction: `lib/email/listing-flyer.ts:204` sets `ctaUrl: facts.sourceUrl` for the
+shared lifecycle chrome, and `lifecycle-chrome.ts:290` hands that one url to the button on every
+lifecycle recipe. So Coming Soon, New Listing, Price Reduced, Under Contract, Just Sold all point at
+the same listing source URL no matter what the button SAYS. Screenshot 015458 is the proof of the
+mismatch: the button reads "What's My Home Worth?" — a seller-valuation ask — and links to the
+listing page. (`default-docs.ts:351` seeds that label with no url of its own.)
+
+A CTA whose words and destination disagree is worse than no CTA. Each stage needs its own
+destination, and the label and url need to be defined in one place so they can't drift apart.
+
+### ⚠️ Items 20-25 have NO `checks` entries — the ledger is DOWN (item 19)
+RULE 2.4 says open a check the same session. Attempted 07/21/2026 and it failed:
+`check: Supabase 503: {"code":"PGRST002" ... "Could not query the database for the schema cache."}`
+— the same PostgREST failure as item 19, downstream of the 311% egress throttle. `check.mjs list`
+returns empty for the same reason, so the session-start check list is currently BLIND, not clean.
+
+**Owed the moment REST is back — open these six:**
+`demo_page_stale_fixtures` · `email_footer_internal_copy_to_recipient` ·
+`applybrand_no_server_side_caller` (the product half of item 15) · `equation_footnotes_all_recipes` ·
+`market_comps_only_one_comp` · `email_button_placeholder_and_shared_cta`
+Until then THIS FILE is the only record of items 20-25. Do not let it be the last word — the whole
+reason RULE 2.4 exists is that a prose entry nobody re-reads is forgetting on a delay.
+
+### CORRECTION to items 21, 22, 24 — written same session, from source, zero DB
+I logged items 20-25 off the screenshots before reading the branches. Two errors, both mine.
+
+**(a) TWO of the five screenshots are the Lab EDIT CANVAS, not a received email.**
+`FooterBlock.tsx:60` renders the `"Postal address (CAN-SPAM)"` EditableText when `props.address ||
+scope`; the `!scope`-and-no-address branch is the line-77 nag instead. So visible placeholder text
+means `scope` is truthy → editor. Same for `ButtonBlock.tsx:19` — `if (!props.label && !scope)
+return null` means an unlabeled button VANISHES outside edit scope, so a visible "Button" pill is
+also the editor. The operator's own words confirm both ("can't even change it" — he is in the
+editor).
+- **Editor:** 020452 ("Button"), 020500 ("Postal address (CAN-SPAM)" + grey "Phone")
+- **Rendered output:** 015458 (line-77 nag + just-sold footnote + CTA), 015737 (price strip)
+
+This RE-POINTS two fixes. **Item 24 is not "we ship buttons named Button"** — it is "editing a
+button label in the Lab does not persist," a save-path bug in a different file than `ButtonBlock`.
+**Item 21's first bullet is not a sent-email leak** — that placeholder is a correct authoring
+affordance. What IS wrong in item 21 stands: the line-77 nag genuinely renders in output, and the
+address is empty in the first place because of item 15.
+
+**(b) Item 22 overcounted. Only TWO producers still emit an equation, not three.** Read the bodies:
+- `compsFootnote` (`market-comps.ts:264`) — `"*$/Sq Ft = price ÷ listed sq ft."` **STILL EMITS.**
+- `just-sold.ts:280-282` — both ÷ sentences. **STILL EMITS** — matches screenshot 015458 exactly.
+- `priceStripFootnote` (`price-reduced.ts:277-279`) — its `notes` array is `[specFootnote(facts)]`
+  (now `undefined`) plus the previous-price sentence. It emits ONLY "*Previous price = this asking
+  price plus the reduction on record." today. **Screenshot 015737 shows BOTH sentences, so that
+  email PREDATES the 07/20 fix.** The 07/20 fix did work here; the screenshot is stale evidence.
+- `provenanceFootnote` (`back-on-market.ts:105`) — `"*Local: SWFL Data Gulf, as of X. National: ..."`
+  That is a SOURCE CITATION, not an equation, and it is required. **I was wrong to list it. Do not
+  kill it.**
+
+Net: kill the equation in `compsFootnote` and in just-sold. Decide separately whether
+price-reduced's surviving previous-price sentence stays (it explains something genuinely
+uncheckable from the page). The `lib/email/CLAUDE.md` carve-out still needs rewriting either way —
+the operator rejected just-sold's note, which that file explicitly told us to keep.
+
+**Why this correction exists:** the original entry was written from five screenshots without
+checking which render path produced them, and would have sent the next session hunting a
+placeholder-leak bug that does not exist and deleting a citation that must stay. Screenshots show
+OUTPUT; they do not tell you WHICH CODE PATH produced it or WHEN it was built.
+
+---
+
+### 26. EGRESS BURNER FOUND 07/21/2026 — the lake MCP server, on THIS Windows machine
+Operator, verbatim: *"YOU MOTHERFUCKERS WASTED 750 GBs GOING TO THE FUCKING LAKE."* He was right,
+and literally so. Item 19 listed five suspects and picked none; this is the answer, from the
+Storage log, not a guess.
+
+**Evidence — every single Storage request in the 24h log carries the same user-agent:**
+`duckdb/v1.5.4(windows_amd64) node-neo-api`
+Not a GitHub cron (that would be linux). Not the website. **A local DuckDB on Ricky's Windows box**,
+pulling objects out of `lake-tier1` and `raw-tabular-cold` over the S3 endpoint. ~100 requests in a
+370-second window, HEAD followed by repeated `GET 206`.
+
+**The mechanism, from `tools/lake-mcp-server.mts` (read, not assumed):**
+`tier1ListReader` (line 176-189) builds each Tier-1 view over an **explicit list of every
+inventoried file** in the dataset — the list is assembled at line 368,
+`g.rows.map((r) => 's3://${r.bucket}/${r.path}')` — and emits `read_csv_auto([...],
+union_by_name=true)` / `read_json_auto(...)` / `read_parquet([...])`. Its own comment says the
+explicit list is deliberate ("not a glob, so only inventoried files are read").
+
+That is correct for correctness and catastrophic for egress, because **the cold datasets are
+`.csv.gz`**. Gzip is not seekable: no range read, no column pruning, no predicate pushdown. So a
+single question against one of those views **downloads every dated snapshot of that dataset, in
+full, every time it is asked** — and `union_by_name=true` forces reading every file's header too.
+Nothing is cached between queries.
+
+**The log shows exactly that shape:** one burst pulled `fema/nfip_claims` for 2026-07-15, 07-14 AND
+06-13; `fdot_aadt` for 2026-07-15, 07-03 AND 06-15; `leepa/just_value/2026-06-15.csv.gz` fetched
+**five times in 28 seconds**. Same object, HEAD then 4-5 full GETs, seconds apart.
+
+**THREE lake server processes are STILL RUNNING RIGHT NOW** (bun, duckdb module loaded):
+PID 54044 (started 01:46), PID 59824 (01:49), PID 40916 (02:29) — 256s, 293s, 266s CPU.
+
+**The "fix" already applied today does NOT work.** `.mcp.json` has the key renamed to
+`lake_DISABLED_EGRESS_BURN_20260721` — and that is (a) **uncommitted** (` M .mcp.json`, which is why
+`git log -S` finds nothing and why two days of "fixes" left no trace) and (b) **not a disable at
+all**. In Claude Code the mcpServers KEY is just the server name; the entry still runs
+`bun tools/lake-mcp-server.mts` and its tools simply reappear under a different prefix. Renaming
+deters the model from calling it. It does not stop the server, and it did not stop the three
+processes above.
+
+**This is item 12's lesson repeating verbatim:** killing the config does not kill the process. Same
+words in that entry — "the harness reported two background runs as killed/stopped and the bun
+processes SURVIVED."
+
+**Why three days of fixing changed nothing:** the burner is a developer tool, so it only runs while
+someone is working — which is also when the fixes were being made. And per item 19, egress is a
+cumulative period-to-date counter that cannot go down, so no correct fix could ever have LOOKED
+like it worked.
+
+**What actually stops it (operator's call, not mine — one is a process kill):**
+1. Kill PIDs 54044 / 59824 / 40916.
+2. Really disable it — comment the entry out or delete it, don't rename it — and COMMIT that.
+3. Before it ever comes back: it must not read whole `.csv.gz` snapshots per query. Options are
+   convert cold CSV to parquet (seekable, column-pruned, predicate-pushdown), restrict views to the
+   latest snapshot instead of every dated one, or cache locally. Not designed here — flagged.
+-> check owed when the ledger is back: `lake_mcp_egress_burn`.
+
+### 21. Focus-hook fallback holds 7 of 12 rules — COULD NOT OPEN A CHECK (Supabase 503)
+(Renumbered from 19 — a parallel session claimed 19 and 20 while this was being written. Which is
+the exact ordinal-instability defect the `second-order` agent had just flagged, occurring live,
+inside the same file, within the hour. Cite by phrase, not by number.)
+**503 CAUSE NOW KNOWN — see the PROD OUTAGE item above:** egress overage → spend cap → PostgREST
+restricted. The check ledger was unreachable for that reason, not a transient blip.
+07/21/2026. Found by the `second-order` agent auditing its own shipment. `DEFAULT_RULES` in
+`.claude/hooks/inject-focus.mjs:50-57` carries 7 rules; the live `_ASSISTANT/RULES.md` carries 12.
+`loadRules` (`:61-69`) fails OPEN — if the rules file is ever missing, unreadable, or blank, the hook
+silently substitutes the 7-rule constant and rules 8-12 (data-roots, scratchpad, do-it-when-told,
+our-volume, and the new second-order rule) vanish from every prompt with no error. Pre-existing gap;
+rule #12 widened it rather than caused it.
+
+**This belongs in `checks`, not here.** `node scripts/check.mjs open brain-platform
+focus_hook_default_rules_drift "..."` was run TWICE and both times returned
+`Supabase 503 PGRST002 — Could not query the database for the schema cache`. The session-start
+tripwire reported the same 503 against the spend ledger, so the database was degraded, not the
+command. Logged here so it is not lost. **Next session: open the check and delete this item.**
+

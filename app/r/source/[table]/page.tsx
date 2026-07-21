@@ -73,9 +73,23 @@ export default async function SourceProvenancePage({ params, searchParams }: Pag
     );
   }
 
+  // count="estimated", NOT "exact". This page is `force-dynamic` (uncached), is
+  // published in app/sitemap.ts, and robots.ts allows crawlers on /r/ — so every
+  // crawl of /r/source/parcel_subdivision_v ran an EXACT count over a view that
+  // is lee_parcels (383,487) UNION collier_parcels (220,875) = 604,362 rows: a
+  // full sequential scan of both parcel tables, per request, forever. On
+  // 07/21/2026 the DB showed tup_returned 2,119,493,309 vs tup_fetched
+  // 44,615,698 — a 47:1 scanned-to-used ratio — with statement timeouts firing
+  // every 20-60s around the clock.
+  //
+  // PostgREST's count=estimated returns the EXACT count up to a threshold and the
+  // fast statistics-based count beyond it; that threshold is db-max-rows, already
+  // 1000 here. So every small source table keeps an exact count (no display
+  // regression) and only the huge views go approximate.
+  // Verified: docs.postgrest.org/en/v12/references/api/pagination_count.html
   const { count, error: countError } = await supabase
     .from(table)
-    .select("*", { count: "exact", head: true });
+    .select("*", { count: "estimated", head: true });
 
   if (countError) {
     return (

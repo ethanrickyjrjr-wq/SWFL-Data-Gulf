@@ -4,7 +4,7 @@
       "command": "serena",
       "args": ["start-mcp-server", "--context", "claude-code", "--project", "."]
     },
-    "lake": {
+    "lake_DISABLED_EGRESS_BURN_20260721": {
       "command": "bun",
       "args": ["tools/lake-mcp-server.mts"]
     },

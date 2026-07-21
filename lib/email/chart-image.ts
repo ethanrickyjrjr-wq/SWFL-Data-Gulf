@@ -16,6 +16,7 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
 import { formatAxisDateLabel, formatDisplayDate } from "@/lib/format-date";
 import { CHART_FONT_FILES, CHART_FONT_FAMILY } from "@/lib/charts/chart-fonts";
+import { MEDIA_CACHE_IMMUTABLE } from "@/lib/media/cache-control";
 
 const PUBLIC_BUCKET = "email-media";
 
@@ -340,7 +341,12 @@ export async function hostEmailMedia(
   const admin = createServiceRoleClient();
   const { error } = await admin.storage
     .from(PUBLIC_BUCKET)
-    .upload(key, buf, { contentType, upsert: true });
+    // cacheControl is NOT optional — without it every fetch of an email image is
+    // served from origin and billed as Supabase egress. Keys are date-and-content
+    // stamped (email-charts/market-comps-33908-2026-07-20-B98F45.png), so a long
+    // TTL is safe: changed content lands on a NEW key, never a stale hit.
+    // Egress hit 311% of plan on 07/21/2026 with zero cache headers anywhere.
+    .upload(key, buf, { contentType, upsert: true, cacheControl: MEDIA_CACHE_IMMUTABLE });
   if (error) throw new Error(`email-media upload failed: ${error.message}`);
   const { data } = admin.storage.from(PUBLIC_BUCKET).getPublicUrl(key);
   return data.publicUrl;

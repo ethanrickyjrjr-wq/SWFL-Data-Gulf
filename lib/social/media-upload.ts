@@ -16,6 +16,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { MEDIA_CACHE_MUTABLE } from "@/lib/media/cache-control";
 
 export const SOCIAL_MEDIA_BUCKET = "social-media";
 
@@ -39,6 +40,10 @@ export async function uploadSocialImage(
   const { error } = await db.storage.from(SOCIAL_MEDIA_BUCKET).upload(key, buffer, {
     contentType: "image/png",
     upsert: true,
+    // MUTABLE, not IMMUTABLE: the key is `${scheduleId}/${YYYY-MM-DD}.png` with
+    // upsert on, so a re-render the same day overwrites in place. Without any
+    // cacheControl every platform fetch was billed as origin egress.
+    cacheControl: MEDIA_CACHE_MUTABLE,
   });
   if (error) throw new Error(`uploadSocialImage failed for ${key}: ${error.message}`);
 

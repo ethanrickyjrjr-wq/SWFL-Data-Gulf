@@ -1,3 +1,46 @@
+## 2026-07-21 (Opus 4.8 · main) — PROD OUTAGE: egress 311% of plan; storage cache headers + the parcel-scan fix
+
+Operator: "what in the world is going on with /desk page?" → "it doesn't render and i can't log in."
+Live state, verified by the operator's own terminal: `/desk` returns 200 with the KPI row ABSENT
+(`curl … | findstr "Median asking price"` → empty); `/charts` renders four panels reading
+"Data unavailable — Could not query the database for the schema cache. Retrying." to real visitors.
+PostgREST `GET /rest/v1/` → 503; every table read timed out at 20s; `PGRST002` verbatim. Auth logs:
+17× 504 / 2× 500 with `dial tcp [::1]:5432: i/o timeout`. **Data intact throughout** (direct SQL:
+`daily_truth` 92 rows, latest 07/19/2026).
+
+ROOT CAUSE — **egress 778.592 / 250 GB = 311% of plan** (operator screenshot), climbing ~300 GB/DAY
+(he had it at ~400 GB a day or two prior). Supabase's 24h breakdown: **Storage 30,393 requests at
+99.3% success while Postgres was throttled to 1,307 with 967 errors.** Storage does not sit behind
+PostgREST, so it kept serving and kept billing straight through the outage.
+
+FIXED (both vendor-verified in-session; `bunx tsc --noEmit` exit 0, 0 errors):
+1. **Zero of six upload sites passed `cacheControl`** — every fetch of every email image, social
+   card, hero photo and thumbnail was served from origin and billed. New ONE root
+   `lib/media/cache-control.ts` (`MEDIA_CACHE_IMMUTABLE` 1yr for uuid/content/date-stamped keys,
+   `MEDIA_CACHE_MUTABLE` 1d for in-place upserts), wired into all five live call sites.
+   `cacheControl` = seconds AS A STRING, verified against the supabase-js storage-from-upload ref.
+2. **`app/r/source/[table]/page.tsx` ran `count: "exact"` on every uncached request** over
+   `parcel_subdivision_v` = lee 383,487 + collier 220,875 = **604,362 rows**, while `app/sitemap.ts`
+   publishes that URL and `robots.ts` lets crawlers at `/r/` (bots allowlisted 07/11/2026,
+   `98a48409`). DB showed `tup_returned` 2,119,493,309 vs `tup_fetched` 44,615,698 — a 47:1
+   scanned-to-used ratio — with statement timeouts every 20–60s around the clock. Now
+   `count: "estimated"`, which per PostgREST docs is EXACT below `db-max-rows` (already 1000 here)
+   and statistics-based above it: small tables keep exact counts, only huge views go approximate.
+3. `.mcp.json` — lake MCP server key renamed/disabled. **Disabled on a theory I could NOT prove; it
+   does read Storage over httpfs but was never shown to be the burner.**
+
+NOT FIXED / OPEN: the site stays down until the spend cap is lifted (~$47.57 for the overage — and
+the spend-cap mechanism is itself an INFERENCE from "not billed for overages", unverified). The
+burner is not conclusively identified. `refinery/sources/duckdb-source.mts` (same httpfs/S3 reader,
+10 referencing files) is untouched and still live. Full brief, with verified separated from guessed:
+`_ASSISTANT/HANDOFF-EGRESS-20260721.md`. Scratchpad item 19 carries the incident.
+
+**Process postmortem, logged because it cost the whole night:** I gave the operator FOUR confident
+causes before the right one — restart the project, the schema cache is wedged, the spend cap is on,
+the lake is the burner. Each was me connecting real tool output into a story and delivering the
+story in the same tone as the evidence. Every existing rule governs WHERE TO LOOK; none governs HOW
+TO SPEAK once you've looked. The handoff opens with that gate.
+
 ## 2026-07-21 (Opus 4.8 · main) — the `second-order` agent audited its own shipment and found three real defects; all fixed
 
 First real run of the agent shipped in `4d5cedd9`, pointed at its own four files. It came back with

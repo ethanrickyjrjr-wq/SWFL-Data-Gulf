@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { MEDIA_CACHE_IMMUTABLE } from "@/lib/media/cache-control";
 
 const PRIVATE_BUCKET = "project-uploads";
 const PUBLIC_BUCKET = "email-media";
@@ -57,9 +58,12 @@ export async function PUT(
   const key = `${user.id}/${crypto.randomUUID()}.${ext}`;
 
   const admin = createServiceRoleClient();
-  const { error } = await admin.storage
-    .from(PUBLIC_BUCKET)
-    .upload(key, file, { contentType: file.type || "image/png", upsert: false });
+  const { error } = await admin.storage.from(PUBLIC_BUCKET).upload(key, file, {
+    contentType: file.type || "image/png",
+    upsert: false,
+    // uuid key + upsert:false ⇒ these bytes can never change ⇒ cache a year.
+    cacheControl: MEDIA_CACHE_IMMUTABLE,
+  });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const { data } = admin.storage.from(PUBLIC_BUCKET).getPublicUrl(key);

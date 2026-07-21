@@ -9,6 +9,7 @@ import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { MEDIA_CACHE_MUTABLE } from "@/lib/media/cache-control";
 import { projectItemsSchema } from "@/lib/project/items";
 
 export const runtime = "nodejs";
@@ -47,9 +48,13 @@ export async function POST(
   // Public bucket lives under the owner's uid prefix, like email-media uploads.
   const key = `${user.id}/thumbnails/${itemId}.png`;
   const admin = createServiceRoleClient();
-  const { error: upErr } = await admin.storage
-    .from(PUBLIC_BUCKET)
-    .upload(key, bytes, { contentType: "image/png", upsert: true });
+  const { error: upErr } = await admin.storage.from(PUBLIC_BUCKET).upload(key, bytes, {
+    contentType: "image/png",
+    upsert: true,
+    // MUTABLE: key is stable (`thumbnails/${itemId}.png`) with upsert on, so a
+    // regenerated thumbnail replaces these bytes in place.
+    cacheControl: MEDIA_CACHE_MUTABLE,
+  });
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
 
   const { data: pub } = admin.storage.from(PUBLIC_BUCKET).getPublicUrl(key);
