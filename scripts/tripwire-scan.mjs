@@ -19,6 +19,7 @@ import path from "node:path";
 import { execSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { MANIFEST_PATH, SHOULD_BE_DARK, zombieCrons, darkDrift } from "./lib/watch-manifest.mjs";
+import { scanMachine } from "./egress-burner-scan.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const DAILY_CEILING_USD = 5.0; // locked decree 07/05/2026 (ingest/CLAUDE.md)
@@ -419,6 +420,23 @@ function checkWorktrees() {
   if (!sawNonMain) greens.push("WORKTREES — none besides the main checkout");
 }
 
+// The 07/21/2026 egress incident: the lake MCP server burned ~300 GB/day for
+// DAYS and was caught by a BILL, not a monitor. Nothing on this machine watched
+// for it. This folds that detector into the scan the operator already reads at
+// every session start — presence-based (live process / unguarded copy /
+// spawning config / disarmed guard), because egress is a cumulative counter
+// that cannot fall mid-cycle, so the bill can never be the proof.
+function checkEgressBurner() {
+  const result = scanMachine(ROOT);
+  if (result.level === "green") {
+    greens.push(
+      "EGRESS BURNER — none: no live process, no unguarded copy, no spawning config, guard armed",
+    );
+    return;
+  }
+  for (const f of result.findings) reds.push(`EGRESS — ${f}`);
+}
+
 // ---------- run ---------------------------------------------------------------
 
 const isMain = (() => {
@@ -437,6 +455,7 @@ if (isMain) {
   checkGuards();
   checkValveAudit();
   checkWorktrees();
+  checkEgressBurner();
 
   const B = "=".repeat(72);
   console.log(`\n${B}\nTRIPWIRE SCAN ${new Date().toISOString()}\n${B}`);

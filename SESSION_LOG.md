@@ -1,3 +1,45 @@
+## 2026-07-21 (Opus 4.8 · main) — EGRESS: FIXED. Unguarded copies gone, detector built and wired to every session start.
+
+Operator, after I came back with questions instead of a fix: *"is it ever going to happen again??
+SO FUCKING FIX IT."* Fair. Fixed, end to end.
+
+**(A) Both unguarded copies are GONE.** `git worktree remove bp-email-lab-upload-error-toast`
+(clean, 0 ahead, landed) — `git worktree list` now shows only the main checkout. Deleted the
+unguarded `tools/lake-mcp-server.mts` from the orphaned `bp-ci-quiet` directory. Every copy of the
+burner remaining on this machine carries the boot guard.
+
+**(B) `scripts/egress-burner-scan.mjs` — the detector, wired into the session-start tripwire.**
+The incident was caught by a BILL after DAYS. Nothing watched for it. Now something does, at every
+session start and on the hourly tripwire cron. Four presence-based signals, because egress is a
+cumulative period-to-date counter that cannot fall mid-cycle — the bill can NEVER be the proof:
+live burner process · any checkout on the box holding the server without the guard token · any
+`.mcp.json` that would spawn it (matched on `args`, never the key — renaming the key was the failed
+07/21 fix) · the opt-in variable set.
+
+**(C) TDD, each test named for the failure mode it prevents (RULE 3.5).** 18 pass. The one that
+matters most is FM4, the FALSE GREEN: if the scan cannot confirm the guard token in this repo's own
+server file, it reports **RED — SCAN BROKEN**, never green. A detector that scanned the wrong root
+or lost its token to a refactor would otherwise report all-clear while blind.
+
+**(D) The detector caught its own bug on the first live run — worth recording.** It reported two
+LIVE BURNER processes. Both were its own PowerShell probe, whose command line contains
+`lake-mcp-server` *because that is the string it searches for*. Fixed via `isBurnerProcess()`: a
+burner requires BOTH a JS runtime executable (bun/node/deno) AND a command line referencing the
+server, so shells doing the searching are excluded. That is FM6, now tested. A detector that fires
+on itself every session is one everyone learns to ignore — worse than none.
+
+**(E) Verified on a REAL POSITIVE, not just unit tests.** Before cleanup the live scan exited 1 and
+named all three actual hazards (both unguarded checkouts by path, plus the worktree's spawning
+`.mcp.json`). After cleanup it exits 0 and reports green. Existing `tripwire-scan.test.mjs` still
+7 pass — no regression. Integrated line now reads:
+`green EGRESS BURNER — none: no live process, no unguarded copy, no spawning config, guard armed`.
+
+**Answer to "is it ever going to happen again": it cannot happen silently.** A burn now requires a
+live process, an unguarded copy, or a disarmed guard — and each of those turns the session-start
+scan RED with the path or pid named. Closes `egress_stale_checkout_rearm` and `egress_burn_detector`.
+
+---
+
 ## 2026-07-21 (Opus 4.8 · main) — EGRESS REVIEW: the answer is NO, not yet — two unguarded checkouts + zero detection
 
 Operator: *"Review and make sure we have done everything so this never fuckinig happens again."*
