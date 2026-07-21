@@ -777,6 +777,40 @@ line. Both directions of error in one hour. **A probe that measures the wrong th
 no probe: one cries wolf until it's ignored, the other says all-clear while blind.** Both are now
 tested (FM6 and FM4).
 
+### 28. "HOW DOES EVERYONE HAVE A DIFFERENT FUCKING ANSWER?" — 07/21/2026. Because nobody has the bill.
+Operator pasted a parallel session's egress analysis and asked why every session says something
+different. **Both sessions are right and they are answering DIFFERENT QUESTIONS.** Nobody said so,
+which is the failure.
+
+**Two separate egress lines, conflated under one word:**
+- **THIS session — Storage/S3 egress.** `tools/lake-mcp-server.mts`, a LOCAL DuckDB pulling whole
+  `.csv.gz` snapshots out of the `lake-tier1` / `raw-tabular-cold` buckets. Gzip isn't seekable, so
+  every query re-downloads every dated snapshot whole. Scale: ~300 GB/day. Fixed + detector wired.
+- **The other session — PostgREST/API egress.** Next.js page queries against Postgres tables
+  (`corridor_profiles`, `zhvi_zip_yoy_monthly`, `census_acs_zcta`, `listing_active_stats`,
+  `market_details_swfl_latest`, `listing_pulse_daily`). Scale: ~241 kB per render.
+
+Different mechanism, different source, ~six orders of magnitude apart. Not contradictory answers —
+answers to different questions, both filed under "egress."
+
+**Their finding is REAL and I verified it:** `app/r/cre-swfl/corridors.ts:20` is
+`.select("*")` on `corridor_profiles` — 27 rows, 163 kB, 68% of that page's payload, because three
+narrative prose columns (`character_speculative` 39 kB, `character_facts` 24 kB, `character_chart`
+10 kB = 73 kB) ride along whether the page renders them or not. One-line fix: name the columns.
+
+**THE ROOT CAUSE OF THE DISAGREEMENT, and it is not the sessions:** every one of these numbers —
+mine and theirs — is **payload arithmetic, not a bill**. Neither session has read the actual
+Supabase egress total, because it is not exposed on the wired MCP surface (it needs the Management
+API). That session says so outright: *"I still do not have the actual egress total from billing,
+so I cannot tell you whether egress is even elevated."* Same limit applies to my ~300 GB/day, which
+came from the Storage request log, not the invoice.
+
+**Rule:** until someone reads the real usage number from the billing surface, no session should
+rank egress causes or call anything "the burner" — measure the bill FIRST, then attribute. Two
+sessions independently produced honest, verified, mutually-irrelevant numbers and it read to the
+operator as three days of contradiction.
+-> owed: wire a real egress read (Management API) so the bill is a fact, not arithmetic.
+
 **Why the correction above is written down instead of quietly fixed:** an unverified egress number
 is the exact thing that cost trust on this issue. Item 19 named five suspects and picked none; item 26
 recorded a "fix" that did nothing. Making the same shape of unchecked claim while auditing those
@@ -818,4 +852,32 @@ presence of a capability.* The lint says "no policy" and reads as "wide open"; r
 GRANT + schema USAGE + exposure checked separately, and three of those were closed. Check the
 whole path before pricing the risk. Corollary learned here: it cuts both ways — the same probe that
 downgraded the panic surfaced a real latent hole (27 anon-writable tables) the panic wasn't about.
+
+**CORRECTION to item 29, same session, caught by /advisor BEFORE it was spoken.** I ranked the
+27-table anon GRANT as "the one real finding" and waved the three `USING(true)` tables through as
+"by design." **Inverted.** The GRANT is deny-all today — latent, not exploitable. The `USING(true)`
+trio is readable by the open internet *right now*. Correct ranking, proven with a real anon-key
+request against production (not a catalog read):
+
+`public.deliverables` — **LIVE CROSS-TENANT LEAK.** `GET /rest/v1/deliverables` with the
+publishable key returns `Content-Range: 0-57/58` — **all 58 rows, 3 distinct users, 53 real user
+documents** (`instruction`, `narrative`, `items_snapshot`, `branding`, `project_id`). The table has
+BOTH a `user_id` AND an `is_example` flag — the exact gate the policy should use — and the policy
+is a blanket `SELECT USING (true)`. Control probes in the same request batch: `contacts` and
+`email_contacts` correctly returned `42501 permission denied`; `data_lake.lee_parcels` returned
+`PGRST205 not in schema cache`. So RLS works everywhere it was actually wired — this one table was
+handed a bypass.
+
+**It is dead weight.** All 44 consuming files read `deliverables` / `saved_charts` via
+`createServiceRoleClient()` — server-side, RLS-bypassing. **Zero** browser/anon clients touch them;
+zero direct `rest/v1/...` URL fetches exist. The public share pages (`app/p/[id]`, `app/c/[id]`) are
+server components using service_role. Revoking anon breaks nothing — verified, not assumed.
+`narratives` is different and should be LEFT ALONE: no `user_id`, baked public product output, and
+`lib/narratives/store.ts:16` legitimately falls back to the anon key.
+
+**The lesson that outranks the fix:** the dashboard's 57 INFO warnings were all safe, and the one
+table with a policy was the hole. *A policy existing is not a policy being correct* — `USING(true)`
+is a policy, passes every "has RLS?" check, and grants the world read. Counting policies is not
+auditing them. The lint cannot tell you this; only reading the predicate can.
+→ check opened: `rls_deliverables_public_read` [defect].
 
