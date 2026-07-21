@@ -263,6 +263,7 @@ Locked 07/07/2026 (operator correction — this line previously overclaimed "6-c
 |---|---|
 | **★ Data roots — CHECK FIRST** | `docs/standards/data-roots.md` — the ONE catalog of which table/root feeds each number; any data question or build starts at its top section (one root per concept) |
 | **Data & Build Bible** | `docs/standards/data-and-build-bible.md` |
+| Infrastructure (13 layers) | `docs/standards/infrastructure-playbook.md` — per-layer status + remediation playbook + what NOT to build; two layers are NO-OP BY DESIGN, don't "fix" them |
 | Ontology + roadmap | `docs/ontology-and-roadmap.md` |
 | Data Tier Policy | `docs/API_BLUEPRINTS.md` |
 | Pipeline-freshness | `docs/standards/pipeline-freshness.md` |

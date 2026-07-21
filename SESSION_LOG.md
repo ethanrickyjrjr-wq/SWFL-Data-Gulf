@@ -1,3 +1,46 @@
+## 2026-07-21 (Opus 4.8 · main) — The 13-layer playbook is now dispatchable: six work packages, file ownership, and a collision matrix. Eight layers were never work at all.
+
+Operator: *"docs/standards/infrastructure-playbook.md — work on breaking this into sectiions for
+different claudes to work on"*.
+
+**Carved by work package, NOT by layer.** The playbook's own volume lens is the discriminator:
+eight of thirteen layers are STANDING (maintained, no end state) and two are NO-OP BY DESIGN.
+Thirteen sections would have dispatched eight sessions to do nothing and baited two into "fixing"
+the no-ops the playbook explicitly says never to touch. The dispatchable set is the five
+work-order items plus Layer 7's four ratchets → **six packages: A egress/revalidate (L10),
+B backup posture (L13), C WAF ceiling (L9), D error tracking (L12), E authz sweep (L8),
+F CI ratchets (L7).**
+
+**The actual payload is the collision matrix, not the prose.** Four verified serialization points:
+(1) `package.json`/`bun.lock` is a hard lock held by D alone — it is the only package adding a
+dependency, and Gate 1 reds whoever pushes second; (2) D must land before E's error-leak fix —
+the playbook says the detail needs a *somewhere* and that somewhere IS Layer 12; (3) `SESSION_LOG.md`
+serializes at push regardless of what else a package touched; (4) A and E are genuinely disjoint —
+A edits **pages**, E edits **route handlers** — but `app/r/` (A) vs `app/api/r/` (E) is a real trap,
+so path-check instead of pattern-matching on `/r/`. Also split **code lanes from operator lanes**:
+B and C are dashboard actions no session can click, so they are prep-and-record, not code sessions.
+
+**⚠ FOUND A SCOPE DISCREPANCY — Layer 8's "82 routes" reconciles with nothing.** Live repo probe
+07/21/2026: **120** total `route.ts` under `app/api`, **64** importing service-role directly, **160**
+files across `app/` + `lib/`. That figure scopes the largest package's tranches, so it is not
+cosmetic. Opened `infra_layer8_route_count_unverified` [verify] rather than silently overwriting it
+— and the 64 is itself one grep on the `service-role` literal, so a transitive wrapper would not
+match. The doc reads "numbers to reconcile," never "the correct count."
+
+**Housekeeping:** released a stale repolith claim on the playbook held by `2b6f0cdc` — timeline-checked
+first, not assumed: the claimed files are exactly the two the prior-session summary lists, mtimes
+15:58/15:59 match its "Last Updated 16:00," nothing written since. Ghost claim from the session that
+compacted into this one, not a live rival.
+
+**Shipped:** `docs/handoff/2026-07-21-infrastructure-work-packages.md` (new) · playbook gains a
+dispatch pointer · `CLAUDE.md` reference-index line for the playbook (prior session's, uncommitted
+until now). Playbook + handoff are mutually referential and commit as ONE unit — the playbook was
+still untracked, so committing the handoff alone would dangle its top-line reference.
+
+**Next:** package A first — it is the only gap costing money, and its internal gate is reading the
+real billed egress number before any revalidate pass. Every figure quoted to date is payload
+arithmetic.
+
 ## 2026-07-21 (Opus 4.8 · main) — DB HEALTH: 317 live Supabase metric series we had never scraped. Now nine gauges, hourly, on /ops — and it is NOT egress coverage.
 
 Operator, handing `https://supabase.com/docs/guides/telemetry/metrics`: *"why do we not have all of
