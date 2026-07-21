@@ -200,6 +200,27 @@ export function deriveSafeViewName(path: string): string {
   return name;
 }
 
+/** Which of `viewNames` a SQL statement actually references.
+ *
+ *  This is the whole boot-egress fix. Binding a view's schema forces DuckDB to
+ *  sniff its backing object, and a `.csv.gz` is NOT range-readable (gzip is not
+ *  seekable) — so sniffing one costs a FULL download (~18 MB for a leepa file).
+ *  Registering every view at boot therefore re-downloaded most of the bucket on
+ *  every server start, which is how egress scaled with SERVER BOOTS rather than
+ *  with queries (07/21/2026 incident, ~300 GB/day).
+ *
+ *  Matching is case-insensitive (SQL identifiers are) and word-boundary-anchored
+ *  so `faf5_2024_backup` never drags in `faf5_2024`. It deliberately over-matches
+ *  names inside string literals: materializing one extra named view is cheap,
+ *  missing one breaks the query.
+ */
+export function viewsReferencedBy(sql: string, viewNames: string[]): string[] {
+  return viewNames.filter((name) => {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?<![A-Za-z0-9_])${escaped}(?![A-Za-z0-9_])`, "i").test(sql);
+  });
+}
+
 // ---------- Startup ----------
 
 /** Fetch _tier1_inventory via a dedicated short-lived DuckDB connection.
@@ -239,6 +260,43 @@ async function fetchInventory(pg: PgCreds): Promise<InventoryRow[]> {
 type DuckDBConn = Awaited<ReturnType<InstanceType<typeof DuckDBInstance>["connect"]>>;
 let mainConn: DuckDBConn | null = null;
 let registeredViews: ViewMeta[] = [];
+
+/** Catalogued but not yet bound. Populated at boot from the inventory (no S3
+ *  reads); drained by ensureViews() as queries actually name each view. */
+const pendingGroups = new Map<string, ViewGroup>();
+/** Views whose schema has been bound on this connection — never sniffed twice. */
+const materializedViews = new Set<string>();
+
+/** Binds the named views on demand, skipping any already materialized.
+ *
+ *  This is where the S3 read that used to happen at boot now happens: once, for
+ *  the views a query actually names, and never again for the life of the
+ *  process. A view that fails (corrupt file, transient S3 error, drifting
+ *  schema) is logged and skipped — the query then fails on its own terms with
+ *  DuckDB's real error rather than a silent empty result.
+ */
+async function ensureViews(names: string[]): Promise<void> {
+  for (const name of names) {
+    if (materializedViews.has(name)) continue;
+    const g = pendingGroups.get(name);
+    if (!g) continue;
+    const urls = g.rows.map((r) => `s3://${r.bucket}/${r.path}`);
+    try {
+      await mainConn!.run(
+        `CREATE OR REPLACE VIEW ${g.name} AS SELECT * FROM ${tier1ListReader(g.format, urls)};`,
+      );
+      materializedViews.add(name);
+      console.error(
+        `[lake-mcp] bound view "${name}" (${g.format}, ${urls.length} file(s)) on demand`,
+      );
+    } catch (err) {
+      console.error(
+        `[lake-mcp] failed to bind view "${name}" (${g.format}, ${urls.length} file(s)): ` +
+          String(err).split("\n")[0].slice(0, 140),
+      );
+    }
+  }
+}
 
 /** Resolves when startup() finishes. Tool handlers await this so the server can
  *  accept the MCP handshake immediately while view registration runs in the
@@ -333,48 +391,43 @@ async function startup(): Promise<void> {
   // are still being built in the background.
   mainConn = conn;
 
-  // Step 5 — Register each dataset view in its own try/catch. A view that fails
-  // (corrupt file, transient S3 error, drifting schema) is logged and skipped;
-  // the server still comes up with every view that did register.
+  // Step 5 — Catalog every dataset view from the INVENTORY ONLY. No CREATE VIEW
+  // here, and therefore ZERO S3 bytes at startup.
   //
-  // This is the slow part of startup: each CREATE VIEW forces DuckDB to sniff
-  // the backing S3 object(s) to bind a schema (csv_auto ~5s/file; a 26-file
-  // ndjson union_by_name read ~30s), summing to ~90s. It stays serial on
-  // purpose — DuckDB's node binding executes run() calls on a single scheduler,
-  // so fanning these across multiple connections measured *slower*, not faster.
-  // The connect-first ordering in the boot block (not parallelism) is what
-  // keeps this off the handshake's critical path: the transport is already
-  // connected, so this whole loop runs in the background and only the first
-  // tool call waits on it.
+  // This used to be the slow part of boot: each CREATE VIEW forces DuckDB to
+  // sniff the backing S3 object(s) to bind a schema (csv_auto ~5s/file; a
+  // 26-file ndjson union_by_name read ~30s), summing to ~90s. What nobody
+  // costed is that sniffing is a DATA READ, and on a `.csv.gz` it is a FULL
+  // read — gzip is not seekable, so DuckDB cannot range-request a footer the
+  // way it can with Parquet. Every boot re-downloaded most of the bucket
+  // (~18 MB per leepa file), which is how egress scaled with SERVER BOOTS
+  // instead of with queries and reached ~300 GB/day on 07/21/2026.
+  //
+  // Every field ViewMeta needs — name, format, file_count, source, vintage —
+  // comes from `data_lake._tier1_inventory` over Postgres. Only binding a
+  // SCHEMA needs the object itself, and only a real query needs a schema. So
+  // list_views is now free, and views materialize on demand in ensureViews().
   const registered: ViewMeta[] = [];
+  pendingGroups.clear();
+  materializedViews.clear();
   if (s3) {
     for (const g of groups) {
       const urls = g.rows.map((r) => `s3://${r.bucket}/${r.path}`);
-      const reader = tier1ListReader(g.format, urls);
-      try {
-        await conn.run(`CREATE OR REPLACE VIEW ${g.name} AS SELECT * FROM ${reader};`);
-        const top = g.rows[0]!.path.split("/")[0] ?? "";
-        registered.push({
-          name: g.name,
-          format: g.format,
-          file_count: urls.length,
-          source:
-            urls.length === 1
-              ? urls[0]!
-              : `s3://${g.rows[0]!.bucket}/${top}/ (${urls.length} files)`,
-          vintage:
-            g.rows
-              .map((r) => r.vintage)
-              .filter((v): v is string => !!v)
-              .sort()
-              .pop() ?? null,
-        });
-      } catch (err) {
-        console.error(
-          `[lake-mcp] skipped view "${g.name}" (${g.format}, ${urls.length} file(s)): ` +
-            String(err).split("\n")[0].slice(0, 140),
-        );
-      }
+      const top = g.rows[0]!.path.split("/")[0] ?? "";
+      pendingGroups.set(g.name, g);
+      registered.push({
+        name: g.name,
+        format: g.format,
+        file_count: urls.length,
+        source:
+          urls.length === 1 ? urls[0]! : `s3://${g.rows[0]!.bucket}/${top}/ (${urls.length} files)`,
+        vintage:
+          g.rows
+            .map((r) => r.vintage)
+            .filter((v): v is string => !!v)
+            .sort()
+            .pop() ?? null,
+      });
     }
   }
   registeredViews = registered;
@@ -408,6 +461,7 @@ async function handleDescribeView(viewName: string): Promise<object> {
       `Unknown view "${viewName}". Valid names: ${valid}. For Postgres tables use query_lake.`,
     );
   }
+  await ensureViews([viewName]);
   const reader = await mainConn!.runAndReadAll(`DESCRIBE SELECT * FROM ${viewName} LIMIT 0`);
   return { columns: reader.getRowObjects() };
 }
@@ -420,6 +474,9 @@ async function handleQueryLake(sql: string): Promise<object> {
         `Got: ${sql.slice(0, 120)}`,
     );
   }
+  // Bind only the Tier-1 views this statement names. A pg.data_lake.* query
+  // touches no Tier-1 object at all and so costs zero Storage egress.
+  await ensureViews(viewsReferencedBy(sql, [...pendingGroups.keys()]));
   const finalSql = buildFinalQuery(sql);
   const reader = await mainConn!.runAndReadAll(finalSql);
   return { rows: reader.getRowObjects() };

@@ -18,6 +18,7 @@ const {
   tier1ListReader,
   assertEgressOptIn,
   EGRESS_OPT_IN_ENV,
+  viewsReferencedBy,
 } = await import("./lake-mcp-server.mts");
 
 // ---------------------------------------------------------------------------
@@ -300,4 +301,49 @@ test("inventoryRowToParquetView: constructs s3 URL and derives view name", () =>
   const view = inventoryRowToParquetView(row);
   assert.equal(view.name, "faf5_2024");
   assert.equal(view.s3_url, "s3://lake-tier1/faf5/faf5_2024.parquet");
+});
+
+// ---- viewsReferencedBy — the boot-egress fix ----
+//
+// FAILURE MODE THESE TESTS TARGET (07/21/2026 incident): the server used to
+// CREATE VIEW over EVERY inventory group at boot. Binding a schema forces DuckDB
+// to sniff the backing object, and a .csv.gz is not range-readable — gzip is not
+// seekable — so each boot re-downloaded the whole bucket (~18 MB per leepa file).
+// Egress scaled with SERVER BOOTS, not with queries. Views are now materialized
+// on demand; viewsReferencedBy decides what a given SQL actually needs.
+
+test("viewsReferencedBy: a pg-only query materializes NO tier-1 view (the boot burn)", () => {
+  const names = ["just_value_2026_05_30", "city_pulse", "faf5_2024"];
+  const refs = viewsReferencedBy("SELECT * FROM pg.data_lake.corridor_profiles LIMIT 5", names);
+  assert.deepEqual(refs, []);
+});
+
+test("viewsReferencedBy: returns only the views the SQL names, not the whole inventory", () => {
+  const names = ["just_value_2026_05_30", "city_pulse", "faf5_2024"];
+  const refs = viewsReferencedBy("SELECT * FROM faf5_2024 LIMIT 10", names);
+  assert.deepEqual(refs, ["faf5_2024"]);
+});
+
+test("viewsReferencedBy: picks up every view in a join", () => {
+  const names = ["usgs_water_swfl", "usgs_water_swfl_sites", "faf5_2024"];
+  const refs = viewsReferencedBy(
+    "SELECT d.v FROM usgs_water_swfl d JOIN usgs_water_swfl_sites s ON d.site_no = s.site_no",
+    names,
+  );
+  assert.deepEqual(refs.sort(), ["usgs_water_swfl", "usgs_water_swfl_sites"]);
+});
+
+test("viewsReferencedBy: matches case-insensitively (SQL identifiers are)", () => {
+  assert.deepEqual(viewsReferencedBy("SELECT * FROM FAF5_2024", ["faf5_2024"]), ["faf5_2024"]);
+});
+
+test("viewsReferencedBy: word-boundary only — a longer identifier is not a match", () => {
+  // "faf5_2024_backup" must NOT drag in the "faf5_2024" view.
+  assert.deepEqual(viewsReferencedBy("SELECT * FROM faf5_2024_backup", ["faf5_2024"]), []);
+});
+
+test("viewsReferencedBy: a name appearing only inside a string literal still counts (safe over-match)", () => {
+  // Over-materializing one named view is cheap; missing one breaks the query.
+  const refs = viewsReferencedBy("SELECT 'faf5_2024' AS label FROM faf5_2024", ["faf5_2024"]);
+  assert.deepEqual(refs, ["faf5_2024"]);
 });

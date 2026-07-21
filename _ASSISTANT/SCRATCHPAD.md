@@ -19,6 +19,96 @@ entry. Don't do it.
 
 ---
 
+## OPEN — raised 07/21/2026
+
+### 0a. THE EGRESS BURNER IS NAMED, WITH BYTES: the lake MCP sniffs the whole bucket on every BOOT
+
+Operator hypothesis 07/21: *"data-roots has to be causing the egress increase."*
+**Answer: no — and here is what is, with receipts.** The mechanism is per-BOOT, not
+per-query, which is why every workload-hunting theory missed it.
+
+**(A) TOOL-PRINTED — Supabase storage log, 07/21/2026 (`get_logs` service `storage`):**
+- User agent `duckdb/v1.5.4(windows_amd64) node-neo-api` — a LOCAL WINDOWS client, not
+  Vercel and not GHA (those show `linux_amd64 python/3.13`).
+- It repeatedly GETs whole compressed objects: `raw-tabular-cold/leepa/just_value/
+  2026-05-30.csv.gz` **5× in ~10s**, `last_sale` 5×, `use_codes` 4×, plus a HEAD/GET
+  fan-out across **every city and every month** of `lake-tier1/city_pulse/*/year=*/
+  month=*/run-*.ndjson` (many `ABORTED REQ`).
+- Burst window **08:11:29–08:12:46 UTC**.
+
+**(A) Object sizes (`storage.objects`):** `leepa/just_value` **18 MB**, `leepa/parcels`
+**9.3 MB**, `leepa/last_sale` **8 MB**, `city_pulse` ndjson up to **6.5 MB**.
+→ ~130 MB in 40 seconds. Sustained that is **~11 GB/hr ≈ 280 GB/day**, against the
+operator-observed **~300 GB/day**. The arithmetic lands.
+
+**(A) Only ONE file in the repo references those exact paths:** `tools/lake-mcp-server.mts`
+(+ its test). No `refinery/sources/duckdb-source.mts` caller reads `leepa/` or
+`city_pulse/` — the packs read named parquets (`storm_events_swfl`, `hurdat2_fl`,
+`zori_swfl`, `faf5_2024`). This rules out the build pipeline, which the MCP kill did NOT
+touch and which was the leading rival suspect.
+
+**(A) THE AMPLIFIER — the code says it itself,** `tools/lake-mcp-server.mts:336-348`:
+Step 5 loops over EVERY tier-1 inventory group at **startup** and runs
+`CREATE OR REPLACE VIEW ... SELECT * FROM read_csv_auto([...])`. Verbatim comment:
+*"each CREATE VIEW forces DuckDB to sniff the backing S3 object(s) to bind a schema
+(csv_auto ~5s/file; a 26-file ndjson union_by_name read ~30s), summing to ~90s."*
+**A `.csv.gz` is not seekable — gzip cannot be range-read, so binding a schema pulls the
+entire 18 MB file.** Every boot re-downloads a large fraction of the bucket. Four copies
+were found running (killed 07/21, commit `d21d6766`).
+
+**THE REAL LESSON: the burn scaled with MCP BOOTS, not with queries.** Nobody had to run a
+single lake query to burn hundreds of GB — starting sessions was sufficient. Every theory
+that hunted for a heavy *workload* (a cron, a crawler, a page) was looking at the wrong
+axis. **Schema inference is a data read, and on compressed files it is a FULL read.**
+
+**(B) CONCLUDED, not measured — where data-roots actually fits:** the consolidation work
+did convert one real DB read into a Storage read (`a2b9229f`, USGS → tier-1 parquet
+dual-read), and the 07/18–07/19 consolidation push is plausibly when lake-facing session
+volume spiked. But that is a contributor to volume, **not the mechanism**, and the
+`just_value`/`last_sale`/`city_pulse` reads are NOT traced to data-roots specifically.
+Operator's instinct pointed at the right era and the wrong cause.
+
+**NOT YET CLOSED — do not call this fixed.** What is true: **no burner-class reads in the
+storage log since 08:22 UTC (7+ hours)**; the only later s3 activity is the GHA
+`linux/python` `zori_swfl.parquet` read at 15:09 UTC (legitimate ingest). Quiet is
+*consistent with* the kill working and also with nothing having run. **The only (A)-grade
+confirmation is the daily-RATE egress chart, never the cumulative total** — egress is a
+period-to-date counter that cannot go down, and this project has already been "re-fixed"
+twice off a rising cumulative number.
+
+**Durable fix still owed:** the boot-time full-bucket schema sniff is a design defect, not
+a one-off. Deleting the `.mcp.json` entry stops today's burn; it does not stop the next
+person who re-adds it. Cache bound schemas, or never sniff a `.gz` on boot.
+
+### 0b. Supabase Metrics API — 317 live series we have never scraped, and /ops shows none of it
+
+Operator 07/21, handing `https://supabase.com/docs/guides/telemetry/metrics`:
+*"why do we not have all of this in /ops (other repo)"*
+
+**Verified live in-session, not from docs prose.** `GET https://<ref>.supabase.co/customer/v1/privileged/metrics`,
+HTTP Basic auth (`service_role` : service key), Prometheus text format. Probed against our
+project: **HTTP 200, 135 KB, 1138 lines, 317 metric families.** Beta; not on self-hosted.
+
+**What it has:** `db_transmit_bytes`, `node_network_{transmit,receive}_bytes_total`,
+`pgbouncer_stats_{sent,received}_bytes_total`, plus ~300 Postgres/host families (CPU, IO,
+WAL, replication lag, connections, per-database size, query stats).
+
+**What it does NOT have — the load-bearing part: ZERO storage metrics.** `grep -i storag`
+over all 317 families returns nothing. The 07/21 burn was **Storage/S3 egress** (lake MCP
+sniffing whole `.csv.gz` objects on boot, item 0a). **This endpoint would not have caught
+it.** It is DB-instance-only. It is also still not the invoice.
+
+**Why we don't have it:** nobody wired it — `grep -ri 'privileged/metrics|prometheus'` over
+the ops repo returns zero hits. Not a decision, just never built. Natural home is
+`/ops/spend` (already has `confidence: needs-input` slots) or a new `/ops/db-health`.
+
+**Open question for the operator:** do NOT stand up Prometheus + Grafana for this — that is
+the RULE 11 hyperscaler pattern at our volume. Proportionate path is a scheduled scrape of
+~5–10 chosen series into a table, rendered like `/ops/spend` already renders its slots.
+Decide which series matter before building.
+
+---
+
 ## OPEN — raised 07/20/2026, not yet resolved
 
 ### 0. Same surface "fixed" five times in a row without ever being driven live
