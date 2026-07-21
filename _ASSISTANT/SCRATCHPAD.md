@@ -708,3 +708,41 @@ focus_hook_default_rules_drift "..."` was run TWICE and both times returned
 tripwire reported the same 503 against the spend ledger, so the database was degraded, not the
 command. Logged here so it is not lost. **Next session: open the check and delete this item.**
 
+### 27. CORRECTION to item 26 — the egress fix did NOT cover stale checkouts. Verified 07/21/2026.
+Operator asked: *"Review and make sure we have done everything so this never fuckinig happens
+again."* Answer: **on `main`, yes. On this machine, no.** Two checkouts still hold a fully-armed,
+UNGUARDED copy of the burner.
+
+**Measured, not assumed** — `grep -c LAKE_MCP_ALLOW_EGRESS tools/lake-mcp-server.mts` per checkout:
+- `C:/Users/ethan/dev/brain-platform` → **1** (guarded)
+- `C:/Users/ethan/dev/SWFL-Data-Gulf` → **1** (guarded)
+- `C:/Users/ethan/dev/bp-email-lab-upload-error-toast` → **0** — registered worktree, HEAD
+  `4ac8e2bf`, 30 behind origin/main, working tree CLEAN, and its `.mcp.json` still carries the
+  **original** `"lake"` entry (never even renamed). Opening a Claude Code session in that directory
+  auto-spawns `bun tools/lake-mcp-server.mts` from PRE-guard code. Full ~300 GB/day burn, one
+  session away.
+- `C:/Users/ethan/dev/bp-ci-quiet` → **0** — orphaned directory, no longer a git repo at all, no
+  `.mcp.json`, so no auto-spawn; only a manual `bun tools/lake-mcp-server.mts` would fire it.
+
+**The uncomfortable part, stated plainly:** the guard's own comment
+(`tools/lake-mcp-server.mts:537-543`) claims it covers "a stale config in a worktree." **It does
+not.** The guard is in code, and a stale worktree carries its own pre-guard copy of that code — a
+guard that isn't there cannot fire. That reasoning was written last session and was wrong. Same
+"you told me it was fixed" shape as item 26's own postmortem, one layer up.
+
+**What IS verified good on main:** guard fires before any DuckDB instance or S3 credential
+(`import.meta.main` block, lines 574-582); the opt-in variable `LAKE_MCP_ALLOW_EGRESS` is absent
+from the ambient environment AND from every local env file (checked — the precondition the guard
+depends on actually holds, which last session never verified); zero live `lake-mcp-server`
+processes in the full command-line process list; dead `.mcp.json` entry now deleted.
+
+**Fix is the operator's — the cross-project write hook correctly blocks doing it from here:**
+`git worktree remove bp-email-lab-upload-error-toast` (clean, 0 ahead, tripwire already says safe)
+and delete the `bp-ci-quiet` directory.
+
+**The deeper gap: there is still NO detector.** The burn ran for days and was caught by a bill, not
+a monitor. The guard cages *this* burner; nothing catches the next one.
+
+-> checks opened (ledger is BACK — PGRST002 cleared): `egress_stale_checkout_rearm` [defect],
+`egress_burn_detector` [task]. These supersede item 26's owed `lake_mcp_egress_burn`.
+

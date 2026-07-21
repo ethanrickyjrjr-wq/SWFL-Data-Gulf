@@ -1,3 +1,50 @@
+## 2026-07-21 (Opus 4.8 · main) — EGRESS REVIEW: the answer is NO, not yet — two unguarded checkouts + zero detection
+
+Operator: *"Review and make sure we have done everything so this never fuckinig happens again."*
+Reviewed the egress kill against the actual machine rather than against the diff. **On `main` it
+holds. On this box it does not.** Reporting the honest no.
+
+**(A) Verified good on main — including the precondition last session never checked.** The boot
+guard fires inside `import.meta.main` (`tools/lake-mcp-server.mts:574-582`) **before** any
+`DuckDBInstance` or S3 credential, so a blocked start issues zero billable requests. Critically,
+`env.mts` calls `process.loadEnvFile()` on import and the guard reads `process.env` *after* that —
+so if `LAKE_MCP_ALLOW_EGRESS=1` sat in a local env file or the shell, the guard would pass and the
+burn would already be uncaged. **Checked: absent from the ambient environment and from every local
+env file.** The guard's precondition actually holds. Full command-line process sweep
+(`Get-CimInstance Win32_Process`): **zero** `lake-mcp-server` processes alive.
+
+**(B) THE HOLE — two checkouts hold an UNGUARDED copy.** `grep -c LAKE_MCP_ALLOW_EGRESS
+tools/lake-mcp-server.mts` per checkout on disk: `brain-platform` → 1, `SWFL-Data-Gulf` → 1,
+**`bp-email-lab-upload-error-toast` → 0**, **`bp-ci-quiet` → 0**. The first of those is a
+registered worktree at `4ac8e2bf` (30 behind, working tree clean) whose `.mcp.json` still carries
+the **original** `"lake"` entry — never even renamed. Opening a session in that directory
+auto-spawns `bun tools/lake-mcp-server.mts` from pre-guard code: the full ~300 GB/day burn, one
+session away. `bp-ci-quiet` is an orphaned non-git directory with no `.mcp.json`, so manual-run
+risk only.
+
+**Correcting my own claim from last session:** the guard comment
+(`tools/lake-mcp-server.mts:537-543`) says it covers "a stale config in a worktree." **It does
+not.** A stale worktree carries its own pre-guard copy of the code, and a guard that isn't there
+cannot fire. That was wrong when written.
+
+**(C) Fixed here:** deleted the dead `lake_DISABLED_EGRESS_BURN_20260721` entry from `.mcp.json`
+(inert since the guard landed, but it still spawned a doomed process every session). The worktree
+fix is the operator's — the cross-project write hook correctly refused to let a brain-platform
+session reach into a sibling checkout.
+
+**(D) The deeper gap: there is still NO detector.** The burn ran for days and was found from a
+bill, not a monitor. The guard cages *this* burner; nothing catches the next one. Byte-level
+Storage egress likely needs the Management API (not in the wired Supabase MCP surface) — the
+tractable detector is presence-based: live burner process, any checkout missing the guard string,
+opt-in variable set. Not built here — it is a new build owing a RULE 3.5 brainstorm plus a
+failure-modes section.
+
+**Checks — ledger is BACK (PGRST002 cleared, 624 open).** Opened `egress_stale_checkout_rearm`
+[defect, due 07/22] and `egress_burn_detector` [task, due 07/24]. Scratchpad item 27 records the
+correction. Remaining checks owed from last session are still owed.
+
+---
+
 ## 2026-07-21 (Opus 4.8 · main) — BRAIN CATALOG + LAKE-READ RATCHET: the architecture question, answered with a triage
 
 Second and third commits of the session (first is the egress kill, below). Answers the operator's

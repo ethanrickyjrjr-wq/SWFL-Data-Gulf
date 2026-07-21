@@ -4,10 +4,6 @@
       "command": "serena",
       "args": ["start-mcp-server", "--context", "claude-code", "--project", "."]
     },
-    "lake_DISABLED_EGRESS_BURN_20260721": {
-      "command": "bun",
-      "args": ["tools/lake-mcp-server.mts"]
-    },
     "swfl": {
       "type": "http",
       "url": "https://www.swfldatagulf.com/api/mcp",
