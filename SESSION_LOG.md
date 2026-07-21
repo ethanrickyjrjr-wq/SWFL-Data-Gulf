@@ -1,3 +1,39 @@
+## 2026-07-21 (Opus 4.8 · main) — EGRESS BURNER NAMED: the lake MCP, on this Windows box + 6 email defects logged
+
+Docs only — no code touched. Two deliverables: `_ASSISTANT/HANDOFF-2026-07-21-fix-list.md` and
+SCRATCHPAD items 20-26.
+
+**The burner, answering the open question the parallel session's `HANDOFF-EGRESS-20260721.md` ends
+on** ("which bucket do those 30,393 requests hit, and who issues them — that is the first thing to
+run"). Ran `get_logs` service `storage`: **every request in the window carries one user-agent,
+`duckdb/v1.5.4(windows_amd64) node-neo-api`** — not the website, not a GHA cron (linux), but the
+local machine, spanning `lake-tier1` and `raw-tabular-cold`. Same object re-fetched 4-5× seconds
+apart (`leepa/just_value/2026-06-15.csv.gz` 5 GETs in 28s); one burst pulls multiple dated snapshots
+of the same dataset. `Get-CimInstance` shows **three live `bun tools/lake-mcp-server.mts` processes**
+(PIDs 54044/59824/40916). Mechanism read from source: `tier1ListReader` (lines 176-189) builds each
+view over an explicit list of EVERY inventoried file, `read_csv_auto([...], union_by_name=true)`;
+cold data is `.csv.gz`, which is not seekable, so each query re-downloads every snapshot whole.
+Confirms that handoff's own 30,393 × 11 MB ≈ 334 GB/day arithmetic and **kills its "storage is ruled
+out / re-enable the lake MCP" paragraph** — `last_accessed_at` is not maintained on download, which
+is why the lake looked innocent.
+
+**The `.mcp.json` "disable" does not disable anything** — renaming the mcpServers key only renames
+the server; the entry still runs the same command, and it did not stop the three live processes. It
+is also uncommitted, which is why two days of fixes left no `git log` trace. Same shape as SCRATCHPAD
+item 12: killing the config does not kill the process. **Not killed and not changed — process kill
+and `.mcp.json` are the operator's call; `.mcp.json` is another session's uncommitted edit.**
+
+**Six email/demo defects logged** from operator screenshots (items 20-25) — `/demo` runs entirely on
+static fixtures with a frozen 05/22/2026 token; the CAN-SPAM nag renders to recipients; `applyBrand`
+still has no server-side caller (item 15's product half); two equation-footnote producers still emit;
+market-comps ships one comp; every lifecycle CTA shares `facts.sourceUrl`. **Includes a correction
+block** — the first pass misread two screenshots as sent email when `FooterBlock.tsx:60` /
+`ButtonBlock.tsx:19` prove they are the edit canvas (re-points the "Button" fix to a save-path bug),
+and overcounted equation producers 3→2 (`provenanceFootnote` is a citation — do not kill it).
+
+**Checks could not be opened — ledger returns `PGRST002`.** Eight keys listed in the handoff; the
+session-start check list is currently blind, not clean.
+
 ## 2026-07-21 (Opus 4.8 · main) — PROD OUTAGE: egress 311% of plan; storage cache headers + the parcel-scan fix
 
 Operator: "what in the world is going on with /desk page?" → "it doesn't render and i can't log in."
