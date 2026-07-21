@@ -20,6 +20,7 @@ import { execSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { MANIFEST_PATH, SHOULD_BE_DARK, zombieCrons, darkDrift } from "./lib/watch-manifest.mjs";
 import { scanMachine } from "./egress-burner-scan.mjs";
+import { canReadEgress, TOKEN_ENV as EGRESS_TOKEN_ENV } from "./supabase-egress-read.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const DAILY_CEILING_USD = 5.0; // locked decree 07/05/2026 (ingest/CLAUDE.md)
@@ -437,6 +438,27 @@ function checkEgressBurner() {
   for (const f of result.findings) reds.push(`EGRESS — ${f}`);
 }
 
+// Every "egress" number spoken on this platform to date — ~300 GB/day of Storage
+// snapshot re-downloads, ~241 kB per page render of PostgREST payload — has been
+// payload arithmetic, not a bill. Two sessions produced two honest, verified,
+// mutually-irrelevant figures on 07/21/2026 and it read as days of contradiction.
+// Vendor-verified same day: the Management API has NO egress endpoint (the words
+// "egress" and "bandwidth" appear zero times in its OpenAPI spec); served bytes
+// are reachable only via the log-query endpoint, which needs a token nobody has
+// minted. Surfaced as YELLOW so the gap is VISIBLE every session instead of
+// quietly persisting — unknown egress is not zero egress.
+function checkEgressReadable() {
+  if (canReadEgress(process.env)) {
+    greens.push("EGRESS READABLE — Management token present; served bytes can be measured");
+    return;
+  }
+  yellows.push(
+    `EGRESS UNKNOWN — no ${EGRESS_TOKEN_ENV}, so the real served-bytes number has NEVER been ` +
+      `read. Every egress figure quoted so far is payload arithmetic. Mint a token with the ` +
+      `analytics_usage_read scope, then: node scripts/supabase-egress-read.mjs --ref <ref> --sql "..."`,
+  );
+}
+
 // ---------- run ---------------------------------------------------------------
 
 const isMain = (() => {
@@ -456,6 +478,7 @@ if (isMain) {
   checkValveAudit();
   checkWorktrees();
   checkEgressBurner();
+  checkEgressReadable();
 
   const B = "=".repeat(72);
   console.log(`\n${B}\nTRIPWIRE SCAN ${new Date().toISOString()}\n${B}`);

@@ -1,3 +1,48 @@
+## 2026-07-21 (Opus 4.8 · main) — THE BILL: there is NO Supabase egress endpoint. Vendor-verified, and the gap is now visible every session.
+
+Operator, after two sessions gave two different "egress" answers: *"HOW DOES EVERYONE HAVE A
+DIFFERENT FUCKING ANSWER?"* then *"DO IT."* Answer: because nobody had read the bill — and it turns
+out the bill is not readable from the API at all.
+
+**(A) THE FINDING, verified in-session against `https://api.supabase.com/api/v1-json` (the
+authoritative OpenAPI spec, fetched live — not docs prose, not memory): the words "egress" and
+"bandwidth" appear ZERO times in the entire Management API v1 spec.** There is no egress endpoint.
+Billing paths are addon management only (`/v1/projects/{ref}/billing/addons`). The two usage paths
+return COUNTS, not bytes (`usage.api-counts`, `usage.api-requests-count`). This corrects the premise
+of the check I opened an hour earlier, which assumed the Management API could produce the bill.
+
+**(B) The ONE byte-level path that does exist**, contract verified from the same spec:
+`GET /v1/projects/{ref}/analytics/endpoints/logs.all`, query params `sql` /
+`iso_timestamp_start` / `iso_timestamp_end`, bearer auth, fine-grained scope
+`analytics_usage_read`. Served bytes from logs is strictly better than payload arithmetic — it is
+bytes that actually left — but it is still NOT the invoice, and the file says so in its header so
+nobody overclaims it later.
+
+**(C) `scripts/supabase-egress-read.mjs` + 10 tests.** Verified transport, not a guessed query: the
+endpoint/params/auth are confirmed, the log table and column names are NOT (no token existed to
+probe them), so `--sql` is required and the tool refuses rather than inventing one. The load-bearing
+test is that an absent token produces a LOUD refusal naming the token and scope and exits 2 —
+**never a zero.** A confident zero is the most dangerous wrong answer available here, and `sumBytes`
+returns null (unknown) rather than 0 when no byte column is present.
+
+**(D) The gap is now VISIBLE, which is the actual fix.** `checkEgressReadable()` in the tripwire
+prints YELLOW at every session start: *"EGRESS UNKNOWN — no SUPABASE_ACCESS_TOKEN, so the real
+served-bytes number has NEVER been read. Every egress figure quoted so far is payload arithmetic."*
+It stays yellow until a token exists. Unknown egress is not zero egress, and it will no longer sit
+silent.
+
+**(E) Why two sessions disagreed, for the record.** They measured different things and neither said
+so: this session measured Storage/S3 snapshot re-downloads (~300 GB/day, from the Storage request
+log); the parallel session measured PostgREST page payloads (~241 kB/render, `select("*")` on
+`corridor_profiles` at `app/r/cre-swfl/corridors.ts:20` being 68% of it — I verified their finding is
+real). Same word, different mechanism, six orders of magnitude apart. Both honest, neither the bill.
+
+**Credential is the one thing code cannot do:** no Management token exists locally or in gh secrets
+(checked by name, values never read). Verification: 10 tests pass, refusal path exits 2 with the
+right message, tripwire shows the YELLOW line, existing `tripwire-scan.test.mjs` still 7 pass.
+
+---
+
 ## 2026-07-21 (Opus 4.8 · main) — EGRESS: FIXED. Unguarded copies gone, detector built and wired to every session start.
 
 Operator, after I came back with questions instead of a fix: *"is it ever going to happen again??
