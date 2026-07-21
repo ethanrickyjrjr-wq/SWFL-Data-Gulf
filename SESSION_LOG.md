@@ -1,3 +1,42 @@
+## 2026-07-21 (Opus 4.8 · main) — `second-order` agent: "and then what?" as a callable consequence auditor
+
+Operator: "crawl4ai second order thinking and lets build an agent to help us out." `_RESEARCH/INDEX.md`
+scanned first per RULE 0.4 — no prior research on this, confirmed gap. crawl4ai on three live sources:
+Farnam Street's second-order-thinking page (Howard Marks' first-vs-second-level framing, Dalio on
+failing to consider second- and third-order consequences, the operative question "And then what?"),
+its inversion page (Munger via Jacobi, "invert, always invert" — forward thinking is additive and
+raises the odds of causing harm, inversion is subtractive), and the live Claude Code sub-agents doc to
+verify the frontmatter contract before authoring (only `name`/`description` required; `tools`, `model`,
+`disallowedTools`, `skills`, `memory`, `hooks`, `permissionMode`, `mcpServers` supported).
+
+The blog pages give a question and a disposition, not a procedure — so the procedure came from our own
+incident log. Every OPEN item in `_ASSISTANT/SCRATCHPAD.md` is a second-order failure (items 9/11 use
+the phrase "Second-order damage:" verbatim), and they sort into five recurring shapes that became the
+agent's five passes: PROPAGATION (the 9.9%-vs-54.2% floored figure quoted from a day-old spec, then
+propagated into a plan doc and shaped its sequencing), CONSUMERS in both directions (the import count
+scoped to `app/`+`components/` that reported zero where repo-wide was five; `applyBrand` reachable only
+from two React client components), LATENCY (`fixtures/community-aliases.json` populated 1→69 but inert
+until the `neighborhood_stats` fold re-runs), EVIDENCE CLASS (five consecutive commits declaring the
+`/graph` physics fixed on screenshot evidence when both real symptoms were time-domain), LIFECYCLE
+(three concurrent senders; duplicate-send guard read once at startup). Plus an inversion pass.
+
+Shipped: `.claude/agents/second-order.md` (read-only — `Read, Glob, Grep, Bash`, opus, no edit tools,
+so "never propose a different change" is structural not promised), `_ASSISTANT/RULES.md` #12 as the
+trigger, and `_ASSISTANT/HANDOFF-second-order-test.md` for a fresh session to verify it. Research +
+INDEX line filed to `_RESEARCH/agent-behavior/` (gitignored, so not in this commit).
+
+Trigger is a RULES.md line, not a hook — operator's explicit call this session, hook held as a
+proven-later option. Recorded falsifier: if it goes uninvoked for two weeks the TRIGGER failed, not the
+agent, and the fix is the hook rather than a prompt rewrite.
+
+Two things worth inheriting. The agent is required to cite a `path:line` or command output per finding
+and is explicitly allowed to return NOTHING FOUND — without that escape hatch an agent whose job is
+finding consequences invents them. And the research file was wrong twice in opposite directions inside
+one hour: first asserting from the vendor doc that a mid-session agent file is live without restart (no
+invocation attempted), then, after two "agent type not found" errors seconds apart, asserting the
+opposite as a hard rule. It registered one turn later with no restart. Both claims outran their
+evidence. Corrected in place, and left in the file as the worked example.
+
 ## 2026-07-20 (Sonnet 5 · main) — Ask AI floating pill: input now leads, matching the lab/socials order
 
 Operator screenshot of the floating "Ask AI" panel (pitch state) showed three suggested-prompt
