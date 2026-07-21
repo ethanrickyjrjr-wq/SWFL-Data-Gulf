@@ -1,0 +1,224 @@
+[
+  {
+    "file": "app/charts/page.tsx",
+    "line": 57,
+    "table": "<dynamic:view>",
+    "verdict": "series_only",
+    "note": "Takes redfin_metro_sold_pivoted or zori_pivoted. Full monthly series by metro; brains publish point values, not series."
+  },
+  {
+    "file": "app/charts/page.tsx",
+    "line": 85,
+    "table": "zhvi_pivoted",
+    "verdict": "series_only",
+    "note": "YoY home-value momentum by city — needs the whole series to compute the curve."
+  },
+  {
+    "file": "app/charts/page.tsx",
+    "line": 109,
+    "table": "tier_divergence_pivoted",
+    "verdict": "series_only",
+    "note": "Luxury vs starter indexed to 100 at 2019-01 — an index needs every point since the base period."
+  },
+  {
+    "file": "app/charts/page.tsx",
+    "line": 129,
+    "table": "tier_divergence_pivoted",
+    "verdict": "series_only",
+    "note": "Luxury vs starter YoY % change series."
+  },
+  {
+    "file": "app/charts/page.tsx",
+    "line": 148,
+    "table": "market_details_swfl_latest",
+    "verdict": "brain_candidate",
+    "brain_id": "market-temperature-swfl",
+    "note": "Market-temperature dial = median per-ZIP hotness, a POINT value. market-temperature-swfl holds a 54-row per-ZIP snapshot. Repoint with the raw query kept as an outage fallback."
+  },
+  {
+    "file": "app/charts/page.tsx",
+    "line": 174,
+    "table": "zhvi_zip_yoy_monthly",
+    "verdict": "series_only",
+    "note": "Trailing-13-month ZIP x month heatmap — inherently a series, and at a grain no brain publishes."
+  },
+  {
+    "file": "app/charts/page.tsx",
+    "line": 196,
+    "table": "rsw_airport_monthly",
+    "verdict": "series_only",
+    "note": "Monthly passengers plus a 12-month rolling average. rsw-airport holds point metrics only, no series."
+  },
+  {
+    "file": "app/embed/c/[id]/page.tsx",
+    "line": 26,
+    "table": "saved_charts",
+    "verdict": "live_feed",
+    "note": "Not lake data at all — a user-saved chart record fetched by id. No brain could hold it."
+  },
+  {
+    "file": "app/embed/cards/asking-rent/page.tsx",
+    "line": 43,
+    "table": "corridor_profiles",
+    "verdict": "live_feed",
+    "note": "Asking rent $/sqft ranked by submarket. corridor-pulse-swfl publishes signal_* metrics only, no per-submarket rent table. Already falls back to fixtures/corridor-rents.json on error."
+  },
+  {
+    "file": "app/embed/charts/page.tsx",
+    "line": 121,
+    "table": "corridor_profiles",
+    "verdict": "live_feed",
+    "note": "Per-corridor character chart blocks. No brain publishes this table. Note this same file ALREADY reads env-swfl.md from disk for flood AAL — the correct pattern, just via its own fs.readFile rather than lib/fetch-brain.ts."
+  },
+  {
+    "file": "lib/charts/gallery-loaders.ts",
+    "line": 50,
+    "table": "<dynamic:view>",
+    "verdict": "series_only",
+    "note": "Metro trend series; defaults to zhvi_pivoted."
+  },
+  {
+    "file": "lib/charts/gallery-loaders.ts",
+    "line": 71,
+    "table": "zhvi_pivoted",
+    "verdict": "series_only",
+    "note": "YoY home-value momentum series."
+  },
+  {
+    "file": "lib/charts/gallery-loaders.ts",
+    "line": 92,
+    "table": "tier_divergence_pivoted",
+    "verdict": "series_only",
+    "note": "Tier gap, indexed series."
+  },
+  {
+    "file": "lib/charts/gallery-loaders.ts",
+    "line": 107,
+    "table": "tier_divergence_pivoted",
+    "verdict": "series_only",
+    "note": "Tier gap, YoY series."
+  },
+  {
+    "file": "lib/charts/gallery-loaders.ts",
+    "line": 121,
+    "table": "rsw_airport_monthly",
+    "verdict": "series_only",
+    "note": "RSW passenger volume series."
+  },
+  {
+    "file": "lib/charts/gallery-loaders.ts",
+    "line": 149,
+    "table": "listing_pulse_daily",
+    "verdict": "live_feed",
+    "note": "Daily listing-event counts. Daily grain is finer than any brain's rebuild cadence."
+  },
+  {
+    "file": "lib/charts/gallery-loaders.ts",
+    "line": 180,
+    "table": "daily_truth",
+    "verdict": "series_only",
+    "note": "Desk price trend lane 1 — daily asking-price series."
+  },
+  {
+    "file": "lib/charts/gallery-loaders.ts",
+    "line": 204,
+    "table": "redfin_city_swfl",
+    "verdict": "series_only",
+    "note": "Desk price trend lane 2 — monthly closed-sale series."
+  },
+  {
+    "file": "lib/charts/load-metro-trend.ts",
+    "line": 32,
+    "table": "<dynamic:view>",
+    "verdict": "series_only",
+    "note": "3-metro monthly trend; zhvi_pivoted or zori_pivoted. Callers live outside the guarded dirs (app/insiders, app/r/zip-report, app/r/housing-swfl)."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 98,
+    "table": "daily_truth",
+    "verdict": "series_only",
+    "note": "Daily median asking price per city plus the 30-year mortgage rate — a daily series."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 174,
+    "table": "redfin_city_swfl",
+    "verdict": "series_only",
+    "note": "Monthly closed-sale median and months-of-supply per city. Paged via selectAllPaged."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 275,
+    "table": "listing_active_stats",
+    "verdict": "brain_candidate",
+    "brain_id": "active-listings-swfl",
+    "note": "STRONGEST match. Brain publishes active_listings_count_swfl and median_list_price_swfl plus a 4-row county and 58-row ZIP table, and was rebuilt 07/20/2026 — as fresh as the raw view. Repoint first."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 298,
+    "table": "listing_momentum_stats",
+    "verdict": "brain_candidate",
+    "brain_id": "listing-momentum-swfl",
+    "note": "Exact concept match: brain publishes price_reduced_share_swfl and new_listing_share_swfl with a 54-row per-ZIP table. Check the 07/14 as-of against the tile's freshness claim before repointing."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 339,
+    "table": "listing_pulse_daily",
+    "verdict": "live_feed",
+    "note": "The Daily Pulse — daily listing-event counts. Genuinely new data; this is what the lake is for."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 381,
+    "table": "listing_state",
+    "verdict": "live_feed",
+    "note": "Active-listing count per flag. Fires THREE times (new_construction, pending, foreclosure) — a dedupe/caching target independent of any brain question."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 408,
+    "table": "news_articles_swfl",
+    "verdict": "live_feed",
+    "note": "Six newest SWFL headlines. news-swfl publishes 9 metrics but no headline rows."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 441,
+    "table": "listing_state",
+    "verdict": "live_feed",
+    "note": "Largest active price cuts, flash feed. Per-listing rows; no brain holds listing-level detail."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 489,
+    "table": "listing_transitions",
+    "verdict": "live_feed",
+    "note": "Eight most recent sold transitions."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 502,
+    "table": "listing_state",
+    "verdict": "live_feed",
+    "note": "Second hop of the sold feed — address and list-price enrichment for the ids from line 489."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 548,
+    "table": "market_details_swfl_latest",
+    "verdict": "brain_candidate",
+    "brain_id": "market-temperature-swfl",
+    "note": "Same point value as app/charts/page.tsx:148 — median per-ZIP hotness for the temperature gauge. Brain holds a 54-row per-ZIP snapshot as of 07/19/2026."
+  },
+  {
+    "file": "lib/desk/loaders.ts",
+    "line": 577,
+    "table": "listing_price_bands",
+    "verdict": "brain_candidate",
+    "brain_id": "price-distribution-swfl",
+    "note": "Affordability histogram at region grain. Brain publishes entry_level / midmarket / upper_tier / luxury listing shares at region level as of 07/17/2026. Verify the band cutpoints match before repointing — the brain's tables are county grain."
+  }
+]

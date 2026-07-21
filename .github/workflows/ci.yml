@@ -58,6 +58,14 @@ jobs:
       - name: Dead code (knip, report-only)
         run: bunx --bun knip
 
+      # Ratchet on raw lake reads in page/loader code. Does NOT ban them — most
+      # surviving reads are legitimately live (a time series or a daily feed that
+      # no brain publishes). It fails only on a NEW un-triaged one, so the pattern
+      # that took /desk and /charts down on 07/21/2026 — each bypass locally
+      # reasonable, the accumulation fatal — cannot rebuild itself silently.
+      - name: Lake-read ratchet
+        run: bun scripts/check-lake-reads.mts
+
       # Config-identity cross-check. --static is files-only and matches the pre-push
       # Gate 7 exactly, so a push that bypassed the hook still fails here.
       - name: Registry identity (static)

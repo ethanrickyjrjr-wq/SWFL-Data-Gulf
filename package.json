@@ -49,6 +49,7 @@
     "check:schema-drift": "bun scripts/check-schema-drift.ts",
     "brain-catalog": "bun scripts/brain-catalog.mts",
     "check:brain-catalog": "bun scripts/brain-catalog.mts --check",
+    "check:lake-reads": "bun scripts/check-lake-reads.mts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
