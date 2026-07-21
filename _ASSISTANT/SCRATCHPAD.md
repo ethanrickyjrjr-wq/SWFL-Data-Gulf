@@ -746,3 +746,22 @@ a monitor. The guard cages *this* burner; nothing catches the next one.
 -> checks opened (ledger is BACK — PGRST002 cleared): `egress_stale_checkout_rearm` [defect],
 `egress_burn_detector` [task]. These supersede item 26's owed `lake_mcp_egress_burn`.
 
+**CORRECTION to my own item 27, same session, caught before the operator acted.** I wrote "one
+session away" from ~300 GB/day. **Overclaim — disproven.** `grep -c` = 0 proves the guard is GONE;
+it does not prove the thing can BURN. Burning also needs credentials, and that worktree has none:
+only `.env.example` present (local secrets files are gitignored, so a worktree checkout never
+carries one), and `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` / `SUPABASE_PG_HOST` / `SUPABASE_PG_USER`
+/ `SUPABASE_PG_PASSWORD` are all absent from the ambient environment (presence-checked, values
+never read). `env.mts:7-11` swallows the missing file rather than throwing, so the server proceeds
+and then dies in `requirePgEnv()`. **It crashes on startup; it does not download.** Priority 1 → 3.
+
+**Still remove it** — loaded gun without ammunition. Copy a secrets file in to make the worktree
+runnable (the normal reason worktrees exist) and the burn is live and unguarded.
+
+**Why this correction is written down instead of quietly fixed:** an unverified egress number is
+the exact thing that cost trust on this issue. Item 19 named five suspects and picked none; item 26
+recorded a "fix" that did nothing. Making the same shape of unchecked claim while auditing those
+two would have been the third repeat. The lesson generalizes past egress: *absence of a guard is
+not presence of a capability* — check that the dangerous path can actually reach its resources
+before pricing the risk.
+

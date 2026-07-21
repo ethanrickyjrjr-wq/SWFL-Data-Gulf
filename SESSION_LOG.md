@@ -43,6 +43,24 @@ failure-modes section.
 [defect, due 07/22] and `egress_burn_detector` [task, due 07/24]. Scratchpad item 27 records the
 correction. Remaining checks owed from last session are still owed.
 
+**CORRECTION, appended same session, before the operator acted on it.** Section (B) above says the
+worktree is "one session away" from ~300 GB/day. **That was an overclaim and it is now disproven.**
+`grep -c` = 0 proves the guard is *gone*; it does not prove the thing can *burn* — burning also
+requires credentials. Checked: the worktree holds only `.env.example` (local secrets files are
+gitignored, so a worktree checkout never carries them), and every credential the server needs —
+`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_PG_HOST`, `SUPABASE_PG_USER`,
+`SUPABASE_PG_PASSWORD` — is absent from the ambient environment (presence-checked; values never
+read). `env.mts:7-11` swallows the missing env file rather than throwing, so the server does not
+die there; it proceeds and then throws in `requirePgEnv()` for want of credentials. **Net: an
+unguarded server that crashes on startup rather than downloading anything.**
+
+**Still remove it.** It is a loaded gun without ammunition: the moment anyone copies a local
+secrets file in to make that worktree runnable — the normal reason a worktree exists — the burn is
+live and unguarded. Priority dropped 1 → 3 on the check; the recommendation is unchanged.
+
+Logging the overclaim rather than quietly fixing it, because an unverified egress number is the
+specific thing that cost trust on this issue in the first place.
+
 ---
 
 ## 2026-07-21 (Opus 4.8 · main) — BRAIN CATALOG + LAKE-READ RATCHET: the architecture question, answered with a triage
