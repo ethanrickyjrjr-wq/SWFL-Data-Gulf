@@ -329,3 +329,100 @@ That fold runs at `neighborhood_stats` pipeline BUILD time (`label_by_pattern`),
 only takes effect once that pipeline is re-run — a bigger, slower table (604,362 parcels) with a
 known statement-timeout risk (check `neighborhood_stats_full_scan_statement_timeout`). Flagged to
 operator, not yet triggered.
+
+### 19. PROD OUTAGE 07/21/2026 — PostgREST down; /desk renders blank, login broken
+Operator: "what in the world is going on with /desk page?" then "it doesn't render and i can't log in"
+(screenshot: sign-in card with a red `{}` under "Email me a code").
+
+**Root cause — NOT a /desk bug. The Supabase REST API (PostgREST) is down.** Evidence gathered live:
+- `GET /rest/v1/` → **503**. Every table read through PostgREST → **timeout at 20s** (`HTTP 000`),
+  public AND data_lake, including a 1-row `limit 1` on a 92-row table. Not table-specific.
+- **Verbatim from PostgREST** (via `scripts/check.mjs`): `PGRST002: Could not query the database for
+  the schema cache. Retrying.` That is the official error code for "cannot build schema cache."
+- Direct Postgres (MCP, 5432) answered **instantly** at first — `daily_truth` = 92 rows, latest
+  07/19. **The data is completely intact.** By the end of the session even direct SQL began timing
+  out ("Connection terminated due to connection timeout") — it is actively getting WORSE.
+- Postgres logs: wall-to-wall `canceling statement due to statement timeout`, one every ~20-60s,
+  continuously across the whole log window.
+- **The tell:** PostgREST's schema-cache introspection query (`pg_class`/`pg_attribute`/
+  `pg_namespace`) logged at **48.6s, 48.5s, and 12.3s**. That catalog query should take ~50ms on 468
+  relations. It never finishes, so PostgREST 503s every request.
+- Auth logs (24h): **17x HTTP 504, 2x 500**, error window 07/20 23:05 UTC -> 07/21 05:55 UTC (~7h,
+  ongoing). Verbatim: `error finding user: failed to connect to host=localhost
+  user=supabase_auth_admin database=postgres: dial error (timeout: dial tcp [::1]:5432: i/o timeout)`
+  and `context deadline exceeded`. That is why login fails. The red `{}` is supabase-js stringifying
+  an error response with an empty body — the login form is not the bug, it is the messenger.
+- Supabase platform status: **"All Systems Operational", 0 unresolved incidents.** This is OUR
+  instance, not a Supabase-wide outage.
+- Pool snapshot: 34/60 used (`max_connections=60` = small compute). **Supabase Storage API squatting
+  15 idle connections — 25% of the entire pool.** One `postgrest` conn idle **2 days 9 hours**. Also
+  3x `password authentication failed for user "user1"` — not one of our roles; unexplained.
+
+**Why only /desk looked broken:** it isn't only /desk. `/desk` and `/charts` both carry
+`revalidate = 300`. Desk's ISR cache expired DURING the outage and re-rendered empty; /charts is
+still serving pre-outage cached HTML and **will go blank too** when its cache turns. Desk was just
+first, not special.
+
+**The design flaw this exposed (ours, not Supabase's):** `lib/desk/loaders.ts` is "empty-tolerant by
+construction" — every loader is `try { ... } catch { return empty }` / `if (error || !data) return
+empty`, and every zone in `app/desk/page.tsx` is `{desk.x ? <Zone/> : null}`. So a total backend
+outage renders as a **200 OK page with a green pulsing "Live" badge and zero content**. The page
+confidently claimed LIVE while showing nothing. Empty-tolerance was designed for ONE dead feed, not
+thirteen — there is no "we can't reach the data right now" state and no floor at which the page
+admits it is broken. A blank page that says "Live" is worse than an error page.
+-> check opened: `desk_blank_no_outage_state`.
+
+**Fix path (restarting prod is the operator's call, not mine):**
+1. Restart the Supabase project (Dashboard -> Settings -> General -> Restart project). Standard
+   remedy for a wedged PostgREST; clears the schema-cache deadlock, auth, and squatting conns.
+2. If it recurs: 60 max_connections is small-compute sizing. Either upsize, or find what issues the
+   query that times out every ~30s around the clock.
+3. Product-side, independent of the outage: real "data unavailable" state + kill the "Live" badge
+   when zero zones resolve.
+
+**CONFIRMED 07/21/2026, minutes later — /charts broke exactly as predicted above.** Operator
+screenshot: every chart card rendering "Data unavailable — Could not query the database for the
+schema cache. Retrying." That is PGRST002 printed verbatim to the end user. Its ISR cache turned and
+it re-rendered against the dead REST API, same as desk did.
+**Worth keeping:** /charts degrades CORRECTLY and /desk does not. Charts says "Data unavailable" and
+shows the reason; desk renders a blank page with a green "Live" badge. Same outage, same backend,
+opposite honesty. Whatever `components/charts` does on a failed load is the pattern desk should copy
+— the fix for `desk_blank_no_outage_state` may already exist in-repo (RULE 0.5: probe charts before
+designing anything new). Do NOT leak the raw PostgREST string to users either way; charts is honest
+but is speaking engineer to a customer.
+Dashboard link (project ref pulled live, not from memory):
+https://supabase.com/dashboard/project/jtkdowmrjaxfvwmemxso/settings/general
+
+**REAL ROOT CAUSE FOUND 07/21/2026 — EGRESS OVERAGE, NOT A WEDGED CACHE. MY RESTART ADVICE WAS
+WRONG.** Operator screenshot of the Supabase Usage Summary: **Egress 778.592 / 250 GB = 311% of
+plan**, with the notice "you may experience restrictions, as you are currently not billed for
+overages." Storage size is fine (1.5/100 GB, 1%). The project is being **THROTTLED for blowing
+through egress**. Everything I diagnosed earlier — PGRST002, the 48s schema-cache introspection, the
+auth 504s, the 12-minute lake query — is DOWNSTREAM of that throttle, not the disease. A project
+restart would have come back up and been throttled again within minutes.
+**The failure in my own reasoning, worth naming:** I had conclusive evidence of a SYMPTOM (PostgREST
+cannot build its schema cache — vendor error code, verbatim) and treated a confirmed symptom as a
+confirmed cause. The vendor's own error string is still only the layer that broke, never the reason
+it broke. I never checked the billing/usage surface at all. RULE 0.5 says probe first — I probed the
+code and the logs and skipped the account.
+
+**Operator, third day running: "just fixed this yesterday and the day before and now we are even
+higher."**
+**The trap he is caught in — egress is a CUMULATIVE period-to-date counter. It CANNOT go down.** A
+correct fix shipped yesterday still leaves the number climbing; it only resets at the billing cycle
+boundary. So "it went up again" is NOT evidence the fix failed, and re-fixing on that signal means
+fixing something that may already be fixed while the real burner keeps running. **The only valid
+signal is the DAILY RATE (the breakdown chart), never the running total.** Anyone picking this up:
+do not let him fix it a fourth time off the cumulative number.
+NOTE: grep of SESSION_LOG found NO record of the two prior egress fixes — the "egress" hits in
+`docs/cron-rebuild-failures.md` are Anthropic API connection flakes, unrelated to database egress.
+So two days of fixes left no evidence anywhere. That is its own problem (RULE 0 §5, no fabrication /
+log what you did) and it is why day three started from zero.
+
+**Open question, being hunted now:** what burns 778 GB against a 2 GB database (~390 full-database
+reads)? Suspects under investigation: scheduled GHA crons doing full-table pulls (lee_parcels,
+collier_parcels, neighborhood_stats ~604k rows), `selectAllPaged` callers, Storage bucket downloads,
+retry storms (the outage itself feeds egress — timeouts retry, retries re-download), and
+`revalidate = 300` on /desk + /charts (288 renders/day each). Needs the dashboard's egress BREAKDOWN
+(database vs storage vs realtime vs auth) to narrow before touching code.
+

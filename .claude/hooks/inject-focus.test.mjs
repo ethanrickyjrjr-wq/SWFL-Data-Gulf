@@ -1,6 +1,7 @@
 // Proof that the focus-injection hook builds correct UserPromptSubmit output.
 // Run: node .claude/hooks/inject-focus.test.mjs
 import assert from "node:assert";
+import { readFileSync } from "node:fs";
 import {
   loadRules,
   buildAdditionalContext,
@@ -95,6 +96,39 @@ check("hook output serializes to valid JSON under the 10k cap", () => {
   const json = JSON.stringify(out);
   assert.ok(json.length < 10000, `output exceeds 10k char cap (${json.length})`);
   assert.deepEqual(JSON.parse(json), out);
+});
+
+// --- the LIVE rules file, not the fallback constant, is what actually ships ---
+// Every size assertion above measures DEFAULT_RULES (7 rules, frozen in the hook).
+// The text that actually reaches every prompt is _ASSISTANT/RULES.md, which is
+// larger and still growing. Nothing asserted on it, so this suite stayed green
+// no matter how big the real payload got — a test that measures a different
+// object than the one that ships is not evidence about the one that ships.
+// Found 07/21/2026 by the second-order agent auditing its own shipment.
+const LIVE_RULES_URL = new URL("../../_ASSISTANT/RULES.md", import.meta.url);
+
+check("LIVE _ASSISTANT/RULES.md actually loads (not silently the fallback)", () => {
+  const txt = loadRules({ read: () => readFileSync(LIVE_RULES_URL, "utf8") });
+  assert.notEqual(
+    txt,
+    DEFAULT_RULES,
+    "live rules file did not load — every LIVE assertion below is measuring the fallback",
+  );
+});
+
+check("LIVE rules keep the real hook output under the 10k cap", () => {
+  const rulesText = loadRules({ read: () => readFileSync(LIVE_RULES_URL, "utf8") });
+  const json = JSON.stringify(buildHookOutput({ rulesText, todayExists: true }));
+  assert.ok(
+    json.length < 10000,
+    `LIVE output exceeds the 10k char cap (${json.length}) — trim _ASSISTANT/RULES.md`,
+  );
+});
+
+check("LIVE rules still carry the second-order rule and its scope limit", () => {
+  const rulesText = loadRules({ read: () => readFileSync(LIVE_RULES_URL, "utf8") });
+  assert.match(rulesText, /second-order/, "the and-then-what rule was dropped from RULES.md");
+  assert.match(rulesText, /SCOPE/, "the second-order rule lost its blast-radius scope limit");
 });
 
 console.log(`\n${fail === 0 ? "ALL GREEN ✅" : "FAILURES ❌"}: ${pass} passed, ${fail} failed`);

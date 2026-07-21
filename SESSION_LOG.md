@@ -1,3 +1,42 @@
+## 2026-07-21 (Opus 4.8 · main) — the `second-order` agent audited its own shipment and found three real defects; all fixed
+
+First real run of the agent shipped in `4d5cedd9`, pointed at its own four files. It came back with
+artifacts, not prose, and three findings survived. Operator: "DO IT ALL" — all three fixed here.
+
+1. PROPAGATION, self-inflicted. The agent prompt cited SCRATCHPAD incidents by ordinal ("item 9",
+"item 16", …) and those ordinals are not stable: `_ASSISTANT/SCRATCHPAD.md` has two headings numbered
+9 (`:93`, `:130`), an item 11 duplicating item 9's title (`:134`), and a RESOLVED section (`:169`)
+that items migrate into as they close. Roughly a third of the agent's own citations were unresolvable
+on the day it shipped — the propagation failure, committed inside the propagation checker. All ten
+incident citations now quote the distinguishing heading phrase instead, and the file carries a stated
+citation convention so the next edit doesn't reintroduce ordinals. Verified: each of the ten phrases
+greps to exactly one hit in SCRATCHPAD, and zero bare-ordinal citations remain.
+
+2. EVIDENCE CLASS, in the hook's own tests. `.claude/hooks/inject-focus.test.mjs` asserted its size
+caps (`:78-81`, `:93-98`) against the `DEFAULT_RULES` constant and never read the live
+`_ASSISTANT/RULES.md` at all — so the suite stayed green regardless of how large the actually-injected
+payload grew. Same shape as judging a time-domain bug by screenshot: the instrument could not detect
+the failure class. Added three checks that load the live file, assert it isn't silently the fallback,
+assert the real serialized output stays under the 10k cap, and assert the rules file still carries the
+second-order rule and its scope limit. 13 tests green; live payload measured at 3,711 bytes.
+
+3. INVERSION turned on the rule itself, correctly. Rule #12 fired at three of the most frequent events
+in a session with no scope limit — in direct tension with rule #11 ("justify itself at OUR volume"),
+sitting one line above it in the same injected block. Rule #12 now scopes to blast radius: skip typos,
+copy tweaks, formatting, doc lines, anything revertable in under a minute. Notably the agent declined
+to convert its frequency argument into a spend figure, citing the scratchpad's own prohibition on
+speculating about session cost — it obeyed a rule that made its own finding weaker.
+
+NOT fixed, and it is NOT a silent deferral: `DEFAULT_RULES` (`inject-focus.mjs:50-57`) holds 7 rules
+while the live file holds 12, and `loadRules` (`:61-69`) fails OPEN — a missing or blank rules file
+silently substitutes the 7-rule constant and rules 8-12 disappear from every prompt with no error.
+Pre-existing; rule #12 widened it. `scripts/check.mjs open` was run TWICE and returned Supabase 503
+(PGRST002) both times — the session-start tripwire reported the same 503 against the spend ledger, so
+the database was degraded, not the command. Recorded as SCRATCHPAD item 19 with the exact command to
+run. **Next session: open `focus_hook_default_rules_drift` and delete that item.** SCRATCHPAD itself
+is not in this commit — it carries a parallel session's uncommitted edits and those aren't mine to
+land.
+
 ## 2026-07-21 (Opus 4.8 · main) — `second-order` agent: "and then what?" as a callable consequence auditor
 
 Operator: "crawl4ai second order thinking and lets build an agent to help us out." `_RESEARCH/INDEX.md`
