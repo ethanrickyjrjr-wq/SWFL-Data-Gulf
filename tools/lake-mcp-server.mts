@@ -215,9 +215,16 @@ export function deriveSafeViewName(path: string): string {
  *  missing one breaks the query.
  */
 export function viewsReferencedBy(sql: string, viewNames: string[]): string[] {
+  // Scrub Postgres-qualified references FIRST. A partitioned Tier-1 dataset is
+  // named after its top folder, and its Tier-2 table carries the SAME name —
+  // `city_pulse` and `city_pulse_corridors` are both. Without this, the tool's
+  // own documented-safe example (`SELECT * FROM pg.data_lake.city_pulse`) — a
+  // query that touches zero storage — would bind a cold multi-file ndjson union
+  // and download every run-snapshot. Found by consequence audit before ship.
+  const scrubbed = sql.replace(/\bpg\.[A-Za-z0-9_]+\.[A-Za-z0-9_]+/gi, " ");
   return viewNames.filter((name) => {
     const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return new RegExp(`(?<![A-Za-z0-9_])${escaped}(?![A-Za-z0-9_])`, "i").test(sql);
+    return new RegExp(`(?<![A-Za-z0-9_])${escaped}(?![A-Za-z0-9_])`, "i").test(scrubbed);
   });
 }
 
@@ -266,6 +273,9 @@ let registeredViews: ViewMeta[] = [];
 const pendingGroups = new Map<string, ViewGroup>();
 /** Views whose schema has been bound on this connection — never sniffed twice. */
 const materializedViews = new Set<string>();
+/** Binds currently in flight, keyed by view name, so concurrent MCP requests
+ *  naming the same unbound view share ONE download instead of racing. */
+const bindsInFlight = new Map<string, Promise<void>>();
 
 /** Binds the named views on demand, skipping any already materialized.
  *
@@ -278,23 +288,38 @@ const materializedViews = new Set<string>();
 async function ensureViews(names: string[]): Promise<void> {
   for (const name of names) {
     if (materializedViews.has(name)) continue;
+    // Join an in-flight bind rather than starting a second one. The MCP SDK
+    // dispatches requests concurrently (it does not await _onrequest), so a
+    // has()-check followed by an await is check-then-act: two query_lake calls
+    // naming the same unbound cold view would each pass the check and each
+    // download the object. Same shape as the campaign-sim triple-send.
+    const inFlight = bindsInFlight.get(name);
+    if (inFlight) {
+      await inFlight;
+      continue;
+    }
     const g = pendingGroups.get(name);
     if (!g) continue;
     const urls = g.rows.map((r) => `s3://${r.bucket}/${r.path}`);
-    try {
-      await mainConn!.run(
-        `CREATE OR REPLACE VIEW ${g.name} AS SELECT * FROM ${tier1ListReader(g.format, urls)};`,
-      );
-      materializedViews.add(name);
-      console.error(
-        `[lake-mcp] bound view "${name}" (${g.format}, ${urls.length} file(s)) on demand`,
-      );
-    } catch (err) {
-      console.error(
-        `[lake-mcp] failed to bind view "${name}" (${g.format}, ${urls.length} file(s)): ` +
-          String(err).split("\n")[0].slice(0, 140),
-      );
-    }
+    const bind = mainConn!
+      .run(`CREATE OR REPLACE VIEW ${g.name} AS SELECT * FROM ${tier1ListReader(g.format, urls)};`)
+      .then(() => {
+        materializedViews.add(name);
+        console.error(
+          `[lake-mcp] bound view "${name}" (${g.format}, ${urls.length} file(s)) on demand`,
+        );
+      })
+      .catch((err: unknown) => {
+        console.error(
+          `[lake-mcp] failed to bind view "${name}" (${g.format}, ${urls.length} file(s)): ` +
+            String(err).split("\n")[0].slice(0, 140),
+        );
+      })
+      .finally(() => {
+        bindsInFlight.delete(name);
+      });
+    bindsInFlight.set(name, bind);
+    await bind;
   }
 }
 
@@ -410,6 +435,7 @@ async function startup(): Promise<void> {
   const registered: ViewMeta[] = [];
   pendingGroups.clear();
   materializedViews.clear();
+  bindsInFlight.clear();
   if (s3) {
     for (const g of groups) {
       const urls = g.rows.map((r) => `s3://${r.bucket}/${r.path}`);

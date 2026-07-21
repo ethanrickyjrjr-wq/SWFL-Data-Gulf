@@ -109,6 +109,66 @@ Decide which series matter before building.
 
 ---
 
+## OPEN — raised 07/21/2026, not yet resolved
+
+### 0. I called an egress alarm before measuring, and pointed at the wrong table
+Operator, 07/21, escalating: *"whhyyyyyyyyyyy?????"* then *"YOU HAVE SUPABASE MCP WITH READ
+AND WRITE!!!!"* — both earned. I read the API log, saw queries with no `limit`, and called
+them "unbounded full-table pulls" **without measuring a single byte**, while holding
+`execute_sql` the entire time.
+
+**What measuring actually showed (live SQL, 07/21/2026):**
+`corridor_profiles` `select("*")` — 27 rows, **163 kB** (`character_speculative` 39 kB,
+`character_facts` 24 kB, `character_chart` 10 kB) · `zhvi_zip_yoy_monthly` 1,308 rows, 61 kB ·
+`census_acs_zcta` 100 rows, **10 kB** · `listing_active_stats` 61 rows, 2,928 B ·
+`market_details_swfl_latest` 54 rows, 2,520 B · `listing_pulse_daily` 18 rows, 1,869 B.
+Total ≈ 241 kB. **I led the alarm with the 10 kB item and nearly missed the 163 kB one.**
+The fewest rows carried the most bytes. Row count is not payload size — measure, don't eyeball
+a missing `LIMIT`.
+
+Two of the "offenders" were deliberate and the code said so: `census_acs_zcta` needs every row
+for a percentile distribution (and was ALREADY consolidated from 2 queries to 1 cached fetch),
+and `zhvi_zip_yoy_monthly`'s 1,400 rows ARE the heatmap cells, paged around the 1,000-row
+PostgREST cap. I'd have known both by reading the comments first.
+
+**Fixed this session:** `app/sitemap.ts` was pulling all 163 kB of corridor prose to emit a
+list of URLs. Added `fetchVerifiedCorridorSlugRows()` (two columns, IDENTICAL predicate) and
+pointed the sitemap at it. Three of four consumers genuinely need the fat read — the drill-down,
+`/r/[slug]`, and `lib/narratives/corridor-inputs.ts` — so the `select("*")` stays for them.
+`app/r/cre-swfl/corridors.test.ts` pins slim-vs-fat link parity so the 404-safety invariant
+can't silently drift. `bunx next build` green.
+
+**STILL UNKNOWN — do not let this close as done:** nobody has looked at the actual egress
+number on the billing/usage page. Everything above is payload arithmetic, not a bill. 241 kB
+per render may be entirely fine; we do not know, and I should not have implied a crisis.
+
+**Also unresolved: the duplicate-fetch pattern.** Same URL twice, seconds apart —
+`sum_api_spend` fires twice **2 ms** apart, `market_details_swfl_latest` 156 ms apart, plus
+doubles on `city_pulse`, `sourced_figures`, `narratives`, `zhvi_pivoted`, `zori_pivoted`, both
+`deliverables` example rows, both `listing_state` HEAD counts; `redfin_metro_sold_pivoted` 3×.
+No comment explains it. Untraced.
+
+### 0b. Postgres is being actively probed from the open internet
+Five FATALs in the 07/21 log, none of them ours: `password authentication failed for user
+"testuser"` ×3, spaced 233 s apart (a bot on a timer — we have no `testuser`), plus a
+one-second scanner burst (`unsupported frontend protocol 0.0`, then `255.255`, then `no
+PostgreSQL user name specified in startup packet`). That is what tripped Fail2ban and produced
+the banned IP (186.236.254.56 — Brazil, Prefeitura de Cuiabá municipal network, a stranger).
+Vendor-verified: bans trip on 2 wrong passwords in a row and clear after 30 min.
+
+**Attribution NOT proven:** `log_connections`/`log_disconnections` were flipped on at ~15:27
+on 07/21; all five FATALs predate the flip, so no host was recorded for them. Timing fits, the
+join does not exist. Next attempt will carry its source IP.
+
+**Open, undecided:** Network Restrictions state is UNCHECKED (Supabase default is an empty
+allowlist = all IPs may connect). And `origin` is the **PUBLIC** repo
+`ethanrickyjrjr-wq/SWFL-Data-Gulf`, with the old Postgres password still readable in history at
+`f1efbac` on `main` — rotated 05/20/2026 so the value is dead, but the memory note that
+deferred the history scrub said "if the repo ever goes public." It is public. Verified clean:
+no secrets file tracked at HEAD.
+
+---
+
 ## OPEN — raised 07/20/2026, not yet resolved
 
 ### 0. Same surface "fixed" five times in a row without ever being driven live

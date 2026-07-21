@@ -1,3 +1,50 @@
+## 2026-07-21 (Opus 4.8 · main) — The egress burner, named with bytes: the lake MCP full-read the bucket on every BOOT. Plus: a parallel session pushed my half-done fix to main.
+
+Operator: *"data-roots has to be causing the egress increase"* → **no, and here is what is.**
+
+**(A) THE BURNER, from the storage log** (`get_logs` service `storage`, first time anyone ran it —
+the handoff named this as "the first thing to run" and it sat unrun): user agent
+`duckdb/v1.5.4(windows_amd64) node-neo-api` — a LOCAL WINDOWS client, not Vercel, not GHA
+(`linux_amd64 python/3.13`). It re-GETs whole compressed objects: `raw-tabular-cold/leepa/
+just_value/2026-05-30.csv.gz` **5× in ~10s**, `last_sale` 5×, `use_codes` 4×, plus a HEAD/GET
+fan-out across every city and month of `lake-tier1/city_pulse/*/year=*/month=*/run-*.ndjson`.
+Burst **08:11:29–08:12:46 UTC**.
+
+**(A) The bytes** (`storage.objects`): just_value **18 MB**, parcels **9.3 MB**, last_sale **8 MB**,
+city_pulse ndjson to **6.5 MB**. ~130 MB in 40s → **~11 GB/hr ≈ 280 GB/day** vs the operator-observed
+~300 GB/day. **(A) Only `tools/lake-mcp-server.mts` references those paths** — no `duckdb-source.mts`
+caller reads `leepa/` or `city_pulse/`, which RULES OUT the build pipeline the MCP kill never touched.
+
+**(A) THE MECHANISM — the old code's own comment costed the time and missed the bytes:** Step 5
+looped `CREATE VIEW` over EVERY inventory group at **startup**; binding a schema makes DuckDB sniff
+the object, and **a `.csv.gz` is not range-readable — gzip is not seekable — so a sniff is a FULL
+download.** Egress scaled with **SERVER BOOTS, not queries.** Four copies were running. Nobody had to
+run a single lake query.
+
+**THE FIX (this session):** boot now catalogs views from `data_lake._tier1_inventory` metadata only —
+**zero S3 bytes at startup**; views bind on demand via new pure `viewsReferencedBy(sql, names)` +
+`ensureViews()`. 39 tests green.
+
+**Consequence audit caught a bug I introduced, before it could burn:** a partitioned Tier-1 view is
+named after its top folder and the **Tier-2 table carries the same name** (`city_pulse`,
+`city_pulse_corridors` — 2 of 2). So `SELECT * FROM pg.data_lake.city_pulse` — the tool's own
+documented-safe example, a zero-storage query — would have bound a cold ndjson union and downloaded
+every run-snapshot. Fixed by scrubbing `pg.<schema>.<table>` before matching; 3 regression tests.
+Also fixed a check-then-act race in `ensureViews` (MCP SDK dispatches concurrently; same shape as the
+campaign-sim triple-send) via an in-flight promise map.
+
+**⚠️ PARALLEL-SESSION INCIDENT:** while I was mid-fix, session `622d163c` committed my in-progress
+work and **pushed it to main as `05744a93`** — without the `pg.` scrub, i.e. with the egress bug in
+it. Found because `git diff` on a file I had just edited came back empty. `origin/main...HEAD` = `0 0`
+confirmed it was already pushed. Its repolith claim was stale (work landed), released, fix applied on
+top. **Not hypothetical: a rival session can land your half-finished code on main under its own
+commit message.**
+
+**NOT LIVE-VERIFIED, and it cannot be from a diff.** The unit tests are pure-string; they cannot
+observe boot egress. The only instrument in the right domain is the storage request log for a boot
+window, and taking that measurement requires setting `LAKE_MCP_ALLOW_EGRESS=1` — i.e. booting the
+burner. Left disabled. Open: `lake_mcp_boot_schema_sniff`.
+
 ## 2026-07-21 (Opus 4.8 · main) — THE BILL: there is NO Supabase egress endpoint. Vendor-verified, and the gap is now visible every session.
 
 Operator, after two sessions gave two different "egress" answers: *"HOW DOES EVERYONE HAVE A

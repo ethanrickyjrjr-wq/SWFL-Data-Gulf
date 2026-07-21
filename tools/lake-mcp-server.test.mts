@@ -347,3 +347,33 @@ test("viewsReferencedBy: a name appearing only inside a string literal still cou
   const refs = viewsReferencedBy("SELECT 'faf5_2024' AS label FROM faf5_2024", ["faf5_2024"]);
   assert.deepEqual(refs, ["faf5_2024"]);
 });
+
+// REGRESSION (found by second-order audit, 07/21/2026): a partitioned Tier-1
+// dataset is named after its top folder, and the Tier-2 table carries the SAME
+// name — `city_pulse` and `city_pulse_corridors` are both. So a pure Postgres
+// query, the exact shape the tool documents as the safe example, matched the
+// Tier-1 view and bound a cold multi-file ndjson union: zero-egress query turned
+// into a full download. The pg alias must be scrubbed before matching.
+
+test("viewsReferencedBy: pg.data_lake.<name> does NOT bind the same-named tier-1 view", () => {
+  const names = ["city_pulse", "city_pulse_corridors", "faf5_2024"];
+  assert.deepEqual(viewsReferencedBy("SELECT * FROM pg.data_lake.city_pulse LIMIT 5", names), []);
+  assert.deepEqual(
+    viewsReferencedBy("SELECT * FROM pg.data_lake.city_pulse_corridors LIMIT 5", names),
+    [],
+  );
+});
+
+test("viewsReferencedBy: a bare tier-1 name still binds even when a pg table shares it", () => {
+  const names = ["city_pulse"];
+  assert.deepEqual(viewsReferencedBy("SELECT * FROM city_pulse LIMIT 5", names), ["city_pulse"]);
+});
+
+test("viewsReferencedBy: a join across pg and tier-1 binds ONLY the tier-1 side", () => {
+  const names = ["city_pulse", "faf5_2024"];
+  const refs = viewsReferencedBy(
+    "SELECT * FROM pg.data_lake.city_pulse c JOIN faf5_2024 f ON c.id = f.id",
+    names,
+  );
+  assert.deepEqual(refs, ["faf5_2024"]);
+});
