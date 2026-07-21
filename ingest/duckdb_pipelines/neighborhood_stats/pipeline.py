@@ -28,10 +28,44 @@ from ingest.lib.tier1_inventory import _get_connection
 
 from .agg import aggregate_stats
 
-_SELECT = (
+_SELECT_ALL = (
     "SELECT parcel_id, county, property_type, just_value, subdivision_name, actual_year_built "
     "FROM data_lake.parcel_subdivision_v"
 )
+
+# 604,362 rows as of 07/19/2026 (parcel_subdivision_v). One plain fetchall() SELECT
+# hits the Supabase pooler's own statement_timeout (confirmed live 07/20/2026 --
+# raising the session-level timeout doesn't help, the pooler enforces its own
+# ceiling underneath). LIMIT/OFFSET and keyset (WHERE parcel_id > last_seen) pagination
+# BOTH also timed out live, including page 1 -- the view derives subdivision_name via 3
+# chained regexp_replace() calls on legal_description with no supporting index, so any
+# ORDER BY (which LIMIT/keyset pagination both need for deterministic paging) forces
+# Postgres to compute + sort the full matching set before returning anything, no
+# matter how small the requested page is.
+# Real fix: a named (server-side) cursor with NO ORDER BY. Aggregation doesn't care
+# about row order, so Postgres can stream rows as it computes them instead of
+# buffering/sorting the whole result first -- each fetchmany() just continues pulling
+# from the already-open, already-planned scan. Confirmed live 07/20/2026 to complete
+# where every ORDER BY-based approach could not.
+_PAGE_SIZE = 20_000
+
+
+def _load_parcel_subdivision_rows(conn) -> list[dict]:
+    rows: list[dict] = []
+    conn.autocommit = False
+    with conn.cursor(name="parcel_subdivision_read") as cur:
+        cur.execute(_SELECT_ALL)
+        cols = None
+        while True:
+            page = cur.fetchmany(_PAGE_SIZE)
+            if cols is None:
+                cols = [d[0] for d in cur.description]
+            rows.extend(dict(zip(cols, r)) for r in page)
+            if len(page) < _PAGE_SIZE:
+                break
+    conn.commit()
+    return rows
+
 
 _DELETE_ALL = "DELETE FROM data_lake.neighborhood_stats"
 
@@ -41,13 +75,6 @@ _INSERT = """
     VALUES
         (%(county)s, %(subdivision_name)s, %(home_count)s, %(count_by_type)s, %(median_just_value)s, %(median_year_built)s, %(source_url)s, %(as_of)s, now())
 """
-
-
-def _load_parcel_subdivision_rows(conn) -> list[dict]:
-    with conn.cursor() as cur:
-        cur.execute(_SELECT)
-        cols = [d[0] for d in cur.description]
-        return [dict(zip(cols, r)) for r in cur.fetchall()]
 
 
 def _aggregate(rows: list[dict]) -> list[dict]:

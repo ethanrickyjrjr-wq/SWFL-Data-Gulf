@@ -1,3 +1,278 @@
 {
-  "heritage-bay": { "label": "Heritage Bay", "patterns": ["HERITAGE BAY"] }
+  "audubon-country-club": {
+    "label": "Audubon Country Club",
+    "patterns": ["AUDUBON"]
+  },
+  "bay-colony-golf-club": {
+    "label": "Bay Colony Golf Club",
+    "patterns": ["BAY COLONY"]
+  },
+  "bears-paw-country-club": {
+    "label": "Bears Paw Country Club",
+    "patterns": ["BEARS PAW"]
+  },
+  "bonita-fairways-golf-club": {
+    "label": "Bonita Fairways Golf Club",
+    "patterns": ["BONITA FAIRWAYS"]
+  },
+  "bonita-national-golf-country-club": {
+    "label": "Bonita National Golf Country Club",
+    "patterns": ["BONITA NATIONAL"]
+  },
+  "copperleaf-at-the-brooks": {
+    "label": "Copperleaf At The Brooks",
+    "patterns": ["COPPERLEAF AT THE BROOKS"]
+  },
+  "country-creek": {
+    "label": "Country Creek",
+    "patterns": ["COUNTRY CREEK"]
+  },
+  "cross-creek-country-club": {
+    "label": "Cross Creek Country Club",
+    "patterns": ["CROSS CREEK"]
+  },
+  "crown-colony-golf-and-country-club": {
+    "label": "Crown Colony Golf And Country Club",
+    "patterns": ["CROWN COLONY"]
+  },
+  "cypress-lake-golf-club": {
+    "label": "Cypress Lake Golf Club",
+    "patterns": ["CYPRESS LAKE"]
+  },
+  "eagle-creek": {
+    "label": "Eagle Creek",
+    "patterns": ["EAGLE CREEK"]
+  },
+  "eagle-ridge-golf-club": {
+    "label": "Eagle Ridge Golf Club",
+    "patterns": ["EAGLE RIDGE"]
+  },
+  "estero-country-club": {
+    "label": "Estero Country Club",
+    "patterns": ["ESTERO"]
+  },
+  "fiddlers-creek": {
+    "label": "Fiddlers Creek",
+    "patterns": ["FIDDLERS CREEK"]
+  },
+  "fiddlesticks-country-club": {
+    "label": "Fiddlesticks Country Club",
+    "patterns": ["FIDDLESTICKS"]
+  },
+  "forest-glen-golf-country-club": {
+    "label": "Forest Glen Golf Country Club",
+    "patterns": ["FOREST GLEN"]
+  },
+  "fort-myers-country-club": {
+    "label": "Fort Myers Country Club",
+    "patterns": ["FORT MYERS"]
+  },
+  "foxfire-country-club": {
+    "label": "Foxfire Country Club",
+    "patterns": ["FOXFIRE"]
+  },
+  "glades-country-club": {
+    "label": "Glades Country Club",
+    "patterns": ["GLADES"]
+  },
+  "glen-eagle-golf-and-country-club": {
+    "label": "Glen Eagle Golf And Country Club",
+    "patterns": ["GLEN EAGLE"]
+  },
+  "golf-club-of-the-everglades": {
+    "label": "Golf Club Of The Everglades",
+    "patterns": ["GOLF CLUB OF THE EVERGLADES"]
+  },
+  "grandezza-country-club": {
+    "label": "Grandezza Country Club",
+    "patterns": ["GRANDEZZA"]
+  },
+  "grey-oaks-country-club": {
+    "label": "Grey Oaks Country Club",
+    "patterns": ["GREY OAKS"]
+  },
+  "hammock-bay": {
+    "label": "Hammock Bay",
+    "patterns": ["HAMMOCK BAY"]
+  },
+  "heritage-bay": {
+    "label": "Heritage Bay",
+    "patterns": ["HERITAGE BAY"]
+  },
+  "heritage-palms-golf-club": {
+    "label": "Heritage Palms Golf Club",
+    "patterns": ["HERITAGE PALMS"]
+  },
+  "hibiscus-golf-club": {
+    "label": "Hibiscus Golf Club",
+    "patterns": ["HIBISCUS"]
+  },
+  "hideout-golf-club": {
+    "label": "Hideout Golf Club",
+    "patterns": ["HIDEOUT"]
+  },
+  "highland-woods": {
+    "label": "Highland Woods",
+    "patterns": ["HIGHLAND WOODS"]
+  },
+  "hunters-ridge-country-club": {
+    "label": "Hunters Ridge Country Club",
+    "patterns": ["HUNTERS RIDGE"]
+  },
+  "imperial-golf-estates": {
+    "label": "Imperial Golf Estates",
+    "patterns": ["IMPERIAL GOLF ESTATES"]
+  },
+  "kelly-greens-golf-and-country-club": {
+    "label": "Kelly Greens Golf And Country Club",
+    "patterns": ["KELLY GREENS"]
+  },
+  "kensington-golf-country-club": {
+    "label": "Kensington Golf Country Club",
+    "patterns": ["KENSINGTON"]
+  },
+  "legends-golf": {
+    "label": "Legends Golf",
+    "patterns": ["LEGENDS GOLF"]
+  },
+  "lely-resort": {
+    "label": "Lely Resort",
+    "patterns": ["LELY RESORT"]
+  },
+  "miromar-lakes-golf-club": {
+    "label": "Miromar Lakes Golf Club",
+    "patterns": ["MIROMAR LAKES"]
+  },
+  "myerlee-country-club": {
+    "label": "Myerlee Country Club",
+    "patterns": ["MYERLEE"]
+  },
+  "naples-heritage-golf-club": {
+    "label": "Naples Heritage Golf Club",
+    "patterns": ["NAPLES HERITAGE"]
+  },
+  "naples-lakes-country-club": {
+    "label": "Naples Lakes Country Club",
+    "patterns": ["NAPLES LAKES"]
+  },
+  "olde-cypress": {
+    "label": "Olde Cypress",
+    "patterns": ["OLDE CYPRESS"]
+  },
+  "olde-hickory": {
+    "label": "Olde Hickory",
+    "patterns": ["OLDE HICKORY"]
+  },
+  "palmira-golf-club": {
+    "label": "Palmira Golf Club",
+    "patterns": ["PALMIRA"]
+  },
+  "pelican-marsh-golf-club": {
+    "label": "Pelican Marsh Golf Club",
+    "patterns": ["PELICAN MARSH"]
+  },
+  "pelican-preserve": {
+    "label": "Pelican Preserve",
+    "patterns": ["PELICAN PRESERVE"]
+  },
+  "pelican-sound": {
+    "label": "Pelican Sound",
+    "patterns": ["PELICAN SOUND"]
+  },
+  "river-hall-country-club": {
+    "label": "River Hall Country Club",
+    "patterns": ["RIVER HALL"]
+  },
+  "rookery-golf-club": {
+    "label": "Rookery Golf Club",
+    "patterns": ["ROOKERY"]
+  },
+  "royal-poinciana-golf-club": {
+    "label": "Royal Poinciana Golf Club",
+    "patterns": ["ROYAL POINCIANA"]
+  },
+  "royal-wood-golf-country-club": {
+    "label": "Royal Wood Golf Country Club",
+    "patterns": ["ROYAL WOOD"]
+  },
+  "san-carlos-golf-club": {
+    "label": "San Carlos Golf Club",
+    "patterns": ["SAN CARLOS"]
+  },
+  "shadow-wood-country-club": {
+    "label": "Shadow Wood Country Club",
+    "patterns": ["SHADOW WOOD"]
+  },
+  "shadow-wood-preserve": {
+    "label": "Shadow Wood Preserve",
+    "patterns": ["SHADOW WOOD PRESERVE"]
+  },
+  "spanish-wells-country-club": {
+    "label": "Spanish Wells Country Club",
+    "patterns": ["SPANISH WELLS"]
+  },
+  "spring-run": {
+    "label": "Spring Run",
+    "patterns": ["SPRING RUN"]
+  },
+  "talis-park": {
+    "label": "Talis Park",
+    "patterns": ["TALIS PARK"]
+  },
+  "the-national-golf-country-club": {
+    "label": "The National Golf Country Club",
+    "patterns": ["THE NATIONAL"]
+  },
+  "the-quarry": {
+    "label": "The Quarry",
+    "patterns": ["THE QUARRY"]
+  },
+  "tiburon-golf-club": {
+    "label": "Tiburon Golf Club",
+    "patterns": ["TIBURON"]
+  },
+  "treviso-bay": {
+    "label": "Treviso Bay",
+    "patterns": ["TREVISO BAY"]
+  },
+  "vasari-country-club": {
+    "label": "Vasari Country Club",
+    "patterns": ["VASARI"]
+  },
+  "verandah-golf-club": {
+    "label": "Verandah Golf Club",
+    "patterns": ["VERANDAH"]
+  },
+  "vineyards-country-club": {
+    "label": "Vineyards Country Club",
+    "patterns": ["VINEYARDS"]
+  },
+  "west-bay-club": {
+    "label": "West Bay Club",
+    "patterns": ["WEST BAY CLUB"]
+  },
+  "whiskey-creek-country-club": {
+    "label": "Whiskey Creek Country Club",
+    "patterns": ["WHISKEY CREEK"]
+  },
+  "wildcat-run": {
+    "label": "Wildcat Run",
+    "patterns": ["WILDCAT RUN"]
+  },
+  "wilderness-country-club": {
+    "label": "Wilderness Country Club",
+    "patterns": ["WILDERNESS"]
+  },
+  "windstar-golf-club": {
+    "label": "Windstar Golf Club",
+    "patterns": ["WINDSTAR"]
+  },
+  "worthington-country-club": {
+    "label": "Worthington Country Club",
+    "patterns": ["WORTHINGTON"]
+  },
+  "wyndemere-country-club": {
+    "label": "Wyndemere Country Club",
+    "patterns": ["WYNDEMERE"]
+  }
 }

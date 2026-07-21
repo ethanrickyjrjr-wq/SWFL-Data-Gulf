@@ -279,3 +279,53 @@ reimplemented the send path, then reported it green for hours. It was testing MY
 Every divergence I found (browser-only brand overlay, missing address, house logo) I "fixed" INSIDE
 the simulator, which made it less like the site each time. The site already had the whole feature —
 "From Teaser to Sold", five steps, real scheduling. OPEN THE SITE FIRST.
+
+### 18. /project empty-state page: unrequested invention + "buttons don't work" — IN PROGRESS
+07/20/2026 evening. Operator hit `/project` on the demo account (zero projects) and reacted to a
+page he never ordered: "why is projects so fucking different, where is the fucking calendar, why
+is the ai rail so different, where is the walkthru, why is contacts add so fucking small." Traced
+via git log + the 07/16 spec/handoff docs: the mission-control dashboard (calendar, campaign
+analysis, see/edit/update) IS his verbatim 07/16 ask and is built correctly — but it only renders
+when the account has ≥1 project. With zero projects, `EmptyLaunchpad.tsx` renders instead, and
+THAT screen — the "Left rail / Pills on top / Right panel" text blurb, the two fake "see a
+finished campaign" walkthrough cards, and Contacts shrunk to a gray text link — was invented by a
+building session and never run past him. Operator confirmed: "No" — not what he ordered.
+Operator then: "YES and make all buttons work becuase they don't and it fucking sucks. I can't
+believe I have wasted so much time with Claude." Scope now: (1) fix EmptyLaunchpad's 3 invented
+pieces (silence on the dashboard, fake walkthrough, tiny Contacts), (2) actually click through
+every button on the live page (not screenshot-judge it — see item 0's rule) to find what's really
+broken, fix those too. Trust is now explicitly low — verify everything live before claiming done.
+
+### 17. Community data: TWO systems, operator furious — "why the fuck would we have 2" — SHIPPED
+07/20/2026. Operator asked community amenities/golf/HOA status, then: "WHY THE FUCK WOULD WE HAVE 2?
+DO WE HAVE ALL THE SAME ROWS FOR BOTH? WHAT THE FUCK IS GOING ON?" Answer: not two competing live
+systems — `neighborhood_stats` (~30,800 rows, address-real, zero amenities) was the only LIVE one;
+`community_profiles` (golf/HOA/amenity scrape, 158 merged rows as of today's finalize.py) was still
+0 rows in the actual database. A 07/16 note (check `community_profiles_empty_via_lake_mcp`) claimed
+it held populated data — it did not; that claim was apparently never verified against the live table
+(same shape as tonight's triple-send: verified against a report, not the recipient). Still needs its
+own root-cause, separate from this item.
+Operator: "FIGURE OUT SHIPPING AND JOINING, I GUESS" → executed same session. Found 89 of 158 rows
+had NO county (NOT NULL column) — several are Sarasota/Manatee clubs (Boca Royale, Capri Isles,
+Concession), outside the locked Lee/Collier/Hendry scope; the discovery scrape was never
+geo-filtered. Shipped only the 69 with a resolved Lee/Collier county (verified live: 32 Collier + 37
+Lee = 69, confirmed via direct query, not the script's own printed success). Held the other 89 out
+of the live table — they stay in `golf_communities_master.json`/`final_rows.json`, unshipped, real
+scraped data not thrown away, pending county resolution. Added 13 missing columns via additive
+migration (`club_type`, `price_range`, `golf_annual_dues`, etc. — real scraped fields the 07/06
+table was never built with columns for). Populated `fixtures/community-aliases.json` 1→69 entries
+(the actual join key `neighborhood_stats`' fold reads).
+**dlt landmine, worth remembering:** the first write attempt failed on a date-vs-varchar column
+mismatch. Fixing the source data was NOT enough — dlt had already created
+`data_lake_staging.community_profiles` with the wrong inferred column type, and reuses an existing
+staging table across retries rather than recreating it; local `~/.dlt/pipelines/<name>` cache
+clearing didn't help either (dlt resyncs schema state from Postgres-side `_dlt_version` tracking
+tables). Fix: drop the poisoned staging table AND use a fresh `pipeline_name` for the one-time ship
+(dlt's own bookkeeping identity, unrelated to the destination table/dataset) rather than fight the
+old identity's pending-package state.
+**NOT done yet — needs its own operator call:** the alias fixture being populated does NOT
+retroactively fold `neighborhood_stats`' ~30,800 raw subdivision rows into these 69 marketed labels.
+That fold runs at `neighborhood_stats` pipeline BUILD time (`label_by_pattern`), so the actual join
+only takes effect once that pipeline is re-run — a bigger, slower table (604,362 parcels) with a
+known statement-timeout risk (check `neighborhood_stats_full_scan_statement_timeout`). Flagged to
+operator, not yet triggered.

@@ -74,6 +74,11 @@ export function EmptyLaunchpad({ contactsCount }: { contactsCount: number }) {
           <span className="font-semibold text-white/80">Right panel</span> — the AI and your
           campaign starters, always top right.
         </li>
+        <li>
+          <span className="font-semibold text-white/80">This center area</span> — becomes your
+          calendar, campaign performance, and a see/edit/update card for your latest build, the
+          moment you start your first listing or campaign below.
+        </li>
       </ul>
 
       <form
@@ -124,14 +129,15 @@ export function EmptyLaunchpad({ contactsCount }: { contactsCount: number }) {
         </ul>
       </div>
 
-      <p className="text-center text-xs">
-        <Link href="/contacts" className="text-gray-300 hover:text-gulf-teal">
-          👥{" "}
-          {contactsCount === 0
-            ? "Bring your contacts in first — Import →"
-            : `Contacts — ${contactsCount} people · Manage →`}
-        </Link>
-      </p>
+      <Link
+        href="/contacts"
+        className="flex items-center justify-center gap-2 rounded-xl border border-gulf-teal/30 bg-gulf-teal/10 px-4 py-2.5 text-sm font-semibold text-gulf-teal transition-colors hover:bg-gulf-teal/20"
+      >
+        👥{" "}
+        {contactsCount === 0
+          ? "Bring your contacts in first — Import →"
+          : `Contacts — ${contactsCount} people · Manage →`}
+      </Link>
 
       {openShowcase && (
         <ShowcaseOverlay
