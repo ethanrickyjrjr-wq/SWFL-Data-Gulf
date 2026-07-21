@@ -1,3 +1,42 @@
+## 2026-07-21 (Opus 4.8 · main) — EGRESS BURN STOPPED: 4 processes killed + boot guard so it cannot restart
+
+Acts on the handoff below, which named the burner but left it running. **The burn is stopped; the
+bill is not yet down** — egress is a cumulative period-to-date counter that CANNOT fall mid-cycle.
+Proof of this fix is "no live process + guard refuses boot", NOT the running total. Do not re-fix
+off the cumulative number (that trap has already cost two days).
+
+**(A) Four live burners, not three.** `Get-CimInstance Win32_Process` showed PIDs 54044 (01:46),
+59824 (01:49), 40916 (02:29) — *and a fourth, 6332, spawned 04:07 at THIS session's start*. That
+fourth process is the proof the `.mcp.json` key-rename did nothing: Claude Code respawns the server
+per session because the entry still ran `bun tools/lake-mcp-server.mts`. All four killed;
+`Get-CimInstance` now returns none.
+
+**(A) Boot guard added — `tools/lake-mcp-server.mts`.** `assertEgressOptIn()` throws unless
+`LAKE_MCP_ALLOW_EGRESS=1`, fired inside `import.meta.main` BEFORE any DuckDB instance, S3 credential
+or inventory read — a blocked boot cannot issue one billable request. Verified on the real process,
+not just the unit test: `bun tools/lake-mcp-server.mts` → exit 1, refusal message, zero surviving
+processes. 4 new tests, each named for the failure mode it stops (absent flag / stale `""`/`"0"`/
+`"true"` not counting as consent / explicit `1` still works / message names cost + override).
+`bun test tools/lake-mcp-server.test.mts` → **30 pass, 0 fail**.
+
+**Why the guard is in CODE, not config.** `.mcp.json` is per checkout. Removing the entry stops this
+one; it does not stop a stale config in a worktree, another clone, or a manual `bun` invocation. The
+guard is in the file all of those share, so the config entry is now inert either way.
+
+**(A) `.mcp.json` entry NOT removed — file is claimed by live parallel session 57b205ea** (claimed
+17 min ago, still held). Left alone deliberately per RULE 1.5. Not load-bearing: the guard already
+neutralizes the entry. Owed as cleanup when that session releases.
+
+**(A) `refinery/sources/duckdb-source.mts` did NOT contribute to this burn — do not neutralize it.**
+Every workflow in `.github/workflows/` is `runs-on: ubuntu-latest` (sole exception
+`dbpr-sirs-monthly.yml`, self-hosted, monthly, and disabled at the API), while every request in the
+burn window carried `windows_amd64`. It is also a different read shape: single-file `read_parquet`
+on ~1 MB `lake-tier1` objects (seekable, column-pruned, pushdown) vs the MCP server's
+`read_csv_auto` over EVERY inventoried snapshot including 11 MB `.csv.gz`. Reading the lake to BUILD
+brains is the one legitimate lake read.
+
+---
+
 ## 2026-07-21 (Opus 4.8 · main) — EGRESS BURNER NAMED: the lake MCP, on this Windows box + 6 email defects logged
 
 Docs only — no code touched. Two deliverables: `_ASSISTANT/HANDOFF-2026-07-21-fix-list.md` and

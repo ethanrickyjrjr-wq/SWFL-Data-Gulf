@@ -16,7 +16,49 @@ const {
   safeIdent,
   buildViewGroups,
   tier1ListReader,
+  assertEgressOptIn,
+  EGRESS_OPT_IN_ENV,
 } = await import("./lake-mcp-server.mts");
+
+// ---------------------------------------------------------------------------
+// EGRESS BOOT GUARD — regression tests for the 07/21/2026 ~300 GB/day burn.
+// Each test is named after the failure mode it stops.
+// ---------------------------------------------------------------------------
+
+test("egress guard: refuses to boot when the opt-in flag is absent", () => {
+  // The default state. A checkout that just pulls main cannot start the burner.
+  assert.throws(() => assertEgressOptIn({}), /REFUSING TO START/);
+});
+
+test("egress guard: a stale empty or '0' value is NOT consent", () => {
+  // A leftover `LAKE_MCP_ALLOW_EGRESS=` or `=0` in a shell profile / .env must
+  // not read as opt-in — that is how a guard silently stops guarding.
+  assert.throws(() => assertEgressOptIn({ [EGRESS_OPT_IN_ENV]: "" }), /REFUSING TO START/);
+  assert.throws(() => assertEgressOptIn({ [EGRESS_OPT_IN_ENV]: "0" }), /REFUSING TO START/);
+  assert.throws(() => assertEgressOptIn({ [EGRESS_OPT_IN_ENV]: "true" }), /REFUSING TO START/);
+});
+
+test("egress guard: explicit '1' allows boot", () => {
+  // The deliberate override still works — this is a guard, not a removal.
+  assert.doesNotThrow(() => assertEgressOptIn({ [EGRESS_OPT_IN_ENV]: "1" }));
+});
+
+test("egress guard: the error names the cost and the override", () => {
+  // The message IS the guard's interface. Whoever hits this at 2am must learn
+  // why it is blocked and what to fix, not just that it failed.
+  const err = (() => {
+    try {
+      assertEgressOptIn({});
+      return null;
+    } catch (e) {
+      return e as Error;
+    }
+  })();
+  assert.ok(err, "expected a throw");
+  assert.match(err!.message, /egress/i);
+  assert.match(err!.message, /csv\.gz/);
+  assert.match(err!.message, new RegExp(EGRESS_OPT_IN_ENV));
+});
 
 /** Minimal InventoryRow factory for grouping tests. */
 function invRow(path: string, bucket = "lake-tier1") {
@@ -44,10 +86,7 @@ test("deriveViewName: case-insensitive .Parquet strip", () => {
 });
 
 test("deriveViewName: strips non-parquet extensions", () => {
-  assert.equal(
-    deriveViewName("tier1/run-20260527T002658Z.ndjson"),
-    "run_20260527T002658Z",
-  );
+  assert.equal(deriveViewName("tier1/run-20260527T002658Z.ndjson"), "run_20260527T002658Z");
 });
 
 test("deriveViewName: replaces hyphens and other non-word chars with underscores", () => {
@@ -74,27 +113,15 @@ test("jsonSafe: BigInt beyond safe-integer range falls back to a lossless string
 
 test("deriveSafeViewName: valid unique names pass through unchanged", () => {
   assert.equal(deriveSafeViewName("faf5/faf5_2024.parquet"), "faf5_2024");
-  assert.equal(
-    deriveSafeViewName("environmental/hurdat2_fl.parquet"),
-    "hurdat2_fl",
-  );
+  assert.equal(deriveSafeViewName("environmental/hurdat2_fl.parquet"), "hurdat2_fl");
 });
 
 test("deriveSafeViewName: leading-digit names are parent-qualified (fixes 2026-05.parquet)", () => {
   // The three macro files that DuckDB rejected as "syntax error at 2026_05"
   // and which all collided on one name — now distinct, valid identifiers.
-  assert.equal(
-    deriveSafeViewName("macro/census_vip/2026-05.parquet"),
-    "census_vip_2026_05",
-  );
-  assert.equal(
-    deriveSafeViewName("macro/bls_ppi/2026-05.parquet"),
-    "bls_ppi_2026_05",
-  );
-  assert.equal(
-    deriveSafeViewName("macro/fred_g17/2026-05.parquet"),
-    "fred_g17_2026_05",
-  );
+  assert.equal(deriveSafeViewName("macro/census_vip/2026-05.parquet"), "census_vip_2026_05");
+  assert.equal(deriveSafeViewName("macro/bls_ppi/2026-05.parquet"), "bls_ppi_2026_05");
+  assert.equal(deriveSafeViewName("macro/fred_g17/2026-05.parquet"), "fred_g17_2026_05");
 });
 
 test("deriveSafeViewName: digit-leading even after parent qualification gets a letter prefix", () => {
@@ -117,9 +144,7 @@ test("tier1Format: classifies by extension incl. compression suffix", () => {
 // ---- isPartitioned ----
 
 test("isPartitioned: true only when a Hive partition segment is present", () => {
-  assert.ok(
-    isPartitioned("city_pulse_corridors/a/year=2026/month=06/run-1.ndjson"),
-  );
+  assert.ok(isPartitioned("city_pulse_corridors/a/year=2026/month=06/run-1.ndjson"));
   assert.ok(!isPartitioned("macro/census_vip/2026-05.parquet"));
   assert.ok(!isPartitioned("faf5/faf5_2024.parquet"));
 });
@@ -238,21 +263,14 @@ test("isAllowedSql: rejects semicolon-appended injection (second statement unrea
   // defense is the single-statement API, not the allowlist.
   //
   // If we ever want a second layer, add a semicolon-scan check here.
-  assert.ok(
-    isAllowedSql(
-      "SELECT 1; CREATE TABLE exfil AS SELECT * FROM pg.data_lake.foo",
-    ),
-  );
+  assert.ok(isAllowedSql("SELECT 1; CREATE TABLE exfil AS SELECT * FROM pg.data_lake.foo"));
 });
 
 // ---- buildFinalQuery ----
 
 test("buildFinalQuery: appends LIMIT 10000 when query has no LIMIT", () => {
   assert.match(buildFinalQuery("SELECT * FROM foo"), /LIMIT 10000/);
-  assert.match(
-    buildFinalQuery("WITH cte AS (SELECT 1) SELECT * FROM cte"),
-    /LIMIT 10000/,
-  );
+  assert.match(buildFinalQuery("WITH cte AS (SELECT 1) SELECT * FROM cte"), /LIMIT 10000/);
 });
 
 test("buildFinalQuery: preserves existing LIMIT", () => {

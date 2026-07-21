@@ -9,11 +9,7 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import {
-  composeQuery,
-  sqlEscape,
-  type ParquetView,
-} from "../refinery/sources/duckdb-source.mts";
+import { composeQuery, sqlEscape, type ParquetView } from "../refinery/sources/duckdb-source.mts";
 import { requirePgEnv, type PgCreds } from "../refinery/config/env.mts";
 
 // env.mts calls process.loadEnvFile(".env.local") on import — no need to repeat.
@@ -84,8 +80,7 @@ export function tier1Format(path: string): Tier1Format {
   if (l.endsWith(".parquet")) return "parquet";
   if (l.endsWith(".csv") || l.endsWith(".csv.gz")) return "csv";
   if (l.endsWith(".geojson") || l.endsWith(".geojson.gz")) return "geojson";
-  if (l.endsWith(".ndjson") || l.endsWith(".jsonl") || l.endsWith(".json"))
-    return "ndjson";
+  if (l.endsWith(".ndjson") || l.endsWith(".jsonl") || l.endsWith(".json")) return "ndjson";
   return "other";
 }
 
@@ -173,10 +168,7 @@ export function buildViewGroups(rows: InventoryRow[]): ViewGroup[] {
  *  cleanly; ndjson adds ignore_errors + a raised object-size cap (run records
  *  can be large). These exact forms were verified against the live lake.
  */
-export function tier1ListReader(
-  format: "parquet" | "csv" | "ndjson",
-  s3Urls: string[],
-): string {
+export function tier1ListReader(format: "parquet" | "csv" | "ndjson", s3Urls: string[]): string {
   const list = `[${s3Urls.map((u) => `'${sqlEscape(u)}'`).join(", ")}]`;
   switch (format) {
     case "parquet":
@@ -231,9 +223,7 @@ async function fetchInventory(pg: PgCreds): Promise<InventoryRow[]> {
         ");",
       ].join("\n"),
     );
-    await conn.run(
-      "ATTACH '' AS inv (TYPE POSTGRES, SECRET inv_pg, READ_ONLY);",
-    );
+    await conn.run("ATTACH '' AS inv (TYPE POSTGRES, SECRET inv_pg, READ_ONLY);");
     const reader = await conn.runAndReadAll(
       "SELECT id, bucket, path, vintage, byte_size, pack_id, source_url" +
         " FROM inv.data_lake._tier1_inventory",
@@ -246,9 +236,7 @@ async function fetchInventory(pg: PgCreds): Promise<InventoryRow[]> {
 
 // ---------- Session state (populated by startup()) ----------
 
-type DuckDBConn = Awaited<
-  ReturnType<InstanceType<typeof DuckDBInstance>["connect"]>
->;
+type DuckDBConn = Awaited<ReturnType<InstanceType<typeof DuckDBInstance>["connect"]>>;
 let mainConn: DuckDBConn | null = null;
 let registeredViews: ViewMeta[] = [];
 
@@ -301,17 +289,13 @@ async function startup(): Promise<void> {
   const skippedCount = inventoryRows.length - viewableRows;
 
   // Step 3 — Resolve S3 creds (required to read any Tier-1 view).
-  let s3:
-    | { endpoint: string; accessKey: string; secretKey: string }
-    | undefined;
+  let s3: { endpoint: string; accessKey: string; secretKey: string } | undefined;
   if (groups.length > 0) {
     const endpointRaw = process.env["SUPABASE_S3_ENDPOINT"];
     const accessKey = process.env["SUPABASE_S3_ACCESS_KEY_ID"];
     const secretKey = process.env["SUPABASE_S3_SECRET_ACCESS_KEY"];
     if (!endpointRaw || !accessKey || !secretKey) {
-      console.error(
-        "[lake-mcp] Warning: SUPABASE_S3_* env vars missing; Tier-1 views skipped.",
-      );
+      console.error("[lake-mcp] Warning: SUPABASE_S3_* env vars missing; Tier-1 views skipped.");
     } else {
       s3 = {
         endpoint: endpointRaw.replace(/^https?:\/\//, ""),
@@ -368,9 +352,7 @@ async function startup(): Promise<void> {
       const urls = g.rows.map((r) => `s3://${r.bucket}/${r.path}`);
       const reader = tier1ListReader(g.format, urls);
       try {
-        await conn.run(
-          `CREATE OR REPLACE VIEW ${g.name} AS SELECT * FROM ${reader};`,
-        );
+        await conn.run(`CREATE OR REPLACE VIEW ${g.name} AS SELECT * FROM ${reader};`);
         const top = g.rows[0]!.path.split("/")[0] ?? "";
         registered.push({
           name: g.name,
@@ -426,9 +408,7 @@ async function handleDescribeView(viewName: string): Promise<object> {
       `Unknown view "${viewName}". Valid names: ${valid}. For Postgres tables use query_lake.`,
     );
   }
-  const reader = await mainConn!.runAndReadAll(
-    `DESCRIBE SELECT * FROM ${viewName} LIMIT 0`,
-  );
+  const reader = await mainConn!.runAndReadAll(`DESCRIBE SELECT * FROM ${viewName} LIMIT 0`);
   return { columns: reader.getRowObjects() };
 }
 
@@ -455,8 +435,7 @@ export function jsonSafe(value: unknown): string {
     value,
     (_key, v) =>
       typeof v === "bigint"
-        ? v >= BigInt(Number.MIN_SAFE_INTEGER) &&
-          v <= BigInt(Number.MAX_SAFE_INTEGER)
+        ? v >= BigInt(Number.MIN_SAFE_INTEGER) && v <= BigInt(Number.MAX_SAFE_INTEGER)
           ? Number(v)
           : v.toString()
         : v,
@@ -466,10 +445,7 @@ export function jsonSafe(value: unknown): string {
 
 // ---------- MCP server ----------
 
-const server = new Server(
-  { name: "lake", version: "1.0.0" },
-  { capabilities: { tools: {} } },
-);
+const server = new Server({ name: "lake", version: "1.0.0" }, { capabilities: { tools: {} } });
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
@@ -482,8 +458,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "describe_view",
-      description:
-        "Show the column names and types of a registered Tier 1 dataset view.",
+      description: "Show the column names and types of a registered Tier 1 dataset view.",
       inputSchema: {
         type: "object",
         properties: {
@@ -547,8 +522,69 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
+/**
+ * EGRESS BOOT GUARD — added 07/21/2026 after this server burned ~300 GB/day.
+ *
+ * Incident: every request in the storage log for the burn window carried
+ * `duckdb/v1.5.4(windows_amd64) node-neo-api` — this server, on the operator's
+ * own machine. Four copies were alive at once. The mechanism is structural, not
+ * a bug: `tier1ListReader` builds each view over EVERY inventoried file in a
+ * dataset and emits `read_csv_auto([...], union_by_name=true)`. Cold objects are
+ * `.csv.gz`; gzip is not seekable, so there is no range read, no column pruning
+ * and no predicate pushdown — every query downloads every snapshot WHOLE, and
+ * nothing caches between queries. One `raw-tabular-cold` object averages 11 MB.
+ *
+ * Why the guard lives HERE and not only in `.mcp.json`: the config is per
+ * checkout. Renaming the mcpServers key (the first attempt) changed only the
+ * server's display name — the entry still ran `bun tools/lake-mcp-server.mts`
+ * and its tools reappeared under a new prefix. Removing the entry stops THIS
+ * checkout; it does not stop a stale config in a worktree, a teammate's clone,
+ * or someone running `bun tools/lake-mcp-server.mts` by hand. The guard is in
+ * the one file all of those share.
+ *
+ * To re-enable, the read path must first stop pulling whole `.csv.gz` snapshots
+ * per query (convert cold CSV to Parquet, or scope views to the latest vintage,
+ * or cache locally). Setting the flag without doing that restarts the burn.
+ */
+export const EGRESS_OPT_IN_ENV = "LAKE_MCP_ALLOW_EGRESS";
+
+export class LakeMcpEgressBlockedError extends Error {
+  constructor() {
+    super(
+      `[lake-mcp] REFUSING TO START — this server bills Supabase Storage egress.\n` +
+        `Each query re-downloads every .csv.gz snapshot in the dataset whole ` +
+        `(no range read, no pruning, no cache). It burned ~300 GB/day on 07/21/2026.\n` +
+        `Fix the read path before re-enabling (Parquet, or latest-vintage-only views, or a local cache).\n` +
+        `Deliberate override: set ${EGRESS_OPT_IN_ENV}=1`,
+    );
+    this.name = "LakeMcpEgressBlockedError";
+  }
+}
+
+/**
+ * Pure, exported for the test. Throws unless the operator explicitly opted in.
+ * Only `"1"` counts — a stray empty string or `"0"` left in a shell profile must
+ * not read as consent.
+ */
+export function assertEgressOptIn(env: Record<string, string | undefined>): void {
+  if (env[EGRESS_OPT_IN_ENV] !== "1") throw new LakeMcpEgressBlockedError();
+}
+
 // Only start when invoked directly (not when imported by tests).
 if (import.meta.main) {
+  // Fires BEFORE any DuckDB instance, S3 credential or inventory read, so a
+  // blocked boot cannot issue a single billable request.
+  try {
+    assertEgressOptIn(process.env);
+  } catch (err) {
+    console.error((err as Error).message);
+    process.exit(1);
+  }
+  // Opted in — never let that be silent. The incident's root cause was three
+  // copies running unnoticed for hours.
+  console.error(
+    `[lake-mcp] ${EGRESS_OPT_IN_ENV}=1 — EGRESS BILLING IS LIVE. Every query downloads whole snapshots.`,
+  );
   process.on("exit", () => {
     mainConn?.closeSync();
   });
