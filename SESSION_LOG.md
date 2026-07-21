@@ -1,3 +1,23 @@
+## 2026-07-21 (Sonnet 5 · main) — llms.txt existed already; fixed its own spec violation and a robots.txt gap that blocked the answer-engine bots it was built for.
+
+Operator: *"Do we have any llms.txt? crawl4ai that and see how we should use it"*.
+
+`app/llms.txt/route.ts` was already built 07/11/2026 (desk-discovery-flywheel plan, Task 5).
+crawl4ai'd the real spec (llmstxt.org, RULE 0.4) and found two things:
+
+1. **Our own file violated the spec.** Every H2 section must be a link file-list per spec; our
+   `## About` section was prose. Moved that sentence into the pre-H2 free-text area (spec-legal
+   placement). Test still passes, served bytes verified via `next build` + curl.
+2. **robots.ts blocked the bots llms.txt exists for.** The 07/11 SEARCH_INDEX carve-out
+   (OAI-SearchBot, Claude-SearchBot, PerplexityBot) allowlisted only `/desk` and `/r/` —
+   `/llms.txt` matched neither prefix, so `disallow: "/"` caught it. The exact indexers the
+   carve-out was built to let in couldn't reach the discovery file. Operator confirmed via
+   AskUserQuestion; added `/llms.txt` to the allow array + updated the two stale comments that
+   named "the two public showpiece paths." Training bots unaffected (still full-blocked).
+   Verified served `/robots.txt` shows `Allow: /llms.txt` under the SEARCH_INDEX group.
+
+No new build, no page-level `.md` mirrors (spec-optional, out of scope for this pass).
+
 ## 2026-07-21 (Opus 4.8 · main) — The 13-layer playbook is now dispatchable: six work packages, file ownership, and a collision matrix. Eight layers were never work at all.
 
 Operator: *"docs/standards/infrastructure-playbook.md — work on breaking this into sectiions for

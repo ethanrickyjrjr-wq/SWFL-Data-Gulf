@@ -35,12 +35,14 @@ const ORIGIN = "https://www.swfldatagulf.com";
  * — a citation/discovery channel, not bulk harvest — and several ignore robots
  * anyway. To switch to a strict-lockdown posture, move them into AI_ANSWER_ENGINES.
  *
- * ANSWER-ENGINE SEARCH CARVE-OUT (operator-approved 07/11/2026) — the three
- * search/index bots below (OAI-SearchBot, Claude-SearchBot, PerplexityBot) are
- * allowlisted on the two public showpiece paths (/desk, /r/) ONLY, so our public
- * data is citable inside answer engines (GEO reach) while the TRAINING bots stay
- * blocked everywhere (moat unchanged — public data citable, not fed to training
- * corpora). Still advisory; the training-bot block's real teeth are the WAF.
+ * ANSWER-ENGINE SEARCH CARVE-OUT (operator-approved 07/11/2026, extended
+ * 07/21/2026 to cover /llms.txt) — the three search/index bots below
+ * (OAI-SearchBot, Claude-SearchBot, PerplexityBot) are allowlisted on the two
+ * public showpiece paths (/desk, /r/) plus the curated discovery file
+ * (/llms.txt) ONLY, so our public data is citable inside answer engines (GEO
+ * reach) while the TRAINING bots stay blocked everywhere (moat unchanged —
+ * public data citable, not fed to training corpora). Still advisory; the
+ * training-bot block's real teeth are the WAF.
  */
 
 // ── AI TRAINING crawlers — ingest content to train/improve models. ──────────
@@ -105,9 +107,10 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "*", allow: "/", disallow: "/api/" },
       // AI training + non-search answer engines: full block (moat unchanged).
       { userAgent: TRAINING_AND_OTHER_ANSWER, disallow: "/" },
-      // Answer-engine SEARCH indexers: allowed ONLY on the two public showpiece
-      // paths, blocked everywhere else (public data citable; synthesis stays private).
-      { userAgent: SEARCH_INDEX, allow: ["/desk", "/r/"], disallow: "/" },
+      // Answer-engine SEARCH indexers: allowed ONLY on the public showpiece
+      // paths + the curated discovery file, blocked everywhere else
+      // (public data citable; synthesis stays private).
+      { userAgent: SEARCH_INDEX, allow: ["/desk", "/r/", "/llms.txt"], disallow: "/" },
     ],
     sitemap: `${ORIGIN}/sitemap.xml`,
   };

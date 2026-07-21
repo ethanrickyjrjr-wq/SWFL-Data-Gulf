@@ -12,6 +12,9 @@ const BODY = `# SWFL Data Gulf
 > Daily-refreshed, explicitly-sourced Southwest Florida (Lee & Collier County)
 > housing-market data. Every figure names its source and its own as-of date.
 
+SWFL Data Gulf publishes cited SWFL market data. Data is free to read; every
+number is attributed to a named source.
+
 ## Live data
 - [SWFL Data Desk](${SITE}/desk): daily market terminal — median asking price,
   active inventory, price-cut share, 30-yr mortgage, and daily listing-flow counts.
@@ -20,10 +23,6 @@ const BODY = `# SWFL Data Gulf
 - [Master read](${SITE}/r/master): the synthesized Southwest Florida market direction.
 - [Housing](${SITE}/r/housing-swfl): Lee & Collier housing metrics.
 - [Commercial real estate](${SITE}/r/cre-swfl): corridor-level CRE fundamentals.
-
-## About
-SWFL Data Gulf publishes cited SWFL market data. Data is free to read; every
-number is attributed to a named source.
 `;
 
 export function GET() {
