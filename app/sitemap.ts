@@ -1,7 +1,7 @@
 import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import type { MetadataRoute } from "next";
-import { fetchVerifiedCorridorRows, toCorridorLinks } from "./r/cre-swfl/corridors";
+import { fetchVerifiedCorridorSlugRows, toCorridorLinks } from "./r/cre-swfl/corridors";
 import { SOURCE_PROVENANCE_TABLES } from "./r/source/_tables";
 import { GUIDES } from "@/lib/guides/registry";
 
@@ -17,8 +17,12 @@ const BRAINS_DIR = path.join(process.cwd(), "brains");
  * source the report page reads — if no .md file exists the page 404s, so we
  * skip it). `test-alpha.md` is a development fixture and is excluded.
  *
- * Corridor slugs come from `fetchVerifiedCorridorRows()` → `toCorridorLinks()`,
- * the same query the corridor drill-down route resolves against.
+ * Corridor slugs come from `fetchVerifiedCorridorSlugRows()` → `toCorridorLinks()`.
+ * That is the two-column twin of the drill-down route's `select("*")` read,
+ * carrying the IDENTICAL predicate — so it resolves the same corridor SET, and
+ * the sitemap still cannot list a URL that 404s. Narrowing columns cannot
+ * change which rows return; `corridors.test.ts` pins the link output as equal
+ * for slim and fat rows.
  *
  * Source-provenance slugs come from `SOURCE_PROVENANCE_TABLES`, the same
  * allowlist the `/r/source/[table]` page guards against.
@@ -121,7 +125,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // ── Corridor drill-down pages (/r/cre-swfl/[corridor]) ───────────────────
   try {
-    const corridorRows = await fetchVerifiedCorridorRows();
+    // Slug-only read: this loop emits URLs, never corridor prose. Same
+    // predicate as the fat fetch, so the slug set is identical.
+    const corridorRows = await fetchVerifiedCorridorSlugRows();
     const corridorLinks = toCorridorLinks(corridorRows);
     for (const link of corridorLinks) {
       entries.push({

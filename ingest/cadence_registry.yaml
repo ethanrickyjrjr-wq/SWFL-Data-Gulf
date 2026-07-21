@@ -2368,6 +2368,13 @@ jobs:
   - name: tripwire-hourly
     workflow: tripwire-hourly.yml
     purpose: Tripwire scan — spend, dispatches, guard-file state.
+  - name: supabase-metrics-scrape
+    workflow: supabase-metrics-scrape.yml
+    purpose: >-
+      Scrapes the Supabase Metrics API into public.supabase_db_metrics (connections,
+      memory, disk, load, replication lag, db size) — the leading indicator behind ops
+      /db-health. DB instance only: carries NO storage metrics and is not the invoice,
+      so it must never be cited as egress coverage. Deterministic, no LLM call.
   - name: narrative-bake
     workflow: narrative-bake.yml
     purpose: Bakes narrative surfaces behind a no-invention numeric-token validator. Chained off daily-rebuild's completion; own schedule retired 07/12.

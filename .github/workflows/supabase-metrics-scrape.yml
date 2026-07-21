@@ -1,0 +1,43 @@
+name: Supabase DB metrics scrape
+
+# Hourly scrape of the Supabase Metrics API (beta) into public.supabase_db_metrics,
+# rendered by swfldatagulf-ops /db-health. Deterministic, $0, no LLM call.
+#
+# NOT egress: this feed is the Postgres instance and its host only. It publishes
+# zero storage metrics and is not the invoice. Never cite it as egress coverage.
+#
+# Spec: docs/superpowers/specs/2026-07-21-supabase-db-metrics-design.md
+# Kill switch (repo Settings -> Variables): SUPABASE_METRICS_ENABLED = "false"
+
+on:
+  schedule:
+    - cron: "23 * * * *" # hourly at :23 — off-hour minute, GH congests at :00
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-metrics-scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    if: vars.SUPABASE_METRICS_ENABLED != 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+
+      # The scraper aborts and writes nothing if any required series is absent,
+      # so a beta rename surfaces here as a red run naming the missing metrics
+      # rather than as a dashboard quietly full of zeros.
+      - name: Scrape and store
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node scripts/supabase-metrics-scrape.mjs

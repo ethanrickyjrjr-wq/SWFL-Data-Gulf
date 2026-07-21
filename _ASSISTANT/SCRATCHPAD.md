@@ -107,6 +107,21 @@ the RULE 11 hyperscaler pattern at our volume. Proportionate path is a scheduled
 ~5–10 chosen series into a table, rendered like `/ops/spend` already renders its slots.
 Decide which series matter before building.
 
+**BUILT 07/21/2026** — operator said "Build it". Nine gauges (connections used/max/pct,
+memory, disk `/` and `/data`, load1, replication lag, db size), hourly cron at :23, into
+`public.supabase_db_metrics`, rendered at ops `/db-health`. No Prometheus, no Grafana.
+Spec + failure modes F1–F9: `docs/superpowers/specs/2026-07-21-supabase-db-metrics-design.md`.
+21 scraper tests + 8 page tests, all green. Live values at build time: connections 30%,
+memory 44.17%, **disk `/` 77.59%** (warn at 80 — the one to watch), load 0.05, lag 0s.
+
+The `second-order` audit caught the build reproducing its own target defect: the reader
+collapsed four failures into one calm empty state, so a PostgREST outage — the exact thing
+this predicts — would have rendered as a fresh install. Fixed to a four-state status with a
+red READ FAILED panel, verified by building against a deliberately invalid key. It also
+caught the DDL never being committed (applied via MCP only) and cross-repo gauge-key drift.
+
+NOT PUSHED — two repos, awaiting per-push approval.
+
 ---
 
 ## OPEN — raised 07/21/2026, not yet resolved

@@ -1,3 +1,51 @@
+## 2026-07-21 (Opus 4.8 · main) — DB HEALTH: 317 live Supabase metric series we had never scraped. Now nine gauges, hourly, on /ops — and it is NOT egress coverage.
+
+Operator, handing `https://supabase.com/docs/guides/telemetry/metrics`: *"why do we not have all of
+this in /ops (other repo)"* → then *"Build it"*.
+
+**Why we didn't have it: nobody wired it.** `grep -ri 'privileged/metrics|prometheus|customer/v1'`
+over `swfldatagulf-ops` returned zero hits. No decision behind it, just never built.
+
+**(A) VENDOR CONTRACT, verified live in-session — probed, not read off the docs.**
+`GET https://<ref>.supabase.co/customer/v1/privileged/metrics`, HTTP Basic (`service_role` : service
+key), Prometheus text. Our project: **HTTP 200, 135 KB, 1138 lines, 317 metric families.** Marked
+BETA by Supabase ("metric names and labels might evolve") — which is why the scraper carries a
+`REQUIRED` list and aborts rather than writing zeros.
+
+**(B) THE LOAD-BEARING CAVEAT — this would NOT have caught the 07/21 burn.** `grep -i storag` over
+all 317 families returns **nothing**. The Metrics API is the Postgres instance and its host only.
+The burn was Storage/S3 (item 0a — lake MCP sniffing whole `.csv.gz` objects on boot). It is also
+not the invoice. That sentence is now pinned in five places so it cannot be re-forgotten: the spec,
+the script header, the migration comment, the cadence-registry purpose, and the page itself.
+
+**(C) SHIPPED.** `migrations/20260721_supabase_db_metrics.sql` (long format — adding a gauge never
+needs a migration; RLS on, no policies, verified `relrowsecurity = true`) ·
+`scripts/supabase-metrics-scrape.mjs` + **21 tests** (TDD, named F1–F5 for the failure modes in the
+spec) · `.github/workflows/supabase-metrics-scrape.yml` hourly at :23, kill-switch
+`SUPABASE_METRICS_ENABLED` · registered in `cadence_registry.yaml` `jobs:` (Gate 10 caught it
+unregistered and now reports 80/80 registered). Ops repo: `lib/db-health.ts` + `/db-health` page +
+**8 tests**, nav pill added.
+
+Nine gauges, live right now: connections 18/60 (30%), memory 44.17%, disk `/` **77.59%**, disk
+`/data` 26.74%, load 0.05, replication lag 0s, db size 2033 MB. Root disk at 77.6% is the one
+number worth watching — warn fires at 80%.
+
+**(D) THE CONSEQUENCE AUDIT EARNED ITS KEEP — it found the build reproducing the exact defect it
+was built to fix.** `second-order` flagged that `fetchDbHealth` collapsed FOUR distinct failures
+(env unset, zero rows, query error, thrown error) into one calm "No scrape data yet", and that the
+staleness alarm lived only inside the success branch. Both legs run through PostgREST — so during a
+PostgREST outage, *the outage class this page exists to predict*, the page would have failed to read
+its own table and rendered as a fresh install. Fixed: a four-state `Status`, and a read failure now
+renders a red READ FAILED panel. **Verified by building with a deliberately invalid key — the
+prerendered HTML contains "READ FAILED", not the calm empty state.** Same audit caught the DDL
+shipping nowhere (applied via MCP, never committed — now `migrations/20260721_*.sql`) and the nine
+gauge keys being re-declared across a repo boundary where no test can see both sides (the reader now
+surfaces an unknown key with its raw name instead of silently dropping the row).
+
+**Not pushed.** Two repos, operator approval per push. The ops half needs its own `SESSION_LOG.md`
+touched (`check-session-log-on-push.mjs` has no foreign-repo scope guard, unlike
+`check-prepush-gate.mjs`) plus `OPERATOR_APPROVED_PUSH=1`.
+
 ## 2026-07-21 (Opus 4.8 · main) — The egress burner, named with bytes: the lake MCP full-read the bucket on every BOOT. Plus: a parallel session pushed my half-done fix to main.
 
 Operator: *"data-roots has to be causing the egress increase"* → **no, and here is what is.**
