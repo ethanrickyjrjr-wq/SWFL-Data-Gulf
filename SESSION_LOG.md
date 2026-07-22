@@ -213,6 +213,43 @@ the trace rather than crying "discount these figures" over numerical dust.
 its go/no-go input is the Section 2 number, which needs more labeled weeks before it can
 decide anything. Re-run `python -m ingest.analysis.challenger` as weeks accumulate.
 
+## 2026-07-22 (Opus 4.8 · main) — "why do we keep building around data we already hold" — answered: every guard against it was itself unverified. The gate had never fired.
+
+Operator asked for the root cause after the third instance in one day. It is not forgetfulness.
+
+MEASURED, not theorized. `.claude/hooks/check-four-searches.mjs` existed, documented five
+failures, quoted the decree — and was registered in NO settings file. Zero Stop hooks were
+registered at all. It had never executed. Its own header (lines 190-197) records that it ALREADY
+shipped once as a silent no-op from a Windows argv guard and "got described as a forcing function
+without ever being executed once" — fixed in `1ad4eb12`, then never wired. Same gate, believed
+working, not working, twice in one day.
+
+Worse: I ran `isDataTurn` against the operator's six real messages this session. FIVE were SILENT,
+including "do we not have the information somewhere else?" — the precise question the gate exists
+to force. Only the all-caps order matched, and only because it contains the word "DATA". A
+registered-but-deaf gate would have blocked 1 turn in 6.
+
+**Root cause: we accept existence as evidence of function.** Four instances today, same shape —
+the lake comp feed (committed, green, zero consumers), the geometry docstring ("TIGER/Line 2024"
+over 2010 fields, labeled never checked), the LeePA pipeline (has a cron, has never once
+completed), and this hook. Existed, didn't run. Building around held data is the symptom that
+surfaces first because it is the ONLY error class with no red signal — a duplicate passes every
+test, runs every pipeline, renders every number. Nothing goes red for redundancy. Five separate
+read-first rules now point at this one failure; five rules for one failure is the proof that the
+rule layer cannot fix it.
+
+FIXED: widened `isDataTurn` from one door to three — ALREADY_HAVE phrasing that names no noun
+("dont we already have this"), a bare incredulous challenge ("WHAT????", anchored to the whole
+message so real questions still take door 3), and the original subject+interrogative with the
+concrete artifact nouns added (geometry, pipe, vintage, file, layer, fixture). TDD: 3 RED tests
+named for the real misses, then green, 17 pass. Conversational turns still pass through
+("thanks", "commit and push", "looks good") — RULE 11 holds.
+
+A parallel session wired the Stop registration in `ba30a776` mid-work; that was not mine. What is
+mine is the widening, and PROVING it: ran the binary against synthetic transcripts — lazy data
+turn exits 2 and blocks, four-lane turn exits 0 and passes. That verification step is the one
+skipped twice before. Reading a hook is not running it.
+
 ## 2026-07-22 (Opus 4.8 · main) — ZIP adjacency asset built. We already owned polygons; they were the wrong vintage, and the graph they produce crosses water.
 
 Took over the stats-regions handoff. Its running order said "advisor first on B1/B2," but the spec's
