@@ -1,3 +1,15 @@
+## 2026-07-21 (Opus 4.8 · wt/sentry-error-tracking) — Verified the console-filter fix actually works, not just "worst case it's a no-op."
+
+Advisor flagged that `defaults.filter((i) => i.name !== "Console")` was shipping on inference —
+if the real integration name didn't match exactly, the filter would silently do nothing and the
+raw-Postgres-error breadcrumb vector would stay open under a comment saying it's closed. Checked
+the installed source directly instead of trusting the string: `node_modules/@sentry/core/build/cjs/
+integrations/console.js:12` — `const INTEGRATION_NAME = "Console";` — exact match. Confirmed it's
+actually ON the default list both runtimes filter: `@sentry/node-core/build/cjs/light/sdk.js:33`
+(`console$1.consoleIntegration()`) and `@sentry/vercel-edge/build/cjs/index.js:3498`
+(`core.consoleIntegration()`) — both import the same `@sentry/core` integration whose name was just
+confirmed. The filter removes a real, present integration on both runtimes; not a guess anymore.
+
 ## 2026-07-21 (Opus 4.8 · wt/sentry-error-tracking) — Post-build review fixes: two real scrub gaps closed, two more error boundaries wired, one operator action item.
 
 Three review agents (code, security, second-order) audited the Sentry build below. PII scrub core
