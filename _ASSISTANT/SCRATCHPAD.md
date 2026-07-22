@@ -21,6 +21,35 @@ entry. Don't do it.
 
 ## OPEN — raised 07/22/2026
 
+### 0aj. THREE LIVE CRITICALS were sitting correctly recorded in the ledger since 07/18 and nobody looked.
+
+Found 07/22 while burning down the ledger. All three are ALREADY open checks — the ledger did its
+job. 722 rows of unclosable noise buried them. Priority bumped to 100 so they surface first.
+
+1. **`/embed/footer-token` FABRICATES a freshness token on a PUBLIC page.** Serves the literal
+   `SWFL-7421-vX-pending` and captions it "Master brain — live", twice each. Verified by direct
+   fetch 07/22, not a diff. When the master fetch fails it invents the token AND a 0.78 confidence
+   and still says "live". This is the ONE hard block in our own rules — an invented value with no
+   source — shipping publicly. `app/embed/footer-token/page.tsx:27,28,65`.
+   Check: `sa0718_embed_widget_fabricates_freshness_token_co`
+2. **`/map` serves MOCK flood dollars as real, undisclosed.** All three `MapCanvas` calls pass
+   `metric="flood"` with no override, falling through to a fixture whose own header says
+   "MOCK FIXTURE — fail-soft fallback ONLY … do NOT import from new surfaces". No "sample data"
+   disclosure in served HTML. `app/map/page.tsx:13,22,26`.
+   Check: `sa0718_map_page_always_renders_hardcoded_mock_flo`
+3. **Stripe checkout silently downgrades paying subscribers.** `app/api/stripe/checkout/route.ts:47`
+   never destructures `error`, then unconditionally upserts `tier:"free", status:"none"`. A
+   transient DB blip turns a paying customer free. Zero commits to that file since 07/18.
+   Check: `sa0718_unchecked_supabase_read_on_the_customer_lo`
+
+**And the premise correction that matters more than any of them:** the 74 site-audit defects were
+never "unreconciled." Two fix passes landed WITHIN AN HOUR of the checks being created 07/18
+(`daeb1f6e` +57min, `f3a4e833` next morning). `_RESEARCH/audits/2026-07-18-fanout-fix-log.md` ends
+with "close the `checks` for the 43 fixed findings — waiting on the review." **Nobody ever did the
+closing.** Sample: 4 of 10 already fixed, 6 of 10 still reproducing. Disposition is SPLIT, log-guided
+(the log validated 13/13 on spot-check, so it's one grep per check, not a 74-item re-audit).
+Closing the batch is ruled out — see the three criticals above.
+
 ### 0ai. The checks ledger only grows. "NOTHING BUT PROBLEMS AND NOTHING WORKS CORRECTLY, SO WHAT IS THE POINT?"
 
 **Operator, 07/22/2026, verbatim:** *"FIGURE OUT HOW TO CLOSE ALL OF THESE. WE AVE NOTHING BUT
