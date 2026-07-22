@@ -1,3 +1,50 @@
+## 2026-07-22 (Opus 4.8 · main) — PCA/Random Forest answered, then RE-answered after the operator caught me scoping it to one table. Spec A written, nothing built.
+
+Operator: *"how do we include Dimensionality reduction? Principal Component Analysis. And what parts
+need Random Forest?"* — then, after my first answer: *"but don't we have things happening all the
+time that we track?????? data changes every day."*
+
+**He was right and the correction is the point of this entry.** My first answer probed
+`listing_week`, found 163 sold events over 3 labeled weeks, and concluded "neither belongs, come back
+in September." Two things wrong with that: (1) **PCA is unsupervised — it never needed the labels I
+gated it on**; we hold 847,056 parcels at 104 columns / 59 numeric today. (2) **"Sold" is not our
+only label** — live probe of the same table: `price_cut_next_week` **2,521** events vs
+`sold_next_week` **163**. 15x. I walked past it. Logged as SCRATCHPAD `0aa`; it is the third
+instance of answering the question the first file I opened was scoped to (cf. `0z`, the caching plan
+with no traffic check).
+
+Corrected position, then brainstormed to a spec per RULE 3.5:
+- **PCA** — never in the served path (a principal component cannot be cited). Real home is
+  explained-variance reporting on the parcel tables; the *actionable* output is correlation
+  clustering keeping one named representative, which is scikit-learn's own recommendation.
+- **Random Forest** — never serves (serving is deterministic TS: dot product + sigmoid + hazard
+  compounding). Real home is an offline challenger. At 163 events that was theoretical; at 2,521
+  it is a real experiment. Importances via `permutation_importance` ONLY — vendor verbatim
+  (sklearn 1.9.0, crawl4ai 07/22/2026): MDI importance is *"strongly biased"* toward high-cardinality
+  features over binary ones, and our stress signals are exactly that mix.
+- **RF-imputing the 18,098 floored DOM rows is OUT** — a model-imputed served number has no source.
+
+**Shipped:** `docs/superpowers/specs/2026-07-22-offline-model-analysis-design.md` (Spec A, offline
+only) + check `offline_model_analysis_live_verify`. Two analyses under a new `ingest/analysis/`
+package, each one command writing a dated committed report. Two validation splits reported
+separately — grouped-CV by address for the model-class question, time-forward for the ship gate,
+and only the second is ever the gate. 11 failure modes each paired with a guard + named test.
+Thresholds deliberately unset (chosen at first run from observed distribution, no invented number).
+**Spec B** — price-cut as a served check inside the already-built `lib/why-not-selling/` engine — is
+deferred behind Spec A's gate and NOT designed yet.
+
+**Verified, not assumed:** no feature/label leakage in the panel — `builder.py:40` replays events
+`<= week_end`, `builder.py:105` takes labels from the following week.
+
+**Scope boundary made load-bearing:** `listing_week` has NO parcel columns, so the challenger cannot
+see the parcel work. A "no lift" report says nothing about parcels. It lives in the shared report
+header, not in prose.
+
+**Parallel session note:** the entry below (Naive Bayes/KNN) is the adjacent question from another
+session and landed on logistic regression as the strongest classifier follow-up — which is exactly
+what this challenger tests. Complementary, not colliding; its comp-distance-ranker work is a
+different surface and was left unstaged.
+
 ## 2026-07-22 (Opus 4.8 · main) — Naive Bayes is DISQUALIFIED from sell odds; KNN belongs on comps. Spec written, nothing built.
 
 Operator: *"any way we can use Naive Bayes? ... even KNN. look at them both."* Researched per RULE
