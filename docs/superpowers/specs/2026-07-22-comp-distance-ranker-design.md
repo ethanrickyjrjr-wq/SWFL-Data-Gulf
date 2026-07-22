@@ -104,13 +104,76 @@ where candidates came from. Phase 1 feeds it the vendor's 25. Phase 2 feeds it p
 function, same tests, same output. Phase 2 is a new **adapter**, not a rewrite. This is the entire
 reason "do both" is cheaper than it sounds.
 
+### ⚠️ FIELD AUDIT — what the vendor feed actually carries (probed 07/22/2026, AFTER approval)
+
+Read `lib/assistant/comp-helper.ts:34` (`RenderComp`) and `lib/listings/steadyapi.ts:355`
+(`NearbyComp`). **Three features named in the approved design have NO DATA in Phase 1:**
+
+| Feature | Phase 1 (vendor) | Phase 2 (parcels) |
+|---|---|---|
+| sqft / beds / baths | ✅ present | ✅ `living_area_sqft` |
+| sale date (recency) | ✅ `priceDate` | ⚠️ `sale_yr1`/`sale_mo1`, month grain |
+| ZIP locality | ✅ `zip` (on `NearbyComp`) | ✅ `phy_zipcd` |
+| **property type / class** | ❌ **ABSENT** | ✅ `dor_uc` |
+| **lat/lon → miles** | ❌ **ABSENT** | ❌ absent (needs geometry join) |
+| **year built / age** | ❌ **ABSENT** | ✅ `actual_year_built` |
+
+Corroborates the standing note `reference_steadyapi-no-property-type-field.md` — SteadyAPI exposes
+property type as a `/search` FILTER only, never as a per-row field.
+
+**Geocoding the 25 comps to recover miles is NOT a workaround** — `compsForAddress` is hard-capped at
+≤3 Steady calls, and 25 geocodes would blow both that cap and the egress constraint.
+
+**Consequence — Phase 1 scope narrows, and the headline defect still closes.**
+`comps_no_size_band_guard` (due Jul 26) is a **size** defect, and sqft is present. Recency is present.
+So Phase 1 ships size band + 6-month window + beds/baths/sqft ranking + ZIP locality — which is the
+dated defect, fully. **Class match (F4), straight-line miles, and age move to Phase 2**, where the
+parcel fields exist.
+
+**This was caught before writing code, not after** — the field audit is exactly what the RULE 3.5
+failure-modes discipline is for. A test written for F4 in Phase 1 would have been a test against a
+field that does not exist.
+
+### 🚫 WIRING BLOCKER — the 6-month window is NOT enforceable on the vendor feed
+
+Found 07/22/2026 while wiring, by reading `comp-helper.ts:300-334` (the `NearbyComp` →
+`RenderComp` mapping). **The ranker is built and green; this blocks only its wiring.**
+
+The vendor's `/nearby-home-values` response carries **no sale date**. A real sale date arrives only
+from the separate `/property-tax-history` enrichment, which is **hard-capped at 2 comps** to hold
+the ≤3-call budget. The mapping is explicit:
+- `priceKind: "sold"` → `priceDate = sold.soldDate` — a REAL sale date, **≤2 comps only**
+- `priceKind: "estimate"` → `priceDate = c.estimateDate` — **an AVM date, not a sale**
+- `priceKind: "last_list"` → `priceDate = null`
+
+So filtering "sold in the last 6 months" on `priceDate` would (a) drop every comp except the ≤2
+enriched ones, and (b) silently treat AVM valuation dates as sale dates for the rest. **Both are
+wrong, and (b) would be an invented fact** — the exact hard block in RULE 1.
+
+Also found: `zip` exists on `NearbyComp` but is **dropped** by the mapping, so ZIP locality is
+available at selection time (pre-mapping) and gone afterward. **Rank before the mapping, not after.**
+
+**What this does NOT block.** `comps_no_size_band_guard` (due Jul 26) is a **size** defect. Size,
+beds, baths and ZIP are all present on all 25 candidates at selection time, so the dated defect
+closes fully. The fix also reorders the pipeline correctly: today it is fetch 25 → `slice(6)` →
+enrich 2, which enriches whatever the vendor happened to list first. Ranking **before** enrichment
+spends the same 2 calls on the 2 best comps instead.
+
+**Open decision for the operator — do NOT resolve this silently.** The 6-month window can be
+enforced honestly on `priceKind === "sold"` rows only, because those are the only actual sales we
+hold a date for. The existing code already tells sales from estimates from last-list, and
+`market-comps.ts` already carries honesty machinery for that mix. Options are: apply the window to
+sold-priced comps only; raise the enrichment cap (more vendor calls); or source sale dates from our
+own lake instead of the vendor. **Not decided here.**
+
 ### Hard filters (disqualify before ranking)
 
 A candidate that fails any of these never reaches the score:
 1. **Not a home** — must have beds AND sqft (existing `isComparableHome`; Fannie forbids land in a
    home comp set).
 2. **Class match** — condo comps to condo, single-family to single-family. Never cross.
-3. **Recency — 6 months, HARD.** Operator decree.
+   **PHASE 2 ONLY** — no type field on the vendor feed (see field audit above).
+3. **Recency — 6 months, HARD.** Operator decree. Phase 1 uses `priceDate`.
 4. **Size band** — comp sqft within **±25%** of subject sqft at Tier 1–2, widening to **±35%** at
    Tier 3 only. This is the `comps_no_size_band_guard` fix: against a 1,978 sq ft subject the band is
    1,484–2,473 sq ft, so the 460 and 684 sq ft rows named in that defect are **disqualified, not
@@ -128,9 +191,12 @@ sum, sorted ascending:
 - **sq ft** — `|log(comp_sqft / subject_sqft)|`. Log so half-size and double-size are penalized
   symmetrically; a raw difference makes sqft dominate every other feature.
 - **beds**, **baths** — absolute difference, scaled.
-- **age** — absolute difference in year built.
-- **distance** — straight-line miles (Fannie's measure).
+- **locality** — same ZIP as subject scores better than a different ZIP. **Phase 1's only geographic
+  signal**, since the vendor feed has no coordinates.
 - **recency** — fresher sale scores better inside the 6-month window.
+- **age** — absolute difference in year built. **PHASE 2 ONLY** (no year built on the vendor feed).
+- **distance** — straight-line miles (Fannie's measure). **PHASE 2 ONLY**, and only once a geometry
+  join exists; parcels carry no lat/lon either.
 
 Weights are constants in one place, named, with the rationale in a comment. They are **not** fitted
 — there are no labels, and inventing fitted weights is the seller-stress mistake this platform is
@@ -153,8 +219,17 @@ statement about a thin market.
 
 ### Output — every comp carries its own why
 
-Each comp renders the facts that made it comparable, in Fannie's presentation format:
-`1.2 miles NW · 1,840 sq ft vs your 1,978 · sold 03/14/2026`
+Each comp renders the facts that made it comparable.
+
+**Phase 1** (no coordinates, so no miles): `1,840 sq ft vs your 1,978 · 3 bed / 2 bath · same ZIP ·
+sold 03/14/2026`
+
+**Phase 2** adds Fannie's distance format once a geometry join exists:
+`1.2 miles NW · 1,840 sq ft vs your 1,978 · built 2004 · sold 03/14/2026`
+
+Phase 1 must **not** print a distance or a direction — we do not hold the coordinates to compute
+one, and stating "1.2 miles NW" without them would be an invented number (RULE 1, the one hard
+block).
 
 **The raw distance score is never displayed.** A reader verifies the comp from the facts, not from
 a number they cannot check (research failure mode F6). Citation stays "SWFL Data Gulf" with an
@@ -173,9 +248,12 @@ internal provenance.
   no tier can return a comp older than 6 months.
 - **F3 — Padding a thin set.** Returning 6 comps when only 2 qualify, by relaxing filters. *Guard:*
   a test that a 2-qualifier fixture returns exactly 2 **plus** the standard-not-met flag — never 6.
-- **F4 — Class leakage.** A condo comped against single-family homes. *Guard:* class-match test over
-  the real type values (condo/single_family/townhouse/multi_family), asserting no cross-class comp
-  survives.
+- **F4 — Class leakage.** A condo comped against single-family homes. **PHASE 2** — the vendor feed
+  carries no type field (field audit above), so there is nothing to filter on in Phase 1. *Guard
+  (Phase 2):* class-match test over the real `dor_uc`-derived values, asserting no cross-class comp
+  survives. *Phase 1 mitigation:* the size band is a partial proxy — a 700 sq ft condo falls outside
+  a 1,978 sq ft subject's band anyway — but it is a **proxy, not the guard**, and the spec says so
+  rather than claiming coverage it does not have.
 - **F5 — Vendor-empty read as market-empty.** `compsForAddress` already distinguishes a degraded/
   throttled empty from a true empty; the ranker must not collapse that distinction. *Guard:* a
   degraded-source fixture asserts the existing retry wording still fires, not "no comps exist."
