@@ -271,9 +271,14 @@ And there is evidence the checks are uneven:
 
 - `sa0718_unhandled_internal_error_messages_passed_s` — unhandled internal error messages pass
   straight through into API responses, leaking internals.
-- `email_lab_project_activity_rls_insert_missing` — `project_activity` has a SELECT policy and
-  no INSERT policy since its 06/19/2026 migration, so every `logActivity` call has been
-  silently failing. The RLS story is half-built where it exists at all.
+- `email_lab_project_activity_rls_insert_missing` — **FIXED 2026-07-21.** `project_activity` had a
+  SELECT policy and no INSERT policy since its 06/19/2026 migration — and, found on a live probe, no
+  `authenticated` table grants at all — so every `logActivity` call silently RLS-failed (and the
+  cookie-client read path returned `[]`). Fix: `GRANT SELECT, INSERT` + an owner INSERT policy
+  (migration `project_activity_insert_policy_and_grant`, prod-live + two-sided-verified; mirror in
+  `docs/sql/20260721_project_activity_insert_policy_and_grant.sql`), and wired the project-scoped AI
+  build (`app/api/projects/[id]/ai-material`) to log `deliverable_built`. The rest of this layer's
+  RLS/sweep story is unchanged.
 
 Also open, both low severity: 14 functions with a role-mutable `search_path`, and the `vector`
 extension installed in the `public` schema.
@@ -293,8 +298,11 @@ extension installed in the `public` schema.
 3. **Kill the error leak first** — it is one fix, not a sweep. Wrap route handlers so unhandled
    errors return a generic message and the detail goes to the log (which is Layer 12, and is
    why 12 should land before or alongside this).
-4. **Fix `project_activity`** — add the INSERT policy or route the insert through the
-   service-role client, and wire the AI-build route that never calls it at all.
+4. **Fix `project_activity`** — ✅ DONE 2026-07-21. Added `GRANT SELECT, INSERT` (append-only) + an
+   owner INSERT policy mirroring the SELECT USING (cookie-client posture, matching sibling
+   `project_feed`; NOT service-role — that bypasses the policy and opens a cross-user write hole),
+   and wired `app/api/projects/[id]/ai-material` to log `deliverable_built`. Prod-live +
+   two-sided-verified; mirror in `docs/sql/20260721_project_activity_insert_policy_and_grant.sql`.
 5. **Low severity, batch them:** set `search_path` on the 14 flagged functions; move the
    `vector` extension out of `public`.
 

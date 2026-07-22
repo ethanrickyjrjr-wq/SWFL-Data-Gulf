@@ -68,6 +68,24 @@ Dispatched work package **D** of the six-package infrastructure order (`docs/han
 **Layer 8:** did NOT wire the `sa0718_unhandled_internal_error_messages_passed_s` error-leak fix (explicitly E's, blocked-on-D). Server-side exceptions are now captured, so that fix now has its "somewhere" to send detail to.
 
 Local commit only on `wt/sentry-error-tracking`; a human lands it via `node scripts/worktree.mjs land sentry-error-tracking`.
+## 2026-07-21 (Opus 4.8 · wt/rls-project-activity) — project_activity never logged a single row since it shipped: no INSERT policy AND (undocumented) no authenticated grant. Fixed both; wired the AI-material build.
+
+Package E, ONE named fix: `email_lab_project_activity_rls_insert_missing`. NOT the 120-route authz sweep — that stays open, as does the `sa0718` error-leak fix (blocked by D).
+
+**Root cause was worse than logged.** The 06/19 migration gave `project_activity` an owner SELECT policy but no INSERT policy. Probing live prod (Supabase MCP) found a second, undocumented gap: the `authenticated` role has NO table grants at all — not INSERT, not SELECT. Every `logActivity()` call site passes the cookie (authenticated) client, so every INSERT was RLS-rejected and swallowed by logActivity's try/catch; and the read path (`page.tsx` → `readRecentActivity`, also the cookie client) was equally dead — no SELECT grant means the owner SELECT policy could never be reached, returning `[]` every time. The table has held zero real rows for any project since it shipped.
+
+**Fix = complete it to its class, not route through service-role.** `project_activity` is a user-owned app table (siblings `projects`, `project_feed` — cookie-client owner-RLS WITH grants), half-built. `project_feed` grants SELECT/INSERT/UPDATE to `authenticated` + carries `project_feed_owner_all`; `project_activity` had the SELECT policy but no grants and no INSERT policy. Routing through service-role would have needed edits to 7+ call sites, contradicted the deliberate cookie-client pattern, and left the read path dead. Instead: `GRANT SELECT, INSERT` (append-only — no UPDATE/DELETE) + an INSERT policy whose WITH CHECK mirrors the existing SELECT USING, `(select auth.uid())` optimized to keep the 07/18 initplan pass intact.
+
+**LIVE NOW (prod, via MCP `apply_migration` `project_activity_insert_policy_and_grant`).** Verified as the `authenticated` role — MCP runs privileged and bypasses RLS, so impersonated via `SET LOCAL role authenticated` + `request.jwt.claims` in a `begin/rollback`:
+- owner (`8bc02711…`) INSERT into an owned project (`207ed528-b36`) → success, row SELECT-able back
+- same owner INSERT into a non-owned project (`campaign-sim`) → `ERROR 42501: new row violates row-level security policy for table "project_activity"`
+- owner SELECT on the owned project → returns the row (read path now live)
+
+Mirrored to `docs/sql/20260721_project_activity_insert_policy_and_grant.sql` (prod-not-silent-drift). Migration is idempotent (GRANT + `DROP POLICY IF EXISTS`/`CREATE`).
+
+**Code (LOCAL, pending review — this worktree lands via `node scripts/worktree.mjs land rls-project-activity`).** Wired `app/api/projects/[id]/ai-material/route.ts` — the project-scoped AI-material build that inserts a deliverable but never logged. NOT `/email-lab/ai` (anonymous lane, no `project_id`, shared engine also called by ai-material — and its investigation-suggested service-role wire was a cross-user write hole, since service-role bypasses the new policy). `ai-material` already resolves the caller and proves ownership via the cookie-client project SELECT, so it now logs `deliverable_built` via the COOKIE client `db` (NOT the service-role `admin` it uses for the deliverables insert) — exactly the `refresh/route.ts` pattern. `deliverable_built` was a dead enum value with zero callers until now.
+
+`bunx next build` green (compile + TypeScript + full production prerender, with the two Supabase env vars supplied to the fresh worktree via the sanctioned single-var pattern — the worktree's env-exfil hook correctly blocked a full `.env.local` copy).
 
 ## 2026-07-21 (Sonnet 5 · main) — llms.txt existed already; fixed its own spec violation and a robots.txt gap that blocked the answer-engine bots it was built for.
 

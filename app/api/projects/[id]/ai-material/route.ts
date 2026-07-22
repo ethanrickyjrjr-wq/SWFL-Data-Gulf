@@ -6,6 +6,7 @@ import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { seedById } from "@/lib/email/doc/default-docs";
 import { inferScopeFromItems } from "@/lib/project/derive-name";
 import type { ProjectItem } from "@/lib/project/items";
+import { logActivity } from "@/lib/project/activity";
 import { pickSeedId } from "./pick-seed";
 
 export const runtime = "nodejs";
@@ -78,6 +79,18 @@ export async function POST(
     status: "ready",
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Activity root: an AI-authored material is a deliverable_built event. Logged via the
+  // COOKIE client (db) — ownership was already proven by the RLS project SELECT above, and
+  // project_activity's owner INSERT policy scopes the row to this user. logActivity is
+  // fire-and-forget: it never throws, never fails the build.
+  await logActivity(db, {
+    projectId: id,
+    type: "deliverable_built",
+    actor: "user",
+    summary: `Built "${seed.name}" with AI`,
+    detail: { deliverable_id: newId, template: seed.id, ...(intent ? { intent } : {}) },
+  });
 
   return NextResponse.json(
     { id: newId, template: { id: seed.id, name: seed.name } },
