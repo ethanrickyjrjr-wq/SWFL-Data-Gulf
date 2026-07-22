@@ -1,3 +1,34 @@
+## 2026-07-22 (Opus 4.8 · main) — Asked whether we use k-means; answer was no, and the design that followed got audited down to its one uncontested piece.
+
+Probe: ZERO k-means anywhere — no impl, no sklearn/scipy. Two doc mentions, both rejections.
+CORRECTION mid-session: I claimed "no numpy" too. Wrong — pandas declares NumPy >=1.26.0 as a
+hard dependency (vendor install page), so numpy is on every runner that installs
+ingest/requirements.txt. "No way to run one" was never true; the blocker was never capability.
+
+crawl4ai (RULE 0.4): found regionalization — spatially CONSTRAINED clustering, a family we had
+no note on (spopt: MaxPHeuristic/Skater/WardSpatial/AZP). Max-P's contract is a literal match for
+thin cells: contiguous regions each satisfying a minimum threshold. REJECTED it anyway — read the
+source, it drives the GLOBAL numpy RNG with no random_state, so two runs on identical data can
+differ. Fails the churn guard at the source.
+
+Specced a deterministic greedy threshold-merge instead (docs/superpowers/specs/2026-07-22-stats-regions-design.md),
+then ran the second-order agent against it BEFORE any code. It found two blocking defects in my
+own design: (1) I cited CORRELATION_MIN_ZIPS=10 as precedent for a bare count gate — that module's
+header is the POSTMORTEM of that exact gate failing ("the entire 0.2-0.6 band was noise, painted as
+signal, on a live page"), and the units don't transfer; (2) inversion — pooling thin sales into an
+area stamped "clears the floor" manufactures confidence rather than protecting against its absence.
+Plus: "region" already means SWFL-wide (coarser than county) in the grain ladder; the spec wired
+ZERO consumers so it would have landed inert.
+
+Scope narrowed by operator to the uncontested adjacency asset. Probing the vendor killed the worst
+part of my own plan: the 504MB TIGER shapefile is UNNECESSARY — Census TIGERweb serves the same
+ZCTA geometry as GeoJSON over ArcGIS REST (layer 2), the request shape we already use for FDOR
+parcels. 3 ZIPs = 37,116 bytes. Probe also caught mixed geometry: 34102 returns MultiPolygon while
+33901/33904 return Polygon — a single-ring reader would silently under-report Naples' adjacency.
+
+Next: build fetch-zip-polygons + build-zip-adjacency with TDD. Merge engine and the floor guarantee
+stay DEFERRED behind the two blocking findings. Check stats_regions_live_verify is open — and it
+was opened WITHOUT a signal, so it is a manual close, not a tripwire.
 ## 2026-07-22 (Opus 4.8 · main) — PCA/Random Forest answered, then RE-answered after the operator caught me scoping it to one table. Spec A written, nothing built.
 
 Operator: *"how do we include Dimensionality reduction? Principal Component Analysis. And what parts
