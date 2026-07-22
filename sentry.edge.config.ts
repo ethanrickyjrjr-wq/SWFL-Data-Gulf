@@ -10,5 +10,7 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
   dataCollection: SENTRY_DATA_COLLECTION,
+  // Console breadcrumbs — see sentry.server.config.ts for why this is filtered.
+  integrations: (defaults) => defaults.filter((i) => i.name !== "Console"),
   tracesSampleRate: resolveTracesSampleRate(process.env.SENTRY_TRACES_SAMPLE_RATE),
 });

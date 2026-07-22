@@ -15,6 +15,9 @@ Sentry.init({
   environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV,
   // Do NOT ship user data / bodies / cookies / GenAI content to a third party.
   dataCollection: SENTRY_DATA_COLLECTION,
+  // Console breadcrumbs — separate control from dataCollection (post-build review
+  // finding, verified live via crawl4ai against Sentry's own docs).
+  integrations: [Sentry.breadcrumbsIntegration({ console: false })],
   // Errors are captured at 100% (Sentry `sampleRate` default 1.0); this only
   // sizes the secondary tracing feature. Build-time inlined — changing it needs
   // a rebuild. See lib/observability/sentry-sampling.ts for the budget rationale.

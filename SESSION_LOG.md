@@ -1,3 +1,38 @@
+## 2026-07-21 (Opus 4.8 · wt/sentry-error-tracking) — Post-build review fixes: two real scrub gaps closed, two more error boundaries wired, one operator action item.
+
+Three review agents (code, security, second-order) audited the Sentry build below. PII scrub core
+(identity/cookies/headers/bodies/query params/Anthropic GenAI content) confirmed airtight against
+the live SDK's own type declarations — refuting the initial concern. Two real gaps found and fixed
+here, both categories `dataCollection` structurally cannot reach:
+
+1. **`databaseQueryData: false` was a fabricated Sentry option** — not a real key in this SDK
+   version (silently did nothing; harmless today since no DB-capturing integration is registered,
+   but the "every category disabled" claim overclaimed). Removed. Added the two real keys the
+   privacy module was missing: `graphQL: { document: false, variables: false }` and
+   `frameContextLines: 0`. `lib/observability/sentry-privacy.ts`.
+2. **Console breadcrumbs were never disabled** — confirmed live: `app/api/weekly-read/subscribe` and
+   `app/api/insiders/subscribe` both `console.error` the raw Postgres error object (not just
+   `.message`) on a subscriber-email upsert path; an unfiltered console integration would ride that
+   along as a breadcrumb on any later Sentry event in the same request. Re-verified live via crawl4ai
+   against Sentry's actual docs before fixing (RULE 0.4) — `breadcrumbsIntegration({ console: false })`
+   is BROWSER-ONLY (confirmed: "this integration only works inside a browser environment"); Node/edge's
+   default `Console` integration has no disable option, so it's filtered out of `defaultIntegrations`
+   instead (`integrations: (defaults) => defaults.filter((i) => i.name !== "Console")`, the documented
+   callback form). Browser keeps `breadcrumbsIntegration({ console: false })`. All three configs.
+3. **Two more error boundaries wired** — `app/p/[id]/error.tsx` and `app/project/[id]/error.tsx` had
+   the identical "boundary swallows the exception" problem `app/error.tsx` was fixed for, but were
+   left out of the original pass. Same `useEffect(() => Sentry.captureException(error), [error])`
+   pattern added to both.
+
+**Operator action item, not a code fix — flagging so it isn't lost:** second-order review found
+preview and production deploys share ONE Sentry DSN, so they share the same 5,000-error/mo quota,
+while every sampling control in this build defends the loose 5,000,000-span budget instead. A noisy
+preview deploy could silently exhaust the budget meant to catch real production errors. Recommended:
+scope `NEXT_PUBLIC_SENTRY_DSN` to Production-only in Vercel's environment variable settings (leave
+Preview unset) when provisioning the DSN — this is a dashboard setting, not something fixable in code.
+
+`bunx tsc --noEmit` clean after all fixes. Still local, still not pushed.
+
 ## 2026-07-21 (Opus 4.8 · wt/sentry-error-tracking) — Layer 12: Sentry wired across all three Next runtimes, PII scrubbed, traces env-sized. Local commit, NOT pushed.
 
 Dispatched work package **D** of the six-package infrastructure order (`docs/handoff/2026-07-21-infrastructure-work-packages.md`). Closes the blind spot behind `selfheal_error_spike_parked`: an application 500 was invisible unless a human opened the Vercel log viewer and scrolled to it.
