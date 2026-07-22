@@ -1,3 +1,16 @@
+## 2026-07-22 (Sonnet 5 · main) — /demo caveats were unreadable — real data broke a layout the old fixtures never exercised.
+
+Operator screenshotted `/demo` post-fix: the 8 real caveats from master's live output (flood
+barrier, SBA FOIA gap, broker-survey coverage, FRED revision lag, Census CBP lag, BLS LAUS
+preliminary, thin-sample sectors, worst-sector charge-off) were rendering as 8 illegible slivers
+side by side. Cause: `app/demo/page.tsx` laid caveats out in a non-wrapping `flex gap-6` row —
+fine for the old fixture's 1-2 short caveats, broken once real `master.display.summaryCaveats`
+supplied 8 full sentences. Fixed to `flex flex-col gap-2` (vertical stack, `leading-relaxed`).
+Verified against the rebuilt HTML: each caveat is its own full-width `<p>` now. Also found
+`node_modules` was missing `@sentry/nextjs` even though `package.json`/`bun.lock` already had it
+(stale local install from the Sentry work landing on main) — `bun install` resolved it, lockfile
+unchanged.
+
 ## 2026-07-22 (Opus 4.8 · main) — Asked whether we use k-means; answer was no, and the design that followed got audited down to its one uncontested piece.
 
 Probe: ZERO k-means anywhere — no impl, no sklearn/scipy. Two doc mentions, both rejections.

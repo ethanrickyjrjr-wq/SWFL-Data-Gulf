@@ -55,9 +55,9 @@ export default async function DemoPage() {
             Current conclusion
           </p>
           <p className="text-xl leading-relaxed text-[#F0EDE6]">{brainSummary.conclusion}</p>
-          <div className="mt-4 flex gap-6">
+          <div className="mt-4 flex flex-col gap-2">
             {brainSummary.caveats.map((c, i) => (
-              <p key={i} className="text-xs text-[#807E76]">
+              <p key={i} className="text-xs leading-relaxed text-[#807E76]">
                 ⚠ {c}
               </p>
             ))}
