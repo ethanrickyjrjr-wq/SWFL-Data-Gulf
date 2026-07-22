@@ -1,3 +1,42 @@
+## 2026-07-22 (Opus 4.8 · main) — Tuned the four-lane gate: it was blind to the searches it demands and loud on prose it shouldn't read.
+
+**Operator, verbatim:** *"tune it!!!!!!!!!!!!!"* — after the gate blocked a turn in which the work
+had actually been done.
+
+**Measured first, against the live transcripts:** 44 rendered blocks across 9 sessions since the gate
+went live at 16:08, **24 of them reporting all four lanes missing**. That distribution is the
+signature of a reset counting window, not of an agent skipping four searches.
+
+**Three defects fixed, each now covered by a test named for it (22 pass / 0 fail):**
+
+1. **Harness injections reset the tool-call window.** The window counts from the last user-role
+   message — but skill loads, background task-notifications and auto-compact resumes all arrive as
+   user-role TEXT. Each one zeroed a turn whose lanes HAD been searched. RULE 3.5 makes those skill
+   loads mandatory, so the gate fired hardest on the workflow the repo requires. New `isInjected()`
+   skips them, same concept as the existing `tool_result` skip. Its own block message is on the list
+   too, so it cannot re-trigger itself.
+2. **It could not see the searches it demands.** `graphify`, Serena, and a tree-wide `grep` through
+   Bash all classified as `null`. RULE 0.5 tells us to prefer graphify; following that rule earned
+   nothing and forced a decoy `Grep`. All now earn the code lane; `psql` earns live.
+3. **A one-file Grep satisfied the code lane — the exact shape of failure #4.** `grep steadyGet
+   lib/listings/steadyapi.ts`, one file, called "everything we call" (real answer 7 of 18). The gate
+   would have waved it through on the very lane it exists to enforce. A single named file with an
+   extension and no glob now earns nothing.
+
+**Also trimmed** the generic SUBJECT nouns measured firing on ~30% of real operator prose
+(`value|number|count|index|info|information|feed|hold|holds|wire|wired`). Restored `pipe` — the
+existing suite caught that my trim was over-broad ("WHY IS THE PIPE BLOCKKED"), which is the test
+suite doing its job against me.
+
+**Verified by running, 20/20:** all 9 real operator data messages from SCRATCHPAD fire; 7 non-data
+messages stay quiet (including *"take over for this idiot"*, *"just fix it"*, *"tune it"*); all 4
+injection classes stay quiet.
+
+**Still open, needs an operator call:** `Stop` placement cannot prevent a first wrong word, only
+append a correction; `stop_hook_active` makes it a one-shot nudge; and `scripts/tripwire-scan.mjs`
+(lines 257-259) guards three hooks by name and still does not include this one — so the
+never-registered failure has no detector.
+
 ## 2026-07-22 (Opus 4.8 · main) — Full-week failure audit. The four-lane gate was deaf to the exact message that caused failure #1.
 
 **Audit:** `_ASSISTANT/2026-07-22-claude-failure-audit-OPUS.md`. Commissioned by the handoff written

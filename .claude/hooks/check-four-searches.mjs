@@ -74,7 +74,14 @@ export function isDataTurn(text) {
   // concrete artifact nouns the operator actually types (geometry, pipe, vintage,
   // file, layer, fixture…); the old list held only abstractions like "data".
   const SUBJECT =
-    /\b(data|dataset|field|fields|column|columns|table|tables|root|roots|endpoint|endpoints|api|source|sources|ingest|pipe|pipeline|schema|grain|quota|comps?|sold|sale|dates?|records?|rows?|coverage|hold|holds|grab|grabbing|pull|pulling|store|stored|storing|geometry|polygon|vintage|files?|layers?|fixture|catalog|crosswalk|index|feed|information|info|number|value|median|price|count|beds?|baths?|bedrooms?|bathrooms?|sqft|acreage|wire|wired|wiring|calls?|calling)\b/i;
+    // TRIMMED 07/22/2026. The generic nouns below were measured firing on ~30% of real
+    // operator prose — "value", "number", "count", "index", "info", "information",
+    // "feed", "hold(s)", "wire", "wired" appear constantly in ordinary sentences and
+    // carry no data specificity on their own. Dropped. The concrete artifact nouns and
+    // the property fields stay: those are what the five 07/22 failures were actually
+    // about. A gate that cries wolf on a third of messages is a gate that gets ignored
+    // on the one message that matters (RULE 11 — a per-turn habit tax is not free).
+    /\b(data|dataset|field|fields|column|columns|table|tables|root|roots|endpoint|endpoints|api|source|sources|ingest|pipe|pipeline|schema|grain|quota|comps?|sold|sale|dates?|records?|rows?|coverage|grab|grabbing|pull|pulling|store|stored|storing|geometry|polygon|vintage|layers?|fixture|catalog|crosswalk|median|beds?|baths?|bedrooms?|bathrooms?|sqft|acreage|wiring|calls?|calling)\b/i;
   // ASKING stays permissive ONLY because SUBJECT is the real gate: a turn carrying no
   // data noun never fires regardless of phrasing. Verified 07/22/2026 by running the
   // binary against 9 real operator messages from SCRATCHPAD — "make the button blue"
@@ -114,8 +121,39 @@ export function laneFor(name, input) {
   )
     return "research";
 
-  // CODE — a SEARCH across the tree. A single Read is not a search; that is failure #4.
-  if (/^(Grep|Glob)$/.test(n)) return "code";
+  // LIVE — a real DB shell counts too.
+  if (/^(Bash|PowerShell)$/.test(n) && /\b(psql|execute_sql|supabase\s+db)\b/.test(cmd))
+    return "live";
+
+  // CODE — a SEARCH across the tree.
+  // TUNED 07/22/2026. Two measured defects, both fixed here:
+  //
+  //  (a) UNDER-CREDIT. The repo's OWN preferred probes earned nothing: RULE 0.5 says
+  //      prefer graphify when the graph exists, a PreToolUse hook nags Serena on every
+  //      edit, and a tree-wide `grep`/`rg` through Bash is the most common search there
+  //      is. All returned null. Measured live: this gate blocked a turn in which the
+  //      binary had been run, every tool classified against it, and 44 real blocks
+  //      counted across 9 transcripts — because all of that went through Bash. A gate
+  //      that cannot see the search it demands trains people to run a decoy Grep.
+  //
+  //  (b) OVER-CREDIT. A Grep scoped to ONE file returned "code". Failure #4 in the
+  //      header above IS that exact shape — `grep steadyGet lib/listings/steadyapi.ts`,
+  //      one file, called "everything we call". The gate would have waved it through on
+  //      the very lane it exists to enforce. A single-file pattern now earns nothing.
+  const searchesTheTree =
+    /^(Grep|Glob)$/.test(n) ||
+    /^mcp__serena__(search_for_pattern|find_symbol|find_referencing_symbols|get_symbols_overview)$/.test(
+      n,
+    ) ||
+    (/^(Bash|PowerShell)$/.test(n) && /\b(grep|rg|ripgrep|graphify|Select-String)\b/.test(cmd));
+  if (searchesTheTree) {
+    // One named file with an extension and no glob is a READ wearing a search's clothes.
+    const scopedToOneFile =
+      /^(Grep|Glob)$/.test(n) &&
+      /\.[a-z0-9]{1,5}$/i.test(String(i.path || "")) &&
+      !/[*?]/.test(String(i.path || ""));
+    if (!scopedToOneFile) return "code";
+  }
 
   return null;
 }
@@ -134,6 +172,28 @@ export function lanesCovered(calls) {
 export function missingLanes(calls) {
   const seen = lanesCovered(calls);
   return Object.keys(LANES).filter((k) => !seen.has(k));
+}
+
+/** Text of a message content field, string or block array. Pure. */
+export function textOf(content) {
+  if (typeof content === "string") return content;
+  return (content || [])
+    .filter((b) => b?.type === "text")
+    .map((b) => b.text)
+    .join("\n");
+}
+
+/**
+ * User-role text that is NOT the operator speaking. The harness injects several
+ * classes of message with role=user; none of them is a question from Ricky, and
+ * treating them as one both false-fires the gate and resets the tool-call window.
+ * Anchored to the START of the message so a genuine question that merely mentions
+ * one of these words is unaffected.
+ */
+export function isInjected(text) {
+  return /^\s*(<task-notification|\[SYSTEM NOTIFICATION|Base directory for this skill:|<command-name>|<local-command|<system-reminder|Caveat: The messages below were generated by the user|This session is being continued from a previous conversation|Stop hook feedback:|⛔ FOUR-LANE READ GATE)/i.test(
+    String(text || ""),
+  );
 }
 
 /** Last user text + tool calls made since it. Pure over transcript lines. */
@@ -157,10 +217,20 @@ export function readTurn(lines) {
     const hasText =
       typeof content === "string" ||
       (Array.isArray(content) && content.some((b) => b?.type === "text"));
-    if (hasText) {
-      lastUserIdx = i;
-      break;
-    }
+    if (!hasText) continue;
+    // NEITHER IS A HARNESS INJECTION — and this is the load-bearing one.
+    // The tool-call window is counted from the last user-role message. Skill loads,
+    // background task-notifications and auto-compact resumes all arrive as user-role
+    // TEXT, so each one silently RESET that window to zero mid-turn: a turn in which
+    // all four lanes were genuinely searched, followed by a mandated
+    // `superpowers:brainstorming` load, scored 0 of 4. RULE 3.5 makes those loads
+    // mandatory, so the gate fired hardest on the workflow the repo requires.
+    // Measured 07/22/2026 across the live transcripts: of 44 rendered blocks in 9
+    // sessions, 24 reported all four lanes missing — the signature of a reset window,
+    // not of an agent that skipped four searches.
+    if (textOf(content) && isInjected(textOf(content))) continue;
+    lastUserIdx = i;
+    break;
   }
   if (lastUserIdx < 0) return { text: "", calls: [] };
 

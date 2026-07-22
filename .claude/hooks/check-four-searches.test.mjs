@@ -3,7 +3,7 @@
 // Every test is named for the REAL 07/22/2026 failure it would have caught.
 
 import { describe, expect, test } from "bun:test";
-import { isDataTurn, laneFor, missingLanes, readTurn } from "./check-four-searches.mjs";
+import { isDataTurn, isInjected, laneFor, missingLanes, readTurn } from "./check-four-searches.mjs";
 
 const u = (text) => JSON.stringify({ type: "user", message: { content: text } });
 const a = (calls) =>
@@ -156,5 +156,67 @@ describe("transcript reading", () => {
   test("malformed lines are skipped, never thrown on", () => {
     const { text } = readTurn(["not json", "", u("which table holds sold price?")]);
     expect(text).toContain("which table");
+  });
+});
+
+// ── TUNING PASS 07/22/2026 ───────────────────────────────────────────────────
+// Each test below is named for a defect MEASURED against the live transcripts
+// after the gate went live: 44 rendered blocks across 9 sessions, 24 of them
+// reporting all four lanes missing.
+describe("tuning — measured against live transcripts", () => {
+  test("FM: a harness injection resets the tool-call window to zero mid-turn", () => {
+    // The window is counted from the last user-role message. Skill loads, background
+    // task-notifications and compact resumes all arrive as user-role TEXT, so each one
+    // zeroed a turn in which the lanes HAD been searched. RULE 3.5 makes those skill
+    // loads mandatory — the gate fired hardest on the workflow the repo requires.
+    const lines = [
+      u("which table holds sold price?"),
+      JSON.stringify({
+        type: "assistant",
+        message: { content: [{ type: "tool_use", name: "Grep", input: { pattern: "sold" } }] },
+      }),
+      u("Base directory for this skill: C:/skills/brainstorming"),
+    ];
+    const { text, calls } = readTurn(lines);
+    expect(text).toContain("which table"); // the OPERATOR's message, not the injection
+    expect(calls).toHaveLength(1); // the Grep is still counted
+  });
+
+  test("FM: the gate's own block message must not re-trigger the gate", () => {
+    expect(isInjected("Stop hook feedback: [check-four-searches.mjs] 4 of 4 lanes")).toBe(true);
+    expect(isInjected("<task-notification><result>3 rows</result></task-notification>")).toBe(true);
+    expect(isInjected("[SYSTEM NOTIFICATION - NOT USER INPUT]")).toBe(true);
+    // A real question that merely mentions one of those words is NOT an injection.
+    expect(isInjected("did the task notification say which table?")).toBe(false);
+  });
+
+  test("FM4: a Grep scoped to ONE file must NOT satisfy the code lane", () => {
+    // Failure #4 verbatim: grepped `steadyGet` in one .ts file and called the result
+    // "everything we call". Real answer was 7 of 18. The gate used to pass that.
+    expect(laneFor("Grep", { pattern: "steadyGet", path: "lib/listings/steadyapi.ts" })).toBe(null);
+    expect(laneFor("Grep", { pattern: "steadyGet", path: "lib" })).toBe("code");
+    expect(laneFor("Grep", { pattern: "steadyGet" })).toBe("code");
+  });
+
+  test("FM: the repo's OWN preferred probes must earn the code lane", () => {
+    // RULE 0.5 says prefer graphify; a PreToolUse hook nags Serena on every edit; a
+    // tree-wide grep through Bash is the commonest search there is. All returned null,
+    // so a turn that genuinely searched scored 0 of 4 and got blocked.
+    expect(laneFor("Bash", { command: "grep -rn steadyGet ." })).toBe("code");
+    expect(laneFor("Bash", { command: 'graphify query "sale dates"' })).toBe("code");
+    expect(laneFor("mcp__serena__search_for_pattern", {})).toBe("code");
+    expect(laneFor("Bash", { command: 'psql -c "select 1"' })).toBe("live");
+  });
+
+  test("RULE 11: generic nouns must not fire on ordinary operator prose", () => {
+    // Measured ~30% fire rate on real prose before this trim. A gate that cries wolf on
+    // a third of messages is ignored on the one that matters.
+    expect(isDataTurn("take over for this idiot")).toBe(false);
+    expect(isDataTurn("I need this all fixed. No questions. Just fix it.")).toBe(false);
+    expect(isDataTurn("tune it!!!!!!!!!!!!!")).toBe(false);
+    expect(isDataTurn("land it and make sure we don't fuck up egress again")).toBe(false);
+    // …while the five real 07/22 failures still fire.
+    expect(isDataTurn("ok, just make sure we have beds and baths")).toBe(true);
+    expect(isDataTurn("check this / where are we wiring to??")).toBe(true);
   });
 });
