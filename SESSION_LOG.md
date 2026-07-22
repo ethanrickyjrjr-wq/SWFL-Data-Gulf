@@ -1,3 +1,22 @@
+## 2026-07-22 (Sonnet 5 · main) — /demo wired to live data (was frozen 05/22/2026 fixtures); retroactive log for 14103c27.
+
+Operator: "fix the demos page if no one has by now... why are dates so old??" — it read four
+static `fixtures/*.json` snapshots with no regen cadence, so the freshness date never moved.
+Wired `app/demo/page.tsx` to live sources via new `lib/demo/live-loaders.ts`: master brain
+conclusion/caveats/confidence/freshness via `fetchBrain`, on-theme key metrics from
+cre-swfl/home-values-swfl/env-swfl, corridor rents from live `corridor_profiles` (same predicate
+as `cre-source.mts`), ZHVI trend from `data_lake.zhvi_pivoted` (same mapper `/charts` uses), flood
+count scoped to the real 3-FIPS SWFL filter (not the 6-county convenience view — Charlotte/Glades/
+Sarasota aren't real coverage). Caught a live compliance bug along the way: `home-values-swfl`'s own
+metric label said "median ZHVI" (ZHVI is an index, never a median per data-roots.md) — added a
+`safeMetrics` filter that strips that combination from any brain's metrics before display, with 4
+tests. 8/8 new tests pass, `bunx next build` clean, verified against the actual prerendered HTML
+(37 sources, 27 corridors, 57 ZIPs, 63,348 flood records, 07/20/2026 freshness — no stale/fabricated
+values). Commit `14103c27` landed without this log entry (auto-committed across a compaction
+boundary, before I could append it per RULE 0) — this entry corrects that gap after the fact.
+Opened 4 checks for unrelated email-surface bugs (items 21-25, scratchpad) once the Supabase/PostgREST
+outage blocking them cleared.
+
 ## 2026-07-21 (Opus 4.8 · wt/sentry-error-tracking) — Verified the console-filter fix actually works, not just "worst case it's a no-op."
 
 Advisor flagged that `defaults.filter((i) => i.name !== "Console")` was shipping on inference —
