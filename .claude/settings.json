@@ -41,6 +41,10 @@
           },
           {
             "type": "command",
+            "command": "node .claude/hooks/print-scratchpad.mjs"
+          },
+          {
+            "type": "command",
             "command": "node .claude/hooks/print-kickoff.mjs"
           },
           {
@@ -78,6 +82,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/check-session-log-on-push.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-scratchpad-on-push.mjs"
           },
           {
             "type": "command",

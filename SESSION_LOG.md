@@ -1,3 +1,45 @@
+## 2026-07-22 (Opus 4.8 · main) — The scratchpad had a RULE and no MECHANISM. Wired both halves, the way SESSION_LOG already was.
+
+**Operator, verbatim:** *"are we readng session logs and writing them or just reading scratchpads???????????????"*
+
+**Answered from config + git, not memory.** SESSION_LOG is fully mechanized in BOTH directions:
+`print-session-log.mjs` is the first SessionStart hook, and `check-session-log-on-push.mjs` blocks a
+push whose commits didn't touch it — 12 of today's commits did. The scratchpad had NEITHER. The five
+registered SessionStart printers were session-log, kickoff, desk-status, closeable-checks, tripwire;
+`grep -rl SCRATCHPAD .claude/hooks/` returned exactly one file, and it's a Stop-gate, not a reader.
+RULE 2.0 says "read at session start" — a rule with nothing enforcing it.
+
+**Proof it had already failed:** 68 lines sat UNCOMMITTED in `_ASSISTANT/SCRATCHPAD.md` at session
+start, written by the prior session, never pushed. The next session would have read the committed
+file, seen nothing, and Ricky would have typed it a second time — the exact thing the file exists to
+prevent. Those lines are committed here.
+
+**Built (TDD, 13 pass / 0 fail, each test named for the failure mode it stops):**
+- `lib/scratchpad-parse.mjs` — pure parse, so it's provable by fixture rather than by running a hook.
+- `print-scratchpad.mjs` — SessionStart READ half. Titles-only digest, hard cap 24, fails soft on a
+  missing/malformed file (a printer that throws breaks every session opening).
+- `check-scratchpad-on-push.mjs` — push WRITE half. Blocks while the file is dirty. Carries the
+  07/19 scope-guard idiom so it exits 0 on foreign-repo pushes, plus `ALLOW_DIRTY_SCRATCHPAD=1`.
+  Deliberately its own hook, not a Gate inside `check-prepush-gate.mjs` — that file currently holds
+  another session's unpushed Gate 3, and committing it would have dragged that work along.
+- Both registered in `.claude/settings.json`; `hook-registration.test.mjs` passes 5/5.
+
+**Two real defects caught by running it against the live file instead of trusting the fixtures:**
+1. A loose closure match hid three OPEN items — worst was `0a. THE EGRESS BURNER`, buried by a line
+   reading **"NOT YET CLOSED — do not call this fixed."** Over-filtering here silently buries an
+   operator gripe, so closure is now a position-anchored, case-sensitive STATUS STAMP. Open count
+   went 40 → 43.
+2. The guard fires on any Bash command whose text contains `git push` — including an echoed test
+   payload. Inherited from `check-session-log-on-push.mjs`'s identical matcher, not new, and it errs
+   toward over-triggering. Noted, not changed.
+
+**Found and NOT fixed — check opened, per RULE 2.4:** `four_searches_test_bun_import_breaks_ci`.
+`check-four-searches.test.mjs` (landed in fe44b3ea, last commit on main) imports `bun:test` while
+`ci.yml:56` runs `node --test` over that glob → `ERR_UNSUPPORTED_ESM_URL_SCHEME`. **main's CI is red
+right now, independent of this diff.** Not a one-word fix — it uses bun's `expect()`.
+
+**Next:** operator decision on pushing this; the CI red above wants its own pass.
+
 ## 2026-07-22 (Opus 4.8 · main) — Tuned the four-lane gate: it was blind to the searches it demands and loud on prose it shouldn't read.
 
 **Operator, verbatim:** *"tune it!!!!!!!!!!!!!"* — after the gate blocked a turn in which the work

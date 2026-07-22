@@ -1,3 +1,25 @@
+## 2026-07-22 — Operator: "are we reading session logs and writing them or just reading scratchpads???"
+
+**Answer, from config + git, not memory:**
+- **SESSION_LOG = both, and both are mechanized.** `print-session-log.mjs` is the FIRST
+  SessionStart hook (prints last 8 entries every session); `check-session-log-on-push.mjs`
+  blocks any push whose commits didn't touch it. 12 of today's commits touched it.
+- **SCRATCHPAD = write-only by mechanism.** Nothing prints it. `.claude/settings.json`
+  SessionStart runs 5 printers — session-log, kickoff, desk-status, closeable-checks,
+  tripwire — and NOT the scratchpad. RULE 2.0 says "read at session start"; no hook enforces
+  it. The only hook that even references SCRATCHPAD is `check-four-searches.mjs`.
+- **Live proof of the gap:** 68 lines sat UNCOMMITTED in this file at session start —
+  written by the prior session, never pushed, so the next session couldn't inherit them
+  even if it had looked.
+
+**The asymmetry:** the log has a mechanism, the scratchpad has a rule. Rules get forgotten
+across a compaction; hooks don't. The scratchpad is the one whose whole purpose is "Ricky
+never types it twice" — and it's the one without enforcement.
+
+**Fix (not yet built, pending operator go):** add `print-scratchpad.mjs` to SessionStart
+(unresolved items only, same shape as print-session-log), and extend the pre-push gate to
+refuse a push that leaves SCRATCHPAD.md dirty in the working tree.
+
 ## 2026-07-22 — "we have zero flood data" was FALSE. I never opened the catalog.
 
 **What I said:** `/map` can't be repointed because flood has no live source — "MetricKey is
@@ -108,6 +130,74 @@ So "no data found anywhere" is mostly **agents reporting absence that isn't real
 
 Also T1: aggregate DOM is censored today — ~63% of the active book is a `first_seen` floor. A
 "typical DOM" off the aggregate is confidently wrong right now.
+
+### 0al. OPERATOR (07/22, same session): "what is going to fuck up egress? do the rebuilds build
+correctly? no errors and egress problems since rebuilds were shut down, i guess. make sure we are
+wired correctly EVERYWHERE before the rebuild."
+
+**HIS HYPOTHESIS IS FALSIFIED BY THE TIMELINE — the rebuild is NOT the egress burner.** (A, two
+tool outputs): last Daily Brain Rebuild run was **07/20T01:30** (`gh run list`, success). The egress
+overage → spend cap → PostgREST outage is dated **07/21** (`HANDOFF-EGRESS-20260721.md` + line 1506).
+**The worst egress event happened AFTER rebuilds were already dark.** Turning them back on does not
+re-create it. Do not let this correlation get re-argued next session.
+
+**Burner is fully caged — the two stale checkouts from item 27 are GONE** (A): `bp-email-lab-upload-
+error-toast` and `bp-ci-quiet` no longer contain `tools/lake-mcp-server.mts` at all. The two
+surviving copies (`brain-platform`, `SWFL-Data-Gulf`) both have `guard=1`, neither `.mcp.json` has a
+`"lake"` entry, zero live `lake-mcp` processes. Item 27's owed operator action is DONE.
+
+**What actually threatens egress, ranked** (A for counts, B for the ranking):
+1. `tools/lake-mcp-server.mts` — the agent-side DuckDB/S3 lake MCP. Scratchpad records ~300 GB/day
+   full burn. Orders of magnitude above everything else. Now guarded; the guard is the whole defense.
+2. Per-render raw-table reads on the showpiece pages — `lib/desk/loaders.ts` **12 raw `.from()`,
+   0 brain reads**; `lib/charts/` **31 raw `.from()`, 0 brain reads**; `app/charts/` 0 brain reads.
+   **MITIGATION FOUND, state it honestly:** both `app/charts/page.tsx:42` and `app/desk/page.tsx:42`
+   carry `export const revalidate = 300`. That caps the cost at once per 5 min per page, NOT per
+   visitor — so this is bounded, not the runaway the raw count implies. The handoff's structural
+   finding still stands (pages re-derive instead of reading brains) but it is an architecture debt,
+   not today's burner.
+3. The rebuild itself — reads go through `selectAllPaged` with a `maxRows` cap and page loop
+   (`refinery/lib/paginate.mts:54-72`), which aborts rather than looping unbounded. Bounded by design.
+
+**Do rebuilds build correctly?** (A): last two runs 07/20T01:26 and 01:30 both `success`. Of the
+last 12, 3 failed — all on 07/19 (02:11, 02:27, 02:33), all `workflow_dispatch`. So: yes recently,
+with a rough patch on 07/19 whose cause I did NOT diagnose.
+
+**NOT AUDITED — do not read this as "everywhere is clear."** I checked the burner guard, desk/charts
+wiring, rebuild read caps, and rebuild run history. I did NOT audit every pipeline or every consumer.
+
+### 0am. EGRESS, run to ground 07/22 — ATTRIBUTION measured CLEAN; BYTES blocked on ONE missing token.
+
+Operator said "egress" — go get a real number. Result, split the way `scripts/supabase-egress-read.mjs`
+says to split it:
+
+**ATTRIBUTION — measured, free, no token, RAN IT** (A): `get_logs` service `storage`, last 24h.
+Contents: infra health checks, ONE `POST /object/raw-tabular-cold/leepa/comparable_sales/2026-07-22.csv.gz`
+(python-requests — today's legit ingest), and ONE `zhvi_swfl.parquet` PUT + HEAD + range-GET 206 from
+`duckdb/v1.5.5(linux_amd64) python/3.13` out of SJC (the GHA ingest path). **The 07/21 burn signature
+is ABSENT** — that was `leepa/last_sale/2026-05-30.csv.gz` fetched FIVE times in twelve seconds by
+`duckdb windows_amd64/node-neo-api` (local Windows, i.e. an agent session). Nothing repeats today.
+No runaway reader is live. This is the same log that caught the burner, so absence here is meaningful.
+
+**BYTES — still never read, and now I know exactly why** (A, vendor-verified 07/21 against
+`https://api.supabase.com/api/v1-json` in-session, recorded in the script header):
+- The words "egress" and "bandwidth" appear **ZERO times** in Management API v1. **There is no egress
+  endpoint.** Anyone proposing "just call the usage API for egress" is wrong — this is now settled.
+- The usage paths return **counts, not bytes**.
+- The ONLY byte-level path is `GET /v1/projects/{ref}/analytics/endpoints/logs.all` (params `sql`,
+  `iso_timestamp_start/end`), bearer auth, fine-grained scope **`analytics_usage_read`**.
+- **The org invoice total is NOT reachable from the API at all** — dashboard/billing export only, human.
+
+**THE ONE BLOCKER, verified not assumed** (A): `SUPABASE_ACCESS_TOKEN` is absent from the shell env
+AND absent from all **52** GitHub secrets (`gh secret list` — `SUPABASE_PG_*` and `SUPABASE_S3_*`
+exist, the management token does not). That single token is the whole gap between "payload
+arithmetic" and served bytes. Creating it is an operator action (his account, fine-grained scope
+`analytics_usage_read`); once `SUPABASE_ACCESS_TOKEN` is set, `node scripts/supabase-egress-read.mjs`
+runs as-built.
+
+**Standing correction to keep:** "we can't read egress" is HALF TRUE and saying it unqualified sent a
+prior session building around a wall that wasn't there. Attribution = free and available now.
+Bytes = one token. Invoice = dashboard only, never code.
 
 ### 0aj. THREE LIVE CRITICALS were sitting correctly recorded in the ledger since 07/18 and nobody looked.
 
@@ -1774,3 +1864,33 @@ is a policy, passes every "has RLS?" check, and grants the world read. Counting 
 auditing them. The lint cannot tell you this; only reading the predicate can.
 → check opened: `rls_deliverables_public_read` [defect].
 
+
+## 0aj — 07/22/2026 · audit hardening: what landed, what is blocked (Opus, uncommitted)
+
+Operator, 07/22/2026, verbatim: "make it all work!!!!!!!!!!!!!!!" (re: the OPUS failure audit)
+
+LANDED, uncommitted, tests green:
+- `.claude/hooks/hook-registration.test.mjs` — every `check-*.mjs` must be registered in a
+  settings file or declared PARKED with a reason. Proven against the historical defect:
+  fed the 15:10 state it reports `["check-four-searches.mjs"]`. Found a SECOND live
+  instance — `check-build-context.mjs`, tracked, wired to nothing; declared PARKED.
+- Gate 3 now BLOCKS (`check-prepush-gate.mjs` + `lib/secret-wiring.mjs` + its test).
+  Measured before flipping: naive rule = 5 of 112 workflows (false positives — DRY_RUN,
+  fallback halves of `A ?? process.env.B`); narrowed to repo-managed secrets = **0 of 112**.
+  Two of my own regex bugs caught by measuring, not by reading: greedy-class backoff
+  inventing `BRAINS_SUPABASE_UR`, and `- env:` blocks being skipped entirely.
+- `ci.yml` glob widened to `.claude/hooks/lib/*.test.mjs` — it stopped at `.claude/hooks/`,
+  so `ledger-parse.test.mjs` + `pipeline-scope.test.mjs` had NEVER run in CI.
+
+BLOCKED — a live parallel session (43ea856e) holds both `check-four-searches.mjs` and its
+test, claim refreshed mid-work. Did not override. Still standing on that file:
+  1. It is a `Stop` hook — fires at turn END, so it structurally CANNOT satisfy "before
+     Claude says a word". Needs a `UserPromptSubmit` half.
+  2. `stop_hook_active` -> `exit 0` (line ~193) yields permanently after ONE nudge.
+  3. **CI IS RED**: `check-four-searches.test.mjs` imports `bun:test` but ci.yml runs it
+     under `node --test`. Red since the gate landed today. 21/22 hook tests pass; this is
+     the 1. Not caused by my changes — pre-existing.
+
+NOT DONE: Windows/POSIX hook-path class -> `docs/cron-rebuild-failures.md`; signal backfill
+on the 100 verify-class checks; absolute-claim lint. Also found: `.github/scripts/heal-cron-failure.mjs`
+reads `FIRECRAWL_API_KEY` — we do not use Firecrawl (crawl4ai only). Dead or wrong.
