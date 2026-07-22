@@ -38,6 +38,31 @@ generator and test cannot agree on a wrong 58.
 `stats_regions_live_verify` stays OPEN and unclosed — it names the deferred floor guarantee (B1/B2),
 not this asset. It also still has no signal (R6), so it remains a manual close rather than a tripwire.
 
+## 2026-07-22 (Opus 4.8 · main) — Built a root and never catalogued it. Operator caught it; data-roots now carries the comp + sale-date authority.
+
+*"DID YOU UPDATE ALL OF THIS IN ONE PLACE AT DATA-ROOTS?"* — no, I hadn't. Created
+`lee_comp_sales_v`, live-probed the whole sale-date picture, wrote it to SESSION_LOG and module
+headers, skipped the ONE catalog RULE 0.55 exists for. Third instance today (scratchpad 0ac, 0ad,
+now 0ae): 0ad was failing to READ the census, this is failing to WRITE the catalog. Same discipline,
+both ends missed.
+
+Added to `docs/standards/data-roots.md`: a **Comp set** row (`lee_comp_sales_v` 🟡, Lee only, vendor
+feed explicitly NOT a sold-comp root) and a **Sale DATE — grain + recency** row, plus traps T9/T10
+carrying the measured numbers so nobody re-derives them. Live-probed 07/22/2026: 387,609 sales
+all-time, 17,859 trailing 12mo, 8,999 trailing 6mo, 41 ZIPs. Month grain confirmed hard — exactly one
+distinct day-of-month (the 1st) across all 387,609 rows, and the `__v_text` variant is NULL on recent
+rows so there is no hidden precision. Newest month 06/01/2026 = 51 days behind, and thin (745 vs May
+1,931 / April 2,377), so "last 6 months" is really the last ~5 complete months. Day-grain fix
+`lee_deed_official_records` holds ZERO rows — parked, Akamai blocks unattended fetch of the Lee Clerk
+site, a human captures each pull.
+
+CORRECTED my own module headers, same table-vs-source conflation 0ad caught in this morning's commit
+message: they claimed "NEITHER source has beds/baths" and "we do not hold the coordinates." True of
+`lee_parcels`/`leepa_parcels`, FALSE of LeePA — MapServer layer 23 is named "Comparable Sales" and
+carries BedRooms, Bathrooms, YearBuilt, GrossArea, SalePrice and SHAPE across 108,881 rows, joining
+on a FOLIOID we already store. Unpulled, not absent. It would close the bed/bath gap and enable real
+distance — but it is SaleYear+SaleMonth, so it does NOT fix recency. 259 green.
+
 ## 2026-07-22 (Opus 4.8 · main) — CORRECTION to the entry below: the wiring commit shipped a false recency claim. Caught on review, fixed.
 
 `39b84856` was green and still told users something untrue. `rankComps`'s standard-not-met note

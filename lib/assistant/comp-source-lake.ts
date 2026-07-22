@@ -18,9 +18,12 @@
 //   1. `sale_month` is MONTH GRAIN. Every `last_sale_date` is day-of-month 1 (all 31,632
 //      rows in the trailing 12 months). Candidates are tagged `dateGrain: "month"` so the
 //      renderer says "May 2026" and never a fabricated "05/01/2026".
-//   2. NEITHER source has bedroom or bathroom columns. Beds/baths are null by construction;
+//   2. NEITHER TABLE WE PULLED has bedroom or bathroom columns. Beds/baths are null here;
 //      living area is the home test (land has none), per Fannie B4-1.3-08's ban on mixing
 //      vacant-land sales into a home comp set.
+//      NOT a source limit — CORRECTED 07/22/2026. LeePA MapServer layer 23 ("Comparable
+//      Sales") carries BedRooms + Bathrooms + SHAPE over 108,881 rows and joins on a
+//      FOLIOID `leepa_parcels` already has. Unpulled, not absent (data-roots T10).
 //
 // LEE ONLY. Collier's parcel table carries FDOR month-grain sale fields with no
 // exact-date equivalent, so Collier needs its own source before it can be served.

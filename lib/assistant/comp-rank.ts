@@ -16,8 +16,17 @@
 //
 // PHASE 1 = the vendor feed, which carries NO property type, NO lat/lon and NO year
 // built (field audit in the spec). So class match, straight-line miles and age are
-// PHASE 2, when parcel fields exist. Phase 1 must never print a distance or a
-// direction — we do not hold the coordinates, and stating one would be invented.
+// PHASE 2. Phase 1 must never print a distance or a direction — nothing on THIS path
+// holds coordinates, and stating one would be invented.
+//
+// CORRECTED 07/22/2026 — read this before "improving" the line above. An earlier version
+// said the SOURCE has no beds/baths and that we do not hold coordinates. That was true of
+// the two tables we pulled (`lee_parcels`, `leepa_parcels`) and FALSE of LeePA as a
+// source: MapServer layer 23, named "Comparable Sales", carries BedRooms, Bathrooms,
+// YearBuilt, GrossArea, SalePrice and SHAPE across 108,881 rows, joinable on a FOLIOID
+// `leepa_parcels` already has (live-probed, see data-roots T10). Unpulled, not absent —
+// a table's columns are not a source's ceiling. It is still SaleYear+SaleMonth, so it
+// would buy beds/baths and real distance, NOT recency.
 
 /** The home being compared against. */
 export interface CompSubject {

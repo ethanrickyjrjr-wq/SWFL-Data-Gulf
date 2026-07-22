@@ -21,6 +21,166 @@ entry. Don't do it.
 
 ## OPEN — raised 07/22/2026
 
+### 0af. "WHY IS THIS MANUAL!!!!! MAKE SURE WE BRING IT IN DAILY!!!!!" — the deed fetch
+
+**Operator, 07/22/2026, verbatim:** *"WHY IS THIS MANUAL!!!!!!!!!!!"* and
+*"MAE SURE WE BRING IT IN DAILY!!!!!!!!!!!!!!"*
+
+Raised immediately after I told him the six-month comp window is month-grain over seven-week-stale
+data, that deeds fix both the grain and the lag, and that deeds are "blocked on a manual capture
+step, not on anything I can build." He is right that this is the wrong answer to give him.
+
+**What "manual" actually means today** (`ingest/pipelines/lee_deed_official_records/README.md`,
+`cadence_registry.yaml:2149-2190`): the pipeline is SPLIT. The LOAD half is already automated —
+`ingest-lee-deed-official-records.yml` merges committed `raw/<YYYY-MM-DD>.json` into
+`data_lake.lee_deed_official_records` idempotently on `internal_doc_id`, cron currently COMMENTED.
+The FETCH half is manual: `or.leeclerk.org` runs Akamai Bot Manager and rejected four unattended
+approaches on 07/19–07/20/2026 — crawl4ai, a CDP-attached Chromium, plain curl, and curl_cffi with
+full Chrome124 TLS impersonation (the last returned a clean 403, which is what proves it's
+JS-behavioral `_abck` sensor detection, not a TLS/JA3 check). Only a human-initiated extension-driven
+Chrome session has ever gotten through.
+
+**The gap in my answer, and it's the RULE 0.7 gap:** the README itself names an untried escalation —
+"a stealth-patched headless browser (playwright-extra + stealth plugin) was not yet tried" — and I
+reported the blocker as settled anyway. Four failures is not the same as exhausted. Untried lanes as
+of this session: stealth/undetected browser drivers, a real installed-Chrome headful run with a
+persistent profile on Ricky's own machine under Task Scheduler (residential IP, real profile — the
+closest possible thing to the session that DOES work), and whether Lee Clerk or myfloridacounty.com
+sells a bulk/subscription official-records feed that skips the web UI entirely.
+
+**Consequence if it stays manual:** every comp search run today gets a systematically thin newest
+month and nothing flags it. That was the thing I offered to open a check on instead of fixing.
+
+**Status:** OPEN — researching the untried lanes this session, daily automation is the target.
+
+### 0ae. Built a NEW ROOT and never put it in data-roots. Third time today the catalog was skipped.
+
+**Operator, 07/22/2026, verbatim:** *"DID YOU UPDATE ALL OF THIS IN ONE PLACE AT DATA-ROOTS?"*
+
+No. I created `data_lake.lee_comp_sales_v` (the Lee sold-comp candidate universe), live-probed the
+whole sale-date authority picture, wrote it into SESSION_LOG and module headers — and never touched
+`docs/standards/data-roots.md`, the ONE catalog RULE 0.55 exists to keep current. A root that isn't
+in the catalog is a root the next session re-derives or duplicates.
+
+**This is the same failure as 0ad and 0ac, third instance in one day.** 0ad was "the census held the
+answer and I didn't read it." This is the mirror: I *produced* catalog-grade facts and didn't write
+them. Reading and writing are the same discipline and I missed both ends.
+
+**Also corrected here — my own module headers state SOURCE claims that are false.**
+`comp-rank.ts` and `comp-source-lake.ts` say "NEITHER source has bedroom or bathroom columns" and
+"Phase 1 must never print a distance — we do not hold the coordinates." True of `lee_parcels` +
+`leepa_parcels`, FALSE of LeePA as a source: layer 23 "Comparable Sales" carries BedRooms, Bathrooms
+AND SHAPE (108,881 rows, per 0ad's live probe today). Same table-vs-source conflation 0ad caught in
+my commit message. Fixing the headers to say "the tables we pulled," not "the source."
+
+**What layer 23 does NOT fix:** it carries `SaleYear` + `SaleMonth`, so it is month grain too. The
+exact-day sale date exists only in `lee_deed_official_records.record_date`, which is EMPTY and parked
+(Akamai blocks unattended fetch). Pulling layer 23 buys beds/baths/coords/depth — not recency.
+
+**Standing ask this implies:** nothing converts "I built a root" into a data-roots edit, the same way
+0ad found nothing converts a recorded `source_ceiling` into a queue item. Both are write-only
+records. Worth a gate, operator's call.
+
+### 0ad. CORRECTION TO 0ac — the census DID hold beds/baths. I answered without reading it.
+
+**Operator, 07/22/2026, verbatim:** *"WHY DO WE NOT HAVE WHAT THE FUCING PAGES HOLD IS /CENSUS
+OR DATA-ROOTS!!!!!!!!!!!!!!!!!!!!!!!!"*
+
+He is right. `ingest/cadence_registry.yaml:855`, LeePA `source_ceiling`, recorded 07/19/2026 with
+the service URL, says verbatim: *"23 Comparable Sales (adds dorcode, BedRooms, Bathrooms, Pool,
+YearBuilt, GrossArea, NbhdLand) — all still unpulled."*
+
+**Live-probed 07/22/2026** against
+`https://gissvr.leepa.org/gissvr/rest/services/ParcelInfo/MapServer/23`:
+- Layer name is literally **"Comparable Sales"**. Feature Layer, maxRecordCount 1000.
+- Fields: FOLIOID, SHAPE (geometry), SaleYear, SaleMonth, DeedType, dorcode, BuildingCount,
+  **BedRooms**, **Bathrooms**, NbhdLand, Pool, YearBuilt, GrossArea, ImpCode, SalePrice.
+- **108,881 rows · 75,746 with BedRooms > 0 · SaleYear spans 2024–2026.**
+- Join key FOLIOID is ALREADY a column on `data_lake.leepa_parcels`. No new crosswalk needed.
+- SHAPE means coordinates — which also kills `comp-rank.ts`'s "Phase 1 must never print a distance
+  or a direction — we do not hold the coordinates" limitation.
+
+**TWO SEPARATE FAILURES, don't conflate them:**
+
+1. **Systemic:** the ceiling was censused 07/19/2026 and never queued. The `source_scope` block
+   records what's available-unpulled, but NOTHING converts a recorded ceiling into a build-queue
+   item or a check. A ceiling entry is write-only today. Same shape as the FDOR 7-of-120
+   postmortem that created FULL-SCOPE-FIRST in the first place — we fixed the *recording* and
+   never fixed the *acting*.
+2. **Mine, this session:** asked a data question about a SOURCE, I probed our table columns,
+   concluded "the field is not in the file," and offered to go crawl LeePA fresh — with the answer
+   already in our registry carrying a URL and an as_of date. That is precisely the step RULE 0.4
+   step 0 / RULE 0.55 exist to force, skipped. Also: this morning's commit message asserted
+   "Neither source has beds/baths columns" — true of the two tables we pulled, FALSE of the source,
+   and it was stated as a source property and used to justify the ranker design.
+
+**Consequence:** check `comps_bed_bath_missing` opened earlier today is MIS-SCOPED — it says the
+data doesn't exist. It exists. Re-scope it to "pull LeePA layer 23," not "we don't have beds."
+
+### 0ac. "just make sure we have beds and baths" — we do NOT, for sold homes. BATHS are ~absent platform-wide.
+
+**Operator, 07/22/2026, verbatim:** *"ok, just make sure we have beds and baths"*
+
+Probed live against the database 07/22/2026. Answer is no, in two separate ways.
+
+**1. The parcel roll has no bed/bath column at all.** Full column list pulled for
+`data_lake.lee_parcels` (FDOR) and `data_lake.leepa_parcels` (LeePA). Neither has a bedroom or
+bathroom field. The roll carries `living_area_sqft`, `building_count`, `residential_unit_count`,
+`improvement_quality`, `construction_class`, `actual_year_built` — no bed/bath. This is NOT a
+full-scope-first pull gap; the field is not in the file.
+
+**2. The listing tables have the columns but not the coverage.**
+- `listing_state` is CURRENT for-sale inventory, not sold history — 23,579 Lee rows, every one
+  `status='for_sale'`, last_seen 07/01–07/19/2026.
+- Joining it to the 6-month sold set (8,999 rows) matched 102 rows, 99 with beds = **1.1%**.
+  NOT an address-normalization bug — formats normalize cleanly on both sides (verified by
+  sampling: "2135 SW 8th Pl" vs "2130 SW 17TH AVE", same shape after upper+strip). A sold home
+  only matches if it happens to be re-listed right now. Category mismatch, not a join defect.
+- **BATHS ARE EFFECTIVELY EMPTY EVEN ON LIVE LISTINGS.** Lee 85 of 23,579 = 0.4%. Collier 27 of
+  8,667 = 0.3%. Hendry 302 of 1,425 = 21.2%. Beds are better but partial: Lee 16,120 of
+  23,579 = 68.4%.
+- `listing_week` sold events: 163 total, 38 Lee, weeks of 06/29 and 07/06/2026 only, 146 with
+  beds, **0 with baths**.
+
+**Consequence:** the ranker's `W_BEDS`/`W_BATHS` terms cannot fire on lake comps, and won't for
+the vendor-fed ones either wherever baths are null. A 1,978 sq ft 4/3 and a 1,978 sq ft 2/2 score
+identically and the why-line can't show the difference. That is a real comparability hole in a
+sell-side number, not a cosmetic one.
+
+**Lanes that could actually close it (RULE 0.7), none taken yet:**
+(a) LeePA's public parcel detail page — the bulk roll omits bed/bath but the property card may
+expose it; needs a crawl4ai probe + FULL-SCOPE-FIRST field census before any ingest code.
+(b) `user_mls_listings` already has `bedrooms_total`/`bathrooms_total` — real when a user uploads
+their own MLS export.
+(c) agent types the subject's beds/baths in.
+
+**Not built.** No ingest written against a new source without the scope census and Ricky's
+sign-off. See [[feedback_full-scope-first-census-before-ingest]].
+
+### 0ab. "where are we wiring to??" — the lake comp feed (20205251) has ZERO consumers
+
+**Operator, 07/22/2026, verbatim:** *"check this / where are we wiring to??"*
+
+Probed on the spot. `fetchLeeComps` (`lib/assistant/comp-source-lake.ts`) and `rankComps`
+(`lib/assistant/comp-rank.ts`) are imported by **nothing but their own test files**.
+`lib/assistant/comp-helper.ts` — the ONE live comp path, `compsForAddress` — does not import
+either module. So the commit shipped a verified, live-probed feed that no surface reads.
+
+Eight real consumers still run on the unguarded SteadyAPI `/nearby-home-values` path:
+`app/r/offer-check`, `app/r/should-i-sell/[zip]`, recipes `just-sold` / `price-reduced` /
+`market-comps`, `lib/listings/showing-prep-source.ts`, `lib/offer-check/verdict.ts`,
+`lib/assistant/conversation-path.ts`.
+
+**Consequence to state plainly:** the commit message says the 460/684 sq ft size-band defect was
+"closed against our own data." The probe closed it *in the module*. The defect check
+(size-band guard, due 07/26) is still open and still correct to be open — production comps are
+unchanged. A module that works is not a fix that shipped — same failure shape as
+"a code fix isn't live until the brain rebuilds," one layer down.
+
+**Next:** name the seam in `comp-helper.ts` where lake candidates enter ahead of the vendor
+nearby call, Lee-only, vendor as fallback. Not built — no wiring written without Ricky's call on
+that seam.
+
 ### 0aa. "don't we have things happening all the time that we track?" — I scoped an ML answer to ONE table's label clock and called it the platform
 
 **Operator, 07/22/2026, verbatim:** *"but don't we have things happening all the time that we
