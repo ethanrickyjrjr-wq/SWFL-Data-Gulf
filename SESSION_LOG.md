@@ -54,6 +54,18 @@ byte-identical after the change, which also re-confirms FM 9 determinism.
 sklearn lives in a separate `ingest/requirements-analysis.txt` so cron runners never
 install it (RULE 11), wired into deptry with the `scikit-learn`/`sklearn` name map.
 
+**Follow-up same session (review caught it):** `validate_allowlist` — the FM 4 abort path —
+shipped with its raise branch **untested**, and there was no `test_parcel_structure.py` at all,
+so "each test named for the failure mode it targets" was not true as written. The earlier test
+covered `pick_representatives` against a fixture, a different function and a different contract.
+Added the spec-named `test_allowlist_columns_exist` plus the block-rendering tests (59 green now).
+Also verified a real risk in the headline: the correlation matrix is assembled from INDEPENDENT
+pairwise `corr()` reads, so it is not guaranteed positive-semi-definite, and negative eigenvalues
+were being clipped silently. Measured — **Lee is PSD, nothing clipped**, so "9 components explain
+80%" stands unaffected; Collier clips 2 eigenvalues totalling 4.04e-04 = **0.0016% of total
+variance**. The report now states conditioning every run, and phrases it by magnitude relative to
+the trace rather than crying "discount these figures" over numerical dust.
+
 **Next:** Spec B (price-cut as a served check in `lib/why-not-selling/`) stays deferred —
 its go/no-go input is the Section 2 number, which needs more labeled weeks before it can
 decide anything. Re-run `python -m ingest.analysis.challenger` as weeks accumulate.

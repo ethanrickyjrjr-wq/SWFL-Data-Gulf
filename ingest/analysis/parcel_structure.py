@@ -31,7 +31,7 @@ from ingest.analysis._report import Report
 from ingest.analysis._stats import (
     ColumnProfile,
     correlation_clusters,
-    explained_variance_ratio,
+    explained_variance_with_diagnostics,
     pick_representatives,
     screen_columns,
 )
@@ -104,16 +104,45 @@ def _clusters_block(table: str, names: list[str], labels: list[int],
     return "\n".join(lines)
 
 
-def _variance_block(table: str, ev) -> str:
+def _variance_block(table: str, ev, *, clipped_mass: float,
+                    clipped_count: int) -> str:
     cumulative = ev.cumsum()
-    n80 = int((cumulative < 0.80).sum()) + 1
-    n95 = int((cumulative < 0.95).sum()) + 1
+    n80 = min(int((cumulative < 0.80).sum()) + 1, len(ev))
+    n95 = min(int((cumulative < 0.95).sum()) + 1, len(ev))
+    # Say what the magnitude actually warrants. A mass of ~1e-9 is float noise on
+    # an eigendecomposition, not a reason to distrust the read; a material mass
+    # is. Stating "discount these figures" for numerical dust is how a real
+    # warning gets trained into background noise.
+    # Judge the clip RELATIVE TO THE TRACE, not in absolute terms. A correlation
+    # matrix has unit diagonal, so its eigenvalues sum to the column count — the
+    # same absolute mass is trivial across 59 columns and material across 3. An
+    # absolute floor would also have to be re-tuned every time the matrix
+    # changed size.
+    trace = float(len(ev)) or 1.0
+    relative = clipped_mass / trace
+
+    if clipped_count == 0:
+        conditioning = "matrix was positive-semi-definite (none clipped)"
+    elif relative < 1e-3:
+        conditioning = (
+            f"{clipped_count} negative eigenvalue(s) clipped, total mass "
+            f"{clipped_mass:.2e} = {relative:.4%} of total variance — numerically "
+            f"negligible, not a structural problem; the figures above stand"
+        )
+    else:
+        conditioning = (
+            f"{clipped_count} negative eigenvalue(s) clipped, total mass "
+            f"{clipped_mass:.2e} = {relative:.2%} of total variance — the matrix "
+            f"is assembled from independent pairwise reads and is not guaranteed "
+            f"PSD; discount the figures above accordingly"
+        )
     lines = [
         f"### `{table}` — PCA explained variance (reported only, never served)",
         "",
         f"- **{n80}** components explain 80% of variance.",
         f"- **{n95}** components explain 95% of variance.",
         f"- First component alone: {ev[0]:.1%}.",
+        f"- Conditioning: {conditioning}.",
         "",
         "This is a dimensionality READ. No component is persisted, written to the "
         "allow-list, or served — the allow-list is named columns only (FM 4).",
@@ -166,7 +195,11 @@ def run(args) -> int:
 
             report.add(_clusters_block(table, names, labels, allowlist,
                                        args.corr_threshold))
-            report.add(_variance_block(table, explained_variance_ratio(matrix)))
+            ev, clipped_mass, clipped_count = explained_variance_with_diagnostics(
+                matrix
+            )
+            report.add(_variance_block(table, ev, clipped_mass=clipped_mass,
+                                       clipped_count=clipped_count))
             report.add(
                 f"### `{table}` — ALLOW-LIST ({len(allowlist)} columns)\n\n"
                 + "\n".join(f"- `{c}`" for c in allowlist)

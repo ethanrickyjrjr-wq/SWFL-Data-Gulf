@@ -169,9 +169,29 @@ def explained_variance_ratio(corr: np.ndarray) -> np.ndarray:
     eigvalsh (not eigvals) because a correlation matrix is symmetric: it returns
     real eigenvalues in deterministic order.
     """
-    eigenvalues = np.linalg.eigvalsh(np.asarray(corr, dtype=float))
-    eigenvalues = np.clip(eigenvalues[::-1], 0.0, None)  # descending, no -0.0 noise
+    ratio, _, _ = explained_variance_with_diagnostics(corr)
+    return ratio
+
+
+def explained_variance_with_diagnostics(
+    corr: np.ndarray,
+) -> tuple[np.ndarray, float, int]:
+    """As above, plus how much negative eigenvalue mass had to be clipped.
+
+    This matrix is assembled from INDEPENDENT pairwise corr() reads, so unlike a
+    single-pass covariance estimate it is not guaranteed positive-semi-definite:
+    a few slightly-negative eigenvalues are possible, and clipping them silently
+    would distort the "N components explain 80%" headline that lands in the
+    report, the spec and the session log. Reporting the clipped mass means the
+    number can be trusted or discounted on evidence rather than on faith.
+    """
+    raw = np.linalg.eigvalsh(np.asarray(corr, dtype=float))[::-1]
+    negative = raw[raw < 0]
+    clipped_count = int(negative.size)
+    clipped_mass = float(-negative.sum()) if clipped_count else 0.0
+
+    eigenvalues = np.clip(raw, 0.0, None)
     total = eigenvalues.sum()
     if total <= 0:
-        return np.zeros_like(eigenvalues)
-    return eigenvalues / total
+        return np.zeros_like(eigenvalues), clipped_mass, clipped_count
+    return eigenvalues / total, clipped_mass, clipped_count

@@ -1,7 +1,7 @@
 # Parcel structure pass — column allow-list + dimensionality read
 
 - **As of:** 07/22/2026
-- **Commit:** `29c62f79`
+- **Commit:** `cc90bb0b`
 - **Command:** `python -m ingest.analysis.parcel_structure --max-zero-share 0.95 --min-distinct 2 --min-non-null-share 0.5 --max-distinct-share 0.99 --corr-threshold 0.8`
 - **Source `data_lake.collier_parcels`:** 290,973 rows
 - **Source `data_lake.lee_parcels`:** 556,083 rows
@@ -139,6 +139,7 @@ FM 5: printed with their rates, never silently dropped.
 - **9** components explain 80% of variance.
 - **15** components explain 95% of variance.
 - First component alone: 30.5%.
+- Conditioning: matrix was positive-semi-definite (none clipped).
 
 This is a dimensionality READ. No component is persisted, written to the allow-list, or served — the allow-list is named columns only (FM 4).
 
@@ -293,6 +294,7 @@ FM 5: printed with their rates, never silently dropped.
 - **8** components explain 80% of variance.
 - **13** components explain 95% of variance.
 - First component alone: 32.7%.
+- Conditioning: 2 negative eigenvalue(s) clipped, total mass 4.04e-04 = 0.0016% of total variance — numerically negligible, not a structural problem; the figures above stand.
 
 This is a dimensionality READ. No component is persisted, written to the allow-list, or served — the allow-list is named columns only (FM 4).
 
