@@ -1,3 +1,40 @@
+## 2026-07-22 (Opus 4.8 · main) — The checks ledger had an automatic opener and no automatic closer. Built the missing half; it closed 8/8 on the first live run.
+
+Operator, verbatim: *"FIGURE OUT HOW TO CLOSE ALL OF THESE … OR SET UP A TRIP THAT CLOSES
+THEM OUT WHEN IT IS USED!!!"* He was right, and the cause was structural, not discipline.
+
+**The measured bug.** Live count at session start: **722 open, 8 carrying a `signal`.**
+`scripts/reverify-signals.mjs` walks CLOSED signal-bearing checks, re-runs the signal, and
+REOPENS regressions — built, tested, scheduled. **Nothing walked OPEN checks.** `runSignal`
+fired only inside `check.mjs close`, one key at a time, typed by a human. The ledger could
+only grow, by construction. Same shape as the ceilings postmortem: we build the recording
+half of a mechanism and never the acting half.
+
+**Built:** `scripts/check-sweep.mjs` — the exact mirror. Scans `state=open` + signal, runs
+each signal live, closes the passers with a `proof.kind='signal'` record built from what the
+run actually observed and re-validated server-side by the `checks_require_proof` trigger.
+`resolved_by='check-sweep'`, so machine closes stay queryable apart from human ones forever.
+15 tests green, each named for a failure mode in
+`docs/superpowers/specs/2026-07-22-check-sweep-design.md`.
+
+**First live run: 8 of 8 closed, zero human decisions** — `corridor_factor_wire`,
+`active_rentals_swfl`, `wire_listings_investor_master`, `market_heat_region_trend`,
+`briefcase_email_pdf_deliverable`, `market_cadence_three_tier`, `rsw_v3`, `storm_ian`. Every
+one had been satisfied for weeks and nobody looked. Dry-run first; the weakest signal
+(`"33901"`, a bare ZIP) was hand-probed for discrimination before the write — real report
+render, correct title, 4 occurrences, no fallback markers.
+
+**The honest remainder, so the count is never mistaken for finished work.** 716 open, **0 with
+a signal**. The sweeper is only as good as the signals attached to it, and picking a
+*discriminating* one is per-check human judgment — FM1: a loose `contains` that also matches a
+fallback closes a broken thing, which is strictly worse than leaving it open. The 39 `idea`
+rows, the 72 `ceiling_` tasks, and genuinely unfinished `verify` rows (e.g.
+`buyer_leverage_report`: "NO page, route, or consumer") do NOT close this way and should not.
+Backfill tracked as `checks_signal_backfill`.
+
+**Not wired to any cron or SessionStart** — auto-close on a schedule is the operator's call,
+not a default.
+
 ## 2026-07-22 (Opus 4.8 · main) — Took over Spec A ("nothing built"). Both items built and run live; the gate split reverses the flattering one, and the RF does NOT win.
 
 Handoff was `f0f81b61`, whose entry ends "Spec A written, nothing built." Built it:

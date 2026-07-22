@@ -9,6 +9,13 @@ usage lives HERE (root CLAUDE.md keeps the rules, this file keeps the mechanics)
   `open <project> <key> "<label>" [--class …] [--detail "…"] [--due YYYY-MM-DD]` ·
   `close <key> [note] [--evidence "…"]` — the obligations ledger (Supabase `public.checks`).
   A check WITH a `--signal` closes only when the CLI re-runs it live; without one it needs `--evidence`.
+- `node scripts/check-sweep.mjs [--dry-run] [--class verify] [--project ingest]` — the ACTING half:
+  walks OPEN signal-bearing checks, runs each signal live, and CLOSES the passers with a
+  trigger-validated signal proof (`resolved_by='check-sweep'`). Its mirror,
+  `node scripts/reverify-signals.mjs`, walks CLOSED ones and REOPENS regressions. Neither costs LLM
+  tokens. A sweep can only close what a signal proves — so the real work is ATTACHING signals
+  (`check.mjs update <key> --signal '<json>'`), and a loose `contains` that also matches a fallback
+  body closes a broken thing. Always `--dry-run` a newly-backfilled batch first.
 - `node scripts/safe-push.mjs` — the ONLY push path. Landmines: it rebases and can carry
   foreign parallel-session commits — check `git log origin/main..HEAD` first and ASK before bundling;
   it also flattens `--no-ff` merges.
