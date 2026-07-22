@@ -1,3 +1,33 @@
+## 2026-07-22 (Opus 4.8 · main) — CORRECTION: "we have zero flood data" was false. /map repointed to the live env-swfl flood root.
+
+**I was wrong and the operator caught it.** I claimed /map couldn't be repointed because
+flood has no live source, citing `MetricKey = value|activity|dom`. That is the homepage PILL
+SET, not our data holdings. I read one file and reported it as an inventory. I never opened
+`docs/standards/data-roots.md` — RULE 0.55, the rule that exists for exactly this — where
+line 238 states the fix verbatim: "The fix is wiring `/map` to the real env-swfl flood root."
+
+**What we actually hold:** env-swfl emits a `flood_by_zip` detail table (realized NFIP loss,
+AAL per insured property, per ZIP) + `swfl_zip_<zip>_flood_aal_*` key metrics, and queries
+FEMA NFHL flood polygons live every build. It ALREADY drives the live flood gradient on
+/r/zip-report/[zip] (`lib/zip-report/load-ranked-signals.ts:75-105`).
+
+**Shipped:** `lib/landing/load-map-flood.ts` — reads `flood_by_zip`, scoped to CORE_SCOPE_ZIPS
+(same root as load-home-map-data, so the two maps can't disagree on which ZIPs exist), with a
+key_metrics fallback lane. Empty-tolerant: returns null on a miss, `override` goes undefined,
+MapCanvas shows "Sample data — not live" instead of passing mock off as live. `app/map/page.tsx`
+is now async and passes the override to all three maps.
+
+**Bounds come from the ROWS, never the fixture** — deliberately, because
+`sa0718_live_flood_gradient_bounds_are_numerically` is exactly that bug (a "live" gradient whose
+bounds were copied from the mock). Live probe: **55 ZIPs, $0–$32,609.96 per insured property**,
+sample=false. The mock it replaced topped out near $700 — the page was off by ~50x, not merely
+unsourced. `bunx next build` green.
+
+**Standing correction banked to SCRATCHPAD:** "we don't have X" is a claim about the CATALOG,
+not about the file in front of me. Before saying it: data-roots.md, then cadence_registry
+source_scope/source_ceiling, then grep the lake — and name which of the three I checked.
+Same failure as the beds/baths one banked earlier the SAME DAY.
+
 ## 2026-07-22 (Opus 4.8 · main) — Fixed the 3 priority-100 criticals (build green), launched the 377-check fan-out, banked the burndown knowledge as two skills.
 
 The handoff (85585e7c) said the fan-out was never run and named 3 criticals sitting live

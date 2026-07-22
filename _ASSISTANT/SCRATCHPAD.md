@@ -1,3 +1,35 @@
+## 2026-07-22 — "we have zero flood data" was FALSE. I never opened the catalog.
+
+**What I said:** `/map` can't be repointed because flood has no live source — "MetricKey is
+value|activity|dom, flood lost its pill 07/03 for bad data."
+
+**What is true:** we hold live per-ZIP flood data and it already renders on another page.
+- `env-swfl` emits a `flood_by_zip` detail table + per-ZIP `swfl_zip_<zip>_flood_aal_*`
+  key metrics (realized NFIP flood loss / average annualized loss).
+- FEMA NFHL flood polygons queried live every build (hazards.fema.gov Layer 28,
+  `refinery/sources/env-swfl-source.mts`).
+- `lib/zip-report/load-ranked-signals.ts:75-105` already reads it → `computeZipGradient`
+  → live flood gradient on `app/r/zip-report/[zip]/page.tsx`.
+- **`docs/standards/data-roots.md:238` states the fix verbatim: "The fix is wiring `/map`
+  to the real env-swfl flood root."** The answer was written down before I was asked.
+
+**Root cause:** I read ONE file (`lib/landing/home-map-types.ts`), saw the homepage PILL SET,
+and reported it as our data holdings. A pill set is what one surface chose to show. It is not
+an inventory. This is the exact failure already banked as
+`feedback_read-source-ceiling-before-claiming-we-lack-a-field` (07/22: told Ricky beds/baths
+didn't exist with the answer sitting in our own registry) — recurred the same day, on flood.
+
+**The rule I skipped:** RULE 0.55 / FOCUS 8 — any data question starts at the top of
+`docs/standards/data-roots.md`. I never opened it. I also never grepped `cadence_registry.yaml`.
+
+**Standing correction:** "we don't have X" is a claim about the CATALOG, not about the file in
+front of me. Before ever saying it: (1) data-roots.md, (2) cadence_registry source_scope +
+source_ceiling, (3) grep the lake. Naming which of those three I checked is part of the answer.
+
+**Also caught:** `sa0718_live_flood_gradient_bounds_are_numerically` — the ZIP-report's "live"
+flood gradient bounds are numerically IDENTICAL to the mock fixture, i.e. the calibration was
+copied from fake data. Repointing /map must not inherit those bounds.
+
 # SCRATCHPAD — standing issue list
 
 **RULE 2: ALWAYS USE THE SCRATCHPAD.** Operator should never have to retype an issue.
