@@ -11,12 +11,12 @@ from __future__ import annotations
 
 import hashlib
 import secrets as _secrets
-import time
 from datetime import date
 
 import dlt
+import requests
 
-from ingest.lib.arcgis_paginator import arcgis_count, paginate_arcgis_keyset
+from ingest.lib.arcgis_paginator import arcgis_count, paginate_arcgis_tabular
 from ingest.lib.coercion import coerce_float as _coerce_float, coerce_int as _coerce_int
 from ingest.lib.guards import VolumeGuardError, assert_min_rows, assert_vs_canonical
 from ingest.lib.storage_uploader import upload_csv_gz
@@ -131,74 +131,98 @@ def _normalize(attrs: dict) -> dict:
     }
 
 
-def fetch_comp_sales(max_resumes: int = 8) -> list[dict]:
-    """Keyset-paginate layer 23 and return raw attribute dicts.
+def _distinct_values(field: str) -> list:
+    """Distinct values of one field, via ArcGIS returnDistinctValues.
 
-    KEYSET, not resultOffset: the offset walk silently TRUNCATES on this host — LeePA
-    layer 12 stopped at 40,000 of ~548k because the server quit reporting
-    exceededTransferLimit (see arcgis_paginator.paginate_arcgis_keyset). At 108,881
-    rows layer 23 is well past that ceiling, so the offset walk is not an option.
-
-    geometry=False: the SHAPE polygon more than doubles the payload (measured 07/22/2026:
-    100 rows = 27,629 bytes without vs 58,929 with) for a polygon the parcel spine
-    already holds.
-
-    RESUME ENVELOPE — measured, not speculative. gissvr.leepa.org stalls intermittently
-    deep in a long walk: on 07/22/2026 this pull reached 90,000 rows and then hit three
-    consecutive 120s read timeouts while individual pages before and after served in
-    ~0.5s. The shared paginator retries 3x and then raises, which throws away all 90,000
-    rows already in hand and makes a ~109-page pull a coin flip. So we re-enter the
-    shared paginator from the last OBJECTID we actually banked instead of forking or
-    loosening it — every other caller keeps the existing retry semantics.
-
-    Correctness of the resume: the paginator composes `({where}) AND OBJECTID>{internal}`
-    and walks ascending, so re-entering with `OBJECTID>{last_oid}` is a strict
-    continuation — no gap and no overlap. OBJECTIDs are deduped anyway because a resume
-    that races the boundary must not double-count against the volume guard.
+    Discovered, never hardcoded: if the appraiser publishes a 2027 sale, a hardcoded
+    year list would silently drop it while every row count still looked plausible.
     """
-    rows: list[dict] = []
-    seen: set = set()
-    last_oid = -1
-    resumes = 0
+    resp = requests.get(
+        LEEPA_COMP_SALES_URL,
+        params={
+            "where": "1=1",
+            "outFields": field,
+            "returnDistinctValues": "true",
+            "returnGeometry": "false",
+            "orderByFields": f"{field} ASC",
+            "f": "json",
+        },
+        timeout=90,
+    )
+    resp.raise_for_status()
+    vals = [(f.get("attributes") or {}).get(field) for f in resp.json().get("features", [])]
+    return [v for v in vals if v is not None]
 
-    while True:
-        try:
-            for feature in paginate_arcgis_keyset(
-                LEEPA_COMP_SALES_URL,
-                where=f"OBJECTID>{last_oid}",
-                out_fields=COMP_SALES_OUT_FIELDS,
-                page_size=1000,  # the layer's maxRecordCount
-                geometry=False,
-            ):
-                attrs = feature.get("attributes") or {}
-                if not attrs:
-                    continue
-                oid = attrs.get("OBJECTID")
-                if oid is not None:
-                    if oid in seen:
-                        continue
-                    seen.add(oid)
-                    if oid > last_oid:
-                        last_oid = oid
-                rows.append(attrs)
-                # Progress marker every ~10 pages: distinguishes "slow" from "dead"
-                # and records the last-good point a resume restarts from.
-                if len(rows) % 10_000 == 0:
-                    print(f"    ...{len(rows):,} rows", flush=True)
-            return rows
-        except Exception as exc:  # noqa: BLE001 — resume, then re-raise if out of budget
-            resumes += 1
-            if resumes > max_resumes:
-                raise
-            backoff = min(15 * resumes, 60)
-            # ASCII only in this line: it prints on a cp1252 Windows console where an
-            # em-dash renders as a replacement char.
-            print(
-                f"    fetch stalled after {len(rows):,} rows at OBJECTID {last_oid} "
-                f"({type(exc).__name__}) - resume {resumes}/{max_resumes} in {backoff}s",
-                flush=True,
+
+def fetch_comp_sales() -> list[dict]:
+    """Fetch layer 23 in SaleYear x SaleMonth partitions. Returns raw attribute dicts.
+
+    WHY PARTITIONED — measured 07/22/2026, this is the whole design constraint.
+    A single whole-layer walk does not work on this host, by either method:
+
+      * resultOffset over the whole layer silently TRUNCATES (LeePA layer 12 died at
+        40,000 of ~548k when the server stopped reporting exceededTransferLimit).
+      * Keyset on OBJECTID dies differently and worse: the layer's 108,881 rows are
+        spread over an OBJECTID space past 512,000, so a deep `OBJECTID > n ORDER BY
+        OBJECTID` forces a huge sparse scan. Measured at OBJECTID > 512626 —
+        n=1000 timed out at 140s, n=200 took 71.2s, n=100 took 73.5s — while the
+        IDENTICAL query shape at the shallow end served n=1000 in 0.6s. Cost scales
+        with the OID range scanned, not with rows returned, so shrinking the page
+        does not help and no retry/resume budget can rescue it.
+
+    Partitioning on SaleYear x SaleMonth removes OBJECTID from the query entirely.
+    Each partition holds ~3-5k rows (2025-06 = 3,370, page 0 served in 1.4s), so the
+    offset walk never approaches the 40k truncation ceiling and never triggers the
+    sparse-OID scan. Year alone is NOT fine enough: 2024 = 46,659 rows, over the ceiling.
+
+    COMPLETENESS GUARD — the reason this is safer than the single walk it replaces.
+    Every partition is asserted EXACTLY against its own returnCountOnly (a partition is
+    small enough to demand exactness, not a 90% floor), and the sum of the partition
+    counts is asserted against the layer's global count. A (year, month) combination
+    that discovery missed — a NULL SaleMonth, say — makes the sum short and aborts,
+    instead of landing a quietly incomplete table.
+    """
+    global_canonical = arcgis_count(LEEPA_COMP_SALES_URL)
+    years = _distinct_values("SaleYear")
+    months = _distinct_values("SaleMonth")
+    print(f"  partitions: SaleYear {years} x SaleMonth {len(months)} months", flush=True)
+
+    rows: list[dict] = []
+    partition_sum = 0
+
+    for year in years:
+        for month in months:
+            where = f"SaleYear={year} AND SaleMonth={month}"
+            expected = arcgis_count(LEEPA_COMP_SALES_URL, where=where)
+            if expected == 0:
+                continue
+            partition_sum += expected
+            got = list(
+                paginate_arcgis_tabular(
+                    LEEPA_COMP_SALES_URL,
+                    where=where,
+                    out_fields=COMP_SALES_OUT_FIELDS,
+                    page_size=1000,  # the layer's maxRecordCount
+                )
             )
-            time.sleep(backoff)
+            if len(got) != expected:
+                raise VolumeGuardError(
+                    f"[volume-guard] leepa_comparable_sales: partition {year}-{month:02d} "
+                    f"fetched {len(got):,} rows but the source counts {expected:,} — a short "
+                    f"page walk (offset truncation) or a source change mid-pull. Aborting rather "
+                    f"than landing a partial table."
+                )
+            rows.extend(got)
+            print(f"    {year}-{month:02d}: {len(got):,} rows ({len(rows):,} total)", flush=True)
+
+    if partition_sum != global_canonical:
+        raise VolumeGuardError(
+            f"[volume-guard] leepa_comparable_sales: partitions cover {partition_sum:,} rows but "
+            f"the layer holds {global_canonical:,} — {global_canonical - partition_sum:,} rows fall "
+            f"outside the discovered SaleYear x SaleMonth grid (a NULL or out-of-range "
+            f"SaleYear/SaleMonth). Aborting rather than silently dropping them."
+        )
+    return rows
 
 
 def _assert_shape(normalized: list[dict]) -> None:

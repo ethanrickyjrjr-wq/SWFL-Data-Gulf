@@ -53,6 +53,62 @@ entry. Don't do it.
 
 ## OPEN — raised 07/22/2026
 
+### 0ak. OPERATOR: "why is no data being found anywhere???? was it the egress issue?"
+
+Raised 07/22 ~20:20 UTC. Logged before answering, per RULE 2.
+
+**Probed live, end to end — every lane returns real data right now:**
+- Lake is FULL: `leepa_parcels` 548,798 · `fema_nfip_claims` 448,425 · `census_cbp_fl` 255,563 ·
+  `fdot_aadt_fl` 103,662 · `leepa_comparable_sales` 108,848. Real `COUNT(*)`, not estimates.
+- **TRAP AVOIDED:** `pg_stat_user_tables.n_live_tup` reports **0** for nearly every one of those
+  tables. It is a stale planner estimate, not a count. Anyone reading that view — human or agent —
+  concludes "the lake is empty" and is WRONG. This is a live false-alarm generator; if a session
+  ever reports the lake empty, this is probably why. Always `COUNT(*)`.
+- `/api/b/master` 200 w/ real figures; housing/env/macro/cre leaf brains all 200.
+- `/`, `/map`, `/r/zip-report/33901` all 200 with full payloads.
+- `/api/assistant` on "home prices + DOM in 33901" returns **$312,929 median sale, $1,558 rent,
+  84 DOM**, Redfin + ZORI cited, token `SWFL-7421-v9-20260629`. The answer path is not blind.
+
+**So "nowhere" is not the serving path today.** Could not reproduce. Did NOT hand over a cause
+I couldn't tie to the symptom (the 07/13 five-wrong-theories trap).
+
+**Most likely he is remembering 07/21, and he was RIGHT that it was egress.** This file, line 1506:
+"egress overage → spend cap → PostgREST restricted." That outage genuinely was "no data anywhere,"
+and it genuinely was the egress burn. It has since cleared (PGRST002 gone, my reads work).
+
+**Two REAL defects found — but neither empties a screen, so neither is the answer:**
+1. **Daily Brain Rebuild has not run on its schedule.** Last 12 runs are ALL `workflow_dispatch`
+   (manual); zero `schedule` events; last one 07/20T01:30. Workflow shows `active`, and no cron
+   block was found in the workflow file. Brains are 2-3 days stale (`master.md` = Jul 19) but
+   still serve full payloads. -> needs a check.
+2. **CI has failed on every push today** (18:18, 18:51, 19:00, 20:03, 20:14). Prod is unaffected —
+   Smoke/Rollback on Prod both green — so this is a merge-safety hole, not an outage. -> needs a check.
+
+**CORRECTION to my own answer above, same turn — the four-lane gate caught me skipping THE CATALOG,
+and the catalog changes the conclusion.** I told the operator "it's not data-roots." That was wrong.
+
+`docs/standards/data-roots.md:54-59` is the answer to his actual question, written 07/22:
+"LeePA layer 23 was censused 07/19 and recorded correctly in BOTH the registry and this file. On
+07/22 **two separate sessions independently told the operator we had no beds/baths for comps** —
+one after querying `information_schema` and concluding 'the field is not in the file.' It was in
+the file, twice. **Recording a ceiling is not surfacing it; until today nothing read them back.**"
+
+So "no data found anywhere" is mostly **agents reporting absence that isn't real**, two ways:
+1. **Wrong axis.** `information_schema` = what we PULLED. `source_ceiling` = what EXISTS. **72
+   recorded ceilings** as of 07/22 (FDOT 1,586 layers we use 1 of; Lee permits FeatureServer;
+   FEMA real NFIP penetration vs our static 0.3 guess; FRED county series; FDLE offense breakdown).
+   Query the first, and we "have nothing" while holding it.
+2. **Dead roots serve nothing.** The decision table's DO-NOT-READ column is full of tables that
+   are genuinely empty or NULL — `listing_state.days_on_market` (0%),
+   `listing_active_stats.avg_days_on_market` (NULL), `listing_active_homes.days_on_market` (NULL),
+   `active_listings_residential*` (corpse), `community_profiles` (EMPTY),
+   `lee_deed_official_records.record_date` 🔴 EMPTY, `listing_dom_historical` 🔴 not built.
+   **A consumer wired to one of those finds nothing while the lake is full.** That is exactly how a
+   screen goes blank without a single thing being "down" — which is what I wrongly ruled out.
+
+Also T1: aggregate DOM is censored today — ~63% of the active book is a `first_seen` floor. A
+"typical DOM" off the aggregate is confidently wrong right now.
+
 ### 0aj. THREE LIVE CRITICALS were sitting correctly recorded in the ledger since 07/18 and nobody looked.
 
 Found 07/22 while burning down the ledger. All three are ALREADY open checks — the ledger did its

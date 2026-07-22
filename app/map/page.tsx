@@ -14,8 +14,11 @@ export const revalidate = 3600;
 export default async function MapPage() {
   const flood = await loadMapFlood();
   const override = flood ?? undefined;
+  // FEMA is a NAMED FEDERAL SOURCE — cite it as OpenFEMA FimaNfipClaims, never as
+  // "SWFL Data Gulf" (docs/handoff/2026-07-14-fema-flood-data-usage-handoff.md).
+  // The SWFL Data Gulf attribution is for our own derived numbers, not a federal feed.
   const source = flood
-    ? "Realized NFIP flood loss per insured property · SWFL Data Gulf"
+    ? "Realized NFIP flood loss per insured property · OpenFEMA FimaNfipClaims"
     : "Sample data — live flood loss is temporarily unavailable.";
 
   return (

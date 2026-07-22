@@ -25,6 +25,10 @@ LEEPA_COMP_SALES_URL = f"{LEEPA_MAPSERVER_BASE}/23/query"
 # 27,629 bytes without geometry vs 58,929 with — geometry more than doubles the pull for
 # a polygon we already hold on the parcel spine. If coordinates are ever wanted, request
 # them as attribute columns, never the full polygon.
+#
+# OBJECTID is NOT in this list: it is neither stored nor used as a cursor. The fetch
+# partitions on SaleYear x SaleMonth precisely to keep OBJECTID out of the WHERE clause —
+# see resources.fetch_comp_sales for the measured reason (deep sparse-OID scans time out).
 COMP_SALES_OUT_FIELDS = ",".join([
     "FOLIOID",
     "SaleYear",
