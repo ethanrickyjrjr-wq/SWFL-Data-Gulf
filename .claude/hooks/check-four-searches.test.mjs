@@ -80,6 +80,38 @@ describe("scope — RULE 11, a per-turn tax gets ignored on the turn that matter
   test("the operator can opt out explicitly", () => {
     expect(isDataTurn("what fields do we have? no search, just tell me")).toBe(false);
   });
+
+  // 07/22/2026 — MEASURED against the real transcript, not imagined. The gate was deaf
+  // to 5 of the operator's 6 messages that session, including the one it exists to
+  // force. Every string below is verbatim from that transcript; none of them matched.
+  test("fires on 'do we have it somewhere else' — the four-lane question itself", () => {
+    expect(isDataTurn("do we not have the information somewhere else?????")).toBe(true);
+    expect(isDataTurn("dont we already have this")).toBe(true);
+    expect(isDataTurn("is that somewhere already")).toBe(true);
+  });
+
+  test("fires when the subject is a specific artifact, not the word 'data'", () => {
+    // "geometry", "pipe", "vintage" are subjects; the old SUBJECT list had none of them.
+    expect(isDataTurn("why did we ue 2010 geometry anywhere???")).toBe(true);
+    expect(isDataTurn("WHY IS THE PIPE BLOCKKED??????")).toBe(true);
+    expect(isDataTurn("what vintage is that file")).toBe(true);
+  });
+
+  test("fires on a bare incredulous challenge to something just asserted", () => {
+    // The operator's real reaction to a claim he doubts. It IS a demand to re-verify.
+    expect(isDataTurn("WHAT????????????")).toBe(true);
+    expect(isDataTurn("really??")).toBe(true);
+  });
+
+  test("still does NOT fire on genuine conversation", () => {
+    // The scope limit has to survive the widening, or RULE 11 kicks in and the gate
+    // gets ignored on the turn that actually matters.
+    expect(isDataTurn("nice, ship it")).toBe(false);
+    expect(isDataTurn("make the header bigger")).toBe(false);
+    expect(isDataTurn("thanks")).toBe(false);
+    expect(isDataTurn("commit and push")).toBe(false);
+    expect(isDataTurn("looks good")).toBe(false);
+  });
 });
 
 describe("lane classification", () => {

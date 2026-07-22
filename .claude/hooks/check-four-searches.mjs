@@ -42,14 +42,39 @@ export const LANES = {
   live: "THE LIVE SOURCE — a real query/response (SQL, API, crawl4ai). A parser's shape is not the source's shape.",
 };
 
-/** Does this user message read as a data / capability question? */
+/**
+ * Does this user message read as a data / capability question?
+ *
+ * WIDENED 07/22/2026 after measuring the original against a real transcript: it was
+ * deaf to 5 of the operator's 6 messages that session — including "do we not have the
+ * information somewhere else?", the exact question this gate exists to force. The
+ * original demanded a noun from a fixed list AND an interrogative. Real operator
+ * messages often carry neither: "dont we already have this" names no noun, and
+ * "WHAT????" is a challenge rather than a question. Three doors now, any one opens.
+ */
 export function isDataTurn(text) {
   const t = String(text || "");
   if (!t.trim()) return false;
-  // Explicit opt-out for turns the operator knows are trivial.
+  // Explicit opt-out for turns the operator knows are trivial. Stays first — it must
+  // beat every door below, or he loses the ability to say "just tell me".
   if (/\b(no search|skip search|no probe)\b/i.test(t)) return false;
+
+  // DOOR 1 — "don't we already have this?" The four-lane question, asked outright.
+  // Needs no subject noun: the phrasing IS the instruction to go look.
+  const ALREADY_HAVE =
+    /\b(already (have|hold|has|got|pulled|built)|do(n'?t| not) we|somewhere (else|already)|elsewhere|anywhere else)\b/i;
+  if (ALREADY_HAVE.test(t)) return true;
+
+  // DOOR 2 — a bare incredulous challenge to something just asserted. "WHAT????" is
+  // the operator disbelieving a claim, which is a demand to re-verify it, not chatter.
+  // Anchored to the WHOLE message, so "what dates does the lake hold?" takes door 3.
+  if (/^\W*(what|really|huh|seriously|wait|since when)\W*$/i.test(t)) return true;
+
+  // DOOR 3 — the original: a data subject plus an interrogative. SUBJECT gained the
+  // concrete artifact nouns the operator actually types (geometry, pipe, vintage,
+  // file, layer, fixture…); the old list held only abstractions like "data".
   const SUBJECT =
-    /\b(data|dataset|field|fields|column|columns|table|tables|root|roots|endpoint|endpoints|api|source|sources|ingest|pipeline|schema|grain|quota|comps?|sold|sale|dates?|records?|rows?|coverage|hold|holds|grab|grabbing|pull|pulling|store|stored|storing)\b/i;
+    /\b(data|dataset|field|fields|column|columns|table|tables|root|roots|endpoint|endpoints|api|source|sources|ingest|pipe|pipeline|schema|grain|quota|comps?|sold|sale|dates?|records?|rows?|coverage|hold|holds|grab|grabbing|pull|pulling|store|stored|storing|geometry|polygon|vintage|files?|layers?|fixture|catalog|crosswalk|index|feed|information|info|number|value|median|price|count)\b/i;
   const ASKING =
     /\?|\b(what|which|why|where|how many|do we|did we|can we|are we|is there|are there|show me|list)\b/i;
   return SUBJECT.test(t) && ASKING.test(t);

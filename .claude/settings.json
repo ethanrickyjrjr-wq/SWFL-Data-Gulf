@@ -175,6 +175,12 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node .claude/hooks/check-four-searches.mjs",
+            "timeout": 15,
+            "statusMessage": "Four-lane read gate..."
+          },
+          {
+            "type": "command",
             "command": "bash .claude/hooks/session-notes.sh",
             "timeout": 30,
             "statusMessage": "Saving session notes..."
