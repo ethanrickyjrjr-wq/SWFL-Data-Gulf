@@ -19,6 +19,44 @@ entry. Don't do it.
 
 ---
 
+## OPEN — raised 07/22/2026
+
+### 0aa. "don't we have things happening all the time that we track?" — I scoped an ML answer to ONE table's label clock and called it the platform
+
+**Operator, 07/22/2026, verbatim:** *"but don't we have things happening all the time that we
+track?????? data changes every day....just because it's not someone doing itm doesn't mean we
+don't have things going on that we track"*
+
+**The failure:** He asked how PCA/dimensionality reduction fits and what needs Random Forest. I
+probed `listing_week`, found 163 sold events across 3 labeled weeks, and answered "neither belongs
+in the build, come back in late September when labels mature." That conclusion was drawn from a
+single supervised label on a single table, then generalized to the whole platform.
+
+Two things wrong with it:
+
+1. **PCA is UNSUPERVISED — it never needed the labels I said it was waiting on.** It needs rows and
+   columns. We hold 556,083 Lee parcels and 290,973 Collier parcels at 102 pulled fields each,
+   today. I gated an unsupervised method on a supervised clock. That is a category error, not a
+   judgment call.
+2. **"Sold within 90 days" is not our only tracked outcome.** Everything in the lake that changes
+   on a cadence — price cuts, delistings, relists, permits, deeds, delinquent tax — is an observed
+   event stream we already snapshot. I treated the one outcome the sell-odds spec happens to name
+   as if it were the only label the platform has.
+
+**The pattern (this is the third instance):** same shape as 0z (caching plan without checking
+traffic) and the *"CHECK THE ACCOUNT, NOT JUST THE CODE"* handoff lesson. I answer the question
+that the first file I opened is scoped to, instead of the question the operator asked. The spec I
+anchored on was real and relevant — but it was a *boundary* on one build, and I imported its
+boundary as a boundary on the whole platform.
+
+**Standing correction:** before answering "can we do X with our data," inventory what we actually
+track and how often it changes — the cadence registry is the index for exactly this — BEFORE
+reaching for whichever spec mentions X. A spec's scope limit is that spec's, not the lake's.
+
+**Status:** OPEN — corrected answer delivered same session 07/22/2026.
+
+---
+
 ## OPEN — raised 07/21/2026
 
 ### 0z. "there is no traffic..is there?" — I proposed a caching plan without ever checking volume
