@@ -22,6 +22,7 @@ import {
   type SteadyDegradeReason,
 } from "@/lib/listings/steadyapi";
 import { daysBetweenIso, formatSoldSpell } from "@/lib/listings/dom";
+import { rankComps, type CompCandidate, type CompSubject } from "./comp-rank";
 import type { WelcomeSource } from "@/lib/welcome/frames";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
@@ -95,6 +96,19 @@ export interface CompDeps {
   /** Injectable fetch for the pasted-link lane. Defaults to `fetchListingFacts`, which
    *  is already SSRF-guarded via `safeFetchPublicUrl`. */
   fetchPastedFacts?: (url: string) => Promise<ListingFacts | null>;
+  /**
+   * The subject home's living area, when the caller actually knows it.
+   *
+   * Present -> the comp set is RANKED (size band + shape) instead of blind-sliced,
+   * which is what closes `comps_no_size_band_guard`. Absent -> the prior slice, byte
+   * for byte. Deliberately NOT defaulted or inferred: filtering comps against a size we
+   * guessed would invent the fact the whole filter rests on.
+   */
+  subjectSqft?: number | null;
+  /** Subject shape, when known. Only sharpens the ORDER — never filters, and a null is
+   *  skipped rather than scored as zero. */
+  subjectBeds?: number | null;
+  subjectBaths?: number | null;
   /** The saved subject address of the current listing project (Build 1). When a comp ask
    *  carries NO typed address but this is set, the helper CONFIRMS this address (rather than
    *  guessing or cold-asking). The caller resolves a "yes"/new-address reply — see
@@ -269,8 +283,7 @@ export async function compsForAddress(address: string, deps: CompDeps = {}): Pro
     status: "sold",
     limit: 25,
   });
-  const surfaced = nearby.slice(0, deps.topN ?? 6);
-  if (surfaced.length === 0) {
+  if (nearby.length === 0) {
     // A throttled/degraded empty is NOT "no comps exist" — saying so would be an
     // invented fact about the market. Ask for a retry instead.
     return done(
@@ -279,6 +292,76 @@ export async function compsForAddress(address: string, deps: CompDeps = {}): Pro
         degraded
           ? "The comp lookup is briefly busy — ask me again in a minute, or share any comps you already know."
           : "I didn't find nearby comps at that point — want me to widen the search, or you can share any comps you already know?",
+      ],
+      geo.matchedAddress,
+    );
+  }
+
+  // ── selection ───────────────────────────────────────────────────────────────
+  // Was `nearby.slice(0, topN)` — the entire prior notion of "comparable" was that the
+  // vendor listed it. That shipped 460 and 684 sq ft rows against a 1,978 sq ft subject
+  // (`comps_no_size_band_guard`), which makes an honest ask look wildly overpriced.
+  //
+  // We rank ONLY when the caller knows the subject's size; otherwise the old slice
+  // stands, because filtering against a guessed size would invent the fact it filters on.
+  //
+  // requireSaleDate is FALSE here and nowhere else: this feed has no sale date to give.
+  // `/nearby-home-values` returns an AVM `estimateDate` — "not a sale," per the vendor
+  // module — and real sale dates arrive only from the enrichment BELOW, which runs after
+  // selection. Ranking this feed strictly would return zero comps for every address;
+  // passing the AVM date as `priceDate` would launder a valuation into a sale. So the
+  // vendor path selects on size and shape, and the 6-month window stays the lake feed's
+  // job, since only it carries real dates.
+  const topN = deps.topN ?? 6;
+  let surfaced: NearbyComp[];
+  let bandNote: string | null = null;
+
+  if (deps.subjectSqft != null && deps.subjectSqft > 0) {
+    const subject: CompSubject = {
+      sqft: deps.subjectSqft,
+      beds: deps.subjectBeds ?? null,
+      baths: deps.subjectBaths ?? null,
+      zip: geo.zip, // the geocoder already resolved it — no caller supplies this
+    };
+
+    const byId = new Map<string, NearbyComp>();
+    const candidates: CompCandidate[] = nearby.map((c, i) => {
+      const id = `v${i}`; // positional and opaque; never displayed
+      byId.set(id, c);
+      return {
+        id,
+        addressLine: c.addressLine,
+        city: c.city,
+        zip: c.zip,
+        beds: c.beds,
+        baths: c.baths,
+        sqft: c.sqft,
+        price: c.estimateValue ?? c.listPrice,
+        priceDate: null, // see above — the vendor dates no sale
+      };
+    });
+
+    const ranked = rankComps(subject, candidates, now, {
+      requireSaleDate: false,
+      maxComps: topN,
+    });
+    surfaced = ranked.comps
+      .map((c) => (c.id ? byId.get(c.id) : undefined))
+      .filter((c): c is NearbyComp => c != null);
+    bandNote = ranked.note;
+  } else {
+    surfaced = nearby.slice(0, topN);
+  }
+
+  if (surfaced.length === 0) {
+    // THREE states, kept distinct. The vendor was throttled; the vendor returned
+    // nothing; the vendor returned homes and none was comparable. Both earlier branches
+    // returned above, so reaching here means we ARE holding sales — telling the user we
+    // found none would describe an empty market we did not observe.
+    return done(
+      [],
+      [
+        `I found nearby sales, but none close enough in size to compare fairly against a ${deps.subjectSqft?.toLocaleString("en-US")} sq ft home — want me to widen the size range, or share any comps you already know?`,
       ],
       geo.matchedAddress,
     );
@@ -334,7 +417,11 @@ export async function compsForAddress(address: string, deps: CompDeps = {}): Pro
   });
 
   const needs: string[] = [];
-  if (surfaced.length < 2) {
+  // Fannie B4-1.3-08 requires commentary when a search leaves the market area, and we
+  // require it whenever the three-comp standard went unmet. Surfacing it beats a set
+  // that is quietly thin — the reader cannot see what was filtered out.
+  if (bandNote) needs.push(bandNote);
+  if (surfaced.length < 2 && !bandNote) {
     needs.push(
       "Only one nearby comp came back — want me to widen the search, or add any comps you know?",
     );

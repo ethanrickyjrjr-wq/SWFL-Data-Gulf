@@ -29,6 +29,13 @@ export interface CompSubject {
 
 /** A candidate comp, in the shape both feeds can produce. */
 export interface CompCandidate {
+  /** Opaque caller key, echoed onto the ranked comp untouched.
+   *
+   *  Ranking REBUILDS objects, so a caller that needs to find its own richer row again
+   *  (the vendor's `propertyId` sold-event join key, a parcel's strap) cannot rely on
+   *  identity. Never displayed, never interpreted here — matching on `addressLine`
+   *  instead would collide across units at one street address. */
+  id?: string;
   addressLine: string;
   city: string;
   zip: string | null;
@@ -63,6 +70,21 @@ export interface RankConfig {
   bandPct?: number;
   /** Size band at the widest tier only. */
   tier3BandPct?: number;
+  /**
+   * Whether a candidate MUST carry a sale date to be rankable. Default TRUE.
+   *
+   * Set false ONLY for the vendor feed, which structurally has no sale date:
+   * `/nearby-home-values` returns an AVM `estimateDate` ("not a sale", per the vendor
+   * module) and real sale dates arrive only from the ≤2-call enrichment that runs AFTER
+   * selection. Ranking that feed strictly returns zero comps for every address; mapping
+   * the AVM date into `priceDate` to survive the window would launder a valuation as a
+   * sale — an invented fact.
+   *
+   * This drops the date REQUIREMENT. It does NOT widen the window: a candidate that DOES
+   * carry a date must still fall inside it, so the operator's 6-month decree cannot die
+   * by flag. Callers read `recencyVerified` to know which kind of set they got.
+   */
+  requireSaleDate?: boolean;
 }
 
 export interface RankResult {
@@ -74,6 +96,15 @@ export interface RankResult {
   /** Commentary — required by Fannie when the search leaves the market area, and
    *  required by us whenever the standard was not met. Null when tier 1 and met. */
   note: string | null;
+  /**
+   * True when EVERY returned comp carries a real in-window sale date.
+   *
+   * Describes the DATA, not the config — a `requireSaleDate: false` run whose survivors
+   * all happen to be dated still reports true. False means the set was chosen on size and
+   * shape alone, and no caller may describe it as recent sales. Vacuously true on an
+   * empty set, which carries no claim at all.
+   */
+  recencyVerified: boolean;
 }
 
 const DEFAULTS = {
@@ -82,6 +113,9 @@ const DEFAULTS = {
   windowMonths: 6,
   bandPct: 0.25,
   tier3BandPct: 0.35,
+  // Strict by default: a new feed wired without thinking about dates fails loudly
+  // (zero comps) rather than silently ranking undated rows as if they were sales.
+  requireSaleDate: true,
 } as const;
 
 // ── Weights ───────────────────────────────────────────────────────────────────
@@ -143,8 +177,9 @@ function monthsBefore(now: Date, months: number): Date {
  *  column at all (probed 07/22/2026) — requiring them would reject every comp from our
  *  own lake while silently passing the vendor's. The vendor feed keeps its own
  *  `isComparableHome` beds-and-sqft guard upstream in comp-helper. */
-function isRankable(c: CompCandidate): boolean {
-  return c.sqft != null && c.sqft > 0 && c.priceDate != null;
+function isRankable(c: CompCandidate, requireSaleDate: boolean): boolean {
+  if (c.sqft == null || c.sqft <= 0) return false;
+  return requireSaleDate ? c.priceDate != null : true;
 }
 
 function withinWindow(c: CompCandidate, cutoff: Date): boolean {
@@ -228,7 +263,14 @@ export function rankComps(
   const cutoff = monthsBefore(now, cfg.windowMonths);
 
   // The window and the home-ness test apply identically at every tier.
-  const eligible = candidates.filter((c) => isRankable(c) && withinWindow(c, cutoff));
+  //
+  // Note the asymmetry, and that it is deliberate: `requireSaleDate: false` admits a
+  // candidate that has NO date, but a candidate that HAS one is still held to the window.
+  // Relaxing "must be dated" must never become "may be stale" (failure mode F2).
+  const eligible = candidates.filter((c) => {
+    if (!isRankable(c, cfg.requireSaleDate)) return false;
+    return c.priceDate ? withinWindow(c, cutoff) : !cfg.requireSaleDate;
+  });
 
   const tiers: { tier: 1 | 2 | 3; pick: (c: CompCandidate) => boolean }[] = [
     {
@@ -277,5 +319,9 @@ export function rankComps(
         : "Widened the search area and the size range to find enough comparable sales.";
   }
 
-  return { comps: ranked, standardMet, tier: usedTier, note };
+  // Derived from the SURVIVORS, not from the flag — see RankResult.recencyVerified.
+  // Vacuously true on an empty set, which makes no claim about anything.
+  const recencyVerified = ranked.every((c) => c.priceDate != null);
+
+  return { comps: ranked, standardMet, tier: usedTier, note, recencyVerified };
 }

@@ -141,7 +141,12 @@ async function PaidResult({
 }) {
   let result: CompResult;
   try {
-    result = await compsForAddress(address);
+    // `sqft` is the size the user typed for THIS home, and it was already driving
+    // buildOfferPosition below while the comp lookup ignored it — which is how a 460 sq
+    // ft row ended up in the set that judges a 1,978 sq ft home's offer. Passing it here
+    // is what closes comps_no_size_band_guard on the surface the defect was filed
+    // against. Null stays null: no size, no filter, prior behavior.
+    result = await compsForAddress(address, { subjectSqft: sqft });
   } catch {
     result = {
       comps: [],

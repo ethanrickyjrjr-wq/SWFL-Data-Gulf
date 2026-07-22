@@ -3,6 +3,7 @@ import {
   looksLikeCompAsk,
   extractAddress,
   compHelper,
+  compsForAddress,
   renderCompBlock,
   compSources,
   buildCompsChartSpec,
@@ -53,6 +54,105 @@ function baseDeps(over: Partial<CompDeps> = {}): CompDeps {
     ...over,
   };
 }
+
+// ── the size-band guard, in the path that actually runs ──────────────────────
+// Closes `comps_no_size_band_guard`: "460 and 684 sq ft rows compared against a
+// 1,978 sq ft subject make the ask look wildly overpriced."
+//
+// The ranker was already green as a pure function; that proved nothing about the live
+// path, because `compsForAddress` still did `nearby.slice(0, 6)`. These are the tests
+// that make the defect actually closed rather than merely addressed.
+const MIXED_POOL = [
+  comp({ addressLine: "460 sq ft row", sqft: 460, propertyId: "M-A" }),
+  comp({ addressLine: "684 sq ft row", sqft: 684, propertyId: "M-B" }),
+  comp({ addressLine: "in band A", sqft: 1900, propertyId: "M-C" }),
+  comp({ addressLine: "in band B", sqft: 2050, propertyId: "M-D" }),
+  comp({ addressLine: "in band C", sqft: 1800, propertyId: "M-E" }),
+];
+
+describe("comps_no_size_band_guard — the live path, not just the pure ranker", () => {
+  it("DROPS the 460 and 684 sq ft rows once the subject's size is known", async () => {
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({ subjectSqft: 1978, fetchNearby: async () => MIXED_POOL }),
+    );
+
+    const addresses = out.comps.map((c) => c.addressLine);
+    expect(addresses).not.toContain("460 sq ft row");
+    expect(addresses).not.toContain("684 sq ft row");
+    expect(out.comps).toHaveLength(3);
+  });
+
+  it("changes NOTHING when the subject's size is unknown", async () => {
+    // Behavior preservation. Every existing caller that cannot supply a size keeps the
+    // old slice — a wiring that silently filtered on a size it had to guess would be
+    // inventing the very fact the filter depends on.
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({ fetchNearby: async () => MIXED_POOL }),
+    );
+    expect(out.comps).toHaveLength(5);
+  });
+
+  it("keeps the enrichment join intact — a ranked comp still gets its RECORDED sale", async () => {
+    // The map-back guard. Ranking rebuilds objects, so a naive implementation loses
+    // `propertyId`, the sold-event join key. Nothing would throw: prices would quietly
+    // degrade from recorded sales to AVM estimates, which is the exact
+    // estimate-as-sale confusion this module exists to prevent.
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        subjectSqft: 1978,
+        fetchNearby: async () => MIXED_POOL,
+        fetchSold: async () => ({ soldPrice: 400_000, soldDate: "2026-05-12" }),
+      }),
+    );
+
+    const sold = out.comps.filter((c) => c.priceKind === "sold");
+    expect(sold.length).toBeGreaterThan(0);
+    expect(sold[0].price).toBe(400_000);
+    expect(sold[0].priceDate).toBe("2026-05-12");
+  });
+
+  it("never fabricates a sale date for a comp the vendor never dated", async () => {
+    // The vendor sends an AVM `estimateDate`, never a sale date. It must not ride into
+    // the ranker as `priceDate` to survive a window — that laundering is RULE 1.
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        subjectSqft: 1978,
+        fetchNearby: async () => MIXED_POOL,
+        fetchSold: async () => null, // no enrichment → nothing is a recorded sale
+      }),
+    );
+
+    for (const c of out.comps) {
+      expect(c.priceKind).not.toBe("sold");
+      if (c.priceKind === "estimate") expect(c.priceDate).toBe("2026-05-01"); // AVM date, tagged as such
+    }
+  });
+
+  it("says 'none comparable' — NOT 'no comps found' — when the pool is all wrong-sized", async () => {
+    // F5's shape. Three distinct states must stay distinct: the vendor was throttled,
+    // the vendor returned nothing, and the vendor returned homes none of which are
+    // comparable. Collapsing the third into the second tells the user the market is
+    // empty when we are actually holding five sales.
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        subjectSqft: 1978,
+        fetchNearby: async () => [
+          comp({ addressLine: "tiny A", sqft: 460, propertyId: "M-A" }),
+          comp({ addressLine: "tiny B", sqft: 684, propertyId: "M-B" }),
+        ],
+      }),
+    );
+
+    expect(out.comps).toHaveLength(0);
+    expect(out.needs.join(" ")).toMatch(/size|comparable/i);
+    expect(out.needs.join(" ")).not.toMatch(/didn't find nearby comps/i);
+  });
+});
 
 describe("throttle-honest empty (07/16/2026) — a degraded call never claims 'no comps'", () => {
   it("says briefly-busy when the nearby call degraded (throttle/timeout)", async () => {

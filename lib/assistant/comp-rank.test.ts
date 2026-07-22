@@ -239,3 +239,93 @@ describe("output — every comp explains itself, and never invents a distance", 
     }
   });
 });
+
+// ── F9 — the DATELESS VENDOR FEED ────────────────────────────────────────────
+// The blocker found on wiring 07/22/2026, before a line of wiring shipped.
+//
+// `compsForAddress` ranks the /nearby-home-values response, and `NearbyComp` has NO
+// sale-date field — only `estimateValue`/`estimateDate`, which the vendor module's own
+// comment labels "not a sale." Real sale dates arrive ONLY from the ≤2-call enrichment
+// that runs AFTER selection. So at ranking time every vendor candidate is dateless.
+//
+// That left exactly two wrong moves and one right one:
+//   WRONG — map `priceDate: null` and rank as-is: the window rejects all 25 candidates
+//           and EVERY Lee/Collier address returns "no comps." A blank product.
+//   WRONG — map `estimateDate` into `priceDate` to survive the window: that launders an
+//           AVM valuation date into a sale date. An invented fact — RULE 1, the one hard
+//           block, and precisely what the lake feed was built to avoid.
+//   RIGHT — rank the vendor feed on BAND + SHAPE and say plainly that recency is not
+//           verified from this source. That is what closes comps_no_size_band_guard;
+//           the 6-month window is the lake feed's job, because only it has real dates.
+describe("F9 — the vendor feed carries no sale dates and must not fake them", () => {
+  test("dateless comps still DROP the 460 and 684 sq ft rows from the defect", () => {
+    // The whole point of Phase 1: the size-band guard cannot depend on dates the
+    // vendor never sends, or it protects nothing on the path that actually runs.
+    const result = rankComps(
+      SUBJECT,
+      [
+        comp({ addressLine: "460 sq ft row", sqft: 460, priceDate: null }),
+        comp({ addressLine: "684 sq ft row", sqft: 684, priceDate: null }),
+        comp({ addressLine: "in band A", sqft: 1900, priceDate: null }),
+        comp({ addressLine: "in band B", sqft: 2050, priceDate: null }),
+        comp({ addressLine: "in band C", sqft: 1800, priceDate: null }),
+      ],
+      NOW,
+      { requireSaleDate: false },
+    );
+
+    const addresses = result.comps.map((c) => c.addressLine);
+    expect(addresses).not.toContain("460 sq ft row");
+    expect(addresses).not.toContain("684 sq ft row");
+    expect(result.comps).toHaveLength(3);
+    expect(result.standardMet).toBe(true);
+  });
+
+  test("the escape hatch is DECLARED, never silent — recencyVerified is false", () => {
+    // A caller must be able to tell a band-only set from a real 6-month set. If this
+    // were implicit, prose could claim a recency nobody checked.
+    const dateless = rankComps(SUBJECT, [comp({ priceDate: null })], NOW, {
+      requireSaleDate: false,
+    });
+    expect(dateless.recencyVerified).toBe(false);
+
+    const dated = rankComps(SUBJECT, [comp()], NOW);
+    expect(dated.recencyVerified).toBe(true);
+  });
+
+  test("requireSaleDate:false does NOT become a back door around the 6-month window", () => {
+    // F2's guard, re-asserted against the new flag. Dropping the date REQUIREMENT must
+    // never mean accepting a sale we CAN date and know is stale — otherwise the operator
+    // decree dies by flag instead of by fallback.
+    const result = rankComps(
+      SUBJECT,
+      [
+        comp({ addressLine: "stale but dated", priceDate: "2025-10-14" }),
+        comp({ addressLine: "undated", priceDate: null }),
+      ],
+      NOW,
+      { requireSaleDate: false },
+    );
+
+    const addresses = result.comps.map((c) => c.addressLine);
+    expect(addresses).toContain("undated");
+    expect(addresses).not.toContain("stale but dated");
+  });
+
+  test("a dateless comp never prints a sold date in its why-line", () => {
+    // No date in, no date out — not "sold recently", not today's date.
+    const result = rankComps(SUBJECT, [comp({ priceDate: null })], NOW, {
+      requireSaleDate: false,
+    });
+    expect(result.comps[0].why).not.toMatch(/sold/i);
+    expect(result.comps[0].why).toContain("sq ft vs your");
+  });
+
+  test("the DEFAULT still requires a sale date — the lake path cannot drift", () => {
+    // Omitting the flag must keep the strict behavior, so wiring a new feed without
+    // thinking about dates fails loudly rather than silently ranking undated rows.
+    const result = rankComps(SUBJECT, [comp({ priceDate: null })], NOW);
+    expect(result.comps).toHaveLength(0);
+    expect(result.recencyVerified).toBe(true);
+  });
+});

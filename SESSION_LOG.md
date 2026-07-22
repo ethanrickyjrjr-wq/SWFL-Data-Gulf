@@ -1,3 +1,36 @@
+## 2026-07-22 (Opus 4.8 · main) — Wired the comp ranker into the live path; the vendor feed's missing sale dates turned out to block the obvious wiring.
+
+Verified the prior session's claims first, and they held: `20205251` at HEAD, all five artifacts on
+disk, 26 tests genuinely green, LeePA month-grain and the view GRANT both real.
+
+Then the wiring hit a blocker that neither the spec nor the green tests could see. `compsForAddress`
+ranks the `/nearby-home-values` response, and `NearbyComp` has NO sale-date field — only an AVM
+`estimateDate`, which the vendor module's own comment labels "not a sale." Real sale dates arrive
+only from the ≤2-call enrichment that runs AFTER selection. So at ranking time every vendor candidate
+is dateless, and `rankComps` hard-required a date (`comp-rank.test.ts:106` already asserted it). Two
+wrong moves were available: rank as-is and return ZERO comps for every Lee/Collier address, or map
+`estimateDate` into `priceDate` and launder a valuation into a sale (RULE 1). Took the third:
+`requireSaleDate: false` for the vendor feed only — band + shape selection, with `recencyVerified`
+derived from the SURVIVORS so no caller can describe a band-only set as recent sales. The flag drops
+the date REQUIREMENT and never widens the window: a candidate that HAS a date is still held to the
+6 months, so the operator decree cannot die by flag (test named for it).
+
+Shipped: `subjectSqft`/`subjectBeds`/`subjectBaths` on `CompDeps`; ranking replaces
+`nearby.slice(0, 6)` ONLY when the caller knows the subject's size, else prior behavior byte for byte
+— filtering against a guessed size would invent the fact the filter rests on. `CompCandidate.id`
+carries the map-back so ranking cannot silently drop `propertyId` and degrade recorded sales into AVM
+estimates (that one has its own test). Three empty-states now stay distinct: vendor throttled, vendor
+returned nothing, vendor returned homes none of which are comparable — the third used to claim an
+empty market we never observed. `offer-check` passes its user-entered `sqft`, which is the surface
+`comps_no_size_band_guard` was filed against.
+
+Green: 72 comp tests, 424 across assistant/listings/address-context, 517 deliverable recipes,
+`bunx next build` exit 0. NOT closing `comps_no_size_band_guard` yet — it is closed on offer-check
+but the CHAT lane still blind-slices (no subject size at call time), so it stays open with
+`comps_size_band_chat_lane` opened beside it. Also opened `comps_lake_feed_unwired`: the lake feed is
+green and live-probed but has zero production callers, which means the 6-month window is unenforced
+in production until Phase 2 wires it.
+
 ## 2026-07-22 (Sonnet 5 · main) — /demo caveats were unreadable — real data broke a layout the old fixtures never exercised.
 
 Operator screenshotted `/demo` post-fix: the 8 real caveats from master's live output (flood
