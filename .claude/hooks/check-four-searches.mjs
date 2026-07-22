@@ -74,9 +74,18 @@ export function isDataTurn(text) {
   // concrete artifact nouns the operator actually types (geometry, pipe, vintage,
   // file, layer, fixture…); the old list held only abstractions like "data".
   const SUBJECT =
-    /\b(data|dataset|field|fields|column|columns|table|tables|root|roots|endpoint|endpoints|api|source|sources|ingest|pipe|pipeline|schema|grain|quota|comps?|sold|sale|dates?|records?|rows?|coverage|hold|holds|grab|grabbing|pull|pulling|store|stored|storing|geometry|polygon|vintage|files?|layers?|fixture|catalog|crosswalk|index|feed|information|info|number|value|median|price|count)\b/i;
+    /\b(data|dataset|field|fields|column|columns|table|tables|root|roots|endpoint|endpoints|api|source|sources|ingest|pipe|pipeline|schema|grain|quota|comps?|sold|sale|dates?|records?|rows?|coverage|hold|holds|grab|grabbing|pull|pulling|store|stored|storing|geometry|polygon|vintage|files?|layers?|fixture|catalog|crosswalk|index|feed|information|info|number|value|median|price|count|beds?|baths?|bedrooms?|bathrooms?|sqft|acreage|wire|wired|wiring|calls?|calling)\b/i;
+  // ASKING stays permissive ONLY because SUBJECT is the real gate: a turn carrying no
+  // data noun never fires regardless of phrasing. Verified 07/22/2026 by running the
+  // binary against 9 real operator messages from SCRATCHPAD — "make the button blue"
+  // and "make sure we don't fuck up egress" both stay silent, because neither carries
+  // a SUBJECT word. The three that were DEAF before this widening:
+  //   "ok, just make sure we have beds and baths"      -> failure #1 in the header above
+  //   "...WE ONLYY CALL 3 OF 18. ARE YOU LOOKING..."   -> failure #4 in the header above
+  //   "check this / where are we wiring to??"          -> scratchpad 0ab
+  // The gate was deaf to the exact messages that produced the failures it exists to stop.
   const ASKING =
-    /\?|\b(what|which|why|where|how many|do we|did we|can we|are we|is there|are there|show me|list)\b/i;
+    /\?|\b(what|which|why|where|how many|do we|did we|can we|are we|is there|are there|show me|list|make sure|we have|we hold|we got|verify|confirm)\b/i;
   return SUBJECT.test(t) && ASKING.test(t);
 }
 

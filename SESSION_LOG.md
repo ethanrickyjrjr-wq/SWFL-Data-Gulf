@@ -1,3 +1,34 @@
+## 2026-07-22 (Opus 4.8 · main) — Full-week failure audit. The four-lane gate was deaf to the exact message that caused failure #1.
+
+**Audit:** `_ASSISTANT/2026-07-22-claude-failure-audit-OPUS.md`. Commissioned by the handoff written
+earlier today; every claim carries a run command, commit hash, or scratchpad item.
+
+**Live numbers (measured, not quoted):** checks ledger is **667 open — 193 defect · 100 verify ·
+287 task · 87 untriaged**, and **0 of 667 carry a signal** (SQL, read-only). Neither the 722 nor the
+649 figure in today's two other handoffs is current. `check-sweep.mjs` is correct and currently
+**inert** — it can act on zero open checks until signals are backfilled. `public.deliverables` anon
+probe returns **HTTP 401 permission denied** — that leak is genuinely closed.
+
+**Three "durably fixed" classes in `docs/cron-rebuild-failures.md` recurred this week:**
+secret-not-passed-to-workflow (`23410a45`, 07/15 — its guard, Gate 3, is written *"advisory, never
+blocks"*), vocab-slug orphan (`d33bb497`, 07/18), and an unnamed class — Windows/POSIX path handling
+inside `.claude/hooks/`, twice in five days (`bdfd9f18` 07/17, `1ad4eb12` 07/22).
+
+**Four-lane gate.** Measured at ~15:0x: registered in **zero** settings files — the hook had never
+fired once, and neither `ce163255` nor `1ad4eb12` touched `settings.json`. A parallel session landed
+`ba30a776` at 16:08 fixing exactly that; recorded here that the audit did not fix it. Then, running
+the now-registered gate against 9 real operator messages from SCRATCHPAD, it was **DEAF to 3** —
+including *"ok, just make sure we have beds and baths"*, the message that produced failure #1 in the
+hook's own header. Widened SUBJECT + ASKING; **9/9 fire, 4/4 non-data controls stay silent, 17 hook
+tests pass**. Still open: `Stop` placement cannot prevent a first wrong word, and `stop_hook_active`
+makes it a one-shot nudge — both need an operator call.
+
+**Also found:** `bun test` from the repo root does not match `.claude/**` (dot-dirs excluded; 9,616
+files searched, 0 matched). The guard suite for our guards never runs in CI.
+
+**Egress:** `node scripts/egress-burner-scan.mjs` → **green**, no live process, no unguarded copy,
+no spawning config, guard armed.
+
 ## 2026-07-22 (Opus 4.8 · main) — CORRECTION: "we have zero flood data" was false. /map repointed to the live env-swfl flood root.
 
 **I was wrong and the operator caught it.** I claimed /map couldn't be repointed because
