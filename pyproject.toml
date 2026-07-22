@@ -1,6 +1,6 @@
 [tool.deptry]
 # requirements.txt path is relative to the repo root (where deptry is invoked from)
-requirements_files = ["ingest/requirements.txt"]
+requirements_files = ["ingest/requirements.txt", "ingest/requirements-analysis.txt"]
 
 # Local modules: 'ingest' is the local package (ingest/__init__.py);
 # 'check_freshness' is ingest/scripts/check_freshness.py, imported by rebuild_due.py
@@ -17,6 +17,7 @@ known_first_party = ["ingest", "check_freshness"]
 "python-dateutil"  = "dateutil"
 "pyyaml"           = "yaml"
 "pymupdf"          = "fitz"
+"scikit-learn"     = "sklearn"
 
 # psycopg2 ships as a transitive of psycopg[binary] and is imported directly in a
 # few low-level DB helpers.  Suppress both DEP001 (missing) and DEP003 (transitive)

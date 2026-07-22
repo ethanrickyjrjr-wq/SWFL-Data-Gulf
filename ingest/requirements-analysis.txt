@@ -1,0 +1,11 @@
+# Offline model analysis only (ingest/analysis/) — NEVER installed by the scheduled
+# cron runners, which install -r ingest/requirements.txt. RULE 11: no runner carries
+# weight for code it never executes.
+#
+# Spec: docs/superpowers/specs/2026-07-22-offline-model-analysis-design.md
+# Precedent for a split requirements file: ingest/requirements-probe.txt
+#
+# psycopg: the analysis reads AGGREGATES (not rows) out of data_lake — see _sql.py.
+psycopg[binary]>=3.2
+scikit-learn>=1.6
+numpy>=2.0
