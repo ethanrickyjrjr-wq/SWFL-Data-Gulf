@@ -191,7 +191,9 @@ out of `public`.
 **Internally sequential by the playbook's own rule — one at a time, never as a batch, so a red is
 attributable.** This is the whole discipline of this package; batching them destroys the signal.
 
-1. **knip to phase 2** — triage the ~14-file orphan surface, then flip `rules.files` to `error`.
+1. **knip to phase 2** — triage the orphan surface (the ~14-file estimate above was stale; the live
+   07/21 surface was 32 files — re-run knip rather than trusting either number), then flip
+   `rules.files` to `error`.
 2. **Registry identity to live gating** — `registry_identity_live_gating`. Advisory on purpose:
    `redfin_city_swfl`, `dbpr_re_licensees`, and `leepa_parcel_zip` are genuinely red on the
    current snapshot. Flip to `--live --gate` only after one green confirm, or you red `main` on
