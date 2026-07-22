@@ -51,8 +51,10 @@
     // background/projection modules) are a kept vendored snapshot, not our dead code.
     "components/charts/vendor/**",
     // Docs are not app source — embedded code snippets under archived/_FINISHED plans
-    // (e.g. the flagged cre-swfl.mts) are artifacts, never imported by the app.
-    "docs/**",
+    // (e.g. the flagged cre-swfl.mts) are artifacts, never imported by the app. Scoped to
+    // the _FINISHED subtree only (not all of docs/**) so a real .ts/.mts file dropped
+    // elsewhere under docs/ (docs/sql/, docs/standards/, etc.) still gets caught.
+    "docs/superpowers/plans/_FINISHED/**",
     // Claude harness workflow prose (piece1-shell-review.js et al.) — invoked by the
     // agent harness, not imported as code.
     ".claude/workflows/**",

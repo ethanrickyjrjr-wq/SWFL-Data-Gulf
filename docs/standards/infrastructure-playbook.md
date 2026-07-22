@@ -231,20 +231,31 @@ not code.
 1. **knip to phase 2 — DONE 2026-07-21 (wt/ci-ratchets).** `knip.jsonc` `rules.files` is now
    `error`: a newly-orphaned module fails the build (proven — a scratch orphan reds knip, exit 1).
    The live 07/21 surface was 32 files, not ~14: vendored bklit lib (`ignore
-   components/charts/vendor/**`), `docs/**` + `.claude/workflows/**` (`ignore`), two CLIs
-   (`entry`), and 16 no-importer app files FROZEN in `ignoreFiles` for operator core-vs-parked
-   triage — named, not deleted.
+   components/charts/vendor/**`), `docs/superpowers/plans/_FINISHED/**` (the one archived-plan file
+   that triggered it — scoped narrow, not a blanket `docs/**`, so real code dropped elsewhere under
+   docs/ still gets caught) + `.claude/workflows/**` (`ignore`), two CLIs (`entry`), and 16
+   no-importer app files FROZEN in `ignoreFiles` for operator core-vs-parked triage — named, not
+   deleted, tracked by check `knip_frozen_orphan_triage`. Residual: knip runs CI-only, no local
+   pre-push hook, so a legit untraceable file (a new `node <path>` CLI, a dynamic-import-only
+   module) reds CI remotely for a contributor who didn't touch this config.
 2. **Registry identity to live gating.** The `--live` step is advisory on purpose: on the
    current snapshot `redfin_city_swfl`, `dbpr_re_licensees`, and `leepa_parcel_zip` are
    genuinely red, and a blocking live gate on day one reds `main` — the exact false-red disease
    this build exists to kill. Flip to `--live --gate` after one green confirm. Tracked by
    `registry_identity_live_gating`.
-3. **Factuality gate to blocking — DONE 2026-07-21 (wt/ci-ratchets).** `factuality-gate.yml`
-   `continue-on-error` flipped `true`->`false`. Evidence: 17/17 step-level green over the gate's
-   entire life (runs 29481865012 [07-16] .. 29781925042 [07-20]; job-level continue-on-error does
-   not mask a step conclusion). Caveat in the workflow header — the gate is LLM-judged (promptfoo
-   factuality grader, 14 live-Anthropic fixtures), so a grading/infra blip can red main; revert if
-   it flakes. Tracked by `factuality_gate_blocking_flip`.
+3. **Factuality gate un-masked to VISIBLE — DONE 2026-07-21 (wt/ci-ratchets), but read this before
+   calling it "blocking."** `factuality-gate.yml` `continue-on-error` flipped `true`->`false`.
+   Evidence: 17/17 step-level green over the gate's entire life (runs 29481865012 [07-16] ..
+   29781925042 [07-20]; job-level continue-on-error does not mask a step conclusion). **Verified
+   post-build (second-order review): this flip does NOT gate main.** main's branch ruleset requires
+   only the `CI / build` context (factuality-gate isn't in it), the operator's account has
+   bypass_mode=always regardless, and the workflow has no `pull_request` trigger so it structurally
+   cannot post a status to a PR even if added to required checks. Real effect: a failing grade now
+   shows as a visible red run + notification instead of a masked green — signal, not enforcement.
+   Caveat in the workflow header — the gate is LLM-judged (promptfoo factuality grader, 14
+   live-Anthropic fixtures) with no retry, so a grading/infra blip can red the run with no code
+   change; revert `continue-on-error` if it flakes. Tracked by `factuality_gate_blocking_flip` —
+   close with the "visible, not gating" framing, not "main is now gated on factuality."
 4. **Visual regression into CI.** Currently local-only. Three open checks cover it:
    `visual_regression_ci_job`, `visual_regression_prepush_wiring`,
    `storybook_visual_regression_gap`.

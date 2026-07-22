@@ -1,13 +1,23 @@
-# Factuality CI gate — BLOCKING as of 2026-07-21 (spec 2026-07-16-factuality-ci-gate-design.md
-# D5/D6; ratchet 3/4, check `factuality_gate_blocking_flip`). Flipped continue-on-error true->false
-# after a validated warn-first stretch: 17/17 step-level green over the gate's entire life
-# (runs 29481865012 [2026-07-16] .. 29781925042 [2026-07-20], all step conclusion=success — the
-# job-level continue-on-error does not mask a step conclusion, so these are real passes).
+# Factuality CI gate — VISIBLE (not blocking) as of 2026-07-21 (spec
+# 2026-07-16-factuality-ci-gate-design.md D5/D6; ratchet 3/4, check
+# `factuality_gate_blocking_flip`). Flipped continue-on-error true->false after a validated
+# warn-first stretch: 17/17 step-level green over the gate's entire life (runs 29481865012
+# [2026-07-16] .. 29781925042 [2026-07-20], all step conclusion=success — job-level
+# continue-on-error does not mask a step conclusion, so these are real passes).
+# WHAT THE FLIP ACTUALLY DOES, VERIFIED 2026-07-21 — read before calling this "blocking" again:
+# it un-masks a failing grade into a visible red run + GitHub notification. It does NOT gate
+# main. Three independent reasons: (1) main's branch ruleset requires only the `CI / build`
+# context — this workflow is not in required_status_checks; (2) the operator's account has
+# ruleset bypass_mode=always, so even a required check would not block a direct push;
+# (3) this workflow triggers on `push` only (no `pull_request`), so it structurally cannot post
+# a status to a PR head commit even if added to required checks. Net effect: signal, not gate.
+# To make this a REAL gate: add a pull_request trigger, add this context to the ruleset's
+# required_status_checks, and decide what bypass_mode=always should mean for an LLM-judged check.
 # CAVEAT — this gate is LLM-JUDGED (promptfoo `factuality` grader, 14 fixtures, live Anthropic
-# calls): grading nondeterminism OR an Anthropic/infra blip (surfaced as result.error) can red
-# main with no code change. If it flakes, revert continue-on-error to true. Supabase secrets are
-# LOAD-BEARING: without them
-# logApiUsage() silently no-ops and the grading spend becomes invisible.
+# calls): grading nondeterminism OR an Anthropic/infra blip (surfaced as result.error) turns the
+# run red with no code change and no retry/re-run mechanism exists. If it flakes, revert
+# continue-on-error to true. Supabase secrets are LOAD-BEARING: without them logApiUsage()
+# silently no-ops and the grading spend becomes invisible.
 # Spec deviation, documented: spec success-criteria said "a real PR"; this repo
 # pushes to main and never opens PRs, so the trigger is push-with-path-filter
 # plus manual dispatch.
@@ -24,7 +34,7 @@ on:
 jobs:
   gate:
     runs-on: ubuntu-latest
-    continue-on-error: false # BLOCKING 2026-07-21 (ratchet 3/4). See header for the validated warn-first evidence + the LLM-judged false-red caveat.
+    continue-on-error: false # Un-masks failures to a visible red run (ratchet 3/4) — NOT a merge gate, see header.
     steps:
       - uses: actions/checkout@v4
 

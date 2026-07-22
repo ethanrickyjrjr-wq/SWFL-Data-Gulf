@@ -138,6 +138,22 @@ Mirrored to `docs/sql/20260721_project_activity_insert_policy_and_grant.sql` (pr
 **Code (LOCAL, pending review — this worktree lands via `node scripts/worktree.mjs land rls-project-activity`).** Wired `app/api/projects/[id]/ai-material/route.ts` — the project-scoped AI-material build that inserts a deliverable but never logged. NOT `/email-lab/ai` (anonymous lane, no `project_id`, shared engine also called by ai-material — and its investigation-suggested service-role wire was a cross-user write hole, since service-role bypasses the new policy). `ai-material` already resolves the caller and proves ownership via the cookie-client project SELECT, so it now logs `deliverable_built` via the COOKIE client `db` (NOT the service-role `admin` it uses for the deliverables insert) — exactly the `refresh/route.ts` pattern. `deliverable_built` was a dead enum value with zero callers until now.
 
 `bunx next build` green (compile + TypeScript + full production prerender, with the two Supabase env vars supplied to the fresh worktree via the sanctioned single-var pattern — the worktree's env-exfil hook correctly blocked a full `.env.local` copy).
+## 2026-07-21 (Opus 4.8 · wt/ci-ratchets) — Correction: the ratchet-3 flip does NOT make factuality-gate a merge gate. Re-worded before landing.
+
+Post-build review (second-order agent) caught that the two entries below, the workflow header, and
+the infra-playbook Layer 7 line all called continue-on-error:false "BLOCKING main." That claim is
+false, verified against the live GitHub ruleset (`gh api repos/:owner/:repo/rulesets/16713869`):
+main's ruleset requires only the `CI / build` context (factuality-gate is not in it), the operator's
+account has bypass_mode=always regardless, and factuality-gate.yml has no `pull_request` trigger so
+it structurally cannot post a status to a PR head commit even if it were added to required checks.
+The flip's real and only effect: a failing grade now shows as a visible red run + GitHub
+notification instead of a masked green. That is still worth having — it restores a failure signal
+that didn't exist before — but it is signal, not enforcement, and the entries below overclaim.
+Corrected in `.github/workflows/factuality-gate.yml`'s header + inline comment (this worktree) and
+in `docs/standards/infrastructure-playbook.md`'s Layer 7 section, same commit as this entry. Per
+RULE 0 (append-only), the two entries below are left as written — this entry is the correction on
+top, not an edit to them.
+
 ## 2026-07-21 (Opus 4.8 · wt/ci-ratchets) — Sync CI labels to the ratchet-1 flip (no behavior change).
 
 Follow-up to ratchet 1: knip is now blocking, but two references still called it "report-only /
