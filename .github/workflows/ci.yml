@@ -51,11 +51,13 @@ jobs:
       - name: Test .github scripts (node:test)
         run: node --test .github/scripts/*.test.mjs scripts/lib/*.test.mjs .claude/hooks/*.test.mjs
 
-      # Dead-code detector (Operation July task 20). PHASE 1: REPORT-ONLY — knip.jsonc
-      # sets rules.files to "warn", so this exits 0 and only prints the candidate orphan
-      # list in the CI log. Flip rules.files to "error" once the ~14-file surface is
-      # triaged clean, to fail the build on newly-orphaned modules (phase 2).
-      - name: Dead code (knip, report-only)
+      # Dead-code detector (Operation July task 20). PHASE 2 (2026-07-21): ENFORCING —
+      # knip.jsonc sets rules.files to "error", so a newly-orphaned module FAILS the build.
+      # The 07/21 orphan surface (32 files) was triaged in knip.jsonc: vendored lib + docs +
+      # CLIs resolved via ignore/entry; 16 no-importer app files frozen in ignoreFiles for
+      # operator core-vs-parked triage. A red here = a real new orphan (or a frozen file wired
+      # away — drop its ignoreFiles line).
+      - name: Dead code (knip, phase 2 — blocking)
         run: bunx --bun knip
 
       # Ratchet on raw lake reads in page/loader code. Does NOT ban them — most

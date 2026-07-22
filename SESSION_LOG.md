@@ -138,6 +138,20 @@ Mirrored to `docs/sql/20260721_project_activity_insert_policy_and_grant.sql` (pr
 **Code (LOCAL, pending review — this worktree lands via `node scripts/worktree.mjs land rls-project-activity`).** Wired `app/api/projects/[id]/ai-material/route.ts` — the project-scoped AI-material build that inserts a deliverable but never logged. NOT `/email-lab/ai` (anonymous lane, no `project_id`, shared engine also called by ai-material — and its investigation-suggested service-role wire was a cross-user write hole, since service-role bypasses the new policy). `ai-material` already resolves the caller and proves ownership via the cookie-client project SELECT, so it now logs `deliverable_built` via the COOKIE client `db` (NOT the service-role `admin` it uses for the deliverables insert) — exactly the `refresh/route.ts` pattern. `deliverable_built` was a dead enum value with zero callers until now.
 
 `bunx next build` green (compile + TypeScript + full production prerender, with the two Supabase env vars supplied to the fresh worktree via the sanctioned single-var pattern — the worktree's env-exfil hook correctly blocked a full `.env.local` copy).
+## 2026-07-21 (Opus 4.8 · wt/ci-ratchets) — Sync CI labels to the ratchet-1 flip (no behavior change).
+
+Follow-up to ratchet 1: knip is now blocking, but two references still called it "report-only /
+phase 1", either of which would mislead someone debugging a knip-failed build. Fixed both (package F
+owns .github/workflows/*.yml): ci.yml's knip step name `Dead code (knip, report-only)` ->
+`Dead code (knip, phase 2 — blocking)` and its comment, plus the Layer 7 EVIDENCE line ("report-only,
+phase 1" -> "phase 2, blocking"). Separate commit from the flip so it doesn't touch the one-flip-per-
+commit attributability. Not an amend — ratchet 1 is stacked under ratchet 3.
+
+Also confirmed (advisor prompt) the ratchet-3 warn-first stretch is REAL gradings, not self-skips:
+run 29781925042 ran all 14 named fixtures live (`a-median-price-accurate (class a, expect pass)
+[5522ms]` .. `14 pass, 0 fail`), not the "skipped — set FACTUALITY_GATE=1" branch; every one of the
+17 runs took >1min, consistent with real Anthropic grading (a skip is seconds). Flip stands.
+
 ## 2026-07-21 (Opus 4.8 · wt/ci-ratchets) — CI ratchet 3/4: factuality gate flipped to BLOCKING (continue-on-error true->false). LLM-judged, so the caveat travels in the workflow header.
 
 Package F, ratchet 3 — its own commit (attributability). Ratchet 2 not flipped; ratchet 4 scoped

@@ -221,7 +221,7 @@ runner limits — and then move that ONE job, not the fleet.
 **EVIDENCE.** `.github/workflows/ci.yml` runs, on every push to `main` and every PR:
 typecheck (`bunx tsc --noEmit`), lint (`bunx eslint .`), `bun test` with Playwright Chromium
 installed, `node --test` over `.github/scripts`, `scripts/lib`, and `.claude/hooks`, knip
-dead-code detection (report-only, phase 1), the lake-read ratchet
+dead-code detection (phase 2, blocking as of 2026-07-21), the lake-read ratchet
 (`scripts/check-lake-reads.mts`), and registry identity (static blocking, live advisory).
 `brains/**`-only pushes are skipped via `paths-ignore` because the rebuild bot commits data,
 not code.
