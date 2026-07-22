@@ -1,3 +1,48 @@
+## 2026-07-22 (Opus 4.8 · main) — CORRECTION to the correction below: main IS red right now, and NOT for my reason. Four-lane test converted to node:test.
+
+Append-only. The entry below corrected an earlier one and got it wrong in the other direction. Both
+prior versions are superseded by measured evidence, so here is the settled account.
+
+**Measured, not remembered.** `gh run list --workflow=ci.yml --branch=main` returns **failure on the
+last 6+ consecutive runs**, back through 18:51 UTC today. So:
+- The original claim *"main's CI is red right now"* was **RIGHT**.
+- The correction below — *"nothing is red yet"* — was **WRONG**. I corrected a true statement into a
+  false one, on reasoning rather than on `gh`. Same class of error the correction was written to
+  fix, committed in the act of writing the fix.
+
+**But it is not red for my reason, and that half of the correction stands.** The failing step is
+`Test` (`bun test`), on a single test: `uploadSocialImage > uploads PNG with upsert + image/png
+content-type and returns the public URL`. That step runs **before** `Test .github scripts
+(node:test)`. CI fails fast, so the node:test step **never executes today**. My break was real but
+**masked** — it would have landed silently and surfaced later as someone else's mystery break, the
+moment uploadSocialImage went green.
+
+**The break, named:** `.claude/hooks/check-four-searches.test.mjs` imported `bun:test`, while the
+committed `ci.yml` runs that glob under `node --test`. Node's ESM loader cannot resolve the `bun:`
+protocol — `ERR_UNSUPPORTED_ESM_URL_SCHEME`, a hard crash killing the whole step before one
+assertion runs. It was the lone file in `.claude/hooks/` doing this; all 7 siblings use
+`node:test` + `node:assert`.
+
+**Fix:** converted to `node:test` + `node:assert` — 57 assertions, `toBe`→`strictEqual`,
+`toEqual`→`deepStrictEqual`, `toContain`→`ok(...includes)`, `toHaveLength`→`strictEqual(.length)`.
+Every test name and comment preserved verbatim. Standalone: **22/22 pass**. Under the exact
+committed CI command the suite goes from **148 tests / 4 fail → 169 tests / 3 fail** — my 21 tests
+now actually execute, and my file is green.
+
+**The 3 remaining failures are NOT mine and pre-date this push:** the `_watch-manifest.json` drift
+guard plus the two watcher-list tests. Proof they are pre-existing — `git diff origin/main -- .github/`
+shows the only delta is a parallel session's uncommitted `ci.yml` `run:` line, and the manifest test
+reads workflow filenames + `on.schedule`/`workflows:` blocks, not `run:`. Inputs are identical to
+origin/main, so these fail on origin/main too. This is a **recurrence** of the drift fixed 07/18
+(`21ab9a8b`). Not regenerating unilaterally: `node scripts/build-watch-lists.mjs --write
+--write-watchers` rewrites contested `.github/` watchers while parallel sessions are live.
+
+**Checks:** closed `four_searches_test_bun_import_breaks_ci`; opened one each for the uploadSocialImage
+red and the watch-manifest drift recurrence, per RULE 2.4 — neither is left as a log sentence.
+
+**Not claiming CI green.** main stays red for uploadSocialImage. This push removes a latent second
+break; it does not fix the live one.
+
 ## 2026-07-22 (Opus 4.8 · main) — CORRECTION to the entry below: that CI break is red-ON-PUSH, not red now.
 
 Append-only, so the entry below stands as written and this corrects it. I wrote *"main's CI is red

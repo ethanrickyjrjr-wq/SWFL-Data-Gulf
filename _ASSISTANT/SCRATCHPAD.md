@@ -52,6 +52,55 @@ source_ceiling, (3) grep the lake. Naming which of those three I checked is part
 flood gradient bounds are numerically IDENTICAL to the mock fixture, i.e. the calibration was
 copied from fake data. Repointing /map must not inherit those bounds.
 
+## 2026-07-22 — RE-RAISE: "Did we figure out why no one knows where data is? Was it the rebuilds?"
+
+He asked this once already today (0ak) and had to ask again. That re-ask IS the finding: 0ak
+sprawled across corrections and never landed a single answer. This is the consolidation. **His
+hypothesis is CORRECT on the mechanism, and it is ONE of three separate things called "no data."**
+
+**THE MECHANISM — verified live this session, `nightly-chain.yml:200-204`:**
+```
+rebuild:
+  needs: [row-gate]
+  uses: ./.github/workflows/daily-rebuild.yml
+```
+It is a nested `workflow_call`. The whole nightly pipeline hangs off ONE head:
+`guard → listings/lifecycle/pulse/live-search → row-gate → rebuild → bake + warm`.
+`Nightly Chain` (311550406) was `disabled_manually` **at the API**. Commit `185810fd` (07/12
+"CRON CUTOVER") had retired 12 standalone crons AND commented out daily-rebuild's own cron,
+pointing everything at the chain. **So one disable killed the ingests AND the brain rebuild AND
+the narrative bake AND the cache warm.** Single point of failure, by design, undefended.
+
+**Why every status surface said "active":** `gh workflow list` reports the CHILDREN active — they
+are. The disable was on the PARENT, at the API, not in source. And because nested `workflow_call`
+runs execute under the CALLER's run ID, "Daily Brain Rebuild" run history shows **100%
+`workflow_dispatch`, zero `schedule`, ever** — which reads as "the rebuild has no cron" when the
+truth is "its cron moved to a parent that was switched off." Both readings are wrong in a way that
+hides the same fact.
+
+**LIVE STATE RIGHT NOW (queried, not recalled):** `listing_state.last_seen` newest =
+**2026-07-19 04:28:56 UTC**, 33,671 rows. `listing_week.week_start` newest = **2026-07-13**.
+Frozen at the exact point the chain went dark. Chain is re-enabled (API `state: active`) but its
+cron is `23 4 * * *` — **next auto-fire 07/23 04:23 UTC**. It stays frozen until then unless
+dispatched. Dispatch is egress-safe: 0al's timeline already falsified rebuild-as-burner (last
+rebuild 07/20T01:30, overage 07/21 — AFTER rebuilds went dark).
+
+**THE THREE THINGS CALLED "NO DATA" — stop conflating them:**
+1. **Blank screens / login dead** → 07/21 egress overage → spend cap → PostgREST 503. **CLEARED.**
+2. **Data is STALE** → this disabled clock. **ONGOING until 07/23 04:23.** ← his hypothesis, correct.
+3. **Claude saying "we don't have X" when we hold it** (beds/baths, flood, sale dates, DOM — the
+   whole 07/22 litany) → reading `information_schema` (what we PULLED) instead of `source_ceiling`
+   (what EXISTS), plus consumers wired to dead roots. **ONGOING, behavioral, and it is the chronic
+   one.** This is the real answer to "why does no one know where the data is."
+
+**AND THE BUILT-BUT-UNWIRED FIX — new finding, this session.** `scripts/ceilings-to-checks.mjs`
+EXISTS (landed in `5418714d`). It is the exact converter 0ad said was missing — turns a recorded
+`source_ceiling` into a check so it surfaces at session start. **Nothing invokes it.** Repo-wide it
+appears in 6 files: itself, 3 handoff docs, a skill, and data-roots. Zero workflows, zero hooks,
+zero package.json, not in session-kickoff. 75 `source_ceiling` entries recorded; still write-only.
+Same shape as 0ai's ledger (opener, no closer) — except here the acting half was BUILT and never
+plugged in. That is one wiring line from turning bucket 3 from a habit into a mechanism.
+
 # SCRATCHPAD — standing issue list
 
 **RULE 2: ALWAYS USE THE SCRATCHPAD.** Operator should never have to retype an issue.
@@ -74,6 +123,32 @@ entry. Don't do it.
 ---
 
 ## OPEN — raised 07/22/2026
+
+### 0an. OPERATOR: every narrative write carries a second usage-log write — request count doubled on the busiest phase of the rebuild
+
+Raised 07/22, logged before answering, per RULE 2.
+
+**Operator's framing, kept verbatim because he drew the boundary himself:**
+- *"every narrative write is accompanied by a separate usage-log write. That doubles the
+  request count on the busiest phase of the rebuild."*
+- *"Requests aren't bytes, so I'm not calling it an egress problem — but it's a real pattern
+  and it's the kind of thing that adds up. Worth a look when you're not in the middle of this."*
+
+**Do not relitigate this as egress.** He explicitly declined that framing. This is a request-count
+pattern, full stop. Re-raising it as a byte/egress problem is the failure mode, not the finding.
+
+**And the byte question is settled as stated — he wrote it out precisely so nobody reopens it:**
+- Attribution is **free and works**, and he used it twice on 07/22.
+- Bytes need the token. The blocker is **NOT** a missing capability on our side —
+  **neither log service records response size at all.** Read/write access is real and was
+  exercised; the field simply does not exist in the data.
+- This supersedes any earlier "we're blind / we lack access" framing (see 0am, which framed it
+  as blocked on a missing token — the token is only half of it; the field isn't recorded either way).
+
+**Status:** report only, per his "when you're not in the middle of this." Probe the narrative-write
+path and the usage-log-write path, confirm it is genuinely 2 requests per narrative, quantify the
+extra requests across a full rebuild, and say whether they can coalesce. A change to the rebuild
+write path is a behavior change → RULE 3.5 brainstorm before any build.
 
 ### 0ak. OPERATOR: "why is no data being found anywhere???? was it the egress issue?"
 
