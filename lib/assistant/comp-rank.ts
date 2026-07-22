@@ -306,12 +306,19 @@ export function rankComps(
 
   const standardMet = ranked.length >= cfg.minComps;
 
+  // The note is USER-FACING PROSE, so it may only claim what this run actually did.
+  // A `requireSaleDate: false` run applied no window — its candidates can be any age —
+  // and hardcoding "in the last N months" there asserts a recency nobody checked, while
+  // the same result object reports `recencyVerified: false`. Dropping the clause is the
+  // difference between commentary and an invented fact.
+  const windowClause = cfg.requireSaleDate ? ` in the last ${cfg.windowMonths} months` : "";
+
   let note: string | null = null;
   if (!standardMet) {
     note =
       ranked.length === 0
-        ? `No sales in the last ${cfg.windowMonths} months matched this home closely enough to compare.`
-        : `Only ${ranked.length} comparable ${ranked.length === 1 ? "sale" : "sales"} in the last ${cfg.windowMonths} months met the standard — fewer than the three a lender expects.`;
+        ? `No sales${windowClause} matched this home closely enough to compare.`
+        : `Only ${ranked.length} comparable ${ranked.length === 1 ? "sale" : "sales"}${windowClause} met the standard — fewer than the three a lender expects.`;
   } else if (usedTier > 1) {
     note =
       usedTier === 2

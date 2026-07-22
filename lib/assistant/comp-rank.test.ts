@@ -321,6 +321,43 @@ describe("F9 — the vendor feed carries no sale dates and must not fake them", 
     expect(result.comps[0].why).toContain("sq ft vs your");
   });
 
+  test("a window-free run NEVER claims a window in its note", () => {
+    // The note is user-facing prose, and the not-met branch hardcoded "in the last N
+    // months." On the vendor path no window was applied at all, so that sentence asserts
+    // a recency nobody checked — the same invented fact `recencyVerified` exists to deny,
+    // contradicting it in the same result object.
+    const result = rankComps(
+      SUBJECT,
+      [
+        comp({ addressLine: "in band A", sqft: 1900, priceDate: null }),
+        comp({ addressLine: "in band B", sqft: 2050, priceDate: null }),
+      ],
+      NOW,
+      { requireSaleDate: false },
+    );
+
+    expect(result.standardMet).toBe(false);
+    expect(result.recencyVerified).toBe(false);
+    expect(result.note).not.toMatch(/last \d+ months/);
+    expect(result.note).toMatch(/fewer than the three/);
+  });
+
+  test("a window-free run with ZERO survivors also claims no window", () => {
+    const result = rankComps(SUBJECT, [comp({ sqft: 460, priceDate: null })], NOW, {
+      requireSaleDate: false,
+    });
+    expect(result.comps).toHaveLength(0);
+    expect(result.note).not.toMatch(/last \d+ months/);
+  });
+
+  test("a DATED run still states the window — the claim is true there", () => {
+    // The fix must not strip an accurate claim: when dates were required, every comp
+    // considered really was inside the window, and saying so is the commentary Fannie
+    // asks for.
+    const result = rankComps(SUBJECT, [comp({ addressLine: "only one" })], NOW);
+    expect(result.note).toMatch(/last 6 months/);
+  });
+
   test("the DEFAULT still requires a sale date — the lake path cannot drift", () => {
     // Omitting the flag must keep the strict behavior, so wiring a new feed without
     // thinking about dates fails loudly rather than silently ranking undated rows.

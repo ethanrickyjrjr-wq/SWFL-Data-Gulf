@@ -132,6 +132,28 @@ describe("comps_no_size_band_guard — the live path, not just the pure ranker",
     }
   });
 
+  it("never tells the user a comp sold 'in the last 6 months' when nothing was dated", async () => {
+    // The gap the zero-comp test could not reach: with 1-2 in-band comps the ranker's
+    // not-met commentary rides into `needs[]`, and that sentence used to hardcode the
+    // window. The vendor path applies NO window — these comps carry no sale date and
+    // could be any age — so the sentence would be a recency claim we never verified.
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        subjectSqft: 1978,
+        fetchNearby: async () => [
+          comp({ addressLine: "in band A", sqft: 1900, propertyId: "M-C" }),
+          comp({ addressLine: "in band B", sqft: 2050, propertyId: "M-D" }),
+          comp({ addressLine: "way too small", sqft: 460, propertyId: "M-A" }),
+        ],
+        fetchSold: async () => null, // nothing enriches -> no comp holds a real sale date
+      }),
+    );
+
+    expect(out.comps).toHaveLength(2);
+    expect(out.needs.join(" ")).not.toMatch(/last \d+ months/);
+  });
+
   it("says 'none comparable' — NOT 'no comps found' — when the pool is all wrong-sized", async () => {
     // F5's shape. Three distinct states must stay distinct: the vendor was throttled,
     // the vendor returned nothing, and the vendor returned homes none of which are

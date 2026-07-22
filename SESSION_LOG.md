@@ -1,3 +1,23 @@
+## 2026-07-22 (Opus 4.8 · main) — CORRECTION to the entry below: the wiring commit shipped a false recency claim. Caught on review, fixed.
+
+`39b84856` was green and still told users something untrue. `rankComps`'s standard-not-met note
+hardcoded "in the last N months", and `comp-helper` pushes that note into `needs[]` — so on the
+vendor path, which applies NO window, a user with 1-2 in-band comps read "Only 2 comparable sales in
+the last 6 months met the standard" about comps carrying no sale date at all. The same result object
+was reporting `recencyVerified: false` at the time. A recency claim nobody checked, contradicted by
+our own flag one field over.
+
+Why the suite missed it: the F9 ranker tests exercised dated or explicitly-dateless candidates, and
+the comp-helper "none comparable" test used a pool that ranked to ZERO, which early-returns before
+the note is ever read. Nothing covered "subject size known, 1-2 comps in band" — the only path that
+reaches the note on the vendor feed. Fixed by deriving the window clause from `cfg.requireSaleDate`:
+a run that did not require dates does not get to mention a window. A dated run still states it,
+because there the claim is true (test asserts both directions). 776 green.
+
+Standing lesson, same shape as the entry below: a green suite proves the cases you thought of. Both
+defects this session — the dateless vendor feed and this note — were found by tracing what the code
+would SAY to a user, not by running it.
+
 ## 2026-07-22 (Opus 4.8 · main) — Wired the comp ranker into the live path; the vendor feed's missing sale dates turned out to block the obvious wiring.
 
 Verified the prior session's claims first, and they held: `20205251` at HEAD, all five artifacts on
