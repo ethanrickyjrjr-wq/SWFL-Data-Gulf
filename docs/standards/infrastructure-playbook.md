@@ -276,8 +276,9 @@ And there is evidence the checks are uneven:
   `authenticated` table grants at all — so every `logActivity` call silently RLS-failed (and the
   cookie-client read path returned `[]`). Fix: `GRANT SELECT, INSERT` + an owner INSERT policy
   (migration `project_activity_insert_policy_and_grant`, prod-live + two-sided-verified; mirror in
-  `docs/sql/20260721_project_activity_insert_policy_and_grant.sql`), and wired the project-scoped AI
-  build (`app/api/projects/[id]/ai-material`) to log `deliverable_built`. The rest of this layer's
+  `docs/sql/20260721_project_activity_insert_policy_and_grant.sql`), and wired BOTH project-scoped
+  deliverable-build routes (`app/api/projects/[id]/build` — the primary path, reused by MCP
+  `swfl_project_build` — and `.../ai-material`) to log `deliverable_built`. The rest of this layer's
   RLS/sweep story is unchanged.
 
 Also open, both low severity: 14 functions with a role-mutable `search_path`, and the `vector`
@@ -301,8 +302,9 @@ extension installed in the `public` schema.
 4. **Fix `project_activity`** — ✅ DONE 2026-07-21. Added `GRANT SELECT, INSERT` (append-only) + an
    owner INSERT policy mirroring the SELECT USING (cookie-client posture, matching sibling
    `project_feed`; NOT service-role — that bypasses the policy and opens a cross-user write hole),
-   and wired `app/api/projects/[id]/ai-material` to log `deliverable_built`. Prod-live +
-   two-sided-verified; mirror in `docs/sql/20260721_project_activity_insert_policy_and_grant.sql`.
+   and wired BOTH project-scoped deliverable-build routes — `app/api/projects/[id]/build` (primary,
+   MCP-reused) and `.../ai-material` — to log `deliverable_built`. Prod-live + two-sided-verified;
+   mirror in `docs/sql/20260721_project_activity_insert_policy_and_grant.sql`.
 5. **Low severity, batch them:** set `search_path` on the 14 flagged functions; move the
    `vector` extension out of `public`.
 

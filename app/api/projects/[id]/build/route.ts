@@ -5,6 +5,7 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { recordUse } from "@/lib/highlighter/meter";
 import { assembleDeliverable, isTemplateId, DeliverableError } from "@/lib/deliverable/assemble";
 import { parseDeliverableScope } from "@/lib/deliverable/parse-scope";
+import { logActivity } from "@/lib/project/activity";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -71,6 +72,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       template,
       instruction,
       ...scope,
+    });
+    // Activity root: a built deliverable is a deliverable_built event. Logged via the
+    // COOKIE client (supabase) — ownership was already proven by the RLS project SELECT
+    // above; the assemble itself uses service-role only because `deliverables` has no
+    // owner INSERT policy. logActivity is fire-and-forget: it never throws.
+    await logActivity(supabase, {
+      projectId: id,
+      type: "deliverable_built",
+      actor: "user",
+      summary: `Built a ${template} deliverable`,
+      detail: { deliverable_id: slug, template, ...(instruction ? { instruction } : {}) },
     });
     return NextResponse.json({ id: slug });
   } catch (e) {

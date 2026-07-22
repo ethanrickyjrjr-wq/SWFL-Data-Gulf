@@ -68,6 +68,14 @@ Dispatched work package **D** of the six-package infrastructure order (`docs/han
 **Layer 8:** did NOT wire the `sa0718_unhandled_internal_error_messages_passed_s` error-leak fix (explicitly E's, blocked-on-D). Server-side exceptions are now captured, so that fix now has its "somewhere" to send detail to.
 
 Local commit only on `wt/sentry-error-tracking`; a human lands it via `node scripts/worktree.mjs land sentry-error-tracking`.
+## 2026-07-21 (Opus 4.8 · wt/rls-project-activity) — follow-up: wired the PRIMARY build route too, not just ai-material.
+
+Adversarial review of the prior commit (36f4a497) caught that the deliverable-build surface has TWO project-scoped routes that both persist a deliverable and both lacked `logActivity`, not one: `app/api/projects/[id]/build` (the primary "Build" — navigates to `/p/[id]`, and the ONE assemble path reused by the MCP `swfl_project_build` tool) AND `.../ai-material` (the Materials-Hub AI generator, wired in 36f4a497). Wiring only ai-material left the main Build button logging nothing. Both now log `deliverable_built` via the cookie client after their successful deliverable insert — the same `refresh/route.ts` pattern, ownership already proven by each route's RLS project SELECT.
+
+`/email-lab/ai` stays deliberately unwired: it authors a doc and persists nothing (a lab build only becomes a deliverable on save/send), so it has no `deliverable_built` moment — and it is the anonymous, no-`project_id` shared engine both routes above call internally. (With the new cookie-client INSERT policy the old cross-user-write objection is moot — WITH CHECK rejects a non-owner `project_id` — so instrumenting the lab-build path later is now SAFE; it just needs the shell to thread `projectId`. Left as a product call.)
+
+`bunx next build` green (95/95 static pages, TypeScript clean). DB migration unchanged from 36f4a497 (already prod-live + two-sided-verified). Check `email_lab_project_activity_rls_insert_missing` stays OPEN until this worktree lands and deploys — `public.checks` is prod-evidence, and the route wiring is local-only pending review.
+
 ## 2026-07-21 (Opus 4.8 · wt/rls-project-activity) — project_activity never logged a single row since it shipped: no INSERT policy AND (undocumented) no authenticated grant. Fixed both; wired the AI-material build.
 
 Package E, ONE named fix: `email_lab_project_activity_rls_insert_missing`. NOT the 120-route authz sweep — that stays open, as does the `sa0718` error-leak fix (blocked by D).
