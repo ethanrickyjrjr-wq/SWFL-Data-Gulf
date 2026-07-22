@@ -1,3 +1,22 @@
+## 2026-07-22 (Opus 4.8 · main) — CORRECTION to the entry below: that CI break is red-ON-PUSH, not red now.
+
+Append-only, so the entry below stands as written and this corrects it. I wrote *"main's CI is red
+right now, independent of this diff."* **Both halves of that are wrong.**
+
+`fe44b3ea` is UNPUSHED — CI has never run it, so nothing is red yet. And it is not independent of my
+diff: `fe44b3ea` is an ANCESTOR of my commit, so it cannot be left behind. The COMMITTED `ci.yml`
+(line 52) already globs `.claude/hooks/*.test.mjs`, and `check-four-searches.test.mjs` sits in that
+directory — so **the first push carrying `fe44b3ea` is what turns remote CI red**, and that push is
+mine. I filed an activation I would cause as a bystander observation.
+
+**Also stated too strongly below:** "13 tests pass" is a LOCAL result. My parser test lives in
+`.claude/hooks/lib/`, and the committed `ci.yml` glob stops at `.claude/hooks/` — the `lib/` glob is
+in another session's UNCOMMITTED `ci.yml`. Same for `hook-registration.test.mjs`, which enforces that
+my hook stays registered: untracked, theirs. So in CI today my test does not run and my registration
+is not enforced. Green locally is not covered remotely. Not taking their files to fix it.
+
+Check `four_searches_test_bun_import_breaks_ci` updated with the corrected framing.
+
 ## 2026-07-22 (Opus 4.8 · main) — The scratchpad had a RULE and no MECHANISM. Wired both halves, the way SESSION_LOG already was.
 
 **Operator, verbatim:** *"are we readng session logs and writing them or just reading scratchpads???????????????"*
