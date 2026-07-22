@@ -97,7 +97,11 @@ async function getOpenRecordsRequests(sbUrl, sbKey) {
   const headers = { apikey: sbKey, Authorization: "Bearer " + sbKey };
   try {
     const res = await fetch(
-      `${sbUrl}/rest/v1/records_requests?state=in.(filed,acknowledged,cost_quoted,cost_approved,fulfilled)&select=request_key,target_agency,state,follow_up_days,filed_at,last_contact_at&order=last_contact_at.asc.nullsfirst&limit=200`,
+      // `drafted` MUST be in this list. A drafted-never-filed request is the class most likely to
+      // be forgotten, and omitting it made that class structurally invisible at session start
+      // (found 07/22/2026: fldor_collier_nal sat drafted since 07/11 and never once surfaced).
+      // Keep in sync with the `list` verb in scripts/records-request.mts — same state set.
+      `${sbUrl}/rest/v1/records_requests?state=in.(drafted,filed,acknowledged,cost_quoted,cost_approved,fulfilled)&select=request_key,target_agency,state,follow_up_days,filed_at,last_contact_at&order=last_contact_at.asc.nullsfirst&limit=200`,
       { headers },
     );
     if (!res.ok) return null;
@@ -110,25 +114,39 @@ async function getOpenRecordsRequests(sbUrl, sbKey) {
 // Requests past their follow_up_days with no contact — the "gone quiet" nudge.
 function summariseQuietRequests(rows) {
   if (!rows) return "(could not reach Supabase)";
+  if (rows.length === 0) return "none open ✓";
   const now = Date.now();
+
+  // Never-filed is its OWN category, not a quiet one. A drafted row has no filed_at and no
+  // last_contact_at, so there is no clock to measure against — the old code returned false for it
+  // and the row vanished from the alert entirely. It is the most-forgettable class we hold, so it
+  // reports unconditionally, with no day threshold to clear.
+  const neverFiled = rows.filter((r) => !(r.last_contact_at ?? r.filed_at));
   const quiet = rows.filter((r) => {
     const since = r.last_contact_at ?? r.filed_at;
-    if (!since) return false;
+    if (!since) return false; // counted above; never double-report
     return (now - new Date(since).getTime()) / 86400000 >= (r.follow_up_days ?? 14);
   });
-  if (rows.length === 0) return "none open ✓";
-  if (quiet.length === 0) return `${rows.length} open, none quiet ✓`;
-  return (
-    `${rows.length} open, ${quiet.length} gone quiet:\n    · ` +
-    quiet
-      .slice(0, 6)
-      .map((r) => {
-        const since = r.last_contact_at ?? r.filed_at;
-        const days = Math.floor((now - new Date(since).getTime()) / 86400000);
-        return `${r.request_key} — ${r.target_agency} (${r.state}, ${days}d quiet)`;
-      })
-      .join("\n    · ")
-  );
+
+  if (quiet.length === 0 && neverFiled.length === 0) return `${rows.length} open, none quiet ✓`;
+
+  const headline = [
+    neverFiled.length ? `${neverFiled.length} NEVER FILED` : null,
+    quiet.length ? `${quiet.length} gone quiet` : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const lines = [
+    ...neverFiled.map((r) => `${r.request_key} — ${r.target_agency} (drafted, NEVER FILED)`),
+    ...quiet.map((r) => {
+      const since = r.last_contact_at ?? r.filed_at;
+      const days = Math.floor((now - new Date(since).getTime()) / 86400000);
+      return `${r.request_key} — ${r.target_agency} (${r.state}, ${days}d quiet)`;
+    }),
+  ];
+
+  return `${rows.length} open, ${headline}:\n    · ` + lines.slice(0, 6).join("\n    · ");
 }
 
 // Newest open morning-brief issue -> top close-candidate lines. Best-effort:

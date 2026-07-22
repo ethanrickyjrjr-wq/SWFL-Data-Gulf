@@ -852,7 +852,44 @@ pipelines:
         as_of: "07/19/2026"
         source_url: "https://gissvr.leepa.org/gissvr/rest/services/ParcelInfo/MapServer"
         source_label: "LeePA ParcelInfo MapServer (+ sibling ParcelsWFS service)"
-        summary: "ParcelInfo: 24 layers; we pull 0, 9, 10, 12 (layers 1-8 are cartographic label duplicates of 13-18, not a gap). Layers 11/19-23 field schemas CONFIRMED live 07/19/2026 (the 07/08 timeouts did not recur): 11 Qualified Sales Ratios (ORBookPage, Instrument, DoS, Ratio) · 19 Non CT Sales (SaleYear/Month, DeedType, SalePrice) · 21 Delinquent Tax Advertising (10,964 rows: FOLIOID, current_strap, face_value — a seller-stress distress signal, unpulled; check leepa_delinquent_tax_layer_unused) · 22 Cert of Title Sales (foreclosure deeds, same shape as 19) · 23 Comparable Sales (adds dorcode, BedRooms, Bathrooms, Pool, YearBuilt, GrossArea, NbhdLand) — all still unpulled. SIBLING SERVICE ParcelsWFS/MapServer/0 'FabricParcels' (564,339 rows, ~110 fields): PULLED 07/19/2026 = Name (the Lee STRAP, = lee_parcels.parcel_id form) + FolioID, joined onto leepa_parcels.strap as the parcel-grain FDOR crosswalk. Available-unpulled there: Longitude/Latitude/Point_X/Point_Y (parcel coords), DORCode, CondoName, Legal, LandUseCode/Desc, Zoning, TaxingDistrict, AVMMarketArea, AVMNBHD, unit/condo block (BldgNumber/UnitNumber/MaxFloor/PhaseNum), plat Book/Page; owner fields PII-excluded. WARNING: FabricParcels Address*/City/State/ZIP are OWNER-MAILING, never situs (G1) — FDOR phy_zipcd stays the situs-ZIP authority."
+        summary: "ParcelInfo: 24 layers; we pull 0, 9, 10, 12, 23 (layers 1-8 are cartographic label duplicates of 13-18, not a gap). LAYER 23 'Comparable Sales' PULLED 07/22/2026 by operator decree — see the leepa_comp_sales pipeline entry for its own full field census; it is no longer an unpulled ceiling item. Layers 11/19-22 field schemas CONFIRMED live 07/19/2026 (the 07/08 timeouts did not recur): 11 Qualified Sales Ratios (ORBookPage, Instrument, DoS, Ratio) · 19 Non CT Sales (SaleYear/Month, DeedType, SalePrice) · 21 Delinquent Tax Advertising (10,964 rows: FOLIOID, current_strap, face_value — a seller-stress distress signal, unpulled; check leepa_delinquent_tax_layer_unused) · 22 Cert of Title Sales (foreclosure deeds, same shape as 19) — still unpulled. SIBLING SERVICE ParcelsWFS/MapServer/0 'FabricParcels' (564,339 rows, ~110 fields): PULLED 07/19/2026 = Name (the Lee STRAP, = lee_parcels.parcel_id form) + FolioID, joined onto leepa_parcels.strap as the parcel-grain FDOR crosswalk. Available-unpulled there: Longitude/Latitude/Point_X/Point_Y (parcel coords), DORCode, CondoName, Legal, LandUseCode/Desc, Zoning, TaxingDistrict, AVMMarketArea, AVMNBHD, unit/condo block (BldgNumber/UnitNumber/MaxFloor/PhaseNum), plat Book/Page; owner fields PII-excluded. WARNING: FabricParcels Address*/City/State/ZIP are OWNER-MAILING, never situs (G1) — FDOR phy_zipcd stays the situs-ZIP authority."
+
+  - name: leepa_comp_sales
+    workflow: leepa-comparable-sales-annual.yml
+    consuming_pack: properties-lee-value
+    schema_static: unverifiable # resources.py builds pipeline_name=f"leepa_comp_t2_{token_hex(4)}"
+      # at RUNTIME (same chunked-merge pattern as leepa) — the static dlt schema literal can
+      # never appear in code or _dlt_loads. Key freshness/volume on count_table.
+    lane: tier-2
+    cadence_days: 365
+    tolerance_multiplier: 1.5
+    count_table: data_lake.leepa_comparable_sales
+    expected_rows_min: 90000 # 90% of 108,881 confirmed live 07/22/2026
+    freshness_sla:
+      warn_after_days: 540  # mirrors leepa — same source, same annual-ish publish
+      error_after_days: 730
+    # LeePA ParcelInfo layer 23 "Comparable Sales" — the ONLY LeePA surface carrying
+    # BedRooms/Bathrooms. Neither leepa_parcels nor lee_parcels (FDOR) has a bed or bath
+    # column at all, which is why lee_comp_sales_v falls back to living_area_sqft as its
+    # only home test (docs/sql/20260722_lee_comp_sales_view.sql).
+    # GRAIN: SaleYear + SaleMonth are separate integers = MONTH grain. This does NOT fix
+    # sale-date recency (data-roots T10) and no consumer may render a day-of-month.
+    # KNOWN GHA LIMITATION: LeePA HTTP fetch does not land on GitHub runners — see the
+    # leepa-parcels-annual.yml history and check leepa_http_fetch_blocked_needs_crawl4ai_path.
+    # The 07/22/2026 load was run locally. The cron exists for freshness tracking + manual
+    # dispatch; do not read a green schedule as proof this ran.
+    source_scope:
+      confirmed_total:
+        value: 108881
+        as_of: "07/22/2026"
+        source: "our ingest (layer 23, all 15 attribute fields)"
+        summary: "108,881 comparable-sale rows, SaleYear 2024-2026, all 15 attribute fields (everything the layer exposes except the SHAPE polygon). 75,746 (69.6%) carry BedRooms > 0 — the bed/bath signal that exists nowhere else in our Lee stack."
+      source_ceiling:
+        value: 16
+        as_of: "07/22/2026"
+        source_url: "https://gissvr.leepa.org/gissvr/rest/services/ParcelInfo/MapServer/23"
+        source_label: "LeePA ParcelInfo MapServer layer 23 (Comparable Sales)"
+        summary: "FULL FIELD CENSUS, live-probed 07/22/2026 — the layer exposes exactly 16 fields and we pull 15 of them, so there is NO unpulled ceiling here beyond geometry. Pulled: FOLIOID (int; stored as TEXT to match leepa_parcels.folioid, which is varchar) · SaleYear (int) · SaleMonth (int) · DeedType (string) · dorcode (string) · BuildingCount (int) · BedRooms (double) · Bathrooms (double) · NbhdLand (string) · Pool (string) · YearBuilt (smallint) · GrossArea (double) · ImpCode (int) · SalePrice (STRING, arrives formatted '$245,000' — normalized to numeric via coercion.coerce_float) · OBJECTID (OID, used as the keyset cursor, not stored). DELIBERATELY UNPULLED: SHAPE (geometry) — measured 100 rows = 27,629 bytes without vs 58,929 with, and the parcel spine already holds the polygon; if coordinates are ever wanted, request them as attribute columns rather than the full polygon. Volume: 108,881 rows, 75,746 (69.6%) with BedRooms > 0, SaleYear spans 2024-2026. maxRecordCount 1000 — must page, and KEYSET on OBJECTID: the resultOffset walk silently truncates on this host (layer 12 died at 40,000 of 548k). Join: FOLIOID is already a column on data_lake.leepa_parcels, no new crosswalk."
 
   - name: redfin_collier
     workflow: redfin-collier-monthly.yml

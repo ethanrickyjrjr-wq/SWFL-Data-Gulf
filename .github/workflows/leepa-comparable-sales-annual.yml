@@ -1,0 +1,61 @@
+name: LeePA comparable sales annual
+
+# LeePA ParcelInfo layer 23 "Comparable Sales" -> data_lake.leepa_comparable_sales.
+# The only LeePA surface carrying BedRooms/Bathrooms.
+#
+# READ THIS BEFORE TRUSTING A GREEN RUN. LeePA HTTP fetch has never landed on a GitHub
+# runner — the sibling leepa-parcels-annual.yml documents 5/5 scheduled+dispatch runs
+# cancelled at their timeout ceiling (30min then 90min, same result either way); see
+# check leepa_http_fetch_blocked_needs_crawl4ai_path. The first real load of this table
+# (07/22/2026) was run LOCALLY for exactly that reason. This workflow exists so the
+# pipeline is freshness-tracked and manually dispatchable, NOT because a green schedule
+# proves the data refreshed. Verify the row count in the table, never the run badge.
+#
+# The source host also stalls intermittently mid-pull even from a healthy network
+# (measured 07/22/2026: three consecutive 120s read timeouts at ~90k of 108,881 rows
+# while single pages served in 0.5s). The pipeline carries its own resume envelope, but
+# that is why the timeout below is generous.
+
+on:
+  schedule:
+    # 13:00 UTC = 9 AM ET on March 1st — same slot as leepa-parcels-annual.yml.
+    # Same source, same annual certified-roll publish cadence.
+    - cron: "0 13 1 3 *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch, normalize and guard only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run leepa_comp_sales pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.leepa_comp_sales.pipeline --dry-run
+          else
+            python -m ingest.pipelines.leepa_comp_sales.pipeline
+          fi

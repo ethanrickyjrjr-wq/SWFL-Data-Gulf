@@ -20,6 +20,46 @@ root," treat that as the audit's recommendation too until signed off. Roots carr
 A 🔴 root is the *intended home*, never a served value. **Never `DROP`/`DELETE` a duplicate** until its
 replacement runs, every consumer repoints, and the operator signs off (RULE 1).
 
+## ⚠️ WHAT WE HOLD BUT DO NOT PULL — **72 recorded ceilings** (07/22/2026)
+
+**The table below tells you which root feeds a number. It does NOT tell you what a source was
+already proven to carry and we never pulled. That is a different axis, and it is the one that keeps
+biting us.** Ceiling notes appear ~94 times in this file — all of them buried in the per-source
+detail sections 1,000+ lines down, where nobody reads them.
+
+**Before you tell anyone "we don't have field X," check the ceiling.** `information_schema` tells
+you what we PULLED. `source_scope.source_ceiling` in `ingest/cadence_registry.yaml` tells you what
+EXISTS. Answer with both and the delta, never one.
+
+Regenerate the count and the full list any time — it reads the registry, so it cannot go stale:
+
+```
+node scripts/ceilings-to-checks.mjs            # dry run, prints all 72
+node scripts/ceilings-to-checks.mjs --apply    # opens one check per ceiling (idempotent)
+```
+
+As of 07/22/2026 all 72 are open checks in the `ingest` project, key prefix `ceiling_`, so they now
+surface in the session-start banner instead of waiting to be read. A sample of what sat invisible:
+
+- **LeePA layer 23 "Comparable Sales"** — 108,881 rows w/ `BedRooms`, `Bathrooms`, `YearBuilt`,
+  `GrossArea`, `SHAPE`; joins on `FOLIOID` we already hold. See trap **T10**.
+- **FDOT** — their ArcGIS org runs 1,586 public layers; we use one. Crash/fatality data untouched.
+- **Lee permits** — the county's own ArcGIS has structured permit FeatureServer layers (9,386
+  unincorporated-Lee permits) we don't read.
+- **FEMA** — publishes real NFIP residential penetration rates; our code uses a static 0.3 guess.
+- **FDLE crime** — city-level + offense-type breakdown already sits in a variable we compute.
+- **FRED** — confirmed-live Lee/Collier county series (house price index, county GDP, per-capita
+  income) not pulled.
+
+**Why this section exists (07/22/2026):** LeePA layer 23 was censused 07/19/2026 and recorded
+correctly in BOTH the registry and this file. On 07/22 two separate sessions independently told the
+operator we had no beds/baths for comps — one of them after querying `information_schema` and
+concluding "the field is not in the file." It was in the file, twice. Recording a ceiling is not
+surfacing it; until today nothing read them back. Do not let the 30-second map at the top of this
+doc summarize only what we serve.
+
+---
+
 ## Decision table — CONCEPT → recommended ROOT → BRAIN → DO-NOT-READ  **[NEEDS-SIGN-OFF]**
 
 "no single brain" = a view/spine read directly by many surfaces, not owned by one pack (don't invent an owner).
