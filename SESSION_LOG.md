@@ -1,3 +1,56 @@
+## 2026-07-22 (Opus 4.8 · main) — Naive Bayes is DISQUALIFIED from sell odds; KNN belongs on comps. Spec written, nothing built.
+
+Operator: *"any way we can use Naive Bayes? ... even KNN. look at them both."* Researched per RULE
+0.4 (ours first, then crawl4ai), then brainstormed to a spec per RULE 3.5.
+
+**Most of this was already answered on 07/13/2026 and nobody re-surfaced it.** Grepping
+`naive bayes|k-nearest|KNN` over all `.md` returned 2 hits, both prior art: the trend-fit spec's
+"Follow-ups" section already concluded KNN belongs on comps and logistic regression is the strongest
+classifier follow-up, and opened `knn_own_the_comp_distance` + `logistic_regression_listing_outcome`
+— both sat 8 days untouched. This session's independent research reached the same KNN conclusion by
+a different route. That is corroboration, not discovery.
+
+**The new finding: NB is disqualified from sell odds, specifically.** scikit-learn 1.9.0 (crawled
+in-session): NB is *"known to be a bad estimator, so the probability outputs from `predict_proba`
+are not to be taken too seriously,"* and the calibration page names the mechanism — *"`GaussianNB`
+tends to push probabilities to 0 or 1... because it makes the assumption that features are
+conditionally independent,"* violated by **redundant features**. Our listing features (sqft/beds/
+baths/price) are collinear by construction, so we would feed NB the exact input class that breaks
+its calibration and then print the result to a homeowner as their odds of selling. Calibration can't
+rescue it either — sklearn requires the calibrator be fit on data *independent* of training. Logistic
+regression stays the right classifier inside the already-approved hazard model. **NB has no
+qualifying surface today** (its home is text classification; the City Voices gate is dead and locked,
+and no labeled corpus exists for either candidate).
+
+**Three live probes that corrected written claims — all three had been quoted from documents:**
+- `data_lake.listing_transitions` live: 208 sold / 56 withdrawn (spec said 195/43). But `max(at)` =
+  **07/19/2026 — no labels for 3 days.** A stalled labeler is indistinguishable from "nothing sold."
+  → check `listing_transitions_label_stall_since_0719`.
+- **Condos are NOT collapsed.** `listing_state.property_type` live: single_family 13,182 · land 7,931
+  · condo 5,781 · townhouse 519 · multi_family 566. I had repeated the stale scratchpad claim as a
+  blocker before checking it — the exact failure I had flagged in the research doc one message
+  earlier.
+- **`lee_parcels` has ZERO 2026 sales** (2025: 24,063 / 15,776 priced; 2024: 62,711 / 43,182) and
+  **no lat/lon**. The FDOR annual roll is 7+ months behind, so our parcels are a DEPTH source, not a
+  RECENCY source. This is what makes "vendor API first" correct rather than a compromise.
+
+**Spec:** `docs/superpowers/specs/2026-07-22-comp-distance-ranker-design.md` (check
+`comp_distance_ranker_live_verify`). Comp selection today does **no similarity computation at all** —
+`compsForAddress` is one vendor call then `nearby.slice(0, 6)`. Design is one pure source-agnostic
+ranker with two feeds (vendor now, parcels later, per operator "Do both. Start with api"), built to
+**Fannie Mae B4-1.3-08** (crawled live): minimum 3 comps, straight-line miles with a direction,
+subdivision-first with commentary when you leave it, no land in a home comp set. Recency window is
+**6 months per operator decree** — stricter than Fannie's 12, and HARD: the ladder expands geography
+and size band only, never time, so the decree can't silently drift. Below 3 qualifying comps we
+return fewer and say the standard wasn't met rather than padding. ±25%/±35% size band is flagged in
+the spec as OUR default, not a cited standard — Fannie publishes no percentage.
+
+7 failure modes named with guards before any code (RULE 3.5). **Nothing implemented; no code push.**
+Research filed at `_RESEARCH/data-and-ingest/2026-07-22-naive-bayes-knn-algorithm-fit.md`
+(gitignored) — its INDEX.md line is NOT landed, blocked 30+ min by a parallel session's claim lock
+→ check `research_index_line_nb_knn`. Also opened `comps_flood_zone_consideration` (Fannie names
+flood zone; we hold the data; deliberately out of v1).
+
 ## 2026-07-22 (Sonnet 5 · main) — /demo wired to live data (was frozen 05/22/2026 fixtures); retroactive log for 14103c27.
 
 Operator: "fix the demos page if no one has by now... why are dates so old??" — it read four
