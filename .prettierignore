@@ -12,3 +12,7 @@ ingest/
 
 # Hand-maintained semantic artifact — surgical edits only, never bulk-reformat
 refinery/vocab/brain-vocabulary.json
+
+# Generated geometry fixture — one ZCTA per line so a boundary change is a
+# 58-line diff, not a million coordinate lines. Regenerate, never reformat.
+fixtures/swfl-zip-polygons.json

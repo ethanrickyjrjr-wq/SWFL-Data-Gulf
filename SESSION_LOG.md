@@ -1,3 +1,43 @@
+## 2026-07-22 (Opus 4.8 · main) — ZIP adjacency asset built. We already owned polygons; they were the wrong vintage, and the graph they produce crosses water.
+
+Took over the stats-regions handoff. Its running order said "advisor first on B1/B2," but the spec's
+own final section had already narrowed scope to adjacency-only with B1/B2 deferred — so the blocker
+was elsewhere. Advisor named the real one: the scope-narrowing swapped the 504MB TIGER/Line
+shapefile for TIGERweb GeoJSON to dodge the download, and nobody checked whether exact shared-vertex
+topology survived that swap. Probed it: 33901~33916 return 108 bit-identical vertices / 107
+consecutive shared segments, min distance exactly 0; distant control 33901~34102 returns 0. Topology
+intact, so exact matching with no epsilon — verified, not assumed.
+
+RULE 0.5 caught a bigger one mid-build. `ingest/lib/zcta_assign.py:14` says ZCTA polygons are
+"already vendored in the repo" — and they are: `public/maps/fl_zips.geojson`, 983 FL ZCTAs,
+833 Polygon / 150 MultiPolygon, 22MB, committed since June, all 58 footprint ZIPs present, topology
+intact. The spec had specced a fetch for data we already held. But its fields are `ZCTA5CE10` /
+`GEOID10` — **2010 vintage** — while `swfl-zip-county.json` and `swfl-zip-centroids.json` are both
+2020. Measured the difference rather than hand-waving it: the vintages disagree on a real edge
+(33903~33916 along the Caloosahatchee is adjacent in 2020, not in 2010). Operator picked 2020 to
+stay vintage-matched. Opened `fl_zips_geojson_vintage` — that file feeds the G1 parcel-ZIP gate and
+`zip_approx.py`'s docstring miscalls it "TIGER/Line 2024".
+
+**The finding that qualifies the asset:** ZCTA boundaries follow census blocks, which include water
+area, so shared-boundary contiguity is NOT land adjacency. 33957 (Sanibel — an island) touches
+33908 (mainland) via 4 shared segments out in San Carlos Bay, against 107 for the genuine land
+boundary 33901~33916. The spec claimed real adjacency "removes the need to encode by hand what the
+geometry already knows" (the barrier lock). That claim is too strong and is now contradicted in the
+fixture itself under `caveat_water_mediated_links`. The barrier-class check in
+`refinery/lib/swfl-geo.mts` is still required. Opened `zip_adjacency_water_links`; segment count
+looks like a usable edge weight (4 vs 107) but no threshold was invented.
+
+Shipped: `scripts/geo/zip-adjacency-lib.mts` (pure, TDD, rook contiguity — shared edge, not shared
+corner), `fetch-zip-polygons.mts`, `build-zip-adjacency.mts`, and both fixtures. 58 ZIPs, 142 links,
+mean 4.90 neighbours; one isolated ZIP, 33921 Boca Grande on Gasparilla Island, which is correct.
+22 tests green. Per advisor, the specced test set caught only false positives and structure — all of
+it stays green if the matcher is too strict and returns an empty graph — so positive controls were
+added. The ANY-county 58 derivation was extracted out of `build-market-areas.mts` (R3, copy #2) so
+generator and test cannot agree on a wrong 58.
+
+`stats_regions_live_verify` stays OPEN and unclosed — it names the deferred floor guarantee (B1/B2),
+not this asset. It also still has no signal (R6), so it remains a manual close rather than a tripwire.
+
 ## 2026-07-22 (Opus 4.8 · main) — CORRECTION to the entry below: the wiring commit shipped a false recency claim. Caught on review, fixed.
 
 `39b84856` was green and still told users something untrue. `rankComps`'s standard-not-met note
