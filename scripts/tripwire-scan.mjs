@@ -453,9 +453,11 @@ function checkEgressReadable() {
     return;
   }
   yellows.push(
-    `EGRESS UNKNOWN — no ${EGRESS_TOKEN_ENV}, so the real served-bytes number has NEVER been ` +
-      `read. Every egress figure quoted so far is payload arithmetic. Mint a token with the ` +
-      `analytics_usage_read scope, then: node scripts/supabase-egress-read.mjs --ref <ref> --sql "..."`,
+    `EGRESS BYTES UNKNOWN — no ${EGRESS_TOKEN_ENV}, so no served-BYTE total has ever been read; ` +
+      `every byte figure quoted so far is payload arithmetic. ATTRIBUTION is NOT blind: the ` +
+      `storage log (who read what, how often, which client) is readable right now with NO token ` +
+      `via the Supabase connection's get_logs, service "storage" — that is what identified the ` +
+      `07/21 burner. Bytes need the billing export; the log carries no size field.`,
   );
 }
 

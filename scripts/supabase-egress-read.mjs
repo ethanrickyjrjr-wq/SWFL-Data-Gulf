@@ -33,6 +33,24 @@
 // SCOPE LIMIT, STATED SO NOBODY OVERCLAIMS AGAIN: this reads SERVED BYTES FROM
 // LOGS. That is not the invoice. If you need the billed total, it is the
 // dashboard/billing export, and no code here can produce it.
+//
+// CORRECTION 07/21/2026, same session, after the operator pushed back with
+// "you have read/write capabilities on supabase!!!" — HE WAS RIGHT and this
+// file's premise was too pessimistic. A TOKEN IS NOT REQUIRED TO SEE WHO IS
+// BURNING. The Supabase connection already wired into the agent exposes the
+// storage request log directly (get_logs, service "storage", last 24h, no
+// token, no setup). Running it confirmed the 07/21 kill: the burner's final
+// entries are all "ABORTED REQ" and nothing follows them, while the only
+// remaining reader is duckdb linux_amd64/python doing HEAD + range GET on
+// single .parquet files — the legitimate ingest path, exactly as triaged.
+// It also shows the burn verbatim: leepa/last_sale/2026-05-30.csv.gz fetched
+// FIVE times in twelve seconds by duckdb windows_amd64/node-neo-api.
+//
+// So the split is: ATTRIBUTION (who read what, how often, which client) is
+// free and available right now. BYTES are not — those log lines carry no size
+// field, which is the only thing this file's token is actually for. Do not let
+// "we can't read egress" stand unqualified again; it was half true, and the
+// half that was false sent us building around a wall that wasn't there.
 
 import process from "node:process";
 import { pathToFileURL } from "node:url";

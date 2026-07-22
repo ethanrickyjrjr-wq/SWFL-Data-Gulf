@@ -1615,8 +1615,35 @@ API). That session says so outright: *"I still do not have the actual egress tot
 so I cannot tell you whether egress is even elevated."* Same limit applies to my ~300 GB/day, which
 came from the Storage request log, not the invoice.
 
+**CORRECTION, same session — operator: *"you have read/writte capabilities on supabae!!!"* HE WAS
+RIGHT.** I declared the machine blind without probing the Supabase connection already wired into
+this agent. It exposes the storage request log directly — `get_logs`, service `storage`, last 24h,
+**no token, no setup.** I had asserted "not on the wired MCP surface" from reading the *Management
+API* OpenAPI spec, which is a different surface entirely. RULE 0.5 violation: I probed a vendor doc
+instead of the tool in my own hand.
+
+**What the log showed the moment I actually ran it — this is the kill confirmation:**
+- The burner (`duckdb/v1.5.4(windows_amd64) node-neo-api`) has final entries that are ALL
+  `ABORTED REQ`, dozens of them, cut off mid-request. Nothing after. That is what a killed process
+  looks like from the server side — independent confirmation of the 07/21 kill, from Supabase's
+  own log rather than from my process sweep.
+- The burn mechanism, verbatim in the log: `raw-tabular-cold/leepa/last_sale/2026-05-30.csv.gz`
+  fetched **five times in twelve seconds**, same object, plus `use_codes` and `just_value` the same
+  way. Not my description of the pattern — the pattern itself.
+- The ONLY storage reader after the kill is `duckdb/v1.5.4(linux_amd64) python/3.13` doing
+  HEAD + range `GET 206` on single `.parquet` files. That is the GitHub ingest path I deliberately
+  did NOT neutralize. **The log vindicates that call** — Linux, parquet, range reads, small.
+
+**The split that matters, and the thing to never collapse again:** ATTRIBUTION (who read what, how
+often, from which client) is FREE and available right now with zero setup. BYTES are not — those
+log lines carry no size field, and the byte total genuinely needs the billing export. "We can't
+read egress" was half true, and stating it unqualified sent this session building around a wall
+that wasn't there.
+
 **Rule:** until someone reads the real usage number from the billing surface, no session should
-rank egress causes or call anything "the burner" — measure the bill FIRST, then attribute. Two
+rank egress causes by SIZE or quote a byte total — but attribution is always one tool call away,
+so "who is burning" should never again be answered with a guess or a build. Measure what you can
+reach FIRST; check the tools in your own hand BEFORE the vendor docs. Two
 sessions independently produced honest, verified, mutually-irrelevant numbers and it read to the
 operator as three days of contradiction.
 -> owed: wire a real egress read (Management API) so the bill is a fact, not arithmetic.

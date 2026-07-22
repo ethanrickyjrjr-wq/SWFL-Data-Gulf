@@ -960,6 +960,42 @@ observe boot egress. The only instrument in the right domain is the storage requ
 window, and taking that measurement requires setting `LAKE_MCP_ALLOW_EGRESS=1` — i.e. booting the
 burner. Left disabled. Open: `lake_mcp_boot_schema_sniff`.
 
+## 2026-07-21 (Opus 4.8 · main) — KILL CONFIRMED BY SUPABASE'S OWN LOG. And I was wrong that we were blind.
+
+Operator: *"you have read/writte capabilities on supabae!!!"* **He was right.** I declared the
+machine blind on egress without probing the Supabase connection already wired into this agent.
+RULE 0.5 violation of the purest kind — I read a vendor OpenAPI spec instead of trying the tool in
+my own hand. The Management API having no egress endpoint (true, verified) says nothing about what
+the wired connection can already do.
+
+**It exposes the storage request log directly — no token, no setup, last 24h.** Ran it. Three
+things came back, all of which matter:
+
+**(A) The kill is confirmed from the server side.** The burner
+(`duckdb/v1.5.4(windows_amd64) node-neo-api`) has final entries that are ALL `ABORTED REQ` — dozens,
+cut off mid-request — and nothing after. That is independent confirmation, from Supabase's log
+rather than from my own process sweep, which is a strictly better evidence class than the sweep I
+had been leaning on (and which I had already gotten wrong once by filtering on process name).
+
+**(B) The burn mechanism, verbatim, not my description of it.**
+`raw-tabular-cold/leepa/last_sale/2026-05-30.csv.gz` fetched **five times in twelve seconds**, same
+object; `use_codes` and `just_value` the same way. Exactly the whole-snapshot-per-query pattern the
+boot guard exists to stop.
+
+**(C) The one call I deliberately did NOT make is vindicated.** The only storage reader after the
+kill is `duckdb/v1.5.4(linux_amd64) python/3.13`, doing HEAD + range `GET 206` on single `.parquet`
+files. That is the GitHub ingest path I left alone on 07/21 reasoning it was Linux, parquet, and
+range-read. The log confirms it rather than contradicting it.
+
+**The correction that generalizes:** ATTRIBUTION — who read what, how often, from which client — is
+FREE and one call away, right now, no credential. BYTES are not: those log lines carry no size
+field, so a byte total still needs the billing export. "We can't read egress" was HALF true, and
+saying it unqualified sent this session building around a wall that wasn't there. The tripwire text
+and `supabase-egress-read.mjs` header now both carry that split explicitly so it cannot be
+re-collapsed.
+
+---
+
 ## 2026-07-21 (Opus 4.8 · main) — THE BILL: there is NO Supabase egress endpoint. Vendor-verified, and the gap is now visible every session.
 
 Operator, after two sessions gave two different "egress" answers: *"HOW DOES EVERYONE HAVE A
