@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v11 | Token: SWFL-7421-v11-20260720 -->
+<!-- FRESHNESS: v12 | Token: SWFL-7421-v12-20260722 -->
 ---
 brain_id: active-listings-swfl
-version: 11
-refined_at: 2026-07-20T01:26:48Z
-freshness_token: SWFL-7421-v11-20260720
+version: 12
+refined_at: 2026-07-22T22:13:02Z
+freshness_token: SWFL-7421-v12-20260722
 ttl_seconds: 172800
 pack_hash: 7cacb8bbd110
 context_type: user_saved_reference
@@ -29,19 +29,19 @@ SCOPE: Southwest Florida active residential listing inventory — count, median 
 
 --- CITATION TABLE ---
 id  | source                                      | verified   | expires
-s01 | SWFL active for-sale listings — realtor.com | 2026-07-20 | 2026-07-22
+s01 | SWFL active for-sale listings — realtor.com | 2026-07-22 | 2026-07-24
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"active_listings_swfl_snapshot","fact":"SWFL active residential listing inventory ","value":"21,130 active listings, median asking $425,000. 4 counties, 58 ZIPs covered.","src":"s01","date":"2026-07-20"}
+  {"id":"f001","topic":"active_listings_swfl_snapshot","fact":"SWFL active residential listing inventory ","value":"21,130 active listings, median asking $425,000. 4 counties, 58 ZIPs covered.","src":"s01","date":"2026-07-22"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "active-listings-swfl",
-  "version": 11,
-  "refined_at": "2026-07-20T01:26:48Z",
-  "expires": "2026-07-22T01:26:48Z",
+  "version": 12,
+  "refined_at": "2026-07-22T22:13:02Z",
+  "expires": "2026-07-24T22:13:02Z",
   "ttl_seconds": 172800,
   "direction": "neutral",
   "magnitude": 0,
@@ -59,7 +59,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-20 | 2026-07-22
       "display_format": "count",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-07-20T01:26:48Z",
+        "fetched_at": "2026-07-22T22:13:02Z",
         "tier": 2,
         "citation": "21,130 active SWFL residential listings as of 2026-07-19"
       },
@@ -78,7 +78,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-20 | 2026-07-22
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-07-20T01:26:48Z",
+        "fetched_at": "2026-07-22T22:13:02Z",
         "tier": 2,
         "citation": "median asking price across 21,130 active SWFL listings: $425,000"
       },
@@ -153,7 +153,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-20 | 2026-07-22
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-07-20T01:26:48Z",
+        "fetched_at": "2026-07-22T22:13:02Z",
         "tier": 2,
         "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-19"
       }
@@ -708,7 +708,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-20 | 2026-07-22
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-07-20T01:26:48Z",
+        "fetched_at": "2026-07-22T22:13:02Z",
         "tier": 2,
         "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-19"
       }
@@ -730,7 +730,7 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-20 | 2026-07-22
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-20T01:26:48Z"
+    "computed_at": "2026-07-22T22:13:02Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -747,5 +747,5 @@ s01 | SWFL active for-sale listings — realtor.com | 2026-07-20 | 2026-07-22
 - active-listings-swfl: region-wide SWFL active residential inventory (count / median ask / avg DOM) from the realtor.com daily feed, licensed-feed-swap-ready.
 
 --- RECENT NOTES ---
-- 2026-07-20: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-07-22: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

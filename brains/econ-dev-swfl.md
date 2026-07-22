@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v11 | Token: SWFL-7421-v11-20260719 -->
+<!-- FRESHNESS: v12 | Token: SWFL-7421-v12-20260722 -->
 ---
 brain_id: econ-dev-swfl
-version: 11
-refined_at: 2026-07-19T02:29:02Z
-freshness_token: SWFL-7421-v11-20260719
+version: 12
+refined_at: 2026-07-22T22:12:59Z
+freshness_token: SWFL-7421-v12-20260722
 ttl_seconds: 604800
 pack_hash: 024e26113e59
 context_type: user_saved_reference
@@ -30,19 +30,19 @@ SCOPE: Southwest Florida economic development project announcements — weekly s
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                             | verified   | expires
-s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase swfl_inc_announcements: title, announced_date, county, category, investment_usd, jobs; weekly scrape of swflinc.com/blog/) | 2026-07-19 | 2026-07-26
+s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase swfl_inc_announcements: title, announced_date, county, category, investment_usd, jobs; weekly scrape of swflinc.com/blog/) | 2026-07-22 | 2026-07-29
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"econ_dev_snapshot","fact":"SWFL economic development pulse — latest 90 days","value":"SWFL Inc. announcements (last 90 days): 1 projects. Prior window (90–180 days): 0 projects. ","src":"s01","date":"2026-07-19"}
+  {"id":"f001","topic":"econ_dev_snapshot","fact":"SWFL economic development pulse — latest 90 days","value":"SWFL Inc. announcements (last 90 days): 1 projects. Prior window (90–180 days): 0 projects. ","src":"s01","date":"2026-07-22"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "econ-dev-swfl",
-  "version": 11,
-  "refined_at": "2026-07-19T02:29:02Z",
-  "expires": "2026-07-26T02:29:02Z",
+  "version": 12,
+  "refined_at": "2026-07-22T22:12:59Z",
+  "expires": "2026-07-29T22:12:59Z",
   "ttl_seconds": 604800,
   "direction": "neutral",
   "magnitude": 0.3,
@@ -60,7 +60,7 @@ s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase 
       "display_format": "raw",
       "source": {
         "url": "https://www.swflinc.com/blog/florida-policy-updates-housing-property-taxes-and-the-state-budget--what-southwest-florida-busin",
-        "fetched_at": "2026-07-19T02:29:02Z",
+        "fetched_at": "2026-07-22T22:12:59Z",
         "tier": 2,
         "citation": "SWFL Inc. Economic Development Announcements — Lee County EDO (1 announcements in last 90 days via swfl_inc_announcements)"
       },
@@ -79,7 +79,7 @@ s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase 
       "display_format": "raw",
       "source": {
         "url": "https://www.swflinc.com/blog/florida-policy-updates-housing-property-taxes-and-the-state-budget--what-southwest-florida-busin",
-        "fetched_at": "2026-07-19T02:29:02Z",
+        "fetched_at": "2026-07-22T22:12:59Z",
         "tier": 2,
         "citation": "SWFL Inc. Economic Development Announcements — Lee County EDO (0 announcements in 90–180 days prior window)"
       },
@@ -104,7 +104,7 @@ s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase 
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-19T02:29:02Z"
+    "computed_at": "2026-07-22T22:12:59Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -122,5 +122,5 @@ s01 | SWFL Inc. Economic Development Announcements — Lee County EDO (Supabase 
 - econ-dev-swfl: weekly SWFL economic development pulse from SWFL Inc. (swflinc.com/blog/) — announcement count, investment totals, job counts, and 90-day momentum for Lee + Collier counties.
 
 --- RECENT NOTES ---
-- 2026-07-19: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-07-22: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

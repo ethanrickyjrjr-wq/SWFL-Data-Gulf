@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260717 -->
+<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260722 -->
 ---
 brain_id: price-distribution-swfl
-version: 3
-refined_at: 2026-07-17T21:56:13Z
-freshness_token: SWFL-7421-v3-20260717
+version: 4
+refined_at: 2026-07-22T22:13:00Z
+freshness_token: SWFL-7421-v4-20260722
 ttl_seconds: 691200
 pack_hash: d2795ba06114
 context_type: user_saved_reference
@@ -29,39 +29,39 @@ SCOPE: Southwest Florida active for-sale listing distribution by $50k price band
 
 --- CITATION TABLE ---
 id  | source                                                         | verified   | expires
-s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-07-17 | 2026-07-25
+s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-07-22 | 2026-07-30
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"price_distribution_swfl_snapshot","fact":"SWFL for-sale listing price distribution ","value":"29,558 active for-sale listings across 2 counties; 43.70% priced under $300k. As of 2026-07-13.","src":"s01","date":"2026-07-17"}
+  {"id":"f001","topic":"price_distribution_swfl_snapshot","fact":"SWFL for-sale listing price distribution ","value":"29,307 active for-sale listings across 2 counties; 43.80% priced under $300k. As of 2026-07-20.","src":"s01","date":"2026-07-22"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "price-distribution-swfl",
-  "version": 3,
-  "refined_at": "2026-07-17T21:56:13Z",
-  "expires": "2026-07-25T21:56:13Z",
+  "version": 4,
+  "refined_at": "2026-07-22T22:13:00Z",
+  "expires": "2026-07-30T22:13:00Z",
   "ttl_seconds": 691200,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "Of 29,558 active SWFL for-sale listings (as of 2026-07-13), 43.70% are priced under $300k, 31.40% $300k–$600k, 12.00% $600k–$1M, and 12.90% at $1M or above. By county: Lee 21,855, Collier 7,703.",
+  "conclusion": "Of 29,307 active SWFL for-sale listings (as of 2026-07-20), 43.80% are priced under $300k, 31.60% $300k–$600k, 11.90% $600k–$1M, and 12.70% at $1M or above. By county: Lee 21,685, Collier 7,622.",
   "key_metrics": [
     {
       "metric": "entry_level_listing_share_swfl",
       "label": "SWFL for-sale listings priced under $300k (share of active inventory)",
-      "value": 43.7,
+      "value": 43.8,
       "direction": "stable",
       "variable_type": "intensive",
       "units": "%",
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-07-17T21:56:13Z",
+        "fetched_at": "2026-07-22T22:13:00Z",
         "tier": 2,
-        "citation": "Entry-tier (<$300k) share of listings across 29,558 active SWFL for-sale listings, as of 2026-07-13"
+        "citation": "Entry-tier (<$300k) share of listings across 29,307 active SWFL for-sale listings, as of 2026-07-20"
       },
       "suggestions": [
         "What's driving entry level listing share swfl?",
@@ -71,16 +71,16 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-07
     {
       "metric": "midmarket_listing_share_swfl",
       "label": "SWFL for-sale listings priced $300k–$600k (share of active inventory)",
-      "value": 31.4,
+      "value": 31.6,
       "direction": "stable",
       "variable_type": "intensive",
       "units": "%",
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-07-17T21:56:13Z",
+        "fetched_at": "2026-07-22T22:13:00Z",
         "tier": 2,
-        "citation": "Mid-tier ($300k–$600k) share of listings across 29,558 active SWFL for-sale listings, as of 2026-07-13"
+        "citation": "Mid-tier ($300k–$600k) share of listings across 29,307 active SWFL for-sale listings, as of 2026-07-20"
       },
       "suggestions": [
         "What's driving midmarket listing share swfl?",
@@ -90,16 +90,16 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-07
     {
       "metric": "upper_tier_listing_share_swfl",
       "label": "SWFL for-sale listings priced $600k–$1M (share of active inventory)",
-      "value": 12,
+      "value": 11.9,
       "direction": "stable",
       "variable_type": "intensive",
       "units": "%",
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-07-17T21:56:13Z",
+        "fetched_at": "2026-07-22T22:13:00Z",
         "tier": 2,
-        "citation": "Upper-tier ($600k–$1M) share of listings across 29,558 active SWFL for-sale listings, as of 2026-07-13"
+        "citation": "Upper-tier ($600k–$1M) share of listings across 29,307 active SWFL for-sale listings, as of 2026-07-20"
       },
       "suggestions": [
         "What's driving upper tier listing share swfl?",
@@ -109,16 +109,16 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-07
     {
       "metric": "luxury_listing_share_swfl",
       "label": "SWFL for-sale listings priced $1M and above (share of active inventory)",
-      "value": 12.9,
+      "value": 12.7,
       "direction": "stable",
       "variable_type": "intensive",
       "units": "%",
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-07-17T21:56:13Z",
+        "fetched_at": "2026-07-22T22:13:00Z",
         "tier": 2,
-        "citation": "Luxury ($1M+) share of listings across 29,558 active SWFL for-sale listings, as of 2026-07-13"
+        "citation": "Luxury ($1M+) share of listings across 29,307 active SWFL for-sale listings, as of 2026-07-20"
       },
       "suggestions": [
         "What's driving luxury listing share swfl?",
@@ -174,32 +174,32 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-07
           "key": "Lee",
           "label": "Lee",
           "cells": {
-            "total_listings": 21855,
-            "entry_under_300k": 11326,
-            "mid_300k_600k": 7014,
-            "upper_600k_1m": 1958,
-            "luxury_1m_plus": 1557,
-            "entry_share": 51.8
+            "total_listings": 21685,
+            "entry_under_300k": 11256,
+            "mid_300k_600k": 7006,
+            "upper_600k_1m": 1902,
+            "luxury_1m_plus": 1521,
+            "entry_share": 51.9
           }
         },
         {
           "key": "Collier",
           "label": "Collier",
           "cells": {
-            "total_listings": 7703,
-            "entry_under_300k": 1588,
-            "mid_300k_600k": 2266,
-            "upper_600k_1m": 1595,
-            "luxury_1m_plus": 2254,
-            "entry_share": 20.6
+            "total_listings": 7622,
+            "entry_under_300k": 1578,
+            "mid_300k_600k": 2250,
+            "upper_600k_1m": 1587,
+            "luxury_1m_plus": 2207,
+            "entry_share": 20.7
           }
         }
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-07-17T21:56:13Z",
+        "fetched_at": "2026-07-22T22:13:00Z",
         "tier": 2,
-        "citation": "SWFL for-sale listing distribution by price tier, per county, as of 2026-07-13"
+        "citation": "SWFL for-sale listing distribution by price tier, per county, as of 2026-07-20"
       }
     },
     {
@@ -243,30 +243,30 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-07
           "key": "Lee",
           "label": "Lee",
           "cells": {
-            "band_2m_3m": 284,
-            "band_3m_5m": 229,
-            "band_5m_10m": 96,
+            "band_2m_3m": 278,
+            "band_3m_5m": 219,
+            "band_5m_10m": 92,
             "band_10m_plus": 36,
-            "total_2m_plus": 645
+            "total_2m_plus": 625
           }
         },
         {
           "key": "Collier",
           "label": "Collier",
           "cells": {
-            "band_2m_3m": 378,
-            "band_3m_5m": 395,
-            "band_5m_10m": 274,
-            "band_10m_plus": 151,
-            "total_2m_plus": 1198
+            "band_2m_3m": 372,
+            "band_3m_5m": 391,
+            "band_5m_10m": 270,
+            "band_10m_plus": 148,
+            "total_2m_plus": 1181
           }
         }
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-07-17T21:56:13Z",
+        "fetched_at": "2026-07-22T22:13:00Z",
         "tier": 2,
-        "citation": "SWFL active $2M+ for-sale listings by price band, per county, as of 2026-07-13"
+        "citation": "SWFL active $2M+ for-sale listings by price band, per county, as of 2026-07-20"
       }
     }
   ],
@@ -286,7 +286,7 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-07
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-17T21:56:13Z"
+    "computed_at": "2026-07-22T22:13:00Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -303,5 +303,5 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-07
 - price-distribution-swfl: SWFL for-sale listing count per $50k price band per county from the realtor.com price-histogram aggregate (one call per county).
 
 --- RECENT NOTES ---
-- 2026-07-17: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-07-22: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
