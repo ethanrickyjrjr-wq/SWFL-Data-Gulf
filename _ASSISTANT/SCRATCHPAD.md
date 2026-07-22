@@ -109,6 +109,40 @@ NOT yet expanded; do that before claiming that ceiling.)
 **NOTHING IS PERSISTED.** Every one of these calls is fetched, partially parsed, used for one
 response, and discarded. The next lookup re-fetches and re-discards. Recorded quota 50k/mo
 ([[feedback_steadyapi-50k-quota-use-the-headroom]]); a comp lookup spends ≤3 and stores 0.
+**Where it "goes":** nowhere durable — in-process memory for one request, plus Vercel's HTTP data
+cache via `next: { revalidate: 3600 }`. Keyed by URL, unqueryable, expires hourly. That is the
+"nobody knows where it is": an ephemeral cache no code can read twice and no catalog can describe.
+
+**ENDPOINT CENSUS — crawled live 07/22/2026. WE CALL 3 OF 18.**
+Called: `v1/search`, `v1/nearby-home-values`, `v1/property-tax-history`.
+**UNUSED (15):** `v2/search` · `v1/autocomplete` · `v1/similar-homes` · `v1/gallery-similar-homes` ·
+`v1/property-estimates` · `v1/property-urgency` · `v1/environment-risk` · `v1/neighborhood-amenities` ·
+`v1/neighborhood-market-trends` · `v1/housing-market-details` · `v1/price-histogram` ·
+`v1/new-construction` · `v1/nearby-rentals` · `v1/rentals-search` · `v1/geo-details` · `v1/mortgage-rate`.
+
+Ones that map onto work we BUILT, STUBBED or DECLINED — verify each before acting, this is a doc
+listing not a probe:
+- **`similar-homes` / `gallery-similar-homes`** — a COMPS endpoint. Spent 07/22 building a comp
+  ranker over `nearby-home-values` without checking whether the vendor ships comps directly.
+- **`property-urgency`** — seller-stress is our validated whitespace
+  ([[project_seller-stress-whitespace-validated]]).
+- **`neighborhood-amenities`** — `community_profiles` is EMPTY and data-roots says "NO amenity root
+  exists today" (`community_profiles_empty_via_lake_mcp`).
+- **`environment-risk`** — flood risk is in scope.
+- **`autocomplete`** — the `/search` address-slug centering died 07/19
+  ([[reference_steadyapi-search-slug-centering-dead]]); this may be the intended resolver.
+
+**`statistics` object (never read) holds:** `tax.{total_years,total_tax_paid,average_annual_tax,
+latest_tax_year,latest_tax_amount,trend}` · `transactions.{total,sales_count,listings_count,
+current_price,first_price,price_appreciation_percentage}` · `permits.{total,recent[]}`.
+CORRECTION to my line above: `tax_history[]` is NOT flat — `assessment{total,building,land}` and
+`market_value{building,land,total}` are objects.
+
+**CONSEQUENCE FOR WHAT I SHIPPED TODAY (measured, 07/22/2026):** on `nearby-home-values`,
+**sold: only 15 of 25 carry sqft** (beds 15, baths 15, lot_sqft 25); for_sale: sqft 20 of 25. The
+ranker requires sqft, so the size-band wiring **silently drops ~40% of the vendor's sold pool**.
+Not a crash — a narrowing I did not know about and did not document. `similar-homes` may not have
+this hole; unverified.
 
 ### 0ag. "WE CAN FIND DATA ON SOLD HOUSES FOR 3 FUCKING DAYS AND FILL IT IN" + "DON'T WE HAVE POLYGONS AND ZIP EXTRACTOR?????" — three corrections in one message
 
