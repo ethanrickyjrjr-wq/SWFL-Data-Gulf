@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   // @resvg/resvg-js is a native (napi) addon; Turbopack cannot place its .node
@@ -89,4 +90,20 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry (Layer 12 — error tracking). withSentryConfig wraps the Next config to
+// register the SDK across all three runtimes and (only when SENTRY_AUTH_TOKEN is
+// set in CI) upload source maps. With no auth token the upload step is skipped and
+// the build still succeeds — nothing here requires network access at build time.
+export default withSentryConfig(nextConfig, {
+  // Project coordinates for source-map upload. Read from env so this file carries
+  // no org/project literals; unset → upload simply no-ops.
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  // Auth token stays in CI/Vercel env, never in version control. Absent → no upload.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Only print SDK build logs in CI.
+  silent: !process.env.CI,
+  // Upload a wider set of client bundles for readable stack traces (only runs
+  // when an auth token is present).
+  widenClientFileUpload: true,
+});

@@ -1,3 +1,27 @@
+## 2026-07-21 (Opus 4.8 · wt/sentry-error-tracking) — Layer 12: Sentry wired across all three Next runtimes, PII scrubbed, traces env-sized. Local commit, NOT pushed.
+
+Dispatched work package **D** of the six-package infrastructure order (`docs/handoff/2026-07-21-infrastructure-work-packages.md`). Closes the blind spot behind `selfheal_error_spike_parked`: an application 500 was invisible unless a human opened the Vercel log viewer and scrolled to it.
+
+**Re-verified the vendor surface LIVE via crawl4ai (RULE 0.4) — did not trust the playbook's 07/21 facts.** Two real drifts caught:
+1. `sendDefaultPii` is now **deprecated** (removed in SDK v11). Its successor `dataCollection` (since 10.57.0) has **permissive defaults** — passing the starter snippet's empty `dataCollection: {}` opts INTO collecting user identity, request/response **bodies**, cookies, URL params, GenAI prompt/response content, DB query values, and stack-frame locals. Shipping the snippet as-is would have leaked exactly the PII this package was told to scrub.
+2. Free "Developer" tier quota (sentry.io/pricing, verified): **5,000 errors/mo + 5,000,000 spans/mo**, 30-day retention, spike-protection default-on.
+
+**Shipped:**
+- `@sentry/nextjs@10.67.0` (package.json + bun.lock together — the D-only lockfile lock; one dependency).
+- Three runtime inits: `instrumentation-client.ts` (browser), `sentry.server.config.ts` (node), `sentry.edge.config.ts` (edge — NOT optional, `middleware.ts` does real edge work). `instrumentation.ts` loads server/edge by `NEXT_RUNTIME` and exports `onRequestError = captureRequestError` for server-side exceptions. `next.config.ts` wrapped in `withSentryConfig` with the existing `outputFileTracingIncludes`/`serverExternalPackages` preserved verbatim; source-map upload no-ops without `SENTRY_AUTH_TOKEN`.
+- **PII scrub is ONE authority** — `lib/observability/sentry-privacy.ts` disables every sensitive `dataCollection` category explicitly (`userInfo`, `cookies`, `httpHeaders`, `httpBodies: []`, `urlQueryParams`, `genAI`, `databaseQueryData`, `stackFrameVariables`); imported by all three configs so they can't drift back into the permissive default.
+- **Traces sized to our volume, not the 0.1 hyperscaler default** — `tracesSampleRate` from env (`SENTRY_TRACES_SAMPLE_RATE` server/edge; `NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE` client), default 0.1, parsed/clamped by `resolveTracesSampleRate` (TDD unit — `lib/observability/sentry-sampling.test.ts`, 11 pass). Errors stay at 100% via Sentry's separate `sampleRate`; this only sizes the secondary tracing feature against the 5M-span budget and is tunable UP once real usage stats confirm headroom.
+- Both error boundaries capture: new `app/global-error.tsx` (root-layout errors; self-contained inline styles since global-error renders without `globals.css`) + `Sentry.captureException` added to the existing `app/error.tsx` (boundaries swallow the error, so the SDK won't auto-capture it).
+- `.env.example` documents the six new vars (DSN, two sample-rate vars, org/project/auth-token).
+
+**Verification (ceiling stated honestly):** `bun test` 11/11 green; `bunx next build` → "✓ Compiled successfully" + full TypeScript check passed, and `register()` → server `Sentry.init` actually executed during prerender of 47+/95 pages without crashing. Build then stops at static prerender of `/charts` on `createServiceRoleClientUntyped()` needing `SUPABASE_URL` — a pre-existing Supabase-env dependency in `app/charts/page.tsx` (NOT in my diff), failing only because this isolated worktree has no `.env.local`. Unrelated to Sentry. **Live-alert verification** (a deliberate uncaught exception in a preview deploy producing an alert) is PENDING a real deploy + a provisioned DSN + the ONE new-issue-in-production alert (a Sentry-dashboard action — Sentry's default new-project rule) — none reachable from a local worktree.
+
+**`selfheal_error_spike_parked` left OPEN.** Its done-when (preview-deploy alert) is unmet from here, and the prod `checks` ledger should not be written from an unpushed worktree. Recommend re-scoping it to "wired locally 07/21; pending deploy + DSN + alert" when this lands.
+
+**Layer 8:** did NOT wire the `sa0718_unhandled_internal_error_messages_passed_s` error-leak fix (explicitly E's, blocked-on-D). Server-side exceptions are now captured, so that fix now has its "somewhere" to send detail to.
+
+Local commit only on `wt/sentry-error-tracking`; a human lands it via `node scripts/worktree.mjs land sentry-error-tracking`.
+
 ## 2026-07-21 (Sonnet 5 · main) — llms.txt existed already; fixed its own spec violation and a robots.txt gap that blocked the answer-engine bots it was built for.
 
 Operator: *"Do we have any llms.txt? crawl4ai that and see how we should use it"*.

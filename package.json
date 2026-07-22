@@ -68,6 +68,7 @@
     "@react-email/render": "^2.0.9",
     "@react-pdf/renderer": "4.5.1",
     "@resvg/resvg-js": "2.6.2",
+    "@sentry/nextjs": "^10.67.0",
     "@supabase/ssr": "0.12.0",
     "@supabase/supabase-js": "^2.108.2",
     "@visx/curve": "^4.0.0",

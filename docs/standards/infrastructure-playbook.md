@@ -448,7 +448,7 @@ announce itself with a bill or a 503 — not with a checklist.
 
 # Layer 12 — Error tracking and logs
 
-**STATUS: REAL GAP. Pipeline health is well instrumented; application errors are invisible.**
+**STATUS: WIRED LOCALLY (07/21/2026), LIVE-ALERT VERIFICATION PENDING. Sentry (@sentry/nextjs 10.67.0) is initialized across all three Next runtimes (browser / node / edge) with PII scrubbed (every sensitive `dataCollection` category disabled) and trace sampling env-tunable (errors captured at 100%). What is NOT yet proven: a deliberate uncaught exception in a preview deploy producing an alert — that needs a real deploy, a provisioned DSN, and the one new-issue-in-production alert, so `selfheal_error_spike_parked` stays OPEN until then. Pipeline health was already well instrumented; this closes the application-error blind spot.**
 
 **EVIDENCE.** Confirmed against `package.json`: **no Sentry, no OpenTelemetry, no PostHog, no
 log drain, no APM of any kind.** Zero matches.
