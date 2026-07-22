@@ -216,6 +216,79 @@ the boundary statement is part of the shared report header, not prose someone ha
 - No change to `refinery/packs/seller-stress-swfl.mts` constants — that remains Phase 3 of the
   sell-odds spec, operator sign-off required (RULE 1).
 
+## BUILT 07/22/2026 — amendments the build forced
+
+Both items are built and have run live. Four things the design got wrong or missed,
+each found by probing rather than by argument. Recorded here because the next reader
+will otherwise re-derive them.
+
+**A. Statistics are computed SOURCE-SIDE — new FM 12.** The 11 failure modes above all
+cover *analytical* correctness; none covers what the run itself costs. `parcel_structure`
+as designed reads 847,056 rows x 59 numeric ~= **400 MB per run** over psycopg — and
+`db-max-rows = 1000` bounds PostgREST only, so nothing structural stops it. The project
+is at **311% of its Supabase egress quota with the spend cap ON** (the live throttle
+behind the /desk + /charts outage). Every statistic is therefore computed by Postgres
+(`count`, `count(distinct)`, `count(*) FILTER`, `corr`) and only scalars cross the wire:
+a 59x59 correlation matrix is ~28 KB regardless of table size, and it is computed over
+every row rather than a sample. PCA explained variance is the eigendecomposition of that
+same matrix, so the dimensionality read costs nothing extra. *Guard:* `_sql.py` exposes
+query builders only; `test_sql.py` asserts every projected term is an aggregate and that
+no builder can emit `SELECT *`. The challenger is the one place rows are genuinely
+required (a model cannot be fitted on aggregates) — there the guard is that it pulls only
+LABELED rows and only used columns: 8,801 of 96,090, ~11x less.
+
+**B. The FM 5 guard is ZERO-SHARE, not null-rate.** FDOR zero-fills. Live probe of
+`lee_parcels`: **12 columns are 100.00% zero at cardinality 1** (`jv_change`,
+`jv_change_code`, `jv_h2o_recharge`, `av_h2o_recharge`, `jv_hist_commercial`,
+`av_hist_commercial`, `jv_hist_significant`, `av_hist_significant`,
+`jv_working_waterfront`, `av_working_waterfront`, `special_circumstances_code`,
+`special_circumstances_year`), plus `jv_conservation` at 99.96% and `sale_prc1` at
+85.47% — and **every one of them reads `non_null_share = 1.0000`**. The null-rate floor
+this spec specified would have caught none of them and clustered on all of them.
+
+**C. Identifier columns — new FM 13.** `lee_parcels.file_sequence_no` has
+`distinct = 556,083`, exactly the row count. It is a primary key wearing a numeric type:
+100% non-null, 0% zero, maximally high-cardinality, so the sparse / constant / zero-fill
+floors all wave it through and it lands in the committed allow-list as a "feature."
+*Guard:* `max_distinct_share` (drop at distinct/non-null >= 0.99), with a paired test
+proving it does not eat a genuinely granular money column (`av_nsd` is 0.470).
+
+**D. The panel has 2 LABELED weeks, not 3.** This spec's evidence section says "3
+distinct labeled weeks." Queried live 07/22/2026: 3 distinct weeks exist, but only **2**
+carry labels (06/29/2026 – 07/06/2026) — the last observed week is censored by
+construction. So a time-forward split with `holdout_weeks = 1` trains on exactly ONE week
+and validates on ONE. That is the thinnest split that can be called time-forward, and the
+Section 2 number must be read as provisional to a degree the spec did not anticipate.
+This is the standing lesson applied to itself: a number in a spec is a hypothesis with a
+timestamp, even when the spec is hours old.
+
+### First-run results (committed reports carry the full detail)
+
+`parcel_structure` — Lee 59 numeric -> 32 excluded -> 27 screened -> **17 clusters**;
+Collier 59 -> 34 excluded -> 25 screened -> **17 clusters**. PCA read: **9 components
+explain 80%** of variance, 15 explain 95%, PC1 = 30.5%. `av_nsd` absorbs `av_sd`, `jv`,
+`jv_resd_non_resd`, `living_area_sqft` (probed r = 0.992). The answer to question 1 is
+that 59 columns carry roughly 17 independent signals.
+
+`challenger` — **the two splits disagree, and that is the finding.** Grouped-CV (Section
+1, never a gate) has the forest winning: log loss 0.5274 vs logistic 0.5527, AUC 0.8075
+vs 0.7893. Time-forward (Section 2, the gate) reverses it: forest 0.5816 vs logistic
+0.5746, AUC 0.7698 vs 0.7903. On the only split that gates, **the tree ensemble does not
+beat regularized logistic** — it is worse on log loss, Brier and AUC. FM 1 was written to
+stop the flattering number being quoted as the gate, and it caught a genuine sign flip on
+the first run. FM 7 comes back clean: with/without `dom_days` is near-identical on the
+gate (0.5746 vs 0.5786), so the 54.2%-floored field is not carrying the model.
+
+**Consequence for Spec B:** the answer to question 2 is currently "no lift" — but on one
+training week. The honest reading is *not yet decidable*, not *settled*. Re-run as weeks
+accumulate. And per the Scope boundary above, none of this speaks to parcel data, which
+was never in the challenger's feature set.
+
+A vendor contract also drifted under the spec: `LogisticRegression(penalty=...)` is
+deprecated in scikit-learn 1.8 and **removed in 1.10**. The installed 1.9.0 says verbatim
+to "Use l1_ratio=0 instead of penalty='l2'". Written the documented way, it would have run
+green today and broken on the next bump.
+
 ## Sequencing
 
 Both analyses are independent and can be built in either order. `parcel_structure.py` has no label

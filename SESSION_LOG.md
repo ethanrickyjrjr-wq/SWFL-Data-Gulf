@@ -1,3 +1,63 @@
+## 2026-07-22 (Opus 4.8 · main) — Took over Spec A ("nothing built"). Both items built and run live; the gate split reverses the flattering one, and the RF does NOT win.
+
+Handoff was `f0f81b61`, whose entry ends "Spec A written, nothing built." Built it:
+`ingest/analysis/` (`_stats` pure · `_sql` seam · `_report` · `parcel_structure` ·
+`challenger`), 47 tests green, each named for the failure mode it targets. Two dated
+reports committed under `reports/analysis/`. Nothing serves — no route, render, cron, or
+pack change.
+
+**The headline result, and the reason the spec's FM 1 exists.** The challenger's two
+splits disagree. Grouped-CV (Section 1, explicitly never a gate) has the forest winning —
+log loss **0.5274** vs logistic 0.5527, AUC 0.8075 vs 0.7893. Time-forward (Section 2,
+THE gate) reverses it — forest **0.5816** vs logistic **0.5746**, AUC 0.7698 vs 0.7903.
+On the only split that gates, **the tree ensemble loses on log loss, Brier and AUC**. Had
+the design permitted only the flattering split we would have concluded "RF wins, switch
+model class." FM 1 caught a real sign flip on the first run. FM 7 came back clean:
+with/without `dom_days` is near-identical on the gate (0.5746 vs 0.5786), so the
+54.2%-floored field is not carrying the model.
+
+**Item 1 answer:** 59 numeric parcel columns carry roughly **17 independent signals**.
+Lee 59 -> 32 excluded -> 27 screened -> 17 clusters; Collier independently also 17. PCA
+read: 9 components explain 80% of variance, 15 explain 95%, PC1 = 30.5%. `av_nsd` absorbs
+`av_sd`, `jv`, `jv_resd_non_resd`, `living_area_sqft` (probed r = 0.992).
+
+**Four amendments the build forced, all from probing rather than argument** (written into
+the spec as FM 12/13 + corrections):
+
+1. **Statistics run SOURCE-SIDE — new FM 12.** The spec's 11 failure modes all cover
+   analytical correctness; none covers what the run itself pulls. As designed,
+   `parcel_structure` reads 847,056 rows x 59 numeric ~= **400 MB per run** over psycopg,
+   and `db-max-rows = 1000` bounds PostgREST only — while we sit at **311% of egress quota
+   with the spend cap ON**. Now Postgres computes `corr`/`count` and only scalars cross
+   the wire (~28 KB), over every row rather than a sample. PCA explained variance is the
+   eigendecomposition of that same matrix, so the dimensionality read is free. The
+   challenger genuinely needs rows, so its guard is labeled-rows-only: 8,801 of 96,090.
+2. **FM 5's guard is zero-share, not null-rate.** FDOR zero-fills. **12 Lee columns are
+   100.00% zero at cardinality 1** — and every one reads `non_null_share = 1.0000`. The
+   specified null-rate floor would have caught none of them.
+3. **New FM 13 — identifier columns.** `file_sequence_no` has distinct = 556,083 = exactly
+   the row count. A primary key wearing a numeric type; it passes the sparse, constant and
+   zero-fill floors untouched and lands in the allow-list as a "feature." Guarded, with a
+   paired test proving the guard doesn't eat a granular money column (`av_nsd` = 0.470).
+4. **The panel has 2 LABELED weeks, not 3.** Spec says 3. Queried live: 3 weeks exist,
+   2 carry labels (06/29–07/06); the last observed week is censored by construction. So
+   `holdout_weeks=1` trains on ONE week and validates on ONE. **The gate number is far
+   more provisional than the spec assumed** — "no lift" today reads as *not yet decidable*,
+   not *settled*. Same standing lesson as the 9.9%-vs-54.2% incident, applied to a spec
+   that was hours old.
+
+**Vendor drift caught:** `LogisticRegression(penalty=...)` is deprecated in scikit-learn
+1.8 and **removed in 1.10**; installed 1.9.0 says verbatim to use `l1_ratio=0`. Written
+the documented way it runs green today and breaks on the next bump. Fixed; results
+byte-identical after the change, which also re-confirms FM 9 determinism.
+
+sklearn lives in a separate `ingest/requirements-analysis.txt` so cron runners never
+install it (RULE 11), wired into deptry with the `scikit-learn`/`sklearn` name map.
+
+**Next:** Spec B (price-cut as a served check in `lib/why-not-selling/`) stays deferred —
+its go/no-go input is the Section 2 number, which needs more labeled weeks before it can
+decide anything. Re-run `python -m ingest.analysis.challenger` as weeks accumulate.
+
 ## 2026-07-22 (Opus 4.8 · main) — ZIP adjacency asset built. We already owned polygons; they were the wrong vintage, and the graph they produce crosses water.
 
 Took over the stats-regions handoff. Its running order said "advisor first on B1/B2," but the spec's

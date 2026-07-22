@@ -9,3 +9,5 @@
 psycopg[binary]>=3.2
 scikit-learn>=1.6
 numpy>=2.0
+# challenger.py frames the labeled panel before fitting.
+pandas>=2.0
