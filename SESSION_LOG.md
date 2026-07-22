@@ -10582,6 +10582,28 @@ append a correction; `stop_hook_active` makes it a one-shot nudge; and `scripts/
 never-registered failure has no detector.
 
 ## 2026-07-22 (Opus 4.8 · main) — Full-week failure audit. The four-lane gate was deaf to the exact message that caused failure #1.
+## 2026-07-22 (Sonnet 5 · wt/fourlane-gate-fix) — The four-lane gate was reading a Skill's own returned doc as "the operator speaking," not the actual prompt.
+
+**Live incident, this session.** Asked "get these" (enable three Anthropic plugins). Invoked the
+`update-config` skill mid-turn to edit `settings.json`; its ~154k-char returned doc (full settings
+JSON schema — dense with "schema", "table", "which") landed in the transcript as a synthetic
+`type:"user"` entry stamped `isMeta:true`. `readTurn()` in `.claude/hooks/check-four-searches.mjs`
+only skipped `tool_result`-shaped user turns, not `isMeta:true` ones, so it read that doc as the
+operator's message instead of the real "get these" beneath it — and the gate blocked a plugin-config
+edit as an unsearched "data question." Confirmed against the live transcript (`b55563da-...jsonl`
+line 302: `isMeta:true`, no `origin`/`promptSource`; a real typed prompt at line 289 carries
+`origin:{kind:"human"}` + `promptSource:"typed"`).
+
+**Fix:** `readTurn()` now skips `isMeta:true` entries the same way it already skips `tool_result`
+ones. Regression test `F6` added to `check-four-searches.test.mjs` (fails against the pre-fix code,
+passes after) — reproduces this exact shape rather than a synthetic guess. 18/18 tests pass.
+
+**Coordination note:** `.claude/hooks/check-four-searches.test.mjs` was claimed by another active
+session when this fix started; isolated the whole fix in `wt/fourlane-gate-fix` per RULE 1.5 rather
+than fight the claim or wait blind. This is a THIRD distinct bug found in this same gate today
+(after `ba30a776` wiring it in and `44bd54fe`/`d0ebbff8` widening the classifier) — worth a beat to
+ask whether the gate needs a design pass instead of another one-off patch next time it misfires.
+
 
 **Audit:** `_ASSISTANT/2026-07-22-claude-failure-audit-OPUS.md`. Commissioned by the handoff written
 earlier today; every claim carries a run command, commit hash, or scratchpad item.

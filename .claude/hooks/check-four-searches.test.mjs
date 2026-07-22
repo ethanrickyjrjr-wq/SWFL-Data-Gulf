@@ -196,6 +196,34 @@ describe("transcript reading", () => {
     assert.strictEqual(calls.length, 1);
   });
 
+  test("F6 — a harness-injected isMeta:true turn is not the operator speaking", () => {
+    // Real failure 07/22/2026, THIS session: invoking the update-config skill returned
+    // its ~154k-char doc (dense with "schema", "table", "which") as a synthetic
+    // isMeta:true user turn. readTurn() picked that as "the operator's message" instead
+    // of the real prompt beneath it, and the gate fired on a plugin-settings edit that
+    // was never a data question. Verified against the live transcript, not imagined:
+    // isMeta:true is the field Claude Code stamps on harness-injected turns; a real
+    // typed prompt carries origin:{kind:"human"} + promptSource:"typed" instead.
+    const lines = [
+      u("get these"),
+      JSON.stringify({
+        type: "user",
+        isMeta: true,
+        message: {
+          content: [
+            {
+              type: "text",
+              text: "Full Settings JSON Schema ... which settings file to modify ... table ... source ...",
+            },
+          ],
+        },
+      }),
+    ];
+    const { text } = readTurn(lines);
+    expect(text).toBe("get these");
+    expect(isDataTurn(text)).toBe(false);
+  });
+
   test("malformed lines are skipped, never thrown on", () => {
     const { text } = readTurn(["not json", "", u("which table holds sold price?")]);
     assert.ok(text.includes("which table"));

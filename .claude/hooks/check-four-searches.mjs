@@ -370,6 +370,12 @@ export function readTurn(lines) {
     // A tool RESULT arrives as a user-role turn; that is not the operator speaking.
     const isToolResult = Array.isArray(content) && content.some((b) => b?.type === "tool_result");
     if (isToolResult) continue;
+    // A harness-injected turn (Skill/tool output, hook additionalContext delivered
+    // outside the tool_result wrapper) is stamped isMeta:true — not the operator
+    // speaking either. Real typed prompts carry origin:{kind:"human"} instead.
+    // Confirmed 07/22/2026 against a live transcript: the update-config skill's
+    // ~154k-char returned doc landed here and got read as "the operator's message."
+    if (entries[i]?.isMeta) continue;
     const hasText =
       typeof content === "string" ||
       (Array.isArray(content) && content.some((b) => b?.type === "text"));
