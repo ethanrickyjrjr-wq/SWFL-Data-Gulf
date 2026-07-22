@@ -89,6 +89,26 @@ describe("grounding coverage guard", () => {
     ).toEqual([]);
   });
 
+  // ── Check 1b: MOCK DISCLOSURE ──────────────────────────────────────────────
+  // MapCanvas is allowlisted above to import the mock fixture, but it may only
+  // paint from it while SAYING SO. Without an `override` prop the colors are
+  // fixture numbers; /map shipped three such maps captioned "Flood risk by ZIP"
+  // with no disclosure in the served HTML — mock dollars read as real. The badge
+  // must live on the component (a page cannot forget it). Failure mode this
+  // guards: "undisclosed mock served as live data".
+  test("MapCanvas discloses sample data whenever it falls back to the fixture", () => {
+    const src = readFileSync("components/charts/MapCanvas.tsx", "utf8");
+    expect(
+      /\{!override && \(/.test(src),
+      "MapCanvas lost its `{!override && (...)}` disclosure branch. Without an override " +
+        "the map paints import-quarantined mock numbers; removing the badge ships them as live.",
+    ).toBe(true);
+    expect(
+      /Sample data/.test(src),
+      "MapCanvas no longer renders a 'Sample data' badge on the fixture path.",
+    ).toBe(true);
+  });
+
   // ── Check 2: BRIDGE REGRESSION ─────────────────────────────────────────────
   // Each known data-report route MUST keep mounting the ReportAi root (which is
   // the ONE importer of ReportHighlightBridge — Phase E one-root). Removing it

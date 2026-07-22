@@ -44,11 +44,20 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   const db = createServiceRoleClient();
-  const { data: row } = await db
+  // `error` MUST be destructured and checked. It used to be dropped, so a
+  // transient DB blip returned row=null, which read as "this user has no
+  // customer yet" and fell into the seed-upsert below — overwriting a PAYING
+  // subscriber's row with tier:"free". Fail closed instead: a read we cannot
+  // trust is not evidence that the customer is new.
+  const { data: row, error: readErr } = await db
     .from("billing_subscriptions")
     .select("stripe_customer_id")
     .eq("user_id", user.id)
     .maybeSingle();
+  if (readErr) {
+    console.error(`[stripe-checkout] billing_subscriptions read failed: ${readErr.message}`);
+    return NextResponse.json({ error: "billing_unavailable" }, { status: 503 });
+  }
 
   let customerId = row?.stripe_customer_id ?? null;
   if (!customerId) {
@@ -58,7 +67,10 @@ export async function POST(req: NextRequest): Promise<Response> {
     });
     customerId = customer.id;
     // Seed the row now so webhook updates keyed on customer id always land.
-    await db.from("billing_subscriptions").upsert(
+    // `ignoreDuplicates` keeps this INSERT-only: /api/stripe/webhook is the one
+    // writer of billing tier state (app/api/CLAUDE.md), so this path must never
+    // overwrite an existing row's tier/status even if one appears in a race.
+    const { error: seedErr } = await db.from("billing_subscriptions").upsert(
       {
         user_id: user.id,
         stripe_customer_id: customerId,
@@ -66,8 +78,12 @@ export async function POST(req: NextRequest): Promise<Response> {
         status: "none",
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "user_id" },
+      { onConflict: "user_id", ignoreDuplicates: true },
     );
+    if (seedErr) {
+      console.error(`[stripe-checkout] billing_subscriptions seed failed: ${seedErr.message}`);
+      return NextResponse.json({ error: "billing_unavailable" }, { status: 503 });
+    }
   }
 
   const prices = await stripe.prices.list({ lookup_keys: [lookupKey], limit: 1 });

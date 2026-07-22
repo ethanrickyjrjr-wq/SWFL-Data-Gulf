@@ -1,3 +1,48 @@
+## 2026-07-22 (Opus 4.8 · main) — Fixed the 3 priority-100 criticals (build green), launched the 377-check fan-out, banked the burndown knowledge as two skills.
+
+The handoff (85585e7c) said the fan-out was never run and named 3 criticals sitting live
+for four days. All three verified still present in `main` before touching anything.
+
+**1. `/embed/footer-token` fabricated a freshness token.** On a failed master fetch it
+served the literal `SWFL-7421-vX-pending` (lifted from a test fixture — that string is all
+over `lib/**/*.test.ts`) plus an invented `0.78` confidence, and still captioned itself
+"live". An unsourced value on a public embed: the one hard block in our own rules. Now
+returns an honest "Freshness unavailable right now." state — no token, no gauge, no "live".
+Also dropped the "Master brain" system noun off a public surface (speaker hygiene).
+
+**2. `/map` served mock flood dollars as real, undisclosed.** Handoff said "wire the live
+loader" — that option does not exist: `MetricKey` is `value|activity|dom`, flood LOST its
+pill on 07/03 by operator ruling (bad data). So the fix went to the component, not the page:
+`MapCanvas` now renders a "Sample data — not live" badge whenever `override` is absent
+(= painting from the import-quarantined fixture). On the component so a future surface
+cannot reintroduce the hole by forgetting it. The homepage passes a live override and never
+sees it.
+
+**3. Stripe checkout silently downgraded paying subscribers.** `route.ts:47` never
+destructured `error`, so a transient DB blip read as "no customer yet" and fell into an
+upsert writing `tier:"free"`. Now fails closed with 503, and the seed upsert is
+`ignoreDuplicates:true` — `/api/stripe/webhook` stays the ONE writer of tier state
+(app/api/CLAUDE.md hard line).
+
+**Proof:** `bunx next build` exit 0. New guard `grounding-coverage.test.ts` "MapCanvas
+discloses sample data…" — falsified with a probe (stripped the branch → RED) then restored
+(4 pass). NOT closing the three checks: prod evidence, not dev attestation — they close
+when Vercel serves the fixed bytes.
+
+**Fan-out running** (`wf_80061966-e13`): 377 open defect+verify+untriaged checks, Sonnet,
+4 phases — triage → worktree-isolated fix → 3-lens adversarial refute (majority refute kills
+the fix) → human close. Excluded: 287 `task`/`ceiling_` (different debt) and the 3 criticals.
+Early returns validate the handoff's premise: first 42 verdicts = 22 ALREADY_FIXED,
+20 STILL_BROKEN. First launch was a silent no-op — `args` arrived as a JSON *string*, so
+destructuring gave undefined, batchCount went NaN, and it "succeeded" with zero agents.
+Coerce-and-throw added; that trap is written into the skill.
+
+**Two skills added** (the durable half — the operator asked for skills, not just a smaller
+number): `.claude/skills/checks-burndown/` (why the count only goes up: an automatic opener
+with no automatic closer; scope selection; the 4-phase fan-out; never mass-close) and
+`.claude/skills/check-signal/` (the trap catalog — a false pass NEVER self-heals because
+reverify only reopens on FAIL, so a too-loose signal returns ok:true forever).
+
 ## 2026-07-22 (Opus 4.8 · main) — The checks ledger had an automatic opener and no automatic closer. Built the missing half; it closed 8/8 on the first live run.
 
 Operator, verbatim: *"FIGURE OUT HOW TO CLOSE ALL OF THESE … OR SET UP A TRIP THAT CLOSES

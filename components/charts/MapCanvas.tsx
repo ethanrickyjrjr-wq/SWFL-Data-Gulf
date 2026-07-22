@@ -327,6 +327,24 @@ export function MapCanvas({ county = "both", metric = "flood", override, classNa
       style={{ background: "var(--gulf-deep, #152832)" }}
     >
       <div ref={hostRef} className="map-canvas w-full h-full" style={{ position: "relative" }} />
+      {/* No `override` means the colors came from the import-quarantined mock
+          fixture (home-map-data.ts), NOT the lake. /map shipped three of these
+          captioned only "Flood risk by ZIP" — mock dollars served as real, with
+          no disclosure anywhere in the HTML. The badge lives on the COMPONENT,
+          not the page, so a new surface cannot reintroduce the hole by
+          forgetting it. The homepage passes a live `override` and never sees it. */}
+      {!override && (
+        <div
+          className="pointer-events-none absolute left-3 top-3 z-20 rounded border px-2 py-1 text-[11px] font-medium uppercase tracking-wide"
+          style={{
+            background: "rgba(10,20,25,0.92)",
+            borderColor: "var(--neutral-gold, #d4b370)",
+            color: "var(--neutral-gold, #d4b370)",
+          }}
+        >
+          Sample data — not live
+        </div>
+      )}
       {tooltip && (
         <div
           className="pointer-events-none absolute z-20 rounded-lg border px-3 py-2 text-xs"
