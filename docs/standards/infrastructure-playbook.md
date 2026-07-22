@@ -226,11 +226,14 @@ dead-code detection (report-only, phase 1), the lake-read ratchet
 `brains/**`-only pushes are skipped via `paths-ignore` because the rebuild bot commits data,
 not code.
 
-**PLAYBOOK — the four ratchets waiting to be tightened.**
+**PLAYBOOK — the ratchets (1 DONE 2026-07-21; 2–4 below).**
 
-1. **knip to phase 2.** `knip.jsonc` sets `rules.files` to `warn`, so CI prints orphan
-   candidates and exits 0. Triage the ~14-file surface, then flip to `error` so newly-orphaned
-   modules fail the build.
+1. **knip to phase 2 — DONE 2026-07-21 (wt/ci-ratchets).** `knip.jsonc` `rules.files` is now
+   `error`: a newly-orphaned module fails the build (proven — a scratch orphan reds knip, exit 1).
+   The live 07/21 surface was 32 files, not ~14: vendored bklit lib (`ignore
+   components/charts/vendor/**`), `docs/**` + `.claude/workflows/**` (`ignore`), two CLIs
+   (`entry`), and 16 no-importer app files FROZEN in `ignoreFiles` for operator core-vs-parked
+   triage — named, not deleted.
 2. **Registry identity to live gating.** The `--live` step is advisory on purpose: on the
    current snapshot `redfin_city_swfl`, `dbpr_re_licensees`, and `leepa_parcel_zip` are
    genuinely red, and a blocking live gate on day one reds `main` — the exact false-red disease

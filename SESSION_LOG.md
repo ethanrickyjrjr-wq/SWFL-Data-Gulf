@@ -138,6 +138,37 @@ Mirrored to `docs/sql/20260721_project_activity_insert_policy_and_grant.sql` (pr
 **Code (LOCAL, pending review — this worktree lands via `node scripts/worktree.mjs land rls-project-activity`).** Wired `app/api/projects/[id]/ai-material/route.ts` — the project-scoped AI-material build that inserts a deliverable but never logged. NOT `/email-lab/ai` (anonymous lane, no `project_id`, shared engine also called by ai-material — and its investigation-suggested service-role wire was a cross-user write hole, since service-role bypasses the new policy). `ai-material` already resolves the caller and proves ownership via the cookie-client project SELECT, so it now logs `deliverable_built` via the COOKIE client `db` (NOT the service-role `admin` it uses for the deliverables insert) — exactly the `refresh/route.ts` pattern. `deliverable_built` was a dead enum value with zero callers until now.
 
 `bunx next build` green (compile + TypeScript + full production prerender, with the two Supabase env vars supplied to the fresh worktree via the sanctioned single-var pattern — the worktree's env-exfil hook correctly blocked a full `.env.local` copy).
+## 2026-07-21 (Opus 4.8 · wt/ci-ratchets) — CI ratchet 1/4: knip flipped to phase-2 ENFORCING (rules.files: error). New orphans now fail the build.
+
+Package F (Layer 7 CI ratchets). Discipline: one flip per commit so a red is attributable —
+this is ratchet 1, committed alone.
+
+**Re-ran knip (RULE 0.5): live surface is 32 files, not the playbook's ~14.** Triaged each:
+- **Vendored bklit lib (12)** → `ignore` `components/charts/vendor/**`. MIT, NOTICE-pinned to an
+  upstream commit; the flagged legend/background/projection modules are the NOTICE's own documented
+  "vendored and proven but not yet wired — next increment, not a silent gap." An external dep,
+  exactly like the existing `mcp-widget/**`.
+- **Non-app source (2)** → `ignore`: `docs/**` (flagged file is an archived _FINISHED plan
+  artifact) and `.claude/workflows/**` (harness prose, not imported).
+- **CLIs (2)** → `entry`: `refinery/scaffold.mts` (`node … --id=…`, documented in packs/catalog +
+  index) and `cloud-secrets/vault.mjs` (`node … build`). Invoked, not imported.
+- **16 no-importer app/component/lib files → FROZEN in `ignoreFiles`, NOT deleted.** Landing
+  sections superseded by the homepage redesign (app/page.tsx imports HeroBar/Hero/SiteDoors/
+  GuidesStrip/PricingStrip/ObjectionFaq — a different set), the highlighter "dock" cluster
+  (comments still call it live — possible dynamic wiring), Modal, use-assistant, master-source,
+  etc. Per the operator rule (core-vs-parked is Ricky's call — name-and-ASK), deletion is his call
+  on landing; freezing holds the count at zero so the ratchet still catches the 33rd orphan.
+
+**Proof it bites:** `bunx --bun knip` exits 0 clean; a scratch `lib/__knip_ratchet_proof__.ts`
+makes it report "Unused files (1)" and exit 1 (then removed). The 10 remaining "Configuration
+hints" do NOT affect exit code (empirical: 10 hints, exit 0) — left untouched; the `brains/**`
+etc. ignores they flag are defensive.
+
+**Next (separate commits/decisions):** ratchet 2 (registry live gating) stays ADVISORY — 3 sources
+red per playbook + tool source, worktree has no creds to re-confirm; ratchet 3 (factuality
+blocking) has a clean 17/17 step-level stretch and flips next; ratchet 4 (visual regression)
+scopes out as its own package (single-platform baselines + email-dev-server boot + zero Storybook
+coverage — a build, not a flip).
 
 ## 2026-07-21 (Sonnet 5 · main) — llms.txt existed already; fixed its own spec violation and a robots.txt gap that blocked the answer-engine bots it was built for.
 

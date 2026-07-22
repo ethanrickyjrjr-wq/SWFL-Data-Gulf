@@ -1,12 +1,22 @@
 {
   // Dead-code detector — catches orphan modules at PR time (Operation July task 20).
   //
-  // PHASE 1 (now): REPORT-ONLY. Every rule is "warn", so `knip` always exits 0 and
-  // the CI step can never redden `main` on a false positive. This repo invokes dozens
-  // of scripts from GHA workflows, git hooks, and cron (not just package.json), so the
-  // first passes need `entry` tuning before enforcement. Read the CI log's "Unused
-  // files" section, confirm each is genuinely dead (RULE 0.5) or add it to `ignoreFiles`,
-  // and only THEN flip `rules.files` to "error" (phase 2 — fails the build on new orphans).
+  // PHASE 2 (2026-07-21): ENFORCING. `rules.files` is "error", so a NEWLY-orphaned
+  // module fails the build. The 07/21 surface (32 flagged files) was triaged (RULE 0.5)
+  // into four buckets, three of them resolved here structurally:
+  //   • vendored third-party lib  → `ignore` `components/charts/vendor/**` (bklit, MIT,
+  //     NOTICE-pinned; its currently-unwired legend/background modules are documented
+  //     "next increment, not a silent gap")
+  //   • non-app source            → `ignore` `docs/**`, `.claude/workflows/**`
+  //   • CLI entry points          → `entry` `cloud-secrets/vault.mjs`, `refinery/scaffold.mts`
+  // The fourth bucket is the "phase-2 frozen orphan surface" sub-block in `ignoreFiles`
+  // below: 16 app/component/lib files with NO static importer that are NOT verified-dead
+  // (landing remnants of the homepage redesign, the highlighter "dock" cluster comments
+  // still call live, etc.). Per the operator rule — core-vs-parked is Ricky's call,
+  // name-the-pattern-and-ASK — those are FROZEN, not deleted: they hold the file count at
+  // zero so the ratchet catches the 33rd orphan, and a human triages delete-vs-keep on
+  // landing. When one gets wired up, knip emits a "Remove from ignoreFiles" hint and it
+  // self-cleans.
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
 
   // Entry points knip can't discover on its own. The `next` plugin auto-adds the
@@ -18,6 +28,11 @@
     ".claude/hooks/**/*.mjs",
     "refinery/cli.mts",
     "refinery/tools/**/*.mts",
+    // CLIs invoked as `node <path> ...`, not imported (RULE 0.5-verified 2026-07-21):
+    // scaffold.mts (`node refinery/scaffold.mts --id=…`, documented in packs/catalog.mts
+    // + packs/index.mts) and the secrets-vault CLI (`node cloud-secrets/vault.mjs build`).
+    "refinery/scaffold.mts",
+    "cloud-secrets/vault.mjs",
     "middleware.ts",
     // Test files are run by `bun test` / `node --test`, not imported — they're entries.
     "**/*.test.{ts,tsx,mts,mjs}",
@@ -31,6 +46,16 @@
     "graphify-out/**",
     "app/_design/**",
     "mcp-widget/**",
+    // Vendored third-party charting lib (bklit, MIT — see NOTICE.md). Treated as an
+    // external dependency exactly like mcp-widget: its internals (unwired legend/
+    // background/projection modules) are a kept vendored snapshot, not our dead code.
+    "components/charts/vendor/**",
+    // Docs are not app source — embedded code snippets under archived/_FINISHED plans
+    // (e.g. the flagged cre-swfl.mts) are artifacts, never imported by the app.
+    "docs/**",
+    // Claude harness workflow prose (piece1-shell-review.js et al.) — invoked by the
+    // agent harness, not imported as code.
+    ".claude/workflows/**",
     "**/*.css",
     "**/*.d.ts",
     "next-env.d.ts",
@@ -45,14 +70,40 @@
     "lib/social/recipients.ts",
     "components/landing/Waitlist.tsx",
     "components/email-lab/PhotopeaModal.tsx",
-    "lib/email/snicklefritz/targets.ts"
+    "lib/email/snicklefritz/targets.ts",
+
+    // --- PHASE-2 FROZEN ORPHAN SURFACE (2026-07-21) ---------------------------------
+    // No static importer as of 07/21, but NOT verified-dead. Frozen (not deleted) so
+    // the `files: error` flip catches NEW orphans while a human makes the core-vs-parked
+    // call (memory: "NEVER propose parking active surfaces from repo metrics — Ricky's
+    // call"). Triage owner: operator. Delete or wire each, then drop its line here.
+    // Landing sections superseded by the homepage redesign (app/page.tsx now imports
+    // HeroBar/Hero/SiteDoors/GuidesStrip/PricingStrip/ObjectionFaq — a different set):
+    "components/landing/Capabilities.tsx",
+    "components/landing/Charts.tsx",
+    "components/landing/ComparisonSection.tsx",
+    "components/landing/DeliverableShowcase.tsx",
+    "components/landing/ProofStrip.tsx",
+    "components/landing/WeeklyReadCapture.tsx",
+    // Highlighter "dock" cluster — bind-frame.ts / chart-for-question.ts comments still
+    // describe a "live dock" that "the client DockChart validates"; possible dynamic wiring:
+    "components/highlighter/ChartUnavailable.tsx",
+    "components/highlighter/DeliverableHighlightPopup.tsx",
+    "components/highlighter/DockChart.tsx",
+    "lib/highlighter/deliverable-owner-store.ts",
+    // Other no-importer app/component/lib files pending operator triage:
+    "app/project/[id]/workspace/DeliverableThumbnail.tsx",
+    "app/waitlist-form.tsx",
+    "components/ui/Modal.tsx",
+    "lib/assistant/use-assistant.ts",
+    "lib/templates/token-contracts.ts",
+    "refinery/sources/master-source.mts"
   ],
 
-  // Phase 1: focus the signal on dead FILES + dependency hygiene (the task's target).
-  // Unused-exports/types are noisy on a large app and are silenced until the file
-  // surface is clean. All "warn" = report-only (exit 0). Flip `files` to "error" in phase 2.
+  // Phase 2: dead FILES fail the build (files: error). Unused-exports/types stay
+  // silenced — noisy on a large app, and out of scope for the file-surface ratchet.
   "rules": {
-    "files": "warn",
+    "files": "error",
     "dependencies": "off",
     "devDependencies": "off",
     "unlisted": "off",
