@@ -21,6 +21,7 @@
   "lib/concoctions/seed-authored.ts",
   "lib/deliverable/recipes/coming-soon.ts",
   "lib/deliverable/recipes/review-reply.ts",
+  "lib/demo/live-loaders.ts",
   "lib/desk/loaders.ts",
   "lib/email/build-usage.ts",
   "lib/email/market-context.ts",

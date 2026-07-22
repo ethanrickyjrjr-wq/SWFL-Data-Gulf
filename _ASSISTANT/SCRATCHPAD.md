@@ -21,6 +21,44 @@ entry. Don't do it.
 
 ## OPEN — raised 07/21/2026
 
+### 0z. "there is no traffic..is there?" — I proposed a caching plan without ever checking volume
+
+**Operator, 07/21/2026, verbatim:** *"there is no traffic..is there?"* — asked immediately after
+I handed him a three-move caching plan. He was right and I had not looked.
+
+**The failure:** I answered "how is our caching looking" by inventorying caching primitives and
+crawling vendor docs, then recommending optimizations — without once asking whether any request
+reaches these surfaces. That is RULE 11 skipped at the first step: I sized a solution before
+sizing the problem. It is also the handoff's *"CHECK THE ACCOUNT, NOT JUST THE CODE"* lesson,
+missed again — traffic volume is an account-surface fact, not a source-code fact.
+
+**(A) TOOL-PRINTED — what the probe actually found:**
+- **No analytics package installed at all.** No `@vercel/analytics`, no Speed Insights, no
+  PostHog/Plausible/Sentry. Nothing in `app/layout.tsx`. We have no page-traffic instrumentation.
+- `welcome_chat_usage`: 1128 rows, but `cid` is the literal string **`"anon"`** on 1055 of them
+  (905 distinct IPs, 06/21–07/21). The per-day "1 visitor" figure was that constant, not a person.
+- Those IPs are **all Azure ranges** (20.x, 4.x, 13.83, 52.x, 104.209, 172.172–174, 135.x),
+  arriving in **pairs seconds apart**.
+- **Every row maps to a `smoke-prod.yml` CI run 20–40s earlier.** Verified against
+  `gh run list --workflow=smoke-prod.yml`: run 18:38:24Z → rows 18:38:48/18:38:58; run 16:09:04Z
+  → 16:09:30/16:09:39; run 21:32:12Z → 21:32:39/21:32:42. Workflow trigger is `deployment_status`,
+  and `scripts/smoke-prod.mts` hits `/api/assistant` + `welcome_converse_mcp_zip_live_verify`.
+- `usage_events`: 440 rows total, top action `project_open` 225 from **2** client ids; `ask` 73
+  from 10; last activity 07/19–07/20. Dev/test volume.
+
+**(B) MY CONCLUSION, not tool output:** there is no public traffic. The welcome-chat log is 100%
+our own deploy smoke test. Caching is not a live problem — it is a problem we do not have yet.
+
+**AND THEN WHAT — the part that is actually worth acting on:** every deploy fires a smoke run that
+drives a real dossier fan-out (and the assistant endpoint) against prod. That is self-inflicted
+load on the exact surfaces flagged in the 07/21 egress work. NOT yet verified: whether the smoke
+path bills a Haiku turn per run, and whether its fan-out touches the lake. Worth one probe before
+anyone "optimizes caching" for phantom users.
+
+**Standing correction to carry forward:** before proposing any performance/caching/scale work,
+read the volume first and say the number. If there is no instrumentation, say *that* — do not
+substitute a code inventory for a traffic measurement.
+
 ### 0a. THE EGRESS BURNER IS NAMED, WITH BYTES: the lake MCP sniffs the whole bucket on every BOOT
 
 Operator hypothesis 07/21: *"data-roots has to be causing the egress increase."*
@@ -658,6 +696,21 @@ later" that came due.
 must NOT keep doing is what it does now — show a stale date and a hardcoded confidence score on a
 public page, which is the exact thing every rule here exists to prevent.
 
+**RESOLVED 07/21/2026 — operator chose "wire it to live data."** `app/demo/page.tsx` now reads
+`lib/demo/live-loaders.ts` (new): master/cre-swfl/home-values-swfl/env-swfl via `fetchBrain` (real
+conclusion + caveats + confidence + MM/DD/YYYY freshness, no more frozen `05/22/2026`), a live
+`corridor_profiles` query (27 real corridors, replacing the 6-week-stale committed fixture), live
+`data_lake.zhvi_pivoted` (same mapper `app/charts/page.tsx` uses), and a live `fema_nfip_claims`
+count scoped to the same 3 SWFL FIPS the env-swfl brain uses. Caught mid-build: `home-values-swfl`'s
+own metric label says "median ZHVI" — the exact mislabel data-roots.md forbids — so `safeMetrics()`
+filters any median+ZHVI-labeled metric before it can reach the page, regardless of source brain.
+Verified via `bunx next build` (prerendered `/demo`, 5-min revalidate) + inspected the built HTML
+directly: real numbers rendered (37 sources, 27 corridors, 57 ZIPs, 63,348 flood records, 80%
+confidence, 07/20/2026). 8 new `bun:test` cases (direction mapping + the mislabel guard). Visible
+copy changes flagged to operator before building: 68→57 ZIPs (canonical core-scope denominator),
+26→27 corridors (live count), key-metric tiles show real direction words instead of invented
+`+X% vs prior period` deltas.
+
 ### 21. CAN-SPAM: instructions meant for the SENDER are being printed to the RECIPIENT
 Operator: *"why are we writing shit we shouldn't have in emails, if it's for AI, why don't we put in
 the background? and why are we not putting in my can-spam address for an email?"*
@@ -755,6 +808,13 @@ returns empty for the same reason, so the session-start check list is currently 
 `market_comps_only_one_comp` · `email_button_placeholder_and_shared_cta`
 Until then THIS FILE is the only record of items 20-25. Do not let it be the last word — the whole
 reason RULE 2.4 exists is that a prose entry nobody re-reads is forgetting on a delay.
+
+**DONE 07/21/2026 — REST is back, all six accounted for.** `demo_page_stale_fixtures` needs no
+check — item 20 is RESOLVED above, not deferred. The other five are now real `checks` entries:
+`email_footer_internal_copy_to_recipient`, `equation_footnotes_all_recipes`,
+`market_comps_only_one_comp`, `email_button_placeholder_and_shared_cta` opened this session;
+`applybrand_no_server_side_caller` already existed in the ledger (confirmed via `check.mjs open`
+returning "already exists").
 
 ### CORRECTION to items 21, 22, 24 — written same session, from source, zero DB
 I logged items 20-25 off the screenshots before reading the branches. Two errors, both mine.
