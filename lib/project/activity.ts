@@ -5,8 +5,14 @@
  * calls logActivity. The AI reads recentActivity() to build its state document. One table,
  * one source of truth — the AI is never out of sync with what the user has done.
  *
- * All writes use the service-role client (passed by the route handler). RLS on the table
- * allows owners to SELECT; all INSERTs are server-side only.
+ * Writes use the COOKIE (RLS) client, not service-role (corrected 2026-07-21 — this
+ * docstring previously said service-role-only, which was stale the moment the INSERT
+ * policy below shipped). RLS enforces owner-scoped INSERT via a policy that joins
+ * project_activity.project_id -> projects.user_id = auth.uid() — see
+ * docs/sql/20260721_project_activity_insert_policy_and_grant.sql. A future writer that
+ * routes through service-role instead BYPASSES that policy and must do its own ownership
+ * check upstream; the cookie-client pattern below is the safer default and should stay
+ * the norm unless a specific call site has a real reason to differ.
  *
  * logActivity is fire-and-forget: it never throws, never fails the primary request.
  */

@@ -271,15 +271,23 @@ And there is evidence the checks are uneven:
 
 - `sa0718_unhandled_internal_error_messages_passed_s` — unhandled internal error messages pass
   straight through into API responses, leaking internals.
-- `email_lab_project_activity_rls_insert_missing` — **FIXED 2026-07-21.** `project_activity` had a
-  SELECT policy and no INSERT policy since its 06/19/2026 migration — and, found on a live probe, no
-  `authenticated` table grants at all — so every `logActivity` call silently RLS-failed (and the
-  cookie-client read path returned `[]`). Fix: `GRANT SELECT, INSERT` + an owner INSERT policy
-  (migration `project_activity_insert_policy_and_grant`, prod-live + two-sided-verified; mirror in
-  `docs/sql/20260721_project_activity_insert_policy_and_grant.sql`), and wired BOTH project-scoped
-  deliverable-build routes (`app/api/projects/[id]/build` — the primary path, reused by MCP
-  `swfl_project_build` — and `.../ai-material`) to log `deliverable_built`. The rest of this layer's
-  RLS/sweep story is unchanged.
+- `email_lab_project_activity_rls_insert_missing` — **DB half FIXED 2026-07-21, live and
+  two-sided-verified; app-layer coverage PARTIAL, corrected same day post-review.**
+  `project_activity` had a SELECT policy and no INSERT policy since its 06/19/2026 migration — and,
+  found on a live probe, no `authenticated` table grants at all — so every `logActivity` call
+  silently RLS-failed (and the cookie-client read path returned `[]`). Fix: `GRANT SELECT, INSERT`
+  + an owner INSERT policy (migration `project_activity_insert_policy_and_grant`; mirror in
+  `docs/sql/20260721_project_activity_insert_policy_and_grant.sql`). This is a universal backstop —
+  it now protects all 9 existing `logActivity` call sites repo-wide, not just the two below, and 6 of
+  those 9 were already deployed on `main` and started persisting real rows the moment the grant went
+  live (no redeploy needed). Wired TWO of the deliverable-build paths to log `deliverable_built`:
+  `app/api/projects/[id]/build` (the primary "Build" button) and `.../ai-material`. **Correction:**
+  an earlier version of this entry claimed the build route is "reused by MCP `swfl_project_build`" —
+  false. `assembleDeliverable` (the shared assembly engine) is reused by MCP and by the action-bar's
+  `build_deliverable` branch, but the ROUTE (and its new logActivity call) is not — both of those
+  paths call `assembleDeliverable` directly via service-role, bypassing this handler. Builds
+  triggered through MCP or the action bar still log nothing. Tracked, not silently deferred: check
+  `project_activity_mcp_actionbar_gap`. The rest of this layer's RLS/sweep story is unchanged.
 
 Also open, both low severity: 14 functions with a role-mutable `search_path`, and the `vector`
 extension installed in the `public` schema.

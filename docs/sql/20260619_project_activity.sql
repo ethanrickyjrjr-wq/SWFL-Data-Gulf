@@ -33,5 +33,10 @@ DO $$ BEGIN
     );
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- Service role bypasses RLS (used by server-side logActivity helper).
--- No write policy needed for users — all writes are server-side via service role.
+-- CORRECTED 2026-07-21: this table now HAS an owner-scoped INSERT policy + an
+-- explicit GRANT SELECT, INSERT to authenticated — see
+-- docs/sql/20260721_project_activity_insert_policy_and_grant.sql. logActivity uses the
+-- cookie (RLS) client, not service-role; every insert since 06/19 had been silently
+-- RLS-rejected because no INSERT policy or grant existed (this comment's original claim
+-- of "service-role only" was itself the stale assumption that produced that bug).
+-- Service role still bypasses RLS if a future writer chooses that path deliberately.

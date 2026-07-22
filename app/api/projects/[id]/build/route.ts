@@ -15,10 +15,17 @@ export const maxDuration = 60;
  *
  * Ownership is proven via the COOKIE client (RLS: a non-owner's project row is
  * invisible → 404). The actual assembly (freeze → forced-tool narrative → lint →
- * insert) lives in the shared `assembleDeliverable` orchestrator — ONE build path
- * reused by the MCP `swfl_project_build` tool. The row is written via service-role
- * because `deliverables` has no INSERT policy; ownership is already proven above.
- * Returns `{ id }` → the client navigates to /p/[id].
+ * insert) lives in the shared `assembleDeliverable` orchestrator, which IS reused
+ * elsewhere. The row is written via service-role because `deliverables` has no INSERT
+ * policy; ownership is already proven above. Returns `{ id }` → the client navigates
+ * to /p/[id].
+ *
+ * CORRECTED 2026-07-21 (post-build review): this ROUTE, and therefore the
+ * logActivity('deliverable_built', ...) call below, is NOT reused by the MCP
+ * `swfl_project_build` tool or by the action-bar's build_deliverable branch — both call
+ * `assembleDeliverable` directly via service-role, bypassing this handler entirely. A
+ * build triggered through either of those paths still logs no project_activity row.
+ * Tracked, not silently deferred: see checks entry `project_activity_mcp_actionbar_gap`.
  */
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

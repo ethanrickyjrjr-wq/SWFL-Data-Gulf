@@ -68,6 +68,50 @@ Dispatched work package **D** of the six-package infrastructure order (`docs/han
 **Layer 8:** did NOT wire the `sa0718_unhandled_internal_error_messages_passed_s` error-leak fix (explicitly E's, blocked-on-D). Server-side exceptions are now captured, so that fix now has its "somewhere" to send detail to.
 
 Local commit only on `wt/sentry-error-tracking`; a human lands it via `node scripts/worktree.mjs land sentry-error-tracking`.
+## 2026-07-21 (Opus 4.8 · wt/rls-project-activity) — Post-build review fixes: corrected a false "reused by MCP" claim, fixed two stale service-role docstrings, confirmed the digest stays contained.
+
+Three review agents (database/security, code, second-order) audited the RLS fix and route wiring
+below. Verdict on the DB-layer fix itself: no CRITICAL/HIGH — the new INSERT policy is a genuine
+universal backstop, verified to protect all 9 `logActivity` call sites repo-wide (not just the two
+wired here), grants are least-privilege, migration is idempotent, actor identity is server-resolved
+not client-forgeable. Findings below are documentation/framing corrections, not DB defects.
+
+**Corrected a false claim, in three places.** The entries below (and `app/api/projects/[id]/build/
+route.ts`'s own comment) said the build route is "the ONE assemble path reused by the MCP
+`swfl_project_build` tool." Two independent reviewers caught this is wrong: `assembleDeliverable`
+(the shared assembly engine) IS reused by MCP and by the action-bar's `build_deliverable` branch, but
+the ROUTE — and therefore its new `logActivity` call — is not. Both of those paths call
+`assembleDeliverable` directly via service-role, bypassing this handler entirely. A build triggered
+through MCP or the action bar still logs zero `project_activity` rows. This was already mapped in a
+prior investigation doc and left unwired without being named as a gap — exactly what RULE 2.4 exists
+to catch. Corrected the claim in `route.ts`'s comment and `docs/standards/infrastructure-playbook.md`;
+opened check `project_activity_mcp_actionbar_gap` (main repo, has creds — this worktree doesn't) so
+the remaining coverage doesn't silently vanish. Left the two routes as-is rather than expanding scope
+to wire MCP/action-bar too — this package was scoped as ONE bounded fix, not the sweep, and wiring two
+more call sites is its own decision, not an emergency.
+
+**Fixed two stale "service-role only" docstrings** (security review + second-order both flagged
+independently): `lib/project/activity.ts`'s header comment and `docs/sql/20260619_project_activity.sql`'s
+trailing comment both still said all writes are server-side via service-role. Both are now false — the
+whole point of this fix was adding an owner-scoped INSERT policy for the cookie-client pattern. Left
+uncorrected, either comment could steer a future writer toward the service-role path, which BYPASSES
+the new policy and reopens the exact cross-user hole this fix closed. Both corrected in place, pointing
+at `docs/sql/20260721_project_activity_insert_policy_and_grant.sql`.
+
+**Verified the digest stays contained** (second-order's inversion check — self-authored activity text
+flowing into the interactive AI's context, could it reach a sent/shared artifact and carry an
+injection). Traced every `buildProjectDigest`/`readRecentActivity` consumer: `app/project/page.tsx`
+(dashboard list), `app/project/[id]/page.tsx` → `ProjectWorkspace.tsx` (interactive AI panel), and
+`lib/project/other-projects.ts`. None touch an email/deliverable send path. Contained — no fix needed,
+noting the verification so it doesn't need re-tracing later.
+
+**Not fixed, tracked instead (RULE 2.4):** no retention/deletion path exists for `project_activity`
+(append-only, SELECT/INSERT grant only, unbounded growth) — low consequence at current volume, but
+opening check `project_activity_retention` (main repo) rather than leaving it as a prose note only.
+
+`bunx tsc --noEmit` clean after all fixes. Still local, still not pushed. The DB migration itself
+remains LIVE (applied earlier this session, unaffected by these doc/comment corrections).
+
 ## 2026-07-21 (Opus 4.8 · wt/rls-project-activity) — follow-up: wired the PRIMARY build route too, not just ai-material.
 
 Adversarial review of the prior commit (36f4a497) caught that the deliverable-build surface has TWO project-scoped routes that both persist a deliverable and both lacked `logActivity`, not one: `app/api/projects/[id]/build` (the primary "Build" — navigates to `/p/[id]`, and the ONE assemble path reused by the MCP `swfl_project_build` tool) AND `.../ai-material` (the Materials-Hub AI generator, wired in 36f4a497). Wiring only ai-material left the main Build button logging nothing. Both now log `deliverable_built` via the cookie client after their successful deliverable insert — the same `refresh/route.ts` pattern, ownership already proven by each route's RLS project SELECT.
