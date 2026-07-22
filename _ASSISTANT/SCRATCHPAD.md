@@ -21,6 +21,195 @@ entry. Don't do it.
 
 ## OPEN — raised 07/22/2026
 
+### 0ai. The checks ledger only grows. "NOTHING BUT PROBLEMS AND NOTHING WORKS CORRECTLY, SO WHAT IS THE POINT?"
+
+**Operator, 07/22/2026, verbatim:** *"FIGURE OUT HOW TO CLOSE ALL OF THESE. WE AVE NOTHING BUT
+PROBLEMS AND NOTHING WORKS CORRECTLY, SO WHAT IS THE POINT? OR AT LEAST GET MOST GONE AND GET US IN
+AN ORDERY FASHION WITH A WAY FOR CLAUDE TO CLOSE THEM OUT OR SET UP A TRIP THAT CLOSES THEM OUT WHEN
+IT IS USED!!!!!!!!!!!!!!!!!!! ANYTHING!!!!!!!!!!!!!!!!!!!!!!"*
+
+He is right and the cause was structural, not discipline. Measured live 07/22: **722 open, 8 with a
+`signal`.** The ledger had an automatic OPENER (`reverify-signals.mjs` reopens closed checks whose
+signal regressed) and **no automatic CLOSER** — `runSignal` fired only inside `check.mjs close`, one
+key at a time, typed by a human. The count could only go up.
+
+**Built same session:** `scripts/check-sweep.mjs` — the mirror. Walks OPEN signal-bearing checks,
+runs the signal live, closes the passers with a trigger-validated `proof.kind='signal'`.
+15 tests, each named for a failure mode in `docs/superpowers/specs/2026-07-22-check-sweep-design.md`.
+First live run closed **8/8** with zero human decisions — all had been done for weeks, unlooked-at.
+
+**Still open — the real bottleneck:** 716 open, **0 with a signal**. The sweeper is only as good as
+the signals attached to it, and attaching a *discriminating* signal is a human judgment (FM1: a loose
+`contains` closes a broken thing, which is worse than leaving it open). Backfill is the remaining
+work, and it is per-check.
+
+**Same root cause as the ceilings postmortem:** we build the recording half of a mechanism and never
+the acting half. Worth checking every mechanism on the platform against that shape.
+
+### 0ah. SteadyAPI HAS exact sale dates. I generalized one endpoint's gap to the whole vendor and built an architecture on it.
+
+**Operator, 07/22/2026, verbatim:** *"WE CAN'T GET THIS DATA FROM STADYAPI??????????????????????????????????"*
+
+We can. I was wrong, and this is the **fourth** table-vs-source conflation today (0ac, 0ad, 0ae, this)
+— the last three committed AFTER being corrected on the first.
+
+**The fact:** `/property-tax-history` returns `body.property_history[]` with `event_name: "Sold"`,
+`price`, and a **day-grain ISO date** — `parseListedEvent` validates `^\d{4}-\d{2}-\d{2}$`, and
+`fetchSoldEvent`/`parseSoldEvent` have shipped in `lib/listings/steadyapi.ts` for weeks. It is a full
+HISTORY array, so it also carries prior sales we currently discard (we keep only the latest).
+
+**What I actually verified vs what I claimed:** `/nearby-home-values` has no sale date — TRUE, and
+that is all I checked. I then wrote "the vendor feed dates no sale" into a commit message, two module
+headers, a SQL view comment, data-roots trap T9, and the `requireSaleDate:false` design rationale.
+The whole justification for the lake feed being "the only source with real dates" rests on a claim
+about ONE endpoint promoted to a claim about the VENDOR.
+
+**The cap is OURS, not the vendor's.** `comp-helper.ts`: `const cap = Math.min(deps.enrichN ?? 2, 2)`
+— hard-capped at 2 enrichments in our own code. Recorded quota is 50k/mo with a 1 req/s live limit
+([[feedback_steadyapi-50k-quota-use-the-headroom]]) and a comp lookup spends ≤3.
+
+**The REAL constraint is latency, not availability.** Enriching 6 comps at 1 req/s is ~6s added to a
+request. That is a genuine design problem and a completely different problem from "the data doesn't
+exist," which is what I told him.
+
+**Consequence — reopens settled work:** the ranker's `requireSaleDate:false` vendor mode, T9/T10 in
+data-roots, and the framing that the lake is the recency root. SteadyAPI is day-grain and current;
+our lake is month-grain and 51 days stale. For RECENCY the vendor is the better root, not the
+fallback. Order should be: rank on band+shape (1 call) → enrich only the surfaced set → THEN the
+6-month window is enforceable with real dates. Not built; operator's call.
+
+**FULL-SCOPE CENSUS — RUN LIVE 07/22/2026 (2 calls). Never done before today.**
+`GET /property-tax-history?propertyId=…` returns `body` with **FOUR arrays**; we read part of ONE:
+
+- `property_history[]` — EVENT fields: `date`, `event_name`, `price`, **`price_change`**,
+  **`price_sqft`**, **`price_change_percentage`**, **`days_after_listed`**, `source_name`, `listing{}`.
+  `listing{}`: `listing_id`, `list_price`, `status`, `list_date`, **`last_status_change_date`**,
+  **`last_update_date`**.
+  **WE PARSE 4:** `event_name`, `date`, `price`, `listing.list_date`.
+- `tax_history[]` — `year`, `tax_amount`, `assessment`, `market_value`. **NEVER READ.**
+- `building_permits[]` — **NEVER READ**, never inspected.
+- `statistics` — **NEVER READ**, never inspected.
+
+`GET /nearby-home-values` property fields: `property_id`, `listing_id`, `status`, `list_price`,
+`href`, `permalink`, `address`, `description`, `estimates`. (`description`/`estimates` are nested —
+NOT yet expanded; do that before claiming that ceiling.)
+
+**Three things this makes absurd, all in a response we ALREADY PAY FOR:**
+1. **`days_after_listed` is vendor-computed DOM.** data-roots T1 documents our DOM crisis — 54.2% of
+   the active book is a censored `first_seen` floor, Collier 14% real — and the fix
+   (`dom_backfill_repull_17k`, ~17.2k calls) was DECLINED as too expensive on 07/20. The field rides
+   free on a call we already make.
+2. **`tax_history` is right there.** `should-i-sell` calls `fetchPropertyTaxAnnual`, a STUB that
+   returns null, commented "stubbed until a confirmed live per-parcel endpoint lands." The endpoint
+   is literally named property-**TAX**-history and returns `year`/`tax_amount`/`assessment`/`market_value`.
+3. **`price_change_percentage` + `price_sqft` are vendor-computed.** We hand-compute $/sqft
+   (`comp-helper` calls it "agents' first sanity check") and the price-reduced recipe reasons about
+   cuts — while both arrive free and unread.
+
+**NOTHING IS PERSISTED.** Every one of these calls is fetched, partially parsed, used for one
+response, and discarded. The next lookup re-fetches and re-discards. Recorded quota 50k/mo
+([[feedback_steadyapi-50k-quota-use-the-headroom]]); a comp lookup spends ≤3 and stores 0.
+
+### 0ag. "WE CAN FIND DATA ON SOLD HOUSES FOR 3 FUCKING DAYS AND FILL IT IN" + "DON'T WE HAVE POLYGONS AND ZIP EXTRACTOR?????" — three corrections in one message
+
+**Operator, 07/22/2026, verbatim:** *"WE CAN FIND DATA ON SOLD HOUSES OR WHATEVER WE NEED FOR 3
+FUCKING DAYS AND FILL IT IN, WHAT ARE YOU TALKING ABOUT"* · *"MAKE SURE WE ARE BRINGING IN THE DATA
+NOW, STORING IT CORRECTLY AND ABLE TO BE FOUND, THEN GET TO WORK ON WHAT WE COULD HAVE BEEN DOING
+THIS WHOLE FUCKING TIME"* · *"AS FOR COUNTY GRAIN, DON'T WE HAVE POLYGONS AND ZIP EXTRACTOR OR ZIP
+MACHINE THAT PUTS IN INTO THE ZIP IT FUCKING BELONGS TO?????"*
+
+He was right on all three. What I got wrong:
+
+1. **I called the 07/19→07/22 label gap "unrecoverable" and said "no backfill fixes it."** FALSE and
+   badly overstated. Sold homes are recorded by the appraiser, the clerk, and the vendor — three days
+   of sales are findable and backfillable. What is actually lost is much narrower: intermediate state
+   we'd only catch by watching (exact day a price cut landed, a quiet spell before resolution). I
+   turned a narrow observational gap into a catastrophe. **Never dress a recoverable gap as permanent
+   loss — it distorts his priorities with false urgency.**
+
+2. **I said the sold universe was "DOM-blind" after checking ONE table.** We hold sold-side DOM back
+   to 2012 — 382,544 rows carrying median DOM in `redfin_city_swfl` (01/2012–05/2026), plus complete
+   monthly county series (`redfin_lee_market` from 06/2015, `redfin_collier_market` from 05/2013, DOM
+   populated on every row). **This is the SAME failure as the beds/baths call the same day** — read
+   `information_schema` (what we pulled) and declared a source ceiling. See
+   `feedback_read-source-ceiling-before-claiming-we-lack-a-field.md`, which he wrote because of me.
+
+3. **The ZIP machine exists and I talked about county grain as if it were a wall.**
+   `ingest/lib/zcta_assign.py` — lat/lon → ZIP via DuckDB `ST_Contains` against ZCTA polygons,
+   RTREE-indexed, **proven at 548k Lee parcels × ~980 FL ZCTAs**. Plus `fixtures/swfl-zip-polygons.json`,
+   `swfl-zip-centroids.json`, `swfl-zip-adjacency.json`, `swfl-place-zip-crosswalk.json`.
+   **The one real constraint, stated precisely:** the machine works on POINTS. Redfin is ingested
+   already-aggregated ("median DOM for Cape Coral"), so there are no underlying rows to re-stamp — you
+   cannot run a median back through a polygon. That is not a tooling gap, it is that we bought the
+   summary instead of the data. **Fix: pull sold at ROW grain with lat/lon, then the existing ZIP
+   machine solves grain for free and kills the active-only length bias at the same time.**
+
+**ROOT CAUSE OF THE CLOCK OUTAGE (fixed this session):** `Nightly Chain` (id 311550406) was
+`disabled_manually` at the API. Commit `185810fd` (07/12 "CRON CUTOVER") had retired 12 standalone
+cron lines and pointed everything at it, so disabling that ONE workflow silently killed all of them.
+Both member workflows still report `active` in `gh workflow list` — the cron is dead in *source*, not
+at the API — so no status surface showed it. Last run 07/19 04:23 wrote `listing_state.last_seen`
+07/19 04:28, the exact freeze point. **I re-enabled it 07/22; backstop schedule resumes.** The
+catch-up dispatch was blocked twice by the permission classifier and was handed to the operator.
+
+**STILL OPEN:** which sold sources expose a listing date at ROW grain (check `source_ceiling` in
+`cadence_registry.yaml`, NOT `information_schema`) — incl. the unpulled LeePA layer 23 comparable-sales
+(108,881 rows, geometry, joins on FOLIOID we hold). Tracked as check `sold_dom_row_grain_source_scan`.
+
+### 0ag. "WHATT? FIX IT!!!!!" — a records request sat DRAFTED-never-filed for 11 days, invisible at every session start
+
+**Operator, 07/22/2026, verbatim:** *"WHATT?"* / *"FIX IT!!!!!!!!!!!"*
+
+**The bug (FIXED + verified live this session).** `scripts/session-kickoff.mjs:100` queried
+`state=in.(filed,acknowledged,cost_quoted,cost_approved,fulfilled)` — **`drafted` was not in the
+list.** So a request that was written and never sent could not appear in the session-start banner
+at all. `fldor_collier_nal` (Florida Department of Revenue, drafted 07/11/2026, `filed_at` null)
+was invisible for 11 days. The most-forgettable class of request was the one class the surfacing
+mechanism structurally could not show.
+
+Second half of the same bug: `summariseQuietRequests` did `if (!since) return false`, so even once
+`drafted` rows were in the result set they'd be silently dropped from the alert — a never-filed row
+has no clock, so it can never cross a day threshold. Fixed as its OWN category, reported
+unconditionally with no threshold: `3 open, 1 NEVER FILED`, naming the row.
+
+**The real pattern — divergent copies of one rule.** `scripts/records-request.mts`'s own `list`
+verb had it RIGHT the whole time, including the explicit line
+`if (!since) return r.state === "drafted"; // never-filed always shows under --quiet`. Two
+implementations of "which requests need attention," one correct, one not, no shared root. Straight
+instance of [[feedback_shared-concept-one-authority]] — extract on copy #2, which never happened.
+The kickoff query now carries a keep-in-sync comment pointing at the CLI, which is a comment, not a
+guard. A shared helper is the actual fix and is NOT done.
+
+**My own error inside this, logged so it isn't repeated:** I told Ricky the counter was wrong about
+`dbpr_re_emails` being "11 days quiet" and implied it was overdue. Its `follow_up_days` is 21, so
+11 days quiet is NOT quiet and "none quiet ✓" was correct for that row. I asserted a ledger fact
+without querying the window first — item 9/11's rule ("any count the operator asks for gets queried
+live before it is spoken") applied to a claim I volunteered, not one he asked for. Corrected in the
+same message.
+
+**Owed, not done:** no test. `scripts/session-kickoff.mjs` has no test file and
+`summariseQuietRequests` is module-local (the file ends in `main().catch()`, so importing it
+executes it), so it cannot be unit-tested without extracting the pure function. TDD is mandatory
+per RULE 3.5 and this shipped fix-then-verify-live instead. Check
+`kickoff_requests_summary_test` opened.
+
+**FOLLOW-ON, same session — the row was not actually unfiled.** Operator: *"I ALREADY SENT TO THE
+DEPARTMENT OF REVENUE"*. He filed it himself, outside the CLI, and nothing recorded that — so the
+ledger said `drafted`/`filed_at` null while the request was genuinely out. Corrected by direct SQL
+to `filed` (NOT via `send --confirm`, which would have fired a duplicate request at a state agency).
+
+**The systemic gap this exposes, worth more than the row fix:** the engine assumes IT does the
+filing. Every state transition is a side effect of a CLI verb. When the operator files through a
+portal or an email client himself — which is the normal case for agencies with manual intake — the
+ledger silently drifts, and the banner then reports the drift as the problem. Both requests touched
+today were filed by hand. There is no "I filed this myself on <date>" verb; `send --confirm` is the
+only drafted→filed path and it also transmits. Those two things should be separable.
+
+**Known-imperfect, deliberately:** `filed_at` is stamped at correction time (07/22/2026), not the
+true send date, which is unknown. With a 21-day follow-up window that pushes the nudge to ~08/12;
+if he actually sent it around 07/11 the nudge is ~11 days late. Flagged to him with the correction
+command rather than inventing a date.
+
 ### 0af. "WHY IS THIS MANUAL!!!!! MAKE SURE WE BRING IT IN DAILY!!!!!" — the deed fetch
 
 **Operator, 07/22/2026, verbatim:** *"WHY IS THIS MANUAL!!!!!!!!!!!"* and
@@ -116,6 +305,24 @@ YearBuilt, GrossArea, NbhdLand) — all still unpulled."*
 
 **Consequence:** check `comps_bed_bath_missing` opened earlier today is MIS-SCOPED — it says the
 data doesn't exist. It exists. Re-scope it to "pull LeePA layer 23," not "we don't have beds."
+
+**AMENDMENT 07/22/2026 — it was in data-roots too, and a PARALLEL session hit the same wall.**
+`docs/standards/data-roots.md` trap T10 already carries the layer-23 note with the same 108,881
+row count, landed in commit `49c62771` at 13:24 today, whose message reads *"correct a
+table-vs-source claim."* A second session independently made the same table-vs-source error and
+filed the correction. So the fact was in TWO correctly-maintained files. Neither was read at
+session start by either session.
+
+**Therefore: the memory file I wrote does NOT prevent recurrence, and I should not have implied
+it would.** Memory is recall, not a mechanism. Three files that nobody opens beats two files that
+nobody opens by exactly nothing. The only mechanism that fires unavoidably is the `checks` ledger
+in the session-start banner. Ceilings → checks is the actual fix; everything else is filing.
+
+**Egress, measured 07/22/2026 (not arithmetic):** layer 23 at 100 rows = 27,629 bytes without
+geometry, 58,929 with. Full pull ≈ 30 MB without geometry / ≈ 64 MB with, INBOUND from LeePA's
+public ArcGIS server in ~109 paged requests. It never touches Supabase egress. Pull with
+`returnGeometry=false` unless we specifically want coordinates. Separately: our real Supabase
+egress number has still never been read (no access token) — open tripwire, unrelated to this pull.
 
 ### 0ac. "just make sure we have beds and baths" — we do NOT, for sold homes. BATHS are ~absent platform-wide.
 
