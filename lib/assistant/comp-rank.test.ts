@@ -147,6 +147,36 @@ describe("F3 — never pad a thin comp set to look complete", () => {
   });
 });
 
+describe("feed-shape — the lake feed has sq ft but NO beds/baths", () => {
+  test("a comp with real sq ft and NULL beds/baths is still rankable", () => {
+    // data_lake.lee_parcels (FDOR, 104 cols) has living_area_sqft and
+    // actual_year_built but NO bedroom or bathroom columns (probed 07/22/2026).
+    // Requiring beds would reject EVERY lake comp. Living area is the home test —
+    // land has none — so sq ft + a dated sale is the real floor.
+    const result = rankComps(
+      SUBJECT,
+      [
+        comp({ addressLine: "lake A", beds: null, baths: null }),
+        comp({ addressLine: "lake B", beds: null, baths: null }),
+        comp({ addressLine: "lake C", beds: null, baths: null }),
+      ],
+      NOW,
+    );
+
+    expect(result.comps).toHaveLength(3);
+    expect(result.standardMet).toBe(true);
+  });
+
+  test("zero or null sq ft is NOT a home and never ranks", () => {
+    const result = rankComps(
+      SUBJECT,
+      [comp({ sqft: null, beds: null }), comp({ sqft: 0, beds: null })],
+      NOW,
+    );
+    expect(result.comps).toHaveLength(0);
+  });
+});
+
 describe("F5 — an empty source must not be dressed up as a market fact", () => {
   test("zero candidates returns zero comps and an unmet standard", () => {
     const result = rankComps(SUBJECT, [], NOW);
@@ -177,6 +207,27 @@ describe("output — every comp explains itself, and never invents a distance", 
 
     expect(why).toContain("1,840");
     expect(why).toContain("1,978"); // the subject, for comparison
+  });
+
+  test("F8 — a MONTH-grain sale date never renders a fabricated day", () => {
+    // leepa_parcels.last_sale_date is month grain stored as a date: ALL 31,632 rows
+    // in the last 12 months are day-of-month 1 (queried live 07/22/2026). Printing
+    // "sold 05/01/2026" would assert a precision the source does not have — an
+    // invented figure, same family as an invented number.
+    const result = rankComps(SUBJECT, [comp({ priceDate: "2026-05-01", dateGrain: "month" })], NOW);
+
+    expect(result.comps[0].why).toContain("May 2026");
+    expect(result.comps[0].why).not.toContain("05/01/2026");
+  });
+
+  test("a DAY-grain sale date still renders the exact date", () => {
+    const result = rankComps(SUBJECT, [comp({ priceDate: "2026-05-14", dateGrain: "day" })], NOW);
+    expect(result.comps[0].why).toContain("05/14/2026");
+  });
+
+  test("an absent grain defaults to DAY — vendor sold dates are exact", () => {
+    const result = rankComps(SUBJECT, [comp({ priceDate: "2026-05-14" })], NOW);
+    expect(result.comps[0].why).toContain("05/14/2026");
   });
 
   test("NEVER prints miles or a direction — we hold no coordinates in Phase 1", () => {

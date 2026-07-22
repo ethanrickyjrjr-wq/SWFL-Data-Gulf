@@ -38,6 +38,14 @@ export interface CompCandidate {
   price: number | null;
   /** ISO date of the sale behind `price`. No date => cannot satisfy the window. */
   priceDate: string | null;
+  /** How precise `priceDate` actually is. Defaults to "day".
+   *
+   *  "month" is NOT a nicety — `data_lake.leepa_parcels.last_sale_date` is month grain
+   *  stored in a `date` column: ALL 31,632 rows in the last 12 months are day-of-month 1
+   *  (queried live 07/22/2026). Rendering that as "05/01/2026" asserts a day the source
+   *  never recorded, which is invented precision. The grain travels with the value so a
+   *  feed cannot silently launder month data as an exact date. */
+  dateGrain?: "day" | "month";
 }
 
 export interface RankedComp extends CompCandidate {
@@ -91,11 +99,33 @@ const W_BATHS = 0.3;
 const W_ZIP = 0.4;
 const W_RECENCY = 0.2;
 
-/** ISO -> MM/DD/YYYY (rule 2: never the raw token). Null-safe. */
-function mdY(iso: string | null): string | null {
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
+
+/** Render a sale date AT THE PRECISION THE SOURCE ACTUALLY HAS.
+ *  Day grain -> MM/DD/YYYY (rule 2). Month grain -> "May 2026" — never a fabricated
+ *  day-of-month. Null-safe. */
+function saleDateLabel(iso: string | null, grain: "day" | "month" = "day"): string | null {
   if (!iso) return null;
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
-  return m ? `${m[2]}/${m[3]}/${m[1]}` : null;
+  if (!m) return null;
+  if (grain === "month") {
+    const idx = Number(m[2]) - 1;
+    return idx >= 0 && idx < 12 ? `${MONTHS[idx]} ${m[1]}` : null;
+  }
+  return `${m[2]}/${m[3]}/${m[1]}`;
 }
 
 function monthsBefore(now: Date, months: number): Date {
@@ -104,9 +134,17 @@ function monthsBefore(now: Date, months: number): Date {
   return d;
 }
 
-/** A comp must be a HOME with a size and a dated sale to be rankable at all. */
+/** A comp must be a HOME with a size and a dated sale to be rankable at all.
+ *
+ *  LIVING AREA is the home test, deliberately — not bedroom count. Land and most
+ *  commercial parcels carry no living area, which is what Fannie B4-1.3-08's ban on
+ *  mixing vacant-land sales into a home comp set requires. Beds/baths are NOT required
+ *  because `data_lake.lee_parcels` (FDOR, 104 columns) has no bedroom or bathroom
+ *  column at all (probed 07/22/2026) — requiring them would reject every comp from our
+ *  own lake while silently passing the vendor's. The vendor feed keeps its own
+ *  `isComparableHome` beds-and-sqft guard upstream in comp-helper. */
 function isRankable(c: CompCandidate): boolean {
-  return c.beds != null && c.sqft != null && c.sqft > 0 && c.priceDate != null;
+  return c.sqft != null && c.sqft > 0 && c.priceDate != null;
 }
 
 function withinWindow(c: CompCandidate, cutoff: Date): boolean {
@@ -165,7 +203,7 @@ function whyLine(subject: CompSubject, c: CompCandidate): string {
 
   if (subject.zip && c.zip) parts.push(c.zip === subject.zip ? "same ZIP" : `ZIP ${c.zip}`);
 
-  const sold = mdY(c.priceDate);
+  const sold = saleDateLabel(c.priceDate, c.dateGrain ?? "day");
   if (sold) parts.push(`sold ${sold}`);
 
   return parts.join(" · ");
