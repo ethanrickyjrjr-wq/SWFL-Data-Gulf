@@ -113,7 +113,43 @@ response, and discarded. The next lookup re-fetches and re-discards. Recorded qu
 cache via `next: { revalidate: 3600 }`. Keyed by URL, unqueryable, expires hourly. That is the
 "nobody knows where it is": an ephemeral cache no code can read twice and no catalog can describe.
 
-**ENDPOINT CENSUS — crawled live 07/22/2026. WE CALL 3 OF 18.**
+**⛔ THE "3 OF 18" BELOW IS WRONG — RETRACTED 07/22/2026. IT IS 7 OF 18, AND A CENSUS ALREADY EXISTED.**
+**Operator, verbatim:** *"ARE YOU SURE YOU ARE CHECKING THIS OUT CORRECTLY. THERE IS NO WAY WE ONLYY
+CALL 3 OF 18. ARE YOU LOOKING IN THE RIGHT FUCKING PLACES?????"* — he was right.
+
+**How I got it wrong:** grepped `steadyGet(` — a helper that exists only in
+`lib/listings/steadyapi.ts` — and called the result "everything we call." Ignored the ENTIRE Python
+ingest layer (`ingest/pipelines/{listing_lifecycle,rentals,market_aggregates}/`) and the second TS
+client (`lib/social-pulse/steady-client.ts`). One file ≠ the codebase, exactly like one endpoint ≠
+the vendor and one table ≠ the source. **Fifth instance of the same error in one day.**
+
+**AND `docs/steadyapi-capability-census.md` ALREADY EXISTS** — as-of 07/16/2026, operator-requested,
+titled "everything we can grab, what we do get, what we should also get." It answers every question I
+spent this session re-deriving with live calls. Straight RULE 0.4 step-0 violation: our own research
+first. Companions: `docs/handoff/2026-07-07-steadyapi-full-scope-handoff.md`,
+`docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/00-foundation-endpoint-catalog.md`,
+`docs/handoff/2026-07-16-failed-calls-findings.md`.
+
+**THE REAL NUMBERS (from that census, 07/16/2026):** 7 of 18 wired — `/search`,
+`/nearby-home-values`, `/property-tax-history`, `/rentals-search`, `/price-histogram`,
+`/housing-market-details`, **`/similar-homes`** (comps lane, in `extract_api.py` — verified by grep
+07/22). Burn **13–16k/mo of a 50,000/mo quota** (~26–32%), headroom 34–37k. Rate limit UNVERIFIED,
+evidence spans 1–15 req/s; all surfaces pace ~1 req/s to be safe.
+
+**My worst claim of the session, now dead:** I said we'd built a comp ranker "without checking
+whether the vendor ships comps directly." `/similar-homes` was already wired, and the census says it
+carries `baths_full`/`baths_half`, a `community` field and an MLS source id. The open question is
+narrower and real: the chat/email comp lane uses `/nearby-home-values` (~40% sqft-null on sold) while
+the Python lane uses `/similar-homes`. **Two comp sources, different shapes, one product.**
+
+**Census staleness to verify (do NOT trust either side):** the census marks
+`/neighborhood-market-trends` ❌ unused, but `.github/workflows/realtor-geo-trends-monthly.yml` runs
+it into `realtor_geo_medians`. One of them is out of date.
+
+**Everything below this line was written before I found the census. Treat as SUPERSEDED where it
+conflicts; the live field-level dumps still stand (they were measured, not recalled).**
+
+**ENDPOINT CENSUS — crawled live 07/22/2026. WE CALL 3 OF 18.** ← WRONG, see retraction above.
 Called: `v1/search`, `v1/nearby-home-values`, `v1/property-tax-history`.
 **UNUSED (15):** `v2/search` · `v1/autocomplete` · `v1/similar-homes` · `v1/gallery-similar-homes` ·
 `v1/property-estimates` · `v1/property-urgency` · `v1/environment-risk` · `v1/neighborhood-amenities` ·
@@ -397,6 +433,24 @@ their own MLS export.
 
 **Not built.** No ingest written against a new source without the scope census and Ricky's
 sign-off. See [[feedback_full-scope-first-census-before-ingest]].
+
+### 0ac. "why did we use 2010 geometry anywhere???????????????"
+
+**Operator, 07/22/2026, verbatim:** *"why did we ue 2010 geometry anywhere???????????????"*
+
+Raised after I reported that `public/maps/fl_zips.geojson` (22MB, 983 FL ZCTAs, committed
+06/11/2026) carries `ZCTA5CE10` / `GEOID10` / `INTPTLAT10` fields — 2010-vintage ZCTAs — while
+`fixtures/swfl-zip-county.json` and `fixtures/swfl-zip-centroids.json` are both 2020. The two
+vintages disagree on real edges (33903~33916 on the Caloosahatchee).
+
+**It is not one file.** `ingest/utils/zip_approx.py`'s docstring calls it "TIGER/Line 2024" — a
+claim its own 2010 field names contradict, so anyone reading the docstring believes it is current.
+Consumers found so far: `ingest/lib/zcta_assign.py` (the G1 parcel site-ZIP gate),
+`ingest/utils/zip_approx.py`, `ingest/duckdb_pipelines/franchise_outcomes/constants.py`.
+
+Answer owed: WHY 2010 was chosen (or whether it was chosen at all vs inherited), and what the
+2010→2020 delta does to every number those three consumers feed. Tracked as
+`fl_zips_geojson_vintage`. **Do not close until the blast radius is measured, not estimated.**
 
 ### 0ab. "where are we wiring to??" — the lake comp feed (20205251) has ZERO consumers
 
