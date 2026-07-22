@@ -138,6 +138,45 @@ Mirrored to `docs/sql/20260721_project_activity_insert_policy_and_grant.sql` (pr
 **Code (LOCAL, pending review — this worktree lands via `node scripts/worktree.mjs land rls-project-activity`).** Wired `app/api/projects/[id]/ai-material/route.ts` — the project-scoped AI-material build that inserts a deliverable but never logged. NOT `/email-lab/ai` (anonymous lane, no `project_id`, shared engine also called by ai-material — and its investigation-suggested service-role wire was a cross-user write hole, since service-role bypasses the new policy). `ai-material` already resolves the caller and proves ownership via the cookie-client project SELECT, so it now logs `deliverable_built` via the COOKIE client `db` (NOT the service-role `admin` it uses for the deliverables insert) — exactly the `refresh/route.ts` pattern. `deliverable_built` was a dead enum value with zero callers until now.
 
 `bunx next build` green (compile + TypeScript + full production prerender, with the two Supabase env vars supplied to the fresh worktree via the sanctioned single-var pattern — the worktree's env-exfil hook correctly blocked a full `.env.local` copy).
+## 2026-07-21 (Opus 4.8 · wt/ci-ratchets) — CI ratchet 3/4: factuality gate flipped to BLOCKING (continue-on-error true->false). LLM-judged, so the caveat travels in the workflow header.
+
+Package F, ratchet 3 — its own commit (attributability). Ratchet 2 not flipped; ratchet 4 scoped
+out; both documented below since neither produces a commit.
+
+**Evidence for the flip — the gate's entire life is green.** `factuality-gate.yml` has run 17 times
+since it shipped 2026-07-16, all on real pushes touching lib/deliverable/** (path-filtered), and the
+graded step (`Run factuality gate`) shows conclusion=success on ALL 17 — runs 29481865012 (07-16)
+through 29781925042 (07-20). Verified the conclusion isn't masked: continue-on-error was at the JOB
+level, which does not rewrite a step's own conclusion, so these are real passes.
+
+**Caveat recorded in the workflow header, not buried.** The gate is LLM-judged — promptfoo's
+`factuality` grader over 14 fixtures, each a live Anthropic call. A grading nondeterminism, or an
+Anthropic/infra blip surfaced as `result.error`, can now red main with no code change — the exact
+false-red class this ratchet system fights. Header says: if it flakes, revert to true. The flip is
+the designed lifecycle (warn-first -> blocking after a clean stretch, tracked by check
+factuality_gate_blocking_flip); the human landing this worktree owns the residual risk.
+
+**Ratchet 2 (registry live gating) NOT flipped — advisory holds.** Playbook + the tool's own source
+(both 07/21) name redfin_city_swfl / dbpr_re_licensees / leepa_parcel_zip red on the live snapshot.
+Ran `--live` here to confirm, but the worktree has no DESTINATION__POSTGRES__CREDENTIALS / .dlt/
+secrets.toml, so it fails-open (live_unavailable, DB checks SKIPPED) and prints a MISLEADING "OK" —
+a false green, not a pass. Flipping on that reds main day one. Left advisory; the
+registry_identity_live_gating check needs a credentialed green confirm first (couldn't update the
+check from here — same missing creds).
+
+**Ratchet 4 (visual regression) scoped out as its own package** — a build, not a flip: committed
+email baselines are single-platform (no -linux suffix; snapshotPathTemplate strips it) so they'd
+false-red on ubuntu CI, the run needs `bun email:dev` booted in CI, and the Storybook stories have
+zero visual coverage (the playwright suite only covers emails/*.tsx). Checks visual_regression_ci_job
+/ visual_regression_prepush_wiring / storybook_visual_regression_gap stay OPEN.
+
+Verified: YAML parses (continue-on-error=false); `bunx next build` COMPILES + TYPECHECKS clean
+(`✓ Compiled successfully`, `Finished TypeScript`). It then fails static prerender of /charts on an
+unset SUPABASE_URL/SERVICE_KEY — a credential-less-worktree env gap (no .env.local / .dlt in a
+worktree), deterministic regardless of commit and NOT this edit: neither .github/workflows/*.yml nor
+knip.jsonc is a Next build input, and the failure is a runtime env guard on a Supabase-reading page.
+CI has those secrets, so it does not hit this. Compile+typecheck green is the real regression signal.
+
 ## 2026-07-21 (Opus 4.8 · wt/ci-ratchets) — CI ratchet 1/4: knip flipped to phase-2 ENFORCING (rules.files: error). New orphans now fail the build.
 
 Package F (Layer 7 CI ratchets). Discipline: one flip per commit so a red is attributable —

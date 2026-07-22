@@ -226,7 +226,7 @@ dead-code detection (report-only, phase 1), the lake-read ratchet
 `brains/**`-only pushes are skipped via `paths-ignore` because the rebuild bot commits data,
 not code.
 
-**PLAYBOOK — the ratchets (1 DONE 2026-07-21; 2–4 below).**
+**PLAYBOOK — the ratchets (1 & 3 DONE 2026-07-21; 2 held advisory, 4 scoped out — below).**
 
 1. **knip to phase 2 — DONE 2026-07-21 (wt/ci-ratchets).** `knip.jsonc` `rules.files` is now
    `error`: a newly-orphaned module fails the build (proven — a scratch orphan reds knip, exit 1).
@@ -239,9 +239,12 @@ not code.
    genuinely red, and a blocking live gate on day one reds `main` — the exact false-red disease
    this build exists to kill. Flip to `--live --gate` after one green confirm. Tracked by
    `registry_identity_live_gating`.
-3. **Factuality gate to blocking.** `factuality-gate.yml` runs with `continue-on-error`. Flip
-   to `false` after a validated clean stretch of warn-first runs; record the evidence run ids.
-   Tracked by `factuality_gate_blocking_flip`.
+3. **Factuality gate to blocking — DONE 2026-07-21 (wt/ci-ratchets).** `factuality-gate.yml`
+   `continue-on-error` flipped `true`->`false`. Evidence: 17/17 step-level green over the gate's
+   entire life (runs 29481865012 [07-16] .. 29781925042 [07-20]; job-level continue-on-error does
+   not mask a step conclusion). Caveat in the workflow header — the gate is LLM-judged (promptfoo
+   factuality grader, 14 live-Anthropic fixtures), so a grading/infra blip can red main; revert if
+   it flakes. Tracked by `factuality_gate_blocking_flip`.
 4. **Visual regression into CI.** Currently local-only. Three open checks cover it:
    `visual_regression_ci_job`, `visual_regression_prepush_wiring`,
    `storybook_visual_regression_gap`.
@@ -251,7 +254,10 @@ gates — single operator, and the pre-push hooks already do more than most revi
 
 **DONE WHEN.** All four ratchets above are tightened. Each is a one-line flip plus the
 evidence run that justifies it — do them one at a time, never as a batch, so a red is
-attributable.
+attributable. **Progress 2026-07-21 (wt/ci-ratchets):** ratchets 1 (knip) & 3 (factuality)
+tightened; ratchet 2 held ADVISORY (3 sources — redfin_city_swfl / dbpr_re_licensees /
+leepa_parcel_zip — still red on the live snapshot, flipping would red main); ratchet 4 scoped
+out as its OWN package (real CI build, not a flip). NOT complete.
 
 ---
 

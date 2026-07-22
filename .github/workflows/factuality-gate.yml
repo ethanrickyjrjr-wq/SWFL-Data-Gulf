@@ -1,6 +1,12 @@
-# Factuality CI gate — warn-first (spec 2026-07-16-factuality-ci-gate-design.md D5/D6).
-# continue-on-error flips to false via check `factuality_gate_blocking_flip` after a
-# validated clean stretch. Supabase secrets are LOAD-BEARING: without them
+# Factuality CI gate — BLOCKING as of 2026-07-21 (spec 2026-07-16-factuality-ci-gate-design.md
+# D5/D6; ratchet 3/4, check `factuality_gate_blocking_flip`). Flipped continue-on-error true->false
+# after a validated warn-first stretch: 17/17 step-level green over the gate's entire life
+# (runs 29481865012 [2026-07-16] .. 29781925042 [2026-07-20], all step conclusion=success — the
+# job-level continue-on-error does not mask a step conclusion, so these are real passes).
+# CAVEAT — this gate is LLM-JUDGED (promptfoo `factuality` grader, 14 fixtures, live Anthropic
+# calls): grading nondeterminism OR an Anthropic/infra blip (surfaced as result.error) can red
+# main with no code change. If it flakes, revert continue-on-error to true. Supabase secrets are
+# LOAD-BEARING: without them
 # logApiUsage() silently no-ops and the grading spend becomes invisible.
 # Spec deviation, documented: spec success-criteria said "a real PR"; this repo
 # pushes to main and never opens PRs, so the trigger is push-with-path-filter
@@ -18,7 +24,7 @@ on:
 jobs:
   gate:
     runs-on: ubuntu-latest
-    continue-on-error: true # D6 warn-first — do not remove without the blocking-flip check
+    continue-on-error: false # BLOCKING 2026-07-21 (ratchet 3/4). See header for the validated warn-first evidence + the LLM-judged false-red caveat.
     steps:
       - uses: actions/checkout@v4
 
