@@ -18,6 +18,34 @@ pytest.importorskip("crawl4ai")  # this module needs the pinned crawl4ai venv, n
 
 from ingest.lib import extract_client
 from ingest.lib.crawl_client import Crawl4aiError
+
+# extract_client.py:202 meters EVERY call into the api_usage ledger:
+#   log_api_usage(model=msg.model, call_type="ingest_extract", usage=msg.usage)
+# A message stub without both attributes is not a real Anthropic message, and the
+# test then fails on the metering instead of on the thing it means to assert.
+# (compute_cost_usd reads usage via getattr with 0 defaults, so token counts here
+# only need to exist — they are never asserted on.)
+_STUB_MODEL = "claude-haiku-4-5-20251001"
+
+
+class _StubUsage:
+    input_tokens = 100
+    output_tokens = 20
+    cache_read_input_tokens = 0
+    cache_creation_input_tokens = 0
+
+
+@pytest.fixture(autouse=True)
+def _never_write_the_spend_ledger(monkeypatch):
+    """A unit test must never insert into api_usage_log.
+
+    log_api_usage() writes a real row whenever DESTINATION__POSTGRES__CREDENTIALS
+    is present in the environment. It is unset in CI and in this shell today, so
+    nothing leaked — but a developer with it exported would have every run of
+    this file post fake spend into the ledger the ops spend page reads. Pinning
+    SKIP_USAGE_LOG makes that impossible rather than merely unlikely.
+    """
+    monkeypatch.setenv("SKIP_USAGE_LOG", "1")
 from ingest.lib.firecrawl_client import FirecrawlError
 from ingest.lib.spider_client import SpiderError
 
@@ -149,6 +177,8 @@ def test_llm_extract_rows_passes_strict_output_config(monkeypatch):
 
     class _Msg:
         stop_reason = "end_turn"
+        model = _STUB_MODEL
+        usage = _StubUsage()
         content = [type("C", (), {"text": '{"rows":[{"addr":"1 Main"}]}'})()]
 
     class _Client:
@@ -180,6 +210,8 @@ def test_llm_extract_rows_no_schema_omits_output_config(monkeypatch):
 
     class _Msg:
         stop_reason = "end_turn"
+        model = _STUB_MODEL
+        usage = _StubUsage()
         content = [type("C", (), {"text": '{"rows":[]}'})()]
 
     class _Client:
@@ -201,6 +233,8 @@ def test_llm_extract_rows_raises_on_refusal(monkeypatch):
 
     class _Msg:
         stop_reason = "refusal"
+        model = _STUB_MODEL
+        usage = _StubUsage()
         content = [type("C", (), {"text": "I can't help with that."})()]
 
     class _Client:

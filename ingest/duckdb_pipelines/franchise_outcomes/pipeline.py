@@ -64,16 +64,11 @@ from .constants import (
 )
 from ingest.lib.tier1_inventory import upsert_inventory_row
 from ingest.utils.zip_approx import get_zip_approx
+from ingest.lib.env_local import load_env_local
 
 
 def _load_env() -> None:
-    env_path = Path(__file__).parent.parent.parent.parent / ".env.local"
-    if not env_path.exists():
-        return
-    for line in env_path.read_text().splitlines():
-        if "=" in line and not line.startswith("#"):
-            k, _, v = line.partition("=")
-            os.environ.setdefault(k.strip(), v.strip().strip("'\""))
+    load_env_local()
 
 
 def _configure_s3(con: duckdb.DuckDBPyConnection) -> None:

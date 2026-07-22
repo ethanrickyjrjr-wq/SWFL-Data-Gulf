@@ -8,7 +8,6 @@ Outputs:
 """
 import os
 import re
-from pathlib import Path
 
 import duckdb
 import requests
@@ -30,6 +29,7 @@ from ingest.duckdb_pipelines.storm_history_swfl.constants import (
 )
 from ingest.lib.guards import assert_min_rows
 from ingest.lib.tier1_inventory import upsert_inventory_row
+from ingest.lib.env_local import load_env_local
 
 
 _DAMAGE_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*([KMB]?)\s*$", re.IGNORECASE)
@@ -74,13 +74,7 @@ def _list_noaa_urls(start_year: int, end_year: int) -> list[str]:
 
 def _load_env() -> None:
     """Load .env.local for SUPABASE_S3_* credentials."""
-    env_path = Path(__file__).parent.parent.parent.parent / ".env.local"
-    if not env_path.exists():
-        return
-    for line in env_path.read_text().splitlines():
-        if "=" in line and not line.startswith("#"):
-            k, _, v = line.partition("=")
-            os.environ.setdefault(k.strip(), v.strip().strip("'\""))
+    load_env_local()
 
 
 def run() -> None:

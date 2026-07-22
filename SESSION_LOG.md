@@ -35,6 +35,67 @@ Backfill tracked as `checks_signal_backfill`.
 **Not wired to any cron or SessionStart** — auto-close on a schedule is the operator's call,
 not a default.
 
+## 2026-07-22 (Opus 4.8 · main) — Cleared the pre-existing red ingest suite, 18 -> 0 in CI. One fix uncovered unit tests making REAL billed vendor calls.
+
+Operator: *"YES AND TAE CARE OF THE PREXISTING PROBLEM"* — the 18 failures the Spec A work
+ran into but did not cause. Five distinct root causes, none of them a real regression:
+
+**1. `.env.local` loader (5 tests).** `ingest/lib/env_local.py` has been the ONE correct loader
+since 07/16 (UTF-8, `errors="replace"`), but **13 modules still carried the pre-extraction
+copy-paste** using `Path.read_text()`'s locale default — cp1252 on Windows — which dies on the
+em-dashes in that file. Migrated all 13 to the shared loader (**-97/+26**), stripped 6 now-unused
+`Path` imports, byte-compiled clean. Closes the standing `env_local_loader_migrate_pipelines`
+migration.
+
+**2. THE ONE THAT MATTERS — that fix exposed tests hitting production.** With the loader
+actually working, two tests started failing, and the reason is much worse than a failure:
+`test_fetch_steadyapi_no_key_is_a_gap` stopped testing the no-key gap and made a **REAL, BILLED
+SteadyAPI call, returning 6,077 realtor.com property records** against a 50k/mo quota;
+`test_default_run_config_is_neutral` picked up a **live proxy**. Pipelines call `load_env_local()`
+at runtime, so any test touching a pipeline path inherits production secrets.
+**This was never Windows-only** — `read_text()` is UTF-8 on Linux, so CI has always loaded that
+file; the cp1252 crash was accidentally *shielding* local runs from a hazard CI already had.
+Guard: `INGEST_NO_ENV_LOCAL`, checked at call time inside the one root (so it holds for all 13
+callers regardless of import binding) and set session-scoped in `ingest/conftest.py`. Suite
+runtime fell **92s -> 24s** once tests stopped making real network calls — that delta is the
+receipt. Them failing was the lucky outcome; a test that silently succeeds against production
+spends money and never tells you.
+
+**3. Stale mocks vs a JSON->CSV migration (2).** `bls_qcew`'s `_find_latest_quarter` now probes
+the `.csv` endpoint and parses `resp.text` with `csv.DictReader`; the mocks still stubbed
+`.json()` and left `.text` a bare MagicMock, so `io.StringIO()` raised, `except Exception: pass`
+swallowed it, and all 6 back-steps "failed."
+
+**4. Stale metering stubs (3) + a stale count (1).** `extract_client.py:202` meters every call
+(`log_api_usage(model=msg.model, usage=msg.usage)`); the `_Msg` stubs predated it. Added an
+autouse fixture pinning `SKIP_USAGE_LOG` so a unit test can never insert fake spend into the
+ledger the ops spend page reads. And `test_registry_shape_is_75_plus_3` wanted 3 parked entries
+against 4 — `lee_deed_official_records` landed without the bump. That test's own docstring records
+this happening twice before; this is the third.
+
+**5. Pipeline drift (8) — and the fix was NOT to create workflows.** Three
+(`county_planning_swfl`, `leepa_parcel_zip`, `parcel_subdivision`) held **nothing but a gitignored
+`__pycache__` of cpython-**314** bytecode** — orphans of removed source, compiled by the 3.14
+toolchain `ingest/CLAUDE.md` has since pinned away to 3.12. `parcel_subdivision`'s source is
+provably gone (`migrations/20260719_drop_parcel_subdivision.sql`). They are invisible to CI and
+only ever redden a local run. The guard now skips directories with no `.py` source — deliberately
+narrow, NOT "no `pipeline.py`", because `faf5` legitimately has none and passes today.
+Of the remaining four, **giving `corridor_grounded` a cron would have violated a locked decree**:
+it makes a paid `web_search_20250305` call per corridor, and scheduled `web_search_*` drained the
+account twice (06/18 freeze, 07/05 at ~$6/run). `community_profiles` is a one-time manual ship;
+the other two are crawl4ai research one-offs that write no table. All four are correctly
+workflow-less, now recorded with reasons in ALLOW_LIST + check
+`workflowless_pipelines_declare_intent` to move that intent into cadence_registry where it belongs.
+
+**Result: 18 -> 1 locally, 18 -> 0 in CI.** The one remaining is `leepa_comp_sales`, another
+session's UNTRACKED in-flight work (0 tracked files) — invisible to CI and theirs to declare.
+
+**My own mistake, logged so it isn't repeated:** I used `git stash` to A/B a test against
+pre-change state. A stash is repo-wide, so it swept two parallel sessions' uncommitted files
+(`docs/standards/data-roots.md`, `scripts/session-kickoff.mjs`). The pop restored both intact
+(+40 and +48 lines verified present), but on a shared tree that was careless — the A/B was not
+worth the risk, and running the tests in isolation answered the same question.
+
 ## 2026-07-22 (Opus 4.8 · main) — Took over Spec A ("nothing built"). Both items built and run live; the gate split reverses the flattering one, and the RF does NOT win.
 
 Handoff was `f0f81b61`, whose entry ends "Spec A written, nothing built." Built it:

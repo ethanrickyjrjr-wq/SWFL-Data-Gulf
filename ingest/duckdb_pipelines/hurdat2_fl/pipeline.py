@@ -21,7 +21,6 @@ Outputs
 import os
 import re
 from dataclasses import astuple
-from pathlib import Path
 
 import duckdb
 import requests
@@ -41,6 +40,7 @@ from ingest.duckdb_pipelines.hurdat2_fl.constants import (
 )
 from ingest.duckdb_pipelines.hurdat2_fl.parse_hurdat2 import parse_hurdat2
 from ingest.lib.tier1_inventory import upsert_inventory_row
+from ingest.lib.env_local import load_env_local
 
 
 # Match `hurdat2-1851-2024-040425.txt` but NOT `hurdat2-nepac-...txt`.
@@ -52,13 +52,7 @@ _HURDAT2_FILE_RE = re.compile(
 
 def _load_env() -> None:
     """Load .env.local for SUPABASE_S3_* + SUPABASE_PG_* credentials."""
-    env_path = Path(__file__).parent.parent.parent.parent / ".env.local"
-    if not env_path.exists():
-        return
-    for line in env_path.read_text().splitlines():
-        if "=" in line and not line.startswith("#"):
-            k, _, v = line.partition("=")
-            os.environ.setdefault(k.strip(), v.strip().strip("'\""))
+    load_env_local()
 
 
 def _latest_hurdat2_url() -> tuple[str, str, str]:

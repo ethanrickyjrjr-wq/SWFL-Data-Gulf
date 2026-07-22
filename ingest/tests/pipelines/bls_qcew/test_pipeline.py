@@ -1,10 +1,26 @@
 from unittest.mock import patch, MagicMock
 
 
+_CSV_HEADER = "area_fips,own_code,industry_code,qtrly_estabs,month1_emplvl\n"
+
+
 def _mock_resp(ok=True, data=None):
+    """A BLS QCEW area response.
+
+    _find_latest_quarter probes the `.csv` endpoint and parses resp.text with
+    csv.DictReader — it does NOT call .json(). These mocks stubbed .json() and
+    left .text a bare MagicMock, so io.StringIO() raised TypeError, the
+    `except Exception: pass` in the probe loop swallowed it, and all 6 back-steps
+    "failed" -> RuntimeError. Stale mocks against a JSON->CSV migration, not a
+    real regression. `data=[]` means header-only: a quarter BLS has no data for.
+    """
     m = MagicMock()
     m.ok = ok
-    m.json.return_value = data if data is not None else []
+    rows = data if data is not None else []
+    m.text = _CSV_HEADER + "".join(
+        f"12071,{r.get('own_code', '0')},10,1234,56789\n" for r in rows
+    )
+    m.json.return_value = rows
     return m
 
 

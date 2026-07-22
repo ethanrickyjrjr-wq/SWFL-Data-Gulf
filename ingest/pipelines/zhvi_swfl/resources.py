@@ -10,7 +10,6 @@ idempotent — a re-run against an unchanged Parquet is a no-op.
 from __future__ import annotations
 
 import os
-from pathlib import Path
 from typing import Iterable, Optional
 
 import dlt
@@ -21,6 +20,7 @@ from ingest.duckdb_pipelines.zhvi_swfl.constants import (
     PARQUET_PATH,
     PARQUET_TARGET,
 )
+from ingest.lib.env_local import load_env_local
 
 
 def _load_env_local() -> None:
@@ -28,13 +28,7 @@ def _load_env_local() -> None:
     pipeline. Needed because `npm run ingest:zhvi-swfl` chains two python
     subprocesses; the second one starts with a fresh environment and does
     not inherit Tier 1's loaded vars."""
-    env_path = Path(__file__).parent.parent.parent.parent / ".env.local"
-    if not env_path.exists():
-        return
-    for line in env_path.read_text().splitlines():
-        if "=" in line and not line.startswith("#"):
-            k, _, v = line.partition("=")
-            os.environ.setdefault(k.strip(), v.strip().strip("'\""))
+    load_env_local()
 
 
 def _configure_s3(con: duckdb.DuckDBPyConnection) -> None:

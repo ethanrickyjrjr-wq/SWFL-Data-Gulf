@@ -59,9 +59,14 @@ def test_registry_shape_is_75_plus_3():
     rather than letting every other test in this file vacuously pass on an empty list.
     73->75 on 07/19/2026: a parallel session's registry addition landed without this
     bump (pre-existing red at HEAD, found during listing_week's edit), plus
-    listing_week (sell-odds Phase 0 panel)."""
+    listing_week (sell-odds Phase 0 panel).
+    3->4 parked on 07/22/2026: the same shape a third time — `lee_deed_official_records`
+    landed in not_yet_running: without this bump, so the guard was already red at HEAD
+    before any of today's work touched it. The entry itself is legitimate (it carries
+    its own known_drift rule, `lee_deed_load_parked_but_scheduled`); only the count was
+    stale. Verified live: 75 pipelines, 4 parked."""
     assert len(_pipelines()) == 75, f"expected 75 pipelines: entries, got {len(_pipelines())}"
-    assert len(_parked()) == 3, f"expected 3 not_yet_running: entries, got {len(_parked())}"
+    assert len(_parked()) == 4, f"expected 4 not_yet_running: entries, got {len(_parked())}"
 
 
 def test_every_pipelines_entry_declares_a_workflow():
