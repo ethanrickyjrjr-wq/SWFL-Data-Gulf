@@ -31,6 +31,7 @@
 // styling, and "run the tests" turns pass straight through.
 
 import { readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 export const LANES = {
   research:
@@ -186,4 +187,11 @@ function main() {
   process.exit(2);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+// WINDOWS. The idiomatic `import.meta.url === \`file://${process.argv[1]}\`` is BROKEN
+// here: argv[1] is `C:\Users\…` (backslashes, drive letter) while import.meta.url is
+// `file:///C:/Users/…`. They never match, so main() never runs and the gate silently
+// becomes a no-op that exits 0 on every input — which is exactly how it shipped in
+// ce163255 and got described as a forcing function without ever being executed once.
+// The unit tests could not catch it: they import the pure helpers and never touch main().
+// pathToFileURL normalizes both sides. Verified by RUNNING the binary, not reading it.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
