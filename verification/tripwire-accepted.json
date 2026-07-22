@@ -232,6 +232,12 @@
       "pack": "master",
       "accepted_on": "07/19/2026",
       "note": "operator decree 07/19: fold fresh active-listings-swfl v11 (today's sweep) into master dossier — standard no-force propagation (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/29962016951",
+      "pack": "master",
+      "accepted_on": "07/22/2026",
+      "note": "Operator decree 07/22/2026: first rebuild since 07/20 after egress triage — burner verified caged, storage log clean, rebuild cleared as not-the-burner (overage was 07/21, after rebuilds went dark). Attribution watched live via storage log. (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
