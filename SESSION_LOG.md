@@ -1,3 +1,27 @@
+## 2026-07-23 (Sonnet 5 · main) — /wire-map: force-directed canvas rejected live ("this is not a wire map!!!"), rebuilt as fixed lanes + real SVG wires, full 185-node dataset shipped
+
+Follow-up to the spike logged earlier under 07/22. After scaling to the full 185-node/
+191-edge dataset, vis-network's hierarchical LR layout came out unreadably tall/narrow
+(~50 independent sub-chains each needing their own vertical tree slot), so I swapped to
+`/graph`'s proven forceAtlas2Based physics — but a radial hub-and-spoke reads as a generic
+bubble chart, not wiring. Operator said so directly, twice, escalating. Rebuilt the whole
+render as four fixed DOM lanes (Lake tables + live vendor calls → Packs → Master →
+Consumers) with real `<svg>` `<path>` wires computed from each box's measured
+`getBoundingClientRect()` — no physics, no canvas, no clustering. Click a box: its real
+wires brighten, everything else dims, side panel lists every connection (clickable) plus
+a live drill (Supabase estimated count for a table, real `/api/b/<pack>` output for a
+brain). Verified live: clicking master lit up all 27 real inputs and visibly dimmed the
+5 packs NOT wired to it (fgcu-reri, corridor-pulse-swfl, home-values-swfl,
+tier-divergence-swfl, lee-deed-records-swfl) — exactly the audit's own gaps, now visible
+at a glance. Also hit and fixed a self-inflicted `next build` + `next dev` cache
+collision (`Cannot find module './331.js'`) twice by running a production build against
+a directory a dev server already had open — lesson: never do that again, dev-server
+hot-reload is enough for verification. Pushed to `swfldatagulf-ops` (commit `338ddbf7`),
+approved same session. Full log of the spike + roster-diff discovery (rentals-swfl,
+city-pulse-swfl missing from the audit doc) is the entry below this one.
+
+---
+
 ## 2026-07-23 (Sonnet 5 · main) — Inventoried + landed 22 real fixes stranded in orphaned Workflow-isolation worktrees; discovered a concurrent session auto-pushed them all
 
 Operator's VS Code showed two Source Control panels — main plus an unfamiliar
