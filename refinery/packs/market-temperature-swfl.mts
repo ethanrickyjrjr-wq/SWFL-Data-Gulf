@@ -93,6 +93,12 @@ function marketTemperatureOutputProducer(_out: PackOutput): BrainOutputProducerR
     fetchedAt,
     url,
   );
+  // realtor.com's list_to_sold_ratio_pct is a vendor-native field, not a value we compute — and it
+  // is occasionally junk at ZIP grain (values like 472% or 883% have been observed). Anything
+  // outside a plausible sale-price band is suppressed to null rather than rendered as fact.
+  const MIN_PLAUSIBLE_LIST_TO_SOLD_PCT = 30;
+  const MAX_PLAUSIBLE_LIST_TO_SOLD_PCT = 200;
+  const listToSoldOutlierZips: string[] = [];
   const detail_tables: BrainOutputDetailTable[] = [
     {
       id: "market_temperature_by_zip",
@@ -132,7 +138,7 @@ function marketTemperatureOutputProducer(_out: PackOutput): BrainOutputProducerR
         },
         {
           id: "list_to_sold_ratio_pct",
-          label: "List-to-sold",
+          label: "List-to-sold (realtor.com)",
           display_format: "percent",
           units: "%",
         },
@@ -146,21 +152,32 @@ function marketTemperatureOutputProducer(_out: PackOutput): BrainOutputProducerR
       ],
       rows: [...summary.rows]
         .sort((a, b) => (a.sold_to_rent_ratio ?? Infinity) - (b.sold_to_rent_ratio ?? Infinity))
-        .map((r) => ({
-          key: r.zip_code,
-          label: `${r.zip_code}${r.county ? ` (${r.county})` : ""}`,
-          cells: {
-            sold_to_rent_ratio: r.sold_to_rent_ratio,
-            median_sold_price: r.median_sold_price,
-            median_listing_price: r.median_listing_price,
-            median_rent_price: r.median_rent_price,
-            median_days_on_market: r.median_days_on_market,
-            median_price_per_sqft: r.median_price_per_sqft,
-            list_to_sold_ratio_pct: r.list_to_sold_ratio_pct,
-            local_hotness_score: r.local_hotness_score,
-            market_strength: r.market_strength,
-          },
-        })),
+        .map((r) => {
+          let listToSold = r.list_to_sold_ratio_pct;
+          if (
+            listToSold != null &&
+            (listToSold > MAX_PLAUSIBLE_LIST_TO_SOLD_PCT ||
+              listToSold < MIN_PLAUSIBLE_LIST_TO_SOLD_PCT)
+          ) {
+            listToSoldOutlierZips.push(r.zip_code);
+            listToSold = null;
+          }
+          return {
+            key: r.zip_code,
+            label: `${r.zip_code}${r.county ? ` (${r.county})` : ""}`,
+            cells: {
+              sold_to_rent_ratio: r.sold_to_rent_ratio,
+              median_sold_price: r.median_sold_price,
+              median_listing_price: r.median_listing_price,
+              median_rent_price: r.median_rent_price,
+              median_days_on_market: r.median_days_on_market,
+              median_price_per_sqft: r.median_price_per_sqft,
+              list_to_sold_ratio_pct: listToSold,
+              local_hotness_score: r.local_hotness_score,
+              market_strength: r.market_strength,
+            },
+          };
+        }),
       source: tableSource,
     },
   ];
@@ -195,9 +212,20 @@ function marketTemperatureOutputProducer(_out: PackOutput): BrainOutputProducerR
   const caveats = [
     "The headline is a gross yield (sold price ÷ annual rent) — before taxes, insurance, HOA, vacancy, and maintenance; a net yield is materially lower, especially given SWFL insurance costs.",
     "The median sold/DOM/hotness/list-to-sold figures in the table are CONTEXT — the same signals are tracked at monthly cadence elsewhere; this brain's own read is the sold-to-rent yield.",
+    "The table's List-to-sold (realtor.com) figure is a different vendor's ratio, on a different sales " +
+      "population, than housing-swfl's Sale-to-list ratio (Redfin) — the two are computed differently and " +
+      "will not match for the same ZIP; housing-swfl is the ratified sale-to-list read, this one is cited " +
+      "vendor-native context only.",
     "Monthly cadence: realtor.com's ZIP-grain aggregates refresh monthly, so these numbers move month to month, not week to week.",
     "Source is realtor.com per-ZIP market aggregates.",
   ];
+  if (listToSoldOutlierZips.length > 0) {
+    caveats.push(
+      `Suppressed an implausible List-to-sold (realtor.com) value for ${listToSoldOutlierZips.length} ZIP(s) ` +
+        `(${listToSoldOutlierZips.join(", ")}) — outside a plausible ${MIN_PLAUSIBLE_LIST_TO_SOLD_PCT}%-` +
+        `${MAX_PLAUSIBLE_LIST_TO_SOLD_PCT}% band, a known vendor data-quality issue at ZIP grain. Shown as n/a rather than a fabricated-looking figure.`,
+    );
+  }
   if (outlierZips.length > 0) {
     caveats.push(
       `Excluded ${outlierZips.length} ZIP(s) from the "Highest-yield" ranking (${outlierZips.join(", ")}) — ` +

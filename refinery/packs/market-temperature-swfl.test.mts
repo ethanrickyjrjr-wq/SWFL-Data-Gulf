@@ -119,3 +119,54 @@ test("market-temperature-swfl: zero-data path returns neutral with no metrics", 
   assert.equal(result.direction, "neutral");
   assert.equal(result.key_metrics.length, 0);
 });
+
+test("market-temperature-swfl: list-to-sold caveat always disambiguates from housing-swfl's sale-to-list ratio", () => {
+  marketTemperatureSwfl.corpusSummary!([makeFragment(ROWS)]);
+  const result = marketTemperatureSwfl.outputProducer!({} as never);
+
+  assert.ok(
+    result.caveats.some(
+      (c) => c.includes("housing-swfl") && c.toLowerCase().includes("sale-to-list"),
+    ),
+    "caveats must explain the list-to-sold figure is a different vendor/population than housing-swfl's sale-to-list ratio and the two will not match",
+  );
+});
+
+test("market-temperature-swfl: an absurd vendor list_to_sold_ratio_pct outlier is suppressed to null in the table, not passed through raw", () => {
+  const rowsWithOutlier: MarketDetailRow[] = [
+    ...ROWS,
+    {
+      zip_code: "33904",
+      county: "Lee",
+      median_sold_price: 30000,
+      median_listing_price: 32000,
+      median_rent_price: 1200,
+      median_days_on_market: 40,
+      median_price_per_sqft: 216,
+      local_hotness_score: 50.0,
+      list_to_sold_ratio_pct: 472.73, // vendor junk — not a real percentage
+      sold_to_rent_ratio: 20.83,
+      market_strength: "very_hot",
+      is_competitive: false,
+      captured_date: "2026-06-30",
+    },
+  ];
+  marketTemperatureSwfl.corpusSummary!([makeFragment(rowsWithOutlier)]);
+  const result = marketTemperatureSwfl.outputProducer!({} as never);
+
+  const table = result.detail_tables?.find((t) => t.id === "market_temperature_by_zip");
+  const outlierRow = table!.rows.find((r) => r.key === "33904");
+  assert.equal(
+    outlierRow?.cells.list_to_sold_ratio_pct,
+    null,
+    "an implausible list_to_sold_ratio_pct (outside 30%-200%) must be suppressed, not rendered as fact",
+  );
+  // A plausible value in the same table must still pass through unchanged.
+  const normalRow = table!.rows.find((r) => r.key === "33901");
+  assert.equal(normalRow?.cells.list_to_sold_ratio_pct, 94.15);
+
+  assert.ok(
+    result.caveats.some((c) => c.includes("33904") && c.toLowerCase().includes("list-to-sold")),
+    "caveats must name which ZIP(s) had their list-to-sold figure suppressed as an outlier",
+  );
+});
