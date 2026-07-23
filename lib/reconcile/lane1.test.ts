@@ -182,6 +182,34 @@ test("per-ZIP with no matching row → null (lake doesn't hold that ZIP)", () =>
   expect(factFromParsedBrain("housing-swfl", brain, "median_sale_price", "99999")).toBeNull();
 });
 
+// Regression — piece3_track_b_verify. The prior per-ZIP tests above reuse the SAME
+// slug ("median_sale_price") for both the headline key_metric AND the detail-table
+// column, which is NOT what the real committed brain looks like and is why this bug
+// shipped silent for a month: this fixture mirrors the REAL brains/housing-swfl.md
+// shape, where the headline key_metric id/label ("housing_median_sale_price_swfl" /
+// "SWFL regional median sale price...") never normalize-matches the per-ZIP
+// detail-table column id the change-detection cron passes as `slugOrLabel`
+// ("median_sale_price"). Gating the per-ZIP branch on key_metrics resolution first
+// made every real per-ZIP lookup return null before ever reaching `findZipCell`.
+test("REAL housing-swfl shape — per-ZIP column id differs from headline key_metrics slug/label, still resolves", () => {
+  const brain = makeBrain(
+    "housing-swfl",
+    REFINED,
+    [
+      metric(
+        "housing_median_sale_price_swfl",
+        "SWFL regional median sale price (all property types), data through 2026-06-30 (-3.3% YoY)",
+        443650,
+      ),
+    ],
+    { detail_tables: [zipTable("median_sale_price", "Median sale price", "33901", 312929)] },
+  );
+  const fact = factFromParsedBrain("housing-swfl", brain, "median_sale_price", "33901");
+  expect(fact).not.toBeNull();
+  expect(fact!.value).toBe(312929); // the ZIP cell, NOT the 443650 headline
+  expect(fact!.metric_slug).toBe("median_sale_price");
+});
+
 // --- I/O wrapper resilience (B5) --------------------------------------------
 
 test("lookupLakeFact on a missing brain → null (never throws across the boundary)", async () => {
