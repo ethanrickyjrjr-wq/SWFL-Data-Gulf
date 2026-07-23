@@ -29,10 +29,10 @@ describe("buildHeldChartBlock — the structural moat (select rows, never emit c
   // A menu where each corridor carries TWO metrics, so a wrong-COLUMN mispair is
   // even expressible in principle — and we prove the select-rows design can't make one.
   const points: MenuPoint[] = [
-    { id: "p0", entity: "Estero", metric: "Vacancy", value: 0.4, unit: "percent", format: "percent", brain: "cre-swfl" }, // prettier-ignore
-    { id: "p1", entity: "Cape Coral", metric: "Vacancy", value: 2.2, unit: "percent", format: "percent", brain: "cre-swfl" }, // prettier-ignore
-    { id: "p2", entity: "North Fort Myers", metric: "Vacancy", value: 2.6, unit: "percent", format: "percent", brain: "cre-swfl" }, // prettier-ignore
-    { id: "p3", entity: "Estero", metric: "Asking Rent", value: 28.5, unit: "usd", format: "usd", brain: "cre-swfl" }, // prettier-ignore
+    { id: "p0", entity: "Estero", metric: "Vacancy", value: 0.4, unit: "percent", format: "percent", brain: "cre-swfl", grain: "corridor" }, // prettier-ignore
+    { id: "p1", entity: "Cape Coral", metric: "Vacancy", value: 2.2, unit: "percent", format: "percent", brain: "cre-swfl", grain: "corridor" }, // prettier-ignore
+    { id: "p2", entity: "North Fort Myers", metric: "Vacancy", value: 2.6, unit: "percent", format: "percent", brain: "cre-swfl", grain: "corridor" }, // prettier-ignore
+    { id: "p3", entity: "Estero", metric: "Asking Rent", value: 28.5, unit: "usd", format: "usd", brain: "cre-swfl", grain: "corridor" }, // prettier-ignore
   ];
   const menu: Menu = {
     points,
@@ -91,6 +91,35 @@ describe("buildHeldChartBlock — the structural moat (select rows, never emit c
       ["Estero", 0.4],
       ["Cape Coral", 2.2],
     ]);
+  });
+
+  it("does NOT collapse a headline (brain-wide) figure and a ZIP-level detail row into one comparable series just because the metric string matches", () => {
+    // p10 is housing-swfl's capped key_metric — a region-wide headline figure. p11 is
+    // one row from its by-ZIP detail_table. Same metric label, DIFFERENT grain: one is
+    // an aggregate, the other a single ZIP's cell. Collapsing them into one series
+    // would present "Median Sale Price" (the whole region) as a bar directly
+    // comparable to "33912" (one ZIP within it) — a grain mispair, not a metric one.
+    const grainPoints: MenuPoint[] = [
+      { id: "p10", entity: "Median Sale Price", metric: "Median Sale Price", value: 410000, unit: "usd", format: "usd", brain: "housing-swfl", grain: "headline" }, // prettier-ignore
+      { id: "p11", entity: "33912", metric: "Median Sale Price", value: 380000, unit: "usd", format: "usd", brain: "housing-swfl", grain: "zip" }, // prettier-ignore
+    ];
+    const grainMenu: Menu = {
+      points: grainPoints,
+      byId: new Map(grainPoints.map((p) => [p.id, p])),
+      numbers: new Set(grainPoints.map((p) => p.value)),
+      asOf: "2026-06-20",
+      citation: "SWFL Data Gulf — housing-swfl",
+    };
+    const block = buildHeldChartBlock(
+      { title: "x", category_label: "Area", point_ids: ["p10", "p11"], chart_type: "bar" },
+      grainMenu,
+    );
+    // Falls into the mixed-metric branch (grain mismatch), NOT a clean shared-unit axis.
+    expect(block!.rows).toEqual([
+      ["Median Sale Price", 410000],
+      ["33912 — Median Sale Price", 380000],
+    ]);
+    expect(block!.value_format).toBe("number"); // never claims one shared axis across grains
   });
 
   it("returns null when no valid point is selected (caller falls back to canned)", () => {

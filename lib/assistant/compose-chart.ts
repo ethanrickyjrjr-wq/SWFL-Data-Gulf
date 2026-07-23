@@ -88,6 +88,16 @@ export interface MenuPoint {
   unit: string; // normalized units ("" when none)
   format: ChartValueFormat;
   brain: string; // source slug (for citation)
+  /**
+   * The grain this value resolves at: "headline" for a brain's capped
+   * key_metrics (its region/county-wide summary figure), or the source
+   * detail_table's own declared `grain` (e.g. "zip", "corridor") for a bulk
+   * per-row figure. Two points can share a metric STRING while measuring
+   * different things — a brain-wide aggregate vs. one ZIP's cell within it —
+   * so a clean single-series merge requires grain equality too, not just
+   * metric equality (see `buildHeldChartBlock`).
+   */
+  grain: string;
 }
 
 export interface Menu {
@@ -135,6 +145,7 @@ async function buildMenu(question: string, origin: string): Promise<Menu | null>
         unit: (m.units ?? "").trim().toLowerCase(),
         format: valueFormatFor(m.display_format),
         brain: slug,
+        grain: "headline", // capped key_metric — the brain's region/county-wide figure
       });
       numbers.add(m.value);
       added++;
@@ -154,6 +165,7 @@ async function buildMenu(question: string, origin: string): Promise<Menu | null>
             unit: (col.units ?? "").trim().toLowerCase(),
             format: valueFormatFor(col.display_format),
             brain: slug,
+            grain: t.grain, // e.g. "zip", "corridor" — the table's own declared grain
           });
           numbers.add(v);
           added++;
@@ -348,11 +360,17 @@ export function buildHeldChartBlock(input: HeldSelection, menu: Menu): ChartBloc
   }
   if (picked.length < 1) return null;
 
-  // Series coherence: a single shared metric → clean single-series axis; mixed
-  // metrics → label each bar by entity+metric and use a neutral numeric axis (we
-  // never claim one $/% format across heterogeneous figures).
+  // Series coherence: a single shared metric AT a single shared grain → clean
+  // single-series axis; mixed metrics OR mixed grains → label each bar by
+  // entity+metric and use a neutral numeric axis (we never claim one $/% format
+  // across heterogeneous figures). Grain matters even when the metric STRING
+  // matches: a brain's headline figure (region/county-wide) and one row of its
+  // own by-ZIP detail_table can both be labeled "Median Sale Price" while
+  // measuring different things — merging them would present the whole region
+  // and one ZIP within it as directly comparable entities.
   const metrics = new Set(picked.map((p) => p.metric));
-  const singleMetric = metrics.size === 1;
+  const grains = new Set(picked.map((p) => p.grain));
+  const singleMetric = metrics.size === 1 && grains.size === 1;
 
   let valueHeader: string;
   let valueFormat: ChartValueFormat;
