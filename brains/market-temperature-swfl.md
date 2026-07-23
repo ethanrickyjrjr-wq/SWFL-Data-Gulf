@@ -1,11 +1,11 @@
-<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260719 -->
+<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260723 -->
 ---
 brain_id: market-temperature-swfl
-version: 3
-refined_at: 2026-07-19T02:29:05Z
-freshness_token: SWFL-7421-v3-20260719
+version: 4
+refined_at: 2026-07-23T06:48:30Z
+freshness_token: SWFL-7421-v4-20260723
 ttl_seconds: 3024000
-pack_hash: 7d0d7b94b65f
+pack_hash: 9e83d28b5147
 context_type: user_saved_reference
 scope: Southwest Florida per-ZIP market snapshot (Lee + Collier) from realtor.com's monthly ZIP aggregates. Headline is the sold-to-rent gross-yield read (median home price ÷ annual rent) — the one field no free source publishes. The full per-ZIP snapshot (median sold, list, rent, days-on-market, price/sqft, hotness, list-to-sold, market strength) rides as cited context. Monthly cadence; deterministic, no LLM synthesis.
 ---
@@ -29,19 +29,19 @@ SCOPE: Southwest Florida per-ZIP market snapshot (Lee + Collier) from realtor.co
 
 --- CITATION TABLE ---
 id  | source                                     | verified   | expires
-s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
+s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-23 | 2026-08-27
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"market_temperature_swfl_snapshot","fact":"SWFL sold-to-rent yield snapshot ","value":"median price-to-annual-rent 11.4× (~8.77% gross yield) across 54 ZIPs, as of 2026-07-04.","src":"s01","date":"2026-07-19"}
+  {"id":"f001","topic":"market_temperature_swfl_snapshot","fact":"SWFL sold-to-rent yield snapshot ","value":"median price-to-annual-rent 11.4× (~8.77% gross yield) across 54 ZIPs, as of 2026-07-04.","src":"s01","date":"2026-07-23"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "market-temperature-swfl",
-  "version": 3,
-  "refined_at": "2026-07-19T02:29:05Z",
-  "expires": "2026-08-23T02:29:05Z",
+  "version": 4,
+  "refined_at": "2026-07-23T06:48:30Z",
+  "expires": "2026-08-27T06:48:30Z",
   "ttl_seconds": 3024000,
   "direction": "neutral",
   "magnitude": 0,
@@ -59,7 +59,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
       "display_format": "ratio",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/market_details_swfl_latest?label=SWFL+per-ZIP+market+snapshot+%28sold-to-rent+yield+%2B+medians%29&source=realtor.com&brain=market-temperature-swfl&date_col=captured_date",
-        "fetched_at": "2026-07-19T02:29:05Z",
+        "fetched_at": "2026-07-23T06:48:30Z",
         "tier": 2,
         "citation": "median price-to-annual-rent multiple across 54 SWFL ZIPs: 11.4 (~8.77% gross yield), as of 2026-07-04"
       },
@@ -114,7 +114,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
         },
         {
           "id": "list_to_sold_ratio_pct",
-          "label": "List-to-sold",
+          "label": "List-to-sold (realtor.com)",
           "display_format": "percent",
           "units": "%"
         },
@@ -455,7 +455,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
             "median_rent_price": 1995,
             "median_days_on_market": 93,
             "median_price_per_sqft": 205,
-            "list_to_sold_ratio_pct": 472.73,
+            "list_to_sold_ratio_pct": null,
             "local_hotness_score": 12.121212121,
             "market_strength": "cold"
           }
@@ -530,7 +530,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
             "median_rent_price": 1917,
             "median_days_on_market": 103,
             "median_price_per_sqft": 210,
-            "list_to_sold_ratio_pct": 883.33,
+            "list_to_sold_ratio_pct": null,
             "local_hotness_score": 3.03030303,
             "market_strength": "cold"
           }
@@ -545,7 +545,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
             "median_rent_price": 1995,
             "median_days_on_market": 91,
             "median_price_per_sqft": 208,
-            "list_to_sold_ratio_pct": 272.86,
+            "list_to_sold_ratio_pct": null,
             "local_hotness_score": 75.757575758,
             "market_strength": "very_hot"
           }
@@ -943,7 +943,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/market_details_swfl_latest?label=SWFL+per-ZIP+market+snapshot+%28sold-to-rent+yield+%2B+medians%29&source=realtor.com&brain=market-temperature-swfl&date_col=captured_date",
-        "fetched_at": "2026-07-19T02:29:05Z",
+        "fetched_at": "2026-07-23T06:48:30Z",
         "tier": 2,
         "citation": "SWFL per-ZIP market snapshot (realtor.com monthly ZIP aggregates), as of 2026-07-04"
       }
@@ -952,8 +952,10 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
   "caveats": [
     "The headline is a gross yield (sold price ÷ annual rent) — before taxes, insurance, HOA, vacancy, and maintenance; a net yield is materially lower, especially given SWFL insurance costs.",
     "The median sold/DOM/hotness/list-to-sold figures in the table are CONTEXT — the same signals are tracked at monthly cadence elsewhere; this brain's own read is the sold-to-rent yield.",
+    "The table's List-to-sold (realtor.com) figure is a different vendor's ratio, on a different sales population, than housing-swfl's Sale-to-list ratio (Redfin) — the two are computed differently and will not match for the same ZIP; housing-swfl is the ratified sale-to-list read, this one is cited vendor-native context only.",
     "Monthly cadence: realtor.com's ZIP-grain aggregates refresh monthly, so these numbers move month to month, not week to week.",
     "Source is realtor.com per-ZIP market aggregates.",
+    "Suppressed an implausible List-to-sold (realtor.com) value for 3 ZIP(s) (33971, 33974, 33909) — outside a plausible 30%-200% band, a known vendor data-quality issue at ZIP grain. Shown as n/a rather than a fabricated-looking figure.",
     "Excluded 2 ZIP(s) from the \"Highest-yield\" ranking (33920, 33972) — their median sold price implies under 500 sqft at the ZIP's own price/sqft, meaning the sale mix is dominated by land/mobile-home lots rather than homes, which would inflate the implied yield past any realistic reading. Still in the full table below."
   ],
   "contradicts": [],
@@ -966,7 +968,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-19T02:29:05Z"
+    "computed_at": "2026-07-23T06:48:30Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -983,5 +985,5 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-07-19 | 2026-08-23
 - market-temperature-swfl: SWFL per-ZIP sold-to-rent yield + full market snapshot from realtor.com monthly ZIP aggregates (one call per ZIP).
 
 --- RECENT NOTES ---
-- 2026-07-19: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-07-23: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
