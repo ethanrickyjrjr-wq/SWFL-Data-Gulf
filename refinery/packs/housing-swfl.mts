@@ -134,6 +134,17 @@ export function formatDomYoyPct(fraction: number): string {
   return `${sign}${txt}%`;
 }
 
+// A DOM-YoY swing this large only happens when the prior-year median_dom was
+// itself near zero — a real market never moves this much. SUPPRESS it in the
+// per-ZIP detail table the same way monthsOfSupply suppresses a thin-sample
+// derivation above: a null is more honest than a nonsense percent. Threshold
+// per _RESEARCH/audits/2026-07-18-fanout-fix-log.md finding #2 — ZIP 33904
+// served -2796.2%; audit suggested ~150% as the sane bound.
+const DOM_YOY_PCT_SANITY_BOUND = 150;
+export function sanitizeDomYoyPct(pct: number): number | null {
+  return Math.abs(pct) > DOM_YOY_PCT_SANITY_BOUND ? null : pct;
+}
+
 function rowsFromFragments(fragments: RawFragment[]): HousingZipRow[] {
   return fragments
     .map((f) => f.normalized as unknown as HousingZipRow)
@@ -488,7 +499,9 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
               : Number((r.median_sale_price_yoy * 100).toFixed(1)),
           median_dom: r.median_dom,
           median_dom_yoy_pct:
-            r.median_dom_yoy === null ? null : Number((r.median_dom_yoy * 100).toFixed(1)),
+            r.median_dom_yoy === null
+              ? null
+              : sanitizeDomYoyPct(Number((r.median_dom_yoy * 100).toFixed(1))),
           avg_sale_to_list_pct:
             r.avg_sale_to_list === null ? null : Number((r.avg_sale_to_list * 100).toFixed(1)),
           months_of_supply: mos === null ? null : Number(mos.toFixed(1)),

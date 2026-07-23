@@ -21,6 +21,7 @@ import {
   formatDomYoyPct,
   isLowSample,
   buildSnapshot,
+  sanitizeDomYoyPct,
 } from "./housing-swfl.mts";
 import type { HousingZipRow } from "../sources/housing-source.mts";
 
@@ -135,6 +136,23 @@ describe("housing-swfl helpers", () => {
       assert.equal(isLowSample(row({ homes_sold: 5 })), false);
       assert.equal(isLowSample(row({ homes_sold: 297 })), false);
       assert.equal(isLowSample(row({ homes_sold: null })), true);
+    });
+  });
+
+  describe("sanitizeDomYoyPct — suppresses a near-zero-prior-year-base swing", () => {
+    test("nulls out the 2026-07-18 fanout-fix-log #2 nonsense value (ZIP 33904, -2796.2%)", () => {
+      assert.equal(sanitizeDomYoyPct(-2796.2), null);
+    });
+    test("passes through an ordinary, plausible swing unchanged", () => {
+      assert.equal(sanitizeDomYoyPct(-13.8), -13.8);
+      assert.equal(sanitizeDomYoyPct(4), 4);
+      assert.equal(sanitizeDomYoyPct(0), 0);
+    });
+    test("keeps the boundary value, nulls just past it", () => {
+      assert.equal(sanitizeDomYoyPct(150), 150);
+      assert.equal(sanitizeDomYoyPct(-150), -150);
+      assert.equal(sanitizeDomYoyPct(150.1), null);
+      assert.equal(sanitizeDomYoyPct(-150.1), null);
     });
   });
 });
