@@ -123,3 +123,39 @@ test("thread cap reached → hands off (no reply), still alerts the agent", asyn
   expect(sent.autoReplies).toBe(0);
   expect(sent.alerts).toBe(1);
 });
+
+test("grounded auto-reply carries its own freshness — never discards the token it was given", async () => {
+  let sentText: string | null = null;
+  let alertAnswerText: string | null = null;
+  const { deps } = makeDeps({
+    generateAnswer: async () => ({
+      text: "Median in 33908 is $410,000.",
+      freshnessToken: "SWFL-7421-v12-20260701",
+    }),
+    sendAutoReply: async (args) => {
+      sentText = args.text;
+    },
+    sendAgentAlert: async (args) => {
+      alertAnswerText = args.answerText;
+    },
+  });
+  await processInboundReply(event, deps);
+  // The client-facing send must carry the as-of date, not just the bare answer text.
+  expect(sentText).toContain("07/01/2026");
+  // The agent's alert echoes the SAME text the client received (agent-alert.ts quotes
+  // `answerText` verbatim) — it must carry the same freshness, not the un-captioned answer.
+  expect(alertAnswerText).toContain("07/01/2026");
+});
+
+test("grounded auto-reply with an unparseable freshness token still sends (no caveat, no crash)", async () => {
+  let sentText: string | null = null;
+  const { deps } = makeDeps({
+    generateAnswer: async () => ({ text: "Median in 33908 is $410,000.", freshnessToken: "" }),
+    sendAutoReply: async (args) => {
+      sentText = args.text;
+    },
+  });
+  const out = await processInboundReply(event, deps);
+  expect(out).toMatchObject({ answerSent: true });
+  expect(sentText).toBe("Median in 33908 is $410,000.");
+});

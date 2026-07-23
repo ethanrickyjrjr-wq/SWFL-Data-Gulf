@@ -19,6 +19,7 @@
 import { pickReplyEntry, buildReplyAddress } from "./reply-token";
 import { isAutoResponder, evaluateAutoReply, AUTO_REPLY_LIMITS } from "./inbound-guards";
 import { parseReplyIntent, describeIntent, type ReplyIntent } from "./parse-intent";
+import { asOfFromToken } from "@/lib/project/as-of";
 
 /** The minimal webhook event shape we act on (subset of Resend's EmailReceivedEvent). */
 export interface InboundEvent {
@@ -197,15 +198,20 @@ export async function processInboundReply(
   if (decision.allow && rawReply) {
     try {
       const answer = await deps.generateAnswer(rawReply);
+      // The answer is a buffered snapshot of the dossier at generation time — it must
+      // carry its own as-of date into the sent text, the same way every other grounded
+      // answer surface does, instead of discarding `freshnessToken` on the floor.
+      const asOf = asOfFromToken(answer.freshnessToken);
+      const text = asOf ? `${answer.text}\n\n(Figures as of ${asOf}.)` : answer.text;
       await deps.sendAutoReply({
         to: fromEmail,
         fromName: send.fromName,
         fromEmail: send.fromEmail,
         replyTo: buildReplyAddress(entry.token, deps.replyDomain),
         subject: subject.toLowerCase().startsWith("re:") ? subject : `Re: ${subject}`,
-        text: answer.text,
+        text,
       });
-      answerText = answer.text;
+      answerText = text;
       deps.log(`[inbound] auto-replied to ${fromEmail} (${describeIntent(intent)}).`);
     } catch (err) {
       // A send/model failure must NOT lose the lead signal — fall through to the
