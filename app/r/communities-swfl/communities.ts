@@ -70,7 +70,27 @@ export function nameToSlug(name: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-function mapProfile(r: Record<string, unknown>): CommunityProfile {
+/**
+ * `data_lake.community_profiles` has NO `hoa_fee_min`/`hoa_fee_max` columns —
+ * only a curated text `hoa_fee_range` (e.g. "$400–$700/mo", sometimes with a
+ * trailing "(est.)" or "+ equity" annotation, per
+ * ingest/pipelines/community_profiles/merge.py). Recovers numeric min/max
+ * from the dollar figures embedded in that text so the already-scraped fee
+ * data renders without a new ingest pass. Returns both null when the text is
+ * missing or has no recognizable dollar figure.
+ */
+export function parseHoaFeeRange(text: string | null | undefined): {
+  min: number | null;
+  max: number | null;
+} {
+  const matches = text?.match(/\$[\d,]+/g);
+  if (!matches || matches.length === 0) return { min: null, max: null };
+  const nums = matches.map((m) => Number(m.replace(/[$,]/g, "")));
+  return { min: nums[0], max: nums[nums.length - 1] };
+}
+
+export function mapProfile(r: Record<string, unknown>): CommunityProfile {
+  const hoaFee = parseHoaFeeRange(str(r.hoa_fee_range));
   return {
     slug: String(r.community_slug ?? r.slug ?? ""),
     label: str(r.label ?? r.community_name ?? r.name),
@@ -79,8 +99,8 @@ function mapProfile(r: Record<string, unknown>): CommunityProfile {
     gated: bool(r.gated),
     golf_structure: str(r.golf_structure),
     golf_holes: num(r.golf_holes),
-    hoa_fee_min: num(r.hoa_fee_min),
-    hoa_fee_max: num(r.hoa_fee_max),
+    hoa_fee_min: hoaFee.min,
+    hoa_fee_max: hoaFee.max,
     cdd_flag: bool(r.cdd_flag),
     pool: bool(r.pool),
     tennis: bool(r.tennis),
@@ -88,7 +108,7 @@ function mapProfile(r: Record<string, unknown>): CommunityProfile {
     fitness: bool(r.fitness),
     clubhouse: bool(r.clubhouse),
     on_site_dining: bool(r.on_site_dining),
-    boating: bool(r.boating),
+    boating: bool(r.boating_marina),
     drive_min_rsw: num(r.drive_min_rsw),
     drive_min_beach: num(r.drive_min_beach),
     drive_min_downtown: num(r.drive_min_downtown),
