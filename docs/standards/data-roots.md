@@ -821,8 +821,11 @@ So: **duckdb parquet = raw base → tier2 Postgres = promotion → views = brain
 - **NOTES:** registry `consuming_pack: tier-divergence-swfl` = eventual brain, not a direct parquet reader.
 
 ### tier_divergence_swfl_tier2 · cadence 30d · lane tier-2
-- **STATUS:** live-via-non-master surfaces — the DATA is live (charts + zip-report), but the tier-divergence
-  BRAIN's directional vote NEVER reaches master, and it is NOT in the answer-engine catalog. See notes.
+- **STATUS:** live, wired into master as of 07/23/2026 — the BRAIN never built until 07/23/2026 (its source
+  view carried out-of-scope Sarasota/Charlotte ZIPs that tripped Stage 4's zip-scope validator; fixed with
+  the same `isCoreScope()` filter every sibling brain uses) and is now in master's `input_brains` casting a
+  real bullish/bearish/neutral vote (not a neutral/magnitude-0 dummy). Still NOT in the answer-engine catalog
+  — see notes.
 - **ROOT:** promotion of `tier_divergence_swfl_duckdb`. Postgres `data_lake.tier_divergence_swfl` is the canonical root.
   `liveness_view: data_lake.tier_divergence_zip_latest`, `dlt_schema_name: tier_divergence_swfl`.
   (Promotion mechanism: registry declares it "the Postgres promotion pipeline"; verified identical sibling
@@ -839,17 +842,20 @@ So: **duckdb parquet = raw base → tier2 Postgres = promotion → views = brain
       (`lib/charts/gallery-loaders.ts:91,106,278-284`).
   - **Brain → zip-report (its ONLY brain-output consumer):** `REGISTRY_PACK_IDS` `lib/zip-report/assemble.ts:37`;
     rail-citation candidate `lib/zip-report/candidates.ts:313-314` (`tier-divergence-swfl:tier_divergence_by_zip`).
-- **NOTES — the tier-divergence BRAIN is under-wired:**
-  - NOT in master input_brains (`refinery/packs/master.mts` — absent; contrast the value brains at `:239-240,265`).
-    Its bullish/bearish K-shape vote never enters synthesis.
-  - NOT in the answer-engine catalog — `refinery/packs/catalog.test.mts:25` pins it in `KNOWN_INCOMPLETE`;
-    it's absent from `catalog.mts`. So it is NOT directly askable in chat.
-  - Its most prominent surface, the /charts "tier-gap" panel, reads the LAKE VIEW `tier_divergence_pivoted`
+- **NOTES — the tier-divergence BRAIN, wiring history:**
+  - **IN master input_brains as of 07/23/2026** (`refinery/packs/master.mts` — plain `input`, non-critical,
+    same pattern as the other per-ZIP value reporters). Its bullish/bearish K-shape vote now enters
+    synthesis and can surface as a contradiction against other upstreams (e.g. labor-demand-swfl,
+    rsw-airport, market-heat-swfl, licenses-swfl all disagreed with it on the 07/23 rebuild).
+  - Still NOT in the answer-engine catalog — `refinery/packs/catalog.test.mts:25` pins it in `KNOWN_INCOMPLETE`;
+    it's absent from `catalog.mts`. So it is still NOT directly askable in chat. Open follow-up, not done here.
+  - Its most prominent surface, the /charts "tier-gap" panel, still reads the LAKE VIEW `tier_divergence_pivoted`
     directly and BYPASSES the brain entirely. The chart subtitle even states the regional read is flat
     ("the two tiers have risen in near-lockstep … the K-shaped split shows up ZIP by ZIP, not in the median",
     `gallery-loaders.ts:281-282`) — i.e. the headline the brain computes is deliberately not shown at region grain.
-  - Net: the brain is genuinely reachable ONLY through zip-report rail citations; master + chat + the flagship
-    chart all get tier-divergence WITHOUT the brain. Closest thing to an orphan in this batch.
+  - Net: as of 07/23/2026 the brain reaches master (real vote) and zip-report (rail citations); chat and the
+    flagship chart still get tier-divergence WITHOUT the brain — no longer the closest thing to an orphan, but
+    still partially wired.
 
 ### leepa · cadence 365d · lane tier-2
 - **STATUS:** live
@@ -989,11 +995,14 @@ So: **duckdb parquet = raw base → tier2 Postgres = promotion → views = brain
 ---
 
 ## Unwired / corpse / under-wired findings (summary)
-- **tier_divergence_swfl_tier2 / tier-divergence-swfl BRAIN — UNDER-WIRED (closest to orphan).** The brain
-  is NOT in master input_brains and NOT in the answer-engine catalog (`catalog.test.mts:25` KNOWN_INCOMPLETE).
-  Its only brain-output consumer is zip-report rail citations (`candidates.ts:313-314`). Master, chat, and the
-  flagship `/charts` "tier-gap" panel all get tier-divergence data WITHOUT the brain — the chart reads
-  `data_lake.tier_divergence_pivoted` directly and even states the regional signal is flat.
+- **tier_divergence_swfl_tier2 / tier-divergence-swfl BRAIN — WIRED INTO MASTER 07/23/2026, still catalog-gap.**
+  Was previously never wired into master AND never actually built (source view carried out-of-scope
+  Sarasota/Charlotte ZIPs, tripped the zip-scope validator) — fixed and wired 07/23/2026, now in master
+  input_brains casting a real vote. Still NOT in the answer-engine catalog (`catalog.test.mts:25`
+  KNOWN_INCOMPLETE) — open follow-up. Its other brain-output consumer is zip-report rail citations
+  (`candidates.ts:313-314`). The flagship `/charts` "tier-gap" panel still gets tier-divergence data WITHOUT
+  the brain — the chart reads `data_lake.tier_divergence_pivoted` directly and even states the regional
+  signal is flat.
 - **home-values-swfl BRAIN reaches master only INDIRECTLY** via investor-zip-swfl (not a direct master input).
   Not a defect, but a non-obvious routing dependency: if investor-zip-swfl drops the value join, ZHVI silently
   stops informing master.

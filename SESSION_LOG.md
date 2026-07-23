@@ -1,3 +1,42 @@
+## 2026-07-23 (Sonnet 5 · main) — tier-divergence-swfl wired into master (first-ever real build), collided with the nightly rebuild bot mid-push, resolved
+
+Operator asked what home-values-swfl and tier-divergence-swfl are and why they don't feed master.
+Answer, from code not memory: home-values-swfl reaches master indirectly via investor-zip-swfl;
+tier-divergence-swfl (K-shaped luxury-vs-starter ZHVI spread) was genuinely unwired — confirmed
+absent from both `master.mts` sources[] and input_brains[]. Operator said wire it in.
+
+**Found while wiring: the brain had never successfully built, ever.** `bun run refinery --
+tier-divergence-swfl` failed Stage 4's zip-scope validator — its source view
+(`data_lake.tier_divergence_zip_latest`) carries Sarasota/Charlotte ZIPs outside Lee+Collier scope,
+never filtered. Added the same `isCoreScope()` filter every sibling brain (home-values-swfl, etc.)
+already uses (`refinery/packs/tier-divergence-swfl.mts`). First-ever `brains/tier-divergence-swfl.md`
+built clean after the fix. Wired into `refinery/packs/master.mts` sources[]/input_brains[] as plain
+`input`, non-critical — unlike several of master's other recent additions this one casts a REAL
+bullish/bearish/neutral vote (deterministic, no LLM), not a hardcoded neutral/magnitude-0 dummy.
+
+**Hit a live merge race pushing it.** Between the local build (06:10 UTC) and push, the nightly GHA
+"Daily Brain Rebuild" bot (github-actions[bot]) landed `d0ed133c` on origin (06:48 UTC) — its own
+fresh rebuild of several other brains including master.md, without the new wiring. A parallel
+process in this same working directory had already committed my dirty tree under a generic message
+("Refactor code structure...", commit a06656cf — not written by me, source unconfirmed, worth
+watching) and attempted the merge, leaving `brains/master.md` conflicted (6 marker blocks, one inside
+the YAML frontmatter) mid-flight. Ran a second-order check before resolving: confirmed the code
+(master.mts, tier-divergence-swfl.mts, brains/tier-divergence-swfl.md) was never in conflict — only
+the generated master.md was. Resolved by taking local side to unblock, then re-ran
+`bun run refinery -- master --target-only` to regenerate master.md fresh so it folds in BOTH the new
+vote AND the bot's newer upstream data. Confirmed zero conflict markers ship (`grep -rln '<<<<<<<'
+brains/` → none). Verified: typecheck clean, 75 relevant tests passing, vocab-coverage OK, master
+rebuilt to v116 listing tier-divergence-swfl as source s38.
+
+**Also found, not fixed (flagged to operator, worth a follow-up):** the two colliding real versions
+of master.md v115 shared an identical `freshness_token` (`SWFL-7421-v115-...`) despite different
+content — the token is keyed to version number, not content hash, so it can't actually prove which
+v115 was served. Doesn't block this push (v116 is unambiguous); undercuts data-protocol-v3 rule 2
+("prove it's live") if it recurs. Updated `docs/standards/data-roots.md` (3 spans) so the tier-divergence
+entry no longer claims "closest thing to an orphan" — it's wired into master now, still gapped from
+the chat catalog (`catalog.test.mts:25` KNOWN_INCOMPLETE) and the `/charts` tier-gap panel (reads the
+lake view directly, bypasses the brain) — both left open as known follow-ups, not done here.
+
 ## 2026-07-23 (Sonnet 5 · main) — Egress-bytes question settled for good, live vendor-checked; found the real unbuilt path (rebuild-egress-meter spec)
 
 Operator minted a real `SUPABASE_ACCESS_TOKEN` (`analytics_usage_read` scope) and had me run
