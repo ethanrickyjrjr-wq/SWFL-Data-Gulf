@@ -48,6 +48,14 @@ export function makeBrainInputSource(upstreamId: string): SourceConnector {
   // date — surfacing real upstream staleness through to the consuming brain's
   // citation table. Fall back to "today" if fetch ran out of order.
   let upstreamRefinedDate: string | null = null;
+  // Captured on fetch() so citationMeta() computes `expires` from the
+  // UPSTREAM's own ttl_seconds, never the caller's (the currently-building
+  // pack's own ttl_seconds passed in by Stage 4). Without this, a slow-cadence
+  // upstream (e.g. 30-day TTL) inherits a fast-cadence downstream's TTL (e.g.
+  // master's 7 days) and gets marked "expired" weeks before it's actually due
+  // to refresh. Falls back to the caller-supplied ttlSeconds for legacy
+  // upstream outputs built before ttl_seconds was stamped on BrainOutput.
+  let upstreamTtlSeconds: number | null = null;
 
   return {
     source_id: sourceId,
@@ -62,6 +70,7 @@ export function makeBrainInputSource(upstreamId: string): SourceConnector {
       }
       const output = read.output;
       upstreamRefinedDate = output.refined_at.slice(0, 10);
+      upstreamTtlSeconds = output.ttl_seconds ?? null;
 
       const normalized: BrainInputNormalized = {
         kind: "brain-input",
@@ -86,10 +95,16 @@ export function makeBrainInputSource(upstreamId: string): SourceConnector {
     },
     citationMeta(verifiedDate, ttlSeconds): Omit<CitationRow, "id"> {
       const verified = upstreamRefinedDate ?? verifiedDate;
+      // Use the UPSTREAM's own ttl_seconds, not the caller's — the caller is
+      // the currently-building (downstream) pack, whose cadence may be
+      // completely unrelated to this upstream's. Legacy upstream outputs
+      // built before ttl_seconds was stamped on BrainOutput fall back to the
+      // caller-supplied value (no worse than the prior behavior).
+      const effectiveTtlSeconds = upstreamTtlSeconds ?? ttlSeconds;
       return {
         source: `${upstreamId} brain — ${url}`,
         verified,
-        expires: expiresDate(verified, ttlSeconds),
+        expires: expiresDate(verified, effectiveTtlSeconds),
       };
     },
   };
