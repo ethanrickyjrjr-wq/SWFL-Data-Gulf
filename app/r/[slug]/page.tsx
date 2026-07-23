@@ -112,7 +112,7 @@ export default async function ReportPage({ params }: PageProps) {
     parsed = parseBrainMarkdown(content);
     display = toDisplayBrain(parsed);
   } catch {
-    return <RawFallback slug={slug} content={content} />;
+    return <RawFallback slug={slug} />;
   }
 
   const narrative = await loadNarrative("brain", slug);
@@ -405,17 +405,18 @@ async function CRESection({ mbMetrics }: { mbMetrics: MBCityMetric[] }) {
   return <CRECorridorBreakdown mbMetrics={mbMetrics} counties={counties} />;
 }
 
-function RawFallback({ slug, content }: { slug: string; content: string }) {
+// Deliberately content-free: the brain markdown file carries source citations
+// and internal pipeline/reference notes that are safe for an LLM to read but
+// were never meant to render verbatim on a public page, so this fallback never
+// takes (or shows) the raw file text — only a generic, no-data notice.
+export function RawFallback({ slug }: { slug: string }) {
   return (
     <ReportShell>
       <ReportHeader title={displayName(slug)}>
         <p className="mt-3 text-sm text-gray-400">
-          This read does not expose a structured summary yet. Showing the raw artifact.
+          This read could not be rendered right now. Check back once the brain refreshes.
         </p>
       </ReportHeader>
-      <pre className="mt-6 overflow-x-auto rounded-xl glass-card-modern border border-white/10 p-4 text-xs leading-5 text-gray-300">
-        {content}
-      </pre>
     </ReportShell>
   );
 }
