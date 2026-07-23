@@ -4,7 +4,7 @@
  * if it fails, the run aborts and the existing pack is left intact.
  */
 
-import { freshnessToken, parseFreshnessComment } from "../lib/freshness.mts";
+import { contentDigest, freshnessToken, parseFreshnessComment } from "../lib/freshness.mts";
 
 export interface ValidationResult {
   ok: boolean;
@@ -97,8 +97,12 @@ export function validateSpec(md: string): ValidationResult {
   // --- freshness guard ---
   // The doc must start with a `<!-- FRESHNESS ... -->` comment, and the
   // comment + the `freshness_token` field must agree with each other and
-  // with `version` / `refined_at`. This keeps the two copies of the token
-  // (comment + frontmatter) from silently drifting apart.
+  // with `version` / `refined_at` / the actual OUTPUT content — this keeps
+  // the two copies of the token (comment + frontmatter) from silently
+  // drifting apart. Reference block/OUTPUT extracted early (ahead of its
+  // other use below) so the token check can hash the real served content.
+  const blocks = extractReferenceBlocks(md);
+  const outputSection = blocks.length > 0 ? extractSection(blocks[0], "--- OUTPUT ---") : null;
   if (fm) {
     const firstLine = md.split("\n", 1)[0];
     const comment = parseFreshnessComment(firstLine);
@@ -120,7 +124,11 @@ export function validateSpec(md: string): ValidationResult {
           );
         }
         if (fm.freshness_token && fm.refined_at) {
-          const expected = freshnessToken(version, fm.refined_at);
+          const expected = freshnessToken(
+            version,
+            fm.refined_at,
+            contentDigest(outputSection ?? ""),
+          );
           if (fm.freshness_token !== expected) {
             errors.push(
               `freshness_token "${fm.freshness_token}" does not match version/refined_at — expected "${expected}".`,
@@ -131,8 +139,7 @@ export function validateSpec(md: string): ValidationResult {
     }
   }
 
-  // --- reference block ---
-  const blocks = extractReferenceBlocks(md);
+  // --- reference block --- (blocks/outputSection already extracted above, ahead of the freshness guard)
   if (blocks.length === 0) {
     errors.push("No ```reference fenced block found.");
     return { ok: false, errors };
@@ -182,7 +189,6 @@ export function validateSpec(md: string): ValidationResult {
   }
 
   // --- output block (BrainOutput JSON) ---
-  const outputSection = extractSection(ref, "--- OUTPUT ---");
   if (outputSection !== null) {
     let parsed: unknown = null;
     try {

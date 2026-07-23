@@ -2,6 +2,7 @@ import { test } from "bun:test";
 import assert from "node:assert/strict";
 import {
   LAKE_ID,
+  contentDigest,
   freshnessToken,
   freshnessComment,
   parseFreshnessComment,
@@ -9,27 +10,65 @@ import {
   freshnessGate,
 } from "./freshness.mts";
 
+const HASH_A = contentDigest("content A");
+const HASH_B = contentDigest("content B");
+
 test("LAKE_ID is the fixed SWFL constant", () => {
   assert.equal(LAKE_ID, "7421");
 });
 
-test("freshnessToken builds SWFL-7421-v{n}-{YYYYMMDD}", () => {
-  assert.equal(freshnessToken(4, "2026-05-14T19:21:08Z"), "SWFL-7421-v4-20260514");
-  assert.equal(freshnessToken(2, "2026-05-14T11:44:04Z"), "SWFL-7421-v2-20260514");
+test("contentDigest is deterministic and 8 lowercase hex chars", () => {
+  assert.equal(contentDigest("same"), contentDigest("same"));
+  assert.match(contentDigest("same"), /^[0-9a-f]{8}$/);
+});
+
+test("contentDigest: different content produces a different digest", () => {
+  assert.notEqual(HASH_A, HASH_B);
+});
+
+test("freshnessToken builds SWFL-7421-v{n}-{YYYYMMDD}-{contentHash}", () => {
+  assert.equal(
+    freshnessToken(4, "2026-05-14T19:21:08Z", HASH_A),
+    `SWFL-7421-v4-20260514-${HASH_A}`,
+  );
+  assert.equal(
+    freshnessToken(2, "2026-05-14T11:44:04Z", HASH_A),
+    `SWFL-7421-v2-20260514-${HASH_A}`,
+  );
+});
+
+// REGRESSION (incident 07/23/2026): `version` alone does not disambiguate two
+// racing rebuilds — a local build and the nightly GHA bot can both compute
+// `version = priorVersion + 1` off the same prior file, same calendar day,
+// and previously produced the IDENTICAL token despite serving different
+// content. The token must diverge whenever the served content does.
+test("freshnessToken: same version + same day but different content -> different tokens", () => {
+  const a = freshnessToken(9, "2026-07-23T06:10:00Z", HASH_A);
+  const b = freshnessToken(9, "2026-07-23T06:48:00Z", HASH_B);
+  assert.notEqual(a, b);
+});
+
+test("freshnessToken: same version + same day + same content -> same token (no false divergence)", () => {
+  const a = freshnessToken(9, "2026-07-23T06:10:00Z", HASH_A);
+  const b = freshnessToken(9, "2026-07-23T06:48:00Z", HASH_A);
+  assert.equal(a, b);
 });
 
 test("freshnessComment wraps the token", () => {
   assert.equal(
-    freshnessComment(4, "SWFL-7421-v4-20260514"),
-    "<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260514 -->",
+    freshnessComment(4, `SWFL-7421-v4-20260514-${HASH_A}`),
+    `<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260514-${HASH_A} -->`,
   );
 });
 
 test("parseFreshnessComment reads a well-formed comment", () => {
-  assert.deepEqual(parseFreshnessComment("<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260514 -->"), {
-    version: 4,
-    token: "SWFL-7421-v4-20260514",
-  });
+  assert.deepEqual(
+    parseFreshnessComment(`<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260514-${HASH_A} -->`),
+    {
+      version: 4,
+      token: `SWFL-7421-v4-20260514-${HASH_A}`,
+    },
+  );
 });
 
 test("parseFreshnessComment returns null on malformed input", () => {
@@ -47,7 +86,7 @@ test("round-trip: parse(comment(token)) recovers version and token", () => {
     [2, "2026-05-14T11:44:04Z"],
     [3, "2026-05-14T04:00:00Z"],
   ] as const) {
-    const token = freshnessToken(v, ts);
+    const token = freshnessToken(v, ts, HASH_A);
     const parsed = parseFreshnessComment(freshnessComment(v, token));
     assert.deepEqual(parsed, { version: v, token });
   }

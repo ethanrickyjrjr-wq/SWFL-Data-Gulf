@@ -3,7 +3,7 @@ import type { BrainOutput } from "../types/brain-output.mts";
 import { renderFrontmatter } from "./frontmatter.mts";
 import { renderCitationTable } from "./citation-table.mts";
 import { renderSavedFacts } from "./saved-facts.mts";
-import { freshnessComment, freshnessToken } from "../lib/freshness.mts";
+import { contentDigest, freshnessComment, freshnessToken } from "../lib/freshness.mts";
 
 /**
  * Lane 1B — renderer-side cross-validation: every metric whose
@@ -50,10 +50,7 @@ function renderOutputBlock(brainOutput: BrainOutput): string {
 }
 
 /** Render a complete spec-v1.1 Master Index markdown document. */
-export function renderMasterIndex(
-  out: PackOutput,
-  brainOutput: BrainOutput,
-): string {
+export function renderMasterIndex(out: PackOutput, brainOutput: BrainOutput): string {
   const { pack, citations, facts, recentNote } = out;
 
   // Lane 1B: gate the render on citation_ref resolution. The id set the
@@ -77,16 +74,15 @@ export function renderMasterIndex(
   const citationTable = renderCitationTable(citations);
   const savedFacts = renderSavedFacts(facts);
   const outputBlock = renderOutputBlock(brainOutput);
+  // Hash the exact OUTPUT body that ships (not pack/version/day) so the
+  // freshness token is unique to what was actually served — see freshness.mts.
+  const contentHash = contentDigest(outputBlock);
 
   // Optional SUB-BRAIN POINTERS section — only a master index sets this.
   // Deprecated by input_brains + brain_registry; preserved until consumers migrate.
   const subBrainPointers =
     pack.subBrainPointers && pack.subBrainPointers.length > 0
-      ? [
-          "--- SUB-BRAIN POINTERS ---",
-          pack.subBrainPointers.map((p) => `- ${p}`).join("\n"),
-          "",
-        ]
+      ? ["--- SUB-BRAIN POINTERS ---", pack.subBrainPointers.map((p) => `- ${p}`).join("\n"), ""]
       : [];
 
   const referenceBlock = [
@@ -116,8 +112,8 @@ export function renderMasterIndex(
   ].join("\n");
 
   return [
-    freshnessComment(out.version, freshnessToken(out.version, out.refined_at)),
-    renderFrontmatter(out),
+    freshnessComment(out.version, freshnessToken(out.version, out.refined_at, contentHash)),
+    renderFrontmatter(out, contentHash),
     "",
     FRAMING_PARAGRAPH,
     "",

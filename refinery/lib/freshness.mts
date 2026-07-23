@@ -8,19 +8,40 @@
  * source of truth for building and parsing that token.
  */
 
+import { createHash } from "node:crypto";
 import { isoTimestamp } from "./dates.mts";
 
 /** Fixed SWFL-lake identifier. Stable across every brain in the lake. */
 export const LAKE_ID = "7421";
 
 /**
- * Build the freshness token: `SWFL-7421-v{version}-{YYYYMMDD}`.
- * The date segment is the calendar day of `refinedAt` (a refined_at ISO
- * timestamp), so the token changes on every refine.
+ * SHA-256 (first 8 hex chars) of a brain's rendered `--- OUTPUT ---` body —
+ * the actual served content. Mirrors `packSourceHash`'s style but hashes
+ * OUTPUT, not source code (see `freshnessToken`).
  */
-export function freshnessToken(version: number, refinedAt: string): string {
+export function contentDigest(content: string): string {
+  return createHash("sha256").update(content).digest("hex").slice(0, 8);
+}
+
+/**
+ * Build the freshness token: `SWFL-7421-v{version}-{YYYYMMDD}-{contentHash}`.
+ * The date segment is the calendar day of `refinedAt` (a refined_at ISO
+ * timestamp); `contentHash` is `contentDigest` of the rendered OUTPUT body.
+ *
+ * The hash exists because `version` alone does NOT uniquely identify a
+ * rebuild: `version` is computed as `priorVersion + 1` (stages/4-output.mts),
+ * so two independent rebuilds racing off the same prior file — e.g. a local
+ * session and the nightly GHA bot, both starting before either has pushed —
+ * compute the SAME version on the SAME calendar day even though they
+ * synthesize from different upstream state and produce different content.
+ * Before this hash, that collision was invisible: the token couldn't prove
+ * which rebuild's content a caller actually got (incident: 07/23/2026,
+ * tier-divergence-swfl master-wiring race). The hash makes same-content
+ * builds keep sharing a token (fine) and different-content builds diverge.
+ */
+export function freshnessToken(version: number, refinedAt: string, contentHash: string): string {
   const yyyymmdd = refinedAt.slice(0, 10).replace(/-/g, "");
-  return `SWFL-${LAKE_ID}-v${version}-${yyyymmdd}`;
+  return `SWFL-${LAKE_ID}-v${version}-${yyyymmdd}-${contentHash}`;
 }
 
 /** Build the leading HTML comment that wraps the token. */

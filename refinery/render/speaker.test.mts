@@ -414,7 +414,7 @@ describe("parseBrainMarkdown", () => {
     const brain = parseBrainMarkdown(md);
     assert.equal(brain.brain_id, "master");
     assert.ok(brain.version >= 1);
-    assert.match(brain.freshness_token, /^SWFL-\d+-v\d+-\d{8}$/);
+    assert.match(brain.freshness_token, /^SWFL-\d+-v\d+-\d{8}(-[0-9a-f]{8})?$/);
     assert.equal(brain.output.brain_id, "master");
     assert.ok(brain.output.key_metrics.length > 0);
     assert.ok(brain.output.conclusion.length > 0);

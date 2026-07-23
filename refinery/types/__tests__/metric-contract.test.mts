@@ -16,6 +16,7 @@
 import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { validateSpec } from "../../validate/spec-validator.mts";
+import { contentDigest, freshnessToken } from "../../lib/freshness.mts";
 
 const VALID_SOURCE = {
   url: "https://example.test/metric",
@@ -26,13 +27,45 @@ const VALID_SOURCE = {
 
 function wrap(output: object): string {
   const refined_at = "2026-05-18T00:00:00Z";
-  // Token must match `freshnessToken(version, refined_at)` — see refinery/lib/freshness.mts.
-  const token = "SWFL-7421-v1-20260518";
+  const version = 1;
+  const outputJson = JSON.stringify(
+    {
+      brain_id: "contract-test",
+      version,
+      refined_at,
+      direction: "neutral",
+      magnitude: 0.5,
+      drivers: [],
+      overrides: [],
+      conclusion: "contract test",
+      caveats: [],
+      contradicts: [],
+      confidence: 0.8,
+      joint_integrity: 1.0,
+      confidence_dispersion: 0,
+      chain_depth: 0,
+      trust_tier: 1,
+      upstream_count: 0,
+      relevance: {
+        decay_curve: "hours",
+        half_life_hours: 24,
+        computed_at: refined_at,
+      },
+      exogenous_signals: [],
+      ...output,
+    },
+    null,
+    2,
+  );
+  // Token derived from the ACTUAL output JSON below — see freshnessToken in
+  // refinery/lib/freshness.mts — so it stays valid regardless of which test
+  // case overrides which fields (the hash tracks content, not a magic string).
+  const token = freshnessToken(version, refined_at, contentDigest(outputJson));
   return [
-    `<!-- FRESHNESS: v1 | Token: ${token} -->`,
+    `<!-- FRESHNESS: v${version} | Token: ${token} -->`,
     "---",
     "brain_id: contract-test",
-    "version: 1",
+    `version: ${version}`,
     "refined_at: 2026-05-18T00:00:00Z",
     `freshness_token: ${token}`,
     "ttl_seconds: 3600",
@@ -55,35 +88,7 @@ function wrap(output: object): string {
     "[]",
     "",
     "--- OUTPUT ---",
-    JSON.stringify(
-      {
-        brain_id: "contract-test",
-        version: 1,
-        refined_at,
-        direction: "neutral",
-        magnitude: 0.5,
-        drivers: [],
-        overrides: [],
-        conclusion: "contract test",
-        caveats: [],
-        contradicts: [],
-        confidence: 0.8,
-        joint_integrity: 1.0,
-        confidence_dispersion: 0,
-        chain_depth: 0,
-        trust_tier: 1,
-        upstream_count: 0,
-        relevance: {
-          decay_curve: "hours",
-          half_life_hours: 24,
-          computed_at: refined_at,
-        },
-        exogenous_signals: [],
-        ...output,
-      },
-      null,
-      2,
-    ),
+    outputJson,
     "",
     "--- ACTIVE PROJECTS ---",
     "- placeholder",
