@@ -5,6 +5,7 @@ import type { Contact } from "@/lib/contacts/types";
 import type { Condition } from "@/lib/email/segments/filter";
 import { SendCeilingMeter } from "@/components/email/SendCeilingMeter";
 import { BlastResultsPanel } from "./BlastResultsPanel";
+import { makeDebouncedRunner } from "@/lib/contacts/segment-preview-debounce";
 
 interface Props {
   deliverableId: string;
@@ -57,6 +58,7 @@ export function ContactPickerModal({
   const [search, setSearch] = useState("");
   const [conditions, setConditions] = useState<UiCondition[]>([]);
   const [matched, setMatched] = useState<Contact[] | null>(null);
+  const [isResolving, setIsResolving] = useState(false);
   const [sentDeliverables, setSentDeliverables] = useState<SentDeliverable[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [subject, setSubject] = useState("");
@@ -85,30 +87,55 @@ export function ContactPickerModal({
   }, []);
 
   const filter = useMemo(() => conditionsToFilter(conditions), [conditions]);
+  // Tracks the filter value isResolving was last armed/cleared for.
+  const [firedFilter, setFiredFilter] = useState<Condition | null>(null);
+
+  // Set-state-during-render (react.dev "Adjusting state when a prop changes"):
+  // `filter` is a fresh object every condition edit (useMemo recomputes off
+  // `conditions`), so comparing it against `firedFilter` catches every edit,
+  // arming/clearing `isResolving` immediately and converging on the next
+  // render — never a synchronous setState inside the effect below, which is
+  // what `react-hooks/set-state-in-effect` flags.
+  if (filter !== firedFilter) {
+    setFiredFilter(filter);
+    setIsResolving(!!filter);
+  }
 
   // Resolve matches server-side whenever the filter changes (attribs/engagement
   // conditions can't be evaluated client-side — the picker doesn't hold
   // email_events). With no filter the effect does nothing and `base` (below)
   // falls back to the plain client-side contact list — see the `filter ? …`
   // guard where `base` is computed, which makes any stale `matched` irrelevant
-  // once the filter is cleared (and avoids a synchronous setState in an effect).
+  // once the filter is cleared. This debounces via makeDebouncedRunner —
+  // otherwise rapid edits fire one request per keystroke and flash whichever
+  // intermediate result lands (contact_picker_no_preview_debounce).
   useEffect(() => {
     if (!filter) return;
     let cancelled = false;
-    fetch("/api/segments/preview", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ filter }),
-    })
-      .then((r) => (r.ok ? r.json() : { contacts: [] }))
-      .then((body: { contacts: Contact[] }) => {
-        if (!cancelled) setMatched(body.contacts ?? []);
+    const runner = makeDebouncedRunner();
+    runner.schedule(() => {
+      fetch("/api/segments/preview", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ filter }),
       })
-      .catch(() => {
-        if (!cancelled) setMatched([]);
-      });
+        .then((r) => (r.ok ? r.json() : { contacts: [] }))
+        .then((body: { contacts: Contact[] }) => {
+          if (!cancelled) {
+            setMatched(body.contacts ?? []);
+            setIsResolving(false);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setMatched([]);
+            setIsResolving(false);
+          }
+        });
+    });
     return () => {
       cancelled = true;
+      runner.cancel();
     };
   }, [filter]);
 
@@ -466,6 +493,7 @@ export function ContactPickerModal({
                     Attribute and engagement conditions are a paid feature — tag filtering is free.
                   </p>
                 )}
+                {isResolving && <p className="text-[11px] text-gray-500">Updating matches…</p>}
                 {filter && (
                   <div className="flex items-center gap-2 pt-1">
                     <input
@@ -487,7 +515,9 @@ export function ContactPickerModal({
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div
+              className={`flex-1 overflow-y-auto ${isResolving ? "opacity-50 transition-opacity" : ""}`}
+            >
               {visible.length === 0 ? (
                 <p className="py-8 text-center text-sm text-gray-500">
                   {contacts.length === 0 ? (
