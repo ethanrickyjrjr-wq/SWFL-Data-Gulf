@@ -11,6 +11,7 @@ import {
   Meta,
   Chip,
 } from "../../../_components/report-shell";
+import { SourceLink } from "../../../_components/metrics-table";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,6 +67,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
         </div>
         <dl className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
           {n.as_of && asOfFromIso(n.as_of) && <Meta label="As of" value={asOfFromIso(n.as_of)} />}
+          {n.source_url && <Meta label="Source" value={<SourceLink url={n.source_url} />} />}
         </dl>
       </ReportHeader>
 

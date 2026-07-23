@@ -15,6 +15,7 @@ import {
   Meta,
   Chip,
 } from "../../_components/report-shell";
+import { SourceLink } from "../../_components/metrics-table";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -128,6 +129,7 @@ export default async function CommunityPage({ params }: PageProps) {
             />
           )}
           {c.as_of && asOfFromIso(c.as_of) && <Meta label="As of" value={asOfFromIso(c.as_of)} />}
+          {c.source_url && <Meta label="Source" value={<SourceLink url={c.source_url} />} />}
         </dl>
       </ReportHeader>
 
