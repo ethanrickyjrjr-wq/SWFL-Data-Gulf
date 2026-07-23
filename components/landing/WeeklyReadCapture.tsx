@@ -3,9 +3,17 @@
 import { useState } from "react";
 
 /**
- * Weekly-read capture (Lane B spec §6 / spine D3) — replaces the dead-end
- * waitlist. Posts to the LIVE Lane D enrollment endpoint
- * (POST /api/weekly-read/subscribe — public.weekly_read_subscribers, consent
+ * Weekly-read capture (Lane B spec §6 / spine D3). NOT currently mounted —
+ * confirmed unimported anywhere under app/ (pinned by
+ * lib/landing/home-spine.static.test.ts, which asserts app/page.tsx contains
+ * neither "WeeklyReadCapture" nor "Waitlist"). The live weekly-read signup UI
+ * that actually ships today is components/email/SubscribeCapture.tsx, mounted
+ * at app/r/zip-report/[zip]/page.tsx with endpoint="/api/weekly-read/subscribe"
+ * (same endpoint below). Mounting this component (vs. deleting it) is an
+ * open operator judgment call — left in place on purpose, not an oversight.
+ *
+ * Posts to the LIVE Lane D enrollment endpoint (POST
+ * /api/weekly-read/subscribe — public.weekly_read_subscribers, consent
  * recorded server-side, out-of-footprint ZIPs hard-400). The old fork-2
  * `weekly_read_signups` seam is obsolete — Lane D landed first.
  */

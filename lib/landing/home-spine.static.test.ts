@@ -25,6 +25,18 @@ describe("homepage spine (static pins)", () => {
     expect(page).not.toContain("Waitlist");
   });
 
+  test("WeeklyReadCapture's header does not claim to replace anything live while unmounted", () => {
+    // This file is confirmed unmounted (assertion above) — its own header
+    // comment must not claim present-tense that it "replaces" a dead-end
+    // waitlist, which would be stale/misleading now that nothing renders it.
+    // Deletion is also a valid disposition for this file (operator call) —
+    // don't fail the suite if it's gone, only if it's stale-and-present.
+    const rel = "components/landing/WeeklyReadCapture.tsx";
+    if (!existsSync(join(process.cwd(), rel))) return;
+    const normalized = read(rel).replace(/\*/g, " ").replace(/\s+/g, " ");
+    expect(normalized).not.toContain("replaces the dead-end waitlist");
+  });
+
   test("the spine is bar → map → doors → guides → pricing → faq", () => {
     const order = [
       "<HeroBar",
