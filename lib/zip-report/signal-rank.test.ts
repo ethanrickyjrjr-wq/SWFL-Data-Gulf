@@ -1,6 +1,6 @@
 // lib/zip-report/signal-rank.test.ts
 import { describe, expect, test } from "bun:test";
-import { percentileOf, rankSignals, type SignalCandidate } from "./signal-rank";
+import { percentileOf, rankSignals, sampleThinCaveat, type SignalCandidate } from "./signal-rank";
 
 function cand(over: Partial<SignalCandidate>): SignalCandidate {
   return {
@@ -113,6 +113,18 @@ describe("rankSignals — sampleThin guard (the 33993 one-permit crowning, 07/12
     expect(r.rankPos).toBe(23);
     expect(r.rankOf).toBe(23);
     expect(r.percentile).toBe(0);
+  });
+});
+
+describe("sampleThinCaveat — reader-facing caveat copy (sa0718, 07/22/2026)", () => {
+  test("thin candidate gets caveat text — the '#23 of 23' framing must not read as a confident extreme", () => {
+    expect(sampleThinCaveat(cand({ key: "a", sampleThin: true }))).toBe(
+      "Small sample — shown for context only",
+    );
+  });
+
+  test("non-thin candidate gets no caveat", () => {
+    expect(sampleThinCaveat(cand({ key: "a" }))).toBeNull();
   });
 });
 

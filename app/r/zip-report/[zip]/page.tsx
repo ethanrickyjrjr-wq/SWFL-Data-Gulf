@@ -5,7 +5,7 @@ import { openZipLab } from "@/lib/lab-entry/destination";
 import { resolveZip } from "../../../../refinery/lib/zip-resolver.mts";
 import type { Grain } from "../../../../refinery/lib/zip-resolver.mts";
 import { assembleZipReport } from "../../../../lib/zip-report/assemble";
-import type { RankedSignal } from "../../../../lib/zip-report/signal-rank";
+import { sampleThinCaveat, type RankedSignal } from "../../../../lib/zip-report/signal-rank";
 import { ZIP_METRIC_SOURCES, type FloodZipRow } from "../../../../lib/zip-report/candidates";
 import { getSourcedFigures } from "../../../../lib/figures/sourced";
 import { FindItButton, type FoundFigure } from "../_components/find-it-button";
@@ -319,6 +319,7 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
                 <div className="zp-stat-value">{s.display}</div>
                 {s.sub && <div className="zp-stat-sub">{s.sub}</div>}
                 {s.why && <div className="zp-stat-tag">{s.why}</div>}
+                {sampleThinCaveat(s) && <div className="zp-stat-caveat">{sampleThinCaveat(s)}</div>}
               </div>
             ))}
           </div>
@@ -576,6 +577,9 @@ function SignalCard({ s }: { s: RankedSignal }) {
       {s.why && <p className="mt-1 text-xs text-teal-primary/80">{s.why}</p>}
       {s.movementText && s.movementText !== s.why && (
         <p className="mt-1 text-xs text-gray-400">{s.movementText}</p>
+      )}
+      {sampleThinCaveat(s) && (
+        <p className="mt-1 text-xs font-medium text-amber-400/90">{sampleThinCaveat(s)}</p>
       )}
       {s.footnote && <p className="mt-1 text-xs text-gray-500 italic">{s.footnote}</p>}
     </div>

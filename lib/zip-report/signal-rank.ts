@@ -56,6 +56,18 @@ export interface SignalCandidate {
 /** Raw counts below this can't claim distinction — see `sampleThin`. */
 export const THIN_COUNT_FLOOR = 5;
 
+/**
+ * Reader-facing caveat for a `sampleThin` candidate. The ranker zeroes its
+ * extremity term (see `rankSignals`) but the held rank/value still render
+ * verbatim (e.g. "#23 of 23 SWFL ZIPs"), which without this reads as a
+ * confident extreme instead of a trace count. sa0718, 07/22/2026.
+ */
+export const SAMPLE_THIN_CAVEAT = "Small sample — shown for context only";
+
+export function sampleThinCaveat(s: { sampleThin?: boolean }): string | null {
+  return s.sampleThin ? SAMPLE_THIN_CAVEAT : null;
+}
+
 export interface RankedSignal extends SignalCandidate {
   score: number;
   /** Why this signal leads — "#2 of 57 SWFL ZIPs" or "↑ 18% YoY". */

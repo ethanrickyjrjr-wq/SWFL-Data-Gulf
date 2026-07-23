@@ -144,6 +144,16 @@
   color: var(--gulf-teal);
   border: 1px solid rgba(10,128,120,.2);
 }
+/* Sample-thin caveat — a trace-count candidate still renders its held rank
+   (e.g. "#23 of 23 SWFL ZIPs") but that must not read as a confident extreme.
+   sa0718, 07/22/2026. */
+.zp-stat-caveat {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #f5a623;
+}
 
 /* ─── BODY 2-COL ─── */
 .zp-body {
