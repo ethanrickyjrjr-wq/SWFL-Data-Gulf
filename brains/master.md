@@ -1,11 +1,11 @@
-<!-- FRESHNESS: v114 | Token: SWFL-7421-v114-20260723 -->
+<!-- FRESHNESS: v115 | Token: SWFL-7421-v115-20260723 -->
 ---
 brain_id: master
-version: 114
-refined_at: 2026-07-23T04:30:51Z
-freshness_token: SWFL-7421-v114-20260723
+version: 115
+refined_at: 2026-07-23T06:10:31Z
+freshness_token: SWFL-7421-v115-20260723
 ttl_seconds: 604800
-pack_hash: 70e0f9ee1d30
+pack_hash: a6ea50d6784a
 context_type: user_saved_reference
 scope: SWFL Intelligence Lake — master synthesizer over the verified Franchise Outcomes, CRE Corridors, Macro SWFL, and Sector-Credit SWFL upstream brains (Lee & Collier counties, FL).
 ---
@@ -30,43 +30,44 @@ SCOPE: SWFL Intelligence Lake — master synthesizer over the verified Franchise
 
 --- CITATION TABLE ---
 id  | source                                                                                       | verified   | expires
-s01 | franchise-outcomes brain — https://www.swfldatagulf.com/api/b/franchise-outcomes             | 2026-07-03 | 2026-07-10
+s01 | franchise-outcomes brain — https://www.swfldatagulf.com/api/b/franchise-outcomes             | 2026-07-03 | 2026-10-01
 s02 | cre-swfl brain — https://www.swfldatagulf.com/api/b/cre-swfl                                 | 2026-07-19 | 2026-07-26
-s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us                                 | 2026-06-29 | 2026-07-06
-s04 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                       | 2026-07-19 | 2026-07-26
-s05 | macro-swfl brain — https://www.swfldatagulf.com/api/b/macro-swfl                             | 2026-06-29 | 2026-07-06
+s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us                                 | 2026-06-29 | 2026-07-29
+s04 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                       | 2026-07-19 | 2026-08-18
+s05 | macro-swfl brain — https://www.swfldatagulf.com/api/b/macro-swfl                             | 2026-06-29 | 2026-07-29
 s06 | sector-credit-swfl brain — https://www.swfldatagulf.com/api/b/sector-credit-swfl             | 2026-07-20 | 2026-07-27
 s07 | tourism-tdt brain — https://www.swfldatagulf.com/api/b/tourism-tdt                           | 2026-07-20 | 2026-07-27
-s08 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl                                 | 2026-07-19 | 2026-07-26
-s09 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl                     | 2026-07-03 | 2026-07-10
-s10 | logistics-swfl-nowcast brain — https://www.swfldatagulf.com/api/b/logistics-swfl-nowcast     | 2026-07-19 | 2026-07-26
-s11 | traffic-swfl brain — https://www.swfldatagulf.com/api/b/traffic-swfl                         | 2026-07-19 | 2026-07-26
-s12 | properties-lee-value brain — https://www.swfldatagulf.com/api/b/properties-lee-value         | 2026-07-19 | 2026-07-26
-s13 | properties-collier-value brain — https://www.swfldatagulf.com/api/b/properties-collier-value | 2026-07-22 | 2026-07-29
+s08 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl                                 | 2026-07-19 | 2026-08-18
+s09 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl                     | 2026-07-03 | 2026-08-02
+s10 | logistics-swfl-nowcast brain — https://www.swfldatagulf.com/api/b/logistics-swfl-nowcast     | 2026-07-19 | 2026-08-18
+s11 | traffic-swfl brain — https://www.swfldatagulf.com/api/b/traffic-swfl                         | 2026-07-19 | 2026-08-18
+s12 | properties-lee-value brain — https://www.swfldatagulf.com/api/b/properties-lee-value         | 2026-07-19 | 2026-08-18
+s13 | properties-collier-value brain — https://www.swfldatagulf.com/api/b/properties-collier-value | 2026-07-22 | 2026-08-21
 s14 | permits-swfl brain — https://www.swfldatagulf.com/api/b/permits-swfl                         | 2026-07-22 | 2026-07-29
-s15 | rentals-swfl brain — https://www.swfldatagulf.com/api/b/rentals-swfl                         | 2026-07-22 | 2026-07-29
-s16 | housing-swfl brain — https://www.swfldatagulf.com/api/b/housing-swfl                         | 2026-07-19 | 2026-07-26
-s17 | safety-swfl brain — https://www.swfldatagulf.com/api/b/safety-swfl                           | 2026-07-19 | 2026-07-26
-s18 | labor-demand-swfl brain — https://www.swfldatagulf.com/api/b/labor-demand-swfl               | 2026-07-19 | 2026-07-26
+s15 | rentals-swfl brain — https://www.swfldatagulf.com/api/b/rentals-swfl                         | 2026-07-22 | 2026-08-26
+s16 | housing-swfl brain — https://www.swfldatagulf.com/api/b/housing-swfl                         | 2026-07-19 | 2026-08-23
+s17 | safety-swfl brain — https://www.swfldatagulf.com/api/b/safety-swfl                           | 2026-07-19 | 2026-10-17
+s18 | labor-demand-swfl brain — https://www.swfldatagulf.com/api/b/labor-demand-swfl               | 2026-07-19 | 2026-10-17
 s19 | econ-dev-swfl brain — https://www.swfldatagulf.com/api/b/econ-dev-swfl                       | 2026-07-22 | 2026-07-29
-s20 | city-pulse-swfl brain — https://www.swfldatagulf.com/api/b/city-pulse-swfl                   | 2026-07-23 | 2026-07-30
-s21 | rsw-airport brain — https://www.swfldatagulf.com/api/b/rsw-airport                           | 2026-06-29 | 2026-07-06
+s20 | city-pulse-swfl brain — https://www.swfldatagulf.com/api/b/city-pulse-swfl                   | 2026-07-23 | 2026-07-24
+s21 | rsw-airport brain — https://www.swfldatagulf.com/api/b/rsw-airport                           | 2026-06-29 | 2026-07-29
 s22 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl                               | 2026-07-22 | 2026-07-29
-s23 | freshness-pulse brain — https://www.swfldatagulf.com/api/b/freshness-pulse                   | 2026-07-23 | 2026-07-30
-s24 | seller-stress-swfl brain — https://www.swfldatagulf.com/api/b/seller-stress-swfl             | 2026-07-18 | 2026-07-25
-s25 | market-heat-swfl brain — https://www.swfldatagulf.com/api/b/market-heat-swfl                 | 2026-07-19 | 2026-07-26
-s26 | storm-history-swfl brain — https://www.swfldatagulf.com/api/b/storm-history-swfl             | 2026-07-19 | 2026-07-26
-s27 | hurricane-tracks-fl brain — https://www.swfldatagulf.com/api/b/hurricane-tracks-fl           | 2026-07-15 | 2026-07-22
-s28 | licenses-swfl brain — https://www.swfldatagulf.com/api/b/licenses-swfl                       | 2026-07-19 | 2026-07-26
-s29 | condo-sirs-swfl brain — https://www.swfldatagulf.com/api/b/condo-sirs-swfl                   | 2026-06-29 | 2026-07-06
-s30 | permits-commercial-swfl brain — https://www.swfldatagulf.com/api/b/permits-commercial-swfl   | 2026-07-19 | 2026-07-26
-s31 | price-distribution-swfl brain — https://www.swfldatagulf.com/api/b/price-distribution-swfl   | 2026-07-22 | 2026-07-29
-s32 | listing-momentum-swfl brain — https://www.swfldatagulf.com/api/b/listing-momentum-swfl       | 2026-07-22 | 2026-07-29
-s33 | market-temperature-swfl brain — https://www.swfldatagulf.com/api/b/market-temperature-swfl   | 2026-07-19 | 2026-07-26
-s34 | investor-zip-swfl brain — https://www.swfldatagulf.com/api/b/investor-zip-swfl               | 2026-07-17 | 2026-07-24
-s35 | active-listings-swfl brain — https://www.swfldatagulf.com/api/b/active-listings-swfl         | 2026-07-23 | 2026-07-30
-s36 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-rentals-swfl           | 2026-07-11 | 2026-07-18
-s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-swfl                 | 2026-07-14 | 2026-07-21
+s23 | freshness-pulse brain — https://www.swfldatagulf.com/api/b/freshness-pulse                   | 2026-07-23 | 2026-07-24
+s24 | seller-stress-swfl brain — https://www.swfldatagulf.com/api/b/seller-stress-swfl             | 2026-07-18 | 2026-08-17
+s25 | market-heat-swfl brain — https://www.swfldatagulf.com/api/b/market-heat-swfl                 | 2026-07-19 | 2026-08-23
+s26 | storm-history-swfl brain — https://www.swfldatagulf.com/api/b/storm-history-swfl             | 2026-07-19 | 2027-07-19
+s27 | hurricane-tracks-fl brain — https://www.swfldatagulf.com/api/b/hurricane-tracks-fl           | 2026-07-15 | 2027-07-15
+s28 | licenses-swfl brain — https://www.swfldatagulf.com/api/b/licenses-swfl                       | 2026-07-19 | 2026-08-18
+s29 | condo-sirs-swfl brain — https://www.swfldatagulf.com/api/b/condo-sirs-swfl                   | 2026-06-29 | 2026-07-29
+s30 | permits-commercial-swfl brain — https://www.swfldatagulf.com/api/b/permits-commercial-swfl   | 2026-07-19 | 2027-07-19
+s31 | price-distribution-swfl brain — https://www.swfldatagulf.com/api/b/price-distribution-swfl   | 2026-07-22 | 2026-07-30
+s32 | listing-momentum-swfl brain — https://www.swfldatagulf.com/api/b/listing-momentum-swfl       | 2026-07-22 | 2026-07-30
+s33 | market-temperature-swfl brain — https://www.swfldatagulf.com/api/b/market-temperature-swfl   | 2026-07-19 | 2026-08-23
+s34 | investor-zip-swfl brain — https://www.swfldatagulf.com/api/b/investor-zip-swfl               | 2026-07-17 | 2026-08-21
+s35 | active-listings-swfl brain — https://www.swfldatagulf.com/api/b/active-listings-swfl         | 2026-07-23 | 2026-07-25
+s36 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-rentals-swfl           | 2026-07-11 | 2026-07-19
+s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-swfl                 | 2026-07-14 | 2027-01-10
+s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-divergence-swfl         | 2026-07-23 | 2026-08-27
 
 --- SAVED FACTS ---
 [
@@ -106,18 +107,19 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
   {"id":"f034","topic":"upstream :: investor-zip-swfl","fact":"Upstream snapshot — investor-zip-swfl (neutral, magnitude 0.00, confidence 0.78)","value":"investor-zip-swfl as of 2026-07-17: direction neutral, magnitude 0.00, confidence 0.78, trust tier T4, 8 key metric(s). SWFL investor composite: 53 ZIP cards pairing home value (ZHVI) with long-term rent (ZORI) at a regional median gross rent yield of 7.19%. 2 carry the flood-adjusted cap rate — the value + rent + flood-and-NFIP-percentile read no other source pairs at ZIP grain.","src":"s01","date":"2026-07-23"},
   {"id":"f035","topic":"upstream :: active-listings-swfl","fact":"Upstream snapshot — active-listings-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"active-listings-swfl as of 2026-07-23: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 2 key metric(s). 21,344 active SWFL residential listings, median asking $425,000 (active residential listings, as of 2026-07-23). By county: Lee 14,695 (median $369,900), Collier 6,649 (median $650,000), Lee 1 (median $319,900).","src":"s01","date":"2026-07-23"},
   {"id":"f036","topic":"upstream :: active-rentals-swfl","fact":"Upstream snapshot — active-rentals-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"active-rentals-swfl as of 2026-07-11: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 1 key metric(s). 7,059 active SWFL rental listings, asking prices observed from $485 to $17,000/mo (as of 2026-07-06). By county: Lee 3,927, Collier 3,132.","src":"s01","date":"2026-07-23"},
-  {"id":"f037","topic":"upstream :: communities-swfl","fact":"Upstream snapshot — communities-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"communities-swfl as of 2026-07-14: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 1 key metric(s). 30,354 SWFL homes catalogued across 1,000 neighborhoods (Lee + Collier) (as of 2026-07-14). Golf-or-not, fees, amenities, home count and drive-times per community ride in the community catalogue for a specific-community lookup.","src":"s01","date":"2026-07-23"}
+  {"id":"f037","topic":"upstream :: communities-swfl","fact":"Upstream snapshot — communities-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"communities-swfl as of 2026-07-14: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 1 key metric(s). 30,354 SWFL homes catalogued across 1,000 neighborhoods (Lee + Collier) (as of 2026-07-14). Golf-or-not, fees, amenities, home count and drive-times per community ride in the community catalogue for a specific-community lookup.","src":"s01","date":"2026-07-23"},
+  {"id":"f038","topic":"upstream :: tier-divergence-swfl","fact":"Upstream snapshot — tier-divergence-swfl (bearish, magnitude 0.13, confidence 0.60)","value":"tier-divergence-swfl as of 2026-07-23: direction bearish, magnitude 0.13, confidence 0.60, trust tier T3, 12 key metric(s). SWFL price tiers read bearish at 2026-05-31 — luxury -5.12% YoY vs starter -6.42% YoY, a median spread of 2.56x moving 1.32% YoY. 0 of 50 ZIPs are in a K-shape (luxury holding, starter falling). Widest fractures: 34105 (8.76%, 5.2x), 33907 (7.81%, 2.5x), 33919 (7.23%, 2.7x).","src":"s01","date":"2026-07-23"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 114,
-  "refined_at": "2026-07-23T04:30:51Z",
-  "expires": "2026-07-30T04:30:51Z",
+  "version": 115,
+  "refined_at": "2026-07-23T06:10:31Z",
+  "expires": "2026-07-30T06:10:31Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.5427669506265742,
+  "magnitude": 0.5472903914278278,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -266,13 +268,17 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
     {
       "brain_id": "communities-swfl",
       "edge_type": "input"
+    },
+    {
+      "brain_id": "tier-divergence-swfl",
+      "edge_type": "input"
     }
   ],
   "overrides": [
     "flood-barrier-mode-1",
     "storm-history-modifier"
   ],
-  "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, active-rentals-swfl, communities-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs labor-demand-swfl (bullish). Combined confidence 0.88, trust tier T4, based on 37 upstream brains.",
+  "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, active-rentals-swfl, communities-swfl, tier-divergence-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs labor-demand-swfl (bullish). Combined confidence 0.87, trust tier T4, based on 38 upstream brains.",
   "key_metrics": [
     {
       "metric": "permits_swfl_county_weighted_avg_corridor_z",
@@ -812,8 +818,16 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
     "Neighborhood home counts are authoritative from our parcel name-join (Lee + Collier tax rolls); a built-out single-name community can differ ~7% from a marketed-community source because a marketed community spans several platted subdivisions.",
     "Golf structure, HOA fee ranges and amenities are cited to named real-estate sources (naplesgolfguy / 55places / realtyofnaples); drive-times and nearby counts are computed by Mapbox. Each carries its own source and as-of.",
     "Marketed-community coverage is the ~300 branded golf/gated communities, not every neighborhood — a non-branded neighborhood still resolves to its parcel-derived stats.",
-    "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-    "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-07-23; using last good read from 2026-07-11 (v3)."
+    "Tier spread widening / starter tier softening — the entry market is fracturing relative to luxury.",
+    "Zillow publishes the top/bottom ZHVI tiers RAW only (no seasonally-adjusted variant); the spread LEVEL is a 3-month trailing average to tame that noise, while the YoY signals use raw monthly values (YoY already cancels seasonality).",
+    "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
+    "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
+    "Upstream brain 'permits-swfl' was stale at build time (expired 2026-07-29).",
+    "Upstream brain 'housing-swfl' was stale at build time (expired 2026-08-23).",
+    "Upstream brain 'listing-momentum-swfl' was stale at build time (expired 2026-07-30).",
+    "Upstream brain 'market-temperature-swfl' was stale at build time (expired 2026-08-23).",
+    "Upstream brain 'active-listings-swfl' was stale at build time (expired 2026-07-25).",
+    "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19)."
   ],
   "contradicts": [
     "macro-us (bearish) vs labor-demand-swfl (bullish)",
@@ -847,26 +861,30 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
     "labor-demand-swfl (bullish) vs news-swfl (bearish)",
     "labor-demand-swfl (bullish) vs seller-stress-swfl (bearish)",
     "labor-demand-swfl (bullish) vs storm-history-swfl (bearish)",
+    "labor-demand-swfl (bullish) vs tier-divergence-swfl (bearish)",
     "rsw-airport (bullish) vs news-swfl (bearish)",
     "rsw-airport (bullish) vs seller-stress-swfl (bearish)",
     "rsw-airport (bullish) vs storm-history-swfl (bearish)",
+    "rsw-airport (bullish) vs tier-divergence-swfl (bearish)",
     "news-swfl (bearish) vs market-heat-swfl (bullish)",
     "news-swfl (bearish) vs licenses-swfl (bullish)",
     "seller-stress-swfl (bearish) vs market-heat-swfl (bullish)",
     "seller-stress-swfl (bearish) vs licenses-swfl (bullish)",
     "market-heat-swfl (bullish) vs storm-history-swfl (bearish)",
-    "storm-history-swfl (bearish) vs licenses-swfl (bullish)"
+    "market-heat-swfl (bullish) vs tier-divergence-swfl (bearish)",
+    "storm-history-swfl (bearish) vs licenses-swfl (bullish)",
+    "licenses-swfl (bullish) vs tier-divergence-swfl (bearish)"
   ],
-  "confidence": 0.8,
-  "joint_integrity": 0.01,
-  "confidence_dispersion": 0.13,
+  "confidence": 0.6,
+  "joint_integrity": 0,
+  "confidence_dispersion": 0.14,
   "chain_depth": 3,
   "trust_tier": 4,
-  "upstream_count": 37,
+  "upstream_count": 38,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000002,
-    "computed_at": "2026-07-23T04:30:51.000Z"
+    "half_life_hours": 719.9999999999999,
+    "computed_at": "2026-07-23T06:10:31.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
@@ -894,13 +912,12 @@ s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-
       "Housing prices, days on market and supply are tracked per ZIP — want it for a specific ZIP or town?"
     ]
   },
-  "prediction_window": "next freight-shock print (days), then re-confirm at the next monthly macro release",
-  "degraded_inputs": []
+  "prediction_window": "next freight-shock print (days), then re-confirm at the next monthly macro release"
 }
 
 --- ACTIVE PROJECTS ---
 - swfl-intelligence-lake: master synthesizer over the verified SWFL upstream brains enumerated in input_brains.
 
 --- RECENT NOTES ---
-- 2026-07-23: pack refined by the Refinery — 37 fact(s) from 37 source(s).
+- 2026-07-23: pack refined by the Refinery — 38 fact(s) from 38 source(s).
 ```

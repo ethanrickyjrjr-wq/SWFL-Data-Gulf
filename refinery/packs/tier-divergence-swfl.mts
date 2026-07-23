@@ -12,6 +12,7 @@ import {
   type TierDivergenceZipLatestRow,
 } from "../sources/tier-divergence-zip-latest-source.mts";
 import { env } from "../config/env.mts";
+import { isCoreScope } from "../lib/core-scope.mts";
 
 const BRAIN_ID = "tier-divergence-swfl";
 
@@ -199,7 +200,10 @@ function tierDivergenceCorpusSummary(allFragments: RawFragment[]): SynthesisFact
   lastSnapshot = null;
   lastFetchedAt = null;
 
-  const rows = rowsFromFragments(allFragments);
+  // Core scope (Lee + Collier = 57) only. The source view carries Sarasota/Charlotte
+  // spillover ZIPs the platform doesn't cover — unfiltered, they inflate zips_covered
+  // and the "N SWFL ZIPs" denominator in corpus prose (same fix as home-values-swfl.mts).
+  const rows = rowsFromFragments(allFragments).filter((r) => isCoreScope(r.zip_code));
   if (rows.length === 0) return [];
 
   const snap = buildSnapshotFromViewRows(rows);

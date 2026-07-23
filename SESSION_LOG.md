@@ -1,3 +1,20 @@
+## 2026-07-23 (Sonnet 5 · main) — Egress-bytes question settled for good, live vendor-checked; found the real unbuilt path (rebuild-egress-meter spec)
+
+Operator minted a real `SUPABASE_ACCESS_TOKEN` (`analytics_usage_read` scope) and had me run
+`scripts/supabase-egress-read.mjs` against it live. Token authenticated (no 401). The query itself
+errored, which forced a real check instead of guessing: crawl4ai'd
+`https://supabase.com/docs/guides/telemetry/log-field-reference` live (not the 07/21 script comment).
+Confirmed: the API Gateway log source has NO byte/content-length field in its queryable schema at
+all — `content-length` is only an "allowed header" for capture, never a queryable field. Conclusion,
+final: served-bytes/egress is not obtainable via `GET /v1/projects/{ref}/analytics/endpoints/logs.all`
+with any token or query — the capability doesn't exist in this API surface. The real vendor bytes
+live only on the Supabase dashboard's Usage/Billing page, human-only, confirmed from two independent
+angles now (OpenAPI spec 07/21, log field reference 07/23). Full writeup + the four-lane search that
+surfaced a real unbuilt sibling mechanism (`docs/superpowers/specs/2026-07-22-rebuild-egress-meter-design.md`
+— client-side "bytes the rebuild pulled" meter, no token needed, decreed but not yet built) is in
+`_ASSISTANT/SCRATCHPAD.md` top entry. Operator's token was pasted in plaintext in this chat; told him
+to rotate it. Not pushed this turn — log entry only, per standing no-autonomous-push rule.
+
 ## 2026-07-23 (Sonnet 5 · main) — /wire-map: force-directed canvas rejected live ("this is not a wire map!!!"), rebuilt as fixed lanes + real SVG wires, full 185-node dataset shipped
 
 Follow-up to the spike logged earlier under 07/22. After scaling to the full 185-node/

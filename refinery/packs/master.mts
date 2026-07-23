@@ -268,6 +268,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("active-listings-swfl"),
     makeBrainInputSource("active-rentals-swfl"),
     makeBrainInputSource("communities-swfl"),
+    makeBrainInputSource("tier-divergence-swfl"),
   ],
   // Typed edges (P5 + Group C 2026-05-20): every leaf feeds master as `input`
   // data EXCEPT env-swfl, which is wired as a `modifier`. Group B made env-swfl
@@ -367,6 +368,17 @@ export const master: PackDefinition = {
     // (route-don't-guess), gated on the community catalog actually contributing
     // rows this run (see composeGrainBoundary in synth.mts).
     { id: "communities-swfl", edge_type: "input" },
+    // 2026-07-23: tier-divergence-swfl — the K-shaped-market brain (luxury vs.
+    // starter Zillow ZHVI tier spread, per ZIP), fully built and publishing to
+    // /charts + zip-report but never wired into master (docs/standards/data-roots.md
+    // flagged it the closest thing to an orphan brain — no answer-engine catalog
+    // entry either, tracked separately). UNLIKE the neutral/magnitude-0 reporters
+    // above, this one computes a REAL bullish/bearish/neutral verdict off the
+    // tier-spread YoY trend (tierDivergenceOutputProducer, deterministic, no LLM)
+    // — wiring it in gives it an actual, non-trivial vote in master's direction
+    // synthesis, not a no-op. Plain `input`, non-critical: a stale run adds a
+    // caveat but never holds master, same as the other per-ZIP value brains.
+    { id: "tier-divergence-swfl", edge_type: "input" },
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
   // gates whether the upstream is fresh enough to even reach this pack.
