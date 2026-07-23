@@ -89,6 +89,22 @@ if (CORE_SCOPE_COUNTY_NAMES.size !== 2) {
   );
 }
 
+/**
+ * zip -> its PRIMARY county name (index-aligned county_names[] lookup, same pattern as
+ * CORE_SCOPE_COUNTY_NAMES above, but per-ZIP instead of aggregated to a Set). Covers every ZIP in
+ * the crosswalk, core or not. Used by `dedupeCoreZipRows` below to give a straddling ZIP one
+ * deterministic county label instead of whichever raw county string happened to win.
+ */
+export const PRIMARY_COUNTY_NAME_BY_ZIP: ReadonlyMap<string, string> = new Map(
+  (zipCountyJson.entries as ZipCountyEntry[])
+    .map((e): readonly [string, string] | null => {
+      const idx = (e.counties ?? []).indexOf(e.primary_county);
+      const name = idx >= 0 ? e.county_names?.[idx] : undefined;
+      return name ? ([e.zip, name] as const) : null;
+    })
+    .filter((x): x is readonly [string, string] => x !== null),
+);
+
 /** True iff `name` is a core county ("Lee"/"Collier"). Strips a trailing " County", trims; garbage → false. */
 export function isCoreCounty(name: string | null | undefined): boolean {
   return CORE_SCOPE_COUNTY_NAMES.has(
@@ -96,4 +112,32 @@ export function isCoreCounty(name: string | null | undefined): boolean {
       .replace(/\s*County$/i, "")
       .trim(),
   );
+}
+
+/**
+ * De-dupe ZIP-grain rows for a ZIP that straddles two counties (e.g. 33936 Lee/Hendry, 34134
+ * Lee/Collier) — its GROUPING SETS-shaped source view groups by (county, zip_code), so it emits
+ * one row per raw-listing county value even though the ZIP itself is one thing
+ * (active_listings_zip_county_contamination). Mirrors `reduceActiveStats`'s "keepFattest" rule in
+ * lib/desk/loaders.ts (verified 07/14/2026 against listing_active_stats: the row with the most
+ * listings is the real one for that ZIP; a thin twin — including same-county whitespace-dirty
+ * duplicates like 33971 — is not a second real population to add to it). Keeps the max-count row
+ * per zip_code and relabels its county to the ZIP's canonical PRIMARY county so the label is
+ * deterministic regardless of which raw county string happened to win.
+ */
+export function dedupeCoreZipRows<T extends { zip_code: string | null; county: string | null }>(
+  rows: readonly T[],
+  countOf: (row: T) => number,
+): T[] {
+  const fattest = new Map<string, T>();
+  for (const r of rows) {
+    const zip = r.zip_code;
+    if (zip == null) continue;
+    const prev = fattest.get(zip);
+    if (!prev || countOf(r) > countOf(prev)) fattest.set(zip, r);
+  }
+  return [...fattest.values()].map((r) => {
+    const primary = PRIMARY_COUNTY_NAME_BY_ZIP.get(r.zip_code as string);
+    return primary && primary !== r.county ? { ...r, county: primary } : r;
+  });
 }

@@ -90,6 +90,37 @@ test("listing-momentum-swfl: per-county and per-ZIP shares ride in detail_tables
   assert.equal(lee?.cells.price_reduced_share, 20.0);
 });
 
+test("listing-momentum-swfl: dual-county ZIP (33936 Lee/Hendry) collapses to ONE by-ZIP row, keeping the higher-count row with the canonical county label", () => {
+  // active_listings_zip_county_contamination: 33936 straddles Lee(primary)/Hendry. The zip-grain
+  // view groups by (county, zip_code), so it emits one row per raw-listing county value for the
+  // SAME zip — this reproduces LIVE in brains/listing-momentum-swfl.md today as "33936 (Lee)"
+  // AND "33936 (Hendry)" both listed. The pack must collapse that to ONE row.
+  const summary: ListingMomentumSummary = {
+    kind: "listing-momentum-summary",
+    region: row(null, null, 27000, 18.5, 9.0),
+    by_county: [row("Lee", null, 20000, 20.0, 8.5)],
+    by_zip: [row("Lee", "33936", 524, 12.0, 6.0), row("Hendry", "33936", 1, 0.0, 100.0)],
+    latest_scraped_at: NOW,
+    source_url: "fixture://listing-momentum",
+  };
+  const fragment = {
+    fragment_id: "listing_momentum_swfl:summary:test-dual-county",
+    source_id: "listing_momentum_swfl",
+    source_trust_tier: 2,
+    fetched_at: NOW,
+    raw: summary,
+    normalized: summary,
+  } as unknown as RawFragment;
+
+  listingMomentumSwfl.corpusSummary!([fragment]);
+  const result = listingMomentumSwfl.outputProducer!({} as never);
+  const byZip = result.detail_tables?.find((t) => t.id === "listing_momentum_by_zip");
+  const zip33936Rows = byZip!.rows.filter((r) => r.key === "33936");
+  assert.equal(zip33936Rows.length, 1, "33936 must appear exactly once in the by-ZIP table");
+  assert.equal(zip33936Rows[0].label, "33936 (Lee)");
+  assert.equal(zip33936Rows[0].cells.active_listing_count, 524);
+});
+
 test("listing-momentum-swfl: zero-data path returns neutral with no metrics", () => {
   listingMomentumSwfl.corpusSummary!([]);
   const result = listingMomentumSwfl.outputProducer!({} as never);

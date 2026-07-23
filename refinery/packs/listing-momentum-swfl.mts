@@ -12,7 +12,7 @@ import {
   type MomentumRow,
 } from "../sources/listing-momentum-source.mts";
 import { fmtPct } from "./lib/number-format.mts";
-import { isCoreScope } from "../lib/core-scope.mts";
+import { isCoreScope, dedupeCoreZipRows } from "../lib/core-scope.mts";
 
 const SOURCE_ID = "listing_momentum_swfl";
 
@@ -226,8 +226,15 @@ export const listingMomentumSwfl: PackDefinition = {
     // counties + mailing/other-metro spillover. This ONE filter at the ZIP-entry point scopes BOTH
     // the by-ZIP detail table (built downstream in outputProducer from lastSummary.by_zip) AND the
     // "N ZIPs" count in the corpus fact below — region/county grains are unaffected.
+    //
+    // dedupeCoreZipRows: a ZIP straddling two counties (e.g. 33936 Lee/Hendry) emits one row per
+    // raw-listing county value at this grain — without this, the by-ZIP table lists that ZIP twice
+    // (active_listings_zip_county_contamination). Keeps the higher-count row, canonical county label.
     if (lastSummary) {
-      lastSummary.by_zip = lastSummary.by_zip.filter((r) => isCoreScope(r.zip_code));
+      lastSummary.by_zip = dedupeCoreZipRows(
+        lastSummary.by_zip.filter((r) => isCoreScope(r.zip_code)),
+        (r) => r.active_listing_count,
+      );
     }
 
     if (!lastSummary || !lastSummary.region) return [];

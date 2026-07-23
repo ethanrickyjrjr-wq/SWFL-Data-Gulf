@@ -4,6 +4,7 @@ import {
   CORE_SCOPE_COUNTY_FIPS,
   CORE_SCOPE_COUNTY_NAMES,
   TOTAL_CORE_ZIPS,
+  PRIMARY_COUNTY_NAME_BY_ZIP,
   isCoreScope,
   isCoreCounty,
 } from "./core-scope.mts";
@@ -73,5 +74,27 @@ describe("core-scope", () => {
     expect(isCoreCounty("")).toBe(false);
     expect(isCoreCounty(null)).toBe(false);
     expect(isCoreCounty(undefined)).toBe(false);
+  });
+
+  // active_listings_zip_county_contamination: a ZIP straddling two counties (one or both core)
+  // resolves to exactly ONE canonical county name — the PRIMARY county from the crosswalk, not
+  // whichever county string a given raw listing happened to carry.
+  it("PRIMARY_COUNTY_NAME_BY_ZIP resolves a dual-CORE-county ZIP to its primary (34134 -> Lee)", () => {
+    expect(PRIMARY_COUNTY_NAME_BY_ZIP.get("34134")).toBe("Lee"); // Lee(primary)/Collier
+    expect(PRIMARY_COUNTY_NAME_BY_ZIP.get("34119")).toBe("Collier"); // Collier(primary)/Lee
+    expect(PRIMARY_COUNTY_NAME_BY_ZIP.get("34110")).toBe("Collier"); // Collier(primary)/Lee
+  });
+
+  it("PRIMARY_COUNTY_NAME_BY_ZIP resolves a core/non-core straddling ZIP to its core primary (33936 -> Lee)", () => {
+    expect(PRIMARY_COUNTY_NAME_BY_ZIP.get("33936")).toBe("Lee"); // Lee(primary)/Hendry
+  });
+
+  it("PRIMARY_COUNTY_NAME_BY_ZIP resolves a single-county ZIP to that county", () => {
+    expect(PRIMARY_COUNTY_NAME_BY_ZIP.get("33901")).toBe("Lee");
+    expect(PRIMARY_COUNTY_NAME_BY_ZIP.get("34102")).toBe("Collier");
+  });
+
+  it("PRIMARY_COUNTY_NAME_BY_ZIP has no entry for a ZIP outside the crosswalk", () => {
+    expect(PRIMARY_COUNTY_NAME_BY_ZIP.get("00000")).toBeUndefined();
   });
 });

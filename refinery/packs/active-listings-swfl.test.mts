@@ -108,6 +108,39 @@ test("active-listings-swfl: per-county and per-ZIP rows ride in detail_tables", 
   assert.equal(zip33993?.cells.listing_count, 722);
 });
 
+test("active-listings-swfl: dual-CORE-county ZIP (34134 Lee/Collier) collapses to ONE by-ZIP row, keeping the higher-count row with the canonical county label", () => {
+  // active_listings_zip_county_contamination: 34134 straddles Lee(primary)/Collier — BOTH core
+  // counties, so the 07/11 btrim(county) IN ('Lee','Collier') core-scope filter can't dedupe it.
+  // This reproduces LIVE in brains/active-listings-swfl.md today as "34134 (Lee)" 394 listings
+  // AND "34134 (Collier)" 87 listings, two separate rows for the same ZIP. The pack must
+  // collapse that to ONE row (the same "keepFattest" rule lib/desk/loaders.ts already applies to
+  // this identical view for its own /desk consumer).
+  const summary: ActiveListingsResidentialSummary = {
+    kind: "active-listings-residential-summary",
+    region: row(null, null, 10459, 496470, null),
+    by_county: [row("Lee", null, 7412, 414900, null), row("Collier", null, 2749, 912000, null)],
+    by_zip: [row("Lee", "34134", 394, 799000, null), row("Collier", "34134", 87, 1950000, null)],
+    latest_scraped_at: NOW,
+    source_url: "fixture://listing-active-stats",
+  };
+  const fragment = {
+    fragment_id: "active_listings_residential:summary:test-dual-county",
+    source_id: "active_listings_residential",
+    source_trust_tier: 2,
+    fetched_at: NOW,
+    raw: summary,
+    normalized: summary,
+  } as unknown as RawFragment;
+
+  activeListingsSwfl.corpusSummary!([fragment]);
+  const result = activeListingsSwfl.outputProducer!({} as never);
+  const byZip = result.detail_tables?.find((t) => t.id === "active_listings_by_zip");
+  const zip34134Rows = byZip!.rows.filter((r) => r.key === "34134");
+  assert.equal(zip34134Rows.length, 1, "34134 must appear exactly once in the by-ZIP table");
+  assert.equal(zip34134Rows[0].label, "34134 (Lee)");
+  assert.equal(zip34134Rows[0].cells.listing_count, 394);
+});
+
 test("active-listings-swfl: zero-data path returns neutral with no metrics", () => {
   activeListingsSwfl.corpusSummary!([]);
   const result = activeListingsSwfl.outputProducer!({} as never);

@@ -11,7 +11,7 @@ import {
   type ActiveListingsResidentialSummary,
   type ResidentialStatRow,
 } from "../sources/active-listings-residential-source.mts";
-import { isCoreScope } from "../lib/core-scope.mts";
+import { isCoreScope, dedupeCoreZipRows } from "../lib/core-scope.mts";
 
 const SOURCE_ID = "active_listings_residential";
 
@@ -249,9 +249,19 @@ export const activeListingsSwfl: PackDefinition = {
     // detail table (outputProducer reads summary.by_zip) AND the "N ZIPs covered" count in the
     // corpusSummary fact below — one filter, both surfaces. Region/county grains are not ZIP-keyed
     // and stay as-is.
+    //
+    // dedupeCoreZipRows: a ZIP straddling two CORE counties (e.g. 34134 Lee/Collier) emits one row
+    // per raw-listing county value at this grain — without this, the by-ZIP table lists that ZIP
+    // twice (active_listings_zip_county_contamination). Keeps the higher-count row, canonical label.
     const rawSummary = fragment ? (fragment.normalized as ActiveListingsResidentialSummary) : null;
     lastSummary = rawSummary
-      ? { ...rawSummary, by_zip: rawSummary.by_zip.filter((r) => isCoreScope(r.zip_code)) }
+      ? {
+          ...rawSummary,
+          by_zip: dedupeCoreZipRows(
+            rawSummary.by_zip.filter((r) => isCoreScope(r.zip_code)),
+            (r) => r.listing_count,
+          ),
+        }
       : null;
     lastFetchedAt = fragment?.fetched_at ?? null;
 
