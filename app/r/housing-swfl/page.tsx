@@ -30,7 +30,7 @@ import { loadNarrative } from "../../../lib/narratives/store";
 import { NarrativeSections } from "../../../components/narratives/NarrativeSections";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 const BRAINS_DIR = path.join(process.cwd(), "brains");
 

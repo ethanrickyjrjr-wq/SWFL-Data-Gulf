@@ -43,7 +43,11 @@ import { zipReportMetadata } from "./metadata";
 import type { Metadata } from "next";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+export async function generateStaticParams(): Promise<{ zip: string }[]> {
+  return [];
+}
 
 export async function generateMetadata({
   params,

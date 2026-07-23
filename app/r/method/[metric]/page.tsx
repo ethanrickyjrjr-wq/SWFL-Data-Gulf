@@ -10,7 +10,11 @@ import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { methodTrail } from "@/lib/nav/breadcrumbs";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+export async function generateStaticParams(): Promise<{ metric: string }[]> {
+  return [];
+}
 
 const VALID_SLUG = /^[a-z0-9_]+$/;
 

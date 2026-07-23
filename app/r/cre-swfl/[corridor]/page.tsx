@@ -33,7 +33,11 @@ import { loadPulseNearbyCorridor } from "../../../../lib/pulse/corridor-nearby";
 import { PulseNearby } from "../../../../components/narratives/PulseNearby";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+export async function generateStaticParams(): Promise<{ corridor: string }[]> {
+  return [];
+}
 
 const BRAINS_DIR = path.join(process.cwd(), "brains");
 const VALID_SLUG = /^[a-z0-9-]+$/;

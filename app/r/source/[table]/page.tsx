@@ -11,7 +11,11 @@ import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { sourceTrail } from "@/lib/nav/breadcrumbs";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+export async function generateStaticParams(): Promise<{ table: string }[]> {
+  return [];
+}
 
 const TABLE_SCHEMA = z
   .string()
