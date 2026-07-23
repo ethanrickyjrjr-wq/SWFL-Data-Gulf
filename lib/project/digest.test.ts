@@ -2,6 +2,38 @@ import { describe, it, expect } from "bun:test";
 import { buildProjectDigest, brandingForDigest, type ProjectDigestInput } from "./digest";
 import type { ProjectItem } from "./items";
 import type { FeedRow } from "./feed";
+import type { SignificantChange, ScoredEventSummary } from "@/lib/signals/types";
+
+function significantChange(over: Partial<SignificantChange> = {}): SignificantChange {
+  return {
+    slug: "rent_zori",
+    item_id: "a",
+    label: "ZORI",
+    previous_value: "-3.5% YoY",
+    current_value: "-7.7% YoY",
+    delta_description: "dropped 4.2 percentage points",
+    signal_strength: 1.2,
+    impact_weight: 6,
+    priority: 7.2,
+    ...over,
+  };
+}
+
+function scoredEvent(over: Partial<ScoredEventSummary> = {}): ScoredEventSummary {
+  return {
+    id: "evt-1",
+    entity_name: "New Publix",
+    event_type: "opening",
+    event_date: "2026-06-01",
+    brand_tier: 2,
+    final_score: 8.1,
+    distance_miles: 1.2,
+    headline: "New Publix opening nearby",
+    source_url: "https://example.com/publix",
+    ai_summary: "A new Publix is opening 1.2 miles away.",
+    ...over,
+  };
+}
 
 function feedRow(over: Partial<FeedRow> = {}): FeedRow {
   return {
@@ -289,6 +321,26 @@ describe("buildProjectDigest", () => {
     const a = buildProjectDigest(input({ recentActivity: ["Email sent (today)"] }));
     const b = buildProjectDigest(input({ recentActivity: ["Project renamed (today)"] }));
     expect(b.rev).not.toBe(a.rev);
+  });
+
+  it("rev changes when ONLY significantChanges changes (a metric crossing threshold must reach the AI context bus, else ai-context-store's sameDigest silently drops it)", () => {
+    const a = buildProjectDigest(input({ significantChanges: [] }));
+    const b = buildProjectDigest(
+      input({ significantChanges: [significantChange({ current_value: "-7.7% YoY" })] }),
+    );
+    expect(b.rev).not.toBe(a.rev);
+    const c = buildProjectDigest(
+      input({ significantChanges: [significantChange({ current_value: "-9.1% YoY" })] }),
+    );
+    expect(c.rev).not.toBe(b.rev);
+  });
+
+  it("rev changes when ONLY activeEvents changes (a new nearby event clearing inject_ai must reach the AI context bus, else ai-context-store's sameDigest silently drops it)", () => {
+    const a = buildProjectDigest(input({ activeEvents: [] }));
+    const b = buildProjectDigest(input({ activeEvents: [scoredEvent({ id: "evt-1" })] }));
+    expect(b.rev).not.toBe(a.rev);
+    const c = buildProjectDigest(input({ activeEvents: [scoredEvent({ id: "evt-2" })] }));
+    expect(c.rev).not.toBe(b.rev);
   });
 
   // Regression guards (already pass — the builder passes these through today; they pin the

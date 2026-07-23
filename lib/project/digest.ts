@@ -208,7 +208,11 @@ function foldFeedSignals(feedRows: FeedRow[]): FeedSignal[] {
  *  (new agent name) or a freshly-logged activity is served to the AI by `page-context`
  *  yet changes nothing else here, so without them in the rev the store's keyed-write
  *  no-op (`sameDigest` compares only projectId+rev) would silently drop the update — the
- *  AI would keep the stale name / miss "email sent today". Fields join on a U+001F unit
+ *  AI would keep the stale name / miss "email sent today". ALSO folds in significantChanges
+ *  + activeEvents for the identical reason: a metric crossing its significance threshold or
+ *  a new nearby event clearing `inject_ai` changes nothing else in this basis (same items,
+ *  same scope, same token), so without them here the store's keyed-write no-op would
+ *  silently keep serving the stale digest. Fields join on a U+001F unit
  *  separator (cannot occur in a title/slug/token) so no field boundary collides. */
 function computeRev(
   title: string,
@@ -218,10 +222,16 @@ function computeRev(
   feedSignals: FeedSignal[],
   branding: { agentName?: string; brokerage?: string; license?: string },
   recentActivity: string[],
+  significantChanges: SignificantChange[],
+  activeEvents: ScoredEventSummary[],
 ): string {
   const scopeKey = `${scope.zip ?? ""}|${scope.place ?? ""}|${scope.topic ?? ""}`;
   const feedKey = feedSignals.map((s) => `${s.feedId}:${s.title}`).join("|");
   const brandingKey = `${branding.agentName ?? ""}|${branding.brokerage ?? ""}|${branding.license ?? ""}`;
+  const changesKey = significantChanges
+    .map((c) => `${c.item_id}:${c.slug}:${c.current_value}`)
+    .join("|");
+  const eventsKey = activeEvents.map((e) => e.id).join("|");
   const basis = [
     title,
     scopeKey,
@@ -231,6 +241,8 @@ function computeRev(
     feedKey,
     brandingKey,
     recentActivity.join("|"),
+    changesKey,
+    eventsKey,
   ].join(String.fromCharCode(31)); // U+001F unit separator
   let h = 5381;
   for (let i = 0; i < basis.length; i++) h = (((h << 5) + h) ^ basis.charCodeAt(i)) | 0;
@@ -368,6 +380,8 @@ export function buildProjectDigest(input: ProjectDigestInput): ProjectDigest {
       feedSignals,
       branding,
       recentActivity,
+      input.significantChanges ?? [],
+      input.activeEvents ?? [],
     ),
     scope,
     itemCount: items.length,
