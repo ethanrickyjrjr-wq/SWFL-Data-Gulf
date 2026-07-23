@@ -43,6 +43,16 @@ export function chartLoadingElement(id: string): ChartElement {
   return { id, type: "chart", x: 80, y: 80, width: 500, height: 320, spec: null, src: "" };
 }
 
+/** True when the design that produced `exported` isn't the design being edited now —
+ *  every mutator (updateElement/addElement/deleteSelected/addChart/applyPhotoUrl/fill/
+ *  setFormat/…) replaces `design` with a new object via spread, so reference inequality
+ *  catches ANY edit since the last export, present or future, with no per-mutator list to
+ *  maintain. `exported === null` (never exported yet) counts as stale.
+ *  Pure + exported so the openSchedule staleness check is unit-tested without a DOM. */
+export function isExportStale(exported: SocialDesign | null, current: SocialDesign): boolean {
+  return exported !== current;
+}
+
 export function useSocialComposer({
   scope,
   projectId,
@@ -96,6 +106,9 @@ export function useSocialComposer({
   const [exportError, setExportError] = useState<string | null>(null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  // The design object that produced `mediaUrl` — compared by reference in openSchedule
+  // so ANY edit after "Export PNG" forces a fresh export instead of scheduling stale art.
+  const exportedDesignRef = useRef<SocialDesign | null>(null);
 
   // photos
   const [promotingPath, setPromotingPath] = useState<string | null>(null);
@@ -438,6 +451,7 @@ export function useSocialComposer({
       }
       const { url } = (await res.json()) as { url: string };
       setMediaUrl(url);
+      exportedDesignRef.current = design;
       return url;
     } finally {
       setExporting(false);
@@ -445,7 +459,8 @@ export function useSocialComposer({
   }
 
   async function openSchedule() {
-    const url = mediaUrl ?? (await exportPng());
+    const url =
+      mediaUrl && !isExportStale(exportedDesignRef.current, design) ? mediaUrl : await exportPng();
     if (!url) return; // export error already surfaced
     setScheduleOpen(true);
   }
