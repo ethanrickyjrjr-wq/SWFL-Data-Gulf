@@ -1,3 +1,25 @@
+## 2026-07-22 (Sonnet 5 · main) — /wire-map spike: clickable, drillable lake wire chart in swfldatagulf-ops, browser-verified with real production data
+
+Operator asked for a visual of `_RESEARCH/data-and-ingest/2026-07-22-lake-wire-map.md` on `/ops`,
+click-to-drill into what a node is wired to, plus census-style live "look inside" per node. Brainstormed
+(RULE 3.5), crawl4ai'd vis-network's hierarchical-layout + clustering API against
+visjs.github.io/vis-network/docs/network/, advisor flagged the real risk as unproven canvas behavior
+(not the data), so built a ~10-node spike first: `swfldatagulf-ops` gets `lib/supabase.ts`'s
+`tableSnapshot()` (estimated count, never exact — egress-safe per the active scratchpad thread),
+two new server-only API routes (`/api/wire-map/table`, `/api/wire-map/brain`), `app/wire-map/page.tsx`
+(vis-network, hierarchical LR + clustering, reused from `/graph`'s CDN-script pattern — no new dep),
+and `wire-map-data.json` (11 nodes, one real example per case, transcribed verbatim from the audit).
+Drove it through Chrome: clicking a cluster opens it to the real wiring; clicking `active-listings-swfl`
+and `master` pulled real live production output from swfldatagulf.com; table nodes correctly degrade
+("Supabase env unset") with no local creds. One bug found+fixed live (`shapeProperties: undefined`
+crashed vis-network's option merge). Spec: `docs/superpowers/specs/2026-07-22-ops-wire-map-design.md`.
+Check opened: `ops_wire_map_live_verify`. Committed locally in the ops repo, NOT pushed — cross-repo
+push-hook friction from a brain-platform session is a documented landmine; handed the push to the
+operator instead. Full ~200-node transcription + `/ops` nav link held pending operator go-ahead on
+the spike.
+
+---
+
 ## 2026-07-22 (Opus 4.8 · main) — CORRECTION to the correction below: main IS red right now, and NOT for my reason. Four-lane test converted to node:test.
 
 Append-only. The entry below corrected an earlier one and got it wrong in the other direction. Both
