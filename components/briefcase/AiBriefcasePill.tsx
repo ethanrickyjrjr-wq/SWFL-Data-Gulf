@@ -102,7 +102,7 @@ export function AiBriefcasePill({
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-label={open ? "Close Ask AI" : "Open Ask AI"}
-          className="btn-gradient relative flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-navy-dark shadow-lg shadow-black/40 transition-transform hover:scale-105 active:scale-95"
+          className="btn-gradient relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-navy-dark shadow-lg shadow-black/40 transition-transform hover:scale-105 active:scale-95"
         >
           <svg className="h-4 w-4 shrink-0" viewBox="0 0 512 512" fill="none" aria-hidden="true">
             <g stroke="currentColor" strokeLinecap="round" strokeWidth="56">
