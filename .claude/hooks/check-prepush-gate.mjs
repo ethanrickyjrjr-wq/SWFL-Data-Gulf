@@ -45,8 +45,11 @@
 //   • Runs alongside check-session-log-on-push.mjs; both must pass.
 
 import { execSync } from "node:child_process";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { resolvePushCwd } from "./push-context.mjs";
 import { parseLedger, findOrphanedClaims } from "./lib/ledger-parse.mjs";
+import { findUnwiredSecrets } from "./lib/secret-wiring.mjs";
 
 const BANNER = "=".repeat(72);
 
@@ -450,20 +453,23 @@ process.stdin.on("end", () => {
     }
   }
 
-  // ---- Gate 3: secret-wiring reminder (advisory, never blocks) --------------
-  const touchedPipelineOrWorkflow = changed.some(
-    (f) =>
-      f.startsWith(".github/workflows/") ||
-      (f.startsWith("ingest/") && (/pipeline.*\.py$/.test(f) || /source/.test(f))),
-  );
-  if (touchedPipelineOrWorkflow) {
-    process.stdout.write(
-      `\n[pre-push gate] NOTE: you touched a pipeline or workflow. If it reads a\n` +
-        `new secret, confirm the secret is in EVERY workflow \`env:\` block that\n` +
-        `invokes that pipeline — \`gh secret set\` alone does not expose it to the\n` +
-        `job. (Recurring breaker: FRED/S3/Firecrawl keys, docs/cron-rebuild-failures.md.)\n`,
-    );
-  }
+  // ---- Gate 3: secret wiring (BLOCKS as of 07/22/2026) ----------------------
+  // WAS advisory — literally labelled "(advisory, never blocks)" and doing nothing
+  // but a stdout NOTE. Its class ("secret wired in the repo but never passed to the
+  // workflow") is documented in docs/cron-rebuild-failures.md with three May–June
+  // instances AND a prescription, and then RECURRED 07/15/2026: 23410a45
+  // "fix(ci): wire SUPABASE_PG_* secrets into daily-rebuild.yml", plus the follow-on
+  // 57db3f8d. It recurred because the guard built to stop it was built not to stop
+  // anything. Recording half shipped; acting half never did.
+  //
+  // WHY IT IS SAFE TO BLOCK — measured, not assumed. A naive "required env var
+  // missing" rule flags 5 of 112 workflows, nearly all tuning knobs (DRY_RUN,
+  // WEEKLY_READ_PREVIEW_ZIP) whose absence is harmless, plus fallback halves of
+  // `A ?? process.env.B`. Narrowing to names the repo ACTUALLY manages as GitHub
+  // secrets (referenced as `secrets.NAME` in some workflow) flags **0 of 112** on
+  // the current tree — zero false positives, so this cannot wedge a push today,
+  // and it bites exactly the class that broke the rebuild twice.
+  secretWiringGate(changed);
 
   // ---- Gate 4: ingest hardening (BIBLE §0.2) --------------------------------
   // Backstop against the ONE irreversible ingest failure: a destructive write
@@ -538,6 +544,53 @@ function run(c) {
 function truncate(s, max = 2000) {
   const t = String(s || "").trim();
   return t.length > max ? `${t.slice(0, max)}\n… (truncated)` : t;
+}
+
+// ---- Gate 3 internals -----------------------------------------------------
+// The rule itself is pure and lives in lib/secret-wiring.mjs so it can be proven by
+// test; this file only supplies the filesystem. (Importing THIS file from a test
+// hangs the runner — it attaches a stdin handler at module scope.)
+function readOrNull(abs) {
+  try {
+    return existsSync(abs) ? readFileSync(abs, "utf8") : null;
+  } catch {
+    return null;
+  }
+}
+
+function secretWiringGate(changed) {
+  if (process.env.ALLOW_MISSING_WORKFLOW_SECRET === "1") return;
+  const touched = changed.filter((f) => /^\.github\/workflows\/.+\.ya?ml$/.test(f));
+  if (touched.length === 0) return;
+
+  const wfDir = join(REPO_CWD, ".github", "workflows");
+  let allWorkflowTexts = [];
+  try {
+    allWorkflowTexts = readdirSync(wfDir)
+      .filter((f) => /\.ya?ml$/.test(f))
+      .map((f) => readOrNull(join(wfDir, f)))
+      .filter((t) => t != null);
+  } catch {
+    return; // no workflows dir — nothing to gate
+  }
+
+  const findings = findUnwiredSecrets({
+    touched,
+    allWorkflowTexts,
+    readWorkflow: (wf) => readOrNull(join(REPO_CWD, wf)),
+    readScript: (s) => readOrNull(join(REPO_CWD, s)),
+  });
+
+  if (findings.length > 0) {
+    block(
+      "SECRET WIRING — a touched workflow runs a script whose secret it never passes",
+      findings.join("\n") +
+        `\n\n\`gh secret set\` is step 1; adding it to the workflow's \`env:\` block is\n` +
+        `step 2. This exact class aborted the daily rebuild in May, June, and again\n` +
+        `on 07/15/2026 (23410a45). See docs/cron-rebuild-failures.md.\n\n` +
+        `Override (only if the var is supplied another way): ALLOW_MISSING_WORKFLOW_SECRET=1`,
+    );
+  }
 }
 
 function block(title, body) {

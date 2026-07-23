@@ -49,7 +49,11 @@ jobs:
       # dot-dirs and these are node:test, not bun:test — so they need their own step
       # or they ship unenforced.
       - name: Test .github scripts (node:test)
-        run: node --test .github/scripts/*.test.mjs scripts/lib/*.test.mjs .claude/hooks/*.test.mjs
+        # .claude/hooks/lib/*.test.mjs was NOT covered until 07/22/2026: the glob
+        # stopped at .claude/hooks/, so ledger-parse.test.mjs and pipeline-scope.test.mjs
+        # sat green-by-assumption, never executed by CI once. Same class as the four-lane
+        # gate that shipped registered to nothing — a guard nobody wired to a runner.
+        run: node --test .github/scripts/*.test.mjs scripts/lib/*.test.mjs .claude/hooks/*.test.mjs .claude/hooks/lib/*.test.mjs
 
       # Dead-code detector (Operation July task 20). PHASE 2 (2026-07-21): ENFORCING —
       # knip.jsonc sets rules.files to "error", so a newly-orphaned module FAILS the build.
