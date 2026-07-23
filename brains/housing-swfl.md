@@ -1,11 +1,11 @@
-<!-- FRESHNESS: v13 | Token: SWFL-7421-v13-20260719 -->
+<!-- FRESHNESS: v14 | Token: SWFL-7421-v14-20260723 -->
 ---
 brain_id: housing-swfl
-version: 13
-refined_at: 2026-07-19T02:29:01Z
-freshness_token: SWFL-7421-v13-20260719
+version: 14
+refined_at: 2026-07-23T06:48:30Z
+freshness_token: SWFL-7421-v14-20260723
 ttl_seconds: 3024000
-pack_hash: b917b93cdd71
+pack_hash: c5cc1d3e969b
 context_type: user_saved_reference
 scope: SWFL residential buy-side housing market (Redfin), monthly — median sale price, days on market, inventory, sale-to-list ratio, and market heat direction.
 ---
@@ -30,19 +30,19 @@ SCOPE: SWFL residential buy-side housing market (Redfin), monthly — median sal
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                          | verified   | expires
-s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (all property types). Updated monthly ~mid-month. https://www.redfin.com/news/data-center/ | 2026-07-19 | 2026-08-23
+s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (all property types). Updated monthly ~mid-month. https://www.redfin.com/news/data-center/ | 2026-07-23 | 2026-08-27
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Redfin SWFL housing market corpus","value":"55 ZIP snapshots, data through 2026-06-30. Regional median sale price = $443,650, YoY = -3.3%. Median DOM = 70 days. Months of supply = 4.5.","src":"s01","date":"2026-07-19"}
+  {"id":"f001","topic":"corpus_overview","fact":"Redfin SWFL housing market corpus","value":"55 ZIP snapshots, data through 2026-06-30. Regional median sale price = $443,650, YoY = -3.3%. Median DOM = 70 days. Months of supply = 4.5.","src":"s01","date":"2026-07-23"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "housing-swfl",
-  "version": 13,
-  "refined_at": "2026-07-19T02:29:01Z",
-  "expires": "2026-08-23T02:29:01Z",
+  "version": 14,
+  "refined_at": "2026-07-23T06:48:30Z",
+  "expires": "2026-08-27T06:48:30Z",
   "ttl_seconds": 3024000,
   "direction": "mixed",
   "magnitude": 0.25,
@@ -60,7 +60,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "currency",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-19T02:29:01Z",
+        "fetched_at": "2026-07-23T06:48:30Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -80,7 +80,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "count",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-19T02:29:01Z",
+        "fetched_at": "2026-07-23T06:48:30Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -100,7 +100,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "raw",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-19T02:29:01Z",
+        "fetched_at": "2026-07-23T06:48:30Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -120,7 +120,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-19T02:29:01Z",
+        "fetched_at": "2026-07-23T06:48:30Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -140,7 +140,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-19T02:29:01Z",
+        "fetched_at": "2026-07-23T06:48:30Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -160,7 +160,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-19T02:29:01Z",
+        "fetched_at": "2026-07-23T06:48:30Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -243,7 +243,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 312929,
             "median_sale_price_yoy_pct": 9.8,
             "median_dom": 84,
-            "median_dom_yoy_pct": 205.6,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.2,
             "months_of_supply": 7.1,
             "homes_sold": 70,
@@ -259,7 +259,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 298432,
             "median_sale_price_yoy_pct": 19.4,
             "median_dom": 63,
-            "median_dom_yoy_pct": 354.2,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.5,
             "months_of_supply": 6.2,
             "homes_sold": 94,
@@ -275,7 +275,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 344422,
             "median_sale_price_yoy_pct": -1.6,
             "median_dom": 57,
-            "median_dom_yoy_pct": -2796.2,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.9,
             "months_of_supply": 4.2,
             "homes_sold": 311,
@@ -291,7 +291,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 336924,
             "median_sale_price_yoy_pct": -10.3,
             "median_dom": 67,
-            "median_dom_yoy_pct": -845.5,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 96.4,
             "months_of_supply": 4.5,
             "homes_sold": 219,
@@ -307,7 +307,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 218451,
             "median_sale_price_yoy_pct": -12.6,
             "median_dom": 57,
-            "median_dom_yoy_pct": -1046.2,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.9,
             "months_of_supply": 6,
             "homes_sold": 107,
@@ -323,7 +323,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 324927,
             "median_sale_price_yoy_pct": -13.4,
             "median_dom": 78,
-            "median_dom_yoy_pct": -894.8,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.4,
             "months_of_supply": 5.2,
             "homes_sold": 375,
@@ -339,7 +339,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 332325,
             "median_sale_price_yoy_pct": 3.9,
             "median_dom": 48,
-            "median_dom_yoy_pct": -1296.8,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 97.8,
             "months_of_supply": 4.3,
             "homes_sold": 328,
@@ -355,7 +355,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 372416,
             "median_sale_price_yoy_pct": 4.9,
             "median_dom": 71,
-            "median_dom_yoy_pct": 354.7,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.8,
             "months_of_supply": 3.5,
             "homes_sold": 150,
@@ -371,7 +371,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 475250,
             "median_sale_price_yoy_pct": -5,
             "median_dom": 60,
-            "median_dom_yoy_pct": -1396,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 95.6,
             "months_of_supply": 3.5,
             "homes_sold": 373,
@@ -387,7 +387,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 496888,
             "median_sale_price_yoy_pct": 1.4,
             "median_dom": 67,
-            "median_dom_yoy_pct": -845.5,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 96.1,
             "months_of_supply": 4.2,
             "homes_sold": 408,
@@ -403,7 +403,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 249944,
             "median_sale_price_yoy_pct": -14.5,
             "median_dom": 133,
-            "median_dom_yoy_pct": 4208.9,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 93.5,
             "months_of_supply": 6.5,
             "homes_sold": 73,
@@ -419,7 +419,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 324927,
             "median_sale_price_yoy_pct": -1.2,
             "median_dom": 60,
-            "median_dom_yoy_pct": -896,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 95.7,
             "months_of_supply": 4.4,
             "homes_sold": 204,
@@ -435,7 +435,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 259941,
             "median_sale_price_yoy_pct": -9.4,
             "median_dom": 65,
-            "median_dom_yoy_pct": -1245.6,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.6,
             "months_of_supply": 4.2,
             "homes_sold": 255,
@@ -451,7 +451,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 384913,
             "median_sale_price_yoy_pct": -18.1,
             "median_dom": 68,
-            "median_dom_yoy_pct": -4495.4,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 97.1,
             "months_of_supply": 5.3,
             "homes_sold": 58,
@@ -467,7 +467,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 3299254,
             "median_sale_price_yoy_pct": -14.3,
             "median_dom": 125,
-            "median_dom_yoy_pct": 5958.4,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 92.8,
             "months_of_supply": 6,
             "homes_sold": 17,
@@ -483,7 +483,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 474893,
             "median_sale_price_yoy_pct": 18,
             "median_dom": 105,
-            "median_dom_yoy_pct": -2293,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 92.8,
             "months_of_supply": 7.6,
             "homes_sold": 32,
@@ -499,7 +499,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 974780,
             "median_sale_price_yoy_pct": 4,
             "median_dom": 60,
-            "median_dom_yoy_pct": -9946,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 91.8,
             "months_of_supply": 11,
             "homes_sold": 15,
@@ -531,7 +531,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 549876,
             "median_sale_price_yoy_pct": -12,
             "median_dom": 115,
-            "median_dom_yoy_pct": 807.7,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 92.9,
             "months_of_supply": 10,
             "homes_sold": 120,
@@ -547,7 +547,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 234947,
             "median_sale_price_yoy_pct": -5.5,
             "median_dom": 81,
-            "median_dom_yoy_pct": 1055.4,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 96.6,
             "months_of_supply": 4.9,
             "homes_sold": 140,
@@ -563,7 +563,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 449898,
             "median_sale_price_yoy_pct": -17.4,
             "median_dom": 100,
-            "median_dom_yoy_pct": 1206.7,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.6,
             "months_of_supply": 8.7,
             "homes_sold": 28,
@@ -579,7 +579,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 1032267,
             "median_sale_price_yoy_pct": 17.6,
             "median_dom": 137,
-            "median_dom_yoy_pct": 3759.2,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 92.3,
             "months_of_supply": 5.7,
             "homes_sold": 142,
@@ -595,7 +595,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 345422,
             "median_sale_price_yoy_pct": -5.4,
             "median_dom": 70,
-            "median_dom_yoy_pct": 1754.7,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 95.8,
             "months_of_supply": 3.8,
             "homes_sold": 93,
@@ -627,7 +627,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 309429,
             "median_sale_price_yoy_pct": -7.6,
             "median_dom": 66,
-            "median_dom_yoy_pct": 404.4,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 98.5,
             "months_of_supply": 4.4,
             "homes_sold": 261,
@@ -643,7 +643,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 334924,
             "median_sale_price_yoy_pct": -3.3,
             "median_dom": 68,
-            "median_dom_yoy_pct": -545.5,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 98.1,
             "months_of_supply": 6.1,
             "homes_sold": 150,
@@ -659,7 +659,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 437401,
             "median_sale_price_yoy_pct": -10.3,
             "median_dom": 69,
-            "median_dom_yoy_pct": 1754.6,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 97.6,
             "months_of_supply": 9,
             "homes_sold": 49,
@@ -691,7 +691,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 309930,
             "median_sale_price_yoy_pct": -6.1,
             "median_dom": 61,
-            "median_dom_yoy_pct": 254.1,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 99,
             "months_of_supply": 4.4,
             "homes_sold": 182,
@@ -707,7 +707,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 344922,
             "median_sale_price_yoy_pct": -5.5,
             "median_dom": 53,
-            "median_dom_yoy_pct": -1296.4,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 97.2,
             "months_of_supply": 3.6,
             "homes_sold": 177,
@@ -723,7 +723,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 394911,
             "median_sale_price_yoy_pct": 2.6,
             "median_dom": 68,
-            "median_dom_yoy_pct": 804.6,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 96.8,
             "months_of_supply": 3.7,
             "homes_sold": 244,
@@ -739,7 +739,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 368917,
             "median_sale_price_yoy_pct": 5.4,
             "median_dom": 66,
-            "median_dom_yoy_pct": -1445.6,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 97.7,
             "months_of_supply": 5.3,
             "homes_sold": 404,
@@ -755,7 +755,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 2249492,
             "median_sale_price_yoy_pct": -8.2,
             "median_dom": 102,
-            "median_dom_yoy_pct": -993.2,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 93,
             "months_of_supply": 6.7,
             "homes_sold": 162,
@@ -803,7 +803,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 582368,
             "median_sale_price_yoy_pct": -5.2,
             "median_dom": 60,
-            "median_dom_yoy_pct": 954,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 93.3,
             "months_of_supply": 3.4,
             "homes_sold": 144,
@@ -819,7 +819,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 1109749,
             "median_sale_price_yoy_pct": -14.6,
             "median_dom": 98,
-            "median_dom_yoy_pct": 2206.6,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 93.7,
             "months_of_supply": 5.1,
             "homes_sold": 217,
@@ -835,7 +835,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 662350,
             "median_sale_price_yoy_pct": 6,
             "median_dom": 65,
-            "median_dom_yoy_pct": 354.3,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.4,
             "months_of_supply": 3.9,
             "homes_sold": 193,
@@ -851,7 +851,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 804818,
             "median_sale_price_yoy_pct": 39.4,
             "median_dom": 74,
-            "median_dom_yoy_pct": -1545,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 93.5,
             "months_of_supply": 4.6,
             "homes_sold": 217,
@@ -867,7 +867,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 334924,
             "median_sale_price_yoy_pct": -19.3,
             "median_dom": 93,
-            "median_dom_yoy_pct": 2356.2,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.7,
             "months_of_supply": 3.9,
             "homes_sold": 275,
@@ -883,7 +883,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 629858,
             "median_sale_price_yoy_pct": 3.3,
             "median_dom": 70,
-            "median_dom_yoy_pct": -1795.3,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.5,
             "months_of_supply": 4.6,
             "homes_sold": 236,
@@ -899,7 +899,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 640281,
             "median_sale_price_yoy_pct": 0.8,
             "median_dom": 79,
-            "median_dom_yoy_pct": -644.7,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 95,
             "months_of_supply": 4.5,
             "homes_sold": 254,
@@ -915,7 +915,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 449898,
             "median_sale_price_yoy_pct": -3.3,
             "median_dom": 31,
-            "median_dom_yoy_pct": -1097.9,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 96,
             "months_of_supply": 3.5,
             "homes_sold": 61,
@@ -931,7 +931,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 548876,
             "median_sale_price_yoy_pct": -2.3,
             "median_dom": 77,
-            "median_dom_yoy_pct": 3605.2,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 96.6,
             "months_of_supply": 5.8,
             "homes_sold": 73,
@@ -963,7 +963,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 579869,
             "median_sale_price_yoy_pct": 4.4,
             "median_dom": 70,
-            "median_dom_yoy_pct": -645.3,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 96.1,
             "months_of_supply": 4.7,
             "homes_sold": 321,
@@ -979,7 +979,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 742332,
             "median_sale_price_yoy_pct": -4.5,
             "median_dom": 98,
-            "median_dom_yoy_pct": 1506.6,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 93.7,
             "months_of_supply": 4.2,
             "homes_sold": 270,
@@ -995,7 +995,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 492889,
             "median_sale_price_yoy_pct": -7.2,
             "median_dom": 64,
-            "median_dom_yoy_pct": -395.7,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 95.7,
             "months_of_supply": 3.3,
             "homes_sold": 409,
@@ -1011,7 +1011,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 882301,
             "median_sale_price_yoy_pct": 34.2,
             "median_dom": 237,
-            "median_dom_yoy_pct": 12465.9,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 85.7,
             "months_of_supply": 3.7,
             "homes_sold": 6,
@@ -1043,7 +1043,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 402409,
             "median_sale_price_yoy_pct": 7.3,
             "median_dom": 87,
-            "median_dom_yoy_pct": -1444.2,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 95.9,
             "months_of_supply": 7.5,
             "homes_sold": 105,
@@ -1059,7 +1059,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
             "median_sale_price": 959783,
             "median_sale_price_yoy_pct": 0,
             "median_dom": 99,
-            "median_dom_yoy_pct": 706.6,
+            "median_dom_yoy_pct": null,
             "avg_sale_to_list_pct": 94.2,
             "months_of_supply": 4.4,
             "homes_sold": 297,
@@ -1070,7 +1070,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
       ],
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-19T02:29:01Z",
+        "fetched_at": "2026-07-23T06:48:30Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -1088,7 +1088,7 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-19T02:29:01Z"
+    "computed_at": "2026-07-23T06:48:30Z"
   },
   "exogenous_signals": []
 }
@@ -1097,5 +1097,5 @@ s01 | Redfin Data Center — ZIP-level monthly housing metrics for SWFL MSAs (al
 - housing-swfl: track SWFL ZIP-level residential buy-side market direction via Redfin monthly data.
 
 --- RECENT NOTES ---
-- 2026-07-19: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-07-23: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
