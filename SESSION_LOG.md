@@ -1,3 +1,53 @@
+## 2026-07-23 (Sonnet 5 · main) — Inventoried + landed 22 real fixes stranded in orphaned Workflow-isolation worktrees; discovered a concurrent session auto-pushed them all
+
+Operator's VS Code showed two Source Control panels — main plus an unfamiliar
+`.claude/worktrees/wf_80061966-e13-*` worktree. `git worktree list` found 36 such folders
+(6.4GB), leftover from past Workflow `isolation:"worktree"` fan-outs, never cleaned up.
+Full triage (per operator's "yes"/"full triage pass" answers): 5 were empty (safe-deleted),
+1 (`e13-111`) held a LIVE secrets file (`.dlt_secrets_copy.toml` — Postgres password, Supabase
+service-role JWT, Anthropic key, DataForSEO creds, S3 keys) — deleted the file + worktree,
+flagged all those credentials as burned (now in this transcript) for the operator to rotate
+himself. The remaining 30 held real, distinct, unlanded fixes, most citing exact open
+`checks` keys in their own code comments (confirming a past checks-burndown fan-out whose
+results were never collected). Matched each against `node scripts/check.mjs list --class defect`
+and spot-checked (per advisor) that base-commit-already-merged did NOT mean the fix content
+was already on main — confirmed genuinely stranded (e.g. `core-scope.mts` on main lacked
+`dedupeCoreZipRows`, `stripe-client.ts` lacked `isResourceMissing`).
+
+Operator chose "land the non-ask-first ones now" (excluding the 5 touching MCP/billing/auth:
+`e13-104` branding-save, `e13-76` contacts-auth, `e13-78` stripe-webhook, `e13-84` mcp-cors,
+`e13-102` mcp-project-tools — still sitting uncommitted in their worktrees, untouched).
+Landed 22 fixes as 22 separate commits (one pair, `e13-74`+`e13-80`, merged since both touched
+different functions in the same `permits-swfl.mts`). Found+fixed 2 real defects along the way:
+`e13-101` (smoke-prod.mts) referenced a function (`pageQuotesCurrentAsOf`) that was never
+implemented — reverted, not landed, flagged back as incomplete. `e13-65`'s ContactPickerModal
+fix reset `isResolving` synchronously inside a `useEffect` — a `react-hooks/set-state-in-effect`
+hard-error in this repo — reworked to the set-state-during-render idiom already used in
+`lib/highlighter/use-steer-suggestions.ts` (a `firedFilter` tracker armed/cleared during render,
+never inside the effect). All touched refinery packs passed `check-vocab-coverage.mts --all`
+and the `catalog.test.mts` Gate-5 mirror; full bun/vitest suites green (142+58+3 tests).
+
+**Discovered mid-landing: a concurrent session pushed all 22 commits to origin/main without
+my (or the operator's) explicit per-push approval.** `git rev-parse origin/main` first showed
+my 5th commit already on the remote; `git ls-remote origin refs/heads/main` + a fresh `git fetch`
+confirmed the remote tip matched my full local HEAD (`119cb464`) — all 22 commits, fully pushed,
+before I ever ran `safe-push.mjs` myself. This is the documented "concurrent rebase-push carries
+your commits" landmine, not something I did. Per advisor: did not unwind it (no reset/revert —
+legitimate, tested fixes; force-push is banned and would clobber the concurrent session anyway).
+Added `--detail` notes (commit hash) to all 21 matched `checks` keys WITHOUT closing any —
+per this repo's own "checks = prod evidence, not dev attestation" rule, a dev commit is not a
+live/prod close, especially for the `_live_verify`-suffixed keys (`communities_swfl_live_verify`,
+`piece3_track_b_verify`).
+
+**What's next:** operator needs to (1) rotate every credential from the `e13-111` secrets file
+(now burned via this transcript), (2) decide whether/how to review+land the 5 ask-first worktrees
+(`e13-104/76/78/102/84`), (3) confirm whether `bp-fourlane-gate-fix` (flagged live at session start)
+or another parallel session is the one auto-pushing, since it may push future uncommitted work
+the same way without anyone asking it to. Remaining 6 empty/stray worktrees not yet cleaned up:
+worth a `git worktree remove` pass once operator confirms nothing else is watching them.
+
+---
+
 ## 2026-07-22 (Sonnet 5 · main) — /wire-map spike: clickable, drillable lake wire chart in swfldatagulf-ops, browser-verified with real production data
 
 Operator asked for a visual of `_RESEARCH/data-and-ingest/2026-07-22-lake-wire-map.md` on `/ops`,
