@@ -14,7 +14,12 @@ import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { fetchAllFubPeople, fubPeopleToContactRows, FubFetchError } from "@/lib/switch/fub-map";
+import {
+  fetchAllFubPeople,
+  fetchAllFubUnsubscribedPersonIds,
+  fubPeopleToContactRows,
+  FubFetchError,
+} from "@/lib/switch/fub-map";
 import { upsertCanonicalContacts } from "@/lib/contacts/upsert";
 import { activateSwitchPass } from "@/lib/switch/activate";
 
@@ -48,7 +53,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { rows, skipped } = fubPeopleToContactRows(people);
+  // Best-effort: an unsubscribe-events fetch problem must never fail an
+  // otherwise-good people import — degrade to "no opt-out signal known"
+  // (the pre-existing behavior) rather than a 500, same posture as the
+  // pass-activation try/catch below.
+  let unsubscribedPersonIds: Set<number> | undefined;
+  try {
+    const emEventsResult = await fetchAllFubUnsubscribedPersonIds(apiKey);
+    unsubscribedPersonIds = emEventsResult.personIds;
+    if (emEventsResult.truncated) truncated = true;
+  } catch (err) {
+    console.error("[fub] unsubscribe events fetch failed:", err);
+  }
+
+  const { rows, skipped } = fubPeopleToContactRows(people, unsubscribedPersonIds);
 
   if (rows.length === 0) {
     return NextResponse.json({

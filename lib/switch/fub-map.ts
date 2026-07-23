@@ -56,9 +56,34 @@
  * inbound, via `GET /people`. `emails[].status` ("Valid"/"Invalid") is a
  * deliverability signal, not a subscription signal, and is deliberately NOT
  * read as a proxy for opt-out — conflating the two would be inventing a
- * signal FUB never sent. Consequently `fubPeopleToContactRows` NEVER sets
- * `unsubscribed` on any row; the key is always absent (never `false`),
- * satisfying `upsertCanonicalContacts`'s one-way contract by construction.
+ * signal FUB never sent.
+ *
+ * CORRECTION (crawl4ai, live, 07/22/2026 — same local-only output convention
+ * as above): the 07/16/2026 delta above undersold `/v1/emEvents`. Its own doc
+ * (https://docs.followupboss.com/reference/emevents-get) states "As Follow Up
+ * Boss has built-in email marketing functionality and also integrates with
+ * third-party email marketing tools, this API will return information about
+ * both" — so a `type: "unsubscribe"` emEvent is NOT only an outside system's
+ * echo; it also fires for FUB's OWN built-in drips/blasts, which makes
+ * `personId` on that event a real, FUB-native inbound opt-out signal (still
+ * never present on the Person object itself — that part of the original
+ * finding holds). The live response shape (fetched via the `.md` route):
+ * ```
+ * { "_metadata": { "collection": "emEvents", "offset": 0, "limit": 10, "total": 102938 },
+ *   "emEvents": [ { "count": 2, "type": "open", "personId": 10911, "campaignId": 102,
+ *     "campaignName": "Can I help", "created": "2017-01-03T19:20:49Z",
+ *     "updated": "2017-01-03T19:20:49Z" }, ... ] }
+ * ```
+ * Query params are `type` / `personId` / `updatedAfter` / `limit` / `offset`
+ * ONLY — no `next` keyset cursor (unlike `/people`'s documented response,
+ * `/emEvents`'s own example `_metadata` carries no `next`/`nextLink`), so
+ * `fetchAllFubUnsubscribedPersonIds` below pages via `offset`, not `next`.
+ * Filtering server-side with `type=unsubscribe` keeps the paged set small
+ * relative to the full (opens/clicks/deliveries-dominated) event stream.
+ * `fubPeopleToContactRows` now takes that person-id set and sets
+ * `unsubscribed: true` for a matching row; every other row still OMITS the
+ * key entirely (never `false`), preserving `upsertCanonicalContacts`'s
+ * one-way opt-out contract.
  */
 import type { ContactRow } from "@/lib/contacts/types";
 import { isValidEmail } from "@/lib/email/validation";
@@ -105,12 +130,33 @@ interface FubPeopleResponse {
   people?: FubPerson[];
 }
 
+/** The slice of a FUB `emEvents[]` entry this connector reads (see file header's 07/22/2026 correction). */
+export interface FubEmEvent {
+  type?: string | null;
+  personId?: number | null;
+}
+
+/** `/emEvents`'s own `_metadata` — no `next`/`nextLink` per the live example (see file header). */
+interface FubEmEventsMetadata {
+  collection?: string;
+  offset?: number;
+  limit?: number;
+  total?: number;
+}
+
+interface FubEmEventsResponse {
+  _metadata?: FubEmEventsMetadata;
+  emEvents?: FubEmEvent[];
+}
+
 /** Are we authorized? (fetch failed on the very first page — bad key, locked account, etc.) */
 export class FubFetchError extends Error {}
 
 const PAGE_SIZE = 100; // the documented maximum `limit`
 export const FUB_MAX_PAGES = 40;
 export const FUB_MAX_PEOPLE = FUB_MAX_PAGES * PAGE_SIZE; // 4000, per the brief's hard cap
+export const FUB_MAX_EMEVENTS_PAGES = 40;
+export const FUB_MAX_EMEVENTS = FUB_MAX_EMEVENTS_PAGES * PAGE_SIZE; // 4000 unsubscribe events
 
 /** Only the fields this connector reads — minimizes payload per the docs' own guidance. */
 const FIELDS = "id,name,firstName,lastName,emails,phones";
@@ -174,6 +220,59 @@ export async function fetchAllFubPeople(
 }
 
 /**
+ * Page every `type: "unsubscribe"` email-marketing event via
+ * `GET /v1/emEvents?type=unsubscribe`, collecting the distinct `personId`s
+ * (see file header's 07/22/2026 correction for why this is a real, FUB-native
+ * inbound opt-out signal). Unlike `fetchAllFubPeople`, this pages via
+ * `offset`/`limit` — `/emEvents`'s own doc lists no `next` query param and its
+ * live example `_metadata` carries neither `next` nor `nextLink`. Hard-capped
+ * at FUB_MAX_EMEVENTS_PAGES pages / FUB_MAX_EMEVENTS events, mirroring the
+ * people fetch's cap; `truncated: true` when the cap cuts off a longer result
+ * set. Server-side `type=unsubscribe` filtering keeps this small relative to
+ * the full (opens/clicks/deliveries-dominated) event stream.
+ *
+ * The API key is used ONLY for these requests, held in a local variable —
+ * never persisted, never logged.
+ */
+export async function fetchAllFubUnsubscribedPersonIds(
+  apiKey: string,
+): Promise<{ personIds: Set<number>; truncated: boolean }> {
+  const auth = basicAuthHeader(apiKey);
+  const headers: Record<string, string> = { authorization: auth, accept: "application/json" };
+  if (process.env.FUB_X_SYSTEM_NAME) headers["X-System"] = process.env.FUB_X_SYSTEM_NAME;
+  if (process.env.FUB_X_SYSTEM_KEY) headers["X-System-Key"] = process.env.FUB_X_SYSTEM_KEY;
+
+  const personIds = new Set<number>();
+  let truncated = false;
+
+  for (let page = 0; page < FUB_MAX_EMEVENTS_PAGES; page++) {
+    const params = new URLSearchParams({
+      type: "unsubscribe",
+      limit: String(PAGE_SIZE),
+      offset: String(page * PAGE_SIZE),
+    });
+
+    const res = await fetch(`${FUB_API_ROOT}/emEvents?${params.toString()}`, { headers });
+    if (!res.ok) {
+      throw new FubFetchError(`GET /emEvents failed (${res.status})`);
+    }
+    const json = (await res.json()) as FubEmEventsResponse;
+    const batch = json.emEvents ?? [];
+    for (const ev of batch) {
+      if (typeof ev.personId === "number") personIds.add(ev.personId);
+    }
+
+    const lastPageOfLoop = page === FUB_MAX_EMEVENTS_PAGES - 1;
+    const noMorePages = batch.length < PAGE_SIZE;
+
+    if (noMorePages) break;
+    if (lastPageOfLoop) truncated = true;
+  }
+
+  return { personIds, truncated };
+}
+
+/**
  * Pure FUB Person -> ContactRow mapper. Network-free so it unit-tests in
  * isolation (the Basic-auth paged fetch lives in `fetchAllFubPeople` above).
  *
@@ -190,11 +289,17 @@ export async function fetchAllFubPeople(
  * file header; FUB's read response does not carry `isPrimary` on phones the
  * way it does on emails), null-safe when `phones` is empty/absent.
  *
- * `unsubscribed` is NEVER set (see file header's DELTA note) — every row
- * omits the key, which is what `upsertCanonicalContacts`'s one-way opt-out
+ * `unsubscribed` is set to `true` ONLY for a person whose `id` appears in the
+ * optional `unsubscribedPersonIds` set (from `fetchAllFubUnsubscribedPersonIds`
+ * — see file header's 07/22/2026 correction); every other row (no set passed,
+ * person not in the set, or person has no `id` to match) OMITS the key
+ * entirely, never `false` — what `upsertCanonicalContacts`'s one-way opt-out
  * contract requires for "no signal either way".
  */
-export function fubPeopleToContactRows(people: FubPerson[]): {
+export function fubPeopleToContactRows(
+  people: FubPerson[],
+  unsubscribedPersonIds?: ReadonlySet<number>,
+): {
   rows: ContactRow[];
   skipped: number;
 } {
@@ -218,7 +323,16 @@ export function fubPeopleToContactRows(people: FubPerson[]): {
     const joinedName = [p.firstName, p.lastName].filter(Boolean).join(" ").trim();
     const name = directName || joinedName || null;
 
-    rows.push({ name, email, phone, tags: ["followupboss"], attribs: {} });
+    const isUnsubscribed = typeof p.id === "number" && (unsubscribedPersonIds?.has(p.id) ?? false);
+
+    rows.push({
+      name,
+      email,
+      phone,
+      tags: ["followupboss"],
+      attribs: {},
+      ...(isUnsubscribed ? { unsubscribed: true as const } : {}),
+    });
   }
 
   return { rows, skipped };

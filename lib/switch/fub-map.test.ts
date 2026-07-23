@@ -138,7 +138,7 @@ describe("fubPeopleToContactRows", () => {
     expect(fubPeopleToContactRows([])).toEqual({ rows: [], skipped: 0 });
   });
 
-  test("unsubscribed key is ALWAYS absent — FUB's People API has no per-person opt-out flag", () => {
+  test("unsubscribed key is absent when no emEvents unsubscribe signal is provided (default, backward compatible)", () => {
     const { rows } = fubPeopleToContactRows([person()]);
     expect(Object.prototype.hasOwnProperty.call(rows[0], "unsubscribed")).toBe(false);
   });
@@ -149,6 +149,21 @@ describe("fubPeopleToContactRows", () => {
       person({ emails: [{ value: "person@example.com", isPrimary: 1, status: "Invalid" }] }),
     ]);
     expect(rows).toHaveLength(1);
+    expect(Object.prototype.hasOwnProperty.call(rows[0], "unsubscribed")).toBe(false);
+  });
+
+  test("sets unsubscribed:true for a person whose id is in the emEvents unsubscribe set", () => {
+    const { rows } = fubPeopleToContactRows([person({ id: 10911 })], new Set([10911]));
+    expect(rows[0].unsubscribed).toBe(true);
+  });
+
+  test("omits unsubscribed for a person whose id is NOT in the emEvents unsubscribe set", () => {
+    const { rows } = fubPeopleToContactRows([person({ id: 10911 })], new Set([999]));
+    expect(Object.prototype.hasOwnProperty.call(rows[0], "unsubscribed")).toBe(false);
+  });
+
+  test("omits unsubscribed for a person with no id, even when the set is non-empty", () => {
+    const { rows } = fubPeopleToContactRows([person({ id: undefined })], new Set([10911]));
     expect(Object.prototype.hasOwnProperty.call(rows[0], "unsubscribed")).toBe(false);
   });
 });
