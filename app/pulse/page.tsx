@@ -117,6 +117,26 @@ export default async function PulsePage() {
         </section>
       ) : null}
 
+      {digest.topics?.length ? (
+        <section className="mt-10">
+          <h2 className="text-xl font-medium">Trending topics</h2>
+          <ul className="mt-3 space-y-2">
+            {digest.topics.map((t) => (
+              <li
+                key={t.topic}
+                className="border-gulf-haze/40 flex items-baseline justify-between border-b pb-2"
+              >
+                <span>{t.label}</span>
+                <span className="text-text-secondary text-sm">
+                  {t.postCount.toLocaleString()} posts · median {t.medianLikes.toLocaleString()}{" "}
+                  likes
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <p className="text-text-secondary mt-12 text-xs">
         Engagement figures are read from public Instagram posts as written — never estimated. Posts
         link to their creators on Instagram.{" "}
