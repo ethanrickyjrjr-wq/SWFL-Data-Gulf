@@ -578,7 +578,7 @@ function isCollierStale(snap: PermitsSnapshot, now: Date): boolean {
   return (now.getTime() - t) / 86400_000 > COLLIER_STALE_DAYS;
 }
 
-function buildConclusionProse(snap: PermitsSnapshot, now: Date): string {
+export function buildConclusionProse(snap: PermitsSnapshot, now: Date): string {
   const swflZ = snap.swfl_weighted_z.toFixed(2);
   const leeZ = snap.lee_weighted_z.toFixed(2);
   const collierZ = snap.collier_weighted_z.toFixed(2);
@@ -595,16 +595,14 @@ function buildConclusionProse(snap: PermitsSnapshot, now: Date): string {
     parts.push(
       `Lee permit flow reads ${directionWord(snap.lee_weighted_z)} (county-weighted z = ${leeZ}, ${swflSat}% of corridors saturated at z >= +2 in commercial buckets).`,
     );
-    parts.push(
-      `Naples (Collier) feed returned zero rows this build — SWFL rollup excludes Collier.`,
-    );
+    parts.push(`Collier permit data is not available this update — this read covers Lee only.`);
   } else if (collierStale) {
     parts.push(
       `Lee permit flow reads ${directionWord(snap.lee_weighted_z)} (county-weighted z = ${leeZ}).`,
     );
     const lastDate = snap.collier_max_issued_date ?? "unknown";
     parts.push(
-      `Naples feed last refreshed ${lastDate}; current build excludes Collier from the SWFL rollup.`,
+      `Naples/Collier permit filings are current through ${lastDate}; Collier is excluded from this SWFL-wide read until it refreshes.`,
     );
   } else {
     const leeDir = directionWord(snap.lee_weighted_z);
@@ -1042,6 +1040,7 @@ async function permitsSidecarProducer(
       headline_z: Number((weightedSum / weightSum).toFixed(3)),
       n_current: weightSum,
       last_refined_at: fetched_at,
+      backfill_days: snap.backfill_days,
     }))
     .sort((a, b) => a.corridor_id.localeCompare(b.corridor_id));
 

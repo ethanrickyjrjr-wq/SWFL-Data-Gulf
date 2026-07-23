@@ -27,6 +27,17 @@ export interface CorridorRentChartProps {
   className?: string;
 }
 
+// Permit Z-Score caveat copy. `backfill_days` comes from the permits-swfl
+// sidecar (fixtures/corridor-permits.json); older sidecar rows written before
+// that field existed omit it, so `undefined` must read as "unknown," not as
+// a 365d-complete baseline.
+export function permitBaselineCaveat(backfillDays: number | undefined, nCurrent: number): string {
+  if (typeof backfillDays === "number" && backfillDays < 365) {
+    return `Z-Score measures building permit volumes normalized relative to the trailing-${backfillDays}d baseline (still filling in). Sample of ${nCurrent} qualifying permits.`;
+  }
+  return `Z-Score measures building permit volumes normalized relative to the trailing-365d baseline. Sample of ${nCurrent} qualifying permits.`;
+}
+
 // Utility to parse and interpolate colors between cool teal (#2A8C85) and warm amber (#D4B370)
 function interpolateColor(color1: string, color2: string, factor: number): string {
   const parseHex = (hex: string) => {
@@ -444,9 +455,10 @@ export function CorridorRentChart({
                       />
                     </div>
                     <p className="text-[10px] text-slate-500">
-                      Z-Score measures building permit volumes normalized relative to the
-                      trailing-365d baseline. Sample of {selectedCorridor.permits.n_current}{" "}
-                      qualifying permits.
+                      {permitBaselineCaveat(
+                        selectedCorridor.permits.backfill_days,
+                        selectedCorridor.permits.n_current,
+                      )}
                     </p>
                   </div>
                 ) : (

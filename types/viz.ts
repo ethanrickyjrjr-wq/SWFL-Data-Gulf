@@ -28,6 +28,13 @@ export interface CorridorPermitsEntry {
   headline_z: number;
   n_current: number;
   last_refined_at: string;
+  /**
+   * Days of permit history behind the current snapshot (from
+   * `PermitsSnapshot.backfill_days` in permits-swfl.mts). Optional because
+   * fixture rows written before this field existed lack it — consumers
+   * must treat a missing value as "unknown," never assume 365d completeness.
+   */
+  backfill_days?: number;
 }
 
 /**

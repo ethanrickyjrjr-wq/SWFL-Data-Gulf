@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { buildSnapshot } from "./permits-swfl.mts";
+import { buildSnapshot, buildConclusionProse } from "./permits-swfl.mts";
 import { permitsSwfl } from "./permits-swfl.mts";
 import type { LeePermitRow, NormalizedPermitRow } from "../sources/permits-source.mts";
 import type { CorridorCentroid } from "../lib/corridor-assignment.mts";
+import type { PermitsSnapshot } from "./permits-swfl.mts";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -240,5 +241,119 @@ describe("permitsSidecarProducer (via pack)", () => {
     permitsSwfl.corpusSummary!([]);
     const sidecars = await permitsSwfl.sidecarProducer!({} as never, []);
     expect(sidecars).toEqual([]);
+  });
+
+  it("threads snapshot backfill_days onto every emitted row (so CorridorRentChart can render the narrower trailing-window caveat instead of hardcoding 365d)", async () => {
+    // Synthetic, wall-clock-relative permits (not the aging sample fixture) so
+    // this test stays deterministic as real time passes: 15 commercial_new
+    // permits at a real corridor centroid, spread across the last 30 days,
+    // clearing LOW_N_THRESHOLD for that (corridor, bucket) cell regardless of
+    // when this test runs.
+    const { corridors } = loadFixtures();
+    const centroid = corridors.find((c) => c.corridor_id === "ben-hill-griffin-pkwy");
+    if (!centroid) throw new Error("fixture missing ben-hill-griffin-pkwy centroid");
+
+    const now = new Date();
+    const synthetic: NormalizedPermitRow[] = Array.from({ length: 15 }, (_, i) => ({
+      permit_uid: `synthetic:backfill-days-test:${i}`,
+      county: "lee",
+      issued_date: new Date(now.getTime() - i * 2 * 86400_000).toISOString().slice(0, 10),
+      bucket: "commercial_new",
+      address: null,
+      zip_code: "33928",
+      lat: centroid.center_lat,
+      lon: centroid.center_lon,
+      declared_value_usd: 100_000,
+      status: "Issued",
+      permit_type_raw: "New Construction",
+      permit_description_raw: null,
+    }));
+
+    const fragments = synthetic.map((p, i) => ({
+      fragment_id: `lee_building_permits::synthetic-${i}`,
+      source_id: "lee_building_permits",
+      source_trust_tier: 1 as const,
+      fetched_at: now.toISOString(),
+      raw: { permit_id: `synthetic-${i}`, issued_date: p.issued_date, bucket: p.bucket },
+      normalized: p,
+    }));
+    permitsSwfl.corpusSummary!(fragments);
+
+    const sidecars = await permitsSwfl.sidecarProducer!({} as never, fragments);
+    const rows = sidecars[0].data as Array<{ corridor_id: string; backfill_days: number }>;
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      expect(typeof row.backfill_days).toBe("number");
+      expect(Number.isFinite(row.backfill_days)).toBe(true);
+      expect(row.backfill_days).toBeGreaterThanOrEqual(0);
+    }
+    const row = rows.find((r) => r.corridor_id === "ben-hill-griffin-pkwy");
+    expect(row).toBeDefined();
+    // Earliest synthetic permit is 28 days back — backfill_days should reflect that,
+    // not a hardcoded 365.
+    expect(row!.backfill_days).toBeLessThan(365);
+    expect(row!.backfill_days).toBeGreaterThanOrEqual(27);
+  });
+});
+
+// Finding #22 (checks: sa0718_internal_build_notes_leak_into_the_served_) — the
+// customer-facing conclusion prose must never carry engineering/build-system
+// vocabulary ("current build", "this build", "SWFL rollup"). Those phrases are
+// meaningless to a reader and were shipped verbatim to the live site.
+function baseSnapshot(overrides: Partial<PermitsSnapshot> = {}): PermitsSnapshot {
+  return {
+    corridor_cells: [],
+    zip_cells: [],
+    swfl_weighted_z: 0.41,
+    lee_weighted_z: 0.41,
+    collier_weighted_z: 0,
+    swfl_saturation_index: 0.1,
+    lee_saturation_index: 0.1,
+    collier_saturation_index: 0,
+    top_heating_lee_alt: [],
+    top_heating_lee_new: [],
+    top_cooling_lee_alt: [],
+    top_cooling_lee_new: [],
+    top_heating_swfl_alt: [],
+    top_heating_swfl_new: [],
+    top_cooling_swfl_alt: [],
+    top_cooling_swfl_new: [],
+    low_n_cell_count: 0,
+    total_cell_count: 0,
+    thin_corridor_share: 0,
+    backfill_days: 90,
+    collier_backfill_months: 0,
+    lee_backfill_months: 6,
+    lee_row_count: 40,
+    collier_row_count: 0,
+    lee_max_issued_date: "2026-05-20",
+    collier_max_issued_date: null,
+    storm_caveat_fires: false,
+    ...overrides,
+  };
+}
+
+describe("buildConclusionProse — no build-system vocabulary leaks to the reader (finding #22)", () => {
+  it("collier-empty branch never mentions 'this build' or 'SWFL rollup'", () => {
+    const snap = baseSnapshot({ collier_row_count: 0, collier_max_issued_date: null });
+    const prose = buildConclusionProse(snap, NOW);
+    expect(prose).not.toMatch(/\bthis build\b/i);
+    expect(prose).not.toMatch(/\bSWFL rollup\b/i);
+    // The reader-facing meaning must survive the reword: Collier is absent.
+    expect(prose).toMatch(/Collier/i);
+  });
+
+  it("collier-stale branch never mentions 'current build' or 'SWFL rollup'", () => {
+    const snap = baseSnapshot({
+      collier_row_count: 12,
+      collier_max_issued_date: "2026-02-01", // > COLLIER_STALE_DAYS (60d) before NOW (2026-05-22)
+    });
+    const prose = buildConclusionProse(snap, NOW);
+    expect(prose).not.toMatch(/\bcurrent build\b/i);
+    expect(prose).not.toMatch(/\bSWFL rollup\b/i);
+    // The reader-facing meaning must survive the reword: the stale date + the
+    // fact that Collier is excluded from this read.
+    expect(prose).toMatch(/2026-02-01|02\/01\/2026/);
+    expect(prose).toMatch(/Collier/i);
   });
 });
