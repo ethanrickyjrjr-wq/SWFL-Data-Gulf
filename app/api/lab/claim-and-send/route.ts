@@ -17,6 +17,7 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { getMarketingResend } from "@/lib/email/marketing-client";
+import { resolvePostalAddress } from "@/lib/email/postal-address";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint";
 import { applyLinkFallbacks, subjectListingUrl } from "@/lib/email/link-audit";
@@ -43,14 +44,15 @@ function escAttr(s: string): string {
 
 /** Free-build watermark + CAN-SPAM floor (sender identity + postal line). No
  *  unsubscribe link: this is a single user-requested send to the requester —
- *  there is no list to leave. */
-function withSelfSendFooter(html: string, webUrl: string): string {
+ *  there is no list to leave. `postalAddress` is the caller's own resolved,
+ *  real value (resolvePostalAddress) — never a hardcoded placeholder city. */
+function withSelfSendFooter(html: string, webUrl: string, postalAddress: string): string {
   const footer =
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px">` +
     `<tr><td style="padding:20px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;color:#8a8a8a">` +
     `You sent this to yourself from the SWFL Data Gulf email lab &middot; ` +
     `<a href="${escAttr(webUrl)}" style="color:#8a8a8a">keep styling it here</a><br>` +
-    `Built free with <a href="${BASE_URL}" style="color:#8a8a8a">SWFL Data Gulf</a> &middot; Fort Myers, FL` +
+    `Built free with <a href="${BASE_URL}" style="color:#8a8a8a">SWFL Data Gulf</a> &middot; ${escAttr(postalAddress)}` +
     `</td></tr></table>`;
   return html.includes("</body>") ? html.replace("</body>", `${footer}</body>`) : html + footer;
 }
@@ -130,6 +132,20 @@ export async function POST(req: NextRequest) {
   const usage = await checkUsageLimit(user.id);
   if (!usage.allowed) return respond(false); // saved; quota message shows in-project
 
+  // CAN-SPAM floor: a real physical postal address, never a hardcoded city
+  // line — mirrors the same gate app/api/deliverables/[id]/blast/route.ts
+  // enforces. This route creates a fresh deliverable with no branding blob of
+  // its own, so the account-level brand profile is the only lane; nothing
+  // real there → skip the send (capture already succeeded, sent:false) rather
+  // than fabricate a compliance-critical field.
+  const { data: brandProfile } = await supabase
+    .from("user_brand_profiles")
+    .select("business_address")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const postalAddress = resolvePostalAddress(null, brandProfile?.business_address ?? null);
+  if (!postalAddress) return respond(false); // saved; no real address to send with
+
   try {
     const webUrl = `${BASE_URL}/project/${projectId}/email-lab?did=${deliverableId}`;
     // Dead-link floor: the funnel self-send has no link popup, so a labeled
@@ -142,7 +158,7 @@ export async function POST(req: NextRequest) {
       hostedUrl: webUrl,
     });
     let html = await renderEmailDocHtml(ladder.doc);
-    html = withSelfSendFooter(html, webUrl);
+    html = withSelfSendFooter(html, webUrl, postalAddress);
     // Fake-link tripwire — every href/src verbatim from the doc or platform.
     const gate = lintCompiledHtml(html, collectAllowedUrls(parsed.data, [], null, null, webUrl));
     if (!gate.ok) return respond(false); // saved; never ship a minted URL
