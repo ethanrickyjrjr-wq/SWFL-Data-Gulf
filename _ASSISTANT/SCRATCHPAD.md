@@ -1,3 +1,35 @@
+## 2026-07-23 — FIXED: lake comp feed wired into the live path. Notes from being "out there" — 5 more comp-area things still broken, one of them is the highest-traffic surface.
+
+Operator: "fix built wrong and take notes on what is not working while you are out there." Fixed the
+thing flagged in scratchpad 0ab (comp-source-lake.ts built, verified, never imported by
+comp-helper.ts). Full writeup in SESSION_LOG top entry. Short version: Lee addresses with a known
+subject sqft now get real recorded sale dates from our own lake instead of the vendor's undated AVM
+estimate; also caught and fixed a false "realtor.com" citation that would have shipped on lake-only
+comps. Tests, typecheck, `next build` all green. NOT pushed — holding for confirmation.
+
+**What's still not working, found while in this area (none fixed, all pre-existing):**
+1. **`comps_size_band_chat_lane` [due 08/04] — the actual chat comp lane never got either fix.**
+   `compHelper` (what fires when someone types "comps for 123 Main St" in chat) never has a subject
+   sqft — no caller supplies one. Both the 07/22 vendor ranker AND this session's lake wiring are
+   gated on `subjectSqft` being known, so NEITHER ever runs in chat. Two rounds of "fix the comps"
+   have now landed on offer-check, should-i-sell, and the email recipes — the highest-traffic single
+   comp surface (chat) has had zero of it reach it. This is probably the next thing to fix, not
+   another improvement to the callers that already got one.
+2. **Collier has no lake source at all**, by design — the source table's own header says FDOR gives
+   month-grain fields with no exact-date equivalent for Collier. Every Collier comp still runs the
+   same undated vendor path as before this session. Not a bug, just a real gap the operator should
+   know is still there before assuming "comps" got fixed platform-wide.
+3. **`market_comps_only_one_comp`** — the market-comps EMAIL chart (different module,
+   `lib/deliverable/recipes/market-comps.ts`) plots the subject + an area-median line and zero actual
+   comparable sales. Untouched by this session.
+4. **`comp_lane_prose_contradicts_chart`** — chat prose has said "I don't have comps for that
+   address" in the SAME answer whose chart frame carried 5 priced comps. Separately, one specific
+   address (809 SE 10th St, 33990) returned zero comp rows minutes after a nearby address returned
+   5 — smells like comp-fetch flakiness, not a wiring gap, unconfirmed.
+5. **`market-comps-chart-key-collision`** — the market-comps chart's storage key has no per-house
+   discriminator; two different houses, same ZIP, same day, can silently overwrite each other's sent
+   chart image in an email that already went out.
+
 ## 2026-07-23 — Operator: "I DON'T KNOW WHAT YOU ARE TALKINIG ABOUT" — answer to "why do no consumers run through master?" landed as unreadable jargon.
 
 Asked a plain question about the /wire-map tool (ops repo). Answer came back dense: internal
@@ -910,6 +942,21 @@ anyone "optimizes caching" for phantom users.
 **Standing correction to carry forward:** before proposing any performance/caching/scale work,
 read the volume first and say the number. If there is no instrumentation, say *that* — do not
 substitute a code inventory for a traffic measurement.
+
+### CORRECTION (07/23/2026) to 0a below — the "durable fix still owed" line is STALE. It shipped the same day.
+
+Operator asked "how do we know the lake MCP was the problem, and how do we know it won't happen again"
+— re-verified live rather than trusting this note. `git log -- tools/lake-mcp-server.mts` shows
+`fbccd04e` "fix(egress): the burner was BOOT, not queries — bind tier-1 views on demand", dated
+07/21/2026 12:28:16 -0400 — i.e., landed the SAME DAY as this entry, just later. `git status --short`
+on the file is clean — fully committed, not a dangling local edit. Read the current code: Step 5 no
+longer runs any `CREATE VIEW` at boot at all (0 S3 bytes at startup); a view binds on-demand the first
+time a query actually names it, gets cached in `materializedViews` so it is "never sniffed twice," and
+concurrent requests for the same unbound view share one in-flight download instead of racing/
+multiplying it. Both remediations this entry called "owed" — cache bound schemas, never sniff on boot
+— are in the code, committed, current. `.mcp.json` also still has zero "lake" entry (re-checked live),
+so the tool cannot even start today. Leaving the rest of 0a below intact as the evidence trail; only
+the "still owed" framing was wrong, and it was wrong from later the same day forward.
 
 ### 0a. THE EGRESS BURNER IS NAMED, WITH BYTES: the lake MCP sniffs the whole bucket on every BOOT
 

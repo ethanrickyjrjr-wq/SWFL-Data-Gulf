@@ -160,7 +160,7 @@ const MONTHS = [
 /** Render a sale date AT THE PRECISION THE SOURCE ACTUALLY HAS.
  *  Day grain -> MM/DD/YYYY (rule 2). Month grain -> "May 2026" — never a fabricated
  *  day-of-month. Null-safe. */
-function saleDateLabel(iso: string | null, grain: "day" | "month" = "day"): string | null {
+export function saleDateLabel(iso: string | null, grain: "day" | "month" = "day"): string | null {
   if (!iso) return null;
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   if (!m) return null;

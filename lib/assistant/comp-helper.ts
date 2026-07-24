@@ -22,7 +22,8 @@ import {
   type SteadyDegradeReason,
 } from "@/lib/listings/steadyapi";
 import { daysBetweenIso, formatSoldSpell } from "@/lib/listings/dom";
-import { rankComps, type CompCandidate, type CompSubject } from "./comp-rank";
+import { rankComps, saleDateLabel, type CompCandidate, type CompSubject } from "./comp-rank";
+import { fetchLeeComps } from "./comp-source-lake";
 import type { WelcomeSource } from "@/lib/welcome/frames";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
@@ -43,6 +44,10 @@ export interface RenderComp {
   priceKind: PriceKind;
   /** ISO date behind the price (sold date / AVM date); null for a last-list. */
   priceDate: string | null;
+  /** Precision `priceDate` actually carries. Default "day" (vendor/enrichment).
+   *  "month" is our own lake feed — every row is day-of-month 1 by construction — so
+   *  the renderer says "May 2026", never a fabricated "05/01/2026" (RULE 1). */
+  dateGrain?: "day" | "month";
   /** Closed-spell length for a RECORDED sale (sold date − vendor list date, same
    *  response, zero extra calls); null for estimates/last-list or missing history. */
   soldInDays: number | null;
@@ -59,6 +64,10 @@ export interface CompResult {
   matchedAddress?: string;
   /** Lane-4 asks: what the user must supply for the helper to finish. */
   needs: string[];
+  /** Which path produced `comps` — governs citation (compSources/buildCompsChartSpec):
+   *  "lake" cites SWFL Data Gulf only (LeePA + FDOR, no vendor call); undefined/"vendor"
+   *  keeps the existing realtor.com citation. Never mixed within one result. */
+  source?: "lake" | "vendor";
 }
 
 export interface CompDeps {
@@ -83,6 +92,15 @@ export interface CompDeps {
     degraded: SteadyDegradeReason | null;
   }>;
   fetchSold?: (propertyId: string) => Promise<SoldEvent | null>;
+  /**
+   * Lee-only, our own sold universe (`data_lake.lee_comp_sales_v` — LeePA sale +
+   * FDOR characteristics), real dates, zero vendor calls. Tried FIRST for a Lee
+   * subject with a known size; falls back to the vendor path whenever this comes up
+   * thin (fewer than Fannie's 3-comp minimum), Collier (no lake source yet), or the
+   * subject's size is unknown (the lake query needs it to bound the read).
+   * Defaults to the live `fetchLeeComps`. Spec: 2026-07-22-comp-distance-ranker-design.md.
+   */
+  fetchLeeComps?: (subject: CompSubject, now: Date) => Promise<CompCandidate[]>;
   /** Injectable clock so `asOf` is deterministic in tests. */
   now?: Date;
   /** How many comps to surface (default 6). */
@@ -221,6 +239,55 @@ function usd(n: number): string {
   return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
+// ── Lee lake comps (real dates, no vendor call) ────────────────────────────────
+
+/**
+ * Lee-only. Tries our own sold universe before ever calling the vendor. Returns
+ * null (never throws) whenever the lake path does not apply or comes up thin, so
+ * the caller falls straight through to the unchanged vendor path — this function
+ * makes no decision the caller cannot see and never partially commits.
+ *
+ * Gated exactly like the vendor's own ranking branch: only runs when the caller
+ * supplied `subjectSqft`, because `lakeCompFilters` needs it to bound the read
+ * (an unbounded lake scan is the egress pattern killed 07/21 — data-roots F6).
+ */
+async function tryLeeLakeComps(geo: GeocodedAddress, deps: CompDeps): Promise<RenderComp[] | null> {
+  if (geo.countyFips !== "12071") return null; // Collier has no lake source yet
+  if (deps.subjectSqft == null || deps.subjectSqft <= 0) return null;
+
+  const now = deps.now ?? new Date();
+  const subject: CompSubject = {
+    sqft: deps.subjectSqft,
+    beds: deps.subjectBeds ?? null,
+    baths: deps.subjectBaths ?? null,
+    zip: geo.zip,
+  };
+
+  const fetchLake = deps.fetchLeeComps ?? fetchLeeComps;
+  const candidates = await fetchLake(subject, now);
+  if (candidates.length === 0) return null;
+
+  // requireSaleDate defaults TRUE — every row is a real recorded sale (unlike the
+  // vendor's AVM estimate), so the 6-month window is honestly enforceable here.
+  const ranked = rankComps(subject, candidates, now);
+  if (!ranked.standardMet) return null; // thin lake result -> let the vendor try
+
+  return ranked.comps.map((c) => ({
+    addressLine: c.addressLine,
+    city: c.city,
+    beds: c.beds,
+    baths: c.baths,
+    sqft: c.sqft,
+    status: "sold",
+    price: c.price,
+    priceKind: "sold" as const,
+    priceDate: c.priceDate,
+    dateGrain: c.dateGrain ?? "day",
+    soldInDays: null, // no list date on this feed to compute a spell
+    sourceUrl: null,
+  }));
+}
+
 // ── the orchestrator ──────────────────────────────────────────────────────────
 
 /**
@@ -260,6 +327,17 @@ export async function compsForAddress(address: string, deps: CompDeps = {}): Pro
       ],
       geo.matchedAddress,
     );
+  }
+
+  const lakeComps = await tryLeeLakeComps(geo, deps);
+  if (lakeComps) {
+    return {
+      comps: lakeComps,
+      asOf,
+      needs: [],
+      matchedAddress: geo.matchedAddress,
+      source: "lake",
+    };
   }
 
   const fetchTracked =
@@ -479,13 +557,17 @@ function perSqftPhrase(c: RenderComp): string {
   return ` · $${Math.round(c.price / c.sqft).toLocaleString("en-US")}/sqft`;
 }
 
-/** The price phrase, labeled by kind so an AVM/last-list is never called a sale. */
+/** The price phrase, labeled by kind so an AVM/last-list is never called a sale.
+ *  Day-grain dates render "on 05/12/2026"; month-grain (our own lake feed, which
+ *  never records a day-of-month) render "in May 2026" — never a fabricated day. */
 function pricePhrase(c: RenderComp): string {
   if (c.price == null) return "price not available";
   if (c.priceKind === "sold") {
-    const d = isoToMDY(c.priceDate);
+    const grain = c.dateGrain ?? "day";
+    const d = grain === "month" ? saleDateLabel(c.priceDate, "month") : isoToMDY(c.priceDate);
+    const dPhrase = d ? (grain === "month" ? ` in ${d}` : ` on ${d}`) : "";
     const spell = formatSoldSpell(c.soldInDays);
-    return `sold ${usd(c.price)}${d ? ` on ${d}` : ""}${spell ? ` · ${spell}` : ""}`;
+    return `sold ${usd(c.price)}${dPhrase}${spell ? ` · ${spell}` : ""}`;
   }
   if (c.priceKind === "estimate") return `estimated value ${usd(c.price)}`;
   return `last listed ${usd(c.price)}`;
@@ -542,6 +624,12 @@ export function renderCompBlock(result: CompResult): string {
  */
 export function compSources(result: CompResult): WelcomeSource[] {
   if (result.comps.length === 0) return [];
+  if (result.source === "lake") {
+    // Our own sold universe (LeePA + FDOR) — no vendor call, so no vendor citation.
+    return [
+      { label: "SWFL Data Gulf", domain: "swfldatagulf.com", url: "https://www.swfldatagulf.com" },
+    ];
+  }
   return [
     { label: "SWFL Data Gulf", domain: "swfldatagulf.com", url: "https://www.swfldatagulf.com" },
     { label: "realtor.com", domain: "realtor.com", url: "https://www.realtor.com" },
@@ -585,9 +673,12 @@ export function buildCompsChartSpec(result: CompResult): ChartSpec | null {
     value_format: "usd",
     chart_type: "bar",
     asOf: mdyToIso(result.asOf),
-    source: {
-      citation: "Nearby comps, SWFL Data Gulf + realtor.com",
-      url: "https://www.realtor.com",
-    },
+    source:
+      result.source === "lake"
+        ? { citation: "Nearby comps, SWFL Data Gulf", url: "https://www.swfldatagulf.com" }
+        : {
+            citation: "Nearby comps, SWFL Data Gulf + realtor.com",
+            url: "https://www.realtor.com",
+          },
   };
 }

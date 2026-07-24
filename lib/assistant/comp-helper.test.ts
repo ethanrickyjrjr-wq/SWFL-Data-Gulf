@@ -11,6 +11,7 @@ import {
   type CompDeps,
   type CompResult,
 } from "./comp-helper";
+import type { CompCandidate } from "./comp-rank";
 import type { NearbyComp } from "@/lib/listings/steadyapi";
 
 // ── the injected fakes (no Mapbox, no SteadyAPI) ──────────────────────────────
@@ -173,6 +174,126 @@ describe("comps_no_size_band_guard — the live path, not just the pure ranker",
     expect(out.comps).toHaveLength(0);
     expect(out.needs.join(" ")).toMatch(/size|comparable/i);
     expect(out.needs.join(" ")).not.toMatch(/didn't find nearby comps/i);
+  });
+});
+
+// ── Lee lake-first wiring (built 07/23/2026) ──────────────────────────────────
+// comp-source-lake.ts's fetchLeeComps existed, tested, and unwired — comp-helper.ts
+// never imported it, so every production comp still ran the undated vendor path.
+// These pin the wiring: tried first for Lee+known-size, silent vendor fallback
+// otherwise, honest month-grain rendering, and citation that never claims a vendor
+// call that didn't happen.
+function lakeComp(over: Partial<CompCandidate> = {}): CompCandidate {
+  return {
+    addressLine: "210 SE 15th Ter",
+    city: "Cape Coral",
+    zip: "33904",
+    beds: null,
+    baths: null,
+    sqft: 1900,
+    price: 410000,
+    priceDate: "2026-05-01",
+    dateGrain: "month",
+    ...over,
+  };
+}
+const THREE_LAKE_COMPS: CompCandidate[] = [
+  lakeComp({ addressLine: "A" }),
+  lakeComp({ addressLine: "B" }),
+  lakeComp({ addressLine: "C" }),
+];
+
+describe("Lee lake-first wiring — real dates, no vendor call", () => {
+  it("uses the lake feed for a Lee subject with a known size, never calling the vendor", async () => {
+    let vendorCalled = false;
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        subjectSqft: 1978,
+        fetchNearby: async () => {
+          vendorCalled = true;
+          return [];
+        },
+        fetchLeeComps: async () => THREE_LAKE_COMPS,
+      }),
+    );
+
+    expect(vendorCalled).toBe(false);
+    expect(out.comps).toHaveLength(3);
+    expect(out.comps.every((c) => c.priceKind === "sold")).toBe(true);
+    expect(out.source).toBe("lake");
+  });
+
+  it("renders a month-grain lake sale as 'in May 2026', never a fabricated day-of-month", async () => {
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({ subjectSqft: 1978, fetchLeeComps: async () => THREE_LAKE_COMPS }),
+    );
+
+    const block = renderCompBlock(out);
+    expect(block).toContain("in May 2026");
+    expect(block).not.toContain("05/01/2026");
+  });
+
+  it("cites SWFL Data Gulf only for lake comps — never realtor.com, no vendor call happened", async () => {
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({ subjectSqft: 1978, fetchLeeComps: async () => THREE_LAKE_COMPS }),
+    );
+
+    expect(compSources(out).map((s) => s.domain)).toEqual(["swfldatagulf.com"]);
+    const chart = buildCompsChartSpec(out);
+    expect(chart?.source.citation).not.toMatch(/realtor/i);
+  });
+
+  it("falls back to the vendor when the lake result is thin (fewer than 3 qualify)", async () => {
+    const out = await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        subjectSqft: 1978,
+        fetchLeeComps: async () => [lakeComp({ addressLine: "only one" })],
+        fetchNearby: async () => MIXED_POOL,
+      }),
+    );
+
+    const addresses = out.comps.map((c) => c.addressLine);
+    expect(addresses).not.toContain("only one");
+    expect(addresses).toContain("in band A"); // the vendor's own size-band guard ran
+  });
+
+  it("never tries the lake for a Collier address — vendor path runs unchanged", async () => {
+    let lakeCalled = false;
+    const out = await compsForAddress(
+      "900 Goodlette-Frank Rd, Naples",
+      baseDeps({
+        subjectSqft: 1978,
+        geocode: async () => ({ ...leeGeo, county: "Collier", countyFips: "12021" as const }),
+        fetchLeeComps: async () => {
+          lakeCalled = true;
+          return [];
+        },
+        fetchNearby: async () => MIXED_POOL,
+      }),
+    );
+
+    expect(lakeCalled).toBe(false);
+    expect(out.comps.length).toBeGreaterThan(0);
+  });
+
+  it("never tries the lake when the subject's size is unknown — the query needs sqft to bound the read", async () => {
+    let lakeCalled = false;
+    await compsForAddress(
+      "1403 NE 19th Ter, Cape Coral",
+      baseDeps({
+        fetchLeeComps: async () => {
+          lakeCalled = true;
+          return [];
+        },
+        fetchNearby: async () => MIXED_POOL,
+      }),
+    );
+
+    expect(lakeCalled).toBe(false);
   });
 });
 
