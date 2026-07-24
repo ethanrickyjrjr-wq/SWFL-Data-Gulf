@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v27 | Token: SWFL-7421-v27-20260723 -->
+<!-- FRESHNESS: v28 | Token: SWFL-7421-v28-20260724-9d354028 -->
 ---
 brain_id: freshness-pulse
-version: 27
-refined_at: 2026-07-23T04:30:30Z
-freshness_token: SWFL-7421-v27-20260723
+version: 28
+refined_at: 2026-07-24T04:34:16Z
+freshness_token: SWFL-7421-v28-20260724-9d354028
 ttl_seconds: 86400
 pack_hash: 588cf8ec5cf3
 context_type: user_saved_reference
@@ -30,42 +30,42 @@ SCOPE: SWFL daily sourced freshness snapshot — today's cited median asking pri
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                                           | verified   | expires
-s01 | SWFL daily freshness layer — one cited current number per (metric, area) from a grounded live search (Gemini grounded → Firecrawl failsafe), provenance-gated to a real source URL, via Supabase data_lake.daily_truth (metric_key, area, period, value, unit, source_url, source_title, source_tag, verified_on_page, agreement_n, anomaly_flag, retrieved_at). | 2026-07-23 | 2026-07-24
+s01 | SWFL daily freshness layer — one cited current number per (metric, area) from a grounded live search (Gemini grounded → Firecrawl failsafe), provenance-gated to a real source URL, via Supabase data_lake.daily_truth (metric_key, area, period, value, unit, source_url, source_title, source_tag, verified_on_page, agreement_n, anomaly_flag, retrieved_at). | 2026-07-24 | 2026-07-25
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"freshness :: median_asking_price :: cape_coral","fact":"Cape Coral median asking price (sourced 2026-07-23)","value":"399999 usd as of 2026-07-23, source SWFL Data Gulf active-listing inventory (https://www.swfldatagulf.com/desk).","src":"s01","date":"2026-07-23"},
-  {"id":"f002","topic":"freshness :: median_asking_price :: fort_myers","fact":"Fort Myers median asking price (sourced 2026-07-23)","value":"324900 usd as of 2026-07-23, source SWFL Data Gulf active-listing inventory (https://www.swfldatagulf.com/desk).","src":"s01","date":"2026-07-23"},
-  {"id":"f003","topic":"freshness :: median_asking_price :: naples","fact":"Naples median asking price (sourced 2026-07-23)","value":"659000 usd as of 2026-07-23, source SWFL Data Gulf active-listing inventory (https://www.swfldatagulf.com/desk).","src":"s01","date":"2026-07-23"},
-  {"id":"f004","topic":"freshness :: mortgage_30yr_fixed :: swfl","fact":"SWFL 30-year fixed mortgage rate (sourced 2026-07-16)","value":"6.55 pct as of 2026-07-16, source FRED (https://fred.stlouisfed.org/series/MORTGAGE30US).","src":"s01","date":"2026-07-23"}
+  {"id":"f001","topic":"freshness :: median_asking_price :: cape_coral","fact":"Cape Coral median asking price (sourced 2026-07-24)","value":"399994 usd as of 2026-07-24, source SWFL Data Gulf active-listing inventory (https://www.swfldatagulf.com/desk).","src":"s01","date":"2026-07-24"},
+  {"id":"f002","topic":"freshness :: median_asking_price :: fort_myers","fact":"Fort Myers median asking price (sourced 2026-07-24)","value":"325000 usd as of 2026-07-24, source SWFL Data Gulf active-listing inventory (https://www.swfldatagulf.com/desk).","src":"s01","date":"2026-07-24"},
+  {"id":"f003","topic":"freshness :: median_asking_price :: naples","fact":"Naples median asking price (sourced 2026-07-24)","value":"659000 usd as of 2026-07-24, source SWFL Data Gulf active-listing inventory (https://www.swfldatagulf.com/desk).","src":"s01","date":"2026-07-24"},
+  {"id":"f004","topic":"freshness :: mortgage_30yr_fixed :: swfl","fact":"SWFL 30-year fixed mortgage rate (sourced 2026-07-23)","value":"6.58 pct as of 2026-07-23, source FRED (https://fred.stlouisfed.org/series/MORTGAGE30US).","src":"s01","date":"2026-07-24"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "freshness-pulse",
-  "version": 27,
-  "refined_at": "2026-07-23T04:30:30Z",
-  "expires": "2026-07-24T04:30:30Z",
+  "version": 28,
+  "refined_at": "2026-07-24T04:34:16Z",
+  "expires": "2026-07-25T04:34:16Z",
   "ttl_seconds": 86400,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-07-23) $399,999; Fort Myers median asking price (as of 2026-07-23) $324,900; Naples median asking price (as of 2026-07-23) $659,000; SWFL 30-year fixed mortgage rate (as of 2026-07-16) 6.55%. These are cited current facts only; the direction call lives downstream in master.",
+  "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-07-24) $399,994; Fort Myers median asking price (as of 2026-07-24) $325,000; Naples median asking price (as of 2026-07-24) $659,000; SWFL 30-year fixed mortgage rate (as of 2026-07-23) 6.58%. These are cited current facts only; the direction call lives downstream in master.",
   "key_metrics": [
     {
       "metric": "freshness_median_asking_price_cape_coral_usd",
-      "value": 399999,
+      "value": 399994,
       "direction": "stable",
-      "label": "Cape Coral median asking price (as of 2026-07-23)",
+      "label": "Cape Coral median asking price (as of 2026-07-24)",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/desk",
-        "fetched_at": "2026-07-23T04:25:20.344111+00:00",
+        "fetched_at": "2026-07-24T04:24:42.754484+00:00",
         "tier": 2,
-        "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-07-23"
+        "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-07-24"
       },
       "suggestions": [
         "Chart asking rents across the corridors",
@@ -75,17 +75,17 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
     },
     {
       "metric": "freshness_median_asking_price_fort_myers_usd",
-      "value": 324900,
+      "value": 325000,
       "direction": "stable",
-      "label": "Fort Myers median asking price (as of 2026-07-23)",
+      "label": "Fort Myers median asking price (as of 2026-07-24)",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/desk",
-        "fetched_at": "2026-07-23T04:25:20.344111+00:00",
+        "fetched_at": "2026-07-24T04:24:42.754484+00:00",
         "tier": 2,
-        "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-07-23"
+        "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-07-24"
       },
       "suggestions": [
         "Chart asking rents across the corridors",
@@ -97,15 +97,15 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
       "metric": "freshness_median_asking_price_naples_usd",
       "value": 659000,
       "direction": "stable",
-      "label": "Naples median asking price (as of 2026-07-23)",
+      "label": "Naples median asking price (as of 2026-07-24)",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/desk",
-        "fetched_at": "2026-07-23T04:25:20.344111+00:00",
+        "fetched_at": "2026-07-24T04:24:42.754484+00:00",
         "tier": 2,
-        "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-07-23"
+        "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-07-24"
       },
       "suggestions": [
         "Chart asking rents across the corridors",
@@ -115,17 +115,17 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
     },
     {
       "metric": "freshness_mortgage_30yr_fixed_pct",
-      "value": 6.55,
+      "value": 6.58,
       "direction": "stable",
-      "label": "SWFL 30-year fixed mortgage rate (as of 2026-07-16)",
+      "label": "SWFL 30-year fixed mortgage rate (as of 2026-07-23)",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-        "fetched_at": "2026-07-23T04:25:20.344111+00:00",
+        "fetched_at": "2026-07-24T04:24:42.754484+00:00",
         "tier": 2,
-        "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-07-16"
+        "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-07-23"
       },
       "suggestions": [
         "What's driving freshness mortgage 30yr fixed pct?",
@@ -147,7 +147,7 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-23T04:30:30Z"
+    "computed_at": "2026-07-24T04:34:16Z"
   },
   "exogenous_signals": []
 }
@@ -156,5 +156,5 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
 - freshness-pulse: daily SWFL sourced-freshness reporter over data_lake.daily_truth (cited, provenance-gated, anomaly-screened), feeding master a fresh county-grain snapshot.
 
 --- RECENT NOTES ---
-- 2026-07-23: pack refined by the Refinery — 4 fact(s) from 1 source(s).
+- 2026-07-24: pack refined by the Refinery — 4 fact(s) from 1 source(s).
 ```
