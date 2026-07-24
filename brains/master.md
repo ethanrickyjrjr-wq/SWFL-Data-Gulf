@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v117 | Token: SWFL-7421-v117-20260724-50e525db -->
+<!-- FRESHNESS: v118 | Token: SWFL-7421-v118-20260724-181e1c2b -->
 ---
 brain_id: master
-version: 117
-refined_at: 2026-07-24T04:34:40Z
-freshness_token: SWFL-7421-v117-20260724-50e525db
+version: 118
+refined_at: 2026-07-24T06:53:10Z
+freshness_token: SWFL-7421-v118-20260724-181e1c2b
 ttl_seconds: 604800
 pack_hash: a6ea50d6784a
 context_type: user_saved_reference
@@ -90,7 +90,7 @@ s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-div
   {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-07-19: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-07-24"},
   {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-07-19: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-07-24"},
   {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"econ-dev-swfl as of 2026-07-22: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-07-24"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-07-24: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-07-24: 116 live current-events signals across 11 cities — Fort Myers (41), Cape Coral (18), Naples (30), Fort Myers Beach (5), Marco Island (4), Bonita Springs (5), North Naples (5), Sanibel (3), Estero (3), Lehigh Acres (1), Golden Gate (1). Most current: Fort Myers — Fort Myers-based NeoGenomics Laboratories is paying $9.8 million to settle allegations it violated the federal False Claims Act by providing discounted consulting services to select providers in exchange for referrals, as reported July 20, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-07-24"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-07-24: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-07-24: 116 live current-events signals across 11 cities — Cape Coral (19), Marco Island (5), Fort Myers (39), Naples (30), North Naples (5), Fort Myers Beach (5), Bonita Springs (5), Sanibel (3), Estero (3), Lehigh Acres (1), Golden Gate (1). Most current: Cape Coral — A midyear report released July 20, 2026 from ATTOM real estate analytics found Charlotte County posted the highest foreclosure rate in the nation; Southwest Florida has become the nation's foreclosure epicenter. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-07-24"},
   {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-06-29: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-07-24"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (bearish, magnitude 0.70, confidence 0.80)","value":"news-swfl as of 2026-07-22: direction bearish, magnitude 0.70, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 0 SWFL-relevant press releases in the last 90 days. 6 individual enforcement notices active in Lee and Collier counties (4 construction unlicensed, 0 ABT/hospitality). Enforcement activity momentum: -1 vs prior 90-day window. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-07-24"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-07-24: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — Cape Coral median asking price (as of 2026-07-24) $399,994; Fort Myers median asking price (as of 2026-07-24) $325,000; Naples median asking price (as of 2026-07-24) $659,000; SWFL 30-year fixed mortgage rate (as of 2026-07-23) 6.58%. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-07-24"},
@@ -114,9 +114,9 @@ s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-div
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 117,
-  "refined_at": "2026-07-24T04:34:40Z",
-  "expires": "2026-07-31T04:34:40Z",
+  "version": 118,
+  "refined_at": "2026-07-24T06:53:10Z",
+  "expires": "2026-07-31T06:53:10Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
   "magnitude": 0.5486218683363845,
@@ -881,8 +881,8 @@ s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-div
   "upstream_count": 38,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000001,
-    "computed_at": "2026-07-24T04:34:40.000Z"
+    "half_life_hours": 720,
+    "computed_at": "2026-07-24T06:53:10.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [

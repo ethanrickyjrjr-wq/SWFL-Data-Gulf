@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-07-24T04:34:15.761Z",
-    "finished": "2026-07-24T04:34:40.903Z"
+    "started": "2026-07-24T06:52:48.347Z",
+    "finished": "2026-07-24T06:53:10.261Z"
   },
   "source": "live",
   "outcomes": [
@@ -114,31 +114,31 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 41,
+      "version": 42,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 41,
-        "refined_at": "2026-07-24T04:34:16Z",
-        "expires": "2026-07-25T04:34:16Z",
+        "version": 42,
+        "refined_at": "2026-07-24T06:52:48Z",
+        "expires": "2026-07-25T06:52:48Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-07-24: 116 live current-events signals across 11 cities — Fort Myers (41), Cape Coral (18), Naples (30), Fort Myers Beach (5), Marco Island (4), Bonita Springs (5), North Naples (5), Sanibel (3), Estero (3), Lehigh Acres (1), Golden Gate (1). Most current: Fort Myers — Fort Myers-based NeoGenomics Laboratories is paying $9.8 million to settle allegations it violated the federal False Claims Act by providing discounted consulting services to select providers in exchange for referrals, as reported July 20, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-07-24: 116 live current-events signals across 11 cities — Cape Coral (19), Marco Island (5), Fort Myers (39), Naples (30), North Naples (5), Fort Myers Beach (5), Bonita Springs (5), Sanibel (3), Estero (3), Lehigh Acres (1), Golden Gate (1). Most current: Cape Coral — A midyear report released July 20, 2026 from ATTOM real estate analytics found Charlotte County posted the highest foreclosure rate in the nation; Southwest Florida has become the nation's foreclosure epicenter. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_breaking_1",
-            "value": "Fort Myers: Fort Myers-based NeoGenomics Laboratories is paying $9.8 million to settle allegations it violated the federal False Claims Act by providing discounted consulting services to select providers in exchange for referrals, as reported July 20, 2026.",
+            "value": "Cape Coral: A midyear report released July 20, 2026 from ATTOM real estate analytics found Charlotte County posted the highest foreclosure rate in the nation; Southwest Florida has become the nation's foreclosure epicenter.",
             "direction": "stable",
-            "label": "Fort Myers — breaking",
+            "label": "Cape Coral — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/companies/2026/07/20/fort-myers-based-neogenomics-settles-referral-kickback-allegations/90986901007/",
-              "fetched_at": "2026-07-24T04:34:16Z",
+              "url": "https://www.news-press.com/story/money/2026/07/20/in-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers/90946392007/",
+              "fetched_at": "2026-07-24T06:52:48Z",
               "tier": 2,
-              "citation": "Fort Myers-based NeoGenomics settles referral kickback allegations: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Mostly Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Breaking news: NeoGenomics pays $9.8 million to resolve fraud probe\n[![Portrait of Liz Freeman](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/08/28/PNDN/74979810007-liz-freeman.jpg?crop=4271,4270,x1164,y0&width=48&height=48&format=pjpg&auto=webp) Liz Freeman](https://www.naplesnews.com/staff/2647835001/liz-freeman/)\nFort Myers News-Press & Naples Daily News\nJuly 20, 2026, 5:48 p.m. ET\nFort Myers-based N[eoGenomics Laboratories](https://www.neogenomics.com/) is paying $9.8 million to settle allegations it violated the federal F[alse Claims Act](https://www.justice.gov/civil/false-claims-act) by providing discounted consulting services to select providers in exchange for referrals, according to federal authorities.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https:/\""
+              "citation": "In the worst state, Southwest Florida foreclosures highest in America: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# A list nobody wants to top. Southwest Florida now leads foreclosures\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nJuly 20, 2026, 5:09 a.m. ET\n[Southwest Florida](https://www.news-press.com/story/money/2026/07/16/new-florida-beachfront-club-bars-dining-cabanas-pools-naples-swfl-collier-gulf-living/90901414007/) has become the nation's foreclosure epicenter.\nA new midyear report Thursday from ATTOM real estate analytics found Charlotte County posted the highest foreclosur\""
             },
             "suggestions": [
               "What's driving signal breaking 1?",
@@ -147,15 +147,15 @@
           },
           {
             "metric": "signal_breaking_2",
-            "value": "Fort Myers: Southwest Florida has become the nation's foreclosure epicenter; a midyear ATTOM real estate analytics report released in July 2026 found Charlotte County posted the highest foreclosure rates, with Lee County (Cape Coral, Fort Myers) also among the highest in America.",
+            "value": "Marco Island: Federal officials are seeking forfeiture of a $6.6 million Marco Island home over fraud.",
             "direction": "stable",
-            "label": "Fort Myers — breaking",
+            "label": "Marco Island — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/2026/07/20/in-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers/90946392007/",
-              "fetched_at": "2026-07-24T04:34:16Z",
+              "url": "https://www.gulfshorebusiness.com/news/officials-pursue-forfeiture-of-66-million-marco-island-home/article_a966af27-14f9-4e52-9d15-2e755c37bac4.html",
+              "fetched_at": "2026-07-24T06:52:48Z",
               "tier": 2,
-              "citation": "In the worst state, Southwest Florida foreclosures highest in America: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Mostly Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nMONEY\n# A list nobody wants to top. Southwest Florida now leads foreclosures\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nJuly 20, 2026, 5:09 a.m. ET\n[Southwest Florida](https://www.naplesnews.com/story/money/2026/07/16/new-florida-beachfront-club-bars-dining-cabanas-pools-naples-swfl-collier-gulf-living/90901414007/) has become the nation's foreclosure epicenter.\nA new midyear report Thursday from ATTOM real estate analytics found Charlotte County posted the\""
+              "citation": "Feds seek $6.6M Marco Island home forfeiture over fraud | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/officials-pursue-forfeiture-of-66-million-marco-island-home/article_a966af27-14f9-4e52-9d15-2e755c37bac4.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=a966af27-14f9-4e52-9d15-2e755c37bac4) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fofficials-pursue-forfeiture-of-66-million-marco-island-home%2Farticle_a966af27-14f9-4e52-9d15-2e755c37bac4.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fofficials-pursue-forfeiture-of-66-million-marco-island-home%2Farticle_a966af27-14f9-4e52-9d15-2e755c37bac4.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/officials-pursue-forfeiture-of-66-million-marco-island-home/article_a966af27-14f9-4e52-9d15-2e755c37bac4.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness\""
             },
             "suggestions": [
               "What's driving signal breaking 2?",
@@ -170,7 +170,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/07/20/naples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina/90978394007/",
-              "fetched_at": "2026-07-24T04:34:16Z",
+              "fetched_at": "2026-07-24T06:52:48Z",
               "tier": 2,
               "citation": "Naples Bay resort, marina and club sells for more than $41 million: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# 'Irreplaceable' Naples Bay Resort with 97-slip marina sells for millions\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 20, 2026, 6:50 p.m. ET\nThe [Naples Bay Resort & Marina](https://www.naplesbayresort.com/) is in new hands.\nThe high-profile waterfront property — along with the 450-member Naples Bay Club — changed hands for $41.25 million.\n[](https://www.naplesnews.com/)\n[Help](https:\""
             },
@@ -187,7 +187,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/07/20/naples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina/90978394007/",
-              "fetched_at": "2026-07-24T04:34:16Z",
+              "fetched_at": "2026-07-24T06:52:48Z",
               "tier": 2,
               "citation": "Naples Bay resort, marina and club sells for more than $41 million: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# 'Irreplaceable' Naples Bay Resort with 97-slip marina sells for millions\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 20, 2026, 6:50 p.m. ET\nThe [Naples Bay Resort & Marina](https://www.naplesbayresort.com/) is in new hands.\nThe high-profile waterfront property — along with the 450-member Naples Bay Club — changed hands for $41.25 million.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-pr\""
             },
@@ -204,7 +204,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/07/20/naples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina/90978394007/",
-              "fetched_at": "2026-07-24T04:34:16Z",
+              "fetched_at": "2026-07-24T06:52:48Z",
               "tier": 2,
               "citation": "Naples Bay resort, marina and club sells for more than $41 million: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Mostly Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# 'Irreplaceable' Naples Bay Resort with 97-slip marina sells for millions\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 20, 2026, 6:50 p.m. ET\nThe [Naples Bay Resort & Marina](https://www.naplesbayresort.com/) is in new hands.\nThe high-profile waterfront property — along with the 450-member Naples Bay Club — changed hands for $41.25 million.\n[](https://www.naplesnews.com/)\n[Help]\""
             },
@@ -214,54 +214,54 @@
             ]
           },
           {
-            "metric": "signal_transactions_6",
-            "value": "Fort Myers: A newly built, move-in-ready waterfront estate in North Naples will be sold to the highest bidder at a no-reserve auction, as reported July 10, 2026.",
+            "metric": "signal_development_6",
+            "value": "Fort Myers: The Quail Creek Golf Club in North Naples dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.",
             "direction": "stable",
-            "label": "Fort Myers — transactions",
+            "label": "Fort Myers — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/",
-              "fetched_at": "2026-07-24T04:34:16Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/07/22/collier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek/90987096007/",
+              "fetched_at": "2026-07-24T06:52:48Z",
               "tier": 2,
-              "citation": "North Naples waterfront estate to sell at 'no reserve auction': \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F10%2Fnorth-naples-waterfront-estate-to-sell-at-no-reserve-auction%2F90861406007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F10%2Fnorth-naples-waterfront-estate-to-sell-at-no-reserve-auction%2F90861406007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F10%2Fnorth-naples-waterfront-estate-to-sell-at-no-reserve-auction%2F90861406007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F10%2Fnorth-naples-waterfront-estate-to-sell-at-no-reserve-auction%2F90861406007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F10%2Fnorth-naples-waterfront-estate-to-sell-at-no-reserve-auction%2F90861406007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# This move-in-ready North Naples estate will sell to the highest bidder\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 10, 2026, 9:44 a.m. ET\nA newly built, move-in-ready waterfront estate in North Naples will be sold to the highest bidder.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com/sitemap/) [Terms of Service](https://cm.naplesnews.com/terms/) [Subscription Terms & Conditio\""
+              "citation": "Collier golf club revises controversial code amendment for tall fencing: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Golf club backs down on controversial code amendment in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 22, 2026, 9:17 a.m. ET\n[The Quail Creek Golf Club](https://www.quailcreekcc.com/) in North Naples has dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.\n[](https://www.news-press.com/)\n[Help](h\""
             },
             "suggestions": [
-              "What's driving signal transactions 6?",
-              "How does signal transactions 6 here compare to other SWFL areas?"
+              "What's driving signal development 6?",
+              "How does signal development 6 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_transactions_7",
-            "value": "Naples: A Gulf-front estate in Old Naples fetched $27 million, selling for less than its original listing price of $39 million, ranking as one of the highest residential deals of 2026 in Naples.",
+            "metric": "signal_development_7",
+            "value": "Naples: The Quail Creek Golf Club in North Naples dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right, as of July 22, 2026.",
             "direction": "stable",
-            "label": "Naples — transactions",
+            "label": "Naples — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/06/24/gulf-front-estate-fetches-the-highest-price-in-old-naples-this-year/90667733007/",
-              "fetched_at": "2026-07-24T04:34:16Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/07/22/collier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek/90987096007/",
+              "fetched_at": "2026-07-24T06:52:48Z",
               "tier": 2,
-              "citation": "Gulf-front estate fetches the highest price in Old Naples this year: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F24%2Fgulf-front-estate-fetches-the-highest-price-in-old-naples-this-year%2F90667733007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F24%2Fgulf-front-estate-fetches-the-highest-price-in-old-naples-this-year%2F90667733007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F24%2Fgulf-front-estate-fetches-the-highest-price-in-old-naples-this-year%2F90667733007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F24%2Fgulf-front-estate-fetches-the-highest-price-in-old-naples-this-year%2F90667733007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F24%2Fgulf-front-estate-fetches-the-highest-price-in-old-naples-this-year%2F90667733007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Gulf-front home in Old Naples fetches $27 million\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJune 24, 2026, 10:05 a.m. ET\nOld Naples has seen its biggest home resale of the year.\nA Gulf-front estate in the neighborhood fetched $27 million.\nWhile the newer home went for less than its original listing price of $39 million, the sale still ranks as one of the highest residential deals of 2026 in Naples.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesn\""
+              "citation": "Collier golf club revises controversial code amendment for tall fencing: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Golf club backs down on controversial code amendment in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 22, 2026, 9:17 a.m. ET\n[The Quail Creek Golf Club](https://www.quailcreekcc.com/) in North Naples has dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.\n[](https://www.news-press.com/)\n[Help](h\""
             },
             "suggestions": [
-              "What's driving signal transactions 7?",
-              "How does signal transactions 7 here compare to other SWFL areas?"
+              "What's driving signal development 7?",
+              "How does signal development 7 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_transactions_8",
-            "value": "Naples: On June 1, 2026, Gulf Coast International Properties in Naples announced a 'milestone sale' to Phil McCabe, the first buyer to close on a condo residence at the Naples Beach Club mixed-use development; McCabe is investing in a second condo as well.",
+            "metric": "signal_development_8",
+            "value": "North Naples: The Quail Creek Golf Club in North Naples has dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.",
             "direction": "stable",
-            "label": "Naples — transactions",
+            "label": "North Naples — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/06/09/developer-phil-mccabe-others-buying-into-naples-beach-club-in-florida/90457403007/",
-              "fetched_at": "2026-07-24T04:34:16Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/07/22/collier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek/90987096007/",
+              "fetched_at": "2026-07-24T06:52:48Z",
               "tier": 2,
-              "citation": "Developer Phil McCabe, others buying into Naples Beach Club in Florida: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026JUNEACQ&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F09%2Fdeveloper-phil-mccabe-others-buying-into-naples-beach-club-in-florida%2F90457403007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026JUNEACQ&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F09%2Fdeveloper-phil-mccabe-others-buying-into-naples-beach-club-in-florida%2F90457403007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026JUNEACQ&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F09%2Fdeveloper-phil-mccabe-others-buying-into-naples-beach-club-in-florida%2F90457403007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F09%2Fdeveloper-phil-mccabe-others-buying-into-naples-beach-club-in-florida%2F90457403007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F06%2F09%2Fdeveloper-phil-mccabe-others-buying-into-naples-beach-club-in-florida%2F90457403007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Who are the 'big dogs' moving into Naples Beach Club\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJune 9, 2026Updated June 10, 2026, 10:13 a.m. ET\nA prominent Naples resident, developer and entrepreneur isn't just buying one condo at the new Naples Beach Club.\nHe's investing in a second.\nOn June 1, [Gulf Coast International Properties](https://www.gcipnaples.com/) in Naples announced a \"milestone sale\" to Phil McCabe, the first buyer to close on a condo residence at the upscale mixed-use development, which has be\""
+              "citation": "Collier golf club revises controversial code amendment for tall fencing: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Golf club backs down on controversial code amendment in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 22, 2026, 9:17 a.m. ET\n[The Quail Creek Golf Club](https://www.quailcreekcc.com/) in North Naples has dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.\n[](https://www.news-press.com/)\n[Help](h\""
             },
             "suggestions": [
-              "What's driving signal transactions 8?",
-              "How does signal transactions 8 here compare to other SWFL areas?"
+              "What's driving signal development 8?",
+              "How does signal development 8 here compare to other SWFL areas?"
             ]
           }
         ],
@@ -290,23 +290,13 @@
             ],
             "rows": [
               {
-                "key": "34102",
-                "label": "34102",
-                "cells": {
-                  "items": 5,
-                  "latest_fact": "Cars on 5th has reached the end of the road in Naples, with no compromise in sight as of July 17, 2026.",
-                  "latest_place": "5th",
-                  "latest_source": "https://www.news-press.com/story/money/business/local/2026/07/17/with-no-compromise-in-sight-iconic-car-show-likely-to-leave-naples/90943375007/"
-                }
-              },
-              {
                 "key": "34119",
                 "label": "34119",
                 "cells": {
                   "items": 1,
                   "latest_fact": "The Quail Creek Golf Club in North Naples dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right, as of July 22, 2026.",
                   "latest_place": "Quail Creek Golf Club",
-                  "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/07/22/collier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek/90987096007/"
+                  "latest_source": "https://www.news-press.com/story/money/business/local/2026/07/22/collier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek/90987096007/"
                 }
               },
               {
@@ -317,6 +307,16 @@
                   "latest_fact": "Construction began Wednesday July 15 (2026) on Paraíso Beach Club on Collier County's Vanderbilt Beach, described as 'Naples' first and only private beachfront members' club,' featuring bars, fine dining, pools, and cabanas.",
                   "latest_place": "Vanderbilt Beach",
                   "latest_source": "https://www.naplesnews.com/story/money/2026/07/16/new-florida-beachfront-club-bars-dining-cabanas-pools-naples-swfl-collier-gulf-living/90901414007/"
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "items": 3,
+                  "latest_fact": "Cars on 5th has reached the end of the road in Naples, with no compromise in sight as of July 17, 2026.",
+                  "latest_place": "5th",
+                  "latest_source": "https://www.news-press.com/story/money/business/local/2026/07/17/with-no-compromise-in-sight-iconic-car-show-likely-to-leave-naples/90943375007/"
                 }
               },
               {
@@ -332,7 +332,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-07-24T04:34:16Z",
+              "fetched_at": "2026-07-24T06:52:48Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -353,7 +353,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-07-24T04:34:16Z"
+          "computed_at": "2026-07-24T06:52:48Z"
         },
         "exogenous_signals": []
       }
@@ -370,119 +370,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 28,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 28,
-        "refined_at": "2026-07-24T04:34:16Z",
-        "expires": "2026-07-25T04:34:16Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-07-24) $399,994; Fort Myers median asking price (as of 2026-07-24) $325,000; Naples median asking price (as of 2026-07-24) $659,000; SWFL 30-year fixed mortgage rate (as of 2026-07-23) 6.58%. These are cited current facts only; the direction call lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "freshness_median_asking_price_cape_coral_usd",
-            "value": 399994,
-            "direction": "stable",
-            "label": "Cape Coral median asking price (as of 2026-07-24)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-07-24T04:24:42.754484+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-07-24"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price cape coral usd?",
-              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_fort_myers_usd",
-            "value": 325000,
-            "direction": "stable",
-            "label": "Fort Myers median asking price (as of 2026-07-24)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-07-24T04:24:42.754484+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-07-24"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price fort myers usd?",
-              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_naples_usd",
-            "value": 659000,
-            "direction": "stable",
-            "label": "Naples median asking price (as of 2026-07-24)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-07-24T04:24:42.754484+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-07-24"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price naples usd?",
-              "How does freshness median asking price naples usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_mortgage_30yr_fixed_pct",
-            "value": 6.58,
-            "direction": "stable",
-            "label": "SWFL 30-year fixed mortgage rate (as of 2026-07-23)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-              "fetched_at": "2026-07-24T04:24:42.754484+00:00",
-              "tier": 2,
-              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-07-23"
-            },
-            "suggestions": [
-              "What's driving freshness mortgage 30yr fixed pct?",
-              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [],
-        "caveats": [
-          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-07-24T04:34:16Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
@@ -531,1096 +420,8 @@
     },
     {
       "packId": "home-values-swfl",
-      "status": "built",
-      "version": 5,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "home-values-swfl",
-        "version": 5,
-        "refined_at": "2026-07-24T04:34:18Z",
-        "expires": "2026-08-28T04:34:18Z",
-        "ttl_seconds": 3024000,
-        "direction": "bearish",
-        "magnitude": 0.37651569653138467,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "SWFL ZHVI home values read bearish at 2026-06-30 — regional median YoY -5.65% on a median value of $361,089 across 53 ZIPs. Fastest-appreciating: 34139 (0.1%), 34145 (-1.7%), 34117 (-2.6%). Coolest: 33921 (-11.1%), 33907 (-10.7%), 33919 (-10.6%).",
-        "key_metrics": [
-          {
-            "metric": "home_value_yoy_pct_regional_median",
-            "value": -5.65,
-            "direction": "falling",
-            "label": "SWFL regional median ZHVI home-value YoY % (latest period across all covered ZIPs)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value yoy pct regional median?",
-              "How does home value yoy pct regional median here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_zhvi_regional_median",
-            "value": 361089,
-            "direction": "stable",
-            "label": "SWFL regional typical (ZHVI) home value (USD) at 2026-06-30",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value zhvi regional median?",
-              "How does home value zhvi regional median here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_values_zips_covered",
-            "value": 53,
-            "direction": "stable",
-            "label": "Count of SWFL ZIPs with at least one ZHVI observation in the corpus",
-            "variable_type": "extensive",
-            "units": "count",
-            "display_format": "count",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home values zips covered?",
-              "How does home values zips covered here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_yoy_pct_top_appreciating_zips",
-            "value": "34139:0.11%,34145:-1.73%,34117:-2.55%",
-            "direction": "stable",
-            "label": "Top-3 SWFL ZIPs by ZHVI home-value YoY % (rank-ordered, appreciating)",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value yoy pct top appreciating zips?",
-              "How does home value yoy pct top appreciating zips here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_yoy_pct_zip_34139",
-            "value": 0.11,
-            "direction": "rising",
-            "label": "ZHVI home-value YoY % - ZIP 34139 (Everglades), 2026-06-30",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value yoy pct zip 34139?",
-              "How does home value yoy pct zip 34139 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_zhvi_zip_34139",
-            "value": 301358,
-            "direction": "stable",
-            "label": "ZHVI home value (USD) - ZIP 34139 (Everglades), 2026-06-30",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value zhvi zip 34139?",
-              "How does home value zhvi zip 34139 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_yoy_pct_zip_34145",
-            "value": -1.73,
-            "direction": "falling",
-            "label": "ZHVI home-value YoY % - ZIP 34145 (Marco Island), 2026-06-30",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value yoy pct zip 34145?",
-              "How does home value yoy pct zip 34145 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_zhvi_zip_34145",
-            "value": 855245,
-            "direction": "stable",
-            "label": "ZHVI home value (USD) - ZIP 34145 (Marco Island), 2026-06-30",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value zhvi zip 34145?",
-              "How does home value zhvi zip 34145 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_yoy_pct_zip_34117",
-            "value": -2.55,
-            "direction": "falling",
-            "label": "ZHVI home-value YoY % - ZIP 34117 (Naples), 2026-06-30",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value yoy pct zip 34117?",
-              "How does home value yoy pct zip 34117 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_zhvi_zip_34117",
-            "value": 562588,
-            "direction": "stable",
-            "label": "ZHVI home value (USD) - ZIP 34117 (Naples), 2026-06-30",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value zhvi zip 34117?",
-              "How does home value zhvi zip 34117 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_yoy_pct_zip_33921",
-            "value": -11.14,
-            "direction": "falling",
-            "label": "ZHVI home-value YoY % - ZIP 33921 (Boca Grande), 2026-06-30",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value yoy pct zip 33921?",
-              "How does home value yoy pct zip 33921 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_zhvi_zip_33921",
-            "value": 2269236,
-            "direction": "stable",
-            "label": "ZHVI home value (USD) - ZIP 33921 (Boca Grande), 2026-06-30",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value zhvi zip 33921?",
-              "How does home value zhvi zip 33921 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_yoy_pct_zip_33907",
-            "value": -10.75,
-            "direction": "falling",
-            "label": "ZHVI home-value YoY % - ZIP 33907 (Fort Myers), 2026-06-30",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value yoy pct zip 33907?",
-              "How does home value yoy pct zip 33907 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_zhvi_zip_33907",
-            "value": 202405,
-            "direction": "stable",
-            "label": "ZHVI home value (USD) - ZIP 33907 (Fort Myers), 2026-06-30",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value zhvi zip 33907?",
-              "How does home value zhvi zip 33907 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_yoy_pct_zip_33919",
-            "value": -10.65,
-            "direction": "falling",
-            "label": "ZHVI home-value YoY % - ZIP 33919 (Fort Myers), 2026-06-30",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value yoy pct zip 33919?",
-              "How does home value yoy pct zip 33919 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "home_value_zhvi_zip_33919",
-            "value": 248834,
-            "direction": "stable",
-            "label": "ZHVI home value (USD) - ZIP 33919 (Fort Myers), 2026-06-30",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "suggestions": [
-              "Chart home values over time",
-              "What's driving home value zhvi zip 33919?",
-              "How does home value zhvi zip 33919 here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "home_values_by_zip",
-            "title": "SWFL ZHVI home value by ZIP — latest period 2026-06-30",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "metro",
-                "label": "Metro area"
-              },
-              {
-                "id": "county_name",
-                "label": "County"
-              },
-              {
-                "id": "city",
-                "label": "City"
-              },
-              {
-                "id": "latest_period",
-                "label": "Latest period"
-              },
-              {
-                "id": "home_value_zhvi",
-                "label": "Home value (USD)",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "value_yoy_pct",
-                "label": "Value YoY %",
-                "display_format": "percent",
-                "units": "percent"
-              },
-              {
-                "id": "value_mom_pct",
-                "label": "Value MoM %",
-                "display_format": "percent",
-                "units": "percent"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33901",
-                "label": "33901",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 259710,
-                  "value_yoy_pct": -7.87,
-                  "value_mom_pct": -0.45
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "North Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 228778,
-                  "value_yoy_pct": -8.13,
-                  "value_mom_pct": -0.49
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 339948,
-                  "value_yoy_pct": -6.33,
-                  "value_mom_pct": -0.3
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 284857,
-                  "value_yoy_pct": -5.98,
-                  "value_mom_pct": -0.5
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 202405,
-                  "value_yoy_pct": -10.75,
-                  "value_mom_pct": -0.87
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 323703,
-                  "value_yoy_pct": -8.28,
-                  "value_mom_pct": -0.45
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 295840,
-                  "value_yoy_pct": -6.57,
-                  "value_mom_pct": -0.37
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 380920,
-                  "value_yoy_pct": -5.32,
-                  "value_mom_pct": -0.24
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 441150,
-                  "value_yoy_pct": -5.07,
-                  "value_mom_pct": -0.16
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 421126,
-                  "value_yoy_pct": -4.93,
-                  "value_mom_pct": -0.19
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 215257,
-                  "value_yoy_pct": -7.62,
-                  "value_mom_pct": -0.62
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "North Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 293240,
-                  "value_yoy_pct": -4.94,
-                  "value_mom_pct": -0.27
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 248834,
-                  "value_yoy_pct": -10.65,
-                  "value_mom_pct": -0.41
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Alva",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 383170,
-                  "value_yoy_pct": -5.48,
-                  "value_mom_pct": -0.41
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Boca Grande",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 2269236,
-                  "value_yoy_pct": -11.14,
-                  "value_mom_pct": -1.02
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Bokeelia",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 361089,
-                  "value_yoy_pct": -6.98,
-                  "value_mom_pct": -0.01
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Captiva",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 1073455,
-                  "value_yoy_pct": -6.79,
-                  "value_mom_pct": 0
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Estero",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 477469,
-                  "value_yoy_pct": -5.73,
-                  "value_mom_pct": -0.41
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers Beach",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 495854,
-                  "value_yoy_pct": -5.23,
-                  "value_mom_pct": 0.17
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 241318,
-                  "value_yoy_pct": -8.18,
-                  "value_mom_pct": -0.79
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Saint James City",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 429010,
-                  "value_yoy_pct": -2.84,
-                  "value_mom_pct": 0.24
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Sanibel",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 810548,
-                  "value_yoy_pct": -6.36,
-                  "value_mom_pct": 0.08
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 338696,
-                  "value_yoy_pct": -5.12,
-                  "value_mom_pct": -0.03
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 357327,
-                  "value_yoy_pct": -5.3,
-                  "value_mom_pct": -0.49
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 287277,
-                  "value_yoy_pct": -7.08,
-                  "value_mom_pct": -0.61
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 311900,
-                  "value_yoy_pct": -5.18,
-                  "value_mom_pct": -0.45
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 277788,
-                  "value_yoy_pct": -10.52,
-                  "value_mom_pct": -0.61
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 289101,
-                  "value_yoy_pct": -7.09,
-                  "value_mom_pct": -0.52
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 285082,
-                  "value_yoy_pct": -7.76,
-                  "value_mom_pct": -0.71
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 324566,
-                  "value_yoy_pct": -5.54,
-                  "value_mom_pct": -0.31
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 359318,
-                  "value_yoy_pct": -5.01,
-                  "value_mom_pct": -0.24
-                }
-              },
-              {
-                "key": "33993",
-                "label": "33993",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 326776,
-                  "value_yoy_pct": -6.38,
-                  "value_mom_pct": -0.35
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 1312265,
-                  "value_yoy_pct": -2.84,
-                  "value_mom_pct": -0.2
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 1118253,
-                  "value_yoy_pct": -5.49,
-                  "value_mom_pct": -0.29
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 351377,
-                  "value_yoy_pct": -4.58,
-                  "value_mom_pct": -0.3
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 454049,
-                  "value_yoy_pct": -3.37,
-                  "value_mom_pct": -0.48
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 1009311,
-                  "value_yoy_pct": -5.65,
-                  "value_mom_pct": -0.03
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 582143,
-                  "value_yoy_pct": -3.99,
-                  "value_mom_pct": -0.42
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 602801,
-                  "value_yoy_pct": -4.86,
-                  "value_mom_pct": -0.46
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 331094,
-                  "value_yoy_pct": -7.43,
-                  "value_mom_pct": -0.47
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 502846,
-                  "value_yoy_pct": -6.11,
-                  "value_mom_pct": -0.36
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 515347,
-                  "value_yoy_pct": -5.8,
-                  "value_mom_pct": -0.33
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 453820,
-                  "value_yoy_pct": -4.1,
-                  "value_mom_pct": -0.37
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 562588,
-                  "value_yoy_pct": -2.55,
-                  "value_mom_pct": -0.35
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 649564,
-                  "value_yoy_pct": -5.54,
-                  "value_mom_pct": -0.49
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 550678,
-                  "value_yoy_pct": -4.28,
-                  "value_mom_pct": -0.46
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Bonita Springs",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 636586,
-                  "value_yoy_pct": -6.37,
-                  "value_mom_pct": -0.13
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Bonita Springs",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 461025,
-                  "value_yoy_pct": -5.54,
-                  "value_mom_pct": -0.32
-                }
-              },
-              {
-                "key": "34138",
-                "label": "34138",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Chokoloskee",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 313991,
-                  "value_yoy_pct": -7.47,
-                  "value_mom_pct": -0.7
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Everglades",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 301358,
-                  "value_yoy_pct": 0.11,
-                  "value_mom_pct": -0.08
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 600928,
-                  "value_yoy_pct": -3.87,
-                  "value_mom_pct": -0.61
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Immokalee",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 344277,
-                  "value_yoy_pct": -5.7,
-                  "value_mom_pct": -0.28
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Marco Island",
-                  "latest_period": "2026-06-30",
-                  "home_value_zhvi": 855245,
-                  "value_yoy_pct": -1.73,
-                  "value_mom_pct": -0.47
-                }
-              }
-            ],
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-              "fetched_at": "2026-07-24T04:34:16Z",
-              "tier": 3,
-              "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-            },
-            "note": "One row per SWFL ZIP with at least one ZHVI observation. Home value is Zillow's seasonally-adjusted middle-tier (0.33-0.67) all-homes value index (USD). YoY and MoM are null when a 12-month or 1-month look-back observation is unavailable."
-          }
-        ],
-        "caveats": [],
-        "contradicts": [],
-        "confidence": 0.6,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 3,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-07-24T04:34:18Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "investor-zip-swfl",
@@ -1629,678 +430,8 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "built",
-      "version": 15,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "active-listings-swfl",
-        "version": 15,
-        "refined_at": "2026-07-24T04:34:18Z",
-        "expires": "2026-07-26T04:34:18Z",
-        "ttl_seconds": 172800,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "21,457 active SWFL residential listings, median asking $424,900 (active residential listings, as of 2026-07-24). By county: Lee 14,822 (median $369,900), Collier 6,635 (median $650,000), Lee 1 (median $319,900).",
-        "key_metrics": [
-          {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 21457,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-07-24T04:34:18Z",
-              "tier": 2,
-              "citation": "21,457 active SWFL residential listings as of 2026-07-24"
-            },
-            "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_list_price_swfl",
-            "label": "SWFL median asking price (active residential)",
-            "value": 424900,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-07-24T04:34:18Z",
-              "tier": 2,
-              "citation": "median asking price across 21,457 active SWFL listings: $424,900"
-            },
-            "suggestions": [
-              "What's driving median list price swfl?",
-              "How does median list price swfl here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "active_listings_by_county",
-            "title": "SWFL active residential listings by county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 14822,
-                  "median_list_price": 369900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "listing_count": 6635,
-                  "median_list_price": 650000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 319900,
-                  "avg_days_on_market": null
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-07-24T04:34:18Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-24"
-            }
-          },
-          {
-            "id": "active_listings_by_zip",
-            "title": "SWFL active residential listings by ZIP",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33993",
-                "label": "33993 (Lee)",
-                "cells": {
-                  "listing_count": 1029,
-                  "median_list_price": 389999,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908 (Lee)",
-                "cells": {
-                  "listing_count": 941,
-                  "median_list_price": 329900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917 (Lee)",
-                "cells": {
-                  "listing_count": 779,
-                  "median_list_price": 189900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914 (Lee)",
-                "cells": {
-                  "listing_count": 775,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120 (Collier)",
-                "cells": {
-                  "listing_count": 723,
-                  "median_list_price": 650000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909 (Lee)",
-                "cells": {
-                  "listing_count": 700,
-                  "median_list_price": 340250,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135 (Lee)",
-                "cells": {
-                  "listing_count": 685,
-                  "median_list_price": 459900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974 (Lee)",
-                "cells": {
-                  "listing_count": 650,
-                  "median_list_price": 324900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114 (Collier)",
-                "cells": {
-                  "listing_count": 612,
-                  "median_list_price": 547000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904 (Lee)",
-                "cells": {
-                  "listing_count": 587,
-                  "median_list_price": 420000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112 (Collier)",
-                "cells": {
-                  "listing_count": 581,
-                  "median_list_price": 340000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971 (Lee)",
-                "cells": {
-                  "listing_count": 574,
-                  "median_list_price": 320000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931 (Lee)",
-                "cells": {
-                  "listing_count": 566,
-                  "median_list_price": 675000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913 (Lee)",
-                "cells": {
-                  "listing_count": 559,
-                  "median_list_price": 469900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903 (Lee)",
-                "cells": {
-                  "listing_count": 537,
-                  "median_list_price": 139900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928 (Lee)",
-                "cells": {
-                  "listing_count": 525,
-                  "median_list_price": 530000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145 (Collier)",
-                "cells": {
-                  "listing_count": 522,
-                  "median_list_price": 972450,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919 (Lee)",
-                "cells": {
-                  "listing_count": 492,
-                  "median_list_price": 247250,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905 (Lee)",
-                "cells": {
-                  "listing_count": 462,
-                  "median_list_price": 355192,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108 (Collier)",
-                "cells": {
-                  "listing_count": 460,
-                  "median_list_price": 1282500,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119 (Collier)",
-                "cells": {
-                  "listing_count": 460,
-                  "median_list_price": 688500,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102 (Collier)",
-                "cells": {
-                  "listing_count": 458,
-                  "median_list_price": 2987500,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110 (Collier)",
-                "cells": {
-                  "listing_count": 438,
-                  "median_list_price": 675000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113 (Collier)",
-                "cells": {
-                  "listing_count": 436,
-                  "median_list_price": 522450,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991 (Lee)",
-                "cells": {
-                  "listing_count": 422,
-                  "median_list_price": 469000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976 (Lee)",
-                "cells": {
-                  "listing_count": 413,
-                  "median_list_price": 329900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972 (Lee)",
-                "cells": {
-                  "listing_count": 412,
-                  "median_list_price": 359000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134 (Lee)",
-                "cells": {
-                  "listing_count": 406,
-                  "median_list_price": 825000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936 (Lee)",
-                "cells": {
-                  "listing_count": 400,
-                  "median_list_price": 245000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957 (Lee)",
-                "cells": {
-                  "listing_count": 368,
-                  "median_list_price": 954500,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103 (Collier)",
-                "cells": {
-                  "listing_count": 360,
-                  "median_list_price": 1495000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142 (Collier)",
-                "cells": {
-                  "listing_count": 336,
-                  "median_list_price": 435298,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990 (Lee)",
-                "cells": {
-                  "listing_count": 309,
-                  "median_list_price": 409000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109 (Collier)",
-                "cells": {
-                  "listing_count": 301,
-                  "median_list_price": 699900,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104 (Collier)",
-                "cells": {
-                  "listing_count": 296,
-                  "median_list_price": 406950,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912 (Lee)",
-                "cells": {
-                  "listing_count": 280,
-                  "median_list_price": 349450,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907 (Lee)",
-                "cells": {
-                  "listing_count": 261,
-                  "median_list_price": 179999,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916 (Lee)",
-                "cells": {
-                  "listing_count": 241,
-                  "median_list_price": 305000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33901",
-                "label": "33901 (Lee)",
-                "cells": {
-                  "listing_count": 235,
-                  "median_list_price": 310000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105 (Collier)",
-                "cells": {
-                  "listing_count": 206,
-                  "median_list_price": 454000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920 (Lee)",
-                "cells": {
-                  "listing_count": 197,
-                  "median_list_price": 429205,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967 (Lee)",
-                "cells": {
-                  "listing_count": 195,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973 (Lee)",
-                "cells": {
-                  "listing_count": 191,
-                  "median_list_price": 479000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117 (Collier)",
-                "cells": {
-                  "listing_count": 182,
-                  "median_list_price": 707450,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966 (Lee)",
-                "cells": {
-                  "listing_count": 150,
-                  "median_list_price": 319250,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924 (Lee)",
-                "cells": {
-                  "listing_count": 130,
-                  "median_list_price": 1500000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922 (Lee)",
-                "cells": {
-                  "listing_count": 103,
-                  "median_list_price": 499000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956 (Lee)",
-                "cells": {
-                  "listing_count": 100,
-                  "median_list_price": 584000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116 (Collier)",
-                "cells": {
-                  "listing_count": 98,
-                  "median_list_price": 584000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921 (Lee)",
-                "cells": {
-                  "listing_count": 43,
-                  "median_list_price": 3975000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34138",
-                "label": "34138 (Collier)",
-                "cells": {
-                  "listing_count": 32,
-                  "median_list_price": 180000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139 (Collier)",
-                "cells": {
-                  "listing_count": 31,
-                  "median_list_price": 349000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140 (Collier)",
-                "cells": {
-                  "listing_count": 14,
-                  "median_list_price": 530000,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34141",
-                "label": "34141 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 269500,
-                  "avg_days_on_market": null
-                }
-              },
-              {
-                "key": "34137",
-                "label": "34137 (Collier)",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 350000,
-                  "avg_days_on_market": null
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-07-24T04:34:18Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-24"
-            }
-          }
-        ],
-        "caveats": [
-          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
-          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
-          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-07-24T04:34:18Z"
-        },
-        "exogenous_signals": [],
-        "grain_boundary": {
-          "not_available": [
-            "Sold / closed sale prices — active asking prices only, not closed transactions",
-            "Per-listing history or price-cut events — current snapshot only",
-            "Rental listings — sale listings only"
-          ],
-          "finest_grain": "zip-snapshot"
-        }
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "active-rentals-swfl",
@@ -2323,13 +454,13 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 117,
+      "version": 118,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 117,
-        "refined_at": "2026-07-24T04:34:40Z",
-        "expires": "2026-07-31T04:34:40Z",
+        "version": 118,
+        "refined_at": "2026-07-24T06:53:10Z",
+        "expires": "2026-07-31T06:53:10Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
         "magnitude": 0.5486218683363845,
@@ -3094,8 +1225,8 @@
         "upstream_count": 38,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720.0000000000001,
-          "computed_at": "2026-07-24T04:34:40.000Z"
+          "half_life_hours": 720,
+          "computed_at": "2026-07-24T06:53:10.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
