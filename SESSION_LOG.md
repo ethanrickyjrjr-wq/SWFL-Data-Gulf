@@ -1,3 +1,60 @@
+## 2026-07-23 (Sonnet 5 · main) — wired the built-but-unused Lee lake comp feed into the live comp path; real sale dates replace vendor AVM estimates for Lee, sqft-known callers
+
+Follow-up to a prior session's own finding (scratchpad 0ab): `comp-source-lake.ts` (`fetchLeeComps`,
+reading `data_lake.lee_comp_sales_v` — LeePA sale + FDOR characteristics, real dates) and
+`comp-rank.ts`'s `rankComps` were built, tested, and verified in isolation on 07/22, but
+`comp-helper.ts` — the one live comp path (`compsForAddress`, 34 importers: offer-check,
+should-i-sell, market-comps/just-sold/price-reduced email recipes, showing-prep, address-context)
+never imported either. Every production comp still ran the vendor's undated `/nearby-home-values`
+AVM path even after that work shipped.
+
+**Fixed:** added `tryLeeLakeComps()` in `comp-helper.ts` — Lee-only (12071), gated on the caller
+already supplying `subjectSqft` (same gate the lake query needs to bound its read, per the killed
+07/21 egress pattern). Tried first; ranks via the existing `rankComps` with `requireSaleDate: true`
+(default — every lake row is a real recorded sale, unlike the vendor's AVM estimate), and returns
+early with `source: "lake"` only when it meets Fannie's 3-comp minimum. Falls through silently to
+the unchanged vendor path otherwise (thin lake result, Collier, or unknown subject size).
+
+**Caught while wiring, not asked for, fixed anyway:** `compSources()` and `buildCompsChartSpec()`
+unconditionally cited "realtor.com" for every comp result, which would have been a false citation
+for lake-sourced comps that never call the vendor at all. Added `CompResult.source` and made both
+functions source-aware — lake comps cite SWFL Data Gulf only.
+
+**Also fixed:** `RenderComp` gained a `dateGrain?: "day"|"month"` field and `pricePhrase()` now
+renders month-grain lake dates as "sold $X in May 2026" instead of running them through the
+day-grain formatter, which would have fabricated a day-of-month the source never recorded (the
+same T10 trap `data-roots.md` already documents for this exact table). `saleDateLabel` exported
+from `comp-rank.ts` to back this (previously module-local).
+
+6 new tests in `comp-helper.test.ts` pin: lake-first with zero vendor calls, month-grain rendering,
+lake-only citation, vendor fallback on a thin lake result, Collier never touching the lake path, and
+unknown-sqft never touching it either (mirrors the vendor ranker's existing "unknown size changes
+nothing" test). Full `lib/assistant/` suite 266/266 green, downstream consumer suites (deliverable
+recipes, email, offer-check, should-i-sell) 538/538 green, `bunx tsc --noEmit` clean, `bunx next
+build` clean.
+
+**Found while out there, NOT fixed, still open:**
+- `comps_size_band_chat_lane` [defect, due 08/04] — the raw chat comp lane (`compHelper` with no
+  caller-supplied sqft) never reaches either ranker, vendor or lake. Two rounds of comp-quality
+  fixes now (07/22 vendor ranking, this session's lake wiring) both require `subjectSqft`, and chat
+  is the one call site that doesn't have it. This is the highest-traffic comp surface and the least
+  fixed one — worth prioritizing over further comp work elsewhere.
+- Collier still has zero lake source by design (`comp-source-lake.ts`'s own header: FDOR month-grain
+  fields, no exact-date equivalent) — every Collier comp still runs the vendor's undated AVM path,
+  unchanged by this session.
+- `market_comps_only_one_comp` [defect] — the market-comps EMAIL chart plots subject + area-median
+  line only, zero actual comparable sales; a different module (`lib/deliverable/recipes/market-comps.ts`
+  chart builder) than what this session touched.
+- `comp_lane_prose_contradicts_chart` [defect] — chat prose says "I don't have comps for that
+  address" while the SAME answer's chart frame carries 5 priced comps; separately, one specific
+  address returned zero comp rows minutes after a nearby one returned 5 — comp-fetch stability, not
+  a wiring gap.
+- `market-comps-chart-key-collision` [defect] — the market-comps chart's storage key has no
+  per-house discriminator, so two different houses in the same ZIP on the same day can silently
+  overwrite each other's sent chart image.
+
+Not pushed this turn — per standing no-autonomous-push rule, holding for confirmation.
+
 ## 2026-07-23 (Sonnet 5 · main) — tier-divergence-swfl wired into master (first-ever real build), collided with the nightly rebuild bot mid-push, resolved
 
 Operator asked what home-values-swfl and tier-divergence-swfl are and why they don't feed master.
