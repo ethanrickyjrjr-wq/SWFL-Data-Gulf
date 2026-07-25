@@ -34,6 +34,18 @@ jobs:
       - name: Lint
         run: bunx eslint .
 
+      # Chromium is a fixed-version binary download — no resolution, no compile — so a
+      # cache hit skips essentially all of it. This is the highest-frequency cache in the
+      # repo because CI runs on every push. Keyed on bun.lock: the Playwright version is
+      # pinned there, so any dependency change rebuilds and nothing stale can be served.
+      # `--with-deps` still runs its apt step on a hit (OS packages live outside this
+      # directory and are not cacheable) — only the browser download is skipped.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
+
       # Several bun:test suites launch a real browser (lib/pdf rasterize + the
       # PDF/HTML visual-parity tests). `bun test` has no browser without this, so
       # they failed with "Executable doesn't exist" and red-ed main. `chromium`

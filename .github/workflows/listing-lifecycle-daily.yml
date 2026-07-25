@@ -88,13 +88,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python + cached ingest venv
+        uses: ./.github/actions/setup-ingest-python
         with:
           python-version: "3.12"
-          cache: pip
-
-      - name: Install dependencies
-        run: pip install -r ingest/requirements.txt
 
       - name: Install Playwright browser
         # Missing on 07/07 (28884444909/28874493335/28863961787): crawl4ai's browser leg needs the

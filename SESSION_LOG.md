@@ -1,3 +1,48 @@
+## 2026-07-25 (Opus 5 · main) — brought GHA dependency caching in; measured that our existing `cache: pip` was buying ~2s and replaced it with a cached virtualenv
+
+Operator asked what `actions/cache` could do for us. Measured before recommending, and the
+first number kills the usual pitch: the repo is **public**, so Actions minutes are free and
+unlimited. This saves $0. Everything below is wall-clock only, and I said so up front.
+
+**What's actually slow (measured 07/25/2026 off real run logs, not estimated):**
+`pip install -r ingest/requirements.txt` = **50s** — on `bls-laus-monthly` that's 50 of a 63s
+run, four-fifths of the job, before 2s of actual work. 69 workflows install that manifest.
+`bun install` = 13-15s across 26 workflows. `playwright install` = 22s across 5.
+
+**The finding worth keeping:** twelve workflows already set `cache: pip` and it is nearly a
+no-op. I pulled the logs to rule out a cold miss — `ingest-brevitas-listings` (run 29689353778)
+and `active-listings-daily` (run 29199258454) both logged `Cache hit ... Cache Size: ~362 MB`
+and still took 47-48s versus 50s uncached. **~2s.** `cache: pip` caches pip's *download*
+directory; our cost is resolving and building the tree into site-packages (crawl4ai, pandas,
+pyarrow, duckdb, pymupdf), not fetching wheels. So it caches the wrong layer.
+
+**Shipped:** `.github/actions/setup-ingest-python` — a composite action that caches the built
+`.venv` and skips the install outright on a hit (50s → ~5s). Wired into the 7 daily workflows
+whose shape it could verify, plus a Playwright browser cache on `ci.yml` (highest-frequency
+workflow — runs on every push; Chromium is a fixed-version binary so a hit skips the download).
+Added `.venv/` to `.gitignore`: no workflow stages broadly today (checked — every `git add`
+names explicit paths), but a ~1 GB tree in the workspace is one `git add -A` away from disaster.
+
+**Design note that makes it work at all:** GitHub evicts any entry not *accessed* in 7 days, and
+49 of our pip workflows run monthly or rarer — a per-workflow key would miss every single time.
+So every workflow on a manifest shares ONE key and the daily runs keep it warm for the annual
+ones. Guards against the obvious ways this goes wrong (no `restore-keys`, so a prefix match can
+never serve a venv built from different deps; key carries the *resolved* python version, not the
+requested "3.13", so a patch bump rebuilds instead of poisoning) are written into the action file.
+
+**An argument I checked and killed, rather than sell:** I expected the real case to be reliability
+— caching removing PyPI as a per-run failure surface, given the cron ledger and how often
+`heal-cron-failure` fires. The evidence isn't there. The only network failure in 180 lines of
+`docs/cron-rebuild-failures.md` is a `ReadTimeout` from api.census.gov, an upstream API. No
+dependency install has ever failed us.
+
+**Not done, deliberately:** the remaining ~62 pip workflows (monthly/quarterly/annual) still
+install cold — they benefit only once wired, and I staged rather than sweeping 62 crons that feed
+the lake before one green run proves the action. `data-targets-daily.yml` was skipped by the
+codemod's own safety check (single-line `- run:` shape it couldn't prove safe). 10 workflows run
+`crawl4ai-setup`, which downloads Chromium and is cacheable the same way as `ci.yml`. All three
+are on check `gha_dependency_cache_live_verify`.
+
 ## 2026-07-23 (Sonnet 5 · main) — wired the built-but-unused Lee lake comp feed into the live comp path; real sale dates replace vendor AVM estimates for Lee, sqft-known callers
 
 Follow-up to a prior session's own finding (scratchpad 0ab): `comp-source-lake.ts` (`fetchLeeComps`,

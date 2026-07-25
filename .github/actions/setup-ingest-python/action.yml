@@ -1,0 +1,97 @@
+name: "Setup ingest Python"
+description: "setup-python + a cached virtualenv for the ingest dependency set. Restores a prebuilt .venv on an exact key match; falls back to a normal pip install on a miss."
+
+# WHY THIS EXISTS (measured 07/25/2026, not assumed):
+#   `pip install -r ingest/requirements.txt` measures 50s on a cold runner and is the
+#   bulk of most ingest jobs — bls-laus-monthly spent 50s of a 63s run installing before
+#   doing 2s of work. Twelve workflows already set `cache: pip` on setup-python and it
+#   buys ~2s: ingest-brevitas-listings and active-listings-daily BOTH logged a real
+#   "Cache hit ... Cache Size: ~362 MB" and still took 47-48s. That cache stores pip's
+#   DOWNLOAD directory — our cost is resolving and building the tree into site-packages
+#   (crawl4ai, pandas, pyarrow, duckdb, pymupdf), not fetching wheels. So we cache the
+#   built virtualenv instead and skip the install step outright on a hit.
+#
+#   This saves NO money — the repo is public, so Actions minutes are free and unlimited.
+#   It buys wall-clock, and it matters most on a manual workflow_dispatch where a human
+#   is actually watching 50 of 63 seconds go to pip.
+#
+# FAILURE MODES AND THE GUARD FOR EACH:
+#   1. Stale venv served after requirements.txt changes → the key hashes the requirements
+#      file, AND there are deliberately NO restore-keys. A prefix match would hand back a
+#      venv built from a DIFFERENT dependency set and the job would run green on wrong
+#      code. Exact key or full reinstall; there is no partial-credit path.
+#   2. Python patch bump poisons the tree (ABI + absolute-path shebangs in .venv/bin) →
+#      the key uses setup-python's RESOLVED `python-version` output (e.g. 3.13.5), never
+#      the requested "3.13". A 3.13.5 → 3.13.6 bump changes the key and rebuilds.
+#   3. Two different manifests colliding on one key → the key includes the requirements
+#      path, so ingest/requirements.txt and ingest/requirements-probe.txt never share an
+#      entry. Workflows doing inline installs (`pip install graphifyy`) must NOT use this
+#      action; they have no manifest to hash.
+#   4. Cross-runner restore → key includes runner.os and runner.arch.
+#   5. Eviction starving the rare crons — GitHub drops any entry not ACCESSED in 7 days,
+#      and 49 of our pip workflows run monthly or rarer, so a per-workflow key would miss
+#      every single time → every workflow on the same manifest shares ONE key, so the
+#      daily jobs keep the entry warm and the annual ones ride along on it.
+#   6. The action silently not applying → there is no silent path. If .venv/bin never
+#      lands on PATH the job runs against system python with zero deps and dies on
+#      ImportError immediately. A miss is slow; it is never quietly wrong.
+#
+# Pinned to actions/cache@v4 on purpose: v5+ requires Actions Runner >= 2.327.1, and we
+# have two `[self-hosted, swfl-local]` workflows. Those two don't use this action (they
+# drive pre-provisioned Windows venvs), but v4 keeps a future reuse from breaking them.
+
+inputs:
+  python-version:
+    description: "Python version to set up. Must match what the workflow pinned before."
+    required: false
+    default: "3.13"
+  requirements:
+    description: "Path to the requirements file to install and to hash into the cache key."
+    required: false
+    default: "ingest/requirements.txt"
+
+outputs:
+  cache-hit:
+    description: "'true' when the prebuilt virtualenv was restored and the install was skipped."
+    value: ${{ steps.venv-cache.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Python
+      id: py
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+        # No `cache: pip` here. It is the ~362 MB download cache measured above at ~2s of
+        # benefit, and keeping it would burn repo cache quota (10 GB cap, evicted
+        # oldest-access-first) competing with the venv entry that actually pays.
+
+    - name: Restore cached virtualenv
+      id: venv-cache
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ runner.arch }}-py${{ steps.py.outputs.python-version }}-${{ inputs.requirements }}-${{ hashFiles(inputs.requirements) }}
+        # restore-keys intentionally omitted — see failure mode 1 above.
+
+    - name: Build virtualenv (cache miss only)
+      if: steps.venv-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        python -m venv .venv
+        .venv/bin/python -m pip install --upgrade pip
+        .venv/bin/python -m pip install -r "${{ inputs.requirements }}"
+
+    - name: Put the virtualenv on PATH
+      shell: bash
+      run: echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+
+    - name: Confirm the interpreter the job will actually use
+      # Cheap and load-bearing: proves `python` resolves INTO .venv before any pipeline
+      # runs, so a broken restore surfaces here with a clear message instead of as a
+      # confusing ImportError three steps later.
+      shell: bash
+      run: |
+        echo "python -> $(command -v python)"
+        python -c 'import sys; assert ".venv" in sys.prefix, f"venv not active: {sys.prefix}"; print(sys.version)'

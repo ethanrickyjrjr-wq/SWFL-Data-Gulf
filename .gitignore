@@ -105,6 +105,12 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
+# Virtualenv. On CI this is the cached ingest venv that
+# .github/actions/setup-ingest-python restores into the workspace root — no workflow
+# stages broadly today (every `git add` names explicit paths), but a ~1 GB tree sitting
+# in the workspace is one careless `git add -A` away from a commit nobody can revert.
+.venv/
+
 # personal_vault backups — strategic insights, never commit
 .private/
 

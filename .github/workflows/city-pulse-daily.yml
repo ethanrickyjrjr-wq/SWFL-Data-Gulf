@@ -44,13 +44,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup Python
-        uses: actions/setup-python@v6
+      - name: Setup Python + cached ingest venv
+        uses: ./.github/actions/setup-ingest-python
         with:
           python-version: "3.13"
-
-      - name: Install ingest dependencies
-        run: pip install -r ingest/requirements.txt
 
       - name: Run city_pulse pipeline
         env:

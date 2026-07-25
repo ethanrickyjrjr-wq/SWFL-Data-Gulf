@@ -74,13 +74,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python + cached ingest venv
+        uses: ./.github/actions/setup-ingest-python
         with:
           python-version: "3.12"
-          cache: pip
-
-      - name: Install dependencies
-        run: pip install -r ingest/requirements.txt
 
       - name: crawl4ai preflight
         run: crawl4ai-doctor
