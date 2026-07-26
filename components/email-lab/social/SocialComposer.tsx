@@ -1,7 +1,11 @@
 // components/email-lab/social/SocialComposer.tsx
 "use client";
 import dynamic from "next/dynamic";
+import { useCallback } from "react";
+import { SOCIAL_FORMATS } from "@/lib/social/formats";
 import type { SocialComposerHandle } from "./useSocialComposer";
+import { BlueskyPostBar } from "./BlueskyPostBar";
+import { deriveAltDefault, type ExportImageFn } from "./bluesky-post-bar-logic";
 
 // react-konva is browser-only (it touches `window`); never server-render it.
 const KonvaStage = dynamic(() => import("./KonvaStage"), {
@@ -27,7 +31,31 @@ export function SocialComposer({ composer }: { composer: SocialComposerHandle })
     setCaption,
     hashtags,
     variants,
+    hasElements,
   } = composer;
+
+  // Exposes the stage the same way useSocialComposer.ts's exportPng does
+  // (stage.toDataURL({ pixelRatio, mimeType })), but parameterized so
+  // BlueskyPostBar's re-encode ladder (bluesky-post-bar-logic.ts's
+  // shrinkToCap) can ask for progressively cheaper exports. `baseRatio`
+  // mirrors exportPng's own `targetW / stage.width()` normalization — the
+  // on-screen stage is shrunk to `displayWidth`, so the ladder's pixelRatio
+  // (2, 1.5, 1) is a multiple of the format's real publish width, not of the
+  // shrunk preview.
+  const exportImage: ExportImageFn = useCallback(
+    (opts) => {
+      const stage = stageRef.current;
+      if (!stage) return null;
+      const targetW = SOCIAL_FORMATS[design.format].width;
+      const baseRatio = targetW / stage.width();
+      try {
+        return stage.toDataURL({ ...opts, pixelRatio: baseRatio * opts.pixelRatio });
+      } catch {
+        return null;
+      }
+    },
+    [design.format, stageRef],
+  );
 
   return (
     <div className="flex h-full flex-col overflow-auto">
@@ -65,6 +93,12 @@ export function SocialComposer({ composer }: { composer: SocialComposerHandle })
             </p>
           )}
         </div>
+      )}
+
+      {/* Post to Bluesky — mirrors the "Export PNG"/"Schedule post" hasElements
+          gate in EmailLabGridShell.tsx; nothing to post from a blank canvas. */}
+      {hasElements && (
+        <BlueskyPostBar exportImage={exportImage} altDefault={deriveAltDefault(design.elements)} />
       )}
     </div>
   );
