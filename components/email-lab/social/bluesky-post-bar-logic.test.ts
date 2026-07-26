@@ -4,6 +4,7 @@ import {
   SHRINK_LADDER,
   captionState,
   deriveAltDefault,
+  resolveInitialCaption,
   shrinkToCap,
   type ExportImageFn,
 } from "./bluesky-post-bar-logic";
@@ -134,6 +135,26 @@ describe("shrinkToCap", () => {
     const result = shrinkToCap(exportImage);
 
     expect("error" in result).toBe(true);
+  });
+});
+
+describe("resolveInitialCaption", () => {
+  // BlueskyPostBar reads this ONCE via useState(() => resolveInitialCaption(...)) —
+  // a one-shot seed from the composer's existing caption, never a live sync.
+  it("seeds from the composer's caption when provided", () => {
+    expect(resolveInitialCaption("Fort Myers Beach stays hot")).toBe("Fort Myers Beach stays hot");
+  });
+
+  it("defaults to empty when no caption is passed (undefined)", () => {
+    expect(resolveInitialCaption(undefined)).toBe("");
+  });
+
+  it("defaults to empty when called with no argument at all", () => {
+    expect(resolveInitialCaption()).toBe("");
+  });
+
+  it("passes through an already-empty caption as empty", () => {
+    expect(resolveInitialCaption("")).toBe("");
   });
 });
 

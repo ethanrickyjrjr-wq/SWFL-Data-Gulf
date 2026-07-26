@@ -98,7 +98,11 @@ export function SocialComposer({ composer }: { composer: SocialComposerHandle })
       {/* Post to Bluesky — mirrors the "Export PNG"/"Schedule post" hasElements
           gate in EmailLabGridShell.tsx; nothing to post from a blank canvas. */}
       {hasElements && (
-        <BlueskyPostBar exportImage={exportImage} altDefault={deriveAltDefault(design.elements)} />
+        <BlueskyPostBar
+          exportImage={exportImage}
+          altDefault={deriveAltDefault(design.elements)}
+          initialCaption={caption}
+        />
       )}
     </div>
   );

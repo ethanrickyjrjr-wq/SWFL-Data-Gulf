@@ -83,6 +83,18 @@ export function captionState(caption: string): { count: number; overLimit: boole
   return { count, overLimit: count > MAX_CAPTION_GRAPHEMES };
 }
 
+/** One-shot seed for BlueskyPostBar's caption textarea — NOT a live sync.
+ *  The bar reads this ONCE via useState's initializer (`useState(() =>
+ *  resolveInitialCaption(initialCaption))`), so it seeds from whatever the
+ *  composer's AI-authored caption was at mount time, then edits
+ *  independently afterward. That's intentional, not an oversight: a caption
+ *  that fits the email/other-platform caption editor above may still need
+ *  trimming to Bluesky's MAX_CAPTION_GRAPHEMES cap, and a continuously-synced
+ *  field would fight the user's own edits. */
+export function resolveInitialCaption(initialCaption?: string): string {
+  return initialCaption ?? "";
+}
+
 /** The server's own fallback (app/api/social/post-now/route.ts DEFAULT_ALT) —
  *  kept identical here so the client-side prefill and the server's
  *  last-resort default never drift apart. */

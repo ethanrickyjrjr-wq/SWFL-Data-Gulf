@@ -15,7 +15,12 @@
 "use client";
 import { useState } from "react";
 import { MAX_CAPTION_GRAPHEMES } from "@/lib/social/post-now-validate";
-import { captionState, shrinkToCap, type ExportImageFn } from "./bluesky-post-bar-logic";
+import {
+  captionState,
+  resolveInitialCaption,
+  shrinkToCap,
+  type ExportImageFn,
+} from "./bluesky-post-bar-logic";
 
 export interface BlueskyPostBarProps {
   /** Exports the composer's Konva stage at the given pixelRatio/mimeType/
@@ -26,12 +31,19 @@ export interface BlueskyPostBarProps {
    *  composer model has one, else the platform default. Computed by the
    *  caller via bluesky-post-bar-logic.ts's deriveAltDefault. */
   altDefault: string;
+  /** One-shot seed for the caption textarea — typically the composer's own
+   *  AI-authored caption (SocialComposer.tsx's `caption`), read ONCE at
+   *  mount. NOT a live sync: after the seed, this field edits independently
+   *  of the caption editor above it (Bluesky's MAX_CAPTION_GRAPHEMES cap may
+   *  force trimming a caption that fits elsewhere). See
+   *  bluesky-post-bar-logic.ts's resolveInitialCaption. */
+  initialCaption?: string;
 }
 
 type PostResult = { url: string } | { error: string };
 
-export function BlueskyPostBar({ exportImage, altDefault }: BlueskyPostBarProps) {
-  const [caption, setCaption] = useState("");
+export function BlueskyPostBar({ exportImage, altDefault, initialCaption }: BlueskyPostBarProps) {
+  const [caption, setCaption] = useState(() => resolveInitialCaption(initialCaption));
   const [alt, setAlt] = useState(altDefault);
   const [posting, setPosting] = useState(false);
   const [result, setResult] = useState<PostResult | null>(null);
