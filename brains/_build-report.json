@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-07-24T06:52:48.347Z",
-    "finished": "2026-07-24T06:53:10.261Z"
+    "started": "2026-07-26T03:57:49.312Z",
+    "finished": "2026-07-26T03:58:12.904Z"
   },
   "source": "live",
   "outcomes": [
@@ -43,8 +43,229 @@
     },
     {
       "packId": "macro-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 37,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "macro-swfl",
+        "version": 37,
+        "refined_at": "2026-07-26T03:57:50Z",
+        "expires": "2026-08-25T03:57:50Z",
+        "ttl_seconds": 2592000,
+        "direction": "bearish",
+        "magnitude": 1,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL labor market, 2026-M05 (preliminary): Lee County at 4.9%, +1.1pp YoY; Collier County at 4.5%, +1pp YoY; FL state LAUS 4.4% (benchmark). Private-sector wages in Lee County ran $1,173/wk in 2025-Q3 (+6.6% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.",
+        "key_metrics": [
+          {
+            "metric": "laus_lee_unemployment_rate",
+            "label": "Lee County Unemployment Rate",
+            "value": 4.9,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+              "fetched_at": "2026-07-26T03:57:49Z",
+              "tier": 1,
+              "citation": "BLS LAUS series LAUCN120710000000003, 2026-M05 = 4.9%"
+            },
+            "suggestions": [
+              "What's driving laus lee unemployment rate?",
+              "How does laus lee unemployment rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "laus_collier_unemployment_rate",
+            "label": "Collier County Unemployment Rate",
+            "value": 4.5,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+              "fetched_at": "2026-07-26T03:57:49Z",
+              "tier": 1,
+              "citation": "BLS LAUS series LAUCN120210000000003, 2026-M05 = 4.5%"
+            },
+            "suggestions": [
+              "What's driving laus collier unemployment rate?",
+              "How does laus collier unemployment rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "laus_fl_unemployment_rate",
+            "label": "Florida LAUS Unemployment Rate",
+            "value": 4.4,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+              "fetched_at": "2026-07-26T03:57:49Z",
+              "tier": 1,
+              "citation": "BLS LAUS series LAUST120000000000003, 2026-M05 = 4.4%"
+            },
+            "suggestions": [
+              "What's driving laus fl unemployment rate?",
+              "How does laus fl unemployment rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "laus_lee_unemployment_rate_yoy_delta",
+            "label": "Lee County Unemployment Rate YoY Δ",
+            "value": 1.1,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "pp",
+            "display_format": "raw",
+            "source": {
+              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+              "fetched_at": "2026-07-26T03:57:49Z",
+              "tier": 1,
+              "citation": "BLS LAUS LAUCN120710000000003, YoY delta (prior-year 2026-M05 → 2026-M05) = +1.1pp"
+            },
+            "suggestions": [
+              "What's driving laus lee unemployment rate yoy delta?",
+              "How does laus lee unemployment rate yoy delta here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_lee_private_avg_wkly_wage",
+            "label": "Lee County Private-Sector Avg Weekly Wage (2025-Q3)",
+            "value": 1173,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "USD/week",
+            "display_format": "currency",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-07-26T03:57:50Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2025-Q3: avg_wkly_wage = $1,173/wk"
+            },
+            "suggestions": [
+              "What's driving qcew lee private avg wkly wage?",
+              "How does qcew lee private avg wkly wage here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_lee_private_avg_wkly_wage_yoy_pct",
+            "label": "Lee County Private-Sector Avg Weekly Wage YoY % (2025-Q3 vs 2024-Q3)",
+            "value": 6.64,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-07-26T03:57:50Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2025-Q3: avg_wkly_wage YoY = +6.64%"
+            },
+            "suggestions": [
+              "What's driving qcew lee private avg wkly wage yoy pct?",
+              "How does qcew lee private avg wkly wage yoy pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_collier_private_avg_wkly_wage",
+            "label": "Collier County Private-Sector Avg Weekly Wage (2025-Q3)",
+            "value": 1293,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "USD/week",
+            "display_format": "currency",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-07-26T03:57:50Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2025-Q3: avg_wkly_wage = $1,293/wk"
+            },
+            "suggestions": [
+              "What's driving qcew collier private avg wkly wage?",
+              "How does qcew collier private avg wkly wage here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_collier_private_avg_wkly_wage_yoy_pct",
+            "label": "Collier County Private-Sector Avg Weekly Wage YoY % (2025-Q3 vs 2024-Q3)",
+            "value": 4.53,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-07-26T03:57:50Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2025-Q3: avg_wkly_wage YoY = +4.53%"
+            },
+            "suggestions": [
+              "What's driving qcew collier private avg wkly wage yoy pct?",
+              "How does qcew collier private avg wkly wage yoy pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_lee_private_employment",
+            "label": "Lee County Private-Sector Employment (2025-Q3)",
+            "value": 264065,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "jobs",
+            "display_format": "count",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-07-26T03:57:50Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2025-Q3: month3_emplvl = 264,065 jobs"
+            },
+            "suggestions": [
+              "What's driving qcew lee private employment?",
+              "How does qcew lee private employment here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_collier_private_employment",
+            "label": "Collier County Private-Sector Employment (2025-Q3)",
+            "value": 151229,
+            "direction": "falling",
+            "variable_type": "extensive",
+            "units": "jobs",
+            "display_format": "count",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-07-26T03:57:50Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2025-Q3: month3_emplvl = 151,229 jobs"
+            },
+            "suggestions": [
+              "What's driving qcew collier private employment?",
+              "How does qcew collier private employment here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "BLS LAUS data for 2026-M05 is preliminary — subject to revision at next monthly release."
+        ],
+        "contradicts": [],
+        "confidence": 1,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 2,
+        "trust_tier": 1,
+        "upstream_count": 1,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-07-26T03:57:50Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "sector-credit-swfl",
@@ -114,31 +335,31 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 42,
+      "version": 43,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 42,
-        "refined_at": "2026-07-24T06:52:48Z",
-        "expires": "2026-07-25T06:52:48Z",
+        "version": 43,
+        "refined_at": "2026-07-26T03:57:50Z",
+        "expires": "2026-07-27T03:57:50Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-07-24: 116 live current-events signals across 11 cities — Cape Coral (19), Marco Island (5), Fort Myers (39), Naples (30), North Naples (5), Fort Myers Beach (5), Bonita Springs (5), Sanibel (3), Estero (3), Lehigh Acres (1), Golden Gate (1). Most current: Cape Coral — A midyear report released July 20, 2026 from ATTOM real estate analytics found Charlotte County posted the highest foreclosure rate in the nation; Southwest Florida has become the nation's foreclosure epicenter. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-07-26: 114 live current-events signals across 11 cities — Fort Myers (40), Naples (29), Fort Myers Beach (6), Cape Coral (16), Golden Gate (2), North Naples (5), Marco Island (4), Bonita Springs (5), Sanibel (3), Estero (3), Lehigh Acres (1). Most current: Fort Myers — Southwest Florida has become the nation's foreclosure epicenter; a midyear report from ATTOM real estate analytics released July 20, 2026 found Charlotte County posted the highest foreclosure rate in America. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_breaking_1",
-            "value": "Cape Coral: A midyear report released July 20, 2026 from ATTOM real estate analytics found Charlotte County posted the highest foreclosure rate in the nation; Southwest Florida has become the nation's foreclosure epicenter.",
+            "value": "Fort Myers: Southwest Florida has become the nation's foreclosure epicenter; a midyear report from ATTOM real estate analytics released July 20, 2026 found Charlotte County posted the highest foreclosure rate in America.",
             "direction": "stable",
-            "label": "Cape Coral — breaking",
+            "label": "Fort Myers — breaking",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/07/20/in-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers/90946392007/",
-              "fetched_at": "2026-07-24T06:52:48Z",
+              "fetched_at": "2026-07-26T03:57:50Z",
               "tier": 2,
-              "citation": "In the worst state, Southwest Florida foreclosures highest in America: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# A list nobody wants to top. Southwest Florida now leads foreclosures\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nJuly 20, 2026, 5:09 a.m. ET\n[Southwest Florida](https://www.news-press.com/story/money/2026/07/16/new-florida-beachfront-club-bars-dining-cabanas-pools-naples-swfl-collier-gulf-living/90901414007/) has become the nation's foreclosure epicenter.\nA new midyear report Thursday from ATTOM real estate analytics found Charlotte County posted the highest foreclosur\""
+              "citation": "In the worst state, Southwest Florida foreclosures highest in America: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Partly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# A list nobody wants to top. Southwest Florida now leads foreclosures\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nJuly 20, 2026, 5:09 a.m. ET\n[Southwest Florida](https://www.news-press.com/story/money/2026/07/16/new-florida-beachfront-club-bars-dining-cabanas-pools-naples-swfl-collier-gulf-living/90901414007/) has become the nation's foreclosure epicenter.\nA new midyear report Thursday from ATTOM real estate analytics found Charlotte County posted the highest foreclosu\""
             },
             "suggestions": [
               "What's driving signal breaking 1?",
@@ -147,15 +368,15 @@
           },
           {
             "metric": "signal_breaking_2",
-            "value": "Marco Island: Federal officials are seeking forfeiture of a $6.6 million Marco Island home over fraud.",
+            "value": "Naples: NeoGenomics Laboratories is paying $9.8 million to settle allegations it violated the federal False Claims Act by providing discounted consulting services to select providers in exchange for referrals, as of July 20, 2026.",
             "direction": "stable",
-            "label": "Marco Island — breaking",
+            "label": "Naples — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.gulfshorebusiness.com/news/officials-pursue-forfeiture-of-66-million-marco-island-home/article_a966af27-14f9-4e52-9d15-2e755c37bac4.html",
-              "fetched_at": "2026-07-24T06:52:48Z",
+              "url": "https://www.naplesnews.com/story/money/companies/2026/07/20/fort-myers-based-neogenomics-settles-referral-kickback-allegations/90986901007/",
+              "fetched_at": "2026-07-26T03:57:50Z",
               "tier": 2,
-              "citation": "Feds seek $6.6M Marco Island home forfeiture over fraud | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/officials-pursue-forfeiture-of-66-million-marco-island-home/article_a966af27-14f9-4e52-9d15-2e755c37bac4.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=a966af27-14f9-4e52-9d15-2e755c37bac4) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fofficials-pursue-forfeiture-of-66-million-marco-island-home%2Farticle_a966af27-14f9-4e52-9d15-2e755c37bac4.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fofficials-pursue-forfeiture-of-66-million-marco-island-home%2Farticle_a966af27-14f9-4e52-9d15-2e755c37bac4.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/officials-pursue-forfeiture-of-66-million-marco-island-home/article_a966af27-14f9-4e52-9d15-2e755c37bac4.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness\""
+              "citation": "Fort Myers-based NeoGenomics settles referral kickback allegations: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F20%2Ffort-myers-based-neogenomics-settles-referral-kickback-allegations%2F90986901007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Breaking news: NeoGenomics pays $9.8 million to resolve fraud probe\n[![Portrait of Liz Freeman](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/08/28/PNDN/74979810007-liz-freeman.jpg?crop=4271,4270,x1164,y0&width=48&height=48&format=pjpg&auto=webp) Liz Freeman](https://www.naplesnews.com/staff/2647835001/liz-freeman/)\nFort Myers News-Press & Naples Daily News\nJuly 20, 2026, 5:48 p.m. ET\nFort Myers-based N[eoGenomics Laboratories](https://www.neogenomics.com/) is paying $9.8 million to settle allegations it violated the federal F[alse Claims Act](https://www.justice.gov/civil/false-claims-act) by providing discounted consulting services to select providers in exchange for referrals, according to federal authorities.\nIn connection to the settlement, the U.S government acknowledges the company “took signifi\""
             },
             "suggestions": [
               "What's driving signal breaking 2?",
@@ -164,15 +385,15 @@
           },
           {
             "metric": "signal_transactions_3",
-            "value": "Fort Myers: Naples Bay Resort & Marina, along with the 450-member Naples Bay Club, sold for $41.25 million, as reported July 20, 2026.",
+            "value": "Fort Myers: A waterfront condominium on Fort Myers Beach sold for $2 million, setting a new record as the highest price ever paid for an existing (resale) condo on the island, as reported July 24, 2026.",
             "direction": "stable",
             "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/07/20/naples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina/90978394007/",
-              "fetched_at": "2026-07-24T06:52:48Z",
+              "url": "https://www.naplesnews.com/story/money/companies/2026/07/24/fort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand/90999859007/",
+              "fetched_at": "2026-07-26T03:57:50Z",
               "tier": 2,
-              "citation": "Naples Bay resort, marina and club sells for more than $41 million: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# 'Irreplaceable' Naples Bay Resort with 97-slip marina sells for millions\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 20, 2026, 6:50 p.m. ET\nThe [Naples Bay Resort & Marina](https://www.naplesbayresort.com/) is in new hands.\nThe high-profile waterfront property — along with the 450-member Naples Bay Club — changed hands for $41.25 million.\n[](https://www.naplesnews.com/)\n[Help](https:\""
+              "citation": "Fort Myers Beach condo sells for $2 million, a new record in the sand: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# A big deal: Fort Myers Beach condo sells for record $2 million\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 24, 2026, 5:06 a.m. ET\nA waterfront condominium on Fort Myers Beach fetched $2 million, setting a new record on the island.\nIt's the highest price paid for an existing — or resale — condo on the sand in the town — ever, according to the seller's agent.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com/sitemap/) [Ter\""
             },
             "suggestions": [
               "What's driving signal transactions 3?",
@@ -181,15 +402,15 @@
           },
           {
             "metric": "signal_transactions_4",
-            "value": "Cape Coral: Naples Bay Resort & Marina — along with the 450-member Naples Bay Club — sold for $41.25 million.",
+            "value": "Fort Myers Beach: A waterfront condominium on Fort Myers Beach sold for $2 million, setting a new record — the highest price paid for an existing (resale) condo on the island ever, according to the seller's agent.",
             "direction": "stable",
-            "label": "Cape Coral — transactions",
+            "label": "Fort Myers Beach — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/07/20/naples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina/90978394007/",
-              "fetched_at": "2026-07-24T06:52:48Z",
+              "url": "https://www.naplesnews.com/story/money/companies/2026/07/24/fort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand/90999859007/",
+              "fetched_at": "2026-07-26T03:57:50Z",
               "tier": 2,
-              "citation": "Naples Bay resort, marina and club sells for more than $41 million: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# 'Irreplaceable' Naples Bay Resort with 97-slip marina sells for millions\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 20, 2026, 6:50 p.m. ET\nThe [Naples Bay Resort & Marina](https://www.naplesbayresort.com/) is in new hands.\nThe high-profile waterfront property — along with the 450-member Naples Bay Club — changed hands for $41.25 million.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-pr\""
+              "citation": "Fort Myers Beach condo sells for $2 million, a new record in the sand: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# A big deal: Fort Myers Beach condo sells for record $2 million\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 24, 2026, 5:06 a.m. ET\nA waterfront condominium on Fort Myers Beach fetched $2 million, setting a new record on the island.\nIt's the highest price paid for an existing — or resale — condo on the sand in the town — ever, according to the seller's agent.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com/sitemap/) [Ter\""
             },
             "suggestions": [
               "What's driving signal transactions 4?",
@@ -198,15 +419,15 @@
           },
           {
             "metric": "signal_transactions_5",
-            "value": "Naples: The Naples Bay Resort & Marina sale included a 97-slip marina, as reported July 20, 2026.",
+            "value": "Fort Myers: Naples Bay Resort & Marina, along with the 450-member Naples Bay Club, sold for $41.25 million, as reported July 20, 2026.",
             "direction": "stable",
-            "label": "Naples — transactions",
+            "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/07/20/naples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina/90978394007/",
-              "fetched_at": "2026-07-24T06:52:48Z",
+              "fetched_at": "2026-07-26T03:57:50Z",
               "tier": 2,
-              "citation": "Naples Bay resort, marina and club sells for more than $41 million: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Mostly Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# 'Irreplaceable' Naples Bay Resort with 97-slip marina sells for millions\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 20, 2026, 6:50 p.m. ET\nThe [Naples Bay Resort & Marina](https://www.naplesbayresort.com/) is in new hands.\nThe high-profile waterfront property — along with the 450-member Naples Bay Club — changed hands for $41.25 million.\n[](https://www.naplesnews.com/)\n[Help]\""
+              "citation": "Naples Bay resort, marina and club sells for more than $41 million: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# 'Irreplaceable' Naples Bay Resort with 97-slip marina sells for millions\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 20, 2026, 6:50 p.m. ET\nThe [Naples Bay Resort & Marina](https://www.naplesbayresort.com/) is in new hands.\nThe high-profile waterfront property — along with the 450-member Naples Bay Club — changed hands for $41.25 million.\n[](https://www.naplesnews.com/)\n[Help](https:\""
             },
             "suggestions": [
               "What's driving signal transactions 5?",
@@ -214,50 +435,50 @@
             ]
           },
           {
-            "metric": "signal_development_6",
-            "value": "Fort Myers: The Quail Creek Golf Club in North Naples dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.",
+            "metric": "signal_transactions_6",
+            "value": "Cape Coral: Naples Bay Resort & Marina — along with the 450-member Naples Bay Club — sold for $41.25 million.",
             "direction": "stable",
-            "label": "Fort Myers — development",
+            "label": "Cape Coral — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/07/22/collier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek/90987096007/",
-              "fetched_at": "2026-07-24T06:52:48Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/07/20/naples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina/90978394007/",
+              "fetched_at": "2026-07-26T03:57:50Z",
               "tier": 2,
-              "citation": "Collier golf club revises controversial code amendment for tall fencing: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Golf club backs down on controversial code amendment in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 22, 2026, 9:17 a.m. ET\n[The Quail Creek Golf Club](https://www.quailcreekcc.com/) in North Naples has dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.\n[](https://www.news-press.com/)\n[Help](h\""
+              "citation": "Naples Bay resort, marina and club sells for more than $41 million: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# 'Irreplaceable' Naples Bay Resort with 97-slip marina sells for millions\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 20, 2026, 6:50 p.m. ET\nThe [Naples Bay Resort & Marina](https://www.naplesbayresort.com/) is in new hands.\nThe high-profile waterfront property — along with the 450-member Naples Bay Club — changed hands for $41.25 million.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-pr\""
             },
             "suggestions": [
-              "What's driving signal development 6?",
-              "How does signal development 6 here compare to other SWFL areas?"
+              "What's driving signal transactions 6?",
+              "How does signal transactions 6 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_development_7",
-            "value": "Naples: The Quail Creek Golf Club in North Naples dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right, as of July 22, 2026.",
+            "metric": "signal_transactions_7",
+            "value": "Naples: The Naples Bay Resort & Marina sale included a 97-slip marina, as reported July 20, 2026.",
             "direction": "stable",
-            "label": "Naples — development",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/07/22/collier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek/90987096007/",
-              "fetched_at": "2026-07-24T06:52:48Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/07/20/naples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina/90978394007/",
+              "fetched_at": "2026-07-26T03:57:50Z",
               "tier": 2,
-              "citation": "Collier golf club revises controversial code amendment for tall fencing: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Golf club backs down on controversial code amendment in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 22, 2026, 9:17 a.m. ET\n[The Quail Creek Golf Club](https://www.quailcreekcc.com/) in North Naples has dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.\n[](https://www.news-press.com/)\n[Help](h\""
+              "citation": "Naples Bay resort, marina and club sells for more than $41 million: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Mostly Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F20%2Fnaples-bay-resort-marina-and-club-sells-for-more-than-41-million-includes-marina%2F90978394007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# 'Irreplaceable' Naples Bay Resort with 97-slip marina sells for millions\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 20, 2026, 6:50 p.m. ET\nThe [Naples Bay Resort & Marina](https://www.naplesbayresort.com/) is in new hands.\nThe high-profile waterfront property — along with the 450-member Naples Bay Club — changed hands for $41.25 million.\n[](https://www.naplesnews.com/)\n[Help]\""
             },
             "suggestions": [
-              "What's driving signal development 7?",
-              "How does signal development 7 here compare to other SWFL areas?"
+              "What's driving signal transactions 7?",
+              "How does signal transactions 7 here compare to other SWFL areas?"
             ]
           },
           {
             "metric": "signal_development_8",
-            "value": "North Naples: The Quail Creek Golf Club in North Naples has dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.",
+            "value": "Golden Gate: Golden Gate Estates opened a new fire and EMS station this week.",
             "direction": "stable",
-            "label": "North Naples — development",
+            "label": "Golden Gate — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/07/22/collier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek/90987096007/",
-              "fetched_at": "2026-07-24T06:52:48Z",
+              "url": "https://www.gulfshorebusiness.com/news/golden-gate-estates-opens-new-fire-and-ems-station-this-week/article_587014e5-2ee5-418c-ba6b-0d27fcc1c5e7.html",
+              "fetched_at": "2026-07-26T03:57:50Z",
               "tier": 2,
-              "citation": "Collier golf club revises controversial code amendment for tall fencing: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F07%2F22%2Fcollier-golf-club-revises-controversial-code-amendment-for-tall-fencing-north-naples-quail-creek%2F90987096007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Golf club backs down on controversial code amendment in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated July 22, 2026, 9:17 a.m. ET\n[The Quail Creek Golf Club](https://www.quailcreekcc.com/) in North Naples has dropped a controversial proposal that would have allowed it to have much taller barrier fencing by right.\n[](https://www.news-press.com/)\n[Help](h\""
+              "citation": "Golden Gate Estates opens new fire and EMS station | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/golden-gate-estates-opens-new-fire-and-ems-station-this-week/article_587014e5-2ee5-418c-ba6b-0d27fcc1c5e7.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=587014e5-2ee5-418c-ba6b-0d27fcc1c5e7) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fgolden-gate-estates-opens-new-fire-and-ems-station-this-week%2Farticle_587014e5-2ee5-418c-ba6b-0d27fcc1c5e7.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fgolden-gate-estates-opens-new-fire-and-ems-station-this-week%2Farticle_587014e5-2ee5-418c-ba6b-0d27fcc1c5e7.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/golden-gate-estates-opens-new-fire-and-ems-station-this-week/article_587014e5-2ee5-418c-ba6b-0d27fcc1c5e7.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusi\""
             },
             "suggestions": [
               "What's driving signal development 8?",
@@ -290,6 +511,16 @@
             ],
             "rows": [
               {
+                "key": "34120",
+                "label": "34120",
+                "cells": {
+                  "items": 1,
+                  "latest_fact": "Golden Gate Estates opened a new fire and EMS station this week.",
+                  "latest_place": "Golden Gate Estates",
+                  "latest_source": "https://www.gulfshorebusiness.com/news/golden-gate-estates-opens-new-fire-and-ems-station-this-week/article_587014e5-2ee5-418c-ba6b-0d27fcc1c5e7.html"
+                }
+              },
+              {
                 "key": "34119",
                 "label": "34119",
                 "cells": {
@@ -313,10 +544,10 @@
                 "key": "34102",
                 "label": "34102",
                 "cells": {
-                  "items": 3,
-                  "latest_fact": "Cars on 5th has reached the end of the road in Naples, with no compromise in sight as of July 17, 2026.",
-                  "latest_place": "5th",
-                  "latest_source": "https://www.news-press.com/story/money/business/local/2026/07/17/with-no-compromise-in-sight-iconic-car-show-likely-to-leave-naples/90943375007/"
+                  "items": 2,
+                  "latest_fact": "A well-known and prolific restaurateur has signed a lease at the long-vacant Olde Naples Building on Third Street South, which has sat empty for nearly 20 years since Fantozzi's closed in August 2006.",
+                  "latest_place": "Third Street South",
+                  "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/06/18/new-lease-signed-for-restaurant-at-olde-naples-building/90594796007/"
                 }
               },
               {
@@ -332,7 +563,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-07-24T06:52:48Z",
+              "fetched_at": "2026-07-26T03:57:50Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -340,7 +571,7 @@
           }
         ],
         "caveats": [
-          "108 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "106 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -353,7 +584,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-07-24T06:52:48Z"
+          "computed_at": "2026-07-26T03:57:50Z"
         },
         "exogenous_signals": []
       }
@@ -370,8 +601,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 29,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 29,
+        "refined_at": "2026-07-26T03:57:50Z",
+        "expires": "2026-07-27T03:57:50Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-07-26) $399,900; Fort Myers median asking price (as of 2026-07-26) $325,000; Naples median asking price (as of 2026-07-26) $654,052; SWFL 30-year fixed mortgage rate (as of 2026-07-23) 6.58%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399900,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-07-26)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-07-26T03:43:40.5619+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-07-26"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-07-26)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-07-26T03:43:40.5619+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-07-26"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 654052,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-07-26)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-07-26T03:43:40.5619+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-07-26"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 6.58,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-07-23)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-07-26T03:43:40.5619+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-07-23"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-07-26T03:57:50Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -430,8 +772,678 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 16,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "active-listings-swfl",
+        "version": 16,
+        "refined_at": "2026-07-26T03:57:51Z",
+        "expires": "2026-07-28T03:57:51Z",
+        "ttl_seconds": 172800,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "21,614 active SWFL residential listings, median asking $424,076 (active residential listings, as of 2026-07-26). By county: Lee 14,990 (median $369,900), Collier 6,624 (median $650,000), Lee 1 (median $319,900).",
+        "key_metrics": [
+          {
+            "metric": "active_listings_count_swfl",
+            "label": "SWFL active residential listings (count)",
+            "value": 21614,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-07-26T03:57:51Z",
+              "tier": 2,
+              "citation": "21,614 active SWFL residential listings as of 2026-07-26"
+            },
+            "suggestions": [
+              "What's driving active listings count swfl?",
+              "How does active listings count swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "median_list_price_swfl",
+            "label": "SWFL median asking price (active residential)",
+            "value": 424076,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-07-26T03:57:51Z",
+              "tier": 2,
+              "citation": "median asking price across 21,614 active SWFL listings: $424,076"
+            },
+            "suggestions": [
+              "What's driving median list price swfl?",
+              "How does median list price swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "active_listings_by_county",
+            "title": "SWFL active residential listings by county",
+            "grain": "county",
+            "columns": [
+              {
+                "id": "listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "median_list_price",
+                "label": "Median asking price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "avg_days_on_market",
+                "label": "Avg days on market",
+                "display_format": "count",
+                "units": "days"
+              }
+            ],
+            "rows": [
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "listing_count": 14990,
+                  "median_list_price": 369900,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "Collier",
+                "label": "Collier",
+                "cells": {
+                  "listing_count": 6624,
+                  "median_list_price": 650000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "listing_count": 1,
+                  "median_list_price": 319900,
+                  "avg_days_on_market": null
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-07-26T03:57:51Z",
+              "tier": 2,
+              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-26"
+            }
+          },
+          {
+            "id": "active_listings_by_zip",
+            "title": "SWFL active residential listings by ZIP",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "median_list_price",
+                "label": "Median asking price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "avg_days_on_market",
+                "label": "Avg days on market",
+                "display_format": "count",
+                "units": "days"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33993",
+                "label": "33993 (Lee)",
+                "cells": {
+                  "listing_count": 1033,
+                  "median_list_price": 389999,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908 (Lee)",
+                "cells": {
+                  "listing_count": 948,
+                  "median_list_price": 329450,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914 (Lee)",
+                "cells": {
+                  "listing_count": 792,
+                  "median_list_price": 524950,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917 (Lee)",
+                "cells": {
+                  "listing_count": 783,
+                  "median_list_price": 190000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120 (Collier)",
+                "cells": {
+                  "listing_count": 718,
+                  "median_list_price": 649900,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909 (Lee)",
+                "cells": {
+                  "listing_count": 711,
+                  "median_list_price": 340000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135 (Lee)",
+                "cells": {
+                  "listing_count": 694,
+                  "median_list_price": 459000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974 (Lee)",
+                "cells": {
+                  "listing_count": 661,
+                  "median_list_price": 324000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114 (Collier)",
+                "cells": {
+                  "listing_count": 611,
+                  "median_list_price": 549000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904 (Lee)",
+                "cells": {
+                  "listing_count": 597,
+                  "median_list_price": 420000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112 (Collier)",
+                "cells": {
+                  "listing_count": 580,
+                  "median_list_price": 339450,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971 (Lee)",
+                "cells": {
+                  "listing_count": 579,
+                  "median_list_price": 320000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931 (Lee)",
+                "cells": {
+                  "listing_count": 568,
+                  "median_list_price": 675000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913 (Lee)",
+                "cells": {
+                  "listing_count": 566,
+                  "median_list_price": 469900,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903 (Lee)",
+                "cells": {
+                  "listing_count": 540,
+                  "median_list_price": 139900,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928 (Lee)",
+                "cells": {
+                  "listing_count": 539,
+                  "median_list_price": 530000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145 (Collier)",
+                "cells": {
+                  "listing_count": 525,
+                  "median_list_price": 960000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919 (Lee)",
+                "cells": {
+                  "listing_count": 498,
+                  "median_list_price": 247250,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905 (Lee)",
+                "cells": {
+                  "listing_count": 468,
+                  "median_list_price": 354000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119 (Collier)",
+                "cells": {
+                  "listing_count": 461,
+                  "median_list_price": 687000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108 (Collier)",
+                "cells": {
+                  "listing_count": 457,
+                  "median_list_price": 1280000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102 (Collier)",
+                "cells": {
+                  "listing_count": 456,
+                  "median_list_price": 2997500,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110 (Collier)",
+                "cells": {
+                  "listing_count": 435,
+                  "median_list_price": 677000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113 (Collier)",
+                "cells": {
+                  "listing_count": 435,
+                  "median_list_price": 525000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991 (Lee)",
+                "cells": {
+                  "listing_count": 422,
+                  "median_list_price": 469450,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976 (Lee)",
+                "cells": {
+                  "listing_count": 419,
+                  "median_list_price": 329900,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972 (Lee)",
+                "cells": {
+                  "listing_count": 415,
+                  "median_list_price": 355000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134 (Lee)",
+                "cells": {
+                  "listing_count": 408,
+                  "median_list_price": 825000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936 (Lee)",
+                "cells": {
+                  "listing_count": 407,
+                  "median_list_price": 245000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957 (Lee)",
+                "cells": {
+                  "listing_count": 370,
+                  "median_list_price": 950000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103 (Collier)",
+                "cells": {
+                  "listing_count": 353,
+                  "median_list_price": 1445000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142 (Collier)",
+                "cells": {
+                  "listing_count": 338,
+                  "median_list_price": 435748,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990 (Lee)",
+                "cells": {
+                  "listing_count": 316,
+                  "median_list_price": 405000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109 (Collier)",
+                "cells": {
+                  "listing_count": 304,
+                  "median_list_price": 699900,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104 (Collier)",
+                "cells": {
+                  "listing_count": 298,
+                  "median_list_price": 406950,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912 (Lee)",
+                "cells": {
+                  "listing_count": 282,
+                  "median_list_price": 349450,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907 (Lee)",
+                "cells": {
+                  "listing_count": 265,
+                  "median_list_price": 179999,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916 (Lee)",
+                "cells": {
+                  "listing_count": 241,
+                  "median_list_price": 305000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901 (Lee)",
+                "cells": {
+                  "listing_count": 235,
+                  "median_list_price": 310000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105 (Collier)",
+                "cells": {
+                  "listing_count": 204,
+                  "median_list_price": 447000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967 (Lee)",
+                "cells": {
+                  "listing_count": 201,
+                  "median_list_price": 399000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920 (Lee)",
+                "cells": {
+                  "listing_count": 199,
+                  "median_list_price": 429205,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973 (Lee)",
+                "cells": {
+                  "listing_count": 195,
+                  "median_list_price": 479000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117 (Collier)",
+                "cells": {
+                  "listing_count": 182,
+                  "median_list_price": 722450,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966 (Lee)",
+                "cells": {
+                  "listing_count": 152,
+                  "median_list_price": 319250,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924 (Lee)",
+                "cells": {
+                  "listing_count": 130,
+                  "median_list_price": 1500000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922 (Lee)",
+                "cells": {
+                  "listing_count": 106,
+                  "median_list_price": 499000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956 (Lee)",
+                "cells": {
+                  "listing_count": 100,
+                  "median_list_price": 584000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116 (Collier)",
+                "cells": {
+                  "listing_count": 98,
+                  "median_list_price": 577000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921 (Lee)",
+                "cells": {
+                  "listing_count": 43,
+                  "median_list_price": 3975000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138 (Collier)",
+                "cells": {
+                  "listing_count": 33,
+                  "median_list_price": 185000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139 (Collier)",
+                "cells": {
+                  "listing_count": 31,
+                  "median_list_price": 349000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140 (Collier)",
+                "cells": {
+                  "listing_count": 14,
+                  "median_list_price": 530000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34137",
+                "label": "34137 (Collier)",
+                "cells": {
+                  "listing_count": 2,
+                  "median_list_price": 290000,
+                  "avg_days_on_market": null
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141 (Collier)",
+                "cells": {
+                  "listing_count": 2,
+                  "median_list_price": 269500,
+                  "avg_days_on_market": null
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-07-26T03:57:51Z",
+              "tier": 2,
+              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-07-26"
+            }
+          }
+        ],
+        "caveats": [
+          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
+          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
+          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
+          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-07-26T03:57:51Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Sold / closed sale prices — active asking prices only, not closed transactions",
+            "Per-listing history or price-cut events — current snapshot only",
+            "Rental listings — sale listings only"
+          ],
+          "finest_grain": "zip-snapshot"
+        }
+      }
     },
     {
       "packId": "active-rentals-swfl",
@@ -454,16 +1466,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 118,
+      "version": 119,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 118,
-        "refined_at": "2026-07-24T06:53:10Z",
-        "expires": "2026-07-31T06:53:10Z",
+        "version": 119,
+        "refined_at": "2026-07-26T03:58:12Z",
+        "expires": "2026-08-02T03:58:12Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.5486218683363845,
+        "magnitude": 0.5746536500723056,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -618,9 +1630,31 @@
             "edge_type": "input"
           }
         ],
-        "overrides": ["flood-barrier-mode-1", "storm-history-modifier"],
+        "overrides": [
+          "flood-barrier-mode-1",
+          "storm-history-modifier"
+        ],
         "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, active-rentals-swfl, communities-swfl, tier-divergence-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs labor-demand-swfl (bullish). Combined confidence 0.87, trust tier T4, based on 38 upstream brains.",
         "key_metrics": [
+          {
+            "metric": "laus_lee_unemployment_rate",
+            "label": "Lee County Unemployment Rate",
+            "value": 4.9,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+              "fetched_at": "2026-07-26T03:57:49Z",
+              "tier": 1,
+              "citation": "BLS LAUS series LAUCN120710000000003, 2026-M05 = 4.9%"
+            },
+            "suggestions": [
+              "What's driving laus lee unemployment rate?",
+              "How does laus lee unemployment rate here compare to other SWFL areas?"
+            ]
+          },
           {
             "metric": "permits_swfl_county_weighted_avg_corridor_z",
             "value": 0.12,
@@ -888,25 +1922,6 @@
             ]
           },
           {
-            "metric": "laus_lee_unemployment_rate",
-            "label": "Lee County Unemployment Rate",
-            "value": 5,
-            "direction": "rising",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "percent",
-            "source": {
-              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-              "fetched_at": "2026-06-29T18:35:33Z",
-              "tier": 1,
-              "citation": "BLS LAUS series LAUCN120710000000003, 2026-M04 = 5%"
-            },
-            "suggestions": [
-              "What's driving laus lee unemployment rate?",
-              "How does laus lee unemployment rate here compare to other SWFL areas?"
-            ]
-          },
-          {
             "metric": "sofr_rate",
             "value": 3.62,
             "direction": "stable",
@@ -926,41 +1941,39 @@
             ]
           },
           {
-            "metric": "collier_homes_sold_zscore",
-            "value": -0.77,
+            "metric": "active_listings_count_swfl",
+            "label": "SWFL active residential listings (count)",
+            "value": 21614,
             "direction": "stable",
-            "label": "Collier homes-sold z-score, year 2025 vs trailing 3yr (2022-2024)",
-            "variable_type": "intensive",
-            "units": "z-score",
-            "display_format": "ratio",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
             "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-              "fetched_at": "2026-07-22T22:12:43Z",
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-07-26T03:57:51Z",
               "tier": 2,
-              "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
+              "citation": "21,614 active SWFL residential listings as of 2026-07-26"
             },
             "suggestions": [
-              "What's driving collier homes sold zscore?",
-              "How does collier homes sold zscore here compare to other SWFL areas?"
+              "What's driving active listings count swfl?",
+              "How does active listings count swfl here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "faf5_inbound_flow_tons_year",
-            "value": 1226969100,
+            "metric": "signal_breaking_1",
+            "value": "Fort Myers: Southwest Florida has become the nation's foreclosure epicenter; a midyear report from ATTOM real estate analytics released July 20, 2026 found Charlotte County posted the highest foreclosure rate in America.",
             "direction": "stable",
-            "label": "FAF5 audited annual inbound freight FLOW to SWFL (CONTEXT — not the math anchor; the deviation z below is computed against FDOT's own rolling history)",
-            "variable_type": "extensive",
-            "units": "tons/year",
-            "display_format": "count",
+            "label": "Fort Myers — breaking",
+            "variable_type": "categorical",
             "source": {
-              "url": "https://www.swfldatagulf.com/api/b/logistics-swfl",
-              "fetched_at": "2026-07-19T02:28:39Z",
-              "tier": 1,
-              "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-07-03) — supplies the FAF5 inbound-flow CONTEXT number (not the math anchor under Path B)."
+              "url": "https://www.news-press.com/story/money/2026/07/20/in-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers/90946392007/",
+              "fetched_at": "2026-07-26T03:57:50Z",
+              "tier": 2,
+              "citation": "In the worst state, Southwest Florida foreclosures highest in America: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Partly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F07%2F20%2Fin-worst-state-southwest-florida-foreclosures-highest-in-america-lee-county-cape-coral-fort-myers%2F90946392007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# A list nobody wants to top. Southwest Florida now leads foreclosures\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nJuly 20, 2026, 5:09 a.m. ET\n[Southwest Florida](https://www.news-press.com/story/money/2026/07/16/new-florida-beachfront-club-bars-dining-cabanas-pools-naples-swfl-collier-gulf-living/90901414007/) has become the nation's foreclosure epicenter.\nA new midyear report Thursday from ATTOM real estate analytics found Charlotte County posted the highest foreclosu\""
             },
             "suggestions": [
-              "What's driving faf5 inbound flow tons year?",
-              "How does faf5 inbound flow tons year here compare to other SWFL areas?"
+              "What's driving signal breaking 1?",
+              "How does signal breaking 1 here compare to other SWFL areas?"
             ]
           },
           {
@@ -1045,7 +2058,7 @@
           "Fort Myers Beach local context [fmb_planning (2025-08-01)]: Bay Oaks Park -- reconstruction completed ~Aug 2025 — Bay Oaks Recreation Center and Park reconstruction completed approximately August 2025. Restores key community and tourism amenity destroyed by Hurricane Ian.",
           "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.",
           "Census CBP data is an annual snapshot; establishment and employment counts may lag up to 18 months behind current conditions.",
-          "BLS LAUS data for 2026-M04 is preliminary — subject to revision at next monthly release.",
+          "BLS LAUS data for 2026-M05 is preliminary — subject to revision at next monthly release.",
           "Charge-off rates use the resolved-loan denominator (n_chargeoffs / (n_chargeoffs + n_paid_in_full)); the materialized view's `chargeoff_pct` is intentionally ignored because it understates risk on still-active loans.",
           "Sectors with fewer than 5 resolved loans are not ranked — small-sample charge-off rates are directional, not actionable.",
           "Worst-sector charge-off 57.1% (Transportation & Warehousing, NAICS 48) above 30% bearish threshold — sector-level credit risk is elevated.",
@@ -1099,7 +2112,7 @@
           "1 of 5 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "108 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "106 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
           "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -1166,7 +2179,7 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-07-24; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-07-26; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs labor-demand-swfl (bullish)",
@@ -1222,8 +2235,8 @@
         "upstream_count": 38,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-07-24T06:53:10.000Z"
+          "half_life_hours": 720.0000000000003,
+          "computed_at": "2026-07-26T03:58:12.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
@@ -1231,7 +2244,10 @@
             "condition": "the upstream split resolves — the strongest bullish and bearish reads do not currently agree",
             "then_direction": "mixed",
             "basis": "upstream brains are pulling in opposite directions; no single direction clears the agreement threshold",
-            "basis_refs": ["labor-demand-swfl", "env-swfl"],
+            "basis_refs": [
+              "labor-demand-swfl",
+              "macro-swfl"
+            ],
             "falsifier": "one side's weight clears 60% of the total on the next refine, breaking the tie"
           }
         ],
