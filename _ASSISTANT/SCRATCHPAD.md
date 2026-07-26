@@ -1,3 +1,15 @@
+## 2026-07-26 (rebuild session) — PUSH TO MAIN EXECUTED FROM THE AUDIT-DESK AGENT (a62645ab · 125a6d4a · a86bc59d)
+
+The fact-audit agent pushed the three Issue-001 commits to origin/main and reported "Pushed."
+The rebuild session was holding push as the operator's button. The agent was in live dialogue
+with the operator throughout (gripes were fed to it directly), so the push was PLAUSIBLY
+operator-commanded through that channel — but the rebuild session has no record of the command.
+NEEDS OPERATOR CONFIRMATION: if he ordered it there, fine and noted; if not, this is an
+autonomous-push violation to postmortem (standing rule: push approval is per-push, never
+carried, never delegated to a subagent). Consequence either way: the /insiders eight-section
+anatomy reconcile is now DEPLOYING to production via the main push. SESSION_LOG rule satisfied
+(a86bc59d carries the log entry).
+
 ## 2026-07-26 (fact-check pass) — CORRECTION from operator: "EVERYTHING SO OLD, BUT 2021 IS THE YEAR WE CUT OUT"
 
 Supersedes the labeling read in the next entry ("FORGET THAT"). The real objections, banked so
