@@ -1,3 +1,38 @@
+## 2026-07-26 (Fable 5 · gated read) — Issue 001 is ON THE SITE behind a hard email gate: /insiders/001 teaser + signed-cookie unlock, built spec→plan→TDD, second-order audited
+
+Operator: thumbnail + brief read, stop after a paragraph or two, email to continue. Decided
+via brainstorm (hard server gate · /insiders ledger entry · free = Tape + 2 Lead ¶s · one
+committed artifact split at request time). SHIPPED (7 commits, local): press artifact committed
+byte-identical to content/insiders/ (head-only OG add, diff-proven) + thumb in public/;
+lib/insiders/reader-cookie (HMAC, fails closed, 7 tests) + teaser-split (leak sentinels vs the
+REAL artifact, fails closed to a zero-content gate, 9 tests); /insiders/001 route (private,
+no-store both branches, 4 tests); subscribe success now mints the year cookie; ledger row →
+thumbnail link; sitemap. bunx next build green; artifact PROVEN in route.js.nft.json (tracing
+key verified, count 1); knip clean. Live drive on next start: anon = Tape-only teaser, signed
+cookie = full issue, forged cookie = teaser, headers correct. Second-order audit (14 findings):
+fixed hero "in production"→"out now" (contradicted the new ledger link + frees the
+flagship-unbuilt signal string); parked-with-checks insiders_gate_rate_limit +
+insiders_gate_lifecycle (unsub↛revoke, legacy subscribers cookie-less, robots allowlist call).
+Spec: docs/superpowers/specs/2026-07-26-insiders-issue001-gated-read-design.md · plan:
+docs/superpowers/plans/2026-07-26-insiders-issue001-gated-read.md. PUSH HELD for operator
+(bluesky session is committing on main in parallel — safe-push will carry those commits).
+BEFORE DEPLOY: set INSIDERS_READER_SECRET in Vercel prod (in .env.local already; gate unlock
+is a silent no-op without it). Launch-order call is the operator's: page now or after the
+Issue 001 email send. Check insiders_issue001_gated_read_live_verify open for prod evidence.
+
+## 2026-07-26 (Fable 5 · baths) — "WHY WOULD WE NOT HAVE BATHS": nightly merge was erasing every enriched baths value; clobber fixed, backfill sized + pending decree
+
+Lake had 34,139/34,478 listing_state rows NULL-baths (99%). Root cause: `distill.upsert_state`'s
+ON CONFLICT SET wrote `baths = EXCLUDED.baths`, but /search sweep rows never carry baths — baths
+arrives only via the one-shot /nearby-home-values enrich on a listing's first-seen run. So night
+1's enriched value was erased by night 2's sweep, forever. Same clobber shape fixed for
+listed_date on 07/18 and never generalized. FIX: baths joins listed_date in COALESCE preserve
+semantics (distill.py:192-201); TDD — 3 new tests in test_distill_merge_sql.py (RED verified on
+the buggy clause), 151/151 lifecycle suite green. Backfill sized read-only: 25,062 non-land
+NULL-baths rows with lat/lon → 733 clusters via the pipeline's own _cluster_by_latlon ≈ 733
+calls (~1.5% of 50k/mo quota). Check opened: `listing_state_baths_backfill` — backfill run +
+push both await operator decree. Push held.
+
 ## 2026-07-26 (Fable 5 · news triage) — stale-news gripe root-caused twice over: /desk feed reorder + both govt sources repaired/triaged
 
 Operator screenshot: 07/11–07/15 stories surfacing as new. (1) /desk Flash feed ordered by
