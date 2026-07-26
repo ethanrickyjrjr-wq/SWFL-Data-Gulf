@@ -87,8 +87,8 @@ exact start order. The operator pasted this to start you — treat it as the dec
 
 ## 5. Process + money
 
-- `bun scripts/email/insiders-run.mts --month 2026-07` — DRY_RUN default; paid authoring ONLY
-  with `INSIDERS_LIVE_AUTHOR=1` (≤ $20/issue ledger). Preview + spend ledger land in
+- `bun scripts/email/insiders-run.mts --month 2026-07` — DRY_RUN default;
+   `INSIDERS_LIVE_AUTHOR=1` . Preview + spend ledger land in
   `runs/insiders-runs/<stamp>/`.
 - Voice charge (playbook + collection 07/16 §6): Thompson pace, Nature numbers, Chronicle
   paragraphs, ATTOM/CoStar vocabulary. Drama in rhythm, never in figures; extremes stated
