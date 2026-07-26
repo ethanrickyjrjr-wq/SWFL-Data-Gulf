@@ -7,7 +7,7 @@ import type { Grain } from "../../../../refinery/lib/zip-resolver.mts";
 import { assembleZipReport } from "../../../../lib/zip-report/assemble";
 import { sampleThinCaveat, type RankedSignal } from "../../../../lib/zip-report/signal-rank";
 import { ZIP_METRIC_SOURCES, type FloodZipRow } from "../../../../lib/zip-report/candidates";
-import { getSourcedFigures } from "../../../../lib/figures/sourced";
+import { loadZipPageModules } from "./page-data";
 import { FindItButton, type FoundFigure } from "../_components/find-it-button";
 import { selectDossierLines } from "../../../../lib/zip-dossier";
 import type { LocationDossierLine } from "../../../../lib/zip-dossier";
@@ -30,13 +30,8 @@ import { computeZipGradient, FLOOD_GRADIENT } from "../../../../lib/map/zip-colo
 import SubscribeCapture from "../../../../components/email/SubscribeCapture";
 import { MetroAreaChart } from "../../../../components/charts";
 import { REDFIN_METRO_SOLD_SERIES } from "../../../../lib/charts/series";
-import { loadMetroTrend } from "../../../../lib/charts/load-metro-trend";
-import { loadNarrative } from "../../../../lib/narratives/store";
 import { NarrativeSections } from "../../../../components/narratives/NarrativeSections";
-import { loadPulseNearby } from "../../../../lib/pulse/nearby";
 import { PulseNearby } from "../../../../components/narratives/PulseNearby";
-import { buildZipSeedDoc } from "../../../../lib/email/zip-seed";
-import { renderEmailDocHtml } from "../../../../lib/email/render-email-doc";
 import { ZipEmailFunnel } from "../_components/zip-email-funnel";
 import { nearestZips } from "../../../../lib/geo/nearest-zips";
 import { zipReportMetadata } from "./metadata";
@@ -96,20 +91,10 @@ export default async function ZipReportPage({ params, searchParams }: PageProps)
   }
 
   // Shared report data — ONE assembly root (lib/zip-report/assemble.ts), the
-  // same derivations the narrative bake adapter reads. Page-only loads ride
-  // the same Promise.all.
-  const [a, metroTrend, sourcedFigures, narrative, pulseNearby, seedEmailHtml] = await Promise.all([
-    assembleZipReport(zip),
-    loadMetroTrend("redfin_metro_sold_pivoted"),
-    getSourcedFigures({ kind: "zip", key: zip }),
-    loadNarrative("zip", zip),
-    loadPulseNearby(zip),
-    // Funnel miniature (Phase D): the SAME doc a lab visitor lands in, rendered
-    // through the ONE EmailDoc→HTML root. Additive — any failure = no module.
-    buildZipSeedDoc(zip)
-      .then((doc) => (doc ? renderEmailDocHtml(doc) : null))
-      .catch(() => null),
-  ]);
+  // same derivations the narrative bake adapter reads. Page-only lake loads
+  // ride the hourly data cache in page-data.ts (shell stays per-request).
+  const [a, modules] = await Promise.all([assembleZipReport(zip), loadZipPageModules(zip)]);
+  const { metroTrend, sourcedFigures, narrative, pulseNearby, seedEmailHtml } = modules;
   if (!a) notFound(); // unreachable — res.in_scope already guarded above
   const {
     dossier,

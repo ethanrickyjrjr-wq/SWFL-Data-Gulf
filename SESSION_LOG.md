@@ -1,3 +1,17 @@
+## 2026-07-25 (Fable 5 · main) — Caching done the way the 07/23 commit MEANT: hourly data-cache on zip-report + source pages' lake reads, shells stay per-request
+
+Operator: "THAT IS WHAT WE WANTED. DO IT!!" Per the 07/21 caching research (no KV, no
+`cacheComponents` flip): new `page-data.ts` beside each of the two reverted pages wraps their
+Supabase loads in `unstable_cache` (revalidate 3600) — zip-report's five page-level loaders
+(metro trend, sourced figures, narrative, pulse nearby, seed email HTML; keyed by zip) and
+source/[table]'s estimated-count + 12-row sample (keyed by table+date_col). `assembleZipReport`
+deliberately NOT cached: returns Maps (die in the JSON round-trip) and is shared with the bake,
+which runs outside the Next server. Guard: degraded/error shapes throw instead of storing, caller
+falls back to a live read — an outage or junk `date_col` can never pin an empty page for an hour
+(bun-tested predicates, 5 pass). Both pages confirmed back up live before this (zip-report +
+source both 200 after the parallel session's pushes of 5e37361e/ae4e5854). Full `bunx next build`
+clean.
+
 ## 2026-07-25 (Fable 5 · main) — /r/source/[table] was the SECOND page the 07/23 ISR commit killed; force-dynamic restored (zip-report's twin), zip-report confirmed back live
 
 Operator: "WHY CAN'T THESE RUN THIS WAY, BUT WE BUILT IT?" Probed all 7 pages `7ef40312` touched:

@@ -21,6 +21,13 @@ broke; the other five didn't. Not "the page can't be cached" — the page shell 
 **Fix:** same force-dynamic revert applied to `app/r/source/[table]/page.tsx`, build verifying,
 commit to ride the same operator-approved push as zip-report.
 
+## 2026-07-26 — Operator: Lee records form CLOSED ("no longer accepting requests through this form") — active permits → eConnect@leegov.com, closed permits/other → DCDRecords@leegov.com. Decree: "WRITE EMAIILS AND SEND"
+
+Filed via the §119 engine same session (see records_requests ledger): `lee_permit_history_bulk`
+→ DCDRecords@leegov.com (2019→present closed/issued permit export — the `lee_permits_history_source`
+gap) and `lee_permit_active_bulk` → eConnect@leegov.com (active-permit dataset export — the inert
+Accela date-filter workaround). Both sent from hello@swfldatagulf.com via records-request.mts.
+
 ## 2026-07-26 — 🔴 Operator on permits: "collier_permits does not exist. Neither does lee_permits ... WHY DO WE NOT HAVE???"
 
 TWO different problems, live-verified 07/26:

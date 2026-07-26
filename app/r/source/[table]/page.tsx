@@ -4,7 +4,7 @@ import {
   SOURCE_PROVENANCE_TABLES,
   type SourceTableEntry,
 } from "../_tables";
-import { createServiceRoleClient } from "../../../../utils/supabase/service-role";
+import { loadSourceTableSample } from "./page-data";
 import { ReportShell, ReportHeader, ReportFooter, Meta } from "../../_components/report-shell";
 import { ReportAi } from "../../_components/report-ai";
 import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
@@ -56,10 +56,12 @@ export default async function SourceProvenancePage({ params, searchParams }: Pag
   const requestedDateCol = firstParam(sp.date_col);
   const dateCol = requestedDateCol ?? entry.date_col ?? null;
 
-  let supabase;
-  try {
-    supabase = createServiceRoleClient();
-  } catch {
+  // Count + sample ride the hourly data cache in page-data.ts (shell stays
+  // per-request). The count="estimated" rationale and the 07/21 crawler
+  // full-scan incident notes moved there with the queries.
+  const sample = await loadSourceTableSample(table, dateCol);
+
+  if (sample.status === "no_creds") {
     return (
       <Shell
         table={table}
@@ -77,25 +79,7 @@ export default async function SourceProvenancePage({ params, searchParams }: Pag
     );
   }
 
-  // count="estimated", NOT "exact". This page is `force-dynamic` (uncached), is
-  // published in app/sitemap.ts, and robots.ts allows crawlers on /r/ — so every
-  // crawl of /r/source/parcel_subdivision_v ran an EXACT count over a view that
-  // is lee_parcels (383,487) UNION collier_parcels (220,875) = 604,362 rows: a
-  // full sequential scan of both parcel tables, per request, forever. On
-  // 07/21/2026 the DB showed tup_returned 2,119,493,309 vs tup_fetched
-  // 44,615,698 — a 47:1 scanned-to-used ratio — with statement timeouts firing
-  // every 20-60s around the clock.
-  //
-  // PostgREST's count=estimated returns the EXACT count up to a threshold and the
-  // fast statistics-based count beyond it; that threshold is db-max-rows, already
-  // 1000 here. So every small source table keeps an exact count (no display
-  // regression) and only the huge views go approximate.
-  // Verified: docs.postgrest.org/en/v12/references/api/pagination_count.html
-  const { count, error: countError } = await supabase
-    .from(table)
-    .select("*", { count: "estimated", head: true });
-
-  if (countError) {
+  if (sample.status === "count_error") {
     return (
       <Shell
         table={table}
@@ -113,9 +97,7 @@ export default async function SourceProvenancePage({ params, searchParams }: Pag
     );
   }
 
-  const rowCount = count ?? 0;
-
-  if (rowCount === 0) {
+  if (sample.status === "empty") {
     return (
       <Shell
         table={table}
@@ -133,13 +115,7 @@ export default async function SourceProvenancePage({ params, searchParams }: Pag
     );
   }
 
-  let sampleQuery = supabase.from(table).select("*").limit(12);
-  if (dateCol) {
-    sampleQuery = sampleQuery.order(dateCol, { ascending: false });
-  }
-  const { data, error: sampleError } = await sampleQuery;
-
-  if (sampleError || !data || data.length === 0) {
+  if (sample.status === "sample_error") {
     return (
       <Shell
         table={table}
@@ -147,7 +123,7 @@ export default async function SourceProvenancePage({ params, searchParams }: Pag
         brain={brain}
         sourceName={sourceName}
         docHref={docHref}
-        rowCount={rowCount}
+        rowCount={sample.rowCount}
         rows={[]}
         columns={[]}
         dateColEffective={null}
@@ -157,7 +133,7 @@ export default async function SourceProvenancePage({ params, searchParams }: Pag
     );
   }
 
-  const rows = data as Record<string, unknown>[];
+  const { rowCount, rows } = sample;
   const columns = Object.keys(rows[0]);
 
   const dateColEffective = dateCol ?? DATE_COL_CANDIDATES.find((c) => columns.includes(c)) ?? null;
