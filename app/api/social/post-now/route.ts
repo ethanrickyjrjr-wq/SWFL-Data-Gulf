@@ -32,6 +32,22 @@ export const runtime = "nodejs";
 const DEDUPE_WINDOW_MS = 10 * 60 * 1000;
 const DEFAULT_ALT = "SWFL Data Gulf market card";
 
+/**
+ * Optional `{width, height}` pass-through for the image embed's aspectRatio
+ * hint (lib/social/channels/bluesky.ts's BlueskyPostInput.image.aspectRatio).
+ * Malformed or missing input is NOT an error — it's just dropped, since the
+ * card still posts fine without the hint. Only two positive integers count.
+ */
+function parseAspectRatio(body: unknown): { width: number; height: number } | undefined {
+  const raw = (body as { aspectRatio?: unknown } | null)?.aspectRatio;
+  if (!raw || typeof raw !== "object") return undefined;
+  const { width, height } = raw as { width?: unknown; height?: unknown };
+  const isPositiveInt = (n: unknown): n is number =>
+    typeof n === "number" && Number.isInteger(n) && n > 0;
+  if (!isPositiveInt(width) || !isPositiveInt(height)) return undefined;
+  return { width, height };
+}
+
 export async function POST(req: NextRequest) {
   // 1. Session — cookie-bound client, auth only.
   const supabase = createClient(await cookies());
@@ -40,10 +56,15 @@ export async function POST(req: NextRequest) {
   } = await supabase.auth.getUser();
 
   // 2. Operator gate — fail CLOSED. Missing OPERATOR_EMAIL, no session email,
-  // or a mismatch are all 403; never treat "both absent" as a pass.
-  const operatorEmail = process.env.OPERATOR_EMAIL;
-  if (!operatorEmail || !user?.email || user.email !== operatorEmail) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  // or a mismatch are all 403; never treat "both absent" as a pass. Compared
+  // trimmed + lower-cased on both sides so a stray space or a differently-cased
+  // email (Supabase sessions, a hand-typed Vercel env var) doesn't false-403 —
+  // an empty string on either side after trim is still falsy, so it stays
+  // fail-closed, never an accidental "" === "" pass.
+  const operatorEmail = process.env.OPERATOR_EMAIL?.trim().toLowerCase();
+  const sessionEmail = user?.email?.trim().toLowerCase();
+  if (!operatorEmail || !sessionEmail || sessionEmail !== operatorEmail) {
+    return NextResponse.json({ error: "Only the site operator can post." }, { status: 403 });
   }
 
   // 3. Env presence — the app-password credential, checked BEFORE validation
@@ -85,10 +106,16 @@ export async function POST(req: NextRequest) {
     .gte("created_at", tenMinAgoIso)
     .limit(1);
   if (dupes && dupes.length > 0) {
-    return NextResponse.json({ error: "duplicate_post" }, { status: 409 });
+    return NextResponse.json(
+      { error: "Same caption and image were already posted in the last 10 minutes." },
+      { status: 409 },
+    );
   }
 
-  // 8. Publish.
+  // 8. Publish. aspectRatio is optional pass-through — malformed/missing input
+  // is silently ignored (never a 400) since the composer's export ladder
+  // already renders a correct card without it; Bluesky just skips the hint.
+  const aspectRatio = parseAspectRatio(body);
   const publishResult = await postToBluesky(
     {
       caption,
@@ -97,6 +124,7 @@ export async function POST(req: NextRequest) {
             bytes: result.bytes,
             mime: result.mime!,
             alt: alt || DEFAULT_ALT,
+            ...(aspectRatio ? { aspectRatio } : {}),
           }
         : undefined,
     },

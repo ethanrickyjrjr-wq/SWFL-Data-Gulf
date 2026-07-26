@@ -38,11 +38,22 @@ export interface BlueskyPostBarProps {
    *  force trimming a caption that fits elsewhere). See
    *  bluesky-post-bar-logic.ts's resolveInitialCaption. */
   initialCaption?: string;
+  /** The composed canvas's real pixel dimensions — SocialComposer.tsx's
+   *  `SOCIAL_FORMATS[design.format]`. Forwarded verbatim as the POST body's
+   *  `aspectRatio` so the route can pass it through to postToBluesky's
+   *  image.aspectRatio embed hint. Optional — a missing value just means no
+   *  hint ships, never a validation error. */
+  aspectRatio?: { width: number; height: number };
 }
 
 type PostResult = { url: string } | { error: string };
 
-export function BlueskyPostBar({ exportImage, altDefault, initialCaption }: BlueskyPostBarProps) {
+export function BlueskyPostBar({
+  exportImage,
+  altDefault,
+  initialCaption,
+  aspectRatio,
+}: BlueskyPostBarProps) {
   const [caption, setCaption] = useState(() => resolveInitialCaption(initialCaption));
   const [alt, setAlt] = useState(altDefault);
   const [posting, setPosting] = useState(false);
@@ -63,7 +74,12 @@ export function BlueskyPostBar({ exportImage, altDefault, initialCaption }: Blue
       const res = await fetch("/api/social/post-now", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ caption, imageDataUrl: shrunk.dataUrl, alt: alt || undefined }),
+        body: JSON.stringify({
+          caption,
+          imageDataUrl: shrunk.dataUrl,
+          alt: alt || undefined,
+          ...(aspectRatio ? { aspectRatio } : {}),
+        }),
       });
       const data = (await res.json().catch(() => null)) as {
         ok?: boolean;

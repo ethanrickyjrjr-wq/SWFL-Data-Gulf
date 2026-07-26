@@ -103,6 +103,46 @@ test("happy path with image: 3 calls in order, Bearer on calls 2+3, blob verbati
   expect(result.url).toBe("https://bsky.app/profile/swfldatagulf.bsky.social/post/3kabc123");
 });
 
+test("aspectRatio, when supplied, is embedded verbatim alongside the image", async () => {
+  const mockBlob = {
+    $type: "blob",
+    ref: { $link: "bafySomeCid" },
+    mimeType: "image/png",
+    size: 99,
+  };
+  globalThis.fetch = (async (input: unknown, init?: RequestInit) => {
+    const url = String(input);
+    if (url === "https://bsky.social/xrpc/com.atproto.server.createSession") {
+      return fakeResponse(200, { accessJwt: "jwt-abc", did: "did:plc:xyz" });
+    }
+    if (url === "https://bsky.social/xrpc/com.atproto.repo.uploadBlob") {
+      return fakeResponse(200, { blob: mockBlob });
+    }
+    if (url === "https://bsky.social/xrpc/com.atproto.repo.createRecord") {
+      const body = JSON.parse((init?.body as string) ?? "{}");
+      expect(body.record.embed.images[0].aspectRatio).toEqual({ width: 1080, height: 1350 });
+      return fakeResponse(200, {
+        uri: "at://did:plc:xyz/app.bsky.feed.post/3karatio",
+        cid: "bafyRatioCid",
+      });
+    }
+    throw new Error(`unexpected fetch to ${url}`);
+  }) as typeof fetch;
+
+  const input: BlueskyPostInput = {
+    caption: "With aspect ratio",
+    image: {
+      bytes: new Uint8Array([1, 2, 3]),
+      mime: "image/png",
+      alt: "a chart",
+      aspectRatio: { width: 1080, height: 1350 },
+    },
+  };
+
+  const result = await postToBluesky(input, cred);
+  expect(result.ok).toBe(true);
+});
+
 test("caption-only path: 2 calls (no uploadBlob), no embed key", async () => {
   const calls: string[] = [];
   globalThis.fetch = (async (input: unknown, init?: RequestInit) => {

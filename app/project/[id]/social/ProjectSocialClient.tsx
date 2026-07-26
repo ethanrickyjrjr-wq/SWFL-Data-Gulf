@@ -181,7 +181,9 @@ export function ProjectSocialClient({
           </p>
         </div>
         <div className="min-h-0 flex-1">
-          <SocialComposer composer={social} />
+          {/* This is the ONLY caller that opts into the Bluesky bar — it never
+              renders from EmailLabGridShell.tsx's client-facing grid. */}
+          <SocialComposer composer={social} showBlueskyPostBar />
         </div>
       </main>
 

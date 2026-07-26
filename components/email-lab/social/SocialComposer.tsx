@@ -19,7 +19,18 @@ const KonvaStage = dynamic(() => import("./KonvaStage"), {
  * layout, mirrored. This component just renders the Konva stage + the caption strip,
  * driven by the shared `useSocialComposer` handle.
  */
-export function SocialComposer({ composer }: { composer: SocialComposerHandle }) {
+export function SocialComposer({
+  composer,
+  showBlueskyPostBar = false,
+}: {
+  composer: SocialComposerHandle;
+  /** Opt-in, default false. This composer mounts in TWO places — the project
+   *  Social tab (ProjectSocialClient.tsx, the spec'd surface for "Post to
+   *  Bluesky") AND the client-facing Email Lab grid shell
+   *  (EmailLabGridShell.tsx). Only ProjectSocialClient.tsx passes true; the
+   *  grid shell must never render this bar. */
+  showBlueskyPostBar?: boolean;
+}) {
   const {
     design,
     displayWidth,
@@ -95,13 +106,16 @@ export function SocialComposer({ composer }: { composer: SocialComposerHandle })
         </div>
       )}
 
-      {/* Post to Bluesky — mirrors the "Export PNG"/"Schedule post" hasElements
-          gate in EmailLabGridShell.tsx; nothing to post from a blank canvas. */}
-      {hasElements && (
+      {/* Post to Bluesky — opt-in (ProjectSocialClient.tsx's Social tab ONLY;
+          EmailLabGridShell.tsx's client-facing grid never passes this true).
+          Mirrors the "Export PNG"/"Schedule post" hasElements gate — nothing
+          to post from a blank canvas. */}
+      {showBlueskyPostBar && hasElements && (
         <BlueskyPostBar
           exportImage={exportImage}
           altDefault={deriveAltDefault(design.elements)}
           initialCaption={caption}
+          aspectRatio={SOCIAL_FORMATS[design.format]}
         />
       )}
     </div>

@@ -103,7 +103,9 @@ export interface SocialSchedule {
 export interface SocialPost {
   id: string;
   post_schedule_id: number | null; // null for one-off posts
-  social_account_id: string;
+  // Nullable — env-credential post-now rows (app/api/social/post-now/route.ts)
+  // post without a connected social_accounts row.
+  social_account_id: string | null;
   platform: Platform;
   platform_post_id: string | null; // null while dry_run/queued; set on publish
   freshness_token: string | null; // snapshot of brain freshness at publish time

@@ -107,15 +107,31 @@ afterEach(() => {
   process.env = { ...realEnv };
 });
 
-test("non-operator session → 403", async () => {
+test("non-operator session → 403 with a human-readable message", async () => {
   scenario.user = { id: "user-b", email: "not-operator@example.com" };
   const res = await POST(req({ caption: "hello" }));
   expect(res.status).toBe(403);
+  const json = await res.json();
+  expect(json.error).toBe("Only the site operator can post.");
   expect(captured.postToBlueskyArgs).toBeUndefined();
 });
 
 test("OPERATOR_EMAIL unset (fail closed), even with a session email → 403", async () => {
   delete process.env.OPERATOR_EMAIL;
+  const res = await POST(req({ caption: "hello" }));
+  expect(res.status).toBe(403);
+  expect(captured.postToBlueskyArgs).toBeUndefined();
+});
+
+test("operator email differs only by case/whitespace from session email → still passes", async () => {
+  process.env.OPERATOR_EMAIL = "  Operator@SWFLDataGulf.com  ";
+  scenario.user = { id: "user-a", email: "operator@swfldatagulf.com" };
+  const res = await POST(req({ caption: "Case-insensitive operator match" }));
+  expect(res.status).toBe(200);
+});
+
+test("OPERATOR_EMAIL set to whitespace-only → still 403 (fail closed, not an accidental pass)", async () => {
+  process.env.OPERATOR_EMAIL = "   ";
   const res = await POST(req({ caption: "hello" }));
   expect(res.status).toBe(403);
   expect(captured.postToBlueskyArgs).toBeUndefined();
@@ -164,11 +180,39 @@ test("operator + valid input → calls postToBluesky once and returns its url", 
   expect(captured.insertRow).toBeDefined();
 });
 
-test("identical payload again within the dedupe window → 409, no adapter call", async () => {
+test("identical payload again within the dedupe window → 409 with a human-readable message, no adapter call", async () => {
   scenario.dupeRows = [{ id: "existing-post-1" }];
   const res = await POST(req({ caption: "Market update for Cape Coral" }));
   expect(res.status).toBe(409);
+  const json = await res.json();
+  expect(json.error).toBe("Same caption and image were already posted in the last 10 minutes.");
   expect(captured.postToBlueskyArgs).toBeUndefined();
+});
+
+test("valid aspectRatio in the body is forwarded to postToBluesky's image.aspectRatio", async () => {
+  const res = await POST(
+    req({
+      caption: "Card with aspect ratio",
+      imageDataUrl: "data:image/png;base64,aGVsbG8=",
+      aspectRatio: { width: 1080, height: 1350 },
+    }),
+  );
+  expect(res.status).toBe(200);
+  const [input] = captured.postToBlueskyArgs as [{ image?: { aspectRatio?: unknown } }];
+  expect(input.image?.aspectRatio).toEqual({ width: 1080, height: 1350 });
+});
+
+test("malformed aspectRatio (non-integer) is dropped, never a 400", async () => {
+  const res = await POST(
+    req({
+      caption: "Card with bad aspect ratio",
+      imageDataUrl: "data:image/png;base64,aGVsbG8=",
+      aspectRatio: { width: 1080.5, height: -1 },
+    }),
+  );
+  expect(res.status).toBe(200);
+  const [input] = captured.postToBlueskyArgs as [{ image?: { aspectRatio?: unknown } }];
+  expect(input.image?.aspectRatio).toBeUndefined();
 });
 
 test("adapter { ok: false } → 502 with the same error string", async () => {
