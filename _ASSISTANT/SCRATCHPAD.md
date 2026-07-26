@@ -1,4 +1,13 @@
-## 2026-07-26 — "DID YOU FUCKING USE BCKLIT CHARTS????" — the two new frames were hand-rolled plain SVG, NOT bklit, and the dumbbell has a collision bug
+## 2026-07-26 — "WHY AM I USING ANTHROPIC when everyone else uses Kimi/ChatGPT/Ollama/DeepSeek/Moonshot" — provider-choice challenge, raised in anger after the logo/bklit/credits night
+
+Standing answer owed, not a brush-off: the platform's provider surface is ONE seam by design
+(refinery/agents/anthropic.mts — every call, spend guard, usage log), so switching or mixing
+providers is an engineering option, not a hostage situation. Tonight's failures (hand-drawn
+logo, wrong chart lane, silent empty wallet) were session-discipline failures, not
+model-capability failures — a different logo doesn't get less wrong on DeepSeek. If he raises
+it calm, the real evaluation is: pulse-distill + brain synthesis quality on a cheaper provider
+vs current (pulse distill is already locked SONNET-only after Haiku hallucinated — see
+pulse-distill memory). No migration work unless he asks for it deliberately.
 
 Operator's screenshots of the teaser charts: (1) DULL — white-ground flat SVG when he explicitly
 asked for BKLIT (bklit.com — the backlit/glow chart library, ALREADY VENDORED at
