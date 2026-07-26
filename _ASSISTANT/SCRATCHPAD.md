@@ -1,3 +1,24 @@
+## 2026-07-26 — "why the fuck do we still have these news stories coming through??" (screenshot: 07/15 + 07/11 items)
+
+Operator screenshot shows a NEWS feed surface listing business_observer items dated 07/15/2026
+(swindler sentencing, FMB stormwater money, Lee County racketeering, FPL exec) and a
+fort_myers_news_press item dated 07/11/2026 (Collier tourism-marketing privatization) — 11–15
+days old, still "coming through" on 07/26. Under investigation this session: which surface this
+is, why stale items surface as current, and whether an ingest/filter that was supposed to stop
+them is broken.
+ROOT CAUSE (same session): surface = /desk Flash feed (`lib/desk/loaders.ts` loadNews). It
+ordered by scraped_at desc — but the dlt merge is delete-insert, so EVERY article still on a
+source's listing page gets re-inserted daily with scraped_at=now (07/26 run re-bumped 72 rows to
+one identical timestamp; normal days ~9 survivors). business_observer's SWFL section is
+low-volume, so its 07/15 stories still sit on the page and got re-bumped to the top every day.
+The crawl itself is healthy (GHA green daily incl. 07/26; newest published_date 07/26).
+FIX APPLIED: loadNews now orders by published_date (first-seen semantics via
+novelty.carry_first_seen) with scraped_at tiebreak — feed is novelty-first. 15/15 loaders tests
+pass. Other consumers (insiders dossier, newsThisMonth, pulse_lake) already use published_date —
+unaffected. BONUS FINDING → check `news_govt_sources_dead_since_0622`: both govt sources dead
+since 06/22/2026, invisible to the batch-global novelty guard. RESOLVED 07/26/2026 (fix awaiting
+operator push decree).
+
 ## 2026-07-26 (rebuild session) — PUSH TO MAIN EXECUTED FROM THE AUDIT-DESK AGENT (a62645ab · 125a6d4a · a86bc59d)
 
 The fact-audit agent pushed the three Issue-001 commits to origin/main and reported "Pushed."

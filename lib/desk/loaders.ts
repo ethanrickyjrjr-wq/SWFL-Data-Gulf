@@ -407,6 +407,11 @@ async function loadNews(supabase: Supabase): Promise<FlashItem[]> {
       .schema("data_lake")
       .from("news_articles_swfl")
       .select("headline, source_name, article_url, published_date, scraped_at")
+      // published_date carries FIRST-SEEN semantics (novelty.carry_first_seen);
+      // scraped_at is re-bumped to now() for every re-seen URL by the dlt
+      // delete-insert merge, so ordering on it surfaces 2-week-old stories as
+      // "new" whenever a slow source keeps them on its listing page.
+      .order("published_date", { ascending: false })
       .order("scraped_at", { ascending: false })
       .limit(6);
     if (error || !data) return [];
