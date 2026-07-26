@@ -2994,6 +2994,51 @@ export interface Database {
         };
         Relationships: [];
       };
+      report_watches: {
+        Row: {
+          id: string;
+          email: string;
+          address_key: string;
+          zip: string;
+          query_text: string;
+          confirm_token: string;
+          created_at: string;
+          confirmed_at: string | null;
+          unsubscribed_at: string | null;
+          last_sent_at: string | null;
+          agent_optin_at: string | null;
+          consent_text: string | null;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          address_key: string;
+          zip: string;
+          query_text: string;
+          confirm_token?: string;
+          created_at?: string;
+          confirmed_at?: string | null;
+          unsubscribed_at?: string | null;
+          last_sent_at?: string | null;
+          agent_optin_at?: string | null;
+          consent_text?: string | null;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          address_key?: string;
+          zip?: string;
+          query_text?: string;
+          confirm_token?: string;
+          created_at?: string;
+          confirmed_at?: string | null;
+          unsubscribed_at?: string | null;
+          last_sent_at?: string | null;
+          agent_optin_at?: string | null;
+          consent_text?: string | null;
+        };
+        Relationships: [];
+      };
       rsw_airport_monthly: {
         Row: {
           id: string;
@@ -3211,7 +3256,7 @@ export interface Database {
         Row: {
           id: string;
           post_schedule_id: number | null;
-          social_account_id: string;
+          social_account_id: string | null;
           platform: string;
           platform_post_id: string | null;
           freshness_token: string | null;
@@ -3227,7 +3272,7 @@ export interface Database {
         Insert: {
           id?: string;
           post_schedule_id?: number | null;
-          social_account_id: string;
+          social_account_id?: string | null;
           platform: string;
           platform_post_id?: string | null;
           freshness_token?: string | null;
@@ -3243,7 +3288,7 @@ export interface Database {
         Update: {
           id?: string;
           post_schedule_id?: number | null;
-          social_account_id?: string;
+          social_account_id?: string | null;
           platform?: string;
           platform_post_id?: string | null;
           freshness_token?: string | null;
@@ -3618,6 +3663,24 @@ export interface Database {
           fetched_at?: string;
           expires_at?: string;
           requested_from?: string;
+        };
+        Relationships: [];
+      };
+      supabase_db_metrics: {
+        Row: {
+          scraped_at: string;
+          metric: string;
+          value: number;
+        };
+        Insert: {
+          scraped_at: string;
+          metric: string;
+          value: number;
+        };
+        Update: {
+          scraped_at?: string;
+          metric?: string;
+          value?: number;
         };
         Relationships: [];
       };
@@ -4102,6 +4165,7 @@ export interface Database {
           consent_at: string | null;
           created_at: string;
           updated_at: string;
+          last_event_keys: Json;
         };
         Insert: {
           id?: string;
@@ -4115,6 +4179,7 @@ export interface Database {
           consent_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          last_event_keys?: Json;
         };
         Update: {
           id?: string;
@@ -4128,6 +4193,7 @@ export interface Database {
           consent_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          last_event_keys?: Json;
         };
         Relationships: [];
       };
