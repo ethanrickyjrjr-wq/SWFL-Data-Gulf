@@ -382,14 +382,20 @@ export default async function InsidersPage() {
           <p className="ins-eyebrow">The ledger</p>
           <h2 className="ins-h2">Every issue, on the record.</h2>
         </header>
-        <div className="ins-ledger-row">
+        <Link href="/insiders/001" className="ins-ledger-row ins-ledger-link">
+          {/* eslint-disable-next-line @next/next/no-img-element -- one fixed 149 KB below-the-fold thumbnail; next/image buys nothing here */}
+          <img
+            src="/insiders/issue-001-thumb.png"
+            alt="Issue 001 masthead — The Insiders Edition, July 2026"
+            className="ins-ledger-thumb"
+            width={320}
+            height={180}
+            loading="lazy"
+          />
           <span className="ins-ledger-num">001</span>
           <span className="ins-ledger-date">July 2026</span>
-          <span className="ins-ledger-status">
-            <span className="ins-pulse" aria-hidden="true" />
-            in production
-          </span>
-        </div>
+          <span className="ins-ledger-status">Read the opening — free</span>
+        </Link>
         <p className="ins-ledger-note">
           The archive starts here and never gets edited after the fact. Direction calls stay up —
           right or wrong — next to the falsifiers they shipped with.

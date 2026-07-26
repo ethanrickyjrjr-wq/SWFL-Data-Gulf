@@ -47,6 +47,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   });
 
+  // Issue 001 gated read (teaser public, full issue behind the email gate).
+  entries.push({
+    url: `${ORIGIN}/insiders/001`,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  });
+
   // ── Data Desk (/desk — the daily live terminal, highest recency signal) ───
   entries.push({
     url: `${ORIGIN}/desk`,

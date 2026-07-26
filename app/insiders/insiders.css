@@ -805,3 +805,24 @@
     transition: none;
   }
 }
+
+/* ── Issue 001 ledger link (gated read entry) ─────────────────────────── */
+.ins-ledger-link {
+  flex-wrap: wrap;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.ins-ledger-link:hover {
+  border-color: rgba(61, 201, 192, 0.5);
+}
+.ins-ledger-thumb {
+  flex-basis: 100%;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: block;
+}
