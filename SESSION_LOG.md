@@ -1,3 +1,28 @@
+## 2026-07-26 (Fable 5 · main) — Issue 001 REBUILT from Fables in the brand; live /insiders anatomy reconciled; dot-plot inset ported; reviewed before the operator saw it
+
+Operator go on `issue001_rebuild_and_page_reconcile` + five decrees (showcase yesterday's emails ·
+readable · Thompson-x-research voice · bklit product show · Fable 5 review · Max plan, no metered
+authoring). Composed IN-SESSION from the banked collection/desk/playbook in Fables' own section
+names: masthead → The Tape (15 sourced lines) → The Lead (bifurcation, 33907 tier chart) → papers
+vs ledger (dot-plot + two z-gauge clocks) → The Atlas (7 signed-off pairs, dumbbell log) → The
+Watch → falsifier ledger (3 preregistered calls) → The Receipts (counts computed in code:
+126 figures · 23 sources · 0 invented) → sources accordion. All charts through the estate
+(bklit AreaChart via renderBklitStaticSvg + house builders, dark press skin); brand midnight/teal,
+Instrument Serif embedded; showcase = yesterday's Listed→Sold card (fetched from the artifact,
+re-screenshotted). Preview: `runs/insiders-runs/2026-07-26-rebuild/issue-2026-07.html` (+
+side-by-side.png vs live page). Review pass ran BEFORE delivery: fact-audit (1 blocker fixed —
+"roughly twice" led with a 6.3x ZIP; 9 minors fixed; "three times in ten days" kept, banked in
+desk 07/26) + voice edit (13 edits applied). Operator caught two chart sins mid-review via the
+agent: dot-plot title read as OUR thin samples (retitled "The papers' record prints…") and
+dot/label crowding (5% domain inset ported into `lib/charts/svg/dot-plot.ts`, 11 tests green —
+dumbbell precedent 88a41599). CODE: `app/insiders/page.tsx` + `_components/specimen.tsx` anatomy
+five→eight sections ("page follows the decisions"); `bunx next build` green (pre-dot-plot edit;
+dot-plot covered by bun tests). Checks: `insiders_schema_spec_reconcile` OPENED (IssueDoc schema
++ 07/10 spec still five-section — pipeline can't author the decreed architecture yet);
+`issue001_rebuild_and_page_reconcile` stays OPEN pending operator sign-off + deploy. Send/push =
+operator buttons. Session-local $1-defect also fixed: String.replace "$128K" parsed as capture
+ref leaked SVG attrs into the lead legend (function replacement now).
+
 ## 2026-07-26 (Fable 5 · main) — Issue 001 pre-press CLOSED OUT: rebuilt live (as-of 07/26), teaser reworked to real logo + real bklit dark charts, compose handoff written
 
 Addendum to the entry below, same night: chain re-dispatched after billing revived → GREEN incl.

@@ -66,13 +66,18 @@ export function dotPlotSvg(items: DotPlotItem[], opts: DotPlotOpts): string {
   const H = padT + n * rowH + padB;
   const trackW = W - padL - padR;
 
-  // Shared horizontal scale across every value + reference.
+  // Shared horizontal scale across every value + reference. The domain is
+  // inset 5% each side (dumbbell-gap's Cape Coral fix, ported 07/26/2026 on an
+  // operator catch): without it the global min dot sits at exactly x=padL,
+  // kissing its own row label, and the max dot crowds the end value column.
   const allVals = rows.flatMap((r) =>
     typeof r.reference === "number" ? [r.value, r.reference] : [r.value],
   );
-  const minV = allVals.length ? Math.min(...allVals) : 0;
-  const maxV = allVals.length ? Math.max(...allVals) : 1;
-  const span = maxV - minV || 1;
+  const rawMin = allVals.length ? Math.min(...allVals) : 0;
+  const rawMax = allVals.length ? Math.max(...allVals) : 1;
+  const rawSpan = rawMax - rawMin || 1;
+  const minV = rawMin - rawSpan * 0.05;
+  const span = rawSpan * 1.1;
   const xPos = (v: number) => padL + ((v - minV) / span) * trackW;
 
   const parts: string[] = [
@@ -111,7 +116,7 @@ export function dotPlotSvg(items: DotPlotItem[], opts: DotPlotOpts): string {
     // accent value dot + end label
     parts.push(
       `<circle cx="${xPos(r.value).toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="${esc(opts.accent)}"/>`,
-      `<text x="${(padL + trackW + 10).toFixed(1)}" y="${(cy + 4).toFixed(1)}" font-family="Arial" font-size="12" font-weight="bold" fill="#1F2937">${esc(formatAxisTick(fmt, r.value))}</text>`,
+      `<text x="${(padL + trackW + 14).toFixed(1)}" y="${(cy + 4).toFixed(1)}" font-family="Arial" font-size="12" font-weight="bold" fill="#1F2937">${esc(formatAxisTick(fmt, r.value))}</text>`,
     );
   });
 

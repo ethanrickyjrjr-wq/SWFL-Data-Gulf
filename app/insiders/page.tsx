@@ -239,7 +239,7 @@ export default async function InsidersPage() {
             Checked like a ledger.
           </h2>
           <p className="ins-lede">
-            Five sections, one rule: if a number can&rsquo;t name its source, the issue
+            Eight sections, one rule: if a number can&rsquo;t name its source, the issue
             doesn&rsquo;t ship. Here is Issue 001&rsquo;s skeleton — annotated.
           </p>
         </header>
@@ -319,8 +319,8 @@ export default async function InsidersPage() {
             <span className="ins-rule-n">03</span>
             <h3>Facts and calls stay separated</h3>
             <p>
-              The reporting sections state what is. Exactly one section is allowed an opinion: the
-              Forward Look&rsquo;s single direction call.
+              The reporting sections state what is. The calls live in The Watch and the falsifier
+              ledger — every one tagged, dated, and printed with the number that would kill it.
             </p>
           </div>
           <div className="ins-rule">

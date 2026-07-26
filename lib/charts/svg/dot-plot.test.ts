@@ -71,6 +71,37 @@ test("reference legend sits after the value label (scales with its length)", () 
   expect(legendRefCx(long)).toBeGreaterThan(legendRefCx(short));
 });
 
+// Regression (operator, 07/26/2026 — "why are the words so close to the teal"):
+// the linear scale mapped the MIN value dot to the exact track start (flush against
+// the row label) and the MAX value dot to the exact track end (flush against the
+// value label). Dots must stay clear of both text gutters.
+test("min-value dot clears the row-label gutter (inset from track start)", () => {
+  const svg = dotPlotSvg(items, { title: "x", accent: "#0aa" });
+  const cxs = [...svg.matchAll(/<circle cx="([\d.]+)" cy="[\d.]+" r="6" fill="#0aa"/g)].map((m) =>
+    Number(m[1]),
+  );
+  expect(cxs.length).toBe(items.length);
+  // padL = 156; the smallest value's dot must sit a visible inset inside the track,
+  // not at x=156 where its 6px radius lands 2px from the label text.
+  expect(Math.min(...cxs)).toBeGreaterThanOrEqual(156 + 12);
+});
+
+test("value labels sit clear of the max-value dot (gap ≥ dot radius + 8)", () => {
+  const svg = dotPlotSvg(items, { title: "x", accent: "#0aa" });
+  const cxs = [...svg.matchAll(/<circle cx="([\d.]+)" cy="[\d.]+" r="6" fill="#0aa"/g)].map((m) =>
+    Number(m[1]),
+  );
+  const labelXs = [
+    ...svg.matchAll(
+      /<text x="([\d.]+)" y="[\d.]+" font-family="Arial" font-size="12" font-weight="bold"/g,
+    ),
+  ].map((m) => Number(m[1]));
+  expect(labelXs.length).toBe(items.length);
+  const maxDot = Math.max(...cxs);
+  const labelX = Math.min(...labelXs);
+  expect(labelX - maxDot).toBeGreaterThanOrEqual(14); // 6px radius + 8px daylight
+});
+
 test("renders a source · as-of caption with MM/DD/YYYY (Rule 5)", () => {
   const svg = dotPlotSvg(items, {
     title: "x",

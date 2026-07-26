@@ -24,28 +24,43 @@ interface Annotation {
 const ANNOTATIONS: Annotation[] = [
   {
     n: "01",
-    title: "The Read",
-    body: "The month's thesis, in a few tight paragraphs. Every claim in them traces back to a figure on the data desk — no vibes, no filler.",
+    title: "The Tape",
+    body: "Fifteen numbers, cold. Each line carries its own source and date — the month before anyone frames it.",
   },
   {
     n: "02",
-    title: "The Stories",
-    body: "Three to four a month: what happened, what our data shows about it, and the historical analog that puts it in context.",
+    title: "The Lead",
+    body: "The month's one thesis, argued in prose that is chained to the desk. Anything beyond the cited facts is tagged as inference, with its falsifier.",
   },
   {
     n: "03",
-    title: "The Dashboard",
-    body: "Charts drawn only from series we actually hold. If we don't have the data, the chart doesn't exist — there is no stock-art version.",
+    title: "The papers vs. the ledger",
+    body: "The month's loudest press claim, run against the data. A standing fact-check — what was said, and what the records say.",
   },
   {
     n: "04",
-    title: "The Forward Look",
-    body: "One direction call per issue — printed with its falsifier: the number that, if it prints, kills the call. Accountability by design.",
+    title: "The Atlas",
+    body: "Two communities per city, top against entry, on one yardstick from the counties' own parcel rolls. Nobody else prints the market at this grain.",
   },
   {
     n: "05",
+    title: "The Watch",
+    body: "Dated events with what we expect — and what would prove us wrong. The next issue grades every entry, in print.",
+  },
+  {
+    n: "06",
+    title: "The Falsifier Ledger",
+    body: "Every call preregistered: base value, direction, the number that kills it, and the date it gets graded. Misses included.",
+  },
+  {
+    n: "07",
+    title: "The Receipts",
+    body: "The issue's own audit, counted in code: figures stated, sources named, zero invented. Built the way your emails and reports get built.",
+  },
+  {
+    n: "08",
     title: "Sources",
-    body: "Every figure in the issue carries a number, and every number resolves to a named source in this list. All of them, every month.",
+    body: "Every figure resolves to a named source in one list at the bottom. All of them, every month.",
   },
 ];
 
@@ -81,14 +96,8 @@ export function Specimen({
 
         <section className="ins-paper-section">
           <h3 className="ins-paper-h">
-            The Read <Pin n="01" />
+            The Tape <Pin n="01" />
           </h3>
-          <p className="ins-paper-body ins-paper-dropcap">
-            Every issue opens with what the month actually did, why it did it, and what that means
-            if you own, build, or lease here. The prose is written to be read — but underneath it,
-            each sentence is chained to the desk. A claim that can&rsquo;t point at its figure never
-            makes the page.
-          </p>
           {pullStat && (
             <aside className="ins-paper-pullstat">
               <p className="ins-paper-pullstat-label">{pullStat.label}</p>
@@ -101,26 +110,40 @@ export function Specimen({
               </p>
             </aside>
           )}
-        </section>
-
-        <section className="ins-paper-section">
-          <h3 className="ins-paper-h">
-            The Stories <Pin n="02" />
-          </h3>
-          <div className="ins-paper-skeletons" aria-hidden="true">
-            <div className="ins-paper-skel" style={{ width: "86%" }} />
-            <div className="ins-paper-skel" style={{ width: "72%" }} />
-            <div className="ins-paper-skel" style={{ width: "64%" }} />
-          </div>
           <p className="ins-paper-caption">
-            Headlines land with the issue — each told three ways: what happened, what our data
-            shows, and the closest historical analog.
+            Fifteen one-line numbers open every issue — no commentary, every line sourced and dated.
+            The figure above is line one, live.
           </p>
         </section>
 
         <section className="ins-paper-section">
           <h3 className="ins-paper-h">
-            The Dashboard <Pin n="03" />
+            The Lead <Pin n="02" />
+          </h3>
+          <p className="ins-paper-body ins-paper-dropcap">
+            The month&rsquo;s one thesis, argued start to finish. The prose is written to be read —
+            but underneath it, each sentence is chained to the desk. A claim that can&rsquo;t point
+            at its figure never makes the page.
+          </p>
+        </section>
+
+        <section className="ins-paper-section">
+          <h3 className="ins-paper-h">
+            What the papers said · what the ledger says <Pin n="03" />
+          </h3>
+          <div className="ins-paper-skeletons" aria-hidden="true">
+            <div className="ins-paper-skel" style={{ width: "86%" }} />
+            <div className="ins-paper-skel" style={{ width: "64%" }} />
+          </div>
+          <p className="ins-paper-caption">
+            The month&rsquo;s loudest press claim, run against the records — a standing fact-check,
+            every issue.
+          </p>
+        </section>
+
+        <section className="ins-paper-section">
+          <h3 className="ins-paper-h">
+            The Atlas <Pin n="04" />
           </h3>
           {sparkPoints ? (
             <svg
@@ -133,34 +156,35 @@ export function Specimen({
             </svg>
           ) : null}
           <p className="ins-paper-caption">
-            Drawn from the same live series charted further down this page — never illustrated,
-            always plotted.
+            Community-grain pairs, city by city, on one yardstick — plotted from the same live
+            series charted further down this page. Never illustrated, always plotted.
           </p>
         </section>
 
         <section className="ins-paper-section">
           <h3 className="ins-paper-h">
-            The Forward Look <Pin n="04" />
+            The Watch &amp; The Falsifier Ledger <Pin n="05" /> <Pin n="06" />
           </h3>
           <div className="ins-paper-call">
             <span className="ins-paper-tag">[inference]</span>
             <p className="ins-paper-body">
-              The one place the issue takes a position — a single direction call, stated with the
-              audited base value it stands on <em>and the falsifier printed beside it</em>: the
-              number that proves us wrong if it shows up.
+              Where the issue takes its positions — dated expectations and direction calls, each
+              stated with the audited base value it stands on{" "}
+              <em>and the falsifier printed beside it</em>: the number that proves us wrong if it
+              shows up. The next issue grades them all, in print.
             </p>
           </div>
         </section>
 
         <footer className="ins-paper-sources">
           <h3 className="ins-paper-h">
-            Sources <Pin n="05" />
+            The Receipts &amp; Sources <Pin n="07" /> <Pin n="08" />
           </h3>
           <p className="ins-paper-src-line">
             {pullStat
               ? `[1] ${pullStat.source} — as of ${pullStat.asOf}.`
               : "[1] — every figure resolves here, numbered and named."}{" "}
-            Every other figure prints the same way.
+            Every other figure prints the same way — and the issue closes by counting them.
           </p>
         </footer>
       </article>
