@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
     // The render route reads template shells from disk at runtime — bundle them
     // into the serverless function (otherwise renderHtmlTemplate 500s in prod).
     "/api/templates/render": ["./templates/html/**/*.html"],
+    // The Issue 001 gated read serves the committed press artifact from disk —
+    // bundle it into the serverless function (otherwise the route degrades to
+    // the last-resort teaser in prod: gate closed, issue unreadable).
+    "/insiders/001": ["./content/insiders/**/*.html"],
     // The data-readiness cron reads the per-metric tolerances yaml from disk at
     // runtime — bundle it so loadTolerances finds the real config rather than
     // falling back to built-in defaults (the read is via process.cwd()).
