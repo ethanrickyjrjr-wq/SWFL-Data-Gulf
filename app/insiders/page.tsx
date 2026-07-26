@@ -216,7 +216,7 @@ export default async function InsidersPage() {
           <div className="ins-badge-row">
             <p className="ins-issue-badge">
               <span className="ins-pulse" aria-hidden="true" />
-              Issue 001 · July 2026 · in production
+              Issue 001 · July 2026 · out now
             </p>
             {desk.listingsAsOf && (
               <p className="ins-issue-badge">Desk updated {desk.listingsAsOf}</p>
