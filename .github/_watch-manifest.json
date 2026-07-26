@@ -540,6 +540,16 @@
     "disabled": false
   },
   {
+    "name": "lee-deed-official-records load",
+    "file": "ingest-lee-deed-official-records.yml",
+    "scheduled": false,
+    "timeout_minutes": 15,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "ingest-local-cre-context",
     "file": "ingest-local-cre-context.yml",
     "scheduled": true,
@@ -618,6 +628,16 @@
     "paid": false,
     "should_be_dark": false,
     "disabled": false
+  },
+  {
+    "name": "LeePA comparable sales annual",
+    "file": "leepa-comparable-sales-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 90,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
   },
   {
     "name": "LeePA parcels annual",
@@ -948,6 +968,16 @@
     "paid": false,
     "should_be_dark": false,
     "disabled": false
+  },
+  {
+    "name": "Supabase DB metrics scrape",
+    "file": "supabase-metrics-scrape.yml",
+    "scheduled": true,
+    "timeout_minutes": 5,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
   },
   {
     "name": "SWFL Inc. economic dev weekly",
