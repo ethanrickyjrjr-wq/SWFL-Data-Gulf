@@ -1,3 +1,15 @@
+## 2026-07-25 (Fable 5 · main) — /r/source/[table] was the SECOND page the 07/23 ISR commit killed; force-dynamic restored (zip-report's twin), zip-report confirmed back live
+
+Operator: "WHY CAN'T THESE RUN THIS WAY, BUT WE BUILT IT?" Probed all 7 pages `7ef40312` touched:
+zip-report 200 again (5e37361e deployed via the 21:55 push) but **/r/source/[table] 500 on every
+slug since 07/23 — same defect, missed by the zip-report-only revert**. Mechanism: only the two
+pages with BOTH `await searchParams` AND `generateStaticParams` broke — revalidate+GSP declares
+the route static, then awaiting request data contradicts it and Next 500s before any code runs.
+should-i-sell/housing (revalidate only, silently ignored) and method/communities/cre (no request
+reads, genuinely cacheable) all fine. Fix: same force-dynamic revert on
+`app/r/source/[table]/page.tsx`; full `bunx next build` clean, route table shows `ƒ`. Committed,
+push awaiting operator approval.
+
 ## 2026-07-26 (Fable 5 · main) — Why Isn't It Selling WIRED LIVE: the dark five-check engine got its route, loader, checks 6–7, and watch store; smoked on a real 1,582-day listing
 
 Operator: *"so fix what we are missing. we have data, we have algos… bring it all together!"* The

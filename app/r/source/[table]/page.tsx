@@ -11,11 +11,11 @@ import { Breadcrumbs } from "@/components/nav/Breadcrumbs";
 import { sourceTrail } from "@/lib/nav/breadcrumbs";
 
 export const runtime = "nodejs";
-export const revalidate = 3600;
-
-export async function generateStaticParams(): Promise<{ table: string }[]> {
-  return [];
-}
+// force-dynamic restored 07/25/2026: same defect as zip-report (fixed in
+// 5e37361e) — the 07/23 switch to `revalidate = 3600` + empty
+// generateStaticParams 500'd every /r/source/[table] request because the page
+// awaits searchParams, which cannot exist during a static render.
+export const dynamic = "force-dynamic";
 
 const TABLE_SCHEMA = z
   .string()

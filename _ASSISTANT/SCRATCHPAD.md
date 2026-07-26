@@ -1,3 +1,49 @@
+## 2026-07-25 — 🔴 SECOND page down from the same 07/23 commit: /r/source/[table] 500s on EVERY table, live-probed 07/25 after the zip-report revert
+
+Operator: "WHY CAN'T THESE RUN THIS WA[Y], BUT WE BUILT IT????????????" — answered with the
+mechanism (below) and a probe of ALL 7 pages the 07/23 commit `7ef40312` touched. The zip-report
+revert (5e37361e) fixed only 1 of the 2 broken pages.
+
+**Live probe 07/25:** zip-report 500 (fix committed, unpushed) · **source/[table] 500 on every
+slug — still broken, nobody had checked it** · communities-swfl + cre-swfl render (404 on bad
+slug = page runs) · method 200 · should-i-sell + housing-swfl 200 (their `revalidate` is
+silently ignored).
+
+**Mechanism:** the pages were BUILT to read per-visitor request data (`await searchParams` — the
+?q= search box). Static/ISR = render once with NO request in hand, serve the copy for an hour.
+`revalidate` alone is a hint Next quietly overrides (should-i-sell/housing kept working);
+`revalidate` + `generateStaticParams` is a binding "this route IS static" declaration, and a page
+that then awaits searchParams contradicts it → Next throws before any data is read → 500 on every
+request, valid or garbage. Exactly the two pages with BOTH searchParams and generateStaticParams
+broke; the other five didn't. Not "the page can't be cached" — the page shell can't be; the
+07/21 caching research already named the right lane (cache the data loaders, not the shell).
+
+**Fix:** same force-dynamic revert applied to `app/r/source/[table]/page.tsx`, build verifying,
+commit to ride the same operator-approved push as zip-report.
+
+## 2026-07-26 — 🔴 Operator on permits: "collier_permits does not exist. Neither does lee_permits ... WHY DO WE NOT HAVE???"
+
+TWO different problems, live-verified 07/26:
+(a) FALSE ALARM on Collier existence — the probe queried the PIPELINE names (`collier_permits`,
+`lee_permits`); the real tables are `data_lake.collier_building_permits` (4,975 rows, live-counted)
+and `data_lake.lee_building_permits` (registry annotates "dlt schema_name != table name" on BOTH
+entries; data-roots.md:281 lists roots by pipeline name — that's what misled the probe). Check
+`permits_spine_thin_collier_missing` (opened 07/25) carries this false claim — needs correcting.
+(b) REAL: Collier stale since 05/27 (cron deliberately OFF, `dispatch_only`, pending crawl4ai
+dry-run + open `collier_permits_runner_ip_403`); Lee genuinely thin at 300 rows because Accela is
+hostile — inert date filter (no pre-2026 history, `lee_permits_history_source`), CapDetail WAF
+429s (`lee_permits_capdetail_waf_429`), and the cursor-window mismatch netting ~1 row/run
+(`lee_permits_issued_date_cursor_window_mismatch`). Replacement named since 07/08 and never built:
+Lee County's own ArcGIS FeatureServer permit layers (9,386 + 719 + 2,192 rows, structured, no WAF)
+— open as `ceiling_lee_permits`. Same shape as 0aj: everything correctly recorded, nothing acted on.
+⚠️ DISCREPANCY (live-checked 07/26): the 07/08 audit's ArcGIS permit-layer claim cites NO item IDs
+or URLs, and live AGOL org searches ("permit", "building permit" on orgid LvWGAAhHwbCJ2GMP) do NOT
+surface those layers (top hits: wells, coastal zones, Development Orders; the only building-permit
+web maps found are PORT ST. LUCIE's). Self-hosted server probes (leegis/maps.leegov.com/arcgis)
+redirect to the hub. Layers may be org-private or differently titled — but the replacement is
+UNVERIFIED, not confirmed. Re-verify (crawl4ai the hub / Development Orders layer fields) before
+anyone builds on it.
+
 ## 2026-07-25 — 🔴 LIVE 500: operator "why are zip codes 500??????" — CONFIRMED: /r/zip-report/33904 returns HTTP 500 in production (curl 07/25). /r/should-i-sell/33904 = 200, /api/b/master = 200, /z/33904 = 307 (redirect target TBD — if it lands on zip-report the whole /z lane is down). Note open check `zip_quick_summary_live_verify` (ACS demographic cards on zip-report, deployed ~2 days ago, never live-verified) — prime suspect window. Diagnosing now.
 
 ## 2026-07-25 — 🔴 Operator: "HOW DOES LEE HAVE NAPLES???? ALVA??? DID YOU LOOK THIS SHIT UP?? LOOK UP WHAT IS IN LEE AND COLLIER FUCKING COUNTIES" — then, after verifying the roster himself: "WHATEVER. LEAVE IT."
