@@ -338,11 +338,15 @@ export async function loadWinsReport(
         asOf: today,
       }
     : null;
+  // Cut share is OUR OWN daily listing sweep — user-facing label is the platform, same
+  // as every other own-data figure. The brain's verbose citation ("…as of YYYY-MM-DD")
+  // is internal provenance; passing it through printed a raw ISO date AND a second
+  // as-of on the page (caught on the 07/25/2026 live smoke).
   const zipCutShare =
     snapshot?.momentum?.priceCutSharePct != null
       ? {
           pct: snapshot.momentum.priceCutSharePct,
-          source: snapshot.momentum.source.label,
+          source: "SWFL Data Gulf",
           asOf: snapshot.momentum.source.asOf,
         }
       : null;
