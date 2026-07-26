@@ -1,3 +1,21 @@
+## 2026-07-26 (Fable 5 · main) — Issue 001 launch punch list: desk triage + atlas executed + research banked + 2 new chart skeletons + Listed→Sold teaser; found the Anthropic-credits outage
+
+Operator: "make the first issue pop… full control." (1) REBUILD CHECK: nightly chain RED
+07/24+07/25 — Anthropic API credit balance too low (city-pulse distill 400) → rebuild leg
+skipped, brains frozen at 07/24; all listing ingest legs green. Operator billing action; check
+`anthropic_credits_nightly_red`. (2) FABLES: desk 07/26 triage (42 rows → 34 distinct → 4 picks;
+two [4]s: "coldest housing markets" 07/23 + "foreclosures highest in America" 07/20) +
+collection 07/26 section: PMMS 6.58% (07/23), NAR cash 25% June / NABOR Naples 61% May,
+Citizens 278,219 vs 1.42M peak + FLOIR −8.7%, ZHVI tier series 1996→2026-05 banked as
+`_FABLE5/collection/zhvi-tier-series-2026-07.json`. (3) ATLAS EXECUTED: pairs for all 7 cities
+(Naples 241.6x → Lehigh 4.6x; the gap itself bifurcates), Olympia Pointe verified into Lehigh
+33971, check `insiders_atlas_pair_signoff`. (4) NEW FRAMES (skeletons, unwired):
+`lib/charts/svg/dumbbell-gap.ts` + `slope-pair.ts` + tests (18/0). (5) TEASER: "Listed → Sold"
+artifact — 6480 Sandalwood Ln Naples closed 07/24 at $2,275,000, exact 123-day spell vs 34109's
+100-day typical, no jargon. (6) FLYER AUDIT (operator's Gmail link): 78-DOM + 10-of-33 claims
+EXACT vs live brain; four defects + $635k-vs-$659k conflict → 5 checks opened (scratchpad
+07/26). Committed local, push held for operator.
+
 ## 2026-07-26 (Fable 5 · main) — Bible §0.4: append-only log tables index their timestamp at birth (pattern from stinkpot review)
 
 Operator asked what tangled.org/oppi.li/stinkpot does for us (crawl4ai'd live: a ~400-line

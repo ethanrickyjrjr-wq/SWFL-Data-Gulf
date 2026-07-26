@@ -1,3 +1,26 @@
+## 2026-07-26 — 🔴 ANTHROPIC API OUT OF CREDITS: nightly chain red 07/24 + 07/25, brains frozen at 07/24, paid author run blocked
+
+Launch-prep sweep found it: city-pulse's distill call 400s with "Your credit balance is too low
+to access the Anthropic API" → the ingest leg fails → `rebuild · brains` SKIPS. Master serves
+07/24 freshness; every listing/lifecycle ingest leg is green, so one billing top-up + one chain
+re-run catches everything up. ALSO blocks the Insiders Issue 001 paid author run (same API).
+ONLY the operator can fix (Anthropic Plans & Billing). Check: `anthropic_credits_nightly_red`.
+
+## 2026-07-26 — Under-contract flyer (8348 Southwind Bay Cir, sent 07/20) AUDITED on operator request: relational numbers exact, four defects, one data conflict
+
+VERIFIED against the live housing brain: "78 typical days to sell in 33908" exact; "10 of 33
+ZIP codes in the Cape Coral, FL metro area" slower — exact (peers=33, slower=10); $321/sqft
+arithmetic correct and disclosed. DEFECTS: (1) sent TWICE, identical, 4:04 PM — duplicate-send;
+(2) CAN-SPAM footer shipped its PLACEHOLDER ("Physical mailing address required (CAN-SPAM) —
+add one in Branding") in a real send; (3) raw enum `single_family` in the TYPE cell; (4)
+"metro area metro" — the metro string already ends in "metro area" and under-contract.ts:441
+appends " metro". DATA CONFLICT: email said under contract at $635,000 after a $24,000 cut;
+our lake (transition 07/19: active @ $659,000; state still for_sale) AND live Zillow 07/25
+(Active $659,000, "7 days on Zillow") disagree — 659,000−635,000 = exactly the $24,000, so
+the likely story is a pending state at build time that fell through and relisted at $659k, but
+the pending state is unverifiable today. Checks opened; fixes NOT applied this session (launch
+punch list took priority).
+
 ## 2026-07-26 — Bluesky handle claim @swfldatagulf.com IN FLIGHT (operator doing it manually)
 
 Operator asked what atproto.com is → verdict: claim @swfldatagulf.com as the Bluesky handle
@@ -8,6 +31,11 @@ firehose/PDS at our volume. Steps handed 07/26: create bsky.app account → Sett
 over `/.well-known/atproto-did` route deliberately — site pages were 500ing this week, DNS
 survives a bad deploy. OPEN until the handle resolves; verify with
 `nslookup -type=TXT _atproto.swfldatagulf.com` + profile shows @swfldatagulf.com.
+STATUS 07/26 (later session, live-probed): TXT still absent (dns.google NXDOMAIN) and
+resolveHandle returns "Unable to resolve handle" — blocked on the Cloudflare TXT step, nothing
+on Bluesky's side. Side find: bluetails.app = logged-out Bluesky profile/thread inspector
+(handle→DID, likes, lists, blocklists; swap `bsky`→`bluetails` in any profile URL). Handy as a
+free recon/verify lens once we're posting; nothing to integrate.
 
 ## 2026-07-25 — 🔴 SECOND page down from the same 07/23 commit: /r/source/[table] 500s on EVERY table, live-probed 07/25 after the zip-report revert
 
