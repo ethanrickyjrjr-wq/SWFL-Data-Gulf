@@ -889,7 +889,10 @@ So: **duckdb parquet = raw base → tier2 Postgres = promotion → views = brain
 - **DATA WE GET:** 290,973 unique PARCEL_IDs (as_of 07/18/2026), **102 of 120 fields** (widened from 15 the same
   day). All parcel types (no DOR_UC filter). Landed 104 columns, 78 distinct DOR use codes; SOH fields
   `jv_hmstd`/`av_hmstd`/`av_sd`/etc., `sale_price_1`, new-construction value, special-features value, census block group.
-  Pre-aggregated views: `collier_parcels_summary`, `collier_parcels_zip_summary`, `collier_sold_median_by_zip`.
+  Pre-aggregated views: `collier_parcels_summary`, `collier_parcels_zip_summary`, `collier_sold_median_by_zip`,
+  `collier_parcels_city_summary` (CITY grain, built 07/25/2026 by operator decree — a city name may only label
+  numbers computed over ALL its parcels; medians recomputed at parcel grain, never combined from ZIP medians;
+  7 city rows, NAPLES = 256,178 parcels. 🟡 no consumers wired yet).
 - **DATA AVAILABLE, unpulled:** 120 fields total; the 18-field gap is DELIBERATE — 14 owner/fiduciary PII fields
   (`OWN_*`/`FIDU_*`) + 4 ArcGIS row artifacts (`OBJECTID`/`OID_`/`ORIG_FID`/`PARCELNO`). Source:
   `services9.arcgis.com/.../Florida_Statewide_Parcel_Centroid_Version/FeatureServer/0`.
@@ -918,8 +921,11 @@ So: **duckdb parquet = raw base → tier2 Postgres = promotion → views = brain
   scope as collier_parcels. All parcel types (no DOR_UC filter).
 - **DATA AVAILABLE, unpulled:** same 18 excluded fields as collier (14 PII + 4 ArcGIS artifacts), same
   FeatureServer/0 source.
-- **ROUTES:** ingest `ingest/pipelines/lee_parcels/pipeline.py` → `data_lake.lee_parcels` (+ view
-  `lee_parcels_summary`) → source `refinery/sources/lee-parcels-source.mts` → brain
+- **ROUTES:** ingest `ingest/pipelines/lee_parcels/pipeline.py` → `data_lake.lee_parcels` (+ views
+  `lee_parcels_summary`, `lee_parcels_zip_summary`, and `lee_parcels_city_summary` — CITY grain, built
+  07/25/2026 by operator decree, 22 city rows, CAPE CORAL = 137,926 parcels / SOH gap median 29.4% vs
+  33904's 37.9%; medians recomputed at parcel grain, 🟡 no consumers wired yet) → source
+  `refinery/sources/lee-parcels-source.mts` → brain
   `refinery/packs/properties-lee-value.mts` (metric `fdor_commercial_parcel_count` `:603`, use-code categorized
   per FDOR 2025 NAL guide) → master (via properties-lee-value `:239/:293`) → chat catalog (`catalog.mts:151`).
 - **NOTES:** a FDOR CROSS-CHECK for Lee, NOT LeePA's replacement — Lee's primary parcel/value signal still

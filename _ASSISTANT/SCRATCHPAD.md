@@ -1,3 +1,119 @@
+## 2026-07-25 — 🔴 Operator: "HOW DOES LEE HAVE NAPLES???? ALVA??? DID YOU LOOK THIS SHIT UP?? LOOK UP WHAT IS IN LEE AND COLLIER FUCKING COUNTIES" — then, after verifying the roster himself: "WHATEVER. LEAVE IT."
+
+RESOLVED-AS-VERIFIED 07/25/2026: crawled both county rosters live; ALL 22 Lee + 7 Collier rows
+reconcile (Alva = Lee CDP; Punta Gorda rows = Burnt Store Marina CDP parcels w/ Punta Gorda postal
+city, ZIP 33955; Naples-in-Lee = straddle ZIPs 34110/34119; Golden Gate City = Golden Gate CDP).
+He then pasted the same roster from his own lookup — data and sources agree. DEFERRED by "LEAVE
+IT": the roster-curation decision (full address-place roster vs curated list w/ incorporated tag)
+— parked inside the open `city_grain_rollup` check, do NOT re-raise unprompted. STILL PENDING HIS
+GO: the push (should-i-sell label fix + city-summary SQL + data-roots + SESSION_LOG all sit
+uncommitted; parallel session 2ed452a7 has STAGED work in the shared index — commit with explicit
+paths only).
+
+## 2026-07-25 — 🔴 Operator on the 22 Lee / 7 Collier city rows: "Lee is county, Fort Myers, Cape Coral, North Fort Myers, Lehigh, Estero, Bonita Springs are cities — why 22 rows? Collier is Naples, maybe Immokalee and Marco Island, yet 7 rows. WHAT THE FUCK"
+
+The column is FDOR PHY_CITY = the SITE-ADDRESS place name on the state tax roll, NOT the
+incorporated-municipality roster. So the rows include unincorporated communities (in Lee: Alva,
+Bokeelia, Saint James City, Matlacha, Captiva…; in Collier: Golden Gate City, Chokoloskee,
+Goodland) and postal names that cross the county line (PUNTA GORDA on 1,995 real Lee parcels).
+Note his own list mixes the two senses too — North Fort Myers and Lehigh Acres are unincorporated
+CDPs, not incorporated cities; addresses still say them, which is exactly what PHY_CITY captures.
+DECISION NEEDED (his call): product surfaces that say a bare place name should use the tax-roll
+place roster as-is (every name a real address uses, incl. unincorporated) — recommended — or gate
+to a curated roster with an incorporated/unincorporated tag in the crosswalk. Either way the rows
+themselves are real parcel groupings, not junk (junk candidates to prune: blank city already
+excluded; watch for misspellings in the long tail).
+
+## 2026-07-26 — 🔴🔴 Operator: "have we rebuilt correctly recently, or ever? why is ops page all yellows? when is the last time we had city pulse updated? what data is stale? why can't we see this anywhere?"
+
+Four-lane run 07/26 ~01:40 UTC. Findings, all evidence-verified:
+1. **ANTHROPIC CREDITS EXHAUSTED since 07/23** — every nightly-chain run 07/23, 07/24, 07/25
+   (schedule + repository_dispatch, 6 runs) failed with 400 "Your credit balance is too low"
+   (07/23+07/24 died at bake·narratives, 07/25 at city_pulse distill — 5 of 13 cities errored).
+   Last successful master rebuild: **07/24 06:53 UTC, v118** (`SWFL-7421-v118-20260724`) — the
+   rebuild job committed one minute before bake hit the credit wall. Nothing has rebuilt since.
+   Billing is operator-locked (key `ANTHROPIC_API_KEY_LOCKED_BY_OPERATOR`) — HIS action to top up.
+2. **Ops page "all yellows" is NOT staleness** — `applyQueueOverlay` in swfldatagulf-ops
+   `lib/ledger.ts` force-paints any tile mentioned by a build-queue `[~]` line yellow;
+   `_AUDIT_AND_ROADMAP/build-queue.md` has **41 stale `[~]` items**, painting 26 tiles.
+   Worse: brains tiles are `status: token ? green : red` — NO age check; a 2-day-old master
+   still shows green absent the overlay. The board literally cannot show "brain is stale."
+3. **Prod is throwing 500s**: `/r/zip-report/33908` HTTP 500 → Smoke-Prod red → Rollback-on-red
+   red, every deploy tonight.
+4. **CI red on docs-only pushes** (3 tonight): failing bun tests `computes median close price
+   per ZIP`, `upserts fetched listings`, `uploadSocialImage` — diff-independent → env/infra
+   class, suspect the 6313aa34 ci(cache) venv-caching commit.
+Checks opened this session for 1 (billing side is operator's), 2, 3, 4.
+
+## 2026-07-25 — 🔴🔴 Operator: "why do we have no numbers computed at city grain??? that is fucking crazy! it's literally the same thing as all the zip codes combined. WHAT THE FUCK ARE WE DOING"
+
+DECREE: build city grain NOW, not as a parked check. Executing same session: city summary
+tables in the lake mirroring the existing per-ZIP parcel summaries (parcel-grain recompute,
+medians from parcels never from ZIP medians), idempotent SQL per RULE 1, row counts verified,
+root added to data-roots. The honest "why it didn't exist": every surface was routed /[zip]
+from day one, the crosswalk made city a display string, and no build ever asked a city
+question — ZIP-first tunnel vision, not a data limitation. The parcels always had the city.
+
+## 2026-07-25 — 🔴 Operator, after the grain fix: "the numbers need to be for the actual zip. if we want to look at Cape Coral, that would be all the zips combined... You don't know what numbers are real or fake... there are no checks and you don't even know what a city is"
+
+Three durable decrees out of this:
+1. **CITY IS A REAL GRAIN.** "Cape Coral" may only ever label a number computed over ALL its
+   member ZIPs/parcels. City-grain rollups do not exist today anywhere in the product — the city
+   name is only a crosswalk display label. HONESTY TRAP for the build: city medians (SOH gap,
+   values) CANNOT be derived by combining ZIP medians — they need parcel-grain recompute per city.
+   Counts can sum; medians/rates cannot (same "read rates as written" discipline).
+2. **LABEL-GRAIN HAS NO GUARD.** The invention gates verify a FIGURE traces to a source; nothing
+   verifies the WORDS around the figure describe its grain correctly on website surfaces.
+   grain-guard-lint covers brain narratives only. A true number under a wrong label is
+   functionally fake and nothing catches it. Needs a check + a mechanism (label carried WITH the
+   data row, not a separate prop a page can mismatch).
+3. **STOP OVERCLAIMING THE PITCH.** He is right that I promoted "structurally cannot lie" while
+   the flagship page mislabeled its numbers. The honest claim is narrower: "every figure traces
+   to a source." Attribution correctness is NOT yet guaranteed. Do not sell the stronger sentence
+   until the label-grain guard exists. (Fold into the 07/25 market-scan verdict.)
+
+## 2026-07-25 — 🔴 Operator: "you said 33904 is cape coral. that makes no sense. cape coral is many zip codes. what the fuck"
+
+He pasted the 8 Cape Coral ZIPs precisely to expose this. I wrote "That's Cape Coral, live" about
+33904-only numbers (37.9% SOH gap, 9,953 homesteaded parcels) — attributing ZIP-grain figures to a
+whole city of ~8 ZIPs. GRAIN MISLABEL, the exact class grain-guard-lint exists to stop in brain
+narratives. Standing rule for me: a place name may only label a number whose grain IS that place.
+
+CONFIRMED REAL DEFECT, PAGE-WIDE, then FIXED IN CODE same session 07/25/2026 (not yet live —
+needs push + deploy): live HTML read "Homesteaded owners in Cape Coral typically have 37.9%…"
+over the 33904-only median. Root cause: `page.tsx` set `place = cityForZip(zip)` and that bare
+city label flowed into EVERY attribution sentence (SohPortability, SellerStressRead heading +
+rank + condo sentence, MarketSnapshot heading, SellNowVsWait). Note the loader comment `/** The
+named place — never framed as "ZIP-level". */` — FOCUS rule 3 (product isn't ZIP-limited) was
+misapplied as "hide the ZIP grain," which is how the defect got designed in. Fix: one file,
+`app/r/should-i-sell/[zip]/page.tsx` — `place` is now "Cape Coral 33904" (OG-card composition),
+inherited by all sections; Meta Area de-duped. Verified: 75/75 should-i-sell tests + full
+`bunx next build` clean. OG route unaffected (composes its own label independently).
+
+## 2026-07-25 — Operator, correcting my scoping of the BYO-data product: "we aren't talking about real estate here. we are talking about anything."
+
+The packaging question is DOMAIN-AGNOSTIC by decree — anyone's data (he demo-pasted a raw Cape
+Coral ZIP list as the kind of thing a user adds), through the provenance pipeline, to their own
+synthesized read, out their own AI. This matches FOCUS rule 3 (moat is four-lane at ANY grain,
+never "ZIP-level") and the deliverable-factory END-STATE memory. Do not scope this thread back to
+real estate again. Key architectural insight from this exchange: the general product does NOT need
+93 hand-authored packs per tenant — it needs ONE universal upload→dossier pack (schema-infer
+tabular data, deterministic aggregates only, each figure registered "user upload MM/DD/YYYY",
+existing lints/output contract reused). Per-tenant cost = one model call per rebuild → maps to
+paid tiers. SWFL = tenant #1 of the general engine, launch kit still the user source.
+
+## 2026-07-25 — Operator, on the sell-the-guardrails idea: "I don't actually have a company. we have no users. We can barely do anything right, so what is the better play?" + "how would we package the delta if users can just add their own data and have it flow through our pipeline to their own master and out of their own AI?"
+
+Two things to never make him repeat: (1) the honest baseline — no company, no users, execution
+trust low (matches 07/17 trust-low-point memory); stop proposing second companies. (2) The BYO-data
+packaging question is now a standing product thread: user-supplied data → our provenance pipeline →
+per-user synthesized read → their own branded AI. Today's true state: lane-2 uploads + `brain-input:*`
+bypass exist; per-tenant master/brain DAGs do NOT (32 global brains, GHA + paid model calls per
+rebuild). Answer given 07/25: productize lane 2 first (their data as cited sources in deliverables/AI
+answers — no new architecture), per-tenant dossier only as a paid tier after first users. Better play
+named: launch-kit asks (07/19 kit still unused, funnel verified) + rank 1 (SOH cost-of-waiting,
+SMALL) + rank 2 (second-opinion price verdict, SMALL, ask-first on the chat gate).
+
 ## 2026-07-25 — 🔴 THE FOUR-LANE GATE CAUGHT ME SKIPPING RESEARCH, AND THE SKIPPED LANE HELD AN UNROTATED CREDENTIAL DUMP, 7 DAYS OLD
 
 I answered "what could we sell" having only LISTED the `_RESEARCH/competitor-and-strategy/`

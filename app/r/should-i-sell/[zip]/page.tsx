@@ -63,7 +63,11 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { zip } = await params;
-  const place = cityForZip(zip) ?? `ZIP ${zip}`;
+  // City alone misstates the grain — every number on this page is ZIP-scoped and
+  // a city spans many ZIPs (operator correction 07/25/2026: "cape coral is many
+  // zip codes"). Label = "Cape Coral 33904", same composition as the OG card.
+  const city = cityForZip(zip);
+  const place = city ? `${city} ${zip}` : `ZIP ${zip}`;
   const title = `Should I sell in ${place}? — SWFL Data Gulf`;
   const description = `A seller's honest read for ${place}: your area's stress level, the market snapshot, and what waiting 6–12 months could cost or gain you.`;
   // Absolute URLs on purpose (same ORIGIN convention as app/sitemap.ts) — share
@@ -104,7 +108,11 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
     );
   }
 
-  const place = cityForZip(zip) ?? `ZIP ${zip}`;
+  // Grain-honest label: "Cape Coral 33904", never the bare city over ZIP-scoped
+  // numbers (operator correction 07/25/2026). Flows into every section heading
+  // and attribution sentence via the components' existing `place` plumbing.
+  const city = cityForZip(zip);
+  const place = city ? `${city} ${zip}` : `ZIP ${zip}`;
   // Concrete number under the always-shown condo caveat — sourced parcel share, or null
   // outside the Lee/Collier footprint (line omits, never invents). Synchronous fixture read.
   const condoShare = condoShareForZip(zip);
@@ -179,7 +187,7 @@ export default async function ShouldISellPage({ params, searchParams }: PageProp
           invented.
         </p>
         <dl className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-          <Meta label="Area" value={`${place} · ${zip}`} />
+          <Meta label="Area" value={place} />
           {res.county_names[0] && <Meta label="County" value={`${res.county_names[0]} County`} />}
         </dl>
       </ReportHeader>

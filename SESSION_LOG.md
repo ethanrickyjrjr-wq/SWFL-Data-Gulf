@@ -1,3 +1,24 @@
+## 2026-07-25 (Fable 5 · main) — operator caught a live grain mislabel (city name over ZIP numbers); fixed the label, BUILT city grain in the lake, opened the guard checks
+
+Operator pasted Cape Coral's 8 ZIPs to expose it: the should-i-sell page said *"Homesteaded owners
+in Cape Coral typically have 37.9%…"* — but 37.9% is ZIP 33904's median. Confirmed in live HTML,
+fixed in `app/r/should-i-sell/[zip]/page.tsx` (label now "Cape Coral 33904", the OG-card
+composition, flows to every section; 75/75 should-i-sell tests + full `bunx next build` clean).
+NOT deployed — push awaits operator go.
+
+Then the decree: *"why do we have no numbers computed at city grain???"* — built same session:
+`docs/sql/20260725_parcels_city_summary.sql` → `data_lake.lee_parcels_city_summary` (22 rows) +
+`collier_parcels_city_summary` (7 rows), parcel-grain recompute mirroring the ZIP summaries,
+run + live-verified via Bun.SQL. **CAPE CORAL city grain: 137,926 parcels, 61,737 homesteaded,
+median JV $264,855, SOH gap median 29.4% — vs 33904's 37.9%. The mislabel was 8.5 points wrong,
+now measurable.** Roots registered in data-roots (🟡 no consumers wired). Checks:
+`city_grain_rollup` (updated w/ evidence + db_row_exists signal; open until surfaces wire) and
+`label_grain_guard` (corrected per operator: "Cape Coral 33904" pairing is FINE — the requirement
+is the system knows each number's grain; bare city name ⇒ city-grain rows). Also filed
+`_RESEARCH/competitor-and-strategy/2026-07-25-guardrails-provenance-market-scan.md` (Guardrails
+AI + Cleanlab crawls; verdict: sell the outcome, not the engine — and the honest pitch is "every
+figure traces to a source," NOT "output can't mislead," which today's defect disproved).
+
 ## 2026-07-25 (Opus 5 · main) — operator challenged the ripgrep claim; proved it, then fixed all four defects the playbook surfaced instead of filing them
 
 Operator: *"why would the grep tool be ripgrep? write a list fix all problems inline."* He was right
