@@ -1,3 +1,17 @@
+## 2026-07-26 (Fable 5 · main) — Issue 001 pre-press CLOSED OUT: rebuilt live (as-of 07/26), teaser reworked to real logo + real bklit dark charts, compose handoff written
+
+Addendum to the entry below, same night: chain re-dispatched after billing revived → GREEN incl.
+brain rebuild (only the known narrative-bake red remains); master serves as-of 07/26/2026.
+Operator caught two build sins: hand-drawn logo (fixed → `public/logo-mark.png` embedded) and
+hand-rolled plain-SVG charts when bklit was the ask (fixed → both teaser charts now render
+through `renderBklitStaticSvg`, dark press style; dumbbell-gap Cape Coral label collision fixed
+via 5% domain inset, `88a41599`). Final data pass: cut:raise events 90d Lee 3,283:292 /
+Collier 1,006:125 (07/26 live; NOT comparable to the banked 07/16 stat — different windows);
+June ZHVI still not landed. Compose start order → `docs/handoff/2026-07-26-issue-001-compose-handoff.md`.
+Checks opened tonight: anthropic_credits_nightly_red · billing_deadman_alarm ·
+under_contract_duplicate_send · flyer_canspam_placeholder_sent · under_contract_flyer_wording ·
+under_contract_price_state_conflict · insiders_atlas_pair_signoff.
+
 ## 2026-07-26 (Fable 5 · main) — Issue 001 launch punch list: desk triage + atlas executed + research banked + 2 new chart skeletons + Listed→Sold teaser; found the Anthropic-credits outage
 
 Operator: "make the first issue pop… full control." (1) REBUILD CHECK: nightly chain RED
