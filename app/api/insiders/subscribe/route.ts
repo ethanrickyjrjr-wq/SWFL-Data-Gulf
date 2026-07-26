@@ -8,6 +8,7 @@
 import { NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { normalizeEmail, isValidEmail, sanitizeSource } from "@/lib/email/validation";
+import { buildReaderSetCookie } from "@/lib/insiders/reader-cookie";
 
 export const runtime = "nodejs";
 
@@ -57,5 +58,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "subscribe_failed" }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  // Unlock the on-site gated read (spec: 2026-07-26-insiders-issue001-gated-
+  // read-design.md). Cookie ONLY on this success path — a failed upsert must
+  // not mint a reader (failure mode #7). Missing secret: subscription still
+  // succeeds, the gate simply stays closed (fails safe).
+  const res = NextResponse.json({ ok: true });
+  const secret = process.env.INSIDERS_READER_SECRET;
+  if (secret) {
+    res.headers.append("Set-Cookie", buildReaderSetCookie(email, secret));
+  }
+  return res;
 }
