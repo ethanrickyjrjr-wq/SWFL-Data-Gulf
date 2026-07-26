@@ -72,9 +72,14 @@ export function dumbbellGapSvg(items: DumbbellGapItem[], opts: DumbbellGapOpts):
   // Shared horizontal scale across every low + high. Log scale demands > 0.
   const pos = (v: number) => (useLog ? Math.log10(Math.max(v, 1)) : v);
   const allVals = rows.flatMap((r) => [pos(r.low), pos(r.high)]);
-  const minV = allVals.length ? Math.min(...allVals) : 0;
-  const maxV = allVals.length ? Math.max(...allVals) : 1;
-  const span = maxV - minV || 1;
+  // Inset the domain 5% each side so the global min/max dots float inside the
+  // track instead of touching the row label / value badge (Cape Coral bug:
+  // the minimum entry dot sat at exactly x=padL, kissing its own label).
+  const rawMin = allVals.length ? Math.min(...allVals) : 0;
+  const rawMax = allVals.length ? Math.max(...allVals) : 1;
+  const rawSpan = rawMax - rawMin || 1;
+  const minV = rawMin - rawSpan * 0.05;
+  const span = rawSpan * 1.1;
   const xPos = (v: number) => padL + ((pos(v) - minV) / span) * trackW;
 
   const parts: string[] = [

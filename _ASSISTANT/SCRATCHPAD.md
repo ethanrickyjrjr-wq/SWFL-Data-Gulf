@@ -1,3 +1,30 @@
+## 2026-07-26 — "DID YOU FUCKING USE BCKLIT CHARTS????" — the two new frames were hand-rolled plain SVG, NOT bklit, and the dumbbell has a collision bug
+
+Operator's screenshots of the teaser charts: (1) DULL — white-ground flat SVG when he explicitly
+asked for BKLIT (bklit.com — the backlit/glow chart library, ALREADY VENDORED at
+components/charts/vendor/bklit with render-static + email-svg; zhvi-area already renders through
+the real bklit AreaChart in spec-to-image). I built house-plain frames and never touched the
+vendor estate — wrong lane. (2) BUG: Cape Coral's entry dot is the global min on the log axis →
+sits at exactly x=padL, touching the "Cape Coral" row label; the "$55k" axis-min label crowds
+the caption under the last row. RULE going forward: "bklit chart" = render THROUGH the vendored
+bklit components (dark, glow), never a from-scratch SVG that only matches the old email frames.
+Fix in flight this session: rebuild both teaser charts through bklit + inset the dumbbell scale
+domain so min/max dots never touch the track edges.
+
+Operator's real question isn't "why are we broke," it's "why did nobody TELL me." The chain
+went red 07/24 and 07/25 with the exact string "credit balance is too low" in the logs, and it
+surfaced only as another red run among hundreds of open checks — no distinct billing tripwire,
+no push, nothing that says THE WALLET IS EMPTY, EVERYTHING PAID IS DEAD. Zero dollars out =
+zero successful paid calls; the API refuses at the door, so spend flatlines silently. Gap to
+close: detect the billing-refusal string in any workflow log → one distinctly-named critical
+alarm that cannot drown. Check: `billing_deadman_alarm`.
+
+## 2026-07-26 — "we can't even get our own logo right" — the Listed→Sold teaser shipped a HAND-DRAWN wave squiggle instead of the real SWFL Data Gulf logo
+
+Operator caught it laughing. Rule for every future preview/deliverable: NEVER improvise the
+brand mark — pull the real logo asset from the repo (same rule class as "drive the builder,
+never hand-author"). Fix: locate the real asset, embed it, republish the artifact same URL.
+
 ## 2026-07-26 — 🔴 ANTHROPIC API OUT OF CREDITS: nightly chain red 07/24 + 07/25, brains frozen at 07/24, paid author run blocked
 
 Launch-prep sweep found it: city-pulse's distill call 400s with "Your credit balance is too low
