@@ -42,6 +42,18 @@ BEFORE DEPLOY: set INSIDERS_READER_SECRET in Vercel prod (in .env.local already;
 is a silent no-op without it). Launch-order call is the operator's: page now or after the
 Issue 001 email send. Check insiders_issue001_gated_read_live_verify open for prod evidence.
 
+## 2026-07-26 (Fable 5 · baths, push decree) — operator decreed Go + push-everything: baths COALESCE fix + re-runnable backfill_baths.py ship; 733-call backfill runs post-push
+
+Operator answered "Push everything" on the 20-commit bundle question (bluesky, social review,
+Issue 001, news fixes ride along — per-push approval given explicitly). New in this commit:
+`backfill_baths.py` (re-runnable: targets baths IS NULL each run, fill-only UPDATE that can
+never overwrite a stored value, loud failure on missing PHOTOS_API, 1.1s call spacing) + 3
+fold tests. 154/154 lifecycle suite. Live round-trip proof of the COALESCE fix ran against
+prod table on a synthetic scratch row (2.5 survived a NULL re-upsert; row deleted). Dry-run:
+25,026 distinct targets, 733 clusters. Backfill executes after this push lands (fix must be
+on main before the 04:23 UTC nightly or it re-erases the fill — ordering per second-order
+audit finding 1).
+
 ## 2026-07-26 (Fable 5 · baths) — "WHY WOULD WE NOT HAVE BATHS": nightly merge was erasing every enriched baths value; clobber fixed, backfill sized + pending decree
 
 Lake had 34,139/34,478 listing_state rows NULL-baths (99%). Root cause: `distill.upsert_state`'s
