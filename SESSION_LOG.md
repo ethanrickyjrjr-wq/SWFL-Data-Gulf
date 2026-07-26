@@ -1,3 +1,34 @@
+## 2026-07-26 (Fable 5 · main) — Why Isn't It Selling WIRED LIVE: the dark five-check engine got its route, loader, checks 6–7, and watch store; smoked on a real 1,582-day listing
+
+Operator: *"so fix what we are missing. we have data, we have algos… bring it all together!"* The
+gap (per the 07/20 assembly plan): five tested checks in `lib/why-not-selling/` had ZERO importers.
+Executed the remaining tasks of `docs/superpowers/plans/2026-07-19-why-isnt-it-selling.md` (Tasks
+6–9; 1–5 were already built by the 07/19 session):
+
+- **Checks 6–7** (`competition.ts`, `cross-check.ts`) — TDD, 11 new tests. Competition flags on
+  40%+ of exact-DOM book at 90+ days OR 9+ months supply; sold-side figures labeled "of SOLD homes".
+- **`load-report.ts`** — the one impure orchestrator: subject row (address-key round-trip + floored
+  heal), 3 wins RPCs, snapshot/heat brains, cuts/parcel/ZHVI/relist; all injectable, all
+  empty-tolerant. `resolveQToZip` extracted to `app/r/_components/resolve-q.ts` (copy #2).
+- **Route + render** — `/r/why-isnt-it-selling/page.tsx` + `WinsRead.tsx` (report-family chrome).
+- **Watch store** (dark sender) — `watch-store.ts` + 3 `/api/report-watch*` routes; consent text
+  stored verbatim on opt-in only; `report_watches` migration applied (idempotent re-run).
+- **Verified**: 241 tests green · `bunx next build` green · live prod smoke on :3105 — bare-ZIP
+  33904 area read (658 active, 122/289 at 90+, competition correctly FLAGS at 42%) and a real
+  subject report for a 1,582-day Cape Coral listing (7 checks, honesty block, track form).
+- **Incident, self-inflicted**: recreated the three SQL functions before finding the committed
+  `docs/sql/20260719_wins_functions.sql` (glob was too narrow) — created a duplicate
+  `zip_price_position` overload live. Restored canonical bodies, dropped the stray overload,
+  deleted my duplicate migration file, verified one-signature-each via pg_proc.
+- **Known cosmetic defect, fix staged**: momentum cut-share figure prints the brain's verbose
+  citation incl. a raw ISO "as of" (double as-of on page). One-line fix to `load-report.ts`
+  blocked mid-session by a live parallel claim (session 9af8e942) — lands when the claim frees.
+- Checks OPENED: `stale_listing_radar_build` · `parcel_owner_fields_probe` ·
+  `wins_print_mail_addon` · `wins_direct_mail_loop` · `wins_watch_email_live`.
+  `why_isnt_it_selling_live_verify` stays OPEN — closes on post-deploy prod evidence only.
+- NOT pushed. NOTE FOR PUSH: parallel-session commit `cfb8e063` sits between my wins commits and
+  swept `page.tsx`/`WinsRead.tsx` into itself (shared index); content correct, attribution mixed.
+
 ## 2026-07-26 (Fable 5 · main) — CI red 5 days root-caused and fixed: bun mock.module leak + stale media-upload expectation; nightly chain dark = Anthropic credits; ops board age-check shipped
 
 Operator: "have we rebuilt correctly recently, or ever? why is ops page all yellows?" Four-lane
