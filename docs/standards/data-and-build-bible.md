@@ -159,6 +159,28 @@ hard way and re-proven on the active residential listings residential pipeline (
    cron expression (`0 25 * * *`) silently never runs (GHA drops it). When you un-park a schedule,
    confirm the next run actually appears in the Actions tab — green data is not proof the cron ran.
 
+### 0.4 — Append-only log tables: index the timestamp at birth
+
+Any append-only event/log table that gets read newest-first (a spend log, an event
+stream, a click ledger) ships its `created_at DESC` index **in the same migration
+that creates the table** — retrofit indexes are how a table gets slow silently for
+weeks first. Without it, every `ORDER BY created_at DESC` builds a temp B-tree; with
+it, the planner walks the index. `[policy-only]`.
+
+- **Exemplar:** `migrations/20260701_api_usage_log.sql` — `api_usage_log_created_at_idx
+  (created_at DESC)` plus the composite `(call_type, created_at DESC)` for the filtered
+  variant. Also applied: `sourced_figures_fetched_idx`, `source_totals_pipeline_fetched_idx`.
+- **Composite rule:** if the hot read is "latest N *of kind X*", index `(kind, created_at DESC)`
+  — a bare timestamp index still scans past every other kind.
+- **Volume gate (CLAUDE.md FOCUS rule 11):** tables in the hundreds of rows
+  (`public.checks` today) don't need it — apply at creation for anything designed to
+  grow unbounded, skip for small bounded ledgers until a real slow read shows up.
+
+Provenance: pattern confirmed in the wild 07/26/2026 — stinkpot (sqlite shell-history
+searcher, tangled.org/oppi.li/stinkpot) commit `843bd02f` "create idx on timestamp:
+speeds up reverse search, the sqlite plan now uses covering index instead of temp
+b-tree for order-by". Same shape, same fix, any engine.
+
 ---
 
 ## 1. The three tiers

@@ -1,3 +1,13 @@
+## 2026-07-26 (Fable 5 · main) — Bible §0.4: append-only log tables index their timestamp at birth (pattern from stinkpot review)
+
+Operator asked what tangled.org/oppi.li/stinkpot does for us (crawl4ai'd live: a ~400-line
+sqlite-backed bash-history searcher — nothing directly, wrong shell + wrong OS), then "add the
+pattern" — the one transferable idea. New §0.4 in `docs/standards/data-and-build-bible.md`:
+any append-only event/log table ships its `created_at DESC` index in the CREATE migration
+(composite `(kind, created_at DESC)` when the hot read is filtered), with a rule-11 volume
+gate so tiny bounded ledgers (checks, ~700 rows) skip it. Verified already applied where it
+matters: `api_usage_log`, `sourced_figures`, `source_totals`. Docs-only, no code touched.
+
 ## 2026-07-25 (Fable 5 · main) — Caching done the way the 07/23 commit MEANT: hourly data-cache on zip-report + source pages' lake reads, shells stay per-request
 
 Operator: "THAT IS WHAT WE WANTED. DO IT!!" Per the 07/21 caching research (no KV, no
