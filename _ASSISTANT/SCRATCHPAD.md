@@ -1,3 +1,23 @@
+## 2026-07-26 — "why the fuck would you not just take care of that??????????" (dead govt news sources)
+
+Operator on the follow-up: I found lee_county_govt + collier_county_govt dead since 06/22/2026,
+opened a check, and reported it instead of FIXING it in the same session. The standing rule is
+already written at 0aa (07/22): told to do it right, found the data, then STOPPED instead of
+finishing. A found-and-fixable defect gets fixed in-session; the check is for tracking, not a
+substitute for the fix.
+RESOLVED 07/26/2026 same session. Cause: BOTH counties migrated their sites ~06/22
+(colliercountyfl.gov → collier.gov; leegov.com → leefl.gov). Collier REPAIRED live: fetcher →
+collier.gov/News-articles with article_path scoping, image-markdown strip (their cards nest the
+image inside the link — regex was capturing the PNG as the article URL), wide-window card parse
+(card text blows the 120-char cap), and REAL publish dates parsed from "Published on …" (first
+real content dates this pipeline has ever had). End-to-end probe: 10 relevant rows, pub
+07/17–07/24/2026. 11/11 pipeline tests green (7 new). Lee is dark UPSTREAM — their old news page
+is an empty shell fully rendered, leefl.gov 503s at the Akamai edge → check
+lee_govt_news_upstream_dark (nothing on our side to fix until their migration lands). Registry
+source_scope corrected 4→6 sources while in there. Check news_govt_sources_dead_since_0622
+CLOSED with evidence. Side find: registry spine test red pre-existing (76 entries vs pinned
+75, not caused by this session) → check cadence_spine_pin_75_vs_76.
+
 ## 2026-07-26 — "why the fuck do we still have these news stories coming through??" (screenshot: 07/15 + 07/11 items)
 
 Operator screenshot shows a NEWS feed surface listing business_observer items dated 07/15/2026

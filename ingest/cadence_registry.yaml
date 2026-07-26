@@ -1875,15 +1875,16 @@ pipelines:
     # (Unrelated: data_lake.daily_truth has a real source_tag COLUMN — engine.py:67 — but it is
     # 'live_search' for every row, so the live_search entries discriminate on metric_key via
     # count_filter, not on source_tag. See :55/:89.)
-    note: "4 SWFL sources via crawl4ai. Cron at /api/cron/news-crawl scores + inserts into project_events. Novelty guard (2026-07-05): published_date = first-seen (carried forward pre-merge); assert_content_fresh 7d gate trips when no NEW article_url appears — news has no real content date, so staleness = no novelty."
+    note: "6 SWFL sources via crawl4ai (fetcher.py SOURCES). Cron at /api/cron/news-crawl scores + inserts into project_events. Novelty guard (2026-07-05): published_date = first-seen (carried forward pre-merge; since 07/26/2026 collier.gov cards supply the REAL publish date at listing stage); assert_content_fresh 7d gate trips when no NEW article_url appears. Guard is batch-GLOBAL: a single dead source is invisible while others produce (proven 06/22-07/26/2026: both county govt sources silent 34 days behind county site migrations, run stayed green — check news_govt_sources_dead_since_0622). Collier repaired 07/26/2026 (collier.gov/News-articles); Lee still dark upstream (leegov.com news shell empty, leefl.gov 503s at the edge)."
     source_scope:
       confirmed_total:
-        summary: "4 named sources scraped daily: Naples Daily News (business section), Fort Myers News-Press (business section), Lee County govt releases, Collier County govt news"
-        source: "our ingest"
+        summary: "6 named sources scraped daily: Naples Daily News (business section), Fort Myers News-Press (business section), Gulfshore Business, Business Observer (Charlotte-Lee-Collier section), Lee County govt releases (upstream-dark since ~06/22/2026, county mid-migration to leefl.gov), Collier County govt news (collier.gov/News-articles since 07/26/2026)"
+        as_of: "07/26/2026"
+        source: "our ingest (ingest/pipelines/news_swfl/fetcher.py SOURCES)"
       source_ceiling:
-        summary: "6 real, live SWFL outlets confirmed but not scraped: Gulfshore Business, WINK News (fox4now.com now redirects into the same site — one outlet, not two), NBC2/WBBH (gulfcoastnewsnow.com), WGCU public media news, Cape Coral Breeze, Florida Weekly (has separate Naples/Fort Myers county editions)."
-        as_of: "07/08/2026"
-        source_label: "gulfshorebusiness.com, winknews.com, gulfcoastnewsnow.com, wgcu.org/news, capecoralbreeze.com, floridaweekly.com"
+        summary: "5 real, live SWFL outlets confirmed but not scraped: WINK News (fox4now.com now redirects into the same site — one outlet, not two), NBC2/WBBH (gulfcoastnewsnow.com), WGCU public media news, Cape Coral Breeze, Florida Weekly (has separate Naples/Fort Myers county editions). Gulfshore Business moved to PULLED."
+        as_of: "07/26/2026"
+        source_label: "winknews.com, gulfcoastnewsnow.com, wgcu.org/news, capecoralbreeze.com, floridaweekly.com"
 
   - name: active_listings
     workflow: active-listings-daily.yml

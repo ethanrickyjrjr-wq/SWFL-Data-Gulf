@@ -1,3 +1,17 @@
+## 2026-07-26 (Fable 5 · news triage) — stale-news gripe root-caused twice over: /desk feed reorder + both govt sources repaired/triaged
+
+Operator screenshot: 07/11–07/15 stories surfacing as new. (1) /desk Flash feed ordered by
+scraped_at, which the dlt delete-insert merge re-bumps daily for every article still on a
+listing page — loadNews now orders by published_date (first-seen) with scraped_at tiebreak
+(154bc188, 15/15 tests). (2) Probe exposed both county govt sources dead since 06/22: county
+site migrations. Collier repaired live — fetcher → collier.gov/News-articles, article_path
+scoping, image-strip, wide-window card parse + REAL publish dates; end-to-end probe 10 rows
+(pub 07/17–07/24), 11/11 pipeline tests (7 new in test_fetcher_extract.py). Lee dark upstream
+(leefl.gov 503s at the edge) → check lee_govt_news_upstream_dark. Registry news_swfl
+note/source_scope corrected 4→6 sources. Checks: news_govt_sources_dead_since_0622 closed w/
+evidence; opened lee_govt_news_upstream_dark + cadence_spine_pin_75_vs_76 (pre-existing 76-vs-75
+spine red, not this session's edit — proven by stash test). Push held for operator decree.
+
 ## 2026-07-26 (Fable 5 · audit desk) — fact-check punch list CLOSED: last template fix applied, preview reassembled, push decreed
 
 Adversarial audit of issue-2026-07.template.html vs the collection bank (07/26 §8 freshest) +
