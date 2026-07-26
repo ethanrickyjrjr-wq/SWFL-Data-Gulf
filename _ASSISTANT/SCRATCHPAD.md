@@ -1,3 +1,14 @@
+## 2026-07-26 — Bluesky handle claim @swfldatagulf.com IN FLIGHT (operator doing it manually)
+
+Operator asked what atproto.com is → verdict: claim @swfldatagulf.com as the Bluesky handle
+(free brand verification via DNS), park Bluesky as a possible third social lane, skip
+firehose/PDS at our volume. Steps handed 07/26: create bsky.app account → Settings → Handle →
+"I have my own domain" → grab `did:plc:` value → Cloudflare (confirmed our DNS host; no
+`_atproto` TXT exists yet) → add TXT `_atproto` = `did=did:plc:...` → Verify. DNS lane chosen
+over `/.well-known/atproto-did` route deliberately — site pages were 500ing this week, DNS
+survives a bad deploy. OPEN until the handle resolves; verify with
+`nslookup -type=TXT _atproto.swfldatagulf.com` + profile shows @swfldatagulf.com.
+
 ## 2026-07-25 — 🔴 SECOND page down from the same 07/23 commit: /r/source/[table] 500s on EVERY table, live-probed 07/25 after the zip-report revert
 
 Operator: "WHY CAN'T THESE RUN THIS WA[Y], BUT WE BUILT IT????????????" — answered with the
