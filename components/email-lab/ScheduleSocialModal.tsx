@@ -37,14 +37,23 @@ type Cadence = "daily" | "weekly" | "monthly";
 // Local label map — importing platformLabel from lib/social/channels/index.ts would pull
 // the server-only OAuth + adapter code into this client bundle. The Platform union is
 // published-first and breaking-change-gated, so a small map here can't silently drift.
-const PLATFORM_LABEL: Record<Platform, string> = {
+// bluesky is deliberately excluded — this modal only offers the schedule/cron lane's
+// publishable platforms, and bluesky's cron lane isn't wired (lib/social/types.ts).
+type PublishablePlatform = Exclude<Platform, "bluesky">;
+const PLATFORM_LABEL: Record<PublishablePlatform, string> = {
   x: "X",
   facebook: "Facebook",
   instagram: "Instagram",
   linkedin: "LinkedIn",
   google_business: "Google Business",
 };
-const PUBLISHABLE: Platform[] = ["x", "facebook", "instagram", "linkedin", "google_business"];
+const PUBLISHABLE: PublishablePlatform[] = [
+  "x",
+  "facebook",
+  "instagram",
+  "linkedin",
+  "google_business",
+];
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const HOUR_OPTIONS = [
@@ -78,8 +87,8 @@ export function ScheduleSocialModal({
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{
     when: string;
-    scheduled: Platform[];
-    skipped: Platform[];
+    scheduled: PublishablePlatform[];
+    skipped: PublishablePlatform[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 

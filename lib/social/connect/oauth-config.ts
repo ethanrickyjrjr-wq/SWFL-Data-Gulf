@@ -173,7 +173,10 @@ interface ClientCreds {
   secret: string;
 }
 
-const CRED_ENV: Record<Platform, { id: string; secret: string }> = {
+// Partial, NOT Record<Platform,...> — bluesky is deliberately excluded (env-credential
+// app password on /api/social/post-now, no OAuth client id/secret; see lib/social/types.ts).
+// A partial map means a missing entry is a type-legal state, not a forced dummy row.
+const CRED_ENV: Partial<Record<Platform, { id: string; secret: string }>> = {
   x: { id: "X_CLIENT_ID", secret: "X_CLIENT_SECRET" },
   facebook: { id: "META_APP_ID", secret: "META_APP_SECRET" },
   instagram: { id: "META_APP_ID", secret: "META_APP_SECRET" },
@@ -182,17 +185,19 @@ const CRED_ENV: Record<Platform, { id: string; secret: string }> = {
 };
 
 function creds(platform: Platform): ClientCreds {
-  const { id, secret } = CRED_ENV[platform];
-  const idVal = process.env[id];
-  const secretVal = process.env[secret];
-  if (!idVal || !secretVal) throw new Error(`${id}/${secret} not configured`);
+  const env = CRED_ENV[platform];
+  if (!env) throw new Error(`No OAuth credential env mapping for platform: ${platform}`);
+  const idVal = process.env[env.id];
+  const secretVal = process.env[env.secret];
+  if (!idVal || !secretVal) throw new Error(`${env.id}/${env.secret} not configured`);
   return { id: idVal, secret: secretVal };
 }
 
 /** Are this platform's OAuth credentials present? Routes degrade gracefully when not. */
 export function socialOauthConfigured(platform: Platform): boolean {
-  const { id, secret } = CRED_ENV[platform];
-  return Boolean(process.env[id] && process.env[secret]);
+  const env = CRED_ENV[platform];
+  if (!env) return false;
+  return Boolean(process.env[env.id] && process.env[env.secret]);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -511,7 +516,11 @@ const gbpConfig: OAuthPlatformConfig = {
 // 11. Registry + accessor
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const OAUTH_CONFIGS: Record<Platform, OAuthPlatformConfig> = {
+// Partial, NOT Record<Platform,...> — bluesky has no connector here (test asserts this:
+// "bluesky is NOT an OAuth-configurable platform", channels.test.ts). getOAuthConfig()
+// throws its existing "No OAuth config for platform" error for it, same as any
+// not-yet-connectorized platform would.
+export const OAUTH_CONFIGS: Partial<Record<Platform, OAuthPlatformConfig>> = {
   x: xConfig,
   facebook: metaConfig(false),
   instagram: metaConfig(true),

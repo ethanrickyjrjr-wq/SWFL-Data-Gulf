@@ -14,8 +14,9 @@
  *   5. Refresh-before-post: getValidAccessToken is called with correct args
  */
 
-import { describe, expect, it, beforeEach, afterEach, mock } from "bun:test";
+import { describe, expect, it, test, beforeEach, afterEach, mock } from "bun:test";
 import type { PublishInput } from "../types";
+import { OAUTH_CONFIGS } from "../connect/oauth-config";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -657,5 +658,39 @@ describe("createChannelPublisher", () => {
     const result = await publisher.post(BASE_INPUT);
     expect(result.ok).toBe(false);
     expect(result.error).toMatch(/DRY MODE/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. bluesky — type-lift only (post-now lane lands in a later build; cron not wired)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("bluesky (Platform union type-lift)", () => {
+  afterEach(() => {
+    delete process.env.SOCIAL_PUBLISH_ENABLED;
+  });
+
+  test("platformLabel knows bluesky", async () => {
+    const { platformLabel } = await import("./index");
+    expect(platformLabel("bluesky")).toBe("Bluesky");
+  });
+
+  test("postToChannel routes bluesky to the not-wired error, not token lookup", async () => {
+    process.env.SOCIAL_PUBLISH_ENABLED = "true";
+    const { postToChannel } = await import("./index");
+    const fakeDb = {} as import("@supabase/supabase-js").SupabaseClient;
+    const r = await postToChannel(fakeDb, "u1", {
+      platform: "bluesky",
+      accountId: "env",
+      caption: "x",
+      media: [],
+    });
+    expect(r.ok).toBe(false);
+    expect(r.error).toContain("post-now");
+  });
+
+  test("bluesky is NOT an OAuth-configurable platform", () => {
+    // Gate connect UIs off oauth-config keys, never the union (spec failure-mode 2).
+    expect(Object.keys(OAUTH_CONFIGS)).not.toContain("bluesky");
   });
 });

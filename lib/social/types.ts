@@ -4,9 +4,13 @@
  * Channel-agnostic social backbone — shared interface everyone downstream codes against.
  * Mirrors the email/outreach engine; swaps the email seam for a platform seam.
  *
- * Platform scope (v1): x | facebook | instagram | linkedin | google_business
+ * Platform scope (v1): x | facebook | instagram | linkedin | google_business | bluesky
  * Instagram/Facebook share the Meta Graph API; google_business = GBP.
- * Phase-2 additions (TikTok, Threads, Bluesky, Pinterest, YouTube) slot in here.
+ * bluesky posts via /api/social/post-now on an env-credential app password —
+ * NOT OAuth-configurable (see lib/social/connect/oauth-config.ts) and NOT wired
+ * into the cron/schedule lane yet (postToChannel's bluesky case + schedule/connect
+ * routes reject it there). Phase-2 additions (TikTok, Threads, Pinterest, YouTube)
+ * slot in here.
  *
  * Published FIRST (build 01). All other social builds import from here — changing
  * this file is a breaking-change event requiring all social imports to be updated.
@@ -20,7 +24,7 @@ import type { SocialDesign } from "@/lib/social/design/types";
 // 1. Platform union (v1 scope + Phase-2 extension points)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type Platform = "x" | "facebook" | "instagram" | "linkedin" | "google_business";
+export type Platform = "x" | "facebook" | "instagram" | "linkedin" | "google_business" | "bluesky";
 
 export type PostStatus = "queued" | "dry_run" | "published" | "failed";
 export type SocialAccountStatus = "connected" | "expired" | "revoked";

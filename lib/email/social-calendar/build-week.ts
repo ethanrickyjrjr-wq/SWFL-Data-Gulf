@@ -41,17 +41,19 @@ import { deriveListingPhoto } from "@/lib/media/listing-photo";
 // docs.x.com/fundamentals/counting-characters ("Posts on X can contain up to 280 characters").
 const X_CHAR_LIMIT = 280;
 
-// The 5 PUBLISHABLE platforms (schedule targets) = the `Platform` union, NOT the 8
-// display platforms in lib/email/social/platforms.ts. Built off a full Record so a
-// new Platform member is a compile error here until it is listed.
-const PUBLISHABLE_SET: Record<Platform, true> = {
+// The 5 PUBLISHABLE platforms (schedule targets) = the `Platform` union MINUS bluesky
+// (post-now only; its cron lane isn't wired — lib/social/types.ts), NOT the 8 display
+// platforms in lib/email/social/platforms.ts. Built off a full Record so a new Platform
+// member is a compile error here until it is deliberately listed (or excluded, as bluesky is).
+type PublishablePlatform = Exclude<Platform, "bluesky">;
+const PUBLISHABLE_SET: Record<PublishablePlatform, true> = {
   x: true,
   facebook: true,
   instagram: true,
   linkedin: true,
   google_business: true,
 };
-export const PUBLISHABLE_PLATFORMS = Object.keys(PUBLISHABLE_SET) as Platform[];
+export const PUBLISHABLE_PLATFORMS = Object.keys(PUBLISHABLE_SET) as PublishablePlatform[];
 
 // The four-lane no-invention sourcing rules — ONE source of truth, shared by the
 // social-card builder (socialPostSystem) and the canvas author (authorSocialSystem).
@@ -65,7 +67,7 @@ ONLY block: an invented number with no real source. Build is NEVER blocked.`;
 
 // Per-network caption SHAPE rules (the Buffer "content tailoring" pattern). These change
 // only the shape; figures + citations are reused verbatim — the four-lane moat is untouched.
-const PLATFORM_RULES: Record<Platform, string> = {
+const PLATFORM_RULES: Record<PublishablePlatform, string> = {
   x: `<=${X_CHAR_LIMIT} CHARACTERS total (hard limit), one punchy hook, at most 1-2 hashtags`,
   linkedin: "longer-form and professional, 2-3 short paragraphs, insight-led, few or no hashtags",
   instagram: "caption first, then a block of 5-8 hashtags on their own line at the end",
@@ -107,8 +109,11 @@ export function socialPostSystem(
   const variantsKeyLine = platforms.length
     ? `\n  variants: object      (keys EXACTLY: ${platforms.join(", ")} — the SAME post reshaped per network; reuse the SAME figures + citations as captionText, never invent)`
     : "";
+  // bluesky has no per-network shape rule here (it's not a schedule/compose target —
+  // its post-now lane is a separate build) — filter it out rather than widen PLATFORM_RULES.
   const networkBlock = platforms.length
     ? `\n\nPER-NETWORK VARIANTS — also return "variants" reshaping captionText for each requested network. Change only the SHAPE; keep the exact same figures and citations:\n${platforms
+        .filter((p): p is PublishablePlatform => p in PLATFORM_RULES)
         .map((p) => `- ${p}: ${PLATFORM_RULES[p]}`)
         .join("\n")}`
     : "";

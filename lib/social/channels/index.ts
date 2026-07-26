@@ -65,6 +65,18 @@ export async function postToChannel(
     };
   }
 
+  // ── BLUESKY: not an OAuth platform, not wired into this (token-lookup) lane ──
+  // bluesky posts via /api/social/post-now on an env-credential app password.
+  // It has no social_accounts row and no oauth-config entry, so it must be routed
+  // OUT before getValidAccessToken ever runs — honest exhaustiveness, no pretend
+  // cron support.
+  if (input.platform === "bluesky") {
+    return {
+      ok: false,
+      error: "bluesky posts via /api/social/post-now (env credential); cron lane not wired",
+    };
+  }
+
   // ── GET VALID (POSSIBLY REFRESHED) ACCESS TOKEN ──────────────────────────
   let accessToken: string;
   try {
@@ -128,6 +140,7 @@ export function platformLabel(platform: Platform): string {
     instagram: "Instagram",
     linkedin: "LinkedIn",
     google_business: "Google Business Profile",
+    bluesky: "Bluesky",
   };
   return labels[platform];
 }

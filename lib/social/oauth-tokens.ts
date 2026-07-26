@@ -370,6 +370,11 @@ export async function refreshAccessToken(
     case "google_business":
       refreshed = await callGBPRefresh(rt);
       break;
+    case "bluesky":
+      // bluesky is an env-credential app password (lib/social/types.ts), not OAuth —
+      // it has no social_accounts row and no refresh_token to refresh. Reject on this
+      // OAuth-only path the same way an unknown platform would be rejected.
+      throw new Error("bluesky does not use OAuth token refresh (env credential, not wired here)");
     default: {
       // Exhaustiveness guard — TypeScript knows Platform is a closed union
       const _never: never = platform;
