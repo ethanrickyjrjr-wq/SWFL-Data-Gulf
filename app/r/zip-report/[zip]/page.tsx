@@ -43,11 +43,11 @@ import { zipReportMetadata } from "./metadata";
 import type { Metadata } from "next";
 
 export const runtime = "nodejs";
-export const revalidate = 3600;
-
-export async function generateStaticParams(): Promise<{ zip: string }[]> {
-  return [];
-}
+// force-dynamic restored 07/25/2026: the 07/23 switch to `revalidate = 3600` +
+// empty generateStaticParams made every /r/zip-report/[zip] request 500 in
+// production (crashed before data — even out-of-scope ZIPs). This page does
+// request-time work and must render per request.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

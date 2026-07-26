@@ -1,3 +1,5 @@
+## 2026-07-25 — 🔴 LIVE 500: operator "why are zip codes 500??????" — CONFIRMED: /r/zip-report/33904 returns HTTP 500 in production (curl 07/25). /r/should-i-sell/33904 = 200, /api/b/master = 200, /z/33904 = 307 (redirect target TBD — if it lands on zip-report the whole /z lane is down). Note open check `zip_quick_summary_live_verify` (ACS demographic cards on zip-report, deployed ~2 days ago, never live-verified) — prime suspect window. Diagnosing now.
+
 ## 2026-07-25 — 🔴 Operator: "HOW DOES LEE HAVE NAPLES???? ALVA??? DID YOU LOOK THIS SHIT UP?? LOOK UP WHAT IS IN LEE AND COLLIER FUCKING COUNTIES" — then, after verifying the roster himself: "WHATEVER. LEAVE IT."
 
 RESOLVED-AS-VERIFIED 07/25/2026: crawled both county rosters live; ALL 22 Lee + 7 Collier rows
@@ -113,6 +115,79 @@ rebuild). Answer given 07/25: productize lane 2 first (their data as cited sourc
 answers — no new architecture), per-tenant dossier only as a paid tier after first users. Better play
 named: launch-kit asks (07/19 kit still unused, funnel verified) + rank 1 (SOH cost-of-waiting,
 SMALL) + rank 2 (second-opinion price verdict, SMALL, ask-first on the chat gate).
+
+## 2026-07-25 — 🔴 CORRECTION, SAME SESSION: the gate fired a SECOND time and the LIVE lane killed my own #1 recommendation
+
+I ranked the appraiser/inspector cross-check #1 off the 07/18 plan without ever querying the permit
+tables. The plan's OWN adversarial verifier had flagged "core parcel tables not yet confirmed live"
+and a "documented 0/360 prior failure" on permit→parcel matching. I relayed it anyway. Then the
+four-lane gate blocked me for skipping CATALOG + LIVE, and both lanes changed the answer.
+
+**CATALOG (`data-roots.md:281`, registry batch 5):** `lee_permits` 🟡 · the real table is
+`data_lake.lee_building_permits` · source is an **Accela Angular-SPA scrape (crawl4ai stealth) with a
+~90-day backfill** — the registry itself calls it fragile and names the replacement.
+
+**LIVE PROBE (07/25/2026, PostgREST, service key):**
+- `data_lake.lee_building_permits` = **300 rows total**, `issued_date` 02/25/2026 → 07/20/2026.
+- Status distribution over all 300: **224 "Documents Uploaded" (75%)** · 27 In Review · 16 Payment
+  Required · **13 "Permit Issued"** · 6 Waiting on Applicant · 5 Submitted · 4 NULL · **1 literal "3"**
+  (junk) · 1 Closed-Revision Approved · 1 Application Received · 1 Ready-Documents Required.
+- **`data_lake.collier_permits` DOES NOT EXIST** — PGRST205. **`data_lake.lee_permits` DOES NOT
+  EXIST** either, despite the catalog naming it a root.
+
+**What this means, plainly:** we do not hold permit HISTORY. We hold a 5-month snapshot of 300
+mostly-unissued permit APPLICATIONS for one county. The flagship feature of the #1 plan — "permit
+history including permits pulled-but-never-closed" — is **NOT buildable on current data**, and
+"Lee + Collier" is not buildable at all because Collier has no table.
+
+**It does not kill the product, it re-sequences it.** The fix is already recorded as a ceiling: Lee
+County ArcGIS FeatureServers (9,386 unincorporated + 719 commercial + 2,192 Cape Coral residential),
+plus a Collier permits pipeline from scratch. So it is "build the ingest first," not "wire up what we
+have" — materially different from the plan's 3-4 week estimate, which assumed reuse.
+→ check `permits_spine_thin_collier_missing` opened (NOT left as prose, per RULE 2.4).
+
+**The meta-lesson, third instance today:** I wrote the playbook saying a number in a plan is a
+hypothesis with a timestamp, then quoted a plan's data assumptions as fact — twice in one session,
+on the two biggest questions asked. The gate caught both. The gate is the only reason this didn't
+become a multi-week build on a table with 300 rows in it.
+
+## 2026-07-25 — Operator: "WHAT are the best ones" — re-ranked under HIS filter (ignore current volume; assume we rebuild it as a hosted product for real businesses)
+
+Read the whole board this time: `docs/vertical-plays/README.md` + `02-horizontal-engine-spec.md`
++ the 10 ranked candidates in `05-non-re-monetization-sweep-2026-07-18.md`.
+
+**THE FILTER CHANGES THE RANKING.** The 07/18 sweep capped candidate after candidate on SWFL
+addressable market (#2 explicitly: "~1,000 licensees … caps subscription-revenue ceiling on SWFL
+volume alone"). Removing geography deletes exactly that cap, and the order moves.
+
+**Re-ranked for "could be a real hosted business":**
+1. **Appraiser/Inspector Subject Cross-Check (#2).** Demand driver is NATIONAL and DATED — UAD 3.6
+   mandatory 11/02/2026; only 3% of 1,798 surveyed appraisers had done one, 58% untrained (Working
+   RE, n=1,798, closed 03/15/2026). Every state has assessors, permits, and a licensee roster.
+   Real moat = the BUNDLE (permit+storm+flood+assessor-GLA discrepancy), NOT permits — BuildFAX
+   (Verisk) already ships permit history natively in ClickFORMS.
+2. **Compliance Radar pattern (#1 SIRS + #6 CAM outreach).** #6 is explicitly the acquisition arm
+   for #1 — together they're a complete business: find who hasn't filed a mandated report, reach
+   the manager who must fix it. Pattern generalizes to any dated mandate.
+3. **The horizontal engine itself (02 spec).** Already vertical-agnostic by design — only 3
+   pluggable parts (list adapter, content pack, paywall). Insurance is the reachability winner:
+   FL DFS publishes a FREE bulk CSV carrying **email + phone + county + license class**, no records
+   request, no enrichment. Cleanest path to a first paying customer on the whole board.
+
+**CORRECTION TO MY OWN EARLIER ANSWER TODAY — Grounding Gate (#9) is NOT our best sellable asset.**
+I pitched it that way this session from reasoning. Our own adversarially-verified research says
+otherwise and I should have read it first: the REUSED half (numeric-anchor + hedge-word + injection
+regex) is the commodity layer — ~9 indie tools give it away free — and the DIFFERENTIATING half
+(open-world claim-vs-context entailment) is **100% net-new**, competing with 0.91-AUROC funded
+incumbents. Category evidence is negative: Cleanlab TLM acqui-hired (Jan 2026, talent grab — 9 staff
+incl. all 3 founders), Guardrails AI retreated from a raw API to OSS. Verifier's words: "a narrow
+validator-only product may be a feature, not a durable standalone company." Keep it as a differentiator
+INSIDE our products, not as the company.
+
+**The synthesis worth keeping:** we don't have 30 products, we have ONE product with 30
+configurations — resolve an address/entity → join public records → emit a branded, no-invention,
+sourced artifact → gate the send. `02-horizontal-engine-spec.md` already specs that for the OUTREACH
+half; nothing specs it for the REPORT half. That gap is the actual build.
 
 ## 2026-07-25 — 🔴 THE FOUR-LANE GATE CAUGHT ME SKIPPING RESEARCH, AND THE SKIPPED LANE HELD AN UNROTATED CREDENTIAL DUMP, 7 DAYS OLD
 

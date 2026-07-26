@@ -1,3 +1,16 @@
+## 2026-07-25 (Fable 5 · main) — LIVE OUTAGE: every /r/zip-report/[zip] 500ing in prod; root-caused to the 07/23 static-rendering switch; force-dynamic restored
+
+Operator: "why are zip codes 500??????" Confirmed live: 500 on 33904/33908/33990/34110 AND
+out-of-scope 00000 — crash precedes any data read. Root cause: commit `7ef40312` (07/23) replaced
+`dynamic = "force-dynamic"` with `revalidate = 3600` + empty `generateStaticParams` on
+`app/r/zip-report/[zip]/page.tsx`; the page does request-time work and 500s under ISR. Broken
+since that deploy — the open `zip_quick_summary_live_verify` check was the never-run live proof.
+NOT caused by tonight's pushes (none touched zip-report; the new city views are additive
+read-only). Fix: restored `force-dynamic` with a why-comment; full `bunx next build` clean, route
+shows `ƒ` (dynamic) again. NOTE: the parallel session's 21:43 push (`cfb8e063`) carried this
+session's should-i-sell label fix + city-summary SQL to prod — those are live and verified
+working; the label fix now renders "Cape Coral 33904".
+
 ## 2026-07-25 (Fable 5 · main) — operator caught a live grain mislabel (city name over ZIP numbers); fixed the label, BUILT city grain in the lake, opened the guard checks
 
 Operator pasted Cape Coral's 8 ZIPs to expose it: the should-i-sell page said *"Homesteaded owners
