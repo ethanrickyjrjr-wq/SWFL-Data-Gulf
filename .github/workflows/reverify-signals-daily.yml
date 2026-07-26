@@ -59,6 +59,30 @@ jobs:
             node scripts/reverify-signals.mjs | tee scan.txt
           fi
 
+      # WIRED 07/25/2026 — scripts/ceilings-to-checks.mjs shipped weeks ago and was
+      # invoked by NOTHING: not a workflow, not a hook, not package.json. The 72
+      # recorded source_ceilings became checks exactly once, by hand. That is the
+      # "recording half built, acting half never wired" failure documented in
+      # docs/standards/new-project-playbook.md §1 — a ceiling nobody surfaces is why
+      # two sessions independently told the operator we had no beds/baths while it
+      # sat recorded in the registry, twice.
+      # Home chosen deliberately: same ledger, same daily cadence, same secrets
+      # already proven in the step above. --apply is idempotent (data-roots.md:38),
+      # so re-running cannot duplicate a check. continue-on-error so a ceiling
+      # hiccup can never mask a signal regression, which is this workflow's day job.
+      - name: Surface recorded source ceilings as checks (idempotent)
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          set -o pipefail
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            node scripts/ceilings-to-checks.mjs
+          else
+            node scripts/ceilings-to-checks.mjs --apply
+          fi
+
       - name: Open or update the regression issue
         if: steps.run.outcome == 'failure'
         env:

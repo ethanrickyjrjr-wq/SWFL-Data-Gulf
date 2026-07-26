@@ -29,18 +29,31 @@ check("loadRules returns file contents (trimmed) when the file reads", () => {
   assert.equal(txt, "RULE ONE\nRULE TWO");
 });
 
-check("loadRules falls back to DEFAULT_RULES when the file is absent", () => {
+// FAILURE MODE (07/25/2026): the fallback used to be SILENT. RULES.md carries 12
+// rules; DEFAULT_RULES carries 7. An unreadable or blank file therefore deleted
+// rules 8-12 (data-roots, scratchpad, do-it-when-told, our-volume, second-order)
+// from every prompt with no error anywhere. Fail-open on the PROMPT is deliberate
+// (a broken hook must never wedge a turn) but the DEGRADATION must be visible.
+check("loadRules falls back to DEFAULT_RULES when the file is absent — LOUDLY", () => {
   const txt = loadRules({
     read: () => {
       throw new Error("ENOENT");
     },
   });
-  assert.equal(txt, DEFAULT_RULES);
+  assert.ok(txt.includes(DEFAULT_RULES), "fallback canon must still be delivered");
+  assert.match(txt, /DEGRADED/, "silent fallback: no degraded banner");
+  assert.match(txt, /_ASSISTANT\/RULES\.md/, "banner must name the unreadable file");
 });
 
-check("loadRules falls back when the file is empty/whitespace", () => {
+check("loadRules falls back when the file is empty/whitespace — LOUDLY", () => {
   const txt = loadRules({ read: () => "   \n  " });
-  assert.equal(txt, DEFAULT_RULES);
+  assert.ok(txt.includes(DEFAULT_RULES), "fallback canon must still be delivered");
+  assert.match(txt, /DEGRADED/, "silent fallback: no degraded banner");
+});
+
+check("loadRules does NOT emit the degraded banner on the happy path", () => {
+  const txt = loadRules({ read: () => "RULE ONE" });
+  assert.doesNotMatch(txt, /DEGRADED/, "banner leaked onto a healthy read");
 });
 
 // --- DEFAULT_RULES carries the load-bearing canon markers ---

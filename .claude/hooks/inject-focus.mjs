@@ -25,7 +25,7 @@
 // Rules live in operator-editable `_ASSISTANT/RULES.md` so wording changes in ONE
 // plain-text place without touching this script; DEFAULT_RULES is the fallback.
 //
-// Fail-OPEN: any error → exit 0 silently. A broken focus hook must never wedge a
+// Fail-OPEN on the PROMPT: any error → exit 0. A broken focus hook must never wedge a
 // prompt.
 
 import { readFileSync, existsSync } from "node:fs";
@@ -56,16 +56,31 @@ export const DEFAULT_RULES = `FOCUS — the rules that get repeated. Honor them 
 6. Answers are plain text — no blockquotes, no tables (they break copy-paste). Code fences are for commands only.
 7. Probe our code first (RULE 0.5), research the outside answer with crawl4ai not memory (RULE 0.4). If unsure, use /advisor — never guess.`;
 
+/** Banner prepended whenever we serve the frozen fallback instead of the live file.
+ *  WHY (07/25/2026): the fallback was SILENT. RULES.md carries 12 rules and
+ *  DEFAULT_RULES carries 7, so an unreadable or blank file quietly deleted rules
+ *  8-12 — data-roots, scratchpad, do-it-when-told, our-volume, second-order — from
+ *  every prompt, with no error anywhere. Fail-open on the PROMPT stays deliberate
+ *  (a broken hook must never wedge a turn); the DEGRADATION is now visible. */
+export const DEGRADED_BANNER = `⚠️ FOCUS DEGRADED — could not read \`_ASSISTANT/RULES.md\`; serving the frozen 7-rule fallback.
+Rules 8-12 (data-roots · scratchpad · do-it-when-told · our-volume · second-order) are NOT in this prompt.
+Say so before answering, and read _ASSISTANT/RULES.md directly if the turn touches data, counts, or files.
+
+`;
+
 /** Load the hard rules: the operator's file wins; fall back to DEFAULT_RULES when
- *  the file is missing or blank. `read` is injectable for testing. */
+ *  the file is missing or blank — LOUDLY, never silently. `read` is injectable for
+ *  testing. */
 export function loadRules({ read }) {
   let text;
   try {
     text = read();
   } catch {
-    return DEFAULT_RULES;
+    return DEGRADED_BANNER + DEFAULT_RULES;
   }
-  if (typeof text !== "string" || text.trim().length === 0) return DEFAULT_RULES;
+  if (typeof text !== "string" || text.trim().length === 0) {
+    return DEGRADED_BANNER + DEFAULT_RULES;
+  }
   return text.trim();
 }
 

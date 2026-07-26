@@ -262,6 +262,7 @@ Locked 07/07/2026 (operator correction — this line previously overclaimed "6-c
 | Topic | File |
 |---|---|
 | **★ Data roots — CHECK FIRST** | `docs/standards/data-roots.md` — the ONE catalog of which table/root feeds each number; any data question or build starts at its top section (one root per concept) |
+| **★ New-project playbook — guards, tracking, anti-drift** | `docs/standards/new-project-playbook.md` — every failure shape this project hit, the guard that stops each, and the day-0 install order. Read before standing up any new project or proposing a new guard; §2 is why gitignored research never gets read |
 | **Data & Build Bible** | `docs/standards/data-and-build-bible.md` |
 | Infrastructure (13 layers) | `docs/standards/infrastructure-playbook.md` — per-layer status + remediation playbook + what NOT to build; two layers are NO-OP BY DESIGN, don't "fix" them |
 | Ontology + roadmap | `docs/ontology-and-roadmap.md` |

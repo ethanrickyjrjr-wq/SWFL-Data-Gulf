@@ -240,21 +240,28 @@ async function haikuDiagnose(c, logTail, code) {
     .trim();
 }
 
-// ---------- L2: DATA_EMPTY URL rediscovery (Firecrawl v2 map; advisory only) ----------
+// ---------- L2: DATA_EMPTY source-origin surfacing (no network; advisory only) ----------
 
-// A 0-row failure is usually a dead/moved source URL. Map the source's own domain
-// and surface candidate replacement URLs on the incident issue. We NEVER re-point
-// the source or write code — a human verifies and wires the swap. Degrades to null
-// without FIRECRAWL_API_KEY (same pattern as the Haiku key).
+// FIRECRAWL REMOVED 07/25/2026. This function used to POST to api.firecrawl.dev to
+// map the source domain for candidate replacement URLs. Two reasons it's gone:
+//   1. RULE 0.4 is explicit — "crawl4ai is the ONLY web-crawl tool — never Firecrawl."
+//      A banned vendor was wired into the self-healing path.
+//   2. It was DEAD anyway. FIRECRAWL_API_KEY exists as a repo secret (set 2026-05-26)
+//      but is passed to NO workflow env: block, so process.env never carried it and
+//      this branch always returned null. Orphaned secret — safe to delete in the
+//      GitHub UI; nothing reads it after this commit.
+// NOT swapped to crawl4ai: crawl4ai is machine-local (pinned to the operator's box)
+// and cannot run on a GitHub runner. So the automated half is genuinely unavailable,
+// and pretending otherwise would be the invented capability this repo keeps getting
+// burned by.
+// What survives is the part that carried the actual value: extract the source origin
+// from the pipeline code and print it on the incident issue so a human can crawl4ai
+// it locally in one command. No network, no key, no vendor.
 async function rediscoverUrls(c, code) {
   if (c.klass !== "DATA_EMPTY") return null;
-  if (!process.env.FIRECRAWL_API_KEY) {
-    log("no FIRECRAWL_API_KEY set — skipping DATA_EMPTY URL rediscovery");
-    return null;
-  }
   const urlMatch = (code.code || "").match(/https?:\/\/[^\s"'`)]+/);
   if (!urlMatch) {
-    log("DATA_EMPTY: no source URL found in pipeline code — skipping rediscovery");
+    log("DATA_EMPTY: no source URL found in pipeline code — skipping origin surfacing");
     return null;
   }
   let origin;
@@ -269,32 +276,8 @@ async function rediscoverUrls(c, code) {
       .replace(/\b(weekly|monthly|daily|annual|quarterly|tier ?\d+|fetch|load)\b/gi, "")
       .replace(/\s+/g, " ")
       .trim() || undefined;
-  // Firecrawl v2 map: POST /v2/map, Bearer auth, body { url, search?, limit?, sitemap? },
-  // response { success, links: [{ url, title?, description? }] }. Verified live 2026-06-09.
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 25000);
-  try {
-    const res = await fetch("https://api.firecrawl.dev/v2/map", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url: origin, search, limit: 20, sitemap: "include" }),
-      signal: ctrl.signal,
-    });
-    if (!res.ok) {
-      log(`Firecrawl map HTTP ${res.status} — rediscovery skipped`);
-      return null;
-    }
-    const data = await res.json();
-    const links = (Array.isArray(data.links) ? data.links : [])
-      .filter((l) => l && l.url)
-      .slice(0, 5);
-    return links.length ? { origin, search, candidates: links } : null;
-  } finally {
-    clearTimeout(timer);
-  }
+  log(`DATA_EMPTY: surfacing source origin ${origin} for manual crawl4ai check`);
+  return { origin, sourceUrl: urlMatch[0], search, candidates: [] };
 }
 
 function buildComment(c, llmText, sourcePath, rediscovery) {
@@ -310,10 +293,17 @@ function buildComment(c, llmText, sourcePath, rediscovery) {
   } else {
     lines.push(`**Suggested action:** ${c.suggestedAction}`, "");
   }
-  if (rediscovery && rediscovery.candidates.length) {
+  if (rediscovery && rediscovery.origin) {
     lines.push(
-      `**🔎 Candidate replacement URLs** — auto-discovered by mapping \`${rediscovery.origin}\`${rediscovery.search ? ` (ranked for "${rediscovery.search}")` : ""}. Verify before wiring; do not blind-swap:`,
-      ...rediscovery.candidates.map((l) => `- ${l.url}${l.title ? ` — ${l.title}` : ""}`),
+      `**🔎 Source URL to check** — a 0-row failure is usually a dead or moved source. The pipeline points at:`,
+      `- source: \`${rediscovery.sourceUrl}\``,
+      `- origin: \`${rediscovery.origin}\`${rediscovery.search ? ` (look for "${rediscovery.search}")` : ""}`,
+      "",
+      "Auto-discovery of replacement URLs is NOT run — it needs a crawler, and crawl4ai is machine-local (RULE 0.4 bans Firecrawl). Check it by hand in one command:",
+      "```",
+      `crawl4ai ${rediscovery.origin}`,
+      "```",
+      "Verify before wiring; do not blind-swap.",
       "",
     );
   }

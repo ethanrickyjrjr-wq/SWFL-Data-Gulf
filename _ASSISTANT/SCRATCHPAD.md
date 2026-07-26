@@ -1,3 +1,120 @@
+## 2026-07-25 — Operator: "why would the grep tool be ripgrep?" — challenged my mechanism claim. PROVEN at the rg level, and the alternative explanation ruled out.
+
+He was right to push: I asserted a mechanism instead of proving it. Proved it three ways.
+
+1. **The tool says so.** The Grep tool's own description: *"Content search built on ripgrep …
+   Ripgrep, not grep — escape literal braces."* Not an inference.
+2. **rg is installed and behaves exactly as claimed** — `rg --version` = **ripgrep 15.2.0**.
+   `rg -l "first stop for any outside-answer question"` (default) returns ONLY the new playbook file.
+   `rg -l --no-ignore "<same>"` returns **`_RESEARCH/INDEX.md` AND** the playbook. Default rg skips
+   gitignored files; `--no-ignore` finds them. Same delta as the Grep tool showed.
+3. **Alternative explanation RULED OUT.** Underscore-prefixed dir? No — repo-wide Grep for a string
+   in `_ASSISTANT/SCRATCHPAD.md` (also underscore-prefixed, but TRACKED) **found it**. Result-limit
+   truncation? No — the miss was "No files found," not a truncated list. The only variable is
+   gitignore.
+
+### THE LIST — problems found this session, verified live 07/25/2026, before any fix
+
+**A. `_RESEARCH/` is invisible to content search.** Confirmed above. Check
+`research_gitignore_discoverability` open. → FIXING INLINE: SessionStart printer that injects the
+index, mirroring `print-scratchpad.mjs`. No shipping, no leak, respects the 07/17 decree.
+
+**B. `inject-focus.mjs` FAILS OPEN — silently drops 5 of 12 rules.** `loadRules` returns
+`DEFAULT_RULES` when the file is missing, unreadable, or blank. Counted live: `_ASSISTANT/RULES.md`
+= **12** rules, `DEFAULT_RULES` = **7**. So a missing/blank file silently deletes rules 8–12
+(data-roots, scratchpad, do-it-when-told, our-volume, second-order) from EVERY prompt with no error.
+This is the playbook's own "fail loud, never fail open" violated in the rule-injection hook itself.
+→ FIXING INLINE.
+
+**C. `.github/scripts/heal-cron-failure.mjs` uses FIRECRAWL.** Lines 248/251/252/280 read
+`FIRECRAWL_API_KEY` and Bearer-auth against Firecrawl. RULE 0.4: *"crawl4ai is the ONLY web-crawl
+tool — never Firecrawl."* Banned vendor wired into the self-healing path. → FIXING INLINE.
+
+**D. `scripts/ceilings-to-checks.mjs` is still invoked by NOTHING.** Grepped `.github/`, `scripts/`,
+`package.json`, `.claude/hooks/` in the main repo (worktree copies excluded): the only hit is the
+script itself. The 72 ceilings became checks once, by a manual run. Recording half built, acting
+half still unwired — the exact shape §1 of the playbook is named after. → FIXING INLINE.
+
+### ALL FOUR FIXED SAME SESSION 07/25/2026 — verified, not asserted
+
+**A. FIXED — `_RESEARCH` now injected at session start.** New `.claude/hooks/print-research-index.mjs`,
+registered as the 6th SessionStart printer (`.claude/settings.json`, next to print-scratchpad).
+Prints the Categories block — every category, every filename, every one-line conclusion — under a
+banner stating Grep cannot see these files and that a Grep miss is NOT evidence the research is
+absent. **Proven on a real positive AND a real negative:** piped real stdin in-repo → full index,
+exit 0; run from a directory with no `_RESEARCH` → silent, exit 0. 5 tests, each named for the
+failure mode it prevents (FM3 "bled past the Categories section" and FM5 "empty section emits a
+banner claiming an inventory it doesn't have" both caught real edge cases). Bodies stay gitignored,
+so the 07/17 competitor-name decree is intact and nothing new ships.
+
+**B. FIXED — `inject-focus.mjs` no longer fails silently.** Added `DEGRADED_BANNER`; `loadRules`
+now returns banner + fallback instead of bare `DEFAULT_RULES`. Fail-open on the PROMPT is preserved
+deliberately (a broken hook must never wedge a turn) — what changed is that the degradation is
+VISIBLE and names the 5 missing rules. TDD: rewrote the two silent-fallback tests to demand the
+banner, confirmed RED (2 failed), implemented, GREEN. Third test added so the banner can't leak onto
+a healthy read. 14/14 pass.
+
+**C. FIXED — Firecrawl removed from the self-healing path.** `.github/scripts/heal-cron-failure.mjs`
+no longer calls `api.firecrawl.dev`. **It was dead AND banned:** `FIRECRAWL_API_KEY` exists as a repo
+secret (set 05/26/2026) but is wired into **NO** workflow `env:` block, so the branch always returned
+null. NOT swapped to crawl4ai — crawl4ai is machine-local and cannot run on a GitHub runner, and
+pretending otherwise would be an invented capability. Kept the half that carried the value: the
+incident issue now prints the dead source URL + origin and the exact `crawl4ai <origin>` command to
+run by hand. Parses clean.
+→ **OWED, operator action:** delete the orphaned `FIRECRAWL_API_KEY` repo secret. Nothing reads it now.
+→ Python side already clean by the 06/16 decree — `pyproject.toml` documents firecrawl-py as
+deliberately NOT a dependency, `ingest/lib/firecrawl_client.py` is dormant/gated, collier-permits
+already uses crawl4ai. Left alone on purpose.
+
+**D. FIXED — `ceilings-to-checks.mjs` is finally invoked by something.** Added a step to
+`.github/workflows/reverify-signals-daily.yml` (cron 41 15 * * *) — same ledger, same cadence, same
+secrets already proven in the adjacent step. `--apply` is idempotent so re-runs can't duplicate.
+Dry run works: reports 1 ceiling to refresh.
+**Checked the thing that would have made this fake:** that workflow's last 3 scheduled runs all
+concluded `failure`, so I verified my step is actually REACHED — it has no `if:` condition and sits
+ahead of the `exit 1` step, which is gated on `steps.run.outcome == 'failure'` and is a DELIBERATE
+red X meaning reverify found a regression. Wiring a fix into a step that never executes would have
+been this exact file's favourite mistake.
+
+**Full hook suite after all four: 61 passed, 0 failed.** settings.json parses.
+
+### STALE CLAIMS IN THIS FILE — corrected, do not re-chase
+
+- **"CI IS RED: `check-four-searches.test.mjs` imports `bun:test` under `node --test`"** (07/22 entry)
+  is **STALE**. Read the file live: its header explains it deliberately uses `node:test`, NOT
+  `bun:test`, and names the `bun:` protocol resolution failure as the reason. Already fixed.
+- **"`check-build-context.mjs` tracked, wired to nothing"** — it IS declared PARKED, with a reason,
+  at `hook-registration.test.mjs:41` ("parked by design — 4h intake staleness gate, unused"). Working
+  as designed, not a defect.
+
+## 2026-07-25 — Operator: "This is not a read one fucking line and make a decision thing claude always does" + "why gitignored research isn't implemented and claude chooses not to do it"
+
+Asked for a complete new-project playbook: every issue hit, the rule that would have saved us, why
+it happened, day-0 guards, how we track what we bring in, how we keep Claude from losing track.
+
+**Delivered:** `docs/standards/new-project-playbook.md` (ships, NOT in `_RESEARCH/` — on purpose).
+Indexed in CLAUDE.md's reference table same pass.
+
+**The answer to the gitignored-research question is MECHANICAL, not behavioral — proven by a
+controlled experiment, not asserted.** `Grep` is ripgrep and ripgrep honors `.gitignore`. Repo-wide
+Grep for a string that IS in `_RESEARCH/INDEX.md` returns **No files found**; the same pattern with
+`path=_RESEARCH` finds it. `git check-ignore -v` confirms `.gitignore:163:_RESEARCH/`.
+**Correction to my own first read:** `Glob` is NOT blind — a repo-wide `**/2026-07-22-*.md` DID
+surface `_RESEARCH/` files. So it is content-discovery that is blind, not filename-discovery. To
+find gitignored research you must already know it exists. Second half: gitignored files are in no
+other clone/worktree/CI checkout, so no hook and no CI job can ever enforce reading them, and a
+worktree session starts with zero research, silently.
+
+That is why five read-first rules never fixed it. Fix options in §2 of the playbook: commit it
+(default), or commit a conclusions-only index and gitignore the bodies, or inject the index at
+`SessionStart`/`UserPromptSubmit` (the only events whose stdout Claude sees).
+
+**Also verified while in there — a stale note in this file corrected:** the 07/22 entry saying
+`print-scratchpad.mjs` was "not yet built, pending operator go" is STALE. It is registered at
+`.claude/settings.json:44`, and `check-scratchpad-on-push.mjs` gates the push. That fix shipped.
+
+NOT pushed — holding for confirmation per standing rule.
+
 ## 2026-07-23 — FIXED: lake comp feed wired into the live path. Notes from being "out there" — 5 more comp-area things still broken, one of them is the highest-traffic surface.
 
 Operator: "fix built wrong and take notes on what is not working while you are out there." Fixed the

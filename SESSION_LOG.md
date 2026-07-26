@@ -1,3 +1,95 @@
+## 2026-07-25 (Opus 5 · main) — operator challenged the ripgrep claim; proved it, then fixed all four defects the playbook surfaced instead of filing them
+
+Operator: *"why would the grep tool be ripgrep? write a list fix all problems inline."* He was right
+to push — I had asserted a mechanism rather than proving it.
+
+**PROVEN THREE WAYS, not asserted.** (1) The Grep tool's own description says "Content search built
+on ripgrep." (2) `rg --version` = **ripgrep 15.2.0**; `rg -l "<string in _RESEARCH/INDEX.md>"` returns
+only the new playbook file, while `rg -l --no-ignore "<same>"` returns **`_RESEARCH/INDEX.md` too**.
+(3) **Alternative explanation ruled out** — repo-wide Grep for a string in `_ASSISTANT/SCRATCHPAD.md`
+(also underscore-prefixed, but TRACKED) **finds it**, so it is not the underscore and not a result
+limit. `git check-ignore -v` = `.gitignore:163:_RESEARCH/`.
+
+**Then fixed all four, inline, verified:**
+
+**A. `_RESEARCH` is now discoverable.** New `.claude/hooks/print-research-index.mjs`, registered as
+the 6th SessionStart printer. Injects every category, filename and one-line conclusion under a banner
+saying Grep cannot see these and a Grep miss is not evidence of absence. Proven on a **real positive**
+(full index, exit 0) **and a real negative** (no `_RESEARCH` present → silent, exit 0). 5 failure-mode
+tests. Bodies stay gitignored — the 07/17 competitor-name decree is intact, nothing new ships.
+Check `research_gitignore_discoverability` closed with evidence.
+
+**B. `inject-focus.mjs` no longer degrades silently.** `loadRules` fell back from the live 12-rule
+`_ASSISTANT/RULES.md` to a frozen 7-rule constant with **no error**, deleting rules 8–12 (data-roots,
+scratchpad, do-it-when-told, our-volume, second-order) from every prompt. Added `DEGRADED_BANNER`;
+fail-open on the prompt is kept deliberately, but the degradation is now visible and names the
+missing rules. TDD: tests rewritten to demand the banner → confirmed **RED (2 failed)** → implemented
+→ **GREEN 14/14**.
+
+**C. Firecrawl removed from the self-healing path.** `.github/scripts/heal-cron-failure.mjs` was
+POSTing to `api.firecrawl.dev` — a vendor RULE 0.4 bans outright. It was also **dead**:
+`FIRECRAWL_API_KEY` is a repo secret (05/26/2026) wired into **no** workflow `env:` block, so the
+branch always returned null. Not swapped to crawl4ai — crawl4ai is machine-local and cannot run on a
+GitHub runner, and claiming otherwise would be an invented capability. Kept the value: the incident
+issue now prints the dead source URL, its origin, and the exact `crawl4ai <origin>` command.
+**Owed (operator action): delete the orphaned `FIRECRAWL_API_KEY` secret.** Python side was already
+clean by the 06/16 decree and was left alone.
+
+**D. `ceilings-to-checks.mjs` is finally invoked by something.** It had shipped weeks ago and was
+called by nothing — not a workflow, not a hook, not package.json; the 72 ceilings became checks once,
+by hand. Wired into `reverify-signals-daily.yml` (same ledger, same cadence, same secrets already
+proven one step above); `--apply` is idempotent. **Checked the thing that would have made this fake:**
+that workflow's last 3 scheduled runs all concluded `failure`, so I verified my step is actually
+reached — no `if:` condition, and it sits ahead of the `exit 1`, which is a deliberate red X gated on
+reverify finding a regression.
+
+**Two claims in SCRATCHPAD corrected as STALE** rather than re-chased: `check-four-searches.test.mjs`
+already uses `node:test` (the "CI IS RED" note is obsolete), and `check-build-context.mjs` is properly
+declared PARKED with a reason at `hook-registration.test.mjs:41`.
+
+Full hook suite after all four: **61 passed, 0 failed.** `settings.json` parses. NOT pushed.
+
+## 2026-07-25 (Opus 5 · main) — new-project playbook written from our own incident record; the "why doesn't Claude read our research" question answered mechanically, not behaviorally
+
+Operator asked for a complete playbook for starting a new project: every issue we hit, the rule that
+would have prevented it, why it happened, the guards needed from day 0, how we track what we bring
+in, and how we keep the AI from losing track — explicitly *"not a read one fucking line and make a
+decision thing."*
+
+Mined `_ASSISTANT/SCRATCHPAD.md` (all 2,065 lines), `SESSION_LOG.md`, `docs/cron-rebuild-failures.md`,
+`docs/standards/data-roots.md`, and the registered hook set. Shipped
+`docs/standards/new-project-playbook.md` — 15 failure shapes, each with dated real instances and a
+typed guard (validation/gate/test/lint/detector), an 11-step day-0 install order, and a one-page
+checklist. Indexed in CLAUDE.md's reference table the same pass. Filed in `docs/standards/`, NOT in
+`_RESEARCH/`, deliberately — see below.
+
+**The gitignored-research question has a mechanical answer and I proved it rather than asserting it.**
+Controlled experiment: repo-wide `Grep` for a string that IS in `_RESEARCH/INDEX.md` returns **No
+files found**; the identical pattern with `path=_RESEARCH` finds it; `git check-ignore -v` confirms
+`.gitignore:163:_RESEARCH/`. The `Grep` tool is ripgrep, and ripgrep honors `.gitignore`. **Corrected
+my own first read in the same pass:** `Glob` is NOT blind — a repo-wide `**/2026-07-22-*.md` did
+surface `_RESEARCH/` files. So filename discovery works and *content* discovery does not, which is the
+mode that matters, because you look for research by concept. To find gitignored research you must
+already know it exists. Second half, worse: gitignored files exist in no other clone, worktree, or CI
+checkout, so no hook and no CI job can ever enforce reading them. That is why five read-first rules
+accumulated and none of them worked.
+
+**Stale note corrected while in there:** the 07/22 scratchpad entry saying `print-scratchpad.mjs` was
+"not yet built, pending operator go" is stale — it is registered at `.claude/settings.json:44` and
+`check-scratchpad-on-push.mjs` gates the push. The mechanism shipped.
+
+**Gave the finding an acting half rather than leaving it as prose** (RULE 2.4): check
+`research_gitignore_discoverability` opened with the three fix options.
+
+Outside half verified live per RULE 0.4 — crawl4ai'd `code.claude.com/docs/en/hooks` in-session for
+the hook contract in §8. The load-bearing landmine: **exit 1 is a NON-blocking error and the action
+proceeds; only exit 2 blocks.** A policy hook written with `exit 1` is a silent no-op — our own law
+("existence is not function") reproduced inside the guard layer. Also confirmed only `SessionStart`,
+`UserPromptSubmit`, and `UserPromptExpansion` put stdout where Claude can see it, and that
+`SessionStart` cannot block at all.
+
+Docs-only, no code touched. NOT pushed — holding for confirmation.
+
 ## 2026-07-25 (Opus 5 · main) — brought GHA dependency caching in; measured that our existing `cache: pip` was buying ~2s and replaced it with a cached virtualenv
 
 Operator asked what `actions/cache` could do for us. Measured before recommending, and the
