@@ -1,6 +1,6 @@
 // app/r/back-on-market/resolve-q.test.ts
 import { expect, test } from "bun:test";
-import { resolveQToZip } from "./page";
+import { resolveQToZip } from "../_components/resolve-q";
 
 // The injected geocoder returns a raw GeocodeResult ({ lat, lon, zip, place }) — the
 // real geocodeAddress derives county itself. A bare ZIP short-circuits before geocoding.

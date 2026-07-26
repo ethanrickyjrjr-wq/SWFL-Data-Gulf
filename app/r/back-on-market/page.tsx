@@ -8,31 +8,18 @@
 // Report-family chrome (report-shell.tsx), reused not reinvented — same shell/header/
 // footer + container as /r/should-i-sell (fix 07/18/2026: the page was rendering bare
 // <main> with undefined bom-* classes, so content sat flush to the top-left).
-import { geocodeAddress, type GeocodeFn } from "@/lib/geo/geocode-address";
 import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
 import { cityForZip } from "@/lib/swfl-zip-city";
 import { loadBackOnMarketZip } from "@/lib/back-on-market/load-zip";
 import { resolveRelistFact } from "@/lib/back-on-market/relist-fact";
 import BackOnMarketRead from "@/components/back-on-market/BackOnMarketRead";
 import { ReportShell, ReportHeader, ReportFooter, Meta } from "../_components/report-shell";
+// resolveQToZip extracted to app/r/_components/resolve-q.ts (copy #2: the Why Isn't It
+// Selling route uses the identical resolution); behavior unchanged.
+import { resolveQToZip, BARE_ZIP } from "../_components/resolve-q";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const BARE_ZIP = /^\d{5}$/;
-
-/** q → { zip, place } or null. Pure; the geocoder is injectable for tests. */
-export async function resolveQToZip(
-  q: string,
-  deps: { geocode?: GeocodeFn } = {},
-): Promise<{ zip: string; place?: string } | null> {
-  const s = (q ?? "").trim();
-  if (!s) return null;
-  if (BARE_ZIP.test(s)) return { zip: s, place: undefined };
-  const geo = await geocodeAddress(s, deps.geocode ? { geocode: deps.geocode } : {});
-  if (!geo?.zip) return null;
-  return { zip: geo.zip, place: undefined };
-}
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q = "" } = await searchParams;
