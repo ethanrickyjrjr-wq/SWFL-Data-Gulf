@@ -1,3 +1,15 @@
+## 2026-07-26 (Fable 5 · main) — addendum: stress-gauge ramp flipped + retitled, Tape re-led with 07/26 desk lines (operator catches via the audit desk)
+
+Three more operator catches banked by the fact-check pass, applied and re-verified in-browser:
+(1) stress z-gauge ramp FLIPPED for the issue (green low / hot high — the builder's emerald-at-
+high is heat semantics, wrong on a stress dial), retitled "Seller stress — vs the last normal
+market," delta now "13 points above the 2019–21 norm"; estate-level ramp decision + the baseline
+question ride the agent-opened check `seller_stress_baseline_includes_2021` (2021 is the year we
+cut out — upstream index-construction call is the operator's). (2) The Tape now opens with the
+07/26-fresh desk lines (cut:raise, actives) instead of the vendor-lagged indices — "lead with
+fresh, laggy is context." (3) Dot-plot title/crowding fixes confirmed in the final render.
+Preview regenerated: same path, `issue-2026-07.html`.
+
 ## 2026-07-26 (Fable 5 · main) — Issue 001 REBUILT from Fables in the brand; live /insiders anatomy reconciled; dot-plot inset ported; reviewed before the operator saw it
 
 Operator go on `issue001_rebuild_and_page_reconcile` + five decrees (showcase yesterday's emails ·
