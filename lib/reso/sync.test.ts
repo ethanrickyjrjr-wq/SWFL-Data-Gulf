@@ -1,9 +1,17 @@
 import { test, expect, mock, afterAll } from "bun:test";
 import * as realClient from "./client";
-// Snapshot the real module before mock.module replaces it (process-global, no per-file isolation).
+import * as realPullAgentListings from "./pull-agent-listings";
+import * as realPullZipStats from "./pull-zip-stats";
+// Snapshot the real modules before mock.module replaces them (process-global, no per-file
+// isolation — an unrestored mock leaks into whichever test file runs next; on Linux CI the
+// file order is filesystem-dependent, so the leak reddens pull-*.test.ts at random).
 const clientOrig = { ...realClient };
+const pullAgentListingsOrig = { ...realPullAgentListings };
+const pullZipStatsOrig = { ...realPullZipStats };
 afterAll(() => {
   mock.module("./client", () => clientOrig);
+  mock.module("./pull-agent-listings", () => pullAgentListingsOrig);
+  mock.module("./pull-zip-stats", () => pullZipStatsOrig);
 });
 
 // Mock all dependencies

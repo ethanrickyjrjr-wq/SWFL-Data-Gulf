@@ -63,7 +63,11 @@ describe("uploadSocialImage", () => {
     );
     expect(calls.bucket).toBe(SOCIAL_MEDIA_BUCKET);
     expect(calls.uploadKey).toBe("42/2026-06-20.png");
-    expect(calls.fileOpts).toEqual({ contentType: "image/png", upsert: true });
+    expect(calls.fileOpts).toEqual({
+      contentType: "image/png",
+      upsert: true,
+      cacheControl: "86400",
+    });
     expect(calls.uploadBody).toBe(buf);
     expect(calls.publicUrlKey).toBe("42/2026-06-20.png");
   });

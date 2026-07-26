@@ -26,6 +26,20 @@ to a curated roster with an incorporated/unincorporated tag in the crosswalk. Ei
 themselves are real parcel groupings, not junk (junk candidates to prune: blank city already
 excluded; watch for misspellings in the long tail).
 
+## 2026-07-26 — HANDOFF to the parallel session on ZIP pages (operator: "OTHER CLAUDE LOOKING INTO ZIPS")
+
+zip-report 500 findings so far, so nobody re-derives them (check `zip_report_500_prod`):
+- `/r/zip-report/<any zip>` 500s live (33908, 34102 both). Sibling routes from the SAME commit
+  (`/r/method/*`, `/r/housing-swfl`, `/r/should-i-sell/*`) are 200 — zip-report-specific.
+- Suspect commit: 7ef40312 (07/23) swapped `force-dynamic` → `revalidate = 3600` + empty
+  `generateStaticParams` on 5 routes incl. zip-report.
+- Prime in-route suspect: `lib/map/extract-zip-shape.ts:219` does
+  `fs.readFileSync(process.cwd() + "/public/map/lee-collier.svg")` at render — a Vercel
+  function-bundle miss would 500 exactly this route. NOT confirmed — needs a local
+  `bunx next build` + prod-serve repro (/verify skill) or Vercel function logs.
+- Smoke-Prod only ran tonight (3 failures from 07/25 23:52) — onset is UNKNOWN; could have
+  been broken since the 07/23 deploy. Do not assume it broke tonight.
+
 ## 2026-07-26 — 🔴🔴 Operator: "have we rebuilt correctly recently, or ever? why is ops page all yellows? when is the last time we had city pulse updated? what data is stale? why can't we see this anywhere?"
 
 Four-lane run 07/26 ~01:40 UTC. Findings, all evidence-verified:

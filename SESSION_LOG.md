@@ -1,3 +1,26 @@
+## 2026-07-26 (Fable 5 · main) — CI red 5 days root-caused and fixed: bun mock.module leak + stale media-upload expectation; nightly chain dark = Anthropic credits; ops board age-check shipped
+
+Operator: "have we rebuilt correctly recently, or ever? why is ops page all yellows?" Four-lane
+answer: last good rebuild 07/24 06:53 UTC (v118); nightly chain failed 07/23–25 on Anthropic
+"credit balance too low" (billing is operator's, check `nightly_chain_dark_anthropic_credits`).
+Ops "all yellows" = 41 stale `[~]` build-queue lines force-painting 26 tiles via applyQueueOverlay,
+NOT staleness (check `ops_board_yellow_overlay_noise`).
+
+**CI red since 07/20 (last green 1b33e1b9), diff-independent — TWO fixes, both verified locally:**
+1. `lib/reso/sync.test.ts` mocked `./pull-agent-listings` + `./pull-zip-stats` process-globally but
+   its afterAll restored only `./client`; on Linux CI (filesystem-dependent file order) the stubs
+   leak into `pull-*.test.ts` → "Received: undefined" ×3. Fix: snapshot + restore all three, same
+   pattern the file already used for client.
+2. `media-upload.test.ts` expectation predated the 07/21 egress fix eb3ba1f8 that deliberately added
+   `cacheControl: "86400"` — expectation updated to the intended behavior.
+   `bun test lib/reso/ media-upload` = 12 pass / 0 fail. Close `ci_red_docs_only_pushes` only on a
+   green CI run (prod evidence rule).
+
+**Ops repo:** `74de3679` — Brains tiles now age-check against each brain's own `ttl_seconds`
+(yellow > TTL, red > 2×), killing the token-exists-means-green blindspot. Push needs operator
+terminal (hook friction). zip-report 500 handed to the parallel session per operator; they
+root-caused same commit (7ef40312) and restored force-dynamic (entry below).
+
 ## 2026-07-25 (Fable 5 · main) — LIVE OUTAGE: every /r/zip-report/[zip] 500ing in prod; root-caused to the 07/23 static-rendering switch; force-dynamic restored
 
 Operator: "why are zip codes 500??????" Confirmed live: 500 on 33904/33908/33990/34110 AND
