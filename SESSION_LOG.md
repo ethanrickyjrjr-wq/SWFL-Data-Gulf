@@ -1,3 +1,19 @@
+## 2026-07-26 (Fable 5 · audit desk) — fact-check punch list CLOSED: last template fix applied, preview reassembled, push decreed
+
+Adversarial audit of issue-2026-07.template.html vs the collection bank (07/26 §8 freshest) +
+handoff §3 gates returned 1 blocker + 9 minors + 3 chart findings; the compose session applied
+all but one from the scratchpad. The audit desk applied the last one itself: Watch item 2's
+unbanked "met three times in ten days" (2×) → "met for the third time on 07/21/2026" (the banked
+fact, news-press), and "ground's worth" → "lease's worth" ($8M–$10.8M/yr appraises the LEASE).
+Preview reassembled from repo root: issue-2026-07.html, figures=126 · sources=23. Verified
+landed: "twice the rate or worse" lead rewrite, since-07/01 cut window, Tape line dates, May
+index labeling, 2025 velocity vintage, atlas color cut, papers-chart title ownership, stress
+gauge ramp+retitle. Also this session: 2 regression tests locked into dot-plot.test.ts (dot/text
+gutter clearance — rode a62645ab), check `seller_stress_baseline_includes_2021` opened. Push is
+the operator's decree ("FIX IT AND PUSH"); carries this workstream's two commits. Atlas pairs +
+superseded values verified clean to the dollar. Next: operator preview → live author run → send
+(his buttons).
+
 ## 2026-07-26 (Fable 5 · main) — addendum: stress-gauge ramp flipped + retitled, Tape re-led with 07/26 desk lines (operator catches via the audit desk)
 
 Three more operator catches banked by the fact-check pass, applied and re-verified in-browser:
