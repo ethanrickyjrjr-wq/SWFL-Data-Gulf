@@ -1,3 +1,25 @@
+## 2026-07-26 (Fable 5 · bluesky) — Socials can PUBLISH for the first time: @swfldatagulf.com claimed, post-now lane built spec→plan→SDD, 7 commits local awaiting push approval
+
+Operator: "fix socials so we can get some practice on building social posts." Morning: claimed
+@swfldatagulf.com on Bluesky (DNS TXT in Cloudflare → did:plc:ig7giq6zgpm77f2nsecbaywi), proved
+posting live with app password (first post public on the feed), credential in .env.local. Then
+brainstorm → spec (docs/superpowers/specs/2026-07-26-bluesky-post-now-design.md, 10 failure
+modes each with a guard; image cap 2,000,000 bytes + caption 300 graphemes read from the LIVE
+atproto lexicons — docs prose says 1MB, lexicon says 2MB) → plan → subagent-driven build:
+bluesky joins the Platform union (cron lane explicitly not wired, OAuth surfaces reject it);
+lib/social/post-now-validate (grapheme/byte/hash, dep-free); channels/bluesky.ts adapter
+(session→uploadBlob→createRecord, never throws); /api/social/post-now (operator-gated fail-closed
+via OPERATOR_EMAIL trim/lowercase, 503 unconfigured, 400/413, 10-min dedupe 409, social_posts
+history — migration made social_account_id nullable, verified); BlueskyPostBar in SocialComposer
+gated by showBlueskyPostBar prop passed ONLY from the project Social tab (final review caught it
+leaking onto the email-lab grid). Per-task reviews + final opus whole-branch review (fix-first →
+fix wave → re-review all-ADDRESSED). 352 tests green, tsc clean, next build green pre-wave
+(re-running post-wave). Checks: bluesky_repost_history_gap opened; bluesky_post_now_live_verify
+open until a real post goes out through the deployed UI. Parked with ruling:
+database-generated.types.ts carries parallel-session drift (content live-accurate; un-bundling =
+forbidden history rewrite on shared main). NEEDED FROM OPERATOR: OPERATOR_EMAIL value (login
+email) in .env.local + Vercel, BSKY_IDENTIFIER/BSKY_APP_PASSWORD into Vercel env, push approval.
+
 ## 2026-07-26 (Fable 5 · gated read) — Issue 001 is ON THE SITE behind a hard email gate: /insiders/001 teaser + signed-cookie unlock, built spec→plan→TDD, second-order audited
 
 Operator: thumbnail + brief read, stop after a paragraph or two, email to continue. Decided

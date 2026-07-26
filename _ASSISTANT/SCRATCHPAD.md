@@ -1,3 +1,22 @@
+## 2026-07-26 — "WHY WOULD WE NOT HAVE BATHS????????????" (6480 Sandalwood Ln, lake baths=NULL)
+
+Operator gripe on the email card fix: the card had to be patched with a one-off SteadyAPI call
+(2.5 baths, beds/sqft matched our row) because the lake row carries baths=NULL. This is the SAME
+gripe as 0ac (07/22, "just make sure we have beds and baths") — typed twice, which is exactly
+what RULE 2 exists to prevent. The card-side no-invention refusal was correct; the lake-side gap
+is the defect. ROOT-CAUSED + FIXED same session: the enrich lane EXISTS and fires
+(`enrich_baths_batched`, new listings only) — but `distill.upsert_state`'s nightly MERGE
+overwrote every column with the sweep row (`baths = EXCLUDED.baths`), and /search rows never
+carry baths. So every enriched value was ERASED the next night; only `listed_date` had been
+given the COALESCE survive-the-merge fix (07/18), never generalized. Measured: 34,139 of
+34,478 rows NULL-baths (99%); 25,062 non-land rows with lat/lon fillable. FIX: baths joins
+listed_date in COALESCE preserve semantics (distill.py), 3 new tests in
+test_distill_merge_sql.py, 151/151 lifecycle suite green. "Nightly enrich lane is the proper
+backfill path" from the prior session was WRONG — the lane never revisits known listings.
+PENDING OPERATOR DECREE (check `listing_state_baths_backfill`): one-off backfill = 733
+clustered /nearby-home-values calls (~1.5% of monthly quota, ~12 min at 1 req/s) + push of the
+fix. Until both land, the lake stays NULL and new fills still evaporate nightly.
+
 ## 2026-07-26 — "why the fuck would you not just take care of that??????????" (dead govt news sources)
 
 Operator on the follow-up: I found lee_county_govt + collier_county_govt dead since 06/22/2026,
@@ -325,9 +344,13 @@ Handle live: `swfldatagulf.com` resolves to `did:plc:ig7giq6zgpm77f2nsecbaywi` (
 session via app password ("swfl-engine") — session + createRecord, link facet included,
 publicly visible on the feed. Credential stored in `.env.local` as
 `BSKY_IDENTIFIER`/`BSKY_APP_PASSWORD` (gitignored; append was write-only, no env read).
-STILL OPEN downstream: Bluesky as a sixth engine adapter (`lib/social/channels/`) is
-PROPOSED, not built — needs brainstorming + `new-build.mjs` registration if decreed. The
-engine⇆lab seam stays unwired regardless (known, separate).
+UPDATE same day: operator decreed "fix socials" → the sixth adapter IS BUILT (spec→plan→SDD,
+7 local commits, reviews clean, 352 tests green, next build green). Awaiting from operator:
+OPERATOR_EMAIL value for .env.local + Vercel (route 403s for everyone until set — fail-closed
+by design), BSKY_IDENTIFIER/BSKY_APP_PASSWORD into Vercel env, and push approval. After deploy:
+one real post through the Social tab closes `bluesky_post_now_live_verify`. New check
+`bluesky_repost_history_gap` tracks the >10-min repost history quirk. The engine⇆lab seam
+stays unwired (known, separate).
 STATUS 07/26 (later session, live-probed): TXT still absent (dns.google NXDOMAIN) and
 resolveHandle returns "Unable to resolve handle" — blocked on the Cloudflare TXT step, nothing
 on Bluesky's side. Side find: bluetails.app = logged-out Bluesky profile/thread inspector
