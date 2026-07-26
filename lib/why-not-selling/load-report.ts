@@ -71,9 +71,7 @@ export interface WinsDeps {
   fetchSubject: (addressKey: string) => Promise<SubjectRow | null>;
   heal: (rows: SubjectRow[]) => Promise<void>;
   fetchZipMedian: (zip: string) => Promise<{ median_dom: number | null; sample_size: number }>;
-  fetchBands: (
-    zip: string,
-  ) => Promise<
+  fetchBands: (zip: string) => Promise<
     {
       band: number;
       price_lo: number;
@@ -82,9 +80,7 @@ export interface WinsDeps {
       sample_size: number;
     }[]
   >;
-  fetchStale: (
-    zip: string,
-  ) => Promise<{
+  fetchStale: (zip: string) => Promise<{
     active_count: number;
     exact_count: number;
     over_90: number;
@@ -153,7 +149,7 @@ async function defaultFetchSubject(key: string): Promise<SubjectRow | null> {
     .eq("state", "active")
     .limit(1)
     .maybeSingle();
-  return (data as SubjectRow) ?? null;
+  return (data as unknown as SubjectRow) ?? null;
 }
 
 /** The shared probe-on-use heal (≤3 vendor calls) — the SubjectRow narrows to the fields
@@ -174,9 +170,7 @@ async function defaultFetchZipMedian(
   };
 }
 
-async function defaultFetchBands(
-  zip: string,
-): Promise<
+async function defaultFetchBands(zip: string): Promise<
   {
     band: number;
     price_lo: number;
@@ -197,9 +191,7 @@ async function defaultFetchBands(
   }));
 }
 
-async function defaultFetchStale(
-  zip: string,
-): Promise<{
+async function defaultFetchStale(zip: string): Promise<{
   active_count: number;
   exact_count: number;
   over_90: number;
