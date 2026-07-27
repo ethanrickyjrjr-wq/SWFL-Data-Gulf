@@ -42,6 +42,17 @@ BEFORE DEPLOY: set INSIDERS_READER_SECRET in Vercel prod (in .env.local already;
 is a silent no-op without it). Launch-order call is the operator's: page now or after the
 Issue 001 email send. Check insiders_issue001_gated_read_live_verify open for prod evidence.
 
+## 2026-07-26 (Fable 5 · baths, backfill result) — backfill EXECUTED: 4,474 rows filled in 733 calls + Sandalwood targeted-fill (2.5); baths_null 34,139 → 29,653 verified live
+
+Post-push run of backfill_baths.py: 733 /nearby-home-values calls, 4,474 NULL-baths rows
+filled. 6480 Sandalwood Ln (the gripe row) was missed by its grid cluster's nearest-100 — one
+extra call centered on its own lat/lon filled it to 2.5 (matches the prior session's
+vendor-fetched card value digit-for-digit). Lake verified live after: baths_null 29,653
+(from 34,139). Check `listing_state_baths_backfill` CLOSED with evidence. Known limit held
+honestly: nearest-100-per-call caps grid coverage at ~18%/pass; ~20.6k non-land rows remain
+NULL. Escalation lane if decreed: per-listing-centered greedy pass (thousands of calls, quota
+fine). This entry is uncommitted until the next push.
+
 ## 2026-07-26 (Fable 5 · baths, push decree) — operator decreed Go + push-everything: baths COALESCE fix + re-runnable backfill_baths.py ship; 733-call backfill runs post-push
 
 Operator answered "Push everything" on the 20-commit bundle question (bluesky, social review,

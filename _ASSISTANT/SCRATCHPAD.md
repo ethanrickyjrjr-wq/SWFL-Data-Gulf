@@ -13,9 +13,15 @@ given the COALESCE survive-the-merge fix (07/18), never generalized. Measured: 3
 listed_date in COALESCE preserve semantics (distill.py), 3 new tests in
 test_distill_merge_sql.py, 151/151 lifecycle suite green. "Nightly enrich lane is the proper
 backfill path" from the prior session was WRONG — the lane never revisits known listings.
-PENDING OPERATOR DECREE (check `listing_state_baths_backfill`): one-off backfill = 733
-clustered /nearby-home-values calls (~1.5% of monthly quota, ~12 min at 1 req/s) + push of the
-fix. Until both land, the lake stays NULL and new fills still evaporate nightly.
+RESOLVED 07/26/2026 same session, operator decreed Go + push-everything: fix pushed to main
+(51fc9950) ahead of the nightly; backfill ran — 733 calls, 4,474 rows filled, plus 1 targeted
+call for 6480 Sandalwood Ln itself (its cluster's nearest-100 missed it; centered on its own
+lat/lon it filled to 2.5, matching the prior session's vendor value). Lake baths_null
+34,139 → 29,653, verified live. Check `listing_state_baths_backfill` closed with evidence.
+KNOWN LIMIT, honestly held: /nearby-home-values returns the nearest 100 per call, so grid-cell
+backfill coverage caps out (~18% of targets this pass); ~20.6k non-land rows remain NULL.
+backfill_baths.py is re-runnable + fill-only; a per-listing-centered greedy pass (~thousands of
+calls, quota fine) is the escalation lane if he wants the remainder — needs its own word.
 
 ## 2026-07-26 — "why the fuck would you not just take care of that??????????" (dead govt news sources)
 
