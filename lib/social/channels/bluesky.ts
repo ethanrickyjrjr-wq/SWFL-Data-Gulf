@@ -34,14 +34,19 @@ export interface BlueskyCredential {
   appPassword: string;
 }
 
+export interface BlueskyImage {
+  bytes: Uint8Array;
+  mime: string;
+  alt: string;
+  aspectRatio?: { width: number; height: number };
+}
+
 export interface BlueskyPostInput {
   caption: string;
-  image?: {
-    bytes: Uint8Array;
-    mime: string;
-    alt: string;
-    aspectRatio?: { width: number; height: number };
-  };
+  /** Single-image convenience (the post-now route's shape). */
+  image?: BlueskyImage;
+  /** Multi-image post (lexicon cap: 4). Takes precedence over `image`. */
+  images?: BlueskyImage[];
 }
 
 export interface BlueskyPostResult extends PublishResult {
@@ -75,10 +80,48 @@ function rkeyFromUri(uri: string): string {
   return segments[segments.length - 1];
 }
 
+export interface LinkFacet {
+  index: { byteStart: number; byteEnd: number };
+  features: Array<{ $type: "app.bsky.richtext.facet#link"; uri: string }>;
+}
+
+const URL_IN_TEXT = /https?:\/\/\S+/g;
+const TRAILING_PUNCT = /[.,;:!?)\]]+$/;
+
+/**
+ * Bare URLs in post text render as dead text on Bluesky unless the record
+ * carries rich-text facets. Facet ranges are BYTE offsets into the UTF-8
+ * encoding (inclusive start, exclusive end) — never JS string indices
+ * (https://docs.bsky.app/docs/advanced-guides/post-richtext). Trailing
+ * sentence punctuation is excluded from both the range and the uri.
+ */
+export function detectLinkFacets(text: string): LinkFacet[] {
+  const enc = new TextEncoder();
+  const facets: LinkFacet[] = [];
+  for (const m of text.matchAll(URL_IN_TEXT)) {
+    const uri = m[0].replace(TRAILING_PUNCT, "");
+    if (!uri) continue;
+    const byteStart = enc.encode(text.slice(0, m.index)).length;
+    facets.push({
+      index: { byteStart, byteEnd: byteStart + enc.encode(uri).length },
+      features: [{ $type: "app.bsky.richtext.facet#link", uri }],
+    });
+  }
+  return facets;
+}
+
 export async function postToBluesky(
   input: BlueskyPostInput,
   cred: BlueskyCredential,
 ): Promise<BlueskyPostResult> {
+  // Normalized image list — `images` wins; the lexicon caps a post at 4.
+  const imageList: BlueskyImage[] = input.images ?? (input.image ? [input.image] : []);
+  if (imageList.length > 4) {
+    return {
+      ok: false,
+      error: `Bluesky allows at most 4 images per post, got ${imageList.length}`,
+    };
+  }
   try {
     // 1. createSession
     const sessionRes = await fetch(`${PDS_BASE}/xrpc/com.atproto.server.createSession`, {
@@ -89,23 +132,23 @@ export async function postToBluesky(
     if (!sessionRes.ok) return xrpcFailure("createSession", sessionRes);
     const session = (await sessionRes.json()) as CreateSessionResponse;
 
-    // 2. uploadBlob — only when an image is attached
-    let blob: unknown;
-    if (input.image) {
+    // 2. uploadBlob — one per attached image, in post order
+    const blobs: unknown[] = [];
+    for (const img of imageList) {
       const uploadRes = await fetch(`${PDS_BASE}/xrpc/com.atproto.repo.uploadBlob`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${session.accessJwt}`,
-          "Content-Type": input.image.mime,
+          "Content-Type": img.mime,
         },
         // Cast: lib.dom's BodyInit union doesn't include the generic
         // Uint8Array<ArrayBufferLike> shape TS infers here, but fetch (Bun/Node)
         // accepts any ArrayBufferView as a raw-bytes body at runtime.
-        body: input.image.bytes as BodyInit,
+        body: img.bytes as BodyInit,
       });
       if (!uploadRes.ok) return xrpcFailure("uploadBlob", uploadRes);
       const uploaded = (await uploadRes.json()) as UploadBlobResponse;
-      blob = uploaded.blob;
+      blobs.push(uploaded.blob);
     }
 
     // 3. createRecord
@@ -115,16 +158,16 @@ export async function postToBluesky(
       createdAt: new Date().toISOString(),
       langs: ["en"],
     };
-    if (input.image) {
+    const facets = detectLinkFacets(input.caption);
+    if (facets.length > 0) record.facets = facets;
+    if (imageList.length > 0) {
       record.embed = {
         $type: "app.bsky.embed.images",
-        images: [
-          {
-            alt: input.image.alt,
-            image: blob, // embedded verbatim — never reshaped
-            ...(input.image.aspectRatio ? { aspectRatio: input.image.aspectRatio } : {}),
-          },
-        ],
+        images: imageList.map((img, i) => ({
+          alt: img.alt,
+          image: blobs[i], // embedded verbatim — never reshaped
+          ...(img.aspectRatio ? { aspectRatio: img.aspectRatio } : {}),
+        })),
       };
     }
 

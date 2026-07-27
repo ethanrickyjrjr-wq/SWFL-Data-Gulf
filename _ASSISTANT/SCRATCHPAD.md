@@ -1,3 +1,43 @@
+## 2026-07-27 — "Why the fuck would we post an off market fucking house?????" (subject choice)
+
+Fourth gripe, same post — and it names the ROOT error under the other three: the subject itself.
+An off-market house from the assessment rolls has no photo, no urgency, no reason for a reader
+to care. The product posts LIVE inventory: an active listing (photo_url + price + status fresh
+from our own feed), which is also exactly what the site sells. Standing rule: social subjects
+come from LIVE listing_state (state=active, photo_url present) unless the operator explicitly
+asks for a market-history angle. The parcel rolls are for facts ABOUT a subject, not for
+choosing one.
+
+## 2026-07-27 — "We have the fucking url to the fucking listing photo" (aerial was the wrong lane)
+
+Third gripe, same post. I reached for a Mapbox aerial when `listing_state.photo_url` — OUR OWN
+COLUMN — holds real listing photos. My error: I anchored on the parcel-rolls house (not in the
+listings feed, so no photo) and changed the PHOTO LANE instead of changing the HOUSE. The
+product move: pick the subject FROM the root that has photos (listing_state), join the parcel
+roll for sale facts if needed. Standing rule: when the chosen subject lacks an asset the post
+needs, re-pick the subject from the root that HAS it before falling to a weaker lane. Aerial
+stays the documented fallback for photo-less subjects (lib/listings/aerial.ts exists for exactly
+that), not the first reach.
+
+## 2026-07-27 — "Where is the house photo!!!???" (house post card has no photo of the house)
+
+Second gripe on the same post, same shape as the first: a post about ONE HOUSE must SHOW the
+house. The data card alone isn't the deliverable — photo of the subject + the data. Photo lanes
+in provenance order: (1) our lake (listing photos if SteadyAPI captured them), (2) aerial via
+Mapbox satellite at the parcel location (paid-for, citable), never an invented/stock image.
+Standing rule: a subject-property post carries a real image OF the subject, sourced, or it
+doesn't go out.
+
+## 2026-07-26 — "we have a fucking social lab and claude writes fucking words on a social site" (text-only Bluesky post)
+
+Operator on the "random house post": I posted BARE TEXT to Bluesky when the entire social lab
+exists to BUILD THE IMAGE. The adapter even supports image upload (uploadBlob was built and
+spec'd with the 2MB lexicon cap) — I proved the publish path with the laziest possible payload
+instead of driving the actual product through it. Standing rule from this: a social post from
+this platform is IMAGE (built by our own render engine) + LINK to swfldatagulf.com. A text-only
+post is a violation of the product itself — the lab is the product; the post is its output.
+Never hand-author what the builder exists to build (same rule as email lab: drive the builder).
+
 ## 2026-07-26 — "WHY WOULD WE NOT HAVE BATHS????????????" (6480 Sandalwood Ln, lake baths=NULL)
 
 Operator gripe on the email card fix: the card had to be patched with a one-off SteadyAPI call
