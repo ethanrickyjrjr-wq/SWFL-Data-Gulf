@@ -467,6 +467,45 @@ decision with a competing plan.
 
 ---
 
+### 4.16 A recorded claim about the world, with nothing binding it to the world
+
+**Shape:** you write down something true — a source exposes these fields, this file is unpulled,
+there are N pipelines, this endpoint is gated. It is accurate the day you write it. Then the world
+moves and **nothing forces the record to move with it.** The claim doesn't decay visibly; it stays
+confidently phrased, carries an as-of date nobody re-reads, and gets trusted precisely because it
+looks like verified fact rather than a guess. This is the opposite of 4.9 and 4.13 — there are no
+divergent copies here. There is ONE authoritative record, and it is simply wrong now.
+
+**Instances — three found in a single file on 07/30/2026, each by a different discovery path, which
+is the tell that no mechanism was watching any of them:**
+- A `source_ceiling` still listed `contract_cancellations`, `delistings_relistings` and `price_drops`
+  as **unpulled**. All three had been live pipelines since 06/14/2026 — defined about twenty lines
+  *below* the ceiling that called them missing, in the same file. Six weeks stale. Cost: a later
+  session read the ceiling, believed it, and wrote up "three unpulled files" as a cheap win.
+- The `active_listings` ceiling claimed detail pages carry an **HOA fee**. A live probe on 07/14/2026
+  of a single-family and a condo page found none. The opposite failure direction from the one above —
+  a ceiling inventing a field rather than hiding one — which is why a sweep looking only for
+  "claims-missing-but-we-hold-it" missed it entirely. It was found in the checks ledger, where it had
+  sat open and untouched for sixteen days.
+- `test_cadence_registry_spine.py` asserts a **hardcoded pipeline count**. It was red at HEAD because
+  a pipeline landed without bumping the literal. Its own docstring records the identical drift twice
+  before, each time repaired by editing the number. Found by accident, while correcting something
+  unrelated.
+
+> **The generalized lesson: a claim about the world needs a mechanism that fails when the world
+> changes, or it is a guess with a date on it. An as-of stamp records when someone last looked; it
+> does NOT make the claim self-invalidating, and treating it as if it does is the whole failure.
+> Note also that hand-patching an instance (edit the line, bump the count) leaves the shape intact —
+> that is why the count guard drifted four separate times.**
+
+**Guard — gate, not lint.** Bind the claim to the artifact it describes at the moment the artifact
+changes: the change that lands a pipeline must edit the ceiling that named it, in the same commit,
+or be blocked. Where a count or field list can be *derived* from the source of truth, derive it and
+delete the literal — an assertion that can be computed should never be typed. Where it genuinely
+cannot be derived (a vendor's field list, a portal's access posture), it is not fact, it is a dated
+observation: label it unverified-since and re-probe on a cadence. **Never let a hand-typed claim
+about an external world sit undated and unbound.**
+
 ## 5. DAY-0 SETUP — the minimum viable guard set, in install order
 
 Do these before the first feature. Each is small; the order matters because each verifies the next.

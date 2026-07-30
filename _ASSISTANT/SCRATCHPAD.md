@@ -1,3 +1,53 @@
+## 2026-07-30 — "did you update the pattern for the world in here and in patent folder/file?"
+
+Caught me twice in one session, same shape both times. First: I opened a check on the contradicting
+registry line and did NOT fix the line — log-it-don't-fix-it, immediately after criticising another
+doc for exactly that. Second: I articulated the general PATTERN in chat only ("we write a claim about
+the world into a file, the world changes, nothing forces the claim to change") and wrote just the
+one instance-specific rule into the line I fixed. A pattern stated in conversation is gone when the
+session ends — the same disappearing-knowledge failure the scratchpad and the playbook exist to stop.
+
+FIXED: pattern written up as failure shape 4.16 in `docs/standards/new-project-playbook.md` — checked
+first against 4.9 / 4.10 / 4.13 so it wasn't a duplicate shape (it isn't; those are about divergent
+COPIES, this is a single authoritative record that is simply wrong now). Guard named as a GATE, not a
+lint: the change that lands a pipeline must edit the ceiling that named it in the same commit, and
+anything derivable gets derived instead of typed. Patent brief gets the same warning as a new §1b,
+placed BEFORE its claims rather than after — written and handed over, because the cross-project hook
+correctly blocks a brain-platform session from editing the patent folder.
+
+STANDING: when a lesson is worth saying out loud, it goes in a durable file in the same turn. Chat is
+not storage.
+
+## 2026-07-30 — "Correct whatever you are doing wrong" (a handoff forwarded three claims nobody opened a file to check)
+
+Operator, on `docs/handoff/2026-07-30-free-corpus-and-patent-source-handoff.md`. Its whole
+actionable section — "Cheapest real wins" — was 1-for-3, and every wrong item was INHERITED text
+repeated without opening the code or the registry:
+
+- "Five tested checks in `lib/why-not-selling/checks/` have zero importers" — FALSE. `load-report.ts`
+  lines 29-35 import all seven by name; `app/r/why-isnt-it-selling/page.tsx:10` imports
+  `loadWinsReport`; a test file exists. `load-report.ts` landed 07/25, five days BEFORE the handoff.
+  Worse, the origin paragraph (`_RESEARCH/data-and-ingest/2026-07-22-predictive-analytics-and-lead-mining.md`
+  line 344) already ended with "Already covered by an approved spec + open check
+  `why_isnt_it_selling_live_verify` — this is execution, not new research." The handoff copied the
+  one-line INDEX summary instead of the paragraph it summarized.
+- "Three UNPULLED files in an already-authenticated bucket" — FALSE. `redfin_price_drops`,
+  `redfin_contract_cancellations`, `redfin_delistings_relistings` are all live pipelines with
+  workflows and staggered crons (`ingest/cadence_registry.yaml:304-352`), first runs 06/14/2026.
+  They sit ~20 lines BELOW the `source_ceiling` block at line 299 that still calls them unpulled.
+  **The registry contradicts itself inside one file** — that is the only real finding in the doc,
+  and it matters because FULL-SCOPE-FIRST trusts `source_ceiling` to be true.
+- `listing_state` columns never snapshotted into `listing_week` — TRUE, this one survives.
+
+STANDING RULE this sets: a claim you did not personally verify does not get forwarded as an
+actionable item. Copy the paragraph, not the index summary. A doc is trustworthy on what it probed
+live and untrustworthy on everything it relayed.
+
+DONE 07/30/2026: handoff split per operator decree — patents moved OUT to its own project
+(`C:\Users\ethan\dev\patent-citation-graph\`), brain-platform-usable items kept here in
+`docs/handoff/2026-07-30-inside-perimeter-data-opportunities.md` with the two false wins corrected.
+Both missing `_RESEARCH/INDEX.md` lines added. Check opened on the stale `source_ceiling`.
+
 ## 2026-07-30 — "Either way, we are not producing the data. Can we actually do it well???????"
 
 Operator, strategic, unresolved. The idea on the table: the email builder becomes a PIPELINE where

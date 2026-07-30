@@ -1,3 +1,174 @@
+## 2026-07-30 (Opus 5 · carve-out) — DAY-0 CLAUDE SETUP RUNBOOK written, and the playbook's hook contract is ALREADY STALE IN TWO PLACES after five days
+
+Operator: "how do we set up Claude in a new folder so we have no missteps." New file
+`docs/carve-out/DAY-0-CLAUDE-SETUP.md` — 11 ordered steps, each with a command and a PROVE IT line,
+cross-linked both ways with the carve-out plan so neither orphans. Nothing created, nothing copied.
+
+**Re-crawled `code.claude.com/docs/en/hooks` live (the playbook's copy is 07/25, five days old).
+Two of its claims are now wrong:**
+(1) §7.1 "only SessionStart / UserPromptSubmit / UserPromptExpansion write into Claude's context" is
+true of RAW STDOUT only. `hookSpecificOutput.additionalContext` returns a string into the context
+window on exit 0 **from any event** — so a PostToolUse hook CAN put text in front of Claude. We were
+about to design the new repo around a wall that isn't there (the playbook's own §7.6 failure).
+(2) §8 knows only command hooks; there are now FIVE handler types — command, http, mcp_tool, prompt,
+agent. Sticking with command hooks (Rule 11), but the surface exists.
+
+**Three landmines the playbook doesn't carry, all verbatim from the live doc:**
+- RESUME REPLAY: mid-session injected text is replayed from the transcript on `--continue`/`--resume`,
+  NOT re-run — so any injected timestamp, SHA, or open-count goes stale silently. SessionStart
+  re-runs with `source: "resume"`. Design consequence: everything time-varying belongs on
+  SessionStart, never on a UserPromptSubmit injector. Ours currently violates this.
+- PROMPT-INJECTION SELF-OWN: docs say write injected context as FACTUAL STATEMENTS; imperative
+  out-of-band phrasing "can trigger Claude's prompt-injection defenses, which causes Claude to
+  surface the text to you instead of treating it as context." Our `inject-focus.mjs` FOCUS block is
+  written imperatively. NOT observed failing here — documented hazard, not measured.
+- SessionEnd hooks share a **1.5-second budget**; anything heavy there dies silently. Also: exit 2
+  with malformed JSON now BLOCKS (flipped in v2.1.214; previously proceeded).
+
+**Harness inventory verified, not remembered:** 32 hook files, 4 lib helpers, 2 settings files;
+1 UserPromptSubmit / 6 SessionStart / ~12 PreToolUse / 3 PostToolUse / 1 Stop / 1 SessionEnd
+registered. `hook-registration.test.mjs` is real and genuinely wired, with a PARKED-with-reason map
+checked in both directions. CI glob DOES reach `.claude/hooks/lib/*.test.mjs` (ci.yml:68, fixed
+07/22 with a comment recording the prior one-level-short failure) — do not inherit the broken form.
+**Real gap found by running it:** the meta-guard filters `f.startsWith("check-")`, so printers and
+injectors are OUTSIDE its coverage — a session-start printer registered nowhere would be invisible
+to the exact test built to catch that. New repo widens the filter to every non-test `.mjs`.
+
+## 2026-07-30 (Opus 5 · carve-out) — §2 IMPORT AUDIT RUN: the moat can't be copied, it has to be extracted. Carve-out plan closed out — 10 sections, all DECIDED/AUDITED, no code touched
+
+Operator: "make sure we have it planned out the best we can… do not half ass this." Ran §2's own
+named exit condition — the import graph over all 37 candidate paths, one level deep plus a second
+level on every hit. **Three claims in the prior draft were wrong.**
+
+(1) `lib/deliverable/bind-frame.ts` — called "the moat" and listed as a clean copy — imports
+`refinery/lib/chart-from-metrics.mts` (a RUNTIME import, which itself pulls `chart-block-lint.mts`)
+plus `registry.ts`. `brain-output.mts` is type-only so it erases, but the runtime edge is real. The
+moat is not movable; it is an extraction, and it's now the highest-effort line item in the plan.
+(2) `pick-frames.ts` has TWO blockers, not the one recorded 07/01 — the React-value bundling through
+`registry.ts` (12 frame components, named) AND a direct dependency on the refinery type vocabulary.
+(3) The comes-over list was incomplete: `author-doc.ts` reaches `narrative-lint.ts`, which imports
+`refinery/lib/smoothing-tokens.mts` — so the most important file in the move is transitively
+refinery-coupled. Also folded in `lib/brand/fonts.ts` (missing entirely).
+
+Verified CLEAN with zero imports, exactly as claimed: `doc/types.ts`, `csv-escape.ts`,
+`segments/filter.ts`, and — correcting the draft the other way — `author-recipes.ts`, which was
+filed as a "split" but is dependency-free (only its content is real-estate-shaped). `lib/reso/` read
+per the prior entry's instruction: self-contained, only `@supabase/supabase-js` outside itself; the
+per-user-credential → per-user-table SHAPE comes over, the MLS specifics stay.
+
+VENDOR SURFACE, crawl4ai live 07/30 (global rule 1): **SheetJS is not on the npm registry.** Docs
+verbatim — `bun rm xlsx` then `bun install https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`,
+with vendoring the tarball as their own recommendation and "Bun support is considered experimental."
+`bun add xlsx` from memory installs a different, stale package — the `actions/checkout@v6` failure
+class, caught before it shipped.
+
+Plan restructured so a cold session can't get lost: every section carries a fixed
+PURPOSE / DONE WHEN / GATES / STATUS header, with a state-at-a-glance list up top. Five OPEN
+sections closed to DECIDED — parser+provenance (CSV/XLSX only, header row proposed-not-assumed,
+`Q3-numbers.xlsx · Summary · B14` as the reader-facing string over a stored hash record), the claim
+("faithful to your source," one sentence, three surfaces, nothing stronger), repo shape + the first
+slice (one CSV → one number traceable, no send), and the kill list. §4 went from 9 unspecified
+candidates to 13 guards each with a failure mode, a typed mechanism, and a test name — including
+four the draft had no guard for at all: cross-tenant read (precedent: `deliverables` `USING(true)`,
+58 rows, 3 users, proven live), content-derived figure ids (an ordinal `[fN]` silently rebinds on
+re-parse), re-upload invalidation, and duplicate upload. Added the acting half — day-0 install order
+lands in the NEW repo's ledger, not this one at 718 open.
+
+Sources: full SCRATCHPAD read for the real dated instances (double-send 4:04 PM, CAN-SPAM
+placeholder, Cape Coral grain mislabel, mojibake preview, baths erased by the nightly MERGE),
+`new-project-playbook.md`, the 07/30 competitor scan. Nothing built, nothing pushed.
+
+ADDENDUM (same session, advisor caught it): the first §2 header claimed audit coverage it didn't
+have — `lib/email/blocks/` was listed as coming over and had never been traced, sitting directly
+under two files marked clean. Swept it: **clean**, zero hits for refinery/listings/market-context/
+data_lake/reconcile across the whole directory; every renderer reaches only `@react-email/*`,
+`react`, and `../doc/types`. Two unlisted edges folded in — `email-head.ts` → `@/lib/brand/fonts`
+and `FooterBlock.tsx` → `@/components/email-lab/social-icons` (a component outside `lib/`, so the
+move is blocks/ plus that icon component). Header now names what was NOT traced instead of
+implying total coverage — the file's own worst failure shape, caught inside its own audit.
+
+ADDENDUM 2 (four-lane gate blocked the answer, correctly): I had quoted
+`cadence_registry.yaml:2355-2361` from the PRIOR session's log entry without opening the registry
+myself — relaying an inherited claim as verified, the exact failure the doc I was writing warns
+about. Read both catalog halves firsthand. Registry claim CONFIRMED verbatim. `data-roots.md`
+confirmed to have no user-upload root (two hits, both Parquet-upload watches on the corridor pulse,
+unrelated). **The relayed version missed the useful half:** the second entry,
+`data_lake.user_mls_stats`, reads "Aggregates over user_mls_listings — same lib/reso writer, same
+class" — so the pattern already registers DERIVED AGGREGATES over user data, which is precisely
+what our figure records are. Precedent exists for both tiers this product produces, not just the
+raw upload. Also killed a stale number in my own draft: it carried "72 source ceilings as of
+07/22/2026"; the string appears on 75 lines today, so the figure moved and a line count isn't a
+populated-ceiling count either. Replaced with an instruction to re-count live — the doc was
+committing the floored-listings error inside the section that names it.
+
+## 2026-07-30 (Opus 5 · registry sweep) — AMENDS the entry below: the contradiction is FIXED, not just filed, and the sweep found two more
+
+Operator: "Did you change the contradiction? Are there more contradictions?" Answer to the first was
+NO — I had opened a check and left the bad line in place, the same log-it-don't-fix-it pattern I had
+just criticised in the handoff. Corrected:
+
+1. `cadence_registry.yaml:299` EDITED. The three already-live pipelines removed from the unpulled
+   list, as_of → 07/30/2026, and the rule written inline: a source_ceiling is only true until the
+   pipeline lands, so whoever lands one edits the ceiling that named it in the same change.
+2. SWEEP: all 17 "unpulled / not pulled" claims cross-checked against the 76 registered pipelines.
+   Line 299 was the only false-unpulled hit. The leepa block (line 855) was already self-corrected
+   (layer 23 marked PULLED 07/22) — that one is the model of a maintained ceiling.
+3. The sweep was ONE-DIRECTIONAL and missed the opposite failure mode — a ceiling claiming a field
+   that does NOT exist. Found it via the ledger instead: `listing_detail_no_hoa_fee`, open and
+   untouched 16 days, saying the `active_listings` ceiling claims HOA fee while a 07/14/2026 live
+   probe of a single-family and a condo detail page found none. Line 1916 corrected, plus an inline
+   warning that every REMAINING item on that list is still design-doc sourced and unprobed.
+4. THIRD contradiction, found only because the tests were run: `test_cadence_registry_spine.py` was
+   RED AT HEAD — asserts a hardcoded 75 pipelines, the file has 76 since `leepa_comp_sales` landed in
+   5418714d. Its own docstring records the identical drift twice before (73→75, parked 3→4), each
+   hand-patched. Bumped to 76 to get green (85/85 pass), and opened
+   `registry_count_guard_hand_patched_four_times` to fix the mechanism instead of the literal a fifth
+   time.
+
+Checks: `source_ceiling_stale_vs_live_pipelines` and `listing_detail_no_hoa_fee` both CLOSED with
+evidence. One new check opened. YAML re-parsed clean after both edits.
+
+## 2026-07-30 (Opus 5 · handoff split) — Patent work moved OUT to its own project; the inherited handoff was 1-for-3 and the one real finding is a self-contradicting cadence registry
+
+Operator decree: "Patent is a new project. Patents is its own thing." Split
+`docs/handoff/2026-07-30-free-corpus-and-patent-source-handoff.md` (untracked, never committed) into
+two files and deleted the original. Patent half staged for
+`C:\Users\ethan\dev\patent-citation-graph\PROJECT-BRIEF.md` — a repo hook correctly blocked a
+brain-platform session from writing into a sibling project, so it sits in this session's scratchpad
+as `PATENT-PROJECT-BRIEF.md` awaiting the operator's move. Brain-platform half is
+`docs/handoff/2026-07-30-inside-perimeter-data-opportunities.md`.
+
+Verified every claim in the old doc's "Cheapest real wins" section before carrying it forward. It was
+**1-for-3**, and both wrong items were inherited text repeated without opening a file:
+
+1. "Five tested checks in `lib/why-not-selling/checks/` have zero importers" — FALSE.
+   `load-report.ts:29-35` imports all seven by name, `app/r/why-isnt-it-selling/page.tsx:10` imports
+   `loadWinsReport`, `load-report.test.ts` exists. `load-report.ts` landed 07/25, five days before
+   the handoff called the code dark. The origin paragraph
+   (`_RESEARCH/data-and-ingest/2026-07-22-predictive-analytics-and-lead-mining.md:344`) already said
+   "Already covered by an approved spec + open check `why_isnt_it_selling_live_verify`" — the handoff
+   copied the one-line INDEX summary instead of the paragraph it summarized.
+2. "Three UNPULLED files in an already-authenticated bucket" — FALSE, and this is the real finding.
+   `redfin_price_drops`, `redfin_contract_cancellations`, `redfin_delistings_relistings` are live
+   pipelines at `ingest/cadence_registry.yaml:304-352` with workflows, staggered 15th crons, and
+   9,955-row first runs on 06/14/2026 — sitting ~20 lines BELOW the `source_ceiling` block (line 299,
+   as_of 07/16/2026) that still calls them unpulled. **The registry contradicts itself inside one
+   file.** FULL-SCOPE-FIRST trusts `source_ceiling`, so a stale one sends the next session chasing
+   data we already ingest. Check opened: `source_ceiling_stale_vs_live_pipelines`.
+3. `listing_state` columns never snapshotted into `listing_week` — TRUE, survives. Only `coming_soon`
+   appears in the pipeline (`builder.py:19`) and only as a status string in a `_LIVE` frozenset.
+
+Also corrected: the old doc's "8% label coverage is unexplained" alarm rests on an undefined word —
+418 sold + 3,473 price-cut = 3,891 events vs 10,479 "rows carrying labels" only contradict if
+*labeled* means "carries an event." Open check `challenger_rerun_when_weeks_accumulate` already
+records that only two weeks are labeled. **No new check opened for it** — the prior session flagged
+it to the operator three times; a fourth unilateral action is noise, so it waits on his word.
+
+`_RESEARCH/INDEX.md`: added the missing `2026-07-22-naive-bayes-knn-algorithm-fit.md` line (eight days
+late; the index said 4 files, disk had 6). Did NOT add a patent line — patents are no longer a
+brain-platform subject. Released a 7h-stale repolith claim held by the dead authoring session
+(15a0963c) after a timeline check.
+
 ## 2026-07-30 (Opus 5 · carve-out) — CORRECTION to the entry below: the catalog DOES have a user-supplied-data precedent
 
 The entry below (and the first draft of `docs/carve-out/EMAIL-BUILDER-CARVE-OUT.md` §2c) said there

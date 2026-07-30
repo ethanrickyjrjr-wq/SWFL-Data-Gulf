@@ -296,8 +296,8 @@ pipelines:
         as_of: "07/16/2026"
         source: "our ingest (126 ZIPs × ~80 rolling-3-month windows since 2019; ALL 50 source columns pulled, values as-written)"
       source_ceiling:
-        summary: "Same bucket/prefix, unpulled: property_types/monthly/all_zips.csv (1.42 GB, per-property-type ONLY — no all-residential rollup rows); contract_cancellations + delistings_relistings monthly ZIP files; price_drops ZIP file (own pipeline: redfin_price_drops). Weekly feeds are metro-grain and coarser only — no weekly ZIP file exists, monthly is the finest ZIP cadence."
-        as_of: "07/16/2026"
+        summary: "Same bucket/prefix, unpulled: property_types/monthly/all_zips.csv (1.42 GB, per-property-type ONLY — no all-residential rollup rows). Weekly feeds are metro-grain and coarser only — no weekly ZIP file exists, monthly is the finest ZIP cadence. CORRECTED 07/30/2026: this line previously also listed contract_cancellations, delistings_relistings and price_drops as unpulled. All three have been LIVE PIPELINES since 06/14/2026 (redfin_price_drops, redfin_contract_cancellations, redfin_delistings_relistings — defined immediately below this entry, 9,955 rows each, staggered crons on the 15th). The stale text sent a later session chasing data we already ingest. A source_ceiling is only true until the pipeline lands: whoever lands one edits the ceiling that named it, in the same change."
+        as_of: "07/30/2026"
         source_url: "https://www.redfin.com/news/data-center/downloads/"
         source_label: "Redfin Data Center — Downloads"
 
@@ -1913,7 +1913,7 @@ pipelines:
         summary: "mls_id, list_price, street_address, city, community, beds, baths, sqft, acres, days_on_market, status, property_type, listing_type, zip_code, county, state, listing_url — card-level HTML scrape of an undisclosed regional brokerage site (base URL is a GHA secret, not committed), region-wide SWFL, daily"
         source: "our ingest"
       source_ceiling:
-        summary: "Per-listing DETAIL PAGES (one fetch per listing, deliberately skipped to keep the index scrape light) would carry year built, garage, pool/waterfront features, HOA fee, listing agent/office contact, photo count, virtual tour link, open house schedule, price-change history, and listing remarks/description — none captured. Not live-probed this session given the deliberate operational-security posture (secret withheld); code/design-doc sourced."
+        summary: "Per-listing DETAIL PAGES (one fetch per listing, deliberately skipped to keep the index scrape light) would carry year built, garage, pool/waterfront features, listing agent/office contact, photo count, virtual tour link, open house schedule, price-change history, and listing remarks/description — none captured. CORRECTED 07/30/2026: this line previously also claimed HOA FEE. A live probe on 07/14/2026 of both a single-family and a condo detail page found NO HOA fee on the page — see check listing_detail_no_hoa_fee. HOA/fee remains unsourced in every lane we hold, so it must never be rendered as a figure. The rest of this list is still code/design-doc sourced and NOT live-probed (operational-security posture, secret withheld) — treat every remaining item as unverified until someone probes a real detail page."
         as_of: "07/08/2026"
         source_label: "regional listings source (base URL undisclosed by design)"
 

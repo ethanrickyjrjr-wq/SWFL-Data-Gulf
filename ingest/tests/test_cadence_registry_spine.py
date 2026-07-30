@@ -64,8 +64,13 @@ def test_registry_shape_is_75_plus_3():
     landed in not_yet_running: without this bump, so the guard was already red at HEAD
     before any of today's work touched it. The entry itself is legitimate (it carries
     its own known_drift rule, `lee_deed_load_parked_but_scheduled`); only the count was
-    stale. Verified live: 75 pipelines, 4 parked."""
-    assert len(_pipelines()) == 75, f"expected 75 pipelines: entries, got {len(_pipelines())}"
+    stale.
+    75->76 on 07/30/2026: THE FOURTH TIME this exact drift landed. `leepa_comp_sales`
+    was added in 5418714d without bumping this number, leaving the guard red at HEAD —
+    found while correcting an unrelated source_ceiling, not by anyone running the suite.
+    Hand-patching the literal a fourth time is the reason it keeps recurring; see check
+    `registry_count_guard_hand_patched_four_times`. Verified live: 76 pipelines, 4 parked."""
+    assert len(_pipelines()) == 76, f"expected 76 pipelines: entries, got {len(_pipelines())}"
     assert len(_parked()) == 4, f"expected 4 not_yet_running: entries, got {len(_parked())}"
 
 
