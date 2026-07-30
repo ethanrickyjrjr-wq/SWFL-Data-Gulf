@@ -1,3 +1,37 @@
+## 2026-07-30 (Opus 5 · carve-out) — Competitor scan on "email company running on OTHER people's data": Gamma prompts charts, we bind them. Carve-out plan opened, no code touched
+
+Operator, discussion-only session: could the email builder become its own product running on
+whatever a user uploads, dropping the lake entirely. Four-lane sweep (the gate caught me skipping
+CATALOG + CODE and both lanes changed the answer). Research filed + indexed:
+`_RESEARCH/email-and-social/2026-07-30-email-creation-on-user-data-competitor-scan.md`.
+
+Findings, all crawl4ai-live 07/30/2026, nothing from memory. Beefree SDK's MCP server (open beta,
+v1 endpoint dies 09/01/2026) is the reference agentic email contract — ONE agent with a wide flat
+toolbelt (`beefree_add_section`/`add_title`/`add_paragraph`/… plus `beefree_check_template`), which
+independently confirms the operator's own correction that the orchestrator shouldn't know how to
+build a chart. It has ZERO data tools: no CSV, no figures, no chart, no provenance anywhere in the
+category. beehiiv already ships per-block "AI blocks" — copy-only, so the shape is validated and its
+ceiling is visible. Gamma: full mechanics pulled from developers.gamma.app/llms-full.txt (272 KB,
+OpenAPI inline) — one `inputText` (400k chars) → whole artifact, async+poll; `textMode`
+preserve|condense|generate IS the "say exactly what they say" dial; theme ⟂ content so design is
+APPLIED not generated; sections = a literal `\n---\n`; `pages[]` (≤50) is the orchestrator brief as
+a parameter; 40+ image models. Their charts are PROMPTED not bound — their own words:
+"non-deterministic… may vary across runs, even with identical inputs," no chart-type parameters, and
+a label like `$100` "may be interpreted as data." We bind (`pickFramesForData` + `bindFrameSpec`).
+
+CODE lane found the upload lane is already built and PROVEN: `scripts/prove-upload-chart.mts` drives
+`composeChartFromRequest(…, { uploadsText })` and charts a figure read from the user's document,
+verified verbatim against the upload bytes, footnoted "From your upload." Gap is exact —
+`package.json` has no xlsx/papaparse/csv-parse/exceljs, so the lane is TEXT only; a spreadsheet has
+no parser. CATALOG lane: `data-roots.md` has no root for user uploads at all, and records 72
+proven-but-never-pulled ceilings — much of the lake was never wired to a consumer.
+
+Opened `docs/carve-out/EMAIL-BUILDER-CARVE-OUT.md` — §1 positioning, §2 comes/stays/gets-written
+inventory (DRAFTED, import-graph audit NOT run — that's next session's first task), §3 the nine
+product-shaped ways we screwed up the first time, §4–§8 OPEN with the question each must answer.
+Deliberately does not restate `docs/standards/new-project-playbook.md`, which already covers the
+harness half in 10 sections. No code changed this session.
+
 ## 2026-07-26 (Fable 5 · bluesky) — Socials can PUBLISH for the first time: @swfldatagulf.com claimed, post-now lane built spec→plan→SDD, 7 commits local awaiting push approval
 
 Operator: "fix socials so we can get some practice on building social posts." Morning: claimed

@@ -1,3 +1,26 @@
+## 2026-07-30 — "Either way, we are not producing the data. Can we actually do it well???????"
+
+Operator, strategic, unresolved. The idea on the table: the email builder becomes a PIPELINE where
+each grid section is owned by its own specialized agent (data-summary agent, chart agent, closing
+agent; photos need none), up to 6 grids; the user drops raw material into a section and the pipeline
+routes by the destination agent; the user then converses with each section's agent for changes; the
+finished arrangement saves as a reusable structure because people send the same few kinds of email.
+The strategic half is the harder half — "forget about the data we kind of have," can we be an email
+creation company running on OTHER people's data and information.
+
+What I found probing before answering (do not re-derive): the DATA MENU in `lib/email/author-doc.ts`
+(`authorSystem` + `buildFigureMenu`/`renderFigureMenu`) is already the pivot — an id-addressable list
+of figures where the model SELECTS `[fN]` and the system writes the value and its label, so the model
+can never type a number. Today `fetchLakeParts()` fills that menu from our lake. A dropped file
+filling it instead leaves the no-invention harness, the 17-block vocabulary (`doc/types.ts`), the 11
+recipes (`author-recipes.ts`), the 12-col grid (`grid-schema.ts` / `compile-grid.ts`), and the send
+lane untouched. That is the real answer to "can we do it well" — the moat is the provenance harness,
+not the lake, and the harness is already source-agnostic. The open questions are the INGEST side
+(file → cited figures) and whether N section-agents beat the one whole-doc author we run today.
+
+STATUS: brainstorm opened 07/30/2026, no design settled, no crawl4ai pass run yet (RULE 0.4 owes one
+before any design gets presented). Nothing built.
+
 ## 2026-07-27 — "Why the fuck would we post an off market fucking house?????" (subject choice)
 
 Fourth gripe, same post — and it names the ROOT error under the other three: the subject itself.
