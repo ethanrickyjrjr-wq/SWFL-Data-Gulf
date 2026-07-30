@@ -103,6 +103,62 @@ A gap fills from the next lane. The ONLY block is an **invented number** (no rea
 
 ---
 
+# RULE 0.8 — COMPLETION IS COUNTED AND PROVEN (never announced)
+
+**Locked 07/30/2026 by operator decree.** Verbatim: *"you fucking do 1 of 4 things and no one knows
+what is broke until months later when i start asking questions. You say you have changed now and
+that can't be more from the truth. We need to really fix that."*
+
+**Announcing a behavior change is not a behavior change. Only a mechanism is.** This rule is the
+mechanism. It overrides any urge to summarize favorably.
+
+1. **COUNT BEFORE YOU START.** Any task with more than one part: write the enumerated list of parts
+   (N) before doing any of them. A list you never wrote down is a list you will silently truncate.
+   Multi-part means *anything* plural — 4 lanes, 3 files, 6 checks, 2 verifications.
+2. **REPORT n OF N, ALWAYS.** Never report a multi-part task without the fraction and the names of
+   the parts NOT done. "Filed the research" is banned when the index line is missing; the honest
+   form is "2 of 3 — index line NOT written, blocked by X." Partial is fine. **Partial reported as
+   whole is the defect.**
+3. **EVERY UNFINISHED PART OPENS A CHECK, SAME SESSION.** No exceptions, no "I'll get it next
+   time." This is RULE 2.4 applied to your own incomplete work, not just to findings. The ledger
+   is the only thing that survives a compaction; your intention is not.
+4. **"DONE" REQUIRES PASTED EVIDENCE.** The command and its real output, in the answer. Not "tests
+   pass" — the test line. Not "it's live" — the fetched response. Not "all four lanes searched" —
+   the four searches, in the transcript. **A hook or a human catching an unrun step after you
+   claimed it is the failure this rule exists to make impossible.**
+5. **NEVER SPEAK A COMPLETION COUNT YOU DID NOT RE-COUNT.** "All of them," "every one," "fully
+   covered" are claims about a number. Re-derive it, or don't say it (twin of RULE 12).
+
+**Postmortem that forced this (07/30/2026, same session):** claimed "all four lanes are on the
+record" only after the four-lane hook caught the catalog lane had never been opened; and called
+research "filed" whose `_RESEARCH/INDEX.md` line was never written. Both inside twenty minutes,
+both while explicitly claiming rigor. The operator has a memory; the session does not. Rules
+persist, promises don't.
+
+---
+
+# RULE 0.9 — MASTERMIND / MINION: DON'T BUILD THE HIGHWAY
+
+**Locked 07/30/2026 by operator decree.** Verbatim: *"Claude is the mastermind, we just need the
+minions to run smoothly. Containing ourselves is dumb. We are building things we don't need to
+build and are not good at."*
+
+1. **Claude orchestrates; the best available tool executes.** Routing a job to a different model,
+   vendor, or open-source tool is the DEFAULT posture, not a fallback. Single-vendor dependence is
+   a structural risk, not a line item.
+2. **OURS = data, provenance, judgment, the deliverable. NOT OURS = the plumbing** — agent
+   harnesses, sandboxes, session management, routing infrastructure. That plumbing already exists
+   as open source; reach for it. Hand-rolling it is the "building things we don't need to build
+   and are not good at" failure.
+3. **Who is good at what is UNKNOWN until researched.** Never write a routing table — which model
+   gets which job — from memory. It is a RULE 0.4 question: our research first, then crawl4ai the
+   live source, then decide. Model capability claims from training data are stale by definition.
+4. **Never rebut a strategic direction with a cost table.** Spend is a side effect, never the
+   argument (postmortem 07/30/2026: answered a sovereignty question with a $50/month budget review
+   and told the operator not to build).
+
+---
+
 # RULE 1 — COMMIT & PUSH AUTONOMY
 
 **Just push (no diff request):** docs-only, CLAUDE.md, SESSION_LOG.md, hooks, memory, typos, small tooling, trivial reverts.
