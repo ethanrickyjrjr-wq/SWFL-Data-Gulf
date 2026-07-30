@@ -24,6 +24,35 @@ THE MECHANISM, stated plainly (a diagnosis, not a new rule):
    survives only if a mechanism re-injects it — which is why the hook-backed ones still bite weeks
    later and the prose ones don't.
 
+**CORRECTION, SAME TURN — the four-lane gate fired ON THIS ANSWER and I had spoken 4 counts while
+re-deriving 1. Re-derived all of them, and the corrected number IS the diagnosis:**
+- 66 scratchpad `##` entries ✓ (grep) · 13 `# RULE` headings in CLAUDE.md ✓ (grep; still 13 after
+  foreign commit cbbe28b9) · 12 FOCUS items ✓ — but sourced from `_ASSISTANT/RULES.md`, NOT from
+  `inject-focus.mjs` (which holds 7 of its own) · 725 open checks ✓ NOW live-verified via
+  `node scripts/check.mjs list` → "725 open — 208 defect · 106 verify · 291 task · 120 untriaged"
+  (before, I was repeating the SessionStart printout).
+- **WRONG: "the handful that are code — four or five."** There are **25 hook scripts**, 15 named
+  `check-*`. The real distribution, from `.claude/settings.json`: PreToolUse **12**, SessionStart
+  **7** (printers — they inject, they verify nothing), PostToolUse **4**, UserPromptSubmit **1**
+  (inject-focus — also injects), Stop **1**.
+- **THE FINDING: `check-four-searches.mjs` is the ONLY hook in the repo that fires on me SPEAKING.**
+  All 12 PreToolUse gates watch git and tool calls — push, branch, paid dispatch, env exfil, write
+  path. Every guard we built watches an ACTION. The failure mode is in the ANSWER. So the four-lane
+  gate is not unusually smart, it is unusually POSITIONED — it is the only sentry on that wall, and
+  everywhere else the same skip costs nothing. That is the literal answer to "why all over the place."
+
+RESEARCH LANE (opened, not narrated): `_RESEARCH/agent-behavior/2026-07-15-ai-steering-anti-drift-research.md`
+already answers this with vendor authority, 15 days old and unapplied to our own rule stack —
+Anthropic's context-engineering page explicitly REJECTS our approach: "Teams will often stuff a
+laundry list of edge cases into a prompt in an attempt to articulate every possible rule the LLM
+should follow... We do not recommend this," prescribing few canonical examples instead. Hamel Husain
+names our exact shape: "Addressing one failure mode led to the emergence of others, resembling a
+game of whack-a-mole... Prompts expanded into long and unwieldy forms." Anthropic's evals page gives
+the grader taxonomy (code-based / model-based / human) and capability→regression graduation.
+CATALOG LANE: `docs/standards/data-roots.md` holds no rule-count authority, but corroborates
+independently — "Ceiling notes appear ~94 times in this file — all of them buried in the per-source
+detail sections 1,000+ lines down, where nobody reads them." Same disease, different file.
+
 SELF-INDICTMENT ON THE QUOTED TEXT: the paragraph he pasted is MY writing. Producing an elegant
 observation about which guards pay for themselves is itself the cheap move. The guard was code; the
 insight was prose. Do not confuse writing the second for having built the first.

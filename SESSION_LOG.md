@@ -1,3 +1,63 @@
+## 2026-07-30 (Opus 5 · routing) — LANES 1/2/3 RESEARCHED, LANE 4 REBUILT BECAUSE IT WAS VAPOR, and the routing question turned up a live $0-billing defect
+
+Operator: "pick up on the lane research." Lanes 1–3 of the mastermind/minion routing question were
+open and not started. New file `_RESEARCH/agent-behavior/2026-07-30-model-routing-lanes-1-2-3.md`
+(gitignored), indexed in the same pass — and the omnigent file's missing index line written too, so
+`agent-behavior/` went (3) → (5) with both 07/30 entries described.
+
+**Lane 4 was vapor and I rebuilt it first.** `route_research_4_job_inventory` was open at 0d
+untouched, no file, no log entry — the only artifact was the 11-row cost table in the omnigent
+file's §5, which is the *product* half of a check that asks for "call types **+ coding/agent
+work**." Rebuilt from code: **19 metered call types** (11 TS `CallType` at `anthropic.mts:19` + 8
+Python ingest, each with file:line), the per-job model constants, and the agent half — **17 of 112
+GHA workflows** carry `ANTHROPIC_API_KEY`, **3** run `claude-code-action@v1`, 1 uses the SDK, 9
+local subagents. Lanes 1 and 3 had nothing to index against until this existed.
+
+**The finding (BFCL V4, crawled live).** Single-turn structured tool calls are a **wash** across
+tiers — Qwen3-14B scores 84.94 non-live AST against Claude-Haiku-4-5's 86.5, and *beats* it on live
+AST. Agentic web search **collapses 8×**: 10 vs 83.5. So a small open model can emit one correct
+tool call and cannot run a tool loop. That maps cleanly onto our inventory (`triage` and the
+extraction jobs are one-shot; `assistant_stream` and every Claude Code agent are loops) and is the
+spine of the routing table in §4. **Method note worth inheriting: my first pass collapsed BFCL's two
+distinct `Memory` and `Multi turn` columns into one** — that board is a 35-column wide table with
+five separate columns literally named "Overall Acc". Caught on review; corrected by aligning the 35
+header cells to the 35 data cells programmatically rather than by eye. The corrected picture is
+better than the original: the gap is a **gradient in statefulness**, Qwen3-14B vs Haiku — multi-turn
+34.75 vs 53.62 (1.5×), memory 19.57 vs 54.41 (2.8×), web search 10 vs 83.5 (8×). Never read a wide
+crawled table positionally without aligning the header first. Caveat stated in the file: the board is dated 2026-04-12 and
+contains no Claude 4.6-gen model, no Opus 5/Sonnet 5, and no qwen3.5/3.6/gemma4/gpt-oss — it ranks
+the previous generation on both sides, so it is evidence about the *shape* of the gap, not a current
+head-to-head.
+
+**Lane 3 corrected my own candidate list on the first fetch.** `qwen3.5`, `qwen3.6`, `gemma4`, and
+`nemotron-3-super` are all current models I did not have. Real q4_K_M sizes vs 16,380 MiB: fits with
+headroom = `qwen3.5:9b` 6.6 GB, `gemma4:12b` 7.6 GB, `qwen3:14b` 9.3 GB. Nominal-but-not-working =
+`gpt-oss:20b` 14 GB, `mistral-small3.2:24b` 15 GB (≈1–2 GB left on a card also holding the desktop
+framebuffer). Everything 27b+ is 17–81 GB and does not fit.
+
+**Lane 2 verdict: adopt nothing yet, and the reason is arithmetic.** A router's value is provider
+fan-out; we have ONE provider. LiteLLM's non-dead-weight half is the Python SDK, which reaches only
+8 of our 19 call types — the other 11 are TypeScript and would need the Proxy Server, i.e. the
+multi-tenant/virtual-keys/admin-dashboard half RULE 11 rejects. vLLM is an inference server, wrong
+layer. The decision is gated on whether a second provider ever exists, not on the routers' merits.
+
+**🔴 Live defect found, check opened (`rates_missing_opus5_sonnet5`):** the `RATES` table
+(`anthropic.mts:53-64`) has no `claude-opus-5` or `claude-sonnet-5` row. `computeCostUsd` returns 0
+for an unrecognized model *by design* — so either would log real token counts at `cost_usd = 0` and
+contribute nothing to the spend guard. **Third instance of this hole**; the file's own comments
+record the opus-4-8 and fable-5 ones. Not fixed here (the ask was research) — filed, not deferred.
+
+**5 of 5 checks closed with evidence** — `route_research_1/2/3/4` + `omnigent_research_index_line`
+(whose recorded blocker was a parallel session's claim that sits on the omnigent `.md` and
+`CLAUDE.md`, **not** on `INDEX.md`, so the index line was never actually blocked). **Gaps named, not
+papered over:** Vercel AI Gateway body never rendered through crawl4ai (nav chrome only, two
+attempts) so its contract is unverified; OpenRouter contract not pulled; KV-cache headroom at 32k
+unmeasured (a probe, not a crawl); SWE-bench/Terminal-Bench not pulled, so the coding-agent row is
+the one table row with no fetched evidence; interactive coding spend still unmeasured.
+
+Nothing shipped, no code touched. `_RESEARCH/` is gitignored, so this entry is the only committable
+artifact.
+
 ## 2026-07-30 (Opus 5 · carve-out) — DAY-0 CLAUDE SETUP RUNBOOK written, and the playbook's hook contract is ALREADY STALE IN TWO PLACES after five days
 
 Operator: "how do we set up Claude in a new folder so we have no missteps." New file
