@@ -121,6 +121,22 @@ workflows and their tripwires.
 pulled source ceilings as of 07/22/2026. A large share of the lake was never wired to a consumer at
 all, so leaving it behind costs less than its size suggests.
 
+**CORRECTION 07/30/2026 (catalog lane, run after this section was first written).** An earlier draft
+said there is no precedent for user-supplied data in the catalog. That is true of
+`docs/standards/data-roots.md` (its only "upload" entries are Parquet-upload *watches* on the
+corridor pulse — unrelated), but it is NOT true of the registry. `ingest/cadence_registry.yaml`
+lines 2355–2361 carry a `client_upload_surface` reason code over `data_lake.user_mls_listings` and
+`data_lake.user_mls_stats`, noted verbatim: "Client RESO/MLS upload surface — `lib/reso/sync.ts`
+writes it per user connection (`migrations/20260625_user_mls_data_lake.sql`). App-side, not ingest."
+
+Two consequences for this plan:
+1. **There is already a working pattern for registering user-supplied data without pretending it is
+   a pipeline** — a reason code that says "app-side writer, no cadence, do not expect a cron." Copy
+   that idea into the new product's catalog from day 0 rather than inventing one.
+2. **`lib/reso/` was missing from §2 and belongs in the inventory** — it is the closest existing
+   thing we have to "a user brings their own data and we write it per connection." Classify it
+   (comes / splits / stays) during the §2 import-graph audit; do not assume, read it.
+
 ### 2d. GETS WRITTEN FRESH — this is the actual build
 
 1. **Tabular parser: CSV / XLSX → figures.** Verified 07/30/2026: `package.json` has no `xlsx`, no

@@ -1,3 +1,15 @@
+## 2026-07-30 (Opus 5 · carve-out) — CORRECTION to the entry below: the catalog DOES have a user-supplied-data precedent
+
+The entry below (and the first draft of `docs/carve-out/EMAIL-BUILDER-CARVE-OUT.md` §2c) said there
+is no root/precedent for user uploads. True of `docs/standards/data-roots.md`; NOT true of the
+registry. `ingest/cadence_registry.yaml:2355-2361` carries a `client_upload_surface` reason code over
+`data_lake.user_mls_listings` + `user_mls_stats` — "Client RESO/MLS upload surface — lib/reso/sync.ts
+writes it per user connection (migrations/20260625_user_mls_data_lake.sql). App-side, not ingest."
+So we already have a pattern for cataloguing user-supplied data without pretending it has a cadence,
+and `lib/reso/` — the closest existing thing to "user brings their own data" — was missing from the
+§2 inventory entirely. Both folded into the carve-out file. Found only because the four-lane gate
+forced the CATALOG lane I had skipped.
+
 ## 2026-07-30 (Opus 5 · carve-out) — Competitor scan on "email company running on OTHER people's data": Gamma prompts charts, we bind them. Carve-out plan opened, no code touched
 
 Operator, discussion-only session: could the email builder become its own product running on
