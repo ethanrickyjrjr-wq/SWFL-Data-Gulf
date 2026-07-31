@@ -19,8 +19,9 @@ section relevant to that area.
 never got the override), `orphan_ingest_pipelines_unregistered` (4 pipelines with real code, zero
 registry/cron entry), `cre_figures_unregistered` (2 live tables, 1,078+985 rows, outside the
 registry entirely), `precompute_candidates_triage` (16 uncached/re-fired-per-request computations
-found live, needs a fix/skip decision per row — headline one: `app/api/z/[zip]`'s ~28-brain fan-out
-has no cache guard at all, unlike the chat path's `dossier-cache.ts`).
+found live, each needs a per-row triage call — cache it, or accept it as-is — headline one:
+`app/api/z/[zip]`'s ~28-brain fan-out has no cache guard at all, unlike the chat path's
+`dossier-cache.ts`).
 
 ## 2026-07-30 (Opus 5 · routing) — LANES 1/2/3 RESEARCHED, LANE 4 REBUILT BECAUSE IT WAS VAPOR, and the routing question turned up a live $0-billing defect
 
