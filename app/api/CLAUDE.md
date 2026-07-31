@@ -5,6 +5,13 @@ public vs gated, external vendor) lives on the ops architecture page —
 `https://swfldatagulf-ops.vercel.app/architecture#routes`. It is a curated snapshot: when you add,
 delete, or re-scope a route, that snapshot is stale until regenerated from `app/api/**/route.ts`.
 
+> **READ FIRST, UPDATE LAST → `docs/standards/repo-inventory-audit.md`** — every route that calls
+> an LLM directly (#llm-call-sites: `extract-pdf`, `action`, `schedule-command`, `email-lab/ai`) and
+> the route-level precompute gaps (#precompute-candidates: `app/api/z/[zip]` has no cache guard on
+> its ~28-brain fan-out unlike the chat-path `dossier-cache.ts`; `og/should-i-sell/[zip]` relies on
+> unverified CDN header caching). Add/remove a direct LLM call or a route-level cache? Update the
+> matching section in the SAME commit — that file exists so this audit never has to be re-run cold.
+
 ## The two Supabase clients — pick deliberately
 
 - **Default:** `createClient` from `@/utils/supabase/server` (81 routes) — cookie-bound, RLS-enforced.

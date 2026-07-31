@@ -1,3 +1,27 @@
+## 2026-07-31 (Sonnet 5) — Fireworks-AI audit PROMOTED to a committed living doc, wired into 6 area CLAUDE.md files so it never gets re-run cold
+
+Operator relayed a 5-task repo-audit prompt (sources/tables, free-text columns, row counts/cadence,
+LLM call sites, precompute candidates) that another session produced while evaluating Fireworks AI.
+Ran the audit for real (live `information_schema` + `SELECT count(*)` queries, `cadence_registry.yaml`,
+`.github/workflows/`, and a full `getAnthropic()` call-site grep), delivered it as a file. Operator's
+follow-up: commit it, and make sure each section is the first thing read entering an area and the
+last thing updated leaving it — so this stops being a one-off audit.
+
+**New committed file:** `docs/standards/repo-inventory-audit.md` — the 5-task audit content, living,
+with `#anchor`s per section. Rows into root `CLAUDE.md`'s reference index. Read-first/update-last
+pointer blocks added to the top of `ingest/CLAUDE.md`, `lib/assistant/CLAUDE.md`, `lib/email/CLAUDE.md`,
+`lib/deliverable/CLAUDE.md`, `app/api/CLAUDE.md`, `refinery/packs/CLAUDE.md` — each linking only the
+section relevant to that area.
+
+**The audit surfaced 5 real defects, not just facts — opened as `checks`, not left as prose (RULE
+2.4):** `stale_registry_usgs_sites` (coverage_exempt still lists a table dropped 07/19),
+`dbpr_notices_model_mismatch` (docs say Haiku, code runs Sonnet — `summarize.py:26`'s default param
+never got the override), `orphan_ingest_pipelines_unregistered` (4 pipelines with real code, zero
+registry/cron entry), `cre_figures_unregistered` (2 live tables, 1,078+985 rows, outside the
+registry entirely), `precompute_candidates_triage` (16 uncached/re-fired-per-request computations
+found live, needs a fix/skip decision per row — headline one: `app/api/z/[zip]`'s ~28-brain fan-out
+has no cache guard at all, unlike the chat path's `dossier-cache.ts`).
+
 ## 2026-07-30 (Opus 5 · routing) — LANES 1/2/3 RESEARCHED, LANE 4 REBUILT BECAUSE IT WAS VAPOR, and the routing question turned up a live $0-billing defect
 
 Operator: "pick up on the lane research." Lanes 1–3 of the mastermind/minion routing question were

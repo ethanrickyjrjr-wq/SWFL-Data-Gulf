@@ -5,6 +5,13 @@
 > broken), vendor reality, and the kill list. This file is the in-context digest; the map is the
 > full picture. Any email postmortem or decree updates the map in the SAME session.
 
+> **ALSO READ FIRST, UPDATE LAST → `docs/standards/repo-inventory-audit.md`** — every LLM call
+> site in the build pipeline (#llm-call-sites-email: `build-doc.ts` ×4, `showing-prep-assemble.ts`,
+> social-calendar builders) and precompute candidates that touch this area (#precompute-candidates:
+> `buildDeliverableNarrative()` re-running its LLM call on every `/refresh` even when the underlying
+> brain data hasn't changed). Add/remove a call site or a cache here? Update the matching section
+> in the SAME commit — that file exists so this audit never has to be re-run cold.
+
 - **Social platforms have ONE root:** `lib/email/social/platforms.ts` (8 platforms). The footer, the
   social-icons block, the icons, `applyBrand`, the brand form, and the PDF all read it — change it there,
   not in copies. Custom icons = keyless favicon → globe fallback. **No paid logo vendor** (Logo.dev was

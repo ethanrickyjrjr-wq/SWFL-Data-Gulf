@@ -4,6 +4,13 @@
 > truth gates, render engines, send lanes, failure catalog). Doctrine detail stays in
 > `docs/standards/deliverable-playbook.md`; this file is the in-context digest.
 
+> **ALSO READ FIRST, UPDATE LAST → `docs/standards/repo-inventory-audit.md`** — `build.ts` and the
+> 8 recipe files' LLM call sites (#llm-call-sites-email, `deliverable_build` callType) and the
+> precompute gap where `buildDeliverableNarrative()` re-fires its Sonnet call on every
+> `/api/deliverables/[id]/refresh` even when the source brain data hasn't moved
+> (#precompute-candidates). Add/remove a recipe's LLM call or wrap a build step in a cache? Update
+> the matching section in the SAME commit — that file exists so this audit never has to be re-run cold.
+
 - **Every `Recipe` declares `positioning: "sell-side" | "story-side"`** (`recipes.ts`). Sell-side = pitches
   a specific property or the agent's own brand; story-side = recurring relationship/informational content.
   Adding a recipe? It will not compile without this field.

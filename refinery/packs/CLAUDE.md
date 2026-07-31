@@ -1,5 +1,10 @@
 # refinery/packs/ — brain pack conventions (loads when you edit here)
 
+> **READ FIRST, UPDATE LAST → `docs/standards/repo-inventory-audit.md`** — the two brain-rebuild
+> LLM call sites (#llm-call-sites-brain-rebuild: `triage-agent.mts` Haiku, `synthesis-agent.mts`
+> Sonnet). Add, remove, or re-model one of these? Update that section in the SAME commit — that
+> file exists so this audit never has to be re-run cold.
+
 - **Thin pipe.** A downstream brain reads ONLY the `--- OUTPUT ---` of an upstream brain, never its
   internals/branches.
 - **Deterministic math, narrative prose.** Numbers are computed in code; the LLM produces synthesis only.

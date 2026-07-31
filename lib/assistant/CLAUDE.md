@@ -1,5 +1,12 @@
 # lib/assistant/ — answer engine conventions (loads when you edit here)
 
+> **READ FIRST, UPDATE LAST → `docs/standards/repo-inventory-audit.md`** — chat-surface LLM call
+> sites (#llm-call-sites-chat) and this directory's precompute candidates (#precompute-candidates:
+> `buildDossier`/`loadParsedBrain` uncached callers, `comp-helper.ts`, `web-fallback.ts`
+> `defaultProbe`, `gap-fill.ts` `fillExternalPoint`, `compose-chart.ts`, `conversation-path.ts`
+> `otherProjectsBlockFor`). Add/remove an LLM call or wrap something in a cache here? Update the
+> matching section in the SAME commit — that file exists so this audit never has to be re-run cold.
+
 This is the LIVE answer engine. The single most important fact:
 
 - **User-facing framing lives in `refinery/lib/rules-of-engagement.mts`, NOT CLAUDE.md.** That lean block

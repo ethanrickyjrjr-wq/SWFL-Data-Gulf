@@ -1,5 +1,11 @@
 # ingest/ — data ingest conventions (loads when you edit here)
 
+> **READ FIRST, UPDATE LAST → `docs/standards/repo-inventory-audit.md`** — the living
+> source→table inventory (#ingest-sources), free-text column schema (#free-text-columns),
+> refresh cadence (#refresh-cadence), and Python LLM call sites (#llm-call-sites-python-ingest).
+> Adding/removing a source, table, free-text column, or ingest-time LLM call? Update the matching
+> section there in the SAME commit — that file exists so this audit never has to be re-run cold.
+
 This is the Python ingest island (dlt + DuckDB), zero TS coupling. Rules for working here:
 
 - **Incremental, not re-fetch-everything.** Append/event sources (permits, listings, licenses) use
