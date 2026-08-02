@@ -69,8 +69,11 @@ Local-only until the operator says otherwise (no autonomous remote/push — stan
 5. **No-invention lint runs on the RENDERED artifact** (playbook §4.4 — grep the rendered string,
    not the helper): every numeral in the output HTML must trace to a BrainOutput fact or be
    whitelisted (dates, layout constants). Fails the build, not a warning.
-6. **No credentials at all in v1.** Scout constraint: all 4 sources free/no-key. The secrets
-   failure class (07/18 incident: plaintext key dumps in /tmp) is deleted, not guarded.
+6. **Source reliability is the selection criterion** (operator correction 08/02: "you just stated
+   plenty that always fail"). Official, versioned, documented APIs only — no scraped portals, PDF
+   extractions, third-party mirrors, or state SFTP drops in the proof's 4. Free registered keys
+   are acceptable (FRED-class); paid or approval-gated access is out. Keys live in an ignored
+   `.env` with a scan hook from commit zero (07/18 plaintext-dump incident).
 
 ## 4. Day-0 install order (from new-project-playbook §5, applied)
 
@@ -120,13 +123,34 @@ chosen industry would want, every number traceable to a live public source.
 
 ## 7. Open decisions for the operator
 
-1. **Industry — RECOMMENDED: restaurants/hospitality** (see §9 for the scout evidence and ranking).
-2. **Repo name** — proposed: `the-pass` (the pass is where a kitchen's plates get checked before
-   service — this build is the plate check). Alternatives welcome.
+1. **Sources — RECOMMENDED four (reliability round, §9b):** FRED (key we already hold; Lee/Collier
+   county-grain series confirmed in our own registry ceiling; operator-named) · BLS Public Data API
+   (no key; Lee County unemployment fetched live) · NOAA CO-OPS tides (no key; Fort Myers fetched
+   live) · OpenFEMA Disaster Declarations v2 (no key; real record fetched). Alternate/5th: Treasury
+   FiscalData (verified, national grain only). Theme: a weekly SWFL economy-and-risk brief — buyer:
+   a SWFL insurance agent or local business audience — one dated, cited line per source.
+2. **Repo name** — proposed: `gulf-brief`.
 3. **Send or produce** — v1 produces the email (HTML + screenshot); actually sending via Resend is
    a later, separate decision.
 
-## 9. Scout evidence and industry ranking (all three reports filed + indexed in `_RESEARCH/data-and-ingest/`, 08/02/2026)
+## 9b. Round-2 reliability scout (08/02/2026, filed as `2026-08-02-greenfield-scout-reliable-apis.md`, indexed) — THE DECIDING ROUND
+
+Ranked purely on reliability, all claims from real fetches: **BLS Public Data API** (no key, HTTP
+200, real Lee County unemployment 5.1% June 2026 preliminary) · **Treasury FiscalData** (no key,
+versioned, real debt-to-penny record) · **NOAA CO-OPS tides** (no key, real Fort Myers
+predictions, re-confirmed) · **OpenFEMA Disaster Declarations v2** (no key, real record, HTTP
+200). **FRED** verified structurally (live 400 naming the exact key format; scout couldn't
+register a key by rule) — but the CATALOG lane closes that gap: brain-platform already runs three
+FRED pipelines in api mode, holds a key, and has confirmed unpulled Lee/Collier county-grain
+series IDs in its registry ceiling. FRED is therefore the most proven vendor on the board for us.
+
+Confirmed dead or fragile — stays dead: FLOIR QUASR/choices (XLSX/portal only, zero API, domain
+moved undocumented) · OpenFEMA NFIP claims county filter (503 twice; the documented v3
+replacement 503'd 4/4; v2 sunsets 10/15/2026) · Census (key hard-required) · BLS docs pages 403
+to automated fetch (API itself fine). Insurance theme survives via FEMA disaster declarations, not
+NFIP claims or the state regulator.
+
+## 9. Round-1 scout evidence (08/02/2026, all filed + indexed in `_RESEARCH/data-and-ingest/`) — SUPERSEDED as a ranking, kept as evidence
 
 **1st — RESTAURANTS/HOSPITALITY (recommended).** Six sources live-verified, all credential-free:
 DBPR active food-service licenses (bulk CSV, 2,662 Lee + 1,378 Collier, 34 fields) · DBPR

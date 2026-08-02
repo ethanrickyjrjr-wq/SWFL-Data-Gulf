@@ -1,3 +1,12 @@
+## 2026-08-02 — CORRECTION on greenfield sources: RELIABILITY over cleverness — "you just stated plenty that always fail"
+
+Operator rejected the first scout picks (scraped portals, PDFs, mirrors, state SFTP = the classes
+that always break). New criterion: which data can we ACTUALLY get easily — official, stable,
+versioned APIs. "even building from FRED API or something api is great." Free registered keys are
+ACCEPTABLE (FRED needs one) — the earlier "no credentials at all" rule was mine, not his, and is
+overridden. Insurance was named as talked-about and is in scope. Don't need tons of rows — enough
+rows + solid sources. Sonnet to figure it out.
+
 ## 2026-08-02 — DIRECTIVE: greenfield proof — new industry, 4 sources → lake → brain(s) → email, built clean from day 0
 
 Operator direction, verbatim intent: "prove we can build a pipeline from new data, from a new
