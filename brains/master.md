@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v123 | Token: SWFL-7421-v123-20260802-4cae51a2 -->
+<!-- FRESHNESS: v124 | Token: SWFL-7421-v124-20260802-9b00ff59 -->
 ---
 brain_id: master
-version: 123
-refined_at: 2026-08-02T04:29:33Z
-freshness_token: SWFL-7421-v123-20260802-4cae51a2
+version: 124
+refined_at: 2026-08-02T07:14:54Z
+freshness_token: SWFL-7421-v124-20260802-9b00ff59
 ttl_seconds: 604800
 pack_hash: a6ea50d6784a
 context_type: user_saved_reference
@@ -114,9 +114,9 @@ s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-div
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 123,
-  "refined_at": "2026-08-02T04:29:33Z",
-  "expires": "2026-08-09T04:29:33Z",
+  "version": 124,
+  "refined_at": "2026-08-02T07:14:54Z",
+  "expires": "2026-08-09T07:14:54Z",
   "ttl_seconds": 604800,
   "direction": "bearish",
   "magnitude": 0.85,
@@ -612,7 +612,7 @@ s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-div
       "variable_type": "categorical",
       "source": {
         "url": "https://www.naplesnews.com/story/money/real-estate/2026/07/30/historic-naples-florida-cottage-once-owned-by-design-icon-hits-market/91088413007/",
-        "fetched_at": "2026-08-02T04:29:11Z",
+        "fetched_at": "2026-08-02T07:14:33Z",
         "tier": 2,
         "citation": "Historic Naples cottage once owned by design icon hits market: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 81°F Showers\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[REAL ESTATE](https://www.naplesnews.com/business/real-estate/)\n# Rare Naples cottage once owned by design icon hits market\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 30, 2026, 10:28 a.m. ET\nA quaint cottage that once served as a personal retreat for Albert Hadley, a legendary interior designer, has hit the market in Naples.\nBelieved to have been home to the original postmistress in Old Naples, Hadley discovered the 1930s-era cottage decades later and reportedly purchased it on the spot.\nThe late American designer's client list\""
       },
@@ -878,8 +878,8 @@ s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-div
   "upstream_count": 38,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 719.9999999999998,
-    "computed_at": "2026-08-02T04:29:33.000Z"
+    "half_life_hours": 720.0000000000001,
+    "computed_at": "2026-08-02T07:14:54.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
