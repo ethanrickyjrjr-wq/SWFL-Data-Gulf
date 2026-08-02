@@ -74,7 +74,6 @@
   "tier_divergence_swfl_duckdb": ["raw_landing_class"],
   "tier_divergence_swfl_tier2": ["raw_landing_class"],
   "usgs": ["raw_landing_class"],
-  "usgs_tier2": ["raw_landing_class"],
   "zhvi_swfl_duckdb": ["raw_landing_class"],
   "zhvi_swfl_tier2": ["raw_landing_class"],
   "zori_swfl_duckdb": ["raw_landing_class"],
