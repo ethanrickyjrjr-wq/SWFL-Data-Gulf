@@ -11,7 +11,36 @@ census amended 08/02 (§4 per-listing-DOM ceiling CORRECTED — days_after_liste
 cadence_registry source_ceiling rewritten with all 4 unread families, as_of 08/02/2026. Sonnet's
 entry point = the playbook, nothing else needed.
 
-## 2026-08-02 (later session) — "why do i not have a fucking email????????????????"
+## 2026-08-02 (later session) — "HOW DO WE NOT HAVE A FUCKING LOGO" + "WE HAVE A FUCKING BRANDIND SECITION!!! HOW ARE THE COLORS NOT OUR BRAND COLORS"
+
+Mid-redesign the operator caught the deeper failure: v1–v4 of the databrief showcase used an
+INVENTED teal (#16646E) and no logo while the house holds BOTH — 5 logo files in `public/`
+(logo-transparent.svg is the email-ready one) and THE canonical palette at
+`lib/brand/tokens.ts` (BRAND.*), whose own header documents this exact failure class ("someone
+typed a teal from memory... A TEAL THAT IS NOT OUR TEAL"). I repeated the documented postmortem
+inside the repo that wrote it down. STANDING RULE: any deliverable that renders color or identity
+imports/mirrors BRAND.* and uses a `public/` logo asset — a from-memory hex or a text-only
+wordmark is the defect, and the tokens file's contrast law travels with the palette (teal
+decorative-only on light; tealDim large-text only; onAccent ink on teal fills). v5 shipped
+brand-correct same session (delivered 08/02, Resend ed5eaad5); wave mark rasterized to
+email-media via new scripts/email/host-image.mts.
+
+## 2026-08-02 (later session) — showcase email "PRETTY BLAND" — design bar not met, research not applied
+
+Verbatim: "WOULD BE BETTER IF WE ACTUALLY BUILT IT RIGHT WITH BRAND AND MADE THE CHART LOOK GOOD
+WITH THE COLORS THAT SHOW UP WITH A SLIGHT GREY BACKGROUND. NO INFERENCE, BUT NOT A LOT OF DATA.
+NO LINKS. NO PICTURES. NO HEADING SIZES. NO CALLS TO ACTION. NO SOCIALS. NO GRABBING HEADLINE AND
+INITIAL INFORMATION THAT CAPTURES ATTENTION. PRETTY BLAND. JUST MAKE SURE WE ARE BUILDING
+SHOWCASES THAT ACTUALL DO WHAT WE RESEARCHED AND DON'T SUCK. HERE ARE SOME COMPANIES WHO ACTUALLY
+TRY." Handed 5 reference screenshots (Foursquare, NVIDIA, TikTok for Business, Google Gemini,
+Airtable) vs 2 of ours. What the references all have that v3 lacked: real logo/brand header, a
+hero block (photo or bold color panel) with a big grabbing headline, visible heading hierarchy,
+a colored CTA button, body links, social icons + full footer (address, unsubscribe), and charts/
+graphics with saturated colors. Our chart's area fill was so low-contrast it read as blank; tiles
+and eyebrows all one muted register. STANDING RULE: every future showcase ships against the
+deliverable-design research bar + this reference set, not just the no-invention/test bar. §4.17
+checklist must gain the design half (brand header, hero headline, CTA, footer/socials, chart
+contrast on slight-grey background).
 
 The Underwriter's Brief showcase send (Resend id 56659da5-6fd8-4506-a9d6-ce66ff0d6c0b) was not
 visible in the operator's inbox. LIVE Resend API check this session: `last_event: "delivered"` to
