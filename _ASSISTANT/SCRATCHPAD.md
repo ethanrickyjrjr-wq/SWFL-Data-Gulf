@@ -1,3 +1,12 @@
+## 2026-08-02 (Fable 5) — "did you try the create email campaign????????????????" — Clay app drive round 3 skipped the campaign flow
+
+During the logged-in Clay drive I mapped the table/column/AI mechanics but never opened
+"Create a campaign" — the one surface closest to OUR product (data→email). Operator caught it
+and handed the table URL (wb_0tj5yyzbnZeDnFZfuKZ / t_0tj60zkv8inxouaF9Vo). Driving it now;
+findings go in _RESEARCH/competitor-and-strategy/2026-08-02-claydotcom-app-drive.md as an
+appended campaign section. Guardrail while driving: build/draft only — never send, never
+connect an email account/OAuth on his behalf.
+
 ## 2026-08-02 (Fable 5) — "NOTHING!!!" — Clay scan answer was too polite/dismissive, and the real ask is engineering-quality vs. our pipeline breakage
 
 Operator reaction to the Clay.com research answer: rejected "nothing we can use" / "not a
