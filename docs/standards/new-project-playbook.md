@@ -554,6 +554,23 @@ row on the greenfield proof (databrief), all 08/02/2026:**
    rows is a true zero only if the window was actually pulled; zero-filling a partial pull is
    inventing numbers. (§4.12's floor, applied at ingest; OpenFEMA spent this exact day 503-flapping
    to prove it.)
+6. **The DESIGN bar is half the checklist, and the brand is an importable artifact, not a vibe
+   (v4→v5, 08/02/2026).** v1–v4 passed every data guard and still read "PRETTY BLAND" vs real
+   senders: no logo, no brand colors, no hero, no CTA, no heading hierarchy, no footer — and the
+   accent was a from-memory teal while `lib/brand/tokens.ts` holds THE palette and documents that
+   exact failure in its header. The design floor travels with the reader rules: palette + logo from
+   the brand root (never re-typed), the tokens' contrast law, and every brief carries masthead +
+   dark footer, one real attributed hero, a 30px-class headline, ≥1 CTA, per-section source links,
+   chart on a slight grey plot. A green no-invention lint on a bland email is HALF a pass.
+7. **The bar becomes a GATE or it decays (08/02/2026, the "PROVE ME WRONG" decree).** Every lesson
+   above was prose until the operator caught a numberless chart and a 7-try hand-orchestrated
+   build. The mechanization that answered it: charts DRAW their numbers (opt-in `valueLabels` in
+   the bklit email root — the hand-built builders always had them; the bklit upgrade dropped them,
+   the exact §4.17 shape one layer down); the §4.17/§5a checklist runs as code
+   (databrief `tools/scorecard.py`, 11 deterministic checks over the RENDERED artifact); and the
+   send tool refuses below the bar with NO bypass flag. One command builds
+   (`tools/build_brief.py`), the program sends only when told (`tools/send_brief.py`). The
+   executable twin lives at databrief `RUNBOOK.md`.
 
 ## 5. DAY-0 SETUP — the minimum viable guard set, in install order
 
