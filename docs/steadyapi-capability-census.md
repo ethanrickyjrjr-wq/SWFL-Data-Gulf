@@ -1,7 +1,16 @@
 # SteadyAPI capability census — everything we can grab, what we do get, what we should also get
 
-As-of **07/16/2026**. Operator-requested (same session as the 50k-quota read). Every claim below
-names its evidence; nothing is from memory. Companion docs:
+As-of **07/16/2026**, amended **08/02/2026**. Operator-requested (same session as the 50k-quota
+read). Every claim below names its evidence; nothing is from memory.
+
+> **08/02/2026 AMENDMENT — READ FIRST.** A four-property live census found `/property-tax-history`
+> carries **64 field paths; we persist 3** (census: `_RESEARCH/data-and-ingest/2026-08-02-property-tax-history-full-scope.md`).
+> Root cause every prior audit's findings never shipped: `extract_api.py:586` `fetch_sold_event`
+> discards the raw body at its `return`. The execution brief to fix it (raw JSONB landing →
+> 17.9k-call re-pull → typed tables) is `docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md`.
+> §4's per-listing-DOM ceiling is CORRECTED below.
+
+Companion docs:
 `docs/handoff/2026-07-16-failed-calls-findings.md` (burn + limits),
 `docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/06-full-audit-and-continue-decision.md`
 (the 07/07 live 18-endpoint audit this census consolidates),
@@ -107,8 +116,11 @@ trends/autocomplete/mortgage (~1–2k) ≈ **~18–21k/mo ≈ 40% of quota** —
   point (SB 4-D reserve opacity, $100k+ surprise assessments) — if we ever address it, it comes
   from state DBPR/SIRS filings (`condo-sirs-swfl`), not this vendor.
 - **Agent/brokerage/office fields** — zero across all 18 endpoints (grepped 07/08).
-- **Per-listing days-on-market** — aggregate `median_days_on_market` only; our fix is
-  persisting `listed_date` + our own observation spine (§3.3).
+- ~~**Per-listing days-on-market** — aggregate `median_days_on_market` only~~ **CORRECTED
+  08/02/2026: FALSE as a vendor ceiling.** `/property-tax-history` `property_history[]` carries the
+  vendor's own per-event `days_after_listed` (null on some elements — multi-property verification
+  owed at Step 3 of the raw-landing playbook). True for `/search` only. `listed_date` persistence +
+  our observation spine remain the primary lane.
 - **Property type as data** — filter-only; manufactured/mobile not filterable at all
   ('other' bucket is honest, not a backfill gap).
 - **1 req/s pacing assumption** until a sustained-rate probe says otherwise (§0).

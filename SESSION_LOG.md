@@ -1,3 +1,22 @@
+## 2026-08-02 (Fable 5) — SteadyAPI raw-landing SETUP: playbook + data-roots + census + registry, ready for the Sonnet hours-long run
+
+Operator: "i want a fucking playbook, i want data root updated and I want everything we know about
+it listed so it is found … set it all up and i will have sonnet run because it will take HOURS."
+All four lanes searched before writing (LIVE SQL: `to_regclass('data_lake.steadyapi_property_history_raw')`
+= NULL; api_feed 34,904 rows / 21,458 undated / 17,880 backfill-reachable — unchanged from the
+handoff). Shipped 8 of 8 counted parts: (1) scratchpad entry; (2) LIVE evidence; (3)
+`docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md` — Steps 1–5 (migration SQL,
+`fetch_sold_event_raw` sibling design, `insert_raw_bodies`, backfill wiring, 5-test TDD list,
+failure-modes→guards table, run/canary commands, evidence requirements) + an EVERYTHING-WE-KNOW
+index; (4) data-roots.md — new 🔴 root `steadyapi_property_history_raw` entry + listing_lifecycle
+ceiling line rewritten (64-persist-3, per-listing-DOM ceiling corrected); (5) capability census
+amended 08/02 (header amendment + §4 DOM-ceiling correction); (6) cadence_registry
+`source_ceiling` records all 4 unread families, as_of 08/02/2026 (yaml.safe_load OK); (7) checks:
+closed `listing_lifecycle_source_scope_missing_families` w/ evidence; `steadyapi_pth_raw_landing_before_backfill`
++ `dom_backfill_repull_17k` stay open as Sonnet's trackers; (8) this entry + commit. NOT done, by
+design: no pipeline code written (Sonnet executes the playbook); `ENGINE_ENABLED=false` still
+operator-owed. NEXT: operator launches Sonnet on the playbook, Step 1 → canary → 17.9k run.
+
 ## 2026-08-02 (Fable 5) — four-lane gate gains its UPFRONT half: inject-focus arms the gate BEFORE the first word
 
 Operator: "Make new Claude's comply upfront" — after the Stop-hook gate correctly blocked a

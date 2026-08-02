@@ -1,3 +1,27 @@
+## 2026-08-02 (latest session) — "i want a fucking playbook, i want data root updated and I want everything we know about it listed" — SteadyAPI raw-landing SETUP SHIPPED, Sonnet runs the hours
+
+Decree verbatim: "build this out correctly so everyone can fucking find the fucking data and we get
+everything!!! … set it all up and i will have sonnet run because it will take HOURS." Set up this
+session (all four lanes searched first; LIVE SQL re-confirmed raw table absent, 21,458 undated /
+17,880 reachable): (1) execution playbook `docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md`
+— Steps 1–5 with migration SQL, extractor sibling design, TDD list, failure-modes table, run
+commands, evidence requirements, and an EVERYTHING-WE-KNOW index §0.1; (2) data-roots.md — new 🔴
+root `steadyapi_property_history_raw` + corrected listing_lifecycle ceiling line; (3) capability
+census amended 08/02 (§4 per-listing-DOM ceiling CORRECTED — days_after_listed exists); (4)
+cadence_registry source_ceiling rewritten with all 4 unread families, as_of 08/02/2026. Sonnet's
+entry point = the playbook, nothing else needed.
+
+## 2026-08-02 (later session) — "why do i not have a fucking email????????????????"
+
+The Underwriter's Brief showcase send (Resend id 56659da5-6fd8-4506-a9d6-ce66ff0d6c0b) was not
+visible in the operator's inbox. LIVE Resend API check this session: `last_event: "delivered"` to
+ethanrickyjrjr@gmail.com at 10:00 UTC 08/02 — Gmail ACCEPTED it, so it is in that account, almost
+certainly Spam or the Promotions tab (first-ever send from "The Underwriter's Brief
+<hello@swfldatagulf.com>" — brand-new display name, image-heavy HTML). Lesson: a send report must
+state WHERE it will land (tab/spam risk for a new sender identity) and the exact recipient address,
+not just "HTTP 200 sent." The prior session's send-only API key cannot read delivery status;
+RESEND_AUDIENCES_KEY can — that's the status-check path.
+
 ## 2026-08-02 (later session) — "Why the fuck are you writing things twice on the first fucking ask???"
 
 The SteadyAPI what-happened answer went out TWICE, near-verbatim. Mechanical cause: I answered
