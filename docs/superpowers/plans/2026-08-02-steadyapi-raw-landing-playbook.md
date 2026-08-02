@@ -159,18 +159,63 @@ optional ~13.4k-call top-up sweep (operator decision — with the 17,880 run tha
    those rows stay in the target set and will be re-probed on any later pass (bounded re-spend;
    acceptable, they refresh the body).
 
-## STEP 3 — typed tables from stored bytes (ZERO paid calls, NOT yet specced)
+## STEP 3 — typed tables from stored bytes (ZERO paid calls; AUTHORITY + VALIDATION DESIGN LOCKED 08/02/2026)
 
-Parse `tax_history[]` (9-yr per-parcel tax+valuation, covers Collier where LEEPA doesn't),
-`building_permits[]` (should-get #2 since 07/16; serves `permits_spine_thin_collier_missing`),
-`property_history[]` (full event/price-cut history incl. `days_after_listed`, `source_name` MLS
-board, `last_status_change_date`) out of the JSONB. One-to-many → own tables, NEVER onto
-`listing_state`. **Brain-first gate: each table ships with its consuming `PackDefinition` in the
-same PR. RULE 3.5 brainstorm + failure-modes + TDD owed per table.**
+**Operator decree 08/02/2026 (this section's binding law):** "USE ALL THE DATA TO CONFIRM A SMALL
+AMOUNT OF THE DATA WE ALREADY HAVE AND MAKE THE SYSTEM RUN EFFICENTLY BY USING THE DATA FROM THE
+BEST SOURCE. IF WE RUN FASTER BY USING ALL STEADY DATA, HAVE IT WIRED THAT WAY. BUT WE ARE ONLY
+GETTING DATA OF LISTED HOUSES OR SOLD … JUST GET EVERYTHING DONE CORRCTLY BEFORE WE BRING IN. THIS
+IS NOT A RUSH." Translation into mechanism: (a) every incoming family gets a cross-source agreement
+contract against what we already hold; (b) per-concept authority = best source, county-aware,
+decided in `data-roots.md`; (c) correctness gates ship before any typed parse runs.
+
+**THE COVERAGE LAW (applies to every table below):** Steady data is LISTING-SCOPED — a row exists
+only for a property we probed because it was listed or sold. County rolls are FULL-BOOK. So a
+Steady table is NEVER the authority for a county-wide statistic, and a county source stays
+authority wherever it exists; Steady serves per-property depth, gap-fill, and validation. Lee will
+accrue the most rows in every family (LIVE 08/02/2026: api_feed book = Lee 24,548 · Collier 9,142 ·
+Hendry 1,214) — expected asymmetry, not a defect. Each typed table's consuming pack carries this
+caveat in its output; never serve a Steady aggregate as "the county."
+
+**Per-family authority decisions (evidence cited; ratify in data-roots on ship):**
+
+- **A. `property_history[]` → `steadyapi_listing_events` (🔴).** Steady is the SOLE source for
+  per-listing event history (price cuts w/ amount+pct, `days_after_listed`, `source_name` MLS
+  board, `last_status_change_date`) — nothing else we hold carries it, so this IS the root,
+  listing-scoped by definition. Serves the 08/01 listing-status wire design + should-i-sell.
+  Efficiency ruling: computed `listing_dom` view STAYS the DOM root (full coverage,
+  deterministic); vendor `days_after_listed` lands as a VALIDATION column, never a second root.
+- **B. `tax_history[]` → `steadyapi_tax_history` (🔴).** Full-book assessed/market-value authority
+  STAYS `leepa_parcels` (Lee) / `collier_parcels` (Collier — it IS the FDOR pull; Collier is
+  covered, correcting this playbook's earlier "covers Collier where LEEPA doesn't" shorthand).
+  Steady's role: (1) the THIRD cross-source agreement family — `steady_tax ↔ county valuation`
+  contract in `ingest/quality/quality_registry.yaml`, same two-class discipline as leepa↔fdor
+  (same-year value mismatch alert · different-vintage watch · coverage floor) — this is the
+  decree's "use all the data to confirm data we already have"; (2) the intended home for ANNUAL
+  TAX PAID (`tax_amount` by year) — NO built root exists today (`fetchPropertyTaxAnnual` is a
+  stub, check `should_i_sell_property_tax_source`); validate vendor `tax_amount` against a known
+  county tax bill BEFORE serving, and caveat that vendor annual tax ≠ the county bill.
+- **C. `building_permits[]` → `steadyapi_property_permits` (🔴).** LIVE 08/02/2026: our county
+  permit spines are thin and stale — `lee_building_permits` 303 rows (newest 07/27/2026),
+  `collier_building_permits` 4,975 rows (newest 04/30/2026, ~3 months stale). For a PROBED
+  property, Steady's per-property permit history is the richer source → root for "permits on THIS
+  listed/sold property" (listing scope); county spines remain the area-wide lane (their own fix is
+  check `permits_spine_thin_collier_missing`, which this serves but does not close). Cross-check
+  contract on the overlap where both sides carry the same property.
+
+**JOIN LANE (named failure mode):** Steady rows key on `property_id`/`address_key`; county parcels
+key on strap/`parcel_id` with a site address. Every validation contract joins via normalized site
+address — and address matching has burned us before (Marco Island 0/360, 06/30). Gate: MEASURE the
+match rate on the Lee overlap first; contracts assert only on matched pairs, with the match rate
+reported as its own coverage metric so a join collapse reads as a join collapse, not as agreement.
+
+**Ship discipline per table (NOT A RUSH — one family per PR, in order A → B → C):** RULE 3.5
+brainstorm + failure-modes + TDD → table + consuming `PackDefinition` (brain-first gate) +
+quality-registry contract + `cadence_registry` entry + data-roots ratification, all in the same PR.
+One-to-many stays in its own table, NEVER onto `listing_state`.
 **Landmine:** `building_permits[].effective_date` = `"Mar 8, 2021"` (human string, NOT ISO — every
-other date is ISO). Parse explicitly or it lands as garbage. Also fixes the false premise in check
-`should_i_sell_property_tax_source` (`fetchPropertyTaxAnnual` stub — vendor annual tax ≠ county bill;
-validate against a known parcel, caveat before serving).
+other date is ISO). Parse explicitly or it lands as garbage.
+Tracking check: `steadyapi_step3_typed_families_spec`.
 
 ## STEP 4 — scalars onto `listing_state` (`days_after_listed`, `last_status_change_date`, `source_name`)
 

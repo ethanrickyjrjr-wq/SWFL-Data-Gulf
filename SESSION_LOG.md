@@ -1,3 +1,18 @@
+## 2026-08-02 (Fable 5) — SteadyAPI Step 1 verified end-to-end + Step 3 authority/validation design LOCKED per operator decree
+
+Verified Sonnet's Step 1 with live evidence (raw table exists/empty, dry-run prints 17,880
+targets zero-calls, 61/61 tests green, nightly + backfill both wired via fetch_sold_event_raw;
+crons parked + ENGINE_ENABLED=false confirmed live — Step 5 re-enable is the remaining trap).
+Then operator decree: "USE ALL THE DATA TO CONFIRM … DATA WE ALREADY HAVE … BEST SOURCE … ONLY
+GETTING DATA OF LISTED HOUSES OR SOLD … NOT A RUSH." Encoded it: playbook §STEP 3 rewritten with
+per-family authority decisions (A listing_events = sole-source root; B tax_history = NEVER a
+valuation root, third leepa↔fdor-style agreement family + annual-tax-paid intended home; C
+property_permits = per-property root, county spines stay area-wide — live: lee 303 rows/fresh,
+collier 4,975/stale 04/30), the LISTING-SCOPE coverage law (Lee-heavy by construction: book
+24,548/9,142/1,214), and the address-join match-rate gate (Marco 0/360 precedent). data-roots
+raw-landing entry mirrors it. Check opened: steadyapi_step3_typed_families_spec. Zero paid calls
+spent; Step 2 (17,880-call run) remains Sonnet's, playbook unchanged on that.
+
 ## 2026-08-02 (Fable 5) — databrief v4–v6: chart styling + image hosting in the bridge; showcase rebuilt to the design bar, re-sent ON-BRAND, then de-jargoned + widened
 
 Operator: v3 "PRETTY BLAND" vs 5 reference senders; then "HOW DO WE NOT HAVE A FUCKING LOGO" /

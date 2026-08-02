@@ -1,3 +1,54 @@
+## 2026-08-02 (this session) — "JUST MAKE IT ALL CORRECT … BEST SOURCE … NOT A RUSH" — SteadyAPI Step-3 authority + validation decree
+
+Decree verbatim: "USE ALL THE DATA TO CONFIRM A SMALL AMOUNT OF THE DATA WE ALREADY HAVE AND MAKE
+THE SYSTEM RUN EFFICENTLY BY USING THE DATA FROM THE BEST SOURCE. IF WE RUN FASTER BY USING ALL
+STEADY DATA, HAVE IT WIRED THAT WAY. BUT WE ARE ONLY GETTING DATA OF LISTED HOUSES OR SOLD, SO LEE
+IS GOING TO HAVE MORE DATA FOR MORE PROPERTIES IN MOST OF THE EXTRA LANES … JUST GET EVERYTHING
+DONE CORRCTLY BEFORE WE BRING IN. THIS IS NOT A RUSH." Binding design rules for Step 3 typed
+tables: (1) incoming Steady families get cross-validation contracts against what we already hold
+(the existing leepa↔FDOR / realtor↔redfin contract pattern — Steady tax_history↔county valuation
+is the third family); (2) per-concept authority = BEST source, chosen in data-roots, county-aware —
+Steady coverage is LISTING-SCOPED (probed listed/sold only), county rolls are full-book, so county
+sources stay authority where they exist and Steady fills gaps/validates; (3) correctness before
+ingestion of the typed tables — no rush.
+
+## 2026-08-02 (latest session) — "HOW DO WE NOT ALREADY HAVE A CHART CONSUMER... WHY ARE WE MAKING MORE OF EVERYTHING" — mid-build check
+
+Operator caught the smell of a parallel build. Verified in-code before answering: the labels work
+is an EDIT to the existing chart root (components/charts/vendor/bklit/email-svg.tsx — the ONE
+producer behind web frames, email PNGs, and the databrief bridge), porting the label technique
+that already exists in scripts/generate-seed-preview-charts.mts (module-local there, not
+reusable). No new renderer, no new consumer — RULE 3 C2 extension of the existing seam. Standing
+rule reaffirmed: before ANY chart/email build, name the existing artifact being extended in the
+first sentence, or stop.
+
+## 2026-08-02 (latest session) — "NO NUMBERS ON THE CHART" + "PROVE ME WRONG" — the standing work order
+
+Four decrees in one message, all binding until closed:
+1. CHART NUMBERS: the v7 chart has no value labels on the data points — "NO NUMBERS ON THE
+   CHART, WHICH SUCKS." Every chart on a delivered surface carries readable numbers from now on.
+2. THE SCORECARD: the v7 underwriter-brief email IS the quality bar. "DON'T SEND ME ANYTHING
+   UNTIL IT IS AS GOOD OR FUCKING BETTER." No sends to the operator until a BUILDER-built email
+   meets or beats it. Verbatim: "FUCKING MAKE THE PLAYBOOK AND FUCKING SHOW ME IT CAN FUCKING
+   DO IT YOU FUCKING IDIOT. PROVE ME WRONG. I DON'T CARE HOW LONG IT TAKES."
+3. BUILDER PROOF: hand-orchestration took 7 tries; the demand is the PROGRAM builds a
+   scorecard-grade email — with commentary and inference, on any data — not Claude hand-writing
+   TSX. The playbook is the mechanism; the builder run is the proof.
+4. SEND ACCESS: "GIVE THE FUCKING PROGRAM ACCESS TO SENDING FUCKING EMAILS WHEN IT IS TOLD
+   TO" — the program owns the send path (Resend, standing guards: edition-date subject, brand,
+   no system nouns), invoked on command. Claude stops being the sender.
+
+## 2026-08-02 (latest session) — "DID BUILDER BUILD THAT EMAIL????" — honest answer: NO, the databrief showcase bypassed the Lab builder
+
+Operator asked point-blank whether the builder built the hello@ databrief send. It did not — it
+was built by the databrief bridge (databrief repo react-email recipe + brain-platform's
+bklit chart bridge + host-image.mts) and sent straight through Resend, hand-orchestrated
+in-session. The Lab grid builder (the crown jewel, "drive builder, never hand-author") never
+touched it. This is the gap the open `databrief_design_bar_playbook_sync` check + the "i want a
+fucking playbook" decree already point at: the greenfield proved the FACTORY, but the flow isn't
+yet a surface the builder drives. Fold the bridge into builder-driven machinery when the playbook
+lands — do not keep hand-orchestrating sends forever.
+
 ## 2026-08-02 (latest session) — "i want a fucking playbook, i want data root updated and I want everything we know about it listed" — SteadyAPI raw-landing SETUP SHIPPED, Sonnet runs the hours
 
 Decree verbatim: "build this out correctly so everyone can fucking find the fucking data and we get
