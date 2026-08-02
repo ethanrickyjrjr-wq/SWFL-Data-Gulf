@@ -48,6 +48,7 @@ import { buildAgentLaunch } from "./agent-launch";
 import { buildSphereWeekly } from "./sphere-weekly";
 import { buildReviewReply } from "./review-reply";
 import { buildMarketPulse } from "./market-pulse";
+import { buildDefaultGrid } from "./default-grid";
 
 /** What every builder is handed. The subject is ALREADY resolved — do not re-resolve. */
 export interface RecipeBuildContext {
@@ -90,6 +91,7 @@ export const RECIPE_BUILDERS: Partial<Record<RecipeKey, RecipeBuilder>> = {
   "sphere-weekly": buildSphereWeekly, // headline number is a LANE-3 web fact, cited
   "review-reply": buildReviewReply, // pure lake data; genuinely about numbers, so it charts
   "market-pulse": buildMarketPulse, // every ZIP's month-over-month move
+  "default-grid": buildDefaultGrid, // the terminal fallback — open-slot grid over the fill seam
   // ── Social — a DIFFERENT renderer, and a DIFFERENT contract ────────────────
   // NOT RecipeBuilder-shaped, and deliberately not registered here. Recon (07/13/2026)
   // found TWO live social systems: the "Make this →" button on a social slide lands in

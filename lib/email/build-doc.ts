@@ -714,7 +714,42 @@ export async function buildContentDoc({
   }
   const placeholderMiss = unfilledPlaceholderMiss(prompt);
   if (placeholderMiss) return placeholderMiss;
-  let doc = docParsed.data;
+  return fillSkeletonResult({ prompt, doc: docParsed.data, scope, mode, chartType });
+}
+
+/** ONE-LANE SEAM (spec 2026-08-02): fill a fixed skeleton's open slots from sourced
+ *  lanes. Never invents; a slot with no sourced value stays open. Throwing is
+ *  allowed — callers (the default-grid builder) catch and fall back to the raw
+ *  skeleton. This is buildContentDoc's post-validation core with the BuildResult
+ *  HTTP shape stripped off. */
+export async function fillSkeletonFromSources(args: {
+  prompt: string;
+  doc: EmailDoc;
+  scope?: { kind: "zip" | "city"; value: string };
+}): Promise<EmailDoc> {
+  const res = await fillSkeletonResult({ prompt: args.prompt, doc: args.doc, scope: args.scope });
+  const out = EmailDocSchema.safeParse(res.payload.doc);
+  if (!out.success) throw new Error("skeleton fill did not return a valid doc");
+  return out.data;
+}
+
+/** The shared fill core: listing-flyer branch, lake parts + chart + photo, the
+ *  model patch, sources accordion, comp rows. Returns the full BuildResult so
+ *  buildContentDoc's HTTP callers stay byte-identical. */
+async function fillSkeletonResult({
+  prompt,
+  doc: inputDoc,
+  scope,
+  mode,
+  chartType,
+}: {
+  prompt: string;
+  doc: EmailDoc;
+  scope?: BuildScope;
+  mode?: string;
+  chartType?: ChartType;
+}): Promise<BuildResult> {
+  let doc = inputDoc;
 
   // ── Listing flyer branch ───────────────────────────────────────────────────
   // A "describe THIS house" ask carrying a pasted listing URL: scrape the page
