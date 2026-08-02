@@ -112,6 +112,16 @@ In `run()`'s chunk loop: call `fetch_sold_event_raw`, keep passing classificatio
 the same `_write_with_retry`-style retry (raw insert failure must NOT abort the run or block the
 `listed_date` write — log and continue; the row stays `listed_date IS NULL` only if THAT write failed).
 
+**ALSO wire the NIGHTLY probe path in the same commit** — `pipeline.py:29` imports `fetch_sold_event`
+for the departure/recheck probes (via `transitions.py`). Switch those call sites to
+`fetch_sold_event_raw` and land their bodies through the same `insert_raw_bodies`. From then on,
+EVERY paid probe — backfill or nightly — keeps 100% of what the vendor sends, and coverage converges
+toward the whole book automatically as listings depart/recheck. Coverage math (LIVE SQL 08/02/2026):
+all 34,904 api_feed rows carry a property_id (zero unprobe-able); the Step-2 run bodies 17,880; the
+13,446 already-dated rows get bodies as their nightly departure probes fire, or immediately via an
+optional ~13.4k-call top-up sweep (operator decision — with the 17,880 run that totals ~31.3k calls
+≈ 63% of monthly quota, so the top-up likely waits for next cycle).
+
 ### 1e. TDD (RULE 3.5 — write these failing FIRST, in `ingest/tests/pipelines/listing_lifecycle/`)
 
 1. `fetch_sold_event_raw` returns `(classification, body)` on 200; `(gap, None)` on non-200/bad-body/no-key.
