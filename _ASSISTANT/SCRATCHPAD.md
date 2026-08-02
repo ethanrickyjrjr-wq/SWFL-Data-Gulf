@@ -11,6 +11,19 @@ census amended 08/02 (§4 per-listing-DOM ceiling CORRECTED — days_after_liste
 cadence_registry source_ceiling rewritten with all 4 unread families, as_of 08/02/2026. Sonnet's
 entry point = the playbook, nothing else needed.
 
+## 2026-08-02 (later session) — "WHY THE FUCK ARE YOU SAYING BRAINS" + "IT LOOKS SO DUMB ON SCREEN" + "why is this closed"
+
+Three v5 defects, all operator-caught from the real inbox: (1) footer said "two deterministic
+brains" — a SYSTEM NOUN on a customer surface, violating the standing reader rule I had in
+context; v6 rewrote footer+CTA copy to plain words (no brains/recipes/pipelines). The no-system-
+noun rule applies to EVERY delivered surface including footers of showcases. (2) 600px card reads
+skinny in desktop Gmail — v6 widened to 680px (react-email Container's 600 default is overridable
+via style on BOTH containers; media widths track the 616px content column). (3) "closed" footer =
+Gmail's trimmed-content ⋯ because v3–v5 shared one subject → threaded, repeated trailing content
+collapsed; a first-time recipient of ONE send never sees it — resend artifact, not a defect.
+v6 Resend a67c0835, delivered 18:08 UTC. LESSON: check the artifact in the REAL client, not just
+a browser render — two of three defects were only visible in Gmail.
+
 ## 2026-08-02 (later session) — "HOW DO WE NOT HAVE A FUCKING LOGO" + "WE HAVE A FUCKING BRANDIND SECITION!!! HOW ARE THE COLORS NOT OUR BRAND COLORS"
 
 Mid-redesign the operator caught the deeper failure: v1–v4 of the databrief showcase used an
