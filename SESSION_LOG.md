@@ -16,6 +16,12 @@ Beefree/Gamma scan, `recipes.parity.test.ts` 17 pass + `author-recipes.test.ts` 
 **Next:** operator reviews spec → writing-plans → TDD implementation. Free-author deletion is
 ask-first (RULE 1). Nothing under `lib/` touched this session.
 
+**Addendum (same session):** spec approved + pushed (`d3be2c58`). Implementation plan written:
+`docs/superpowers/plans/2026-08-02-one-lane-email-recipes.md` — 6 tasks, TDD, each failure mode
+a named failing test first; Task 3 is the single-commit lane collapse; key reuse finding:
+`buildContentDoc`'s fixed-skeleton fill (build-doc.ts:704) becomes the extracted
+`fillSkeletonFromSources` seam, so the default-grid builder is mostly assembly, not new machinery.
+
 ## 2026-07-31 (Sonnet 5) — Fireworks-AI audit PROMOTED to a committed living doc, wired into 6 area CLAUDE.md files so it never gets re-run cold
 
 Operator relayed a 5-task repo-audit prompt (sources/tables, free-text columns, row counts/cadence,
