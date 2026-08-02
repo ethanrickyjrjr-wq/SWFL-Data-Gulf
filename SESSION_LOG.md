@@ -1,3 +1,23 @@
+## 2026-08-02 (Fable 5) — GREENFIELD PROOF SHIPPED: `C:\Users\ethan\dev\databrief` — 4 live APIs → DuckDB lake → 2 brains → coded email, 6/6 plan steps, guards proven on real positives
+
+Operator decree: prove the factory generalizes on NEW data, not real estate, "data we can get
+EASILY," playbook written down. Done in a fresh sibling repo (3 commits, `126e493..3ba95bc`):
+BLS + Treasury FiscalData + NOAA CO-OPS + OpenFEMA (all no-key, all live-verified by a Sonnet
+reliability scout after two earlier scout rounds got vetoed — evidence in
+`_RESEARCH/data-and-ingest/2026-08-02-greenfield-scout-{marine,bizform,restaurants,reliable-apis}.md`,
+all indexed). **Proof:** `python -m databrief.run` loaded 192 rows live (bls 58 / treasury 30 /
+noaa 4 / fema 100), brains emitted 6 facts each `{value, source_url, as_of, method}`, react-email
+recipe bound all 6 → `out/brief.html` (23,373 bytes); `pytest -q` → `5 passed`; no-invention lint
+on the RENDERED artifact went red on a real orphan its first run (`&#x27;` entity read as "27"),
+fixed by unescaping — the detector was proven on a real positive, per playbook. Registry is
+GENERATED from pipeline code (drift + consumer tests); SESSION_LOG/LEDGER(with closer)/DATA-ROOTS/
+hook meta-guard installed day-0. Spec+plan committed here:
+`docs/superpowers/specs/2026-08-02-greenfield-proof-playbook-design.md`,
+`docs/superpowers/plans/2026-08-02-greenfield-proof-databrief.md`. Deferrals in databrief
+LEDGER.md (fred-5th, send-lane, cron-lane). Cross-project Write hook fired as designed; scaffold
+went through shell per operator's direct commission — future databrief work belongs in its own
+session. NOT pushed anywhere (no remote; house rule).
+
 ## 2026-08-02 (Fable 5) — VOICE PICKER WIRED (check `voice_presets_not_consumed` closed): the pick now changes the build, with an end-to-end guard the unit suite lacked
 
 Operator pushed the collapse (9 commits, `d3be2c58..c6d4e80d`) and flagged the real defect: "no
