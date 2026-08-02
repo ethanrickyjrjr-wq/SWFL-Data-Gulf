@@ -59,3 +59,21 @@ def test_intended_call_counts():
     assert counts["Lee"] > 0 and counts["Collier"] > 0
     # ~471 total pages at the 07/01 measured totals (5,211 Lee / 4,182 Collier @ 20/page).
     assert 400 <= counts["Lee"] + counts["Collier"] <= 550
+
+
+# ── raw landing collection (decree 08/02/2026) — gap items must never land ──────
+
+def test_collect_raw_items_keeps_full_vendor_item_keyed_on_property_id():
+    from ingest.pipelines.rentals.resources import collect_raw_items
+
+    item = {"property_id": 9001, "price": {"min": 1000}, "unparsed_field": {"deep": True}}
+    out = collect_raw_items({"body": [item]}, "Lee")
+    assert out == [{"property_id": "9001", "county": "Lee", "body": item}]
+
+
+def test_collect_raw_items_skips_items_without_property_id_and_bad_bodies():
+    from ingest.pipelines.rentals.resources import collect_raw_items
+
+    assert collect_raw_items({"body": [{"price": {"min": 1}}, "junk"]}, "Lee") == []
+    assert collect_raw_items({"body": None}, "Lee") == []
+    assert collect_raw_items({}, "Lee") == []

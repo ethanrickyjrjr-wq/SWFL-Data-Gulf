@@ -443,6 +443,7 @@ def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: 
     seed = COUNTY_SEED.get(county)
     cities = [seed] if seed else []
     sa_rows: list[dict] = []
+    raw_items: list[dict] = []
     all_ok = True
     search_calls = 0
     source_total = 0
@@ -451,6 +452,12 @@ def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: 
         all_ok = all_ok and sa_ok
         search_calls += pages
         source_total += city_total or 0
+        # Raw landing (decree 08/02/2026): keep the FULL vendor /search item, unfiltered —
+        # county column is scan context; items without a property_id have no upsert identity.
+        raw_items.extend(
+            {"property_id": str(x["property_id"]), "county": county, "body": x}
+            for x in sa_raw if isinstance(x, dict) and x.get("property_id")
+        )
         if not sa_raw:
             # Nothing came back — a cleanly-empty city (ok) or a dead pull (not ok). Either
             # way there are zero rows to type-stamp, so don't burn 4 type-sweep calls on it.
@@ -474,6 +481,7 @@ def scan_county_api(county: str, known_ids: set[str] | None = None, *, dry_run: 
         "enrich_calls": enrich_stats["calls"],
         "enrich_new_count": enrich_stats["new_count"],
         "enrich_baths_filled": enrich_stats["baths_filled"],
+        "raw_items": raw_items,
     }
 
 

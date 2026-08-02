@@ -15,6 +15,8 @@ import argparse
 import sys
 from datetime import date
 
+from ingest.lib import raw_landing
+
 from . import db
 from .constants import COUNTY_LOCATIONS
 from .resources import fetch_rentals_county, intended_call_counts
@@ -29,14 +31,20 @@ _CONFLICT = ["property_id", "captured_date"]
 def run(*, dry_run: bool = False, today: str | None = None) -> dict:
     captured = today or str(date.today())
     rows: list[dict] = []
+    raw_rows: list[dict] = []
     calls = 0
     per_county: dict[str, int] = {}
     for county in COUNTY_LOCATIONS:
         res = fetch_rentals_county(county, captured=captured, dry_run=dry_run)
         rows.extend(res["rows"])
+        raw_rows.extend(res.get("raw") or [])
         calls += res["calls"]
         per_county[county] = res["calls"]
     n = db.upsert(_TABLE, _COLS, _CONFLICT, rows, dry_run=dry_run)
+    n_raw = raw_landing.write_isolated(
+        "data_lake.steadyapi_rentals_search_raw", ["property_id"], raw_rows,
+        dry_run=dry_run, label="rentals-raw")
+    print(f"[raw] rentals raw bodies landed={n_raw}", flush=True)
     intended = sum(intended_call_counts().values())
     print(f"[budget] rentals = {calls if not dry_run else intended} rentals-search calls "
           f"(weekly; ~{intended}/run; per-county={per_county if not dry_run else intended_call_counts()})",

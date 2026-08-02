@@ -1961,8 +1961,17 @@ pipelines:
     # probe (extract_api.fetch_sold_event_raw -> distill.insert_raw_bodies). NOT a served root — a
     # provenance store Step 3 of the raw-landing playbook parses into typed tables. Migration:
     # migrations/20260802_steadyapi_property_history_raw.sql. Data root entry: docs/standards/data-roots.md.
+    # THIRD TABLE (08/02/2026 decree — ALL paid surfaces raw-land): data_lake.steadyapi_search_raw
+    # (property_id PK, county, body jsonb, fetched_at) — latest-wins landing of the FULL vendor
+    # /search item for every listing the nightly sweep returns (scan_county_api raw_items ->
+    # ingest.lib.raw_landing.write_isolated). Migration: migrations/20260802_steadyapi_raw_landings.sql.
 
   # ── Market aggregates (SteadyAPI Layer-B, realtor.com origin) ──────────────
+  # RAW LANDINGS (08/02/2026 decree, all three resources): steadyapi_price_histogram_raw
+  # (county+captured_date), steadyapi_market_details_raw (zip+captured_date — written BEFORE the
+  # content-contract gate so an aborted batch still keeps its evidence), steadyapi_geo_trends_raw
+  # (anchor+captured_date). Time-series grain mirrors the typed tables. Writer:
+  # ingest.lib.raw_landing. Migration: migrations/20260802_steadyapi_raw_landings.sql.
   # GRADUATED 2026-07-01: moved up from not_yet_running: — schedules uncommented in
   # ingest-market-aggregates-histogram.yml + ingest-market-aggregates-details.yml. Each has 1 clean
   # live dispatch so far (histogram run 28495473103, details run 28495474425, both success,
@@ -2059,6 +2068,9 @@ pipelines:
     workflow: ingest-rentals.yml
     consuming_pack: active-rentals-swfl
     lane: tier-2
+    # RAW LANDING (08/02/2026 decree): data_lake.steadyapi_rentals_search_raw (property_id PK,
+    # latest-wins full vendor item) written alongside every sweep via ingest.lib.raw_landing.
+    # Migration: migrations/20260802_steadyapi_raw_landings.sql. Cold store, not a served root.
     cadence_days: 7 # weekly — matches the SteadyAPI sole-spine plan's weekly rentals sweep
     tolerance_multiplier: 3.0
     freshness_table: data_lake.rental_listings_swfl

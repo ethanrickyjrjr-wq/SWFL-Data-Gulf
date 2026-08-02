@@ -61,14 +61,16 @@ def parse_histogram(raw: dict, county: str, captured: str) -> list[dict]:
 
 
 def fetch_price_histogram(county: str, *, captured: str, dry_run: bool = False, key: str | None = None) -> dict:
-    """One /price-histogram call for a county. Returns {rows, calls, ok}. dry_run -> zero network."""
+    """One /price-histogram call for a county. Returns {rows, calls, ok, raw}. `raw` = the FULL
+    vendor response for the raw landing (None on dry-run/gap — a failed call never lands a body).
+    dry_run -> zero network."""
     loc = COUNTY_LOCATIONS.get(county)
     if dry_run or not loc:
-        return {"rows": [], "calls": 0, "ok": bool(loc)}
+        return {"rows": [], "calls": 0, "ok": bool(loc), "raw": None}
     st, data = get_json("price-histogram", {"location": loc, "status[]": HISTOGRAM_STATUS}, key=key)
     if st != 200 or not isinstance(data, dict):
-        return {"rows": [], "calls": 1, "ok": False}
-    return {"rows": parse_histogram(data, county, captured), "calls": 1, "ok": True}
+        return {"rows": [], "calls": 1, "ok": False, "raw": None}
+    return {"rows": parse_histogram(data, county, captured), "calls": 1, "ok": True, "raw": data}
 
 
 # ── housing market details (per ZIP) ────────────────────────────────────────────
@@ -122,13 +124,14 @@ def parse_market_details(raw: dict, zip_code: str, county: str, captured: str) -
 
 
 def fetch_market_details(zip_code: str, county: str, *, captured: str, dry_run: bool = False, key: str | None = None) -> dict:
-    """One /housing-market-details call for a ZIP. Returns {row, calls}. dry_run -> zero network."""
+    """One /housing-market-details call for a ZIP. Returns {row, calls, raw}. `raw` = the FULL
+    vendor response for the raw landing (None on dry-run/gap). dry_run -> zero network."""
     if dry_run:
-        return {"row": None, "calls": 0}
+        return {"row": None, "calls": 0, "raw": None}
     st, data = get_json("housing-market-details", {"zipcode": zip_code}, key=key)
     if st != 200 or not isinstance(data, dict):
-        return {"row": None, "calls": 1}
-    return {"row": parse_market_details(data, zip_code, county, captured), "calls": 1}
+        return {"row": None, "calls": 1, "raw": None}
+    return {"row": parse_market_details(data, zip_code, county, captured), "calls": 1, "raw": data}
 
 
 # ── neighborhood market trends (city/county/neighborhood medians per anchor) ────
@@ -184,11 +187,12 @@ def fetch_geo_trends(anchor_label: str, anchor_pid: str, *, captured: str,
     """One /neighborhood-market-trends call for an anchor property. Returns {rows, calls}.
     dry_run -> zero network."""
     if dry_run:
-        return {"rows": [], "calls": 0}
+        return {"rows": [], "calls": 0, "raw": None}
     st, data = get_json("neighborhood-market-trends", {"propertyId": anchor_pid}, key=key)
     if st != 200 or not isinstance(data, dict):
-        return {"rows": [], "calls": 1}
-    return {"rows": parse_geo_trends(data, anchor_label, anchor_pid, captured), "calls": 1}
+        return {"rows": [], "calls": 1, "raw": None}
+    return {"rows": parse_geo_trends(data, anchor_label, anchor_pid, captured), "calls": 1,
+            "raw": data}
 
 
 def intended_call_counts() -> dict:

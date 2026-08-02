@@ -1,3 +1,51 @@
+## 2026-08-02 (Fable 5) — "HOW DOES IT HAVE THE EXACT SAME COMMENTARY" — deterministic prose is template-grade prose
+
+The resend's commentary was byte-identical to v7's because databrief's commentary is COMPUTED:
+same lake rows in → same sentences out. That is the no-invention guard doing its job at the
+NUMBER layer, wrongly extended to the PROSE layer. Two sends hours apart reading identically is
+also exactly what fed Gmail's trimmer. The house rule has always been "deterministic math,
+NARRATIVE PROSE" — numbers locked in code, a model writes the synthesis over them (that's how
+the parent platform's briefs stay alive), and the greenfield dropped that half when it went
+100%-deterministic. Named fix, operator's call (it adds a model call per edition): a synthesis
+layer over the locked facts — model writes commentary, lint verifies every numeral against the
+lake, refusal on any invented figure. Until decided, same-day identical data = identical words.
+
+## 2026-08-02 (Fable 5) — "FUCKING TOLD YOU" — the told-to send arrived TRIMMED AGAIN; the edition-date rule was insufficient
+
+Screenshot 15:05: the delivered brief shows ⋯ markers and ONLY the sources block — the one
+paragraph whose copy changed this session. Root cause: the edition-date subject rule
+de-duplicates by DAY, but v7 was already sent to the same inbox TODAY with the SAME subject
+("… · 08/02/2026"), so Gmail threaded the resend with it and trimmed everything identical,
+showing only the delta. The scorecard's subject-edition-date check PASSED as written — the
+RULE was wrong, not the check: same-day resends of one edition still collide. Date-grain
+uniqueness is not send-grain uniqueness. FIX (mechanism, same session): send_brief.py keeps a
+local send ledger (out/sent.jsonl); a repeat (subject, recipient) pair gets a visible
+"· updated H:MM PM" suffix so every SEND is its own Gmail thread. Operator also predicted the
+program would miss something ("TOLD YOU") — he was right; logged as-is.
+
+## 2026-08-02 (Fable 5) — RESOLVED 08/02/2026: the four "PROVE ME WRONG" decrees, 4 of 4 mechanized
+
+1. CHART NUMBERS → RESOLVED: bklit email charts draw their values (opt-in valueLabels, on by
+   default in the databrief spec layer; proven in the rendered PNG — 3.0%/3.5% endpoints).
+2. PLAYBOOK → RESOLVED: databrief RUNBOOK.md (executable twin: two commands, 6-step chain,
+   any-data generalization contract, failure modes → typed guards).
+3. SEND ACCESS → RESOLVED: send_brief.py sends when told (--to required, env key) and REFUSES
+   below the scorecard bar, no bypass flag — refusal proven red on a doctored dateless subject.
+4. SCORECARD → MECHANIZED: tools/scorecard.py, 11 deterministic checks over the rendered
+   artifact + 4 named manual-review items; runs inside every send. NO send to the operator has
+   happened or will until he says the word — databrief_autopilot_live_verify holds that
+   obligation. The Lab builder (brain-platform authorDoc) is a SEPARATE surface: scorecard-gate
+   pattern not yet folded into it — that gap stays OPEN in the earlier entry below.
+
+## 2026-08-02 (this session) — "FUCKING FIX IT" — raw-land ALL paid Steady surfaces NOW, not a check
+
+Operator decree on the parse-and-discard gap across the other paid endpoints: fix it this
+session, not park it. Build order: /search (biggest nightly volume) → /rentals-search →
+/geo-trends → histogram/details (uniformity; registry claims full extraction — land anyway,
+cheap) → TS /nearby-home-values (answer-path, different runtime, LAST). Pattern = the proven
+Step-1 design verbatim: raw-returning fetch + isolated best-effort writer + PK upsert latest-wins
++ TDD. Check `steadyapi_raw_land_all_paid_surfaces` tracks; close only with landed rows.
+
 ## 2026-08-02 (this session) — raw-landing covers ONE endpoint; every other paid Steady surface still parse-and-discards, uncensused
 
 Named gap (operator-confirmed): `steadyapi_property_history_raw` lands `/property-tax-history`

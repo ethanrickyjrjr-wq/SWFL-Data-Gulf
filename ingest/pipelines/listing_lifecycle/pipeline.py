@@ -26,6 +26,7 @@ from ingest.pipelines.listing_lifecycle.address_key import address_key, identity
 from ingest.pipelines.listing_lifecycle.coverage_guard import scan_is_complete
 from ingest.pipelines.listing_lifecycle.constants_api import API_SOURCE_NAME, SOLD_CHECK_CAP
 from ingest.pipelines.listing_lifecycle.extract import SWFL_COUNTIES, scan_county
+from ingest.lib import raw_landing
 from ingest.pipelines.listing_lifecycle.extract_api import scan_county_api, fetch_sold_event_raw
 from ingest.pipelines.listing_lifecycle.transitions import (
     apply_off_market_resolutions,
@@ -146,6 +147,12 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
             result = scan_county_api(county, known_ids, dry_run=dry_run)
             budget_calls += result.get("search_calls", 0) + result.get("enrich_calls", 0)
             totals["source_total"] += result.get("source_total", 0)
+            # Raw landing (decree 08/02/2026): keep 100% of every paid /search item this
+            # sweep returned. Isolated best-effort — a raw failure never touches the scan,
+            # the diff, or the typed merge below.
+            raw_landing.write_isolated(
+                "data_lake.steadyapi_search_raw", ["property_id"],
+                result.get("raw_items") or [], dry_run=dry_run, label="search-raw")
             # Ledger fix (07/16/2026, check source_totals_migration_apply): every SCHEDULED run
             # passes --county (one county per cron: Lee 09, Collier 12, Hendry 15 UTC), so the
             # old end-of-run `not only_county` guard made this write unreachable in production —

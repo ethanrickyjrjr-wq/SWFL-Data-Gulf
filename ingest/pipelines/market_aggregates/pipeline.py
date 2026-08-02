@@ -21,6 +21,7 @@ import argparse
 import sys
 from datetime import date
 
+from ingest.lib import raw_landing
 from ingest.lib.guards import ContentContractError
 from ingest.quality.contracts import evaluate_batch
 
@@ -62,12 +63,18 @@ _GEO_CONFLICT = ["slug_id", "captured_date"]
 def run_histogram(*, dry_run: bool = False, today: str | None = None) -> dict:
     captured = today or str(date.today())
     rows: list[dict] = []
+    raw_rows: list[dict] = []
     calls = 0
     for county in COUNTY_LOCATIONS:
         res = fetch_price_histogram(county, captured=captured, dry_run=dry_run)
         rows.extend(res["rows"])
         calls += res["calls"]
+        if res.get("raw") is not None:
+            raw_rows.append({"county": county, "captured_date": captured, "body": res["raw"]})
     n = db.upsert(_HIST_TABLE, _HIST_COLS, _HIST_CONFLICT, rows, dry_run=dry_run)
+    raw_landing.write_isolated(
+        "data_lake.steadyapi_price_histogram_raw", ["county", "captured_date"], raw_rows,
+        dry_run=dry_run, label="histogram-raw")
     intended = intended_call_counts()["histogram"]
     print(f"[budget] histogram = {calls if not dry_run else intended} price-histogram calls "
           f"(weekly; ~{intended}/run)", flush=True)
@@ -79,12 +86,22 @@ def run_details(*, dry_run: bool = False, today: str | None = None) -> dict:
     captured = today or str(date.today())
     zips = swfl_zip_counties()
     rows: list[dict] = []
+    raw_rows: list[dict] = []
     calls = 0
     for zip_code, county in zips:
         res = fetch_market_details(zip_code, county, captured=captured, dry_run=dry_run)
         if res["row"]:
             rows.append(res["row"])
         calls += res["calls"]
+        if res.get("raw") is not None:
+            raw_rows.append({"zip_code": zip_code, "county": county,
+                             "captured_date": captured, "body": res["raw"]})
+    # Raw landing FIRST, before the contract gate: on a ContentContractError abort the typed
+    # rows never merge, but the raw bodies are exactly the evidence needed to debug the flip —
+    # never throw them away with the aborted batch. Isolated: a raw failure can't abort details.
+    raw_landing.write_isolated(
+        "data_lake.steadyapi_market_details_raw", ["zip_code", "captured_date"], raw_rows,
+        dry_run=dry_run, label="details-raw")
     # ── LOCUS A: content contracts on the whole-batch details load. ─────────────────────
     # THE ONLY clean whole-batch site of the three loci: run_details accumulates `rows` across
     # every ZIP and merges ONCE, so the contamination SHARE here really is a share of the whole
@@ -128,11 +145,15 @@ def run_geo_trends(*, dry_run: bool = False, today: str | None = None) -> dict:
     return the same Lee county block) by slug_id before the upsert."""
     captured = today or str(date.today())
     rows: list[dict] = []
+    raw_rows: list[dict] = []
     seen: set[str] = set()
     calls = 0
     for label, pid in GEO_TREND_ANCHORS:
         res = fetch_geo_trends(label, pid, captured=captured, dry_run=dry_run)
         calls += res["calls"]
+        if res.get("raw") is not None:
+            raw_rows.append({"anchor_property_id": pid, "anchor_label": label,
+                             "captured_date": captured, "body": res["raw"]})
         if not dry_run and not res["rows"]:
             # A stale/unresolvable anchor must be LOUD (see GEO_TREND_ANCHORS note),
             # but one dead anchor must not sink the other cities' rows.
@@ -144,6 +165,9 @@ def run_geo_trends(*, dry_run: bool = False, today: str | None = None) -> dict:
             seen.add(r["slug_id"])
             rows.append(r)
     n = db.upsert(_GEO_TABLE, _GEO_COLS, _GEO_CONFLICT, rows, dry_run=dry_run)
+    raw_landing.write_isolated(
+        "data_lake.steadyapi_geo_trends_raw", ["anchor_property_id", "captured_date"], raw_rows,
+        dry_run=dry_run, label="geo-trends-raw")
     intended = intended_call_counts()["geo_trends"]
     print(f"[budget] geo_trends = {calls if not dry_run else intended} "
           f"neighborhood-market-trends calls (monthly; ~{intended}/run)", flush=True)

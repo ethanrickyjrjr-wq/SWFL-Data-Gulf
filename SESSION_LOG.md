@@ -1,3 +1,19 @@
+## 2026-08-02 (Fable 5) — "PROVE ME WRONG": charts carry their numbers, the scorecard is a gate, the program owns the send
+
+Operator: "NO NUMBERS ON THE CHART" + "MAKE THE PLAYBOOK AND SHOW ME IT CAN DO IT … the v7
+email IS the scorecard … GIVE THE PROGRAM ACCESS TO SENDING WHEN TOLD." THIS REPO: (1)
+email-svg.tsx gained opt-in `valueLabels` + `display` — endpoint/per-bar numbers drawn from
+scraped bklit geometry (the hand-built chart-image.ts builders always had numbers; the bklit
+upgrade dropped them — §4.17 one layer down); 9 failure-mode tests green
+(email-svg-labels.test.ts); defaults byte-identical. (2) databrief-chart.mts passes
+`valueLabels` through and exits non-zero if a labeled render comes back numberless. (3)
+new-project-playbook.md §4.17 gained lessons 6 (design bar) + 7 (bar-as-gate) — check
+databrief_design_bar_playbook_sync CLOSED with evidence. (4) Registered databrief-autopilot
+(spec + databrief_autopilot_live_verify check OPEN — awaits a told-to send). SIBLING repo
+databrief: scorecard.py (11 checks), gated send_brief.py (no bypass), build_brief.py (one
+command), RUNBOOK.md; proof run BUILD GREEN unsent; send refusal proven red on a doctored
+subject. NOTE: an auto-committer landed my WIP as dbe53231/3885dba2 mid-session. NOT pushed.
+
 ## 2026-08-02 (Fable 5) — SteadyAPI Step 1 verified end-to-end + Step 3 authority/validation design LOCKED per operator decree
 
 Verified Sonnet's Step 1 with live evidence (raw table exists/empty, dry-run prints 17,880
@@ -16,6 +32,13 @@ ADDENDUM same session: raw landing covers /property-tax-history ONLY — /search
 /geo-trends, TS /nearby-home-values still parse-and-discard with no field census (histogram+details
 claim full extraction — verify, don't trust). Second check opened:
 steadyapi_raw_land_all_paid_surfaces. Non-blocking for the 17.9k run.
+ADDENDUM 2 ("FUCKING FIX IT"): BUILT same session — generic writer ingest/lib/raw_landing.py
+(upsert latest-wins + isolated best-effort) + migration 20260802_steadyapi_raw_landings.sql (5
+tables, applied live, all EXISTS) + wiring at /search (scan_county_api raw_items),
+/rentals-search, histogram, details (raw lands BEFORE the contract abort), geo-trends. Evidence:
+full ingest suite 1053 passed / 3 skipped; new failure-mode tests 7/7 (lib) + 2 (rentals
+collection). 4 of 5 surfaces landed — TS /nearby-home-values (live answer path) stays under the
+check. Registry + data-roots updated.
 
 ## 2026-08-02 (Fable 5) — databrief v4–v6: chart styling + image hosting in the bridge; showcase rebuilt to the design bar, re-sent ON-BRAND, then de-jargoned + widened
 
