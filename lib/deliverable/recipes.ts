@@ -142,8 +142,9 @@ export interface Recipe {
    *  (a) load an existing committed grid and justify it against the real blocks, or
    *  (b) propose a new one. It probably already exists — look before you build. */
   skeleton: string | null;
-  /** author-recipes.ts RecipeId — the prose/voice layer. `null` = the generic
-   *  author prompt, byte-identical to today. Advisory only; it never invents. */
+  /** voice-presets.ts VoicePresetId — the prose VOICE layer (how it sounds, never
+   *  what gets built). `null` = plain, byte-identical to no guidance. Advisory
+   *  only; it never invents. (author-recipes.ts died in the one-lane collapse.) */
   prose: string | null;
   subject: SubjectSpine;
   chart: ChartPolicy;
@@ -288,7 +289,9 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     positioning: "sell-side",
     label: "Agent Brand Intro",
     skeleton: null,
-    prose: "agent-intro",
+    // Was "agent-intro" (a type-shaped advisory id; consumed only by the dead free
+    // author). The coded builder owns this structure now. null = plain voice.
+    prose: null,
     // TWO spines at once: a farm area AND the agent's newest listing as anchor.
     // Needs the agent's HEADSHOT — a photo we don't have → open slot + file picker.
     subject: "agent",
@@ -302,7 +305,9 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     positioning: "sell-side",
     label: "Agent Launch — The Letter",
     skeleton: null,
-    prose: "agent-intro",
+    // Was "agent-intro" — same fold as agent-brand-intro; the LETTER_SYSTEM in the
+    // coded builder carries the one-number/no-chart rule itself. null = plain voice.
+    prose: null,
     subject: "agent",
     // A personal letter carries ONE hard number and NO chart (the agent-intro
     // prose recipe already enforces this, and authorDoc honors it explicitly).
@@ -316,7 +321,9 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     positioning: "story-side",
     label: "Weekly Sphere Update",
     skeleton: null,
-    prose: "sphere-weekly",
+    // Was "sphere-weekly" (type-shaped; dead-free-author-only). The coded
+    // buildSphereWeekly owns the headlines-vs-here structure. null = plain voice.
+    prose: null,
     subject: "area",
     // The headline number is a LANE-3 fact (a named web source) — it is not in our
     // lake. Cite it or leave it an open slot. Never invent it.
@@ -350,7 +357,10 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     positioning: "story-side",
     label: "Monthly Market Pulse",
     skeleton: null,
-    prose: "monthly-newsletter",
+    // Was "monthly-newsletter" (a type-shaped advisory id). Type folds died in the
+    // one-lane collapse — the monthly structure returns as a promoted showcase
+    // grid, not as prose advice. null = plain voice.
+    prose: null,
     subject: "area",
     chart: "zip-mom-move",
     prompt:

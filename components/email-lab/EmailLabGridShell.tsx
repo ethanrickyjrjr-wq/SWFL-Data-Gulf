@@ -17,7 +17,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { CHART_TYPE_OPTIONS, type ChartType } from "@/lib/email/reshape-chart-type";
-import { RECIPE_IDS, RECIPE_LABELS } from "@/lib/email/author-recipes";
+import { VOICE_PRESET_IDS, VOICE_PRESET_LABELS, resolveVoice } from "@/lib/email/voice-presets";
 import type {
   BlockLayout,
   BlockType,
@@ -513,10 +513,11 @@ export function EmailLabGridShell({
           scope,
           build: true,
           chartType: chartType === "auto" ? undefined : chartType,
-          recipeId: branding.preferred_recipe || undefined,
-          // The DELIVERABLE's identity (distinct from recipeId, which is the prose
-          // recipe). Absent for an organically typed prompt — that still falls through
-          // to the generic author exactly as before.
+          // The VOICE preset (stale legacy ids degrade to "plain" — FM4).
+          recipeId: resolveVoice(branding.preferred_recipe),
+          // The DELIVERABLE's identity (distinct from recipeId, which is the voice
+          // preset). Absent for an organically typed prompt — the server lands it
+          // on the default grid (one lane, spec 2026-08-02).
           recipeKey: activeRecipeKey || undefined,
           useSavedLayout: opts.useSavedLayout === true,
         }),
@@ -601,7 +602,7 @@ export function EmailLabGridShell({
           doc: brandPatch ? applyBrand(doc, brandingToTokens(nextBranding)) : doc,
           scope,
           build: true,
-          recipeId: nextBranding.preferred_recipe || undefined,
+          recipeId: resolveVoice(nextBranding.preferred_recipe),
           // The arrival door never sent the deliverable's identity — it leaned on the
           // server re-deriving it from the prompt text. The saved layout is keyed on
           // the IDENTITY, so it has to ride explicitly.
@@ -1879,22 +1880,22 @@ export function EmailLabGridShell({
                   </button>
                 ))}
               </div>
-              {/* Recipe picker (M3) — pick a research-backed layout recipe, or let the
-                  prompt choose. Stored in the brand blob, so it saves with the project. */}
+              {/* Voice picker (one-lane collapse, spec 2026-08-02) — how the email
+                  SOUNDS, never what gets built (structure is the recipe key's job).
+                  Explicit pick only; keyword detection is dead. A stored legacy
+                  author-recipe id displays as its degraded preset (FM4). Stored in
+                  the brand blob, so it saves with the project. */}
               <div className="mb-1.5 mt-2.5">
-                <span className="text-[10px] uppercase tracking-[0.15em] text-white/35">
-                  Recipe
-                </span>
+                <span className="text-[10px] uppercase tracking-[0.15em] text-white/35">Voice</span>
               </div>
               <select
-                value={branding.preferred_recipe ?? ""}
+                value={resolveVoice(branding.preferred_recipe)}
                 onChange={(e) => setBranding({ ...branding, preferred_recipe: e.target.value })}
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm text-white/80 focus:border-gulf-teal/50 focus:outline-none"
               >
-                <option value="">Auto — choose from my prompt</option>
-                {RECIPE_IDS.map((id) => (
+                {VOICE_PRESET_IDS.map((id) => (
                   <option key={id} value={id} className="text-black">
-                    {RECIPE_LABELS[id]}
+                    {VOICE_PRESET_LABELS[id]}
                   </option>
                 ))}
               </select>

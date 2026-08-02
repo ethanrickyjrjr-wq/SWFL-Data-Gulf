@@ -23,7 +23,7 @@ import { SHOWCASES } from "@/lib/showcase/registry";
 import { HERO_CAMPAIGNS, heroDestination } from "@/lib/campaigns";
 import { recipeDestination, findPlaceholder, inputKindForRecipe } from "@/lib/showcase/recipe";
 import { SEED_DOCS } from "@/lib/email/doc/default-docs";
-import { RECIPE_IDS } from "@/lib/email/author-recipes";
+import { VOICE_PRESET_IDS } from "@/lib/email/voice-presets";
 
 /** Every recipe object reachable from a user-facing surface, tagged with the door
  *  it came from — so a failure names the button that drifted. */
@@ -63,14 +63,14 @@ describe("the registry is internally sound", () => {
     }
   });
 
-  it("every key's prose recipe, when assigned, is a real author recipe", () => {
-    const proseIds = new Set<string>(RECIPE_IDS);
+  it("every key's prose voice, when assigned, is a real voice preset", () => {
+    const presetIds = new Set<string>(VOICE_PRESET_IDS);
     for (const key of RECIPE_KEYS) {
       const { prose } = RECIPES[key];
       if (prose !== null) {
         expect(
-          proseIds.has(prose),
-          `recipe "${key}" names a prose recipe that does not exist: "${prose}"`,
+          presetIds.has(prose),
+          `recipe "${key}" names a voice preset that does not exist: "${prose}"`,
         ).toBe(true);
       }
     }
