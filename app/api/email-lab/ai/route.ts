@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { createClient } from "@/utils/supabase/server";
 import { buildContentDoc, authorDoc, fetchLakeContext } from "@/lib/email/build-doc";
+import { suggestRecipes, suggestionChips } from "@/lib/email/suggest-recipe";
 import { checkBuildAllowance, recordBuild } from "@/lib/email/build-usage";
 import { toPanelItem, type MediaAssetRow } from "@/lib/email/media-assets";
 import type { LibraryAsset } from "@/lib/email/author-doc";
@@ -162,31 +163,41 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const { httpStatus, payload } = isAuthor
-        ? await authorDoc({
-            prompt,
-            rawDoc: body.doc,
-            scope: body.scope,
-            mode: body.mode,
-            chartType: body.chartType as ChartType | undefined,
-            assets: caller?.assets,
-            replyEmail: caller?.email,
-            recipeId: body.recipeId,
-            recipeKey: body.recipeKey,
-            savedLayout,
-          })
-        : await buildContentDoc({
-            prompt,
-            rawDoc: body.doc,
-            scope: body.scope,
-            mode: body.mode,
-            chartType: body.chartType as ChartType | undefined,
-          });
+      // Suggestion chips (one lane, spec 2026-08-02): ONLY a keyless author build
+      // gets proposals, computed alongside the build. Advisory navigation only —
+      // each chip is a door URL; suggestRecipes never throws and never routes.
+      const wantSuggestions = isAuthor && !body.recipeKey;
+      const [built, suggestedKeys] = await Promise.all([
+        isAuthor
+          ? authorDoc({
+              prompt,
+              rawDoc: body.doc,
+              scope: body.scope,
+              mode: body.mode,
+              chartType: body.chartType as ChartType | undefined,
+              assets: caller?.assets,
+              replyEmail: caller?.email,
+              recipeId: body.recipeId,
+              recipeKey: body.recipeKey,
+              savedLayout,
+            })
+          : buildContentDoc({
+              prompt,
+              rawDoc: body.doc,
+              scope: body.scope,
+              mode: body.mode,
+              chartType: body.chartType as ChartType | undefined,
+            }),
+        wantSuggestions ? suggestRecipes(prompt) : Promise.resolve([]),
+      ]);
+      const { httpStatus, payload } = built;
+      const chips = wantSuggestions ? suggestionChips(suggestedKeys) : [];
+      const outPayload = chips.length > 0 ? { ...payload, suggestions: chips } : payload;
       // Metering never blocks a build — fire-and-forget, swallow any DB error.
       if (meteredUid) recordBuild(meteredUid).catch(() => {});
       return httpStatus
-        ? NextResponse.json(payload, { status: httpStatus })
-        : NextResponse.json(payload);
+        ? NextResponse.json(outPayload, { status: httpStatus })
+        : NextResponse.json(outPayload);
     } catch (err) {
       console.error("[email-lab/ai] unhandled error:", err);
       return NextResponse.json(

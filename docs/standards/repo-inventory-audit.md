@@ -210,7 +210,8 @@ Root: `refinery/agents/anthropic.mts` (`CallType` union, `getAnthropic(callType)
 ### Deliverable/email build (per user request) {#llm-call-sites-email}
 - `lib/deliverable/build.ts:344` — deliverable narrative synthesis — `deliverable_build`, Sonnet
 - `lib/email/data-readiness.ts:227` — grounded lookup / outlier web-confirm during a build — default callType
-- `lib/email/build-doc.ts:581,847,992,1112` — email document authoring, 4 call sites — `email_build`, Sonnet
+- `lib/email/build-doc.ts:552,853,1058` — email document build, 3 call sites (added-slot author, skeleton fill, listing narrative) — `email_build`, Sonnet/Haiku. Was 4: the free-author `callAuthor` site died in the one-lane collapse (spec 2026-08-02)
+- `lib/email/suggest-recipe.ts:54` — suggestion chips: keyless-ask → ≤2 recipe-key proposals (closed-list filtered, navigation only) — `email_build`, Haiku
 - `lib/deliverable/recipes/{under-contract,sphere-weekly,agent-brand-intro,shared,agent-launch,market-comps,market-pulse,review-reply}.ts` — 8 recipe-authoring call sites — `email_build`, Sonnet
 - `lib/email/showing-prep-assemble.ts:87` — showing-prep document build — `email_build`
 - `lib/email/social-calendar/build-canvas-fill.ts:60`, `build-week.ts:250` — social calendar build — default callType

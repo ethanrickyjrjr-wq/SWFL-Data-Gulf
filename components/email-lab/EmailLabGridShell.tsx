@@ -302,6 +302,12 @@ export function EmailLabGridShell({
   const [chartType, setChartType] = useState<ChartType | "auto">("auto");
   const [aiLoading, setAiLoading] = useState(Boolean(autoGenerate));
   const [aiMessage, setAiMessage] = useState<string | null>(null);
+  // Suggestion chips (one lane, spec 2026-08-02): server-proposed doors for a
+  // keyless typed ask. Navigation ONLY — each renders as a plain <a href> to the
+  // recipe's door URL; clicking one never triggers a build from here (FM2).
+  const [suggestions, setSuggestions] = useState<{ key: string; label: string; href: string }[]>(
+    [],
+  );
   // The AI's last "what I just did" line, shown in the panel ("Built the whole email…").
   const [aiStatus, setAiStatus] = useState<string | null>(null);
   // Post-build link asks: click-promising slots (labeled button / listing card /
@@ -503,6 +509,7 @@ export function EmailLabGridShell({
     if (!trimmed) return;
     setAiLoading(true);
     setAiMessage(null);
+    setSuggestions([]);
     try {
       const res = await fetch("/api/email-lab/ai", {
         method: "POST",
@@ -528,7 +535,9 @@ export function EmailLabGridShell({
         message?: string;
         note?: string;
         listing?: { subject?: string };
+        suggestions?: { key: string; label: string; href: string }[];
       };
+      setSuggestions(data.suggestions ?? []);
       // Only treat it as a real build when the engine actually authored — the
       // author path echoes the INPUT doc with applied:false on a miss, so guarding
       // on `data.doc` alone would falsely report "built" and re-commit the seed.
@@ -705,6 +714,7 @@ export function EmailLabGridShell({
     if (!trimmed) return;
     setAiLoading(true);
     setAiMessage(null);
+    setSuggestions([]);
     try {
       const res = await fetch("/api/email-lab/ai", {
         method: "POST",
@@ -1948,6 +1958,21 @@ export function EmailLabGridShell({
                 </p>
               )}
               {aiMessage && <p className="mt-2 text-[11px] text-amber-300/80">{aiMessage}</p>}
+              {suggestions.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {suggestions.map((s) => (
+                    // A chip IS a door (FM2): a plain link to the recipe's own
+                    // arrival URL — never an onClick, never a build trigger.
+                    <a
+                      key={s.key}
+                      href={s.href}
+                      className="rounded-full border border-gulf-teal/40 bg-gulf-teal/10 px-2.5 py-1 text-[11px] text-gulf-teal/90 transition-colors hover:bg-gulf-teal/20"
+                    >
+                      Looks like {s.label} — use that grid?
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
