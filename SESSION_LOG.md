@@ -10,11 +10,10 @@ it), P2 desk floor bypass + Marco cluster probe-first, P3 fgcu range parser, P4 
 freshness-ledger artifact, P5 timeout verification. KEY RESEARCH FIND driving P1: baths were
 34,139/34,478 on 07/26 and were WIPED by the sweep upsert (dom-full-scope handoff §5); COALESCE
 guard 51fc9950 now holds; live coverage today Lee 13% / Collier 18% of active-sale rows.
-Ops visibility: opened parked_crexi_restore_pending_proxy_research +
-parked_dbpr_sirs_monthly_local_pull (reason inline, plan-doc pointer); closed superseded
-swfl_local_runner_offline_dark_sources with the runner-was-never-real evidence. Dispatched P5
+Ops visibility: opened check `parked_crexi_restore_pending_proxy_research` + check
+`parked_dbpr_sirs_monthly_local_pull` (reason inline, plan-doc pointer); closed superseded check `swfl_local_runner_offline_dark_sources` with the runner-was-never-real evidence. Dispatched P5
 verification NOW (workflow_dispatch bypasses ENGINE_ENABLED): fema 30766166374 (90m ceiling),
-dbpr-re-licensees 30766167329 (45m) — timeout_raises_live_verify closes on their evidence.
+dbpr-re-licensees 30766167329 (45m) — check `timeout_raises_live_verify` closes on their evidence.
 ## 2026-08-02 (Fable 5) — Runner brief lands: the "working swfl-local runner" was never real; checks reconciled 2 closed / 6 opened
 
 Fifth Sonnet brief (crexi/dbpr-sirs) invalidates the restore-the-runner framing: the 06/22
