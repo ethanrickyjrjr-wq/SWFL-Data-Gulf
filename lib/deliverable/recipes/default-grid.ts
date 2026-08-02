@@ -18,6 +18,7 @@ export async function buildDefaultGrid(ctx: RecipeBuildContext): Promise<EmailDo
       prompt,
       doc: base,
       scope: ctx.zip ? { kind: "zip", value: ctx.zip } : undefined,
+      voice: ctx.voice,
     });
   } catch {
     return base; // sourcing failed → open slots, never null, never invented

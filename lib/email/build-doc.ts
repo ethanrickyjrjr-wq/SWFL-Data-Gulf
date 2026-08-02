@@ -33,6 +33,7 @@ import {
 } from "@/lib/email/listing-intent";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { recipeByKey, recipeFromPrompt, RECIPES, type Recipe } from "@/lib/deliverable/recipes";
+import { resolveVoice, voiceSection, type VoicePresetId } from "@/lib/email/voice-presets";
 import { builderFor } from "@/lib/deliverable/recipes/index";
 import { buildDefaultGrid } from "@/lib/deliverable/recipes/default-grid";
 import { seedById } from "@/lib/email/doc/default-docs";
@@ -436,7 +437,21 @@ export function unfilledFigureSlots(before: EmailDoc, after: EmailDoc): string[]
   return out;
 }
 
-function contentPatchSystem(lakeContext: string, hasChart: boolean): string {
+function contentPatchSystem(
+  lakeContext: string,
+  hasChart: boolean,
+  voice: VoicePresetId = "plain",
+): string {
+  // The VOICE layer (voice-presets.ts) — the user's explicit pick, threaded from
+  // the lab picker / saved preferred_recipe. "plain" appends NOTHING, so a build
+  // with no pick stays byte-identical (test-enforced in voice-wiring.test.ts).
+  // The preset text is verbatim from the registry; the preamble pins it to TONE
+  // because this model is forbidden to restructure blocks — where a preset
+  // describes structure, only its voice applies here.
+  const voiceText = voiceSection(voice);
+  const voiceBlock = voiceText
+    ? `\n\nVOICE — the user picked how this email should SOUND. The block structure is FIXED (the block rules above always win — never add, remove, or reorder blocks to satisfy this); apply the guidance below to tone and wording, and where it describes blocks this doc doesn't have, carry only its voice:\n${voiceText}`
+    : "";
   const dataBlock = lakeContext
     ? `\n\nREAL LAKE DATA (cite verbatim — value · source · as-of):\n${lakeContext}\n`
     : "";
@@ -464,7 +479,7 @@ Block rules:
 - Only include block ids and fields you are actually changing.
 - Tight prose, no jargon, no internal ids in the copy.${chartLine}
 
-SELLING A PROPERTY — when the email's job is a specific home (new listing, open house, price move, featured or just-sold property), you are its agent and every figure you include must work FOR the sale. Quote a market comparison ONLY when it favors the subject (priced under the median, moving faster than typical); NEVER quote a market median, average, or price-per-square-foot that reads cheaper than the subject property — that tells the reader it's overpriced. Use county pace figures (pending share, price-cut share, days on market) to build urgency instead. Leaving a figure out is selection, not invention — sourcing rules above still apply to every number you DO use.`;
+SELLING A PROPERTY — when the email's job is a specific home (new listing, open house, price move, featured or just-sold property), you are its agent and every figure you include must work FOR the sale. Quote a market comparison ONLY when it favors the subject (priced under the median, moving faster than typical); NEVER quote a market median, average, or price-per-square-foot that reads cheaper than the subject property — that tells the reader it's overpriced. Use county pace figures (pending share, price-cut share, days on market) to build urgency instead. Leaving a figure out is selection, not invention — sourcing rules above still apply to every number you DO use.${voiceBlock}`;
 }
 
 /**
@@ -529,7 +544,7 @@ const ADDED_SLOT_FIELDS: Record<string, readonly string[]> = {
 export async function authorAddedSlots(
   doc: EmailDoc,
   addedIds: string[],
-  opts: { prompt: string; context: string; mode?: string },
+  opts: { prompt: string; context: string; mode?: string; voice?: VoicePresetId },
 ): Promise<EmailDoc> {
   const targets = doc.blocks.filter((b) => {
     if (!addedIds.includes(b.id)) return false;
@@ -552,7 +567,7 @@ export async function authorAddedSlots(
     msg = await getAnthropic("email_build").messages.create({
       model: resolveEmailModel(opts.mode),
       max_tokens: MAX_TOKENS,
-      system: contentPatchSystem(opts.context, false),
+      system: contentPatchSystem(opts.context, false, opts.voice),
       messages: [
         {
           role: "user",
@@ -678,6 +693,7 @@ export async function buildContentDoc({
   scope,
   mode,
   chartType,
+  recipeId,
 }: BuildArgs): Promise<BuildResult> {
   const docParsed = EmailDocSchema.safeParse(rawDoc);
   if (!docParsed.success) {
@@ -685,7 +701,14 @@ export async function buildContentDoc({
   }
   const placeholderMiss = unfilledPlaceholderMiss(prompt);
   if (placeholderMiss) return placeholderMiss;
-  return fillSkeletonResult({ prompt, doc: docParsed.data, scope, mode, chartType });
+  return fillSkeletonResult({
+    prompt,
+    doc: docParsed.data,
+    scope,
+    mode,
+    chartType,
+    voice: resolveVoice(recipeId),
+  });
 }
 
 /** ONE-LANE SEAM (spec 2026-08-02): fill a fixed skeleton's open slots from sourced
@@ -697,8 +720,15 @@ export async function fillSkeletonFromSources(args: {
   prompt: string;
   doc: EmailDoc;
   scope?: { kind: "zip" | "city"; value: string };
+  /** The user's voice pick — reaches the fill model's system prompt. Absent = plain. */
+  voice?: VoicePresetId;
 }): Promise<EmailDoc> {
-  const res = await fillSkeletonResult({ prompt: args.prompt, doc: args.doc, scope: args.scope });
+  const res = await fillSkeletonResult({
+    prompt: args.prompt,
+    doc: args.doc,
+    scope: args.scope,
+    voice: args.voice,
+  });
   const out = EmailDocSchema.safeParse(res.payload.doc);
   if (!out.success) throw new Error("skeleton fill did not return a valid doc");
   return out.data;
@@ -713,12 +743,14 @@ async function fillSkeletonResult({
   scope,
   mode,
   chartType,
+  voice = "plain",
 }: {
   prompt: string;
   doc: EmailDoc;
   scope?: BuildScope;
   mode?: string;
   chartType?: ChartType;
+  voice?: VoicePresetId;
 }): Promise<BuildResult> {
   let doc = inputDoc;
 
@@ -853,7 +885,7 @@ async function fillSkeletonResult({
     msg = await getAnthropic("email_build").messages.create({
       model,
       max_tokens: MAX_TOKENS,
-      system: contentPatchSystem(fullContext, !!chartRes),
+      system: contentPatchSystem(fullContext, !!chartRes, voice),
       messages: [
         {
           role: "user",
@@ -1078,6 +1110,7 @@ export async function authorDoc({
   scope,
   mode,
   recipeKey,
+  recipeId,
   savedLayout,
 }: BuildArgs): Promise<BuildResult> {
   const docParsed = EmailDocSchema.safeParse(rawDoc);
@@ -1142,6 +1175,7 @@ export async function authorDoc({
               ? subjectFactsContext(resolvedSubject.facts)
               : await fetchLakeContext(scope).catch(() => ""),
             mode,
+            voice,
           }).catch(() => reshaped)
         : reshaped;
 
@@ -1202,6 +1236,14 @@ export async function authorDoc({
   const keyedRecipe = recipeByKey(recipeKey) ?? recipeFromPrompt(prompt);
   const keyedBuilder = keyedRecipe ? builderFor(keyedRecipe.key) : null;
 
+  // THE VOICE for this build (check `voice_presets_not_consumed`): the user's
+  // explicit pick wins; a recipe's declared prose voice covers callers that send
+  // none (sims, cron); anything stale degrades to "plain" (FM4). Declared here —
+  // after recipe resolution, before any builder or `finish` call — so every lane
+  // below (keyed builder, default-grid fallback, added-slot authoring) reads the
+  // same resolved value.
+  const voice = resolveVoice(recipeId ?? keyedRecipe?.prose);
+
   if (keyedRecipe && keyedBuilder) {
     // Resolve the SUBJECT once, from a real record, before any layout happens. The
     // address reaches us by EITHER door — a field (homepage hero) or the prompt text
@@ -1221,6 +1263,7 @@ export async function authorDoc({
       facts: resolvedSubject?.facts ?? null,
       resolved: resolvedSubject?.resolved ?? false,
       zip: scope?.kind === "zip" ? scope.value : undefined,
+      voice,
     }).catch(() => null);
 
     if (built) {
@@ -1370,6 +1413,7 @@ export async function authorDoc({
     currentDoc: baseDoc,
     facts: null,
     resolved: false,
+    voice,
     // A place named IN THE PROMPT ("...for Cape Coral") resolves to its real ZIP
     // scope when the caller didn't pass one — the user should never have to
     // supply a raw ZIP by hand. Never overrides an explicit caller scope.

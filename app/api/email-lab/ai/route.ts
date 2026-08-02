@@ -187,6 +187,9 @@ export async function POST(req: NextRequest) {
               scope: body.scope,
               mode: body.mode,
               chartType: body.chartType as ChartType | undefined,
+              // The voice pick reaches the fill lane too — the shell sends it on
+              // both lanes (check voice_presets_not_consumed: it used to stop here).
+              recipeId: body.recipeId,
             }),
         wantSuggestions ? suggestRecipes(prompt) : Promise.resolve([]),
       ]);

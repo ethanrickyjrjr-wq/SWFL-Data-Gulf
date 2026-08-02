@@ -44,6 +44,7 @@
 // byte-identity, since the user's own address and brand ride through it.
 
 import type { BrandNeed } from "@/lib/showcase/recipe";
+import type { VoicePresetId } from "@/lib/email/voice-presets";
 
 /** Every deliverable we OFFER, by stable key. Adding a key here is what makes a
  *  recipe exist; a surface may only reference a key that lives in this list. */
@@ -144,8 +145,9 @@ export interface Recipe {
   skeleton: string | null;
   /** voice-presets.ts VoicePresetId — the prose VOICE layer (how it sounds, never
    *  what gets built). `null` = plain, byte-identical to no guidance. Advisory
-   *  only; it never invents. (author-recipes.ts died in the one-lane collapse.) */
-  prose: string | null;
+   *  only; it never invents. (author-recipes.ts died in the one-lane collapse.)
+   *  Consumed by authorDoc's dispatch: an explicit lab pick overrides this. */
+  prose: VoicePresetId | null;
   subject: SubjectSpine;
   chart: ChartPolicy;
   /** The seed TEXT a door drops in the build box. Carries exactly one [[blank]].

@@ -10,7 +10,10 @@ the missing guard is an integration test on the user-visible behavior. When wiri
 in (check `voice_presets_not_consumed`), the fix must include a test that fails on "picker
 selection has no effect on output," not just unit tests on the new plumbing.
 
-Status: OPEN — operator said push it all and keep working; wiring fix is the next task this session.
+Status: RESOLVED 08/02/2026 — voice wired end-to-end (`resolveVoice` → `contentPatchSystem`) with
+`lib/email/voice-wiring.test.ts` as the guard that fails when a pick stops changing the model's
+prompt; check `voice_presets_not_consumed` closed. The LESSON stays live: a green unit suite never
+proves a control is CONNECTED — every user-visible control ships with a test on its effect.
 
 ## 2026-08-01 — "Thanks for the fucking confusion" — direction: make ALL emails coded-grid recipes; user edits AFTER, AI never free-authors layout
 

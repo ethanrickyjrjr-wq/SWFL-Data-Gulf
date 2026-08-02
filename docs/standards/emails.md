@@ -37,7 +37,13 @@ session ships the same bug again.
    recipe doors; the model proposes from the closed key list and can never route
    (`lib/email/suggest-recipe.ts`). The advisory prose registry (`author-recipes.ts`, 11 ids,
    keyword detection) is DELETED too — its editorial family survives as `voice-presets.ts`
-   (explicit pick only; stale saved ids degrade to "plain").
+   (explicit pick only; stale saved ids degrade to "plain"). The pick is CONSUMED (08/02, check
+   `voice_presets_not_consumed` closed): `resolveVoice(recipeId ?? recipe.prose)` in
+   `buildContentDoc`/`authorDoc` → `voiceSection` appended to `contentPatchSystem` (tone-only —
+   the fixed-structure block rules always win). "plain" appends nothing, byte-identical;
+   coded builders' own narrators (framing policy, no-numbers letters) deliberately ignore it.
+   End-to-end guard: `lib/email/voice-wiring.test.ts` fails if a pick stops changing the
+   fill model's prompt.
 2. **The subject is resolved from OUR lake first.** `resolveSubjectListing`
    (`lib/listings/resolve-subject.ts`) reads `data_lake.listing_dom` before any vendor call.
    The vendor's exact-address lookup DIED silently on 07/19 and every address email shipped

@@ -36,6 +36,7 @@
 import type { EmailDoc } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { Recipe, RecipeKey } from "@/lib/deliverable/recipes";
+import type { VoicePresetId } from "@/lib/email/voice-presets";
 import { buildNewListing } from "./new-listing";
 import { buildComingSoon } from "./coming-soon";
 import { buildMarketComps } from "./market-comps";
@@ -66,6 +67,11 @@ export interface RecipeBuildContext {
   resolved: boolean;
   /** subject === "area" | "agent": the ZIP the build is scoped to, when known. */
   zip?: string;
+  /** The build's resolved voice pick (lib/email/voice-presets.ts) — how prose
+   *  should SOUND. Consumed by the sourced-fill lane (default-grid); coded
+   *  builders with their own narrative prompts (framing policy, no-numbers
+   *  letters) deliberately ignore it. Absent = "plain". */
+  voice?: VoicePresetId;
 }
 
 export type RecipeBuilder = (ctx: RecipeBuildContext) => Promise<EmailDoc | null>;

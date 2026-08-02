@@ -1,3 +1,27 @@
+## 2026-08-02 (Fable 5) — VOICE PICKER WIRED (check `voice_presets_not_consumed` closed): the pick now changes the build, with an end-to-end guard the unit suite lacked
+
+Operator pushed the collapse (9 commits, `d3be2c58..c6d4e80d`) and flagged the real defect: "no
+fucking clue how this creates a green suite" — 2596 green tests while the voice picker was wired
+to NOTHING (unit tests proved the pieces, nothing asserted the connection; gripe logged in
+SCRATCHPAD). Fix, TDD red→green: `resolveVoice(recipeId ?? recipe.prose)` resolved once in
+`authorDoc` dispatch (explicit pick > recipe prose > plain) and in `buildContentDoc`; threaded
+through `fillSkeletonResult` / `fillSkeletonFromSources` / `RecipeBuildContext.voice` /
+default-grid / `authorAddedSlots` into `contentPatchSystem(…, voice)` — tone-only preamble, block
+rules always win, "plain" appends nothing (byte-identical, test-enforced). Route now forwards
+`body.recipeId` on the fill lane too (it only fed authorDoc before). `Recipe.prose` tightened to
+`VoicePresetId | null`. Coded builders' own narrators deliberately ignore voice (framing policy /
+no-numbers constraints, per lib/deliverable/CLAUDE.md). NEW GUARD `lib/email/voice-wiring.test.ts`
+(5 tests): fails whenever a pick stops changing the fill model's system prompt — the exact failure
+the green suite couldn't see. Map synced (emails.md §1).
+
+**Proof:** `bun test lib/email/voice-wiring.test.ts` → `5 pass · 0 fail` (was 3 fail pre-wiring);
+`bun test lib/email lib/deliverable` → `2601 pass · 0 fail · 7327 expect() calls · 238 files`;
+`bunx next build` → compiles (route table printed).
+
+**Still open (2 of 3 audit findings):** `blast_ab_variants_no_producer`,
+`author_doc_dead_exports_cleanup`; plus `one_lane_email_recipes_live_verify` (needs prod evidence
+post-deploy) and the 8-recipe promotion queue (`one_lane_recipe_promotions`).
+
 ## 2026-08-02 (Fable 5) — ONE-LANE COLLAPSE SHIPPED: all 6 plan tasks landed in 6 commits, TDD throughout; free author + author-recipes DELETED
 
 Executed `docs/superpowers/plans/2026-08-02-one-lane-email-recipes.md` inline, 6 of 6 tasks, one
