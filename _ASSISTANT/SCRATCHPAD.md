@@ -1,3 +1,17 @@
+## 2026-08-01 — "No fucking clue how this creates a green suite" — 2596 tests pass while the voice picker is wired to NOTHING
+
+Raised on reviewing the one-lane collapse: the suite is fully green (2596 pass, 0 fail) yet the
+second-order audit found `recipeId` flows shell → API → and stops — voiceSection plugs into
+nothing on the surviving path. "That's Claude fucking sucking." The structural failure: TDD tests
+each unit in isolation; no test asserts the END-TO-END claim "picking a voice changes the built
+email." A green suite proved the pieces work, not that they're connected. Same shape as the RULE
+3.5 scope-limit warning (green tests can't stand in for guards they weren't built to be) — here
+the missing guard is an integration test on the user-visible behavior. When wiring voice presets
+in (check `voice_presets_not_consumed`), the fix must include a test that fails on "picker
+selection has no effect on output," not just unit tests on the new plumbing.
+
+Status: OPEN — operator said push it all and keep working; wiring fix is the next task this session.
+
 ## 2026-08-01 — "Thanks for the fucking confusion" — direction: make ALL emails coded-grid recipes; user edits AFTER, AI never free-authors layout
 
 Raised after I reported the two-registry recipe situation (14 structural `RecipeKey`s in
