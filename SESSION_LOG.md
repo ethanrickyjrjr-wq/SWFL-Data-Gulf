@@ -27,6 +27,18 @@ asks now take the single-scope fill path (place-in-prompt ZIP resolution preserv
 evidence (checks = prod evidence). Promotion queue (8 type-shaped recipes → showcase grids) is
 follow-on builds, not started. NOTHING PUSHED — commits are local; push is the operator's call.
 
+**Addendum — second-order audit (post-verify, same session):** ran the `second-order` agent on
+the collapse; three real findings, each promoted to `checks` (RULE 2.4): (1)
+`voice_presets_not_consumed` — HIGHEST: the voice picker is live but `recipeId` is write-only
+end-to-end; `voiceSection` reaches no prompt (design gap the plan never specified — consumption
+was implicit). (2) `blast_ab_variants_no_producer` — the blast A/B split-test UI is unreachable:
+the only ≥2-variant producer died with `assembleAuthoredDoc`. (3)
+`author_doc_dead_exports_cleanup` — 12 orphaned author-doc exports + two test files still passing
+as proof gates for the deleted path (knip `exports: off` can't see either), one tmp script
+printing deleted payload keys, four stale comments. Audit also confirmed the cron/blast/schedule
+lanes never touched the deleted path (all call `buildContentDoc`), and that prod live-verify of
+the keyless lane is the one check that exercises default-grid + chips + seating together.
+
 ## 2026-08-01 (Fable 5) — ONE-LANE EMAIL DECREE: every email becomes a coded-grid recipe; spec written + build registered, code NOT started
 
 Operator decree after I surfaced the two-registry recipe confusion (14 structural `RecipeKey`s vs
