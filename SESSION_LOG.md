@@ -12,6 +12,10 @@ collier 4,975/stale 04/30), the LISTING-SCOPE coverage law (Lee-heavy by constru
 24,548/9,142/1,214), and the address-join match-rate gate (Marco 0/360 precedent). data-roots
 raw-landing entry mirrors it. Check opened: steadyapi_step3_typed_families_spec. Zero paid calls
 spent; Step 2 (17,880-call run) remains Sonnet's, playbook unchanged on that.
+ADDENDUM same session: raw landing covers /property-tax-history ONLY — /search, /rentals-search,
+/geo-trends, TS /nearby-home-values still parse-and-discard with no field census (histogram+details
+claim full extraction — verify, don't trust). Second check opened:
+steadyapi_raw_land_all_paid_surfaces. Non-blocking for the 17.9k run.
 
 ## 2026-08-02 (Fable 5) — databrief v4–v6: chart styling + image hosting in the bridge; showcase rebuilt to the design bar, re-sent ON-BRAND, then de-jargoned + widened
 

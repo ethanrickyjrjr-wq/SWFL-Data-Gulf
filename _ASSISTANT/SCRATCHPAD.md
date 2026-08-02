@@ -1,3 +1,15 @@
+## 2026-08-02 (this session) — raw-landing covers ONE endpoint; every other paid Steady surface still parse-and-discards, uncensused
+
+Named gap (operator-confirmed): `steadyapi_property_history_raw` lands `/property-tax-history`
+only. Still parse-and-discard with NO 64-style live field census: `/search`
+(extract_api.scan_county_api — the biggest daily call volume), `/rentals-search`
+(rentals/steady_client.py), `/geo-trends` (market_aggregates fetch_geo_trends), and the TS-side
+`/nearby-home-values` (lib/assistant/comp-helper.ts). Histogram + market-details CLAIM "full
+extraction confirmed" in the registry — verify that claim with a live census rather than trust
+it. Same disease that took 7+ audits on property-tax-history. Check opened same session:
+`steadyapi_raw_land_all_paid_surfaces` (census per endpoint → land-or-document-why-not per
+endpoint). Does NOT block the 17.9k run.
+
 ## 2026-08-02 (this session) — "JUST MAKE IT ALL CORRECT … BEST SOURCE … NOT A RUSH" — SteadyAPI Step-3 authority + validation decree
 
 Decree verbatim: "USE ALL THE DATA TO CONFIRM A SMALL AMOUNT OF THE DATA WE ALREADY HAVE AND MAKE
