@@ -27,9 +27,17 @@ session ships the same bug again.
 
 ## 1. THE 60-SECOND VERSION
 
-1. **One build path.** Every door carries a **recipe key** into `authorDoc()`
-   (`lib/email/build-doc.ts`). The key is the identity — never the prompt string, never a
-   regex over the prompt. A prompt-regex gate once silently killed 15 of 17 recipes (07/13).
+1. **One build path — and since 08/02/2026 ONE LANE.** Every door carries a **recipe key** into
+   `authorDoc()` (`lib/email/build-doc.ts`). The key is the identity — never the prompt string,
+   never a regex over the prompt. A prompt-regex gate once silently killed 15 of 17 recipes
+   (07/13). **Every build now lands on a coded-grid recipe:** a keyless/organic ask — and any
+   builder miss — lands on the `default-grid` recipe (blank skeleton + sourced fill, open slots
+   for the rest). The free author (model-composed layout) is DELETED. Typed asks may get ≤2
+   **suggestion chips** ("Looks like Just Sold — use that grid?") — navigation-only links to
+   recipe doors; the model proposes from the closed key list and can never route
+   (`lib/email/suggest-recipe.ts`). The advisory prose registry (`author-recipes.ts`, 11 ids,
+   keyword detection) is DELETED too — its editorial family survives as `voice-presets.ts`
+   (explicit pick only; stale saved ids degrade to "plain").
 2. **The subject is resolved from OUR lake first.** `resolveSubjectListing`
    (`lib/listings/resolve-subject.ts`) reads `data_lake.listing_dom` before any vendor call.
    The vendor's exact-address lookup DIED silently on 07/19 and every address email shipped
@@ -98,7 +106,7 @@ Staged (open checks — the map is wrong the day these close if it isn't updated
 DOOR                      IDENTITY                 BUILD                        AFTER
 homepage hero  ─┐   lib/lab-entry/          authorDoc()                  applyBrand overlay
 campaign btn   ─┼─→ destination.ts +   ─→   lib/email/build-doc.ts  ─→   (client-side)
-showcase       ─┤   arrival.ts              recipe lane │ free author         │
+showcase       ─┤   arrival.ts              recipe lane │ default grid        │
 lab pick       ─┘   (?recipe=<key>)              │                        3 render engines
 seed card ──→ same skeleton, unfilled       resolveSubject                    │
                                             (lake-first)                 send lanes / PDF
@@ -112,14 +120,19 @@ seed card ──→ same skeleton, unfilled       resolveSubject                
    recipe arrival opens the BLANK skeleton (`skeleton-clean-white`) — never the fake-fill demo
    doc. The generic on-mount auto-build is dead (it built the wrong-listing email).
 2. **Identity** — `lib/deliverable/recipes.ts` = THE root for what a recipe IS. `RECIPE_KEYS`
-   (14 keys as of 07/19/2026 — count the file, don't trust this number later): the 7-recipe
+   (15 keys as of 08/02/2026 — count the file, don't trust this number later): the 7-recipe
    listing lifecycle (new-listing → just-sold, ONE shared address spine + resolver), 5 area/agent
-   recipes (ZIP/city/agent spine — never force the flyer on them), 2 social. Each recipe declares
+   recipes (ZIP/city/agent spine — never force the flyer on them), `default-grid` (the terminal
+   fallback every keyless ask lands on), 2 social. Each recipe declares
    `positioning: "sell-side" | "story-side"` and a `ChartPolicy`. Parity across every surface is
    enforced by `recipes.parity.test.ts`.
-3. **Dispatch** — `authorDoc()` resolves `recipeByKey(recipeKey) ?? recipeFromPrompt(prompt)`.
-   The address reaches the builder from the scope FIELD or the PROMPT TEXT (the lab's campaign
-   button seeds only text) — the builder decides, never the door.
+3. **Dispatch** — `authorDoc()` resolves `recipeByKey(recipeKey) ?? recipeFromPrompt(prompt)`,
+   and since 08/02/2026 a null resolve lands on `RECIPES["default-grid"]` (one lane — no free
+   author to fall to; the legacy subject-listing flyer lane still catches keyless listing-shaped
+   asks first). The default grid fills the blank skeleton through `fillSkeletonFromSources` —
+   the SAME fill core `buildContentDoc` uses. The address reaches the builder from the scope
+   FIELD or the PROMPT TEXT (the lab's campaign button seeds only text) — the builder decides,
+   never the door.
 4. **Subject resolution** — `resolveSubjectListing()` in `lib/listings/resolve-subject.ts`.
    Lane 0 = LAKE-FIRST (`listing_dom` authority view: house-number + ZIP narrow fetch, canonical
    street match, zero vendor quota). Vendor address-slug + ≤800-row city scan are FALLBACKS only
@@ -137,7 +150,8 @@ seed card ──→ same skeleton, unfilled       resolveSubject                
 7. **Validation** — `EmailDocSchema` (`lib/email/doc/schema.ts`) — **strip-mode**: a new prop
    missing from its `*PropsSchema` is silently dropped on every save/load/AI-fill. Every new
    prop gets a schema entry + round-trip test. An invalid recipe build logs a LOUD error and
-   falls back to the generic author (a real email — never a refusal, never camouflage).
+   falls back to the DEFAULT GRID (a real coded-grid email with open slots — never a refusal,
+   never camouflage; the generic author it used to fall to is deleted).
 8. **Truth gates** — `lib/deliverable/claims.ts` (CODE computes every comparison/count/ordering;
    the narrator receives settled sentences — invention is CLAIM-shaped, not number-shaped:
    playbook Part 1–2), `gateNarrative` (`lib/deliverable/build.ts`, the no-invention output

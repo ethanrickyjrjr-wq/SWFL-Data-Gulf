@@ -12,6 +12,12 @@
 > brain data hasn't changed). Add/remove a call site or a cache here? Update the matching section
 > in the SAME commit — that file exists so this audit never has to be re-run cold.
 
+- **ONE LANE (08/02/2026):** every `authorDoc` build lands on a coded-grid recipe. Keyless/organic
+  asks → the `default-grid` recipe (blank skeleton, sourced fill via `fillSkeletonFromSources`,
+  open slots for the rest). The free author is DELETED — never re-add a model-composed layout
+  path. `author-recipes.ts` is DELETED — voice lives in `voice-presets.ts` (explicit pick only,
+  no keyword detection; stale `preferred_recipe` ids degrade to "plain"). Keyless builds may
+  return ≤2 suggestion chips (`suggest-recipe.ts`) — navigation-only door links, never routing.
 - **Social platforms have ONE root:** `lib/email/social/platforms.ts` (8 platforms). The footer, the
   social-icons block, the icons, `applyBrand`, the brand form, and the PDF all read it — change it there,
   not in copies. Custom icons = keyless favicon → globe fallback. **No paid logo vendor** (Logo.dev was

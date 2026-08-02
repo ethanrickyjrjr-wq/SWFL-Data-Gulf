@@ -11,6 +11,11 @@
 > (#precompute-candidates). Add/remove a recipe's LLM call or wrap a build step in a cache? Update
 > the matching section in the SAME commit — that file exists so this audit never has to be re-run cold.
 
+- **ONE LANE (08/02/2026):** `default-grid` in `recipes.ts` is the terminal fallback — every
+  keyless/organic ask and every builder miss lands there (blank skeleton + sourced fill, open
+  slots). Its builder (`recipes/default-grid.ts`) rides `fillSkeletonFromSources` and is TOTAL
+  (empty context → the open-slot skeleton, never null, never invented). `Recipe.prose` names a
+  `voice-presets.ts` VoicePresetId now — the advisory author-recipes registry is dead.
 - **Every `Recipe` declares `positioning: "sell-side" | "story-side"`** (`recipes.ts`). Sell-side = pitches
   a specific property or the agent's own brand; story-side = recurring relationship/informational content.
   Adding a recipe? It will not compile without this field.

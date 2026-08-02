@@ -1,3 +1,32 @@
+## 2026-08-02 (Fable 5) — ONE-LANE COLLAPSE SHIPPED: all 6 plan tasks landed in 6 commits, TDD throughout; free author + author-recipes DELETED
+
+Executed `docs/superpowers/plans/2026-08-02-one-lane-email-recipes.md` inline, 6 of 6 tasks, one
+commit per task (each a clean handoff point): `b656cff4` default-grid registry entry ·
+`adff2a7e` `fillSkeletonFromSources` seam extracted from `buildContentDoc` + the default-grid
+builder · `6d7c3fce` THE collapse (keyless/organic asks + builder misses land the default grid;
+free-author `authorSystem`/`callAuthor` path deleted, −433 lines; shared post-build tail extracted
+as `finish()`) · `77f28c68` `voice-presets.ts` replaces `author-recipes.ts` (keyword detection
+dead; stale `preferred_recipe` degrades to "plain") · `89eb1514` suggestion chips
+(`suggest-recipe.ts`, closed-list filtered, navigation-only door links) · this commit (docs sync).
+
+**Proof (pasted from live runs):** `bun test lib/email lib/deliverable` → `2596 pass · 0 fail ·
+7315 expect() calls · 237 files`. `bunx next build` → compiles (route table printed).
+`bun scripts/email/campaign-sim.mts` dry run → `built 7/7 · sent 0/7 · run 2026-08-02-msb4q6tn`.
+
+**Plan deviations (all named):** (1) parity/plan claimed all `Recipe.prose` values were null —
+FOUR carried legacy ids (`market-pulse`, `agent-brand-intro`, `agent-launch`, `sphere-weekly`);
+all set to null with comments (type-shaped advisory ids, consumed only by the dead free author).
+(2) API `suggestions` returns full chip objects `{key,label,href}` (not bare keys) so the client
+holds zero routing logic — `suggest-recipe.ts` is server-only (metered anthropic import).
+(3) FM5b tested via the no-builder leg (social-pack key) + mocked live-binding seam — a
+deterministic offline invalid-builder isn't mockable through the value-captured dispatch table.
+(4) Free-author multi-ZIP city figure-merge + city-scoped chart died with the section — keyless
+asks now take the single-scope fill path (place-in-prompt ZIP resolution preserved).
+
+**NOT done / still open:** `one_lane_email_recipes_live_verify` stays OPEN — needs LIVE deployed
+evidence (checks = prod evidence). Promotion queue (8 type-shaped recipes → showcase grids) is
+follow-on builds, not started. NOTHING PUSHED — commits are local; push is the operator's call.
+
 ## 2026-08-01 (Fable 5) — ONE-LANE EMAIL DECREE: every email becomes a coded-grid recipe; spec written + build registered, code NOT started
 
 Operator decree after I surfaced the two-registry recipe confusion (14 structural `RecipeKey`s vs
