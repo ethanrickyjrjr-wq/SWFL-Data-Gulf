@@ -1,3 +1,21 @@
+## 2026-08-01 (Fable 5) — ONE-LANE EMAIL DECREE: every email becomes a coded-grid recipe; spec written + build registered, code NOT started
+
+Operator decree after I surfaced the two-registry recipe confusion (14 structural `RecipeKey`s vs
+11 advisory `RecipeId`s, both firing inside one `authorDoc`): "make all the emails recipes and
+user can then change if they want … we just build more real showcase examples and those are what
+get built." Ran the RULE 3.5 brainstorm; operator confirmed four picks: emails only (social
+deferred), typed asks land a DEFAULT GRID + non-binding suggestion chips (key stays the identity —
+07/13 rule), advisory recipes promote (types → showcase grids, queued) + fold (editorial family →
+voice presets, keyword detection dies), collapse-first sequencing (one PR, promotions follow).
+
+**Spec:** `docs/superpowers/specs/2026-08-02-one-lane-email-recipes-design.md` (full failure-modes
+section, 9 modes each with a guard). **Registered:** `one_lane_email_recipes_live_verify` check
+opened via `scripts/new-build.mjs`. Four-lane evidence in the spec: emails.md map, 07/30
+Beefree/Gamma scan, `recipes.parity.test.ts` 17 pass + `author-recipes.test.ts` 59 pass run live.
+
+**Next:** operator reviews spec → writing-plans → TDD implementation. Free-author deletion is
+ask-first (RULE 1). Nothing under `lib/` touched this session.
+
 ## 2026-07-31 (Sonnet 5) — Fireworks-AI audit PROMOTED to a committed living doc, wired into 6 area CLAUDE.md files so it never gets re-run cold
 
 Operator relayed a 5-task repo-audit prompt (sources/tables, free-text columns, row counts/cadence,

@@ -1,3 +1,22 @@
+## 2026-08-01 — "Thanks for the fucking confusion" — direction: make ALL emails coded-grid recipes; user edits AFTER, AI never free-authors layout
+
+Raised after I reported the two-registry recipe situation (14 structural `RecipeKey`s in
+`lib/deliverable/recipes.ts` vs 11 advisory `RecipeId`s in `lib/email/author-recipes.ts`, both
+firing inside one authorDoc call). His proposal, verbatim intent: "make all the emails recipes and
+user can then change if they want" — every email is a coded grid, certain data goes to certain
+places because of research; the user moves items / rewords AFTERWARD in the lab. Kill the lane
+where the AI has to "understand what's going on" (the free author + advisory tone registry).
+Underlying gripe: "I'm tired of Claude never knowing what the fuck is going on" — the confusion IS
+the two-lane architecture, not any one session's reading of it. Also voiced: 3 months in, doubts
+it'll work, "open sourced ai is better" (frustration marker, not a migration decree — do not
+answer it with a cost table, RULE 0.9).
+
+Status: OPEN — direction agreed in-session (it matches the SEED_DOCS slot rule, the grid-builder
+crown-jewel memory, and the 07/30 Beefree/Gamma scan: design is APPLIED, not generated). Needs a
+RULE 3.5 brainstorm + failure-modes section before any code; the free-author lane removal is an
+ask-first change (RULE 1). Key constraint: an organic prompt that fits no recipe must land on a
+DEFAULT grid skeleton with open slots — never a refusal (RULE 0.7), never a free-form authored doc.
+
 ## 2026-08-01 — "incidental??????" — called property/area historical lookup "incidental in-memory processing," missed that it IS the memory mechanism he'd been describing the whole conversation
 
 Ricky's original pitch (this session): pre-load an agent with a "quick BA" — structured, cited
