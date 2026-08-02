@@ -33,7 +33,15 @@ to users = realtor.com / "SWFL Data Gulf".
   sustained-rate probe could pin the real limit if a bulk job ever needs >1 req/s.
 - **All real-estate endpoints are weight 1** (docs crawl 07/16) — requests ≈ quota units.
 - **No rate/quota headers on any response** — the dashboard is the only usage authority.
-- Still unread from the dashboard: cycle reset date, per-API split (real-estate vs social keys).
+- **08/02/2026 ~15:11 dashboard read (operator screenshot): 1,430 / 50,000 used (1,428 ok / 2
+  failed) — ≥20k headroom CONFIRMED for the raw-landing Step-2 run.** Subscription paid
+  **07/14**; a prior full-quota burn was ticketed with the vendor (~20k lost requests) and the
+  counter appears to have been refreshed — so the **cycle reset date is UNKNOWN: treat as "1st
+  or 14th" until the ticket answer says which** (operator decree 08/02, will update). Note an
+  anniversary cycle (07/14→08/14) at normal burn would read ~9–10k+ on 08/02, not 1,430 —
+  evidence leans refresh-or-calendar, but nothing is pinned yet.
+- Still unread from the dashboard: per-API split (real-estate vs social keys); cycle reset
+  date pending the vendor ticket (see 08/02 read above).
 
 ## 1. What we pull today (5 surfaces)
 
