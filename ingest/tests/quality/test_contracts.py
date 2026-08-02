@@ -411,7 +411,8 @@ def test_sql_expectation_rejects_anything_that_is_not_read_only(bad):
 
 def test_the_real_registry_sql_is_all_read_only():
     from ingest.quality.contracts import load_contracts as lc
-    for table in ("data_lake.listing_active_stats", "data_lake.market_details_swfl"):
+    for table in ("data_lake.listing_active_stats", "data_lake.market_details_swfl",
+                  "data_lake.lee_parcels"):
         for c in lc(table):
             if c["type"] == "sql_expectation":
                 assert_read_only(c["failing_rows_sql"])   # raises if not

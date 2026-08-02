@@ -1,3 +1,11 @@
+## 2026-08-02 — RESOLVED same session — lean-verifier handoff caution: stale ATTOM breadcrumb in memory
+
+The cross-session paste flagged memory `reference_leepa-no-sale-price.md` line 28 ("repeat-sales
+index needs ATTOM or FL DOR SDF") as an ATTOM breadcrumb that could steer sold-price sourcing
+wrong. Fixed 08/02/2026: memory amended in place — no ATTOM (never wired), deed lane parked at 0
+rows, sold-price roots = redfin/realtor lanes per data-roots. The leepa↔FDOR agreement contracts
+shipped in the same pass deliberately touch no sold-price serving root.
+
 ## 2026-08-02 — "why the fuck are there so many original fucking problems with the fucking email" — databrief v1 send failed the house quality bar
 
 Verbatim gripes on the delivered brief: "font sucks, no fucking commentary, backwards fucking

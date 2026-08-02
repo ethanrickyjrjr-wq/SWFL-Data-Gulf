@@ -1,3 +1,23 @@
+## 2026-08-02 (Fable 5) — leepa⇆FDOR cross-source sale-price AGREEMENT contracts shipped (registry, Locus B) — the first same-record two-source verdict surface
+
+Operator directive (via lean-verifier handoff; spec + prod evidence in that repo's CHECKS.md
+§ "First real surface", commit fdb3971): sql_expectation contracts for the leepa_parcels ⇆
+lee_parcels strap-crosswalk price agreement, different-event-selected classed separately from
+value mismatch, alert on degradation, contract-not-gate. Shipped 3 contracts under
+`data_lake.lee_parcels` in `ingest/quality/quality_registry.yaml` (housed on the FDOR twin
+deliberately — `test_leepa_parcels_carries_no_price_contract_ever` locks leepa against price
+contracts; the family is equality-only and its own test forbids any numeric floor):
+`leepa_fdor_same_sale_price_mismatch` (error; fires >2.5% ≈ 3× the live 0.88% baseline),
+`leepa_fdor_different_event_selected_watch` (warn; the expected vintage-lag class, visible so
+nobody "fixes" the naive 9.5%), `leepa_fdor_same_event_coverage_floor` (error; <40,000 = the
+C3b vacuous-green guard). Live evidence 08/02/2026, registry SQL through the real builder:
+mismatch → 0, watch → 473,382, floor → 0; baseline measured 49,760/50,202 exact (99.1%) on
+523,584 joined rows; `pytest ingest/tests/quality` → 73 passed (5 new structural locks).
+Lee-only by construction (Collier has no appraiser-vs-FDOR twin). Also resolved the handoff's
+ATTOM-breadcrumb caution: memory `reference_leepa-no-sale-price.md` amended (no ATTOM lane).
+Check opened: `leepa_fdor_agreement_contracts_live_verify` (prod evidence = tomorrow's
+freshness-probe run showing the family, per code-fix≠live).
+
 ## 2026-08-02 (Fable 5) — GREENFIELD PROOF SHIPPED: `C:\Users\ethan\dev\databrief` — 4 live APIs → DuckDB lake → 2 brains → coded email, 6/6 plan steps, guards proven on real positives
 
 Operator decree: prove the factory generalizes on NEW data, not real estate, "data we can get

@@ -155,6 +155,73 @@ def test_the_band_has_a_coverage_floor_or_it_is_satisfiable_by_no_data():
     assert "< 45" in sql and "median_rent_price IS NOT NULL" in sql
 
 
+# ── LEEPA ⇆ FDOR AGREEMENT FAMILY (data_lake.lee_parcels) ──────────────────────
+# Cross-source same-record agreement, authored 08/02/2026. Prod evidence:
+# lean-verifier CHECKS.md § "First real surface" (commit fdb3971) — 523,584 strap-joined
+# rows with a sale on both sides; same-event agreement 49,760/50,202 (99.1%); naive
+# whole-join agreement 9.5% purely from FDOR annual-roll vintage lag.
+
+
+def test_leepa_fdor_agreement_is_equality_only_never_a_floor():
+    """The no-price-floor lock (test_leepa_parcels_carries_no_price_contract_ever) exists
+    because 41,510 legit $1-9,999 nominal-consideration deeds make ANY constant threshold on
+    a sale-amount column a false-positive machine. This family is housed on lee_parcels and
+    compares the two vendors' values for EQUALITY only — a $100 quitclaim agreeing with a
+    $100 quitclaim passes. If a constant price floor ever appears in this SQL, the lock has
+    been dodged by table-scoping, which is exactly what this test makes impossible."""
+    import re
+    floor = re.compile(r"(last_sale_amount|sale_prc1)\s*(<=|>=|<(?!>)|>)\s*\$?\d")
+    for c in load_contracts("data_lake.lee_parcels"):
+        assert not floor.search(c["failing_rows_sql"]), (
+            f"{c['name']} compares a sale-amount column against a numeric literal — "
+            "that is a price floor, the exact thing the leepa lock forbids"
+        )
+    mismatch = _by_name("data_lake.lee_parcels", "leepa_fdor_same_sale_price_mismatch")
+    assert "last_sale_amount <> fd.sale_prc1" in mismatch["failing_rows_sql"]
+
+
+def test_leepa_fdor_mismatch_is_conditioned_on_the_same_sale_event():
+    """Without the year+month condition the contract compares DIFFERENT sales: FDOR's sale1
+    is the roll's qualified sale (max sale_yr1 = 2025) while LeePA's is the literal latest
+    transfer (runs to 2026), so naive whole-join agreement is 9.5% — event-selection drift,
+    not corruption. Dropping the condition turns a 0.88%-baseline defect signal into a
+    permanently-red 90% alarm that gets ignored (or worse, 'fixed')."""
+    sql = _by_name("data_lake.lee_parcels",
+                   "leepa_fdor_same_sale_price_mismatch")["failing_rows_sql"]
+    assert "extract(year FROM lp.last_sale_date)::int = fd.sale_yr1" in sql
+    assert "extract(month FROM lp.last_sale_date)::int = fd.sale_mo1" in sql
+
+
+def test_leepa_fdor_different_event_class_stays_visible_as_a_warn_watch():
+    """The 90.4% different-event share is EXPECTED vintage behavior, and it must stay a
+    NAMED number on the daily summary (warn = summary-only, no checks row) so nobody
+    rediscovers the naive 9.5% and treats it as a defect. The watch carries the NEGATED
+    same-event condition — it counts the complement class, nothing else."""
+    watch = _by_name("data_lake.lee_parcels", "leepa_fdor_different_event_selected_watch")
+    assert watch["severity"] == "warn"
+    assert "NOT (extract(year FROM lp.last_sale_date)::int = fd.sale_yr1" in watch["failing_rows_sql"]
+
+
+def test_leepa_fdor_family_has_a_coverage_floor_or_it_is_satisfiable_by_no_data():
+    """The C3b lesson, verbatim: A1's WHERE requires the strap join and both sale columns,
+    so a crosswalk regression (strap goes NULL) EMPTIES the join and A1 reports GREEN with
+    zero power. Floor 40,000 = today's 50,202 same-event rows with ~20% slack; the annual
+    FDOR roll refresh grows this population, so vintage transitions cannot false-fire it."""
+    sql = _by_name("data_lake.lee_parcels",
+                   "leepa_fdor_same_event_coverage_floor")["failing_rows_sql"]
+    assert "< 40000" in sql
+    assert "fd.parcel_id = lp.strap" in sql
+
+
+def test_leepa_parcels_price_lock_survives_the_agreement_family():
+    """The agreement family must NEVER migrate onto data_lake.leepa_parcels — that table's
+    no-price-contract lock is load-bearing and this asserts the family stayed on the FDOR
+    twin where it was deliberately housed."""
+    assert load_contracts("data_lake.lee_parcels"), "agreement family missing from lee_parcels"
+    for c in load_contracts("data_lake.leepa_parcels"):
+        assert not c["name"].startswith("leepa_fdor_"), c["name"]
+
+
 # ── shape invariants every contract must hold ─────────────────────────────────
 
 
@@ -162,6 +229,7 @@ def test_the_band_has_a_coverage_floor_or_it_is_satisfiable_by_no_data():
     "data_lake.listing_state",
     "data_lake.listing_active_stats",
     "data_lake.market_details_swfl",
+    "data_lake.lee_parcels",
 ])
 def test_every_contract_declares_a_valid_type_locus_policy_and_severity(table):
     for c in load_contracts(table):

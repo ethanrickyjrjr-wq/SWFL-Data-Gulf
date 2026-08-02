@@ -429,3 +429,101 @@ tables:
             AND sold_to_rent_ratio IS NOT NULL
             AND abs(sold_to_rent_ratio
                     - (median_sold_price::numeric / median_rent_price / 12)) >= 0.05
+
+  # ── data_lake.lee_parcels — the leepa ⇆ FDOR cross-source AGREEMENT family. ──────────
+  # Authored 08/02/2026 against the live lake (all counts pasted in SESSION_LOG that day);
+  # spec + prod evidence: lean-verifier CHECKS.md § "First real surface" (commit fdb3971).
+  # Two LIVE sources assert the same sale for the same Lee parcel: leepa_parcels
+  # (appraiser: last_sale_amount, last_sale_date) ⇆ lee_parcels (FDOR: sale_prc1,
+  # sale_yr1/sale_mo1), joined on the 07/19/2026 strap crosswalk
+  # (lee_parcels.parcel_id = leepa_parcels.strap). Live 08/02/2026: 523,584 joined rows
+  # with a sale on both sides.
+  #
+  # TWO CLASSES, NEVER CONFLATED — this is the whole design:
+  #   different-event-selected — the two sources picked DIFFERENT sales for the parcel.
+  #     473,382 of 523,584 (90.4%) today, and EXPECTED: FDOR's sale1 is the roll's
+  #     qualified sale (max sale_yr1 = 2025) while LeePA's is the literal latest transfer
+  #     (runs to 2026) — annual-roll vintage lag, not corruption. Naive whole-join
+  #     agreement therefore reads 9.5%. DO NOT "FIX" THE 9.5% — that number is the two
+  #     sources answering different questions, and it RESETS every year when the new
+  #     FDOR roll lands.
+  #   value-mismatch — same year+month sale event, different price. THE defect class.
+  #     Baseline 08/02/2026: 442 of 50,202 same-event rows (0.88% — i.e. 49,760 exact,
+  #     99.1%; within-$100 adds exactly ONE row, so agreement is byte-level, not rounding).
+  #
+  # HOUSED HERE, NOT ON data_lake.leepa_parcels, DELIBERATELY:
+  # test_leepa_parcels_carries_no_price_contract_ever locks that table against price
+  # contracts because a `>= 20000` floor would quarantine 41,510 legit $1-9,999
+  # nominal-consideration deeds. This family THRESHOLDS NOTHING against a constant —
+  # it compares the two vendors' values for EQUALITY (a $100 quitclaim agreeing with a
+  # $100 quitclaim PASSES) — but the lock stays intact by table-scoping, same as it was
+  # built. Locked by its own twin: test_leepa_fdor_agreement_is_equality_only.
+  #
+  # LEE-ONLY BY CONSTRUCTION: Collier has no appraiser-vs-FDOR twin (collier_parcels IS
+  # the FDOR pull). No Collier instantiation exists or is pending.
+  # This is a CONTRACT in the registry (Locus B, report-only, daily freshness probe),
+  # NOT a new gate — C2: extend existing seams.
+  data_lake.lee_parcels:
+    content_contracts:
+
+      # A1: value-mismatch alert. Fires (returns 1) when same-event price disagreement
+      # exceeds 2.5% — ~3x the live 0.88% baseline, rounded up: real degradation clears it,
+      # baseline noise never has. Sample floor 1,000 so a mid-reload sliver can't produce a
+      # nonsense share (coverage collapse itself is A3's job, not this contract's).
+      - name: leepa_fdor_same_sale_price_mismatch
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: error
+        failing_rows_sql: |
+          SELECT CASE
+                   WHEN count(*) >= 1000
+                    AND count(*) FILTER (WHERE lp.last_sale_amount <> fd.sale_prc1)
+                        > 0.025 * count(*)
+                   THEN 1 ELSE 0
+                 END
+          FROM data_lake.leepa_parcels lp
+          JOIN data_lake.lee_parcels fd ON fd.parcel_id = lp.strap
+          WHERE lp.last_sale_amount IS NOT NULL AND fd.sale_prc1 IS NOT NULL
+            AND lp.last_sale_date IS NOT NULL AND fd.sale_yr1 IS NOT NULL
+            AND extract(year FROM lp.last_sale_date)::int = fd.sale_yr1
+            AND extract(month FROM lp.last_sale_date)::int = fd.sale_mo1
+
+      # A2: the different-event-selected class, kept VISIBLE (the C3 `_watch` pattern).
+      # Reports ~473,382 today at `warn` (summary-only, opens NO checks row) so the
+      # event-selection drift is a NAMED, EXPECTED number on the daily summary instead of
+      # a catastrophic-looking 9.5% someone rediscovers and "fixes". Expect it to DROP
+      # sharply when each year's FDOR roll lands, then climb through the year.
+      - name: leepa_fdor_different_event_selected_watch
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: warn
+        failing_rows_sql: |
+          SELECT count(*)
+          FROM data_lake.leepa_parcels lp
+          JOIN data_lake.lee_parcels fd ON fd.parcel_id = lp.strap
+          WHERE lp.last_sale_amount IS NOT NULL AND fd.sale_prc1 IS NOT NULL
+            AND lp.last_sale_date IS NOT NULL AND fd.sale_yr1 IS NOT NULL
+            AND NOT (extract(year FROM lp.last_sale_date)::int = fd.sale_yr1
+                     AND extract(month FROM lp.last_sale_date)::int = fd.sale_mo1)
+
+      # A3: the coverage floor — A1 is otherwise SATISFIABLE BY HAVING NO DATA (the C3b
+      # lesson): a strap-crosswalk regression (strap goes NULL) or a sale-column outage
+      # empties the join, A1 counts nothing, and reports GREEN. Floor 40,000 = today's
+      # 50,202 same-event rows with ~20% slack; the annual FDOR roll refresh GROWS this
+      # population (new roll captures the lagged year's sales), so the floor is safe
+      # across vintage transitions. Returns 1 on collapse, 0 otherwise.
+      - name: leepa_fdor_same_event_coverage_floor
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: error
+        failing_rows_sql: |
+          SELECT CASE WHEN count(*) < 40000 THEN 1 ELSE 0 END
+          FROM data_lake.leepa_parcels lp
+          JOIN data_lake.lee_parcels fd ON fd.parcel_id = lp.strap
+          WHERE lp.last_sale_amount IS NOT NULL AND fd.sale_prc1 IS NOT NULL
+            AND lp.last_sale_date IS NOT NULL AND fd.sale_yr1 IS NOT NULL
+            AND extract(year FROM lp.last_sale_date)::int = fd.sale_yr1
+            AND extract(month FROM lp.last_sale_date)::int = fd.sale_mo1
