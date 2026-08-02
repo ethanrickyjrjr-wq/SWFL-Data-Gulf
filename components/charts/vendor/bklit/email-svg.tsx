@@ -21,10 +21,64 @@ import { renderBklitStaticSvg } from "./render-static";
 import { formatDisplayDate } from "@/lib/format-date";
 
 const AXIS_TEXT = "#6B7280";
+const LABEL_INK = "#1F2937";
 
 export interface EmailTrendPoint {
   label: string;
   value: number;
+  /** Text drawn when value labels are on. Defaults to a locale-formatted
+   *  `value` — presentation of an already-sourced number, never a new one. */
+  display?: string;
+}
+
+/** Default on-chart number: the sourced value, locale-formatted, no unit. */
+export function defaultValueDisplay(v: number): string {
+  return Number.isInteger(v)
+    ? v.toLocaleString("en-US")
+    : v.toLocaleString("en-US", { maximumFractionDigits: 1 });
+}
+
+// bklit static geometry (probed 07/09/2026, re-proven by the count-mismatch
+// guard on every labeled render): plot group at translate(40,40), plot area
+// (W-80) × (H-80). Line paths and bar rects are in PLOT coordinates.
+const PLOT_X = 40;
+const PLOT_Y = 40;
+
+/** First/last coordinate pair of the bklit line path (plot coords), or null
+ *  when the path shape drifted — callers skip labels rather than misplace. */
+export function lineEndpoints(
+  svg: string,
+): { x0: number; y0: number; x1: number; y1: number } | null {
+  const m = svg.match(/class="visx-linepath" d="([^"]+)"/);
+  if (!m) return null;
+  const pairs = [...m[1].matchAll(/(-?[\d.]+),(-?[\d.]+)/g)];
+  if (pairs.length < 2) return null;
+  const f = pairs[0];
+  const l = pairs[pairs.length - 1];
+  return { x0: +f[1], y0: +f[2], x1: +l[1], y1: +l[2] };
+}
+
+/** Accent-filled bar rects (plot coords), in document order. */
+export function barRects(svg: string, accent: string): { cx: number; top: number }[] {
+  const out: { cx: number; top: number }[] = [];
+  const re = new RegExp(
+    `<rect fill="${accent}"[^>]*width="([\\d.]+)" x="(-?[\\d.]+)" y="(-?[\\d.]+)"`,
+    "g",
+  );
+  for (const m of svg.matchAll(re)) {
+    out.push({ cx: +m[2] + +m[1] / 2, top: +m[3] });
+  }
+  return out;
+}
+
+/** "YYYY-MM…" → "Mon ’YY"; anything else passes through untouched. */
+export function axisLabel(raw: string): string {
+  const m = raw.match(/^(\d{4})-(\d{2})/);
+  if (!m) return raw;
+  const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
+    +m[2] - 1
+  ];
+  return mon ? `${mon} ’${m[1].slice(2)}` : raw;
 }
 
 export interface BklitTrendOpts {
@@ -43,6 +97,15 @@ export interface BklitTrendOpts {
   /** Gridline stroke. Default #EAECEF is tuned for white; go a step darker
    *  on a grey background so the grid stays visible. */
   gridStroke?: string;
+  /** Draw the NUMBERS on the chart (operator decree 08/02/2026: a chart with
+   *  no numbers on it sucks). Off by default — existing renders stay
+   *  byte-identical. "endpoints": first/last value + first/last x label
+   *  (right density for a long series). "all": every point — trend treats it
+   *  as endpoints; composed labels every bar + its category. Geometry is
+   *  scraped from the rendered bklit subtree; if the scrape misses (version
+   *  drift), the chart renders UNLABELED rather than mislabeled — showcase
+   *  callers assert label presence and fail loud (databrief-chart.mts). */
+  valueLabels?: "endpoints" | "all";
 }
 
 /** A time-series trend as a real bklit `AreaChart` (gradient fill + line),
@@ -88,15 +151,46 @@ export async function bklitTrendSvg(
       : "",
   ].join("");
 
-  return svg.replace(
-    /<svg([^>]*)>/,
-    `<svg$1><rect width="${W}" height="${H}" fill="${opts.background ?? "#ffffff"}"/>${chrome}`,
-  );
+  // Numbers on the chart — endpoint dots + first/last values + first/last x
+  // labels, geometry scraped from the line path. Scrape miss → no labels,
+  // never misplaced ones.
+  let labels = "";
+  if (opts.valueLabels) {
+    const ep = lineEndpoints(svg);
+    if (ep) {
+      const first = points[0];
+      const last = points[points.length - 1];
+      const x0 = PLOT_X + ep.x0;
+      const y0 = PLOT_Y + ep.y0;
+      const x1 = PLOT_X + ep.x1;
+      const y1 = PLOT_Y + ep.y1;
+      // flip a label below its endpoint when the line immediately rises past it
+      const y0text = points[1].value > first.value ? y0 + 18 : y0 - 8;
+      const y1text = points[points.length - 2].value > last.value ? y1 + 18 : y1 - 8;
+      labels = [
+        `<circle cx="${x0}" cy="${y0}" r="4" fill="${opts.accent}" stroke="#ffffff" stroke-width="2"/>`,
+        `<circle cx="${x1}" cy="${y1}" r="4" fill="${opts.accent}" stroke="#ffffff" stroke-width="2"/>`,
+        `<text x="${x0 + 8}" y="${Math.max(y0text, 44)}" font-family="Arial" font-size="12" font-weight="bold" fill="${LABEL_INK}">${escXml(first.display ?? defaultValueDisplay(first.value))}</text>`,
+        `<text x="${x1 - 8}" y="${Math.max(y1text, 44)}" font-family="Arial" font-size="12" font-weight="bold" fill="${LABEL_INK}" text-anchor="end">${escXml(last.display ?? defaultValueDisplay(last.value))}</text>`,
+        `<text x="${x0}" y="${H - 24}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${escXml(axisLabel(first.label))}</text>`,
+        `<text x="${x1}" y="${H - 24}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}" text-anchor="end">${escXml(axisLabel(last.label))}</text>`,
+      ].join("");
+    }
+  }
+
+  return svg
+    .replace(
+      /<svg([^>]*)>/,
+      `<svg$1><rect width="${W}" height="${H}" fill="${opts.background ?? "#ffffff"}"/>${chrome}`,
+    )
+    .replace("</svg>", `${labels}</svg>`);
 }
 
 export interface EmailComposedPoint {
   label: string;
   value: number;
+  /** Text drawn when value labels are on — see EmailTrendPoint.display. */
+  display?: string;
 }
 
 /** A bar + reference-line combo as a real bklit `ComposedChart` (SeriesBar +
@@ -146,10 +240,36 @@ export async function bklitComposedSvg(
       : "",
   ].join("");
 
-  return svg.replace(
-    /<svg([^>]*)>/,
-    `<svg$1><rect width="${W}" height="${H}" fill="${opts.background ?? "#ffffff"}"/>${chrome}`,
-  );
+  // Numbers on the chart — per-bar category + value labels ("all"), or
+  // first/last bars only ("endpoints"). Geometry from the rendered rects; a
+  // count mismatch means bklit drift → no labels, never wrong ones. The
+  // value label y is clamped below the title line so a full-height bar's
+  // number never collides with the chart title.
+  let labels = "";
+  if (opts.valueLabels) {
+    const rects = barRects(svg, opts.accent);
+    if (rects.length === points.length) {
+      const wanted = opts.valueLabels === "all" ? points.map((_, i) => i) : [0, points.length - 1];
+      labels = rects
+        .map((r, i) => {
+          if (!wanted.includes(i)) return "";
+          const cx = PLOT_X + r.cx;
+          const p = points[i];
+          return [
+            `<text x="${cx}" y="${H - 24}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}" text-anchor="middle">${escXml(axisLabel(p.label))}</text>`,
+            `<text x="${cx}" y="${Math.max(PLOT_Y + r.top - 6, 44)}" font-family="Arial" font-size="11" font-weight="bold" fill="${LABEL_INK}" text-anchor="middle">${escXml(p.display ?? defaultValueDisplay(p.value))}</text>`,
+          ].join("");
+        })
+        .join("");
+    }
+  }
+
+  return svg
+    .replace(
+      /<svg([^>]*)>/,
+      `<svg$1><rect width="${W}" height="${H}" fill="${opts.background ?? "#ffffff"}"/>${chrome}`,
+    )
+    .replace("</svg>", `${labels}</svg>`);
 }
 
 function escXml(s: string): string {

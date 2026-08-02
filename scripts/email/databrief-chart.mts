@@ -21,11 +21,15 @@
  * shallow slope — bklit pins the y-domain to [0, max*1.1] and renders no y-axis,
  * so a shift would be magnitude with no number on the image to correct it.
  *
- * NOT drawn: per-point labels. bklit renders bare geometry; email-svg.tsx adds
- * only the title + source/as-of caption. `label` positions a point, it does not
- * appear in the PNG. If the caller ever needs value/axis labels, the technique
- * is scripts/generate-seed-preview-charts.mts (regex-scrape the bklit subtree
- * for bar rects / line endpoints, inject <text> in outer coords).
+ * Value labels (08/02/2026, operator decree "NO NUMBERS ON THE CHART"):
+ * `valueLabels: "endpoints" | "all"` on a chart draws the numbers — endpoint
+ * values + dates on a trend, per-bar value + category on composed ("all") or
+ * first/last bars ("endpoints"). Points may carry `display` (the exact text,
+ * e.g. "3.5%"); omitted → the value locale-formatted. This is presentation of
+ * already-sourced values, drawn by email-svg.tsx's exported label chrome (the
+ * same technique generate-seed-preview-charts.mts proved). Because this is a
+ * showcase path, a labeled render that comes back without its label text
+ * exits NON-ZERO — geometry drift fails loud here, soft in the lib.
  *
  * This is a showcase path: any render that comes back empty exits NON-ZERO.
  * There is no silent fallback to a hand-built SVG here.
@@ -35,8 +39,18 @@ import { basename, join } from "node:path";
 import {
   bklitTrendSvg,
   bklitComposedSvg,
+  defaultValueDisplay,
   type EmailTrendPoint,
 } from "@/components/charts/vendor/bklit/email-svg";
+
+/** Mirror email-svg's escXml for the label-presence probe. */
+function escForProbe(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 import { svgToPng, hostEmailPng } from "@/lib/email/chart-image";
 
 /** Where databrief picks the PNGs up. Written on every run, hosted or not. */
@@ -46,7 +60,7 @@ interface ChartSpec {
   kind: "composed" | "trend";
   key: string;
   title: string;
-  points: { label: string; value: number }[];
+  points: { label: string; value: number; display?: string }[];
   average?: number;
   accent: string;
   source: string;
@@ -56,6 +70,7 @@ interface ChartSpec {
   background?: string;
   fillOpacity?: number;
   gridStroke?: string;
+  valueLabels?: "endpoints" | "all";
 }
 
 interface Spec {
@@ -157,6 +172,7 @@ for (const c of spec.charts) {
     background: c.background,
     fillOpacity: c.fillOpacity,
     gridStroke: c.gridStroke,
+    valueLabels: c.valueLabels,
   };
   const svg =
     c.kind === "composed"
@@ -166,6 +182,16 @@ for (const c of spec.charts) {
     fail(
       `${c.kind} render returned NULL for ${c.key} — bklit produced no <svg>. No fallback here.`,
     );
+  }
+  if (c.valueLabels) {
+    // Loud half of the label guard: the lib skips labels on geometry drift;
+    // a showcase chart that asked for numbers must actually carry them.
+    const firstText = c.points[0].display ?? defaultValueDisplay(c.points[0].value);
+    if (!svg.includes(`>${escForProbe(firstText)}</text>`)) {
+      fail(
+        `${c.key}: valueLabels="${c.valueLabels}" requested but ${JSON.stringify(firstText)} is not drawn — bklit geometry scrape missed (version drift?). Fix email-svg.tsx's lineEndpoints/barRects before sending this chart.`,
+      );
+    }
   }
 
   const png = svgToPng(svg);
