@@ -1004,7 +1004,12 @@ pipelines:
     lane: tier-2
     cadence_days: 365
     tolerance_multiplier: 1.5
-    expected_rows_min: 27975 # 90% of 31,084 — first stable baseline set 07/19/2026 (view-repointed rebuild)
+    expected_rows_min: 18360 # 90% of 20,400 — rebaselined 08/02/2026 from the verified dispatch
+      # (run 30765299583, GREEN): 20,400 county-subdivision rows = COMPLETE population, matches
+      # parcel_subdivision_v's 20,370 distinct subdivisions live (a few span both counties;
+      # lee 11,569 + collier 8,831, both inserted 08/02). The old 27,975 (90% of 31,084, set
+      # 07/19) predates the view's legal_description re-derivation folding groups — it was a
+      # floor the CURRENT population can never reach, i.e. a permanent LOW_VOLUME false-red.
     count_table: data_lake.neighborhood_stats
     # Not a dlt pipeline — no dlt_schema_name. Reads data_lake.parcel_subdivision_v (the
     # two-county homes-only VIEW over lee_parcels + collier_parcels; repointed 07/19/2026 when
