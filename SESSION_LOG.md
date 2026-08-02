@@ -1,3 +1,22 @@
+## 2026-08-02 (Fable 5) — Step-2 gate re-verified GO (operator headroom only blocker) + coverage-contracts handoff for ALL sources
+
+Re-verified the raw-landing playbook addendum's 6-item hard gate live, not from the text (its
+"un-done" claims were stale — Step 1 shipped after drafting, commit 54a94313 on origin/main):
+backfill + nightly both land bodies; to_regclass non-null with 15 rows (latest 18:58 UTC); registry
+entry 1958-1963; 104/104 tests green; ENGINE_ENABLED=false + listing-lifecycle-daily.yml AND
+nightly-chain.yml both disabled_manually at the GH API. Only gate 6 (vendor-dashboard headroom +
+reset date) remains — operator-owed. Check OPENED: steadyapi_source_ceiling_coverage_contracts
+(task, due 08/16, no signal — set-diff inexpressible by the 4 signal types). Operator's addendum
+paste into the playbook is still OWED — file claim-held by the parallel raw-land-all-surfaces
+session (b4c727fc); background wait timed out; paste on next unlock. Then, per decree ("tried to
+keep track 10 fucking times… ops page… no one checks"): wrote
+docs/superpowers/handoffs/2026-08-02-coverage-contracts-all-sources-handoff.md — §0 proves the
+inventory layer EXISTS (registry source_scope 78/80 + ceiling 74/80, ops page renders it, 07/08
+vendor-ceiling audit w/ 22d-untouched follow-up check, quality_registry, raw_landing.py b50092bf);
+delta = ENFORCEMENT (machine pins + zero-paid-calls differ w/ positive control + pre-push registry
+lint extending check-prepush-gate.mjs). Umbrella check OPENED: coverage_contracts_platform_wide
+(due 08/23). Scratchpad updated. NOT pushed — push is operator-approved per-push.
+
 ## 2026-08-02 (Fable 5) — "PROVE ME WRONG": charts carry their numbers, the scorecard is a gate, the program owns the send
 
 Operator: "NO NUMBERS ON THE CHART" + "MAKE THE PLAYBOOK AND SHOW ME IT CAN DO IT … the v7

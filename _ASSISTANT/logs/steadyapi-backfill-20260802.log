@@ -1,0 +1,5 @@
+[backfill-dom] chunk 1: probed=200 wrote=200 no_list_date=0 gap=0  (running: wrote=200/200)
+[backfill-dom] chunk 2: probed=200 wrote=200 no_list_date=0 gap=0  (running: wrote=400/400)
+[backfill-dom] chunk 3: probed=200 wrote=200 no_list_date=0 gap=0  (running: wrote=600/600)
+[backfill-dom] chunk 4: probed=200 wrote=200 no_list_date=0 gap=0  (running: wrote=800/800)
+[backfill-dom] chunk 5: probed=200 wrote=199 no_list_date=1 gap=0  (running: wrote=999/1000)

@@ -1,3 +1,39 @@
+## 2026-08-02 (Fable 5) — "I've tried to keep track of everything 10 fucking times… ops page full of this shit… yet no one checks and just fucks me over and over"
+
+Raised while asking for a handoff extending source-ceiling coverage contracts to ALL
+pipelines/lakes/crons. The gripe is NOT "we lack tracking" — it's that tracking EXISTS
+(cadence_registry source_scope blocks, /ops census page in the ops repo, checks ledger, quality
+contracts) and sessions don't READ it before building tracker N+1. Standing order encoded into
+the handoff: any coverage work STARTS by reading the existing registry/ops surfaces; a handoff
+that spawns a new parallel tracker instead of wiring enforcement into the existing ones is the
+failure repeating. (Same disease as RULE 0.4's unread-research postmortem and new-project-playbook §2.)
+
+## 2026-08-02 (Fable 5) — WIRED: synthesis layer live in the chain; actual prose blocked on ONE thing — API credits
+
+tools/synthesize.py (Sonnet, the parent's synthesis lane per repo-inventory-audit) is wired
+into build_brief.py between brains and charts: model prose over locked numerals, inference
+framed as inference, numbers-from-numbers allowed and named as derived, computed prose kept
+as commentary_computed (audit + fallback), lint downstream stays the hard wall. Sources
+block now a CLOSED <details> accordion (falls open, never hidden, where clients strip it);
+footer copy updated honestly (no longer claims "no number written by a model"). LIVE-proven
+to the vendor: real API request went out and the account answered "credit balance is too
+low" — the plumbing works, the fallback held BUILD GREEN 11/11, pytest 10/10. The ONE
+remaining step is operator-side: credits/working key → the same one command produces
+model-written commentary. Check open: databrief_synthesis_live_prose.
+
+## 2026-08-02 (Fable 5) — "WIRE THE SHIT" — synthesis layer decreed, with the standing content rules restated AGAIN
+
+Operator (verbatim gist): Claude IS allowed to make numbers based on numbers and what it sees —
+that lives in INFERENCE framing or "down the road" projections; any model thought beyond the
+audited figures is SAID AS inference, or sourced from user uploads / internet with SOURCES IN A
+CLOSED ACCORDION AT THE BOTTOM. "HOW MANY TIMES DO WE HAVE TO GO OVER THIS" + "IT'S THE SAME
+RECIPE IT'S BEEN FOR MONTHS" — the parent platform's synthesis pattern (model prose over locked
+computed numerals, lint-gated) is the recipe; databrief just never got it. Wiring it NOW into
+the databrief chain: model-written commentary per brain over the full computed fact/stat set,
+inference explicitly framed, accordion sources, lint still the hard wall, computed prose kept
+as the no-key/outage fallback. This entry exists so the content rules never have to be retyped:
+numbers-from-numbers = allowed AS INFERENCE; unsourced flat assertions = never.
+
 ## 2026-08-02 (Fable 5) — "HOW DOES IT HAVE THE EXACT SAME COMMENTARY" — deterministic prose is template-grade prose
 
 The resend's commentary was byte-identical to v7's because databrief's commentary is COMPUTED:
