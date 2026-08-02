@@ -630,3 +630,32 @@ def test_collect_relkinds_binds_schemas_as_a_param():
     sql_arg, params = cur.execute.call_args[0]
     assert "pg_catalog.pg_class" in sql_arg
     assert params == (["data_lake"],)
+
+
+# ── emit_report: cron mode must echo to stdout, not ONLY the summary file ─────
+# Failure mode this guards (08/02/2026, run 30753405899): the daily probe failed
+# red and the run LOG was empty — the report lived only in $GITHUB_STEP_SUMMARY.
+
+def test_emit_report_cron_writes_summary_AND_stdout(tmp_path, capfdbinary):
+    summary = tmp_path / "summary.md"
+    doctor.emit_report("## doctor\nreport-body\n", cron=True, dry_run=False,
+                       step_summary=str(summary))
+    assert "report-body" in summary.read_text(encoding="utf-8")
+    out, _ = capfdbinary.readouterr()
+    assert b"report-body" in out
+
+
+def test_emit_report_without_summary_env_still_prints(capfdbinary):
+    doctor.emit_report("## doctor\nreport-body\n", cron=True, dry_run=False,
+                       step_summary=None)
+    out, _ = capfdbinary.readouterr()
+    assert b"report-body" in out
+
+
+def test_emit_report_dry_run_never_touches_summary_file(tmp_path, capfdbinary):
+    summary = tmp_path / "summary.md"
+    doctor.emit_report("## doctor\nreport-body\n", cron=True, dry_run=True,
+                       step_summary=str(summary))
+    assert not summary.exists()
+    out, _ = capfdbinary.readouterr()
+    assert b"report-body" in out

@@ -638,6 +638,18 @@ def format_report(payload: dict) -> str:
 # ── main ──────────────────────────────────────────────────────────────────────
 
 
+def emit_report(report: str, *, cron: bool, dry_run: bool, step_summary: str | None) -> None:
+    """Route the report. Cron mode writes the step summary AND echoes to stdout —
+    before 08/02/2026 it wrote ONLY the summary file, so the gating step that
+    failed the daily probe showed literally nothing in the run log (the operator
+    clicked into a red run and found no report; run 30753405899). stdout is the
+    log; the summary tab is a bonus, never the only copy."""
+    if not dry_run and cron and step_summary:
+        with open(step_summary, "a", encoding="utf-8") as fh:
+            fh.write(report)
+    sys.stdout.buffer.write(report.encode("utf-8"))
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="doctor — one health line per dataset.")
     ap.add_argument(
@@ -715,13 +727,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         sys.stdout.write(json.dumps(payload, indent=2, default=str) + "\n")
     else:
-        report = format_report(payload)
-        step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
-        if args.dry_run or not step_summary or not args.cron:
-            sys.stdout.buffer.write(report.encode("utf-8"))
-        else:
-            with open(step_summary, "a", encoding="utf-8") as fh:
-                fh.write(report)
+        emit_report(
+            format_report(payload),
+            cron=args.cron,
+            dry_run=args.dry_run,
+            step_summary=os.environ.get("GITHUB_STEP_SUMMARY"),
+        )
 
     if args.fail_on == "red" and payload["counts"]["red"] > 0:
         return 1

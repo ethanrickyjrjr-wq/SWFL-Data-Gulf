@@ -773,35 +773,17 @@ pipelines:
         source_url: "https://www.census.gov/programs-surveys/saipe.html"
         source_label: "Census SAIPE"
 
-  - name: usgs_tier2
-    workflow: none
-    consuming_pack: env-swfl
-    known_drift: # ZOMBIE READ FIXED 07/19/2026: usgs-water-source.mts repointed to the fresh
-      # tier-1 Parquets (usgs_water_swfl + _sites, refreshed by usgs-monthly.yml) — nothing
-      # reads data_lake.usgs_daily/usgs_sites anymore. The frozen tables + this entry are
-      # dropped/removed once the env-swfl rebuild is verified serving the Parquet number
-      # (check usgs_tier2_orphan closes then). Until that drop lands this entry stays so the
-      # still-present tables don't false-RED zero_coverage.
-      - { rule: zombie_target, check: usgs_tier2_orphan }
-      - { rule: no_producer_workflow, check: usgs_tier2_orphan } # same condition, Rule-A facet
-    lane: tier-2
-    cadence_days: 30
-    tolerance_multiplier: 2.0
-    dlt_schema_name: usgs
-    expected_rows_min: 544 # 90% of 605 confirmed 2026-05-31
-    count_table: data_lake.usgs_daily # dlt schema_name != table name
-    # Verified: MAX(inserted_at) = 2026-05-19 ✓
-    # Separate from usgs tier-1-duckdb entry above; this tracks the Postgres load.
-    source_scope:
-      confirmed_total:
-        value: 605
-        as_of: "2026-05-31"
-        source: "our ingest (4 parameters)"
-      source_ceiling:
-        summary: "Same 60 USGS sites, same fetch, also carry streamflow/discharge, water temperature, salinity, and dissolved oxygen/pH — free at the same call, not extracted."
-        as_of: "07/07/2026"
-        source_url: "https://waterdata.usgs.gov/nwis"
-        source_label: "USGS National Water Information System"
+  # RETIRED 08/02/2026: usgs_tier2 (workflow: none — producing module deleted since 2026-05-19).
+  # Tracked the frozen Postgres load data_lake.usgs_daily/usgs_sites. usgs-water-source.mts was
+  # repointed 07/19/2026 to the fresh tier-1 Parquets (usgs_water_swfl + _sites, refreshed by
+  # usgs-monthly.yml, tracked by the usgs tier-1-duckdb entry above); the corpse tables were
+  # dropped the same day AFTER the env-swfl repoint verified on served bytes
+  # (migrations/20260719_drop_usgs_tier2_corpses.sql — /api/b/env-swfl serving 3.36 ft @
+  # 2026-07-09 from the Parquet dual-read vs frozen 3.17 @ 2026-05-17). Entry retirement was
+  # written 07/19 but blocked by a parallel-session file claim; landed 08/02 — doctor confirmed
+  # the count_table missing (pg_class kind=missing), so the entry was pure daily false-RED.
+  # History: check usgs_tier2_orphan (closed) + usgs_tier2_registry_entry_retirement;
+  # docs/audits/2026-07-18-data-consolidation/P8-bypass-and-zombie.md.
 
   - name: fema
     workflow: fema-nfip-quarterly.yml
@@ -974,7 +956,12 @@ pipelines:
     workflow: lee-parcels-annual.yml
     consuming_pack: properties-lee-value
     lane: tier-2
-    cadence_days: null # dispatch-only by design — see workflow comment; not a standing cron
+    cadence_days: 365 # annual FDOR roll — same cadence as sibling collier_parcels. Was null
+      # ("dispatch-only") until 08/02/2026: check_freshness._safe_cadence_days treats ANY null
+      # as MISCONFIGURED regardless of dispatch_only (that flag is read only by
+      # registry-identity's workflow_dark check, a different classifier) — the null made this
+      # entry a permanent daily doctor RED while the data sat FRESH (landed 07/18, age 15d
+      # vs 547d threshold). Every other dispatch_only entry sets a real cadence_days.
     dispatch_only: true # lee-parcels-annual.yml has no cron on purpose (556k-parcel annual pull) —
       # states the fact structurally so registry-identity's workflow_dark check doesn't RED it
     tolerance_multiplier: 1.5
@@ -1260,7 +1247,12 @@ pipelines:
     cadence_days: 30
     tolerance_multiplier: 2.0
     freshness_table: public.fgcu_reri_indicators
-    expected_rows_min: 16 # ≥2 months × 8 indicators; rebaseline to 90% of actual after first monthly cron count
+    expected_rows_min: 7 # structural floor, corrected 08/02/2026 from the never-rebaselined
+      # placeholder 16 ("≥2 months × 8"): the RERI homepage exposes ONE month per scrape (never
+      # accumulates 2), and a month yields 7 always-present single-value indicators plus a
+      # 0-3-row home-price fan-out depending on the sentence format (live probe 08/02: July
+      # page parses 7 — home_prices range-phrasing regression, check
+      # fgcu_reri_home_prices_range_parse_regression). Bump to 9 once the range parser ships.
     # Non-dlt pipeline — freshness checked via MAX(inserted_at) on the table directly.
     # Source: FGCU RERI homepage (https://www.fgcu.edu/cob/reri/). Scrapes via crawl4ai
     # (ingest.lib.crawl_client) — comment corrected 07/08/2026, code was never Firecrawl.

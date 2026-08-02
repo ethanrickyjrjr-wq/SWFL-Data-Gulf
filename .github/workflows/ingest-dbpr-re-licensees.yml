@@ -20,7 +20,12 @@ jobs:
   ingest:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 45, not 15: run 30273914780 (07/27/2026) was TIMEOUT_KILLed — the pipeline step
+    # ran 14m16s (14:13:05->14:27:21) straight into the 15m ceiling and 0 of ~15k rows
+    # landed (identity_live_red_baseline row_floor_breach). The DBPR download host is
+    # slow; 15m never left room for a full pull. If 45 is also hit, shrink the fetch
+    # (per-county or resumable chunks) instead of raising again.
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v6

@@ -20,7 +20,12 @@ jobs:
   aggregate:
     if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 45, not 20: scheduled run 30110144989 (07/24/2026) was killed at the 20m ceiling
+    # (cancelled at 20m22s) and the kill was never diagnosed — doctor read the absence of
+    # a landed load as NEVER_LANDED. The aggregate reads parcel_subdivision_v (a two-county
+    # view over 920k+ parcels) before the in-memory DuckDB GROUP BY; give it real headroom.
+    # If 45 is also hit, materialize the view read instead of raising again.
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v6

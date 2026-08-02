@@ -1,3 +1,29 @@
+## 2026-08-02 (Fable 5) — Daily probe red (30753405899) run to ground: 5 direct fixes + 5 Sonnet fix-or-drop briefs
+
+Operator: "WHY IS EVERYTHING NOT FUCKING GREEN… take care of what you can… fanning out sonnets."
+Doctor = 10 red / 38 yellow / 30 green of 78. Every red already had an open check; none was new.
+SHIPPED this session: (1) usgs_tier2 registry entry RETIRED (tables dropped 07/19, entry was
+daily false-RED; spine test 76→75 bumped same commit, 16/16 green); (2) fema-nfip timeout 45→90
+(killed at 44m19s, run 29359639709); (3) dbpr-re-licensees timeout 15→45 (killed at 14m16s,
+0/15k rows, run 30273914780); (4) neighborhood-stats timeout 20→45 — its 07/24 "never-landed"
+was actually an undiagnosed 20m22s TIMEOUT_KILL (run 30110144989); re-dispatched
+(run 30765299583); (5) doctor --cron now echoes the report to stdout AND the step summary —
+the red run's failed step used to show an EMPTY log (emit_report + 3 tests, doctor suite 56/56);
+(6) lee_parcels cadence_days null→365 — check_freshness treats null as MISCONFIGURED regardless
+of dispatch_only (Sonnet triage; data was FRESH, age 15d); (7) fgcu floor 16→7 (RERI page is
+one-month-per-scrape; 16 was a never-rebaselined placeholder; parser range-regression check
+already open). Sonnet briefs (5/5 returned): lee_parcels contract watch = working-as-designed,
+zero consumer blast radius; listing_lifecycle 24 under-floor rows = authority view already
+excludes all 24, BUT lib/desk/loaders.ts loadNotableCuts + countActiveFlag read raw
+listing_state (one $6,000 garbage cut can surface on the desk — fix: repoint to
+listing_active_homes); leepa_comp_sales NOT never-landed — 108,848 rows LIVE (loaded locally
+07/22, GHA can't reach LeePA host; commit 7c0aec5e already on main, stale check), FIX path =
+extend lee_comp_sales_v with folioid LATERAL join for beds/baths (comp-rank W_BEDS scoring
+already built waiting), blocker = comps_commercial_contamination; fgcu = parser regression +
+floor (fixed above), source live, no key exists to die; crexi/dbpr-sirs runner brief pending at
+entry time. KNOWN CONTEXT: ENGINE_ENABLED=false is DELIBERATE (SteadyAPI backfill in flight,
+Step-5 re-enable owed — see entries above). NOT fixed by design: doctor still re-fails daily on
+acknowledged reds — new-vs-known split proposed to operator, not yet approved as a build.
 ## 2026-08-02 (Fable 5) — Gate 11 SHIPPED: source-coverage ratchet lands FIRST per operator corollary
 
 Operator flipped the handoff ordering ("land the ratcheting lint first… everything before the

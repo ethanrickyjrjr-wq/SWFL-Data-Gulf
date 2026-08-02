@@ -69,8 +69,11 @@ def test_registry_shape_is_75_plus_3():
     was added in 5418714d without bumping this number, leaving the guard red at HEAD —
     found while correcting an unrelated source_ceiling, not by anyone running the suite.
     Hand-patching the literal a fourth time is the reason it keeps recurring; see check
-    `registry_count_guard_hand_patched_four_times`. Verified live: 76 pipelines, 4 parked."""
-    assert len(_pipelines()) == 76, f"expected 76 pipelines: entries, got {len(_pipelines())}"
+    `registry_count_guard_hand_patched_four_times`. Verified live: 76 pipelines, 4 parked.
+    76->75 on 08/02/2026: usgs_tier2 entry RETIRED (bump in the SAME commit as the
+    removal — the shape the guard exists to force). Tables dropped 07/19
+    (migrations/20260719_drop_usgs_tier2_corpses.sql); entry was daily false-RED."""
+    assert len(_pipelines()) == 75, f"expected 75 pipelines: entries, got {len(_pipelines())}"
     assert len(_parked()) == 4, f"expected 4 not_yet_running: entries, got {len(_parked())}"
 
 
@@ -80,7 +83,7 @@ def test_every_pipelines_entry_declares_a_workflow():
     assert not missing, (
         f"{len(missing)} pipelines: entries lack `workflow:` — {missing}\n"
         "Every entry must name its .github/workflows/ file, or the literal `none` "
-        "when no workflow writes it (usgs_tier2, mhs_databook)."
+        "when no workflow writes it (mhs_databook)."
     )
 
 

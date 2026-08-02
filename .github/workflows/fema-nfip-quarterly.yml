@@ -25,7 +25,12 @@ jobs:
     # attempts, possibly across 2+ pages) can legitimately eat 25+ min even in a run
     # that would otherwise succeed. Fixed the logging blindness (flush=True everywhere
     # in ingest/pipelines/fema/) AND gave real retry headroom.
-    timeout-minutes: 45
+    # 90, not 45: run 29359639709 (07/14/2026) was killed at the 45m ceiling too —
+    # pipeline step ran 44m19s (18:53:47->19:38:06) before the TIMEOUT_KILL. Same
+    # legitimate retry math, one ceiling higher. If 90 is ALSO hit, stop raising and
+    # shrink the batch (per-quarter pages) instead — a third kill means the fetch
+    # shape is wrong, not the ceiling. Check: fema_nfip_timeout_kill.
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v6

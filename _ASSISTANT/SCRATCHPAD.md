@@ -1,3 +1,27 @@
+## 2026-08-02 (Fable 5) — "WHAT THE FUCK IS THIS PAGE? WHY IS EVERYTHING NOT GREEN?" — the daily doctor run (30753405899)
+
+The red GHA run is the pipeline-freshness probe doing its job: doctor found 10 red of 78 datasets
+and `--fail-on red` fails the run BY DESIGN. The 10 reds are all KNOWN — the same set the 07/31
+audit opened checks for (SESSION_LOG ~line 4887). None are new breaks. They stay red because each
+one is waiting on a decision or a dispatch, not on a diagnosis. The daily re-alarm on already-
+checked reds with no "new vs known" distinction is exactly the "why do I deal with this shit
+daily" cost — the probe screams the same scream every morning. Open question logged: should the
+daily gate distinguish NEW reds (fail loud) from acknowledged reds with an open check (report,
+don't re-fail)?
+
+## 2026-08-02 (Fable 5) — "WHERE THE FUCK IS THE FIXED Underwriter's Brief EMAIL" — it WAS in the inbox, Gmail-trimmed to a beige shell
+
+The 3:02 PM send (Resend 4780574a) was the fixed build, but it reused the exact subject of the
+earlier v7 send of the same edition → Gmail threaded it and trimmed everything identical, showing
+only "⋯" markers + the one changed footer paragraph. The builder's anti-threading fix (send-grain
+subject ledger, "· updated H:MM PM" suffix, commit ad98d46) landed AFTER that send and no resend
+was performed — so the operator opened a gutted email and had no way to know the fix existed.
+RESOLVED same session: resent through the fixed lane (Resend 5bea52b9, HTTP 200, subject
+"… · updated 3:59 PM" — own thread, nothing trimmed). Lesson: when a fix targets a
+delivery-rendering defect the operator SAW, the fix isn't done until a send he can SEE goes out —
+"no resend performed, content identical" left the visible symptom standing. Still open behind it:
+model-written commentary blocked on Anthropic credits (databrief_synthesis_live_prose).
+
 ## 2026-08-02 (Fable 5) — "MAKKE IT FUCKING WORK RIGHT" — gate ships FIRST, not as Step D of a doc
 
 Operator corollary on the coverage handoff: flip the ordering — the ratcheting pre-push lint lands
