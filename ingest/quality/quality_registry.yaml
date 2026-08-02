@@ -527,3 +527,83 @@ tables:
             AND lp.last_sale_date IS NOT NULL AND fd.sale_yr1 IS NOT NULL
             AND extract(year FROM lp.last_sale_date)::int = fd.sale_yr1
             AND extract(month FROM lp.last_sale_date)::int = fd.sale_mo1
+
+  # ── data_lake.realtor_redfin_median_overlap — the realtor ⇆ redfin cross-vendor
+  # sold-median AGREEMENT family. Authored 08/02/2026, same two-pass discipline as
+  # leepa_fdor above. Both vendors publish an independent monthly sold-price median at
+  # city/county grain — the ONLY grain they share (redfin_swfl is ZIP, realtor_geo_medians
+  # is city/county/neighborhood; SteadyAPI comp data is unrelated to either). This VIEW
+  # (docs/sql/20260718_realtor_geo_medians.sql) already does the vendor-name-to-region
+  # join and is the cutover-decision surface for `realtor_redfin_overlap_cutover` — the
+  # contract reads it directly rather than re-deriving the join.
+  #
+  # TWO-PASS BASELINE: queried live 08/02/2026, identical to the 07/18/2026 first-run
+  # numbers already in SESSION_LOG (same captured_date — realtor_geo_medians has landed
+  # exactly one monthly snapshot so far, next due ~08/18) — the delta_pct values are
+  # stable, not a one-query fluke: Lee 0.0 / Collier 1.2 / Cape Coral 1.4 / Fort Myers
+  # -1.8 / Naples -49.9. Redfin lags realtor by ~6 weeks, so this is a cross-vendor
+  # sanity band on different vintages, never a same-month diff — the leepa lesson.
+  #
+  # NAPLES IS DEFINITIONAL, NOT A DEFECT: realtor's "Naples" is the broad postal-code
+  # sweep ($619k); Redfin's "Naples, FL" is the city-proper polygon ($1.235M). This is
+  # the SAME two-class split as leepa_fdor (value-mismatch vs different-event-selected):
+  # one contract excludes Naples and asserts real agreement, the other keeps Naples
+  # VISIBLE as a named, permanently-non-zero watch so nobody "fixes" the -49.9%.
+  #
+  # PROBE-ONLY: this table key is a VIEW with no pipeline/Locus A, same shape as
+  # data_lake.listing_active_stats.
+  data_lake.realtor_redfin_median_overlap:
+    content_contracts:
+
+      # B1: value-mismatch alert, Naples excluded. Baseline max |delta| among the four
+      # comparable rows is 1.8% (Fort Myers) — threshold set ~3x that, rounded up, same
+      # convention as leepa_fdor A1. Small fixed population (5 rows/month): any single
+      # row past threshold is real degradation, not sampling noise, so this asserts
+      # per-row rather than per-share.
+      - name: realtor_redfin_median_mismatch
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: error
+        failing_rows_sql: |
+          SELECT CASE
+                   WHEN count(*) FILTER (
+                          WHERE name <> 'Naples'
+                            AND redfin_median_sale IS NOT NULL
+                            AND abs(delta_pct) > 5
+                        ) > 0
+                   THEN 1 ELSE 0
+                 END
+          FROM data_lake.realtor_redfin_median_overlap
+
+      # B2: the Naples definitional-mismatch class, kept VISIBLE (the leepa_fdor A2
+      # pattern) — reports at `warn` (summary-only, opens no checks row) so the vendor
+      # boundary-definition gap is a NAMED, EXPECTED number instead of a -49.9% someone
+      # rediscovers and "fixes" by widening B1's threshold until it stops meaning anything.
+      - name: realtor_redfin_naples_definitional_watch
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: warn
+        failing_rows_sql: |
+          SELECT count(*)
+          FROM data_lake.realtor_redfin_median_overlap
+          WHERE name = 'Naples' AND redfin_median_sale IS NOT NULL
+
+      # B3: coverage floor — B1 is otherwise satisfiable by having no data (the C3b
+      # lesson): if the monthly realtor pull stops landing or the view's region-name
+      # join breaks, B1 counts nothing and reports GREEN. Floor is the current full
+      # matched population (3 cities + 2 counties = 5) with NO slack — this is a small,
+      # closed anchor list (`realtor-geo-trends-monthly.yml`), not a population that
+      # naturally fluctuates like the leepa_fdor parcel join, so any loss is immediate.
+      - name: realtor_redfin_overlap_coverage_floor
+        type: sql_expectation
+        locus: probe
+        policy: report
+        severity: error
+        failing_rows_sql: |
+          SELECT CASE
+                   WHEN count(*) FILTER (WHERE redfin_median_sale IS NOT NULL) < 5
+                   THEN 1 ELSE 0
+                 END
+          FROM data_lake.realtor_redfin_median_overlap

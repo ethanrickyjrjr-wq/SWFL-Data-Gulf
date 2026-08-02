@@ -222,6 +222,50 @@ def test_leepa_parcels_price_lock_survives_the_agreement_family():
         assert not c["name"].startswith("leepa_fdor_"), c["name"]
 
 
+# ── data_lake.realtor_redfin_median_overlap — the realtor ⇆ redfin AGREEMENT family ──
+# Authored 08/02/2026, same two-pass discipline as leepa_fdor: 07/18/2026 first-run
+# numbers (SESSION_LOG) reproduce byte-for-byte on a live re-query the same day this
+# family was authored — Lee 0.0 / Collier 1.2 / Cape Coral 1.4 / Fort Myers -1.8 /
+# Naples -49.9 (definitional).
+
+
+def test_realtor_redfin_mismatch_excludes_the_naples_definitional_row():
+    """Naples is NOT a defect: realtor's broad postal-code sweep ($619k) vs Redfin's
+    city-proper polygon ($1.235M) are different definitions of 'Naples', not the same
+    fact measured twice. Without the exclusion, B1 is permanently red on a number that
+    means nothing — exactly the leepa_fdor naive-9.5% trap, one level up."""
+    mismatch = _by_name("data_lake.realtor_redfin_median_overlap", "realtor_redfin_median_mismatch")
+    assert "name <> 'Naples'" in mismatch["failing_rows_sql"]
+
+
+def test_realtor_redfin_naples_class_stays_visible_as_a_warn_watch():
+    """The Naples definitional gap must stay a NAMED number on the daily summary (warn =
+    summary-only, no checks row) so nobody rediscovers -49.9% and 'fixes' it by widening
+    B1's threshold until it stops meaning anything."""
+    watch = _by_name("data_lake.realtor_redfin_median_overlap",
+                      "realtor_redfin_naples_definitional_watch")
+    assert watch["severity"] == "warn"
+    assert "name = 'Naples'" in watch["failing_rows_sql"]
+
+
+def test_realtor_redfin_family_has_a_coverage_floor_or_it_is_satisfiable_by_no_data():
+    """The C3b lesson again: B1's WHERE excludes Naples and requires a redfin match, so a
+    broken region-name join or a stalled monthly realtor pull EMPTIES the comparison and
+    B1 reports GREEN with zero power. Floor 5 = the current full matched population (3
+    cities + 2 counties), a small closed anchor list with no natural fluctuation."""
+    sql = _by_name("data_lake.realtor_redfin_median_overlap",
+                    "realtor_redfin_overlap_coverage_floor")["failing_rows_sql"]
+    assert "< 5" in sql
+    assert "redfin_median_sale IS NOT NULL" in sql
+
+
+def test_realtor_redfin_overlap_is_probe_only_it_is_a_VIEW_with_no_pipeline():
+    """CREATE OR REPLACE VIEW ... (docs/sql/20260718_realtor_geo_medians.sql:37). No
+    batch, no merge call, no Locus A — same shape as data_lake.listing_active_stats."""
+    for c in load_contracts("data_lake.realtor_redfin_median_overlap"):
+        assert c["locus"] == "probe"
+
+
 # ── shape invariants every contract must hold ─────────────────────────────────
 
 
@@ -230,6 +274,7 @@ def test_leepa_parcels_price_lock_survives_the_agreement_family():
     "data_lake.listing_active_stats",
     "data_lake.market_details_swfl",
     "data_lake.lee_parcels",
+    "data_lake.realtor_redfin_median_overlap",
 ])
 def test_every_contract_declares_a_valid_type_locus_policy_and_severity(table):
     for c in load_contracts(table):

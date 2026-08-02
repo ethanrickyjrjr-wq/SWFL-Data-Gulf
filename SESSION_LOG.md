@@ -1,3 +1,39 @@
+## 2026-08-02 (Sonnet 5) — leepa_fdor closed on a REAL scheduled-path run + realtor⇆redfin is the second AGREEMENT family
+
+Two-part operator directive. (1) Manually dispatched `freshness-probe-daily.yml`
+(`gh workflow run` workflow_dispatch, dry_run=false) so leepa_fdor ran on a real
+scheduled-path execution today instead of waiting on tomorrow's cron: run 30741151274,
+Data-quality probe step conclusion=success 09:08:50-09:09:09Z (only the unrelated,
+pre-existing "doctor" gating step failed, a different red dataset, untouched by this
+family). GitHub exposes no API for step-summary text, so corroborated via direct SQL
+against prod at 09:17:01Z (8min later, same DB state the run read): mismatch=0,
+different-event watch=473,382 (expected), coverage-floor=0 — matches the same-day
+dry-run exactly. Closed `leepa_fdor_agreement_contracts_live_verify` with that evidence.
+(2) Named + built the next agreement surface: realtor ⇆ redfin sold-median, at the ONLY
+grain they share (city/county monthly — realtor_geo_medians is city/county/neighborhood,
+redfin_swfl is ZIP). Discovered a live surface already doing the join:
+`data_lake.realtor_redfin_median_overlap` (docs/sql/20260718_realtor_geo_medians.sql),
+built 07/18 for the `realtor_redfin_overlap_cutover` decision. Two-pass baseline: live
+re-query 08/02 reproduced the 07/18 SESSION_LOG numbers byte-for-byte (Lee 0.0 / Collier
+1.2 / Cape Coral 1.4 / Fort Myers -1.8 / Naples -49.9 — Naples is DEFINITIONAL: realtor's
+broad postal sweep $619k vs Redfin's city-proper polygon $1.235M, never a defect). Shipped
+3 contracts on that view (probe-only, it's a VIEW with no pipeline): `realtor_redfin_median_mismatch`
+(error, fires >5% excluding Naples — ~3x the live 1.8% max), `realtor_redfin_naples_definitional_watch`
+(warn, keeps the -49.9% visible so nobody "fixes" it), `realtor_redfin_overlap_coverage_floor`
+(error, <5 of the 5-anchor population). Live SQL 08/02/2026 direct against prod: mismatch=0,
+Naples watch=1, floor=0 — `pytest ingest/tests/quality` → 90 passed (4 new structural locks).
+Swept remaining live lanes per the kill-list (deed/redfin↔zhvi-zori/cbp↔qcew/Collier
+already correctly killed, not re-litigated); found two MORE kills worth naming so they
+aren't rediscovered: `listing_active_stats` (daily "now" count) vs Redfin's
+`housing_by_zip.inventory` (monthly END-OF-MONTH) — grain mismatch, same class as cbp/qcew;
+redfin's sold-side `median_dom` vs realtor's list-side DOM — different statistic, same
+class as zhvi/zori. One candidate flagged UNRESEARCHED, not silently dropped: SteadyAPI
+sale-level comp data as a possible second parcel/sale-grain twin to leepa/FDOR (scratchpad
+0ah confirms SteadyAPI holds exact sale dates) — opened `steadyapi_sale_grain_agreement_candidate_unresearched`
+per RULE 2.4 rather than deferring in prose only. Checks opened this session:
+`realtor_redfin_agreement_contracts_live_verify` (needs its own real cron/dispatch-run
+evidence, same as leepa_fdor got today), `steadyapi_sale_grain_agreement_candidate_unresearched`.
+
 ## 2026-08-02 (Fable 5) — leepa⇆FDOR cross-source sale-price AGREEMENT contracts shipped (registry, Locus B) — the first same-record two-source verdict surface
 
 Operator directive (via lean-verifier handoff; spec + prod evidence in that repo's CHECKS.md
