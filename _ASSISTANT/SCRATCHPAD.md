@@ -1,3 +1,17 @@
+## 2026-08-02 — "why the fuck are there so many original fucking problems with the fucking email" — databrief v1 send failed the house quality bar
+
+Verbatim gripes on the delivered brief: "font sucks, no fucking commentary, backwards fucking
+date… where the fuck did this get built at". Concrete defects: raw ISO timestamps with tz offsets
+in visible text ("2026-08-02 15:00:00-04:00", "dated 2026-07-04 20:00:00-04:00") — violates the
+standing MM/DD/YYYY rule THIS repo already has; "1 declarations" (no singular handling); internal
+tokens leaked ("lake-loaded-…Z" freshness, station id 8725520, "MLLW", method text rendered as
+debug-speak) — violates the no-system-nouns rule; zero commentary — a bare number list, sterile;
+Georgia serif font. ROOT CAUSE: the greenfield repo carried the playbook's DATA guards but not
+the house READER-FACING quality bar (date format, jargon scrub, plain-language, commentary). The
+quality bar must travel with the factory — add to the greenfield spec as a named lesson. Fix:
+humanized dates, plural handling, computed commentary (deltas from the lake, not LLM filler),
+sans font stack, one as-of per fact, no tokens — then resend.
+
 ## 2026-08-02 — SECOND CORRECTION on greenfield sources: "it doesn't have to be SWFL AT ALL — DATA WE CAN GET EASILY"
 
 The SWFL/local framing was MINE, not his — dropped entirely. The proof's only source criteria:

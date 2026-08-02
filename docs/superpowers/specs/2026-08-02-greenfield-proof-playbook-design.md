@@ -120,6 +120,7 @@ chosen industry would want, every number traceable to a live public source.
 | Hand-typed claims drift (counts, field lists) | registry derived from code; computed, never typed — gate |
 | "We don't have X" while the source holds it | ceiling recorded per source at ingest, auto-surfaced — validation |
 | Secrets leak | no credentials in v1; ignore + scan from commit zero — lint |
+| Quality bar doesn't travel (PROVEN 08/02: v1 shipped raw ISO dates, "1 declarations", leaked tokens, no commentary — every one a rule the parent repo already had) | reader rules encoded IN the greenfield (date helpers, source_label vs method split, plural units, computed commentary) — validation |
 
 ## 7. Open decisions for the operator
 
