@@ -44,7 +44,7 @@ from typing import Any
 
 from ingest.pipelines.listing_lifecycle import distill
 from ingest.pipelines.listing_lifecycle.constants_api import API_SOURCE_NAME
-from ingest.pipelines.listing_lifecycle.extract_api import fetch_sold_event
+from ingest.pipelines.listing_lifecycle.extract_api import fetch_sold_event_raw
 
 _STATE_TABLE = distill._STATE_TABLE  # data_lake.listing_state
 
@@ -117,6 +117,21 @@ def fold_updates(
     return updates, stats
 
 
+def _write_raw_bodies_with_isolation(bodies: list[dict[str, Any]]) -> int:
+    """Write the raw /property-tax-history bodies collected this chunk, isolated from the
+    listed_date write: a raw-write failure is logged and swallowed, NEVER raised — it must not kill
+    a multi-hour run or block the listed_date write that already (or will) succeed independently
+    (playbook 08/02/2026 §1d failure-modes table: 'Raw write failure kills a 5-hour run')."""
+    if not bodies:
+        return 0
+    try:
+        return distill.insert_raw_bodies(bodies)
+    except Exception as e:  # noqa: BLE001 — isolation by design, this write is best-effort
+        print(f"[backfill-dom] raw-body write failed for {len(bodies)} row(s) ({e}); "
+              f"listed_date write is unaffected, will re-land on a later re-probe", flush=True)
+        return 0
+
+
 def _write_with_retry(
     updates: list[dict[str, Any]], *, source_name: str, attempts: int = 4, base_delay: float = 3.0,
 ) -> int:
@@ -184,11 +199,17 @@ def run(
     # (~1 req/s) is enforced module-wide inside fetch_sold_event -> _get_with_retry -> _pace.
     for i in range(0, len(targets), batch):
         chunk = targets[i:i + batch]
-        resolutions = [
-            fetch_sold_event(str(t["property_id"]), since=today, at=today) for t in chunk
+        resolutions_raw = [
+            fetch_sold_event_raw(str(t["property_id"]), since=today, at=today) for t in chunk
+        ]
+        resolutions = [c for c, _body in resolutions_raw]
+        bodies = [
+            {"property_id": t["property_id"], "address_key": t["address_key"], "county": t["county"], "body": b}
+            for t, (_c, b) in zip(chunk, resolutions_raw) if b is not None
         ]
         updates, stats = fold_updates(chunk, resolutions)
         _write_with_retry(updates, source_name=src)
+        _write_raw_bodies_with_isolation(bodies)
         for k in totals:
             totals[k] += stats[k]
         print(

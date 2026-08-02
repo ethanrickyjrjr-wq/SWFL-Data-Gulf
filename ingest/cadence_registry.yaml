@@ -1955,6 +1955,12 @@ pipelines:
         source_url: "https://docs.steadyapi.com/collection.json"
         source_label: "realtor.com (via SteadyAPI)"
     # Tables: data_lake.listing_state (MERGE) + data_lake.listing_transitions (log). Migration: migrations/20260627_listing_lifecycle.sql.
+    # SECOND TABLE (raw-landing, added 08/02/2026): data_lake.steadyapi_property_history_raw
+    # (property_id PK, address_key, county, body jsonb, fetched_at) — cold landing for the FULL
+    # /property-tax-history response, written alongside every departure/recheck/price-recheck/backfill
+    # probe (extract_api.fetch_sold_event_raw -> distill.insert_raw_bodies). NOT a served root — a
+    # provenance store Step 3 of the raw-landing playbook parses into typed tables. Migration:
+    # migrations/20260802_steadyapi_property_history_raw.sql. Data root entry: docs/standards/data-roots.md.
 
   # ── Market aggregates (SteadyAPI Layer-B, realtor.com origin) ──────────────
   # GRADUATED 2026-07-01: moved up from not_yet_running: — schedules uncommented in

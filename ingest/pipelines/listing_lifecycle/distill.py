@@ -68,6 +68,7 @@ def address_key_to_street(address_key: str) -> str:
 
 _STATE_TABLE = "data_lake.listing_state"
 _TRANS_TABLE = "data_lake.listing_transitions"
+_RAW_TABLE = "data_lake.steadyapi_property_history_raw"
 SOURCE_NAME = "lifecycle_seed"  # neutral; never a vendor/board name (real origin lives in the secret)
 
 # Wide state columns the diff engine fills (everything except the SQL-managed first_seen/last_seen/
@@ -281,7 +282,7 @@ def load_price_pending_solds(
     "no candidates", never a crash — backfill is strictly best-effort."""
     sql = f"""
         SELECT t.address_key, t.sale_or_rent, t.at, t.sold_date,
-               s.property_id, s.list_price, s.sold_check_at
+               s.property_id, s.list_price, s.sold_check_at, s.county
         FROM {_TRANS_TABLE} t
         JOIN {_STATE_TABLE} s
           ON s.source_name = t.source_name
@@ -292,7 +293,7 @@ def load_price_pending_solds(
           AND (t.sold_price IS NULL OR t.sold_price <= 0)
           AND COALESCE(t.sold_date, t.at) >= current_date - %(days)s * interval '1 day'
     """
-    cols = ["address_key", "sale_or_rent", "at", "sold_date", "property_id", "list_price", "sold_check_at"]
+    cols = ["address_key", "sale_or_rent", "at", "sold_date", "property_id", "list_price", "sold_check_at", "county"]
     try:
         with _get_conn() as conn, conn.cursor() as cur:
             cur.execute(sql, {"src": source_name, "days": max_age_days})
@@ -383,3 +384,42 @@ def stamp_sold_checked(
             cur.executemany(sql, params)
         conn.commit()
     return len(keys)
+
+
+def insert_raw_bodies(rows: list[dict[str, Any]], *, dry_run: bool = False) -> int:
+    """UPSERT the full SteadyAPI /property-tax-history response body into the cold landing table
+    (migrations/20260802_steadyapi_property_history_raw.sql) — the raw-landing writer (08/02/2026
+    playbook §1c). Idempotent on property_id: a re-probe refreshes the row, never duplicates. Each
+    row: {property_id, address_key, county, body} — body is the FULL vendor JSON, not the small
+    classification dict. Caller owns failure isolation (see backfill_listed_date's
+    _write_raw_bodies_with_isolation) — a raw-landing write must never abort a run whose primary
+    write (listed_date, or the state/transition MERGE) already succeeded."""
+    if not rows:
+        return 0
+    if dry_run:
+        print(f"[dry-run] would upsert {len(rows)} raw bodies to {_RAW_TABLE}")
+        return len(rows)
+    from psycopg.types.json import Jsonb  # lazy, mirrors _get_conn's psycopg import
+
+    sql = f"""
+        INSERT INTO {_RAW_TABLE} (property_id, address_key, county, body, fetched_at)
+        VALUES (%(property_id)s, %(address_key)s, %(county)s, %(body)s, %(now)s)
+        ON CONFLICT (property_id) DO UPDATE SET
+          body = EXCLUDED.body,
+          address_key = EXCLUDED.address_key,
+          county = EXCLUDED.county,
+          fetched_at = EXCLUDED.fetched_at
+    """
+    now = datetime.now(timezone.utc)
+    params = [
+        {
+            "property_id": r["property_id"], "address_key": r.get("address_key"),
+            "county": r.get("county"), "body": Jsonb(r["body"]), "now": now,
+        }
+        for r in rows
+    ]
+    with _get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.executemany(sql, params)
+        conn.commit()
+    return len(rows)

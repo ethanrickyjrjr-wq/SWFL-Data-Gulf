@@ -25,6 +25,7 @@ from ingest.pipelines.listing_lifecycle import extract_api
 from ingest.pipelines.listing_lifecycle.extract_api import (
     classify_off_market,
     fetch_sold_event,
+    fetch_sold_event_raw,
 )
 from ingest.pipelines.listing_lifecycle.transitions import (
     apply_off_market_resolutions,
@@ -175,6 +176,53 @@ def test_fetch_sold_event_non_200_is_gap():
     with patch.object(extract_api.requests, "get", return_value=_resp(429, {})):
         r = fetch_sold_event("123", since=TODAY, at=TODAY, key="p")
     assert r["outcome"] == "gap"
+
+
+# --------------------------------------------------- fetch_sold_event_raw (raw-body landing, 08/02)
+
+def test_fetch_sold_event_raw_returns_classification_and_body_on_200():
+    h = _hist("sold", [_ev("2026-06-20", "Sold", 355000)])
+    with patch.object(extract_api.requests, "get", return_value=_resp(200, h)):
+        classification, body = fetch_sold_event_raw("123", since=TODAY, at=TODAY, key="p")
+    assert classification["outcome"] == "sold" and classification["sold_price"] == 355000
+    assert body == h  # the FULL vendor payload, not the small classification dict
+
+
+def test_fetch_sold_event_raw_no_key_is_gap_none_body_no_network():
+    with patch.object(extract_api.requests, "get") as mock_get:
+        classification, body = fetch_sold_event_raw("123", since=TODAY, at=TODAY, key=None)
+    mock_get.assert_not_called()
+    assert classification["outcome"] == "gap"
+    assert body is None
+
+
+def test_fetch_sold_event_raw_non_200_is_gap_none_body():
+    with patch.object(extract_api.requests, "get", return_value=_resp(429, {})):
+        classification, body = fetch_sold_event_raw("123", since=TODAY, at=TODAY, key="p")
+    assert classification["outcome"] == "gap"
+    assert body is None
+
+
+def test_fetch_sold_event_raw_bad_body_is_gap_none_body():
+    m = MagicMock()
+    m.status_code = 200
+    m.json.side_effect = ValueError("bad json")
+    with patch.object(extract_api.requests, "get", return_value=m):
+        classification, body = fetch_sold_event_raw("123", since=TODAY, at=TODAY, key="p")
+    assert classification["outcome"] == "gap"
+    assert body is None
+
+
+def test_fetch_sold_event_is_byte_identical_thin_wrapper_over_raw():
+    # fetch_sold_event must return EXACTLY what fetch_sold_event_raw's classification half returns —
+    # the refactor is a thin wrapper, never a behavior change for existing callers (backfill_listed_date,
+    # pipeline.py's two probe sites all still call fetch_sold_event or need identical semantics).
+    h = _hist("sold", [_ev("2026-06-20", "Sold", 355000)])
+    with patch.object(extract_api.requests, "get", return_value=_resp(200, h)):
+        classification, _body = fetch_sold_event_raw("123", since=TODAY, at=TODAY, key="p")
+    with patch.object(extract_api.requests, "get", return_value=_resp(200, h)):
+        thin = fetch_sold_event("123", since=TODAY, at=TODAY, key="p")
+    assert thin == classification
 
 
 # ------------------------------------------------------------------ plan_off_market_checks (pure)
@@ -490,8 +538,8 @@ def _wire(monkeypatch, calls):
 
     def fake_fetch(pid, **k):
         calls.append(pid)
-        return {"outcome": "gap"}
-    monkeypatch.setattr(P, "fetch_sold_event", fake_fetch)
+        return {"outcome": "gap"}, None
+    monkeypatch.setattr(P, "fetch_sold_event_raw", fake_fetch)
 
 
 def test_hook_never_fires_on_dry_run(monkeypatch):
@@ -528,9 +576,9 @@ def test_backfill_fires_on_leftover_budget_and_upgrades_in_place(monkeypatch):
     def fake_fetch(pid, **k):
         calls.append(pid)
         if pid == "77":
-            return {"outcome": "sold", "sold_price": 8100000, "sold_date": "2026-06-25"}
-        return {"outcome": "gap"}
-    monkeypatch.setattr(P, "fetch_sold_event", fake_fetch)
+            return {"outcome": "sold", "sold_price": 8100000, "sold_date": "2026-06-25"}, None
+        return {"outcome": "gap"}, None
+    monkeypatch.setattr(P, "fetch_sold_event_raw", fake_fetch)
 
     P.run(dry_run=False, only_county="Lee", today=TODAY, source="api")
     assert "77" in calls                             # leftover budget reached the price backfill
@@ -568,8 +616,8 @@ def test_recheck_still_holding_listed_date_reaches_update_listed_date(monkeypatc
 
     def fake_fetch(pid, **k):
         calls.append(pid)
-        return {"outcome": "holding", "listed_date": "2026-05-01"}
-    monkeypatch.setattr(P, "fetch_sold_event", fake_fetch)
+        return {"outcome": "holding", "listed_date": "2026-05-01"}, None
+    monkeypatch.setattr(P, "fetch_sold_event_raw", fake_fetch)
 
     P.run(dry_run=False, only_county="Lee", today=TODAY, source="api")
     assert persisted == [{"key": ("Z", "sale"), "listed_date": "2026-05-01"}]

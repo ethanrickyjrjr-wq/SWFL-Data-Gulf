@@ -422,7 +422,7 @@ def plan_price_rechecks(
         seen.add(key)
         eligible.append({
             "kind": "price_recheck", "key": key, "property_id": str(pid),
-            "since": anchor.isoformat(),
+            "since": anchor.isoformat(), "county": c.get("county"),
             "list_price": _to_int(c.get("list_price")) or 0, "days": age,
         })
 

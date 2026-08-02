@@ -26,7 +26,7 @@ from ingest.pipelines.listing_lifecycle.address_key import address_key, identity
 from ingest.pipelines.listing_lifecycle.coverage_guard import scan_is_complete
 from ingest.pipelines.listing_lifecycle.constants_api import API_SOURCE_NAME, SOLD_CHECK_CAP
 from ingest.pipelines.listing_lifecycle.extract import SWFL_COUNTIES, scan_county
-from ingest.pipelines.listing_lifecycle.extract_api import scan_county_api, fetch_sold_event
+from ingest.pipelines.listing_lifecycle.extract_api import scan_county_api, fetch_sold_event_raw
 from ingest.pipelines.listing_lifecycle.transitions import (
     apply_off_market_resolutions,
     apply_price_recheck_results,
@@ -45,6 +45,20 @@ API_COUNTIES = ["Lee", "Collier", "Hendry"]
 # matches. 732 such rows live in listing_state on 07/16/2026 (693 active), each one an amalgam
 # of every street-less listing that shared its city/street+ZIP.
 _OLD_STREETLESS_KEY = re.compile(r"^[A-Z]+:\d{5}$")
+
+
+def _insert_raw_bodies_with_isolation(bodies: list[dict]) -> int:
+    """Write raw /property-tax-history bodies collected this run, isolated from the state/transition
+    MERGE that already happens elsewhere in run() — a raw-write failure must never abort a nightly
+    sweep whose primary writes already succeeded (mirrors backfill_listed_date.py's twin helper)."""
+    if not bodies:
+        return 0
+    try:
+        return distill.insert_raw_bodies(bodies)
+    except Exception as e:  # noqa: BLE001 — isolation by design, this write is best-effort
+        print(f"[raw] write failed for {len(bodies)} row(s) ({e}); state/transition writes unaffected",
+              flush=True)
+        return 0
 
 
 def _keyed_scan(rows: list[dict]) -> dict[tuple[str, str], dict]:
@@ -196,7 +210,13 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
         # the sold budget into it mostly buys gaps. The probes run on the next complete scan.
         if source == "api" and not dry_run and not is_seed and complete and sold_budget_remaining > 0:
             checks, plan_stats = plan_off_market_checks(ups, trans, prior, today, cap=sold_budget_remaining)
-            resolutions = [fetch_sold_event(c["property_id"], since=c["since"], at=today) for c in checks]
+            resolutions_raw = [fetch_sold_event_raw(c["property_id"], since=c["since"], at=today) for c in checks]
+            resolutions = [c for c, _body in resolutions_raw]
+            raw_bodies = [
+                {"property_id": chk["property_id"], "address_key": chk["key"][0], "county": county, "body": b}
+                for chk, (_c, b) in zip(checks, resolutions_raw) if b is not None
+            ]
+            _insert_raw_bodies_with_isolation(raw_bodies)
             res_stats = apply_off_market_resolutions(ups, trans, checks, resolutions, prior, today)
             budget_calls += len(checks)
             sold_budget_remaining -= len(checks)
@@ -264,7 +284,14 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
         pending = distill.load_price_pending_solds(source_name=src_name)
         bf_checks, bf_plan = plan_price_rechecks(pending, today, cap=sold_budget_remaining)
         if bf_checks:
-            bf_res = [fetch_sold_event(c["property_id"], since=c["since"], at=today) for c in bf_checks]
+            bf_res_raw = [fetch_sold_event_raw(c["property_id"], since=c["since"], at=today) for c in bf_checks]
+            bf_res = [c for c, _body in bf_res_raw]
+            bf_raw_bodies = [
+                {"property_id": chk["property_id"], "address_key": chk["key"][0],
+                 "county": chk.get("county"), "body": b}
+                for chk, (_c, b) in zip(bf_checks, bf_res_raw) if b is not None
+            ]
+            _insert_raw_bodies_with_isolation(bf_raw_bodies)
             applied = apply_price_recheck_results(bf_checks, bf_res)
             distill.update_sold_price(applied["upgrades"], source_name=src_name, dry_run=dry_run)
             if applied["listed_date_updates"]:  # zero new calls — off this same backfill probe

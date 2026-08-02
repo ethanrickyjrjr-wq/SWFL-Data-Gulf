@@ -1,3 +1,36 @@
+## 2026-08-02 (Sonnet) — SteadyAPI raw-landing Step 1 SHIPPED: table + code live, 167/167 green, Step 2 awaits operator quota confirm
+
+Executed Step 1 of `docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md` end to end.
+Four-lane read first (playbook + data-roots.md CATALOG + tree-wide grep of every `fetch_sold_event`
+call site + LIVE query re-confirming baseline: `to_regclass` NULL, api_feed 34,904/17,880 unchanged).
+6 of 6 counted parts shipped: (1) migration `migrations/20260802_steadyapi_property_history_raw.sql`
+run live via `bun scripts/run-migration.ts` — `to_regclass` now non-null, verified; (2) TDD: 5 failing
+tests written FIRST (`test_sold_capture.py` + new `test_raw_landing.py`), confirmed red, then green;
+(3) `extract_api.fetch_sold_event_raw` added (returns `(classification, raw_body)`, `None` body on
+every gap path) — `fetch_sold_event` is now a byte-identical thin wrapper over it, test-enforced;
+(4) `distill.insert_raw_bodies` UPSERT writer (`ON CONFLICT (property_id) DO UPDATE`); (5) wired into
+`backfill_listed_date.py` (isolated retry — a raw-write failure logs and continues, never blocks the
+`listed_date` write, own test) AND all 3 of `pipeline.py`'s nightly probe call sites (departure/recheck
+line ~199, price-recheck line ~267) — threaded `county` through `load_price_pending_solds` +
+`plan_price_rechecks` so every raw row carries provenance; (6) `cadence_registry.yaml` registered the
+table as `listing_lifecycle`'s second table + `data-roots.md` status flipped 🔴→🟡 (built, zero rows —
+Step 2 hasn't fired). 167/167 `listing_lifecycle` tests pass (`pytest ingest/tests/pipelines/
+listing_lifecycle/` — 31.45s); `--dry-run` smoke-tested the CLI (17,880 targets, unchanged, zero
+calls/writes). Closed `steadyapi_pth_raw_landing_before_backfill` with this evidence.
+
+Hit two ghost repolith claims from the prior (already-committed, compacted) Fable 5 session on
+`cadence_registry.yaml` and `data-roots.md` — timeline-checked (`git log` showed the commit already
+landed) before releasing, per the documented post-compaction-ghost-claims pattern.
+
+NOT done, by design: Step 2 (the paid ~17,880-call backfill run + its `--limit 15` canary) — the
+playbook gates it on the operator checking the SteadyAPI vendor dashboard for ≥20k monthly headroom
+(no quota headers exist on responses; I cannot check this myself), so zero paid calls were made this
+session. Tracked under `dom_backfill_repull_17k` (existing, per playbook — did not open a new check).
+Step 3 (typed tables parsed from the JSONB) and Step 5 (re-enable the cron) are explicitly deferred
+in the playbook until Step 2 lands rows to parse.
+
+---
+
 ## 2026-08-02 (Fable 5) — SteadyAPI raw-landing SETUP: playbook + data-roots + census + registry, ready for the Sonnet hours-long run
 
 Operator: "i want a fucking playbook, i want data root updated and I want everything we know about

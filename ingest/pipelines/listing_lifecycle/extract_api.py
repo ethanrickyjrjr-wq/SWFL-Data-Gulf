@@ -561,26 +561,40 @@ def classify_off_market(history: dict, *, since: str, at: str) -> dict[str, Any]
     return {"outcome": "holding", "reason": cur or "unknown", "listed_date": listed_date}
 
 
-def fetch_sold_event(property_id: str, *, since: str, at: str, key: str | None = None) -> dict[str, Any]:
-    """Network: one /property-tax-history?propertyId= probe -> classify_off_market. A missing key,
-    non-200, or unparseable body returns {'outcome': 'gap'} so the caller leaves the listing HOLDING —
-    an API failure must never fabricate a sold/withdrawn. Costs exactly ONE weight-1 SteadyAPI call."""
+def fetch_sold_event_raw(
+    property_id: str, *, since: str, at: str, key: str | None = None,
+) -> tuple[dict[str, Any], dict | None]:
+    """Network: one /property-tax-history?propertyId= probe -> (classify_off_market result, raw body).
+    A missing key, non-200, or unparseable body returns ({'outcome': 'gap', ...}, None) — a failed
+    call must NEVER land a body, and the classification half must never fabricate a sold/withdrawn.
+    Costs exactly ONE weight-1 SteadyAPI call. This is the raw-landing sibling (08/02/2026 playbook)
+    that stops the discard at the old fetch_sold_event's `return` — the FULL vendor payload (64 field
+    paths; 3 persisted) is now available to the caller to land in data_lake.steadyapi_property_history_raw."""
     key = key or os.environ.get("PHOTOS_API")
     if not key or not property_id:
-        return {"outcome": "gap", "reason": "no-key-or-id"}
+        return {"outcome": "gap", "reason": "no-key-or-id"}, None
     r, _attempts = _get_with_retry(
         f"{STEADYAPI_BASE}/property-tax-history",
         params={"propertyId": property_id},
         headers={**STEADYAPI_HEADERS, "Authorization": f"Bearer {key}"},
     )
     if r is None:
-        return {"outcome": "gap", "reason": "network"}
+        return {"outcome": "gap", "reason": "network"}, None
     if r.status_code != 200:
-        return {"outcome": "gap", "reason": f"http-{r.status_code}"}
+        return {"outcome": "gap", "reason": f"http-{r.status_code}"}, None
     try:
         data = r.json()
     except Exception:
-        return {"outcome": "gap", "reason": "bad-body"}
+        return {"outcome": "gap", "reason": "bad-body"}, None
     if not isinstance(data, dict):
-        return {"outcome": "gap", "reason": "bad-body"}
-    return classify_off_market(data, since=since, at=at)
+        return {"outcome": "gap", "reason": "bad-body"}, None
+    return classify_off_market(data, since=since, at=at), data
+
+
+def fetch_sold_event(property_id: str, *, since: str, at: str, key: str | None = None) -> dict[str, Any]:
+    """Network: one /property-tax-history?propertyId= probe -> classify_off_market. A missing key,
+    non-200, or unparseable body returns {'outcome': 'gap'} so the caller leaves the listing HOLDING —
+    an API failure must never fabricate a sold/withdrawn. Costs exactly ONE weight-1 SteadyAPI call.
+    Thin wrapper over fetch_sold_event_raw, discarding the raw body — kept for callers that only need
+    the classification (byte-identical to the pre-08/02/2026 behavior)."""
+    return fetch_sold_event_raw(property_id, since=since, at=at, key=key)[0]
