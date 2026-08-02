@@ -1,3 +1,13 @@
+## 2026-08-02 (Fable 5) — "MAKKE IT FUCKING WORK RIGHT" — gate ships FIRST, not as Step D of a doc
+
+Operator corollary on the coverage handoff: flip the ordering — the ratcheting pre-push lint lands
+BEFORE registry gap-fill/checker/triage, because "everything before the hook lands is still trust"
+and the lint can't rot. Once in, Steps A/C become burn-down of a machine-tracked baseline instead
+of prose obligations. Also: umbrella check closes on PER-ITEM evidence (ledger vs actual listing),
+never a per-step "done" sentence — that's the difference from the seven prior audits. Addendum
+paste into the playbook downgraded to minor (evidence already in SESSION_LOG; gates cleared
+independently). ACTION taken same session: lint implemented + handoff reordered, not just re-documented.
+
 ## 2026-08-02 (Fable 5) — "I've tried to keep track of everything 10 fucking times… ops page full of this shit… yet no one checks and just fucks me over and over"
 
 Raised while asking for a handoff extending source-ceiling coverage contracts to ALL

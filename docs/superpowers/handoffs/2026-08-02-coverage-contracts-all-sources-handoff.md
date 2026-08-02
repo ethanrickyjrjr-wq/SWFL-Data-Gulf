@@ -65,9 +65,27 @@ tracker number 11.**
 
 ## §2 EXECUTION (one PR per step; RULE 3.5 brainstorm + failure modes + TDD each)
 
-**Step A — close the registry gaps.** List entries missing `source_scope`/`source_ceiling`
-(command above); fill each from vendor docs/probe per FULL-SCOPE-FIRST (crawl4ai, cited
-source_url + as_of). Zero code.
+**ORDERING FLIPPED by operator corollary 08/02/2026: the gate lands FIRST.** Verbatim: "land the
+ratcheting lint first. It's the only piece that can't rot, it doesn't depend on the others, and
+once it's in, A and C become burn-down of a machine-tracked list instead of another prose
+obligation. Everything before the hook lands is still trust."
+
+**Step 0 — the ratcheting gate. ✅ SHIPPED 08/02/2026, same session as this handoff.**
+Gate 11 in `.claude/hooks/check-prepush-gate.mjs`; pure rules + positive controls in
+`.claude/hooks/lib/coverage-ratchet{,.test}.mjs` (10/10 green); grandfathered baseline
+`.claude/hooks/lib/coverage-ratchet-baseline.json` — **80 entries, 89 gap atoms at pin time
+(80 missing `raw_landing_class`, 7 missing `source_ceiling`, 2 missing `source_scope`)**.
+Rules: every pipeline entry declares `source_scope` + `source_ceiling` + `raw_landing_class`
+(`paid_landed | scrape_fragile | free_refetchable`); the baseline may only SHRINK — a new entry
+shipping incomplete, a regression, a fix that doesn't shrink the baseline, or debt ADDED to the
+baseline all fail the push with a paste-ready fix. Escape: `ALLOW_COVERAGE_RATCHET=1` (logged).
+Live proof on ship day: real registry vs baseline → ok; synthetic new incomplete entry → 3 drift
+atoms, blocked. Steps A and C below are now burn-down of THIS baseline, not prose obligations.
+
+**Step A — burn down `source_scope`/`source_ceiling` gaps.** The list is the baseline (9 atoms
+across those two keys at pin time — re-derive from the JSON, never quote this sentence). Fill
+each from vendor docs/probe per FULL-SCOPE-FIRST (crawl4ai, cited source_url + as_of); shrink
+the baseline in the same commit or the gate blocks the push. Zero code.
 
 **Step B — the coverage-contract checker (the mechanism; THE step).** One Python job,
 `ingest/quality/` — a new contract family beside the value contracts:
@@ -87,18 +105,17 @@ source_url + as_of). Zero code.
   (pipeline-freshness law). Signal warning: public.checks signal types cannot express a set-diff —
   the related checks close on the checker's own self-test output, never a db_row_exists.
 
-**Step C — raw-landing triage for everything else (rule-11-proportioned).** Classify all 80
-pipeline entries into: PAID or rate-limited (SteadyAPI — DONE via `raw_landing.py`) ·
-SCRAPE-FRAGILE or ephemeral (Accela permits, FMB dashboard, MarketBeat PDFs — raw-land next; the
-source can vanish) · FREE-REFETCHABLE (Census, FRED, Zillow CSVs, NOAA — do NOT raw-land; the
-vendor archive IS the raw store; a copy is hyperscaler cosplay at our volume). Record the
-classification as ONE line in each entry's existing registry block — not a new file.
+**Step C — raw-landing triage burn-down (rule-11-proportioned).** The list is the baseline's 80
+`raw_landing_class` atoms. Classify each entry: `paid_landed` (SteadyAPI — bodies land via
+`raw_landing.py`) · `scrape_fragile` (Accela permits, FMB dashboard, MarketBeat PDFs — raw-land
+next; the source can vanish) · `free_refetchable` (Census, FRED, Zillow CSVs, NOAA — do NOT
+raw-land; the vendor archive IS the raw store; a copy is hyperscaler cosplay at our volume).
+Write `raw_landing_class: <value>` into each entry's existing registry block (Gate 11 validates
+the value) and shrink the baseline in the same commit. Batchable — any push may classify any
+number of entries, the gate enforces monotonic progress and blocks wrong-way movement.
 
-**Step D — the gate (the actual "no one checks" fix).** Extend
-`.claude/hooks/check-prepush-gate.mjs` with a registry lint: a push adding a pipeline entry
-without `source_scope` + `source_ceiling` + the Step-C classification line is BLOCKED (same
-family as Gate 4/5; RULE 3 C2 — extend the existing seam, never a new mandatory gate system).
-Humans stopped checking ten trackers; the hook checks the one that renders on the ops page.
+**Step D — SHIPPED as Step 0 above** (the ordering flip). Kept as a numbered step only so older
+references to "Step D = the gate" still resolve. Nothing left to build here.
 
 **Step E — crons.** No new tracking needed: the `jobs:` section + Gate 10 (schedule catalog)
 already enforce cron membership. The only cron work here is Step B's own wrapper.
@@ -125,6 +142,12 @@ already enforce cron membership. The only cron work here is Step B's own wrapper
   endpoint's census claim, then close with evidence.
 - NEW umbrella check `coverage_contracts_platform_wide` (opened 08/02/2026, this session) — points
   here; closes when Steps A–E are individually evidenced.
+
+**CLOSE DISCIPLINE (operator corollary 08/02/2026 — the difference between this audit and the
+seven before it):** every step closes on PER-ITEM evidence — the ledger diffed against the actual
+listing (baseline JSON vs `computeGaps` output, pin fixture vs live body paths, classification
+value vs the pipeline's real fetch behavior) — never a per-step "done" sentence. A close whose
+evidence is prose re-opens.
 
 ## §5 RULES THAT BIND
 

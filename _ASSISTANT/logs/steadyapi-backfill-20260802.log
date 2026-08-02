@@ -3,3 +3,7 @@
 [backfill-dom] chunk 3: probed=200 wrote=200 no_list_date=0 gap=0  (running: wrote=600/600)
 [backfill-dom] chunk 4: probed=200 wrote=200 no_list_date=0 gap=0  (running: wrote=800/800)
 [backfill-dom] chunk 5: probed=200 wrote=199 no_list_date=1 gap=0  (running: wrote=999/1000)
+[backfill-dom] chunk 6: probed=200 wrote=200 no_list_date=0 gap=0  (running: wrote=1199/1200)
+[backfill-dom] chunk 7: probed=200 wrote=198 no_list_date=2 gap=0  (running: wrote=1397/1400)
+[backfill-dom] chunk 8: probed=200 wrote=199 no_list_date=1 gap=0  (running: wrote=1596/1600)
+[backfill-dom] chunk 9: probed=200 wrote=200 no_list_date=0 gap=0  (running: wrote=1796/1800)

@@ -50,6 +50,13 @@ import { join } from "node:path";
 import { resolvePushCwd } from "./push-context.mjs";
 import { parseLedger, findOrphanedClaims } from "./lib/ledger-parse.mjs";
 import { findUnwiredSecrets } from "./lib/secret-wiring.mjs";
+import {
+  computeGaps,
+  invalidClasses,
+  ratchetVerdict,
+  baselineJson,
+  ALLOWED_CLASSES,
+} from "./lib/coverage-ratchet.mjs";
 
 const BANNER = "=".repeat(72);
 
@@ -345,6 +352,15 @@ process.stdin.on("end", () => {
   // registering in the SAME commit passes. That script is the working-tree twin
   // (full-repo sweep + JSON view); its test file pins both shapes.
   scheduleCatalogGate(changed);
+
+  // ---- Gate 11: source-coverage ratchet (operator decree 08/02/2026) --------
+  // "Land the ratcheting lint first — everything before the hook lands is still
+  // trust." Every pipeline entry declares source_scope + source_ceiling +
+  // raw_landing_class; existing gaps are grandfathered in a committed baseline
+  // that may only SHRINK. Ten prose trackers went unread; this is the one that
+  // fails a push instead. Pure rules + positive controls:
+  // lib/coverage-ratchet{,.test}.mjs.
+  coverageRatchetGate(changed, base);
 
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
@@ -941,6 +957,83 @@ function scheduleCatalogGate(changed) {
         `(An ingest SOURCE belongs under pipelines:/not_yet_running: instead — register\n` +
         `it there with lane/cadence so the freshness probe covers it.)\n` +
         `Operator escape for a legitimate one-off: ALLOW_UNREGISTERED_CRON=1.`,
+    );
+  } catch {
+    // never wedge a push on a guard bug — fail open
+  }
+}
+
+// Gate 11 body. Fires when the registry OR the baseline is in the push. Reads
+// both sides at HEAD plus the baseline at the push base (the ratchet reference).
+// Fail-OPEN on any internal error; fail-CLOSED on a real violation.
+const RATCHET_BASELINE = ".claude/hooks/lib/coverage-ratchet-baseline.json";
+function coverageRatchetGate(changed, base) {
+  try {
+    if (process.env.ALLOW_COVERAGE_RATCHET === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] OVERRIDE: ALLOW_COVERAGE_RATCHET=1 — skipping the\n` +
+          `source-coverage ratchet (logged).\n`,
+      );
+      return;
+    }
+    const touched =
+      changed.includes("ingest/cadence_registry.yaml") || changed.includes(RATCHET_BASELINE);
+    if (!touched) return;
+
+    let registry;
+    try {
+      registry = sh("git show HEAD:ingest/cadence_registry.yaml");
+    } catch {
+      return; // no registry at HEAD — fail open
+    }
+    const readJson = (ref) => {
+      try {
+        return JSON.parse(sh(`git show ${ref}:${RATCHET_BASELINE}`));
+      } catch {
+        return null; // absent/unparseable at that ref
+      }
+    };
+    const baselineHead = readJson("HEAD");
+    const baselineBase = readJson(base);
+
+    const badClasses = invalidClasses(registry);
+    if (badClasses.length > 0) {
+      block(
+        "COVERAGE RATCHET — invalid raw_landing_class value (Gate 11)",
+        badClasses.map((b) => `  - ${b.name}: raw_landing_class: ${b.value}`).join("\n") +
+          `\n\nAllowed values: ${ALLOWED_CLASSES.join(" | ")}\n` +
+          `(paid_landed = raw bodies land via ingest/lib/raw_landing.py · scrape_fragile =\n` +
+          `source can vanish, land bytes · free_refetchable = vendor archive IS the raw\n` +
+          `store, do not copy it). Handoff:\n` +
+          `docs/superpowers/handoffs/2026-08-02-coverage-contracts-all-sources-handoff.md`,
+      );
+    }
+
+    const computed = computeGaps(registry);
+    const verdict = ratchetVerdict({ computed, baselineHead, baselineBase });
+    if (verdict.ok) return;
+
+    if (verdict.newDebt.length > 0) {
+      block(
+        "COVERAGE RATCHET — the baseline only shrinks; new debt was added to it (Gate 11)",
+        `These gaps were ADDED to ${RATCHET_BASELINE} instead of being filled:\n\n` +
+          verdict.newDebt.map((a) => `  - ${a}`).join("\n") +
+          `\n\nFill the missing block(s) in ingest/cadence_registry.yaml (FULL-SCOPE-FIRST:\n` +
+          `cited source_url + as_of for scope/ceiling; raw_landing_class per the handoff\n` +
+          `triage) and remove them from the baseline. New pipelines ship complete.\n` +
+          `Operator escape for a legitimate one-off: ALLOW_COVERAGE_RATCHET=1.`,
+      );
+    }
+    block(
+      "COVERAGE RATCHET — registry gaps drifted from the committed baseline (Gate 11)",
+      `Every pipeline entry declares source_scope + source_ceiling + raw_landing_class;\n` +
+        `known gaps are grandfathered in ${RATCHET_BASELINE}\n` +
+        `and burn DOWN from there. This push drifted:\n\n` +
+        verdict.drift.map((d) => `  - ${d}`).join("\n") +
+        `\n\nFix: fill the missing block(s) in the registry (preferred), or — ONLY for a\n` +
+        `gap that shrank — update the baseline to match. Paste-ready current truth:\n\n` +
+        truncate(baselineJson(computed), 3000) +
+        `\nOperator escape for a legitimate one-off: ALLOW_COVERAGE_RATCHET=1.`,
     );
   } catch {
     // never wedge a push on a guard bug — fail open

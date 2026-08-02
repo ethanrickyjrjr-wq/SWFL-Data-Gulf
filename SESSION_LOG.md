@@ -1,3 +1,22 @@
+## 2026-08-02 (Fable 5) — Gate 11 SHIPPED: source-coverage ratchet lands FIRST per operator corollary
+
+Operator flipped the handoff ordering ("land the ratcheting lint first… everything before the
+hook lands is still trust" + "MAKKE IT FUCKING WORK RIGHT") — so the gate shipped THIS session,
+not as a doc step: (1) `.claude/hooks/lib/coverage-ratchet.mjs` — pure rules: every registry
+pipeline entry declares source_scope + source_ceiling + raw_landing_class
+(paid_landed|scrape_fragile|free_refetchable); baseline may only SHRINK (drift, new-debt, and
+bad-class all block, paste-ready fix printed). (2) 10/10 tests green incl. 4 positive controls
+(`coverage-ratchet.test.mjs`). (3) Baseline pinned from HEAD:
+`.claude/hooks/lib/coverage-ratchet-baseline.json` — 80 entries, 89 gap atoms (80
+raw_landing_class, 7 source_ceiling, 2 source_scope) = the machine-tracked burn-down for handoff
+Steps A/C. (4) Gate 11 wired into `check-prepush-gate.mjs` after Gate 10; node --check clean;
+live proof: real registry vs baseline ok, synthetic incomplete entry → blocked, 3 drift atoms.
+Escape: ALLOW_COVERAGE_RATCHET=1. Handoff §2 reordered (Step 0 = gate SHIPPED; A/C = baseline
+burn-down; D absorbed), §4 gained the per-item-evidence close law (ledger vs actual listing,
+prose closes re-open). Umbrella check detail updated. NOTE: an auto-committer landed the
+pre-flip handoff as 4157266f; the reorder is working-tree on top. Playbook addendum paste STILL
+owed (claim held by b4c727fc; operator downgraded to minor). NOT pushed.
+
 ## 2026-08-02 (Fable 5) — Step-2 gate re-verified GO (operator headroom only blocker) + coverage-contracts handoff for ALL sources
 
 Re-verified the raw-landing playbook addendum's 6-item hard gate live, not from the text (its
