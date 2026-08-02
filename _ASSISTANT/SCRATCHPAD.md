@@ -1,3 +1,11 @@
+## 2026-08-02 (Fable 5) — "Running baths to email builder… connect through folio or property id" + TDD plans + parked-items visibility
+
+Operator directives after the probe burn-down: (1) TDD plans for each remaining item; (2) if
+SteadyAPI doesn't carry baths for for-sale homes, wire beds/baths from the LeePA comparable-sales
+table (the ONLY Lee surface holding them) into the email-builder path, joined via folio or
+property id; (3) proxies deferred until most things run correctly — do NOT propose proxy spend
+now; (4) every issue we can't fix/wire now must carry an easy-to-find reason ON THE OPS PAGE —
+he wants a single place he can be pointed at to read, not prose buried in SESSION_LOG.
 ## 2026-08-02 (Fable 5) — "WHAT THE FUCK IS THIS PAGE? WHY IS EVERYTHING NOT GREEN?" — the daily doctor run (30753405899)
 
 The red GHA run is the pipeline-freshness probe doing its job: doctor found 10 red of 78 datasets
